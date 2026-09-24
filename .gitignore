@@ -1,0 +1,11 @@
+# private drafting space -- article drafts + attachments stay local
+docs/private/
+
+# secrets + scratch
+.claude/.env
+.claude/tmp/
+
+# noise
+.DS_Store
+__pycache__/
+*.pyc
