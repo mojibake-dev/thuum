@@ -1,7 +1,7 @@
 ---
 paths:
-  - "skymp-wire/**/*.rs"
-  - "skymp-wire/**/Cargo.toml"
+  - "skymp/skymp-wire/**/*.rs"
+  - "skymp/skymp-wire/**/Cargo.toml"
 ---
 
 # Rust rules (skymp-wire)

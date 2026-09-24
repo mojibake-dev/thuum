@@ -64,7 +64,7 @@ lab-down:
 
 # --- wire (Rust edge, docs/WIRE.md) ------------------------------------------
 
-wire := "skymp-wire"
+wire := "skymp/skymp-wire"
 
 # Build the workspace; the client cdylib and cxx bridge included.
 wire-build:

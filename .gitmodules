@@ -5,3 +5,4 @@
 [submodule "skymp"]
 	path = skymp
 	url = https://github.com/mojibake-dev/skymp.git
+	branch = parity

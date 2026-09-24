@@ -1,8 +1,8 @@
 ---
 paths:
-  - "skymp-wire/crates/wire-schema/**"
-  - "skymp-wire/crates/wire-codec/**"
-  - "skymp-wire/crates/wire-validate/**"
+  - "skymp/skymp-wire/crates/wire-schema/**"
+  - "skymp/skymp-wire/crates/wire-codec/**"
+  - "skymp/skymp-wire/crates/wire-validate/**"
   - "**/*Message*"
   - "**/*MsgType*"
   - "**/PacketParser*"
