@@ -1,9 +1,15 @@
-# private drafting space -- article drafts + attachments stay local
+# private drafting space: article drafts and attachments stay local (incept)
 docs/private/
 
-# secrets + scratch
+# secrets and scratch
 .claude/.env
 .claude/tmp/
+.claude/settings.local.json
+CLAUDE.local.md
+
+# lab artifacts
+lab/results/
+lab/frida/*.jsonl
 
 # noise
 .DS_Store

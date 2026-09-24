@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(just *)",
+      "Bash(cmake *)",
+      "Bash(ctest *)",
+      "Bash(npm *)",
+      "Bash(yarn *)",
+      "Bash(rg *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git rebase *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force*)",
+      "Edit(addrlib/**)",
+      "Write(addrlib/**)",
+      "Edit(lab/results/**)",
+      "Write(lab/results/**)",
+      "Edit(lab/scenarios/**)",
+      "Write(lab/scenarios/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "lab/hooks/post-edit.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
