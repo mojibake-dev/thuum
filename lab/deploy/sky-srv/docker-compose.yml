@@ -31,7 +31,7 @@ services:
       PVE_TOKEN_ID: ${PVE_TOKEN_ID}
       PVE_TOKEN_SECRET: ${PVE_TOKEN_SECRET}
       PVE_NODE: core
-      PVE_VERIFY_SSL: /etc/ssl/pve-root-ca.pem   # the cluster CA, mounted below
+      PVE_VERIFY_SSL: /srv/persist/pve-root-ca.pem   # the Proxmox cluster CA, published on the persist dataset by the estate role
       RESULTS_DIR: /srv/lab/results
       COMPOSE_FILE: /srv/lab/docker-compose.yml
       COMPOSE_SERVICE: skymp-server
@@ -45,5 +45,4 @@ services:
     volumes:
       - /srv/lab:/srv/lab
       - /srv/persist:/srv/persist:ro
-      - /srv/lab/pve-root-ca.pem:/etc/ssl/pve-root-ca.pem:ro   # /etc/pve/pve-root-ca.pem from the host, placed by the estate role
       - /var/run/docker.sock:/var/run/docker.sock
