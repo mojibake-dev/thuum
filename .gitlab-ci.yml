@@ -1,0 +1,78 @@
+# GitLab CI for the thuum superproject (ADR-016). Jobs run only on the dedicated
+# sky-ci runner (tag `sky`); the estate's own runner never executes this project.
+# Image: alpine plus a pinned `just` release binary downloaded in before_script.
+# Kept deliberately small: this repo holds docs, lab software, and config; the
+# Rust and C++ pipelines live in the skymp fork's own .gitlab-ci.yml.
+#
+# The GitLab merge request approval rule that names Eli as the required
+# approver for lab/scenarios/ is configured in the project settings, not here.
+
+stages: [lint, gate]
+
+variables:
+  GIT_SUBMODULE_STRATEGY: none
+  JUST_VERSION: "1.58.0"
+
+.base:
+  image: alpine:3.20
+  tags: [sky]
+  before_script:
+    - apk add --no-cache git curl python3
+    - curl -fsSL "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar -xz -C /usr/local/bin just
+
+# Rule 11 (no em dash) across the docs, config, and scenarios, and the justfile must parse.
+docs-lint:
+  extends: .base
+  stage: lint
+  script:
+    - |
+      python3 - <<'PY'
+      import pathlib, sys
+      skip = {".git", "skymp", "CommonLibSSE-NG", "node_modules", "target"}
+      exts = {".md", ".yaml", ".yml", ".json"}
+      bad = []
+      for p in pathlib.Path(".").rglob("*"):
+          if any(part in skip for part in p.parts):
+              continue
+          if p.is_file() and (p.suffix in exts or p.name == "justfile"):
+              for n, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+                  if chr(0x2014) in line:
+                      bad.append(f"{p}:{n}: {line.strip()}")
+      if bad:
+          print("em dash found (rule 11):")
+          print("\n".join(bad))
+          sys.exit(1)
+      print("no em dash")
+      PY
+    - just --list
+
+# ADR-009 / ADR-016: a scenario change travels alone. Fail the MR if any commit in it
+# touches lab/scenarios/*.yaml together with any other path.
+scenario-gate:
+  extends: .base
+  stage: gate
+  variables:
+    GIT_DEPTH: "0"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - |
+      python3 - <<'PY'
+      import os, re, subprocess, sys
+      base = os.environ["CI_MERGE_REQUEST_DIFF_BASE_SHA"]
+      commits = subprocess.check_output(["git", "rev-list", f"{base}..HEAD"], text=True).split()
+      pat = re.compile(r"^lab/scenarios/.*\.ya?ml$")
+      bad = 0
+      for c in commits:
+          files = subprocess.check_output(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", c], text=True).split()
+          scen = [f for f in files if pat.match(f)]
+          other = [f for f in files if not pat.match(f)]
+          if scen and other:
+              bad += 1
+              print(f"commit {c} mixes scenario YAML with other files:")
+              for f in files:
+                  print("  ", f)
+      if bad:
+          sys.exit(1)
+      print(f"{len(commits)} commits checked, none mixes scenarios with code")
+      PY
