@@ -16,6 +16,20 @@ def _env(name: str, default: str) -> str:
     return os.environ.get(name, default)
 
 
+def _env_verify(name: str, default: bool | str) -> bool | str:
+    """PVE_VERIFY_SSL: "true" or "false" as booleans, anything else is a CA
+    bundle path (what requests accepts as `verify`)."""
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    low = raw.strip().lower()
+    if low in ("1", "true", "yes", "on"):
+        return True
+    if low in ("0", "false", "no", "off"):
+        return False
+    return raw.strip()
+
+
 def _env_bool(name: str, default: bool) -> bool:
     raw = os.environ.get(name)
     if raw is None:
@@ -33,7 +47,10 @@ class Settings:
     pve_token_id: str = ""  # user@realm!tokenname
     pve_token_secret: str = ""
     pve_node: str = "core"
-    pve_verify_ssl: bool = True
+    # true, false, or a path to a CA bundle: Proxmox's API certificate is
+    # issued by the cluster's own CA (pve-root-ca.pem on the host), so the
+    # right setting on sky-srv is that file, mounted read-only.
+    pve_verify_ssl: bool | str = True
     # Where runs land (rpool/sky/results over virtiofs) and where the guest table is.
     results_dir: str = "/srv/lab/results"
     guests_file: str = str(PKG_DIR / "guests.yaml")
@@ -88,7 +105,7 @@ class Settings:
             pve_token_id=_env("PVE_TOKEN_ID", d.pve_token_id),
             pve_token_secret=_env("PVE_TOKEN_SECRET", d.pve_token_secret),
             pve_node=_env("PVE_NODE", d.pve_node),
-            pve_verify_ssl=_env_bool("PVE_VERIFY_SSL", d.pve_verify_ssl),
+            pve_verify_ssl=_env_verify("PVE_VERIFY_SSL", d.pve_verify_ssl),
             results_dir=_env("RESULTS_DIR", d.results_dir),
             guests_file=_env("GUESTS_FILE", d.guests_file),
             compose_file=_env("COMPOSE_FILE", d.compose_file),

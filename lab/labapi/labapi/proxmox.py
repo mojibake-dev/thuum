@@ -6,6 +6,8 @@ with the one rule that matters: an unmanaged guest is never touched."""
 
 from __future__ import annotations
 
+import logging
+
 import time
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -14,6 +16,8 @@ from .guests import Guest
 
 FILE_READ_MAX = 16 * 1024 * 1024  # the guest-agent file-read cap
 
+
+log = logging.getLogger("labapi.proxmox")
 
 class ProxmoxError(Exception):
     """E_PVE: the API refused, a task failed, or a rule was violated."""
@@ -89,7 +93,7 @@ class GuestControl:
 class ProxmoxerGuests:
     """The real backend. Imported lazily so tests run without proxmoxer."""
 
-    def __init__(self, url: str, token_id: str, token_secret: str, node: str, verify_ssl: bool, task_timeout: float = 120.0):
+    def __init__(self, url: str, token_id: str, token_secret: str, node: str, verify_ssl: bool | str, task_timeout: float = 120.0):
         from urllib.parse import urlparse
 
         from proxmoxer import ProxmoxAPI
@@ -101,6 +105,7 @@ class ProxmoxerGuests:
         self._api = ProxmoxAPI(u.hostname, port=u.port or 8006, user=user, token_name=token_name, token_value=token_secret, verify_ssl=verify_ssl)
         self._node = node
         self._task_timeout = task_timeout
+        self._status_warned: set[str] = set()
 
     def _res(self, guest: Guest):
         node = self._api.nodes(self._node)
@@ -130,6 +135,10 @@ class ProxmoxerGuests:
         try:
             return str(self._res(guest).status.current.get().get("status", "unknown"))
         except Exception as e:  # proxmoxer raises ResourceException and requests errors
+            # "unknown" in /lab/status must not hide the cause: log it once per guest.
+            if guest.name not in self._status_warned:
+                self._status_warned.add(guest.name)
+                log.warning("E_PVE_STATUS: %s: %s: %s", guest.name, type(e).__name__, str(e)[:200])
             raise ProxmoxError(f"E_PVE_STATUS: {guest.name}: {e}") from e
 
     def exec(self, guest: Guest, command: list[str], timeout: float) -> ExecResult:

@@ -6,6 +6,7 @@
 /srv/lab/
   docker-compose.yml        this directory's compose file
   .env                      from env.example, filled by hand once (secrets)
+  pve-root-ca.pem           the Proxmox cluster CA (/etc/pve/pve-root-ca.pem on the host), so lab-api verifies the API
   server/
     server-settings.json    this directory's settings (offline, file driver, lab gamemode)
     data/                   writable data dir the server fills (ui/, manifest)
