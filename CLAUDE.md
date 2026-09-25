@@ -1,4 +1,4 @@
-# skymp-parity
+# thuum (skymp-parity)
 
 Make SkyMP play the actual game the way TES3MP plays Morrowind: a persistent,
 server-owned world where clients simulate only what the server can't, every
@@ -28,24 +28,30 @@ toolchain per layer, every feature the same shape.
 - Languages: Rust for everything that touches the network and for all new
   server code (ADR-010); C++ for the existing core, papyrus-vm, espm, and SP
   native until strangled in exposure order; TypeScript for the SP client and
-  gamemode. Transport is renet over netcode (ADR-011); messages are the Rust
-  types in wire-schema (ADR-012). One wire implementation on both ends.
+  gamemode; Python for lab tooling (lab-api, addr.py, ledger.py). Transport is
+  renet over netcode (ADR-011); messages are the Rust types in wire-schema
+  (ADR-012), which lives in the fork at skymp/skymp-wire (ADR-015). One wire
+  implementation on both ends.
 
-## Workspace layout (verify on first session, then fix this section)
+## Workspace layout (real, as of 2026-09-24)
 
-- skymp/ ............ our public fork of skyrim-multiplayer/skymp (ADR-013, ADR-014):
-                      server core, papyrus-vm, libespm, skymp5-client, skymp5-server,
-                      skyrim-platform, docs/, ROADMAP.md
-- skymp-wire/ ....... Rust workspace: schema, codec, validate, transport, cxx bridge,
-                      client cdylib, difftest harness, fuzz targets (docs/WIRE.md)
-- CommonLibSSE-NG/ .. skyrim-multiplayer fork: the engine map (classes, vtables, REL::ID)
-- addrlib/ .......... Address Library database for SkyrimSE 1.6.1170 (read-only)
-- docs/ ............. PLAN.md, VERB.md, LAB.md, DECISIONS.md, NATIVES.md (ledger), verbs/
-- lab/ .............. Proxmox lab scripts, scenarios/, hooks/, results/ (gitignored)
-- ghidra/ ........... notes only; the Ghidra project lives on the sky-re VM
+- thuum/ (this repo) ... docs/ (PLAN, DECISIONS, LAB, WIRE, VERB, NATIVES, verbs/),
+                         lab/ (labapi/, driver/, scenarios/, frida/, hooks/, results/),
+                         .claude/ (rules, skills, agents, settings), justfile,
+                         .mcp.json, .gitlab-ci.yml
+- skymp/ .............. git submodule: our public fork mojibake-dev/skymp, branch
+                         parity (main mirrors upstream, ADR-016). Subprojects:
+                         skymp5-server, skymp5-client, skyrim-platform, papyrus-vm,
+                         libespm, savefile, and our skymp-wire/ (ADR-015). Its vcpkg
+                         submodule is initialized only where the server is built.
+- CommonLibSSE-NG/ .... git submodule at upstream skyrim-multiplayer/CommonLibSSE-NG:
+                         the engine map (classes, vtables, REL::ID). Never modified.
+- addrlib/ ............ Address Library database for SkyrimSE 1.6.1170; gitignored,
+                         downloaded from Nexus by Eli, read-only to the agent.
+- ghidra/ ............. notes only; the Ghidra project lives on sky-re under
+                         rpool/sky/persist and is served by pyghidra-mcp (docs/LAB.md).
 
-First session: run `just tree`, replace the paths above with real ones, and pin
-the build commands below from skymp/docs. Do not guess either.
+`just tree` prints the live version of this list.
 
 ## Hard rules
 
@@ -78,6 +84,9 @@ the build commands below from skymp/docs. Do not guess either.
 12. Network bytes are recognized once, in Rust, before anything else sees
     them. No raw bytes cross the bridge into C++; no `unsafe` outside the two
     FFI crates; no panic reachable from a packet. See .claude/rules/rust.md.
+13. Scenario YAML changes go in their own commits and Eli reviews them
+    (ADR-009, ADR-016). Never turn a scenario green by weakening its
+    assertions; CI refuses a commit that mixes a scenario with other files.
 
 ## Workflow per verb
 
@@ -86,30 +95,39 @@ the build commands below from skymp/docs. Do not guess either.
    CommonLib, SP, and the roadmap for candidates. Fill in: intent, rung, engine
    surface, observe/impose/suppress split, message contract, tests, scenario.
 3. Static: if CommonLib has the symbol, cite file:line. If not, delegate to
-   the re-analyst subagent (Ghidra MCP). It returns hypotheses; you file them.
+   the re-analyst subagent (pyghidra-mcp). It returns hypotheses; you file them.
 4. Implement inside-out: server logic with its T0 test, then the message in
    wire-schema plus its validator (Rust, same commit), then the SP native
    hook, then the TS handler. Server first because it is the only layer with
    a fast oracle. New handlers are Rust; C++ handlers are legacy.
 5. `just test` (T0 unit, T1 host-less native). Green before any lab time.
-6. `just lab run <scenario>`; read lab/results/<run>/ (server log, client
-   logs, screenshots, db diff, pcap, frida traces). Update HYPOTHESIS tags.
+6. `just lab-run <scenario>`; read the run under
+   https://thuum.gaussing.tv/results/<run>/ (server log, client logs,
+   screenshots, world diff, pcap, frida traces). Update HYPOTHESIS tags.
 7. Still unconfirmed after one lab run: hand the Dynamic plan to Eli. Wait.
 8. PR body is the verb doc. Reviewer checklist is at the bottom of docs/VERB.md.
 
-## Commands (pin from skymp/docs before first use)
+## Commands (justfile, pinned 2026-09-24)
 
-- `just build` ................ server, client, SP (CMake + vcpkg; see skymp/docs)
-- `just test` ................. T0 + T1
-- `just test-proto` ........... T2 protocol tests with fake clients
-- `just wire-build` / `just wire-test` / `just wire-fuzz <target>` / `just wire-diff <session>`
-- `just wire-header` .......... regenerate the C header for the SP client cdylib
-- `just lab up` / `just lab run <scenario>` / `just lab down`
-- `just ghidra` ............... confirm the Ghidra MCP is reachable
+- `just build` ................ Linux server build inside upstream's build image
+                                 (skymp/Dockerfile stage skymp-build-base, then
+                                 build.sh --configure and --build). On Apple Silicon
+                                 set DOCKER_PLATFORM=linux/amd64.
+- `just test` ................. T0: ctest --verbose in skymp/build, same image.
+- `just build-client` ......... download the client and SP `dist` artifact that
+                                 upstream's Windows workflow builds on the GitHub
+                                 mirror. T1 is Windows-only and runs on a client.
+- `just test-proto` ........... T2: fakeclient sessions against a local server
+                                 (lands with the difftest legacy driver, docs/WIRE.md).
+- `just wire-build` / `just wire-test` / `just wire-fuzz <target> [seconds]` /
+  `just wire-diff <session>` / `just wire-header` / `just wire-header-check`
+- `just lab-up` / `just lab-status` / `just lab-run <scenario>` / `just lab-down`
+                                 against LAB_API (default https://thuum.gaussing.tv/lab)
+- `just frida <script> <client>` run a trace script on a lab client through lab-api
+- `just ghidra` ............... confirm GHIDRA_MCP_URL answers
 - `just addr <id>` ............ resolve an Address Library ID for 1.6.1170
-- `just ledger` ............... regenerate docs/NATIVES.md from papyrus-vm
-- `just frida <script> <client>` run a trace script on a lab client
-- `just tree` ................. dump the real workspace layout for this file
+- `just ledger` ............... regenerate docs/NATIVES.md from the fork
+- `just tree` ................. print the real workspace layout
 
 ## Testing tiers
 

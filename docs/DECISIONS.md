@@ -211,3 +211,47 @@ lawyer; the operative consequence is only that nothing we build is private,
 and that any gamemode we write for a public server should be treated as
 distributed. Keizaal's private-gamemode posture is theirs to defend, not a
 precedent we rely on.
+
+## ADR-015: Wire dependency pins and location
+
+Status: accepted (2026-09-24)
+
+The scaffold's placeholder versions did not compose: postcard 1.1 implements
+`MaxSize` for heapless types only behind its `heapless` feature and only for
+heapless 0.7, while the workspace named heapless 0.8 with that feature off,
+so `Message::MAX_ENCODED_LEN`, the constant the whole recognizer is capped
+by, could not derive. Pins: heapless 0.7 with `serde`, postcard 1.1 with
+`heapless` and `experimental-derive`, renet 2 with the renet_netcode release
+that pairs with it, rust-version 1.88 because cxx requires it. cbindgen
+(MPL-2.0) leaves the dependency graph: it is a CLI run by `just wire-header`,
+the header is committed at crates/wire-client-ffi/include/skymp_wire.h, and
+CI diffs a fresh generation against it. Location: the workspace lives inside
+the fork as `skymp/skymp-wire/`, one subproject folder with its own MIT
+LICENSE in upstream's per-subproject convention (ADR-014), so the M1
+corrosion import is a relative path and the fork builds standalone. Only
+wire-schema names heapless, so the old pin has one place to change when
+postcard moves.
+
+## ADR-016: Hosting, CI, and the M0 agent host
+
+Status: accepted (2026-09-24)
+
+GitLab on the estate (VM 110) is canonical for both repositories, the thuum
+superproject and the skymp fork; each push-mirrors to a public GitHub
+repository under mojibake-dev within minutes, which is how ADR-014's "public
+from the first commit" holds, and the GitHub side is where upstream fetches,
+weekly rebases, and upstream pull requests happen. Fork branches: `main`
+mirrors upstream and is never committed to directly; `parity` is ours,
+rebased onto main weekly; branches for upstream PRs are cut from main.
+Upstream's own GitHub workflows keep running on the mirror (they build the
+server, the client, and Skyrim Platform on GitHub-hosted runners for free,
+which is the M0 Windows build); our jobs run in GitLab CI on the dedicated
+sky-ci runner, never on the estate's own runner, which holds root on the
+host. The agent host for M0 is Eli's Mac with the route limits LAB.md
+states; sky-agent stays a reserved guest until unattended overnight loops
+need it. The estate mapping (VLAN 70, guests 700 to 739, Caddy names,
+storage, rollback budgets) is recorded in docs/LAB.md, not here. Scenario
+authoring is review-gated as ADR-009 asks rather than tool-denied: scenario
+YAML changes travel in their own commits, Eli is the required approver for
+lab/scenarios/, and CI refuses any commit that mixes a scenario with other
+files.

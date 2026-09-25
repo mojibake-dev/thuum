@@ -78,24 +78,29 @@ it carries a HYPOTHESIS tag.
 ### M0: Lab and baseline (2 to 4 weeks, mostly infra)
 
 - Fork upstream skyrim-multiplayer/skymp (ADR-013 settled the base; there is
-  no fork worth diffing). Public repo from the first commit (ADR-014).
-- Proxmox lab per docs/LAB.md: server container, one client VM plus Eli's
-  desktop as client two, Ghidra with MCP, agent container.
+  no fork worth diffing). Public repo from the first commit (ADR-014), through
+  the GitLab-to-GitHub mirror (ADR-016).
+- Proxmox lab per docs/LAB.md: the sky-srv VM and the sky-ci runner, one
+  client VM once its GPU arrives plus fenestrate (Eli's desktop VM) as client
+  two, Ghidra served by pyghidra-mcp on sky-re. The agent runs on Eli's Mac
+  in M0 (ADR-016).
 - `just lab run smoke-two-players` green: connect, see each other, walk,
   restart server, positions and inventories survive.
 - Ghidra project for SkyrimSE.exe 1.6.1170 analyzed, CommonLib types
-  imported, reachable from the agent.
+  imported, reachable from the agent through pyghidra-mcp.
 - `just addr <id>` resolves against addrlib/.
 - docs/NATIVES.md generated from papyrus-vm: every native as implemented,
   delegated (SpSnippet), or stub.
 - Re-verify SkyMP's "done" column (appearance, attributes, death, inventory,
   forge) as scenarios `m0-*`. They are the regression floor.
 - CLAUDE.md layout and commands pinned to reality.
-- skymp-wire (docs/WIRE.md, ADR-010 to ADR-012): schema, codec, validate,
-  transport, difftest, and all three fuzz targets green on T2. `just
-  wire-test` in CI. renet's packet ingestion and fragment reassembly fuzzed
-  for the M0 gate in ADR-011. No lab time required for any of this; it runs
-  beside the lab build-out.
+- skymp-wire (docs/WIRE.md, ADR-010 to ADR-012, ADR-015; lives in the fork):
+  schema, codec, validate, transport, difftest, and all three fuzz targets
+  green on T2. `just wire-test` in GitLab CI on sky-ci (ADR-016). renet's
+  packet ingestion and fragment reassembly fuzzed for the M0 gate in ADR-011.
+  The M0 difftest wire driver runs against an in-process Rust edge recorder;
+  the bridged server it fronts lands in M1. No lab time required for any of
+  this; it runs beside the lab build-out.
 
 ### M1: Close Class A (4 to 8 weeks, agent-heavy)
 
