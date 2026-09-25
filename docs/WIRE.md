@@ -56,9 +56,13 @@ carries per-connection keys, so encryption and replay protection come with
 the transport and are not something a handler can forget.
 
 Limits live in `wire-transport::limits` and are enforced before decode:
-max clients, max packet size, per-client bytes per second and messages per
-second on each channel, queue depth per client, and a connect-rate cap per
-source address.
+max clients (netcode), max reassembled message size, bytes per second per
+client, channel memory as the queue depth (renet disconnects a client whose
+reliable channel fills), and messages per second per family (the validator's
+token buckets). Not enforced in the crate: a connect-rate cap per source
+address. The netcode transport owns the socket, so nothing above it sees a
+handshake before it is processed; that cap lives at the host firewall until
+the transport grows a hook for it, and this sentence is the record of the gap.
 
 ## Messages (ADR-012)
 
