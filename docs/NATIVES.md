@@ -74,8 +74,8 @@ Status meanings:
 | `ActiveMagicEffect.UnregisterForUpdateGameTime` (method) | missing |  |  |  |
 | `Actor.AddPerk` (method) | missing |  |  |  |
 | `Actor.AddShout` (method) | missing |  |  |  |
-| `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782] |  |
-| `Actor.AddToFaction` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:778] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:778] |  |
+| `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782] |  |
+| `Actor.AddToFaction` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:778] |  |
 | `Actor.AllowBleedoutDialogue` (method) | missing |  |  |  |
 | `Actor.AllowPCDialogue` (method) | missing |  |  |  |
 | `Actor.AttachAshPile` (method) | missing |  |  |  |
@@ -87,19 +87,19 @@ Status meanings:
 | `Actor.ClearForcedMovement` (method) | missing |  |  |  |
 | `Actor.ClearKeepOffsetFromActor` (method) | missing |  |  |  |
 | `Actor.ClearLookAt` (method) | missing |  |  |  |
-| `Actor.DamageActorValue` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:766] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:766] |  |
+| `Actor.DamageActorValue` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:766] |  |
 | `Actor.Dismount` (method) | missing |  |  |  |
 | `Actor.DispelAllSpells` (method) | missing |  |  |  |
 | `Actor.DispelSpell` (method) | missing |  |  |  |
 | `Actor.DoCombatSpellApply` (method) | missing |  |  |  |
-| `Actor.DrawWeapon` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:760] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:760] |  |
+| `Actor.DrawWeapon` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:760] |  |
 | `Actor.EnableAI` (method) | missing |  |  |  |
 | `Actor.EndDeferredKill` (method) | missing |  |  |  |
-| `Actor.EquipItem` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:771] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:771] |  |
+| `Actor.EquipItem` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:771] |  |
 | `Actor.EquipItemById` (method) | missing |  |  |  |
-| `Actor.EquipItemEx` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:772] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:772] |  |
+| `Actor.EquipItemEx` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:772] |  |
 | `Actor.EquipShout` (method) | missing |  |  |  |
-| `Actor.EquipSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:773] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:773] |  |
+| `Actor.EquipSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:773] |  |
 | `Actor.EvaluatePackage` (method) | missing |  |  |  |
 | `Actor.ForceActorValue` (method) | missing |  |  |  |
 | `Actor.ForceMovementDirection` (method) | missing |  |  |  |
@@ -113,7 +113,7 @@ Status meanings:
 | `Actor.ForceTargetSpeed` (method) | missing |  |  |  |
 | `Actor.GetActorValue` (method) | missing |  |  |  |
 | `Actor.GetActorValueMax` (method) | missing |  |  |  |
-| `Actor.GetActorValuePercentage` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:768] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:768] |  |
+| `Actor.GetActorValuePercentage` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:768] |  |
 | `Actor.GetBaseActorValue` (method) | missing |  |  |  |
 | `Actor.GetBribeAmount` (method) | missing |  |  |  |
 | `Actor.GetCombatState` (method) | missing |  |  |  |
@@ -131,7 +131,7 @@ Status meanings:
 | `Actor.GetEquippedWeapon` (method) | missing |  |  |  |
 | `Actor.GetFactionRank` (method) | missing |  |  |  |
 | `Actor.GetFactionReaction` (method) | missing |  |  |  |
-| `Actor.GetFactions` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:780] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:780] |  |
+| `Actor.GetFactions` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:780] |  |
 | `Actor.GetFlyingState` (method) | missing |  |  |  |
 | `Actor.GetForcedLandingMarker` (method) | missing |  |  |  |
 | `Actor.GetFurnitureReference` (method) | missing |  |  |  |
@@ -143,13 +143,13 @@ Status meanings:
 | `Actor.GetLightLevel` (method) | missing |  |  |  |
 | `Actor.GetLowestRelationshipRank` (method) | missing |  |  |  |
 | `Actor.GetNoBleedoutRecovery` (method) | missing |  |  |  |
-| `Actor.GetNthSpell` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:786] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:786] |  |
+| `Actor.GetNthSpell` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:786] |  |
 | `Actor.GetPlayerControls` (method) | missing |  |  |  |
-| `Actor.GetRace` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:784] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:784] |  |
+| `Actor.GetRace` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:784] |  |
 | `Actor.GetRelationshipRank` (method) | missing |  |  |  |
-| `Actor.GetSitState` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:763] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:763] |  |
+| `Actor.GetSitState` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:763] |  |
 | `Actor.GetSleepState` (method) | missing |  |  |  |
-| `Actor.GetSpellCount` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:785] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:785] |  |
+| `Actor.GetSpellCount` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:785] |  |
 | `Actor.GetVoiceRecoveryTime` (method) | missing |  |  |  |
 | `Actor.GetWarmthRating` (method) | missing |  |  |  |
 | `Actor.GetWornForm` (method) | missing |  |  |  |
@@ -173,17 +173,17 @@ Status meanings:
 | `Actor.IsBribed` (method) | missing |  |  |  |
 | `Actor.IsChild` (method) | missing |  |  |  |
 | `Actor.IsCommandedActor` (method) | missing |  |  |  |
-| `Actor.IsDead` (method) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:776; skymp5-functions-lib/index.ts:351] [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:776; skymp5-functions-lib/index.ts:351] |  |
+| `Actor.IsDead` (method) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:776; skymp5-functions-lib/index.ts:351] |  |
 | `Actor.IsDetectedBy` (method) | missing |  |  |  |
 | `Actor.IsDoingFavor` (method) | missing |  |  |  |
-| `Actor.IsEquipped` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:767] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:767] |  |
+| `Actor.IsEquipped` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:767] |  |
 | `Actor.IsEssential` (method) | missing |  |  |  |
 | `Actor.IsFlying` (method) | missing |  |  |  |
 | `Actor.IsGhost` (method) | missing |  |  |  |
 | `Actor.IsGuard` (method) | missing |  |  |  |
 | `Actor.IsHostileToActor` (method) | missing |  |  |  |
 | `Actor.IsInCombat` (method) | missing |  |  |  |
-| `Actor.IsInFaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:779] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:779] |  |
+| `Actor.IsInFaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:779] |  |
 | `Actor.IsInKillMove` (method) | missing |  |  |  |
 | `Actor.IsIntimidated` (method) | missing |  |  |  |
 | `Actor.IsOnMount` (method) | missing |  |  |  |
@@ -196,7 +196,7 @@ Status meanings:
 | `Actor.IsSwimming` (method) | missing |  |  |  |
 | `Actor.IsTrespassing` (method) | missing |  |  |  |
 | `Actor.IsUnconscious` (method) | missing |  |  |  |
-| `Actor.IsWeaponDrawn` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:759] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:759] |  |
+| `Actor.IsWeaponDrawn` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:759] |  |
 | `Actor.KeepOffsetFromActor` (method) | missing |  |  |  |
 | `Actor.Kill` (method) | missing |  |  |  |
 | `Actor.KillSilent` (method) | missing |  |  |  |
@@ -205,37 +205,37 @@ Status meanings:
 | `Actor.MoveToPackageLocation` (method, latent) | missing |  |  |  |
 | `Actor.OpenInventory` (method) | missing |  |  |  |
 | `Actor.PathToReference` (method, latent) | missing |  |  |  |
-| `Actor.PlayIdle` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:762] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:762] |  |
+| `Actor.PlayIdle` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:762] |  |
 | `Actor.PlayIdleWithTarget` (method) | missing |  |  |  |
 | `Actor.PlaySubGraphAnimation` (method) | missing |  |  |  |
 | `Actor.QueueNiNodeUpdate` (method) | missing |  |  |  |
 | `Actor.RegenerateHead` (method) | missing |  |  |  |
 | `Actor.RemoveFromAllFactions` (method) | missing |  |  |  |
-| `Actor.RemoveFromFaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:781] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:781] |  |
+| `Actor.RemoveFromFaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:781] |  |
 | `Actor.RemovePerk` (method) | missing |  |  |  |
 | `Actor.RemoveShout` (method) | missing |  |  |  |
-| `Actor.RemoveSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:783] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:783] |  |
+| `Actor.RemoveSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:783] |  |
 | `Actor.ReplaceHeadPart` (method) | missing |  |  |  |
 | `Actor.ResetAI` (method) | missing |  |  |  |
 | `Actor.ResetExpressionOverrides` (method) | missing |  |  |  |
 | `Actor.ResetHealthAndLimbs` (method) | missing |  |  |  |
-| `Actor.RestoreActorValue` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:764] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:764] |  |
+| `Actor.RestoreActorValue` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:764] |  |
 | `Actor.Resurrect` (method, latent) | missing |  |  |  |
 | `Actor.SendAssaultAlarm` (method) | missing |  |  |  |
 | `Actor.SendLycanthropyStateChanged` (method) | missing |  |  |  |
 | `Actor.SendTrespassAlarm` (method) | missing |  |  |  |
 | `Actor.SendVampirismStateChanged` (method) | missing |  |  |  |
-| `Actor.SetActorValue` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:765] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:765] |  |
+| `Actor.SetActorValue` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:765] |  |
 | `Actor.SetAlert` (method) | missing |  |  |  |
 | `Actor.SetAllowFlying` (method) | missing |  |  |  |
 | `Actor.SetAllowFlyingEx` (method) | missing |  |  |  |
-| `Actor.SetAlpha` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:770] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:770] |  |
+| `Actor.SetAlpha` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:770] |  |
 | `Actor.SetAttackActorOnSight` (method) | missing |  |  |  |
 | `Actor.SetBribed` (method) | missing |  |  |  |
 | `Actor.SetCrimeFaction` (method) | missing |  |  |  |
 | `Actor.SetCriticalStage` (method) | missing |  |  |  |
 | `Actor.SetDoingFavor` (method) | missing |  |  |  |
-| `Actor.SetDontMove` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:775] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:775] |  |
+| `Actor.SetDontMove` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:775] |  |
 | `Actor.SetExpressionModifier` (method) | missing |  |  |  |
 | `Actor.SetExpressionOverride` (method) | missing |  |  |  |
 | `Actor.SetExpressionPhoneme` (method) | missing |  |  |  |
@@ -270,8 +270,8 @@ Status meanings:
 | `Actor.StopCombat` (method) | missing |  |  |  |
 | `Actor.StopCombatAlarm` (method) | missing |  |  |  |
 | `Actor.TrapSoul` (method) | missing |  |  |  |
-| `Actor.UnequipAll` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:761] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:761] |  |
-| `Actor.UnequipItem` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:774] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:774] |  |
+| `Actor.UnequipAll` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:761] |  |
+| `Actor.UnequipItem` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:774] |  |
 | `Actor.UnequipItemEx` (method) | missing |  |  |  |
 | `Actor.UnequipItemSlot` (method) | missing |  |  |  |
 | `Actor.UnequipShout` (method) | missing |  |  |  |
@@ -279,7 +279,7 @@ Status meanings:
 | `Actor.UnLockOwnedDoorsInCell` (method) | missing |  |  |  |
 | `Actor.UpdateWeight` (method) | missing |  |  |  |
 | `Actor.WillIntimidateSucceed` (method) | missing |  |  |  |
-| `Actor.WornHasKeyword` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:777] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:777] |  |
+| `Actor.WornHasKeyword` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:777] |  |
 | `ActorBase.GetClass` (method) | missing |  |  |  |
 | `ActorBase.GetCombatStyle` (method) | missing |  |  |  |
 | `ActorBase.GetDeadCount` (method) | missing |  |  |  |
@@ -429,7 +429,7 @@ Status meanings:
 | `Art.GetModelPath` (method) | missing |  |  |  |
 | `Art.SetModelPath` (method) | missing |  |  |  |
 | `Book.GetSkill` (method) | missing |  |  |  |
-| `Book.GetSpell` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusBook.cpp:47] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusBook.cpp:47] |  |
+| `Book.GetSpell` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusBook.cpp:47] |  |
 | `Book.IsRead` (method) | missing |  |  |  |
 | `Book.IsTakeable` (method) | missing |  |  |  |
 | `Cell.GetActorOwner` (method) | missing |  |  |  |
@@ -437,8 +437,8 @@ Status meanings:
 | `Cell.GetNthRef` (method) | missing |  |  |  |
 | `Cell.GetNumRefs` (method) | missing |  |  |  |
 | `Cell.GetWaterLevel` (method) | missing |  |  |  |
-| `Cell.IsAttached` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusCell.cpp:36] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusCell.cpp:36] |  |
-| `Cell.IsInterior` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusCell.cpp:37] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusCell.cpp:37] |  |
+| `Cell.IsAttached` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusCell.cpp:36] |  |
+| `Cell.IsInterior` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusCell.cpp:37] |  |
 | `Cell.Reset` (method) | missing |  |  |  |
 | `Cell.SetActorOwner` (method) | missing |  |  |  |
 | `Cell.SetFactionOwner` (method) | missing |  |  |  |
@@ -522,12 +522,12 @@ Status meanings:
 | `Debug.GetConfigName` (global, latent) | missing |  |  |  |
 | `Debug.GetPlatformName` (global, latent) | missing |  |  |  |
 | `Debug.GetVersionNumber` (global, latent) | missing |  |  |  |
-| `Debug.MessageBox` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:53] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:53] |  |
-| `Debug.Notification` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:52] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:52] |  |
+| `Debug.MessageBox` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:53] |  |
+| `Debug.Notification` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:52] |  |
 | `Debug.OpenUserLog` (global) | missing |  |  |  |
 | `Debug.PlayerMoveToAndWait` (global, latent) | missing |  |  |  |
 | `Debug.QuitGame` (global) | missing |  |  |  |
-| `Debug.SendAnimationEvent` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:54] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:54] |  |
+| `Debug.SendAnimationEvent` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:54] |  |
 | `Debug.SetFootIK` (global) | missing |  |  |  |
 | `Debug.SetGodMode` (global) | missing |  |  |  |
 | `Debug.ShowRefPosition` (global) | missing |  |  |  |
@@ -539,7 +539,7 @@ Status meanings:
 | `Debug.ToggleAI` (global) | missing |  |  |  |
 | `Debug.ToggleCollisions` (global) | missing |  |  |  |
 | `Debug.ToggleMenus` (global) | missing |  |  |  |
-| `Debug.Trace` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:55] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:55] |  |
+| `Debug.Trace` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusDebug.cpp:55] |  |
 | `Debug.TraceStack` (global) | missing |  |  |  |
 | `Debug.TraceUser` (global) | missing |  |  |  |
 | `DefaultObjectManager.GetForm` (method) | missing |  |  |  |
@@ -571,7 +571,7 @@ Status meanings:
 | `Faction.GetInfamyNonViolent` (method) | missing |  |  |  |
 | `Faction.GetInfamyViolent` (method) | missing |  |  |  |
 | `Faction.GetMerchantContainer` (method) | missing |  |  |  |
-| `Faction.GetReaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFaction.cpp:44] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFaction.cpp:44] |  |
+| `Faction.GetReaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFaction.cpp:44] |  |
 | `Faction.GetStolenItemValueCrime` (method) | missing |  |  |  |
 | `Faction.GetStolenItemValueNoCrime` (method) | missing |  |  |  |
 | `Faction.GetVendorEndHour` (method) | missing |  |  |  |
@@ -606,18 +606,18 @@ Status meanings:
 | `Flora.GetIngredient` (method) | missing |  |  |  |
 | `Flora.SetHarvestSound` (method) | missing |  |  |  |
 | `Flora.SetIngredient` (method) | missing |  |  |  |
-| `Form.GetFormID` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:179] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:179] |  |
+| `Form.GetFormID` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:179] |  |
 | `Form.GetGoldValue` (method) | missing |  |  |  |
 | `Form.GetKeywords` (method) | missing |  |  |  |
-| `Form.GetName` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:180] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:180] |  |
+| `Form.GetName` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:180] |  |
 | `Form.GetNthKeyword` (method) | missing |  |  |  |
 | `Form.GetNumKeywords` (method) | missing |  |  |  |
-| `Form.GetType` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:177] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:177] |  |
-| `Form.GetWeight` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:181] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:181] |  |
+| `Form.GetType` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:177] |  |
+| `Form.GetWeight` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:181] |  |
 | `Form.GetWorldModelNthTextureSet` (method) | missing |  |  |  |
 | `Form.GetWorldModelNumTextureSets` (method) | missing |  |  |  |
 | `Form.GetWorldModelPath` (method) | missing |  |  |  |
-| `Form.HasKeyword` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:178] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:178] |  |
+| `Form.HasKeyword` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:178] |  |
 | `Form.HasWorldModel` (method) | missing |  |  |  |
 | `Form.IsPlayable` (method) | missing |  |  |  |
 | `Form.PlayerKnows` (method) | missing |  |  |  |
@@ -633,7 +633,7 @@ Status meanings:
 | `Form.RegisterForNiNodeUpdate` (method) | missing |  |  |  |
 | `Form.RegisterForSingleLOSGain` (method) | missing |  |  |  |
 | `Form.RegisterForSingleLOSLost` (method) | missing |  |  |  |
-| `Form.RegisterForSingleUpdate` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:175] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:175] |  |
+| `Form.RegisterForSingleUpdate` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusForm.cpp:175] |  |
 | `Form.RegisterForSingleUpdateGameTime` (method) | missing |  |  |  |
 | `Form.RegisterForSleep` (method) | missing |  |  |  |
 | `Form.RegisterForTrackedStatsEvent` (method) | missing |  |  |  |
@@ -669,9 +669,9 @@ Status meanings:
 | `Form.UnregisterForUpdateGameTime` (method) | missing |  |  |  |
 | `FormList.AddForm` (method) | missing |  |  |  |
 | `FormList.AddForms` (method) | missing |  |  |  |
-| `FormList.Find` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:67] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:67] |  |
-| `FormList.GetAt` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:66] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:66] |  |
-| `FormList.GetSize` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:65] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:65] |  |
+| `FormList.Find` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:67] |  |
+| `FormList.GetAt` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:66] |  |
+| `FormList.GetSize` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusFormList.cpp:65] |  |
 | `FormList.HasForm` (method) | missing |  |  |  |
 | `FormList.RemoveAddedForm` (method) | missing |  |  |  |
 | `FormList.Revert` (method) | missing |  |  |  |
@@ -683,28 +683,28 @@ Status meanings:
 | `Game.CalculateFavorCost` (global) | missing |  |  |  |
 | `Game.ClearPrison` (global) | missing |  |  |  |
 | `Game.ClearTempEffects` (global) | missing |  |  |  |
-| `Game.DisablePlayerControls` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:236] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:236] |  |
+| `Game.DisablePlayerControls` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:236] |  |
 | `Game.EnableFastTravel` (global) | missing |  |  |  |
-| `Game.EnablePlayerControls` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:237] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:237] |  |
+| `Game.EnablePlayerControls` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:237] |  |
 | `Game.FadeOutGame` (global) | missing |  |  |  |
 | `Game.FastTravel` (global) | missing |  |  |  |
 | `Game.FindClosestActor` (global) | missing |  |  |  |
 | `Game.FindClosestReferenceOfAnyTypeInList` (global) | missing |  |  |  |
-| `Game.FindClosestReferenceOfAnyTypeInListFromRef` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:238] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:238] |  |
+| `Game.FindClosestReferenceOfAnyTypeInListFromRef` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:238] |  |
 | `Game.FindClosestReferenceOfType` (global) | missing |  |  |  |
-| `Game.FindClosestReferenceOfTypeFromRef` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:240] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:240] |  |
+| `Game.FindClosestReferenceOfTypeFromRef` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:240] |  |
 | `Game.FindRandomActor` (global) | missing |  |  |  |
 | `Game.FindRandomReferenceOfAnyTypeInList` (global) | missing |  |  |  |
 | `Game.FindRandomReferenceOfType` (global) | missing |  |  |  |
 | `Game.ForceFirstPerson` (global) | missing |  |  |  |
-| `Game.ForceThirdPerson` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:235] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:235] |  |
-| `Game.GetCameraState` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:245] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:245] |  |
+| `Game.ForceThirdPerson` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:235] |  |
+| `Game.GetCameraState` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:245] |  |
 | `Game.GetCurrentConsoleRef` (global) | missing |  |  |  |
 | `Game.GetCurrentCrosshairRef` (global) | missing |  |  |  |
 | `Game.GetDialogueTarget` (global) | missing |  |  |  |
 | `Game.GetExperienceForLevel` (global) | missing |  |  |  |
-| `Game.GetForm` (global) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:246; skymp5-functions-lib/index.ts:348] [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:246; skymp5-functions-lib/index.ts:348] |  |
-| `Game.GetFormEx` (global) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:247; skymp5-functions-lib/index.ts:349] [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:247; skymp5-functions-lib/index.ts:349] |  |
+| `Game.GetForm` (global) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:246; skymp5-functions-lib/index.ts:348] |  |
+| `Game.GetFormEx` (global) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:247; skymp5-functions-lib/index.ts:349] |  |
 | `Game.GetFormFromFile` (global) | missing |  |  |  |
 | `Game.GetGameSettingFloat` (global) | missing |  |  |  |
 | `Game.GetGameSettingInt` (global) | missing |  |  |  |
@@ -730,7 +730,7 @@ Status meanings:
 | `Game.GetNumTintsByType` (global) | missing |  |  |  |
 | `Game.GetPerkPoints` (global) | missing |  |  |  |
 | `Game.getplayer` (global) | missing |  |  |  |
-| `Game.GetPlayer` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:242] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:242] |  |
+| `Game.GetPlayer` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:242] |  |
 | `Game.GetPlayerExperience` (global) | missing |  |  |  |
 | `Game.GetPlayerGrabbedRef` (global) | missing |  |  |  |
 | `Game.GetPlayerMovementMode` (global) | missing |  |  |  |
@@ -744,7 +744,7 @@ Status meanings:
 | `Game.HideTitleSequenceMenu` (global) | missing |  |  |  |
 | `Game.IncrementSkill` (global) | missing |  |  |  |
 | `Game.IncrementSkillBy` (global) | missing |  |  |  |
-| `Game.IncrementStat` (global) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:234] [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:234] |  |
+| `Game.IncrementStat` (global) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:234] |  |
 | `Game.IsActivateControlsEnabled` (global) | missing |  |  |  |
 | `Game.IsCamSwitchControlsEnabled` (global) | missing |  |  |  |
 | `Game.IsFastTravelControlsEnabled` (global) | missing |  |  |  |
@@ -797,10 +797,10 @@ Status meanings:
 | `Game.SetTintMaskTexturePath` (global) | missing |  |  |  |
 | `Game.shakeCamera` (global) | missing |  |  |  |
 | `Game.shakeController` (global) | missing |  |  |  |
-| `Game.ShakeController` (global, not in SP dump) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:248] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:248] |  |
+| `Game.ShakeController` (global, not in SP dump) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:248] |  |
 | `Game.ShowFirstPersonGeometry` (global) | missing |  |  |  |
-| `Game.ShowLimitedRaceMenu` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:244] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:244] |  |
-| `Game.ShowRaceMenu` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:243] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:243] |  |
+| `Game.ShowLimitedRaceMenu` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:244] |  |
+| `Game.ShowRaceMenu` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:243] |  |
 | `Game.ShowTitleSequenceMenu` (global) | missing |  |  |  |
 | `Game.ShowTrainingMenu` (global) | missing |  |  |  |
 | `Game.StartTitleSequence` (global) | missing |  |  |  |
@@ -855,7 +855,7 @@ Status meanings:
 | `Input.IsKeyPressed` (global) | missing |  |  |  |
 | `Input.ReleaseKey` (global) | missing |  |  |  |
 | `Input.TapKey` (global) | missing |  |  |  |
-| `Keyword.GetKeyword` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusKeyword.cpp:45] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusKeyword.cpp:45] |  |
+| `Keyword.GetKeyword` (global) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusKeyword.cpp:45] |  |
 | `Keyword.GetString` (method) | missing |  |  |  |
 | `Keyword.SendStoryEvent` (method) | missing |  |  |  |
 | `Keyword.SendStoryEventAndWait` (method, latent) | missing |  |  |  |
@@ -946,7 +946,7 @@ Status meanings:
 | `MagicEffect.SetSkillLevel` (method) | missing |  |  |  |
 | `MagicEffect.SetSkillUsageMult` (method) | missing |  |  |  |
 | `Message.ResetHelpMessage` (global) | missing |  |  |  |
-| `Message.Show` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusMessage.cpp:16] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusMessage.cpp:16] |  |
+| `Message.Show` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusMessage.cpp:16] |  |
 | `Message.ShowAsHelpMessage` (method) | missing |  |  |  |
 | `MusicType.Add` (method) | missing |  |  |  |
 | `MusicType.Remove` (method) | missing |  |  |  |
@@ -974,47 +974,47 @@ Status meanings:
 | `NetImmerse.SetNodeLocalPositionZ` (global) | missing |  |  |  |
 | `NetImmerse.SetNodeLocalRotationEuler` (global) | missing |  |  |  |
 | `NetImmerse.SetNodeLocalRotationMatrix` (global) | missing |  |  |  |
-| `NetImmerse.SetNodeScale` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:83] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:83] |  |
-| `NetImmerse.SetNodeTextureSet` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:82] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:82] |  |
-| `ObjectReference.Activate` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:956] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:956] |  |
+| `NetImmerse.SetNodeScale` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:83] |  |
+| `NetImmerse.SetNodeTextureSet` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:82] |  |
+| `ObjectReference.Activate` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:956] |  |
 | `ObjectReference.AddDependentAnimatedObjectReference` (method) | missing |  |  |  |
 | `ObjectReference.AddInventoryEventFilter` (method) | missing |  |  |  |
-| `ObjectReference.AddItem` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:942] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:942] |  |
+| `ObjectReference.AddItem` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:942] |  |
 | `ObjectReference.AddToMap` (method) | missing |  |  |  |
 | `ObjectReference.ApplyHavokImpulse` (method, latent) | missing |  |  |  |
-| `ObjectReference.BlockActivation` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:953] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:953] |  |
+| `ObjectReference.BlockActivation` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:953] |  |
 | `ObjectReference.CalculateEncounterLevel` (method) | missing |  |  |  |
 | `ObjectReference.CanFastTravelToMarker` (method) | missing |  |  |  |
 | `ObjectReference.ClearDestruction` (method) | missing |  |  |  |
 | `ObjectReference.CreateDetectionEvent` (method) | missing |  |  |  |
 | `ObjectReference.CreateEnchantment` (method) | missing |  |  |  |
 | `ObjectReference.DamageObject` (method, latent) | missing |  |  |  |
-| `ObjectReference.Delete` (method, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:952] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:952] |  |
-| `ObjectReference.Disable` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:951] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:951] |  |
-| `ObjectReference.DisableNoWait` (method) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:941] [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:941] |  |
+| `ObjectReference.Delete` (method, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:952] |  |
+| `ObjectReference.Disable` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:951] |  |
+| `ObjectReference.DisableNoWait` (method) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:941] |  |
 | `ObjectReference.DropObject` (method, latent) | missing |  |  |  |
-| `ObjectReference.Enable` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:950] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:950] |  |
+| `ObjectReference.Enable` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:950] |  |
 | `ObjectReference.EnableFastTravel` (method) | missing |  |  |  |
-| `ObjectReference.EnableNoWait` (method) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:940] [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:940] |  |
+| `ObjectReference.EnableNoWait` (method) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:940] |  |
 | `ObjectReference.ForceAddRagdollToWorld` (method, latent) | missing |  |  |  |
 | `ObjectReference.ForceRemoveRagdollFromWorld` (method, latent) | missing |  |  |  |
 | `ObjectReference.GetActorOwner` (method) | missing |  |  |  |
 | `ObjectReference.GetAllForms` (method) | missing |  |  |  |
-| `ObjectReference.GetAllItemsCount` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:974] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:974] |  |
+| `ObjectReference.GetAllItemsCount` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:974] |  |
 | `ObjectReference.GetAngleX` (method) | missing |  |  |  |
 | `ObjectReference.GetAngleY` (method) | missing |  |  |  |
 | `ObjectReference.GetAngleZ` (method) | missing |  |  |  |
-| `ObjectReference.GetAnimationVariableBool` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:946] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:946] |  |
+| `ObjectReference.GetAnimationVariableBool` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:946] |  |
 | `ObjectReference.GetAnimationVariableFloat` (method) | missing |  |  |  |
 | `ObjectReference.GetAnimationVariableInt` (method) | missing |  |  |  |
-| `ObjectReference.GetBaseObject` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:961] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:961] |  |
+| `ObjectReference.GetBaseObject` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:961] |  |
 | `ObjectReference.GetContainerForms` (method) | missing |  |  |  |
 | `ObjectReference.GetCurrentDestructionStage` (method) | missing |  |  |  |
 | `ObjectReference.GetCurrentLocation` (method) | missing |  |  |  |
 | `ObjectReference.GetCurrentScene` (method) | missing |  |  |  |
 | `ObjectReference.GetDisplayName` (method) | missing |  |  |  |
 | `ObjectReference.getDistance` (method) | missing |  |  |  |
-| `ObjectReference.GetDistance` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:977] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:977] |  |
+| `ObjectReference.GetDistance` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:977] |  |
 | `ObjectReference.GetEditorLocation` (method) | missing |  |  |  |
 | `ObjectReference.GetEnableParent` (method) | missing |  |  |  |
 | `ObjectReference.GetEnchantment` (method) | missing |  |  |  |
@@ -1022,29 +1022,29 @@ Status meanings:
 | `ObjectReference.GetHeadingAngle` (method) | missing |  |  |  |
 | `ObjectReference.GetHeight` (method) | missing |  |  |  |
 | `ObjectReference.GetItemCharge` (method) | missing |  |  |  |
-| `ObjectReference.GetItemCount` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:945] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:945] |  |
+| `ObjectReference.GetItemCount` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:945] |  |
 | `ObjectReference.GetItemHealthPercent` (method) | missing |  |  |  |
 | `ObjectReference.GetItemMaxCharge` (method) | missing |  |  |  |
 | `ObjectReference.GetKey` (method) | missing |  |  |  |
 | `ObjectReference.GetLength` (method) | missing |  |  |  |
-| `ObjectReference.GetLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970] |  |
+| `ObjectReference.GetLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970] |  |
 | `ObjectReference.GetLockLevel` (method) | missing |  |  |  |
 | `ObjectReference.GetMass` (method) | missing |  |  |  |
 | `ObjectReference.GetNthForm` (method) | missing |  |  |  |
-| `ObjectReference.GetNthLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:971] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:971] |  |
+| `ObjectReference.GetNthLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:971] |  |
 | `ObjectReference.GetNthReferenceAlias` (method) | missing |  |  |  |
 | `ObjectReference.GetNumItems` (method) | missing |  |  |  |
 | `ObjectReference.GetNumReferenceAliases` (method) | missing |  |  |  |
-| `ObjectReference.GetOpenState` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:973] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:973] |  |
-| `ObjectReference.GetParentCell` (method) | stub |  | [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:972] [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:972] |  |
+| `ObjectReference.GetOpenState` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:973] |  |
+| `ObjectReference.GetParentCell` (method) | stub |  | [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:972] |  |
 | `ObjectReference.GetPoison` (method) | missing |  |  |  |
-| `ObjectReference.GetPositionX` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:957] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:957] |  |
-| `ObjectReference.GetPositionY` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:958] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:958] |  |
-| `ObjectReference.GetPositionZ` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:959] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:959] |  |
+| `ObjectReference.GetPositionX` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:957] |  |
+| `ObjectReference.GetPositionY` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:958] |  |
+| `ObjectReference.GetPositionZ` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:959] |  |
 | `ObjectReference.GetReferenceAliases` (method) | missing |  |  |  |
-| `ObjectReference.GetScale` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:938] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:938] |  |
+| `ObjectReference.GetScale` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:938] |  |
 | `ObjectReference.GetTotalArmorWeight` (method) | missing |  |  |  |
-| `ObjectReference.GetTotalItemWeight` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:978] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:978] |  |
+| `ObjectReference.GetTotalItemWeight` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:978] |  |
 | `ObjectReference.GetTriggerObjectCount` (method) | missing |  |  |  |
 | `ObjectReference.GetVoiceType` (method) | missing |  |  |  |
 | `ObjectReference.GetWidth` (method) | missing |  |  |  |
@@ -1054,15 +1054,15 @@ Status meanings:
 | `ObjectReference.HasRefType` (method) | missing |  |  |  |
 | `ObjectReference.IgnoreFriendlyHits` (method) | missing |  |  |  |
 | `ObjectReference.InterruptCast` (method) | missing |  |  |  |
-| `ObjectReference.Is3DLoaded` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:969] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:969] |  |
+| `ObjectReference.Is3DLoaded` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:969] |  |
 | `ObjectReference.IsActivateChild` (method) | missing |  |  |  |
-| `ObjectReference.IsActivationBlocked` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:954] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:954] |  |
-| `ObjectReference.IsContainerEmpty` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:975] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:975] |  |
-| `ObjectReference.IsDeleted` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:937] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:937] |  |
-| `ObjectReference.IsDisabled` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:936] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:936] |  |
+| `ObjectReference.IsActivationBlocked` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:954] |  |
+| `ObjectReference.IsContainerEmpty` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:975] |  |
+| `ObjectReference.IsDeleted` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:937] |  |
+| `ObjectReference.IsDisabled` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:936] |  |
 | `ObjectReference.IsFurnitureInUse` (method) | missing |  |  |  |
 | `ObjectReference.IsFurnitureMarkerInUse` (method) | missing |  |  |  |
-| `ObjectReference.IsHarvested` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:935] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:935] |  |
+| `ObjectReference.IsHarvested` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:935] |  |
 | `ObjectReference.IsIgnoringFriendlyHits` (method) | missing |  |  |  |
 | `ObjectReference.IsInDialogueWithPlayer` (method) | missing |  |  |  |
 | `ObjectReference.IsLockBroken` (method) | missing |  |  |  |
@@ -1071,15 +1071,15 @@ Status meanings:
 | `ObjectReference.IsOffLimits` (method) | missing |  |  |  |
 | `ObjectReference.KnockAreaEffect` (method) | missing |  |  |  |
 | `ObjectReference.Lock` (method) | missing |  |  |  |
-| `ObjectReference.MoveTo` (method, latent) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:967; skymp5-functions-lib/index.ts:350] [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:967; skymp5-functions-lib/index.ts:350] |  |
+| `ObjectReference.MoveTo` (method, latent) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:967; skymp5-functions-lib/index.ts:350] |  |
 | `ObjectReference.MoveToInteractionLocation` (method, latent) | missing |  |  |  |
 | `ObjectReference.MoveToMyEditorLocation` (method, latent) | missing |  |  |  |
 | `ObjectReference.MoveToNode` (method, latent) | missing |  |  |  |
 | `ObjectReference.PlaceActorAtMe` (method) | missing |  |  |  |
-| `ObjectReference.PlaceAtMe` (method) | stub |  | [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:948] [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:948] |  |
-| `ObjectReference.PlayAnimation` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:962] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:962] |  |
-| `ObjectReference.PlayAnimationAndWait` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:963] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:963] |  |
-| `ObjectReference.PlayGamebryoAnimation` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:965] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:965] |  |
+| `ObjectReference.PlaceAtMe` (method) | stub |  | [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:948] |  |
+| `ObjectReference.PlayAnimation` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:962] |  |
+| `ObjectReference.PlayAnimationAndWait` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:963] |  |
+| `ObjectReference.PlayGamebryoAnimation` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:965] |  |
 | `ObjectReference.PlayImpactEffect` (method) | missing |  |  |  |
 | `ObjectReference.PlaySyncedAnimationAndWaitSS` (method, latent) | missing |  |  |  |
 | `ObjectReference.PlaySyncedAnimationSS` (method) | missing |  |  |  |
@@ -1087,22 +1087,22 @@ Status meanings:
 | `ObjectReference.ProcessTrapHit` (method) | missing |  |  |  |
 | `ObjectReference.PushActorAway` (method) | missing |  |  |  |
 | `ObjectReference.RemoveAllInventoryEventFilters` (method) | missing |  |  |  |
-| `ObjectReference.RemoveAllItems` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:944] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:944] |  |
+| `ObjectReference.RemoveAllItems` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:944] |  |
 | `ObjectReference.RemoveDependentAnimatedObjectReference` (method) | missing |  |  |  |
 | `ObjectReference.RemoveInventoryEventFilter` (method) | missing |  |  |  |
-| `ObjectReference.RemoveItem` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:943] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:943] |  |
+| `ObjectReference.RemoveItem` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:943] |  |
 | `ObjectReference.Reset` (method, latent) | missing |  |  |  |
 | `ObjectReference.ResetInventory` (method) | missing |  |  |  |
 | `ObjectReference.Say` (method) | missing |  |  |  |
 | `ObjectReference.SendStealAlarm` (method) | missing |  |  |  |
 | `ObjectReference.SetActorCause` (method) | missing |  |  |  |
 | `ObjectReference.SetActorOwner` (method) | missing |  |  |  |
-| `ObjectReference.SetAngle` (method, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:949] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:949] |  |
+| `ObjectReference.SetAngle` (method, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:949] |  |
 | `ObjectReference.SetAnimationVariableBool` (method) | missing |  |  |  |
 | `ObjectReference.SetAnimationVariableFloat` (method) | missing |  |  |  |
 | `ObjectReference.SetAnimationVariableInt` (method) | missing |  |  |  |
 | `ObjectReference.SetDestroyed` (method) | missing |  |  |  |
-| `ObjectReference.SetDisplayName` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:976] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:976] |  |
+| `ObjectReference.SetDisplayName` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:976] |  |
 | `ObjectReference.SetEnchantment` (method) | missing |  |  |  |
 | `ObjectReference.SetFactionOwner` (method) | missing |  |  |  |
 | `ObjectReference.SetHarvested` (method) | missing |  |  |  |
@@ -1112,9 +1112,9 @@ Status meanings:
 | `ObjectReference.SetLockLevel` (method) | missing |  |  |  |
 | `ObjectReference.SetMotionType` (method, latent) | missing |  |  |  |
 | `ObjectReference.SetNoFavorAllowed` (method) | missing |  |  |  |
-| `ObjectReference.SetOpen` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:968] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:968] |  |
-| `ObjectReference.SetPosition` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:960] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:960] |  |
-| `ObjectReference.SetScale` (method, latent) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:939] [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:939] |  |
+| `ObjectReference.SetOpen` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:968] |  |
+| `ObjectReference.SetPosition` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:960] |  |
+| `ObjectReference.SetScale` (method, latent) | stub |  | [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:939] |  |
 | `ObjectReference.SplineTranslateTo` (method) | missing |  |  |  |
 | `ObjectReference.SplineTranslateToRefNode` (method) | missing |  |  |  |
 | `ObjectReference.StopTranslation` (method) | missing |  |  |  |
@@ -1154,7 +1154,7 @@ Status meanings:
 | `Potion.GetNthEffectMagnitude` (method) | missing |  |  |  |
 | `Potion.GetNumEffects` (method) | missing |  |  |  |
 | `Potion.GetUseSound` (method) | missing |  |  |  |
-| `Potion.IsFood` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusPotion.cpp:27] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusPotion.cpp:27] |  |
+| `Potion.IsFood` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusPotion.cpp:27] |  |
 | `Potion.IsHostile` (method) | missing |  |  |  |
 | `Potion.IsPoison` (method) | missing |  |  |  |
 | `Potion.SetNthEffectArea` (method) | missing |  |  |  |
@@ -1167,13 +1167,13 @@ Status meanings:
 | `Quest.GetAliasById` (method) | missing |  |  |  |
 | `Quest.GetAliasByName` (method) | missing |  |  |  |
 | `Quest.GetAliases` (method) | missing |  |  |  |
-| `Quest.GetCurrentStageID` (method) | stub |  | [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusQuest.cpp:37] [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusQuest.cpp:37] |  |
+| `Quest.GetCurrentStageID` (method) | stub |  | [body says not implemented; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusQuest.cpp:37] |  |
 | `Quest.GetID` (method) | missing |  |  |  |
 | `Quest.GetNthAlias` (method) | missing |  |  |  |
 | `Quest.GetNumAliases` (method) | missing |  |  |  |
 | `Quest.GetPriority` (method) | missing |  |  |  |
 | `Quest.GetQuest` (global) | missing |  |  |  |
-| `Quest.GetStage` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusQuest.cpp:36] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusQuest.cpp:36] |  |
+| `Quest.GetStage` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusQuest.cpp:36] |  |
 | `Quest.IsActive` (method) | missing |  |  |  |
 | `Quest.IsCompleted` (method) | missing |  |  |  |
 | `Quest.IsObjectiveCompleted` (method) | missing |  |  |  |
@@ -1243,11 +1243,11 @@ Status meanings:
 | `Shout.SetNthRecoveryTime` (method) | missing |  |  |  |
 | `Shout.SetNthSpell` (method) | missing |  |  |  |
 | `Shout.SetNthWordOfPower` (method) | missing |  |  |  |
-| `Skymp.SetDefaultActor` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSkymp.cpp:22] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSkymp.cpp:22] |  |
+| `Skymp.SetDefaultActor` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSkymp.cpp:22] |  |
 | `SoulGem.GetGemSize` (method) | missing |  |  |  |
 | `SoulGem.GetSoulSize` (method) | missing |  |  |  |
 | `Sound.GetDescriptor` (method) | missing |  |  |  |
-| `Sound.Play` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSound.cpp:38] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSound.cpp:38] |  |
+| `Sound.Play` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSound.cpp:38] |  |
 | `Sound.PlayAndWait` (method, latent) | missing |  |  |  |
 | `Sound.SetInstanceVolume` (global) | missing |  |  |  |
 | `Sound.StopInstance` (global) | missing |  |  |  |
@@ -1289,19 +1289,19 @@ Status meanings:
 | `SPELL.SetNthEffectDuration` (method) | missing |  |  |  |
 | `SPELL.SetNthEffectMagnitude` (method) | missing |  |  |  |
 | `SPELL.Unload` (method) | missing |  |  |  |
-| `SweetPie.GetBuyPieCommissionItem` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:363] [skymp5-functions-lib/index.ts:363] |  |
-| `SweetPie.GetBuyPieCommissionSize` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:364] [skymp5-functions-lib/index.ts:364] |  |
-| `SweetPie.GetBuyPieFailMessage` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:358] [skymp5-functions-lib/index.ts:358] |  |
-| `SweetPie.GetBuyPieFinishMessage` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:359] [skymp5-functions-lib/index.ts:359] |  |
-| `SweetPie.GetBuyPieLicenses` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:354] [skymp5-functions-lib/index.ts:354] |  |
-| `SweetPie.GetBuyPieRequiredItemCount` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:356] [skymp5-functions-lib/index.ts:356] |  |
-| `SweetPie.GetBuyPieRequiredItems` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:355] [skymp5-functions-lib/index.ts:355] |  |
-| `SweetPie.GetBuyPieReturnItem` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:361] [skymp5-functions-lib/index.ts:361] |  |
-| `SweetPie.GetBuyPieReturnItemCount` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:362] [skymp5-functions-lib/index.ts:362] |  |
-| `SweetPie.GetBuyPieReturnItemIndex` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:360] [skymp5-functions-lib/index.ts:360] |  |
-| `SweetPie.GetBuyPieStartMessage` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:357] [skymp5-functions-lib/index.ts:357] |  |
-| `SweetPie.SPDumpActorArray` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:353] [skymp5-functions-lib/index.ts:353] |  |
-| `SweetPie.SPLog` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:352] [skymp5-functions-lib/index.ts:352] |  |
+| `SweetPie.GetBuyPieCommissionItem` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:363] |  |
+| `SweetPie.GetBuyPieCommissionSize` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:364] |  |
+| `SweetPie.GetBuyPieFailMessage` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:358] |  |
+| `SweetPie.GetBuyPieFinishMessage` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:359] |  |
+| `SweetPie.GetBuyPieLicenses` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:354] |  |
+| `SweetPie.GetBuyPieRequiredItemCount` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:356] |  |
+| `SweetPie.GetBuyPieRequiredItems` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:355] |  |
+| `SweetPie.GetBuyPieReturnItem` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:361] |  |
+| `SweetPie.GetBuyPieReturnItemCount` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:362] |  |
+| `SweetPie.GetBuyPieReturnItemIndex` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:360] |  |
+| `SweetPie.GetBuyPieStartMessage` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:357] |  |
+| `SweetPie.SPDumpActorArray` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:353] |  |
+| `SweetPie.SPLog` (global, not in SP dump) | gamemode |  | [skymp5-functions-lib/index.ts:352] |  |
 | `TESModPlatform.Add` (global) | missing |  |  |  |
 | `TESModPlatform.AddItemEx` (global) | missing |  |  |  |
 | `TESModPlatform.ClearTintMasks` (global) | missing |  |  |  |
@@ -1355,28 +1355,28 @@ Status meanings:
 | `UI.SetString` (global) | missing |  |  |  |
 | `utility.CaptureFrameRate` (global) | missing |  |  |  |
 | `utility.CreateAliasArray` (global) | missing |  |  |  |
-| `Utility.CreateAliasArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:173] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:173] |  |
+| `Utility.CreateAliasArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:173] |  |
 | `utility.CreateBoolArray` (global) | missing |  |  |  |
-| `Utility.CreateBoolArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:174] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:174] |  |
+| `Utility.CreateBoolArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:174] |  |
 | `utility.CreateFloatArray` (global) | missing |  |  |  |
-| `Utility.CreateFloatArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:175] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:175] |  |
+| `Utility.CreateFloatArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:175] |  |
 | `utility.CreateFormArray` (global) | missing |  |  |  |
-| `Utility.CreateFormArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:176] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:176] |  |
+| `Utility.CreateFormArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:176] |  |
 | `utility.CreateIntArray` (global) | missing |  |  |  |
-| `Utility.CreateIntArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:177] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:177] |  |
+| `Utility.CreateIntArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:177] |  |
 | `utility.CreateStringArray` (global) | missing |  |  |  |
 | `utility.EndFrameRateCapture` (global) | missing |  |  |  |
 | `utility.GameTimeToString` (global, latent) | missing |  |  |  |
-| `Utility.GameTimeToString` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:172] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:172] |  |
+| `Utility.GameTimeToString` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:172] |  |
 | `utility.GetAverageFrameRate` (global) | missing |  |  |  |
 | `utility.GetBudgetCount` (global) | missing |  |  |  |
 | `utility.GetBudgetName` (global) | missing |  |  |  |
 | `utility.GetCurrentBudget` (global) | missing |  |  |  |
 | `utility.GetCurrentGameTime` (global) | missing |  |  |  |
-| `Utility.GetCurrentGameTime` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:171] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:171] |  |
+| `Utility.GetCurrentGameTime` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:171] |  |
 | `utility.GetCurrentMemory` (global) | missing |  |  |  |
 | `utility.GetCurrentRealTime` (global) | missing |  |  |  |
-| `Utility.GetCurrentRealTime` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:170] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:170] |  |
+| `Utility.GetCurrentRealTime` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:170] |  |
 | `utility.GetINIBool` (global) | missing |  |  |  |
 | `utility.GetINIFloat` (global) | missing |  |  |  |
 | `utility.GetINIInt` (global) | missing |  |  |  |
@@ -1384,22 +1384,22 @@ Status meanings:
 | `utility.GetMaxFrameRate` (global) | missing |  |  |  |
 | `utility.GetMinFrameRate` (global) | missing |  |  |  |
 | `utility.IsInMenuMode` (global) | missing |  |  |  |
-| `Utility.IsInMenuMode` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:167] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:167] |  |
+| `Utility.IsInMenuMode` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:167] |  |
 | `utility.OverBudget` (global) | missing |  |  |  |
 | `utility.RandomFloat` (global) | missing |  |  |  |
-| `Utility.RandomFloat` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:169] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:169] |  |
+| `Utility.RandomFloat` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:169] |  |
 | `utility.RandomInt` (global) | missing |  |  |  |
-| `Utility.RandomInt` (global, not in SP dump) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:168; skymp5-functions-lib/index.ts:347] [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:168; skymp5-functions-lib/index.ts:347] |  |
+| `Utility.RandomInt` (global, not in SP dump) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:168; skymp5-functions-lib/index.ts:347] |  |
 | `utility.ResizeAliasArray` (global) | missing |  |  |  |
-| `Utility.ResizeAliasArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:178] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:178] |  |
+| `Utility.ResizeAliasArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:178] |  |
 | `utility.ResizeBoolArray` (global) | missing |  |  |  |
-| `Utility.ResizeBoolArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:179] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:179] |  |
+| `Utility.ResizeBoolArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:179] |  |
 | `utility.ResizeFloatArray` (global) | missing |  |  |  |
-| `Utility.ResizeFloatArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:180] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:180] |  |
+| `Utility.ResizeFloatArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:180] |  |
 | `utility.ResizeFormArray` (global) | missing |  |  |  |
-| `Utility.ResizeFormArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:181] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:181] |  |
+| `Utility.ResizeFormArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:181] |  |
 | `utility.ResizeIntArray` (global) | missing |  |  |  |
-| `Utility.ResizeIntArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:182] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:182] |  |
+| `Utility.ResizeIntArray` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:182] |  |
 | `utility.ResizeStringArray` (global) | missing |  |  |  |
 | `utility.SetINIBool` (global) | missing |  |  |  |
 | `utility.SetINIFloat` (global) | missing |  |  |  |
@@ -1407,11 +1407,11 @@ Status meanings:
 | `utility.SetINIString` (global) | missing |  |  |  |
 | `utility.StartFrameRateCapture` (global) | missing |  |  |  |
 | `utility.Wait` (global, latent) | missing |  |  |  |
-| `Utility.Wait` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:164] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:164] |  |
+| `Utility.Wait` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:164] |  |
 | `utility.WaitGameTime` (global, latent) | missing |  |  |  |
-| `Utility.WaitGameTime` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:166] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:166] |  |
+| `Utility.WaitGameTime` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:166] |  |
 | `utility.WaitMenuMode` (global, latent) | missing |  |  |  |
-| `Utility.WaitMenuMode` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:165] [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:165] |  |
+| `Utility.WaitMenuMode` (global, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:165] |  |
 | `VisualEffect.Play` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusEffectBase.cpp:30] |  |
 | `VisualEffect.Stop` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusEffectBase.cpp:31] |  |
 | `WEAPON.Fire` (method) | missing |  |  |  |

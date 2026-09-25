@@ -230,7 +230,7 @@ def build(skymp: Path) -> list[Native]:
 
 # The bracketed note this generator appends to the Reason column; stripped
 # when reading hand columns back so regeneration is idempotent.
-_GENERATED_SUFFIX = re.compile(r"\s*\[[^\]]*(?:\.cpp:\d+|\.ts:\d+|returns None|body not located|overrides the C\+\+)[^\]]*\]\s*$")
+_GENERATED_SUFFIX = re.compile(r"(?:\s*\[[^\]]*(?:\.cpp:\d+|\.ts:\d+|returns None|body not located|overrides the C\+\+)[^\]]*\])+\s*$")
 _ROW = re.compile(r"^\|\s*`?([\w.]+)`?[^|]*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*$")
 
 
