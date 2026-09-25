@@ -1,0 +1,38 @@
+# M0 regression floor: attributes. Health, magicka, and stamina are server
+# state: the server lowers c1's health, c1 sees it, c2 sees it on c1, and it
+# survives a restart. Assertions are evaluated by lab-api only (ADR-009).
+# Needs: gamemode labCommand set-percentages (mp.set percentages), lab-driver
+# dump-state (own actor values, healthPercentage of nearby actors).
+id: m0-attributes
+milestone: M0
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 200, y: 0, z: 0}
+  - wait: 5
+  - c1: set-percentages {health: 0.5, magicka: 0.25, stamina: 0.75}
+  - wait: 3
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - abs(server.actor(c1).healthPercentage - 0.5) < 0.05
+      - abs(c1.state.health.percentage - 0.5) < 0.05
+      - abs(c1.state.magicka.percentage - 0.25) < 0.05
+      - abs(c1.state.stamina.percentage - 0.75) < 0.05
+      - abs(c2.view(c1).healthPercentage - 0.5) < 0.05
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 5
+  - c1: dump-state
+  - assert:
+      - abs(server.actor(c1).healthPercentage - 0.5) < 0.05
+      - abs(c1.state.health.percentage - 0.5) < 0.05
+artifacts: [server.log, c1.log, c2.log, world-diff]

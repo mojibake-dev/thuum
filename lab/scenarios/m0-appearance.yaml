@@ -1,0 +1,37 @@
+# M0 regression floor, SkyMP's "done" column: appearance. c1's look reaches c2
+# and survives a server restart. Assertions are evaluated by lab-api only
+# (ADR-009). Edit the code, not this file; scenario changes travel alone.
+# Needs: gamemode labCommand set-appearance (preset JSON under lab/presets/),
+# lab-driver dump-state (race, sex of nearby actors). Client rollback is
+# disk-only and budgeted at 90 to 120 s per client (docs/LAB.md).
+id: m0-appearance
+milestone: M0
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: set-appearance {preset: lab-nord-1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 200, y: 0, z: 0}
+  - wait: 5
+  - c2: dump-state
+  - c2: screenshot
+  - assert:
+      - server.actor(c1).hasAppearance == true
+      - c2.sees(c1) == true
+      - c2.view(c1).race == server.actor(c1).race
+      - c2.view(c1).sex == server.actor(c1).sex
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 5
+  - c2: dump-state
+  - assert:
+      - server.actor(c1).hasAppearance == true
+      - c2.view(c1).race == server.actor(c1).race
+artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]

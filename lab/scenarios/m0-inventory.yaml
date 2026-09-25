@@ -1,0 +1,42 @@
+# M0 regression floor: inventory and equipment. The server gives c1 a sword
+# (R0), c1 equips it, c2 sees it in c1's hand, a restart keeps both the item
+# and the equipped state. Assertions are evaluated by lab-api only (ADR-009).
+# Needs: gamemode labCommand give, lab-driver equip and dump-state
+# (equippedRight of nearby actors). Item names resolve through lab-api's
+# form table (lab/labapi/guests.yaml) until the ledger tooling provides it.
+id: m0-inventory
+milestone: M0
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 200, y: 0, z: 0}
+  - wait: 5
+  - c1: give {item: "Skyrim.esm:IronSword", count: 1}
+  - wait: 3
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:IronSword") == 1
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - wait: 3
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - c1.state.equippedRight == form("Skyrim.esm:IronSword")
+      - c2.view(c1).equippedRight == form("Skyrim.esm:IronSword")
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 5
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:IronSword") == 1
+      - c1.state.equippedRight == form("Skyrim.esm:IronSword")
+      - c2.view(c1).equippedRight == form("Skyrim.esm:IronSword")
+artifacts: [server.log, c1.log, c2.log, world-diff]

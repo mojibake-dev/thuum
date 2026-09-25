@@ -1,0 +1,36 @@
+# M0 regression floor: crafting at a forge. c1 crafts an iron dagger at the
+# lab cell's forge; the server owns the result (R0): materials leave, the
+# dagger arrives, and both survive a restart. Assertions are evaluated by
+# lab-api only (ADR-009).
+# Needs: a forge in the lab cell (lab.esp, Track L4), gamemode labCommand
+# give, a lab-driver craft action (open item on Track L1: crafting is a menu
+# in the engine, so the driver drives the crafting menu or the server-side
+# CraftItem path; the action name is fixed here so the scenario is the spec).
+id: m0-forge
+milestone: M0
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 200, y: 0, z: 0}
+  - wait: 5
+  - c1: give {item: "Skyrim.esm:IronIngot", count: 1}
+  - c1: give {item: "Skyrim.esm:LeatherStrips", count: 1}
+  - wait: 3
+  - c1: craft {station: lab-forge, recipe: "Skyrim.esm:RecipeIronDagger"}
+  - wait: 10
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:IronDagger") == 1
+      - server.inventory(c1).count("Skyrim.esm:IronIngot") == 0
+      - server.inventory(c1).count("Skyrim.esm:LeatherStrips") == 0
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:IronDagger") == 1
+artifacts: [server.log, c1.log, c2.log, world-diff]

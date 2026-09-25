@@ -1,0 +1,44 @@
+# M0 regression floor: death and respawn. The server kills c1; c1 and c2 see
+# it; a restart while dead keeps c1 dead; the server's respawn brings c1 back
+# at its spawn point. Assertions are evaluated by lab-api only (ADR-009).
+# Needs: gamemode labCommand kill (mp.set isDead) and respawn (spawn point),
+# lab-driver dump-state (isDead of self and nearby actors).
+id: m0-death
+milestone: M0
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 200, y: 0, z: 0}
+  - wait: 5
+  - c1: kill
+  - wait: 5
+  - c1: dump-state
+  - c2: dump-state
+  - c2: screenshot
+  - assert:
+      - server.actor(c1).isDead == true
+      - c1.state.isDead == true
+      - c2.view(c1).isDead == true
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 5
+  - c1: dump-state
+  - assert:
+      - server.actor(c1).isDead == true
+      - c1.state.isDead == true
+  - c1: respawn
+  - wait: 10
+  - c1: dump-state
+  - assert:
+      - server.actor(c1).isDead == false
+      - c1.state.isDead == false
+      - server.actor(c1).cell == "lab-spawn"
+artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]
