@@ -75,6 +75,14 @@ ledger:
 test-lab:
     @python3 -m unittest discover -s lab/tests -v
 
+# The lab gamemode against a fake server object (node:test).
+test-gamemode:
+    @node --test lab/gamemode/gamemode.test.js
+
+# Bundle lab-driver (Skyrim Platform plugin) into lab/driver/build/lab-driver.js.
+build-driver:
+    @cd lab/driver && npm ci --silent && npm run --silent build && ls -la build/lab-driver.js
+
 # lab-api's tests through its uv environment (FastAPI, httpx, PyYAML); `test-lab` skips them without it.
 test-labapi:
     @uv run --project lab/labapi python -m unittest discover -s lab/tests -v

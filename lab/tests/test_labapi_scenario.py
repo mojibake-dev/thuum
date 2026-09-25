@@ -1,5 +1,8 @@
 import unittest
 
+from _labapi import needs_deps
+from pathlib import Path
+
 from _labapi import SMOKE, needs_deps
 
 
@@ -46,3 +49,18 @@ class ScenarioTests(unittest.TestCase):
 
         sc = load_scenario("id: t\nclients: []\nserver: {snapshot: s, netem: {delay_ms: 60, jitter_ms: 15, loss_pct: 0.5}}\n")
         self.assertEqual((sc.server.netem.delay_ms, sc.server.netem.jitter_ms, sc.server.netem.loss_pct), (60, 15, 0.5))
+
+
+@needs_deps
+class AllScenariosParse(unittest.TestCase):
+    def test_every_scenario_file_parses(self):
+        from labapi.scenario import load_scenario
+
+        root = Path(__file__).resolve().parents[2] / "lab" / "scenarios"
+        files = sorted(root.glob("*.yaml"))
+        self.assertGreaterEqual(len(files), 6)
+        for f in files:
+            with self.subTest(scenario=f.name):
+                sc = load_scenario(f.read_text())
+                self.assertEqual(sc.id, f.stem)
+                self.assertTrue(sc.steps)

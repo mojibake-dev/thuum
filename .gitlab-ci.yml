@@ -52,7 +52,28 @@ lab-tests:
   extends: .base
   stage: lint
   script:
+    - apk add --no-cache nodejs
     - python3 -m unittest discover -s lab/tests -v
+    - node --test lab/gamemode/gamemode.test.js
+
+# lab-api's own tests need its dependencies; uv's image carries Python 3.12.
+labapi-tests:
+  stage: lint
+  tags: [sky]
+  image: ghcr.io/astral-sh/uv:python3.12-alpine
+  script:
+    - uv run --project lab/labapi python -m unittest discover -s lab/tests -v
+
+# The lab-driver bundle, kept as a job artifact for the client template.
+driver-build:
+  stage: lint
+  tags: [sky]
+  image: node:22-alpine
+  script:
+    - cd lab/driver && npm ci && npm run build
+  artifacts:
+    paths: [lab/driver/build/lab-driver.js]
+    expire_in: 3 months
 
 # ADR-009 / ADR-016: a scenario change travels alone. Fail the MR if any commit in it
 # touches lab/scenarios/*.yaml together with any other path.

@@ -92,3 +92,71 @@ class EvaluatorTests(unittest.TestCase):
         self.assertEqual(clients_needing_views("abs(c2.view(c1).x - server.actor(c1).x) < 50", ["c1", "c2"]), {"c2"})
         self.assertEqual(clients_needing_views("c1.sees(c2) == true and c2.sees(c1) == true", ["c1", "c2"]), {"c1", "c2"})
         self.assertEqual(clients_needing_views('server.actor(c1).cell == "x"', ["c1", "c2"]), set())
+
+
+class RichServer(Server):
+    """labState answers with the M0 fields, and a near list on the views."""
+
+    def __init__(self):
+        super().__init__()
+        self.actors["c1"].update({"isDead": False, "healthPercentage": 0.5, "hasAppearance": True, "raceId": 79683, "sex": 0})
+        self.actors["c2"].update({"isDead": True, "healthPercentage": 0.0, "hasAppearance": False, "raceId": None, "sex": None})
+
+
+class NearViews:
+    """c2's dump has no sees map, only the driver's near list; c1's dump is its own state."""
+
+    def __init__(self):
+        self.data = {
+            "c2": {"pos": [200, 0, 0], "near": [
+                {"formId": 0xFF000001, "name": "c1", "pos": [295.0, 2.0, 0.0], "distance": 95.0, "raceId": 79683, "sex": 0, "isDead": False, "healthPercentage": 0.5, "equippedRight": 0x12EB7, "equippedLeft": 0},
+                {"formId": 0xFF000009, "name": "Guard", "pos": [5000.0, 0.0, 0.0], "distance": 4800.0, "raceId": 1, "sex": 0, "isDead": False, "healthPercentage": 1.0, "equippedRight": 0, "equippedLeft": 0},
+            ]},
+            "c1": {"pos": [290, 0, 0], "worldOrCell": 60, "cellName": "lab", "isDead": False, "raceId": 79683, "sex": 0,
+                   "health": {"value": 50, "percentage": 0.5}, "magicka": {"value": 100, "percentage": 1.0}, "stamina": {"value": 100, "percentage": 1.0},
+                   "equippedRight": 0x12EB7, "equippedLeft": 0},
+        }
+
+    def view(self, observer):
+        return self.data.get(observer)
+
+
+@needs_deps
+class M0VocabularyTests(unittest.TestCase):
+    def setUp(self):
+        from labapi.assertions import Evaluator
+        self.ev = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
+
+    def test_form_and_state_and_actor_fields(self):
+        for expr in [
+            'c1.state.equippedRight == form("Skyrim.esm:IronSword")',
+            "abs(c1.state.health.percentage - 0.5) < 0.05" if False else "abs(c1.state.healthPercentage - 0.5) < 0.05",
+            "c1.state.magickaPercentage == 1.0",
+            "server.actor(c1).hasAppearance == true",
+            "server.actor(c1).raceId == 79683",
+            "server.actor(c2).isDead == true",
+            "c1.state.isDead == false",
+        ]:
+            with self.subTest(expr=expr):
+                self.assertTrue(self.ev.evaluate(expr))
+
+    def test_sees_and_view_match_near_to_the_server_position(self):
+        self.assertTrue(self.ev.evaluate("c2.sees(c1) == true"))
+        self.assertTrue(self.ev.evaluate("abs(c2.view(c1).x - server.actor(c1).x) < 50"))
+        self.assertTrue(self.ev.evaluate("c2.view(c1).raceId == server.actor(c1).raceId"))
+        self.assertTrue(self.ev.evaluate("c2.view(c1).sex == server.actor(c1).sex"))
+        self.assertTrue(self.ev.evaluate('c2.view(c1).equippedRight == form("Skyrim.esm:IronSword")'))
+        self.assertTrue(self.ev.evaluate("abs(c2.view(c1).healthPercentage - 0.5) < 0.05"))
+
+    def test_unreported_fields_are_data_errors(self):
+        from labapi.assertions import AssertionData, AssertionSyntax
+        with self.assertRaises(AssertionData):
+            self.ev.evaluate("server.actor(c2).raceId == 1")
+        with self.assertRaises(AssertionSyntax):
+            self.ev.evaluate("c1.state.secret == 1")
+        with self.assertRaises(AssertionSyntax):
+            self.ev.evaluate("form(1) == 1")
+
+    def test_state_needs_a_dump(self):
+        from labapi.assertions import clients_needing_views
+        self.assertEqual(clients_needing_views("c1.state.isDead == true and c2.sees(c1)", ["c1", "c2"]), {"c1", "c2"})

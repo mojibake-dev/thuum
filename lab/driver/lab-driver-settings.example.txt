@@ -1,0 +1,7 @@
+{
+  "labApiBase": "http://10.10.70.10",
+  "labApiPath": "/lab",
+  "client": "c1",
+  "pollMs": 250,
+  "timeoutMs": 5000
+}

@@ -21,8 +21,11 @@ clients:
 
 # items: "<file>:<editor id>" to base form id, hand-maintained for the item
 # names the m0 scenarios use until the ledger tooling generates it. A plain
-# integer or 0x-hex form id in a scenario needs no entry here.
+# integer or 0x-hex form id in a scenario needs no entry here. Every id here
+# needs a source (rule 1 in spirit): these two appear in upstream's own
+# misc/tests/test_removeallitems.js. The m0-forge names (IronIngot,
+# LeatherStrips, IronDagger, RecipeIronDagger) are added once verified
+# against Skyrim.esm on rpool/sky/persist, not from memory.
 items:
   "Skyrim.esm:IronSword": 0x00012EB7
-  "Skyrim.esm:IronDagger": 0x0001397E
   "Skyrim.esm:Gold001": 0x0000000F

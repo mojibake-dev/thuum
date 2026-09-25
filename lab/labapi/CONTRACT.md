@@ -37,8 +37,15 @@ Response when the profile has an actor:
 
 ```json
 {"found": true, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "lab-spawn",
- "isDead": false, "healthPercentage": 1.0}
+ "isDead": false, "healthPercentage": 1.0,
+ "hasAppearance": true, "raceId": 79683, "sex": 0}
 ```
+
+`hasAppearance`, `raceId` (the race's form id from the actor's appearance),
+and `sex` (0 male, 1 female, from the appearance's `isFemale`) are `false`
+or `null` for an actor without an appearance. lab-driver reports the same
+`raceId` and `sex` for actors a client sees, so the two sides compare
+directly.
 
 `cell` is the gamemode's string for the actor's cell or worldspace (the
 editor id where one exists, the hex form id otherwise); assertions compare it
@@ -56,13 +63,24 @@ the hand-maintained `items` table in `guests.yaml`; a plain integer or
 
 ## labCommand
 
-The scenario verbs `teleport` and `give` are server-side (rung R0): lab-api
-sends them here rather than to the client.
+The server-side scenario verbs (rung R0) go here rather than to the client;
+a scenario writes them as client steps (`c1: give {...}`) and lab-api routes
+them by name.
 
 ```json
 {"payload": {"kind": "teleport", "profileId": 1, "cell": "lab-spawn", "x": 0, "y": 0, "z": 0}}
 {"payload": {"kind": "give", "profileId": 1, "item": "Skyrim.esm:IronSword", "baseId": 77495, "count": 1}}
+{"payload": {"kind": "set-appearance", "profileId": 1, "preset": "lab-nord-1"}}
+{"payload": {"kind": "set-percentages", "profileId": 1, "health": 0.5, "magicka": 0.25, "stamina": 0.75}}
+{"payload": {"kind": "kill", "profileId": 1}}
+{"payload": {"kind": "respawn", "profileId": 1}}
 ```
+
+`set-appearance` applies `presets/<preset>.json` next to the gamemode (an
+appearance record as `mp.get(actor, "appearance")` returns it; recorded from
+a real client, never typed). `set-percentages` sets the given actor values as
+fractions. `kill` sets the actor dead; `respawn` clears it and moves the actor
+to its spawn point.
 
 Response: `{"ok": true}` or `{"ok": false, "error": "<reason>"}`. For `give`,
 lab-api adds `baseId` next to the scenario's `item` string so the gamemode

@@ -101,7 +101,11 @@ class FakeActor:
     cell: str = "lab-spawn"
     isDead: bool = False
     healthPercentage: float = 1.0
+    magickaPercentage: float = 1.0
+    staminaPercentage: float = 1.0
+    appearance: dict[str, Any] | None = None
     inventory: dict[int, int] = field(default_factory=dict)
+    spawn: tuple[float, float, float, str] = (0.0, 0.0, 0.0, "lab-spawn")
 
 
 class FakeState:
@@ -125,7 +129,14 @@ class FakeState:
             if actor is None:
                 return {"found": False}
             if payload.get("kind") == "actor":
-                return {"found": True, "x": actor.x, "y": actor.y, "z": actor.z, "cell": actor.cell, "isDead": actor.isDead, "healthPercentage": actor.healthPercentage}
+                app = actor.appearance
+                return {
+                    "found": True, "x": actor.x, "y": actor.y, "z": actor.z, "cell": actor.cell,
+                    "isDead": actor.isDead, "healthPercentage": actor.healthPercentage,
+                    "hasAppearance": app is not None,
+                    "raceId": app.get("raceId") if app else None,
+                    "sex": (1 if app.get("isFemale") else 0) if app else None,
+                }
             if payload.get("kind") == "inventory":
                 return {"found": True, "entries": [{"baseId": b, "count": c} for b, c in sorted(actor.inventory.items())]}
             return {"found": False, "error": f"unknown kind {payload.get('kind')!r}"}
@@ -141,6 +152,26 @@ class FakeState:
             if kind == "give":
                 base = int(payload["baseId"])
                 actor.inventory[base] = actor.inventory.get(base, 0) + int(payload.get("count", 1))
+                return {"ok": True}
+            if kind == "set-appearance":
+                # presets are files next to the real gamemode; the fake knows one
+                if payload.get("preset") != "lab-nord-1":
+                    return {"ok": False, "error": f"unknown preset {payload.get('preset')!r}"}
+                actor.appearance = {"raceId": 1, "isFemale": False}
+                return {"ok": True}
+            if kind == "set-percentages":
+                for k in ("health", "magicka", "stamina"):
+                    if k in payload:
+                        setattr(actor, f"{k}Percentage", float(payload[k]))
+                return {"ok": True}
+            if kind == "kill":
+                actor.isDead = True
+                actor.healthPercentage = 0.0
+                return {"ok": True}
+            if kind == "respawn":
+                actor.isDead = False
+                actor.healthPercentage = 1.0
+                actor.x, actor.y, actor.z, actor.cell = actor.spawn
                 return {"ok": True}
             return {"ok": False, "error": f"unknown command {kind!r}"}
         return {"ok": False, "error": f"unknown rpc {name!r}"}

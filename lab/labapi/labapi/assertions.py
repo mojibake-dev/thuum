@@ -39,19 +39,72 @@ class ViewsFacade(Protocol):
     def view(self, observer: str) -> dict[str, Any] | None: ...
 
 
+def _opt_float(v: Any) -> float | None:
+    return None if v is None else float(v)
+
+
+def _opt_int(v: Any) -> int | None:
+    return None if v is None else int(v)
+
+
+def _opt_bool(v: Any) -> bool | None:
+    return None if v is None else bool(v)
+
+
+def _opt_str(v: Any) -> str | None:
+    return None if v is None else str(v)
+
+
 @dataclass(frozen=True)
 class ActorView:
+    """server.actor(c): the labState actor record. Optional fields are None
+    when the gamemode did not report them, and reading one is a data error."""
+
     x: float
     y: float
     z: float
     cell: str
+    isDead: bool | None = None
+    healthPercentage: float | None = None
+    hasAppearance: bool | None = None
+    raceId: int | None = None
+    sex: int | None = None
 
 
 @dataclass(frozen=True)
 class Pos:
+    """c.view(other): what a client's dump-state reported about another
+    client's actor, matched to the server's position for that client."""
+
     x: float
     y: float
     z: float
+    name: str | None = None
+    isDead: bool | None = None
+    healthPercentage: float | None = None
+    equippedRight: int | None = None
+    equippedLeft: int | None = None
+    raceId: int | None = None
+    sex: int | None = None
+
+
+@dataclass(frozen=True)
+class StateView:
+    """c.state: the client's own dump-state, as lab-driver reports it."""
+
+    x: float
+    y: float
+    z: float
+    worldOrCell: int | None = None
+    cellName: str | None = None
+    isDead: bool | None = None
+    healthPercentage: float | None = None
+    magickaPercentage: float | None = None
+    staminaPercentage: float | None = None
+    equippedRight: int | None = None
+    equippedLeft: int | None = None
+    raceId: int | None = None
+    sex: int | None = None
 
 
 @dataclass(frozen=True)
@@ -76,7 +129,14 @@ class _ServerRef:
         if not d or not d.get("found", True):
             raise AssertionData(f"server has no actor for {client}")
         try:
-            return ActorView(float(d["x"]), float(d["y"]), float(d["z"]), str(d["cell"]))
+            return ActorView(
+                float(d["x"]), float(d["y"]), float(d["z"]), str(d["cell"]),
+                isDead=_opt_bool(d.get("isDead")),
+                healthPercentage=_opt_float(d.get("healthPercentage")),
+                hasAppearance=_opt_bool(d.get("hasAppearance")),
+                raceId=_opt_int(d.get("raceId")),
+                sex=_opt_int(d.get("sex")),
+            )
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"actor record for {client} lacks {e}") from e
 
@@ -88,9 +148,17 @@ class _ServerRef:
 
 
 class _ClientRef:
-    def __init__(self, name: str, views: ViewsFacade):
+    """A scenario client in an expression. `sees` and `view` come from the
+    client's latest dump-state: either a `sees` map the driver built itself,
+    or its `near` list matched against the server's position for the other
+    client (within SEE_RADIUS engine units)."""
+
+    SEE_RADIUS = 512.0
+
+    def __init__(self, name: str, views: ViewsFacade, server: ServerFacade):
         self.name = name
         self._views = views
+        self._server = server
 
     def _dump(self) -> dict[str, Any]:
         v = self._views.view(self.name)
@@ -98,22 +166,81 @@ class _ClientRef:
             raise AssertionData(f"{self.name} has not reported a dump-state yet")
         return v
 
+    def _seen(self, other: str) -> dict[str, Any] | None:
+        dump = self._dump()
+        sees = dump.get("sees")
+        if isinstance(sees, dict):
+            return sees.get(other)
+        target = self._server.actor(other)
+        if not target or not target.get("found", True):
+            raise AssertionData(f"server has no actor for {other}")
+        best: dict[str, Any] | None = None
+        best_d = 0.0
+        for n in dump.get("near") or []:
+            try:
+                pos = n["pos"]
+                dx = float(pos[0]) - float(target["x"])
+                dy = float(pos[1]) - float(target["y"])
+                dz = float(pos[2]) - float(target["z"])
+            except (KeyError, IndexError, TypeError, ValueError):
+                continue
+            d = (dx * dx + dy * dy + dz * dz) ** 0.5
+            if d <= self.SEE_RADIUS and (best is None or d < best_d):
+                best, best_d = n, d
+        return best
+
     def sees(self, other: str) -> bool:
-        return other in (self._dump().get("sees") or {})
+        return self._seen(other) is not None
 
     def view(self, other: str) -> Pos:
-        seen = (self._dump().get("sees") or {}).get(other)
+        seen = self._seen(other)
         if not seen:
             raise AssertionData(f"{self.name} does not see {other}")
         try:
-            return Pos(float(seen["x"]), float(seen["y"]), float(seen["z"]))
-        except (KeyError, TypeError, ValueError) as e:
+            pos = seen.get("pos") or [seen["x"], seen["y"], seen["z"]]
+            return Pos(
+                float(pos[0]), float(pos[1]), float(pos[2]),
+                name=_opt_str(seen.get("name")),
+                isDead=_opt_bool(seen.get("isDead")),
+                healthPercentage=_opt_float(seen.get("healthPercentage")),
+                equippedRight=_opt_int(seen.get("equippedRight")),
+                equippedLeft=_opt_int(seen.get("equippedLeft")),
+                raceId=_opt_int(seen.get("raceId")),
+                sex=_opt_int(seen.get("sex")),
+            )
+        except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s view of {other} lacks {e}") from e
+
+    @property
+    def state(self) -> StateView:
+        dump = self._dump()
+        try:
+            pos = dump.get("pos") or [dump["x"], dump["y"], dump["z"]]
+            health = dump.get("health") or {}
+            magicka = dump.get("magicka") or {}
+            stamina = dump.get("stamina") or {}
+            return StateView(
+                float(pos[0]), float(pos[1]), float(pos[2]),
+                worldOrCell=_opt_int(dump.get("worldOrCell")),
+                cellName=_opt_str(dump.get("cellName")),
+                isDead=_opt_bool(dump.get("isDead")),
+                healthPercentage=_opt_float(health.get("percentage") if isinstance(health, dict) else dump.get("healthPercentage")),
+                magickaPercentage=_opt_float(magicka.get("percentage") if isinstance(magicka, dict) else None),
+                staminaPercentage=_opt_float(stamina.get("percentage") if isinstance(stamina, dict) else None),
+                equippedRight=_opt_int(dump.get("equippedRight")),
+                equippedLeft=_opt_int(dump.get("equippedLeft")),
+                raceId=_opt_int(dump.get("raceId")),
+                sex=_opt_int(dump.get("sex")),
+            )
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s state lacks {e}") from e
 
 
 _ATTRS = {
-    ActorView: {"x", "y", "z", "cell"},
-    Pos: {"x", "y", "z"},
+    ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex"},
+    Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
+    StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
+    _ClientRef: {"state"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory"},
@@ -130,8 +257,9 @@ _BIN = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, as
 class Evaluator:
     def __init__(self, server: ServerFacade, views: ViewsFacade, clients: list[str]):
         self._names: dict[str, Any] = {"server": _ServerRef(server), "true": True, "false": False, "True": True, "False": False}
+        self._server_facade = server
         for c in clients:
-            self._names[c] = _ClientRef(c, views)
+            self._names[c] = _ClientRef(c, views, server)
 
     def evaluate(self, expr: str) -> bool:
         try:
@@ -186,7 +314,10 @@ class Evaluator:
             allowed = _ATTRS.get(type(obj))
             if allowed is None or node.attr not in allowed:
                 raise AssertionSyntax(f"E_ASSERT_SYNTAX: attribute {node.attr!r} not allowed on {type(obj).__name__}")
-            return getattr(obj, node.attr)
+            value = getattr(obj, node.attr)
+            if value is None:
+                raise AssertionData(f"{type(obj).__name__}.{node.attr} was not reported")
+            return value
         if isinstance(node, ast.Call):
             if node.keywords:
                 raise AssertionSyntax("E_ASSERT_SYNTAX: keyword arguments not allowed")
@@ -196,6 +327,11 @@ class Evaluator:
                     if isinstance(v, (int, float)) and not isinstance(v, bool):
                         return abs(v)
                     raise AssertionSyntax("E_ASSERT_SYNTAX: abs() of a non-number")
+                if node.func.id == "form" and len(node.args) == 1:
+                    spec = self._eval(node.args[0])
+                    if isinstance(spec, str):
+                        return int(self._server_facade.base_id(spec))
+                    raise AssertionSyntax("E_ASSERT_SYNTAX: form() takes a string")
                 raise AssertionSyntax(f"E_ASSERT_SYNTAX: call to {node.func.id!r} not allowed")
             if isinstance(node.func, ast.Attribute):
                 obj = self._eval(node.func.value)
@@ -225,6 +361,10 @@ def clients_needing_views(expr: str, clients: list[str]) -> set[str]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ("sees", "view"):
             base = node.func.value
+            if isinstance(base, ast.Name) and base.id in clients:
+                needed.add(base.id)
+        elif isinstance(node, ast.Attribute) and node.attr == "state":
+            base = node.value
             if isinstance(base, ast.Name) and base.id in clients:
                 needed.add(base.id)
     return needed

@@ -229,14 +229,28 @@ pinned:
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/.
 
+Scenario verbs. Client verbs run in lab-driver: connect, reconnect, move,
+equip, cast, activate, hit, dump-state, request-screenshot, craft (an open
+driver item that m0-forge specifies). Server verbs are written as client
+steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
+rung R0: teleport, give, set-appearance, set-percentages, kill, respawn.
+`screenshot` is a guest exec on a managed client and request-screenshot on
+fenestrate. Assertions read `server.actor(c)`, `server.inventory(c)`,
+`c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
+dump's nearby actors matched to the server's position for `other`), and
+`form("File.esm:EditorID")` through lab-api's item table.
+
 Input is a YAML scenario (see lab/scenarios/). The runner:
 
-1. Rolls the server back to the scenario's snapshot: stop, rollback to the
-   named disk snapshot, start, `docker compose up`, wait for udp/7777.
-   Budget 20 to 40 s. sky-srv carries virtio-fs shares, which are
-   incompatible with RAM snapshots, so this rollback is disk-only like the
-   clients'. No guest anywhere in the lab depends on a RAM snapshot; sky-re
-   is rolled back the same way with `pct`.
+1. Rolls the server back to the scenario's snapshot. lab-api runs on sky-srv
+   itself, so per scenario it restores server state, not the VM: stop the
+   server container, restore `world/` from the named snapshot directory,
+   `docker compose up`, wait for tcp/3000. The VM-level rollback (stop,
+   rollback to the named disk snapshot, start; budget 20 to 40 s) is the
+   operator's `sky-lab` action between scenario sets, and lab-api can drive
+   it only when hosted elsewhere (`SERVER_ROLLBACK_MODE=vm`). sky-srv carries
+   virtio-fs shares, which are incompatible with RAM snapshots, so every
+   rollback in the lab is disk-only; sky-re is rolled back with `pct`.
 2. Applies netem if asked.
 3. Rolls each named lab-owned client back and starts it; waits for the
    lab-driver heartbeat. fenestrate is never rolled back; the runner only
