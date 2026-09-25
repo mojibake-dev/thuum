@@ -1,0 +1,46 @@
+# Compose fragment for sky-srv (/srv/skymp/docker-compose.yml): the legacy
+# server and lab-api side by side. The bridged server joins as a second
+# service in M1. The server's entrypoint and settings files are Track S1;
+# the image is skymp-server:parity from the fork's ci/server.Dockerfile.
+services:
+  skymp-server:
+    image: skymp-server:parity
+    restart: unless-stopped
+    ports:
+      - "7777:7777/udp"
+      - "3000:3000"
+    volumes:
+      - /srv/skymp/server/data:/srv/skymp/data:ro        # the five .esm files from rpool/sky/persist
+      - /srv/skymp/server/world:/srv/skymp/world         # the file driver's database
+      - /srv/skymp/server/server-settings.json:/srv/skymp/server-settings.json:ro
+      - /srv/skymp/server/gamemode:/srv/skymp/gamemode:ro
+    # entrypoint: set in Track S1 from launch_server (node + the server addon)
+
+  lab-api:
+    build: /srv/skymp/labapi
+    image: thuum/lab-api:latest
+    restart: unless-stopped
+    network_mode: host                 # probes :3000, runs tc and tcpdump on eth0
+    cap_add: [NET_ADMIN, NET_RAW]
+    environment:
+      LAB_ROOT_PATH: /lab
+      LAB_LISTEN_PORT: "80"
+      PVE_URL: https://10.0.0.10:8006
+      PVE_TOKEN_ID: ${PVE_TOKEN_ID}
+      PVE_TOKEN_SECRET: ${PVE_TOKEN_SECRET}
+      PVE_NODE: core
+      PVE_VERIFY_SSL: "true"
+      RESULTS_DIR: /srv/lab/results
+      COMPOSE_FILE: /srv/skymp/docker-compose.yml
+      COMPOSE_SERVICE: skymp-server
+      SERVER_WORLD_DIR: /srv/skymp/server/world
+      SERVER_SNAPSHOTS_DIR: /srv/skymp/snapshots
+      SERVER_UI_PORT: "3000"
+      SERVER_STATE_URL: http://10.10.70.10:3000
+      LAB_API_INTERNAL_URL: http://10.10.70.10/lab
+      FRIDA_SCRIPTS_DIR: /srv/skymp/frida
+      GUESTS_FILE: /app/labapi/guests.yaml
+    volumes:
+      - /srv/lab/results:/srv/lab/results
+      - /srv/skymp:/srv/skymp
+      - /var/run/docker.sock:/var/run/docker.sock
