@@ -1,5 +1,8 @@
 # M0 smoke: two clients connect, see each other, move, and survive a server restart.
 # Assertions are evaluated by lab-api only (ADR-009). Edit the code, not this file.
+# Client rollback is disk-only (no RAM snapshots with a passed-through GPU): stop,
+# rollback, cold boot, autologon, scheduled task launches SKSE + lab-driver. Budget
+# 90 to 120 s per client; the timeout below already covers it.
 id: smoke-two-players
 milestone: M0
 clients: [c1, c2]
@@ -34,4 +37,4 @@ steps:
       - abs(server.actor(c1).x - 300) < 50
       - server.inventory(c1).count("Skyrim.esm:IronSword") == 1
       - c2.sees(c1) == true
-artifacts: [server.log, c1.log, c2.log, screenshots, db-diff, pcap]
+artifacts: [server.log, c1.log, c2.log, screenshots, world-diff, pcap]
