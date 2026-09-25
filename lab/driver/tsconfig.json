@@ -7,11 +7,18 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "baseUrl": ".",
-    "lib": ["es2019"],
+    "lib": [
+      "es2019"
+    ],
     "paths": {
-      "skyrimPlatform": ["../../skymp/skyrim-platform/src/platform_se/codegen/convert-files/skyrimPlatform.ts"]
+      "skyrimPlatform": [
+        "../../skymp/skyrim-platform/src/platform_se/codegen/convert-files/skyrimPlatform.ts",
+        "node_modules/@skyrim-platform/skyrim-platform"
+      ]
     },
     "outDir": "dist"
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

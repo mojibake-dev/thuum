@@ -1,0 +1,48 @@
+# sky-srv (VM 700): the legacy server and lab-api side by side (docs/LAB.md).
+# Lives at /srv/lab/docker-compose.yml; `just deploy-srv` puts it there with
+# the rest of /srv/lab. The bridged server joins as a second service in M1.
+# Images come from sky-ci through the registry named in /srv/lab/.env
+# (REGISTRY=10.10.70.12:5000/) or, when empty, from images loaded by hand.
+services:
+  skymp-server:
+    image: ${REGISTRY:-}skymp-server:parity
+    restart: unless-stopped
+    working_dir: /srv/skymp
+    command: ["node", "dist_back/skymp5-server.js"]
+    ports:
+      - "7777:7777/udp"
+      - "3000:3000"
+    volumes:
+      - /srv/persist/esm:/srv/skymp/esm:ro                                   # the five master files (Eli's hand step)
+      - /srv/lab/server/data:/srv/skymp/data                                  # the server writes ui/ and a manifest here
+      - /srv/lab/server/world:/srv/skymp/world                                # the file driver's database
+      - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
+      - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro                    # gamemode.js and presets/
+
+  lab-api:
+    image: ${REGISTRY:-}thuum/lab-api:latest
+    restart: unless-stopped
+    network_mode: host                 # probes :3000, runs tc and tcpdump on the VM's interface
+    cap_add: [NET_ADMIN, NET_RAW]
+    environment:
+      LAB_ROOT_PATH: /lab
+      LAB_LISTEN_PORT: "80"
+      PVE_URL: https://10.0.0.10:8006
+      PVE_TOKEN_ID: ${PVE_TOKEN_ID}
+      PVE_TOKEN_SECRET: ${PVE_TOKEN_SECRET}
+      PVE_NODE: core
+      PVE_VERIFY_SSL: "true"
+      RESULTS_DIR: /srv/lab/results
+      COMPOSE_FILE: /srv/lab/docker-compose.yml
+      COMPOSE_SERVICE: skymp-server
+      SERVER_WORLD_DIR: /srv/lab/server/world
+      SERVER_SNAPSHOTS_DIR: /srv/lab/snapshots
+      SERVER_UI_PORT: "3000"
+      SERVER_STATE_URL: http://10.10.70.10:3000
+      LAB_API_INTERNAL_URL: http://10.10.70.10/lab
+      FRIDA_SCRIPTS_DIR: /srv/lab/thuum/lab/frida
+      GUESTS_FILE: /app/labapi/guests.yaml
+    volumes:
+      - /srv/lab:/srv/lab
+      - /srv/persist:/srv/persist:ro
+      - /var/run/docker.sock:/var/run/docker.sock

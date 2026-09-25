@@ -1,0 +1,22 @@
+{
+  "name": "thuum lab",
+  "port": 7777,
+  "maxPlayers": 8,
+  "offlineMode": true,
+  "master": "",
+  "dataDir": "data",
+  "loadOrder": [
+    "/srv/skymp/esm/Skyrim.esm",
+    "/srv/skymp/esm/Update.esm",
+    "/srv/skymp/esm/Dawnguard.esm",
+    "/srv/skymp/esm/HearthFires.esm",
+    "/srv/skymp/esm/Dragonborn.esm"
+  ],
+  "databaseDriver": "file",
+  "databaseName": "world",
+  "gamemodePath": "/srv/skymp/gamemode/gamemode.js",
+  "enableConsoleCommandsForAll": true,
+  "startPoints": [
+    { "pos": [133857, -61130, 14662], "worldOrCell": "0x3c", "angleZ": 72 }
+  ]
+}

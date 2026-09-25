@@ -134,6 +134,19 @@ lab-run scenario:
 lab-down:
     @curl -fsS -X POST "{{lab_api}}/down"
 
+# Copy the lab tree and the sky-srv deployment files to /srv/lab on sky-srv (VM 700) through the host jump.
+srv_ssh := "ssh -J root@core.gaussing.tv"
+deploy-srv:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    host=eli@10.10.70.10
+    {{srv_ssh}} "$host" 'mkdir -p /srv/lab/thuum/lab /srv/lab/server/data /srv/lab/server/world /srv/lab/snapshots'
+    rsync -az --delete -e "{{srv_ssh}}" --exclude node_modules --exclude .venv --exclude build --exclude __pycache__ --exclude results lab/ "$host:/srv/lab/thuum/lab/"
+    rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/docker-compose.yml "$host:/srv/lab/docker-compose.yml"
+    rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/server-settings.json "$host:/srv/lab/server/server-settings.json"
+    {{srv_ssh}} "$host" 'test -f /srv/lab/.env || { cp /srv/lab/thuum/lab/deploy/sky-srv/env.example /srv/lab/.env; echo "NOTE: /srv/lab/.env created from env.example; fill PVE_TOKEN_SECRET by hand"; }'
+    {{srv_ssh}} "$host" 'ls -la /srv/lab /srv/lab/server; docker compose -f /srv/lab/docker-compose.yml config --quiet && echo "compose config ok"'
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
