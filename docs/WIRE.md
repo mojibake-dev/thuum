@@ -135,24 +135,36 @@ transports and diffs the normalized outputs (message stream per client plus
 a database dump at the end, canonical JSON). A divergence is a bug in one of
 them; the session becomes a regression test once it is settled.
 
-Drivers:
+Drivers, as of M0:
 
-- legacy: `fakeclient`, one binary in the fork built on the fork's own
-  client networking code, speaks RakNet to the unmodified C++ server. It is
-  also the `just test-proto` harness, so T2 and difftest share one client.
-- wire: `wire_transport::Client` speaking netcode. In M0 it runs against an
-  in-process Rust edge recorder that logs accepts and reason codes, because
-  the bridged server it will front lands in M1; from M1 it targets the
-  bridged server beside the legacy one on sky-srv.
+- wire: real `wire_transport` clients over loopback into an in-process edge
+  recorder (a `wire_transport::Server` with no core behind it). Its output
+  per step is the edge's decision, accepted or rejected, with the reason
+  code kept outside the diff.
+- legacy: the fork's headless `fakeclient` (skymp5-server/cpp/fakeclient)
+  against the unmodified C++ server, one run per session client with a
+  script of moves relative to the spawn. The outcome of a move is what the
+  server sent back, the echoed update (accepted) or a Teleport2 correction
+  (rejected); login is the fakeclient's own; a hit has no translation yet
+  and reports as unsupported. `DIFFTEST_FAKECLIENT` names the binary,
+  `DIFFTEST_LEGACY_ADDR` the server (default 127.0.0.1:7777); without the
+  first, `difftest` self-diffs two wire runs, which proves determinism. A
+  stub under difftest/tools stands in for the binary in `cargo test`.
 
-Sessions declare expected divergences per step, because the C++ server may
-accept what the validator rejects; a declared divergence is reviewed like a
-validator change.
+Declared divergences: a step may carry `divergence: {legacy: accept |
+reject | unsupported}` where the C++ server is known to behave differently
+from the validator (it has no movement sequence check, for one). The diff
+marks such a step on both sides once the legacy outcome matches the
+declaration, and keeps a contradicting legacy outcome so the diff fails;
+declarations are reviewed like validator changes. In M0 the comparison is
+the per-step outcomes only; `server_to_client` and the database dump join
+it when the bridged server exists (M1).
 
 Corpus: sessions are recorded from lab runs. Wireshark ships a RakNet
 dissector, so `tshark` on `lab.pcap` gives the legacy message stream, and
-`difftest/tools/pcap2session` turns it into YAML. Hand-written sessions
-cover the rejection paths the corpus never exercises.
+`difftest/tools/pcap2session` turns it into YAML once the first lab pcap
+exists. Hand-written sessions cover the rejection paths the corpus never
+exercises.
 
 ## Fuzzing
 
