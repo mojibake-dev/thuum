@@ -4,9 +4,10 @@ The lab software half of docs/LAB.md. The substrate (VLAN 70, guests 700 to
 739, storage, Caddy names, the runner) is IaC in mojibake/core; this
 directory holds what runs on it.
 
-- labapi/: the scenario runner (Python), served on sky-srv:80 under /lab and
-  reached at https://thuum.gaussing.tv/lab. Endpoint list pinned in
-  docs/LAB.md. Written in M0.
+- labapi/: the scenario runner (Python, FastAPI, a uv project), served on
+  sky-srv:80 under /lab and reached at https://thuum.gaussing.tv/lab. Endpoint
+  list pinned in docs/LAB.md; the server-side contract in labapi/CONTRACT.md;
+  `just test-labapi` and `just labapi-dev` run it on fakes.
 - driver/: lab-driver, the Skyrim Platform plugin (TypeScript) that polls
   lab-api for steps from inside the game. Written in M0.
 - scenarios/*.yaml: T3 scenarios. Only lab-api marks them green (ADR-009).

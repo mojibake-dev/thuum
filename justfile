@@ -75,6 +75,14 @@ ledger:
 test-lab:
     @python3 -m unittest discover -s lab/tests -v
 
+# lab-api's tests through its uv environment (FastAPI, httpx, PyYAML); `test-lab` skips them without it.
+test-labapi:
+    @uv run --project lab/labapi python -m unittest discover -s lab/tests -v
+
+# lab-api on the fakes: no Proxmox, no server, no clients; LAB_API=http://127.0.0.1:8080/lab.
+labapi-dev:
+    @uv run --project lab/labapi labapi-dev
+
 # Run a Frida trace script on a lab client through lab-api.
 frida script client:
     @curl -fsS -X POST "{{lab_api}}/frida" -F "client={{client}}" -F "script=@{{script}}"
