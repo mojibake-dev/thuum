@@ -49,10 +49,37 @@ class ServerState:
     """The facade the evaluator and the runner use: scenario client names in,
     labState answers out. Profile ids and item ids come from the tables."""
 
-    def __init__(self, backend: StateBackend, profile_ids: dict[str, int], base_id_resolver):
+    def __init__(self, backend: StateBackend, profile_ids: dict[str, int], base_id_resolver, cells=None):
         self._backend = backend
         self._profile_ids = profile_ids
         self.base_id = base_id_resolver
+        # The cells table (guests.Tables) or None: scenario coordinates are
+        # offsets from a named cell's origin; the wire carries absolutes.
+        self._cells = cells
+
+    def origin_for_desc(self, desc: str):
+        return self._cells.origin_for_desc(desc) if self._cells else None
+
+    def origin_for_form(self, form_id: int):
+        return self._cells.origin_for_form(form_id) if self._cells else None
+
+    def _normalize_actor(self, body: dict[str, Any]) -> dict[str, Any]:
+        """Absolute server coordinates and descriptor to the scenario's frame:
+        the named cell and offsets from its origin, when the table knows the
+        descriptor; otherwise unchanged. The absolute record rides along."""
+        cell = self._cells.cell_by_desc(str(body.get("cell", ""))) if self._cells else None
+        if cell is None:
+            return body
+        out = dict(body)
+        out["absolute"] = {"x": body.get("x"), "y": body.get("y"), "z": body.get("z"), "cell": body.get("cell")}
+        try:
+            out["x"] = float(body["x"]) - cell.origin[0]
+            out["y"] = float(body["y"]) - cell.origin[1]
+            out["z"] = float(body["z"]) - cell.origin[2]
+        except (KeyError, TypeError, ValueError):
+            return body
+        out["cell"] = cell.name
+        return out
 
     def _profile(self, client: str) -> int:
         try:
@@ -62,7 +89,7 @@ class ServerState:
 
     def actor(self, client: str) -> dict[str, Any] | None:
         body = self._backend.rpc("labState", {"kind": "actor", "profileId": self._profile(client)})
-        return body if body.get("found") else None
+        return self._normalize_actor(body) if body.get("found") else None
 
     def inventory(self, client: str) -> list[dict[str, Any]] | None:
         body = self._backend.rpc("labState", {"kind": "inventory", "profileId": self._profile(client)})
@@ -75,6 +102,12 @@ class ServerState:
 
     def command(self, client: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
         payload = {"kind": action, "profileId": self._profile(client), **args}
+        if action == "teleport" and self._cells is not None and "cell" in args:
+            cell = self._cells.cell(str(args["cell"]))
+            if cell is not None:
+                payload["cell"] = cell.desc
+                for axis, origin in zip(("x", "y", "z"), cell.origin):
+                    payload[axis] = origin + float(args.get(axis, 0))
         if action == "give" and "item" in args:
             try:
                 payload["baseId"] = int(self.base_id(str(args["item"])))

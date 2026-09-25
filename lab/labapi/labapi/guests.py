@@ -24,10 +24,45 @@ class Guest:
 
 
 @dataclass(frozen=True)
+class Cell:
+    """A named place scenarios teleport to and measure from (guests.yaml cells)."""
+
+    name: str
+    desc: str  # FormDesc::ToString, "<hex id>:<file>"
+    world_or_cell: int  # the form id lab-driver reports
+    origin: tuple[float, float, float]
+
+
+@dataclass(frozen=True)
 class Tables:
     guests: dict[str, Guest]
     profile_ids: dict[str, int]  # scenario client name to profileId
     items: dict[str, int]  # lowercased "file:editorid" to base form id
+    cells: dict[str, Cell] = field(default_factory=dict)  # lowercased name to cell
+
+    def cell(self, name: str) -> Cell | None:
+        return self.cells.get(name.strip().lower())
+
+    def cell_by_desc(self, desc: str) -> Cell | None:
+        d = desc.strip().lower()
+        for c in self.cells.values():
+            if c.desc.lower() == d:
+                return c
+        return None
+
+    def cell_by_form(self, form_id: int) -> Cell | None:
+        for c in self.cells.values():
+            if c.world_or_cell == form_id:
+                return c
+        return None
+
+    def origin_for_desc(self, desc: str) -> tuple[float, float, float] | None:
+        c = self.cell_by_desc(desc)
+        return c.origin if c else None
+
+    def origin_for_form(self, form_id: int) -> tuple[float, float, float] | None:
+        c = self.cell_by_form(form_id)
+        return c.origin if c else None
 
     def guest_for_client(self, client: str) -> Guest | None:
         for g in self.guests.values():
@@ -79,7 +114,14 @@ def load_tables(path: str | Path) -> Tables:
         guests[g.name] = g
     profile_ids = {str(k): int(v["profile_id"]) for k, v in (data.get("clients") or {}).items()}
     items = {str(k).lower(): int(v, 0) if isinstance(v, str) else int(v) for k, v in (data.get("items") or {}).items()}
-    return Tables(guests, profile_ids, items)
+    cells: dict[str, Cell] = {}
+    for name, row in (data.get("cells") or {}).items():
+        origin = tuple(float(v) for v in row.get("origin", [0, 0, 0]))
+        if len(origin) != 3:
+            raise ValueError(f"cell {name}: origin needs three numbers")
+        woc = row.get("worldOrCell", 0)
+        cells[str(name).lower()] = Cell(str(name), str(row["desc"]), int(woc, 0) if isinstance(woc, str) else int(woc), origin)
+    return Tables(guests, profile_ids, items, cells)
 
 
 def load_guests(path: str | Path) -> dict[str, Guest]:

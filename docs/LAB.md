@@ -238,7 +238,11 @@ rung R0: teleport, give, set-appearance, set-percentages, kill, respawn.
 fenestrate. Assertions read `server.actor(c)`, `server.inventory(c)`,
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
 dump's nearby actors matched to the server's position for `other`), and
-`form("File.esm:EditorID")` through lab-api's item table.
+`form("File.esm:EditorID")` through lab-api's item table. Coordinates in a
+scenario are offsets from a named cell's origin (`cells` in lab-api's
+guests.yaml; `lab-spawn` is the server's default start point until lab.esp
+provides a cell); lab-api converts to and from the engine's absolute
+coordinates on both the server and the client side.
 
 Input is a YAML scenario (see lab/scenarios/). The runner:
 

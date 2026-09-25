@@ -47,9 +47,12 @@ or `null` for an actor without an appearance. lab-driver reports the same
 `raceId` and `sex` for actors a client sees, so the two sides compare
 directly.
 
-`cell` is the gamemode's string for the actor's cell or worldspace (the
-editor id where one exists, the hex form id otherwise); assertions compare it
-to the scenario's literal. Without an actor: `{"found": false}`.
+`cell` is the server's descriptor for the actor's cell or worldspace,
+`FormDesc::ToString`, that is `"<hex id>:<file>"` such as `"3c:Skyrim.esm"`;
+`x`, `y`, `z` are absolute engine coordinates. lab-api translates both
+through the `cells` table in `guests.yaml`: a known descriptor becomes the
+cell's name and the coordinates become offsets from its origin, so a scenario
+says `cell: lab-spawn, x: 300`. Without an actor: `{"found": false}`.
 
 ```json
 {"payload": {"kind": "inventory", "profileId": 1}}
@@ -68,7 +71,7 @@ a scenario writes them as client steps (`c1: give {...}`) and lab-api routes
 them by name.
 
 ```json
-{"payload": {"kind": "teleport", "profileId": 1, "cell": "lab-spawn", "x": 0, "y": 0, "z": 0}}
+{"payload": {"kind": "teleport", "profileId": 1, "cell": "3c:Skyrim.esm", "x": 133857, "y": -61130, "z": 14662}}
 {"payload": {"kind": "give", "profileId": 1, "item": "Skyrim.esm:IronSword", "baseId": 77495, "count": 1}}
 {"payload": {"kind": "set-appearance", "profileId": 1, "preset": "lab-nord-1"}}
 {"payload": {"kind": "set-percentages", "profileId": 1, "health": 0.5, "magicka": 0.25, "stamina": 0.75}}
@@ -76,7 +79,9 @@ them by name.
 {"payload": {"kind": "respawn", "profileId": 1}}
 ```
 
-`set-appearance` applies `presets/<preset>.json` next to the gamemode (an
+`teleport` carries the descriptor and absolute coordinates; lab-api resolves
+a scenario's named cell and offsets before sending (a descriptor the table
+does not know passes through unchanged). `set-appearance` applies `presets/<preset>.json` next to the gamemode (an
 appearance record as `mp.get(actor, "appearance")` returns it; recorded from
 a real client, never typed). `set-percentages` sets the given actor values as
 fractions. `kill` sets the actor dead; `respawn` clears it and moves the actor

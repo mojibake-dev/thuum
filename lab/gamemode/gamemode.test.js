@@ -41,9 +41,10 @@ test("labCommand teleport and give", () => {
   global.mp = fakeMp();
   delete require.cache[require.resolve("./gamemode.js")];
   require("./gamemode.js");
-  const t = mp.onHttpRpcRunAttempt("labCommand", { kind: "teleport", profileId: 1, cell: "lab-spawn", pos: [100, 200, 300] });
+  const t = mp.onHttpRpcRunAttempt("labCommand", { kind: "teleport", profileId: 1, cell: "3c:Skyrim.esm", x: 100, y: 200, z: 300 });
   assert.strictEqual(t.ok, true);
-  assert.deepStrictEqual(mp.get(0xff000001, "locationalData"), { cellOrWorldDesc: "lab-spawn", pos: [100, 200, 300], rot: [0, 0, 72] });
+  assert.deepStrictEqual(mp.get(0xff000001, "locationalData"), { cellOrWorldDesc: "3c:Skyrim.esm", pos: [100, 200, 300], rot: [0, 0, 72] });
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "teleport", profileId: 1, cell: "3c:Skyrim.esm" }).ok, false);
   const g1 = mp.onHttpRpcRunAttempt("labCommand", { kind: "give", profileId: 1, baseId: 0x12eb7, count: 1 });
   assert.strictEqual(g1.count, 1);
   const g2 = mp.onHttpRpcRunAttempt("labCommand", { kind: "give", profileId: 1, baseId: 0xf, count: 5 });

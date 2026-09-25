@@ -75,9 +75,11 @@ const command = {
     const actorId = actorFor(payload.profileId);
     if (!actorId) return notFound(payload.profileId);
     const current = mp.get(actorId, "locationalData");
+    const pos = Array.isArray(payload.pos) ? payload.pos : [payload.x, payload.y, payload.z];
+    if (pos.some((v) => typeof v !== "number")) return { ok: false, error: "teleport needs pos or x, y, z" };
     mp.set(actorId, "locationalData", {
       cellOrWorldDesc: payload.cell || current.cellOrWorldDesc,
-      pos: payload.pos,
+      pos,
       rot: payload.rot || current.rot,
     });
     return { ok: true, actorId };

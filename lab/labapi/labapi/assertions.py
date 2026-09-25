@@ -166,40 +166,50 @@ class _ClientRef:
             raise AssertionData(f"{self.name} has not reported a dump-state yet")
         return v
 
-    def _seen(self, other: str) -> dict[str, Any] | None:
+    def _origin(self, kind: str, key: Any) -> tuple[float, float, float]:
+        fn = getattr(self._server, f"origin_for_{kind}", None)
+        origin = fn(key) if fn and key is not None else None
+        return tuple(origin) if origin else (0.0, 0.0, 0.0)
+
+    def _seen(self, other: str) -> tuple[dict[str, Any] | None, tuple[float, float, float]]:
+        """The near entry that is the other client, and the origin its
+        coordinates are relative to. Matching is done in absolute
+        coordinates, so a driver dump and the server's record agree."""
         dump = self._dump()
         sees = dump.get("sees")
         if isinstance(sees, dict):
-            return sees.get(other)
+            return sees.get(other), (0.0, 0.0, 0.0)
         target = self._server.actor(other)
         if not target or not target.get("found", True):
             raise AssertionData(f"server has no actor for {other}")
+        absolute = target.get("absolute") or target
+        origin = self._origin("desc", absolute.get("cell"))
         best: dict[str, Any] | None = None
         best_d = 0.0
         for n in dump.get("near") or []:
             try:
                 pos = n["pos"]
-                dx = float(pos[0]) - float(target["x"])
-                dy = float(pos[1]) - float(target["y"])
-                dz = float(pos[2]) - float(target["z"])
+                dx = float(pos[0]) - float(absolute["x"])
+                dy = float(pos[1]) - float(absolute["y"])
+                dz = float(pos[2]) - float(absolute["z"])
             except (KeyError, IndexError, TypeError, ValueError):
                 continue
             d = (dx * dx + dy * dy + dz * dz) ** 0.5
             if d <= self.SEE_RADIUS and (best is None or d < best_d):
                 best, best_d = n, d
-        return best
+        return best, origin
 
     def sees(self, other: str) -> bool:
-        return self._seen(other) is not None
+        return self._seen(other)[0] is not None
 
     def view(self, other: str) -> Pos:
-        seen = self._seen(other)
+        seen, origin = self._seen(other)
         if not seen:
             raise AssertionData(f"{self.name} does not see {other}")
         try:
             pos = seen.get("pos") or [seen["x"], seen["y"], seen["z"]]
             return Pos(
-                float(pos[0]), float(pos[1]), float(pos[2]),
+                float(pos[0]) - origin[0], float(pos[1]) - origin[1], float(pos[2]) - origin[2],
                 name=_opt_str(seen.get("name")),
                 isDead=_opt_bool(seen.get("isDead")),
                 healthPercentage=_opt_float(seen.get("healthPercentage")),
@@ -216,11 +226,12 @@ class _ClientRef:
         dump = self._dump()
         try:
             pos = dump.get("pos") or [dump["x"], dump["y"], dump["z"]]
+            origin = self._origin("form", _opt_int(dump.get("worldOrCell")))
             health = dump.get("health") or {}
             magicka = dump.get("magicka") or {}
             stamina = dump.get("stamina") or {}
             return StateView(
-                float(pos[0]), float(pos[1]), float(pos[2]),
+                float(pos[0]) - origin[0], float(pos[1]) - origin[1], float(pos[2]) - origin[2],
                 worldOrCell=_opt_int(dump.get("worldOrCell")),
                 cellName=_opt_str(dump.get("cellName")),
                 isDead=_opt_bool(dump.get("isDead")),

@@ -64,6 +64,23 @@ labapi-tests:
   script:
     - uv run --project lab/labapi python -m unittest discover -s lab/tests -v
 
+# lab-api image, pushed to the sky-ci registry that sky-srv pulls from
+# (10.10.70.12:5000; localhost:5000 from a host-socket job). Tags: the commit
+# and latest.
+labapi-image:
+  stage: gate
+  tags: [sky]
+  image: docker:27
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes: [lab/labapi/**/*]
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - docker build -t "localhost:5000/thuum/lab-api:$CI_COMMIT_SHORT_SHA" lab/labapi
+    - docker tag "localhost:5000/thuum/lab-api:$CI_COMMIT_SHORT_SHA" localhost:5000/thuum/lab-api:latest
+    - docker push "localhost:5000/thuum/lab-api:$CI_COMMIT_SHORT_SHA"
+    - docker push localhost:5000/thuum/lab-api:latest
+
 # The lab-driver bundle, kept as a job artifact for the client template.
 driver-build:
   stage: lint

@@ -29,3 +29,14 @@ clients:
 items:
   "Skyrim.esm:IronSword": 0x00012EB7
   "Skyrim.esm:Gold001": 0x0000000F
+
+# cells: the places scenarios teleport to and measure from. A scenario's x, y, z
+# are offsets from the cell's origin: lab-api adds the origin on the way to the
+# server and subtracts it on the way back, and names the cell by this key when
+# the server's descriptor matches. desc is FormDesc::ToString ("<hex id>:<file>",
+# skymp5-server/cpp/server_guest_lib/FormDesc.cpp); worldOrCell is the form id
+# lab-driver reports. lab-spawn is the server's default start point
+# (skymp5-server/ts/settings.ts) in Tamriel until lab.esp (Track L4) provides a
+# dedicated cell.
+cells:
+  lab-spawn: {desc: "3c:Skyrim.esm", worldOrCell: 0x3c, origin: [133857, -61130, 14662]}
