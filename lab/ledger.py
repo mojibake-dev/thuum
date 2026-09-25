@@ -228,6 +228,9 @@ def build(skymp: Path) -> list[Native]:
     return sorted(universe.values(), key=lambda n: (n.cls.lower(), n.name.lower()))
 
 
+# The bracketed note this generator appends to the Reason column; stripped
+# when reading hand columns back so regeneration is idempotent.
+_GENERATED_SUFFIX = re.compile(r"\s*\[[^\]]*(?:\.cpp:\d+|\.ts:\d+|returns None|body not located|overrides the C\+\+)[^\]]*\]\s*$")
 _ROW = re.compile(r"^\|\s*`?([\w.]+)`?[^|]*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*$")
 
 
@@ -242,6 +245,7 @@ def read_hand_columns(existing: Path) -> dict[str, Hand]:
         key, _status, rung, reason, verb = (g.strip() for g in m.groups())
         if key in ("Native", "(regenerate)") or set(key) <= {"-"}:
             continue
+        reason = _GENERATED_SUFFIX.sub("", reason).strip()
         if rung or reason or verb:
             hand[key] = Hand(rung, reason, verb)
     return hand
@@ -306,7 +310,7 @@ def main(argv: list[str] | None = None) -> int:
     natives = build(args.skymp)
     hand = read_hand_columns(args.natives_md)
     text = render(natives, hand, git_head(args.skymp))
-    if "—" in text:
+    if chr(0x2014) in text:
         print("E_LEDGER: em dash in output (rule 11)", file=sys.stderr)
         return 1
     if args.dry_run:

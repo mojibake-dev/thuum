@@ -153,7 +153,9 @@ class Synthetic(unittest.TestCase):
             again = md.read_text()
             self.assertIn("| `Game.IncrementStat` (global) | stub | R0 | never: stats are client cosmetics [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusGame.cpp:24] | docs/verbs/none.md |", again)
             self.assertIn("| stub | 1 |", again)
-            self.assertNotIn("—", again)
+            self.assertEqual(ledger.main([str(root), str(md)]), 0)
+            self.assertEqual(md.read_text(), again, "regeneration must be idempotent")
+            self.assertNotIn(chr(0x2014), again)
 
 
 @unittest.skipUnless((SKYMP / ledger.DUMP).is_file(), "skymp submodule not checked out")
