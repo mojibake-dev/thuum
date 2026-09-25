@@ -66,6 +66,10 @@ class GuestControl:
 
     def status(self, guest: Guest) -> str:
         try:
+            if not guest.managed:
+                # Never asked about: fenestrate is outside pool sky by design and
+                # a query would only 403. Its liveness is its heartbeat.
+                return "unmanaged"
             return self._b.status(guest)
         except ProxmoxError:
             return "unknown"

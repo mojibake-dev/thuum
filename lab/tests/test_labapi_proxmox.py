@@ -32,7 +32,9 @@ class GuestControlTests(unittest.TestCase):
             with self.assertRaises(ProxmoxError):
                 call()
         self.assertEqual(self.pve.calls, [])
-        self.assertEqual(self.control.status(self.fen), "running")
+        # not even a status query: fenestrate is outside pool sky and would 403
+        self.assertEqual(self.control.status(self.fen), "unmanaged")
+        self.assertEqual(self.pve.calls, [])
 
     def test_exec_is_qemu_only(self):
         from labapi.proxmox import ProxmoxError
