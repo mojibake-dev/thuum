@@ -4,8 +4,15 @@
 # mounted socket.
 FROM python:3.12-slim
 COPY --from=ghcr.io/astral-sh/uv:0.8 /uv /usr/local/bin/uv
-RUN apt-get update && apt-get install -y --no-install-recommends iproute2 tcpdump docker.io docker-compose-v2 ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+# The docker CLI and the compose plugin as static binaries from the official
+# CLI image: distro-independent (python:3.12-slim moved to Debian trixie,
+# which has no docker-compose-v2 package). The daemon is sky-srv's, through
+# the mounted socket.
+COPY --from=docker:27-cli /usr/local/bin/docker /usr/local/bin/docker
+COPY --from=docker:27-cli /usr/local/libexec/docker/cli-plugins/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose
+RUN apt-get update && apt-get install -y --no-install-recommends iproute2 tcpdump ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && docker --version && docker compose version
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
