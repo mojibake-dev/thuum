@@ -1,7 +1,6 @@
 [submodule "CommonLibSSE-NG"]
 	path = CommonLibSSE-NG
-	url = https://github.com/skyrim-multiplayer/CommonLibSSE-NG.git
-	branch = main
+	url = https://github.com/CharmedBaryon/CommonLibSSE-NG.git
 [submodule "skymp"]
 	path = skymp
 	url = https://github.com/mojibake-dev/skymp.git

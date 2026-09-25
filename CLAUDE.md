@@ -44,8 +44,11 @@ toolchain per layer, every feature the same shape.
                          skymp5-server, skymp5-client, skyrim-platform, papyrus-vm,
                          libespm, savefile, and our skymp-wire/ (ADR-015). Its vcpkg
                          submodule is initialized only where the server is built.
-- CommonLibSSE-NG/ .... git submodule at upstream skyrim-multiplayer/CommonLibSSE-NG:
-                         the engine map (classes, vtables, REL::ID). Never modified.
+- CommonLibSSE-NG/ .... git submodule at CharmedBaryon/CommonLibSSE-NG b93280e8
+                         (2024-09-03): the commit skymp's vcpkg overlay port builds
+                         the client against (skymp/overlay_ports/commonlibsse-ng-flatrim,
+                         plus its four patches there). The engine map (classes, vtables,
+                         REL::ID). Never modified; repinned only when the port moves.
 - addrlib/ ............ Address Library database for SkyrimSE 1.6.1170; gitignored,
                          downloaded from Nexus by Eli, read-only to the agent.
 - ghidra/ ............. notes only; the Ghidra project lives on sky-re under

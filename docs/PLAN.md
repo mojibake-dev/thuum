@@ -245,7 +245,7 @@ natives ledger.
 - SkyMP roadmap: https://github.com/skyrim-multiplayer/skymp/blob/main/ROADMAP.md
 - Skyrim Platform docs: https://github.com/skyrim-multiplayer/skymp/blob/main/docs/docs_skyrim_platform.md
 - SP hooks: https://github.com/skyrim-multiplayer/skymp/blob/main/docs/skyrim_platform/events.md
-- CommonLibSSE-NG (skyrim-multiplayer fork): https://github.com/skyrim-multiplayer/CommonLibSSE-NG
+- CommonLibSSE-NG at the commit skymp's client builds against (CharmedBaryon b93280e8; the skyrim-multiplayer fork stopped in 2023): https://github.com/CharmedBaryon/CommonLibSSE-NG/tree/b93280e832f263dbef44e44cbe2936622a02f91a
 - CommonLibSSE-NG docs: https://ng.commonlib.dev/
 - Address Library for SKSE Plugins: https://www.nexusmods.com/skyrimspecialedition/mods/32444
 - UESP save format (change forms): https://en.uesp.net/wiki/Skyrim_Mod:Save_File_Format

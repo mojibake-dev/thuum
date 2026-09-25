@@ -46,6 +46,14 @@ docs-lint:
       PY
     - just --list
 
+# Lab tooling unit tests (addr.py, later ledger.py and lab-api). The fixture
+# tests skip without the CommonLibSSE-NG submodule; synthetic ones always run.
+lab-tests:
+  extends: .base
+  stage: lint
+  script:
+    - python3 -m unittest discover -s lab/tests -v
+
 # ADR-009 / ADR-016: a scenario change travels alone. Fail the MR if any commit in it
 # touches lab/scenarios/*.yaml together with any other path.
 scenario-gate:

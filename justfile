@@ -71,6 +71,10 @@ addr id:
 ledger:
     @python3 lab/ledger.py "{{skymp}}" docs/NATIVES.md
 
+# Unit tests for the lab tooling (addr.py, ledger.py, lab-api). Fixture tests skip without the CommonLibSSE-NG submodule.
+test-lab:
+    @python3 -m unittest discover -s lab/tests -v
+
 # Run a Frida trace script on a lab client through lab-api.
 frida script client:
     @curl -fsS -X POST "{{lab_api}}/frida" -F "client={{client}}" -F "script=@{{script}}"
