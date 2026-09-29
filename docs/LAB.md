@@ -25,9 +25,7 @@ flowchart LR
       ci["sky-ci 702 / .12\nDebian 12 VM + Docker\nGitLab runner, permanent egress"]
       tpl["tpl-sky-client 710 / .20\nWindows 11 template"]
       c1["sky-c1 711 / .21\nWindows 11 linked clone\nGPU passthrough, Skyrim + SP + lab-driver"]
-    end
-    subgraph vlan60["VLAN 60 untrusted"]
-      fen["fenestrate 220\nEli's Windows desktop VM\nRTX 5060 Ti, client two"]
+      c2["sky-c2 712 / .22\nWindows 11 linked clone\nsecond display adapter, same image"]
     end
     caddy["Caddy on the host\nthuum.gaussing.tv, ghidra.gaussing.tv\nLAN and tailnet only"]
     results[("rpool/sky/results")]
@@ -85,14 +83,14 @@ Roles:
   fed to Ghidra's C parser (templates); the labels are the import.
 - sky-ci: the only runner that executes this project's jobs. The estate's own
   runner holds root on the host and never runs a fork job.
-- sky-c1: Windows 11 linked clone of tpl-sky-client with a passed-through GPU,
-  Skyrim SE plus Skyrim Platform plus lab-driver plus Frida.
-- fenestrate (VM 220, VLAN 60): Eli's Windows desktop VM, which holds the
-  host's only discrete GPU (RTX 5060 Ti). It is client two during M0 to M2,
-  allow-listed to sky-srv on udp/7777, tcp/3000, and tcp/80. It is never in
-  pool `sky`, never snapshotted, rolled back, or guest-exec'd by lab-api;
-  its only lab role is lab-driver polling lab-api from inside the game. M0 T3
-  runs are therefore attended: Eli launches the game on fenestrate.
+- sky-c1 and sky-c2: Windows 11 linked clones of tpl-sky-client, each with
+  its own display adapter, Skyrim SE plus Skyrim Platform plus lab-driver
+  plus Frida. Both are lab-owned (pool `sky`), rolled back per run, and
+  driven by lab-api; a two-client scenario needs both up.
+- fenestrate (VM 220, VLAN 60) is Eli's desktop and only ever a file source
+  (decided 2026-09-29: "not a dev machine, just a template"). It is not a
+  lab client, needs no allow toward sky-srv, and nothing in the lab depends
+  on it being up.
 - Agent: Claude Code on Eli's Mac in M0 (ADR-016). It reaches the lab only
   through the Caddy names and the SSH jump; it has no route into VLAN 70.
   sky-agent stays reserved until unattended overnight loops need it.
@@ -147,21 +145,20 @@ operator's IaC command and is not called from CI.
   TPM 2.0), VirtIO disk and NIC, QEMU guest agent, host CPU type. Proxmox's
   PCI(e) passthrough wiki is the reference; do not improvise the vfio
   configuration.
-- GPU: one per concurrent lab-owned Windows client. The host's only discrete
-  GPU belongs to fenestrate. Decided 2026-09-24: sky-c1 gets a used
-  low-profile NVIDIA card (GTX 1650 class, no auxiliary power) in one of the
-  board's PCIe 4.0 x1-wired slots, which is enough for Skyrim at 1080p low
-  once assets are resident; NVIDIA resets reliably under vfio on this host.
-  The 9950X3D iGPU (RDNA2, two CUs) stays an inert, variable-guarded
-  experiment in the IaC: reports of passing through once per host boot make
-  it unfit for a rollback-heavy lab, and it is the host console. sky-c2 needs
-  a third GPU (M2).
-- RAM: the host has 96 GB and is tight. Phase 1 fits. Phase 3 with fenestrate
-  as client two does not fit at full size: on a T3 night sky-re is powered
-  off, sky-srv and sky-ci sit at their balloon floors, sky-c1 runs at 12 GB
-  (Skyrim SE's published minimum is 8 GB), the IDS keeps running, and
-  fenestrate is never resized. `sky-lab up` refuses to start T3 when free
-  memory is short. A RAM upgrade is Eli's call.
+- GPU: one per concurrent lab-owned Windows client. The RTX 5060 Ti belongs
+  to fenestrate. sky-c1 has the GTX 1050 3 GB that arrived 2026-09-29 (an x1
+  link; enough for Skyrim at 1080p low once assets are resident; NVIDIA
+  resets reliably under vfio on this host). sky-c2 (wanted since
+  2026-09-29, two lab clients) still needs an adapter: a second used card is
+  the clean answer; the 9950X3D iGPU (RDNA2, two CUs) is the guarded
+  experiment in the IaC, with the reset-once-per-boot reports and the host
+  console against it. The 1050 cannot be shared: no vGPU on consumer Pascal
+  without the vgpu_unlock hack, and 3 GB does not hold two Skyrims.
+- RAM: the host has 96 GB and is tight. Phase 1 fits. Two client VMs at
+  12 GB each (Skyrim SE's published minimum is 8 GB) fit only with sky-re
+  powered off and sky-srv and sky-ci at their balloon floors on a T3 night;
+  fenestrate being off helps and is the normal state. `sky-lab up` refuses
+  to start T3 when free memory is short. A RAM upgrade is Eli's call.
 - Storage: ZFS. `rpool/sky/results` (quota 500 GB, no snapshots, 30-day age
   pruning on the host) is shared into sky-srv over virtiofs at
   /srv/lab/results read-write, so a rollback of sky-srv can never delete the
@@ -171,8 +168,15 @@ operator's IaC command and is not called from CI.
   The Windows template disk is 120 GB on the guest pool, exempt from the
   estate's hourly snapshot policy. Licensed files never leave rpool/sky.
 - Display: the client GPU needs a display target for D3D11 when nobody is
-  looking, a dummy HDMI plug or a virtual display driver; Sunshine for remote
-  viewing, Moonlight on fenestrate or the Mac.
+  looking, a dummy HDMI plug or a virtual display driver (the Virtual
+  Display Driver project, installed into the template); Sunshine in every
+  client for remote viewing, Moonlight on Eli's laptop. Sunshine's admin
+  user is `lab` (password in the Mac Keychain, sky-client/sunshine), set in
+  the template on 2026-09-29; the estate DNATs each client's Sunshine ports
+  (TCP 47984, 47989, 47990, 48010; UDP 47998 to 48000) from the LAN and
+  tailnet, one external base port per client since Moonlight derives the
+  rest from the base it is given. Pairing is a Moonlight PIN typed into the
+  web UI on 47990; a pairing made in the template is inherited by clones.
 - Licensing: Steam's rule is one licensed copy per person playing at once
   (Steam Families FAQ), so two concurrent clients on one account are outside
   the supported policy. Eli's decision (2026-09-29): the lab clients use
@@ -184,8 +188,10 @@ operator's IaC command and is not called from CI.
   1.7.104.0 with master files whose CRC32s differ from the pre-AE set upstream
   tests against (libespm's Utils.cpp records both sets). Upstream's Skyrim
   Platform still loads skse64_1_6_1170.dll, so a 1.7.104 client cannot run
-  SP or skymp5-client; the lab keeps the 1.6.1170 pin and a client is rolled
-  back with Steam's depot download (Eli's hand step in the template notes).
+  SP or skymp5-client as shipped. Decided 2026-09-29 (Eli): the lab runs the
+  current Steam build and the fork is made to handle it (CommonLibSSE-NG's
+  active fork reads the new address library format; the port lives on the
+  fork branch skyrim-1.7); the depot rollback is the fallback, not the path.
   `just persist-game` copies whatever fenestrate has into rpool/sky/persist:
   the master files as-is, and an exe that is not 1.6.1170 under its own name
   (game/SkyrimSE-1.7.104.0.exe tonight), never as the pinned SkyrimSE.exe.
@@ -225,8 +231,8 @@ gets back (teleport via server command, equip, cast, activate, hit, wait,
 request-screenshot, dump-state), and posts the result to
 `POST /lab/step/<id>/result` with the client's view of the relevant refs. It
 is the only automation surface inside the game; keep its verbs boring. On
-sky-c1 it reaches lab-api at http://10.10.70.10/lab inside the VLAN; on
-fenestrate through the tcp/80 allow.
+sky-c1 and sky-c2 it reaches lab-api at http://10.10.70.10/lab inside the
+VLAN.
 
 Screenshots and Frida invocations go through a guest exec from lab-api,
 not through the game, so a crashed client can still be observed. Scripts
@@ -261,8 +267,8 @@ equip, cast, activate, hit, dump-state, request-screenshot, craft (an open
 driver item that m0-forge specifies). Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, set-percentages, kill, respawn.
-`screenshot` is a guest exec on a managed client and request-screenshot on
-fenestrate. Assertions read `server.actor(c)`, `server.inventory(c)`,
+`screenshot` is a guest exec on a managed client (request-screenshot is
+the in-game fallback). Assertions read `server.actor(c)`, `server.inventory(c)`,
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
 dump's nearby actors matched to the server's position for `other`), and
 `form("File.esm:EditorID")` through lab-api's item table. Coordinates in a
@@ -283,9 +289,8 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    virtio-fs shares, which are incompatible with RAM snapshots, so every
    rollback in the lab is disk-only; sky-re is rolled back with `pct`.
 2. Applies netem if asked.
-3. Rolls each named lab-owned client back and starts it; waits for the
-   lab-driver heartbeat. fenestrate is never rolled back; the runner only
-   waits for its heartbeat.
+3. Rolls each named client back and starts it; waits for the lab-driver
+   heartbeat.
 4. Feeds steps in order; each step names a client or the server; waits for
    the ack or the timeout.
 5. Runs assertions: server-side through the lab gamemode's state endpoint
@@ -361,7 +366,7 @@ re-analyst subagent's procedure is unchanged, only the transport.
 
 ## Bill of constraints
 
-- GPUs equal concurrent lab-owned clients; fenestrate is the attended extra.
+- GPUs equal concurrent lab-owned clients; there is no attended extra.
 - Licenses equal concurrent clients.
 - Windows activation per VM.
 - A T3 run is minutes plus 90 to 120 s per client rollback; a human dynamic
@@ -381,10 +386,8 @@ re-analyst subagent's procedure is unchanged, only the transport.
    client at all; the server image is the T2 runtime (fakeclient and
    difftest both execute inside it).
 2. sky-re with pyghidra-mcp.
-3. sky-c1 once its card arrives, fenestrate as client two;
-   `smoke-two-players` green, attended.
-4. sky-c2 and a third GPU at M2, when observer scenarios and unattended
-   nightly T3 need it.
+3. sky-c1 with the 1050, sky-c2 with the second adapter;
+   `smoke-two-players` green, unattended once both clones boot to connected.
 
 ## References
 
