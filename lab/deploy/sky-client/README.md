@@ -15,6 +15,9 @@ C:\sky-lab\
   launch.ps1                   sky-lab-launch, at logon of `lab`: starts skse64_loader
   screenshot.ps1               sky-lab-screenshot, on demand: primary screen to
                                screenshots\latest.png (interactive session)
+  client-dist.zip, dist\       the mirror's Windows workflow output when
+                               `just build-client` fetched it: Skyrim Platform and
+                               skymp5-client, for Eli to lay into the game
 ```
 
 Once SKSE and SP are installed, apply it (as an administrator in the VM or

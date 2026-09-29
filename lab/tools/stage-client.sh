@@ -25,5 +25,20 @@ for f in "${files[@]}"; do
   [ "$want" = "$got" ] || { echo "hash mismatch for $name: $want vs $got" >&2; exit 3; }
   printf '  %-28s %s\n' "$name" "$got"
 done
+# The client dist from the mirror's Windows workflow (`just build-client`), when
+# present: one zip in, expanded to C:\sky-lab\dist inside the guest. It carries
+# Skyrim Platform and skymp5-client; laying it into the game stays Eli's step.
+dist="$here/skymp/build/dist-client"
+if [ -d "$dist" ] && [ -n "$(ls -A "$dist")" ]; then
+  zip=$(mktemp -t client-dist).zip
+  (cd "$dist" && zip -qr "$zip" .)
+  put "$zip" "client-dist.zip"
+  want=$(shasum -a 256 "$zip" | awk '{print $1}')
+  got=$(run "(Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\client-dist.zip').Hash.ToLower()")
+  [ "$want" = "$got" ] || { echo "hash mismatch for client-dist.zip" >&2; exit 3; }
+  run "Expand-Archive -Force -Path 'C:\\sky-lab\\client-dist.zip' -DestinationPath 'C:\\sky-lab\\dist'; (Get-ChildItem -Recurse -File 'C:\\sky-lab\\dist' | Measure-Object).Count"
+  printf '  %-28s %s (expanded to dist\\)\n' "client-dist.zip" "$got"
+  rm -f "$zip"
+fi
 run "Get-ChildItem 'C:\\sky-lab' | ForEach-Object { '{0,10} {1}' -f \$_.Length, \$_.Name }"
 echo "staged into VM $vmid under C:\\sky-lab; apply with install-lab.ps1 once SKSE and SP exist"
