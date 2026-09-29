@@ -1,0 +1,24 @@
+# T2 only (no Windows client): the fork's headless legacy client logs in as
+# c1, walks, receives an iron sword through a console command; the server owns
+# the result (R0) and it survives a restart. Green here means sky-srv, the
+# server image, lab-api's compose access and the file database all agree; it
+# is the regression floor a T3 run stands on. Assertions are evaluated by
+# lab-api only (ADR-009).
+id: t2-fakeclient-restart
+milestone: M0
+clients: []
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 300
+steps:
+  - server: fakeclient {as: c1, moves: 5, item: "Skyrim.esm:IronSword", count: 1}
+  - assert:
+      - server.actor(c1).cell == "lab-spawn"
+      - server.inventory(c1).count("Skyrim.esm:IronSword") >= 1
+  - server: restart
+  - wait: 5
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:IronSword") >= 1
+      - abs(server.actor(c1).x - 150) < 50
+artifacts: [server.log, world-diff]
