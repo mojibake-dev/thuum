@@ -276,3 +276,40 @@ expects it on every platform); a T2 scenario asserts only through labState
 and world diffs, never through client views; the bridged server of M1 joins as
 a second compose service and the same recipe drives both, which is what
 difftest is for (ADR-010).
+
+## ADR-018: The lab runs the current Skyrim build, and how the fork gets there
+
+Status: proposed (2026-09-29)
+
+Eli's direction on 2026-09-29: the lab clients run whatever Steam ships
+(1.7.104.0 tonight) and the fork is made to handle it; Steam's depot rollback
+to 1.6.1170 is the fallback for bring-up, not the destination. Two facts
+shape the how. First, upstream skymp still pins 1.6.1170 (Skyrim Platform
+loads skse64_1_6_1170.dll by name; CommonLibSSE-NG is pinned at CharmedBaryon
+b93280e8, MIT, dormant since 2024-09), and 1.7.x ships its Address Library in
+format 5, which that pin refuses. Second, the actively maintained
+CommonLibSSE-NG line that reads format 5 (alandtse, v9.0.0 on 2026-09-21,
+v10.0.0 on 2026-09-28) relicensed to GPL-3.0-or-later on 2026-08-15. Skyrim
+Platform links CommonLib statically into a binary the public fork ships, so
+ADR-014 applies: pulling that line in would put the client half of the fork
+under the GPL. That is Eli's call to make explicitly, not a side effect of a
+dependency bump.
+
+Decision as proposed: stay on the MIT line. The fork branch `skyrim-1.7`
+carries (1) Skyrim Platform naming the SKSE DLL from the running game's
+version; (2) an overlay patch on the pinned CommonLib that reads Address
+Library format 5, taken from an MIT fork of the same base (Zzyxz, 2026-08-22,
+about 150 lines, two commits ahead of our pin) after review against the
+format's own reference header, the versionlibdb.h that ships with the
+Address Library download; (3) whatever engine-layout changes 1.7 brought,
+found by us with Ghidra against the analyzed 1.7.104 program rather than read
+out of GPL code. The four skymp header patches are already rebased for a
+newer CommonLib should the decision go the other way (they apply cleanly to
+v10.0.0). Validation is T1 on a client with SKSE 2.3.1 and the 1.7.104
+Address Library, then T3; until then the template keeps a 1.6.1170 game
+directory beside the current one so bring-up does not wait on the port.
+
+Consequences: the version pin in CLAUDE.md and the addrlib/ database move to
+1.7.104 when the branch lands; `just addr` and the Ghidra labels follow the
+Address Library for that version; the client template installs SKSE 2.3.1;
+every REL::ID the fork touches is re-verified rather than assumed stable.
