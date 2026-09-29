@@ -248,6 +248,8 @@ server: {snapshot: clean}
 timeout_s: 30
 steps:
   - server: fakeclient {as: c1, moves: 5, item: "Skyrim.esm:IronSword", count: 1}
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:IronSword") >= 0
   - server: restart
   - server: fakeclient {as: c2}
 artifacts: [server.log]
@@ -273,7 +275,7 @@ class FakeclientSteps(RunTests):
         self.assertEqual(second[second.index("--profile-id") + 1], "2")
         self.assertEqual(second[second.index("--add-item-count") + 1], "0")
         self.assertIn("fakeclient-c1-0.jsonl", body["artifacts"])
-        self.assertIn("fakeclient-c2-2.jsonl", body["artifacts"])
+        self.assertIn("fakeclient-c2-3.jsonl", body["artifacts"])
         self.assertTrue(any(c[-2:] == ["restart", "skymp-server"] for c in self.services.system.commands))
         self.assertEqual(self.services.system.chowned, [(str(self.tmp / "world"), 1001, 1001)])
 

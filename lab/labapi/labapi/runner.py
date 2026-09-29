@@ -350,7 +350,7 @@ class Runner:
     async def _assert(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         needed: set[str] = set()
         for expr in step.assertions:
-            needed |= clients_needing_views(expr, rec.scenario.clients)
+            needed |= clients_needing_views(expr, rec.scenario.clients)  # fakeclients have no view
         if needed:
             results = await asyncio.gather(*(self.board.run_step(c, "dump-state", {}, self.s.step_timeout_s) for c in sorted(needed)))
             for qs in results:
@@ -358,7 +358,7 @@ class Runner:
                     rec.failures.append({"step": index, "kind": "timeout", "client": qs.client, "error": "dump-state before assert timed out"})
                     rec.verdict = "red"
                     return False, f"dump-state from {qs.client} timed out"
-        evaluator = Evaluator(self.state, self.board, rec.scenario.clients)
+        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario))
         failed = []
         for expr in step.assertions:
             try:
@@ -465,6 +465,19 @@ class Runner:
             rec.artifacts.append(f"frida/{client}-{script}.jsonl")
         except ProxmoxError as e:
             rec.notes.append(f"frida {script}: {e}")
+
+    @staticmethod
+    def _client_names(scenario) -> list[str]:
+        """Names an assertion may use: the scenario's clients plus every client a
+        `server: fakeclient {as: ...}` step logged in as (T2-only scenarios
+        declare `clients: []` and still assert on `server.actor(c1)`)."""
+        names = list(scenario.clients)
+        for st in scenario.steps:
+            if st.kind == "server" and st.action == "fakeclient":
+                who = str((st.args or {}).get("as") or "")
+                if who and who not in names:
+                    names.append(who)
+        return names
 
     def _client_args(self, action: str, args: dict[str, Any] | None) -> dict[str, Any]:
         """Names in client steps become form ids before the driver sees them;
