@@ -8,7 +8,7 @@
   .env                      from env.example, filled by hand once (secrets)
   server/
     server-settings.json    this directory's settings (offline, file driver, lab gamemode)
-    data/                   writable data dir the server fills (ui/, manifest)
+    data/                   unused since 2026-09-29: the image's own data/ (compiled scripts) stays visible, ui/ is regenerated
     world/                  the file driver's database; snapshots copy it
   snapshots/<name>/world/   server state snapshots lab-api restores per scenario
   thuum/                    a copy of the superproject's lab/ tree (gamemode, presets, frida, scenarios)

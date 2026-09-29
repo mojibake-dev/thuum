@@ -7,6 +7,12 @@ services:
   skymp-server:
     image: ${REGISTRY:-}skymp-server:parity
     restart: unless-stopped
+    # The server loads scam_native.node from its cwd and dumps its settings
+    # there, so the cwd must be the code dir and writable. The runtime image
+    # created /srv/skymp as root (WORKDIR before COPY --chown), so until the
+    # image fix in ci/server.Dockerfile ships, the container runs as root and
+    # the state it writes under /srv/lab/server is root-owned on the VM.
+    user: "${SERVER_USER:-0:0}"
     working_dir: /srv/skymp
     command: ["node", "dist_back/skymp5-server.js"]
     ports:
@@ -14,7 +20,7 @@ services:
       - "3000:3000"
     volumes:
       - /srv/persist/esm:/srv/skymp/esm:ro                                   # the five master files (Eli's hand step)
-      - /srv/lab/server/data:/srv/skymp/data                                  # the server writes ui/ and a manifest here
+      # no mount over /srv/skymp/data: the image ships data/scripts (compiled Papyrus) there and the server only writes ui/ and a manifest into it, both regenerated at start
       - /srv/lab/server/world:/srv/skymp/world                                # the file driver's database
       - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro                    # gamemode.js and presets/

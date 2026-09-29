@@ -63,6 +63,21 @@ test-proto:
 ghidra:
     @code=$(curl -sS -o /dev/null -w '%{http_code}' "${GHIDRA_MCP_URL:?set GHIDRA_MCP_URL}") && echo "ghidra mcp: http $code at $GHIDRA_MCP_URL"
 
+# Import an exe from /srv/persist/game into the Ghidra project on sky-re (LXC 701) as a transient
+# systemd unit; pyghidra-mcp is stopped for the analysis and restarted after. Hours for SkyrimSE.
+# Runs lab/tools/ghidra-import.sh inside sky-re for one exe, e.g. `just ghidra-import SkyrimSE-1.7.104.0.exe`.
+ghidra-import exe:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    host=root@core.gaussing.tv
+    scp -q lab/tools/ghidra-import.sh "$host:/tmp/ghidra-import.sh"
+    ssh "$host" 'pct push 701 /tmp/ghidra-import.sh /usr/local/sbin/ghidra-import.sh --perms 0755 && rm /tmp/ghidra-import.sh'
+    ssh "$host" "pct exec 701 -- systemd-run --unit ghidra-import --collect --property=WorkingDirectory=/srv/persist/ghidra /usr/local/sbin/ghidra-import.sh /srv/persist/game/{{exe}}"
+
+# Progress of the running or last Ghidra import on sky-re: unit state and the log tail.
+ghidra-import-status:
+    @ssh root@core.gaussing.tv 'pct exec 701 -- bash -c "systemctl status ghidra-import --no-pager -n 3 2>&1 | head -12; echo ---; tail -n 15 /srv/persist/ghidra/import-*.log 2>/dev/null | cut -c1-160"'
+
 # Resolve an Address Library ID for the pinned runtime. Never type the answer into code by hand.
 addr id:
     @python3 lab/addr.py "{{addrlib}}" "{{runtime}}" "{{id}}"
