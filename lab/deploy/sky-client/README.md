@@ -33,3 +33,13 @@ VLAN 70, hash-checked and expanded. Nothing leaves the lab network.
 Then the template snapshot `clean-sp` carries it and every clone boots to
 "connected" by itself (docs/LAB.md). For a second client change `client` and
 `profileId` before installing.
+
+## Driving a client from the laptop
+
+Moonlight (`brew install --cask moonlight` on the Mac) to the host's external
+base port for the client: `10.0.0.10:48989` on the LAN or
+`core.gaussing.tv:48989` on the tailnet reaches the template today and
+sky-c1 once it exists; `49989` is sky-c2. The first connection shows a PIN;
+enter it at https://core.gaussing.tv:48990 (user `lab`, password in the Mac
+Keychain under sky-client/sunshine). Sunshine's default app is the desktop,
+which is enough to log into Steam and install the game.

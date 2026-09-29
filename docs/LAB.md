@@ -173,10 +173,17 @@ operator's IaC command and is not called from CI.
   client for remote viewing, Moonlight on Eli's laptop. Sunshine's admin
   user is `lab` (password in the Mac Keychain, sky-client/sunshine), set in
   the template on 2026-09-29; the estate DNATs each client's Sunshine ports
-  (TCP 47984, 47989, 47990, 48010; UDP 47998 to 48000) from the LAN and
-  tailnet, one external base port per client since Moonlight derives the
-  rest from the base it is given. Pairing is a Moonlight PIN typed into the
-  web UI on 47990; a pairing made in the template is inherited by clones.
+  from the LAN and tailnet, one external base port per client since Moonlight
+  derives the rest from the base it is given (live 2026-09-29, inventory
+  `sky_client_streams` in mojibake/core): base 48989 is the template (710)
+  now and sky-c1 (711) once the clone exists; base 49989 is sky-c2 (712).
+  Per base B the host forwards TCP B-5, B, B+1, B+21 and UDP B+9, B+10,
+  B+11, B+13, B+21 onto the guest's default Sunshine family, so the clones
+  carry no port config. In Moonlight add the host `10.0.0.10:48989` (LAN) or
+  `core.gaussing.tv:48989` (tailnet); the pairing PIN goes into the web UI at
+  https://core.gaussing.tv:48990 (LAN: https://10.0.0.10:48990), user `lab`.
+  A pairing made in the template is inherited by clones. 47989 on the host
+  IP is fenestrate's own Sunshine, not the lab's.
 - Licensing: Steam's rule is one licensed copy per person playing at once
   (Steam Families FAQ), so two concurrent clients on one account are outside
   the supported policy. Eli's decision (2026-09-29): the lab clients use
