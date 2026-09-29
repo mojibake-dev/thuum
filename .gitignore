@@ -15,3 +15,6 @@ lab/frida/*.jsonl
 .DS_Store
 __pycache__/
 *.pyc
+
+# derived from the CommonLibSSE-NG submodule by `just relid`
+lab/relids.tsv

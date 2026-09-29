@@ -52,9 +52,9 @@ build-client:
     @gh run download -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
     @ls {{skymp}}/build/dist-client | head
 
-# T2 protocol tests: fakeclient sessions against a local server, including restart persistence.
+# T2 protocol tests on sky-srv: the fakeclient against the live server (state checked through labState), then difftest's smoke session with the legacy driver; lab/tools/test-proto.sh.
 test-proto:
-    @echo "TODO(M0, Track W step 8): fakeclient lands with the difftest legacy driver; see docs/WIRE.md" && exit 1
+    @lab/tools/test-proto.sh
 
 # --- reverse engineering ------------------------------------------------------
 
@@ -81,6 +81,10 @@ ghidra-import-status:
 # Resolve an Address Library ID for the pinned runtime. Never type the answer into code by hand.
 addr id:
     @python3 lab/addr.py "{{addrlib}}" "{{runtime}}" "{{id}}"
+
+# Index every Address Library ID CommonLibSSE-NG names (function, data, offset, vtable, rtti) into lab/relids.tsv.
+relid:
+    @python3 lab/relid.py
 
 # Regenerate docs/NATIVES.md from the fork, preserving hand-maintained rung/reason columns.
 ledger:
