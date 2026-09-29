@@ -2,6 +2,7 @@
 # the install dir, the exe's FileVersion, and name/path/size/sha256 for SkyrimSE.exe
 # and the five master files. Read-only. Run by lab/tools/persist-game.sh over ssh.
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'   # no CLIXML progress records on stderr
 $steam = (Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Valve\Steam' -ErrorAction SilentlyContinue).InstallPath
 if (-not $steam) { $steam = (Get-ItemProperty 'HKCU:\Software\Valve\Steam').SteamPath -replace '/', '\' }
 $libs = @($steam)
