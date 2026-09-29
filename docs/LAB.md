@@ -211,6 +211,14 @@ rollback to `clean-sp`, cold boot, autologon, the scheduled task launches
 SKSE and lab-driver, lab-driver heartbeats to lab-api. Budget 90 to 120 s per
 client rollback; scenario timeouts are sized for it.
 
+The lab's own files on a client live under `C:\sky-lab` and nowhere else:
+`just stage-client <vmid>` puts the built lab-driver, its settings, the
+skymp5-client settings for sky-srv, and the PowerShell helpers there through
+the guest agent (lab/deploy/sky-client/README.md); `install-lab.ps1` applies
+them once the game, SKSE and SP exist and registers the logon launch task and
+an on-demand screenshot task for the lab user. Staged into tpl-sky-client on
+2026-09-29; the `clean-sp` snapshot carries it.
+
 lab-driver is a small SP plugin: on the `update` tick it polls
 `GET /lab/step?client=<id>` (SP ships an HTTP client), executes the step it
 gets back (teleport via server command, equip, cast, activate, hit, wait,
@@ -367,6 +375,11 @@ re-analyst subagent's procedure is unchanged, only the transport.
 1. sky-srv, sky-ci, and the T2 fakeclient harness. No GPU, no Windows;
    unblocks M1 entirely. sky-srv runs the legacy server now and adds the
    bridged server when the bridge PR lands, so difftest can drive both.
+   Live since 2026-09-29: `just test-proto` is the T2 gate on sky-srv, and
+   a scenario with `clients: []` plus `server: fakeclient {as: c1, ...}`
+   steps (t2-fakeclient-restart) runs through lab-api with no Windows
+   client at all; the server image is the T2 runtime (fakeclient and
+   difftest both execute inside it).
 2. sky-re with pyghidra-mcp.
 3. sky-c1 once its card arrives, fenestrate as client two;
    `smoke-two-players` green, attended.

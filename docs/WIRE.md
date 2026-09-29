@@ -150,6 +150,13 @@ Drivers, as of M0:
   `DIFFTEST_LEGACY_ADDR` the server (default 127.0.0.1:7777); without the
   first, `difftest` self-diffs two wire runs, which proves determinism. A
   stub under difftest/tools stands in for the binary in `cargo test`.
+  Where it really runs: the fork's `difftest-build` job publishes a Linux
+  `difftest` with the session files, and `just test-proto` runs it on
+  sky-srv inside the server image, next to the fakeclient the same image
+  ships, against the live server (lab/tools/test-proto.sh). The same
+  recipe runs the fakeclient smoke first and checks its result through the
+  gamemode's labState RPC; a lab-api scenario reaches the fakeclient
+  through `server: fakeclient` steps (lab/labapi/README.md).
 
 Declared divergences: a step may carry `divergence: {legacy: accept |
 reject | unsupported}` where the C++ server is known to behave differently
