@@ -43,3 +43,11 @@ sky-c1 once it exists; `49989` is sky-c2. The first connection shows a PIN;
 enter it at https://core.gaussing.tv:48990 (user `lab`, password in the Mac
 Keychain under sky-client/sunshine). Sunshine's default app is the desktop,
 which is enough to log into Steam and install the game.
+
+## Display on a headless clone
+
+The template carries the Virtual Display Driver (VirtualDrivers 25.7.23,
+installed by `sky-lab client stage` on 2026-09-29) so a clone whose only
+adapter is the passed-through GPU still has a monitor for D3D11 and Sunshine
+capture. Its one knob is `C:\VirtualDisplayDriver\vdd_settings.xml` (monitor
+count, mode list incl. 1920x1080 at 60 Hz).
