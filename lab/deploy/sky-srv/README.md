@@ -13,7 +13,8 @@
   snapshots/<name>/world/   server state snapshots lab-api restores per scenario
   thuum/                    a copy of the superproject's lab/ tree (gamemode, presets, frida, scenarios)
   results/                  the host dataset (virtio-fs), served at https://thuum.gaussing.tv/results/
-/srv/persist/esm/           the five master files, read-only, Eli's hand step
+/srv/persist/esm/           the five master files, read-only; `just persist-game` fills them from fenestrate
+/srv/persist/game/          SkyrimSE.exe 1.6.1170 (and its .version), same recipe; the Ghidra import reads it
 /srv/persist/pve-root-ca.pem the Proxmox cluster CA, published by the estate role; lab-api verifies the API against it
 ```
 

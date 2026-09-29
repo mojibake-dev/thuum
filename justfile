@@ -147,6 +147,12 @@ deploy-srv:
     {{srv_ssh}} "$host" 'test -f /srv/lab/.env || { cp /srv/lab/thuum/lab/deploy/sky-srv/env.example /srv/lab/.env; echo "NOTE: /srv/lab/.env created from env.example; fill PVE_TOKEN_SECRET by hand"; }'
     {{srv_ssh}} "$host" 'ls -la /srv/lab /srv/lab/server; docker compose -f /srv/lab/docker-compose.yml config --quiet && echo "compose config ok"'
 
+# Streams through this machine with scp -3 (nothing licensed is staged locally), checks hashes on both
+# ends, writes SHA256SUMS per directory. Needs fenestrate up: ask, never start Eli's desktop.
+# Copy the five master .esm files and the pinned SkyrimSE.exe from fenestrate into rpool/sky/persist on the host.
+persist-game:
+    @lab/tools/persist-game.sh
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
