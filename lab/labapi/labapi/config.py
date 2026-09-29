@@ -61,6 +61,9 @@ class Settings:
     compose_service: str = "skymp-server"
     server_world_dir: str = "/srv/skymp/server/world"
     server_snapshots_dir: str = "/srv/skymp/snapshots"
+    # uid:gid the server container runs as; a restored world/ is handed to it.
+    server_uid: int = 1001
+    server_gid: int = 1001
     server_ui_port: int = 3000
     # The headless legacy client shipped in the server image, run through
     # `docker compose run` for `server: fakeclient` steps (T2 without Windows).
@@ -117,6 +120,8 @@ class Settings:
             compose_service=_env("COMPOSE_SERVICE", d.compose_service),
             server_world_dir=_env("SERVER_WORLD_DIR", d.server_world_dir),
             server_snapshots_dir=_env("SERVER_SNAPSHOTS_DIR", d.server_snapshots_dir),
+            server_uid=int(_env("SERVER_UID", str(d.server_uid))),
+            server_gid=int(_env("SERVER_GID", str(d.server_gid))),
             server_ui_port=int(_env("SERVER_UI_PORT", str(d.server_ui_port))),
             server_port=int(_env("SERVER_PORT", str(d.server_port))),
             fakeclient_bin=_env("FAKECLIENT_BIN", d.fakeclient_bin),

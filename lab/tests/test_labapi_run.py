@@ -272,6 +272,7 @@ class FakeclientSteps(RunTests):
         self.assertIn("fakeclient-c1-0.jsonl", body["artifacts"])
         self.assertIn("fakeclient-c2-2.jsonl", body["artifacts"])
         self.assertTrue(any(c[-2:] == ["restart", "skymp-server"] for c in self.services.system.commands))
+        self.assertEqual(self.services.system.chowned, [(str(self.tmp / "world"), 1001, 1001)])
 
     def test_fakeclient_failure_is_a_red_step(self):
         self.services.system.fakeclient_rc = 1

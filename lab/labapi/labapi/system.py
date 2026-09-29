@@ -30,6 +30,7 @@ class System(Protocol):
     def tcp_ready(self, host: str, port: int, timeout: float) -> bool: ...
     def copytree(self, src: Path, dst: Path) -> None: ...
     def rmtree(self, path: Path) -> None: ...
+    def chown_tree(self, path: Path, uid: int, gid: int) -> None: ...
     def meminfo(self) -> dict[str, int]: ...
 
 
@@ -69,6 +70,15 @@ class RealSystem:
 
     def rmtree(self, path: Path) -> None:
         shutil.rmtree(path, ignore_errors=True)
+
+    def chown_tree(self, path: Path, uid: int, gid: int) -> None:
+        """The server container runs as its image user; a world/ that lab-api
+        (root) restored must belong to that user or the server cannot write."""
+        import os
+
+        os.chown(path, uid, gid)
+        for p in path.rglob("*"):
+            os.chown(p, uid, gid)
 
     def meminfo(self) -> dict[str, int]:
         out: dict[str, int] = {}

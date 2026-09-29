@@ -106,6 +106,7 @@ game.
 | FRIDA_EXEC_TEMPLATE | see config.py | PowerShell run through the guest agent |
 | SCREENSHOT_CMD_TEMPLATE | see config.py | PowerShell screenshot helper |
 | STEP_TIMEOUT_S | 60 | per client step |
+| SERVER_UID, SERVER_GID | 1001 | the server container's user; a restored world/ is chowned to it |
 | SERVER_PORT | 7777 | the game port fakeclient steps connect to (service name as host) |
 | FAKECLIENT_BIN | /srv/skymp/fakeclient | the headless client inside the server image |
 | FAKECLIENT_TIMEOUT_S | 90 | wall clock for one fakeclient step |

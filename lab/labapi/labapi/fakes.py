@@ -69,6 +69,7 @@ class FakeSystem:
         self.stopped_captures: list[list[str]] = []
         self.ready = ready
         self.log_text = "fake server log\n"
+        self.chowned: list[tuple[str, int, int]] = []
 
     fakeclient_rc = 0
 
@@ -96,6 +97,9 @@ class FakeSystem:
 
     def rmtree(self, path: Path) -> None:
         shutil.rmtree(path, ignore_errors=True)
+
+    def chown_tree(self, path: Path, uid: int, gid: int) -> None:
+        self.chowned.append((str(path), uid, gid))
 
     def meminfo(self) -> dict[str, int]:
         return {"MemTotal": 8 << 30, "MemAvailable": 4 << 30}

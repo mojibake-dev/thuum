@@ -209,6 +209,7 @@ class Runner:
                 world = Path(self.s.server_world_dir)
                 self.system.rmtree(world)
                 self.system.copytree(snap, world)
+                self.system.chown_tree(world, self.s.server_uid, self.s.server_gid)
                 await asyncio.to_thread(self.system.run, self._compose("up", "-d", self.s.compose_service))
                 host = "127.0.0.1"
             ready = await asyncio.to_thread(self.system.tcp_ready, host, self.s.server_ui_port, self.s.server_ready_timeout_s)
