@@ -172,6 +172,11 @@ deploy-srv:
 persist-game:
     @lab/tools/persist-game.sh
 
+# Stage the built lab-driver, its settings and the PowerShell helpers into C:\sky-lab on a Windows lab VM
+# through the guest agent (lab/deploy/sky-client/README.md); nothing outside that directory.
+stage-client vmid: build-driver
+    @lab/tools/stage-client.sh {{vmid}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
