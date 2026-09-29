@@ -73,8 +73,16 @@ Roles:
   runner), the database, packet capture, and fault injection, because it sits
   on every game flow. Snapshotted before each run and rolled back after.
 - sky-re: Ghidra headless with pyghidra-mcp serving the project over
-  streamable HTTP. One project: SkyrimSE.exe 1.6.1170, analyzed once,
-  CommonLibSSE-NG types imported, stored on rpool/sky/persist.
+  streamable HTTP. One project on rpool/sky/persist, one program per exe
+  version (`just ghidra-import SkyrimSE-<version>.exe` runs analyzeHeadless
+  inside sky-re with pyghidra-mcp stopped around it; SkyrimSE-1.7.104.0.exe
+  was imported and auto-analyzed on 2026-09-29 in eight minutes; the pinned
+  1.6.1170 goes beside it when that exe exists). CommonLibSSE-NG's names reach
+  the program through `just relid` (every Address Library ID the submodule
+  names, with its function, variable, vtable or RTTI name) plus the Address
+  Library database for that exe version; the RTTI analyzer already names
+  classes and vtables from the binary itself. CommonLib's C++ types are not
+  fed to Ghidra's C parser (templates); the labels are the import.
 - sky-ci: the only runner that executes this project's jobs. The estate's own
   runner holds root on the host and never runs a fork job.
 - sky-c1: Windows 11 linked clone of tpl-sky-client with a passed-through GPU,
@@ -165,11 +173,22 @@ operator's IaC command and is not called from CI.
 - Display: the client GPU needs a display target for D3D11 when nobody is
   looking, a dummy HDMI plug or a virtual display driver; Sunshine for remote
   viewing, Moonlight on fenestrate or the Mac.
-- Licensing: one licensed copy of Skyrim SE per concurrent client, so two
-  Steam accounts (Steam blocks the same game running twice on one account),
-  and a Windows activation per VM. Steam in offline mode inside the VMs,
-  Skyrim's update setting on "only update when I launch it", SkyrimSE.exe
-  1.6.1170 backed up on rpool/sky/persist, Windows Update paused.
+- Licensing: Steam's rule is one licensed copy per person playing at once
+  (Steam Families FAQ), so two concurrent clients on one account are outside
+  the supported policy. Eli's decision (2026-09-29): the lab clients use
+  Eli's one account for personal use, and a second account is bought only if
+  that becomes a sticking point. A Windows activation per VM. Steam in
+  offline mode inside the VMs, Skyrim's update setting on "only update when
+  I launch it", Windows Update paused.
+- Version drift (found 2026-09-29): a current Steam install is Skyrim SE
+  1.7.104.0 with master files whose CRC32s differ from the pre-AE set upstream
+  tests against (libespm's Utils.cpp records both sets). Upstream's Skyrim
+  Platform still loads skse64_1_6_1170.dll, so a 1.7.104 client cannot run
+  SP or skymp5-client; the lab keeps the 1.6.1170 pin and a client is rolled
+  back with Steam's depot download (Eli's hand step in the template notes).
+  `just persist-game` copies whatever fenestrate has into rpool/sky/persist:
+  the master files as-is, and an exe that is not 1.6.1170 under its own name
+  (game/SkyrimSE-1.7.104.0.exe tonight), never as the pinned SkyrimSE.exe.
 - Skyrim is single-thread bound: host CPU type and no oversubscription on the
   Windows VMs during runs, or scenario timings lie.
 

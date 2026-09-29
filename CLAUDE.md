@@ -120,16 +120,23 @@ toolchain per layer, every feature the same shape.
 - `just build-client` ......... download the client and SP `dist` artifact that
                                  upstream's Windows workflow builds on the GitHub
                                  mirror. T1 is Windows-only and runs on a client.
-- `just test-proto` ........... T2: fakeclient sessions against a local server
-                                 (lands with the difftest legacy driver, docs/WIRE.md).
+- `just test-proto` ........... T2 on sky-srv: the fakeclient against the live server,
+                                 checked through labState, then difftest's smoke
+                                 session with the legacy driver (docs/WIRE.md).
 - `just wire-build` / `just wire-test` / `just wire-fuzz <target> [seconds]` /
   `just wire-diff <session>` / `just wire-header` / `just wire-header-check`
 - `just lab-up` / `just lab-status` / `just lab-run <scenario>` / `just lab-down`
                                  against LAB_API (default https://thuum.gaussing.tv/lab)
 - `just frida <script> <client>` run a trace script on a lab client through lab-api
 - `just ghidra` ............... confirm GHIDRA_MCP_URL answers
+- `just ghidra-import <exe>` .. import an exe from rpool/sky/persist/game into the
+                                 Ghidra project on sky-re (one program per version)
 - `just addr <id>` ............ resolve an Address Library ID for 1.6.1170
+- `just relid` ................ index every Address Library ID CommonLibSSE-NG names
+                                 into lab/relids.tsv (derived, ignored)
 - `just ledger` ............... regenerate docs/NATIVES.md from the fork
+- `just persist-game` ......... copy the master files and the exe from fenestrate into
+                                 rpool/sky/persist (licensed files never enter a repo)
 - `just tree` ................. print the real workspace layout
 
 ## Testing tiers
