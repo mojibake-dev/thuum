@@ -255,3 +255,24 @@ authoring is review-gated as ADR-009 asks rather than tool-denied: scenario
 YAML changes travel in their own commits, Eli is the required approver for
 lab/scenarios/, and CI refuses any commit that mixes a scenario with other
 files.
+
+## ADR-017: The server image is the T2 runtime
+
+Status: proposed (2026-09-29)
+
+Everything that plays a client without a game runs inside the fork's server
+image on sky-srv: the headless `fakeclient` the image already ships, and
+`difftest`, delivered by the fork's `difftest-build` job and executed in the
+same container next to it. lab-api reaches the fakeclient through
+`docker compose run` for `server: fakeclient` scenario steps, so a scenario
+with `clients: []` is a complete T2 run with a result.json, a world diff and
+the fakeclient's event log as artifacts (t2-fakeclient-restart was the first
+green one). `just test-proto` is the same two runs from the Mac. No second
+T2 harness, no test client built outside the fork's own build, and no T2 job
+on sky-ci: the runner builds, the lab runs (docs/LAB.md, ADR-009).
+
+Consequences: the server image must keep shipping the fakeclient (DistContents
+expects it on every platform); a T2 scenario asserts only through labState
+and world diffs, never through client views; the bridged server of M1 joins as
+a second compose service and the same recipe drives both, which is what
+difftest is for (ADR-010).
