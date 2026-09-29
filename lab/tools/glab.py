@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""glab.py: read-only GitLab pipeline status for root/thuum (6) and root/skymp (7).
-Tokens come from the macOS Keychain items thuum-mundus created (service
-gitlab-thuum-readapi, accounts thuum and skymp, read_api scope) and are never
-printed. Usage: glab.py [thuum|skymp ...] | glab.py log <project> <job-id> [lines]"""
+"""glab.py: GitLab pipelines for root/thuum (6) and root/skymp (7).
+Read-only calls use the Keychain items thuum-mundus created (service
+gitlab-thuum-readapi, accounts thuum and skymp); `run` uses the project access
+tokens (service gitlab-thuum-api, same accounts, api scope). Tokens are never
+printed. Usage: glab.py [thuum|skymp ...] | glab.py log <project> <job-id> [lines]
+| glab.py run <project> [ref]   (an API pipeline: every changes: rule counts as
+matched, so the image jobs run even when the push pipeline skipped them)"""
 import json, subprocess, sys, urllib.request
 G = "https://gitlab.gaussing.tv/api/v4"
 PROJECTS = {"thuum": 6, "skymp": 7}
 
-def token(name):
-    return subprocess.check_output(["security", "find-generic-password", "-s", "gitlab-thuum-readapi", "-a", name, "-w"], text=True).strip()
+def token(name, service="gitlab-thuum-readapi"):
+    return subprocess.check_output(["security", "find-generic-password", "-s", service, "-a", name, "-w"], text=True).strip()
 
 def get(tok, path):
     req = urllib.request.Request(G + path, headers={"PRIVATE-TOKEN": tok})
@@ -17,7 +20,14 @@ def get(tok, path):
 
 def main():
     which = sys.argv[1:] or list(PROJECTS)
-    job_log = None
+    if which and which[0] == "run":
+        name = which[1]; ref = which[2] if len(which) > 2 else {"thuum": "main", "skymp": "parity"}[name]
+        tok = token(name, "gitlab-thuum-api")
+        req = urllib.request.Request(f"{G}/projects/{PROJECTS[name]}/pipeline?ref={ref}", method="POST", headers={"PRIVATE-TOKEN": tok})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            p = json.load(r)
+        print(f"pipeline {p['id']} {p['status']} {p['ref']} {p['sha'][:8]} {p['web_url']}")
+        return
     if which and which[0] == "log":
         name, job_id = which[1], which[2]
         tok = token(name)

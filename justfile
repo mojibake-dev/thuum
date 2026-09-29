@@ -177,6 +177,15 @@ persist-game:
 stage-client vmid: build-driver
     @lab/tools/stage-client.sh {{vmid}}
 
+# GitLab pipelines: `just ci` shows both projects, `just ci-run thuum|skymp` starts an API pipeline on the
+# default branch (image jobs included), `just ci-log skymp <job-id>` tails a job.
+ci *args:
+    @python3 lab/tools/glab.py {{args}}
+ci-run project:
+    @python3 lab/tools/glab.py run {{project}}
+ci-log project job:
+    @python3 lab/tools/glab.py log {{project}} {{job}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
