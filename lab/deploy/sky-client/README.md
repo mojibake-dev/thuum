@@ -25,6 +25,11 @@ through guest exec):
 
     powershell -ExecutionPolicy Bypass -File C:\sky-lab\install-lab.ps1
 
+The small files go in through the agent's stdin; the client dist (hundreds
+of MB) is zipped, copied to sky-srv over the jump, served for a minute by a
+throwaway python http.server on 10.10.70.10, fetched by the guest inside
+VLAN 70, hash-checked and expanded. Nothing leaves the lab network.
+
 Then the template snapshot `clean-sp` carries it and every clone boots to
 "connected" by itself (docs/LAB.md). For a second client change `client` and
 `profileId` before installing.

@@ -28,14 +28,24 @@ done
 # The client dist from the mirror's Windows workflow (`just build-client`), when
 # present: one zip in, expanded to C:\sky-lab\dist inside the guest. It carries
 # Skyrim Platform and skymp5-client; laying it into the game stays Eli's step.
+# Too big for the agent's stdin, so it travels inside VLAN 70: the zip goes to
+# sky-srv over the jump, a throwaway python http.server on sky-srv serves it,
+# the guest fetches it with Invoke-WebRequest, and the server is stopped again.
 dist="$here/skymp/build/dist-client"
+srv=${SRV_HOST:-eli@10.10.70.10}; srv_ip=${SRV_IP:-10.10.70.10}; port=${DIST_PORT:-8765}
 if [ -d "$dist" ] && [ -n "$(ls -A "$dist")" ]; then
   zip=$(mktemp -t client-dist).zip
-  (cd "$dist" && zip -qr "$zip" .)
-  put "$zip" "client-dist.zip"
+  # the artifact also carries server/ and papyrus-vm/; a client needs client/ (Data\...)
+  [ -d "$dist/client" ] && root="$dist/client" || root="$dist"
+  (cd "$root" && zip -qr "$zip" .)
   want=$(shasum -a 256 "$zip" | awk '{print $1}')
-  got=$(run "(Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\client-dist.zip').Hash.ToLower()")
-  [ "$want" = "$got" ] || { echo "hash mismatch for client-dist.zip" >&2; exit 3; }
+  ssh -o BatchMode=yes -J "$jump" "$srv" 'mkdir -p /srv/lab/handover'
+  scp -q -o BatchMode=yes -J "$jump" "$zip" "$srv:/srv/lab/handover/client-dist.zip"
+  ssh -o BatchMode=yes -J "$jump" "$srv" "cd /srv/lab/handover && (nohup python3 -m http.server $port --bind $srv_ip >/dev/null 2>&1 & echo \$! > .http.pid)"
+  run "New-Item -ItemType Directory -Force -Path 'C:\\sky-lab' | Out-Null; \$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri 'http://$srv_ip:$port/client-dist.zip' -OutFile 'C:\\sky-lab\\client-dist.zip'; (Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\client-dist.zip').Hash.ToLower()" > /tmp/claude-501/dist-hash.txt || { ssh -o BatchMode=yes -J "$jump" "$srv" 'kill $(cat /srv/lab/handover/.http.pid) 2>/dev/null; rm -f /srv/lab/handover/client-dist.zip'; echo "guest download failed" >&2; exit 4; }
+  got=$(tail -1 /tmp/claude-501/dist-hash.txt | tr -d '\r')
+  ssh -o BatchMode=yes -J "$jump" "$srv" 'kill $(cat /srv/lab/handover/.http.pid) 2>/dev/null; rm -f /srv/lab/handover/client-dist.zip /srv/lab/handover/.http.pid'
+  [ "$want" = "$got" ] || { echo "hash mismatch for client-dist.zip: $want vs $got" >&2; exit 3; }
   run "Expand-Archive -Force -Path 'C:\\sky-lab\\client-dist.zip' -DestinationPath 'C:\\sky-lab\\dist'; (Get-ChildItem -Recurse -File 'C:\\sky-lab\\dist' | Measure-Object).Count"
   printf '  %-28s %s (expanded to dist\\)\n' "client-dist.zip" "$got"
   rm -f "$zip"

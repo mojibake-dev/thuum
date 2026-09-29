@@ -48,9 +48,13 @@ test: build-image
 # Downloads the newest `dist` artifact from mojibake-dev/skymp into skymp/build/dist-client.
 # Client and Skyrim Platform: fetch what upstream's Windows workflow built on the GitHub mirror.
 build-client:
-    @mkdir -p {{skymp}}/build/dist-client
-    @gh run download -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
-    @ls {{skymp}}/build/dist-client | head
+    #!/usr/bin/env bash
+    set -euo pipefail
+    run=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch parity --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+    test -n "$run" || { echo "no successful Parity Windows run on the mirror yet"; exit 1; }
+    rm -rf {{skymp}}/build/dist-client && mkdir -p {{skymp}}/build/dist-client
+    gh run download "$run" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
+    echo "run $run -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
 
 # T2 protocol tests on sky-srv: the fakeclient against the live server (state checked through labState), then difftest's smoke session with the legacy driver; lab/tools/test-proto.sh.
 test-proto:
