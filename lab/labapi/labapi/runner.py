@@ -224,6 +224,50 @@ class Runner:
         if not ready:
             raise RunnerError("E_RUN_SERVER_NOT_READY: after restart")
 
+    async def _fakeclient(self, rec: RunRecord, index: int, step) -> str:
+        """`server: fakeclient {as: c1, moves: 5, item: "Skyrim.esm:IronSword",
+        count: 1}`: the fork's headless legacy client logs in with the named
+        client's profile id from inside the server image, walks `moves` steps
+        of 30 units, adds `count` of `item` through a console command, and
+        exits. Its event log is the artifact fakeclient-<client>-<step>.jsonl;
+        a non-zero exit is a red step."""
+        args = step.args or {}
+        client = str(args.get("as") or "")
+        if not client:
+            raise RunnerError("E_RUN_FAKECLIENT: `as: <client>` names whose profile the fakeclient logs in with")
+        try:
+            profile = self.tables.profile_id(client)
+        except KeyError as e:
+            raise RunnerError(f"E_RUN_FAKECLIENT: {e}") from None
+        cmd = self._compose(
+            "run", "--rm", "--no-deps", "-T", self.s.compose_service, self.s.fakeclient_bin,
+            "--host", self.s.compose_service, "--port", str(self.s.server_port),
+            "--profile-id", str(profile),
+            "--moves", str(int(args.get("moves", 0))),
+            "--timeout-ms", str(int(self.s.step_timeout_s * 1000)),
+            "--settle-ms", str(int(args.get("settle_ms", 2000))),
+        )
+        if "item" in args:
+            cmd += ["--add-item", str(self.tables.base_id(str(args["item"]))), "--add-item-count", str(int(args.get("count", 1)))]
+        else:
+            cmd += ["--add-item-count", "0"]
+        r = await asyncio.to_thread(self.system.run, cmd, self.s.fakeclient_timeout_s)
+        log = rec.dir / f"fakeclient-{client}-{index}.jsonl"
+        log.write_text(r.stdout)
+        rec.artifacts.append(log.name)
+        events = []
+        for line in r.stdout.splitlines():
+            try:
+                events.append(json.loads(line))
+            except ValueError:
+                continue
+        done = next((e for e in events if e.get("event") == "done"), None)
+        errors = [str(e.get("error")) for e in events if e.get("event") == "error"]
+        if r.returncode != 0 or done is None or done.get("rc") != 0:
+            raise RunnerError(f"E_RUN_FAKECLIENT: fakeclient for {client} exited {r.returncode}: {'; '.join(errors) or (r.stderr or '').strip()[-300:] or 'no done event'}")
+        actor = next((e for e in events if e.get("event") == "actor"), {})
+        return f"fakeclient {client} (profile {profile}) idx {actor.get('idx')} received {done.get('received')} messages"
+
     async def _netem(self, rec: RunRecord, spec) -> None:
         async def go():
             cmd = ["tc", "qdisc", "add", "dev", self.s.netem_dev, "root", "netem", "delay", f"{spec.delay_ms:g}ms", f"{spec.jitter_ms:g}ms", "loss", f"{spec.loss_pct:g}%"]
@@ -265,11 +309,15 @@ class Runner:
             return True, ""
         if step.kind == "server":
             try:
-                await self._restart_server(rec)
+                if step.action == "fakeclient":
+                    note = await self._fakeclient(rec, index, step)
+                    rec.notes.append(f"step {index}: {note}")
+                else:
+                    await self._restart_server(rec)
                 return True, ""
             except RunnerError as e:
                 rec.failures.append({"step": index, "kind": "lab", "error": str(e)})
-                rec.verdict = "error"
+                rec.verdict = "error" if step.action != "fakeclient" else "red"
                 return False, str(e)
         if step.kind == "assert":
             return await self._assert(rec, index, step)

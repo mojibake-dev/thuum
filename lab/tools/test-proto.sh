@@ -15,12 +15,18 @@ echo "== difftest artifact"
 tok=$(security find-generic-password -s gitlab-thuum-api -a skymp -w)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-if curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
-     "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs/artifacts/parity/download?job=difftest-build"; then
-  (cd "$tmp" && unzip -q a.zip) && rsync -az --delete -e "ssh -J $jump" "$tmp/difftest-dist/" "$host:/srv/lab/difftest/" && echo "   installed on sky-srv"
+# The newest successful difftest-build job on parity (GitLab's ref-level
+# artifact download wants the whole pipeline green, which server-build may
+# still be working on).
+job=$(curl -fsS -m 60 -H "PRIVATE-TOKEN: $tok" \
+  "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs?scope[]=success&per_page=100" \
+  | python3 -c 'import sys,json; j=[x for x in json.load(sys.stdin) if x["name"]=="difftest-build" and x["ref"]=="parity"]; print(j[0]["id"] if j else "")')
+if [ -n "$job" ] && curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
+     "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs/$job/artifacts"; then
+  (cd "$tmp" && unzip -q a.zip) && rsync -az --delete -e "ssh -J $jump" "$tmp/difftest-dist/" "$host:/srv/lab/difftest/" && echo "   job $job installed on sky-srv"
   have_difftest=1
 else
-  echo "   no difftest-build artifact on parity yet; skipping the legacy diff"
+  echo "   no successful difftest-build job on parity yet; skipping the legacy diff"
   have_difftest=0
 fi
 

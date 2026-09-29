@@ -9,7 +9,7 @@
   server/
     server-settings.json    this directory's settings (offline, file driver, lab gamemode)
     data/                   unused since 2026-09-29: the image's own data/ (compiled scripts) stays visible, ui/ is regenerated
-    world/                  the file driver's database; snapshots copy it
+    world/                  the file driver's database, owned by uid 1001 (the image's skymp user); snapshots copy it
   snapshots/<name>/world/   server state snapshots lab-api restores per scenario
   thuum/                    a copy of the superproject's lab/ tree (gamemode, presets, frida, scenarios)
   results/                  the host dataset (virtio-fs), served at https://thuum.gaussing.tv/results/

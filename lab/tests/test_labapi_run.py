@@ -236,3 +236,53 @@ class RunTests(unittest.TestCase):
         self.assertEqual(pve.calls, [("stop", 711), ("rollback", 711, "clean-sp"), ("start", 711)])
         self.assertTrue(rec.phases[0]["ok"], rec.phases)
         self.assertIn("unmanaged", rec.phases[0]["note"])
+
+
+T2_ONLY = """
+id: t2-fakeclient
+clients: []
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - server: fakeclient {as: c1, moves: 5, item: "Skyrim.esm:IronSword", count: 1}
+  - server: restart
+  - server: fakeclient {as: c2}
+artifacts: [server.log]
+"""
+
+
+@needs_deps
+class FakeclientSteps(RunTests):
+    def test_t2_only_scenario_runs_the_fakeclient_inside_the_server_image(self):
+        run_id, body = self._run(T2_ONLY)
+        self.assertEqual(body["verdict"], "green", body)
+        runs = [c for c in self.services.system.commands if "run" in c and any(x.endswith("fakeclient") for x in c)]
+        self.assertEqual(len(runs), 2)
+        first = runs[0]
+        self.assertEqual(first[:4], ["docker", "compose", "-f", self.settings.compose_file])
+        self.assertEqual(first[4:9], ["run", "--rm", "--no-deps", "-T", "skymp-server"])
+        self.assertIn("--profile-id", first)
+        self.assertEqual(first[first.index("--profile-id") + 1], "1")
+        self.assertEqual(first[first.index("--moves") + 1], "5")
+        self.assertEqual(first[first.index("--add-item") + 1], str(0x12EB7))
+        self.assertEqual(first[first.index("--add-item-count") + 1], "1")
+        second = runs[1]
+        self.assertEqual(second[second.index("--profile-id") + 1], "2")
+        self.assertEqual(second[second.index("--add-item-count") + 1], "0")
+        self.assertIn("fakeclient-c1-0.jsonl", body["artifacts"])
+        self.assertIn("fakeclient-c2-2.jsonl", body["artifacts"])
+        self.assertTrue(any(c[-2:] == ["restart", "skymp-server"] for c in self.services.system.commands))
+
+    def test_fakeclient_failure_is_a_red_step(self):
+        self.services.system.fakeclient_rc = 1
+        run_id, body = self._run(T2_ONLY)
+        self.assertEqual(body["verdict"], "red")
+        self.assertEqual(body["failures"][0]["kind"], "lab")
+        self.assertIn("connect timed out", body["failures"][0]["error"])
+        self.assertEqual(len(body["steps"]), 1, "the run stops at the failed step")
+
+    def test_fakeclient_step_needs_a_known_client(self):
+        text = "id: t2-bad\nclients: []\nsteps:\n  - server: fakeclient {as: c9}\n"
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "red")
+        self.assertIn("c9", body["failures"][0]["error"])

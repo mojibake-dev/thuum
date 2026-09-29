@@ -70,10 +70,18 @@ class FakeSystem:
         self.ready = ready
         self.log_text = "fake server log\n"
 
+    fakeclient_rc = 0
+
     def run(self, cmd: list[str], timeout: float = 120.0) -> Completed:
         self.commands.append(list(cmd))
         if cmd[:2] == ["docker", "compose"] and "logs" in cmd:
             return Completed(0, self.log_text, "")
+        if any(c.endswith("fakeclient") for c in cmd):
+            events = ['{"event": "actor", "idx": 0, "pos": [0, 0, 0], "rot": [0, 0, 0], "worldOrCell": 60}']
+            if self.fakeclient_rc:
+                events.append('{"event": "error", "error": "connect timed out"}')
+            events.append('{"event": "done", "received": 3, "rc": %d}' % self.fakeclient_rc)
+            return Completed(self.fakeclient_rc, "\n".join(events) + "\n", "")
         return Completed(0, "", "")
 
     def start_capture(self, cmd: list[str]):

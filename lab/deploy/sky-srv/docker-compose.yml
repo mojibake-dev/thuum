@@ -7,12 +7,11 @@ services:
   skymp-server:
     image: ${REGISTRY:-}skymp-server:parity
     restart: unless-stopped
-    # The server loads scam_native.node from its cwd and dumps its settings
-    # there, so the cwd must be the code dir and writable. The runtime image
-    # created /srv/skymp as root (WORKDIR before COPY --chown), so until the
-    # image fix in ci/server.Dockerfile ships, the container runs as root and
-    # the state it writes under /srv/lab/server is root-owned on the VM.
-    user: "${SERVER_USER:-0:0}"
+    # The image's own user (skymp, uid 1001) owns /srv/skymp since the fork's
+    # ci/server.Dockerfile chowns the cwd; world/ on the VM is owned by that
+    # uid too (lab/deploy/sky-srv/README.md). SERVER_USER overrides for a
+    # rescue.
+    user: "${SERVER_USER:-1001:1001}"
     working_dir: /srv/skymp
     command: ["node", "dist_back/skymp5-server.js"]
     ports:

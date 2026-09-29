@@ -62,6 +62,11 @@ class Settings:
     server_world_dir: str = "/srv/skymp/server/world"
     server_snapshots_dir: str = "/srv/skymp/snapshots"
     server_ui_port: int = 3000
+    # The headless legacy client shipped in the server image, run through
+    # `docker compose run` for `server: fakeclient` steps (T2 without Windows).
+    server_port: int = 7777
+    fakeclient_bin: str = "/srv/skymp/fakeclient"
+    fakeclient_timeout_s: float = 90.0
     server_snapshot_default: str = "clean"
     # "state": stop the server container, restore world/ from the named
     # snapshot, start, wait (lab-api runs on sky-srv and cannot roll back the
@@ -113,6 +118,9 @@ class Settings:
             server_world_dir=_env("SERVER_WORLD_DIR", d.server_world_dir),
             server_snapshots_dir=_env("SERVER_SNAPSHOTS_DIR", d.server_snapshots_dir),
             server_ui_port=int(_env("SERVER_UI_PORT", str(d.server_ui_port))),
+            server_port=int(_env("SERVER_PORT", str(d.server_port))),
+            fakeclient_bin=_env("FAKECLIENT_BIN", d.fakeclient_bin),
+            fakeclient_timeout_s=float(_env("FAKECLIENT_TIMEOUT_S", str(d.fakeclient_timeout_s))),
             server_snapshot_default=_env("SERVER_SNAPSHOT_DEFAULT", d.server_snapshot_default),
             server_rollback_mode=_env("SERVER_ROLLBACK_MODE", d.server_rollback_mode),
             server_state_url=_env("SERVER_STATE_URL", d.server_state_url),

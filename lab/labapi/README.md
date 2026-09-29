@@ -52,6 +52,17 @@ only), and a `request-screenshot` client verb on an unmanaged one.
 client the block reads through `.sees()` or `.view()` gets a `dump-state`
 step so the view is fresh.
 
+Server steps take the `server:` key: `- server: restart` restarts the server
+container and waits for its UI port; `- server: fakeclient {as: c1, moves: 5,
+item: "Skyrim.esm:IronSword", count: 1}` runs the fork's headless legacy
+client from inside the server image (FAKECLIENT_BIN, default
+/srv/skymp/fakeclient) logged in with c1's profile id, walking `moves` steps
+of 30 units and adding `count` of `item` through a console command; its event
+log lands in the run directory as `fakeclient-c1-<step>.jsonl`, and a
+non-zero exit is a red step. A scenario with `clients: []` and fakeclient
+steps is T2: it needs no Windows client, and `server.*` assertions still
+resolve c1 through the clients table.
+
 The scenario step notation `- c1: teleport {cell: lab-spawn, x: 0}` is not
 plain YAML (the colon inside the braces ends the scalar); the loader quotes
 such values before parsing, and the quoted form is accepted as well.
@@ -95,6 +106,9 @@ game.
 | FRIDA_EXEC_TEMPLATE | see config.py | PowerShell run through the guest agent |
 | SCREENSHOT_CMD_TEMPLATE | see config.py | PowerShell screenshot helper |
 | STEP_TIMEOUT_S | 60 | per client step |
+| SERVER_PORT | 7777 | the game port fakeclient steps connect to (service name as host) |
+| FAKECLIENT_BIN | /srv/skymp/fakeclient | the headless client inside the server image |
+| FAKECLIENT_TIMEOUT_S | 90 | wall clock for one fakeclient step |
 | HEARTBEAT_TIMEOUT_S | 180 | client rollback to first poll |
 | SERVER_READY_TIMEOUT_S | 120 | server rollback to UI port |
 | GUEST_TASK_TIMEOUT_S | 120 | Proxmox tasks and guest execs |

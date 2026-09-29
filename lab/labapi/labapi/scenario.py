@@ -20,7 +20,9 @@ CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "set-percentages", "kill", "respawn"}
 SPECIAL_ACTIONS = {"screenshot"}
-SERVER_STEP_ACTIONS = {"restart"}
+# fakeclient: the fork's headless legacy client logs in as a scenario client's
+# profile from inside the server image (T2 without a Windows client).
+SERVER_STEP_ACTIONS = {"restart", "fakeclient"}
 KNOWN_ARTIFACTS = {"server.log", "screenshots", "world-diff", "pcap"}
 
 _FLOW_STEP = re.compile(r"^(?P<lead>\s*-\s+[\w-]+:\s+)(?P<value>[\w-]+\s+\{.*\})\s*(?P<comment>#.*)?$")
