@@ -59,6 +59,7 @@ clients:
   c2: {profile_id: 2}
 items:
   "Skyrim.esm:IronSword": 0x00012EB7
+  "Skyrim.esm:RecipeWeaponIronDagger": 0x000DA76A
 """
 
 
@@ -68,6 +69,7 @@ class Doubles:
     def __init__(self, client, state, names, prefix="/lab"):
         self.client, self.state, self.names, self.prefix = client, state, names, prefix
         self.profile = {"c1": 1, "c2": 2}
+        self.seen: list[tuple[str, str, dict]] = []
 
     def turn(self):
         for name in self.names:
@@ -75,6 +77,7 @@ class Doubles:
             if not step:
                 continue
             me = self.state.actors[self.profile[name]]
+            self.seen.append((name, step["action"], dict(step.get("args") or {})))
             data = {}
             if step["action"] == "move":
                 me.x += float(step["args"].get("dx", 0))
@@ -287,3 +290,29 @@ class FakeclientSteps(RunTests):
         run_id, body = self._run(text)
         self.assertEqual(body["verdict"], "red")
         self.assertIn("c9", body["failures"][0]["error"])
+
+
+NAMED_ARGS = """
+id: t3-names
+clients: [c1]
+steps:
+  - c1: connect
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: craft {station: 0x1234, recipe: "Skyrim.esm:RecipeWeaponIronDagger"}
+"""
+
+
+@needs_deps
+class ClientStepNames(RunTests):
+    def test_item_and_recipe_names_reach_the_driver_as_form_ids(self):
+        run_id, body = self._run(NAMED_ARGS)
+        self.assertEqual(body["verdict"], "green", body)
+        seen = {a: args for _, a, args in self.doubles.seen if a in ("equip", "craft")}
+        self.assertEqual(seen["equip"], {"formId": 0x12EB7})
+        self.assertEqual(seen["craft"], {"station": 0x1234, "recipe": 0xDA76A})
+
+    def test_unknown_item_name_is_a_red_step(self):
+        text = "id: t3-bad\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: equip {item: \"Skyrim.esm:Nope\"}\n"
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "red")
+        self.assertIn("Nope", body["failures"][0]["error"])

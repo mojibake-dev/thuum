@@ -15,7 +15,8 @@ from pydantic import BaseModel, Field, field_validator
 # Verbs the client executes (lab-driver) and verbs lab-api sends to the
 # server's command endpoint (CONTRACT.md). Screenshot is special: guest exec on
 # a managed guest, a client verb on an unmanaged one.
-# craft is specified by m0-forge and not yet implemented by lab-driver (Track L1).
+# craft: lab-driver reproduces the crafting menu's inventory effect at a station
+# (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
 CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "hit", "dump-state", "request-screenshot", "craft"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "set-percentages", "kill", "respawn"}

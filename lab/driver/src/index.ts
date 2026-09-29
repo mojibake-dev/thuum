@@ -17,6 +17,7 @@
 import {
   Actor,
   Cell,
+  ConstructibleObject,
   Debug,
   Game,
   HttpClient,
@@ -234,6 +235,33 @@ function run(step: Step, player: Actor): unknown {
       const ref = form(a.refId);
       if (!ref) return { error: "no such ref" };
       return ref.activate(player, false);
+    }
+    case "craft": {
+      // UNCONFIRMED: crafting is a menu in the engine, so the driver reproduces
+      // what the engine does to the inventory while the player uses the
+      // station: enter the furniture, take the recipe's ingredients out of the
+      // player (to no container) and put the result in. skymp5-client's
+      // craft service watches exactly those container changes while
+      // getFurnitureReference() is set and sends CraftItem; the server owns
+      // the outcome (R0). args: {station: <ref form id>, recipe: <COBJ form id>}
+      // (lab-api resolves names to ids before the step reaches the driver).
+      const station = form(a.station);
+      if (!station) return { error: "no such station" };
+      const recipe = ConstructibleObject.from(Game.getFormEx(num(a.recipe)));
+      if (!recipe) return { error: "no such recipe" };
+      const result = recipe.getResult();
+      if (!result) return { error: "recipe has no result" };
+      const ingredients: Array<[number, number]> = [];
+      for (let i = 0; i < recipe.getNumIngredients(); i++) {
+        const ing = recipe.getNthIngredient(i);
+        if (ing) ingredients.push([ing.getFormID(), recipe.getNthIngredientQuantity(i)]);
+      }
+      station.activate(player, false);
+      const me = Game.getPlayer();
+      if (!me) return { error: "no player" };
+      for (const [id, count] of ingredients) me.removeItem(Game.getFormEx(id), count, true, null);
+      me.addItem(result, recipe.getResultQuantity(), true);
+      return { result: result.getFormID(), ingredients };
     }
     case "screenshot":
       // UNCONFIRMED in a retail build; lab-api also captures from outside the

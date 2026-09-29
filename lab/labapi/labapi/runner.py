@@ -333,7 +333,13 @@ class Runner:
                 return False, str(e)
         if step.action == "screenshot":
             return await self._screenshot(rec, index, step.client)
-        qs = await self.board.run_step(step.client, step.action, step.args, self.s.step_timeout_s)
+        try:
+            args = self._client_args(step.action, step.args)
+        except RunnerError as e:
+            rec.failures.append({"step": index, "kind": "lab", "error": str(e)})
+            rec.verdict = "red"
+            return False, str(e)
+        qs = await self.board.run_step(step.client, step.action, args, self.s.step_timeout_s)
         if qs.ok:
             return True, ""
         error = str(qs.result.get("error", "step failed"))
@@ -459,6 +465,21 @@ class Runner:
             rec.artifacts.append(f"frida/{client}-{script}.jsonl")
         except ProxmoxError as e:
             rec.notes.append(f"frida {script}: {e}")
+
+    def _client_args(self, action: str, args: dict[str, Any] | None) -> dict[str, Any]:
+        """Names in client steps become form ids before the driver sees them;
+        the driver carries no item table. equip's item becomes formId, craft's
+        recipe becomes the recipe's form id (its station passes through: a
+        reference id, or a name a later refs table resolves)."""
+        out = dict(args or {})
+        try:
+            if action == "equip" and "item" in out:
+                out["formId"] = self.tables.base_id(str(out.pop("item")))
+            if action == "craft" and isinstance(out.get("recipe"), str):
+                out["recipe"] = self.tables.base_id(out["recipe"])
+        except KeyError as e:
+            raise RunnerError(f"E_RUN_ITEM: {e}") from None
+        return out
 
     def _compose(self, *args: str) -> list[str]:
         return ["docker", "compose", "-f", self.s.compose_file, *args]

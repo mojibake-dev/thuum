@@ -29,6 +29,11 @@ clients:
 items:
   "Skyrim.esm:IronSword": 0x00012EB7
   "Skyrim.esm:Gold001": 0x0000000F
+  # read from the lab's Skyrim.esm by editor id (record scan on the host, 2026-09-29)
+  "Skyrim.esm:IngotIron": 0x0005ACE4
+  "Skyrim.esm:LeatherStrips": 0x000800E4
+  "Skyrim.esm:IronDagger": 0x0001397E
+  "Skyrim.esm:RecipeWeaponIronDagger": 0x000DA76A
 
 # cells: the places scenarios teleport to and measure from. A scenario's x, y, z
 # are offsets from the cell's origin: lab-api adds the origin on the way to the
