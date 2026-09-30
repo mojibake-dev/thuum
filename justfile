@@ -195,6 +195,11 @@ ci-log project job:
 client-sunshine-port vmid base:
     @lab/tools/client-sunshine-port.sh {{vmid}} {{base}}
 
+# Run a PowerShell script in the lab user's desktop session on a Windows lab client (the guest agent alone
+# only reaches session 0): steam:// links, launchers, the game. Needs register-runner.ps1 applied once.
+client-run vmid script:
+    @lab/tools/client-run.sh {{vmid}} {{script}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.

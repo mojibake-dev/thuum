@@ -10,6 +10,8 @@ C:\sky-lab\
   lab-driver.js                the SP plugin (lab/driver, `just build-driver`)
   lab-driver-settings.txt      lab-api base, client name (c1 by default)
   skymp5-client-settings.txt   server 10.10.70.10:7777, profileId 1, no server info
+  register-runner.ps1          registers sky-lab-run, the on-demand task that runs run.ps1 in
+                               the lab user's desktop session (`just client-run <vmid> <ps1>`)
   install-layer.ps1            lays SKSE (from skse\) and versionlib-*.bin (from addrlib\)
                                into the game, once Steam has installed it
   install-lab.ps1              copies the three files into Data\Platform\Plugins,
