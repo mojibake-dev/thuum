@@ -82,6 +82,12 @@ ghidra-import exe:
 ghidra-import-status:
     @ssh root@core.gaussing.tv 'pct exec 701 -- bash -c "systemctl status ghidra-import --no-pager -n 3 2>&1 | head -12; echo ---; tail -n 15 /srv/persist/ghidra/import-*.log 2>/dev/null | cut -c1-160"'
 
+# Headless Ghidra on sky-re, no MCP in the loop (the MCP server indexes the whole binary before its first
+# answer): `just ghidra-query <program> decompile <addr>`, `... xrefs <addr>`, `... bytes <addr> [n]`.
+# Addresses are image addresses (0x1409e3580) or RVAs with a leading '+' (+0x9e3580).
+ghidra-query program +args:
+    @lab/tools/ghidra-query.sh {{program}} {{args}}
+
 # Resolve an Address Library ID for the pinned runtime. Never type the answer into code by hand.
 addr id:
     @python3 lab/addr.py "{{addrlib}}" "{{runtime}}" "{{id}}"
