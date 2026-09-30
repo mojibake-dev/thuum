@@ -50,5 +50,19 @@ if [ -d "$dist" ] && [ -n "$(ls -A "$dist")" ]; then
   printf '  %-28s %s (expanded to dist\\)\n' "client-dist.zip" "$got"
   rm -f "$zip"
 fi
+# The script-extender layer, when present on the Mac: versionlib-*.bin from
+# addrlib/ (Eli's Address Library download) and an unpacked SKSE archive under
+# lab/.cache/skse/, both small, through the agent's stdin as zips.
+layer_zip() {  # layer_zip <local dir> <name>: zip a directory and expand it to C:\sky-lab\<name>
+  local z; z=$(mktemp -t "$2").zip
+  (cd "$1" && zip -qr "$z" .)
+  put "$z" "$2.zip"
+  run "Expand-Archive -Force -Path 'C:\\sky-lab\\$2.zip' -DestinationPath 'C:\\sky-lab\\$2'; Remove-Item 'C:\\sky-lab\\$2.zip'; (Get-ChildItem -Recurse -File 'C:\\sky-lab\\$2' | Measure-Object).Count" | tail -1 | xargs printf '  %-28s %s files\n' "$2\\"
+  rm -f "$z"
+}
+if ls "$here"/addrlib/versionlib-*.bin >/dev/null 2>&1; then
+  tmpd=$(mktemp -d); cp "$here"/addrlib/versionlib-*.bin "$tmpd/"; layer_zip "$tmpd" addrlib; rm -rf "$tmpd"
+fi
+[ -d "$here/lab/.cache/skse" ] && layer_zip "$here/lab/.cache/skse" skse
 run "Get-ChildItem 'C:\\sky-lab' | ForEach-Object { '{0,10} {1}' -f \$_.Length, \$_.Name }"
-echo "staged into VM $vmid under C:\\sky-lab; apply with install-lab.ps1 once SKSE and SP exist"
+echo "staged into VM $vmid under C:\\sky-lab; apply with install-layer.ps1 (SKSE, Address Library) then install-lab.ps1 (plugins, tasks)"

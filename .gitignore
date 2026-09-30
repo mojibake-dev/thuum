@@ -18,3 +18,6 @@ __pycache__/
 
 # derived from the CommonLibSSE-NG submodule by `just relid`
 lab/relids.tsv
+
+# downloads staged into clients (SKSE archives)
+lab/.cache/
