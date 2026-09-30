@@ -43,6 +43,9 @@ sky-c1 once it exists; `49989` is sky-c2. The first connection shows a PIN;
 enter it at https://core.gaussing.tv:48990 (user `lab`, password in the Mac
 Keychain under sky-client/sunshine). Sunshine's default app is the desktop,
 which is enough to log into Steam and install the game.
+Each client's Sunshine runs on its own base port (the template and sky-c1 on
+48989, sky-c2 on 49989, set with `just client-sunshine-port`), mapped one to one
+by the host, because Moonlight follows the HTTPS port Sunshine advertises.
 
 ## Display on a headless clone
 

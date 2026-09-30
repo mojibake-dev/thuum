@@ -177,9 +177,13 @@ operator's IaC command and is not called from CI.
   derives the rest from the base it is given (live 2026-09-29, inventory
   `sky_client_streams` in mojibake/core): base 48989 is the template (710)
   now and sky-c1 (711) once the clone exists; base 49989 is sky-c2 (712).
-  Per base B the host forwards TCP B-5, B, B+1, B+21 and UDP B+9, B+10,
-  B+11, B+13, B+21 onto the guest's default Sunshine family, so the clones
-  carry no port config. In Moonlight add the host `10.0.0.10:48989` (LAN) or
+  Each client's Sunshine is set to its own base (`just client-sunshine-port
+  <vmid> <base>`; 48989 already in the template, 49989 in sky-c2 once
+  cloned) and the host forwards that family one to one: TCP B-5, B, B+1,
+  B+21 and UDP B+9, B+10, B+11, B+13, B+21. Translating ports does not work,
+  found 2026-09-30: Moonlight takes the HTTPS port from Sunshine's own
+  /serverinfo, so the pairing challenge went to 47984 on the host and was
+  refused. In Moonlight add the host `10.0.0.10:48989` (LAN) or
   `core.gaussing.tv:48989` (tailnet); the pairing PIN goes into the web UI at
   https://core.gaussing.tv:48990 (LAN: https://10.0.0.10:48990), user `lab`.
   A pairing made in the template is inherited by clones. 47989 on the host

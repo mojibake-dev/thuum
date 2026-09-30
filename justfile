@@ -190,6 +190,11 @@ ci-run project:
 ci-log project job:
     @python3 lab/tools/glab.py log {{project}} {{job}}
 
+# Set a Windows lab client's Sunshine base port (48989 for c1, 49989 for c2) through the guest agent; the
+# host maps that family one to one. Moonlight follows the port Sunshine advertises, so no translation.
+client-sunshine-port vmid base:
+    @lab/tools/client-sunshine-port.sh {{vmid}} {{base}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
