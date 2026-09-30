@@ -43,6 +43,23 @@ sky-c1 once it exists; `49989` is sky-c2. The first connection shows a PIN;
 enter it at https://core.gaussing.tv:48990 (user `lab`, password in the Mac
 Keychain under sky-client/sunshine). Sunshine's default app is the desktop,
 which is enough to log into Steam and install the game.
+Pairing from the Mac without touching the web UI: run Moonlight's pairing
+helper with a chosen PIN, read the pending request's id from Sunshine's API
+and post the PIN with it, then let the helper finish on its own:
+
+```
+security find-generic-password -s sky-client -a sunshine -w        # Sunshine password
+/Applications/Moonlight.app/Contents/MacOS/Moonlight pair core.gaussing.tv:48989 --pin 1234 &
+curl -k -u lab:PASSWORD https://core.gaussing.tv:48990/api/pin      # {"pairings":[{"id":...,"name":"roth"}]}
+curl -k -u lab:PASSWORD -H 'Content-Type: application/json' -X POST https://core.gaussing.tv:48990/api/pin \
+     -d '{"pairing_id":"<id>","pin":"1234","name":"roth"}'
+```
+
+An interrupted attempt leaves a stale session in Sunshine that makes the next
+attempt fail with "The client is not authorized. Certificate verification
+failed."; restart SunshineService (or `just client-sunshine-port <vmid>
+<base>`, which restarts it) and pair once more.
+
 Each client's Sunshine runs on its own base port (the template and sky-c1 on
 48989, sky-c2 on 49989, set with `just client-sunshine-port`), mapped one to one
 by the host, because Moonlight follows the HTTPS port Sunshine advertises.
