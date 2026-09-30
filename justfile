@@ -200,6 +200,11 @@ client-sunshine-port vmid base:
 client-run vmid script:
     @lab/tools/client-run.sh {{vmid}} {{script}}
 
+# Pull the script-extender layer (versionlib-*.bin into addrlib/, SKSE loader and DLLs into lab/.cache/skse/)
+# from fenestrate's Skyrim install so the lab clients get the same files; then `just stage-client <vmid>`.
+pull-layer:
+    @lab/tools/pull-layer.sh
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
