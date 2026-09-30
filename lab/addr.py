@@ -80,8 +80,25 @@ def _i32(f: BinaryIO) -> int:
     return struct.unpack("<i", _read_exact(f, 4))[0]
 
 
+FORMAT5_NAME_BYTES = 64
+
+
 def read_header(f: BinaryIO) -> Header:
     fmt = _i32(f)
+    if fmt == 5:
+        # Format 5 (the 1.7.x releases): i32 version[4], a fixed 64-byte module
+        # name, i32 pointer size, i32 data format (0), i32 count, then one u32
+        # RVA per id with index = id and 0 meaning no address in this version.
+        # Checked against versionlib-1-7-104-0.bin on 2026-09-30: file size is
+        # 96 + 4 * count exactly, and id 1 matches the published offsets text.
+        version = tuple(_i32(f) & 0xFFFF for _ in range(4))
+        name = _read_exact(f, FORMAT5_NAME_BYTES).split(b"\0", 1)[0].decode("ascii", errors="replace")
+        pointer_size = _i32(f)
+        data_format = _i32(f)
+        count = _i32(f)
+        if data_format != 0 or pointer_size <= 0 or count < 0:
+            raise AddrLibError(f"unsupported format 5 layout: data format {data_format}, pointer size {pointer_size}, count {count}")
+        return Header(fmt, version, name, pointer_size, count)
     if fmt not in (1, 2):
         raise AddrLibError(f"unknown format {fmt}")
     version = tuple(_i32(f) & 0xFFFF for _ in range(4))
@@ -118,6 +135,11 @@ def _payload(f: BinaryIO, code: int, prev: int) -> int:
 
 
 def read_entries(f: BinaryIO, header: Header) -> tuple[list[int], list[int]]:
+    if header.format == 5:
+        raw = _read_exact(f, 4 * header.count)
+        rvas = struct.unpack(f"<{header.count}I", raw)
+        ids = [i for i, rva in enumerate(rvas) if rva != 0]
+        return ids, [rvas[i] for i in ids]
     prev_id = 0
     prev_off = 0
     pairs: list[tuple[int, int]] = []
@@ -154,8 +176,8 @@ def parse_version(text: str) -> tuple[int, int, int, int]:
 
 
 def database_name(version: tuple[int, int, int, int]) -> str:
-    """versionlib-<v>.bin (format 2) for 1.6.x, version-<v>.bin (format 1) for 1.5.x,
-    as REL::IDDatabase::load chooses (Relocation.h)."""
+    """versionlib-<v>.bin for 1.6.x (format 2) and 1.7.x (format 5), version-<v>.bin
+    (format 1) for 1.5.x, as REL::IDDatabase::load chooses (Relocation.h)."""
     prefix = "versionlib-" if version[1] >= 6 else "version-"
     return prefix + "-".join(str(p) for p in version) + ".bin"
 

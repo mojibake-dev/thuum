@@ -183,3 +183,40 @@ class Synthetic(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+class Format5(unittest.TestCase):
+    """The 1.7.x layout: a fixed header and a flat table of one RVA per id."""
+
+    @staticmethod
+    def _blob(version=(1, 7, 104, 0), rvas=(0, 0x1022, 0, 0x1038)):
+        import struct
+        head = struct.pack("<i4i", 5, *version) + b"SkyrimSE.exe".ljust(64, b"\0") + struct.pack("<iii", 8, 0, len(rvas))
+        return head + struct.pack(f"<{len(rvas)}I", *rvas)
+
+    def test_synthetic_table_reads_ids_with_addresses_only(self):
+        import io
+        f = io.BytesIO(self._blob())
+        h = addr.read_header(f)
+        self.assertEqual((h.format, h.version, h.module_name, h.pointer_size, h.count), (5, (1, 7, 104, 0), "SkyrimSE.exe", 8, 4))
+        ids, offs = addr.read_entries(f, h)
+        self.assertEqual((ids, offs), ([1, 3], [0x1022, 0x1038]))
+        db = addr.Database(h, ids, offs)
+        self.assertEqual(db.offset(3), 0x1038)
+        with self.assertRaises(addr.AddrLibError):
+            db.offset(2)  # present in the table with no address
+
+    def test_rejects_an_unknown_data_format(self):
+        import io, struct
+        bad = self._blob()[:84] + struct.pack("<iii", 8, 1, 0)
+        with self.assertRaises(addr.AddrLibError):
+            addr.read_header(io.BytesIO(bad))
+
+    @unittest.skipUnless((ROOT / "addrlib" / "versionlib-1-7-104-0.bin").is_file(), "no 1.7.104 database under addrlib/")
+    def test_real_1_7_104_database(self):
+        db = addr.load(ROOT / "addrlib" / "versionlib-1-7-104-0.bin")
+        self.assertEqual(db.header.version, (1, 7, 104, 0))
+        self.assertGreater(len(db), 400000)
+        self.assertEqual(db.offset(1), 0x1022)  # offsets-1-7-104-0.txt: "1  140001022"
+        self.assertEqual(db.address(1, 0x140000000), 0x140001022)
