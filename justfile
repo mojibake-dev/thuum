@@ -205,6 +205,11 @@ client-run vmid script:
 pull-layer:
     @lab/tools/pull-layer.sh
 
+# Launch the game through SKSE on a Windows lab client (desktop session), report processes, the SKSE log and
+# any dialog's text, and pull a screenshot into lab/results/. The T3 bring-up loop in one command.
+client-launch-test vmid:
+    @lab/tools/client-launch-test.sh {{vmid}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
