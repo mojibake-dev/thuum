@@ -111,6 +111,12 @@ command["set-appearance"] = (payload) => {
   const file = path.join(PRESET_DIR, `${preset}.json`);
   if (!fs.existsSync(file)) return { ok: false, error: `no preset file ${file}` };
   mp.set(actorId, "appearance", JSON.parse(fs.readFileSync(file, "utf8")));
+  // The server only accepts the client's own appearance while the race menu is
+  // open for the actor, and keeps the flag until then; with the preset applied
+  // the menu is done. The stock client cannot close an open menu on this (a
+  // TODO in skymp5-client), so a client sitting in it needs a relaunch; a
+  // client logging in afterwards goes straight into the world.
+  if (typeof mp.setRaceMenuOpen === "function") mp.setRaceMenuOpen(actorId, false);
   return { ok: true, actorId, preset };
 };
 
