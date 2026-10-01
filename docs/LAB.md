@@ -211,17 +211,23 @@ operator's IaC command and is not called from CI.
 
 ## Client VM template (tpl-sky-client)
 
-Build once behind a setup lease, snapshot, clone per run. Snapshots are
-disk-only: QEMU refuses snapshots with RAM for any VM with a vfio device, so
-there is no "connected" snapshot to roll back to. Snapshot chain:
+Build once behind a setup lease, convert to a template, clone per client.
+Snapshots are disk-only: QEMU refuses snapshots with RAM for any VM with a
+vfio device, so there is no "connected" snapshot to roll back to. What is
+where (real since 2026-10-01):
 
-1. `clean-desktop`: Windows 11, VirtIO disk and NIC, QEMU guest agent,
-   autologon, GPU driver, Sunshine, virtual display, Windows Update paused,
-   Steam in offline mode, Skyrim SE 1.6.1170 verified, SKSE 2.2.6 installed.
-2. `clean-sp`: Skyrim Platform, skymp5-client configured for sky-srv, the
-   lab-driver SP plugin, Frida server registered as a scheduled task, a
-   PowerShell helper for screenshots, and a scheduled task at logon that
-   launches the game through the SKSE loader.
+1. The template, tpl-sky-client (710, immutable): Windows 11 activated,
+   VirtIO disk and NIC, QEMU guest agent, autologon as `lab`, Sunshine on
+   base 48989 paired with the laptop, the virtual display, the DirectX and
+   VC++ runtimes, Steam logged in, Skyrim SE at the current build (1.7.104),
+   SKSE 2.3.1, Address Library, Skyrim Platform and skymp5-client from the
+   fork's `skyrim-1.7` dist, lab-driver, the lab helpers under `C:\sky-lab`
+   and their scheduled tasks. No GPU in the template, so no NVIDIA driver.
+2. Per clone, after `sky-lab` sets its address: `just client-bringup <vmid>
+   <sunshine base>` (Sunshine base port, NVIDIA driver, 1920x1080 display,
+   the game firewall for the dark lab, launch test), then the clone's
+   `clean-sp` snapshot with the game stopped. That snapshot is what lab-api
+   rolls back to (lab/deploy/sky-client/README.md, "Clone bring-up").
 
 "Connected" is not a snapshot; it is where a clone arrives by itself: stop,
 rollback to `clean-sp`, cold boot, autologon, the scheduled task launches

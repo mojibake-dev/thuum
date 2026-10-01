@@ -15,6 +15,9 @@ public class W {
   [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
   [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+  [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L, T, R, B; }
+  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+  public static string Rect(IntPtr h) { RECT r; if (!GetWindowRect(h, out r)) return "?"; return (r.R - r.L) + "x" + (r.B - r.T) + " at " + r.L + "," + r.T; }
   public static List<string> Top() { var o = new List<string>(); EnumWindows((h, l) => { if (IsWindowVisible(h)) { var sb = new StringBuilder(512); GetWindowText(h, sb, 512); if (sb.Length > 0) { uint pid; GetWindowThreadProcessId(h, out pid); o.Add(h.ToInt64() + "\t" + pid + "\t" + sb); } } return true; }, IntPtr.Zero); return o; }
   public static List<string> Children(IntPtr p) { var o = new List<string>(); EnumChildWindows(p, (h, l) => { var sb = new StringBuilder(1024); GetWindowText(h, sb, 1024); var cn = new StringBuilder(128); GetClassName(h, cn, 128); if (sb.Length > 0) o.Add(cn + "=" + sb); return true; }, IntPtr.Zero); return o; }
 }
@@ -30,6 +33,9 @@ Start-Process -FilePath (Join-Path $game 'skse64_loader.exe') -WorkingDirectory 
 Start-Sleep -Seconds $wait
 $r = [ordered]@{ launched = (Get-Date).AddSeconds(-$wait).ToString('HH:mm:ss') }
 $r.procs = ((Get-Process SkyrimSE -ErrorAction SilentlyContinue | ForEach-Object { $_.Name + ':' + $_.Id + ':' + [int]($_.WorkingSet64 / 1MB) + 'MB' }) -join ',')
+# gpu: the Direct3D user-mode driver the game loaded (nvwgf2umx = NVIDIA, d3d10warp = software); window: the game window's size.
+$r.gpu = ((Get-Process SkyrimSE -ErrorAction SilentlyContinue | ForEach-Object { $_.Modules } | Where-Object { $_.ModuleName -match '^(nvwgf2umx|d3d10warp|amdxc64|igd1\dumd64)' } | ForEach-Object { $_.ModuleName }) -join ','); if (-not $r.gpu) { $r.gpu = 'none' }
+$r.window = ((Tops | Where-Object { $_.title -eq 'Skyrim Special Edition' } | ForEach-Object { [W]::Rect($_.h) }) -join ',')
 $r.skse_log = ((Get-Content (Join-Path $docs 'skse64.log') -ErrorAction SilentlyContinue | Select-Object -Last 6) -join ' | ')
 $r.dialogs = ''
 foreach ($w in (Tops | Where-Object { $_.title -match 'Skyrim|System Error' })) {

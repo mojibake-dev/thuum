@@ -74,4 +74,37 @@ The template carries the Virtual Display Driver (VirtualDrivers 25.7.23,
 installed by `sky-lab client stage` on 2026-09-29) so a clone whose only
 adapter is the passed-through GPU still has a monitor for D3D11 and Sunshine
 capture. Its one knob is `C:\VirtualDisplayDriver\vdd_settings.xml` (monitor
-count, mode list incl. 1920x1080 at 60 Hz).
+count, mode list incl. 1920x1080 at 60 Hz). A fresh clone comes up at 800x600
+at 30 Hz, the first mode in that list; `just client-display <vmid>`
+(display.ps1 in the lab user's session) switches the primary display to
+1920x1080 at 60 Hz with the change written to the registry, and sets the
+game's SkyrimPrefs.ini to the same size, windowed and borderless, so the frame
+fills what Sunshine and the screenshot task capture. The launch test reports
+the game window's size and the Direct3D user-mode driver it loaded
+(`nvwgf2umx.dll` is the NVIDIA one; `d3d10warp.dll` means software rendering,
+the state before `just client-gpu-driver`).
+
+## The game's traffic outside the lab
+
+The lab VLAN is dark by dropping, and SkyrimSE.exe opens TCP connections to
+bethesda.net from the main menu (Creations, the bnet login). With the SYNs
+dropped the game sits in connect() retries and Skyrim Platform never gets its
+first tick: on sky-c1 on 2026-10-01 the same client that had logged in within
+two minutes while the egress lease was open showed four SynSent sockets to
+99.84.41.x:443 and no plugin load in ten minutes once the lab was dark again.
+`just client-game-firewall <vmid>` (game-firewall.ps1 as SYSTEM) adds a
+Windows Firewall rule that blocks the exe outside 10.10.70.0/24, so those
+connections are refused at once, the case the game handles; with the rule the
+client logged in ten seconds after launch. The server (UDP 7777, TCP 3000) and
+lab-api (TCP 80 on sky-srv) are inside the allowed range; DNS is the Windows
+resolver's, not the exe's, and is untouched.
+
+## Clone bring-up
+
+`just client-bringup <vmid> <sunshine base>` runs the per-clone steps in order
+once thuum-mundus's `sky-lab` has given the clone its address: Sunshine base
+port, NVIDIA driver, display mode, game firewall, launch test. The template is
+immutable (converted 2026-10-01), so every clone needs them; sky-c1 (711) is
+done, sky-c2 (712) gets base 49989 when fenestrate is off. A clone's
+`clean-sp` snapshot, the one lab-api rolls back to, is taken after this and
+with the game stopped.

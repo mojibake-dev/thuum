@@ -227,6 +227,26 @@ gpu-driver-fetch:
 client-gpu-driver vmid installer="lab/.cache/nvidia-driver.exe":
     @lab/tools/client-gpu-driver.sh {{vmid}} {{installer}}
 
+# Set a headless clone's desktop mode (the Virtual Display Driver comes up at 800x600) and the game's window
+# to match, borderless: `just client-display <vmid>` per clone, after the GPU driver.
+client-display vmid w="1920" h="1080" hz="60":
+    @lab/tools/client-display.sh {{vmid}} {{w}} {{h}} {{hz}}
+
+# Block SkyrimSE.exe outside 10.10.70.0/24 on a clone: bethesda.net connects then fail at once instead of hanging
+# in the dark lab, which otherwise stalls Skyrim Platform's first tick (see game-firewall.ps1).
+client-game-firewall vmid:
+    @lab/tools/client-game-firewall.sh {{vmid}}
+
+# Bring a fresh clone of the template up to a connected lab client, in order: its Sunshine base port
+# (48989 sky-c1, 49989 sky-c2), the NVIDIA driver, the 1920x1080 display, the game firewall, and a launch
+# test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
+client-bringup vmid base:
+    just client-sunshine-port {{vmid}} {{base}}
+    just client-gpu-driver {{vmid}}
+    just client-display {{vmid}}
+    just client-game-firewall {{vmid}}
+    just client-launch-test {{vmid}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
