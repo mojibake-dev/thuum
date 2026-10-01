@@ -51,6 +51,9 @@ class Settings:
     # issued by the cluster's own CA (pve-root-ca.pem on the host), so the
     # right setting on sky-srv is that file, mounted read-only.
     pve_verify_ssl: bool | str = True
+    # proxmoxer's per-request HTTP timeout; its 5 s default is shorter than a
+    # guest exec that waits for a screenshot task (run 20261001-201016).
+    pve_timeout_s: float = 30.0
     # Where runs land (rpool/sky/results over virtiofs) and where the guest table is.
     results_dir: str = "/srv/lab/results"
     guests_file: str = str(PKG_DIR / "guests.yaml")
@@ -140,6 +143,7 @@ class Settings:
             pve_url=_env("PVE_URL", d.pve_url),
             pve_token_id=_env("PVE_TOKEN_ID", d.pve_token_id),
             pve_token_secret=_env("PVE_TOKEN_SECRET", d.pve_token_secret),
+            pve_timeout_s=float(_env("PVE_TIMEOUT_S", str(d.pve_timeout_s))),
             pve_node=_env("PVE_NODE", d.pve_node),
             pve_verify_ssl=_env_verify("PVE_VERIFY_SSL", d.pve_verify_ssl),
             results_dir=_env("RESULTS_DIR", d.results_dir),

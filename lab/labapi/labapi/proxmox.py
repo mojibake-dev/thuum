@@ -110,7 +110,7 @@ class GuestControl:
 class ProxmoxerGuests:
     """The real backend. Imported lazily so tests run without proxmoxer."""
 
-    def __init__(self, url: str, token_id: str, token_secret: str, node: str, verify_ssl: bool | str, task_timeout: float = 120.0):
+    def __init__(self, url: str, token_id: str, token_secret: str, node: str, verify_ssl: bool | str, task_timeout: float = 120.0, http_timeout: float = 30.0):
         from urllib.parse import urlparse
 
         from proxmoxer import ProxmoxAPI
@@ -119,7 +119,7 @@ class ProxmoxerGuests:
         if "!" not in token_id:
             raise ProxmoxError("E_PVE_TOKEN: PVE_TOKEN_ID must look like user@realm!tokenname")
         user, token_name = token_id.split("!", 1)
-        self._api = ProxmoxAPI(u.hostname, port=u.port or 8006, user=user, token_name=token_name, token_value=token_secret, verify_ssl=verify_ssl)
+        self._api = ProxmoxAPI(u.hostname, port=u.port or 8006, user=user, token_name=token_name, token_value=token_secret, verify_ssl=verify_ssl, timeout=http_timeout)
         self._node = node
         self._task_timeout = task_timeout
         self._status_warned: set[str] = set()
