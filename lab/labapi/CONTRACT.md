@@ -100,12 +100,15 @@ them by name.
 `teleport` carries the descriptor and absolute coordinates; lab-api resolves
 a scenario's named cell and offsets before sending (a descriptor the table
 does not know passes through unchanged). The server answers ok as soon as
-the record is set, which proves nothing about the client, so lab-api waits
-`teleport_settle_s` (3 s), reads the actor back and sends the teleport again
-until the record sits within `teleport_tolerance` (64 units) of the target in
-x and y (z is the terrain's) or `teleport_timeout_s` (60 s) is spent; the
-step's note says how many attempts it took, and a step that never lands is
-red (E_RUN_TELEPORT). `set-appearance` applies `presets/<preset>.json` next to the gamemode (an
+the record is set, which proves nothing about the client, and the written
+record stands until the client's next movement report (an idle client can
+take longer than a few seconds), so lab-api waits `teleport_settle_s` (3 s),
+asks the client for a dump-state and reads the actor back: the client's own
+position and the server's record must both sit within `teleport_tolerance`
+(64 units) of the target in x and y (z is the terrain's), or the teleport is
+sent again until `teleport_timeout_s` (60 s) is spent. The step's note says
+how many attempts it took, and a step that never lands is red
+(E_RUN_TELEPORT) with the last client report and server record named. `set-appearance` applies `presets/<preset>.json` next to the gamemode (an
 appearance record as `mp.get(actor, "appearance")` returns it; recorded from
 a real client, never typed). `set-percentages` sets the given actor values as
 fractions. `kill` sets the actor dead; `respawn` clears it and moves the actor

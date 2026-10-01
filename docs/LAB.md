@@ -338,11 +338,13 @@ Results are browsed at https://thuum.gaussing.tv/results/<run>/.
 
 Scenario verbs. connect and reconnect are judged by the server (lab-api
 holds the step until labState lists the client online; the driver never
-touches mpClientPlugin). teleport is judged by the server too: the record is
-read back 3 s after each send and the teleport is sent again until the
-record sits at the target, because the client drops position moves until
-about eight seconds after online (Skyrim Platform blocks MoveRefrToPosition
-while its generated save settles; measured on sky-c1, 2026-10-01). Every
+touches mpClientPlugin). teleport is judged by the client it is imposed on
+and then by the server: 3 s after each send the client reports its own
+position (dump-state) and the record is read back, both must sit at the
+target, else the teleport is sent again, because the client drops position
+moves until about eight seconds after online (Skyrim Platform blocks
+MoveRefrToPosition while its generated save settles; measured on sky-c1,
+2026-10-01) and the written record alone can stand for seconds. Every
 client step records the server's position of that client afterwards in
 result.json (`pos`), and a driver step's answer rides in its `note`. The other client verbs run in lab-driver: move,
 equip, cast, activate, hit, dump-state, request-screenshot, craft (an open

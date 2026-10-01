@@ -24,7 +24,7 @@ from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
 from .state import ServerState, StateError
 from .system import Capture, System
 
-def _brief(value: Any, limit: int = 240) -> str:
+def _brief(value: Any, limit: int = 800) -> str:
     """A step's answer (the driver's data, a record) as one short JSON string
     for result.json; empty for nothing."""
     if value in (None, "", {}, []):
@@ -390,39 +390,63 @@ class Runner:
         return False, error
 
     async def _teleport(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
-        """teleport is judged by the server's record of the client, the owner
-        of that state: the gamemode sets the record and tells the client, the
-        client either moves (and reports from the target) or drops the move
-        (Skyrim Platform blocks MoveRefrToPosition while its generated save
-        settles after a login) and the record snaps back to where the client
-        really is. So: send, wait teleport_settle_s, read back, send again,
-        until the record sits within teleport_tolerance of the target in x
-        and y (z is the terrain's) or teleport_timeout_s is spent."""
+        """teleport is judged by the client it is imposed on, then by the
+        server's record. The gamemode writes the record and tells the client;
+        the client either moves or drops the move (Skyrim Platform blocks
+        MoveRefrToPosition while its generated save settles after a login),
+        and a dropped move leaves the written record standing until the
+        client's next movement report overwrites it, which for an idle client
+        can take longer than the settle (run 20261001-232457: the record read
+        back exactly at the target while the client stood 300 units away). So
+        after each send and settle the client reports its own position
+        (dump-state) and that must sit within teleport_tolerance of the
+        target in x and y, and the server's record must agree; otherwise send
+        again, until teleport_timeout_s is spent."""
         assert step.client
         started = self._clock()
         deadline = started + self.s.teleport_timeout_s
         attempts = 0
-        last = "no record"
+        last = "no report"
         while True:
             attempts += 1
             try:
                 await asyncio.to_thread(self.state.command, step.client, "teleport", step.args)
                 await asyncio.sleep(self.s.teleport_settle_s * self.s.time_scale)
+                qs = await self.board.run_step(step.client, "dump-state", {}, self.s.step_timeout_s)
                 actor = await asyncio.to_thread(self.state.actor, step.client)
             except StateError as e:
                 rec.failures.append({"step": index, "kind": "server-command", "error": str(e)})
                 rec.verdict = "red"
                 return False, str(e)
-            if actor is not None and self._at_target(actor, step.args):
+            dump = qs.result.get("data") if qs.ok and isinstance(qs.result.get("data"), dict) else None
+            client_there = dump is not None and self._dump_at_target(dump, step.args)
+            server_there = actor is not None and self._at_target(actor, step.args)
+            if client_there and server_there:
                 note = f"landed after {attempts} attempt(s), {self._clock() - started:.1f}s"
                 rec.notes.append(f"step {index}: {step.client} teleport {note}")
                 return True, note
-            last = _brief({k: actor.get(k) for k in ("cell", "x", "y", "z")}) if actor else "no record"
+            where = {"client": (dump or {}).get("pos") if dump else ("no dump-state" if qs.ok else str(qs.result.get("error", "dump-state failed"))),
+                     "server": {k: actor.get(k) for k in ("cell", "x", "y", "z")} if actor else "no record"}
+            last = _brief(where)
             if self._clock() >= deadline:
                 error = f"E_RUN_TELEPORT: {step.client} never settled at the target within {self.s.teleport_timeout_s:g}s ({attempts} attempts, last {last})"
                 rec.failures.append({"step": index, "kind": "timeout", "client": step.client, "error": error})
                 rec.verdict = "red"
                 return False, error
+
+    def _dump_at_target(self, dump: dict[str, Any], args: dict[str, Any]) -> bool:
+        """The client's own position (dump-state pos, absolute world units)
+        against the scenario's target: offsets from a named cell's origin when
+        the table knows the cell, absolute otherwise."""
+        pos = dump.get("pos")
+        if not isinstance(pos, (list, tuple)) or len(pos) < 2:
+            return False
+        cell = self.tables.cell(str(args.get("cell", ""))) if args.get("cell") is not None else None
+        origin = cell.origin if cell is not None else (0.0, 0.0, 0.0)
+        try:
+            return all(abs(float(pos[i]) - float(origin[i]) - float(args.get(k, 0) or 0)) <= self.s.teleport_tolerance for i, k in ((0, "x"), (1, "y")))
+        except (TypeError, ValueError):
+            return False
 
     def _at_target(self, actor: dict[str, Any], args: dict[str, Any]) -> bool:
         """The record and the scenario's target share a frame when the target

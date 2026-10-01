@@ -70,6 +70,7 @@ class Doubles:
         self.client, self.state, self.names, self.prefix = client, state, names, prefix
         self.profile = {"c1": 1, "c2": 2}
         self.seen: list[tuple[str, str, dict]] = []
+        self.stale_dumps = 0  # dump-states that report the client far from where the server's record says
 
     def turn(self):
         for name in self.names:
@@ -88,7 +89,14 @@ class Doubles:
                 me.z = float(step["args"]["z"])
                 data = {"dispatched": True, "distance": distance, "speed": step["args"].get("speed")}
             elif step["action"] == "dump-state":
-                data = {"self": {"x": me.x, "y": me.y, "z": me.z, "cell": me.cell},
+                if self.stale_dumps > 0:
+                    self.stale_dumps -= 1
+                    data = {"pos": [9999.0, 9999.0, 0.0], "worldOrCell": 60, "sees": {}}
+                    r = self.client.post(f"{self.prefix}/step/{step['id']}/result", json={"ok": True, "data": data})
+                    assert r.status_code == 200, r.text
+                    continue
+                data = {"pos": [me.x, me.y, me.z], "worldOrCell": 60,
+                        "self": {"x": me.x, "y": me.y, "z": me.z, "cell": me.cell},
                         "sees": {o: {"x": a.x, "y": a.y, "z": a.z} for pid, a in self.state.actors.items() for o, p in self.profile.items() if p == pid and o != name}}
             elif step["action"] == "request-screenshot":
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
@@ -377,6 +385,20 @@ class TeleportSteps(RunTests):
         self.assertIn("landed after 3 attempt", step["note"], step)
         self.assertTrue(any("c1 teleport landed after 3 attempt" in n for n in body["notes"]), body["notes"])
 
+    def test_teleport_is_judged_by_the_client_before_the_record(self):
+        """The written record alone proves nothing: the first dump-state puts
+        the client elsewhere, so the teleport goes again although the server's
+        record already read at the target."""
+        self.doubles.stale_dumps = 1
+        run_id, body = self._run(TELEPORT)
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"]
+        self.assertEqual(len(sent), 2, sent)
+        dumps = [a for _, a, _ in self.doubles.seen if a == "dump-state"]
+        self.assertGreaterEqual(len(dumps), 2, self.doubles.seen)
+        step = next(s for s in body["steps"] if s["action"] == "teleport")
+        self.assertIn("landed after 2 attempt", step["note"], step)
+
     def test_teleport_the_client_never_takes_is_red(self):
         import dataclasses
 
@@ -388,7 +410,8 @@ class TeleportSteps(RunTests):
         self.assertEqual(fail["kind"], "timeout", fail)
         self.assertIn("E_RUN_TELEPORT", fail["error"])
         self.assertIn("1 attempts", fail["error"])
-        self.assertIn('"x": 0', fail["error"], "the last record read is named")
+        self.assertIn('"server": {', fail["error"], "the last record read is named")
+        self.assertIn('"client": [', fail["error"], "the client's own report is named")
         # the run stopped at the teleport: no assertion was evaluated
         self.assertEqual([s["action"] for s in body["steps"]][-1], "teleport", body["steps"])
 
