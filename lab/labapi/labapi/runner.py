@@ -496,7 +496,15 @@ class Runner:
             rec.notes.append(f"{name}: {client} is unmanaged or unmapped; log not fetched")
             return
         try:
-            text = await asyncio.to_thread(self.control.file_read, g, self.s.client_driver_log)
+            # The game holds its log open without read sharing, which the agent's
+            # file-read cannot get past; PowerShell's Copy-Item can. Copy, then read.
+            copy = f"{self.s.client_lab_dir}\\{name}"
+            cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath '{self.s.client_driver_log}' -Destination '{copy}' -Force"]
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            if res.exitcode != 0:
+                rec.notes.append(f"{name}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
+                return
+            text = await asyncio.to_thread(self.control.file_read, g, copy)
             (rec.dir / name).write_text(text)
             rec.artifacts.append(name)
         except ProxmoxError as e:
