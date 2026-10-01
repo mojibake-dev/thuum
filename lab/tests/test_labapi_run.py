@@ -80,8 +80,11 @@ class Doubles:
             self.seen.append((name, step["action"], dict(step.get("args") or {})))
             data = {}
             if step["action"] == "move":
-                me.x += float(step["args"].get("dx", 0))
-                me.y += float(step["args"].get("dy", 0))
+                # the driver's contract: an absolute target, never an offset
+                assert "dx" not in step["args"] and "x" in step["args"], step["args"]
+                me.x = float(step["args"]["x"])
+                me.y = float(step["args"]["y"])
+                me.z = float(step["args"]["z"])
             elif step["action"] == "dump-state":
                 data = {"self": {"x": me.x, "y": me.y, "z": me.z, "cell": me.cell},
                         "sees": {o: {"x": a.x, "y": a.y, "z": a.z} for pid, a in self.state.actors.items() for o, p in self.profile.items() if p == pid and o != name}}
@@ -309,6 +312,34 @@ class ConnectSteps(RunTests):
         self.assertEqual(body["verdict"], "red", body)
         self.assertTrue(any(f["kind"] == "timeout" and "E_RUN_CONNECT" in f["error"] for f in body["failures"]), body["failures"])
         self.assertNotIn("dump-state", [a for _, a, _ in self.doubles.seen])
+
+
+MOVE = """
+id: move
+clients: [c1]
+steps:
+  - c1: connect
+  - c1: teleport {cell: lab-spawn, x: 10, y: 20, z: 0}
+  - c1: move {dx: 300, dy: -5, duration_s: 3}
+  - assert:
+      - abs(server.actor(c1).x - 310) < 1
+      - abs(server.actor(c1).y - 15) < 1
+"""
+
+
+@needs_deps
+class MoveSteps(RunTests):
+    def test_move_offsets_become_an_absolute_target_for_the_driver(self):
+        run_id, body = self._run(MOVE)
+        self.assertEqual(body["verdict"], "green", body)
+        moves = [a for _, action, a in self.doubles.seen if action == "move"]
+        self.assertEqual(len(moves), 1, self.doubles.seen)
+        cell = self.services.tables.cell("lab-spawn")  # the test tables carry no cells: origin 0
+        ox, oy = (cell.origin[0], cell.origin[1]) if cell else (0.0, 0.0)
+        self.assertAlmostEqual(moves[0]["x"], ox + 310)
+        self.assertAlmostEqual(moves[0]["y"], oy + 15)
+        self.assertEqual(moves[0]["speed"], 1.0)
+        self.assertEqual(moves[0]["duration_s"], 3)
 
 
 T2_ONLY = """

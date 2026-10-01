@@ -353,7 +353,9 @@ class Runner:
             return await self._wait_online(rec, index, step.client, step.action)
         try:
             args = self._client_args(step.action, step.args)
-        except RunnerError as e:
+            if step.action == "move":
+                args = await asyncio.to_thread(self._move_args, step.client, args)
+        except (RunnerError, StateError) as e:
             rec.failures.append({"step": index, "kind": "lab", "error": str(e)})
             rec.verdict = "red"
             return False, str(e)
@@ -489,7 +491,7 @@ class Runner:
             rec.notes.append(f"{name}: {client} is unmanaged or unmapped; log not fetched")
             return
         try:
-            text = await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\lab-driver.log")
+            text = await asyncio.to_thread(self.control.file_read, g, self.s.client_driver_log)
             (rec.dir / name).write_text(text)
             rec.artifacts.append(name)
         except ProxmoxError as e:
@@ -534,6 +536,22 @@ class Runner:
                 out["recipe"] = self.tables.base_id(out["recipe"])
         except KeyError as e:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None
+        return out
+
+    def _move_args(self, client: str, args: dict[str, Any]) -> dict[str, Any]:
+        """`move {dx, dy, dz?, duration_s}` is an offset from where the server
+        says the client is; the driver paths to an absolute target (x, y, z in
+        world units) at run speed, and the scenario's wait covers the distance."""
+        actor = self.state.actor(client)
+        if actor is None:
+            raise RunnerError(f"E_RUN_MOVE: the server has no actor for {client}")
+        base = actor.get("absolute") or actor
+        try:
+            x0, y0, z0 = float(base["x"]), float(base["y"]), float(base["z"])
+        except (KeyError, TypeError, ValueError) as e:
+            raise RunnerError(f"E_RUN_MOVE: no position for {client}: {e}") from None
+        out = {k: v for k, v in args.items() if k not in ("dx", "dy", "dz")}
+        out.update({"x": x0 + float(args.get("dx", 0) or 0), "y": y0 + float(args.get("dy", 0) or 0), "z": z0 + float(args.get("dz", 0) or 0), "speed": float(args.get("speed", 1.0) or 1.0)})
         return out
 
     def _compose(self, *args: str) -> list[str]:

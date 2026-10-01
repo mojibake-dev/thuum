@@ -86,7 +86,10 @@ class Settings:
     pcap_iface: str = "any"
     game_port: int = 7777
     # Inside a Windows client (template build, Track L2).
-    client_lab_dir: str = r"C:\lab"
+    client_lab_dir: str = r"C:\sky-lab"
+    # lab-driver logs through Skyrim Platform's writeLogs, which lands in the game's
+    # Data\Platform\Logs\<plugin>-logs.txt (skyrim_platform/ConsoleApi.cpp).
+    client_driver_log: str = r"C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Platform\Logs\lab-driver-logs.txt"
     # PowerShell run through the guest agent. {url} {name} {lab_dir} {out} are filled in.
     frida_exec_template: str = (
         "Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile '{lab_dir}\\frida\\{name}'; "
@@ -94,7 +97,21 @@ class Settings:
         "'-n','SkyrimSE.exe','-l','{lab_dir}\\frida\\{name}','-o','{lab_dir}\\frida\\{name}.jsonl'"
     )
     # Writes a base64 text file next to the PNG so the guest-agent file API (text only) can carry it.
-    screenshot_cmd_template: str = "& '{lab_dir}\\screenshot.ps1' -Out '{out}'"
+    # The capture must happen in the lab user's session: the guest agent runs
+    # as SYSTEM in session 0, which cannot see the desktop (and the client's
+    # execution policy blocks a bare script there). So: start the on-demand
+    # task sky-lab-screenshot (screenshot.ps1 as the lab user, writes
+    # C:\sky-lab\screenshots\latest.png), wait for the file to be newer than
+    # the start, copy it to {out} and write a base64 sidecar the runner reads
+    # through the agent file API. Braces are doubled for str.format.
+    screenshot_cmd_template: str = (
+        "$t0 = Get-Date; Start-ScheduledTask -TaskName sky-lab-screenshot; "
+        "$f = '{lab_dir}\\screenshots\\latest.png'; $d = (Get-Date).AddSeconds(25); "
+        "while ((Get-Date) -lt $d -and -not ((Test-Path $f) -and (Get-Item $f).LastWriteTime -gt $t0)) {{ Start-Sleep -Milliseconds 500 }}; "
+        "if (-not ((Test-Path $f) -and (Get-Item $f).LastWriteTime -gt $t0)) {{ Write-Error 'no new latest.png within 25 s'; exit 3 }}; "
+        "New-Item -ItemType Directory -Force -Path (Split-Path '{out}') | Out-Null; Copy-Item $f '{out}' -Force; "
+        "[Convert]::ToBase64String([IO.File]::ReadAllBytes('{out}')) | Set-Content -Path '{out}.b64' -NoNewline"
+    )
     # Timeouts and budgets (seconds); time_scale shrinks scenario waits in tests.
     step_timeout_s: float = 60.0
     # connect / reconnect: how long the server may take to report the client online.
@@ -137,6 +154,7 @@ class Settings:
             pcap_iface=_env("PCAP_IFACE", d.pcap_iface),
             game_port=int(_env("GAME_PORT", str(d.game_port))),
             client_lab_dir=_env("CLIENT_LAB_DIR", d.client_lab_dir),
+            client_driver_log=_env("CLIENT_DRIVER_LOG", d.client_driver_log),
             frida_exec_template=_env("FRIDA_EXEC_TEMPLATE", d.frida_exec_template),
             screenshot_cmd_template=_env("SCREENSHOT_CMD_TEMPLATE", d.screenshot_cmd_template),
             step_timeout_s=float(_env("STEP_TIMEOUT_S", str(d.step_timeout_s))),
