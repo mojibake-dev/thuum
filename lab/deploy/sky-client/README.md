@@ -117,6 +117,18 @@ both done in the template; its ticket ages with the wall clock, so if a far
 future rollback boot shows Steam asking for a login, the fix is an egress
 lease, Go Online, Go Offline, and a retaken snapshot.
 
+## A driver change
+
+`just client-driver <vmid>` builds lab-driver, pushes the bundle into the
+game's Data\Platform\Plugins on the clone, relaunches through the launch
+test, confirms the login and the heartbeat, and stops the game. The clone's
+`clean-sp` snapshot must then be retaken cold by thuum-mundus (`sky-lab
+snapshot <vmid> clean-sp --cold`), because lab-api's rollback restores the
+snapshot and would erase the new bundle. The game exits silently now and
+then right after its generated save loads (twice on 2026-10-01, both on a
+relaunch inside a running session, never on a cold boot); the launch step
+retries once.
+
 ## Clone bring-up
 
 `just client-bringup <vmid> <sunshine base>` runs the per-clone steps in order

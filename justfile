@@ -242,6 +242,11 @@ client-game-firewall vmid:
 client-steam-offline vmid:
     @lab/tools/client-steam-offline.sh {{vmid}}
 
+# A lab-driver change onto a clone: build, push the bundle into Data\Platform\Plugins, relaunch and confirm the
+# login and heartbeat, stop the game. Ends in a cold clean-sp retake by thuum-mundus (the rollback erases it otherwise).
+client-driver vmid: build-driver
+    @lab/tools/client-driver.sh {{vmid}}
+
 # Bring a fresh clone of the template up to a connected lab client, in order: its Sunshine base port
 # (48989 sky-c1, 49989 sky-c2), the NVIDIA driver, the 1920x1080 display, the game firewall, Steam offline,
 # and a launch test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
