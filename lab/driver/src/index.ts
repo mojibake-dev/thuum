@@ -74,9 +74,8 @@ let sentAt = 0;
 let warnedNoConfig = false;
 // A screenshot request waits for the file the engine writes; posted later.
 let deferred: { step: Step; file: string; startedAt: number } | null = null;
-// A TranslateTo in flight: stopped by the update loop near its target or on time.
-let moving: { x: number; y: number; until: number } | null = null;
-const MOVE_REACH = 16;
+// A move in flight: the update loop steps the player toward (x, y) at speed units per second until it arrives or time is up.
+let moving: { x: number; y: number; speed: number; last: number; until: number } | null = null;
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -203,26 +202,23 @@ function run(step: Step, player: Actor): unknown {
       return "dispatched";
     }
     case "move": {
-      // Linear motion of the player to an absolute target (x, y, z world
-      // units) at `speed` units per second through TranslateTo, which needs
-      // no navmesh path: AI-driven pathing (setPlayerAIDriven plus
-      // pathToReference, the first attempt) ran its latent calls and moved
-      // nothing on sky-c1 (run 20261001-180643). TranslateTo aims at a point,
-      // and the ground at the target is rarely at the start's height, so the
-      // engine never quite arrives and keeps pushing the player along the
-      // ground (run 20261001-205928: 600 units south of a 300-unit move); the
-      // update loop therefore stops the translation once the player is within
-      // reach of the target in the plane, or when 1.5 x duration_s is up.
-      // UNCONFIRMED until a run shows the server's record settling (rule 2).
-      const x = num(a.x), y = num(a.y), z = num(a.z);
+      // Motion of the player to an absolute target (x, y, z world units) at
+      // `speed` units per second, done as a position step per update tick
+      // (setPosition), which carries no physics velocity. The two earlier
+      // forms failed in the lab: AI-driven pathing (setPlayerAIDriven plus
+      // pathToReference) moved nothing (run 20261001-180643); TranslateTo
+      // reached the target but left the player sliding another 280 units
+      // after stopTranslation (runs 20261001-205928 to 221557), a Havok
+      // quirk of translating the player. The height stays the player's own,
+      // so the ground keeps it. UNCONFIRMED until a run shows the server's
+      // record settling at the target (rule 2).
+      const x = num(a.x), y = num(a.y);
       const dx = x - player.getPositionX();
       const dy = y - player.getPositionY();
-      const dz = z - player.getPositionZ();
-      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const distance = Math.sqrt(dx * dx + dy * dy);
       const speed = Math.max(1, num(a.speed, 300));
       const duration = num(a.duration_s, 0) > 0 ? num(a.duration_s) : distance / speed;
-      moving = { x, y, until: Date.now() + Math.max(500, duration * 1500) };
-      player.translateTo(x, y, z, player.getAngleX(), player.getAngleY(), player.getAngleZ(), speed, 0);
+      moving = { x, y, speed, last: Date.now(), until: Date.now() + Math.max(500, duration * 1500) };
       return { dispatched: true, distance, speed };
     }
     case "equip": {
@@ -340,12 +336,19 @@ on("tick", () => {
 // Execute in update: Papyrus is legal here; it does not fire in the main menu.
 function settleMove(player: Actor): void {
   if (!moving) return;
-  const ddx = moving.x - player.getPositionX();
-  const ddy = moving.y - player.getPositionY();
-  if (ddx * ddx + ddy * ddy <= MOVE_REACH * MOVE_REACH || Date.now() >= moving.until) {
+  const now = Date.now();
+  const px = player.getPositionX();
+  const py = player.getPositionY();
+  const ddx = moving.x - px;
+  const ddy = moving.y - py;
+  const remaining = Math.sqrt(ddx * ddx + ddy * ddy);
+  const step = Math.min(remaining, moving.speed * Math.max(0, now - moving.last) / 1000);
+  moving.last = now;
+  if (remaining <= 1 || now >= moving.until) {
     moving = null;
-    player.stopTranslation();
+    return;
   }
+  if (step > 0) player.setPosition(px + ddx / remaining * step, py + ddy / remaining * step, player.getPositionZ());
 }
 
 on("update", () => {
