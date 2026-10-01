@@ -288,7 +288,9 @@ Scenario verbs. connect and reconnect are judged by the server (lab-api
 holds the step until labState lists the client online; the driver never
 touches mpClientPlugin). The other client verbs run in lab-driver: move,
 equip, cast, activate, hit, dump-state, request-screenshot, craft (an open
-driver item that m0-forge specifies). Server verbs are written as client
+driver item that m0-forge specifies), tap-key (one DirectInput scan code
+through SKSE's Input.TapKey, for menus the server cannot close for the
+client, such as the race menu's Done). Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, set-percentages, kill, respawn.
 `screenshot` is a guest exec on a managed client (request-screenshot is

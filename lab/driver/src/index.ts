@@ -22,6 +22,7 @@ import {
   Game,
   HttpClient,
   HttpResponse,
+  Input,
   ObjectReference,
   Spell,
   TESModPlatform,
@@ -259,6 +260,16 @@ function run(step: Step, player: Actor): unknown {
       for (const [id, count] of ingredients) me.removeItem(Game.getFormEx(id), count, true, null);
       me.addItem(result, recipe.getResultQuantity(), true);
       return { result: result.getFormID(), ingredients };
+    }
+    case "tap-key": {
+      // One key press through the engine's input system (SKSE Input.TapKey,
+      // DirectInput scan code), for menus the server cannot close for the
+      // client: the race menu's Done is 19 (R) and the name prompt's accept
+      // is 28 (Enter). UNCONFIRMED: a tap reaching Scaleform menus (rule 2).
+      const code = num(a.code, 0);
+      if (code <= 0) return { error: "no scan code" };
+      Input.tapKey(code);
+      return "tapped";
     }
     case "screenshot":
       // UNCONFIRMED in a retail build; lab-api also captures from outside the
