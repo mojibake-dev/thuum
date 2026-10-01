@@ -86,10 +86,17 @@ it carries a HYPOTHESIS tag.
   in M0 (ADR-016).
 - `just lab run smoke-two-players` green: connect, see each other, walk,
   restart server, positions and inventories survive.
-  Status 2026-10-01: the one-client floor of that loop, `smoke-solo`, is
-  green on sky-c1 against the 1.7.104 port (rollback to connected, connect,
-  teleport, screenshot, move, give, restart, reconnect, persistence);
-  smoke-two-players waits on sky-c2.
+  Status 2026-10-01 (evening): the one-client floor of that loop,
+  `smoke-solo`, is green on sky-c1 against the 1.7.104 port (rollback to
+  connected, connect, teleport, screenshot, move, give, restart, reconnect,
+  persistence). With sky-c2 on the RTX 5060 Ti, both clones boot to
+  connected in parallel (about 80 s), see each other and take judged
+  teleports in every run; what still reads red is the move assertion, by
+  a driver timing bug (the stepped move ran at half speed; fixed in
+  lab-driver 6616fab16eed530d) after two fixture faults were cleared the
+  same evening (profile 2 parked at the origin where c1 is placed; c2's
+  scenario spot on c1's path). Green waits on the clones' next cold
+  clean-sp with that driver.
 - Ghidra project for SkyrimSE.exe 1.6.1170 analyzed, CommonLib types
   imported, reachable from the agent through pyghidra-mcp.
 - `just addr <id>` resolves against addrlib/.
