@@ -103,10 +103,15 @@ it carries a HYPOTHESIS tag.
   forge) as scenarios `m0-*`. They are the regression floor.
   Status 2026-10-01: m0-appearance green (run 20261001-232145) and
   m0-inventory green (run 20261001-234336: give, equip, the observer sees
-  the equipped weapon, all of it across a restart). m0-attributes: health
-  reaches the client and the observer; magicka and stamina regenerate
-  faster than a 3 s sample tolerates, so the sample moved to 1 s (rerun
-  pending). m0-death: the server marks the player dead and the other
+  the equipped weapon, all of it across a restart). m0-attributes (run
+  20261001-235144): server-set health, magicka and stamina reach the client
+  and the observer within a second (the sample moved from 3 s to 1 s because
+  magicka and stamina regenerate); across a server restart and relog they do
+  not survive: server record and client both read 1.0 again (the server's
+  regen crop measures from its last percentage update, which a restart
+  forgets, so the relogging client's full values pass validation). That is
+  a real gap in the "done" column and stays red here; it is M1's
+  "persistence gaps" item, not a scenario edit. m0-death: the server marks the player dead and the other
   client sees a dead actor, but the stock client never kills the local
   player (skymp5-client deathService.killWithPush ragdolls it; isDead()
   stays false, health stays full), so `c1.state.isDead == true` describes
