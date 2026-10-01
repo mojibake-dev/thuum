@@ -517,7 +517,7 @@ class Runner:
             return
         (rec.dir / "frida").mkdir(exist_ok=True)
         try:
-            text = await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\frida\\{script}.jsonl")
+            text = await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\frida\\{script}.out")  # frida-inject's stdout
             (rec.dir / "frida" / f"{client}-{script}.jsonl").write_text(text)
             rec.artifacts.append(f"frida/{client}-{script}.jsonl")
         except ProxmoxError as e:

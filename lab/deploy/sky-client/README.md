@@ -126,6 +126,16 @@ no dialog, no application error event and nothing for WER to catch; with the
 policy in place a crash leaves a dump, and an exit that still leaves nothing
 was a deliberate ExitProcess, which narrows the search to the plugins.
 
+## Tracing the game
+
+`just client-frida <vmid>` stages Frida's standalone injector into
+`C:\sky-lab\frida` (lab/frida/README.md); `just frida <script> <client>` then
+runs a script from lab/frida/ inside the game through lab-api, which waits
+for the process, attaches five seconds in and keeps the injector's stdout as
+the run's frida artifact. The crash-dump step also turns on process
+termination auditing, so an exit's status shows in the Security log (event
+4689) even when nothing else records it.
+
 ## A driver change
 
 `just client-driver <vmid>` builds lab-driver, pushes the bundle into the

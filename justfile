@@ -246,6 +246,10 @@ client-steam-offline vmid:
 client-crash-dumps vmid:
     @lab/tools/client-crash-dumps.sh {{vmid}}
 
+# Stage Frida's standalone injector into C:\sky-lab\frida on a clone (lab/frida/README.md), for `just frida`.
+client-frida vmid:
+    @lab/tools/client-frida.sh {{vmid}}
+
 # A lab-driver change onto a clone: build, push the bundle into Data\Platform\Plugins, relaunch and confirm the
 # login and heartbeat, stop the game. Ends in a cold clean-sp retake by thuum-mundus (the rollback erases it otherwise).
 client-driver vmid: build-driver
