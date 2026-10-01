@@ -308,7 +308,13 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
 1. Rolls the server back to the scenario's snapshot. lab-api runs on sky-srv
    itself, so per scenario it restores server state, not the VM: stop the
    server container, restore `world/` from the named snapshot directory,
-   `docker compose up`, wait for tcp/3000. The VM-level rollback (stop,
+   `docker compose up`, wait for tcp/3000. `clean` (/srv/lab/snapshots/clean)
+   is the lab's baseline world: the lab clients' recorded characters and
+   nothing else (profile 1 since 2026-10-01, the appearance in
+   lab/gamemode/presets/lab-nord-1.json), because a profile without an
+   appearance lands in the race menu, which pauses the world, and the stock
+   client cannot close that menu on the server's say-so. The empty world is
+   kept beside it as `clean-empty-<stamp>`. The VM-level rollback (stop,
    rollback to the named disk snapshot, start; budget 20 to 40 s) is the
    operator's `sky-lab` action between scenario sets, and lab-api can drive
    it only when hosted elsewhere (`SERVER_ROLLBACK_MODE=vm`). sky-srv carries
