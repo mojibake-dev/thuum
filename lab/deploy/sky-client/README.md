@@ -152,7 +152,9 @@ retries once.
 
 `just client-bringup <vmid> <sunshine base>` runs the per-clone steps in order
 once thuum-mundus's `sky-lab` has given the clone its address: Sunshine base
-port, NVIDIA driver, display mode, game firewall, Steam offline, launch test.
+port, NVIDIA driver, display mode, game firewall, Steam offline, crash dumps,
+the current client dist (`just client-dist`, since the template's is stale
+whenever the fork moves), launch test.
 The template is immutable (converted 2026-10-01), so every clone needs them;
 sky-c1 (711) is done, sky-c2 (712) gets base 49989 when fenestrate is off.
 A clone's `clean-sp` snapshot, the one lab-api rolls back to, is taken after

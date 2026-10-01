@@ -248,6 +248,10 @@ client-steam-offline vmid:
 client-crash-dumps vmid:
     @lab/tools/client-crash-dumps.sh {{vmid}}
 
+# The current client dist (just build-client) plus the lab files onto a clone and into the game (install-lab.ps1).
+client-dist vmid:
+    @lab/tools/client-dist.sh {{vmid}}
+
 # Stage Frida's standalone injector into C:\sky-lab\frida on a clone (lab/frida/README.md), for `just frida`.
 client-frida vmid:
     @lab/tools/client-frida.sh {{vmid}}
@@ -259,7 +263,7 @@ client-driver vmid: build-driver
 
 # Bring a fresh clone of the template up to a connected lab client, in order: its Sunshine base port
 # (48989 sky-c1, 49989 sky-c2), the NVIDIA driver, the 1920x1080 display, the game firewall, Steam offline,
-# crash dumps, and a launch test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
+# crash dumps, the current client dist, and a launch test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
 client-bringup vmid base:
     just client-sunshine-port {{vmid}} {{base}}
     just client-gpu-driver {{vmid}}
@@ -267,6 +271,7 @@ client-bringup vmid base:
     just client-game-firewall {{vmid}}
     just client-steam-offline {{vmid}}
     just client-crash-dumps {{vmid}}
+    just client-dist {{vmid}}
     just client-launch-test {{vmid}}
 
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
