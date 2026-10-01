@@ -279,7 +279,9 @@ difftest is for (ADR-010).
 
 ## ADR-018: The lab runs the current Skyrim build, and how the fork gets there
 
-Status: proposed (2026-09-29)
+Status: accepted (2026-10-01). Eli reaffirmed "keep porting" after the port's
+first crash on 1.7.104 (the player's appearance, see docs/verbs/appearance.md),
+with the depot rollback to 1.6.1170 offered as the alternative and declined.
 
 Eli's direction on 2026-09-29: the lab clients run whatever Steam ships
 (1.7.104.0 tonight) and the fork is made to handle it; Steam's depot rollback
