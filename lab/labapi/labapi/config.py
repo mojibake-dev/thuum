@@ -87,9 +87,11 @@ class Settings:
     game_port: int = 7777
     # Inside a Windows client (template build, Track L2).
     client_lab_dir: str = r"C:\sky-lab"
-    # lab-driver logs through Skyrim Platform's writeLogs, which lands in the game's
-    # Data\Platform\Logs\<plugin>-logs.txt (skyrim_platform/ConsoleApi.cpp).
-    client_driver_log: str = r"C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Platform\Logs\lab-driver-logs.txt"
+    # The client log artifact (c1.log): Skyrim Platform's own log, which always
+    # exists and carries plugin load, JavaScript exceptions and latent-call
+    # traces. lab-driver's writeLogs sink (Data\Platform\Logs\lab-driver-logs.txt
+    # in the game directory) only appears once the driver logs an error.
+    client_driver_log: str = r"C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform.log"
     # PowerShell run through the guest agent. {url} {name} {lab_dir} {out} are filled in.
     frida_exec_template: str = (
         "Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile '{lab_dir}\\frida\\{name}'; "

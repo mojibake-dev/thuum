@@ -545,8 +545,8 @@ class Runner:
 
     def _move_args(self, client: str, args: dict[str, Any]) -> dict[str, Any]:
         """`move {dx, dy, dz?, duration_s}` is an offset from where the server
-        says the client is; the driver paths to an absolute target (x, y, z in
-        world units) at run speed, and the scenario's wait covers the distance."""
+        says the client is; the driver translates the player to an absolute
+        target (x, y, z in world units) at a speed in units per second."""
         actor = self.state.actor(client)
         if actor is None:
             raise RunnerError(f"E_RUN_MOVE: the server has no actor for {client}")
@@ -555,8 +555,14 @@ class Runner:
             x0, y0, z0 = float(base["x"]), float(base["y"]), float(base["z"])
         except (KeyError, TypeError, ValueError) as e:
             raise RunnerError(f"E_RUN_MOVE: no position for {client}: {e}") from None
+        dx, dy, dz = (float(args.get(k, 0) or 0) for k in ("dx", "dy", "dz"))
         out = {k: v for k, v in args.items() if k not in ("dx", "dy", "dz")}
-        out.update({"x": x0 + float(args.get("dx", 0) or 0), "y": y0 + float(args.get("dy", 0) or 0), "z": z0 + float(args.get("dz", 0) or 0), "speed": float(args.get("speed", 1.0) or 1.0)})
+        # speed in world units per second (the driver's TranslateTo): the
+        # scenario's distance over its duration_s, clamped to 50..500.
+        distance = (dx * dx + dy * dy + dz * dz) ** 0.5
+        duration = float(args.get("duration_s", 0) or 0)
+        speed = float(args.get("speed", 0) or 0) or (min(500.0, max(50.0, distance / duration)) if duration > 0 else 300.0)
+        out.update({"x": x0 + dx, "y": y0 + dy, "z": z0 + dz, "speed": speed})
         return out
 
     def _compose(self, *args: str) -> list[str]:

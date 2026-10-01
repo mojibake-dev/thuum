@@ -199,24 +199,21 @@ function run(step: Step, player: Actor): unknown {
       return "dispatched";
     }
     case "move": {
-      // UNCONFIRMED: AI-driven pathing of the player toward a marker placed at
-      // the target. 0x3B is Skyrim.esm's XMarker; keep it a lab run away from
-      // being trusted (rule 2).
-      const marker = player.placeAtMe(Game.getFormEx(0x3b), 1, false, false);
-      const markerId = marker ? marker.getFormID() : 0;
-      if (!markerId) return { error: "no marker" };
-      const target = ObjectReference.from(Game.getFormEx(markerId));
-      if (!target) return { error: "marker vanished" };
-      Game.setPlayerAIDriven(true);
-      target.setPosition(num(a.x), num(a.y), num(a.z)).then(() => {
-        const again = ObjectReference.from(Game.getFormEx(markerId));
-        const me = Game.getPlayer();
-        return me && again ? me.pathToReference(again, num(a.speed, 0.5)) : Promise.resolve(false);
-      }).then(
-        () => Game.setPlayerAIDriven(false),
-        () => Game.setPlayerAIDriven(false),
-      );
-      return "dispatched";
+      // Linear motion of the player to an absolute target (x, y, z world
+      // units) at `speed` units per second through TranslateTo, which needs
+      // no navmesh path: AI-driven pathing (setPlayerAIDriven plus
+      // pathToReference, the first attempt) ran its latent calls and moved
+      // nothing on sky-c1 (run 20261001-180643). The engine ends the motion
+      // at the target; the scenario's wait covers the distance. UNCONFIRMED
+      // until a run shows the server's record following (rule 2).
+      const x = num(a.x), y = num(a.y), z = num(a.z);
+      const dx = x - player.getPositionX();
+      const dy = y - player.getPositionY();
+      const dz = z - player.getPositionZ();
+      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const speed = Math.max(1, num(a.speed, 300));
+      player.translateTo(x, y, z, player.getAngleX(), player.getAngleY(), player.getAngleZ(), speed, 0);
+      return { dispatched: true, distance, speed };
     }
     case "equip": {
       const item = Game.getFormEx(num(a.formId));
