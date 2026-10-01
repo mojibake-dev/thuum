@@ -10,6 +10,8 @@ wire     := "skymp/skymp-wire"
 addrlib  := "addrlib"
 lab_api  := env_var_or_default("LAB_API", "https://thuum.gaussing.tv/lab")
 runtime  := "1.6.1170"
+# The fork branch whose Windows build the lab clients run (ADR-018: the 1.7 port).
+client_branch := "skyrim-1.7"
 # Upstream's Dockerfile targets x86-64. On Apple Silicon export
 # DOCKER_PLATFORM=linux/amd64 (emulated, slow); on sky-ci leave it unset.
 docker_platform := env_var_or_default("DOCKER_PLATFORM", "")
@@ -47,11 +49,11 @@ test: build-image
 
 # Downloads the newest `dist` artifact from mojibake-dev/skymp into skymp/build/dist-client.
 # Client and Skyrim Platform: fetch what upstream's Windows workflow built on the GitHub mirror.
-build-client:
+build-client branch=client_branch:
     #!/usr/bin/env bash
     set -euo pipefail
-    run=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch parity --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-    test -n "$run" || { echo "no successful Parity Windows run on the mirror yet"; exit 1; }
+    run=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+    test -n "$run" || { echo "no successful Parity Windows run on the mirror for branch {{branch}} yet"; exit 1; }
     rm -rf {{skymp}}/build/dist-client && mkdir -p {{skymp}}/build/dist-client
     gh run download "$run" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
     echo "run $run -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
