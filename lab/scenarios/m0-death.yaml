@@ -13,7 +13,7 @@ timeout_s: 900
 steps:
   - c1: connect
   - c2: connect
-  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}   # on the flat strip: a ragdoll at the origin rolled off the summit (run 20261001-234132)
   - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
   - wait: 5
   - c1: kill
