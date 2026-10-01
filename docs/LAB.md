@@ -246,6 +246,12 @@ where (real since 2026-10-01):
    20261001-195142, with the patch-08 build); the game continues and
    movement syncs, so it is parked until m0-inventory shows whether
    equipment and inventory updates reach the server.
+   Also open: lab-spawn (upstream's default start point) is a mountain top.
+   300 units east the player fell about 1070 units and after that fall the
+   client ignored every server teleport until relaunched (the client's
+   teleport handler first waits on a ragdoll-removal call); on a fresh
+   client teleports take within 3 s. Scenario offsets stay on the probed
+   flat directions until lab.esp provides a level cell (Track L4).
 
 "Connected" is not a snapshot; it is where a clone arrives by itself: stop,
 rollback to `clean-sp`, cold boot, autologon, the scheduled task launches
