@@ -328,6 +328,12 @@ class Runner:
                     # the estate refused (a newer ZFS snapshot on the clone's disk, a
                     # task timeout): a lab failure with the cause, not an internal one
                     raise RunnerError(f"E_RUN_ROLLBACK: {g.name}: {e}") from e
+                # Only a heartbeat from the fresh boot proves "boots to connected":
+                # the previous session kept polling until the stop landed, and a
+                # clock started before it let that poll pass the phase while the
+                # clone was still booting (run 20261001-233852: the phase passed
+                # at 74 s and c2 was not online 60 s later).
+                since = self._clock()
             if not await self.board.wait_heartbeat(client, since, self.s.heartbeat_timeout_s):
                 raise RunnerError(f"E_RUN_NO_HEARTBEAT: {client} ({g.name}) did not poll within {self.s.heartbeat_timeout_s}s")
             return f"{client}={g.name}{'' if g.managed else ' (unmanaged, heartbeat only)'}"

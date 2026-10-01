@@ -264,6 +264,40 @@ class RunTests(unittest.TestCase):
         self.assertIn("unmanaged", rec.phases[0]["note"])
 
 
+@needs_deps
+class RollbackHeartbeat(RunTests):
+    def test_a_heartbeat_from_before_the_restart_does_not_pass_the_phase(self):
+        """The old session polls until the stop lands; that poll must not count
+        as the fresh boot's heartbeat (run 20261001-233852)."""
+        import asyncio
+
+        from labapi.guests import Guest
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        board = self.services.board
+        real_stop = pve.stop
+
+        def stop_with_a_late_poll(guest):
+            board.poll("c1")  # the previous session's last heartbeat, landing as the stop is issued
+            real_stop(guest)
+
+        pve.stop = stop_with_a_late_poll
+        runner = self.services.runner
+        runner.s = __import__("dataclasses").replace(runner.s, heartbeat_timeout_s=0.3)
+        from labapi.runner import RunnerError
+
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        with self.assertRaises(RunnerError):
+            asyncio.run(runner._rollback_clients(rec, ["c1"]))
+        self.assertFalse(rec.phases[0]["ok"], rec.phases)
+        self.assertIn("E_RUN_NO_HEARTBEAT", rec.phases[0]["note"])
+        self.assertEqual([c for c in pve.calls if c[0] in ("stop", "rollback", "start")], [("stop", 901), ("rollback", 901, "clean-sp"), ("start", 901)])
+
+
 SOLO_WITH_LOG = """
 id: solo-log
 clients: [c1]
