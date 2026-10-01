@@ -148,6 +148,16 @@ then right after its generated save loads (twice on 2026-10-01, both on a
 relaunch inside a running session, never on a cold boot); the launch step
 retries once.
 
+## The NVIDIA driver, per card family
+
+NVIDIA split Pascal (the GTX 1050 on sky-c1) into its own driver branch in
+2025, and a Pascal package refuses a Blackwell card (the RTX 5060 Ti on
+sky-c2) with exit -436207360 and no log at all, on any boot; on 2026-10-01
+that looked like a passthrough problem for an hour. `just gpu-driver-fetch`
+fetches both families into `lab/.cache/nvidia-driver-<family>.exe` through
+NVIDIA's lookup, and `just client-gpu-driver <vmid>` picks the package by the
+card's PCI device id (GP107 1C83: pascal; GB2xx: blackwell) before the hop.
+
 ## Clone bring-up
 
 `just client-bringup <vmid> <sunshine base> [client] [profile]` runs the per-clone steps in order

@@ -236,10 +236,14 @@ where (real since 2026-10-01):
    (lab/deploy/sky-client/README.md, "Clone bring-up"). Steam offline mode is
    what lets a cold boot in the dark lab reach a running game at all.
    sky-c1 (711, GTX 1050) and sky-c2 (712, RTX 5060 Ti) are both through it
-   as of 2026-10-01. On sky-c2 the card first sat in Windows with Code 43
-   before any driver: the clone lacked fenestrate's `cpu: host,hidden=1`
-   (the hidden-hypervisor flag); the estate now sets it on both clones, and
-   it takes effect at the next start. The estate's PCI mapping names are
+   as of 2026-10-01. On sky-c2 the driver installer first refused the card
+   (exit -436207360, no log, the device at Code 43 as any NVIDIA card is
+   before its driver): the package was the Pascal branch, fetched for the
+   GTX 1050's product id, which carries no Blackwell entries; the lab keeps
+   one package per card family now (lab/deploy/sky-client/README.md). Two
+   estate changes made while that was chased stay: `cpu: host,hidden=1`
+   on both clones (fenestrate's setting) and Secure Boot off on sky-c2's
+   EFI store (fenestrate's state). The estate's PCI mapping names are
    swapped against the hardware: `gpu-gtx1050` is 0000:01:00.0, the 5060
    Ti, and `gpu-sky` is 0000:0b:00.0, the GTX 1050; renaming touches
    fenestrate's config and waits for Eli.

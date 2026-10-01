@@ -218,15 +218,21 @@ pull-layer:
 client-launch-test vmid:
     @lab/tools/client-launch-test.sh {{vmid}}
 
-# Fetch the current WHQL GeForce driver for the lab's card (GTX 1050, Windows 11 x64) into lab/.cache/, then
-# install it on a clone: `just gpu-driver-fetch` once, `just client-gpu-driver <vmid>` per clone (the template has none).
+# Fetch the current WHQL GeForce driver for one card family into lab/.cache/nvidia-driver-<family>.exe
+# through NVIDIA's lookup (product series psid, product pfid, Windows 11 x64 osID 135). NVIDIA split
+# Pascal into its own branch in 2025, so the lab's two cards need two packages: `just gpu-driver-fetch`
+# fetches both (GTX 1050: 101/845; RTX 5060 Ti: 131/1076); `just client-gpu-driver <vmid>` picks the
+# one for the card the clone shows (PCI device id), the template having none.
 gpu-driver-fetch:
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p lab/.cache
-    url=$(curl -sS -m 30 "https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=101&pfid=845&osID=135&languageCode=1033&beta=0&isWHQL=1&dltype=-1&dch=1&upCRD=0&qnf=0&sort1=0&numberOfResults=1" | python3 -c 'import sys,json; d=json.load(sys.stdin); i=d["IDS"][0]["downloadInfo"]; print(i["DownloadURL"]); print("version", i["Version"], i["ReleaseDateTime"], file=sys.stderr)')
-    curl -sS -L -m 1200 -o lab/.cache/nvidia-driver.exe "$url" && ls -la lab/.cache/nvidia-driver.exe
-client-gpu-driver vmid installer="lab/.cache/nvidia-driver.exe":
+    for spec in "pascal 101 845" "blackwell 131 1076"; do
+      set -- $spec
+      url=$(curl -sS -m 30 "https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=$2&pfid=$3&osID=135&languageCode=1033&beta=0&isWHQL=1&dltype=-1&dch=1&upCRD=0&qnf=0&sort1=0&numberOfResults=1" | python3 -c 'import sys,json; d=json.load(sys.stdin); i=d["IDS"][0]["downloadInfo"]; print(i["DownloadURL"]); print("version", i["Version"], i["ReleaseDateTime"], file=sys.stderr)')
+      curl -sS -L -m 1200 -o "lab/.cache/nvidia-driver-$1.exe" "$url" && ls -la "lab/.cache/nvidia-driver-$1.exe"
+    done
+client-gpu-driver vmid installer="":
     @lab/tools/client-gpu-driver.sh {{vmid}} {{installer}}
 
 # Set a headless clone's desktop mode (the Virtual Display Driver comes up at 800x600) and the game's window
