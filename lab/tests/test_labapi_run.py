@@ -338,7 +338,7 @@ class MoveSteps(RunTests):
         ox, oy = (cell.origin[0], cell.origin[1]) if cell else (0.0, 0.0)
         self.assertAlmostEqual(moves[0]["x"], ox + 310)
         self.assertAlmostEqual(moves[0]["y"], oy + 15)
-        self.assertAlmostEqual(moves[0]["speed"], 100.0, delta=0.1)  # 300 units over 3 s
+        self.assertAlmostEqual(moves[0]["speed"], 300.0 / 2.25, delta=0.1)  # 300 units inside three quarters of 3 s
         self.assertEqual(moves[0]["duration_s"], 3)
 
 

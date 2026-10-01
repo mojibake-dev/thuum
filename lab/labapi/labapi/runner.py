@@ -566,10 +566,14 @@ class Runner:
         dx, dy, dz = (float(args.get(k, 0) or 0) for k in ("dx", "dy", "dz"))
         out = {k: v for k, v in args.items() if k not in ("dx", "dy", "dz")}
         # speed in world units per second (the driver's TranslateTo): the
-        # scenario's distance over its duration_s, clamped to 50..500.
+        # scenario's distance over three quarters of its duration_s, so the
+        # motion and the server's record of it are done before a wait of
+        # duration_s ends (run 20261001-205928: at exactly distance/duration
+        # the assertion raced the last movement update and read 240 of 300);
+        # clamped to 50..500.
         distance = (dx * dx + dy * dy + dz * dz) ** 0.5
         duration = float(args.get("duration_s", 0) or 0)
-        speed = float(args.get("speed", 0) or 0) or (min(500.0, max(50.0, distance / duration)) if duration > 0 else 300.0)
+        speed = float(args.get("speed", 0) or 0) or (min(500.0, max(50.0, distance / (duration * 0.75))) if duration > 0 else 300.0)
         out.update({"x": x0 + dx, "y": y0 + dy, "z": z0 + dz, "speed": speed})
         return out
 
