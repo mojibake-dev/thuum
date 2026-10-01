@@ -41,8 +41,17 @@ Rate limit / bounds: one accepted update per race-menu open.
   from the CommonLib headers pinned for 1.6.1170 (b93280e8), which is the
   suspect: any TESNPC, TESRace or TintMask layout change in 1.7 corrupts
   memory here.
-- If UNKNOWN: delegated to re-analyst on 2026-10-01 once the crash site is
-  known (Dynamic plan below).
+- Found 2026-10-01 (Frida first-chance trace, then Ghidra on the 1.7.104
+  program): the fault is CommonLib's PlayerCharacter::GetTintList, reached
+  from TESModPlatform's tint natives (PushTintMask, ClearTintMasks). In
+  1.7.104 the player's tint array sits at PlayerCharacter+0xB20 (count at
+  +0xB30), 8 bytes further than 1.6.1170; the pinned headers read the
+  overlay-list pointer at +0xB30 and got the tint count (0x22 = 34 for the
+  recorded character), then faulted reading its size at 0x32. Evidence:
+  ghidra/notes/playercharacter-tints-1-7-104.md (GetNumTints 40700 and
+  GetTintMask 40698 decompiled). Fix: overlay patch 08 on the fork's
+  CommonLib port (skyrim-1.7 branch); the overlay pointer at +0xB38 is a
+  HYPOTHESIS until tints are seen applying.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -59,13 +68,14 @@ Rate limit / bounds: one accepted update per race-menu open.
   with changeFormNpc) and applyAppearance (others, CreateNpc).
 - Visual without simulation achieved by: TESNPC edits plus
   queueNiNodeUpdate.
-- Side effects: HYPOTHESIS. On 1.7.104 the own-player path kills the
-  process: 4 of 4 launches with an appearance on the player ended about 4 s
+- Side effects: HYPOTHESIS (the fix is unbuilt). On 1.7.104 the own-player
+  path killed the process before patch 08: 6 of 6 launches with an appearance on the player ended about 4 s
   after SKSE's PostLoadGame with exit status 0xC0000005 (Security event
   4689 on sky-c1, 2026-10-01 11:45:59 and 11:48:28), no dialog, no
   application error event, no dump even with WER LocalDumps set: something
   in-process handles the access violation and terminates. Launches without
-  an appearance (race menu open) never did this on cold boots (6 of 6).
+  an appearance (race menu open) never did this on cold boots (6 of 6). The
+  no-tints bisect crashed too, as ClearTintMasks walks the same pointer.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
