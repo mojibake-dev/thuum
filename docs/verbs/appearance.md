@@ -68,14 +68,19 @@ Rate limit / bounds: one accepted update per race-menu open.
   with changeFormNpc) and applyAppearance (others, CreateNpc).
 - Visual without simulation achieved by: TESNPC edits plus
   queueNiNodeUpdate.
-- Side effects: HYPOTHESIS (the fix is unbuilt). On 1.7.104 the own-player
-  path killed the process before patch 08: 6 of 6 launches with an appearance on the player ended about 4 s
+- Side effects: the crash is gone with patch 08, CONFIRMED (sky-c1,
+  2026-10-01 12:47: the client launched with the appearance on, logged in
+  after 10 s, was in the world a minute later; before the patch 6 of 6
+  launches with an appearance on the player ended about 4 s
   after SKSE's PostLoadGame with exit status 0xC0000005 (Security event
   4689 on sky-c1, 2026-10-01 11:45:59 and 11:48:28), no dialog, no
   application error event, no dump even with WER LocalDumps set: something
   in-process handles the access violation and terminates. Launches without
   an appearance (race menu open) never did this on cold boots (6 of 6). The
   no-tints bisect crashed too, as ClearTintMasks walks the same pointer.
+  Still HYPOTHESIS: the overlay pointer's new offset (0xB38) and the tints
+  rendering as recorded; both are settled by m0-appearance's view
+  assertions or a third-person screenshot.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 

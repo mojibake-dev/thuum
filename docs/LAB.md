@@ -233,6 +233,13 @@ where (real since 2026-10-01):
    down). That snapshot is what lab-api rolls back to
    (lab/deploy/sky-client/README.md, "Clone bring-up"). Steam offline mode is
    what lets a cold boot in the dark lab reach a running game at all.
+   The current build's Data carries ten plugins (the five masters,
+   _ResourcePack.esl and the four free Creation Club plugins) while the
+   server loads the five masters, so skymp5-client shows "LOAD ORDER
+   WARNING: you have more mods than server" for five seconds at login; the
+   check passes because the first five match in order. Load-order parity
+   (the same ten on the server, from fenestrate through `just persist-game`)
+   is an open M0 item.
 
 "Connected" is not a snapshot; it is where a clone arrives by itself: stop,
 rollback to `clean-sp`, cold boot, autologon, the scheduled task launches
