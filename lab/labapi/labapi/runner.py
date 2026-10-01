@@ -307,7 +307,12 @@ class Runner:
                 raise RunnerError(f"E_RUN_NO_GUEST: no guest plays client {client!r} (guests.yaml)")
             since = self._clock()
             if g.managed:
-                await asyncio.to_thread(self.control.rollback_sequence, g, g.snapshot)
+                try:
+                    await asyncio.to_thread(self.control.rollback_sequence, g, g.snapshot)
+                except ProxmoxError as e:
+                    # the estate refused (a newer ZFS snapshot on the clone's disk, a
+                    # task timeout): a lab failure with the cause, not an internal one
+                    raise RunnerError(f"E_RUN_ROLLBACK: {g.name}: {e}") from e
             if not await self.board.wait_heartbeat(client, since, self.s.heartbeat_timeout_s):
                 raise RunnerError(f"E_RUN_NO_HEARTBEAT: {client} ({g.name}) did not poll within {self.s.heartbeat_timeout_s}s")
             return f"{client}={g.name}{'' if g.managed else ' (unmanaged, heartbeat only)'}"
