@@ -240,6 +240,12 @@ where (real since 2026-10-01):
    check passes because the first five match in order. Load-order parity
    (the same ten on the server, from fenestrate through `just persist-game`)
    is an open M0 item.
+   Also open: Skyrim Platform logs "on('update'): failed to get key 'data':
+   failed to call custom Serialize for type struct Equipment: ... class
+   Inventory" once per login on the 1.7.104 client (c1.log of run
+   20261001-195142, with the patch-08 build); the game continues and
+   movement syncs, so it is parked until m0-inventory shows whether
+   equipment and inventory updates reach the server.
 
 "Connected" is not a snapshot; it is where a clone arrives by itself: stop,
 rollback to `clean-sp`, cold boot, autologon, the scheduled task launches
