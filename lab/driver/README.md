@@ -14,6 +14,6 @@ when that folder changes, so do not drop it in mid-session.
 Types come from the fork's own `skyrimPlatform.ts` (tsconfig paths), so the
 API this compiles against is the one the client ships.
 
-Actions: dump-state, teleport, move (UNCONFIRMED), equip, cast, activate,
+Actions: dump-state, teleport, move (confirmed, run 20261001-231903), equip, cast, activate,
 screenshot (UNCONFIRMED). Each UNCONFIRMED tag is cleared by a lab run, not
 by reading code (CLAUDE.md rule 2).

@@ -217,8 +217,9 @@ function run(step: Step, player: Actor): unknown {
       // reached the target but left the player sliding another 280 units
       // after stopTranslation (runs 20261001-205928 to 221557), a Havok
       // quirk of translating the player. The height stays the player's own,
-      // so the ground keeps it. UNCONFIRMED until a run shows the server's
-      // record settling at the target (rule 2).
+      // so the ground keeps it. CONFIRMED by run 20261001-231903: the server's
+      // record went from (0, 0) to (0, -300) in about two seconds at the asked
+      // 133 units/s and settled there (rule 2).
       const x = num(a.x), y = num(a.y);
       const dx = x - player.getPositionX();
       const dy = y - player.getPositionY();
