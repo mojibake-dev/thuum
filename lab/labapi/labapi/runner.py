@@ -89,6 +89,13 @@ class Runner:
         stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime(self._wall()))
         run_id = f"{stamp}-{scenario.id}"
         run_dir = Path(self.s.results_dir) / run_id
+        # Two runs of one scenario inside a second (the fakes finish that fast)
+        # must not share a results directory.
+        n = 1
+        while run_dir.exists():
+            n += 1
+            run_id = f"{stamp}-{scenario.id}-{n}"
+            run_dir = Path(self.s.results_dir) / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
         rec = RunRecord(run_id=run_id, scenario=scenario, dir=run_dir, started_at=_iso(self._wall()))
         self.runs[run_id] = rec
