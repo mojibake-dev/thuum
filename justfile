@@ -216,6 +216,17 @@ pull-layer:
 client-launch-test vmid:
     @lab/tools/client-launch-test.sh {{vmid}}
 
+# Fetch the current WHQL GeForce driver for the lab's card (GTX 1050, Windows 11 x64) into lab/.cache/, then
+# install it on a clone: `just gpu-driver-fetch` once, `just client-gpu-driver <vmid>` per clone (the template has none).
+gpu-driver-fetch:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p lab/.cache
+    url=$(curl -sS -m 30 "https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=101&pfid=845&osID=135&languageCode=1033&beta=0&isWHQL=1&dltype=-1&dch=1&upCRD=0&qnf=0&sort1=0&numberOfResults=1" | python3 -c 'import sys,json; d=json.load(sys.stdin); i=d["IDS"][0]["downloadInfo"]; print(i["DownloadURL"]); print("version", i["Version"], i["ReleaseDateTime"], file=sys.stderr)')
+    curl -sS -L -m 1200 -o lab/.cache/nvidia-driver.exe "$url" && ls -la lab/.cache/nvidia-driver.exe
+client-gpu-driver vmid installer="lab/.cache/nvidia-driver.exe":
+    @lab/tools/client-gpu-driver.sh {{vmid}} {{installer}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
