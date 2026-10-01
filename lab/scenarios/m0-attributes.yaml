@@ -17,7 +17,7 @@ steps:
   - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
   - wait: 5
   - c1: set-percentages {health: 0.5, magicka: 0.25, stamina: 0.75}
-  - wait: 3
+  - wait: 1    # magicka and stamina regenerate (about 1.4 %/s magicka at +3.5 s, run 20261001-232457); sample before regeneration eats the tolerance
   - c1: dump-state
   - c2: dump-state
   - assert:
