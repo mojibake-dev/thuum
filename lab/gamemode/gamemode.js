@@ -19,7 +19,10 @@
 const fs = require("fs");
 const path = require("path");
 
-const PRESET_DIR = path.join(typeof __dirname !== "undefined" ? __dirname : process.cwd(), "presets");
+// The server runs a temporary copy of gamemode.js (/tmp/skymp5-server*/), so
+// __dirname never points at the mounted lab/gamemode; presets live at the
+// compose mount (lab/deploy/sky-srv/docker-compose.yml), overridable for tests.
+const PRESET_DIR = process.env.LAB_PRESET_DIR || (fs.existsSync("/srv/skymp/gamemode/presets") ? "/srv/skymp/gamemode/presets" : path.join(typeof __dirname !== "undefined" ? __dirname : process.cwd(), "presets"));
 
 function actorFor(profileId) {
   const ids = mp.getActorsByProfileId(Number(profileId)) || [];

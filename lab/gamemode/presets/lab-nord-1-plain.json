@@ -1,0 +1,22 @@
+{
+  "hairColor": 3685164,
+  "headTextureSetId": 242977,
+  "headpartIds": [
+    333359,
+    333361,
+    546143,
+    333063,
+    333061,
+    331956,
+    148036,
+    333064
+  ],
+  "isFemale": false,
+  "name": "test 1",
+  "options": [],
+  "presets": [],
+  "raceId": 79686,
+  "skinColor": 13021352,
+  "tints": [],
+  "weight": 75.0
+}
