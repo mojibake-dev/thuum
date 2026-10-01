@@ -106,7 +106,7 @@ class RunTests(unittest.TestCase):
         self.settings = Settings(
             results_dir=str(self.tmp / "results"), guests_file=str(self.tmp / "guests.yaml"),
             server_world_dir=str(self.tmp / "world"), server_snapshots_dir=str(self.tmp / "snapshots"),
-            step_timeout_s=5, heartbeat_timeout_s=5, server_ready_timeout_s=1, time_scale=0.0,
+            step_timeout_s=5, heartbeat_timeout_s=5, server_ready_timeout_s=1, connect_timeout_s=1, time_scale=0.0,
         )
         self.state = FakeState()
         self.state.spawn(1, 0, 0, 0)
@@ -176,7 +176,8 @@ class RunTests(unittest.TestCase):
         self.assertEqual(len(body["steps"]), 2, "the run stops at the failed assert block")
 
     def test_step_timeout_is_red_and_busy_is_409(self):
-        text = "id: t2-timeout\nclients: [c1]\nsteps:\n  - c1: connect\n"
+        # a driver step (connect is judged by the server and never reaches the queue)
+        text = "id: t2-timeout\nclients: [c1]\nsteps:\n  - c1: dump-state\n"
         r = self.client.post("/lab/run", files={"scenario": ("s.yaml", text.encode(), "text/yaml")})
         run_id = r.json()["run"]
         self.assertEqual(self.client.post("/lab/run", files={"scenario": ("s.yaml", text.encode(), "text/yaml")}).status_code, 409)
@@ -280,6 +281,34 @@ class ArtifactFailures(RunTests):
         run_id2, body2 = self._run(SOLO_WITH_LOG)
         self.assertNotEqual(run_id, run_id2)
         self.assertEqual(body2["verdict"], "green", body2)
+
+
+OFFLINE = """
+id: offline
+clients: [c1]
+steps:
+  - c1: connect
+  - c1: dump-state
+"""
+
+
+@needs_deps
+class ConnectSteps(RunTests):
+    def test_connect_is_judged_by_the_server_online_list(self):
+        """connect holds until labState lists the profile; the double's queue
+        never sees it (the driver has no such action)."""
+        run_id, body = self._run(RED)  # starts with c1: connect, then a failing assert
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertTrue(any("c1 online after" in n for n in body["notes"]), body["notes"])
+        self.assertNotIn("connect", [a for _, a, _ in self.doubles.seen])
+        self.assertTrue(any(name == "labState" and p.get("kind") == "online" for name, p in self.state.rpc_log))
+
+    def test_connect_times_out_red_when_the_server_never_lists_the_client(self):
+        self.state.actors[1].online = False
+        run_id, body = self._run(OFFLINE)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertTrue(any(f["kind"] == "timeout" and "E_RUN_CONNECT" in f["error"] for f in body["failures"]), body["failures"])
+        self.assertNotIn("dump-state", [a for _, a, _ in self.doubles.seen])
 
 
 T2_ONLY = """

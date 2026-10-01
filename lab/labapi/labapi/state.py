@@ -91,6 +91,16 @@ class ServerState:
         body = self._backend.rpc("labState", {"kind": "actor", "profileId": self._profile(client)})
         return self._normalize_actor(body) if body.get("found") else None
 
+    def online(self, client: str) -> bool:
+        """The server reports the client's profile among its logged-in players
+        (labState kind online: {"players": [{"actorId", "profileId"}, ...]})."""
+        body = self._backend.rpc("labState", {"kind": "online"})
+        players = body.get("players")
+        if not isinstance(players, list):
+            raise StateError("E_STATE: online answer lacks players")
+        want = self._profile(client)
+        return any(isinstance(p, dict) and p.get("profileId") == want for p in players)
+
     def inventory(self, client: str) -> list[dict[str, Any]] | None:
         body = self._backend.rpc("labState", {"kind": "inventory", "profileId": self._profile(client)})
         if not body.get("found"):

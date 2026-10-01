@@ -118,6 +118,7 @@ class FakeActor:
     appearance: dict[str, Any] | None = None
     inventory: dict[int, int] = field(default_factory=dict)
     spawn: tuple[float, float, float, str] = (0.0, 0.0, 0.0, "lab-spawn")
+    online: bool = True  # listed by labState kind online
 
 
 class FakeState:
@@ -137,6 +138,8 @@ class FakeState:
     def rpc(self, name: str, payload: dict[str, Any]) -> dict[str, Any]:
         self.rpc_log.append((name, payload))
         if name == "labState":
+            if payload.get("kind") == "online":
+                return {"players": [{"actorId": 0xFF000000 + pid, "profileId": pid} for pid in sorted(self.actors) if self.actors[pid].online]}
             actor = self.actors.get(int(payload.get("profileId", -1)))
             if actor is None:
                 return {"found": False}

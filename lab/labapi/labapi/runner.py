@@ -349,6 +349,8 @@ class Runner:
                 return False, str(e)
         if step.action == "screenshot":
             return await self._screenshot(rec, index, step.client)
+        if step.action in ("connect", "reconnect"):
+            return await self._wait_online(rec, index, step.client, step.action)
         try:
             args = self._client_args(step.action, step.args)
         except RunnerError as e:
@@ -362,6 +364,30 @@ class Runner:
         rec.failures.append({"step": index, "kind": "timeout" if error == "timeout" else "step-error", "client": step.client, "error": error})
         rec.verdict = "red"
         return False, error
+
+    async def _wait_online(self, rec: RunRecord, index: int, client: str, action: str) -> tuple[bool, str]:
+        """connect and reconnect are judged by the server, the owner of that
+        state: the step holds until labState lists the client's profile among
+        the logged-in players. skymp5-client connects and logs in by itself at
+        launch and again after a server restart; lab-driver stays out of
+        mpClientPlugin (docs/LAB.md). A restart empties the server's list, so
+        presence after one is a fresh login."""
+        started = self._clock()
+        deadline = started + self.s.connect_timeout_s
+        while True:
+            try:
+                if await asyncio.to_thread(self.state.online, client):
+                    rec.notes.append(f"step {index}: {client} online after {self._clock() - started:.1f}s")
+                    return True, ""
+            except StateError as e:
+                last = str(e)
+            else:
+                last = f"{client} not among the server's online players"
+            if self._clock() >= deadline:
+                rec.failures.append({"step": index, "kind": "timeout", "client": client, "error": f"E_RUN_{action.upper()}: {last} after {self.s.connect_timeout_s}s"})
+                rec.verdict = "red"
+                return False, last
+            await asyncio.sleep(1.0 * self.s.time_scale if self.s.time_scale else 0.01)
 
     async def _assert(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         needed: set[str] = set()

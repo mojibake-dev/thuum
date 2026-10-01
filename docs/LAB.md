@@ -281,7 +281,9 @@ pinned:
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/.
 
-Scenario verbs. Client verbs run in lab-driver: connect, reconnect, move,
+Scenario verbs. connect and reconnect are judged by the server (lab-api
+holds the step until labState lists the client online; the driver never
+touches mpClientPlugin). The other client verbs run in lab-driver: move,
 equip, cast, activate, hit, dump-state, request-screenshot, craft (an open
 driver item that m0-forge specifies). Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as

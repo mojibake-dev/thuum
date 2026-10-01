@@ -97,6 +97,8 @@ class Settings:
     screenshot_cmd_template: str = "& '{lab_dir}\\screenshot.ps1' -Out '{out}'"
     # Timeouts and budgets (seconds); time_scale shrinks scenario waits in tests.
     step_timeout_s: float = 60.0
+    # connect / reconnect: how long the server may take to report the client online.
+    connect_timeout_s: float = 60.0
     heartbeat_timeout_s: float = 180.0
     server_ready_timeout_s: float = 120.0
     guest_task_timeout_s: float = 120.0
@@ -138,6 +140,7 @@ class Settings:
             frida_exec_template=_env("FRIDA_EXEC_TEMPLATE", d.frida_exec_template),
             screenshot_cmd_template=_env("SCREENSHOT_CMD_TEMPLATE", d.screenshot_cmd_template),
             step_timeout_s=float(_env("STEP_TIMEOUT_S", str(d.step_timeout_s))),
+            connect_timeout_s=float(_env("CONNECT_TIMEOUT_S", str(d.connect_timeout_s))),
             heartbeat_timeout_s=float(_env("HEARTBEAT_TIMEOUT_S", str(d.heartbeat_timeout_s))),
             server_ready_timeout_s=float(_env("SERVER_READY_TIMEOUT_S", str(d.server_ready_timeout_s))),
             guest_task_timeout_s=float(_env("GUEST_TASK_TIMEOUT_S", str(d.guest_task_timeout_s))),

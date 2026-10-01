@@ -64,6 +64,16 @@ lab-api resolves a scenario's `"Skyrim.esm:IronSword"` to a base id through
 the hand-maintained `items` table in `guests.yaml`; a plain integer or
 `0x`-hex form id in a scenario needs no table entry.
 
+
+### online
+
+Request: `POST {SERVER_STATE_URL}/rpc/labState` with
+`{"payload": {"kind": "online"}}`. Answer: `{"players": [{"actorId": <int>,
+"profileId": <int>}, ...]}`, the players logged in right now. lab-api's
+`connect` and `reconnect` steps hold until the client's profile appears here
+(the server owns that state; a restart empties the list, so presence after
+one is a fresh login), up to `connect_timeout_s` (60 s).
+
 ## labCommand
 
 The server-side scenario verbs (rung R0) go here rather than to the client;
