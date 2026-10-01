@@ -166,7 +166,10 @@ operator's IaC command and is not called from CI.
   kept) is bind-mounted into sky-re for the Ghidra project and shared into
   sky-srv for the five master .esm files, the pinned exe backup, and addrlib.
   The Windows template disk is 120 GB on the guest pool, exempt from the
-  estate's hourly snapshot policy. Licensed files never leave rpool/sky.
+  estate's hourly snapshot policy, and so are the clones' disks: ZFS rolls
+  back only to the newest snapshot, so one hourly autosnap taken after
+  `clean-sp` makes Proxmox refuse lab-api's rollback (seen 2026-10-01 at the
+  first hour boundary after the snapshot). Licensed files never leave rpool/sky.
 - Display: the client GPU needs a display target for D3D11 when nobody is
   looking, a dummy HDMI plug or a virtual display driver (the Virtual
   Display Driver project, installed into the template); Sunshine in every
