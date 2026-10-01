@@ -33,6 +33,8 @@ if (-not (Test-Path (Join-Path $Game 'skse64_loader.exe'))) { throw "no skse64_l
 $dist = Join-Path $lab 'dist\Data'
 if (Test-Path $dist) { Copy-Item (Join-Path $dist '*') (Join-Path $Game 'Data') -Recurse -Force }
 if (-not (Test-Path $plugins)) { throw "no Skyrim Platform at $plugins after laying the dist" }
+# writeLogs (Skyrim Platform) needs this directory to exist; it never creates it.
+New-Item -ItemType Directory -Force -Path (Join-Path $Game 'Data\Platform\Logs') | Out-Null
 foreach ($f in 'lab-driver.js', 'lab-driver-settings.txt', 'skymp5-client-settings.txt') {
   Copy-Item (Join-Path $lab $f) (Join-Path $plugins $f) -Force
 }

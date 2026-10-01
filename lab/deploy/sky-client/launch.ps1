@@ -16,6 +16,10 @@ $game = (Get-Content 'C:\sky-lab\game-dir.txt' -Raw).Trim()
 $log = 'C:\sky-lab\launch.log'
 function Log($m) { Add-Content -Path $log -Value ((Get-Date).ToString('HH:mm:ss.fff') + ' ' + $m) }
 Log 'logon'
+# Skyrim Platform's writeLogs opens Data\Platform\Logs\<plugin>-logs.txt and never
+# creates the directory (ConsoleApi.cpp); without it lab-driver's log silently
+# does not exist (sky-c1, 2026-10-01). lab-api collects it as <client>-driver.log.
+New-Item -ItemType Directory -Force -Path (Join-Path $game 'Data\Platform\Logs') | Out-Null
 $deadline = (Get-Date).AddSeconds(60)
 while (-not (Get-Process steam -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 2 }
 Log ('steam ' + [bool](Get-Process steam -ErrorAction SilentlyContinue))
