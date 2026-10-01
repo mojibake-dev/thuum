@@ -13,16 +13,23 @@ put() {  # put <local file> <name in C:\sky-lab>
   local script="New-Item -ItemType Directory -Force -Path 'C:\\sky-lab' | Out-Null
 \$in=[Console]::OpenStandardInput(); \$f=[IO.File]::Create('C:\\sky-lab\\$2'); \$in.CopyTo(\$f); \$f.Close()"
   ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --pass-stdin 1 --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$script")" < "$1" \
-    | python3 -c 'import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get("exitcode")==0 else 1)' || { echo "failed: $2" >&2; exit 1; }
+    | python3 -c 'import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get("exitcode")==0 else 1)' || { echo "failed: $2" >&2; return 1; }
 }
 files=("$here/lab/driver/build/lab-driver.js")
 for f in "$here"/lab/deploy/sky-client/*; do case "$f" in *.md) ;; *) files+=("$f");; esac; done
 for f in "${files[@]}"; do
   name=$(basename "$f")
-  put "$f" "$name"
   want=$(shasum -a 256 "$f" | awk '{print $1}')
-  got=$(run "(Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\$name').Hash.ToLower()")
-  [ "$want" = "$got" ] || { echo "hash mismatch for $name: $want vs $got" >&2; exit 3; }
+  # the agent's stdin path fails now and then (a timeout answered with no JSON); three tries per file
+  ok=0
+  for attempt in 1 2 3; do
+    if put "$f" "$name" 2>/dev/null; then
+      got=$(run "(Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\$name').Hash.ToLower()" 2>/dev/null || true)
+      [ "$want" = "$got" ] && { ok=1; break; }
+    fi
+    sleep 3
+  done
+  [ "$ok" = 1 ] || { echo "could not stage $name after 3 tries (last hash: ${got:-none})" >&2; exit 3; }
   printf '  %-28s %s\n' "$name" "$got"
 done
 # The client dist from the mirror's Windows workflow (`just build-client`), when
