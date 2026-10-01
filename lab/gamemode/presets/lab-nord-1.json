@@ -1,0 +1,218 @@
+{
+  "hairColor": 3685164,
+  "headTextureSetId": 242977,
+  "headpartIds": [
+    333359,
+    333361,
+    546143,
+    333063,
+    333061,
+    331956,
+    148036,
+    333064
+  ],
+  "isFemale": false,
+  "name": "test 1",
+  "options": [
+    0.05999999865889549,
+    0.10000000149011612,
+    0.07999999821186066,
+    -1.0,
+    0.03999999910593033,
+    0.019999999552965164,
+    0.5,
+    0.5,
+    -0.05999999865889549,
+    -1.0,
+    0.0,
+    -0.23999999463558197,
+    0.6600000262260437,
+    0.1599999964237213,
+    -0.3400000035762787,
+    -0.4000000059604645,
+    0.18000000715255737,
+    -0.6399999856948853,
+    3.4028234663852886e+38
+  ],
+  "presets": [
+    1.0,
+    -1.0,
+    1.0,
+    19.0
+  ],
+  "raceId": 79686,
+  "skinColor": 13021352,
+  "tints": [
+    {
+      "argb": -3755864,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\SkinTone.dds",
+      "type": 6
+    },
+    {
+      "argb": 1799554049,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleUpperEyeSocket.dds",
+      "type": 4
+    },
+    {
+      "argb": 1621709906,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleLowerEyeSocket.dds",
+      "type": 5
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Cheeks.dds",
+      "type": 2
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Cheeks2.dds",
+      "type": 9
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_FrownLines.dds",
+      "type": 8
+    },
+    {
+      "argb": 816403538,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNord_Lips.dds",
+      "type": 1
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Nose.dds",
+      "type": 10
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadHuman_ForeHead.dds",
+      "type": 13
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadHuman_Chin.dds",
+      "type": 11
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadHuman_Neck.dds",
+      "type": 12
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Frekles_01.dds",
+      "type": 0
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_01.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_02.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_03.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_04.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_05.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_06.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_07.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_08.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_09.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_10.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_01.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_02.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_03.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_04.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_05.dds",
+      "type": 7
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadBothiahTattoo_01.dds",
+      "type": 0
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadBlackBloodTattoo_01.dds",
+      "type": 0
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadBlackBloodTattoo_02.dds",
+      "type": 0
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\RedGuardMaleEyeLinerStyle_01.dds",
+      "type": 3
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadDirt_01.dds",
+      "type": 14
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadDirt_02.dds",
+      "type": 14
+    },
+    {
+      "argb": 16777215,
+      "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadDirt_03.dds",
+      "type": 14
+    }
+  ],
+  "weight": 75.0
+}
