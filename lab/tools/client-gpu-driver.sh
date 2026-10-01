@@ -19,7 +19,7 @@ want=$(shasum -a 256 "$exe" | awk '{print $1}')
 ssh -o BatchMode=yes -J "$jump" "$srv" 'mkdir -p /srv/lab/handover'
 scp -q -o BatchMode=yes -J "$jump" "$exe" "$srv:/srv/lab/handover/nvidia-driver.exe"
 ssh -o BatchMode=yes -J "$jump" "$srv" "cd /srv/lab/handover && (nohup python3 -m http.server $port --bind $srv_ip >/dev/null 2>&1 & echo \$! > .http.pid)"
-got=$(run "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; New-Item -ItemType Directory -Force -Path 'C:\\sky-lab\\redist' | Out-Null; \$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri 'http://$srv_ip:$port/nvidia-driver.exe' -OutFile 'C:\\sky-lab\\redist\\nvidia-driver.exe'; (Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\redist\\nvidia-driver.exe').Hash.ToLower()" 600 | tail -1 | tr -d '\r') || true
+got=$(run "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; New-Item -ItemType Directory -Force -Path 'C:\\sky-lab\\redist' | Out-Null; \$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri 'http://$srv_ip:$port/nvidia-driver.exe' -OutFile 'C:\\sky-lab\\redist\\nvidia-driver.exe'; (Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\redist\\nvidia-driver.exe').Hash.ToLower()" 1500 | tail -1 | tr -d '\r') || true
 ssh -o BatchMode=yes -J "$jump" "$srv" "kill \$(cat /srv/lab/handover/.http.pid) 2>/dev/null; rm -f /srv/lab/handover/nvidia-driver.exe /srv/lab/handover/.http.pid"
 [ "$want" = "$got" ] || { echo "hash mismatch for the installer: $want vs $got" >&2; exit 3; }
 echo "== installing (silent, no reboot)"
