@@ -35,6 +35,9 @@ items:
   "Skyrim.esm:LeatherStrips": 0x000800E4
   "Skyrim.esm:IronDagger": 0x0001397E
   "Skyrim.esm:RecipeWeaponIronDagger": 0x000DA76A
+  # a one-handed weapon the spawn kit does not carry (the kit holds IronSword,
+  # IronDagger, IronWarAxe), for m0-inventory; same record scan, 2026-10-01
+  "Skyrim.esm:SteelSword": 0x00013989
 
 # cells: the places scenarios teleport to and measure from. A scenario's x, y, z
 # are offsets from the cell's origin: lab-api adds the origin on the way to the
