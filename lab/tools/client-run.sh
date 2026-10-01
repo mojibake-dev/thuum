@@ -18,5 +18,5 @@ Remove-Item 'C:\\sky-lab\\run.out' -ErrorAction SilentlyContinue
 Start-ScheduledTask -TaskName 'sky-lab-run'
 Start-Sleep -Seconds $wait_s
 @{ state = (Get-ScheduledTask -TaskName 'sky-lab-run').State.ToString(); result = (Get-ScheduledTaskInfo -TaskName 'sky-lab-run').LastTaskResult; out = ((Get-Content 'C:\\sky-lab\\run.out' -ErrorAction SilentlyContinue) -join ' | ') } | ConvertTo-Json -Compress"
-ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout $((wait_s + 60)) -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$launcher")" \
+ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout $((wait_s + 120)) -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$launcher")" \
   | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'
