@@ -149,6 +149,13 @@ the run's frida artifact. The crash-dump step also turns on process
 termination auditing, so an exit's status shows in the Security log (event
 4689) even when nothing else records it.
 
+Logs a run collects: Skyrim Platform's own (`skyrim-platform.log` under the
+lab user's My Games\Skyrim Special Edition\SKSE) as `<client>.log`, and
+lab-driver's (`Data\Platform\Logs\lab-driver-logs.txt`, Skyrim Platform's
+writeLogs) as `<client>-driver.log`. Skyrim Platform never creates that Logs
+directory, so install-lab.ps1 and launch.ps1 do; a clone whose snapshot
+predates that has no driver log until its next client-dist and cold retake.
+
 ## A driver change
 
 `just client-driver <vmid>` builds lab-driver, pushes the bundle into the
