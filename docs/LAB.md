@@ -237,9 +237,18 @@ where (real since 2026-10-01):
    _ResourcePack.esl and the four free Creation Club plugins) while the
    server loads the five masters, so skymp5-client shows "LOAD ORDER
    WARNING: you have more mods than server" for five seconds at login; the
-   check passes because the first five match in order. Load-order parity
-   (the same ten on the server, from fenestrate through `just persist-game`)
-   is an open M0 item.
+   check passes because the first five match in order. The client's order
+   is the engine's: the five masters, then the plugins present on disk in
+   the order of the game's own Skyrim.ccc (ccBGSSSE001-Fish.esm,
+   ccQDRSSE001-SurvivalMode.esl, ccBGSSSE037-Curios.esl,
+   ccBGSSSE025-AdvDSGS.esm), then _ResourcePack.esl. The five extra files
+   (2.6 MB in all, identical on every Steam install) sit in
+   rpool/sky/persist/esm beside the masters since 2026-10-01, pulled off
+   sky-c1 through the guest agent. They are not in the server's loadOrder
+   yet: libespm has no light-plugin (.esl) handling, so the server would
+   give those records full load indices where the client compacts them into
+   the FE space, and form ids would disagree. Load-order parity therefore
+   waits on ESL support in libespm, a port item.
    Also open: Skyrim Platform logs "on('update'): failed to get key 'data':
    failed to call custom Serialize for type struct Equipment: ... class
    Inventory" once per login on the 1.7.104 client (c1.log of run
