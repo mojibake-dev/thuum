@@ -487,6 +487,8 @@ re-analyst subagent's procedure is unchanged, only the transport.
 2. sky-re with pyghidra-mcp.
 3. sky-c1 with the 1050, sky-c2 with the second adapter;
    `smoke-two-players` green, unattended once both clones boot to connected.
+   Done 2026-10-01: run 20261001-233455 (17 of 17 steps, 3 min 10 s wall,
+   both clones rolled back and booted to connected in 81 s).
 
 ## References
 
