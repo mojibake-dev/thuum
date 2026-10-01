@@ -237,14 +237,20 @@ client-display vmid w="1920" h="1080" hz="60":
 client-game-firewall vmid:
     @lab/tools/client-game-firewall.sh {{vmid}}
 
+# Steam into offline mode on a clone (loginusers.vdf WantsOfflineMode): a cold boot in the dark lab otherwise
+# leaves Steam connecting forever and the Steam-wrapped game exits before SKSE runs (steam-offline.ps1).
+client-steam-offline vmid:
+    @lab/tools/client-steam-offline.sh {{vmid}}
+
 # Bring a fresh clone of the template up to a connected lab client, in order: its Sunshine base port
-# (48989 sky-c1, 49989 sky-c2), the NVIDIA driver, the 1920x1080 display, the game firewall, and a launch
-# test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
+# (48989 sky-c1, 49989 sky-c2), the NVIDIA driver, the 1920x1080 display, the game firewall, Steam offline,
+# and a launch test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
 client-bringup vmid base:
     just client-sunshine-port {{vmid}} {{base}}
     just client-gpu-driver {{vmid}}
     just client-display {{vmid}}
     just client-game-firewall {{vmid}}
+    just client-steam-offline {{vmid}}
     just client-launch-test {{vmid}}
 
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------

@@ -225,9 +225,11 @@ where (real since 2026-10-01):
    and their scheduled tasks. No GPU in the template, so no NVIDIA driver.
 2. Per clone, after `sky-lab` sets its address: `just client-bringup <vmid>
    <sunshine base>` (Sunshine base port, NVIDIA driver, 1920x1080 display,
-   the game firewall for the dark lab, launch test), then the clone's
-   `clean-sp` snapshot with the game stopped. That snapshot is what lab-api
-   rolls back to (lab/deploy/sky-client/README.md, "Clone bring-up").
+   the game firewall for the dark lab, Steam in offline mode, launch test),
+   then the clone's `clean-sp` snapshot, taken cold (game stopped, VM shut
+   down). That snapshot is what lab-api rolls back to
+   (lab/deploy/sky-client/README.md, "Clone bring-up"). Steam offline mode is
+   what lets a cold boot in the dark lab reach a running game at all.
 
 "Connected" is not a snapshot; it is where a clone arrives by itself: stop,
 rollback to `clean-sp`, cold boot, autologon, the scheduled task launches

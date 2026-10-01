@@ -99,12 +99,33 @@ client logged in ten seconds after launch. The server (UDP 7777, TCP 3000) and
 lab-api (TCP 80 on sky-srv) are inside the allowed range; DNS is the Windows
 resolver's, not the exe's, and is untouched.
 
+## Steam on a dark boot
+
+Steam is the game's launcher and licence check, and on a cold boot inside the
+dark lab it never logs in: it loops on CM pings (connection_log.txt, "failed
+talking to cm" every second with the fail-fast lock), and SkyrimSE.exe
+started by the SKSE loader exits before SKSE writes its log, so the logon
+task's launch produces no heartbeat. Every launch test that passed before
+2026-10-01 rode the template's still-running online session. The answer is
+Steam's own offline mode, persisted the way the client's "Go Offline" menu
+does it: `WantsOfflineMode` and `SkipOfflineModeWarning` set to 1 for the
+remembered account in `config\loginusers.vdf`. `just client-steam-offline
+<vmid>` (steam-offline.ps1 in the lab user's session) shuts Steam down, sets
+them, starts it again; a launch test after it ends logged in. Offline mode
+needs one online login with "Remember me" and one online run of the game,
+both done in the template; its ticket ages with the wall clock, so if a far
+future rollback boot shows Steam asking for a login, the fix is an egress
+lease, Go Online, Go Offline, and a retaken snapshot.
+
 ## Clone bring-up
 
 `just client-bringup <vmid> <sunshine base>` runs the per-clone steps in order
 once thuum-mundus's `sky-lab` has given the clone its address: Sunshine base
-port, NVIDIA driver, display mode, game firewall, launch test. The template is
-immutable (converted 2026-10-01), so every clone needs them; sky-c1 (711) is
-done, sky-c2 (712) gets base 49989 when fenestrate is off. A clone's
-`clean-sp` snapshot, the one lab-api rolls back to, is taken after this and
-with the game stopped.
+port, NVIDIA driver, display mode, game firewall, Steam offline, launch test.
+The template is immutable (converted 2026-10-01), so every clone needs them;
+sky-c1 (711) is done, sky-c2 (712) gets base 49989 when fenestrate is off.
+A clone's `clean-sp` snapshot, the one lab-api rolls back to, is taken after
+this with the game stopped and the VM shut down (`sky-lab snapshot <vmid>
+clean-sp --cold`): a snapshot of a running Windows is a power-cut image, and
+the first boot from one on 2026-10-01 logged a 45 s start timeout for the
+QEMU guest agent and a last-alive stamp 13 minutes older than the snapshot.
