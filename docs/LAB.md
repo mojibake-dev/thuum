@@ -241,9 +241,11 @@ where (real since 2026-10-01):
    before its driver): the package was the Pascal branch, fetched for the
    GTX 1050's product id, which carries no Blackwell entries; the lab keeps
    one package per card family now (lab/deploy/sky-client/README.md). Two
-   estate changes made while that was chased stay: `cpu: host,hidden=1`
-   on both clones (fenestrate's setting) and Secure Boot off on sky-c2's
-   EFI store (fenestrate's state). The estate's PCI mapping names are
+   host variables were measured as non-causes on the way: the hidden
+   hypervisor flag (`cpu: host,hidden=1`, fenestrate's setting, now on both
+   clones and harmless) and Secure Boot (the installed driver drives the
+   card with the template's keyed EFI store, so the clones stayed identical
+   to the template). The estate's PCI mapping names are
    swapped against the hardware: `gpu-gtx1050` is 0000:01:00.0, the 5060
    Ti, and `gpu-sky` is 0000:0b:00.0, the GTX 1050; renaming touches
    fenestrate's config and waits for Eli.
