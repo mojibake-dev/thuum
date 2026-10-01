@@ -227,12 +227,22 @@ where (real since 2026-10-01):
    fork's `skyrim-1.7` dist, lab-driver, the lab helpers under `C:\sky-lab`
    and their scheduled tasks. No GPU in the template, so no NVIDIA driver.
 2. Per clone, after `sky-lab` sets its address: `just client-bringup <vmid>
-   <sunshine base>` (Sunshine base port, NVIDIA driver, 1920x1080 display,
-   the game firewall for the dark lab, Steam in offline mode, launch test),
+   <sunshine base> <client> <profile>` (Sunshine base port, NVIDIA driver,
+   1920x1080 display, the game firewall for the dark lab, Steam in offline
+   mode, crash dumps, the current client dist, the clone's client name and
+   profile id, launch test),
    then the clone's `clean-sp` snapshot, taken cold (game stopped, VM shut
    down). That snapshot is what lab-api rolls back to
    (lab/deploy/sky-client/README.md, "Clone bring-up"). Steam offline mode is
    what lets a cold boot in the dark lab reach a running game at all.
+   sky-c1 (711, GTX 1050) and sky-c2 (712, RTX 5060 Ti) are both through it
+   as of 2026-10-01. On sky-c2 the card first sat in Windows with Code 43
+   before any driver: the clone lacked fenestrate's `cpu: host,hidden=1`
+   (the hidden-hypervisor flag); the estate now sets it on both clones, and
+   it takes effect at the next start. The estate's PCI mapping names are
+   swapped against the hardware: `gpu-gtx1050` is 0000:01:00.0, the 5060
+   Ti, and `gpu-sky` is 0000:0b:00.0, the GTX 1050; renaming touches
+   fenestrate's config and waits for Eli.
    The current build's Data carries ten plugins (the five masters,
    _ResourcePack.esl and the four free Creation Club plugins) while the
    server loads the five masters, so skymp5-client shows "LOAD ORDER
@@ -338,8 +348,10 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    server container, restore `world/` from the named snapshot directory,
    `docker compose up`, wait for tcp/3000. `clean` (/srv/lab/snapshots/clean)
    is the lab's baseline world: the lab clients' recorded characters and
-   nothing else (profile 1 since 2026-10-01, the appearance in
-   lab/gamemode/presets/lab-nord-1.json), because a profile without an
+   nothing else (profiles 1 and 2 since 2026-10-01; profile 1's look was
+   recorded from the race menu into lab/gamemode/presets/lab-nord-1.json,
+   profile 2 got the same preset through set-appearance, which also clears
+   the server's race-menu flag), because a profile without an
    appearance lands in the race menu, which pauses the world, and the stock
    client cannot close that menu on the server's say-so. The empty world is
    kept beside it as `clean-empty-<stamp>`. The VM-level rollback (stop,
