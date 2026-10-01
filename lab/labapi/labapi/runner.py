@@ -24,6 +24,18 @@ from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
 from .state import ServerState, StateError
 from .system import Capture, System
 
+def _brief(value: Any, limit: int = 240) -> str:
+    """A step's answer (the driver's data, a record) as one short JSON string
+    for result.json; empty for nothing."""
+    if value in (None, "", {}, []):
+        return ""
+    try:
+        text = json.dumps(value, sort_keys=True, default=str)
+    except (TypeError, ValueError):
+        text = str(value)
+    return text if len(text) <= limit else text[: limit - 3] + "..."
+
+
 
 class RunnerError(Exception):
     """E_RUN: the lab itself failed; the verdict is error, not red."""
@@ -194,7 +206,10 @@ class Runner:
             rec.step = f"{i}: {step.describe()}"
             t0 = self._clock()
             ok, note = await self._run_step(rec, i, step)
-            rec.steps.append({"index": i, "kind": step.kind, "client": step.client, "action": step.action, "ok": ok, "seconds": round(self._clock() - t0, 3), "note": note})
+            entry = {"index": i, "kind": step.kind, "client": step.client, "action": step.action, "ok": ok, "seconds": round(self._clock() - t0, 3), "note": note}
+            if step.client:
+                entry["pos"] = await asyncio.to_thread(self._pos_of, step.client)
+            rec.steps.append(entry)
             if not ok and rec.verdict in ("red", "error"):
                 break
         rec.phase = "artifacts"
@@ -344,6 +359,8 @@ class Runner:
         if step.kind == "assert":
             return await self._assert(rec, index, step)
         assert step.client and step.action
+        if step.action == "teleport":
+            return await self._teleport(rec, index, step)
         if step.action in SERVER_ACTIONS:
             try:
                 await asyncio.to_thread(self.state.command, step.client, step.action, step.args)
@@ -366,11 +383,74 @@ class Runner:
             return False, str(e)
         qs = await self.board.run_step(step.client, step.action, args, self.s.step_timeout_s)
         if qs.ok:
-            return True, ""
+            return True, _brief(qs.result.get("data"))
         error = str(qs.result.get("error", "step failed"))
         rec.failures.append({"step": index, "kind": "timeout" if error == "timeout" else "step-error", "client": step.client, "error": error})
         rec.verdict = "red"
         return False, error
+
+    async def _teleport(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+        """teleport is judged by the server's record of the client, the owner
+        of that state: the gamemode sets the record and tells the client, the
+        client either moves (and reports from the target) or drops the move
+        (Skyrim Platform blocks MoveRefrToPosition while its generated save
+        settles after a login) and the record snaps back to where the client
+        really is. So: send, wait teleport_settle_s, read back, send again,
+        until the record sits within teleport_tolerance of the target in x
+        and y (z is the terrain's) or teleport_timeout_s is spent."""
+        assert step.client
+        started = self._clock()
+        deadline = started + self.s.teleport_timeout_s
+        attempts = 0
+        last = "no record"
+        while True:
+            attempts += 1
+            try:
+                await asyncio.to_thread(self.state.command, step.client, "teleport", step.args)
+                await asyncio.sleep(self.s.teleport_settle_s * self.s.time_scale)
+                actor = await asyncio.to_thread(self.state.actor, step.client)
+            except StateError as e:
+                rec.failures.append({"step": index, "kind": "server-command", "error": str(e)})
+                rec.verdict = "red"
+                return False, str(e)
+            if actor is not None and self._at_target(actor, step.args):
+                note = f"landed after {attempts} attempt(s), {self._clock() - started:.1f}s"
+                rec.notes.append(f"step {index}: {step.client} teleport {note}")
+                return True, note
+            last = _brief({k: actor.get(k) for k in ("cell", "x", "y", "z")}) if actor else "no record"
+            if self._clock() >= deadline:
+                error = f"E_RUN_TELEPORT: {step.client} never settled at the target within {self.s.teleport_timeout_s:g}s ({attempts} attempts, last {last})"
+                rec.failures.append({"step": index, "kind": "timeout", "client": step.client, "error": error})
+                rec.verdict = "red"
+                return False, error
+
+    def _at_target(self, actor: dict[str, Any], args: dict[str, Any]) -> bool:
+        """The record and the scenario's target share a frame when the target
+        names a cell the table knows (the record then carries offsets from the
+        same origin); a bare descriptor compares absolute to absolute."""
+        if "cell" in args and str(actor.get("cell")) != str(args["cell"]):
+            return False
+        try:
+            return all(abs(float(actor[k]) - float(args.get(k, 0) or 0)) <= self.s.teleport_tolerance for k in ("x", "y"))
+        except (KeyError, TypeError, ValueError):
+            return False
+
+    def _pos_of(self, client: str) -> dict[str, Any] | None:
+        """The server's record of a client after a step, in the scenario's
+        frame, for result.json; never fails a step."""
+        try:
+            actor = self.state.actor(client)
+        except StateError:
+            return None
+        if actor is None:
+            return None
+        out: dict[str, Any] = {"cell": actor.get("cell")}
+        for k in ("x", "y", "z"):
+            try:
+                out[k] = round(float(actor[k]), 1)
+            except (KeyError, TypeError, ValueError):
+                out[k] = None
+        return out
 
     async def _wait_online(self, rec: RunRecord, index: int, client: str, action: str) -> tuple[bool, str]:
         """connect and reconnect are judged by the server, the owner of that
@@ -385,8 +465,9 @@ class Runner:
             try:
                 if await asyncio.to_thread(self.state.online, client):
                     rec.notes.append(f"step {index}: {client} online after {self._clock() - started:.1f}s")
-                    # the client drops MoveRefrToPosition for ~5 s after its save loads (config.connect_settle_s)
-                    await asyncio.sleep(self.s.connect_settle_s * self.s.time_scale)
+                    # an optional pause after online (config.connect_settle_s); the teleport step judges itself
+                    if self.s.connect_settle_s > 0:
+                        await asyncio.sleep(self.s.connect_settle_s * self.s.time_scale)
                     return True, ""
             except StateError as e:
                 last = str(e)
@@ -493,15 +574,26 @@ class Runner:
             rec.notes.append(f"unknown artifact {n!r} ignored")
 
     async def _client_log(self, rec: RunRecord, client: str, name: str) -> None:
+        """<client>.log is Skyrim Platform's log; <client>-driver.log is
+        lab-driver's own (writeLogs), found under the game directory the client
+        recorded at install. Both are copied first: the game holds its logs
+        open without read sharing, which the agent's file-read cannot get past,
+        and PowerShell's Copy-Item can."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             rec.notes.append(f"{name}: {client} is unmanaged or unmapped; log not fetched")
             return
+        await self._fetch_client_file(rec, g, name, f"'{self.s.client_driver_log}'")
+        game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
+        await self._fetch_client_file(rec, g, f"{client}-driver.log", f"(Join-Path {game_dir} '{self.s.client_plugin_log}')")
+
+    async def _fetch_client_file(self, rec: RunRecord, g: Guest, name: str, source: str) -> None:
+        """Copy the file at the PowerShell path expression `source` on the
+        client into the lab directory as `name`, read it back and store it as
+        an artifact; a failure is a note, never a failed run."""
         try:
-            # The game holds its log open without read sharing, which the agent's
-            # file-read cannot get past; PowerShell's Copy-Item can. Copy, then read.
             copy = f"{self.s.client_lab_dir}\\{name}"
-            cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath '{self.s.client_driver_log}' -Destination '{copy}' -Force"]
+            cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath {source} -Destination '{copy}' -Force"]
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
             if res.exitcode != 0:
                 rec.notes.append(f"{name}: copy exited {res.exitcode}: {res.err.strip()[:200]}")

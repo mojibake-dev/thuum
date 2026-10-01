@@ -72,11 +72,15 @@ Request: `POST {SERVER_STATE_URL}/rpc/labState` with
 "profileId": <int>}, ...]}`, the players logged in right now. lab-api's
 `connect` and `reconnect` steps hold until the client's profile appears here
 (the server owns that state; a restart empties the list, so presence after
-one is a fresh login), up to `connect_timeout_s` (60 s), and then wait
-`connect_settle_s` (8 s): the client refuses MoveRefrToPosition for about five
-seconds after its generated save loads (Skyrim Platform's LoadGame sink), so a
-teleport sent earlier is dropped on the client and the server's record snaps
-back to the client's real position (run 20261001-222803).
+one is a fresh login), up to `connect_timeout_s` (60 s). Online is not yet
+movable: the client refuses MoveRefrToPosition until its generated save has
+loaded and fifty Papyrus updates have passed (Skyrim Platform's LoadGame
+sink), about eight seconds after online on sky-c1 (measured 2026-10-01), so a
+teleport sent in that window is dropped on the client and the server's record
+snaps back to the client's real position within three seconds (run
+20261001-222803). The `teleport` step therefore judges itself by the record
+(below) instead of waiting a fixed time; `connect_settle_s` (0 s) is an
+optional extra pause after online.
 
 ## labCommand
 
@@ -95,7 +99,13 @@ them by name.
 
 `teleport` carries the descriptor and absolute coordinates; lab-api resolves
 a scenario's named cell and offsets before sending (a descriptor the table
-does not know passes through unchanged). `set-appearance` applies `presets/<preset>.json` next to the gamemode (an
+does not know passes through unchanged). The server answers ok as soon as
+the record is set, which proves nothing about the client, so lab-api waits
+`teleport_settle_s` (3 s), reads the actor back and sends the teleport again
+until the record sits within `teleport_tolerance` (64 units) of the target in
+x and y (z is the terrain's) or `teleport_timeout_s` (60 s) is spent; the
+step's note says how many attempts it took, and a step that never lands is
+red (E_RUN_TELEPORT). `set-appearance` applies `presets/<preset>.json` next to the gamemode (an
 appearance record as `mp.get(actor, "appearance")` returns it; recorded from
 a real client, never typed). `set-percentages` sets the given actor values as
 fractions. `kill` sets the actor dead; `respawn` clears it and moves the actor

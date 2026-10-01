@@ -119,6 +119,10 @@ class FakeActor:
     inventory: dict[int, int] = field(default_factory=dict)
     spawn: tuple[float, float, float, str] = (0.0, 0.0, 0.0, "lab-spawn")
     online: bool = True  # listed by labState kind online
+    # teleports the client drops (Skyrim Platform's post-login block): the
+    # record stays where it is, as the real server's does once the client
+    # reports its true position back.
+    drops_teleports: int = 0
 
 
 class FakeState:
@@ -161,6 +165,9 @@ class FakeState:
                 return {"ok": False, "error": "no actor for that profileId"}
             kind = payload.get("kind")
             if kind == "teleport":
+                if actor.drops_teleports > 0:
+                    actor.drops_teleports -= 1
+                    return {"ok": True, "actorId": 0xFF000000 + int(payload.get("profileId", 0))}
                 actor.x, actor.y, actor.z = float(payload.get("x", 0)), float(payload.get("y", 0)), float(payload.get("z", 0))
                 actor.cell = str(payload.get("cell", actor.cell))
                 return {"ok": True}

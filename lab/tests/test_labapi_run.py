@@ -82,9 +82,11 @@ class Doubles:
             if step["action"] == "move":
                 # the driver's contract: an absolute target, never an offset
                 assert "dx" not in step["args"] and "x" in step["args"], step["args"]
+                distance = ((float(step["args"]["x"]) - me.x) ** 2 + (float(step["args"]["y"]) - me.y) ** 2) ** 0.5
                 me.x = float(step["args"]["x"])
                 me.y = float(step["args"]["y"])
                 me.z = float(step["args"]["z"])
+                data = {"dispatched": True, "distance": distance, "speed": step["args"].get("speed")}
             elif step["action"] == "dump-state":
                 data = {"self": {"x": me.x, "y": me.y, "z": me.z, "cell": me.cell},
                         "sees": {o: {"x": a.x, "y": a.y, "z": a.z} for pid, a in self.state.actors.items() for o, p in self.profile.items() if p == pid and o != name}}
@@ -155,6 +157,15 @@ class RunTests(unittest.TestCase):
         self.assertTrue((run_dir / "world-before" / "actors.json").is_file())
         self.assertTrue((run_dir / "world-diff").is_file())
         self.assertTrue(any("c1.log" in n for n in result["notes"]), "unmanaged client log is noted, not fetched")
+        # every client step records where the server put the client afterwards, and a driver step its answer
+        move = next(s for s in result["steps"] if s["action"] == "move")
+        self.assertEqual(move["pos"]["cell"], "lab-spawn", move)
+        self.assertAlmostEqual(move["pos"]["x"], 300.0, delta=1)
+        self.assertIn('"dispatched": true', move["note"], move)
+        self.assertIn('"distance": 300.0', move["note"], move)
+        teleport = next(s for s in result["steps"] if s["action"] == "teleport")
+        self.assertIn("landed after 1 attempt", teleport["note"], teleport)
+        self.assertNotIn("pos", next(s for s in result["steps"] if s["kind"] == "wait"))
         # the fake state saw the two server verbs and the RPC contract's shapes
         kinds = [(n, p["kind"]) for n, p in self.state.rpc_log]
         self.assertIn(("labCommand", "teleport"), kinds)
@@ -286,6 +297,31 @@ class ArtifactFailures(RunTests):
         self.assertEqual(body2["verdict"], "green", body2)
 
 
+@needs_deps
+class ClientLogs(RunTests):
+    def test_managed_client_yields_the_platform_log_and_the_driver_log(self):
+        """c1.log is Skyrim Platform's log; c1-driver.log is lab-driver's own
+        (writeLogs under the game directory named in game-dir.txt). Both are
+        copied into the lab directory first and read from there."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.files[r"C:\sky-lab\c1.log"] = "platform log\n"
+        pve.files[r"C:\sky-lab\c1-driver.log"] = "2026-10-01T00:00:00Z loaded\n"
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn("c1.log", body["artifacts"])
+        self.assertIn("c1-driver.log", body["artifacts"])
+        run_dir = self.tmp / "results" / run_id
+        self.assertEqual((run_dir / "c1-driver.log").read_text(), "2026-10-01T00:00:00Z loaded\n")
+        copies = [c for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
+        self.assertEqual(len(copies), 2, pve.calls)
+        self.assertIn("game-dir.txt", " ".join(copies[1][2]))
+        self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
+
+
 OFFLINE = """
 id: offline
 clients: [c1]
@@ -312,6 +348,60 @@ class ConnectSteps(RunTests):
         self.assertEqual(body["verdict"], "red", body)
         self.assertTrue(any(f["kind"] == "timeout" and "E_RUN_CONNECT" in f["error"] for f in body["failures"]), body["failures"])
         self.assertNotIn("dump-state", [a for _, a, _ in self.doubles.seen])
+
+
+TELEPORT = """
+id: teleport
+clients: [c1]
+steps:
+  - c1: connect
+  - c1: teleport {cell: lab-spawn, x: 300, y: -200, z: 0}
+  - assert:
+      - abs(server.actor(c1).x - 300) < 1
+"""
+
+
+@needs_deps
+class TeleportSteps(RunTests):
+    def test_teleport_is_resent_until_the_server_record_sits_at_the_target(self):
+        """The client drops the first two (the post-login block): the record
+        stays put each time, lab-api reads that back and sends again."""
+        self.state.actors[1].drops_teleports = 2
+        run_id, body = self._run(TELEPORT)
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"]
+        self.assertEqual(len(sent), 3, sent)
+        reads = [p for n, p in self.state.rpc_log if n == "labState" and p["kind"] == "actor"]
+        self.assertGreaterEqual(len(reads), 3, "each attempt reads the record back")
+        step = next(s for s in body["steps"] if s["action"] == "teleport")
+        self.assertIn("landed after 3 attempt", step["note"], step)
+        self.assertTrue(any("c1 teleport landed after 3 attempt" in n for n in body["notes"]), body["notes"])
+
+    def test_teleport_the_client_never_takes_is_red(self):
+        import dataclasses
+
+        self.state.actors[1].drops_teleports = 10 ** 6
+        self.services.runner.s = dataclasses.replace(self.services.runner.s, teleport_timeout_s=0.0)
+        run_id, body = self._run(TELEPORT)
+        self.assertEqual(body["verdict"], "red", body)
+        fail = body["failures"][0]
+        self.assertEqual(fail["kind"], "timeout", fail)
+        self.assertIn("E_RUN_TELEPORT", fail["error"])
+        self.assertIn("1 attempts", fail["error"])
+        self.assertIn('"x": 0', fail["error"], "the last record read is named")
+        # the run stopped at the teleport: no assertion was evaluated
+        self.assertEqual([s["action"] for s in body["steps"]][-1], "teleport", body["steps"])
+
+    def test_teleport_target_is_compared_in_the_scenario_frame(self):
+        """A record in another cell is never 'at the target' whatever its numbers."""
+        from labapi.runner import Runner
+
+        runner = self.services.runner
+        self.assertTrue(runner._at_target({"cell": "lab-spawn", "x": 40.0, "y": -20.0, "z": 500.0}, {"cell": "lab-spawn", "x": 0, "y": 0, "z": 0}))
+        self.assertFalse(runner._at_target({"cell": "lab-spawn", "x": 65.0, "y": 0.0, "z": 0.0}, {"cell": "lab-spawn", "x": 0, "y": 0, "z": 0}))
+        self.assertFalse(runner._at_target({"cell": "3c:Skyrim.esm", "x": 0.0, "y": 0.0, "z": 0.0}, {"cell": "lab-spawn", "x": 0, "y": 0, "z": 0}))
+        self.assertFalse(runner._at_target({"cell": "lab-spawn"}, {"cell": "lab-spawn", "x": 0, "y": 0}))
+        self.assertIsInstance(runner, Runner)
 
 
 MOVE = """

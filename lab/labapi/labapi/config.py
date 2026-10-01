@@ -95,6 +95,10 @@ class Settings:
     # traces. lab-driver's writeLogs sink (Data\Platform\Logs\lab-driver-logs.txt
     # in the game directory) only appears once the driver logs an error.
     client_driver_log: str = r"C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform.log"
+    # lab-driver's own log (Skyrim Platform's writeLogs), relative to the game
+    # directory the client recorded in {client_lab_dir}\game-dir.txt at install;
+    # collected as <client>-driver.log beside <client>.log.
+    client_plugin_log: str = r"Data\Platform\Logs\lab-driver-logs.txt"
     # PowerShell run through the guest agent. {url} {name} {lab_dir} {out} are filled in.
     # frida-inject (the standalone injector, staged by `just client-frida`) attaches
     # to the game by name once it exists plus five seconds (attaching at process
@@ -129,12 +133,20 @@ class Settings:
     # connect / reconnect: how long the server may take to report the client online.
     connect_timeout_s: float = 60.0
     # After the server reports the client online, the client still refuses
-    # MoveRefrToPosition for about five seconds (Skyrim Platform's LoadGame sink
-    # blocks it while its generated save settles), so a teleport sent in that
-    # window is dropped on the client and the server's record snaps back to
-    # where the client really is. connect and reconnect wait this long after
-    # online before the next step (run 20261001-222803).
-    connect_settle_s: float = 8.0
+    # MoveRefrToPosition until its generated save has loaded and fifty Papyrus
+    # updates have passed (Skyrim Platform's LoadGame sink; about eight seconds
+    # after online on sky-c1, measured 2026-10-01, longer when the load is slow),
+    # so a teleport sent in that window is dropped on the client and the
+    # server's record snaps back to the client's real position within three
+    # seconds. The teleport step therefore judges itself by the server's
+    # record: send, wait teleport_settle_s, read back, and send again until the
+    # record sits within teleport_tolerance units of the target or
+    # teleport_timeout_s is spent. connect_settle_s is an extra pause after
+    # online for scenarios that need one; the judged teleport needs none.
+    connect_settle_s: float = 0.0
+    teleport_settle_s: float = 3.0
+    teleport_timeout_s: float = 60.0
+    teleport_tolerance: float = 64.0
     heartbeat_timeout_s: float = 180.0
     server_ready_timeout_s: float = 120.0
     guest_task_timeout_s: float = 120.0
@@ -175,11 +187,15 @@ class Settings:
             game_port=int(_env("GAME_PORT", str(d.game_port))),
             client_lab_dir=_env("CLIENT_LAB_DIR", d.client_lab_dir),
             client_driver_log=_env("CLIENT_DRIVER_LOG", d.client_driver_log),
+            client_plugin_log=_env("CLIENT_PLUGIN_LOG", d.client_plugin_log),
             frida_exec_template=_env("FRIDA_EXEC_TEMPLATE", d.frida_exec_template),
             screenshot_cmd_template=_env("SCREENSHOT_CMD_TEMPLATE", d.screenshot_cmd_template),
             step_timeout_s=float(_env("STEP_TIMEOUT_S", str(d.step_timeout_s))),
             connect_timeout_s=float(_env("CONNECT_TIMEOUT_S", str(d.connect_timeout_s))),
             connect_settle_s=float(_env("CONNECT_SETTLE_S", str(d.connect_settle_s))),
+            teleport_settle_s=float(_env("TELEPORT_SETTLE_S", str(d.teleport_settle_s))),
+            teleport_timeout_s=float(_env("TELEPORT_TIMEOUT_S", str(d.teleport_timeout_s))),
+            teleport_tolerance=float(_env("TELEPORT_TOLERANCE", str(d.teleport_tolerance))),
             heartbeat_timeout_s=float(_env("HEARTBEAT_TIMEOUT_S", str(d.heartbeat_timeout_s))),
             server_ready_timeout_s=float(_env("SERVER_READY_TIMEOUT_S", str(d.server_ready_timeout_s))),
             guest_task_timeout_s=float(_env("GUEST_TASK_TIMEOUT_S", str(d.guest_task_timeout_s))),
