@@ -72,7 +72,11 @@ Request: `POST {SERVER_STATE_URL}/rpc/labState` with
 "profileId": <int>}, ...]}`, the players logged in right now. lab-api's
 `connect` and `reconnect` steps hold until the client's profile appears here
 (the server owns that state; a restart empties the list, so presence after
-one is a fresh login), up to `connect_timeout_s` (60 s).
+one is a fresh login), up to `connect_timeout_s` (60 s), and then wait
+`connect_settle_s` (8 s): the client refuses MoveRefrToPosition for about five
+seconds after its generated save loads (Skyrim Platform's LoadGame sink), so a
+teleport sent earlier is dropped on the client and the server's record snaps
+back to the client's real position (run 20261001-222803).
 
 ## labCommand
 

@@ -385,6 +385,8 @@ class Runner:
             try:
                 if await asyncio.to_thread(self.state.online, client):
                     rec.notes.append(f"step {index}: {client} online after {self._clock() - started:.1f}s")
+                    # the client drops MoveRefrToPosition for ~5 s after its save loads (config.connect_settle_s)
+                    await asyncio.sleep(self.s.connect_settle_s * self.s.time_scale)
                     return True, ""
             except StateError as e:
                 last = str(e)

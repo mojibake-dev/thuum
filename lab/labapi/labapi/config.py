@@ -128,6 +128,13 @@ class Settings:
     step_timeout_s: float = 60.0
     # connect / reconnect: how long the server may take to report the client online.
     connect_timeout_s: float = 60.0
+    # After the server reports the client online, the client still refuses
+    # MoveRefrToPosition for about five seconds (Skyrim Platform's LoadGame sink
+    # blocks it while its generated save settles), so a teleport sent in that
+    # window is dropped on the client and the server's record snaps back to
+    # where the client really is. connect and reconnect wait this long after
+    # online before the next step (run 20261001-222803).
+    connect_settle_s: float = 8.0
     heartbeat_timeout_s: float = 180.0
     server_ready_timeout_s: float = 120.0
     guest_task_timeout_s: float = 120.0
@@ -172,6 +179,7 @@ class Settings:
             screenshot_cmd_template=_env("SCREENSHOT_CMD_TEMPLATE", d.screenshot_cmd_template),
             step_timeout_s=float(_env("STEP_TIMEOUT_S", str(d.step_timeout_s))),
             connect_timeout_s=float(_env("CONNECT_TIMEOUT_S", str(d.connect_timeout_s))),
+            connect_settle_s=float(_env("CONNECT_SETTLE_S", str(d.connect_settle_s))),
             heartbeat_timeout_s=float(_env("HEARTBEAT_TIMEOUT_S", str(d.heartbeat_timeout_s))),
             server_ready_timeout_s=float(_env("SERVER_READY_TIMEOUT_S", str(d.server_ready_timeout_s))),
             guest_task_timeout_s=float(_env("GUEST_TASK_TIMEOUT_S", str(d.guest_task_timeout_s))),
