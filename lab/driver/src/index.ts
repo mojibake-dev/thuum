@@ -75,7 +75,13 @@ let warnedNoConfig = false;
 // A screenshot request waits for the file the engine writes; posted later.
 let deferred: { step: Step; file: string; startedAt: number } | null = null;
 // A move in flight: the update loop steps the player toward (x, y) at speed units per second until it arrives or time is up.
-let moving: { x: number; y: number; speed: number; last: number; until: number } | null = null;
+// A move in flight: the target, the position we last commanded (cx, cy) and
+// the speed. The step is taken from the commanded position, not from the
+// position read back, because setPosition lands a frame late and reading the
+// stale position back halved the speed (run 20261001-230147: 65 units/s of
+// the 133 asked; the server's record then reached the target 3 s after the
+// scenario's wait had ended).
+let moving: { x: number; y: number; cx: number; cy: number; speed: number; last: number; until: number } | null = null;
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -104,6 +110,7 @@ function describe(actor: Actor) {
     formId: actor.getFormID(),
     name: actor.getDisplayName(),
     race: race ? race.getName() : "",
+    raceId: race ? race.getFormID() : 0,  // lab-api compares raceId (the server's appearance record carries ids)
     sex: base ? base.getSex() : -1,
     isDead: actor.isDead(),
     healthPercentage: actor.getActorValuePercentage("health"),
@@ -218,7 +225,7 @@ function run(step: Step, player: Actor): unknown {
       const distance = Math.sqrt(dx * dx + dy * dy);
       const speed = Math.max(1, num(a.speed, 300));
       const duration = num(a.duration_s, 0) > 0 ? num(a.duration_s) : distance / speed;
-      moving = { x, y, speed, last: Date.now(), until: Date.now() + Math.max(500, duration * 1500) };
+      moving = { x, y, cx: player.getPositionX(), cy: player.getPositionY(), speed, last: Date.now(), until: Date.now() + Math.max(500, duration * 1500) };
       return { dispatched: true, distance, speed };
     }
     case "equip": {
@@ -337,10 +344,8 @@ on("tick", () => {
 function settleMove(player: Actor): void {
   if (!moving) return;
   const now = Date.now();
-  const px = player.getPositionX();
-  const py = player.getPositionY();
-  const ddx = moving.x - px;
-  const ddy = moving.y - py;
+  const ddx = moving.x - moving.cx;
+  const ddy = moving.y - moving.cy;
   const remaining = Math.sqrt(ddx * ddx + ddy * ddy);
   const step = Math.min(remaining, moving.speed * Math.max(0, now - moving.last) / 1000);
   moving.last = now;
@@ -348,7 +353,11 @@ function settleMove(player: Actor): void {
     moving = null;
     return;
   }
-  if (step > 0) player.setPosition(px + ddx / remaining * step, py + ddy / remaining * step, player.getPositionZ());
+  if (step > 0) {
+    moving.cx += ddx / remaining * step;
+    moving.cy += ddy / remaining * step;
+    player.setPosition(moving.cx, moving.cy, player.getPositionZ());
+  }
 }
 
 on("update", () => {
