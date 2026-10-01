@@ -16,7 +16,11 @@ echo "== adapters before"; run "Get-CimInstance Win32_VideoController | ForEach-
 if [ -z "$exe" ]; then
   # the package by the card: NVIDIA's branches split by family, and a Pascal package refuses a Blackwell
   # card with no log (sky-c2, 2026-10-01). The PCI device id decides: GP107 1C83 is Pascal, GB206 2D04 Blackwell.
-  dev=$(run "(Get-CimInstance Win32_PnPEntity | Where-Object { \$_.DeviceID -like 'PCI\\VEN_10DE&DEV_*' -and \$_.PNPClass -ne 'MEDIA' } | Select-Object -First 1).DeviceID -replace '^PCI\\\\VEN_10DE&DEV_([0-9A-F]{4}).*', '\$1'" | tail -1 | tr -d '\r')
+  detect=$(cat <<'PS'
+(Get-CimInstance Win32_PnPEntity | Where-Object { $_.DeviceID -like 'PCI\VEN_10DE&DEV_*' -and $_.PNPClass -ne 'MEDIA' } | Select-Object -First 1).DeviceID -replace '^PCI\\VEN_10DE&DEV_([0-9A-F]{4}).*', '$1'
+PS
+)
+  dev=$(run "$detect" 2>/dev/null | tail -1 | tr -d '\r')
   case "$dev" in
     1C8[0-9A-F]|1C[0-9A-F][0-9A-F]|1B[0-9A-F][0-9A-F]) family=pascal;;
     2[B-F][0-9A-F][0-9A-F]) family=blackwell;;
