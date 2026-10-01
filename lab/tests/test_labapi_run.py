@@ -140,7 +140,8 @@ class RunTests(unittest.TestCase):
         while time.time() < deadline:
             self.doubles.turn()
             body = self.client.get(f"/lab/run/{run_id}").json()
-            if body["verdict"] != "running":
+            # the verdict turns terminal inside a step; the record is complete once finished is set
+            if body["verdict"] != "running" and body.get("finished"):
                 return run_id, body
             time.sleep(0.02)
         self.fail(f"run {run_id} did not finish: {body}")
