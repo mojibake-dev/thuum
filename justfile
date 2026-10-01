@@ -242,6 +242,10 @@ client-game-firewall vmid:
 client-steam-offline vmid:
     @lab/tools/client-steam-offline.sh {{vmid}}
 
+# Windows Error Reporting minidumps for SkyrimSE.exe under C:\sky-lab\dumps on a clone (crash-dumps.ps1).
+client-crash-dumps vmid:
+    @lab/tools/client-crash-dumps.sh {{vmid}}
+
 # A lab-driver change onto a clone: build, push the bundle into Data\Platform\Plugins, relaunch and confirm the
 # login and heartbeat, stop the game. Ends in a cold clean-sp retake by thuum-mundus (the rollback erases it otherwise).
 client-driver vmid: build-driver
@@ -249,13 +253,14 @@ client-driver vmid: build-driver
 
 # Bring a fresh clone of the template up to a connected lab client, in order: its Sunshine base port
 # (48989 sky-c1, 49989 sky-c2), the NVIDIA driver, the 1920x1080 display, the game firewall, Steam offline,
-# and a launch test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
+# crash dumps, and a launch test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
 client-bringup vmid base:
     just client-sunshine-port {{vmid}} {{base}}
     just client-gpu-driver {{vmid}}
     just client-display {{vmid}}
     just client-game-firewall {{vmid}}
     just client-steam-offline {{vmid}}
+    just client-crash-dumps {{vmid}}
     just client-launch-test {{vmid}}
 
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------

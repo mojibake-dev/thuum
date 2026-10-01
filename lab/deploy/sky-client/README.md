@@ -117,6 +117,15 @@ both done in the template; its ticket ages with the wall clock, so if a far
 future rollback boot shows Steam asking for a login, the fix is an egress
 lease, Go Online, Go Offline, and a retaken snapshot.
 
+## Crash dumps
+
+`just client-crash-dumps <vmid>` sets Windows Error Reporting's LocalDumps
+policy for SkyrimSE.exe (minidump, five kept, under `C:\sky-lab\dumps`),
+part of bring-up. The game left the desktop three times on 2026-10-01 with
+no dialog, no application error event and nothing for WER to catch; with the
+policy in place a crash leaves a dump, and an exit that still leaves nothing
+was a deliberate ExitProcess, which narrows the search to the plugins.
+
 ## A driver change
 
 `just client-driver <vmid>` builds lab-driver, pushes the bundle into the
