@@ -74,6 +74,9 @@ let sentAt = 0;
 let warnedNoConfig = false;
 // A screenshot request waits for the file the engine writes; posted later.
 let deferred: { step: Step; file: string; startedAt: number } | null = null;
+// A TranslateTo in flight: stopped by the update loop near its target or on time.
+let moving: { x: number; y: number; until: number } | null = null;
+const MOVE_REACH = 16;
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -204,15 +207,21 @@ function run(step: Step, player: Actor): unknown {
       // units) at `speed` units per second through TranslateTo, which needs
       // no navmesh path: AI-driven pathing (setPlayerAIDriven plus
       // pathToReference, the first attempt) ran its latent calls and moved
-      // nothing on sky-c1 (run 20261001-180643). The engine ends the motion
-      // at the target; the scenario's wait covers the distance. UNCONFIRMED
-      // until a run shows the server's record following (rule 2).
+      // nothing on sky-c1 (run 20261001-180643). TranslateTo aims at a point,
+      // and the ground at the target is rarely at the start's height, so the
+      // engine never quite arrives and keeps pushing the player along the
+      // ground (run 20261001-205928: 600 units south of a 300-unit move); the
+      // update loop therefore stops the translation once the player is within
+      // reach of the target in the plane, or when 1.5 x duration_s is up.
+      // UNCONFIRMED until a run shows the server's record settling (rule 2).
       const x = num(a.x), y = num(a.y), z = num(a.z);
       const dx = x - player.getPositionX();
       const dy = y - player.getPositionY();
       const dz = z - player.getPositionZ();
       const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
       const speed = Math.max(1, num(a.speed, 300));
+      const duration = num(a.duration_s, 0) > 0 ? num(a.duration_s) : distance / speed;
+      moving = { x, y, until: Date.now() + Math.max(500, duration * 1500) };
       player.translateTo(x, y, z, player.getAngleX(), player.getAngleY(), player.getAngleZ(), speed, 0);
       return { dispatched: true, distance, speed };
     }
@@ -329,10 +338,22 @@ on("tick", () => {
 });
 
 // Execute in update: Papyrus is legal here; it does not fire in the main menu.
+function settleMove(player: Actor): void {
+  if (!moving) return;
+  const ddx = moving.x - player.getPositionX();
+  const ddy = moving.y - player.getPositionY();
+  if (ddx * ddx + ddy * ddy <= MOVE_REACH * MOVE_REACH || Date.now() >= moving.until) {
+    moving = null;
+    player.stopTranslation();
+  }
+}
+
 on("update", () => {
   const c = config();
   if (!c) return;
   finishDeferred(c);
+  const me = Game.getPlayer();
+  if (me) settleMove(me);
   const step = pending;
   if (!step) return;
   pending = null;
