@@ -52,6 +52,29 @@ class GuestControlTests(unittest.TestCase):
         self.assertIn("16 MiB", str(cm.exception))
         self.assertEqual(len(self.control.file_read(self.c1, "C:\\ok")), 1024)
 
+    def test_backend_exceptions_become_proxmox_errors(self):
+        """proxmoxer raises its own ResourceException (e.g. "QEMU guest agent is
+        not running" after a rollback); the runner must only ever see ProxmoxError."""
+        from labapi.fakes import FakeProxmox
+        from labapi.guests import Guest
+        from labapi.proxmox import GuestControl, ProxmoxError
+
+        class Backend(FakeProxmox):
+            def file_read(self, guest, path):
+                raise RuntimeError("500 Internal Server Error: QEMU guest agent is not running")
+
+            def start(self, guest):
+                raise ValueError("boom")
+
+        control = GuestControl(Backend())
+        g = Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-sp", "c1")
+        with self.assertRaises(ProxmoxError) as cm:
+            control.file_read(g, "C:\\sky-lab\\lab-driver.log")
+        self.assertIn("E_PVE_FILE: sky-c1: RuntimeError: 500", str(cm.exception))
+        with self.assertRaises(ProxmoxError) as cm:
+            control.start(g)
+        self.assertIn("E_PVE_START", str(cm.exception))
+
     def test_empty_snapshot_name_is_refused(self):
         from labapi.guests import Guest
         from labapi.proxmox import ProxmoxError

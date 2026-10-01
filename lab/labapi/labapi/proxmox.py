@@ -50,19 +50,32 @@ class GuestControl:
         if not guest.managed:
             raise ProxmoxError(f"E_PVE_UNMANAGED: refusing to {what} {guest.name}; lab-api only waits for its heartbeat")
 
+    @staticmethod
+    def _call(code: str, guest: Guest, fn, *args):
+        """The backend raises proxmoxer's ResourceException and requests errors
+        (a guest agent that is not running, a task that failed); the runner only
+        knows ProxmoxError, and anything else escaping from artifact collection
+        once left a finished run marked active (2026-10-01)."""
+        try:
+            return fn(*args)
+        except ProxmoxError:
+            raise
+        except Exception as e:
+            raise ProxmoxError(f"{code}: {guest.name}: {type(e).__name__}: {str(e)[:200]}") from e
+
     def stop(self, guest: Guest) -> None:
         self._managed(guest, "stop")
-        self._b.stop(guest)
+        self._call("E_PVE_STOP", guest, self._b.stop, guest)
 
     def rollback(self, guest: Guest, snapshot: str) -> None:
         self._managed(guest, "roll back")
         if not snapshot:
             raise ProxmoxError(f"E_PVE_SNAPSHOT: {guest.name} has no snapshot name")
-        self._b.rollback(guest, snapshot)
+        self._call("E_PVE_ROLLBACK", guest, self._b.rollback, guest, snapshot)
 
     def start(self, guest: Guest) -> None:
         self._managed(guest, "start")
-        self._b.start(guest)
+        self._call("E_PVE_START", guest, self._b.start, guest)
 
     def status(self, guest: Guest) -> str:
         try:
@@ -78,11 +91,11 @@ class GuestControl:
         self._managed(guest, "exec into")
         if guest.kind != "qemu":
             raise ProxmoxError(f"E_PVE_EXEC: {guest.name} is not a qemu guest; the guest agent is qemu only")
-        return self._b.exec(guest, command, timeout)
+        return self._call("E_PVE_EXEC", guest, self._b.exec, guest, command, timeout)
 
     def file_read(self, guest: Guest, path: str) -> str:
         self._managed(guest, "read a file from")
-        content = self._b.file_read(guest, path)
+        content = self._call("E_PVE_FILE", guest, self._b.file_read, guest, path)
         if len(content.encode("utf-8", errors="replace")) > FILE_READ_MAX:
             raise ProxmoxError(f"E_PVE_FILE_TOO_BIG: {path} on {guest.name} exceeds the 16 MiB guest-agent cap")
         return content

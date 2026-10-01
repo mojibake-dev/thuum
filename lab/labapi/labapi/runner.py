@@ -111,9 +111,18 @@ class Runner:
             rec.verdict = "error"
         finally:
             capture = getattr(rec, "_capture", None)
-            await self._artifacts(rec, capture)
+            # Whatever happens here the run must finish: result.json, board
+            # cleared, `active` released. A backend error while fetching a
+            # client log once escaped and left the next POST /run a 409.
+            try:
+                await self._artifacts(rec, capture)
+            except Exception as e:
+                rec.notes.append(f"artifacts: {type(e).__name__}: {e}")
             if self.netem_active:
-                await self._clear_netem(rec)
+                try:
+                    await self._clear_netem(rec)
+                except Exception as e:
+                    rec.notes.append(f"netem: {type(e).__name__}: {e}")
             if rec.verdict == "running":
                 rec.verdict = "green" if not rec.failures else "red"
             rec.finished_at = _iso(self._wall())

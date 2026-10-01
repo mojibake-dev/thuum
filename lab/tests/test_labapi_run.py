@@ -241,6 +241,47 @@ class RunTests(unittest.TestCase):
         self.assertIn("unmanaged", rec.phases[0]["note"])
 
 
+SOLO_WITH_LOG = """
+id: solo-log
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: dump-state
+  - assert:
+      - server.actor(c1).x == 0
+artifacts: [server.log, c1.log]
+"""
+
+
+@needs_deps
+class ArtifactFailures(RunTests):
+    def test_backend_error_in_artifact_collection_still_finalizes_the_run(self):
+        """The guest agent of a managed client gone after its rollback (sky-c1,
+        2026-10-01): the client log fetch fails, the run still ends with a
+        result, the board is cleared and the next run is accepted."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+
+        def boom(guest, path):
+            raise RuntimeError("500 Internal Server Error: QEMU guest agent is not running")
+
+        pve.file_read = boom
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertTrue(any("c1.log" in n and "QEMU guest agent" in n for n in body["notes"]), body["notes"])
+        self.assertIsNotNone(body["finished"], body)
+        self.assertTrue(list((self.tmp / "results").glob("**/result.json")), "result.json not written")
+        self.assertIsNone(self.client.get("/lab/status").json()["run"])
+        run_id2, body2 = self._run(SOLO_WITH_LOG)
+        self.assertNotEqual(run_id, run_id2)
+        self.assertEqual(body2["verdict"], "green", body2)
+
+
 T2_ONLY = """
 id: t2-fakeclient
 clients: []
