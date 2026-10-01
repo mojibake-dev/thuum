@@ -86,17 +86,14 @@ it carries a HYPOTHESIS tag.
   in M0 (ADR-016).
 - `just lab run smoke-two-players` green: connect, see each other, walk,
   restart server, positions and inventories survive.
-  Status 2026-10-01 (evening): the one-client floor of that loop,
-  `smoke-solo`, is green on sky-c1 against the 1.7.104 port (rollback to
-  connected, connect, teleport, screenshot, move, give, restart, reconnect,
-  persistence). With sky-c2 on the RTX 5060 Ti, both clones boot to
-  connected in parallel (about 80 s), see each other and take judged
-  teleports in every run; what still reads red is the move assertion, by
-  a driver timing bug (the stepped move ran at half speed; fixed in
-  lab-driver 6616fab16eed530d) after two fixture faults were cleared the
-  same evening (profile 2 parked at the origin where c1 is placed; c2's
-  scenario spot on c1's path). Green waits on the clones' next cold
-  clean-sp with that driver.
+  DONE 2026-10-01: run 20261001-233455 green, 17 of 17 steps, 3 min 10 s
+  wall (rollback of both clones 81 s, c1 reconnect after the restart 40 s),
+  unattended, against the 1.7.104 port with sky-c1 (GTX 1050) and sky-c2
+  (RTX 5060 Ti). `smoke-solo` (run 20261001-201016) is the one-client floor.
+  The day's fixes on the way there, all in the harness and the fixture, none
+  in the game: judged teleports (the client drops server moves for about 8 s
+  after online), profile 2 parked off the origin, c2 off c1's path, the
+  stepped move at full speed, an item outside the spawn kit.
 - Ghidra project for SkyrimSE.exe 1.6.1170 analyzed, CommonLib types
   imported, reachable from the agent through pyghidra-mcp.
 - `just addr <id>` resolves against addrlib/.
@@ -104,6 +101,9 @@ it carries a HYPOTHESIS tag.
   delegated (SpSnippet), or stub.
 - Re-verify SkyMP's "done" column (appearance, attributes, death, inventory,
   forge) as scenarios `m0-*`. They are the regression floor.
+  Status 2026-10-01: m0-appearance green (run 20261001-232145); attributes,
+  death and inventory running the same evening; m0-forge waits for a forge
+  reference, which is the lab cell (Track L4).
 - CLAUDE.md layout and commands pinned to reality.
 - skymp-wire (docs/WIRE.md, ADR-010 to ADR-012, ADR-015; lives in the fork):
   schema, codec, validate, transport, difftest, and all three fuzz targets
