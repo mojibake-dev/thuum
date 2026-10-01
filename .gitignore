@@ -21,3 +21,6 @@ lab/relids.tsv
 
 # downloads staged into clients (SKSE archives)
 lab/.cache/
+
+# Address Library database and its Nexus archive (CLAUDE.md: downloaded by Eli, never committed)
+addrlib/
