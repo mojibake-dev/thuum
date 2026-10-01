@@ -158,6 +158,13 @@ predates that has no driver log until its next client-dist and cold retake.
 
 ## A driver change
 
+A relay of the lab files (`just client-dist <vmid>`) keeps the clone's
+identity: install-lab.ps1 reads the client name and profile id out of the
+settings files already in Plugins and writes them back over the template's
+copies. `just client-identity <vmid> <client> <profile>` is for giving a
+clone a new identity, not for repairing one after a relay.
+
+
 `just client-driver <vmid>` builds lab-driver, pushes the bundle into the
 game's Data\Platform\Plugins on the clone, relaunches through the launch
 test, confirms the login and the heartbeat, and stops the game. The clone's
