@@ -29,6 +29,6 @@ for attempt in 1 2; do
   echo "not online after launch $attempt: $on"
   [ "$attempt" = 2 ] && exit 4
 done
-echo "heartbeat c1 s ago: $(curl -sS -m 15 "$lab_api/status" | python3 -c 'import sys,json; print(json.load(sys.stdin)["heartbeats_s_ago"].get("c1"))')"
+echo "heartbeats (s ago): $(curl -sS -m 15 "$lab_api/status" | python3 -c 'import sys,json; print(json.load(sys.stdin)["heartbeats_s_ago"])')"
 run "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3; 'stopped; tasks: ' + ((Get-ScheduledTask -TaskName 'sky-lab-*' | ForEach-Object { \$_.TaskName + '=' + \$_.State }) -join ' ')"
 echo "ready for a cold clean-sp retake (thuum-mundus: sky-lab snapshot $vmid clean-sp --cold)"
