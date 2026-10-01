@@ -38,3 +38,22 @@ commonlibsse-ng-flatrim/patches/08-playercharacter-tints-1-7.patch):
 GetTintList and GetOverlayTintMask pick 0xB20/0xB38 on 1.7.x. Other
 PLAYER_RUNTIME_DATA members after the insertion point may have moved too;
 not yet checked (nothing the client uses crashed on them so far).
+
+## The NPC record itself did not move
+
+The same check on TESNPC, the other structure the appearance path writes
+(AE ids from CommonLib include/RE/Offsets.h, resolved with lab/addr.py for
+1.7.104, decompiled with `just ghidra-query SkyrimSE-1.7.104.0.exe decompile`):
+
+| function | reads | pinned header |
+| --- | --- | --- |
+| FUN_1403c5bd0 ChangeHeadPart (24750, +0x3c5bd0) | headParts `this+0x238`, numHeadParts `this+0x240` | TESNPC.h: 238, 240 |
+| FUN_1403c8c00 HasOverlays (24790, +0x3c8c00) | race `this+0x158`, `this+0x1e8`; player singleton `+0xb48` | TESRaceForm at 150, race at 158 |
+| FUN_1403c8d90 GetNumBaseOverlays (24792) | a hash map keyed by the NPC, no NPC fields | n/a |
+| FUN_1403c0080 UpdateNeck (24711) | `this+0x1fc` (a float) | n/a |
+
+So SetNpcSex, SetNpcRace, SetNpcSkinColor, ResizeHeadpartsArray and the
+head-part writes land where the headers say; only PlayerCharacter moved.
+HasOverlays comparing the NPC's race with `player+0xB48` fits the same +8
+shift (RACE_DATA follows the overlay pointer).
+
