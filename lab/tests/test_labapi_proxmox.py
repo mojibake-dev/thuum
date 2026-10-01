@@ -92,8 +92,10 @@ class TablesTests(unittest.TestCase):
 
         t = load_tables(PKG_DIR / "guests.yaml")
         self.assertEqual(t.guest_for_client("c1").name, "sky-c1")
-        self.assertEqual(t.guest_for_client("c2").name, "fenestrate")
-        self.assertFalse(t.guest_for_client("c2").managed)
+        self.assertEqual(t.guest_for_client("c2").name, "sky-c2")  # since 2026-10-01; fenestrate is a file source, never a client
+        self.assertTrue(t.guest_for_client("c2").managed)
+        self.assertFalse(t.guests["fenestrate"].managed)
+        self.assertIsNone(t.guests["fenestrate"].client)
         self.assertEqual(t.server_guest().vmid, 700)
         self.assertEqual(t.profile_id("c1"), 1)
         self.assertEqual(t.base_id("Skyrim.esm:IronSword"), 0x12EB7)

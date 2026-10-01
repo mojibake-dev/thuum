@@ -2,15 +2,16 @@
 #
 # guests: `managed: false` means lab-api never stops, rolls back, starts, or
 # execs into the guest; it only waits for its heartbeat. `client:` names the
-# scenario client a guest plays: in M0 c2 is fenestrate (Eli's desktop); at M2
-# move `client: c2` to sky-c2 and clear it on fenestrate.
+# scenario client a guest plays: c1 is sky-c1 and c2 is sky-c2 (since
+# 2026-10-01, when sky-c2 got the GPU); fenestrate is Eli's desktop, a file
+# source only, never a client.
 guests:
   - {name: sky-srv,    vmid: 700, ip: 10.10.70.10, kind: qemu, role: server, managed: true,  snapshot: clean}
   - {name: sky-re,     vmid: 701, ip: 10.10.70.11, kind: lxc,  role: re,     managed: true,  snapshot: clean}
   - {name: sky-ci,     vmid: 702, ip: 10.10.70.12, kind: qemu, role: ci,     managed: false}
   - {name: sky-c1,     vmid: 711, ip: 10.10.70.21, kind: qemu, role: client, managed: true,  snapshot: clean-sp, client: c1}
-  - {name: sky-c2,     vmid: 712, ip: 10.10.70.22, kind: qemu, role: client, managed: true,  snapshot: clean-sp}
-  - {name: fenestrate, vmid: 220, ip: 10.10.60.20, kind: qemu, role: client, managed: false, client: c2}
+  - {name: sky-c2,     vmid: 712, ip: 10.10.70.22, kind: qemu, role: client, managed: true,  snapshot: clean-sp, client: c2}
+  - {name: fenestrate, vmid: 220, ip: 10.10.60.20, kind: qemu, role: client, managed: false}
 
 # clients: the profileId each scenario client logs in with (offlineMode on the
 # server; skymp5-settings.txt on the machine that plays the client). The
