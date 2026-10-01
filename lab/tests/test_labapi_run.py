@@ -401,6 +401,10 @@ class TeleportSteps(RunTests):
         self.assertFalse(runner._at_target({"cell": "lab-spawn", "x": 65.0, "y": 0.0, "z": 0.0}, {"cell": "lab-spawn", "x": 0, "y": 0, "z": 0}))
         self.assertFalse(runner._at_target({"cell": "3c:Skyrim.esm", "x": 0.0, "y": 0.0, "z": 0.0}, {"cell": "lab-spawn", "x": 0, "y": 0, "z": 0}))
         self.assertFalse(runner._at_target({"cell": "lab-spawn"}, {"cell": "lab-spawn", "x": 0, "y": 0}))
+        # a target in the server's own descriptor and units matches the absolute record that rides along
+        normalized = {"cell": "lab-spawn", "x": 0.0, "y": 0.0, "z": 0.0, "absolute": {"cell": "3c:Skyrim.esm", "x": 133857.0, "y": -61130.0, "z": 14662.0}}
+        self.assertTrue(runner._at_target(normalized, {"cell": "3c:Skyrim.esm", "x": 133860, "y": -61100, "z": 14662}))
+        self.assertFalse(runner._at_target(normalized, {"cell": "3c:Skyrim.esm", "x": 0, "y": 0, "z": 0}))
         self.assertIsInstance(runner, Runner)
 
 

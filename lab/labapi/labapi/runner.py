@@ -427,11 +427,17 @@ class Runner:
     def _at_target(self, actor: dict[str, Any], args: dict[str, Any]) -> bool:
         """The record and the scenario's target share a frame when the target
         names a cell the table knows (the record then carries offsets from the
-        same origin); a bare descriptor compares absolute to absolute."""
+        same origin); a target written as the server's own descriptor compares
+        against the absolute record that rides along. Another cell is never
+        at the target, whatever its numbers."""
+        frame: dict[str, Any] = actor
         if "cell" in args and str(actor.get("cell")) != str(args["cell"]):
-            return False
+            absolute = actor.get("absolute")
+            if not isinstance(absolute, dict) or str(absolute.get("cell")) != str(args["cell"]):
+                return False
+            frame = absolute
         try:
-            return all(abs(float(actor[k]) - float(args.get(k, 0) or 0)) <= self.s.teleport_tolerance for k in ("x", "y"))
+            return all(abs(float(frame[k]) - float(args.get(k, 0) or 0)) <= self.s.teleport_tolerance for k in ("x", "y"))
         except (KeyError, TypeError, ValueError):
             return False
 
