@@ -1,4 +1,4 @@
-# M0 smoke, one client: sky-c1 boots to connected, is placed, moves, is given
+# M0 smoke, one client: sky-c1 boots to connected, is placed, moves south, is given
 # an item the spawn kit does not contain, and both survive a server restart. The one-client floor of the lab
 # loop (rollback, boot-to-connected, steps, assertions, artifacts) that can
 # run before sky-c2 exists; smoke-two-players is the real smoke. Assertions
@@ -19,11 +19,11 @@ steps:
   - assert:
       - server.actor(c1).cell == "lab-spawn"
       - abs(server.actor(c1).x) < 50
-      - abs(c1.state.x - server.actor(c1).x) < 50
-  - c1: move {dx: 300, dy: 0, duration_s: 3}
+      - abs(c1.state.y - server.actor(c1).y) < 50
+  - c1: move {dx: 0, dy: -300, duration_s: 3}   # south: the probed flat direction (docs/LAB.md)
   - wait: 3
   - assert:
-      - abs(server.actor(c1).x - 300) < 50
+      - abs(server.actor(c1).y + 300) < 50
   - c1: give {item: "Skyrim.esm:IngotIron", count: 1}   # server command, R0; not in the spawn kit
   - wait: 3
   - assert:
@@ -34,7 +34,7 @@ steps:
   - wait: 5
   - c1: dump-state
   - assert:
-      - abs(server.actor(c1).x - 300) < 50
+      - abs(server.actor(c1).y + 300) < 50
       - server.inventory(c1).count("Skyrim.esm:IngotIron") == 1
-      - abs(c1.state.x - server.actor(c1).x) < 50
+      - abs(c1.state.y - server.actor(c1).y) < 50
 artifacts: [server.log, c1.log, screenshots, world-diff]
