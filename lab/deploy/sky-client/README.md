@@ -99,6 +99,19 @@ client logged in ten seconds after launch. The server (UDP 7777, TCP 3000) and
 lab-api (TCP 80 on sky-srv) are inside the allowed range; DNS is the Windows
 resolver's, not the exe's, and is untouched.
 
+## The logon launcher
+
+`launch.ps1`, run by the task `sky-lab-launch` at the lab user's logon, waits
+for Steam's process plus 20 s, starts the game through the SKSE loader, and
+starts it again up to twice when the game is gone 30 s after a launch. The
+retry is not decoration: the game is Steam-wrapped and exits at once (status
+0x35 in the Security log, no SKSE log) when launched before Steam has
+finished its own startup, which sky-c2 hit on its first rollback boot while
+sky-c1 had won that race every time, and Steam exposes no readiness signal
+in offline mode (`ActiveUser` stays 0 there). The same retry covers the
+occasional silent exit after the generated save loads. It logs to
+`C:\sky-lab\launch.log`.
+
 ## Steam on a dark boot
 
 Steam is the game's launcher and licence check, and on a cold boot inside the
