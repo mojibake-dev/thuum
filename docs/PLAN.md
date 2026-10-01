@@ -101,9 +101,20 @@ it carries a HYPOTHESIS tag.
   delegated (SpSnippet), or stub.
 - Re-verify SkyMP's "done" column (appearance, attributes, death, inventory,
   forge) as scenarios `m0-*`. They are the regression floor.
-  Status 2026-10-01: m0-appearance green (run 20261001-232145); attributes,
-  death and inventory running the same evening; m0-forge waits for a forge
-  reference, which is the lab cell (Track L4).
+  Status 2026-10-01: m0-appearance green (run 20261001-232145) and
+  m0-inventory green (run 20261001-234336: give, equip, the observer sees
+  the equipped weapon, all of it across a restart). m0-attributes: health
+  reaches the client and the observer; magicka and stamina regenerate
+  faster than a 3 s sample tolerates, so the sample moved to 1 s (rerun
+  pending). m0-death: the server marks the player dead and the other
+  client sees a dead actor, but the stock client never kills the local
+  player (skymp5-client deathService.killWithPush ragdolls it; isDead()
+  stays false, health stays full), so `c1.state.isDead == true` describes
+  a client the fork does not have yet: Eli decides whether the local-death
+  observable becomes a driver field (ragdoll state) or the assertion goes;
+  the ragdoll also rolled off the summit at the origin, so the kill moved
+  to the flat strip. m0-forge waits for a forge reference, which is the
+  lab cell (Track L4).
 - CLAUDE.md layout and commands pinned to reality.
 - skymp-wire (docs/WIRE.md, ADR-010 to ADR-012, ADR-015; lives in the fork):
   schema, codec, validate, transport, difftest, and all three fuzz targets
