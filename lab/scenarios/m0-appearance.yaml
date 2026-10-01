@@ -16,7 +16,7 @@ steps:
   - c2: connect
   - c1: set-appearance {preset: lab-nord-1}
   - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
-  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
   - wait: 5
   - c2: dump-state
   - c2: screenshot

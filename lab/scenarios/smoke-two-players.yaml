@@ -14,7 +14,7 @@ steps:
   - c1: connect
   - c2: connect
   - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
-  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
   - wait: 5
   - c1: screenshot
   - assert:
