@@ -272,11 +272,19 @@ where (real since 2026-10-01):
    movement syncs, so it is parked until m0-inventory shows whether
    equipment and inventory updates reach the server.
    Also open: lab-spawn (upstream's default start point) is a mountain top.
-   300 units east the player fell about 1070 units and after that fall the
-   client ignored every server teleport until relaunched (the client's
-   teleport handler first waits on a ragdoll-removal call); on a fresh
-   client teleports take within 3 s. Scenario offsets stay on the probed
-   flat directions until lab.esp provides a level cell (Track L4).
+   The flat strip runs along x = 0 from the origin to about y = -450
+   (probed 2026-10-01: (0, -150) to (0, -450) settle at z 11 to 15; (0, +150)
+   and (200, 0) are over the north and east edges, (150, -300) and
+   (-200, 0) are slopes). 300 units east the player fell about 1070 units.
+   Teleports after a fall land fine; what looked like "ignored after a
+   fall" was the post-login window (the teleport step above). Two actors
+   placed on one spot are shoved apart by the engine, on this summit
+   north-east and down the slope, so the clean world parks the profiles
+   apart and off every scenario target: profile 1 at (0, -296), profile 2
+   at (0, -450); the origin and the first 300 units south of it are c1's
+   (runs 20261001-223515 and 225648 fell that way with profile 2 parked at
+   the origin). Scenario offsets stay on that strip until lab.esp provides
+   a level cell (Track L4).
 
 "Connected" is not a snapshot; it is where a clone arrives by itself: stop,
 rollback to `clean-sp`, cold boot, autologon, the scheduled task launches
@@ -365,8 +373,13 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    profile 2 got the same preset through set-appearance, which also clears
    the server's race-menu flag), because a profile without an
    appearance lands in the race menu, which pauses the world, and the stock
-   client cannot close that menu on the server's say-so. The empty world is
-   kept beside it as `clean-empty-<stamp>`. The VM-level rollback (stop,
+   client cannot close that menu on the server's say-so. Its records park
+   profile 1 at lab-spawn (0, -296) and profile 2 at (0, -450), apart and
+   off every scenario target (see the summit note under M0 status); a
+   profile's parking spot is edited in changeForms/<n>.json of the
+   snapshot (absolute coordinates), not re-recorded. The empty world is
+   kept beside it as `clean-empty-<stamp>`, and each earlier baseline as
+   `clean-<what>-<stamp>`. The VM-level rollback (stop,
    rollback to the named disk snapshot, start; budget 20 to 40 s) is the
    operator's `sky-lab` action between scenario sets, and lab-api can drive
    it only when hosted elsewhere (`SERVER_ROLLBACK_MODE=vm`). sky-srv carries
