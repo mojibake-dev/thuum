@@ -130,8 +130,13 @@ class Settings:
     )
     # Timeouts and budgets (seconds); time_scale shrinks scenario waits in tests.
     step_timeout_s: float = 60.0
-    # connect / reconnect: how long the server may take to report the client online.
-    connect_timeout_s: float = 60.0
+    # connect / reconnect: how long the server may take to report the client
+    # online. A clone's logon launcher relaunches the game 40 s after a launch
+    # that lost the Steam startup race, and a reconnect after a server restart
+    # takes about 40 s, so one retry has to fit (run 20261001-233852: c2 came
+    # online after the 60 s budget while every other run of the day logged in
+    # within a second of its step).
+    connect_timeout_s: float = 120.0
     # After the server reports the client online, the client still refuses
     # MoveRefrToPosition until its generated save has loaded and fifty Papyrus
     # updates have passed (Skyrim Platform's LoadGame sink; about eight seconds

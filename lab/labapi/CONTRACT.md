@@ -72,7 +72,8 @@ Request: `POST {SERVER_STATE_URL}/rpc/labState` with
 "profileId": <int>}, ...]}`, the players logged in right now. lab-api's
 `connect` and `reconnect` steps hold until the client's profile appears here
 (the server owns that state; a restart empties the list, so presence after
-one is a fresh login), up to `connect_timeout_s` (60 s). Online is not yet
+one is a fresh login), up to `connect_timeout_s` (120 s: one relaunch by the
+logon launcher or one reconnect after a server restart must fit). Online is not yet
 movable: the client refuses MoveRefrToPosition until its generated save has
 loaded and fifty Papyrus updates have passed (Skyrim Platform's LoadGame
 sink), about eight seconds after online on sky-c1 (measured 2026-10-01), so a
