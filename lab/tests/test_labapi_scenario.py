@@ -25,7 +25,7 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual((tele.kind, tele.client, tele.action), ("client", "c1", "teleport"))
         self.assertEqual(tele.args, {"cell": "lab-spawn", "x": 0, "y": 0, "z": 0})
         give = next(s for s in sc.steps if s.action == "give")
-        self.assertEqual(give.args, {"item": "Skyrim.esm:IronSword", "count": 1})
+        self.assertEqual(give.args, {"item": "Skyrim.esm:IngotIron", "count": 1})  # not in the spawn kit (an iron sword is)
 
     def test_quoted_and_bare_flow_forms_agree(self):
         from labapi.scenario import load_scenario
