@@ -22,9 +22,9 @@ steps:
   - c2: dump-state
   - assert:
       - abs(server.actor(c1).healthPercentage - 0.5) < 0.05
-      - abs(c1.state.health.percentage - 0.5) < 0.05
-      - abs(c1.state.magicka.percentage - 0.25) < 0.05
-      - abs(c1.state.stamina.percentage - 0.75) < 0.05
+      - abs(c1.state.healthPercentage - 0.5) < 0.05
+      - abs(c1.state.magickaPercentage - 0.25) < 0.05
+      - abs(c1.state.staminaPercentage - 0.75) < 0.05
       - abs(c2.view(c1).healthPercentage - 0.5) < 0.05
   - server: restart
   - wait: 20
@@ -34,5 +34,5 @@ steps:
   - c1: dump-state
   - assert:
       - abs(server.actor(c1).healthPercentage - 0.5) < 0.05
-      - abs(c1.state.health.percentage - 0.5) < 0.05
+      - abs(c1.state.healthPercentage - 0.5) < 0.05
 artifacts: [server.log, c1.log, c2.log, world-diff]

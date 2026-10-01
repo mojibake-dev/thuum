@@ -23,7 +23,7 @@ steps:
   - assert:
       - server.actor(c1).hasAppearance == true
       - c2.sees(c1) == true
-      - c2.view(c1).race == server.actor(c1).race
+      - c2.view(c1).raceId == server.actor(c1).raceId
       - c2.view(c1).sex == server.actor(c1).sex
   - server: restart
   - wait: 20
@@ -33,5 +33,5 @@ steps:
   - c2: dump-state
   - assert:
       - server.actor(c1).hasAppearance == true
-      - c2.view(c1).race == server.actor(c1).race
+      - c2.view(c1).raceId == server.actor(c1).raceId
 artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]
