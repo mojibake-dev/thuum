@@ -58,9 +58,9 @@ build-client branch=client_branch:
     gh run download "$run" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
     echo "run $run -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
 
-# T2 protocol tests on sky-srv: the fakeclient against the live server (state checked through labState), then difftest's smoke session with the legacy driver; lab/tools/test-proto.sh.
-test-proto:
-    @lab/tools/test-proto.sh
+# T2 on sky-srv (ADR-019): the server build SERVER_TAG (default the lab's) from the clean world, the fakeclient smoke checked through labState, then difftest's sessions against the legacy RakNet stack (LEGACY_TAG, default parity-legacy); lab/tools/test-proto.sh.
+test-proto tag="":
+    @SERVER_TAG="{{tag}}" lab/tools/test-proto.sh
 
 # --- reverse engineering ------------------------------------------------------
 

@@ -1,11 +1,13 @@
-# sky-srv (VM 700): the legacy server and lab-api side by side (docs/LAB.md).
+# sky-srv (VM 700): the server and lab-api side by side (docs/LAB.md).
 # Lives at /srv/lab/docker-compose.yml; `just deploy-srv` puts it there with
-# the rest of /srv/lab. The bridged server joins as a second service in M1.
-# Images come from sky-ci through the registry named in /srv/lab/.env
-# (REGISTRY=10.10.70.12:5000/) or, when empty, from images loaded by hand.
+# the rest of /srv/lab. Images come from sky-ci through the registry named in
+# /srv/lab/.env (REGISTRY=10.10.70.12:5000/) or, when empty, from images
+# loaded by hand. SERVER_TAG picks the server build lab-api drives: parity
+# (the default) or a port branch such as m1-wire (ADR-019), which needs the
+# clients' MpClientPlugin.dll from the same branch.
 services:
   skymp-server:
-    image: ${REGISTRY:-}skymp-server:parity
+    image: ${REGISTRY:-}skymp-server:${SERVER_TAG:-parity}
     restart: unless-stopped
     # The image's own user (skymp, uid 1001) owns /srv/skymp since the fork's
     # ci/server.Dockerfile chowns the cwd; world/ on the VM is owned by that
@@ -23,6 +25,21 @@ services:
       - /srv/lab/server/world:/srv/skymp/world                                # the file driver's database
       - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro                    # gamemode.js and presets/
+
+  # difftest's legacy stack (docs/WIRE.md): the last RakNet image, beside the
+  # wire server, on its own copy of the world, reachable only inside the
+  # compose network. Started by `just test-proto` with --profile difftest.
+  skymp-server-legacy:
+    profiles: [difftest]
+    image: ${REGISTRY:-}skymp-server:${LEGACY_TAG:-parity-legacy}
+    user: "${SERVER_USER:-1001:1001}"
+    working_dir: /srv/skymp
+    command: ["node", "dist_back/skymp5-server.js"]
+    volumes:
+      - /srv/persist/esm:/srv/skymp/esm:ro
+      - /srv/lab/server-legacy/world:/srv/skymp/world
+      - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
+      - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro
 
   lab-api:
     image: ${REGISTRY:-}thuum/lab-api:latest

@@ -390,8 +390,10 @@ Decision.
    legacy binary format, which also proves every captured message fits the
    declared capacities.
 
-Consequences: .claude/rules/wire.md reads "no unbounded collections" where it
-read "heapless" once this is accepted; `just build` needs a Rust toolchain in
+Consequences: once this is accepted, .claude/rules/wire.md reads "no
+unbounded collections" where it read "heapless", and .claude/rules/rust.md
+reads "C++ receives decoded, validated messages as JSON Rust rendered" where
+it read "decoded, validated structs"; `just build` needs a Rust toolchain in
 the server image and the mirror's Windows workflow builds the cdylib; the
 fork's T0 loses the RakNet and BitStream tests and gains a JSON contract test
 that reads the same fixtures as the Rust tests.

@@ -1,43 +1,69 @@
 #!/usr/bin/env bash
-# T2 on sky-srv (docs/LAB.md, CLAUDE.md `just test-proto`): the headless
-# fakeclient against the live legacy server, checked through the lab gamemode's
-# labState RPC, then difftest's smoke session with the legacy driver, both run
-# inside the server image where the fakeclient lives. The difftest binary is
-# the fork's difftest-build artifact, fetched from GitLab with the project token
-# in the Keychain and placed under /srv/lab/difftest on sky-srv.
+# T2 on sky-srv (docs/LAB.md, CLAUDE.md `just test-proto`), M1 shape (ADR-019):
+#   1. the server build under test (SERVER_TAG, default the .env's or parity)
+#      from the clean world, the fakeclient smoke against it, its effects
+#      checked through the lab gamemode's labState RPC;
+#   2. difftest's sessions across two stacks from the same clean world: the
+#      legacy RakNet server (LEGACY_TAG, default parity-legacy) with its C++
+#      fakeclient, and the server under test with its own fakeclient.
+# The fakeclient and difftest run inside the server images; the difftest binary
+# and its sessions are the fork's difftest-build artifact for the branch that
+# built SERVER_TAG (DIFFTEST_REF, default the tag), fetched from GitLab with the
+# project token in the Keychain. The lab's compose service ends as it started.
 set -euo pipefail
 host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 project=${GITLAB_PROJECT:-7}
 ssh_srv() { ssh -o BatchMode=yes -J "$jump" "$host" "$@"; }
+# world/ belongs to the image's user (uid 1001): restore it from a root shell in
+# the server image, as lab-api's own rollback does from its container
+restore() { # restore <tag> <dir under /srv/lab>...
+  local t=$1; shift
+  ssh_srv "cd /srv/lab && SERVER_TAG=$t docker compose run --rm --no-deps -T --user 0 -v /srv/lab:/lab --entrypoint sh skymp-server -c 'set -e; for d in $*; do rm -rf /lab/\$d; mkdir -p /lab/\$d; cp -a /lab/snapshots/clean/. /lab/\$d/; chown -R 1001:1001 /lab/\$d; done'"
+}
+
+env_tag=$(ssh_srv 'grep -E "^SERVER_TAG=" /srv/lab/.env 2>/dev/null | cut -d= -f2' || true)
+tag=${SERVER_TAG:-${env_tag:-parity}}
+legacy=${LEGACY_TAG:-parity-legacy}
+ref=${DIFFTEST_REF:-$tag}
+echo "== server under test: skymp-server:$tag; legacy stack: skymp-server:$legacy; difftest from $ref"
 
 echo "== difftest artifact"
 tok=$(security find-generic-password -s gitlab-thuum-api -a skymp -w)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-# The newest successful difftest-build job on parity (GitLab's ref-level
-# artifact download wants the whole pipeline green, which server-build may
-# still be working on).
 job=$(curl -fsS -m 60 -H "PRIVATE-TOKEN: $tok" \
   "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs?scope[]=success&per_page=100" \
-  | python3 -c 'import sys,json; j=[x for x in json.load(sys.stdin) if x["name"]=="difftest-build" and x["ref"]=="parity"]; print(j[0]["id"] if j else "")')
+  | python3 -c "import sys,json; j=[x for x in json.load(sys.stdin) if x['name']=='difftest-build' and x['ref']=='$ref']; print(j[0]['id'] if j else '')")
 if [ -n "$job" ] && curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
      "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs/$job/artifacts"; then
   (cd "$tmp" && unzip -q a.zip) && rsync -az --delete -e "ssh -J $jump" "$tmp/difftest-dist/" "$host:/srv/lab/difftest/" && echo "   job $job installed on sky-srv"
   have_difftest=1
 else
-  echo "   no successful difftest-build job on parity yet; skipping the legacy diff"
+  echo "   no successful difftest-build job on $ref yet; skipping the diff"
   have_difftest=0
 fi
 
+echo "== clean worlds, server images"
+ssh_srv "set -e; cd /srv/lab
+  docker compose pull -q skymp-server 2>/dev/null || true
+  SERVER_TAG=$tag docker compose pull -q skymp-server
+  docker compose stop -t 20 skymp-server >/dev/null 2>&1 || true"
+restore "$tag" server/world server-legacy/world
+ssh_srv "set -e; cd /srv/lab
+  SERVER_TAG=$tag docker compose up -d skymp-server >/dev/null
+  for i in \$(seq 1 90); do (echo > /dev/tcp/127.0.0.1/3000) >/dev/null 2>&1 && break; sleep 2; done
+  echo '   skymp-server:$tag up'"
+
 echo "== fakeclient smoke (profile 9, 5 moves, AddItem IronSword)"
-ssh_srv 'cd /srv/lab && docker compose run --rm --no-deps -T skymp-server /srv/skymp/fakeclient --host skymp-server --port 7777 --profile-id 9 --moves 5 --add-item 77495 --add-item-count 1 --timeout-ms 20000 --settle-ms 2000 2>/dev/null' > "$tmp/events.jsonl"
+ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose run --rm --no-deps -T skymp-server /srv/skymp/fakeclient --host skymp-server --port 7777 --profile-id 9 --moves 5 --add-item 77495 --add-item-count 1 --timeout-ms 20000 --settle-ms 2000 2>/dev/null" > "$tmp/events.jsonl" || true
 python3 - "$tmp/events.jsonl" <<'PY'
 import json, sys
 events = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
 done = [e for e in events if e.get("event") == "done"]
 actor = [e for e in events if e.get("event") == "actor"]
-assert done and done[0].get("rc") == 0, f"fakeclient did not finish cleanly: {done}"
+errors = [e for e in events if e.get("event") == "error"]
+assert done and done[0].get("rc") == 0, f"fakeclient did not finish cleanly: {done} {errors}"
 assert actor, "no CreateActor with isMe"
 sent = [e for e in events if e.get("event") == "sent" and e["msg"].get("t") == 2]
 assert len(sent) >= 5, f"only {len(sent)} movement updates sent"
@@ -47,7 +73,7 @@ ssh_srv 'curl -sS -m 10 -X POST localhost:3000/rpc/labState -H "Content-Type: ap
 python3 - "$tmp/state.txt" "$tmp/events.jsonl" <<'PY'
 import json, sys
 actor, inv = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
-spawn = [json.loads(l) for l in open(sys.argv[2]) if l.strip() and '"event": "actor"' in l or '"event":"actor"' in l][0]["pos"]
+spawn = [json.loads(l) for l in open(sys.argv[2]) if l.strip() and ('"event": "actor"' in l or '"event":"actor"' in l)][0]["pos"]
 assert actor.get("found"), f"server has no actor for profile 9: {actor}"
 dx = abs(actor["x"] - spawn[0])
 assert dx > 100, f"server did not apply the movement (dx={dx})"
@@ -56,8 +82,23 @@ assert swords and swords[0] >= 1, f"AddItem did not land: {inv}"
 print(f"   server state ok: moved {dx:.0f} units, iron swords {swords[0]}")
 PY
 
+rc=0
 if [ "$have_difftest" = 1 ]; then
-  echo "== difftest smoke, legacy driver against the live server"
-  ssh_srv 'cd /srv/lab && docker compose run --rm --no-deps -T -v /srv/lab/difftest:/opt/difftest:ro -e DIFFTEST_FAKECLIENT=/srv/skymp/fakeclient -e DIFFTEST_LEGACY_ADDR=skymp-server:7777 skymp-server /opt/difftest/difftest /opt/difftest/sessions/smoke.yaml'
+  echo "== difftest: skymp-server:$legacy (C++ fakeclient) against skymp-server:$tag"
+  ssh_srv "cd /srv/lab && docker compose stop -t 20 skymp-server >/dev/null"
+  restore "$tag" server/world
+  ssh_srv "set -e; cd /srv/lab
+    SERVER_TAG=$tag docker compose up -d skymp-server >/dev/null
+    LEGACY_TAG=$legacy docker compose --profile difftest up -d skymp-server-legacy >/dev/null
+    id=\$(docker create ${REGISTRY_PREFIX:-10.10.70.12:5000/}skymp-server:$legacy) && docker cp \"\$id:/srv/skymp/fakeclient\" difftest/legacy-fakeclient && docker rm \"\$id\" >/dev/null
+    sleep 20"
+  for s in $(ssh_srv 'ls /srv/lab/difftest/sessions/*.yaml'); do
+    name=$(basename "$s")
+    ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose run --rm --no-deps -T -v /srv/lab/difftest:/opt/difftest:ro -e DIFFTEST_LEGACY_FAKECLIENT=/opt/difftest/legacy-fakeclient -e DIFFTEST_LEGACY_ADDR=skymp-server-legacy:7777 -e DIFFTEST_WIRE_FAKECLIENT=/srv/skymp/fakeclient -e DIFFTEST_WIRE_ADDR=skymp-server:7777 skymp-server /opt/difftest/difftest /opt/difftest/sessions/$name" || rc=1
+  done
+  ssh_srv "cd /srv/lab && LEGACY_TAG=$legacy docker compose --profile difftest stop -t 10 skymp-server-legacy >/dev/null"
 fi
-echo "T2 green"
+
+echo "== the lab's server back to its own setting (${env_tag:-parity})"
+ssh_srv "cd /srv/lab && docker compose up -d skymp-server >/dev/null && echo '   skymp-server:${env_tag:-parity} up'"
+[ "$rc" = 0 ] && echo "T2 green" || { echo "T2 red: difftest found differences"; exit 1; }
