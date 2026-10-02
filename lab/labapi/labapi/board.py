@@ -1,6 +1,8 @@
 """The step board: what lab-driver polls. One queue per scenario client; a
 poll is the heartbeat; a step completes when its result is posted or times
-out. dump-state results are kept as the client's latest view for assertions."""
+out. dump-state results are kept as the client's latest view for assertions,
+and watch-stop results as its latest watch (what it saw of other actors
+between watch-start and watch-stop)."""
 
 from __future__ import annotations
 
@@ -34,6 +36,7 @@ class StepBoard:
         self._all: dict[str, QueuedStep] = {}
         self._last_poll: dict[str, float] = {}
         self._views: dict[str, dict[str, Any]] = {}
+        self._watches: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
 
     # lab-driver side ---------------------------------------------------------
@@ -58,6 +61,8 @@ class StepBoard:
         step.result = body
         if step.action == "dump-state" and isinstance(body.get("data"), dict):
             self._views[step.client] = body["data"]
+        if step.action == "watch-stop" and isinstance(body.get("data"), dict):
+            self._watches[step.client] = body["data"]
         step.done.set()
         return True
 
@@ -108,8 +113,12 @@ class StepBoard:
     def view(self, observer: str) -> dict[str, Any] | None:
         return self._views.get(observer)
 
+    def watch(self, observer: str) -> dict[str, Any] | None:
+        return self._watches.get(observer)
+
     def clear_views(self) -> None:
         self._views.clear()
+        self._watches.clear()
 
     def clear(self, client: str | None = None) -> None:
         if client is None:

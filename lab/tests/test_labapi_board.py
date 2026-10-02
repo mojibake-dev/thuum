@@ -30,6 +30,12 @@ class BoardTests(unittest.TestCase):
             board.poll("c1")
             board.complete(dump.id, {"ok": True, "data": {"sees": {"c2": {"x": 1, "y": 2, "z": 3}}}})
             self.assertEqual(board.view("c1")["sees"]["c2"]["x"], 1)
+            # watch-stop results become the client's watch, apart from its view
+            stop = board.enqueue("c1", "watch-stop")
+            board.poll("c1")
+            board.complete(stop.id, {"ok": True, "data": {"actors": [{"formId": 1, "maxDisplacement": 2.0}]}})
+            self.assertEqual(board.watch("c1")["actors"][0]["maxDisplacement"], 2.0)
+            self.assertIn("sees", board.view("c1"))
             # a timed-out step is cancelled and a late result is ignored
             late = board.enqueue("c1", "connect")
             board.poll("c1")

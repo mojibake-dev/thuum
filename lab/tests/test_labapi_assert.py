@@ -160,3 +160,39 @@ class M0VocabularyTests(unittest.TestCase):
     def test_state_needs_a_dump(self):
         from labapi.assertions import clients_needing_views
         self.assertEqual(clients_needing_views("c1.state.isDead == true and c2.sees(c1)", ["c1", "c2"]), {"c1", "c2"})
+
+
+class WatchViews(NearViews):
+    """c2 watched two actors: c1, who started at the server's position and
+    jumped 5000 units before coming back, and a guard that never moved."""
+
+    def __init__(self, c1_max=5000.0):
+        super().__init__()
+        self.watches = {
+            "c2": {"actors": [
+                {"formId": 0xFF000001, "name": "c1", "first": [296.0, 1.0, 0.0], "last": [296.0, 1.0, 0.0], "maxDisplacement": c1_max, "samples": 240},
+                {"formId": 0xFF000009, "name": "Guard", "first": [5000.0, 0.0, 0.0], "last": [5000.0, 0.0, 0.0], "maxDisplacement": 0.0, "samples": 240},
+            ]},
+        }
+
+    def watch(self, observer):
+        return self.watches.get(observer)
+
+
+@needs_deps
+class WatchTests(unittest.TestCase):
+    def test_watched_matches_the_server_position_and_reports_the_farthest_point(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.watched(c1).maxDisplacement > 4000"))
+        self.assertTrue(ev.evaluate("c2.watched(c1).samples > 0"))
+        self.assertTrue(ev.evaluate("abs(c2.watched(c1).x - server.actor(c1).x) < 50"))
+        still = Evaluator(RichServer(), WatchViews(c1_max=3.0), ["c1", "c2"])
+        self.assertTrue(still.evaluate("c2.watched(c1).maxDisplacement < 500"))
+
+    def test_a_watch_is_needed_and_is_not_a_dump(self):
+        from labapi.assertions import AssertionData, Evaluator, clients_needing_views
+        ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.watched(c2).maxDisplacement < 1")
+        self.assertEqual(clients_needing_views("c2.watched(c1).maxDisplacement < 500", ["c1", "c2"]), set())

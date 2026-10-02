@@ -37,6 +37,7 @@ class ServerFacade(Protocol):
 
 class ViewsFacade(Protocol):
     def view(self, observer: str) -> dict[str, Any] | None: ...
+    def watch(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -86,6 +87,20 @@ class Pos:
     equippedLeft: int | None = None
     raceId: int | None = None
     sex: int | None = None
+
+
+@dataclass(frozen=True)
+class WatchView:
+    """c.watched(other): what a client saw of another client's actor between
+    its watch-start and watch-stop steps: where the actor was when the watch
+    began (relative to its cell's origin), the farthest it ever got from
+    there, and how many frames sampled it."""
+
+    x: float
+    y: float
+    z: float
+    maxDisplacement: float
+    samples: int
 
 
 @dataclass(frozen=True)
@@ -202,6 +217,44 @@ class _ClientRef:
     def sees(self, other: str) -> bool:
         return self._seen(other)[0] is not None
 
+    def watched(self, other: str) -> WatchView:
+        """The watched actor that started where the server says `other` is
+        (within SEE_RADIUS): a rejected move leaves the server's record where
+        it was, so the match holds even when the watcher saw the actor leave."""
+        fn = getattr(self._views, "watch", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a watch-stop yet")
+        target = self._server.actor(other)
+        if not target or not target.get("found", True):
+            raise AssertionData(f"server has no actor for {other}")
+        absolute = target.get("absolute") or target
+        origin = self._origin("desc", absolute.get("cell"))
+        best: dict[str, Any] | None = None
+        best_d = 0.0
+        for a in data.get("actors") or []:
+            try:
+                first = a["first"]
+                dx = float(first[0]) - float(absolute["x"])
+                dy = float(first[1]) - float(absolute["y"])
+                dz = float(first[2]) - float(absolute["z"])
+            except (KeyError, IndexError, TypeError, ValueError):
+                continue
+            d = (dx * dx + dy * dy + dz * dz) ** 0.5
+            if d <= self.SEE_RADIUS and (best is None or d < best_d):
+                best, best_d = a, d
+        if best is None:
+            raise AssertionData(f"{self.name} watched no actor where the server has {other}")
+        try:
+            first = best["first"]
+            return WatchView(
+                float(first[0]) - origin[0], float(first[1]) - origin[1], float(first[2]) - origin[2],
+                maxDisplacement=float(best["maxDisplacement"]),
+                samples=int(best.get("samples", 0)),
+            )
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s watch of {other} lacks {e}") from e
+
     def view(self, other: str) -> Pos:
         seen, origin = self._seen(other)
         if not seen:
@@ -250,12 +303,13 @@ class _ClientRef:
 _ATTRS = {
     ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
+    WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     _ClientRef: {"state"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory"},
-    _ClientRef: {"sees", "view"},
+    _ClientRef: {"sees", "view", "watched"},
     InventoryView: {"count"},
 }
 _CMP = {

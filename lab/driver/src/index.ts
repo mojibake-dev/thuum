@@ -82,6 +82,11 @@ let deferred: { step: Step; file: string; startedAt: number } | null = null;
 // the 133 asked; the server's record then reached the target 3 s after the
 // scenario's wait had ended).
 let moving: { x: number; y: number; cx: number; cy: number; speed: number; last: number; until: number } | null = null;
+// watch-start to watch-stop: every frame, how far each actor near us at the
+// start has got from where it was (lab-api's c.watched(other)). Actors are
+// kept by form id, so one that jumps out of range is still followed.
+type Watched = { name: string; first: number[]; last: number[]; maxDisplacement: number; samples: number };
+let watching: { startedAt: number; actors: Map<number, Watched> } | null = null;
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -119,24 +124,55 @@ function describe(actor: Actor) {
   };
 }
 
+// Other actors within 4096 units. The Papyrus API has no enumeration;
+// findClosestActor at our own position returns ourselves, so sample
+// findRandomActor a few times and keep the distinct others.
+function nearbyActors(player: Actor): Actor[] {
+  const found: Actor[] = [];
+  const px = player.getPositionX();
+  const py = player.getPositionY();
+  const pz = player.getPositionZ();
+  for (let i = 0; i < 12 && found.length < 8; i++) {
+    const other = Game.findRandomActor(px, py, pz, 4096);
+    if (!other) continue;
+    const id = other.getFormID();
+    if (id === player.getFormID() || found.some((f) => f.getFormID() === id)) continue;
+    found.push(other);
+  }
+  return found;
+}
+
+function positionOf(actor: Actor): number[] {
+  return [actor.getPositionX(), actor.getPositionY(), actor.getPositionZ()];
+}
+
+function trackWatch(): void {
+  if (!watching) return;
+  watching.actors.forEach((w, id) => {
+    const actor = Actor.from(Game.getFormEx(id));
+    if (!actor) return;
+    const pos = positionOf(actor);
+    const dx = pos[0] - w.first[0];
+    const dy = pos[1] - w.first[1];
+    const dz = pos[2] - w.first[2];
+    w.maxDisplacement = Math.max(w.maxDisplacement, Math.sqrt(dx * dx + dy * dy + dz * dz));
+    w.last = pos;
+    w.samples += 1;
+  });
+}
+
 function dumpState(player: Actor) {
   const cell = player.getParentCell();
   const world = player.getWorldSpace();
   const worldOrCell = world ? world.getFormID() : cell ? cell.getFormID() : 0;
-  // Other actors within 4096 units, for lab-api's sees() and view(). The
-  // Papyrus API has no enumeration; findClosestActor at our own position
-  // returns ourselves, so sample findRandomActor a few times and keep the
-  // distinct others. The runner matches their positions against the
-  // server's record of the other client.
+  // Other actors nearby (nearbyActors), for lab-api's sees() and view(); the
+  // runner matches their positions against the server's record of the
+  // other client.
   const px = player.getPositionX();
   const py = player.getPositionY();
   const pz = player.getPositionZ();
   const near: Array<ReturnType<typeof describe> & { pos: number[]; distance: number }> = [];
-  for (let i = 0; i < 12 && near.length < 8; i++) {
-    const other = Game.findRandomActor(px, py, pz, 4096);
-    if (!other) continue;
-    const id = other.getFormID();
-    if (id === player.getFormID() || near.some((n) => n.formId === id)) continue;
+  for (const other of nearbyActors(player)) {
     const dx = other.getPositionX() - px;
     const dy = other.getPositionY() - py;
     const dz = other.getPositionZ() - pz;
@@ -228,6 +264,23 @@ function run(step: Step, player: Actor): unknown {
       const duration = num(a.duration_s, 0) > 0 ? num(a.duration_s) : distance / speed;
       moving = { x, y, cx: player.getPositionX(), cy: player.getPositionY(), speed, last: Date.now(), until: Date.now() + Math.max(500, duration * 1500) };
       return { dispatched: true, distance, speed };
+    }
+    case "watch-start": {
+      const actors = new Map<number, Watched>();
+      for (const other of nearbyActors(player)) {
+        const pos = positionOf(other);
+        actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0 });
+      }
+      watching = { startedAt: Date.now(), actors };
+      return { watching: actors.size };
+    }
+    case "watch-stop": {
+      if (!watching) return { error: "no watch-start before watch-stop" };
+      const w = watching;
+      watching = null;
+      const actors: Array<Watched & { formId: number }> = [];
+      w.actors.forEach((v, formId) => actors.push({ formId, ...v }));
+      return { seconds: (Date.now() - w.startedAt) / 1000, actors };
     }
     case "equip": {
       const item = Game.getFormEx(num(a.formId));
@@ -367,6 +420,7 @@ on("update", () => {
   finishDeferred(c);
   const me = Game.getPlayer();
   if (me) settleMove(me);
+  trackWatch();
   const step = pending;
   if (!step) return;
   pending = null;

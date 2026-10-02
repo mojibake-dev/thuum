@@ -354,13 +354,19 @@ result.json (`pos`), and a driver step's answer rides in its `note`. The other c
 equip, cast, activate, hit, dump-state, request-screenshot, craft (an open
 driver item that m0-forge specifies), tap-key (one DirectInput scan code
 through SKSE's Input.TapKey, for menus the server cannot close for the
-client, such as the race menu's Done). Server verbs are written as client
+client, such as the race menu's Done), and watch-start / watch-stop (the
+client follows every actor near it at watch-start, by form id, each frame
+until watch-stop, and reports how far each got from where it began; for
+"the observer never saw X" checks that one dump-state would sample too
+late). Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, set-percentages, kill, respawn.
 `screenshot` is a guest exec on a managed client (request-screenshot is
 the in-game fallback). Assertions read `server.actor(c)`, `server.inventory(c)`,
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
-dump's nearby actors matched to the server's position for `other`), and
+dump's nearby actors matched to the server's position for `other`),
+`c.watched(other)` (the last watch-stop's actor that started where the
+server has `other`: `x, y, z`, `maxDisplacement`, `samples`), and
 `form("File.esm:EditorID")` through lab-api's item table. Coordinates in a
 scenario are offsets from a named cell's origin (`cells` in lab-api's
 guests.yaml; `lab-spawn` is the server's default start point until lab.esp

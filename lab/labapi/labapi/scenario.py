@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "hit", "dump-state", "request-screenshot", "craft", "tap-key"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "hit", "dump-state", "request-screenshot", "craft", "tap-key", "watch-start", "watch-stop"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "set-percentages", "kill", "respawn"}
 SPECIAL_ACTIONS = {"screenshot"}
