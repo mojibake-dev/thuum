@@ -28,18 +28,13 @@ if (-not $Game) {
 $exe = Get-Item (Join-Path $Game 'SkyrimSE.exe')
 $plugins = Join-Path $Game 'Data\Platform\Plugins'
 if (-not (Test-Path (Join-Path $Game 'skse64_loader.exe'))) { throw "no skse64_loader.exe in $Game (run install-layer.ps1 first)" }
-# The client dist (Skyrim Platform, skymp5-client, their scripts and UI) first,
-# when `just stage-client` put it under C:\sky-lab\dist; then the lab's own files.
-$dist = Join-Path $lab 'dist\Data'
-if (Test-Path $dist) { Copy-Item (Join-Path $dist '*') (Join-Path $Game 'Data') -Recurse -Force }
-if (-not (Test-Path $plugins)) { throw "no Skyrim Platform at $plugins after laying the dist" }
-# writeLogs (Skyrim Platform) needs this directory to exist; it never creates it.
-New-Item -ItemType Directory -Force -Path (Join-Path $Game 'Data\Platform\Logs') | Out-Null
 # A clone's identity (identity.ps1: lab-driver's client name, skymp5-client's
 # profileId) lives in the two settings files already in Plugins; the staged
 # copies are the template's (c1 / 1). Keep the clone's own across a relay:
 # sky-c2 came back as c1 / profile 1 after a client-dist on 2026-10-01 and
-# collided with sky-c1's login.
+# collided with sky-c1's login. Read it before anything is laid over Plugins:
+# the client dist carries its own skymp5-client-settings.txt (profile 1), and
+# reading after the dist made sky-c2 log in as profile 1 on 2026-10-02.
 $identity = $null
 $oldDriver = Join-Path $plugins 'lab-driver-settings.txt'
 $oldClient = Join-Path $plugins 'skymp5-client-settings.txt'
@@ -48,6 +43,13 @@ if ((Test-Path $oldDriver) -and (Test-Path $oldClient)) {
     $identity = @{ client = (Get-Content $oldDriver -Raw | ConvertFrom-Json).client; profileId = (Get-Content $oldClient -Raw | ConvertFrom-Json).gameData.profileId }
   } catch { $identity = $null }
 }
+# The client dist (Skyrim Platform, skymp5-client, their scripts and UI) first,
+# when `just stage-client` put it under C:\sky-lab\dist; then the lab's own files.
+$dist = Join-Path $lab 'dist\Data'
+if (Test-Path $dist) { Copy-Item (Join-Path $dist '*') (Join-Path $Game 'Data') -Recurse -Force }
+if (-not (Test-Path $plugins)) { throw "no Skyrim Platform at $plugins after laying the dist" }
+# writeLogs (Skyrim Platform) needs this directory to exist; it never creates it.
+New-Item -ItemType Directory -Force -Path (Join-Path $Game 'Data\Platform\Logs') | Out-Null
 foreach ($f in 'lab-driver.js', 'lab-driver-settings.txt', 'skymp5-client-settings.txt') {
   Copy-Item (Join-Path $lab $f) (Join-Path $plugins $f) -Force
 }
