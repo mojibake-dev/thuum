@@ -315,3 +315,83 @@ Consequences: the version pin in CLAUDE.md and the addrlib/ database move to
 1.7.104 when the branch lands; `just addr` and the Ghidra labels follow the
 Address Library for that version; the client template installs SKSE 2.3.1;
 every REL::ID the fork touches is re-verified rather than assumed stable.
+
+## ADR-019: The M1 port: SkyMP's own messages as wire-schema types, JSON at the in-process edge
+
+Status: proposed (2026-10-02). Amends ADR-012 (how C++ receives messages,
+heapless) and ADR-015 (the heapless and MaxSize pins); the rest of both
+stands. Built on the fork branch `m1-wire`; nothing reaches `parity` until
+smoke-two-players is green on it.
+
+What M1 replaces is smaller and better shaped than the M0 plan assumed.
+SkyMP already separates format from transport: each of its 33 message types
+(MsgType 1 to 33) declares one field list, `Serialize(Archive&)`, which
+drives a binary encoding on the wire and a JSON form for JavaScript. Nothing
+JSON crosses RakNet: a green smoke-two-players capture (run
+20261001-233455) holds 7,977 SkyMP messages, all binary, of 11 types. The
+client half is one DLL, MpClientPlugin.dll, that Skyrim Platform loads by
+name and drives through seven C exports (CreateClient, DestroyClient,
+IsConnected, Tick, Send, SendRaw, MpCommonGetVersion), converting binary to
+JSON for skymp5-client and back. The server half is one interface,
+`Networking::IServer`, behind which RakNet sits (mp_common/Networking.cpp).
+And the binary reader is the recognizer ADR-010 is about: the input archive
+loops a u32 count taken from the packet ("TODO: check n before resizing",
+serialization/include/archives/BitStreamInputArchive.h), so one crafted
+packet makes the server, or a malicious server makes a client, read and
+append up to 2^32 elements.
+
+Decision.
+
+1. Every MsgType becomes a wire-schema variant, appended after the nine M0
+   variants (wire id = MsgType + 8, SCHEMA_VERSION 2), with its C++ field
+   list in the same order under the same JSON keys; the nested payload types
+   (Appearance, Tint, Equipment, Inventory and its ExtraData, AnimationData,
+   Transform, the CreateActor props, the SpSnippet arguments) come with them.
+   The M0 variants stay reserved for the authority model.
+2. The in-process edge is JSON, rendered and recognized by Rust. Rust renders
+   a decoded, validated message as exactly what the C++ JsonOutputArchive
+   writes (absent optionals omitted, `t` = MsgType, including the nested `t`
+   quirks), and recognizes JSON from the C++ core and from skymp5-client
+   into a typed message, validates it and encodes it. Server: a Rust-backed
+   `IServer` hands the core `0x86 + JSON`, the input PacketParser already
+   accepts for all 33 types, and the core's sends become WriteJson output;
+   the six raw relays (SendToNeighbours) therefore forward Rust-rendered
+   JSON. Client: the Rust cdylib is MpClientPlugin.dll, same seven exports,
+   so Skyrim Platform and skymp5-client do not change. Deleted: RakNet on
+   both ends, the BitStream archives, MessageSerializer's binary paths, the
+   C++ MpClientPlugin and fakeclient (a Rust fakeclient keeps the CLI and
+   event lines lab-api reads). C++ then never parses network bytes, only
+   canonical JSON whose every length Rust has already bounded. This replaces
+   ADR-012's "decoded structs across the cxx bridge": per-message cxx structs
+   would write every field list three times for no gain in what C++ can be
+   fed. The cost is JSON on every message at the edge; a typed fast path for
+   UpdateMovement is the named optimization if fan-out measurements ask.
+3. Collections are `wire_schema::bounded::{Vec<T, N>, String<N>}`: heap
+   backed, length checked against N before any growth, at decode and at
+   construction. heapless leaves the workspace: inline storage makes the
+   Message enum as large as its largest variant, and SetInventory or
+   CreateActor at game-sized capacities (a thousand-odd inventory stacks of
+   up to about 300 bytes each) would put hundreds of KiB on Skyrim's main
+   thread per decoded value. Capacities stay chosen from the game and named
+   next to the type. Every message declares its byte cap (`MAX_LEN`), which
+   the codec checks after reading the variant tag and before decoding the
+   body, so postcard's experimental MaxSize derive leaves too; the transport
+   caps reassembled messages per direction (client to server tight, server
+   to client generous).
+4. Channels keep SkyMP's semantics: a reliable send rides ReliableOrdered
+   (the server's RELIABLE_ORDERED; the client's RELIABLE becomes ordered,
+   which only ever adds ordering), an unreliable one rides Unreliable.
+   Version gating is netcode's protocol id, derived from SCHEMA_VERSION, so
+   mismatched peers never connect; the server password travels in the
+   connect token's user data where RakNet carried "7_" + password.
+5. The oracle is the last RakNet server image, pinned by digest, with the C++
+   fakeclient, against the bridged image with the Rust fakeclient; difftest
+   sessions come from lab captures through a test-only Rust reader of the
+   legacy binary format, which also proves every captured message fits the
+   declared capacities.
+
+Consequences: .claude/rules/wire.md reads "no unbounded collections" where it
+read "heapless" once this is accepted; `just build` needs a Rust toolchain in
+the server image and the mirror's Windows workflow builds the cdylib; the
+fork's T0 loses the RakNet and BitStream tests and gains a JSON contract test
+that reads the same fixtures as the Rust tests.
