@@ -1,0 +1,46 @@
+# M1 exit scenario (docs/PLAN.md M1): what the server owns about a player
+# survives a restart. It grows with each persistence verb; today it holds
+# position, inventory, the equipped weapon (as the player and the observer
+# see it), and attributes (docs/verbs/attributes.md; the bounds allow the
+# client's regeneration, as m0-attributes explains, and exclude a reset to
+# 1.0). Assertions are evaluated by lab-api only (ADR-009).
+id: a-restart-persistence
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: -150, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
+  - wait: 5
+  - c1: give {item: "Skyrim.esm:SteelSword", count: 1}
+  - wait: 3
+  - c1: equip {item: "Skyrim.esm:SteelSword"}
+  - c1: set-percentages {health: 0.5, magicka: 0.25, stamina: 0.75}
+  - wait: 3
+  - c1: dump-state
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:SteelSword") == 1
+      - c1.state.equippedRight == form("Skyrim.esm:SteelSword")
+      - abs(server.actor(c1).y - (-150)) < 64
+      - 0.45 <= server.actor(c1).healthPercentage < 0.6
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 5
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:SteelSword") == 1
+      - c1.state.equippedRight == form("Skyrim.esm:SteelSword")
+      - c2.view(c1).equippedRight == form("Skyrim.esm:SteelSword")
+      - abs(server.actor(c1).y - (-150)) < 64
+      - abs(c1.state.y - (-150)) < 64
+      - 0.45 <= server.actor(c1).healthPercentage < 0.8
+      - 0.45 <= c1.state.healthPercentage < 0.8
+artifacts: [server.log, c1.log, c2.log, world-diff]
