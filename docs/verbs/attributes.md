@@ -109,7 +109,9 @@ and the crop's window is at most 2 s.
   Fails without the fix (reads 1.0).
 - T1: n/a (no native code).
 - T2: `just test-proto` sets profile 9's percentages, restarts the server
-  and reads the record before any login.
+  and reads the record before any login. 2026-10-02: red on m1-wire (reads
+  1, 1, 1; no fix there), green on m1-attributes (reads 0.5, 0.25, 0.75),
+  with the fakeclient smoke and difftest green on both.
 - T3 scenario id: lab/scenarios/m0-attributes.yaml, unchanged; its
   restart-and-relog assertions are the ones that were red.
 - Assertions that would fail if the verb silently regressed: the record's
@@ -121,5 +123,5 @@ and the crop's window is at most 2 s.
 - [x] doc complete, rung declared
 - [x] engine surface cited (none new)
 - [x] server logic + T0
-- [ ] T2 green
+- [x] T2 green (m1-attributes, 2026-10-02)
 - [ ] T3 scenario green, no HYPOTHESIS tags
