@@ -27,8 +27,9 @@ services:
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro                    # gamemode.js and presets/
 
   # difftest's legacy stack (docs/WIRE.md): the last RakNet image, beside the
-  # wire server, on its own copy of the world, reachable only inside the
-  # compose network. Started by `just test-proto` with --profile difftest.
+  # server under test (skymp-server-test), on its own copy of the world,
+  # reachable only inside the compose network. Started by `just test-proto`
+  # with --profile difftest.
   skymp-server-legacy:
     profiles: [difftest]
     image: ${REGISTRY:-}skymp-server:${LEGACY_TAG:-parity-legacy}
@@ -38,6 +39,25 @@ services:
     volumes:
       - /srv/persist/esm:/srv/skymp/esm:ro
       - /srv/lab/server-legacy/world:/srv/skymp/world
+      - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
+      - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro
+
+  # T2's server under test (lab/tools/test-proto.sh): the image under test
+  # (TEST_TAG) on its own world, reachable inside the compose network and, for
+  # the lab RPC, on the VM's loopback only. Never the lab's skymp-server, so T2
+  # neither disturbs nor sees the clients playing T3 (their traffic broke a
+  # difftest session on 2026-10-02).
+  skymp-server-test:
+    profiles: [difftest]
+    image: ${REGISTRY:-}skymp-server:${TEST_TAG:-parity}
+    user: "${SERVER_USER:-1001:1001}"
+    working_dir: /srv/skymp
+    command: ["node", "dist_back/skymp5-server.js"]
+    ports:
+      - "127.0.0.1:3100:3000"
+    volumes:
+      - /srv/persist/esm:/srv/skymp/esm:ro
+      - /srv/lab/server-test/world:/srv/skymp/world
       - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro
 
