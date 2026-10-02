@@ -1,0 +1,33 @@
+# M1 validation, movement (docs/verbs/validation.md): a move the server
+# rejects reaches nobody. c1 jumps 5000 units in one frame (a move at a speed
+# that covers it in one update); MovementValidation rejects jumps of 4096 or
+# more and snaps c1 back with Teleport2. c2 watches the whole time and must
+# never see c1 leave its spot, and the server's record of c1 stays where it
+# was. Under the RakNet core the jump reached c2 before it was rejected.
+# Assertions are evaluated by lab-api only (ADR-009).
+# Needs: lab-driver watch-start and watch-stop (lab-api c.watched), and the
+# fork's validate-before-relay fix (branch m1-movement).
+id: a-movement-reject
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
+  - wait: 5
+  - c2: watch-start
+  - c1: move {dx: 0, dy: 5000, speed: 1000000}
+  - wait: 4
+  - c2: watch-stop
+  - c1: dump-state
+  - assert:
+      - c2.watched(c1).samples > 0
+      - c2.watched(c1).maxDisplacement < 500
+      - abs(server.actor(c1).y - 0) < 200
+      - abs(c1.state.y - 0) < 200
+artifacts: [server.log, c1.log, c2.log, world-diff]
