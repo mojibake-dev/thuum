@@ -224,6 +224,17 @@ diffs against itself, which proves determinism only if the world is
 restored between runs. The database dump joins the comparison when
 `just test-proto` runs both servers side by side on sky-srv.
 
+A difference the port means to make is declared in the session, not
+normalized away: `divergences` lists a message one client receives a
+different number of times on each stack, with the counts and the reason.
+Declarations apply legacy against wire only and are reviewed like validator
+changes; one that stops occurring as declared is itself a difference, so it
+cannot outlive its cause. The first, from T2 on 2026-10-02: in the smoke
+session c2 sees c1's actor destroyed on the wire and not on RakNet, because
+the C++ fakeclient exits without closing its connection (the legacy server
+waits out RakNet's timeout) while the Rust fakeclient's close reaches the
+wire server at once.
+
 Corpus: lab captures. Wireshark's RakNet dissector stops at SkyMP's packet
 id (0x86), so the RakNet framing is parsed directly (reliability header,
 ordering, split reassembly; the capture holds both sides of docker's NAT)
