@@ -19,6 +19,11 @@ host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 project=${GITLAB_PROJECT:-7}
 ssh_srv() { ssh -o BatchMode=yes -J "$jump" "$host" "$@"; }
+# Ready means the lab RPC answers: docker's port proxy accepts TCP on :3000
+# before the server listens, so a bare connect proves nothing.
+wait_ready() {
+  ssh_srv 'for i in $(seq 1 90); do curl -fsS -m 5 -X POST localhost:3000/rpc/labState -H "Content-Type: application/json" -d "{\"payload\":{\"kind\":\"online\"}}" >/dev/null 2>&1 && exit 0; sleep 2; done; exit 1'
+}
 # world/ belongs to the image's user (uid 1001): restore it from a root shell in
 # the server image, as lab-api's own rollback does from its container
 restore() { # restore <tag> <dir under /srv/lab>...
@@ -59,10 +64,8 @@ ssh_srv "set -e; cd /srv/lab
   SERVER_TAG=$tag docker compose pull -q skymp-server
   docker compose stop -t 20 skymp-server >/dev/null 2>&1 || true"
 restore "$tag" server/world server-legacy/world
-ssh_srv "set -e; cd /srv/lab
-  SERVER_TAG=$tag docker compose up -d skymp-server >/dev/null
-  for i in \$(seq 1 90); do (echo > /dev/tcp/127.0.0.1/3000) >/dev/null 2>&1 && break; sleep 2; done
-  echo '   skymp-server:$tag up'"
+ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose up -d skymp-server >/dev/null"
+wait_ready && echo "   skymp-server:$tag up" || { echo "   skymp-server:$tag never answered labState"; exit 1; }
 
 echo "== fakeclient smoke (profile 9, 5 moves, AddItem IronSword)"
 ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose run --rm --no-deps -T skymp-server /srv/skymp/fakeclient --host skymp-server --port 7777 --profile-id 9 --moves 5 --add-item 77495 --add-item-count 1 --timeout-ms 20000 --settle-ms 2000 2>/dev/null" > "$tmp/events.jsonl" || true
@@ -93,13 +96,17 @@ PY
 
 echo "== attributes across a restart (profile 9 at 0.5, 0.25, 0.75)"
 ssh_srv 'curl -sS -m 10 -X POST localhost:3000/rpc/labCommand -H "Content-Type: application/json" -d "{\"payload\":{\"kind\":\"set-percentages\",\"profileId\":9,\"health\":0.5,\"magicka\":0.25,\"stamina\":0.75}}"' > /dev/null
+# Each check below records its verdict and the script goes on, so one run
+# reports every red; the verdict is printed at the end.
+attr_rc=0
 # the file driver writes the record asynchronously; restart once it is on disk
-ssh_srv 'for i in $(seq 1 30); do grep -Eqs "\"healthPercentage\": ?0\.5" /srv/lab/server/world/changeForms/*.json && exit 0; sleep 1; done; exit 1' \
-  || { echo "   the record never reached the disk"; exit 1; }
-ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose restart skymp-server >/dev/null 2>&1
-  for i in \$(seq 1 90); do (echo > /dev/tcp/127.0.0.1/3000) >/dev/null 2>&1 && break; sleep 2; done"
-ssh_srv 'curl -sS -m 10 -X POST localhost:3000/rpc/labState -H "Content-Type: application/json" -d "{\"payload\":{\"kind\":\"actor\",\"profileId\":9}}"' > "$tmp/attr.txt"
-python3 - "$tmp/attr.txt" <<'PY'
+if ! ssh_srv 'for i in $(seq 1 30); do grep -Eqs "\"healthPercentage\": ?0\.5" /srv/lab/server/world/changeForms/*.json && exit 0; sleep 1; done; exit 1'; then
+  echo "   the record never reached the disk"; attr_rc=1
+fi
+ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose restart skymp-server >/dev/null 2>&1"
+wait_ready || echo "   the server never answered labState after the restart"
+ssh_srv 'curl -sS -m 10 -X POST localhost:3000/rpc/labState -H "Content-Type: application/json" -d "{\"payload\":{\"kind\":\"actor\",\"profileId\":9}}"' > "$tmp/attr.txt" || true
+python3 - "$tmp/attr.txt" <<'PY' || attr_rc=1
 import json, sys
 a = json.load(open(sys.argv[1]))
 assert a.get("found"), f"no actor for profile 9 after the restart: {a}"
@@ -125,4 +132,7 @@ if [ "$have_difftest" = 1 ]; then
   done
 fi
 
-[ "$rc" = 0 ] && echo "T2 green" || { echo "T2 red: difftest found differences"; exit 1; }
+red=""
+[ "$attr_rc" = 0 ] || red="$red attributes-across-restart"
+[ "$rc" = 0 ] || red="$red difftest"
+[ -z "$red" ] && echo "T2 green" || { echo "T2 red:$red"; exit 1; }
