@@ -24,9 +24,10 @@ noted.
   message, is rejected and the sender's own actor snapped back with
   Teleport2 (MovementValidation.cpp); the first update after a server
   teleport is always rejected and snapped back.
-- Defect: OnUpdateMovement relays the raw packet to every neighbour
-  (SendToNeighbours) before MovementValidation runs, so a rejected move
-  has already reached the other clients. Validation must come first.
+- Defect, FIXED 2026-10-02 (docs/verbs/movement-relay.md, on parity):
+  OnUpdateMovement relayed the raw packet to every neighbour
+  (SendToNeighbours) before MovementValidation ran, so a rejected move had
+  already reached the other clients.
 - Not checked: speed over time (only the per-message jump), message rate,
   height and navmesh, rotation. A hosted NPC's rejected move is dropped
   without a snap-back or a log line.
@@ -78,7 +79,7 @@ noted.
 
 ## Order of work (proposal)
 
-1. Movement: validate before relay (a correctness fix with a T2 test),
+1. Movement: validate before relay (done, docs/verbs/movement-relay.md),
    then speed bounds from the game's movement records.
 2. Activation distance.
 3. Melee reach, with the bow range question settled.

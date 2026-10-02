@@ -162,6 +162,11 @@ it carries a HYPOTHESIS tag.
   own isDead as under RakNet (Eli's call, see M0).
 - Validation: character creation, damage range and angle, movement speed
   bounds, activation distance.
+  Survey of what the server checks today: docs/verbs/validation.md. First
+  verb DONE 2026-10-02: a move the server rejects is no longer relayed
+  before validation (docs/verbs/movement-relay.md; a-movement-reject green
+  on the fix, run 20261002-230136, red without it, run 20261002-230814; on
+  parity).
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
