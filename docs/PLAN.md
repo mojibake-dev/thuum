@@ -170,6 +170,11 @@ it carries a HYPOTHESIS tag.
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
+  Status 2026-10-02: `a-restart-persistence` exists and is green on the
+  wire (run 20261002-231256: position, inventory, the equipped weapon as
+  the player and the observer see it, and attributes survive a restart); it
+  grows with each persistence verb. `a-movement-reject` green (movement
+  relay order). Both scenarios await Eli's review.
 
 ### M2: Combat and magic authority (8 to 12 weeks, Class B)
 
