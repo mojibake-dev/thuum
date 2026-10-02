@@ -152,6 +152,14 @@ it carries a HYPOTHESIS tag.
   reason), or "never" with a reason. No silent stubs.
 - Persistence gaps from the roadmap: equipment in hands across restart,
   favorites, map markers, learned effects, script variables.
+  Attributes DONE 2026-10-02 (docs/verbs/attributes.md): every server start
+  reset loaded actors to full health, magicka and stamina; fixed, T2 and
+  m0-attributes green on the wire (run 20261002-222409), on parity.
+  Equipment in hands already survives a restart (m0-inventory green on the
+  wire, run 20261002-221239), so that roadmap line is stale.
+  M0 floor on the wire (2026-10-02): m0-appearance green (run
+  20261002-221528), m0-inventory green, m0-death red only on the client's
+  own isDead as under RakNet (Eli's call, see M0).
 - Validation: character creation, damage range and angle, movement speed
   bounds, activation distance.
 - Console commands, full ActorValue set, game time and globals, wait and

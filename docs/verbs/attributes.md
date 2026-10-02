@@ -112,8 +112,14 @@ and the crop's window is at most 2 s.
   and reads the record before any login. 2026-10-02: red on m1-wire (reads
   1, 1, 1; no fix there), green on m1-attributes (reads 0.5, 0.25, 0.75),
   with the fakeclient smoke and difftest green on both.
-- T3 scenario id: lab/scenarios/m0-attributes.yaml, unchanged; its
-  restart-and-relog assertions are the ones that were red.
+- T3 scenario id: lab/scenarios/m0-attributes.yaml; its restart-and-relog
+  assertions are the ones that were red. Green on 2026-10-02, run
+  20261002-222409, 17 of 17, on the wire with the fix: after the restart and
+  relog the client read health 0.59 and magicka 0.59 (the record's 0.5 and
+  0.25 plus about 13 s of regeneration), where it read 1.0 before. That run
+  uses the scenario's regeneration-aware bounds (thuum 43042f9, awaiting
+  Eli's review): the old band of 0.05 around the set value failed on stamina
+  at the assert's own dump in both earlier wire runs, before the restart.
 - Assertions that would fail if the verb silently regressed: the record's
   and the client's health after the restart and relog (m0-attributes),
   the T2 record check, the T0 test.
@@ -124,4 +130,6 @@ and the crop's window is at most 2 s.
 - [x] engine surface cited (none new)
 - [x] server logic + T0
 - [x] T2 green (m1-attributes, 2026-10-02)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T3 scenario green, no HYPOTHESIS tags (run 20261002-222409; the
+  scenario revision it ran is under Eli's review)
+- [x] on fork parity (875c4778, 2026-10-02)
