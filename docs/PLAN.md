@@ -107,11 +107,14 @@ it carries a HYPOTHESIS tag.
   20261001-235144): server-set health, magicka and stamina reach the client
   and the observer within a second (the sample moved from 3 s to 1 s because
   magicka and stamina regenerate); across a server restart and relog they do
-  not survive: server record and client both read 1.0 again (the server's
-  regen crop measures from its last percentage update, which a restart
-  forgets, so the relogging client's full values pass validation). That is
-  a real gap in the "done" column and stays red here; it is M1's
-  "persistence gaps" item, not a scenario edit. m0-death: the server marks the player dead and the other
+  not survive: server record and client both read 1.0 again. Cause, pinned
+  on 2026-10-02 by a T2 run (the record reads 1.0 right after the restart,
+  before any login, while the change form on disk still holds the saved
+  values): MpActor::ApplyChangeForm replaces a loaded actor's values with
+  the master files' base values, percentages included, so every server start
+  heals every actor. That is a real gap in the "done" column and stays red
+  here; the fix is M1's first persistence verb (docs/verbs/attributes.md),
+  not a scenario edit. m0-death: the server marks the player dead and the other
   client sees a dead actor, but the stock client never kills the local
   player (skymp5-client deathService.killWithPush ragdolls it; isDead()
   stays false, health stays full), so `c1.state.isDead == true` describes

@@ -3,13 +3,17 @@
 #   1. the server build under test (SERVER_TAG, default the .env's or parity)
 #      from the clean world, the fakeclient smoke against it, its effects
 #      checked through the lab gamemode's labState RPC;
-#   2. difftest's sessions across two stacks from the same clean world: the
+#   2. attributes across a restart (docs/verbs/attributes.md): profile 9's
+#      percentages set through labCommand, the server restarted, the record
+#      read back before anyone logs in;
+#   3. difftest's sessions across two stacks from the same clean world: the
 #      legacy RakNet server (LEGACY_TAG, default parity-legacy) with its C++
 #      fakeclient, and the server under test with its own fakeclient.
 # The fakeclient and difftest run inside the server images; the difftest binary
 # and its sessions are the fork's difftest-build artifact for the branch that
 # built SERVER_TAG (DIFFTEST_REF, default the tag), fetched from GitLab with the
-# project token in the Keychain. The lab's compose service ends as it started.
+# project token in the Keychain. The lab's compose service ends as it started,
+# whether the checks pass or not.
 set -euo pipefail
 host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
@@ -31,7 +35,12 @@ echo "== server under test: skymp-server:$tag; legacy stack: skymp-server:$legac
 echo "== difftest artifact"
 tok=$(security find-generic-password -s gitlab-thuum-api -a skymp -w)
 tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
+lab_back() {
+  echo "== the lab's server back to its own setting (${env_tag:-parity})"
+  ssh_srv "cd /srv/lab && LEGACY_TAG=$legacy docker compose --profile difftest stop -t 10 skymp-server-legacy >/dev/null 2>&1; docker compose up -d skymp-server >/dev/null 2>&1 && echo '   skymp-server:${env_tag:-parity} up'" || true
+  rm -rf "$tmp"
+}
+trap lab_back EXIT
 job=$(curl -fsS -m 60 -H "PRIVATE-TOKEN: $tok" \
   "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs?scope[]=success&per_page=100" \
   | python3 -c "import sys,json; j=[x for x in json.load(sys.stdin) if x['name']=='difftest-build' and x['ref']=='$ref']; print(j[0]['id'] if j else '')")
@@ -82,6 +91,24 @@ assert swords and swords[0] >= 1, f"AddItem did not land: {inv}"
 print(f"   server state ok: moved {dx:.0f} units, iron swords {swords[0]}")
 PY
 
+echo "== attributes across a restart (profile 9 at 0.5, 0.25, 0.75)"
+ssh_srv 'curl -sS -m 10 -X POST localhost:3000/rpc/labCommand -H "Content-Type: application/json" -d "{\"payload\":{\"kind\":\"set-percentages\",\"profileId\":9,\"health\":0.5,\"magicka\":0.25,\"stamina\":0.75}}"' > /dev/null
+# the file driver writes the record asynchronously; restart once it is on disk
+ssh_srv 'for i in $(seq 1 30); do grep -Eqs "\"healthPercentage\": ?0\.5" /srv/lab/server/world/changeForms/*.json && exit 0; sleep 1; done; exit 1' \
+  || { echo "   the record never reached the disk"; exit 1; }
+ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose restart skymp-server >/dev/null 2>&1
+  for i in \$(seq 1 90); do (echo > /dev/tcp/127.0.0.1/3000) >/dev/null 2>&1 && break; sleep 2; done"
+ssh_srv 'curl -sS -m 10 -X POST localhost:3000/rpc/labState -H "Content-Type: application/json" -d "{\"payload\":{\"kind\":\"actor\",\"profileId\":9}}"' > "$tmp/attr.txt"
+python3 - "$tmp/attr.txt" <<'PY'
+import json, sys
+a = json.load(open(sys.argv[1]))
+assert a.get("found"), f"no actor for profile 9 after the restart: {a}"
+got = (a.get("healthPercentage"), a.get("magickaPercentage"), a.get("staminaPercentage"))
+want = (0.5, 0.25, 0.75)
+assert all(g is not None and abs(g - w) < 0.01 for g, w in zip(got, want)), f"after the restart the record reads {got}, saved {want}"
+print(f"   record after the restart, before any login: {got}")
+PY
+
 rc=0
 if [ "$have_difftest" = 1 ]; then
   echo "== difftest: skymp-server:$legacy (C++ fakeclient) against skymp-server:$tag"
@@ -96,9 +123,6 @@ if [ "$have_difftest" = 1 ]; then
     name=$(basename "$s")
     ssh_srv "cd /srv/lab && SERVER_TAG=$tag docker compose run --rm --no-deps -T -v /srv/lab/difftest:/opt/difftest:ro -e DIFFTEST_LEGACY_FAKECLIENT=/opt/difftest/legacy-fakeclient -e DIFFTEST_LEGACY_ADDR=skymp-server-legacy:7777 -e DIFFTEST_WIRE_FAKECLIENT=/srv/skymp/fakeclient -e DIFFTEST_WIRE_ADDR=skymp-server:7777 skymp-server /opt/difftest/difftest /opt/difftest/sessions/$name" || rc=1
   done
-  ssh_srv "cd /srv/lab && LEGACY_TAG=$legacy docker compose --profile difftest stop -t 10 skymp-server-legacy >/dev/null"
 fi
 
-echo "== the lab's server back to its own setting (${env_tag:-parity})"
-ssh_srv "cd /srv/lab && docker compose up -d skymp-server >/dev/null && echo '   skymp-server:${env_tag:-parity} up'"
 [ "$rc" = 0 ] && echo "T2 green" || { echo "T2 red: difftest found differences"; exit 1; }
