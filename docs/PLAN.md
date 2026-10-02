@@ -138,6 +138,15 @@ it carries a HYPOTHESIS tag.
   RakNet dependency deleted in the same PR; the client cdylib lands and the
   client's RakNet goes with it. `smoke-two-players` green on the new wire.
   From here every new handler is Rust behind the bridge.
+  DONE 2026-10-02 (ADR-019, still proposed): `smoke-two-players` green on
+  the wire, run 20261002-220606, 17 of 17 steps, 2 min 31 s, both clones on
+  the Rust MpClientPlugin.dll (lab-api rolls them back to `clean-m1`); fork
+  parity fast-forwarded to 2d50bf5e. Deleted: Networking.cpp, RakNet on
+  both ends, the BitStream archives, the C++ client plugin and fakeclient.
+  PacketParser stays as the dispatcher of the JSON the Rust edge renders
+  (ADR-019 point 2), not deleted as this bullet first said. T2 (`just
+  test-proto`) is green against the pinned RakNet image with one declared
+  divergence (the wire notices a graceful disconnect at once).
 
 - Natives ledger: every stub becomes implemented (R0), delegated (R2 with a
   reason), or "never" with a reason. No silent stubs.
