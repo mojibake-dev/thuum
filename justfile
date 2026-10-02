@@ -11,7 +11,7 @@ addrlib  := "addrlib"
 lab_api  := env_var_or_default("LAB_API", "https://thuum.gaussing.tv/lab")
 runtime  := "1.6.1170"
 # The fork branch whose Windows build the lab clients run (ADR-018: the 1.7 port).
-client_branch := "skyrim-1.7"
+client_branch := "parity"   # the 1.7 port fast-forwarded parity on 2026-10-02 (ADR-018); one branch
 # Upstream's Dockerfile targets x86-64. On Apple Silicon export
 # DOCKER_PLATFORM=linux/amd64 (emulated, slow); on sky-ci leave it unset.
 docker_platform := env_var_or_default("DOCKER_PLATFORM", "")

@@ -224,7 +224,7 @@ where (real since 2026-10-01):
    base 48989 paired with the laptop, the virtual display, the DirectX and
    VC++ runtimes, Steam logged in, Skyrim SE at the current build (1.7.104),
    SKSE 2.3.1, Address Library, Skyrim Platform and skymp5-client from the
-   fork's `skyrim-1.7` dist, lab-driver, the lab helpers under `C:\sky-lab`
+   fork's dist (branch `skyrim-1.7`, fast-forwarded into `parity` on 2026-10-02), lab-driver, the lab helpers under `C:\sky-lab`
    and their scheduled tasks. No GPU in the template, so no NVIDIA driver.
 2. Per clone, after `sky-lab` sets its address: `just client-bringup <vmid>
    <sunshine base> <client> <profile>` (Sunshine base port, NVIDIA driver,
