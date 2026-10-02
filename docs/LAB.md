@@ -233,7 +233,11 @@ where (real since 2026-10-01):
    profile id, launch test),
    then the clone's `clean-sp` snapshot, taken cold (game stopped, VM shut
    down). That snapshot is what lab-api rolls back to
-   (lab/deploy/sky-client/README.md, "Clone bring-up"). Steam offline mode is
+   (lab/deploy/sky-client/README.md, "Clone bring-up"). From M1 (2026-10-02)
+   the target is `clean-m1`, the wire client taken cold on top of
+   `clean-sp`, which stays as the RakNet baseline: Proxmox rolls back only to
+   the newest snapshot, so deleting `clean-m1` (and pointing
+   lab/labapi/labapi/guests.yaml back at `clean-sp`) is the way back. Steam offline mode is
    what lets a cold boot in the dark lab reach a running game at all.
    sky-c1 (711, GTX 1050) and sky-c2 (712, RTX 5060 Ti) are both through it
    as of 2026-10-01. On sky-c2 the driver installer first refused the card
