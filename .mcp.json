@@ -2,7 +2,7 @@
   "mcpServers": {
     "ghidra": {
       "type": "http",
-      "url": "${GHIDRA_MCP_URL}"
+      "url": "${GHIDRA_MCP_URL:-https://ghidra.gaussing.tv/mcp}"
     }
   }
 }

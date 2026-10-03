@@ -67,7 +67,7 @@ test-proto tag="":
 # A streamable-HTTP MCP endpoint answers a bare GET with a 4xx, so any HTTP status counts.
 # Confirm pyghidra-mcp answers at GHIDRA_MCP_URL (an MCP initialize over streamable HTTP; a bare GET gets 406).
 ghidra:
-    @curl -sS -m 20 -X POST -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' "${GHIDRA_MCP_URL:?set GHIDRA_MCP_URL}" -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"thuum","version":"0"}}}' | sed -n 's/^data: //p' | python3 -c 'import sys,json; d=json.load(sys.stdin); si=d["result"]["serverInfo"]; print("ghidra mcp ok:", si["name"], si["version"])'
+    @curl -sS -m 20 -X POST -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' "${GHIDRA_MCP_URL:-https://ghidra.gaussing.tv/mcp}" -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"thuum","version":"0"}}}' | sed -n 's/^data: //p' | python3 -c 'import sys,json; d=json.load(sys.stdin); si=d["result"]["serverInfo"]; print("ghidra mcp ok:", si["name"], si["version"])'
 
 # Import an exe from /srv/persist/game into the Ghidra project on sky-re (LXC 701) as a transient
 # systemd unit; pyghidra-mcp is stopped for the analysis and restarted after. Hours for SkyrimSE.
