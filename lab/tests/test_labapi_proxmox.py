@@ -85,7 +85,6 @@ class GuestControlTests(unittest.TestCase):
 
 
 @needs_deps
-@needs_deps
 class ProxmoxerExecTests(unittest.TestCase):
     """The real backend's exec loop against a scripted guest agent."""
 
@@ -141,6 +140,7 @@ class ProxmoxerExecTests(unittest.TestCase):
         self.assertIn("got timeout", str(cm.exception))
 
 
+@needs_deps
 class TablesTests(unittest.TestCase):
     def test_shipped_tables(self):
         from labapi.config import PKG_DIR
