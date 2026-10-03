@@ -169,9 +169,15 @@ it carries a HYPOTHESIS tag.
   parity). Second DONE 2026-10-03: a client's activation must be within the
   game's reach, 180 + 16 confirmed live (docs/verbs/activation-reach.md;
   a-activation-reach green on the fix, run 20261003-070107, red on parity
-  before it, run 20261003-062216; on parity b095fca6). Movement speed bounds
-  are next (movement types read from Skyrim.esm: run 370, sprint 500, horse
-  sprint 600 before SpeedMult).
+  before it, run 20261003-062216; on parity b095fca6). Third DONE
+  2026-10-03: the race menu takes only a race it offers (Playable flag) or
+  the one the server records (docs/verbs/character-creation.md; T2 difftest
+  character-creation: the legacy server took DremoraRace, the fixed one
+  refuses it; a-character-creation green through the real menu, run
+  20261003-081014; on parity c104128f). Melee reach is next (the server's
+  dormant IsDistanceValid; the engine's formula under re-analysis), then
+  movement speed bounds (movement types read from Skyrim.esm: run 370,
+  sprint 500, horse sprint 600 before SpeedMult).
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.

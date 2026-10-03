@@ -58,7 +58,7 @@ noted.
   worldspace" outdoors is all of Tamriel. The 512 and 256 unit reach in
   MpObjectReference.cpp measures the current occupant, not the activator.
 
-## Character creation (R0 record)
+## Character creation (R1, the record R0)
 
 - Checked: the race menu must be open, and an accepted appearance closes
   it. A refusal is silent apart from onUpdateAppearanceAttempt, which no
@@ -67,6 +67,10 @@ noted.
 - Not checked: race allow-list (bannedEspmCharacterRaceIds filters NPC
   spawns, never players), sex, weight, headpart and texture-set validity,
   name content.
+- Race allow-list, DONE 2026-10-03 (docs/verbs/character-creation.md, on
+  parity c104128f): the race must have the Playable flag or be the race the
+  server already records. Sex, weight, head parts, tints and the name are
+  still recorded as sent.
 
 ## Client-side shape that never reaches a validator
 
@@ -83,6 +87,6 @@ noted.
    then speed bounds from the game's movement records.
 2. Activation distance.
 3. Melee reach, with the bow range question settled.
-4. Character creation (race allow-list first).
+4. Character creation (race allow-list first; done 2026-10-03).
 5. Damage flags: decide which of power, sneak and blocked the server can
    know itself.
