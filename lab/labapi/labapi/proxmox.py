@@ -162,12 +162,22 @@ class ProxmoxerGuests:
         agent = self._res(guest).agent
         pid = agent.exec.post(command=command).get("pid")
         deadline = time.monotonic() + timeout
+        last: Exception | None = None
         while time.monotonic() < deadline:
-            st = agent("exec-status").get(pid=pid)
+            try:
+                st = agent("exec-status").get(pid=pid)
+            except Exception as e:  # proxmoxer raises ResourceException and requests errors
+                # A busy guest agent answers exec-status with "got timeout" now
+                # and then while the command runs on (sky-c1 at a game launch,
+                # sky-c2 at a quiet-down, 2026-10-03): ask again until the deadline.
+                last = e
+                time.sleep(1.0)
+                continue
             if st.get("exited"):
                 return ExecResult(int(st.get("exitcode", -1)), str(st.get("out-data", "")), str(st.get("err-data", "")))
             time.sleep(0.5)
-        raise ProxmoxError(f"E_PVE_EXEC: pid {pid} on {guest.name} did not exit in {timeout}s")
+        why = f"; last exec-status error {type(last).__name__}: {str(last)[:200]}" if last else ""
+        raise ProxmoxError(f"E_PVE_EXEC: pid {pid} on {guest.name} did not exit in {timeout}s{why}")
 
     def file_read(self, guest: Guest, path: str) -> str:
         r = self._res(guest).agent("file-read").get(file=path)

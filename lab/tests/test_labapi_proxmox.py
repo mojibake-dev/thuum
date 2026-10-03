@@ -85,6 +85,62 @@ class GuestControlTests(unittest.TestCase):
 
 
 @needs_deps
+@needs_deps
+class ProxmoxerExecTests(unittest.TestCase):
+    """The real backend's exec loop against a scripted guest agent."""
+
+    def _backend(self, statuses):
+        from labapi.proxmox import ProxmoxerGuests
+
+        class Agent:
+            def __init__(self):
+                self.exec = self
+                self.left = list(statuses)
+
+            def post(self, command):
+                return {"pid": 42}
+
+            def __call__(self, name):
+                assert name == "exec-status"
+                return self
+
+            def get(self, pid):
+                st = self.left.pop(0) if len(self.left) > 1 else self.left[0]
+                if isinstance(st, Exception):
+                    raise st
+                return st
+
+        class Res:
+            agent = Agent()
+
+        b = object.__new__(ProxmoxerGuests)
+        b._res = lambda guest: Res()
+        return b
+
+    def test_exec_status_errors_are_asked_again(self):
+        from unittest import mock
+
+        from labapi.guests import Guest
+
+        g = Guest("sky-c2", 712, "10.10.70.22", "qemu", "client", True, "clean-m1", "c2")
+        b = self._backend([RuntimeError("got timeout"), RuntimeError("got timeout"), {"exited": 1, "exitcode": 0, "out-data": "ok"}])
+        with mock.patch("labapi.proxmox.time.sleep"):
+            res = b.exec(g, ["cmd"], 5.0)
+        self.assertEqual((res.exitcode, res.out), (0, "ok"))
+
+    def test_exec_status_that_never_answers_names_the_last_error(self):
+        from unittest import mock
+
+        from labapi.guests import Guest
+        from labapi.proxmox import ProxmoxError
+
+        g = Guest("sky-c2", 712, "10.10.70.22", "qemu", "client", True, "clean-m1", "c2")
+        b = self._backend([RuntimeError("got timeout")])
+        with mock.patch("labapi.proxmox.time.sleep"), self.assertRaises(ProxmoxError) as cm:
+            b.exec(g, ["cmd"], 0.05)
+        self.assertIn("got timeout", str(cm.exception))
+
+
 class TablesTests(unittest.TestCase):
     def test_shipped_tables(self):
         from labapi.config import PKG_DIR
