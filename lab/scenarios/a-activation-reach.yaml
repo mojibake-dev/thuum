@@ -16,6 +16,9 @@ steps:
   - c1: connect
   - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
   - wait: 5
+  # the game's own reach values, into this run's notes (the server's bound is
+  # built on them: docs/verbs/activation-reach.md)
+  - c1: settings {ini: ["fActivatePickLength:Interface", "fActivatePickRadius:Interface"], gmst: [fFavorRequestPickDistance, fLargeActivatePickLength_G]}
   # from the spawn, 1509 units away: refused, nothing harvested
   - c1: activate {refId: 0x5355d}
   - wait: 3
