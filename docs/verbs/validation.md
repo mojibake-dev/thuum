@@ -47,6 +47,11 @@ noted.
 - unit/HitTest.cpp "OnHit doesn't damage character if it is out of range"
   never equips the weapon, so it exits at the not-equipped branch and
   passes at any distance: it does not test range.
+- Melee reach, DONE 2026-10-03 for player against player
+  (docs/verbs/melee-reach.md, on parity 15eb653d): the largest reach the
+  attacker's equipment allows, or the eye cast, plus both forward extents
+  and 256 of slack; 447 units for a Nord with a sword. PvE, hosted NPCs,
+  the cone and the client's damage flags are still open.
 
 ## Activation and containers (R1)
 
@@ -86,7 +91,8 @@ noted.
 1. Movement: validate before relay (done, docs/verbs/movement-relay.md),
    then speed bounds from the game's movement records.
 2. Activation distance.
-3. Melee reach, with the bow range question settled.
+3. Melee reach (player against player done 2026-10-03; the bow range
+   question still open).
 4. Character creation (race allow-list first; done 2026-10-03).
 5. Damage flags: decide which of power, sneak and blocked the server can
    know itself.

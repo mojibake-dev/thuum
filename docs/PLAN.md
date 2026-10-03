@@ -174,10 +174,15 @@ it carries a HYPOTHESIS tag.
   the one the server records (docs/verbs/character-creation.md; T2 difftest
   character-creation: the legacy server took DremoraRace, the fixed one
   refuses it; a-character-creation green through the real menu, run
-  20261003-081014; on parity c104128f). Melee reach is next (the server's
-  dormant IsDistanceValid; the engine's formula under re-analysis), then
-  movement speed bounds (movement types read from Skyrim.esm: run 370,
-  sprint 500, horse sprint 600 before SpeedMult).
+  20261003-081014; on parity c104128f). Fourth DONE 2026-10-03: a
+  player's melee hit on a player must be within the game's reach plus room
+  for stale positions, 447 units for a Nord with a sword where the bound
+  was 4096 (docs/verbs/melee-reach.md; the engine's formula from Ghidra,
+  its edge measured in the lab; a-melee-reach red on parity, run
+  20261003-091943, green on the fix, run 20261003-092301; on parity
+  15eb653d). Movement speed bounds are next (movement types read from
+  Skyrim.esm: run 370, sprint 500, horse sprint 600 before SpeedMult;
+  lab-driver hold-key and set-av are in clean-m1 for it).
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
