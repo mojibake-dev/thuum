@@ -1,0 +1,38 @@
+# M1 validation, movement speed bounds (docs/verbs/movement-speed.md): a
+# player's moves over the ground spend a budget that refills at 660 units a
+# second (the fastest movement type a player uses, 600, plus a tenth) and
+# holds 2048. c1 faces north (rotation 0: a teleport's rotation is read in
+# radians on the client, docs/LAB.md) at the south end of the level strip
+# south of lab-spawn. First it runs for 1.5 s under the controls (lab-driver
+# hold-key, W): the server takes the run. Then lab-driver glides it 6000
+# units north at 3000 units a second (move: its position set every frame, as
+# a fly or speed hack moves; the glide leaves the summit, so c1 ends in the
+# air or falling, which does not matter here): the budget runs out after
+# about 2600 units (y near 2080 here) and the server holds c1 there, snapping
+# it back. On a server without the bound the glide's 6000 units stand (y near
+# 5450), the hole this verb closes.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-movement-speed
+milestone: M1
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - wait: 3
+  - c1: hold-key {code: 17, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.actor(c1).y > -346
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - wait: 3
+  - c1: move {dx: 0, dy: 6000, speed: 3000}
+  - wait: 6
+  - assert:
+      - server.actor(c1).y < 3000
+  - c1: dump-state
+artifacts: [server.log, c1.log]
