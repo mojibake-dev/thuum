@@ -351,17 +351,23 @@ MoveRefrToPosition while its generated save settles; measured on sky-c1,
 2026-10-01) and the written record alone can stand for seconds. Every
 client step records the server's position of that client afterwards in
 result.json (`pos`), and a driver step's answer rides in its `note`. The other client verbs run in lab-driver: move,
-equip, cast, activate, hit, dump-state, request-screenshot, craft (an open
+equip, cast, activate, draw-weapon, anim-event {name} (an animation event
+on the player, such as attackStart: the engine's own swing, which hits
+what the engine's hit test picks), dump-state (with each actor's bounding
+box: length, width, height), request-screenshot, craft (an open
 driver item that m0-forge specifies), tap-key (one DirectInput scan code
 through SKSE's Input.TapKey: it works the race menu, 208 Down for the next
-race and 19 R for Done, but not the menu's Ok/Cancel finish box), close-menu
+race and 19 R for Done, but not the menu's Ok/Cancel finish box), hold-key
+{code, ms} (a key held through SKSE's Input.HoldKey and released ms later:
+real movement under the controls, 17 W forward, 42 Left Shift sprint),
+close-menu
 {name} (the engine's own close of a named menu, through Skyrim Platform's
 TESModPlatform.CloseMenu; `name: "RaceSex Menu"` ends the race menu and
 skymp5-client sends its result), and watch-start / watch-stop (the
 client follows every actor near it at watch-start, by form id, each frame
 until watch-stop, and reports how far each got from where it began; for
 "the observer never saw X" checks that one dump-state would sample too
-late), and settings {ini: [...], gmst: [...]} (the running game's own
+late), and settings {ini: [...], gmst: [...], gmstInt: [...]} (the running game's own
 values of named INI settings and game settings, through Papyrus, recorded
 in the step's note). Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as

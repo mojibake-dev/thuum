@@ -101,6 +101,18 @@ function form(id: unknown): ObjectReference | null {
   return ObjectReference.from(Game.getFormEx(n));
 }
 
+// hold-key's keys and when to let each go; released in update
+const heldKeys: Array<{ code: number; until: number }> = [];
+function releaseHeldKeys(): void {
+  const now = Date.now();
+  for (let i = heldKeys.length - 1; i >= 0; i--) {
+    if (heldKeys[i].until <= now) {
+      Input.releaseKey(heldKeys[i].code);
+      heldKeys.splice(i, 1);
+    }
+  }
+}
+
 function num(v: unknown, fallback = 0): number {
   return typeof v === "number" && Number.isFinite(v) ? v : fallback;
 }
@@ -124,6 +136,12 @@ function describe(actor: Actor) {
     healthPercentage: actor.getActorValuePercentage("health"),
     equippedRight: right ? right.getFormID() : 0,
     equippedLeft: left ? left.getFormID() : 0,
+    // the reference's bounding box (Papyrus GetLength, GetWidth, GetHeight),
+    // for the melee reach measurement: the engine's hit test subtracts each
+    // actor's forward bound extent (ghidra/notes/melee-reach-1-7-104.md)
+    length: actor.getLength(),
+    width: actor.getWidth(),
+    height: actor.getHeight(),
   };
 }
 
@@ -272,12 +290,14 @@ function run(step: Step, player: Actor): unknown {
       // Live values of named settings in the running game, so a verb records
       // the game's own numbers (rule 2): INI settings ("name:Section") through
       // Utility.GetINIFloat, game settings (GMST) through
-      // Game.GetGameSettingFloat.
+      // Game.GetGameSettingFloat, integer ones (iName) through
+      // Game.GetGameSettingInt.
       const names = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
       const ini: Record<string, number> = {};
       for (const n of names(a.ini)) ini[n] = Utility.getINIFloat(n);
       const gmst: Record<string, number> = {};
       for (const n of names(a.gmst)) gmst[n] = Game.getGameSettingFloat(n);
+      for (const n of names(a.gmstInt)) gmst[n] = Game.getGameSettingInt(n);
       return { ini, gmst };
     }
     case "watch-start": {
@@ -314,6 +334,22 @@ function run(step: Step, player: Actor): unknown {
       const ref = form(a.refId);
       if (!ref) return { error: "no such ref" };
       return ref.activate(player, false);
+    }
+    case "draw-weapon":
+      player.drawWeapon();
+      return "drawn";
+    case "anim-event": {
+      // One animation event on the player's behavior graph (Papyrus
+      // Debug.SendAnimationEvent), the way the controls start an attack:
+      // "attackStart" swings the right hand, "AttackStartH2HRight" a fist;
+      // the engine's hit frame then picks the target itself
+      // (ghidra/notes/melee-reach-1-7-104.md). Names as skymp5-server's
+      // AnimationSystem.cpp keys them from real clients. UNCONFIRMED: a sent
+      // attackStart lands a hit.
+      const name = typeof a.name === "string" ? a.name : "";
+      if (!name) return { error: "no event name" };
+      Debug.sendAnimationEvent(player, name);
+      return "sent";
     }
     case "craft": {
       // UNCONFIRMED: crafting is a menu in the engine, so the driver reproduces
@@ -353,6 +389,18 @@ function run(step: Step, player: Actor): unknown {
       if (code <= 0) return { error: "no scan code" };
       Input.tapKey(code);
       return "tapped";
+    }
+    case "hold-key": {
+      // A key held down through the engine's input system (SKSE
+      // Input.HoldKey) and released ms later from the update loop: real
+      // movement under the controls (W 17 forward, Left Shift 42 sprint),
+      // where move only sets a position. args: {code, ms}
+      const code = num(a.code, 0);
+      const ms = num(a.ms, 0);
+      if (code <= 0 || ms <= 0) return { error: "hold-key needs code and ms" };
+      Input.holdKey(code);
+      heldKeys.push({ code, until: Date.now() + ms });
+      return "holding";
     }
     case "close-menu": {
       // Close a menu through the engine's UI message queue: Skyrim
@@ -448,6 +496,7 @@ on("update", () => {
   const c = config();
   if (!c) return;
   finishDeferred(c);
+  releaseHeldKeys();
   const me = Game.getPlayer();
   if (me) settleMove(me);
   trackWatch();
