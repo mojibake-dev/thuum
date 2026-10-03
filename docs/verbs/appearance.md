@@ -155,6 +155,18 @@ Rate limit / bounds: one accepted update per race-menu open.
   form involvement (then the generated save or an unrelated 1.7 change).
 - Breakpoint plan for a human session: none needed yet.
 - Owner: agent (Frida, ProcDump)
+- Open since patch 08 (2026-10-02/03, on the wire): sky-c1 (profile 1,
+  which carries an appearance) still dies with 0xC0000005 on the first
+  launch after a client install, three times out of three, about 3 s after
+  connecting and right after SKSE loads the generated save (Security 4689 at
+  23:42:27 local on 2026-10-02 was the latest); every relaunch after that is
+  stable, and sky-c2 (profile 2) has not crashed. HYPOTHESIS: the same tint
+  or overlay path (the overlay pointer at +0xB38 is still unconfirmed), hit
+  only on a run that rebuilds something Skyrim Platform caches after its
+  files are replaced. Next: ProcDump attached before the first launch after
+  a client install on sky-c1 (procdump64 is staged in C:\sky-lab\frida),
+  and the dump read for the faulting module and stack. Frida is out for now:
+  the game refused its agent on 2026-10-03.
 
 ## Status
 

@@ -37,8 +37,10 @@ Rate limit / bounds: the reach above; rate unchanged.
   include/RE/Offsets.h) is the player's pick-and-activate path.
 - The pick length is not a game setting in Skyrim.esm (lab/esm.py found no
   GMST with "ActivatePick" in its editor id on 2026-10-03). Re-analyst on
-  the 1.7.104 program (Ghidra, 2026-10-03), all HYPOTHESIS until read in a
-  running game:
+  the 1.7.104 program (Ghidra, 2026-10-03); the two values the bound uses
+  are CONFIRMED in the running game (run 20261003-070107, lab-driver
+  settings: fActivatePickLength:Interface 180, fActivatePickRadius:Interface
+  16):
   - fActivatePickLength:Interface is an INI setting in the executable,
     default 180.0 (the Setting object at Address Library ID 370108 holds
     00 00 34 43 beside its name; constant-initialized, no constructor).
@@ -48,16 +50,18 @@ Rate limit / bounds: the reach above; rate unchanged.
     180; fActivatePickRadius (ID 370105) = 16 is the pick sphere's radius.
     ActivatePickRef (ID 40548) then calls TESObjectREFR::ActivateRef (ID
     19796) with no distance check of its own.
-  - Exceptions: fFavorRequestPickDistance = 800 replaces 180 while the
-    player commands a follower; fLargeActivatePickLength_G = 500 applies to
-    extra-large actors. Neither applies yet (SkyMP runs without NPCs by
-    default; no followers), and this verb does not allow them: revisit with
-    followers (M2+).
+  - Exceptions: fFavorRequestPickDistance replaces 180 while the player
+    commands a follower; the executable's default is 800, but the running
+    game reads 2100 (a game setting overrides it; same run).
+    fLargeActivatePickLength_G (500 in the executable) applies to
+    extra-large actors; it does not read as a game setting (the run got 0),
+    so where it lives is still open. Neither applies yet (SkyMP runs without
+    NPCs by default; no followers), and this verb does not allow them:
+    revisit with followers (M2+).
   - The INI is client-editable, so the server enforces its own constant.
-- Lab reading of the defaults: lab/frida/settings-read.js reads them by
-  name in the running game, but the game refused the Frida agent on
-  2026-10-03 (as on 2026-10-01); next, lab-driver reads them through
-  Papyrus (Utility.GetINIFloat) with its next client install.
+- Lab reading: lab-driver's settings action (Papyrus Utility.GetINIFloat
+  and Game.GetGameSettingFloat) in every a-activation-reach run. The Frida
+  route (lab/frida/settings-read.js) failed: the game refused the agent.
 
 ## Observe, impose, suppress
 
@@ -97,17 +101,20 @@ Rate limit / bounds: the reach above; rate unchanged.
 - T2: difftest session activation-reach: the legacy server harvests the
   Canis Root from 1509 units (isHarvested, the harvest's OpenContainer, the
   root in the inventory; seen on 2026-10-03 on both the RakNet image and
-  parity before the fix); the fixed server sends none of the three.
-
+  parity before the fix); the fixed server sends none of the three. Green
+  on m1-activation, 2026-10-03.
 - T3: lab/scenarios/a-activation-reach.yaml (awaiting Eli's review): c1
   activates the Canis Root plant 1509 units from lab-spawn (reference
   0x0005355D; lab/esm.py), then from beside it. Baseline on parity without
   the check, run 20261003-062216: red at the first assert, because the far
-  activation harvested the plant (the hole this verb closes).
+  activation harvested the plant (the hole this verb closes). Green on the
+  fix, run 20261003-070107, 12 of 12.
 
 ## Status
 
-- [ ] reach value sourced (Ghidra) and confirmed in the lab
-- [ ] server logic + T0
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] reach value sourced (Ghidra) and confirmed in the lab
+- [x] server logic + T0
+- [x] T2 green
+- [x] T3 scenario green, no HYPOTHESIS tags on the values the bound uses
+  (the scenario is under Eli's review)
+- [x] on fork parity (b095fca6, 2026-10-03)

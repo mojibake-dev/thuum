@@ -166,7 +166,12 @@ it carries a HYPOTHESIS tag.
   verb DONE 2026-10-02: a move the server rejects is no longer relayed
   before validation (docs/verbs/movement-relay.md; a-movement-reject green
   on the fix, run 20261002-230136, red without it, run 20261002-230814; on
-  parity).
+  parity). Second DONE 2026-10-03: a client's activation must be within the
+  game's reach, 180 + 16 confirmed live (docs/verbs/activation-reach.md;
+  a-activation-reach green on the fix, run 20261003-070107, red on parity
+  before it, run 20261003-062216; on parity b095fca6). Movement speed bounds
+  are next (movement types read from Skyrim.esm: run 370, sprint 500, horse
+  sprint 600 before SpeedMult).
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
