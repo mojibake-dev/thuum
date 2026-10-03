@@ -17,6 +17,7 @@ field's size is the uint32 that XXXX carried.
 
     esm.py find <plugin> <TYPE> <editor id substring>
     esm.py near <plugin> <world form id> <x> <y> <radius> <TYPE,TYPE,...>
+    esm.py ref <plugin> <form id>
 
 `near` lists the references placed in a worldspace within a radius (in the
 x-y plane) whose base record is one of the types, e.g. FLOR,CONT,ACTI,DOOR:
@@ -149,6 +150,15 @@ def near(buf: bytes, world: int, x: float, y: float, radius: float, types: set[s
     return sorted(out, key=lambda p: p.distance)
 
 
+def ref(buf: bytes, form_id: int) -> tuple[Record, int | None] | None:
+    """A placed reference (REFR or ACHR) by form id, exterior or interior,
+    with the worldspace it is placed in (None inside a cell)."""
+    for t, fid, off, world in headers(buf, 0, len(buf), {"WRLD", "CELL"}):
+        if fid == form_id and t in ("REFR", "ACHR"):
+            return record_at(buf, off)[0], world
+    return None
+
+
 def find(buf: bytes, rtype: str, needle: str) -> list[Record]:
     return [r for r in walk(buf, 0, len(buf), rtype) if needle.lower() in r.editor_id.lower()]
 
@@ -203,6 +213,20 @@ def main(argv: list[str]) -> int:
         for p in placed:
             print(f"{p.form_id:#010x} {p.base_type} {p.base_id:#010x} {p.base_editor_id} at ({p.pos[0]:.0f}, {p.pos[1]:.0f}, {p.pos[2]:.0f}), {p.distance:.0f} away")
         return 0 if placed else 1
+    if len(argv) == 4 and argv[1] == "ref":
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        hit = ref(buf, int(argv[3], 0))
+        if not hit:
+            return 1
+        rec, world = hit
+        data = rec.get("DATA") or b""
+        base = struct.unpack("<I", (rec.get("NAME") or b"\0\0\0\0")[:4])[0]
+        scale = struct.unpack("<f", rec.get("XSCL"))[0] if rec.get("XSCL") else 1.0
+        pos = struct.unpack_from("<3f", data) if len(data) >= 12 else (0.0, 0.0, 0.0)
+        where = f"world {world:#x}" if world is not None else "a cell"
+        print(f"{rec.type} {rec.form_id:#010x} base {base:#010x} in {where} at ({pos[0]:.1f}, {pos[1]:.1f}, {pos[2]:.1f}) scale {scale:g}")
+        return 0
     print(__doc__, file=sys.stderr)
     return 2
 

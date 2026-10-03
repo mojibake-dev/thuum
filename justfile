@@ -124,7 +124,7 @@ labapi-dev:
 
 # Run a Frida trace script on a lab client through lab-api.
 frida script client:
-    @curl -fsS -X POST "{{lab_api}}/frida" -F "client={{client}}" -F "script=@{{script}}"
+    @curl -fsS -X POST "{{lab_api}}/frida" -F "client={{client}}" -F "file=@{{script}}"
 
 # --- lab (docs/LAB.md endpoint list) ------------------------------------------
 
