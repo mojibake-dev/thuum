@@ -53,24 +53,22 @@ Rung: R0 for the clock and for globals the server owns. A client's own
 GameHour becomes a render of the server's value; its local changes are
 suppressed or corrected.
 
-## Decisions needed before code (Eli; an ADR once settled)
+## Decisions (Eli, 2026-10-03; ADR-021)
 
-1. Time scale. SkyMP runs game time at real time (one game hour per real
-   hour). Single-player Skyrim reads its rate from the TimeScale global in
-   Skyrim.esm. Which does the server run, and is it a server setting?
-2. Wait and sleep. Options: keep them disabled; let one player's wait pass
-   only for that player's view (breaks shared time); pass global time when
-   every online player agrees (SkyMP's own roadmap line); or give sleep its
-   benefits (healing, the rested bonus) without moving the clock.
-3. Unhosted time. With TES3MP-style cell hosting (M3), does the clock run
-   while nobody is online?
-4. Which globals are server-owned. The time globals are; quest and
-   faction globals ride with M6. A server GlobalVariable class needs
-   libespm to read GLOB records and a persistence home outside the per
-   reference change forms, which is a schema change (rule 6: migration and
-   a restart scenario).
+1. Time scale: a server setting. The default is the TES3MP paradigm, normal
+   game time: one shared, server-owned clock at the game's own rate (the
+   TimeScale global in Skyrim.esm). The setting switches to SkyMP's real time
+   of day.
+2. Wait and sleep: per player, and they never move the shared clock. A
+   player who waits or sleeps gets that rest's effects for themselves
+   (healing; sleep's rested bonus) while the world's time runs on as before.
+3. Unhosted time: the clock keeps running while nobody is online.
+4. Server-owned globals: deferred. The time globals are the clock's and come
+   with it; any other global waits until a verb needs it (quests, M6). The
+   GLOB reader and its persistence home (a schema change, rule 6) are built
+   then, not now.
 
-## Sketch, to be confirmed by the decisions
+## Sketch
 
 - Server: a clock in Rust behind the bridge (ADR-010, new handlers are
   Rust), persisted, advancing at the chosen scale; GameHour, GameDay,
@@ -87,7 +85,7 @@ suppressed or corrected.
 
 ## Status
 
-- [ ] decisions 1 to 4 settled (ADR)
+- [x] decisions 1 to 4 settled (ADR-021; 4 deferred)
 - [ ] doc complete, rung declared
 - [ ] server logic + T0
 - [ ] message + validator (same commit)

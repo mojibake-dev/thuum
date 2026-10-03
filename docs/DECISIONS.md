@@ -433,3 +433,18 @@ step 4).
 
 If rejected: the five verbs' checks move behind the bridge into Rust with
 the state they need exposed, and docs/verbs/ records the move per verb.
+
+## ADR-021: Server-owned game time
+
+Status: accepted (2026-10-03, Eli's decisions on docs/verbs/time.md).
+
+SkyMP has no server clock: each client derives game time from its own PC
+clock (docs/verbs/time.md). The server owns the clock (rung R0). By default
+it runs at the game's own rate (Skyrim.esm's TimeScale), shared by every
+player, as TES3MP does; a server setting switches to SkyMP's real time of
+day. Waiting and sleeping are per player and never move the shared clock:
+the player gets the rest's effects (healing, the rested bonus), the world's
+time runs on. The clock runs while nobody is online. Which other globals the
+server owns is deferred until a verb needs them (quests, M6), together with
+the GLOB reader and its persistence home.
+
