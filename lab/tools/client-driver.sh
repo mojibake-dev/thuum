@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# client-driver.sh <vmid>: push the built lab-driver bundle into a clone's
+# client-driver.sh <vmid> [profile]: push the built lab-driver bundle into a clone's
 # Data\Platform\Plugins, relaunch the game through the launch test, confirm
 # the login and the lab-driver heartbeat, then stop the game so the clone's
 # clean-sp snapshot can be retaken cold (lab-api's rollback erases anything
 # staged after the snapshot, so a driver change always ends in a retake).
 set -euo pipefail
 vmid=${1:?vmid}
+# the clone's profile id (1 sky-c1, 2 sky-c2): the login to wait for; without
+# it any online player counts, which another running client satisfies
+profile=${2:-}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 here=$(cd "$(dirname "$0")/../.." && pwd)
 f="$here/lab/driver/build/lab-driver.js"
@@ -23,12 +26,13 @@ lab_api=${LAB_API:-https://thuum.gaussing.tv/lab}
 for attempt in 1 2; do
   RUN_WAIT_S=70 "$here/lab/tools/client-launch-test.sh" "$vmid" 2>&1 | grep -v "^  skse_log" || true
   n=0; on=""
-  until [ $n -ge 9 ]; do n=$((n+1)); on=$(curl -sS -m 15 -X POST "$lab_api/state/rpc/labState" -H 'content-type: application/json' -d '{"payload":{"kind":"online"}}'); case "$on" in *profileId*) break;; esac; sleep 10; done
-  case "$on" in *profileId*) echo "online: $on"; break;; esac
+  seen="\"profileId\":${profile}}"; [ -n "$profile" ] || seen='profileId'
+  until [ $n -ge 9 ]; do n=$((n+1)); on=$(curl -sS -m 15 -X POST "$lab_api/state/rpc/labState" -H 'content-type: application/json' -d '{"payload":{"kind":"online"}}'); case "$on" in *"$seen"*) break;; esac; sleep 10; done
+  case "$on" in *"$seen"*) echo "online: $on"; break;; esac
   # the game exits silently now and then right after its save loads (twice on 2026-10-01, only on a relaunch inside a running session); one retry
   echo "not online after launch $attempt: $on"
   [ "$attempt" = 2 ] && exit 4
 done
 echo "heartbeats (s ago): $(curl -sS -m 15 "$lab_api/status" | python3 -c 'import sys,json; print(json.load(sys.stdin)["heartbeats_s_ago"])')"
 run "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3; 'stopped; tasks: ' + ((Get-ScheduledTask -TaskName 'sky-lab-*' | ForEach-Object { \$_.TaskName + '=' + \$_.State }) -join ' ')"
-echo "ready for a cold clean-sp retake (thuum-mundus: sky-lab snapshot $vmid clean-sp --cold)"
+echo "ready for a cold retake of the clone's lab snapshot (thuum-mundus; clean-m1 since 2026-10-02)"

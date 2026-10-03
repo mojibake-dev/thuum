@@ -12,10 +12,12 @@
 // lab-driver-settings.example.txt. Keep the verbs boring (docs/LAB.md).
 //
 // UNCONFIRMED until a lab run: takeScreenshot in a retail build, walk through
-// AI-driven pathing, update firing with menus open. Each is tagged below.
+// AI-driven pathing. Each is tagged below. CONFIRMED: update fires while the
+// race menu is open (tap-key steps ran in it, runs 20261003-074730 on).
 
 import {
   Actor,
+  callNative,
   Cell,
   ConstructibleObject,
   Debug,
@@ -342,13 +344,28 @@ function run(step: Step, player: Actor): unknown {
     }
     case "tap-key": {
       // One key press through the engine's input system (SKSE Input.TapKey,
-      // DirectInput scan code), for menus the server cannot close for the
-      // client: the race menu's Done is 19 (R) and the name prompt's accept
-      // is 28 (Enter). UNCONFIRMED: a tap reaching Scaleform menus (rule 2).
+      // DirectInput scan code). It reaches the race menu (CONFIRMED,
+      // exploratory runs 20261003-074730 and -075403: 208 Down picks the
+      // next race, 19 R opens "Finish and name your character?"), but not
+      // that Ok/Cancel box: 28 Enter, 156 numpad Enter and 203 Left then
+      // Enter left it open (runs -075113, -075403). close-menu ends the menu.
       const code = num(a.code, 0);
       if (code <= 0) return { error: "no scan code" };
       Input.tapKey(code);
       return "tapped";
+    }
+    case "close-menu": {
+      // Close a menu through the engine's UI message queue: Skyrim
+      // Platform's TESModPlatform.CloseMenu native posts a kHide message for
+      // the named menu (skyrim-platform PapyrusTESModPlatform.cpp), as the
+      // menu's own close does. For the race menu, whose finish box ignores
+      // tapped keys; skymp5-client sends the menu's result when it sees the
+      // menu closed (sendInputsService.ts sendAppearance). Called by name:
+      // SP 2.9.0's bindings predate the native. args: {name: "RaceSex Menu"}
+      const name = typeof a.name === "string" ? a.name : "";
+      if (!name) return { error: "no menu name" };
+      callNative("TESModPlatform", "CloseMenu", undefined, name);
+      return "closing";
     }
     case "screenshot":
       // UNCONFIRMED in a retail build; lab-api also captures from outside the

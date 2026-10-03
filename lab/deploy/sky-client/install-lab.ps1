@@ -66,7 +66,11 @@ if ($identity -and $identity.client -and $identity.profileId) {
 Set-Content -Path (Join-Path $lab 'game-dir.txt') -Value $Game -NoNewline
 $ps = 'powershell.exe'
 $launch = New-ScheduledTaskAction -Execute $ps -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $lab\launch.ps1"
-$shot = New-ScheduledTaskAction -Execute $ps -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $lab\screenshot.ps1"
+# The capture runs headless: through Windows Terminal (Windows 11's default
+# console host) -WindowStyle Hidden still opened a window over the game, in
+# the next capture and in front of the game's input (runs 20261003-074358 on).
+# conhost --headless opens none (sky-c1, 2026-10-03: two captures, no window).
+$shot = New-ScheduledTaskAction -Execute 'conhost.exe' -Argument "--headless $ps -NoProfile -ExecutionPolicy Bypass -File $lab\screenshot.ps1"
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Hours 12) -MultipleInstances IgnoreNew
 $principal = New-ScheduledTaskPrincipal -UserId $User -LogonType Interactive -RunLevel Limited
 Register-ScheduledTask -TaskName 'sky-lab-launch' -Action $launch -Trigger (New-ScheduledTaskTrigger -AtLogOn -User $User) -Principal $principal -Settings $settings -Force | Out-Null

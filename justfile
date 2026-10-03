@@ -268,8 +268,8 @@ client-frida vmid:
 
 # A lab-driver change onto a clone: build, push the bundle into Data\Platform\Plugins, relaunch and confirm the
 # login and heartbeat, stop the game. Ends in a cold clean-sp retake by thuum-mundus (the rollback erases it otherwise).
-client-driver vmid: build-driver
-    @lab/tools/client-driver.sh {{vmid}}
+client-driver vmid profile="": build-driver
+    @lab/tools/client-driver.sh {{vmid}} {{profile}}
 
 # Bring a fresh clone of the template up to a connected lab client, in order: its Sunshine base port
 # (48989 sky-c1, 49989 sky-c2), the NVIDIA driver, the 1920x1080 display, the game firewall, Steam offline,

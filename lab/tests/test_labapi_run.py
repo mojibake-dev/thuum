@@ -572,6 +572,12 @@ class ClientStepNames(RunTests):
         self.assertEqual(body["verdict"], "red")
         self.assertIn("Nope", body["failures"][0]["error"])
 
+    def test_close_menu_reaches_the_driver_with_the_menu_name(self):
+        text = "id: t3-close\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: close-menu {name: \"RaceSex Menu\"}\n"
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn(("c1", "close-menu", {"name": "RaceSex Menu"}), self.doubles.seen)
+
     def test_open_race_menu_is_a_server_verb_and_attempts_read_back(self):
         text = ("id: t3-race\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: open-race-menu\n"
                 "  - assert:\n      - server.actor(c1).appearanceAttempts == 0\n")
