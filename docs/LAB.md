@@ -360,7 +360,9 @@ through SKSE's Input.TapKey: it works the race menu, 208 Down for the next
 race and 19 R for Done, but not the menu's Ok/Cancel finish box), hold-key
 {code, ms} (a key held through SKSE's Input.HoldKey and released ms later:
 real movement under the controls, 17 W forward, 42 Left Shift sprint),
-close-menu
+set-gmst {name, value} and set-av {name, value} (what a player's console
+does with setgs and setav, in this client only: a validation verb's
+negative control), close-menu
 {name} (the engine's own close of a named menu, through Skyrim Platform's
 TESModPlatform.CloseMenu; `name: "RaceSex Menu"` ends the race menu and
 skymp5-client sends its result), and watch-start / watch-stop (the
@@ -374,6 +376,12 @@ steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, open-race-menu (the server opens
 the client's race menu and takes one race menu result from it),
 set-percentages, kill, respawn.
+A teleport's `rot` reaches the client in degrees, and skymp5-client hands
+it to MoveRefrToPosition, which takes radians (CommonLibSSE-NG
+TESObjectREFR::MoveTo_Impl): `rot: [0, 0, 180]` left c1 facing 233.24
+degrees, 180 radians (run 20261003-083828). Until the client converts, a
+scenario that needs a heading uses 0 (north, the same in both units) and
+places the other actor accordingly.
 `screenshot` is a guest exec on a managed client (request-screenshot is
 the in-game fallback). Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the

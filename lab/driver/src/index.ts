@@ -300,6 +300,26 @@ function run(step: Step, player: Actor): unknown {
       for (const n of names(a.gmstInt)) gmst[n] = Game.getGameSettingInt(n);
       return { ini, gmst };
     }
+    case "set-gmst": {
+      // What a player's console can do (setgs): change a game setting in
+      // this client only. A validation verb's negative control: with
+      // fCombatDistance raised, the engine itself lands hits from afar and
+      // skymp5-client reports them like any other (Game.SetGameSettingFloat).
+      // args: {name, value}
+      const name = typeof a.name === "string" ? a.name : "";
+      if (!name || typeof a.value !== "number") return { error: "set-gmst needs name and value" };
+      Game.setGameSettingFloat(name, a.value);
+      return { [name]: Game.getGameSettingFloat(name) };
+    }
+    case "set-av": {
+      // The console's setav on the player: an actor value in this client
+      // only (Actor.SetActorValue), such as SpeedMult for movement speed
+      // bounds. args: {name, value}
+      const name = typeof a.name === "string" ? a.name : "";
+      if (!name || typeof a.value !== "number") return { error: "set-av needs name and value" };
+      player.setActorValue(name, a.value);
+      return { [name]: player.getActorValue(name) };
+    }
     case "watch-start": {
       const actors = new Map<number, Watched>();
       for (const other of nearbyActors(player)) {
