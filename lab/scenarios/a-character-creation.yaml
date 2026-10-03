@@ -1,0 +1,44 @@
+# M1 validation, character creation (docs/verbs/character-creation.md): the
+# server takes a race from the race menu only if the menu offers it (the
+# race's Playable flag) or the server already records it. This is the real
+# menu path, the guard against refusing a real player: the server opens c1's
+# race menu (labCommand open-race-menu), the stock client shows it, lab-driver
+# picks the next race in the menu's list (tap-key 208, Down: Nord to Orc) and
+# closes the menu (close-menu, the engine's own close; the menu's Ok/Cancel
+# box does not take tapped keys), and skymp5-client sends the menu's result.
+# Orc has the flag and is not c1's recorded race, so the server checks the
+# flag and takes it. The second time nothing changes: the recorded race. The
+# refusal of a race the menu does not offer is T2 (difftest session
+# character-creation): the stock client cannot send one.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-character-creation
+milestone: M1
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: open-race-menu
+  - wait: 6
+  - c1: tap-key {code: 208}
+  - wait: 3
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 6
+  - assert:
+      - server.actor(c1).appearanceAttempts == 1
+      - server.actor(c1).lastAppearanceAllowed == true
+      - server.actor(c1).lastAppearanceRaceId == form("Skyrim.esm:OrcRace")
+      - server.actor(c1).raceId == form("Skyrim.esm:OrcRace")
+  - c1: open-race-menu
+  - wait: 6
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 6
+  - assert:
+      - server.actor(c1).appearanceAttempts == 2
+      - server.actor(c1).lastAppearanceAllowed == true
+      - server.actor(c1).raceId == form("Skyrim.esm:OrcRace")
+  - c1: screenshot
+artifacts: [server.log, c1.log, screenshots]
