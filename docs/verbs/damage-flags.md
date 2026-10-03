@@ -58,7 +58,7 @@ A flag the server cannot back is dropped and the hit lands as a plain one
 
 - Where the logic lives: ActionListener::OnHit (the flag check before the
   reach check and OnWeaponHit) and AnimationSystem (the power attack start
-  times), fork branch m1-damage-flags. A dropped flag logs E_HIT_POWER or
+  times), fork 69149658; the rule is Rust since the port (skymp-wire wire-rules, ADR-020), on parity f0045206. A dropped flag logs E_HIT_POWER or
   E_HIT_SNEAK.
 - DB fields / migration: none (runtime state).
 
@@ -74,12 +74,14 @@ A flag the server cannot back is dropped and the hit lands as a plain one
   power attack with no power attack among its events; the legacy server
   doubles the damage (c2 told 0.92576), the fixed one does not (0.96288).
   Green on m1-damage-flags, 2026-10-03, with the six other sessions.
-- T3: blocked (see the Dynamic plan). The scenario a-damage-flags (a plain
-  swing, then a real power attack that must still double the damage on the
-  fixed server) is drafted but not committed: the lab cannot make the
-  engine perform a power attack yet.
+- T3: lab/scenarios/a-damage-flags.yaml: c1 taps the attack key (a plain
+  hit on c2 120 units off) and holds it 1.5 s (a power attack); the server
+  keeps the real power attack's flag and the second hit takes c2 below 0.92.
+  Green on the Rust rules (m1-rules), run 20261003-224045. The clones bind
+  Right Attack/Block to Home (lab/deploy/sky-client/controlmap.ps1, Eli's
+  call). It cannot fail on a server without the check; the refusal is T2.
 
-## Dynamic plan (T3 blocked on in-game behavior, rule 8)
+## Dynamic plan (resolved 2026-10-03 by option 2, the remap)
 
 What the lab tried (2026-10-03, on m1-damage-flags, c1 with the IronSword
 facing c2 180 units off):
@@ -110,5 +112,7 @@ Until one of them is green, the verb stays on fork branch m1-damage-flags.
 
 - [x] server logic + T0
 - [x] T2 green
-- [ ] T3 scenario green: blocked, Dynamic plan above (Eli)
-- [ ] on fork parity (stays on m1-damage-flags until T3)
+- [x] T3 scenario green (run 20261003-224045); the power attack misses at
+  188 units where a plain swing lands (exploratory run 20261003-223313),
+  HYPOTHESIS that power attacks use the pick only, without the eye cast
+- [x] on fork parity (f0045206, 2026-10-03, with the Rust port)

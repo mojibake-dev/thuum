@@ -90,7 +90,7 @@ rotation 0.
 ## Server
 
 - Where the logic lives: ActionListener::OnHit and MeleeReachBound (fork
-  f9ef96ec, on parity 15eb653d). The bound is max(s_a * max(fCombatBashReach,
+  f9ef96ec, on parity 15eb653d). The rule itself moved to Rust on 2026-10-03 (skymp-wire wire-rules, ADR-020; fork f0045206): the C++ handler gathers the facts and asks. The bound is max(s_a * max(fCombatBashReach,
   fCombatDistance * the longest reach among the attacker's worn weapons,
   unarmedReach), 162) + 14 * (s_a + s_t) + 256, s being the race's height
   for the actor's sex (refScale and the base record's height are 1 for

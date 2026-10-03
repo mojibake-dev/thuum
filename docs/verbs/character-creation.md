@@ -78,7 +78,7 @@ Rate limit / bounds: unchanged; one accepted result per race menu open.
 ## Server
 
 - Where the logic lives: ActionListener::OnUpdateAppearance and
-  IsAllowedRace (fork faa575d2, on parity c104128f). The race must resolve, in the
+  IsAllowedRace (fork faa575d2, on parity c104128f). The rule itself moved to Rust on 2026-10-03 (skymp-wire wire-rules, ADR-020; fork f0045206): the C++ handler gathers the facts and asks. The race must resolve, in the
   server's load order, to a RACE record with the Playable flag, unless it is
   the race already recorded for the actor. A refusal logs E_APPEARANCE_RACE
   with the actor and the race. Without loaded game files (unit tests only)

@@ -67,7 +67,7 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
 ## Server
 
 - Where the logic lives: MovementBudget (server_guest_lib/MovementBudget.h)
-  and MovementValidation::Validate (fork 8b991392, on parity 8266a21c). The budget is
+  and MovementValidation::Validate (fork 8b991392, on parity 8266a21c). The rule itself moved to Rust on 2026-10-03 (skymp-wire wire-rules, ADR-020; fork f0045206): the C++ handler gathers the facts and asks. The budgets are Rust state; MovementBudget.h is gone. The budget is
   runtime state on MpActor (not persisted; a fresh one after a restart or
   login starts full). A refusal logs E_MOVE_SPEED with the actor and the
   distance.

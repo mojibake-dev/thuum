@@ -79,7 +79,7 @@ Rate limit / bounds: the reach above; rate unchanged.
 ## Server
 
 - Where the logic lives: ActionListener::OnActivate (fork branch
-  m1-activation). A client's first activation needs the caster within
+  m1-activation). The rule itself moved to Rust on 2026-10-03 (skymp-wire wire-rules, ADR-020; fork f0045206): the C++ handler gathers the facts and asks. A client's first activation needs the caster within
   180 + 16 (the game's reach) + 256 (the eye above the feet and the shoulder
   offset; the server measures from the actor's position at its feet) + the
   target's size (the farthest point of its base record's OBND box from its
