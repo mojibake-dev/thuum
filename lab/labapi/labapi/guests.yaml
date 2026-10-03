@@ -43,6 +43,10 @@ items:
   # a one-handed weapon the spawn kit does not carry (the kit holds IronSword,
   # IronDagger, IronWarAxe), for m0-inventory; same record scan, 2026-10-01
   "Skyrim.esm:SteelSword": 0x00013989
+  # what the Canis Root plant near lab-spawn yields (reference 0x0005355D, base
+  # TreeFloraCanisRoot01 0x000BB94A, its PFIG field), for a-activation-reach;
+  # read with lab/esm.py from the lab's Skyrim.esm, 2026-10-03
+  "Skyrim.esm:CanisRoot01": 0x0006ABCB
 
 # cells: the places scenarios teleport to and measure from. A scenario's x, y, z
 # are offsets from the cell's origin: lab-api adds the origin on the way to the

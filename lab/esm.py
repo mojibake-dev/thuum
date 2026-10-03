@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+"""Read records from a TES4-format plugin (Skyrim.esm) by editor id.
+
+The server's validators take game numbers (activation reach, movement speeds)
+from the master files, never from memory (CLAUDE.md rule 1 in spirit). This
+finds the record that holds one and prints its form id and fields. It runs
+where the master files are (sky-srv: /srv/persist/esm), because licensed
+files never leave rpool/sky.
+
+Format (UESP, "Skyrim Mod:Mod File Format"): a record is a 24-byte header
+(type, data size, flags, form id, timestamp, version control, internal
+version, unknown) and its fields; flag 0x00040000 means the data is a uint32
+decompressed size followed by zlib data. A GRUP header is 24 bytes (type,
+size including the header, label, group type, timestamp, version control,
+unknown). A field is type, uint16 size, data; after an XXXX field the next
+field's size is the uint32 that XXXX carried.
+
+    esm.py find <plugin> <TYPE> <editor id substring>
+    esm.py near <plugin> <world form id> <x> <y> <radius> <TYPE,TYPE,...>
+
+`near` lists the references placed in a worldspace within a radius (in the
+x-y plane) whose base record is one of the types, e.g. FLOR,CONT,ACTI,DOOR:
+the objects a scenario can activate around a spot.
+"""
+
+from __future__ import annotations
+
+import struct
+import sys
+import zlib
+from dataclasses import dataclass, field
+from typing import Iterator
+
+RECORD = struct.Struct("<4sIIIHHHH")
+GROUP = struct.Struct("<4sI4siHHI")
+FIELD = struct.Struct("<4sH")
+COMPRESSED = 0x00040000
+
+
+@dataclass
+class Record:
+    type: str
+    form_id: int
+    flags: int
+    fields: list[tuple[str, bytes]] = field(default_factory=list)
+
+    def get(self, name: str) -> bytes | None:
+        return next((d for t, d in self.fields if t == name), None)
+
+    @property
+    def editor_id(self) -> str:
+        raw = self.get("EDID") or b""
+        return raw.split(b"\0", 1)[0].decode("latin-1")
+
+
+def parse_fields(data: bytes) -> list[tuple[str, bytes]]:
+    out: list[tuple[str, bytes]] = []
+    pos, big = 0, None
+    while pos + FIELD.size <= len(data):
+        ftype, size = FIELD.unpack_from(data, pos)
+        pos += FIELD.size
+        if big is not None:
+            size, big = big, None
+        name = ftype.decode("latin-1")
+        chunk = data[pos:pos + size]
+        pos += size
+        if name == "XXXX":
+            big = struct.unpack("<I", chunk)[0]
+            continue
+        out.append((name, chunk))
+    return out
+
+
+def record_at(buf: bytes, pos: int) -> tuple[Record, int]:
+    rtype, size, flags, form_id, *_ = RECORD.unpack_from(buf, pos)
+    body = buf[pos + RECORD.size:pos + RECORD.size + size]
+    if flags & COMPRESSED:
+        body = zlib.decompress(body[4:])
+    return Record(rtype.decode("latin-1"), form_id, flags, parse_fields(body)), pos + RECORD.size + size
+
+
+def walk(buf: bytes, start: int, end: int, want: str) -> Iterator[Record]:
+    """Every record of type `want` between start and end, descending into
+    groups (records of other types are skipped without parsing)."""
+    pos = start
+    while pos + RECORD.size <= end:
+        tag = buf[pos:pos + 4]
+        if tag == b"GRUP":
+            _, gsize, label, gtype, *_ = GROUP.unpack_from(buf, pos)
+            # a top-level group (type 0) is labelled with its record type;
+            # skip whole top-level groups of other types
+            if gtype != 0 or label.decode("latin-1") == want:
+                yield from walk(buf, pos + GROUP.size, pos + gsize, want)
+            pos += gsize
+            continue
+        rtype, size = struct.unpack_from("<4sI", buf, pos)
+        if rtype.decode("latin-1") == want:
+            rec, _ = record_at(buf, pos)
+            yield rec
+        pos += RECORD.size + size
+
+
+def headers(buf: bytes, start: int, end: int, top: set[str] | None, world: int | None = None) -> Iterator[tuple[str, int, int, int | None]]:
+    """(type, form id, offset, worldspace) for every record in the top-level
+    groups labelled in `top` (all of them when None), descending into nested
+    groups; a World Children group (type 1) names the worldspace below it."""
+    pos = start
+    while pos + RECORD.size <= end:
+        if buf[pos:pos + 4] == b"GRUP":
+            _, gsize, label, gtype, *_ = GROUP.unpack_from(buf, pos)
+            if gtype != 0 or top is None or label.decode("latin-1") in top:
+                inner = struct.unpack("<I", label)[0] if gtype == 1 else world
+                yield from headers(buf, pos + GROUP.size, pos + gsize, None, inner)
+            pos += gsize
+            continue
+        rtype, size, _, form_id = struct.unpack_from("<4sIII", buf, pos)
+        yield rtype.decode("latin-1"), form_id, pos, world
+        pos += RECORD.size + size
+
+
+@dataclass
+class Placed:
+    form_id: int
+    base_id: int
+    base_type: str
+    base_editor_id: str
+    pos: tuple[float, float, float]
+    distance: float
+
+
+def near(buf: bytes, world: int, x: float, y: float, radius: float, types: set[str]) -> list[Placed]:
+    bases = {fid: (t, off) for t, fid, off, _ in headers(buf, 0, len(buf), types) if t in types}
+    out: list[Placed] = []
+    for t, fid, off, w in headers(buf, 0, len(buf), {"WRLD"}):
+        if t != "REFR" or w != world:
+            continue
+        rec, _ = record_at(buf, off)
+        name, data = rec.get("NAME"), rec.get("DATA")
+        if not name or not data or len(data) < 12:
+            continue
+        base = struct.unpack("<I", name[:4])[0]
+        if base not in bases:
+            continue
+        px, py, pz = struct.unpack_from("<3f", data)
+        d = ((px - x) ** 2 + (py - y) ** 2) ** 0.5
+        if d <= radius:
+            btype, boff = bases[base]
+            out.append(Placed(fid, base, btype, record_at(buf, boff)[0].editor_id, (px, py, pz), d))
+    return sorted(out, key=lambda p: p.distance)
+
+
+def find(buf: bytes, rtype: str, needle: str) -> list[Record]:
+    return [r for r in walk(buf, 0, len(buf), rtype) if needle.lower() in r.editor_id.lower()]
+
+
+def gmst_value(rec: Record) -> object:
+    """A game setting's value by its editor id's type letter (f float, i int,
+    u unsigned, b bool); strings are localized ids in Skyrim.esm."""
+    data = rec.get("DATA") or b""
+    kind = rec.editor_id[:1]
+    if len(data) < 4:
+        return None
+    if kind == "f":
+        return struct.unpack_from("<f", data)[0]
+    if kind == "i":
+        return struct.unpack_from("<i", data)[0]
+    if kind in ("u", "b"):
+        return struct.unpack_from("<I", data)[0]
+    return data.hex()
+
+
+def describe(rec: Record) -> str:
+    head = f"{rec.type} {rec.form_id:#010x} {rec.editor_id}"
+    if rec.type == "GMST":
+        return f"{head} = {gmst_value(rec)}"
+    parts = []
+    for name, data in rec.fields:
+        if name == "EDID":
+            continue
+        if len(data) == 4:
+            u, f = struct.unpack("<I", data)[0], struct.unpack("<f", data)[0]
+            parts.append(f"{name}[4] {u:#010x} (float {f:g})")
+        elif len(data) % 4 == 0 and 0 < len(data) <= 64:
+            floats = struct.unpack(f"<{len(data) // 4}f", data)
+            parts.append(f"{name}[{len(data)}] floats {['%g' % v for v in floats]}")
+        else:
+            parts.append(f"{name}[{len(data)}] {data[:32].hex()}")
+    return head + ("\n  " + "\n  ".join(parts) if parts else "")
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) == 5 and argv[1] == "find":
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        hits = find(buf, argv[3], argv[4])
+        for rec in hits:
+            print(describe(rec))
+        return 0 if hits else 1
+    if len(argv) == 8 and argv[1] == "near":
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        placed = near(buf, int(argv[3], 0), float(argv[4]), float(argv[5]), float(argv[6]), set(argv[7].split(",")))
+        for p in placed:
+            print(f"{p.form_id:#010x} {p.base_type} {p.base_id:#010x} {p.base_editor_id} at ({p.pos[0]:.0f}, {p.pos[1]:.0f}, {p.pos[2]:.0f}), {p.distance:.0f} away")
+        return 0 if placed else 1
+    print(__doc__, file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
