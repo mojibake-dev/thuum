@@ -70,6 +70,12 @@ class ActorView:
     hasAppearance: bool | None = None
     raceId: int | None = None
     sex: int | None = None
+    # the server's verdicts on the client's race menu results since it started
+    # (the gamemode's onUpdateAppearanceAttempt record): how many, and the
+    # last one's race and outcome
+    appearanceAttempts: int | None = None
+    lastAppearanceRaceId: int | None = None
+    lastAppearanceAllowed: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -151,6 +157,9 @@ class _ServerRef:
                 hasAppearance=_opt_bool(d.get("hasAppearance")),
                 raceId=_opt_int(d.get("raceId")),
                 sex=_opt_int(d.get("sex")),
+                appearanceAttempts=_opt_int(d.get("appearanceAttempts")),
+                lastAppearanceRaceId=_opt_int(d.get("lastAppearanceRaceId")),
+                lastAppearanceAllowed=_opt_bool(d.get("lastAppearanceAllowed")),
             )
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"actor record for {client} lacks {e}") from e
@@ -301,7 +310,8 @@ class _ClientRef:
 
 
 _ATTRS = {
-    ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex"},
+    ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex",
+                "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},

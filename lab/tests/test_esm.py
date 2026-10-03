@@ -60,6 +60,17 @@ class EsmTests(unittest.TestCase):
 
 
 
+class RaceTests(unittest.TestCase):
+    def test_race_flags_sit_after_the_skill_boosts_and_body_sizes(self):
+        def race(fid, edid, flags):
+            data = bytes(14) + bytes(2) + struct.pack("<4f", 1, 1, 0.5, 0.5) + struct.pack("<I", flags) + bytes(128 - 36)
+            return record("RACE", fid, field("EDID", edid.encode() + b"\0") + field("DATA", data))
+        buf = record("TES4", 0, b"") + group("RACE", race(0x13746, "NordRace", esm.RACE_PLAYABLE) + race(0x2C65B, "NordRaceChild", esm.RACE_CHILD) + race(0x131F0, "DremoraRace", 0))
+        flags = {r.editor_id: esm.race_flags(r) for r in esm.walk(buf, 0, len(buf), "RACE")}
+        self.assertEqual(flags, {"NordRace": esm.RACE_PLAYABLE, "NordRaceChild": esm.RACE_CHILD, "DremoraRace": 0})
+        self.assertIsNone(esm.race_flags(esm.Record("RACE", 1, 0, [("DATA", bytes(20))])))
+
+
 class NearTests(unittest.TestCase):
     def test_lists_placed_objects_of_the_types_near_a_point_in_one_world(self):
         flor = group("FLOR", record("FLOR", 0x0004_0001, field("EDID", b"Mountainflower\0")))

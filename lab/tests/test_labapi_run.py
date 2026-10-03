@@ -571,3 +571,13 @@ class ClientStepNames(RunTests):
         run_id, body = self._run(text)
         self.assertEqual(body["verdict"], "red")
         self.assertIn("Nope", body["failures"][0]["error"])
+
+    def test_open_race_menu_is_a_server_verb_and_attempts_read_back(self):
+        text = ("id: t3-race\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: open-race-menu\n"
+                "  - assert:\n      - server.actor(c1).appearanceAttempts == 0\n")
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "open-race-menu"]
+        self.assertEqual(sent, [{"kind": "open-race-menu", "profileId": 1}])
+        self.assertTrue(self.state.actors[1].race_menu_open)
+        self.assertNotIn("open-race-menu", [a for _, a, _ in self.doubles.seen])

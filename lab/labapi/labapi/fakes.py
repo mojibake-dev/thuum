@@ -116,6 +116,9 @@ class FakeActor:
     magickaPercentage: float = 1.0
     staminaPercentage: float = 1.0
     appearance: dict[str, Any] | None = None
+    race_menu_open: bool = False
+    # (raceId, allowed) per UpdateAppearance the server judged
+    appearance_attempts: list[tuple[int, bool]] = field(default_factory=list)
     inventory: dict[int, int] = field(default_factory=dict)
     spawn: tuple[float, float, float, str] = (0.0, 0.0, 0.0, "lab-spawn")
     online: bool = True  # listed by labState kind online
@@ -155,6 +158,9 @@ class FakeState:
                     "hasAppearance": app is not None,
                     "raceId": app.get("raceId") if app else None,
                     "sex": (1 if app.get("isFemale") else 0) if app else None,
+                    "appearanceAttempts": len(actor.appearance_attempts),
+                    "lastAppearanceRaceId": actor.appearance_attempts[-1][0] if actor.appearance_attempts else None,
+                    "lastAppearanceAllowed": actor.appearance_attempts[-1][1] if actor.appearance_attempts else None,
                 }
             if payload.get("kind") == "inventory":
                 return {"found": True, "entries": [{"baseId": b, "count": c} for b, c in sorted(actor.inventory.items())]}
@@ -180,6 +186,9 @@ class FakeState:
                 if payload.get("preset") != "lab-nord-1":
                     return {"ok": False, "error": f"unknown preset {payload.get('preset')!r}"}
                 actor.appearance = {"raceId": 1, "isFemale": False}
+                return {"ok": True}
+            if kind == "open-race-menu":
+                actor.race_menu_open = True
                 return {"ok": True}
             if kind == "set-percentages":
                 for k in ("health", "magicka", "stamina"):

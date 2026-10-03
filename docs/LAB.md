@@ -362,9 +362,13 @@ late), and settings {ini: [...], gmst: [...]} (the running game's own
 values of named INI settings and game settings, through Papyrus, recorded
 in the step's note). Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
-rung R0: teleport, give, set-appearance, set-percentages, kill, respawn.
+rung R0: teleport, give, set-appearance, open-race-menu (the server opens
+the client's race menu and takes one race menu result from it),
+set-percentages, kill, respawn.
 `screenshot` is a guest exec on a managed client (request-screenshot is
-the in-game fallback). Assertions read `server.actor(c)`, `server.inventory(c)`,
+the in-game fallback). Assertions read `server.actor(c)` (the record, and
+`appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
+server's verdicts on the client's race menu results), `server.inventory(c)`,
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
 dump's nearby actors matched to the server's position for `other`),
 `c.watched(other)` (the last watch-stop's actor that started where the

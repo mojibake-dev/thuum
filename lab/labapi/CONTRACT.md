@@ -38,14 +38,20 @@ Response when the profile has an actor:
 ```json
 {"found": true, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "lab-spawn",
  "isDead": false, "healthPercentage": 1.0,
- "hasAppearance": true, "raceId": 79683, "sex": 0}
+ "hasAppearance": true, "raceId": 79683, "sex": 0,
+ "appearanceAttempts": 1, "lastAppearanceRaceId": 79683,
+ "lastAppearanceAllowed": true}
 ```
 
 `hasAppearance`, `raceId` (the race's form id from the actor's appearance),
 and `sex` (0 male, 1 female, from the appearance's `isFemale`) are `false`
 or `null` for an actor without an appearance. lab-driver reports the same
 `raceId` and `sex` for actors a client sees, so the two sides compare
-directly.
+directly. `appearanceAttempts` counts the client's race menu results
+(UpdateAppearance) the server has judged since it started, through the
+gamemode event onUpdateAppearanceAttempt; `lastAppearanceRaceId` and
+`lastAppearanceAllowed` are the last one's race and the server's verdict
+(`null` before the first).
 
 `cell` is the server's descriptor for the actor's cell or worldspace,
 `FormDesc::ToString`, that is `"<hex id>:<file>"` such as `"3c:Skyrim.esm"`;
@@ -93,6 +99,7 @@ them by name.
 {"payload": {"kind": "teleport", "profileId": 1, "cell": "3c:Skyrim.esm", "x": 133857, "y": -61130, "z": 14662}}
 {"payload": {"kind": "give", "profileId": 1, "item": "Skyrim.esm:IronSword", "baseId": 77495, "count": 1}}
 {"payload": {"kind": "set-appearance", "profileId": 1, "preset": "lab-nord-1"}}
+{"payload": {"kind": "open-race-menu", "profileId": 1}}
 {"payload": {"kind": "set-percentages", "profileId": 1, "health": 0.5, "magicka": 0.25, "stamina": 0.75}}
 {"payload": {"kind": "kill", "profileId": 1}}
 {"payload": {"kind": "respawn", "profileId": 1}}
@@ -111,7 +118,9 @@ sent again until `teleport_timeout_s` (60 s) is spent. The step's note says
 how many attempts it took, and a step that never lands is red
 (E_RUN_TELEPORT) with the last client report and server record named. `set-appearance` applies `presets/<preset>.json` next to the gamemode (an
 appearance record as `mp.get(actor, "appearance")` returns it; recorded from
-a real client, never typed). `set-percentages` sets the given actor values as
+a real client, never typed). `open-race-menu` opens the server's race menu
+for the actor (`mp.setRaceMenuOpen`): the client is told to show the menu,
+and the server takes one UpdateAppearance from it. `set-percentages` sets the given actor values as
 fractions. `kill` sets the actor dead; `respawn` clears it and moves the actor
 to its spawn point.
 

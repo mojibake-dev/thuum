@@ -75,6 +75,23 @@ test("labState reports appearance, and the new commands change state", () => {
   assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "set-appearance", profileId: 1, preset: "../x" }).ok, false);
 });
 
+test("open-race-menu opens the server's menu, and labState reports the verdict", () => {
+  global.mp = fakeMp();
+  const opened = [];
+  mp.setRaceMenuOpen = (actorId, open) => opened.push([actorId, open]);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const before = mp.onHttpRpcRunAttempt("labState", { kind: "actor", profileId: 1 });
+  assert.deepStrictEqual([before.appearanceAttempts, before.lastAppearanceRaceId, before.lastAppearanceAllowed], [0, null, null]);
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "open-race-menu", profileId: 1 }).ok, true);
+  assert.deepStrictEqual(opened, [[0xff000001, true]]);
+  assert.strictEqual(mp.onUpdateAppearanceAttempt(0xff000001, { raceId: 78320 }, false), undefined);
+  mp.onUpdateAppearanceAttempt(0xff000001, { raceId: 79686 }, true);
+  const after = mp.onHttpRpcRunAttempt("labState", { kind: "actor", profileId: 1 });
+  assert.deepStrictEqual([after.appearanceAttempts, after.lastAppearanceRaceId, after.lastAppearanceAllowed], [2, 79686, true]);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "open-race-menu", profileId: 9 }), { found: false, profileId: 9 });
+});
+
 test("unknown rpc and kind, and thrown errors, answer with error", () => {
   global.mp = fakeMp();
   mp.get = () => { throw new Error("boom"); };

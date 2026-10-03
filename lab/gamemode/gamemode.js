@@ -9,6 +9,11 @@
 //   labState   {kind: "actor" | "inventory" | "online", profileId}
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
+//              {kind: "open-race-menu", profileId}, and the others below
+//
+// It also listens to one gamemode event, onUpdateAppearanceAttempt (the
+// server's verdict on a client's race menu result), so labState can report
+// what the server decided (docs/verbs/character-creation.md).
 //
 // The request and response shapes are the contract in lab/labapi/CONTRACT.md;
 // lab-api is the only caller. No auth: the UI port is reachable only inside
@@ -33,6 +38,20 @@ function notFound(profileId) {
   return { found: false, profileId: Number(profileId) };
 }
 
+// actorId -> {count, raceId, allowed}: every UpdateAppearance the server
+// judged since it started (skymp5-server UpdateAppearanceAttemptEvent:
+// actor form id, the appearance the client sent, whether it was taken).
+// Returning nothing never blocks the event.
+const appearanceAttempts = new Map();
+mp.onUpdateAppearanceAttempt = (actorId, appearance, isAllowed) => {
+  const prev = appearanceAttempts.get(actorId);
+  appearanceAttempts.set(actorId, {
+    count: (prev ? prev.count : 0) + 1,
+    raceId: appearance ? appearance.raceId : null,
+    allowed: Boolean(isAllowed),
+  });
+};
+
 const state = {
   actor(payload) {
     const actorId = actorFor(payload.profileId);
@@ -40,10 +59,14 @@ const state = {
     const loc = mp.get(actorId, "locationalData");
     const pct = mp.get(actorId, "percentages") || {};
     const app = mp.get(actorId, "appearance");
+    const attempt = appearanceAttempts.get(actorId);
     return {
       hasAppearance: app !== null && app !== undefined,
       raceId: app ? app.raceId : null,
       sex: app ? (app.isFemale ? 1 : 0) : null,
+      appearanceAttempts: attempt ? attempt.count : 0,
+      lastAppearanceRaceId: attempt ? attempt.raceId : null,
+      lastAppearanceAllowed: attempt ? attempt.allowed : null,
       found: true,
       profileId: Number(payload.profileId),
       actorId,
@@ -120,6 +143,18 @@ command["set-appearance"] = (payload) => {
   return { ok: true, actorId, preset };
 };
 
+// The server sends the client SetRaceMenuOpen and takes one UpdateAppearance
+// from it while the menu is open: the race menu a new character gets, opened
+// for a recorded one. The stock client shows the menu; closing it is the
+// client's (lab-driver tap-key: R, then Enter for the name).
+command["open-race-menu"] = (payload) => {
+  const actorId = actorFor(payload.profileId);
+  if (!actorId) return notFound(payload.profileId);
+  if (typeof mp.setRaceMenuOpen !== "function") return { ok: false, error: "this server has no setRaceMenuOpen" };
+  mp.setRaceMenuOpen(actorId, true);
+  return { ok: true, actorId };
+};
+
 command["set-percentages"] = (payload) => {
   const actorId = actorFor(payload.profileId);
   if (!actorId) return notFound(payload.profileId);
@@ -170,7 +205,7 @@ mp.onHttpRpcRunAttempt = (name, payload) => {
   }
 };
 
-console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, set-percentages, kill, respawn)");
+console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn)");
 
 // For the unit test only; the server never reads this.
 if (typeof module !== "undefined") {

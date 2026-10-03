@@ -99,7 +99,8 @@ class RichServer(Server):
 
     def __init__(self):
         super().__init__()
-        self.actors["c1"].update({"isDead": False, "healthPercentage": 0.5, "hasAppearance": True, "raceId": 79683, "sex": 0})
+        self.actors["c1"].update({"isDead": False, "healthPercentage": 0.5, "hasAppearance": True, "raceId": 79683, "sex": 0,
+                                  "appearanceAttempts": 2, "lastAppearanceRaceId": 79683, "lastAppearanceAllowed": True})
         self.actors["c2"].update({"isDead": True, "healthPercentage": 0.0, "hasAppearance": False, "raceId": None, "sex": None})
 
 
@@ -134,6 +135,9 @@ class M0VocabularyTests(unittest.TestCase):
             "c1.state.magickaPercentage == 1.0",
             "server.actor(c1).hasAppearance == true",
             "server.actor(c1).raceId == 79683",
+            "server.actor(c1).appearanceAttempts == 2",
+            "server.actor(c1).lastAppearanceAllowed == true",
+            "server.actor(c1).lastAppearanceRaceId == server.actor(c1).raceId",
             "server.actor(c2).isDead == true",
             "c1.state.isDead == false",
         ]:

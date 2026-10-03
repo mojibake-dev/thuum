@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, field_validator
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
 CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "hit", "dump-state", "request-screenshot", "craft", "tap-key", "watch-start", "watch-stop", "settings"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
-SERVER_ACTIONS = {"teleport", "give", "set-appearance", "set-percentages", "kill", "respawn"}
+SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn"}
 SPECIAL_ACTIONS = {"screenshot"}
 # fakeclient: the fork's headless legacy client logs in as a scenario client's
 # profile from inside the server image (T2 without a Windows client).
