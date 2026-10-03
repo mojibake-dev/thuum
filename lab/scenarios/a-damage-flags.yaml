@@ -1,0 +1,47 @@
+# M1 validation, damage flags (docs/verbs/damage-flags.md): a player's power
+# attack counts only when the server saw it start. This is the real path, the
+# guard against taking the bonus from a real power attack: c1 (IronSword
+# drawn, facing north at rotation 0) hits c2 120 units north first with a
+# plain attack (the attack key tapped, 100 ms), then with a power attack (the
+# key held 1.5 s; the clones bind Right Attack/Block to Home, 199, through
+# lab/deploy/sky-client/controlmap.ps1, since SKSE's HoldKey does not drive
+# the mouse button): skymp5-client reports the power attack's start as an
+# animation event and the hit flagged as a power attack, and the
+# server keeps the flag, so the power hit costs c2 about twice the plain
+# one's health (a plain hit of the iron sword left c2 at 0.947 in the melee
+# probes). 120 units: inside the power attack's reach too, which missed at
+# 188 (exploratory run 20261003-223313; the plain swing's eye cast reaches
+# farther). The refusal of a flag without the event is T2 (difftest session
+# damage-flags): the stock client sends no such hit.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-damage-flags
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: draw-weapon
+  - wait: 2
+  - c2: teleport {cell: lab-spawn, x: 0, y: -426, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage < 1
+      - server.actor(c2).healthPercentage > 0.92
+  - c2: set-percentages {health: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.actor(c2).healthPercentage < 0.92
+artifacts: [server.log, c1.log, c2.log]
