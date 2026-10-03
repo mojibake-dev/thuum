@@ -26,6 +26,7 @@ import {
   ObjectReference,
   Spell,
   TESModPlatform,
+  Utility,
   WorldSpace,
   on,
   printConsole,
@@ -264,6 +265,18 @@ function run(step: Step, player: Actor): unknown {
       const duration = num(a.duration_s, 0) > 0 ? num(a.duration_s) : distance / speed;
       moving = { x, y, cx: player.getPositionX(), cy: player.getPositionY(), speed, last: Date.now(), until: Date.now() + Math.max(500, duration * 1500) };
       return { dispatched: true, distance, speed };
+    }
+    case "settings": {
+      // Live values of named settings in the running game, so a verb records
+      // the game's own numbers (rule 2): INI settings ("name:Section") through
+      // Utility.GetINIFloat, game settings (GMST) through
+      // Game.GetGameSettingFloat.
+      const names = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+      const ini: Record<string, number> = {};
+      for (const n of names(a.ini)) ini[n] = Utility.getINIFloat(n);
+      const gmst: Record<string, number> = {};
+      for (const n of names(a.gmst)) gmst[n] = Game.getGameSettingFloat(n);
+      return { ini, gmst };
     }
     case "watch-start": {
       const actors = new Map<number, Watched>();

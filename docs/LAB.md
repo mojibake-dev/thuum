@@ -358,7 +358,9 @@ client, such as the race menu's Done), and watch-start / watch-stop (the
 client follows every actor near it at watch-start, by form id, each frame
 until watch-stop, and reports how far each got from where it began; for
 "the observer never saw X" checks that one dump-state would sample too
-late). Server verbs are written as client
+late), and settings {ini: [...], gmst: [...]} (the running game's own
+values of named INI settings and game settings, through Papyrus, recorded
+in the step's note). Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, set-percentages, kill, respawn.
 `screenshot` is a guest exec on a managed client (request-screenshot is
