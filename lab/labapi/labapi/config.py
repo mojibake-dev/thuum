@@ -152,7 +152,10 @@ class Settings:
     teleport_settle_s: float = 3.0
     teleport_timeout_s: float = 60.0
     teleport_tolerance: float = 64.0
-    heartbeat_timeout_s: float = 180.0
+    # a cold boot of a clone to its first lab-driver poll: Windows, the logon,
+    # Steam's own startup (65 s on sky-c2 on 2026-10-03, launch.ps1 waits for
+    # it), the game and Skyrim Platform; 180 s was too tight that day
+    heartbeat_timeout_s: float = 300.0
     server_ready_timeout_s: float = 120.0
     guest_task_timeout_s: float = 120.0
     time_scale: float = 1.0
