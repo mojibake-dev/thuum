@@ -1,0 +1,47 @@
+# M1 validation, melee reach (docs/verbs/melee-reach.md): the server refuses
+# a player's melee hit on another player from beyond the reach the game
+# allows. c1 faces north (rotation 0: a teleport's rotation is read in
+# radians on the client, docs/LAB.md) with the IronSword drawn and swings
+# with the engine's own attack (lab-driver anim-event attackStart), from the
+# south end of the level strip south of lab-spawn (x 0, y -546 to -66; north
+# of it the summit drops away, run 20261003-091513). First c2 stands 180
+# units north, inside the sword's measured edge (a hit at 185, a miss at
+# 190): the hit lands. Then c1 raises its own fCombatDistance to 1000, as a
+# player's console can (setgs), and c2 stands 520 units north: c1's engine
+# lands the swing, skymp5-client reports it, and the server must refuse it
+# (its bound for a Nord with a sword is 447). On a server without the check
+# that hit lands, the hole this verb closes.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-melee-reach
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: draw-weapon
+  - wait: 2
+  - c2: teleport {cell: lab-spawn, x: 0, y: -366, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage < 1
+  - c1: set-gmst {name: fCombatDistance, value: 1000}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -26, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage == 1
+  - c1: dump-state
+artifacts: [server.log, c1.log, c2.log, world-diff]
