@@ -48,8 +48,11 @@ items:
   # read with lab/esm.py from the lab's Skyrim.esm, 2026-10-03
   "Skyrim.esm:CanisRoot01": 0x0006ABCB
   # the lab characters' race (the lab-nord-1 preset), one the race menu offers
-  # (Playable flag), for a-character-creation; lab/esm.py races, 2026-10-03
+  # (Playable flag), and the one after it in the menu's list (Down from Nord,
+  # exploratory run 20261003-074730), for a-character-creation; lab/esm.py
+  # races, 2026-10-03
   "Skyrim.esm:NordRace": 0x00013746
+  "Skyrim.esm:OrcRace": 0x00013747
 
 # cells: the places scenarios teleport to and measure from. A scenario's x, y, z
 # are offsets from the cell's origin: lab-api adds the origin on the way to the
