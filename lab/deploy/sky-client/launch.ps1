@@ -30,13 +30,17 @@ while (-not (Get-Process steamwebhelper -ErrorAction SilentlyContinue) -and (Get
 Log ('steam ' + [bool](Get-Process steam -ErrorAction SilentlyContinue) + ', service ' + [bool](Get-Process steamservice -ErrorAction SilentlyContinue) + ', web helper ' + [bool](Get-Process steamwebhelper -ErrorAction SilentlyContinue))
 Start-Sleep -Seconds 15
 for ($attempt = 1; $attempt -le 3; $attempt++) {
-  # a loader from a failed attempt waits forever; it must not hold the next
+  # A failed attempt leaves its loader waiting forever and the SkyrimSE.exe it
+  # created suspended for the injection, with no window (thuum-mundus stopped
+  # three of those on sky-c2 on 2026-10-03); neither may hold the next one.
   Get-Process skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force
+  Get-Process SkyrimSE -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -eq 0 } | Stop-Process -Force
   Log ('launch ' + $attempt)
   Start-Process -FilePath (Join-Path $game 'skse64_loader.exe') -WorkingDirectory $game
   Start-Sleep -Seconds 30
-  $p = Get-Process SkyrimSE -ErrorAction SilentlyContinue
+  # the game is up when it has a window; a suspended or hung one has none
+  $p = Get-Process SkyrimSE -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
   if ($p) { Log ('running pid ' + $p.Id); break }
-  Log 'the game is not running 30 s after the launch'
+  Log 'no game window 30 s after the launch'
   Start-Sleep -Seconds 10
 }
