@@ -180,9 +180,14 @@ it carries a HYPOTHESIS tag.
   was 4096 (docs/verbs/melee-reach.md; the engine's formula from Ghidra,
   its edge measured in the lab; a-melee-reach red on parity, run
   20261003-091943, green on the fix, run 20261003-092301; on parity
-  15eb653d). Movement speed bounds are next (movement types read from
-  Skyrim.esm: run 370, sprint 500, horse sprint 600 before SpeedMult;
-  lab-driver hold-key and set-av are in clean-m1 for it).
+  15eb653d). Fifth DONE 2026-10-03: a player's movement over the ground
+  spends a budget refilled at 660 units a second (the fastest movement
+  type a player uses, 600, plus a tenth) and holding 2048, where a client
+  could cover 4095 units every 130 ms update before
+  (docs/verbs/movement-speed.md; a-movement-speed red on parity, run
+  20261003-094307, green on the fix, run 20261003-100454; on parity
+  8266a21c). Open in this bullet: the hit's angle (cone), PvE and NPC
+  reach, and the client's damage flags (power, sneak, blocked).
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.

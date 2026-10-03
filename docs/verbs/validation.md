@@ -29,7 +29,9 @@ noted.
   (SendToNeighbours) before MovementValidation ran, so a rejected move had
   already reached the other clients.
 - Not checked: speed over time (only the per-message jump), message rate,
-  height and navmesh, rotation. A hosted NPC's rejected move is dropped
+  height and navmesh, rotation. Speed over the ground DONE 2026-10-03
+  (docs/verbs/movement-speed.md, on parity 8266a21c): a budget refilled at
+  660 units a second that holds 2048; height, rate and rotation still open. A hosted NPC's rejected move is dropped
   without a snap-back or a log line.
 
 ## Hits and damage (R1, damage R0)
