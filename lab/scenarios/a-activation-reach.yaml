@@ -1,0 +1,31 @@
+# M1 validation, activation reach (docs/verbs/validation.md): the server
+# refuses an activation from beyond the player's reach. The target is the
+# Canis Root plant 1509 units from lab-spawn (reference 0x0005355D, base
+# TreeFloraCanisRoot01; lab/esm.py on the lab's Skyrim.esm), which the server
+# harvests into the activator's inventory. lab-driver's activate runs the
+# engine's own Activate, which skymp5-client reports like a player's.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-activation-reach
+milestone: M1
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - wait: 5
+  # from the spawn, 1509 units away: refused, nothing harvested
+  - c1: activate {refId: 0x5355d}
+  - wait: 3
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:CanisRoot01") == 0
+  # beside the plant (it stands at -300, -1479, -174 from the cell origin)
+  - c1: teleport {cell: lab-spawn, x: -300, y: -1400, z: -150}
+  - wait: 5
+  - c1: activate {refId: 0x5355d}
+  - wait: 3
+  - assert:
+      - server.inventory(c1).count("Skyrim.esm:CanisRoot01") == 1
+artifacts: [server.log, c1.log, world-diff]
