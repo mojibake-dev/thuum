@@ -397,3 +397,39 @@ it read "decoded, validated structs"; `just build` needs a Rust toolchain in
 the server image and the mirror's Windows workflow builds the cdylib; the
 fork's T0 loses the RakNet and BitStream tests and gains a JSON contract test
 that reads the same fixtures as the Rust tests.
+
+## ADR-020: Game-state validators live beside the state they read
+
+Status: proposed (2026-10-03). Clarifies ADR-010's point 2 for M1's
+validation verbs; Eli decides.
+
+ADR-010 puts "validators and message handlers, which is where every new
+verb adds code" second in its Rust order. M1's validation verbs (activation
+reach, character creation, melee reach, movement speed, damage flags;
+docs/verbs/) were written in the C++ handlers instead (ActionListener.cpp,
+MovementValidation.cpp, AnimationSystem.cpp), because each reads state only
+the C++ world model holds: positions, equipment, worn weapons, game records
+through espm, animation events, per-actor runtime state. That was a call
+made in the session without an ADR; this records it for a decision.
+
+The case for keeping them there: the memory-safety argument that orders
+ADR-010 is about code fed attacker bytes, and that code is already Rust
+(the recognizer, ADR-019: C++ sees only canonical JSON with every length
+bounded). A game-state validator is a few lines of arithmetic over the
+server's own records, after recognition. Moving it to Rust means either
+mirroring the world model's state in Rust or widening the cxx bridge to
+query it per message, which is ADR-010's step 4 (the world model, "only if
+the exposed surface still reaches them") pulled forward for no gain in what
+an attacker can reach. Each verb still ships whole: a T0 test in the fork's
+ctest, a difftest session against the pinned RakNet oracle, and a T3
+scenario.
+
+Proposed: structural validation (lengths, finiteness, positions' bounds,
+rates per connection) stays in the Rust edge (wire-validate); validation of
+game semantics lives in the handler next to the state it reads, in that
+handler's language, and moves with that state if the world model ever
+moves. New handlers for new messages are still Rust (CLAUDE.md, workflow
+step 4).
+
+If rejected: the five verbs' checks move behind the bridge into Rust with
+the state they need exposed, and docs/verbs/ records the move per verb.
