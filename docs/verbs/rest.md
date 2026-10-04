@@ -1,10 +1,11 @@
-# Verb: rest (draft; time part two)
+# Verb: rest (time part two; on fork branch m1-rest)
 
 Part two of M1's "game time and globals, wait and sleep as server-owned
 time" (docs/PLAN.md), following time part one (docs/verbs/time.md). ADR-021
 decision 2 governs it: waiting and sleeping are per player and never move
-the shared clock; the player gets the rest's effects for themselves. Nothing
-here is built. This is the design, for review before code.
+the shared clock; the player gets the rest's effects for themselves. The
+design's conventions were approved with Eli's "These are fine"
+(2026-10-04). The code is on fork branch m1-rest; T3 is open.
 
 ## Intent
 
@@ -67,7 +68,8 @@ Milestone: M1   Class: B
   CropRegeneration already uses (the race's and the actor's rate and rate
   multiplier). The time it regenerates over follows the engine, which the
   Dynamic plan measures; until then, game seconds. It writes the new
-  percentages and sends them to the player and its neighbours.
+  percentages and sends them to the player, as every attribute change
+  does (MpActor::NetSetPercentages).
 - **R3 for the client's own world.** The engine's local jump in time during
   the menu stays on the resting client. That covers its view of weather and
   of NPC schedules, and the clock snaps back afterwards.
@@ -81,22 +83,38 @@ Milestone: M1   Class: B
 
 ## Design
 
-- **Client: allow waiting.** setInChargen(true, false, false) keeps saving
-  disabled and allows waiting. The lab confirms whether beds follow.
-- **Client: observe the rest.** Record the Sleep/Wait menu's open and close
-  (Skyrim Platform menuOpen and menuClose; the menu's name is to be read in
-  the lab). Measure the hours as the engine's game hours across the menu,
-  from GameDaysPassed before and after, and the kind from whether the player
-  is in bed furniture. Then send a RestIntent.
-- **Wire:** RestIntent, a new message on the SkyMP family's next MsgType,
-  client to server, reliable. Fields: hours (f32, in (0, 24]) and sleep
-  (bool).
-  - The validator refuses non-finite and out-of-range values (E_VAL_RANGE)
-    and rate-limits the message.
-  - Message and validator ship in the same commit (rule 4).
-- **Server:** a Rust rule (ADR-020) computes the recovery from the hours
-  and the race's regeneration rates. The core gathers the facts, writes the
-  percentages, and sends ChangeValues.
+- **Client: allow waiting.** EnforceLimitationsService's
+  setInChargen(true, false, false) keeps saving disabled and allows waiting.
+  The lab confirms whether beds follow.
+- **Client: observe the rest, in TimeService.** TimeService corrects the
+  engine's clock every 2 s, which would pull a wait back while it runs, so
+  the two are one mechanism:
+  - While the Sleep/Wait menu is open (its name is "Sleep/Wait Menu",
+    RE::SleepWaitMenu::MENU_NAME in CommonLibSSE-NG
+    include/RE/S/SleepWaitMenu.h:16), the correction holds off.
+  - After the menu has been open, the whole hours the engine's day count
+    runs ahead of the server's clock are the rest. TimeService sends a
+    RestIntent with them, capped at 24, then corrects the clock as before.
+  - `sleep` is true when the player is still in furniture, the bed it slept
+    in. Only the log and the rested bonus care, and the bonus is the
+    client's anyway.
+  - Only a Sleep/Wait menu counts, so a fast travel's hours are corrected
+    without a rest.
+- **Wire:** RestIntent, MsgType 35 (wire id 43, SCHEMA_VERSION 4), client
+  to server, reliable. Fields: hours (f32) and sleep (bool).
+  - The validator refuses non-finite hours (E_VAL_NONFINITE), hours outside
+    1 to 24 (E_VAL_RANGE), and more than two at once or one a second after
+    (E_VAL_RATE).
+  - Message and validator shipped in one commit (rule 4), fork e9797e2d.
+- **Server:** wire-rules `rest` (ADR-020) holds the checks and the
+  recovery. ActionListener::OnRestIntent gathers the facts and asks it
+  through the bridge:
+  - the facts are the hours, death, and the last hit the player dealt or
+    took. MpActor already recorded hits dealt; it now records hits taken too.
+  - A rest let through sets each attribute to its regeneration over the
+    rested hours, at CropRegeneration's own rates (now getters both use),
+    and sends ChangeValues to the player.
+  - Refusals log E_REST_HOURS, E_REST_DEAD or E_REST_FIGHTING.
 - **Where rest is allowed** is the game's own rule, which the engine
   enforces: wait anywhere, sleep in a bed, bedroll or hay pile, and neither
   with enemies nearby or while trespassing
@@ -127,8 +145,7 @@ What the lab measures before the rule's time base loses its HYPOTHESIS tag:
     percentages;
   - difftest declares the new message once (the legacy server has none).
 - **T3 (a-rest):** c1, hurt to half, waits two hours through the real menu.
-  - Afterwards the server's record shows it recovered, and c2 sees it
-    recovered.
+  - Afterwards the server's record shows it recovered.
   - Both clients' clocks are still the server's (a-time's assertions).
   - It needs lab-driver to drive the Sleep/Wait menu. tap-key worked on the
     race menu's lists but not its finish box, so this is the open risk.
@@ -144,12 +161,19 @@ resting in the tool anyway?").
 - **The rested bonus.** It is a skill-gain multiplier, so it lives with skill
   gains: in the client's engine until M5.
 
+## Open
+
+- TES3MP's switches as server settings (allowWait, and allowBedRest as
+  allowSleep; Skyrim has no wilderness sleep): not built yet. Both are on in
+  TES3MP's own defaults, which is today's behaviour.
+
 ## Status
 
-- [ ] design reviewed
-- [ ] doc complete, rung declared
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] TS handler
+- [x] design reviewed (conventions: Eli, 2026-10-04)
+- [x] doc complete, rung declared (R1 rest, R0 recovery)
+- [x] server logic + T0 (wire-rules rest and its tests; RestTest in
+      ctest, on CI)
+- [x] message + validator (same commit, fork e9797e2d)
+- [x] TS handler (TimeService; the Windows build compiles it)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
