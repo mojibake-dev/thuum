@@ -309,6 +309,12 @@ scenario once the systems it leans on exist.
   creation and SkyMP's appearance sync already cover it, so it is the first
   to test. RaceMenu co-save data is not carried.
 
+- RaceMenu sync (Eli, 2026-10-04: "if this thuum project built that racemenu
+  stuff that would slap"): friends see each other's RaceMenu looks (sculpt,
+  overlays, body morphs, node scales), which SkyMP never sends. It is a verb
+  of its own, and it needs RaceMenu to load on every client, so it waits on
+  the game-version decision below.
+
 The detail, sources and gaps are in docs/MODS.md (apocrypha's analysis,
 2026-10-04). Open for Eli: RaceMenu 0.4.20 targets 1.6.1170 only and Nexus
 has no 1.7.x build, while the lab runs 1.7.104 (ADR-018); rotfern's own look

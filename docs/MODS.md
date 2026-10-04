@@ -187,6 +187,23 @@ What it needs from thuum:
 - **Later.** Vampirism (M7) needs the three missing RaceCompatibility natives.
 - **Not carried.** RaceMenu co-save data (sculpt, overlays) is outside SkyMP's
   appearance model.
+- **Fenestrate's own state** (core read its disk read-only from a snapshot,
+  2026-10-04; the VM stayed off):
+  - Steam updated the game to 1.7.104 on 2026-09-02 (auto-update on).
+  - RaceMenu 0.4.20 last loaded correctly on 2026-07-22, under 1.6.1170 with
+    SKSE 2.2.6.
+  - The game has not been launched since the update. Its only SKSE runtime
+    is 2.2.6's, for 1.6.1170, so on 1.7.104 SKSE, and RaceMenu with it,
+    cannot load. That last point is inferred, not observed.
+- **RaceMenu sync** is what Eli wants (2026-10-04): friends see each other's
+  RaceMenu looks.
+  - It would carry the sculpt, overlays, body morphs and node scales, which
+    live in RaceMenu's co-save and which SkyMP never sends.
+  - It is a verb of its own: capture RaceMenu's data on the owner's client,
+    carry it through the server (R2, bounded), and apply it on every client
+    through RaceMenu's own functions.
+  - Every client must load RaceMenu, so it waits on the game-version
+    decision (docs/PLAN.md).
 - **RaceMenu does not load on the lab.** skee64.dll 0.4.20.0 lists only
   1.6.1170 and declares no Address Library independence, so SKSE refuses it
   on the lab's 1.7.104. Nexus has no 1.7.x RaceMenu yet: the newest build is
