@@ -60,7 +60,7 @@ build-client branch=client_branch:
 
 # T2 on sky-srv (ADR-019): the server build SERVER_TAG (default the lab's) from the clean world, the fakeclient smoke checked through labState, then difftest's sessions against the legacy RakNet stack (LEGACY_TAG, default parity-legacy); lab/tools/test-proto.sh.
 test-proto tag="":
-    @SERVER_TAG="{{tag}}" lab/tools/test-proto.sh
+    @if [ -n "{{tag}}" ]; then SERVER_TAG="{{tag}}" lab/tools/test-proto.sh; else lab/tools/test-proto.sh; fi
 
 # --- reverse engineering ------------------------------------------------------
 

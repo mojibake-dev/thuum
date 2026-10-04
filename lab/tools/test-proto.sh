@@ -44,7 +44,12 @@ rpc() { # rpc <name> <payload json>
 env_tag=$(ssh_srv 'grep -E "^SERVER_TAG=" /srv/lab/.env 2>/dev/null | cut -d= -f2' || true)
 tag=${SERVER_TAG:-${env_tag:-parity}}
 legacy=${LEGACY_TAG:-parity-legacy}
-ref=${DIFFTEST_REF:-$tag}
+# The difftest artifact comes from the branch that built the tag: a tag with a
+# commit suffix (m1-hostility-9e68db37) names that branch and that commit; a
+# bare one (parity) the branch's latest. Looking the whole tag up as a branch
+# found nothing, and T2 skipped the diff (2026-10-04).
+ref=${DIFFTEST_REF:-$(printf '%s' "$tag" | sed -E 's/-[0-9a-f]{8}$//')}
+sha=$(printf '%s' "$tag" | sed -nE 's/.*-([0-9a-f]{8})$/\1/p')
 dc="cd /srv/lab && TEST_TAG=$tag LEGACY_TAG=$legacy docker compose --profile difftest"
 echo "== server under test: skymp-server:$tag; legacy stack: skymp-server:$legacy; difftest from $ref"
 
@@ -68,7 +73,7 @@ cleanup() {
 trap cleanup EXIT
 job=$(curl -fsS -m 60 -H "PRIVATE-TOKEN: $tok" \
   "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs?scope[]=success&per_page=100" \
-  | python3 -c "import sys,json; j=[x for x in json.load(sys.stdin) if x['name']=='difftest-build' and x['ref']=='$ref']; print(j[0]['id'] if j else '')")
+  | python3 -c "import sys,json; j=[x for x in json.load(sys.stdin) if x['name']=='difftest-build' and x['ref']=='$ref' and x['commit']['id'].startswith('$sha')]; print(j[0]['id'] if j else '')")
 if [ -n "$job" ] && curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
      "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs/$job/artifacts"; then
   (cd "$tmp" && unzip -q a.zip) && rsync -az --delete -e "ssh -J $jump" "$tmp/difftest-dist/" "$host:/srv/lab/difftest/" && echo "   job $job installed on sky-srv"
@@ -165,6 +170,8 @@ if [ "$have_difftest" = 1 ]; then
 fi
 
 red=""
+# no artifact means no diff, and a T2 without its diff is not green
+[ "$have_difftest" = 1 ] || red="$red no-difftest-artifact"
 [ "$attr_rc" = 0 ] || red="$red attributes-across-restart"
 [ "$rc" = 0 ] || red="$red difftest"
 [ -z "$red" ] && echo "T2 green" || { echo "T2 red:$red"; exit 1; }
