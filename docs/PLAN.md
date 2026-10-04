@@ -220,10 +220,16 @@ it carries a HYPOTHESIS tag.
 - From Eli's first T4 playtest (2026-10-04, sky-c1 and sky-c2 over
   Moonlight). Passed: movement with no snap-backs; hits, power attacks and
   reach; death and respawn; items. Found:
-  - Sneak attack damage: the server multiplies by SkyMP's flat 1.3
+  - Sneak attack damage: the server multiplied by SkyMP's flat 1.3
     (TES5DamageFormula.cpp, upstream's TODO "get from GameSettings"), while
-    the game promises its own multiplier. A damage-parity verb: the
-    multipliers from the master files.
+    the game promises its own multiplier. DONE 2026-10-04
+    (docs/verbs/sneak-damage.md, fork bb0725ec): a kept sneak attack is
+    worth the game's base multiplier for the weapon's type, from
+    Skyrim.esm's fCombatSneak*Mult settings (one-handed and daggers 3,
+    two-handed and unarmed 2), a Rust rule in wire-rules `damage`. Bows,
+    crossbows and staffs keep 1.3 until a ranged verb. a-sneak-damage green
+    on 1.7.104 and 1.6.1170 (runs 20261004-213205 and -213505); the
+    engine's own message read "Sneak attack for 3.0X damage!".
   - Hostility is one-sided: only the attacker's game marks the other an
     enemy. ADR-023: share it with the victim's game (a verb).
   - The two clients' clocks looked "a few minutes" apart. Not drift: at
@@ -234,7 +240,9 @@ it carries a HYPOTHESIS tag.
     run 20261004-201638).
   - Next playtest: profile 2 needs a look of its own to judge appearance
     sync, players start hurt so a rest's recovery shows, and a bed within
-    reach for sleep.
+    reach for sleep. Done 2026-10-04: profile 2 is an Orc named "test 2" in
+    the clean world (preset lab-orc-2), and `just playtest-start` puts both
+    players at half health by an unowned bedroll.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
