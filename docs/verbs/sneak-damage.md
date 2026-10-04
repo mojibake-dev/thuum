@@ -137,7 +137,9 @@ changes one factor of that computation.
 - [x] message + validator (none: no message changes)
 - [x] native hook + T1 (none)
 - [x] TS handler (none)
-- [x] T2 green (the nine sessions against the m1-sneak build, 2026-10-04)
+- [x] T2 green: the nine sessions against parity at bb0725ec, the sneak
+      commit, 2026-10-04. A first run claimed for the m1-sneak build had
+      tested parity before it (the recipe bug fixed in thuum a96df9b).
 - [x] T3 scenario green, no HYPOTHESIS tags: a-sneak-damage on 1.7.104
       (run 20261004-213205) and 1.6.1170 (run 20261004-213505), the sneak
       hit leaving c2 at 0.8051 and the plain one at 0.935 on both
