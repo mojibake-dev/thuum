@@ -1,8 +1,8 @@
 # At logon of the lab user: wait for Steam's process, give it a moment, start
 # the game through the SKSE loader from the install directory recorded by
 # install-lab.ps1, and start it again when no game has started loading 30 s
-# later; a loading game gets two minutes for its window and is never launched
-# over. lab-driver (a Skyrim Platform plugin) then heartbeats to lab-api by
+# later or the game is gone within a minute of its window; a loading game gets
+# two minutes for its window and is never launched over. lab-driver (a Skyrim Platform plugin) then heartbeats to lab-api by
 # itself.
 #
 # The retry is not decoration. The game is Steam-wrapped and exits at once
@@ -85,7 +85,20 @@ for ($attempt = 1; $attempt -le 3; $attempt++) {
     $busy = (Get-Loading) -or (Get-Process skse64_loader -ErrorAction SilentlyContinue)
     $age = ((Get-Date) - $t0).TotalSeconds
   } while (-not $p -and $age -lt 120 -and ($busy -or $age -lt 30))
-  if ($p) { Log ('running pid ' + $p.Id + ' after ' + [int]$age + ' s'); break }
+  # A window is not yet a game: on sky-c2 on 2026-10-04 one exited within a
+  # second of its window, during loading, with no crash report (Security log
+  # 4689, run 20261004-211758), and lab-api waited out its heartbeat. A game
+  # still running a minute after its window is up; one gone by then is
+  # another failed attempt.
+  if ($p) {
+    Log ('window pid ' + $p.Id + ' after ' + [int]$age + ' s')
+    $watch = (Get-Date).AddSeconds(60)
+    while ((Get-Date) -lt $watch -and -not $p.HasExited) { Start-Sleep -Seconds 3; $p.Refresh() }
+    if (-not $p.HasExited) { Log ('running pid ' + $p.Id); break }
+    Log ('pid ' + $p.Id + ' exited within a minute of its window')
+    Start-Sleep -Seconds 5
+    continue
+  }
   $ws = (Get-Process SkyrimSE -ErrorAction SilentlyContinue | ForEach-Object { [int]($_.WorkingSet64 / 1MB) }) -join ','
   Log ('no game window ' + [int]$age + ' s after the launch (game working sets MB: ' + $(if ($ws) { $ws } else { 'none' }) + ')')
   Start-Sleep -Seconds 5

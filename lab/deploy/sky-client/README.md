@@ -133,7 +133,9 @@ folder the current boot plays.
 lab-api (GET /lab/game) which game version the boot plays and writes that
 folder into game-dir.txt, waits for Steam's process plus 20 s, starts the
 game through the SKSE loader, and
-starts it again up to twice when the game is gone 30 s after a launch. The
+starts it again up to twice when the game is gone 30 s after a launch or
+within a minute of its window (one exited a second after its window on
+sky-c2, 2026-10-04, run 20261004-211758). The
 retry is not decoration: the game is Steam-wrapped and exits at once (status
 0x35 in the Security log, no SKSE log) when launched before Steam has
 finished its own startup, which sky-c2 hit on its first rollback boot while
