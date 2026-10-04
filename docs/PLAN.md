@@ -49,7 +49,8 @@ All of the following, verified by T3 scenarios and a restart in the middle:
    the three fuzz targets in docs/WIRE.md run in CI.
 
 Non-goals: matching STR's mod compatibility; running the Helgen intro
-(ADR-007); dragons before M7; VR; Skyrim LE; any runtime other than SE 1.6.1170.
+(ADR-007); dragons before M7; VR; Skyrim LE; any runtime other than SE
+1.7.104 and 1.6.1170 (ADR-022).
 
 ## Work classes
 
@@ -149,7 +150,12 @@ it carries a HYPOTHESIS tag.
   divergence (the wire notices a graceful disconnect at once).
 
 - Natives ledger: every stub becomes implemented (R0), delegated (R2 with a
-  reason), or "never" with a reason. No silent stubs.
+  reason), or "never" with a reason. No silent stubs. Eli decided the seven
+  stubs on 2026-10-04. Five are made real on fork branch m1-stubs:
+  IncrementStat delegated; EnableNoWait and DisableNoWait; GetParentCell for
+  exteriors; PlaceAtMe of an explosion drawn by the clients. Its ctest and
+  T2 are green, and it waits on a T3 sweep. SetScale and GetCurrentStageID
+  are deferred to verbs of their own.
 - Persistence gaps from the roadmap: equipment in hands across restart,
   favorites, map markers, learned effects, script variables.
   Attributes DONE 2026-10-02 (docs/verbs/attributes.md): every server start
@@ -312,13 +318,17 @@ scenario once the systems it leans on exist.
 - RaceMenu sync (Eli, 2026-10-04: "if this thuum project built that racemenu
   stuff that would slap"): friends see each other's RaceMenu looks (sculpt,
   overlays, body morphs, node scales), which SkyMP never sends. It is a verb
-  of its own, and it needs RaceMenu to load on every client, so it waits on
-  the game-version decision below.
+  of its own, and it needs RaceMenu to load on every client. RaceMenu 0.4.20
+  targets 1.6.1170 only, so it is built and tested on the lab's 1.6.1170
+  client set.
 
-The detail, sources and gaps are in docs/MODS.md (apocrypha's analysis,
-2026-10-04). Open for Eli: RaceMenu 0.4.20 targets 1.6.1170 only and Nexus
-has no 1.7.x build, while the lab runs 1.7.104 (ADR-018); rotfern's own look
-does not need it.
+Game versions (ADR-022, Eli, 2026-10-04): thuum supports and tests 1.7.104
+and 1.6.1170, one version per lab run (`just lab-run <scenario> [game]`).
+Both clones carry a 1.6.1170 folder, built from Steam's own depots for that
+build, kept in persist. On sky-c1 it launched through SKSE 2.2.6 and logged
+in against the server on 1.6.1170's masters (2026-10-04). The detail,
+sources and gaps of the three mods are in docs/MODS.md (apocrypha's
+analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 
 ## Cross-cutting tracks
 

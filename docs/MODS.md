@@ -202,10 +202,13 @@ What it needs from thuum:
   - It is a verb of its own: capture RaceMenu's data on the owner's client,
     carry it through the server (R2, bounded), and apply it on every client
     through RaceMenu's own functions.
-  - Every client must load RaceMenu, so it waits on the game-version
-    decision (docs/PLAN.md).
-- **RaceMenu does not load on the lab.** skee64.dll 0.4.20.0 lists only
+  - Every client must load RaceMenu, so it is built on the lab's 1.6.1170
+    client set (ADR-022).
+- **RaceMenu loads only on 1.6.1170.** skee64.dll 0.4.20.0 lists only
   1.6.1170 and declares no Address Library independence, so SKSE refuses it
-  on the lab's 1.7.104. Nexus has no 1.7.x RaceMenu yet: the newest build is
-  for 1.6.1170 (Steam) and 1.6.1179 (GOG). This is the one runtime question
-  left for Eli. Rotfern's own look does not need RaceMenu.
+  on 1.7.104. Nexus has no 1.7.x RaceMenu yet: the newest build is for
+  1.6.1170 (Steam) and 1.6.1179 (GOG).
+  - Eli chose to support both versions (ADR-022, 2026-10-04). The lab's
+    clones carry a 1.6.1170 folder beside Steam's, where RaceMenu will be
+    installed for its verb.
+  - Rotfern's own look does not need RaceMenu.
