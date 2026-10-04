@@ -1,0 +1,65 @@
+# M1 validation, hit cone (docs/verbs/hit-cone.md): the server refuses a
+# player's melee hit on another player outside the attacker's cone.
+#
+# Setup: c2 stands 120 units due north of c1 on the level strip south of
+# lab-spawn. c1, a Nord with the IronSword drawn, is turned to a heading and
+# swings with the engine's own attack (lab-driver anim-event attackStart).
+# Turning works now that teleport rotations are honored in degrees.
+#
+# - At heading 0 and at 30 degrees off, the engine lands the swing (the
+#   probe's measurement, run 20261004-045109) and the server takes it.
+# - Then c1 raises fCombatHitConeAngle to 180, as a player's console can
+#   (setgs), and turns its back on c2. The engine lands the swing, as the
+#   second probe saw (run 20261004-045647), and skymp5-client reports it.
+#   The server must refuse it: 180 and 135 degrees off the heading are
+#   outside the bound of 95 for a Nord.
+#
+# On a server without the check those hits land, which is the hole this verb
+# closes. Assertions are evaluated by lab-api only (ADR-009).
+id: a-melee-cone
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: draw-weapon
+  - wait: 2
+  - c2: teleport {cell: lab-spawn, x: 0, y: -426, z: 0, rot: [0, 0, 180]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage < 1
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 30]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage < 1
+  - c1: set-gmst {name: fCombatHitConeAngle, value: 180}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 180]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage == 1
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 135]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage == 1
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log]
