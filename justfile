@@ -260,6 +260,11 @@ client-crash-dumps vmid:
 client-onedrive-off vmid:
     @lab/tools/client-onedrive-off.sh {{vmid}}
 
+# A clone's own Sunshine identity (sunshine-identity.ps1): clones inherit the template's uniqueid and certificate,
+# and Moonlight keeps one entry per uniqueid, so it showed one lab client for two. Pair the clone afresh after.
+client-sunshine-identity vmid name:
+    @lab/tools/client-sunshine-identity.sh {{vmid}} "{{name}}"
+
 # The current client dist (just build-client) plus the lab files onto a clone and into the game (install-lab.ps1).
 client-dist vmid:
     @lab/tools/client-dist.sh {{vmid}}
@@ -288,6 +293,7 @@ client-driver vmid profile="": build-driver
 # crash dumps, the current client dist, the clone's client name and profile id, and a launch test that must end with the client logged in. Its address is set by thuum-mundus's `sky-lab` first.
 client-bringup vmid base client="c1" profile="1":
     just client-sunshine-port {{vmid}} {{base}}
+    just client-sunshine-identity {{vmid}} "sky {{client}}"
     just client-gpu-driver {{vmid}}
     just client-display {{vmid}}
     just client-game-firewall {{vmid}}
