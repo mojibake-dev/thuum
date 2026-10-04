@@ -51,6 +51,15 @@ From the melee-reach Ghidra reading (ghidra/notes/melee-reach-1-7-104.md,
   - every other attack is 35, and attackAngle is 0 throughout;
   - the playable vampire races match their base races;
   - creatures run to 180 (a giant's stomp).
+- **Update.esm overrides NordRace and NordRaceVampire** with four mounted side
+  attacks (attackStart_MC_1HMRight and its kin: attack angle 90 or -90,
+  strike angle 85), which aim a rider's cone to its side.
+  - The first build counted them, so every Nord's bound on foot came out at
+    130 degrees (the ctest log of pipeline 648).
+  - The rule counts forward attacks only (attack angle 0): a Nord's widest
+    forward strike angle is 50.
+  - Mounted combat is M7, and until it is ruled a mounted side attack can be
+    refused.
 - **The player's aim offset** (ID 41248) was not followed.
 
 ## Measured (2026-10-04)

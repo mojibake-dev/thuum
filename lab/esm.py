@@ -288,7 +288,8 @@ def main(argv: list[str]) -> int:
         for rec in hits:
             attacks = race_attacks(rec)
             widest = max((a.strike_angle for a in attacks), default=0.0)
-            print(f"{rec.form_id:#010x} {rec.editor_id}: {len(attacks)} attacks, widest strike angle {widest:g}")
+            forward = max((a.strike_angle for a in attacks if a.attack_angle == 0.0), default=0.0)
+            print(f"{rec.form_id:#010x} {rec.editor_id}: {len(attacks)} attacks, widest strike angle {widest:g}, forward {forward:g}")
             for a in attacks:
                 print(f"  {a.event:32} strike {a.strike_angle:g} angle {a.attack_angle:g} flags {a.flags:#x}")
         return 0 if hits else 1
