@@ -1,0 +1,56 @@
+# M1 validation, hostility sync (docs/verbs/hostility-sync.md, ADR-023): a
+# fight between players is in both games. c1 (IronSword drawn, facing north)
+# hits c2 once from 120 units behind. The attacker's engine marks c2 an enemy
+# by itself; the server tells c2's game, which starts combat between its
+# figure of c1 and c2's player. Both are set to half health after the hit.
+# 12 s later, past the server's 10-second rest rule, each tries to wait: T
+# (DirectInput 20) and Enter (28). Each game refuses ("You cannot wait when
+# enemies are nearby."), so neither rests, where a rest would fill them.
+# Without the notice c2's game opens the wait menu, the server grants the
+# rest, and c2 is at full health. c2's figure of c1 must not move while c1
+# stands still: its combat AI runs, and SkyMP's movement keeps it where c1
+# is. The exploratory run 20261004-224519 measured 0.6036 for c2, 0.6129 for
+# c1, and 0.0 units of drift over 28 s. c2 then turns to face c1 for a
+# screenshot of the compass's enemy marker.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-hostility
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: draw-weapon
+  - wait: 2
+  - c2: teleport {cell: lab-spawn, x: 0, y: -426, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 1
+  - c2: set-percentages {health: 0.5}
+  - c1: set-percentages {health: 0.5}
+  - c2: watch-start
+  - wait: 12
+  - c2: tap-key {code: 20}
+  - c1: tap-key {code: 20}
+  - wait: 1
+  - c2: screenshot
+  - c2: tap-key {code: 28}
+  - c1: tap-key {code: 28}
+  - wait: 8
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.8
+      - server.actor(c1).healthPercentage < 0.8
+      - c2.watched(c1).maxDisplacement < 100
+  - c2: teleport {cell: lab-spawn, x: 0, y: -426, z: 0, rot: [0, 0, 180]}
+  - wait: 2
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
