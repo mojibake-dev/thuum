@@ -74,8 +74,10 @@ Roles:
   streamable HTTP. One project on rpool/sky/persist, one program per exe
   version (`just ghidra-import SkyrimSE-<version>.exe` runs analyzeHeadless
   inside sky-re with pyghidra-mcp stopped around it; SkyrimSE-1.7.104.0.exe
-  was imported and auto-analyzed on 2026-09-29 in eight minutes; the pinned
-  1.6.1170 goes beside it when that exe exists). CommonLibSSE-NG's names reach
+  was imported and auto-analyzed on 2026-09-29 in eight minutes, and
+  SkyrimSE-1.6.1170.0.exe beside it on 2026-10-04, from Steam's depot for
+  that build, ADR-022). A verb's engine notes name the program they were
+  read in. CommonLibSSE-NG's names reach
   the program through `just relid` (every Address Library ID the submodule
   names, with its function, variable, vtable or RTTI name) plus the Address
   Library database for that exe version; the RTTI analyzer already names
