@@ -249,6 +249,7 @@ function dumpState(player: Actor) {
     stamina: actorValue(player, "stamina"),
     health: actorValue(player, "health"),
     down: lastRagdollAt > lastGetUpAt,
+    afterRest,
     ...timeGlobals(),
     near,
   };
@@ -272,6 +273,31 @@ let lastRagdollAt = 0;
 let lastGetUpAt = 0;
 hooks.sendAnimationEvent.add({ enter: () => {}, leave: (ctx) => { if (ctx.animationSucceeded) lastRagdollAt = Date.now(); } }, 0x14, 0x14, "Ragdoll");
 hooks.sendAnimationEvent.add({ enter: () => {}, leave: (ctx) => { if (ctx.animationSucceeded) lastGetUpAt = Date.now(); } }, 0x14, 0x14, "GetUpBegin");
+
+// The player's attributes as the engine left them after a Sleep/Wait menu,
+// read on the first update after it closes: before the server's answer to
+// skymp5-client's RestIntent can arrive (a round trip over the network). For
+// the rest verb's Dynamic plan (docs/verbs/rest.md): with a lowered rate the
+// engine's own recovery tells which time it regenerates over. The menu's name
+// is RE::SleepWaitMenu::MENU_NAME (CommonLibSSE-NG
+// include/RE/S/SleepWaitMenu.h:16).
+let restMenuClosed = false;
+let afterRest: Record<string, number> | null = null;
+on("menuClose", (e) => {
+  if (e.name === "Sleep/Wait Menu") restMenuClosed = true;
+});
+
+function readAfterRest(player: Actor): void {
+  if (!restMenuClosed) return;
+  restMenuClosed = false;
+  afterRest = {
+    health: player.getActorValuePercentage("health"),
+    magicka: player.getActorValuePercentage("magicka"),
+    stamina: player.getActorValuePercentage("stamina"),
+    healRateMult: player.getActorValue("HealRateMult"),
+    at: Date.now(),
+  };
+}
 
 const DEFERRED = Symbol("deferred");
 
@@ -605,6 +631,7 @@ on("update", () => {
   const me = Game.getPlayer();
   if (me) settleMove(me);
   if (me) finishCraft(c, me);
+  if (me) readAfterRest(me);
   trackWatch();
   const step = pending;
   if (!step) return;
