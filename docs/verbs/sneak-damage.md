@@ -89,10 +89,12 @@ changes one factor of that computation.
   and a table missing a setting.
 - **T0, ctest:** a kept sneak hit with an iron sword deals 3 times the plain
   hit's damage, bare-handed 2 times.
-- **T2:** difftest session sneak-damage. c1 moves with sneaking set, then
-  hits c2 bare-handed flagged as a sneak attack. The legacy server applies
-  1.3, the fixed one 2.0 (fCombatSneakHandMult): a declared divergence in
-  c2's health.
+- **T2:** no new session. A kept sneak attack needs the server to hold the
+  attacker sneaking, which comes from its movement. Neither fakeclient can
+  mark a move sneaking: the wire one's move step takes dx, dy, dz and
+  runMode only, and the legacy one is frozen with the RakNet image. The
+  arithmetic is T0 on the real formula; the whole chain is T3. T2 is the
+  nine existing sessions, unchanged.
 - **T3, a-sneak-damage:** c1 with an iron sword hits c2 once plainly and once
   sneaking (the engine's sneak toggle, then the attack key).
   - The plain hit leaves c2 above 0.94.
