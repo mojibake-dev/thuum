@@ -39,8 +39,13 @@ changes one factor of that computation.
   | fCombatSneak2HAxeMult | 0x00069F48 | 2.0 |
   | fCombatSneakHandMult | 0x00050DA3 | 2.0 |
 
-- **No setting names bows, crossbows or staffs.** Their sneak attacks are
-  out of this verb; they keep SkyMP's 1.3 until a ranged verb measures them.
+  The same values, by weapon, are UESP's table of sneak attack multipliers:
+  one-handed weapons and daggers 3x, two-handed weapons and unarmed 2x
+  ([UESP, Skyrim:Sneak](https://en.uesp.net/wiki/Skyrim:Sneak)).
+- **No setting names bows, crossbows or staffs.** UESP gives bows 2x, but no
+  Skyrim.esm setting carries it. Ranged sneak attacks are out of this verb;
+  they keep SkyMP's 1.3 until a ranged verb finds where the engine's number
+  comes from and measures it.
 - **The weapon type** is the WEAP record's DNAM animation type, which libespm
   already reads (libespm/include/libespm/WEAP.h, `AnimType`: 0 hand to hand,
   1 to 4 one-handed sword, dagger, axe, mace, 5 and 6 two-handed sword and
@@ -50,10 +55,15 @@ changes one factor of that computation.
   `RE::HitData::sneakAttackBonus` (CommonLibSSE-NG
   include/RE/H/HitData.h:70). Perks raise it through the entry point
   `kModSneakAttackMult` (include/RE/B/BGSEntryPoint.h:31).
-- **HYPOTHESIS:** the base multiplier of a hit without perks is exactly the
-  weapon type's GMST. `fDamageSneakAttackMult` (1.0) and
-  `fCombatSneakAttackBonusMult` (100.0) may scale it, and their roles are
-  not established. The Dynamic plan below checks the engine's own number.
+- **CONFIRMED (exploratory run 20261004-212438):** the base multiplier of a
+  hit without perks is the weapon type's setting. After c1's sneak hit with
+  the iron sword, c1's screen read "Sneak attack for 3.0X damage!", which is
+  fCombatSneak1HSwordMult (screenshot 015-c1.png in the run). The other
+  types use their own settings by name, and UESP's values agree with every
+  one. `fDamageSneakAttackMult` (1.0) and `fCombatSneakAttackBonusMult`
+  (100.0) have roles no one has established. At their Skyrim.esm values
+  they leave a perkless hit at the setting. A load order that changes them
+  is out of this verb.
 
 ## Observe, impose, suppress
 
@@ -95,31 +105,40 @@ changes one factor of that computation.
   runMode only, and the legacy one is frozen with the RakNet image. The
   arithmetic is T0 on the real formula; the whole chain is T3. T2 is the
   nine existing sessions, unchanged.
-- **T3, a-sneak-damage:** c1 with an iron sword hits c2 once plainly and once
-  sneaking (the engine's sneak toggle, then the attack key).
-  - The plain hit leaves c2 above 0.94.
-  - The sneak hit leaves c2 below 0.90.
-  - The sneak hit's damage is about 3 times the plain hit's, which 1.3
-    cannot reach.
+- **T3, a-sneak-damage:** c1 with an iron sword hits c2 once sneaking and
+  then once plainly. Left Ctrl (29) toggles the engine's sneak, and Home
+  (199) is the attack key on the clones.
+  - The sneak hit comes first. The engine grants a sneak attack only while
+    the target has not detected the attacker, and a hit is detection.
+  - c2 regenerates about half a percent of its health a second, so each
+    check comes 2 s after its hit.
+  - The sneak hit leaves c2 between 0.75 and 0.87. The exploratory run
+    measured about 0.81. SkyMP's 1.3 would leave about 0.92, and 2.0 about
+    0.87.
+  - The plain hit leaves c2 between 0.90 and 0.98 (measured about 0.935):
+    it lands, and it is not a sneak attack.
 
 ## Dynamic plan
 
-- A screenshot right after the T3 sneak hit shows the engine's own message,
-  "Sneak attack for 3.0x damage!" for the iron sword (sSuccessfulSneakAttack
-  Main/End). That is the engine's multiplier for a one-handed sword with no
-  perks. The same with bare hands should read 2.0x.
-- If the message shows another number, the GMST table is not the whole
-  formula, and the HYPOTHESIS above stays open for the re-analyst (HitData
-  sneakAttackBonus's writer).
+- Done for the iron sword. The exploratory run 20261004-212438 took a
+  screenshot right after the sneak hit: "Sneak attack for 3.0X damage!".
+  The scenario keeps a screenshot after its own sneak hit.
+- Bare hands should read 2.0x. That is a check in the second T4 playtest
+  (docs/private). A lab run of it needs a lab-driver step that unequips the
+  sword, which does not exist yet.
 
 ## Status
 
 - [x] doc complete, rung declared (R0)
 - [x] engine surface cited (GMSTs, WEAP animation type, HitData)
-- [ ] server logic + T0
-- [ ] message + validator (none: no message changes)
-- [ ] native hook + T1 (none)
-- [ ] TS handler (none)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated (no native touched)
+- [x] server logic + T0 (wire-rules `damage::sneak_mult` with its cargo
+      tests; TES5DamageFormulaTest in ctest with the master files, pipeline
+      715: all 265 test cases passed)
+- [x] message + validator (none: no message changes)
+- [x] native hook + T1 (none)
+- [x] TS handler (none)
+- [x] T2 green (the nine sessions against the m1-sneak build, 2026-10-04)
+- [x] T3 scenario green, no HYPOTHESIS tags: a-sneak-damage on 1.7.104
+      (run 20261004-213205) and 1.6.1170 (run 20261004-213505), the sneak
+      hit leaving c2 at 0.8051 and the plain one at 0.935 on both
+- [x] ledger and suppression registry updated (no native touched)
