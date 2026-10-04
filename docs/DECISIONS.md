@@ -440,3 +440,48 @@ time runs on. The clock runs while nobody is online. Which other globals the
 server owns is deferred until a verb needs them (quests, M6), together with
 the GLOB reader and its persistence home.
 
+
+## ADR-022: thuum supports and tests two game versions, 1.7.104 and 1.6.1170
+
+Status: accepted (2026-10-04, Eli: "go with B"). Amends ADR-018: the lab
+still runs what Steam ships, and it now also runs 1.6.1170.
+
+**Why.** ADR-018 put the lab on current Steam, 1.7.104. Two facts arrived
+since:
+- Eli's own modded setup runs on 1.6.1170. Fenestrate last ran SKSE 2.2.6
+  and RaceMenu 0.4.20 there on 2026-07-22. Steam updated it to 1.7.104 on
+  2026-09-02, after which no SKSE mod can load (core's read-only look,
+  2026-10-04; docs/MODS.md).
+- RaceMenu has no 1.7 build. Eli wants RaceMenu sync (docs/PLAN.md, stretch),
+  which needs RaceMenu loading on every client.
+
+Players who mod will run the version their mods need. That is 1.6.1170 for
+RaceMenu today.
+
+**The fork is meant to run on both.** Skyrim Platform picks the SKSE runtime
+by the running exe's version, and the CommonLib overlay reads both Address
+Library formats (ADR-018). Only 1.7.104 had been tested since the port, so
+1.6.1170 support is proven by running it, not assumed.
+
+**How:**
+- **A second client set.** The same clones get a second game folder holding
+  1.6.1170, with SKSE 2.2.6 and the client dist, and a second snapshot set
+  that records that folder as the game directory.
+- **Where the files come from.** Steam's own depots for that build,
+  downloaded once:
+  - `download_depot 489830 489831 8442952117333549665`
+  - `download_depot 489830 489832 8042843504692938467`
+  - `download_depot 489830 489833 1914580699073641964` (the exe)
+  - Sources: the [Wildlander wiki's downgrade guide](https://wiki.wildlandermod.com/09-How-Do-i/HowDoI/downgrade/)
+    and the [Nexus article](https://www.nexusmods.com/skyrimspecialedition/articles/12471),
+    which agree.
+  - The result is kept in rpool/sky/persist like the other licensed files,
+    never in a repo.
+- **Choosing per run.** lab-api picks the client set per run. A scenario
+  runs against either version, and the regression sweep runs against both.
+
+**Consequences:**
+- Scenario runs per version double the lab time of a full sweep.
+- The Ghidra project gains the 1.6.1170 program beside 1.7.104
+  (docs/LAB.md), and a verb's engine facts name the version they were read
+  on.
