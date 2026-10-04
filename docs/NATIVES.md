@@ -263,7 +263,7 @@ Status meanings:
 | `Actor.ShowBarterMenu` (method) | missing |  |  |  |
 | `Actor.ShowGiftMenu` (method, latent) | missing |  |  |  |
 | `Actor.StartCannibal` (method) | missing |  |  |  |
-| `Actor.StartCombat` (method) | missing |  |  |  |
+| `Actor.StartCombat` (method) | missing | R3 | Not on the server VM. The server itself sends it to a victim's client as an SpSnippet when a fight between players begins (ADR-023): the client-local combat state that refuses waiting. | hostility-sync |
 | `Actor.StartDeferredKill` (method) | missing |  |  |  |
 | `Actor.StartSneaking` (method) | missing |  |  |  |
 | `Actor.StartVampireFeed` (method) | missing |  |  |  |
