@@ -129,5 +129,6 @@ IronSword and swings with attackStart.
 - [x] doc complete, rung declared (R1)
 - [x] probe run, edge measured (runs 20261004-045109, -045647)
 - [x] server logic + T0 (cargo; ctest on the fork's CI)
-- [ ] T2 green
+- [x] T2 green (2026-10-04, image a08ee1f2): the melee-cone session diverges
+      as declared, the six others unchanged
 - [ ] T3 scenario green, no HYPOTHESIS tags
