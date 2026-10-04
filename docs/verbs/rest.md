@@ -111,8 +111,8 @@ Milestone: M1   Class: B
 What the lab measures before the rule's time base loses its HYPOTHESIS tag:
 - c1 sets its HealRateMult to 1 percent (set-av), takes damage to half
   health, waits one hour through the menu, then dumps its health.
-- Game seconds predict +36 percent (0.70 x 0.01 x 3,600). The real-time
-  equivalent predicts +1.26 percent (0.70 x 0.01 x 180).
+- Game seconds predict +25.2 percent (0.70 percent x 0.01 x 3,600). The real-time
+  equivalent predicts +1.26 percent (0.70 percent x 0.01 x 180).
 - The same run with the menu on two hours tells a cap from a rate.
 
 ## Tests
