@@ -115,6 +115,17 @@ for (h : processLists->highActorHandles) {          // ProcessLists.h:69
   Actor.SendAssaultAlarm (files the local player as the criminal); a Get
   Should Attack perk (needs an ESP).
 
+## Frida trace (planned, not run: the lab result made it unnecessary)
+
+On the victim's client, with 1.7.104 RVAs from `python3 lab/addr.py`:
+hook 40443 (args[1] null for a wait; log the return value), 41402 (its
+return value), 38571 and 37533 while inside 41402 (the actor's form id at
++0x14, boolFlags +0x204 bit 11, combatController +0x160, the return value),
+and 52933 (the notification's text). Expected after the notice: 41402
+returns 1 through 38571 for the attacker's figure. For the engine's own end
+of a fight, add 41340 and 38566, and log the figure's process level
+(AIProcess+0x137; 41402 scans only high-process actors).
+
 ## Open
 
 - Whether a CombatController marked inactive or ignoring combat

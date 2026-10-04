@@ -45,58 +45,31 @@ Rung: R0 for the fact, R3 for its consequences inside each game.
 
 ## Engine surface
 
-All addresses below come from the re-analyst's static read of
-SkyrimSE-1.7.104.0.exe on sky-re (2026-10-04), with Address Library ids
-resolved through lab/addr.py. Every one is HYPOTHESIS until the Dynamic
-plan confirms it. The 1.6.1170 program in the Ghidra project disassembles
-to junk (its .text looks encrypted, likely the Steam wrapper), so its
-bodies are unread; the ids exist in both databases.
+What this verb relies on, confirmed in the lab (exploratory run
+20261004-224519; a-hostility on 1.7.104 and 1.6.1170, runs 20261004-230736
+and -231111):
 
-- **The refusal.** The sleep and wait gate (id 40443, 1.7.104
-  0x140743ef0) refuses with the game setting sNoWaitHostileActorsNear
-  ("You cannot wait when enemies are nearby."), sNoSleepHostileActorsNear
-  for a bed and sNoFastTravelHostileActorsNear for fast travel. HYPOTHESIS.
-- **The test behind it** is id 41402 (0x140785b30). It scans the process
-  lists' high-process actors (CommonLibSSE-NG include/RE/P/ProcessLists.h:69)
-  within fHostileActorExteriorDistance (3000) outdoors or
-  fHostileActorInteriorDistance (2000) indoors. An actor counts when
-  either holds. HYPOTHESIS:
-  - its combat group targets the player (id 38571; CombatController.h:31,
-    CombatGroup.h);
-  - it is hostile to the player by id 37533, which reads the actor's
-    kAngryWithPlayer flag (include/RE/A/Actor.h:207), frenzy, guards and
-    crime, and faction reactions.
-- **Not inputs:** the player's own isInCombat flag, combat group and combat
-  timer (include/RE/P/PlayerCharacter.h:301, 514, 519). HYPOTHESIS.
-- **The compass** lists the members of every combat group that targets the
-  player (id 41240, rebuilt every frame). kAngryWithPlayer alone never puts
-  an actor there. HYPOTHESIS.
-- **What a hit does on the attacker's game.** The victim's on-hit reaction
-  (id 38626) raises the assault alarm (id 37425), which sets
-  kAngryWithPlayer on the victim's figure (id 37463). It also starts the
-  figure's combat against the attacker (id 39359, then 38561). That is why
-  the attacker's game refuses waiting and the victim's does not: the hit
-  runs only on the attacker's game. HYPOTHESIS.
-- **The mechanism this verb uses:** Papyrus `Actor.StartCombat(akTarget)`
-  (native id 54768) on the attacker's figure in the victim's game, with the
-  player as the target. It queues the same combat start as a hit (id
-  39359), so it produces the state the attacker's game already holds: the
-  figure's combat group targets the player. HYPOTHESIS. The engine ends
-  that combat on its own when the target is lost, or `Actor.StopCombatAlarm`
-  (id 54771) ends it at once.
-- **Rejected alternatives** (the re-analyst's read):
-  - Setting kAngryWithPlayer directly (id 37463) needs native code and puts
-    no marker on the compass.
-  - Frenzy makes the figure hostile to everyone.
-  - Faction.SetPlayerEnemy changes a whole faction.
-  - SetRelationshipRank only matters for unique NPCs.
-  - Actor.SendAssaultAlarm files the local player as the criminal.
-- **SkyMP's figures keep their AI.** They are placed with placeAtMe and
-  given attackDamageMult 0 (skymp5-client/src/view/formView.ts:170, 288).
-  They are moved with keepOffsetFromActor, and the call to stopCombat
-  above it is commented out (src/sync/movementApply.ts:57, 60). So a
-  figure already runs combat AI on the attacker's game today, and its
-  attacks deal no damage.
+- **Papyrus `Actor.StartCombat(akTarget)`** on the attacker's figure in the
+  victim's game, with the player as the target, makes the victim's engine
+  refuse a wait with its own message, "You cannot wait when enemies are
+  nearby." (the game setting sNoWaitHostileActorsNear). It also puts the
+  attacker on the victim's compass as an enemy. Screenshots 019-c2.png and
+  027-c2.png in run 20261004-230736.
+- **The figure stays put.** Its combat AI runs, but SkyMP's movement keeps
+  it where the attacker is: 0.016 units of drift over 28 s in both runs.
+  SkyMP places figures with placeAtMe, gives them attackDamageMult 0
+  (skymp5-client/src/view/formView.ts:170, 288), and moves them with
+  keepOffsetFromActor (src/sync/movementApply.ts:57, where the stopCombat
+  call above it is commented out).
+- **The attacker's side is unchanged.** Its engine's own hit reaction still
+  refuses its wait (c1 at 0.592 and 0.5893 after trying).
+
+How the engine does it, from the re-analyst's static read, is in
+ghidra/notes/hostility-1-7-104.md: the wait gate (id 40443), its scan of
+nearby actors whose combat group targets the player or who are angry with
+the player (41402), the compass list (41240), and what a hit does on the
+attacker's game (38626). The verb uses none of those addresses; it calls a
+Papyrus native through Skyrim Platform.
 
 ## Observe
 
@@ -115,20 +88,17 @@ bodies are unread; the ids exist in both databases.
     as is.
   It goes to the victim alone; the attacker's engine has already reacted.
 - Visual without simulation: the figure's position and animations still
-  come from the attacker's real movement. Its combat AI must not move it
-  or make it swing on its own; the Dynamic plan measures that.
-- Side effects (HYPOTHESIS): combat music on the victim's side, as when an
-  enemy attacks in single-player. Possibly combat dialogue from the figure,
-  and an equip call by the combat start (the re-analyst saw 38561 reach
-  ActorEquipManager).
+  come from the attacker's real movement; its combat AI did not move it.
+- To watch in the second T4 playtest: combat music on the victim's side, as
+  when an enemy attacks in single-player, and any combat dialogue from the
+  figure. The attacker's side has had both since before this verb.
 
 ## Suppress
 
 - The figure's combat AI acts only through its attacks, which already deal
   no damage (attackDamageMult 0), and through movement, which
-  keepOffsetFromActor overrides. HYPOTHESIS: whether that override wins
-  against combat pathing, and whether the AI plays attack animations on its
-  own, is the Dynamic plan's step 3.
+  keepOffsetFromActor overrides: no drift in the lab. Swings it might play
+  on its own are a T4 check.
 - Release: the engine's own end of combat. If the figure's combat outlives
   the fight (after a respawn, say), the server can send
   `Actor.StopCombatAlarm`; not built until the lab shows a need.
@@ -185,35 +155,25 @@ bodies are unread; the ids exist in both databases.
 
 ## Dynamic plan
 
-The T3 scenario confirms the behavior. Two more checks clear the tags
-above, in an exploratory run first (lab/scenarios is for the final shape):
-
-1. c2's screenshot right after T reads "You cannot wait when enemies are
-   nearby.", the gate's own refusal (sNoWaitHostileActorsNear). The same
-   screenshot shows c1 on c2's compass as an enemy (the CompassMarkerEnemy
-   frame).
-2. c2's figure of c1 over 10 s, while c1 stands still: position from c2's
-   watch (no drift beyond 100 units) and screenshots (no swings c1 did not
-   make). If it moves or swings, the Suppress section needs work before
-   this verb ships.
-3. If 1 fails, a Frida trace on c2 (lab/frida/hostility.js, functions by
-   Address Library id through lab/addr.py):
-   - hook 40443 and log its return value, with args[1] null for a wait;
-   - hook 41402 and log its return value;
-   - inside 41402, hook 38571 and 37533 with the actor's form id;
-   - hook 52933, the notification, and log its text.
-   Expected: 41402 returns 1 through 38571 for c1's figure.
-
-Owner: agent (screenshots, watch, Frida).
+Done. The exploratory run 20261004-224519 and the scenario's screenshots
+showed the refusal text and the compass marker on the victim's side, and the
+watch showed no drift, so the Frida trace in the plan was not needed. It
+stays in ghidra/notes/hostility-1-7-104.md for the day the engine's own end
+of a fight needs measuring.
 
 ## Status
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (none: no message changes)
-- [ ] native hook + T1 (none)
-- [ ] TS handler (none)
+- [x] doc complete, rung declared (R0 for the fact, R3 for its
+      consequences)
+- [x] engine surface cited (Papyrus Actor.StartCombat, confirmed in the
+      lab; the static read in ghidra/notes/hostility-1-7-104.md)
+- [x] server logic + T0 (wire-rules `hostility` with its cargo tests; the
+      HitTest case in ctest with the master files, pipeline 719: all 266
+      test cases passed)
+- [x] message + validator (none: no message changes)
+- [x] native hook + T1 (none)
+- [x] TS handler (none)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] T3 scenario green, no HYPOTHESIS tags: a-hostility on 1.7.104 (run
+      20261004-230736) and 1.6.1170 (run 20261004-231111)
+- [x] ledger and suppression registry updated (`Actor.StartCombat` noted)
