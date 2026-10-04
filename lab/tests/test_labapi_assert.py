@@ -86,6 +86,22 @@ class EvaluatorTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             Evaluator(NoClock(), views, ["c1"]).evaluate("server.time().hour == 1")
 
+    def test_a_client_s_own_knock_down(self):
+        """skymp5-client ragdolls its local player on the server's death state
+        and never sets the engine's isDead; lab-driver reports down (m0-death)."""
+        from labapi.assertions import AssertionData, Evaluator
+
+        views = Views()
+        views.data["c1"] = {"pos": [0, 0, 0], "isDead": False, "down": True}
+        ev = Evaluator(Server(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.state.down == true"))
+        self.assertTrue(ev.evaluate("c1.state.isDead == false and c1.state.down"))
+        views.data["c1"]["down"] = False
+        self.assertTrue(ev.evaluate("c1.state.down == false"))
+        del views.data["c1"]["down"]
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.state.down == false")  # a driver too old to report it
+
     def test_rejects_outside_the_language(self):
         from labapi.assertions import AssertionSyntax
 

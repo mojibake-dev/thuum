@@ -9,6 +9,8 @@ the lab can grep (E_ASSERT_*).
                                                      the server's game clock, read when the assert runs
   <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
                                                      that client's time globals, from its dump-state
+  <client>.state.down                                its player knocked down: skymp5-client's death,
+                                                     which never sets the engine's own isDead
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -151,6 +153,9 @@ class StateView:
     gameHour: float | None = None
     gameDaysPassed: float | None = None
     timeScale: float | None = None
+    # lab-driver's "down": a Ragdoll the engine accepted on the player and no
+    # GetUpBegin since (skymp5-client's local death, m0-death)
+    down: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -346,6 +351,7 @@ class _ClientRef:
                 gameHour=_opt_float(dump.get("gameHour")),
                 gameDaysPassed=_opt_float(dump.get("gameDaysPassed")),
                 timeScale=_opt_float(dump.get("timeScale")),
+                down=_opt_bool(dump.get("down")),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s state lacks {e}") from e
@@ -358,7 +364,7 @@ _ATTRS = {
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
-                "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale"},
+                "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down"},
     _ClientRef: {"state"},
 }
 # Methods that take no argument: server.time()

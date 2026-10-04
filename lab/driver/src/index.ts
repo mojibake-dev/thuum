@@ -31,6 +31,7 @@ import {
   TESModPlatform,
   Utility,
   WorldSpace,
+  hooks,
   on,
   printConsole,
   settings,
@@ -234,10 +235,28 @@ function dumpState(player: Actor) {
     magicka: actorValue(player, "magicka"),
     stamina: actorValue(player, "stamina"),
     health: actorValue(player, "health"),
+    down: lastRagdollAt > lastGetUpAt,
     ...timeGlobals(),
     near,
   };
 }
+
+// The local player knocked down (m0-death; Eli, 2026-10-04, option a).
+// skymp5-client never lets the engine kill the local player, whose single
+// player death would reload a save: on the server's death state it ragdolls
+// the player and lets through only the "Ragdoll" animation event
+// (deathService.ts killWithPush), and on a respawn it sends "GetUpBegin"
+// (ressurectWithPushKill). Its own sync takes the player's animation events
+// the engine accepted (animation.ts AnimationSource), which is how other
+// clients see the fall. So "down" is a Ragdoll the engine accepted on the
+// player with no GetUpBegin after it. HYPOTHESIS until m0-death runs:
+// pushActorAway raises an accepted "Ragdoll" on the pushed actor. Filtered
+// in native (rule 9): the player's form id, 0x14 as deathService.ts has it,
+// and the one event name each.
+let lastRagdollAt = 0;
+let lastGetUpAt = 0;
+hooks.sendAnimationEvent.add({ enter: () => {}, leave: (ctx) => { if (ctx.animationSucceeded) lastRagdollAt = Date.now(); } }, 0x14, 0x14, "Ragdoll");
+hooks.sendAnimationEvent.add({ enter: () => {}, leave: (ctx) => { if (ctx.animationSucceeded) lastGetUpAt = Date.now(); } }, 0x14, 0x14, "GetUpBegin");
 
 const DEFERRED = Symbol("deferred");
 
