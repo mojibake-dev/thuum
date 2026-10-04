@@ -256,6 +256,10 @@ client-steam-offline vmid:
 client-crash-dumps vmid:
     @lab/tools/client-crash-dumps.sh {{vmid}}
 
+# OneDrive off on a clone (onedrive-off.ps1): its backup prompt opened over the game on sky-c1.
+client-onedrive-off vmid:
+    @lab/tools/client-onedrive-off.sh {{vmid}}
+
 # The current client dist (just build-client) plus the lab files onto a clone and into the game (install-lab.ps1).
 client-dist vmid:
     @lab/tools/client-dist.sh {{vmid}}
@@ -289,6 +293,7 @@ client-bringup vmid base client="c1" profile="1":
     just client-game-firewall {{vmid}}
     just client-steam-offline {{vmid}}
     just client-crash-dumps {{vmid}}
+    just client-onedrive-off {{vmid}}
     just client-dist {{vmid}}
     just client-identity {{vmid}} {{client}} {{profile}}
     just client-launch-test {{vmid}}
