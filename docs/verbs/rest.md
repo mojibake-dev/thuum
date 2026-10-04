@@ -144,11 +144,11 @@ What the lab measures before the rule's time base loses its HYPOTHESIS tag:
   - the fakeclient sends a RestIntent and labState shows the healed
     percentages;
   - difftest declares the new message once (the legacy server has none).
-- **T3 (a-rest):** c1, hurt to half, waits two hours through the real menu.
+- **T3 (a-rest):** c1, hurt to half, waits an hour through the real menu.
   - Afterwards the server's record shows it recovered.
   - Both clients' clocks are still the server's (a-time's assertions).
-  - It needs lab-driver to drive the Sleep/Wait menu. tap-key worked on the
-    race menu's lists but not its finish box, so this is the open risk.
+  - lab-driver drives the Sleep/Wait menu with tap-key: T (DirectInput 0x14)
+    opens it and Enter (28) accepts its default hour (run 20261004-093837).
 
 ## Conventions adopted
 
@@ -175,5 +175,14 @@ resting in the tool anyway?").
       ctest, on CI)
 - [x] message + validator (same commit, fork e9797e2d)
 - [x] TS handler (TimeService; the Windows build compiles it)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T2 green (2026-10-04, image m1-rest): the rest session diverges as
+      declared (the wire grants the rest after the fight window; a rest
+      inside it is refused on both), the eight others unchanged
+- [x] T3 scenario green: a-rest, run 20261004-094211 on 1.7.104 and run
+      20261004-094636 on 1.6.1170. The exploratory run 20261004-093837 drove
+      the real menu: T opened "Wait how long?" at 1 hour, Enter accepted,
+      and the server logged "Rest: user 2 actor ff000000 waited 1 h,
+      percentages now 1 1 1"
+- [ ] no HYPOTHESIS tags: the time base waits on the Dynamic plan's run
+      (lab-driver's afterRest, x-rest-timebase)
+- [ ] scenario reviewed by Eli (a-rest, thuum 7b12fa7)
