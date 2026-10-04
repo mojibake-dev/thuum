@@ -21,7 +21,8 @@ ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --pass-stdin 1 --timeout 120 -
 want=$(shasum -a 256 "$f" | awk '{print $1}')
 got=$(run "(Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\lab-driver.js').Hash.ToLower()")
 [ "$want" = "$got" ] || { echo "hash mismatch: $want vs $got" >&2; exit 3; }
-run "\$g = (Get-Content 'C:\\sky-lab\\game-dir.txt' -Raw).Trim(); Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2; Copy-Item 'C:\\sky-lab\\lab-driver.js' (Join-Path \$g 'Data\\Platform\\Plugins\\lab-driver.js') -Force; 'installed ' + (Get-FileHash -Algorithm SHA256 (Join-Path \$g 'Data\\Platform\\Plugins\\lab-driver.js')).Hash.ToLower().Substring(0, 16)"
+# into every game folder the clone keeps (C:\sky-lab\games, ADR-022), or game-dir.txt's on a clone with none recorded
+run "\$gs = @(if (Test-Path 'C:\\sky-lab\\games') { Get-ChildItem 'C:\\sky-lab\\games' -Filter '*.txt' | ForEach-Object { (Get-Content \$_.FullName -Raw).Trim() } }); if (-not \$gs) { \$gs = @((Get-Content 'C:\\sky-lab\\game-dir.txt' -Raw).Trim()) }; Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2; foreach (\$g in \$gs) { Copy-Item 'C:\\sky-lab\\lab-driver.js' (Join-Path \$g 'Data\\Platform\\Plugins\\lab-driver.js') -Force; 'installed ' + (Get-FileHash -Algorithm SHA256 (Join-Path \$g 'Data\\Platform\\Plugins\\lab-driver.js')).Hash.ToLower().Substring(0, 16) + ' in ' + \$g }"
 lab_api=${LAB_API:-https://thuum.gaussing.tv/lab}
 for attempt in 1 2; do
   RUN_WAIT_S=70 "$here/lab/tools/client-launch-test.sh" "$vmid" 2>&1 | grep -v "^  skse_log" || true

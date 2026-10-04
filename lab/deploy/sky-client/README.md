@@ -12,11 +12,16 @@ C:\sky-lab\
   skymp5-client-settings.txt   server 10.10.70.10:7777, profileId 1, no server info
   register-runner.ps1          registers sky-lab-run, the on-demand task that runs run.ps1 in
                                the lab user's desktop session (`just client-run <vmid> <ps1>`)
-  install-layer.ps1            lays SKSE (from skse\) and versionlib-*.bin (from addrlib\)
-                               into the game, once Steam has installed it
-  install-lab.ps1              copies the three files into Data\Platform\Plugins,
-                               records game-dir.txt, registers the two tasks
-  launch.ps1                   sky-lab-launch, at logon of `lab`: starts skse64_loader
+  install-layer.ps1            lays SKSE (from skse\, or -Skse skse-<version>\) and
+                               versionlib-*.bin (from addrlib\) into a game folder
+  install-lab.ps1              copies the three files into Data\Platform\Plugins of every
+                               game folder, records each as games\<version>.txt, registers
+                               the two tasks
+  add-game.ps1                 a second Skyrim version's folder from Steam's depots in
+                               persist (`just client-game <vmid> 1.6.1170`, ADR-022)
+  skse-1.6.1170\               SKSE 2.2.6 for that folder (Nexus mod 30379, file 462377)
+  launch.ps1                   sky-lab-launch, at logon of `lab`: asks lab-api which game
+                               version the run plays, starts that folder's skse64_loader
   screenshot.ps1               sky-lab-screenshot, on demand: primary screen to
                                screenshots\latest.png (interactive session)
   client-dist.zip, dist\       the mirror's Windows workflow output when
@@ -99,10 +104,35 @@ client logged in ten seconds after launch. The server (UDP 7777, TCP 3000) and
 lab-api (TCP 80 on sky-srv) are inside the allowed range; DNS is the Windows
 resolver's, not the exe's, and is untouched.
 
+## Two game versions
+
+thuum supports and tests Skyrim 1.7.104 and 1.6.1170 (ADR-022). Each clone
+keeps a game folder per version, both in one snapshot (Proxmox rolls a ZFS
+disk back only to its newest snapshot, so the version can't be picked by
+snapshot):
+
+- **1.7.104** is Steam's own folder, with SKSE 2.3.1.
+- **1.6.1170** is `C:\Games\Skyrim Special Edition 1.6.1170`, with SKSE
+  2.2.6. Steam's depots for that build (489831, 489832 and 489833) are the
+  complete game, kept in persist at game/1.6.1170. `just client-game <vmid>`
+  serves them from sky-srv inside VLAN 70; add-game.ps1 fetches and
+  hash-checks each file, then lays the same mod layer on it as on Steam's
+  folder. Run it after `just client-dist <vmid>`, which records Steam's
+  folder first, so the new folder inherits the clone's identity.
+
+Steam never sees the second folder. The game starts from it through the
+SKSE loader while Steam runs offline, as a Wabbajack "Stock Game" copy does.
+`install-lab.ps1` records every folder as `C:\sky-lab\games\<version>.txt`.
+Without -Game it applies the dist to every recorded folder, as do
+`client-dist`, `client-driver` and `identity.ps1`. `game-dir.txt` names the
+folder the current boot plays.
+
 ## The logon launcher
 
-`launch.ps1`, run by the task `sky-lab-launch` at the lab user's logon, waits
-for Steam's process plus 20 s, starts the game through the SKSE loader, and
+`launch.ps1`, run by the task `sky-lab-launch` at the lab user's logon, asks
+lab-api (GET /lab/game) which game version the boot plays and writes that
+folder into game-dir.txt, waits for Steam's process plus 20 s, starts the
+game through the SKSE loader, and
 starts it again up to twice when the game is gone 30 s after a launch. The
 retry is not decoration: the game is Steam-wrapped and exits at once (status
 0x35 in the Security log, no SKSE log) when launched before Steam has

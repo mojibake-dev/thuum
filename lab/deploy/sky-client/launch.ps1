@@ -16,6 +16,28 @@ $game = (Get-Content 'C:\sky-lab\game-dir.txt' -Raw).Trim()
 $log = 'C:\sky-lab\launch.log'
 function Log($m) { Add-Content -Path $log -Value ((Get-Date).ToString('HH:mm:ss.fff') + ' ' + $m) }
 Log 'logon'
+# Which game this boot plays (ADR-022): lab-api names the version, the run's
+# or its default, and each version has its own folder, recorded by
+# install-lab.ps1 as C:\sky-lab\games\<version>.txt. The chosen folder becomes
+# game-dir.txt, which everything else on the clone reads (lab-api's log
+# fetch, identity.ps1, controlmap.ps1). With no answer, or no folder for the
+# version asked, the last folder stays; lab-api's game check then fails the
+# run with the version it found, rather than letting it play another build.
+try {
+  $cfg = Get-Content 'C:\sky-lab\lab-driver-settings.txt' -Raw | ConvertFrom-Json
+  $uri = $cfg.labApiBase + $cfg.labApiPath + '/game?client=' + $cfg.client
+  $want = $null
+  for ($i = 0; $i -lt 10 -and -not $want; $i++) {
+    try { $want = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 5 -Uri $uri).Content | ConvertFrom-Json | ForEach-Object { $_.version } } catch { Start-Sleep -Seconds 3 }
+  }
+  $rec = if ($want) { Join-Path 'C:\sky-lab\games' ($want + '.txt') } else { $null }
+  if ($rec -and (Test-Path $rec)) {
+    $game = (Get-Content $rec -Raw).Trim()
+    Set-Content -Path 'C:\sky-lab\game-dir.txt' -Value $game -NoNewline
+    Log ('game ' + $want + ': ' + $game)
+  } elseif ($want) { Log ('game ' + $want + ' asked, no folder recorded for it; staying on ' + $game) }
+  else { Log ('no answer from ' + $uri + '; staying on ' + $game) }
+} catch { Log ('game choice failed: ' + $_.Exception.Message + '; staying on ' + $game) }
 # Skyrim Platform's writeLogs opens Data\Platform\Logs\<plugin>-logs.txt and never
 # creates the directory (ConsoleApi.cpp); without it lab-driver's log silently
 # does not exist (sky-c1, 2026-10-01). lab-api collects it as <client>-driver.log.

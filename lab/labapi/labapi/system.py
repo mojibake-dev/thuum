@@ -4,6 +4,7 @@ so the runner is testable without any of it."""
 
 from __future__ import annotations
 
+import os
 import shutil
 import socket
 import subprocess
@@ -25,7 +26,7 @@ class Capture(Protocol):
 
 
 class System(Protocol):
-    def run(self, cmd: list[str], timeout: float = 120.0) -> Completed: ...
+    def run(self, cmd: list[str], timeout: float = 120.0, env: dict[str, str] | None = None) -> Completed: ...
     def start_capture(self, cmd: list[str]) -> Capture: ...
     def tcp_ready(self, host: str, port: int, timeout: float) -> bool: ...
     def copytree(self, src: Path, dst: Path) -> None: ...
@@ -48,8 +49,10 @@ class _Proc:
 
 
 class RealSystem:
-    def run(self, cmd: list[str], timeout: float = 120.0) -> Completed:
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False)
+    def run(self, cmd: list[str], timeout: float = 120.0, env: dict[str, str] | None = None) -> Completed:
+        # env adds to lab-api's own environment; docker compose interpolates
+        # the compose file from it ahead of .env (ESM_DIR, the run's master files)
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False, env={**os.environ, **env} if env else None)
         return Completed(p.returncode, p.stdout, p.stderr)
 
     def start_capture(self, cmd: list[str]) -> Capture:

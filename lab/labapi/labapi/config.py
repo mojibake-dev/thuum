@@ -128,6 +128,22 @@ class Settings:
         "New-Item -ItemType Directory -Force -Path (Split-Path '{out}') | Out-Null; Copy-Item $f '{out}' -Force; "
         "[Convert]::ToBase64String([IO.File]::ReadAllBytes('{out}')) | Set-Content -Path '{out}.b64' -NoNewline"
     )
+    # The game versions the lab plays (ADR-022) and, for each, the host
+    # directory of the master files the server mounts at /srv/skymp/esm for a
+    # run on it (the compose file's ESM_DIR). A server and its clients must
+    # run the same masters: skymp5-client compares size and CRC32 with the
+    # server's manifest. A run plays the request's version, else the
+    # scenario's, else game_default (what Steam ships, ADR-018).
+    game_default: str = "1.7.104"
+    game_esm_dirs: str = "1.7.104=/srv/persist/esm;1.6.1170=/srv/persist/esm/1.6.1170"
+    # Run through the guest agent after a client's first heartbeat: the path
+    # and file version of the SkyrimSE.exe that is running, one per line.
+    # The logon launcher picks the folder; this checks what it started.
+    game_check_cmd: str = (
+        "$p = Get-Process SkyrimSE -ErrorAction SilentlyContinue | Select-Object -First 1; "
+        "if (-not $p) { Write-Error 'no SkyrimSE process'; exit 3 }; "
+        "$p.Path; (Get-Item -LiteralPath $p.Path).VersionInfo.FileVersion"
+    )
     # Timeouts and budgets (seconds); time_scale shrinks scenario waits in tests.
     step_timeout_s: float = 60.0
     # connect / reconnect: how long the server may take to report the client
@@ -160,6 +176,15 @@ class Settings:
     guest_task_timeout_s: float = 120.0
     time_scale: float = 1.0
     extra: dict = field(default_factory=dict)
+
+    def game_versions(self) -> dict[str, str]:
+        """game_esm_dirs as {version: host directory of its master files}."""
+        out: dict[str, str] = {}
+        for part in self.game_esm_dirs.split(";"):
+            version, sep, path = part.partition("=")
+            if sep and version.strip() and path.strip():
+                out[version.strip()] = path.strip()
+        return out
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -208,4 +233,7 @@ class Settings:
             server_ready_timeout_s=float(_env("SERVER_READY_TIMEOUT_S", str(d.server_ready_timeout_s))),
             guest_task_timeout_s=float(_env("GUEST_TASK_TIMEOUT_S", str(d.guest_task_timeout_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
+            game_default=_env("GAME_DEFAULT", d.game_default),
+            game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),
+            game_check_cmd=_env("GAME_CHECK_CMD", d.game_check_cmd),
         )

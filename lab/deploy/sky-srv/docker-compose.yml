@@ -20,7 +20,10 @@ services:
       - "7777:7777/udp"
       - "3000:3000"
     volumes:
-      - /srv/persist/esm:/srv/skymp/esm:ro                                   # the five master files (Eli's hand step)
+      # the five master files of the game version the run plays (ADR-022): lab-api
+      # sets ESM_DIR per run (/srv/persist/esm/1.6.1170 for 1.6.1170); unset is
+      # 1.7.104's, which Steam ships. A server and its clients must run the same masters.
+      - ${ESM_DIR:-/srv/persist/esm}:/srv/skymp/esm:ro
       # no mount over /srv/skymp/data: the image ships data/scripts (compiled Papyrus) there and the server only writes ui/ and a manifest into it, both regenerated at start
       - /srv/lab/server/world:/srv/skymp/world                                # the file driver's database
       - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
@@ -37,7 +40,7 @@ services:
     working_dir: /srv/skymp
     command: ["node", "dist_back/skymp5-server.js"]
     volumes:
-      - /srv/persist/esm:/srv/skymp/esm:ro
+      - ${ESM_DIR:-/srv/persist/esm}:/srv/skymp/esm:ro
       - /srv/lab/server-legacy/world:/srv/skymp/world
       - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro
@@ -56,7 +59,7 @@ services:
     ports:
       - "127.0.0.1:3100:3000"
     volumes:
-      - /srv/persist/esm:/srv/skymp/esm:ro
+      - ${ESM_DIR:-/srv/persist/esm}:/srv/skymp/esm:ro
       - /srv/lab/server-test/world:/srv/skymp/world
       - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro

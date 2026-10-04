@@ -74,5 +74,9 @@ if ls "$here"/addrlib/versionlib-*.bin >/dev/null 2>&1; then
   tmpd=$(mktemp -d); cp "$here"/addrlib/versionlib-*.bin "$tmpd/"; layer_zip "$tmpd" addrlib; rm -rf "$tmpd"
 fi
 [ -d "$here/lab/.cache/skse" ] && layer_zip "$here/lab/.cache/skse" skse
+# SKSE for each further game version (ADR-022), unpacked under
+# lab/.cache/skse-<version>/ (SKSE 2.2.6 for 1.6.1170, Nexus mod 30379 file
+# 462377), to C:\sky-lab\skse-<version> for add-game.ps1
+for d in "$here"/lab/.cache/skse-1.*; do [ -d "$d" ] && layer_zip "$d" "$(basename "$d")"; done
 run "Get-ChildItem 'C:\\sky-lab' | ForEach-Object { '{0,10} {1}' -f \$_.Length, \$_.Name }"
 echo "staged into VM $vmid under C:\\sky-lab; apply with install-layer.ps1 (SKSE, Address Library) then install-lab.ps1 (plugins, tasks)"

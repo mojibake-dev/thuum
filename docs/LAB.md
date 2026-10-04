@@ -331,14 +331,29 @@ pinned:
 | POST /lab/up | bring the lab up: sky-srv snapshot check, clients cloned or rolled back, heartbeats waited on |
 | POST /lab/down | roll back clients and server, clear netem |
 | GET /lab/status | guest power, heartbeats, netem state, free memory |
-| POST /lab/run | multipart scenario YAML in; returns a run id immediately |
+| POST /lab/run | multipart scenario YAML in, and optionally `game` (the Skyrim version the run plays, ADR-022); returns a run id immediately |
 | GET /lab/run/<id> | progress, then result.json when the run is done |
+| GET /lab/game?client=<id> | the game version a client's logon launcher starts: the active run's, else the default |
 | GET /lab/step?client=<id> | lab-driver's poll for the next step |
 | POST /lab/step/<id>/result | lab-driver's report for a step |
 | POST /lab/frida | client and script in; starts a trace through a guest exec |
 | GET /lab/state/<query> | proxy to the lab gamemode's state endpoint on the server |
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/.
+
+Game versions (ADR-022). A run plays one Skyrim version: the request's
+`game`, else the scenario's `game:`, else 1.7.104 (`just lab-run <scenario>
+[game]`). A server and its clients must run the same master files, so the
+version picks both:
+- **Server.** lab-api starts the server with that version's masters
+  (ESM_DIR in the compose file: /srv/persist/esm for 1.7.104,
+  /srv/persist/esm/1.6.1170 for 1.6.1170).
+- **Clients.** Each client keeps one game folder per version in the same
+  snapshot (C:\sky-lab\games\<version>.txt), and its logon launcher asks
+  GET /lab/game which one to start.
+- **The check.** After the clients' first heartbeats, the game-version phase
+  reads the running SkyrimSE.exe on every managed client through the guest
+  agent. Another build fails the run with E_RUN_GAME.
 
 Scenario verbs. connect and reconnect are judged by the server (lab-api
 holds the step until labState lists the client online; the driver never

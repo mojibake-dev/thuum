@@ -56,6 +56,9 @@ class RunRecord:
     artifacts: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     finished_at: str | None = None
+    # the game version this run plays (ADR-022); "" on the lab-up and
+    # lab-down records, which run on the default
+    game: str = ""
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -67,6 +70,7 @@ class RunRecord:
             "run": self.run_id,
             "scenario": self.scenario.id,
             "milestone": self.scenario.milestone,
+            "game": self.game,
             "verdict": self.verdict,
             "started": self.started_at,
             "finished": self.finished_at,
@@ -95,9 +99,12 @@ class Runner:
 
     # ----- public -------------------------------------------------------------
 
-    def prepare(self, scenario: Scenario) -> RunRecord:
+    def prepare(self, scenario: Scenario, game: str | None = None) -> RunRecord:
         if self.active is not None:
             raise RunnerError(f"E_RUN_BUSY: run {self.active.run_id} is active")
+        version = game or scenario.game or self.s.game_default
+        if version not in self.s.game_versions():
+            raise RunnerError(f"E_RUN_GAME: unknown game version {version!r}; the lab plays {', '.join(self.s.game_versions())}")
         stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime(self._wall()))
         run_id = f"{stamp}-{scenario.id}"
         run_dir = Path(self.s.results_dir) / run_id
@@ -109,7 +116,7 @@ class Runner:
             run_id = f"{stamp}-{scenario.id}-{n}"
             run_dir = Path(self.s.results_dir) / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
-        rec = RunRecord(run_id=run_id, scenario=scenario, dir=run_dir, started_at=_iso(self._wall()))
+        rec = RunRecord(run_id=run_id, scenario=scenario, dir=run_dir, started_at=_iso(self._wall()), game=version)
         self.runs[run_id] = rec
         self.active = rec
         return rec
@@ -178,6 +185,18 @@ class Runner:
         await self._clear_netem(rec)
         return {"ok": not notes, "notes": notes, "phases": rec.phases}
 
+    def game_for(self, client: str) -> str:
+        """The game version a client's logon launcher starts: the active run's,
+        else the default. One version per run: a server and its clients must
+        run the same master files (ADR-022)."""
+        return self.active.game if self.active is not None and self.active.game else self.s.game_default
+
+    def _compose_env(self, rec: RunRecord) -> dict[str, str]:
+        """The run's master files for the server container (the compose file's
+        ESM_DIR): docker compose takes it from the environment ahead of .env."""
+        version = rec.game or self.s.game_default
+        return {"ESM_DIR": self.s.game_versions()[version]}
+
     def status(self) -> dict[str, Any]:
         guests = {name: self.control.status(g) for name, g in self.tables.guests.items()}
         return {
@@ -200,6 +219,7 @@ class Runner:
         if sc.server.netem:
             await self._netem(rec, sc.server.netem)
         await self._rollback_clients(rec, sc.clients)
+        await self._check_game(rec, sc.clients)
         rec.phase = "steps"
         self.board.clear_views()
         for i, step in enumerate(sc.steps):
@@ -233,7 +253,8 @@ class Runner:
                 await asyncio.to_thread(self.control.rollback_sequence, g, snapshot)
                 host = g.ip
             else:
-                await asyncio.to_thread(self.system.run, self._compose("stop", self.s.compose_service))
+                env = self._compose_env(rec)
+                await asyncio.to_thread(self.system.run, self._compose("stop", self.s.compose_service), env=env)
                 snap = Path(self.s.server_snapshots_dir) / snapshot
                 if not snap.is_dir():
                     raise RunnerError(f"E_RUN_SNAPSHOT: no world snapshot {snapshot!r} under {self.s.server_snapshots_dir}")
@@ -241,17 +262,19 @@ class Runner:
                 self.system.rmtree(world)
                 self.system.copytree(snap, world)
                 self.system.chown_tree(world, self.s.server_uid, self.s.server_gid)
-                await asyncio.to_thread(self.system.run, self._compose("up", "-d", self.s.compose_service))
+                # a run on another version's master files recreates the
+                # container (its mount changed); the same version only starts it
+                await asyncio.to_thread(self.system.run, self._compose("up", "-d", self.s.compose_service), env=env)
                 host = "127.0.0.1"
             ready = await asyncio.to_thread(self.system.tcp_ready, host, self.s.server_ui_port, self.s.server_ready_timeout_s)
             if not ready:
                 raise RunnerError(f"E_RUN_SERVER_NOT_READY: {host}:{self.s.server_ui_port} in {self.s.server_ready_timeout_s}s")
-            return f"snapshot {snapshot}, mode {self.s.server_rollback_mode}"
+            return f"snapshot {snapshot}, mode {self.s.server_rollback_mode}, game {rec.game or self.s.game_default}"
 
         await self._phase(rec, "rollback-server", go())
 
     async def _restart_server(self, rec: RunRecord) -> None:
-        await asyncio.to_thread(self.system.run, self._compose("restart", self.s.compose_service))
+        await asyncio.to_thread(self.system.run, self._compose("restart", self.s.compose_service), env=self._compose_env(rec))
         ready = await asyncio.to_thread(self.system.tcp_ready, "127.0.0.1", self.s.server_ui_port, self.s.server_ready_timeout_s)
         if not ready:
             raise RunnerError("E_RUN_SERVER_NOT_READY: after restart")
@@ -283,7 +306,7 @@ class Runner:
             cmd += ["--add-item", str(self.tables.base_id(str(args["item"]))), "--add-item-count", str(int(args.get("count", 1)))]
         else:
             cmd += ["--add-item-count", "0"]
-        r = await asyncio.to_thread(self.system.run, cmd, self.s.fakeclient_timeout_s)
+        r = await asyncio.to_thread(self.system.run, cmd, self.s.fakeclient_timeout_s, self._compose_env(rec))
         log = rec.dir / f"fakeclient-{client}-{index}.jsonl"
         log.write_text(r.stdout)
         rec.artifacts.append(log.name)
@@ -343,6 +366,36 @@ class Runner:
             return ", ".join(notes)
 
         await self._phase(rec, "rollback-clients", go())
+
+    async def _check_game(self, rec: RunRecord, clients: list[str]) -> None:
+        """Each managed client runs the run's game version: the logon launcher
+        picks the folder from GET /game, and this reads back the SkyrimSE.exe
+        that is running (path and file version) through the guest agent. A
+        client on another build would meet the server's master files with its
+        own and play a different game, so a mismatch is a lab error. An
+        unmanaged client is not checked (lab-api never execs into it)."""
+        async def one(client: str) -> str:
+            g = self.tables.guest_for_client(client)
+            if g is None or not g.managed:
+                return f"{client}=unchecked (unmanaged)"
+            cmd = ["powershell", "-NoProfile", "-Command", self.s.game_check_cmd]
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            except ProxmoxError as e:
+                raise RunnerError(f"E_RUN_GAME: {client} ({g.name}): {e}") from e
+            lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
+            if res.exitcode != 0 or len(lines) < 2:
+                raise RunnerError(f"E_RUN_GAME: {client} ({g.name}): no running SkyrimSE.exe to read ({res.err.strip()[:200] or res.exitcode})")
+            path, version = lines[-2], lines[-1]
+            if version != rec.game and not version.startswith(rec.game + "."):
+                raise RunnerError(f"E_RUN_GAME: {client} ({g.name}) runs SkyrimSE.exe {version} from {path}; the run plays {rec.game}")
+            return f"{client}={version}"
+
+        async def go():
+            notes = await asyncio.gather(*(one(c) for c in clients))
+            return ", ".join(notes)
+
+        await self._phase(rec, "game-version", go())
 
     # ----- steps ----------------------------------------------------------------
 

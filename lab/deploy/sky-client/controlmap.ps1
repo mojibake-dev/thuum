@@ -9,9 +9,11 @@
 # archive's copy. The licensed file never leaves the clone; the repo holds
 # only this script. Run as an administrator inside the VM or through the guest
 # agent; idempotent. Prints the attack line before and after.
-param([string]$Key = '0xc7')   # Home: no default binding
+# -Game names the game folder; by default the one in game-dir.txt. Each game
+# version's folder (ADR-022) reads the map out of its own archive.
+param([string]$Key = '0xc7', [string]$Game = '')   # Home: no default binding
 $ErrorActionPreference = 'Stop'
-$game = (Get-Content 'C:\sky-lab\game-dir.txt' -Raw).Trim()
+$game = if ($Game) { $Game } else { (Get-Content 'C:\sky-lab\game-dir.txt' -Raw).Trim() }
 $bsa = Join-Path $game 'Data\Skyrim - Interface.bsa'
 $out = Join-Path $game 'Data\Interface\Controls\PC\controlmap.txt'
 

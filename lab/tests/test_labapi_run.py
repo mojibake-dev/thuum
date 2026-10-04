@@ -149,7 +149,7 @@ class RunTests(unittest.TestCase):
     def test_green_run_end_to_end(self):
         run_id, body = self._run(GREEN)
         self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
-        self.assertEqual([p["name"] for p in body["phases"]], ["rollback-server", "rollback-clients"])
+        self.assertEqual([p["name"] for p in body["phases"]], ["rollback-server", "rollback-clients", "game-version"])
         self.assertTrue(all(p["ok"] for p in body["phases"]))
         self.assertEqual(len(body["steps"]), 14)
         self.assertTrue(all(s["ok"] for s in body["steps"]))
@@ -587,3 +587,115 @@ class ClientStepNames(RunTests):
         self.assertEqual(sent, [{"kind": "open-race-menu", "profileId": 1}])
         self.assertTrue(self.state.actors[1].race_menu_open)
         self.assertNotIn("open-race-menu", [a for _, a, _ in self.doubles.seen])
+
+
+GAME_ONE = """
+id: t-game
+clients: [c1]
+steps:
+  - c1: connect
+"""
+
+
+@needs_deps
+class GameVersions(RunTests):
+    """ADR-022: a run plays one game version, the request's, else the
+    scenario's, else the default; the server mounts that build's master files
+    and the clients' launcher asks which folder to start."""
+
+    def _post(self, text, game=None):
+        data = {"game": game} if game else None
+        return self.client.post("/lab/run", files={"scenario": ("s.yaml", text.encode(), "text/yaml")}, data=data)
+
+    def _finish(self, run_id, timeout=20.0):
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            self.doubles.turn()
+            body = self.client.get(f"/lab/run/{run_id}").json()
+            if body["verdict"] != "running" and body.get("finished"):
+                return body
+            time.sleep(0.02)
+        self.fail(f"run {run_id} did not finish")
+
+    def _up_env(self):
+        system = self.services.system
+        ups = [env for cmd, env in zip(system.commands, system.envs) if cmd[:2] == ["docker", "compose"] and "up" in cmd]
+        self.assertTrue(ups, system.commands)
+        return ups[-1]
+
+    def test_default_run_plays_the_steam_build_on_the_default_masters(self):
+        r = self._post(GAME_ONE)
+        self.assertEqual(r.status_code, 200, r.text)
+        body = self._finish(r.json()["run"])
+        self.assertEqual(body["game"], "1.7.104")
+        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm"})
+        self.assertIn("game 1.7.104", body["phases"][0]["note"])
+
+    def test_request_version_wins_over_the_scenario_and_reaches_the_server_mount(self):
+        r = self._post(GAME_ONE + "game: 1.7.104\n", game="1.6.1170")
+        self.assertEqual(r.status_code, 200, r.text)
+        body = self._finish(r.json()["run"])
+        self.assertEqual(body["game"], "1.6.1170")
+        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm/1.6.1170"})
+
+    def test_scenario_version_is_used_without_a_request_version(self):
+        r = self._post(GAME_ONE + "game: 1.6.1170\n")
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(self._finish(r.json()["run"])["game"], "1.6.1170")
+
+    def test_unknown_version_is_400_and_starts_nothing(self):
+        r = self._post(GAME_ONE, game="1.5.97")
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("E_GAME", r.text)
+        r = self._post(GAME_ONE + "game: 1.5.97\n")
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(self.services.system.commands, [])
+
+    def test_launcher_endpoint_answers_the_active_runs_version(self):
+        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.7.104")
+        r = self._post(GAME_ONE, game="1.6.1170")
+        self.assertEqual(r.status_code, 200, r.text)
+        # the run waits in rollback-clients for c1's first poll, which is when
+        # a booting clone's launcher asks
+        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.6.1170")
+        self._finish(r.json()["run"])
+        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.7.104")
+
+    def _check(self, game, out, exitcode=0):
+        import asyncio
+
+        from labapi.guests import Guest
+        from labapi.proxmox import ExecResult
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        tables = self.services.tables
+        tables.guests["sky-c1"] = Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1")
+        tables.guests.pop("fake-c1", None)
+        pve = self.services.control._b
+        pve.calls.clear()
+        pve.game = ExecResult(exitcode, out, "" if exitcode == 0 else "no SkyrimSE process")
+        rec = RunRecord("x", Scenario(id="x", clients=["c1", "c2"]), self.tmp, "now", game=game)
+        asyncio.run(self.services.runner._check_game(rec, ["c1", "c2"]))
+        return rec, pve
+
+    def test_game_check_reads_the_running_exe_on_managed_clients_only(self):
+        rec, pve = self._check("1.6.1170", "C:\\Games\\Skyrim Special Edition 1.6.1170\\SkyrimSE.exe\r\n1.6.1170.0\r\n")
+        self.assertEqual(rec.phases[0]["name"], "game-version")
+        self.assertTrue(rec.phases[0]["ok"])
+        self.assertEqual(rec.phases[0]["note"], "c1=1.6.1170.0, c2=unchecked (unmanaged)")
+        self.assertEqual([c[0] for c in pve.calls], ["exec"])
+
+    def test_a_client_on_another_build_is_a_lab_error(self):
+        from labapi.runner import RunnerError
+
+        with self.assertRaises(RunnerError) as ctx:
+            self._check("1.6.1170", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\SkyrimSE.exe\r\n1.7.104.0\r\n")
+        self.assertIn("E_RUN_GAME", str(ctx.exception))
+        self.assertIn("1.7.104.0", str(ctx.exception))
+        with self.assertRaises(RunnerError) as ctx:
+            self._check("1.6.1170", "", exitcode=3)
+        self.assertIn("no running SkyrimSE.exe", str(ctx.exception))
+        # 1.6.11700 is not 1.6.1170
+        with self.assertRaises(RunnerError):
+            self._check("1.6.1170", "C:\\x\\SkyrimSE.exe\r\n1.6.11700.0\r\n")

@@ -138,14 +138,16 @@ lab-status:
 
 # POST /run returns a run id; GET /run/<id> is polled until result.json exists and is
 # saved to lab/results/<run>.json.
-# Run one scenario through lab-api; exit code is the verdict.
-lab-run scenario:
+# Run one scenario through lab-api; exit code is the verdict. `game` picks the Skyrim version the run plays
+# (ADR-022: 1.7.104 or 1.6.1170); empty means the scenario's, else lab-api's default.
+lab-run scenario game="":
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p lab/results
-    run=$(curl -fsS -X POST "{{lab_api}}/run" -F "scenario=@lab/scenarios/{{scenario}}.yaml" \
+    game="{{game}}"; extra=(); [ -z "$game" ] || extra=(-F "game=$game")
+    run=$(curl -fsS -X POST "{{lab_api}}/run" -F "scenario=@lab/scenarios/{{scenario}}.yaml" ${extra[@]+"${extra[@]}"} \
         | python3 -c 'import json,sys; print(json.load(sys.stdin)["run"])')
-    echo "run $run started"
+    echo "run $run started${game:+ on $game}"
     python3 - "$run" "{{lab_api}}" <<'PY'
     import json, sys, time, urllib.request
     run, api = sys.argv[1], sys.argv[2]
@@ -257,6 +259,12 @@ client-crash-dumps vmid:
 # The current client dist (just build-client) plus the lab files onto a clone and into the game (install-lab.ps1).
 client-dist vmid:
     @lab/tools/client-dist.sh {{vmid}}
+
+# A second Skyrim version's game folder on a clone (ADR-022): Steam's depots for it from persist over the
+# VLAN, then SKSE, the client dist and the lab files (add-game.ps1). After `just client-dist <vmid>`; ends in
+# a cold retake of the clone's snapshot by thuum-mundus.
+client-game vmid version="1.6.1170":
+    @lab/tools/client-game.sh {{vmid}} {{version}}
 
 # A clone's scenario client name and profile id (identity.ps1): the template carries c1 / 1.
 client-identity vmid client profile:

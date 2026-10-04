@@ -108,15 +108,18 @@ def create_app(services: Services) -> FastAPI:
         return await asyncio.to_thread(runner.status)
 
     @router.post("/run")
-    async def run(scenario: UploadFile = File(...)):
+    async def run(scenario: UploadFile = File(...), game: str | None = Form(None)):
         text = (await scenario.read()).decode("utf-8", errors="replace")
         try:
             sc = load_scenario(text)
         except (ValueError, ValidationError, KeyError) as e:
             raise HTTPException(400, f"E_SCENARIO: {e}") from e
+        version = game or sc.game
+        if version is not None and version not in s.game_versions():
+            raise HTTPException(400, f"E_GAME: unknown game version {version!r}; the lab plays {', '.join(s.game_versions())}")
         if runner.active:
             return _busy()
-        rec = runner.prepare(sc)
+        rec = runner.prepare(sc, game)
         task = asyncio.create_task(runner.execute(rec))
         app.state.tasks.add(task)
         task.add_done_callback(app.state.tasks.discard)
@@ -132,6 +135,12 @@ def create_app(services: Services) -> FastAPI:
     @router.get("/step")
     async def step(client: str):
         return board.poll(client)
+
+    # The client's logon launcher asks which game version to start (ADR-022):
+    # the active run's, else the default. It keeps one game folder per version.
+    @router.get("/game")
+    async def game_version(client: str):
+        return {"client": client, "version": runner.game_for(client)}
 
     @router.post("/step/{step_id}/result")
     async def step_result(step_id: str, request: Request):

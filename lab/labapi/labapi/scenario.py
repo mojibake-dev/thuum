@@ -74,6 +74,10 @@ class Step(BaseModel):
 class Scenario(BaseModel):
     id: str
     milestone: str | None = None
+    # The game version the run plays (ADR-022), when the scenario needs one:
+    # a mod that loads on one build only. A run request's own version wins;
+    # neither means lab-api's default.
+    game: str | None = None
     clients: list[str] = Field(default_factory=list)
     server: ServerSpec = Field(default_factory=ServerSpec)
     timeout_s: float = 600
@@ -139,6 +143,7 @@ def load_scenario(text: str) -> Scenario:
     return Scenario(
         id=str(data["id"]),
         milestone=(str(data["milestone"]) if data.get("milestone") is not None else None),
+        game=(str(data["game"]) if data.get("game") is not None else None),
         clients=clients,
         server=ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=(Netem(**server["netem"]) if server.get("netem") else None)),
         timeout_s=float(data.get("timeout_s", 600)),

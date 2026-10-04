@@ -24,6 +24,9 @@ class FakeProxmox:
         self.statuses: dict[int, str] = {}
         self.files: dict[str, str] = {}
         self.exec_result = ExecResult(0, "", "")
+        # what the game check (Settings.game_check_cmd) reads on a clone: the
+        # Steam folder's exe at the default version unless a test says otherwise
+        self.game = ExecResult(0, "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\SkyrimSE.exe\r\n1.7.104.0\r\n", "")
 
     def stop(self, guest: Guest) -> None:
         self.calls.append(("stop", guest.vmid))
@@ -42,6 +45,8 @@ class FakeProxmox:
 
     def exec(self, guest: Guest, command: list[str], timeout: float) -> ExecResult:
         self.calls.append(("exec", guest.vmid, tuple(command)))
+        if any("Get-Process SkyrimSE" in c for c in command):
+            return self.game
         return self.exec_result
 
     def file_read(self, guest: Guest, path: str) -> str:
@@ -70,11 +75,13 @@ class FakeSystem:
         self.ready = ready
         self.log_text = "fake server log\n"
         self.chowned: list[tuple[str, int, int]] = []
+        self.envs: list[dict[str, str]] = []  # the env each command ran with, beside commands
 
     fakeclient_rc = 0
 
-    def run(self, cmd: list[str], timeout: float = 120.0) -> Completed:
+    def run(self, cmd: list[str], timeout: float = 120.0, env: dict[str, str] | None = None) -> Completed:
         self.commands.append(list(cmd))
+        self.envs.append(dict(env or {}))
         if cmd[:2] == ["docker", "compose"] and "logs" in cmd:
             return Completed(0, self.log_text, "")
         if any(c.endswith("fakeclient") for c in cmd):

@@ -14,6 +14,9 @@ run "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Pr
 "$here/lab/tools/stage-client.sh" "$vmid" | tail -3
 run "& powershell -NoProfile -ExecutionPolicy Bypass -File C:\\sky-lab\\install-lab.ps1" | tail -1 | cut -c1-120
 want=$(shasum -a 256 "$dll" | cut -c1-16)
-got=$(run "(Get-FileHash -Algorithm SHA256 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\Data\\Platform\\Distribution\\RuntimeDependencies\\SkyrimPlatformImpl.dll').Hash.ToLower().Substring(0,16)" | tail -1)
-[ "$want" = "$got" ] || { echo "SkyrimPlatformImpl.dll in the game ($got) is not the dist's ($want)" >&2; exit 3; }
-echo "dist laid into the game on VM $vmid: SkyrimPlatformImpl.dll $got"
+# every game folder the clone keeps (C:\sky-lab\games\<version>.txt, ADR-022) must carry this dist
+got=$(run "Get-ChildItem 'C:\\sky-lab\\games' -Filter '*.txt' | ForEach-Object { \$g = (Get-Content \$_.FullName -Raw).Trim(); \$_.BaseName + '=' + (Get-FileHash -Algorithm SHA256 (Join-Path \$g 'Data\\Platform\\Distribution\\RuntimeDependencies\\SkyrimPlatformImpl.dll')).Hash.ToLower().Substring(0,16) }" | tr -d '\r')
+echo "$got" | grep -q . || { echo "no game folder recorded on VM $vmid" >&2; exit 3; }
+bad=$(echo "$got" | grep -v "=$want\$" || true)
+[ -z "$bad" ] || { echo "SkyrimPlatformImpl.dll is not the dist's ($want) in: $bad" >&2; exit 3; }
+echo "dist laid into every game folder on VM $vmid: $(echo $got | tr '\n' ' ')(SkyrimPlatformImpl.dll $want)"

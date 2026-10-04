@@ -1,9 +1,11 @@
-# Lay the script-extender layer into the game from C:\sky-lab: SKSE (if a
-# C:\sky-lab\skse directory holds an unpacked SKSE archive) and every
-# versionlib-*.bin under C:\sky-lab\addrlib into Data\SKSE\Plugins. Idempotent.
-# Run through guest exec after Steam has installed the game:
-#   powershell -ExecutionPolicy Bypass -File C:\sky-lab\install-layer.ps1 [-Game <dir>]
-param([string]$Game = '')
+# Lay the script-extender layer into the game from C:\sky-lab: SKSE (if the
+# -Skse directory, C:\sky-lab\skse by default, holds an unpacked SKSE archive)
+# and every versionlib-*.bin under C:\sky-lab\addrlib into Data\SKSE\Plugins.
+# Each game version needs its own SKSE build: SKSE 2.3.1 for 1.7.104 in
+# C:\sky-lab\skse, SKSE 2.2.6 for 1.6.1170 in C:\sky-lab\skse-1.6.1170
+# (ADR-022). Idempotent. Run through guest exec after the game is in place:
+#   powershell -ExecutionPolicy Bypass -File C:\sky-lab\install-layer.ps1 [-Game <dir>] [-Skse <dir>]
+param([string]$Game = '', [string]$Skse = 'C:\sky-lab\skse')
 $ErrorActionPreference = 'Stop'
 $lab = 'C:\sky-lab'
 if (-not $Game) {
@@ -24,7 +26,7 @@ if (-not $Game) {
 }
 $exe = Get-Item (Join-Path $Game 'SkyrimSE.exe')
 $result = [ordered]@{ game = $Game; exeVersion = $exe.VersionInfo.FileVersion; skse = 'not staged'; versionlibs = @() }
-$skse = Join-Path $lab 'skse'
+$skse = $Skse
 if (Test-Path $skse) {
   # the archive unpacks to one directory (skse64_2_03_01\) holding the loader, the dll and Data\
   $root = Get-ChildItem $skse -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'skse64_loader.exe') } | Select-Object -First 1
