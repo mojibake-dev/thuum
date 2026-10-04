@@ -270,6 +270,26 @@ Dragons, lycanthropy, vampirism, mounted combat, custom record push to
 clients (TES3MP 0.8 parity), a mod compatibility matrix generated from the
 natives ledger.
 
+### Stretch: Eli's mods
+
+Three mods Eli wants working (2026-10-03). They are acceptance cases for
+definition of done item 6 and M7's compatibility matrix, not a widening of
+the non-goal: each works to the extent the ledger says, and each gets a
+scenario once the systems it leans on exist.
+
+- The Apocalypse spell bundle: spells are M2 (cast intent R1, resolution
+  R0); its scripted effects run wherever docs/NATIVES.md puts their natives.
+- The bow headshot mod: hit location rides M2's hit registration. A headshot
+  a client claims is untrusted input (hard rule 5); the server validates the
+  hit location or the verb doc records it as R2.
+- Eli's rotfern race character: character creation already accepts a
+  playable race from the server's load order. Anything the look needs beyond
+  vanilla appearance fields (RaceMenu overlays, body morphs) is the open
+  question.
+
+Exact files, versions and dependencies come from apocrypha (asked
+2026-10-03) and land here when they arrive.
+
 ## Cross-cutting tracks
 
 - Natives ledger (docs/NATIVES.md): the honest list of what server Papyrus
