@@ -82,7 +82,7 @@ bump is an ADR, not a Tuesday.
 
 ## ADR-007: Post-Helgen start
 
-Status: proposed
+Status: accepted (2026-10-04, Eli).
 
 The Helgen intro is one long scripted scene with a single protagonist. Server
 spawns new players after it (Unbound marked complete) rather than making
@@ -90,7 +90,7 @@ scene sync the first quest problem we solve.
 
 ## ADR-008: Quest policy defaults to per-player, world-shared by allowlist
 
-Status: proposed
+Status: accepted (2026-10-04, Eli).
 
 Mirrors TES3MP's shared-journal settings. Per-player quest state is the
 default because it is the safe one; a gamemode allowlist promotes specific
@@ -258,7 +258,7 @@ files.
 
 ## ADR-017: The server image is the T2 runtime
 
-Status: proposed (2026-09-29)
+Status: accepted (2026-10-04, Eli; proposed 2026-09-29).
 
 Everything that plays a client without a game runs inside the fork's server
 image on sky-srv: the headless `fakeclient` the image already ships, and
@@ -318,7 +318,7 @@ every REL::ID the fork touches is re-verified rather than assumed stable.
 
 ## ADR-019: The M1 port: SkyMP's own messages as wire-schema types, JSON at the in-process edge
 
-Status: proposed (2026-10-02). Amends ADR-012 (how C++ receives messages,
+Status: accepted (2026-10-04, Eli; proposed 2026-10-02). Amends ADR-012 (how C++ receives messages,
 heapless) and ADR-015 (the heapless and MaxSize pins); the rest of both
 stands. Built on the fork branch `m1-wire`; nothing reaches `parity` until
 smoke-two-players is green on it.

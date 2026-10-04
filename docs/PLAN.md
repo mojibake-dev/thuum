@@ -210,7 +210,8 @@ it carries a HYPOTHESIS tag.
   wire (run 20261002-231256: position, inventory, the equipped weapon as
   the player and the observer see it, and attributes survive a restart); it
   grows with each persistence verb. `a-movement-reject` green (movement
-  relay order). Both scenarios await Eli's review.
+  relay order). Both reviewed by Eli (accepted with the scenario commits up
+  to 9e87c65; confirmed 2026-10-04).
 
 ### M2: Combat and magic authority (8 to 12 weeks, Class B)
 

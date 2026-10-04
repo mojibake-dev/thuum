@@ -137,4 +137,4 @@ IronSword and swings with attackStart.
       smoke-two-players stayed green on the same image (runs
       20261004-055913, -060235, -060556)
 - [x] on parity 64ba89a4 (2026-10-04)
-- [ ] scenario reviewed by Eli
+- [x] scenario reviewed by Eli (2026-10-04)
