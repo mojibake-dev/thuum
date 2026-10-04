@@ -49,10 +49,13 @@ Milestone: M1   Class: B
 - **R3 for the client's own world.** The engine's local jump in time during
   the menu stays on the resting client. That covers its view of weather and
   of NPC schedules, and the clock snaps back afterwards.
-- **R3 for now: the rested bonus.** Sleep's Rested and Well Rested spells
-  are applied by the client's engine and stay client-local until M2's magic
-  effect system. That is decision 2's "the rested bonus" as the client sees
-  it; the server does not know it.
+- **The rested bonus goes where skill gains go.** Sleep's bonuses are a
+  multiplier on skill gains for eight game hours: Rested 5 percent, Well
+  Rested 10 in an owned bed, Lover's Comfort 15
+  ([UESP, Skyrim:Beds](https://en.uesp.net/wiki/Skyrim:Beds)). Skill gains
+  are the client engine's until M5 computes them on the server (R0), so the
+  engine applies the bonus where the gains happen. It moves with them in
+  M5.
 
 ## Design
 
@@ -72,8 +75,14 @@ Milestone: M1   Class: B
 - **Server:** a Rust rule (ADR-020) computes the recovery from the hours
   and the race's regeneration rates. The core gathers the facts, writes the
   percentages, and sends ChangeValues.
-- **Settings.** TES3MP's switches carried over (CoreScripts config.lua:
-  allowWait, allowBedRest, allowWildernessRest), all on by default.
+- **Where rest is allowed** is the game's own rule, which the engine
+  enforces: wait anywhere, sleep in a bed, bedroll or hay pile, and neither
+  with enemies nearby or while trespassing
+  ([UESP, Skyrim:Beds](https://en.uesp.net/wiki/Skyrim:Beds)). TES3MP's
+  switches come on top as server settings, all on by default as TES3MP
+  ships them (CoreScripts 0.8.1 scripts/config.lua:82-89, applied per player
+  at login in eventHandler.lua:550-552): allowWait, allowBedRest,
+  allowWildernessRest.
 
 ## Tests
 
@@ -93,11 +102,16 @@ Milestone: M1   Class: B
   - It needs lab-driver to drive the Sleep/Wait menu. tap-key worked on the
     race menu's lists but not its finish box, so this is the open risk.
 
-## Open (for Eli)
+## Conventions adopted
 
-1. **Rest switches.** Rest allowed everywhere by default (TES3MP's
-   defaults), or only in beds?
-2. **The rested bonus** stays client-local until M2: acceptable?
+Neither question this draft first put to Eli needed him: the baseline
+answers both (Eli, 2026-10-04: "is there not a baseline convention for
+resting in the tool anyway?").
+
+- **Where rest is allowed.** The game's own rules, as above, plus
+  TES3MP's switches, on by default.
+- **The rested bonus.** It is a skill-gain multiplier, so it lives with skill
+  gains: in the client's engine until M5.
 
 ## Status
 
