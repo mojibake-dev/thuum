@@ -10,4 +10,5 @@ one the m0-appearance scenario names; it does not exist until recorded.
 Orc made through the real race menu on sky-c2 (exploratory run
 20261004-202843: the server opened the menu, Down picked Orc, the menu
 closed), recorded from the server's record, so the two lab characters look
-different for appearance checks.
+different for appearance checks. Its name is "test 2", set by hand: the race
+menu kept profile 1's "test 1", which the playtest showed over both heads.
