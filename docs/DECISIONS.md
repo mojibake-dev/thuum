@@ -464,24 +464,50 @@ Library formats (ADR-018). Only 1.7.104 had been tested since the port, so
 1.6.1170 support is proven by running it, not assumed.
 
 **How:**
-- **A second client set.** The same clones get a second game folder holding
-  1.6.1170, with SKSE 2.2.6 and the client dist, and a second snapshot set
-  that records that folder as the game directory.
+- **One run, one version.** A server and its clients run the same master
+  files. skymp5-client compares each file's name, size and CRC32 with the
+  server's manifest and puts up "LOAD ORDER ERROR" on any difference
+  (skymp5-client loadOrderVerificationService.ts; the server writes the
+  manifest from its own data directory, skymp5-server/ts/manifestGen.ts).
+  The two builds' masters differ (libespm's kKnownHashcodes holds a CRC32
+  per build). So a lab run picks one version, and the server's master files
+  and the clients' game folder both follow it. Mixing versions in one
+  session is out of scope here.
+- **Two game folders on each client.** The clones keep Steam's folder
+  (1.7.104) and gain a second folder holding 1.6.1170, with SKSE 2.2.6, the
+  Address Library for 1.6.1170 and the same client dist. Wabbajack modlists
+  do the same with a "Stock Game" folder, a copy of the game's files run
+  through SKSE from outside Steam's folder
+  ([Wabbajack docs](https://wiki.wabbajack.org/modlist_author_documentation/Keeping%20the%20Game%20Folder%20clean.html)).
+  Both folders live in the one
+  clean-m1 snapshot: Proxmox rolls a ZFS disk back only to its newest
+  snapshot (lab/labapi/labapi/guests.yaml), so the version can't be picked
+  by snapshot. The logon launcher asks lab-api which version the run wants
+  and starts that folder.
+- **Two master-file sets on the server.** /rpool/sky/persist/esm keeps
+  1.7.104's masters as the default; esm/1.6.1170 holds that build's. lab-api
+  starts the server on the run's set.
 - **Where the files come from.** Steam's own depots for that build,
-  downloaded once:
+  downloaded once on one clone under an egress lease, using the Steam
+  session already logged in there:
   - `download_depot 489830 489831 8442952117333549665`
   - `download_depot 489830 489832 8042843504692938467`
   - `download_depot 489830 489833 1914580699073641964` (the exe)
   - Sources: the [Wildlander wiki's downgrade guide](https://wiki.wildlandermod.com/09-How-Do-i/HowDoI/downgrade/)
     and the [Nexus article](https://www.nexusmods.com/skyrimspecialedition/articles/12471),
     which agree.
-  - The result is kept in rpool/sky/persist like the other licensed files,
-    never in a repo.
-- **Choosing per run.** lab-api picks the client set per run. A scenario
-  runs against either version, and the regression sweep runs against both.
+  - The depots are kept in /rpool/sky/persist/game/1.6.1170 like the other
+    licensed files, never in a repo. Each clone builds its second folder
+    from there over the VLAN: a copy of Steam's folder with the three
+    depots laid on top, in order, as the guide does it.
+- **Choosing per run.** A run takes a game version from the run request,
+  else from the scenario, else 1.7.104. A scenario that needs a mod which
+  only loads on one version names it; the regression sweep runs against
+  both.
 
 **Consequences:**
 - Scenario runs per version double the lab time of a full sweep.
 - The Ghidra project gains the 1.6.1170 program beside 1.7.104
   (docs/LAB.md), and a verb's engine facts name the version they were read
   on.
+- libespm's checksum table and T0 learn the 1.6.1170 set.
