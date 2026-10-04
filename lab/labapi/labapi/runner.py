@@ -585,18 +585,19 @@ class Runner:
             try:
                 held = await asyncio.to_thread(evaluator.evaluate, expr)
                 if not held:
-                    failed.append({"step": index, "kind": "assertion", "expr": expr, "error": "false"})
+                    failed.append({"step": index, "kind": "assertion", "expr": expr, "error": "false", "values": dict(evaluator.readings)})
             except AssertionSyntax as e:
                 failed.append({"step": index, "kind": "assertion-syntax", "expr": expr, "error": str(e)})
                 rec.verdict = "error"
             except (AssertionData, StateError) as e:
                 failed.append({"step": index, "kind": "assertion-data", "expr": expr, "error": str(e)})
+        read = "; ".join(f"{k} = {v}" for k, v in evaluator.readings.items())
         if failed:
             rec.failures.extend(failed)
             if rec.verdict == "running":
                 rec.verdict = "red"
-            return False, f"{len(failed)} of {len(step.assertions)} failed"
-        return True, f"{len(step.assertions)} held"
+            return False, f"{len(failed)} of {len(step.assertions)} failed" + (f" ({read})" if read else "")
+        return True, f"{len(step.assertions)} held" + (f" ({read})" if read else "")
 
     async def _screenshot(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
         shots = rec.dir / "screenshots"

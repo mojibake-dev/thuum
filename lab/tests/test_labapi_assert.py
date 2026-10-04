@@ -42,6 +42,15 @@ class EvaluatorTests(unittest.TestCase):
 
         self.ev = Evaluator(Server(), Views(), ["c1", "c2"])
 
+    def test_readings_name_each_value_read(self):
+        self.assertTrue(self.ev.evaluate("abs(server.actor(c1).x - 300) < 50 and c1.sees(c2)"))
+        self.assertTrue(self.ev.evaluate('server.inventory(c1).count("Skyrim.esm:IronSword") == 1'))
+        self.assertEqual(self.ev.readings, {
+            "server.actor(c1).x": 290.0,
+            "c1.sees(c2)": True,
+            "server.inventory(c1).count('Skyrim.esm:IronSword')": 1,
+        })
+
     def test_smoke_expressions(self):
         for expr in [
             'server.actor(c2).cell == "lab-spawn"',

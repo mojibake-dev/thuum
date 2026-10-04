@@ -389,6 +389,16 @@ class Evaluator:
         self._server_facade = server
         for c in clients:
             self._names[c] = _ClientRef(c, views, server)
+        # Every scalar an expression read, by its source text: the numbers
+        # behind a verdict, which a reviewer reads in the step's note.
+        self.readings: dict[str, Any] = {}
+
+    def _read(self, node: ast.AST, value: Any) -> Any:
+        if isinstance(value, float):
+            self.readings[ast.unparse(node)] = round(value, 4)
+        elif isinstance(value, (bool, int, str)):
+            self.readings[ast.unparse(node)] = value
+        return value
 
     def evaluate(self, expr: str) -> bool:
         try:
@@ -446,7 +456,7 @@ class Evaluator:
             value = getattr(obj, node.attr)
             if value is None:
                 raise AssertionData(f"{type(obj).__name__}.{node.attr} was not reported")
-            return value
+            return self._read(node, value)
         if isinstance(node, ast.Call):
             if node.keywords:
                 raise AssertionSyntax("E_ASSERT_SYNTAX: keyword arguments not allowed")
@@ -479,7 +489,7 @@ class Evaluator:
                         args.append(self._eval(a))
                 if len(args) != 1 or not isinstance(args[0], str):
                     raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one client name or string")
-                return getattr(obj, node.func.attr)(args[0])
+                return self._read(node, getattr(obj, node.func.attr)(args[0]))
             raise AssertionSyntax("E_ASSERT_SYNTAX: call form not allowed")
         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {type(node).__name__} not allowed")
 

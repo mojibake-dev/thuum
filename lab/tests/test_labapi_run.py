@@ -197,6 +197,10 @@ class RunTests(unittest.TestCase):
         self.assertEqual(body["failures"][0]["kind"], "assertion")
         self.assertEqual(body["failures"][0]["expr"], "server.actor(c1).x == 12345")
         self.assertEqual(len(body["steps"]), 2, "the run stops at the failed assert block")
+        # the number behind the verdict is in the failure and the step's note
+        x = body["failures"][0]["values"]["server.actor(c1).x"]
+        self.assertIsInstance(x, float)
+        self.assertIn(f"server.actor(c1).x = {x}", body["steps"][-1]["note"])
 
     def test_step_timeout_is_red_and_busy_is_409(self):
         # a driver step (connect is judged by the server and never reaches the queue)
