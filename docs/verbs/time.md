@@ -2,8 +2,8 @@
 
 Part one of M1's "game time and globals, wait and sleep as server-owned
 time" (docs/PLAN.md): one clock, owned by the server, shown by every client.
-Per-player wait and sleep (decision 2) is part two. Other globals are
-deferred (decision 4).
+Per-player wait and sleep (decision 2) is part two, docs/verbs/rest.md (done
+2026-10-04). Other globals are deferred (decision 4).
 
 ## Intent
 
@@ -221,7 +221,9 @@ ticking it, so there is nothing to save, and decision 3 costs nothing.
 - **Suppress:**
   - TimeService stops reading the PC clock and `hoursOffset`;
   - the TimeScale nudge goes;
-  - local waiting stays disabled (setInChargen) until part two.
+  - local waiting stays disabled (setInChargen) until part two; since part
+    two it is allowed, and TimeService holds its correction while the
+    Sleep/Wait menu is open (docs/verbs/rest.md).
 
 ## Message contract
 

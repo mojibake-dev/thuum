@@ -210,7 +210,13 @@ it carries a HYPOTHESIS tag.
   setting the engine's day count through a new Skyrim Platform native
   (TESModPlatform.SetGameDaysPassed); a-time green, run
   20261004-035822-a-time; on parity 4257036e. Part two, per-player wait and
-  sleep, is open.
+  sleep, DONE 2026-10-04 (docs/verbs/rest.md): a player's rest is its own.
+  The client reports the hours its engine ran ahead across the Sleep/Wait
+  menu (RestIntent, wire schema 4). The server checks them (the menu's 1 to
+  24 hours, alive, no hit within 10 s, TES3MP's allowWait and allowSleep)
+  and grants the rest's recovery, 360 s of regeneration a rested hour, as
+  measured in the engine. Nobody's clock moves. a-rest green on 1.7.104 and
+  1.6.1170 (runs 20261004-094211, -094636, and -111831 on the final image).
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
