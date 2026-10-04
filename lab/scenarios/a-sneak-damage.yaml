@@ -1,0 +1,56 @@
+# M1 validation, sneak damage (docs/verbs/sneak-damage.md): a kept sneak
+# attack costs its target the game's base multiplier for the weapon's type,
+# Skyrim.esm's fCombatSneak1HSwordMult 3.0 for the iron sword, not SkyMP's
+# flat 1.3. c1 (IronSword drawn, facing north at rotation 0) stands 120 units
+# behind c2 and sneaks: Left Ctrl (DirectInput 29, the clones' Sneak binding
+# in controlmap.txt) toggles the engine's sneak, c1's movement reports it,
+# and the server holds c1 sneaking (docs/verbs/damage-flags.md). The attack
+# key tapped (Home 199, Right Attack/Block on the clones) swings; the engine
+# flags the hit a sneak attack, the server keeps the flag and multiplies.
+# Then c1 stands up (Ctrl again) and hits plainly.
+# Numbers from the exploratory run 20261004-212438 on this build: the sneak
+# hit left c2 at about 0.81, the plain one at about 0.935; c1's screen showed
+# "Sneak attack for 3.0X damage!". At SkyMP's 1.3 the sneak hit would leave
+# about 0.92, at 2.0 about 0.87. c2 regenerates about half a percent of its
+# health a second, so each check comes 2 s after its hit.
+# The sneak hit comes first, while c2's figure on c1's screen has not been
+# hit yet: the engine grants a sneak attack only while the target has not
+# detected the attacker, and a hit is detection.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-sneak-damage
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: draw-weapon
+  - wait: 2
+  - c2: teleport {cell: lab-spawn, x: 0, y: -426, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: tap-key {code: 29}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 0.87
+      - server.actor(c2).healthPercentage > 0.75
+  - c1: screenshot
+  - c1: tap-key {code: 29}
+  - wait: 3
+  - c2: set-percentages {health: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 0.98
+      - server.actor(c2).healthPercentage > 0.9
+artifacts: [server.log, c1.log, c2.log, screenshots]
