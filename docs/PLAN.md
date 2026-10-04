@@ -217,6 +217,21 @@ it carries a HYPOTHESIS tag.
   and grants the rest's recovery, 360 s of regeneration a rested hour, as
   measured in the engine. Nobody's clock moves. a-rest green on 1.7.104 and
   1.6.1170 (runs 20261004-094211, -094636, and -111831 on the final image).
+- From Eli's first T4 playtest (2026-10-04, sky-c1 and sky-c2 over
+  Moonlight). Passed: movement with no snap-backs; hits, power attacks and
+  reach; death and respawn; items. Found:
+  - Sneak attack damage: the server multiplies by SkyMP's flat 1.3
+    (TES5DamageFormula.cpp, upstream's TODO "get from GameSettings"), while
+    the game promises its own multiplier. A damage-parity verb: the
+    multipliers from the master files.
+  - Hostility is one-sided: only the attacker's game marks the other an
+    enemy. ADR-023: share it with the victim's game (a verb).
+  - The two clients' clocks disagreed during the session. a-time agrees at
+    login and 30 s later (run 20261004-200816), so the drift builds over a
+    session. Open: reproduce it in a longer run.
+  - Next playtest: profile 2 needs a look of its own to judge appearance
+    sync, players start hurt so a rest's recovery shows, and a bed within
+    reach for sleep.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
