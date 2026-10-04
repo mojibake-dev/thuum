@@ -24,7 +24,16 @@ Milestone: M1   Class: B
   Game.setInChargen(true, true, false) at the first update and at every game
   load. Its second argument disables waiting.
 - **Beds are unconfirmed.** Whether sleeping in a bed is blocked too is engine
-  behavior still to confirm in the lab.
+  behavior still to confirm in the lab. Two exploratory runs on 2026-10-04
+  activated an unowned bedroll (Skyrim.esm REFR 0x000CE5F9) from about 90
+  units through lab-driver's activate step. The camera went to third person
+  for a moment, as for entering furniture, then back, and no sleep menu
+  opened (runs 20261004-212438 and -214508). The server logged nothing for
+  that activation, though its furniture path logs every attempt
+  (MpObjectReference::CheckIfObjectCanStartOccupyThis). So either the
+  client never sent it, or ActionListener::OnActivate returned early: it
+  returns without a log when the target is unknown to the server. Open;
+  the second playtest tries it by hand.
 - **The server would undo a rest's healing.** It crops a client's health and
   magicka reports to what regeneration allows over at most 2 s
   (docs/verbs/attributes.md; ActionListener::OnChangeValues,

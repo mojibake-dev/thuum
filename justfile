@@ -145,15 +145,33 @@ lab-run scenario game="":
     set -euo pipefail
     mkdir -p lab/results
     game="{{game}}"; extra=(); [ -z "$game" ] || extra=(-F "game=$game")
+    # One run at a time, and a run's verdict comes before its artifacts are in: a run posted
+    # right after another's verdict gets 409. Wait up to ten minutes for the lab to be idle.
+    for _ in $(seq 60); do
+        idle=$(curl -fsS -m 15 "{{lab_api}}/status" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("run") is None)' || echo False)
+        [ "$idle" = True ] && break
+        sleep 10
+    done
     run=$(curl -fsS -X POST "{{lab_api}}/run" -F "scenario=@lab/scenarios/{{scenario}}.yaml" ${extra[@]+"${extra[@]}"} \
         | python3 -c 'import json,sys; print(json.load(sys.stdin)["run"])')
     echo "run $run started${game:+ on $game}"
     python3 - "$run" "{{lab_api}}" <<'PY'
     import json, sys, time, urllib.request
     run, api = sys.argv[1], sys.argv[2]
+    misses = 0
     while True:
-        with urllib.request.urlopen(f"{api}/run/{run}", timeout=30) as r:
-            body = json.load(r)
+        try:
+            with urllib.request.urlopen(f"{api}/run/{run}", timeout=30) as r:
+                body = json.load(r)
+            misses = 0
+        except (OSError, ValueError) as e:
+            # The run lives on sky-srv; a dropped poll (the tailnet, Caddy) must not fail it.
+            misses += 1
+            if misses > 30:
+                raise
+            print("   poll failed, retrying:", e, flush=True)
+            time.sleep(10)
+            continue
         if body.get("verdict") in ("green", "red", "error"):
             break
         print("  ", body.get("phase", "running"), body.get("step", ""), flush=True)
@@ -259,6 +277,11 @@ client-crash-dumps vmid:
 # OneDrive off on a clone (onedrive-off.ps1): its backup prompt opened over the game on sky-c1.
 client-onedrive-off vmid:
     @lab/tools/client-onedrive-off.sh {{vmid}}
+
+# A T4 playtest's start (docs/private/playtest-*.md): both lab characters to an empty camp south of the spawn, a
+# few steps from an unowned bedroll, at half health, magicka and stamina. Both clients online, no lab run active.
+playtest-start:
+    @lab/tools/playtest-start.sh
 
 # A clone's own Sunshine identity (sunshine-identity.ps1): clones inherit the template's uniqueid and certificate,
 # and Moonlight keeps one entry per uniqueid, so it showed one lab client for two. Pair the clone afresh after.
