@@ -194,10 +194,13 @@ it carries a HYPOTHESIS tag.
   PvE and NPC reach. The blocked flag only lowers the attacker's own
   damage and stays as it is.
 - Console commands, full ActorValue set, game time and globals, wait and
-  sleep as server-owned time. Game time part one, the shared clock
-  (docs/verbs/time.md, ADR-021), is built on fork branch m1-time: a
-  stateless Rust clock, SetGameTime at login and every minute, the client
-  rendering it; T3 a-time pending the client build and a retake.
+  sleep as server-owned time. Game time part one, the shared clock, DONE
+  2026-10-04 (docs/verbs/time.md, ADR-021): a stateless Rust clock,
+  SetGameTime at login and every minute, the client rendering it and
+  setting the engine's day count through a new Skyrim Platform native
+  (TESModPlatform.SetGameDaysPassed); a-time green, run
+  20261004-035822-a-time; on parity 4257036e. Part two, per-player wait and
+  sleep, is open.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as

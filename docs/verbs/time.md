@@ -410,4 +410,7 @@ T2: green on the same image, 2026-10-04:
 - [x] T3 scenario green (run 20261004-035822-a-time); no HYPOTHESIS tag
       left on what the verb does
 - [x] ledger updated (GetCurrentGameTime, WaitGameTime)
-- [ ] on parity: after the regression sweep on m1-time
+- [x] on parity 4257036e (2026-10-04), after a regression sweep on m1-time:
+      13 of 15 green; m0-death (the client's own isDead, Eli's call) and
+      m0-forge (no forge reference until the lab cell, Track L4) were red
+      before it
