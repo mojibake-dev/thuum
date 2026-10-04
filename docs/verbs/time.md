@@ -177,9 +177,14 @@ ticking it, so there is nothing to save, and decision 3 costs nothing.
 - **What is known to work.** TimeService has written GameHour, GameDay,
   GameMonth and GameYear this way since SkyMP shipped it, and the sky
   follows.
-- **The engine's clock step, read in Ghidra on 1.7.104 (HYPOTHESIS).**
+- **The engine's clock step, read in Ghidra on 1.7.104.**
   ghidra/notes/calendar-1-7-104.md has the ids, the trimmed code and a
-  Frida plan.
+  Frida plan, and keeps its static findings tagged HYPOTHESIS.
+  - What this verb relies on is CONFIRMED in the lab (a-time, run
+    20261004-035822-a-time). Both clients read GameDaysPassed as the day
+    count set through SetGameDaysPassed plus GameHour / 24 (24.68319 at
+    16.3966), and it still agreed with the server 30 s later and after a
+    restart (Results).
   - Every unpaused frame, wait step, fast travel and cell move calls one
     step (Address Library 36291). It adds the frame's game hours to
     GameHour and rolls the date past 24.0 by the days-in-month table.
@@ -360,6 +365,36 @@ TimeService renders the latest SetGameTime and keeps its receipt time.
     fails the daysPassed assertions, because the engine's step rebuilds the
     global every frame.
 
+## Results
+
+T3: a-time green, run 20261004-035822-a-time, 2026-10-04. The run used the
+fork's m1-time server image (pipeline 637) and its client and Skyrim
+Platform build (GitHub run 37174019756) on both clones. All 21 assertions
+held.
+
+| point | c1 GameHour | c1 days passed | c2 GameHour | c2 days passed |
+| --- | --- | --- | --- | --- |
+| after login | 16.3966 | 24.68319 | 16.3965 | 24.68319 |
+| 30 s later | 16.5658 | 24.69024 | 16.5680 | 24.69033 |
+| after a server restart and relog | 16.7925 | 24.69969 | 16.7994 | 24.69998 |
+
+- **Date and rate.** Both clients were on 4E 201, month 8 (Hearthfire),
+  day 9, at TimeScale 20. The hour moved 10.2 game minutes in the 30 s
+  between the first two dumps.
+- **Agreement.** The two clients agreed within 0.5 game seconds, and each
+  agreed with the server's clock (labState time) within the 3-minute
+  tolerance at every assert.
+- **Rotation fix.** It showed up in the same run: c2 spawned facing 72
+  degrees, its record's rotation, where the old client turned that into 72
+  radians (165.3 degrees).
+
+T2: green on the same image, 2026-10-04:
+- the smoke saw one SetGameTime ahead of its CreateActor (hour 9.093, days
+  passed 24.3789);
+- labState agreed 1.3 game minutes later;
+- all seven difftest sessions were identical, with the clock's divergence
+  declared once.
+
 ## Status
 
 - [x] decisions 1 to 4 settled (ADR-021; 4 deferred)
@@ -368,9 +403,11 @@ TimeService renders the latest SetGameTime and keeps its receipt time.
       (ghidra/notes/calendar-1-7-104.md, HYPOTHESIS until a-time)
 - [x] SP binding: TESModPlatform.SetGameDaysPassed (T1 has no harness yet;
       a-time is the proof)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger updated (GetCurrentGameTime, WaitGameTime)
+- [x] server logic + T0 (cargo, and the fork's ctest: 257 cases)
+- [x] message + validator (same commit, f280d576)
+- [x] TS handler (TimeService)
+- [x] T2 green (2026-10-04)
+- [x] T3 scenario green (run 20261004-035822-a-time); no HYPOTHESIS tag
+      left on what the verb does
+- [x] ledger updated (GetCurrentGameTime, WaitGameTime)
+- [ ] on parity: after the regression sweep on m1-time

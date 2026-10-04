@@ -1,10 +1,16 @@
 # Calendar in 1.7.104: GameDaysPassed is rebuilt every frame
 
-Status: HYPOTHESIS. Read statically on 2026-10-04 by the re-analyst subagent
-through the ghidra MCP, for docs/verbs/time.md. Nothing was renamed or saved
-in the project. Lab confirmation is the a-time scenario: its daysPassed
-asserts pass only if the client's day count is set the way this note says
-it must be.
+Status: HYPOTHESIS for the engine's internals below. Read statically on
+2026-10-04 by the re-analyst subagent through the ghidra MCP, for
+docs/verbs/time.md. Nothing was renamed or saved in the project.
+
+Corroborated in the lab: a-time (run 20261004-035822-a-time) read both
+clients' GameDaysPassed as the day count set through
+TESModPlatform.SetGameDaysPassed plus GameHour / 24 (24.68319 at hour
+16.3966). It was still in step with the server 30 s later and after a
+restart. That is the rebuild formula this note reads. The run had no
+negative control (a client that only calls SetValue), so "a SetValue lasts
+one step" stays unproven in the lab.
 
 Program: SkyrimSE-1.7.104.0.exe in the sky-re Ghidra project. Ids below are
 Address Library ids, resolved with `lab/addr.py` against
