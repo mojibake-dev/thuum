@@ -60,7 +60,11 @@ Milestone: M1   Class: B
   - no hit dealt or taken by that player in the last 10 seconds, as the
     server saw them. This is the server's stand-in for the engine's "not
     with enemies nearby", which only the client can see. The 10 seconds is
-    a setting and a choice, not an engine number.
+    a setting and a choice, not an engine number. Eli's playtest showed it
+    alone lets a victim rest 10 s after the last hit, because only the
+    attacker's game marks the other an enemy. ADR-023 shares the hostility
+    with the victim's game (a verb of its own), and the 10 s rule stays as
+    the backstop.
   - No further rate limit. Rests one after another cannot heal past full,
     and the combat check keeps a rest from being an in-fight heal. The
     message's rate limit stops floods.

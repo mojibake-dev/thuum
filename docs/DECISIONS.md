@@ -511,3 +511,36 @@ Library formats (ADR-018). Only 1.7.104 had been tested since the port, so
   (docs/LAB.md), and a verb's engine facts name the version they were read
   on.
 - libespm's checksum table and T0 learn the 1.6.1170 set.
+
+## ADR-023: Hostility between players is shared by both games
+
+Status: accepted (2026-10-04, Eli: "the fairest seems to be C. i can see a
+and b being exploited").
+
+**Context.** Eli's playtest found combat one-sided. When a player hits
+another, the attacker's game marks the victim an enemy: it shows on the
+compass, and the attacker cannot wait. The victim's game never marks the
+attacker, because each client keeps its own combat state for the other
+players. The rest verb's server-side check is "no hit dealt or taken in the
+last 10 s" (docs/verbs/rest.md). So a victim could step back 10 s, rest an
+hour, and return at full health, which single-player forbids ("not with
+enemies nearby"; UESP, [Skyrim:Beds](https://en.uesp.net/wiki/Skyrim:Beds)).
+
+**Options weighed:**
+- (a) Lengthen the server's window. Beatable by waiting it out.
+- (b) Refuse a rest while a recent opponent is nearby, on the server.
+- (c) Make both games see the fight: when the server takes a hit between two
+  players, the victim's game also treats the attacker as an enemy. The
+  engine's own rules then block waiting on both sides, as in single-player.
+
+**Decision: (c).** The server, which already validates every player-on-player
+hit (R1), tells the victim's client that the attacker is hostile. The engine
+then applies its own combat rules to both players. The server keeps its
+10-second rule as the backstop for a client that ignores its own engine.
+
+**Consequences:**
+- A new verb: hostility sync. It needs the engine's surface, which actor
+  state makes "enemies nearby" true for the player. That comes from
+  CommonLibSSE-NG or Ghidra, not memory (rule 1), and so does how a remote
+  player's actor can carry it without its AI acting.
+- Until it lands, rest keeps the 10-second rule alone.
