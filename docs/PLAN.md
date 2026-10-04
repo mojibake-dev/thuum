@@ -294,16 +294,17 @@ scenario once the systems it leans on exist.
   Core Impact Framework (an SKSE plugin hooking projectile collision and hit
   processing on the shooting client) reports an unhelmeted head hit. Hit
   location rides M2's hit registration as untrusted input (hard rule 5), and
-  the kill is the server's (R0). CIF 1.2.8 loads on 1.6.1170, not on the
-  lab's 1.7.104.
+  the kill is the server's (R0). On the lab's 1.7.104 it runs on CIF 2.0.7
+  unchanged (1.2.8 reads only the older Address Library format).
 - Eli's rotfern race: the standalone plugin (masters Skyrim.esm and
   RaceCompatibility.esm) uses vanilla appearance data only. Character
   creation and SkyMP's appearance sync already cover it, so it is the first
   to test. RaceMenu co-save data is not carried.
 
 The detail, sources and gaps are in docs/MODS.md (apocrypha's analysis,
-2026-10-04). Open for Eli: the lab runs 1.7.104 (ADR-018) while CIF 1.2.8
-and RaceMenu 0.4.20 target 1.6.1170.
+2026-10-04). Open for Eli: RaceMenu 0.4.20 targets 1.6.1170 only and Nexus
+has no 1.7.x build, while the lab runs 1.7.104 (ADR-018); rotfern's own look
+does not need it.
 
 ## Cross-cutting tracks
 

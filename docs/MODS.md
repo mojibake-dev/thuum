@@ -25,7 +25,8 @@ Nexus files, for re-pulling (`/v1/games/skyrimspecialedition/mods/{mod}/files/{f
 | --- | --- | --- | --- | --- |
 | Apocalypse - Magic of Skyrim | 1090 | 758998 | 10.2.3 (the page is at 10.3.0) | 26fa3eb013175c09d12b5b52d5df09ac |
 | Headshot Kills - CIF | 148579 | 622326 | 1.2 | bd394ef49f6830d0d48e88c2cb0cb19c |
-| Core Impact Framework | 146873 | 721776 | 1.2.8 (the page is at 2.0.7) | 88ffc290d14e283f576bda68b0b246bd |
+| Core Impact Framework | 146873 | 721776 | 1.2.8, Fenestrate's (1.6.1170 only) | 88ffc290d14e283f576bda68b0b246bd |
+| Core Impact Framework | 146873 | 801478 | 2.0.7, the lab's (1.7.104) | 280692a00e60890fc8a16826cceb56f1 |
 | RaceCompatibility for SSE, All-In-One | 2853 | 381971 | 2.16 | 9a8fc2437ac9339ab42647f096f61c95 |
 | RaceMenu | 19080 | 743640 | 0.4.20.0 | 92f8e9de4b2a1ef8a442752dab460ada |
 | Goam's Elven Ears Proper RaceMenu Integration | 122236 | 696384 | 1.1.0 | 43f58837afbc2e7cca970a76e7ce3e81 |
@@ -116,14 +117,22 @@ What it needs from thuum:
 - **The kill is R0.** It is the server's decision on the server's health
   record; a client-side Kill() on an actor it does not own is suppressed.
 - **Natives.** Actor.Kill, the one native involved, is missing.
-- **Runtime mismatch.**
-  - CIF 1.2.8 declares Address Library post-AE but not the 1.7.99+ version 5
-    flag, so it loads on 1.6.1170 (Fenestrate) and not on the lab's 1.7.104
-    (ADR-018).
-  - CIF 2.0.7 may load there, but it renamed BipedSlot to BipedSlots and made
-    plain Conditions an OR; Headshot Kills is written in the 1.x keys.
-  - So the lab needs either a CIF 2.x port of headshot.json or a 1.6.1170
-    client. That is Eli's call.
+- **Runtime: CIF 2.0.7 on the lab.** apocrypha read SKSE 2.3.1's
+  PluginManager.cpp and both DLLs (2026-10-04, static analysis only).
+  - SKSE's gate does not stop either version. Neither sets the 1.7.99+
+    Address Library version 5 flag, but both were built after 2025-05-26,
+    and SKSE only refuses older DLLs for missing it.
+  - The real gate is CIF's own Address Library loader.
+    - The lab's versionlib-1-7-104-0.bin is format 5.
+    - CIF 1.2.8's vendored CommonLibSSE-NG accepts a single format and stops
+      with "Unsupported address library format".
+    - CIF 2.0.7 handles formats 1, 2 and 5.
+  - So the lab uses CIF 2.0.7 and Fenestrate's 1.2.8 stays on 1.6.1170.
+  - Headshot Kills should work on 2.0.7 unchanged: it still recognizes the
+    1.x key BipedSlot, and the mod has a single Conditions entry, so the
+    AND-to-OR change in 2.x does not touch it.
+  - The empirical check is one lab boot: skse64.log, and CIF's own log at
+    iVerboseMode=1 for JSON warnings.
 
 ## Rotfern (Eli's race)
 
@@ -177,5 +186,9 @@ What it needs from thuum:
   - the RACE's Playable flag, read with lab/esm.py.
 - **Later.** Vampirism (M7) needs the three missing RaceCompatibility natives.
 - **Not carried.** RaceMenu co-save data (sculpt, overlays) is outside SkyMP's
-  appearance model, and its skee64.dll targets 1.6.1170 only, the same
-  runtime question as CIF.
+  appearance model.
+- **RaceMenu does not load on the lab.** skee64.dll 0.4.20.0 lists only
+  1.6.1170 and declares no Address Library independence, so SKSE refuses it
+  on the lab's 1.7.104. Nexus has no 1.7.x RaceMenu yet: the newest build is
+  for 1.6.1170 (Steam) and 1.6.1179 (GOG). This is the one runtime question
+  left for Eli. Rotfern's own look does not need RaceMenu.
