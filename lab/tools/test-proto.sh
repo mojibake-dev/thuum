@@ -27,7 +27,11 @@ host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 project=${GITLAB_PROJECT:-7}
 rpc_port=3100
-ssh_srv() { ssh -o BatchMode=yes -J "$jump" "$host" "$@"; }
+# Keepalives: a connection through the jump that dies silently otherwise
+# leaves ssh waiting forever (two T2 runs hung for hours on 2026-10-04, their
+# remote commands long finished); with them ssh gives up within a minute and
+# the run fails, named.
+ssh_srv() { ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -J "$jump" "$host" "$@"; }
 # Ready means the lab RPC answers: docker's port proxy accepts TCP before the
 # server listens, so a bare connect proves nothing.
 wait_ready() {

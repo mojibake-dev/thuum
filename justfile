@@ -168,7 +168,7 @@ lab-down:
     @curl -fsS -X POST "{{lab_api}}/down"
 
 # Copy the lab tree and the sky-srv deployment files to /srv/lab on sky-srv (VM 700) through the host jump.
-srv_ssh := "ssh -J root@core.gaussing.tv"
+srv_ssh := "ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -J root@core.gaussing.tv"
 deploy-srv:
     #!/usr/bin/env bash
     set -euo pipefail
