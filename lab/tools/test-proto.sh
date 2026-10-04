@@ -94,11 +94,24 @@ assert actor, "no CreateActor with isMe"
 sent = [e for e in events if e.get("event") == "sent" and e["msg"].get("t") == 2]
 assert len(sent) >= 5, f"only {len(sent)} movement updates sent"
 print(f"   fakeclient ok: actor idx {actor[0]['idx']} at {actor[0]['pos']}, {len(sent)} moves, {done[0].get('received')} messages received")
+# the game clock (docs/verbs/time.md): one SetGameTime at login, ahead of the
+# player's own CreateActor, at the game's rate
+clocks = [i for i, e in enumerate(events) if e.get("event") == "message" and e["msg"].get("t") == 34]
+assert len(clocks) == 1, f"{len(clocks)} SetGameTime messages, want one at login"
+assert clocks[0] < events.index(actor[0]), "SetGameTime came after the player's CreateActor"
+c = events[clocks[0]]["msg"]
+assert c["timeScale"] == 20 and 0 <= c["hour"] < 24 and 0 <= c["month"] <= 11 and c["day"] >= 1, f"SetGameTime out of shape: {c}"
+print(f"   clock ok: year {c['year']} month {c['month']} day {c['day']} hour {c['hour']:.3f} days passed {c['daysPassed']:.4f} at scale {c['timeScale']}")
 PY
-{ rpc labState '{"kind":"actor","profileId":9}'; echo; rpc labState '{"kind":"inventory","profileId":9}'; } > "$tmp/state.txt"
+{ rpc labState '{"kind":"actor","profileId":9}'; echo; rpc labState '{"kind":"inventory","profileId":9}'; echo; rpc labState '{"kind":"time"}'; } > "$tmp/state.txt"
 python3 - "$tmp/state.txt" "$tmp/events.jsonl" <<'PY'
 import json, sys
-actor, inv = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
+actor, inv, clock = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
+told = [json.loads(l)["msg"] for l in open(sys.argv[2]) if l.strip() and '"t":34' in l.replace(" ", "")][0]
+assert clock.get("found"), f"labState has no game clock: {clock}"
+ahead = clock["daysPassed"] - told["daysPassed"]
+assert 0 <= ahead < 0.02, f"labState's clock is {ahead:.4f} days from what the client was told"
+print(f"   labState clock agrees: {ahead * 24 * 60:.1f} game minutes on since login")
 spawn = [json.loads(l) for l in open(sys.argv[2]) if l.strip() and ('"event": "actor"' in l or '"event":"actor"' in l)][0]["pos"]
 assert actor.get("found"), f"server has no actor for profile 9: {actor}"
 dx = abs(actor["x"] - spawn[0])
