@@ -34,18 +34,40 @@ Milestone: M1   Class: B
   2 s of the menu closing. TimeService takes that path for any engine ahead
   of the server, and sets the day count back through SetGameDaysPassed.
 
+## Engine facts
+
+- **Regeneration.** Health regenerates 0.70 percent of its maximum per
+  second outside combat and 0.49 percent in combat
+  ([UESP, Skyrim:Health](https://en.uesp.net/wiki/Skyrim:Health)).
+- **A rest restores fully, normally.** "Sleeping or waiting fully restores
+  your health": under normal circumstances it takes 142.86 seconds to heal to
+  full, "well under the hour minimum of waiting or sleeping" (the same page).
+  The menu's minimum is therefore one hour.
+- **HYPOTHESIS: what time the engine regenerates over during a rest.** It
+  may be the rest's game seconds (3,600 per hour) or their real-time
+  equivalent at the time scale (180 per hour at 20). Both restore fully at
+  the base rates. They differ only when a rate is lowered. The Dynamic plan
+  below measures it.
+
 ## Authority
 
 - **R1 for the rest itself.** The client reports that its player rested,
   and for how many hours and of which kind. The server validates it:
-  - hours in (0, 24];
-  - not more often than the hours rested allow;
-  - the player alive and not in a menu the server can see.
+  - hours in [1, 24], the menu's range;
+  - the player alive;
+  - no hit dealt or taken by that player in the last 10 seconds, as the
+    server saw them. This is the server's stand-in for the engine's "not
+    with enemies nearby", which only the client can see. The 10 seconds is
+    a setting and a choice, not an engine number.
+  - No further rate limit. Rests one after another cannot heal past full,
+    and the combat check keeps a rest from being an in-fight heal. The
+    message's rate limit stops floods.
 - **R0 for its effect on the record.** The server computes the recovery:
   each attribute's regeneration over the rested hours, at the rates
-  CropRegeneration already uses for the race, in game time over the hours.
-  It writes the new percentages and sends them to the player and its
-  neighbours.
+  CropRegeneration already uses (the race's and the actor's rate and rate
+  multiplier). The time it regenerates over follows the engine, which the
+  Dynamic plan measures; until then, game seconds. It writes the new
+  percentages and sends them to the player and its neighbours.
 - **R3 for the client's own world.** The engine's local jump in time during
   the menu stays on the resting client. That covers its view of weather and
   of NPC schedules, and the clock snaps back afterwards.
@@ -83,6 +105,15 @@ Milestone: M1   Class: B
   ships them (CoreScripts 0.8.1 scripts/config.lua:82-89, applied per player
   at login in eventHandler.lua:550-552): allowWait, allowBedRest,
   allowWildernessRest.
+
+## Dynamic plan
+
+What the lab measures before the rule's time base loses its HYPOTHESIS tag:
+- c1 sets its HealRateMult to 1 percent (set-av), takes damage to half
+  health, waits one hour through the menu, then dumps its health.
+- Game seconds predict +36 percent (0.70 x 0.01 x 3,600). The real-time
+  equivalent predicts +1.26 percent (0.70 x 0.01 x 180).
+- The same run with the menu on two hours tells a cap from a rate.
 
 ## Tests
 
