@@ -20,12 +20,19 @@ field's size is the uint32 that XXXX carried.
     esm.py ref <plugin> <form id>
     esm.py id <plugin> <form id>
     esm.py races <plugin>
+    esm.py attacks <plugin> <race editor id substring>
 
 `near` lists the references placed in a worldspace within a radius (in the
 x-y plane) whose base record is one of the types, e.g. FLOR,CONT,ACTI,DOOR:
 the objects a scenario can activate around a spot. `races` lists the plugin's
 RACE records with their Playable and Child flags: the races the race menu
-offers are the playable ones (docs/verbs/character-creation.md).
+offers are the playable ones (docs/verbs/character-creation.md). `attacks`
+lists a race's attack data, one ATKD and its ATKE event name per attack
+(UESP, "Skyrim Mod:Mod File Format/RACE": damage mult, chance, spell, flags,
+attack angle, strike angle, stagger, attack type, knockdown, recovery,
+stamina mult; the same order as CommonLibSSE-NG's BGSAttackData::AttackData).
+The strike angle is the half angle of the engine's hit cone for that attack
+(docs/verbs/melee-reach.md).
 """
 
 from __future__ import annotations
@@ -176,6 +183,29 @@ def race_flags(rec: Record) -> int | None:
     return struct.unpack_from("<I", data, RACE_FLAGS_AT)[0]
 
 
+@dataclass
+class Attack:
+    event: str
+    flags: int
+    attack_angle: float
+    strike_angle: float
+
+
+def race_attacks(rec: Record) -> list[Attack]:
+    """A race's ATKD records, each named by the ATKE that follows it."""
+    out: list[Attack] = []
+    pending: tuple[int, float, float] | None = None
+    for name, data in rec.fields:
+        if name == "ATKD" and len(data) >= 24:
+            flags = struct.unpack_from("<I", data, 12)[0]
+            angle, strike = struct.unpack_from("<2f", data, 16)
+            pending = (flags, angle, strike)
+        elif name == "ATKE" and pending is not None:
+            out.append(Attack(data.split(b"\0", 1)[0].decode("latin-1"), *pending))
+            pending = None
+    return out
+
+
 def find(buf: bytes, rtype: str, needle: str) -> list[Record]:
     return [r for r in walk(buf, 0, len(buf), rtype) if needle.lower() in r.editor_id.lower()]
 
@@ -251,6 +281,17 @@ def main(argv: list[str]) -> int:
             print(f"{rec.form_id:#010x} {rec.editor_id}"
                   f"{' playable' if flags & RACE_PLAYABLE else ''}{' child' if flags & RACE_CHILD else ''}")
         return 0 if races else 1
+    if len(argv) == 4 and argv[1] == "attacks":
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        hits = [r for r in find(buf, "RACE", argv[3])]
+        for rec in hits:
+            attacks = race_attacks(rec)
+            widest = max((a.strike_angle for a in attacks), default=0.0)
+            print(f"{rec.form_id:#010x} {rec.editor_id}: {len(attacks)} attacks, widest strike angle {widest:g}")
+            for a in attacks:
+                print(f"  {a.event:32} strike {a.strike_angle:g} angle {a.attack_angle:g} flags {a.flags:#x}")
+        return 0 if hits else 1
     if len(argv) == 4 and argv[1] == "ref":
         with open(argv[2], "rb") as f:
             buf = f.read()

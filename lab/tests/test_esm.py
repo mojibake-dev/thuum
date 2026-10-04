@@ -71,6 +71,21 @@ class RaceTests(unittest.TestCase):
         self.assertIsNone(esm.race_flags(esm.Record("RACE", 1, 0, [("DATA", bytes(20))])))
 
 
+class AttackTests(unittest.TestCase):
+    def test_each_atkd_is_named_by_the_atke_after_it(self):
+        def atkd(flags, angle, strike):
+            # damage mult, chance, spell, flags, attack angle, strike angle,
+            # stagger, attack type, knockdown, recovery, stamina mult
+            return field("ATKD", struct.pack("<ffIIfffIfff", 1.0, 1.0, 0, flags, angle, strike, 0.0, 0, 0.0, 0.0, 1.0))
+        fields = (field("EDID", b"NordRace\0") + atkd(0x1, 0.0, 50.0) + field("ATKE", b"attackStart\0")
+                  + atkd(0x5, 0.0, 35.0) + field("ATKE", b"attackPowerStartInPlace\0") + field("ATKD", bytes(8)))
+        buf = record("TES4", 0, b"") + group("RACE", record("RACE", 0x13746, fields))
+        rec = next(esm.walk(buf, 0, len(buf), "RACE"))
+        attacks = esm.race_attacks(rec)
+        self.assertEqual([(a.event, a.strike_angle, a.flags) for a in attacks],
+                         [("attackStart", 50.0, 0x1), ("attackPowerStartInPlace", 35.0, 0x5)])
+
+
 class NearTests(unittest.TestCase):
     def test_lists_placed_objects_of_the_types_near_a_point_in_one_world(self):
         flor = group("FLOR", record("FLOR", 0x0004_0001, field("EDID", b"Mountainflower\0")))
