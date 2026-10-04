@@ -1,0 +1,44 @@
+# M1, game time part two (thuum docs/verbs/rest.md, ADR-021 decision 2): a
+# player's rest is its own. c1, set to half health, magicka and stamina,
+# waits an hour through the real Sleep/Wait menu: T (DirectInput 0x14,
+# Skyrim's wait key) opens it, Enter accepts its default hour (exploratory
+# run 20261004-093837: the "Wait how long?" menu at 1, then the server's log
+# "Rest: ... waited 1 h, percentages now 1 1 1").
+# What must hold afterwards:
+# - the server's record shows c1 recovered, which only the server's rest can
+#   do: a client's own report is cropped to 2 s of regeneration;
+# - c1's own game shows it recovered;
+# - c1's clock is back on the server's, and c2's never moved: the shared
+#   clock does not move for one player's rest.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-rest
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
+  - wait: 5
+  - c1: set-percentages {health: 0.5, magicka: 0.5, stamina: 0.5}
+  - wait: 3
+  - c1: dump-state
+  - assert:
+      - server.actor(c1).healthPercentage < 0.6
+  - c1: tap-key {code: 20}
+  - wait: 2
+  - c1: screenshot
+  - c1: tap-key {code: 28}
+  - wait: 8
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - server.actor(c1).healthPercentage == 1
+      - c1.state.healthPercentage > 0.99
+      - abs(c1.state.gameHour - server.time().hour) < 0.05
+      - abs(c2.state.gameHour - server.time().hour) < 0.05
+artifacts: [server.log, c1.log, c2.log, screenshots]
