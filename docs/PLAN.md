@@ -190,8 +190,12 @@ it carries a HYPOTHESIS tag.
   only when the server saw a power attack start within 3 s or holds the
   attacker sneaking (docs/verbs/damage-flags.md; a-damage-flags green on
   the Rust rules, run 20261003-224045; on parity f0045206, where the five
-  game rules are Rust, ADR-020). Open in this bullet: the hit's angle (cone),
-  PvE and NPC reach. The blocked flag only lowers the attacker's own
+  game rules are Rust, ADR-020). Seventh DONE 2026-10-04: a player's melee
+  hit on a player must come from within the attacker's cone, 95 degrees off
+  its heading for a Nord (145 for a power attack's sweep), where the game's
+  own cone is the client's to widen (docs/verbs/hit-cone.md; a-melee-cone
+  green, run 20261004-055345; on parity 64ba89a4). Open in this bullet: PvE
+  and NPC reach and angle. The blocked flag only lowers the attacker's own
   damage and stays as it is.
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time. Game time part one, the shared clock, DONE

@@ -1,8 +1,8 @@
 # Verb: hit cone
 
 M1 validation, "damage range and angle" (docs/PLAN.md). This is the angle
-half; docs/verbs/melee-reach.md is the range half. It is built on fork
-branch m1-cone.
+half; docs/verbs/melee-reach.md is the range half. DONE 2026-10-04, on
+parity 64ba89a4.
 
 ## Intent
 
@@ -131,4 +131,10 @@ IronSword and swings with attackStart.
 - [x] server logic + T0 (cargo; ctest on the fork's CI)
 - [x] T2 green (2026-10-04, image a08ee1f2): the melee-cone session diverges
       as declared, the six others unchanged
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T3 scenario green: a-melee-cone, run 20261004-055345 (the swings at 0
+      and 30 degrees landed; with the cone widened by a console, the swings at
+      180 and 135 were refused). a-melee-reach, a-damage-flags and
+      smoke-two-players stayed green on the same image (runs
+      20261004-055913, -060235, -060556)
+- [x] on parity 64ba89a4 (2026-10-04)
+- [ ] scenario reviewed by Eli
