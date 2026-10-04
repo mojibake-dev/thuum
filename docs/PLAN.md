@@ -231,7 +231,14 @@ it carries a HYPOTHESIS tag.
     on 1.7.104 and 1.6.1170 (runs 20261004-213205 and -213505); the
     engine's own message read "Sneak attack for 3.0X damage!".
   - Hostility is one-sided: only the attacker's game marks the other an
-    enemy. ADR-023: share it with the victim's game (a verb).
+    enemy. ADR-023: share it with the victim's game. DONE 2026-10-04
+    (docs/verbs/hostility-sync.md, fork 5af53787): on the first hit of a
+    fight between players, the server has the victim's game call
+    Actor.StartCombat on its figure of the attacker (an SpSnippet, no new
+    message; the rule is Rust in wire-rules `hostility`). Both games then
+    refuse a wait and mark the enemy on the compass; the figure does not
+    drift. a-hostility green on 1.7.104 and 1.6.1170 (runs 20261004-230736
+    and -231111).
   - The two clients' clocks looked "a few minutes" apart. Not drift: at
     time scale 20 a game minute passes every 3 real seconds, so reading two
     wait menus 10 to 15 s apart shows 3 to 5 minutes. Read back to back

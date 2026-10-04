@@ -173,7 +173,10 @@ of a fight needs measuring.
 - [x] message + validator (none: no message changes)
 - [x] native hook + T1 (none)
 - [x] TS handler (none)
-- [ ] T2 green
+- [x] T2 green: the ten sessions against m1-hostility-5af53787, with
+      that commit's own difftest artifact (job 3101), 2026-10-04. The new
+      notice is declared in hostility, damage-flags and rest, the sessions
+      where players fight.
 - [x] T3 scenario green, no HYPOTHESIS tags: a-hostility on 1.7.104 (run
       20261004-230736) and 1.6.1170 (run 20261004-231111)
 - [x] ledger and suppression registry updated (`Actor.StartCombat` noted)
