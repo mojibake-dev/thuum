@@ -161,11 +161,14 @@ resting in the tool anyway?").
 - **The rested bonus.** It is a skill-gain multiplier, so it lives with skill
   gains: in the client's engine until M5.
 
-## Open
+## Server settings
 
-- TES3MP's switches as server settings (allowWait, and allowBedRest as
-  allowSleep; Skyrim has no wilderness sleep): not built yet. Both are on in
-  TES3MP's own defaults, which is today's behaviour.
+TES3MP's switches, server-settings.json's `rest` block (fork 43b51ef1):
+`{"allowWait": true, "allowSleep": true}`, both on when the block or a key
+is missing, as TES3MP ships them. allowSleep is TES3MP's allowBedRest;
+Skyrim has no wilderness sleep, so TES3MP's allowWildernessRest has no
+counterpart, and an unknown key stops the server at start, named, as the
+clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
 
 ## Status
 
