@@ -22,6 +22,7 @@ import {
   ConstructibleObject,
   Debug,
   Game,
+  GlobalVariable,
   HttpClient,
   HttpResponse,
   Input,
@@ -115,6 +116,27 @@ function releaseHeldKeys(): void {
 
 function num(v: unknown, fallback = 0): number {
   return typeof v === "number" && Number.isFinite(v) ? v : fallback;
+}
+
+// The engine's six time globals, Skyrim.esm form ids (lab/esm.py,
+// 2026-10-03): the server's game clock as this client renders it (thuum
+// docs/verbs/time.md)
+const TIME_GLOBALS: Array<[string, number]> = [
+  ["gameYear", 0x35],
+  ["gameMonth", 0x36],
+  ["gameDay", 0x37],
+  ["gameHour", 0x38],
+  ["gameDaysPassed", 0x39],
+  ["timeScale", 0x3a],
+];
+
+function timeGlobals(): Record<string, number | null> {
+  const out: Record<string, number | null> = {};
+  for (const [name, id] of TIME_GLOBALS) {
+    const g = GlobalVariable.from(Game.getFormEx(id));
+    out[name] = g ? g.getValue() : null;
+  }
+  return out;
 }
 
 function actorValue(player: Actor, name: string) {
@@ -212,6 +234,7 @@ function dumpState(player: Actor) {
     magicka: actorValue(player, "magicka"),
     stamina: actorValue(player, "stamina"),
     health: actorValue(player, "health"),
+    ...timeGlobals(),
     near,
   };
 }

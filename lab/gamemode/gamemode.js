@@ -7,6 +7,7 @@
 // POST /rpc/<name> with body {"payload": ...}):
 //
 //   labState   {kind: "actor" | "inventory" | "online", profileId}
+//              {kind: "time"}: the server's game clock now
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -93,6 +94,16 @@ const state = {
   online() {
     const ids = mp.get(0, "onlinePlayers") || [];
     return { players: ids.map((actorId) => ({ actorId, profileId: mp.get(actorId, "profileId") })) };
+  },
+
+  // The server's game clock (docs/verbs/time.md): year, month (from 0), day,
+  // hour, daysPassed, timeScale. A server without the clock has no property.
+  time() {
+    try {
+      return { found: true, ...mp.get(0, "gameTime") };
+    } catch (e) {
+      return { found: false, error: String((e && e.message) || e) };
+    }
   },
 };
 

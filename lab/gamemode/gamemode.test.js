@@ -37,6 +37,21 @@ test("labState actor and inventory", () => {
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "online" }), { players: [{ actorId: 0xff000001, profileId: 1 }] });
 });
 
+test("labState time is the server's clock, and absent without one", () => {
+  global.mp = fakeMp();
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const clock = { year: 201, month: 7, day: 17, hour: 8.5, daysPassed: 1.02, timeScale: 20 };
+  mp.set(0, "gameTime", clock);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "time" }), { found: true, ...clock });
+  mp.get = (id, k) => {
+    throw new Error(`mp.get is not implemented for '${k}'`);
+  };
+  const none = mp.onHttpRpcRunAttempt("labState", { kind: "time" });
+  assert.strictEqual(none.found, false);
+  assert.match(none.error, /gameTime/);
+});
+
 test("labCommand teleport and give", () => {
   global.mp = fakeMp();
   delete require.cache[require.resolve("./gamemode.js")];

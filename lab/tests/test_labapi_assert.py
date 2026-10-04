@@ -23,6 +23,9 @@ class Server:
         except ValueError:
             return self.items[spec.lower()]
 
+    def time(self):
+        return {"found": True, "year": 201, "month": 8, "day": 2, "hour": 14.25, "daysPassed": 16.26, "timeScale": 20.0}
+
 
 class Views:
     def __init__(self):
@@ -54,6 +57,34 @@ class EvaluatorTests(unittest.TestCase):
         ]:
             self.assertTrue(self.ev.evaluate(expr), expr)
         self.assertFalse(self.ev.evaluate("server.actor(c1).x == 12345"))
+
+    def test_the_game_clock_against_a_client_s_globals(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+
+        views = Views()
+        views.data["c1"] = {"pos": [0, 0, 0], "gameYear": 201.0, "gameMonth": 8.0, "gameDay": 2.0, "gameHour": 14.27,
+                            "gameDaysPassed": 16.261, "timeScale": 20.0}
+        ev = Evaluator(Server(), views, ["c1", "c2"])
+        for expr in [
+            "server.time().timeScale == 20",
+            "c1.state.timeScale == server.time().timeScale",
+            "abs(c1.state.gameHour - server.time().hour) < 0.05",
+            "c1.state.gameDay == server.time().day and c1.state.gameMonth == server.time().month",
+            "c1.state.gameYear == server.time().year",
+            "abs(c1.state.gameDaysPassed - server.time().daysPassed) < 0.01",
+        ]:
+            self.assertTrue(ev.evaluate(expr), expr)
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("server.time(c1).hour == 1")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.state.gameHour == 1")  # c2's dump has no globals
+
+        class NoClock(Server):
+            def time(self):
+                return None
+
+        with self.assertRaises(AssertionData):
+            Evaluator(NoClock(), views, ["c1"]).evaluate("server.time().hour == 1")
 
     def test_rejects_outside_the_language(self):
         from labapi.assertions import AssertionSyntax

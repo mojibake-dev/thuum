@@ -5,6 +5,10 @@ the lab can grep (E_ASSERT_*).
 
   server.actor(<client>).x | .y | .z | .cell        from the state endpoint
   server.inventory(<client>).count("<file>:<id>")   from the state endpoint
+  server.time().hour | .day | .month | .year | .daysPassed | .timeScale
+                                                     the server's game clock, read when the assert runs
+  <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
+                                                     that client's time globals, from its dump-state
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -33,6 +37,7 @@ class ServerFacade(Protocol):
     def actor(self, client: str) -> dict[str, Any] | None: ...
     def inventory(self, client: str) -> list[dict[str, Any]] | None: ...
     def base_id(self, spec: str) -> int: ...
+    def time(self) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -110,6 +115,19 @@ class WatchView:
 
 
 @dataclass(frozen=True)
+class TimeView:
+    """server.time(): the server's game clock (labState kind time), read when
+    the expression is evaluated (docs/verbs/time.md)."""
+
+    year: int
+    month: int
+    day: int
+    hour: float
+    daysPassed: float
+    timeScale: float
+
+
+@dataclass(frozen=True)
 class StateView:
     """c.state: the client's own dump-state, as lab-driver reports it."""
 
@@ -126,6 +144,13 @@ class StateView:
     equippedLeft: int | None = None
     raceId: int | None = None
     sex: int | None = None
+    # the engine's time globals as the client renders the server's clock
+    gameYear: float | None = None
+    gameMonth: float | None = None
+    gameDay: float | None = None
+    gameHour: float | None = None
+    gameDaysPassed: float | None = None
+    timeScale: float | None = None
 
 
 @dataclass(frozen=True)
@@ -163,6 +188,17 @@ class _ServerRef:
             )
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"actor record for {client} lacks {e}") from e
+
+    def time(self) -> TimeView:
+        fn = getattr(self._f, "time", None)
+        d = fn() if fn else None
+        if not d:
+            raise AssertionData("server reports no game clock")
+        try:
+            return TimeView(int(d["year"]), int(d["month"]), int(d["day"]), float(d["hour"]),
+                            float(d["daysPassed"]), float(d["timeScale"]))
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"game clock lacks {e}") from e
 
     def inventory(self, client: str) -> InventoryView:
         entries = self._f.inventory(client)
@@ -304,6 +340,12 @@ class _ClientRef:
                 equippedLeft=_opt_int(dump.get("equippedLeft")),
                 raceId=_opt_int(dump.get("raceId")),
                 sex=_opt_int(dump.get("sex")),
+                gameYear=_opt_float(dump.get("gameYear")),
+                gameMonth=_opt_float(dump.get("gameMonth")),
+                gameDay=_opt_float(dump.get("gameDay")),
+                gameHour=_opt_float(dump.get("gameHour")),
+                gameDaysPassed=_opt_float(dump.get("gameDaysPassed")),
+                timeScale=_opt_float(dump.get("timeScale")),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s state lacks {e}") from e
@@ -314,11 +356,17 @@ _ATTRS = {
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
-    StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
+    TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
+    StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
+                "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale"},
     _ClientRef: {"state"},
 }
+# Methods that take no argument: server.time()
+_NULLARY = {
+    _ServerRef: {"time"},
+}
 _METHODS = {
-    _ServerRef: {"actor", "inventory"},
+    _ServerRef: {"actor", "inventory", "time"},
     _ClientRef: {"sees", "view", "watched"},
     InventoryView: {"count"},
 }
@@ -413,6 +461,10 @@ class Evaluator:
                 methods = _METHODS.get(type(obj))
                 if methods is None or node.func.attr not in methods:
                     raise AssertionSyntax(f"E_ASSERT_SYNTAX: method {node.func.attr!r} not allowed on {type(obj).__name__}")
+                if node.func.attr in _NULLARY.get(type(obj), set()):
+                    if node.args:
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes no argument")
+                    return getattr(obj, node.func.attr)()
                 args = []
                 for a in node.args:
                     if isinstance(a, ast.Name) and isinstance(self._names.get(a.id), _ClientRef):

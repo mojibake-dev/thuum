@@ -101,6 +101,12 @@ class ServerState:
         want = self._profile(client)
         return any(isinstance(p, dict) and p.get("profileId") == want for p in players)
 
+    def time(self) -> dict[str, Any] | None:
+        """The server's game clock now (labState kind time), or None from a
+        server without one (docs/verbs/time.md)."""
+        body = self._backend.rpc("labState", {"kind": "time"})
+        return body if body.get("found") else None
+
     def inventory(self, client: str) -> list[dict[str, Any]] | None:
         body = self._backend.rpc("labState", {"kind": "inventory", "profileId": self._profile(client)})
         if not body.get("found"):

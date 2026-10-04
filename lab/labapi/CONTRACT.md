@@ -89,6 +89,16 @@ snaps back to the client's real position within three seconds (run
 (below) instead of waiting a fixed time; `connect_settle_s` (0 s) is an
 optional extra pause after online.
 
+### time
+
+Request: `POST {SERVER_STATE_URL}/rpc/labState` with
+`{"payload": {"kind": "time"}}`. Answer: `{"found": true, "year": <int>,
+"month": <int, from 0>, "day": <int, from 1>, "hour": <float>, "daysPassed":
+<float>, "timeScale": <float>}`, the server's game clock at the moment it
+answers (docs/verbs/time.md; `mp.get(0, "gameTime")`), or `{"found": false,
+"error": ...}` from a server without the clock. Scenarios read it as
+`server.time().hour` and so on, evaluated when the assert runs.
+
 ## labCommand
 
 The server-side scenario verbs (rung R0) go here rather than to the client;
