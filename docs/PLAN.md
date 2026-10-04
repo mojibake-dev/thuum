@@ -226,9 +226,12 @@ it carries a HYPOTHESIS tag.
     multipliers from the master files.
   - Hostility is one-sided: only the attacker's game marks the other an
     enemy. ADR-023: share it with the victim's game (a verb).
-  - The two clients' clocks disagreed during the session. a-time agrees at
-    login and 30 s later (run 20261004-200816), so the drift builds over a
-    session. Open: reproduce it in a longer run.
+  - The two clients' clocks looked "a few minutes" apart. Not drift: at
+    time scale 20 a game minute passes every 3 real seconds, so reading two
+    wait menus 10 to 15 s apart shows 3 to 5 minutes. Read back to back
+    every minute for eight minutes, through a 7-hour rest and a death and
+    respawn, they never differed by more than 0.9 game minutes (exploratory
+    run 20261004-201638).
   - Next playtest: profile 2 needs a look of its own to judge appearance
     sync, players start hurt so a rest's recovery shows, and a bed within
     reach for sleep.
