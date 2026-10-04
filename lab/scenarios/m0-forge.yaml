@@ -1,12 +1,16 @@
-# M0 regression floor: crafting at a forge. c1 crafts an iron dagger at the
-# lab cell's forge; the server owns the result (R0): materials leave, the
-# dagger arrives, and both survive a restart. Assertions are evaluated by
-# lab-api only (ADR-009).
-# Needs: a forge reference for `station` (lab-forge: the lab cell's forge,
-# lab.esp, Track L4, or a vanilla forge's reference id), gamemode labCommand
-# give, and lab-driver's craft action (implemented, UNCONFIRMED until this
-# scenario runs). Editor ids are the ones in Skyrim.esm (IngotIron,
-# RecipeWeaponIronDagger).
+# M0 regression floor: crafting at a forge. c1 crafts an iron dagger at a
+# vanilla forge; the server owns the result (R0): materials leave, the dagger
+# arrives, and both survive a restart. Assertions are evaluated by lab-api
+# only (ADR-009).
+# The forge (Eli, 2026-10-04: a real forge in the game world rather than the
+# lab cell's): Skyrim.esm REFR 0x000A4ACA, base CraftingBlackSmithForge
+# 0x000CAE0B, in Tamriel at (162618.1, -62057.9, 7487.8), the nearest forge to
+# lab-spawn (lab/esm.py near and ref, 2026-10-04). Its keywords carry
+# 0x00088105, the workbench keyword (BNAM) of RecipeWeaponIronDagger
+# 0x000DA76A. c1 stands 120 units south of it at its height plus 50; the
+# offsets below are from lab-spawn's origin (133857, -61130, 14662).
+# Needs gamemode labCommand give and lab-driver's craft action (implemented,
+# UNCONFIRMED until this scenario runs).
 id: m0-forge
 milestone: M0
 clients: [c1, c2]
@@ -17,13 +21,13 @@ timeout_s: 900
 steps:
   - c1: connect
   - c2: connect
-  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c1: teleport {cell: lab-spawn, x: 28761, y: -1048, z: -7124}
   - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
   - wait: 5
   - c1: give {item: "Skyrim.esm:IngotIron", count: 1}
   - c1: give {item: "Skyrim.esm:LeatherStrips", count: 1}
   - wait: 3
-  - c1: craft {station: lab-forge, recipe: "Skyrim.esm:RecipeWeaponIronDagger"}
+  - c1: craft {station: 0x000A4ACA, recipe: "Skyrim.esm:RecipeWeaponIronDagger"}
   - wait: 10
   - assert:
       - server.inventory(c1).count("Skyrim.esm:IronDagger") == 1
