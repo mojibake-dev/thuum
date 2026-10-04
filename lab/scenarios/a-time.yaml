@@ -1,0 +1,74 @@
+# M1, the shared game clock (docs/verbs/time.md, ADR-021). The server owns
+# the date, the hour and the time scale (TimeScale 20, Skyrim.esm's), and
+# both clients render it. Each assert compares a client's six time globals
+# (lab-driver dump-state) against the server's clock at the moment the
+# assert runs (labState time). It runs three times: after login, 30 s later
+# (10 game minutes on), and after a server restart and relog, where the
+# players hear the clock again and the clock carries on from where its
+# function puts it.
+#
+# What fails without the verb:
+# - a client on its PC clock (SkyMP's TimeService) shows UTC time of day,
+#   unrelated to the server's game hour, and nudges TimeScale to 0.6 or 1.2;
+# - a GameDaysPassed write that does not stick fails the daysPassed lines
+#   (the verb doc's one HYPOTHESIS).
+#
+# Tolerances:
+# - A client's dump and the server's answer are a few real seconds apart;
+#   at 20 game seconds per real second, 0.05 h (3 game minutes) is 9 s of
+#   that, and 0.01 days is 43 s.
+# - Clients correct when a game minute off.
+# - A run whose assert falls within a real minute after game midnight can
+#   fail the hour and date lines: the client keeps the old date until the
+#   server's next word, a minute away at most. That is about one assert in
+#   seventy; rerun.
+#
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-time
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - server.time().timeScale == 20
+      - c1.state.timeScale == server.time().timeScale
+      - c2.state.timeScale == server.time().timeScale
+      - abs(c1.state.gameHour - server.time().hour) < 0.05
+      - abs(c2.state.gameHour - server.time().hour) < 0.05
+      - c1.state.gameDay == server.time().day and c1.state.gameMonth == server.time().month and c1.state.gameYear == server.time().year
+      - c2.state.gameDay == server.time().day and c2.state.gameMonth == server.time().month and c2.state.gameYear == server.time().year
+      - abs(c1.state.gameDaysPassed - server.time().daysPassed) < 0.01
+      - abs(c2.state.gameDaysPassed - server.time().daysPassed) < 0.01
+  - wait: 30
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - abs(c1.state.gameHour - server.time().hour) < 0.05
+      - abs(c2.state.gameHour - server.time().hour) < 0.05
+      - abs(c1.state.gameDaysPassed - server.time().daysPassed) < 0.01
+      - abs(c2.state.gameDaysPassed - server.time().daysPassed) < 0.01
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 10
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - c1.state.timeScale == server.time().timeScale
+      - c2.state.timeScale == server.time().timeScale
+      - abs(c1.state.gameHour - server.time().hour) < 0.05
+      - abs(c2.state.gameHour - server.time().hour) < 0.05
+      - c1.state.gameDay == server.time().day and c1.state.gameMonth == server.time().month and c1.state.gameYear == server.time().year
+      - c2.state.gameDay == server.time().day and c2.state.gameMonth == server.time().month and c2.state.gameYear == server.time().year
+      - abs(c1.state.gameDaysPassed - server.time().daysPassed) < 0.01
+      - abs(c2.state.gameDaysPassed - server.time().daysPassed) < 0.01
+artifacts: [server.log, c1.log, c2.log]
