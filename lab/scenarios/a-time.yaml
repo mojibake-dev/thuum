@@ -10,8 +10,9 @@
 # What fails without the verb:
 # - a client on its PC clock (SkyMP's TimeService) shows UTC time of day,
 #   unrelated to the server's game hour, and nudges TimeScale to 0.6 or 1.2;
-# - a GameDaysPassed write that does not stick fails the daysPassed lines
-#   (the verb doc's one HYPOTHESIS).
+# - a client that writes GameDaysPassed instead of setting the day count
+#   through TESModPlatform.SetGameDaysPassed fails the daysPassed lines: the
+#   engine rebuilds that global every frame (ghidra/notes/calendar-1-7-104.md).
 #
 # Tolerances:
 # - A client's dump and the server's answer are a few real seconds apart;
