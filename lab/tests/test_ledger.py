@@ -1,7 +1,8 @@
 """Tests for lab/ledger.py: a synthetic fork with every status, hand-column
 preservation, and, when the skymp submodule is present, facts the fork
 exploration established (Debug.Notification delegates, Game.IncrementStat is
-a stub, Actor.IsDead is overridden by the gamemode)."""
+delegated since Eli's 2026-10-04 decision, SetScale is still a stub,
+Actor.IsDead is overridden by the gamemode)."""
 
 import json
 import sys
@@ -123,7 +124,9 @@ class Synthetic(unittest.TestCase):
             make_fork(root)
             natives = {n.key: n for n in ledger.build(root)}
         self.assertEqual(natives["Game.GetPlayer"].status, "implemented")
-        self.assertEqual(natives["Game.IncrementStat"].status, "stub")
+        self.assertEqual(natives["Game.IncrementStat"].status, "delegated")
+        self.assertEqual(natives["ObjectReference.EnableNoWait"].status, "implemented")
+        self.assertEqual(natives["ObjectReference.SetScale"].status, "stub")
         self.assertEqual(natives["Game.Missing"].status, "missing")
         self.assertTrue(natives["Game.Missing"].latent)
         self.assertEqual(natives["Debug.Notification"].status, "delegated")
