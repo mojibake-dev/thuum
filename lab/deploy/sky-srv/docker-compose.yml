@@ -86,7 +86,10 @@ services:
       SERVER_STATE_URL: http://10.10.70.10:3000
       LAB_API_INTERNAL_URL: http://10.10.70.10/lab
       FRIDA_SCRIPTS_DIR: /srv/lab/thuum/lab/frida
-      GUESTS_FILE: /app/labapi/guests.yaml
+      # the lab's tables from the deployed tree, like the Frida scripts: a
+      # snapshot switch (a stacked clean-m1-<branch> for a client on another
+      # wire schema) is a `just deploy-srv` and a lab-api restart, not an image
+      GUESTS_FILE: /srv/lab/thuum/lab/labapi/labapi/guests.yaml
     volumes:
       - /srv/lab:/srv/lab
       - /srv/persist:/srv/persist:ro
