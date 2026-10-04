@@ -44,11 +44,12 @@ Milestone: M1   Class: B
   your health": under normal circumstances it takes 142.86 seconds to heal to
   full, "well under the hour minimum of waiting or sleeping" (the same page).
   The menu's minimum is therefore one hour.
-- **HYPOTHESIS: what time the engine regenerates over during a rest.** It
-  may be the rest's game seconds (3,600 per hour) or their real-time
-  equivalent at the time scale (180 per hour at 20). Both restore fully at
-  the base rates. They differ only when a rate is lowered. The Dynamic plan
-  below measures it.
+- **What time the engine regenerates over during a rest: measured.** At time
+  scale 20, the default, the engine gives a rest 360 seconds of
+  regeneration per game hour, linear in hours. That is neither the rest's
+  game seconds (3,600) nor their real-time equivalent (180). At time
+  scale 10 it gave about 457 a game hour, a dependence on the time scale
+  that the rule does not follow yet (see Measured).
 
 ## Authority
 
@@ -66,8 +67,8 @@ Milestone: M1   Class: B
 - **R0 for its effect on the record.** The server computes the recovery:
   each attribute's regeneration over the rested hours, at the rates
   CropRegeneration already uses (the race's and the actor's rate and rate
-  multiplier). The time it regenerates over follows the engine, which the
-  Dynamic plan measures; until then, game seconds. It writes the new
+  multiplier), over 360 seconds per hour, as the engine gives at the
+  default time scale. It writes the new
   percentages and sends them to the player, as every attribute change
   does (MpActor::NetSetPercentages).
 - **R3 for the client's own world.** The engine's local jump in time during
@@ -124,14 +125,30 @@ Milestone: M1   Class: B
   at login in eventHandler.lua:550-552): allowWait, allowBedRest,
   allowWildernessRest.
 
-## Dynamic plan
+## Measured (2026-10-04)
 
-What the lab measures before the rule's time base loses its HYPOTHESIS tag:
-- c1 sets its HealRateMult to 1 percent (set-av), takes damage to half
-  health, waits one hour through the menu, then dumps its health.
-- Game seconds predict +25.2 percent (0.70 percent x 0.01 x 3,600). The real-time
-  equivalent predicts +1.26 percent (0.70 percent x 0.01 x 180).
-- The same run with the menu on two hours tells a cap from a rate.
+lab-driver's afterRest reads the player's attributes on the first frame
+after the Sleep/Wait menu closes, before the server's answer to the
+client's RestIntent can arrive, so it shows the engine's own recovery. c1's
+HealRateMult was 1 percent (set-av), its health half.
+
+| run | time scale | wait | health gained |
+| --- | --- | --- | --- |
+| 20261004-095556 | 20 | 1 hour | 0.0252 |
+| 20261004-095556 | 20 | 2 hours | 0.0506 |
+| 20261004-100415 | 10 | 1 hour | 0.0320 |
+
+- **The real-time rate**, run 20261004-100002: at HealRateMult 1 percent,
+  health climbed 0.0020 in 30 real seconds, about 0.007 percent a second,
+  UESP's 0.70 at 1 percent. At 100 percent the 10 s window read low: health
+  regeneration waits a few seconds after a change.
+- **So a rested hour is 360 seconds of regeneration at time scale 20.** The
+  server's rule uses that (fork 142493d7).
+- **At time scale 10 it was about 457.** Neither twice the real-time
+  equivalent (720) nor a tenth of the game seconds (360) fits both runs.
+  The rule keeps 360, which is right at the default and at the lab's
+  setting. A server on another time scale gets 360 too: a difference only
+  with a lowered rate, since at base rates any rest restores fully.
 
 ## Tests
 
@@ -186,6 +203,7 @@ clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
       the real menu: T opened "Wait how long?" at 1 hour, Enter accepted,
       and the server logged "Rest: user 2 actor ff000000 waited 1 h,
       percentages now 1 1 1"
-- [ ] no HYPOTHESIS tags: the time base waits on the Dynamic plan's run
-      (lab-driver's afterRest, x-rest-timebase)
+- [x] no HYPOTHESIS tags: the time base measured (360 s a game hour at
+      time scale 20); its dependence on other time scales is measured once
+      (time scale 10) and written down as not followed
 - [ ] scenario reviewed by Eli (a-rest, thuum 7b12fa7)
