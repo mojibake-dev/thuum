@@ -186,10 +186,18 @@ it carries a HYPOTHESIS tag.
   could cover 4095 units every 130 ms update before
   (docs/verbs/movement-speed.md; a-movement-speed red on parity, run
   20261003-094307, green on the fix, run 20261003-100454; on parity
-  8266a21c). Open in this bullet: the hit's angle (cone), PvE and NPC
-  reach, and the client's damage flags (power, sneak, blocked).
+  8266a21c). Sixth DONE 2026-10-03: a player's power and sneak flags count
+  only when the server saw a power attack start within 3 s or holds the
+  attacker sneaking (docs/verbs/damage-flags.md; a-damage-flags green on
+  the Rust rules, run 20261003-224045; on parity f0045206, where the five
+  game rules are Rust, ADR-020). Open in this bullet: the hit's angle (cone),
+  PvE and NPC reach. The blocked flag only lowers the attacker's own
+  damage and stays as it is.
 - Console commands, full ActorValue set, game time and globals, wait and
-  sleep as server-owned time.
+  sleep as server-owned time. Game time part one, the shared clock
+  (docs/verbs/time.md, ADR-021), is built on fork branch m1-time: a
+  stateless Rust clock, SetGameTime at login and every minute, the client
+  rendering it; T3 a-time pending the client build and a retake.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as

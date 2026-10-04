@@ -52,7 +52,11 @@ skymp5-client (TS)  JSON  MpClientPlugin.dll (Rust)  postcard/renet  wire-bridge
 - wire-schema holds the 33 messages as structs with the C++ field lists
   and JSON keys (wire id = MsgType + 8), collections as bounded heap types,
   a byte cap per message (`Message::max_len`, checked from the variant tag
-  before the body is read).
+  before the body is read). thuum's own messages continue SkyMP's numbering
+  after 33, in the same family and the same JSON form, and the C++ core and
+  skymp5-client gain the type alongside: 34 SetGameTime, the server's game
+  clock (docs/verbs/time.md; SCHEMA_VERSION 3, reason E_VAL_RANGE, code
+  207).
 - wire-json renders a decoded, validated message as exactly what
   JsonOutputArchive writes (absent optionals omitted, `"t"` included,
   nested `"t"` quirks kept) and recognizes JSON from the core or the client,
