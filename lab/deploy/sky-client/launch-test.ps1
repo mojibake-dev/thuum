@@ -23,7 +23,8 @@ public class W {
 }
 "@
 function Tops { [W]::Top() | ForEach-Object { $p = $_ -split "`t", 3; [pscustomobject]@{ h = [IntPtr][int64]$p[0]; pid = [int]$p[1]; title = $p[2] } } }
-$game = 'C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition'
+# the folder in game-dir.txt: the one this boot plays (ADR-022: one per game version)
+$game = (Get-Content 'C:\sky-lab\game-dir.txt' -Raw).Trim()
 $docs = 'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE'
 $wait = 45
 Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force

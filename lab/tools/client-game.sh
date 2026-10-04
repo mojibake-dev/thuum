@@ -19,4 +19,27 @@ ssh -o BatchMode=yes -J "$jump" "$srv" "test -f /srv/persist/game/$version/SHA25
 ssh -o BatchMode=yes -J "$jump" "$srv" "cd /srv/persist/game/$version && (nohup python3 -m http.server $port --bind $srv_ip >/dev/null 2>&1 & echo \$! > /srv/lab/handover/.game-http.pid)"
 trap 'ssh -o BatchMode=yes -J "$jump" "$srv" "kill \$(cat /srv/lab/handover/.game-http.pid) 2>/dev/null; rm -f /srv/lab/handover/.game-http.pid"' EXIT
 sleep 1
-run "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; & powershell -NoProfile -ExecutionPolicy Bypass -File C:\\sky-lab\\add-game.ps1 -Version $version -From http://$srv_ip:$port" | tail -1
+# add-game.ps1 runs as a one-shot SYSTEM task, not inside the guest agent's
+# exec: on sky-c1 on 2026-10-04 the agent's exec ended after two minutes and
+# took the script down with it, mid-file. The task logs to add-game.out, which
+# is polled here until the task is done; reruns keep every file whose hash
+# already matches.
+start="Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force
+Remove-Item 'C:\\sky-lab\\add-game.out' -ErrorAction SilentlyContinue
+\$a = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument \"-NoProfile -ExecutionPolicy Bypass -Command & 'C:\\sky-lab\\add-game.ps1' -Version $version -From 'http://$srv_ip:$port' *> 'C:\\sky-lab\\add-game.out'\"
+\$p = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
+\$s = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 2) -MultipleInstances IgnoreNew
+Register-ScheduledTask -TaskName 'sky-lab-add-game' -Action \$a -Principal \$p -Settings \$s -Force | Out-Null
+Start-ScheduledTask -TaskName 'sky-lab-add-game'; 'started'"
+run "$start" >/dev/null
+poll="\$t = Get-ScheduledTask -TaskName 'sky-lab-add-game'; \$i = Get-ScheduledTaskInfo -TaskName 'sky-lab-add-game'; \$d = 'C:\\Games\\Skyrim Special Edition $version'; \$n = @(Get-ChildItem \$d -Recurse -File -ErrorAction SilentlyContinue).Count; \$t.State.ToString() + ' ' + \$i.LastTaskResult + ' files=' + \$n + ' | ' + ((Get-Content 'C:\\sky-lab\\add-game.out' -Tail 1 -ErrorAction SilentlyContinue) -join '')"
+for i in $(seq 1 240); do
+  sleep 15
+  line=$(run "$poll" 2>/dev/null | tr -d '\r' | tail -1) || continue
+  case "$line" in
+    Running*) printf '  %s\n' "${line:0:160}" ;;
+    Ready\ 0\ *) echo "${line#*| }"; exit 0 ;;
+    Ready*) echo "add-game failed: $line" >&2; run "Get-Content 'C:\\sky-lab\\add-game.out' -Tail 15" >&2 || true; exit 4 ;;
+  esac
+done
+echo "add-game still running after an hour" >&2; exit 5
