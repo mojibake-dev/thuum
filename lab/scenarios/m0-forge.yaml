@@ -9,6 +9,8 @@
 # 0x00088105, the workbench keyword (BNAM) of RecipeWeaponIronDagger
 # 0x000DA76A. c1 stands 120 units south of it at its height plus 50; the
 # offsets below are from lab-spawn's origin (133857, -61130, 14662).
+# c1's starting kit already holds one iron dagger, so a craft makes two; a
+# count of one held with no craft at all (run 20261004-084658).
 # Needs gamemode labCommand give and lab-driver's craft action (implemented,
 # UNCONFIRMED until this scenario runs).
 id: m0-forge
@@ -30,12 +32,12 @@ steps:
   - c1: craft {station: 0x000A4ACA, recipe: "Skyrim.esm:RecipeWeaponIronDagger"}
   - wait: 10
   - assert:
-      - server.inventory(c1).count("Skyrim.esm:IronDagger") == 1
+      - server.inventory(c1).count("Skyrim.esm:IronDagger") == 2
       - server.inventory(c1).count("Skyrim.esm:IngotIron") == 0
       - server.inventory(c1).count("Skyrim.esm:LeatherStrips") == 0
   - server: restart
   - wait: 20
   - c1: reconnect
   - assert:
-      - server.inventory(c1).count("Skyrim.esm:IronDagger") == 1
+      - server.inventory(c1).count("Skyrim.esm:IronDagger") == 2
 artifacts: [server.log, c1.log, c2.log, world-diff]
