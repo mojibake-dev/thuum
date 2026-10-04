@@ -19,7 +19,11 @@ which is the set of natives a script mod may call. Status per native:
                 fails on the server
 
 Natives registered on the server but absent from the dump (Skymp.*, and any
-gamemode extras) are listed too, marked "(not in SP dump)".
+gamemode extras) are listed too, marked "(not in SP dump)". The dump lacks one
+script a mod may call, Math, so its natives are added from the Creation Kit
+wiki (SUPPLEMENT). Papyrus names are case-insensitive, and so is the match
+between the dump, the server and the hand columns: the dump spells Utility
+in lower case.
 
 The Rung, Reason / notes, and Verb columns are hand-maintained: they are read
 from the existing docs/NATIVES.md by native name and written back unchanged.
@@ -42,6 +46,19 @@ CLASSES = Path("skymp5-server/cpp/server_guest_lib/script_classes")
 FUNCTIONS_LIB = Path("skymp5-functions-lib/index.ts")
 
 STATUSES = ("implemented", "delegated", "stub", "gamemode", "missing")
+
+# Global natives a script mod may call that FunctionsDump.txt does not know:
+# it has no Math type (found by apocrypha's mod analysis, 2026-10-04). From
+# the Creation Kit wiki's Math script, mirrored at
+# https://papyrus.bellcube.dev/skyrimse/script/math/: thirteen vanilla
+# natives, then seven SKSE additions.
+SUPPLEMENT: dict[str, list[str]] = {
+    "Math": [
+        "Abs", "ACos", "ASin", "ATan", "Ceiling", "Cos", "DegreesToRadians", "Floor",
+        "Pow", "RadiansToDegrees", "Sin", "Sqrt", "Tan",
+        "LeftShift", "RightShift", "LogicalAnd", "LogicalOr", "LogicalXor", "LogicalNot", "Log",
+    ],
+}
 
 
 @dataclass
@@ -70,15 +87,20 @@ class Hand:
 # --- universe ------------------------------------------------------------------
 
 def load_dump(skymp: Path) -> dict[str, Native]:
+    """The universe, keyed by the lower-cased Type.Function."""
     data = json.loads((skymp / DUMP).read_text(encoding="utf-8"))
     out: dict[str, Native] = {}
     for cls, body in data["types"].items():
         for f in body.get("globalFunctions", []):
             n = Native(cls, f["name"], "global", "missing", latent=bool(f.get("isLatent")))
-            out[n.key] = n
+            out[n.key.lower()] = n
         for f in body.get("memberFunctions", []):
             n = Native(cls, f["name"], "method", "missing", latent=bool(f.get("isLatent")))
-            out[n.key] = n
+            out[n.key.lower()] = n
+    for cls, names in SUPPLEMENT.items():
+        for name in names:
+            n = Native(cls, name, "global", "missing", note="not in SP's dump; Math from the Creation Kit wiki")
+            out.setdefault(n.key.lower(), n)
     return out
 
 
@@ -211,26 +233,32 @@ def gamemode_registrations(skymp: Path) -> list[Native]:
 def build(skymp: Path) -> list[Native]:
     universe = load_dump(skymp)
     for n in server_registrations(skymp):
-        u = universe.get(n.key)
+        u = universe.get(n.key.lower())
         if u is None:
             n.in_dump = False
-            universe[n.key] = n
+            universe[n.key.lower()] = n
         else:
+            # the server's spelling wins where the two differ only in case
+            u.cls, u.name = n.cls, n.name
             u.status, u.source, u.note = n.status, n.source, n.note
     for n in gamemode_registrations(skymp):
-        u = universe.get(n.key)
+        u = universe.get(n.key.lower())
         if u is None:
             n.in_dump = False
-            universe[n.key] = n
+            universe[n.key.lower()] = n
         else:
             overridden = f"overrides the C++ {u.status} at {u.source}" if u.status != "missing" else ""
             u.status, u.source, u.note = "gamemode", n.source, overridden
+    # one spelling per class: the server's, where it registers any native of it
+    spelling = {n.cls.lower(): n.cls for n in universe.values() if n.status != "missing"}
+    for n in universe.values():
+        n.cls = spelling.get(n.cls.lower(), n.cls)
     return sorted(universe.values(), key=lambda n: (n.cls.lower(), n.name.lower()))
 
 
 # The bracketed note this generator appends to the Reason column; stripped
 # when reading hand columns back so regeneration is idempotent.
-_GENERATED_SUFFIX = re.compile(r"(?:\s*\[[^\]]*(?:\.cpp:\d+|\.ts:\d+|returns None|body not located|overrides the C\+\+)[^\]]*\])+\s*$")
+_GENERATED_SUFFIX = re.compile(r"(?:\s*\[[^\]]*(?:\.cpp:\d+|\.ts:\d+|returns None|body not located|overrides the C\+\+|not in SP's dump)[^\]]*\])+\s*$")
 _ROW = re.compile(r"^\|\s*`?([\w.]+)`?[^|]*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*$")
 
 
@@ -247,7 +275,7 @@ def read_hand_columns(existing: Path) -> dict[str, Hand]:
             continue
         reason = _GENERATED_SUFFIX.sub("", reason).strip()
         if rung or reason or verb:
-            hand[key] = Hand(rung, reason, verb)
+            hand[key.lower()] = Hand(rung, reason, verb)
     return hand
 
 
@@ -274,7 +302,7 @@ def render(natives: list[Native], hand: dict[str, Hand], skymp_head: str) -> str
     lines += [f"| {s} | {counts[s]} |" for s in STATUSES]
     lines += [f"| total | {len(natives)} |", "", "| Native | Status | Rung | Reason / notes | Verb |", "| --- | --- | --- | --- | --- |"]
     for n in natives:
-        h = hand.get(n.key, Hand())
+        h = hand.get(n.key.lower(), Hand())
         tags = [n.kind]
         if n.latent:
             tags.append("latent")

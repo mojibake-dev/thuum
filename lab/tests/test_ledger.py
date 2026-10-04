@@ -158,6 +158,39 @@ class Synthetic(unittest.TestCase):
             self.assertNotIn(chr(0x2014), again)
 
 
+class CaseAndMath(unittest.TestCase):
+    def test_a_lower_case_dump_type_merges_with_the_server_s_and_math_is_listed(self):
+        dump = json.loads(json.dumps(DUMP))
+        # Skyrim Platform's dump spells Utility in lower case
+        dump["types"]["utility"] = {"parent": None, "globalFunctions": [
+            {"name": "Wait", "isLatent": True, "arguments": [], "returnType": {"rawType": "None"}},
+            {"name": "GetINIBool", "isLatent": False, "arguments": [], "returnType": {"rawType": "Bool"}},
+        ], "memberFunctions": []}
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            make_fork(root)
+            (root / ledger.DUMP).write_text(json.dumps(dump))
+            c = root / ledger.CLASSES
+            (c / "PapyrusUtility.h").write_text(GAME_H.replace("PapyrusGame", "PapyrusUtility").replace('"Game"', '"Utility"'))
+            (c / "PapyrusUtility.cpp").write_text(
+                'VarValue PapyrusUtility::Wait(VarValue self, const std::vector<VarValue>& arguments)\n{\n  return WaitHelper(self, "Wait", arguments);\n}\n'
+                'void PapyrusUtility::Register(VirtualMachine& vm, std::shared_ptr<IPapyrusCompatibilityPolicy> policy)\n{\n  AddStatic(vm, "Wait", &PapyrusUtility::Wait);\n}\n')
+            md = root / "NATIVES.md"
+            self.assertEqual(ledger.main([str(root), str(md)]), 0)
+            natives = {n.key: n for n in ledger.build(root)}
+            text = md.read_text()
+        # one row per native, in the server's spelling, its status the server's
+        self.assertEqual(natives["Utility.Wait"].status, "implemented")
+        self.assertTrue(natives["Utility.Wait"].in_dump)
+        self.assertEqual(natives["Utility.GetINIBool"].status, "missing")
+        self.assertNotIn("utility.Wait", natives)
+        self.assertNotIn("`utility.", text)
+        # Math, absent from the dump, is in the universe, missing on the server
+        for name in ("Sin", "Cos", "Abs", "Tan", "Floor", "LeftShift", "Log"):
+            self.assertEqual(natives[f"Math.{name}"].status, "missing", name)
+        self.assertEqual(sum(1 for k in natives if k.startswith("Math.")), 20)
+
+
 @unittest.skipUnless((SKYMP / ledger.DUMP).is_file(), "skymp submodule not checked out")
 class RealFork(unittest.TestCase):
     def test_established_facts(self):
@@ -175,6 +208,10 @@ class RealFork(unittest.TestCase):
         classes = {n.cls for n in natives.values() if n.status in ("implemented", "delegated", "stub")}
         for expected in ("Game", "ObjectReference", "Actor", "Debug", "Utility", "Skymp", "EffectShader", "LeveledItem"):
             self.assertIn(expected, classes, expected)
+        # Utility's natives are one row each, in the dump (it spells the type in lower case)
+        self.assertTrue(natives["Utility.GetCurrentGameTime"].in_dump)
+        self.assertFalse(any(k.startswith("utility.") for k in natives))
+        self.assertEqual(natives["Math.Sin"].status, "missing")
 
 
 if __name__ == "__main__":
