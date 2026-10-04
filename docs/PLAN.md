@@ -285,18 +285,25 @@ definition of done item 6 and M7's compatibility matrix, not a widening of
 the non-goal: each works to the extent the ledger says, and each gets a
 scenario once the systems it leans on exist.
 
-- The Apocalypse spell bundle: spells are M2 (cast intent R1, resolution
-  R0); its scripted effects run wherever docs/NATIVES.md puts their natives.
-- The bow headshot mod: hit location rides M2's hit registration. A headshot
-  a client claims is untrusted input (hard rule 5); the server validates the
-  hit location or the verb doc records it as R2.
-- Eli's rotfern race character: character creation already accepts a
-  playable race from the server's load order. Anything the look needs beyond
-  vanilla appearance fields (RaceMenu overlays, body morphs) is the open
-  question.
+- Apocalypse - Magic of Skyrim 10.2.3: records plus 206 vanilla-Papyrus
+  scripts, effectively no SKSE. Spells are M2 (cast intent R1, resolution
+  R0). Of its 165 natives, 102 are missing, GlobalVariable.GetValue and
+  SetValue the most called, which makes it the first verb to need
+  server-owned globals (ADR-021 decision 4).
+- Headshot Kills - CIF 1.2: an ESL and a script that Kill() the victim when
+  Core Impact Framework (an SKSE plugin hooking projectile collision and hit
+  processing on the shooting client) reports an unhelmeted head hit. Hit
+  location rides M2's hit registration as untrusted input (hard rule 5), and
+  the kill is the server's (R0). CIF 1.2.8 loads on 1.6.1170, not on the
+  lab's 1.7.104.
+- Eli's rotfern race: the standalone plugin (masters Skyrim.esm and
+  RaceCompatibility.esm) uses vanilla appearance data only. Character
+  creation and SkyMP's appearance sync already cover it, so it is the first
+  to test. RaceMenu co-save data is not carried.
 
-Exact files, versions and dependencies come from apocrypha (asked
-2026-10-03) and land here when they arrive.
+The detail, sources and gaps are in docs/MODS.md (apocrypha's analysis,
+2026-10-04). Open for Eli: the lab runs 1.7.104 (ADR-018) while CIF 1.2.8
+and RaceMenu 0.4.20 target 1.6.1170.
 
 ## Cross-cutting tracks
 
