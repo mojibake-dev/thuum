@@ -262,8 +262,10 @@ function dumpState(player: Actor) {
 // (ressurectWithPushKill). Its own sync takes the player's animation events
 // the engine accepted (animation.ts AnimationSource), which is how other
 // clients see the fall. So "down" is a Ragdoll the engine accepted on the
-// player with no GetUpBegin after it. HYPOTHESIS until m0-death runs:
-// pushActorAway raises an accepted "Ragdoll" on the pushed actor. Filtered
+// player with no GetUpBegin after it. CONFIRMED: pushActorAway raises an
+// accepted "Ragdoll" on the pushed actor, and a respawn's GetUpBegin clears
+// it (m0-death green, run 20261004-085303: down after the kill and after a
+// server restart, up after the respawn). Filtered
 // in native (rule 9): the player's form id, 0x14 as deathService.ts has it,
 // and the one event name each.
 let lastRagdollAt = 0;
