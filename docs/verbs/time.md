@@ -126,10 +126,12 @@ until the GLOB reader exists (decision 4).
     (include/RE/C/Calendar.h:12-24), so there are no leap years, matching
     Tamriel's months ([UESP, Lore:Calendar](https://en.uesp.net/wiki/Lore:Calendar));
   - months roll into years.
-- **Days passed.** daysPassed = start.daysPassed + elapsed hours / 24.
+- **Days passed** are whole days plus the hour over 24, the way the engine
+  counts them (Engine surface): daysPassed = start.daysPassed + (start.hour
+  + elapsed hours) / 24. With Skyrim.esm's start that is 1 + 8/24 at 08:00,
+  what the engine's own Calendar constructor makes of a new game.
 - **Weekday.** The engine derives the weekday as uint(GameDaysPassed) % 7
-  (CommonLibSSE-NG src/RE/C/Calendar.cpp:62-65). With Skyrim.esm's start
-  (daysPassed 1.0 at 08:00), the weekday therefore turns at 08:00 game time.
+  (CommonLibSSE-NG src/RE/C/Calendar.cpp:62-65), so it turns at midnight.
 - **Changing the rate moves the clock.** A stateless clock has no "now" to
   continue from, so changing `timeScale` or `epoch` moves the time. An
   operator who changes the rate sets a new `epoch` and `start` with it. A
@@ -146,8 +148,8 @@ This is SkyMP's mapping from timeService.ts, computed on the server:
 - GameYear = the UTC year - 2020 + 199;
 - time scale 1.
 
-daysPassed advances by one per real day, starting from `start.daysPassed` at
-the epoch.
+daysPassed is `start.daysPassed` plus the whole days since the epoch's date,
+plus the hour over 24.
 
 ### Against TES3MP
 
@@ -175,27 +177,42 @@ ticking it, so there is nothing to save, and decision 3 costs nothing.
 - **What is known to work.** TimeService has written GameHour, GameDay,
   GameMonth and GameYear this way since SkyMP shipped it, and the sky
   follows.
-- **HYPOTHESIS: a written GameDaysPassed stays written.** The engine may
-  rebuild GameDaysPassed from `rawDaysPassed` each frame. If it does, a
-  client's write would not stick. T3 reads GameDaysPassed back on both
-  clients and settles this.
-- **The engine stops advancing GameDaysPassed itself.** Past about 64 game
-  days, the engine's own GameDaysPassed stops advancing in real time; only
-  save, load, rest and travel move it. Sources:
-  - [Nexus forums, "GameDaysPassed Precision bug past 64 days"](https://forums.nexusmods.com/topic/13528839-gamedayspassed-precision-bug-past-64-days);
-  - the cause is a single-precision float that no longer resolves one
-    frame's increment (Goldberg, "What Every Computer Scientist Should Know
-    About Floating-Point Arithmetic", ACM Computing Surveys 23(1), 1991).
-
-  At 20 game days per real day, the server's clock passes 64 within four
-  real days. So clients take daysPassed from the server; the engine's own
-  value is never trusted.
+- **The engine's clock step, read in Ghidra on 1.7.104 (HYPOTHESIS).**
+  ghidra/notes/calendar-1-7-104.md has the ids, the trimmed code and a
+  Frida plan.
+  - Every unpaused frame, wait step, fast travel and cell move calls one
+    step (Address Library 36291). It adds the frame's game hours to
+    GameHour and rolls the date past 24.0 by the days-in-month table.
+  - A roll adds one to its day count (`rawDaysPassed`) and to
+    midnightsPassed, and sends one Days Passed stat event.
+  - It **rebuilds** GameDaysPassed as GameHour / 24 + rawDaysPassed, so a
+    SetValue on that global lasts one frame.
+  - GameHour and TimeScale are read on every step, and the date only at a
+    roll, so writes to those stick.
+  - The Calendar constructor (36289) adds GameHour / 24 to GameDaysPassed,
+    and a save load floors GameDaysPassed into rawDaysPassed (36317).
+- **The day count is therefore set, not written: TESModPlatform.SetGameDaysPassed.**
+  - It is a Skyrim Platform native, new in the fork: rawDaysPassed =
+    daysPassed - GameHour / 24, through CommonLib's Calendar layout and its
+    singleton id. The re-analyst resolved both on 1.7.104, and its
+    GetTimeDateString reads the same fields.
+  - It goes on the native ledger as a client-side binding. No new Address
+    Library id is involved.
+- **No slowdown past 64 days.** A Nexus forum thread reports
+  GameDaysPassed slowing past about 64 days
+  ([Nexus forums](https://forums.nexusmods.com/topic/13528839-gamedayspassed-precision-bug-past-64-days)).
+  The step accumulates nothing into it, only the hour (below 24), so that
+  report does not describe 1.7.104. The value is only rounded to float
+  spacing: 2^-17 days between day 64 and 128 (Goldberg, "What Every
+  Computer Scientist Should Know About Floating-Point Arithmetic", ACM
+  Computing Surveys 23(1), 1991).
 
 ## Observe, impose, suppress
 
 - **Observe:** nothing. No client intent exists.
-- **Impose:** TimeService writes GameYear, GameMonth, GameDay, GameHour,
-  GameDaysPassed and TimeScale from the server's clock (Client, below).
+- **Impose:** TimeService writes GameYear, GameMonth, GameDay, GameHour and
+  TimeScale from the server's clock, and sets the day count through
+  TESModPlatform.SetGameDaysPassed (Client, below).
 - **Suppress:**
   - TimeService stops reading the PC clock and `hoursOffset`;
   - the TimeScale nudge goes;
@@ -217,7 +234,7 @@ ticking it, so there is nothing to save, and decision 3 costs nothing.
   | `month` | u32 | 0 to 11 |
   | `day` | u32 | 1 to 31 |
   | `hour` | f32 | at least 0, below 24 |
-  | `daysPassed` | f32 | at least 0 |
+  | `daysPassed` | f32 | at least 0; whole days plus the hour over 24 |
   | `timeScale` | f32 | at least 0 |
 
 - **Validator** (wire-validate; runs on the server before encoding and on
@@ -257,17 +274,29 @@ ticking it, so there is nothing to save, and decision 3 costs nothing.
 TimeService renders the latest SetGameTime and keeps its receipt time.
 
 - **Every 2 s** (its existing cadence), the target is the message advanced
-  by the real time since receipt x timeScale: the hour and daysPassed move,
-  and the date stays as sent.
-  - **Midnight.** When the advanced hour reaches 24, a midnight has passed
-    since the message. The client then waits for the next message (at most
-    60 s away) instead of doing calendar arithmetic of its own.
-  - **Hour and date.** Otherwise, if the engine's GameHour is a game minute
-    or more off the target, or its date differs, the client writes GameYear,
-    GameMonth, GameDay and GameHour.
-  - **Days passed.** GameDaysPassed is written whenever it is off by a game
-    minute (Engine surface).
-  - **Time scale.** TimeScale is always the message's.
+  by the real time since receipt x timeScale:
+  - the hours since the message day's midnight (above 24 once a midnight has
+    passed);
+  - the day count, continuous across midnight.
+- **In step.** The engine is in step when both of these hold:
+  - its day count is within 0.01 of the target's (a wrong day count is
+    whole days off: a save's, a fast travel's);
+  - its hours since the message day's midnight are within a game minute of
+    the target's (its GameHour, plus 24 once it has rolled to the next
+    date).
+- **Correction.** When it is not in step, the client writes:
+  - the message's date;
+  - GameHour as those hours, even past 24, so that the engine's next step
+    rolls the date, its day count and the Days Passed stat itself;
+  - then the day count through SetGameDaysPassed, which is set against the
+    hour.
+- **More than a day past the message**, the client waits for the next one,
+  which is at most 60 s away. The client never does calendar arithmetic.
+- **Time scale.** TimeScale is always the message's.
+- **Accepted, not fixed** (ghidra/notes/calendar-1-7-104.md): a fast travel
+  across midnight rolls the engine a day, which the correction undoes. The
+  Days Passed stat keeps the extra day, and midnightsPassed counts the
+  session's own rolls.
 - **Latency.** The receipt time stands in for the server's send time, which
   is Cristian's method without the round trip:
   - Cristian, "Probabilistic clock synchronization", Distributed Computing
@@ -291,7 +320,8 @@ TimeService renders the latest SetGameTime and keeps its receipt time.
   - the start at the epoch and the hold before it;
   - the rate;
   - rollover of day, month (31 to 28 to 31) and year;
-  - daysPassed;
+  - daysPassed as whole days plus the hour over 24, the engine's way (a
+    property over four years of game time);
   - real-time mapping with an offset across UTC midnight;
   - settings defaults and each refusal;
   - a property: for any instant, the hour is in [0, 24), the day is valid
@@ -326,15 +356,18 @@ TimeService renders the latest SetGameTime and keeps its receipt time.
     hour is unrelated to UTC);
   - the old nudge fails TimeScale == 20;
   - a clock that reset on restart fails the post-restart hour;
-  - a GameDaysPassed write that does not stick fails the daysPassed
-    assertion.
+  - a client that writes GameDaysPassed instead of setting the day count
+    fails the daysPassed assertions, because the engine's step rebuilds the
+    global every frame.
 
 ## Status
 
 - [x] decisions 1 to 4 settled (ADR-021; 4 deferred)
 - [x] doc complete, rung declared
-- [x] engine surface cited (Calendar.h); one HYPOTHESIS (GameDaysPassed
-      writes) for T3
+- [x] engine surface cited (Calendar.h) and the clock step read in Ghidra
+      (ghidra/notes/calendar-1-7-104.md, HYPOTHESIS until a-time)
+- [x] SP binding: TESModPlatform.SetGameDaysPassed (T1 has no harness yet;
+      a-time is the proof)
 - [ ] server logic + T0
 - [ ] message + validator (same commit)
 - [ ] TS handler
