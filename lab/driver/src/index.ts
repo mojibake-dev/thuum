@@ -79,6 +79,19 @@ let sentAt = 0;
 let warnedNoConfig = false;
 // A screenshot request waits for the file the engine writes; posted later.
 let deferred: { step: Step; file: string; startedAt: number } | null = null;
+// A craft waits for the player to be in the station's furniture before the
+// inventory changes (see the craft verb); then its menu closes a moment later.
+let crafting: {
+  step: Step;
+  ingredients: Array<[number, number]>;
+  result: number;
+  count: number;
+  startedAt: number;
+  closeAt?: number;
+} | null = null;
+const CRAFT_WAIT_MS = 15000;
+// RE::CraftingMenu::MENU_NAME (CommonLibSSE-NG include/RE/C/CraftingMenu.h:19)
+const CRAFTING_MENU = "Crafting Menu";
 // A move in flight: the update loop steps the player toward (x, y) at speed units per second until it arrives or time is up.
 // A move in flight: the target, the position we last commanded (cx, cy) and
 // the speed. The step is taken from the commanded position, not from the
@@ -289,6 +302,33 @@ function finishDeferred(c: Config): void {
   }
 }
 
+function finishCraft(c: Config, player: Actor): void {
+  if (!crafting) return;
+  const k = crafting;
+  try {
+    if (k.closeAt !== undefined) {
+      if (Date.now() >= k.closeAt) {
+        crafting = null;
+        callNative("TESModPlatform", "CloseMenu", undefined, CRAFTING_MENU);
+      }
+      return;
+    }
+    const furniture = player.getFurnitureReference();
+    if (furniture) {
+      for (const [id, count] of k.ingredients) player.removeItem(Game.getFormEx(id), count, true, null);
+      player.addItem(Game.getFormEx(k.result), k.count, true);
+      k.closeAt = Date.now() + 2000;
+      postResult(c, k.step, { ok: true, data: { result: k.result, ingredients: k.ingredients, furniture: furniture.getFormID(), waitedMs: Date.now() - k.startedAt } });
+    } else if (Date.now() - k.startedAt > CRAFT_WAIT_MS) {
+      crafting = null;
+      postResult(c, k.step, { ok: false, error: `not in the station's furniture ${CRAFT_WAIT_MS} ms after activating it` });
+    }
+  } catch (e) {
+    crafting = null;
+    postResult(c, k.step, { ok: false, error: String(e) });
+  }
+}
+
 function run(step: Step, player: Actor): unknown {
   const a = step.args || {};
   switch (step.action) {
@@ -422,6 +462,10 @@ function run(step: Step, player: Actor): unknown {
       // getFurnitureReference() is set and sends CraftItem; the server owns
       // the outcome (R0). args: {station: <ref form id>, recipe: <COBJ form id>}
       // (lab-api resolves names to ids before the step reaches the driver).
+      // The changes wait for the player to be in the furniture (finishCraft):
+      // made in the frame of the activation, before the player had entered
+      // it, they reached no CraftItem and the server kept the materials (run
+      // 20261004-084658-m0-forge).
       const station = form(a.station);
       if (!station) return { error: "no such station" };
       const recipe = ConstructibleObject.from(Game.getFormEx(num(a.recipe)));
@@ -434,11 +478,8 @@ function run(step: Step, player: Actor): unknown {
         if (ing) ingredients.push([ing.getFormID(), recipe.getNthIngredientQuantity(i)]);
       }
       station.activate(player, false);
-      const me = Game.getPlayer();
-      if (!me) return { error: "no player" };
-      for (const [id, count] of ingredients) me.removeItem(Game.getFormEx(id), count, true, null);
-      me.addItem(result, recipe.getResultQuantity(), true);
-      return { result: result.getFormID(), ingredients };
+      crafting = { step, ingredients, result: result.getFormID(), count: recipe.getResultQuantity(), startedAt: Date.now() };
+      return DEFERRED;
     }
     case "tap-key": {
       // One key press through the engine's input system (SKSE Input.TapKey,
@@ -561,6 +602,7 @@ on("update", () => {
   releaseHeldKeys();
   const me = Game.getPlayer();
   if (me) settleMove(me);
+  if (me) finishCraft(c, me);
   trackWatch();
   const step = pending;
   if (!step) return;
