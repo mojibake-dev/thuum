@@ -20,8 +20,8 @@ guests:
   - {name: sky-srv,    vmid: 700, ip: 10.10.70.10, kind: qemu, role: server, managed: true,  snapshot: clean}
   - {name: sky-re,     vmid: 701, ip: 10.10.70.11, kind: lxc,  role: re,     managed: true,  snapshot: clean}
   - {name: sky-ci,     vmid: 702, ip: 10.10.70.12, kind: qemu, role: ci,     managed: false}
-  - {name: sky-c1,     vmid: 711, ip: 10.10.70.21, kind: qemu, role: client, managed: true,  snapshot: clean-m1, client: c1}
-  - {name: sky-c2,     vmid: 712, ip: 10.10.70.22, kind: qemu, role: client, managed: true,  snapshot: clean-m1, client: c2}
+  - {name: sky-c1,     vmid: 711, ip: 10.10.70.21, kind: qemu, role: client, managed: true,  snapshot: clean-m1-ctl, client: c1}
+  - {name: sky-c2,     vmid: 712, ip: 10.10.70.22, kind: qemu, role: client, managed: true,  snapshot: clean-m1-ctl, client: c2}
   - {name: fenestrate, vmid: 220, ip: 10.10.60.20, kind: qemu, role: client, managed: false}
 
 # clients: the profileId each scenario client logs in with (offlineMode on the
