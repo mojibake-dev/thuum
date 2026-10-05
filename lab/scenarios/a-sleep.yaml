@@ -1,0 +1,46 @@
+# M1 validation, sleep (docs/verbs/sleep.md): a bed works every time, the
+# server takes the rest for a sleep, and the player gets Rested. c1 stands
+# by the hunters' camp bedroll southwest of the spawn (Skyrim.esm REFR
+# 0x000B3184 at (117786, -81333, 10997) in Tamriel: unowned, touched by no
+# DLC master; lab/esm.py over all five masters), at half health, and
+# activates it; the sleep menu opens at its default hour and Enter (28)
+# sleeps. The server restores c1 (a rest) and grants Rested (a sleep: the
+# client's own flag would have called it a wait), so c1's game holds the
+# spell. Then the same bed again: in Eli's second playtest a bed worked once
+# per player, SkyMP's furniture occupancy blocking every later use. c2 stands
+# at the other tent and plays no part but the second client.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-sleep
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: teleport {cell: lab-spawn, x: -15957, y: -20350, z: -3582, rot: [0, 0, 322]}
+  - c2: teleport {cell: lab-spawn, x: -15677, y: -20630, z: -3582, rot: [0, 0, 130]}
+  - wait: 3
+  - c1: set-percentages {health: 0.5, magicka: 0.5, stamina: 0.5}
+  - wait: 2
+  - c1: activate {refId: 0x000B3184}
+  - wait: 2
+  - c1: screenshot
+  - c1: tap-key {code: 28}
+  - wait: 8
+  - c1: dump-state
+  - assert:
+      - server.actor(c1).healthPercentage == 1
+      - c1.state.rested == true
+  - c1: set-percentages {health: 0.5, magicka: 0.5, stamina: 0.5}
+  - wait: 2
+  - c1: activate {refId: 0x000B3184}
+  - wait: 2
+  - c1: tap-key {code: 28}
+  - wait: 8
+  - assert:
+      - server.actor(c1).healthPercentage == 1
+artifacts: [server.log, c1.log, c2.log, screenshots]
