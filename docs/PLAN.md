@@ -154,8 +154,10 @@ it carries a HYPOTHESIS tag.
   stubs on 2026-10-04. Five are made real on fork branch m1-stubs:
   IncrementStat delegated; EnableNoWait and DisableNoWait; GetParentCell for
   exteriors; PlaceAtMe of an explosion drawn by the clients. Its ctest and
-  T2 are green, and it waits on a T3 sweep. SetScale and GetCurrentStageID
-  are deferred to verbs of their own.
+  T2 are green. DONE: merged into parity (b183e529), and every T3 sweep
+  since has been green with it, the latest on 81f953dd (runs
+  20261005-092733 to -094551). SetScale and GetCurrentStageID are deferred
+  to verbs of their own.
 - Persistence gaps from the roadmap: equipment in hands across restart,
   favorites, map markers, learned effects, script variables.
   Attributes DONE 2026-10-02 (docs/verbs/attributes.md): every server start
