@@ -139,7 +139,8 @@ lab-status:
 # POST /run returns a run id; GET /run/<id> is polled until result.json exists and is
 # saved to lab/results/<run>.json.
 # Run one scenario through lab-api; exit code is the verdict. `game` picks the Skyrim version the run plays
-# (ADR-022: 1.7.104 or 1.6.1170); empty means the scenario's, else lab-api's default.
+# (ADR-022: 1.7.104 or 1.6.1170); empty means the scenario's, else lab-api's default. A path to a YAML file
+# runs that file instead: an exploratory x- probe, which never lives in lab/scenarios (ADR-009).
 lab-run scenario game="":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -152,7 +153,8 @@ lab-run scenario game="":
         [ "$idle" = True ] && break
         sleep 10
     done
-    run=$(curl -fsS -X POST "{{lab_api}}/run" -F "scenario=@lab/scenarios/{{scenario}}.yaml" ${extra[@]+"${extra[@]}"} \
+    file="lab/scenarios/{{scenario}}.yaml"; [ -f "{{scenario}}" ] && file="{{scenario}}"
+    run=$(curl -fsS -X POST "{{lab_api}}/run" -F "scenario=@$file" ${extra[@]+"${extra[@]}"} \
         | python3 -c 'import json,sys; print(json.load(sys.stdin)["run"])')
     echo "run $run started${game:+ on $game}"
     python3 - "$run" "{{lab_api}}" <<'PY'

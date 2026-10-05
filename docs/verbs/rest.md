@@ -51,7 +51,15 @@ Milestone: M1   Class: B
   - a fight, then a 6-hour wait three minutes later (-063140);
   - a 6-hour wait 3500 units from an attacker whose figure was still in
     combat, on the build where fights never end (-095456) and on the one
-    where they do (-094935).
+    where they do (-094935);
+  - the playtest's own order, which the first three missed: its server log
+    has test 2 waiting 6 hours at 06:12:23Z and playtest-start teleporting
+    both players and setting half health at 06:13:07Z, 44 s later. Replayed
+    with a hit first and the same 44 s (-182350), c2's controls read true and
+    it walked.
+  Not the idle-client memory leak found the same day
+  (lab/deploy/sky-client/README.md): test 2's game had been running 16 to 21
+  minutes (launched 05:56:58Z), about 5 to 6.5 GB of a 12 GB client.
   If a playtest hits it again, `just probe <client>` reads the client's
   controls with nothing reset.
 - **The server would undo a rest's healing.** It crops a client's health and
