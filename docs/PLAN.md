@@ -261,6 +261,20 @@ it carries a HYPOTHESIS tag.
     kCanSleep) works every time, the server decides a sleep from the bed
     the player just activated, and a sleep grants Rested for eight game
     hours. a-sleep green on 1.7.104 and 1.6.1170.
+- From Eli's third T4 playtest (2026-10-05, docs/private/playtest-m1-3.md).
+  Passed: Rested shows in Active Effects, the same bed works twice, swapping
+  beds works. Found:
+  - Aggro never expired: each game's figure of the other player is an AI in
+    combat, which gives up only when it loses its target. Eli's call: a fight
+    ends after 60 s without a hit, or with the players walked apart (ADR-023
+    amendment). DONE 2026-10-05 (docs/verbs/hostility-sync.md, "Ending a
+    fight"): wire-rules hostility::Fights, PartOne::TickFights, and
+    Actor.StopCombatAlarm to both games; a-fight-end green.
+  - A bed one player had activated blocked the other: SkyMP's furniture
+    occupancy, meaningless for beds that seat no one. Beds now take no
+    occupant (docs/verbs/sleep.md).
+  - test 2's stuck wait waits on fights ending, so it moves to playtest four
+    (docs/private/playtest-m1-4.md).
   - After a 6-hour wait test 2 could not act until the playtest reset moved
     it; no log shows why. Needs a repro.
   - No sound in the Moonlight streams.

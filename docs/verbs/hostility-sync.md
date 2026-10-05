@@ -95,6 +95,11 @@ up only when it loses its target, so without an end the aggro never expired
 - Until a fight ends, the rest rule refuses its players a rest, however long
   ago the last hit (wire-rules rest, `in_fight`).
 - A player who leaves ends its fights without a notice.
+- Lab (a-fight-end, run 20261005-092733): c1 hit c2 at 09:29:51, and at
+  09:30:51 the server logged "the fight ... is over (a minute quiet); both
+  games are told". Both then waited side by side, and both rests were
+  granted. A second hit at 09:31:07 ended "(apart)" at 09:31:14, once c2 was
+  taken 26,000 units off. Back next to c1, c2 waited too, so the stop held.
 
 ## Observe
 
