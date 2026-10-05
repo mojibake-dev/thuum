@@ -66,6 +66,21 @@ Milestone: M1   Class: B
   Ruled out in skymp5-client: the only other code that holds the player still
   is deathService (setDontMove on death; test 2 never died) and
   sweetTaffyPlayerCombatService (only with a "sweetpie" mod loaded).
+  HYPOTHESIS, a race with the clock correction: once the Sleep/Wait menu is
+  closed, TimeService's next 2-second tick reports the rest and sets the
+  engine's clock back to the server's, here 6 hours. The engine keeps wait
+  bookkeeping on the player (PlayerCharacter INFO_RUNTIME_DATA sleepSeconds
+  +0x14 and hoursToSleep +0x38, and the `sleeping` bit; CommonLibSSE-NG
+  include/RE/P/PlayerCharacter.h:475, :482, :282). If any of it is still
+  running when the tick lands and waits on the game clock, it would hold the
+  player for 6 game hours, 18 real minutes at time scale 20. A small window
+  fits one stuck wait in four long ones (two playtests, two probes).
+  Checks: a stuck player freeing itself after about 18 minutes (playtest
+  four's checklist asks for it); a Frida read of hoursToSleep, sleepSeconds
+  and `sleeping` across a wait, with the correction made at once versus held
+  a few seconds (needs sky-re for the 1.7.104 member offsets, so after the
+  playtest); and the fix to try if it holds: TimeService waits until the
+  engine reports the wait over before correcting.
   If a playtest hits it again, `just probe <client>` reads the client's
   controls with nothing reset.
 - **The server would undo a rest's healing.** It crops a client's health and
