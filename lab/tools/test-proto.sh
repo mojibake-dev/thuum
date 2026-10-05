@@ -71,9 +71,19 @@ cleanup() {
   rm -rf "$tmp"
 }
 trap cleanup EXIT
+# The commit's own artifact, else the branch's newest: difftest-build runs only
+# when skymp-wire changes (the fork's .gitlab-ci.yml), so a commit that left it
+# alone has none and its branch's last one is the same binary and sessions.
 job=$(curl -fsS -m 60 -H "PRIVATE-TOKEN: $tok" \
   "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs?scope[]=success&per_page=100" \
-  | python3 -c "import sys,json; j=[x for x in json.load(sys.stdin) if x['name']=='difftest-build' and x['ref']=='$ref' and x['commit']['id'].startswith('$sha')]; print(j[0]['id'] if j else '')")
+  | python3 -c "
+import sys, json
+jobs = [x for x in json.load(sys.stdin) if x['name'] == 'difftest-build' and x['ref'] == '$ref']
+own = [x for x in jobs if x['commit']['id'].startswith('$sha')]
+pick = own or jobs
+if pick and not own:
+    print('   no difftest-build at $sha (it left skymp-wire alone): job %d from %s, the branch\'s newest' % (pick[0]['id'], pick[0]['commit']['id'][:8]), file=sys.stderr)
+print(pick[0]['id'] if pick else '')")
 if [ -n "$job" ] && curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
      "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs/$job/artifacts"; then
   (cd "$tmp" && unzip -q a.zip) && rsync -az --delete -e "ssh -J $jump" "$tmp/difftest-dist/" "$host:/srv/lab/difftest/" && echo "   job $job installed on sky-srv"
