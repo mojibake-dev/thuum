@@ -41,6 +41,19 @@ Milestone: M1   Class: B
   - The earlier "never reached the server" result (runs 20261004-212438 and
     -214508) was a bedroll Dawnguard.esm deletes (0x000CE5F9), not a SkyMP
     gap.
+- **A stuck wait, not reproduced.** In the second playtest, after a 6-hour
+  wait test 2 could look around but not move, open menus or wait again. That
+  is what Game.DisablePlayerControls blocks with its defaults. Three lab
+  probes did not reproduce it, and lab-driver now reads the engine's controls
+  (dump-state `controls`). After each wait all four controls read true and
+  the player walked:
+  - a plain 6-hour wait (run 20261005-062647);
+  - a fight, then a 6-hour wait three minutes later (-063140);
+  - a 6-hour wait 3500 units from an attacker whose figure was still in
+    combat, on the build where fights never end (-095456) and on the one
+    where they do (-094935).
+  If a playtest hits it again, `just probe <client>` reads the client's
+  controls with nothing reset.
 - **The server would undo a rest's healing.** It crops a client's health and
   magicka reports to what regeneration allows over at most 2 s
   (docs/verbs/attributes.md; ActionListener::OnChangeValues,
