@@ -27,6 +27,7 @@ class FakeProxmox:
         # what the game check (Settings.game_check_cmd) reads on a clone: the
         # Steam folder's exe at the default version unless a test says otherwise
         self.game = ExecResult(0, "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\SkyrimSE.exe\r\n1.7.104.0\r\n", "")
+        self.game_misses = 0
 
     def stop(self, guest: Guest) -> None:
         self.calls.append(("stop", guest.vmid))
@@ -46,6 +47,10 @@ class FakeProxmox:
     def exec(self, guest: Guest, command: list[str], timeout: float) -> ExecResult:
         self.calls.append(("exec", guest.vmid, tuple(command)))
         if any("Get-Process SkyrimSE" in c for c in command):
+            # a guest agent too busy to answer, this many times first
+            if self.game_misses > 0:
+                self.game_misses -= 1
+                raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: qga command 'guest-exec' failed - got timeout")
             return self.game
         return self.exec_result
 

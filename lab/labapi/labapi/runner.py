@@ -379,10 +379,18 @@ class Runner:
             if g is None or not g.managed:
                 return f"{client}=unchecked (unmanaged)"
             cmd = ["powershell", "-NoProfile", "-Command", self.s.game_check_cmd]
-            try:
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            except ProxmoxError as e:
-                raise RunnerError(f"E_RUN_GAME: {client} ({g.name}): {e}") from e
+            # Both clones boot and launch their games at once after a rollback,
+            # and a guest agent that busy can miss its answer (run
+            # 20261005-095237; thuum-mundus saw no host-side cause). Two more
+            # tries, 10 s apart, before the run errs.
+            for attempt in range(3):
+                try:
+                    res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                    break
+                except ProxmoxError as e:
+                    if attempt == 2:
+                        raise RunnerError(f"E_RUN_GAME: {client} ({g.name}): {e}") from e
+                    await asyncio.sleep(10 * self.s.time_scale)
             lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
             if res.exitcode != 0 or len(lines) < 2:
                 raise RunnerError(f"E_RUN_GAME: {client} ({g.name}): no running SkyrimSE.exe to read ({res.err.strip()[:200] or res.exitcode})")

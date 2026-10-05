@@ -729,3 +729,37 @@ class ProbeSteps(RunTests):
 
     def test_a_probe_of_an_unknown_client_is_404(self):
         self.assertEqual(self.client.get("/lab/probe", params={"client": "c9"}).status_code, 404)
+
+
+@needs_deps
+class GameCheckRetries(GameVersions):
+    """The game check rides out a guest agent too busy to answer right after
+    both clones boot (run 20261005-095237): two misses pass, a third errs."""
+
+    def _check_with_misses(self, misses):
+        import asyncio
+
+        from labapi.guests import Guest
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        tables = self.services.tables
+        tables.guests["sky-c1"] = Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1")
+        tables.guests.pop("fake-c1", None)
+        pve = self.services.control._b
+        pve.game_misses = misses
+        rec = RunRecord("x", Scenario(id="x", clients=["c1", "c2"]), self.tmp, "now", game="1.7.104")
+        asyncio.run(self.services.runner._check_game(rec, ["c1", "c2"]))
+        return rec
+
+    def test_two_missed_answers_still_check_the_game(self):
+        rec = self._check_with_misses(2)
+        self.assertTrue(rec.phases[0]["ok"], rec.phases)
+        self.assertEqual(rec.phases[0]["note"], "c1=1.7.104.0, c2=unchecked (unmanaged)")
+
+    def test_a_third_missed_answer_errs(self):
+        from labapi.runner import RunnerError
+
+        with self.assertRaises(RunnerError) as cm:
+            self._check_with_misses(3)
+        self.assertIn("E_RUN_GAME", str(cm.exception))
