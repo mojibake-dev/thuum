@@ -282,6 +282,11 @@ client-steam-offline vmid:
 client-crash-dumps vmid:
     @lab/tools/client-crash-dumps.sh {{vmid}}
 
+# The Steam Streaming Speakers on a clone (steam-speakers.ps1): an audio output from the first launch, so the
+# game has sound and Sunshine something to stream; Sunshine itself installs them only when a stream starts.
+client-steam-speakers vmid:
+    @lab/tools/client-steam-speakers.sh {{vmid}}
+
 # OneDrive off on a clone (onedrive-off.ps1): its backup prompt opened over the game on sky-c1.
 client-onedrive-off vmid:
     @lab/tools/client-onedrive-off.sh {{vmid}}
@@ -330,6 +335,7 @@ client-bringup vmid base client="c1" profile="1":
     just client-display {{vmid}}
     just client-game-firewall {{vmid}}
     just client-steam-offline {{vmid}}
+    just client-steam-speakers {{vmid}}
     just client-crash-dumps {{vmid}}
     just client-onedrive-off {{vmid}}
     just client-dist {{vmid}}
