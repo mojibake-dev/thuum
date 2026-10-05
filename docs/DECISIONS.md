@@ -544,3 +544,15 @@ then applies its own combat rules to both players. The server keeps its
   CommonLibSSE-NG or Ghidra, not memory (rule 1), and so does how a remote
   player's actor can carry it without its AI acting.
 - Until it lands, rest keeps the 10-second rule alone.
+
+**Amendment (2026-10-05, Eli: "60 seconds OR walk apart"):** a fight ends.
+In Eli's third playtest the aggro never expired: each game's figure of the
+other player is an AI in combat, and such an AI gives up only when it loses
+its target, while players stand side by side. The server now ends a fight
+when neither player has hit the other for 60 s, or when they have stood
+farther apart than the engine's "enemies nearby" range for 5 s (3000 units
+outdoors, 2000 indoors). Both games then stop their figure's combat
+(Actor.StopCombatAlarm). Until a fight ends the server also refuses its
+players a rest, however long ago the last hit. Other options weighed: 10 s
+or 30 s without a hit (an exploit window: step back and rest), and distance
+alone (standing together never ends it).

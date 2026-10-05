@@ -71,6 +71,31 @@ the player (41402), the compass list (41240), and what a hit does on the
 attacker's game (38626). The verb uses none of those addresses; it calls a
 Papyrus native through Skyrim Platform.
 
+## Ending a fight
+
+ADR-023's amendment (Eli, 2026-10-05: "60 seconds OR walk apart"). Each
+game's figure of the other player is an AI in combat, and such an AI gives
+up only when it loses its target, so without an end the aggro never expired
+(the third playtest).
+
+- The fights live in Rust (wire-rules `hostility::Fights`, ADR-020). A hit
+  between two players begins one, which tells the victim's game as above, or
+  keeps it going.
+- Once a second the core measures each pair (PartOne::TickFights). A fight
+  ends when neither player has hit the other for 60 s, or when they have
+  stood farther apart than the engine's "enemies nearby" range for 5 s. The
+  range is 3000 units outdoors and 2000 indoors, the executable's defaults
+  for fHostileActorExteriorDistance and fHostileActorInteriorDistance, which
+  no master file overrides (ghidra/notes/hostility-1-7-104.md; lab/esm.py
+  over the five masters).
+- Both games then get `Actor.StopCombatAlarm` on their figure of the other.
+  The re-analyst's read is that it stops the figure's combat, its alarm and
+  its anger at the player (ghidra/notes/hostility-1-7-104.md). T3 confirms it
+  by the wait it lets through.
+- Until a fight ends, the rest rule refuses its players a rest, however long
+  ago the last hit (wire-rules rest, `in_fight`).
+- A player who leaves ends its fights without a notice.
+
 ## Observe
 
 - Nothing new. The server already sees every player-on-player hit

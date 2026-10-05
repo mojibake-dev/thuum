@@ -101,12 +101,13 @@ client)
 - **The core:**
   - When a player's activation of a bed is allowed, MpObjectReference
     records the bed and the time on the actor.
-  - The bed's occupancy no longer blocks its own occupant: a vanilla bed
-    never seats the player, so a second activation is a new sleep, not a
-    double one.
+  - A bed takes no occupant at all. A vanilla bed never seats the player,
+    so SkyMP's furniture occupancy only blocked a second player. In the third
+    playtest test 2 held test 1 off its bed that way. Two players may now
+    sleep in one bed, each in its own game.
   - OnRestIntent gathers the facts: how long since the actor's last bed
     activation, and its distance to that bed.
-  - After any rest it releases the bed and forgets it.
+  - After any rest it forgets the bed.
 - **The rules** (ADR-020) are Rust, in wire-rules `rest`:
   - `slept`: a rest is a sleep when the bed activation is under 2 minutes
     old (the menu opens at once, and a 24-hour sleep runs about 24 s) and
