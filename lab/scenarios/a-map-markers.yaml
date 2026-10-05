@@ -1,0 +1,49 @@
+# M1 validation, map markers (docs/verbs/map-markers.md): the locations a
+# player discovers stay on its map across a server restart and a new login.
+# Every login loads a generated save that has discovered nothing, so before
+# this verb the map was empty again after each one. The marker is Skyrim.esm
+# REFR 0x00016223 (90659), a clearing (type 23) at (133093, -54772, 9103)
+# in Tamriel, offset (-764, 6358, -5559) from lab-spawn's origin (lab/esm.py).
+# 1. A fresh login: the marker is not on c1's map.
+# 2. c1 is put 1500 units south of it: the engine discovered this clearing
+#    with c1 2000 units off and not at 3000 (run 20261005-222458). The height
+#    follows the ground there, with a 400-unit landing tolerance (a slope
+#    slides). c1's engine discovers the marker, and c1's client reports it to
+#    the server, which records it on c1.
+# 3. c1 goes back to the spawn, about 8500 units from the marker and far
+#    outside the engine's discovery range, so nothing but the server can put
+#    the marker back on its map (run 20261005-222936 relaunched next to the
+#    marker, where its own engine could have found it again).
+# 4. The server restarts, and c1 quits the game and starts it again
+#    (relaunch: a reconnect keeps the old world and only moves the player,
+#    skymp5-client remoteServer.ts), so it loads a fresh save at its login:
+#    the marker is on c1's map again, shown by the server after the login.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-map-markers
+milestone: M1
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: markers {ids: [90659]}
+  - assert:
+      - not c1.marker(90659).visible
+  - c1: teleport {cell: lab-spawn, x: -764, y: 4858, z: -4514, rot: [0, 0, 0], tolerance: 400}
+  - wait: 8
+  - c1: markers {ids: [90659]}
+  - assert:
+      - c1.marker(90659).visible
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 0], tolerance: 400}
+  - wait: 3
+  - server: restart
+  - c1: relaunch
+  - wait: 10
+  - c1: markers {ids: [90659]}
+  - assert:
+      - c1.marker(90659).visible
+  - c1: screenshot
+artifacts: [server.log, c1.log, screenshots]
