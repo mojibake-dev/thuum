@@ -29,6 +29,7 @@ import {
   ObjectReference,
   Spell,
   TESModPlatform,
+  Ui,
   Utility,
   WorldSpace,
   hooks,
@@ -218,6 +219,17 @@ function trackWatch(): void {
   });
 }
 
+// Every menu CommonLibSSE-NG names (the MENU_NAME constants under
+// include/RE), so dump-state can say which are open when a player cannot act.
+const MENUS = [
+  "BarterMenu", "Book Menu", "Console Native UI Menu", "Console", "ContainerMenu", "Crafting Menu",
+  "Creation Club Menu", "Credits Menu", "Cursor Menu", "Dialogue Menu", "Fader Menu", "FavoritesMenu",
+  "GiftMenu", "HUD Menu", "InventoryMenu", "Journal Menu", "Kinect Menu", "LevelUp Menu", "Loading Menu",
+  "LoadWaitSpinner", "Lockpicking Menu", "MagicMenu", "Main Menu", "MapMenu", "MessageBoxMenu", "Mist Menu",
+  "Mod Manager Menu", "RaceSex Menu", "SafeZoneMenu", "Sleep/Wait Menu", "StatsMenu", "TitleSequence Menu",
+  "Training Menu", "Tutorial Menu", "TweenMenu",
+];
+
 function hasSpell(player: Actor, id: number): boolean {
   const spell = Spell.from(Game.getFormEx(id));
   return !!spell && player.hasSpell(spell);
@@ -263,7 +275,19 @@ function dumpState(player: Actor) {
       menu: Game.isMenuControlsEnabled(),
       looking: Game.isLookingControlsEnabled(),
       activate: Game.isActivateControlsEnabled(),
+      fighting: Game.isFightingControlsEnabled(),
+      sneaking: Game.isSneakingControlsEnabled(),
+      camSwitch: Game.isCamSwitchControlsEnabled(),
+      journal: Game.isJournalControlsEnabled(),
+      fastTravel: Game.isFastTravelControlsEnabled(),
     },
+    // and the rest of what can hold a player still with the controls on: an
+    // open menu, menu mode, a furniture, the sit and sleep states
+    menus: MENUS.filter((m) => Ui.isMenuOpen(m)),
+    inMenuMode: Utility.isInMenuMode(),
+    furniture: player.getFurnitureReference()?.getFormID() ?? 0,
+    sitState: player.getSitState(),
+    sleepState: player.getSleepState(),
     // the Rested bonus the server grants after a sleep (docs/verbs/sleep.md;
     // Skyrim.esm SPEL 0x000FB981, lab/esm.py)
     rested: hasSpell(player, 0x000fb981),
