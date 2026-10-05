@@ -74,7 +74,7 @@ Status meanings:
 | `ActiveMagicEffect.UnregisterForUpdateGameTime` (method) | missing |  |  |  |
 | `Actor.AddPerk` (method) | missing |  |  |  |
 | `Actor.AddShout` (method) | missing |  |  |  |
-| `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782] |  |
+| `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782]; the server also sends it after a sleep to grant Rested (ActionListener::GrantRested) | sleep |
 | `Actor.AddToFaction` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:778] |  |
 | `Actor.AllowBleedoutDialogue` (method) | missing |  |  |  |
 | `Actor.AllowPCDialogue` (method) | missing |  |  |  |
@@ -214,7 +214,7 @@ Status meanings:
 | `Actor.RemoveFromFaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:781] |  |
 | `Actor.RemovePerk` (method) | missing |  |  |  |
 | `Actor.RemoveShout` (method) | missing |  |  |  |
-| `Actor.RemoveSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:783] |  |
+| `Actor.RemoveSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:783]; the server also sends it when a Rested grant's eight game hours end | sleep |
 | `Actor.ReplaceHeadPart` (method) | missing |  |  |  |
 | `Actor.ResetAI` (method) | missing |  |  |  |
 | `Actor.ResetExpressionOverrides` (method) | missing |  |  |  |
