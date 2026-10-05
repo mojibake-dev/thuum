@@ -59,7 +59,13 @@ Milestone: M1   Class: B
     it walked.
   Not the idle-client memory leak found the same day
   (lab/deploy/sky-client/README.md): test 2's game had been running 16 to 21
-  minutes (launched 05:56:58Z), about 5 to 6.5 GB of a 12 GB client.
+  minutes (launched 05:56:58Z), about 5 to 6.5 GB of a 12 GB client. The
+  server log (in run 20261005-062647's server.log) has nothing from test 2
+  after its wait: no activation, rest or hit, and no death or respawn, so the
+  stuck state may have begun with the wait itself, before the teleport.
+  Ruled out in skymp5-client: the only other code that holds the player still
+  is deathService (setDontMove on death; test 2 never died) and
+  sweetTaffyPlayerCombatService (only with a "sweetpie" mod loaded).
   If a playtest hits it again, `just probe <client>` reads the client's
   controls with nothing reset.
 - **The server would undo a rest's healing.** It crops a client's health and
