@@ -206,7 +206,8 @@ it carries a HYPOTHESIS tag.
   and NPC reach and angle. The blocked flag only lowers the attacker's own
   damage and stays as it is.
 - Console commands, full ActorValue set, game time and globals, wait and
-  sleep as server-owned time. Game time part one, the shared clock, DONE
+  sleep as server-owned time. Eli (2026-10-05): console commands and the
+  full ActorValue set stay in M1, with the persistence work. Game time part one, the shared clock, DONE
   2026-10-04 (docs/verbs/time.md, ADR-021): a stateless Rust clock,
   SetGameTime at login and every minute, the client rendering it and
   setting the engine's day count through a new Skyrim Platform native
