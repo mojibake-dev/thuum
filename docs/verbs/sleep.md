@@ -149,11 +149,17 @@ client)
 - [x] doc complete, rung declared
 - [x] engine surface cited (TESFurniture kCanSleep, the FURN MNAM in
       Skyrim.esm, the rested spells, UESP)
-- [ ] server logic + T0
-- [ ] message + validator (none: no message changes)
-- [ ] native hook + T1 (none)
-- [ ] TS handler (none; lab-driver only)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated (Actor.AddSpell and
-      Actor.RemoveSpell sent by the server: ledger notes)
+- [x] server logic + T0 (wire-rules `rest::slept` and `rest::rested_ms`
+      with cargo tests; RestTest in ctest with the master files, pipeline
+      730: the new case, and the switch case updated to sleep at a bed)
+- [x] message + validator (none: no message changes)
+- [x] native hook + T1 (none)
+- [x] TS handler (none; lab-driver reports `rested`)
+- [x] T2 green: the ten sessions against m1-sleep-13b2e188, with the
+      branch's difftest artifact (job 3127)
+- [x] T3 scenario green, no HYPOTHESIS tags: a-sleep on 1.7.104 (run
+      20261005-071941) and 1.6.1170 (run 20261005-073126). The server
+      logged "slept 1 h ... Rested for 1440 s" for both sleeps, the second
+      at the same bed, and c1's game held Rested.
+- [x] ledger and suppression registry updated (Actor.AddSpell and
+      Actor.RemoveSpell noted)

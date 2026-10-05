@@ -256,8 +256,11 @@ it carries a HYPOTHESIS tag.
   restores, and the other player's clock stays; after a hit both games show
   the enemy and refuse a wait, and the figure never acts on its own. Found:
   - Beds work once per player, a sleep reports as a wait, and no Rested
-    effect appears (docs/verbs/rest.md lists the three causes). A rest
-    follow-up.
+    effect appears (docs/verbs/rest.md lists the three causes). DONE
+    2026-10-05 (docs/verbs/sleep.md, fork 13b2e188): a bed (FURN with
+    kCanSleep) works every time, the server decides a sleep from the bed
+    the player just activated, and a sleep grants Rested for eight game
+    hours. a-sleep green on 1.7.104 and 1.6.1170.
   - After a 6-hour wait test 2 could not act until the playtest reset moved
     it; no log shows why. Needs a repro.
   - No sound in the Moonlight streams.
