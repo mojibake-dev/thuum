@@ -998,7 +998,7 @@ Status meanings:
 | `ObjectReference.AddDependentAnimatedObjectReference` (method) | missing |  |  |  |
 | `ObjectReference.AddInventoryEventFilter` (method) | missing |  |  |  |
 | `ObjectReference.AddItem` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:944] |  |
-| `ObjectReference.AddToMap` (method) | missing | R3 | Not on the server VM yet (a quest revealing a marker needs a player to reveal it for; a later verb). The server itself sends it to a player's client as an SpSnippet after a login, once per marker that player discovered (docs/verbs/map-markers.md): the map is client-local, the record is the server's. | map-markers |
+| `ObjectReference.AddToMap` (method) | missing | R3 | Not on the server VM yet (a quest revealing a marker needs a player to reveal it for; a later verb). With the map-markers verb (fork branch map-markers until it lands), the server itself sends it to a player's client as an SpSnippet after a login, once per marker that player discovered (docs/verbs/map-markers.md): the map is client-local, the record is the server's. | map-markers |
 | `ObjectReference.ApplyHavokImpulse` (method, latent) | missing |  |  |  |
 | `ObjectReference.BlockActivation` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:955] |  |
 | `ObjectReference.CalculateEncounterLevel` (method) | missing |  |  |  |
