@@ -369,6 +369,35 @@ class ClientLogs(RunTests):
         self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
 
 
+
+@needs_deps
+class FridaTraces(RunTests):
+    def test_a_trace_started_before_a_run_is_fetched_before_the_rollback(self):
+        """POST /lab/frida outside a run leaves frida-inject writing on the
+        clone; the next run's rollback erases that file, so the run fetches it
+        first (2026-10-05: the traces of the idle-client leak were lost that
+        way, five E_PVE_FILE notes)."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        out = r"C:\sky-lab\frida\handle-trace.js.out"
+        pve.files[out] = '{"attached":1}\n'
+        runner = self.services.runner
+        runner.frida_started += [("c1", "handle-trace.js"), ("c1", "handle-trace.js")]
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn("frida/c1-handle-trace.js.before-run.jsonl", body["artifacts"])
+        run_dir = self.tmp / "results" / run_id
+        self.assertEqual((run_dir / "frida" / "c1-handle-trace.js.before-run.jsonl").read_text(), '{"attached":1}\n')
+        reads = [i for i, c in enumerate(pve.calls) if c[:3] == ("file_read", 901, out)]
+        rollback = next(i for i, c in enumerate(pve.calls) if c[:2] == ("rollback", 901))
+        self.assertEqual(len(reads), 1, pve.calls)  # once, though started twice
+        self.assertLess(reads[0], rollback)
+        self.assertEqual(runner.frida_started, [])
+        self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
+
 OFFLINE = """
 id: offline
 clients: [c1]

@@ -362,10 +362,24 @@ class Runner:
             return f"{client}={g.name}{'' if g.managed else ' (unmanaged, heartbeat only)'}"
 
         async def go():
+            await self._traces_before_rollback(rec, clients)
             notes = await asyncio.gather(*(one(c) for c in clients))
             return ", ".join(notes)
 
         await self._phase(rec, "rollback-clients", go())
+
+    async def _traces_before_rollback(self, rec: RunRecord, clients: list[str]) -> None:
+        """A trace started outside a run (POST /lab/frida) is still being
+        written on its clone, and this run's rollback is about to erase it
+        (2026-10-05: the idle-client leak traces went that way). Fetch each one
+        into this run first, once however often it was started."""
+        keep: list[tuple[str, str]] = []
+        for client, script in dict.fromkeys(self.frida_started):
+            if client in clients:
+                await self._frida_trace(rec, client, script, ".before-run")
+            else:
+                keep.append((client, script))
+        self.frida_started = keep
 
     async def _check_game(self, rec: RunRecord, clients: list[str]) -> None:
         """Each managed client runs the run's game version: the logon launcher
@@ -664,7 +678,7 @@ class Runner:
                 await self._client_log(rec, client, name)
         if "screenshots" in wanted and (rec.dir / "screenshots").is_dir():
             rec.artifacts.append("screenshots")
-        for client, script in self.frida_started:
+        for client, script in dict.fromkeys(self.frida_started):
             await self._frida_trace(rec, client, script)
         self.frida_started.clear()
         unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap") and not n.endswith(".log")]
@@ -702,16 +716,17 @@ class Runner:
         except ProxmoxError as e:
             rec.notes.append(f"{name}: {e}")
 
-    async def _frida_trace(self, rec: RunRecord, client: str, script: str) -> None:
+    async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> None:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             rec.notes.append(f"frida {script}: {client} unmanaged; trace not fetched")
             return
         (rec.dir / "frida").mkdir(exist_ok=True)
+        name = f"{client}-{script}{suffix}.jsonl"
         try:
             text = await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\frida\\{script}.out")  # frida-inject's stdout
-            (rec.dir / "frida" / f"{client}-{script}.jsonl").write_text(text)
-            rec.artifacts.append(f"frida/{client}-{script}.jsonl")
+            (rec.dir / "frida" / name).write_text(text)
+            rec.artifacts.append(f"frida/{name}")
         except ProxmoxError as e:
             rec.notes.append(f"frida {script}: {e}")
 
