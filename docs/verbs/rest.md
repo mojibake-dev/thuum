@@ -41,7 +41,7 @@ Milestone: M1   Class: B
   - The earlier "never reached the server" result (runs 20261004-212438 and
     -214508) was a bedroll Dawnguard.esm deletes (0x000CE5F9), not a SkyMP
     gap.
-- **A stuck wait, not reproduced.** In the second playtest, after a 6-hour
+- **A stuck wait, closed without a repro.** In the second playtest, after a 6-hour
   wait test 2 could look around but not move, open menus or wait again. That
   is what Game.DisablePlayerControls blocks with its defaults. Three lab
   probes did not reproduce it, and lab-driver now reads the engine's controls
@@ -81,6 +81,11 @@ Milestone: M1   Class: B
   a few seconds (needs sky-re for the 1.7.104 member offsets, so after the
   playtest); and the fix to try if it holds: TimeService waits until the
   engine reports the wait over before correcting.
+  Closed 2026-10-05 (Eli): playtest four's two 6-hour sleeps and 6-hour
+  wait on test 2, and more of his own, never stuck. If it was
+  `just playtest-start` moving the player right after a wait, that is lab
+  tooling, not a player's path. The race stays an unconfirmed HYPOTHESIS;
+  `just probe` shows what holds a player if one is ever stuck again.
   If a playtest hits it again, `just probe <client>` reads the client's
   controls with nothing reset.
 - **The server would undo a rest's healing.** It crops a client's health and

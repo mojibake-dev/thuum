@@ -276,11 +276,27 @@ it carries a HYPOTHESIS tag.
   - test 2's stuck wait waits on fights ending, so it moves to playtest four
     (docs/private/playtest-m1-4.md).
   - After a 6-hour wait test 2 could not act until the playtest reset moved
-    it; no log shows why. Needs a repro.
-  - No sound in the Moonlight streams.
-  - The lab games quit by themselves after 2.5 to 3.5 hours idle, each with
-    its own process id as the exit code, as sky-c2's game did once during
-    loading.
+    it; no log shows why. Closed 2026-10-05 after playtest four (below):
+    not reproduced.
+  - No sound in the Moonlight streams. Cause found 2026-10-05: sky-c2's
+    clean-m1 has no audio output at all (no Steam Streaming Speakers, which
+    sky-c1's has), and Sunshine installs them only at a stream's start, after
+    the game has launched without them. Fix: the speakers go into both clone
+    snapshots (lab/deploy/sky-client/README.md).
+  - The lab games quit by themselves after 2.5 to 3.5 hours idle. Cause
+    found and fixed 2026-10-05: refused, the game's Bethesda.net request
+    retried hundreds of times a second and WinHTTP leaked each try until the
+    client ran out of memory (lab/deploy/sky-client/README.md, "The game's
+    traffic outside the lab"); an unresolvable machine WinHTTP proxy ends it.
+- From Eli's fourth T4 playtest (2026-10-05, docs/private/playtest-m1-4.md).
+  Passed: a fight shows on both games and refuses a wait, ends after a quiet
+  minute or once the players walk apart (server log: 19:40:16 "a minute
+  quiet", 19:40:45 "apart"), and stays on while hits keep coming; both
+  players sleep in the same bedroll one after the other, each Rested. test
+  2's stuck wait did not come back: two 6-hour sleeps and a 6-hour wait on
+  test 2 in the server log, more of Eli's own after. Eli's call: closed; if
+  it came from `just playtest-start` moving a player right after a wait, that
+  is lab tooling, not a player's path, and not worth code (docs/verbs/rest.md).
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
