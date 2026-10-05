@@ -1,0 +1,68 @@
+# M1 validation, the end of a fight (docs/verbs/hostility-sync.md, ADR-023
+# amendment, Eli 2026-10-05: "60 seconds OR walk apart"). Each game's figure
+# of the other player is an AI in combat, which never gives up while the
+# players stand together, so in the third playtest the aggro never expired.
+# The server now ends a fight a minute after its last hit, or once its
+# players have stood apart for 5 s, and tells both games to stop their
+# figure's combat.
+# 1. c1 hits c2 once from behind. 62 s later both are set to half health
+#    and wait an hour (T 20, Enter 28): both games let them, standing side
+#    by side, and the server restores both to full. Without the end, each
+#    game refuses ("You cannot wait when enemies are nearby."), and
+#    regeneration alone leaves them short of full.
+# 2. c1 hits c2 again: a new fight. c2 is taken to the hunters' camp, about
+#    26,000 units away, past the engine's 3000; 8 s later it comes back next
+#    to c1 and waits. Without the end, c2's figure of c1 would still be in
+#    combat and refuse the wait.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-fight-end
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: draw-weapon
+  - wait: 2
+  - c2: teleport {cell: lab-spawn, x: 0, y: -426, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 1
+  - wait: 62
+  - c2: set-percentages {health: 0.5, magicka: 0.5, stamina: 0.5}
+  - c1: set-percentages {health: 0.5, magicka: 0.5, stamina: 0.5}
+  - wait: 2
+  - c2: tap-key {code: 20}
+  - c1: tap-key {code: 20}
+  - wait: 2
+  - c2: tap-key {code: 28}
+  - c1: tap-key {code: 28}
+  - wait: 8
+  - assert:
+      - server.actor(c2).healthPercentage == 1
+      - server.actor(c1).healthPercentage == 1
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 1
+  - c2: teleport {cell: lab-spawn, x: -15677, y: -20630, z: -3582, rot: [0, 0, 130]}
+  - wait: 8
+  - c2: teleport {cell: lab-spawn, x: 0, y: -426, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 0.5, magicka: 0.5, stamina: 0.5}
+  - wait: 2
+  - c2: tap-key {code: 20}
+  - wait: 2
+  - c2: screenshot
+  - c2: tap-key {code: 28}
+  - wait: 8
+  - assert:
+      - server.actor(c2).healthPercentage == 1
+artifacts: [server.log, c1.log, c2.log, screenshots]
