@@ -391,7 +391,13 @@ scenario once the systems it leans on exist.
   scripts, effectively no SKSE. Spells are M2 (cast intent R1, resolution
   R0). Of its 165 natives, 102 are missing, GlobalVariable.GetValue and
   SetValue the most called, which makes it the first verb to need
-  server-owned globals (ADR-021 decision 4).
+  server-owned globals (ADR-021 decision 4). Eli (2026-10-05): most of its
+  spells should behave about the same as vanilla ones; the hard case is
+  its projectile teleport, a blink step that moves the caster to where
+  the projectile lands. The movement-speed budget
+  (docs/verbs/movement-speed.md) refuses exactly that jump, so the spell
+  needs its own path: the server takes the cast (R1) and allows a jump to
+  the landing point within the spell's reach.
 - Headshot Kills - CIF 1.2: an ESL and a script that Kill() the victim when
   Core Impact Framework (an SKSE plugin hooking projectile collision and hit
   processing on the shooting client) reports an unhelmeted head hit. Hit
