@@ -138,6 +138,8 @@ class FakeActor:
     # record stays where it is, as the real server's does once the client
     # reports its true position back.
     drops_teleports: int = 0
+    # a teleport lands this far off in x, as a drop onto a slope slides
+    slides: float = 0.0
 
 
 class FakeState:
@@ -186,7 +188,9 @@ class FakeState:
                 if actor.drops_teleports > 0:
                     actor.drops_teleports -= 1
                     return {"ok": True, "actorId": 0xFF000000 + int(payload.get("profileId", 0))}
-                actor.x, actor.y, actor.z = float(payload.get("x", 0)), float(payload.get("y", 0)), float(payload.get("z", 0))
+                if "tolerance" in payload:
+                    return {"ok": False, "error": "tolerance is lab-api's, not the gamemode's"}
+                actor.x, actor.y, actor.z = float(payload.get("x", 0)) + actor.slides, float(payload.get("y", 0)), float(payload.get("z", 0))
                 actor.cell = str(payload.get("cell", actor.cell))
                 return {"ok": True}
             if kind == "give":

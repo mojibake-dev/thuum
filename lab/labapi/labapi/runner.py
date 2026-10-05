@@ -484,8 +484,13 @@ class Runner:
         after each send and settle the client reports its own position
         (dump-state) and that must sit within teleport_tolerance of the
         target in x and y, and the server's record must agree; otherwise send
-        again, until teleport_timeout_s is spent."""
+        again, until teleport_timeout_s is spent. A step may widen that bound
+        with its own `tolerance` (a drop onto a slope slides; the map-markers
+        range probe, 20261005-221343, landed 116 units off); it never reaches
+        the gamemode."""
         assert step.client
+        args = dict(step.args)
+        tolerance = float(args.pop("tolerance", self.s.teleport_tolerance))
         started = self._clock()
         deadline = started + self.s.teleport_timeout_s
         attempts = 0
@@ -493,7 +498,7 @@ class Runner:
         while True:
             attempts += 1
             try:
-                await asyncio.to_thread(self.state.command, step.client, "teleport", step.args)
+                await asyncio.to_thread(self.state.command, step.client, "teleport", args)
                 await asyncio.sleep(self.s.teleport_settle_s * self.s.time_scale)
                 qs = await self.board.run_step(step.client, "dump-state", {}, self.s.step_timeout_s)
                 actor = await asyncio.to_thread(self.state.actor, step.client)
@@ -502,8 +507,8 @@ class Runner:
                 rec.verdict = "red"
                 return False, str(e)
             dump = qs.result.get("data") if qs.ok and isinstance(qs.result.get("data"), dict) else None
-            client_there = dump is not None and self._dump_at_target(dump, step.args)
-            server_there = actor is not None and self._at_target(actor, step.args)
+            client_there = dump is not None and self._dump_at_target(dump, args, tolerance)
+            server_there = actor is not None and self._at_target(actor, args, tolerance)
             if client_there and server_there:
                 note = f"landed after {attempts} attempt(s), {self._clock() - started:.1f}s"
                 rec.notes.append(f"step {index}: {step.client} teleport {note}")
@@ -517,7 +522,7 @@ class Runner:
                 rec.verdict = "red"
                 return False, error
 
-    def _dump_at_target(self, dump: dict[str, Any], args: dict[str, Any]) -> bool:
+    def _dump_at_target(self, dump: dict[str, Any], args: dict[str, Any], tolerance: float | None = None) -> bool:
         """The client's own position (dump-state pos, absolute world units)
         against the scenario's target: offsets from a named cell's origin when
         the table knows the cell, absolute otherwise."""
@@ -527,11 +532,12 @@ class Runner:
         cell = self.tables.cell(str(args.get("cell", ""))) if args.get("cell") is not None else None
         origin = cell.origin if cell is not None else (0.0, 0.0, 0.0)
         try:
-            return all(abs(float(pos[i]) - float(origin[i]) - float(args.get(k, 0) or 0)) <= self.s.teleport_tolerance for i, k in ((0, "x"), (1, "y")))
+            bound = self.s.teleport_tolerance if tolerance is None else tolerance
+            return all(abs(float(pos[i]) - float(origin[i]) - float(args.get(k, 0) or 0)) <= bound for i, k in ((0, "x"), (1, "y")))
         except (TypeError, ValueError):
             return False
 
-    def _at_target(self, actor: dict[str, Any], args: dict[str, Any]) -> bool:
+    def _at_target(self, actor: dict[str, Any], args: dict[str, Any], tolerance: float | None = None) -> bool:
         """The record and the scenario's target share a frame when the target
         names a cell the table knows (the record then carries offsets from the
         same origin); a target written as the server's own descriptor compares
@@ -544,7 +550,8 @@ class Runner:
                 return False
             frame = absolute
         try:
-            return all(abs(float(frame[k]) - float(args.get(k, 0) or 0)) <= self.s.teleport_tolerance for k in ("x", "y"))
+            bound = self.s.teleport_tolerance if tolerance is None else tolerance
+            return all(abs(float(frame[k]) - float(args.get(k, 0) or 0)) <= bound for k in ("x", "y"))
         except (KeyError, TypeError, ValueError):
             return False
 

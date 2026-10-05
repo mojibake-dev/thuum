@@ -504,6 +504,21 @@ class TeleportSteps(RunTests):
         step = next(s for s in body["steps"] if s["action"] == "teleport")
         self.assertIn("landed after 2 attempt", step["note"], step)
 
+    def test_a_step_tolerance_lets_a_sliding_landing_count(self):
+        """A teleport may name its own x-y tolerance (a drop onto a slope
+        slides); it is lab-api's bound and never reaches the gamemode."""
+        import dataclasses
+
+        slide = "id: slide\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: teleport {cell: lab-spawn, x: 300, y: -200, z: 0%s}\n"
+        self.state.actors[1].slides = 100.0
+        self.services.runner.s = dataclasses.replace(self.services.runner.s, teleport_timeout_s=0.0)
+        run_id, body = self._run(slide % "")
+        self.assertEqual(body["verdict"], "red", body)  # 100 off, past the default 64
+        run_id, body = self._run(slide % ", tolerance: 150")
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"]
+        self.assertTrue(sent and all("tolerance" not in p for p in sent), sent)
+
     def test_teleport_the_client_never_takes_is_red(self):
         import dataclasses
 
