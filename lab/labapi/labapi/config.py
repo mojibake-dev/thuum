@@ -103,14 +103,19 @@ class Settings:
     # frida-inject (the standalone injector, staged by `just client-frida`) attaches
     # to the game by name once it exists plus five seconds (attaching at process
     # start never loaded the agent, 2026-10-01) and keeps running until the game
-    # ends; its stdout is the trace. Braces are doubled for str.format.
+    # ends; its stdout is the trace. It must run in the lab user's session, the
+    # game's: as SYSTEM through the guest agent it failed on both clones on
+    # 2026-10-05 ("refused to load frida-agent"), while the same command through
+    # the sky-lab-run task (register-runner.ps1, as `lab` on the desktop)
+    # attached. So the watcher becomes C:\sky-lab\run.ps1 and that task runs it.
+    # Braces are doubled for str.format.
     frida_exec_template: str = (
         "Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile '{lab_dir}\\frida\\{name}'; "
         "$w = @'\n"
         "$d = '{lab_dir}\\frida'; for ($i = 0; $i -lt 1500; $i++) {{ $p = Get-Process SkyrimSE -ErrorAction SilentlyContinue; if ($p) {{ break }}; Start-Sleep -Milliseconds 200 }}; "
         "if ($p) {{ Start-Sleep -Seconds 5; Start-Process -FilePath \"$d\\frida-inject.exe\" -ArgumentList '-p', $p.Id, '-s', \"$d\\{name}\" -RedirectStandardOutput \"$d\\{name}.out\" -RedirectStandardError \"$d\\{name}.err\" -WindowStyle Hidden }}\n"
-        "'@; Set-Content -Path '{lab_dir}\\frida\\{name}.watch.ps1' -Value $w; "
-        "Start-Process -FilePath powershell.exe -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File','{lab_dir}\\frida\\{name}.watch.ps1' -WindowStyle Hidden"
+        "'@; Set-Content -Path '{lab_dir}\\run.ps1' -Value $w; "
+        "Start-ScheduledTask -TaskName sky-lab-run"
     )
     # Writes a base64 text file next to the PNG so the guest-agent file API (text only) can carry it.
     # The capture must happen in the lab user's session: the guest agent runs

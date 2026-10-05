@@ -10,6 +10,9 @@ lab/.cache/frida/ and staged into C:\sky-lab\frida by `just client-frida
 to C:\sky-lab\frida\<script>.out and reads back as an artifact. Attaching at
 process start failed once (the agent never loaded before the game died); from a
 few seconds in it works, so lab-api waits for the process and five seconds more.
+The injector must run in the lab user's session, the game's own: as SYSTEM
+through the guest agent it reported "refused to load frida-agent" on both
+clones (2026-10-05), so lab-api hands its watcher to the sky-lab-run task.
 
 - exit-trace.js: who ends the process. A first-chance exception handler
   (module+offset, backtrace, registers) plus hooks on every orderly exit path.
