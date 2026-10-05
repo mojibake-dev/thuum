@@ -164,7 +164,7 @@ own client)
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (three UNKNOWNs for the re-analyst)
-- [ ] server logic + T0 (fork map-markers 151d04ec; ctest in CI)
+- [ ] server logic + T0 (fork m1-map-markers 151d04ec; ctest in CI)
 - [x] message + validator (same commit: fork 61ba659d, schema 5)
 - [x] native hook + T1: none needed, Skyrim Platform's own event and natives
 - [x] TS handler (fork 47853c52)
