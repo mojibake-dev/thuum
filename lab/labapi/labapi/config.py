@@ -179,6 +179,16 @@ class Settings:
     heartbeat_timeout_s: float = 300.0
     server_ready_timeout_s: float = 120.0
     guest_task_timeout_s: float = 120.0
+    # relaunch: a player quits the game and starts it again (docs/verbs/
+    # map-markers.md). The guest agent stops the game and starts the logon
+    # launch task (sky-lab-launch, as `lab` on the desktop); the launcher
+    # asks lab-api which version to start. A fresh launch to in-game took 90
+    # to 120 s on the clones (launch.log).
+    relaunch_cmd: str = (
+        "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; "
+        "Start-Sleep -Seconds 3; Start-ScheduledTask -TaskName sky-lab-launch"
+    )
+    relaunch_timeout_s: float = 300.0
     time_scale: float = 1.0
     extra: dict = field(default_factory=dict)
 

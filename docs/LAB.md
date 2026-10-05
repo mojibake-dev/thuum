@@ -400,7 +400,12 @@ degrees, 180 radians (run 20261003-083828). Until the client converts, a
 scenario that needs a heading uses 0 (north, the same in both units) and
 places the other actor accordingly.
 `screenshot` is a guest exec on a managed client (request-screenshot is
-the in-game fallback). Assertions read `server.actor(c)` (the record, and
+the in-game fallback). `relaunch` is too: the player quits the game and starts it again (the
+guest agent stops the game and starts the sky-lab-launch task), and the
+step holds until the new process polls, answers a dump-state in game and
+is back on the server's online list. It is how a scenario gets a fresh
+save: after a reconnect an in-game client keeps its world and only moves
+its player (skymp5-client remoteServer.ts). Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
 server's verdicts on the client's race menu results), `server.inventory(c)`,
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the

@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "settings"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn"}
-SPECIAL_ACTIONS = {"screenshot"}
+SPECIAL_ACTIONS = {"screenshot", "relaunch"}
 # fakeclient: the fork's headless legacy client logs in as a scenario client's
 # profile from inside the server image (T2 without a Windows client).
 SERVER_STEP_ACTIONS = {"restart", "fakeclient"}

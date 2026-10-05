@@ -398,6 +398,43 @@ class FridaTraces(RunTests):
         self.assertEqual(runner.frida_started, [])
         self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
 
+RELAUNCH = """
+id: relaunch
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: relaunch
+  - c1: dump-state
+"""
+
+
+@needs_deps
+class RelaunchSteps(RunTests):
+    def test_relaunch_restarts_the_game_and_holds_until_it_is_back_in_game(self):
+        """docs/verbs/map-markers.md: a player quitting and coming back loads
+        a fresh save, which a reconnect never does. The guest agent stops the
+        game and starts the launch task; the step then holds for the new
+        process's poll, an in-game dump-state and the online list."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        run_id, body = self._run(RELAUNCH)
+        self.assertEqual(body["verdict"], "green", body)
+        execs = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        relaunches = [e for e in execs if "sky-lab-launch" in e]
+        self.assertEqual(len(relaunches), 1, execs)
+        self.assertIn("Stop-Process", relaunches[0])
+        self.assertTrue([n for n in body.get("notes", []) if "relaunched" in n], body.get("notes"))
+
+    def test_relaunch_needs_a_managed_client(self):
+        run_id, body = self._run(RELAUNCH)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertIn("E_RUN_RELAUNCH", str(body.get("failures")))
+
 OFFLINE = """
 id: offline
 clients: [c1]

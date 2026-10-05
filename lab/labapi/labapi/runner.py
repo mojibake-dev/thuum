@@ -452,6 +452,8 @@ class Runner:
                 return False, str(e)
         if step.action == "screenshot":
             return await self._screenshot(rec, index, step.client)
+        if step.action == "relaunch":
+            return await self._relaunch(rec, index, step.client)
         if step.action in ("connect", "reconnect"):
             return await self._wait_online(rec, index, step.client, step.action)
         try:
@@ -620,6 +622,41 @@ class Runner:
                 rec.verdict = "red"
             return False, f"{len(failed)} of {len(step.assertions)} failed" + (f" ({read})" if read else "")
         return True, f"{len(step.assertions)} held" + (f" ({read})" if read else "")
+
+    async def _relaunch(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
+        """relaunch: the player quits the game and starts it again, so its
+        client loads a fresh generated save at the next login, as a player
+        coming back another day does. A reconnect is not that: an in-game
+        client keeps its world and only moves its player (skymp5-client
+        remoteServer.ts, CreateActor isMe). The guest agent stops the game
+        and starts the launch task; then the step holds for a poll from the
+        new process (any poll after the stop is one), for a dump-state, which
+        lab-driver answers only in-game (it runs steps on update), so the new
+        save is loaded, and for the server's online list."""
+        def fail(error: str) -> tuple[bool, str]:
+            rec.failures.append({"step": index, "kind": "lab", "client": client, "error": error})
+            rec.verdict = "red"
+            return False, error
+
+        g = self.tables.guest_for_client(client)
+        if g is None or not g.managed:
+            return fail(f"E_RUN_RELAUNCH: {client} is not a managed client")
+        cmd = ["powershell", "-NoProfile", "-Command", self.s.relaunch_cmd]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return fail(f"E_RUN_RELAUNCH: {g.name}: {e}")
+        if res.exitcode != 0:
+            return fail(f"E_RUN_RELAUNCH: {g.name}: exit {res.exitcode}: {res.err.strip()[:200]}")
+        started = self._clock()
+        if not await self.board.wait_heartbeat(client, started, self.s.relaunch_timeout_s):
+            return fail(f"E_RUN_RELAUNCH: {client} ({g.name}) did not poll within {self.s.relaunch_timeout_s}s")
+        left = max(1.0, self.s.relaunch_timeout_s - (self._clock() - started))
+        qs = await self.board.run_step(client, "dump-state", {}, left)
+        if not qs.ok:
+            return fail(f"E_RUN_RELAUNCH: {client} not in game: {qs.result.get('error', 'no dump-state')}")
+        rec.notes.append(f"step {index}: {client} relaunched, in game after {self._clock() - started:.1f}s")
+        return await self._wait_online(rec, index, client, "relaunch")
 
     async def _screenshot(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
         shots = rec.dir / "screenshots"
