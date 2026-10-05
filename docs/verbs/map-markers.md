@@ -89,12 +89,15 @@ own client)
   recorded marker, `ObjectReference.AddToMap(canTravel)` with the marker as
   self. No new message for it, as with StartCombat and AddSpell
   (docs/verbs/hostility-sync.md, docs/verbs/sleep.md). Why the first
-  movement: the client runs a snippet on its next in-game `update`
-  (skymp5-client spSnippetService.ts:22), but on a reconnect that can still
-  be the old world, and the fresh save loaded after it would drop the
-  markers again; a client reports movement only once its own actor stands
-  in the loaded world. SetUserActor sets the pending flag, OnUpdateMovement
-  takes it.
+  movement: the markers must land in the world the player will play in. A
+  fresh launch logs in from the main menu and loads a generated save after
+  the login; a reconnect from in game keeps its world and only moves the
+  player (skymp5-client remoteServer.ts, CreateActor isMe). The client runs
+  a snippet on its next in-game `update` (spSnippetService.ts:22), which
+  covers both today, but a client reports movement only once its own actor
+  stands in the loaded world, so waiting for it does not depend on the
+  client's menus. SetUserActor sets the pending flag, OnUpdateMovement takes
+  it.
 - Other players see nothing: a map is its owner's.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
@@ -146,9 +149,11 @@ own client)
 - T2: a difftest session where a fakeclient reports a discovery near
   0x00016223, the server restarts, and the login carries the snippet.
 - T3 scenario: `a-map-markers`. c1 goes to REFR 0x00016223 and its engine
-  discovers it; the server records it; the server restarts; c1 logs in
-  again on a fresh generated save and `c1.marker(0x00016223).visible` holds,
-  where before the verb a fresh save shows nothing.
+  discovers it; the server records it; the server restarts, and c1 quits
+  the game and starts it again (lab-api's `relaunch`: a reconnect would keep
+  the old world, so only a relaunch shows a fresh save); then
+  `c1.marker(0x00016223).visible` holds, where before the verb a fresh save
+  shows nothing.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
