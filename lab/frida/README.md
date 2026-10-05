@@ -32,7 +32,11 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   lab"). Pair it with Sysinternals Handle (`handle64 -s -p <pid>`, staged in
   C:\sky-lab\tools) to pick the leaking type first.
 
-Stop a script by ending frida-inject; check afterwards that the game no longer
-lists frida-agent.dll. A script that walks the stack on every memory commit
-(NtAllocateVirtualMemory) never reported and stayed loaded after its injector
-was killed (sky-c2, 2026-10-05); hook rarer functions, or sample.
+A trace ends with the game: restart it (or let the next rollback do so) once
+the .out has what you need. Never kill frida-inject under a running game. On
+2026-10-05 that left sky-c1's game to crash ten minutes later inside
+frida-agent.dll_unloaded (WER event 1000, 0xC0000005), and on sky-c2 the agent
+stayed loaded. Read the first lines of the .out right after attaching: a
+script that throws at load still prints its error there. A script that walks
+the stack on every memory commit (NtAllocateVirtualMemory) never reported;
+hook rarer functions, or sample.
