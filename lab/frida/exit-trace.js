@@ -13,8 +13,11 @@ function where(context) {
     return m ? m.name + '+0x' + a.sub(m.base).toString(16) : a.toString();
   });
 }
+// Frida 17 removed the static Module.findExportByName (the clients run
+// 17.19.0); a module's exports are read from its Module object.
 function hook(mod, name, kind) {
-  const p = Module.findExportByName(mod, name);
+  const m = Process.findModuleByName(mod);
+  const p = m ? m.findExportByName(name) : null;
   if (!p) { emit({ warn: 'no export', mod: mod, name: name }); return; }
   Interceptor.attach(p, {
     onEnter: function (args) {

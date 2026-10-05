@@ -104,6 +104,21 @@ client logged in ten seconds after launch. The server (UDP 7777, TCP 3000) and
 lab-api (TCP 80 on sky-srv) are inside the allowed range; DNS is the Windows
 resolver's, not the exe's, and is untouched.
 
+The price, found on 2026-10-05: refused at once, the game retries without
+pause and leaks every failed request. A Windows Filtering Platform audit on
+sky-c1 counted 7,352 blocked connections in 20 s, all from SkyrimSE.exe to
+api.bethesda.net:443 (99.84.41.2, .7, .75 and .82 alike). Each failed WinHTTP
+request leaves two Event handles open, with about 43 KB of committed memory
+(lab/frida/handle-trace.js: both stacks run from SkyrimSE.exe's own code into
+WINHTTP.dll; Sysinternals Handle: Event is the only handle type that grows).
+That is 80 to 120 MB a minute, so an idle client reaches about 24 GB in two to
+five hours and dies with 0xC0000005, two minutes after System event 2004 (low
+virtual memory); both clients did so the night of 2026-10-05. Taking the rule
+away does not help: since 2026-10-01 the host's dark lock refuses at once too
+(thuum-mundus), and the silent drop before it hung the main menu. What is left
+is a switch in the game that stops the traffic, or letting the request
+succeed. Until one lands, restart a client's game before a long session.
+
 ## Two game versions
 
 thuum supports and tests Skyrim 1.7.104 and 1.6.1170 (ADR-022). Each clone

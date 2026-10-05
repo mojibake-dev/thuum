@@ -7,6 +7,10 @@
 # was open). A Windows Firewall block rule for the exe outside 10.10.70.0/24
 # refuses those connections at once, the state the game handles. Machine-wide,
 # so it runs as SYSTEM through the guest agent (`just client-game-firewall`).
+# The price (2026-10-05): refused, the game retries api.bethesda.net hundreds
+# of times a second and WinHTTP leaks each failed request, so an idle client
+# runs out of memory in two to five hours (README, "The game's traffic outside
+# the lab").
 $exe = 'C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\SkyrimSE.exe'
 $name = 'sky-lab: SkyrimSE outside the lab'
 Get-NetFirewallRule -DisplayName $name -ErrorAction SilentlyContinue | Remove-NetFirewallRule
