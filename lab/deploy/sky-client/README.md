@@ -116,8 +116,21 @@ five hours and dies with 0xC0000005, two minutes after System event 2004 (low
 virtual memory); both clients did so the night of 2026-10-05. Taking the rule
 away does not help: since 2026-10-01 the host's dark lock refuses at once too
 (thuum-mundus), and the silent drop before it hung the main menu. What is left
-is a switch in the game that stops the traffic, or letting the request
-succeed. Until one lands, restart a client's game before a long session.
+is a switch in the game that stops the traffic, or a failure the game gives
+up on.
+
+The second exists. The request goes through WinHTTP with the machine proxy,
+and its error handler retries only on a refused or broken connection (12004,
+12015, 12029, 12030, 12032; ghidra/notes/bnet-leak-1-7-104.md). So
+game-firewall.ps1 also sets a machine WinHTTP proxy whose name never resolves
+(`bnet-off.invalid`, a reserved name, RFC 2606), bypassed for the lab's own
+10.10.70.*: every Bethesda.net request then fails with 12007, which the
+handler closes. On sky-c2 on 2026-10-05 the handles fell from +930 to -920
+every 30 s within a minute of the change, commit stayed flat, and a fresh
+launch reached the world with about 1,500 handles that did not grow; sky-c1
+leveled off the same way. Nothing outside the guest changes. Skyrim Platform's
+HttpClient (cpp-httplib over plain sockets) and the game's UDP to the server
+do not use WinHTTP, so the lab-driver and skymp are untouched.
 
 ## Two game versions
 
