@@ -278,8 +278,9 @@ client-crash-dumps vmid:
 client-onedrive-off vmid:
     @lab/tools/client-onedrive-off.sh {{vmid}}
 
-# A T4 playtest's start (docs/private/playtest-*.md): both lab characters to an empty camp south of the spawn, a
-# few steps from an unowned bedroll, at half health, magicka and stamina. Both clients online, no lab run active.
+# A T4 playtest's start (docs/private/playtest-*.md): both lab characters to a hunters' camp southwest of the spawn,
+# each a few steps from a tent over an unowned bedroll, at half health, magicka and stamina. Both clients online, no
+# lab run active.
 playtest-start:
     @lab/tools/playtest-start.sh
 
