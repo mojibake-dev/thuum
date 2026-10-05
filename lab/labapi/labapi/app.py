@@ -136,6 +136,21 @@ def create_app(services: Services) -> FastAPI:
     async def step(client: str):
         return board.poll(client)
 
+    # One client's own state outside a run (lab-driver's dump-state), nothing
+    # reset: for a playtest that hits something odd, such as a player who can
+    # look around but not move (docs/verbs/rest.md, the stuck wait). Read only;
+    # refused while a run owns the clients.
+    @router.get("/probe")
+    async def probe(client: str):
+        if runner.active:
+            return _busy()
+        if runner.tables.guest_for_client(client) is None:
+            raise HTTPException(404, f"no client {client!r}")
+        done = await board.run_step(client, "dump-state", {}, s.step_timeout_s)
+        if not done.ok:
+            return JSONResponse({"ok": False, "client": client, "error": done.result.get("error", "no answer")}, status_code=504)
+        return {"ok": True, "client": client, "state": done.result.get("data")}
+
     # The client's logon launcher asks which game version to start (ADR-022):
     # the active run's, else the default. It keeps one game folder per version.
     @router.get("/game")

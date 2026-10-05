@@ -181,6 +181,11 @@ lab-run scenario game="":
     sys.exit(0 if body["verdict"] == "green" else 1)
     PY
 
+# One client's own state outside a run, nothing reset (lab-api GET /lab/probe): the engine's player
+# controls, health, position and the last rest, for a playtest that hits something odd.
+probe client:
+    @curl -fsS -m 30 "{{lab_api}}/probe?client={{client}}" | python3 -c 'import json,sys; d=json.load(sys.stdin); st=d.get("state") or {}; print(json.dumps({k: st.get(k) for k in ("controls", "health", "magicka", "stamina", "pos", "cellName", "down", "rested", "afterRest", "gameHour")}, indent=2) if d.get("ok") else d)'
+
 # Tear the lab down: roll back clients and server, clear netem.
 lab-down:
     @curl -fsS -X POST "{{lab_api}}/down"

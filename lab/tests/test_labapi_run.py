@@ -703,3 +703,29 @@ class GameVersions(RunTests):
         # 1.6.11700 is not 1.6.1170
         with self.assertRaises(RunnerError):
             self._check("1.6.1170", "C:\\x\\SkyrimSE.exe\r\n1.6.11700.0\r\n")
+
+
+@needs_deps
+class ProbeSteps(RunTests):
+    """GET /lab/probe: one client's own dump-state outside a run, so a playtest
+    that hits something odd can be read without resetting anything."""
+
+    def test_a_probe_returns_the_client_s_dump_state(self):
+        import threading
+
+        out = {}
+        t = threading.Thread(target=lambda: out.update(r=self.client.get("/lab/probe", params={"client": "c2"})))
+        t.start()
+        deadline = time.time() + 10
+        while t.is_alive() and time.time() < deadline:
+            self.doubles.turn()
+            time.sleep(0.02)
+        t.join(5)
+        r = out["r"]
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertTrue(r.json()["ok"])
+        self.assertEqual(r.json()["client"], "c2")
+        self.assertIn(("c2", "dump-state", {}), self.doubles.seen)
+
+    def test_a_probe_of_an_unknown_client_is_404(self):
+        self.assertEqual(self.client.get("/lab/probe", params={"client": "c9"}).status_code, 404)
