@@ -11,6 +11,8 @@ the lab can grep (E_ASSERT_*).
                                                      that client's time globals, from its dump-state
   <client>.state.down                                its player knocked down: skymp5-client's death,
                                                      which never sets the engine's own isDead
+  <client>.state.movementControls | .menuControls | .lookingControls | .activateControls
+                                                     the engine's player controls, true when enabled
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -156,6 +158,11 @@ class StateView:
     # lab-driver's "down": a Ragdoll the engine accepted on the player and no
     # GetUpBegin since (skymp5-client's local death, m0-death)
     down: bool | None = None
+    # the engine's player controls (lab-driver's controls), true when enabled
+    movementControls: bool | None = None
+    menuControls: bool | None = None
+    lookingControls: bool | None = None
+    activateControls: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -333,6 +340,7 @@ class _ClientRef:
             health = dump.get("health") or {}
             magicka = dump.get("magicka") or {}
             stamina = dump.get("stamina") or {}
+            controls = dump.get("controls") if isinstance(dump.get("controls"), dict) else {}
             return StateView(
                 float(pos[0]) - origin[0], float(pos[1]) - origin[1], float(pos[2]) - origin[2],
                 worldOrCell=_opt_int(dump.get("worldOrCell")),
@@ -352,6 +360,10 @@ class _ClientRef:
                 gameDaysPassed=_opt_float(dump.get("gameDaysPassed")),
                 timeScale=_opt_float(dump.get("timeScale")),
                 down=_opt_bool(dump.get("down")),
+                movementControls=_opt_bool(controls.get("movement")),
+                menuControls=_opt_bool(controls.get("menu")),
+                lookingControls=_opt_bool(controls.get("looking")),
+                activateControls=_opt_bool(controls.get("activate")),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s state lacks {e}") from e
@@ -364,7 +376,8 @@ _ATTRS = {
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
-                "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down"},
+                "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
+                "movementControls", "menuControls", "lookingControls", "activateControls"},
     _ClientRef: {"state"},
 }
 # Methods that take no argument: server.time()

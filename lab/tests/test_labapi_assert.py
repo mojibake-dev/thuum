@@ -95,6 +95,20 @@ class EvaluatorTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             Evaluator(NoClock(), views, ["c1"]).evaluate("server.time().hour == 1")
 
+    def test_a_client_s_player_controls(self):
+        """After a long wait in the second playtest a player could look around
+        but not move or open menus; lab-driver reports the engine's controls."""
+        from labapi.assertions import AssertionData, Evaluator
+
+        views = Views()
+        views.data["c1"] = {"pos": [0, 0, 0], "controls": {"movement": False, "menu": False, "looking": True, "activate": False}}
+        ev = Evaluator(Server(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate("not c1.state.movementControls and not c1.state.menuControls"))
+        self.assertTrue(ev.evaluate("c1.state.lookingControls == true"))
+        self.assertFalse(ev.evaluate("c1.state.activateControls"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.state.movementControls")  # c2's dump has no controls
+
     def test_a_client_s_own_knock_down(self):
         """skymp5-client ragdolls its local player on the server's death state
         and never sets the engine's isDead; lab-driver reports down (m0-death)."""

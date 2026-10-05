@@ -249,6 +249,16 @@ function dumpState(player: Actor) {
     stamina: actorValue(player, "stamina"),
     health: actorValue(player, "health"),
     down: lastRagdollAt > lastGetUpAt,
+    // The engine's player controls (Papyrus Game.Is*ControlsEnabled): after
+    // a 6-hour wait in the second playtest test 2 could look around but not
+    // move, open menus or wait again, which is what DisablePlayerControls'
+    // defaults block (docs/verbs/rest.md)
+    controls: {
+      movement: Game.isMovementControlsEnabled(),
+      menu: Game.isMenuControlsEnabled(),
+      looking: Game.isLookingControlsEnabled(),
+      activate: Game.isActivateControlsEnabled(),
+    },
     afterRest,
     ...timeGlobals(),
     near,
