@@ -218,6 +218,11 @@ function trackWatch(): void {
   });
 }
 
+function hasSpell(player: Actor, id: number): boolean {
+  const spell = Spell.from(Game.getFormEx(id));
+  return !!spell && player.hasSpell(spell);
+}
+
 function dumpState(player: Actor) {
   const cell = player.getParentCell();
   const world = player.getWorldSpace();
@@ -259,6 +264,9 @@ function dumpState(player: Actor) {
       looking: Game.isLookingControlsEnabled(),
       activate: Game.isActivateControlsEnabled(),
     },
+    // the Rested bonus the server grants after a sleep (docs/verbs/sleep.md;
+    // Skyrim.esm SPEL 0x000FB981, lab/esm.py)
+    rested: hasSpell(player, 0x000fb981),
     afterRest,
     ...timeGlobals(),
     near,

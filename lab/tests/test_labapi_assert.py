@@ -101,11 +101,12 @@ class EvaluatorTests(unittest.TestCase):
         from labapi.assertions import AssertionData, Evaluator
 
         views = Views()
-        views.data["c1"] = {"pos": [0, 0, 0], "controls": {"movement": False, "menu": False, "looking": True, "activate": False}}
+        views.data["c1"] = {"pos": [0, 0, 0], "controls": {"movement": False, "menu": False, "looking": True, "activate": False}, "rested": True}
         ev = Evaluator(Server(), views, ["c1", "c2"])
         self.assertTrue(ev.evaluate("not c1.state.movementControls and not c1.state.menuControls"))
         self.assertTrue(ev.evaluate("c1.state.lookingControls == true"))
         self.assertFalse(ev.evaluate("c1.state.activateControls"))
+        self.assertTrue(ev.evaluate("c1.state.rested"))
         with self.assertRaises(AssertionData):
             ev.evaluate("c2.state.movementControls")  # c2's dump has no controls
 

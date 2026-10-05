@@ -13,6 +13,7 @@ the lab can grep (E_ASSERT_*).
                                                      which never sets the engine's own isDead
   <client>.state.movementControls | .menuControls | .lookingControls | .activateControls
                                                      the engine's player controls, true when enabled
+  <client>.state.rested                              the player has the Rested bonus (a sleep's)
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -163,6 +164,8 @@ class StateView:
     menuControls: bool | None = None
     lookingControls: bool | None = None
     activateControls: bool | None = None
+    # the player has the Rested bonus (lab-driver's rested, docs/verbs/sleep.md)
+    rested: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -364,6 +367,7 @@ class _ClientRef:
                 menuControls=_opt_bool(controls.get("menu")),
                 lookingControls=_opt_bool(controls.get("looking")),
                 activateControls=_opt_bool(controls.get("activate")),
+                rested=_opt_bool(dump.get("rested")),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s state lacks {e}") from e
@@ -377,7 +381,7 @@ _ATTRS = {
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
-                "movementControls", "menuControls", "lookingControls", "activateControls"},
+                "movementControls", "menuControls", "lookingControls", "activateControls", "rested"},
     _ClientRef: {"state"},
 }
 # Methods that take no argument: server.time()
