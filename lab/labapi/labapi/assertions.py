@@ -48,6 +48,7 @@ class ServerFacade(Protocol):
 class ViewsFacade(Protocol):
     def view(self, observer: str) -> dict[str, Any] | None: ...
     def watch(self, observer: str) -> dict[str, Any] | None: ...
+    def markers(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -117,6 +118,16 @@ class WatchView:
     z: float
     maxDisplacement: float
     samples: int
+
+
+@dataclass(frozen=True)
+class MarkerView:
+    """c.marker(id): a map marker on that client's own map, from its last
+    `markers` step (thuum docs/verbs/map-markers.md): shown (Papyrus
+    IsMapMarkerVisible) and open to fast travel (CanFastTravelToMarker)."""
+
+    visible: bool
+    canTravel: bool
 
 
 @dataclass(frozen=True)
@@ -315,6 +326,16 @@ class _ClientRef:
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s watch of {other} lacks {e}") from e
 
+    def marker(self, ref_id: int) -> MarkerView:
+        fn = getattr(self._views, "markers", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a markers step yet")
+        m = data.get(str(int(ref_id)))
+        if not isinstance(m, dict):
+            raise AssertionData(f"{self.name}'s markers step did not read {int(ref_id):#x}")
+        return MarkerView(visible=bool(m.get("visible")), canTravel=bool(m.get("canTravel")))
+
     def view(self, other: str) -> Pos:
         seen, origin = self._seen(other)
         if not seen:
@@ -378,11 +399,16 @@ _ATTRS = {
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
+    MarkerView: {"visible", "canTravel"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
                 "movementControls", "menuControls", "lookingControls", "activateControls", "rested"},
     _ClientRef: {"state"},
+}
+# Methods that take a form id: c.marker(0x00016223)
+_ID_METHODS = {
+    _ClientRef: {"marker"},
 }
 # Methods that take no argument: server.time()
 _NULLARY = {
@@ -390,7 +416,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched"},
+    _ClientRef: {"sees", "view", "watched", "marker"},
     InventoryView: {"count"},
 }
 _CMP = {
@@ -504,7 +530,12 @@ class Evaluator:
                         args.append(a.id)  # a client name is passed as its name
                     else:
                         args.append(self._eval(a))
-                if len(args) != 1 or not isinstance(args[0], str):
+                # methods that take a form id: c.marker(0x00016223)
+                takes_id = node.func.attr in _ID_METHODS.get(type(obj), set())
+                if takes_id:
+                    if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], int):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one form id")
+                elif len(args) != 1 or not isinstance(args[0], str):
                     raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one client name or string")
                 return self._read(node, getattr(obj, node.func.attr)(args[0]))
             raise AssertionSyntax("E_ASSERT_SYNTAX: call form not allowed")

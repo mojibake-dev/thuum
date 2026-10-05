@@ -37,6 +37,8 @@ class StepBoard:
         self._last_poll: dict[str, float] = {}
         self._views: dict[str, dict[str, Any]] = {}
         self._watches: dict[str, dict[str, Any]] = {}
+        # a markers step's answer: marker id (decimal) -> visible, canTravel
+        self._markers: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
 
     # lab-driver side ---------------------------------------------------------
@@ -63,6 +65,8 @@ class StepBoard:
             self._views[step.client] = body["data"]
         if step.action == "watch-stop" and isinstance(body.get("data"), dict):
             self._watches[step.client] = body["data"]
+        if step.action == "markers" and isinstance(body.get("data"), dict):
+            self._markers[step.client] = body["data"]
         step.done.set()
         return True
 
@@ -116,9 +120,13 @@ class StepBoard:
     def watch(self, observer: str) -> dict[str, Any] | None:
         return self._watches.get(observer)
 
+    def markers(self, observer: str) -> dict[str, Any] | None:
+        return self._markers.get(observer)
+
     def clear_views(self) -> None:
         self._views.clear()
         self._watches.clear()
+        self._markers.clear()
 
     def clear(self, client: str | None = None) -> None:
         if client is None:

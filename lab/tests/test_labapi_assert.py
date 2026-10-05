@@ -254,6 +254,36 @@ class WatchViews(NearViews):
         return self.watches.get(observer)
 
 
+class MarkerViews(NearViews):
+    """c1's last markers step read two markers: one on its map with fast
+    travel, one not shown."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {str(0x16223): {"visible": True, "canTravel": True},
+                            str(0x16224): {"visible": False, "canTravel": False}}}
+
+    def markers(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class MarkerTests(unittest.TestCase):
+    def test_marker_reads_the_last_markers_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), MarkerViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.marker(0x16223).visible and c1.marker(0x16223).canTravel"))
+        self.assertTrue(ev.evaluate("not c1.marker(0x16224).visible"))
+
+    def test_an_unread_marker_or_client_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), MarkerViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.marker(0x1).visible")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.marker(0x16223).visible")
+
+
 @needs_deps
 class WatchTests(unittest.TestCase):
     def test_watched_matches_the_server_position_and_reports_the_farthest_point(self):

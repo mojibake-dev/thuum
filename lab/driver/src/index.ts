@@ -404,6 +404,18 @@ function run(step: Step, player: Actor): unknown {
   switch (step.action) {
     case "dump-state":
       return dumpState(player);
+    case "markers": {
+      // thuum docs/verbs/map-markers.md: whether each map marker shows on
+      // this player's map and allows fast travel, keyed by its decimal form
+      // id (lab-api's c.marker(id)); null for a form the game does not have
+      const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
+      const out: Record<string, { visible: boolean; canTravel: boolean } | null> = {};
+      for (const id of ids) {
+        const ref = ObjectReference.from(Game.getFormEx(Number(id)));
+        out[String(Number(id))] = ref ? { visible: ref.isMapMarkerVisible(), canTravel: ref.canFastTravelToMarker() } : null;
+      }
+      return out;
+    }
     case "teleport": {
       // skymp5-client's own teleport call; worldOrCell is a Cell or WorldSpace
       // form id, one of the two casts is null by design.
