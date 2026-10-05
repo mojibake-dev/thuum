@@ -68,20 +68,27 @@ own client)
   src/REFR.cpp:42-46). The marker nearest the lab spawn is REFR 0x00016223
   at (133093, -54772, 9103) in Tamriel (0x3c), 6,404 units from lab-spawn's
   origin (lab/esm.py near, 2026-10-05).
-- UNKNOWN, for the re-analyst once sky-re can run (it needs the clients
-  down): the engine's discovery rule (a distance per marker, a game
-  setting, line of sight); whether AddToMap fires LocationDiscovery; whether
-  AddToMap at login shows a HUD message per marker.
+- Measured in the lab instead of read from the binary:
+  - the engine discovered the clearing REFR 0x00016223 with the player
+    2000 units off in x-y, and not at 3000 (run 20261005-222458; the server
+    measured the reports at 1947, 1828 and 1514 units). Other marker types
+    may have wider discovery radii, so the server's bound stays generous;
+  - AddToMap does not fire LocationDiscovery: after a relaunch far from the
+    marker, the server's re-show was followed by no report (run
+    20261005-223339). Next to it the engine rediscovers the marker by
+    itself (run 20261005-222936).
+- Open, for a playtest: whether AddToMap at login shows a HUD message per
+  marker.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
 - The client listens to `locationDiscovery` and sends MapMarkerDiscovered
   with the event's markerType and canTravelTo. Nothing else: the server
   finds the marker.
-- HYPOTHESIS: the discovered marker is the nearest marker of that type in
-  the player's worldspace. Two markers of one type close together could
-  make it pick wrong; the lab measures how close discovery happens (Dynamic
-  plan).
+- The discovered marker is the nearest marker of that type in the
+  player's worldspace: the server picked 0x00016223 in every lab report.
+  Known limit: two markers of one type within each other's discovery
+  range could be confused; none lies near the lab.
 
 ## Impose (observers render the server's decision)
 
@@ -128,8 +135,10 @@ own client)
 - C++ core: OnMapMarkerDiscovered gathers the facts, records the marker on
   MpActor (refr id and travel flag) in the actor's change form, so the
   database keeps it; at login, sends the AddToMap snippets.
-- Range bound: HYPOTHESIS until measured (Dynamic plan), then the measured
-  distance plus room for a stale position, as melee reach does.
+- Range bound: 8000 units. The engine discovered a clearing at 2000 to
+  3000 (measured); the bound is wider on purpose, since a refusal loses a
+  legitimate discovery from the player's map while a loose bound only lets
+  a client claim markers near where the server already holds it.
 
 ## Client
 
@@ -157,13 +166,13 @@ own client)
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-1. Discovery range: c1 teleports toward 0x00016223 at 5000, 3000, 2000,
-   1000 and 500 units, with the driver logging each `locationDiscovery`.
-   Expected: one event at some distance; that distance sets the range.
-2. AddToMap at login: one recorded marker, then fifty. Screenshot after the
-   login; note any HUD message per marker and how long fifty take.
-3. AddToMap(true) then canFastTravelToMarker() on the same reference:
-   expected true.
+1. Discovery range: done, probe x-marker-range (run 20261005-222458):
+   hidden at 6000, 4000 and 3000 units, shown with fast travel from 2000 in.
+2. AddToMap at login: done for one marker (a-map-markers, runs
+   20261005-223339 on 1.7.104 and 20261005-223747 on 1.6.1170). A HUD message per
+   marker and the time fifty take are a playtest's to see.
+3. AddToMap(true) then canFastTravelToMarker(): true after the relaunch
+   (the scenario's last markers step).
 
 ## Status
 
@@ -173,6 +182,6 @@ own client)
 - [x] message + validator (same commit: fork 61ba659d, schema 5)
 - [x] native hook + T1: none needed, Skyrim Platform's own event and natives
 - [x] TS handler (fork 47853c52)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] T2 green (`just test-proto m1-map-markers`, every session identical)
+- [x] T3 scenario green, no HYPOTHESIS tags (a-map-markers: runs 20261005-223339 on 1.7.104, 20261005-223747 on 1.6.1170; scenario commit 714417f awaits Eli's review)
+- [x] ledger and suppression registry updated (NATIVES.md ObjectReference.AddToMap; nothing suppressed)
