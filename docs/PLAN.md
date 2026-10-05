@@ -250,6 +250,20 @@ it carries a HYPOTHESIS tag.
     reach for sleep. Done 2026-10-04: profile 2 is an Orc named "test 2" in
     the clean world (preset lab-orc-2), and `just playtest-start` puts both
     players at half health by an unowned bedroll.
+- From Eli's second T4 playtest (2026-10-04, docs/private/playtest-m1-2.md).
+  Passed: two distinct characters (an Orc named test 2); sneak attacks at
+  3.0x with the sword and 2.0x bare-handed, with the damage to match; a wait
+  restores, and the other player's clock stays; after a hit both games show
+  the enemy and refuse a wait, and the figure never acts on its own. Found:
+  - Beds work once per player, a sleep reports as a wait, and no Rested
+    effect appears (docs/verbs/rest.md lists the three causes). A rest
+    follow-up.
+  - After a 6-hour wait test 2 could not act until the playtest reset moved
+    it; no log shows why. Needs a repro.
+  - No sound in the Moonlight streams.
+  - The lab games quit by themselves after 2.5 to 3.5 hours idle, each with
+    its own process id as the exit code, as sky-c2's game did once during
+    loading.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
