@@ -99,15 +99,19 @@ own client)
 
 - After a login, on the first movement, the server sends Favorites with the
   record (items filtered to what the player holds now).
-- The client cannot mark them at once: after the generated save loads, the
-  client re-applies the player's inventory on an update timer
-  (remoteServer.ts:79-92, every 5 s), and the first apply of a game session
-  removes every item before adding the server's (sync/inventory.ts:322-339),
-  so an item can be missing when the message arrives. favoritesService marks
-  each entry with `TESModPlatform.SetFavorite(form, hotkey)`, keeps the ones
-  that answer false (no such item yet) and retries them on later updates
-  for 60 s, then drops them. The received list counts as sent, so it is not
-  echoed back.
+- The client keeps that list as what the player wants, until the player
+  closes a menu where favorites change, whose result then becomes the list
+  (and is reported if it changed). SkyMP rebuilds the player's inventory now
+  and then, and an item's mark goes with its entry: the first inventory sync
+  after a login empties and refills the inventory (sync/inventory.ts
+  resetBase), and applyEquipment empties it at a login too (a-favorites,
+  runs 20261006-055012 and -070238: the dagger's mark lost after a relaunch,
+  Flames kept; Eli in playtest six: "weapons as favorites do not stay").
+  So every two seconds, outside those menus and after the first sync,
+  favoritesService puts back the marks the engine lost, through
+  `TESModPlatform.SetFavorite`, which refuses items the player no longer
+  holds and magic it does not know. The received list counts as sent, so it
+  is not echoed back.
 
 ## Suppress
 
