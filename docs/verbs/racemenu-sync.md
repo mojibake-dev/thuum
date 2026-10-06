@@ -54,6 +54,44 @@ above keep a hostile preset from carrying anything but a look.
   slots (TES4 flags 0x0, not light), so the server's load order differs by
   game version once they are in the 1.6.1170 set.
 
+- RaceMenu's own header for plugin authors (0.4.20.0,
+  ModderResource/IPluginInterface.h; in lab/.cache/mods, never in a repo)
+  declares the interface, read 2026-10-06:
+  - `IPluginInterface` (lines 25-32): virtual destructor, `GetVersion()`,
+    `Revert()`.
+  - `IInterfaceMap` (lines 34-40): `QueryInterface(const char* name)`,
+    `AddInterface`, `RemoveInterface`.
+  - `InterfaceExchangeMessage` (lines 42-50): message type `0x9E3779B9`
+    (kMessage_ExchangeInterface) carrying an `IInterfaceMap*`, null until
+    filled.
+  - `IPresetInterface : IPluginInterface` (lines 467-492): plugin version 1;
+    `SavePreset(const char* filePath, const char* tintPath, Actor*)` and
+    `LoadPreset(const char* filePath, const char* tintPath, Actor*,
+    ApplyTypes = kPresetApplyAll)`; ApplyTypes face 0, overrides 1, body
+    morphs 2, transforms 4, skin overrides 8, all 15. Paths like
+    `SKSE\Plugins\CharGen\Exported\<name>.jslot` and
+    `Textures\CharGen\Exported\<name>.dds` (the tint, optional "but
+    recommended for correct look"). LoadPreset: "Details may be saved to
+    the TESNPC, make sure this character is unique!"
+  - Skyrim Platform declares its own copies of these classes for the ABI
+    (the header is RaceMenu's; it is not copied into the fork).
+- HYPOTHESIS: how a plugin gets the map. The header names the message, not
+  who sends it. RaceMenu's public source (expired6978/SKSE64Plugins, older
+  than 0.4.20.0) has skee answer an InterfaceExchangeMessage sent to it by
+  name through SKSE messaging (receiver "skee"), filling `interfaceMap`
+  before Dispatch returns. Confirm in skee64.dll 0.4.20.0 on sky-re
+  (Ghidra): the message handler that writes the map pointer, and the
+  "Preset" entry among the names it registers.
+- HYPOTHESIS: SavePreset and LoadPreset run on the thread Skyrim Platform
+  calls natives on (as TESModPlatform.SetFavorite does, docs/verbs/
+  favorites.md); otherwise the native queues them to the game thread.
+- Remote players: skymp5-client builds each remote player's figure on its
+  own base NPC (src/sync/appearance.ts applyAppearance:
+  `TESModPlatform.createNpc()`), so LoadPreset's writes to the TESNPC stay
+  with that player. The figure is respawned on a new base when its
+  appearance changes (src/view/formView.ts, respawnRequired), so the
+  preset is applied again after every spawn.
+
 ## Observe
 
 - After the race menu closes (and after any later RaceMenu edit), the
@@ -80,24 +118,61 @@ above keep a hostile preset from carrying anything but a look.
 
 ## Message contract
 
-- To be designed: a bounded blob (the JSON, a size cap well under the
-  wire's per-message cap) client to server, and server to client per
-  player.
+- Its own message, RaceMenuPreset, both ways, not SkyMP's property
+  replication: UpdateProperty is capped at 65 KiB on the wire (wire-schema
+  TABLE), and a sculpted head can carry more. Client to server: `preset`,
+  the .jslot JSON, within the transport's 256 KiB from a client (wire-
+  transport Limits max_from_client). Server to client: `actor` (the server
+  id of the player it belongs to) and `preset`. The cap is set once a real
+  sculpted preset is measured in the lab; compression (deflate) only if
+  that measurement needs it.
 
 ## Server
 
-- To be designed: the look in the player's change form (absent in older
-  records, read as none), its bounds checked in Rust.
+- Rust, wire-rules: the bounds (size, well-formed JSON object, only the
+  .jslot's top-level keys, head parts and forms named by "plugin|FormID"
+  present in the server's load order). Sculpt vertex indices are recorded
+  unvalidated (the server has no .tri files; rule 5: R2, bounded).
+- C++ core: the preset in the player's change form (`raceMenuPreset`,
+  absent in older records and read as none). Sent to the player's own
+  client after a login (the map-markers login hook), and to every client
+  that gets CreateActor for that player, right after it; a new preset goes
+  to the player's listeners.
 
 ## Client
 
-- A Skyrim Platform native (or a small SKSE plugin) that takes RaceMenu's
-  Preset interface and exposes save and load to skymp5-client.
+- Skyrim Platform, TESModPlatform: `SaveRaceMenuPreset(Actor) -> String`
+  (SavePreset into a file under SKSE\Plugins\CharGen\Exported, read back)
+  and `LoadRaceMenuPreset(Actor, String) -> Bool` (the JSON written to that
+  folder, then LoadPreset, apply all); both false or empty when RaceMenu is
+  not loaded, as on 1.7.104.
+- skymp5-client RaceMenuService: on the race menu's close, SaveRaceMenuPreset
+  on the player and send it if it changed. On RaceMenuPreset from the
+  server, LoadRaceMenuPreset on the player, or on that player's figure,
+  keeping it in the world model so every respawn applies it again.
+- Lab-driver: a step that loads a preset file staged for the run and one
+  that saves the player's and reports its size and a hash, so a scenario
+  can shape a look without dragging sliders.
 
 ## Tests
 
-- To be designed: T0 for the bounds; T3 on the 1.6.1170 set: c1 sets a
-  sculpt through RaceMenu, c2 sees it, both after a restart and a relaunch.
+- T0: the Rust bounds (sizes, keys, forms) and the change form round trip;
+  the login and CreateActor sends.
+- T3 on 1.6.1170 (`a-racemenu`): c1 loads a sculpted preset and closes the
+  race menu; c2's figure of c1 shows it (the saved preset read back through
+  c2's own SaveRaceMenuPreset on that figure matches); the server restarts
+  and c1 relaunches; c1 and c2 both show it again.
+
+## Order of work
+
+1. RaceMenu into the lab's 1.6.1170 set (thuum 1b4b741, after the merge
+   sweep): its menu shows on both clones, and m0-appearance, a-rotfern,
+   a-character-creation and smoke still pass there.
+2. The interface confirmed in skee64.dll on sky-re (the two HYPOTHESIS
+   tags above).
+3. The two natives and the lab-driver steps: load a preset, save it back,
+   compare. A real preset measured, which sets the message cap.
+4. Message and validator (same commit), server, client, scenario.
 
 ## Status
 
