@@ -143,6 +143,22 @@ class GuestControl:
     def _parent(snaps: list[dict[str, Any]], name: str) -> str | None:
         return next((s.get("parent") for s in snaps if s.get("name") == name), None)
 
+    def _stack_guard(self, guest: Guest, snaps: list[dict[str, Any]], name: str) -> None:
+        """A stacked snapshot sits directly on clean-m1: `current` stands on
+        clean-m1 (a new `name`) or on `name` stacked on clean-m1 (a
+        replacement). Anything deeper, say clean-m1-effects on top of a
+        clean-m1-markers nobody promoted, is a shape neither promote nor
+        `sky-lab` unwinds (thuum-mundus, 2026-10-05)."""
+        top = self._parent(snaps, "current")
+        if top == name and self._parent(snaps, name) == "clean-m1":
+            return
+        exists = any(s.get("name") == name for s in snaps)
+        if top == "clean-m1" and not exists:
+            return
+        if exists and top != name:
+            raise ProxmoxError(f"E_PVE_GUARD: {name} on {guest.name} has later snapshots; not replaced")
+        raise ProxmoxError(f"E_PVE_GUARD: a stacked snapshot goes directly on clean-m1, and {guest.name} stands on {top} (stacked on {self._parent(snaps, top)}); promote or delete that first")
+
     def _await_agent(self, guest: Guest, boot_timeout: float) -> None:
         deadline = time.monotonic() + boot_timeout
         while time.monotonic() < deadline:
@@ -152,26 +168,37 @@ class GuestControl:
         raise ProxmoxError(f"E_PVE_AGENT: {guest.name}'s guest agent did not answer within {boot_timeout:g}s of the start")
 
     def snapshot_clone(self, guest: Guest, name: str, description: str, quiesce_cmd: str, exec_timeout: float, boot_timeout: float) -> dict[str, Any]:
-        """A cold stacked snapshot `name` (clean-m1-<x>) of a lab client:
-        quiesce (stop the game and the lab tasks), a clean ACPI shutdown (its
-        task log must hold no timeout or force line), replace `name` if it is
-        a leaf, snapshot without RAM, start, wait for the guest agent, and
-        prove `name` is the newest (its only child is `current`)."""
+        """A cold stacked snapshot `name` (clean-m1-<x>) of a lab client,
+        directly on clean-m1 or replacing itself there (_stack_guard, checked
+        before anything touches the clone): quiesce (stop the game and the lab
+        tasks), a clean ACPI shutdown (its task log must hold no timeout or
+        force line), snapshot without RAM, start, wait for the guest agent,
+        and prove `name` is the newest (its only child is `current`)."""
         self._snapshot_guard(guest, name)
         if not _STACKED.match(name):
             raise ProxmoxError(f"E_PVE_GUARD: snapshot takes a stacked name, clean-m1-<x>; {name!r} comes only from a promote")
+        self._stack_guard(guest, self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest), name)
         self.exec(guest, ["powershell", "-NoProfile", "-Command", quiesce_cmd], exec_timeout)
-        status, lines = self._call("E_PVE_SHUTDOWN", guest, self._b.shutdown, guest, SHUTDOWN_TIMEOUT_S)
+        try:
+            status, lines = self._call("E_PVE_SHUTDOWN", guest, self._b.shutdown, guest, SHUTDOWN_TIMEOUT_S)
+        except ProxmoxError as e:
+            status, lines = str(e), []
         unclean = [ln for ln in lines if _UNCLEAN.search(ln)]
-        if status != "OK" or unclean or self.status(guest) != "stopped":
-            self.start(guest)  # back as it was, with no snapshot taken
-            raise ProxmoxError(f"E_PVE_SHUTDOWN: {guest.name}: not a clean ACPI shutdown ({status}; {'; '.join(unclean[:2]) or 'no log line'}); no snapshot taken")
-        snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
-        if any(s.get("name") == name for s in snaps):
-            kids = [c for c in self._children(snaps, name) if c != "current"]
-            if kids:
+        power = self.status(guest)
+        if status != "OK" or unclean or power != "stopped":
+            # Back as it was, with no snapshot taken. A shutdown that timed
+            # out leaves the clone running, where a start would only fail with
+            # "already running" and hide this error (thuum-mundus, 2026-10-05).
+            if power == "stopped":
                 self.start(guest)
-                raise ProxmoxError(f"E_PVE_GUARD: {name} on {guest.name} has later snapshots ({', '.join(kids)}); not replaced")
+            raise ProxmoxError(f"E_PVE_SHUTDOWN: {guest.name}: not a clean ACPI shutdown ({status}; {'; '.join(unclean[:2]) or 'no log line'}; the clone is {power}); no snapshot taken")
+        snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+        try:
+            self._stack_guard(guest, snaps, name)  # still true after the shutdown
+        except ProxmoxError:
+            self.start(guest)
+            raise
+        if self._parent(snaps, "current") == name:
             self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, name)
         self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_create, guest, name, description)
         self.start(guest)
@@ -185,8 +212,11 @@ class GuestControl:
     def promote_clone(self, guest: Guest, frm: str, to: str, boot_timeout: float) -> dict[str, Any]:
         """Make `to` (clean-m1) bit-identical to the stacked `frm` on top of
         it: `frm` must be the newest and `to` its parent; stop, roll back to
-        `frm`, delete `frm`, delete `to`, snapshot `to` while stopped, start,
-        wait for the guest agent."""
+        `frm`, delete `frm`, delete `to`, snapshot `to` while stopped with
+        `frm`'s description (which build, which driver), start, wait for the
+        guest agent. A failure between the two deletes and the snapshot
+        leaves the clone on `frm`'s content with no `to`; the repair is a
+        cold snapshot named `to` (docs/LAB.md)."""
         self._snapshot_guard(guest, frm, to)
         if not _STACKED.match(frm) or frm == to:
             raise ProxmoxError(f"E_PVE_GUARD: promote takes a stacked clean-m1-<x> onto its parent; got {frm!r} onto {to!r}")
@@ -195,11 +225,14 @@ class GuestControl:
             raise ProxmoxError(f"E_PVE_GUARD: {frm} is not the newest snapshot on {guest.name}")
         if self._parent(snaps, frm) != to:
             raise ProxmoxError(f"E_PVE_GUARD: {frm} on {guest.name} is not stacked on {to} (its parent is {self._parent(snaps, frm)})")
+        # PVE's snapshot list carries each description (GET .../snapshot)
+        was = next((str(s.get("description") or "").strip() for s in snaps if s.get("name") == frm), "")
+        description = f"promoted from {frm} by lab-api: {was}" if was else f"promoted from {frm} by lab-api"
         self.stop(guest)
         self.rollback(guest, frm)
         self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, frm)
         self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, to)
-        self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_create, guest, to, f"promoted from {frm} by lab-api")
+        self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_create, guest, to, description)
         self.start(guest)
         self._await_agent(guest, boot_timeout)
         snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)

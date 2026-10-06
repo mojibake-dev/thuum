@@ -406,9 +406,16 @@ the in-game fallback). Two lab-api endpoints replace the snapshot round trips to
 whose task log holds no timeout or forced stop, a snapshot without RAM,
 start, guest agent check, and proof the snapshot is the newest), and `POST
 /lab/clients/<c>/promote {from, to}` makes `to` (clean-m1) bit-identical to
-the stacked `from` on top of it. Only sky-c1 and sky-c2, only clean-m1
-names, never clean-sp; no run starts while one is in progress (`just
-client-snapshot c1 clean-m1-x`, `just client-promote c1 clean-m1-x`).
+the stacked `from` on top of it, keeping `from`'s description. Only sky-c1
+and sky-c2, only clean-m1 names, never clean-sp; a stacked snapshot goes
+directly on clean-m1 or replaces itself there, never on top of another one
+(promote or delete that first); no run starts while one is in progress
+(`just client-snapshot c1 clean-m1-x`, `just client-promote c1 clean-m1-x`).
+A shutdown that times out leaves the clone running, game stopped, with no
+snapshot taken. If a promote fails between deleting `from` and creating
+`to`, the clone runs `from`'s content with no `to`: the repair is a cold
+snapshot named `to`, thuum-mundus's `sky-lab client baseline <vmid>
+clean-m1`.
 `relaunch` is too: the player quits the game and starts it again (the
 guest agent stops the game and starts the sky-lab-launch task), and the
 step holds until the new process polls, answers a dump-state in game and

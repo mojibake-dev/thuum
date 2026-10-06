@@ -33,6 +33,7 @@ class FakeProxmox:
         self.snaps: dict[int, list[dict[str, Any]]] = {}
         self.shutdown_status = "OK"
         self.shutdown_log = ["shutdown VM: guest agent stopped the VM", "TASK OK"]
+        self.shutdown_error: str | None = None
         self.agent_up = True
 
     def stop(self, guest: Guest) -> None:
@@ -44,6 +45,9 @@ class FakeProxmox:
 
     def start(self, guest: Guest) -> None:
         self.calls.append(("start", guest.vmid))
+        if self.statuses.get(guest.vmid) == "running":
+            # PVE refuses a start of a running VM
+            raise RuntimeError(f"VM {guest.vmid} already running")
         self.statuses[guest.vmid] = "running"
 
     def status(self, guest: Guest) -> str:
@@ -62,6 +66,8 @@ class FakeProxmox:
 
     def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]:
         self.calls.append(("shutdown", guest.vmid, timeout_s))
+        if self.shutdown_error:
+            raise RuntimeError(self.shutdown_error)
         if self.shutdown_status == "OK":
             self.statuses[guest.vmid] = "stopped"
         return self.shutdown_status, list(self.shutdown_log)
