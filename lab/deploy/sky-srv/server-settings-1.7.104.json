@@ -14,9 +14,7 @@
     "/srv/skymp/esm/ccBGSSSE001-Fish.esm",
     "/srv/skymp/esm/ccBGSSSE025-AdvDSGS.esm",
     "/srv/skymp/esm/RaceCompatibility.esm",
-    "/srv/skymp/esm/rotfern.esp",
-    "/srv/skymp/esm/RaceMenu.esp",
-    "/srv/skymp/esm/RaceMenuPlugin.esp"
+    "/srv/skymp/esm/rotfern.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",

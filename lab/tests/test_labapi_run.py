@@ -722,7 +722,8 @@ class GameVersions(RunTests):
         self.assertEqual(r.status_code, 200, r.text)
         body = self._finish(r.json()["run"])
         self.assertEqual(body["game"], "1.6.1170")
-        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm/1.6.1170"})
+        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm/1.6.1170",
+                                          "SERVER_SETTINGS": "/srv/lab/server/server-settings.json"})
         self.assertIn("game 1.6.1170", body["phases"][0]["note"])
 
     def test_request_version_wins_over_the_scenario_and_reaches_the_server_mount(self):
@@ -730,7 +731,9 @@ class GameVersions(RunTests):
         self.assertEqual(r.status_code, 200, r.text)
         body = self._finish(r.json()["run"])
         self.assertEqual(body["game"], "1.7.104")
-        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm"})
+        # its own load order: RaceMenu's plugins load on 1.6.1170 only (ADR-025)
+        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm",
+                                          "SERVER_SETTINGS": "/srv/lab/server/server-settings-1.7.104.json"})
 
     def test_scenario_version_is_used_without_a_request_version(self):
         r = self._post(GAME_ONE + "game: 1.7.104\n")

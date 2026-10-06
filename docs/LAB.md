@@ -356,9 +356,11 @@ players run (`just lab-run <scenario> [game]`). Routine testing (a verb's
 T3, the merge sweep) is 1.6.1170 only; 1.7.104 stays runnable for a smoke
 when Steam or RaceMenu changes. A server and its clients must run the same
 master files, so the version picks both:
-- **Server.** lab-api starts the server with that version's masters
-  (ESM_DIR in the compose file: /srv/persist/esm for 1.7.104,
-  /srv/persist/esm/1.6.1170 for 1.6.1170).
+- **Server.** lab-api starts the server with that version's masters and
+  settings (ESM_DIR in the compose file: /srv/persist/esm for 1.7.104,
+  /srv/persist/esm/1.6.1170 for 1.6.1170; SERVER_SETTINGS:
+  server-settings-1.7.104.json, or server-settings.json for 1.6.1170, whose
+  load order adds RaceMenu's plugins, docs/MODS.md).
 - **Clients.** Each client keeps one game folder per version in the same
   snapshot (C:\sky-lab\games\<version>.txt), and its logon launcher asks
   GET /lab/game which one to start.

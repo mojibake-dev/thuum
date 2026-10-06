@@ -14,6 +14,16 @@
 # - rotfern, Eli's race: the standalone fork in ~/Code/mods/rotfern-skyrim
 #   (ROTFERN_DIR), rotfern.esp with its meshes and textures, without its
 #   backups. Personal use only (its README): persist and the lab, never a repo.
+# - RaceMenu 0.4.20.0, for 1.6.1170 only (ADR-025: its skee64.dll lists only
+#   that runtime, docs/verbs/racemenu-sync.md): Nexus mod 19080 file 743640,
+#   fetched the same way and checked against the SHA-256 Nexus's own
+#   VirusTotal link names; its two plugins, its BSA and skee64.dll with its
+#   ini, without the ModderResource header.
+#
+# A mod directory named <mod>@<version> installs only into that game
+# version's folder on a clone (add-mods.ps1), and its plugins go only into
+# that version's esm directory; a plugin the other version's folder lacks is
+# skipped by that game, so plugins.txt lists every plugin once.
 #
 # On the host, under /rpool/sky/persist:
 #   mods/<mod>/<path inside Data>   every file, as the game's Data folder takes it
@@ -34,7 +44,13 @@ cache="$root/lab/.cache/mods"
 rc_zip="$cache/RaceCompatibility-AIO-2.16.zip"
 rc_md5=9a8fc2437ac9339ab42647f096f61c95
 rc_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/2853/files/381971
-plugins=(RaceCompatibility.esm rotfern.esp)
+rm_7z="$cache/RaceMenu-AE-0.4.20.0.7z"
+rm_sha=e0f5e923f1eaaefefcb0a98822df091c5b96b010d2df2b52dc377aae539097da
+rm_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/19080/files/743640
+# the load order after the masters and the Creation Club plugins: the server's
+# loadOrder (server-settings.json for 1.6.1170, server-settings-1.7.104.json
+# without RaceMenu's) lists the same plugins in the same order
+plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp)
 
 mkdir -p "$cache"
 if [ ! -f "$rc_zip" ] || [ "$(md5 -q "$rc_zip")" != "$rc_md5" ]; then
@@ -47,6 +63,16 @@ if [ ! -f "$rc_zip" ] || [ "$(md5 -q "$rc_zip")" != "$rc_md5" ]; then
   mv "$rc_zip.part" "$rc_zip"
 fi
 [ "$(md5 -q "$rc_zip")" = "$rc_md5" ] || { echo "RaceCompatibility archive md5 is not $rc_md5" >&2; exit 2; }
+if [ ! -f "$rm_7z" ] || [ "$(shasum -a 256 "$rm_7z" | cut -c1-64)" != "$rm_sha" ]; then
+  echo "fetching RaceMenu 0.4.20.0 from Nexus"
+  url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
+    | curl -fsS -m 30 -H @- "$rm_api/download_link.json" \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["URI"])')
+  curl -fsS -m 600 -o "$rm_7z.part" "${url// /%20}"
+  mv "$rm_7z.part" "$rm_7z"
+fi
+[ "$(shasum -a 256 "$rm_7z" | cut -c1-64)" = "$rm_sha" ] || { echo "RaceMenu archive SHA-256 is not $rm_sha" >&2; exit 2; }
+command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu (brew install sevenzip)" >&2; exit 2; }
 [ -f "$rotfern/rotfern.esp" ] || { echo "no rotfern.esp in $rotfern" >&2; exit 2; }
 
 stage=$(mktemp -d "${TMPDIR:-/tmp}/persist-mods.XXXXXX")
@@ -73,6 +99,12 @@ ranaline="$stage/tree/rotfern/meshes/actors/character/ranaline/character assets"
 mkdir -p "$ranaline" "$stage/tree/rotfern/textures/actors/character/ranaline/child"
 cp "$rotfern/meshes/actors/character/rotfern/skeletonkids.nif" "$rotfern/meshes/actors/character/rotfern/skeleton_female_kids.nif" "$ranaline/"
 cp "$rotfern/textures/actors/character/rotfern/maleliner.dds" "$stage/tree/rotfern/textures/actors/character/ranaline/child/"
+rmx="$stage/racemenu"; mkdir -p "$rmx"
+7zz x -y -o"$rmx" "$rm_7z" >/dev/null
+rm="$stage/tree/racemenu-0.4.20.0@1.6.1170"
+mkdir -p "$rm/SKSE/Plugins"
+cp "$rmx/RaceMenu.esp" "$rmx/RaceMenuPlugin.esp" "$rmx/RaceMenu.bsa" "$rm/"
+cp "$rmx/SKSE/Plugins/skee64.dll" "$rmx/SKSE/Plugins/skee64.ini" "$rm/SKSE/Plugins/"
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
@@ -82,14 +114,22 @@ ssh -o BatchMode=yes "$dst" "install -d -m 2775 -g sky '$persist/mods'"
 # -rlt, not -a: the host's own modes, and group sky from the setgid directory
 # (the Mac's rsync is openrsync, without --chmod or --no-group)
 rsync -rlt --delete "$stage/tree/" "$dst:$persist/mods/"
-# Each game version's server loads the plugins from its own esm directory
-for dir in esm esm/1.6.1170; do
+# Each game version's server loads the plugins from its own esm directory:
+# every version takes the unscoped mods' plugins, 1.6.1170 also RaceMenu's
+place() { # <esm dir> <mods-relative plugin paths...>
+  local dir=$1; shift
+  local names=() n
+  for n in "$@"; do names+=("$(basename "$n")"); done
+  local pattern; pattern=$(printf '%s|' "${names[@]}" | sed 's/|$//; s/\./\\./g')
   ssh -o BatchMode=yes "$dst" "set -e; cd '$persist/$dir'
-    cp '$persist/mods/racecompatibility-2.16/RaceCompatibility.esm' '$persist/mods/rotfern/rotfern.esp' .
-    grep -v -E '  (RaceCompatibility\.esm|rotfern\.esp)\$' SHA256SUMS > SHA256SUMS.new || true
-    sha256sum RaceCompatibility.esm rotfern.esp >> SHA256SUMS.new
+    $(for n in "$@"; do printf "cp '%s/mods/%s' .; " "$persist" "$n"; done)
+    grep -v -E '  ($pattern)\$' SHA256SUMS > SHA256SUMS.new || true
+    sha256sum ${names[*]} >> SHA256SUMS.new
     mv SHA256SUMS.new SHA256SUMS
     sha256sum -c --quiet SHA256SUMS"
-  echo "$dir: plugins in place, SHA256SUMS checked"
-done
+  echo "$dir: ${names[*]} in place, SHA256SUMS checked"
+}
+place esm racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp
+place esm/1.6.1170 racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
+  racemenu-0.4.20.0@1.6.1170/RaceMenu.esp racemenu-0.4.20.0@1.6.1170/RaceMenuPlugin.esp
 ssh -o BatchMode=yes "$dst" "cd '$persist/mods' && sha256sum -c --quiet SHA256SUMS && echo 'mods: SHA256SUMS checked on the host'"

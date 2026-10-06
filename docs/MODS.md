@@ -52,6 +52,20 @@ user's plugins.txt. Both rotfern races carry the Playable flag (RACE DATA
 flags 0x50a08943 and 0x54a08943; lab/esm.py), so the server's character
 creation check offers them.
 
+RaceMenu 0.4.20.0 joins the layer for 1.6.1170 only (ADR-025; it does not
+load on 1.7.104, docs/verbs/racemenu-sync.md): Nexus mod 19080 file 743640,
+checked against the SHA-256 that Nexus's own VirusTotal link names
+(e0f5e923...), unpacked with 7zz, without the ModderResource header. Its
+folder is named racemenu-0.4.20.0@1.6.1170: a mod folder named
+<mod>@<version> installs only into that version's game folder on a clone
+(add-mods.ps1), and its plugins go only into that version's esm directory.
+RaceMenu.esp and RaceMenuPlugin.esp are full slots (TES4 flags 0x0), loaded
+at 09 and 0A after rotfern, so the two versions' servers load different
+lists: server-settings.json for 1.6.1170, server-settings-1.7.104.json
+without them, picked per run by lab-api (SERVER_SETTINGS, like ESM_DIR).
+plugins.txt is shared by both game folders and lists every plugin once; a
+game skips a listed plugin its Data folder lacks.
+
 ## Apocalypse - Magic of Skyrim
 
 What it is:

@@ -2,10 +2,13 @@
 # serves persist's mods/ inside VLAN 70 (`just client-mods`): SHA256SUMS lists
 # every file as "<hash>  <mod>/<path inside Data>", plugins.txt the plugins to
 # enable in load order. Each file goes into the Data folder of every game
-# folder the clone records (C:\sky-lab\games\<version>.txt, ADR-022) and is
-# checked against its hash; a file already in place with the right hash is
-# kept. Then the plugins are enabled in the lab user's plugins.txt, which every
-# game folder shares (it lives in the user's AppData), after what it lists.
+# folder the clone records (C:\sky-lab\games\<version>.txt, ADR-022), or,
+# for a mod directory named <mod>@<version>, only that version's (RaceMenu
+# loads on 1.6.1170 only, ADR-025), and is checked against its hash; a file
+# already in place with the right hash is kept. Then the plugins are enabled
+# in the lab user's plugins.txt, which every game folder shares (it lives in
+# the user's AppData), after what it lists; a game skips a listed plugin its
+# Data folder lacks.
 # The engine loads them after the masters and the Creation Club plugins
 # Skyrim.ccc lists; the server's loadOrder holds the same full-slot plugins in
 # the same order (docs/LAB.md), so form ids agree.
@@ -19,18 +22,22 @@ param(
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $lab = 'C:\sky-lab'
-$games = @(Get-ChildItem (Join-Path $lab 'games') -Filter '*.txt' | ForEach-Object { (Get-Content $_.FullName -Raw).Trim() } |
-  Where-Object { $_ -and (Test-Path (Join-Path $_ 'SkyrimSE.exe')) })
-if (-not $games) { throw "no game folder recorded in $lab\games" }
+$folders = @(Get-ChildItem (Join-Path $lab 'games') -Filter '*.txt' | ForEach-Object {
+    [pscustomobject]@{ Version = $_.BaseName; Dir = (Get-Content $_.FullName -Raw).Trim() } } |
+  Where-Object { $_.Dir -and (Test-Path (Join-Path $_.Dir 'SkyrimSE.exe')) })
+if (-not $folders) { throw "no game folder recorded in $lab\games" }
+$games = @($folders | ForEach-Object { $_.Dir })
 $r = [ordered]@{ games = $games; fetched = 0; kept = 0; bytes = 0; plugins = @() }
 $sums = ((& curl.exe -sS -f "$From/SHA256SUMS") -join "`n") -split "`n" | Where-Object { $_.Trim() }
 if (-not $sums) { throw "no SHA256SUMS at $From" }
 $entries = $sums | ForEach-Object { [pscustomobject]@{ Hash = $_.Substring(0, 64).ToLower(); Rel = $_.Substring(64).TrimStart(' ', '*').Trim() } }
-foreach ($game in $games) {
-  $data = Join-Path $game 'Data'
+foreach ($folder in $folders) {
+  $data = Join-Path $folder.Dir 'Data'
   foreach ($e in $entries) {
     $parts = $e.Rel -split '/'
     if ($parts.Count -lt 2) { throw "unexpected entry $($e.Rel)" }
+    $scope = ($parts[0] -split '@', 2)[1]
+    if ($scope -and $scope -ne $folder.Version) { continue }
     $dest = Join-Path $data (($parts[1..($parts.Count - 1)]) -join '\')
     if ((Test-Path $dest) -and ((Get-FileHash -Algorithm SHA256 $dest).Hash.ToLower() -eq $e.Hash)) { $r.kept++; continue }
     New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null

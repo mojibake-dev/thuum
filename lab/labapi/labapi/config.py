@@ -12,6 +12,16 @@ PKG_DIR = Path(__file__).resolve().parent
 LAB_DIR = PKG_DIR.parent.parent  # lab/
 
 
+def _version_map(spec: str) -> dict[str, str]:
+    """"<version>=<path>;..." as {version: path}."""
+    out: dict[str, str] = {}
+    for part in spec.split(";"):
+        version, sep, path = part.partition("=")
+        if sep and version.strip() and path.strip():
+            out[version.strip()] = path.strip()
+    return out
+
+
 def _env(name: str, default: str) -> str:
     return os.environ.get(name, default)
 
@@ -141,6 +151,13 @@ class Settings:
     # scenario's, else game_default (the version players run, ADR-025).
     game_default: str = "1.6.1170"
     game_esm_dirs: str = "1.7.104=/srv/persist/esm;1.6.1170=/srv/persist/esm/1.6.1170"
+    # The server's settings file for each version (the compose file's
+    # SERVER_SETTINGS): the load orders differ, since RaceMenu's plugins are
+    # full slots that only 1.6.1170 loads (ADR-025). Same format as above.
+    game_server_settings: str = (
+        "1.7.104=/srv/lab/server/server-settings-1.7.104.json;"
+        "1.6.1170=/srv/lab/server/server-settings.json"
+    )
     # Run through the guest agent after a client's first heartbeat: the path
     # and file version of the SkyrimSE.exe that is running, one per line.
     # The logon launcher picks the folder; this checks what it started.
@@ -202,12 +219,11 @@ class Settings:
 
     def game_versions(self) -> dict[str, str]:
         """game_esm_dirs as {version: host directory of its master files}."""
-        out: dict[str, str] = {}
-        for part in self.game_esm_dirs.split(";"):
-            version, sep, path = part.partition("=")
-            if sep and version.strip() and path.strip():
-                out[version.strip()] = path.strip()
-        return out
+        return _version_map(self.game_esm_dirs)
+
+    def game_settings_files(self) -> dict[str, str]:
+        """game_server_settings as {version: host path of its settings file}."""
+        return _version_map(self.game_server_settings)
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -258,5 +274,6 @@ class Settings:
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),
+            game_server_settings=_env("GAME_SERVER_SETTINGS", d.game_server_settings),
             game_check_cmd=_env("GAME_CHECK_CMD", d.game_check_cmd),
         )

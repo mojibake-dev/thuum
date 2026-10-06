@@ -26,7 +26,9 @@ services:
       - ${ESM_DIR:-/srv/persist/esm/1.6.1170}:/srv/skymp/esm:ro
       # no mount over /srv/skymp/data: the image ships data/scripts (compiled Papyrus) there and the server only writes ui/ and a manifest into it, both regenerated at start
       - /srv/lab/server/world:/srv/skymp/world                                # the file driver's database
-      - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
+      # the version's settings (lab-api sets SERVER_SETTINGS per run): their load
+      # orders differ, RaceMenu's plugins load on 1.6.1170 only (ADR-025)
+      - ${SERVER_SETTINGS:-/srv/lab/server/server-settings.json}:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro                    # gamemode.js and presets/
 
   # difftest's legacy stack (docs/WIRE.md): the last RakNet image, beside the
@@ -40,9 +42,10 @@ services:
     working_dir: /srv/skymp
     command: ["node", "dist_back/skymp5-server.js"]
     volumes:
-      - ${ESM_DIR:-/srv/persist/esm}:/srv/skymp/esm:ro
+      # the same version defaults as skymp-server (ADR-025)
+      - ${ESM_DIR:-/srv/persist/esm/1.6.1170}:/srv/skymp/esm:ro
       - /srv/lab/server-legacy/world:/srv/skymp/world
-      - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
+      - ${SERVER_SETTINGS:-/srv/lab/server/server-settings.json}:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro
 
   # T2's server under test (lab/tools/test-proto.sh): the image under test
@@ -59,9 +62,9 @@ services:
     ports:
       - "127.0.0.1:3100:3000"
     volumes:
-      - ${ESM_DIR:-/srv/persist/esm}:/srv/skymp/esm:ro
+      - ${ESM_DIR:-/srv/persist/esm/1.6.1170}:/srv/skymp/esm:ro
       - /srv/lab/server-test/world:/srv/skymp/world
-      - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
+      - ${SERVER_SETTINGS:-/srv/lab/server/server-settings.json}:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro
 
   lab-api:

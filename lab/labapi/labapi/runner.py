@@ -196,10 +196,16 @@ class Runner:
         return self.active.game if self.active is not None and self.active.game else self.s.game_default
 
     def _compose_env(self, rec: RunRecord) -> dict[str, str]:
-        """The run's master files for the server container (the compose file's
-        ESM_DIR): docker compose takes it from the environment ahead of .env."""
+        """The run's master files and settings file for the server container
+        (the compose file's ESM_DIR and SERVER_SETTINGS): docker compose takes
+        them from the environment ahead of .env. The settings differ by
+        version in their load order (ADR-025)."""
         version = rec.game or self.s.game_default
-        return {"ESM_DIR": self.s.game_versions()[version]}
+        env = {"ESM_DIR": self.s.game_versions()[version]}
+        settings = self.s.game_settings_files().get(version)
+        if settings:
+            env["SERVER_SETTINGS"] = settings
+        return env
 
     def status(self) -> dict[str, Any]:
         guests = {name: self.control.status(g) for name, g in self.tables.guests.items()}
