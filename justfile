@@ -261,6 +261,13 @@ pull-layer:
 client-launch-test vmid:
     @lab/tools/client-launch-test.sh {{vmid}}
 
+# Arm ProcDump on a clone for the next SkyrimSE.exe launch: a mini dump per access violation, first chance
+# included, up to count (C:\sky-lab\dumps); client-dumps lists and fetches them under the 16 MiB cap.
+client-dump-arm vmid count="10":
+    @lab/tools/client-dump-arm.sh {{vmid}} {{count}}
+client-dumps vmid:
+    @lab/tools/client-dumps.sh {{vmid}}
+
 # Fetch the current WHQL GeForce driver for one card family into lab/.cache/nvidia-driver-<family>.exe
 # through NVIDIA's lookup (product series psid, product pfid, Windows 11 x64 osID 135). NVIDIA split
 # Pascal into its own branch in 2025, so the lab's two cards need two packages: `just gpu-driver-fetch`
