@@ -175,6 +175,14 @@ Rate limit / bounds: one accepted update per race-menu open.
   timing, so the crash is unconfirmed rather than gone; the next client
   install arms ProcDump again (`just client-dumps <vmid>` fetches what it
   wrote).
+  2026-10-06, second install the same evening (the 8f5365da dist), first
+  launch without ProcDump: the game exited 0xC0000005 at 22:45:37 PDT, about
+  50 s after the launch (Security 4689 on sky-c1); the relaunch was stable,
+  as always. So far: with a debugger attached, no fault (n=1); without one,
+  the fault (every time). A debugger slowing the process hiding it points at
+  a race, not a fixed bad read. Next: ProcDump armed before a first launch
+  that faults; arming it never lets one fault so far, so the dump may have to
+  come from WER LocalDumps with the in-process handler out of the way.
 
 ## Status
 
