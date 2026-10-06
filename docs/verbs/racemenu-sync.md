@@ -57,7 +57,7 @@ above keep a hostile preset from carrying anything but a look.
 - RaceMenu's own header for plugin authors (0.4.20.0,
   ModderResource/IPluginInterface.h; in lab/.cache/mods, never in a repo)
   declares the interface, read 2026-10-06:
-  - `IPluginInterface` (lines 25-32): virtual destructor, `GetVersion()`,
+  - `IPluginInterface` (lines 24-32): virtual destructor, `GetVersion()`,
     `Revert()`.
   - `IInterfaceMap` (lines 34-40): `QueryInterface(const char* name)`,
     `AddInterface`, `RemoveInterface`.
