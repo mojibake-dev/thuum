@@ -321,6 +321,14 @@ client-onedrive-off vmid:
 playtest-start:
     @lab/tools/playtest-start.sh
 
+# In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
+playtest-relaunch client:
+    @lab/tools/playtest-relaunch.sh {{client}}
+
+# In a playtest, open a player's race menu from the server (profile 1 or 2; the gamemode's labCommand open-race-menu).
+playtest-race-menu profile:
+    @curl -fsS -m 15 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' -d '{"payload": {"kind":"open-race-menu","profileId":{{profile}}}}'; echo
+
 # A clone's own Sunshine identity (sunshine-identity.ps1): clones inherit the template's uniqueid and certificate,
 # and Moonlight keeps one entry per uniqueid, so it showed one lab client for two. Pair the clone afresh after.
 client-sunshine-identity vmid name:
