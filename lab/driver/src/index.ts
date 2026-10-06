@@ -127,7 +127,13 @@ let watching: { startedAt: number; actors: Map<number, Watched> } | null = null;
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nodeFs = require("fs") as { existsSync(p: string): boolean; readFileSync(p: string): { toString(enc: string): string } };
+const nodeFs = require("fs") as { existsSync(p: string): boolean; readFileSync(p: string): { toString(enc: string): string; length: number } };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nodeCrypto = require("crypto") as { createHash(alg: string): { update(d: unknown): { digest(enc: string): string } } };
+
+// RaceMenu's export folder, where TESModPlatform's RaceMenu natives save and
+// load a preset by name (thuum docs/verbs/racemenu-sync.md)
+const RACEMENU_EXPORTED = "Data/SKSE/Plugins/CharGen/Exported/";
 
 function form(id: unknown): ObjectReference | null {
   const n = typeof id === "number" ? id : typeof id === "string" ? parseInt(id, 0) : NaN;
@@ -505,6 +511,32 @@ function run(step: Step, player: Actor): unknown {
         out[String(Number(id))] = f ? player.getItemCount(f) : null;
       }
       return out;
+    }
+    case "racemenu": {
+      // thuum docs/verbs/racemenu-sync.md: the version of RaceMenu's Preset
+      // interface as TESModPlatform reaches it; 0, an error here, when RaceMenu
+      // is not loaded or skee did not hand over its interfaces
+      const version = callNative("TESModPlatform", "RaceMenuPresetVersion", undefined) as number;
+      if (!version) throw new Error("RaceMenu's Preset interface not found");
+      return { version };
+    }
+    case "racemenu-save": {
+      // the player's look saved as a RaceMenu preset {name}; its size and
+      // SHA-256 come back, so two saves can be compared
+      const name = String(a.name || "");
+      if (callNative("TESModPlatform", "SaveRaceMenuPreset", undefined, player, name) !== true) {
+        throw new Error(`SaveRaceMenuPreset refused ${name}`);
+      }
+      const file = nodeFs.readFileSync(RACEMENU_EXPORTED + name + ".jslot");
+      return { saved: name, bytes: file.length, sha256: nodeCrypto.createHash("sha256").update(file).digest("hex") };
+    }
+    case "racemenu-load": {
+      // a RaceMenu preset {name} from the export folder applied to the player
+      const name = String(a.name || "");
+      if (callNative("TESModPlatform", "LoadRaceMenuPreset", undefined, player, name) !== true) {
+        throw new Error(`LoadRaceMenuPreset refused ${name}`);
+      }
+      return { loaded: name };
     }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in
