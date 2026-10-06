@@ -52,6 +52,20 @@ papyrus-vm/ and skymp5-server/cpp/server_guest_lib/):
   filled. Upstream left "TODO: uncomment when add script vars save feature"
   (MpChangeForms.cpp:84).
 
+- **Prerequisite: the lab server runs almost no game scripts.** Its image
+  ships one compiled script, data/scripts/ActiveMagicEffect.pex (listed in
+  skymp-server:m1-map-markers, 2026-10-06), so a world object's vanilla
+  script is "not found in the script storage" (the lab server's log) and
+  never runs. SkyMP reads scripts from three places
+  (script_storages/ScriptStorageFactory.cpp): data/scripts, the BSA
+  archives a server setting `archives` lists, and built-in assets. The lazy
+  way is `archives` pointed at the game's own archives in persist (licensed,
+  so through persist only, like the masters), per game version. That makes
+  the server run vanilla Papyrus on every object a player meets (OnInit,
+  OnLoad, critter spawns), a change for every scenario, so it lands first,
+  on its own, with a full sweep; which archives hold the scripts is read
+  from their file lists then, not assumed.
+
 ## Observe
 
 - A snapshot of each script's holder after every Papyrus event the
@@ -114,7 +128,8 @@ papyrus-vm/ and skymp5-server/cpp/server_guest_lib/):
 
 ## Status
 
-- [ ] doc complete, rung declared (the T3 object still to choose)
+- [ ] doc complete, rung declared (the T3 object still to choose, after
+      the server has the game's scripts)
 - [x] engine surface cited (server VM only)
 - [ ] server logic + T0
 - [ ] message + validator: none needed

@@ -381,7 +381,11 @@ what the engine's hit test picks), dump-state (with each actor's bounding
 box: length, width, height), request-screenshot, craft (an open
 driver item that m0-forge specifies), tap-key (one DirectInput scan code
 through SKSE's Input.TapKey: it works the race menu, 208 Down for the next
-race and 19 R for Done, but not the menu's Ok/Cancel finish box), hold-key
+race and 19 R for Done, but not the menu's Ok/Cancel finish box),
+race-pick {race, max} (Down in the open race menu until the player's race
+is the one named, read after each press; the order of the menu's list is
+the menu's, so a scenario names the race instead of counting presses),
+hold-key
 {code, ms} (a key held through SKSE's Input.HoldKey and released ms later:
 real movement under the controls, 17 W forward, 42 Left Shift sprint),
 set-gmst {name, value} and set-av {name, value} (what a player's console
