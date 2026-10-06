@@ -124,8 +124,9 @@ labapi-dev:
 
 # A cold stacked snapshot clean-m1-<x> of a lab client, through lab-api (thuum-mundus's recipe: quiesce, a clean
 # ACPI shutdown, snapshot without RAM, start, agent check; sky-c1 and sky-c2 only, never clean-sp).
-client-snapshot client name:
-    @curl -fsS -m 900 -X POST "{{lab_api}}/clients/{{client}}/snapshot" -H 'content-type: application/json' -d '{"name": "{{name}}"}'
+client-snapshot client name description="":
+    @python3 -c 'import json, sys; print(json.dumps({"name": sys.argv[1], "description": sys.argv[2]}))' {{quote(name)}} {{quote(description)}} \
+      | curl -fsS -m 900 -X POST "{{lab_api}}/clients/{{client}}/snapshot" -H 'content-type: application/json' --data-binary @-
 
 # Promote a stacked snapshot onto its base (clean-m1-<x> onto clean-m1, bit-identical), through lab-api.
 client-promote client from to="clean-m1":
