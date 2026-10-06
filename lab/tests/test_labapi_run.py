@@ -60,6 +60,7 @@ clients:
 items:
   "Skyrim.esm:IronSword": 0x00012EB7
   "Skyrim.esm:RecipeWeaponIronDagger": 0x000DA76A
+  "rotfern.esp:rotfern": 0x0800AA00
 """
 
 
@@ -639,6 +640,7 @@ steps:
   - c1: connect
   - c1: equip {item: "Skyrim.esm:IronSword"}
   - c1: craft {station: 0x1234, recipe: "Skyrim.esm:RecipeWeaponIronDagger"}
+  - c1: race-pick {race: "rotfern.esp:rotfern", max: 12}
 """
 
 
@@ -647,9 +649,10 @@ class ClientStepNames(RunTests):
     def test_item_and_recipe_names_reach_the_driver_as_form_ids(self):
         run_id, body = self._run(NAMED_ARGS)
         self.assertEqual(body["verdict"], "green", body)
-        seen = {a: args for _, a, args in self.doubles.seen if a in ("equip", "craft")}
+        seen = {a: args for _, a, args in self.doubles.seen if a in ("equip", "craft", "race-pick")}
         self.assertEqual(seen["equip"], {"formId": 0x12EB7})
         self.assertEqual(seen["craft"], {"station": 0x1234, "recipe": 0xDA76A})
+        self.assertEqual(seen["race-pick"], {"race": 0x0800AA00, "max": 12})
 
     def test_unknown_item_name_is_a_red_step(self):
         text = "id: t3-bad\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: equip {item: \"Skyrim.esm:Nope\"}\n"

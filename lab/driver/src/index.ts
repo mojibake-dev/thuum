@@ -93,6 +93,12 @@ let crafting: {
   closeAt?: number;
 } | null = null;
 const CRAFT_WAIT_MS = 15000;
+// A race pick presses Down in the open race menu until the player's race is
+// the one asked for: the menu sets the race on the player as the selection
+// moves, and the order of its list is the menu's, so the step reads the race
+// after each press instead of counting presses.
+let racePick: { step: Step; race: number; presses: number; max: number; lastAt: number } | null = null;
+const RACE_PICK_SETTLE_MS = 1200;
 // The result goes in this long after the ingredients come out, so
 // skymp5-client's craft service has every removal before the result: made in
 // one frame, the dagger's event once reached it before the leather strip's
@@ -381,6 +387,32 @@ function finishDeferred(c: Config): void {
   }
 }
 
+function finishRacePick(c: Config, player: Actor): void {
+  if (!racePick) return;
+  const k = racePick;
+  if (Date.now() - k.lastAt < RACE_PICK_SETTLE_MS) return;
+  try {
+    const race = player.getRace();
+    const now = race ? race.getFormID() : 0;
+    if (now === k.race) {
+      racePick = null;
+      postResult(c, k.step, { ok: true, data: { race: now, presses: k.presses } });
+      return;
+    }
+    if (k.presses >= k.max) {
+      racePick = null;
+      postResult(c, k.step, { ok: false, error: `race ${k.race.toString(16)} not reached after ${k.presses} presses (now ${now.toString(16)})` });
+      return;
+    }
+    Input.tapKey(208); // DirectInput Down: the race list's next entry (a-character-creation)
+    k.presses++;
+    k.lastAt = Date.now();
+  } catch (e) {
+    racePick = null;
+    postResult(c, k.step, { ok: false, error: String(e) });
+  }
+}
+
 function finishCraft(c: Config, player: Actor): void {
   if (!crafting) return;
   const k = crafting;
@@ -625,6 +657,14 @@ function run(step: Step, player: Actor): unknown {
       crafting = { step, ingredients, result: result.getFormID(), count: recipe.getResultQuantity(), startedAt: Date.now() };
       return DEFERRED;
     }
+    case "race-pick": {
+      // thuum docs/PLAN.md M1, rotfern: in the open race menu, the race
+      // {race: <form id>, max: presses} by Down presses (finishRacePick)
+      const race = num(a.race);
+      if (!race) return { error: "no race" };
+      racePick = { step, race, presses: 0, max: num(a.max, 20), lastAt: 0 };
+      return DEFERRED;
+    }
     case "tap-key": {
       // One key press through the engine's input system (SKSE Input.TapKey,
       // DirectInput scan code). It reaches the race menu (CONFIRMED,
@@ -747,6 +787,7 @@ on("update", () => {
   const me = Game.getPlayer();
   if (me) settleMove(me);
   if (me) finishCraft(c, me);
+  if (me) finishRacePick(c, me);
   if (me) readAfterRest(me);
   trackWatch();
   const step = pending;
