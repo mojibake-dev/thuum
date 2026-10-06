@@ -125,10 +125,12 @@ own client)
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (two UNKNOWNs the design does not depend on)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] server logic + T0 (fork b56f18bf; ctest LearnedEffectsTest green in
+      pipeline 790)
+- [x] message + validator (same commit, fork 604a2d30, MsgType 37)
+- [x] native hook + T1: none needed, Skyrim Platform has the Papyrus calls
+- [x] TS handler (fork 315861c2, c8f76a58)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (Ingredient.LearnEffect's row;
+      nothing suppressed)
