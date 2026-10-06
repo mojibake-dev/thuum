@@ -130,7 +130,8 @@ own client)
 - [x] message + validator (same commit, fork 604a2d30, MsgType 37)
 - [x] native hook + T1: none needed, Skyrim Platform has the Papyrus calls
 - [x] TS handler (fork 315861c2, c8f76a58)
-- [ ] T2 green
+- [x] T2 green (`just test-proto m1-favorites`, 2026-10-06: the branch is
+      stacked on this one, with the learned-effects difftest session)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [x] ledger and suppression registry updated (Ingredient.LearnEffect's row;
       nothing suppressed)

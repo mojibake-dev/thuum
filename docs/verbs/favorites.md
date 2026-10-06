@@ -189,10 +189,14 @@ own client)
 
 - [x] doc complete, rung declared
 - [x] engine surface cited (two HYPOTHESIS tags the scenario settles)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1 (no T1 harness yet; the scenario is the proof)
-- [ ] TS handler
-- [ ] T2 green
+- [x] server logic + T0 (fork 934e41e2, b20768a9; ctest FavoritesTest and
+      cargo green in pipeline 809)
+- [x] message + validator (same commit, fork 23ce0997, MsgType 38)
+- [x] native hook (fork 65c3a133, TESModPlatform.GetFavorites and
+      SetFavorite); T1: no harness yet, the scenario is the proof
+- [x] TS handler (fork 799dbbf2, FavoritesService)
+- [x] T2 green (`just test-proto m1-favorites`, 2026-10-06, with the
+      favorites difftest session)
 - [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (TESModPlatform.GetFavorites
+      and SetFavorite rows; nothing suppressed)
