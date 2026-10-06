@@ -15,13 +15,16 @@
 # it lands, thuum-mundus promotes that state to clean-m1 (`sky-lab client
 # promote`, as on 2026-10-04 for the rest verb's schema 4: clean-m1 retaken
 # at 11:03/11:04 PDT, bit-identical to clean-m1-rest) and these name clean-m1
-# again.
+# again. Since 2026-10-05 lab-api takes and promotes these snapshots itself
+# (POST /lab/clients/<c>/snapshot and /promote, thuum-mundus's recipe): on
+# 2026-10-06 clean-m1-markers became clean-m1, and clean-m1-next (the
+# m1-favorites client, schema 7, and the mod layer) is stacked on it.
 guests:
   - {name: sky-srv,    vmid: 700, ip: 10.10.70.10, kind: qemu, role: server, managed: true,  snapshot: clean}
   - {name: sky-re,     vmid: 701, ip: 10.10.70.11, kind: lxc,  role: re,     managed: true,  snapshot: clean}
   - {name: sky-ci,     vmid: 702, ip: 10.10.70.12, kind: qemu, role: ci,     managed: false}
-  - {name: sky-c1,     vmid: 711, ip: 10.10.70.21, kind: qemu, role: client, managed: true,  snapshot: clean-m1-markers, client: c1}
-  - {name: sky-c2,     vmid: 712, ip: 10.10.70.22, kind: qemu, role: client, managed: true,  snapshot: clean-m1-markers, client: c2}
+  - {name: sky-c1,     vmid: 711, ip: 10.10.70.21, kind: qemu, role: client, managed: true,  snapshot: clean-m1-next,    client: c1}
+  - {name: sky-c2,     vmid: 712, ip: 10.10.70.22, kind: qemu, role: client, managed: true,  snapshot: clean-m1-next,    client: c2}
   - {name: fenestrate, vmid: 220, ip: 10.10.60.20, kind: qemu, role: client, managed: false}
 
 # clients: the profileId each scenario client logs in with (offlineMode on the
