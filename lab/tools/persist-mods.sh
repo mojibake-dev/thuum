@@ -60,6 +60,19 @@ cp "$x/20 Dawnguard/Scripts/"*.pex "$x/20 Dawnguard Script/Scripts/"*.pex "$x/20
 cp "$x/20 Dawnguard/Strings/"* "$rc/Strings/"
 rsync -a --exclude backups/ --exclude README.md --exclude __folder_managed_by_vortex \
   "$rotfern/rotfern.esp" "$rotfern/meshes" "$rotfern/textures" "$stage/tree/rotfern/"
+# Stopgap, lab only (2026-10-06): rotfern.esp's RACE still names RS Children's
+# skeletons (ANAM, male and female: actors\character\ranaline\character
+# assets\skeletonkids.nif, skeleton_female_kids.nif) and one tint texture
+# (actors\character\ranaline\child\maleliner.dds), which the standalone fork
+# no longer ships; its own copies are under actors\character\rotfern\. The
+# game died in the race menu on rotfern with the paths unresolved (probe
+# 20261006-052250: an access violation in SkyrimSE.exe 1.7.104 at RVA
+# 0x96b1b7, a read at 0x8C through a null). The fork's own files go where the
+# plugin looks until the plugin is repointed (Eli's mod: never edited here).
+ranaline="$stage/tree/rotfern/meshes/actors/character/ranaline/character assets"
+mkdir -p "$ranaline" "$stage/tree/rotfern/textures/actors/character/ranaline/child"
+cp "$rotfern/meshes/actors/character/rotfern/skeletonkids.nif" "$rotfern/meshes/actors/character/rotfern/skeleton_female_kids.nif" "$ranaline/"
+cp "$rotfern/textures/actors/character/rotfern/maleliner.dds" "$stage/tree/rotfern/textures/actors/character/ranaline/child/"
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
