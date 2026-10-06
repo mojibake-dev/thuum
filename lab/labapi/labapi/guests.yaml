@@ -59,6 +59,9 @@ items:
   # races, 2026-10-03
   "Skyrim.esm:NordRace": 0x00013746
   "Skyrim.esm:OrcRace": 0x00013747
+  # an ingredient for a-learned-effects (docs/verbs/learned-effects.md); lab/esm.py
+  # find INGR Wheat, 2026-10-05
+  "Skyrim.esm:Wheat": 0x0004B0BA
 
 # cells: the places scenarios teleport to and measure from. A scenario's x, y, z
 # are offsets from the cell's origin: lab-api adds the origin on the way to the
