@@ -176,14 +176,22 @@ above keep a hostile preset from carrying anything but a look.
 
 ## Status
 
-- [ ] doc complete, rung declared (design input recorded; messages, server
-      and client still to design)
-- [ ] engine surface cited or delegated (the Preset interface, confirmed
-      against skee64.dll 0.4.20.0)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] doc complete, rung declared
+- [ ] engine surface cited or delegated (two HYPOTHESIS tags: the
+      exchange handshake and the calling thread; the first lab probe
+      settles both)
+- [x] server logic + T0 (fork m1-racemenu 0f516e0f: wire-rules
+      `racemenu`, the change form's raceMenuPreset, OnRaceMenuPreset, the
+      login send and the send with a figure; unit/RaceMenuPresetTest.cpp,
+      green when the fork's pipeline is)
+- [x] message + validator (same commit, a2ff7c53: RaceMenuPreset, MsgType
+      39, wire id 47, SCHEMA_VERSION 8; cap 192 KiB until a measured
+      preset; validate_server split out, so a burst of presets at a login
+      is not rate-limited on the client)
+- [x] native hook (387f9f72: TESModPlatform.RaceMenuPresetVersion,
+      SaveRaceMenuPreset, LoadRaceMenuPreset); T1: no harness, the probe
+- [x] TS handler (684f933b: RaceMenuService)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (three NATIVES rows,
+      client only; nothing suppressed)
