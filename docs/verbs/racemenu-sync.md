@@ -38,9 +38,21 @@ above keep a hostile preset from carrying anything but a look.
   `IInterfaceMap::QueryInterface("Preset")`; the "Preset" name is in the
   0.4.20.0 skee64.dll beside the other ten, not in GitHub master's main.cpp,
   so it is confirmed against the binary first.
-- RaceMenu runs on game 1.6.1170 only (Nexus files, 2026-10-06), so the verb
-  is built and proven on the lab's 1.6.1170 client set (ADR-022); 1.7.104
-  follows RaceMenu.
+- RaceMenu runs on game 1.6.1170 only. CONFIRMED live 2026-10-06: skee64.dll
+  0.4.20.0 (Nexus mod 19080 file 743640, its newest, uploaded 2026-04-19;
+  archive SHA-256 e0f5e923... as Nexus's VirusTotal link names it) declares
+  SKSEPluginVersionData compatibleVersions [1.6.1170.0] and no version
+  independence, and SKSE's loader enables a plugin without independence
+  only on a runtime it lists (skse64 2.2.6 src/skse64/skse64/
+  PluginManager.cpp, "simple version list"). On sky-c1's Steam game, SKSE
+  2.3.1 on runtime 01070680 (1.7.104) logged: `plugin skee64.dll (00000001
+  skee 00000001) disabled, incompatible with current version of the game`.
+  Nexus has no newer file as of that day (mod updated 2026-04-20). So the
+  verb is built and proven on the lab's 1.6.1170 client set (ADR-022), and
+  a player who wants RaceMenu plays 1.6.1170 until RaceMenu ships a 1.7
+  build. Its two plugins, RaceMenu.esp and RaceMenuPlugin.esp, are full
+  slots (TES4 flags 0x0, not light), so the server's load order differs by
+  game version once they are in the 1.6.1170 set.
 
 ## Observe
 
