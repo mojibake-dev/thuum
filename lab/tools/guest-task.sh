@@ -6,7 +6,8 @@
 # minutes and takes the script with it (add-game.ps1 on sky-c1, 2026-10-04;
 # install-lab.ps1 on a fresh client dist, 2026-10-06). Exits 0 when the task
 # ended with result 0, 4 when it ended otherwise (the output's tail goes to
-# stderr), 5 when it is still running after <minutes> (default 30).
+# stderr), 5 when it is still running after <minutes> (default 30), 6 when
+# the task could not be started.
 set -euo pipefail
 vmid=${1:?vmid}; name=${2:?task name}; ps=${3:?powershell}; minutes=${4:-30}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
@@ -23,7 +24,16 @@ Remove-Item '$out' -ErrorAction SilentlyContinue
 \$s = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes $minutes) -MultipleInstances IgnoreNew
 Register-ScheduledTask -TaskName 'sky-lab-$name' -Action \$a -Principal \$p -Settings \$s -Force | Out-Null
 Start-ScheduledTask -TaskName 'sky-lab-$name'; 'started'"
-run "$start" >/dev/null
+# The agent's reply can come back unreadable right after other guest work (a
+# JSONDecodeError from client-mods on sky-c2 straight after client-dist,
+# 2026-10-06; the rerun passed): try the start three times. Repeating a start
+# that did go through is harmless: a running task ignores a second instance,
+# and the scripts run this way (install-lab, add-mods) are idempotent.
+for attempt in 1 2 3; do
+  if run "$start" >/dev/null 2>&1; then break; fi
+  [ "$attempt" = 3 ] && { echo "could not start task sky-lab-$name on VM $vmid" >&2; exit 6; }
+  sleep 10
+done
 poll="\$i = Get-ScheduledTaskInfo -TaskName 'sky-lab-$name'; (Get-ScheduledTask -TaskName 'sky-lab-$name').State.ToString() + ' ' + \$i.LastTaskResult + ' | ' + ((Get-Content '$out' -Tail 1 -ErrorAction SilentlyContinue) -join '')"
 deadline=$(( $(date +%s) + minutes * 60 ))
 while [ "$(date +%s)" -lt "$deadline" ]; do
