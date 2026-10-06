@@ -138,8 +138,8 @@ class Settings:
     # run on it (the compose file's ESM_DIR). A server and its clients must
     # run the same masters: skymp5-client compares size and CRC32 with the
     # server's manifest. A run plays the request's version, else the
-    # scenario's, else game_default (what Steam ships, ADR-018).
-    game_default: str = "1.7.104"
+    # scenario's, else game_default (the version players run, ADR-025).
+    game_default: str = "1.6.1170"
     game_esm_dirs: str = "1.7.104=/srv/persist/esm;1.6.1170=/srv/persist/esm/1.6.1170"
     # Run through the guest agent after a client's first heartbeat: the path
     # and file version of the SkyrimSE.exe that is running, one per line.

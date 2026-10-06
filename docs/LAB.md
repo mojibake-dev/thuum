@@ -350,10 +350,12 @@ pinned:
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/.
 
-Game versions (ADR-022). A run plays one Skyrim version: the request's
-`game`, else the scenario's `game:`, else 1.7.104 (`just lab-run <scenario>
-[game]`). A server and its clients must run the same master files, so the
-version picks both:
+Game versions (ADR-022, ADR-025). A run plays one Skyrim version: the
+request's `game`, else the scenario's `game:`, else 1.6.1170, the version
+players run (`just lab-run <scenario> [game]`). Routine testing (a verb's
+T3, the merge sweep) is 1.6.1170 only; 1.7.104 stays runnable for a smoke
+when Steam or RaceMenu changes. A server and its clients must run the same
+master files, so the version picks both:
 - **Server.** lab-api starts the server with that version's masters
   (ESM_DIR in the compose file: /srv/persist/esm for 1.7.104,
   /srv/persist/esm/1.6.1170 for 1.6.1170).

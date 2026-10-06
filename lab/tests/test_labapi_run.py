@@ -716,25 +716,26 @@ class GameVersions(RunTests):
         self.assertTrue(ups, system.commands)
         return ups[-1]
 
-    def test_default_run_plays_the_steam_build_on_the_default_masters(self):
+    def test_default_run_plays_the_players_version_on_its_masters(self):
+        # ADR-025: players run 1.6.1170, so a run that names no version does
         r = self._post(GAME_ONE)
-        self.assertEqual(r.status_code, 200, r.text)
-        body = self._finish(r.json()["run"])
-        self.assertEqual(body["game"], "1.7.104")
-        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm"})
-        self.assertIn("game 1.7.104", body["phases"][0]["note"])
-
-    def test_request_version_wins_over_the_scenario_and_reaches_the_server_mount(self):
-        r = self._post(GAME_ONE + "game: 1.7.104\n", game="1.6.1170")
         self.assertEqual(r.status_code, 200, r.text)
         body = self._finish(r.json()["run"])
         self.assertEqual(body["game"], "1.6.1170")
         self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm/1.6.1170"})
+        self.assertIn("game 1.6.1170", body["phases"][0]["note"])
+
+    def test_request_version_wins_over_the_scenario_and_reaches_the_server_mount(self):
+        r = self._post(GAME_ONE + "game: 1.6.1170\n", game="1.7.104")
+        self.assertEqual(r.status_code, 200, r.text)
+        body = self._finish(r.json()["run"])
+        self.assertEqual(body["game"], "1.7.104")
+        self.assertEqual(self._up_env(), {"ESM_DIR": "/srv/persist/esm"})
 
     def test_scenario_version_is_used_without_a_request_version(self):
-        r = self._post(GAME_ONE + "game: 1.6.1170\n")
+        r = self._post(GAME_ONE + "game: 1.7.104\n")
         self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(self._finish(r.json()["run"])["game"], "1.6.1170")
+        self.assertEqual(self._finish(r.json()["run"])["game"], "1.7.104")
 
     def test_unknown_version_is_400_and_starts_nothing(self):
         r = self._post(GAME_ONE, game="1.5.97")
@@ -745,14 +746,14 @@ class GameVersions(RunTests):
         self.assertEqual(self.services.system.commands, [])
 
     def test_launcher_endpoint_answers_the_active_runs_version(self):
-        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.7.104")
-        r = self._post(GAME_ONE, game="1.6.1170")
+        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.6.1170")
+        r = self._post(GAME_ONE, game="1.7.104")
         self.assertEqual(r.status_code, 200, r.text)
         # the run waits in rollback-clients for c1's first poll, which is when
         # a booting clone's launcher asks
-        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.6.1170")
-        self._finish(r.json()["run"])
         self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.7.104")
+        self._finish(r.json()["run"])
+        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["version"], "1.6.1170")
 
     def _check(self, game, out, exitcode=0):
         import asyncio
@@ -837,14 +838,14 @@ class GameCheckRetries(GameVersions):
         tables.guests.pop("fake-c1", None)
         pve = self.services.control._b
         pve.game_misses = misses
-        rec = RunRecord("x", Scenario(id="x", clients=["c1", "c2"]), self.tmp, "now", game="1.7.104")
+        rec = RunRecord("x", Scenario(id="x", clients=["c1", "c2"]), self.tmp, "now", game="1.6.1170")
         asyncio.run(self.services.runner._check_game(rec, ["c1", "c2"]))
         return rec
 
     def test_two_missed_answers_still_check_the_game(self):
         rec = self._check_with_misses(2)
         self.assertTrue(rec.phases[0]["ok"], rec.phases)
-        self.assertEqual(rec.phases[0]["note"], "c1=1.7.104.0, c2=unchecked (unmanaged)")
+        self.assertEqual(rec.phases[0]["note"], "c1=1.6.1170.0, c2=unchecked (unmanaged)")
 
     def test_a_third_missed_answer_errs(self):
         from labapi.runner import RunnerError

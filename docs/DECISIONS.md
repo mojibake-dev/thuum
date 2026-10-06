@@ -578,3 +578,44 @@ verb, 2026-10-05).
 **Consequences.** A regression in another verb's scenario is found at the
 merge, not on the branch. The merge commit names the sweep's runs, so
 "green at merge" stays checkable.
+
+## ADR-025: Players run 1.6.1170, with a 1.6.1170-era mod layer
+
+Status: accepted (2026-10-06, Eli: "lets pin to a 1.6.1170-era mod
+layer"). Amends ADR-022 (1.6.1170 becomes the default version, and 1.7.104
+leaves routine testing) and ADR-024 (its sweep runs on one version).
+
+**Context.** RaceMenu does not run on 1.7.104, confirmed live on
+2026-10-06: skee64.dll 0.4.20.0, the newest on Nexus, lists only 1.6.1170.0
+as compatible and claims no version independence, and SKSE 2.3.1 on
+sky-c1's Steam game disabled it as "incompatible with current version of
+the game" (docs/verbs/racemenu-sync.md). RaceMenu sync is how players make
+their own characters (Eli, 2026-10-06), so players run a game RaceMenu
+loads in.
+
+**Decision.**
+- 1.6.1170 is the version thuum's players run and the lab's default: a run
+  that names no version, a playtest, and the server's master files outside
+  a run (lab-api's GAME_DEFAULT; compose's ESM_DIR). The mod layer is built
+  for it: RaceMenu 0.4.20.0 joins it in the 1.6.1170 game folders and the
+  1.6.1170 server load order with the RaceMenu sync verb.
+- A player who installs today gets 1.7.104 from Steam and downgrades once
+  with Steam's depots for 1.6.1170 (ADR-022's three `download_depot`
+  commands), into a game folder outside Steam's that it launches through
+  SKSE (the "Stock Game" layout, ADR-022), so Steam's updates never reach
+  it. A patched exe alone does not connect: the server compares each
+  master's name, size and CRC32, and 1.7.104's masters differ. The lab
+  fetched those depots on 2026-10-04, a month after Steam moved to 1.7.104.
+
+- 1.7.104 leaves routine testing (Eli, 2026-10-06: "yes retire it from
+  routine testing"). A verb's T3 is its scenario on 1.6.1170 plus
+  `smoke-two-players`, and the merge sweep (ADR-024) runs on 1.6.1170 only,
+  half the lab time. The clones keep Steam's 1.7.104 folder, persist keeps
+  its masters and depots, and the Ghidra project keeps its program, so a
+  run can still name 1.7.104: `smoke-two-players` there when Steam or
+  RaceMenu changes.
+
+**Consequences.** A player-facing install guide (the downgrade, the Stock
+Game folder, SKSE 2.2.6, the Address Library for 1.6.1170) comes with the
+public server (M2). The 1.7.104 server keeps today's load order: RaceMenu's
+plugins are full slots and join only the 1.6.1170 one.

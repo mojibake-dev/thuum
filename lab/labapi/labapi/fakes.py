@@ -26,8 +26,9 @@ class FakeProxmox:
         self.files: dict[str, str] = {}
         self.exec_result = ExecResult(0, "", "")
         # what the game check (Settings.game_check_cmd) reads on a clone: the
-        # Steam folder's exe at the default version unless a test says otherwise
-        self.game = ExecResult(0, "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\SkyrimSE.exe\r\n1.7.104.0\r\n", "")
+        # default version's exe (ADR-025: 1.6.1170, the clones' second game
+        # folder) unless a test says otherwise
+        self.game = ExecResult(0, "C:\\Games\\Skyrim Special Edition 1.6.1170\\SkyrimSE.exe\r\n1.6.1170.0\r\n", "")
         self.game_misses = 0
         # self-service snapshots: each clone's snapshot tree as PVE lists it,
         # `current` included; a shutdown's exit status and task log

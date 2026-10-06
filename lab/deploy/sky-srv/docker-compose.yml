@@ -21,9 +21,9 @@ services:
       - "3000:3000"
     volumes:
       # the five master files of the game version the run plays (ADR-022): lab-api
-      # sets ESM_DIR per run (/srv/persist/esm/1.6.1170 for 1.6.1170); unset is
-      # 1.7.104's, which Steam ships. A server and its clients must run the same masters.
-      - ${ESM_DIR:-/srv/persist/esm}:/srv/skymp/esm:ro
+      # sets ESM_DIR per run (/srv/persist/esm for 1.7.104); unset is 1.6.1170's,
+      # the version players run (ADR-025). A server and its clients must run the same masters.
+      - ${ESM_DIR:-/srv/persist/esm/1.6.1170}:/srv/skymp/esm:ro
       # no mount over /srv/skymp/data: the image ships data/scripts (compiled Papyrus) there and the server only writes ui/ and a manifest into it, both regenerated at start
       - /srv/lab/server/world:/srv/skymp/world                                # the file driver's database
       - /srv/lab/server/server-settings.json:/srv/skymp/server-settings.json:ro
