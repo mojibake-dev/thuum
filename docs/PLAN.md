@@ -489,11 +489,18 @@ scenario there:
   ranged hit verb.
 
 - RaceMenu sync (Eli, 2026-10-04: "if this thuum project built that racemenu
-  stuff that would slap"): friends see each other's RaceMenu looks (sculpt,
-  overlays, body morphs, node scales), which SkyMP never sends. It is a verb
-  of its own, and it needs RaceMenu to load on every client. RaceMenu 0.4.20
-  targets 1.6.1170 only, so it is built and tested on the lab's 1.6.1170
-  client set.
+  stuff that would slap"; 2026-10-06, chosen over baking rotfern's sculpt
+  into the mod: "i want my friends to be able to make their own hyper
+  specific characters"): every player's RaceMenu look (sculpt, overlays,
+  body morphs, node scales, sliders), which SkyMP never sends, is captured
+  on its client, kept with its character on the server, and applied on
+  every client. It is a verb of its own, and it needs RaceMenu to load on
+  every client. RaceMenu's current files (v0.4.20.0, Nexus 19080, uploaded
+  2026-04-19/20) all require game 1.6.1170 (GOG 1.6.1179), none 1.7.x
+  (Nexus file list, 2026-10-06), and the lab has never loaded it on
+  1.7.104, so it is built and tested on the lab's 1.6.1170 client set; a
+  load test of 0.4.20 on a 1.7.104 clone (does SKSE 2.3.1 load its plugin)
+  decides whether 1.7.104 waits for a RaceMenu release.
 
 Game versions (ADR-022, Eli, 2026-10-04): thuum supports and tests 1.7.104
 and 1.6.1170, one version per lab run (`just lab-run <scenario> [game]`).
