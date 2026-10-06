@@ -357,7 +357,14 @@ it carries a HYPOTHESIS tag.
     After quitting, a rotfern showed as a Nord in its own game: an upstream
     SkyMP bug in the login save (Skyrim Platform wrote every form outside
     Skyrim.esm as a created form), fixed on the branch (dbed91b0, with a
-    T0 test).
+    T0 test). Eli, on the fixed client after midnight: the race swap held
+    through a relaunch, no crash; one more game end then was my restage
+    stopping the game, not rotfern. What remains is the look RaceMenu gave
+    the character on fenestrate (the sculpt, and the menu's options: the
+    lab has no RaceMenu, there is no 1.7.104 build): bake the sculpt into
+    the race's head mesh (chim's outstanding NifMerge step) or a RaceMenu
+    sync verb (Stretch), Eli's call; apocrypha checks that the standalone
+    derived from fenestrate's composite is not broken in itself.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
