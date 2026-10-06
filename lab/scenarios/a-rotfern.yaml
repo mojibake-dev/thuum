@@ -1,0 +1,53 @@
+# M1, Eli's rotfern race (docs/PLAN.md M1; docs/MODS.md). rotfern.esp and its
+# master RaceCompatibility.esm load on the server and both clients in the same
+# order, after the full-slot Creation Club plugins (docs/LAB.md), so rotfern's
+# race is RACE 0x0800AA00 everywhere. The server opens c1's race menu; the
+# driver moves the menu's selection down until c1's race is rotfern
+# (race-pick, which reads the race after each press instead of counting
+# presses) and closes the menu; skymp5-client sends the menu's result, and the
+# server's character creation check takes it, since the race carries the
+# Playable flag (docs/verbs/character-creation.md). Asserts: the server took
+# it and records rotfern; c1's game and c2's figure of c1 are rotfern; all
+# three still after a server restart, c1's relaunch (a fresh save) and c2's
+# reconnect.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-rotfern
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
+  - wait: 5
+  - c1: open-race-menu
+  - wait: 6
+  - c1: race-pick {race: "rotfern.esp:rotfern", max: 16}
+  - wait: 2
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 6
+  - c1: dump-state
+  - c2: dump-state
+  - c2: screenshot
+  - assert:
+      - server.actor(c1).lastAppearanceAllowed == true
+      - server.actor(c1).raceId == form("rotfern.esp:rotfern")
+      - c1.state.raceId == form("rotfern.esp:rotfern")
+      - c2.view(c1).raceId == form("rotfern.esp:rotfern")
+  - server: restart
+  - wait: 20
+  - c1: relaunch
+  - c2: reconnect
+  - wait: 10
+  - c1: dump-state
+  - c2: dump-state
+  - c2: screenshot
+  - assert:
+      - server.actor(c1).raceId == form("rotfern.esp:rotfern")
+      - c1.state.raceId == form("rotfern.esp:rotfern")
+      - c2.view(c1).raceId == form("rotfern.esp:rotfern")
+artifacts: [server.log, c1.log, c2.log, screenshots]
