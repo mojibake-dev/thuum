@@ -89,6 +89,8 @@ let crafting: {
   result: number;
   count: number;
   startedAt: number;
+  station: number;
+  activatedAt?: number;
   held?: number[];
   removedAt?: number;
   closeAt?: number;
@@ -425,22 +427,29 @@ function finishCraft(c: Config, player: Actor): void {
       }
       return;
     }
+    if (k.activatedAt === undefined) {
+      // A player crafts only what it holds: the server's give can reach the
+      // client's inventory after the craft step starts, and removing an item
+      // it does not hold fires no event, so skymp5-client sent a craft
+      // without the leather strip and the server found no recipe (runs
+      // 20261006-034306 and 20261006-051325-m0-forge).
+      const held = k.ingredients.map(([id]) => player.getItemCount(Game.getFormEx(id)));
+      if (k.ingredients.some(([, count], i) => held[i] < count)) {
+        if (Date.now() - k.startedAt < CRAFT_WAIT_MS) return;
+        crafting = null;
+        postResult(c, k.step, { ok: false, error: `ingredients not held ${CRAFT_WAIT_MS} ms after the craft began, before the station: ${JSON.stringify(k.ingredients)}, held ${JSON.stringify(held)}` });
+        return;
+      }
+      k.held = held;
+      const station = form(k.station);
+      if (!station) throw new Error("no such station");
+      station.activate(player, false);
+      k.activatedAt = Date.now();
+      return;
+    }
     const furniture = player.getFurnitureReference();
     if (furniture) {
       if (k.removedAt === undefined) {
-        // A player crafts only what it holds: the server's give can reach the
-        // client's inventory after the craft step starts, and removing an
-        // item it does not hold fires no event, so skymp5-client sent a craft
-        // without the leather strip and the server found no recipe (runs
-        // 20261006-034306 and 20261006-051325-m0-forge).
-        const held = k.ingredients.map(([id]) => player.getItemCount(Game.getFormEx(id)));
-        if (k.ingredients.some(([, count], i) => held[i] < count)) {
-          if (Date.now() - k.startedAt < CRAFT_WAIT_MS) return;
-          crafting = null;
-          postResult(c, k.step, { ok: false, error: `ingredients not held ${CRAFT_WAIT_MS} ms after the craft began: ${JSON.stringify(k.ingredients)}, held ${JSON.stringify(held)}` });
-          return;
-        }
-        k.held = held;
         for (const [id, count] of k.ingredients) player.removeItem(Game.getFormEx(id), count, true, null);
         k.removedAt = Date.now();
         return;
@@ -449,7 +458,7 @@ function finishCraft(c: Config, player: Actor): void {
       player.addItem(Game.getFormEx(k.result), k.count, true);
       k.closeAt = Date.now() + 2000;
       postResult(c, k.step, { ok: true, data: { result: k.result, ingredients: k.ingredients, held: k.held, furniture: furniture.getFormID(), waitedMs: Date.now() - k.startedAt } });
-    } else if (Date.now() - k.startedAt > CRAFT_WAIT_MS) {
+    } else if (Date.now() - k.activatedAt > CRAFT_WAIT_MS) {
       crafting = null;
       postResult(c, k.step, { ok: false, error: `not in the station's furniture ${CRAFT_WAIT_MS} ms after activating it` });
     }
@@ -667,8 +676,11 @@ function run(step: Step, player: Actor): unknown {
         const ing = recipe.getNthIngredient(i);
         if (ing) ingredients.push([ing.getFormID(), recipe.getNthIngredientQuantity(i)]);
       }
-      station.activate(player, false);
-      crafting = { step, ingredients, result: result.getFormID(), count: recipe.getResultQuantity(), startedAt: Date.now() };
+      // The station is activated once the player holds every ingredient
+      // (finishCraft): its menu stops skymp5-client's inventory sync while it
+      // is open (isBadMenuShown), so a give that had not landed by then never
+      // would (m0-forge, run 20261006-055855: held [1, 0] for 15 s)
+      crafting = { step, ingredients, result: result.getFormID(), count: recipe.getResultQuantity(), startedAt: Date.now(), station: station.getFormID() };
       return DEFERRED;
     }
     case "race-pick": {
