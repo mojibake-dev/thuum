@@ -1,0 +1,49 @@
+# M1 persistence (thuum docs/verbs/favorites.md): a player's favorites, and
+# their keys, survive a server restart and a new game. c1's kit holds an iron
+# dagger (Skyrim.esm WEAP 0x0001397E), and its character knows Flames (SPEL
+# 0x00012FCD, a starting spell of the Player NPC_; lab/esm.py). c1 marks the
+# dagger on key 3 and Flames on key 1 as the player would (the `favorite`
+# step), then opens its inventory (I, DirectInput 0x17) and closes it, which
+# makes its client report its favorites. The server restarts and c1 quits and
+# starts its game again, which loads a generated save with no favorites, so
+# only the server's record can mark them again. Every read goes through SKSE
+# (the `favorites` step: Game.isObjectFavorited and getHotkeyBoundObject),
+# never through the verb's own native; c.favorite(id) is the key, 0 to 7, -1
+# for a favorite without one, -2 for none.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-favorites
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
+  - wait: 5
+  - c1: favorites {ids: [0x0001397E, 0x00012FCD]}
+  - assert:
+      - c1.favorite(0x0001397E) == -2
+      - c1.favorite(0x00012FCD) == -2
+  - c1: favorite {form: 0x0001397E, hotkey: 2}
+  - c1: favorite {form: 0x00012FCD, hotkey: 0}
+  - c1: tap-key {code: 23}
+  - wait: 2
+  - c1: close-menu {name: InventoryMenu}
+  - wait: 3
+  - c1: favorites {ids: [0x0001397E, 0x00012FCD]}
+  - assert:
+      - c1.favorite(0x0001397E) == 2
+      - c1.favorite(0x00012FCD) == 0
+  - server: restart
+  - wait: 20
+  - c1: relaunch
+  - wait: 15
+  - c1: favorites {ids: [0x0001397E, 0x00012FCD]}
+  - assert:
+      - c1.favorite(0x0001397E) == 2
+      - c1.favorite(0x00012FCD) == 0
+artifacts: [server.log, c1.log, c2.log, screenshots]
