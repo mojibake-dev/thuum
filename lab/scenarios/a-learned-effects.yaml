@@ -1,0 +1,42 @@
+# M1 validation, learned ingredient effects (docs/verbs/learned-effects.md):
+# the effects a player learns of an ingredient stay learned across a server
+# restart and a new game. Every login loads a generated save that knows no
+# ingredient's effects, so before this verb a player relearned each one every
+# session. The ingredient is Skyrim.esm Wheat (INGR 0x0004B0BA, 307386; lab/esm.py).
+# 1. A fresh login: c1 knows none of Wheat's effects.
+# 2. c1 is given a Wheat and eats it (lab-driver equips it, which eats an
+#    ingredient): its engine learns an effect, its client reports what it
+#    knows, and the server keeps that after the eat it saw.
+# 3. The server restarts, and c1 quits the game and starts it again
+#    (relaunch), so it loads a fresh save that knows nothing: c1 knows Wheat's
+#    effect again, taught by the server after the login. c1 does not eat
+#    again, so nothing else could teach it.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-learned-effects
+milestone: M1
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: known {ids: [307386]}
+  - assert:
+      - c1.known(307386) == 0
+  - c1: give {item: "Skyrim.esm:Wheat"}
+  - wait: 2
+  - c1: equip {item: "Skyrim.esm:Wheat"}
+  - wait: 5
+  - c1: known {ids: [307386]}
+  - assert:
+      - c1.known(307386) >= 1
+  - server: restart
+  - c1: relaunch
+  - wait: 10
+  - c1: known {ids: [307386]}
+  - assert:
+      - c1.known(307386) >= 1
+  - c1: screenshot
+artifacts: [server.log, c1.log, screenshots]
