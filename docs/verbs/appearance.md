@@ -167,6 +167,14 @@ Rate limit / bounds: one accepted update per race-menu open.
   a client install on sky-c1 (procdump64 is staged in C:\sky-lab\frida),
   and the dump read for the faulting module and stack. Frida is out for now:
   the game refused its agent on 2026-10-03.
+  2026-10-06: the first launch after a client install on sky-c1 (the
+  m1-favorites dist, with the new mod layer) ran with ProcDump armed
+  (`just client-dump-arm 711`: a mini dump per access violation, first
+  chance included), logged in as profile 1 and stayed up: no access
+  violation at all, so no dump. One launch, and a debugger attached changes
+  timing, so the crash is unconfirmed rather than gone; the next client
+  install arms ProcDump again (`just client-dumps <vmid>` fetches what it
+  wrote).
 
 ## Status
 
