@@ -24,4 +24,9 @@ cmd '{"kind":"teleport","profileId":1,"cell":"3c:Skyrim.esm","pos":[117900,-8148
 cmd '{"kind":"teleport","profileId":2,"cell":"3c:Skyrim.esm","pos":[118180,-81760,11080],"rot":[0,0,130]}'
 sleep 5
 for p in 1 2; do cmd "{\"kind\":\"set-percentages\",\"profileId\":$p,\"health\":0.5,\"magicka\":0.5,\"stamina\":0.5}"; done
+# Ingredients to eat for the learned-effects check (playtest six): three each
+# of Skyrim.esm INGR Lavender 0x00045C28, MountainFlower01Blue 0x00077E1C and
+# Wheat 0x0004B0BA (lab/esm.py on sky-srv, 2026-10-06), as decimal base ids.
+for p in 1 2; do for id in 285736 491036 307386; do cmd "{\"kind\":\"give\",\"profileId\":$p,\"baseId\":$id,\"count\":3}" >/dev/null; done; done
+echo "gave each player 3 Lavender, 3 Blue Mountain Flower, 3 Wheat"
 for p in 1 2; do state "{\"kind\":\"actor\",\"profileId\":$p}" | python3 -c 'import sys,json; d=json.load(sys.stdin); print("profile", d.get("profileId"), "at", [round(d[k]) for k in ("x", "y", "z") if k in d], "in", d.get("cell"), "health", round(d.get("healthPercentage") or 0, 2))' 2>/dev/null || true; done
