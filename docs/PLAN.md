@@ -168,6 +168,18 @@ it carries a HYPOTHESIS tag.
   M0 floor on the wire (2026-10-02): m0-appearance green (run
   20261002-221528), m0-inventory green, m0-death red only on the client's
   own isDead as under RakNet (Eli's call, see M0).
+  Map markers DONE 2026-10-06 (docs/verbs/map-markers.md): the server
+  records each player's discovered map markers and shows them again after
+  a login, each player's own; a-map-markers green on both versions, Eli's
+  fifth playtest passed, and the full sweep on the branch green, 42 of 42
+  with two reruns on 1.6.1170 (m0-forge: the driver's same-frame craft,
+  fixed in the driver; a-melee-reach: one swing that never connected); on
+  parity add51356. Learned effects (docs/verbs/learned-effects.md) and
+  favorites (docs/verbs/favorites.md) are built on fork branches
+  m1-learned-effects and m1-favorites, stacked so one client (wire schema
+  7) carries both; their T3 runs and playtest six are next. Script
+  variables is designed (docs/verbs/script-variables.md) and first needs
+  the game's own scripts on the server.
 - Validation: character creation, damage range and angle, movement speed
   bounds, activation distance.
   Survey of what the server checks today: docs/verbs/validation.md. First
