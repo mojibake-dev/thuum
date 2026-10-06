@@ -556,3 +556,25 @@ outdoors, 2000 indoors). Both games then stop their figure's combat
 players a rest, however long ago the last hit. Other options weighed: 10 s
 or 30 s without a hit (an exploit window: step back and rest), and distance
 alone (standing together never ends it).
+
+## ADR-024: The full sweep runs at the merge, not per verb
+
+Status: accepted (2026-10-05, Eli: "please yes that's great").
+
+**Context.** A full sweep is every committed scenario on both game versions
+(ADR-022): 21 scenarios twice, about two hours of lab time on the single
+pair of clones. Running it for each verb on its branch, and again after
+landing, made the sweep the largest wait in a verb's cycle (the map-markers
+verb, 2026-10-05).
+
+**Decision.**
+- While a verb is in progress on its branch, T3 is its own scenario on both
+  game versions plus `smoke-two-players`.
+- The full sweep runs once, when the branch merges into parity. It runs
+  overnight when that is possible, and a red run blocks the merge.
+- A change that touches every client (a snapshot retake, a wire schema
+  bump) still gets the full sweep before its snapshot is promoted.
+
+**Consequences.** A regression in another verb's scenario is found at the
+merge, not on the branch. The merge commit names the sweep's runs, so
+"green at merge" stays checkable.
