@@ -309,6 +309,17 @@ it carries a HYPOTHESIS tag.
   refused (E_MARKER_NONE): the server never took the console teleport, so it
   judged the report at the player's old position, as server authority
   should; a COC the server honors belongs to the console-commands verb.
+- Eli's rotfern race (from the stretch list; Eli, 2026-10-05: "my
+  character rotfern whenever", placed with the systems it leans on, all
+  M1's). The standalone plugin (masters Skyrim.esm and
+  RaceCompatibility.esm) uses vanilla appearance data only, so it needs:
+  both plugins in the server's and the clients' load orders (ESP and ESM,
+  which libespm reads; never the RaceCompatibility SKSE plugin), the race
+  offered in the race menu and taken by the character-creation check
+  (docs/verbs/character-creation.md), and SkyMP's appearance sync and its
+  persistence (m0-appearance). Scenario `a-rotfern`: a rotfern created in
+  the race menu, seen as one by the other player, and still one after a
+  restart. RaceMenu co-save data is not carried (see Stretch).
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
@@ -326,8 +337,32 @@ it carries a HYPOTHESIS tag.
 - Spells: cast intent from the caster (observe), server resolves, broadcast
   to renderers (impose), suppress local resolution. Shouts with words known
   as server state. Rung: R1 intent, R0 resolution.
+  - Apocalypse - Magic of Skyrim 10.2.3 (from the stretch list; Eli,
+    2026-10-05: "apocalypse at spells"): records plus 206 vanilla-Papyrus
+    scripts, effectively no SKSE. Of its 165 natives, 102 are missing,
+    GlobalVariable.GetValue and SetValue the most called, which makes it
+    the first verb to need server-owned globals (ADR-021 decision 4); each
+    native it calls gets its ledger line. Eli (2026-10-05): most of its
+    spells should behave about the same as vanilla ones, so they ride this
+    bullet's cast path. The hard case is its projectile teleport, a blink
+    step that moves the caster to where the projectile lands. The
+    movement-speed budget (docs/verbs/movement-speed.md) refuses exactly
+    that jump, so the spell needs its own path: the server takes the cast
+    (R1) and allows a jump to the landing point within the spell's reach.
+    Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and the blink,
+    seen by an observer, the blink not snapped back.
 - Hit registration with lag compensation (rewind by client latency, Bernier
   2001), blocking, marksman aim pitch on the wire, projectile ownership.
+  - Headshot Kills - CIF 1.2 (from the stretch list; Eli, 2026-10-05:
+    "headshots whenever", placed with the first ranged hit verb, which may
+    come before the rest of M2): an ESL and a script that Kill() the victim
+    when Core Impact Framework (an SKSE plugin hooking projectile collision
+    and hit processing on the shooting client) reports an unhelmeted head
+    hit. The hit location rides ranged hit registration as untrusted input
+    (hard rule 5), and the kill is the server's (R0). On the lab's 1.7.104
+    it runs on CIF 2.0.7 unchanged (1.2.8 reads only the older Address
+    Library format). Scenario `b-headshot`: an arrow to an unhelmeted head
+    kills, the same arrow to a helmet does not.
 - Corpse loot, container open animation for observers, container contents
   reconciled on open.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
@@ -394,30 +429,14 @@ natives ledger.
 
 Three mods Eli wants working (2026-10-03). They are acceptance cases for
 definition of done item 6 and M7's compatibility matrix, not a widening of
-the non-goal: each works to the extent the ledger says, and each gets a
-scenario once the systems it leans on exist.
+the non-goal: each works to the extent the ledger says. Since 2026-10-05
+(Eli) each sits in the milestone whose systems it leans on, with its own
+scenario there:
 
-- Apocalypse - Magic of Skyrim 10.2.3: records plus 206 vanilla-Papyrus
-  scripts, effectively no SKSE. Spells are M2 (cast intent R1, resolution
-  R0). Of its 165 natives, 102 are missing, GlobalVariable.GetValue and
-  SetValue the most called, which makes it the first verb to need
-  server-owned globals (ADR-021 decision 4). Eli (2026-10-05): most of its
-  spells should behave about the same as vanilla ones; the hard case is
-  its projectile teleport, a blink step that moves the caster to where
-  the projectile lands. The movement-speed budget
-  (docs/verbs/movement-speed.md) refuses exactly that jump, so the spell
-  needs its own path: the server takes the cast (R1) and allows a jump to
-  the landing point within the spell's reach.
-- Headshot Kills - CIF 1.2: an ESL and a script that Kill() the victim when
-  Core Impact Framework (an SKSE plugin hooking projectile collision and hit
-  processing on the shooting client) reports an unhelmeted head hit. Hit
-  location rides M2's hit registration as untrusted input (hard rule 5), and
-  the kill is the server's (R0). On the lab's 1.7.104 it runs on CIF 2.0.7
-  unchanged (1.2.8 reads only the older Address Library format).
-- Eli's rotfern race: the standalone plugin (masters Skyrim.esm and
-  RaceCompatibility.esm) uses vanilla appearance data only. Character
-  creation and SkyMP's appearance sync already cover it, so it is the first
-  to test. RaceMenu co-save data is not carried.
+- Eli's rotfern race: M1, beside character creation and appearance sync.
+- Apocalypse - Magic of Skyrim 10.2.3: M2, under spells.
+- Headshot Kills - CIF 1.2: M2, under hit registration, with the first
+  ranged hit verb.
 
 - RaceMenu sync (Eli, 2026-10-04: "if this thuum project built that racemenu
   stuff that would slap"): friends see each other's RaceMenu looks (sculpt,
