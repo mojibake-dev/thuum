@@ -219,6 +219,43 @@ What it needs from thuum:
   the Playable flag too (RACE DATA flags 0x54a08943), which vanilla vampire
   races do not; RaceCompatibility maps a race to its vampire twin through its
   own lists, so the vampire race needs no flag of its own.
+- **apocrypha's diff of the standalone against the composite (2026-10-06;
+  the 15-master copy rotfern.esp.pre-p3.bak stands in for fenestrate, which
+  is off; RaceMenu's behaviour from its public source, expired6978
+  SKSE64Plugins skee64).** Broken by the derivation itself, for Eli and
+  chim: (1) both races' ANAM skeletons and (2) one TINT layer point at RS
+  Children's `ranaline` folder (the lab's stopgap above); (3) the vampire
+  pairing: RaceCompatibility's PlayerVampireQuestScript pairs a race with
+  its vampire by index in PlayableRaceList and PlayableVampireList; the
+  derivation stripped RS Children's races unevenly, leaving rotfern at
+  [14] and rotfernRaceVampire at [11], so turning sets no race and curing
+  gives ImperialRaceChild; the fix is RaceCompatibility's 10 vanilla pairs
+  plus the rotfern pair at [10]; (4) every complexion (FTSM, FTSF, DFTM,
+  DFTF) now names one face texture set where the composite had six. Dead
+  weight: an orphan cm01.nif, FaceGen for Kharjo and Teldryn where the
+  engine never looks, stray overrides of NPC_ Kharjo and Keening (WEAP,
+  ENCH). The chargen data is otherwise identical (morph availability, race
+  presets, 63 tint layers and their presets, hair colours); the "missing
+  options" are other mods' parts by design (RS Children's child hairs and
+  brows, Apachii, Goam's ears, the eye packs) and everything RaceMenu adds.
+- **The sculpt is RaceMenu's, per character, in the SKSE co-save,** not
+  FaceGen (the player's head is built at runtime; chim's "FaceGen sculpt
+  merge" concerns rotfernNPC). RaceMenu's Save Preset writes it as a .jslot
+  (JSON; morphs.sculpt, one block per head part, keyed by the part's
+  chargen .tri path, deltas over sculptDivisor 10000). Eli's are keyed to
+  RS Children's `ranaline` paths, so a fenestrate preset would not attach
+  to the standalone's re-pathed head parts until the hosts (and the head
+  part form identifiers) are rewritten. apocrypha's recommendation for
+  rotfern: bake the sculpt into the race's head meshes (geometry and the
+  FOD base morph data), which needs no RaceMenu and works on 1.7.104; every
+  rotfern then starts from that face. Eli's choice for players in general
+  (2026-10-06) is RaceMenu sync (docs/PLAN.md, Stretch); the two do not
+  conflict.
+- **RaceMenu on the lab's 1.6.1170 set needs:** SKSE 2.2.6 with its base
+  Data\Scripts .pex (RaceMenu's scripts call SKSE natives), RaceMenu.esp,
+  RaceMenuPlugin.esp (optional sliders), RaceMenu.bsa, skee64.dll and
+  skee64.ini, launched through skse64_loader; no Address Library (skee64
+  pins 1.6.1170) and no SkyUI (RaceMenu ships its own UI).
 - **Later.** Vampirism (M7) needs the three missing RaceCompatibility natives.
 - **Not carried.** RaceMenu co-save data (sculpt, overlays) is outside SkyMP's
   appearance model.
