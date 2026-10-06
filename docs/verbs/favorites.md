@@ -169,9 +169,9 @@ own client)
   client receives.
 - T3 scenario `a-favorites`: c1 at first has no favorites; it marks the iron
   dagger (its kit holds one) on key 3 and the Flames spell (a starting
-  spell) without a key, then opens and closes its inventory; the server
-  restarts and c1 relaunches; the dagger is a favorite on key 3 and Flames a
-  favorite again, both read through SKSE.
+  spell) on key 1, then opens and closes its inventory; the server restarts
+  and c1 relaunches; the dagger is a favorite on key 3 and Flames on key 1
+  again, both read through SKSE.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
