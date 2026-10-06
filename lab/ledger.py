@@ -42,6 +42,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 DUMP = Path("skyrim-platform/src/platform_se/codegen/convert-files/FunctionsDump.txt")
+# Skyrim Platform's own natives are declared in its TESModPlatform script. The
+# dump predates the ones thuum adds (SetGameDaysPassed, GetFavorites,
+# SetFavorite), so the script is read too: every native a verb adds gets its
+# row (CLAUDE.md rule 10).
+PSC = Path("skyrim-platform/src/platform_se/psc/TESModPlatform.psc")
+_PSC_NATIVE = re.compile(r"^[ \t]*(?:[\w\[\]]+[ \t]+)?Function[ \t]+(\w+)[ \t]*\([^)]*\)[ \t]+global[ \t]+native\b", re.I | re.M)
 CLASSES = Path("skymp5-server/cpp/server_guest_lib/script_classes")
 FUNCTIONS_LIB = Path("skymp5-functions-lib/index.ts")
 
@@ -100,6 +106,11 @@ def load_dump(skymp: Path) -> dict[str, Native]:
     for cls, names in SUPPLEMENT.items():
         for name in names:
             n = Native(cls, name, "global", "missing", note="not in SP's dump; Math from the Creation Kit wiki")
+            out.setdefault(n.key.lower(), n)
+    psc = skymp / PSC
+    if psc.is_file():
+        for name in _PSC_NATIVE.findall(psc.read_text(encoding="utf-8", errors="replace")):
+            n = Native("TESModPlatform", name, "global", "missing", note="not in SP's dump; declared in TESModPlatform.psc")
             out.setdefault(n.key.lower(), n)
     return out
 

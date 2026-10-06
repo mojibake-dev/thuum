@@ -192,6 +192,35 @@ class CaseAndMath(unittest.TestCase):
         self.assertEqual(sum(1 for k in natives if k.startswith("Math.")), 20)
 
 
+class SkyrimPlatformScript(unittest.TestCase):
+    def test_natives_the_script_declares_beyond_the_dump_are_listed(self):
+        dump = json.loads(json.dumps(DUMP))
+        dump["types"]["TESModPlatform"] = {"parent": None, "globalFunctions": [
+            {"name": "CloseMenu", "isLatent": False, "arguments": [], "returnType": {"rawType": "None"}},
+        ], "memberFunctions": []}
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            make_fork(root)
+            (root / ledger.DUMP).write_text(json.dumps(dump))
+            (root / ledger.PSC).parent.mkdir(parents=True, exist_ok=True)
+            (root / ledger.PSC).write_text(
+                "ScriptName TESModPlatform\n\n"
+                "Function CloseMenu(string name) global native\n\n"
+                "Function SetGameDaysPassed(Float daysPassed) global native\n\n"
+                "; a comment\nInt[] Function GetFavorites() global native\n\n"
+                "Bool Function SetFavorite(Form form, Int hotkey) global native\n")
+            md = root / "NATIVES.md"
+            self.assertEqual(ledger.main([str(root), str(md)]), 0)
+            natives = {n.key: n for n in ledger.build(root)}
+            text = md.read_text()
+        for name in ("SetGameDaysPassed", "GetFavorites", "SetFavorite"):
+            self.assertEqual(natives[f"TESModPlatform.{name}"].status, "missing", name)
+            self.assertIn(f"`TESModPlatform.{name}`", text)
+        # one row for a native both declare, as the dump has it
+        self.assertEqual(sum(1 for k in natives if k == "TESModPlatform.CloseMenu"), 1)
+        self.assertTrue(natives["TESModPlatform.CloseMenu"].in_dump)
+
+
 @unittest.skipUnless((SKYMP / ledger.DUMP).is_file(), "skymp submodule not checked out")
 class RealFork(unittest.TestCase):
     def test_established_facts(self):
