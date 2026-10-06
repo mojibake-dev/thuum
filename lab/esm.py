@@ -306,6 +306,15 @@ def main(argv: list[str]) -> int:
         pos = struct.unpack_from("<3f", data) if len(data) >= 12 else (0.0, 0.0, 0.0)
         where = f"world {world:#x}" if world is not None else "a cell"
         print(f"{rec.type} {rec.form_id:#010x} base {base:#010x} in {where} at ({pos[0]:.1f}, {pos[1]:.1f}, {pos[2]:.1f}) scale {scale:g}")
+        if rec.get("XMRK") is not None:
+            # a map marker (docs/verbs/map-markers.md): FNAM flags (visible,
+            # can travel to, show all hidden), TNAM type (the engine's
+            # MARKER_TYPE), FULL name (an lstring id in a localized master)
+            fnam = rec.get("FNAM") or b"\0"
+            tnam = rec.get("TNAM") or b"\0\0"
+            full = rec.get("FULL") or b""
+            name = f"lstring {struct.unpack('<I', full[:4])[0]:#x}" if len(full) >= 4 else "none"
+            print(f"  map marker: type {struct.unpack('<H', tnam[:2])[0]} flags {fnam[0]:#x} name {name}")
         return 0
     print(__doc__, file=sys.stderr)
     return 2
