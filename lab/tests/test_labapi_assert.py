@@ -343,17 +343,11 @@ class FavoriteTests(unittest.TestCase):
 
 
 class HeldViews(NearViews):
-    """c1's last held step: one iron ingot in its game and in what the server
-    sent; a leather strip the server sent that its game does not hold; a
-    steel sword before any inventory arrived."""
+    """c1's last held step: one iron ingot, no leather strip."""
 
     def __init__(self):
         super().__init__()
-        self.read = {"c1": {
-            str(0x5ACE4): {"game": 1, "sent": 1},
-            str(0x800E4): {"game": 0, "sent": 1},
-            str(0x13989): {"game": 0, "sent": None},
-        }}
+        self.read = {"c1": {str(0x5ACE4): 1, str(0x800E4): 0}}
 
     def held(self, observer):
         return self.read.get(observer)
@@ -361,25 +355,19 @@ class HeldViews(NearViews):
 
 @needs_deps
 class HeldTests(unittest.TestCase):
-    def test_held_reads_the_game_and_the_sent_counts(self):
+    def test_held_reads_the_game_count_from_the_last_held_step(self):
         from labapi.assertions import Evaluator
         ev = Evaluator(RichServer(), HeldViews(), ["c1", "c2"])
-        self.assertTrue(ev.evaluate("c1.held(0x5ACE4).game == 1"))
-        self.assertTrue(ev.evaluate("c1.held(0x800E4).sent == 1"))
-        self.assertTrue(ev.evaluate("c1.held(0x800E4).game == 0"))
-
-    def test_no_inventory_sent_yet_reads_minus_one(self):
-        from labapi.assertions import Evaluator
-        ev = Evaluator(RichServer(), HeldViews(), ["c1", "c2"])
-        self.assertTrue(ev.evaluate("c1.held(0x13989).sent == -1"))
+        self.assertTrue(ev.evaluate("c1.held(0x5ACE4) == 1"))
+        self.assertTrue(ev.evaluate("c1.held(0x800E4) == 0"))
 
     def test_an_unread_form_or_client_is_a_data_error(self):
         from labapi.assertions import AssertionData, Evaluator
         ev = Evaluator(RichServer(), HeldViews(), ["c1", "c2"])
         with self.assertRaises(AssertionData):
-            ev.evaluate("c1.held(0x1).game == 0")
+            ev.evaluate("c1.held(0x1) == 0")
         with self.assertRaises(AssertionData):
-            ev.evaluate("c2.held(0x5ACE4).game == 1")
+            ev.evaluate("c2.held(0x5ACE4) == 1")
 
 
 @needs_deps

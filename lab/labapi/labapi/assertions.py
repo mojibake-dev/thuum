@@ -134,17 +134,6 @@ class MarkerView:
 
 
 @dataclass(frozen=True)
-class HeldView:
-    """c.held(id): how many of a form that client holds, from its last `held`
-    step: `game`, its game's own count, and `sent`, the count in the
-    inventory the server last sent it (skymp5-client's own copy, which it
-    lays into the game on its own schedule; -1 before the first arrives)."""
-
-    game: int
-    sent: int
-
-
-@dataclass(frozen=True)
 class TimeView:
     """server.time(): the server's game clock (labState kind time), read when
     the expression is evaluated (docs/verbs/time.md)."""
@@ -377,16 +366,17 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s favorites step did not read {int(ref_id):#x}")
         return key
 
-    def held(self, ref_id: int) -> HeldView:
+    def held(self, ref_id: int) -> int:
+        """c.held(id): how many of a form that client's game holds, from its
+        last `held` step (getItemCount)."""
         fn = getattr(self._views, "held", None)
         data = fn(self.name) if fn else None
         if not isinstance(data, dict):
             raise AssertionData(f"{self.name} has not reported a held step yet")
-        h = data.get(str(int(ref_id)))
-        if not isinstance(h, dict):
+        n = data.get(str(int(ref_id)))
+        if not isinstance(n, int) or isinstance(n, bool):
             raise AssertionData(f"{self.name}'s held step did not read {int(ref_id):#x}")
-        sent = h.get("sent")
-        return HeldView(game=int(h.get("game") or 0), sent=-1 if sent is None else int(sent))
+        return n
 
     def view(self, other: str) -> Pos:
         seen, origin = self._seen(other)
@@ -452,7 +442,6 @@ _ATTRS = {
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     MarkerView: {"visible", "canTravel"},
-    HeldView: {"game", "sent"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",

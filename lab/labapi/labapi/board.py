@@ -43,7 +43,7 @@ class StepBoard:
         self._known: dict[str, dict[str, Any]] = {}
         # a favorites step's answer: form id (decimal) -> hotkey, -1 none, -2 no favorite
         self._favorites: dict[str, dict[str, Any]] = {}
-        # a held step's answer: form id (decimal) -> {game, sent} counts
+        # a held step's answer: form id (decimal) -> the game's count
         self._held: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
 

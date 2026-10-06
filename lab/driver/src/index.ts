@@ -37,7 +37,6 @@ import {
   on,
   printConsole,
   settings,
-  storage,
   writeLogs,
 } from "skyrimPlatform";
 
@@ -417,28 +416,6 @@ function finishRacePick(c: Config, player: Actor): void {
   }
 }
 
-// How many of a form the inventory the server last sent this player holds:
-// skymp5-client keeps that inventory in Skyrim Platform's storage, which every
-// plugin shares (skymp5-client remoteServer.ts setPcInventory, storage key
-// "pcInv"), and lays it into the game on its own schedule. null before the
-// first one arrives. Read beside the game's own count, it tells an item the
-// server never sent from one the client did not apply.
-function sentCount(id: number): number | null {
-  let inv: unknown;
-  try {
-    inv = storage["pcInv"];
-  } catch {
-    return null;
-  }
-  const entries = typeof inv === "object" && inv ? (inv as { entries?: unknown }).entries : undefined;
-  if (!Array.isArray(entries)) return null;
-  let n = 0;
-  for (const e of entries as Array<{ baseId?: unknown; count?: unknown }>) {
-    if (Number(e.baseId) === id) n += Number(e.count) || 0;
-  }
-  return n;
-}
-
 function finishCraft(c: Config, player: Actor): void {
   if (!crafting) return;
   const k = crafting;
@@ -460,8 +437,7 @@ function finishCraft(c: Config, player: Actor): void {
       if (k.ingredients.some(([, count], i) => held[i] < count)) {
         if (Date.now() - k.startedAt < CRAFT_WAIT_MS) return;
         crafting = null;
-        const sent = k.ingredients.map(([id]) => sentCount(id));
-        postResult(c, k.step, { ok: false, error: `ingredients not held ${CRAFT_WAIT_MS} ms after the craft began, before the station: ${JSON.stringify(k.ingredients)}, held ${JSON.stringify(held)}, sent ${JSON.stringify(sent)}` });
+        postResult(c, k.step, { ok: false, error: `ingredients not held ${CRAFT_WAIT_MS} ms after the craft began, before the station: ${JSON.stringify(k.ingredients)}, held ${JSON.stringify(held)}` });
         return;
       }
       k.held = held;
@@ -516,15 +492,17 @@ function run(step: Step, player: Actor): unknown {
       return out;
     }
     case "held": {
-      // How many of each form this player holds, keyed by its decimal form id
-      // (lab-api's c.held(id)): `game`, the game's own count
-      // (getItemCount), and `sent`, the count in the inventory the server
-      // last sent (sentCount); null for a form the game does not have
+      // How many of each form this player's game holds (getItemCount), keyed
+      // by its decimal form id (lab-api's c.held(id)); null for a form the
+      // game does not have. What skymp5-client last received is not
+      // readable here: Skyrim Platform's storage is each plugin's own (run
+      // 20261006-182714: skymp5-client's "pcInv" never showed in
+      // lab-driver's), so that side comes from lab/frida/console-trace.js.
       const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
-      const out: Record<string, { game: number; sent: number | null } | null> = {};
+      const out: Record<string, number | null> = {};
       for (const id of ids) {
         const f = Game.getFormEx(Number(id));
-        out[String(Number(id))] = f ? { game: player.getItemCount(f), sent: sentCount(Number(id)) } : null;
+        out[String(Number(id))] = f ? player.getItemCount(f) : null;
       }
       return out;
     }

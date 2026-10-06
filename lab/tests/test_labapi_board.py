@@ -39,8 +39,8 @@ class BoardTests(unittest.TestCase):
             # held results are kept per client and cleared with the views
             held = board.enqueue("c1", "held", {"ids": [524516]})
             board.poll("c1")
-            board.complete(held.id, {"ok": True, "data": {"524516": {"game": 0, "sent": 1}}})
-            self.assertEqual(board.held("c1")["524516"], {"game": 0, "sent": 1})
+            board.complete(held.id, {"ok": True, "data": {"524516": 0}})
+            self.assertEqual(board.held("c1")["524516"], 0)
             self.assertIsNone(board.held("c2"))
             board.clear_views()
             self.assertIsNone(board.held("c1"))
