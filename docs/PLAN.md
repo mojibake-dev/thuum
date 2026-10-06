@@ -332,6 +332,32 @@ it carries a HYPOTHESIS tag.
   persistence (m0-appearance). Scenario `a-rotfern`: a rotfern created in
   the race menu, seen as one by the other player, and still one after a
   restart. RaceMenu co-save data is not carried (see Stretch).
+- From Eli's sixth T4 playtest (2026-10-05 late, docs/private/playtest-m1-6.md;
+  fork m1-favorites client 8f5365da on both clones, the mod layer loaded).
+  Passed: an eaten ingredient's first effect stays known after quitting the
+  game, three kinds on test 2, and the server taught all three back; spell
+  favorites and their keys come back after quitting; nothing propagates to
+  the other player (test 1's login got no favorites and no effects). Found:
+  - Item favorites did not come back after quitting (the server sent all
+    three; the client's first inventory sync after a login empties and
+    refills the inventory, which threw the mark away), and the next report
+    then shrank the record to two. Fixed on the branch (7e58041b: items are
+    marked after that first sync), in the client built after the playtest.
+  - A remote player's Flames kept spraying on the other screen, damaged the
+    observer, and started no fight (no hostility, ADR-023 covers weapon hits
+    only). Spell cast sync and spell damage authority: M2 (magic authority,
+    below), recorded there.
+  - Rotfern: listed twice (its vampire race is meant to be selectable,
+    Eli); picking an entry crashed the game once (0xC0000005, 23:32 PDT),
+    which Eli placed right after he opened the Moonlight connection. The
+    automated picks of either entry with the skeleton stopgap did not crash
+    (runs 20261006-055423 and -063425), so the trigger is under
+    investigation: the race menu, or the stream start (Sunshine switching
+    the clone's audio device under a running game; a hypothesis, untested).
+    After quitting, a rotfern showed as a Nord in its own game: an upstream
+    SkyMP bug in the login save (Skyrim Platform wrote every form outside
+    Skyrim.esm as a created form), fixed on the branch (dbed91b0, with a
+    T0 test).
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
@@ -377,6 +403,11 @@ it carries a HYPOTHESIS tag.
     kills, the same arrow to a helmet does not.
 - Corpse loot, container open animation for observers, container contents
   reconciled on open.
+- Found in playtest six (2026-10-05): a remote player's Flames keeps
+  spraying on the observer's screen after the caster stops, damages the
+  observer through the observer's own game, and starts no fight. The cast
+  stop is not mirrored, and spell damage is the victim's client's today, not
+  the server's: both belong to this milestone's spell resolution.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
   visible to an observer), `b-magic-restart` (active effects survive a
   restart with remaining duration).
