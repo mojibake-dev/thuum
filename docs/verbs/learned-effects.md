@@ -58,15 +58,21 @@ own client)
   MpActor's equip path (MpActor.cpp:526-528) and fires EatItemEvent
   (MpActor.cpp:1157-1163).
 - UNKNOWN: whether the engine learns the effect before or after the equip
-  that skymp5-client reports (the order decides when the client reads the
-  flags); the number of effects Experimenter teaches per rank (UESP,
-  Skyrim:Alchemy perks, to cite when the verb lands).
+  event (the client waits two seconds for the mask to settle, so either
+  works); the number of effects Experimenter teaches per rank (the client
+  reports what its engine learned, so the server needs no number).
 
 ## Observe
 
-- skymp5-client: after the player eats an ingredient (the equip it already
-  reports), on the next update, read `getIsNthEffectKnown(0..3)` and send
-  IngredientEffectsKnown {ingredient, mask} when the mask grew.
+- skymp5-client already reports every equip of the player's, ingredients
+  included, as OnEquip (sendInputsService.ts:34-53), and the server eats the
+  ingredient from that (MpActor's equip path). The new service listens to
+  the same `equip` event (Skyrim Platform EquipEvent: actor, baseObj;
+  skyrimPlatform.ts:229, :611); for an ingredient it reads
+  `getIsNthEffectKnown(0..3)` on each update for two seconds (whether the
+  engine learns before or after the event is UNKNOWN, so it waits for the
+  mask to settle) and sends IngredientEffectsKnown {ingredient, mask} when
+  the mask grew past what it last sent.
 
 ## Impose
 
@@ -84,15 +90,41 @@ own client)
   four bits; a small rate budget. Server: the form is an INGR, the player
   ate it within a few seconds, and the mask adds to what is recorded.
 
-## Server, client, tests
+## Server
 
-- To fill in when the verb starts, after map-markers lands: its login
-  imposition and change-form pattern are the ones this verb reuses.
+- Rust, wire-rules `effects`: a report is kept when the player ate that
+  ingredient within EAT_WINDOW_MS (10 s, the client's two-second settle plus
+  room for a slow update), and the recorded mask becomes the union of the
+  two; a report that adds nothing changes nothing. Pure and unit tested.
+- C++ core: MpActor remembers the last ingredient it ate and when (set in
+  EatItem, never persisted). OnIngredientEffectsKnown checks the form is an
+  INGR in the master files, asks the rule, and records the mask in the
+  actor's change form (ingredientEffects: ingredient and mask per entry,
+  absent in older records and read as none). After a login, on the first
+  movement, the map-markers hook also sends `Ingredient.LearnEffect(i)` for
+  each recorded bit (docs/verbs/map-markers.md, Impose).
+
+## Client
+
+- skymp5-client ingredientEffectsService.ts, as above.
+- lab-driver: a `known {ids}` step reads getIsNthEffectKnown(0..3) per
+  ingredient; lab-api reads it as `c.known(<form id>)`, the mask.
+
+## Tests
+
+- T0: wire-rules `effects` (inside and outside the window, union, nothing
+  new); ctest: an eat then a report records the mask, a report without an eat
+  or for another ingredient records nothing, the change form round-trips,
+  and a login sends one LearnEffect per bit.
+- T2: a report with no eat changes nothing a client receives.
+- T3 scenario `a-learned-effects`: c1 is given an ingredient and eats it;
+  its first effect is known; the server restarts and c1 relaunches far from
+  anything; the effect is still known, taught by the server.
 
 ## Status
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (two UNKNOWNs the design does not depend on)
 - [ ] server logic + T0
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
