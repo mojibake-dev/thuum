@@ -375,6 +375,19 @@ it carries a HYPOTHESIS tag.
     the race's head mesh (chim's outstanding NifMerge step) or a RaceMenu
     sync verb (Stretch), Eli's call; apocrypha checks that the standalone
     derived from fenestrate's composite is not broken in itself.
+- From Eli's seventh T4 playtest (2026-10-06, docs/private/playtest-m1-7.md;
+  on 1.6.1170 after ADR-025, fork m1-favorites 3ffa1091 with Skyrim
+  Platform's event-order fix). Passed: three ingredients given back to back
+  to each player with both online all stayed; a weapon favorite and its key
+  came back after quitting, on both players; rotfern picked in the race
+  menu held in its own game and the other's after quitting. Found:
+  - Each ingredient showed as two stacks, 2 and 1, while the server held one
+    entry of 3: skymp5-client passed addItemEx the base name for every
+    item, and a name makes addItemEx build an extra list the engine counts
+    as one item (upstream since 94990795, 2020). Fixed on the branch
+    (1e782672: a name only when the server records one).
+  - Neither player knew an ingredient effect: expected, `lab-up` reset the
+    server's world before the playtest and nobody had eaten since.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
