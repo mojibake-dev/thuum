@@ -284,6 +284,34 @@ class MarkerTests(unittest.TestCase):
             ev.evaluate("c2.marker(0x16223).visible")
 
 
+class KnownViews(NearViews):
+    """c1's last known step read Wheat with its first two effects known."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {str(0x4b0ba): 0b0011}}
+
+    def known(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class KnownTests(unittest.TestCase):
+    def test_known_reads_the_mask_from_the_last_known_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), KnownViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.known(0x4b0ba) == 3"))
+        self.assertTrue(ev.evaluate("c1.known(307386) >= 1"))
+
+    def test_an_unread_ingredient_or_client_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), KnownViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.known(0x1) == 0")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.known(0x4b0ba) == 0")
+
+
 @needs_deps
 class WatchTests(unittest.TestCase):
     def test_watched_matches_the_server_position_and_reports_the_farthest_point(self):

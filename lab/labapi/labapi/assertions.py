@@ -49,6 +49,7 @@ class ViewsFacade(Protocol):
     def view(self, observer: str) -> dict[str, Any] | None: ...
     def watch(self, observer: str) -> dict[str, Any] | None: ...
     def markers(self, observer: str) -> dict[str, Any] | None: ...
+    def known(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -336,6 +337,19 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s markers step did not read {int(ref_id):#x}")
         return MarkerView(visible=bool(m.get("visible")), canTravel=bool(m.get("canTravel")))
 
+    def known(self, ref_id: int) -> int:
+        """c.known(id): the effects that client's engine knows of an
+        ingredient, bit i for effect i, from its last `known` step
+        (docs/verbs/learned-effects.md)."""
+        fn = getattr(self._views, "known", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a known step yet")
+        mask = data.get(str(int(ref_id)))
+        if not isinstance(mask, int) or isinstance(mask, bool):
+            raise AssertionData(f"{self.name}'s known step did not read {int(ref_id):#x}")
+        return mask
+
     def view(self, other: str) -> Pos:
         seen, origin = self._seen(other)
         if not seen:
@@ -408,7 +422,7 @@ _ATTRS = {
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker"},
+    _ClientRef: {"marker", "known"},
 }
 # Methods that take no argument: server.time()
 _NULLARY = {
@@ -416,7 +430,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known"},
     InventoryView: {"count"},
 }
 _CMP = {

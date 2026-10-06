@@ -25,6 +25,7 @@ import {
   GlobalVariable,
   HttpClient,
   HttpResponse,
+  Ingredient,
   Input,
   ObjectReference,
   Spell,
@@ -404,6 +405,24 @@ function run(step: Step, player: Actor): unknown {
   switch (step.action) {
     case "dump-state":
       return dumpState(player);
+    case "known": {
+      // thuum docs/verbs/learned-effects.md: the effects this player's engine
+      // knows of each ingredient, bit i for effect i, keyed by its decimal
+      // form id (lab-api's c.known(id)); null for a form that is no ingredient
+      const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
+      const out: Record<string, number | null> = {};
+      for (const id of ids) {
+        const ingredient = Ingredient.from(Game.getFormEx(Number(id)));
+        let mask = 0;
+        if (ingredient) {
+          for (let i = 0; i < 4; ++i) {
+            if (ingredient.getIsNthEffectKnown(i)) mask |= 1 << i;
+          }
+        }
+        out[String(Number(id))] = ingredient ? mask : null;
+      }
+      return out;
+    }
     case "markers": {
       // thuum docs/verbs/map-markers.md: whether each map marker shows on
       // this player's map and allows fast travel, keyed by its decimal form
