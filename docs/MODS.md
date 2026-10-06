@@ -200,6 +200,25 @@ What it needs from thuum:
   menu and c2 sees it. It needs:
   - the plugins and assets on the clones through rpool/sky/persist;
   - the RACE's Playable flag, read with lab/esm.py.
+- **First load in a game (2026-10-06, sky-c1, 1.7.104):** the race menu
+  lists Rotfern, and selecting it killed the game while the preview was
+  being built: an access violation in SkyrimSE.exe at RVA 0x96b1b7, a read
+  at 0x8C through a null (ProcDump mini dump, probe 20261006-052250; the
+  preview still showed the previous race with a loading cursor). The likely
+  cause is in the plugin: an audit of every path rotfern.esp names against
+  the fork's files and the vanilla archives found three that still point at
+  RS Children's `ranaline` folder, which the standalone fork dropped: the
+  RACE's male and female skeletons (ANAM, `actors\character\ranaline\character
+  assets\skeletonkids.nif` and `skeleton_female_kids.nif`) and one tint
+  texture (`actors\character\ranaline\child\maleliner.dds`). The fork ships
+  the same files under `actors\character\rotfern\`. The proper fix is to
+  repoint those three paths in the plugin (Eli's mod; never edited here).
+  Until then `just persist-mods` places the fork's own files at the old
+  paths, a lab-only stopgap, which is also the test of this cause.
+- **Rotfern is listed twice in the race menu:** rotfernRaceVampire carries
+  the Playable flag too (RACE DATA flags 0x54a08943), which vanilla vampire
+  races do not; RaceCompatibility maps a race to its vampire twin through its
+  own lists, so the vampire race needs no flag of its own.
 - **Later.** Vampirism (M7) needs the three missing RaceCompatibility natives.
 - **Not carried.** RaceMenu co-save data (sculpt, overlays) is outside SkyMP's
   appearance model.
