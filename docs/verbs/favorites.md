@@ -78,12 +78,14 @@ own client)
   InventoryChanges::SetFavorite 16098, RemoveFavorite 16099,
   MagicFavorites::SetFavorite 52004, RemoveFavorite 52005, the
   MagicFavorites singleton 403337, Actor::HasSpell 38782, HasShout 38783.
-- HYPOTHESIS: `SetFavorite(entry, nullptr)` on an entry with no extra list
-  creates one carrying ExtraHotkey (the engine's own menu path; the native
-  then sets its hotkey); MagicFavorites' layout on 1.7.104 matches the
-  pinned CommonLib (0x10 and 0x28). The scenario reads favorites back
-  through SKSE's functions, which SKSE maintains for each runtime, so a
-  green run confirms both.
+- Confirmed by a-favorites, green on 1.7.104 and 1.6.1170 (runs
+  20261006-083811 and -094342), both read back through SKSE's functions,
+  which SKSE maintains for each runtime: the native marks the kit's dagger,
+  as SkyMP's login rebuild leaves it (no extra data), and binds key 3; and
+  MagicFavorites' arrays sit where the pinned CommonLib has them (0x10 and
+  0x28) on both runtimes (Flames on key 1). Not covered: an item that
+  carries extra data (worn, tempered, enchanted), whose mark goes through
+  its existing extra list.
 
 ## Observe
 
@@ -179,6 +181,8 @@ own client)
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+Not needed: both checks are green on both runtimes. Kept as written:
+
 - If a-favorites' item check fails after the relaunch: lab-driver's dump of
   `GetFavorites()` before and after the client's retry window, and the
   client log's SetFavorite answers, tell an item that never arrived from a
@@ -192,7 +196,7 @@ own client)
 ## Status
 
 - [x] doc complete, rung declared
-- [x] engine surface cited (two HYPOTHESIS tags the scenario settles)
+- [x] engine surface cited (both HYPOTHESIS tags settled by a-favorites)
 - [x] server logic + T0 (fork 934e41e2, b20768a9; ctest FavoritesTest and
       cargo green in pipeline 809)
 - [x] message + validator (same commit, fork 23ce0997, MsgType 38)
@@ -201,6 +205,8 @@ own client)
 - [x] TS handler (fork 799dbbf2, FavoritesService)
 - [x] T2 green (`just test-proto m1-favorites`, 2026-10-06, with the
       favorites difftest session)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T3 scenario green, no HYPOTHESIS tags (a-favorites, thuum 5badb70,
+      awaiting Eli's review; green on 1.7.104 run 20261006-083811 and on
+      1.6.1170 run 20261006-094342)
 - [x] ledger and suppression registry updated (TESModPlatform.GetFavorites
       and SetFavorite rows; nothing suppressed)
