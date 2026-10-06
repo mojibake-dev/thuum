@@ -220,6 +220,11 @@ deploy-srv:
 persist-game:
     @lab/tools/persist-game.sh
 
+# The lab's mod layer into rpool/sky/persist (docs/MODS.md): RaceCompatibility 2.16 from Nexus (md5-checked) and
+# Eli's rotfern from ~/Code/mods/rotfern-skyrim, under mods/ for the clones and their plugins in each esm dir.
+persist-mods:
+    @lab/tools/persist-mods.sh
+
 # Stage the built lab-driver, its settings and the PowerShell helpers into C:\sky-lab on a Windows lab VM
 # through the guest agent (lab/deploy/sky-client/README.md); nothing outside that directory.
 stage-client vmid: build-driver
@@ -320,6 +325,11 @@ client-dist vmid:
 # a cold retake of the clone's snapshot by thuum-mundus.
 client-game vmid version="1.6.1170":
     @lab/tools/client-game.sh {{vmid}} {{version}}
+
+# The lab's mod layer (persist's mods/, just persist-mods) into every game folder on a clone, plugins enabled
+# (add-mods.ps1). After `just client-dist <vmid>`; ends in a snapshot of the clone.
+client-mods vmid:
+    @lab/tools/client-mods.sh {{vmid}}
 
 # A clone's scenario client name and profile id (identity.ps1): the template carries c1 / 1.
 client-identity vmid client profile:

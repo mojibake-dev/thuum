@@ -36,6 +36,22 @@ Third-party mods never enter a repo or a lab image except through
 rpool/sky/persist, like the master files (Nexus terms; docs/PLAN.md,
 distribution track).
 
+The lab's mod layer (2026-10-06) is built by `just persist-mods`
+(lab/tools/persist-mods.sh) from two sources: RaceCompatibility 2.16, the
+archive above fetched with the Keychain's Nexus key and checked against its
+md5, laid out by the installer's manual path for a game without USSEP and
+without vampire or werewolf overhauls ("20 Dawnguard", "20 Dawnguard
+Script", "20 Dawnguard Werewolf Script"; the USSEP override ESP stays out);
+and rotfern's standalone fork from ~/Code/mods/rotfern-skyrim, without its
+backups. It lands in persist's mods/ (one folder per mod in Data layout,
+SHA256SUMS, plugins.txt) and puts the two plugins in each version's esm
+directory, where the server loads them at 07 and 08 after the full-slot
+Creation Club plugins (docs/LAB.md). `just client-mods <vmid>` installs the
+layer into every game folder of a clone and enables the plugins in the lab
+user's plugins.txt. Both rotfern races carry the Playable flag (RACE DATA
+flags 0x50a08943 and 0x54a08943; lab/esm.py), so the server's character
+creation check offers them.
+
 ## Apocalypse - Magic of Skyrim
 
 What it is:

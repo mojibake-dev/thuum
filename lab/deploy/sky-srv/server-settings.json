@@ -10,7 +10,11 @@
     "/srv/skymp/esm/Update.esm",
     "/srv/skymp/esm/Dawnguard.esm",
     "/srv/skymp/esm/HearthFires.esm",
-    "/srv/skymp/esm/Dragonborn.esm"
+    "/srv/skymp/esm/Dragonborn.esm",
+    "/srv/skymp/esm/ccBGSSSE001-Fish.esm",
+    "/srv/skymp/esm/ccBGSSSE025-AdvDSGS.esm",
+    "/srv/skymp/esm/RaceCompatibility.esm",
+    "/srv/skymp/esm/rotfern.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",

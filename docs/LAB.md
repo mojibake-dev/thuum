@@ -266,11 +266,18 @@ where (real since 2026-10-01):
    ccBGSSSE025-AdvDSGS.esm), then _ResourcePack.esl. The five extra files
    (2.6 MB in all, identical on every Steam install) sit in
    rpool/sky/persist/esm beside the masters since 2026-10-01, pulled off
-   sky-c1 through the guest agent. They are not in the server's loadOrder
-   yet: libespm has no light-plugin (.esl) handling, so the server would
-   give those records full load indices where the client compacts them into
-   the FE space, and form ids would disagree. Load-order parity therefore
-   waits on ESL support in libespm, a port item.
+   sky-c1 through the guest agent. Two of the four Creation Club files are
+   not light: ccBGSSSE001-Fish.esm and ccBGSSSE025-AdvDSGS.esm carry header
+   flags 0x81 (master, localized; no 0x200), depend only on the five masters
+   and are byte-identical across 1.6.1170 and 1.7.104, so they take full
+   slots 05 and 06 on every client. Since 2026-10-06 the server loads them
+   there too, then the lab's mod layer (`just persist-mods`, docs/MODS.md):
+   RaceCompatibility.esm at 07 and rotfern.esp at 08, so form ids agree for
+   every full-slot plugin and skymp5-client's check (name, size and CRC32
+   per slot) matches exactly instead of warning. The light ones
+   (SurvivalMode, Curios, _ResourcePack) live in the FE space, which no
+   full slot depends on; they stay client-only until libespm handles light
+   plugins (a port item), since the server would give them full indices.
    Also open: Skyrim Platform logs "on('update'): failed to get key 'data':
    failed to call custom Serialize for type struct Equipment: ... class
    Inventory" once per login on the 1.7.104 client (c1.log of run
