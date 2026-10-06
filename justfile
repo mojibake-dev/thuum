@@ -208,7 +208,9 @@ deploy-srv:
     set -euo pipefail
     host=eli@10.10.70.10
     {{srv_ssh}} "$host" 'mkdir -p /srv/lab/thuum/lab /srv/lab/server/data /srv/lab/server/world /srv/lab/snapshots'
-    rsync -az --delete -e "{{srv_ssh}}" --exclude node_modules --exclude .venv --exclude build --exclude __pycache__ --exclude results --exclude frida/uploads lab/ "$host:/srv/lab/thuum/lab/"
+    # not lab/.cache: the tools read it on this Mac and ship what a clone needs over their own hop, and the
+    # third-party files in it reach the lab only through persist (docs/MODS.md)
+    rsync -az --delete -e "{{srv_ssh}}" --exclude node_modules --exclude .venv --exclude build --exclude __pycache__ --exclude results --exclude frida/uploads --exclude .cache lab/ "$host:/srv/lab/thuum/lab/"
     rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/docker-compose.yml "$host:/srv/lab/docker-compose.yml"
     rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/server-settings.json "$host:/srv/lab/server/server-settings.json"
     {{srv_ssh}} "$host" 'test -f /srv/lab/.env || { cp /srv/lab/thuum/lab/deploy/sky-srv/env.example /srv/lab/.env; echo "NOTE: /srv/lab/.env created from env.example; fill PVE_TOKEN_SECRET by hand"; }'
