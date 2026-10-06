@@ -300,6 +300,15 @@ it carries a HYPOTHESIS tag.
   test 2 in the server log, more of Eli's own after. Eli's call: closed; if
   it came from `just playtest-start` moving a player right after a wait, that
   is lab tooling, not a player's path, and not worth code (docs/verbs/rest.md).
+- From Eli's fifth T4 playtest (2026-10-05, docs/private/playtest-m1-5.md),
+  the map-markers verb (docs/verbs/map-markers.md, fork m1-map-markers).
+  Passed: each player's discoveries (test 2 a fort and a wheat mill, test 1 a
+  Dawnguard shack) came back on its own map after the game was quit and
+  started again, twice, and never on the other's; the server showed them
+  after the login ("a map update"). A discovery made after a console COC was
+  refused (E_MARKER_NONE): the server never took the console teleport, so it
+  judged the report at the player's old position, as server authority
+  should; a COC the server honors belongs to the console-commands verb.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as

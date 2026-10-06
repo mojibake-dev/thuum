@@ -77,8 +77,9 @@ own client)
     marker, the server's re-show was followed by no report (run
     20261005-223339). Next to it the engine rediscovers the marker by
     itself (run 20261005-222936).
-- Open, for a playtest: whether AddToMap at login shows a HUD message per
-  marker.
+- AddToMap at login shows the game's map-update message (Eli's fifth
+  playtest, 2026-10-05: test 2, with two recorded markers, saw "a map update";
+  test 1, spawned next to its marker, saw the engine's own "Discovered").
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -169,8 +170,9 @@ own client)
 1. Discovery range: done, probe x-marker-range (run 20261005-222458):
    hidden at 6000, 4000 and 3000 units, shown with fast travel from 2000 in.
 2. AddToMap at login: done for one marker (a-map-markers, runs
-   20261005-223339 on 1.7.104 and 20261005-223747 on 1.6.1170). A HUD message per
-   marker and the time fifty take are a playtest's to see.
+   20261005-223339 on 1.7.104 and 20261005-223747 on 1.6.1170) and for two in
+   the fifth playtest, where it showed a map-update message. The time fifty
+   take is not measured.
 3. AddToMap(true) then canFastTravelToMarker(): true after the relaunch
    (the scenario's last markers step).
 
