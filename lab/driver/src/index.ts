@@ -89,6 +89,7 @@ let crafting: {
   result: number;
   count: number;
   startedAt: number;
+  held?: number[];
   removedAt?: number;
   closeAt?: number;
 } | null = null;
@@ -427,6 +428,19 @@ function finishCraft(c: Config, player: Actor): void {
     const furniture = player.getFurnitureReference();
     if (furniture) {
       if (k.removedAt === undefined) {
+        // A player crafts only what it holds: the server's give can reach the
+        // client's inventory after the craft step starts, and removing an
+        // item it does not hold fires no event, so skymp5-client sent a craft
+        // without the leather strip and the server found no recipe (runs
+        // 20261006-034306 and 20261006-051325-m0-forge).
+        const held = k.ingredients.map(([id]) => player.getItemCount(Game.getFormEx(id)));
+        if (k.ingredients.some(([, count], i) => held[i] < count)) {
+          if (Date.now() - k.startedAt < CRAFT_WAIT_MS) return;
+          crafting = null;
+          postResult(c, k.step, { ok: false, error: `ingredients not held ${CRAFT_WAIT_MS} ms after the craft began: ${JSON.stringify(k.ingredients)}, held ${JSON.stringify(held)}` });
+          return;
+        }
+        k.held = held;
         for (const [id, count] of k.ingredients) player.removeItem(Game.getFormEx(id), count, true, null);
         k.removedAt = Date.now();
         return;
@@ -434,7 +448,7 @@ function finishCraft(c: Config, player: Actor): void {
       if (Date.now() - k.removedAt < CRAFT_SETTLE_MS) return;
       player.addItem(Game.getFormEx(k.result), k.count, true);
       k.closeAt = Date.now() + 2000;
-      postResult(c, k.step, { ok: true, data: { result: k.result, ingredients: k.ingredients, furniture: furniture.getFormID(), waitedMs: Date.now() - k.startedAt } });
+      postResult(c, k.step, { ok: true, data: { result: k.result, ingredients: k.ingredients, held: k.held, furniture: furniture.getFormID(), waitedMs: Date.now() - k.startedAt } });
     } else if (Date.now() - k.startedAt > CRAFT_WAIT_MS) {
       crafting = null;
       postResult(c, k.step, { ok: false, error: `not in the station's furniture ${CRAFT_WAIT_MS} ms after activating it` });
