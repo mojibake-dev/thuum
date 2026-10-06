@@ -771,8 +771,20 @@ class Runner:
             return
         (rec.dir / "frida").mkdir(exist_ok=True)
         name = f"{client}-{script}{suffix}.jsonl"
+        # frida-inject's stdout, still open for writing while the game runs:
+        # the agent's file-read cannot open it then (run 20261006-183431,
+        # E_PVE_FILE "being used by another process"), a read that shares
+        # write access can, so it is copied that way first
+        out = f"{self.s.client_lab_dir}\\frida\\{script}.out"
+        copy = f"{out}.copy"
         try:
-            text = await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\frida\\{script}.out")  # frida-inject's stdout
+            cmd = ["powershell", "-NoProfile", "-Command",
+                   f"$s = [IO.File]::Open('{out}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $d.Close(); $s.Close()"]
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            if res.exitcode != 0:
+                rec.notes.append(f"frida {script}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
+                return
+            text = await asyncio.to_thread(self.control.file_read, g, copy)
             (rec.dir / "frida" / name).write_text(text)
             rec.artifacts.append(f"frida/{name}")
         except ProxmoxError as e:

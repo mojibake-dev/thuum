@@ -392,9 +392,14 @@ class FridaTraces(RunTests):
         self.assertIn("frida/c1-handle-trace.js.before-run.jsonl", body["artifacts"])
         run_dir = self.tmp / "results" / run_id
         self.assertEqual((run_dir / "frida" / "c1-handle-trace.js.before-run.jsonl").read_text(), '{"attached":1}\n')
-        reads = [i for i, c in enumerate(pve.calls) if c[:3] == ("file_read", 901, out)]
+        # read through a shared-read copy: frida-inject still writes the file
+        # while the game runs (run 20261006-183431)
+        copies = [i for i, c in enumerate(pve.calls) if c[:2] == ("exec", 901) and any(out in a and "ReadWrite" in a for a in c[2])]
+        reads = [i for i, c in enumerate(pve.calls) if c[:3] == ("file_read", 901, out + ".copy")]
         rollback = next(i for i, c in enumerate(pve.calls) if c[:2] == ("rollback", 901))
+        self.assertEqual(len(copies), 1, pve.calls)
         self.assertEqual(len(reads), 1, pve.calls)  # once, though started twice
+        self.assertLess(copies[0], reads[0])
         self.assertLess(reads[0], rollback)
         self.assertEqual(runner.frida_started, [])
         self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))

@@ -6,6 +6,7 @@ answers the labState and labCommand RPCs over an httpx mock transport
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -56,6 +57,10 @@ class FakeProxmox:
 
     def exec(self, guest: Guest, command: list[str], timeout: float) -> ExecResult:
         self.calls.append(("exec", guest.vmid, tuple(command)))
+        # the runner's shared-read copy of a file another process still writes
+        copied = re.search(r"\[IO\.File\]::Open\('([^']+)'.*\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
+        if copied and copied.group(1) in self.files:
+            self.files[copied.group(2)] = self.files[copied.group(1)]
         if any("Get-Process SkyrimSE" in c for c in command):
             # a guest agent too busy to answer, this many times first
             if self.game_misses > 0:
