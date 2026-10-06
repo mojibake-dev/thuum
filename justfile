@@ -122,6 +122,15 @@ test-labapi:
 labapi-dev:
     @uv run --project lab/labapi labapi-dev
 
+# A cold stacked snapshot clean-m1-<x> of a lab client, through lab-api (thuum-mundus's recipe: quiesce, a clean
+# ACPI shutdown, snapshot without RAM, start, agent check; sky-c1 and sky-c2 only, never clean-sp).
+client-snapshot client name:
+    @curl -fsS -m 900 -X POST "{{lab_api}}/clients/{{client}}/snapshot" -H 'content-type: application/json' -d '{"name": "{{name}}"}'
+
+# Promote a stacked snapshot onto its base (clean-m1-<x> onto clean-m1, bit-identical), through lab-api.
+client-promote client from to="clean-m1":
+    @curl -fsS -m 900 -X POST "{{lab_api}}/clients/{{client}}/promote" -H 'content-type: application/json' -d '{"from": "{{from}}", "to": "{{to}}"}'
+
 # Run a Frida trace script on a lab client through lab-api.
 frida script client:
     @curl -fsS -X POST "{{lab_api}}/frida" -F "client={{client}}" -F "file=@{{script}}"

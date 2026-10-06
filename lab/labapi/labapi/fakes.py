@@ -28,6 +28,12 @@ class FakeProxmox:
         # Steam folder's exe at the default version unless a test says otherwise
         self.game = ExecResult(0, "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\SkyrimSE.exe\r\n1.7.104.0\r\n", "")
         self.game_misses = 0
+        # self-service snapshots: each clone's snapshot tree as PVE lists it,
+        # `current` included; a shutdown's exit status and task log
+        self.snaps: dict[int, list[dict[str, Any]]] = {}
+        self.shutdown_status = "OK"
+        self.shutdown_log = ["shutdown VM: guest agent stopped the VM", "TASK OK"]
+        self.agent_up = True
 
     def stop(self, guest: Guest) -> None:
         self.calls.append(("stop", guest.vmid))
@@ -53,6 +59,36 @@ class FakeProxmox:
                 raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: qga command 'guest-exec' failed - got timeout")
             return self.game
         return self.exec_result
+
+    def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]:
+        self.calls.append(("shutdown", guest.vmid, timeout_s))
+        if self.shutdown_status == "OK":
+            self.statuses[guest.vmid] = "stopped"
+        return self.shutdown_status, list(self.shutdown_log)
+
+    def snapshots(self, guest: Guest) -> list[dict[str, Any]]:
+        self.calls.append(("snapshots", guest.vmid))
+        return [dict(e) for e in self.snaps.get(guest.vmid, [])]
+
+    def snapshot_create(self, guest: Guest, name: str, description: str) -> None:
+        self.calls.append(("snapshot_create", guest.vmid, name))
+        tree = self.snaps.setdefault(guest.vmid, [{"name": "current", "parent": None}])
+        current = next(e for e in tree if e["name"] == "current")
+        tree.insert(len(tree) - 1, {"name": name, "parent": current["parent"], "description": description})
+        current["parent"] = name
+
+    def snapshot_delete(self, guest: Guest, name: str) -> None:
+        self.calls.append(("snapshot_delete", guest.vmid, name))
+        tree = self.snaps.get(guest.vmid, [])
+        gone = next(e for e in tree if e["name"] == name)
+        for e in tree:
+            if e.get("parent") == name:
+                e["parent"] = gone.get("parent")
+        tree.remove(gone)
+
+    def agent_ping(self, guest: Guest) -> bool:
+        self.calls.append(("agent_ping", guest.vmid))
+        return self.agent_up
 
     def file_read(self, guest: Guest, path: str) -> str:
         self.calls.append(("file_read", guest.vmid, path))

@@ -400,7 +400,16 @@ degrees, 180 radians (run 20261003-083828). Until the client converts, a
 scenario that needs a heading uses 0 (north, the same in both units) and
 places the other actor accordingly.
 `screenshot` is a guest exec on a managed client (request-screenshot is
-the in-game fallback). `relaunch` is too: the player quits the game and starts it again (the
+the in-game fallback). Two lab-api endpoints replace the snapshot round trips to thuum-mundus
+(2026-10-05, their recipe and guardrails): `POST /lab/clients/<c>/snapshot
+{name}` takes a cold stacked `clean-m1-<x>` (quiesce, a clean ACPI shutdown
+whose task log holds no timeout or forced stop, a snapshot without RAM,
+start, guest agent check, and proof the snapshot is the newest), and `POST
+/lab/clients/<c>/promote {from, to}` makes `to` (clean-m1) bit-identical to
+the stacked `from` on top of it. Only sky-c1 and sky-c2, only clean-m1
+names, never clean-sp; no run starts while one is in progress (`just
+client-snapshot c1 clean-m1-x`, `just client-promote c1 clean-m1-x`).
+`relaunch` is too: the player quits the game and starts it again (the
 guest agent stops the game and starts the sky-lab-launch task), and the
 step holds until the new process polls, answers a dump-state in game and
 is back on the server's online list. It is how a scenario gets a fresh

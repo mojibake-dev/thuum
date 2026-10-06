@@ -189,6 +189,14 @@ class Settings:
         "Start-Sleep -Seconds 3; Start-ScheduledTask -TaskName sky-lab-launch"
     )
     relaunch_timeout_s: float = 300.0
+    # Before a self-service snapshot (proxmox.GuestControl.snapshot_clone):
+    # stop the game, its loader and Windows Error Reporting, and any running
+    # sky-lab task, so the clone shuts down quiet (thuum-mundus's recipe).
+    quiesce_cmd: str = (
+        "Get-Process SkyrimSE, skse64_loader, WerFault -ErrorAction SilentlyContinue | Stop-Process -Force; "
+        "Get-ScheduledTask -TaskName 'sky-lab*' -ErrorAction SilentlyContinue | "
+        "Where-Object { $_.State -eq 'Running' } | Stop-ScheduledTask"
+    )
     time_scale: float = 1.0
     extra: dict = field(default_factory=dict)
 

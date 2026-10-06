@@ -7,7 +7,7 @@ with the one rule that matters: an unmanaged guest is never touched."""
 from __future__ import annotations
 
 import logging
-
+import re
 import time
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -15,6 +15,19 @@ from typing import Any, Protocol
 from .guests import Guest
 
 FILE_READ_MAX = 16 * 1024 * 1024  # the guest-agent file-read cap
+
+# Self-service snapshots and promotes of the lab clients (thuum-mundus's
+# recipe and guardrails, 2026-10-05, mirroring `sky-lab client baseline` and
+# `promote`): only these clones, only clean-m1 names, never clean-sp. The
+# PVE snapshot list proves "newest" only because sanoid exempts these clone
+# volumes; a new clone VMID goes to thuum-mundus first for that exemption.
+SNAPSHOT_CLIENTS = frozenset({711, 712})
+_STACKED = re.compile(r"^clean-m1-[a-z0-9][a-z0-9-]*$")
+SHUTDOWN_TIMEOUT_S = 180
+# A shutdown task's log line that means it was not a clean ACPI shutdown: a
+# timeout, or a forced or signalled stop ("got timeout", "timed out",
+# "forcing stop", "terminating now with SIGTERM").
+_UNCLEAN = re.compile(r"timeout|timed out|forc|terminat|sigterm|sigkill", re.IGNORECASE)
 
 
 log = logging.getLogger("labapi.proxmox")
@@ -37,6 +50,12 @@ class ProxmoxGuests(Protocol):
     def status(self, guest: Guest) -> str: ...
     def exec(self, guest: Guest, command: list[str], timeout: float) -> ExecResult: ...
     def file_read(self, guest: Guest, path: str) -> str: ...
+    # an ACPI shutdown: the task's exit status and its log lines
+    def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]: ...
+    def snapshots(self, guest: Guest) -> list[dict[str, Any]]: ...
+    def snapshot_create(self, guest: Guest, name: str, description: str) -> None: ...
+    def snapshot_delete(self, guest: Guest, name: str) -> None: ...
+    def agent_ping(self, guest: Guest) -> bool: ...
 
 
 class GuestControl:
@@ -106,6 +125,88 @@ class GuestControl:
         self.rollback(guest, snapshot)
         self.start(guest)
 
+    # ----- self-service snapshots (thuum-mundus's recipe) --------------------
+
+    def _snapshot_guard(self, guest: Guest, *names: str) -> None:
+        self._managed(guest, "snapshot")
+        if guest.vmid not in SNAPSHOT_CLIENTS:
+            raise ProxmoxError(f"E_PVE_GUARD: {guest.name} ({guest.vmid}) is not a lab client clone lab-api may snapshot")
+        for n in names:
+            if n == "clean-sp" or not (n == "clean-m1" or _STACKED.match(n)):
+                raise ProxmoxError(f"E_PVE_GUARD: {n!r} is not clean-m1 or clean-m1-<name>")
+
+    @staticmethod
+    def _children(snaps: list[dict[str, Any]], name: str) -> list[str]:
+        return sorted(str(s.get("name")) for s in snaps if s.get("parent") == name)
+
+    @staticmethod
+    def _parent(snaps: list[dict[str, Any]], name: str) -> str | None:
+        return next((s.get("parent") for s in snaps if s.get("name") == name), None)
+
+    def _await_agent(self, guest: Guest, boot_timeout: float) -> None:
+        deadline = time.monotonic() + boot_timeout
+        while time.monotonic() < deadline:
+            if self._call("E_PVE_AGENT", guest, self._b.agent_ping, guest):
+                return
+            time.sleep(2.0)
+        raise ProxmoxError(f"E_PVE_AGENT: {guest.name}'s guest agent did not answer within {boot_timeout:g}s of the start")
+
+    def snapshot_clone(self, guest: Guest, name: str, description: str, quiesce_cmd: str, exec_timeout: float, boot_timeout: float) -> dict[str, Any]:
+        """A cold stacked snapshot `name` (clean-m1-<x>) of a lab client:
+        quiesce (stop the game and the lab tasks), a clean ACPI shutdown (its
+        task log must hold no timeout or force line), replace `name` if it is
+        a leaf, snapshot without RAM, start, wait for the guest agent, and
+        prove `name` is the newest (its only child is `current`)."""
+        self._snapshot_guard(guest, name)
+        if not _STACKED.match(name):
+            raise ProxmoxError(f"E_PVE_GUARD: snapshot takes a stacked name, clean-m1-<x>; {name!r} comes only from a promote")
+        self.exec(guest, ["powershell", "-NoProfile", "-Command", quiesce_cmd], exec_timeout)
+        status, lines = self._call("E_PVE_SHUTDOWN", guest, self._b.shutdown, guest, SHUTDOWN_TIMEOUT_S)
+        unclean = [ln for ln in lines if _UNCLEAN.search(ln)]
+        if status != "OK" or unclean or self.status(guest) != "stopped":
+            self.start(guest)  # back as it was, with no snapshot taken
+            raise ProxmoxError(f"E_PVE_SHUTDOWN: {guest.name}: not a clean ACPI shutdown ({status}; {'; '.join(unclean[:2]) or 'no log line'}); no snapshot taken")
+        snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+        if any(s.get("name") == name for s in snaps):
+            kids = [c for c in self._children(snaps, name) if c != "current"]
+            if kids:
+                self.start(guest)
+                raise ProxmoxError(f"E_PVE_GUARD: {name} on {guest.name} has later snapshots ({', '.join(kids)}); not replaced")
+            self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, name)
+        self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_create, guest, name, description)
+        self.start(guest)
+        self._await_agent(guest, boot_timeout)
+        snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+        kids = self._children(snaps, name)
+        if kids != ["current"]:
+            raise ProxmoxError(f"E_PVE_SNAPSHOT: {name} on {guest.name} is not the newest after the snapshot (children {kids})")
+        return {"ok": True, "guest": guest.name, "snapshot": name, "parent": self._parent(snaps, name)}
+
+    def promote_clone(self, guest: Guest, frm: str, to: str, boot_timeout: float) -> dict[str, Any]:
+        """Make `to` (clean-m1) bit-identical to the stacked `frm` on top of
+        it: `frm` must be the newest and `to` its parent; stop, roll back to
+        `frm`, delete `frm`, delete `to`, snapshot `to` while stopped, start,
+        wait for the guest agent."""
+        self._snapshot_guard(guest, frm, to)
+        if not _STACKED.match(frm) or frm == to:
+            raise ProxmoxError(f"E_PVE_GUARD: promote takes a stacked clean-m1-<x> onto its parent; got {frm!r} onto {to!r}")
+        snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+        if self._children(snaps, frm) != ["current"]:
+            raise ProxmoxError(f"E_PVE_GUARD: {frm} is not the newest snapshot on {guest.name}")
+        if self._parent(snaps, frm) != to:
+            raise ProxmoxError(f"E_PVE_GUARD: {frm} on {guest.name} is not stacked on {to} (its parent is {self._parent(snaps, frm)})")
+        self.stop(guest)
+        self.rollback(guest, frm)
+        self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, frm)
+        self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, to)
+        self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_create, guest, to, f"promoted from {frm} by lab-api")
+        self.start(guest)
+        self._await_agent(guest, boot_timeout)
+        snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+        if self._children(snaps, to) != ["current"]:
+            raise ProxmoxError(f"E_PVE_SNAPSHOT: {to} on {guest.name} is not the newest after the promote")
+        return {"ok": True, "guest": guest.name, "promoted": frm, "to": to, "parent": self._parent(snaps, to)}
+
 
 class ProxmoxerGuests:
     """The real backend. Imported lazily so tests run without proxmoxer."""
@@ -129,15 +230,19 @@ class ProxmoxerGuests:
         return node.qemu(guest.vmid) if guest.kind == "qemu" else node.lxc(guest.vmid)
 
     def _wait_task(self, upid: str) -> None:
-        deadline = time.monotonic() + self._task_timeout
+        status = self._task_end(upid, self._task_timeout)
+        if status != "OK":
+            raise ProxmoxError(f"E_PVE_TASK: {upid} ended with {status}")
+
+    def _task_end(self, upid: str, timeout: float) -> str:
+        """A task's exit status once it stopped."""
+        deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             st = self._api.nodes(self._node).tasks(upid).status.get()
             if st.get("status") == "stopped":
-                if st.get("exitstatus") != "OK":
-                    raise ProxmoxError(f"E_PVE_TASK: {upid} ended with {st.get('exitstatus')}")
-                return
+                return str(st.get("exitstatus"))
             time.sleep(0.5)
-        raise ProxmoxError(f"E_PVE_TASK: {upid} did not finish in {self._task_timeout}s")
+        raise ProxmoxError(f"E_PVE_TASK: {upid} did not finish in {timeout}s")
 
     def stop(self, guest: Guest) -> None:
         self._wait_task(self._res(guest).status.stop.post())
@@ -178,6 +283,28 @@ class ProxmoxerGuests:
             time.sleep(0.5)
         why = f"; last exec-status error {type(last).__name__}: {str(last)[:200]}" if last else ""
         raise ProxmoxError(f"E_PVE_EXEC: pid {pid} on {guest.name} did not exit in {timeout}s{why}")
+
+    def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]:
+        upid = self._res(guest).status.shutdown.post(timeout=timeout_s)
+        status = self._task_end(upid, timeout_s + 60)
+        lines = [str(e.get("t", "")) for e in self._api.nodes(self._node).tasks(upid).log.get(limit=500)]
+        return status, lines
+
+    def snapshots(self, guest: Guest) -> list[dict[str, Any]]:
+        return list(self._res(guest).snapshot.get())
+
+    def snapshot_create(self, guest: Guest, name: str, description: str) -> None:
+        self._wait_task(self._res(guest).snapshot.post(snapname=name, description=description, vmstate=0))
+
+    def snapshot_delete(self, guest: Guest, name: str) -> None:
+        self._wait_task(self._res(guest).snapshot(name).delete())
+
+    def agent_ping(self, guest: Guest) -> bool:
+        try:
+            self._res(guest).agent.ping.post()
+            return True
+        except Exception:  # not up yet: proxmoxer's ResourceException or a requests error
+            return False
 
     def file_read(self, guest: Guest, path: str) -> str:
         r = self._res(guest).agent("file-read").get(file=path)

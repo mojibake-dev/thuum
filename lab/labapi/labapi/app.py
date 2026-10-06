@@ -83,11 +83,16 @@ def create_app(services: Services) -> FastAPI:
         return response
 
     def _busy() -> JSONResponse:
+        if runner.maintenance:
+            return JSONResponse({"error": f"E_RUN_BUSY: {runner.maintenance} in progress"}, status_code=409)
         return JSONResponse({"error": f"E_RUN_BUSY: run {runner.active.run_id if runner.active else '?'} is active"}, status_code=409)
+
+    def _idle() -> bool:
+        return runner.active is None and runner.maintenance is None
 
     @router.post("/up")
     async def up():
-        if runner.active:
+        if not _idle():
             return _busy()
         try:
             return await runner.up()
@@ -96,7 +101,7 @@ def create_app(services: Services) -> FastAPI:
 
     @router.post("/down")
     async def down():
-        if runner.active:
+        if not _idle():
             return _busy()
         try:
             return await runner.down()
@@ -117,7 +122,7 @@ def create_app(services: Services) -> FastAPI:
         version = game or sc.game
         if version is not None and version not in s.game_versions():
             raise HTTPException(400, f"E_GAME: unknown game version {version!r}; the lab plays {', '.join(s.game_versions())}")
-        if runner.active:
+        if not _idle():
             return _busy()
         rec = runner.prepare(sc, game)
         task = asyncio.create_task(runner.execute(rec))
@@ -153,6 +158,47 @@ def create_app(services: Services) -> FastAPI:
 
     # The client's logon launcher asks which game version to start (ADR-022):
     # the active run's, else the default. It keeps one game folder per version.
+    # Self-service cold snapshots and promotes of a lab client (thuum-mundus's
+    # recipe and guardrails in proxmox.GuestControl): POST
+    # /clients/<c>/snapshot {name, description?} takes a stacked clean-m1-<x>;
+    # POST /clients/<c>/promote {from, to} makes `to` bit-identical to it.
+    # Minutes long; no run starts meanwhile.
+    async def _maintain(what: str, fn, *args):
+        if not _idle():
+            return _busy()
+        runner.maintenance = what
+        try:
+            return await asyncio.to_thread(fn, *args)
+        except ProxmoxError as e:
+            return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+        finally:
+            runner.maintenance = None
+
+    def _client_guest(client: str):
+        g = runner.tables.guest_for_client(client)
+        if g is None:
+            raise HTTPException(404, f"no guest plays client {client}")
+        return g
+
+    @router.post("/clients/{client}/snapshot")
+    async def client_snapshot(client: str, request: Request):
+        body = await request.json()
+        if not isinstance(body, dict) or not isinstance(body.get("name"), str):
+            raise HTTPException(400, "body must be {name, description?}")
+        g = _client_guest(client)
+        description = str(body.get("description") or f"{body['name']} by lab-api")
+        return await _maintain(f"snapshot {body['name']} of {g.name}", services.control.snapshot_clone, g, body["name"],
+                               description, s.quiesce_cmd, s.guest_task_timeout_s, s.heartbeat_timeout_s)
+
+    @router.post("/clients/{client}/promote")
+    async def client_promote(client: str, request: Request):
+        body = await request.json()
+        if not isinstance(body, dict) or not isinstance(body.get("from"), str) or not isinstance(body.get("to"), str):
+            raise HTTPException(400, "body must be {from, to}")
+        g = _client_guest(client)
+        return await _maintain(f"promote {body['from']} to {body['to']} on {g.name}", services.control.promote_clone, g,
+                               body["from"], body["to"], s.heartbeat_timeout_s)
+
     @router.get("/game")
     async def game_version(client: str):
         return {"client": client, "version": runner.game_for(client)}

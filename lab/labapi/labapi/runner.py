@@ -96,12 +96,16 @@ class Runner:
         self.active: RunRecord | None = None
         self.netem_active = False
         self.frida_started: list[tuple[str, str]] = []  # (client, script name)
+        # a snapshot or promote in progress (app.py); no run starts meanwhile
+        self.maintenance: str | None = None
 
     # ----- public -------------------------------------------------------------
 
     def prepare(self, scenario: Scenario, game: str | None = None) -> RunRecord:
         if self.active is not None:
             raise RunnerError(f"E_RUN_BUSY: run {self.active.run_id} is active")
+        if self.maintenance is not None:
+            raise RunnerError(f"E_RUN_BUSY: {self.maintenance} in progress")
         version = game or scenario.game or self.s.game_default
         if version not in self.s.game_versions():
             raise RunnerError(f"E_RUN_GAME: unknown game version {version!r}; the lab plays {', '.join(self.s.game_versions())}")
