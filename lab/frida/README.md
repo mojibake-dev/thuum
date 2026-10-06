@@ -31,6 +31,11 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   closed (lab/deploy/sky-client/README.md, "The game's traffic outside the
   lab"). Pair it with Sysinternals Handle (`handle64 -s -p <pid>`, staged in
   C:\sky-lab\tools) to pick the leaking type first.
+- console-trace.js: every line the game's console prints, timed. Skyrim
+  Platform's printConsole and its JavaScript exceptions end there, so a run
+  keeps skymp5-client's own trace lines (logTrace, logError) and each item
+  an inventory apply adds. Hooks RE::ConsoleLog::VPrint at its Address
+  Library offset for the exe's own file version (1.6.1170 and 1.7.104).
 
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as
