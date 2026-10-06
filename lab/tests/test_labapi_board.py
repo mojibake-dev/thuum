@@ -36,6 +36,14 @@ class BoardTests(unittest.TestCase):
             board.complete(stop.id, {"ok": True, "data": {"actors": [{"formId": 1, "maxDisplacement": 2.0}]}})
             self.assertEqual(board.watch("c1")["actors"][0]["maxDisplacement"], 2.0)
             self.assertIn("sees", board.view("c1"))
+            # held results are kept per client and cleared with the views
+            held = board.enqueue("c1", "held", {"ids": [524516]})
+            board.poll("c1")
+            board.complete(held.id, {"ok": True, "data": {"524516": {"game": 0, "sent": 1}}})
+            self.assertEqual(board.held("c1")["524516"], {"game": 0, "sent": 1})
+            self.assertIsNone(board.held("c2"))
+            board.clear_views()
+            self.assertIsNone(board.held("c1"))
             # a timed-out step is cancelled and a late result is ignored
             late = board.enqueue("c1", "connect")
             board.poll("c1")

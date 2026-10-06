@@ -342,6 +342,46 @@ class FavoriteTests(unittest.TestCase):
             ev.evaluate("c2.favorite(0x1397E) == 2")
 
 
+class HeldViews(NearViews):
+    """c1's last held step: one iron ingot in its game and in what the server
+    sent; a leather strip the server sent that its game does not hold; a
+    steel sword before any inventory arrived."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {
+            str(0x5ACE4): {"game": 1, "sent": 1},
+            str(0x800E4): {"game": 0, "sent": 1},
+            str(0x13989): {"game": 0, "sent": None},
+        }}
+
+    def held(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class HeldTests(unittest.TestCase):
+    def test_held_reads_the_game_and_the_sent_counts(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), HeldViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.held(0x5ACE4).game == 1"))
+        self.assertTrue(ev.evaluate("c1.held(0x800E4).sent == 1"))
+        self.assertTrue(ev.evaluate("c1.held(0x800E4).game == 0"))
+
+    def test_no_inventory_sent_yet_reads_minus_one(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), HeldViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.held(0x13989).sent == -1"))
+
+    def test_an_unread_form_or_client_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), HeldViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.held(0x1).game == 0")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.held(0x5ACE4).game == 1")
+
+
 @needs_deps
 class WatchTests(unittest.TestCase):
     def test_watched_matches_the_server_position_and_reports_the_farthest_point(self):

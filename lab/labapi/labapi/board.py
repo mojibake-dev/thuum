@@ -43,6 +43,8 @@ class StepBoard:
         self._known: dict[str, dict[str, Any]] = {}
         # a favorites step's answer: form id (decimal) -> hotkey, -1 none, -2 no favorite
         self._favorites: dict[str, dict[str, Any]] = {}
+        # a held step's answer: form id (decimal) -> {game, sent} counts
+        self._held: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
 
     # lab-driver side ---------------------------------------------------------
@@ -75,6 +77,8 @@ class StepBoard:
             self._known[step.client] = body["data"]
         if step.action == "favorites" and isinstance(body.get("data"), dict):
             self._favorites[step.client] = body["data"]
+        if step.action == "held" and isinstance(body.get("data"), dict):
+            self._held[step.client] = body["data"]
         step.done.set()
         return True
 
@@ -137,12 +141,16 @@ class StepBoard:
     def favorites(self, observer: str) -> dict[str, Any] | None:
         return self._favorites.get(observer)
 
+    def held(self, observer: str) -> dict[str, Any] | None:
+        return self._held.get(observer)
+
     def clear_views(self) -> None:
         self._views.clear()
         self._watches.clear()
         self._markers.clear()
         self._known.clear()
         self._favorites.clear()
+        self._held.clear()
 
     def clear(self, client: str | None = None) -> None:
         if client is None:
