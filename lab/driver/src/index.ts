@@ -423,6 +423,36 @@ function run(step: Step, player: Actor): unknown {
       }
       return out;
     }
+    case "favorite": {
+      // thuum docs/verbs/favorites.md: mark a favorite as the player would in
+      // its menus, through the native the client's login marks with
+      // (TESModPlatform.SetFavorite): {form, hotkey}, hotkey -1 for none
+      const f = Game.getFormEx(num(a.form));
+      if (!f) throw new Error(`no form ${num(a.form).toString(16)}`);
+      if (callNative("TESModPlatform", "SetFavorite", undefined, f, num(a.hotkey, -1)) !== true) {
+        throw new Error(`SetFavorite refused ${num(a.form).toString(16)}`);
+      }
+      return { marked: true };
+    }
+    case "favorites": {
+      // thuum docs/verbs/favorites.md: each form's favorite state as SKSE
+      // reads it (Game.isObjectFavorited, Game.getHotkeyBoundObject over the
+      // eight keys), never through the verb's own native: the key it is
+      // bound to, -1 for a favorite without one, -2 for none, keyed by its
+      // decimal form id (lab-api's c.favorite(id))
+      const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
+      const bound: number[] = [];
+      for (let k = 0; k < 8; ++k) {
+        const f = Game.getHotkeyBoundObject(k);
+        bound.push(f ? f.getFormID() : 0);
+      }
+      const out: Record<string, number> = {};
+      for (const id of ids) {
+        const f = Game.getFormEx(Number(id));
+        out[String(Number(id))] = f && Game.isObjectFavorited(f) ? bound.indexOf(f.getFormID()) : -2;
+      }
+      return out;
+    }
     case "markers": {
       // thuum docs/verbs/map-markers.md: whether each map marker shows on
       // this player's map and allows fast travel, keyed by its decimal form

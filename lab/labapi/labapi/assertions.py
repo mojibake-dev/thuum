@@ -50,6 +50,7 @@ class ViewsFacade(Protocol):
     def watch(self, observer: str) -> dict[str, Any] | None: ...
     def markers(self, observer: str) -> dict[str, Any] | None: ...
     def known(self, observer: str) -> dict[str, Any] | None: ...
+    def favorites(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -350,6 +351,20 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s known step did not read {int(ref_id):#x}")
         return mask
 
+    def favorite(self, ref_id: int) -> int:
+        """c.favorite(id): the key that client's game binds a favorite to,
+        0 to 7, -1 for a favorite without a key, -2 for no favorite, from its
+        last `favorites` step, which reads through SKSE
+        (docs/verbs/favorites.md)."""
+        fn = getattr(self._views, "favorites", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a favorites step yet")
+        key = data.get(str(int(ref_id)))
+        if not isinstance(key, int) or isinstance(key, bool):
+            raise AssertionData(f"{self.name}'s favorites step did not read {int(ref_id):#x}")
+        return key
+
     def view(self, other: str) -> Pos:
         seen, origin = self._seen(other)
         if not seen:
@@ -422,7 +437,7 @@ _ATTRS = {
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker", "known"},
+    _ClientRef: {"marker", "known", "favorite"},
 }
 # Methods that take no argument: server.time()
 _NULLARY = {
@@ -430,7 +445,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite"},
     InventoryView: {"count"},
 }
 _CMP = {

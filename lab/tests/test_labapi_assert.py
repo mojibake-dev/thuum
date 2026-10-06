@@ -312,6 +312,36 @@ class KnownTests(unittest.TestCase):
             ev.evaluate("c2.known(0x4b0ba) == 0")
 
 
+class FavoriteViews(NearViews):
+    """c1's last favorites step: the iron dagger on key 3, Flames a favorite
+    without a key, the steel sword no favorite."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {str(0x1397E): 2, str(0x12FCD): -1, str(0x13989): -2}}
+
+    def favorites(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class FavoriteTests(unittest.TestCase):
+    def test_favorite_reads_the_key_from_the_last_favorites_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), FavoriteViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.favorite(0x1397E) == 2"))
+        self.assertTrue(ev.evaluate("c1.favorite(0x12FCD) == -1"))
+        self.assertTrue(ev.evaluate("c1.favorite(0x13989) == -2"))
+
+    def test_an_unread_form_or_client_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), FavoriteViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.favorite(0x1) == -2")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.favorite(0x1397E) == 2")
+
+
 @needs_deps
 class WatchTests(unittest.TestCase):
     def test_watched_matches_the_server_position_and_reports_the_farthest_point(self):

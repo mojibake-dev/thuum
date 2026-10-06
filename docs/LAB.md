@@ -431,7 +431,11 @@ server has `other`: `x, y, z`, `maxDisplacement`, `samples`),
 `c.marker(<form id>)` (the client's last `markers {ids: [...]}` step: the
 map marker's `visible` and `canTravel` on that player's own map),
 `c.known(<form id>)` (the client's last `known {ids: [...]}` step: the
-ingredient's known effects as a mask, bit i for effect i), and
+ingredient's known effects as a mask, bit i for effect i),
+`c.favorite(<form id>)` (the client's last `favorites {ids: [...]}` step,
+read through SKSE's Game.isObjectFavorited and getHotkeyBoundObject: the
+key 0 to 7, -1 for a favorite without one, -2 for none; a `favorite {form,
+hotkey}` step marks one as the player would), and
 `form("File.esm:EditorID")` through lab-api's item table. Coordinates in a
 scenario are offsets from a named cell's origin (`cells` in lab-api's
 guests.yaml; `lab-spawn` is the server's default start point until lab.esp

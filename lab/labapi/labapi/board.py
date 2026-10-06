@@ -41,6 +41,8 @@ class StepBoard:
         self._markers: dict[str, dict[str, Any]] = {}
         # a known step's answer: ingredient id (decimal) -> known effects mask
         self._known: dict[str, dict[str, Any]] = {}
+        # a favorites step's answer: form id (decimal) -> hotkey, -1 none, -2 no favorite
+        self._favorites: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
 
     # lab-driver side ---------------------------------------------------------
@@ -71,6 +73,8 @@ class StepBoard:
             self._markers[step.client] = body["data"]
         if step.action == "known" and isinstance(body.get("data"), dict):
             self._known[step.client] = body["data"]
+        if step.action == "favorites" and isinstance(body.get("data"), dict):
+            self._favorites[step.client] = body["data"]
         step.done.set()
         return True
 
@@ -130,11 +134,15 @@ class StepBoard:
     def known(self, observer: str) -> dict[str, Any] | None:
         return self._known.get(observer)
 
+    def favorites(self, observer: str) -> dict[str, Any] | None:
+        return self._favorites.get(observer)
+
     def clear_views(self) -> None:
         self._views.clear()
         self._watches.clear()
         self._markers.clear()
         self._known.clear()
+        self._favorites.clear()
 
     def clear(self, client: str | None = None) -> None:
         if client is None:
