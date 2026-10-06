@@ -89,9 +89,17 @@ let crafting: {
   result: number;
   count: number;
   startedAt: number;
+  removedAt?: number;
   closeAt?: number;
 } | null = null;
 const CRAFT_WAIT_MS = 15000;
+// The result goes in this long after the ingredients come out, so
+// skymp5-client's craft service has every removal before the result: made in
+// one frame, the dagger's event once reached it before the leather strip's
+// removal, the craft message lacked the strip and the server found no recipe
+// (run 20261006-034306-m0-forge, 1.6.1170). The engine's own crafting menu
+// does both itself; only this simulation needs the pause.
+const CRAFT_SETTLE_MS = 500;
 // RE::CraftingMenu::MENU_NAME (CommonLibSSE-NG include/RE/C/CraftingMenu.h:19)
 const CRAFTING_MENU = "Crafting Menu";
 // A move in flight: the update loop steps the player toward (x, y) at speed units per second until it arrives or time is up.
@@ -386,7 +394,12 @@ function finishCraft(c: Config, player: Actor): void {
     }
     const furniture = player.getFurnitureReference();
     if (furniture) {
-      for (const [id, count] of k.ingredients) player.removeItem(Game.getFormEx(id), count, true, null);
+      if (k.removedAt === undefined) {
+        for (const [id, count] of k.ingredients) player.removeItem(Game.getFormEx(id), count, true, null);
+        k.removedAt = Date.now();
+        return;
+      }
+      if (Date.now() - k.removedAt < CRAFT_SETTLE_MS) return;
       player.addItem(Game.getFormEx(k.result), k.count, true);
       k.closeAt = Date.now() + 2000;
       postResult(c, k.step, { ok: true, data: { result: k.result, ingredients: k.ingredients, furniture: furniture.getFormID(), waitedMs: Date.now() - k.startedAt } });
