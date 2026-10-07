@@ -189,6 +189,18 @@ above keep a hostile preset from carrying anything but a look.
   morphs block: RaceMenu's save drops the sculpt vertices a preset did not
   move (448 in the file, 436 saved) and reorders the sliders (fork
   0aaac540).
+- CONFIRMED (Eli, playtest nine, 16:18): with cc2a5e94 on his client, a
+  preset loaded in RaceMenu's menu then Done records the preset as its
+  author made it: appearance skin A6C0D2 (his fenestrate save's own body
+  tint), hair 5E6077, weight 50, the ear at index 2; tints EFA9C5D8,
+  FF000000 x2, C9430401, 590F0440, FF2F2013; the look 30,476 bytes with
+  the ear, 22 custom morphs, one sculpt host. The other seat shows the
+  same values. Open after it: his own view reads shiny where the figure of
+  her on the other seat does not, same tints; the paths differ in how the
+  face maps are bound (RaceMenu's override loader on the player, the
+  race's texture set through the engine on a figure), and the maps are
+  24-bit R8G8B8 DDS; HYPOTHESIS that RaceMenu's loader fails on them,
+  tested with 32-bit re-encodes on one clone.
 - The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
   side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
   under the lab's vanilla light, at 0 her own view matched fenestrate
