@@ -641,15 +641,29 @@ function run(step: Step, player: Actor): unknown {
       // a node's scale on the player or, with {other: true}, on the nearest
       // other actor: the engine's (NetImmerse.GetNodeScale, third person)
       // and RaceMenu's record under "thuum" (NiOverride.GetNodeTransformScale,
-      // nioverride.psc line 439); {node}, the head by default
+      // nioverride.psc line 439); {node}, the head by default. With other,
+      // every actor nearby comes back too (id, base, enabled, 3D, distance,
+      // both scales), so a second reference for one player shows.
       const node = String(a.node || "NPC Head [Head]");
-      const target = a.other ? nearestOther(player) : player;
-      return {
-        node,
+      const scales = (target: Actor) => ({
         actor: target.getFormID(),
         engine: NetImmerse.getNodeScale(target, node, false),
         raceMenu: callNative("NiOverride", "GetNodeTransformScale", undefined, target, false, isFemale(target), node, "thuum"),
-      };
+      });
+      if (!a.other) return { node, ...scales(player) };
+      const near = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
+      if (near.length === 0) throw new Error("no other actor nearby");
+      const all = near.map((o) => {
+        const base = o.getBaseObject();
+        return {
+          ...scales(o),
+          base: base ? base.getFormID() : 0,
+          enabled: !o.isDisabled(),
+          loaded: o.is3DLoaded(),
+          distance: Math.round(distanceTo(player, o)),
+        };
+      });
+      return { node, ...scales(near[0]), all };
     }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in
