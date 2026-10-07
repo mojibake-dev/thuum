@@ -137,7 +137,20 @@ level increase, at most 4 at once and 1 a second after.
   (today missing); each R0 on a player. They need every actor value's
   Papyrus name (the server's ConvertToAV knows three): read from the game's
   own AVIF records with lab/esm.py, or the engine's ActorValueList through
-  the re-analyst, never typed from memory (rule 1).
+  the re-analyst, never typed from memory (rule 1). CONFIRMED 2026-10-07
+  (run 20261007-022013-x-racemenu-probe2, steps/025 and 026): av-table read
+  all 164 actor values' form ids (ActorValueInfo.GetActorValueInfoByID), and
+  av-names checked each Skyrim.esm AVIF editor ID less its "AV" through
+  SKSE's GetActorValueInfoByName: 140 names find the form their editor ID
+  names, none finds another. 24 indices have no confirmed name: nine
+  editor IDs whose names find nothing (Mysticism, NormalWeaponsResist,
+  EquippedItemCharge, EquippedStaffCharge, Muffled, CombatHealthRegenMultMod,
+  CombatHealthRegenMultPowerMod, HealRatePowerMod, MagickaRateMod) and 15
+  forms with no AVIF record in Skyrim.esm (0x3f5, 0x5e0, 0x5e1, 0x5e6,
+  0x5ea, 0x5ee, 0x5ef, 0x5fc, 0x60b, 0x62f, 0x63c, 0x644, 0x647, 0x648,
+  0x649). They sync by index like the rest; the server's natives refuse
+  them by name as unknown until the engine's own names are read (the
+  re-analyst, ActorValueInfo's enum name on sky-re).
 
 ## Client
 
@@ -182,15 +195,17 @@ level increase, at most 4 at once and 1 a second after.
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated (four HYPOTHESIS tags; SetLevel and
       the actor values' Papyrus names to look up)
-- [x] server logic + T0 (fork m1-actor-values: wire-rules actor_values
-      8ebc5f91 and e5549cfc, the record, the holds and the login send
-      d7e73cd9; unit/ActorValuesTest.cpp green in fork pipeline 874, 287
-      test cases; the difftest session actor-values for T2)
-- [x] message + validator (same commit, 4fb8fe6a: ActorValues, MsgType
+- [x] server logic + T0 (fork m1-actor-values, stacked on m1-racemenu and
+      rebased once before its merges began: wire-rules actor_values
+      a84f535f and 16d87b09, the record, the holds and the login send
+      ebeab290, the record's ordering 45ac5c82; unit/ActorValuesTest.cpp
+      green in fork pipelines 874 and 882 (c19de24c); the difftest session
+      actor-values a4e0cd14 for T2)
+- [x] message + validator (same commit, 3919f4aa: ActorValues, MsgType
       40, wire id 48, SCHEMA_VERSION 9)
-- [x] native hook (a4b5b457: TESModPlatform GetActorValueBases,
+- [x] native hook (40a28072: TESModPlatform GetActorValueBases,
       SetActorValueBase, GetPlayerProgress, SetPlayerProgress); T1: none
-- [x] TS handler (a4b5b457: ActorValuesService)
+- [x] TS handler (40a28072: ActorValuesService)
 - [ ] the server's Papyrus natives (Get, Set, Mod, Force on a player)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
