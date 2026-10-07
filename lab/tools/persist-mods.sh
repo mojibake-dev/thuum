@@ -25,6 +25,7 @@
 #   against the md5 Nexus names for the file, laid out as its installer does
 #   for the choices fenestrate had (apocrypha: "Vanilla Shape", "Vanilla
 #   Outfits", "RaceMenu Morphs (BodyMorph)", "Morph Files (Outfits)"),
+#   plus "Face Pack", its female face textures that match its body ones),
 #   resolved from its FOMOD config each run. Its two plugins stay on the
 #   clients: CBBE.esp is light, which the server cannot read yet
 #   (docs/PLAN.md), and RaceMenuMorphsCBBE.esp (full, Skyrim.esm its only
@@ -65,7 +66,11 @@ cb_7z="$cache/CBBE-2.0.3.7z"
 cb_md5=f6d438974d0cedbd0f174e79d7390ee9
 cb_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/198/files/489053
 # CBBE's installer choices, as fenestrate had them (apocrypha, 2026-10-07)
-cb_options="Vanilla Shape|Vanilla Outfits|RaceMenu Morphs (BodyMorph)|Morph Files (Outfits)"
+# plus the Face Pack: CBBE's required files bring its own female body and
+# hand textures, which meet the vanilla female head textures at the neck
+# (the seam on every adult female in the lab, Eli's playtest nine); the
+# FOMOD defaults it on, fenestrate most likely had it (apocrypha)
+cb_options="Vanilla Shape|Vanilla Outfits|RaceMenu Morphs (BodyMorph)|Morph Files (Outfits)|Face Pack"
 # the load order after the masters and the Creation Club plugins: the server's
 # loadOrder (server-settings.json for 1.6.1170, server-settings-1.7.104.json
 # without RaceMenu's) lists the same plugins in the same order. CBBE's two
