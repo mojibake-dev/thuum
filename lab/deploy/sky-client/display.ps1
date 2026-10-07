@@ -52,12 +52,12 @@ else {
 Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force
 $prefs = 'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SkyrimPrefs.ini'
 if (Test-Path $prefs) {
-  # bUse64bitsHDRRenderTarget stays 0 on a lab clone, said outright rather
-  # than left to the template's launcher: at 1 (fenestrate's value) the
-  # same skin reads glossy under the lab's vanilla light, at 0 it matched
-  # what Eli knows from fenestrate (playtest nine, 2026-10-07, both seats
-  # side by side; docs/verbs/racemenu-sync.md)
-  $want = @{ 'iSize W' = $W; 'iSize H' = $H; 'bFull Screen' = 0; 'bBorderless' = 1; 'bUse64bitsHDRRenderTarget' = 0 }
+  # bUse64bitsHDRRenderTarget is 1 on a lab clone, fenestrate's value, said
+  # outright rather than left to the template's launcher (which wrote 0).
+  # It changes how highlights clip or roll off, and Eli judged it not the
+  # cause of rotfern's glossy face either way (playtest nine, 2026-10-07,
+  # both seats side by side; docs/verbs/racemenu-sync.md)
+  $want = @{ 'iSize W' = $W; 'iSize H' = $H; 'bFull Screen' = 0; 'bBorderless' = 1; 'bUse64bitsHDRRenderTarget' = 1 }
   $lines = Get-Content $prefs
   $lines = $lines | ForEach-Object { $l = $_; foreach ($k in $want.Keys) { if ($l -match ('^' + [regex]::Escape($k) + '=')) { $l = $k + '=' + $want[$k]; $want.Remove($k) } }; $l }
   if ($want.Count) { $lines = @($lines[0..$lines.IndexOf('[Display]')]) + @($want.Keys | ForEach-Object { $_ + '=' + $want[$_] }) + @($lines[($lines.IndexOf('[Display]') + 1)..($lines.Count - 1)]) }

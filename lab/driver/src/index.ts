@@ -790,7 +790,12 @@ function run(step: Step, player: Actor): unknown {
           tints.push({ type: Game.getNthTintMaskType(i), argb: Game.getNthTintMaskColor(i), texture: Game.getNthTintMaskTexturePath(i) });
         }
       }
-      return { actor: target.getFormID(), base: base.getFormID(), weight: base.getWeight(), parts, tints };
+      // the actor's race against its base's: RaceMenu builds its slider
+      // list from the actor's (apocrypha, skee's LoadSliders), SkyMP's
+      // appearance apply sets the base's; the two can differ until a reload
+      const actorRace = target.getRace(); const baseRace = base.getRace();
+      return { actor: target.getFormID(), base: base.getFormID(), weight: base.getWeight(),
+        actorRace: actorRace ? actorRace.getFormID() : 0, baseRace: baseRace ? baseRace.getFormID() : 0, parts, tints };
     }
     case "global": {
       // a global variable set on this client (GlobalVariable.setValue) and
