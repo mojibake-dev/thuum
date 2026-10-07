@@ -182,8 +182,9 @@ above keep a hostile preset from carrying anything but a look.
       settles both)
 - [x] server logic + T0 (fork m1-racemenu 0f516e0f: wire-rules
       `racemenu`, the change form's raceMenuPreset, OnRaceMenuPreset, the
-      login send and the send with a figure; unit/RaceMenuPresetTest.cpp,
-      green when the fork's pipeline is)
+      login send and the send with a figure; unit/RaceMenuPresetTest.cpp
+      green in fork pipeline 864, 287 test cases; the difftest session
+      racemenu, 547cf113, for T2)
 - [x] message + validator (same commit, a2ff7c53: RaceMenuPreset, MsgType
       39, wire id 47, SCHEMA_VERSION 8; cap 192 KiB until a measured
       preset; validate_server split out, so a burst of presets at a login

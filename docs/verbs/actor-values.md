@@ -184,7 +184,8 @@ level increase, at most 4 at once and 1 a second after.
       the actor values' Papyrus names to look up)
 - [x] server logic + T0 (fork m1-actor-values: wire-rules actor_values
       8ebc5f91 and e5549cfc, the record, the holds and the login send
-      d7e73cd9; unit/ActorValuesTest.cpp)
+      d7e73cd9; unit/ActorValuesTest.cpp green in fork pipeline 874, 287
+      test cases; the difftest session actor-values for T2)
 - [x] message + validator (same commit, 4fb8fe6a: ActorValues, MsgType
       40, wire id 48, SCHEMA_VERSION 9)
 - [x] native hook (a4b5b457: TESModPlatform GetActorValueBases,
