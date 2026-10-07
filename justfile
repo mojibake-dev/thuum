@@ -213,6 +213,13 @@ deploy-srv:
     # third-party files in it reach the lab only through persist (docs/MODS.md)
     rsync -az --delete -e "{{srv_ssh}}" --exclude node_modules --exclude .venv --exclude build --exclude __pycache__ --exclude results --exclude frida/uploads --exclude .cache lab/ "$host:/srv/lab/thuum/lab/"
     rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/docker-compose.yml "$host:/srv/lab/docker-compose.yml"
+    # a settings file whose load order names a plugin its version's master directory lacks stops the server at
+    # its next start (2026-10-07: RaceMenu.esp deployed before persist-mods, mid-sweep): check before copying
+    for pair in "server-settings.json:/srv/persist/esm/1.6.1170" "server-settings-1.7.104.json:/srv/persist/esm"; do
+      file=${pair%%:*}; dir=${pair#*:}
+      names=$(python3 -c 'import json,sys,os; print(" ".join(os.path.basename(p) for p in json.load(open(sys.argv[1]))["loadOrder"]))' "lab/deploy/sky-srv/$file")
+      {{srv_ssh}} "$host" "cd $dir && for n in $names; do test -f \"\$n\" || { echo \"$file names \$n, which $dir lacks (just persist-mods first)\" >&2; exit 2; }; done"
+    done
     rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/server-settings.json lab/deploy/sky-srv/server-settings-1.7.104.json "$host:/srv/lab/server/"
     {{srv_ssh}} "$host" 'test -f /srv/lab/.env || { cp /srv/lab/thuum/lab/deploy/sky-srv/env.example /srv/lab/.env; echo "NOTE: /srv/lab/.env created from env.example; fill PVE_TOKEN_SECRET by hand"; }'
     {{srv_ssh}} "$host" 'ls -la /srv/lab /srv/lab/server; docker compose -f /srv/lab/docker-compose.yml config --quiet && echo "compose config ok"'
