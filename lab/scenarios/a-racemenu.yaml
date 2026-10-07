@@ -14,6 +14,10 @@
 # load and after the reconnect, the same look): RaceMenu's load writes to an
 # actor's base, and the figure answers GetBaseObject with 0x7, the local
 # player's own base NPC (run 20261007-034304 showed the writes stay off it).
+# c1 also sets a body morph (ShoulderWidth 0.7 under "thuum", as RaceMenu's
+# body sliders do; Eli uses them to fit armor), which rides the same preset:
+# c2's figure of c1 carries it live and after the restart, and c1 again
+# after its relaunch.
 # Last, a look the server never got does not outlive a login: c2 scales its
 # own head without closing the race menu, so nothing is sent, and after its
 # reconnect its head is back at 1.0 (Eli's playtest found the last session's
@@ -38,16 +42,18 @@ steps:
   - assert:
       - abs(c2.node_scale_of(c1) - 1.0) < 0.01
   - c1: racemenu-scale {scale: 1.6}
+  - c1: body-morph {name: ShoulderWidth, value: 0.7}
   - c1: open-race-menu
   - wait: 6
   - c1: close-menu {name: "RaceSex Menu"}
   - wait: 8
   - c1: node-scale
-  - c2: node-scale {other: true}
+  - c2: node-scale {other: true, morph: ShoulderWidth}
   - c2: racemenu-save {name: own-live}
   - assert:
       - abs(c1.node_scale() - 1.6) < 0.01
       - abs(c2.node_scale_of(c1) - 1.6) < 0.01
+      - abs(c2.morph_of(c1) - 0.7) < 0.01
       - c2.preset("own-live").look == c2.preset("own-before").look
   - c2: racemenu-scale {scale: 1.3}
   - c2: node-scale
@@ -58,13 +64,15 @@ steps:
   - c1: relaunch
   - c2: reconnect
   - wait: 12
-  - c1: node-scale
+  - c1: node-scale {morph: ShoulderWidth}
   - c2: node-scale
-  - c2: node-scale {other: true}
+  - c2: node-scale {other: true, morph: ShoulderWidth}
   - c2: racemenu-save {name: own-end}
   - assert:
       - abs(c1.node_scale() - 1.6) < 0.01
+      - abs(c1.morph() - 0.7) < 0.01
       - abs(c2.node_scale_of(c1) - 1.6) < 0.01
+      - abs(c2.morph_of(c1) - 0.7) < 0.01
       - abs(c2.node_scale() - 1.0) < 0.01
       - c2.preset("own-end").look == c2.preset("own-before").look
 artifacts: [server.log, c1.log, c2.log, screenshots]
