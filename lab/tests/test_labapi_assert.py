@@ -423,6 +423,35 @@ class NodeScaleViews(NearViews):
         return self.read.get(observer)
 
 
+class PresetViews(NearViews):
+    """c2 saved its own look twice, the same, and c1 its own, another."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c2": {"own-before": {"saved": "own-before", "bytes": 2932, "sha256": "54d2"},
+                            "own-after": {"saved": "own-after", "bytes": 2932, "sha256": "54d2"}},
+                     "c1": {"c1-own": {"saved": "c1-own", "bytes": 3165, "sha256": "ad0a"}}}
+
+    def presets(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class PresetTests(unittest.TestCase):
+    def test_saves_compare_by_hash_and_size(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), PresetViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c2.preset("own-after").sha256 == c2.preset("own-before").sha256'))
+        self.assertTrue(ev.evaluate('c2.preset("own-before").sha256 != c1.preset("c1-own").sha256'))
+        self.assertTrue(ev.evaluate('c1.preset("c1-own").bytes > 3000'))
+
+    def test_an_unsaved_name_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), PresetViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.preset("own-end").bytes > 0')
+
+
 @needs_deps
 class NodeScaleTests(unittest.TestCase):
     def test_own_and_figure_scales_read_the_last_node_scale_steps(self):

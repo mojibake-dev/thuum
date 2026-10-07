@@ -51,9 +51,15 @@ class BoardTests(unittest.TestCase):
             board.complete(seen.id, {"ok": True, "data": {"engine": 1.0, "all": []}})
             self.assertEqual(board.node_scales("c1")["self"]["engine"], 1.6)
             self.assertEqual(board.node_scales("c1")["other"]["engine"], 1.0)
+            # racemenu-save answers are kept by the name saved
+            save = board.enqueue("c1", "racemenu-save", {"name": "own-before"})
+            board.poll("c1")
+            board.complete(save.id, {"ok": True, "data": {"saved": "own-before", "bytes": 2932, "sha256": "54d2"}})
+            self.assertEqual(board.presets("c1")["own-before"]["bytes"], 2932)
             board.clear_views()
             self.assertIsNone(board.held("c1"))
             self.assertIsNone(board.node_scales("c1"))
+            self.assertIsNone(board.presets("c1"))
             # a timed-out step is cancelled and a late result is ignored
             late = board.enqueue("c1", "connect")
             board.poll("c1")

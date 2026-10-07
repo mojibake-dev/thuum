@@ -19,6 +19,7 @@ the lab can grep (E_ASSERT_*).
   <client>.node_scale_of(<client>)                   the same on its figure of the other client
                                                      (node-scale {other: true}): the enabled actor with
                                                      3D nearest where the server has that client
+  <client>.preset("<name>").bytes | .sha256          the RaceMenu preset its racemenu-save {name} wrote
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -59,6 +60,7 @@ class ViewsFacade(Protocol):
     def held(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
+    def presets(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -138,6 +140,16 @@ class MarkerView:
 
     visible: bool
     canTravel: bool
+
+
+@dataclass(frozen=True)
+class PresetView:
+    """c.preset(name): the RaceMenu preset that client's racemenu-save step
+    wrote under that name: its size and SHA-256, so two saves compare
+    (docs/verbs/racemenu-sync.md)."""
+
+    bytes: int
+    sha256: str
 
 
 @dataclass(frozen=True)
@@ -406,6 +418,19 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s skills step did not read the level")
         return level
 
+    def preset(self, name: str) -> PresetView:
+        """c.preset(name): what that client's last racemenu-save {name} step
+        wrote, its size and SHA-256."""
+        fn = getattr(self._views, "presets", None)
+        data = fn(self.name) if fn else None
+        p = data.get(name) if isinstance(data, dict) else None
+        if not isinstance(p, dict):
+            raise AssertionData(f"{self.name} has not reported a racemenu-save {{name: {name}}} step")
+        try:
+            return PresetView(bytes=int(p["bytes"]), sha256=str(p["sha256"]))
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s racemenu-save {name} lacks {e}") from e
+
     def node_scale(self) -> float:
         """c.node_scale(): the engine's scale of the node that client's last
         `node-scale` step read on its own player."""
@@ -502,6 +527,7 @@ _ATTRS = {
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     MarkerView: {"visible", "canTravel"},
     SkillView: {"base", "xp", "legendary"},
+    PresetView: {"bytes", "sha256"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
@@ -519,7 +545,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "preset"},
     InventoryView: {"count"},
 }
 _CMP = {
