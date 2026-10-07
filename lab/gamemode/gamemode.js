@@ -127,11 +127,16 @@ const command = {
     if (!actorId) return notFound(payload.profileId);
     const baseId = Number(payload.baseId);
     const count = Number(payload.count || 1);
+    // a give of base 0 (a form that is nothing) once reached a player's
+    // inventory from a scan that found no form (2026-10-07); an entry that
+    // reaches zero or less is dropped, not kept at 0
+    if (!baseId) return { ok: false, error: "baseId 0 is no item" };
     const inv = mp.get(actorId, "inventory") || { entries: [] };
-    const entries = (inv.entries || []).map((e) => ({ ...e }));
+    let entries = (inv.entries || []).map((e) => ({ ...e }));
     const hit = entries.find((e) => e.baseId === baseId);
     if (hit) hit.count += count;
     else entries.push({ baseId, count });
+    entries = entries.filter((e) => e.baseId && e.count > 0);
     mp.set(actorId, "inventory", { entries });
     return { ok: true, actorId, baseId, count: (hit ? hit.count : count) };
   },
