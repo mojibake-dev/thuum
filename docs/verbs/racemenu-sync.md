@@ -157,6 +157,21 @@ above keep a hostile preset from carrying anything but a look.
   whose morphs equal the saved look's, the one the menu loaded, applies it
   again through CharGen and saves again; that look is sent (fork
   30b1e262). A face shaped by hand matches no file and stays as it is.
+- Under that: RaceMenu's scripts never ran on the SkyMP client. The client
+  blocks every Papyrus event but OnUpdate (TESModPlatform.BlockPapyrusEvents,
+  Skyrim Platform's hook on the VM's SendEvent blanks the event name),
+  excepting SkyUI's SKI_ scripts and one vanilla script. RaceMenu's menu
+  reaches the actor through its own scripts' mod events (racemenu.psc:
+  OnTintColorChange runs Game.SetTintMaskColor and UpdateTintMaskColors,
+  OnHairColorChange, OnTintSave for RSM_RequestTintSave; the slider plugins
+  such as RaceMenuMorphsCBBE have their own). Eli (playtest nine): "moving
+  the skintone sliders does absolutely nothing". So the sliders were dead,
+  the tints and hair color a menu preset load hands back to the UI were
+  never applied, and RSM_RequestTintSave (13391501) did nothing. Fork
+  d9c940f1: scripts whose name starts with RaceMenu pass the block as
+  SkyUI's do; they run the menu, not game state (rule: the server owns
+  state, the hook is R3). Measured again once staged: the ear drop on the
+  UI load path, the hair color on open, the tints after a menu load.
 - The server takes one look per race menu it opened, before or after the
   appearance that closes it, as SkyMP takes an appearance only while the
   menu it opened is open (ActionListener::OnUpdateAppearance); any other

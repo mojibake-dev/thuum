@@ -447,6 +447,20 @@ it carries a HYPOTHESIS tag.
   with the base-only fallback: the server took rotfern
   (lastAppearanceAllowed, raceId), c1's own actor stayed a Nord until a
   reload; the Actor.SetRace fallback is staged after playtest nine.
+- Playtest nine (2026-10-07, docs/private/playtest-m1-9.md, in progress)
+  found the root of the RaceMenu oddities: skymp5-client blocks every
+  Papyrus event but OnUpdate, so RaceMenu's own scripts never ran in the
+  lab (dead tint and hair color sliders, a preset loaded in the menu
+  landing with the vanilla menu's bare commit, skin tone at alpha 1.0 and
+  another color). Fork d9c940f1 lets scripts named RaceMenu* pass the
+  block as SkyUI's do; 30b1e262 re-applies a menu-loaded preset through
+  CharGen at the menu's close. Both build; staged after the playtest with
+  CBBE's Face Pack (the head-to-body seam on every adult female) and the
+  race-pick fallback. The shine: the HDR key is a lever in the lab (key 0
+  clips highlights in sun and loses them at night, key 1 keeps them), and
+  Eli rules out his lighting mods ("if it's lighting at all it's vanilla
+  game shit"); the full ini diff against fenestrate leaves no other render
+  key, so the tint fix lands first and the face is judged again.
 - Found by apocrypha (2026-10-07, reading Eli's real save): SkyMP's login
   save writes the NPC face block's two counts as 8-byte size_t
   (savefile/src/SFChangeFormNPC.cpp:80 and :84, through the template
