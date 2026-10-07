@@ -11,9 +11,13 @@
 # own) and c2's reconnect, both again, which only the server's record can do.
 # The figure judged is the enabled one with 3D where the server has c1. And
 # c2's own look never moves (its own preset saved before, after the live
-# load and after the reconnect, the same bytes): RaceMenu's load writes to an
+# load and after the reconnect, the same look): RaceMenu's load writes to an
 # actor's base, and the figure answers GetBaseObject with 0x7, the local
 # player's own base NPC (run 20261007-034304 showed the writes stay off it).
+# Last, a look the server never got does not outlive a login: c2 scales its
+# own head without closing the race menu, so nothing is sent, and after its
+# reconnect its head is back at 1.0 (Eli's playtest found the last session's
+# sculpt on a character whose record had none).
 # Assertions are evaluated by lab-api only (ADR-009).
 id: a-racemenu
 milestone: M1
@@ -44,17 +48,23 @@ steps:
   - assert:
       - abs(c1.node_scale() - 1.6) < 0.01
       - abs(c2.node_scale_of(c1) - 1.6) < 0.01
-      - c2.preset("own-live").sha256 == c2.preset("own-before").sha256
+      - c2.preset("own-live").look == c2.preset("own-before").look
+  - c2: racemenu-scale {scale: 1.3}
+  - c2: node-scale
+  - assert:
+      - abs(c2.node_scale() - 1.3) < 0.01
   - server: restart
   - wait: 20
   - c1: relaunch
   - c2: reconnect
   - wait: 12
   - c1: node-scale
+  - c2: node-scale
   - c2: node-scale {other: true}
   - c2: racemenu-save {name: own-end}
   - assert:
       - abs(c1.node_scale() - 1.6) < 0.01
       - abs(c2.node_scale_of(c1) - 1.6) < 0.01
-      - c2.preset("own-end").sha256 == c2.preset("own-before").sha256
+      - abs(c2.node_scale() - 1.0) < 0.01
+      - c2.preset("own-end").look == c2.preset("own-before").look
 artifacts: [server.log, c1.log, c2.log, screenshots]
