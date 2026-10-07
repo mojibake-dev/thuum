@@ -101,6 +101,8 @@ class Doubles:
                         "sees": {o: {"x": a.x, "y": a.y, "z": a.z} for pid, a in self.state.actors.items() for o, p in self.profile.items() if p == pid and o != name}}
             elif step["action"] == "request-screenshot":
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
+            elif step["action"] == "av-table":
+                data = {"ids": list(range(1000, 1164))}
             r = self.client.post(f"{self.prefix}/step/{step['id']}/result", json={"ok": True, "data": data})
             assert r.status_code == 200, r.text
 
@@ -146,6 +148,24 @@ class RunTests(unittest.TestCase):
                 return run_id, body
             time.sleep(0.02)
         self.fail(f"run {run_id} did not finish: {body}")
+
+    def test_a_long_answer_is_kept_whole_beside_the_run(self):
+        run_id, body = self._run("""
+id: t2-long-answer
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: av-table
+""")
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        step = body["steps"][1]
+        self.assertIn("... (whole: steps/001-c1-av-table.json)", step["note"], step)
+        kept = json.loads((self.tmp / "results" / run_id / "steps" / "001-c1-av-table.json").read_text())
+        self.assertEqual(kept["ids"], list(range(1000, 1164)))
+        # a short answer stays whole in result.json, with nothing beside it
+        self.assertFalse((self.tmp / "results" / run_id / "steps" / "000-c1-connect.json").exists())
 
     def test_green_run_end_to_end(self):
         run_id, body = self._run(GREEN)

@@ -24,15 +24,20 @@ from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
 from .state import ServerState, StateError
 from .system import Capture, System
 
-def _brief(value: Any, limit: int = 800) -> str:
-    """A step's answer (the driver's data, a record) as one short JSON string
-    for result.json; empty for nothing."""
+def _text(value: Any) -> str:
+    """A step's answer (the driver's data, a record) as JSON text; empty for
+    nothing."""
     if value in (None, "", {}, []):
         return ""
     try:
-        text = json.dumps(value, sort_keys=True, default=str)
+        return json.dumps(value, sort_keys=True, default=str)
     except (TypeError, ValueError):
-        text = str(value)
+        return str(value)
+
+
+def _brief(value: Any, limit: int = 800) -> str:
+    """A step's answer as one short JSON string for result.json."""
+    text = _text(value)
     return text if len(text) <= limit else text[: limit - 3] + "..."
 
 
@@ -253,6 +258,22 @@ class Runner:
         except Exception as e:
             rec.phases.append({"name": name, "ok": False, "seconds": round(self._clock() - t0, 3), "note": str(e)})
             raise
+
+    def _answer(self, rec: RunRecord, index: int, step: Step, data: Any) -> str:
+        """A client step's note: its brief, and when the brief cuts the
+        answer, the whole answer kept beside the run as
+        steps/<index>-<client>-<action>.json (a probe's table outgrows
+        result.json's 800 characters)."""
+        text, brief = _text(data), _brief(data)
+        if text == brief:
+            return brief
+        name = f"{index:03d}-{step.client}-{step.action}.json"
+        try:
+            (rec.dir / "steps").mkdir(exist_ok=True)
+            (rec.dir / "steps" / name).write_text(text)
+        except OSError as e:
+            return f"{brief} (the whole answer was not kept: {e})"
+        return f"{brief} (whole: steps/{name})"
 
     async def _rollback_server(self, rec: RunRecord, snapshot: str) -> None:
         async def go():
@@ -476,7 +497,7 @@ class Runner:
             return False, str(e)
         qs = await self.board.run_step(step.client, step.action, args, self.s.step_timeout_s)
         if qs.ok:
-            return True, _brief(qs.result.get("data"))
+            return True, self._answer(rec, index, step, qs.result.get("data"))
         error = str(qs.result.get("error", "step failed"))
         rec.failures.append({"step": index, "kind": "timeout" if error == "timeout" else "step-error", "client": step.client, "error": error})
         rec.verdict = "red"
