@@ -187,6 +187,18 @@ function timeGlobals(): Record<string, number | null> {
   return out;
 }
 
+// an actor value as Papyrus reads it: the base (GetBaseActorValue), the
+// current value (GetActorValue), the maximum (GetActorValueMax) and the
+// percentage of the maximum (GetActorValuePercentage)
+function readActorValue(actor: Actor, name: string) {
+  return {
+    base: actor.getBaseActorValue(name),
+    current: actor.getActorValue(name),
+    max: actor.getActorValueMax(name),
+    percentage: actor.getActorValuePercentage(name),
+  };
+}
+
 function actorValue(player: Actor, name: string) {
   return { value: player.getActorValue(name), percentage: player.getActorValuePercentage(name) };
 }
@@ -239,6 +251,30 @@ function nearestOther(player: Actor): Actor {
   const others = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
   if (others.length === 0) throw new Error("no other actor nearby");
   return others[0];
+}
+
+// A RaceMenu preset's look as one hash: its JSON with keys sorted, the head
+// parts as a set of "plugin|FormID" (RaceMenu writes each part's position in
+// the NPC's list as its "type", and its own load and save can swap two, run
+// 20261007-014139) and the version block left out, so two saves of one look
+// compare equal whatever the file's bytes
+function lookHash(text: string): string {
+  const look = JSON.parse(text) as Record<string, unknown>;
+  delete look["version"];
+  const parts = look["headParts"];
+  if (Array.isArray(parts)) {
+    look["headParts"] = parts.map((p) => String((p as Record<string, unknown>)["formIdentifier"])).sort();
+  }
+  return nodeCrypto.createHash("sha256").update(canonicalJson(look)).digest("hex");
+}
+
+function canonicalJson(v: unknown): string {
+  if (Array.isArray(v)) return "[" + v.map(canonicalJson).join(",") + "]";
+  if (v !== null && typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    return "{" + Object.keys(o).sort().map((k) => JSON.stringify(k) + ":" + canonicalJson(o[k])).join(",") + "}";
+  }
+  return JSON.stringify(v);
 }
 
 // an actor's sex as NiOverride keys its transforms
@@ -609,7 +645,12 @@ function run(step: Step, player: Actor): unknown {
       callNative("CharGen", "SaveCharacterPreset", undefined, target, name);
       if (!nodeFs.existsSync(path)) throw new Error(`SaveCharacterPreset left no ${name}.jslot`);
       const file = nodeFs.readFileSync(path);
-      return { saved: name, bytes: file.length, sha256: nodeCrypto.createHash("sha256").update(file).digest("hex") };
+      return {
+        saved: name,
+        bytes: file.length,
+        sha256: nodeCrypto.createHash("sha256").update(file).digest("hex"),
+        look: lookHash(file.toString("utf8")),
+      };
     }
     case "racemenu-load": {
       // a RaceMenu preset {name} from the preset folder applied to the player
@@ -766,6 +807,33 @@ function run(step: Step, player: Actor): unknown {
       if (!name || typeof a.value !== "number") return { error: "set-gmst needs name and value" };
       Game.setGameSettingFloat(name, a.value);
       return { [name]: Game.getGameSettingFloat(name) };
+    }
+    case "av-call": {
+      // thuum docs/verbs/actor-values.md: what a Papyrus actor value function
+      // does to the player, the engine as the oracle for the server's own
+      // natives: {name, how: set | mod | force | damage | restore, value};
+      // base, current, maximum and percentage before and after
+      const name = String(a.name || "");
+      const value = Number(a.value);
+      if (!name || !Number.isFinite(value)) throw new Error("av-call needs name and value");
+      const before = readActorValue(player, name);
+      switch (String(a.how || "")) {
+        case "set": player.setActorValue(name, value); break;
+        case "mod": player.modActorValue(name, value); break;
+        case "force": player.forceActorValue(name, value); break;
+        case "damage": player.damageActorValue(name, value); break;
+        case "restore": player.restoreActorValue(name, value); break;
+        default: throw new Error(`av-call has no call ${String(a.how)}`);
+      }
+      return { name, how: a.how, value, before, after: readActorValue(player, name) };
+    }
+    case "av-read": {
+      // the player's actor values by name: {names}; base, current, maximum
+      // and percentage each
+      const names = Array.isArray(a.names) ? a.names.map(String) : [];
+      const values: Record<string, ReturnType<typeof readActorValue>> = {};
+      for (const n of names) values[n] = readActorValue(player, n);
+      return { values };
     }
     case "set-av": {
       // The console's setav on the player: an actor value in this client

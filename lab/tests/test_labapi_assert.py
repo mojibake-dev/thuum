@@ -428,9 +428,9 @@ class PresetViews(NearViews):
 
     def __init__(self):
         super().__init__()
-        self.read = {"c2": {"own-before": {"saved": "own-before", "bytes": 2932, "sha256": "54d2"},
-                            "own-after": {"saved": "own-after", "bytes": 2932, "sha256": "54d2"}},
-                     "c1": {"c1-own": {"saved": "c1-own", "bytes": 3165, "sha256": "ad0a"}}}
+        self.read = {"c2": {"own-before": {"saved": "own-before", "bytes": 2932, "sha256": "54d2", "look": "1111"},
+                            "own-after": {"saved": "own-after", "bytes": 2932, "sha256": "9f93", "look": "1111"}},
+                     "c1": {"c1-own": {"saved": "c1-own", "bytes": 3165, "sha256": "ad0a", "look": "2222"}}}
 
     def presets(self, observer):
         return self.read.get(observer)
@@ -441,7 +441,9 @@ class PresetTests(unittest.TestCase):
     def test_saves_compare_by_hash_and_size(self):
         from labapi.assertions import Evaluator
         ev = Evaluator(RichServer(), PresetViews(), ["c1", "c2"])
-        self.assertTrue(ev.evaluate('c2.preset("own-after").sha256 == c2.preset("own-before").sha256'))
+        # the same look though the bytes differ (head parts in another order)
+        self.assertTrue(ev.evaluate('c2.preset("own-after").look == c2.preset("own-before").look'))
+        self.assertTrue(ev.evaluate('c2.preset("own-after").sha256 != c2.preset("own-before").sha256'))
         self.assertTrue(ev.evaluate('c2.preset("own-before").sha256 != c1.preset("c1-own").sha256'))
         self.assertTrue(ev.evaluate('c1.preset("c1-own").bytes > 3000'))
 

@@ -19,7 +19,7 @@ the lab can grep (E_ASSERT_*).
   <client>.node_scale_of(<client>)                   the same on its figure of the other client
                                                      (node-scale {other: true}): the enabled actor with
                                                      3D nearest where the server has that client
-  <client>.preset("<name>").bytes | .sha256          the RaceMenu preset its racemenu-save {name} wrote
+  <client>.preset("<name>").bytes | .sha256 | .look  the RaceMenu preset its racemenu-save {name} wrote
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -145,11 +145,13 @@ class MarkerView:
 @dataclass(frozen=True)
 class PresetView:
     """c.preset(name): the RaceMenu preset that client's racemenu-save step
-    wrote under that name: its size and SHA-256, so two saves compare
-    (docs/verbs/racemenu-sync.md)."""
+    wrote under that name: its size, its SHA-256, and `look`, the hash of
+    its JSON with the head parts as a set and the version left out, so two
+    saves of one look compare equal (docs/verbs/racemenu-sync.md)."""
 
     bytes: int
     sha256: str
+    look: str
 
 
 @dataclass(frozen=True)
@@ -427,7 +429,7 @@ class _ClientRef:
         if not isinstance(p, dict):
             raise AssertionData(f"{self.name} has not reported a racemenu-save {{name: {name}}} step")
         try:
-            return PresetView(bytes=int(p["bytes"]), sha256=str(p["sha256"]))
+            return PresetView(bytes=int(p["bytes"]), sha256=str(p["sha256"]), look=str(p["look"]))
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s racemenu-save {name} lacks {e}") from e
 
@@ -527,7 +529,7 @@ _ATTRS = {
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     MarkerView: {"visible", "canTravel"},
     SkillView: {"base", "xp", "legendary"},
-    PresetView: {"bytes", "sha256"},
+    PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
