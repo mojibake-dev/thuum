@@ -111,6 +111,21 @@ above keep a hostile preset from carrying anything but a look.
   before and after c1's look reached its figure, is the same 2932 bytes
   (SHA-256 54d2809f..., run 20261007-034304), so RaceMenu's writes land on
   the figure's own base. a-racemenu asserts it on every run.
+- FOUND 2026-10-07 by Eli, after playtest eight: test 2 came back as the
+  clean world's orc wearing the playtest's sculpt. The sweep's first run
+  restored the server's world (no look recorded for test 2) and restarted
+  the server, but did not restart c2's game (the scenario used c1 only), so
+  c2 reconnected inside one game. RaceMenu keeps a player's sculpt, its own
+  sliders, overrides and transforms in the game's memory and puts them back
+  on the head whenever it is rebuilt, so the client showed a look the
+  server never had. Fixed in 8a8aa50d: at the player's own CreateActor the
+  client takes RaceMenu's additions off (the look saved, the RaceMenu-only
+  sections left out, loaded back: RaceMenu's load erases them first,
+  PresetInterface ApplyPresetData) before anything of the server's is
+  applied, and every CreateActor drops what the service knew of that actor,
+  since the server sends its current look right after. a-racemenu checks
+  it: c2 scales its own head without closing the race menu, and after its
+  reconnect the head is back at 1.0.
 - Two early runs (20261007-022013 and -022551) saw c2's figure keep its old
   look after a live preset, though the server relayed it; the cause was not
   found. Since ba000d6a the service applies a look again to a new reference
@@ -174,14 +189,16 @@ above keep a hostile preset from carrying anything but a look.
 ## Client
 
 - Skyrim Platform: nothing of its own; callNative reaches CharGen.
-- skymp5-client RaceMenuService (b0219fee, ba000d6a): on the race menu's close,
+- skymp5-client RaceMenuService (b0219fee, ba000d6a, 8a8aa50d): on the race menu's close,
   SaveCharacterPreset on the player into RaceMenu's Presets folder, read
   back, sent if it changed. On RaceMenuPreset from the server, the JSON
   written to that folder and LoadCharacterPresetEx on the player or on
   that player's figure, again whenever the figure's reference or base
-  changes, a refused load logged once. RaceMenu
-  is there when CharGen's natives answer, asked once; `raceMenuSync: false`
-  turns it off.
+  changes, a refused load logged once. A login (the player's own
+  CreateActor) takes RaceMenu's additions off the player before anything
+  of the server's is applied, so a look only the server holds survives
+  it. RaceMenu is there when CharGen's natives answer, asked once;
+  `raceMenuSync: false` turns it off.
 - Lab-driver: `racemenu` (CharGen answers), `racemenu-save {name, other?}`
   (a save, its size and SHA-256), `racemenu-load {name}` (a load onto the
   player as RaceMenu's LoadPreset does it), so a scenario can shape a look
