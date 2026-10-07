@@ -93,10 +93,29 @@ above keep a hostile preset from carrying anything but a look.
   listener (skse64.log: the targeted dispatch logs nothing when it finds
   its receiver) and the version asked through the map came back 0. The
   natives built on it (387f9f72) are reverted (35692723).
-- HYPOTHESIS: a save of another actor. chargen.psc says the save works on
-  the player only; what it writes for a remote figure (head parts and
-  morphs come from the base NPC, tints may not) is for the two-client
-  probe to show before the scenario relies on it.
+- Not relied on: a save of another actor. chargen.psc says the save works
+  on the player only; the scenario reads a figure through the engine's own
+  node scale instead (NetImmerse.GetNodeScale).
+- CONFIRMED 2026-10-07, the whole path: c1 scales its head through
+  NiOverride under the key "thuum" (a shape the vanilla appearance cannot
+  carry), closes the race menu, and the preset RaceMenuService saves
+  carries it (the server's record: 8536 bytes, its transforms naming "NPC
+  Head [Head]" at 1.6). c2's figure of c1 draws it within 2 s, and after a
+  server restart, c1's relaunch (a fresh save, no co-save) and c2's
+  reconnect both draw it again (runs 20261007-022013, -022929, -023505,
+  -024000, -024452 and a-racemenu's four).
+- CONFIRMED 2026-10-07: the load onto a figure leaves the local player's
+  own look alone. skymp5-client's figures answer Papyrus GetBaseObject with
+  0x7, the local player's base NPC, and RaceMenu's load writes head parts,
+  morphs, tints and weight into an actor's base; yet c2's own preset, saved
+  before and after c1's look reached its figure, is the same 2932 bytes
+  (SHA-256 54d2809f..., run 20261007-034304), so RaceMenu's writes land on
+  the figure's own base. a-racemenu asserts it on every run.
+- Two early runs (20261007-022013 and -022551) saw c2's figure keep its old
+  look after a live preset, though the server relayed it; the cause was not
+  found. Since ba000d6a the service applies a look again to a new reference
+  as well as a new base and logs a load RaceMenu refuses; every live run
+  since applied it (seven, the console traced in five).
 - Remote players: skymp5-client builds each remote player's figure on its
   own base NPC (src/sync/appearance.ts applyAppearance:
   `TESModPlatform.createNpc()`), so the load's permanent writes to the base
@@ -155,11 +174,12 @@ above keep a hostile preset from carrying anything but a look.
 ## Client
 
 - Skyrim Platform: nothing of its own; callNative reaches CharGen.
-- skymp5-client RaceMenuService (b0219fee): on the race menu's close,
+- skymp5-client RaceMenuService (b0219fee, ba000d6a): on the race menu's close,
   SaveCharacterPreset on the player into RaceMenu's Presets folder, read
   back, sent if it changed. On RaceMenuPreset from the server, the JSON
   written to that folder and LoadCharacterPresetEx on the player or on
-  that player's figure, again whenever the figure's base changes. RaceMenu
+  that player's figure, again whenever the figure's reference or base
+  changes, a refused load logged once. RaceMenu
   is there when CharGen's natives answer, asked once; `raceMenuSync: false`
   turns it off.
 - Lab-driver: `racemenu` (CharGen answers), `racemenu-save {name, other?}`
@@ -171,12 +191,11 @@ above keep a hostile preset from carrying anything but a look.
 
 - T0: the Rust bounds (sizes, keys, forms) and the change form round trip;
   the login and CreateActor sends.
-- T3 on 1.6.1170 (`a-racemenu`): c1 loads a shaped preset and closes the
-  race menu; c2's figure of c1 shows it; the server restarts and c1
-  relaunches; c1 and c2 both show it again. How c2 reads its figure's look
-  (a save of the figure, or RaceMenu's NiOverride getters for a shape the
-  vanilla appearance cannot carry, such as a node scale) is settled by the
-  two-client probe.
+- T3 on 1.6.1170 (`a-racemenu`, d61647d): c1 scales its head as RaceMenu's
+  sliders do and closes the race menu; c1's head and c2's figure of c1 draw
+  at 1.6 and c2's own look is unchanged; the server restarts, c1 relaunches
+  and c2 reconnects; the same three again. The figure judged is the
+  enabled one with 3D where the server has c1 (c.node_scale_of).
 
 ## Order of work
 
@@ -185,17 +204,16 @@ above keep a hostile preset from carrying anything but a look.
    a-character-creation and smoke still pass there.
 2. Saving and loading confirmed (run 20261007-014139, CharGen through
    callNative; the C++ Preset interface refuted and reverted).
-3. The two-client probe on the CharGen client build: c1's shaped look on
-   c2's figure, and what a save of a figure writes. A real sculpted preset
-   measured (Eli's), which sets the message cap.
-4. T2, the scenario, a playtest, the merge.
+3. The two-client probes and a-racemenu green (runs above); T2 green.
+4. A playtest on 1.6.1170, where a real sculpted preset is measured (it
+   sets the message cap), then the merge sweep and the merge.
 
 ## Status
 
 - [x] doc complete, rung declared
 - [x] engine surface cited (CharGen's natives through callNative,
-      confirmed by run 20261007-014139; one HYPOTHESIS left, a save of a
-      figure, for the two-client probe)
+      confirmed by run 20261007-014139 and the two-client runs; no
+      HYPOTHESIS left)
 - [x] server logic + T0 (fork m1-racemenu 0f516e0f: wire-rules
       `racemenu`, the change form's raceMenuPreset, OnRaceMenuPreset, the
       login send and the send with a figure; unit/RaceMenuPresetTest.cpp
@@ -209,7 +227,11 @@ above keep a hostile preset from carrying anything but a look.
       callNative (387f9f72's TESModPlatform natives reverted, 35692723);
       T1: no harness, the probe
 - [x] TS handler (684f933b, CharGen since b0219fee: RaceMenuService)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T2 green (2026-10-07, `just test-proto m1-racemenu`: the smoke,
+      attributes across a restart, and all 14 difftest sessions, racemenu
+      among them, legacy against wire identical)
+- [x] T3 scenario green, no HYPOTHESIS tags (a-racemenu, d61647d, green in
+      runs 20261007-033048, -033403, -033726 and -035046; Eli's review
+      pending; the message cap waits on a sculpted preset)
 - [x] ledger and suppression registry updated (no NATIVES rows: CharGen
       is RaceMenu's and never runs on the server; nothing suppressed)
