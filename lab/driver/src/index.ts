@@ -573,6 +573,19 @@ function run(step: Step, player: Actor): unknown {
       }
       return { ids };
     }
+    case "av-names": {
+      // thuum docs/verbs/actor-values.md: the actor value each name finds
+      // through SKSE's ActorValueInfo.GetActorValueInfoByName, as its form
+      // id (0 for none), so a name table is the game's own, joined to
+      // av-table's index to form id: {names}
+      const names = Array.isArray(a.names) ? a.names.map(String) : [];
+      const ids: Record<string, number> = {};
+      for (const n of names) {
+        const info = ActorValueInfo.getActorValueInfoByName(n);
+        ids[n] = info ? info.getFormID() : 0;
+      }
+      return { ids };
+    }
     case "racemenu": {
       // thuum docs/verbs/racemenu-sync.md: whether RaceMenu's CharGen natives
       // answer (callNative throws when RaceMenu's scripts or skee are not
