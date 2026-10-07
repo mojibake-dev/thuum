@@ -27,17 +27,8 @@ sculpt vertex index is below its host's vertex count.
 Why not R1: there is no game rule to validate a face against; the bounds
 above keep a hostile preset from carrying anything but a look.
 
-## Engine surface (design input, apocrypha 2026-10-06; HYPOTHESIS until tested)
+## Engine surface
 
-- RaceMenu 0.4.20.0 ships ModderResource/IPluginInterface.h with
-  `IPresetInterface`: `SavePreset(filePath, tintPath, Actor*)` and
-  `LoadPreset(filePath, tintPath, Actor*, applyTypes)`, which write and read
-  the .jslot JSON (head parts, morphs, the sculpt, tintInfo, overrides and
-  overlays, body morphs and transforms), optionally with the face tint .dds.
-  Obtained through SKSE messaging (InterfaceExchangeMessage 0x9E3779B9) and
-  `IInterfaceMap::QueryInterface("Preset")`; the "Preset" name is in the
-  0.4.20.0 skee64.dll beside the other ten, not in GitHub master's main.cpp,
-  so it is confirmed against the binary first.
 - RaceMenu runs on game 1.6.1170 only. CONFIRMED live 2026-10-06: skee64.dll
   0.4.20.0 (Nexus mod 19080 file 743640, its newest, uploaded 2026-04-19;
   archive SHA-256 e0f5e923... as Nexus's VirusTotal link names it) declares
@@ -48,66 +39,88 @@ above keep a hostile preset from carrying anything but a look.
   2.3.1 on runtime 01070680 (1.7.104) logged: `plugin skee64.dll (00000001
   skee 00000001) disabled, incompatible with current version of the game`.
   Nexus has no newer file as of that day (mod updated 2026-04-20). So the
-  verb is built and proven on the lab's 1.6.1170 client set (ADR-022), and
-  a player who wants RaceMenu plays 1.6.1170 until RaceMenu ships a 1.7
-  build. Its two plugins, RaceMenu.esp and RaceMenuPlugin.esp, are full
-  slots (TES4 flags 0x0, not light), so the server's load order differs by
-  game version once they are in the 1.6.1170 set.
-
-- RaceMenu's own header for plugin authors (0.4.20.0,
-  ModderResource/IPluginInterface.h; in lab/.cache/mods, never in a repo)
-  declares the interface, read 2026-10-06:
-  - `IPluginInterface` (lines 24-32): virtual destructor, `GetVersion()`,
-    `Revert()`.
-  - `IInterfaceMap` (lines 34-40): `QueryInterface(const char* name)`,
-    `AddInterface`, `RemoveInterface`.
-  - `InterfaceExchangeMessage` (lines 42-50): message type `0x9E3779B9`
-    (kMessage_ExchangeInterface) carrying an `IInterfaceMap*`, null until
-    filled.
-  - `IPresetInterface : IPluginInterface` (lines 467-492): plugin version 1;
-    `SavePreset(const char* filePath, const char* tintPath, Actor*)` and
-    `LoadPreset(const char* filePath, const char* tintPath, Actor*,
-    ApplyTypes = kPresetApplyAll)`; ApplyTypes face 0, overrides 1, body
-    morphs 2, transforms 4, skin overrides 8, all 15. Paths like
-    `SKSE\Plugins\CharGen\Exported\<name>.jslot` and
-    `Textures\CharGen\Exported\<name>.dds` (the tint, optional "but
-    recommended for correct look"). LoadPreset: "Details may be saved to
-    the TESNPC, make sure this character is unique!"
-  - Skyrim Platform declares its own copies of these classes for the ABI
-    (the header is RaceMenu's; it is not copied into the fork).
-- HYPOTHESIS: how a plugin gets the map. The header names the message, not
-  who sends it. RaceMenu's public source (expired6978/SKSE64Plugins, older
-  than 0.4.20.0) has skee answer an InterfaceExchangeMessage sent to it by
-  name through SKSE messaging (receiver "skee"), filling `interfaceMap`
-  before Dispatch returns. Confirm in skee64.dll 0.4.20.0 on sky-re
-  (Ghidra): the message handler that writes the map pointer, and the
-  "Preset" entry among the names it registers.
-- HYPOTHESIS: SavePreset and LoadPreset run on the thread Skyrim Platform
-  calls natives on (as TESModPlatform.SetFavorite does, docs/verbs/
-  favorites.md); otherwise the native queues them to the game thread.
+  verb is built and proven on the lab's 1.6.1170 client set (ADR-022,
+  ADR-025), and a player who wants RaceMenu plays 1.6.1170 until RaceMenu
+  ships a 1.7 build. Its two plugins, RaceMenu.esp and RaceMenuPlugin.esp,
+  are full slots (TES4 flags 0x0, not light), so the server's load order
+  differs by game version once they are in the 1.6.1170 set.
+- Saving and loading a look: RaceMenu's own Papyrus natives, the API it
+  gives scripts. RaceMenu 0.4.20.0's scripts\source\chargen.psc (in
+  RaceMenu.bsa; read 2026-10-06, never in a repo):
+  - line 85: `Function SaveCharacterPreset(Actor akSource, string
+    characterName) native global`, "Saves actor preset to
+    SKSE\Plugins\CharGen\Presets\%characterName%.jslot", and "Only works on
+    player currently / Actor parameter is reserved for future use".
+  - line 80: `bool Function LoadCharacterPresetEx(Actor akDestination,
+    string characterName, ColorForm hairColor, int flags = 0xFFFFFFFF)
+    native global`; its wrapper LoadCharacterPreset (line 76) warns "Loads a
+    preset onto the NPC, permanently (DO NOT USE ON NPCs)" and "Hair Color
+    form that is provided is modified".
+  - lines 56-66: RaceMenu's own LoadPreset for the player passes RaceMenu's
+    hair color form (0x801 in RaceMenu.esp) and then sends the mod event
+    RSM_RequestTintSave, "Signals to RaceMenu that some internals were
+    probably modified and need to be stored into RaceMenu's script
+    representation".
+  - line 41: `bool Function IsExternalEnabled() native global`, a harmless
+    read.
+  RaceMenu's public source has the bodies (expired6978/SKSE64Plugins,
+  skee64/PapyrusCharGen.cpp lines 268-316, registered at 394-398): the save
+  is SaveJsonPreset into Data\SKSE\Plugins\CharGen\Presets\<name>.jslot;
+  the load reads SKSE\Plugins\CharGen\Presets\<name>.jslot (then .slot),
+  sets the hair color form when one is given, ApplyPresetData(actor, data,
+  true, flags) and queues a node update.
+- Skyrim Platform reaches any native by class and name with callNative,
+  loading the class's script on first use (skyrim-platform
+  CallNative.cpp:233-238, VM::ReloadType), so nothing in Skyrim Platform is
+  RaceMenu's.
+- CONFIRMED 2026-10-07 (run 20261007-014139-x-racemenu-probe, green, c1 on
+  1.6.1170): IsExternalEnabled answered (false); SaveCharacterPreset left a
+  3165-byte preset of c1's player when callNative returned; and
+  LoadCharacterPresetEx loaded it back (true). A second save matched the
+  first except for the order of two head parts (Skyrim.esm 05162F and
+  051631 swapped), so two presets compare with head parts as a set. The
+  preset's top-level keys for a default look: actor (hairColor,
+  headTexture, weight), faceTextures, headParts, modNames, mods, morphs
+  (custom, default with 19 morphs and 4 presets, sculpt, sculptDivisor),
+  tintInfo, version.
+- REFUTED 2026-10-07: the C++ Preset interface. RaceMenu's header for
+  plugin authors (0.4.20.0 ModderResource/IPluginInterface.h, lines
+  467-492) declares IPresetInterface, but 0.4.20.0 never registers it:
+  skee's interface map gets eleven names (public source main.cpp:943-953,
+  Override to FormTag), which sit together in skee64.dll's strings at
+  0x1e4300 to 0x1e43f8, while "Preset" sits apart at 0x1e563c. In run
+  20261007-012410 SKSE handed Skyrim Platform's exchange message to skee's
+  listener (skse64.log: the targeted dispatch logs nothing when it finds
+  its receiver) and the version asked through the map came back 0. The
+  natives built on it (387f9f72) are reverted (35692723).
+- HYPOTHESIS: a save of another actor. chargen.psc says the save works on
+  the player only; what it writes for a remote figure (head parts and
+  morphs come from the base NPC, tints may not) is for the two-client
+  probe to show before the scenario relies on it.
 - Remote players: skymp5-client builds each remote player's figure on its
   own base NPC (src/sync/appearance.ts applyAppearance:
-  `TESModPlatform.createNpc()`), so LoadPreset's writes to the TESNPC stay
-  with that player. The figure is respawned on a new base when its
-  appearance changes (src/view/formView.ts, respawnRequired), so the
-  preset is applied again after every spawn.
+  `TESModPlatform.createNpc()`), so the load's permanent writes to the base
+  ("DO NOT USE ON NPCs") stay with that player. The figure is respawned on
+  a new base when its appearance changes (src/view/formView.ts,
+  respawnRequired), so the preset is applied again after every spawn.
 
 ## Observe
 
-- After the race menu closes (and after any later RaceMenu edit), the
-  client calls SavePreset on its player and sends the JSON (and the tint
-  .dds, if the size allows) to the server.
+- After the race menu closes, the client saves its player's look
+  (CharGen.SaveCharacterPreset) and sends the JSON to the server if it
+  changed.
 
 ## Impose
 
 - After a login, the server sends each player's stored look to its own
-  client and to every client that shows that player; each calls
-  LoadPreset (apply all) on that actor.
-- Caveats from RaceMenu's source and header:
-  - LoadPreset may write details to the actor's TESNPC ("make sure this
-    character is unique"): every remote player needs its own base NPC
-    (skymp5-client creates one per remote player through
-    TESModPlatform.CreateNpc; to confirm).
+  client and to every client that shows that player; each loads it
+  (CharGen.LoadCharacterPresetEx, every part) onto that actor. The
+  player's own loads as RaceMenu's LoadPreset does: RaceMenu's hair color
+  form, then RSM_RequestTintSave; a figure's hair color stays its
+  appearance's.
+- Caveats from RaceMenu's source and scripts:
+  - The load writes to the actor's base NPC for good: every remote player
+    has its own (see the engine surface).
   - Head parts are keyed by "plugin|FormID" and sculpt blocks by the head
     part's chargen .tri path: every client needs the same load order and
     the same loose meshes, or entries are skipped silently.
@@ -141,45 +154,48 @@ above keep a hostile preset from carrying anything but a look.
 
 ## Client
 
-- Skyrim Platform, TESModPlatform: `SaveRaceMenuPreset(Actor) -> String`
-  (SavePreset into a file under SKSE\Plugins\CharGen\Exported, read back)
-  and `LoadRaceMenuPreset(Actor, String) -> Bool` (the JSON written to that
-  folder, then LoadPreset, apply all); both false or empty when RaceMenu is
-  not loaded, as on 1.7.104.
-- skymp5-client RaceMenuService: on the race menu's close, SaveRaceMenuPreset
-  on the player and send it if it changed. On RaceMenuPreset from the
-  server, LoadRaceMenuPreset on the player, or on that player's figure,
-  keeping it in the world model so every respawn applies it again.
-- Lab-driver: a step that loads a preset file staged for the run and one
-  that saves the player's and reports its size and a hash, so a scenario
-  can shape a look without dragging sliders.
+- Skyrim Platform: nothing of its own; callNative reaches CharGen.
+- skymp5-client RaceMenuService (b0219fee): on the race menu's close,
+  SaveCharacterPreset on the player into RaceMenu's Presets folder, read
+  back, sent if it changed. On RaceMenuPreset from the server, the JSON
+  written to that folder and LoadCharacterPresetEx on the player or on
+  that player's figure, again whenever the figure's base changes. RaceMenu
+  is there when CharGen's natives answer, asked once; `raceMenuSync: false`
+  turns it off.
+- Lab-driver: `racemenu` (CharGen answers), `racemenu-save {name, other?}`
+  (a save, its size and SHA-256), `racemenu-load {name}` (a load onto the
+  player as RaceMenu's LoadPreset does it), so a scenario can shape a look
+  without dragging sliders.
 
 ## Tests
 
 - T0: the Rust bounds (sizes, keys, forms) and the change form round trip;
   the login and CreateActor sends.
-- T3 on 1.6.1170 (`a-racemenu`): c1 loads a sculpted preset and closes the
-  race menu; c2's figure of c1 shows it (the saved preset read back through
-  c2's own SaveRaceMenuPreset on that figure matches); the server restarts
-  and c1 relaunches; c1 and c2 both show it again.
+- T3 on 1.6.1170 (`a-racemenu`): c1 loads a shaped preset and closes the
+  race menu; c2's figure of c1 shows it; the server restarts and c1
+  relaunches; c1 and c2 both show it again. How c2 reads its figure's look
+  (a save of the figure, or RaceMenu's NiOverride getters for a shape the
+  vanilla appearance cannot carry, such as a node scale) is settled by the
+  two-client probe.
 
 ## Order of work
 
 1. RaceMenu into the lab's 1.6.1170 set (thuum 1b4b741, after the merge
    sweep): its menu shows on both clones, and m0-appearance, a-rotfern,
    a-character-creation and smoke still pass there.
-2. The interface confirmed in skee64.dll on sky-re (the two HYPOTHESIS
-   tags above).
-3. The two natives and the lab-driver steps: load a preset, save it back,
-   compare. A real preset measured, which sets the message cap.
-4. Message and validator (same commit), server, client, scenario.
+2. Saving and loading confirmed (run 20261007-014139, CharGen through
+   callNative; the C++ Preset interface refuted and reverted).
+3. The two-client probe on the CharGen client build: c1's shaped look on
+   c2's figure, and what a save of a figure writes. A real sculpted preset
+   measured (Eli's), which sets the message cap.
+4. T2, the scenario, a playtest, the merge.
 
 ## Status
 
 - [x] doc complete, rung declared
-- [ ] engine surface cited or delegated (two HYPOTHESIS tags: the
-      exchange handshake and the calling thread; the first lab probe
-      settles both)
+- [x] engine surface cited (CharGen's natives through callNative,
+      confirmed by run 20261007-014139; one HYPOTHESIS left, a save of a
+      figure, for the two-client probe)
 - [x] server logic + T0 (fork m1-racemenu 0f516e0f: wire-rules
       `racemenu`, the change form's raceMenuPreset, OnRaceMenuPreset, the
       login send and the send with a figure; unit/RaceMenuPresetTest.cpp
@@ -189,10 +205,11 @@ above keep a hostile preset from carrying anything but a look.
       39, wire id 47, SCHEMA_VERSION 8; cap 192 KiB until a measured
       preset; validate_server split out, so a burst of presets at a login
       is not rate-limited on the client)
-- [x] native hook (387f9f72: TESModPlatform.RaceMenuPresetVersion,
-      SaveRaceMenuPreset, LoadRaceMenuPreset); T1: no harness, the probe
-- [x] TS handler (684f933b: RaceMenuService)
+- [x] native hook: none of ours; RaceMenu's CharGen natives through
+      callNative (387f9f72's TESModPlatform natives reverted, 35692723);
+      T1: no harness, the probe
+- [x] TS handler (684f933b, CharGen since b0219fee: RaceMenuService)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
-- [x] ledger and suppression registry updated (three NATIVES rows,
-      client only; nothing suppressed)
+- [x] ledger and suppression registry updated (no NATIVES rows: CharGen
+      is RaceMenu's and never runs on the server; nothing suppressed)

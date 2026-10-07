@@ -128,13 +128,19 @@ let watching: { startedAt: number; actors: Map<number, Watched> } | null = null;
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nodeFs = require("fs") as { existsSync(p: string): boolean; readFileSync(p: string): { toString(enc: string): string; length: number } };
+const nodeFs = require("fs") as {
+  existsSync(p: string): boolean;
+  readFileSync(p: string): { toString(enc: string): string; length: number };
+  mkdirSync(p: string, o: { recursive: boolean }): void;
+  rmSync(p: string, o: { force: boolean }): void;
+};
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const nodeCrypto = require("crypto") as { createHash(alg: string): { update(d: unknown): { digest(enc: string): string } } };
 
-// RaceMenu's export folder, where TESModPlatform's RaceMenu natives save and
-// load a preset by name (thuum docs/verbs/racemenu-sync.md)
-const RACEMENU_EXPORTED = "Data/SKSE/Plugins/CharGen/Exported/";
+// RaceMenu's preset folder under the game's folder, where its CharGen natives
+// save and load a preset by name (RaceMenu's scripts\source\chargen.psc;
+// thuum docs/verbs/racemenu-sync.md)
+const RACEMENU_PRESETS = "Data/SKSE/Plugins/CharGen/Presets/";
 
 function form(id: unknown): ObjectReference | null {
   const n = typeof id === "number" ? id : typeof id === "string" ? parseInt(id, 0) : NaN;
@@ -552,18 +558,20 @@ function run(step: Step, player: Actor): unknown {
       return { ids };
     }
     case "racemenu": {
-      // thuum docs/verbs/racemenu-sync.md: the version of RaceMenu's Preset
-      // interface as TESModPlatform reaches it; 0, an error here, when RaceMenu
-      // is not loaded or skee did not hand over its interfaces
-      const version = callNative("TESModPlatform", "RaceMenuPresetVersion", undefined) as number;
-      if (!version) throw new Error("RaceMenu's Preset interface not found");
-      return { version };
+      // thuum docs/verbs/racemenu-sync.md: whether RaceMenu's CharGen natives
+      // answer (callNative throws when RaceMenu's scripts or skee are not
+      // loaded), with CharGen.IsExternalEnabled's answer
+      const external = callNative("CharGen", "IsExternalEnabled", undefined) as boolean;
+      return { charGen: true, external };
     }
     case "racemenu-save": {
-      // the player's look saved as a RaceMenu preset {name}, or, with
-      // {other: true}, the look of the nearest other actor (in the lab, the
-      // other player's figure); its size and SHA-256 come back, so two saves
-      // can be compared
+      // the player's look saved as a RaceMenu preset {name}
+      // (CharGen.SaveCharacterPreset), or, with {other: true}, the look of
+      // the nearest other actor (in the lab, the other player's figure;
+      // 0.4.20.0's chargen.psc says the save "Only works on player
+      // currently", and this shows what it writes); its size and SHA-256
+      // come back, so two saves can be compared. RaceMenu's save answers
+      // nothing; the file it leaves is the answer.
       const name = String(a.name || "");
       let target: Actor = player;
       if (a.other) {
@@ -571,18 +579,24 @@ function run(step: Step, player: Actor): unknown {
         if (others.length === 0) throw new Error("no other actor nearby");
         target = others[0];
       }
-      if (callNative("TESModPlatform", "SaveRaceMenuPreset", undefined, target, name) !== true) {
-        throw new Error(`SaveRaceMenuPreset refused ${name}`);
-      }
-      const file = nodeFs.readFileSync(RACEMENU_EXPORTED + name + ".jslot");
+      const path = RACEMENU_PRESETS + name + ".jslot";
+      nodeFs.mkdirSync(RACEMENU_PRESETS, { recursive: true });
+      nodeFs.rmSync(path, { force: true });
+      callNative("CharGen", "SaveCharacterPreset", undefined, target, name);
+      if (!nodeFs.existsSync(path)) throw new Error(`SaveCharacterPreset left no ${name}.jslot`);
+      const file = nodeFs.readFileSync(path);
       return { saved: name, bytes: file.length, sha256: nodeCrypto.createHash("sha256").update(file).digest("hex") };
     }
     case "racemenu-load": {
-      // a RaceMenu preset {name} from the export folder applied to the player
+      // a RaceMenu preset {name} from the preset folder applied to the player
+      // as RaceMenu's own LoadPreset applies it: every part, RaceMenu's hair
+      // color form (0x801 in RaceMenu.esp), then RSM_RequestTintSave
       const name = String(a.name || "");
-      if (callNative("TESModPlatform", "LoadRaceMenuPreset", undefined, player, name) !== true) {
-        throw new Error(`LoadRaceMenuPreset refused ${name}`);
+      const hair = Game.getFormFromFile(0x801, "RaceMenu.esp");
+      if (callNative("CharGen", "LoadCharacterPresetEx", undefined, player, name, hair, -1) !== true) {
+        throw new Error(`LoadCharacterPresetEx refused ${name}`);
       }
+      player.sendModEvent("RSM_RequestTintSave", "", 0);
       return { loaded: name };
     }
     case "favorite": {
