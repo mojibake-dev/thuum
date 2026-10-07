@@ -180,14 +180,16 @@ it carries a HYPOTHESIS tag.
   7) carries both. Both are green at T3 on both versions (a-learned-effects
   runs 20261006-071353 and -074716; a-favorites runs 20261006-083811 and
   -094342, after playtest six found item marks lost at a login). Their
-  merge waits on m0-forge, red with two players on that build since
-  2026-10-06: Skyrim Platform called an event's callbacks in hash order,
-  not the order they subscribed, so skymp5-client could apply a player's
-  older inventory after its newer one and take back the item just given (a
-  Frida trace of the game console, run 20261006-183431-x-give-trace:
-  addItemEx +1, then -1 a frame later). The client's new update handlers
-  only moved the hash order. Fixed in Skyrim Platform on the branch (fork
-  44753816), under test. Script variables is designed
+  merge waited on m0-forge, red with two players on that build:
+  Skyrim Platform called an event's callbacks in hash order, not the order
+  they subscribed, so skymp5-client could apply a player's older inventory
+  after its newer one and take back the item just given (a Frida trace of
+  the game console, run 20261006-183431-x-give-trace: addItemEx +1, then -1
+  a frame later); the client's new update handlers only moved the hash
+  order. Fixed in Skyrim Platform (fork 44753816). Learned effects and
+  favorites DONE 2026-10-07: merged into parity 1e782672 after the full
+  sweep on 1.6.1170, 26 of 26 green in 68 minutes (runs 20261007-000641 to
+  -011406); clean-m1 promoted on both clones. Script variables is designed
   (docs/verbs/script-variables.md) and first needs the game's own scripts
   on the server.
 - Validation: character creation, damage range and angle, movement speed
