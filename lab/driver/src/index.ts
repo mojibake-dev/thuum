@@ -225,6 +225,13 @@ function nearbyActors(player: Actor): Actor[] {
   return found;
 }
 
+function distanceTo(a: Actor, b: Actor): number {
+  const dx = a.getPositionX() - b.getPositionX();
+  const dy = a.getPositionY() - b.getPositionY();
+  const dz = a.getPositionZ() - b.getPositionZ();
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
 function positionOf(actor: Actor): number[] {
   return [actor.getPositionX(), actor.getPositionY(), actor.getPositionZ()];
 }
@@ -513,6 +520,25 @@ function run(step: Step, player: Actor): unknown {
       }
       return out;
     }
+    case "advance-skill": {
+      // thuum docs/verbs/actor-values.md: skill experience as play earns it
+      // (Papyrus Game.AdvanceSkill), {name: the actor value's Papyrus name,
+      // magnitude}
+      Game.advanceSkill(String(a.name || ""), num(a.magnitude));
+      return { advanced: String(a.name || "") };
+    }
+    case "skills": {
+      // each named skill as SKSE's ActorValueInfo reads it, never through
+      // the verb's own natives: {base, xp, legendary} by name, and the
+      // player's level (lab-api's c.skill(name) and c.level())
+      const names = Array.isArray(a.names) ? (a.names as unknown[]).map(String) : [];
+      const out: Record<string, { base: number; xp: number; legendary: number } | null> = {};
+      for (const n of names) {
+        const info = ActorValueInfo.getActorValueInfoByName(n);
+        out[n] = info ? { base: info.getBaseValue(player), xp: info.getSkillExperience(), legendary: info.getSkillLegendaryLevel() } : null;
+      }
+      return { skills: out, level: player.getLevel() };
+    }
     case "av-table": {
       // thuum docs/verbs/actor-values.md: the engine's actor value list, the
       // AVIF form id of each index 0 to 163 as SKSE's
@@ -534,10 +560,18 @@ function run(step: Step, player: Actor): unknown {
       return { version };
     }
     case "racemenu-save": {
-      // the player's look saved as a RaceMenu preset {name}; its size and
-      // SHA-256 come back, so two saves can be compared
+      // the player's look saved as a RaceMenu preset {name}, or, with
+      // {other: true}, the look of the nearest other actor (in the lab, the
+      // other player's figure); its size and SHA-256 come back, so two saves
+      // can be compared
       const name = String(a.name || "");
-      if (callNative("TESModPlatform", "SaveRaceMenuPreset", undefined, player, name) !== true) {
+      let target: Actor = player;
+      if (a.other) {
+        const others = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
+        if (others.length === 0) throw new Error("no other actor nearby");
+        target = others[0];
+      }
+      if (callNative("TESModPlatform", "SaveRaceMenuPreset", undefined, target, name) !== true) {
         throw new Error(`SaveRaceMenuPreset refused ${name}`);
       }
       const file = nodeFs.readFileSync(RACEMENU_EXPORTED + name + ".jslot");

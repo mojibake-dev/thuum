@@ -52,6 +52,7 @@ class ViewsFacade(Protocol):
     def known(self, observer: str) -> dict[str, Any] | None: ...
     def favorites(self, observer: str) -> dict[str, Any] | None: ...
     def held(self, observer: str) -> dict[str, Any] | None: ...
+    def skills(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -131,6 +132,17 @@ class MarkerView:
 
     visible: bool
     canTravel: bool
+
+
+@dataclass(frozen=True)
+class SkillView:
+    """c.skill(name): a skill as that client's game holds it, from its last
+    `skills` step, read through SKSE's ActorValueInfo, never through the
+    actor-values verb's own natives (docs/verbs/actor-values.md)."""
+
+    base: float
+    xp: float
+    legendary: int
 
 
 @dataclass(frozen=True)
@@ -378,6 +390,27 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s held step did not read {int(ref_id):#x}")
         return n
 
+    def _skills_step(self) -> dict[str, Any]:
+        fn = getattr(self._views, "skills", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a skills step yet")
+        return data
+
+    def skill(self, name: str) -> SkillView:
+        s = (self._skills_step().get("skills") or {}).get(name)
+        if not isinstance(s, dict):
+            raise AssertionData(f"{self.name}'s skills step did not read {name!r}")
+        return SkillView(base=float(s.get("base") or 0), xp=float(s.get("xp") or 0), legendary=int(s.get("legendary") or 0))
+
+    def level(self) -> int:
+        """c.level(): that client's character level, from its last `skills`
+        step (Papyrus GetLevel)."""
+        level = self._skills_step().get("level")
+        if not isinstance(level, int) or isinstance(level, bool):
+            raise AssertionData(f"{self.name}'s skills step did not read the level")
+        return level
+
     def view(self, other: str) -> Pos:
         seen, origin = self._seen(other)
         if not seen:
@@ -442,6 +475,7 @@ _ATTRS = {
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     MarkerView: {"visible", "canTravel"},
+    SkillView: {"base", "xp", "legendary"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
@@ -455,10 +489,11 @@ _ID_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
+    _ClientRef: {"level"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level"},
     InventoryView: {"count"},
 }
 _CMP = {

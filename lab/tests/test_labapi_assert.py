@@ -370,6 +370,39 @@ class HeldTests(unittest.TestCase):
             ev.evaluate("c2.held(0x5ACE4) == 1")
 
 
+class SkillViews(NearViews):
+    """c1's last skills step: One-Handed at 41 with some experience, Archery
+    made legendary once, level 12."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {"skills": {"OneHanded": {"base": 41.0, "xp": 3.5, "legendary": 0},
+                                       "Marksman": {"base": 15.0, "xp": 0.0, "legendary": 1}},
+                            "level": 12}}
+
+    def skills(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class SkillTests(unittest.TestCase):
+    def test_skill_and_level_read_the_last_skills_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), SkillViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c1.skill("OneHanded").base >= 41'))
+        self.assertTrue(ev.evaluate('c1.skill("OneHanded").xp > 3'))
+        self.assertTrue(ev.evaluate('c1.skill("Marksman").legendary == 1'))
+        self.assertTrue(ev.evaluate("c1.level() == 12"))
+
+    def test_an_unread_skill_or_client_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), SkillViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c1.skill("Smithing").base == 15')
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.level() == 1")
+
+
 @needs_deps
 class WatchTests(unittest.TestCase):
     def test_watched_matches_the_server_position_and_reports_the_farthest_point(self):
