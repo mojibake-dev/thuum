@@ -48,6 +48,12 @@ items:
   "Skyrim.esm:IngotIron": 0x0005ACE4
   "Skyrim.esm:LeatherStrips": 0x000800E4
   "Skyrim.esm:IronDagger": 0x0001397E
+  # read from the lab's Skyrim.esm by editor id (record scan on sky-srv,
+  # 2026-10-07): the clock global and two weathers, for a look judged under
+  # the same light (docs/verbs/racemenu-sync.md, rotfern's shine)
+  "Skyrim.esm:GameHour": 0x00000038
+  "Skyrim.esm:SkyrimClear": 0x0000081A
+  "Skyrim.esm:SkyrimFog": 0x000C821E
   "Skyrim.esm:RecipeWeaponIronDagger": 0x000DA76A
   # a one-handed weapon the spawn kit does not carry (the kit holds IronSword,
   # IronDagger, IronWarAxe), for m0-inventory; same record scan, 2026-10-01

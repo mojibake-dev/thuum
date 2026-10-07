@@ -844,6 +844,8 @@ class Runner:
                 out["recipe"] = self.tables.base_id(out["recipe"])
             if action == "race-pick" and isinstance(out.get("race"), str):
                 out["race"] = self.tables.base_id(out["race"])
+            if action in ("global", "weather") and isinstance(out.get("form"), str):
+                out["form"] = self.tables.base_id(out["form"])
         except KeyError as e:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None
         return out

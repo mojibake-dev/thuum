@@ -35,6 +35,7 @@ import {
   TESModPlatform,
   Ui,
   Utility,
+  Weather,
   WorldSpace,
   hooks,
   on,
@@ -770,6 +771,30 @@ function run(step: Step, player: Actor): unknown {
         }
       }
       return { actor: target.getFormID(), base: base.getFormID(), weight: base.getWeight(), parts, tints };
+    }
+    case "global": {
+      // a global variable set on this client (GlobalVariable.setValue) and
+      // read back: {form, value}; GameHour puts the sun where a look is to be
+      // judged (the server's clock sets it again within a minute,
+      // docs/verbs/time.md), so the screenshot follows at once
+      const g = GlobalVariable.from(Game.getFormEx(num(a.form)));
+      if (!g) throw new Error(`no global ${num(a.form).toString(16)}`);
+      if (a.value !== undefined) g.setValue(num(a.value));
+      return { form: g.getFormID(), value: g.getValue() };
+    }
+    case "weather": {
+      // the weather forced on this client (Weather.setActive, override and
+      // accelerate) or released ({release: true}): {form}; the current one
+      // comes back (Weather.getCurrentWeather)
+      if (a.release) {
+        Weather.releaseOverride();
+      } else {
+        const w = Weather.from(Game.getFormEx(num(a.form)));
+        if (!w) throw new Error(`no weather ${num(a.form).toString(16)}`);
+        w.setActive(true, true);
+      }
+      const now = Weather.getCurrentWeather();
+      return { current: now ? now.getFormID() : 0 };
     }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in
