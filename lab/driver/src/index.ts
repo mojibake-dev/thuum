@@ -745,6 +745,22 @@ function run(step: Step, player: Actor): unknown {
       });
       return { node, ...scales(near[0]), all };
     }
+    case "head-parts": {
+      // the head parts on the player's base or, with {other: true}, on the
+      // nearest other actor's, as the engine lists them (ActorBase
+      // getNumHeadParts, getNthHeadPart; HeadPart getType, getPartName):
+      // whether a part a look names, an ear of the race's own type, is on
+      // the actor after RaceMenu's load (docs/verbs/racemenu-sync.md)
+      const target = a.other ? nearestOther(player) : player;
+      const base = ActorBase.from(target.getBaseObject());
+      if (!base) throw new Error("the actor has no base");
+      const parts: { id: number; type: number; name: string }[] = [];
+      for (let i = 0; i < base.getNumHeadParts(); ++i) {
+        const part = base.getNthHeadPart(i);
+        if (part) parts.push({ id: part.getFormID(), type: part.getType(), name: part.getPartName() });
+      }
+      return { actor: target.getFormID(), base: base.getFormID(), parts };
+    }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in
       // its menus, through the native the client's login marks with

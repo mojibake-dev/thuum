@@ -412,6 +412,20 @@ it carries a HYPOTHESIS tag.
   and tints, never its baked FaceGen mesh, and a sculpt cannot live in a
   plugin; the carrier is a RaceMenu preset (.jslot) in the mod, which
   apocrypha is making against the standalone's records (Eli, 2026-10-07).
+- From Eli's rotfern session after it (2026-10-07). A hair colour changed
+  in a race menu the player opened itself reached the other client as the
+  look but not as the colour: SkyMP takes an appearance (which carries the
+  colour, as RGB) only from a race menu the server opened and drops any
+  other silently, and the look sync had no such gate. Now it has the same
+  one, one look per server-opened menu (fork 06381be7, docs/verbs/
+  racemenu-sync.md). Rotfern's shine is the specular term, shown by an A/B
+  on test 1 with apocrypha's head mesh at specular strength 0 against the
+  original 3.0 at glossiness 30; fenestrate's ENB gave skin 0.15 outdoors.
+  Eli's call: a lower-spec head mesh in the mod, or the ENB. CBBE 2.0.3 is
+  in the shared mod set for every player (Eli: non-negotiable; body morphs
+  are how armor is fitted, and a look carries them), laid out from its
+  FOMOD by persist-mods; its light plugin stays client-side until the ESL
+  verb above lands.
 - Found by apocrypha (2026-10-07, reading Eli's real save): SkyMP's login
   save writes the NPC face block's two counts as 8-byte size_t
   (savefile/src/SFChangeFormNPC.cpp:80 and :84, through the template

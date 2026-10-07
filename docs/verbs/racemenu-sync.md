@@ -143,6 +143,15 @@ above keep a hostile preset from carrying anything but a look.
 - After the race menu closes, the client saves its player's look
   (CharGen.SaveCharacterPreset) and sends the JSON to the server if it
   changed.
+- The server takes one look per race menu it opened, before or after the
+  appearance that closes it, as SkyMP takes an appearance only while the
+  menu it opened is open (ActionListener::OnUpdateAppearance); any other
+  is refused with E_RACEMENU_CLOSED in the log. Lab, 2026-10-07: test 2
+  changed its hair color in a race menu it opened itself; SkyMP dropped the
+  appearance, which carries the hair color, while the look went through,
+  and test 1 showed the look on the old color. Known limit: a look that
+  arrives before an appearance the race rule refuses (E_APPEARANCE_RACE)
+  stays recorded; the race itself stays the validated one.
 
 ## Impose
 
