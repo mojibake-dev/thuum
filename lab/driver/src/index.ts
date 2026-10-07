@@ -17,6 +17,7 @@
 
 import {
   Actor,
+  ActorValueInfo,
   callNative,
   Cell,
   ConstructibleObject,
@@ -511,6 +512,18 @@ function run(step: Step, player: Actor): unknown {
         out[String(Number(id))] = f ? player.getItemCount(f) : null;
       }
       return out;
+    }
+    case "av-table": {
+      // thuum docs/verbs/actor-values.md: the engine's actor value list, the
+      // AVIF form id of each index 0 to 163 as SKSE's
+      // ActorValueInfo.GetActorValueInfoByID answers it (0 for none), so the
+      // server's name table joins indices to the AVIF records' editor ids
+      const ids: number[] = [];
+      for (let i = 0; i < 164; ++i) {
+        const info = ActorValueInfo.getActorValueInfoByID(i);
+        ids.push(info ? info.getFormID() : 0);
+      }
+      return { ids };
     }
     case "racemenu": {
       // thuum docs/verbs/racemenu-sync.md: the version of RaceMenu's Preset
