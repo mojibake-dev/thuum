@@ -403,6 +403,48 @@ class SkillTests(unittest.TestCase):
             ev.evaluate("c2.level() == 1")
 
 
+class NodeScaleViews(NearViews):
+    """c1 read its own head at 1.6; c2 read every actor near it: a stale
+    disabled reference and a live figure where the server has c1 (290, 0, 0),
+    and a guard far off."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {
+            "c1": {"self": {"node": "NPC Head [Head]", "actor": 20, "engine": 1.6, "raceMenu": 1.6}},
+            "c2": {"other": {"node": "NPC Head [Head]", "actor": 0xFF0008DC, "engine": 1.0, "raceMenu": 1.0, "all": [
+                {"actor": 0xFF0008DC, "engine": 1.0, "raceMenu": 1.0, "enabled": False, "loaded": True, "pos": [290.0, 0.0, 0.0]},
+                {"actor": 0xFF0008DD, "engine": 1.6, "raceMenu": 1.6, "enabled": True, "loaded": True, "pos": [292.0, 1.0, 0.0]},
+                {"actor": 0xFF000009, "engine": 1.0, "raceMenu": 1.0, "enabled": True, "loaded": True, "pos": [5000.0, 0.0, 0.0]},
+            ]}},
+        }
+
+    def node_scales(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class NodeScaleTests(unittest.TestCase):
+    def test_own_and_figure_scales_read_the_last_node_scale_steps(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), NodeScaleViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("abs(c1.node_scale() - 1.6) < 0.01"))
+        # the disabled reference sits nearer the server's position; the live figure is judged
+        self.assertTrue(ev.evaluate("abs(c2.node_scale_of(c1) - 1.6) < 0.01"))
+
+    def test_no_live_figure_or_no_step_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        views = NodeScaleViews()
+        views.read["c2"]["other"]["all"] = [n for n in views.read["c2"]["other"]["all"] if not n["enabled"]]
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.node_scale_of(c1) > 1")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.node_scale() > 1")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.node_scale_of(c2) > 1")
+
+
 @needs_deps
 class WatchTests(unittest.TestCase):
     def test_watched_matches_the_server_position_and_reports_the_farthest_point(self):

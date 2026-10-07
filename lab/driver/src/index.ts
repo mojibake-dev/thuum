@@ -660,6 +660,7 @@ function run(step: Step, player: Actor): unknown {
           base: base ? base.getFormID() : 0,
           enabled: !o.isDisabled(),
           loaded: o.is3DLoaded(),
+          pos: [o.getPositionX(), o.getPositionY(), o.getPositionZ()],
           distance: Math.round(distanceTo(player, o)),
         };
       });

@@ -42,8 +42,18 @@ class BoardTests(unittest.TestCase):
             board.complete(held.id, {"ok": True, "data": {"524516": 0}})
             self.assertEqual(board.held("c1")["524516"], 0)
             self.assertIsNone(board.held("c2"))
+            # a client's own node-scale and its {other: true} one are kept side by side
+            own = board.enqueue("c1", "node-scale", {})
+            board.poll("c1")
+            board.complete(own.id, {"ok": True, "data": {"engine": 1.6}})
+            seen = board.enqueue("c1", "node-scale", {"other": True})
+            board.poll("c1")
+            board.complete(seen.id, {"ok": True, "data": {"engine": 1.0, "all": []}})
+            self.assertEqual(board.node_scales("c1")["self"]["engine"], 1.6)
+            self.assertEqual(board.node_scales("c1")["other"]["engine"], 1.0)
             board.clear_views()
             self.assertIsNone(board.held("c1"))
+            self.assertIsNone(board.node_scales("c1"))
             # a timed-out step is cancelled and a late result is ignored
             late = board.enqueue("c1", "connect")
             board.poll("c1")

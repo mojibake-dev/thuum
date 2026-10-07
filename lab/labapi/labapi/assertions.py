@@ -14,6 +14,11 @@ the lab can grep (E_ASSERT_*).
   <client>.state.movementControls | .menuControls | .lookingControls | .activateControls
                                                      the engine's player controls, true when enabled
   <client>.state.rested                              the player has the Rested bonus (a sleep's)
+  <client>.node_scale()                              the engine's scale of the node its last node-scale
+                                                     step read on its own player
+  <client>.node_scale_of(<client>)                   the same on its figure of the other client
+                                                     (node-scale {other: true}): the enabled actor with
+                                                     3D nearest where the server has that client
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -53,6 +58,7 @@ class ViewsFacade(Protocol):
     def favorites(self, observer: str) -> dict[str, Any] | None: ...
     def held(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
+    def node_scales(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -280,6 +286,12 @@ class _ClientRef:
         sees = dump.get("sees")
         if isinstance(sees, dict):
             return sees.get(other), (0.0, 0.0, 0.0)
+        return self._nearest(other, dump.get("near") or [], lambda n: n["pos"])
+
+    def _nearest(self, other: str, entries: list[Any], pos_of: Any) -> tuple[dict[str, Any] | None, tuple[float, float, float]]:
+        """The entry whose position (pos_of) is nearest where the server has
+        `other`, within SEE_RADIUS, and the origin the server's coordinates
+        are relative to. Matching is in absolute coordinates."""
         target = self._server.actor(other)
         if not target or not target.get("found", True):
             raise AssertionData(f"server has no actor for {other}")
@@ -287,9 +299,9 @@ class _ClientRef:
         origin = self._origin("desc", absolute.get("cell"))
         best: dict[str, Any] | None = None
         best_d = 0.0
-        for n in dump.get("near") or []:
+        for e in entries:
             try:
-                pos = n["pos"]
+                pos = pos_of(e)
                 dx = float(pos[0]) - float(absolute["x"])
                 dy = float(pos[1]) - float(absolute["y"])
                 dz = float(pos[2]) - float(absolute["z"])
@@ -297,7 +309,7 @@ class _ClientRef:
                 continue
             d = (dx * dx + dy * dy + dz * dz) ** 0.5
             if d <= self.SEE_RADIUS and (best is None or d < best_d):
-                best, best_d = n, d
+                best, best_d = e, d
         return best, origin
 
     def sees(self, other: str) -> bool:
@@ -311,24 +323,7 @@ class _ClientRef:
         data = fn(self.name) if fn else None
         if not isinstance(data, dict):
             raise AssertionData(f"{self.name} has not reported a watch-stop yet")
-        target = self._server.actor(other)
-        if not target or not target.get("found", True):
-            raise AssertionData(f"server has no actor for {other}")
-        absolute = target.get("absolute") or target
-        origin = self._origin("desc", absolute.get("cell"))
-        best: dict[str, Any] | None = None
-        best_d = 0.0
-        for a in data.get("actors") or []:
-            try:
-                first = a["first"]
-                dx = float(first[0]) - float(absolute["x"])
-                dy = float(first[1]) - float(absolute["y"])
-                dz = float(first[2]) - float(absolute["z"])
-            except (KeyError, IndexError, TypeError, ValueError):
-                continue
-            d = (dx * dx + dy * dy + dz * dz) ** 0.5
-            if d <= self.SEE_RADIUS and (best is None or d < best_d):
-                best, best_d = a, d
+        best, origin = self._nearest(other, data.get("actors") or [], lambda a: a["first"])
         if best is None:
             raise AssertionData(f"{self.name} watched no actor where the server has {other}")
         try:
@@ -411,6 +406,37 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s skills step did not read the level")
         return level
 
+    def node_scale(self) -> float:
+        """c.node_scale(): the engine's scale of the node that client's last
+        `node-scale` step read on its own player."""
+        return self._node_scale(None)
+
+    def node_scale_of(self, other: str) -> float:
+        """c.node_scale_of(o): the same on that client's figure of client o,
+        from its last `node-scale {other: true}`: of the actors it read, the
+        enabled one with 3D nearest where the server has o (within
+        SEE_RADIUS), so a stale second reference at the same place is never
+        the one judged."""
+        return self._node_scale(other)
+
+    def _node_scale(self, other: str | None) -> float:
+        fn = getattr(self._views, "node_scales", None)
+        data = fn(self.name) if fn else None
+        kind = "self" if other is None else "other"
+        read = data.get(kind) if isinstance(data, dict) else None
+        if not isinstance(read, dict):
+            step = "node-scale" if other is None else "node-scale {other: true}"
+            raise AssertionData(f"{self.name} has not reported a {step} step yet")
+        if other is not None:
+            live = [n for n in read.get("all") or [] if isinstance(n, dict) and n.get("enabled") and n.get("loaded")]
+            read, _ = self._nearest(other, live, lambda n: n["pos"])
+            if read is None:
+                raise AssertionData(f"{self.name} read no enabled actor with 3D where the server has {other}")
+        try:
+            return float(read["engine"])
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s node-scale step lacks {e}") from e
+
     def view(self, other: str) -> Pos:
         seen, origin = self._seen(other)
         if not seen:
@@ -489,11 +515,11 @@ _ID_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level"},
+    _ClientRef: {"level", "node_scale"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of"},
     InventoryView: {"count"},
 }
 _CMP = {
