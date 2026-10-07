@@ -9,6 +9,8 @@ CLAUDE.local.md
 
 # lab artifacts
 lab/results/
+# Eli's own character as the lab's appearance preset: his, not the repo's
+lab/gamemode/presets/rotfern-*.json
 lab/frida/*.jsonl
 
 # noise

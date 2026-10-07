@@ -152,6 +152,25 @@ above keep a hostile preset from carrying anything but a look.
   and test 1 showed the look on the old color. Known limit: a look that
   arrives before an appearance the race rule refuses (E_APPEARANCE_RACE)
   stays recorded; the race itself stays the validated one.
+- What the sync's own load leaves on a player, measured (probe
+  x-head-parts, run 20261007-133253, rotfern's preset 1957f4aa on a player
+  carrying Eli's appearance record): the preset's head parts replace the
+  base's by type, the race's own ear (type 104) included; the weight goes
+  to the preset's (50 from 75); the skin tone tint goes to the preset's
+  (A9C5D8 at 0.94 from SkyMP's FF88B1C6); all three survive a race menu
+  the server opens and the driver closes (Ui close), and the other client's
+  figure shows the ear and the hair color. RaceMenu's saved look keeps its
+  tints under "tintInfo" (a look with "tints" absent is not a look without
+  tints). HYPOTHESIS: Eli's own record (weight 75, tint 0 FF88B1C6, both
+  SkyMP's appearance values, after he loaded the preset in RaceMenu's UI
+  and pressed Done) comes from the vanilla menu's commit on Done writing
+  its own slider state over what the preset set mid-menu; the driver
+  cannot press through the name box, so the T4 check is: load the preset
+  in the UI, Done, then head-parts on the base.
+- A figure's base cannot be read for its parts: it answers GetBaseObject
+  with 0x7, the local player's base (head-parts {other} returns the local
+  player's own parts). A figure's look is judged by eye or by the look
+  record.
 
 ## Impose
 
