@@ -143,6 +143,20 @@ above keep a hostile preset from carrying anything but a look.
 - After the race menu closes, the client saves its player's look
   (CharGen.SaveCharacterPreset) and sends the JSON to the server if it
   changed.
+- A preset loaded through RaceMenu's own menu comes out wrong (Eli's
+  playtest nine, 2026-10-07, rotfern.jslot): the menu's load goes through
+  its sliders, so the skin tone lost its alpha and landed on another color
+  (tint 0 88B1C6 at 1.0 against the file's A9C5D8 at 0.94; the body goes
+  muddy, the face and body tones part at the neck) and the ear, a head
+  part of a type the vanilla menu has no slider for, was dropped; weight
+  came through at 50 (an earlier record held 75, unexplained). The sync's
+  own load of the same file (CharGen.LoadCharacterPresetEx) gives the
+  file's values with the ear (probe x-head-parts). Fenestrate never
+  exercised the menu's load: the preset was exported from the character,
+  never imported. So at the menu's close the client finds the preset file
+  whose morphs equal the saved look's, the one the menu loaded, applies it
+  again through CharGen and saves again; that look is sent (fork
+  30b1e262). A face shaped by hand matches no file and stays as it is.
 - The server takes one look per race menu it opened, before or after the
   appearance that closes it, as SkyMP takes an appearance only while the
   menu it opened is open (ActionListener::OnUpdateAppearance); any other
