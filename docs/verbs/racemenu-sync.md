@@ -172,6 +172,31 @@ above keep a hostile preset from carrying anything but a look.
   SkyUI's do; they run the menu, not game state (rule: the server owns
   state, the hook is R3). Measured again once staged: the ear drop on the
   UI load path, the hair color on open, the tints after a menu load.
+- With the scripts running, the hair went blonde as the menu opened (Eli,
+  playtest nine). racemenu.psc's LoadDefaults runs SaveHair, which marks
+  a hair color as the player's own only when it sits on RaceMenu's form
+  0x801; SkyMP's appearance apply puts it on a fresh form, so SaveHair
+  stored it as not custom, the vanilla slider snapped to the race's hair
+  color list's first entry, and LoadHair had nothing to put back. Fork
+  cc2a5e94: the client moves the player's color onto 0x801 before
+  RSM_RequestTintSave at menu open, fenestrate's sequence. Follow-up
+  (apocrypha): SetNpcHairColor should assign the race's hair color list
+  form whose RGB matches (TESRace faceRelatedData[sex]->hairColors) before
+  creating one, so a plugin's color such as rotfernhair persists in any
+  save with no script state.
+- The menu-loaded preset is matched by its face sliders (morphs.default and
+  morphs.custom as a name to value map, three places), not the whole
+  morphs block: RaceMenu's save drops the sculpt vertices a preset did not
+  move (448 in the file, 436 saved) and reorders the sliders (fork
+  0aaac540).
+- The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
+  side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
+  under the lab's vanilla light, at 0 her own view matched fenestrate
+  ("the skin texture looks VERY correct") while the figure on the other
+  seat was off for the tint reasons above. The lab keeps 0 (display.ps1
+  now says so outright). apocrypha, from the shader source: the detail
+  map term scales only the base color by at most 1.6 percent, so CBBE's
+  Face Pack did not change the gloss.
 - The server takes one look per race menu it opened, before or after the
   appearance that closes it, as SkyMP takes an appearance only while the
   menu it opened is open (ActionListener::OnUpdateAppearance); any other
