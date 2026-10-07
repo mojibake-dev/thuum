@@ -469,7 +469,10 @@ function finishRacePick(c: Config, player: Actor): void {
   const k = racePick;
   if (Date.now() - k.lastAt < RACE_PICK_SETTLE_MS) return;
   try {
-    const race = player.getRace();
+    // after the fallback the base's race is the one the menu's close sends
+    // (appearance.ts reads it there); the actor's own stays until a reload
+    const base = k.set ? ActorBase.from(player.getBaseObject()) : null;
+    const race = base ? base.getRace() : player.getRace();
     const now = race ? race.getFormID() : 0;
     if (now === k.race) {
       racePick = null;
