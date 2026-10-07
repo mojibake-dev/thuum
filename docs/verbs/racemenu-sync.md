@@ -170,7 +170,29 @@ above keep a hostile preset from carrying anything but a look.
 - A figure's base cannot be read for its parts: it answers GetBaseObject
   with 0x7, the local player's base (head-parts {other} returns the local
   player's own parts). A figure's look is judged by eye or by the look
-  record.
+  record. A figure takes the look's head parts but keeps SkyMP's appearance
+  for skin and hair color: RaceMenu writes tints to the local player only
+  (PresetInterface ApplyPresetData, the player == actor check).
+- Rotfern's shine (Eli, 2026-10-07: "the texture is also way too shiny",
+  not so on fenestrate, which never ran an ENB before the character was
+  done; apocrypha's file dates agree). Measured: it is the specular term
+  (A/B on sky-c1 with the head mesh at specular strength 0 against the
+  original 3.0 at glossiness 30, same place, minutes apart: matte against
+  sharp white highlights on the lit side of the face; the body did not
+  read shiny). Every file is byte-identical to fenestrate's (apocrypha:
+  head mesh, all four maps, the texture set record), so the cause is in
+  the render stack. HYPOTHESIS: bUse64bitsHDRRenderTarget, 1 on fenestrate
+  and 0 in the lab (the template's launcher wrote the lab's SkyrimPrefs.ini
+  from its own hardware detect; display.ps1 edited only size and windowed
+  keys), so bright specular clipped to white before tonemapping. The probe
+  x-hdr (runs 20261007-143101 key 1 at game hour 11, 20261007-170xxx key 0
+  at hour 14) showed a matte face both times, inconclusive: the figure
+  stood in profile with the sun off the face, and carried the clean world's
+  orc skin tone under the rotfern parts. The lab now sets the key to 1 on
+  every clone (display.ps1, fenestrate's value) and Eli judges the face in
+  playtest nine; next if it stays shiny: apocrypha's 32-bit head_msn.dds
+  (the 24-bit R8G8B8 map has no D3D11 format), then weather and an
+  interior, from the player's own view.
 
 ## Impose
 

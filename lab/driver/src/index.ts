@@ -469,10 +469,7 @@ function finishRacePick(c: Config, player: Actor): void {
   const k = racePick;
   if (Date.now() - k.lastAt < RACE_PICK_SETTLE_MS) return;
   try {
-    // after the fallback the base's race is the one the menu's close sends
-    // (appearance.ts reads it there); the actor's own stays until a reload
-    const base = k.set ? ActorBase.from(player.getBaseObject()) : null;
-    const race = base ? base.getRace() : player.getRace();
+    const race = player.getRace();
     const now = race ? race.getFormID() : 0;
     if (now === k.race) {
       racePick = null;
@@ -488,10 +485,13 @@ function finishRacePick(c: Config, player: Actor): void {
       // character creation check to take or refuse
       if (!k.set) {
         const race = Race.from(Game.getFormEx(k.race));
-        const base = ActorBase.from(player.getBaseObject());
-        if (!race || !base) throw new Error(`race ${k.race.toString(16)} or the player's base is missing`);
-        TESModPlatform.setNpcRace(base, race);
-        player.queueNiNodeUpdate();
+        if (!race) throw new Error(`race ${k.race.toString(16)} is missing`);
+        // Actor.SetRace, the game's own live race change (RaceCompatibility's
+        // vampire script uses it): the actor and its base both switch, so
+        // the player's own game shows the race at once, as the vanilla list
+        // did (run 20261007-181613: the base alone left the actor a Nord
+        // until a reload, the server having taken rotfern)
+        player.setRace(race);
         k.set = true;
         k.lastAt = Date.now();
         return;

@@ -421,11 +421,32 @@ it carries a HYPOTHESIS tag.
   racemenu-sync.md). Rotfern's shine is the specular term, shown by an A/B
   on test 1 with apocrypha's head mesh at specular strength 0 against the
   original 3.0 at glossiness 30; fenestrate's ENB gave skin 0.15 outdoors.
-  Eli's call: a lower-spec head mesh in the mod, or the ENB. CBBE 2.0.3 is
-  in the shared mod set for every player (Eli: non-negotiable; body morphs
-  are how armor is fitted, and a look carries them), laid out from its
-  FOMOD by persist-mods; its light plugin stays client-side until the ESL
-  verb above lands.
+  Not the ENB (Eli: "i GUARANTEE it's not an enb"; apocrypha's dates agree:
+  the ENB files are from 2026-07-01, the rotfern build from June 5 to 18).
+  Candidate from fenestrate's own inis: bUse64bitsHDRRenderTarget=1 there,
+  0 in the lab (the lab's prefs were never templated), so bright specular
+  clips to white; the same-sun A/B (probe x-hdr) came out matte on both
+  sides and decides nothing (the figure in profile, the sun off the face),
+  so the key is set to 1 on every clone as fenestrate's value (display.ps1)
+  and Eli judges the face in playtest nine; HYPOTHESIS until then. CBBE
+  2.0.3 is in the shared mod set for every player (Eli: non-negotiable;
+  body morphs are how armor is fitted, and a look carries them), laid out
+  from its FOMOD by persist-mods; its light plugin stays client-side until
+  the ESL verb above lands. `a-racemenu` now also carries a body morph
+  (green, run 20261007-135454, server 9c0968b8; commit 952a8e4 for Eli's
+  review). Measured (probe x-head-parts, run 20261007-133253): the sync's
+  own load puts the preset's ear, weight and skin tint on the player and
+  they survive a server-opened menu; Eli's record had SkyMP's appearance
+  values instead, HYPOTHESIS the vanilla menu's Done commit over RaceMenu's
+  UI preset load (docs/verbs/racemenu-sync.md), checked in playtest nine.
+  With RaceMenu's menu in the set, `a-rotfern` went red (run
+  20261007-140054: race-pick's 16 Down presses leave the race unchanged, the
+  menu's race list is RaceMenu's); the driver now falls back to the game's
+  own live race change (Actor.SetRace) after the presses, and the menu's
+  close still sends the result for the server's check. Run 20261007-181613
+  with the base-only fallback: the server took rotfern
+  (lastAppearanceAllowed, raceId), c1's own actor stayed a Nord until a
+  reload; the Actor.SetRace fallback is staged after playtest nine.
 - Found by apocrypha (2026-10-07, reading Eli's real save): SkyMP's login
   save writes the NPC face block's two counts as 8-byte size_t
   (savefile/src/SFChangeFormNPC.cpp:80 and :84, through the template
