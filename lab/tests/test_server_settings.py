@@ -10,6 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SRV = ROOT / "lab" / "deploy" / "sky-srv"
 RACEMENU = ["RaceMenu.esp", "RaceMenuPlugin.esp"]
+# the mod layer's plugins that stay on the clients (persist-mods.sh): CBBE's
+# light plugin, which the server cannot read yet (docs/PLAN.md), and the one
+# that only drives RaceMenu's sliders; they close the clients' load order
+CLIENT_ONLY = ["RaceMenuMorphsCBBE.esp", "CBBE.esp"]
 
 
 def load(name):
@@ -38,7 +42,12 @@ class ServerSettings(unittest.TestCase):
     def test_the_mod_layer_closes_the_load_order_in_its_own_order(self):
         script = (ROOT / "lab" / "tools" / "persist-mods.sh").read_text()
         plugins = re.search(r"^plugins=\(([^)]*)\)", script, re.M).group(1).split()
-        self.assertEqual(names(self.main)[-len(plugins):], plugins)
+        self.assertEqual(plugins[-len(CLIENT_ONLY):], CLIENT_ONLY)
+        served = plugins[: -len(CLIENT_ONLY)]
+        self.assertEqual(names(self.main)[-len(served):], served)
+        for n in CLIENT_ONLY:
+            self.assertNotIn(n, names(self.main))
+            self.assertNotIn(n, names(self.old))
 
 
 if __name__ == "__main__":
