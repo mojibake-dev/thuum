@@ -751,6 +751,10 @@ function run(step: Step, player: Actor): unknown {
       // getNumHeadParts, getNthHeadPart; HeadPart getType, getPartName):
       // whether a part a look names, an ear of the race's own type, is on
       // the actor after RaceMenu's load (docs/verbs/racemenu-sync.md)
+      // With the parts: the base's weight (ActorBase.getWeight; RaceMenu's
+      // load writes a preset's weight to it) and, on the player, its tint
+      // masks as SKSE lists them (Game.getNumTintMasks and the getNthTintMask
+      // three), the list RaceMenu saves a preset's tints from.
       const target = a.other ? nearestOther(player) : player;
       const base = ActorBase.from(target.getBaseObject());
       if (!base) throw new Error("the actor has no base");
@@ -759,7 +763,13 @@ function run(step: Step, player: Actor): unknown {
         const part = base.getNthHeadPart(i);
         if (part) parts.push({ id: part.getFormID(), type: part.getType(), name: part.getPartName() });
       }
-      return { actor: target.getFormID(), base: base.getFormID(), parts };
+      const tints: { type: number; argb: number; texture: string }[] = [];
+      if (!a.other) {
+        for (let i = 0; i < Game.getNumTintMasks(); ++i) {
+          tints.push({ type: Game.getNthTintMaskType(i), argb: Game.getNthTintMaskColor(i), texture: Game.getNthTintMaskTexturePath(i) });
+        }
+      }
+      return { actor: target.getFormID(), base: base.getFormID(), weight: base.getWeight(), parts, tints };
     }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in
