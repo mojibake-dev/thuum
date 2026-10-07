@@ -678,6 +678,28 @@ function run(step: Step, player: Actor): unknown {
       callNative("NiOverride", "UpdateNodeTransform", undefined, player, false, female, node);
       return { node, scale, engine: NetImmerse.getNodeScale(player, node, false) };
     }
+    case "racemenu-drop": {
+      // what skymp5-client's login reset does to the player's transforms
+      // (RaceMenuService.dropTransforms): every key but "internal" taken off
+      // node by node through NiOverride, each node updated from its base;
+      // the nodes it touched come back
+      const female = isFemale(player);
+      const touched: string[] = [];
+      for (const firstPerson of [false, true]) {
+        const nodes = (callNative("NiOverride", "GetNodeTransformNames", undefined, player, firstPerson, female) as string[] | null) || [];
+        for (const node of nodes) {
+          const keys = (callNative("NiOverride", "GetNodeTransformKeys", undefined, player, firstPerson, female, node) as string[] | null) || [];
+          for (const key of keys.filter((k) => k !== "internal")) {
+            for (const fn of ["RemoveNodeTransformPosition", "RemoveNodeTransformScale", "RemoveNodeTransformScaleMode", "RemoveNodeTransformRotation"]) {
+              callNative("NiOverride", fn, undefined, player, firstPerson, female, node, key);
+            }
+          }
+          callNative("NiOverride", "UpdateNodeTransform", undefined, player, firstPerson, female, node);
+          touched.push((firstPerson ? "1st " : "3rd ") + node);
+        }
+      }
+      return { touched };
+    }
     case "node-scale": {
       // a node's scale on the player or, with {other: true}, on the nearest
       // other actor: the engine's (NetImmerse.GetNodeScale, third person)

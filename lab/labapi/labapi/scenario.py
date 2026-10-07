@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "node-scale", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "node-scale", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn"}
 SPECIAL_ACTIONS = {"screenshot", "relaunch"}
