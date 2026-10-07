@@ -17,6 +17,7 @@
 
 import {
   Actor,
+  ActorBase,
   ActorValueInfo,
   callNative,
   Cell,
@@ -28,6 +29,7 @@ import {
   HttpResponse,
   Ingredient,
   Input,
+  NetImmerse,
   ObjectReference,
   Spell,
   TESModPlatform,
@@ -229,6 +231,20 @@ function nearbyActors(player: Actor): Actor[] {
     found.push(other);
   }
   return found;
+}
+
+// the actor nearest the player other than itself (in the lab, the other
+// player's figure)
+function nearestOther(player: Actor): Actor {
+  const others = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
+  if (others.length === 0) throw new Error("no other actor nearby");
+  return others[0];
+}
+
+// an actor's sex as NiOverride keys its transforms
+function isFemale(actor: Actor): boolean {
+  const base = ActorBase.from(actor.getBaseObject());
+  return base !== null && base.getSex() === 1;
 }
 
 function distanceTo(a: Actor, b: Actor): number {
@@ -573,12 +589,7 @@ function run(step: Step, player: Actor): unknown {
       // come back, so two saves can be compared. RaceMenu's save answers
       // nothing; the file it leaves is the answer.
       const name = String(a.name || "");
-      let target: Actor = player;
-      if (a.other) {
-        const others = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
-        if (others.length === 0) throw new Error("no other actor nearby");
-        target = others[0];
-      }
+      const target = a.other ? nearestOther(player) : player;
       const path = RACEMENU_PRESETS + name + ".jslot";
       nodeFs.mkdirSync(RACEMENU_PRESETS, { recursive: true });
       nodeFs.rmSync(path, { force: true });
@@ -598,6 +609,34 @@ function run(step: Step, player: Actor): unknown {
       }
       player.sendModEvent("RSM_RequestTintSave", "", 0);
       return { loaded: name };
+    }
+    case "racemenu-scale": {
+      // a node scaled as RaceMenu's sliders scale one: a NiOverride node
+      // transform on the player under the key "thuum" (RaceMenu 0.4.20.0
+      // nioverride.psc lines 436 and 490), which RaceMenu's preset carries
+      // (its save takes every key but "internal"); {node, scale}, the head
+      // by default
+      const node = String(a.node || "NPC Head [Head]");
+      const scale = Number(a.scale);
+      if (!(scale > 0)) throw new Error("racemenu-scale needs a scale above 0");
+      const female = isFemale(player);
+      callNative("NiOverride", "AddNodeTransformScale", undefined, player, false, female, node, "thuum", scale);
+      callNative("NiOverride", "UpdateNodeTransform", undefined, player, false, female, node);
+      return { node, scale, engine: NetImmerse.getNodeScale(player, node, false) };
+    }
+    case "node-scale": {
+      // a node's scale on the player or, with {other: true}, on the nearest
+      // other actor: the engine's (NetImmerse.GetNodeScale, third person)
+      // and RaceMenu's record under "thuum" (NiOverride.GetNodeTransformScale,
+      // nioverride.psc line 439); {node}, the head by default
+      const node = String(a.node || "NPC Head [Head]");
+      const target = a.other ? nearestOther(player) : player;
+      return {
+        node,
+        actor: target.getFormID(),
+        engine: NetImmerse.getNodeScale(target, node, false),
+        raceMenu: callNative("NiOverride", "GetNodeTransformScale", undefined, target, false, isFemale(target), node, "thuum"),
+      };
     }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in
