@@ -12,8 +12,9 @@
 #   "20 Dawnguard Script", "20 Dawnguard Werewolf Script". The USSEP override
 #   ESP stays out.
 # - rotfern, Eli's race: the standalone fork in ~/Code/mods/rotfern-skyrim
-#   (ROTFERN_DIR), rotfern.esp with its meshes and textures, without its
-#   backups. Personal use only (its README): persist and the lab, never a repo.
+#   (ROTFERN_DIR), the whole folder (plugin, meshes, textures, its RaceMenu
+#   preset and config) without its backups. Personal use only (its README):
+#   persist and the lab, never a repo.
 # - RaceMenu 0.4.20.0, for 1.6.1170 only (ADR-025: its skee64.dll lists only
 #   that runtime, docs/verbs/racemenu-sync.md): Nexus mod 19080 file 743640,
 #   fetched the same way and checked against the SHA-256 Nexus's own
@@ -84,8 +85,12 @@ mkdir -p "$rc/Scripts" "$rc/Strings"
 cp "$x/20 Dawnguard/RaceCompatibility.esm" "$rc/"
 cp "$x/20 Dawnguard/Scripts/"*.pex "$x/20 Dawnguard Script/Scripts/"*.pex "$x/20 Dawnguard Werewolf Script/Scripts/"*.pex "$rc/Scripts/"
 cp "$x/20 Dawnguard/Strings/"* "$rc/Strings/"
+# The whole mod folder but its backups and README: the plugin, meshes,
+# textures, its RaceMenu preset (SKSE\Plugins\CharGen\Presets\rotfern.jslot)
+# and RaceMenu config (meshes\...\facegenmorphs\rotfern.esp, interface\
+# translations, HeadpartWhitelist), apocrypha 2026-10-07
 rsync -a --exclude backups/ --exclude README.md --exclude __folder_managed_by_vortex \
-  "$rotfern/rotfern.esp" "$rotfern/meshes" "$rotfern/textures" "$stage/tree/rotfern/"
+  "$rotfern/" "$stage/tree/rotfern/"
 # Stopgap, lab only (2026-10-06): rotfern.esp's RACE still names RS Children's
 # skeletons (ANAM, male and female: actors\character\ranaline\character
 # assets\skeletonkids.nif, skeleton_female_kids.nif) and one tint texture

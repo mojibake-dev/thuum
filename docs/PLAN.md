@@ -192,6 +192,16 @@ it carries a HYPOTHESIS tag.
   -011406); clean-m1 promoted on both clones. Script variables is designed
   (docs/verbs/script-variables.md) and first needs the game's own scripts
   on the server.
+- Light (ESL) plugins on the server (Eli, 2026-10-07: "we want ESL plugins
+  for SURE"). libespm reads only full-slot plugins, so the server's load
+  order leaves every ESL-flagged plugin out (docs/LAB.md: the light Creation
+  Club plugins load on the clients only), and an item from one cannot exist
+  server-side: found with rotfern's outfit, whose scarf is Lowered Fur
+  Hoods', a light plugin. Most current mods ship as light plugins. The verb:
+  libespm gives a light plugin's records the form ids the engine gives them,
+  the server's load order takes light plugins in the engine's order and the
+  clients match it; a T0 test on the form id mapping, and a scenario that
+  carries an item from a light plugin through a restart.
 - Validation: character creation, damage range and angle, movement speed
   bounds, activation distance.
   Survey of what the server checks today: docs/verbs/validation.md. First
