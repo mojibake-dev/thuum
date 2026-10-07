@@ -1,0 +1,60 @@
+# M1, RaceMenu sync on 1.6.1170 (docs/verbs/racemenu-sync.md; RaceMenu runs
+# on that version only, ADR-025). c1 shapes its look the way RaceMenu's
+# sliders do, a node transform on its head (racemenu-scale, 1.6 under the key
+# "thuum"), which no part of the vanilla appearance can carry, then opens and
+# closes the race menu: skymp5-client saves the look through RaceMenu's own
+# CharGen.SaveCharacterPreset and sends it, the server records it in c1's
+# change form and hands it to c2, whose client loads it onto its figure of c1
+# (CharGen.LoadCharacterPresetEx). Asserts: c1's head and c2's figure of c1
+# both at 1.6 as the engine draws them (NetImmerse.GetNodeScale); then after
+# a server restart, c1's relaunch (a fresh save, so no co-save of RaceMenu's
+# own) and c2's reconnect, both again, which only the server's record can do.
+# The figure judged is the enabled one with 3D where the server has c1. And
+# c2's own look never moves (its own preset saved before, after the live
+# load and after the reconnect, the same bytes): RaceMenu's load writes to an
+# actor's base, and the figure answers GetBaseObject with 0x7, the local
+# player's own base NPC (run 20261007-034304 showed the writes stay off it).
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-racemenu
+milestone: M1
+game: 1.6.1170
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0}
+  - wait: 5
+  - c2: node-scale {other: true}
+  - c2: racemenu-save {name: own-before}
+  - assert:
+      - abs(c2.node_scale_of(c1) - 1.0) < 0.01
+  - c1: racemenu-scale {scale: 1.6}
+  - c1: open-race-menu
+  - wait: 6
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 8
+  - c1: node-scale
+  - c2: node-scale {other: true}
+  - c2: racemenu-save {name: own-live}
+  - assert:
+      - abs(c1.node_scale() - 1.6) < 0.01
+      - abs(c2.node_scale_of(c1) - 1.6) < 0.01
+      - c2.preset("own-live").sha256 == c2.preset("own-before").sha256
+  - server: restart
+  - wait: 20
+  - c1: relaunch
+  - c2: reconnect
+  - wait: 12
+  - c1: node-scale
+  - c2: node-scale {other: true}
+  - c2: racemenu-save {name: own-end}
+  - assert:
+      - abs(c1.node_scale() - 1.6) < 0.01
+      - abs(c2.node_scale_of(c1) - 1.6) < 0.01
+      - c2.preset("own-end").sha256 == c2.preset("own-before").sha256
+artifacts: [server.log, c1.log, c2.log, screenshots]
