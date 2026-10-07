@@ -31,6 +31,7 @@ import {
   Input,
   NetImmerse,
   ObjectReference,
+  Race,
   Spell,
   TESModPlatform,
   Ui,
@@ -104,7 +105,7 @@ const CRAFT_WAIT_MS = 15000;
 // the one asked for: the menu sets the race on the player as the selection
 // moves, and the order of its list is the menu's, so the step reads the race
 // after each press instead of counting presses.
-let racePick: { step: Step; race: number; presses: number; max: number; lastAt: number } | null = null;
+let racePick: { step: Step; race: number; presses: number; max: number; lastAt: number; set?: boolean } | null = null;
 const RACE_PICK_SETTLE_MS = 1200;
 // The result goes in this long after the ingredients come out, so
 // skymp5-client's craft service has every removal before the result: made in
@@ -472,10 +473,26 @@ function finishRacePick(c: Config, player: Actor): void {
     const now = race ? race.getFormID() : 0;
     if (now === k.race) {
       racePick = null;
-      postResult(c, k.step, { ok: true, data: { race: now, presses: k.presses } });
+      postResult(c, k.step, { ok: true, data: { race: now, presses: k.presses, set: !!k.set } });
       return;
     }
     if (k.presses >= k.max) {
+      // RaceMenu's menu does not move its race list on Down (run 20261007-140054-a-rotfern:
+      // 16 presses, the race unchanged), so the pick is made the way the
+      // vanilla list would have made it, on the player's base
+      // (TESModPlatform.SetNpcRace, as the client's own appearance apply
+      // does); the menu's close still sends the result for the server's
+      // character creation check to take or refuse
+      if (!k.set) {
+        const race = Race.from(Game.getFormEx(k.race));
+        const base = ActorBase.from(player.getBaseObject());
+        if (!race || !base) throw new Error(`race ${k.race.toString(16)} or the player's base is missing`);
+        TESModPlatform.setNpcRace(base, race);
+        player.queueNiNodeUpdate();
+        k.set = true;
+        k.lastAt = Date.now();
+        return;
+      }
       racePick = null;
       postResult(c, k.step, { ok: false, error: `race ${k.race.toString(16)} not reached after ${k.presses} presses (now ${now.toString(16)})` });
       return;
@@ -774,9 +791,10 @@ function run(step: Step, player: Actor): unknown {
     }
     case "global": {
       // a global variable set on this client (GlobalVariable.setValue) and
-      // read back: {form, value}; GameHour puts the sun where a look is to be
-      // judged (the server's clock sets it again within a minute,
-      // docs/verbs/time.md), so the screenshot follows at once
+      // read back: {form, value}. Not the sun: TimeService writes GameHour
+      // every frame from the server's clock (docs/verbs/time.md; run
+      // 20261007-134550 read 21.4 back a few seconds after setting 12), so a
+      // shot at a given hour is scheduled by the clock's formula instead
       const g = GlobalVariable.from(Game.getFormEx(num(a.form)));
       if (!g) throw new Error(`no global ${num(a.form).toString(16)}`);
       if (a.value !== undefined) g.setValue(num(a.value));
