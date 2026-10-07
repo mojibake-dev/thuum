@@ -90,6 +90,12 @@ level increase, at most 4 at once and 1 a second after.
   message with the new record; the client applies it.
 - A server-set value holds against a stale report: the server takes a
   report for that value only once it matches what was imposed.
+- The same holds for the whole record a login sends: the player's game
+  starts each session on the race's values (a fresh generated save), so a
+  skill increase reported before the record is applied would carry those
+  defaults. Every value the login sends is held until a report matches it,
+  and the client reports nothing until it applied the record (as favorites
+  holds its list until the server's arrives).
 - Other players see nothing new: their figures already show health, magicka
   and stamina through SkyMP's percentages.
 
