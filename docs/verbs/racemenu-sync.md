@@ -196,11 +196,14 @@ above keep a hostile preset from carrying anything but a look.
   FF000000 x2, C9430401, 590F0440, FF2F2013; the look 30,476 bytes with
   the ear, 22 custom morphs, one sculpt host. The other seat shows the
   same values. Open after it: his own view reads shiny where the figure of
-  her on the other seat does not, same tints; the paths differ in how the
-  face maps are bound (RaceMenu's override loader on the player, the
-  race's texture set through the engine on a figure), and the maps are
-  24-bit R8G8B8 DDS; HYPOTHESIS that RaceMenu's loader fails on them,
-  tested with 32-bit re-encodes on one clone.
+  her on the other seat does not, same tints, and (Eli) with his seat at
+  HDR key 0 and the other at 1, so the key is not what separates the two.
+  Not the face maps' binding either: RaceMenu never applies a preset's
+  faceTextures (apocrypha, PresetInterface.cpp: parsed and written back,
+  read by nothing), so both seats get her maps through the engine's
+  texture set path. Next read: RaceMenu's Export Head on the player's
+  seat, which writes the face's bound textures and shader values as the
+  player renders them, against the figure's.
 - The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
   side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
   under the lab's vanilla light, at 0 her own view matched fenestrate
