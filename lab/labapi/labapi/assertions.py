@@ -16,6 +16,8 @@ the lab can grep (E_ASSERT_*).
   <client>.state.rested                              the player has the Rested bonus (a sleep's)
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
+  <client>.morph() | .morph_of(<client>)             a body morph its node-scale {morph} step read, the
+                                                     same way (its own player, or its figure of the other)
   <client>.node_scale_of(<client>)                   the same on its figure of the other client
                                                      (node-scale {other: true}): the enabled actor with
                                                      3D nearest where the server has that client
@@ -446,7 +448,17 @@ class _ClientRef:
         the one judged."""
         return self._node_scale(other)
 
-    def _node_scale(self, other: str | None) -> float:
+    def morph(self) -> float:
+        """c.morph(): the body morph that client's last `node-scale {morph}`
+        step read on its own player."""
+        return self._node_scale(None, "morph")
+
+    def morph_of(self, other: str) -> float:
+        """c.morph_of(o): the same on that client's figure of client o, the
+        figure chosen as node_scale_of chooses it."""
+        return self._node_scale(other, "morph")
+
+    def _node_scale(self, other: str | None, field: str = "engine") -> float:
         fn = getattr(self._views, "node_scales", None)
         data = fn(self.name) if fn else None
         kind = "self" if other is None else "other"
@@ -460,7 +472,7 @@ class _ClientRef:
             if read is None:
                 raise AssertionData(f"{self.name} read no enabled actor with 3D where the server has {other}")
         try:
-            return float(read["engine"])
+            return float(read[field])
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s node-scale step lacks {e}") from e
 
@@ -543,11 +555,11 @@ _ID_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale"},
+    _ClientRef: {"level", "node_scale", "morph"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "preset"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset"},
     InventoryView: {"count"},
 }
 _CMP = {

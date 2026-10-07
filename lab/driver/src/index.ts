@@ -678,6 +678,18 @@ function run(step: Step, player: Actor): unknown {
       callNative("NiOverride", "UpdateNodeTransform", undefined, player, false, female, node);
       return { node, scale, engine: NetImmerse.getNodeScale(player, node, false) };
     }
+    case "body-morph": {
+      // a RaceMenu body morph on the player, as RaceMenu's body sliders set
+      // one (NiOverride.SetBodyMorph under the key "thuum", then
+      // UpdateModelWeight; 0.4.20.0 nioverride.psc lines 283 and 308), which
+      // RaceMenu's preset carries in its bodyMorphs section: {name, value}
+      const name = String(a.name || "");
+      const value = Number(a.value);
+      if (!name || !Number.isFinite(value)) throw new Error("body-morph needs name and value");
+      callNative("NiOverride", "SetBodyMorph", undefined, player, name, "thuum", value);
+      callNative("NiOverride", "UpdateModelWeight", undefined, player);
+      return { name, value: callNative("NiOverride", "GetBodyMorph", undefined, player, name, "thuum") };
+    }
     case "racemenu-drop": {
       // what skymp5-client's login reset does to the player's transforms
       // (RaceMenuService.dropTransforms): every key but "internal" taken off
@@ -706,12 +718,16 @@ function run(step: Step, player: Actor): unknown {
       // and RaceMenu's record under "thuum" (NiOverride.GetNodeTransformScale,
       // nioverride.psc line 439); {node}, the head by default. With other,
       // every actor nearby comes back too (id, base, enabled, 3D, distance,
-      // both scales), so a second reference for one player shows.
+      // both scales), so a second reference for one player shows. With
+      // {morph}, each also reads that body morph under "thuum"
+      // (NiOverride.GetBodyMorph, line 286).
       const node = String(a.node || "NPC Head [Head]");
+      const morph = typeof a.morph === "string" ? a.morph : "";
       const scales = (target: Actor) => ({
         actor: target.getFormID(),
         engine: NetImmerse.getNodeScale(target, node, false),
         raceMenu: callNative("NiOverride", "GetNodeTransformScale", undefined, target, false, isFemale(target), node, "thuum"),
+        ...(morph ? { morph: callNative("NiOverride", "GetBodyMorph", undefined, target, morph, "thuum") } : {}),
       });
       if (!a.other) return { node, ...scales(player) };
       const near = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));

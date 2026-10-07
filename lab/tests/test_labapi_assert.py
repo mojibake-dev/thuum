@@ -411,10 +411,10 @@ class NodeScaleViews(NearViews):
     def __init__(self):
         super().__init__()
         self.read = {
-            "c1": {"self": {"node": "NPC Head [Head]", "actor": 20, "engine": 1.6, "raceMenu": 1.6}},
+            "c1": {"self": {"node": "NPC Head [Head]", "actor": 20, "engine": 1.6, "raceMenu": 1.6, "morph": 0.7}},
             "c2": {"other": {"node": "NPC Head [Head]", "actor": 0xFF0008DC, "engine": 1.0, "raceMenu": 1.0, "all": [
                 {"actor": 0xFF0008DC, "engine": 1.0, "raceMenu": 1.0, "enabled": False, "loaded": True, "pos": [290.0, 0.0, 0.0]},
-                {"actor": 0xFF0008DD, "engine": 1.6, "raceMenu": 1.6, "enabled": True, "loaded": True, "pos": [292.0, 1.0, 0.0]},
+                {"actor": 0xFF0008DD, "engine": 1.6, "raceMenu": 1.6, "morph": 0.7, "enabled": True, "loaded": True, "pos": [292.0, 1.0, 0.0]},
                 {"actor": 0xFF000009, "engine": 1.0, "raceMenu": 1.0, "enabled": True, "loaded": True, "pos": [5000.0, 0.0, 0.0]},
             ]}},
         }
@@ -462,6 +462,9 @@ class NodeScaleTests(unittest.TestCase):
         self.assertTrue(ev.evaluate("abs(c1.node_scale() - 1.6) < 0.01"))
         # the disabled reference sits nearer the server's position; the live figure is judged
         self.assertTrue(ev.evaluate("abs(c2.node_scale_of(c1) - 1.6) < 0.01"))
+        # a body morph reads the same way
+        self.assertTrue(ev.evaluate("abs(c1.morph() - 0.7) < 0.01"))
+        self.assertTrue(ev.evaluate("abs(c2.morph_of(c1) - 0.7) < 0.01"))
 
     def test_no_live_figure_or_no_step_is_a_data_error(self):
         from labapi.assertions import AssertionData, Evaluator
