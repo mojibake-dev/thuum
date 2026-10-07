@@ -402,6 +402,16 @@ it carries a HYPOTHESIS tag.
   and tints, never its baked FaceGen mesh, and a sculpt cannot live in a
   plugin; the carrier is a RaceMenu preset (.jslot) in the mod, which
   apocrypha is making against the standalone's records (Eli, 2026-10-07).
+- Found by apocrypha (2026-10-07, reading Eli's real save): SkyMP's login
+  save writes the NPC face block's two counts as 8-byte size_t
+  (savefile/src/SFChangeFormNPC.cpp:80 and :84, through the template
+  Write), where the game reads 4-byte counts ([u32 19][19 floats][u32 4][4
+  u32] in a real save). skymp5-client's login save carries a face (head
+  parts and presets, remoteServer.ts loadGame), so the game misreads the
+  rest of that record, the gender after it included, until
+  applyAppearanceToPlayer sets the appearance a moment later. To fix after
+  the RaceMenu merge: the counts as uint32_t, with a T0 test on the block's
+  byte layout.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
