@@ -134,7 +134,10 @@ level increase, at most 4 at once and 1 a second after.
 - Papyrus natives touched (ledger lines added): Actor.GetActorValue,
   GetBaseActorValue, GetActorValueMax (today missing), SetActorValue
   (today delegated, its result not saved), ModActorValue, ForceActorValue
-  (today missing); each R0 on a player.
+  (today missing); each R0 on a player. They need every actor value's
+  Papyrus name (the server's ConvertToAV knows three): read from the game's
+  own AVIF records with lab/esm.py, or the engine's ActorValueList through
+  the re-analyst, never typed from memory (rule 1).
 
 ## Client
 
@@ -177,12 +180,17 @@ level increase, at most 4 at once and 1 a second after.
 ## Status
 
 - [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated (three HYPOTHESIS tags; SetLevel to
-      the re-analyst)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+- [ ] engine surface cited or delegated (four HYPOTHESIS tags; SetLevel and
+      the actor values' Papyrus names to look up)
+- [x] server logic + T0 (fork m1-actor-values: wire-rules actor_values
+      8ebc5f91 and e5549cfc, the record, the holds and the login send
+      d7e73cd9; unit/ActorValuesTest.cpp)
+- [x] message + validator (same commit, 4fb8fe6a: ActorValues, MsgType
+      40, wire id 48, SCHEMA_VERSION 9)
+- [x] native hook (a4b5b457: TESModPlatform GetActorValueBases,
+      SetActorValueBase, GetPlayerProgress, SetPlayerProgress); T1: none
+- [x] TS handler (a4b5b457: ActorValuesService)
+- [ ] the server's Papyrus natives (Get, Set, Mod, Force on a player)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (four NATIVES rows)
