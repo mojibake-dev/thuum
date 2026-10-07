@@ -390,6 +390,18 @@ it carries a HYPOTHESIS tag.
     (1e782672: a name only when the server records one).
   - Neither player knew an ingredient effect: expected, `lab-up` reset the
     server's world before the playtest and nobody had eaten since.
+- From Eli's eighth T4 playtest (2026-10-07, docs/private/playtest-m1-8.md;
+  on 1.6.1170, fork m1-racemenu ba000d6a, RaceMenu 0.4.20.0 on both
+  clones). Passed, every check: each player shaped its look in RaceMenu
+  (sculpt and RaceMenu's sliders), the other saw it within seconds, its own
+  look stayed its own, and both looks came back after quitting, both ways
+  round. The server recorded the looks at 24,463 and 41,332 bytes, so the
+  RaceMenuPreset cap of 192 KiB stands. Found: picking rotfern in RaceMenu
+  gives the race preset's sliders without the sculpted face meant to ship
+  with the mod. A race preset NPC lends a player its head parts, sliders
+  and tints, never its baked FaceGen mesh, and a sculpt cannot live in a
+  plugin; the carrier is a RaceMenu preset (.jslot) in the mod, which
+  apocrypha is making against the standalone's records (Eli, 2026-10-07).
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
@@ -522,10 +534,12 @@ scenario there:
   every client. It is a verb of its own, and it needs RaceMenu to load on
   every client. RaceMenu's current files (v0.4.20.0, Nexus 19080, uploaded
   2026-04-19/20) all require game 1.6.1170 (GOG 1.6.1179), none 1.7.x
-  (Nexus file list, 2026-10-06), and the lab has never loaded it on
-  1.7.104, so it is built and tested on the lab's 1.6.1170 client set; a
-  load test of 0.4.20 on a 1.7.104 clone (does SKSE 2.3.1 load its plugin)
-  decides whether 1.7.104 waits for a RaceMenu release.
+  (Nexus file list, 2026-10-06), and SKSE 2.3.1 on 1.7.104 refuses its
+  plugin (sky-c1, 2026-10-06), so it is built and tested on the lab's
+  1.6.1170 client set (ADR-025). Status 2026-10-07: through RaceMenu's own
+  CharGen natives (docs/verbs/racemenu-sync.md), T2 green, `a-racemenu`
+  green (Eli's review pending), playtest eight passed; the merge sweep
+  next.
 
 Game versions (ADR-022, Eli, 2026-10-04): thuum supports and tests 1.7.104
 and 1.6.1170, one version per lab run (`just lab-run <scenario> [game]`).

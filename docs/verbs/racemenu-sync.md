@@ -205,8 +205,9 @@ above keep a hostile preset from carrying anything but a look.
 2. Saving and loading confirmed (run 20261007-014139, CharGen through
    callNative; the C++ Preset interface refuted and reverted).
 3. The two-client probes and a-racemenu green (runs above); T2 green.
-4. A playtest on 1.6.1170, where a real sculpted preset is measured (it
-   sets the message cap), then the merge sweep and the merge.
+4. Playtest eight on 1.6.1170 passed (2026-10-07): sculpted looks of
+   24,463 and 41,332 bytes, so the 192 KiB cap stands. The merge sweep and
+   the merge next.
 
 ## Status
 
@@ -232,6 +233,6 @@ above keep a hostile preset from carrying anything but a look.
       among them, legacy against wire identical)
 - [x] T3 scenario green, no HYPOTHESIS tags (a-racemenu, d61647d, green in
       runs 20261007-033048, -033403, -033726 and -035046; Eli's review
-      pending; the message cap waits on a sculpted preset)
+      pending; T4 playtest eight passed, the cap stays 192 KiB)
 - [x] ledger and suppression registry updated (no NATIVES rows: CharGen
       is RaceMenu's and never runs on the server; nothing suppressed)
