@@ -132,6 +132,10 @@ own client)
 - [x] TS handler (fork 315861c2, c8f76a58)
 - [x] T2 green (`just test-proto m1-favorites`, 2026-10-06: the branch is
       stacked on this one, with the learned-effects difftest session)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T3 scenario green, no HYPOTHESIS tags (a-learned-effects, thuum
+      d50e23e, approved by Eli; green on 1.7.104 runs 20261006-050420 and
+      -071353, on 1.6.1170 runs 20261006-074716, 20261007-002459 and the
+      merge sweep's 20261008-090356; the two UNKNOWNs above are on paths
+      the design does not depend on)
 - [x] ledger and suppression registry updated (Ingredient.LearnEffect's row;
       nothing suppressed)
