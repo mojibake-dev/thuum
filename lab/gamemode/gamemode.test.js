@@ -143,3 +143,16 @@ test("labCommand papyrus-av runs the server's own actor value natives", () => {
   assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "set", name: "Archery", value: "x" }).ok, false);
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 9, how: "set", name: "Archery", value: 1 }), { found: false, profileId: 9 });
 });
+
+test("labCommand staff-rank sets the server's staffRank property", () => {
+  global.mp = fakeMp();
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const ok = mp.onHttpRpcRunAttempt("labCommand", { kind: "staff-rank", profileId: 1, rank: 3 });
+  assert.strictEqual(ok.ok, true);
+  assert.strictEqual(mp.get(0xff000001, "staffRank"), 3);
+  for (const rank of [-1, 4, 1.5, "owner"]) {
+    assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "staff-rank", profileId: 1, rank }).ok, false);
+  }
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "staff-rank", profileId: 9, rank: 0 }), { found: false, profileId: 9 });
+});

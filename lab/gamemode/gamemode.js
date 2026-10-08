@@ -196,6 +196,21 @@ command["papyrus-av"] = (payload) => {
   };
 };
 
+// A player's staff rank (thuum docs/verbs/console-commands.md: 0 player,
+// 1 moderator, 2 admin, 3 owner), which the server's console table reads; the
+// property staffRank is the server's (fork m1-console). A server without it
+// refuses the set, and the answer says so.
+command["staff-rank"] = (payload) => {
+  const actorId = actorFor(payload.profileId);
+  if (!actorId) return notFound(payload.profileId);
+  const rank = Number(payload.rank);
+  if (!Number.isInteger(rank) || rank < 0 || rank > 3) {
+    return { ok: false, error: "staff-rank needs rank 0 (player), 1 (moderator), 2 (admin) or 3 (owner)" };
+  }
+  mp.set(actorId, "staffRank", rank);
+  return { ok: true, actorId, rank: mp.get(actorId, "staffRank") };
+};
+
 // The server sends the client SetRaceMenuOpen and takes one UpdateAppearance
 // from it while the menu is open: the race menu a new character gets, opened
 // for a recorded one. The stock client shows the menu; closing it is the
@@ -258,7 +273,7 @@ mp.onHttpRpcRunAttempt = (name, payload) => {
   }
 };
 
-console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn)");
+console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn, papyrus-av, staff-rank)");
 
 // For the unit test only; the server never reads this.
 if (typeof module !== "undefined") {
