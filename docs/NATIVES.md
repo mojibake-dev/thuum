@@ -101,7 +101,7 @@ Status meanings:
 | `Actor.EquipShout` (method) | missing |  |  |  |
 | `Actor.EquipSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1017] |  |
 | `Actor.EvaluatePackage` (method) | missing |  |  |  |
-| `Actor.ForceActorValue` (method) | implemented | R0 for the attributes; R0 on a player; R2 delegated otherwise | Health, Magicka, Stamina: the current value moved within the maximum on any actor; a player's other values: the base set (the record keeps one number; HYPOTHESIS). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1010] | actor-values |
+| `Actor.ForceActorValue` (method) | implemented | R2 on a player (the player's game); R0 for the attributes on any other actor; R2 delegated otherwise | a player: run in the player's own game, a permanent modifier set so the current value is the one asked, the base untouched (x-av-probe 20261008-101643, CONFIRMED; not in the record); any other actor: Health, Magicka and Stamina moved within the maximum, as Restore and Damage do. [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1010] | actor-values |
 | `Actor.ForceMovementDirection` (method) | missing |  |  |  |
 | `Actor.ForceMovementDirectionRamp` (method) | missing |  |  |  |
 | `Actor.ForceMovementRotationSpeed` (method) | missing |  |  |  |
@@ -200,7 +200,7 @@ Status meanings:
 | `Actor.KeepOffsetFromActor` (method) | missing |  |  |  |
 | `Actor.Kill` (method) | missing |  |  |  |
 | `Actor.KillSilent` (method) | missing |  |  |  |
-| `Actor.ModActorValue` (method) | implemented | R0 on a player; R2 delegated otherwise | a player: the base plus the change, through SetActorValue's path; nothing before the first report for a skill (HYPOTHESIS: the game changes the base). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1009] | actor-values |
+| `Actor.ModActorValue` (method) | implemented | R2 on a player (the player's game); R2 delegated otherwise | a permanent modifier changed in the game that hosts the actor, the player's own for a player; the base untouched (x-av-probe 20261008-101643, CONFIRMED; not in the record). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1009] | actor-values |
 | `Actor.ModFactionRank` (method) | missing |  |  |  |
 | `Actor.MoveToPackageLocation` (method, latent) | missing |  |  |  |
 | `Actor.OpenInventory` (method) | missing |  |  |  |
@@ -225,7 +225,7 @@ Status meanings:
 | `Actor.SendLycanthropyStateChanged` (method) | missing |  |  |  |
 | `Actor.SendTrespassAlarm` (method) | missing |  |  |  |
 | `Actor.SendVampirismStateChanged` (method) | missing |  |  |  |
-| `Actor.SetActorValue` (method) | implemented | R0 on a player; R2 delegated otherwise | a player: the base set, held against stale reports, sent (wire-rules actor_values set_ok); any other actor, and names the lab confirmed no index for: run by the host as before (HYPOTHESIS: the game sets the base). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1004] | actor-values |
+| `Actor.SetActorValue` (method) | implemented | R0 on a player; R2 delegated otherwise | a player: the base set, held against stale reports, sent (wire-rules actor_values set_ok); any other actor, and names the lab confirmed no index for: run by the host as before (CONFIRMED, x-av-probe 20261008-101643: the game sets the base). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1004] | actor-values |
 | `Actor.SetAlert` (method) | missing |  |  |  |
 | `Actor.SetAllowFlying` (method) | missing |  |  |  |
 | `Actor.SetAllowFlyingEx` (method) | missing |  |  |  |
