@@ -90,11 +90,12 @@ level increase, at most 4 at once and 1 a second after.
   in M1 SkyMP's client keeps skill experience off, so nothing raises a
   skill by use or a level, and the server serves no SetLevel. The level
   and progress are recorded and restored all the same.
-- HYPOTHESIS: a base health, magicka or stamina set after a login does not
-  fight SkyMP's own health sync (ChangeValues carries percentages; the
-  server's ActorValues keeps the race's starting value as the maximum).
-  Measured next by x-av-health-probe (Health's base set to 250 by the
-  server, read by c1's game 6 s and 30 s later and after a relaunch).
+- A base health, magicka or stamina set after a login does not fight
+  SkyMP's own health sync (ChangeValues carries percentages; the server's
+  ActorValues keeps the recorded base as the maximum): CONFIRMED
+  (x-av-health-probe 20261008-234952: Health's base set from 100 to 250
+  by the server's SetActorValue; c1's game read base 250 and current 250
+  at full 6 s later, 30 s later and after a relaunch).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -247,11 +248,11 @@ build: 29 of 29 green (runs 20261008-132148 to -150004).
 
 - [x] doc complete, rung declared (leveling moved to M5 by Eli,
       2026-10-08)
-- [ ] engine surface cited or delegated: the Papyrus names confirmed (140
+- [x] engine surface cited or delegated: the Papyrus names confirmed (140
       in wire-rules actor_values::NAMES), Set, Mod and Force measured,
-      the skills shown after a login confirmed; SetLevel and the level's
-      effects are M5's. One HYPOTHESIS left: a server-set base Health
-      against SkyMP's health sync (x-av-health-probe)
+      the skills shown after a login and a server-set base Health against
+      SkyMP's health sync confirmed; SetLevel and the level's effects are
+      M5's
 - [x] server logic + T0 (fork m1-actor-values, stacked on m1-racemenu and
       rebased once before its merges began: wire-rules actor_values
       a84f535f and 16d87b09, the record, the holds and the login send
@@ -276,7 +277,7 @@ build: 29 of 29 green (runs 20261008-132148 to -150004).
 - [x] the record reaches the game: applied on the next update (51c995b8;
       x-av2-probe 20261008-110553 read CarryWeight 400 and One-Handed 45
       in c1's game after the server set them)
-- [ ] T3 scenario green, no HYPOTHESIS tags: a-actor-values (thuum
+- [x] T3 scenario green, no HYPOTHESIS tags: a-actor-values (thuum
       207a762) green in run 20261008-111013 for the bases, the server's
       sets and Mod, and the record across a restart and a relaunch. The
       record's skill progress and level now apply without an error through
@@ -284,6 +285,6 @@ build: 29 of 29 green (runs 20261008-132148 to -150004).
       the committed TESModPlatform.pex (7f77b42d; x-av3-probe
       20261008-132006: the base shows, the console history holds no
       ActorValuesService error). What a level above 1 does in the game
-      moved to M5 with leveling (Eli, 2026-10-08). Left: the base Health
-      HYPOTHESIS under Engine surface (x-av-health-probe)
+      moved to M5 with leveling (Eli, 2026-10-08); the base Health check
+      green (x-av-health-probe 20261008-234952). DONE: no tag left
 - [x] ledger and suppression registry updated (four NATIVES rows)
