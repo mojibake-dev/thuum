@@ -54,15 +54,26 @@ four at once and one a second after.
   (MsgType 12); ConsoleCommands.cpp ran them behind EnsureAdmin (the
   actor's consoleCommandsAllowed flag, or enableConsoleCommandsForAll) and
   printed nothing back but the client's own "sent".
-- HYPOTHESIS: the engine's names for the table's rows (the long and short
-  names below come from the console's usual spellings, not from the
-  engine). The client logs every name findConsoleCommand does not find; a
-  lab run that types each routed command and sees the server's line settles
-  each row.
-- HYPOTHESIS: the console's `set <global> to <value>` is compiled as a
-  script statement, not a console function, so findConsoleCommand("set")
-  finds nothing and the game still runs it locally; the server's clock sync
-  (ADR-021) then overwrites GameHour and TimeScale. Settled by the same run.
+- The engine's names (thuum lab, 2026-10-08): every routed name is a
+  console or script function the game knows except `set`
+  (x-console2-probe 20261008-120751: the client's startup log names `set`
+  alone as not found). CONFIRMED. `set <global> to <value>` is compiled
+  as a script statement, so the game still runs it locally; HYPOTHESIS:
+  the server's clock sync (ADR-021) then overwrites GameHour and
+  TimeScale.
+- Typed in the console (x-console-probe 20261008-120316, lab-driver's
+  console step): `player.additem f 7` (the server gave seven gold, c1's
+  game held 140), `player.setav marksman 40` (c1's Marksman 40), `player
+  .setpos x 100` and `player.setangle z 90` (the server's teleport), each
+  answered "<command> done"; `coc riverwood` answered "The server does not
+  run this command yet". CONFIRMED. Two of Skyrim Platform's own console
+  bugs showed and are fixed on the branch: a command typed without
+  parameters (tgm, tcl, player.kill, player.resurrect) ran neither the
+  replacement nor the game's handler, its name parsed as empty
+  (ConsoleApi.cpp ParseCommand, 4b2ec408); and a parameter it could not
+  convert (save's file name) threw before the replacement ran, so the
+  refused save printed nothing (5c68aa5a). The rerun with the fixed client
+  settles both.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
