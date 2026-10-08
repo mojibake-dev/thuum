@@ -119,10 +119,11 @@ it carries a HYPOTHESIS tag.
   client sees a dead actor, but the stock client never kills the local
   player (skymp5-client deathService.killWithPush ragdolls it; isDead()
   stays false, health stays full), so `c1.state.isDead == true` describes
-  a client the fork does not have yet: Eli decides whether the local-death
-  observable becomes a driver field (ragdoll state) or the assertion goes;
-  the ragdoll also rolled off the summit at the origin, so the kill moved
-  to the flat strip. m0-forge waits for a forge reference, which is the
+  a client the fork does not have yet. Eli decided (option a, scenario
+  c489296 approved): the observable is the driver's knocked-down state
+  (`c1.state.down`), SkyMP's own death; m0-death green since, last in the
+  2026-10-08 merge sweep (run 20261008-093914). The ragdoll also rolled
+  off the summit at the origin, so the kill moved to the flat strip. m0-forge waits for a forge reference, which is the
   lab cell (Track L4).
 - CLAUDE.md layout and commands pinned to reality.
 - skymp-wire (docs/WIRE.md, ADR-010 to ADR-012, ADR-015; lives in the fork):
@@ -166,8 +167,9 @@ it carries a HYPOTHESIS tag.
   Equipment in hands already survives a restart (m0-inventory green on the
   wire, run 20261002-221239), so that roadmap line is stale.
   M0 floor on the wire (2026-10-02): m0-appearance green (run
-  20261002-221528), m0-inventory green, m0-death red only on the client's
-  own isDead as under RakNet (Eli's call, see M0).
+  20261002-221528), m0-inventory green, m0-death then red only on the
+  client's own isDead as under RakNet; green on the knocked-down state Eli
+  chose (see M0).
   Map markers DONE 2026-10-06 (docs/verbs/map-markers.md): the server
   records each player's discovered map markers and shows them again after
   a login, each player's own; a-map-markers green on both versions, Eli's
@@ -560,7 +562,8 @@ it carries a HYPOTHESIS tag.
      the actor-value commands through their verbs, `a-console`. About four
      sessions.
   4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
-     M0), PvE and hosted-NPC reach and angle moved to the NPC milestone
+     M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
+     moved to the NPC milestone
      (done: M3), the Moonlight sound fix confirmed (done), one sweep green
      on parity. M2 opens
      with the first ranged hit verb (arrows do not fly; Headshot Kills
