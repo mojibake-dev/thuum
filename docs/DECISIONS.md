@@ -662,4 +662,8 @@ them. Tints stay the appearance's for good reason, measured 2026-10-08
 00:26: RaceMenu's own save carries only the tint layers it set itself (six
 against the preset file's thirty, lips and nose missing for rotfern), so a
 look applied over the engine's layers clears them; the appearance, read
-from the base, keeps them.
+from the base, keeps them. Built 2026-10-08 on fork m1-actor-values (e83b8ded):
+the race rule's part of the decision checks each head part's valid-race list
+(RNAM) as the winning override has it; a look carries no race, so the race
+itself stays the appearance's and its character-creation check. Until the
+light-plugins verb, a head part from a light plugin refuses the look.

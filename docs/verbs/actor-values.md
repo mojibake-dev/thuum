@@ -152,6 +152,35 @@ level increase, at most 4 at once and 1 a second after.
   them by name as unknown until the engine's own names are read (the
   re-analyst, ActorValueInfo's enum name on sky-re).
 
+- The natives, as built (fork m1-actor-values 04cd5da6, 2026-10-08). On a
+  player (IsCreatedAsPlayer) every one is R0 against the record:
+  GetBaseActorValue reads the record's base (or a value the server set and
+  holds), GetActorValue the same for any value but Health, Magicka and
+  Stamina, which are the server's percentage of their maximum; the
+  maximum of those three is the recorded base once there is one (the
+  engine's own, raised by level-ups), the race's and the base NPC's before.
+  SetActorValue sets the base through wire-rules actor_values::set_ok
+  (finite, within ±1e6; a skill past 100 is the server's to set), holds it
+  against the player's stale reports and sends the record; ModActorValue
+  adds to the base the server knows; ForceActorValue moves Health, Magicka
+  or Stamina's current value within the maximum on any actor, and on a
+  player sets any other value's base (the record keeps one number). A value
+  the server sets before the player's first report waits in the hold and
+  enters the record with that report, which is sent back; the client now
+  also reports when a loading screen closes, so every player has a record
+  seconds into its session. Names resolve through wire-rules
+  actor_values::index_of (the 140 the lab confirmed); a name it does not
+  know reads 0 with one log line and, for Set, Mod and Force, goes to the
+  host as SetActorValue always did. Any actor but a player keeps that
+  delegation (R2) for everything but the three attributes. Ledger rows in
+  docs/NATIVES.md.
+- HYPOTHESIS, measured next by the probe x-av-probe (the engine as the
+  oracle, through the driver's av-call): that the game's SetActorValue
+  sets the base, ModActorValue changes the base, and ForceActorValue
+  leaves the base and sets the current value, on a skill and on Health.
+  The server follows the first two now; a measured difference changes
+  the natives, not the scenario.
+
 ## Client
 
 - SP binding: TESModPlatform natives, one call each: GetActorValueBases
@@ -206,7 +235,11 @@ level increase, at most 4 at once and 1 a second after.
 - [x] native hook (40a28072: TESModPlatform GetActorValueBases,
       SetActorValueBase, GetPlayerProgress, SetPlayerProgress); T1: none
 - [x] TS handler (40a28072: ActorValuesService)
-- [ ] the server's Papyrus natives (Get, Set, Mod, Force on a player)
+- [x] the server's Papyrus natives (Get, GetBase, GetMax, Set, Mod, Force on
+      a player; fork 04cd5da6, unit/ActorValuesTest.cpp "A player's actor
+      value natives read and set the server's record" and "A value set
+      before the player's first report enters the record with that
+      report"; CI pending at writing, pipeline 993)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [x] ledger and suppression registry updated (four NATIVES rows)

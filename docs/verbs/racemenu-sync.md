@@ -281,6 +281,26 @@ above keep a hostile preset from carrying anything but a look.
   for the jslot (apocrypha). Builds: the dispatch of c4eebeeb cancels the
   in-progress 77400a0d build (the workflow's concurrency rule), so one
   build carries both, landing about 22:20.
+- ADR-026 built (fork m1-actor-values e83b8ded, 2026-10-08 01:29; the
+  server work rides the actor-values branch, as Eli decided): the look is
+  the one record of a character's face. At a look, and at an appearance
+  that comes after one, the server derives the appearance's head parts,
+  hair colour, weight and face texture set from the look (wire-rules
+  racemenu::look_facts and derived_head_parts; libespm now reads HDPT:
+  DATA flags, PNAM type, HNAM extra parts, RNAM valid races). Each part the
+  look names is resolved through the server's load order (full plugins;
+  light plugins with their own verb) and must be a head part whose
+  valid-race list, as the winning override has it, holds the appearance's
+  race; each is followed by the extra parts its record lists. A look that
+  names a part the server lacks or the race may not wear is refused
+  (E_RACEMENU_PARTS) before the gate, so it does not use up the opening.
+  Race, sex, skin and tints stay the appearance's. The derived appearance
+  goes to every other player that shows the player. Measured first on the
+  server's own masters (hdpt-check, 2026-10-08 01:2x): every part of both
+  real looks (her rotfern look, the test Nord's) resolves and is valid for
+  its race, and the rule reproduces her recorded appearance's eight parts
+  in order, the hairline after the hair. Known limit until the
+  light-plugins verb: a head part from a light plugin refuses the look.
 - skee's side of the open, from its source (apocrypha, 21:5x): skee
   re-applies a player's sculpt and extended sliders at every engine head
   rebuild (SKEEHooks.cpp hooks UpdateMorphs and UpdateMorph, then
