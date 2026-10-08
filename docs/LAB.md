@@ -401,9 +401,17 @@ skymp5-client sends its result), and watch-start / watch-stop (the
 client follows every actor near it at watch-start, by form id, each frame
 until watch-stop, and reports how far each got from where it began; for
 "the observer never saw X" checks that one dump-state would sample too
-late), and settings {ini: [...], gmst: [...], gmstInt: [...]} (the running game's own
+late), settings {ini: [...], gmst: [...], gmstInt: [...]} (the running game's own
 values of named INI settings and game settings, through Papyrus, recorded
-in the step's note). Server verbs are written as client
+in the step's note), and console {text} (a line typed into the game's own
+console the way a player types it: the grave key opens it, one DirectInput
+scan code per character through Input.TapKey, Enter runs it, the grave key
+closes it; the note carries every line the console printed in the next
+2.5 s through Skyrim Platform's consoleMessage event, which includes the
+server's ConsoleOutput as skymp5-client prints it; lower case letters,
+digits, space and . , - = / only. docs/verbs/console-commands.md). The
+driver never calls findConsoleCommand: a second lookup of a command resets
+skymp5-client's replacement of it. Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, open-race-menu (the server opens
 the client's race menu and takes one race menu result from it),

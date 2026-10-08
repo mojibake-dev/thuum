@@ -107,6 +107,32 @@ const CRAFT_WAIT_MS = 15000;
 // after each press instead of counting presses.
 let racePick: { step: Step; race: number; presses: number; max: number; lastAt: number; set?: boolean } | null = null;
 const RACE_PICK_SETTLE_MS = 1200;
+// The console step types a line into the game's own console the way a player
+// does (thuum docs/verbs/console-commands.md, Dynamic plan): the grave key
+// opens it, each character is one tapped DirectInput scan code (dinput.h
+// DIK_*, US layout: https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418641(v=vs.85)),
+// Enter runs it, and the grave key closes it again. One key per update, so
+// the console's text field sees each as its own press. The lines the console
+// printed meanwhile come back with the result: Skyrim Platform's
+// consoleMessage event carries every print, the game's own and printConsole's
+// (skymp5-client prints the server's ConsoleOutput through it).
+const DIK_GRAVE = 0x29;
+const DIK_RETURN = 0x1c;
+const DIK: Record<string, number> = {
+  "1": 0x02, "2": 0x03, "3": 0x04, "4": 0x05, "5": 0x06, "6": 0x07, "7": 0x08, "8": 0x09, "9": 0x0a, "0": 0x0b,
+  "-": 0x0c, "=": 0x0d,
+  q: 0x10, w: 0x11, e: 0x12, r: 0x13, t: 0x14, y: 0x15, u: 0x16, i: 0x17, o: 0x18, p: 0x19,
+  a: 0x1e, s: 0x1f, d: 0x20, f: 0x21, g: 0x22, h: 0x23, j: 0x24, k: 0x25, l: 0x26,
+  z: 0x2c, x: 0x2d, c: 0x2e, v: 0x2f, b: 0x30, n: 0x31, m: 0x32,
+  ",": 0x33, ".": 0x34, "/": 0x35, " ": 0x39,
+};
+const CONSOLE_OPEN_MS = 3000;
+const CONSOLE_KEY_MS = 40;
+const CONSOLE_READ_MS = 2500;
+let consoleTyping: {
+  step: Step; text: string; keys: number[]; next: number; phase: "open" | "type" | "read";
+  tapped: boolean; at: number; lines: string[]; wasOpen: boolean;
+} | null = null;
 // The result goes in this long after the ingredients come out, so
 // skymp5-client's craft service has every removal before the result: made in
 // one frame, the dagger's event once reached it before the leather strip's
@@ -505,6 +531,51 @@ function finishRacePick(c: Config, player: Actor): void {
     k.lastAt = Date.now();
   } catch (e) {
     racePick = null;
+    postResult(c, k.step, { ok: false, error: String(e) });
+  }
+}
+
+function finishConsole(c: Config): void {
+  if (!consoleTyping) return;
+  const k = consoleTyping;
+  const now = Date.now();
+  try {
+    if (k.phase === "open") {
+      if (Ui.isMenuOpen("Console")) {
+        k.phase = "type";
+        k.at = now;
+        return;
+      }
+      if (!k.tapped) {
+        Input.tapKey(DIK_GRAVE);
+        k.tapped = true;
+        k.at = now;
+        return;
+      }
+      if (now - k.at > CONSOLE_OPEN_MS) {
+        consoleTyping = null;
+        postResult(c, k.step, { ok: false, error: `the console did not open ${CONSOLE_OPEN_MS} ms after the grave key` });
+      }
+      return;
+    }
+    if (k.phase === "type") {
+      if (now - k.at < CONSOLE_KEY_MS) return;
+      k.at = now;
+      if (k.next < k.keys.length) {
+        Input.tapKey(k.keys[k.next++]);
+        return;
+      }
+      Input.tapKey(DIK_RETURN);
+      k.phase = "read";
+      return;
+    }
+    if (now - k.at < CONSOLE_READ_MS) return;
+    consoleTyping = null;
+    const open = Ui.isMenuOpen("Console");
+    if (open && !k.wasOpen) Input.tapKey(DIK_GRAVE);
+    postResult(c, k.step, { ok: true, data: { typed: k.text, lines: k.lines, keys: k.keys.length } });
+  } catch (e) {
+    consoleTyping = null;
     postResult(c, k.step, { ok: false, error: String(e) });
   }
 }
@@ -1060,6 +1131,23 @@ function run(step: Step, player: Actor): unknown {
       racePick = { step, race, presses: 0, max: num(a.max, 20), lastAt: 0 };
       return DEFERRED;
     }
+    case "console": {
+      // A line typed into the game's console (finishConsole). args: {text}:
+      // lower case letters, digits, space and . , - = / only; a command's
+      // case does not matter to the console
+      const text = typeof a.text === "string" ? a.text.toLowerCase() : "";
+      if (!text) return { error: "no text" };
+      const keys: number[] = [];
+      for (let i = 0; i < text.length; i++) {
+        const code = DIK[text.charAt(i)];
+        if (code === undefined) return { error: `no scan code for ${JSON.stringify(text.charAt(i))}` };
+        keys.push(code);
+      }
+      if (consoleTyping) return { error: "a console step is still typing" };
+      const wasOpen = Ui.isMenuOpen("Console");
+      consoleTyping = { step, text, keys, next: 0, phase: wasOpen ? "type" : "open", tapped: false, at: Date.now(), lines: [], wasOpen };
+      return DEFERRED;
+    }
     case "tap-key": {
       // One key press through the engine's input system (SKSE Input.TapKey,
       // DirectInput scan code). It reaches the race menu (CONFIRMED,
@@ -1183,6 +1271,7 @@ on("update", () => {
   if (me) settleMove(me);
   if (me) finishCraft(c, me);
   if (me) finishRacePick(c, me);
+  finishConsole(c);
   if (me) readAfterRest(me);
   trackWatch();
   const step = pending;
@@ -1197,6 +1286,10 @@ on("update", () => {
   } catch (e) {
     postResult(c, step, { ok: false, error: String(e) });
   }
+});
+
+on("consoleMessage", (e) => {
+  if (consoleTyping) consoleTyping.lines.push(String(e.message));
 });
 
 log("loaded");
