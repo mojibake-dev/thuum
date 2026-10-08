@@ -898,6 +898,17 @@ function run(step: Step, player: Actor): unknown {
       moving = { x, y, cx: player.getPositionX(), cy: player.getPositionY(), speed, last: Date.now(), until: Date.now() + Math.max(500, duration * 1500) };
       return { dispatched: true, distance, speed };
     }
+    case "plugins": {
+      // docs/verbs/light-plugins.md: this game's load order as the engine
+      // numbers it, full and light plugins apart, each in order (SKSE's
+      // Game.GetModCount/GetModName and GetLightModCount/GetLightModName):
+      // the server's light-aware load order must match it
+      const full: string[] = [];
+      for (let i = 0; i < Game.getModCount(); ++i) full.push(Game.getModName(i));
+      const light: string[] = [];
+      for (let i = 0; i < Game.getLightModCount(); ++i) light.push(Game.getLightModName(i));
+      return { full, light };
+    }
     case "settings": {
       // Live values of named settings in the running game, so a verb records
       // the game's own numbers (rule 2): INI settings ("name:Section") through

@@ -204,8 +204,10 @@ level increase, at most 4 at once and 1 a second after.
   [AdvanceSkill](https://ck.uesp.net/wiki/AdvanceSkill_-_Game), is a
   HYPOTHESIS until the scenario runs) until its level rises; the server
   records it; a server-side SetActorValue sets
-  Archery; the server restarts and c1 relaunches; c1's game shows both, and
-  One-Handed's experience is where it was.
+  Archery (Papyrus name Marksman: the game's names, not the menu's, are what
+  natives and AdvanceSkill take; wire-rules actor_values::NAMES); the server
+  restarts and c1 relaunches; c1's game shows both, and One-Handed's
+  experience is where it was.
 - Assertions that would fail if the verb silently regressed: after the
   relaunch, c1's One-Handed base and experience and its Archery base, read
   through Papyrus (GetBaseActorValue) and the player's skill data, not
