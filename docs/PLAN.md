@@ -515,6 +515,19 @@ it carries a HYPOTHESIS tag.
   strengths (apocrypha, tonight), and the sculpt still needs baking into
   childhead.nif with its chargen tri (half a day, the follow-up); about two
   working days with the lab rounds. ADR-026 (one record) proposed.
+- Playtest ten (2026-10-07 evening into 2026-10-08, docs/private/
+  playtest-m1-10.md). Passed: her face matte on both seats after the mesh
+  re-path; body sliders under the robes seen by the other seat and kept
+  across a relaunch; hair colour kept across a relaunch; a brand-new
+  character on a blanked world comes out exactly right (race pick alone
+  gives tone, ear and hair from the race's preset NPC; one preset load
+  gives the sculpted face; Done; relog); with the head parts flagged
+  female (rotfern.esp 790d3b6c) a server-opened menu opens on her and the
+  face node reads her head three seconds in. Found and fixed on the way:
+  the vanilla menu's Done commit over a menu-loaded preset (77400a0d), the
+  open losing RaceMenu's layer (482a331f), the head parts without a gender
+  flag (the plugin). Found, for later: arrows do not fly (Eli: drawn,
+  equipped, no arrow leaves the bow), the roadmap's marksman line.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as

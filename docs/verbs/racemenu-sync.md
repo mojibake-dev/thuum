@@ -374,7 +374,31 @@ above keep a hostile preset from carrying anything but a look.
   open with nothing re-applied, and the sculpt present since its host
   matches. The client's menu-mode re-apply stays as the belt for anything
   else the open does; the appearance/look double record (ADR-026) stays
-  the structural item. Then the mesh: base plus
+  the structural item. Staged 2026-10-08 00:01 to 00:10 (client 482a331f,
+  esp 790d3b6c, server restarted with the world kept, snapshots
+  clean-m1-next). The chain's own dump at 00:12 is void: both games had
+  frozen at 00:11:13 when a second Moonlight stream reached test 2 (the
+  staging script's stream step and a hand-opened window raced; the
+  scripts no longer open streams), and Eli's record still carried the
+  Nord parts from his last Done. Both relaunched 00:13; a server-opened
+  menu on test 1 at 00:14 opened ON HER (Eli: "opening race menu she
+  looked super normal"), the first open tonight that did. A straight Done
+  from that menu re-recorded the stale look (the open puts the recorded
+  look back on faithfully; the record was the stale one), so one preset
+  load plus Done rewrote it (00:21): both records her parts, sculpt 436 on
+  childheadchargen.tri, 22 sliders, Eye Depth 0.3, skin A6C0D2, hair
+  5E6077, the look 26,588 bytes. CLOSED 00:24: test 1 relogged, the server
+  opened her menu, the dump three seconds in and untouched read
+  RotfernChildHead (head.dds, head_s.dds), RotfernChildMouth, her ear,
+  hair, hairline, eyes and brows under actor race rotfern; the record read
+  at 00:24 is the 00:21 one (26,588 bytes, same parts, host, sliders), and
+  Eli's straight Done from that open is read back below; the skin tone layer is
+  EFA9C5D8 in the appearance (type 6), in the look's tintInfo and in the
+  preset file, exact. Eli: "she's perfect right this second", "this looks
+  pretty good tbh, im liking it". Open for later: arrows do not fly from a
+  drawn bow (roadmap marksman); the look's tintInfo records six layers
+  where the file lists thirty (RaceMenu saves the active ones; the engine
+  layers in the appearance carry the lips 590F0440 and nose FF2F2013). Then the mesh: base plus
   the 448-vertex sculpt (plus the 22 slider displacements, recommended so
   figures are right without RaceMenu) written into childhead.nif and its
   chargen tri's base, verified against the lab export; half a day; one
