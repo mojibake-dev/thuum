@@ -236,9 +236,11 @@ it carries a HYPOTHESIS tag.
   hit on a player must come from within the attacker's cone, 95 degrees off
   its heading for a Nord (145 for a power attack's sweep), where the game's
   own cone is the client's to widen (docs/verbs/hit-cone.md; a-melee-cone
-  green, run 20261004-055345; on parity 64ba89a4). Open in this bullet: PvE
-  and NPC reach and angle. The blocked flag only lowers the attacker's own
-  damage and stays as it is.
+  green, run 20261004-055345; on parity 64ba89a4). PvE and hosted-NPC reach
+  and angle move to M3 (planning pass, 2026-10-08): the lab server runs
+  without NPCs (npcEnabled false), and an NPC's swing is its host's to
+  report there. The blocked flag only lowers the attacker's own damage and
+  stays as it is.
 - Console commands, full ActorValue set, game time and globals, wait and
   sleep as server-owned time. Eli (2026-10-05): console commands and the
   full ActorValue set stay in M1, with the persistence work. Game time part one, the shared clock, DONE
@@ -627,6 +629,9 @@ it carries a HYPOTHESIS tag.
   replays state into the engine before releasing suppression.
 - Spawning and respawn rules server-side; deaths persist; physics host
   switching for movables; horses (host follows rider).
+- From M1's validation (2026-10-08): melee reach and the hit cone for a
+  player hitting an NPC and for a hosted NPC hitting anyone, on the rules
+  M1 built for players (docs/verbs/melee-reach.md, docs/verbs/hit-cone.md).
 - Exit: `c-riverwood` (two players, NPC schedules run under host one; host
   one leaves; host two takes over; NPCs continue; restart restores) and
   `c-dungeon-enemies` (bandits fight both players under one host).
