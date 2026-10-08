@@ -24,8 +24,16 @@ Rung: per command, declared in the table below; three classes.
 - R3, client-only: the camera, the HUD, help lookups. Nothing synced.
 - Refused: a command whose effect only the server may make (a save or a load
   of the game, a local god mode or no-clip for a player without the rank).
+- R1, CenterOnCell (COC) alone: the caller's own game computes where it
+  lands (the engine's own spot in the cell) and the server validates it:
+  the cell the server named, once, within a minute (wire-rules movement's
+  permitted jump).
 Why not R1 for the R0 class: a console command is an intent with no
-simulation behind it; the server can apply it directly.
+simulation behind it; the server can apply it directly. Why not R0 for COC:
+the spot is the engine's own choice (markers, statics, the land's height
+outside; ghidra/notes/coc-1-7-104.md), which the server would have to
+reimplement, while the destination is what needs validating (CLAUDE.md: we
+reimplement only what needs validation).
 Bounds: the rank per command; arguments by type (a form that exists, a
 count within the inventory verb's bounds); rate: the console's own pace,
 four at once and one a second after.
@@ -66,7 +74,7 @@ four at once and one a second after.
   game held 140), `player.setav marksman 40` (c1's Marksman 40), `player
   .setpos x 100` and `player.setangle z 90` (the server's teleport), each
   answered "<command> done"; `coc riverwood` answered "The server does not
-  run this command yet". CONFIRMED. Two of Skyrim Platform's own console
+  run this command yet" (before COC was served). CONFIRMED. Two of Skyrim Platform's own console
   bugs showed and are fixed on the branch: a command typed without
   parameters (tgm, tcl, player.kill, player.resurrect) ran neither the
   replacement nor the game's handler, its name parsed as empty
@@ -74,6 +82,20 @@ four at once and one a second after.
   convert (save's file name) threw before the replacement ran, so the
   refused save printed nothing (5c68aa5a). The rerun with the fixed client
   settles both.
+
+- COC (served since fork 0708f531): the game's own console path and its
+  spot are mapped in ghidra/notes/coc-1-7-104.md (static, not relied on).
+  The server has the caller's game run the Papyrus global native
+  Debug.CenterOnCell(String) (Skyrim Platform declares it,
+  skyrim-platform/src/platform_se/codegen/convert-files/skyrimPlatform.ts:2441;
+  SP3 registers a static function under its Papyrus name and the camelCase
+  one, assets/sp3.js:186-195, so a snippet's `Debug.CenterOnCell` resolves).
+  HYPOTHESIS: the native moves the player as the console's COC does, and
+  the landing in an exterior cell lies within a square of it. Skyrim
+  Platform passes the typed cell name by the engine's parameter type
+  (GetTypedArg, ConsoleApi.cpp:256-287): as text, or, through its editor-ID
+  lookup, as the cell's form id. The server takes either; HYPOTHESIS which
+  one the game sends (the server's log line says).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -89,6 +111,12 @@ four at once and one a second after.
   every client through the existing verbs (inventory, references, actor
   values). The caller gets one ConsoleOutput line for every command it
   sends: "<command> done", the refusal's reason, or "Failed: <why>".
+- COC: the server permits the caller's actor one jump into the cell and
+  sends the caller's game a Debug.CenterOnCell snippet with the cell's
+  editor id; the game goes there and reports its movement from there, and
+  the server takes that report as the jump (the record moves into the
+  cell) and relays it as any movement. Other clients see the player leave
+  and arrive through the movement verb.
 - HYPOTHESIS: the game's own console prints nothing when these commands
   succeed (an item added shows in the HUD through the inventory verb), so
   "<command> done" is ours, not the game's. Whether the line should then be
@@ -98,7 +126,8 @@ four at once and one a second after.
 
 - What is suppressed: the engine's own handler of every routed command, in
   every client: the served ones, the ones the server does not run yet, and
-  the refused ones.
+  the refused ones. A typed COC never runs the console's handler; an
+  admin's game moves only through the server's snippet.
 - How: Skyrim Platform's replacement, `execute` returning false
   (ConsoleApi.cpp:344-346).
 - Release condition: none.
@@ -117,7 +146,7 @@ answered "Unknown command".
 | Enable | R0 | admin | yes | references (as Disable: what the server made, and actors) |
 | mp (SkyMP's own) | R0 | admin | yes | references |
 | MoveTo, SetPos, SetAngle | R0 | moderator | yes | position: an actor through the server's teleport, any other reference through the Papyrus natives |
-| CenterOnCell (COC) | R0 | moderator | not yet | position (a teleport the server makes; the map-markers verb then judges discoveries where the player really is) |
+| CenterOnCell (COC) | R1 | admin (Eli, 2026-10-08) | yes | position: the caller's own game (Debug.CenterOnCell by SpSnippet), the server's movement rule taking that one jump into the named cell; the map-markers verb then judges discoveries where the player really is |
 | Kill, Resurrect | R0 | moderator | yes | death: MpActor::Kill, and the respawn without its teleport |
 | SetActorValue (SetAV), ModActorValue (ModAV), ForceActorValue (ForceAV) | R0 | admin | yes | actor-values verb: the server's Papyrus natives, R0 on a player |
 | SetLevel, AdvancePCSkill (AdvSkill) | R0 | admin | not yet | actor-values verb |
@@ -145,6 +174,10 @@ else as player.
 - ConsoleOutput (MsgType 41, server to client, new; wire schema 10, wire id
   49, text capped at 1024 bytes): the line to print and whether the command
   was refused. Fixtures 41-ConsoleOutput-0 and -1.
+- COC adds no message: the cell travels as ConsoleCommand's second
+  argument (a string, or an integer form id), the server's order as the
+  existing SpSnippet (class Debug, function CenterOnCell, self 0, one
+  string), and the landing as the existing UpdateMovement.
 
 ## Server
 
@@ -163,6 +196,22 @@ else as player.
   teleport, each refused on an actor already in the state it makes. A typed value that is not a
   finite number fails with one line and changes nothing; any other
   exception becomes "Failed: <what>".
+- COC (ExecuteCenterOnCell): the cell by its editor id, case aside, over
+  the server's load order (the last file that has a cell of that name), or
+  by the form id Skyrim Platform found for it; a name or id no CELL has
+  fails ("no cell named <name>"). An interior cell is permitted as itself,
+  an exterior one as its worldspace and grid square (XCLC, libespm
+  CELL::GetGrid). PartOne::PermitJump stores the permit in the movement
+  rule (wire-rules movement: Landing, JumpCheck, JUMP_WAIT_MS 60 s, through
+  wire-bridge MovementBudgets). MovementValidation asks the rule whenever
+  its bounds refuse a player's move (another cell, a jump of 4096 units or
+  more, or a ground budget overrun): the permitted landing passes once (an
+  interior: that cell; an exterior: that worldspace, within a square of the
+  cell either way); while the permit waits any other refused move is
+  dropped without the snap back, since the loading screen reports no cell;
+  without a permit the snap back stands. ActionListener::OnUpdateMovement
+  then moves the record into the new cell (SetCellOrWorldObsolete, then
+  SetPos attaches it to that cell's grid), as MpActor::Teleport does.
 - DB fields / migration: `staffRank` in the player's change form, written
   only when set. Absent in older records: consoleCommandsAllowed reads as
   admin, anything else as player. No migration; the field is optional.
@@ -176,17 +225,26 @@ else as player.
   command; one lookup per engine command.
 - TS handler: consoleCommandsService.ts: served commands per their argument
   schema (additem, equipitem, placeatme, disable, mp, setav, modav,
-  forceav); the rest by name alone; ConsoleOutput prints through
-  printConsole in place of "sent".
+  forceav, the second slice's seven, coc as the selected reference and the
+  cell); the rest by name alone; ConsoleOutput prints through printConsole
+  in place of "sent". The server's Debug.CenterOnCell runs through
+  spSnippetService.ts's static path (a snippet with self 0).
 - Kill switch config key: none; the table is the server's.
 
 ## Tests
 
 - T0: wire-rules console (names long and short, ranks, refusals, not yet
-  served, rank numbers, every name unique); wire-validate (the budget);
-  unit/ConsoleCommandTest.cpp (a rank too low changes nothing and says so;
-  an admin's AddItem lands and answers; Save refused, COC not yet,
-  an unknown name; the rank through the change form; SetAV and ModAV with a
+  served, rank numbers, every name unique, COC an admin's); wire-rules
+  movement (a permitted jump lands once in its cell, an exterior landing
+  within a square of its cell, a permit waits a minute and the last one
+  counts); wire-bridge (the permit through the bridge); wire-validate (the
+  budget); unit/ConsoleCommandTest.cpp (a rank too low changes nothing and
+  says so; an admin's AddItem lands and answers; Save refused, SetLevel not
+  yet, an unknown name; COC: a moderator refused, a name or an id no cell
+  has refused, Riverwood by its name and the inn by its form id each sent
+  as the snippet, the loading screen's report and a far one dropped
+  without a snap back, the landing taken once and the next jump sent back,
+  the record moved into the interior; the rank through the change form; SetAV and ModAV with a
   fraction through the natives; "lots", "nan", "inf" and "12abc" refused
   with one line; RemoveItem, SetPos and SetAngle on one axis, a bad axis
   refused, MoveTo, Kill and Resurrect with their refusals, Enable after
@@ -199,6 +257,10 @@ else as player.
   record has both and c1's console printed both lines; c1 types `save x`:
   refused, nothing saved; with the server's ranks on (lab setting off for
   the run), c2 at rank 0 types AddItem: refused, its inventory unchanged.
+  COC (to add once x-coc-probe is green): c1 types `coc
+  RiverwoodSleepingGiantInn`; its game and the server's record are in the
+  inn (0x133c6); c2 types the same and is refused, still at the lab spawn;
+  after the restart and c1's relaunch, c1 is in the inn on both sides.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -215,53 +277,33 @@ else as player.
   the client's log says which.
 - Set: type `set gamehour to 3` and read GameHour before and after the
   server's next clock sync.
-- COC (not served yet). Static pass, 2026-10-08 (re-analyst, Ghidra on
-  sky-re; the 1.6.1170 program's code is encrypted at rest, a SteamStub
-  wrapper, so the bodies were read in the 1.7.104 program under the same
-  Address Library IDs, with 1.6.1170's table and .pdata agreeing). All of
-  it HYPOTHESIS until traced:
-  - The console table's entry 0x27 is CenterOnCell (short COC, one
-    parameter); its handler, ID 22873 (0x14036b490 in 1.6.1170, as `just
-    addr 22873` gives), parses the text and calls
-    PlayerCharacter::CenterOnCell_Impl, ID 40437 (CommonLibSSE-NG
-    include/RE/P/PlayerCharacter.h:548-549), with the typed text and no
-    cell. It ignores the selected reference: COC always moves the player.
-  - The cell: an editor-ID lookup over all forms that keeps a CELL hit
-    (ID 14620), else COCInfo.dat, else a case-insensitive scan of the
-    plugins' CELL records; locations are never consulted.
-  - The spot (ID 19075): an interior always, an exterior unless
-    bDefaultCOCPlacement:General is set, walks the cell's references
-    (ID 19076), skipping deleted ones, and takes the first of: a
-    COCMarkerHeading (position and angle), an XMarkerHeading (position and
-    angle), an XMarker (position), a door whose linked door has teleport
-    data (that position), the first reference whose base is a Static, the
-    last reference walked. Without one: the cell's center, (worldX + 2048,
-    worldY + 2048, land z) outside, (2048, 2048, 0) inside, rotation zero.
-  - The move: ID 40438, then ID 40744 for an interior (ID 40745 finds the
-    exterior cell first): z + 10, Actor::SetPosition, then the angle. It
-    carries the rotation; MoveTo_Impl is not on this path.
-  Dynamic plan: a Frida trace on a seat (1.6.1170 offsets from `just
-  addr`): ID 40437 (its string and return), ID 19076 (the two NiPoint3s on
-  exit), ID 40744 (position, rotation, cell); `coc riverwood`, then `coc`
-  into an interior that libespm shows holding a COCMarkerHeading, and the
-  logged spot compared with that reference's DATA. Then the server makes the
-  same teleport itself from its own masters (libespm's cells and their
-  references), and the map-markers verb judges discoveries where the player
-  really is.
+- COC: x-coc-probe (scratchpad, run by path): c1 at rank 2 types `coc
+  riverwood`, then `coc RiverwoodSleepingGiantInn`. Expected: the server
+  log's "goes to Riverwood (worldspace 3c square (4, -12)), named by ..."
+  (which of text or form id settles the parameter HYPOTHESIS), then "made
+  its permitted jump to 3c at (...)" with x in [12288, 24576) and y in
+  [-53248, -40960) (the landing HYPOTHESIS), any "while its permitted jump
+  waits; dropped" lines (what the loading screen reports); c1's dump-state
+  in Tamriel near Riverwood, then in 0x133c6, and the server's record in
+  "133c6:Skyrim.esm". A snippet error ("SpSnippet Debug CenterOnCell
+  failed") in c1's console, or c1 not moving, refutes the native's
+  HYPOTHESIS. The engine's own path and spot: ghidra/notes/coc-1-7-104.md.
 
 ## Status
 
 On fork branch m1-console, stacked on m1-light-plugins by merge: the first
 slice (3ef05197, 57b7cc04: the table, ConsoleOutput, the ranks, the actor
 value commands, the routing, the rate) and the second (1d9793d2:
-RemoveItem, Enable, Kill, Resurrect, SetPos, SetAngle, MoveTo). Left:
-COC, SetLevel, AdvSkill, the god-mode toggles, Set on a global.
+RemoveItem, Enable, Kill, Resurrect, SetPos, SetAngle, MoveTo), then COC
+(0708f531, e0d5e439: an admin's by Eli's word, 2026-10-08). Left:
+SetLevel, AdvSkill, the god-mode toggles, Set on a global.
 
 - [ ] doc complete, rung declared (the table and the ranks for Eli's review)
 - [x] engine surface cited or delegated (Skyrim Platform's source; the
       engine's names are a lab measurement, tagged above)
 - [x] server logic + T0 (the table, the decision, the three actor value
-      commands; COC and the rest of "not yet" are the next slice)
+      commands, the second slice, COC with the movement rule's permit; the
+      rest of "not yet" is a later slice)
 - [x] message + validator (same commit): ConsoleOutput 3ef05197, the
       console budget 57b7cc04
 - [x] native hook + T1: no native hook of ours (Skyrim Platform's
@@ -273,10 +315,10 @@ COC, SetLevel, AdvSkill, the god-mode toggles, Set on a global.
 - [ ] T3 scenario green, no HYPOTHESIS tags: a-console (thuum 730528f)
       green in run 20261008-153841 on fork 08b124d4 (typed AddItem and
       SetAV by an owner, Save refused, a player's AddItem refused for its
-      rank, the results across a restart and a relaunch). Left: COC's
-      engine path (HYPOTHESIS, the Frida trace above), what `set` does
+      rank, the results across a restart and a relaunch). Left: COC in
+      the lab (x-coc-probe, then its steps in a-console), what `set` does
       against the server's clock (HYPOTHESIS), and Eli's review of the
-      ranks; the verb stays off parity until then
+      other ranks; the verb stays off parity until then
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)

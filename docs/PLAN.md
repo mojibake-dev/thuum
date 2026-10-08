@@ -595,8 +595,14 @@ it carries a HYPOTHESIS tag.
      Later the same night: Skyrim Platform's console bugs found by typing in
      the lab and fixed (a command without parameters never dispatched; an
      unconvertible parameter threw); `a-console` green (run
-     20261008-153841, on Eli's form). Left before its merge: Eli's review of
-     the ranks, COC (served after the trace), `set` against the clock.
+     20261008-153841, on Eli's form). COC served 2026-10-08 (Eli: "anyone
+     with admin should be able to COC"): the caller's own game goes to the
+     named cell and the server's movement rule takes that one jump (R1;
+     fork m1-console 0708f531, e0d5e439); the server does not reimplement
+     the engine's spot, so the Frida trace is no longer on the verb's path.
+     Left before its merge: COC in the lab (x-coc-probe, then its steps in
+     a-console), Eli's review of the other ranks, `set` against the
+     clock.
   4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone
