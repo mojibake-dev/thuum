@@ -685,7 +685,7 @@ above keep a hostile preset from carrying anything but a look.
       among them, legacy against wire identical)
 - [x] T3 scenario green, no HYPOTHESIS tags (a-racemenu, d61647d, green in
       runs 20261007-033048, -033403, -033726 and -035046; approved by Eli,
-      its body-morph addition 952a8e4 on his form; T4 playtest eight
+      its body-morph addition 952a8e4 too on 2026-10-08; T4 playtest eight
       passed, the cap stays 192 KiB)
 - [x] ledger and suppression registry updated (no NATIVES rows: CharGen
       is RaceMenu's and never runs on the server; nothing suppressed)

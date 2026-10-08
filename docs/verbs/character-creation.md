@@ -119,7 +119,7 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
   m1-character, 2026-10-03 (`just test-proto m1-character`: smoke,
   attributes, and the four sessions identical up to their declarations).
 - T3: lab/scenarios/a-character-creation.yaml (approved by Eli, 2026-10-05;
-  its race-pick revision 97834ad, 2026-10-08, awaits his review): the
+  its race-pick revision 97834ad approved 2026-10-08): the
   server opens c1's race menu (labCommand open-race-menu), the stock client
   shows it, lab-driver picks the next race in the list (tap-key 208, Down:
   Nord to Orc) and closes the menu (close-menu, the engine's own close: the

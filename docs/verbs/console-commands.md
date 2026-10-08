@@ -306,7 +306,8 @@ RemoveItem, Enable, Kill, Resurrect, SetPos, SetAngle, MoveTo), then COC
 (0708f531, e0d5e439: an admin's by Eli's word, 2026-10-08). Left:
 SetLevel, AdvSkill, the god-mode toggles, Set on a global.
 
-- [ ] doc complete, rung declared (the table and the ranks for Eli's review)
+- [x] doc complete, rung declared (the ranks approved by Eli, 2026-10-08,
+      COC an admin's by his word the same day)
 - [x] engine surface cited or delegated (Skyrim Platform's source; the
       engine's names are a lab measurement, tagged above)
 - [x] server logic + T0 (the table, the decision, the three actor value
@@ -328,8 +329,9 @@ SetLevel, AdvSkill, the god-mode toggles, Set on a global.
       (6559446) green in run 20261008-191741 on fork e0d5e439 (an admin's
       COC into the inn on both sides and across the restart, a player's
       refused). Left: what `set` does against the server's clock
-      (HYPOTHESIS), and Eli's review of the other ranks; the verb stays off
-      parity until then
+      (HYPOTHESIS, a lab check after playtest eleven) and whether a
+      success should print a line (HYPOTHESIS under Impose, Eli's call in
+      playtest eleven); then the merge sweep
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)

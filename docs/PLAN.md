@@ -446,8 +446,8 @@ it carries a HYPOTHESIS tag.
   body morphs are how armor is fitted, and a look carries them), laid out
   from its FOMOD by persist-mods; its light plugin stays client-side until
   the ESL verb above lands. `a-racemenu` now also carries a body morph
-  (green, run 20261007-135454, server 9c0968b8; commit 952a8e4 for Eli's
-  review). Measured (probe x-head-parts, run 20261007-133253): the sync's
+  (green, run 20261007-135454, server 9c0968b8; commit 952a8e4, approved
+  by Eli 2026-10-08). Measured (probe x-head-parts, run 20261007-133253): the sync's
   own load puts the preset's ear, weight and skin tint on the player and
   they survive a server-opened menu; Eli's record had SkyMP's appearance
   values instead, HYPOTHESIS the vanilla menu's Done commit over RaceMenu's
@@ -603,8 +603,10 @@ it carries a HYPOTHESIS tag.
      Green in the lab the same day: x-coc-probe 20261008-191416 (Riverwood
      and the Sleeping Giant Inn, each landing where the server permitted),
      then a-console with COC (scenario commit 6559446, run
-     20261008-191741, on Eli's form). Left before its merge: Eli's review
-     of the other ranks, `set` against the clock.
+     20261008-191741, on Eli's form). Eli approved the ranks the same
+     day. Left before its merge: `set` against the clock (a lab check after
+     playtest eleven), whether a success should print a line (Eli's call
+     in playtest eleven), then the merge sweep.
   4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone
@@ -755,8 +757,8 @@ scenario there:
   plugin (sky-c1, 2026-10-06), so it is built and tested on the lab's
   1.6.1170 client set (ADR-025). Status 2026-10-07: through RaceMenu's own
   CharGen natives (docs/verbs/racemenu-sync.md), T2 green, `a-racemenu`
-  green (approved by Eli; its body-morph addition 952a8e4 awaits his
-  review), playtest eight passed. DONE 2026-10-08: on fork parity
+  green (approved by Eli, its body-morph addition 952a8e4 too on
+  2026-10-08), playtest eight passed. DONE 2026-10-08: on fork parity
   c8b26bf7 after its merge sweep (rotfern and playtest ten with it).
 
 Game versions (ADR-022, Eli, 2026-10-04): thuum supports and tests 1.7.104
