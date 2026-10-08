@@ -564,7 +564,17 @@ it carries a HYPOTHESIS tag.
      server's Get, Set, Mod and Force natives on a player, the four
      HYPOTHESIS tags, T2, `a-actor-values`) with ADR-026's derivation of
      the appearance from the look in the same server pass. About three
-     sessions.
+     sessions. Status 2026-10-08 night: built (natives 04cd5da6, ADR-026
+     e83b8ded; the probes found the record never applied in the game, Mod
+     and Force meaning a modifier, and callNative refusing an array, each
+     fixed on the branch); T2 green; `a-actor-values` and a-racemenu's
+     ADR-026 check green; the merge sweep runs with light plugins below.
+  2. Light plugins status 2026-10-08 night: built (libespm, FormDesc, the
+     manifest, the client's comparison); the clones' numbering measured;
+     the server loads SurvivalMode, Curios and _ResourcePack in the
+     engine's order; T2 green (the legacy stack without the .esl files);
+     `a-light-plugin` green. CBBE's two plugins stay client-only, each the
+     last of its kind.
   2. Light (ESL) plugins on the server (the bullet above): a verb doc
      first, libespm's light form ids with a T0 test on a fixture plugin the
      repo owns, the load order and the client's verification, CBBE's
@@ -573,7 +583,11 @@ it carries a HYPOTHESIS tag.
      review of the command table's ranks and of how an owner is named
      comes first; then the Rust message and handler, `coc`, `additem`, and
      the actor-value commands through their verbs, `a-console`. About four
-     sessions.
+     sessions. Status 2026-10-08 night: two slices built on fork
+     m1-console (the table and ranks, ConsoleOutput, AddItem through
+     MoveTo, the actor-value commands, the staffRank property); T2's
+     console session identical up to its declarations; the ranks on Eli's
+     form; COC's engine path read in Ghidra and left for a Frida trace.
   4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone
@@ -581,7 +595,11 @@ it carries a HYPOTHESIS tag.
      on parity. M2 opens
      with the first ranged hit verb (arrows do not fly; Headshot Kills
      rides it).
-- Exit: scenarios `a-*` green including `a-restart-persistence`.
+- Exit: scenarios `a-*` green including `a-restart-persistence`. Each
+  persistence verb since attributes proves its own restart in its own
+  scenario (favorites, learned effects, map markers, RaceMenu, actor values,
+  light plugins), so a-restart-persistence stays the position, inventory,
+  equipment and attributes check.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
   the player and the observer see it, and attributes survive a restart); it
