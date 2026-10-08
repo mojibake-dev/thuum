@@ -291,8 +291,14 @@ above keep a hostile preset from carrying anything but a look.
   node must carry RotfernChildHead), so the own look loaded under the
   loaded race left the Nord parts. Fork 0513beba: the own look goes on
   only once the actor's race is its base's (raceAligned), goes on again
-  after every alignment, and the menu aligns the race as it opens. Open,
-  by design: head parts, race, colours and weight are recorded twice (the
+  after every alignment, and the menu aligns the race as it opens. Staged
+  20:50 to 20:58 on both seats (snapshots clean-m1-next): the dump after
+  the relaunch reads RotfernChildHead with head_s.dds on test 2's own face
+  node and on test 1's figure of her, no Nord part left. The 20:31 relaunch
+  before 0513beba had already shown the own head right (a fresh loadGame
+  loads the actor with the save's race), so the measurement that isolates
+  the head-part validity rule is still owed: a reconnect inside one game,
+  then the dump; HYPOTHESIS stays until then. Open, by design: head parts, race, colours and weight are recorded twice (the
   appearance and the look) and can disagree. Next: the server derives the
   appearance's from the look at OnRaceMenuPreset (R0 reconciliation, one
   authority), Eli's "take the output of race menu as overriding and
