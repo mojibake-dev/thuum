@@ -591,6 +591,11 @@ it carries a HYPOTHESIS tag.
      MoveTo, the actor-value commands, the staffRank property); T2's
      console session identical up to its declarations; the ranks on Eli's
      form; COC's engine path read in Ghidra and left for a Frida trace.
+     Later the same night: Skyrim Platform's console bugs found by typing in
+     the lab and fixed (a command without parameters never dispatched; an
+     unconvertible parameter threw); `a-console` green (run
+     20261008-153841, on Eli's form). Left before its merge: Eli's review of
+     the ranks, COC (served after the trace), `set` against the clock.
   4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone

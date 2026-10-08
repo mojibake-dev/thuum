@@ -264,12 +264,19 @@ COC, SetLevel, AdvSkill, the god-mode toggles, Set on a global.
       commands; COC and the rest of "not yet" are the next slice)
 - [x] message + validator (same commit): ConsoleOutput 3ef05197, the
       console budget 57b7cc04
-- [ ] native hook + T1 (no native hook: Skyrim Platform's replacement)
+- [x] native hook + T1: no native hook of ours (Skyrim Platform's
+      replacement, two of its bugs fixed: 4b2ec408, 5c68aa5a); T1 none
 - [x] TS handler
 - [x] T2 green (`just test-proto m1-console`, 2026-10-08: all 16 sessions
       identical up to their declarations, the console session's three
       wire-only reply lines and smoke's AddItem line declared)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags: a-console (thuum 730528f)
+      green in run 20261008-153841 on fork 08b124d4 (typed AddItem and
+      SetAV by an owner, Save refused, a player's AddItem refused for its
+      rank, the results across a restart and a relaunch). Left: COC's
+      engine path (HYPOTHESIS, the Frida trace above), what `set` does
+      against the server's clock (HYPOTHESIS), and Eli's review of the
+      ranks; the verb stays off parity until then
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)
