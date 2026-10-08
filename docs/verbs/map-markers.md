@@ -185,5 +185,5 @@ own client)
 - [x] native hook + T1: none needed, Skyrim Platform's own event and natives
 - [x] TS handler (fork 47853c52)
 - [x] T2 green (`just test-proto m1-map-markers`, every session identical)
-- [x] T3 scenario green, no HYPOTHESIS tags (a-map-markers: runs 20261005-223339 on 1.7.104, 20261005-223747 on 1.6.1170; scenario commit 714417f awaits Eli's review)
+- [x] T3 scenario green, no HYPOTHESIS tags (a-map-markers: runs 20261005-223339 on 1.7.104, 20261005-223747 on 1.6.1170; scenario commit 714417f approved by Eli, 2026-10-05)
 - [x] ledger and suppression registry updated (NATIVES.md ObjectReference.AddToMap; nothing suppressed)

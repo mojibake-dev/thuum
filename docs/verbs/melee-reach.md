@@ -115,7 +115,7 @@ rotation 0.
   bare-handed hit on it; the legacy server lowers c2's health (ChangeValues),
   the fixed server refuses it. Green on m1-melee, 2026-10-03, with the four
   other sessions.
-- T3: lab/scenarios/a-melee-reach.yaml (awaiting Eli's review): c1's real
+- T3: lab/scenarios/a-melee-reach.yaml (approved by Eli, 2026-10-05): c1's real
   swing at c2 180 units off lands; then c1 raises its own fCombatDistance to
   1000 (lab-driver set-gmst, the console's setgs) and its engine lands a
   swing on c2 from 519 units. Red on parity at that assert (run
@@ -130,8 +130,8 @@ rotation 0.
   for two weapons
 - [x] server logic + T0
 - [x] T2 green
-- [x] T3 scenario green on the fix and red without it (the scenario is
-  under Eli's review); the tags left are on the parts of the engine model
+- [x] T3 scenario green on the fix and red without it (the scenario
+  approved by Eli, 2026-10-05); the tags left are on the parts of the engine model
   the bound does not lean on (bash, bare hands, other races, mounts, the
   cone), which the 256 of slack covers
 - [x] on fork parity (15eb653d, 2026-10-03)

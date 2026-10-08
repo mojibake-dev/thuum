@@ -68,7 +68,7 @@ unchecked (the next movement verb).
   against the pinned RakNet image, the rejected jump reached c1 (its echo)
   and c2 on the legacy stack and neither on the fixed one, as declared;
   green on 2026-10-02 with T2 on its own server under test.
-- T3: lab/scenarios/a-movement-reject.yaml (awaiting Eli's review): c1
+- T3: lab/scenarios/a-movement-reject.yaml (approved by Eli, 2026-10-05): c1
   jumps 5000 units in one frame while c2 watches (lab-driver watch-start /
   watch-stop). Green on m1-movement (run 20261002-230136: c2 saw c1 move at
   most 1.7 units over 261 frames; c1 and its record back where they began).

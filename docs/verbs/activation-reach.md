@@ -103,7 +103,7 @@ Rate limit / bounds: the reach above; rate unchanged.
   root in the inventory; seen on 2026-10-03 on both the RakNet image and
   parity before the fix); the fixed server sends none of the three. Green
   on m1-activation, 2026-10-03.
-- T3: lab/scenarios/a-activation-reach.yaml (awaiting Eli's review): c1
+- T3: lab/scenarios/a-activation-reach.yaml (approved by Eli, 2026-10-05): c1
   activates the Canis Root plant 1509 units from lab-spawn (reference
   0x0005355D; lab/esm.py), then from beside it. Baseline on parity without
   the check, run 20261003-062216: red at the first assert, because the far
@@ -116,5 +116,5 @@ Rate limit / bounds: the reach above; rate unchanged.
 - [x] server logic + T0
 - [x] T2 green
 - [x] T3 scenario green, no HYPOTHESIS tags on the values the bound uses
-  (the scenario is under Eli's review)
+  (the scenario approved by Eli, 2026-10-05)
 - [x] on fork parity (b095fca6, 2026-10-03)

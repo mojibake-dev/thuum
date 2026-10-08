@@ -90,7 +90,7 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
   the legacy server c1 also reaches 4000 units north, so nineteen forms near
   the spawn leave its view and three enter it; all declared. Green on
   m1-speed, 2026-10-03, with the five other sessions.
-- T3: lab/scenarios/a-movement-speed.yaml (awaiting Eli's review): a real
+- T3: lab/scenarios/a-movement-speed.yaml (approved by Eli, 2026-10-05): a real
   1.5 s run is taken; a glide of 6000 units at 3000 units a second is held
   where the budget runs out. Red on parity at the glide (run
   20261003-094307: the 6000 units stood), green on m1-speed (run
@@ -102,7 +102,7 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
 - [x] movement types read from the masters; client cadence sourced
 - [x] server logic + T0
 - [x] T2 green
-- [x] T3 scenario green on the fix, red without it (the scenario is under
-  Eli's review); still HYPOTHESIS: that Whirlwind Sprint and knockbacks fit
+- [x] T3 scenario green on the fix, red without it (the scenario
+  approved by Eli, 2026-10-05); still HYPOTHESIS: that Whirlwind Sprint and knockbacks fit
   the 2048 burst (no shout in the lab yet)
 - [x] on fork parity (8266a21c, 2026-10-03)

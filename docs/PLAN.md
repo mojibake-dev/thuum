@@ -695,7 +695,8 @@ scenario there:
   plugin (sky-c1, 2026-10-06), so it is built and tested on the lab's
   1.6.1170 client set (ADR-025). Status 2026-10-07: through RaceMenu's own
   CharGen natives (docs/verbs/racemenu-sync.md), T2 green, `a-racemenu`
-  green (Eli's review pending), playtest eight passed; the merge sweep
+  green (approved by Eli; its body-morph addition 952a8e4 awaits his
+  review), playtest eight passed; the merge sweep
   next.
 
 Game versions (ADR-022, Eli, 2026-10-04): thuum supports and tests 1.7.104

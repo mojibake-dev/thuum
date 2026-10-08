@@ -117,8 +117,8 @@ and the crop's window is at most 2 s.
   20261002-222409, 17 of 17, on the wire with the fix: after the restart and
   relog the client read health 0.59 and magicka 0.59 (the record's 0.5 and
   0.25 plus about 13 s of regeneration), where it read 1.0 before. That run
-  uses the scenario's regeneration-aware bounds (thuum 43042f9, awaiting
-  Eli's review): the old band of 0.05 around the set value failed on stamina
+  uses the scenario's regeneration-aware bounds (thuum 43042f9, approved
+  by Eli, 2026-10-05): the old band of 0.05 around the set value failed on stamina
   at the assert's own dump in both earlier wire runs, before the restart.
 - Assertions that would fail if the verb silently regressed: the record's
   and the client's health after the restart and relog (m0-attributes),
@@ -131,5 +131,5 @@ and the crop's window is at most 2 s.
 - [x] server logic + T0
 - [x] T2 green (m1-attributes, 2026-10-02)
 - [x] T3 scenario green, no HYPOTHESIS tags (run 20261002-222409; the
-  scenario revision it ran is under Eli's review)
+  scenario revision it ran approved by Eli, 2026-10-05)
 - [x] on fork parity (875c4778, 2026-10-02)

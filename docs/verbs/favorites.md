@@ -206,7 +206,7 @@ Not needed: both checks are green on both runtimes. Kept as written:
 - [x] T2 green (`just test-proto m1-favorites`, 2026-10-06, with the
       favorites difftest session)
 - [x] T3 scenario green, no HYPOTHESIS tags (a-favorites, thuum 5badb70,
-      awaiting Eli's review; green on 1.7.104 run 20261006-083811 and on
+      approved by Eli; green on 1.7.104 run 20261006-083811 and on
       1.6.1170 run 20261006-094342)
 - [x] ledger and suppression registry updated (TESModPlatform.GetFavorites
       and SetFavorite rows; nothing suppressed)
