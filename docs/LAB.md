@@ -416,12 +416,13 @@ steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, open-race-menu (the server opens
 the client's race menu and takes one race menu result from it),
 set-percentages, kill, respawn.
-A teleport's `rot` reaches the client in degrees, and skymp5-client hands
-it to MoveRefrToPosition, which takes radians (CommonLibSSE-NG
-TESObjectREFR::MoveTo_Impl): `rot: [0, 0, 180]` left c1 facing 233.24
-degrees, 180 radians (run 20261003-083828). Until the client converts, a
-scenario that needs a heading uses 0 (north, the same in both units) and
-places the other actor accordingly.
+A teleport's `rot` reaches the client in degrees, and MoveRefrToPosition
+takes radians (CommonLibSSE-NG TESObjectREFR::MoveTo_Impl): `rot: [0, 0,
+180]` once left c1 facing 233.24 degrees, 180 radians (run
+20261003-083828). skymp5-client converts since fork 705a07a5
+(remoteServer.ts, degreesToRadians, for teleports and spawns), so a
+scenario names headings in degrees (a-melee-cone turns c1 to 30, 135 and
+180).
 `screenshot` is a guest exec on a managed client (request-screenshot is
 the in-game fallback). Two lab-api endpoints replace the snapshot round trips to thuum-mundus
 (2026-10-05, their recipe and guardrails): `POST /lab/clients/<c>/snapshot
