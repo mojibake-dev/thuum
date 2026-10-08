@@ -186,12 +186,24 @@ Rate limit / bounds: one accepted update per race-menu open.
 
 ## Status
 
+ADR-025 (2026-10-06) took 1.7.104 out of routine runs: players and the lab
+run 1.6.1170, where SkyMP's appearance path is upstream's and works. The
+port this doc tracked stops there; the first-launch fault on 1.7.104 above
+stays recorded as that version's open item, not M1's. On 1.6.1170 the rows
+close through the verbs that carry the appearance since:
+
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated
 - [x] server logic + T0 (upstream's; lab gamemode's set-appearance)
-- [ ] message + validator (same commit): M1, Rust contract
-- [ ] native hook + T1: blocked on the 1.7.104 crash above
+- [x] message + validator (same commit): UpdateAppearance, MsgType 4, in
+      the Rust contract (wire-schema skymp.rs) since the M1 wire port; the
+      race check is the character-creation verb's (wire-rules, ctest)
+- [x] native hook + T1: none on 1.6.1170 (Skyrim Platform's TESModPlatform
+      natives, upstream's); the 1.7.104 crash is ADR-025's retired version
 - [x] TS handler (upstream's)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated: nothing to add
+- [x] T2 green (the character-creation and racemenu difftest sessions)
+- [x] T3 scenario green, no HYPOTHESIS tags on 1.6.1170 (m0-appearance:
+      run 20261007-005616 and the 2026-10-08 merge sweep's 20261008-093401;
+      also green on 1.7.104, run 20261006-072027; a-character-creation and
+      a-racemenu carry the race menu's result)
+- [x] ledger and suppression registry updated: nothing to add
