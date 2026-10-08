@@ -281,6 +281,66 @@ above keep a hostile preset from carrying anything but a look.
   for the jslot (apocrypha). Builds: the dispatch of c4eebeeb cancels the
   in-progress 77400a0d build (the workflow's concurrency rule), so one
   build carries both, landing about 22:20.
+- skee's side of the open, from its source (apocrypha, 21:5x): skee
+  re-applies a player's sculpt and extended sliders at every engine head
+  rebuild (SKEEHooks.cpp hooks UpdateMorphs and UpdateMorph, then
+  FaceMorphInterface::ApplyMorphs), from two in-memory maps keyed by the
+  TESNPC pointer (m_sculptStorage, m_valueMap). A preset apply fills them
+  (ApplyPresetData, which LoadCharacterPresetEx reaches) and so does its
+  co-save; SKEE64Serialization_Revert (main.cpp 328-339) empties them on
+  every game load, and the sync's generated login save carries no skee
+  co-save. Tints live on PlayerCharacter::tintMasks, the hair colour on
+  RaceMenu's 0x801 script state. So a player whose look has not been
+  re-applied since the login's load opens the menu with none of RaceMenu's
+  layer. The sync does re-apply the look after the login's load (reset,
+  then the server's look), and the 21:36 open still lost it: what empties
+  or bypasses the maps between that apply and the menu's rebuild is the
+  open measurement (apocrypha asked for every other caller of Revert or of
+  the per-NPC erase). Also from the same read: ApplyPresetData erases the
+  NPC's entry before writing, so a figure's look applied against the same
+  base pointer as the player's would take the player's face; SkyMP's
+  distinct bases per figure keep that from happening.
+- The race-default route is more than half built in rotfern.esp
+  (apocrypha, 21:5x): rotfernNPC (0200AA04) is the race's only CharGen
+  preset NPC (female, race rotfern, weight 50, hair colour rotfernhair,
+  presets [1,-1,22,15], June's 19 morphs, six tint layers on the right
+  race layer ids), so the vanilla Preset slider already has one entry and
+  picking rotfern gives this face. Missing on it and on rotfernNPCVampire
+  (02019D0B): the ear (02E11C) in the head-part list and Eye Depth 0.3 (it
+  had June's 0.9); DONE 22:0x in rotfern.esp f7946233 (two records
+  changed, byte-level through chim; the earlier "tint strengths at 0.0"
+  was a misread: NPC_ TINV is an int32 in hundredths and both preset NPCs
+  already carry 93, 100, 100, 78, 34, 100, the jslot's alphas). Also from
+  skee's source, the complete list of what empties its per-NPC sculpt and
+  morph maps outside a game load: ApplyPresetData itself (it erases the
+  NPC's entries first, so a look applied without sculpt or custom morphs
+  wipes a sculpt that was there), the mapped-preset apply for NPCs, the
+  Sculpt tab's Clear, a console command path; no race-change path and no
+  menu reset. The client's load() will log, per apply on the player,
+  whether the data carries sculpt hosts and custom morphs (next build), so
+  the last apply before an open is known. skee keys a sculpt to its head
+  part's chargen TRI path (SculptData::GetHostByPart), so a face node that
+  carries FemaleHeadNord instead of RotfernChildHead finds no host and
+  draws unsculpted with the maps intact, and brings the female head
+  texture set with it (the darker tone): the 21:36 symptoms read as the
+  Nord head on the node at the open, not as a wipe (apocrypha). The race
+  record itself cannot be the source: rotfern's female default head parts
+  are RotfernChildHead, RotfernChildMouth, RotfernChildBrows and Skyrim.esm
+  01C558 (read from the esp), so a Nord head at an open comes from the
+  base record or the vanilla menu's slider state. Measurement tonight: the
+  face dump with the menu open, before anything is touched. Then the mesh: base plus
+  the 448-vertex sculpt (plus the 22 slider displacements, recommended so
+  figures are right without RaceMenu) written into childhead.nif and its
+  chargen tri's base, verified against the lab export; half a day; one
+  mesh serves both races. Risks: whether the preset copy carries a
+  type-104 part (else the ear becomes a race default part), the tint
+  interpolation units (0-1 or 0-100; one lab read), double application
+  once baked (the jslot goes thin or away), a player's own sculpt then
+  sits on the baked shape. About two working days with the lab rounds.
+  Tonight (Eli: we end when she is perfect and a brand-new character comes
+  out exactly right) the new-character flow is two steps: pick rotfern,
+  load rotfern.jslot (a9fd4bbc, Eye Depth 0.3), Done; measured on a fresh
+  world at the c4eebeeb staging.
 - The shine, end of 2026-10-07: with the record exact, a flip of the skin
   tint (dark opaque against the preset's pale 0.94) and a flip of the look
   (absent against applied) both left her glossy from both seats, and her

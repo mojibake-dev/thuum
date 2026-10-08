@@ -502,6 +502,19 @@ it carries a HYPOTHESIS tag.
   Rule-1 lesson for every future Frida script: CommonLibSSE-NG's two-number
   RelocateMember is (SE and AE, VR), and RelocateMemberIfNewer shifts a
   struct's field comments; the first dump walked nothing for that reason.
+  Later the same evening (playtest ten): the vanilla menu's Done commit
+  writes its Face and Mouth sliders over a preset loaded in the menu, and
+  its open rebuilds the head from the base's vanilla data without
+  RaceMenu's layer; fixes 77400a0d (the look read at the close event, put
+  back over the commit) and c4eebeeb (the recorded look back on after the
+  open; a stopgap). Eli's definition of done for the leg: she is perfect
+  on both seats and a brand-new character comes out exactly right. The
+  no-import route (docs/verbs/racemenu-sync.md) is more than half in the
+  plugin already: rotfernNPC is the race's only CharGen preset NPC with the
+  June morphs and tints; it lacks the ear, Eye Depth 0.3 and tint
+  strengths (apocrypha, tonight), and the sculpt still needs baking into
+  childhead.nif with its chargen tri (half a day, the follow-up); about two
+  working days with the lab rounds. ADR-026 (one record) proposed.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
