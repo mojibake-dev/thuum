@@ -535,6 +535,17 @@ it carries a HYPOTHESIS tag.
   open losing RaceMenu's layer (482a331f), the head parts without a gender
   flag (the plugin). Found, for later: arrows do not fly (Eli: drawn,
   equipped, no arrow leaves the bow), the roadmap's marksman line.
+- The RaceMenu leg's merge sweep (2026-10-08, client 3a8e4cfd on the
+  m1-racemenu server): 24 of 27 green, then the three reds green on a rerun
+  (a-movement-speed 20261008-095352, a-activation-reach 20261008-095553,
+  a-character-creation 20261008-095804 with its race-pick revision). Watch
+  item:
+  a-movement-speed's 1.5 s run under a held W covered 354 to 434 units in
+  every earlier run and 170 (red) and 213 (green, the bound is 200) on this
+  client stack; both clones still run by default (SkyrimPrefs.ini
+  bAlwaysRunByDefault=1, read after the sweep), so the next suspect is the
+  run starting while the heavier mod layer still loads the cell after the
+  teleport. Measure before touching the scenario.
 - The rest of M1, charted 2026-10-08 (Eli's decisions in the planning
   pass): script variables leave M1 (the design in
   docs/verbs/script-variables.md stays; the verb joins the milestone where
