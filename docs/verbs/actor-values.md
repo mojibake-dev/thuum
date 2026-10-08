@@ -241,7 +241,10 @@ level increase, at most 4 at once and 1 a second after.
       a player; fork 04cd5da6, unit/ActorValuesTest.cpp "A player's actor
       value natives read and set the server's record" and "A value set
       before the player's first report enters the record with that
-      report"; CI pending at writing, pipeline 993)
+      report"; the first test's later reports now carry Health as a
+      client's whole snapshot does, 69750429, after MSVC's run 37752078184
+      read 0.75 for 0.5; ctest green on Linux in pipeline 1007, which runs
+      the same commits on m1-light-plugins)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [x] ledger and suppression registry updated (four NATIVES rows)
