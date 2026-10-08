@@ -396,9 +396,23 @@ above keep a hostile preset from carrying anything but a look.
   EFA9C5D8 in the appearance (type 6), in the look's tintInfo and in the
   preset file, exact. Eli: "she's perfect right this second", "this looks
   pretty good tbh, im liking it". Open for later: arrows do not fly from a
-  drawn bow (roadmap marksman); the look's tintInfo records six layers
-  where the file lists thirty (RaceMenu saves the active ones; the engine
-  layers in the appearance carry the lips 590F0440 and nose FF2F2013). Then the mesh: base plus
+  drawn bow (roadmap marksman).
+- The straight Done, 00:26: Eli pressed Done from that open without
+  loading anything and the record changed: the lips (type 1, 590F0440)
+  and nose (type 10, FF2F2013) layers left both records (the look 26,588
+  to 26,258 bytes; head, sculpt, sliders, hair and the skin tone layer
+  unchanged); Eli: "that borked her skin". Cause: the client's re-apply of
+  the recorded look at the open loads RaceMenu's OWN saved look back, and
+  RaceMenu's SaveCharacterPreset writes only the layers it set itself (six
+  entries against the file's thirty, Lips as FFFFFF), so the load cleared
+  the two layers the engine held and the vanilla commit recorded the face
+  without them. A preset load plus Done (00:29) restored the record to the
+  00:21 state exactly. Fork 527e0b34: no look is loaded back at the open
+  or at the close; with the plugin's flag fix neither was needed; the
+  record is RaceMenu's state once the menu is fully closed. Rule until it
+  is staged: load the preset before Done. The world with Eli's rotfern
+  (profile 1) and the Nord (profile 2) is saved as server snapshot
+  playtest-10-rotfern-20261008T073113Z. Then the mesh: base plus
   the 448-vertex sculpt (plus the 22 slider displacements, recommended so
   figures are right without RaceMenu) written into childhead.nif and its
   chargen tri's base, verified against the lab export; half a day; one
