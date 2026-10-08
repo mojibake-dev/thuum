@@ -729,6 +729,12 @@ it carries a HYPOTHESIS tag.
 - Skills, experience, and leveling from the documented formulas, computed
   R0; the client's own leveling disabled.
 - Perks, enchanting, alchemy, pickpocketing as server transactions.
+- From M1 (Eli, 2026-10-08: "keep leveling in 5 with progression"): what a
+  level above 1 does in the game (the Stats menu, the HUD, leveled lists),
+  the console's SetLevel and AdvSkill, and a skill's next use continuing
+  from the experience the server wrote (docs/verbs/actor-values.md). M1
+  records and restores the level and every skill's progress; nothing in
+  M1 raises them, SkyMP's client keeping skill experience off.
 - Exit: `p-level-up` and `p-craft-restart`.
 
 ### M6: Quests and dialogue (open-ended; partial by design)

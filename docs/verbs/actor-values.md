@@ -79,15 +79,22 @@ level increase, at most 4 at once and 1 a second after.
   network message's handler runs: the client applies the server's record on
   the next update (x-av2-probe 20261008-102852 caught every apply failing
   inside the handler). CONFIRMED.
-- HYPOTHESIS: writing `PlayerSkills::Data` after a login shows in the Skills
-  menu and the next skill use continues from the written experience.
-- HYPOTHESIS: setting `ACTOR_BASE_DATA::level` on the player's base is what
-  the console's SetLevel does, and the Stats menu, the HUD's level and
-  leveled lists follow it. No Papyrus function sets a level; the
-  re-analyst reads SetLevel's console handler on sky-re.
+- Writing `PlayerSkills::Data` after a login shows in the Skills menu:
+  CONFIRMED (x-av3-probe 20261008-132006 read the bases; Eli's playtest
+  eleven, 2026-10-08: Archery 50 and One-Handed 45 in the Skills menu
+  after a relaunch). Whether the next skill use continues from the
+  written experience, and everything about a level above 1 (what the
+  console's SetLevel writes, `ACTOR_BASE_DATA::level`, and whether the
+  Stats menu, the HUD and leveled lists follow it) belong to M5,
+  Progression (Eli, 2026-10-08: "keep leveling in 5 with progression"):
+  in M1 SkyMP's client keeps skill experience off, so nothing raises a
+  skill by use or a level, and the server serves no SetLevel. The level
+  and progress are recorded and restored all the same.
 - HYPOTHESIS: a base health, magicka or stamina set after a login does not
   fight SkyMP's own health sync (ChangeValues carries percentages; the
   server's ActorValues keeps the race's starting value as the maximum).
+  Measured next by x-av-health-probe (Health's base set to 250 by the
+  server, read by c1's game 6 s and 30 s later and after a relaunch).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -96,8 +103,8 @@ level increase, at most 4 at once and 1 a second after.
   player before anything is read (rule 9).
 - Data captured: one call to a new native returning the 164 base values and
   the progress block, compared with the last one sent; sent when it differs.
-- Side effects of hooking here: none expected (events only). HYPOTHESIS until
-  the scenario runs.
+- Side effects of hooking here: none seen (events only): a-actor-values
+  green (run 20261008-111013) and the merge sweep 29 of 29 on its build.
 
 ## Impose (observers render the server's decision)
 
@@ -179,10 +186,12 @@ level increase, at most 4 at once and 1 a second after.
   engine's own, raised by level-ups), the race's and the base NPC's before.
   SetActorValue sets the base through wire-rules actor_values::set_ok
   (finite, within ±1e6; a skill past 100 is the server's to set), holds it
-  against the player's stale reports and sends the record; ModActorValue
-  adds to the base the server knows; ForceActorValue moves Health, Magicka
-  or Stamina's current value within the maximum on any actor, and on a
-  player sets any other value's base (the record keeps one number). A value
+  against the player's stale reports and sends the record. ModActorValue
+  runs in the player's own game (delegated: a modifier, never the base, so
+  the record does not move), and so does ForceActorValue on a player; on
+  any other actor ForceActorValue moves Health, Magicka or Stamina's
+  current value within the maximum, else it is delegated (the semantics
+  measured under Engine surface, x-av-probe 20261008-101643). A value
   the server sets before the player's first report waits in the hold and
   enters the record with that report, which is sent back; the client now
   also reports when a loading screen closes, so every player has a record
@@ -192,12 +201,6 @@ level increase, at most 4 at once and 1 a second after.
   host as SetActorValue always did. Any actor but a player keeps that
   delegation (R2) for everything but the three attributes. Ledger rows in
   docs/NATIVES.md.
-- HYPOTHESIS, measured next by the probe x-av-probe (the engine as the
-  oracle, through the driver's av-call): that the game's SetActorValue
-  sets the base, ModActorValue changes the base, and ForceActorValue
-  leaves the base and sets the current value, on a skill and on Health.
-  The server follows the first two now; a measured difference changes
-  the natives, not the scenario.
 
 ## Client
 
@@ -215,17 +218,15 @@ level increase, at most 4 at once and 1 a second after.
 - T1: none (no harness); the scenario is the proof, as for favorites.
 - T2: a report out of bounds, or a value twice, changes nothing a client
   receives (difftest session).
-- T3 scenario id: lab/scenarios/a-actor-values.yaml. c1 trains One-Handed by
-  play's own path (Papyrus Game.AdvanceSkill, in Skyrim Platform as
-  `Game.advanceSkill(asSkillName, afMagnitude)`, codegen skyrimPlatform.ts:2606;
-  that it adds experience as use does, per the Creation Kit wiki's
-  [AdvanceSkill](https://ck.uesp.net/wiki/AdvanceSkill_-_Game), is a
-  HYPOTHESIS until the scenario runs) until its level rises; the server
-  records it; a server-side SetActorValue sets
-  Archery (Papyrus name Marksman: the game's names, not the menu's, are what
-  natives and AdvanceSkill take; wire-rules actor_values::NAMES); the server
-  restarts and c1 relaunches; c1's game shows both, and One-Handed's
-  experience is where it was.
+- T3 scenario id: lab/scenarios/a-actor-values.yaml (207a762, approved by
+  Eli 2026-10-08): the server's own SetActorValue sets One-Handed and
+  Archery (Papyrus name Marksman: the game's names, not the menu's, are
+  what natives take; wire-rules actor_values::NAMES) and c1's game shows
+  both; its ModActorValue leaves the base, the game's own meaning; the
+  server restarts and c1 relaunches on a fresh save, and both bases come
+  back. Training a skill by play (Papyrus Game.AdvanceSkill, in Skyrim
+  Platform `Game.advanceSkill`, codegen skyrimPlatform.ts:2606) is M5's,
+  with leveling: SkyMP's client keeps skill experience off.
 - Assertions that would fail if the verb silently regressed: after the
   relaunch, c1's One-Handed base and experience and its Archery base, read
   through Papyrus (GetBaseActorValue) and the player's skill data, not
@@ -244,9 +245,13 @@ level increase, at most 4 at once and 1 a second after.
 DONE on fork parity 26acffc4 (2026-10-08), after the merge sweep on that
 build: 29 of 29 green (runs 20261008-132148 to -150004).
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated (four HYPOTHESIS tags; SetLevel and
-      the actor values' Papyrus names to look up)
+- [x] doc complete, rung declared (leveling moved to M5 by Eli,
+      2026-10-08)
+- [ ] engine surface cited or delegated: the Papyrus names confirmed (140
+      in wire-rules actor_values::NAMES), Set, Mod and Force measured,
+      the skills shown after a login confirmed; SetLevel and the level's
+      effects are M5's. One HYPOTHESIS left: a server-set base Health
+      against SkyMP's health sync (x-av-health-probe)
 - [x] server logic + T0 (fork m1-actor-values, stacked on m1-racemenu and
       rebased once before its merges began: wire-rules actor_values
       a84f535f and 16d87b09, the record, the holds and the login send
@@ -278,8 +283,7 @@ build: 29 of 29 green (runs 20261008-132148 to -150004).
       the scalar natives SetPlayerSkill and SetPlayerExperience, declared in
       the committed TESModPlatform.pex (7f77b42d; x-av3-probe
       20261008-132006: the base shows, the console history holds no
-      ActorValuesService error). Left HYPOTHESIS: what a level above 1 does
-      in the game (the Stats menu, leveled lists); none arises while SkyMP's
-      client keeps experience off and the server has no SetLevel, so it
-      waits for the console's SetLevel (not served yet)
+      ActorValuesService error). What a level above 1 does in the game
+      moved to M5 with leveling (Eli, 2026-10-08). Left: the base Health
+      HYPOTHESIS under Engine surface (x-av-health-probe)
 - [x] ledger and suppression registry updated (four NATIVES rows)

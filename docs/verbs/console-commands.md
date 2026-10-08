@@ -169,7 +169,7 @@ answered "Unknown command".
 | CenterOnCell (COC) | R1 | admin (Eli, 2026-10-08) | yes | position: the caller's own game (Debug.CenterOnCell by SpSnippet), the server's movement rule taking that one jump into the named cell; the map-markers verb then judges discoveries where the player really is |
 | Kill, Resurrect | R0 | moderator | yes | death: MpActor::Kill, and the respawn without its teleport |
 | SetActorValue (SetAV), ModActorValue (ModAV), ForceActorValue (ForceAV) | R0 | admin | yes | actor-values verb: the server's Papyrus natives, R0 on a player |
-| SetLevel, AdvancePCSkill (AdvSkill) | R0 | admin | not yet | actor-values verb |
+| SetLevel, AdvancePCSkill (AdvSkill) | R0 | admin | M5, with leveling (Eli, 2026-10-08) | actor-values verb |
 | Set (a global) | R0 | admin | not yet | the server's clock (ADR-021); other globals wait for the verb that needs one |
 | ToggleImmortalMode (TIM), ToggleGodMode (TGM), ToggleCollision (TCL) | R0 | admin | not yet | a server flag the damage and movement rules read |
 | ToggleFreeCamera (TFC), ToggleMenus (TM) | R3 | anyone | in the game | nothing; never sent |
@@ -318,7 +318,8 @@ slice (3ef05197, 57b7cc04: the table, ConsoleOutput, the ranks, the actor
 value commands, the routing, the rate) and the second (1d9793d2:
 RemoveItem, Enable, Kill, Resurrect, SetPos, SetAngle, MoveTo), then COC
 (0708f531, e0d5e439: an admin's by Eli's word, 2026-10-08). Left:
-SetLevel, AdvSkill, the god-mode toggles, Set on a global.
+the god-mode toggles and Set on a global (not yet); SetLevel and AdvSkill
+go to M5 with leveling (Eli, 2026-10-08).
 
 - [x] doc complete, rung declared (the ranks approved by Eli, 2026-10-08,
       COC an admin's by his word the same day)
