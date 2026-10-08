@@ -216,7 +216,16 @@ above keep a hostile preset from carrying anything but a look.
   after loadGame: the game froze at login and the actor came up as a mix
   of both races (Eli, 18:1x). Fork c40595a9 moves it to RaceMenuService,
   once the player's world is up, after the login reset and before the
-  server's look is applied.
+  server's look is applied; that still read the loaded race afterwards
+  (probe 20261008-014823), since at the reset's pass SkyMP's appearance
+  apply has not set the base yet. Measured (probe 20261008-015301):
+  Actor.SetRace moves the actor's pointer mid-world (Orc to rotfern within
+  the driver's settle loop, no freeze), and a fresh loadGame loads the
+  actor with the save's race; a reconnect inside one game is where the
+  actor and the base part. Fork b6048985 aligns on every update pass once
+  the world is up, never behind a loading screen. Engine surface:
+  Actor::race (CommonLibSSE-NG Actor.h:684), read by Actor::GetRace before
+  the base's (Actor.cpp:551); TESModPlatform.SetNpcRace writes the base.
 - The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
   side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
   under the lab's vanilla light, at 0 her own view matched fenestrate
