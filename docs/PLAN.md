@@ -321,7 +321,10 @@ it carries a HYPOTHESIS tag.
     clean-m1 has no audio output at all (no Steam Streaming Speakers, which
     sky-c1's has), and Sunshine installs them only at a stream's start, after
     the game has launched without them. Fix: the speakers go into both clone
-    snapshots (lab/deploy/sky-client/README.md).
+    snapshots (lab/deploy/sky-client/README.md). DONE, confirmed 2026-10-08:
+    after the merge sweep both clones (rolled back to clean-m1-next at each
+    run) have ROOT\STEAMSTREAMINGSPEAKERS\0000 and its "Speakers (Steam
+    Streaming Speakers)" endpoint, both OK.
   - The lab games quit by themselves after 2.5 to 3.5 hours idle. Cause
     found and fixed 2026-10-05: refused, the game's Bethesda.net request
     retried hundreds of times a second and WinHTTP leaked each try until the
@@ -557,8 +560,9 @@ it carries a HYPOTHESIS tag.
      the actor-value commands through their verbs, `a-console`. About four
      sessions.
   4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
-     M0), PvE and hosted-NPC reach and angle moved to the NPC milestone,
-     the Moonlight sound fix confirmed, one sweep green on parity. M2 opens
+     M0), PvE and hosted-NPC reach and angle moved to the NPC milestone
+     (done: M3), the Moonlight sound fix confirmed (done), one sweep green
+     on parity. M2 opens
      with the first ranged hit verb (arrows do not fly; Headshot Kills
      rides it).
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
