@@ -53,14 +53,32 @@ level increase, at most 4 at once and 1 a second after.
 - Skyrim Platform events: `skillIncrease` {player, actorValue} and
   `levelIncrease` {player, newLevel} (codegen skyrimPlatform.ts:502-523,
   :815-825).
-- Papyrus semantics, for the server's natives (HYPOTHESIS until a T0 and a
-  lab read agree: the wiki refused this machine's fetches): SetActorValue
-  sets the base, ModActorValue changes it, ForceActorValue sets the current
-  value, Damage and Restore move the current value within the maximum
-  (Creation Kit wiki:
+- Papyrus semantics, measured with the game's own natives on the player as
+  the oracle (thuum lab, x-av-probe 20261008-101643, 1.6.1170; Creation Kit
+  wiki:
   [SetActorValue](https://ck.uesp.net/wiki/SetActorValue_-_Actor),
   [ModActorValue](https://ck.uesp.net/wiki/ModActorValue_-_Actor),
-  [ForceActorValue](https://ck.uesp.net/wiki/ForceActorValue_-_Actor)).
+  [ForceActorValue](https://ck.uesp.net/wiki/ForceActorValue_-_Actor)):
+  SetActorValue sets the base (Sneak 15 to 30, Health 100 to 150, current
+  following); ModActorValue changes a permanent modifier and never the base
+  (Sneak base 30, current and maximum 35; Health base 150, current and
+  maximum 160); ForceActorValue sets the current value through that same
+  modifier (Sneak base 30, current 40; Health base 150, current and maximum
+  50). CONFIRMED. The server records bases only, so on a player its
+  SetActorValue is R0 and its Mod and Force run in the player's own game
+  (R2, the modifier the session's, not the record's).
+- SkyMP's client turns skill and level experience off at its first update
+  (skymp5-client disableSkillAdvanceService.ts: fXPPerSkillRank 0, every
+  skill's use multiplier 0), so a skill never rises through play and
+  Game.AdvanceSkill moves nothing (x-av-probe: magnitudes 10, 100 and 1000
+  on Marksman left it at 15 with no experience). CONFIRMED. A skill changes
+  only by the server (its natives, the console's SetAV) or a client-local
+  call; the report path records what the game holds after either.
+- Skyrim Platform refuses TESModPlatform's natives outside the Papyrus VM's
+  context ("can't be called in this context", CallNativeApi.cpp), where a
+  network message's handler runs: the client applies the server's record on
+  the next update (x-av2-probe 20261008-102852 caught every apply failing
+  inside the handler). CONFIRMED.
 - HYPOTHESIS: writing `PlayerSkills::Data` after a login shows in the Skills
   menu and the next skill use continues from the written experience.
 - HYPOTHESIS: setting `ACTOR_BASE_DATA::level` on the player's base is what
