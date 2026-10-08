@@ -52,6 +52,8 @@ class StepBoard:
         self._node_scales: dict[str, dict[str, Any]] = {}
         # racemenu-save answers by the name saved: {bytes, sha256, saved}
         self._presets: dict[str, dict[str, Any]] = {}
+        # a console step's answer: {typed, lines, keys}
+        self._consoles: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
 
     # lab-driver side ---------------------------------------------------------
@@ -91,6 +93,8 @@ class StepBoard:
         if step.action == "node-scale" and isinstance(body.get("data"), dict):
             kind = "other" if (step.args or {}).get("other") else "self"
             self._node_scales.setdefault(step.client, {})[kind] = body["data"]
+        if step.action == "console" and isinstance(body.get("data"), dict):
+            self._consoles[step.client] = body["data"]
         if step.action == "racemenu-save" and isinstance(body.get("data"), dict):
             self._presets.setdefault(step.client, {})[str((step.args or {}).get("name", ""))] = body["data"]
         step.done.set()
@@ -167,6 +171,9 @@ class StepBoard:
     def presets(self, observer: str) -> dict[str, Any] | None:
         return self._presets.get(observer)
 
+    def consoles(self, observer: str) -> dict[str, Any] | None:
+        return self._consoles.get(observer)
+
     def clear_views(self) -> None:
         self._views.clear()
         self._watches.clear()
@@ -177,6 +184,7 @@ class StepBoard:
         self._skills.clear()
         self._node_scales.clear()
         self._presets.clear()
+        self._consoles.clear()
 
     def clear(self, client: str | None = None) -> None:
         if client is None:

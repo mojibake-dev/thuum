@@ -22,6 +22,9 @@ the lab can grep (E_ASSERT_*).
                                                      (node-scale {other: true}): the enabled actor with
                                                      3D nearest where the server has that client
   <client>.preset("<name>").bytes | .sha256 | .look  the RaceMenu preset its racemenu-save {name} wrote
+  <client>.printed("<text>")                         true when a line the console printed during its last
+                                                     console step contains the text (the server's
+                                                     ConsoleOutput as skymp5-client prints it)
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -63,6 +66,7 @@ class ViewsFacade(Protocol):
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
+    def consoles(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -435,6 +439,20 @@ class _ClientRef:
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s racemenu-save {name} lacks {e}") from e
 
+    def printed(self, text: str) -> bool:
+        """c.printed(text): whether a line the game's console printed during
+        that client's last `console` step contains the text (Skyrim
+        Platform's consoleMessage, which carries printConsole's lines and so
+        the server's ConsoleOutput; docs/verbs/console-commands.md)."""
+        fn = getattr(self._views, "consoles", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a console step yet")
+        lines = data.get("lines")
+        if not isinstance(lines, list):
+            raise AssertionData(f"{self.name}'s console step reported no lines")
+        return any(isinstance(line, str) and str(text) in line for line in lines)
+
     def node_scale(self) -> float:
         """c.node_scale(): the engine's scale of the node that client's last
         `node-scale` step read on its own player."""
@@ -559,7 +577,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed"},
     InventoryView: {"count"},
 }
 _CMP = {

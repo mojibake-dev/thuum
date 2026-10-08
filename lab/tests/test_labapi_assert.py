@@ -454,6 +454,34 @@ class PresetTests(unittest.TestCase):
             ev.evaluate('c2.preset("own-end").bytes > 0')
 
 
+class ConsoleViews(NearViews):
+    """c1's last console step: the line it typed and what the console printed."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {"typed": "player.additem f 7", "keys": 18,
+                            "lines": ["player.additem f 7", "additem done"]}}
+
+    def consoles(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class ConsoleTests(unittest.TestCase):
+    def test_printed_reads_the_last_console_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), ConsoleViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c1.printed("additem done")'))
+        self.assertFalse(ev.evaluate('c1.printed("Not enough permissions")'))
+        self.assertTrue(ev.evaluate('not c1.printed("refused")'))
+
+    def test_a_client_without_a_console_step_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), ConsoleViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.printed("additem done")')
+
+
 @needs_deps
 class NodeScaleTests(unittest.TestCase):
     def test_own_and_figure_scales_read_the_last_node_scale_steps(self):
