@@ -11,9 +11,14 @@ ROOT = Path(__file__).resolve().parents[2]
 SRV = ROOT / "lab" / "deploy" / "sky-srv"
 RACEMENU = ["RaceMenu.esp", "RaceMenuPlugin.esp"]
 # the mod layer's plugins that stay on the clients (persist-mods.sh): CBBE's
-# light plugin, which the server cannot read yet (docs/PLAN.md), and the one
-# that only drives RaceMenu's sliders; they close the clients' load order
+# light plugin and the one that only drives RaceMenu's sliders, each the last
+# of its kind on the clients and named by no server state; they close the
+# clients' load order
 CLIENT_ONLY = ["RaceMenuMorphsCBBE.esp", "CBBE.esp"]
+# the light plugins the server loads, in the order the clones' engine
+# numbers them (x-light-probe, run 20261008-101512: Skyrim.ccc's order;
+# docs/verbs/light-plugins.md)
+LIGHT = ["ccQDRSSE001-SurvivalMode.esl", "ccBGSSSE037-Curios.esl", "_ResourcePack.esl"]
 
 
 def load(name):
@@ -48,6 +53,17 @@ class ServerSettings(unittest.TestCase):
         for n in CLIENT_ONLY:
             self.assertNotIn(n, names(self.main))
             self.assertNotIn(n, names(self.old))
+
+    def test_light_plugins_load_in_the_engine_s_order(self):
+        for settings in (self.main, self.old):
+            light = [n for n in names(settings) if n.lower().endswith(".esl")]
+            self.assertEqual(light, LIGHT)
+            # each between the full plugins Skyrim.ccc puts around it
+            order = names(settings)
+            self.assertLess(order.index("ccBGSSSE001-Fish.esm"), order.index("ccQDRSSE001-SurvivalMode.esl"))
+            self.assertLess(order.index("ccBGSSSE037-Curios.esl"), order.index("ccBGSSSE025-AdvDSGS.esm"))
+            self.assertLess(order.index("ccBGSSSE025-AdvDSGS.esm"), order.index("_ResourcePack.esl"))
+            self.assertLess(order.index("_ResourcePack.esl"), order.index("RaceCompatibility.esm"))
 
 
 if __name__ == "__main__":

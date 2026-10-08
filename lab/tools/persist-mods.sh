@@ -27,11 +27,13 @@
 #   Outfits", "RaceMenu Morphs (BodyMorph)", "Morph Files (Outfits)"),
 #   plus "Face Pack", its female face textures that match its body ones),
 #   resolved from its FOMOD config each run. Its two plugins stay on the
-#   clients: CBBE.esp is light, which the server cannot read yet
-#   (docs/PLAN.md), and RaceMenuMorphsCBBE.esp (full, Skyrim.esm its only
-#   master) only drives RaceMenu's sliders; it is the last full plugin, so
-#   every earlier plugin keeps its index on both ends. Scoped to 1.6.1170
-#   with RaceMenu, the players' version (ADR-025).
+#   clients: no server state names their forms, and each is the last of its
+#   kind, so every other plugin keeps its index on both ends. CBBE.esp is
+#   light (the clones number it fourth among light plugins, x-light-probe
+#   20261008-101512; the server reads light plugins since the light-plugins
+#   verb) and RaceMenuMorphsCBBE.esp (full, Skyrim.esm its only master) only
+#   drives RaceMenu's sliders. Scoped to 1.6.1170 with RaceMenu, the
+#   players' version (ADR-025).
 #
 # A mod directory named <mod>@<version> installs only into that game
 # version's folder on a clone (add-mods.ps1), and its plugins go only into
@@ -74,9 +76,9 @@ cb_options="Vanilla Shape|Vanilla Outfits|RaceMenu Morphs (BodyMorph)|Morph File
 # the load order after the masters and the Creation Club plugins: the server's
 # loadOrder (server-settings.json for 1.6.1170, server-settings-1.7.104.json
 # without RaceMenu's) lists the same plugins in the same order. CBBE's two
-# come last and on the clients only: CBBE.esp is light (the server reads no
-# light plugin yet, docs/PLAN.md) and RaceMenuMorphsCBBE.esp only drives
-# RaceMenu's sliders, so the server's list stays the clients' first plugins.
+# come last and on the clients only (above: each the last of its kind, no
+# server state names their forms), so the server's list stays the clients'
+# first plugins.
 plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp RaceMenuMorphsCBBE.esp CBBE.esp)
 
 mkdir -p "$cache"

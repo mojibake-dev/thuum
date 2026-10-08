@@ -12,7 +12,10 @@
     "/srv/skymp/esm/HearthFires.esm",
     "/srv/skymp/esm/Dragonborn.esm",
     "/srv/skymp/esm/ccBGSSSE001-Fish.esm",
+    "/srv/skymp/esm/ccQDRSSE001-SurvivalMode.esl",
+    "/srv/skymp/esm/ccBGSSSE037-Curios.esl",
     "/srv/skymp/esm/ccBGSSSE025-AdvDSGS.esm",
+    "/srv/skymp/esm/_ResourcePack.esl",
     "/srv/skymp/esm/RaceCompatibility.esm",
     "/srv/skymp/esm/rotfern.esp"
   ],
