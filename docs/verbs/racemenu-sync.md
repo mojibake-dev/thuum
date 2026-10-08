@@ -263,6 +263,24 @@ above keep a hostile preset from carrying anything but a look.
   separated from the re-select. Not the Headpart Whitelist plugin: the lab
   loads skee64, SkyrimPlatform and MpClientPlugin only, and the mod's
   Data\HeadpartWhitelist\rotfern.ini is dormant here as on fenestrate.
+- The menu's starting state, 21:36, on clean records: the open threw the
+  player back to the "almost right" model (darker tone, the race palette's
+  hair, the unsculpted shape); a race re-select fixed part of it and
+  reloading the preset the rest (Eli). The vanilla menu rebuilds the head
+  from the base's vanilla data and loses RaceMenu's layer. STOPGAP, fork
+  c4eebeeb: the player's recorded look (lastSent, else the server's) goes
+  back on 0.5 s after the open event while the menu is up. Eli named it a
+  band-aid and it is one. The deeper fixes, in order, none of them a patch
+  to the exe: (1) ADR-026, one record, so the base always carries the
+  look's vanilla-expressible face; (2) the race-default route (preset NPC
+  plus the sculpt baked into childhead.nif), so the base is her by
+  construction and the menu has nothing else to start from (apocrypha,
+  estimate asked); (3) whether skee re-applies a player's sculpt at the
+  vanilla menu's rebuild in single player (apocrypha, skee source); if it
+  does not, a small change in a skee fork. Eye Depth 0.3 is Eli's number
+  for the jslot (apocrypha). Builds: the dispatch of c4eebeeb cancels the
+  in-progress 77400a0d build (the workflow's concurrency rule), so one
+  build carries both, landing about 22:20.
 - The shine, end of 2026-10-07: with the record exact, a flip of the skin
   tint (dark opaque against the preset's pale 0.94) and a flip of the look
   (absent against applied) both left her glossy from both seats, and her
