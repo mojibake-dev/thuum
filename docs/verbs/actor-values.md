@@ -241,6 +241,9 @@ level increase, at most 4 at once and 1 a second after.
 
 ## Status
 
+DONE on fork parity 26acffc4 (2026-10-08), after the merge sweep on that
+build: 29 of 29 green (runs 20261008-132148 to -150004).
+
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated (four HYPOTHESIS tags; SetLevel and
       the actor values' Papyrus names to look up)

@@ -128,6 +128,9 @@ each (local ids 0x000 to 0xFFF).
 
 ## Status
 
+DONE on fork parity 26acffc4 (2026-10-08), after the merge sweep on that
+build: 29 of 29 green (runs 20261008-132148 to -150004).
+
 Fork branch m1-light-plugins (stacked on m1-actor-values by merge):
 490976c5 (libespm, FormDesc, WorldState, the T0 fixtures), e6bf3f4a (the
 manifest's `light` flag and the client's comparison), 05da8396 (a test

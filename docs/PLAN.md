@@ -568,13 +568,16 @@ it carries a HYPOTHESIS tag.
      e83b8ded; the probes found the record never applied in the game, Mod
      and Force meaning a modifier, and callNative refusing an array, each
      fixed on the branch); T2 green; `a-actor-values` and a-racemenu's
-     ADR-026 check green; the merge sweep runs with light plugins below.
+     ADR-026 check green. DONE 2026-10-08: on fork parity 26acffc4 with
+     light plugins, after the merge sweep on that build, 29 of 29 green
+     (runs 20261008-132148 to -150004); both clones' clean-m1 promoted.
   2. Light plugins status 2026-10-08 night: built (libespm, FormDesc, the
      manifest, the client's comparison); the clones' numbering measured;
      the server loads SurvivalMode, Curios and _ResourcePack in the
      engine's order; T2 green (the legacy stack without the .esl files);
      `a-light-plugin` green. CBBE's two plugins stay client-only, each the
-     last of its kind.
+     last of its kind. DONE 2026-10-08: on fork parity 26acffc4 (the same
+     merge sweep, 29 of 29).
   2. Light (ESL) plugins on the server (the bullet above): a verb doc
      first, libespm's light form ids with a T0 test on a fixture plugin the
      repo owns, the load order and the client's verification, CBBE's
