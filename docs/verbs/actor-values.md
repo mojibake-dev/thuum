@@ -263,6 +263,16 @@ level increase, at most 4 at once and 1 a second after.
       client's whole snapshot does, 69750429, after MSVC's run 37752078184
       read 0.75 for 0.5; ctest green on Linux in pipeline 1007, which runs
       the same commits on m1-light-plugins)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T2 green (`just test-proto m1-light-plugins`, 2026-10-08, the
+      actor-values session among the 15, identical up to its declarations)
+- [x] the record reaches the game: applied on the next update (51c995b8;
+      x-av2-probe 20261008-110553 read CarryWeight 400 and One-Handed 45
+      in c1's game after the server set them)
+- [ ] T3 scenario green, no HYPOTHESIS tags: a-actor-values (thuum
+      207a762) green in run 20261008-111013 for the bases, the server's
+      sets and Mod, and the record across a restart and a relaunch; left
+      HYPOTHESIS: the skill progress and the level through the scalar
+      natives SetPlayerSkill and SetPlayerExperience (d4ebe6cf, after
+      callNative refused SetPlayerProgress's array), read at the next
+      staging
 - [x] ledger and suppression registry updated (four NATIVES rows)

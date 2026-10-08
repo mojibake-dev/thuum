@@ -144,6 +144,12 @@ call MSVC refused as ambiguous, C2668).
 - [x] native hook + T1: none needed (SKSE's Game.GetLightModCount and
       GetLightModName)
 - [x] TS handler (LoadOrderVerificationService, each kind against its own)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T2 green (`just test-proto m1-light-plugins`, 2026-10-08: the smoke,
+      attributes across a restart and all 15 difftest sessions identical up
+      to their declarations, with the light plugins in the server's load
+      order; the legacy stack runs it without the .esl files, which it
+      refuses by name)
+- [x] T3 scenario green, no HYPOTHESIS tags (a-light-plugin, thuum
+      b33756d, run 20261008-111329; the clones' numbering measured by
+      x-light-probe 20261008-101512, which settled the order HYPOTHESIS)
 - [x] ledger and suppression registry updated: nothing to add
