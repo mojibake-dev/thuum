@@ -90,12 +90,18 @@ four at once and one a second after.
   skyrim-platform/src/platform_se/codegen/convert-files/skyrimPlatform.ts:2441;
   SP3 registers a static function under its Papyrus name and the camelCase
   one, assets/sp3.js:186-195, so a snippet's `Debug.CenterOnCell` resolves).
-  HYPOTHESIS: the native moves the player as the console's COC does, and
-  the landing in an exterior cell lies within a square of it. Skyrim
-  Platform passes the typed cell name by the engine's parameter type
+  The native moves the player as the console's COC does, and an exterior
+  landing lies in the named cell's square. CONFIRMED (x-coc-probe
+  20261008-190207 and -191416, 1.6.1170): `coc riverwood` landed at (17225,
+  -47204, -128), inside Riverwood's square (4, -12), 2.8 to 3.6 s after the
+  command and at the same spot in both runs; `coc
+  riverwoodsleepinggiantinn` landed in 0x133c6 at (-265, -341, 0) 1.0 s
+  after; the screenshots show Riverwood's bridge and the inn's fire pit.
+  Skyrim Platform passes the typed cell name by the engine's parameter type
   (GetTypedArg, ConsoleApi.cpp:256-287): as text, or, through its editor-ID
-  lookup, as the cell's form id. The server takes either; HYPOTHESIS which
-  one the game sends (the server's log line says).
+  lookup, as the cell's form id. The server takes either; the game sent the
+  text for both names, exterior and interior (the server's "named by text"
+  in both runs). CONFIRMED. The form-id path is T0's alone.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -208,8 +214,11 @@ else as player.
   more, or a ground budget overrun): the permitted landing passes once (an
   interior: that cell; an exterior: that worldspace, within a square of the
   cell either way); while the permit waits any other refused move is
-  dropped without the snap back, since the loading screen reports no cell;
-  without a permit the snap back stands. ActionListener::OnUpdateMovement
+  dropped without the snap back, a guard for a report from the loading
+  screen (skymp5-client reports cell 0 when the player has neither a
+  worldspace nor a cell, objectReferenceEx.ts getWorldOrCell); the probe
+  saw none, the first report after each COC being its landing. Without a
+  permit the snap back stands. ActionListener::OnUpdateMovement
   then moves the record into the new cell (SetCellOrWorldObsolete, then
   SetPos attaches it to that cell's grid), as MpActor::Teleport does.
 - DB fields / migration: `staffRank` in the player's change form, written
@@ -259,7 +268,7 @@ else as player.
   record has both and c1's console printed both lines; c1 types `save x`:
   refused, nothing saved; with the server's ranks on (lab setting off for
   the run), c2 at rank 0 types AddItem: refused, its inventory unchanged.
-  COC (to add once x-coc-probe is green): c1 types `coc
+  COC (scenario commit 6559446): c1, made an admin, types `coc
   RiverwoodSleepingGiantInn`; its game and the server's record are in the
   inn (0x133c6); c2 types the same and is refused, still at the lab spawn;
   after the restart and c1's relaunch, c1 is in the inn on both sides.
@@ -279,17 +288,14 @@ else as player.
   the client's log says which.
 - Set: type `set gamehour to 3` and read GameHour before and after the
   server's next clock sync.
-- COC: x-coc-probe (scratchpad, run by path): c1 at rank 2 types `coc
-  riverwood`, then `coc RiverwoodSleepingGiantInn`. Expected: the server
-  log's "goes to Riverwood (worldspace 3c square (4, -12)), named by ..."
-  (which of text or form id settles the parameter HYPOTHESIS), then "made
-  its permitted jump to 3c at (...)" with x in [12288, 24576) and y in
-  [-53248, -40960) (the landing HYPOTHESIS), any "while its permitted jump
-  waits; dropped" lines (what the loading screen reports); c1's dump-state
-  in Tamriel near Riverwood, then in 0x133c6, and the server's record in
-  "133c6:Skyrim.esm". A snippet error ("SpSnippet Debug CenterOnCell
-  failed") in c1's console, or c1 not moving, refutes the native's
-  HYPOTHESIS. The engine's own path and spot: ghidra/notes/coc-1-7-104.md.
+- COC: done. x-coc-probe (scratchpad, run by path; green 20261008-191416
+  on fork e0d5e439 with lab-driver 8aed0d9): c1 at rank 2 typed `coc
+  riverwood`, then `coc riverwoodsleepinggiantinn`; both landed where the
+  server permitted (Engine surface above). Its first run (-190207) took
+  Riverwood and lost the inn to the lab driver, which typed the second
+  command into the console the first had just closed (fixed in 8aed0d9: a
+  console step ends once its console is shut). The engine's own path and
+  spot: ghidra/notes/coc-1-7-104.md.
 
 ## Status
 
@@ -318,10 +324,12 @@ SetLevel, AdvSkill, the god-mode toggles, Set on a global.
 - [ ] T3 scenario green, no HYPOTHESIS tags: a-console (thuum 730528f)
       green in run 20261008-153841 on fork 08b124d4 (typed AddItem and
       SetAV by an owner, Save refused, a player's AddItem refused for its
-      rank, the results across a restart and a relaunch). Left: COC in
-      the lab (x-coc-probe, then its steps in a-console), what `set` does
-      against the server's clock (HYPOTHESIS), and Eli's review of the
-      other ranks; the verb stays off parity until then
+      rank, the results across a restart and a relaunch); with COC
+      (6559446) green in run 20261008-191741 on fork e0d5e439 (an admin's
+      COC into the inn on both sides and across the restart, a player's
+      refused). Left: what `set` does against the server's clock
+      (HYPOTHESIS), and Eli's review of the other ranks; the verb stays off
+      parity until then
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)

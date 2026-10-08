@@ -600,9 +600,11 @@ it carries a HYPOTHESIS tag.
      named cell and the server's movement rule takes that one jump (R1;
      fork m1-console 0708f531, e0d5e439); the server does not reimplement
      the engine's spot, so the Frida trace is no longer on the verb's path.
-     Left before its merge: COC in the lab (x-coc-probe, then its steps in
-     a-console), Eli's review of the other ranks, `set` against the
-     clock.
+     Green in the lab the same day: x-coc-probe 20261008-191416 (Riverwood
+     and the Sleeping Giant Inn, each landing where the server permitted),
+     then a-console with COC (scenario commit 6559446, run
+     20261008-191741, on Eli's form). Left before its merge: Eli's review
+     of the other ranks, `set` against the clock.
   4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone
