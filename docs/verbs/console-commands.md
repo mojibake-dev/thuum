@@ -251,7 +251,9 @@ else as player.
   Disable).
 - T2: a command above the caller's rank changes nothing (difftest session
   console-ranks: the C++ core and the Rust edge agree on the line and on
-  the unchanged state).
+  the unchanged state). COC is not in a T2 session: difftest's moves are
+  offsets within the client's own cell, so the permitted jump is proven by
+  T0 (the server in process) and T3 (the game).
 - T3 scenario id: lab/scenarios/a-console.yaml: c1 types `player.additem`
   for an item and `player.setav marksman 40` in its console; the server's
   record has both and c1's console printed both lines; c1 types `save x`:
@@ -311,7 +313,8 @@ SetLevel, AdvSkill, the god-mode toggles, Set on a global.
 - [x] TS handler
 - [x] T2 green (`just test-proto m1-console`, 2026-10-08: all 16 sessions
       identical up to their declarations, the console session's three
-      wire-only reply lines and smoke's AddItem line declared)
+      wire-only reply lines and smoke's AddItem line declared; again on
+      e0d5e439 with COC, movement-reject and movement-speed unchanged)
 - [ ] T3 scenario green, no HYPOTHESIS tags: a-console (thuum 730528f)
       green in run 20261008-153841 on fork 08b124d4 (typed AddItem and
       SetAV by an owner, Save refused, a player's AddItem refused for its

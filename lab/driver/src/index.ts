@@ -130,7 +130,7 @@ const CONSOLE_OPEN_MS = 3000;
 const CONSOLE_KEY_MS = 40;
 const CONSOLE_READ_MS = 2500;
 let consoleTyping: {
-  step: Step; text: string; keys: number[]; next: number; phase: "open" | "type" | "read";
+  step: Step; text: string; keys: number[]; next: number; phase: "open" | "type" | "read" | "close";
   tapped: boolean; at: number; lines: string[]; wasOpen: boolean; match: string;
 } | null = null;
 // The result goes in this long after the ingredients come out, so
@@ -569,10 +569,22 @@ function finishConsole(c: Config): void {
       k.phase = "read";
       return;
     }
-    if (now - k.at < CONSOLE_READ_MS) return;
+    if (k.phase === "read") {
+      if (now - k.at < CONSOLE_READ_MS) return;
+      if (Ui.isMenuOpen("Console") && !k.wasOpen) {
+        Input.tapKey(DIK_GRAVE);
+        k.phase = "close";
+        k.at = now;
+        return;
+      }
+    }
+    // The step ends once a console it opened is shut: the menu reads open
+    // for a moment after the grave key, and a console step right after
+    // then typed into the closing console, so its keys reached the game
+    // (x-coc-probe 20261008-190207: "coc riverwoodsleepinggiantinn" opened
+    // the inventory)
+    if (k.phase === "close" && Ui.isMenuOpen("Console") && now - k.at < CONSOLE_OPEN_MS) return;
     consoleTyping = null;
-    const open = Ui.isMenuOpen("Console");
-    if (open && !k.wasOpen) Input.tapKey(DIK_GRAVE);
     const history = k.match ? consoleHistory.filter((l) => l.indexOf(k.match) >= 0).slice(-20) : [];
     postResult(c, k.step, { ok: true, data: { typed: k.text, lines: k.lines, keys: k.keys.length, history } });
   } catch (e) {
