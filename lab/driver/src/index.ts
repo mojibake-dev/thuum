@@ -1150,7 +1150,16 @@ function run(step: Step, player: Actor): unknown {
       // command's case does not matter to the console. With {match}, the
       // result's history holds the last 20 lines the console printed since
       // the game started that contain it (skymp5-client logs there)
-      const text = typeof a.text === "string" ? a.text.toLowerCase() : "";
+      // "{other}" stands for the nearest other actor's form id in hex, as
+      // the console shows a clicked reference: the other player's figure,
+      // whose id exists only at runtime (playtest eleven: moveto on it)
+      let raw = typeof a.text === "string" ? a.text : "";
+      if (raw.indexOf("{other}") >= 0) {
+        const other = nearestOther(player);
+        if (!other) return { error: "no other actor near for {other}" };
+        raw = raw.split("{other}").join((other.getFormID() >>> 0).toString(16));
+      }
+      const text = raw.toLowerCase();
       if (!text) return { error: "no text" };
       const keys: number[] = [];
       for (let i = 0; i < text.length; i++) {
