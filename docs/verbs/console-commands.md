@@ -101,12 +101,13 @@ answered "Unknown command".
 | Command (short) | Class | Rank | Server runs it | Through |
 | --- | --- | --- | --- | --- |
 | AddItem, EquipItem | R0 | admin | yes | inventory |
-| RemoveItem | R0 | admin | not yet | inventory |
+| RemoveItem | R0 | admin | yes | inventory |
 | PlaceAtMe, Disable | R0 | admin | yes | references |
-| Enable | R0 | admin | not yet | references |
+| Enable | R0 | admin | yes | references (as Disable: what the server made, and actors) |
 | mp (SkyMP's own) | R0 | admin | yes | references |
-| CenterOnCell (COC), MoveTo, SetPos, SetAngle | R0 | moderator | not yet | position (a teleport the server makes; the map-markers verb then judges discoveries where the player really is) |
-| Kill, Resurrect | R0 | moderator | not yet | death |
+| MoveTo, SetPos, SetAngle | R0 | moderator | yes | position: an actor through the server's teleport, any other reference through the Papyrus natives |
+| CenterOnCell (COC) | R0 | moderator | not yet | position (a teleport the server makes; the map-markers verb then judges discoveries where the player really is) |
+| Kill, Resurrect | R0 | moderator | yes | death: MpActor::Kill, and the respawn without its teleport |
 | SetActorValue (SetAV), ModActorValue (ModAV), ForceActorValue (ForceAV) | R0 | admin | yes | actor-values verb: the server's Papyrus natives, R0 on a player |
 | SetLevel, AdvancePCSkill (AdvSkill) | R0 | admin | not yet | actor-values verb |
 | Set (a global) | R0 | admin | not yet | the server's clock (ADR-021); other globals wait for the verb that needs one |
@@ -139,7 +140,12 @@ enableConsoleCommandsForAll, every player an owner.
   runs, then applies a served command through the paths its verb uses:
   AddItem, EquipItem, PlaceAtMe, Disable and mp as SkyMP ran them; SetAV,
   ModAV and ForceAV through PapyrusActor's SetActorValue, ModActorValue and
-  ForceActorValue (docs/verbs/actor-values.md). A typed value that is not a
+  ForceActorValue (docs/verbs/actor-values.md); RemoveItem, Enable, SetPos,
+  SetAngle and MoveTo through PapyrusObjectReference's natives, except that
+  an actor moves and turns by the server's teleport (skymp5-client turns a
+  teleport's degrees into the engine's radians, remoteServer.ts); Kill and
+  Resurrect through MpActor::Kill and MpActor::Respawn without its
+  teleport, each refused on an actor already in the state it makes. A typed value that is not a
   finite number fails with one line and changes nothing; any other
   exception becomes "Failed: <what>".
 - DB fields / migration: `staffRank` in the player's change form, written
@@ -167,7 +173,9 @@ enableConsoleCommandsForAll, every player an owner.
   an admin's AddItem lands and answers; Save refused, COC not yet,
   an unknown name; the rank through the change form; SetAV and ModAV with a
   fraction through the natives; "lots", "nan", "inf" and "12abc" refused
-  with one line).
+  with one line; RemoveItem, SetPos and SetAngle on one axis, a bad axis
+  refused, MoveTo, Kill and Resurrect with their refusals, Enable after
+  Disable).
 - T2: a command above the caller's rank changes nothing (difftest session
   console-ranks: the C++ core and the Rust edge agree on the line and on
   the unchanged state).
@@ -195,8 +203,11 @@ enableConsoleCommandsForAll, every player an owner.
 
 ## Status
 
-First slice on fork branch m1-console (3ef05197, 57b7cc04; stacked on
-m1-light-plugins by merge).
+On fork branch m1-console, stacked on m1-light-plugins by merge: the first
+slice (3ef05197, 57b7cc04: the table, ConsoleOutput, the ranks, the actor
+value commands, the routing, the rate) and the second (1d9793d2:
+RemoveItem, Enable, Kill, Resurrect, SetPos, SetAngle, MoveTo). Left:
+COC, SetLevel, AdvSkill, the god-mode toggles, Set on a global.
 
 - [ ] doc complete, rung declared (the table and the ranks for Eli's review)
 - [x] engine surface cited or delegated (Skyrim Platform's source; the
