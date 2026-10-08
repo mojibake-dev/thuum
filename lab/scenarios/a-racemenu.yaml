@@ -18,6 +18,10 @@
 # body sliders do; Eli uses them to fit armor), which rides the same preset:
 # c2's figure of c1 carries it live and after the restart, and c1 again
 # after its relaunch.
+# And the server keeps one record of c1's face (ADR-026): the head parts of
+# c1's appearance, which the server derives from the look at each menu
+# close, are the parts on c1's own base (head-parts, ActorBase's list), after
+# the close and again after the relaunch.
 # Last, a look the server never got does not outlive a login: c2 scales its
 # own head without closing the race menu, so nothing is sent, and after its
 # reconnect its head is back at 1.0 (Eli's playtest found the last session's
@@ -48,9 +52,11 @@ steps:
   - c1: close-menu {name: "RaceSex Menu"}
   - wait: 8
   - c1: node-scale
+  - c1: head-parts
   - c2: node-scale {other: true, morph: ShoulderWidth}
   - c2: racemenu-save {name: own-live}
   - assert:
+      - server.actor(c1).headParts == c1.head_parts()
       - abs(c1.node_scale() - 1.6) < 0.01
       - abs(c2.node_scale_of(c1) - 1.6) < 0.01
       - abs(c2.morph_of(c1) - 0.7) < 0.01
@@ -65,10 +71,12 @@ steps:
   - c2: reconnect
   - wait: 12
   - c1: node-scale {morph: ShoulderWidth}
+  - c1: head-parts
   - c2: node-scale
   - c2: node-scale {other: true, morph: ShoulderWidth}
   - c2: racemenu-save {name: own-end}
   - assert:
+      - server.actor(c1).headParts == c1.head_parts()
       - abs(c1.node_scale() - 1.6) < 0.01
       - abs(c1.morph() - 0.7) < 0.01
       - abs(c2.node_scale_of(c1) - 1.6) < 0.01
