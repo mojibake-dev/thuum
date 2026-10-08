@@ -231,6 +231,23 @@ above keep a hostile preset from carrying anything but a look.
   preset exactly and the other seat drew it, while his own seat went back
   to the menu's stale tone and shape). Fork 6ae65bd3: the save, the
   re-apply and the send run 0.25 s after the close.
+- That commit also writes the Face and Mouth parts its sliders held from
+  the menu's open (CONFIRMED by the records, 2026-10-07 21:1x: Eli opened a
+  server menu on test 2 whose base still carried the Nord head and mouth,
+  loaded the preset, imported the sculpt, moved a slider, Done; the
+  appearance AND the look came out with Skyrim.esm 051623 and 05150F for
+  Face and Mouth under the preset's ear, hair, eyes, tints EFA9C5D8 and
+  weight 50; his seat drew the Nord head with the female head texture,
+  "darker", and test 1 the same). The close-time re-apply of 97d53da0
+  fired only when the saved face still equalled a preset file, which a
+  moved slider defeats, so RaceMenu saved the committed parts into the
+  look. Fork 77400a0d: the look is read AT the close event, while it is
+  still RaceMenu's, and loaded back over the commit 0.25 s later; the
+  record is RaceMenu's save after that load. The preset-file matching
+  (importedPreset, sliderKey, openKey) is gone. Measurement at the next
+  staging: menu on test 2, load the preset, move a slider, Done; the
+  look's headParts must read rotfern.esp 02E116 and 02E117 and the own
+  face node RotfernChildHead with no relaunch.
 - The shine, end of 2026-10-07: with the record exact, a flip of the skin
   tint (dark opaque against the preset's pale 0.94) and a flip of the look
   (absent against applied) both left her glossy from both seats, and her
