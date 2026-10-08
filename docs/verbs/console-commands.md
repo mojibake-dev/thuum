@@ -266,7 +266,9 @@ COC, SetLevel, AdvSkill, the god-mode toggles, Set on a global.
       console budget 57b7cc04
 - [ ] native hook + T1 (no native hook: Skyrim Platform's replacement)
 - [x] TS handler
-- [ ] T2 green
+- [x] T2 green (`just test-proto m1-console`, 2026-10-08: all 16 sessions
+      identical up to their declarations, the console session's three
+      wire-only reply lines and smoke's AddItem line declared)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
