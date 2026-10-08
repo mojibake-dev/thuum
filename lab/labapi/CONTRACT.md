@@ -40,7 +40,7 @@ Response when the profile has an actor:
  "isDead": false, "healthPercentage": 1.0,
  "hasAppearance": true, "raceId": 79683, "sex": 0,
  "appearanceAttempts": 1, "lastAppearanceRaceId": 79683,
- "lastAppearanceAllowed": true}
+ "lastAppearanceAllowed": true, "headParts": [333061, 333359, 333361]}
 ```
 
 `hasAppearance`, `raceId` (the race's form id from the actor's appearance),
@@ -51,7 +51,11 @@ directly. `appearanceAttempts` counts the client's race menu results
 (UpdateAppearance) the server has judged since it started, through the
 gamemode event onUpdateAppearanceAttempt; `lastAppearanceRaceId` and
 `lastAppearanceAllowed` are the last one's race and the server's verdict
-(`null` before the first).
+(`null` before the first). `headParts` is the appearance's head part form
+ids, sorted (`null` without an appearance); where RaceMenu is present the
+server derives them from the look (thuum ADR-026), and lab-api compares them
+with a client's head-parts step as `server.actor(c).headParts ==
+c.head_parts()`.
 
 `cell` is the server's descriptor for the actor's cell or worldspace,
 `FormDesc::ToString`, that is `"<hex id>:<file>"` such as `"3c:Skyrim.esm"`;

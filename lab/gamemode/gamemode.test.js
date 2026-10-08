@@ -69,7 +69,7 @@ test("labCommand teleport and give", () => {
 
 test("labState reports appearance, and the new commands change state", () => {
   global.mp = fakeMp();
-  mp.set(0xff000001, "appearance", { raceId: 79683, isFemale: true });
+  mp.set(0xff000001, "appearance", { raceId: 79683, isFemale: true, headpartIds: [0x51631, 0x51505, 0x5162f] });
   mp.set(0xff000001, "spawnPoint", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9, 9, 9], rot: [0, 0, 0] });
   delete require.cache[require.resolve("./gamemode.js")];
   require("./gamemode.js");
@@ -77,6 +77,8 @@ test("labState reports appearance, and the new commands change state", () => {
   assert.strictEqual(a.hasAppearance, true);
   assert.strictEqual(a.raceId, 79683);
   assert.strictEqual(a.sex, 1);
+  // the appearance's head parts, sorted (thuum ADR-026)
+  assert.deepStrictEqual(a.headParts, [0x51505, 0x5162f, 0x51631]);
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "set-percentages", profileId: 1, health: 0.5 }).percentages, { health: 0.5, magicka: 0.5, stamina: 0.25 });
   assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "kill", profileId: 1 }).ok, true);
   assert.strictEqual(mp.get(0xff000001, "isDead"), true);

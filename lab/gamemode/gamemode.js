@@ -65,6 +65,9 @@ const state = {
       hasAppearance: app !== null && app !== undefined,
       raceId: app ? app.raceId : null,
       sex: app ? (app.isFemale ? 1 : 0) : null,
+      // the appearance's head parts, sorted: where RaceMenu is present the
+      // server derives them from the look (thuum ADR-026)
+      headParts: app && Array.isArray(app.headpartIds) ? app.headpartIds.slice().sort((x, y) => x - y) : null,
       appearanceAttempts: attempt ? attempt.count : 0,
       lastAppearanceRaceId: attempt ? attempt.raceId : null,
       lastAppearanceAllowed: attempt ? attempt.allowed : null,

@@ -22,6 +22,9 @@ the lab can grep (E_ASSERT_*).
                                                      (node-scale {other: true}): the enabled actor with
                                                      3D nearest where the server has that client
   <client>.preset("<name>").bytes | .sha256 | .look  the RaceMenu preset its racemenu-save {name} wrote
+  server.actor(<client>).headParts                   the appearance's head parts, "0x..,0x.." sorted
+  <client>.head_parts()                              the parts on its player's base from its last head-parts
+                                                     step, the same form (thuum ADR-026: the two agree)
   <client>.printed("<text>")                         true when a line the console printed during its last
                                                      console step contains the text (the server's
                                                      ConsoleOutput as skymp5-client prints it)
@@ -67,6 +70,7 @@ class ViewsFacade(Protocol):
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
     def consoles(self, observer: str) -> dict[str, Any] | None: ...
+    def head_parts(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -79,6 +83,15 @@ def _opt_int(v: Any) -> int | None:
 
 def _opt_bool(v: Any) -> bool | None:
     return None if v is None else bool(v)
+
+
+def _parts(v: Any) -> str | None:
+    """Head part form ids as one comparable string: sorted, hex, comma-joined."""
+    if v is None:
+        return None
+    if not isinstance(v, list) or not all(isinstance(x, int) and not isinstance(x, bool) for x in v):
+        raise ValueError("head parts must be a list of form ids")
+    return ",".join(f"{x:#x}" for x in sorted(v))
 
 
 def _opt_str(v: Any) -> str | None:
@@ -105,6 +118,8 @@ class ActorView:
     appearanceAttempts: int | None = None
     lastAppearanceRaceId: int | None = None
     lastAppearanceAllowed: bool | None = None
+    # the appearance's head parts as _parts writes them (thuum ADR-026)
+    headParts: str | None = None
 
 
 @dataclass(frozen=True)
@@ -252,6 +267,7 @@ class _ServerRef:
                 appearanceAttempts=_opt_int(d.get("appearanceAttempts")),
                 lastAppearanceRaceId=_opt_int(d.get("lastAppearanceRaceId")),
                 lastAppearanceAllowed=_opt_bool(d.get("lastAppearanceAllowed")),
+                headParts=_parts(d.get("headParts")),
             )
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"actor record for {client} lacks {e}") from e
@@ -439,6 +455,20 @@ class _ClientRef:
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s racemenu-save {name} lacks {e}") from e
 
+    def head_parts(self) -> str:
+        """c.head_parts(): the head parts on that client's player's base, as
+        its last `head-parts` step read them (ActorBase.GetNthHeadPart), in
+        the form server.actor(c).headParts takes."""
+        fn = getattr(self._views, "head_parts", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("parts"), list):
+            raise AssertionData(f"{self.name} has not reported a head-parts step on its own player yet")
+        try:
+            ids = [int(p["id"]) for p in data["parts"]]
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s head-parts step lacks {e}") from e
+        return _parts(ids) or ""
+
     def printed(self, text: str) -> bool:
         """c.printed(text): whether a line the game's console printed during
         that client's last `console` step contains the text (Skyrim
@@ -554,7 +584,7 @@ class _ClientRef:
 
 _ATTRS = {
     ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex",
-                "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed"},
+                "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     MarkerView: {"visible", "canTravel"},
@@ -573,11 +603,11 @@ _ID_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale", "morph"},
+    _ClientRef: {"level", "node_scale", "morph", "head_parts"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
 }
 _CMP = {

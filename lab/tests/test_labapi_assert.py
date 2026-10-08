@@ -482,6 +482,42 @@ class ConsoleTests(unittest.TestCase):
             ev.evaluate('c2.printed("additem done")')
 
 
+class PartsServer(RichServer):
+    """c1's appearance with three head parts, in the order a client sent them."""
+
+    def __init__(self):
+        super().__init__()
+        self.actors["c1"]["headParts"] = [0x51631, 0x51505, 0x5162F]
+
+
+class PartsViews(NearViews):
+    """c1's last head-parts step on its own player; c2 read only c1's figure."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {"actor": 0x14, "parts": [{"id": 0x5162F, "type": 1, "name": "x"},
+                                                    {"id": 0x51631, "type": 0, "name": "y"},
+                                                    {"id": 0x51505, "type": 3, "name": "z"}]}}
+
+    def head_parts(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class HeadPartTests(unittest.TestCase):
+    def test_the_server_and_the_game_agree_as_sets(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(PartsServer(), PartsViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('server.actor(c1).headParts == c1.head_parts()'))
+        self.assertTrue(ev.evaluate('server.actor(c1).headParts == "0x51505,0x5162f,0x51631"'))
+
+    def test_missing_parts_are_data_errors(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(PartsServer(), PartsViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.head_parts() == ""')
+
+
 @needs_deps
 class NodeScaleTests(unittest.TestCase):
     def test_own_and_figure_scales_read_the_last_node_scale_steps(self):
