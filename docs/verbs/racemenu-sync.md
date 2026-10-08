@@ -226,6 +226,22 @@ above keep a hostile preset from carrying anything but a look.
   the world is up, never behind a loading screen. Engine surface:
   Actor::race (CommonLibSSE-NG Actor.h:684), read by Actor::GetRace before
   the base's (Actor.cpp:551); TESModPlatform.SetNpcRace writes the base.
+- The vanilla menu commits its own slider state AFTER Skyrim Platform's
+  menuClose event (Eli, 19:33: the look saved at the close carried the
+  preset exactly and the other seat drew it, while his own seat went back
+  to the menu's stale tone and shape). Fork 6ae65bd3: the save, the
+  re-apply and the send run 0.25 s after the close.
+- The shine, end of 2026-10-07: with the record exact, a flip of the skin
+  tint (dark opaque against the preset's pale 0.94) and a flip of the look
+  (absent against applied) both left her glossy from both seats, and her
+  own seat came out matte only after a RaceMenu menu session rebuilt the
+  head. Open, to be measured in numbers next: a live dump of the face
+  geometries' shader values (names, glossiness, specular strength, flags,
+  texture paths) on the player and on a figure, matte against glossy, and
+  the login save's face block (SFChangeFormNPC.cpp:80 and :84, two counts
+  written as 8 bytes where the game reads 4), which gives the player's own
+  seat a wrong first head before two rebuilds; Eli sees "nord features" and
+  "weird overlaps" on that seat.
 - The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
   side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
   under the lab's vanilla light, at 0 her own view matched fenestrate
