@@ -547,6 +547,25 @@ it carries a HYPOTHESIS tag.
   run starting while the heavier mod layer still loads the cell after the
   teleport. Measure before touching the scenario. The light-plugins merge
   sweep's run (20261008-140709) covered 301.
+- Playtest eleven (2026-10-08 afternoon, docs/private/playtest-m1-11.md;
+  1.6.1170, fork m1-console e0d5e439, Eli's playtest-10 world). Passed:
+  skills the server sets held through a relaunch; console AddItem,
+  Rare Curios' Sload Soap (0xFE00181E) by AddItem and eaten, its effect
+  taught again after each relaunch; Save refused; COC to every cell tried,
+  both seats (Riverwood, the Sleeping Giant, Whiterun's square (8, -5),
+  the Silver-Blood Inn), test 2 back where it stood after a quit; Kill and
+  Resurrect; a player's COC and AddItem refused. Eli kept the success
+  lines. Failed: MoveTo after a kill and a resurrect ("invalid object
+  reference", the game's own; nothing reached the server), and the
+  straight Done owed since the RaceMenu leg: hair and skin back to the
+  race's colors, the tint layers off the record. Both measured and fixed
+  on fork m1-console the same evening (docs/verbs/racemenu-sync.md
+  Status, docs/verbs/console-commands.md Impose); x-set-probe confirmed
+  the server's clock wins over a console `set gamehour`. Eli then put her
+  back by importing her template in the race menu and fitted the
+  Shrouded Robes; after a relaunch "she looks perfect", saved as the
+  server snapshot playtest-11-rotfern-20261008T224415Z. Weather differs
+  between seats: not synced yet, M4's (each game rolls its own).
 - The rest of M1, charted 2026-10-08 (Eli's decisions in the planning
   pass): script variables leave M1 (the design in
   docs/verbs/script-variables.md stays; the verb joins the milestone where
@@ -607,7 +626,10 @@ it carries a HYPOTHESIS tag.
      day. Left before its merge: `set` against the clock (a lab check after
      playtest eleven), whether a success should print a line (Eli's call
      in playtest eleven), then the merge sweep.
-  4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
+  4. Exit: doc hygiene (stale Status boxes), the mirror's Formatting
+     check (red on m1-console since the light-plugins and ADR-026 code:
+     FormDesc.cpp, RaceMenuPresetTest.cpp and PapyrusUtils.h under the
+     linter's clang-format, which a local clang-format passes), m0-death's observable (Eli,
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone
      (done: M3), the Moonlight sound fix confirmed (done), one sweep green

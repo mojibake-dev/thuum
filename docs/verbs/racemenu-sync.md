@@ -697,4 +697,24 @@ above keep a hostile preset from carrying anything but a look.
       new character exactly right (playtest ten); the merge sweep on client
       3a8e4cfd green (24 of 27, the three reds green on rerun), and fork
       parity fast-forwarded to m1-racemenu c8b26bf7 on 2026-10-08. Owed: one
-      straight-Done check on this build at Eli's next session.
+      straight-Done check on this build at Eli's next session (done in
+      playtest eleven: it failed, the box below).
+- [ ] a Done with no change keeps the look. Eli's playtest eleven
+      (2026-10-08): it did not; her hair and skin went back to the race's
+      colors on both seats, and the record lost her eye sockets, frown
+      lines, lips and nose (scratchpad pt11 cf0-before against cf0-after).
+      Measured (x-racemenu-done-probe 20261008-224646, from Eli's world
+      playtest-11-rotfern-20261008T224415Z): 6 tint layers on her after
+      the login, all hers; the race's 30 with the menu open, blank but a
+      default skin tone; the same after the close. Cause, two parts:
+      SkyMP's tint apply put back only the visible layers
+      (skymp5-client appearance.ts applyTints), so her list held 6 of her
+      race's 30 while RaceMenu keeps tints by their place in the list
+      (racemenu.psc SaveTints, LoadTints); and the client asked RaceMenu
+      for a tint save as the menu opened, after the menu had reset the
+      tints and hair color, so RaceMenu put the race's defaults back.
+      Fix on fork m1-console 5746fa9a: the whole recorded list in its
+      order, invisible layers too, and no save at the open (RaceMenu's
+      copy is the one taken when her look loads after a login). Left: the
+      probe on the fix, then a straight-Done check in a-racemenu (its own
+      commit, Eli's review), then the sweep.

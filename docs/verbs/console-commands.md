@@ -66,9 +66,11 @@ four at once and one a second after.
   console or script function the game knows except `set`
   (x-console2-probe 20261008-120751: the client's startup log names `set`
   alone as not found). CONFIRMED. `set <global> to <value>` is compiled
-  as a script statement, so the game still runs it locally; HYPOTHESIS:
-  the server's clock sync (ADR-021) then overwrites GameHour and
-  TimeScale.
+  as a script statement, so the game still runs it locally, and the
+  server's clock wins: CONFIRMED (x-set-probe 20261008-224857: two
+  seconds after `set gamehour to 3` c1's GameHour read 8.86, on the
+  server's clock, and 65 s after, 9.218 against the server's 9.231;
+  skymp5-client's TimeService writes the hour from the server's clock).
 - Typed in the console (x-console-probe 20261008-120316, lab-driver's
   console step): `player.additem f 7` (the server gave seven gold, c1's
   game held 140), `player.setav marksman 40` (c1's Marksman 40), `player
@@ -123,10 +125,22 @@ four at once and one a second after.
   the server takes that report as the jump (the record moves into the
   cell) and relays it as any movement. Other clients see the player leave
   and arrive through the movement verb.
-- HYPOTHESIS: the game's own console prints nothing when these commands
-  succeed (an item added shows in the HUD through the inventory verb), so
-  "<command> done" is ours, not the game's. Whether the line should then be
-  empty is a T4 call.
+- "<command> done" is ours; the game's own console may print nothing on
+  success (not measured). Eli's T4 call in playtest eleven (2026-10-08):
+  keep the lines ("behavior seems fine if less immediate than the OG
+  console command"; the server's answer takes a round trip).
+- MoveTo, playtest eleven: `player.moveto <id>` on the other player's
+  figure, after a kill and a resurrect of it, answered the game's own
+  "invalid object reference" and reached nothing of ours. x-moveto-probe
+  20261008-225615: `player.moveto b3184` (the hunters' camp's bedroll)
+  and `player.moveto` with the figure's id as the game had it then both
+  moved c1 there through the server; `moveto player` with the figure
+  selected failed on the server ("Form with id 0x0 doesn't exist": Skyrim
+  Platform reads the word player as a hex id, 0), fixed in 738be708 (the
+  destination reads 0 as the caller, as the target does). HYPOTHESIS: a
+  kill and a resurrect rebuild the figure under a new id, so a selection
+  made before them names a deleted reference; x-moveto2-probe reads the
+  figure's id before and after.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -328,10 +342,10 @@ SetLevel, AdvSkill, the god-mode toggles, Set on a global.
       rank, the results across a restart and a relaunch); with COC
       (6559446) green in run 20261008-191741 on fork e0d5e439 (an admin's
       COC into the inn on both sides and across the restart, a player's
-      refused). Left: what `set` does against the server's clock
-      (HYPOTHESIS, a lab check after playtest eleven) and whether a
-      success should print a line (HYPOTHESIS under Impose, Eli's call in
-      playtest eleven); then the merge sweep
+      refused). Playtest eleven (2026-10-08) passed but for MoveTo; `set`
+      against the clock confirmed (x-set-probe) and the success lines kept
+      (Eli). Left: MoveTo's fix in the lab (738be708, x-moveto2-probe) and
+      the kill-and-resurrect HYPOTHESIS under Impose; then the merge sweep
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)
