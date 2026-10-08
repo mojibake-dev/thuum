@@ -117,8 +117,12 @@ answered "Unknown command".
 
 Ranks are TES3MP's: 0 player, 1 moderator, 2 admin, 3 owner, kept with the
 player (TES3MP CoreScripts keeps `staffRank` in each player's record:
-[TES3MP/CoreScripts](https://github.com/TES3MP/CoreScripts)). The lab keeps
-enableConsoleCommandsForAll, every player an owner.
+[TES3MP/CoreScripts](https://github.com/TES3MP/CoreScripts)). The gamemode
+names its staff through the server's property `staffRank` (mp.set; the lab
+gamemode's labCommand staff-rank). A recorded rank wins; a player without
+one is an owner when the server's enableConsoleCommandsForAll is on (the
+lab keeps it on), else consoleCommandsAllowed reads as admin and anything
+else as player.
 
 ## Message contract
 
