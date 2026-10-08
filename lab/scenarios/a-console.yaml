@@ -10,9 +10,14 @@
 # the server's own SetActorValue sets c1's Archery (its Papyrus name is
 # Marksman) to 40, and c1's game shows 40. c1 types `save thuum`: the
 # server refuses it with a line. c2, a player, types the same additem: the
-# server refuses it with a line, and c2 has no sword on either side. Then
-# the server restarts and c1 relaunches on a fresh save: the sword and
-# Archery at 40 come back from the server's record.
+# server refuses it with a line, and c2 has no sword on either side. COC is
+# an admin's (Eli, 2026-10-08): c1, made an admin, types `coc
+# RiverwoodSleepingGiantInn` (Skyrim.esm's interior 0x133c6): its own game
+# goes to the inn and the server takes that one jump, so c1's game and the
+# server's record are both in the inn; c2, a player, types the same and is
+# refused, still at the lab spawn on both sides. Then the server restarts
+# and c1 relaunches on a fresh save: the sword, Archery at 40 and the inn
+# come back from the server's record.
 # Assertions are evaluated by lab-api only (ADR-009).
 id: a-console
 milestone: M1
@@ -48,6 +53,14 @@ steps:
   - c1: console {text: "save thuum"}
   - assert:
       - c1.printed("The server owns the world")
+  - c1: staff-rank {rank: 2}
+  - c1: console {text: "coc RiverwoodSleepingGiantInn"}
+  - wait: 20
+  - c1: dump-state
+  - assert:
+      - c1.printed("coc done")
+      - c1.state.worldOrCell == 0x133c6
+      - server.actor(c1).cell == "133c6:Skyrim.esm"
   - c2: console {text: "player.additem 13989 1"}
   - wait: 6
   - c2: held {ids: [0x13989]}
@@ -55,14 +68,24 @@ steps:
       - c2.printed("Not enough permissions")
       - c2.held(0x13989) == 0
       - server.inventory(c2).count("Skyrim.esm:SteelSword") == 0
+  - c2: console {text: "coc RiverwoodSleepingGiantInn"}
+  - wait: 5
+  - c2: dump-state
+  - assert:
+      - c2.printed("Not enough permissions")
+      - c2.state.worldOrCell == 0x3c
+      - server.actor(c2).cell == "lab-spawn"
   - server: restart
   - wait: 20
   - c1: relaunch
   - wait: 15
   - c1: held {ids: [0x13989]}
   - c1: skills {names: [Marksman]}
+  - c1: dump-state
   - assert:
       - c1.held(0x13989) == 1
       - c1.skill("Marksman").base == 40
+      - server.actor(c1).cell == "133c6:Skyrim.esm"
+      - c1.state.worldOrCell == 0x133c6
   - c1: screenshot
 artifacts: [server.log, c1.log, c2.log, screenshots]
