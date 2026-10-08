@@ -128,12 +128,22 @@ each (local ids 0x000 to 0xFFF).
 
 ## Status
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+Fork branch m1-light-plugins (stacked on m1-actor-values by merge):
+490976c5 (libespm, FormDesc, WorldState, the T0 fixtures), e6bf3f4a (the
+manifest's `light` flag and the client's comparison), 05da8396 (a test
+call MSVC refused as ambiguous, C2668).
+
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (CommonLibSSE-NG TESFile.h and
+      TESDataHandler.cpp, cited above; the load order on a clone is the
+      probe's to read)
+- [x] server logic + T0 (unit/LightPluginsTest.cpp on the fixtures; ctest
+      green in fork pipeline 1007)
+- [x] message + validator: no wire message; the HTTP manifest's `light`
+      flag (manifestGen.ts)
+- [x] native hook + T1: none needed (SKSE's Game.GetLightModCount and
+      GetLightModName)
+- [x] TS handler (LoadOrderVerificationService, each kind against its own)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated: nothing to add
