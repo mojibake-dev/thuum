@@ -211,9 +211,12 @@ above keep a hostile preset from carrying anything but a look.
   apocrypha), so the race's ear slider was missing, and the player's own
   face is composed under the actor race's facegen while a figure, a fresh
   NPC whose actor and base agree, is composed as rotfern: the account for
-  "shiny on my seat, right on the other". Fork 30cf4d30: the player's
-  actor race follows the appearance's race through Actor.SetRace, the
-  game's own live race change, before the base is dressed.
+  "shiny on my seat, right on the other". Fork 30cf4d30 put Actor.SetRace,
+  the game's own live race change, into the appearance apply on the tick
+  after loadGame: the game froze at login and the actor came up as a mix
+  of both races (Eli, 18:1x). Fork c40595a9 moves it to RaceMenuService,
+  once the player's world is up, after the login reset and before the
+  server's look is applied.
 - The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
   side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
   under the lab's vanilla light, at 0 her own view matched fenestrate
