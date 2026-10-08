@@ -14,7 +14,9 @@ its compiled defaults and master-file properties.
 
 Roadmap reference: skymp/ROADMAP.md "Scripts" ("Variables need to be
 preserved"); docs/PLAN.md M1, persistence gaps
-Milestone: M1   Class: A (state the server alone owns, recorded and restored)
+Milestone: after M1 (Eli, 2026-10-08: out of M1; the verb joins the
+milestone where the server runs the world's own Papyrus, which it first
+needs)   Class: A (state the server alone owns, recorded and restored)
 
 ## Authority
 

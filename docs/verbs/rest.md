@@ -273,4 +273,4 @@ clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
 - [x] no HYPOTHESIS tags: the time base measured (360 s a game hour at
       time scale 20); its dependence on other time scales is measured once
       (time scale 10) and written down as not followed
-- [ ] scenario reviewed by Eli (a-rest, thuum 7b12fa7)
+- [x] scenario reviewed by Eli (a-rest, thuum 7b12fa7: approved)
