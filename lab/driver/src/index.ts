@@ -131,7 +131,7 @@ const CONSOLE_KEY_MS = 40;
 const CONSOLE_READ_MS = 2500;
 let consoleTyping: {
   step: Step; text: string; keys: number[]; next: number; phase: "open" | "type" | "read";
-  tapped: boolean; at: number; lines: string[]; wasOpen: boolean;
+  tapped: boolean; at: number; lines: string[]; wasOpen: boolean; match: string;
 } | null = null;
 // The result goes in this long after the ingredients come out, so
 // skymp5-client's craft service has every removal before the result: made in
@@ -573,7 +573,8 @@ function finishConsole(c: Config): void {
     consoleTyping = null;
     const open = Ui.isMenuOpen("Console");
     if (open && !k.wasOpen) Input.tapKey(DIK_GRAVE);
-    postResult(c, k.step, { ok: true, data: { typed: k.text, lines: k.lines, keys: k.keys.length } });
+    const history = k.match ? consoleHistory.filter((l) => l.indexOf(k.match) >= 0).slice(-20) : [];
+    postResult(c, k.step, { ok: true, data: { typed: k.text, lines: k.lines, keys: k.keys.length, history } });
   } catch (e) {
     consoleTyping = null;
     postResult(c, k.step, { ok: false, error: String(e) });
@@ -1132,9 +1133,11 @@ function run(step: Step, player: Actor): unknown {
       return DEFERRED;
     }
     case "console": {
-      // A line typed into the game's console (finishConsole). args: {text}:
-      // lower case letters, digits, space and . , - = / only; a command's
-      // case does not matter to the console
+      // A line typed into the game's console (finishConsole). args: {text,
+      // match?}: lower case letters, digits, space and . , - = / only; a
+      // command's case does not matter to the console. With {match}, the
+      // result's history holds the last 20 lines the console printed since
+      // the game started that contain it (skymp5-client logs there)
       const text = typeof a.text === "string" ? a.text.toLowerCase() : "";
       if (!text) return { error: "no text" };
       const keys: number[] = [];
@@ -1145,7 +1148,8 @@ function run(step: Step, player: Actor): unknown {
       }
       if (consoleTyping) return { error: "a console step is still typing" };
       const wasOpen = Ui.isMenuOpen("Console");
-      consoleTyping = { step, text, keys, next: 0, phase: wasOpen ? "type" : "open", tapped: false, at: Date.now(), lines: [], wasOpen };
+      const match = typeof a.match === "string" ? a.match : "";
+      consoleTyping = { step, text, keys, next: 0, phase: wasOpen ? "type" : "open", tapped: false, at: Date.now(), lines: [], wasOpen, match };
       return DEFERRED;
     }
     case "tap-key": {
@@ -1288,8 +1292,16 @@ on("update", () => {
   }
 });
 
+// Every line the game's console printed since the game started, the last
+// CONSOLE_HISTORY_MAX: skymp5-client's own logError and logTrace print only
+// there, so a console step can return the ones that match its {match}
+const CONSOLE_HISTORY_MAX = 400;
+const consoleHistory: string[] = [];
 on("consoleMessage", (e) => {
-  if (consoleTyping) consoleTyping.lines.push(String(e.message));
+  const line = String(e.message);
+  if (consoleTyping) consoleTyping.lines.push(line);
+  consoleHistory.push(line);
+  if (consoleHistory.length > CONSOLE_HISTORY_MAX) consoleHistory.splice(0, consoleHistory.length - CONSOLE_HISTORY_MAX);
 });
 
 log("loaded");

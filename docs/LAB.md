@@ -409,7 +409,9 @@ scan code per character through Input.TapKey, Enter runs it, the grave key
 closes it; the note carries every line the console printed in the next
 2.5 s through Skyrim Platform's consoleMessage event, which includes the
 server's ConsoleOutput as skymp5-client prints it; lower case letters,
-digits, space and . , - = / only. docs/verbs/console-commands.md). The
+digits, space and . , - = / only; with {match}, also the last 20 lines the
+console printed since the game started that contain it, which is where
+skymp5-client's own logError and logTrace go. docs/verbs/console-commands.md). The
 driver never calls findConsoleCommand: a second lookup of a command resets
 skymp5-client's replacement of it. Server verbs are written as client
 steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
