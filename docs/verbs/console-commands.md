@@ -200,28 +200,39 @@ enableConsoleCommandsForAll, every player an owner.
   the client's log says which.
 - Set: type `set gamehour to 3` and read GameHour before and after the
   server's next clock sync.
-- COC (not served yet; the re-analyst's static pass, 2026-10-08, stopped
-  at Ghidra, whose MCP on sky-re answered 502; thuum-mundus asked to bring
-  it back). From CommonLibSSE-NG alone: the console table starts at
-  RELOCATION_ID(501797, 365650) (include/RE/Offsets.h:480,
-  src/RE/C/CommandTable.cpp:75-79), entries 0x50 bytes with
-  `executeFunction` at +0x30 (include/RE/C/CommandTable.h:313-331); the
-  only routine CommonLib names for the move is
-  PlayerCharacter::CenterOnCell_Impl, Address Library ID 40437
-  (include/RE/P/PlayerCharacter.h:548-549, src/RE/P/PlayerCharacter.cpp:
-  49-57), with TESObjectREFR::MoveTo_Impl, ID 56626, a candidate for the
-  move itself (include/RE/T/TESObjectREFR.h:507). HYPOTHESIS, all of it:
-  the handler passes the typed editor ID to 40437; where an interior's
-  player lands (a heading marker, a door's teleport marker, the first
-  reference, the origin) is unknown. Plan: Ghidra on the handler first;
-  then a Frida trace on a seat (hook the CenterOnCell entry's +0x30, ID
-  40437 with its string and cell, ID 56626 with its cell, position and
-  rotation), `coc riverwood` and `coc` into an interior the lab knows,
-  matching the landing spot against the cell's references with libespm.
-  Expected: one call into 40437 with the typed text, and a landing spot
-  that is one of the cell's references or its origin. Then the server can
-  make the same teleport itself (the design above) and the map-markers
-  verb judges discoveries where the player really is.
+- COC (not served yet). Static pass, 2026-10-08 (re-analyst, Ghidra on
+  sky-re; the 1.6.1170 program's code is encrypted at rest, a SteamStub
+  wrapper, so the bodies were read in the 1.7.104 program under the same
+  Address Library IDs, with 1.6.1170's table and .pdata agreeing). All of
+  it HYPOTHESIS until traced:
+  - The console table's entry 0x27 is CenterOnCell (short COC, one
+    parameter); its handler, ID 22873 (0x14036b490 in 1.6.1170, as `just
+    addr 22873` gives), parses the text and calls
+    PlayerCharacter::CenterOnCell_Impl, ID 40437 (CommonLibSSE-NG
+    include/RE/P/PlayerCharacter.h:548-549), with the typed text and no
+    cell. It ignores the selected reference: COC always moves the player.
+  - The cell: an editor-ID lookup over all forms that keeps a CELL hit
+    (ID 14620), else COCInfo.dat, else a case-insensitive scan of the
+    plugins' CELL records; locations are never consulted.
+  - The spot (ID 19075): an interior always, an exterior unless
+    bDefaultCOCPlacement:General is set, walks the cell's references
+    (ID 19076), skipping deleted ones, and takes the first of: a
+    COCMarkerHeading (position and angle), an XMarkerHeading (position and
+    angle), an XMarker (position), a door whose linked door has teleport
+    data (that position), the first reference whose base is a Static, the
+    last reference walked. Without one: the cell's center, (worldX + 2048,
+    worldY + 2048, land z) outside, (2048, 2048, 0) inside, rotation zero.
+  - The move: ID 40438, then ID 40744 for an interior (ID 40745 finds the
+    exterior cell first): z + 10, Actor::SetPosition, then the angle. It
+    carries the rotation; MoveTo_Impl is not on this path.
+  Dynamic plan: a Frida trace on a seat (1.6.1170 offsets from `just
+  addr`): ID 40437 (its string and return), ID 19076 (the two NiPoint3s on
+  exit), ID 40744 (position, rotation, cell); `coc riverwood`, then `coc`
+  into an interior that libespm shows holding a COCMarkerHeading, and the
+  logged spot compared with that reference's DATA. Then the server makes the
+  same teleport itself from its own masters (libespm's cells and their
+  references), and the map-markers verb judges discoveries where the player
+  really is.
 
 ## Status
 
