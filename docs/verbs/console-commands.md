@@ -220,4 +220,6 @@ COC, SetLevel, AdvSkill, the god-mode toggles, Set on a global.
 - [x] TS handler
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (no Papyrus native added; the
+      engine handlers it suppresses are listed under Suppress, with the
+      hook and no release)
