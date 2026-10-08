@@ -327,8 +327,32 @@ above keep a hostile preset from carrying anything but a look.
   record itself cannot be the source: rotfern's female default head parts
   are RotfernChildHead, RotfernChildMouth, RotfernChildBrows and Skyrim.esm
   01C558 (read from the esp), so a Nord head at an open comes from the
-  base record or the vanilla menu's slider state. Measurement tonight: the
-  face dump with the menu open, before anything is touched. Then the mesh: base plus
+  base record or the vanilla menu's slider state. MEASURED 23:27 on a
+  fresh world (both records blanked with the server stopped, both seats
+  relaunched 23:14; Eli created her from nothing on test 1: the race pick
+  alone gave the tone, the ear and the hair colour from the preset NPC,
+  the jslot applied the face in one load, Done, relog; both records then
+  carried her parts, sculpt 436, 22 custom, Eye Depth 0.3): the server
+  opened her menu, and the face dump six seconds later read the node as
+  her ear, hair, hairline, eyes and brows around FemaleHeadNord
+  (FemaleHead.dds, FemaleHead_S.dds) and FemaleMouthHumanoidDefault. The
+  vanilla menu's own open puts the Nord Face and Mouth on while the record
+  and the race's defaults name hers; the Player record 00000007 (a Nord)
+  or the first entry of a part list RaceCompatibility fills with every
+  human head are the candidates (apocrypha reading RaceSexMenu's slider
+  init). In that session RaceMenu's Presets-tab load did NOT replace the
+  Face and Mouth parts (as at 21:1x; the 21:32 race re-select did), the
+  sculpt bound itself to the Nord head's hosts (FemaleHeadCharGen.tri 846,
+  eyes, brows, mouth) when Eli imported it, and his Done wrote the Nord
+  parts and those hosts into both records. Repair recipe on this build:
+  menu, race slider off rotfern and back (her parts return), load the
+  preset (the sculpt finds its host), Done. c4eebeeb's re-apply at open
+  never fired: Utility.wait counts game time, which the race menu stops;
+  fork 482a331f waits in menu mode (Utility.waitMenuMode, real time), so
+  the recorded look goes back on 0.5 s into the open; measured by the
+  same dump at the next staging. If the vanilla menu re-imposes its parts
+  over that, the next step is the race re-select done by the client at
+  open. Then the mesh: base plus
   the 448-vertex sculpt (plus the 22 slider displacements, recommended so
   figures are right without RaceMenu) written into childhead.nif and its
   chargen tri's base, verified against the lab export; half a day; one
