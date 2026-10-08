@@ -37,6 +37,21 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   an inventory apply adds. Hooks RE::ConsoleLog::VPrint at its Address
   Library offset for the exe's own file version (1.6.1170 and 1.7.104).
 
+- face-dump.js: what the renderer holds for a face right now. A read-only
+  walk of the player's and every figure's loaded 3D (one call into the game,
+  LookupReferenceByHandle, to turn the process list's actor handles into
+  references) that prints one line per face geometry: shader property class
+  and flags, material class and specular colour, power and scale, every bound
+  texture with its live D3D11 size and format (ID3D11Texture2D::GetDesc), and
+  the texture set's paths. Hooks nothing, so it can attach to a game in play;
+  each resolved reference keeps one extra reference count. Found rotfern's
+  gloss on 2026-10-07: her head's specular slot bound to BSShader_DefNormalMap,
+  the engine's stand-in for a texture that did not load, because the mesh
+  named a dependency's files (docs/verbs/racemenu-sync.md). Offsets are
+  CommonLibSSE-NG's for 1.6.1170, cited per field; mind that a two-number
+  REL::RelocateMember is (SE and AE, VR), and a RelocateMemberIfNewer shifts
+  every field comment of its struct by the newer start.
+
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as
 frida/<client>-<script>.jsonl; one started outside a run is fetched by the next

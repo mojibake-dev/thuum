@@ -235,19 +235,69 @@ above keep a hostile preset from carrying anything but a look.
   tint (dark opaque against the preset's pale 0.94) and a flip of the look
   (absent against applied) both left her glossy from both seats, and her
   own seat came out matte only after a RaceMenu menu session rebuilt the
-  head. Open, to be measured in numbers next: a live dump of the face
-  geometries' shader values (names, glossiness, specular strength, flags,
-  texture paths) on the player and on a figure, matte against glossy, and
-  the login save's face block (SFChangeFormNPC.cpp:80 and :84, two counts
-  written as 8 bytes where the game reads 4), which gives the player's own
-  seat a wrong first head before two rebuilds; Eli sees "nord features" and
-  "weird overlaps" on that seat.
+  head. Measured next in numbers (below), and the login save's face block
+  (SFChangeFormNPC.cpp:80 and :84, two counts written as 8 bytes where the
+  game reads 4) fixed in 4bd52443 with unit/SaveFileFaceBlockTest.cpp.
+- The shine, FOUND (live dump, 2026-10-07 20:03, lab/frida/face-dump.js:
+  a read-only walk of each actor's loaded 3D that prints every face
+  geometry's shader property and flags, material values, the textures
+  bound to it with their live D3D11 size and format, and the texture set's
+  paths). On test 1, rotfern's figure head (RotfernChildHead,
+  BSLightingShaderMaterialFacegen, specular 1,1,1 at power 30 and scale 3,
+  the file's values) has its specular slot bound to BSShader_DefNormalMap,
+  the engine's 16x16 stand-in for a texture that did not load, and its
+  rim/soft slot the same; every other head on either seat binds a real map
+  there. The material's own texture set is the mesh's: childhead.nif bakes
+  textures\actors\character\ranaline\child\{head.dds, Head_msn.dds,
+  Head_sk.dds, head_s.dds}, the child mod she was derived from, and the
+  lab's ranaline\child folder holds one file (maleliner.dds, the persist
+  stopgap). The facegen pass puts the appearance's face texture set
+  (RotfernFaceTint 02E110, all rotfern\ paths, all shipped) on the diffuse,
+  normal, subsurface and detail slots only; the specular stays the mesh's,
+  so a flat stand-in multiplies specular strength 3.0 over the whole face.
+  Fenestrate has the ranaline textures installed, so head_s.dds loads there
+  and she is matte; RaceMenu's in-menu rebuild binds the preset's
+  faceTextures index 7 itself, which is why she was matte inside a menu
+  session and glossy again after the engine's rebuild on Done. The earlier
+  "every file is byte-identical to fenestrate's" covered the mod's own
+  files; the missing one was never in the mod. Not the HDR key, the tint,
+  the overlays or the weather: those flips all left the file missing. Fix
+  (apocrypha, rotfern-skyrim, 20:2x): childhead.nif's texture set
+  re-pathed to the mod's own head maps (sha256 05278efa...), the six ear
+  meshes likewise (their rim/soft slot read the stand-in too); restaged
+  with the mod layer. Done means the dump binds
+  textures\actors\character\rotfern\head_s.dds on both seats and Eli sees
+  her matte.
+- The own seat's head mesh (same dump): test 2's player face node wore
+  FemaleHeadNord and FemaleMouthHumanoidDefault, the Nord race's defaults,
+  under her ear, hair, hairline, eyes and brows (with the female head maps
+  the CBBE Face Pack ships: 1024 BC7 diffuse, 2048 BC4 specular, so that
+  seat's gloss had a second source), while test 1's figure of the same
+  look wore RotfernChildHead and RotfernChildMouth. The server's
+  appearance for profile 2 carries the two Nord parts (headpartIds
+  0x51623, 0x5150F) next to the rotfern ones, recorded from a menu session
+  the actor sat in as a Nord: the vanilla menu lists the actor race's
+  parts and commits them on Done, and SkyMP's appearance reads the base
+  after. The look names rotfern's parts; RaceMenu's load keeps a head part
+  only when the actor's race allows it (HYPOTHESIS, skee's
+  ApplyPresetData; the measurement is the dump after the fix: the own face
+  node must carry RotfernChildHead), so the own look loaded under the
+  loaded race left the Nord parts. Fork 0513beba: the own look goes on
+  only once the actor's race is its base's (raceAligned), goes on again
+  after every alignment, and the menu aligns the race as it opens. Open,
+  by design: head parts, race, colours and weight are recorded twice (the
+  appearance and the look) and can disagree. Next: the server derives the
+  appearance's from the look at OnRaceMenuPreset (R0 reconciliation, one
+  authority), Eli's "take the output of race menu as overriding and
+  authoritative, and then let the server fully enforce it" (2026-10-07
+  20:0x); ADR candidate.
 - The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
   side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
   under the lab's vanilla light, at 0 her own view matched fenestrate
   ("the skin texture looks VERY correct") while the figure on the other
-  seat was off for the tint reasons above. The lab keeps 0 (display.ps1
-  now says so outright). apocrypha, from the shader source: the detail
+  seat was off for the tint reasons above. The lab keeps 1, fenestrate's
+  value (Eli's call in playtest nine; display.ps1 says so); the gloss
+  itself was the missing specular map above. apocrypha, from the shader source: the detail
   map term scales only the base color by at most 1.6 percent, so CBBE's
   Face Pack did not change the gloss.
 - The server takes one look per race menu it opened, before or after the
@@ -286,9 +336,10 @@ above keep a hostile preset from carrying anything but a look.
   (A/B on sky-c1 with the head mesh at specular strength 0 against the
   original 3.0 at glossiness 30, same place, minutes apart: matte against
   sharp white highlights on the lit side of the face; the body did not
-  read shiny). Every file is byte-identical to fenestrate's (apocrypha:
-  head mesh, all four maps, the texture set record), so the cause is in
-  the render stack. HYPOTHESIS: bUse64bitsHDRRenderTarget, 1 on fenestrate
+  read shiny). Every file of the mod is byte-identical to fenestrate's
+  (apocrypha: head mesh, all four maps, the texture set record); the file
+  that differed was never in the mod (the live dump entry above). Retired
+  HYPOTHESIS: bUse64bitsHDRRenderTarget, 1 on fenestrate
   and 0 in the lab (the template's launcher wrote the lab's SkyrimPrefs.ini
   from its own hardware detect; display.ps1 edited only size and windowed
   keys), so bright specular clipped to white before tonemapping. The probe
@@ -410,3 +461,9 @@ above keep a hostile preset from carrying anything but a look.
       pending; T4 playtest eight passed, the cap stays 192 KiB)
 - [x] ledger and suppression registry updated (no NATIVES rows: CharGen
       is RaceMenu's and never runs on the server; nothing suppressed)
+- [ ] rotfern on two seats (2026-10-07 evening): the gloss measured to a
+      missing specular map (live dump) and fixed in the mod, restaged; the
+      own seat's Nord head part fixed in 0513beba (build pending); done
+      when the dump binds rotfern\head_s.dds and RotfernChildHead on both
+      seats and Eli sees her matte and whole after a relog; then the
+      merge sweep and playtest ten
