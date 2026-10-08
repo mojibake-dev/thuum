@@ -265,9 +265,16 @@ above keep a hostile preset from carrying anything but a look.
   (apocrypha, rotfern-skyrim, 20:2x): childhead.nif's texture set
   re-pathed to the mod's own head maps (sha256 05278efa...), the six ear
   meshes likewise (their rim/soft slot read the stand-in too); restaged
-  with the mod layer. Done means the dump binds
-  textures\actors\character\rotfern\head_s.dds on both seats and Eli sees
-  her matte.
+  with the mod layer. CONFIRMED 20:31, both seats relaunched on the
+  restaged layer (14 files changed): her figure's head on test 1 and her
+  own head on test 2 (RotfernChildHead under an actor of race 0x800AA00)
+  bind data\TEXTURES\actors\character\rotfern\head_s.dds (1024, BC1) on
+  the specular slot and head_sk.dds on the rim/soft slot, the material's
+  set the four rotfern\ paths, shader values unchanged. Eli, 20:32,
+  unprompted: "as of right now test 2 looks CORRECT". Left from the same
+  reading: the ear's rim/soft slot still binds the stand-in, since its
+  texture set has no slot-2 entry at all; the ear's specular binds EL_s.dds
+  and it never read glossy.
 - The own seat's head mesh (same dump): test 2's player face node wore
   FemaleHeadNord and FemaleMouthHumanoidDefault, the Nord race's defaults,
   under her ear, hair, hairline, eyes and brows (with the female head maps

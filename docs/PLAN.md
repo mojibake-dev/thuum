@@ -468,9 +468,34 @@ it carries a HYPOTHESIS tag.
   u32] in a real save). skymp5-client's login save carries a face (head
   parts and presets, remoteServer.ts loadGame), so the game misreads the
   rest of that record, the gender after it included, until
-  applyAppearanceToPlayer sets the appearance a moment later. To fix after
-  the RaceMenu merge: the counts as uint32_t, with a T0 test on the block's
-  byte layout.
+  applyAppearanceToPlayer sets the appearance a moment later. Fixed on the
+  branch the same evening (4bd52443: the counts as uint32_t, with
+  unit/SaveFileFaceBlockTest.cpp on the block's byte layout).
+- The shine, resolved by measurement (2026-10-07 evening, docs/verbs/
+  racemenu-sync.md). A read-only Frida walk of the live face geometries
+  (lab/frida/face-dump.js: shader flags, material specular, every bound
+  texture with its D3D11 format, texture-set paths) showed rotfern's head
+  binding the engine's 16x16 stand-in texture on its specular slot: her
+  head mesh named the textures of the child mod she was derived from
+  (textures\actors\character\ranaline\child\...), which fenestrate has and
+  the lab never did, and the facegen pass replaces the diffuse, normal and
+  subsurface slots from the face texture set but never the specular. Not
+  the HDR key, the tint, the overlays, the weather or the files the mod
+  ships, all of which were byte-identical to fenestrate's. apocrypha
+  re-pathed the head and ear meshes to the mod's own maps; restaged, both
+  seats bind rotfern\head_s.dds and Eli sees her right (20:32). The same
+  dump found the player's own seat wearing the Nord race's head and mouth
+  parts under her other parts: the look had been applied while the actor
+  still carried the race it loaded as, and the appearance recorded the Nord
+  parts from that menu session (the two records can disagree: the look
+  names rotfern's parts). Fork 0513beba applies the own look only once the
+  actor's race is its base's and again after every alignment. Design debt
+  named: head parts, race, colours and weight live in both the appearance
+  and the look; the server deriving the appearance from the look at
+  OnRaceMenuPreset (one authority, R0) is the next step, an ADR candidate.
+  Rule-1 lesson for every future Frida script: CommonLibSSE-NG's two-number
+  RelocateMember is (SE and AE, VR), and RelocateMemberIfNewer shifts a
+  struct's field comments; the first dump walked nothing for that reason.
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
