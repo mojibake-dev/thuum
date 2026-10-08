@@ -684,13 +684,17 @@ above keep a hostile preset from carrying anything but a look.
       attributes across a restart, and all 14 difftest sessions, racemenu
       among them, legacy against wire identical)
 - [x] T3 scenario green, no HYPOTHESIS tags (a-racemenu, d61647d, green in
-      runs 20261007-033048, -033403, -033726 and -035046; Eli's review
-      pending; T4 playtest eight passed, the cap stays 192 KiB)
+      runs 20261007-033048, -033403, -033726 and -035046; approved by Eli,
+      its body-morph addition 952a8e4 on his form; T4 playtest eight
+      passed, the cap stays 192 KiB)
 - [x] ledger and suppression registry updated (no NATIVES rows: CharGen
       is RaceMenu's and never runs on the server; nothing suppressed)
-- [ ] rotfern on two seats (2026-10-07 evening): the gloss measured to a
-      missing specular map (live dump) and fixed in the mod, restaged; the
-      own seat's Nord head part fixed in 0513beba (build pending); done
-      when the dump binds rotfern\head_s.dds and RotfernChildHead on both
-      seats and Eli sees her matte and whole after a relog; then the
-      merge sweep and playtest ten
+- [x] rotfern on two seats (2026-10-07 evening into 2026-10-08): the
+      gloss measured to a missing specular map and fixed in the mod, the
+      Nord head to head parts without a gender flag (rotfern.esp
+      790d3b6c); the menu-open dump binds head_s.dds and RotfernChildHead
+      (night staging, 01:43); Eli saw her matte and whole and made a brand
+      new character exactly right (playtest ten); the merge sweep on client
+      3a8e4cfd green (24 of 27, the three reds green on rerun), and fork
+      parity fast-forwarded to m1-racemenu c8b26bf7 on 2026-10-08. Owed: one
+      straight-Done check on this build at Eli's next session.

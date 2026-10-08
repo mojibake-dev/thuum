@@ -554,9 +554,11 @@ it carries a HYPOTHESIS tag.
   (Apocalypse in M2 is the first to need them); ADR-026 is accepted and
   built in M1. In order, each a verb through CLAUDE.md's workflow with its
   scenario in its own commit and the sweep at its merge (ADR-024):
-  0. Close RaceMenu sync: the night sweep on client 527e0b34, parity
-     fast-forwarded to m1-racemenu, snapshots promoted; one straight-Done
-     check at Eli's next session; apocrypha's mesh bake in parallel.
+  0. Close RaceMenu sync: DONE 2026-10-08. The merge sweep on client
+     3a8e4cfd (527e0b34 and the reloot test fix) green, fork parity
+     fast-forwarded to m1-racemenu c8b26bf7, both clones' clean-m1-next
+     promoted to clean-m1. Owed: one straight-Done check at Eli's next
+     session; apocrypha's mesh bake in parallel.
   1. The full ActorValue set (fork m1-actor-values: rule, MsgType 40,
      record, client service and natives, T0 and difftest built; left: the
      server's Get, Set, Mod and Force natives on a player, the four
@@ -719,8 +721,8 @@ scenario there:
   1.6.1170 client set (ADR-025). Status 2026-10-07: through RaceMenu's own
   CharGen natives (docs/verbs/racemenu-sync.md), T2 green, `a-racemenu`
   green (approved by Eli; its body-morph addition 952a8e4 awaits his
-  review), playtest eight passed; the merge sweep
-  next.
+  review), playtest eight passed. DONE 2026-10-08: on fork parity
+  c8b26bf7 after its merge sweep (rotfern and playtest ten with it).
 
 Game versions (ADR-022, Eli, 2026-10-04): thuum supports and tests 1.7.104
 and 1.6.1170, one version per lab run (`just lab-run <scenario> [game]`).
