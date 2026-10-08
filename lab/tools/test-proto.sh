@@ -95,6 +95,17 @@ fi
 
 echo "== clean world, server under test"
 ssh_srv "$dc pull -q skymp-server-test skymp-server-legacy"
+# The legacy server refuses a light plugin by name ("'ccQDRSSE001-SurvivalMode.esl'
+# is not a valid esp or esm name", 2026-10-08): it runs on the lab's settings
+# without the .esl files, which keeps every full plugin's index, since the
+# server under test numbers light plugins apart (docs/verbs/light-plugins.md).
+# No session names a light plugin's form.
+ssh_srv "python3 - ${SERVER_SETTINGS:-/srv/lab/server/server-settings.json} /srv/lab/server/server-settings-legacy.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1]))
+d["loadOrder"] = [p for p in d["loadOrder"] if not p.lower().endswith(".esl")]
+json.dump(d, open(sys.argv[2], "w"), indent=2)
+PY
 stop_t2
 restore server-test/world
 ssh_srv "$dc up -d skymp-server-test >/dev/null 2>&1"

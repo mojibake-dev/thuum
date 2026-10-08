@@ -45,7 +45,9 @@ services:
       # the same version defaults as skymp-server (ADR-025)
       - ${ESM_DIR:-/srv/persist/esm/1.6.1170}:/srv/skymp/esm:ro
       - /srv/lab/server-legacy/world:/srv/skymp/world
-      - ${SERVER_SETTINGS:-/srv/lab/server/server-settings.json}:/srv/skymp/server-settings.json:ro
+      # the lab's settings without its light plugins, which the legacy server
+      # refuses by name (lab/tools/test-proto.sh writes the file)
+      - ${LEGACY_SETTINGS:-/srv/lab/server/server-settings-legacy.json}:/srv/skymp/server-settings.json:ro
       - /srv/lab/thuum/lab/gamemode:/srv/skymp/gamemode:ro
 
   # T2's server under test (lab/tools/test-proto.sh): the image under test

@@ -223,7 +223,10 @@ UpdateMovement, UpdateAnimation and UpdateAnimVariables as presence) and
 diffed: login and spawn, exit code, what each client sent, what it received.
 `DIFFTEST_LEGACY_FAKECLIENT` (or `DIFFTEST_FAKECLIENT`) with
 `DIFFTEST_LEGACY_ADDR`, and `DIFFTEST_WIRE_FAKECLIENT` with
-`DIFFTEST_WIRE_ADDR`, name the stacks; with one named it runs twice and
+`DIFFTEST_WIRE_ADDR`, name the stacks (on sky-srv the legacy stack runs the
+lab's settings without its .esl files, which it refuses by name; the server
+under test numbers light plugins apart, so every full plugin keeps its index
+on both); with one named it runs twice and
 diffs against itself, which proves determinism only if the world is
 restored between runs. The database dump joins the comparison when
 `just test-proto` runs both servers side by side on sky-srv.
