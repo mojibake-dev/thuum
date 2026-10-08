@@ -248,6 +248,21 @@ above keep a hostile preset from carrying anything but a look.
   staging: menu on test 2, load the preset, move a slider, Done; the
   look's headParts must read rotfern.esp 02E116 and 02E117 and the own
   face node RotfernChildHead with no relaunch.
+- Same evening, 21:32, still on 0513beba: Eli's next two menu sessions on
+  test 2 (preset loaded again, the race slider moved off rotfern and back,
+  hair colour changed, Done) left BOTH records with rotfern's head and
+  mouth (02E116, 02E117), the ear, hair, eyes, brows and hair colour
+  070709. The race re-select re-runs the vanilla menu's LoadSliders and
+  reseats its head-part sliders on the current parts, so the commit kept
+  the preset's; the 21:1x session had no re-select. The "Rotfern Ears"
+  slider was present in that session (Eli), absent at 21:07: apocrypha,
+  from skee's source, FaceMorphInterface::LoadSliders builds the menu's
+  list from the actor's race when the engine's RaceSexMenu::LoadSliders
+  runs, at the open and at every race change; whether the first open alone
+  would have shown it after 0513beba's alignment at open is not yet
+  separated from the re-select. Not the Headpart Whitelist plugin: the lab
+  loads skee64, SkyrimPlatform and MpClientPlugin only, and the mod's
+  Data\HeadpartWhitelist\rotfern.ini is dormant here as on fenestrate.
 - The shine, end of 2026-10-07: with the record exact, a flip of the skin
   tint (dark opaque against the preset's pale 0.94) and a flip of the look
   (absent against applied) both left her glossy from both seats, and her
