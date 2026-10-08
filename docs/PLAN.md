@@ -545,7 +545,8 @@ it carries a HYPOTHESIS tag.
   client stack; both clones still run by default (SkyrimPrefs.ini
   bAlwaysRunByDefault=1, read after the sweep), so the next suspect is the
   run starting while the heavier mod layer still loads the cell after the
-  teleport. Measure before touching the scenario.
+  teleport. Measure before touching the scenario. The light-plugins merge
+  sweep's run (20261008-140709) covered 301.
 - The rest of M1, charted 2026-10-08 (Eli's decisions in the planning
   pass): script variables leave M1 (the design in
   docs/verbs/script-variables.md stays; the verb joins the milestone where
