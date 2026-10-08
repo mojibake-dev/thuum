@@ -1,0 +1,68 @@
+# M1, console commands (docs/verbs/console-commands.md): a player types the
+# commands it knows from single-player, and the server decides who runs
+# which and answers each with a line in the player's console. Ranks count:
+# the scenario names c1 an owner and c2 a player through the server's
+# staffRank property (labCommand staff-rank; a recorded rank wins over the
+# lab's enableConsoleCommandsForAll). Both start with no steel sword.
+# c1 types `player.additem 13989 1` (SteelSword, Skyrim.esm 0x13989): the
+# server gives it one, the server's record and c1's game agree, and c1's
+# console prints the server's line. c1 types `player.setav marksman 40`:
+# the server's own SetActorValue sets c1's Archery (its Papyrus name is
+# Marksman) to 40, and c1's game shows 40. c1 types `save thuum`: the
+# server refuses it with a line. c2, a player, types the same additem: the
+# server refuses it with a line, and c2 has no sword on either side. Then
+# the server restarts and c1 relaunches on a fresh save: the sword and
+# Archery at 40 come back from the server's record.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-console
+milestone: M1
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: staff-rank {rank: 3}
+  - c2: staff-rank {rank: 0}
+  - c1: held {ids: [0x13989]}
+  - c2: held {ids: [0x13989]}
+  - assert:
+      - c1.held(0x13989) == 0
+      - c2.held(0x13989) == 0
+  - c1: console {text: "player.additem 13989 1"}
+  - wait: 6
+  - c1: held {ids: [0x13989]}
+  - assert:
+      - c1.printed("additem done")
+      - c1.held(0x13989) == 1
+      - server.inventory(c1).count("Skyrim.esm:SteelSword") == 1
+  - c1: console {text: "player.setav marksman 40"}
+  - wait: 3
+  - c1: skills {names: [Marksman]}
+  - assert:
+      - c1.printed("setav done")
+      - c1.skill("Marksman").base == 40
+  - c1: console {text: "save thuum"}
+  - assert:
+      - c1.printed("The server owns the world")
+  - c2: console {text: "player.additem 13989 1"}
+  - wait: 6
+  - c2: held {ids: [0x13989]}
+  - assert:
+      - c2.printed("Not enough permissions")
+      - c2.held(0x13989) == 0
+      - server.inventory(c2).count("Skyrim.esm:SteelSword") == 0
+  - server: restart
+  - wait: 20
+  - c1: relaunch
+  - wait: 15
+  - c1: held {ids: [0x13989]}
+  - c1: skills {names: [Marksman]}
+  - assert:
+      - c1.held(0x13989) == 1
+      - c1.skill("Marksman").base == 40
+  - c1: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
