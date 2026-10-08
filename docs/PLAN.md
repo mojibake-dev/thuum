@@ -376,6 +376,12 @@ it carries a HYPOTHESIS tag.
     (runs 20261006-055423 and -063425), so the trigger is under
     investigation: the race menu, or the stream start (Sunshine switching
     the clone's audio device under a running game; a hypothesis, untested).
+    Evidence for the stream start, 2026-10-07 21:01: a second Moonlight
+    session was opened to each seat while an older one was still connected
+    (21:01:31); the lab driver's heartbeat from inside both games stopped
+    by 21:01:40 and Eli saw both frozen, with SkyrimSE.exe still answering
+    Windows as responding. Rule since: one stream per seat, opened before
+    the game or left alone while it runs; check for a running one first.
     After quitting, a rotfern showed as a Nord in its own game: an upstream
     SkyMP bug in the login save (Skyrim Platform wrote every form outside
     Skyrim.esm as a created form), fixed on the branch (dbed91b0, with a
