@@ -352,7 +352,29 @@ above keep a hostile preset from carrying anything but a look.
   the recorded look goes back on 0.5 s into the open; measured by the
   same dump at the next staging. If the vanilla menu re-imposes its parts
   over that, the next step is the race re-select done by the client at
-  open. Then the mesh: base plus
+  open.
+- ROOT CAUSE of the Nord head, from the dump and the plugin (apocrypha,
+  23:35): RotfernChildHead (02E116), RotfernChildMouth (02E117) and
+  RotfernChildBrows (02E118) carried HDPT DATA 0x01, playable with
+  neither gender bit, inherited from RS Children's parts (my own HDPT
+  parse at 21:2x printed exactly that next to the ears' 0x05, unread).
+  Every path that selects a valid part for a female of the race tests
+  the bit: RaceMenu's ApplyPresetData applies a part only if it carries
+  kFlagFemale for a female (so the jslot's head entry was skipped at every
+  load), and the vanilla menu's rebuild at open takes the first valid
+  Face and Mouth for the actor's race and sex, which with her parts out
+  are FemaleHeadNord and FemaleMouthHumanoidDefault (valid on rotfern
+  since the plugin adds the race to the vanilla head-part race lists).
+  Race defaults never check the flag, which is why the race pick and the
+  re-select always restored her head, and why the ear, hair and eyes
+  (0x05) survived every open. Fix in rotfern.esp 790d3b6c (chim,
+  byte-level): DATA 0x05 on the three parts, and RotfernChildHead and
+  RotfernChildMouth appended to both preset NPCs' lists. Expected at the
+  next dump with the menu open: her head and mouth on the node at the
+  open with nothing re-applied, and the sculpt present since its host
+  matches. The client's menu-mode re-apply stays as the belt for anything
+  else the open does; the appearance/look double record (ADR-026) stays
+  the structural item. Then the mesh: base plus
   the 448-vertex sculpt (plus the 22 slider displacements, recommended so
   figures are right without RaceMenu) written into childhead.nif and its
   chargen tri's base, verified against the lab export; half a day; one
