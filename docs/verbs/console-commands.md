@@ -200,6 +200,28 @@ enableConsoleCommandsForAll, every player an owner.
   the client's log says which.
 - Set: type `set gamehour to 3` and read GameHour before and after the
   server's next clock sync.
+- COC (not served yet; the re-analyst's static pass, 2026-10-08, stopped
+  at Ghidra, whose MCP on sky-re answered 502; thuum-mundus asked to bring
+  it back). From CommonLibSSE-NG alone: the console table starts at
+  RELOCATION_ID(501797, 365650) (include/RE/Offsets.h:480,
+  src/RE/C/CommandTable.cpp:75-79), entries 0x50 bytes with
+  `executeFunction` at +0x30 (include/RE/C/CommandTable.h:313-331); the
+  only routine CommonLib names for the move is
+  PlayerCharacter::CenterOnCell_Impl, Address Library ID 40437
+  (include/RE/P/PlayerCharacter.h:548-549, src/RE/P/PlayerCharacter.cpp:
+  49-57), with TESObjectREFR::MoveTo_Impl, ID 56626, a candidate for the
+  move itself (include/RE/T/TESObjectREFR.h:507). HYPOTHESIS, all of it:
+  the handler passes the typed editor ID to 40437; where an interior's
+  player lands (a heading marker, a door's teleport marker, the first
+  reference, the origin) is unknown. Plan: Ghidra on the handler first;
+  then a Frida trace on a seat (hook the CenterOnCell entry's +0x30, ID
+  40437 with its string and cell, ID 56626 with its cell, position and
+  rotation), `coc riverwood` and `coc` into an interior the lab knows,
+  matching the landing spot against the cell's references with libespm.
+  Expected: one call into 40437 with the typed text, and a landing spot
+  that is one of the cell's references or its origin. Then the server can
+  make the same teleport itself (the design above) and the map-markers
+  verb judges discoveries where the player really is.
 
 ## Status
 
