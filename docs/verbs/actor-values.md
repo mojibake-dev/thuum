@@ -270,9 +270,13 @@ level increase, at most 4 at once and 1 a second after.
       in c1's game after the server set them)
 - [ ] T3 scenario green, no HYPOTHESIS tags: a-actor-values (thuum
       207a762) green in run 20261008-111013 for the bases, the server's
-      sets and Mod, and the record across a restart and a relaunch; left
-      HYPOTHESIS: the skill progress and the level through the scalar
-      natives SetPlayerSkill and SetPlayerExperience (d4ebe6cf, after
-      callNative refused SetPlayerProgress's array), read at the next
-      staging
+      sets and Mod, and the record across a restart and a relaunch. The
+      record's skill progress and level now apply without an error through
+      the scalar natives SetPlayerSkill and SetPlayerExperience, declared in
+      the committed TESModPlatform.pex (7f77b42d; x-av3-probe
+      20261008-132006: the base shows, the console history holds no
+      ActorValuesService error). Left HYPOTHESIS: what a level above 1 does
+      in the game (the Stats menu, leveled lists); none arises while SkyMP's
+      client keeps experience off and the server has no SetLevel, so it
+      waits for the console's SetLevel (not served yet)
 - [x] ledger and suppression registry updated (four NATIVES rows)
