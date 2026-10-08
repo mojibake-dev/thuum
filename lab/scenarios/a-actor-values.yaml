@@ -1,0 +1,50 @@
+# M1, actor values (docs/verbs/actor-values.md): the server keeps a player's
+# actor values, skills and level. Its own SetActorValue sets a base (R0) and
+# the player's game shows it; Mod and Force change a permanent modifier in
+# the player's own game, never the base (the game's semantics, measured in
+# x-av-probe 20261008-101643). SkyMP's client turns skill experience off, so
+# a skill never rises through play here; the server is the one that sets it.
+# c1 is the clean world's character, a Nord: One-Handed 20, Archery (its
+# Papyrus name is Marksman) 15. The server sets One-Handed to 45 and
+# Marksman to 30, and c1's game shows both. The server mods One-Handed by 5:
+# c1's base stays 45. Then the server restarts and c1 relaunches on a fresh
+# save, which starts every skill at the race's values: only the server's
+# record can bring back One-Handed 45 and Marksman 30, and the modifier,
+# the session's, is gone with the session.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-actor-values
+milestone: M1
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - wait: 15
+  - c1: skills {names: [OneHanded, Marksman]}
+  - assert:
+      - c1.skill("OneHanded").base == 20
+      - c1.skill("Marksman").base == 15
+  - c1: papyrus-av {how: set, name: OneHanded, value: 45}
+  - c1: papyrus-av {how: set, name: Marksman, value: 30}
+  - wait: 3
+  - c1: skills {names: [OneHanded, Marksman]}
+  - assert:
+      - c1.skill("OneHanded").base == 45
+      - c1.skill("Marksman").base == 30
+  - c1: papyrus-av {how: mod, name: OneHanded, value: 5}
+  - wait: 3
+  - c1: skills {names: [OneHanded]}
+  - assert:
+      - c1.skill("OneHanded").base == 45
+  - server: restart
+  - wait: 20
+  - c1: relaunch
+  - wait: 15
+  - c1: skills {names: [OneHanded, Marksman]}
+  - assert:
+      - c1.skill("OneHanded").base == 45
+      - c1.skill("Marksman").base == 30
+  - c1: screenshot
+artifacts: [server.log, c1.log, screenshots]
