@@ -619,3 +619,42 @@ loads in.
 Game folder, SKSE 2.2.6, the Address Library for 1.6.1170) comes with the
 public server (M2). The 1.7.104 server keeps today's load order: RaceMenu's
 plugins are full slots and join only the 1.6.1170 one.
+
+## ADR-026: A player's look is the one record of its face and body
+
+Status: proposed (2026-10-07, from Eli's question: "take the output of race
+menu as overriding and authoritative, and then from there let the server
+fully enforce it"). Eli decides.
+
+**Context.** A character is recorded twice. SkyMP's appearance (the vanilla
+UpdateAppearance, read from the player's base at the menu's close) carries
+race, head parts, skin and hair colour, weight and the engine's tints; the
+RaceMenu look (docs/verbs/racemenu-sync.md) carries the same under its own
+names plus the sculpt, RaceMenu's sliders, overrides, transforms and body
+morphs. The two can disagree, and did: on 2026-10-07 the live face dump
+found the appearance for profile 2 holding the Nord race's head and mouth
+parts, recorded from a menu session the actor sat in under the race it had
+loaded as, while the look held rotfern's parts; the player's own seat drew
+the appearance's. The client fix (0513beba: the look goes on only once the
+actor's race is its base's) stops that path, and leaves the two records.
+One authority per piece of state is the law (CLAUDE.md).
+
+**Decision (proposed).** Where RaceMenu is present, the look is the record
+of a character's face and body, and the appearance is derived from it on
+the server: at OnRaceMenuPreset the server resolves the look's head parts
+(formIdentifier against its own load order), race, hair colour and weight
+into the actor's appearance (R0), refuses a look whose head parts are not
+valid for its race (the race rule that already guards the appearance), and
+sends the derived appearance with the look. The appearance message stays as
+it is (the wire does not change); a client's own UpdateAppearance after a
+menu close is accepted as today but superseded by the derivation when the
+look of the same menu arrives. Without RaceMenu (1.7.104) the appearance
+stands alone, as now.
+
+**Consequences.** `a-racemenu` asserts the appearance's head parts equal
+the look's after a menu close; the server needs the plugin-name to index
+map it already has for its load order; skin tone stays the appearance's
+until the look's tintInfo is read the same way (a second step). Not done
+tonight: the hairline and other extra parts that RaceMenu lists only
+through their hair must be derived with the engine's extra-part rule, or
+the appearance loses them.
