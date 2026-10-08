@@ -1,0 +1,54 @@
+# M1, light plugins (docs/verbs/light-plugins.md): the server numbers a
+# light plugin's records as the engine does, 0xFE000000 | the plugin's index
+# among light plugins << 12 | the record's own id, so an item from one is
+# the same form on both sides and in the server's records. Rare Curios
+# (ccBGSSSE037-Curios.esl, a Creation Club light plugin in the lab's set)
+# adds Sload Soap, an ingredient (INGR ccBGSSSE037_SloadSoap, own id 0x81E;
+# lab/esm.py on sky-srv). The clones load Curios as light plugin 1
+# (x-light-probe, run 20261008-101512), so the soap is 0xFE00181E on both sides.
+# The server gives c1 two; c1's own game holds two of that form. c1 eats one
+# (equip, as a player eats from the inventory): its game learns the soap's
+# first effect and the learned-effects verb records it under the soap's id.
+# Then the server restarts and c1 relaunches on a fresh save that has
+# neither: the server's records give back the one soap and the learned
+# effect. On a server that numbered the light plugin as a full one, the
+# give would name another form or none.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: a-light-plugin
+milestone: M1
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: known {ids: [0xFE00181E]}
+  - assert:
+      - c1.known(0xFE00181E) == 0
+  - c1: give {item: "0xFE00181E", count: 2}
+  - wait: 3
+  - c1: held {ids: [0xFE00181E]}
+  - assert:
+      - server.inventory(c1).count("0xFE00181E") == 2
+      - c1.held(0xFE00181E) == 2
+  - c1: equip {item: "0xFE00181E"}
+  - wait: 5
+  - c1: known {ids: [0xFE00181E]}
+  - c1: held {ids: [0xFE00181E]}
+  - assert:
+      - c1.known(0xFE00181E) >= 1
+      - c1.held(0xFE00181E) == 1
+      - server.inventory(c1).count("0xFE00181E") == 1
+  - server: restart
+  - c1: relaunch
+  - wait: 10
+  - c1: known {ids: [0xFE00181E]}
+  - c1: held {ids: [0xFE00181E]}
+  - assert:
+      - c1.known(0xFE00181E) >= 1
+      - c1.held(0xFE00181E) == 1
+      - server.inventory(c1).count("0xFE00181E") == 1
+  - c1: screenshot
+artifacts: [server.log, c1.log, screenshots]
