@@ -113,6 +113,7 @@ them by name.
 {"payload": {"kind": "set-percentages", "profileId": 1, "health": 0.5, "magicka": 0.25, "stamina": 0.75}}
 {"payload": {"kind": "kill", "profileId": 1}}
 {"payload": {"kind": "respawn", "profileId": 1}}
+{"payload": {"kind": "papyrus-av", "profileId": 1, "how": "set", "name": "Archery", "value": 45}}
 ```
 
 `teleport` carries the descriptor and absolute coordinates; lab-api resolves
@@ -132,7 +133,11 @@ a real client, never typed). `open-race-menu` opens the server's race menu
 for the actor (`mp.setRaceMenuOpen`): the client is told to show the menu,
 and the server takes one UpdateAppearance from it. `set-percentages` sets the given actor values as
 fractions. `kill` sets the actor dead; `respawn` clears it and moves the actor
-to its spawn point.
+to its spawn point. `papyrus-av` runs an actor value native on the player's
+actor through the server's own Papyrus VM (`mp.callPapyrusFunction`, the
+path a script takes; docs/verbs/actor-values.md): `how` is get, base or max
+(answers `value`) or set, mod or force (answers the `base` and `current`
+the server then reads back).
 
 Response: `{"ok": true}` or `{"ok": false, "error": "<reason>"}`. For `give`,
 lab-api adds `baseId` next to the scenario's `item` string so the gamemode

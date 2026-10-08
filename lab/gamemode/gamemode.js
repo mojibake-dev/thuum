@@ -159,6 +159,40 @@ command["set-appearance"] = (payload) => {
   return { ok: true, actorId, preset };
 };
 
+// docs/verbs/actor-values.md: an actor value native on a player, run by the
+// server's own Papyrus VM (R0) as a script would call it: {profileId, how:
+// get | base | max | set | mod | force, name, value}. Answers what the
+// native returned (get, base, max) or what the server then reads back as
+// the base and current value.
+const AV_NATIVES = {
+  get: "GetActorValue",
+  base: "GetBaseActorValue",
+  max: "GetActorValueMax",
+  set: "SetActorValue",
+  mod: "ModActorValue",
+  force: "ForceActorValue",
+};
+command["papyrus-av"] = (payload) => {
+  const actorId = actorFor(payload.profileId);
+  if (!actorId) return notFound(payload.profileId);
+  const fn = AV_NATIVES[String(payload.how || "")];
+  const name = String(payload.name || "");
+  if (!fn || !name) return { ok: false, error: "papyrus-av needs how (get, base, max, set, mod, force) and name" };
+  const self = { type: "form", desc: mp.getDescFromId(actorId) };
+  const call = (f, args) => mp.callPapyrusFunction("method", "Actor", f, self, args);
+  if (fn.startsWith("Get")) {
+    return { ok: true, actorId, how: payload.how, name, value: call(fn, [name]) };
+  }
+  const value = Number(payload.value);
+  if (!Number.isFinite(value)) return { ok: false, error: "papyrus-av needs a finite value" };
+  call(fn, [name, value]);
+  return {
+    ok: true, actorId, how: payload.how, name, value,
+    base: call("GetBaseActorValue", [name]),
+    current: call("GetActorValue", [name]),
+  };
+};
+
 // The server sends the client SetRaceMenuOpen and takes one UpdateAppearance
 // from it while the menu is open: the race menu a new character gets, opened
 // for a recorded one. The stock client shows the menu; closing it is the

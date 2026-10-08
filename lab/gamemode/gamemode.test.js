@@ -116,3 +116,28 @@ test("unknown rpc and kind, and thrown errors, answer with error", () => {
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "what" }), { error: "unknown kind what" });
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "actor", profileId: 1 }), { error: "boom" });
 });
+
+test("labCommand papyrus-av runs the server's own actor value natives", () => {
+  global.mp = fakeMp();
+  const calls = [];
+  const bases = { Archery: 15 };
+  mp.getDescFromId = (id) => id.toString(16);
+  mp.callPapyrusFunction = (callType, className, fn, self, args) => {
+    calls.push([callType, className, fn, self.type, self.desc, ...args]);
+    if (fn === "SetActorValue") bases[args[0]] = args[1];
+    if (fn === "ModActorValue") bases[args[0]] += args[1];
+    return bases[args[0]];
+  };
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const set = mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "set", name: "Archery", value: 45 });
+  assert.deepStrictEqual(set, { ok: true, actorId: 0xff000001, how: "set", name: "Archery", value: 45, base: 45, current: 45 });
+  assert.deepStrictEqual(calls[0], ["method", "Actor", "SetActorValue", "form", "ff000001", "Archery", 45]);
+  const mod = mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "mod", name: "Archery", value: 5 });
+  assert.strictEqual(mod.base, 50);
+  const base = mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "base", name: "Archery" });
+  assert.strictEqual(base.value, 50);
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "nope", name: "Archery" }).ok, false);
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "set", name: "Archery", value: "x" }).ok, false);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 9, how: "set", name: "Archery", value: 1 }), { found: false, profileId: 9 });
+});
