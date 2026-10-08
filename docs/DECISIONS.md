@@ -622,9 +622,10 @@ plugins are full slots and join only the 1.6.1170 one.
 
 ## ADR-026: A player's look is the one record of its face and body
 
-Status: proposed (2026-10-07, from Eli's question: "take the output of race
-menu as overriding and authoritative, and then from there let the server
-fully enforce it"). Eli decides.
+Status: accepted (2026-10-08, Eli: accept, built in M1 alongside the
+actor-value server work; proposed 2026-10-07 from his question: "take the
+output of race menu as overriding and authoritative, and then from there let
+the server fully enforce it").
 
 **Context.** A character is recorded twice. SkyMP's appearance (the vanilla
 UpdateAppearance, read from the player's base at the menu's close) carries
@@ -639,7 +640,7 @@ the appearance's. The client fix (0513beba: the look goes on only once the
 actor's race is its base's) stops that path, and leaves the two records.
 One authority per piece of state is the law (CLAUDE.md).
 
-**Decision (proposed).** Where RaceMenu is present, the look is the record
+**Decision.** Where RaceMenu is present, the look is the record
 of a character's face and body, and the appearance is derived from it on
 the server: at OnRaceMenuPreset the server resolves the look's head parts
 (formIdentifier against its own load order), race, hair colour and weight
@@ -654,7 +655,11 @@ stands alone, as now.
 **Consequences.** `a-racemenu` asserts the appearance's head parts equal
 the look's after a menu close; the server needs the plugin-name to index
 map it already has for its load order; skin tone stays the appearance's
-until the look's tintInfo is read the same way (a second step). Not done
-tonight: the hairline and other extra parts that RaceMenu lists only
-through their hair must be derived with the engine's extra-part rule, or
-the appearance loses them.
+until the look's tintInfo is read the same way (a second step). The
+hairline and other extra parts that RaceMenu lists only through their hair
+must be derived with the engine's extra-part rule, or the appearance loses
+them. Tints stay the appearance's for good reason, measured 2026-10-08
+00:26: RaceMenu's own save carries only the tint layers it set itself (six
+against the preset file's thirty, lips and nose missing for rotfern), so a
+look applied over the engine's layers clears them; the appearance, read
+from the base, keeps them.

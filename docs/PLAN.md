@@ -528,6 +528,37 @@ it carries a HYPOTHESIS tag.
   open losing RaceMenu's layer (482a331f), the head parts without a gender
   flag (the plugin). Found, for later: arrows do not fly (Eli: drawn,
   equipped, no arrow leaves the bow), the roadmap's marksman line.
+- The rest of M1, charted 2026-10-08 (Eli's decisions in the planning
+  pass): script variables leave M1 (the design in
+  docs/verbs/script-variables.md stays; the verb joins the milestone where
+  the server runs the world's own Papyrus); SetScale waits past M1 for the
+  first verb that scales a reference; globals stay deferred per ADR-021
+  (Apocalypse in M2 is the first to need them); ADR-026 is accepted and
+  built in M1. In order, each a verb through CLAUDE.md's workflow with its
+  scenario in its own commit and the sweep at its merge (ADR-024):
+  0. Close RaceMenu sync: the night sweep on client 527e0b34, parity
+     fast-forwarded to m1-racemenu, snapshots promoted; one straight-Done
+     check at Eli's next session; apocrypha's mesh bake in parallel.
+  1. The full ActorValue set (fork m1-actor-values: rule, MsgType 40,
+     record, client service and natives, T0 and difftest built; left: the
+     server's Get, Set, Mod and Force natives on a player, the four
+     HYPOTHESIS tags, T2, `a-actor-values`) with ADR-026's derivation of
+     the appearance from the look in the same server pass. About three
+     sessions.
+  2. Light (ESL) plugins on the server (the bullet above): a verb doc
+     first, libespm's light form ids with a T0 test on a fixture plugin the
+     repo owns, the load order and the client's verification, CBBE's
+     plugins joining the server, `a-light-plugin`. About four sessions.
+  3. Console commands (docs/verbs/console-commands.md, design only): Eli's
+     review of the command table's ranks and of how an owner is named
+     comes first; then the Rust message and handler, `coc`, `additem`, and
+     the actor-value commands through their verbs, `a-console`. About four
+     sessions.
+  4. Exit: doc hygiene (stale Status boxes), m0-death's observable (Eli,
+     M0), PvE and hosted-NPC reach and angle moved to the NPC milestone,
+     the Moonlight sound fix confirmed, one sweep green on parity. M2 opens
+     with the first ranged hit verb (arrows do not fly; Headshot Kills
+     rides it).
 - Exit: scenarios `a-*` green including `a-restart-persistence`.
   Status 2026-10-02: `a-restart-persistence` exists and is green on the
   wire (run 20261002-231256: position, inventory, the equipped weapon as
