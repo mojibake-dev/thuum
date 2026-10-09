@@ -40,11 +40,13 @@ each (local ids 0x000 to 0xFFF).
   `LookupFormIDRaw`, which counts light and full masters separately).
 - Light and full plugins are numbered separately, each in load order:
   `compileIndex` counts full plugins, `smallFileCompileIndex` light ones
-  (TESDataHandler.h:34, `TESFileCollection::smallFiles`). HYPOTHESIS until
-  the lab reads a client's light plugin list (SKSE Game.GetLightModCount and
-  GetLightModName) against its plugins.txt: that the engine assigns
-  `smallFileCompileIndex` in the order plugins.txt and Skyrim.ccc load them,
-  the Creation Club light plugins among them.
+  (TESDataHandler.h:34, `TESFileCollection::smallFiles`). The engine
+  assigns `smallFileCompileIndex` in the order plugins.txt and Skyrim.ccc
+  load them, the Creation Club light plugins among them: CONFIRMED
+  (x-light-probe 20261008-101512, SKSE Game.GetLightModCount and
+  GetLightModName on both clones: ccqdrsse001-survivalmode.esl,
+  ccbgssse037-curios.esl, _resourcepack.esl, cbbe.esp, in that order and
+  the same on both).
 - No Address Library ID is needed: the server reads files, and the client
   reads its own load order through SKSE's Papyrus natives.
 

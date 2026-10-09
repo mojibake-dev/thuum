@@ -38,9 +38,11 @@ A flag the server cannot back is dropped and the hit lands as a plain one
   the server already prices in stamina (AnimationSystem.cpp:
   attackPowerStartInPlace, attackPowerStartForward and the rest, 30 stamina
   each).
-- Window: a power attack's start to its hit frame is under a second in the
-  vanilla animations (HYPOTHESIS until the T3 run times one); 3 seconds
-  leaves room for the 130 ms movement cadence and network delay.
+- Window: 3 seconds, room for the 130 ms movement cadence and network
+  delay on top of a power attack's own start to its hit frame. That time
+  was never measured on its own; the rule needs only that it fits in 3 s,
+  which every a-damage-flags run shows (the real power attack's hit keeps
+  its flag, in each merge sweep since 2026-10-03).
 
 ## Observe, impose, suppress
 
@@ -114,5 +116,7 @@ Until one of them is green, the verb stays on fork branch m1-damage-flags.
 - [x] T2 green
 - [x] T3 scenario green (run 20261003-224045); the power attack misses at
   188 units where a plain swing lands (exploratory run 20261003-223313),
-  HYPOTHESIS that power attacks use the pick only, without the eye cast
+  HYPOTHESIS that power attacks use the pick only, without the eye cast;
+  measured with M2's hit registration, with melee reach's other open
+  cases (docs/verbs/melee-reach.md)
 - [x] on fork parity (f0045206, 2026-10-03, with the Rust port)

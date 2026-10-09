@@ -424,7 +424,7 @@ past a command's own parameters as text (89db8732).
 - [x] T3: x-mp-probe 20261009-062818; x-arrival-probe before and after
       (20261009-064748, 20261009-065137); a-console with the MoveTo rounds
       and the mp commands green twice (20261009-065601, 20261009-070154),
-      scenario commit 55e2f42 on Eli's form
+      scenario commit 55e2f42, approved by Eli 2026-10-09
 - [x] T2 (`just test-proto m1-console`) on 89db8732, 2026-10-09: all 16
       sessions identical up to their declarations, console, movement-reject
       and movement-speed among them

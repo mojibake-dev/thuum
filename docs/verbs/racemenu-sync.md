@@ -517,7 +517,15 @@ above keep a hostile preset from carrying anything but a look.
   appearance's from the look at OnRaceMenuPreset (R0 reconciliation, one
   authority), Eli's "take the output of race menu as overriding and
   authoritative, and then let the server fully enforce it" (2026-10-07
-  20:0x); ADR candidate.
+  20:0x); ADR candidate. Since then (2026-10-08): ADR-026 made the look the
+  one authority, the server deriving the appearance's head parts, hair
+  colour and weight from it and refusing parts the race does not allow
+  (fork e83b8ded, on parity since 26acffc4; the race stays the
+  appearance's, a look carrying none), and the race alignment
+  loads the own look under its own race on every path the lab and Eli
+  used (a-racemenu's relaunch and reconnect checks; playtests ten to
+  twelve). The skee rule above was never isolated and is no longer relied
+  on.
 - The HDR key: bUse64bitsHDRRenderTarget is a lever, not a fix. Side by
   side on the two seats (Eli, playtest nine): at 1 her skin reads glossy
   under the lab's vanilla light, at 0 her own view matched fenestrate
@@ -550,7 +558,11 @@ above keep a hostile preset from carrying anything but a look.
   and pressed Done) comes from the vanilla menu's commit on Done writing
   its own slider state over what the preset set mid-menu; the driver
   cannot press through the name box, so the T4 check is: load the preset
-  in the UI, Done, then head-parts on the base.
+  in the UI, Done, then head-parts on the base. Not measured, and moot
+  since: the weight is derived from the look under ADR-026 (parity
+  26acffc4), and the tint path was settled by the straight-Done fix
+  (5746fa9a, 137f3fb5; playtest twelve: skin, hair and lips the same after
+  a Done).
 - A figure's base cannot be read for its parts: it answers GetBaseObject
   with 0x7, the local player's base (head-parts {other} returns the local
   player's own parts). A figure's look is judged by eye or by the look
@@ -727,7 +739,7 @@ above keep a hostile preset from carrying anything but a look.
       and after the close, the look byte for byte the same. (One staging
       had left c1 on the earlier client after a failed copy; the staging
       script now checks each clone's copy and stops.) a-racemenu's
-      plain-Done check (thuum 9c24514, on Eli's form) green in runs
+      plain-Done check (thuum 9c24514, approved by Eli 2026-10-09) green in runs
       20261009-005736 and -010108, then in the merge sweep on 137f3fb5 (30
       of 30); fork parity fast-forwarded to it, 2026-10-08.
 

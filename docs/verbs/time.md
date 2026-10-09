@@ -402,7 +402,9 @@ T2: green on the same image, 2026-10-04:
 - [x] decisions 1 to 4 settled (ADR-021; 4 deferred)
 - [x] doc complete, rung declared
 - [x] engine surface cited (Calendar.h) and the clock step read in Ghidra
-      (ghidra/notes/calendar-1-7-104.md, HYPOTHESIS until a-time)
+      (ghidra/notes/calendar-1-7-104.md); what the verb relies on was
+      CONFIRMED by a-time (run 20261004-035822), and the static reading's
+      other findings stay tagged in the notes, not relied on
 - [x] SP binding: TESModPlatform.SetGameDaysPassed (T1 has no harness yet;
       a-time is the proof)
 - [x] server logic + T0 (cargo, and the fork's ctest: 257 cases)

@@ -138,6 +138,7 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
 - [x] server logic + T0 (fork m1-character faa575d2; ctest green with the
   lab's master files in pipeline 586, both refusals logged)
 - [x] T2 green
-- [x] T3 scenario green, no HYPOTHESIS tags (the scenario is under Eli's
-  review)
+- [x] T3 scenario green, no HYPOTHESIS tags (scenario d51cbad approved by
+  Eli with the commits through 9e87c65, confirmed 2026-10-04; its race-pick
+  revision 97834ad approved 2026-10-08)
 - [x] on fork parity (c104128f, 2026-10-03)

@@ -84,6 +84,6 @@ unchecked (the next movement verb).
 - [x] engine surface (none new)
 - [x] server logic + T0
 - [x] T2 green
-- [x] T3 scenario green, no HYPOTHESIS tags (the scenario is under Eli's
-  review)
+- [x] T3 scenario green, no HYPOTHESIS tags (scenario d7758c5 approved by
+  Eli with the commits through 9e87c65, confirmed 2026-10-04)
 - [x] on fork parity (7ca272e2, 2026-10-02)

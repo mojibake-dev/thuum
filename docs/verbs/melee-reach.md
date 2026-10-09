@@ -67,9 +67,11 @@ alone decides):
 
 CONFIRMED for those two at scale 1.03: the edge sits where the model puts
 it, within the few units the two clients' positions differ by. Still
-HYPOTHESIS (not measured): the bash reach, bare hands (modeled 127.7), the
-scale's effect across races, mounted attacks (fMountedAttackRange:Combat
-135, measured from the mount) and the cone.
+HYPOTHESIS (not measured): the bash reach, bare hands (modeled 127.7) and
+the scale's effect across races, with M2's hit registration (docs/PLAN.md);
+mounted attacks (fMountedAttackRange:Combat 135, measured from the mount)
+with mounted combat (M7). The cone became its own verb, measured and on
+parity (docs/verbs/hit-cone.md).
 
 Two lab findings on the way: a teleport's rotation reaches skymp5-client in
 degrees and is applied in radians (docs/LAB.md); a hit only lands when the

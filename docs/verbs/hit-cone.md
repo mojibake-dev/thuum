@@ -30,7 +30,8 @@ Rung: R1. The attacking client computes the hit; the server validates it.
 ## Engine surface
 
 From the melee-reach Ghidra reading (ghidra/notes/melee-reach-1-7-104.md,
-1.7.104, HYPOTHESIS):
+1.7.104, HYPOTHESIS; the edge measured below decides where the two
+differ, and the rule follows the measurement):
 
 - **The angular test** is Address Library 47297. It passes a hit when
   |heading + attackAngle + the player's aim offset - yaw(target - attacker)|

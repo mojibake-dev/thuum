@@ -49,7 +49,8 @@ Rate limit / bounds: the budget above; the per-message bounds stand.
   (src/services/services/sendInputsService.ts, sendMovementRateMs).
 - Not measured: Whirlwind Sprint's dash and Unrelenting Force's knockback.
   The 2048 burst is meant to cover them; if either goes farther, that is a
-  snap-back at the end of the dash. HYPOTHESIS until a lab run shouts.
+  snap-back at the end of the dash. HYPOTHESIS until a lab run shouts:
+  with M2's shouts (docs/PLAN.md, spells and shouts).
 
 Measured (run 20261003-093145, the speed probe on the level strip south of
 lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
@@ -148,13 +149,13 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
 - [x] T2 green
 - [x] T3 scenario green on the fix, red without it (the scenario
   approved by Eli, 2026-10-05); still HYPOTHESIS: that Whirlwind Sprint and knockbacks fit
-  the 2048 burst (no shout in the lab yet)
+  the 2048 burst (no shout in the lab yet; measured with M2's shouts)
 - [x] on fork parity (8266a21c, 2026-10-03)
 - [x] arrivals after a server teleport (fork m1-console d99a01fb, Eli's
   playtest twelve): T0 green; x-arrival-probe's MoveTo sent back three
   times of four before the rule, held four of four with it; a-console's
   MoveTo rounds green twice (20261009-065601, 20261009-070154; scenario
-  commit 55e2f42 on Eli's form)
+  commit 55e2f42, approved by Eli 2026-10-09)
 - [x] arrivals on fork parity 89db8732 (2026-10-09), after the m1-console
   merge sweep (docs/verbs/console-commands.md, Status); a-movement-speed's
   held run in it covered 411 units (20261009-072747)

@@ -140,7 +140,7 @@ it carries a HYPOTHESIS tag.
   RakNet dependency deleted in the same PR; the client cdylib lands and the
   client's RakNet goes with it. `smoke-two-players` green on the new wire.
   From here every new handler is Rust behind the bridge.
-  DONE 2026-10-02 (ADR-019, still proposed): `smoke-two-players` green on
+  DONE 2026-10-02 (ADR-019, accepted 2026-10-04): `smoke-two-players` green on
   the wire, run 20261002-220606, 17 of 17 steps, 2 min 31 s, both clones on
   the Rust MpClientPlugin.dll (lab-api rolls them back to `clean-m1`); fork
   parity fast-forwarded to 2d50bf5e. Deleted: Networking.cpp, RakNet on
@@ -193,7 +193,8 @@ it carries a HYPOTHESIS tag.
   sweep on 1.6.1170, 26 of 26 green in 68 minutes (runs 20261007-000641 to
   -011406); clean-m1 promoted on both clones. Script variables is designed
   (docs/verbs/script-variables.md) and first needs the game's own scripts
-  on the server.
+  on the server; it left M1 (Eli, 2026-10-08) for the milestone where the
+  server runs the world's own Papyrus.
 - Light (ESL) plugins on the server (Eli, 2026-10-07: "we want ESL plugins
   for SURE"). libespm reads only full-slot plugins, so the server's load
   order leaves every ESL-flagged plugin out (docs/LAB.md: the light Creation
@@ -203,7 +204,9 @@ it carries a HYPOTHESIS tag.
   libespm gives a light plugin's records the form ids the engine gives them,
   the server's load order takes light plugins in the engine's order and the
   clients match it; a T0 test on the form id mapping, and a scenario that
-  carries an item from a light plugin through a restart.
+  carries an item from a light plugin through a restart. DONE 2026-10-08
+  (docs/verbs/light-plugins.md; a-light-plugin green; on parity 26acffc4,
+  The rest of M1, item 2).
 - Validation: character creation, damage range and angle, movement speed
   bounds, activation distance.
   Survey of what the server checks today: docs/verbs/validation.md. First
@@ -258,6 +261,12 @@ it carries a HYPOTHESIS tag.
   and grants the rest's recovery, 360 s of regeneration a rested hour, as
   measured in the engine. Nobody's clock moves. a-rest green on 1.7.104 and
   1.6.1170 (runs 20261004-094211, -094636, and -111831 on the final image).
+  The full ActorValue set DONE 2026-10-08 (docs/verbs/actor-values.md; on
+  parity 26acffc4) and console commands DONE 2026-10-08, with TES3MP's
+  player numbers 2026-10-09 (docs/verbs/console-commands.md; on parity
+  89db8732): The rest of M1, items 1 and 3. Globals beyond the clock wait
+  for the first verb that needs one (ADR-021; Apocalypse in M2 is expected
+  first, ahead of M6's quests).
 - From Eli's first T4 playtest (2026-10-04, sky-c1 and sky-c2 over
   Moonlight). Passed: movement with no snap-backs; hits, power attacks and
   reach; death and respawn; items. Found:
@@ -577,8 +586,9 @@ it carries a HYPOTHESIS tag.
   0. Close RaceMenu sync: DONE 2026-10-08. The merge sweep on client
      3a8e4cfd (527e0b34 and the reloot test fix) green, fork parity
      fast-forwarded to m1-racemenu c8b26bf7, both clones' clean-m1-next
-     promoted to clean-m1. Owed: one straight-Done check at Eli's next
-     session; apocrypha's mesh bake in parallel.
+     promoted to clean-m1. The owed straight-Done check failed in playtest
+     eleven, was fixed (5746fa9a, 137f3fb5) and passed in playtest twelve;
+     apocrypha's mesh bake stays in parallel, outside M1.
   1. The full ActorValue set (fork m1-actor-values: rule, MsgType 40,
      record, client service and natives, T0 and difftest built; left: the
      server's Get, Set, Mod and Force natives on a player, the four
@@ -591,18 +601,18 @@ it carries a HYPOTHESIS tag.
      ADR-026 check green. DONE 2026-10-08: on fork parity 26acffc4 with
      light plugins, after the merge sweep on that build, 29 of 29 green
      (runs 20261008-132148 to -150004); both clones' clean-m1 promoted.
-  2. Light plugins status 2026-10-08 night: built (libespm, FormDesc, the
-     manifest, the client's comparison); the clones' numbering measured;
-     the server loads SurvivalMode, Curios and _ResourcePack in the
-     engine's order; T2 green (the legacy stack without the .esl files);
-     `a-light-plugin` green. CBBE's two plugins stay client-only, each the
-     last of its kind. DONE 2026-10-08: on fork parity 26acffc4 (the same
-     merge sweep, 29 of 29).
   2. Light (ESL) plugins on the server (the bullet above): a verb doc
      first, libespm's light form ids with a T0 test on a fixture plugin the
      repo owns, the load order and the client's verification, CBBE's
      plugins joining the server, `a-light-plugin`. About four sessions.
-  3. Console commands (docs/verbs/console-commands.md, design only): Eli's
+     Status 2026-10-08 night: built (libespm, FormDesc, the manifest, the
+     client's comparison); the clones' numbering measured; the server
+     loads SurvivalMode, Curios and _ResourcePack in the engine's order; T2
+     green (the legacy stack without the .esl files); `a-light-plugin`
+     green. CBBE's two plugins stay client-only, each the last of its
+     kind. DONE 2026-10-08: on fork parity 26acffc4 (the same merge sweep,
+     29 of 29).
+  3. Console commands (docs/verbs/console-commands.md): Eli's
      review of the command table's ranks and of how an owner is named
      comes first; then the Rust message and handler, `coc`, `additem`, and
      the actor-value commands through their verbs, `a-console`. About four
@@ -614,7 +624,7 @@ it carries a HYPOTHESIS tag.
      Later the same night: Skyrim Platform's console bugs found by typing in
      the lab and fixed (a command without parameters never dispatched; an
      unconvertible parameter threw); `a-console` green (run
-     20261008-153841, on Eli's form). COC served 2026-10-08 (Eli: "anyone
+     20261008-153841; scenario 730528f approved by Eli 2026-10-08). COC served 2026-10-08 (Eli: "anyone
      with admin should be able to COC"): the caller's own game goes to the
      named cell and the server's movement rule takes that one jump (R1;
      fork m1-console 0708f531, e0d5e439); the server does not reimplement
@@ -622,7 +632,7 @@ it carries a HYPOTHESIS tag.
      Green in the lab the same day: x-coc-probe 20261008-191416 (Riverwood
      and the Sleeping Giant Inn, each landing where the server permitted),
      then a-console with COC (scenario commit 6559446, run
-     20261008-191741, on Eli's form). Eli approved the ranks the same
+     20261008-191741; approved by Eli 2026-10-08). Eli approved the ranks the same
      day. Playtest eleven passed it but for MoveTo after a kill and a
      resurrect (fixed and measured, 738be708); `set` against the clock
      confirmed, the success lines kept (Eli). DONE 2026-10-08: the merge
@@ -644,7 +654,7 @@ it carries a HYPOTHESIS tag.
      of four after), and TES3MP's player numbers on mp (Eli: "ok i like
      that... make it so"): `mp list`, `mp tp <n>`, `mp tpto <n>`
      (ec92fcd2, with Skyrim Platform's console fix 89db8732). a-console
-     grew both (scenario commit 55e2f42, on Eli's form). T2 green on
+     grew both (scenario commit 55e2f42, approved by Eli 2026-10-09). T2 green on
      89db8732 (16 of 16). The merge sweep on fork m1-console 89db8732 went
      29 of 30 green (runs 20261009-072145 to -083936); a-racemenu was red
      once on a figure's head scale after a reconnect (the engine's node at
@@ -693,6 +703,9 @@ it carries a HYPOTHESIS tag.
 - Spells: cast intent from the caster (observe), server resolves, broadcast
   to renderers (impose), suppress local resolution. Shouts with words known
   as server state. Rung: R1 intent, R0 resolution.
+  - Carried from M1: whether Whirlwind Sprint's dash and Unrelenting
+    Force's knockback fit the movement budget's 2048 burst
+    (docs/verbs/movement-speed.md, HYPOTHESIS until a lab run shouts).
   - Apocalypse - Magic of Skyrim 10.2.3 (from the stretch list; Eli,
     2026-10-05: "apocalypse at spells"): records plus 206 vanilla-Papyrus
     scripts, effectively no SKSE. Of its 165 natives, 102 are missing,
@@ -709,6 +722,10 @@ it carries a HYPOTHESIS tag.
     seen by an observer, the blink not snapped back.
 - Hit registration with lag compensation (rewind by client latency, Bernier
   2001), blocking, marksman aim pitch on the wire, projectile ownership.
+  - Carried from M1: melee reach's unmeasured cases, the bash, bare hands
+    and the scale across races (docs/verbs/melee-reach.md), and whether a
+    power attack reaches by the pick alone (docs/verbs/damage-flags.md);
+    each HYPOTHESIS until this verb's lab runs measure it.
   - Headshot Kills - CIF 1.2 (from the stretch list; Eli, 2026-10-05:
     "headshots whenever", placed with the first ranged hit verb, which may
     come before the rest of M2): an ESL and a script that Kill() the victim

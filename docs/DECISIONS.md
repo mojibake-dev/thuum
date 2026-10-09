@@ -667,3 +667,34 @@ the race rule's part of the decision checks each head part's valid-race list
 (RNAM) as the winning override has it; a look carries no race, so the race
 itself stays the appearance's and its character-creation check. Until the
 light-plugins verb, a head part from a light plugin refuses the look.
+
+## ADR-027: A merge sweep's lone red that reruns green is a watch item, not a block
+
+Status: proposed (2026-10-09), to Eli. Amends ADR-024.
+
+**Context.** ADR-024 says a red run blocks the merge. Twice a merge went
+ahead on reruns instead, a choice made in the session, not by this record:
+the RaceMenu leg's sweep (2026-10-08, 24 of 27, its three reds green on a
+rerun, fork parity c8b26bf7) and the m1-console sweep (2026-10-09, 29 of
+30: a-racemenu red once, run 20261009-080458, on c2's figure of c1 drawing
+its head at 1.0 under RaceMenu's recorded 1.6 after a reconnect; green on
+two reruns with nothing changed, 20261009-084041 and -084413; fork parity
+89db8732). Each red came from a scenario green on the same code before
+the sweep, and each rerun ran the same images and snapshots. A sweep is
+about 80 minutes on the one pair of clones, so a block costs a night.
+
+**Decision (proposed).**
+- A red in a merge sweep still blocks the merge, unless all of these hold:
+  it is the sweep's only red; that scenario was green on the branch before
+  the sweep; it reruns green twice in a row with nothing changed; and the
+  red is read (the failing assertion and its values) and written into the
+  verb doc as a watch item with a HYPOTHESIS.
+- The same watch item red again in either of the next two sweeps makes it
+  a bug: the next merge waits for its fix.
+- The merge commit names the red run, the two reruns and the watch item,
+  so "green at merge" stays checkable (ADR-024's consequence).
+
+**Consequences.** Lab timing (a figure's 3D built after its look, a
+driver's race) no longer holds a merge for a night, and a regression that
+shows only sometimes still blocks on its second red. Several reds in one
+sweep, like the RaceMenu leg's three, block under this rule.
