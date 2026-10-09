@@ -76,6 +76,24 @@ a rate budget (none today).
   range bound takes the projectile's speed with a margin (straight-line
   distance never exceeds the arc's length, speed times the time flown).
 
+- Eli's quirk (2026-10-09, playtest twelve): "players other than my
+  rotfern race could shoot arrows ... but rotfern could only draw the bow,
+  but never fire". x-bow-race-probe 20261009-203814, from his saved world
+  on fork m1-tcl: rotfern (c1, Long Bow 0x3B562, iron arrows) and the Nord
+  (c2, the same bow equipped by console) each drew for 2 s and released;
+  both games spent one arrow (22 to 21, so the engine fired its bow-shot
+  event for both), the Nord's arrow sits in the pillar it was aimed at
+  (its screenshot), and nothing shows where rotfern aimed, a pillar a few
+  steps ahead. Her race (rotfern.esp 0x0200AA00) is playable, not a
+  child, with the vanilla behavior graph and a kids skeleton from
+  Ranaline's (skeletonkids.nif, skeleton_female_kids.nif), which carries
+  every weapon, bow and quiver node by name. HYPOTHESIS, one of: the
+  draw's power reaching her game near zero (the arrow dropping at her
+  feet), the arrow launched from a node inside her own collision, or
+  flying off her aim. The verb's shot log (power, aim) and a look for the
+  landed arrow settle it; if it is the skeleton, the fix is the mod's
+  (apocrypha's).
+
 ## Observe (host or acting client sees the intent before the engine acts)
 
 - Hook point: Skyrim Platform's `playerBowShot`, and the crossbow's
