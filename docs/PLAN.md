@@ -682,6 +682,11 @@ it carries a HYPOTHESIS tag.
      on parity. M2 opens
      with the first ranged hit verb (arrows do not fly; Headshot Kills
      rides it).
+  5. M1.1, TCL (Eli, 2026-10-09: "lets do tcl now as m1.1 and then lets
+     kick off m2"): the console's ToggleCollision, an admin's, the
+     caller's own game toggling its collision as COC moves it
+     (docs/verbs/console-commands.md); fork branch m1-tcl from parity
+     89db8732. TGM and TIM go to M2.
 - Exit: scenarios `a-*` green including `a-restart-persistence`. Each
   persistence verb since attributes proves its own restart in its own
   scenario (favorites, learned effects, map markers, RaceMenu, actor values,
@@ -738,6 +743,12 @@ it carries a HYPOTHESIS tag.
     kills, the same arrow to a helmet does not.
 - Corpse loot, container open animation for observers, container contents
   reconciled on open.
+- God mode and immortality, the console's TGM and TIM (Eli, 2026-10-09,
+  out of M1): a flag the server's damage and death rules read, beside the
+  game's own god mode for what it computes itself (Debug.setGodMode,
+  Skyrim Platform's codegen skyrimPlatform.ts:2457); TIM has no Papyrus
+  counterpart, so it is the server's rule alone
+  (docs/verbs/console-commands.md).
 - Found in playtest six (2026-10-05): a remote player's Flames keeps
   spraying on the observer's screen after the caster stops, damages the
   observer through the observer's own game, and starts no fight. The cast

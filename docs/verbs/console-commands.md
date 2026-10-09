@@ -29,6 +29,12 @@ Rung: per command, declared in the table below; three classes.
   lands (the engine's own spot in the cell) and the server validates it:
   the cell the server named, once, within a minute (wire-rules movement's
   permitted jump).
+- ToggleCollision (TCL, M1.1, Eli 2026-10-09): the server decides who may
+  (R0, an admin's) and the caller's own game carries it out; the collision
+  state is that game's alone, client-local and never synced (R3 for the
+  state). Nothing of it is validated because the server models no
+  collision for anyone; the movement rule bounds every move's speed as
+  before, so a no-clip player moves no faster than any other.
 Why not R1 for the R0 class: a console command is an intent with no
 simulation behind it; the server can apply it directly. Why not R0 for COC:
 the spot is the engine's own choice (markers, statics, the land's height
@@ -115,6 +121,15 @@ four at once and one a second after.
   text (`i < numArgs`). Found by reading, before the `mp` player commands
   were typed in a lab; `mp tp 2` and `mp tpto 2` reach the server with
   their number on the fixed client (x-mp-probe 20261009-062818).
+- TCL (served since fork 90294654): Skyrim Platform declares the Papyrus
+  global native Debug.toggleCollisions() (codegen
+  convert-files/skyrimPlatform.ts:2465, beside setGodMode at :2457), and
+  the server sends it as COC's Debug.CenterOnCell (a snippet with self 0,
+  no arguments). The client already routes `tcl` by name (its
+  serverOnlyCommands), so no client change. HYPOTHESIS until the lab: that
+  it toggles the player's collision as the console's own TCL does,
+  observed as the player walking off the spawn strip's east edge without
+  falling, and falling once it is typed again.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -212,7 +227,8 @@ answered "Unknown command".
 | SetActorValue (SetAV), ModActorValue (ModAV), ForceActorValue (ForceAV) | R0 | admin | yes | actor-values verb: the server's Papyrus natives, R0 on a player |
 | SetLevel, AdvancePCSkill (AdvSkill) | R0 | admin | M5, with leveling (Eli, 2026-10-08) | actor-values verb |
 | Set (a global) | R0 | admin | not yet | the server's clock (ADR-021); other globals wait for the verb that needs one |
-| ToggleImmortalMode (TIM), ToggleGodMode (TGM), ToggleCollision (TCL) | R0 | admin | not yet | a server flag the damage and movement rules read |
+| ToggleCollision (TCL) | R0 who, R3 the state | admin | yes (M1.1) | the caller's own game toggles its collision (Debug.ToggleCollisions by SpSnippet, as COC); the server models no collision, the movement rule bounds speed as ever |
+| ToggleImmortalMode (TIM), ToggleGodMode (TGM) | R0 | admin | M2 (Eli, 2026-10-09) | a god or immortal flag the server's damage and death rules read, with M2's damage and effects authority; the game's own god mode for what it computes locally (Debug.setGodMode, skyrimPlatform.ts:2457); TIM has no Papyrus counterpart |
 | ToggleFreeCamera (TFC), ToggleMenus (TM) | R3 | anyone | in the game | nothing; never sent |
 | Save, Load, SaveGame, LoadGame | refused | nobody | never | the server owns the world |
 
@@ -257,6 +273,9 @@ else as player.
   teleport, each refused on an actor already in the state it makes. A typed value that is not a
   finite number fails with one line and changes nothing; any other
   exception becomes "Failed: <what>".
+- TCL (ExecuteToggleCollision, fork 90294654): an admin's tcl, by either
+  name, sends the caller's game Debug.ToggleCollisions and answers "tcl
+  done"; the server keeps no state of it.
 - COC (ExecuteCenterOnCell): the cell by its editor id, case aside, over
   the server's load order (the last file that has a cell of that name), or
   by the form id Skyrim Platform found for it; a name or id no CELL has
@@ -327,6 +346,11 @@ else as player.
   number; "A teleport the server makes is not undone by the reports sent
   before it", the movement-speed verb's). wire-rules console: the three
   `mp` rows and their ranks. Green in fork pipeline 1088 (89db8732).
+- T0 for TCL (fork 90294654): "TCL has an admin's own game toggle its
+  collision" (unit/ConsoleCommandTest.cpp: a moderator's refused with no
+  snippet; an admin's, by either name, sends one Debug.ToggleCollisions
+  each; tgm and tim still answered "not yet"); wire-rules console: tcl
+  served, tgm and tim not.
 - T2: a command above the caller's rank changes nothing (difftest session
   console-ranks: the C++ core and the Rust edge agree on the line and on
   the unchanged state). COC is not in a T2 session: difftest's moves are
@@ -440,3 +464,18 @@ past a command's own parameters as text (89db8732).
       into Whiterun, `mp tp 2` into the Sleeping Giant with the brought
       player told who; `mp tp 2` after a kill and a resurrect; a player's
       `mp tp 1` refused
+
+M1.1, TCL (Eli, 2026-10-09: "lets do tcl now as m1.1"), on fork branch
+m1-tcl from parity 89db8732:
+
+- [x] doc: the table's row, the authority, the engine surface (one
+      HYPOTHESIS, the lab's)
+- [x] server logic + T0 (fork 90294654)
+- [x] message + validator: none new (ConsoleCommand in, SpSnippet out)
+- [x] native hook + T1: none of ours (Debug.ToggleCollisions through
+      Skyrim Platform's snippet path, as COC)
+- [x] TS handler: none new (`tcl` already routed by name)
+- [ ] T2 (`just test-proto m1-tcl`)
+- [ ] T3: x-tcl-probe, then a TCL check in a-console (its own scenario
+      commit)
+- [ ] the merge sweep, then fork parity
