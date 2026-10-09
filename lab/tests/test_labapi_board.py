@@ -45,7 +45,7 @@ class BoardTests(unittest.TestCase):
             # projectiles results too
             arrows = board.enqueue("c2", "projectiles", {"ids": [245265], "radius": 3000})
             board.poll("c2")
-            board.complete(arrows.id, {"ok": True, "data": {"worldOrCell": 60, "refs": {"245265": None}}})
+            board.complete(arrows.id, {"ok": True, "data": {"from": 20, "refs": {"245265": None}}})
             self.assertIsNone(board.projectiles("c2")["refs"]["245265"])
             self.assertIsNone(board.projectiles("c1"))
             # a client's own node-scale and its {other: true} one are kept side by side

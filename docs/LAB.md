@@ -466,10 +466,11 @@ ingredient's known effects as a mask, bit i for effect i),
 read through SKSE's Game.isObjectFavorited and getHotkeyBoundObject: the
 key 0 to 7, -1 for a favorite without one, -2 for none; a `favorite {form,
 hotkey}` step marks one as the player would), `c.projectile(<form id>)`
-(the client's last `projectiles {ids: [...], radius}` step: the reference
-of that projectile base, a PROJ, nearest its player in its own game, its
-`x, y, z` from the cell's origin and its `distance`; where an arrow lies,
-docs/verbs/marksman.md), and
+(the client's last `projectiles {ids: [...], radius}` step: how far the
+reference of that projectile base, a PROJ, nearest its player lies in its
+own game, or with `other: true` nearest its figure of the other player,
+as `distance`; Papyrus reads no position of a projectile, so the step
+narrows the search's radius; docs/verbs/marksman.md), and
 `form("File.esm:EditorID")` through lab-api's item table. Coordinates in a
 scenario are offsets from a named cell's origin (`cells` in lab-api's
 guests.yaml; `lab-spawn` is the server's default start point until lab.esp

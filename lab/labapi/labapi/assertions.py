@@ -28,11 +28,12 @@ the lab can grep (E_ASSERT_*).
   <client>.printed("<text>")                         true when a line the console printed during its last
                                                      console step contains the text (the server's
                                                      ConsoleOutput as skymp5-client prints it)
-  <client>.projectile(<form id>).x | .y | .z | .distance
-                                                     the reference of that projectile base (a PROJ)
-                                                     nearest that client's player in its own game, from
-                                                     its last projectiles step: where an arrow lies
-                                                     (docs/verbs/marksman.md); none is a data error
+  <client>.projectile(<form id>).distance           how far the reference of that projectile base (a
+                                                     PROJ) nearest that client's player, or with the
+                                                     step's {other: true} its figure of the other
+                                                     player, lies in its own game, from its last
+                                                     projectiles step (docs/verbs/marksman.md); none is
+                                                     a data error
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -171,14 +172,12 @@ class MarkerView:
 
 @dataclass(frozen=True)
 class ProjectileView:
-    """c.projectile(id): the reference of a projectile base nearest that
-    client's player in its own game, from its last `projectiles` step
-    (Game.FindClosestReferenceOfType; docs/verbs/marksman.md): where it lies,
-    relative to its cell's origin, and how far from the player."""
+    """c.projectile(id): how far the reference of a projectile base nearest
+    that client's player (or, with the step's {other: true}, its figure of
+    the other player) lies in its own game, from its last `projectiles`
+    step (Game.FindClosestReferenceOfType, the radius narrowed; Papyrus
+    reads no position of a projectile; docs/verbs/marksman.md)."""
 
-    x: float
-    y: float
-    z: float
     distance: float
 
 
@@ -457,12 +456,7 @@ class _ClientRef:
         if "error" in ref:
             raise AssertionData(f"{self.name}'s projectiles step could not read {int(ref_id):#x}: {ref['error']}")
         try:
-            pos = ref["pos"]
-            origin = self._origin("form", _opt_int(data.get("worldOrCell")))
-            return ProjectileView(
-                float(pos[0]) - origin[0], float(pos[1]) - origin[1], float(pos[2]) - origin[2],
-                distance=float(ref["distance"]),
-            )
+            return ProjectileView(distance=float(ref["distance"]))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s projectile {int(ref_id):#x} lacks {e}") from e
 
@@ -633,7 +627,7 @@ _ATTRS = {
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     MarkerView: {"visible", "canTravel"},
-    ProjectileView: {"x", "y", "z", "distance"},
+    ProjectileView: {"distance"},
     SkillView: {"base", "xp", "legendary"},
     PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},

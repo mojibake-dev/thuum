@@ -378,8 +378,8 @@ class ProjectileViews(NearViews):
     def __init__(self):
         super().__init__()
         self.read = {
-            "c1": {"worldOrCell": 60, "refs": {str(0x3BE11): {"formId": 0xFF000F00, "pos": [300.0, -20.0, 5.0], "distance": 320.0}}},
-            "c2": {"worldOrCell": 60, "refs": {str(0x3BE11): None}},
+            "c1": {"from": 0x14, "refs": {str(0x3BE11): {"formId": 0xFF000F00, "distance": 320.0}}},
+            "c2": {"from": 0xFF000ACB, "refs": {str(0x3BE11): None, str(0x3BE12): {"error": "Error: Bad call result 4"}}},
         }
 
     def projectiles(self, observer):
@@ -392,15 +392,18 @@ class ProjectileTests(unittest.TestCase):
         from labapi.assertions import Evaluator
         ev = Evaluator(RichServer(), ProjectileViews(), ["c1", "c2"])
         self.assertTrue(ev.evaluate("c1.projectile(0x3BE11).distance < 400"))
-        self.assertTrue(ev.evaluate("abs(c1.projectile(0x3BE11).x - 300) < 1 and c1.projectile(0x3BE11).y < 0"))
+        self.assertTrue(ev.evaluate("abs(c1.projectile(0x3BE11).distance - 320) < 1"))
 
     def test_none_found_or_not_looked_for_is_a_data_error(self):
         from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
         ev = Evaluator(RichServer(), ProjectileViews(), ["c1", "c2"])
         with self.assertRaises(AssertionData):
             ev.evaluate("c2.projectile(0x3BE11).distance < 400")
+        # a call the step caught, and a base it did not look for
         with self.assertRaises(AssertionData):
             ev.evaluate("c2.projectile(0x3BE12).distance < 400")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.projectile(0x3BE13).distance < 400")
         # the reference's own form id is not in the language
         with self.assertRaises(AssertionSyntax):
             ev.evaluate("c1.projectile(0x3BE11).formId == 1")

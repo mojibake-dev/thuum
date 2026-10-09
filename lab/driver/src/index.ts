@@ -684,54 +684,59 @@ function run(step: Step, player: Actor): unknown {
       return out;
     }
     case "projectiles": {
-      // thuum docs/verbs/marksman.md: the reference of each projectile base
-      // (a PROJ: Skyrim.esm ArrowIronProjectile 0x0003BE11 is the iron
-      // arrow's, lab/esm.py) nearest this player within {radius} units
-      // (Papyrus Game.FindClosestReferenceOfType), keyed by its decimal form
-      // id under `refs`: its position and distance, or null when the game
-      // holds none there; `worldOrCell` as dump-state reports it, for
-      // lab-api's coordinates (c.projectile(id)). An arrow a figure launched
-      // (TESModPlatform.LaunchArrow) is one. UNCONFIRMED: that the search,
-      // which walks the loaded cells' references, finds an arrow in flight
-      // or stuck where it landed.
+      // thuum docs/verbs/marksman.md: for each projectile base (a PROJ:
+      // Skyrim.esm ArrowIronProjectile 0x0003BE11 is the iron arrow's,
+      // lab/esm.py), whether this game holds a reference of it within
+      // {radius} units of this player, or with {other: true} of the nearest
+      // other actor (a figure), and how far the nearest one lies: Papyrus
+      // Game.FindClosestReferenceOfType, its radius narrowed down to
+      // {precision} units (10 by default). Keyed by decimal form id under
+      // `refs`: {formId, distance}, or null for none. Papyrus aborts every
+      // call on a projectile reference itself, GetPositionX included ("Bad
+      // call result 4", Skyrim Platform CallNative.cpp's kFailedAbort;
+      // x-marksman-probe 20261009-224923), so only the search runs. An
+      // arrow a figure launched (TESModPlatform.LaunchArrow) is one: the
+      // same probe found an iron arrow in each game after the shooter's
+      // second shot.
       const ids = Array.isArray(a.ids) ? (a.ids as unknown[]) : [];
       const radius = num(a.radius, 4096);
-      const px = player.getPositionX();
-      const py = player.getPositionY();
-      const pz = player.getPositionZ();
-      // A Papyrus call that aborts on a projectile throws "Bad call result
-      // 4" (Skyrim Platform CallNative.cpp: IFunction::CallResult
-      // kFailedAbort; x-bow-race-probe 20261009-224055): each call is
-      // caught and named in the answer instead of failing the step.
-      const refs: Record<string, { formId: number; pos: number[]; distance: number } | { error: string } | null> = {};
+      const precision = Math.max(1, num(a.precision, 10));
+      let from: Actor = player;
+      if (a.other) {
+        const near = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
+        if (near.length === 0) throw new Error("no other actor nearby");
+        from = near[0];
+      }
+      const fx = from.getPositionX();
+      const fy = from.getPositionY();
+      const fz = from.getPositionZ();
+      const refs: Record<string, { formId: number; distance: number } | { error: string } | null> = {};
       for (const id of ids) {
         const key = String(Number(id));
         const base = Game.getFormEx(Number(id));
-        let ref: ObjectReference | null = null;
-        try {
-          ref = base ? Game.findClosestReferenceOfType(base, px, py, pz, radius) : null;
-        } catch (e) {
-          refs[key] = { error: `FindClosestReferenceOfType: ${e}` };
-          continue;
-        }
-        if (!ref) {
+        if (!base) {
           refs[key] = null;
           continue;
         }
-        const formId = ref.getFormID();
         try {
-          const pos = [ref.getPositionX(), ref.getPositionY(), ref.getPositionZ()];
-          const dx = pos[0] - px;
-          const dy = pos[1] - py;
-          const dz = pos[2] - pz;
-          refs[key] = { formId, pos, distance: Math.sqrt(dx * dx + dy * dy + dz * dz) };
+          const nearest = Game.findClosestReferenceOfType(base, fx, fy, fz, radius);
+          if (!nearest) {
+            refs[key] = null;
+            continue;
+          }
+          let lo = 0;
+          let hi = radius;
+          while (hi - lo > precision) {
+            const mid = (lo + hi) / 2;
+            if (Game.findClosestReferenceOfType(base, fx, fy, fz, mid)) hi = mid;
+            else lo = mid;
+          }
+          refs[key] = { formId: nearest.getFormID(), distance: hi };
         } catch (e) {
-          refs[key] = { error: `GetPosition on ${formId.toString(16)}: ${e}` };
+          refs[key] = { error: String(e) };
         }
       }
-      const world = player.getWorldSpace();
-      const cell = player.getParentCell();
-      return { worldOrCell: world ? world.getFormID() : cell ? cell.getFormID() : 0, refs };
+      return { from: from.getFormID(), refs };
     }
     case "advance-skill": {
       // thuum docs/verbs/actor-values.md: skill experience as play earns it
