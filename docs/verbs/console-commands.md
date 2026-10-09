@@ -137,10 +137,14 @@ four at once and one a second after.
   moved c1 there through the server; `moveto player` with the figure
   selected failed on the server ("Form with id 0x0 doesn't exist": Skyrim
   Platform reads the word player as a hex id, 0), fixed in 738be708 (the
-  destination reads 0 as the caller, as the target does). HYPOTHESIS: a
-  kill and a resurrect rebuild the figure under a new id, so a selection
-  made before them names a deleted reference; x-moveto2-probe reads the
-  figure's id before and after.
+  destination reads 0 as the caller, as the target does). A kill and a
+  resurrect rebuild the figure under a new id, so a selection made before
+  them names a deleted reference: CONFIRMED (x-moveto2-probe
+  20261008-234317: c2's figure 0xff0008e3 before, 0xff0008e7 after; then
+  `player.moveto` with the new id moved c1 to c2, and `prid` with `moveto
+  player` brought c2 to c1 on 738be708). A player clicks the other again
+  after a resurrect; keeping the figure's reference across a respawn is
+  SkyMP's figure lifecycle, not this verb's.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -345,8 +349,8 @@ go to M5 with leveling (Eli, 2026-10-08).
       COC into the inn on both sides and across the restart, a player's
       refused). Playtest eleven (2026-10-08) passed but for MoveTo; `set`
       against the clock confirmed (x-set-probe) and the success lines kept
-      (Eli). Left: MoveTo's fix in the lab (738be708, x-moveto2-probe) and
-      the kill-and-resurrect HYPOTHESIS under Impose; then the merge sweep
+      (Eli); MoveTo's fix and the kill-and-resurrect reading confirmed
+      (x-moveto2-probe 20261008-234317). Left: the merge sweep
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)

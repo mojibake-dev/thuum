@@ -715,6 +715,16 @@ above keep a hostile preset from carrying anything but a look.
       tints and hair color, so RaceMenu put the race's defaults back.
       Fix on fork m1-console 5746fa9a: the whole recorded list in its
       order, invisible layers too, and no save at the open (RaceMenu's
-      copy is the one taken when her look loads after a login). Left: the
-      probe on the fix, then a straight-Done check in a-racemenu (its own
-      commit, Eli's review), then the sweep.
+      copy is the one taken when her look loads after a login). Its probe
+      (20261008-234126) kept her look through a plain Done but showed lips
+      and nose twice: her look's own tint list numbers its layers from the
+      short list, and RaceMenu's load puts a preset's tints on the player
+      by place (skee PresetInterface.cpp ApplyPresetData), so 137f3fb5
+      loads the player's own look without its tint list (the tints are the
+      appearance's, ADR-026). x-racemenu-done-probe 20261009-005520 on
+      137f3fb5: her 30 layers in the race's order, each of hers once
+      (frown lines at 5, lips at 6, nose at 7), the same with the menu open
+      and after the close, the look byte for byte the same. (One staging
+      had left c1 on the earlier client after a failed copy; the staging
+      script now checks each clone's copy and stops.) Left: a-racemenu's
+      plain-Done check (its own commit, Eli's review), then the sweep.
