@@ -143,8 +143,13 @@ a rate budget (none today).
 ## Server
 
 - Where the logic lives: a Rust rule (wire-rules, ADR-020), each actor's
-  recent shots: a shot recorded, a hit claiming one within its flight;
-  ActionListener::OnPlayerBowShot checks the equipment and the arrow, takes
+  recent shots: a shot recorded, a hit claiming one within its flight
+  (the oldest unused shot of that weapon within 17 s whose arrow, at 5400
+  units a second and half again, can have reached the target, with 256
+  units of slack and one resend's 300 ms on the time: a lost shot is
+  resent while its hit waits behind it on the client's ordered channel,
+  so the two arrive together; a hit within about 2700 units never waits
+  on time); ActionListener::OnPlayerBowShot checks the equipment and the arrow, takes
   the arrow, records the shot and relays it; OnHit with a bow claims a shot
   or is refused (logged E_HIT_NO_SHOT, E_HIT_RANGE). The damage formula
   adds the arrow's damage (TES5DamageFormula counts the bow's only today).
@@ -160,7 +165,8 @@ a rate budget (none today).
 
 - SP binding: the new arrow launch native (T1: none; the lab is its proof).
 - TS handler: playerBowShotService.ts (reliable, with the aim);
-  remoteServer.ts (the relayed shot to the native).
+  arrowSyncService.ts (the relayed shot to the native, on the next
+  update).
 - Kill switch config key: `arrowSync` under skymp5-client's settings.
 
 ## Tests
@@ -199,14 +205,19 @@ taken only from the held bow and arrow, recorded and relayed; a player's
 ranged hit claiming a shot or refused; the arrow's damage in the TES5
 formula, libespm's AMMO damage; a hit counted against the recorded
 maximum health); e7c4a88d TESModPlatform.LaunchArrow and the client's
-ArrowSyncService; c4553748 CI runs the server build on m2-* branches.
+ArrowSyncService; c4553748 CI runs the server build on m2-* branches;
+347643f3 MarksmanTest's includes (pipeline 1113 failed to compile it);
+9a376816 the rule's delivery skew, and MarksmanTest counting arrows
+against the shooter's own (pipeline 1115 failed three cases: its base
+starts with 23 iron arrows, and its hit 300 units off in no time is the
+resent shot's case).
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (two HYPOTHESIS tags for the lab:
       a figure's arrow harmless in the observer's game, the draw's power;
       Eli's rotfern quirk to settle with the shot log)
 - [ ] server logic + T0 (MarksmanTest, the formula's arrow test; fork
-      pipeline 1113)
+      pipeline 1116)
 - [x] message + validator (same commit, 75869a44)
 - [x] native hook + T1: TESModPlatform.LaunchArrow (T1 none; the lab)
 - [x] TS handler (ArrowSyncService, playerBowShotService's aim)
