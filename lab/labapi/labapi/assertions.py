@@ -28,6 +28,11 @@ the lab can grep (E_ASSERT_*).
   <client>.printed("<text>")                         true when a line the console printed during its last
                                                      console step contains the text (the server's
                                                      ConsoleOutput as skymp5-client prints it)
+  <client>.projectile(<form id>).x | .y | .z | .distance
+                                                     the reference of that projectile base (a PROJ)
+                                                     nearest that client's player in its own game, from
+                                                     its last projectiles step: where an arrow lies
+                                                     (docs/verbs/marksman.md); none is a data error
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -66,6 +71,7 @@ class ViewsFacade(Protocol):
     def known(self, observer: str) -> dict[str, Any] | None: ...
     def favorites(self, observer: str) -> dict[str, Any] | None: ...
     def held(self, observer: str) -> dict[str, Any] | None: ...
+    def projectiles(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
@@ -161,6 +167,19 @@ class MarkerView:
 
     visible: bool
     canTravel: bool
+
+
+@dataclass(frozen=True)
+class ProjectileView:
+    """c.projectile(id): the reference of a projectile base nearest that
+    client's player in its own game, from its last `projectiles` step
+    (Game.FindClosestReferenceOfType; docs/verbs/marksman.md): where it lies,
+    relative to its cell's origin, and how far from the player."""
+
+    x: float
+    y: float
+    z: float
+    distance: float
 
 
 @dataclass(frozen=True)
@@ -421,6 +440,30 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s held step did not read {int(ref_id):#x}")
         return n
 
+    def projectile(self, ref_id: int) -> ProjectileView:
+        """c.projectile(id): the nearest reference of that projectile base in
+        that client's game, from its last `projectiles` step."""
+        fn = getattr(self._views, "projectiles", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("refs"), dict):
+            raise AssertionData(f"{self.name} has not reported a projectiles step yet")
+        refs = data["refs"]
+        key = str(int(ref_id))
+        if key not in refs:
+            raise AssertionData(f"{self.name}'s projectiles step did not look for {int(ref_id):#x}")
+        ref = refs[key]
+        if not isinstance(ref, dict):
+            raise AssertionData(f"{self.name}'s game holds no {int(ref_id):#x} within the step's radius")
+        try:
+            pos = ref["pos"]
+            origin = self._origin("form", _opt_int(data.get("worldOrCell")))
+            return ProjectileView(
+                float(pos[0]) - origin[0], float(pos[1]) - origin[1], float(pos[2]) - origin[2],
+                distance=float(ref["distance"]),
+            )
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s projectile {int(ref_id):#x} lacks {e}") from e
+
     def _skills_step(self) -> dict[str, Any]:
         fn = getattr(self._views, "skills", None)
         data = fn(self.name) if fn else None
@@ -588,6 +631,7 @@ _ATTRS = {
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
     MarkerView: {"visible", "canTravel"},
+    ProjectileView: {"x", "y", "z", "distance"},
     SkillView: {"base", "xp", "legendary"},
     PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
@@ -598,7 +642,7 @@ _ATTRS = {
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker", "known", "favorite", "held"},
+    _ClientRef: {"marker", "known", "favorite", "held", "projectile"},
 }
 # Methods that take no argument: server.time()
 _NULLARY = {
@@ -607,7 +651,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "projectile", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
 }
 _CMP = {

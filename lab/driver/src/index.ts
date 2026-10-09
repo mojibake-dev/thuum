@@ -688,30 +688,34 @@ function run(step: Step, player: Actor): unknown {
       // (a PROJ: Skyrim.esm ArrowIronProjectile 0x0003BE11 is the iron
       // arrow's, lab/esm.py) nearest this player within {radius} units
       // (Papyrus Game.FindClosestReferenceOfType), keyed by its decimal form
-      // id: its position and distance, or null when the game holds none
-      // there. An arrow a figure launched (TESModPlatform.LaunchArrow) is
-      // one. UNCONFIRMED: that the search, which walks the loaded cells'
-      // references, finds an arrow in flight or stuck where it landed.
+      // id under `refs`: its position and distance, or null when the game
+      // holds none there; `worldOrCell` as dump-state reports it, for
+      // lab-api's coordinates (c.projectile(id)). An arrow a figure launched
+      // (TESModPlatform.LaunchArrow) is one. UNCONFIRMED: that the search,
+      // which walks the loaded cells' references, finds an arrow in flight
+      // or stuck where it landed.
       const ids = Array.isArray(a.ids) ? (a.ids as unknown[]) : [];
       const radius = num(a.radius, 4096);
       const px = player.getPositionX();
       const py = player.getPositionY();
       const pz = player.getPositionZ();
-      const out: Record<string, { formId: number; pos: number[]; distance: number } | null> = {};
+      const refs: Record<string, { formId: number; pos: number[]; distance: number } | null> = {};
       for (const id of ids) {
         const base = Game.getFormEx(Number(id));
         const ref = base ? Game.findClosestReferenceOfType(base, px, py, pz, radius) : null;
         if (!ref) {
-          out[String(Number(id))] = null;
+          refs[String(Number(id))] = null;
           continue;
         }
         const pos = [ref.getPositionX(), ref.getPositionY(), ref.getPositionZ()];
         const dx = pos[0] - px;
         const dy = pos[1] - py;
         const dz = pos[2] - pz;
-        out[String(Number(id))] = { formId: ref.getFormID(), pos, distance: Math.sqrt(dx * dx + dy * dy + dz * dz) };
+        refs[String(Number(id))] = { formId: ref.getFormID(), pos, distance: Math.sqrt(dx * dx + dy * dy + dz * dz) };
       }
-      return out;
+      const world = player.getWorldSpace();
+      const cell = player.getParentCell();
+      return { worldOrCell: world ? world.getFormID() : cell ? cell.getFormID() : 0, refs };
     }
     case "advance-skill": {
       // thuum docs/verbs/actor-values.md: skill experience as play earns it

@@ -370,6 +370,42 @@ class HeldTests(unittest.TestCase):
             ev.evaluate("c2.held(0x5ACE4) == 1")
 
 
+class ProjectileViews(NearViews):
+    """The last projectiles steps (docs/verbs/marksman.md): c1's game holds an
+    iron arrow (ArrowIronProjectile 0x3BE11) 320 units off, c2's none in
+    its radius, and c2 looked for no bolt."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {
+            "c1": {"worldOrCell": 60, "refs": {str(0x3BE11): {"formId": 0xFF000F00, "pos": [300.0, -20.0, 5.0], "distance": 320.0}}},
+            "c2": {"worldOrCell": 60, "refs": {str(0x3BE11): None}},
+        }
+
+    def projectiles(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class ProjectileTests(unittest.TestCase):
+    def test_projectile_reads_the_nearest_reference_from_the_last_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), ProjectileViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.projectile(0x3BE11).distance < 400"))
+        self.assertTrue(ev.evaluate("abs(c1.projectile(0x3BE11).x - 300) < 1 and c1.projectile(0x3BE11).y < 0"))
+
+    def test_none_found_or_not_looked_for_is_a_data_error(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), ProjectileViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.projectile(0x3BE11).distance < 400")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.projectile(0x3BE12).distance < 400")
+        # the reference's own form id is not in the language
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c1.projectile(0x3BE11).formId == 1")
+
+
 class SkillViews(NearViews):
     """c1's last skills step: One-Handed at 41 with some experience, Archery
     made legendary once, level 12."""

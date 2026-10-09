@@ -45,6 +45,9 @@ class StepBoard:
         self._favorites: dict[str, dict[str, Any]] = {}
         # a held step's answer: form id (decimal) -> the game's count
         self._held: dict[str, dict[str, Any]] = {}
+        # a projectiles step's answer: {worldOrCell, refs: projectile base id
+        # (decimal) -> the nearest reference's formId, pos, distance, or null}
+        self._projectiles: dict[str, dict[str, Any]] = {}
         # a skills step's answer: {skills: name -> {base, xp, legendary}, level}
         self._skills: dict[str, dict[str, Any]] = {}
         # node-scale answers: "self" (the player's) and "other" ({other: true},
@@ -90,6 +93,8 @@ class StepBoard:
             self._favorites[step.client] = body["data"]
         if step.action == "held" and isinstance(body.get("data"), dict):
             self._held[step.client] = body["data"]
+        if step.action == "projectiles" and isinstance(body.get("data"), dict):
+            self._projectiles[step.client] = body["data"]
         if step.action == "skills" and isinstance(body.get("data"), dict):
             self._skills[step.client] = body["data"]
         if step.action == "node-scale" and isinstance(body.get("data"), dict):
@@ -166,6 +171,9 @@ class StepBoard:
     def held(self, observer: str) -> dict[str, Any] | None:
         return self._held.get(observer)
 
+    def projectiles(self, observer: str) -> dict[str, Any] | None:
+        return self._projectiles.get(observer)
+
     def skills(self, observer: str) -> dict[str, Any] | None:
         return self._skills.get(observer)
 
@@ -188,6 +196,7 @@ class StepBoard:
         self._known.clear()
         self._favorites.clear()
         self._held.clear()
+        self._projectiles.clear()
         self._skills.clear()
         self._node_scales.clear()
         self._presets.clear()

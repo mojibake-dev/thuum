@@ -42,6 +42,12 @@ class BoardTests(unittest.TestCase):
             board.complete(held.id, {"ok": True, "data": {"524516": 0}})
             self.assertEqual(board.held("c1")["524516"], 0)
             self.assertIsNone(board.held("c2"))
+            # projectiles results too
+            arrows = board.enqueue("c2", "projectiles", {"ids": [245265], "radius": 3000})
+            board.poll("c2")
+            board.complete(arrows.id, {"ok": True, "data": {"worldOrCell": 60, "refs": {"245265": None}}})
+            self.assertIsNone(board.projectiles("c2")["refs"]["245265"])
+            self.assertIsNone(board.projectiles("c1"))
             # a client's own node-scale and its {other: true} one are kept side by side
             own = board.enqueue("c1", "node-scale", {})
             board.poll("c1")
@@ -58,6 +64,7 @@ class BoardTests(unittest.TestCase):
             self.assertEqual(board.presets("c1")["own-before"]["bytes"], 2932)
             board.clear_views()
             self.assertIsNone(board.held("c1"))
+            self.assertIsNone(board.projectiles("c2"))
             self.assertIsNone(board.node_scales("c1"))
             self.assertIsNone(board.presets("c1"))
             # a timed-out step is cancelled and a late result is ignored
