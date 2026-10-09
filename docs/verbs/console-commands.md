@@ -425,6 +425,13 @@ past a command's own parameters as text (89db8732).
       (20261009-064748, 20261009-065137); a-console with the MoveTo rounds
       and the mp commands green twice (20261009-065601, 20261009-070154),
       scenario commit 55e2f42 on Eli's form
-- [ ] T2 (`just test-proto m1-console`) on 89db8732
-- [ ] the merge sweep, then fork parity
+- [x] T2 (`just test-proto m1-console`) on 89db8732, 2026-10-09: all 16
+      sessions identical up to their declarations, console, movement-reject
+      and movement-speed among them
+- [x] the merge sweep, then fork parity: on fork m1-console 89db8732, 29 of
+      30 green (runs 20261009-072145 to -083936; a-console with the MoveTo
+      rounds and the mp commands among them), a-racemenu red once on a
+      figure's head scale (docs/verbs/racemenu-sync.md, watch item) and
+      green on both reruns (20261009-084041, -084413); fork parity
+      fast-forwarded to 89db8732, 2026-10-09
 - [ ] playtest twelve's section 2 (Eli)

@@ -644,12 +644,22 @@ it carries a HYPOTHESIS tag.
      of four after), and TES3MP's player numbers on mp (Eli: "ok i like
      that... make it so"): `mp list`, `mp tp <n>`, `mp tpto <n>`
      (ec92fcd2, with Skyrim Platform's console fix 89db8732). a-console
-     grew both (scenario commit 55e2f42, on Eli's form). Left: T2, the
-     merge sweep, playtest twelve's section 2.
+     grew both (scenario commit 55e2f42, on Eli's form). T2 green on
+     89db8732 (16 of 16). The merge sweep on fork m1-console 89db8732 went
+     29 of 30 green (runs 20261009-072145 to -083936); a-racemenu was red
+     once on a figure's head scale after a reconnect (the engine's node at
+     1.0 under RaceMenu's recorded 1.6; docs/verbs/racemenu-sync.md, watch
+     item) and green on both reruns (20261009-084041, -084413), as the
+     RaceMenu leg's sweep was; fork parity fast-forwarded to 89db8732 on
+     2026-10-09, both clones' clean-m1 promoted. a-movement-speed's held
+     run covered 411 units in it (20261009-072747), back in its old range.
+     Left: playtest twelve's section 2.
   4. Exit: doc hygiene (stale Status boxes), the mirror's Formatting
      check (red on m1-console since the light-plugins and ADR-026 code:
      FormDesc.cpp, RaceMenuPresetTest.cpp and PapyrusUtils.h under the
-     linter's clang-format, which a local clang-format passes), m0-death's observable (Eli,
+     linter's clang-format, which a local clang-format passes; done: green
+     since fork 274c2acd, formatted with the linter's clang-format 21.1.8,
+     where the local one is 23), m0-death's observable (Eli,
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone
      (done: M3), the Moonlight sound fix confirmed (done), one sweep green

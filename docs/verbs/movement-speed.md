@@ -155,4 +155,6 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
   times of four before the rule, held four of four with it; a-console's
   MoveTo rounds green twice (20261009-065601, 20261009-070154; scenario
   commit 55e2f42 on Eli's form)
-- [ ] arrivals on fork parity: the m1-console merge sweep
+- [x] arrivals on fork parity 89db8732 (2026-10-09), after the m1-console
+  merge sweep (docs/verbs/console-commands.md, Status); a-movement-speed's
+  held run in it covered 411 units (20261009-072747)

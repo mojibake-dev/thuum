@@ -730,3 +730,18 @@ above keep a hostile preset from carrying anything but a look.
       plain-Done check (thuum 9c24514, on Eli's form) green in runs
       20261009-005736 and -010108, then in the merge sweep on 137f3fb5 (30
       of 30); fork parity fast-forwarded to it, 2026-10-08.
+
+Watch item (2026-10-09, the merge sweep on fork m1-console 89db8732):
+a-racemenu red once (20261009-080458) at its check after the restart. c2's
+figure of c1 had RaceMenu's head scale recorded (NiOverride 1.6) and the
+body morph applied (0.7), but the engine's head node read 1.0; c1's own
+head read 1.6, and the server sent c1's look to c2 two seconds after c1's
+login (server log 08:07:54). The two reruns read 1.6 for both
+(20261009-084041, -084413), and the eight runs of this check before it were
+green. HYPOTHESIS: the figure's 3D was built again or loaded after
+RaceMenuService applied the look, which it applies once per figure id and
+base (raceMenuService.ts onUpdate, `applied`), so nothing applied the
+recorded transform to the new 3D. If it shows again: read the figure's 3D
+load time against the apply's trace, and harden the apply by comparing the
+engine's node scale with NiOverride's record and calling its
+UpdateNodeTransform when they differ.
