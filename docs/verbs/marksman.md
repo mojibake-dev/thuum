@@ -62,9 +62,19 @@ a rate budget (none today).
   that the same holds for the figure's arrows.
 - HYPOTHESIS until the lab: how the game scales an arrow's damage and
   speed by the draw's power.
-- UNKNOWN until read: the arrow's projectile (AMMO's projectile, PROJ's
-  speed, gravity and range). libespm reads neither; lab/esm.py reads them
-  from the lab's masters first, as movement-speed read MOVT.
+- The arrow's projectile, read from the lab's 1.6.1170 masters with
+  lab/esm.py's walker (2026-10-09; the layouts are UESP's, "Skyrim
+  Mod:Mod File Format/AMMO" and ".../PROJ": AMMO DATA projectile, flags,
+  damage, value, weight; PROJ DATA flags and type, then gravity, speed,
+  range): IronArrow 0x1397D damage 8, SteelArrow 0x1397F 10, DaedricArrow
+  0x139C0 24, each with its own projectile (ArrowIronProjectile 0x3BE11 and
+  its kin) at speed 3600 units a second, gravity 0.35, range 60000;
+  Dawnguard's DLC1BoltSteel damage 10, its projectile at speed 5400. All
+  four projectiles carry type 0x40, UESP's Arrow, a check on the reading.
+  libespm reads neither record yet. Whether a bow scales its arrow's speed,
+  and how the draw's power does: HYPOTHESIS until the lab, so the server's
+  range bound takes the projectile's speed with a margin (straight-line
+  distance never exceeds the arc's length, speed times the time flown).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
