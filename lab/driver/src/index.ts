@@ -1082,11 +1082,19 @@ function run(step: Step, player: Actor): unknown {
     case "set-av": {
       // The console's setav on the player: an actor value in this client
       // only (Actor.SetActorValue), such as SpeedMult for movement speed
-      // bounds. args: {name, value}
+      // bounds. args: {name, value}; with {other: true}, on the nearest
+      // other actor instead, as node-scale picks it: a figure's value in
+      // this game only (docs/verbs/spell-cast.md, the school modifiers)
       const name = typeof a.name === "string" ? a.name : "";
       if (!name || typeof a.value !== "number") return { error: "set-av needs name and value" };
-      player.setActorValue(name, a.value);
-      return { [name]: player.getActorValue(name) };
+      let target: Actor = player;
+      if (a.other) {
+        const near = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
+        if (near.length === 0) throw new Error("no other actor nearby");
+        target = near[0];
+      }
+      target.setActorValue(name, a.value);
+      return { actor: target.getFormID(), [name]: target.getActorValue(name) };
     }
     case "watch-start": {
       const actors = new Map<number, Watched>();
