@@ -328,6 +328,17 @@ client-onedrive-off vmid:
 playtest-start:
     @lab/tools/playtest-start.sh
 
+# A playtest's world kept between sessions (lab runs roll the server back to the clean world): save the live world as
+# /srv/lab/snapshots/playtest-<label>-<UTC stamp>, put one back (no lab run active; connected games log in again), list them.
+playtest-save label:
+    @lab/tools/playtest-world.sh save {{label}}
+
+playtest-restore name:
+    @lab/tools/playtest-world.sh restore {{name}}
+
+playtest-worlds:
+    @lab/tools/playtest-world.sh list
+
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
