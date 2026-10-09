@@ -679,7 +679,9 @@ it carries a HYPOTHESIS tag.
      M0: done, the knocked-down state), PvE and hosted-NPC reach and angle
      moved to the NPC milestone
      (done: M3), the Moonlight sound fix confirmed (done), one sweep green
-     on parity. M2 opens
+     on parity (done: the exit sweep on parity's own image 89db8732, 30 of
+     30 green with no rerun, runs 20261009-191424 to -203427; the doc pass
+     2026-10-09, thuum 5b73604). M1's exit is met. M2 opens
      with the first ranged hit verb (arrows do not fly; Headshot Kills
      rides it).
   5. M1.1, TCL (Eli, 2026-10-09: "lets do tcl now as m1.1 and then lets
