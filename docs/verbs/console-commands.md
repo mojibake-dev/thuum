@@ -7,7 +7,8 @@ that changes the shared world is decided and applied by the server, with
 the game's own output in the player's console; a command that only touches
 the player's own view runs in its game; a command that would go around the
 server is refused with a line saying so. Who may use which command follows a
-staff rank kept with the player, as TES3MP does.
+staff rank kept with the player, as TES3MP does, and a player names another
+by its number, as TES3MP's own player commands do.
 
 Roadmap reference: skymp ROADMAP.md "Console commands" ("Make a list of
 popular console commands, implement them. They should be typed as in the
@@ -104,6 +105,16 @@ four at once and one a second after.
   lookup, as the cell's form id. The server takes either; the game sent the
   text for both names, exterior and interior (the server's "named by text"
   in both runs). CONFIRMED. The form-id path is T0's alone.
+- SkyMP's `mp` has no engine command of its own: consoleCommandsService.ts
+  replaces the engine's " ConfigureUM" (or `test`) and names it mp
+  (:66-73), so Skyrim Platform converts mp's words by that command's
+  parameter table. A word past the end
+  of that table was converted against whatever followed it in memory
+  (ConsoleApi.cpp ConsoleComand_Execute, `paramInfo[i]` for every typed
+  word); since fork 89db8732 such a word goes to the replacement as its
+  text (`i < numArgs`). Found by reading, before the `mp` player commands
+  were typed in a lab; `mp tp 2` and `mp tpto 2` reach the server with
+  their number on the fixed client (x-mp-probe 20261009-062818).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -145,6 +156,30 @@ four at once and one a second after.
   player` brought c2 to c1 on 738be708). A player clicks the other again
   after a resurrect; keeping the figure's reference across a respawn is
   SkyMP's figure lifecycle, not this verb's.
+- MoveTo, playtest twelve (2026-10-08, parity 137f3fb5): within one cell
+  the moved player went "a little" or not at all, though the console
+  printed the server's line; after a COC to Whiterun the other player could
+  not be reached. Two causes. The movement rule undid the server's own
+  teleport (the reports the moved game sent before it; docs/verbs/
+  movement-speed.md, arrivals). And a typed id is the caller's game's own
+  figure: each game numbers the figures it builds itself (Eli: test 2 was
+  ff000d32 from test 1's console, test 1 ff000daf from test 2's, each
+  itself 14), and a player outside the caller's loaded cells has no figure
+  there at all, so nothing the caller can type names it.
+- Player numbers (Eli, 2026-10-08, adopting TES3MP's): `mp list` answers
+  one line per player online, `<number> <name> (<form id>) in <cell>`, the
+  caller's own marked "(you)"; `mp tp <number>` has the server bring that
+  player to the caller and `mp tpto <number>` take the caller to that
+  player, the server's teleport (MpActor::Teleport) wherever the two are,
+  no figure needed; the brought player's console prints "<caller> brought
+  you to them". The number is the player's profile id, the same at every
+  login (TES3MP CoreScripts scripts/commandHandler.lua /list, /teleport
+  and /teleportto, scripts/logicHandler.lua TeleportToPlayer:
+  [TES3MP/CoreScripts](https://github.com/TES3MP/CoreScripts)).
+  CONFIRMED (x-mp-probe 20261009-062818: `mp list` named both; `mp tpto
+  2` took c1 about 25700 units across Tamriel to c2, landing 43 units off
+  it; `mp tp 2` brought c2 back to c1, 49 units off; a-console's runs
+  below: into and out of the inn both ways).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -168,7 +203,9 @@ answered "Unknown command".
 | RemoveItem | R0 | admin | yes | inventory |
 | PlaceAtMe, Disable | R0 | admin | yes | references |
 | Enable | R0 | admin | yes | references (as Disable: what the server made, and actors) |
-| mp (SkyMP's own) | R0 | admin | yes | references |
+| mp list (SkyMP's mp, TES3MP's /list) | R0 | player | yes | the server's players online, by number |
+| mp tp, mp tpto (TES3MP's /teleport, /teleportto) | R0 | moderator | yes | position: the server's teleport, wherever the two players are |
+| mp, any other (SkyMP's own: mp disable) | R0 | admin | yes | references |
 | MoveTo, SetPos, SetAngle | R0 | moderator | yes | position: an actor through the server's teleport, any other reference through the Papyrus natives |
 | CenterOnCell (COC) | R1 | admin (Eli, 2026-10-08) | yes | position: the caller's own game (Debug.CenterOnCell by SpSnippet), the server's movement rule taking that one jump into the named cell; the map-markers verb then judges discoveries where the player really is |
 | Kill, Resurrect | R0 | moderator | yes | death: MpActor::Kill, and the respawn without its teleport |
@@ -239,6 +276,15 @@ else as player.
   permit the snap back stands. ActionListener::OnUpdateMovement
   then moves the record into the new cell (SetCellOrWorldObsolete, then
   SetPos attaches it to that cell's grid), as MpActor::Teleport does.
+- mp's player commands (ExecuteMp, fork ec92fcd2): Execute judges `mp
+  <word>` by its own table row when the table has one (`mp list`, `mp
+  tp`, `mp tpto`) and as `mp` otherwise. `mp list` walks the users online
+  (ServerState::ActorByUser) in their order. `mp tp` and `mp tpto` find
+  the number among the profiles (WorldState::GetActorsByProfileId) and
+  want that actor online (ServerState::UserByActor), else "no player <n>
+  online"; a caller's own number fails ("that number is yours"). The moved
+  actor takes the other's place, cell or worldspace, position and angle,
+  through MpActor::Teleport, so the movement rule's arrival applies.
 - DB fields / migration: `staffRank` in the player's change form, written
   only when set. Absent in older records: consoleCommandsAllowed reads as
   admin, anything else as player. No migration; the field is optional.
@@ -275,7 +321,12 @@ else as player.
   fraction through the natives; "lots", "nan", "inf" and "12abc" refused
   with one line; RemoveItem, SetPos and SetAngle on one axis, a bad axis
   refused, MoveTo, Kill and Resurrect with their refusals, Enable after
-  Disable).
+  Disable; "mp list names the players online, mp tp brings one and mp
+  tpto goes to one": the list's lines, a player's tp refused for its rank,
+  a moderator's tp and tpto, a number no one online has, the caller's own
+  number; "A teleport the server makes is not undone by the reports sent
+  before it", the movement-speed verb's). wire-rules console: the three
+  `mp` rows and their ranks. Green in fork pipeline 1088 (89db8732).
 - T2: a command above the caller's rank changes nothing (difftest session
   console-ranks: the C++ core and the Rust edge agree on the line and on
   the unchanged state). COC is not in a T2 session: difftest's moves are
@@ -290,6 +341,13 @@ else as player.
   RiverwoodSleepingGiantInn`; its game and the server's record are in the
   inn (0x133c6); c2 types the same and is refused, still at the lab spawn;
   after the restart and c1's relaunch, c1 is in the inn on both sides.
+  MoveTo and the player numbers (scenario commit 55e2f42): c2 waits 1237
+  units down the mountain and c1's `player.moveto` on its figure holds,
+  twice, ten seconds after each, on the server and in c1's game (the range
+  playtest twelve lost; docs/verbs/movement-speed.md, arrivals); `mp list`
+  names both by number and cell; c2's `mp tp 1` is refused for its rank;
+  `mp tp 2` brings c2 into the inn beside c1, `mp tpto 2` takes c1 back
+  into it beside c2; c2's record is still in the inn after the restart.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -356,3 +414,17 @@ go to M5 with leveling (Eli, 2026-10-08).
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)
+
+After playtest twelve (2026-10-08 night, Eli: "ok i like that... make it
+so"), on fork m1-console: the movement rule's arrivals (d99a01fb), TES3MP's
+player numbers on mp (ec92fcd2), Skyrim Platform's console reading a word
+past a command's own parameters as text (89db8732).
+
+- [x] server logic + T0 (fork pipeline 1088, 89db8732)
+- [x] T3: x-mp-probe 20261009-062818; x-arrival-probe before and after
+      (20261009-064748, 20261009-065137); a-console with the MoveTo rounds
+      and the mp commands green twice (20261009-065601, 20261009-070154),
+      scenario commit 55e2f42 on Eli's form
+- [ ] T2 (`just test-proto m1-console`) on 89db8732
+- [ ] the merge sweep, then fork parity
+- [ ] playtest twelve's section 2 (Eli)

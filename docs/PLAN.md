@@ -632,7 +632,20 @@ it carries a HYPOTHESIS tag.
      20261009-010443 to -022103); fork parity fast-forwarded to 137f3fb5,
      both clones' clean-m1 promoted, NATIVES regenerated. a-movement-speed's
      held run covered 276 units (bound 200; 354 to 434 before the RaceMenu
-     client stack): the watch item stands.
+     client stack): the watch item stands. Playtest twelve (2026-10-08
+     night, docs/private/playtest-m1-12.md, on parity 137f3fb5 from Eli's
+     playtest-eleven world): the plain Done held, and so did COC and the
+     rest after a quit; MoveTo did not: within one cell the moved player
+     went "a little" or not at all, and a player in another cell could not
+     be named, a typed id being the caller's own figure. Fixed on fork
+     m1-console the same night: a teleport the server makes waits for its
+     arrival (d99a01fb, docs/verbs/movement-speed.md; x-arrival-probe:
+     MoveTo at 1237 units sent back three times of four before, held four
+     of four after), and TES3MP's player numbers on mp (Eli: "ok i like
+     that... make it so"): `mp list`, `mp tp <n>`, `mp tpto <n>`
+     (ec92fcd2, with Skyrim Platform's console fix 89db8732). a-console
+     grew both (scenario commit 55e2f42, on Eli's form). Left: T2, the
+     merge sweep, playtest twelve's section 2.
   4. Exit: doc hygiene (stale Status boxes), the mirror's Formatting
      check (red on m1-console since the light-plugins and ADR-026 code:
      FormDesc.cpp, RaceMenuPresetTest.cpp and PapyrusUtils.h under the

@@ -27,7 +27,9 @@ that refills at 660 units a second and holds 2048. A move the budget cannot
 cover is refused and the sender snapped back to the record (Teleport2),
 exactly as the existing per-message check does. Height is free (falls are
 the engine's). Hosted NPCs are not charged (their movement types are their
-own records'; NPC hosting is M3).
+own records'; NPC hosting is M3). A teleport the server makes is not a
+move: the rule waits for the player's arrival where the server put it
+(Server, arrivals).
 Rate limit / bounds: the budget above; the per-message bounds stand.
 
 ## Engine surface
@@ -57,7 +59,9 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
 
 - Observe: unchanged; the player's own UpdateMovement.
 - Impose: a refused move is not recorded or relayed, and the sender gets
-  Teleport2 back to the server's record (the existing snap-back).
+  Teleport2 back to the server's record (the existing snap-back). After a
+  teleport the server made, a report from anywhere but the arrival is
+  dropped without the snap-back (the teleport itself is on its way).
 - Suppress: the relay of a refused move to the neighbours.
 
 ## Message contract
@@ -74,6 +78,29 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
 - Cost to a cheater: at 1500 units a second the budget runs out in about
   2.4 s and every move after it snaps back; a single teleport of up to
   2048 units every three seconds passes.
+- Arrivals (fork d99a01fb, Eli's playtest twelve: MoveTo moved a player
+  "a little" or not at all): a teleport the server makes (MpActor::Teleport:
+  the console's MoveTo, SetPos and `mp tp`, the gamemode's, the lab's) sets
+  the actor's teleport flag. The player's next report has the rule expect
+  the arrival where the server put it (wire-rules movement
+  `expect_arrival`, `check_arrival`: in that cell or worldspace, within
+  ARRIVAL_RADIUS, 256 units, of its x and y, for ARRIVAL_WAIT_MS, ten
+  seconds; the last teleport counts). MovementValidation asks before its
+  bounds: the arrival passes, once; a report from anywhere else while the
+  rule waits was sent before the move and is dropped, neither recorded,
+  relayed nor sent back. Upstream judged the first report after a teleport
+  at infinity (refused, the player sent to the record) and the second as
+  a move: within the budget it took the record back to where the player
+  had stood, and the arrival then spent the budget a second time, refused
+  and sent back there. So a teleport the budget covers once but not twice
+  failed: by the budget's numbers about 1100 to 2048 units within one cell
+  or worldspace, measured at 1237 (Tests). A farther one, or one into
+  another cell, had its stale report refused by the bounds, which sent the
+  player to the record and so completed the move. A hosted actor (an NPC) keeps upstream's
+  handling. A teleport the moved game drops (Skyrim Platform's settle
+  after a login, docs/LAB.md) is not sent again by the rule: after ten
+  seconds the wait lapses and the bounds judge the next report, a far one
+  sent back to the record (which completes the move), a near one taken.
 - DB fields / migration: none.
 
 ## Tests
@@ -96,6 +123,23 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
   20261003-094307: the 6000 units stood), green on m1-speed (run
   20261003-100454: held at y 1955, about 2500 units into the glide, four
   E_MOVE_SPEED refusals of 731 to 2804 units).
+- Arrivals. T0: "A teleport the server makes is not undone by the reports
+  sent before it" (unit/ConsoleCommandTest.cpp: an 800 unit teleport, two
+  reports from before it dropped without a snap-back, the arrival and the
+  moves after it taken) and wire-rules movement (a report elsewhere, in
+  another cell or not a number waits; the arrival within its radius lands
+  once; another actor is not held; the wait lapses after ten seconds; the
+  last teleport counts); green in fork pipeline 1088 (89db8732). T3, x-arrival-probe (scratchpad, run by path): c2 1237
+  units from c1 down the spawn's mountain, c1 types `player.moveto` on
+  c2's figure four times, the lab taking it back between. On the server
+  just before the rule (fork 274c2acd, run 20261009-064748) the first held
+  and the other three were sent back to where c1 stood, on the server and
+  in its game, each with one E_MOVE_SPEED of 1264 units, and the lab's
+  first teleport back took three attempts (two E_MOVE_SPEED of 1211). With
+  the rule (89db8732, run 20261009-065137) all four held, 25 to 55 units
+  from c2 ten seconds later on both sides, every lab teleport landed at
+  its first attempt, and the server refused nothing. a-console carries two
+  of these MoveTo rounds (docs/verbs/console-commands.md).
 
 ## Status
 
@@ -106,3 +150,9 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
   approved by Eli, 2026-10-05); still HYPOTHESIS: that Whirlwind Sprint and knockbacks fit
   the 2048 burst (no shout in the lab yet)
 - [x] on fork parity (8266a21c, 2026-10-03)
+- [x] arrivals after a server teleport (fork m1-console d99a01fb, Eli's
+  playtest twelve): T0 green; x-arrival-probe's MoveTo sent back three
+  times of four before the rule, held four of four with it; a-console's
+  MoveTo rounds green twice (20261009-065601, 20261009-070154; scenario
+  commit 55e2f42 on Eli's form)
+- [ ] arrivals on fork parity: the m1-console merge sweep
