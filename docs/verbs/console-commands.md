@@ -341,7 +341,7 @@ go to M5 with leveling (Eli, 2026-10-08).
       identical up to their declarations, the console session's three
       wire-only reply lines and smoke's AddItem line declared; again on
       e0d5e439 with COC, movement-reject and movement-speed unchanged)
-- [ ] T3 scenario green, no HYPOTHESIS tags: a-console (thuum 730528f)
+- [x] T3 scenario green, no HYPOTHESIS tags: a-console (thuum 730528f)
       green in run 20261008-153841 on fork 08b124d4 (typed AddItem and
       SetAV by an owner, Save refused, a player's AddItem refused for its
       rank, the results across a restart and a relaunch); with COC
@@ -350,7 +350,9 @@ go to M5 with leveling (Eli, 2026-10-08).
       refused). Playtest eleven (2026-10-08) passed but for MoveTo; `set`
       against the clock confirmed (x-set-probe) and the success lines kept
       (Eli); MoveTo's fix and the kill-and-resurrect reading confirmed
-      (x-moveto2-probe 20261008-234317). Left: the merge sweep
+      (x-moveto2-probe 20261008-234317). DONE 2026-10-08: the merge sweep
+      on fork m1-console 137f3fb5 went 30 of 30 green (a-console
+      20261009-010824 among them) and fork parity fast-forwarded to it
 - [x] ledger and suppression registry updated (no Papyrus native added; the
       engine handlers it suppresses are listed under Suppress, with the
       hook and no release)

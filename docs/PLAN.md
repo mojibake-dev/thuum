@@ -623,9 +623,16 @@ it carries a HYPOTHESIS tag.
      and the Sleeping Giant Inn, each landing where the server permitted),
      then a-console with COC (scenario commit 6559446, run
      20261008-191741, on Eli's form). Eli approved the ranks the same
-     day. Left before its merge: `set` against the clock (a lab check after
-     playtest eleven), whether a success should print a line (Eli's call
-     in playtest eleven), then the merge sweep.
+     day. Playtest eleven passed it but for MoveTo after a kill and a
+     resurrect (fixed and measured, 738be708); `set` against the clock
+     confirmed, the success lines kept (Eli). DONE 2026-10-08: the merge
+     sweep on fork m1-console 137f3fb5 (the console verb, COC, MoveTo, and
+     the RaceMenu straight-Done fix 5746fa9a and 137f3fb5 with
+     a-racemenu's plain-Done check 9c24514) went 30 of 30 green (runs
+     20261009-010443 to -022103); fork parity fast-forwarded to 137f3fb5,
+     both clones' clean-m1 promoted, NATIVES regenerated. a-movement-speed's
+     held run covered 276 units (bound 200; 354 to 434 before the RaceMenu
+     client stack): the watch item stands.
   4. Exit: doc hygiene (stale Status boxes), the mirror's Formatting
      check (red on m1-console since the light-plugins and ADR-026 code:
      FormDesc.cpp, RaceMenuPresetTest.cpp and PapyrusUtils.h under the

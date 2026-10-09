@@ -699,7 +699,7 @@ above keep a hostile preset from carrying anything but a look.
       parity fast-forwarded to m1-racemenu c8b26bf7 on 2026-10-08. Owed: one
       straight-Done check on this build at Eli's next session (done in
       playtest eleven: it failed, the box below).
-- [ ] a Done with no change keeps the look. Eli's playtest eleven
+- [x] a Done with no change keeps the look. Eli's playtest eleven
       (2026-10-08): it did not; her hair and skin went back to the race's
       colors on both seats, and the record lost her eye sockets, frown
       lines, lips and nose (scratchpad pt11 cf0-before against cf0-after).
@@ -726,5 +726,7 @@ above keep a hostile preset from carrying anything but a look.
       (frown lines at 5, lips at 6, nose at 7), the same with the menu open
       and after the close, the look byte for byte the same. (One staging
       had left c1 on the earlier client after a failed copy; the staging
-      script now checks each clone's copy and stops.) Left: a-racemenu's
-      plain-Done check (its own commit, Eli's review), then the sweep.
+      script now checks each clone's copy and stops.) a-racemenu's
+      plain-Done check (thuum 9c24514, on Eli's form) green in runs
+      20261009-005736 and -010108, then in the merge sweep on 137f3fb5 (30
+      of 30); fork parity fast-forwarded to it, 2026-10-08.
