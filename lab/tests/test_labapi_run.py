@@ -208,6 +208,9 @@ steps:
         self.assertTrue(any(c[-2:] == ["stop", "skymp-server"] for c in cmds))
         self.assertTrue(any(c[-3:] == ["up", "-d", "skymp-server"] for c in cmds))
         self.assertTrue(any(c[-2:] == ["restart", "skymp-server"] for c in cmds))
+        # the server's log is this run's alone, from the run's start
+        logs = next(c for c in cmds if "logs" in c)
+        self.assertEqual(logs[-3:], ["--since", result["started"], "skymp-server"])
         self.assertEqual(len(self.services.system.stopped_captures), 1)
         self.assertIsNone(self.services.runner.active)
 

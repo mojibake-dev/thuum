@@ -744,7 +744,11 @@ class Runner:
             except OSError as e:
                 rec.notes.append(f"world-diff: {e}")
         if "server.log" in wanted:
-            r = await asyncio.to_thread(self.system.run, self._compose("logs", "--no-color", self.s.compose_service))
+            # this run's lines alone: the container outlives a run (a run on
+            # the same master files only starts it again), and a bare `logs`
+            # gave each run every earlier run's lines too (2026-10-09: a
+            # glide's refusals read as a later smoke run's)
+            r = await asyncio.to_thread(self.system.run, self._compose("logs", "--no-color", "--since", rec.started_at, self.s.compose_service))
             (rec.dir / "server.log").write_text(r.stdout)
             rec.artifacts.append("server.log")
         for name in wanted:
