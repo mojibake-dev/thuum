@@ -701,6 +701,72 @@ it carries a HYPOTHESIS tag.
 
 ### M2: Combat and magic authority (8 to 12 weeks, Class B)
 
+- The M2 chart (2026-10-09, Eli: "lets kick off m2"), after a survey of the
+  fork at parity 89db8732 (file and line citations go into each verb's doc
+  as it starts). What exists:
+  - Melee is the server's: OnHit, the TES5 damage formula, M1's reach,
+    cone, flag and sneak rules. Health goes to the victim as a percentage
+    of its race's base health, not the player's recorded maximum
+    (ActionListener.cpp:1822-1843 against MpActor.cpp:1924-1939). The
+    blocked and bash flags are taken as sent, and OnHit has no rate budget.
+  - Ranged: a bow shot (PlayerBowShot, sent unreliable though the wire
+    contract calls it reliable) removes one arrow on the server and is
+    relayed to nobody, and nothing launches an arrow in an observer's game,
+    where spells have a launch path (Skyrim Platform's MagicApi.cpp,
+    Projectile::Launch): why arrows do not fly. A ranged hit has no range
+    check and no link to a shot, and the arrow's own damage is not counted.
+  - Magic: casts are relayed (unreliable on the server's side), an
+    observer's figure casts its own equipped spell, and a cast's end is one
+    message that four steps can lose (playtest six's Flames). Spell damage
+    has two paths, the victim's own engine and the server's OnSpellHit,
+    possibly both at once (unmeasured), and a spell hit starts no fight.
+    Active effects exist on the server in a legacy form (one per actor
+    value, restores applied at once, persisted); clients see none, and none
+    of Papyrus's magic natives is implemented. A potion is drunk by the
+    game and written straight to health by the server; a poison is drunk
+    too.
+  - Shouts: the voice slot only. Containers: one player at a time, their
+    changes reach nobody else, no corpse loot.
+  The order proposed, each a verb through CLAUDE.md's workflow:
+  1. marksman: the shot relayed reliably and launched in observers' games
+     (an arrow launch beside MagicApi's spell launch), its aim on the wire,
+     the server checking the shot (bow and ammo equipped) and each ranged
+     hit against a shot (one hit per arrow, within its flight), the arrow's
+     damage counted; the health percentage against the recorded maximum
+     and the hit messages' rate budget with it, as the first damage verb.
+     Scenario `b-marksman`. Headshot Kills rides it (stretch).
+  2. spell-cast: a cast's start and end as server state, relayed reliably,
+     the observer's figure casting the spell sent; the victim's own engine
+     applying none of a remote spell's damage (the server's OnSpellHit the
+     one path); a spell hit starting a fight (ADR-023). Scenario `b-spell`.
+  3. magic-effects: the server's effects from the records (MGEF read in
+     full), magnitude and duration, persisted with their remaining time,
+     sent to clients that show them and keep the engine's own application
+     out; potions and poisons as effects; Papyrus's ActiveMagicEffect and
+     MagicEffect natives as the effects need them. Scenarios `b-potion`
+     and the exit's `b-magic-restart`.
+  4. god-mode: TGM and TIM, flags the server's damage and death rules read.
+  5. blocking: the attacker's blocked claim checked against the target's
+     recorded block and facing, the shield test fixed, the bash's reach
+     (melee reach's carried cases), stagger shown to observers.
+  6. shouts: words of power and their unlocks as server state (SHOU and
+     WOOP read by libespm), the shout cast on spell-cast's path, the
+     cooldown the server's; the movement budget measured against Whirlwind
+     Sprint and Unrelenting Force (carried from M1).
+  7. containers-loot: several players in one container, its changes sent
+     to every viewer, corpse loot, a distance check on PutItem and TakeItem,
+     the reloot timer pushed by restarts and the open-after-restart record.
+  8. Lag compensation (Bernier 2001) only if a playtest shows hits refused
+     inside M1's slack: positions kept per actor, rewound by the attacker's
+     latency.
+  9. Exit: `b-duel` and `b-magic-restart`.
+  Decisions for Eli (docs/private/decisions-m2.md): the order; ADR-028
+  (proposed), which damage the server computes and which the victim's
+  game keeps; whether lag compensation waits for a playtest; Apocalypse's
+  place (it needs server-owned globals and the spell path). At M1's pace
+  (a verb in two to four sessions) the seven verbs are about twenty
+  sessions, with the stretch mods beside them.
+
 - Magic effect system on the server: apply and remove effects with magnitude
   and duration read from ESM records; potions and poisons become effects
   rather than direct attribute writes. Client renders shaders and sounds and

@@ -698,3 +698,43 @@ about 80 minutes on the one pair of clones, so a block costs a night.
 driver's race) no longer holds a merge for a night, and a regression that
 shows only sometimes still blocks on its second red. Several reds in one
 sweep, like the RaceMenu leg's three, block under this rule.
+
+## ADR-028: The server computes the damage one actor deals another
+
+Status: proposed (2026-10-09), to Eli, with M2's chart (docs/PLAN.md).
+
+**Context.** CLAUDE.md puts damage numbers on R0, and M2's exit asks for
+server-authoritative damage between two players. The survey of the fork at
+parity 89db8732 found that true for melee only: OnHit runs the TES5
+formula and sends the victim its health (ActionListener.cpp, OnWeaponHit).
+A remote player's spell is cast inside the victim's own game, whose engine
+applies its damage (skymp5-client remoteServer.ts, the figure's cast;
+Skyrim Platform MagicApi.cpp), while the caster's own hit report reaches
+the server's OnSpellHit as well, so a spell may count twice (unmeasured).
+The server takes any fall of health a client reports (CropRegeneration
+clamps rises only), and a client's report of its own death kills it
+(MpActor.cpp, OnChangeValues). A potion is drunk by the game and written
+to health by the server.
+
+**Decision (proposed).**
+- The server computes every damage an actor deals another (weapons in
+  melee and at range, the arrow included; spells and their effects;
+  poisons) and every restore an actor's own spell or potion gives it (R0).
+  No game applies these on its own: a remote figure's weapons already deal
+  none (skymp5-client formView.ts, attackDamageMult 0), and its spells and
+  projectiles are made to deal none the same way; a player's potion takes
+  effect through the server.
+- Damage the world deals (a fall, drowning, lava, a trap until M4 runs the
+  traps) stays the victim's game's: its health reports record it, and its
+  report of its own death is taken as the world's, logged (R2,
+  unvalidated). A client can hurt or kill only itself this way.
+- A client's reported health still never rises faster than regeneration
+  allows (as today).
+
+**Consequences.** Spell damage moves to the server with M2's spell-cast
+verb, ending the second path; `b-duel`'s server-authoritative damage is
+the rule rather than a test. TGM is a server flag in these rules, while the
+world's damage to a god stays the game's own god mode's (Debug.setGodMode).
+The server needs the game's formula for each kind of damage it takes over:
+the weapon's today, the arrow's with marksman, a spell's magnitude with its
+effects and resistances with magic-effects.
