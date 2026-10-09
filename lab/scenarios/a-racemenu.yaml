@@ -26,6 +26,12 @@
 # own head without closing the race menu, so nothing is sent, and after its
 # reconnect its head is back at 1.0 (Eli's playtest found the last session's
 # sculpt on a character whose record had none).
+# And a Done with no change keeps the look (Eli's playtest eleven: rotfern's
+# hair and skin went back to her race's colors and her lips and nose left
+# the record): after the relaunch c1 saves its look, the server opens its
+# race menu, c1 closes it without touching anything, and its look is the
+# same, tint layers and hair color included (lab-nord-1's skin tone, eye
+# sockets and lips are its visible layers).
 # Assertions are evaluated by lab-api only (ADR-009).
 id: a-racemenu
 milestone: M1
@@ -83,4 +89,12 @@ steps:
       - abs(c2.morph_of(c1) - 0.7) < 0.01
       - abs(c2.node_scale() - 1.0) < 0.01
       - c2.preset("own-end").look == c2.preset("own-before").look
+  - c1: racemenu-save {name: plain-before}
+  - c1: open-race-menu
+  - wait: 6
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 8
+  - c1: racemenu-save {name: plain-after}
+  - assert:
+      - c1.preset("plain-after").look == c1.preset("plain-before").look
 artifacts: [server.log, c1.log, c2.log, screenshots]
