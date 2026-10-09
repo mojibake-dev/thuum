@@ -454,6 +454,8 @@ class _ClientRef:
         ref = refs[key]
         if not isinstance(ref, dict):
             raise AssertionData(f"{self.name}'s game holds no {int(ref_id):#x} within the step's radius")
+        if "error" in ref:
+            raise AssertionData(f"{self.name}'s projectiles step could not read {int(ref_id):#x}: {ref['error']}")
         try:
             pos = ref["pos"]
             origin = self._origin("form", _opt_int(data.get("worldOrCell")))

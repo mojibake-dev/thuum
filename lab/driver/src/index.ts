@@ -699,19 +699,35 @@ function run(step: Step, player: Actor): unknown {
       const px = player.getPositionX();
       const py = player.getPositionY();
       const pz = player.getPositionZ();
-      const refs: Record<string, { formId: number; pos: number[]; distance: number } | null> = {};
+      // A Papyrus call that aborts on a projectile throws "Bad call result
+      // 4" (Skyrim Platform CallNative.cpp: IFunction::CallResult
+      // kFailedAbort; x-bow-race-probe 20261009-224055): each call is
+      // caught and named in the answer instead of failing the step.
+      const refs: Record<string, { formId: number; pos: number[]; distance: number } | { error: string } | null> = {};
       for (const id of ids) {
+        const key = String(Number(id));
         const base = Game.getFormEx(Number(id));
-        const ref = base ? Game.findClosestReferenceOfType(base, px, py, pz, radius) : null;
-        if (!ref) {
-          refs[String(Number(id))] = null;
+        let ref: ObjectReference | null = null;
+        try {
+          ref = base ? Game.findClosestReferenceOfType(base, px, py, pz, radius) : null;
+        } catch (e) {
+          refs[key] = { error: `FindClosestReferenceOfType: ${e}` };
           continue;
         }
-        const pos = [ref.getPositionX(), ref.getPositionY(), ref.getPositionZ()];
-        const dx = pos[0] - px;
-        const dy = pos[1] - py;
-        const dz = pos[2] - pz;
-        refs[String(Number(id))] = { formId: ref.getFormID(), pos, distance: Math.sqrt(dx * dx + dy * dy + dz * dz) };
+        if (!ref) {
+          refs[key] = null;
+          continue;
+        }
+        const formId = ref.getFormID();
+        try {
+          const pos = [ref.getPositionX(), ref.getPositionY(), ref.getPositionZ()];
+          const dx = pos[0] - px;
+          const dy = pos[1] - py;
+          const dz = pos[2] - pz;
+          refs[key] = { formId, pos, distance: Math.sqrt(dx * dx + dy * dy + dz * dz) };
+        } catch (e) {
+          refs[key] = { error: `GetPosition on ${formId.toString(16)}: ${e}` };
+        }
       }
       const world = player.getWorldSpace();
       const cell = player.getParentCell();
