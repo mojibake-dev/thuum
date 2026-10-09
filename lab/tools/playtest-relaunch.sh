@@ -16,8 +16,17 @@ online() { curl -fsS -m 15 -X POST "$api/state/rpc/labState" -H 'content-type: a
 active=$(curl -fsS -m 15 "$api/status" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("run") or "")')
 [ -z "$active" ] || { echo "a lab run is active: $active" >&2; exit 3; }
 ps='Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3; Start-ScheduledTask -TaskName sky-lab-launch; "relaunch started " + (Get-Date -Format HH:mm:ss)'
-ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" \
-  | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip().splitlines()[-1])'
+# the guest agent once answered nothing right after a stream started
+# (2026-10-09 11:55, sky-c2: the game stopped, the task never started); the
+# same command again is safe, stopping nothing new and starting the task
+for attempt in 1 2; do
+  out=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" 2>&1 || true)
+  line=$(printf '%s' "$out" | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip().splitlines()[-1])' 2>/dev/null || true)
+  [ -n "$line" ] && { echo "$line"; break; }
+  echo "the guest agent answered no relaunch line (attempt $attempt): ${out:0:200}" >&2
+  [ "$attempt" = 2 ] && exit 5
+  sleep 5
+done
 # off the list once the game is gone, then back on it after the login
 for i in $(seq 1 20); do case "$(online)" in *"\"profileId\":$profile}"*) sleep 3;; *) break;; esac; done
 for i in $(seq 1 60); do case "$(online)" in *"\"profileId\":$profile}"*) echo "$client (profile $profile) is back online"; exit 0;; esac; sleep 5; done
