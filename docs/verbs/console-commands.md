@@ -478,7 +478,11 @@ m1-tcl from parity 89db8732:
 - [x] native hook + T1: none of ours (Debug.ToggleCollisions through
       Skyrim Platform's snippet path, as COC)
 - [x] TS handler: none new (`tcl` already routed by name)
-- [ ] T2 (`just test-proto m1-tcl`)
-- [ ] T3: x-tcl-probe, then a TCL check in a-console (its own scenario
-      commit)
-- [ ] the merge sweep, then fork parity
+- [x] T2 (`just test-proto m1-tcl`, 2026-10-09 13:55): all 16 sessions
+      identical up to their declarations
+- [x] T3: x-tcl-probe 20261009-203554; a-console with the TCL check
+      green twice (20261009-204154, 20261009-204816), scenario commit
+      4382f56, awaiting Eli's review
+- [x] the merge sweep, then fork parity: on fork m1-tcl 90294654, 30 of
+      30 green with no rerun (runs 20261009-210818 to -222623, a-console
+      first); fork parity fast-forwarded to 90294654, 2026-10-09

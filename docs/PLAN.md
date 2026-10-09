@@ -688,7 +688,12 @@ it carries a HYPOTHESIS tag.
      kick off m2"): the console's ToggleCollision, an admin's, the
      caller's own game toggling its collision as COC moves it
      (docs/verbs/console-commands.md); fork branch m1-tcl from parity
-     89db8732. TGM and TIM go to M2.
+     89db8732. TGM and TIM go to M2. DONE 2026-10-09: x-tcl-probe
+     20261009-203554 confirmed it, a-console's TCL check green twice
+     (thuum 4382f56, awaiting Eli's review), T2 green, and the merge
+     sweep on fork m1-tcl 90294654 went 30 of 30 green with no rerun
+     (runs 20261009-210818 to -222623); fork parity fast-forwarded to
+     90294654.
 - Exit: scenarios `a-*` green including `a-restart-persistence`. Each
   persistence verb since attributes proves its own restart in its own
   scenario (favorites, learned effects, map markers, RaceMenu, actor values,
