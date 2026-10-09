@@ -251,10 +251,11 @@ was clean: a watch item.
 - [x] message + validator (same commit, 75869a44)
 - [x] native hook + T1: TESModPlatform.LaunchArrow (T1 none; the lab)
 - [x] TS handler (ArrowSyncService, playerBowShotService's aim)
-- [ ] T2 green: `just test-proto m2-marksman` green on the 16 sessions
-      (2026-10-09 15:43), and the marksman session identical up to its ten
-      declarations by hand on sky-srv; the official run waits for its
-      difftest artifact (451b2c34)
+- [x] T2 green: `just test-proto m2-marksman` (2026-10-09 16:23, the
+      difftest artifact of fork 451b2c34, job 4682): all 17 sessions
+      identical up to their declarations, the marksman session with its
+      ten (the ArrowShot relay, the hit with the arrow's damage, the second
+      hit and the unheld bow's shot refused)
 - [ ] T3 scenario green, no HYPOTHESIS tags (x-marksman-probe green, then
       b-marksman)
 - [x] ledger and suppression registry updated: TESModPlatform.LaunchArrow
