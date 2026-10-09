@@ -161,7 +161,8 @@ def create_app(services: Services) -> FastAPI:
     # Self-service cold snapshots and promotes of a lab client (thuum-mundus's
     # recipe and guardrails in proxmox.GuestControl): POST
     # /clients/<c>/snapshot {name, description?} takes a stacked clean-m1-<x>;
-    # POST /clients/<c>/promote {from, to} makes `to` bit-identical to it.
+    # POST /clients/<c>/promote {from, to} makes `to` bit-identical to it and
+    # stacks `from` again on top, so the table's name stands after a merge.
     # Minutes long; no run starts meanwhile.
     async def _maintain(what: str, fn, *args):
         if not _idle():

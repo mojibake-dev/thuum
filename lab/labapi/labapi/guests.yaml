@@ -19,6 +19,10 @@
 # (POST /lab/clients/<c>/snapshot and /promote, thuum-mundus's recipe): on
 # 2026-10-06 clean-m1-markers became clean-m1, and clean-m1-next (the
 # m1-favorites client, schema 7, and the mod layer) is stacked on it.
+# Since 2026-10-09 these two always name clean-m1-next: a staging replaces
+# it, and a promote folds it into clean-m1 and takes it again on top, the
+# same disk (proxmox.GuestControl.promote_clone), so the name never goes
+# missing between a merge and the next staging.
 guests:
   - {name: sky-srv,    vmid: 700, ip: 10.10.70.10, kind: qemu, role: server, managed: true,  snapshot: clean}
   - {name: sky-re,     vmid: 701, ip: 10.10.70.11, kind: lxc,  role: re,     managed: true,  snapshot: clean}

@@ -213,10 +213,15 @@ class GuestControl:
         """Make `to` (clean-m1) bit-identical to the stacked `frm` on top of
         it: `frm` must be the newest and `to` its parent; stop, roll back to
         `frm`, delete `frm`, delete `to`, snapshot `to` while stopped with
-        `frm`'s description (which build, which driver), start, wait for the
-        guest agent. A failure between the two deletes and the snapshot
-        leaves the clone on `frm`'s content with no `to`; the repair is a
-        cold snapshot named `to` (docs/LAB.md)."""
+        `frm`'s description (which build, which driver), then `frm` again on
+        top of it, the same disk, start, wait for the guest agent. The lab's
+        table rolls the clients back to `frm` (guests.yaml), so it must
+        still stand after a promote: without it every run failed on the
+        missing name until the next staging (2026-10-08). The next staging
+        replaces it in place. A failure between the two deletes and the
+        snapshots leaves the clone on `frm`'s content with no `to`; the
+        repair is a cold snapshot named `to`, then one named `frm`
+        (docs/LAB.md)."""
         self._snapshot_guard(guest, frm, to)
         if not _STACKED.match(frm) or frm == to:
             raise ProxmoxError(f"E_PVE_GUARD: promote takes a stacked clean-m1-<x> onto its parent; got {frm!r} onto {to!r}")
@@ -233,12 +238,14 @@ class GuestControl:
         self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, frm)
         self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_delete, guest, to)
         self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_create, guest, to, description)
+        again = f"{to} as promoted, stacked again for the lab's table by lab-api: {was}" if was else f"{to} as promoted, stacked again for the lab's table by lab-api"
+        self._call("E_PVE_SNAPSHOT", guest, self._b.snapshot_create, guest, frm, again)
         self.start(guest)
         self._await_agent(guest, boot_timeout)
         snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
-        if self._children(snaps, to) != ["current"]:
-            raise ProxmoxError(f"E_PVE_SNAPSHOT: {to} on {guest.name} is not the newest after the promote")
-        return {"ok": True, "guest": guest.name, "promoted": frm, "to": to, "parent": self._parent(snaps, to)}
+        if self._children(snaps, to) != [frm] or self._children(snaps, frm) != ["current"]:
+            raise ProxmoxError(f"E_PVE_SNAPSHOT: {frm} on {guest.name} is not the newest, directly on {to}, after the promote")
+        return {"ok": True, "guest": guest.name, "promoted": frm, "to": to, "parent": self._parent(snaps, to), "restacked": frm}
 
 
 class ProxmoxerGuests:

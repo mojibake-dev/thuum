@@ -137,12 +137,30 @@ class SnapshotTests(unittest.TestCase):
         self.pve.snaps[711][2]["description"] = "m1-x client, run 1, driver abc"
         out = self.control.promote_clone(self.c1, "clean-m1-x", "clean-m1", 5)
         self.assertEqual(out["to"], "clean-m1")
-        self.assertEqual(self.names(), [("clean-sp", None), ("clean-m1", "clean-sp"), ("current", "clean-m1")])
+        # the stacked name stands again on the promoted base, the same disk,
+        # for the lab's table to roll back to (the trap of 2026-10-08)
+        self.assertEqual(out["restacked"], "clean-m1-x")
+        self.assertEqual(self.names(), [("clean-sp", None), ("clean-m1", "clean-sp"), ("clean-m1-x", "clean-m1"),
+                                        ("current", "clean-m1-x")])
         # the stacked snapshot's description (which build, which driver) lives on
         self.assertEqual(self.pve.snaps[711][1]["description"], "promoted from clean-m1-x by lab-api: m1-x client, run 1, driver abc")
+        self.assertEqual(self.pve.snaps[711][2]["description"],
+                         "clean-m1 as promoted, stacked again for the lab's table by lab-api: m1-x client, run 1, driver abc")
         k = [c for c in self.pve.calls if c[0] in ("stop", "rollback", "snapshot_delete", "snapshot_create", "start")]
         self.assertEqual(k, [("stop", 711), ("rollback", 711, "clean-m1-x"), ("snapshot_delete", 711, "clean-m1-x"),
-                             ("snapshot_delete", 711, "clean-m1"), ("snapshot_create", 711, "clean-m1"), ("start", 711)])
+                             ("snapshot_delete", 711, "clean-m1"), ("snapshot_create", 711, "clean-m1"),
+                             ("snapshot_create", 711, "clean-m1-x"), ("start", 711)])
+
+    def test_after_a_promote_the_next_staging_replaces_the_restacked_snapshot_and_promotes_again(self):
+        self.pve.snaps[711] = tree("clean-sp", "clean-m1", "clean-m1-x")
+        self.control.promote_clone(self.c1, "clean-m1-x", "clean-m1", 5)
+        self.control.snapshot_clone(self.c1, "clean-m1-x", "the next branch's client", QUIESCE, 60, 5)
+        self.assertEqual(self.names(), [("clean-sp", None), ("clean-m1", "clean-sp"), ("clean-m1-x", "clean-m1"),
+                                        ("current", "clean-m1-x")])
+        self.assertEqual(self.pve.snaps[711][2]["description"], "the next branch's client")
+        out = self.control.promote_clone(self.c1, "clean-m1-x", "clean-m1", 5)
+        self.assertEqual(out["restacked"], "clean-m1-x")
+        self.assertEqual(self.pve.snaps[711][1]["description"], "promoted from clean-m1-x by lab-api: the next branch's client")
 
     def test_a_promote_needs_the_newest_snapshot_stacked_on_its_target(self):
         from labapi.proxmox import ProxmoxError
