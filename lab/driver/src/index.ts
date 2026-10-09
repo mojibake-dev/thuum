@@ -153,7 +153,12 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 // watch-start to watch-stop: every frame, how far each actor near us at the
 // start has got from where it was (lab-api's c.watched(other)). Actors are
 // kept by form id, so one that jumps out of range is still followed.
-type Watched = { name: string; first: number[]; last: number[]; maxDisplacement: number; samples: number };
+// health: each change of the actor's current health this game saw, [ms
+// since watch-start, value] (at most WATCH_HEALTH_MAX): the engine's own
+// damage to a figure shows for a frame or so before the server's
+// ChangeValues sets it (thuum docs/verbs/marksman.md, the draw's power)
+type Watched = { name: string; first: number[]; last: number[]; maxDisplacement: number; samples: number; health: number[][] };
+const WATCH_HEALTH_MAX = 64;
 let watching: { startedAt: number; actors: Map<number, Watched> } | null = null;
 const SCREENSHOT_WAIT_MS = 10000;
 
@@ -334,6 +339,11 @@ function trackWatch(): void {
     w.maxDisplacement = Math.max(w.maxDisplacement, Math.sqrt(dx * dx + dy * dy + dz * dz));
     w.last = pos;
     w.samples += 1;
+    const health = actor.getActorValue("health");
+    const lastHealth = w.health.length > 0 ? w.health[w.health.length - 1][1] : NaN;
+    if (health !== lastHealth && w.health.length < WATCH_HEALTH_MAX) {
+      w.health.push([Date.now() - (watching ? watching.startedAt : 0), health]);
+    }
   });
 }
 
@@ -1121,7 +1131,7 @@ function run(step: Step, player: Actor): unknown {
       const actors = new Map<number, Watched>();
       for (const other of nearbyActors(player)) {
         const pos = positionOf(other);
-        actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0 });
+        actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, health: [[0, other.getActorValue("health")]] });
       }
       watching = { startedAt: Date.now(), actors };
       return { watching: actors.size };
