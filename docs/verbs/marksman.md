@@ -60,8 +60,37 @@ a rate budget (none today).
 - An observer's figure deals no weapon damage in that observer's game
   (skymp5-client formView.ts:288, attackDamageMult 0). HYPOTHESIS until the lab:
   that the same holds for the figure's arrows.
-- HYPOTHESIS until the lab: how the game scales an arrow's damage and
-  speed by the draw's power.
+- The draw's power, read by the re-analyst on 2026-10-09 (the 1.6.1170
+  code is encrypted in the Ghidra project, so the bodies were read in
+  1.7.104 under the same Address Library IDs, as
+  ghidra/notes/coc-1-7-104.md did; the settings' defaults were read in
+  1.6.1170's own data):
+  - The power: the player's bow branch of Projectile::Launch (ID 44108)
+    takes the release's held time (ID 40780) and computes it (ID 26435):
+    fArrowMinPower (0.35) for a release before fArrowBowMinTime (0.8 s),
+    then rising linearly to 1.0 at fBowDrawTime (1.6667 s), that span
+    divided by the bow's speed (DNAM) times WeaponSpeedMult (ID 26417).
+    CONFIRMED by the lab's shot logs: a 0.6 s hold reports 0.35, a 2 s
+    hold 1.00 (x-b-marksman 20261009-233002).
+  - The damage: inside that branch only, the power multiplies the damage
+    the arrow carries (Projectile +0x1A0 on 1.6.1170) once: damage =
+    power x ((bow + arrow) x fDamageWeaponMult + temper) x skill
+    multiplier, before armor and perks (ID 26410); the hit (ID 44002)
+    reads the carried damage and never the power. The server's TES5
+    formula takes the bow's and the arrow's damage, and the claimed
+    shot's power is its factor. HYPOTHESIS until a lab read of the
+    engine's own damage at two draws (x-bow-damage: the shooter's game
+    shows it on the figure for a frame before the server's number).
+  - The speed: PROJ speed x a power factor (fArrowMinVelocity, 0.2, at
+    fArrowMinPower, rising linearly to 1.0) x a bow factor (at most 1) x
+    speedMult (ID 44139), plus the player's own horizontal speed at
+    launch (ID 44184). Launch copies LaunchData's power only for a spell:
+    an arrow keeps its constructor's 1.0 (ID 44100). CONFIRMED in part
+    by the lab: a half draw's arrow flew 1437 units in the shooter's game
+    and 5539 from its figure in the observer's (x-b-marksman), so
+    TESModPlatform.LaunchArrow now sets the projectile's power after
+    Launch (the speed is set on the first update, ID 44122); b-marksman
+    asserts the two landings agree.
 - The arrow's projectile, read from the lab's 1.6.1170 masters with
   lab/esm.py's walker (2026-10-09; the layouts are UESP's, "Skyrim
   Mod:Mod File Format/AMMO" and ".../PROJ": AMMO DATA projectile, flags,
@@ -103,12 +132,22 @@ a rate budget (none today).
   the pillar a few steps ahead where she aimed, while the Nord's game
   shows two arrows side by side in that pillar (his screenshot, zoomed),
   one of them his own and the other, by its place, the one her figure
-  launched there (ArrowShot). HYPOTHESIS now: her first-person arrow
+  launched there (ArrowShot). HYPOTHESIS then: her first-person arrow
   leaves from where adult first-person arms put the bow, ahead of a
   child's camera, so close geometry is already behind it and it flies
-  on; her figure's third-person launch hits the pillar. The projectiles
-  step's distance from her, near the pillar and in the open, in first
-  and third person, settles it.
+  on; her figure's third-person launch hits the pillar.
+  x-bow-race-probe3 20261009-233324 measured it (the projectiles step's
+  distance to the nearest iron arrow): her first-person shot lay 484
+  units from her in her own game, her figure's 203 from the figure in the
+  Nord's game, and after F (DirectInput 33, Toggle POV on the clones; her
+  screenshot shows the third-person camera) her third-person shot lay 234
+  from her: both third-person launches stop at the pillar about 200 units
+  away, the first-person one flies past it. Her first-person view is the
+  cause, and the fix is the mod's (her race's first-person setup;
+  apocrypha); she can shoot in third person today. What exactly in her
+  first-person setup places the launch past the pillar (the node, or the
+  camera) stays a question for apocrypha and, if it matters, a Frida read
+  of Projectile::Launch's origin (the re-analyst's plan, 2026-10-09).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -226,7 +265,11 @@ ArrowSyncService; c4553748 CI runs the server build on m2-* branches;
 9a376816 the rule's delivery skew, and MarksmanTest counting arrows
 against the shooter's own (pipeline 1115 failed three cases: its base
 starts with 23 iron arrows, and its hit 300 units off in no time is the
-resent shot's case); 451b2c34 the difftest session marksman.
+resent shot's case); 451b2c34 the difftest session marksman; 50d4c391 the
+server logs each weapon hit's damage at info; 333b2f8f a hit counts at its
+shot's draw power (the ranged rule keeps it, OnWeaponHit takes it as the
+damage's factor); 5bc11086 LaunchArrow gives the figure's arrow the
+shooter's power.
 
 Lab (2026-10-09, the client from Windows run 37995524437 on 9a376816):
 x-marksman-probe 20261009-224923: c1's shot reached the server at full
