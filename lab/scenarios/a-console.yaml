@@ -9,7 +9,11 @@
 # console prints the server's line. c1 types `player.setav marksman 40`:
 # the server's own SetActorValue sets c1's Archery (its Papyrus name is
 # Marksman) to 40, and c1's game shows 40. c1 types `save thuum`: the
-# server refuses it with a line. MoveTo at the range Eli's playtest twelve
+# server refuses it with a line. TCL is an admin's (M1.1, Eli 2026-10-09):
+# c1 faces east on the spawn strip, types tcl, and runs off the strip's
+# edge without falling (its game's collision off, the server's record
+# following it); it types tcl again and falls; c2, a player, is refused.
+# MoveTo at the range Eli's playtest twelve
 # lost (docs/verbs/movement-speed.md, arrivals): c2 stands 1237 units from
 # c1 down the mountain, and c1 types `player.moveto` on c2's figure; the
 # server's teleport puts c1 beside c2 and 10 s later c1 is still there, on
@@ -68,6 +72,27 @@ steps:
   - c1: console {text: "save thuum"}
   - assert:
       - c1.printed("The server owns the world")
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 90]}
+  - wait: 3
+  - c1: console {text: "tcl"}
+  - wait: 2
+  - c1: hold-key {code: 17, ms: 1500}
+  - wait: 4
+  - c1: dump-state
+  - assert:
+      - c1.printed("tcl done")
+      - c1.state.x > 300
+      - c1.state.z > -100
+      - abs(c1.state.x - server.actor(c1).x) < 64
+  - c1: console {text: "tcl"}
+  - wait: 6
+  - c1: dump-state
+  - assert:
+      - c1.printed("tcl done")
+      - c1.state.z < -200
+  - c2: console {text: "tcl"}
+  - assert:
+      - c2.printed("Not enough permissions")
   - c2: teleport {cell: lab-spawn, x: -300, y: -1400, z: -150}
   - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
   - wait: 4
