@@ -190,12 +190,28 @@ a rate budget (none today).
 
 ## Status
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+Built on fork branch m2-marksman, stacked on m1-tcl (2026-10-09):
+019ea488 the ranged rule (wire-rules ranged, bridged as RangedShots);
+75869a44 the wire (PlayerBowShot's aim, ArrowShot MsgType 42, schema 11,
+the validator's bounds and the shot and OnHit budgets, both ends' messages,
+Skyrim Platform's shot event with the aim); 281dc18b the server (the shot
+taken only from the held bow and arrow, recorded and relayed; a player's
+ranged hit claiming a shot or refused; the arrow's damage in the TES5
+formula, libespm's AMMO damage; a hit counted against the recorded
+maximum health); e7c4a88d TESModPlatform.LaunchArrow and the client's
+ArrowSyncService; c4553748 CI runs the server build on m2-* branches.
+
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (two HYPOTHESIS tags for the lab:
+      a figure's arrow harmless in the observer's game, the draw's power;
+      Eli's rotfern quirk to settle with the shot log)
+- [ ] server logic + T0 (MarksmanTest, the formula's arrow test; fork
+      pipeline 1113)
+- [x] message + validator (same commit, 75869a44)
+- [x] native hook + T1: TESModPlatform.LaunchArrow (T1 none; the lab)
+- [x] TS handler (ArrowSyncService, playerBowShotService's aim)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-marksman-probe, then
+      b-marksman)
+- [ ] ledger and suppression registry updated (TESModPlatform.LaunchArrow
+      is the client's, no server native: nothing for NATIVES.md)
