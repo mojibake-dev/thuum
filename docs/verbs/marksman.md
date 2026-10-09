@@ -93,6 +93,22 @@ a rate budget (none today).
   flying off her aim. The verb's shot log (power, aim) and a look for the
   landed arrow settle it; if it is the skeleton, the fix is the mod's
   (apocrypha's).
+  On fork m2-marksman (x-bow-race-probe 20261009-224055, rerun
+  20261009-225305, both from his world): her shot reaches the server at
+  full draw, `power 1.00, aim 0.152 heading 1.598` both times (the
+  Nord's `power 1.00, aim 0.000`), so the draw's power is ruled out; her
+  WeaponSpeedMult (0) and BowSpeedBonus (1) are the Nord's. After her
+  shot her own game holds an iron arrow projectile somewhere within 6000
+  units (the driver's projectiles step found one, ff000c13), yet none in
+  the pillar a few steps ahead where she aimed, while the Nord's game
+  shows two arrows side by side in that pillar (his screenshot, zoomed),
+  one of them his own and the other, by its place, the one her figure
+  launched there (ArrowShot). HYPOTHESIS now: her first-person arrow
+  leaves from where adult first-person arms put the bow, ahead of a
+  child's camera, so close geometry is already behind it and it flies
+  on; her figure's third-person launch hits the pillar. The projectiles
+  step's distance from her, near the pillar and in the open, in first
+  and third person, settles it.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -210,19 +226,38 @@ ArrowSyncService; c4553748 CI runs the server build on m2-* branches;
 9a376816 the rule's delivery skew, and MarksmanTest counting arrows
 against the shooter's own (pipeline 1115 failed three cases: its base
 starts with 23 iron arrows, and its hit 300 units off in no time is the
-resent shot's case).
+resent shot's case); 451b2c34 the difftest session marksman.
+
+Lab (2026-10-09, the client from Windows run 37995524437 on 9a376816):
+x-marksman-probe 20261009-224923: c1's shot reached the server at full
+draw, its arrow taken (33 to 32 in c1's game), the hit 100 ms later
+claimed with no refusal and a fight begun; c2's game read 0.9151 health
+after it (the lab Nord's armor in the formula). The level shot east (the
+teleport's pitch never reaches the aim: `aim 0.000`) left an iron arrow
+projectile in each game, c1's own and, in c2's game, the one c1's figure
+launched (ArrowShot, TESModPlatform.LaunchArrow). Papyrus aborts
+GetPositionX on a projectile reference ("Bad call result 4"), so the
+driver's projectiles step measures distance by narrowing its search
+(thuum b6a8650). The probe's first run (20261009-223804) lost c2's game
+after its load (no actor value report, no answer for 60 s); the rerun
+was clean: a watch item.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (two HYPOTHESIS tags for the lab:
       a figure's arrow harmless in the observer's game, the draw's power;
-      Eli's rotfern quirk to settle with the shot log)
-- [ ] server logic + T0 (MarksmanTest, the formula's arrow test; fork
-      pipeline 1116)
+      Eli's rotfern quirk narrowed to her first-person launch point)
+- [x] server logic + T0 (MarksmanTest, the formula's arrow test; fork
+      pipeline 1116 green, 2026-10-09)
 - [x] message + validator (same commit, 75869a44)
 - [x] native hook + T1: TESModPlatform.LaunchArrow (T1 none; the lab)
 - [x] TS handler (ArrowSyncService, playerBowShotService's aim)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-marksman-probe, then
+- [ ] T2 green: `just test-proto m2-marksman` green on the 16 sessions
+      (2026-10-09 15:43), and the marksman session identical up to its ten
+      declarations by hand on sky-srv; the official run waits for its
+      difftest artifact (451b2c34)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-marksman-probe green, then
       b-marksman)
-- [ ] ledger and suppression registry updated (TESModPlatform.LaunchArrow
-      is the client's, no server native: nothing for NATIVES.md)
+- [x] ledger and suppression registry updated: TESModPlatform.LaunchArrow
+      in NATIVES.md, client only, R3 (the arrow is that game's picture of
+      a shot the server took); no server native
+

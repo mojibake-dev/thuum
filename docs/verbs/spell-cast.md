@@ -243,6 +243,22 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   memory).
 - Owner: agent.
 
+First run, x-spell-probe 20261009-225645 (fork m2-marksman 9a376816,
+casts as parity has them): `player.equipspell 12fcd right` by console
+put Flames in c1's right hand (its dump: equippedRight 0x12FCD). With
+Right Attack held 3 s, c1's game reported six hits on c2, one every
+200 ms or so for one second, and the server counted 8 damage for each,
+48 in all: Flames' magnitude, which the record gives per second, taken
+per report, five times over (the hit cadence, measured once). The stream
+ended after about a second on c1's own screen though the key stayed down
+(its screenshot at 1.5 s shows only the ready glow; HYPOTHESIS: why), and
+c2's screen showed the figure with the same glow and no stream at 1.5 s
+and after. c2's game read 0.5706 health 4.5 s after the release and
+0.5986 five seconds later; the server's own number then was not
+recorded, so the double damage is still open (the next run asserts it
+right after the stream, and screenshots both seats half a second in). The
+server logs nothing for a cast it takes.
+
 ## Status
 
 - [x] doc complete, rung declared
