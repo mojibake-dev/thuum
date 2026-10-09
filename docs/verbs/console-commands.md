@@ -126,10 +126,13 @@ four at once and one a second after.
   convert-files/skyrimPlatform.ts:2465, beside setGodMode at :2457), and
   the server sends it as COC's Debug.CenterOnCell (a snippet with self 0,
   no arguments). The client already routes `tcl` by name (its
-  serverOnlyCommands), so no client change. HYPOTHESIS until the lab: that
-  it toggles the player's collision as the console's own TCL does,
-  observed as the player walking off the spawn strip's east edge without
-  falling, and falling once it is typed again.
+  serverOnlyCommands), so no client change. It toggles the player's
+  collision as the console's own TCL does: CONFIRMED (x-tcl-probe
+  20261009-203554 on fork m1-tcl 90294654): after `tcl` c1 ran east for
+  1.5 s from (0, -300) and stood at x 529 with its height unchanged
+  (12.8), past the spawn strip's edge, the server's record agreeing at
+  every step; after a second `tcl` it fell to -466 within 6 s, unhurt; c2,
+  a player, was refused.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -468,8 +471,8 @@ past a command's own parameters as text (89db8732).
 M1.1, TCL (Eli, 2026-10-09: "lets do tcl now as m1.1"), on fork branch
 m1-tcl from parity 89db8732:
 
-- [x] doc: the table's row, the authority, the engine surface (one
-      HYPOTHESIS, the lab's)
+- [x] doc: the table's row, the authority, the engine surface (its one
+      HYPOTHESIS confirmed by x-tcl-probe 20261009-203554)
 - [x] server logic + T0 (fork 90294654)
 - [x] message + validator: none new (ConsoleCommand in, SpSnippet out)
 - [x] native hook + T1: none of ours (Debug.ToggleCollisions through
