@@ -9,15 +9,30 @@
 # console prints the server's line. c1 types `player.setav marksman 40`:
 # the server's own SetActorValue sets c1's Archery (its Papyrus name is
 # Marksman) to 40, and c1's game shows 40. c1 types `save thuum`: the
-# server refuses it with a line. c2, a player, types the same additem: the
+# server refuses it with a line. MoveTo at the range Eli's playtest twelve
+# lost (docs/verbs/movement-speed.md, arrivals): c2 stands 1237 units from
+# c1 down the mountain, and c1 types `player.moveto` on c2's figure; the
+# server's teleport puts c1 beside c2 and 10 s later c1 is still there, on
+# the server and in its game; the lab takes c1 back and it is done again
+# (x-arrival-probe: before the arrival rule the second and later of these
+# were sent back to where c1 stood, 20261009-064748; with it all four
+# held, 20261009-065137). c2, a player, types the same additem: the
 # server refuses it with a line, and c2 has no sword on either side. COC is
 # an admin's (Eli, 2026-10-08): c1, made an admin, types `coc
 # RiverwoodSleepingGiantInn` (Skyrim.esm's interior 0x133c6): its own game
 # goes to the inn and the server takes that one jump, so c1's game and the
 # server's record are both in the inn; c2, a player, types the same and is
-# refused, still at the lab spawn on both sides. Then the server restarts
-# and c1 relaunches on a fresh save: the sword, Archery at 40 and the inn
-# come back from the server's record.
+# refused, still outside on both sides. TES3MP's player commands
+# on SkyMP's `mp` (Eli, 2026-10-08): c1 lists the players by number, each
+# with its name and where it is; c2, a player, types `mp tp 1` and is
+# refused, c1 staying in the inn; c1 types `mp tp 2`, and the server brings
+# c2 from outside into the inn, a cell where c1's game has no figure of
+# c2: c2's game and the server's record are in the inn beside c1. The lab
+# takes c1 back out to the spawn and c1 types `mp tpto 2`: the server takes
+# c1 into the inn beside c2, its game and the server's record agreeing.
+# Then the server restarts and c1 relaunches on a fresh save: the sword,
+# Archery at 40 and the inn come back from the server's record, and c2's
+# record is still in the inn.
 # Assertions are evaluated by lab-api only (ADR-009).
 id: a-console
 milestone: M1
@@ -53,6 +68,29 @@ steps:
   - c1: console {text: "save thuum"}
   - assert:
       - c1.printed("The server owns the world")
+  - c2: teleport {cell: lab-spawn, x: -300, y: -1400, z: -150}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - wait: 4
+  - c1: console {text: "player.moveto {other}"}
+  - wait: 10
+  - c1: dump-state
+  - assert:
+      - c1.printed("moveto done")
+      - abs(server.actor(c1).x - server.actor(c2).x) < 300
+      - abs(server.actor(c1).y - server.actor(c2).y) < 300
+      - abs(c1.state.x - server.actor(c1).x) < 64
+      - abs(c1.state.y - server.actor(c1).y) < 64
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - wait: 4
+  - c1: console {text: "player.moveto {other}"}
+  - wait: 10
+  - c1: dump-state
+  - assert:
+      - c1.printed("moveto done")
+      - abs(server.actor(c1).x - server.actor(c2).x) < 300
+      - abs(server.actor(c1).y - server.actor(c2).y) < 300
+      - abs(c1.state.x - server.actor(c1).x) < 64
+      - abs(c1.state.y - server.actor(c1).y) < 64
   - c1: staff-rank {rank: 2}
   - c1: console {text: "coc RiverwoodSleepingGiantInn"}
   - wait: 20
@@ -75,6 +113,35 @@ steps:
       - c2.printed("Not enough permissions")
       - c2.state.worldOrCell == 0x3c
       - server.actor(c2).cell == "lab-spawn"
+  - c1: console {text: "mp list"}
+  - assert:
+      - c1.printed("1 test 1 (you) (ff000000) in 133c6:Skyrim.esm")
+      - c1.printed("2 test 2 (ff000001) in 3c:Skyrim.esm")
+  - c2: console {text: "mp tp 1"}
+  - wait: 5
+  - assert:
+      - c2.printed("Not enough permissions")
+      - server.actor(c1).cell == "133c6:Skyrim.esm"
+  - c1: console {text: "mp tp 2"}
+  - wait: 15
+  - c2: dump-state
+  - assert:
+      - c1.printed("mp tp done")
+      - c2.state.worldOrCell == 0x133c6
+      - server.actor(c2).cell == "133c6:Skyrim.esm"
+      - abs(server.actor(c2).x - server.actor(c1).x) < 300
+      - abs(server.actor(c2).y - server.actor(c1).y) < 300
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0}
+  - wait: 5
+  - c1: console {text: "mp tpto 2"}
+  - wait: 15
+  - c1: dump-state
+  - assert:
+      - c1.printed("mp tpto done")
+      - c1.state.worldOrCell == 0x133c6
+      - server.actor(c1).cell == "133c6:Skyrim.esm"
+      - abs(server.actor(c1).x - server.actor(c2).x) < 300
+      - abs(server.actor(c1).y - server.actor(c2).y) < 300
   - server: restart
   - wait: 20
   - c1: relaunch
@@ -87,5 +154,6 @@ steps:
       - c1.skill("Marksman").base == 40
       - server.actor(c1).cell == "133c6:Skyrim.esm"
       - c1.state.worldOrCell == 0x133c6
+      - server.actor(c2).cell == "133c6:Skyrim.esm"
   - c1: screenshot
 artifacts: [server.log, c1.log, c2.log, screenshots]
