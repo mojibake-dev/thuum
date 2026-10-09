@@ -670,7 +670,7 @@ light-plugins verb, a head part from a light plugin refuses the look.
 
 ## ADR-027: A merge sweep's lone red that reruns green is a watch item, not a block
 
-Status: proposed (2026-10-09), to Eli. Amends ADR-024.
+Status: accepted (2026-10-09, Eli's M2 form: accept; proposed the same morning). Amends ADR-024.
 
 **Context.** ADR-024 says a red run blocks the merge. Twice a merge went
 ahead on reruns instead, a choice made in the session, not by this record:
@@ -701,7 +701,7 @@ sweep, like the RaceMenu leg's three, block under this rule.
 
 ## ADR-028: The server computes the damage one actor deals another
 
-Status: proposed (2026-10-09), to Eli, with M2's chart (docs/PLAN.md).
+Status: accepted (2026-10-09, Eli's M2 form: accept; proposed with M2's chart, docs/PLAN.md).
 
 **Context.** CLAUDE.md puts damage numbers on R0, and M2's exit asks for
 server-authoritative damage between two players. The survey of the fork at

@@ -725,8 +725,8 @@ it carries a HYPOTHESIS tag.
     of Papyrus's magic natives is implemented. A potion is drunk by the
     game and written straight to health by the server; a poison is drunk
     too.
-  - Shouts: the voice slot only. Containers: one player at a time, their
-    changes reach nobody else, no corpse loot.
+  - Shouts: the voice slot only. Containers (now M4's): one player at a
+    time, their changes reach nobody else, no corpse loot.
   The order proposed, each a verb through CLAUDE.md's workflow:
   1. marksman: the shot relayed reliably and launched in observers' games
      (an arrow launch beside MagicApi's spell launch), its aim on the wire,
@@ -753,19 +753,18 @@ it carries a HYPOTHESIS tag.
      WOOP read by libespm), the shout cast on spell-cast's path, the
      cooldown the server's; the movement budget measured against Whirlwind
      Sprint and Unrelenting Force (carried from M1).
-  7. containers-loot: several players in one container, its changes sent
-     to every viewer, corpse loot, a distance check on PutItem and TakeItem,
-     the reloot timer pushed by restarts and the open-after-restart record.
-  8. Lag compensation (Bernier 2001) only if a playtest shows hits refused
+  7. Lag compensation (Bernier 2001) only if a playtest shows hits refused
      inside M1's slack: positions kept per actor, rewound by the attacker's
      latency.
-  9. Exit: `b-duel` and `b-magic-restart`.
-  Decisions for Eli (docs/private/decisions-m2.md): the order; ADR-028
-  (proposed), which damage the server computes and which the victim's
-  game keeps; whether lag compensation waits for a playtest; Apocalypse's
-  place (it needs server-owned globals and the spell path). At M1's pace
-  (a verb in two to four sessions) the seven verbs are about twenty
-  sessions, with the stretch mods beside them.
+  8. Exit: `b-duel` and `b-magic-restart`.
+  Decisions taken (Eli, 2026-10-09, docs/private/decisions-m2.md): this
+  order; ADR-027 and ADR-028 accepted; lag compensation only when a
+  playtest shows hits refused that should land; Apocalypse after
+  spell-cast and magic-effects, with a small step that gives the server
+  its global variables; Headshot Kills with marksman; containers and
+  loot to M4 ("looting and containers is way more a dungeon thing than a
+  combat thing"). At M1's pace (a verb in two to four sessions) the six
+  verbs are about eighteen sessions, with the stretch mods beside them.
 
 - Magic effect system on the server: apply and remove effects with magnitude
   and duration read from ESM records; potions and poisons become effects
@@ -790,7 +789,10 @@ it carries a HYPOTHESIS tag.
     that jump, so the spell needs its own path: the server takes the cast
     (R1) and allows a jump to the landing point within the spell's reach.
     Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and the blink,
-    seen by an observer, the blink not snapped back.
+    seen by an observer, the blink not snapped back. Placed after
+    spell-cast and magic-effects (Eli, 2026-10-09), with a small step
+    before it that gives the server its global variables (ADR-021's
+    deferral ends there).
 - Hit registration with lag compensation (rewind by client latency, Bernier
   2001), blocking, marksman aim pitch on the wire, projectile ownership.
   - Carried from M1: melee reach's unmeasured cases, the bash, bare hands
@@ -807,8 +809,6 @@ it carries a HYPOTHESIS tag.
     it runs on CIF 2.0.7 unchanged (1.2.8 reads only the older Address
     Library format). Scenario `b-headshot`: an arrow to an unhelmeted head
     kills, the same arrow to a helmet does not.
-- Corpse loot, container open animation for observers, container contents
-  reconciled on open.
 - God mode and immortality, the console's TGM and TIM (Eli, 2026-10-09,
   out of M1): a flag the server's damage and death rules read, beside the
   game's own god mode for what it computes itself (Debug.setGodMode,
@@ -851,6 +851,14 @@ it carries a HYPOTHESIS tag.
   linked refs (the lever that opens the door), statics.
 - Weather and time as server globals; both rendered, neither rolled locally.
 - Dropped items and kicked objects under the physics host.
+- Containers and loot (from M2, Eli 2026-10-09: "looting and containers is
+  way more a dungeon thing than a combat thing"): several players in one
+  container, its changes sent to every viewer (the server keeps one
+  occupant and sends a container's changes to nobody else today), corpse
+  loot (no path exists), the open animation and sound for observers, a
+  distance check on PutItem and TakeItem, the reloot timer that each
+  restart pushes later, a container saved open coming back open with
+  nobody in it (survey notes in M2's chart).
 - Exit: `d-bleak-falls` (both players through the puzzle door and the traps,
   with a restart mid-dungeon).
 
