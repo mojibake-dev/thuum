@@ -434,4 +434,9 @@ past a command's own parameters as text (89db8732).
       figure's head scale (docs/verbs/racemenu-sync.md, watch item) and
       green on both reruns (20261009-084041, -084413); fork parity
       fast-forwarded to 89db8732, 2026-10-09
-- [ ] playtest twelve's section 2 (Eli)
+- [x] playtest twelve's section 2 (Eli, 2026-10-09 around noon, parity
+      89db8732, docs/private/playtest-m1-12.md): `player.moveto` and
+      `moveto player` landed and held; `mp list` numbered both; `mp tpto 2`
+      into Whiterun, `mp tp 2` into the Sleeping Giant with the brought
+      player told who; `mp tp 2` after a kill and a resurrect; a player's
+      `mp tp 1` refused

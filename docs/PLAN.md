@@ -653,7 +653,13 @@ it carries a HYPOTHESIS tag.
      RaceMenu leg's sweep was; fork parity fast-forwarded to 89db8732 on
      2026-10-09, both clones' clean-m1 promoted. a-movement-speed's held
      run covered 411 units in it (20261009-072747), back in its old range.
-     Left: playtest twelve's section 2.
+     Playtest twelve's section 2 passed (Eli, 2026-10-09 around noon, on
+     parity 89db8732 from his saved world): `player.moveto` and `moveto
+     player` landed and held, `mp list` numbered both players, `mp tpto`
+     into Whiterun and `mp tp` into the Sleeping Giant, `mp tp` after a
+     kill and a resurrect, a player's `mp tp` refused; with sections 1 and
+     3 the playtest passed whole. His world is saved as
+     playtest-m1-12-20261009T190948Z (`just playtest-restore`).
   4. Exit: doc hygiene (stale Status boxes), the mirror's Formatting
      check (red on m1-console since the light-plugins and ADR-026 code:
      FormDesc.cpp, RaceMenuPresetTest.cpp and PapyrusUtils.h under the
