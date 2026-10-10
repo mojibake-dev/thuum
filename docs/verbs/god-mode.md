@@ -135,10 +135,20 @@ Rate limit / bounds: the console budget (four at once, one a second).
 
 ## Status
 
-Doc written 2026-10-10, before any code.
+Doc written 2026-10-10, before any code. Building on fork branch m2-god,
+stacked on m2-effects (it merges after magic-effects): d6a02abf the server
+(the console table serves TGM and TIM; the flags for the session, cleared at
+the departure; Debug.SetGodMode to the caller's game; no damage to a god
+target from a weapon or an effect, a buff's maximum still moving; no arrow
+spent by a god shooter; an immortal actor's health stopped at one point, its
+game told so; GodModeTest); b1d1e3dd the difftest session. The client
+already routes tgm and tim to the server (consoleCommandsService.ts,
+serverOnlyCommands), so no client build. Left: CI, T2, b-god.
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (cited; HYPOTHESIS for the lab: the
+      game's own console text, the engine's TIM at no health, and the game
+      keeping neither flag in a save)
 - [ ] server logic + T0
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
