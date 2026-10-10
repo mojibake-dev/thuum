@@ -204,7 +204,7 @@ a rate budget (none today).
 
 - Where the logic lives: a Rust rule (wire-rules, ADR-020), each actor's
   recent shots: a shot recorded, a hit claiming one within its flight
-  (the oldest unused shot of that weapon within 17 s whose arrow, at 5400
+  (the newest unused shot of that weapon within 17 s whose arrow, at 5400
   units a second and half again, can have reached the target, with 256
   units of slack and one resend's 300 ms on the time: a lost shot is
   resent while its hit waits behind it on the client's ordered channel,
