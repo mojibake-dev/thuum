@@ -278,7 +278,18 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   numbers read after each, c2's screenshot of c1's figure.
 - x-poison-probe: c1 applies DB03Poison to its weapon; its inventory dump
   (which hand, what count); c1 hits c2; c1's watch of c2's figure (the
-  engine's poison on the figure in c1's game, per frame).
+  engine's poison on the figure in c1's game, per frame). First run,
+  20261010-135426 (parity 45839102): Papyrus EquipItem of a poison on the
+  player opens the game's own box, "Do you want to poison the Steel
+  Sword?" (screenshot 027), which no lab input answers (as the race menu's
+  finish box, docs/verbs/character-creation.md), and the open box took the
+  swing: no poison applied, no hit, nothing measured. Blocked on in-game
+  behavior (CLAUDE.md rule 8): handed to Eli as playtest thirteen's poison
+  section (docs/private/playtest-m2-13.md): he applies it by hand on test
+  2, `just probe-poisons c2` reads the sword's ExtraPoison (the hand, the
+  count) before and after one hit on test 1, he reports test 1's health,
+  and the server log shows whether the client sent OnEquip for the poison.
+  The poison slice waits for that answer.
 - x-taper-probe: c1 casts Firebolt at c2; c1's watch of c2's figure per
   frame between the server's sets: the engine's taper steps after the hit.
 - Owner: agent.
