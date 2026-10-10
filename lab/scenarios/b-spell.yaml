@@ -1,0 +1,83 @@
+# M2, spell-cast (docs/verbs/spell-cast.md): a player's spell hurts by the
+# server's number, a stream by the time it held its target and a
+# fire-and-forget spell once, and every screen shows the caster's figure
+# casting until the caster stops. c1 holds Flames (Skyrim.esm 0x12FCD, a new
+# character's spell: FireDamageConcAimed 8 a second) on c2 150 units away
+# for 4 s with its hands drawn first (a key press with sheathed hands spends
+# 1.5 s drawing them, x-spell-time 20261010-105451). The caster's game
+# reports a hit pair every 200 ms or so and the client sends one; the server
+# counts each by the time since the stream's last counted hit, at most
+# 250 ms, so the stream costs c2 8 a second of the time it held c2, about
+# 3.6 s of the 4 (the cast event comes 300 ms after the press):
+# x-spell-observe 20261010-114556 measured 44 for a 6 s hold, 5.5 s on
+# target. c2's own game agrees with the server, because the figure's stream
+# lands nothing there (c2's watch recorded no hit taken and no effect, and
+# its health fell only by the server's steps): no second path (ADR-028).
+# c2's watch of c1's figure times the figure's stream on c2's screen by its
+# magicka, which a figure holds a million of and a stream drains (from 852
+# to 6582 ms against c1's 264 to 6267 in that run, the end relayed): it
+# drains for most of the hold and stops well before the watch ends (a lost
+# end, playtest six's, drains until the watch stops). c2's health is read
+# about a second after the stream ends, before its own regeneration can
+# run ahead of the server's cropped number. Then c1 learns
+# Firebolt (0x12FD0, fire-and-forget, FireDamageFFAimed 25, no area; its
+# record read with lab/esm.py) through the server's own Papyrus AddSpell,
+# equips it and casts it once at c2, reset to full twice first (a lone
+# reset can be undone by a regenerating client's late falls, b-marksman):
+# 25 of c2's base 100, once, c2's game agreeing. The lab runs every player
+# as an owner, so the console's equipspell is taken. Assertions are
+# evaluated by lab-api only (ADR-009).
+id: b-spell
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 1}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c2: watch-start
+  - c1: hold-key {code: 199, ms: 4000}
+  - wait: 5.5
+  - assert:
+      - server.actor(c2).healthPercentage < 0.78
+      - server.actor(c2).healthPercentage > 0.64
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - wait: 3
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).drainMs > 3000
+      - c2.watched(c1).drainEndMs < 7500
+  - c1: learn-spell {spellId: 77776}
+  - c1: set-percentages {magicka: 1}
+  - wait: 2
+  - c1: console {text: "player.equipspell 12fd0 right"}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.actor(c2).healthPercentage < 0.78
+      - server.actor(c2).healthPercentage > 0.74
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
