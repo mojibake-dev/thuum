@@ -371,6 +371,34 @@ class HeldTests(unittest.TestCase):
             ev.evaluate("c2.held(0x5ACE4) == 1")
 
 
+class PoisonViews(NearViews):
+    """The last poisons steps (docs/verbs/magic-effects.md): c1's Steel Sword
+    (0x13989) carries DB03Poison (0x58CFB) with one charge, c1 holds no other
+    poisoned stack, and c2 has not reported."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {
+            "c1": {"poisons": [{"baseId": 0x13989, "poisonId": 0x58CFB, "count": 1, "worn": True, "wornLeft": False}]},
+        }
+
+    def poisons(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class PoisonTests(unittest.TestCase):
+    def test_poison_reads_the_stack_of_that_item_from_the_last_step(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), PoisonViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.poison(0x13989).count == 1"))
+        self.assertTrue(ev.evaluate("c1.poison(0x13989).poisonId == 0x58CFB"))
+        # an item with no poisoned stack: none
+        self.assertTrue(ev.evaluate("c1.poison(0x12EB7).count == 0"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.poison(0x13989).count == 0")
+
+
 class ProjectileViews(NearViews):
     """The last projectiles steps (docs/verbs/marksman.md): c1's game holds an
     iron arrow (ArrowIronProjectile 0x3BE11) 320 units off, c2's none in

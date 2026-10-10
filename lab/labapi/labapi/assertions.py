@@ -34,6 +34,10 @@ the lab can grep (E_ASSERT_*).
                                                      player, lies in its own game, from its last
                                                      projectiles step (docs/verbs/marksman.md); none is
                                                      a data error
+  <client>.poison(<form id>).count | .poisonId      the poison on that item's stack in that client's
+                                                     inventory and its charges, from its last poisons
+                                                     step (docs/verbs/magic-effects.md); 0 and 0 when
+                                                     no stack of the item carries one
   <client>.sees(<client>)                            from that client's last dump-state
   <client>.view(<client>).x | .y | .z                from that client's last dump-state
   abs(), + - * /, comparisons, and, or, not, numbers, strings, true, false
@@ -73,6 +77,7 @@ class ViewsFacade(Protocol):
     def favorites(self, observer: str) -> dict[str, Any] | None: ...
     def held(self, observer: str) -> dict[str, Any] | None: ...
     def projectiles(self, observer: str) -> dict[str, Any] | None: ...
+    def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
@@ -186,6 +191,17 @@ class ProjectileView:
     reads no position of a projectile; docs/verbs/marksman.md)."""
 
     distance: float
+
+
+@dataclass(frozen=True)
+class PoisonView:
+    """c.poison(id): the poison on a stack of that item in that client's
+    inventory, as its game keeps it (ExtraPoison: the poison and its
+    charges), from its last `poisons` step; poisonId and count 0 when no
+    stack of the item carries one (docs/verbs/magic-effects.md)."""
+
+    poisonId: int
+    count: int
 
 
 @dataclass(frozen=True)
@@ -471,6 +487,21 @@ class _ClientRef:
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s projectile {int(ref_id):#x} lacks {e}") from e
 
+    def poison(self, item_id: int) -> PoisonView:
+        """c.poison(id): the poison on that item's stack in that client's
+        inventory, from its last `poisons` step."""
+        fn = getattr(self._views, "poisons", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("poisons"), list):
+            raise AssertionData(f"{self.name} has not reported a poisons step yet")
+        for stack in data["poisons"]:
+            if isinstance(stack, dict) and stack.get("baseId") == int(item_id):
+                try:
+                    return PoisonView(poisonId=int(stack["poisonId"]), count=int(stack["count"]))
+                except (KeyError, TypeError, ValueError) as e:
+                    raise AssertionData(f"{self.name}'s poisoned {int(item_id):#x} lacks {e}") from e
+        return PoisonView(poisonId=0, count=0)
+
     def _skills_step(self) -> dict[str, Any]:
         fn = getattr(self._views, "skills", None)
         data = fn(self.name) if fn else None
@@ -639,6 +670,7 @@ _ATTRS = {
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
+    PoisonView: {"poisonId", "count"},
     SkillView: {"base", "xp", "legendary"},
     PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
@@ -649,7 +681,7 @@ _ATTRS = {
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker", "known", "favorite", "held", "projectile"},
+    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison"},
 }
 # Methods that take no argument: server.time()
 _NULLARY = {
@@ -658,7 +690,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "projectile", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
+    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
 }
 _CMP = {

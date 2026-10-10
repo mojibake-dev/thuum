@@ -463,6 +463,9 @@ its player (skymp5-client remoteServer.ts). Assertions read `server.actor(c)` (t
 server's verdicts on the client's race menu results), `server.inventory(c)`,
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
 dump's nearby actors matched to the server's position for `other`),
+`c.poison(<form id>)` (the poison on that item's stack in the client's
+inventory, from its last `poisons` step: `poisonId` and `count`, both 0
+when no stack of the item carries one),
 `c.watched(other)` (the last watch-stop's actor that started where the
 server has `other`: `x, y, z`, `maxDisplacement`, `samples`, and
 `drainMs` and `drainEndMs`, how long its magicka fell in that game and when
