@@ -144,14 +144,20 @@ def create_app(services: Services) -> FastAPI:
     # One client's own state outside a run (lab-driver's dump-state), nothing
     # reset: for a playtest that hits something odd, such as a player who can
     # look around but not move (docs/verbs/rest.md, the stuck wait). Read only;
-    # refused while a run owns the clients.
+    # refused while a run owns the clients. `action` picks another read-only
+    # step: poisons (docs/verbs/magic-effects.md, what a player's own poison
+    # did to its weapon, which only a human can apply: the game asks first).
+    PROBE_ACTIONS = {"dump-state", "poisons"}
+
     @router.get("/probe")
-    async def probe(client: str):
+    async def probe(client: str, action: str = "dump-state"):
         if runner.active:
             return _busy()
+        if action not in PROBE_ACTIONS:
+            raise HTTPException(400, f"a probe reads only {sorted(PROBE_ACTIONS)}")
         if runner.tables.guest_for_client(client) is None:
             raise HTTPException(404, f"no client {client!r}")
-        done = await board.run_step(client, "dump-state", {}, s.step_timeout_s)
+        done = await board.run_step(client, action, {}, s.step_timeout_s)
         if not done.ok:
             return JSONResponse({"ok": False, "client": client, "error": done.result.get("error", "no answer")}, status_code=504)
         return {"ok": True, "client": client, "state": done.result.get("data")}

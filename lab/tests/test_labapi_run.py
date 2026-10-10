@@ -846,6 +846,22 @@ class ProbeSteps(RunTests):
     def test_a_probe_of_an_unknown_client_is_404(self):
         self.assertEqual(self.client.get("/lab/probe", params={"client": "c9"}).status_code, 404)
 
+    def test_a_probe_reads_a_poison_and_nothing_that_writes(self):
+        import threading
+
+        out = {}
+        t = threading.Thread(target=lambda: out.update(r=self.client.get("/lab/probe", params={"client": "c1", "action": "poisons"})))
+        t.start()
+        deadline = time.time() + 10
+        while t.is_alive() and time.time() < deadline:
+            self.doubles.turn()
+            time.sleep(0.02)
+        t.join(5)
+        self.assertEqual(out["r"].status_code, 200, out["r"].text)
+        self.assertIn(("c1", "poisons", {}), self.doubles.seen)
+        for writes in ("hold-key", "console", "equip"):
+            self.assertEqual(self.client.get("/lab/probe", params={"client": "c1", "action": writes}).status_code, 400)
+
 
 @needs_deps
 class GameCheckRetries(GameVersions):

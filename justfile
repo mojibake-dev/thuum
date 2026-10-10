@@ -193,6 +193,11 @@ lab-run scenario game="":
     sys.exit(0 if body["verdict"] == "green" else 1)
     PY
 
+# A player's poisoned stacks outside a run, nothing reset (lab-api GET /lab/probe?action=poisons): what a
+# poison applied by hand did to its weapon (docs/verbs/magic-effects.md).
+probe-poisons client:
+    @curl -fsS -m 30 "{{lab_api}}/probe?client={{client}}&action=poisons" | python3 -m json.tool
+
 # One client's own state outside a run, nothing reset (lab-api GET /lab/probe): the engine's player
 # controls, health, position and the last rest, for a playtest that hits something odd.
 probe client:
