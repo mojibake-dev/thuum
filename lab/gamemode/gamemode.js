@@ -211,6 +211,25 @@ command["staff-rank"] = (payload) => {
   return { ok: true, actorId, rank: mp.get(actorId, "staffRank") };
 };
 
+// A spell the player learns from the server (thuum docs/verbs/spell-cast.md:
+// a fire-and-forget spell no new character knows): the server's own Papyrus
+// Actor.AddSpell, the path a script takes, which records the spell on the
+// server and has the player's game learn it (PapyrusActor.cpp AddSpell, the
+// learned spells a SpellCast's equipment check reads). spellId is the
+// record's form id, read from the masters with lab/esm.py, never from memory.
+// learned is AddSpell's answer: true when the player learns it now, false
+// when it knew it already or the record is no spell.
+command["learn-spell"] = (payload) => {
+  const actorId = actorFor(payload.profileId);
+  if (!actorId) return notFound(payload.profileId);
+  const spellId = Number(payload.spellId);
+  if (!Number.isInteger(spellId) || spellId <= 0) return { ok: false, error: "learn-spell needs spellId, a form id" };
+  const self = { type: "form", desc: mp.getDescFromId(actorId) };
+  const spell = { type: "espm", desc: mp.getDescFromId(spellId) };
+  const learned = mp.callPapyrusFunction("method", "Actor", "AddSpell", self, [spell, false]);
+  return { ok: true, actorId, spellId, learned: learned === true };
+};
+
 // The server sends the client SetRaceMenuOpen and takes one UpdateAppearance
 // from it while the menu is open: the race menu a new character gets, opened
 // for a recorded one. The stock client shows the menu; closing it is the
@@ -273,7 +292,7 @@ mp.onHttpRpcRunAttempt = (name, payload) => {
   }
 };
 
-console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn, papyrus-av, staff-rank)");
+console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn, papyrus-av, staff-rank, learn-spell)");
 
 // For the unit test only; the server never reads this.
 if (typeof module !== "undefined") {

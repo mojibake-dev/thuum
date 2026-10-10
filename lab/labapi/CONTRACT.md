@@ -119,6 +119,7 @@ them by name.
 {"payload": {"kind": "respawn", "profileId": 1}}
 {"payload": {"kind": "papyrus-av", "profileId": 1, "how": "set", "name": "Archery", "value": 45}}
 {"payload": {"kind": "staff-rank", "profileId": 2, "rank": 0}}
+{"payload": {"kind": "learn-spell", "profileId": 1, "spellId": 77776}}
 ```
 
 `teleport` carries the descriptor and absolute coordinates; lab-api resolves
@@ -145,7 +146,12 @@ path a script takes; docs/verbs/actor-values.md): `how` is get, base or max
 the server then reads back). `staff-rank` sets the player's staff rank, the
 server's property `staffRank` (0 player, 1 moderator, 2 admin, 3 owner;
 docs/verbs/console-commands.md), which the server's console table reads
-when the server's `enableConsoleCommandsForAll` is off.
+when the server's `enableConsoleCommandsForAll` is off. `learn-spell` has
+the player learn a spell through the server's own Papyrus `Actor.AddSpell`
+(the server records it and tells the player's game; docs/verbs/spell-cast.md),
+`spellId` the record's form id; `learned` is AddSpell's answer, true when
+the player learns it now, false when it knew it already or the record is no
+spell.
 
 Response: `{"ok": true}` or `{"ok": false, "error": "<reason>"}`. For `give`,
 lab-api adds `baseId` next to the scenario's `item` string so the gamemode

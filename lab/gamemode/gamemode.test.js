@@ -156,3 +156,24 @@ test("labCommand staff-rank sets the server's staffRank property", () => {
   }
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "staff-rank", profileId: 9, rank: 0 }), { found: false, profileId: 9 });
 });
+
+test("labCommand learn-spell runs the server's own Actor.AddSpell", () => {
+  global.mp = fakeMp();
+  const calls = [];
+  mp.getDescFromId = (id) => id.toString(16);
+  mp.callPapyrusFunction = (callType, className, fn, self, args) => {
+    calls.push([callType, className, fn, self.type, self.desc, args[0].type, args[0].desc, args[1]]);
+    return !calls.slice(0, -1).some((c) => c[6] === args[0].desc);
+  };
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const ok = mp.onHttpRpcRunAttempt("labCommand", { kind: "learn-spell", profileId: 1, spellId: 0x12fd0 });
+  assert.deepStrictEqual(ok, { ok: true, actorId: 0xff000001, spellId: 0x12fd0, learned: true });
+  assert.deepStrictEqual(calls[0], ["method", "Actor", "AddSpell", "form", "ff000001", "espm", "12fd0", false]);
+  const again = mp.onHttpRpcRunAttempt("labCommand", { kind: "learn-spell", profileId: 1, spellId: 0x12fd0 });
+  assert.deepStrictEqual(again, { ok: true, actorId: 0xff000001, spellId: 0x12fd0, learned: false });
+  for (const spellId of [0, -1, 1.5, "firebolt", undefined]) {
+    assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "learn-spell", profileId: 1, spellId }).ok, false);
+  }
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "learn-spell", profileId: 9, spellId: 0x12fd0 }), { found: false, profileId: 9 });
+});
