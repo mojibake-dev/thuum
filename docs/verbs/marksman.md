@@ -105,6 +105,16 @@ a rate budget (none today).
   its kin) at speed 3600 units a second, gravity 0.35, range 60000;
   Dawnguard's DLC1BoltSteel damage 10, its projectile at speed 5400. All
   four projectiles carry type 0x40, UESP's Arrow, a check on the reading.
+  One faster arrow exists (every AMMO record of the five masters with its
+  projectile, scanned with lab/esm.py's walker on 2026-10-10):
+  Skyrim.esm's MQ101SteelArrow 0x00105EE7, damage 10, flagged playable
+  (DATA flags 0x4, non-bolt only), its MQ101ArrowSteelProjectile 0x00105EE6
+  at 15000. The server's bound (below) takes 5400, so a hit with that arrow
+  beyond about 5800 units, where 15000 outruns 8100 a second with the
+  resend's 300 ms and the slack, is refused. Known gap; the fix is each
+  shot's own speed from its arrow's records (AMMO DATA's projectile, then
+  PROJ DATA's speed, which libespm reads since fork m2-spell 46c6558a),
+  with 5400 for an arrow whose records say nothing.
   libespm reads neither record yet. Whether a bow scales its arrow's speed,
   and how the draw's power does: HYPOTHESIS until the lab, so the server's
   range bound takes the projectile's speed with a margin (straight-line
