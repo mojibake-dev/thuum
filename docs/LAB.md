@@ -406,7 +406,9 @@ what a screenshot is too slow to catch: magicka and health on each change,
 each animation event sent to the player's graph, each spell it cast, each
 hit it dealt and took, each magic effect applied to it, and the graph
 variables watch-start's {bools} names, each stamped in ms since
-watch-start), settings {ini: [...], gmst: [...], gmstInt: [...]} (the running game's own
+watch-start), poisons (each poisoned stack in the player's inventory as
+its game keeps it: the item, the poison, its count, the hand it is worn
+in), settings {ini: [...], gmst: [...], gmstInt: [...]} (the running game's own
 values of named INI settings and game settings, through Papyrus, recorded
 in the step's note), and console {text} (a line typed into the game's own
 console the way a player types it: the grave key opens it, one DirectInput

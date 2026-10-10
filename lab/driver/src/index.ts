@@ -28,6 +28,8 @@ import {
   HttpClient,
   HttpResponse,
   Ingredient,
+  ExtraPoison,
+  getExtraContainerChanges,
   Input,
   NetImmerse,
   ObjectReference,
@@ -827,6 +829,29 @@ function run(step: Step, player: Actor): unknown {
         }
       }
       return { from: from.getFormID(), refs };
+    }
+    case "poisons": {
+      // thuum docs/verbs/magic-effects.md: each poisoned stack in the
+      // player's inventory as its game keeps it (Skyrim Platform's
+      // getExtraContainerChanges, the extras skymp5-client's inventory sync
+      // reads): the item, ExtraPoison's poison and count, and whether the
+      // stack is worn in the right or left hand. For where a poison goes and
+      // how many hits it lasts.
+      const out: Array<{ baseId: number; poisonId: number; count: number; worn: boolean; wornLeft: boolean }> = [];
+      for (const entry of getExtraContainerChanges(player.getFormID()) ?? []) {
+        for (const list of entry.extendDataList ?? []) {
+          const poison = list.find((x) => x.type === "Poison") as ExtraPoison | undefined;
+          if (!poison) continue;
+          out.push({
+            baseId: entry.baseId,
+            poisonId: poison.poisonId,
+            count: poison.count,
+            worn: list.some((x) => x.type === "Worn"),
+            wornLeft: list.some((x) => x.type === "WornLeft"),
+          });
+        }
+      }
+      return { poisons: out };
     }
     case "graph-vars": {
       // The player's behavior graph variables by name (Papyrus
