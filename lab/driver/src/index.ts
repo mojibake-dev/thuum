@@ -748,6 +748,21 @@ function run(step: Step, player: Actor): unknown {
       }
       return { from: from.getFormID(), refs };
     }
+    case "graph-vars": {
+      // The player's behavior graph variables by name (Papyrus
+      // GetAnimationVariableBool/Float/Int): {bools, floats, ints}, each a
+      // list of names; a name the graph lacks reads false or 0. For
+      // docs/verbs/spell-cast.md: which variables say a hand is casting
+      // (IsCastingLeft, IsCastingRight, IsCastingDual are the names to try).
+      const names = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+      const bools: Record<string, boolean> = {};
+      for (const n of names(a.bools)) bools[n] = player.getAnimationVariableBool(n);
+      const floats: Record<string, number> = {};
+      for (const n of names(a.floats)) floats[n] = player.getAnimationVariableFloat(n);
+      const ints: Record<string, number> = {};
+      for (const n of names(a.ints)) ints[n] = player.getAnimationVariableInt(n);
+      return { t: Date.now(), bools, floats, ints };
+    }
     case "advance-skill": {
       // thuum docs/verbs/actor-values.md: skill experience as play earns it
       // (Papyrus Game.AdvanceSkill), {name: the actor value's Papyrus name,
