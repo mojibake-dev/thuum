@@ -462,7 +462,9 @@ server's verdicts on the client's race menu results), `server.inventory(c)`,
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
 dump's nearby actors matched to the server's position for `other`),
 `c.watched(other)` (the last watch-stop's actor that started where the
-server has `other`: `x, y, z`, `maxDisplacement`, `samples`),
+server has `other`: `x, y, z`, `maxDisplacement`, `samples`, and
+`drainMs` and `drainEndMs`, how long its magicka fell in that game and when
+it last fell, which time a figure's stream there),
 `c.marker(<form id>)` (the client's last `markers {ids: [...]}` step: the
 map marker's `visible` and `canTravel` on that player's own map),
 `c.known(<form id>)` (the client's last `known {ids: [...]}` step: the

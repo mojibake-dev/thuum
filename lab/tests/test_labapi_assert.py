@@ -241,11 +241,12 @@ class WatchViews(NearViews):
     """c2 watched two actors: c1, who started at the server's position and
     jumped 5000 units before coming back, and a guard that never moved."""
 
-    def __init__(self, c1_max=5000.0):
+    def __init__(self, c1_max=5000.0, c1_magicka=None):
         super().__init__()
         self.watches = {
             "c2": {"actors": [
-                {"formId": 0xFF000001, "name": "c1", "first": [296.0, 1.0, 0.0], "last": [296.0, 1.0, 0.0], "maxDisplacement": c1_max, "samples": 240},
+                {"formId": 0xFF000001, "name": "c1", "first": [296.0, 1.0, 0.0], "last": [296.0, 1.0, 0.0], "maxDisplacement": c1_max, "samples": 240,
+                 "magicka": c1_magicka if c1_magicka is not None else [[0, 1000000.0]]},
                 {"formId": 0xFF000009, "name": "Guard", "first": [5000.0, 0.0, 0.0], "last": [5000.0, 0.0, 0.0], "maxDisplacement": 0.0, "samples": 240},
             ]},
         }
@@ -592,6 +593,18 @@ class WatchTests(unittest.TestCase):
         self.assertTrue(ev.evaluate("abs(c2.watched(c1).x - server.actor(c1).x) < 50"))
         still = Evaluator(RichServer(), WatchViews(c1_max=3.0), ["c1", "c2"])
         self.assertTrue(still.evaluate("c2.watched(c1).maxDisplacement < 500"))
+
+    def test_watched_times_the_figure_s_magicka_drain(self):
+        """c1's figure streamed in c2's game from 900 ms to 4600 ms, then
+        its magicka came back to a million."""
+        from labapi.assertions import Evaluator
+        series = [[0, 1000000.0], [900, 999999.9]] + [[900 + 50 * i, 999999.9 - 0.3 * i] for i in range(1, 75)] + [[5000, 1000000.0]]
+        ev = Evaluator(RichServer(), WatchViews(c1_magicka=series), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.watched(c1).drainMs == 3700"))
+        self.assertTrue(ev.evaluate("c2.watched(c1).drainEndMs == 4600"))
+        never = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        self.assertTrue(never.evaluate("c2.watched(c1).drainMs == 0"))
+        self.assertTrue(never.evaluate("c2.watched(c1).drainEndMs == -1"))
 
     def test_a_watch_is_needed_and_is_not_a_dump(self):
         from labapi.assertions import AssertionData, Evaluator, clients_needing_views

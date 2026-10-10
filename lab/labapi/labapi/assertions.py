@@ -151,13 +151,20 @@ class WatchView:
     """c.watched(other): what a client saw of another client's actor between
     its watch-start and watch-stop steps: where the actor was when the watch
     began (relative to its cell's origin), the farthest it ever got from
-    there, and how many frames sampled it."""
+    there, and how many frames sampled it. drainMs is how long the actor's
+    magicka fell in that game, from its first fall to its last (0 when it
+    never fell), and drainEndMs when it last fell, in ms since watch-start
+    (-1 when never): a figure holds a million magicka and a stream drains
+    it, so the two time a figure's stream in the watcher's game
+    (docs/verbs/spell-cast.md)."""
 
     x: float
     y: float
     z: float
     maxDisplacement: float
     samples: int
+    drainMs: float = 0.0
+    drainEndMs: float = -1.0
 
 
 @dataclass(frozen=True)
@@ -382,10 +389,14 @@ class _ClientRef:
             raise AssertionData(f"{self.name} watched no actor where the server has {other}")
         try:
             first = best["first"]
+            series = best.get("magicka") or []
+            falls = [float(t) for (t, v), (_, prev) in zip(series[1:], series) if float(v) < float(prev)]
             return WatchView(
                 float(first[0]) - origin[0], float(first[1]) - origin[1], float(first[2]) - origin[2],
                 maxDisplacement=float(best["maxDisplacement"]),
                 samples=int(best.get("samples", 0)),
+                drainMs=falls[-1] - falls[0] if falls else 0.0,
+                drainEndMs=falls[-1] if falls else -1.0,
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s watch of {other} lacks {e}") from e
@@ -625,7 +636,7 @@ _ATTRS = {
     ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex",
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
-    WatchView: {"x", "y", "z", "maxDisplacement", "samples"},
+    WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     SkillView: {"base", "xp", "legendary"},
