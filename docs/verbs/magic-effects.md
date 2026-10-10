@@ -32,10 +32,10 @@ marksman's rules). Magnitudes, durations and archetypes come only from the
 records.
 Rate limit / bounds: at most 32 effects running on an actor (an engine's
 potion chugging stays inside it; a new one past the bound replaces the
-oldest of its kind); OnEquip gets a budget (it has none, wire-validate),
-eight at once and four a second after (HYPOTHESIS until the lab drinks a
-row of potions quickly: the bound must not refuse a player's real hotkey
-chug).
+oldest of its kind); OnEquip gets a budget (it had none, wire-validate),
+sixteen at once and eight a second after, since every equip goes through
+it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
+(HYPOTHESIS until the lab drinks a row of potions quickly).
 
 ## Engine surface
 
