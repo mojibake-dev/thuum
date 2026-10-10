@@ -153,7 +153,16 @@ spell, effect or book carries either name, nor do the Nexus changelogs from
   target through MoveTo), Cyclonic Rift (SPEL 0302D068, two persistent
   portals moved out of the same holding cell, a global choosing which) and
   Rift Bolt (SPEL 030253C2, slides the target 150 units back with
-  TranslateTo).
+  TranslateTo). Eli (2026-10-10): the spell he means is "a projectile
+  teleport", cast like a projectile. No player spell in 10.2.3 moves its
+  caster to where its cast lands: every script that moves an actor was
+  listed (MoveTo, SetPosition, TranslateTo), and none does that; of the
+  Alteration line named Teleport only tier 5 (Milestones) is left; and the
+  mod's Nexus changelogs mention teleporting once, Rift Bolt's 9.25 change
+  ("now rapidly moves the target instead of teleporting them"). The aimed
+  spell that teleports is Cyclonic Rift: each cast places one of its two
+  portals where it lands, and anyone within 10 feet of one is moved to the
+  other.
 
 What the fork does with them today (code read, not lab-tested): PlaceAtMe
 of an explosion only reaches the clients (PapyrusObjectReference.cpp:380),
