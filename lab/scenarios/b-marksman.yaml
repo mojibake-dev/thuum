@@ -1,0 +1,107 @@
+# M2, marksman (docs/verbs/marksman.md): a player's arrow flies on every
+# screen and hurts by the server's number, once, at its draw's power. c1 is
+# given Skyrim.esm's Long Bow (0x3B562) and ten iron arrows (0x1397D) on top
+# of its kit's 23 and equips both by console (EquipItem; the lab runs every
+# player as an owner); c2 stands 250 units south of it. A tap of Right
+# Attack (Home 199 on the clones) readies the bow; a 2 s hold draws it fully
+# (power 1.00 on the server's shot log) and a 0.6 s one releases at the
+# engine's least power (0.35: fArrowMinPower, the release before
+# fArrowBowMinTime; the re-analyst's read and the lab's shot logs,
+# 2026-10-09). hold-key returns at once and releases from the driver's
+# update loop, so each check waits past the release. The server takes an
+# arrow for every shot (32, 31, 30, 29 left of its record's 33).
+# First c1 faces east and shoots level, at a full draw and then at a half:
+# c2's game, told each shot (ArrowShot), launches the arrow from c1's figure
+# at the shot's power, and it lands about as far from the figure as c1's own
+# lands from c1. The two launch points differ (the figure's third-person bow
+# node, c1's first-person one), so a level shot's landing differs by up to a
+# quarter (2523 and 2812 units, then 2555 and 3172, in two runs); the bound
+# is a ratio. Before TESModPlatform.LaunchArrow set the power after
+# Projectile::Launch, the figure's half-draw arrow flew at full power (5539
+# units against c1's 1437). The driver's projectiles step measures each
+# game's nearest iron arrow projectile (ArrowIronProjectile 0x3BE11) by
+# narrowing its search, and a half draw's lands nearer than the full
+# draw's, so each check reads the shot just made. The level shots come
+# first because the arrows c1 then shoots at c2 fly on past c2 in c2's game
+# (5490 units out at a full draw, 1648 at a half): run 20261010-075859, in
+# the other order, read the half draw's instead of the level shot's.
+# Then c1 faces c2 and shoots it, at a full draw and at a half. The hit
+# claims the shot, and the server alone hurts c2: the bow's damage and the
+# arrow's (6 and 8) by the TES5 formula, 12.992 of c2's base 100 at full
+# draw (x-b-marksman 20261009-233002: health 1 to 0.87008), the power times
+# that at a half draw (4.5472: 0.954528, x-bow-damage 20261010-075635), each
+# then regenerating a little. c2's own game agrees with the server (0.8786
+# against 0.8771 in that run): a figure's arrow deals nothing there, so no
+# second path (ADR-028). c2's health is reset to full before each hit; the
+# second reset comes while c2 regenerates from the first hit, whose health
+# reports can reach the server after the reset and, being falls, undo it
+# (run 20261010-080133 read 0.8431: the first hit's 0.8701 less the half
+# draw's), so it is made twice and checked on both sides before the shot.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-marksman
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: give {item: "0x3b562", count: 1}
+  - c1: give {item: "0x1397d", count: 10}
+  - wait: 4
+  - c1: console {text: "player.equipitem 3b562"}
+  - c1: console {text: "player.equipitem 1397d"}
+  - c2: set-percentages {health: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 90]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 3
+  - c1: projectiles {ids: [0x3be11], radius: 8000}
+  - c2: projectiles {ids: [0x3be11], radius: 8000, other: true}
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 32
+      - c1.projectile(0x3be11).distance > 1000
+      - c2.projectile(0x3be11).distance > 0.7 * c1.projectile(0x3be11).distance
+      - c2.projectile(0x3be11).distance < 1.5 * c1.projectile(0x3be11).distance
+  - c1: hold-key {code: 199, ms: 600}
+  - wait: 3
+  - c1: projectiles {ids: [0x3be11], radius: 8000}
+  - c2: projectiles {ids: [0x3be11], radius: 8000, other: true}
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 31
+      - c1.projectile(0x3be11).distance > 300
+      - c2.projectile(0x3be11).distance > 0.7 * c1.projectile(0x3be11).distance
+      - c2.projectile(0x3be11).distance < 1.5 * c1.projectile(0x3be11).distance
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - c2: set-percentages {health: 1}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 30
+      - server.actor(c2).healthPercentage < 0.89
+      - server.actor(c2).healthPercentage > 0.86
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c1: hold-key {code: 199, ms: 600}
+  - wait: 3
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 29
+      - server.actor(c2).healthPercentage < 0.97
+      - server.actor(c2).healthPercentage > 0.945
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
