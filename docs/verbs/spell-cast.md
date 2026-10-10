@@ -366,8 +366,8 @@ casts the relayed spell); 0fe3e6dc, 3aef8c78 and 98c7a478 the difftest
 session and its declarations; 45839102 kTouchReach's comment. The lab
 tooling beside it, in thuum: the watch's self record and each watched
 actor's magicka (95559aa, d6a4181, 35b4ef6), c.watched's drainMs and
-drainEndMs (42aa735), labCommand learn-spell (47dace4). Left: the merge
-sweep (ADR-024).
+drainEndMs (42aa735), labCommand learn-spell (47dace4). DONE 2026-10-10:
+merged to parity 45839102.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (cited; every tag the lab could
@@ -392,4 +392,6 @@ sweep (ADR-024).
       suppression for players (a figure's spell lands nothing on the player
       it targets, MEASURED), three untested candidates kept for the NPC
       milestone
-- [ ] merged: the sweep on fork m2-spell
+- [x] merged: the sweep on fork m2-spell 45839102 went 32 of 32 green with
+      no rerun (runs 20261010-122057 to -134720); fork parity fast-forwarded
+      to 45839102, both clones' clean-m1 promoted

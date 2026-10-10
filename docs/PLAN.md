@@ -755,6 +755,18 @@ it carries a HYPOTHESIS tag.
      the observer's figure casting the spell sent; the victim's own engine
      applying none of a remote spell's damage (the server's OnSpellHit the
      one path); a spell hit starting a fight (ADR-023). Scenario `b-spell`.
+     DONE 2026-10-10: a stream counted by the time it held its target
+     (each hit the time since the last, at most 250 ms), a fire-and-forget
+     cast once, every hit within the spell's projectile range; the
+     caster's stop per hand from its own graph, the observer casting the
+     relayed spell. The lab found the "stream ends after a second" was the
+     draw (x-spell-time), that a figure's spell lands nothing on the player
+     it targets, so no second path and no suppression (x-spell-observe), and
+     that a bystander sees the figure's stream (x-spell-side). b-spell (thuum
+     9ed66b8, awaiting Eli's review) green twice, T2 green, and the merge
+     sweep on fork m2-spell 45839102 32 of 32 green with no rerun (runs
+     20261010-122057 to -134720); fork parity fast-forwarded to 45839102
+     and both clones' clean-m1 promoted.
   3. magic-effects: the server's effects from the records (MGEF read in
      full), magnitude and duration, persisted with their remaining time,
      sent to clients that show them and keep the engine's own application
