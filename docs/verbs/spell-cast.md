@@ -54,9 +54,12 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   target, `isDualCasting` from the hand's MagicCaster, a `castingSource`
   read from which of the caster's selectedSpells holds the spell
   (include/RE/A/Actor.h:143-150, :680), and the aim (Actor::GetAimAngle,
-  GetAimHeading, Actor.h:527-528). HYPOTHESIS until the lab: whether the
-  event fires at a fire-and-forget spell's release or at its charge's
-  start, which decides how long a recorded cast waits for its hit.
+  GetAimHeading, Actor.h:527-528). CONFIRMED for a stream (x-spell-time
+  20261010-105451): it fires once, about 300 ms after the hand's
+  MRh_SpellAimedConcentrationStart, when the stream begins and magicka
+  starts to fall (2068 ms after 1765, and 599 after 281). HYPOTHESIS until
+  the lab: whether it fires at a fire-and-forget spell's release or at its
+  charge's start, which decides how long a recorded cast waits for its hit.
 - The caster's state: MagicCaster (include/RE/M/MagicCaster.h:24-98):
   CastSpellImmediate(spell, noHitEffectArt, target, effectiveness,
   hostileEffectivenessOnly, magnitudeOverride, blameActor) (:46),
@@ -103,16 +106,22 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
      a spell's magnitude by them as their names say.
 - The hit report: skymp5-client hitService.ts:44-68 sends a spell's or a
   scroll's hit as OnHit (reliable), at most one per aggressor per 100 ms.
-  HYPOTHESIS until the lab: how often the caster's game reports a hit
-  while a concentration spell holds its target.
+  CONFIRMED for Flames (x-spell-time 20261010-105451): while the stream
+  holds its target, the caster's game reports hits in pairs, both within
+  2 ms, a pair every 200 ms or so (26 events over 2.63 s), and the
+  client's limit lets one of each pair through: 14 OnHit reached the
+  server over those 2.63 s.
 - The cast's end on the caster's side: magicSyncService.ts:71-92 sends the
-  stop only when an equip animation event (mlh_ or mrh_equipped_event,
-  :134-137) follows a cast, which a stream's release does not always
-  produce. HYPOTHESIS until the lab: the behavior graph variables that
-  mark a hand casting (IsCastingLeft, IsCastingRight, IsCastingDual are
-  the names to look for in the variables the client already captures,
-  MagicApi.cpp:191-223), so the end is read from the caster's state
-  rather than guessed from an animation event.
+  stop when an equip animation event (mlh_ or mrh_equipped_event,
+  :134-137) follows a cast. CONFIRMED (x-spell-time): the hand's
+  MRh_Equipped_Event is sent to the caster's graph at the stream's end,
+  at the key's release (3286 ms for a release at about 3281), and
+  IsCastingRight reads true from the stream's start to about 200 ms after
+  that event (1767 to 3466 ms, 282 to 3497). The event is the end to use;
+  the stop failed only on its lookup, which took the caster by its server
+  id and found no figure in its own game, so it read the variables of
+  form 0 and died (c1.log in x-spell-state 20261010-103607 and in
+  x-spell-time, once per stream).
 - The server today: OnSpellCast (skymp5-server ActionListener.cpp:
   2321-2405) refuses a dead caster and a spell not equipped (:2366),
   relays the client's message to the caster's neighbours unreliable
@@ -130,8 +139,9 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
-- Hook point: Skyrim Platform's `spellCast` for the start; the caster's
-  casting state, read each update, for the end (the HYPOTHESIS above).
+- Hook point: Skyrim Platform's `spellCast` for the start; the hand's
+  equipped event on the player's own graph (MLh_ or MRh_Equipped_Event,
+  the sendAnimationEvent hook filtered to the player) for the end.
 - SP filter: the client sends only its own player's and its hosted actors'
   casts (today it sends every caster's, which the server refuses).
 - Data captured: caster, target, spell, hand, dual cast, aim, the
@@ -201,9 +211,9 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
 
 - SP binding: Skyrim Platform's `castSpellImmediate` and `interruptCast`
   (MagicApi.cpp), changed for the suppression the lab picks.
-- TS handler: magicSyncService.ts (its own and hosted casters only; the
-  end from the casting state); remoteServer.ts (the message's spell and
-  hand).
+- TS handler: magicSyncService.ts (a stop for each hand of the player's
+  own casts, read from its own graph; fork 5ea5468a); remoteServer.ts (the
+  message's spell and hand; 5ea5468a).
 - Kill switch config key: `spellSync` under skymp5-client's settings.
 
 ## Tests
@@ -253,7 +263,8 @@ Right Attack held 3 s, c1's game reported six hits on c2, one every
 48 in all: Flames' magnitude, which the record gives per second, taken
 per report, five times over (the hit cadence, measured once). The stream
 ended after about a second on c1's own screen though the key stayed down
-(its screenshot at 1.5 s shows only the ready glow; HYPOTHESIS: why), and
+(its screenshot at 1.5 s shows only the ready glow; explained by
+x-spell-time below: the draw), and
 c2's screen showed the figure with the same glow and no stream at 1.5 s
 and after. c2's game read 0.5706 health 4.5 s after the release and
 0.5986 five seconds later; the server's own number then was not
@@ -264,7 +275,7 @@ server logs nothing for a cast it takes.
 Second run, x-spell-probe2 20261009-233645, the same steps: six hits of
 8 again over one second (40 a second for a spell the record gives 8 a
 second), and again nothing after it though the key stayed down for 3 s
-(HYPOTHESIS still: why the stream ends). Read together right after the
+(explained by x-spell-time below: the draw). Read together right after the
 stream, the server had c2 at 0.555 and c2's own game at 0.5571; three
 seconds later 0.562 and 0.5721: c2's game is not below the server's
 number, so no second path shows, though no screenshot has yet caught the
@@ -280,6 +291,29 @@ caster's client drops its own echo: remoteServer.ts:952 looks the caster
 up as a figure, and the player's own form has no figure unless the debug
 setting show-me is on (formViewArray.ts:43, :82, :98-105), so the lookup
 answers 0 and the handler returns.
+
+Third run, x-spell-state 20261010-103607 (the graph-vars step): its
+screenshot steps took 3.2 s and 2.3 s, so both landed after the key's
+release, and the four graph variables read false at every read; the
+magicSyncService stop died at 10:38:06.34 (c1.log), reading form 0's
+variables.
+
+Fourth run, x-spell-time 20261010-105451 (the watch's self record, thuum
+95559aa: c1's magicka and the animation events sent to its graph, stamped
+in ms): the early end is the draw. Alone, with its hands sheathed, c1's
+key press first drew them (Magic_Equip at 256 ms) and the stream began
+only at 1765 ms, so 1.5 s of the 3 s hold went to the draw; the hand
+returned to its equipped state at 3272 ms, the release. At c2 a moment
+later, hands drawn, the stream ran from 281 ms to 3286 ms, the whole
+hold, magicka falling the whole time (100 to 68.29, about 12 a second).
+Every earlier probe held from sheathed hands, and graph-vars read during
+the draw. The current server (parity 7be31a9d) counted 8 for each of the
+14 OnHit, 112 against c2's 90: c2 died in its own game (Ragdoll at 2719
+ms). c2's own health fell only in the server's steps of 8 and rose by
+regeneration between them, with no fall between, so no second path shows
+again; whether c1's figure streams at all in c2's game is still open (the
+observer casts its figure's equipped spell, remoteServer.ts:948-974, and
+the watch did not yet record hits taken).
 
 ## Status
 
@@ -298,14 +332,18 @@ the validator and the cast budget; c36d27fd the server (StartCast from the
 records, a stop that needs no equipped spell, both relayed reliably; spell
 hits claimed or refused, E_SPELL_NO_CAST and E_SPELL_RANGE, the damage
 scaled by the claim, a fight begun; a departing caster's streams end) and
-SpellCastTest. Left: the client (the caster's stop from its casting state,
-the observer casting the message's spell, the suppression), T2, the lab.
+SpellCastTest (fork pipeline 1140 green); 5ea5468a the client (a stop for
+each hand of the player's own casts, from its own graph; the observer
+casts the relayed spell); 0fe3e6dc the difftest session. Left: the
+suppression, if the observer's game shows a second path once its figure
+casts the relayed spell; T2; the lab.
 
 - [x] doc complete, rung declared
-- [x] engine surface cited or delegated (cited; five HYPOTHESIS tags for
-      the lab: the event's timing, a stream's hit cadence, the casting
-      state's names, the double damage, the suppression)
-- [ ] server logic + T0 (fork c36d27fd; its pipeline)
+- [x] engine surface cited or delegated (cited; HYPOTHESIS tags left for
+      the lab: a fire-and-forget cast's event timing, the double damage,
+      the suppression; the stream's event timing, its hit cadence and the
+      casting state CONFIRMED by x-spell-time)
+- [x] server logic + T0 (fork c36d27fd, pipeline 1140)
 - [x] message + validator (no new message; the validator's bounds and the
       cast budget, ba22a406)
 - [ ] native hook + T1
