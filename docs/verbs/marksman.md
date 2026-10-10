@@ -78,9 +78,14 @@ a rate budget (none today).
     multiplier, before armor and perks (ID 26410); the hit (ID 44002)
     reads the carried damage and never the power. The server's TES5
     formula takes the bow's and the arrow's damage, and the claimed
-    shot's power is its factor. HYPOTHESIS until a lab read of the
-    engine's own damage at two draws (x-bow-damage: the shooter's game
-    shows it on the figure for a frame before the server's number).
+    shot's power is its factor. CONFIRMED by the engine's own damage, read
+    on the figure in the shooter's game for the frame before the server's
+    number arrives (the driver's watch, thuum 24a1018): 12.06 at a full
+    draw and 4.19 at 0.35, twice each (x-bow-damage 20261010-075635,
+    x-bow-damage2 20261010-081840), a ratio of 0.347. The server's TES5
+    formula gives 12.992 for the same full-draw hit, the game 12.06: the
+    formula's fidelity (armor, skill) is its own question, not this
+    verb's; the power factor matches.
   - The speed: PROJ speed x a power factor (fArrowMinVelocity, 0.2, at
     fArrowMinPower, rising linearly to 1.0) x a bow factor (at most 1) x
     speedMult (ID 44139), plus the player's own horizontal speed at
@@ -269,7 +274,9 @@ resent shot's case); 451b2c34 the difftest session marksman; 50d4c391 the
 server logs each weapon hit's damage at info; 333b2f8f a hit counts at its
 shot's draw power (the ranged rule keeps it, OnWeaponHit takes it as the
 damage's factor); 5bc11086 LaunchArrow gives the figure's arrow the
-shooter's power.
+shooter's power; 7be31a9d a hit claims the newest shot its arrow can have
+come from (b-marksman 20261010-082114: a half draw's hit claimed an older
+full-draw shot that had missed, and counted full).
 
 Lab (2026-10-09, the client from Windows run 37995524437 on 9a376816):
 x-marksman-probe 20261009-224923: c1's shot reached the server at full
