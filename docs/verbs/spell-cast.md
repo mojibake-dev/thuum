@@ -166,10 +166,12 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
 - SpellCast (MsgType 23), both directions, unchanged fields (caster,
   target, spell, isDualCasting, interruptCast, castingSource, aimAngle,
   aimHeading, actorAnimationVariables).
-- Validator rules (new): castingSource within 0 to 3; aimAngle finite and
-  within plus or minus a quarter turn; aimHeading finite; spell not 0; a
-  cast budget per client (bursts of dual casting and quick fire-and-forget
-  casts; the numbers measured in the lab, then fixed in wire-validate).
+- Validator rules (new, fork ba22a406): castingSource within 0 to 3;
+  aimAngle finite and within plus or minus a quarter turn; every float
+  finite; spell not 0; a cast budget per client, eight at once and four a
+  second after (a cast charges first, Firebolt's SPIT charge time being
+  half a second, and a stream's start and end are two messages from up to
+  two hands), to be checked against the lab's casting.
 - The server's relay: reliable (it is the start and the end of what every
   screen shows), and its own end of a cast is the same message with
   interruptCast set.
@@ -281,12 +283,31 @@ answers 0 and the handler returns.
 
 ## Status
 
+Building on fork branch m2-spell, stacked on m2-marksman 7be31a9d
+(2026-10-10): d39afaa2 the casts rule (wire-rules casts: a fire-and-forget
+cast covers its first hit and an area spell's further targets within the
+splash window, once each; a stream is open from its start to its end, a new
+cast in that hand or the caster's departure, and each hit counts the time
+since the stream's last counted one, at most 250 ms; every hit within the
+spell's reach; the newest cast first), bridged as SpellCasts; 46c6558a
+libespm reads a magic effect's projectile and a projectile's range (UESP's
+MGEF and PROJ layouts; the masters scanned with lab/esm.py: projectile
+speeds reach 99999 units a second for missiles and 90000 for beams, so a
+spell's hit is bounded by its projectile's range, not by time); ba22a406
+the validator and the cast budget; c36d27fd the server (StartCast from the
+records, a stop that needs no equipped spell, both relayed reliably; spell
+hits claimed or refused, E_SPELL_NO_CAST and E_SPELL_RANGE, the damage
+scaled by the claim, a fight begun; a departing caster's streams end) and
+SpellCastTest. Left: the client (the caster's stop from its casting state,
+the observer casting the message's spell, the suppression), T2, the lab.
+
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (cited; five HYPOTHESIS tags for
       the lab: the event's timing, a stream's hit cadence, the casting
       state's names, the double damage, the suppression)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [ ] server logic + T0 (fork c36d27fd; its pipeline)
+- [x] message + validator (no new message; the validator's bounds and the
+      cast budget, ba22a406)
 - [ ] native hook + T1
 - [ ] TS handler
 - [ ] T2 green
