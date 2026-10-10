@@ -259,6 +259,26 @@ recorded, so the double damage is still open (the next run asserts it
 right after the stream, and screenshots both seats half a second in). The
 server logs nothing for a cast it takes.
 
+Second run, x-spell-probe2 20261009-233645, the same steps: six hits of
+8 again over one second (40 a second for a spell the record gives 8 a
+second), and again nothing after it though the key stayed down for 3 s
+(HYPOTHESIS still: why the stream ends). Read together right after the
+stream, the server had c2 at 0.555 and c2's own game at 0.5571; three
+seconds later 0.562 and 0.5721: c2's game is not below the server's
+number, so no second path shows, though no screenshot has yet caught the
+figure's stream (c2's at 0.6 s shows the figure's hand glowing, before
+the first hit), so whether the figure streams at all in the observer's
+game is still open. Screenshot steps take about a second each through
+the guest agent, too slow to time against a one-second stream.
+
+Ruled out for the early end (2026-10-09, reading the code): the server's
+relay reaches the caster too, since every actor listens to itself
+(MpObjectReference.cpp:713-722, "Self-subscription is OK"), but the
+caster's client drops its own echo: remoteServer.ts:952 looks the caster
+up as a figure, and the player's own form has no figure unless the debug
+setting show-me is on (formViewArray.ts:43, :82, :98-105), so the lookup
+answers 0 and the handler returns.
+
 ## Status
 
 - [x] doc complete, rung declared
