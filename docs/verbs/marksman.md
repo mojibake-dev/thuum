@@ -306,8 +306,14 @@ was clean: a watch item.
       identical up to their declarations, the marksman session with its
       ten (the ArrowShot relay, the hit with the arrow's damage, the second
       hit and the unheld bow's shot refused)
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-marksman-probe green, then
-      b-marksman)
+- [x] T3 scenario green, no HYPOTHESIS tags: b-marksman (thuum 773716b,
+      awaiting Eli's review) green twice on fork 7be31a9d (runs
+      20261010-084704 and -084949); the two engine HYPOTHESIS tags cleared
+      (a figure's arrow deals nothing in the observer's game, x-b-marksman
+      20261009-233002; the draw's power, x-bow-damage and x-bow-damage2).
+      Merged 2026-10-10: the sweep on 7be31a9d went 31 of 31 green with no
+      rerun (runs 20261010-090810 to -102926), fork parity fast-forwarded to
+      7be31a9d and both clones' clean-m1 promoted
 - [x] ledger and suppression registry updated: TESModPlatform.LaunchArrow
       in NATIVES.md, client only, R3 (the arrow is that game's picture of
       a shot the server took); no server native

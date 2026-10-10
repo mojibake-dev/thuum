@@ -741,7 +741,16 @@ it carries a HYPOTHESIS tag.
      hit against a shot (one hit per arrow, within its flight), the arrow's
      damage counted; the health percentage against the recorded maximum
      and the hit messages' rate budget with it, as the first damage verb.
-     Scenario `b-marksman`. Headshot Kills rides it (stretch).
+     Scenario `b-marksman`. Headshot Kills rides it (stretch). DONE
+     2026-10-10: with the draw's power as the game has it (the re-analyst's
+     read of Projectile::Launch, the lab's measurements: a hit counts at its
+     shot's power, an observer's arrow flies at it), b-marksman (thuum
+     773716b, awaiting Eli's review) green twice, T2 green, and the merge
+     sweep on fork m2-marksman 7be31a9d 31 of 31 green with no rerun (runs
+     20261010-090810 to -102926); fork parity fast-forwarded to 7be31a9d and
+     both clones' clean-m1 promoted. Eli's rotfern bow quirk is her
+     first-person launch point (her third-person shots land), the mod's to
+     fix (docs/verbs/marksman.md).
   2. spell-cast: a cast's start and end as server state, relayed reliably,
      the observer's figure casting the spell sent; the victim's own engine
      applying none of a remote spell's damage (the server's OnSpellHit the
