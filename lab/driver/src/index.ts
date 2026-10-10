@@ -159,7 +159,27 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 // ChangeValues sets it (thuum docs/verbs/marksman.md, the draw's power)
 type Watched = { name: string; first: number[]; last: number[]; maxDisplacement: number; samples: number; health: number[][] };
 const WATCH_HEALTH_MAX = 64;
-let watching: { startedAt: number; actors: Map<number, Watched> } | null = null;
+// self: the player's own side over the same span, for how long a held
+// stream flows (thuum docs/verbs/spell-cast.md; screenshots take one to
+// three seconds each through the guest agent, too slow to time it): its
+// magicka and health [ms, value] on a change at most every WATCH_SELF_MS
+// (a figure's spell hurting this player in its own game shows in health), each
+// animation event sent to its graph [ms, name] (a hook on the player alone,
+// rule 9, added at watch-start and removed at watch-stop: the names are what
+// the watch is for, so no pattern), each spell it cast and each hit it dealt
+// as the engine's events report them, and the graph variables watch-start
+// names (args.bools) [ms, value] on each change
+type WatchedSelf = {
+  magicka: number[][];
+  health: number[][];
+  events: Array<[number, string]>;
+  casts: Array<[number, number]>;
+  hits: Array<[number, number, number]>;
+  bools: Record<string, Array<[number, boolean]>>;
+};
+const WATCH_SELF_MAX = 256;
+const WATCH_SELF_MS = 50;
+let watching: { startedAt: number; actors: Map<number, Watched>; self: WatchedSelf; hookId: number } | null = null;
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -345,7 +365,41 @@ function trackWatch(): void {
       w.health.push([Date.now() - (watching ? watching.startedAt : 0), health]);
     }
   });
+  const me = Game.getPlayer();
+  if (!me) return;
+  const s = watching.self;
+  const ms = Date.now() - watching.startedAt;
+  for (const [av, seen] of [["magicka", s.magicka], ["health", s.health]] as Array<[string, number[][]]>) {
+    const value = me.getActorValue(av);
+    const last = seen[seen.length - 1];
+    if (value !== last[1] && ms - last[0] >= WATCH_SELF_MS && seen.length < WATCH_SELF_MAX) seen.push([ms, value]);
+  }
+  for (const name of Object.keys(s.bools)) {
+    const seen = s.bools[name];
+    const value = me.getAnimationVariableBool(name);
+    if ((seen.length === 0 || seen[seen.length - 1][1] !== value) && seen.length < WATCH_SELF_MAX) {
+      seen.push([ms, value]);
+    }
+  }
 }
+
+function watchedMs(): number {
+  return watching ? Date.now() - watching.startedAt : 0;
+}
+
+on("spellCast", (e) => {
+  if (!watching || !e.caster || e.caster.getFormID() !== 0x14) return;
+  if (watching.self.casts.length < WATCH_SELF_MAX) {
+    watching.self.casts.push([watchedMs(), e.spell ? e.spell.getFormID() : 0]);
+  }
+});
+
+on("hit", (e) => {
+  if (!watching || !e.aggressor || e.aggressor.getFormID() !== 0x14) return;
+  if (watching.self.hits.length < WATCH_SELF_MAX) {
+    watching.self.hits.push([watchedMs(), e.target ? e.target.getFormID() : 0, e.source ? e.source.getFormID() : 0]);
+  }
+});
 
 // Every menu CommonLibSSE-NG names (the MENU_NAME constants under
 // include/RE), so dump-state can say which are open when a player cannot act.
@@ -1148,16 +1202,29 @@ function run(step: Step, player: Actor): unknown {
         const pos = positionOf(other);
         actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, health: [[0, other.getActorValue("health")]] });
       }
-      watching = { startedAt: Date.now(), actors };
+      if (watching) hooks.sendAnimationEvent.remove(watching.hookId);
+      const self: WatchedSelf = { magicka: [[0, player.getActorValue("magicka")]], health: [[0, player.getActorValue("health")]], events: [], casts: [], hits: [], bools: {} };
+      const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
+      for (const n of bools) self.bools[n] = [];
+      const hookId = hooks.sendAnimationEvent.add({
+        enter: (ctx) => {
+          if (watching && watching.self.events.length < WATCH_SELF_MAX) watching.self.events.push([watchedMs(), ctx.animEventName]);
+        },
+        leave: () => {},
+      }, 0x14, 0x14);
+      watching = { startedAt: Date.now(), actors, self, hookId };
       return { watching: actors.size };
     }
     case "watch-stop": {
       if (!watching) return { error: "no watch-start before watch-stop" };
       const w = watching;
       watching = null;
+      hooks.sendAnimationEvent.remove(w.hookId);
+      w.self.magicka.push([Date.now() - w.startedAt, player.getActorValue("magicka")]);
+      w.self.health.push([Date.now() - w.startedAt, player.getActorValue("health")]);
       const actors: Array<Watched & { formId: number }> = [];
       w.actors.forEach((v, formId) => actors.push({ formId, ...v }));
-      return { seconds: (Date.now() - w.startedAt) / 1000, actors };
+      return { seconds: (Date.now() - w.startedAt) / 1000, actors, self: w.self };
     }
     case "equip": {
       const item = Game.getFormEx(num(a.formId));
