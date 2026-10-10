@@ -362,20 +362,34 @@ hits claimed or refused, E_SPELL_NO_CAST and E_SPELL_RANGE, the damage
 scaled by the claim, a fight begun; a departing caster's streams end) and
 SpellCastTest (fork pipeline 1140 green); 5ea5468a the client (a stop for
 each hand of the player's own casts, from its own graph; the observer
-casts the relayed spell); 0fe3e6dc the difftest session. Left: the
-suppression, if the observer's game shows a second path once its figure
-casts the relayed spell; T2; the lab.
+casts the relayed spell); 0fe3e6dc, 3aef8c78 and 98c7a478 the difftest
+session and its declarations; 45839102 kTouchReach's comment. The lab
+tooling beside it, in thuum: the watch's self record and each watched
+actor's magicka (95559aa, d6a4181, 35b4ef6), c.watched's drainMs and
+drainEndMs (42aa735), labCommand learn-spell (47dace4). Left: the merge
+sweep (ADR-024).
 
 - [x] doc complete, rung declared
-- [x] engine surface cited or delegated (cited; HYPOTHESIS tags left for
-      the lab: a fire-and-forget cast's event timing, the double damage,
-      the suppression; the stream's event timing, its hit cadence and the
-      casting state CONFIRMED by x-spell-time)
+- [x] engine surface cited or delegated (cited; every tag the lab could
+      settle settled: the cast event's timing for a stream and a
+      fire-and-forget spell, the hit cadence and the casting state by
+      x-spell-time and x-spell-observe; the double damage MEASURED absent;
+      the suppression not needed for players)
 - [x] server logic + T0 (fork c36d27fd, pipeline 1140)
 - [x] message + validator (no new message; the validator's bounds and the
       cast budget, ba22a406)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] native hook + T1: no new native (Skyrim Platform's castSpellImmediate
+      and interruptCast, MagicApi.cpp, as they are); T1 none
+- [x] TS handler (5ea5468a; x-spell-observe 20261010-114556: the stop
+      reaches the observer, whose figure's stream ends about 250 ms after
+      the caster's)
+- [x] T2 green (2026-10-10 on fork 98c7a478: all 18 sessions identical up
+      to their declarations, spell-cast's ten)
+- [x] T3 scenario green, no HYPOTHESIS tags: b-spell (thuum 9ed66b8,
+      awaiting Eli's review) green twice (runs 20261010-121505 and
+      -121750)
+- [x] ledger and suppression registry updated: no native added; no
+      suppression for players (a figure's spell lands nothing on the player
+      it targets, MEASURED), three untested candidates kept for the NPC
+      milestone
+- [ ] merged: the sweep on fork m2-spell
