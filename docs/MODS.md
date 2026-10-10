@@ -115,6 +115,55 @@ What it needs from thuum:
   Math.Sin, Cos, Abs and Tan never reach docs/NATIVES.md. lab/ledger.py has to
   take Math from the Papyrus sources.
 
+### Four spells, read for M2 (2026-10-10)
+
+Eli asked about Mark/Recall, Blink and the wall spell. Read from the 10.2.3
+archive (md5 above; the ESP is not localized) and its 206 .pex scripts, by
+a subagent of the main session. 10.2.3 has no Mark/Recall and no Blink: no
+spell, effect or book carries either name, nor do the Nexus changelogs from
+9.16 to 10.3.0. Unused leftovers of an old Mark and Recall remain (KYWD
+0300E1CD, MESG 0304F4CE and 0304F4CF, "Mark created.", "Recalled to mark.").
+
+- **Raise Wall**, SPEL 0300CC14 (concentration, self). Its effect (MGEF
+  0309852E, Script archetype) applies only when the caster's game finds
+  room ahead (condition GetVATSFrontAreaFree >= 300, an engine geometry
+  query); script WB_FabricateWall_Script places the wall (MSTT 03098529,
+  1470 x 102 x 262 units, a real collision body on the AnimStatic layer,
+  navmesh obstacle flag) 192 units ahead, starting 288 below the ground,
+  raises it with TranslateToRef at speed 512, sets off EXPL 0300C145 there
+  (no damage, knock-down), and on the stream's end fades it out and deletes
+  it after 5 s. Nothing persists between casts. Missing natives:
+  GetAngleZ, Math.Sin, Math.Cos, TranslateTo (TranslateToRef reaches
+  GetAngleX and GetAngleY too).
+- **Milestones**, SPEL 030A59D5, the nearest thing to Mark/Recall: five
+  anchors (ACTI 030AD577, REFR 030AE5C6 to 030AE5CA, parked in CELL
+  030ABFCD) that a player moves into the world and teleports between
+  (Player.MoveTo, across cells), held by QUST 030AE5CB's aliases and five
+  globals (GLOB 030AE5D2 to 030AE5D6). Placing goes through an explosion
+  (EXPL 030AEB3C) that drops a spawner activator whose OnLoad shows a menu;
+  using is the anchor's OnActivate menu. One set for the whole world.
+  Missing natives: GlobalVariable.GetValue and SetValue,
+  ReferenceAlias.GetReference, GetAngleZ.
+- **Ghostwalk**, SPEL 0300AAE8: 10 s of invisibility (Invisibility
+  archetype), then SetPosition back to where it was cast (same cell).
+  Missing: GetCurrentLocation, Location.HasCommonParent,
+  ImageSpaceModifier.Apply, CreateDetectionEvent, RegisterForSingleUpdate,
+  and Actor.QueueNiNodeUpdate (SKSE, a visual refresh).
+- **No Blink.** The nearest: Shadowbond (SPEL 03031C4D, swaps caster and
+  target through MoveTo), Cyclonic Rift (SPEL 0302D068, two persistent
+  portals moved out of the same holding cell, a global choosing which) and
+  Rift Bolt (SPEL 030253C2, slides the target 150 units back with
+  TranslateTo).
+
+What the fork does with them today (code read, not lab-tested): PlaceAtMe
+of an explosion only reaches the clients (PapyrusObjectReference.cpp:380),
+so explosion-placed spawners never exist on the server; MoveTo on a
+non-actor sets a new position that nearby clients may not see until it
+changes grid cell (MpObjectReference.cpp:536); Message.Show takes the
+client's button unvalidated (PapyrusMessage.cpp:3); and no effect script
+runs on the server yet (docs/verbs/magic-effects.md leaves scripted effects
+for a later slice).
+
 ## Headshot Kills - CIF
 
 What it is:
