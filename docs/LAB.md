@@ -403,9 +403,10 @@ until watch-stop, and reports how far each got from where it began; for
 "the observer never saw X" checks that one dump-state would sample too
 late; its `self` is the player's own side over the same span, for timing
 what a screenshot is too slow to catch: magicka and health on each change,
-each animation event sent to the player's graph, each spell it cast and hit
-it dealt, and the graph variables watch-start's {bools} names, each stamped
-in ms since watch-start), settings {ini: [...], gmst: [...], gmstInt: [...]} (the running game's own
+each animation event sent to the player's graph, each spell it cast, each
+hit it dealt and took, each magic effect applied to it, and the graph
+variables watch-start's {bools} names, each stamped in ms since
+watch-start), settings {ini: [...], gmst: [...], gmstInt: [...]} (the running game's own
 values of named INI settings and game settings, through Papyrus, recorded
 in the step's note), and console {text} (a line typed into the game's own
 console the way a player types it: the grave key opens it, one DirectInput

@@ -166,15 +166,20 @@ const WATCH_HEALTH_MAX = 64;
 // (a figure's spell hurting this player in its own game shows in health), each
 // animation event sent to its graph [ms, name] (a hook on the player alone,
 // rule 9, added at watch-start and removed at watch-stop: the names are what
-// the watch is for, so no pattern), each spell it cast and each hit it dealt
-// as the engine's events report them, and the graph variables watch-start
-// names (args.bools) [ms, value] on each change
+// the watch is for, so no pattern), each spell it cast, each hit it dealt
+// and each hit it took [ms, the other actor, source], and each magic effect
+// applied to it [ms, caster, effect], as the engine's events report them
+// (whether a figure's spell reaches this player in this game at all), and
+// the graph variables watch-start names (args.bools) [ms, value] on each
+// change
 type WatchedSelf = {
   magicka: number[][];
   health: number[][];
   events: Array<[number, string]>;
   casts: Array<[number, number]>;
   hits: Array<[number, number, number]>;
+  taken: Array<[number, number, number]>;
+  effects: Array<[number, number, number]>;
   bools: Record<string, Array<[number, boolean]>>;
 };
 const WATCH_SELF_MAX = 256;
@@ -395,9 +400,20 @@ on("spellCast", (e) => {
 });
 
 on("hit", (e) => {
-  if (!watching || !e.aggressor || e.aggressor.getFormID() !== 0x14) return;
-  if (watching.self.hits.length < WATCH_SELF_MAX) {
-    watching.self.hits.push([watchedMs(), e.target ? e.target.getFormID() : 0, e.source ? e.source.getFormID() : 0]);
+  if (!watching) return;
+  const source = e.source ? e.source.getFormID() : 0;
+  if (e.aggressor && e.aggressor.getFormID() === 0x14 && watching.self.hits.length < WATCH_SELF_MAX) {
+    watching.self.hits.push([watchedMs(), e.target ? e.target.getFormID() : 0, source]);
+  }
+  if (e.target && e.target.getFormID() === 0x14 && watching.self.taken.length < WATCH_SELF_MAX) {
+    watching.self.taken.push([watchedMs(), e.aggressor ? e.aggressor.getFormID() : 0, source]);
+  }
+});
+
+on("magicEffectApply", (e) => {
+  if (!watching || !e.target || e.target.getFormID() !== 0x14) return;
+  if (watching.self.effects.length < WATCH_SELF_MAX) {
+    watching.self.effects.push([watchedMs(), e.caster ? e.caster.getFormID() : 0, e.effect ? e.effect.getFormID() : 0]);
   }
 });
 
@@ -1203,7 +1219,7 @@ function run(step: Step, player: Actor): unknown {
         actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, health: [[0, other.getActorValue("health")]] });
       }
       if (watching) hooks.sendAnimationEvent.remove(watching.hookId);
-      const self: WatchedSelf = { magicka: [[0, player.getActorValue("magicka")]], health: [[0, player.getActorValue("health")]], events: [], casts: [], hits: [], bools: {} };
+      const self: WatchedSelf = { magicka: [[0, player.getActorValue("magicka")]], health: [[0, player.getActorValue("health")]], events: [], casts: [], hits: [], taken: [], effects: [], bools: {} };
       const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
       for (const n of bools) self.bools[n] = [];
       const hookId = hooks.sendAnimationEvent.add({
