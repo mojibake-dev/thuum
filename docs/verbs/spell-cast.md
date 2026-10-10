@@ -57,9 +57,14 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   GetAimHeading, Actor.h:527-528). CONFIRMED for a stream (x-spell-time
   20261010-105451): it fires once, about 300 ms after the hand's
   MRh_SpellAimedConcentrationStart, when the stream begins and magicka
-  starts to fall (2068 ms after 1765, and 599 after 281). HYPOTHESIS until
-  the lab: whether it fires at a fire-and-forget spell's release or at its
-  charge's start, which decides how long a recorded cast waits for its hit.
+  starts to fall (2068 ms after 1765, and 599 after 281). CONFIRMED for a
+  fire-and-forget spell (x-spell-observe 20261010-114556, Firebolt): it
+  fires at the release, about 200 ms after the hand's
+  MRh_SpellRelease_Event (1939 ms after 1739; the charge's
+  MRh_SpellAimedStart at 250 and MRh_SpellReady_Event at 766, Firebolt's
+  half second), and the bolt's hit followed 64 ms later; the magicka goes
+  during the charge. So a recorded cast waits for its hit no longer than
+  its projectile's flight.
 - The caster's state: MagicCaster (include/RE/M/MagicCaster.h:24-98):
   CastSpellImmediate(spell, noHitEffectArt, target, effectiveness,
   hostileEffectivenessOnly, magnitudeOverride, blameActor) (:46),
@@ -87,11 +92,20 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   never runs dry: playtest six's Flames.
 - What a figure's spell does in the observer's game: a figure deals no
   weapon damage there (formView.ts:288, attackDamageMult 0); nothing does
-  the same for its spells, so a remote spell's effects land on the
-  observer's own player by its own engine, while the caster's hit report
-  reaches the server's OnSpellHit as well (ADR-028's context: possibly
-  twice, unmeasured). The suppression has three candidates, each a
-  HYPOTHESIS for the lab:
+  the same for its spells. MEASURED (x-spell-observe 20261010-114556):
+  on the player it targets, nothing lands. c2's watch recorded no hit
+  taken and no magic effect applied while c1's figure streamed Flames at
+  it for 5.7 s and cast Firebolt at it once, and c2's health moved only by
+  the server's steps (1.6 each 200 ms, then 25.8 once). In the code, the
+  cast message names its target by server id, and remoteServer.ts:952's
+  lookup answers 0 for a player's own id, as for the caster's echo below;
+  what the engine then does with a cast at form 0 was not measured and
+  the verb does not rest on it.
+  A bystander sees the stream (x-spell-side 20261010-115131: c2 off the
+  line saw c1's figure's Flames across its view). An NPC the observer
+  hosts is the NPC milestone's: a figure's spell can land on it in the
+  host's game, whose report of its health would count beside the server's
+  (ADR-028). For that milestone, three untested suppression candidates:
   1. launch a fire-and-forget spell's projectile without its spell
      (Projectile::LaunchData from the projectile alone,
      include/RE/P/Projectile.h:76, src/RE/P/Projectile.cpp:179-211): its
@@ -157,19 +171,25 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   until the server relays its end, which the server also sends when it
   closes the cast itself (the caster's death or departure, a new cast in
   that hand).
-- Visual without simulation: the suppression candidate the lab confirms.
-- Side effects: HYPOTHESIS (the hit art and sound on the observer's
-  player when the figure's spell reaches it).
+- Visual without simulation: the figure's cast, which lands nothing on
+  the player it targets (MEASURED above) and shows to bystanders; its
+  stream runs from the relayed start to the relayed end, about 250 ms
+  behind the caster's (x-spell-observe: the figure's magicka fell from
+  852 to 6582 ms in c2's game against c1's stream from 584 to 6267;
+  x-spell-side: 819 to 8495 against c1's end at 8259).
+- Side effects: the target sees no flame and no burning on itself, since
+  nothing lands there (a T4 question: whether being flamed should show).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
-- What is suppressed: the effects of a figure's spell in the observer's
-  game, on anything it reaches (the observer's player first).
-- How: the candidate the lab confirms (above); nothing new on the
-  caster's own game, whose spell's effects on others are replaced by the
-  server's damage.
+- What is suppressed: nothing new for players: a figure's spell lands
+  nothing on the player it targets (MEASURED, above); the caster's own
+  game's effects on a figure are that figure's, which the server's
+  ChangeValues overwrite (a figure holds a million health, formView.ts).
+- How: the target lookup as it stands; the candidates above wait for the
+  NPC milestone, where a host's NPCs can be a figure's targets.
 - Release condition: none (a figure is never this game's to simulate).
-- Side effects: HYPOTHESIS.
+- Side effects: none measured.
 
 ## Message contract
 
@@ -200,6 +220,14 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   OnSpellHit claims or refuses (logged E_SPELL_NO_CAST, E_SPELL_RANGE),
   computes the damage from the record and begins a fight (ADR-023,
   NotifyHostility).
+- A hit's reach is the longest range among the spell's effects'
+  projectiles (MGEF DATA 0x48, PROJ DATA 0x0C), with 256 units of slack. A
+  spell that launches none reaches 512 units (PartOne.cpp kTouchReach), a
+  chosen bound, unmeasured: in the five masters every hostile spell
+  delivered by touch or at a target actor is, by its editor id, a
+  creature's attack, a trap's, a perk's, an enchantment's or a daedra
+  banishing's, none cast from a player's hand (2026-10-10 scan of SPEL
+  SPIT delivery 1 and 3), so the bound is for mods'.
 - DB fields / migration: none (casts are runtime state).
 - Restart behavior: none (an open cast ends with the caster's session).
 - Papyrus natives touched: none new on the server (OnSpellCast and OnHit
