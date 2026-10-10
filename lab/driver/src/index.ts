@@ -156,8 +156,12 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 // health: each change of the actor's current health this game saw, [ms
 // since watch-start, value] (at most WATCH_HEALTH_MAX): the engine's own
 // damage to a figure shows for a frame or so before the server's
-// ChangeValues sets it (thuum docs/verbs/marksman.md, the draw's power)
-type Watched = { name: string; first: number[]; last: number[]; maxDisplacement: number; samples: number; health: number[][] };
+// ChangeValues sets it (thuum docs/verbs/marksman.md, the draw's power).
+// magicka: the same for its magicka, on a change at most every
+// WATCH_SELF_MS (at most WATCH_SELF_MAX): a figure holds a million
+// (formView.ts) and a stream drains it, so a figure's falls while it
+// streams in this game (thuum docs/verbs/spell-cast.md)
+type Watched = { name: string; first: number[]; last: number[]; maxDisplacement: number; samples: number; health: number[][]; magicka: number[][] };
 const WATCH_HEALTH_MAX = 64;
 // self: the player's own side over the same span, for how long a held
 // stream flows (thuum docs/verbs/spell-cast.md; screenshots take one to
@@ -368,6 +372,12 @@ function trackWatch(): void {
     const lastHealth = w.health.length > 0 ? w.health[w.health.length - 1][1] : NaN;
     if (health !== lastHealth && w.health.length < WATCH_HEALTH_MAX) {
       w.health.push([Date.now() - (watching ? watching.startedAt : 0), health]);
+    }
+    const magicka = actor.getActorValue("magicka");
+    const lastMagicka = w.magicka[w.magicka.length - 1];
+    const ms = Date.now() - (watching ? watching.startedAt : 0);
+    if (magicka !== lastMagicka[1] && ms - lastMagicka[0] >= WATCH_SELF_MS && w.magicka.length < WATCH_SELF_MAX) {
+      w.magicka.push([ms, magicka]);
     }
   });
   const me = Game.getPlayer();
@@ -1216,7 +1226,7 @@ function run(step: Step, player: Actor): unknown {
       const actors = new Map<number, Watched>();
       for (const other of nearbyActors(player)) {
         const pos = positionOf(other);
-        actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, health: [[0, other.getActorValue("health")]] });
+        actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, health: [[0, other.getActorValue("health")]], magicka: [[0, other.getActorValue("magicka")]] });
       }
       if (watching) hooks.sendAnimationEvent.remove(watching.hookId);
       const self: WatchedSelf = { magicka: [[0, player.getActorValue("magicka")]], health: [[0, player.getActorValue("health")]], events: [], casts: [], hits: [], taken: [], effects: [], bools: {} };
