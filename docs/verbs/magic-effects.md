@@ -62,7 +62,10 @@ chug).
   0, flags 0x200805 (hostile, detrimental, a duration), shader
   ChaurusPoisonFXShader 0x10CC64; ShockDamageConcAimed 0x13CAB and
   FrostDamageConcAimed 0x13CAA archetype 5 (dual value modifier), Health
-  and Magicka, Health and Stamina; AlchParalysis 0x73F30 archetype 21. The
+  and Magicka, Health and Stamina, each second value's weight (0x3C) 1.0,
+  as UESP's Sparks page has it ("8 points of shock damage to Health and
+  Magicka per second", en.uesp.net/wiki/Skyrim:Sparks); AlchParalysis
+  0x73F30 archetype 21. The
   words at 0x78 and 0x7C (UESP's NullData; CommonLib's hit and enchant
   visuals sit there in memory) are 0 in every one of these. libespm reads
   the flags, the archetype, the primary actor value and, since spell-cast,
@@ -282,8 +285,26 @@ chug).
 
 ## Status
 
-Doc written 2026-10-10, before any code; fork branch m2-effects to stack on
-m2-spell once spell-cast merges.
+Doc written 2026-10-10, before any code. Building on fork branch
+m2-effects, stacked on m2-spell 45839102 (2026-10-10): 1d93a001 the effect
+rule (wire-rules magic: apply at a scale, advance, admit within 32, the
+Creation Kit wiki's archetype timing) and 868fa31d its bridge; 67de50ca
+libespm's MGEF second value, weight, hit shader and art; e2a43dbf the change
+form's running effects (FormDesc ids, seconds run); 6d51796c the actor runs
+them (ApplyEffects, AdvanceEffects on WorldState's quarter-second tick, the
+running buffs' sum on the maximum and the regeneration rates; tests); 6eb40440
+a drink through the rule, a poison no longer drunk, effects gated by
+conditions left out (libespm marks a CTDA after an EFIT); 70817737 the wire
+(MagicEffects, MsgType 43, schema 12, the validator, fixtures, the C++ and
+TypeScript messages); d6a0a1c4 the server sends it (on a change of the set,
+to a newcomer after the actor's creation); e67b2a83 the client shows each
+effect's hit shader for its seconds (MagicEffect.GetHitShader through Skyrim
+Platform, no new native), the figure's re-drink snippet gone; a3a4a5ec a
+spell's hit through the rule (SpellCastTest by the records' damage);
+fdda93fb the migration of the legacy per-AV effects (rule 6). Left: the
+poison on the weapon and its delivery by a hit (after x-poison-probe), the
+OnEquip budget and its reliability, the hit art (an ARTO: a client native if
+the lab wants it), T2, the probes, b-potion and b-magic-restart.
 
 - [x] doc complete, rung declared (R0, ADR-028)
 - [x] engine surface cited or delegated (cited: CommonLibSSE-NG, UESP's
