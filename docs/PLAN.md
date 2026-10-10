@@ -847,7 +847,13 @@ it carries a HYPOTHESIS tag.
   spraying on the observer's screen after the caster stops, damages the
   observer through the observer's own game, and starts no fight. The cast
   stop is not mirrored, and spell damage is the victim's client's today, not
-  the server's: both belong to this milestone's spell resolution.
+  the server's: both belong to this milestone's spell resolution. Settled by
+  spell-cast (DONE 2026-10-10): the stop was lost on the caster's own
+  lookup (fixed); a figure's spell lands nothing on the player it targets
+  (x-spell-observe 20261010-114556), so the damage was the old server
+  counting a whole second of Flames for each of five hit reports a second
+  (x-spell-probe), not the observer's own game; spell hits now begin a
+  fight (docs/verbs/spell-cast.md).
 - Exit: `b-duel` (server-authoritative damage between two players, effects
   visible to an observer), `b-magic-restart` (active effects survive a
   restart with remaining duration).
