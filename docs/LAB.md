@@ -461,6 +461,9 @@ save: after a reconnect an in-game client keeps its world and only moves
 its player (skymp5-client remoteServer.ts). Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
 server's verdicts on the client's race menu results), `server.inventory(c)`,
+`server.effects(c)` (the effects the server runs on the actor, by MGEF id:
+`left(id)` the seconds left and `magnitude(id)`, 0 when none runs;
+docs/verbs/magic-effects.md),
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
 dump's nearby actors matched to the server's position for `other`),
 `c.poison(<form id>)` (the poison on that item's stack in the client's

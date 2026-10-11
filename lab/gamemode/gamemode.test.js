@@ -37,6 +37,23 @@ test("labState actor and inventory", () => {
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "online" }), { players: [{ actorId: 0xff000001, profileId: 1 }] });
 });
 
+test("labState actor carries the server's running effects, null without the property", () => {
+  global.mp = fakeMp();
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const fortify = { effect: 0x3eaf3, source: 0xff9fc, magnitude: 100, secondsLeft: 27.5 };
+  mp.set(0xff000001, "runningEffects", [fortify]);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "actor", profileId: 1 }).effects, [fortify]);
+  const get = mp.get;
+  mp.get = (id, k) => {
+    if (k === "runningEffects") throw new Error("Property 'runningEffects' doesn't exist");
+    return get(id, k);
+  };
+  const actor = mp.onHttpRpcRunAttempt("labState", { kind: "actor", profileId: 1 });
+  assert.strictEqual(actor.found, true);
+  assert.strictEqual(actor.effects, null);
+});
+
 test("labState time is the server's clock, and absent without one", () => {
   global.mp = fakeMp();
   delete require.cache[require.resolve("./gamemode.js")];

@@ -35,6 +35,18 @@ function actorFor(profileId) {
   return ids.length ? ids[0] : null;
 }
 
+// The effects the server runs on an actor (mp.get's runningEffects, thuum
+// docs/verbs/magic-effects.md); null from a server without the property,
+// whose mp.get throws on the unknown name (CustomPropertyBinding)
+function runningEffects(actorId) {
+  try {
+    const effects = mp.get(actorId, "runningEffects");
+    return Array.isArray(effects) ? effects : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 function notFound(profileId) {
   return { found: false, profileId: Number(profileId) };
 }
@@ -84,6 +96,10 @@ const state = {
       healthPercentage: pct.health,
       magickaPercentage: pct.magicka,
       staminaPercentage: pct.stamina,
+      // the effects the server runs on the actor, each {effect, source,
+      // magnitude, secondsLeft} (docs/verbs/magic-effects.md); null from a
+      // server without the property
+      effects: runningEffects(actorId),
     };
   },
 

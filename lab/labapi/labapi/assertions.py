@@ -289,6 +289,34 @@ class InventoryView:
         return sum(int(e.get("count", 0)) for e in self.entries if int(e.get("baseId", -1)) == want)
 
 
+@dataclass(frozen=True)
+class EffectsView:
+    """server.effects(c): the effects the server runs on that client's actor
+    (labState's `effects`, the server's mp.get(actor, "runningEffects"),
+    thuum docs/verbs/magic-effects.md), each by its MGEF id: left(id) the
+    seconds the one of that effect with the most time has left, and
+    magnitude(id) its magnitude, both 0 when none runs."""
+
+    entries: tuple[dict[str, Any], ...]  # {"effect", "source", "magnitude", "secondsLeft"}
+    resolver: Any  # as InventoryView's
+
+    def _longest(self, spec: str) -> dict[str, Any] | None:
+        try:
+            want = int(self.resolver(spec))
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        found = [e for e in self.entries if int(e.get("effect", -1)) == want]
+        return max(found, key=lambda e: float(e.get("secondsLeft", 0))) if found else None
+
+    def left(self, spec: str) -> float:
+        e = self._longest(spec)
+        return float(e.get("secondsLeft", 0)) if e else 0.0
+
+    def magnitude(self, spec: str) -> float:
+        e = self._longest(spec)
+        return float(e.get("magnitude", 0)) if e else 0.0
+
+
 class _ServerRef:
     def __init__(self, facade: ServerFacade):
         self._f = facade
@@ -329,6 +357,15 @@ class _ServerRef:
         if entries is None:
             raise AssertionData(f"server has no inventory for {client}")
         return InventoryView(tuple(entries), self._f.base_id)
+
+    def effects(self, client: str) -> EffectsView:
+        d = self._f.actor(client)
+        if not d or not d.get("found", True):
+            raise AssertionData(f"server has no actor for {client}")
+        entries = d.get("effects")
+        if not isinstance(entries, list):
+            raise AssertionData(f"server reports no running effects for {client} (a server without magic-effects)")
+        return EffectsView(tuple(e for e in entries if isinstance(e, dict)), self._f.base_id)
 
 
 class _ClientRef:
@@ -689,9 +726,10 @@ _NULLARY = {
     _ClientRef: {"level", "node_scale", "morph", "head_parts"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "time"},
+    _ServerRef: {"actor", "inventory", "effects", "time"},
     _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
+    EffectsView: {"left", "magnitude"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,

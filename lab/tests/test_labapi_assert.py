@@ -67,6 +67,29 @@ class EvaluatorTests(unittest.TestCase):
             self.assertTrue(self.ev.evaluate(expr), expr)
         self.assertFalse(self.ev.evaluate("server.actor(c1).x == 12345"))
 
+    def test_the_server_s_running_effects_by_their_mgef(self):
+        from labapi.assertions import AssertionData
+
+        # FortifyHealth05's AlchFortifyHealth (Skyrim.esm 0x3EAF3), 100 with
+        # 27.5 s left, and an older 20 of it with 3 s
+        self.ev._server_facade.actors["c1"]["effects"] = [
+            {"effect": 0x3EAF3, "source": 0xFF9FC, "magnitude": 100.0, "secondsLeft": 27.5},
+            {"effect": 0x3EAF3, "source": 0x3EAF2, "magnitude": 20.0, "secondsLeft": 3.0},
+        ]
+        self.ev._server_facade.actors["c2"]["effects"] = []
+        for expr in [
+            'server.effects(c1).left("0x3eaf3") > 20',
+            'server.effects(c1).magnitude("0x3eaf3") == 100',
+            'server.effects(c1).left("0x3eb15") == 0',
+            'server.effects(c2).left("0x3eaf3") == 0',
+        ]:
+            self.assertTrue(self.ev.evaluate(expr), expr)
+        self.assertEqual(self.ev.readings["server.effects(c1).left('0x3eaf3')"], 27.5)
+        # a server without the property reports no list: a data error, not "none"
+        del self.ev._server_facade.actors["c2"]["effects"]
+        with self.assertRaises(AssertionData):
+            self.ev.evaluate('server.effects(c2).left("0x3eaf3") == 0')
+
     def test_the_game_clock_against_a_client_s_globals(self):
         from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
 
