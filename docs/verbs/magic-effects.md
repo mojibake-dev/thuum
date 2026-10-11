@@ -405,10 +405,32 @@ ARTO: a client native if a playtest wants it), the sweep.
       archetype rules; HYPOTHESIS for the lab: the per-second steps, the
       taper, the drinker's own engine agreeing with the server, the
       poison's hand and count, the shader on a figure, OnEquip's budget)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] server logic + T0 (MagicEffectsTest, SpellCastTest by the records'
+      damage, the migration's; the wall clock and the modifiers 72e48503,
+      5cbac803)
+- [x] message + validator (same commit): MagicEffects (MsgType 43) with its
+      validator; the modifiers (schema 13) with the validator's actor-value
+      bound (5cbac803)
+- [x] native hook + T1: the player's MagicTarget::AddTarget refusal of an
+      alchemy item's own effects (Hooks.cpp) and two TESModPlatform natives,
+      SetPotionEffectsBlocked and ModPlayerActorValue (a16232c0); T1 none
+- [x] TS handler: magicEffectsService.ts (the server's sums held, the
+      engine's drinks blocked; a reconnect forgets what the game held,
+      58cbf09d)
+- [x] T2 green (2026-10-10 on fork m2-god 6252f251, every session identical
+      up to its declarations)
+- [x] T3 scenario green: b-potion (thuum bc796d5) green in 20261011-015942
+      and -030531, b-magic-restart (ec9dac2) in -030835 and -031834, both
+      awaiting Eli's review; HYPOTHESIS left: the hit shader on a figure
+      (playtest thirteen's potions), and the poison's hand and count (the
+      poison verb, docs/verbs/poison.md)
+- [x] ledger and suppression registry updated: the two natives' rows
+      (docs/NATIVES.md at 35acc275); the suppression is the player's
+      AddTarget refusal above (Suppress), released never
+- [x] merged with god-mode: the sweep on fork m2-god 35acc275 went 33 of 35
+      green (runs 20261011-033757 to -051523): a-time had no verdict
+      (20261011-044541, sky-c1's guest agent down) and was green on its
+      rerun (-051631); a-melee-reach red once (-042255) and green twice
+      (-051934, -052147), a watch item by ADR-027 (docs/verbs/
+      melee-reach.md); fork parity fast-forwarded to 35acc275, both clones'
+      clean-m1 promoted

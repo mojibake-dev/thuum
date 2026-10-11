@@ -779,12 +779,23 @@ it carries a HYPOTHESIS tag.
      buffs (docs/verbs/magic-effects.md, Suppress); effects count on the
      server's wall clock, as ADR-021's game time does. The poison on a
      weapon became a verb of its own (below), blocked on playtest
-     thirteen's poison section (CLAUDE.md rule 8).
+     thirteen's poison section (CLAUDE.md rule 8). DONE 2026-10-10, merged
+     with god-mode: b-potion (thuum bc796d5) and b-magic-restart (ec9dac2),
+     both awaiting Eli's review, green twice each, T2 green, and the merge
+     sweep on fork m2-god 35acc275 33 of 35 green: a-time had no verdict
+     (sky-c1's guest agent down, 20261011-044541) and was green on its
+     rerun (-051631); a-melee-reach red once (-042255) and green twice
+     (-051934, -052147), a watch item by ADR-027 (docs/verbs/
+     melee-reach.md). Fork parity fast-forwarded to 35acc275 and both
+     clones' clean-m1 promoted.
   3a. poison: a poison on the weapon in the server's inventory (the hand
      and the charges the playtest shows), a poisoned hit applying it
      through the effect rule and spending a charge, both games agreeing.
      Scenario `b-poison`.
   4. god-mode: TGM and TIM, flags the server's damage and death rules read.
+     DONE 2026-10-10: b-god (thuum 189171e, awaiting Eli's review) green
+     twice, T2 green, merged with magic-effects in the same sweep (fork
+     parity 35acc275).
   5. blocking: the attacker's blocked claim checked against the target's
      recorded block and facing, the shield test fixed, the bash's reach
      (melee reach's carried cases), stagger shown to observers. In flight

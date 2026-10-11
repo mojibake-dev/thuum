@@ -166,5 +166,15 @@ first run) and the joint merge sweep (scratchpad merge-m2-god.sh).
 - [x] native hook + T1: none (Debug.SetGodMode by snippet)
 - [x] TS handler: none (the client already routes tgm and tim)
 - [x] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] T3 scenario green: b-god (thuum 189171e, awaiting Eli's review)
+      green in 20261011-033002 and -033326; HYPOTHESIS left: the game's own
+      console text, the engine's TIM at no health, and the game keeping
+      neither flag in a save (playtest thirteen's god mode; a restart
+      scenario if one is wanted)
+- [x] ledger and suppression registry updated: Debug.SetGodMode's row (the
+      server's snippet; docs/NATIVES.md at 35acc275); no suppression
+- [x] merged with magic-effects: the sweep on fork m2-god 35acc275 went 33
+      of 35 green; a-time's missing verdict green on its rerun,
+      a-melee-reach's red green twice, a watch item by ADR-027
+      (docs/verbs/magic-effects.md, Status); fork parity fast-forwarded to
+      35acc275, both clones' clean-m1 promoted

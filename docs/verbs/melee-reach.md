@@ -137,3 +137,17 @@ rotation 0.
   the bound does not lean on (bash, bare hands, other races, mounts, the
   cone), which the 256 of slack covers
 - [x] on fork parity (15eb653d, 2026-10-03)
+
+Watch item (2026-10-10, the merge sweep on fork m2-god 35acc275, ADR-027):
+a-melee-reach red once (20261011-042255) at its first assert: c2's health
+read 1.0 three seconds after c1's swing (anim-event attackStart, sent), with
+c1 at y -545.3 and c2 at -365.7 (179.6 units, inside the sword's measured
+edge, a hit at 185 and a miss at 190, 2026-10-03). The run's server.log
+copy ends at 04:24:45, some twenty seconds before the swing, so whether a
+hit reached the server is not on record. The two reruns were green
+(20261011-051934, -052147), and the scenario was green in every sweep
+before it. HYPOTHESIS: the swing fell short at the edge (5 units of margin,
+against the teleports' landing spread of a few units and c1's facing after
+its teleport). If it shows again: read the full server log for an OnHit or
+an E_HIT_REACH line, and move c2 to 170 units (the scenario's change in its
+own commit, for Eli's review).
