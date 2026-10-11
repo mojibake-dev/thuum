@@ -327,16 +327,30 @@ staggerStart (an UpdateAnimation to its listeners; the victim's client
 draws no figure of itself), which deathService lets through; StaggerTest
 and the T2 session cover it. b-stagger reads the victim's side from its
 graph's IsStaggering and the figure's from the relayed event and its
-IsStaggering. Left: b-stagger on bba1450e.
+IsStaggering. 9cfbcff7 sends to each listener itself (the base class's
+send to listeners is protected; fork pipeline 1244 failed on it).
+b-stagger (thuum 7431108) green twice on 9cfbcff7 (20261011-220330 and
+-220642): the power attack and the blocked one staggered c2 in its own
+game and on c1's screen (the relayed event taken, the figure's
+IsStaggering), the plain swing nobody. Left: T2 on 9cfbcff7, the merge
+sweep.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (the re-analyst's reading; the lab
       confirmed the victim's game, the attacker's engine and the relay)
 - [x] server logic + T0
 - [x] message + validator (same commit): no message change (SpSnippet)
-- [ ] native hook + T1 (TESModPlatform.Stagger built; the lab's check
-      left)
-- [x] TS handler (deathService's narrowed refusal; the lab's check left)
-- [x] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] native hook + T1: TESModPlatform.Stagger (the engine's own start,
+      confirmed in the victim's game by b-stagger); T1 none
+- [x] TS handler (deathService's narrowed refusal; the snippet's
+      callNative fallback for an unbound global)
+- [ ] T2 green on the final commit (green 2026-10-10 on acf5627c, before
+      the relay; on 9cfbcff7 with the relay's declaration, chained)
+- [x] T3 scenario green: b-stagger (thuum 7431108, awaiting Eli's review)
+      green twice; HYPOTHESIS left: which stagger the figure plays with its
+      staggerMagnitude and staggerDirection unset (playtest fourteen's
+      eye), a timed bash's large recoil (not told apart), and the bash's
+      stagger (the lab cannot bash by event)
+- [ ] ledger and suppression registry updated (TESModPlatform.Stagger's
+      row at the merge; the suppression is deathService's narrowed
+      refusal)

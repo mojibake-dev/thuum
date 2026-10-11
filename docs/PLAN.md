@@ -822,8 +822,12 @@ it carries a HYPOTHESIS tag.
      narrowed refusal; T0 and T2 green). x-stagger-probe 20261011-055806
      confirmed the victim's own game never staggers from a figure's hit,
      the attacker's engine tries to stagger the figure (blanked), and a
-     self-started stagger plays and relays. Left: the native and the relay
-     in the lab, b-stagger (docs/verbs/stagger.md).
+     self-started stagger plays and relays. b-stagger (thuum 7431108,
+     awaiting Eli's review) green twice on fork 9cfbcff7 (2026-10-11), after
+     two fixes the lab found: the server's snippet to the native failed in
+     Skyrim Platform (callNative now), and the engine's stagger never
+     reaches other screens by itself (the server sends it). Left: T2 on
+     9cfbcff7, the merge sweep (docs/verbs/stagger.md).
   6. shouts: words of power and their unlocks as server state (SHOU and
      WOOP read by libespm), the shout cast on spell-cast's path, the
      cooldown the server's; the movement budget measured against Whirlwind
