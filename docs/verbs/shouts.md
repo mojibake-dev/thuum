@@ -159,9 +159,12 @@ bounds on casts.
 ## Server
 
 - Where the logic lives:
-  - the record: the change form gains the player's shouts, known words and
-    unlocked words (form ids, FormDesc in the change form as the other
-    records keep them); libespm reads SHOU (its three SNAM) and WOOP;
+  - the record: the change form's ShoutRecord, three lists of FormDesc as
+    the engine keeps them (the shouts in the player's list; the words of
+    power known; the words unlocked, each word a flag of its own in the
+    engine, whichever shouts share it), absent in older records; built on
+    fork m2-shouts 9579dbd2 (MpActor::RecordShoutEntry, ShoutSnippets);
+    libespm reads SHOU (its three SNAM) and WOOP for the cast rule;
   - the cast rule: wire-rules spells (Rust, ADR-010) gains the shout's
     facts (the shout in the voice slot known, the cast's spell one of its
     variations, that variation's word unlocked, the recovery passed) beside
@@ -169,16 +172,24 @@ bounds on casts.
   - the recovery: the variation's recovery times ShoutRecoveryMult (the
     actor-values record, 1 without one) from the accepted cast, on the
     server's wall clock;
-  - Papyrus natives on the server VM, each with its ledger line: Actor.
-    AddShout, Game.TeachWord, Game.UnlockWord, Game.IsWordUnlocked (R0,
-    the record, then the snippet to the player's game);
+  - Papyrus natives on the server VM (Actor.AddShout, Game.TeachWord,
+    Game.UnlockWord, Game.IsWordUnlocked, R0, each with its ledger line):
+    with the word walls' slice, since a global Game function on the server
+    has no player to act for until a script's activation names one;
   - the console: TeachWord, UnlockWord, AddShout for an admin, refused for
-    a player (console-commands' table gains the rows).
+    a player (console-commands' table gains the rows), built on m2-shouts:
+    the record, then the target's own game told by snippet (Game.TeachWord,
+    Game.UnlockWord, Actor.AddShout);
+  - the login: the record taught again on the first movement, as
+    learned-effects teaches (ActionListener, SendShoutRecord).
 - DB fields / migration: the change form's three new lists, absent in old
   records (empty); a restart-persistence scenario (rule 6).
 - Restart behavior: the record holds; a recovery running at a restart is
   forgotten (a runtime timer, as a cast is).
-- Papyrus natives touched (ledger lines added): the four above.
+- Papyrus natives touched (ledger lines added): none on the server VM in
+  this slice; Actor.AddShout, Game.TeachWord and Game.UnlockWord are the
+  server's snippets to a player's game (their rows say so, as
+  Actor.StartCombat's).
 
 ## Client
 
@@ -251,7 +262,12 @@ bounds on casts.
 
 ## Status
 
-Doc written 2026-10-10, before any code.
+Doc written 2026-10-10, before any code. x-shout-probe 20261011-060059
+reopened Observe (a shout fires no spellCast). Fork branch m2-shouts (from
+parity f828279f): 9579dbd2 the record, the console's word commands and the
+login (ShoutsTest). Left: the cast's hook (a probe of two and three
+words), the cast and recovery rule, the T2 session, b-shout with its
+restart (rule 6).
 
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated
