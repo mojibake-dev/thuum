@@ -167,9 +167,10 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   channel (wire-transport channels.rs), and the client applies each in
   arrival order on an update, so a game moves its maximum before it takes
   the percentage, as the server does (MpActor::ApplyAttributeDeltas keeps
-  the damage across a change of the maximum). HYPOTHESIS until b-potion's
-  next run: that ModActorValue moves Health's maximum and current value
-  together, as the engine's own temporary modifier does.
+  the damage across a change of the maximum). CONFIRMED (x-potion-probe
+  20261011-020609, fork m2-effects 9e038edd): after a fortify of 20, c1's
+  maximum 120 and its value with it (79.47 to 99.67), 100 again after the
+  end.
 - Side effects: HYPOTHESIS (whether ApplyEffectShader on a figure looks
   like the engine's own hit shader; the lab compares the two screenshots).
 
@@ -196,9 +197,12 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   the magicEffects setting). The player's MagicTarget vtable is the fifth
   of PlayerCharacter's: TESObjectREFR has four (VTABLE_TESObjectREFR) and
   Actor's MagicTarget base follows them (include/RE/A/Actor.h:126), as
-  VTABLE_Actor's ten count. HYPOTHESIS until b-potion's next run: the
-  index; what Actor::DrinkPotion does with a refused effect (the item
-  consumed, its sound, any message).
+  VTABLE_Actor's ten count. The index CONFIRMED (x-potion-probe
+  20261011-020609: the maximum 120 after a fortify of 20, not 140, so the
+  engine applied none of the drink). HYPOTHESIS for T4 (the next
+  playtest): what Actor::DrinkPotion does with a refused effect beyond
+  that (the item leaves the game's inventory, as the server's inventory
+  says it does; its sound; any message).
 - Release condition: none while connected; with magicEffects off nothing
   is blocked (and the double give-back returns: the setting is a kill
   switch, not a mode).
@@ -345,9 +349,16 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   samples, so the fortify's end fell outside it; c2's photographs show no
   clear shader on c1's figure 3 s after the drink); b-potion
   20261011-004053 (green, wrongly: the double give-back, under Suppress).
-- Next (staged with fork m2-effects 89689154): b-potion again, whose end
-  is now bounded from below, and b-magic-restart; both read the AddTarget
-  hook and ModActorValue's HYPOTHESIS tags above.
+- On fork m2-effects 9e038edd (2026-10-10): b-potion 20261011-015942 green
+  (0.7636 and 0.7869 after the heal, 0.8818 and 0.9026 after the fortify,
+  0.3248 and 0.3253 after its end: the 100 back once); x-potion-probe
+  20261011-020609 (the maximum 120 after a fortify of 20: the hook and
+  ModActorValue confirmed); b-magic-restart 20261011-020256 red on the
+  client's side only: the effect resumed with its time on the wall clock
+  (57 s left, 21 s after the restart, 0 at its end, the server's 0.6005 to
+  0.2805), but c1's game stayed at 1.0 after the restart and its
+  reconnect, taking none of the server's health; x-reconnect-values
+  isolates that from this verb.
 - Owner: agent.
 
 ## Status
