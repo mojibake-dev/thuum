@@ -1365,6 +1365,20 @@ function run(step: Step, player: Actor): unknown {
       Debug.sendAnimationEvent(player, name);
       return "sent";
     }
+    case "voice": {
+      // The player's voice after a shout (thuum docs/verbs/shouts.md): the
+      // recovery its game set at the release (SKSE Actor.GetVoiceRecoveryTime,
+      // the variation's recovery time times ShoutRecoveryMult) and the
+      // equipped shout's three recovery times (SKSE Shout.GetNthRecoveryTime),
+      // through callNative, which needs the .psc declarations SKSE installs
+      const shout = player.getEquippedShout();
+      const recovery = callNative("Actor", "GetVoiceRecoveryTime", player) as number;
+      const variations: number[] = [];
+      if (shout) {
+        for (let n = 0; n < 3; n++) variations.push(callNative("Shout", "GetNthRecoveryTime", shout, n) as number);
+      }
+      return { shout: shout ? shout.getFormID() : 0, recovery, variations, mult: player.getActorValue("ShoutRecoveryMult") };
+    }
     case "graph-float": {
       // One of the player's behavior graph floats (Papyrus
       // SetAnimationVariableFloat), {name, value}: the engine sets

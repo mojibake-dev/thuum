@@ -383,7 +383,9 @@ equip, cast, activate, draw-weapon, anim-event {name} (an animation event
 on the player, such as attackStart: the engine's own swing, which hits
 what the engine's hit test picks), graph-float {name, value} (one of the
 player's behavior graph floats, as the engine sets staggerMagnitude and
-staggerDirection before its stagger; the note reads it back), dump-state (with each actor's bounding
+staggerDirection before its stagger; the note reads it back), voice (the
+player's voice recovery after a shout and its equipped shout's three
+recovery times, through SKSE's Papyrus by callNative), dump-state (with each actor's bounding
 box: length, width, height), request-screenshot, craft (an open
 driver item that m0-forge specifies), tap-key (one DirectInput scan code
 through SKSE's Input.TapKey: it works the race menu, 208 Down for the next
