@@ -313,7 +313,7 @@ and cone (the re-analyst's reading). 1e0e89bf the bash's backing
 (bashStart among the attacker's events within 3 s; E_HIT_BASH). f828279f
 the difftest session (fork pipeline 1213). The m2-god merge put m2-block
 on parity 35acc275 plus these five; its merge sweep started 2026-10-10
-23:35 (scratchpad merge-m2-block.sh). The stagger went to its own verb.
+23:27 (scratchpad merge-m2-block.sh). The stagger went to its own verb.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (the re-analyst's reading,
