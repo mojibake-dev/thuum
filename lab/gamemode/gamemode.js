@@ -47,6 +47,18 @@ function runningEffects(actorId) {
   }
 }
 
+// What the server holds of an actor's shouts (mp.get's shouts, thuum
+// docs/verbs/shouts.md): {shouts, wordsKnown, wordsUnlocked} as form ids
+// and recoverySecondsLeft; null from a server without the property
+function shouts(actorId) {
+  try {
+    const record = mp.get(actorId, "shouts");
+    return record && typeof record === "object" ? record : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 function notFound(profileId) {
   return { found: false, profileId: Number(profileId) };
 }
@@ -100,6 +112,9 @@ const state = {
       // magnitude, secondsLeft} (docs/verbs/magic-effects.md); null from a
       // server without the property
       effects: runningEffects(actorId),
+      // the shouts record and the voice's recovery on the server's clock
+      // (docs/verbs/shouts.md); null from a server without the property
+      shouts: shouts(actorId),
     };
   },
 

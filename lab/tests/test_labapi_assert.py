@@ -573,6 +573,32 @@ class ConsoleTests(unittest.TestCase):
             ev.evaluate('c2.printed("additem done")')
 
 
+class ShoutServer(RichServer):
+    """c1's shouts record: Fire Breath with its first word known and
+    unlocked, 12.5 s of its recovery left."""
+
+    def __init__(self):
+        super().__init__()
+        self.actors["c1"]["shouts"] = {"shouts": [0x3F9EA], "wordsKnown": [0x20E17], "wordsUnlocked": [0x20E17],
+                                       "recoverySecondsLeft": 12.5}
+
+
+@needs_deps
+class ShoutRecordTests(unittest.TestCase):
+    def test_the_record_and_the_recovery_read(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(ShoutServer(), NearViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('server.actor(c1).shouts == "0x3f9ea"'))
+        self.assertTrue(ev.evaluate('server.actor(c1).wordsUnlocked == "0x20e17"'))
+        self.assertTrue(ev.evaluate('server.actor(c1).shoutRecovery > 12'))
+
+    def test_a_server_without_the_record_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('server.actor(c1).shoutRecovery > 0')
+
+
 class PartsServer(RichServer):
     """c1's appearance with three head parts, in the order a client sent them."""
 

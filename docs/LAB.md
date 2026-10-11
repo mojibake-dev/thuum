@@ -385,7 +385,9 @@ what the engine's hit test picks), graph-float {name, value} (one of the
 player's behavior graph floats, as the engine sets staggerMagnitude and
 staggerDirection before its stagger; the note reads it back), voice (the
 player's voice recovery after a shout and its equipped shout's three
-recovery times, through SKSE's Papyrus by callNative), dump-state (with each actor's bounding
+recovery times, through SKSE's Papyrus by callNative; `{set: seconds}`
+first sets the game's own recovery, as a player clearing it would),
+dump-state (with each actor's bounding
 box: length, width, height), request-screenshot, craft (an open
 driver item that m0-forge specifies), tap-key (one DirectInput scan code
 through SKSE's Input.TapKey: it works the race menu, 208 Down for the next
@@ -468,7 +470,10 @@ is back on the server's online list. It is how a scenario gets a fresh
 save: after a reconnect an in-game client keeps its world and only moves
 its player (skymp5-client remoteServer.ts). Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
-server's verdicts on the client's race menu results), `server.inventory(c)`,
+server's verdicts on the client's race menu results; `shouts`,
+`wordsKnown` and `wordsUnlocked`, the shouts record's form ids sorted, hex
+and comma-joined, and `shoutRecovery`, the seconds the voice's recovery
+runs on the server's clock, docs/verbs/shouts.md), `server.inventory(c)`,
 `server.effects(c)` (the effects the server runs on the actor, by MGEF id:
 `left(id)` the seconds left and `magnitude(id)`, 0 when none runs;
 docs/verbs/magic-effects.md),
@@ -490,7 +495,8 @@ graph bools),
 `c.marker(<form id>)` (the client's last `markers {ids: [...]}` step: the
 map marker's `visible` and `canTravel` on that player's own map),
 `c.known(<form id>)` (the client's last `known {ids: [...]}` step: the
-ingredient's known effects as a mask, bit i for effect i),
+ingredient's known effects as a mask, bit i for effect i; a word of power
+reads 1 when that game has it unlocked),
 `c.favorite(<form id>)` (the client's last `favorites {ids: [...]}` step,
 read through SKSE's Game.isObjectFavorited and getHotkeyBoundObject: the
 key 0 to 7, -1 for a favorite without one, -2 for none; a `favorite {form,

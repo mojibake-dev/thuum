@@ -40,6 +40,7 @@ import {
   Ui,
   Utility,
   Weather,
+  WordOfPower,
   WorldSpace,
   hooks,
   on,
@@ -785,11 +786,19 @@ function run(step: Step, player: Actor): unknown {
     case "known": {
       // thuum docs/verbs/learned-effects.md: the effects this player's engine
       // knows of each ingredient, bit i for effect i, keyed by its decimal
-      // form id (lab-api's c.known(id)); null for a form that is no ingredient
+      // form id (lab-api's c.known(id)); a word of power reads 1 when the
+      // engine has it unlocked (Game.IsWordUnlocked, docs/verbs/shouts.md);
+      // null for a form that is neither
       const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
       const out: Record<string, number | null> = {};
       for (const id of ids) {
-        const ingredient = Ingredient.from(Game.getFormEx(Number(id)));
+        const form = Game.getFormEx(Number(id));
+        const word = WordOfPower.from(form);
+        if (word) {
+          out[String(Number(id))] = Game.isWordUnlocked(word) ? 1 : 0;
+          continue;
+        }
+        const ingredient = Ingredient.from(form);
         let mask = 0;
         if (ingredient) {
           for (let i = 0; i < 4; ++i) {
@@ -1370,7 +1379,11 @@ function run(step: Step, player: Actor): unknown {
       // recovery its game set at the release (SKSE Actor.GetVoiceRecoveryTime,
       // the variation's recovery time times ShoutRecoveryMult) and the
       // equipped shout's three recovery times (SKSE Shout.GetNthRecoveryTime),
-      // through callNative, which needs the .psc declarations SKSE installs
+      // through callNative, which needs the .psc declarations SKSE installs.
+      // {set: seconds} first sets the game's own recovery
+      // (Actor.SetVoiceRecoveryTime), as a player clearing it in its own game
+      // would: the server keeps its own (b-shout)
+      if (typeof a.set === "number") callNative("Actor", "SetVoiceRecoveryTime", player, a.set);
       const shout = player.getEquippedShout();
       const recovery = callNative("Actor", "GetVoiceRecoveryTime", player) as number;
       const variations: number[] = [];

@@ -54,6 +54,18 @@ test("labState actor carries the server's running effects, null without the prop
   assert.strictEqual(actor.effects, null);
 });
 
+test("labState actor carries the server's shouts record, null without the property", () => {
+  const record = { shouts: [0x3f9ea], wordsKnown: [0x20e17], wordsUnlocked: [0x20e17], recoverySecondsLeft: 12.5 };
+  mp.set(0xff000001, "shouts", record);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "actor", profileId: 1 }).shouts, record);
+  const get = mp.get;
+  mp.get = (id, k) => {
+    if (k === "shouts") throw new Error("Property 'shouts' doesn't exist");
+    return get(id, k);
+  };
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "actor", profileId: 1 }).shouts, null);
+});
+
 test("labState time is the server's clock, and absent without one", () => {
   global.mp = fakeMp();
   delete require.cache[require.resolve("./gamemode.js")];

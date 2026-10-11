@@ -106,6 +106,11 @@ def _parts(v: Any) -> str | None:
     return ",".join(f"{x:#x}" for x in sorted(v))
 
 
+def _field(record: Any, name: str) -> Any:
+    """One field of a nested record the gamemode may not send (None then)."""
+    return record.get(name) if isinstance(record, dict) else None
+
+
 def _opt_str(v: Any) -> str | None:
     return None if v is None else str(v)
 
@@ -132,6 +137,12 @@ class ActorView:
     lastAppearanceAllowed: bool | None = None
     # the appearance's head parts as _parts writes them (thuum ADR-026)
     headParts: str | None = None
+    # the server's shouts record, each list as _parts writes it, and how
+    # long its voice recovery runs in seconds (docs/verbs/shouts.md)
+    shouts: str | None = None
+    wordsKnown: str | None = None
+    wordsUnlocked: str | None = None
+    shoutRecovery: float | None = None
 
 
 @dataclass(frozen=True)
@@ -390,6 +401,10 @@ class _ServerRef:
                 lastAppearanceRaceId=_opt_int(d.get("lastAppearanceRaceId")),
                 lastAppearanceAllowed=_opt_bool(d.get("lastAppearanceAllowed")),
                 headParts=_parts(d.get("headParts")),
+                shouts=_parts(_field(d.get("shouts"), "shouts")),
+                wordsKnown=_parts(_field(d.get("shouts"), "wordsKnown")),
+                wordsUnlocked=_parts(_field(d.get("shouts"), "wordsUnlocked")),
+                shoutRecovery=_opt_float(_field(d.get("shouts"), "recoverySecondsLeft")),
             )
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"actor record for {client} lacks {e}") from e
@@ -772,7 +787,8 @@ class _ClientRef:
 
 _ATTRS = {
     ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex",
-                "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts"},
+                "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
+                "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs"},
     MarkerView: {"visible", "canTravel"},
