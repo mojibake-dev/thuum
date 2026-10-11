@@ -821,7 +821,10 @@ it carries a HYPOTHESIS tag.
     spell's reach. Apocalypse's own hard cases are Raise Wall (a shared
     wall the server places) and Milestones (five anchors one world shares).
     Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and Raise
-    Wall, seen by an observer and blocking him.
+    Wall, seen by an observer and blocking him. Placed after
+    spell-cast and magic-effects (Eli, 2026-10-09), with a small step
+    before it that gives the server its global variables (ADR-021's
+    deferral ends there).
   - Lost Grimoire 1.6 (Eli, 2026-10-10, from the stretch list; Nexus 4455,
     Fenestrate's version, so his own install matches the server): its
     Teleportation moves the caster to where the cast lands, in the
@@ -830,10 +833,7 @@ it carries a HYPOTHESIS tag.
     teleport, one jump allowed within its reach at its recorded cast.
     LostGrimoire.esp joins the shared mod set and the server's load order.
     Scenario `b-teleport`: c1 casts Teleportation, lands where it aimed and
-    stays there on the server and on c2's screen. Placed after
-    spell-cast and magic-effects (Eli, 2026-10-09), with a small step
-    before it that gives the server its global variables (ADR-021's
-    deferral ends there).
+    stays there on the server and on c2's screen.
 - Hit registration with lag compensation (rewind by client latency, Bernier
   2001), blocking, marksman aim pitch on the wire, projectile ownership.
   - Carried from M1: melee reach's unmeasured cases, the bash, bare hands
