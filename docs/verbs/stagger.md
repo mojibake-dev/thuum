@@ -316,8 +316,18 @@ runs through Skyrim Platform's bindings, which come from its own dump and
 lack its TESModPlatform natives (the ledger's "not in SP's dump"), so any
 server snippet to one of them failed. c9762817: spSnippetService calls an
 unbound global by name through callNative (the update context snippets
-run in), as magicEffectsService calls its natives. Left: the lab on that
-client (Windows run 38126017003), b-stagger.
+run in), as magicEffectsService calls its natives. On that client
+(b-stagger 20261011-213039, -213301, red): c2's game staggered at the
+server's word (IsStaggering for 1.75 s), but no staggerStart showed among
+its own events and none reached c1: the engine's stagger is an action,
+which Skyrim Platform's sendAnimationEvent hook never sees, so the
+victim's client cannot relay it. bba1450e: the server relays the stagger
+itself to every game that sees the victim, as the victim's own
+staggerStart (an UpdateAnimation to its listeners; the victim's client
+draws no figure of itself), which deathService lets through; StaggerTest
+and the T2 session cover it. b-stagger reads the victim's side from its
+graph's IsStaggering and the figure's from the relayed event and its
+IsStaggering. Left: b-stagger on bba1450e.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (the re-analyst's reading; the lab

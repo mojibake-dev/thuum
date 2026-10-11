@@ -164,7 +164,7 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 // WATCH_SELF_MS (at most WATCH_SELF_MAX): a figure holds a million
 // (formView.ts) and a stream drains it, so a figure's falls while it
 // streams in this game (thuum docs/verbs/spell-cast.md)
-// events: its stagger and recoil events as this game's engine or a relay
+// events: its stagger, recoil and shout events as this game's engine or a relay
 // sent them, [ms, name, 1 if its graph took the event after every hook
 // else 0] (the figure hooks below; thuum docs/verbs/stagger.md), and bools:
 // the graph variables watch-start names, on each change, as for the player
@@ -451,13 +451,14 @@ on("magicEffectApply", (e) => {
   }
 });
 
-// A watched figure's stagger and recoil events (thuum docs/verbs/stagger.md):
+// A watched figure's stagger, recoil and shout events (thuum
+// docs/verbs/stagger.md, docs/verbs/shouts.md):
 // one hook per pattern over the figures' range, filtered in native (rule 9)
 // and added at load, before skymp5-client's services add theirs, so each sees
 // the name its sender gave: deathService blanks every figure's staggerStart,
 // and Skyrim Platform hands later hooks the blanked name. Recorded at leave,
 // with whether the graph took the event once every hook had run.
-for (const pattern of ["stagger*", "recoil*"]) {
+for (const pattern of ["stagger*", "recoil*", "shout*"]) {
   hooks.sendAnimationEvent.add({
     enter: () => {},
     leave: (ctx) => {
