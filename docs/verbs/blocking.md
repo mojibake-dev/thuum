@@ -4,8 +4,8 @@
 
 A player who blocks an attack (shield or weapon raised, facing the attacker)
 takes the damage the game's own block rules leave, decided by the server; a
-shield, and only a shield, stops arrows; a bash is a real bash; and the
-stagger a bash or a blocked power attack causes shows on the right screens.
+shield, and only a shield, stops arrows; a bash is a real bash. (The stagger
+a bash or a blocked power attack causes is the stagger verb's, below.)
 
 Roadmap reference: skymp/ROADMAP.md "Blocking" ("The ability to repel an
 attack may require 'Reverse Animation Events'"); "Anims triggered by enemy"
@@ -36,14 +36,10 @@ itself.
 - A bash (OnHit's isBashAttack) counts only when the attacker's recorded
   animation events show one, as damage-flags backs a power attack
   (docs/verbs/damage-flags.md, wire-rules damage::backed_flags).
-- A stagger from a bash, or from a power attack on a block, is imposed on
-  the victim's own game by the server (the victim's game never sees the
-  hit) and shown to observers.
 Why not R1 for the blocked decision: everything it needs is already on the
 server; the attacker's game sees the target's block only through a relayed
 animation, a round trip late.
-Rate limit / bounds: OnHit's own (melee's and marksman's); the stagger, one
-per hit.
+Rate limit / bounds: OnHit's own (melee's and marksman's).
 
 ## Engine surface
 
@@ -123,13 +119,12 @@ per hit.
   BGSBipedObjectForm::BipedObjectSlot::kShield, 1 << 9 (CommonLibSSE-NG
   include/RE/B/BGSBipedObjectForm.h:22), which libespm's ARMO reader can
   test from BOD2 (libespm ARMO.cpp, as headshot's head slots).
-- The stagger: the victim's game plays it from an animation event
-  (staggerStart); every observer's game refuses staggerStart on a remote
-  figure today (skymp5-client deathService.ts:45-57, a sendAnimationEvent
-  hook over 0xff000000 to 0xffffffff), so a figure never staggers.
-  HYPOTHESIS: how the engine starts a stagger on demand (an animation event
-  with the stagger's direction and magnitude graph variables, or Papyrus
-  Debug.SendAnimationEvent on the player alone), measured.
+- The stagger, for the stagger verb (docs/PLAN.md M2 5a): the victim's game
+  plays it from an animation event (staggerStart); every observer's game
+  refuses staggerStart on a remote figure today (skymp5-client
+  deathService.ts:45-57, a sendAnimationEvent hook over 0xff000000 to
+  0xffffffff), so a figure never staggers. How the engine starts a stagger
+  on demand is that verb's probe; nothing here depends on it.
 - Stamina: a blocked hit drains the blocker's stamina in the game
   (fStaminaBlockDmgMult); the server's stamina rule is the blocker's own
   game's report today (R2). Kept so in this slice.
@@ -145,78 +140,86 @@ per hit.
 
 ## Impose (observers render the server's decision)
 
-- Mechanism: the server's damage as any hit (ChangeValues to the victim);
-  for a stagger, an SpSnippet to the victim's own game that starts its
-  player's stagger (HYPOTHESIS: which call, Dynamic plan), whose animation
-  then relays to observers as any of its events.
-- Visual without simulation achieved by: the stagger's animation on the
-  victim's figure in observers' games, once deathService lets a relayed
-  staggerStart through for a stagger the server imposed.
-- Side effects: HYPOTHESIS (the attacker's game plays its own block and
-  stagger effects on the figure from its own verdict; where the server's
-  verdict differs, that game shows the wrong one for a moment).
+- Mechanism: the server's damage as any hit (ChangeValues to the victim,
+  whose own game shows that number: a figure's hit lands nothing there,
+  x-block-probe); scripts on the server hear the server's verdict (the
+  Papyrus OnHit event's abHitBlocked).
+- Visual without simulation achieved by: the block's own animations, which
+  each game plays from the relayed block (the victim's blockHitStart, the
+  attacker's recoilStart, x-block-probe).
+- Side effects: the attacker's game plays its block effects on the figure
+  from its own verdict; where the server's differs (a block the attacker's
+  game saw late), that game shows the wrong effect for a moment, and the
+  damage is the server's either way.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
-- What is suppressed: nothing new; deathService's staggerStart refusal on
-  figures is narrowed to staggers the server did not impose (or replaced by
-  the impose path above).
-- How: the sendAnimationEvent hook's filter.
+- What is suppressed: nothing new (a figure's blocked or unblocked hit
+  already lands nothing in the victim's game).
+- How: none.
 - Release condition: none.
-- Side effects: HYPOTHESIS (why the refusal exists: a stagger playing twice
-  or knocking a figure out of sync; the Dynamic plan watches for it).
+- Side effects: none.
 
 ## Message contract
 
-- No new message: OnHit in, ChangeValues, SpSnippet and the animation
-  relay out.
+- No new message: OnHit in, ChangeValues out.
 - Validator rules: unchanged (OnHit's budget is melee's).
-- Idempotency / ordering: one stagger per hit.
+- Idempotency / ordering: one verdict per hit the server takes.
 - Contract doc updated: no change.
 
 ## Server
 
-- Where the logic lives: a Rust rule (wire-rules damage or a new block
-  module, ADR-010): blocked or not from the facts (the target's block, its
-  facing, the attacker's direction, the source a bow or a crossbow, a shield
-  in hand), the fraction a block stops by the game's formula from the
-  masters' settings (the shield's armor rating or the attacker's weapon
-  damage, the blocker's Block skill from actor-values, a power attack), the
-  bash backed by the attacker's animation events, and whether the hit
-  staggers. The C++ core gathers the facts (equipment and its records, the
-  skill, the animation events) and applies the result.
+- Where the logic lives: wire-rules block (Rust, ADR-010): blocked or not
+  from the facts (the target's recorded block, its heading against the
+  attacker's position within the engine's cone, an arrow or a bolt, a
+  shield in hand by its biped slot), and the share a block stops by the
+  engine's formula from the masters' settings (the shield's rating or the
+  attacker's weapon damage, the blocker's Block and ShieldPerks from the
+  actor-values record, a backed power attack, the cap); wire-rules damage
+  backs a bash claim by the attacker's bashStart. The C++ core
+  (ActionListener's BlockedShare, OnHit's flag facts) gathers the facts and
+  applies the share once, before the Papyrus OnHit event.
 - DB fields / migration: none.
 - Restart behavior: none (the block is live state).
-- Papyrus natives touched: none on the server; the stagger's snippet a
-  client native or Papyrus call (a NATIVES line if new).
+- Papyrus natives touched: none.
 
 ## Client
 
-- SP binding: none new unless the stagger needs one (Dynamic plan).
-- TS handler: deathService.ts (the stagger refusal narrowed).
+- SP binding: none new.
+- TS handler: none new.
 - Kill switch config key: none (the server's rule).
 
 ## Tests
 
-- T0: wire-rules (blocked when blocking and facing within the cone, not
-  from behind, not unblocking; an arrow blocked by a shield only; the
-  shield's and the weapon's fractions at Block 15 and 100, a power attack's
-  multiplier; a bash claim without its animation event refused; the
-  stagger's cases); the server (a blocked hit's damage by the formula; the
-  attacker's isHitBlocked ignored both ways; the shield test by BOD2).
+- T0: wire-rules block (a shield's share at Block 15 and 100, with
+  ShieldPerks, on a power attack; the weapon line; the cone at 0, 30, -34
+  degrees in and 45, 90, 135, 180 out, headings wrapping, nonsense refused;
+  no block without one; an arrow stopped by a shield only; the cap) and
+  damage (a bash flag needs a bashStart within 3 s); the server
+  (BlockingTest: the shield's share facing whatever the attacker's game
+  says, the whole hit from behind or unblocked whatever it says, the weapon
+  line; HitTest: a bash flag counts only after its bashStart).
 - T1: none.
-- T2: a difftest session: c2 blocks (blockStart) facing c1, c1 hits it
-  claiming not blocked, then from behind claiming blocked: the legacy
-  server's tenth and trusted claim against the fixed server's decision.
-  Declared.
-- T3 scenario id: lab/scenarios/b-block.yaml: c2 raises a shield (an Iron
-  Shield) facing c1; c1's sword hit takes the game's blocked share on the
-  server and in c2's game; the same hit from behind takes the full damage;
-  c1's arrow is stopped by the shield and not by a raised sword; c1's bash
-  staggers c2 on c2's screen and on c1's.
+- T2: difftest session blocking (fork m2-block f828279f): c2 steps 50
+  units east of the spawn turned to face c1; c1's first bare-handed hit
+  claims a block c2 never raised (the legacy server deals a tenth on the
+  claim, the fixed one the whole hit), then c2 raises its block (blockStart,
+  a step with isBlocking) and the second hit claims none (the legacy server
+  blocks by its 1 radian test and deals a tenth; the fixed one blocks by
+  its records and stops the empty-handed share, fBlockWeaponBase 0.3, as
+  Unarmed's damage is 0, Skyrim.esm WEAP 0x1F4). Declared from the formula
+  before the run, to be checked against it.
+- T3 scenario id: lab/scenarios/b-block.yaml: c1's full-draw arrow on c2's
+  raised Iron Shield facing it is stopped by the shield's share, on c2's
+  raised sword not at all; c1's Iron Sword swing on the raised shield facing
+  it is stopped by the shield's share, from behind and from 45 degrees off
+  (outside the engine's 35, inside the old 1 radian) not at all, on the
+  raised sword alone by the weapon line; c2's game agrees with the server
+  after each.
 - Assertions that would fail if the verb silently regressed: c2's health
-  after each hit (blocked by the formula, unblocked in full, arrow blocked
-  by a shield only); the stagger seen.
+  after each hit on the server, bounded on both sides (the shield's share
+  against the old tenth and against a whole hit; the cone's 45 degrees; an
+  arrow on a sword unblocked), and c2's own game within 0.02 of it.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -273,6 +276,14 @@ per hit.
     7); the phase's other reading (74.56) fell on a server correction of
     the figure's health, not a swing;
   - c2's own game played its block-hit animations for both blocks.
+- Open: the weapon line. x-block-probe2's 27 percent took its unblocked
+  swings with the shield worn (armor on the figure) and its weapon swings
+  without, so the two do not compare; the re-analyst's line gives 31.4 to
+  31.8 percent with the Iron Sword's 7. x-weapon-block-probe (thuum
+  scratchpad, by path): c2 holds the Iron Sword alone throughout; unblocked,
+  sword-blocked and unblocked again, two swings and one watch of c1's a
+  phase; the ratio of the blocked swings to the unblocked ones is 1 minus
+  the engine's share. Owner: agent, on the m2-block server before b-block.
 
 ## Status
 
@@ -282,8 +293,10 @@ the server (OnWeaponHit decides the block before the Papyrus OnHit event,
 the attacker's verdict logged and never trusted, the formula's tenth gone,
 the shield by its biped slot; BlockingTest), e911dd2b the engine's formula
 and cone (the re-analyst's reading). 1e0e89bf the bash's backing
-(bashStart among the attacker's events within 3 s; E_HIT_BASH). Left: CI,
-T2, b-block (the stagger went to its own verb).
+(bashStart among the attacker's events within 3 s; E_HIT_BASH). f828279f
+the difftest session (fork pipeline 1213). Left: T2, x-weapon-block-probe,
+b-block (drafted in thuum's scratchpad), all chained after the m2-god merge
+sweep (2026-10-10 evening); the stagger went to its own verb.
 
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated
