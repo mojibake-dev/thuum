@@ -821,7 +821,16 @@ it carries a HYPOTHESIS tag.
     spell's reach. Apocalypse's own hard cases are Raise Wall (a shared
     wall the server places) and Milestones (five anchors one world shares).
     Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and Raise
-    Wall, seen by an observer and blocking him. Placed after
+    Wall, seen by an observer and blocking him.
+  - Lost Grimoire 1.6 (Eli, 2026-10-10, from the stretch list; Nexus 4455,
+    Fenestrate's version, so his own install matches the server): its
+    Teleportation moves the caster to where the cast lands, in the
+    caster's own game (an explosion-placed marker, the mod's script). The
+    server's part is the cast teleport above: the spell named as a
+    teleport, one jump allowed within its reach at its recorded cast.
+    LostGrimoire.esp joins the shared mod set and the server's load order.
+    Scenario `b-teleport`: c1 casts Teleportation, lands where it aimed and
+    stays there on the server and on c2's screen. Placed after
     spell-cast and magic-effects (Eli, 2026-10-09), with a small step
     before it that gives the server its global variables (ADR-021's
     deferral ends there).
@@ -947,6 +956,9 @@ scenario there:
 - Apocalypse - Magic of Skyrim 10.2.3: M2, under spells.
 - Headshot Kills - CIF 1.2: M2, under hit registration, with the first
   ranged hit verb.
+- Lost Grimoire 1.6 (Eli, 2026-10-10: "i guess we're rolling in
+  lostgrimoire as well"), for its Teleportation, the cast teleport on
+  rotfern's hotkey 7 (docs/MODS.md): M2, under spells, beside Apocalypse.
 
 - RaceMenu sync (Eli, 2026-10-04: "if this thuum project built that racemenu
   stuff that would slap"; 2026-10-06, chosen over baking rotfern's sculpt

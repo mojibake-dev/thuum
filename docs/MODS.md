@@ -217,8 +217,10 @@ spell's reach, as COC's permitted jump does (wire-rules movement), so the
 movement rule takes the arrival instead of sending the player back. A
 recall to a mark (Mysticism's, Tel Solanum's) has no reach to bound: the
 server would record where its Mark was cast and allow a jump to that point
-only. Adding Lost Grimoire (or Mysticism) to the shared mod set is Eli's
-call: each is a full plugin on the server's load order and every client.
+only. Eli rolled Lost Grimoire in (2026-10-10, "i guess we're rolling in
+lostgrimoire as well"): v1.6, Fenestrate's, so his own install matches the
+server's load order; a full plugin on the server and every client
+(docs/PLAN.md M2). Mysticism is not in.
 
 ## Headshot Kills - CIF
 
