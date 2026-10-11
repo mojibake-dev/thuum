@@ -12,9 +12,11 @@ power, i.e. determine who is a Dovakin and who is not. Iteratively test and
 add more and more shouts.")
 Milestone: M2 (docs/PLAN.md M2 6)   Class: B
 Scope of the first slice: the record (shouts known, words known and
-unlocked), the cast (validated and relayed), the recovery, and the
-movement a shout causes measured against movement-speed's budget (carried
-from M1). Later slices, each its own when a playtest asks: Unrelenting
+unlocked), the cast (validated; observers see it through the animation
+relay), the recovery, and the effects a shout's own spell already has a
+path for (a damage spell's hits). The movement a shout causes was measured
+against movement-speed's budget once (x-shout-probe: Whirlwind Sprint's
+one word inside the burst) and is no assertion of this slice. Later slices, each its own when a playtest asks: Unrelenting
 Force's push imposed on its victim (on stagger's impose path, docs/verbs/
 stagger.md), unlocking a word with a dragon soul in the Magic menu, word
 walls, who may learn words at all (the roadmap's "Dovakin").
@@ -29,12 +31,18 @@ Rung: R0 for what a player knows and for its recovery; R1 for the cast.
   console command, a server Papyrus native a script calls.
 - The cast is the caster's game's (the engine picks the variation by how
   long the shout key is held) and the server validates it: the voice slot
-  holds the shout, the shout is known, the variation's word is unlocked in
-  the server's record, and the shout's recovery has run out on the
-  server's clock; a cast that fails is refused and relayed to nobody.
+  holds the shout and the record has it, the cast's spell is one of its
+  variations, every word up to that variation is unlocked in the server's
+  record, and the last accepted shout's recovery has run out on the
+  server's clock. A refused shout counts for nothing on the server (its
+  hits are refused); no shout is relayed as a cast, accepted or not:
+  observers see the figure's shoutStart through the animation relay.
 - The recovery is the server's: the variation's recovery time times the
-  caster's ShoutRecoveryMult, from the accepted cast. The caster's own game
-  runs its own (the HUD's), which the server does not read.
+  caster's ShoutRecoveryMult (the actor-values record's base plus the
+  running effects', 1 without either), from the accepted shout, kept per
+  player across a reconnect and forgotten at a restart. The caster's own
+  game runs its own (the HUD's), which the server reads only to learn the
+  variation (Observe).
 - A shout's effects follow the paths their effects already have: a damage
   spell's hits are spell-cast's (OnSpellHit, R0); the caster's own dash
   (Whirlwind Sprint) is a move under movement-speed's budget, permitted as
@@ -74,7 +82,15 @@ bounds on casts.
 - What the fork does today:
   - the voice slot is equipment (skymp5-server Equipment.h:19-27, skymp5-
     client sync/equipment.ts:39-57 and :87-122) and the server drops a voice
-    spell the actor has not learned (ActionListener.cpp:500-536);
+    spell the actor has not learned (ActionListener.cpp:500-536, upstream
+    #2665), but the client read the slot with GetEquippedSpell, which
+    returns spells only, so the server never saw a shout there (consistent
+    with x-shout-probe3's server log: no voice slot refused for the
+    equipped Unrelenting Force, which the check would have refused). Built
+    on m2-shouts: the client reads the shout (getEquippedShout) and equips
+    one the server sends (equipShout); the server takes a shout its record
+    holds and takes one it lacks out of the player's game
+    (Actor.RemoveShout);
   - favorites keep a shout (ActionListener.cpp:1201-1229);
   - a cast comes as SpellCast with the engine's castingSource
     (magicSyncService.ts:105-121) and the server keeps a cast per hand, 2 the
@@ -103,7 +119,18 @@ bounds on casts.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
-- Hook point: OPEN, narrowed by x-shout-probe2 (20261011-215824, all three
+- Hook point: the player's own MT_BreathExhale* after its shoutStart
+  (sendAnimationEvent, filtered in native to 0x14 and each name), built on
+  m2-shouts as skymp5-client shoutService.ts: the hooks only note the
+  release (no script function runs inside a hook); the next frames read
+  the voice recovery once the game has set it (at most 1.5 s), find the
+  variation whose recovery times ShoutRecoveryMult the reading sits at or
+  just under (it counts down from the release), and report a SpellCast
+  from the voice (castingSource 2) with that variation's spell
+  (Shout.GetNthSpell), the reads through SKSE's Papyrus by callNative as
+  the lab driver's voice step proved them. HYPOTHESIS until b-shout: that
+  the reads land within the window and name one word the same way. How it
+  was found, narrowed by x-shout-probe2 (20261011-215824, all three
   words of Unrelenting Force, the key held about 0.2, 0.6 and 1.5 s): each
   shout fired shoutStart, then MT_BreathExhaleShort at its release, 215,
   615 and 882 ms later (three words charge in about 0.88 s and release by
@@ -142,16 +169,17 @@ bounds on casts.
 - Mechanism: at login the server teaches the player's game its record by
   SpSnippets (Actor.AddShout on the player for each shout, Game.TeachWord
   and Game.UnlockWord for each word), as learned-effects teaches effects; a
-  change from an admin or a script the same way at once. An accepted cast
-  is relayed as spell-cast relays casts (the figure casts the variation's
-  spell).
-- Visual without simulation achieved by: the figure's cast in observers'
-  games (HYPOTHESIS: a shout's animation and sound come with it, the probe
-  watches).
-- Side effects: HYPOTHESIS (a relayed Unrelenting Force pushing the
-  observer's own player in the observer's game: if the probe sees it, the
-  relay of a push shout waits for its slice, as cast-teleport's teleport
-  cast is never relayed).
+  change from an admin or a script the same way at once. An accepted shout
+  is not relayed as a cast: a figure's cast of the variation's spell would
+  run the spell's effect (a push, fire) in each observer's game, the
+  effect slice's question, as cast-teleport's teleport cast is never
+  relayed. A shout's damage on another player is the shouter's game's
+  hit, claimed against the accepted shout (spell-cast's claim) and dealt
+  by the server's effect rule (R0).
+- Visual without simulation achieved by: the figure's shoutStart, which the
+  animation relay already brings to every observer (x-shout-probe2: c2's
+  game played it for each of c1's shouts).
+- Side effects: none new; the push on another player waits for its slice.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -167,10 +195,14 @@ bounds on casts.
 
 ## Message contract
 
-- No new message in this slice: SpellCast (castingSource 2) in and relayed;
-  SpSnippet out at login and on a change; the console's ConsoleCommand and
-  ConsoleOutput for the admin's commands.
-- Validator rules: unchanged (spell-cast's).
+- No new message in this slice: SpellCast (castingSource 2, the
+  variation's spell, aim 0, no graph variables) in from shoutService and
+  never relayed; UpdateEquipment's voiceSpell may now name a SHOU as well
+  as a SPEL (the same u32, the shape unchanged); SpSnippet out at login, on
+  a change and for a shout the record lacks (Actor.RemoveShout); the
+  console's ConsoleCommand and ConsoleOutput for the admin's commands.
+- Validator rules: unchanged (spell-cast's: a spell, a slot 0 to 3, the aim
+  within a quarter turn).
 - Idempotency / ordering: teaching a known word again is harmless in the
   game; the login's snippets come before the player's first cast.
 - Contract doc updated: no change.
@@ -184,13 +216,22 @@ bounds on casts.
     engine, whichever shouts share it), absent in older records; built on
     fork m2-shouts 9579dbd2 (MpActor::RecordShoutEntry, ShoutSnippets);
     libespm reads SHOU (its three SNAM) and WOOP for the cast rule;
-  - the cast rule: wire-rules spells (Rust, ADR-010) gains the shout's
-    facts (the shout in the voice slot known, the cast's spell one of its
-    variations, that variation's word unlocked, the recovery passed) beside
-    spell-cast's; OnSpellCast for castingSource 2 asks it;
+  - the cast rule: wire-rules shouts (Rust, ADR-010), built on m2-shouts:
+    Voices keeps each player's recovery and judges a shout from its facts
+    (the shout in the voice slot recorded, the spell's place among its
+    variations, the record's unlocked words, the variation's recovery and
+    ShoutRecoveryMult); OnSpellCast asks it for a player's cast from the
+    voice when the slot holds a shout, starts the accepted shout's cast for
+    its hits (PartOne::StartCast) and logs a refusal (E_SHOUT_UNKNOWN,
+    E_SHOUT_SPELL, E_SHOUT_WORD, E_SHOUT_RECOVERY); OnHit claims a hit with
+    a variation's spell against it; libespm reads SHOU's three SNAM;
   - the recovery: the variation's recovery times ShoutRecoveryMult (the
-    actor-values record, 1 without one) from the accepted cast, on the
-    server's wall clock;
+    actor-values record's base plus the running effects', 1 without
+    either) from the accepted shout, on the server's monotonic clock, kept
+    across a reconnect (a reconnect would otherwise clear it);
+  - the lab's view: mp.get(actor, "shouts"), the record and the recovery
+    left (lab gamemode labState, server.actor(c).shouts, wordsUnlocked,
+    shoutRecovery);
   - Papyrus natives on the server VM (Actor.AddShout, Game.TeachWord,
     Game.UnlockWord, Game.IsWordUnlocked, R0, each with its ledger line):
     with the word walls' slice, since a global Game function on the server
@@ -213,36 +254,49 @@ bounds on casts.
 ## Client
 
 - SP binding: none new (Actor.addShout, Game.teachWord and Game.unlockWord
-  by snippet; Skyrim Platform declares them).
+  by snippet; Skyrim Platform declares them; SKSE's
+  Actor.GetVoiceRecoveryTime, Shout.GetNthRecoveryTime and
+  Shout.GetNthSpell by callNative).
 - TS handler: consoleCommandsService's schemas gain teachword, unlockword
-  and addshout (sent to the server).
+  and addshout (sent to the server); shoutService reports a shout (Observe);
+  sync/equipment.ts reads and equips a shout in the voice slot.
 - Kill switch config key: none (the server's rule).
 
 ## Tests
 
-- T0: libespm (UnrelentingForceShout's variations); wire-rules (a known
-  shout with an unlocked word casts; an unknown shout, a word not unlocked,
-  a spell not among the shout's variations, a cast inside the recovery are
-  refused; ShoutRecoveryMult scales the recovery); the server (the record
-  through a change form round trip; the natives write the record and send
-  the snippets; the login teaches the record; OnSpellCast relays an
-  accepted shout and nothing for a refused one; the console's rank).
+- T0: libespm (UnrelentingForceShout's variations, EspmTest); wire-rules
+  shouts and the bridge (a recorded shout with its words unlocked stands
+  and starts its recovery, ShoutRecoveryMult scaling it; an unrecorded
+  shout, a locked word, a spell no variation's and a shout inside the
+  recovery are refused, a refused one leaving the recovery as it was;
+  nonsense recoveries set none); the server, ShoutsTest (the record
+  through a change form round trip; the console writes the record and
+  sends the snippets, refused for a player; the login teaches the record;
+  a shout stands once per recovery, its hit counts and it reaches nobody;
+  the record refuses the rest; the voice slot takes a recorded shout
+  only).
 - T1: none.
-- T2: a difftest session: c1, taught Unrelenting Force's first word by the
-  console as an admin, sends a voice SpellCast of its first variation, then
-  another at once: the legacy server relays both; the fixed server relays
-  the first and refuses the second (inside the recovery). Declared.
-- T3 scenario id: lab/scenarios/b-shout.yaml: c1 is taught Unrelenting
-  Force (the console, as an admin) and shouts at c2: c2 sees the shout,
-  c1's second shout inside the recovery reaches nobody; c1 relaunches and
-  the server restarts: c1 still knows the shout and its word (the record,
-  rule 6); c1's Whirlwind Sprint dash is taken by the server, not sent
-  back.
+- T2: difftest session shouts (fork m2-shouts): c1, an owner, adds itself
+  Fire Breath and unlocks Yol by the console, reports the shout in its
+  voice slot, shouts one word (VoiceFireBreath1) and hits c2, then shouts
+  again inside the recovery and hits again: the wire stack records, takes
+  the slot, counts the first hit once (c2's 100 to 0.5) and refuses the
+  second shout and its hit; the legacy stack refuses the slot and counts
+  neither. Declared from the code and the records before the run.
+- T3 scenario id: lab/scenarios/b-shout.yaml (drafted): c1 is given Fire
+  Breath and Yol by the console as an owner, equips it and shouts one word
+  at c2: the server takes it (its recovery above 20 s), c2's health falls
+  on the server, c2's game plays the figure's shoutStart; c1's own game
+  clears its recovery and shouts again: its game shouts, the server
+  refuses it (its recovery not restarted, c2 unhurt); the server restarts
+  and c1's game is relaunched: the record holds, the fresh game has Yol
+  unlocked again, and c1's next shout stands.
 - Assertions that would fail if the verb silently regressed: the server's
-  record of c1's shouts and words before and after the restart, c1's game's
-  (the word's flags read by the driver), the relayed cast counted in c2's
-  game, the refused second cast absent there, c1's position after the dash
-  on the server.
+  record of c1's shouts and words before and after the restart, c1's
+  game's (the word unlocked, read by the driver), the server's recovery
+  after the first shout and after the refused one, c2's health on the
+  server after each shout, the figure's shoutStart in c2's game, c1's own
+  shoutStart for the refused shout (the refusal is not vacuous).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -282,11 +336,16 @@ bounds on casts.
 ## Status
 
 Doc written 2026-10-10, before any code. x-shout-probe 20261011-060059
-reopened Observe (a shout fires no spellCast). Fork branch m2-shouts (from
-parity f828279f): 9579dbd2 the record, the console's word commands and the
-login (ShoutsTest). Left: the cast's hook (a probe of two and three
-words), the cast and recovery rule, the T2 session, b-shout with its
-restart (rule 6).
+reopened Observe (a shout fires no spellCast); x-shout-probe2 and 3 found
+the hook (the recovery at the release names the variation). Fork branch
+m2-shouts (from parity f828279f): 9579dbd2 and 98e97d9b the record, the
+console's word commands and the login; c2334252 libespm's SHOU; ac243dca
+the cast (wire-rules shouts, OnSpellCast's voice, OnHit's claim, the voice
+slot, shoutService, mp.get "shouts", ShoutsTest, the T2 session). Left:
+the fork pipeline (build and T0), T2, b-shout (drafted in the scratchpad,
+its own commit once green), the ledger rows at the merge (Actor.AddShout,
+Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
+snippets).
 
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated
