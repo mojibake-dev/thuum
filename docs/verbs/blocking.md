@@ -195,7 +195,29 @@ per hit.
   the stagger's events and variables in the attacker's game.
 - Expected: a blocked share near UESP's at the clones' Block skill; a cone
   near 1 radian or a setting found; a bash with its own animation events.
-- Owner: agent.
+- x-block-probe 20261011-021114 (fork m2-effects 9e038edd, green):
+  - a block raised by the graph (anim-event blockStart) is a block to the
+    engine: c2's own game played blockAnticipateStart and blockHitStart at
+    c1's figure's swings, and c1's game, on c2's figure, recoilStart after
+    each of its three swings at the facing blocker (none from behind, none
+    at a lowered block): CONFIRMED that the attacker's game decides blocks
+    from the relayed animation;
+  - the engine's damage on the blocking figure in c1's game: 2.875, 2.938,
+    2.875 a swing; the unblocked swings fell outside the watch (it keeps
+    256 samples), so the blocked share is still open;
+  - the server's verdicts matched the engine's in each phase (0.6328, a
+    tenth of 6.328, for the three facing swings and the bash; 6.328 from
+    behind and with the block lowered), its 1 radian untested between
+    head-on and behind;
+  - c2's own health followed the server's numbers alone (99.38 for the
+    server's 0.993672): a figure's swing that lands in the victim's game
+    deals nothing there;
+  - the bash: bashStart then recoilStart in c1's game, blocked on the
+    server; no stagger anywhere.
+- Next, x-block-probe2: one watch per phase (the unblocked damage, so the
+  share), the cone at 45, 90 and 135 degrees off c2's facing, a block with
+  the sword alone (the weapon formula), a power attack on the shield
+  (attackPowerStartInPlace, damage-flags' event).
 
 ## Status
 
