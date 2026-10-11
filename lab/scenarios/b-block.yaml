@@ -1,0 +1,185 @@
+# M2, blocking (docs/verbs/blocking.md): whether a hit was blocked, and the
+# share the block stops, are the server's, by the engine's own formula and
+# cone (thuum ghidra/notes/block-formula.md, ID 26425 and ID 47297), and the
+# blocker's game shows the server's number. c2 holds an Iron Sword
+# (Skyrim.esm 0x12EB7) and an Iron Shield (0x12EB6: rating 20, the shield's
+# biped slot) and raises its block with the graph's own event (blockStart,
+# x-block-probe 20261011-021114: the engine blocks with it). c2 is reset to
+# full health before each hit, twice, and checked on both sides first
+# (b-marksman: a regenerating player's reports can undo one reset); each
+# check comes about 2 s after its hit, and c2 regenerates about half a
+# percent of its health a second (a-sneak-damage). The shield is armor on
+# the server too: its 20 at fArmorScalingFactor 0.12 (Skyrim.esm) takes 2.4
+# percent off every hit while it is worn. The block share is
+# p = 0.45 + (S + ShieldPerks) x 20 x 0.2 / 100 with a shield and
+# p = 0.3 + S x D x 0.2 / 100 without one, D the attacker's weapon damage,
+# S = 1 + 1.5 x Block / 100 (Skyrim.esm's fArmorRatingBase 1 and
+# fArmorRatingMax 2.5), 0.502 and 0.318 at an Orc's Block 20 (profile 2),
+# 0.49 and 0.314 if the server holds no Block for c2.
+# First c1 takes the Long Bow (0x3B562) and iron arrows (0x1397D) and shoots
+# c2 at a full draw from 250 units, b-marksman's layout and its readying tap
+# (the bow comes first because the lab cannot sheathe a drawn sword):
+# - c2's shield raised facing c1 stops the shield's share of the arrow's
+#   12.992 (b-marksman, unshielded) less the shield's armor: about 0.936
+#   left; the old server's tenth would leave about 0.987;
+# - c2's sword raised, the shield put away, stops nothing of an arrow (the
+#   engine blocks an arrow only on a shield): 0.870, as b-marksman.
+# Then c1 swings its Iron Sword at c2, 100 units north of it (x-block-probe2's
+# layout); the whole swing is 6.328 of c2's 100 with the shield worn
+# (x-block-probe):
+# - facing, the shield stops its share: about 0.968 left (the old tenth
+#   0.9937, an unblocked swing 0.937);
+# - from behind, and turned 45 degrees off c1 (outside the engine's 35 each
+#   side, inside the old server's 1 radian), the swing lands whole: about
+#   0.937;
+# - with the sword alone, the weapon line with the Iron Sword's 7: about
+#   0.956 left of the unshielded swing's 6.484.
+# Green twice on fork m2-block f828279f (runs 20261011-054528 and
+# -054921): the server read 0.937, 0.8701, 0.9685, 0.9367, 0.9367 and
+# 0.9557, each the formula's number, c2's own game within 0.01 above it
+# (regenerating). Assertions are evaluated by lab-api only (ADR-009).
+id: b-block
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: give {item: "0x3b562", count: 1}
+  - c1: give {item: "0x1397d", count: 10}
+  - c1: give {item: "0x12eb7", count: 1}
+  - c2: give {item: "0x12eb7", count: 1}
+  - c2: give {item: "0x12eb6", count: 1}
+  - wait: 4
+  - c1: console {text: "player.equipitem 3b562"}
+  - c1: console {text: "player.equipitem 1397d"}
+  - c2: console {text: "player.equipitem 12eb7"}
+  - c2: console {text: "player.equipitem 12eb6"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c2: draw-weapon
+  - c1: hold-key {code: 199, ms: 100}
+  - wait: 2
+  # an arrow on the raised shield
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 32
+      - server.actor(c2).healthPercentage < 0.952
+      - server.actor(c2).healthPercentage > 0.928
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  # an arrow on the raised sword, the shield put away
+  - c2: anim-event {name: blockStop}
+  - c2: console {text: "player.unequipitem 12eb6"}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 31
+      - server.actor(c2).healthPercentage < 0.89
+      - server.actor(c2).healthPercentage > 0.86
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  # the sword and the shield again, 100 units apart, facing
+  - c2: anim-event {name: blockStop}
+  - c1: console {text: "player.equipitem 12eb7"}
+  - c2: console {text: "player.equipitem 12eb6"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: anim-event {name: attackStart}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 0.982
+      - server.actor(c2).healthPercentage > 0.962
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  # from behind, still blocking
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: anim-event {name: attackStart}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 0.95
+      - server.actor(c2).healthPercentage > 0.928
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  # turned 45 degrees off c1, blocking
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 135]}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: anim-event {name: attackStart}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 0.95
+      - server.actor(c2).healthPercentage > 0.928
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  # facing again, the sword alone
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - c2: console {text: "player.unequipitem 12eb6"}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: anim-event {name: attackStart}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage < 0.968
+      - server.actor(c2).healthPercentage > 0.95
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
