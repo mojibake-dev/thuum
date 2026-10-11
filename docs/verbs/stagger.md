@@ -69,8 +69,9 @@ second stagger while it is staggered (the engine's own rule).
     staggerOffset, at least fStaggerMin; against a blocking victim an
     attack's loses ID 26426's reduction, fStaggerBlockAttackShieldMult x R
     + fStaggerBlockAttackShieldBase + fStaggerBlockMult x Block +
-    fStaggerBlockBase + the mass offset (R the shield's rating, or a drawn
-    weapon's type value by ID 18093), at least fStaggerMin, tested by
+    fStaggerBlockBase + the mass offset of the victim's own Mass, unscaled
+    (ID 44009 passes actor value 36 itself; R the shield's rating, or a
+    drawn weapon's type value by ID 18093), at least fStaggerMin, tested by
     IsBlocking before the cone;
   - the gate, ID 38586 (the victim's hit reaction): only when the hit dealt
     damage and did not kill, outside kill moves; a timed bash (kTimedBash,
@@ -120,11 +121,13 @@ second stagger while it is staggered (the engine's own rule).
 - Worked numbers (HYPOTHESIS, from the reading above): a Nord's forward
   power attack with an Iron Sword on a player, 0.75 x 1.0 / (1 x 1.0 x
   2.5), less (2.5 - 2.1) x 0.15, is 0.24; on a player blocking with an Iron
-  Shield at Block 20, minus 0.001 x 20 + 0.01 + 0.005 x 20 + 0.001 + 0.06 =
-  0.191, leaving 0.049 (a blocked hit always staggers); a plain swing,
-  offset 0, none; a shield bash at Block 15 on a player not blocking,
-  (15 x 0.01 + 0.5) / (1 x m) x 1 x 0.5 = 0.325 with m 1.0, or 0.13 if the
-  bash path takes the player's mass multiplier too (unread); on a blocking
+  Shield at Block 20, minus 0.001 x 20 + 0.01 + 0.005 x 20 + 0.001 + 0 (Mass
+  1 is under the offset's 2.1) = 0.131, leaving 0.109 (a blocked hit always
+  staggers; the doc's first draft took the scaled mass here, 0.049); a
+  plain swing, offset 0, none; a shield bash at Block 15 on a player not
+  blocking, (15 x 0.01 + 0.5) / (1 x m) x 1 x 0.5 = 0.325 with m 1.0, or
+  0.13 if the bash path takes the player's mass multiplier too (unread; the
+  rule takes it unscaled, as the notes read ID 26422); on a blocking
   player, times fStaggerBlockingMult 0: none.
 - The victim's own game: HYPOTHESIS that a figure's power attack does not
   stagger the player there (a figure's hit lands nothing in that game,
@@ -220,7 +223,7 @@ second stagger while it is staggered (the engine's own rule).
 ## Tests
 
 - T0: wire-rules stagger (the worked numbers: the power attack's 0.24, the
-  blocked one's 0.049, a plain swing's none, a bash's on a player and none
+  blocked one's 0.109, a plain swing's none, a bash's on a player and none
   on a blocker; the gate's cases; the floor and the clamp; nonsense
   refused); the server (a power attack on a player sends the victim the
   snippet with its magnitude and the attacker; a plain swing sends none; a
@@ -271,7 +274,14 @@ second stagger while it is staggered (the engine's own rule).
 ## Status
 
 Doc written 2026-10-10, before any code; blocking's notes (thuum
-ghidra/notes/block-formula.md) are the engine reading.
+ghidra/notes/block-formula.md) are the engine reading. Fork branch
+m2-stagger, stacked on m2-block f828279f: 55acfc49 the rule (wire-rules
+stagger, bridged, tests), c73e423a the server (libespm's WEAP stagger,
+RACE mass and ATKD offsets and the stagger GMSTs; AnimationSystem's last
+attack by name; OnWeaponHit's stagger snippet after the damage;
+StaggerTest). Left: the client native (TESModPlatform.Stagger over ID
+37710) and deathService's narrowed refusal, x-stagger-probe (chained on
+the lab after blocking's), T2, b-stagger.
 
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated
