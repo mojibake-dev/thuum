@@ -738,3 +738,59 @@ world's damage to a god stays the game's own god mode's (Debug.setGodMode).
 The server needs the game's formula for each kind of damage it takes over:
 the weapon's today, the arrow's with marksman, a spell's magnitude with its
 effects and resistances with magic-effects.
+
+## ADR-029: A player's own spells run their scripts in that player's game
+
+Status: proposed (2026-10-11), for Eli's call before Apocalypse (docs/PLAN.md M2).
+
+**Context.** M2's plan puts Apocalypse after a small step that gives the
+server its global variables, on the premise that most of its spells ride
+spell-cast's path. A survey of the fork and the mod (2026-10-11, the
+session scratchpad's globals-survey.md) found the premise half true: the
+spells' records do ride it, but their scripts run nowhere. The server's
+Papyrus VM instantiates scripts only on references
+(skymp5-server/cpp/server_guest_lib/MpObjectReference.cpp:1750-1800), so
+no magic effect, quest, alias or perk script runs there; each client's
+game blanks every Papyrus event but OnUpdate unless a script on the
+handle is SkyUI's, RaceMenu's or defaultDisableHavokOnLoad
+(skyrim-platform FridaHooks.cpp:43-87, set by skymp5-client
+blockPapyrusEventsService.ts). Apocalypse 10.2.3 is 206 scripts, 162 of
+them ActiveMagicEffect scripts; 114 of its 265 global uses run from
+OnEffectStart, 82 from its MCM. Its 99 globals sort into settings (30,
+written by the MCM), static tuning (13), a caster's build or progress
+(25: the Craftlord's points, the Battlemage's upgrades, the Avenging
+Wraith's stats), per-cast hand-offs and locks (5), world objects (7: the
+Milestones' five anchors, Cyclonic Rift, Entomb) and unused (19).
+Vanilla's scripted effects meet the same blank (INFERRED: which ones, and
+what a player misses, is unmeasured). TES3MP's answer, the prior art:
+clients run the scripts, and the server sorts the globals they write
+into personal and worldwide by a list, saving and relaying the shared
+ones (CoreScripts clientVariableScopes.lua, eventHandler.lua).
+
+**Decision (proposed).**
+- A player's game runs the scripts of the magic effects on its own player
+  and of those its player casts: their events pass the blank, while
+  references', quests' and aliases' stay blanked. The engine and the mod
+  do the work (the design law: we do not reimplement what a game runs for
+  us). The server's VM runs no magic effect script until a verb needs one
+  validated.
+- A script's changes keep the rungs their state already has: damage and
+  restores between actors stay the server's (ADR-028), so a script's
+  change to another player's figure stays in that game, as a figure's
+  spell lands nothing there today (docs/verbs/spell-cast.md).
+- A global a player's game writes is that player's (R2, recorded
+  unvalidated): the server keeps it in the player's change form (a
+  migration, rule 6) and sets it in the game at login. A global a data
+  list names world-shared (the Milestones' anchors) is the server's one
+  value (R1: a game proposes a write, the server records and relays it).
+  The GLOB reader comes with the first verb that needs a record's value.
+
+**Consequences.** Apocalypse's scripted spells work in their caster's
+game, and its progress globals follow the player between sessions. What
+they put into the world for others (a summon, a wall, an anchor) is the
+summons' and placed objects' work (M3 hosting, M4), named in its verb
+doc. Unblocking runs mod code in a player's game, which is why the
+filter is the player's own effects only. The alternative, the server's
+VM running effect scripts, would mean implementing the natives those
+scripts call (102 of Apocalypse's 165 are missing on the server) for
+spells whose effects are mostly the caster's own.
