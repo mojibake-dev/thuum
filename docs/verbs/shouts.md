@@ -103,16 +103,28 @@ bounds on casts.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
-- Hook point: OPEN. Skyrim Platform's spellCast does not fire for a shout
-  (x-shout-probe), so spell-cast's SpellCast never carries one. What the
-  shouter's game does show: its player's animation events shoutStart, then
-  the variation's breath (MT_BreathExhaleShort for one word), which the
-  animation relay already sends the server (R2, recorded). Candidates: the
-  server reads a shout from that relay (the equipped shout, the variation
-  by the breath event), or the client reports the voice caster's cast
-  (Skyrim Platform's or a native's hook on the voice ActorMagicCaster) as
-  a SpellCast with castingSource 2. A probe of two and three words' events
-  decides between them.
+- Hook point: OPEN, narrowed by x-shout-probe2 (20261011-215824, all three
+  words of Unrelenting Force, the key held about 0.2, 0.6 and 1.5 s): each
+  shout fired shoutStart, then MT_BreathExhaleShort at its release, 215,
+  615 and 882 ms later (three words charge in about 0.88 s and release by
+  themselves), and never a spellCast. The breath's name is the same for
+  every variation, and the masters hold no setting for when a word charges
+  (only fShoutRumble* and texts), so neither the events nor the hold time
+  name the variation exactly. What does: the recovery the shouter's game
+  sets at the release, the variation's recovery time times its
+  ShoutRecoveryMult (Actor::GetVoiceRecoveryTime, CommonLibSSE-NG
+  include/RE/A/Actor.h:566; SKSE's Papyrus Actor.GetVoiceRecoveryTime, by
+  callNative), against the shout's three (Shout.GetNthRecoveryTime). The
+  proposal: at its player's MT_BreathExhaleShort after a shoutStart, the
+  client reads its voice recovery, finds the variation, and reports a
+  SpellCast with castingSource 2 and that variation's spell, which the
+  server validates against its record (spell-cast's path: the shout in the
+  voice slot, the variation's word unlocked, the recovery passed) and
+  records so the variation's hits count. HYPOTHESIS until a probe reads
+  the recovery after each variation.
+- The watcher's game already shows the shout: c2's game played c1's
+  figure's shoutStart each time (x-shout-probe2, the relay); the push
+  reached c2 not at all (its position unchanged), the effect's slice.
 - SP filter: the player's own (0x14).
 - Data captured: the shout in the voice slot (equipment), the variation,
   the caster's position.
