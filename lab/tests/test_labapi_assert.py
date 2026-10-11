@@ -657,6 +657,33 @@ class WatchTests(unittest.TestCase):
         self.assertTrue(never.evaluate("c2.watched(c1).drainMs == 0"))
         self.assertTrue(never.evaluate("c2.watched(c1).drainEndMs == -1"))
 
+    def test_watched_reads_a_figure_s_stagger_events_and_bools(self):
+        """thuum docs/verbs/stagger.md: c2's game blanked one staggerStart on
+        c1's figure (its own engine's) and took one (relayed), and the
+        figure's IsStaggering went true; c2's own side saw recoilStart."""
+        from labapi.assertions import AssertionData, Evaluator
+        views = WatchViews()
+        views.watches["c2"]["actors"][0]["events"] = [[400, "staggerStart", 0], [1300, "staggerStart", 1], [1310, "recoilLargeStart", 1]]
+        views.watches["c2"]["actors"][0]["bools"] = {"IsStaggering": [[0, False], [1320, True], [2600, False]], "IsRecoiling": [[0, False]]}
+        views.watches["c2"]["self"] = {"events": [[200, "attackStart"], [700, "recoilStart"]], "bools": {"IsStaggering": [[0, False]]}}
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.watched(c1).took('staggerStart') == 1"))
+        self.assertTrue(ev.evaluate("c2.watched(c1).sent('staggerStart') == 2"))
+        self.assertTrue(ev.evaluate("c2.watched(c1).ever('IsStaggering')"))
+        self.assertTrue(ev.evaluate("not c2.watched(c1).ever('IsRecoiling')"))
+        self.assertTrue(ev.evaluate("c2.watched_self().saw('recoilStart') == 1"))
+        self.assertTrue(ev.evaluate("c2.watched_self().saw('staggerStart') == 0"))
+        self.assertTrue(ev.evaluate("not c2.watched_self().ever('IsStaggering')"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.watched(c1).ever('bNoStagger')")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.watched_self().saw('staggerStart') == 0")
+        # a driver before bc5d76a reports neither: nothing taken, no bools
+        old = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        self.assertTrue(old.evaluate("c2.watched(c1).took('staggerStart') == 0"))
+        with self.assertRaises(AssertionData):
+            old.evaluate("c2.watched(c1).ever('IsStaggering')")
+
     def test_a_watch_is_needed_and_is_not_a_dump(self):
         from labapi.assertions import AssertionData, Evaluator, clients_needing_views
         ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])

@@ -170,6 +170,52 @@ class WatchView:
     samples: int
     drainMs: float = 0.0
     drainEndMs: float = -1.0
+    # its stagger and recoil events in the watcher's game, (ms, name, 1 if
+    # its graph took the event after every hook), and the graph bools the
+    # watch sampled, (name, ((ms, value), ...)) (lab-driver bc5d76a; thuum
+    # docs/verbs/stagger.md)
+    events: tuple = ()
+    bools: tuple = ()
+
+    def took(self, name: str) -> int:
+        """How many of the actor's events named `name` its graph took in the
+        watcher's game (deathService blanks a figure's staggerStart it did not
+        relay, and a blanked event is not taken)."""
+        return sum(1 for e in self.events if str(e[1]).lower() == name.lower() and e[2])
+
+    def sent(self, name: str) -> int:
+        """How many events named `name` reached the actor's graph in the
+        watcher's game, taken or not."""
+        return sum(1 for e in self.events if str(e[1]).lower() == name.lower())
+
+    def ever(self, name: str) -> bool:
+        """Whether the graph bool `name` was true at any sample."""
+        return _ever(self.bools, name)
+
+
+def _ever(bools: tuple, name: str) -> bool:
+    for n, series in bools:
+        if str(n).lower() == name.lower():
+            return any(bool(v) for _, v in series)
+    raise AssertionData(f"the watch sampled no graph bool {name}")
+
+
+@dataclass(frozen=True)
+class SelfWatchView:
+    """c.watched_self(): the player's own side of its last watch, the
+    animation events its graph was sent (ms, name) and the graph bools
+    watch-start named."""
+
+    events: tuple = ()
+    bools: tuple = ()
+
+    def saw(self, name: str) -> int:
+        """How many of the player's own animation events were named `name`."""
+        return sum(1 for e in self.events if str(e[1]).lower() == name.lower())
+
+    def ever(self, name: str) -> bool:
+        """Whether the player's graph bool `name` was true at any sample."""
+        return _ever(self.bools, name)
 
 
 @dataclass(frozen=True)
@@ -317,6 +363,13 @@ class EffectsView:
         return float(e.get("magnitude", 0)) if e else 0.0
 
 
+def _bool_series(raw: Any) -> tuple:
+    """A watch's {name: [[ms, value], ...]} as (name, ((ms, value), ...))."""
+    if not isinstance(raw, dict):
+        return ()
+    return tuple((str(n), tuple((float(p[0]), bool(p[1])) for p in series)) for n, series in raw.items())
+
+
 class _ServerRef:
     def __init__(self, facade: ServerFacade):
         self._f = facade
@@ -450,9 +503,26 @@ class _ClientRef:
                 samples=int(best.get("samples", 0)),
                 drainMs=falls[-1] - falls[0] if falls else 0.0,
                 drainEndMs=falls[-1] if falls else -1.0,
+                events=tuple((float(e[0]), str(e[1]), int(e[2])) for e in best.get("events") or []),
+                bools=_bool_series(best.get("bools")),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s watch of {other} lacks {e}") from e
+
+    def watched_self(self) -> SelfWatchView:
+        """The player's own side of the client's last watch."""
+        fn = getattr(self._views, "watch", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("self"), dict):
+            raise AssertionData(f"{self.name} has not reported a watch-stop with its own side yet")
+        own = data["self"]
+        try:
+            return SelfWatchView(
+                events=tuple((float(e[0]), str(e[1])) for e in own.get("events") or []),
+                bools=_bool_series(own.get("bools")),
+            )
+        except (IndexError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s own watch lacks {e}") from e
 
     def marker(self, ref_id: int) -> MarkerView:
         fn = getattr(self._views, "markers", None)
@@ -723,13 +793,15 @@ _ID_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale", "morph", "head_parts"},
+    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
+    _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
     EffectsView: {"left", "magnitude"},
+    WatchView: {"took", "sent", "ever"},
+    SelfWatchView: {"saw", "ever"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,

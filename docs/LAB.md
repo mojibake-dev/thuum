@@ -478,7 +478,13 @@ when no stack of the item carries one),
 `c.watched(other)` (the last watch-stop's actor that started where the
 server has `other`: `x, y, z`, `maxDisplacement`, `samples`, and
 `drainMs` and `drainEndMs`, how long its magicka fell in that game and when
-it last fell, which time a figure's stream there),
+it last fell, which time a figure's stream there; `took('staggerStart')`
+and `sent(...)`, how many of its stagger or recoil events of that name its
+graph took or was sent there, and `ever('IsStaggering')`, whether a graph
+bool the watch sampled was ever true),
+`c.watched_self()` (the player's own side of that watch: `saw(name)`, how
+many of its own animation events had that name, and `ever(name)` for its
+graph bools),
 `c.marker(<form id>)` (the client's last `markers {ids: [...]}` step: the
 map marker's `visible` and `canTravel` on that player's own map),
 `c.known(<form id>)` (the client's last `known {ids: [...]}` step: the
