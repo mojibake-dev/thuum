@@ -259,7 +259,12 @@ bounds on casts.
   Shout.GetNthSpell by callNative).
 - TS handler: consoleCommandsService's schemas gain teachword, unlockword
   and addshout (sent to the server); shoutService reports a shout (Observe);
-  sync/equipment.ts reads and equips a shout in the voice slot.
+  sync/equipment.ts reads and equips a shout in the voice slot; hitService
+  holds the player's spell hits while a shout's report is due (the shout's
+  spell hits on the frames after the release, before the report can be
+  read, and a hit the server sees before its shout has no cast to claim;
+  on the one reliable ordered channel a hit sent after the report arrives
+  after it).
 - Kill switch config key: none (the server's rule).
 
 ## Tests
@@ -341,7 +346,9 @@ the hook (the recovery at the release names the variation). Fork branch
 m2-shouts (from parity f828279f): 9579dbd2 and 98e97d9b the record, the
 console's word commands and the login; c2334252 libespm's SHOU; ac243dca
 the cast (wire-rules shouts, OnSpellCast's voice, OnHit's claim, the voice
-slot, shoutService, mp.get "shouts", ShoutsTest, the T2 session). Left:
+slot, shoutService, mp.get "shouts", ShoutsTest, the T2 session); eeb2c930
+a merge of m2-stagger (the shouts merge sweep runs b-stagger); d985e789
+the hits held for the report. Left:
 the fork pipeline (build and T0), T2, b-shout (drafted in the scratchpad,
 its own commit once green), the ledger rows at the merge (Actor.AddShout,
 Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
