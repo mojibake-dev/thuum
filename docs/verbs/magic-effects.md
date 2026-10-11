@@ -357,8 +357,16 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   client's side only: the effect resumed with its time on the wall clock
   (57 s left, 21 s after the restart, 0 at its end, the server's 0.6005 to
   0.2805), but c1's game stayed at 1.0 after the restart and its
-  reconnect, taking none of the server's health; x-reconnect-values
-  isolates that from this verb.
+  reconnect. x-reconnect-values 20261011-021436 (green): with no effect
+  running, a reconnected game takes the server's health (0.3095).
+  x-restart-effects-probe 20261011-021833 found the cause: the login, a
+  reconnect's included, sets the player's base values from its CreateActor
+  (remoteServer.ts, the isMe props), which dropped the held +100 (the
+  maximum 200 before the restart, 100 after), while MagicEffectsService
+  still counted it held; the fortify's end then took 100 the game no
+  longer had. Fixed on 58cbf09d: the service forgets what it holds when the
+  connection is accepted, and the login's MagicEffects puts the sums back
+  whole. Staged with god-mode on fork m2-god 35acc275.
 - Owner: agent.
 
 ## Status
