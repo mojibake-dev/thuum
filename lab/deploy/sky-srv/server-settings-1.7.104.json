@@ -17,7 +17,8 @@
     "/srv/skymp/esm/ccBGSSSE025-AdvDSGS.esm",
     "/srv/skymp/esm/_ResourcePack.esl",
     "/srv/skymp/esm/RaceCompatibility.esm",
-    "/srv/skymp/esm/rotfern.esp"
+    "/srv/skymp/esm/rotfern.esp",
+    "/srv/skymp/esm/LostGrimoire.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",
