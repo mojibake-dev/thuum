@@ -74,12 +74,45 @@ per hit.
   fStaggerBlockAttackMult -0.0001, fStaggerBlockAttackShieldBase 0.01,
   fStaggerBlockAttackShieldMult 0.001, fStaggerBlockingMult 0,
   fStaggerMassOffsetBase 2.1, fStaggerPlayerMassMult 2.5, fStaggerMin 0,
-  iStaggerAttackChance 50). UESP's 1.5 does not match fBlockSkillMult's 2.0,
-  and neither names fBlockMax: HYPOTHESIS which the engine uses, until the
-  Dynamic plan measures the engine's own blocked damage.
-- The block's cone: no setting named for it among the masters' GMSTs;
-  UNKNOWN, measured (Dynamic plan) before the server's 1 radian is kept or
-  replaced.
+  iStaggerAttackChance 50), and fArmorRatingBase 1.0, fArmorRatingMax 2.5.
+- The engine's own reading (thuum ghidra/notes/block-formula.md, the
+  re-analyst on 1.7.104 under Address Library IDs shared with 1.6.1170,
+  2026-10-10; HYPOTHESIS by rule 2 except where the lab agrees):
+  - the share, ID 26425, from the hit's damage adjustment (ID 44014): S =
+    fArmorRatingBase + (fArmorRatingMax - fArmorRatingBase) x Block / 100
+    (so UESP's 1.5); with a shield, fShieldBaseFactor + (S + ShieldPerks,
+    actor value 66) x the shield record's rating x fShieldScalingFactor /
+    100; without one, fBlockWeaponBase + S x the attacker's weapon damage x
+    fBlockWeaponScaling / 100 (the blocker's own weapon never enters); times
+    fBlockPowerAttackMult on a power attack; then the perk entry point
+    kModPercentBlocked; capped at fPlayerMaxResistance / 100 (85 in the
+    executable; the masters set none); the damage after armor times (1 -
+    share). fBlockSkillMult, fBlockMax, fBlockSkillBase,
+    fBlockAmountWeaponMult and fBlockAmountHandToHandMult are read nowhere.
+    The lab agrees: an Iron Shield stopped 50.0 percent at Block 15 to 20,
+    the formula 49.9 to 50.2 (x-block-probe2);
+  - the cone, ID 47297: fCombatHitConeAngle (35, the executable's; no
+    master sets it) each side of the blocker's heading, yaw only; the lab
+    agrees (no block at 45 degrees);
+  - arrows skip the cone: an arrow is a block candidate only when it strikes
+    the shield's collision body (ArrowProjectile::AddImpact, ID 43710), so a
+    raised sword never stops one;
+  - every blocked hit has the victim perform kActionBlockHit (ID 37707) and
+    a melee attacker that is not bashing perform kActionRecoil (ID 37708):
+    the lab's recoilStart in the attacker's own events;
+  - the stagger, ID 37710 (from the victim's hit processing, ID 38586): a
+    blocked hit, or any bash, with stagger above 0 always staggers, others
+    at iStaggerAttackChance; the magnitude the attack's stagger less a block
+    reduction (ID 26426), at least fStaggerMin; a bash on a blocker times
+    fStaggerBlockingMult, 0 in the masters, so it never staggers unless it
+    lands during the target's attack (then kActionLargeRecoil); it sets the
+    graph floats staggerMagnitude and staggerDirection and performs
+    kActionStaggerStart;
+  - stamina, ID 26430: a blocked hit drains share x the damage before armor
+    x fStaminaBlockDmgMult + stagger x fStaminaBlockStaggerMult (5 in the
+    executable) + fStaminaBlockBase.
+- The block's cone: fCombatHitConeAngle, above; the server's 1 radian
+  (57 degrees each side) was wider than the engine's 35.
 - A shield in the records: an ARMO whose biped slots include the shield's,
   BGSBipedObjectForm::BipedObjectSlot::kShield, 1 << 9 (CommonLibSSE-NG
   include/RE/B/BGSBipedObjectForm.h:22), which libespm's ARMO reader can
@@ -198,10 +231,10 @@ per hit.
 - x-block-probe 20261011-021114 (fork m2-effects 9e038edd, green):
   - a block raised by the graph (anim-event blockStart) is a block to the
     engine: c2's own game played blockAnticipateStart and blockHitStart at
-    c1's figure's swings, and c1's game, on c2's figure, recoilStart after
-    each of its three swings at the facing blocker (none from behind, none
-    at a lowered block): CONFIRMED that the attacker's game decides blocks
-    from the relayed animation;
+    c1's figure's swings, and c1's own events show recoilStart after each of
+    its three swings at the facing blocker (none from behind, none at a
+    lowered block): the attacker's recoil, kActionRecoil (above); CONFIRMED
+    that the attacker's game decides blocks from the relayed animation;
   - the engine's damage on the blocking figure in c1's game: 2.875, 2.938,
     2.875 a swing; the unblocked swings fell outside the watch (it keeps
     256 samples), so the blocked share is still open;
@@ -237,7 +270,14 @@ per hit.
 
 ## Status
 
-Doc written 2026-10-10, before any code.
+Doc written 2026-10-10, before any code. Building on fork branch m2-block,
+stacked on m2-god 35acc275: 7d438879 the rule (wire-rules block), 0ecbaed7
+the server (OnWeaponHit decides the block before the Papyrus OnHit event,
+the attacker's verdict logged and never trusted, the formula's tenth gone,
+the shield by its biped slot; BlockingTest), e911dd2b the engine's formula
+and cone (the re-analyst's reading). Left: CI, the stagger imposed on the
+victim's game and deathService's refusal narrowed, the bash's backing by
+its animation events, T2, b-block.
 
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated
