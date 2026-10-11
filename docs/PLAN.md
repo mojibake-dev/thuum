@@ -772,7 +772,18 @@ it carries a HYPOTHESIS tag.
      sent to clients that show them and keep the engine's own application
      out; potions and poisons as effects; Papyrus's ActiveMagicEffect and
      MagicEffect natives as the effects need them. Scenarios `b-potion`
-     and the exit's `b-magic-restart`.
+     and the exit's `b-magic-restart`. In the lab (2026-10-10): the
+     drinker's engine and the server agree while a drink runs, but both
+     gave a fortify back at its end (b-potion left 0.02 of 0.34), so the
+     player's engine applies no drink of its own and holds the server's
+     buffs (docs/verbs/magic-effects.md, Suppress); effects count on the
+     server's wall clock, as ADR-021's game time does. The poison on a
+     weapon became a verb of its own (below), blocked on playtest
+     thirteen's poison section (CLAUDE.md rule 8).
+  3a. poison: a poison on the weapon in the server's inventory (the hand
+     and the charges the playtest shows), a poisoned hit applying it
+     through the effect rule and spending a charge, both games agreeing.
+     Scenario `b-poison`.
   4. god-mode: TGM and TIM, flags the server's damage and death rules read.
   5. blocking: the attacker's blocked claim checked against the target's
      recorded block and facing, the shield test fixed, the bash's reach
