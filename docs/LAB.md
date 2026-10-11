@@ -381,7 +381,9 @@ client step records the server's position of that client afterwards in
 result.json (`pos`), and a driver step's answer rides in its `note`. The other client verbs run in lab-driver: move,
 equip, cast, activate, draw-weapon, anim-event {name} (an animation event
 on the player, such as attackStart: the engine's own swing, which hits
-what the engine's hit test picks), dump-state (with each actor's bounding
+what the engine's hit test picks), graph-float {name, value} (one of the
+player's behavior graph floats, as the engine sets staggerMagnitude and
+staggerDirection before its stagger; the note reads it back), dump-state (with each actor's bounding
 box: length, width, height), request-screenshot, craft (an open
 driver item that m0-forge specifies), tap-key (one DirectInput scan code
 through SKSE's Input.TapKey: it works the race menu, 208 Down for the next
@@ -399,7 +401,11 @@ negative control), close-menu
 TESModPlatform.CloseMenu; `name: "RaceSex Menu"` ends the race menu and
 skymp5-client sends its result), and watch-start / watch-stop (the
 client follows every actor near it at watch-start, by form id, each frame
-until watch-stop, and reports how far each got from where it began; for
+until watch-stop, and reports how far each got from where it began, with
+each one's stagger and recoil events as this game's engine or a relay sent
+them (the name, and whether its graph took the event once every hook had
+run: deathService refuses every figure's staggerStart) and the graph
+variables watch-start's {bools} names; for
 "the observer never saw X" checks that one dump-state would sample too
 late; its `self` is the player's own side over the same span, for timing
 what a screenshot is too slow to catch: magicka and health on each change,
