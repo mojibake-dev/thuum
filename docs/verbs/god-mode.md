@@ -143,7 +143,18 @@ target from a weapon or an effect, a buff's maximum still moving; no arrow
 spent by a god shooter; an immortal actor's health stopped at one point, its
 game told so; GodModeTest); b1d1e3dd the difftest session. The client
 already routes tgm and tim to the server (consoleCommandsService.ts,
-serverOnlyCommands), so no client build. Left: CI, T2, b-god.
+serverOnlyCommands), so no client build. CI green (fork pipeline 1189). T2
+(2026-10-10): the session's first draw had c2 step east of the spawn and
+swing at c1 behind it, so the hit cone refused the hit before god mode was
+reached (no StartCombat on the wire); redrawn as hostility's layout
+(b376d8e1), it showed the five expected differences, now declared
+(161d72f2): c1's console line, its game's SetGodMode, the fight c2's hit
+still begins (StartCombat), the legacy server's 3.7 percent hit, the fixed
+server's unchanged health. Merged m2-effects again (6aea7c78: the god gate
+kept on the effect rule's changes, the effect set sent before the values);
+clang-format 21.1.8 for the fork's Formatting check (2634d44c). Left: T2
+green on the merge (queued), b-god twice (scratchpad draft), the sweep with
+magic-effects.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (cited; HYPOTHESIS for the lab: the
