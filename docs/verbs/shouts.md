@@ -79,10 +79,10 @@ bounds on casts.
   - a cast comes as SpellCast with the engine's castingSource
     (magicSyncService.ts:105-121) and the server keeps a cast per hand, 2 the
     voice (PartOne.h:173; OnSpellCast clamps the source, ActionListener.cpp:
-    2390-2392). HYPOTHESIS: whether Skyrim Platform's spellCast event fires
-    for a shout, which spell it names (the variation's), and whether
-    OnSpellCast's equipped check passes a voice cast whose slot holds the
-    shout and whose cast names the variation's spell;
+    2390-2392). But a shout fires no spellCast: x-shout-probe
+    20261011-060059 recorded none in the shouter's game for Unrelenting
+    Force or Whirlwind Sprint, and the server logged no SpellCast, so today
+    a shout reaches the server not at all (Observe, below);
   - an observer's game casts a relayed spell from the figure
     (castSpellImmediate); HYPOTHESIS: whether that shows a shout (its
     animation and sound) and whether a push from it lands on the observer's
@@ -96,18 +96,27 @@ bounds on casts.
     typed they run in the caller's game alone: R3 by omission, a bug under
     the design law (a player could teach itself every word), closed here.
 - The movement: movement-speed's budget (wire-rules movement: 660 units a
-  second, a 2048 burst) against Whirlwind Sprint's dash (HYPOTHESIS: its
-  length per variation, measured).
+  second, a 2048 burst) against Whirlwind Sprint's dash: one word carried
+  the shouter 1052 units in x-shout-probe, inside the burst, and the server
+  took it (no move back; the observer's game showed the figure travel
+  1053). Two and three words: HYPOTHESIS (longer; unmeasured).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
-- Hook point: none new for the cast (spell-cast's SpellCast with
-  castingSource 2). For the record, none: the server is the only writer in
-  this slice.
-- SP filter: spell-cast's.
-- Data captured: the shout in the voice slot (equipment), the cast's spell
-  (the variation's), the caster's position (spell-cast's record).
-- Side effects of hooking here: none new.
+- Hook point: OPEN. Skyrim Platform's spellCast does not fire for a shout
+  (x-shout-probe), so spell-cast's SpellCast never carries one. What the
+  shouter's game does show: its player's animation events shoutStart, then
+  the variation's breath (MT_BreathExhaleShort for one word), which the
+  animation relay already sends the server (R2, recorded). Candidates: the
+  server reads a shout from that relay (the equipped shout, the variation
+  by the breath event), or the client reports the voice caster's cast
+  (Skyrim Platform's or a native's hook on the voice ActorMagicCaster) as
+  a SpellCast with castingSource 2. A probe of two and three words' events
+  decides between them.
+- SP filter: the player's own (0x14).
+- Data captured: the shout in the voice slot (equipment), the variation,
+  the caster's position.
+- Side effects of hooking here: none expected.
 
 ## Impose (observers render the server's decision)
 
@@ -224,6 +233,21 @@ bounds on casts.
   it; c2's player not pushed (a figure's spell lands nothing there); a dash
   of several hundred units sent back past the budget's burst.
 - Owner: agent.
+- x-shout-probe 20261011-060059 (on the m2-block server, lab-driver
+  eff3448):
+  - the console's AddShout, TeachWord and UnlockWord ran in c1's game alone
+    ("Player now knows the Word 'Fus'", "The Word 'Fus' is now
+    unlocked"): CONFIRMED, the hole Suppress closes;
+  - Unrelenting Force, one word: c1's game played shoutStart and
+    MT_BreathExhaleShort and fired no spellCast; its engine sent
+    staggerStart to c2's figure, which deathService blanked; c2 never
+    moved, on the server or in its own game, and the server heard nothing:
+    the shout reached nobody;
+  - Whirlwind Sprint, one word: 1052 units, taken by the server inside the
+    burst, the figure travelling as far in c2's game; again no spellCast.
+  Next: which events two and three words fire (the hook, Observe), a dash
+  of three words against the burst, and whether c2's game plays the
+  figure's shoutStart (its visual) from the relay.
 
 ## Status
 

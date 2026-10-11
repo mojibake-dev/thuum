@@ -129,10 +129,12 @@ second stagger while it is staggered (the engine's own rule).
   0.13 if the bash path takes the player's mass multiplier too (unread; the
   rule takes it unscaled, as the notes read ID 26422); on a blocking
   player, times fStaggerBlockingMult 0: none.
-- The victim's own game: HYPOTHESIS that a figure's power attack does not
-  stagger the player there (a figure's hit lands nothing in that game,
-  x-block-probe), measured below; the engine's gate would stagger a player
-  on any hit with stagger above 0.
+- The victim's own game does not stagger from a figure's power attack:
+  CONFIRMED (x-stagger-probe 20261011-055806: the victim's game recorded
+  the hit taken, but no staggerStart reached its player and IsStaggering
+  stayed false, unblocked and blocked), though the engine's gate would
+  stagger a player on any hit with stagger above 0 (the figure's hit there
+  carries none, or never reaches the reaction).
 - TiltedEvolution (a map only, ADR-005): staggerMagnitude,
   staggerDirection and IsStaggering are among its synced graph variables
   (block-formula.md, its last hypothesis); no stagger hook.
@@ -174,9 +176,8 @@ second stagger while it is staggered (the engine's own rule).
   own verdict (deathService's refusal, kept for engine-started staggers).
 - How: the sendAnimationEvent hook's filter, narrowed by the allow mark.
 - Release condition: none.
-- Side effects: HYPOTHESIS (if the victim's own game staggers its player
-  from a figure's hit, that stagger is the attacker's game's verdict and
-  needs refusing too; the probe looks for one).
+- Side effects: none (the victim's own game does not stagger from a
+  figure's hit, CONFIRMED above, so nothing more needs refusing there).
 
 ## Message contract
 
@@ -270,6 +271,27 @@ second stagger while it is staggered (the engine's own rule).
   stagger plays and relays and is blanked on c1's figure; c1's engine
   blanks its own stagger of the figure.
 - Owner: agent.
+- x-stagger-probe 20261011-055806 (on the m2-block server, lab-driver
+  eff3448), each expectation CONFIRMED:
+  - a power attack (c1, standing: attackPowerStartInPlace; the server
+    backed it, 12.656 of c2's 100): c1's engine sent staggerStart to c2's
+    figure 15 ms before its hit, which deathService blanked (not taken);
+    c2's own game recorded the hit taken and did not stagger;
+  - the same on c2's raised shield (the server's share 0.502 x 0.66): c1's
+    engine again sent the figure a staggerStart (a blocked hit always
+    staggers), blanked; c2's own game played blockAnticipateStart and
+    blockHitStart and no stagger, and showed c1's figure recoiling;
+  - c2 staggered itself with the graph's floats and the event
+    (staggerMagnitude 0.24, staggerDirection 0, staggerStart): its game
+    played a stagger (IsStaggering for 1.7 s) and its client relayed the
+    staggerStart, which c1's game blanked on the figure, the refusal this
+    verb narrows;
+  - the driver's bashStart is no bash to the engine: both "bashes" landed
+    as plain swings (6.328, then the shield's 0.502), so b-stagger bashes
+    by the game's own keys (block held, then attack).
+  Left for the m2-stagger build: the native's own call (ID 37710) staggering
+  the player at the server's word, the relay playing on the figure once
+  allowed, and which stagger the figure plays with its floats unset.
 
 ## Status
 
@@ -279,16 +301,22 @@ m2-stagger, stacked on m2-block f828279f: 55acfc49 the rule (wire-rules
 stagger, bridged, tests), c73e423a the server (libespm's WEAP stagger,
 RACE mass and ATKD offsets and the stagger GMSTs; AnimationSystem's last
 attack by name; OnWeaponHit's stagger snippet after the damage;
-StaggerTest). Left: the client native (TESModPlatform.Stagger over ID
-37710) and deathService's narrowed refusal, x-stagger-probe (chained on
-the lab after blocking's), T2, b-stagger.
+StaggerTest), 742044fe the client (TESModPlatform.Stagger over ID 37710,
+AE only; deathService lets a relayed staggerStart through), acf5627c the
+difftest session. T0 green (fork pipeline 1223: 334 test cases);
+Windows run 38112498776 green; T2 green (2026-10-10 23:22: the session's
+TESModPlatform.Stagger(the player, 0.24, c1's figure), declared from the
+formula, held). Left: the lab on this build (the native and the relay),
+b-stagger.
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (the re-analyst's reading; the lab
+      confirmed the victim's game, the attacker's engine and the relay)
+- [x] server logic + T0
+- [x] message + validator (same commit): no message change (SpSnippet)
+- [ ] native hook + T1 (TESModPlatform.Stagger built; the lab's check
+      left)
+- [x] TS handler (deathService's narrowed refusal; the lab's check left)
+- [x] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] ledger and suppression registry updated

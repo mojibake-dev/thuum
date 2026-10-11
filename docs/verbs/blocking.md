@@ -276,14 +276,31 @@ Rate limit / bounds: OnHit's own (melee's and marksman's).
     7); the phase's other reading (74.56) fell on a server correction of
     the figure's health, not a swing;
   - c2's own game played its block-hit animations for both blocks.
-- Open: the weapon line. x-block-probe2's 27 percent took its unblocked
-  swings with the shield worn (armor on the figure) and its weapon swings
-  without, so the two do not compare; the re-analyst's line gives 31.4 to
-  31.8 percent with the Iron Sword's 7. x-weapon-block-probe (thuum
-  scratchpad, by path): c2 holds the Iron Sword alone throughout; unblocked,
-  sword-blocked and unblocked again, two swings and one watch of c1's a
-  phase; the ratio of the blocked swings to the unblocked ones is 1 minus
-  the engine's share. Owner: agent, on the m2-block server before b-block.
+- The weapon line, measured: x-block-probe2's 27 percent took its
+  unblocked swings with the shield worn (armor on the figure) and its
+  weapon swings without, so the two did not compare. x-weapon-block-probe
+  20261011-054315 (fork m2-block f828279f; c2 with the Iron Sword alone
+  throughout; unblocked, sword-blocked and unblocked again, two swings and
+  one watch of c1's a phase): the engine's damage on c2's figure in c1's
+  game was 6.188 and 6.125 unblocked, 4.25 and 4.25 blocked, 6.125 and
+  6.188 unblocked again (at a million health a float's step is 1/16, so
+  each reading is good to 0.06): about 31 percent stopped, 30 to 32 within
+  the step, the re-analyst's line giving 31.4 to 31.7 (S from the figure's
+  Block, 0 to 15). CONFIRMED.
+- T2, difftest session blocking (fork m2-block f828279f, T2 2026-10-10
+  22:42): every declaration, written from the formula before the run, held
+  to the digit: the legacy server's tenths (0.996288, then 0.992576)
+  against the fixed server's whole claimed-but-unraised hit (0.96288) and
+  its empty-handed share of the second (0.936896).
+- b-block green twice (thuum 5eebce8, runs 20261011-054528 and -054921):
+  the server read 0.937 (an arrow on the raised shield), 0.8701 (on the
+  raised sword), 0.9685 (a swing on the shield facing, c2's Block 20),
+  0.9367 (from behind), 0.9367 (45 degrees off), 0.9557 (the sword alone):
+  each the formula's number, c2's own game 0.006 to 0.009 above (its own
+  regeneration).
+- x-stagger-probe 20261011-055806 (on the m2-block server) also showed a
+  blocked power attack's share on the server: 0.502 x fBlockPowerAttackMult
+  0.66 = 0.33132 (12.656 down to 8.463).
 
 ## Status
 
@@ -294,16 +311,25 @@ the attacker's verdict logged and never trusted, the formula's tenth gone,
 the shield by its biped slot; BlockingTest), e911dd2b the engine's formula
 and cone (the re-analyst's reading). 1e0e89bf the bash's backing
 (bashStart among the attacker's events within 3 s; E_HIT_BASH). f828279f
-the difftest session (fork pipeline 1213). Left: T2, x-weapon-block-probe,
-b-block (drafted in thuum's scratchpad), all chained after the m2-god merge
-sweep (2026-10-10 evening); the stagger went to its own verb.
+the difftest session (fork pipeline 1213). The m2-god merge put m2-block
+on parity 35acc275 plus these five; its merge sweep started 2026-10-10
+23:35 (scratchpad merge-m2-block.sh). The stagger went to its own verb.
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (the re-analyst's reading,
+      ghidra/notes/block-formula.md; the lab confirmed the shield's share,
+      the weapon line and the cone)
+- [x] server logic + T0 (wire-rules block and damage; BlockingTest,
+      HitTest; fork pipeline 1213)
+- [x] message + validator (same commit): no message change
+- [x] native hook + T1: none
+- [x] TS handler: none
+- [x] T2 green (2026-10-10 22:42 on f828279f, every session identical up
+      to its declarations, blocking's from the formula)
+- [x] T3 scenario green: b-block (thuum 5eebce8, awaiting Eli's review)
+      green twice; HYPOTHESIS left: an arrow counts as blocked by any raised
+      shield in the cone, where the engine wants a strike on the shield's
+      body (ArrowProjectile::AddImpact, ID 43710), which the server cannot
+      see
+- [x] ledger and suppression registry updated: no native; no suppression
+- [ ] merged: the sweep on fork m2-block f828279f (running)

@@ -804,15 +804,32 @@ it carries a HYPOTHESIS tag.
      (2026-10-10, fork m2-block): the server decides blocks and their share
      by the engine's own formula and cone (thuum ghidra/notes/
      block-formula.md, confirmed in the lab where measured), the bash backed
-     by its start; the stagger moved to 5a.
+     by its start; the stagger moved to 5a. T2 green (2026-10-10, its
+     session's declarations from the formula held to the digit), the
+     weapon line measured (about 31 percent stopped, the formula's 31.4,
+     x-weapon-block-probe 20261011-054315), b-block (thuum 5eebce8,
+     awaiting Eli's review) green twice with every server value the
+     formula's; the merge sweep on fork m2-block f828279f started 23:35.
   5a. stagger: a bash's or a blocked power attack's stagger imposed on the
      victim's game and shown to observers (the engine's gate and magnitude
      in ghidra/notes/block-formula.md; deathService refuses every figure's
-     staggerStart today), the roadmap's "Anims triggered by enemy".
+     staggerStart today), the roadmap's "Anims triggered by enemy". Built
+     on fork m2-stagger (2026-10-10: the rule, the server's snippet, the
+     client native TESModPlatform.Stagger over ID 37710, deathService's
+     narrowed refusal; T0 and T2 green). x-stagger-probe 20261011-055806
+     confirmed the victim's own game never staggers from a figure's hit,
+     the attacker's engine tries to stagger the figure (blanked), and a
+     self-started stagger plays and relays. Left: the native and the relay
+     in the lab, b-stagger (docs/verbs/stagger.md).
   6. shouts: words of power and their unlocks as server state (SHOU and
      WOOP read by libespm), the shout cast on spell-cast's path, the
      cooldown the server's; the movement budget measured against Whirlwind
-     Sprint and Unrelenting Force (carried from M1).
+     Sprint and Unrelenting Force (carried from M1). Doc 2026-10-10
+     (docs/verbs/shouts.md). x-shout-probe 20261011-060059: a shout fires
+     no Skyrim Platform spellCast, so it reaches the server not at all
+     today (the hook is open); the console's TeachWord and UnlockWord run
+     in the caller's game alone; one word of Whirlwind Sprint (1052 units)
+     fits the burst.
   7. Lag compensation (Bernier 2001) only if a playtest shows hits refused
      inside M1's slack: positions kept per actor, rewound by the attacker's
      latency.
