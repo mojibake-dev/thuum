@@ -1,0 +1,71 @@
+# M2 exit, magic-effects (docs/verbs/magic-effects.md): a running effect
+# outlasts a server restart with the time it has left on the world's clock
+# (the server's wall clock, as thuum ADR-021's game time: a restart's
+# downtime counts), on the server and in the drinker's own game. c1 drinks a
+# Fortify Health (FortifyHealth05, Skyrim.esm ALCH 0xFF9FC: AlchFortifyHealth
+# 0x3EAF3, 100 for 60 s; lab/esm.py) and the server restarts at once; both
+# clients reconnect (an in-game client keeps its world, and its game still
+# holds the server's 100 on its maximum, which the server's MagicEffects
+# names again at the login). The restart takes about 36 s from its step to
+# the reconnected assert (a-restart-persistence 20261010-131100), so the
+# effect has about 20 s of its 60 left: between 10 and 30 counts. c1's game
+# agrees with the server's health throughout, and at the end both give the
+# 100 back once: health is set to 0.6 of 200 (twice: a regenerating client's
+# late falls can undo a lone set, b-marksman) ten seconds or so before the
+# end, about 0.2 to 0.45 after it, against 0.02 when the game and the server
+# each gave it back (b-potion 20261011-004053) or 0.7 if nothing came back.
+# c2 photographs c1's figure after the restart (the fortify's shader, from
+# the MagicEffects c2 hears at its login). Assertions are evaluated by
+# lab-api only (ADR-009).
+id: b-magic-restart
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: give {item: "0xff9fc", count: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: equip {formId: 0xff9fc}
+  - wait: 3
+  - assert:
+      - server.effects(c1).left("0x3eaf3") > 50
+      - server.effects(c1).magnitude("0x3eaf3") == 100
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 5
+  # after the restart: the effect with its time left on the world's clock
+  - assert:
+      - server.effects(c1).left("0x3eaf3") > 10
+      - server.effects(c1).left("0x3eaf3") < 30
+      - server.effects(c1).magnitude("0x3eaf3") == 100
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
+  - c2: screenshot
+  - wait: 4
+  - c1: set-percentages {health: 0.6}
+  - wait: 2
+  - c1: set-percentages {health: 0.6}
+  - wait: 2
+  - assert:
+      - server.effects(c1).left("0x3eaf3") > 2
+      - server.actor(c1).healthPercentage > 0.58
+      - server.actor(c1).healthPercentage < 0.68
+  # the end: the maximum and the value back by 100, once
+  - wait: 16
+  - assert:
+      - server.effects(c1).left("0x3eaf3") == 0
+      - server.actor(c1).healthPercentage < 0.5
+      - server.actor(c1).healthPercentage > 0.15
+      - server.actor(c1).isDead == false
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
