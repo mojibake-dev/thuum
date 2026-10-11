@@ -120,8 +120,15 @@ bounds on casts.
   SpellCast with castingSource 2 and that variation's spell, which the
   server validates against its record (spell-cast's path: the shout in the
   voice slot, the variation's word unlocked, the recovery passed) and
-  records so the variation's hits count. HYPOTHESIS until a probe reads
-  the recovery after each variation.
+  records so the variation's hits count. x-shout-probe3 (20261011-221358,
+  the voice step about 2 s after each release): before any shout 0, the
+  shout's three 15, 20 and 45 (ShoutRecoveryMult 1); after a 0.2 s hold
+  18.3 left, so 20, two words (one word needs a shorter tap than the
+  driver's); a second shout inside that recovery never fired (1.6 left,
+  the first's); after a 1.5 s hold 44.0 left, so 45, three words.
+  CONFIRMED for two and three words: read at the release, the recovery
+  names the variation, the three set at least 5 s apart; one word
+  unobserved.
 - The watcher's game already shows the shout: c2's game played c1's
   figure's shoutStart each time (x-shout-probe2, the relay); the push
   reached c2 not at all (its position unchanged), the effect's slice.
