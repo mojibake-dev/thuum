@@ -306,8 +306,18 @@ AE only; deathService lets a relayed staggerStart through), acf5627c the
 difftest session. T0 green (fork pipeline 1223: 334 test cases);
 Windows run 38112498776 green; T2 green (2026-10-10 23:22: the session's
 TESModPlatform.Stagger(the player, 0.24, c1's figure), declared from the
-formula, held). Left: the lab on this build (the native and the relay),
-b-stagger.
+formula, held). Staged 2026-10-11 01:41 for b-stagger: the server sent
+c2's game TESModPlatform.Stagger(the player, 0.24, c1's figure) at the
+power attack (its log), and c2's game never staggered (20261011-084217,
+-084440, red): x-stagger-snippet 20261011-084719 read c2's console,
+"SpSnippet TESModPlatform Stagger failed TypeError: Cannot read
+properties of undefined (reading 'apply')": a snippet's global function
+runs through Skyrim Platform's bindings, which come from its own dump and
+lack its TESModPlatform natives (the ledger's "not in SP's dump"), so any
+server snippet to one of them failed. c9762817: spSnippetService calls an
+unbound global by name through callNative (the update context snippets
+run in), as magicEffectsService calls its natives. Left: the lab on that
+client (Windows run 38126017003), b-stagger.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (the re-analyst's reading; the lab
