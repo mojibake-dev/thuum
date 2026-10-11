@@ -214,10 +214,26 @@ per hit.
     deals nothing there;
   - the bash: bashStart then recoilStart in c1's game, blocked on the
     server; no stagger anywhere.
-- Next, x-block-probe2: one watch per phase (the unblocked damage, so the
-  share), the cone at 45, 90 and 135 degrees off c2's facing, a block with
-  the sword alone (the weapon formula), a power attack on the shield
-  (attackPowerStartInPlace, damage-flags' event).
+- x-block-probe2 20261011-031501 (fork m2-god 35acc275, the server's old
+  block logic; one watch of c1's per phase; the engine's damage on c2's
+  figure in c1's game):
+  - shield block facing: 2.875 and 2.875 (recoil each); unblocked facing:
+    5.688 and 5.75; so the Iron Shield (rating 20) at c2's Block stopped
+    50.0 percent (UESP's formula gives 50.2 at Block 20, profile 2 being
+    an Orc, 49.9 at 15; HYPOTHESIS the exact terms, the re-analyst's
+    ghidra/notes/block-formula.md to settle);
+  - the cone: turned 45, 90 and 135 degrees off c1, a raised shield blocked
+    nothing (5.75, no recoil), so the engine's cone is under 45 degrees,
+    while the server's 1 radian (57) still blocked the 45 degree swing
+    (0.6328 in its log): a real disagreement for the rule to fix;
+  - a power attack sent as attackPowerStartInPlace hit as a plain swing
+    (2.875 on the shield, the server's flag not backed): no power attack
+    measured; the multiplier waits for a real one (a held key);
+  - a block with the sword alone: 4.188 against 5.75, about 27 percent
+    stopped (UESP's weapon formula gives about 31.8 with the Iron Sword's
+    7); the phase's other reading (74.56) fell on a server correction of
+    the figure's health, not a swing;
+  - c2's own game played its block-hit animations for both blocks.
 
 ## Status
 
