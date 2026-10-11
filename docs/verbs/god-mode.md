@@ -152,18 +152,19 @@ reached (no StartCombat on the wire); redrawn as hostility's layout
 still begins (StartCombat), the legacy server's 3.7 percent hit, the fixed
 server's unchanged health. Merged m2-effects again (6aea7c78: the god gate
 kept on the effect rule's changes, the effect set sent before the values);
-clang-format 21.1.8 for the fork's Formatting check (2634d44c). Left: T2
-green on the merge (queued), b-god twice (scratchpad draft), the sweep with
-magic-effects.
+clang-format 21.1.8 for the fork's Formatting check (2634d44c). T2 green
+on the merge (6252f251, 2026-10-10 19:38, every session identical up to its
+declarations). Staged with magic-effects on m2-god 35acc275 for b-god (its
+first run) and the joint merge sweep (scratchpad merge-m2-god.sh).
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (cited; HYPOTHESIS for the lab: the
       game's own console text, the engine's TIM at no health, and the game
       keeping neither flag in a save)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
+- [x] server logic + T0
+- [x] message + validator (same commit): no message change
+- [x] native hook + T1: none (Debug.SetGodMode by snippet)
+- [x] TS handler: none (the client already routes tgm and tim)
+- [x] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] ledger and suppression registry updated

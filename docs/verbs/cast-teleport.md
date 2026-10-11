@@ -198,7 +198,16 @@ units, for the two positions' age).
 ## Status
 
 Doc written 2026-10-10, before any code. The Lost Grimoire layer is on thuum
-branch lostgrimoire (6a797a9), held until after playtest thirteen.
+branch lostgrimoire (6a797a9), held until after playtest thirteen. Fork
+branch m2-teleport (from parity 45839102): 2658f38e the rule (wire-rules
+teleports reads castTeleports; movement's cast jump, 5 s, reach plus 256;
+bridged; tests), 67c008e8 the server (ScampServer passes the setting,
+PartOne resolves a spell's FormDesc, OnSpellCast permits the jump and relays
+nothing, MovementValidation takes the landing; CastTeleportTest). CI green
+(fork pipeline 1203); T2 green on the existing sessions (2026-10-10 19:53;
+the setting is empty there, so nothing changes). Left: the layer on the lab,
+x-teleport-probe (the reach and the wait), the setting's reach, the T2
+session, b-teleport.
 
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated
