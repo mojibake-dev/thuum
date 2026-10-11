@@ -56,7 +56,7 @@ flowchart LR
 | sky-agent | 703 | 10.10.70.13 | reserved, not built | (M1) |
 | tpl-sky-client | 710 | 10.10.70.20 | Windows 11 template | template |
 | sky-c1 | 711 | 10.10.70.21 | linked clone + GPU | on demand |
-| sky-c2 | 712 | 10.10.70.22 | reserved | (M2) |
+| sky-c2 | 712 | 10.10.70.22 | linked clone + GPU | on demand |
 | sky-build | 720 | 10.10.70.30 | reserved Windows build box | (fallback) |
 
 VLAN 70, SDN zone `sky`, bridge `vsky`, subnet 10.10.70.0/24, gateway

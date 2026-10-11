@@ -142,11 +142,12 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   with their remaining seconds, sent to the actor's owner and its
   listeners whenever the set changes, and in full when a listener first
   sees the actor. Each client shows each effect on that actor in its game
-  (the player or a figure): the effect's hit shader through
-  ApplyEffectShader and its hit art through ApplyArtObject (one new client
-  native, TESModPlatform.ApplyEffectVisuals, R3) for the remaining
-  seconds, and the hit sound once at the start. A game skips the effects
-  its own engine already shows: the drinker's own potion.
+  (the player or a figure): the effect's hit shader through Papyrus
+  (MagicEffect.GetHitShader, EffectShader.Play) for the remaining seconds;
+  no new native for it, and the hit art (an ARTO, which no Papyrus call
+  plays) and the hit sound wait for a playtest to want them. The
+  drinker's own drinks show the same way, since its engine applies none
+  (Suppress).
 - Visual without simulation achieved by: shaders and art only; no
   ActiveEffect is made in any game for a server effect, so nothing there
   changes a value.

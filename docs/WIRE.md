@@ -117,12 +117,21 @@ renet channels, configured in `wire-transport::channels`:
 
 | Channel | renet SendType | Carries |
 | --- | --- | --- |
-| 0 `ReliableOrdered` | ReliableOrdered | session, ownership, inventory, quests, chat, snippets |
-| 1 `ReliableUnordered` | ReliableUnordered | effects apply/remove, container deltas, hits |
-| 2 `Unreliable` | Unreliable | movement, animation events, aim |
+| 0 `ReliableOrdered` | ReliableOrdered | every send its sender marks reliable |
+| 1 `ReliableUnordered` | ReliableUnordered | the default of the reserved M0 families only (Hit, HostedActor, InventoryApply), which no sender uses today |
+| 2 `Unreliable` | Unreliable | every send marked unreliable (movement, animation, a client's ChangeValues) |
 
-SkyMP's existing RakNet reliability choices map onto these without new
-semantics; the port of `Networking.cpp` is a table, not a design.
+SkyMP's senders choose per send (`reliable` true or false), and
+`wire-transport::channels::for_send` maps that choice: reliable to channel 0,
+unreliable to channel 2 (SkyMP's server sent reliable as RELIABLE_ORDERED and
+its client as RELIABLE; ordered only adds ordering, ADR-019). Channel 1 is
+the per-family default for the M0 messages, which have no JSON form and are
+never sent; the table this section once gave (effects, container deltas and
+hits on channel 1) was the plan, not the code, as the architecture diagram's
+survey found (docs/architecture/thuum-system.drawio, 2026-10-10). One
+consequence: messages a sender marks reliable keep their order relative to
+each other, which magic-effects relies on (MagicEffects before the
+ChangeValues of the same change).
 
 Authentication: netcode connect tokens. The lab runs `Unsecure`. A public
 server runs `Secure` with a private key held by the server process and a
