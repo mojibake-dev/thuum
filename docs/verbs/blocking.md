@@ -332,4 +332,6 @@ on parity 35acc275 plus these five; its merge sweep started 2026-10-10
       body (ArrowProjectile::AddImpact, ID 43710), which the server cannot
       see
 - [x] ledger and suppression registry updated: no native; no suppression
-- [ ] merged: the sweep on fork m2-block f828279f (running)
+- [x] merged: the sweep on fork m2-block f828279f went 36 of 36 green with
+      no rerun (runs 20261011-062658 to -081239); fork parity fast-forwarded
+      to f828279f (2026-10-11 01:13), both clones' clean-m1 promoted

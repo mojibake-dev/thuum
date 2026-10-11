@@ -809,7 +809,10 @@ it carries a HYPOTHESIS tag.
      weapon line measured (about 31 percent stopped, the formula's 31.4,
      x-weapon-block-probe 20261011-054315), b-block (thuum 5eebce8,
      awaiting Eli's review) green twice with every server value the
-     formula's; the merge sweep on fork m2-block f828279f started 23:27.
+     formula's. DONE 2026-10-11: the merge sweep on fork m2-block
+     f828279f went 36 of 36 green with no rerun (runs 20261011-062658 to
+     -081239); fork parity fast-forwarded to f828279f and both clones'
+     clean-m1 promoted.
   5a. stagger: a bash's or a blocked power attack's stagger imposed on the
      victim's game and shown to observers (the engine's gate and magnitude
      in ghidra/notes/block-formula.md; deathService refuses every figure's
