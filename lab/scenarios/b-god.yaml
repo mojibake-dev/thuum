@@ -1,0 +1,115 @@
+# M2, god-mode (docs/verbs/god-mode.md): an admin's TGM takes no damage from
+# another player and spends no arrow, and its own game is in god mode too;
+# TGM again restores both; TIM takes damage but stops at one point instead
+# of a death; a player's TGM is refused. Both players get a Long Bow
+# (Skyrim.esm 0x3B562) and ten iron arrows (0x1397D), and c2 learns Firebolt
+# (0x12FD0, 25 damage) through the server (learn-spell); ids from lab/esm.py,
+# as in b-marksman and b-spell. c2 stands 250 units south of c1 facing it,
+# so its full-draw arrow hits c1 for 12.992 of 100 (b-marksman's number:
+# 0.87008) and its Firebolt for 25. Health resets are made twice and
+# checked, since a regenerating client's late falls can undo a lone reset
+# (b-marksman). The lab makes every player an owner, so c2 is made a player
+# (staff-rank 0) for the refusal. Each shot and cast follows the driver's
+# draw-weapon, never a tap: a tap with a drawn bow looses a weak arrow. Both
+# players go back on their marks before the arrow that follows the Firebolt
+# (one run of three had that arrow fly by c1). Assertions are evaluated by
+# lab-api only (ADR-009).
+id: b-god
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: give {item: "0x3b562", count: 1}
+  - c1: give {item: "0x1397d", count: 10}
+  - c2: give {item: "0x3b562", count: 1}
+  - c2: give {item: "0x1397d", count: 10}
+  - c2: learn-spell {spellId: 77776}
+  - wait: 4
+  - c1: console {text: "player.equipitem 3b562"}
+  - c1: console {text: "player.equipitem 1397d"}
+  - c2: console {text: "player.equipitem 3b562"}
+  - c2: console {text: "player.equipitem 1397d"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 90]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  # god mode on: c2's arrow and Firebolt change nothing
+  - c1: console {text: "tgm"}
+  - assert:
+      - c1.printed("god mode on")
+  - c2: draw-weapon
+  - wait: 2
+  - c2: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.actor(c1).healthPercentage > 0.99
+      - c1.state.healthPercentage > 0.99
+  # c1 shoots level east: no arrow spent
+  - c1: draw-weapon
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 33
+  - c2: console {text: "player.equipspell 12fd0 right"}
+  - wait: 2
+  - c2: draw-weapon
+  - wait: 2
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.actor(c1).healthPercentage > 0.99
+      - c1.state.healthPercentage > 0.99
+  # god mode off: c2's arrow hurts again, c1's shot spends an arrow
+  - c1: console {text: "tgm"}
+  - assert:
+      - c1.printed("god mode off")
+  # both back on their marks: in 20261011-032138 c2's arrow after the
+  # Firebolt flew by c1 (the shot taken at full draw, no hit reported)
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 90]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 3
+  - c2: console {text: "player.equipitem 3b562"}
+  - wait: 2
+  - c2: draw-weapon
+  - wait: 2
+  - c2: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.actor(c1).healthPercentage < 0.89
+      - server.actor(c1).healthPercentage > 0.86
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.02
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.inventory(c1).count("0x1397d") == 32
+  # immortal: a lethal arrow leaves one point
+  - c1: console {text: "tim"}
+  - assert:
+      - c1.printed("immortal mode on")
+  - c1: set-percentages {health: 0.05}
+  - wait: 2
+  - c1: set-percentages {health: 0.05}
+  - wait: 2
+  - assert:
+      - server.actor(c1).healthPercentage < 0.06
+  - c2: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - assert:
+      - server.actor(c1).isDead == false
+      - server.actor(c1).healthPercentage > 0
+      - server.actor(c1).healthPercentage < 0.03
+      - c1.state.isDead == false
+  # a player may not
+  - c2: staff-rank {rank: 0}
+  - c2: console {text: "tgm"}
+  - assert:
+      - c2.printed("Not enough permissions")
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
