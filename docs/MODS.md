@@ -173,6 +173,53 @@ client's button unvalidated (PapyrusMessage.cpp:3); and no effect script
 runs on the server yet (docs/verbs/magic-effects.md leaves scripted effects
 for a later slice).
 
+## Lost Grimoire - Teleportation (found 2026-10-10)
+
+Not one of the three stretch mods: the teleport Eli means ("a projectile
+teleport ... it casts like one") turned out to be Lost Grimoire's, not
+Apocalypse's. apocrypha read it, read-only (the 07-22 copy of Eli's
+rotfern save on the Mac, Fenestrate's archive inventory, and the mods'
+archives pulled from Nexus at Fenestrate's versions):
+
+- **In the save.** Of 35 magic favorites, "Teleportation"
+  (LostGrimoire.esp 0A86DF, GRIM_SPELL_ALT50_Teleportation) on hotkey 7.
+  The other teleports there: Apocalypse's Ghostwalk (self, back to its cast
+  point), Mysticism's Recall (MysticismMagic.esp 45536D, self, to a mark),
+  and Tel Solanum.esp 03746F (Eli's own recall spell).
+- **The mod.** Lost Grimoire SSE, Nexus 4455. Fenestrate has v1.6 (file
+  746543, "Lost Grimoire-4455-1-6-1777325819.zip", md5
+  9ff6e8c0ba4be4689406305ac509ee89; Nexus is at 1.8). LostGrimoire.esp is
+  a full plugin (masters Skyrim, Update, Dawnguard, HearthFires,
+  Dragonborn) with two BSAs.
+- **The spell.** SPEL 0A86DF: Alteration, master tier, cost 135,
+  fire-and-forget, delivered at a target location, SPIT range 160 (its
+  unit unchecked), no projectile, no conditions. Its effect, MGEF 0A86DE,
+  is archetype 43 (Spawn Scripted Ref) with explosion EXPL 0A86DD, whose
+  placed object is ACTI 0A86DC (GRIM_ACT_ALT_TeleportationMarker).
+- **The move.** The marker's script (GRIM_ALT_TeleportationMarker), on
+  load: the player's three angles read, PlayerRef.SetGhost(true), an image
+  space modifier and a vanish effect, Utility.Wait(0.12),
+  PlayerRef.MoveTo(self), SetAngle back, SetGhost(false), an appear effect
+  and a sound, then the marker disables and deletes itself. So the engine
+  places one marker where the cast lands, and the mod's script moves the
+  player onto it, all in the caster's game.
+- **A gate the spell does not use.** QUST 2725D0 (GRIM_TeleportManager)
+  answers GetCanTeleport() false during some quests and places (the
+  brawl, Sovngarde, Cidhna Mine and others); neither the spell nor its
+  effect references it.
+
+What it needs from thuum (the shape PLAN gives a cast teleport): the
+caster's own game does the teleport, engine and script, nothing
+reimplemented; the server knows the spell teleports (records cannot say
+so: other Spawn Scripted Ref spells place runes and anchors) and, when it
+records the cast (spell-cast), allows that caster one jump within the
+spell's reach, as COC's permitted jump does (wire-rules movement), so the
+movement rule takes the arrival instead of sending the player back. A
+recall to a mark (Mysticism's, Tel Solanum's) has no reach to bound: the
+server would record where its Mark was cast and allow a jump to that point
+only. Adding Lost Grimoire (or Mysticism) to the shared mod set is Eli's
+call: each is a full plugin on the server's load order and every client.
+
 ## Headshot Kills - CIF
 
 What it is:

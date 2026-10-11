@@ -811,13 +811,17 @@ it carries a HYPOTHESIS tag.
     the first verb to need server-owned globals (ADR-021 decision 4); each
     native it calls gets its ledger line. Eli (2026-10-05): most of its
     spells should behave about the same as vanilla ones, so they ride this
-    bullet's cast path. The hard case is its projectile teleport, a blink
-    step that moves the caster to where the projectile lands. The
-    movement-speed budget (docs/verbs/movement-speed.md) refuses exactly
-    that jump, so the spell needs its own path: the server takes the cast
-    (R1) and allows a jump to the landing point within the spell's reach.
-    Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and the blink,
-    seen by an observer, the blink not snapped back. Placed after
+    bullet's cast path. The projectile teleport once listed here is not
+    Apocalypse's (2026-10-10: no 10.2.3 spell moves its caster to where its
+    cast lands; apocrypha found it in Eli's rotfern save, hotkey 7: Lost
+    Grimoire's "Teleportation", docs/MODS.md). Its shape still stands for
+    any teleport a player casts: the movement-speed budget
+    (docs/verbs/movement-speed.md) refuses the jump, so the server takes
+    the cast (R1) and allows one jump to the landing point within the
+    spell's reach. Apocalypse's own hard cases are Raise Wall (a shared
+    wall the server places) and Milestones (five anchors one world shares).
+    Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and Raise
+    Wall, seen by an observer and blocking him. Placed after
     spell-cast and magic-effects (Eli, 2026-10-09), with a small step
     before it that gives the server its global variables (ADR-021's
     deferral ends there).
