@@ -34,6 +34,7 @@ import {
   NetImmerse,
   ObjectReference,
   Race,
+  Shout,
   Spell,
   TESModPlatform,
   Ui,
@@ -1324,6 +1325,14 @@ function run(step: Step, player: Actor): unknown {
     case "equip": {
       const item = Game.getFormEx(num(a.formId));
       if (!item) return { error: "no such form" };
+      // a shout goes to the voice slot (Actor.EquipShout; thuum
+      // docs/verbs/shouts.md, x-shout-probe), anything else by EquipItem
+      const shout = Shout.from(item);
+      if (shout) {
+        player.equipShout(shout);
+        const held = player.getEquippedShout();
+        return held && held.getFormID() === shout.getFormID() ? "shout" : { error: "the shout did not equip" };
+      }
       player.equipItem(item, false, true);
       return "ok";
     }
