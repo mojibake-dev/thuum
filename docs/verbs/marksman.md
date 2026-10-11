@@ -157,12 +157,17 @@ a rate budget (none today).
   Nord's game, and after F (DirectInput 33, Toggle POV on the clones; her
   screenshot shows the third-person camera) her third-person shot lay 234
   from her: both third-person launches stop at the pillar about 200 units
-  away, the first-person one flies past it. Her first-person view is the
-  cause, and the fix is the mod's (her race's first-person setup;
-  apocrypha); she can shoot in third person today. What exactly in her
-  first-person setup places the launch past the pillar (the node, or the
-  camera) stays a question for apocrypha and, if it matters, a Frida read
-  of Projectile::Launch's origin (the re-analyst's plan, 2026-10-09).
+  away, the first-person one flies past it. That is a finding about where
+  a released arrow goes, not the quirk: Eli (2026-10-10) saw her bow stay
+  drawn in first person, the release never happening, which no lab run
+  reproduced (every one fired, with the attack on the clones' Home key
+  through SKSE Input.HoldKey, where Eli uses the mouse through Moonlight;
+  and rotfern has only played test 1's seat, the Nord test 2's). The
+  quirk's cause is open: playtest thirteen's arrows section separates the
+  mouse, the Home key and third person on her seat. The first-person
+  launch point past the pillar stays a question of its own (the node, or
+  the camera; a Frida read of Projectile::Launch's origin, the
+  re-analyst's plan, 2026-10-09).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
