@@ -12,6 +12,12 @@ attack may require 'Reverse Animation Events'"); "Anims triggered by enemy"
 ("Usually in PvP. Stagger ...").
 Milestone: M2 (Eli, docs/private/decisions-m2.md question 1: the fifth verb)
 Class: B
+Scope note (2026-10-10): the stagger (a bash's or a blocked power attack's,
+imposed on the victim's game and shown to observers) leaves this verb for
+one of its own under the roadmap's "Anims triggered by enemy" (docs/PLAN.md
+M2 5a): how a game starts a stagger on demand needs its own probe, and the
+engine's own rules for it are in the notes below. This verb is the blocked
+decision, its share, the shield and the cone, and the bash's backing.
 
 ## Authority
 
@@ -275,9 +281,9 @@ stacked on m2-god 35acc275: 7d438879 the rule (wire-rules block), 0ecbaed7
 the server (OnWeaponHit decides the block before the Papyrus OnHit event,
 the attacker's verdict logged and never trusted, the formula's tenth gone,
 the shield by its biped slot; BlockingTest), e911dd2b the engine's formula
-and cone (the re-analyst's reading). Left: CI, the stagger imposed on the
-victim's game and deathService's refusal narrowed, the bash's backing by
-its animation events, T2, b-block.
+and cone (the re-analyst's reading). 1e0e89bf the bash's backing
+(bashStart among the attacker's events within 3 s; E_HIT_BASH). Left: CI,
+T2, b-block (the stagger went to its own verb).
 
 - [ ] doc complete, rung declared
 - [ ] engine surface cited or delegated

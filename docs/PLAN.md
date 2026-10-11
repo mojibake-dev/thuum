@@ -787,7 +787,15 @@ it carries a HYPOTHESIS tag.
   4. god-mode: TGM and TIM, flags the server's damage and death rules read.
   5. blocking: the attacker's blocked claim checked against the target's
      recorded block and facing, the shield test fixed, the bash's reach
-     (melee reach's carried cases), stagger shown to observers.
+     (melee reach's carried cases), stagger shown to observers. In flight
+     (2026-10-10, fork m2-block): the server decides blocks and their share
+     by the engine's own formula and cone (thuum ghidra/notes/
+     block-formula.md, confirmed in the lab where measured), the bash backed
+     by its start; the stagger moved to 5a.
+  5a. stagger: a bash's or a blocked power attack's stagger imposed on the
+     victim's game and shown to observers (the engine's gate and magnitude
+     in ghidra/notes/block-formula.md; deathService refuses every figure's
+     staggerStart today), the roadmap's "Anims triggered by enemy".
   6. shouts: words of power and their unlocks as server state (SHOU and
      WOOP read by libespm), the shout cast on spell-cast's path, the
      cooldown the server's; the movement budget measured against Whirlwind
