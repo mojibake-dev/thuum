@@ -369,18 +369,32 @@ first shout taken (the server's recovery 25.9 s at the check, c2 burned to
 0.505), the cleared-recovery shout refused (E_SHOUT_RECOVERY, its hit
 E_SPELL_NO_CAST, the recovery 17.1 s and running, c2 untouched), and after
 a restart and a relaunch the record and the word back and the next shout
-taken (0.506). 291763e3 rebuilds the god-mode session's difftest. Left:
+taken (0.506). 291763e3 and 3f9e4bc8 settle the T2 session: c2 in god mode,
+health messages compared as presence only (the fire's ticks vary in
+number), the effect set's start and end exact; T2 green on 3f9e4bc8. DONE
+2026-10-11: the merge sweep 38 of 38 (a-actor-values and a-favorites red
+on sky-c1 lab faults, E_RUN_RELAUNCH and E_RUN_TELEPORT with no assertion
+failed, green on their reruns), fork parity fast-forwarded to 3f9e4bc8,
+both clones' clean-m1 promoted. Was left before that:
 the fork pipeline (build and T0), T2, b-shout (drafted in the scratchpad,
 its own commit once green), the ledger rows at the merge (Actor.AddShout,
 Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
 snippets).
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated
+- [x] server logic + T0 (ShoutsTest, EspmTest's SHOU)
+- [x] message + validator (same commit): no new message; SpellCast from
+      the voice, the voice slot's u32 naming a SHOU as well
+- [x] native hook + T1: no new native (SKSE's voice and shout reads)
+- [x] TS handler (shoutService, the voice slot in sync/equipment.ts,
+      hitService's held hits)
+- [x] T2 green (3f9e4bc8, 18 declared divergences)
+- [x] T3 scenario green: b-shout (thuum db6ed77, awaiting Eli's review)
+      green twice; HYPOTHESIS left: the push of Unrelenting Force on another
+      player (a later slice), Whirlwind Sprint's longer dashes against the
+      burst, the cause of callNative's spell (a fallback now)
+- [x] ledger and suppression registry updated (Actor.AddShout,
+      Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
+      snippets; Actor.GetVoiceRecoveryTime, Shout.GetNthRecoveryTime,
+      Shout.GetNthSpell as the client's reads)

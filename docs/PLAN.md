@@ -840,7 +840,17 @@ it carries a HYPOTHESIS tag.
      no Skyrim Platform spellCast, so it reaches the server not at all
      today (the hook is open); the console's TeachWord and UnlockWord run
      in the caller's game alone; one word of Whirlwind Sprint (1052 units)
-     fits the burst.
+     fits the burst. DONE 2026-10-11: the record (shouts, words
+     known and unlocked) is the server's, an admin's console writes it and
+     every login teaches it; a shout's cast is reported from the voice
+     recovery the game sets at the release and judged against the record
+     and the server's own recovery (wire-rules shouts), its damage counted
+     against the accepted shout, its hits held for the report; the voice
+     slot now reaches the server. b-shout (thuum db6ed77, awaiting Eli's
+     review) green twice; T2 green on 3f9e4bc8; the merge sweep 38 of 38 (two
+     lab faults on sky-c1, green on their reruns); fork parity
+     fast-forwarded to 3f9e4bc8 with playtest thirteen's left-hand cast fix,
+     both clones' clean-m1 promoted (docs/verbs/shouts.md).
   7. Lag compensation (Bernier 2001) only if a playtest shows hits refused
      inside M1's slack: positions kept per actor, rewound by the attacker's
      latency.
