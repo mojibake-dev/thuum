@@ -452,14 +452,15 @@ on("magicEffectApply", (e) => {
   }
 });
 
-// A watched figure's stagger, recoil and shout events (thuum
-// docs/verbs/stagger.md, docs/verbs/shouts.md):
+// A watched figure's stagger, recoil, shout and bow events (thuum
+// docs/verbs/stagger.md, docs/verbs/shouts.md, docs/verbs/marksman.md: which
+// bow events the target's game plays on the shooter's figure):
 // one hook per pattern over the figures' range, filtered in native (rule 9)
 // and added at load, before skymp5-client's services add theirs, so each sees
 // the name its sender gave: deathService blanks every figure's staggerStart,
 // and Skyrim Platform hands later hooks the blanked name. Recorded at leave,
 // with whether the graph took the event once every hook had run.
-for (const pattern of ["stagger*", "recoil*", "shout*"]) {
+for (const pattern of ["stagger*", "recoil*", "shout*", "bow*", "Bow*", "arrow*", "Arrow*"]) {
   hooks.sendAnimationEvent.add({
     enter: () => {},
     leave: (ctx) => {
@@ -823,6 +824,17 @@ function run(step: Step, player: Actor): unknown {
         out[String(Number(id))] = f ? player.getItemCount(f) : null;
       }
       return out;
+    }
+    case "arrows": {
+      // thuum docs/verbs/marksman.md (playtest thirteen: the target's screen
+      // shows two arrows per shot): how many arrow projectiles stand in the
+      // player's cell (ArrowProjectile, form type 0x40 PARW, CommonLibSSE-NG
+      // include/RE/F/FormTypes.h:204), by SKSE's Cell.GetNumRefs. Only the
+      // count: any Papyrus call on a projectile reference aborts (the
+      // projectiles step's note)
+      const cell = player.getParentCell();
+      if (!cell) return { error: "no cell" };
+      return { count: cell.getNumRefs(0x40) };
     }
     case "projectiles": {
       // thuum docs/verbs/marksman.md: for each projectile base (a PROJ:
