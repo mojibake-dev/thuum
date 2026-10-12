@@ -149,8 +149,9 @@ eight a second); one charge per hit.
   through SKSE Input.TapKey put it on the sword (no poisoned stack in the
   game, the poison still held). So the verb's client side needs a person
   at the box: playtest fourteen applies a poison again with the server
-  logging what arrives (an info line for a poison's OnEquip, added on the
-  next fork build) and lab/frida/console-trace.js on the seat.
+  logging what arrives (an info line for a poison's OnEquip: fork
+  b3682b71, on parity since ef3fb03c) and lab/frida/console-trace.js on
+  the seat (docs/private/playtest-m2-14.md, section 6).
 
 ## Status
 
