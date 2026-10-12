@@ -232,6 +232,7 @@ answered "Unknown command".
 | Set (a global) | R0 | admin | not yet | the server's clock (ADR-021); other globals wait for the verb that needs one |
 | ToggleCollision (TCL) | R0 who, R3 the state | admin | yes (M1.1) | the caller's own game toggles its collision (Debug.ToggleCollisions by SpSnippet, as COC); the server models no collision, the movement rule bounds speed as ever |
 | ToggleImmortalMode (TIM), ToggleGodMode (TGM) | R0 | admin | M2 (Eli, 2026-10-09) | a god or immortal flag the server's damage and death rules read, with M2's damage and effects authority; the game's own god mode for what it computes locally (Debug.setGodMode, skyrimPlatform.ts:2457); TIM has no Papyrus counterpart |
+| AddSpell | R0 | admin | yes (M2, 2026-10-12) | the server's learned spells (MpActor::AddSpell, as its Papyrus Actor.AddSpell), then the target's game told (Actor.AddSpell by SpSnippet); typed in a game it used to teach that game alone, and the server refused the spell in a hand (docs/verbs/cast-teleport.md) |
 | TeachWord, UnlockWord, AddShout | R0 | admin | yes (M2, 2026-10-11) | the shouts verb: the server's record of what the target knows of shouts, then its game told (Game.TeachWord, Game.UnlockWord, Actor.AddShout by SpSnippet); typed in a game they used to change that game alone (docs/verbs/shouts.md) |
 | ToggleFreeCamera (TFC), ToggleMenus (TM) | R3 | anyone | in the game | nothing; never sent |
 | Save, Load, SaveGame, LoadGame | refused | nobody | never | the server owns the world |

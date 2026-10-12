@@ -906,7 +906,16 @@ it carries a HYPOTHESIS tag.
     teleport, one jump allowed within its reach at its recorded cast.
     LostGrimoire.esp joins the shared mod set and the server's load order.
     Scenario `b-teleport`: c1 casts Teleportation, lands where it aimed and
-    stays there on the server and on c2's screen.
+    stays there on the server and on c2's screen. DONE 2026-10-12, fork
+    parity ef3fb03c (docs/verbs/cast-teleport.md): castTeleports names the
+    spell with its reach (the lab's 8000 until playtest fourteen's
+    farthest cast sets it), a named teleport's cast permits one jump and
+    is relayed to nobody, and the client lets the mod's marker script run
+    in the caster's game (the Papyrus event filter blanked it); the
+    console's AddSpell is the server's. T2 green (the teleports session),
+    b-teleport green twice (thuum 52d6195, awaiting Eli's review), the
+    merge sweep green; x-whirlwind-probe on the way measured Whirlwind
+    Sprint inside the burst. The lostgrimoire layer merged into main.
 - Hit registration with lag compensation (rewind by client latency, Bernier
   2001), blocking, marksman aim pitch on the wire, projectile ownership.
   - Carried from M1: melee reach's unmeasured cases, the bash, bare hands
