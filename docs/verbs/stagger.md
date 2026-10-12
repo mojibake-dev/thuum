@@ -380,3 +380,11 @@ promoted.
   apocrypha sets rotfern.esp's staggerOffsets to the Nord's per attack
   (asked 2026-10-12), then the lab lays the plugin in. Playtest fifteen
   checks both directions: test 2's Nord on rotfern, and rotfern after.
+- rotfern.esp patched (apocrypha, 2026-10-12: only the two RACE records'
+  ATKD bytes 24-27, the Nord's value per ATKE; CRC32 F57D6BFD), laid into
+  the lab (persist-mods, client-mods, both clones' clean-m1 promoted):
+  x-rotfern-stagger 20261012-233851 had c1 become rotfern (race 0x0800AA00)
+  and power attack c2: the server's "attackpowerstartinplace ... staggers
+  it by 0.24" on a 12.99 hit, c2 staggering in its own game (IsStaggering)
+  and on c1's screen (the figure took staggerStart). Eli's own install
+  needs the same file (the server checks a plugin's size and CRC).
