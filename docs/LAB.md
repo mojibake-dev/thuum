@@ -397,7 +397,12 @@ is the one named, read after each press; the order of the menu's list is
 the menu's, so a scenario names the race instead of counting presses),
 hold-key
 {code, ms} (a key held through SKSE's Input.HoldKey and released ms later:
-real movement under the controls, 17 W forward, 42 Left Shift sprint),
+real movement under the controls, 17 W forward, 42 Left Shift sprint; the
+clones' control map binds the right attack to 199 Home and the left attack
+to 207 End, lab/deploy/sky-client/controlmap.ps1, since SKSE's HoldKey on a
+mouse button does nothing), arrows (how many arrow projectiles stand in the
+player's cell: a count only, since any call on a projectile reference
+aborts),
 set-gmst {name, value} and set-av {name, value} (what a player's console
 does with setgs and setav, in this client only: a validation verb's
 negative control), close-menu
@@ -406,7 +411,7 @@ TESModPlatform.CloseMenu; `name: "RaceSex Menu"` ends the race menu and
 skymp5-client sends its result), and watch-start / watch-stop (the
 client follows every actor near it at watch-start, by form id, each frame
 until watch-stop, and reports how far each got from where it began, with
-each one's stagger and recoil events as this game's engine or a relay sent
+each one's stagger, recoil, shout and bow events as this game's engine or a relay sent
 them (the name, and whether its graph took the event once every hook had
 run: deathService refuses every figure's staggerStart) and the graph
 variables watch-start's {bools} names; for
