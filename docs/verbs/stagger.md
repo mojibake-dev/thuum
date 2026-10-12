@@ -332,8 +332,17 @@ send to listeners is protected; fork pipeline 1244 failed on it).
 b-stagger (thuum 7431108) green twice on 9cfbcff7 (20261011-220330 and
 -220642): the power attack and the blocked one staggered c2 in its own
 game and on c1's screen (the relayed event taken, the figure's
-IsStaggering), the plain swing nobody. Left: T2 on 9cfbcff7, the merge
-sweep.
+IsStaggering), the plain swing nobody. T2 on 9cfbcff7 went red on its
+session alone: difftest compares UpdateAnimation (t 3) as presence only by
+default, so the declared relay could never occur; f321a52f compares it
+message by message and declares the relay to c2 too (an actor listens to
+itself), and T2 went green on f321a52f (2026-10-11 18:32: the session
+identical up to 8 declarations). DONE 2026-10-11: the merge sweep went 37
+of 37 green on the m2-stagger server (b-stagger first; runs
+20261011-223751 to 20261012-011230, paused for playtest thirteen; b-spell
+red once, green on both reruns, an ADR-027 watch item in spell-cast.md);
+fork parity fast-forwarded to f321a52f and both clones' clean-m1
+promoted.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (the re-analyst's reading; the lab
@@ -344,13 +353,13 @@ sweep.
       confirmed in the victim's game by b-stagger); T1 none
 - [x] TS handler (deathService's narrowed refusal; the snippet's
       callNative fallback for an unbound global)
-- [ ] T2 green on the final commit (green 2026-10-10 on acf5627c, before
-      the relay; on 9cfbcff7 with the relay's declaration, chained)
+- [x] T2 green on the final commit (f321a52f, 2026-10-11, the relay
+      declared to both games)
 - [x] T3 scenario green: b-stagger (thuum 7431108, awaiting Eli's review)
       green twice; HYPOTHESIS left: which stagger the figure plays with its
       staggerMagnitude and staggerDirection unset (playtest fourteen's
       eye), a timed bash's large recoil (not told apart), and the bash's
       stagger (the lab cannot bash by event)
-- [ ] ledger and suppression registry updated (TESModPlatform.Stagger's
-      row at the merge; the suppression is deathService's narrowed
+- [x] ledger and suppression registry updated (TESModPlatform.Stagger's
+      row, R0, client only; the suppression is deathService's narrowed
       refusal)

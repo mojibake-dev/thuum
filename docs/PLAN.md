@@ -826,8 +826,12 @@ it carries a HYPOTHESIS tag.
      awaiting Eli's review) green twice on fork 9cfbcff7 (2026-10-11), after
      two fixes the lab found: the server's snippet to the native failed in
      Skyrim Platform (callNative now), and the engine's stagger never
-     reaches other screens by itself (the server sends it). Left: T2 on
-     9cfbcff7, the merge sweep (docs/verbs/stagger.md).
+     reaches other screens by itself (the server sends it). DONE
+     2026-10-11: T2 green on f321a52f (its session now compares the
+     relayed animation message by message), the merge sweep 37 of 37 green
+     (b-spell red once and green on both reruns, an ADR-027 watch item);
+     fork parity fast-forwarded to f321a52f and both clones' clean-m1
+     promoted (docs/verbs/stagger.md).
   6. shouts: words of power and their unlocks as server state (SHOU and
      WOOP read by libespm), the shout cast on spell-cast's path, the
      cooldown the server's; the movement budget measured against Whirlwind
