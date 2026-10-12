@@ -70,6 +70,26 @@ units, for the two positions' age).
   If that places the marker in the neighbour's game, the marker's script
   moves that game's player (PlayerRef), the observer. HYPOTHESIS until the
   probe's observer is watched.
+- The client's Papyrus event filter: while skymp5-client blocks Papyrus
+  events, Skyrim Platform's SendEvent hook blanks every event but OnUpdate
+  for a script outside its list (skyrim-platform FridaHooks.cpp
+  OnSendEventEnter: SkyUI's SKI_ scripts, RaceMenu's, and
+  defaultDisableHavokOnLoad). The marker's script was outside it:
+  x-teleport-probe2 20261012-071906 cast Teleportation three times, the
+  game spending its magicka and the server logging "cast teleport ... not
+  relayed" each time, and nobody moved. The list names
+  GRIM_ALT_TeleportationMarker since fork m2-teleport d1fb786c (in the
+  caster's game only: no other game places the marker).
+- Aiming: a target-location cast needs ground under the crosshair within
+  the spell's reach, or the game refuses it and spends nothing
+  (x-teleport-probe 20261012-071036: from the lab spawn, a hilltop whose
+  ground falls away, the level view met the ground far beyond reach). The
+  console's SetAngle X does not pitch the first-person view (it goes
+  through the server's teleport; probe2's screenshots at 0 and 30 degrees
+  match): the first-person camera keeps its own pitch
+  (CommonLibSSE-NG include/RE/F/FirstPersonState.h:45-50). The lab aims
+  with its look step (ObjectReference.SetAngle in the player's own game,
+  as the marker's script restores the player's angles; UNCONFIRMED).
 - What a neighbour sees of the jump: the figure moves by the relayed
   movement, a TranslateTo over 0.2 s within the same cell (skymp5-client
   sync/movementApply.ts:155-205; a respawn only for another world or cell,
@@ -133,7 +153,11 @@ units, for the two positions' age).
   - the cast: ActionListener::OnSpellCast, for a named teleport the caster
     has equipped, records the cast as now, permits the jump, and relays
     nothing.
-  - the check: MovementValidation's permitted-jump path, as COC's.
+  - the check: MovementValidation's permitted-jump path, as COC's. The
+    permit is used only when the bounds or the budget refuse a move, so a
+    landing the budget takes leaves the permit until its wait ends; a
+    second move in that wait is still held to the spell's reach of the
+    cast, which bounds both (R1).
 - DB fields / migration: none (a permit is runtime; a login or a restart
   starts without one).
 - Restart behavior: none.
@@ -194,6 +218,16 @@ units, for the two positions' age).
   the relay (the hazard Suppress names) or not (then the suppression is
   belt and braces, kept for any Spawn Scripted Ref teleport).
 - Owner: agent.
+- Measured 2026-10-12 (fork m2-teleport 0ef4df4d, the layer on the lab):
+  x-teleport-probe 20261012-071036 cast nothing (above, Aiming);
+  x-teleport-probe2 20261012-071906, on level ground at the hunters' camp
+  facing a tent: three casts spent magicka (936 of 1000 read a few
+  seconds after each, regeneration included, so the cost the engine
+  computes at Alteration 15 stays unmeasured), the server recorded each
+  and relayed none, and c1 never
+  moved: the marker's script was blanked (above, the event filter).
+  x-teleport-relay (a server naming no teleport, the cast relayed) waits
+  for the fixed client, since a blanked marker moves nobody in any game.
 
 ## Status
 

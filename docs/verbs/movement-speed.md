@@ -47,10 +47,13 @@ Rate limit / bounds: the budget above; the per-message bounds stand.
   scenario's negative control stands for (here as a glide).
 - skymp5-client sends UpdateMovement every 130 ms
   (src/services/services/sendInputsService.ts, sendMovementRateMs).
-- Not measured: Whirlwind Sprint's dash and Unrelenting Force's knockback.
-  The 2048 burst is meant to cover them; if either goes farther, that is a
-  snap-back at the end of the dash. HYPOTHESIS until a lab run shouts:
-  with M2's shouts (docs/PLAN.md, spells and shouts).
+- Whirlwind Sprint's dash fits the 2048 burst, measured with M2's shouts
+  (x-whirlwind-probe 20261012-072444, east from the lab spawn, the hill
+  falling away under it): one word carried c1 1548 units over the ground
+  and three words 2140, each taken by the server with no E_MOVE_SPEED,
+  a dash spanning several movement reports while the budget refills.
+  Unrelenting Force's knockback moves its target, not the shouter: it
+  waits for the shouts slice that builds the push (docs/verbs/shouts.md).
 
 Measured (run 20261003-093145, the speed probe on the level strip south of
 lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
@@ -148,8 +151,9 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
 - [x] server logic + T0
 - [x] T2 green
 - [x] T3 scenario green on the fix, red without it (the scenario
-  approved by Eli, 2026-10-05); still HYPOTHESIS: that Whirlwind Sprint and knockbacks fit
-  the 2048 burst (no shout in the lab yet; measured with M2's shouts)
+  approved by Eli, 2026-10-05); Whirlwind Sprint's dash fits the 2048
+  burst (x-whirlwind-probe 20261012-072444); a knockback waits for the push
+  it rides (docs/verbs/shouts.md)
 - [x] on fork parity (8266a21c, 2026-10-03)
 - [x] arrivals after a server teleport (fork m1-console d99a01fb, Eli's
   playtest twelve): T0 green; x-arrival-probe's MoveTo sent back three

@@ -115,7 +115,12 @@ bounds on casts.
   second, a 2048 burst) against Whirlwind Sprint's dash: one word carried
   the shouter 1052 units in x-shout-probe, inside the burst, and the server
   took it (no move back; the observer's game showed the figure travel
-  1053). Two and three words: HYPOTHESIS (longer; unmeasured).
+  1053). x-whirlwind-probe 20261012-072444, east from the lab spawn down
+  the hill: one word 1548 units over the ground, three words 2140, the
+  server taking both (no E_MOVE_SPEED: the dash spans several movement
+  reports while the budget refills); c2 watched the figure travel 3068
+  units in all, the fall included, and its own game counted fall damage on
+  the figure (a figure holds a million health; nothing reaches the server).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -392,8 +397,9 @@ snippets).
 - [x] T2 green (3f9e4bc8, 18 declared divergences)
 - [x] T3 scenario green: b-shout (thuum db6ed77, awaiting Eli's review)
       green twice; HYPOTHESIS left: the push of Unrelenting Force on another
-      player (a later slice), Whirlwind Sprint's longer dashes against the
-      burst, the cause of callNative's spell (a fallback now)
+      player (a later slice), the cause of callNative's spell (a fallback
+      now); Whirlwind Sprint's three words fit the burst
+      (x-whirlwind-probe 20261012-072444)
 - [x] ledger and suppression registry updated (Actor.AddShout,
       Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
       snippets; Actor.GetVoiceRecoveryTime, Shout.GetNthRecoveryTime,

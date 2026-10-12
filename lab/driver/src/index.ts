@@ -825,6 +825,20 @@ function run(step: Step, player: Actor): unknown {
       }
       return out;
     }
+    case "look": {
+      // thuum docs/verbs/cast-teleport.md: the player's view, pitch (degrees,
+      // down is positive) and heading (degrees; the current one when absent),
+      // set in this game by ObjectReference.SetAngle, the way Lost Grimoire's
+      // teleport marker restores the player's angles (thuum docs/MODS.md).
+      // The console's SetAngle goes through the server's teleport, whose
+      // angle X the first-person view does not take (x-teleport-probe2
+      // 20261012-071906: the same view at 0 and 30 degrees). UNCONFIRMED: a
+      // target-location cast then aims down by it.
+      const pitch = num(a.pitch);
+      const heading = a.heading === undefined ? player.getAngleZ() : num(a.heading);
+      player.setAngle(pitch, 0, heading);
+      return { pitch: player.getAngleX(), heading: player.getAngleZ() };
+    }
     case "arrows": {
       // thuum docs/verbs/marksman.md (playtest thirteen: the target's screen
       // shows two arrows per shot): how many arrow projectiles stand in the
