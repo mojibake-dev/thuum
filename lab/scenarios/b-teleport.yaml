@@ -1,0 +1,63 @@
+# M2, cast-teleport (docs/verbs/cast-teleport.md): a teleport a player casts
+# lands it where it aimed and stands at the server's word. c1 learns Lost
+# Grimoire's Teleportation from the server (LostGrimoire.esp SPEL 0A86DF at
+# full slot 0B of the lab's load order: 0x0B0A86DF, 185239263; the server's
+# castTeleports names it), gets the magicka to cast it (the console's setav,
+# the server's), equips it, and casts it level at c2, who stands 600 units
+# down the level strip south of the lab spawn: a target-location cast stops
+# at the first thing its ray meets, and neither the console's SetAngle X nor
+# the lab's look step pitches the first-person view (x-teleport-probe3
+# 20261012-080902), so the lab aims at a player. x-teleport-probe4
+# 20261012-081546 landed c1 549 units south, 52 short of c2, with the
+# spell's 1.5 s hold (0.6 s holds cast nothing). c1 lands there in its own
+# game and on the server and stays five seconds later (no snap-back); c2
+# sees c1's figure there and has not moved itself: the server relays no
+# teleport cast, so no game but the caster's runs the spell. A jump beyond
+# the movement budget, which only the cast's permit takes, is T2's (the
+# teleports session's 3000 units): this level ground holds no target that
+# far. Positions are relative to the lab spawn. Assertions are evaluated by
+# lab-api only (ADR-009).
+id: b-teleport
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 185239263}
+  - c1: console {text: "player.setav magicka 3000"}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c1: console {text: "player.equipspell b0a86df right"}
+  - c1: draw-weapon
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -900, z: 0, rot: [0, 0, 0]}
+  - wait: 5
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 64
+      - abs(server.actor(c2).y - (-900)) < 64
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - c1: dump-state
+  - assert:
+      - server.actor(c1).y < -700
+      - abs(c1.state.x - server.actor(c1).x) < 64
+      - abs(c1.state.y - server.actor(c1).y) < 64
+  - wait: 5
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - server.actor(c1).y < -700
+      - abs(c1.state.y - server.actor(c1).y) < 64
+      - abs(c2.view(c1).x - server.actor(c1).x) < 128
+      - abs(c2.view(c1).y - server.actor(c1).y) < 128
+      - abs(server.actor(c2).y - (-900)) < 64
+      - abs(c2.state.y - (-900)) < 64
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
