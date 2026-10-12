@@ -363,7 +363,13 @@ variation 0 recovery 30", the variation found and the report never sent.
 e0826331 takes the variation's spell from the typed Shout.getNthSpell
 (HYPOTHESIS: callNative's game object has no Form methods) and logs any
 throw (E_SHOUT_REPORT); c4641e26 merges m2-pt13's left-hand cast fix.
-Left:
+b-shout (thuum db6ed77, awaiting Eli's review) green twice on c4641e26
+(20261012-030519 and -030920): the record and the word in c1's game, the
+first shout taken (the server's recovery 25.9 s at the check, c2 burned to
+0.505), the cleared-recovery shout refused (E_SHOUT_RECOVERY, its hit
+E_SPELL_NO_CAST, the recovery 17.1 s and running, c2 untouched), and after
+a restart and a relaunch the record and the word back and the next shout
+taken (0.506). 291763e3 rebuilds the god-mode session's difftest. Left:
 the fork pipeline (build and T0), T2, b-shout (drafted in the scratchpad,
 its own commit once green), the ledger rows at the merge (Actor.AddShout,
 Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
