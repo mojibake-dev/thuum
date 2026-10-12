@@ -321,9 +321,14 @@ arrow spent). Two findings:
   game (0 before and after a shot the server took), so it cannot count
   them; c2's game played only bowAttackStart on the shooter's figure (no
   release event is relayed), so a figure's own arrow would be the engine
-  finishing that attack by itself. Next: x-double-arrow2 with
-  lab/frida/launch-trace.js on the target, counting Projectile::Launch
-  calls (ours carry a SkyrimPlatformImpl.dll frame) during one shot.
+  finishing that attack by itself. CONFIRMED by x-double-arrow2
+  20261012-022726 with lab/frida/launch-trace.js on the target: for one
+  shot the server took, the target's game called Projectile::Launch twice,
+  once from the engine alone (the figure's bow) and once through
+  SkyrimPlatformImpl.dll (LaunchArrow). Fix on fork m2-teleport 4198fe78:
+  a figure holds no arrows (sync/equipment.ts), so its bow draws empty and
+  only the relayed arrow, with the shooter's aim and draw, flies. To check
+  in the lab: one launch per shot in the target's game.
 - rotfern still never fires with the mouse on test 1's seat ("draws, no
   arrow in hand, no fire", first and third person): her game reported no
   shot all session, while the server records her iron arrows worn and her
