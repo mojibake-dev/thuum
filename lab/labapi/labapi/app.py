@@ -162,6 +162,30 @@ def create_app(services: Services) -> FastAPI:
             return JSONResponse({"ok": False, "client": client, "error": done.result.get("error", "no answer")}, status_code=504)
         return {"ok": True, "client": client, "state": done.result.get("data")}
 
+    # A playtest's second pair of hands (playtest fourteen, 2026-10-12: one
+    # person plays both seats): one input step in one client's game while the
+    # person plays the other, such as test 2 holding its block (End, the
+    # clones' left attack) while test 1 swings. Input steps only; refused
+    # while a run owns the clients.
+    ASSIST_ACTIONS = {"hold-key", "tap-key", "anim-event", "draw-weapon"}
+
+    @router.post("/clients/{client}/assist")
+    async def assist(client: str, request: Request):
+        if runner.active:
+            return _busy()
+        body = await request.json()
+        if not isinstance(body, dict) or body.get("action") not in ASSIST_ACTIONS:
+            raise HTTPException(400, f"body must be {{action, args?}}, action one of {sorted(ASSIST_ACTIONS)}")
+        args = body.get("args") or {}
+        if not isinstance(args, dict):
+            raise HTTPException(400, "args must be an object")
+        if runner.tables.guest_for_client(client) is None:
+            raise HTTPException(404, f"no client {client!r}")
+        done = await board.run_step(client, body["action"], args, s.step_timeout_s)
+        if not done.ok:
+            return JSONResponse({"ok": False, "client": client, "error": done.result.get("error", "no answer")}, status_code=504)
+        return {"ok": True, "client": client, "result": done.result.get("data")}
+
     # The client's logon launcher asks which game version to start (ADR-022):
     # the active run's, else the default. It keeps one game folder per version.
     # Self-service cold snapshots and promotes of a lab client (thuum-mundus's

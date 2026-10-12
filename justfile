@@ -348,6 +348,11 @@ playtest-worlds:
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
 
+# In a playtest, one input step in a player's game while the person plays the other seat (lab-api's assist: hold-key,
+# tap-key, anim-event, draw-weapon): `just playtest-assist c2 hold-key '{"code":207,"ms":15000}'` holds test 2's block (End).
+playtest-assist client action args="{}":
+    @curl -fsS -m 60 -X POST "{{lab_api}}/clients/{{client}}/assist" -H 'content-type: application/json' -d '{"action":"{{action}}","args":{{args}}}'; echo
+
 # In a playtest, open a player's race menu from the server (profile 1 or 2; the gamemode's labCommand open-race-menu).
 playtest-race-menu profile:
     @curl -fsS -m 15 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' -d '{"payload": {"kind":"open-race-menu","profileId":{{profile}}}}'; echo
