@@ -348,7 +348,22 @@ console's word commands and the login; c2334252 libespm's SHOU; ac243dca
 the cast (wire-rules shouts, OnSpellCast's voice, OnHit's claim, the voice
 slot, shoutService, mp.get "shouts", ShoutsTest, the T2 session); eeb2c930
 a merge of m2-stagger (the shouts merge sweep runs b-stagger); d985e789
-the hits held for the report. Left:
+the hits held for the report. T2's first run (2026-10-11): the shouts
+logic held on the wire stack (the first shout taken, its hit counted, the
+second refused, E_SHOUT_RECOVERY and E_SPELL_NO_CAST in the test server's
+log), but Fire Breath's first word is a one-second effect in
+Dragonborn.esm's override of VoiceFireBreath1 (EFIT 50 over 1 s; Skyrim.esm
+has it instant), dealt in ticks whose values ride the effect clock, so the
+session now puts c2 in god mode and reads the shout's acceptance from the
+effect set both games are told. b-shout's first runs (20261012-020313 and
+the next) red: the server's record, c1's game's word and both games'
+shoutStart held, but no SpellCast reached the server; x-shout-console
+20261012-020808 read c1's console: "Trace in ShoutService: shout 3f9ea
+variation 0 recovery 30", the variation found and the report never sent.
+e0826331 takes the variation's spell from the typed Shout.getNthSpell
+(HYPOTHESIS: callNative's game object has no Form methods) and logs any
+throw (E_SHOUT_REPORT); c4641e26 merges m2-pt13's left-hand cast fix.
+Left:
 the fork pipeline (build and T0), T2, b-shout (drafted in the scratchpad,
 its own commit once green), the ledger rows at the merge (Actor.AddShout,
 Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's

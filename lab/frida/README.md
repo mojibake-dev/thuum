@@ -37,6 +37,13 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   an inventory apply adds. Hooks RE::ConsoleLog::VPrint at its Address
   Library offset for the exe's own file version (1.6.1170 and 1.7.104).
 
+- launch-trace.js: every Projectile::Launch with a backtrace, and whether a
+  SkyrimPlatformImpl.dll frame is in it (Skyrim Platform's
+  TESModPlatform.LaunchArrow) or the engine launched by itself. For
+  playtest thirteen's two arrows on the target's screen
+  (docs/verbs/marksman.md). Projectile::Launch at Address Library 44108
+  (CommonLibSSE-NG src/RE/P/Projectile.cpp:258), 1.6.1170 only.
+
 - face-dump.js: what the renderer holds for a face right now. A read-only
   walk of the player's and every figure's loaded 3D (one call into the game,
   LookupReferenceByHandle, to turn the process list's actor handles into
