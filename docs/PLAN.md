@@ -873,7 +873,10 @@ it carries a HYPOTHESIS tag.
   as server state. Rung: R1 intent, R0 resolution.
   - Carried from M1: whether Whirlwind Sprint's dash and Unrelenting
     Force's knockback fit the movement budget's 2048 burst
-    (docs/verbs/movement-speed.md, HYPOTHESIS until a lab run shouts).
+    (docs/verbs/movement-speed.md). The dash fits: x-whirlwind-probe
+    20261012-072444 measured one word 1548 units and three words 2140,
+    the server taking each. The knockback moves its target and waits for
+    the push (docs/verbs/shouts.md, a later slice).
   - Apocalypse - Magic of Skyrim 10.2.3 (from the stretch list; Eli,
     2026-10-05: "apocalypse at spells"): records plus 206 vanilla-Papyrus
     scripts, effectively no SKSE. Of its 165 natives, 102 are missing,
