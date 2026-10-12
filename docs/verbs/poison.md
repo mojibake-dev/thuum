@@ -133,6 +133,18 @@ eight a second); one charge per hit.
   OnEquip for the poison.
 - Owner: Eli (the box), then agent.
 
+- Measured in playtest thirteen (2026-10-11, Eli, parity f828279f): applying
+  the poison through the game's box unequipped the Steel Sword and left the
+  poison in test 2's inventory; the server's log has no line for the poison
+  (none of its paths logs at info). HYPOTHESIS, a reading of the code: the
+  game used the poison up and marked the sword, the server's inventory
+  record still held the poison and the sword without it, and the next
+  inventory sync put the poison back and unequipped the sword
+  (skymp5-client's inventory reset). If so, the server must take the
+  application itself (the poison off the record, the sword's stack marked)
+  or the game's own is undone each time; a probe reads the sword's
+  ExtraPoison right after the box and again after the sync.
+
 ## Status
 
 Doc written 2026-10-10, split from magic-effects (whose Dynamic plan held

@@ -369,6 +369,31 @@ actor's magicka (95559aa, d6a4181, 35b4ef6), c.watched's drainMs and
 drainEndMs (42aa735), labCommand learn-spell (47dace4). DONE 2026-10-10:
 merged to parity 45839102.
 
+Playtest thirteen (2026-10-11, Eli, parity f828279f): Flames from the
+right hand played and stopped on the other screen as built; from the left
+hand, the other screen's figure streamed from its right hand and never
+stopped. Cause (read in the code): Skyrim Platform's spellCast event names
+no hand of the engine's (TESSpellCastEvent carries the caster and the
+spell only) and inferred it from the slots holding the spell, the right
+one winning a tie (skyrim-platform EventHandler.cpp, the TESSpellCastEvent
+handler), so with Flames in both hands a left-hand cast was reported as the
+right hand's, the figure cast it there, and the left hand's end
+(MLh_Equipped_Event) found no left-hand cast to stop. Fix on fork m2-pt13
+40d15f6d: the event reads each hand's caster when it fires (MagicCaster's
+currentSpell and state, CommonLibSSE-NG include/RE/M/MagicCaster.h:29-41,
+:89-90) and the hand charging or casting the spell breaks the tie.
+HYPOTHESIS until a lab run casts Flames from the left hand with the same
+spell in both (the clones' control map gives the left attack no key yet).
+
+Watch item (ADR-027, the stagger merge sweep 2026-10-11): b-spell red once
+(20261012-004816): after the four-second Flames stream, c2's own game read
+0.6477 and the server 0.692, outside the scenario's 0.02; green on both
+reruns (20261012-010948, -011230). HYPOTHESIS: c2's own game took a little
+of the figure's stream itself that once (a figure's spell lands nothing on
+the player it aims at, x-spell-observe, so this would be a rare race of the
+figure's hit), or the sample caught c2's game before the server's last
+health message. A second red within two sweeps makes it a bug.
+
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (cited; every tag the lab could
       settle settled: the cast event's timing for a stream and a
