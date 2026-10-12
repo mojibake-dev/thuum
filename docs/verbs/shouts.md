@@ -423,5 +423,5 @@ snippets).
   the game's big learned notice for each, which is cumbersome: the
   re-teach should be silent (a slice; how the engine learns a word without
   the notice is to read).
-- To test (a later leg): a word wall still teaches a word, and the server's
-  record takes it (the wall's script and Game.TeachWord on the server).
+- A word wall teaching into the server's record: M4, with dungeons (Eli,
+  2026-10-12, "leave it in dungeons"; docs/PLAN.md M4).

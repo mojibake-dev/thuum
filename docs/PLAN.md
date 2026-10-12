@@ -988,6 +988,9 @@ it carries a HYPOTHESIS tag.
   distance check on PutItem and TakeItem, the reloot timer that each
   restart pushes later, a container saved open coming back open with
   nobody in it (survey notes in M2's chart).
+- Word walls teach through the server's shout record (Eli, 2026-10-12,
+  playtest fourteen: "leave it in dungeons"): a wall's word goes into the
+  record the console and logins use (docs/verbs/shouts.md).
 - Exit: `d-bleak-falls` (both players through the puzzle door and the traps,
   with a restart mid-dungeon).
 

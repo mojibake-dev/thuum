@@ -742,6 +742,10 @@ effects and resistances with magic-effects.
 ## ADR-029: A player's own spells run their scripts in that player's game
 
 Status: proposed (2026-10-11), for Eli's call before Apocalypse (docs/PLAN.md M2).
+Eli, 2026-10-12: "for apocalypse, im unsure. im leaning the later for
+authoritativeness tbh, but like headshots im not opposed to trusting the
+client": a lean to the alternative below (the server's VM runs the effect
+scripts), not yet a decision; a costed comparison of the two comes first.
 
 **Context.** M2's plan puts Apocalypse after a small step that gives the
 server its global variables, on the premise that most of its spells ride

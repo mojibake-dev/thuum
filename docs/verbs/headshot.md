@@ -179,6 +179,12 @@ partly on the shooter's word acceptable for this mod, bounded to one per
 real arrow hit on a bare head? The alternative is headshots off in
 multiplayer.
 
+Decided (Eli, 2026-10-12): "for headshots i think it's ok to trust the
+client a little. its fine." The kill rests partly on the shooter's word,
+bounded as above (a real shot, the bow, a bare head, the race, the
+archer's skill, one kill per real arrow hit), and the head hit is recorded
+in this doc as unvalidated client input (CLAUDE.md rule 5).
+
 ## Status
 
 Doc written 2026-10-10, before any code.

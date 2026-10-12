@@ -376,5 +376,7 @@ promoted.
   race, as the engine does, so rotfern's power attacks would not stagger
   in a single-player game either; b-stagger's attacker is a vanilla race.
   The server's hits show the power attack's damage (12.91 against a plain
-  swing's 6.62, 23:01:41). Next: playtest fifteen has test 2's Nord attack
-  rotfern; rotfern's attack data is Eli's to change (rotfern.esp).
+  swing's 6.62, 23:01:41). Eli, 2026-10-12: "yes give her vanilla values":
+  apocrypha sets rotfern.esp's staggerOffsets to the Nord's per attack
+  (asked 2026-10-12), then the lab lays the plugin in. Playtest fifteen
+  checks both directions: test 2's Nord on rotfern, and rotfern after.
