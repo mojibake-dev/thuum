@@ -1,0 +1,103 @@
+# M2, stagger (docs/verbs/stagger.md): a hit that staggers in the game
+# staggers its victim in the victim's own game and on the attacker's
+# screen, at the server's word. The server computes the stagger by the
+# engine's formula and has the victim's game start it
+# (TESModPlatform.Stagger, the engine's own start), and relays the stagger
+# to every game that sees the victim as the victim's own staggerStart, which
+# the attacker's game now plays on the figure (deathService refuses only a
+# stagger its own engine starts). The engine's stagger is an action, never
+# an animation event the victim's own game reports (b-stagger
+# 20261011-213039), so the victim's side is read from its graph's
+# IsStaggering, the figure's from the relayed event and its IsStaggering.
+# c1 and c2 hold Iron Swords (Skyrim.esm 0x12EB7, stagger 0.75), c2 also
+# an Iron Shield (0x12EB6) for the last phase; c1 stands at (0, -300)
+# facing north, c2 100 units north facing it (x-stagger-probe's layout).
+# Holding Right Attack (Home 199) 1.2 s makes c1's standing power attack
+# (attackPowerStartInPlace, NordRace's stagger offset 1.0): the server's
+# stagger 0.75 x 1.0 / 2.5 - 0.06 = 0.24 (x-stagger-probe 20261011-055806
+# saw c1's own engine try the same on the figure, which deathService
+# blanks: a stagger's events on the figure are sent twice, taken once).
+# - A power attack: c2's own game staggers (IsStaggering), and c1's game
+#   plays the stagger on c2's figure (the relayed staggerStart taken, the
+#   figure's IsStaggering).
+# - A plain swing (staggerOffset 0): nobody staggers.
+# - A power attack on c2's raised shield: blocked, and a blocked hit always
+#   staggers when its stagger is above 0 (0.24 less the block's 0.131 at
+#   Block 20: 0.109).
+# Green twice on fork m2-stagger 9cfbcff7 (runs 20261011-220330 and
+# -220642): each phase held the same in both, c2 staggering in its own game
+# and on c1's screen at the power attack and the blocked one, nobody at the
+# plain swing. Assertions are evaluated by lab-api only (ADR-009).
+id: b-stagger
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: give {item: "0x12eb7", count: 1}
+  - c2: give {item: "0x12eb7", count: 1}
+  - c2: give {item: "0x12eb6", count: 1}
+  - wait: 3
+  - c1: console {text: "player.equipitem 12eb7"}
+  - c2: console {text: "player.equipitem 12eb7"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - wait: 2
+  # a power attack staggers c2 in its own game and on c1's screen
+  - c1: watch-start {bools: [IsStaggering]}
+  - c2: watch-start {bools: [IsStaggering]}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.9
+      - c2.watched_self().ever("IsStaggering")
+      - c1.watched(c2).took("staggerStart") >= 1
+      - c1.watched(c2).ever("IsStaggering")
+  # a plain swing staggers nobody
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: watch-start {bools: [IsStaggering]}
+  - c2: watch-start {bools: [IsStaggering]}
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.99
+      - not c2.watched_self().ever("IsStaggering")
+      - c1.watched(c2).took("staggerStart") == 0
+      - not c1.watched(c2).ever("IsStaggering")
+  # a power attack on c2's raised shield: blocked, and it still staggers
+  - c2: console {text: "player.equipitem 12eb6"}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: watch-start {bools: [IsStaggering]}
+  - c2: watch-start {bools: [IsStaggering]}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.95
+      - c2.watched_self().ever("IsStaggering")
+      - c1.watched(c2).took("staggerStart") >= 1
+      - c1.watched(c2).ever("IsStaggering")
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]

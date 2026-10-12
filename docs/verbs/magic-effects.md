@@ -14,6 +14,11 @@ not visible, when you enter the visibility zone, you should see the effect
 of the shader. The most popular effect archetypes should be implemented
 (with which we attack and heal)").
 Milestone: M2 (docs/PLAN.md, the M2 chart's third verb)   Class: B
+Scope note (2026-10-10): the poison on a weapon left this verb for one of
+its own (docs/PLAN.md M2, "poison"), blocked on playtest thirteen's poison
+section (CLAUDE.md rule 8, the Dynamic plan below); until it ships a poison
+is taken by the server and applies nothing. This verb is drinks, spells'
+effects and the visuals.
 
 ## Authority
 
@@ -137,36 +142,72 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   with their remaining seconds, sent to the actor's owner and its
   listeners whenever the set changes, and in full when a listener first
   sees the actor. Each client shows each effect on that actor in its game
-  (the player or a figure): the effect's hit shader through
-  ApplyEffectShader and its hit art through ApplyArtObject (one new client
-  native, TESModPlatform.ApplyEffectVisuals, R3) for the remaining
-  seconds, and the hit sound once at the start. A game skips the effects
-  its own engine already shows: the drinker's own potion.
+  (the player or a figure): the effect's hit shader through Papyrus
+  (MagicEffect.GetHitShader, EffectShader.Play) for the remaining seconds;
+  no new native for it, and the hit art (an ARTO, which no Papyrus call
+  plays) and the hit sound wait for a playtest to want them. The
+  drinker's own drinks show the same way, since its engine applies none
+  (Suppress).
 - Visual without simulation achieved by: shaders and art only; no
   ActiveEffect is made in any game for a server effect, so nothing there
   changes a value.
 - The drinker's figure stops being told to EquipItem the drink
   (MpActor.cpp:566-583): MagicEffects shows it instead, one path for every
   effect, and a poison is no longer "drunk" on observers' figures.
+- The actor's own game holds the server's buffs: MagicEffects carries the
+  sums the running buffs put on each actor value (modifiers, wire-rules
+  magic::modifier), and the player's game moves each value by the
+  difference from what it holds already, through
+  TESModPlatform.ModPlayerActorValue (ActorValueOwner::ModActorValue,
+  CommonLibSSE-NG include/RE/A/ActorValueOwner.h:19, the change Papyrus
+  ModActorValue makes): a fortify raises its maximum and its value with
+  it, its end takes both back, and a relaunched game, holding nothing,
+  takes the sums whole at the login. The server sends a change's
+  MagicEffects before its ChangeValues, both reliable on the one ordered
+  channel (wire-transport channels.rs), and the client applies each in
+  arrival order on an update, so a game moves its maximum before it takes
+  the percentage, as the server does (MpActor::ApplyAttributeDeltas keeps
+  the damage across a change of the maximum). CONFIRMED (x-potion-probe
+  20261011-020609, fork m2-effects 9e038edd): after a fortify of 20, c1's
+  maximum 120 and its value with it (79.47 to 99.67), 100 again after the
+  end.
 - Side effects: HYPOTHESIS (whether ApplyEffectShader on a figure looks
   like the engine's own hit shader; the lab compares the two screenshots).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
-- What is suppressed: nothing new by default. The drinker's own engine
-  still applies its drink (Actor::DrinkPotion), which keeps the game's own
-  menu entry, sounds and shader; the server applies the same effect and its
-  ChangeValues are the number. HYPOTHESIS: for vanilla potions the two
-  agree (no perk changes a drink's magnitude once made); the lab compares
-  the drinker's own health timeline with the server's (Dynamic plan). If
-  they diverge, the drink is kept out by a hook on Actor::DrinkPotion for
-  the player (the item consumed, its effects not applied), which this doc
-  then gains as its suppression.
+- What is suppressed: the drinker's own engine applies no effect of an
+  alchemy item (a potion, a food, a poison) to the player. Measured why
+  (2026-10-10): the two agree while a drink runs (x-potion-probe
+  20261011-002439: 0.77 on the server and 0.7903 in the game after a heal,
+  0.8083 and 0.8285 after a fortify of 20, the game's own regeneration the
+  difference), but not at a buff's end: both gave the fortify back and the
+  percentages crossed (b-potion 20261011-004053, FortifyHealth05's 100:
+  0.0204 on the server and 0.0335 in the game where about 0.34 was due),
+  the game's report of its own end taken as a fall and the server's end
+  applied on top. A restart made it worse, the game counting its fortify
+  through the server's downtime.
 - A remote spell's effects land nothing on the player it targets (spell-
   cast, MEASURED), so the server's effects are the target's only ones.
-- How: none.
-- Release condition: none.
-- Side effects: HYPOTHESIS (above).
+- How: Skyrim Platform hooks the player's MagicTarget::AddTarget (vfunc
+  01, include/RE/M/MagicTarget.h:78) and refuses an effect whose magic
+  item's spell type is kAlchemy (AlchemyItem::GetSpellType,
+  include/RE/A/AlchemyItem.h:68) while skymp5-client blocks them
+  (TESModPlatform.SetPotionEffectsBlocked, set at its first update behind
+  the magicEffects setting). The player's MagicTarget vtable is the fifth
+  of PlayerCharacter's: TESObjectREFR has four (VTABLE_TESObjectREFR) and
+  Actor's MagicTarget base follows them (include/RE/A/Actor.h:126), as
+  VTABLE_Actor's ten count. The index CONFIRMED (x-potion-probe
+  20261011-020609: the maximum 120 after a fortify of 20, not 140, so the
+  engine applied none of the drink). HYPOTHESIS for T4 (the next
+  playtest): what Actor::DrinkPotion does with a refused effect beyond
+  that (the item leaves the game's inventory, as the server's inventory
+  says it does; its sound; any message).
+- Release condition: none while connected; with magicEffects off nothing
+  is blocked (and the double give-back returns: the setting is a kill
+  switch, not a mode).
+- Side effects: a poison hitting the player from an NPC's weapon applies
+  nothing either, until the poison verb (the server takes no poison yet).
 
 ## Message contract
 
@@ -179,9 +220,15 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
 - Validator rules: a client never sends it (wire-validate refuses it from
   a client, as other server-only messages); every float finite; at most 32
   entries. OnEquip gains the budget above.
+- Since 2026-10-10 (schema 13): modifiers (at most 64, two per effect):
+  av (u32, an actor value the engine has, below 164) and amount (f32,
+  finite): the sums the running buffs put on the actor's values, none at
+  0. The validator refuses an actor value past the engine's.
 - Idempotency / ordering: idempotent (each message replaces the actor's
-  set); ordered on the reliable channel.
-- Contract doc updated: in the same commit as the validator.
+  set); ordered on the reliable channel, before the ChangeValues of the
+  same change.
+- Contract doc updated: in the same commit as the validator (wire-schema's
+  types are the contract, ADR-012).
 
 ## Server
 
@@ -203,13 +250,11 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   the world's timer, applies its deltas to the actor's values and sends
   ChangeValues and MagicEffects.
 - The sources: OnEquip of a potion applies its effects (no more EatItem's
-  instant restore); of a poison, puts it on the weapon in the right hand
-  (poisonId and a poisonCount of 1, HYPOTHESIS: the hand and the count
-  without perks, measured) and sends the owner its inventory so its game's
-  ExtraPoison agrees; a weapon hit with a poisoned weapon applies the
-  poison's effects to the target and spends a charge; a spell hit applies
-  the spell's effects through the rule at the claim's scale (spell-cast's
-  Health damage moves into it, and the dual and duration effects join).
+  instant restore); a poison is taken and applies nothing (its weapon side
+  is the poison verb's: the hand, the count, a poisoned hit); a spell hit
+  applies the spell's effects through the rule at the claim's scale
+  (spell-cast's Health damage moves into it, and the dual and duration
+  effects join).
 - Taper: not counted until the lab measures the engine's (HYPOTHESIS
   above); Firebolt's records give it 0.30 for 1 s at curve 2.
 - DB fields / migration: the change form's activeMagicEffects becomes a
@@ -218,8 +263,13 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   regeneration entries with their end times) into the list (rule 6), and
   b-magic-restart is the restart scenario.
 - Restart behavior: each effect resumes with its remaining time, counted
-  in server time (the legacy map re-armed its timers on load,
-  MpActor::ReapplyMagicEffects, MpActor.cpp:2318-2331).
+  on the server's wall clock, as the world's game time is (ADR-021: the
+  clock runs while the server is down): each running effect keeps when its
+  seconds run were counted (asOf), and a loaded record's effects run on by
+  the time since, an effect that ended meanwhile giving back what it gave
+  (the legacy map kept wall-clock end times too, MpActor::
+  ReapplyMagicEffects). mp.get(actor, "runningEffects") reads them, each
+  with its seconds left (the lab's server.effects(c)).
 - Papyrus natives touched: none in this verb's first slice; the
   ActiveMagicEffect and MagicEffect natives stay missing until a script
   the server runs needs one, each then with its ledger line.
@@ -232,11 +282,15 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
 
 ## Client
 
-- SP binding: TESModPlatform.ApplyEffectVisuals(actor, effect, seconds)
-  (new, client only, R3: the effect's hit shader and hit art through
-  TESObjectREFR::ApplyEffectShader and ApplyArtObject; a ledger line).
-- TS handler: magicEffectsService.ts (MagicEffects to visuals, skipping the
-  player's own drinks); sendInputsService.ts OnEquip reliable.
+- SP binding: the shaders through Papyrus (MagicEffect.GetHitShader,
+  EffectShader.Play), no new native for them; two TESModPlatform natives,
+  client only: SetPotionEffectsBlocked(blocked) and
+  ModPlayerActorValue(av, delta) (above), declared in the .psc and, by
+  lab/pex.py add-native, in the committed TESModPlatform.pex; the
+  AddTarget hook (Hooks.cpp). The hit art (an ARTO) waits for the lab.
+- TS handler: magicEffectsService.ts (MagicEffects to shaders on every
+  actor, the player's drinks included, and the player's held sums);
+  sendInputsService.ts OnEquip reliable.
 - Kill switch config key: `magicEffects` under skymp5-client's settings.
 
 ## Tests
@@ -250,23 +304,21 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   poisoned hit applies the poison and spends its charge; a spell's dual
   effect; effects resume after a reload of the change form).
 - T1: none.
-- T2: a difftest session, a drink, a poison applied and a poisoned hit:
-  the legacy server restores at once, drinks the poison and ignores the
-  weapon's; declared.
+- T2: a difftest session, a fortify drunk and a poison equipped: the
+  legacy server restores at once and drinks the poison as a heal; declared
+  (difftest sessions/magic-effects.yaml).
 - T3 scenario id: lab/scenarios/b-potion.yaml: c1, hurt, drinks a Potion
   of Minor Healing (RestoreHealth01 0x3EADD: 25 at once) and a Fortify
-  Health (FortifyHealth01 0x3EAF2: 20 for 60 s): its health and maximum on
-  the server and in its game agree, and c2 sees the shader on c1's figure;
-  c1 puts a lingering poison on its weapon (DB03Poison 0x58CFB: 6 a second
-  for 10 s) and hits c2: c2 loses the hit and then 60 over ten seconds,
-  both sides agreeing, the poison's shader on c2 on both screens, the
-  charge spent. lab/scenarios/b-magic-restart.yaml (M2's exit): a running
-  Fortify Health and a lingering poison survive a server restart with
-  their remaining time, on the server and in both games.
+  Health (FortifyHealth05 0xFF9FC: 100 for 60 s): its health on the server
+  and in its game agree after each, both drinks leave the server's
+  inventory, and at the fortify's end the 100 comes back once, bounded
+  from both sides. lab/scenarios/b-magic-restart.yaml (M2's exit): a
+  running Fortify Health survives a server restart with the time it has
+  left on the world's clock (server.effects), c1's game agreeing, and its
+  end gives back once. The poison's scenario went with the poison verb.
 - Assertions that would fail if the verb silently regressed: the health
-  steps of the poison over time on both sides; the fortified maximum and
-  its return at the end; the charge's spending; the remaining time after
-  the restart.
+  after each drink on both sides; the return at the fortify's end, once;
+  the time left after the restart.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -292,6 +344,29 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   The poison slice waits for that answer.
 - x-taper-probe: c1 casts Firebolt at c2; c1's watch of c2's figure per
   frame between the server's sets: the engine's taper steps after the hit.
+- Results so far: x-potion-probe 20261011-002439 (green; the two sides
+  agree while drinks run, numbers under Suppress; the watch keeps 256
+  samples, so the fortify's end fell outside it; c2's photographs show no
+  clear shader on c1's figure 3 s after the drink); b-potion
+  20261011-004053 (green, wrongly: the double give-back, under Suppress).
+- On fork m2-effects 9e038edd (2026-10-10): b-potion 20261011-015942 green
+  (0.7636 and 0.7869 after the heal, 0.8818 and 0.9026 after the fortify,
+  0.3248 and 0.3253 after its end: the 100 back once); x-potion-probe
+  20261011-020609 (the maximum 120 after a fortify of 20: the hook and
+  ModActorValue confirmed); b-magic-restart 20261011-020256 red on the
+  client's side only: the effect resumed with its time on the wall clock
+  (57 s left, 21 s after the restart, 0 at its end, the server's 0.6005 to
+  0.2805), but c1's game stayed at 1.0 after the restart and its
+  reconnect. x-reconnect-values 20261011-021436 (green): with no effect
+  running, a reconnected game takes the server's health (0.3095).
+  x-restart-effects-probe 20261011-021833 found the cause: the login, a
+  reconnect's included, sets the player's base values from its CreateActor
+  (remoteServer.ts, the isMe props), which dropped the held +100 (the
+  maximum 200 before the restart, 100 after), while MagicEffectsService
+  still counted it held; the fortify's end then took 100 the game no
+  longer had. Fixed on 58cbf09d: the service forgets what it holds when the
+  connection is accepted, and the login's MagicEffects puts the sums back
+  whole. Staged with god-mode on fork m2-god 35acc275.
 - Owner: agent.
 
 ## Status
@@ -312,10 +387,17 @@ to a newcomer after the actor's creation); e67b2a83 the client shows each
 effect's hit shader for its seconds (MagicEffect.GetHitShader through Skyrim
 Platform, no new native), the figure's re-drink snippet gone; a3a4a5ec a
 spell's hit through the rule (SpellCastTest by the records' damage);
-fdda93fb the migration of the legacy per-AV effects (rule 6). Left: the
-poison on the weapon and its delivery by a hit (after x-poison-probe), the
-OnEquip budget and its reliability, the hit art (an ARTO: a client native if
-the lab wants it), T2, the probes, b-potion and b-magic-restart.
+fdda93fb the migration of the legacy per-AV effects (rule 6); 75fc9f3a
+OnEquip reliable with its budget; 7db86598 and 58f8169b the difftest
+session (T2 green on a9da1873); 57e6c2c5 the migration's end times read from
+memory. After the lab (2026-10-10): 72e48503 effects on the wall clock and
+mp.get's runningEffects; 5cbac803 the wire's modifiers (schema 13) and the
+order before ChangeValues; a16232c0 the client: the engine's drinks blocked
+at the player's AddTarget, the server's buffs held through
+ModPlayerActorValue; 89689154 clang-format 21.1.8 for the fork's Formatting
+check, which the branch had failed since 75fc9f3a. Left: b-potion and
+b-magic-restart green (staged), T2 again on the new wire, the hit art (an
+ARTO: a client native if a playtest wants it), the sweep.
 
 - [x] doc complete, rung declared (R0, ADR-028)
 - [x] engine surface cited or delegated (cited: CommonLibSSE-NG, UESP's
@@ -323,10 +405,32 @@ the lab wants it), T2, the probes, b-potion and b-magic-restart.
       archetype rules; HYPOTHESIS for the lab: the per-second steps, the
       taper, the drinker's own engine agreeing with the server, the
       poison's hand and count, the shader on a figure, OnEquip's budget)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] server logic + T0 (MagicEffectsTest, SpellCastTest by the records'
+      damage, the migration's; the wall clock and the modifiers 72e48503,
+      5cbac803)
+- [x] message + validator (same commit): MagicEffects (MsgType 43) with its
+      validator; the modifiers (schema 13) with the validator's actor-value
+      bound (5cbac803)
+- [x] native hook + T1: the player's MagicTarget::AddTarget refusal of an
+      alchemy item's own effects (Hooks.cpp) and two TESModPlatform natives,
+      SetPotionEffectsBlocked and ModPlayerActorValue (a16232c0); T1 none
+- [x] TS handler: magicEffectsService.ts (the server's sums held, the
+      engine's drinks blocked; a reconnect forgets what the game held,
+      58cbf09d)
+- [x] T2 green (2026-10-10 on fork m2-god 6252f251, every session identical
+      up to its declarations)
+- [x] T3 scenario green: b-potion (thuum bc796d5) green in 20261011-015942
+      and -030531, b-magic-restart (ec9dac2) in -030835 and -031834, both
+      awaiting Eli's review; HYPOTHESIS left: the hit shader on a figure
+      (playtest thirteen's potions), and the poison's hand and count (the
+      poison verb, docs/verbs/poison.md)
+- [x] ledger and suppression registry updated: the two natives' rows
+      (docs/NATIVES.md at 35acc275); the suppression is the player's
+      AddTarget refusal above (Suppress), released never
+- [x] merged with god-mode: the sweep on fork m2-god 35acc275 went 33 of 35
+      green (runs 20261011-033757 to -051523): a-time had no verdict
+      (20261011-044541, sky-c1's guest agent down) and was green on its
+      rerun (-051631); a-melee-reach red once (-042255) and green twice
+      (-051934, -052147), a watch item by ADR-027 (docs/verbs/
+      melee-reach.md); fork parity fast-forwarded to 35acc275, both clones'
+      clean-m1 promoted

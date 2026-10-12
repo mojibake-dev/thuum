@@ -67,6 +67,29 @@ class EvaluatorTests(unittest.TestCase):
             self.assertTrue(self.ev.evaluate(expr), expr)
         self.assertFalse(self.ev.evaluate("server.actor(c1).x == 12345"))
 
+    def test_the_server_s_running_effects_by_their_mgef(self):
+        from labapi.assertions import AssertionData
+
+        # FortifyHealth05's AlchFortifyHealth (Skyrim.esm 0x3EAF3), 100 with
+        # 27.5 s left, and an older 20 of it with 3 s
+        self.ev._server_facade.actors["c1"]["effects"] = [
+            {"effect": 0x3EAF3, "source": 0xFF9FC, "magnitude": 100.0, "secondsLeft": 27.5},
+            {"effect": 0x3EAF3, "source": 0x3EAF2, "magnitude": 20.0, "secondsLeft": 3.0},
+        ]
+        self.ev._server_facade.actors["c2"]["effects"] = []
+        for expr in [
+            'server.effects(c1).left("0x3eaf3") > 20',
+            'server.effects(c1).magnitude("0x3eaf3") == 100',
+            'server.effects(c1).left("0x3eb15") == 0',
+            'server.effects(c2).left("0x3eaf3") == 0',
+        ]:
+            self.assertTrue(self.ev.evaluate(expr), expr)
+        self.assertEqual(self.ev.readings["server.effects(c1).left('0x3eaf3')"], 27.5)
+        # a server without the property reports no list: a data error, not "none"
+        del self.ev._server_facade.actors["c2"]["effects"]
+        with self.assertRaises(AssertionData):
+            self.ev.evaluate('server.effects(c2).left("0x3eaf3") == 0')
+
     def test_the_game_clock_against_a_client_s_globals(self):
         from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
 
@@ -550,6 +573,32 @@ class ConsoleTests(unittest.TestCase):
             ev.evaluate('c2.printed("additem done")')
 
 
+class ShoutServer(RichServer):
+    """c1's shouts record: Fire Breath with its first word known and
+    unlocked, 12.5 s of its recovery left."""
+
+    def __init__(self):
+        super().__init__()
+        self.actors["c1"]["shouts"] = {"shouts": [0x3F9EA], "wordsKnown": [0x20E17], "wordsUnlocked": [0x20E17],
+                                       "recoverySecondsLeft": 12.5}
+
+
+@needs_deps
+class ShoutRecordTests(unittest.TestCase):
+    def test_the_record_and_the_recovery_read(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(ShoutServer(), NearViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('server.actor(c1).shouts == "0x3f9ea"'))
+        self.assertTrue(ev.evaluate('server.actor(c1).wordsUnlocked == "0x20e17"'))
+        self.assertTrue(ev.evaluate('server.actor(c1).shoutRecovery > 12'))
+
+    def test_a_server_without_the_record_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('server.actor(c1).shoutRecovery > 0')
+
+
 class PartsServer(RichServer):
     """c1's appearance with three head parts, in the order a client sent them."""
 
@@ -633,6 +682,33 @@ class WatchTests(unittest.TestCase):
         never = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
         self.assertTrue(never.evaluate("c2.watched(c1).drainMs == 0"))
         self.assertTrue(never.evaluate("c2.watched(c1).drainEndMs == -1"))
+
+    def test_watched_reads_a_figure_s_stagger_events_and_bools(self):
+        """thuum docs/verbs/stagger.md: c2's game blanked one staggerStart on
+        c1's figure (its own engine's) and took one (relayed), and the
+        figure's IsStaggering went true; c2's own side saw recoilStart."""
+        from labapi.assertions import AssertionData, Evaluator
+        views = WatchViews()
+        views.watches["c2"]["actors"][0]["events"] = [[400, "staggerStart", 0], [1300, "staggerStart", 1], [1310, "recoilLargeStart", 1]]
+        views.watches["c2"]["actors"][0]["bools"] = {"IsStaggering": [[0, False], [1320, True], [2600, False]], "IsRecoiling": [[0, False]]}
+        views.watches["c2"]["self"] = {"events": [[200, "attackStart"], [700, "recoilStart"]], "bools": {"IsStaggering": [[0, False]]}}
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.watched(c1).took('staggerStart') == 1"))
+        self.assertTrue(ev.evaluate("c2.watched(c1).sent('staggerStart') == 2"))
+        self.assertTrue(ev.evaluate("c2.watched(c1).ever('IsStaggering')"))
+        self.assertTrue(ev.evaluate("not c2.watched(c1).ever('IsRecoiling')"))
+        self.assertTrue(ev.evaluate("c2.watched_self().saw('recoilStart') == 1"))
+        self.assertTrue(ev.evaluate("c2.watched_self().saw('staggerStart') == 0"))
+        self.assertTrue(ev.evaluate("not c2.watched_self().ever('IsStaggering')"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.watched(c1).ever('bNoStagger')")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.watched_self().saw('staggerStart') == 0")
+        # a driver before bc5d76a reports neither: nothing taken, no bools
+        old = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        self.assertTrue(old.evaluate("c2.watched(c1).took('staggerStart') == 0"))
+        with self.assertRaises(AssertionData):
+            old.evaluate("c2.watched(c1).ever('IsStaggering')")
 
     def test_a_watch_is_needed_and_is_not_a_dump(self):
         from labapi.assertions import AssertionData, Evaluator, clients_needing_views

@@ -56,7 +56,7 @@ flowchart LR
 | sky-agent | 703 | 10.10.70.13 | reserved, not built | (M1) |
 | tpl-sky-client | 710 | 10.10.70.20 | Windows 11 template | template |
 | sky-c1 | 711 | 10.10.70.21 | linked clone + GPU | on demand |
-| sky-c2 | 712 | 10.10.70.22 | reserved | (M2) |
+| sky-c2 | 712 | 10.10.70.22 | linked clone + GPU | on demand |
 | sky-build | 720 | 10.10.70.30 | reserved Windows build box | (fallback) |
 
 VLAN 70, SDN zone `sky`, bridge `vsky`, subnet 10.10.70.0/24, gateway
@@ -381,7 +381,13 @@ client step records the server's position of that client afterwards in
 result.json (`pos`), and a driver step's answer rides in its `note`. The other client verbs run in lab-driver: move,
 equip, cast, activate, draw-weapon, anim-event {name} (an animation event
 on the player, such as attackStart: the engine's own swing, which hits
-what the engine's hit test picks), dump-state (with each actor's bounding
+what the engine's hit test picks), graph-float {name, value} (one of the
+player's behavior graph floats, as the engine sets staggerMagnitude and
+staggerDirection before its stagger; the note reads it back), voice (the
+player's voice recovery after a shout and its equipped shout's three
+recovery times, through SKSE's Papyrus by callNative; `{set: seconds}`
+first sets the game's own recovery, as a player clearing it would),
+dump-state (with each actor's bounding
 box: length, width, height), request-screenshot, craft (an open
 driver item that m0-forge specifies), tap-key (one DirectInput scan code
 through SKSE's Input.TapKey: it works the race menu, 208 Down for the next
@@ -391,7 +397,12 @@ is the one named, read after each press; the order of the menu's list is
 the menu's, so a scenario names the race instead of counting presses),
 hold-key
 {code, ms} (a key held through SKSE's Input.HoldKey and released ms later:
-real movement under the controls, 17 W forward, 42 Left Shift sprint),
+real movement under the controls, 17 W forward, 42 Left Shift sprint; the
+clones' control map binds the right attack to 199 Home and the left attack
+to 207 End, lab/deploy/sky-client/controlmap.ps1, since SKSE's HoldKey on a
+mouse button does nothing), arrows (how many arrow projectiles stand in the
+player's cell: a count only, since any call on a projectile reference
+aborts),
 set-gmst {name, value} and set-av {name, value} (what a player's console
 does with setgs and setav, in this client only: a validation verb's
 negative control), close-menu
@@ -399,7 +410,11 @@ negative control), close-menu
 TESModPlatform.CloseMenu; `name: "RaceSex Menu"` ends the race menu and
 skymp5-client sends its result), and watch-start / watch-stop (the
 client follows every actor near it at watch-start, by form id, each frame
-until watch-stop, and reports how far each got from where it began; for
+until watch-stop, and reports how far each got from where it began, with
+each one's stagger, recoil, shout and bow events as this game's engine or a relay sent
+them (the name, and whether its graph took the event once every hook had
+run: deathService refuses every figure's staggerStart) and the graph
+variables watch-start's {bools} names; for
 "the observer never saw X" checks that one dump-state would sample too
 late; its `self` is the player's own side over the same span, for timing
 what a screenshot is too slow to catch: magicka and health on each change,
@@ -460,7 +475,13 @@ is back on the server's online list. It is how a scenario gets a fresh
 save: after a reconnect an in-game client keeps its world and only moves
 its player (skymp5-client remoteServer.ts). Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
-server's verdicts on the client's race menu results), `server.inventory(c)`,
+server's verdicts on the client's race menu results; `shouts`,
+`wordsKnown` and `wordsUnlocked`, the shouts record's form ids sorted, hex
+and comma-joined, and `shoutRecovery`, the seconds the voice's recovery
+runs on the server's clock, docs/verbs/shouts.md), `server.inventory(c)`,
+`server.effects(c)` (the effects the server runs on the actor, by MGEF id:
+`left(id)` the seconds left and `magnitude(id)`, 0 when none runs;
+docs/verbs/magic-effects.md),
 `c.state` (the client's own dump), `c.sees(other)` and `c.view(other)` (the
 dump's nearby actors matched to the server's position for `other`),
 `c.poison(<form id>)` (the poison on that item's stack in the client's
@@ -469,11 +490,18 @@ when no stack of the item carries one),
 `c.watched(other)` (the last watch-stop's actor that started where the
 server has `other`: `x, y, z`, `maxDisplacement`, `samples`, and
 `drainMs` and `drainEndMs`, how long its magicka fell in that game and when
-it last fell, which time a figure's stream there),
+it last fell, which time a figure's stream there; `took('staggerStart')`
+and `sent(...)`, how many of its stagger or recoil events of that name its
+graph took or was sent there, and `ever('IsStaggering')`, whether a graph
+bool the watch sampled was ever true),
+`c.watched_self()` (the player's own side of that watch: `saw(name)`, how
+many of its own animation events had that name, and `ever(name)` for its
+graph bools),
 `c.marker(<form id>)` (the client's last `markers {ids: [...]}` step: the
 map marker's `visible` and `canTravel` on that player's own map),
 `c.known(<form id>)` (the client's last `known {ids: [...]}` step: the
-ingredient's known effects as a mask, bit i for effect i),
+ingredient's known effects as a mask, bit i for effect i; a word of power
+reads 1 when that game has it unlocked),
 `c.favorite(<form id>)` (the client's last `favorites {ids: [...]}` step,
 read through SKSE's Game.isObjectFavorited and getHotkeyBoundObject: the
 key 0 to 7, -1 for a favorite without one, -2 for none; a `favorite {form,

@@ -143,16 +143,38 @@ target from a weapon or an effect, a buff's maximum still moving; no arrow
 spent by a god shooter; an immortal actor's health stopped at one point, its
 game told so; GodModeTest); b1d1e3dd the difftest session. The client
 already routes tgm and tim to the server (consoleCommandsService.ts,
-serverOnlyCommands), so no client build. Left: CI, T2, b-god.
+serverOnlyCommands), so no client build. CI green (fork pipeline 1189). T2
+(2026-10-10): the session's first draw had c2 step east of the spawn and
+swing at c1 behind it, so the hit cone refused the hit before god mode was
+reached (no StartCombat on the wire); redrawn as hostility's layout
+(b376d8e1), it showed the five expected differences, now declared
+(161d72f2): c1's console line, its game's SetGodMode, the fight c2's hit
+still begins (StartCombat), the legacy server's 3.7 percent hit, the fixed
+server's unchanged health. Merged m2-effects again (6aea7c78: the god gate
+kept on the effect rule's changes, the effect set sent before the values);
+clang-format 21.1.8 for the fork's Formatting check (2634d44c). T2 green
+on the merge (6252f251, 2026-10-10 19:38, every session identical up to its
+declarations). Staged with magic-effects on m2-god 35acc275 for b-god (its
+first run) and the joint merge sweep (scratchpad merge-m2-god.sh).
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (cited; HYPOTHESIS for the lab: the
       game's own console text, the engine's TIM at no health, and the game
       keeping neither flag in a save)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] server logic + T0
+- [x] message + validator (same commit): no message change
+- [x] native hook + T1: none (Debug.SetGodMode by snippet)
+- [x] TS handler: none (the client already routes tgm and tim)
+- [x] T2 green
+- [x] T3 scenario green: b-god (thuum 189171e, awaiting Eli's review)
+      green in 20261011-033002 and -033326; HYPOTHESIS left: the game's own
+      console text, the engine's TIM at no health, and the game keeping
+      neither flag in a save (playtest thirteen's god mode; a restart
+      scenario if one is wanted)
+- [x] ledger and suppression registry updated: Debug.SetGodMode's row (the
+      server's snippet; docs/NATIVES.md at 35acc275); no suppression
+- [x] merged with magic-effects: the sweep on fork m2-god 35acc275 went 33
+      of 35 green; a-time's missing verdict green on its rerun,
+      a-melee-reach's red green twice, a watch item by ADR-027
+      (docs/verbs/magic-effects.md, Status); fork parity fast-forwarded to
+      35acc275, both clones' clean-m1 promoted

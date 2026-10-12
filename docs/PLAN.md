@@ -748,9 +748,11 @@ it carries a HYPOTHESIS tag.
      773716b, awaiting Eli's review) green twice, T2 green, and the merge
      sweep on fork m2-marksman 7be31a9d 31 of 31 green with no rerun (runs
      20261010-090810 to -102926); fork parity fast-forwarded to 7be31a9d and
-     both clones' clean-m1 promoted. Eli's rotfern bow quirk is her
-     first-person launch point (her third-person shots land), the mod's to
-     fix (docs/verbs/marksman.md).
+     both clones' clean-m1 promoted. Eli's rotfern bow quirk (her bow
+     staying drawn in first person) is open: no lab run reproduced it, and
+     the lab's first-person finding, her released arrow flying past near
+     geometry, is a separate one (docs/verbs/marksman.md); playtest
+     thirteen separates the causes.
   2. spell-cast: a cast's start and end as server state, relayed reliably,
      the observer's figure casting the spell sent; the victim's own engine
      applying none of a remote spell's damage (the server's OnSpellHit the
@@ -772,15 +774,73 @@ it carries a HYPOTHESIS tag.
      sent to clients that show them and keep the engine's own application
      out; potions and poisons as effects; Papyrus's ActiveMagicEffect and
      MagicEffect natives as the effects need them. Scenarios `b-potion`
-     and the exit's `b-magic-restart`.
+     and the exit's `b-magic-restart`. In the lab (2026-10-10): the
+     drinker's engine and the server agree while a drink runs, but both
+     gave a fortify back at its end (b-potion left 0.02 of 0.34), so the
+     player's engine applies no drink of its own and holds the server's
+     buffs (docs/verbs/magic-effects.md, Suppress); effects count on the
+     server's wall clock, as ADR-021's game time does. The poison on a
+     weapon became a verb of its own (below), blocked on playtest
+     thirteen's poison section (CLAUDE.md rule 8). DONE 2026-10-10, merged
+     with god-mode: b-potion (thuum bc796d5) and b-magic-restart (ec9dac2),
+     both awaiting Eli's review, green twice each, T2 green, and the merge
+     sweep on fork m2-god 35acc275 33 of 35 green: a-time had no verdict
+     (sky-c1's guest agent down, 20261011-044541) and was green on its
+     rerun (-051631); a-melee-reach red once (-042255) and green twice
+     (-051934, -052147), a watch item by ADR-027 (docs/verbs/
+     melee-reach.md). Fork parity fast-forwarded to 35acc275 and both
+     clones' clean-m1 promoted.
+  3a. poison: a poison on the weapon in the server's inventory (the hand
+     and the charges the playtest shows), a poisoned hit applying it
+     through the effect rule and spending a charge, both games agreeing.
+     Scenario `b-poison`.
   4. god-mode: TGM and TIM, flags the server's damage and death rules read.
+     DONE 2026-10-10: b-god (thuum 189171e, awaiting Eli's review) green
+     twice, T2 green, merged with magic-effects in the same sweep (fork
+     parity 35acc275).
   5. blocking: the attacker's blocked claim checked against the target's
      recorded block and facing, the shield test fixed, the bash's reach
-     (melee reach's carried cases), stagger shown to observers.
+     (melee reach's carried cases), stagger shown to observers. In flight
+     (2026-10-10, fork m2-block): the server decides blocks and their share
+     by the engine's own formula and cone (thuum ghidra/notes/
+     block-formula.md, confirmed in the lab where measured), the bash backed
+     by its start; the stagger moved to 5a. T2 green (2026-10-10, its
+     session's declarations from the formula held to the digit), the
+     weapon line measured (about 31 percent stopped, the formula's 31.4,
+     x-weapon-block-probe 20261011-054315), b-block (thuum 5eebce8,
+     awaiting Eli's review) green twice with every server value the
+     formula's. DONE 2026-10-11: the merge sweep on fork m2-block
+     f828279f went 36 of 36 green with no rerun (runs 20261011-062658 to
+     -081239); fork parity fast-forwarded to f828279f and both clones'
+     clean-m1 promoted.
+  5a. stagger: a bash's or a blocked power attack's stagger imposed on the
+     victim's game and shown to observers (the engine's gate and magnitude
+     in ghidra/notes/block-formula.md; deathService refuses every figure's
+     staggerStart today), the roadmap's "Anims triggered by enemy". Built
+     on fork m2-stagger (2026-10-10: the rule, the server's snippet, the
+     client native TESModPlatform.Stagger over ID 37710, deathService's
+     narrowed refusal; T0 and T2 green). x-stagger-probe 20261011-055806
+     confirmed the victim's own game never staggers from a figure's hit,
+     the attacker's engine tries to stagger the figure (blanked), and a
+     self-started stagger plays and relays. b-stagger (thuum 7431108,
+     awaiting Eli's review) green twice on fork 9cfbcff7 (2026-10-11), after
+     two fixes the lab found: the server's snippet to the native failed in
+     Skyrim Platform (callNative now), and the engine's stagger never
+     reaches other screens by itself (the server sends it). DONE
+     2026-10-11: T2 green on f321a52f (its session now compares the
+     relayed animation message by message), the merge sweep 37 of 37 green
+     (b-spell red once and green on both reruns, an ADR-027 watch item);
+     fork parity fast-forwarded to f321a52f and both clones' clean-m1
+     promoted (docs/verbs/stagger.md).
   6. shouts: words of power and their unlocks as server state (SHOU and
      WOOP read by libespm), the shout cast on spell-cast's path, the
      cooldown the server's; the movement budget measured against Whirlwind
-     Sprint and Unrelenting Force (carried from M1).
+     Sprint and Unrelenting Force (carried from M1). Doc 2026-10-10
+     (docs/verbs/shouts.md). x-shout-probe 20261011-060059: a shout fires
+     no Skyrim Platform spellCast, so it reaches the server not at all
+     today (the hook is open); the console's TeachWord and UnlockWord run
+     in the caller's game alone; one word of Whirlwind Sprint (1052 units)
+     fits the burst.
   7. Lag compensation (Bernier 2001) only if a playtest shows hits refused
      inside M1's slack: positions kept per actor, rewound by the attacker's
      latency.
@@ -821,7 +881,10 @@ it carries a HYPOTHESIS tag.
     spell's reach. Apocalypse's own hard cases are Raise Wall (a shared
     wall the server places) and Milestones (five anchors one world shares).
     Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and Raise
-    Wall, seen by an observer and blocking him.
+    Wall, seen by an observer and blocking him. Placed after
+    spell-cast and magic-effects (Eli, 2026-10-09), with a small step
+    before it that gives the server its global variables (ADR-021's
+    deferral ends there).
   - Lost Grimoire 1.6 (Eli, 2026-10-10, from the stretch list; Nexus 4455,
     Fenestrate's version, so his own install matches the server): its
     Teleportation moves the caster to where the cast lands, in the
@@ -830,10 +893,7 @@ it carries a HYPOTHESIS tag.
     teleport, one jump allowed within its reach at its recorded cast.
     LostGrimoire.esp joins the shared mod set and the server's load order.
     Scenario `b-teleport`: c1 casts Teleportation, lands where it aimed and
-    stays there on the server and on c2's screen. Placed after
-    spell-cast and magic-effects (Eli, 2026-10-09), with a small step
-    before it that gives the server its global variables (ADR-021's
-    deferral ends there).
+    stays there on the server and on c2's screen.
 - Hit registration with lag compensation (rewind by client latency, Bernier
   2001), blocking, marksman aim pitch on the wire, projectile ownership.
   - Carried from M1: melee reach's unmeasured cases, the bash, bare hands

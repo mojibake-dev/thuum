@@ -1,0 +1,80 @@
+# M2, magic-effects (docs/verbs/magic-effects.md): a drink is the server's.
+# c1, hurt, drinks a Potion of Minor Healing (RestoreHealth01, Skyrim.esm ALCH
+# 0x3EADD: AlchRestoreHealth 25, no duration) and then a Fortify Health
+# (FortifyHealth05, 0xFF9FC: AlchFortifyHealth 0x3EAF3, 100 for 60 s, a peak
+# value modifier with Recover; ids and numbers read with lab/esm.py). The
+# server applies each by its records and c1's own game agrees (x-potion-probe
+# 20261011-002439: 0.77 against 0.7903 after the heal, 0.8083 against 0.8285
+# after a fortify of 20, the game's own regeneration the difference): the
+# heal 25 points at once, the fortify the maximum to 200 with the value, and
+# at its end both back by 100, the damage kept (MpActor::ApplyAttributeDeltas,
+# the engine's temporary modifier). Health is set to 0.6 of 200 (twice: a
+# regenerating client's late falls can undo a lone set, b-marksman) about ten
+# seconds before the end, so the return shows past any regeneration: about
+# 0.2 to 0.45 after it, against 0.7 or more if nothing came back or the value
+# only clamped to the old maximum, and 0.02 when c1's own engine ran the
+# drink beside the server and both gave the 100 back (20261011-004053, which
+# this file's first draft passed: it bounded the end from above only). The
+# player's engine now applies no drink of its own and holds the server's
+# buffs (docs/verbs/magic-effects.md). Each drink leaves the server's inventory
+# (the clean world's character carries five Minor Healing potions: six after
+# the give, five after the drink, 20261011-003822).
+# c2 photographs c1's figure while the fortify runs and after its end.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-potion
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: give {item: "0x3eadd", count: 1}
+  - c1: give {item: "0xff9fc", count: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - c1: set-percentages {health: 0.5}
+  - wait: 2
+  - c1: set-percentages {health: 0.5}
+  - wait: 2
+  - assert:
+      - server.actor(c1).healthPercentage < 0.55
+      - server.inventory(c1).count("0x3eadd") == 6
+      - server.inventory(c1).count("0xff9fc") == 1
+  # the heal: 25 at once
+  - c1: equip {formId: 0x3eadd}
+  - wait: 3
+  - assert:
+      - server.actor(c1).healthPercentage > 0.72
+      - server.actor(c1).healthPercentage < 0.82
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
+      - server.inventory(c1).count("0x3eadd") == 5
+  # the fortify: the maximum to 200, the value with it
+  - c1: equip {formId: 0xff9fc}
+  - wait: 3
+  - assert:
+      - server.actor(c1).healthPercentage > 0.84
+      - server.actor(c1).healthPercentage < 0.92
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
+      - server.inventory(c1).count("0xff9fc") == 0
+  - c2: screenshot
+  - wait: 40
+  - c1: set-percentages {health: 0.6}
+  - wait: 2
+  - c1: set-percentages {health: 0.6}
+  - wait: 2
+  - assert:
+      - server.actor(c1).healthPercentage > 0.58
+      - server.actor(c1).healthPercentage < 0.68
+  # the fortify's end: the maximum and the value back by 100, once
+  - wait: 16
+  - assert:
+      - server.actor(c1).healthPercentage < 0.5
+      - server.actor(c1).healthPercentage > 0.15
+      - server.actor(c1).isDead == false
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]

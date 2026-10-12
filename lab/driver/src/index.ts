@@ -34,11 +34,13 @@ import {
   NetImmerse,
   ObjectReference,
   Race,
+  Shout,
   Spell,
   TESModPlatform,
   Ui,
   Utility,
   Weather,
+  WordOfPower,
   WorldSpace,
   hooks,
   on,
@@ -163,7 +165,21 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 // WATCH_SELF_MS (at most WATCH_SELF_MAX): a figure holds a million
 // (formView.ts) and a stream drains it, so a figure's falls while it
 // streams in this game (thuum docs/verbs/spell-cast.md)
-type Watched = { name: string; first: number[]; last: number[]; maxDisplacement: number; samples: number; health: number[][]; magicka: number[][] };
+// events: its stagger, recoil and shout events as this game's engine or a relay
+// sent them, [ms, name, 1 if its graph took the event after every hook
+// else 0] (the figure hooks below; thuum docs/verbs/stagger.md), and bools:
+// the graph variables watch-start names, on each change, as for the player
+type Watched = {
+  name: string;
+  first: number[];
+  last: number[];
+  maxDisplacement: number;
+  samples: number;
+  health: number[][];
+  magicka: number[][];
+  events: Array<[number, string, number]>;
+  bools: Record<string, Array<[number, boolean]>>;
+};
 const WATCH_HEALTH_MAX = 64;
 // self: the player's own side over the same span, for how long a held
 // stream flows (thuum docs/verbs/spell-cast.md; screenshots take one to
@@ -381,6 +397,13 @@ function trackWatch(): void {
     if (magicka !== lastMagicka[1] && ms - lastMagicka[0] >= WATCH_SELF_MS && w.magicka.length < WATCH_SELF_MAX) {
       w.magicka.push([ms, magicka]);
     }
+    for (const name of Object.keys(w.bools)) {
+      const seen = w.bools[name];
+      const value = actor.getAnimationVariableBool(name);
+      if ((seen.length === 0 || seen[seen.length - 1][1] !== value) && seen.length < WATCH_SELF_MAX) {
+        seen.push([ms, value]);
+      }
+    }
   });
   const me = Game.getPlayer();
   if (!me) return;
@@ -428,6 +451,25 @@ on("magicEffectApply", (e) => {
     watching.self.effects.push([watchedMs(), e.caster ? e.caster.getFormID() : 0, e.effect ? e.effect.getFormID() : 0]);
   }
 });
+
+// A watched figure's stagger, recoil, shout and bow events (thuum
+// docs/verbs/stagger.md, docs/verbs/shouts.md, docs/verbs/marksman.md: which
+// bow events the target's game plays on the shooter's figure):
+// one hook per pattern over the figures' range, filtered in native (rule 9)
+// and added at load, before skymp5-client's services add theirs, so each sees
+// the name its sender gave: deathService blanks every figure's staggerStart,
+// and Skyrim Platform hands later hooks the blanked name. Recorded at leave,
+// with whether the graph took the event once every hook had run.
+for (const pattern of ["stagger*", "recoil*", "shout*", "bow*", "Bow*", "arrow*", "Arrow*"]) {
+  hooks.sendAnimationEvent.add({
+    enter: () => {},
+    leave: (ctx) => {
+      if (!watching) return;
+      const w = watching.actors.get(ctx.selfId);
+      if (w && w.events.length < WATCH_SELF_MAX) w.events.push([watchedMs(), ctx.animEventName, ctx.animationSucceeded ? 1 : 0]);
+    },
+  }, 0xff000000, 0xffffffff, pattern);
+}
 
 // Every menu CommonLibSSE-NG names (the MENU_NAME constants under
 // include/RE), so dump-state can say which are open when a player cannot act.
@@ -745,11 +787,19 @@ function run(step: Step, player: Actor): unknown {
     case "known": {
       // thuum docs/verbs/learned-effects.md: the effects this player's engine
       // knows of each ingredient, bit i for effect i, keyed by its decimal
-      // form id (lab-api's c.known(id)); null for a form that is no ingredient
+      // form id (lab-api's c.known(id)); a word of power reads 1 when the
+      // engine has it unlocked (Game.IsWordUnlocked, docs/verbs/shouts.md);
+      // null for a form that is neither
       const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
       const out: Record<string, number | null> = {};
       for (const id of ids) {
-        const ingredient = Ingredient.from(Game.getFormEx(Number(id)));
+        const form = Game.getFormEx(Number(id));
+        const word = WordOfPower.from(form);
+        if (word) {
+          out[String(Number(id))] = Game.isWordUnlocked(word) ? 1 : 0;
+          continue;
+        }
+        const ingredient = Ingredient.from(form);
         let mask = 0;
         if (ingredient) {
           for (let i = 0; i < 4; ++i) {
@@ -774,6 +824,17 @@ function run(step: Step, player: Actor): unknown {
         out[String(Number(id))] = f ? player.getItemCount(f) : null;
       }
       return out;
+    }
+    case "arrows": {
+      // thuum docs/verbs/marksman.md (playtest thirteen: the target's screen
+      // shows two arrows per shot): how many arrow projectiles stand in the
+      // player's cell (ArrowProjectile, form type 0x40 PARW, CommonLibSSE-NG
+      // include/RE/F/FormTypes.h:204), by SKSE's Cell.GetNumRefs. Only the
+      // count: any Papyrus call on a projectile reference aborts (the
+      // projectiles step's note)
+      const cell = player.getParentCell();
+      if (!cell) return { error: "no cell" };
+      return { count: cell.getNumRefs(0x40) };
     }
     case "projectiles": {
       // thuum docs/verbs/marksman.md: for each projectile base (a PROJ:
@@ -1248,14 +1309,20 @@ function run(step: Step, player: Actor): unknown {
       return { actor: target.getFormID(), [name]: target.getActorValue(name) };
     }
     case "watch-start": {
+      const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
       const actors = new Map<number, Watched>();
       for (const other of nearbyActors(player)) {
         const pos = positionOf(other);
-        actors.set(other.getFormID(), { name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, health: [[0, other.getActorValue("health")]], magicka: [[0, other.getActorValue("magicka")]] });
+        const otherBools: Record<string, Array<[number, boolean]>> = {};
+        for (const n of bools) otherBools[n] = [];
+        actors.set(other.getFormID(), {
+          name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0,
+          health: [[0, other.getActorValue("health")]], magicka: [[0, other.getActorValue("magicka")]],
+          events: [], bools: otherBools,
+        });
       }
       if (watching) hooks.sendAnimationEvent.remove(watching.hookId);
       const self: WatchedSelf = { magicka: [[0, player.getActorValue("magicka")]], health: [[0, player.getActorValue("health")]], events: [], casts: [], hits: [], taken: [], effects: [], bools: {} };
-      const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
       for (const n of bools) self.bools[n] = [];
       const hookId = hooks.sendAnimationEvent.add({
         enter: (ctx) => {
@@ -1280,6 +1347,14 @@ function run(step: Step, player: Actor): unknown {
     case "equip": {
       const item = Game.getFormEx(num(a.formId));
       if (!item) return { error: "no such form" };
+      // a shout goes to the voice slot (Actor.EquipShout; thuum
+      // docs/verbs/shouts.md, x-shout-probe), anything else by EquipItem
+      const shout = Shout.from(item);
+      if (shout) {
+        player.equipShout(shout);
+        const held = player.getEquippedShout();
+        return held && held.getFormID() === shout.getFormID() ? "shout" : { error: "the shout did not equip" };
+      }
       player.equipItem(item, false, true);
       return "ok";
     }
@@ -1310,6 +1385,35 @@ function run(step: Step, player: Actor): unknown {
       if (!name) return { error: "no event name" };
       Debug.sendAnimationEvent(player, name);
       return "sent";
+    }
+    case "voice": {
+      // The player's voice after a shout (thuum docs/verbs/shouts.md): the
+      // recovery its game set at the release (SKSE Actor.GetVoiceRecoveryTime,
+      // the variation's recovery time times ShoutRecoveryMult) and the
+      // equipped shout's three recovery times (SKSE Shout.GetNthRecoveryTime),
+      // through callNative, which needs the .psc declarations SKSE installs.
+      // {set: seconds} first sets the game's own recovery
+      // (Actor.SetVoiceRecoveryTime), as a player clearing it in its own game
+      // would: the server keeps its own (b-shout)
+      if (typeof a.set === "number") callNative("Actor", "SetVoiceRecoveryTime", player, a.set);
+      const shout = player.getEquippedShout();
+      const recovery = callNative("Actor", "GetVoiceRecoveryTime", player) as number;
+      const variations: number[] = [];
+      if (shout) {
+        for (let n = 0; n < 3; n++) variations.push(callNative("Shout", "GetNthRecoveryTime", shout, n) as number);
+      }
+      return { shout: shout ? shout.getFormID() : 0, recovery, variations, mult: player.getActorValue("ShoutRecoveryMult") };
+    }
+    case "graph-float": {
+      // One of the player's behavior graph floats (Papyrus
+      // SetAnimationVariableFloat), {name, value}: the engine sets
+      // staggerMagnitude and staggerDirection before its stagger action
+      // (thuum docs/verbs/stagger.md), so a probe can set them before its
+      // own anim-event staggerStart. Returns the value the graph reads back.
+      const name = typeof a.name === "string" ? a.name : "";
+      if (!name || typeof a.value !== "number") return { error: "graph-float needs name and value" };
+      player.setAnimationVariableFloat(name, a.value);
+      return { name, value: player.getAnimationVariableFloat(name) };
     }
     case "craft": {
       // UNCONFIRMED: crafting is a menu in the engine, so the driver reproduces

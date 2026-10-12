@@ -106,6 +106,11 @@ def _parts(v: Any) -> str | None:
     return ",".join(f"{x:#x}" for x in sorted(v))
 
 
+def _field(record: Any, name: str) -> Any:
+    """One field of a nested record the gamemode may not send (None then)."""
+    return record.get(name) if isinstance(record, dict) else None
+
+
 def _opt_str(v: Any) -> str | None:
     return None if v is None else str(v)
 
@@ -132,6 +137,12 @@ class ActorView:
     lastAppearanceAllowed: bool | None = None
     # the appearance's head parts as _parts writes them (thuum ADR-026)
     headParts: str | None = None
+    # the server's shouts record, each list as _parts writes it, and how
+    # long its voice recovery runs in seconds (docs/verbs/shouts.md)
+    shouts: str | None = None
+    wordsKnown: str | None = None
+    wordsUnlocked: str | None = None
+    shoutRecovery: float | None = None
 
 
 @dataclass(frozen=True)
@@ -170,6 +181,52 @@ class WatchView:
     samples: int
     drainMs: float = 0.0
     drainEndMs: float = -1.0
+    # its stagger and recoil events in the watcher's game, (ms, name, 1 if
+    # its graph took the event after every hook), and the graph bools the
+    # watch sampled, (name, ((ms, value), ...)) (lab-driver bc5d76a; thuum
+    # docs/verbs/stagger.md)
+    events: tuple = ()
+    bools: tuple = ()
+
+    def took(self, name: str) -> int:
+        """How many of the actor's events named `name` its graph took in the
+        watcher's game (deathService blanks a figure's staggerStart it did not
+        relay, and a blanked event is not taken)."""
+        return sum(1 for e in self.events if str(e[1]).lower() == name.lower() and e[2])
+
+    def sent(self, name: str) -> int:
+        """How many events named `name` reached the actor's graph in the
+        watcher's game, taken or not."""
+        return sum(1 for e in self.events if str(e[1]).lower() == name.lower())
+
+    def ever(self, name: str) -> bool:
+        """Whether the graph bool `name` was true at any sample."""
+        return _ever(self.bools, name)
+
+
+def _ever(bools: tuple, name: str) -> bool:
+    for n, series in bools:
+        if str(n).lower() == name.lower():
+            return any(bool(v) for _, v in series)
+    raise AssertionData(f"the watch sampled no graph bool {name}")
+
+
+@dataclass(frozen=True)
+class SelfWatchView:
+    """c.watched_self(): the player's own side of its last watch, the
+    animation events its graph was sent (ms, name) and the graph bools
+    watch-start named."""
+
+    events: tuple = ()
+    bools: tuple = ()
+
+    def saw(self, name: str) -> int:
+        """How many of the player's own animation events were named `name`."""
+        return sum(1 for e in self.events if str(e[1]).lower() == name.lower())
+
+    def ever(self, name: str) -> bool:
+        """Whether the player's graph bool `name` was true at any sample."""
+        return _ever(self.bools, name)
 
 
 @dataclass(frozen=True)
@@ -289,6 +346,41 @@ class InventoryView:
         return sum(int(e.get("count", 0)) for e in self.entries if int(e.get("baseId", -1)) == want)
 
 
+@dataclass(frozen=True)
+class EffectsView:
+    """server.effects(c): the effects the server runs on that client's actor
+    (labState's `effects`, the server's mp.get(actor, "runningEffects"),
+    thuum docs/verbs/magic-effects.md), each by its MGEF id: left(id) the
+    seconds the one of that effect with the most time has left, and
+    magnitude(id) its magnitude, both 0 when none runs."""
+
+    entries: tuple[dict[str, Any], ...]  # {"effect", "source", "magnitude", "secondsLeft"}
+    resolver: Any  # as InventoryView's
+
+    def _longest(self, spec: str) -> dict[str, Any] | None:
+        try:
+            want = int(self.resolver(spec))
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        found = [e for e in self.entries if int(e.get("effect", -1)) == want]
+        return max(found, key=lambda e: float(e.get("secondsLeft", 0))) if found else None
+
+    def left(self, spec: str) -> float:
+        e = self._longest(spec)
+        return float(e.get("secondsLeft", 0)) if e else 0.0
+
+    def magnitude(self, spec: str) -> float:
+        e = self._longest(spec)
+        return float(e.get("magnitude", 0)) if e else 0.0
+
+
+def _bool_series(raw: Any) -> tuple:
+    """A watch's {name: [[ms, value], ...]} as (name, ((ms, value), ...))."""
+    if not isinstance(raw, dict):
+        return ()
+    return tuple((str(n), tuple((float(p[0]), bool(p[1])) for p in series)) for n, series in raw.items())
+
+
 class _ServerRef:
     def __init__(self, facade: ServerFacade):
         self._f = facade
@@ -309,6 +401,10 @@ class _ServerRef:
                 lastAppearanceRaceId=_opt_int(d.get("lastAppearanceRaceId")),
                 lastAppearanceAllowed=_opt_bool(d.get("lastAppearanceAllowed")),
                 headParts=_parts(d.get("headParts")),
+                shouts=_parts(_field(d.get("shouts"), "shouts")),
+                wordsKnown=_parts(_field(d.get("shouts"), "wordsKnown")),
+                wordsUnlocked=_parts(_field(d.get("shouts"), "wordsUnlocked")),
+                shoutRecovery=_opt_float(_field(d.get("shouts"), "recoverySecondsLeft")),
             )
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"actor record for {client} lacks {e}") from e
@@ -329,6 +425,15 @@ class _ServerRef:
         if entries is None:
             raise AssertionData(f"server has no inventory for {client}")
         return InventoryView(tuple(entries), self._f.base_id)
+
+    def effects(self, client: str) -> EffectsView:
+        d = self._f.actor(client)
+        if not d or not d.get("found", True):
+            raise AssertionData(f"server has no actor for {client}")
+        entries = d.get("effects")
+        if not isinstance(entries, list):
+            raise AssertionData(f"server reports no running effects for {client} (a server without magic-effects)")
+        return EffectsView(tuple(e for e in entries if isinstance(e, dict)), self._f.base_id)
 
 
 class _ClientRef:
@@ -413,9 +518,26 @@ class _ClientRef:
                 samples=int(best.get("samples", 0)),
                 drainMs=falls[-1] - falls[0] if falls else 0.0,
                 drainEndMs=falls[-1] if falls else -1.0,
+                events=tuple((float(e[0]), str(e[1]), int(e[2])) for e in best.get("events") or []),
+                bools=_bool_series(best.get("bools")),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s watch of {other} lacks {e}") from e
+
+    def watched_self(self) -> SelfWatchView:
+        """The player's own side of the client's last watch."""
+        fn = getattr(self._views, "watch", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("self"), dict):
+            raise AssertionData(f"{self.name} has not reported a watch-stop with its own side yet")
+        own = data["self"]
+        try:
+            return SelfWatchView(
+                events=tuple((float(e[0]), str(e[1])) for e in own.get("events") or []),
+                bools=_bool_series(own.get("bools")),
+            )
+        except (IndexError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s own watch lacks {e}") from e
 
     def marker(self, ref_id: int) -> MarkerView:
         fn = getattr(self._views, "markers", None)
@@ -665,7 +787,8 @@ class _ClientRef:
 
 _ATTRS = {
     ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex",
-                "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts"},
+                "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
+                "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs"},
     MarkerView: {"visible", "canTravel"},
@@ -686,12 +809,15 @@ _ID_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale", "morph", "head_parts"},
+    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "time"},
-    _ClientRef: {"sees", "view", "watched", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
+    _ServerRef: {"actor", "inventory", "effects", "time"},
+    _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
+    EffectsView: {"left", "magnitude"},
+    WatchView: {"took", "sent", "ever"},
+    SelfWatchView: {"saw", "ever"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,

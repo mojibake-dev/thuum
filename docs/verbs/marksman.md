@@ -157,12 +157,17 @@ a rate budget (none today).
   Nord's game, and after F (DirectInput 33, Toggle POV on the clones; her
   screenshot shows the third-person camera) her third-person shot lay 234
   from her: both third-person launches stop at the pillar about 200 units
-  away, the first-person one flies past it. Her first-person view is the
-  cause, and the fix is the mod's (her race's first-person setup;
-  apocrypha); she can shoot in third person today. What exactly in her
-  first-person setup places the launch past the pillar (the node, or the
-  camera) stays a question for apocrypha and, if it matters, a Frida read
-  of Projectile::Launch's origin (the re-analyst's plan, 2026-10-09).
+  away, the first-person one flies past it. That is a finding about where
+  a released arrow goes, not the quirk: Eli (2026-10-10) saw her bow stay
+  drawn in first person, the release never happening, which no lab run
+  reproduced (every one fired, with the attack on the clones' Home key
+  through SKSE Input.HoldKey, where Eli uses the mouse through Moonlight;
+  and rotfern has only played test 1's seat, the Nord test 2's). The
+  quirk's cause is open: playtest thirteen's arrows section separates the
+  mouse, the Home key and third person on her seat. The first-person
+  launch point past the pillar stays a question of its own (the node, or
+  the camera; a Frida read of Projectile::Launch's origin, the
+  re-analyst's plan, 2026-10-09).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -301,6 +306,28 @@ driver's projectiles step measures distance by narrowing its search
 (thuum b6a8650). The probe's first run (20261009-223804) lost c2's game
 after its load (no actor value report, no answer for 60 s); the rerun
 was clean: a watch item.
+
+Playtest thirteen (2026-10-11, Eli, parity f828279f): an arrow's damage
+held as built (13.7 at a full draw, 4.79 at a tap, once per shot, one
+arrow spent). Two findings:
+- Only the target's screen shows two arrows per shot. The server took one
+  shot and one hit per release, and the target's game launches one arrow
+  per ArrowShot (arrowSyncService.ts; TESModPlatform.LaunchArrow launches
+  one projectile, PapyrusTESModPlatform.cpp). HYPOTHESIS: the second is the
+  figure's own bow, firing from the shooter's relayed animation with the
+  bow and arrows the equipment relay gives it. Probe planned: count the
+  iron arrows in the target's cell around one shot and record the figure's
+  bow events.
+- rotfern still never fires with the mouse on test 1's seat ("draws, no
+  arrow in hand, no fire", first and third person): her game reported no
+  shot all session, while the server records her iron arrows worn and her
+  melee hits came through. From that saved world the lab's Home key fired
+  her bow twice at full draw (x-bow-race-probe4 20261012-004212: arrows 72,
+  71, 70; power 1.00), so her race and character fire; the probe's
+  left-mouse step proves nothing (SKSE's HoldKey on a mouse button does
+  nothing, run 20261003-115633, the reason the clones bind the attack to
+  Home). Open: the mouse on her seat. Playtest fourteen: arrows equipped by
+  hand first, and the Home key (fn+Left on a Mac keyboard).
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (two HYPOTHESIS tags for the lab:

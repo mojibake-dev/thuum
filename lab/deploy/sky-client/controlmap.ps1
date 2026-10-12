@@ -1,7 +1,9 @@
 # Give "Right Attack/Block" a keyboard key in the game's control map, so
 # lab-driver's hold-key can make a power attack (the engine decides a power
 # attack by how long the attack is held; SKSE's HoldKey on the mouse button
-# does nothing, thuum run 20261003-115633, docs/verbs/damage-flags.md).
+# does nothing, thuum run 20261003-115633, docs/verbs/damage-flags.md), and
+# "Left Attack/Block" one too, so the lab can cast from the left hand
+# (playtest thirteen's left-hand Flames, docs/verbs/spell-cast.md).
 #
 # The stock control map is read out of the clone's own Skyrim - Interface.bsa
 # (BSA version 105, uncompressed; layout per UESP "Skyrim Mod:Archive File
@@ -11,7 +13,7 @@
 # agent; idempotent. Prints the attack line before and after.
 # -Game names the game folder; by default the one in game-dir.txt. Each game
 # version's folder (ADR-022) reads the map out of its own archive.
-param([string]$Key = '0xc7', [string]$Game = '')   # Home: no default binding
+param([string]$Key = '0xc7', [string]$LeftKey = '0xcf', [string]$Game = '')   # Home, End: no default binding
 $ErrorActionPreference = 'Stop'
 $game = if ($Game) { $Game } else { (Get-Content 'C:\sky-lab\game-dir.txt' -Raw).Trim() }
 $bsa = Join-Path $game 'Data\Skyrim - Interface.bsa'
@@ -54,17 +56,20 @@ try {
 } finally { $br.Close() }
 
 $lines = $text -split "`r?`n"
-$found = $false
-for ($i = 0; $i -lt $lines.Count; $i++) {
-  # keep the stock file's tab alignment: replace only the keyboard column
-  if ($lines[$i] -match '^Right Attack/Block\t+') {
-    'before: ' + $lines[$i]
-    $lines[$i] = $lines[$i] -replace '^(Right Attack/Block\t+)\S+', ('${1}' + $Key)
-    'after:  ' + $lines[$i]
-    $found = $true
+$found = @{}
+foreach ($bind in @(@('Right Attack/Block', $Key), @('Left Attack/Block', $LeftKey))) {
+  $name = [regex]::Escape($bind[0])
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    # keep the stock file's tab alignment: replace only the keyboard column
+    if ($lines[$i] -match ('^' + $name + '\t+')) {
+      'before: ' + $lines[$i]
+      $lines[$i] = $lines[$i] -replace ('^(' + $name + '\t+)\S+'), ('${1}' + $bind[1])
+      'after:  ' + $lines[$i]
+      $found[$bind[0]] = $true
+    }
   }
+  if (-not $found[$bind[0]]) { throw ("no " + $bind[0] + " line") }
 }
-if (-not $found) { throw "no Right Attack/Block line" }
 New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
 [IO.File]::WriteAllText($out, ($lines -join "`r`n"), [Text.Encoding]::ASCII)
 'written ' + $out

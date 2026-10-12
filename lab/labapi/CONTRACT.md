@@ -40,7 +40,9 @@ Response when the profile has an actor:
  "isDead": false, "healthPercentage": 1.0,
  "hasAppearance": true, "raceId": 79683, "sex": 0,
  "appearanceAttempts": 1, "lastAppearanceRaceId": 79683,
- "lastAppearanceAllowed": true, "headParts": [333061, 333359, 333361]}
+ "lastAppearanceAllowed": true, "headParts": [333061, 333359, 333361],
+ "effects": [{"effect": 256755, "source": 1047036, "magnitude": 100.0,
+              "secondsLeft": 27.5}]}
 ```
 
 `hasAppearance`, `raceId` (the race's form id from the actor's appearance),
@@ -55,7 +57,13 @@ gamemode event onUpdateAppearanceAttempt; `lastAppearanceRaceId` and
 ids, sorted (`null` without an appearance); where RaceMenu is present the
 server derives them from the look (thuum ADR-026), and lab-api compares them
 with a client's head-parts step as `server.actor(c).headParts ==
-c.head_parts()`.
+c.head_parts()`. `effects` is the effects the server runs on the actor
+(the server's `mp.get(actor, "runningEffects")`, thuum
+docs/verbs/magic-effects.md): each effect's MGEF form id, its source (the
+potion, poison or spell), its magnitude and the seconds it has left on the
+server's wall clock; `null` from a server without the property. lab-api
+reads it as `server.effects(c).left("0x3eaf3")` and `.magnitude(...)`, 0
+when no effect of that MGEF runs.
 
 `cell` is the server's descriptor for the actor's cell or worldspace,
 `FormDesc::ToString`, that is `"<hex id>:<file>"` such as `"3c:Skyrim.esm"`;
