@@ -17,12 +17,14 @@
     "/srv/skymp/esm/ccBGSSSE025-AdvDSGS.esm",
     "/srv/skymp/esm/_ResourcePack.esl",
     "/srv/skymp/esm/RaceCompatibility.esm",
-    "/srv/skymp/esm/rotfern.esp"
+    "/srv/skymp/esm/rotfern.esp",
+    "/srv/skymp/esm/LostGrimoire.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",
   "gamemodePath": "/srv/skymp/gamemode/gamemode.js",
   "enableConsoleCommandsForAll": true,
+  "castTeleports": [{ "spell": "0a86df:LostGrimoire.esp", "reach": 8000 }],
   "startPoints": [
     { "pos": [133857, -61130, 14662], "worldOrCell": "0x3c", "angleZ": 72 }
   ]

@@ -34,6 +34,15 @@
 #   verb) and RaceMenuMorphsCBBE.esp (full, Skyrim.esm its only master) only
 #   drives RaceMenu's sliders. Scoped to 1.6.1170 with RaceMenu, the
 #   players' version (ADR-025).
+# - Lost Grimoire 1.6 (Eli, 2026-10-10: "i guess we're rolling in
+#   lostgrimoire as well"), for its Teleportation (docs/MODS.md): Nexus mod
+#   4455 file 746543, Fenestrate's version so Eli's own install matches the
+#   server, checked against the md5 apocrypha read from Fenestrate's
+#   archive; its plugin, its two BSAs and its _ANIO.ini (bound axe and
+#   pickaxe props by keyword, a file for an SKSE plugin the layer does not
+#   carry, so nothing reads it), in both game versions. LostGrimoire.esp is
+#   full (masters Skyrim, Update, Dawnguard, HearthFires, Dragonborn) and the
+#   server loads it, before CBBE's client-only pair.
 #
 # A mod directory named <mod>@<version> installs only into that game
 # version's folder on a clone (add-mods.ps1), and its plugins go only into
@@ -73,13 +82,17 @@ cb_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/198/files/48
 # (the seam on every adult female in the lab, Eli's playtest nine); the
 # FOMOD defaults it on, fenestrate most likely had it (apocrypha)
 cb_options="Vanilla Shape|Vanilla Outfits|RaceMenu Morphs (BodyMorph)|Morph Files (Outfits)|Face Pack"
+# Lost Grimoire 1.6, Nexus mod 4455 file 746543 (Fenestrate's; apocrypha's md5)
+lg_zip="$cache/LostGrimoire-1.6.zip"
+lg_md5=9ff6e8c0ba4be4689406305ac509ee89
+lg_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/4455/files/746543
 # the load order after the masters and the Creation Club plugins: the server's
 # loadOrder (server-settings.json for 1.6.1170, server-settings-1.7.104.json
 # without RaceMenu's) lists the same plugins in the same order. CBBE's two
 # come last and on the clients only (above: each the last of its kind, no
 # server state names their forms), so the server's list stays the clients'
 # first plugins.
-plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp RaceMenuMorphsCBBE.esp CBBE.esp)
+plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp LostGrimoire.esp RaceMenuMorphsCBBE.esp CBBE.esp)
 
 mkdir -p "$cache"
 if [ ! -f "$rc_zip" ] || [ "$(md5 -q "$rc_zip")" != "$rc_md5" ]; then
@@ -112,6 +125,15 @@ if [ ! -f "$cb_7z" ] || [ "$(md5 -q "$cb_7z")" != "$cb_md5" ]; then
   mv "$cb_7z.part" "$cb_7z"
 fi
 [ "$(md5 -q "$cb_7z")" = "$cb_md5" ] || { echo "CBBE archive md5 is not $cb_md5" >&2; exit 2; }
+if [ ! -f "$lg_zip" ]; then
+  echo "fetching Lost Grimoire 1.6 from Nexus"
+  url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
+    | curl -fsS -m 30 -H @- "$lg_api/download_link.json" \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["URI"])')
+  curl -fsS -m 900 -o "$lg_zip.part" "${url// /%20}"
+  mv "$lg_zip.part" "$lg_zip"
+fi
+[ "$(md5 -q "$lg_zip")" = "$lg_md5" ] || { echo "Lost Grimoire archive md5 is not $lg_md5" >&2; exit 2; }
 command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu and CBBE (brew install sevenzip)" >&2; exit 2; }
 [ -f "$rotfern/rotfern.esp" ] || { echo "no rotfern.esp in $rotfern" >&2; exit 2; }
 
@@ -195,6 +217,8 @@ while IFS=$'\t' read -r folder into; do
   rsync -a "$cbx/x/$folder/" "$cb/$into/"
 done < "$cbx/plan.tsv"
 echo "CBBE: $(wc -l < "$cbx/plan.tsv" | tr -d ' ') installer folders, $(find "$cb" -type f | wc -l | tr -d ' ') files"
+lg="$stage/tree/lostgrimoire-1.6"; mkdir -p "$lg"
+unzip -q "$lg_zip" "LostGrimoire.esp" "LostGrimoire.bsa" "LostGrimoire - Textures.bsa" "LostGrimoire_ANIO.ini" -d "$lg"
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
@@ -219,7 +243,9 @@ place() { # <esm dir> <mods-relative plugin paths...>
     sha256sum -c --quiet SHA256SUMS"
   echo "$dir: ${names[*]} in place, SHA256SUMS checked"
 }
-place esm racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp
+place esm racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
+  lostgrimoire-1.6/LostGrimoire.esp
 place esm/1.6.1170 racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
-  racemenu-0.4.20.0@1.6.1170/RaceMenu.esp racemenu-0.4.20.0@1.6.1170/RaceMenuPlugin.esp
+  racemenu-0.4.20.0@1.6.1170/RaceMenu.esp racemenu-0.4.20.0@1.6.1170/RaceMenuPlugin.esp \
+  lostgrimoire-1.6/LostGrimoire.esp
 ssh -o BatchMode=yes "$dst" "cd '$persist/mods' && sha256sum -c --quiet SHA256SUMS && echo 'mods: SHA256SUMS checked on the host'"
