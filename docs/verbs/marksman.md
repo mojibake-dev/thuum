@@ -327,8 +327,12 @@ arrow spent). Two findings:
   once from the engine alone (the figure's bow) and once through
   SkyrimPlatformImpl.dll (LaunchArrow). Fix on fork m2-teleport 4198fe78:
   a figure holds no arrows (sync/equipment.ts), so its bow draws empty and
-  only the relayed arrow, with the shooter's aim and draw, flies. To check
-  in the lab: one launch per shot in the target's game.
+  only the relayed arrow, with the shooter's aim and draw, flies.
+  CONFIRMED by x-double-arrow2 20261012-071438 on m2-teleport 0ef4df4d
+  (the fix merged with parity): for c1's full-draw shot, c2's game called
+  Projectile::Launch once, through SkyrimPlatformImpl.dll (LaunchArrow),
+  and the engine launched nothing of its own. Playtest fourteen checks it
+  on a person's screen.
 - rotfern still never fires with the mouse on test 1's seat ("draws, no
   arrow in hand, no fire", first and third person): her game reported no
   shot all session, while the server records her iron arrows worn and her
