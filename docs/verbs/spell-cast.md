@@ -426,3 +426,25 @@ health message. A second red within two sweeps makes it a bug.
 - [x] merged: the sweep on fork m2-spell 45839102 went 32 of 32 green with
       no rerun (runs 20261010-122057 to -134720); fork parity fast-forwarded
       to 45839102, both clones' clean-m1 promoted
+
+## Playtest fourteen (2026-10-12, Eli, parity ef3fb03c)
+
+- Held: Flames from test 2's left hand shows from the left hand on test 1's
+  screen and stops with it (the MagicCaster tie-break, m2-pt13).
+- Found: a concentration spell shows on the observer's screen without the
+  casting animation (the flames leave the figure's hands, the hands do not
+  rise), where a fire-and-forget spell plays it on both screens. A visual
+  slice (R3): which animation events a concentration cast fires and which
+  the relay carries is to read.
+- Found in the server log: every Lost Grimoire Teleportation cast logged
+  "CastFactsFor - b0a86df: Record 0x50a86de doesn't exist; cast as
+  fire-and-forget within 512 units". CastFactsFor (PartOne.cpp:1376-1420)
+  looks up each effect by the SPEL record's own EFID and the effect's
+  projectile by the MGEF's own field: inside a plugin those ids count the
+  plugin's masters (LostGrimoire.esp's own records are 05xxxxxx there, 0B
+  in the load order), so a plugin spell's facts fall back to a touch
+  spell's. Skyrim.esm's ids are global, which hid it. Harmless for
+  Teleportation (no hits); a plugin's damage spells (Apocalypse's) would
+  lose their reach and area. The fix maps both through their records'
+  lookups (LookupResult::ToGlobalId, as MpActor.cpp:2718 does for
+  effects).

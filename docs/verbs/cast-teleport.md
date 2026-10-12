@@ -305,3 +305,16 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
 - [x] ledger and suppression registry updated (no new native: the
       server's Actor.AddSpell snippet already stands for Papyrus
       AddSpell)
+
+## Playtest fourteen (2026-10-12, Eli, parity ef3fb03c)
+
+- Held: test 1 lands where it casts and stays, again right after running;
+  test 2 is not moved. The server took every landing on the movement
+  budget alone (no "made its cast teleport's jump" line in the log, so no
+  landing went past the burst); Eli's farthest cast gave no number, so the
+  setting's 8000 stands.
+- Found: test 2 sees test 1's figure slide to the landing (the movement
+  relay's TranslateTo), not the mod's vanish and appear (its marker script
+  plays them in the caster's game only). A visual slice: the observers'
+  games told to play the vanish where the caster stood and the appear
+  where it lands, the figure placed at once.

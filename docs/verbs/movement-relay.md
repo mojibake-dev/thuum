@@ -87,3 +87,13 @@ unchecked (the next movement verb).
 - [x] T3 scenario green, no HYPOTHESIS tags (scenario d7758c5 approved by
   Eli with the commits through 9e87c65, confirmed 2026-10-04)
 - [x] on fork parity (7ca272e2, 2026-10-02)
+
+## Found in playtests thirteen and fourteen (Eli)
+
+- A player who stands up from sneaking with weapons drawn stays crouched on
+  the other player's screen until it sheathes (playtest thirteen, again in
+  fourteen, 2026-10-12). Carried from thirteen's notes too late: it was not
+  filed then. HYPOTHESIS: the observer's client applies the figure's sneak
+  state through an animation event that the drawn-weapon graph ignores, or
+  only when the weapon state changes (skymp5-client sync/movementApply.ts
+  is to read).

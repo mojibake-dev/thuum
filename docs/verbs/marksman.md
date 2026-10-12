@@ -370,3 +370,12 @@ arrow spent). Two findings:
       in NATIVES.md, client only, R3 (the arrow is that game's picture of
       a shot the server took); no server native
 
+## Playtest fourteen (2026-10-12, Eli, parity ef3fb03c)
+
+- Held: one arrow per shot on the target's screen (test 2 shooting test 1),
+  the figure drawing its bow empty and the arrow appearing as it looses.
+- rotfern's bow fires on test 1 now, its arrows equipped by hand: five
+  full-draw shots the server recorded (22:42:45 to 22:42:58, power 1.00)
+  and later hits for 13.24 unblocked and 6.43 on a raised shield (blocked
+  share 0.502). Thirteen's no-fire stays unexplained (the arrows not
+  equipped is the likely reading); closed unless it comes back.

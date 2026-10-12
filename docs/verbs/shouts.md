@@ -404,3 +404,24 @@ snippets).
       Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
       snippets; Actor.GetVoiceRecoveryTime, Shout.GetNthRecoveryTime,
       Shout.GetNthSpell as the client's reads)
+
+## Playtest fourteen (2026-10-12, Eli, parity ef3fb03c)
+
+- Held: the record (console AddShout, TeachWord and UnlockWord answered
+  "recorded"), a Fire Breath shout taken by the server (22:57:34, "recovers
+  in 30.0 s") that burned test 2, the game refusing a second shout inside
+  the recovery, and the record across test 1's relaunch (both shouts and
+  their first words back).
+- Found: test 2's screen shows test 1's figure shouting (the animation
+  relay) but not the breath: the server relays no shout (this slice's
+  choice: a shout's effect on another player was left for later). A relay
+  of the voice cast would let observers' figures breathe fire as a figure
+  casts a spell, which lands nothing on the observer (spell-cast,
+  x-spell-observe): a slice.
+- Found: after a relaunch the login's re-teach (Actor.AddShout,
+  Game.TeachWord, Game.UnlockWord for every recorded shout and word) shows
+  the game's big learned notice for each, which is cumbersome: the
+  re-teach should be silent (a slice; how the engine learns a word without
+  the notice is to read).
+- To test (a later leg): a word wall still teaches a word, and the server's
+  record takes it (the wall's script and Game.TeachWord on the server).

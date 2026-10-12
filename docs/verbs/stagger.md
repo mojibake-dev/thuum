@@ -363,3 +363,18 @@ promoted.
 - [x] ledger and suppression registry updated (TESModPlatform.Stagger's
       row, R0, client only; the suppression is deathService's narrowed
       refusal)
+
+## Playtest fourteen (2026-10-12, Eli, parity ef3fb03c)
+
+- No stagger from test 1's power attacks, with or without test 2's shield,
+  and the server logged none. Not a server fault: the attacker was rotfern,
+  whose race (rotfern.esp RACE 0x0200AA00) carries a staggerOffset of 0.0
+  on every attack, power attacks and bashes included, where the Nord's
+  power attacks carry 1.0, its bash 0.5 and its power bash 1.5 (ATKD at
+  byte 24, CommonLibSSE-NG BGSAttackData::AttackData; read on sky-srv
+  2026-10-12). The rule takes the attack's offset from the attacker's
+  race, as the engine does, so rotfern's power attacks would not stagger
+  in a single-player game either; b-stagger's attacker is a vanilla race.
+  The server's hits show the power attack's damage (12.91 against a plain
+  swing's 6.62, 23:01:41). Next: playtest fifteen has test 2's Nord attack
+  rotfern; rotfern's attack data is Eli's to change (rotfern.esp).

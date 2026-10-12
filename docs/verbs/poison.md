@@ -153,6 +153,19 @@ eight a second); one charge per hit.
   b3682b71, on parity since ef3fb03c) and lab/frida/console-trace.js on
   the seat (docs/private/playtest-m2-14.md, section 6).
 
+- Playtest fourteen (2026-10-12, Eli, parity ef3fb03c): the box applied
+  the poison and the sword looked poisoned, then test 1's game swung the
+  sword as fists, the sword still visible in hand, in an unequip and
+  re-equip loop. The server's log has no line for it: the poison's OnEquip
+  info line (fork b3682b71) never fired, so the client reports nothing
+  when the game poisons a weapon (not an equip event). That fits the
+  HYPOTHESIS above: the server's inventory keeps the poison and an
+  unpoisoned sword, and each sync puts the game back. Next (static, then
+  dynamic): the engine function that applies a poison to a stack
+  (ExtraPoison, CommonLibSSE-NG include/RE/E/ExtraPoison.h) for the
+  re-analyst, then a client hook that reports it to the server, which
+  records the poison on the weapon and spends the item.
+
 ## Status
 
 Doc written 2026-10-10, split from magic-effects (whose Dynamic plan held
