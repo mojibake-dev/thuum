@@ -1,0 +1,104 @@
+# M2, shouts (docs/verbs/shouts.md): a shout a player's game makes stands
+# at the server's word, once per recovery, and what a player knows of
+# shouts is the server's record, which holds across a restart and a fresh
+# game (rule 6). The lab runs with enableConsoleCommandsForAll, so c1 is an
+# owner: it gives itself Fire Breath (Skyrim.esm SHOU 0x3F9EA) and teaches
+# and unlocks its first word, Yol (WOOP 0x20E17), by the console, which the
+# server records and tells c1's game; c1 then equips the shout, and its
+# voice slot reaches the server, which takes it (the record holds it). c1
+# stands at (0, -300) facing north, c2 150 units north facing it.
+# - One word at c2 (the shout key Z, DirectInput 44, held 0.3 s; Yol is the
+#   only word unlocked): c1's shoutService reads the recovery its game set
+#   and reports the first variation (VoiceFireBreath1, SPEL 0x3F9EB:
+#   recovery 30 s, 50 fire damage); the server takes it, starts its own
+#   recovery and counts the fire on c2; c2's game plays the figure's
+#   shoutStart (the animation relay).
+# - c1's own game clears its recovery (the driver's voice set 0, as a
+#   player's cheat would) and shouts again about 12 s later: its game
+#   shouts, the server refuses it inside its own recovery (about 18 s
+#   left), and c2 takes no damage; the server's recovery runs on from the
+#   first shout (about 14 s at the check, where a taken second shout would
+#   leave about 26).
+# - The server restarts and c1's game is relaunched: the record holds, the
+#   fresh game has Yol unlocked again (the server teaches the record after a
+#   login), and c1's next shout stands (a recovery is forgotten at a
+#   restart) and burns c2 again.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-shout
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 1500
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  # the record: an owner's console commands, told to c1's game
+  - c1: console {text: "player.addshout 3f9ea"}
+  - c1: console {text: "player.teachword 20e17"}
+  - c1: console {text: "player.unlockword 20e17"}
+  - wait: 3
+  - c1: equip {formId: 0x3f9ea}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: known {ids: [0x20e17]}
+  - assert:
+      - server.actor(c1).shouts == "0x3f9ea"
+      - server.actor(c1).wordsUnlocked == "0x20e17"
+      - c1.known(0x20e17) == 1
+      - server.actor(c2).healthPercentage > 0.99
+  # one word at c2: the server takes it and counts its fire
+  - c1: watch-start
+  - c2: watch-start
+  - c1: hold-key {code: 44, ms: 300}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c1.watched_self().saw("shoutStart") >= 1
+      - c2.watched(c1).took("shoutStart") >= 1
+      - server.actor(c1).shoutRecovery > 20
+      - server.actor(c2).healthPercentage < 0.9
+  # c1's own game clears its recovery and shouts again: the server refuses
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: voice {set: 0}
+  - c1: watch-start
+  - c1: hold-key {code: 44, ms: 300}
+  - wait: 4
+  - c1: watch-stop
+  - assert:
+      - c1.watched_self().saw("shoutStart") >= 1
+      - server.actor(c1).shoutRecovery < 20
+      - server.actor(c2).healthPercentage > 0.99
+  # the record holds across a restart and a fresh game; a recovery does not
+  - server: restart
+  - wait: 20
+  - c1: relaunch
+  - c2: reconnect
+  - wait: 10
+  - c1: known {ids: [0x20e17]}
+  - assert:
+      - server.actor(c1).shouts == "0x3f9ea"
+      - server.actor(c1).wordsUnlocked == "0x20e17"
+      - c1.known(0x20e17) == 1
+  - c1: equip {formId: 0x3f9ea}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: hold-key {code: 44, ms: 300}
+  - wait: 4
+  - assert:
+      - server.actor(c2).healthPercentage < 0.9
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]

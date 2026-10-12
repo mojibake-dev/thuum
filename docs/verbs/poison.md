@@ -144,6 +144,13 @@ eight a second); one charge per hit.
   application itself (the poison off the record, the sword's stack marked)
   or the game's own is undone each time; a probe reads the sword's
   ExtraPoison right after the box and again after the sync.
+- x-poison-probe2 20261012-022304: the lab cannot answer the box. After
+  the driver's EquipItem of the poison, neither Enter (28) nor E (18)
+  through SKSE Input.TapKey put it on the sword (no poisoned stack in the
+  game, the poison still held). So the verb's client side needs a person
+  at the box: playtest fourteen applies a poison again with the server
+  logging what arrives (an info line for a poison's OnEquip, added on the
+  next fork build) and lab/frida/console-trace.js on the seat.
 
 ## Status
 

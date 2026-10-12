@@ -382,8 +382,14 @@ right hand's, the figure cast it there, and the left hand's end
 40d15f6d: the event reads each hand's caster when it fires (MagicCaster's
 currentSpell and state, CommonLibSSE-NG include/RE/M/MagicCaster.h:29-41,
 :89-90) and the hand charging or casting the spell breaks the tie.
-HYPOTHESIS until a lab run casts Flames from the left hand with the same
-spell in both (the clones' control map gives the left attack no key yet).
+The clones' control map binds the left attack to End since thuum 8615b9b.
+x-left-flames 20261012-021751 (the client before the fix) reproduced it: c1
+streamed Flames from the left hand for 4 s and the server counted the hits,
+while c2's figure of c1 drained magicka from 0.9 s to the end of the watch
+at 9.7 s (it never stopped). CONFIRMED fixed: the same probe on fork
+m2-shouts c4641e26 (which merges m2-pt13), x-left-flames 20261012-031332:
+the figure drained from 0.7 s to 4.9 s, the 4 s stream and its relay's
+delay, then stopped.
 
 Watch item (ADR-027, the stagger merge sweep 2026-10-11): b-spell red once
 (20261012-004816): after the four-second Flames stream, c2's own game read

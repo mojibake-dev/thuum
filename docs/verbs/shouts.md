@@ -348,18 +348,53 @@ console's word commands and the login; c2334252 libespm's SHOU; ac243dca
 the cast (wire-rules shouts, OnSpellCast's voice, OnHit's claim, the voice
 slot, shoutService, mp.get "shouts", ShoutsTest, the T2 session); eeb2c930
 a merge of m2-stagger (the shouts merge sweep runs b-stagger); d985e789
-the hits held for the report. Left:
+the hits held for the report. T2's first run (2026-10-11): the shouts
+logic held on the wire stack (the first shout taken, its hit counted, the
+second refused, E_SHOUT_RECOVERY and E_SPELL_NO_CAST in the test server's
+log), but Fire Breath's first word is a one-second effect in
+Dragonborn.esm's override of VoiceFireBreath1 (EFIT 50 over 1 s; Skyrim.esm
+has it instant), dealt in ticks whose values ride the effect clock, so the
+session now puts c2 in god mode and reads the shout's acceptance from the
+effect set both games are told. b-shout's first runs (20261012-020313 and
+the next) red: the server's record, c1's game's word and both games'
+shoutStart held, but no SpellCast reached the server; x-shout-console
+20261012-020808 read c1's console: "Trace in ShoutService: shout 3f9ea
+variation 0 recovery 30", the variation found and the report never sent.
+e0826331 takes the variation's spell from the typed Shout.getNthSpell
+(HYPOTHESIS: callNative's game object has no Form methods) and logs any
+throw (E_SHOUT_REPORT); c4641e26 merges m2-pt13's left-hand cast fix.
+b-shout (thuum db6ed77, awaiting Eli's review) green twice on c4641e26
+(20261012-030519 and -030920): the record and the word in c1's game, the
+first shout taken (the server's recovery 25.9 s at the check, c2 burned to
+0.505), the cleared-recovery shout refused (E_SHOUT_RECOVERY, its hit
+E_SPELL_NO_CAST, the recovery 17.1 s and running, c2 untouched), and after
+a restart and a relaunch the record and the word back and the next shout
+taken (0.506). 291763e3 and 3f9e4bc8 settle the T2 session: c2 in god mode,
+health messages compared as presence only (the fire's ticks vary in
+number), the effect set's start and end exact; T2 green on 3f9e4bc8. DONE
+2026-10-11: the merge sweep 38 of 38 (a-actor-values and a-favorites red
+on sky-c1 lab faults, E_RUN_RELAUNCH and E_RUN_TELEPORT with no assertion
+failed, green on their reruns), fork parity fast-forwarded to 3f9e4bc8,
+both clones' clean-m1 promoted. Was left before that:
 the fork pipeline (build and T0), T2, b-shout (drafted in the scratchpad,
 its own commit once green), the ledger rows at the merge (Actor.AddShout,
 Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
 snippets).
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated
+- [x] server logic + T0 (ShoutsTest, EspmTest's SHOU)
+- [x] message + validator (same commit): no new message; SpellCast from
+      the voice, the voice slot's u32 naming a SHOU as well
+- [x] native hook + T1: no new native (SKSE's voice and shout reads)
+- [x] TS handler (shoutService, the voice slot in sync/equipment.ts,
+      hitService's held hits)
+- [x] T2 green (3f9e4bc8, 18 declared divergences)
+- [x] T3 scenario green: b-shout (thuum db6ed77, awaiting Eli's review)
+      green twice; HYPOTHESIS left: the push of Unrelenting Force on another
+      player (a later slice), Whirlwind Sprint's longer dashes against the
+      burst, the cause of callNative's spell (a fallback now)
+- [x] ledger and suppression registry updated (Actor.AddShout,
+      Game.TeachWord, Game.UnlockWord, Actor.RemoveShout as the server's
+      snippets; Actor.GetVoiceRecoveryTime, Shout.GetNthRecoveryTime,
+      Shout.GetNthSpell as the client's reads)

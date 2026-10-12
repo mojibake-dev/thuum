@@ -315,9 +315,20 @@ arrow spent). Two findings:
   per ArrowShot (arrowSyncService.ts; TESModPlatform.LaunchArrow launches
   one projectile, PapyrusTESModPlatform.cpp). HYPOTHESIS: the second is the
   figure's own bow, firing from the shooter's relayed animation with the
-  bow and arrows the equipment relay gives it. Probe planned: count the
-  iron arrows in the target's cell around one shot and record the figure's
-  bow events.
+  bow and arrows the equipment relay gives it (skymp5-client gives a
+  figure 1000 of its worn arrows, sync/equipment.ts). x-double-arrow
+  20261012-022022: SKSE's Cell.GetNumRefs counts no projectile in either
+  game (0 before and after a shot the server took), so it cannot count
+  them; c2's game played only bowAttackStart on the shooter's figure (no
+  release event is relayed), so a figure's own arrow would be the engine
+  finishing that attack by itself. CONFIRMED by x-double-arrow2
+  20261012-022726 with lab/frida/launch-trace.js on the target: for one
+  shot the server took, the target's game called Projectile::Launch twice,
+  once from the engine alone (the figure's bow) and once through
+  SkyrimPlatformImpl.dll (LaunchArrow). Fix on fork m2-teleport 4198fe78:
+  a figure holds no arrows (sync/equipment.ts), so its bow draws empty and
+  only the relayed arrow, with the shooter's aim and draw, flies. To check
+  in the lab: one launch per shot in the target's game.
 - rotfern still never fires with the mouse on test 1's seat ("draws, no
   arrow in hand, no fire", first and third person): her game reported no
   shot all session, while the server records her iron arrows worn and her
