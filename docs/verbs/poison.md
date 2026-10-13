@@ -38,15 +38,29 @@ eight a second); one charge per hit.
   :443-444 read and write an entry's poison; the server's Inventory entry
   has poisonId and poisonCount (Inventory.h:44-58), wire-schema's Entry the
   same (skymp.rs:117-120); the server never reads them.
-- How the player's game reports a poisoning: Skyrim Platform's `equip` on
-  the player with the poison (sendInputsService.ts:54-76, OnEquip):
-  HYPOTHESIS. x-poison-probe (20261010-135426) found that Papyrus EquipItem
-  of a poison opens the game's own box, "Do you want to poison the Steel
-  Sword?", which no lab input answers, and the open box swallowed the swing:
-  nothing measured.
-- Which hand and how many charges without perks: HYPOTHESIS (the right
-  hand's weapon, one charge; the Concentrated Poison perk doubles them, per
-  UESP's Alchemy perks, unread here).
+- How the player's game poisons a weapon (the re-analyst, 2026-10-12,
+  scratchpad poison-re.md; read in 1.7.104's bodies under the same Address
+  Library ids, since the project's 1.6.1170 program is still
+  SteamStub-wrapped at rest; 1.6.1170's unwrapped sections agree on every
+  function size checked). All HYPOTHESIS until a Frida trace on 1.6.1170:
+  - Using a poison runs the per-form-type use switch (Address Library
+    38001), whose ALCH case opens the box (40481) and skips its equip
+    event: the engine sends no TESEquipEvent for a poison, so Skyrim
+    Platform's `equip`, which OnEquip rides (sendInputsService.ts:54-76),
+    never fires. That is why the server heard nothing in playtest fourteen.
+  - The box's callback (40482) on Yes calls InventoryEntryData::PoisonObject
+    (16024; CommonLibSSE-NG include/RE/I/InventoryEntryData.h:54,
+    src/RE/I/InventoryEntryData.cpp:259-264) on the right hand's equipped
+    entry only (a left-hand weapon alone gets "You must first equip a
+    weapon"), adding an ExtraPoison (include/RE/E/ExtraPoison.h:18) to the
+    entry's first ExtraDataList; then RemoveItem of one poison, and an empty
+    PoisonedWeapon::Event (include/RE/P/PoisonedWeapon.h) through 41044 from
+    the source 41069 returns.
+  - Doses: 1, through the kModPoisonDoseCount perk entry point
+    (include/RE/B/BGSEntryPoint.h:96), floored, never under 1; no game
+    setting read.
+  - Skyrim Platform's containerChanged fires when the poison is picked,
+    before the box, on Yes and No alike: no signal.
 - A hit's poison in the attacker's game: the engine applies it to the
   target's figure there, which lands nothing a player's game counts (a
   figure's game shows the server's numbers); the server's hit path is the
@@ -54,8 +68,14 @@ eight a second); one charge per hit.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
-- Hook point: the `equip` event for a poison (as magic-effects' drinks);
-  OnHit for the hit (as now).
+- Hook point (HYPOTHESIS, the re-analyst's recommendation): a sink on
+  PoisonedWeapon::Event at the source Address Library 41069 returns, in
+  Skyrim Platform's native layer; on the event, the player's right-hand
+  equipped entry (Actor::GetEquippedEntryData(false), include/RE/A/Actor.h:540)
+  and its ExtraPoison give the weapon, the poison and the doses. No
+  PlayerCharacter offset needed; skymp's own inventory apply (AddItemEx)
+  never passes through PoisonObject or the event, so it cannot loop. OnHit
+  for the hit (as now).
 - SP filter: the player's own equips.
 - Data captured: the poison's form id, then each hit's weapon.
 - Side effects of hooking here: none new.
@@ -165,6 +185,20 @@ eight a second); one charge per hit.
   (ExtraPoison, CommonLibSSE-NG include/RE/E/ExtraPoison.h) for the
   re-analyst, then a client hook that reports it to the server, which
   records the poison on the weapon and spends the item.
+- Static read done (2026-10-12, Engine surface above). To confirm on
+  1.6.1170 with a Frida trace (a lab/frida/poison-trace.js to write)
+  hooking 40481, 40482, 16024, 41044 and the equip event's send (38386),
+  plus the hit path (38748, 16000), while a person answers the box No, then
+  Yes, then lands one hit. Expected on Yes: the callback with 2, then
+  PoisonObject on the right hand's entry with DB03Poison (0x58CFB) and 1,
+  then the event from the source 41069 returns, and no equip event for the
+  poison; on the hit, the doses go from 1 to 0 and the ExtraPoison leaves.
+  Falsified by: different bytes at PoisonObject's 1.6.1170 address than
+  1.7.104's, the poison on another list than the right hand's first, no
+  41044 call on Yes, or an equip event carrying the poison's form id.
+- Untested lead for the lab: calling the box's callback (40482) with 2 on
+  the game thread might answer the box without a person, which would let a
+  scenario poison a weapon (b-poison).
 
 ## Status
 
