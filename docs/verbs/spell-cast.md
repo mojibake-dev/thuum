@@ -585,3 +585,17 @@ health message. A second red within two sweeps makes it a bug.
   the caster, as OnPlayerBowShot's arrow relay), with the spell-cast and
   marksman sessions' declarations redrawn. Rule 5: client-reported
   anything is untrusted.
+- Dual casting counted per hand, CONFIRMED on the lab (x-dual-cast3
+  20261013-092233, fork m2-visuals be69bf68): two hands of Flames for 4 s
+  reached the server as 38 hits, 7.15 stream-seconds in all (x-dual-cast:
+  3.63), and c2 ended at 0.445 on the server and 0.447 in its own game
+  (one stream: 0.73; no local damage on top since be69bf68), no hit
+  refused. It took three fixes: the client's per-frame double filter
+  (7da7210f), wire-rules' clock per hand (1abfda55), and Skyrim
+  Platform's spellCast event naming the second hand (0f4e3b75: with the
+  same spell in both hands both read as casting once the second began, so
+  it went out as the right hand's and replaced that stream on the server;
+  x-dual-cast3's first run, 20261013-082306 on 31b56fc9, counted 3.63).
+  The figure's graph took none of the relayed cast events this run, where
+  x-dual-cast2's took the left hand's: the hands' pose on the other screen
+  is a playtest item.
