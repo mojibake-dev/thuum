@@ -23,7 +23,11 @@
 # project token in the Keychain. Both T2 services are stopped at the end,
 # whether the checks pass or not. ONLY="poison spell-cast" runs just those
 # difftest sessions, to draw one session's divergences; such a run ends "T2
-# partial", never "T2 green", since a verb's T2 is every session.
+# partial", never "T2 green", since a verb's T2 is every session. SESSIONS=tree
+# (or SESSIONS=<dir>, a worktree's difftest/sessions) runs the working tree's
+# sessions on the artifact's binary, so a declaration edit is tried by this run
+# alone with no pipeline between the edit and the run; the verdict then says the
+# sessions were not the artifact's, since nobody has committed them yet.
 set -euo pipefail
 host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
@@ -93,6 +97,24 @@ if [ -n "$job" ] && curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
 else
   echo "   no successful difftest-build job on $ref yet; skipping the diff"
   have_difftest=0
+fi
+sessions_from=""
+case "${SESSIONS:-}" in
+  "") ;;
+  tree) sessions_from="skymp/skymp-wire/difftest/sessions" ;;
+  *) sessions_from="$SESSIONS" ;;
+esac
+if [ -n "$sessions_from" ]; then
+  if [ "$have_difftest" != 1 ]; then
+    echo "   SESSIONS=$SESSIONS ignored: no difftest binary to run them with"
+    sessions_from=""
+  elif [ ! -d "$sessions_from" ]; then
+    echo "   SESSIONS=$SESSIONS: no directory $sessions_from" >&2
+    exit 2
+  else
+    rsync -az --delete -e "ssh -J $jump" "$sessions_from/" "$host:/srv/lab/difftest/sessions/"
+    echo "   sessions from $sessions_from (the working tree, uncommitted edits included)"
+  fi
 fi
 
 echo "== clean world, server under test"
@@ -201,4 +223,6 @@ red=""
 [ "$attr_rc" = 0 ] || red="$red attributes-across-restart"
 [ "$rc" = 0 ] || red="$red difftest"
 if [ -n "$red" ]; then echo "T2 red:$red"; exit 1; fi
-[ -z "${ONLY:-}" ] && echo "T2 green" || echo "T2 partial (sessions: $ONLY): not a verb's T2"
+tree_note=""
+[ -z "$sessions_from" ] || tree_note=" (sessions from $sessions_from, not the artifact's: commit them and rerun for the verb's T2)"
+if [ -z "${ONLY:-}" ]; then echo "T2 green$tree_note"; else echo "T2 partial (sessions: $ONLY): not a verb's T2"; fi
