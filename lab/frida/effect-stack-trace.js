@@ -12,9 +12,11 @@
 // - ActiveEffect's members (A/ActiveEffect.h:102-115): spell 0x40, target
 //   0x50 (a MagicTarget*), magnitude 0x78, castingSource 0x88
 //   (M/MagicSystem.h:23: 0 left, 1 right, 2 other, 3 instant).
-// - An Actor's MagicTarget at +0x98 on SE and AE (A/Actor.h:126; the second
-//   number there is VR's), a form's id at +0x14 (T/TESForm.h:354). The
-//   script checks the first against ModifyActorValue's own Actor*.
+// - An Actor's MagicTarget at +0xA0 on 1.6.1170, MEASURED by this script
+//   (x-dual-cast3 20261013-082306: the target field less ModifyActorValue's
+//   own Actor* = 160); A/Actor.h:126's comment reads "098, 0A0", and +0x98
+//   read garbage in x-dual-stack. A form's id at +0x14 (T/TESForm.h:354).
+//   The script still checks the offset against ModifyActorValue's Actor*.
 // The vtable is VTABLE_ValueModifierEffect (Offsets_VTABLE.h:1953, Address
 // Library 206143), resolved with lab/addr.py for 1.6.1170 on 2026-10-12.
 // Logged, for one spell only (LAB_PARAMS.SPELL, Flames 0x12FCD by
@@ -28,7 +30,7 @@
 const PARAMS = globalThis.LAB_PARAMS || {};
 const SPELL = Number(PARAMS.SPELL || 0x12fcd) >>> 0;
 const WINDOW_MS = 500;
-const MAGIC_TARGET_IN_ACTOR = 0x98;
+const MAGIC_TARGET_IN_ACTOR = 0xa0;
 
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
