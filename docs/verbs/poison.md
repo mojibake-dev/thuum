@@ -266,7 +266,11 @@ eight a second); one charge per hit.
   message apart from the legacy stack's after its drink. Since then
   (56aaa27b, 40ed43a5) a lone copy takes the mark and gives it back in
   place (PoisonTest pins the dagger's index), and the session hits c1 with
-  its own dagger and compares health as presence.
+  its own dagger and compares health as presence. Its next run (fork
+  40ed43a5): identical but for the eight declared (the marked dagger's
+  inventory, the poison's MagicEffects in both games, the legacy drink on
+  c1's figure, the console line, the clock, the departure); the inventory
+  after the dose equal to the legacy stack's after its drink.
 
 ## Status
 
@@ -281,7 +285,9 @@ the poison until then); built 2026-10-12 on fork m2-poison.
 - [x] native hook + T1 (Skyrim Platform's PoisonedWeapon sink,
       poisonApplied; T1 none)
 - [x] TS handler (sendInputsService.ts onPoisonApplied)
-- [ ] T2 green (the reworked session's first run is next)
+- [ ] T2 green: the poison session identical but for its eight declared
+      divergences (ONLY=poison on fork m2-poison 40ed43a5, 2026-10-12
+      23:46); every session at the merge
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-poison, by path twice, then
       its own commit for Eli's review)
 - [ ] ledger and suppression registry updated (at the merge)
