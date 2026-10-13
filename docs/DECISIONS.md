@@ -745,7 +745,11 @@ Status: proposed (2026-10-11), for Eli's call before Apocalypse (docs/PLAN.md M2
 Eli, 2026-10-12: "for apocalypse, im unsure. im leaning the later for
 authoritativeness tbh, but like headshots im not opposed to trusting the
 client": a lean to the alternative below (the server's VM runs the effect
-scripts), not yet a decision; a costed comparison of the two comes first.
+scripts), not yet a decision. The costed comparison (2026-10-12,
+docs/apocalypse-options.md) prices this proposal at 7 to 12 sessions to
+b-apocalypse and the alternative at 25 to 40 for the mod, and recommends a
+hybrid: this proposal by default, with an allowlist of effect scripts the
+server's VM runs, added verb by verb (ADR-008's shape).
 
 **Context.** M2's plan puts Apocalypse after a small step that gives the
 server its global variables, on the premise that most of its spells ride
