@@ -452,15 +452,17 @@ on("magicEffectApply", (e) => {
   }
 });
 
-// A watched figure's stagger, recoil, shout and bow events (thuum
+// A watched figure's stagger, recoil, shout, bow and sneak events (thuum
 // docs/verbs/stagger.md, docs/verbs/shouts.md, docs/verbs/marksman.md: which
-// bow events the target's game plays on the shooter's figure):
+// bow events the target's game plays on the shooter's figure;
+// docs/verbs/movement-relay.md: when the figure's SneakStop arrives against
+// its player's own, the crouch fix's delay):
 // one hook per pattern over the figures' range, filtered in native (rule 9)
 // and added at load, before skymp5-client's services add theirs, so each sees
 // the name its sender gave: deathService blanks every figure's staggerStart,
 // and Skyrim Platform hands later hooks the blanked name. Recorded at leave,
 // with whether the graph took the event once every hook had run.
-for (const pattern of ["stagger*", "recoil*", "shout*", "bow*", "Bow*", "arrow*", "Arrow*"]) {
+for (const pattern of ["stagger*", "recoil*", "shout*", "bow*", "Bow*", "arrow*", "Arrow*", "Sneak*", "sneak*"]) {
   hooks.sendAnimationEvent.add({
     enter: () => {},
     leave: (ctx) => {
