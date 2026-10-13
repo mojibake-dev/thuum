@@ -5,7 +5,6 @@
 # one out in the commit that closes its item. The full sweep is the nightly's.
 always: [smoke-two-players, a-restart-persistence]
 watch:
-  - a-melee-reach      # docs/verbs/melee-reach.md, red once in the m2-god sweep (2026-10-10)
-  - a-racemenu         # docs/verbs/racemenu-sync.md, a figure's head scale after a reconnect (2026-10-09)
-  - a-movement-speed   # docs/verbs/movement-speed.md, the held run's distance on the RaceMenu client stack (2026-10-08)
-  - b-spell            # docs/verbs/spell-cast.md, red once in the m2-stagger sweep (2026-10-11)
+  - a-melee-reach      # docs/verbs/melee-reach.md:141, red once in the m2-god sweep (2026-10-10)
+  - a-racemenu         # docs/verbs/racemenu-sync.md:746, a figure's head scale after a reconnect (2026-10-09)
+  - b-spell            # docs/verbs/spell-cast.md:394, red once in the m2-stagger sweep (2026-10-11)
