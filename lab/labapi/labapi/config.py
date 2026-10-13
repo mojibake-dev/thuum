@@ -196,6 +196,12 @@ class Settings:
     heartbeat_timeout_s: float = 300.0
     server_ready_timeout_s: float = 120.0
     guest_task_timeout_s: float = 120.0
+    # a run that starts this long after the last one ended follows a quiet
+    # spell (a playtest, hand probes) and keeps the clients' Skyrim Platform
+    # logs as <client>-before.log before rolling them back; inside a sweep the
+    # runs are seconds apart and the clients hold only the previous run's log;
+    # 0 turns the fetch off (the server's own log is kept regardless)
+    before_logs_quiet_s: float = 600.0
     # relaunch: a player quits the game and starts it again (docs/verbs/
     # map-markers.md). The guest agent stops the game and starts the logon
     # launch task (sky-lab-launch, as `lab` on the desktop); the launcher
@@ -271,6 +277,7 @@ class Settings:
             heartbeat_timeout_s=float(_env("HEARTBEAT_TIMEOUT_S", str(d.heartbeat_timeout_s))),
             server_ready_timeout_s=float(_env("SERVER_READY_TIMEOUT_S", str(d.server_ready_timeout_s))),
             guest_task_timeout_s=float(_env("GUEST_TASK_TIMEOUT_S", str(d.guest_task_timeout_s))),
+            before_logs_quiet_s=float(_env("BEFORE_LOGS_QUIET_S", str(d.before_logs_quiet_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),
