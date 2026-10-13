@@ -949,6 +949,23 @@ it carries a HYPOTHESIS tag.
   counting a whole second of Flames for each of five hit reports a second
   (x-spell-probe), not the observer's own game; spell hits now begin a
   fight (docs/verbs/spell-cast.md).
+- Found in playtest fourteen (2026-10-12; Eli's order: the plugin spell's
+  fix, poison, the visual fixes, then Apocalypse and headshots):
+  - Merged on fork parity c918a7a1 (2026-10-12 22:38, the sweep 39 of 39
+    green, T2 green, both clones promoted):
+    - CastFactsFor finds a plugin spell's own effect and projectile
+      (docs/verbs/spell-cast.md);
+    - a figure stands up from a crouch with hands readied
+      (docs/verbs/movement-relay.md);
+    - difftest reads its sessions with serde-saphyr, since cargo deny's
+      RUSTSEC-2024-0449 stopped every pipeline.
+  - rotfern.esp carries the Nord's stagger offsets (apocrypha; Eli: "yes
+    give her vanilla values").
+  - In progress: poison (fork m2-poison, docs/verbs/poison.md).
+  - Next: the visual fixes. The shout's breath on observers, the
+    teleport's vanish and appear, a silent re-teach after a relaunch, a
+    concentration cast's hand animation, and dual casting (unread on both
+    ends: docs/verbs/spell-cast.md).
 - Exit: `b-duel` (server-authoritative damage between two players, effects
   visible to an observer), `b-magic-restart` (active effects survive a
   restart with remaining duration).

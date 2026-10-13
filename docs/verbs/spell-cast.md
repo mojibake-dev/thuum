@@ -459,4 +459,6 @@ health message. A second red within two sweeps makes it a bug.
   Teleportation (no hits); a plugin's damage spells (Apocalypse's) would
   lose their reach and area. The fix maps both through their records'
   lookups (LookupResult::ToGlobalId, as MpActor.cpp:2718 does for
-  effects).
+  effects). Merged on fork parity c918a7a1 (2026-10-12): T0 SpellCastTest
+  reaches a target 2000 units off with Dragonborn.esm's Miraak lightning
+  storm (its projectile's 6144).

@@ -97,3 +97,15 @@ unchecked (the next movement verb).
   state through an animation event that the drawn-weapon graph ignores, or
   only when the weapon state changes (skymp5-client sync/movementApply.ts
   is to read).
+- Read and fixed (2026-10-12): the lab reproduced it with magic readied
+  (x-crouch-magic2 20261012-235927: the figure still crouched three seconds
+  after c1 stood, up only after the hands were sheathed); a drawn weapon,
+  rotfern and a running fight all stood the figure up within 10 to 300 ms
+  (x-crouch-drawn, -rotfern, -fight). With magic readied the graph's
+  IsSneaking stays false, even in the player's own game, and a figure's
+  isSneaking() never turns true, so applySneaking (sync/movementApply.ts)
+  saw nothing to undo and never sent SneakStop. The fix keeps the last
+  sneak state sent to each figure and sends the event on a change of the
+  report. On the fix, x-crouch-magic2 20261013-004245 showed the figure up
+  three seconds after the stand (the screenshot's delay, not the figure's;
+  x-crouch-latency measures it). Merged on fork parity c918a7a1.
