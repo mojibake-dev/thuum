@@ -1,5 +1,9 @@
 # GitLab CI for the thuum superproject (ADR-016). Jobs run only on the dedicated
-# sky-ci runner (tag `sky`); the estate's own runner never executes this project.
+# sky-ci VM, on its light lane (tag `sky-light`: a second runner there since
+# 2026-10-13, one job at a time, 1 CPU and 1 GB, so these alpine, python and
+# node jobs no longer queue behind the fork's builds on the `sky` lane; a
+# heavier job here would be OOM-killed by design). The estate's own runner
+# never executes this project.
 # Image: alpine plus a pinned `just` release binary downloaded in before_script.
 # Kept deliberately small: this repo holds docs, lab software, and config; the
 # Rust and C++ pipelines live in the skymp fork's own .gitlab-ci.yml.
@@ -15,7 +19,7 @@ variables:
 
 .base:
   image: alpine:3.20
-  tags: [sky]
+  tags: [sky-light]
   before_script:
     - apk add --no-cache git curl python3
     - curl -fsSL "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar -xz -C /usr/local/bin just
@@ -59,7 +63,7 @@ lab-tests:
 # lab-api's own tests need its dependencies; uv's image carries Python 3.12.
 labapi-tests:
   stage: lint
-  tags: [sky]
+  tags: [sky-light]
   image: ghcr.io/astral-sh/uv:python3.12-alpine
   script:
     - uv run --project lab/labapi python -m unittest discover -s lab/tests -v
@@ -69,7 +73,7 @@ labapi-tests:
 # and latest.
 labapi-image:
   stage: gate
-  tags: [sky]
+  tags: [sky-light]
   image: docker:27
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
@@ -84,7 +88,7 @@ labapi-image:
 # The lab-driver bundle, kept as a job artifact for the client template.
 driver-build:
   stage: lint
-  tags: [sky]
+  tags: [sky-light]
   image: node:22-alpine
   script:
     - cd lab/driver && npm ci && npm run build
