@@ -123,6 +123,7 @@ class RunTests(unittest.TestCase):
             results_dir=str(self.tmp / "results"), guests_file=str(self.tmp / "guests.yaml"),
             server_world_dir=str(self.tmp / "world"), server_snapshots_dir=str(self.tmp / "snapshots"),
             step_timeout_s=5, heartbeat_timeout_s=5, server_ready_timeout_s=1, connect_timeout_s=1, time_scale=0.0,
+            before_logs_quiet_s=0.0,  # the clients' before-run logs are fetched only where a test turns it on
         )
         self.state = FakeState()
         self.state.spawn(1, 0, 0, 0)
@@ -167,6 +168,35 @@ steps:
         # a short answer stays whole in result.json, with nothing beside it
         self.assertFalse((self.tmp / "results" / run_id / "steps" / "000-c1-connect.json").exists())
 
+    def test_the_outgoing_server_log_is_kept_before_the_world_is_replaced(self):
+        """A playtest's server log lived only in the container until the next
+        run recreated it (playtest fifteen, 2026-10-13). The first run after
+        lab-api starts keeps the last 24 h; a run after another keeps the lines
+        since that one ended; both before `compose stop`."""
+        run_id, body = self._run(GREEN)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        cmds = self.services.system.commands
+        first_logs = next(i for i, c in enumerate(cmds) if "logs" in c)
+        first_stop = next(i for i, c in enumerate(cmds) if c[-2:] == ["stop", "skymp-server"])
+        self.assertLess(first_logs, first_stop, "the outgoing log is read before the server stops")
+        self.assertEqual(cmds[first_logs][-3:], ["--since", "24h", "skymp-server"])
+        run_dir = self.tmp / "results" / run_id
+        self.assertEqual((run_dir / "server-before.log").read_text(), "fake server log\n")
+        self.assertIn("server-before.log", body["artifacts"])
+        # the next run keeps the lines since this one ended
+        self.services.system.commands.clear()
+        run2, body2 = self._run(GREEN)
+        logs2 = next(c for c in self.services.system.commands if "logs" in c)
+        self.assertEqual(logs2[-3:], ["--since", body["finished"], "skymp-server"])
+        self.assertTrue((self.tmp / "results" / run2 / "server-before.log").is_file())
+
+    def test_an_empty_outgoing_log_leaves_no_artifact(self):
+        self.services.system.log_text = ""
+        run_id, body = self._run(GREEN)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        self.assertFalse((self.tmp / "results" / run_id / "server-before.log").exists())
+        self.assertNotIn("server-before.log", body["artifacts"])
+
     def test_green_run_end_to_end(self):
         run_id, body = self._run(GREEN)
         self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
@@ -208,8 +238,9 @@ steps:
         self.assertTrue(any(c[-2:] == ["stop", "skymp-server"] for c in cmds))
         self.assertTrue(any(c[-3:] == ["up", "-d", "skymp-server"] for c in cmds))
         self.assertTrue(any(c[-2:] == ["restart", "skymp-server"] for c in cmds))
-        # the server's log is this run's alone, from the run's start
-        logs = next(c for c in cmds if "logs" in c)
+        # the server's log is this run's alone, from the run's start (the first
+        # `logs` is the outgoing log kept before the world was replaced)
+        logs = [c for c in cmds if "logs" in c][-1]
         self.assertEqual(logs[-3:], ["--since", result["started"], "skymp-server"])
         self.assertEqual(len(self.services.system.stopped_captures), 1)
         self.assertIsNone(self.services.runner.active)
@@ -391,6 +422,35 @@ class ClientLogs(RunTests):
         self.assertEqual(len(copies), 2, pve.calls)
         self.assertIn("game-dir.txt", " ".join(copies[1][2]))
         self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
+
+    def test_after_a_quiet_spell_the_clients_logs_are_kept_before_the_rollback(self):
+        """A playtest's Skyrim Platform log is on the clone until the next run
+        rolls it back. The first run after a quiet spell (or after lab-api
+        starts) keeps it as <client>-before.log, before the clone stops; a run
+        seconds after another fetches nothing (a sweep pays nothing)."""
+        import dataclasses
+        from labapi.guests import Guest
+
+        self.services.runner.s = dataclasses.replace(self.settings, before_logs_quiet_s=600.0)
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.files[r"C:\sky-lab\c1.log"] = "platform log\n"
+        pve.files[r"C:\sky-lab\c1-driver.log"] = "driver\n"
+        pve.files[r"C:\sky-lab\c1-before.log"] = "the playtest's platform log\n"
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn("c1-before.log", body["artifacts"])
+        self.assertEqual((self.tmp / "results" / run_id / "c1-before.log").read_text(), "the playtest's platform log\n")
+        before = next(i for i, c in enumerate(pve.calls) if c[0] == "exec" and "c1-before.log" in " ".join(c[2]))
+        stop = next(i for i, c in enumerate(pve.calls) if c[:2] == ("stop", 901))
+        self.assertLess(before, stop, "the clone's log is copied before the clone stops")
+        # the next run follows within the quiet window: nothing to keep
+        pve.calls.clear()
+        run_id2, body2 = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body2["verdict"], "green", body2)
+        self.assertNotIn("c1-before.log", body2["artifacts"])
+        self.assertFalse(any(c[0] == "exec" and "c1-before.log" in " ".join(c[2]) for c in pve.calls))
 
 
 

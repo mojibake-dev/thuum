@@ -103,6 +103,12 @@ class Runner:
         self.frida_started: list[tuple[str, str]] = []  # (client, script name)
         # a snapshot or promote in progress (app.py); no run starts meanwhile
         self.maintenance: str | None = None
+        # when the last run (or lab-up, lab-down) ended, as the next run's
+        # `--since` for the server log it keeps before replacing the world, and
+        # on the wall clock, to tell a sweep's next run from one after a quiet
+        # spell (a playtest, hand probes), whose clients' logs are worth keeping
+        self.last_run_ended: str | None = None
+        self._last_run_ended_wall: float | None = None
 
     # ----- public -------------------------------------------------------------
 
@@ -165,7 +171,22 @@ class Runner:
             (rec.dir / "result.json").write_text(json.dumps(rec.to_result(), indent=2))
             self.board.clear()
             self.active = None
+            self._note_run_end()
         return rec
+
+    def _note_run_end(self) -> None:
+        self.last_run_ended = _iso(self._wall())
+        self._last_run_ended_wall = self._wall()
+
+    def _after_quiet_spell(self) -> bool:
+        """True when nothing ran for a while (or lab-api just started): what
+        the clients hold then is not the previous run's, it is a playtest's or a
+        hand probe's, and the rollback is about to erase it."""
+        if self.s.before_logs_quiet_s <= 0:
+            return False  # the feature off (the test harness; a lab that wants no guest reads)
+        if self._last_run_ended_wall is None:
+            return True
+        return self._wall() - self._last_run_ended_wall > self.s.before_logs_quiet_s
 
     async def up(self) -> dict[str, Any]:
         if self.active is not None:
@@ -174,6 +195,7 @@ class Runner:
         await self._rollback_server(rec, self.s.server_snapshot_default)
         clients = [g.client for g in self.tables.guests.values() if g.role == "client" and g.client]
         await self._rollback_clients(rec, clients)
+        self._note_run_end()
         return {"ok": True, "phases": rec.phases}
 
     async def down(self) -> dict[str, Any]:
@@ -192,6 +214,7 @@ class Runner:
         except RunnerError as e:
             notes.append(str(e))
         await self._clear_netem(rec)
+        self._note_run_end()
         return {"ok": not notes, "notes": notes, "phases": rec.phases}
 
     def game_for(self, client: str) -> str:
@@ -285,6 +308,7 @@ class Runner:
                 host = g.ip
             else:
                 env = self._compose_env(rec)
+                await self._keep_outgoing_server_log(rec)
                 await asyncio.to_thread(self.system.run, self._compose("stop", self.s.compose_service), env=env)
                 snap = Path(self.s.server_snapshots_dir) / snapshot
                 if not snap.is_dir():
@@ -303,6 +327,48 @@ class Runner:
             return f"snapshot {snapshot}, mode {self.s.server_rollback_mode}, game {rec.game or self.s.game_default}"
 
         await self._phase(rec, "rollback-server", go())
+
+    async def _keep_outgoing_server_log(self, rec: RunRecord) -> None:
+        """What the server logged since the last run ended (since 24 h when
+        nothing ran), kept before this run replaces its world: server-before.log
+        beside the run, or results/server-before/<stamp>-<up|down>.log for
+        lab-up and lab-down. A playtest's log lived only in the container until
+        here, and the run that followed recreated the container (playtest
+        fifteen, 2026-10-13: two findings unreadable afterwards). A failure is
+        a note, never a failed run."""
+        since = self.last_run_ended or "24h"
+        try:
+            r = await asyncio.to_thread(self.system.run, self._compose("logs", "--no-color", "--since", since, self.s.compose_service))
+        except Exception as e:  # the log is a courtesy; the rollback goes on
+            rec.notes.append(f"server-before.log: {type(e).__name__}: {e}")
+            return
+        if not r.stdout.strip():
+            return
+        try:
+            if rec.run_id in ("up", "down"):
+                d = Path(self.s.results_dir) / "server-before"
+                d.mkdir(parents=True, exist_ok=True)
+                stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime(self._wall()))
+                (d / f"{stamp}-{rec.run_id}.log").write_text(r.stdout)
+            else:
+                (rec.dir / "server-before.log").write_text(r.stdout)
+                rec.artifacts.append("server-before.log")
+        except OSError as e:
+            rec.notes.append(f"server-before.log: {e}")
+
+    async def _client_logs_before_rollback(self, rec: RunRecord, clients: list[str]) -> None:
+        """After a quiet spell the clients hold a playtest's or a hand probe's
+        Skyrim Platform log, which their rollback erases: keep each as
+        <client>-before.log. Inside a sweep (runs seconds apart) the clients
+        hold only the previous run's log, already kept with it, so nothing is
+        fetched and the sweep pays nothing."""
+        if rec.run_id in ("up", "down") or not self._after_quiet_spell():
+            return
+        for client in clients:
+            g = self.tables.guest_for_client(client)
+            if g is None or not g.managed:
+                continue
+            await self._fetch_client_file(rec, g, f"{client}-before.log", f"'{self.s.client_driver_log}'")
 
     async def _restart_server(self, rec: RunRecord) -> None:
         await asyncio.to_thread(self.system.run, self._compose("restart", self.s.compose_service), env=self._compose_env(rec))
@@ -394,6 +460,7 @@ class Runner:
 
         async def go():
             await self._traces_before_rollback(rec, clients)
+            await self._client_logs_before_rollback(rec, clients)
             notes = await asyncio.gather(*(one(c) for c in clients))
             return ", ".join(notes)
 

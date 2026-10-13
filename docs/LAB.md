@@ -555,6 +555,13 @@ Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/
 (copies of the server's `world/` directory, the `file` database driver;
 there is no sqlite), world-diff, lab.pcap, frida/*.jsonl, result.json.
+Also server-before.log: what the server logged between the previous run's
+end and this run's start, kept before the run replaces the world (a
+playtest's log lived only in the container until 2026-10-13, and the next
+run recreated it); lab-up and lab-down keep theirs under
+results/server-before/. After a quiet spell (BEFORE_LOGS_QUIET_S, 600 s) a
+run also keeps each client's Skyrim Platform log as <client>-before.log
+before rolling the clone back; inside a sweep nothing is fetched.
 During M0 and M1 the pcap is also the source for difftest sessions:
 `pcap2session` runs on it and the resulting YAML lands in
 skymp/skymp-wire/difftest/sessions/ (docs/WIRE.md).

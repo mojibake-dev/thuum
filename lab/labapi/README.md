@@ -110,9 +110,10 @@ game.
 | SERVER_PORT | 7777 | the game port fakeclient steps connect to (service name as host) |
 | FAKECLIENT_BIN | /srv/skymp/fakeclient | the headless client inside the server image |
 | FAKECLIENT_TIMEOUT_S | 90 | wall clock for one fakeclient step |
-| HEARTBEAT_TIMEOUT_S | 180 | client rollback to first poll |
+| HEARTBEAT_TIMEOUT_S | 300 | client rollback to first poll |
 | SERVER_READY_TIMEOUT_S | 120 | server rollback to UI port |
 | GUEST_TASK_TIMEOUT_S | 120 | Proxmox tasks and guest execs |
+| BEFORE_LOGS_QUIET_S | 600 | a run this long after the last keeps the clients' logs as <client>-before.log before their rollback; 0 turns it off |
 | TIME_SCALE | 1.0 | multiplies `wait:` and the scenario timeout |
 
 ## Running

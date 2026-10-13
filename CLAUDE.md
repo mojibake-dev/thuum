@@ -4,7 +4,7 @@ Make SkyMP play the actual game the way TES3MP plays Morrowind: a persistent,
 server-owned world where clients simulate only what the server can't, every
 piece of state has exactly one declared authority, and every network byte is
 recognized by the Rust wire first. The lab proves each capability; the agent
-loop supplies the labor. Definition of done lives in docs/PLAN.md. Decisions already made live in docs/DECISIONS.md; don't relitigate
+loop supplies the labor. Definition of done lives in docs/PLAN.md (the chart: one line of state per item); the dated record of how things got done is docs/LOG.md, appended by date. Decisions already made live in docs/DECISIONS.md; don't relitigate
 them in a session, open an ADR instead.
 
 ## The design law (lazy and vain)
@@ -35,7 +35,7 @@ toolchain per layer, every feature the same shape.
 
 ## Workspace layout (real, as of 2026-09-24)
 
-- thuum/ (this repo) ... docs/ (PLAN, DECISIONS, LAB, WIRE, VERB, NATIVES, verbs/),
+- thuum/ (this repo) ... docs/ (PLAN, LOG, DECISIONS, LAB, WIRE, VERB, NATIVES, verbs/),
                          lab/ (labapi/, driver/, scenarios/, frida/, hooks/, results/),
                          .claude/ (rules, skills, agents, settings), justfile,
                          .mcp.json, .gitlab-ci.yml
@@ -135,6 +135,7 @@ toolchain per layer, every feature the same shape.
 - `just relid` ................ index every Address Library ID CommonLibSSE-NG names
                                  into lab/relids.tsv (derived, ignored)
 - `just ledger` ............... regenerate docs/NATIVES.md from the fork
+- `just status` ............... every verb's live state from its doc's Status boxes
 - `just persist-game` ......... copy the master files and the exe from fenestrate into
                                  rpool/sky/persist (licensed files never enter a repo)
 - `just tree` ................. print the real workspace layout
