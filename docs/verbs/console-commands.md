@@ -503,3 +503,10 @@ m1-tcl from parity 89db8732:
   lab-api's playtest assist (thuum 20199c7). Eli judged it the wrong shape:
   a server-side lab command is to replace it, and console to leave the
   assist again.
+- Built: the server's mp.executeConsoleCommand(actorId, name, args) (fork
+  m2-fifteen 5de0f3fc) runs a console command by the verb's own path as the
+  actor would type it (its rank checked, its reply to its game), the lab
+  gamemode's labCommand console calls it (thuum 16fbdea), and just playtest-
+  console wraps it: a seat's setup goes through the server. The assist's
+  console (20199c7) leaves the assist once the lab runs a server with the
+  method.

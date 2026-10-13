@@ -1016,6 +1016,16 @@ it carries a HYPOTHESIS tag.
     decided by the server as staggers are (Unrelenting Force's ragdoll),
     the teleport's vanish and appear on observers, then Apocalypse
     (ADR-029, Ghostwalk's filter first) and headshots.
+  - In progress, fork m2-fifteen on m2-relay (2026-10-13): shouts
+    reported from their own hits when the recovery cannot name them, god
+    mode's shouts without recovery, the recovery's skew
+    (docs/verbs/shouts.md); the self-cast verb (docs/verbs/self-cast.md:
+    a Self spell's effects on the server, Invisibility and Etherealize as
+    states, no damage to an ethereal player, a rest running the effects,
+    Oakflesh's armor in the damage); the server's console for the lab's
+    setup (mp.executeConsoleCommand). The poisoned sword's look did not
+    reproduce on the lab (docs/verbs/poison.md); playtest sixteen watches
+    for it.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
   visible to an observer), `b-magic-restart` (active effects survive a
   restart with remaining duration).

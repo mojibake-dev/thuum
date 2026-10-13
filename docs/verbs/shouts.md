@@ -534,3 +534,15 @@ snippets).
 - Found: Become Ethereal did not stop damage. The server still damages an
   ethereal player when a hit is reported (the self-cast slice,
   docs/verbs/magic-effects.md).
+
+- Built on fork m2-fifteen (2026-10-13, after x-uf-hold 20261013-203328 and
+  x-uf-rotfern 20261013-204305 reported every shout, the lab's characters
+  and rotfern on Eli's saved world alike, so the playtest's quarter hour of
+  unreported shouts did not reproduce): the shout recovery's skew (04b2b27b:
+  a shout stands with up to 400 ms of the last recovery left, wire-rules
+  RECOVERY_SKEW_MS), god mode's (88bc8888: TGM's shouts start no recovery on
+  the server, as its game sets none), and the report from a shout's own hit
+  (337be481: when the recovery cannot name the variation, god mode's
+  included, the held hit of one of the shout's spells names it; a hit of one
+  with no report within chargeMs, the release unseen, reports it first; each
+  logs E_SHOUT_FROM_HIT or E_SHOUT_UNREPORTED with why).

@@ -342,3 +342,11 @@ the poison until then); built 2026-10-12 on fork m2-poison.
   0x13989): a desync of the weapon's look, HYPOTHESIS, to reproduce on the
   lab before a fix (the figure's right hand and both screens, before and
   after a mark and a spent dose).
+- Not reproduced on the lab: x-poison-figure (20261013-203933, the lab's
+  characters) and x-poison-figure-rotfern3 (20261013-210249, rotfern on
+  Eli's saved world, c2 300 units off) kept the drawn sword in the figure's
+  hand on c2's screen and in its owner's own, before the mark, after it,
+  after the poisoned swing spent the dose and after; Papyrus read it
+  equipped throughout (the playtest's reads did too). Playtest sixteen
+  watches for it, with a read of both seats on the spot (lab-api's probe) if
+  it comes back.
