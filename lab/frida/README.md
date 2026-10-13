@@ -75,6 +75,14 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   magnitude) and every 500 ms each effect's call counts. Offsets are
   CommonLibSSE-NG's, cited per field; 1.6.1170 only.
 
+- hud-trace.js: what the game shows on its HUD and who asked
+  (docs/verbs/shouts.md, the re-teach at login). Hooks
+  UIMessageQueue::AddMessage (13631) for the HUD's notification, center,
+  quest, skill and word-of-power messages, and DebugNotification (52933),
+  each with the caller's frames as module+offset. Found on 2026-10-12
+  (x-reteach-probe) that Game.TeachWord raises the word-of-power message
+  (HUD type 21) and AddShout and UnlockWord raise none. 1.6.1170 only.
+
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as
 frida/<client>-<script>.jsonl; one started outside a run is fetched by the next
