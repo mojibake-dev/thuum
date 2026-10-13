@@ -21,7 +21,9 @@
 # and its sessions are the fork's difftest-build artifact for the branch that
 # built SERVER_TAG (DIFFTEST_REF, default the tag), fetched from GitLab with the
 # project token in the Keychain. Both T2 services are stopped at the end,
-# whether the checks pass or not.
+# whether the checks pass or not. ONLY="poison spell-cast" runs just those
+# difftest sessions, to draw one session's divergences; such a run ends "T2
+# partial", never "T2 green", since a verb's T2 is every session.
 set -euo pipefail
 host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
@@ -179,6 +181,9 @@ if [ "$have_difftest" = 1 ]; then
   ssh_srv "cd /srv/lab && id=\$(docker create ${REGISTRY_PREFIX:-10.10.70.12:5000/}skymp-server:$legacy) && docker cp \"\$id:/srv/skymp/fakeclient\" difftest/legacy-fakeclient && docker rm \"\$id\" >/dev/null"
   for s in $(ssh_srv 'ls /srv/lab/difftest/sessions/*.yaml'); do
     name=$(basename "$s")
+    if [ -n "${ONLY:-}" ] && ! printf ' %s ' "$ONLY" | grep -q " ${name%.yaml} "; then
+      continue
+    fi
     # every session from the clean world on both stacks, so none inherits
     # another's forms or actors
     stop_t2
@@ -195,4 +200,5 @@ red=""
 [ "$have_difftest" = 1 ] || red="$red no-difftest-artifact"
 [ "$attr_rc" = 0 ] || red="$red attributes-across-restart"
 [ "$rc" = 0 ] || red="$red difftest"
-[ -z "$red" ] && echo "T2 green" || { echo "T2 red:$red"; exit 1; }
+if [ -n "$red" ]; then echo "T2 red:$red"; exit 1; fi
+[ -z "${ONLY:-}" ] && echo "T2 green" || echo "T2 partial (sessions: $ONLY): not a verb's T2"
