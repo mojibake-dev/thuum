@@ -11,6 +11,23 @@ One sentence. What a player can do, or what the server can now know.
 Roadmap reference: <skymp/ROADMAP.md item, or "none">
 Milestone: <M0..M7>   Class: <A|B|C>
 
+## Inventory (ADR-031: the action's consequences, before its rung)
+
+Everything the engine plays for this action, listed before any authority
+question, from two sources: the reference trace (the recorder in a solo
+client run, kept as lab/references/<action>.json and reviewed like a
+scenario) and the records (lab/esm.py: WEAP, the race's ATKD, MGEF, SPEL,
+SHOU, PROJ, EXPL, IPDS). One row per consequence; each row has exactly one
+disposition. A row without one blocks the merge, as an undeclared rung does.
+
+| consequence | seen in | disposition |
+| --- | --- | --- |
+| <a graph event or variable, an effect, a shader or art, a sound, an impact, a ragdoll or impulse, an actor value change, a HUD message> | trace / record / both | native (the host game plays it) / imposed (the server tells the game to) / suppressed: <reason> / later: <the slice that takes it> |
+
+The parity scenario (lab/scenarios/p-<action>.yaml) compares the multiplayer
+run's trace, per viewpoint (actor, target, bystander), with the reference;
+its `later:` list is this table's "later" rows and nothing else.
+
 ## Authority
 
 Rung: <R0|R1|R2|R3>
@@ -84,7 +101,7 @@ Rate limit / bounds:
 
 ## Status
 
-- [ ] doc complete, rung declared
+- [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [ ] engine surface cited or delegated
 - [ ] server logic + T0
 - [ ] message + validator (same commit)
@@ -92,6 +109,7 @@ Rate limit / bounds:
 - [ ] TS handler
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] ledger and suppression registry updated
 
 ## Reviewer checklist
@@ -105,3 +123,6 @@ Rate limit / bounds:
 6. Are the HYPOTHESIS tags gone, and were they cleared by evidence?
 7. Is the suppression reversible on host handoff?
 8. Did the ledger change if a native did?
+9. Does the Inventory list every consequence of the reference trace and the
+   records, each with one disposition, and does the parity scenario's later
+   list match its later rows and nothing more?

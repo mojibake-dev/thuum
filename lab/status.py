@@ -3,9 +3,9 @@
 docs' own Status checklists, as one table. PLAN.md keeps one line of state per
 item and the order; this is the check against it, generated, never edited.
 
-Columns: verb, milestone, class, rung, boxes ticked of nine, lines that say
-HYPOTHESIS without a CONFIRMED (a grep, not a verdict), the T3 scenario, and the
-first unticked box (what the verb waits on).
+Columns: verb, milestone, class, rung, boxes ticked, lines that say HYPOTHESIS
+without a CONFIRMED (a grep, not a verdict), the Inventory's rows marked later
+(ADR-031), the T3 scenario, and the first unticked box (what the verb waits on).
 Usage: status.py [docs/verbs] [--md]  (--md writes nothing; the table is
 Markdown either way, so it pastes into a report)."""
 import re
@@ -57,21 +57,30 @@ def read_verb(path: Path) -> dict:
         if "HYPOTHESIS" not in line or "CONFIRMED" in line or "still HYPOTHESIS" in line:
             continue
         hyp += 1
+    # the Inventory's "later" rows (ADR-031): consequences a later slice takes
+    later = 0
+    in_inv = False
+    for line in lines:
+        if line.startswith("## "):
+            in_inv = line.startswith("## Inventory")
+            continue
+        if in_inv and line.startswith("|") and re.search(r"\|\s*later\b", line):
+            later += 1
     return {"verb": name, "milestone": milestone, "class": klass, "rung": rung, "ticked": ticked,
-            "total": total, "hypotheses": hyp, "scenario": scenario, "waits_on": first_open}
+            "total": total, "hypotheses": hyp, "later": later, "scenario": scenario, "waits_on": first_open}
 
 
 def table(rows: list[dict]) -> str:
     order = {"M0": 0, "M1": 1, "M1.1": 2, "M2": 3, "M3": 4, "M4": 5, "M5": 6, "M6": 7, "M7": 8}
     rows = sorted(rows, key=lambda r: (order.get(r["milestone"], 99), r["verb"]))
-    out = ["| verb | M | class | rung | status | hyp. lines | scenario | waits on |",
-           "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+    out = ["| verb | M | class | rung | status | hyp. lines | later | scenario | waits on |",
+           "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for r in rows:
         state = "DONE" if r["total"] and r["ticked"] == r["total"] else f"{r['ticked']}/{r['total']}"
-        out.append(f"| {r['verb']} | {r['milestone']} | {r['class']} | {r['rung']} | {state} | {r['hypotheses']} | {r['scenario']} | {r['waits_on'][:48]} |")
+        out.append(f"| {r['verb']} | {r['milestone']} | {r['class']} | {r['rung']} | {state} | {r['hypotheses']} | {r['later']} | {r['scenario']} | {r['waits_on'][:48]} |")
     done = sum(1 for r in rows if r["total"] and r["ticked"] == r["total"])
     out.append("")
-    out.append(f"{len(rows)} verbs, {done} with every Status box ticked; {sum(r['hypotheses'] for r in rows)} lines still say HYPOTHESIS without a CONFIRMED (a grep: the docs decide).")
+    out.append(f"{len(rows)} verbs, {done} with every Status box ticked; {sum(r['hypotheses'] for r in rows)} lines still say HYPOTHESIS without a CONFIRMED (a grep: the docs decide); {sum(r['later'] for r in rows)} Inventory rows marked later (ADR-031).")
     return "\n".join(out)
 
 

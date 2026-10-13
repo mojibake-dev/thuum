@@ -96,8 +96,9 @@ driver-build:
     paths: [lab/driver/build/lab-driver.js]
     expire_in: 3 months
 
-# ADR-009 / ADR-016: a scenario change travels alone. Fail the pipeline if any commit
-# in it touches lab/scenarios/*.yaml together with any other path: on a merge request
+# ADR-009 / ADR-016 / ADR-031: a scenario or reference change travels alone. Fail the
+# pipeline if any commit in it touches lab/scenarios/*.yaml or lab/references/* together
+# with any other path: on a merge request
 # the commits since its base, on a push to main the commits the push brought (the
 # repo commits straight to main, so until 2026-10-13 this gate never ran).
 scenario-gate:
@@ -117,7 +118,7 @@ scenario-gate:
           print("no base commit to compare against (a new branch or an API pipeline); nothing checked")
           sys.exit(0)
       commits = subprocess.check_output(["git", "rev-list", f"{base}..HEAD"], text=True).split()
-      pat = re.compile(r"^lab/scenarios/.*\.ya?ml$")
+      pat = re.compile(r"^lab/(scenarios/.*\.ya?ml|references/.*)$")
       bad = 0
       for c in commits:
           files = subprocess.check_output(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", c], text=True).split()
