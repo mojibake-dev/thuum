@@ -1,0 +1,65 @@
+# b-poison (M2, docs/verbs/poison.md): a poison put on a weapon, carried by
+# its next hit, and spent. c2 holds a Steel Sword (Skyrim.esm 0x13989) in the
+# right hand and a DB03Poison (0x58CFB: 6 Health a second for 10 s; thuum
+# lab/esm.py). Equipping the poison opens the game's box ("Do you want to
+# poison the Steel Sword?"); lab/frida/poison-trace.js with ANSWER_YES
+# answers Yes and keeps the box shut (no key or close-menu dismisses it:
+# x-poison-probe4, -probe5). The game poisons the sword and fires its
+# PoisonedWeapon event, Skyrim Platform's poisonApplied, which skymp5-client
+# reports as the poison's OnEquip; the server spends the poison and marks the
+# sword with one dose (R0). c2's swing at c1 100 units off: the sword's
+# damage, then the poison's effects run on c1 from the server's mark, and
+# the dose is spent, so a second swing deals the sword's damage alone.
+# - after the equip: the poison gone from the server's inventory, the sword
+#   poisoned in c2's own game;
+# - after the swing: c1 well under what the sword alone leaves (x-poison-
+#   probe6: 0.926 from the sword, 0.326 ten seconds on), c2's sword clean
+#   in its game;
+# - a second swing on a full c1: the sword's share only (3 s on: about 0.95
+#   from the sword, about 0.77 if a dose were left).
+id: b-poison
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c2: give {item: "0x13989", count: 1}
+  - c2: give {item: "0x58cfb", count: 1}
+  - wait: 3
+  - c2: console {text: "player.equipitem 13989"}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - wait: 3
+  - c2: frida {script: poison-trace.js, params: {ANSWER_YES: true}}
+  - wait: 15
+  - c2: equip {formId: 0x58cfb}
+  - wait: 3
+  - c2: poisons
+  - assert:
+      - server.inventory(c2).count("0x58cfb") == 0
+      - c2.poison(0x13989).poisonId == 0x58cfb
+      - c2.poison(0x13989).count == 1
+  - c1: set-percentages {health: 1}
+  - wait: 2
+  - c2: draw-weapon
+  - wait: 2
+  - c2: anim-event {name: attackStart}
+  - wait: 12
+  - c2: poisons
+  - assert:
+      - server.actor(c1).healthPercentage < 0.6
+      - c2.poison(0x13989).poisonId == 0
+  - c1: set-percentages {health: 1}
+  - wait: 2
+  - c2: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c1).healthPercentage < 0.99
+      - server.actor(c1).healthPercentage > 0.85
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
