@@ -109,3 +109,16 @@ unchecked (the next movement verb).
   report. On the fix, x-crouch-magic2 20261013-004245 showed the figure up
   three seconds after the stand (the screenshot's delay, not the figure's;
   x-crouch-latency measures it). Merged on fork parity c918a7a1.
+- Measured (x-crouch-latency2 20261013-060851, fork m2-poison on parity
+  c918a7a1, magic readied, three crouches and three stands): the figure on
+  c2's screen took its player's SneakStart or SneakStop 238 to 356 ms after
+  c1's own (273, 339, 275, 238, 356, 273 ms), the relay's usual delay (its
+  0.2 s glide plus the network). c1's zero is c2's plus the watch-start
+  step between them (61 ms), so each figure lags by a few ms less.
+- Found in that run: while c1 crouched with magic readied, c2's client sent
+  the figure's graph SneakStart again every 100 to 130 ms (58 SneakStart,
+  55 of them refused; 3 SneakStop). applySneaking resends while the graph
+  disagrees with the report, and with magic readied the graph never reports
+  sneaking. Harmless on screen, a waste per figure per update; the resend
+  on disagreement is to be rate-limited (it recovers a figure whose graph
+  reset, as on a reload of its 3D).
