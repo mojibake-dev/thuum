@@ -102,6 +102,11 @@ relid:
 ledger:
     @python3 lab/ledger.py "{{skymp}}" docs/NATIVES.md
 
+# Every verb's live state from its doc's Status boxes (ticked of nine, open HYPOTHESIS tags, scenario, what it
+# waits on), one table; PLAN.md keeps the order and one line per item, this is the check against it.
+status:
+    @python3 lab/status.py docs/verbs
+
 # Unit tests for the lab tooling (addr.py, ledger.py, lab-api). Fixture tests skip without the CommonLibSSE-NG submodule.
 test-lab:
     @python3 -m unittest discover -s lab/tests -v
