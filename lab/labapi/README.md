@@ -114,6 +114,9 @@ game.
 | SERVER_READY_TIMEOUT_S | 120 | server rollback to UI port |
 | GUEST_TASK_TIMEOUT_S | 120 | Proxmox tasks and guest execs |
 | BEFORE_LOGS_QUIET_S | 600 | a run this long after the last keeps the clients' logs as <client>-before.log before their rollback; 0 turns it off |
+| SCENARIOS_DIR | lab/scenarios | the committed scenarios a run set plays by id (sky-srv: the deployed tree) |
+| NIGHTLY_SWEEP_UTC | (unset) | the nightly sweep's start, HH:MM UTC; unset means no nightly |
+| NIGHTLY_QUIET_S | 1800 | the lab must have been idle this long before the nightly starts |
 | TIME_SCALE | 1.0 | multiplies `wait:` and the scenario timeout |
 
 ## Running

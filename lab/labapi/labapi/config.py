@@ -94,6 +94,14 @@ class Settings:
     # Where clients pull Frida scripts from (inside the VLAN, plain http).
     lab_api_internal_url: str = "http://10.10.70.10/lab"
     frida_scripts_dir: str = str(LAB_DIR / "frida")
+    # The committed scenarios as `just deploy-srv` put them on sky-srv: what a run
+    # set (POST /lab/runset, the merge gate and the nightly sweep) plays by id.
+    scenarios_dir: str = str(LAB_DIR / "scenarios")
+    # The nightly sweep (ADR-030): every scenario, started by the clock at this
+    # UTC time ("10:30" is 03:30 PDT) once the lab has been idle nightly_quiet_s;
+    # empty means no nightly.
+    nightly_sweep_utc: str = ""
+    nightly_quiet_s: float = 1800.0
     # Fault injection and capture, on sky-srv.
     netem_dev: str = "eth0"
     pcap_iface: str = "any"
@@ -260,6 +268,9 @@ class Settings:
             server_state_url=_env("SERVER_STATE_URL", d.server_state_url),
             lab_api_internal_url=_env("LAB_API_INTERNAL_URL", d.lab_api_internal_url),
             frida_scripts_dir=_env("FRIDA_SCRIPTS_DIR", d.frida_scripts_dir),
+            scenarios_dir=_env("SCENARIOS_DIR", d.scenarios_dir),
+            nightly_sweep_utc=_env("NIGHTLY_SWEEP_UTC", d.nightly_sweep_utc),
+            nightly_quiet_s=float(_env("NIGHTLY_QUIET_S", str(d.nightly_quiet_s))),
             netem_dev=_env("NETEM_DEV", d.netem_dev),
             pcap_iface=_env("PCAP_IFACE", d.pcap_iface),
             game_port=int(_env("GAME_PORT", str(d.game_port))),

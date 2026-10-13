@@ -7,7 +7,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +22,7 @@ from .config import Settings
 from .guests import Tables, load_tables
 from .proxmox import GuestControl, ProxmoxError
 from .runner import Runner, RunnerError
+from .runset import Policy, RunSetError, RunSets
 from .scenario import load_scenario
 from .state import RpcStateClient, ServerState, StateError
 from .system import RealSystem, System
@@ -36,6 +39,7 @@ class Services:
     state: ServerState
     board: StepBoard
     runner: Runner
+    runsets: RunSets
 
 
 def build_real(settings: Settings) -> Services:
@@ -47,7 +51,7 @@ def build_real(settings: Settings) -> Services:
     state = ServerState(RpcStateClient(settings.server_state_url), tables.profile_ids, tables.base_id, tables)
     board = StepBoard()
     runner = Runner(settings, tables, control, system, state, board)
-    return Services(settings, tables, control, system, state, board, runner)
+    return Services(settings, tables, control, system, state, board, runner, RunSets(settings, runner))
 
 
 def build_fake(settings: Settings, fake_state=None, fake_pve=None, fake_system=None) -> Services:
@@ -61,17 +65,46 @@ def build_fake(settings: Settings, fake_state=None, fake_pve=None, fake_system=N
     state = ServerState(RpcStateClient(settings.server_state_url, transport=fs.transport()), tables.profile_ids, tables.base_id, tables)
     board = StepBoard()
     runner = Runner(settings, tables, control, system, state, board)
-    return Services(settings, tables, control, system, state, board, runner)
+    return Services(settings, tables, control, system, state, board, runner, RunSets(settings, runner))
 
 
 def create_app(services: Services) -> FastAPI:
     s = services.settings
-    app = FastAPI(title="thuum lab-api", docs_url=None, redoc_url=None)
+    runsets = services.runsets
+
+    async def nightly_loop() -> None:
+        # the clock's only job: start the nightly set when its minute has come
+        # and the lab is idle (runset.maybe_nightly decides); never while a run,
+        # a snapshot or another set is in progress
+        while True:
+            await asyncio.sleep(60)
+            try:
+                rs = runsets.maybe_nightly(datetime.now(timezone.utc))
+            except Exception as e:  # a clock bug must not take lab-api down
+                log.warning("nightly: %s", e)
+                continue
+            if rs is not None:
+                log.info("nightly sweep %s: %d scenarios", rs.id, len(rs.scenarios))
+                _track(asyncio.create_task(runsets.execute(rs)))
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        task = asyncio.create_task(nightly_loop())
+        try:
+            yield
+        finally:
+            task.cancel()
+
+    app = FastAPI(title="thuum lab-api", docs_url=None, redoc_url=None, lifespan=lifespan)
     app.state.services = services
     app.state.tasks: set[asyncio.Task] = set()
     router = APIRouter(prefix=s.root_path.rstrip("/"))
     runner = services.runner
     board = services.board
+
+    def _track(task: asyncio.Task) -> None:
+        app.state.tasks.add(task)
+        task.add_done_callback(app.state.tasks.discard)
 
     @app.middleware("http")
     async def access_log(request: Request, call_next):
@@ -110,7 +143,60 @@ def create_app(services: Services) -> FastAPI:
 
     @router.get("/status")
     async def status():
-        return await asyncio.to_thread(runner.status)
+        d = await asyncio.to_thread(runner.status)
+        d["runset"] = runsets.active.summary() if runsets.active else None
+        return d
+
+    # A run set (runset.py): the scenarios named, or "all" of the deployed tree,
+    # one after another, with ADR-027's and the lab-fault reruns applied; the
+    # merge gate and the nightly sweep are both this. POST {name, scenarios:
+    # [...] | "all", game?, lab_fault_reruns?, lone_red_reruns?}.
+    @router.post("/runset")
+    async def runset_start(request: Request):
+        body = await request.json()
+        if not isinstance(body, dict) or not isinstance(body.get("name"), str):
+            raise HTTPException(400, "body must be {name, scenarios, game?, lab_fault_reruns?, lone_red_reruns?}")
+        scenarios = body.get("scenarios", "all")
+        if scenarios != "all" and not (isinstance(scenarios, list) and all(isinstance(x, str) for x in scenarios)):
+            raise HTTPException(400, 'scenarios must be a list of ids or "all"')
+        policy = Policy(lab_fault_reruns=int(body.get("lab_fault_reruns", 1)), lone_red_reruns=int(body.get("lone_red_reruns", 2)))
+        if not _idle() or runsets.active is not None:
+            return _busy() if not _idle() else JSONResponse({"error": f"E_RUNSET_BUSY: run set {runsets.active.id} is active"}, status_code=409)
+        try:
+            rs = runsets.start(body["name"], scenarios, body.get("game"), policy)
+        except RunSetError as e:
+            raise HTTPException(400, str(e)) from e
+        _track(asyncio.create_task(runsets.execute(rs)))
+        return rs.to_dict()
+
+    @router.get("/runsets")
+    async def runsets_list():
+        return runsets.listing()
+
+    @router.get("/runset/{rid}")
+    async def runset_status(rid: str):
+        rs = runsets.get(rid)
+        if rs is None:
+            raise HTTPException(404, f"no run set {rid}")
+        return rs.to_dict()
+
+    @router.post("/runset/{rid}/stop")
+    async def runset_stop(rid: str):
+        try:
+            return runsets.stop(rid).to_dict()
+        except RunSetError as e:
+            raise HTTPException(404, str(e)) from e
+
+    @router.post("/runset/{rid}/resume")
+    async def runset_resume(rid: str):
+        if runsets.active is not None:
+            return JSONResponse({"error": f"E_RUNSET_BUSY: run set {runsets.active.id} is active"}, status_code=409)
+        try:
+            rs = runsets.resume(rid)
+        except RunSetError as e:
+            raise HTTPException(409 if "BUSY" in str(e) else 404 if "UNKNOWN" in str(e) else 400, str(e)) from e
+        _track(asyncio.create_task(runsets.execute(rs)))
+        return rs.to_dict()
 
     @router.post("/run")
     async def run(scenario: UploadFile = File(...), game: str | None = Form(None)):
@@ -125,9 +211,7 @@ def create_app(services: Services) -> FastAPI:
         if not _idle():
             return _busy()
         rec = runner.prepare(sc, game)
-        task = asyncio.create_task(runner.execute(rec))
-        app.state.tasks.add(task)
-        task.add_done_callback(app.state.tasks.discard)
+        _track(asyncio.create_task(runner.execute(rec)))
         return {"run": rec.run_id}
 
     @router.get("/run/{run_id}")
