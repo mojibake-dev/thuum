@@ -76,8 +76,11 @@ eight a second); one charge per hit.
   PlayerCharacter offset needed; skymp's own inventory apply (AddItemEx)
   never passes through PoisonObject or the event, so it cannot loop. OnHit
   for the hit (as now).
-- SP filter: the player's own equips.
-- Data captured: the poison's form id, then each hit's weapon.
+- SP filter: the player's own (the event fires only in the poisoning
+  player's game; the box exists for the player alone, 40481's caller
+  checks it).
+- Data captured: the poison's form id (the dose count the game shows is not
+  taken: the server computes it), then each hit's weapon.
 - Side effects of hooking here: none new.
 
 ## Impose (observers render the server's decision)
@@ -102,18 +105,26 @@ eight a second); one charge per hit.
 ## Message contract
 
 - No new message: OnEquip in; ChangeValues, MagicEffects and the inventory
-  out.
-- Validator rules: unchanged.
+  out. OnEquip of a poison means "put on my right-hand weapon": the engine
+  has no other use of a poison for its player (it sends no equip event for
+  one, the box being its only path), so the client sends OnEquip with the
+  poison's form id when the game's PoisonedWeapon event fires.
+- Validator rules: unchanged (OnEquip's form id, as for drinks).
 - Idempotency / ordering: a charge spent once per hit the server takes.
 - Contract doc updated: no change.
 
 ## Server
 
-- Where the logic lives: the C++ core's OnEquip (a poison: on the weapon in
-  the hand the playtest shows, its count by the record and later perks) and
-  OnWeaponHit (a poisoned weapon's hit: magic-effects' ApplyEffects with
-  the poison's effects and the attacker as caster, then a charge spent);
-  a Rust rule only if the charges grow rules of their own.
+- Where the logic lives: the C++ core's OnEquip (a poison: refused without
+  the poison in the server's inventory or a weapon in the server's right
+  hand, staves and bare hands too, as the game refuses them; else one
+  poison spent and the right-hand weapon's entry marked with it and one
+  dose, the doses the server's, R0; perks that add doses wait for M5's
+  perks) and OnWeaponHit (a poisoned weapon's hit: magic-effects'
+  ApplyEffects with the poison's effects and the attacker as caster, then
+  a dose spent and the mark cleared at none; the owner's inventory sent
+  after each change, so the game's ExtraPoison agrees); a Rust rule only
+  if the doses grow rules of their own.
 - DB fields / migration: none (the inventory entry already has poisonId
   and poisonCount; restart-persistent through the inventory).
 - Restart behavior: a poisoned weapon stays poisoned with its charges.
@@ -121,8 +132,14 @@ eight a second); one charge per hit.
 
 ## Client
 
-- SP binding: none new.
-- TS handler: none new (inventory sync carries the poison).
+- SP binding: Skyrim Platform's native layer adds a sink on
+  PoisonedWeapon::Event (the source Address Library 41069 returns,
+  1.6.1170 only per ADR-025) and emits a `poisonApplied` event with the
+  right-hand entry's poison (Actor::GetEquippedEntryData(false) and its
+  ExtraPoison).
+- TS handler: on `poisonApplied`, OnEquip with the poison's form id
+  (sendInputsService's path for drinks); inventory sync then carries the
+  server's mark back.
 - Kill switch config key: magic-effects' (magicEffects).
 
 ## Tests
@@ -136,9 +153,13 @@ eight a second); one charge per hit.
 - T2: a difftest session: c1 equips a poison, then hits c2: the legacy
   server drank the poison and ignores the weapon's; the fixed server
   poisons the weapon and applies it on the hit. Declared.
-- T3 scenario id: lab/scenarios/b-poison.yaml (once the playtest shows how
-  the lab can poison a weapon without the box: the driver could set the
-  stack's ExtraPoison directly, as the engine does after the box).
+- T3 scenario id: lab/scenarios/b-poison.yaml. The lab answers the box
+  with lab/frida/poison-trace.js (ANSWER_YES true, x-poison-probe3), so
+  lab-api needs a scenario step that starts a Frida script on a client at
+  that point (today a script starts beside a run). c2 poisons its sword,
+  hits c1: c1's health falls over the poison's duration on the server and
+  in c1's game, c2's sword carries no dose after, and the server's
+  inventory agrees with c2's game (no loop).
 - Assertions that would fail if the verb silently regressed: the target's
   health over the poison's duration on both sides; the charge spent on the
   server and in the attacker's game (c.poison).
