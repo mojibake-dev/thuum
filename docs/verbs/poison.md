@@ -196,9 +196,20 @@ eight a second); one charge per hit.
   Falsified by: different bytes at PoisonObject's 1.6.1170 address than
   1.7.104's, the poison on another list than the right hand's first, no
   41044 call on Yes, or an equip event carrying the poison's form id.
-- Untested lead for the lab: calling the box's callback (40482) with 2 on
-  the game thread might answer the box without a person, which would let a
-  scenario poison a weapon (b-poison).
+- The lab answers the box (x-poison-probe3 20261013-001004, 1.6.1170):
+  lab/frida/poison-trace.js on c2, uploaded with ANSWER_YES true, called
+  the callback (40482) with 2 in the opener's (40481) return on the game
+  thread, and c2's Steel Sword (Skyrim.esm 0x13989), worn in the right
+  hand, carried DB03Poison (0x58CFB) with one dose (the driver's poisons
+  step). CONFIRMED: the right hand and one dose without perks. The trace
+  logged the opener and the answer but not the callback, PoisonObject or
+  the event: Frida's hooks do not fire for calls made inside another hook,
+  so those stay HYPOTHESIS until a person answers under the watching
+  copy. No equip event during the poisoning (consistent with the read).
+  Not reproduced here: playtest fourteen's equip loop (the sword stayed
+  poisoned and worn 12 s later); the swing landed no hit, so no dose was
+  spent. A scenario can poison a weapon once lab-api can start a Frida
+  script at a scenario step (today it starts beside a run).
 
 ## Status
 
