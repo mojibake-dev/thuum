@@ -120,7 +120,16 @@ if (at === undefined) {
       const d = count(args[0], 'modifies');
       if (d !== null && !checked) {
         checked = true;
-        emit({ offsetCheck: formId(args[1]) === d.target, actor: hex(formId(args[1])), fromTarget: hex(d.target), av: args[3].toInt32() });
+        // the target's MagicTarget less this call's own Actor: where the
+        // MagicTarget sits in an Actor on this runtime (x-dual-stack's check
+        // failed at 0x98)
+        let measured = null;
+        try {
+          measured = args[0].add(0x50).readPointer().sub(args[1]).toInt32();
+        } catch (e) {
+          measured = null;
+        }
+        emit({ offsetCheck: formId(args[1]) === d.target, actor: hex(formId(args[1])), fromTarget: hex(d.target), magicTargetInActor: measured, av: args[3].toInt32() });
       }
     },
   });
