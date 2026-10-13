@@ -829,3 +829,49 @@ scripts call something only a game can do.
 Open for Eli at the first allowlist entry: whether b-apocalypse keeps
 Raise Wall, and whether the server evaluates an allowlisted effect's
 conditions or takes the engine's report that it started.
+
+## ADR-030: The merge runs a gate sweep; the full sweep runs nightly
+
+Status: accepted (2026-10-13, Eli: "im approving the ADRs in the policy section";
+proposed the same day from the process audit, ~/.claude/plans/serene-frolicking-cascade.md
+in the agent's plans). Amends ADR-024 and ADR-027.
+
+**Context.** ADR-024 put the full sweep at the merge, ADR-025 halved it to one game
+version, ADR-027 kept a lone red from costing a night. Measured over the sixteen sweeps
+since 2026-10-07 (1,038 lab runs): a sweep is 68 min for 26 scenarios and 124 min for 43,
+strictly serial on the one pair of clones, growing one scenario per verb; sweeps were 540
+of the 1,038 runs and 25.1 of the lab's 47.5 busy hours, while the lab itself is busy
+three to five hours a day and idle the rest. From a branch's last fork commit to its merge
+is a median 3.0 hours, which is the sweep, T2 and the bookkeeping. So the sweep's cost is
+where it runs, on the merge's critical path, not that it runs; at M3's sixty scenarios it
+would be two and a half hours per merge.
+
+**Decision.**
+- At a merge to parity, the gate sweep: `smoke-two-players`, `a-restart-persistence`,
+  the merging verb's own scenario(s), the scenarios of every verb whose server, wire or
+  client files the branch touched (each scenario names its verb; a `touches:` list in the
+  scenario, or the verb docs' file and message names, gives the mapping), and every
+  scenario with an open ADR-027 watch item. About ten runs at 2.6 min each, about 26 min.
+  A red in the gate blocks the merge under ADR-027's rules.
+- The full sweep, every committed scenario on 1.6.1170, runs on a nightly schedule through
+  lab-api, unattended, when no playtest or staging holds the lab. A nightly red reopens its
+  verb (docs/LAB.md, CI): the next merge waits for its fix or its ADR-027 watch item.
+- A verb's own client change is promoted to clean-m1 on its gate; the nightly sweep is its
+  full check. The full sweep still runs first, as ADR-024 asked, before a promotion that is
+  not a verb's merge: a snapshot retake, a change to the mod layer, the game, SKSE, Skyrim
+  Platform's build or the lab driver stack, where no verb's scenario names what changed.
+  (Most M2 verbs change the client; had every promotion kept the full sweep, the gate
+  would have saved nothing.)
+- Merge trains: verbs whose branches are green within a few hours of each other stack (by
+  merge, never rebase) and merge together under one gate sweep and one promotion, as
+  magic-effects with god-mode and poison with the visual fixes already did. The merge
+  commit names every verb it carries.
+- The merge commit names the gate's runs; the nightly sweep's result is a run set under
+  lab/results that the next session reads first.
+
+**Consequences.** A cross-verb regression the gate's selection misses shows at night
+instead of at the merge; ADR-027's two-sweep rule already tolerates that shape, and the
+nightly sweep gives the flakiness statistics for free. The sweep stops growing the merge's
+critical path. The tooling (`just verb-merge`, a lab-api run set with the ADR-027 and
+lab-fault reruns encoded, the nightly schedule) is the process audit's items B1 and B3;
+until it exists the gate set is run by hand at a merge, named in the merge commit.
