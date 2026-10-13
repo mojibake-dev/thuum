@@ -546,3 +546,14 @@ snippets).
   included, the held hit of one of the shout's spells names it; a hit of one
   with no report within chargeMs, the release unseen, reports it first; each
   logs E_SHOUT_FROM_HIT or E_SHOUT_UNREPORTED with why).
+- Root cause found (2026-10-13): with magic readied or a weapon drawn a
+  shout's release is CombatReady_BreathExhaleShort, not MT_BreathExhaleShort
+  (x-shout-drawn2 20261013-221426, c1's own graph events in each state), and
+  shoutService hooked only MT_BreathExhale*: x-shout-drawn 20261013-220949
+  saw Fire Breath's release unseen with Flames readied and with a sword
+  drawn, reported only from its hit (E_SHOUT_UNREPORTED), and x-self-cast's
+  Become Ethereal, which hits nothing, went unreported (20261013-214827,
+  20261013-220500). Playtest fifteen's Unrelenting Force was shouted with
+  Flames readied in rotfern's hand; the lab's earlier shouts were all made
+  with the hands down. A wait was ruled out (x-shout-wait 20261013-220058).
+  Fork m2-fifteen 744fddb0 hooks both releases.

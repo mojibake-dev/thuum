@@ -620,10 +620,12 @@ health message. A second red within two sweeps makes it a bug.
 
 - Passed: Flames at test 1 from one hand, then from both: about 7 health a
   second from one, about twice that from two (dual casting per hand, at T4).
-- Found: the figure still shows no concentration pose. The flames leave its
-  hand with no raised hand, while a fire-and-forget Firebolt's wind-up
+- Found: the figure raises its hands for a concentration spell but never
+  makes the cast's own motion, the grab and push that drives the stream
+  (Eli: "the hands ARE readied, they're raised, but they dont do the like,,,
+  grab push hand animation"), while a fire-and-forget Firebolt's wind-up
   shows. The relay sends the cast's events in order since 4cb2082e, and the
-  figure's graph does not take the concentration pose from them (x-dual-
-  cast2's figure took the left hand's events, x-dual-cast3's none). To read:
-  which events or graph variables raise a caster's hands for a concentration
-  spell, and why the figure's graph refuses them.
+  figure's graph does not play the push from them (x-dual-cast2's figure
+  took the left hand's events, x-dual-cast3's none). To read: which events
+  or graph variables start a caster's concentration push, and why the
+  figure's graph refuses them.
