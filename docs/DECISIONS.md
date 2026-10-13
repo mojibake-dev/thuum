@@ -875,3 +875,124 @@ nightly sweep gives the flakiness statistics for free. The sweep stops growing t
 critical path. The tooling (`just verb-merge`, a lab-api run set with the ADR-027 and
 lab-fault reruns encoded, the nightly schedule) is the process audit's items B1 and B3;
 until it exists the gate set is run by hand at a merge, named in the merge commit.
+
+## ADR-031: The server decides an action and its numbers; the engine plays the rest
+
+Status: accepted (2026-10-13, Eli: "accept ADR-031, item 3 included";
+proposed the same day from his question: "there's gotta be a more wholistic
+approach than one element of a thing at a time"). Amends ADR-028 (how "no
+game applies these on its own" is enforced) and docs/VERB.md (an inventory
+and a parity check per verb).
+
+**Context.** A game action is a bundle: a hit has its number, the swing,
+the victim's reaction (a recoil, a stagger, a throw), the impact's art and
+sound, a blood shader, the HUD. The verbs so far start from the authority
+question (who owns the number, which message carries it) and read the
+engine only for the hook that question needs. Nothing lists the whole
+bundle first, so a verb ships the parts it set out to build, and the
+playtests find the rest one at a time:
+- the concentration push on a figure (fifteen; docs/verbs/spell-cast.md);
+- Unrelenting Force's throw (fifteen; docs/verbs/stagger.md);
+- no flame and no burning on a spell's target (spell-cast.md, "a T4
+  question");
+- the block-and-stagger animation missing on the figure (stagger.md,
+  fifteen);
+- the teleport's vanish and appear, TCL's figure (docs/PLAN.md M2).
+
+Two habits make it worse:
+- **The suppressions cut events, not numbers.** To keep damage on the
+  server (ADR-028) each verb blocked a whole path, and each block drops
+  every consequence after it:
+  - a figure's spell lands nothing on the player it targets
+    (spell-cast.md, x-spell-observe 20261010-114556). This is an accident
+    of the target lookup that the verb kept: the relayed cast names its
+    target by server id, and the client turns the player's own id into
+    form 0;
+  - a figure's weapons deal no damage (formView.ts, attackDamageMult 0);
+  - the player's own engine counts no actor damage (m2-visuals);
+  - a figure's stagger the server did not relay is blanked (deathService);
+  - a drinker's engine applies no potion (SetPotionEffectsBlocked).
+  The verbs then re-add the consequences one at a time: the server's
+  stagger, spell staggers, hit shaders through magicEffectsService, the
+  throw next. That rebuilds what the engine already does.
+- **The scenarios assert what a verb meant to change** (the server's number
+  and one look). A missing consequence fails nothing and waits for a
+  playtest.
+
+**Decision.**
+1. **Inventory first.** Before its rung, a verb's doc lists the action's
+   consequences in the engine, from two sources:
+   - a reference trace: the action in one game, against a local NPC or the
+     player itself, with no multiplayer path involved;
+   - what the records declare: WEAP, the race's ATKD, MGEF, SPEL, SHOU,
+     PROJ, EXPL, IPDS (lab/esm.py).
+
+   The trace records at a few engine chokepoints, found once by the
+   re-analyst on sky-re and hooked by Frida or Skyrim Platform:
+   - graph events and graph variables on both actors;
+   - effects, shaders and art applied;
+   - sounds and impacts;
+   - physics: a ragdoll, an impulse, positions;
+   - actor value changes;
+   - HUD messages.
+
+   The recorder is built once and serves every verb.
+2. **Every item gets a disposition** in the verb doc:
+   - native: the engine plays it in the game that hosts the subject;
+   - imposed: the server tells a game to play it;
+   - suppressed, with the reason;
+   - later, with the slice that takes it.
+
+   An item without one blocks the merge, as an undeclared rung does.
+3. **Cut at the number, not at the event.** The server's authority is over
+   decisions (did it land, how hard, from whom) and over numbers (actor
+   values). The server's decision reaches the subject's host game as the
+   cause: this hit, or this spell, from this source, at this magnitude.
+   That game applies the cause through the engine's own path (for a spell,
+   MagicCaster::CastSpellImmediate, CommonLibSSE-NG
+   include/RE/M/MagicCaster.h:46; the weapon hit's path is to find), so the
+   consequences come as the engine makes them. The game suppresses only the
+   local change of a number the server owns, at the value-change
+   chokepoint, never the event carrying it. ADR-028 stands for the
+   numbers: "no game applies these on its own" now means no game changes
+   those values on its own, not that nothing lands.
+4. **Verify by diff.** A parity scenario per action class records the same
+   trace in the multiplayer run, from the actor's game, the target's and a
+   bystander's, and compares each with the reference. A consequence
+   missing or extra in a viewpoint is red unless the inventory marks it
+   later. The reference traces are committed with their scenarios, alone,
+   for Eli's review (ADR-009).
+
+   This is differential testing with the engine alone as the oracle
+   (McKeeman, "Differential Testing for Software", Digital Technical
+   Journal 10(1), 1998), the same shape as T2's harness (ADR-010). Unreal's
+   Gameplay Ability System draws the same line, between attribute changes
+   the server owns and "cues" every client plays
+   (github.com/tranek/GASDocumentation, GameplayCues).
+
+**Consequences.**
+- A verb's gaps are listed before it is built; a later slice is a named
+  inventory item, not a playtest surprise.
+- Rebuilt consequences can retire (the server's stagger impose, spell
+  staggers, the hit shaders) where the engine plays them from the imposed
+  cause. Each retirement is a verb change with its own scenario evidence.
+- RE needed, once:
+  - the value-change chokepoints, where a local change of health,
+    magicka, stamina and their maxima can be zeroed with the rest intact
+    (one candidate: the health damage function,
+    ghidra/notes/block-formula.md:427);
+  - the engine path that applies a decided weapon hit to a target;
+  - the trace's chokepoints.
+- Not solved here: a bystander's view of a body the engine moves (a throw,
+  a ragdoll). The movement relay positions a figure and carries no pose.
+  It is the first named "later" item.
+- A game's own physics never decides a hit on a player: the target's host
+  plays what the server decided. The figure's own projectile in the
+  target's game stays harmless as a cause, which is ADR-028's ground.
+- First slice:
+  - the recorder, with the inventory and the parity check for the merged
+    combat verbs (melee hit, block, stagger, spell hit, shout), which gives
+    the gap list;
+  - then Unrelenting Force's throw, the first verb built this way: the
+    server imposes the spell's hit from the shouter's figure, and the
+    engine throws.
