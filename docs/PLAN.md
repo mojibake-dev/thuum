@@ -961,11 +961,39 @@ it carries a HYPOTHESIS tag.
       RUSTSEC-2024-0449 stopped every pipeline.
   - rotfern.esp carries the Nord's stagger offsets (apocrypha; Eli: "yes
     give her vanilla values").
-  - In progress: poison (fork m2-poison, docs/verbs/poison.md).
-  - Next: the visual fixes. The shout's breath on observers, the
-    teleport's vanish and appear, a silent re-teach after a relaunch, a
-    concentration cast's hand animation, and dual casting (unread on both
-    ends: docs/verbs/spell-cast.md).
+  - Merged on fork parity 11c126b9 (2026-10-13 05:31: the sweep
+    of every scenario on be69bf68, 40 of 40 green, and T2 green on 11c126b9,
+    which adds a difftest session change alone; both clones promoted),
+    fork m2-visuals on m2-poison:
+    - poison: a poison put on the right-hand weapon is the server's to
+      carry, run on the target by the next hit and spent (b-poison, thuum
+      de09fdc, awaiting Eli's review; docs/verbs/poison.md);
+    - the shout's breath on observers (the server relays an accepted
+      shout as it resolved it, with the shouter's graph variables and
+      facing), and a silent re-teach (a login restores a known word by its
+      known flag: Game.TeachWord raised the word-of-power message;
+      docs/verbs/shouts.md);
+    - a concentration cast's hand animation (the relay sends the graph's
+      events in order), a figure placed past 1024 units instead of gliding
+      (the teleport's slide), the crouch's resend once a second;
+    - dual casting counted per hand (the game runs each hand's stream on
+      the target, CONFIRMED by Frida; the server keeps a clock per hand,
+      the client keeps a second hand's hit and names its cast; CONFIRMED
+      at T3 by x-dual-cast3 on be69bf68; docs/verbs/spell-cast.md);
+    - a spell of Self delivery cast on the caster's figure in observers'
+      games, so its look shows there (Become Ethereal does; Eli's spell
+      visuals, docs/verbs/magic-effects.md);
+    - damage another actor deals the player counts only on the server:
+      locally it counts nothing (ADR-028), so a figure's shout or spell no
+      longer hurts its target twice (docs/verbs/shouts.md).
+  - Next, from Eli's spell visuals and tonight's reads: the self-cast
+    slice (the server runs a self spell's effects on its caster:
+    Invisibility hidden, Become Ethereal spared, Oakflesh's armor; wards'
+    absorption), the pushes and paralysis decided by the server as
+    staggers are (Unrelenting Force's ragdoll), the spell relay sent as the
+    server resolved it (fork m2-relay 184bcc6f: a cast naming 0x14 made
+    neighbours cast; docs/verbs/spell-cast.md), the teleport's vanish and
+    appear on observers, then Apocalypse (ADR-029) and headshots.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
   visible to an observer), `b-magic-restart` (active effects survive a
   restart with remaining duration).

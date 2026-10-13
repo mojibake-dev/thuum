@@ -122,3 +122,8 @@ unchecked (the next movement verb).
   sneaking. Harmless on screen, a waste per figure per update; the resend
   on disagreement is to be rate-limited (it recovers a figure whose graph
   reset, as on a reload of its 3D).
+- Built on fork m2-visuals 7769ec57: a figure's SneakStart or SneakStop is
+  sent on a change of the report and at most once a second while the graph
+  disagrees, and merged on fork parity 11c126b9 (2026-10-13 05:31: the sweep
+  of every scenario on m2-visuals be69bf68, 40 of 40 green, and T2 green on
+  11c126b9, which adds a difftest session change alone).

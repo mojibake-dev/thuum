@@ -42,7 +42,11 @@ eight a second); one charge per hit.
   scratchpad poison-re.md; read in 1.7.104's bodies under the same Address
   Library ids, since the project's 1.6.1170 program is still
   SteamStub-wrapped at rest; 1.6.1170's unwrapped sections agree on every
-  function size checked). All HYPOTHESIS until a Frida trace on 1.6.1170:
+  function size checked). Each step HYPOTHESIS until a Frida trace on
+  1.6.1170; the lab has since CONFIRMED the right hand, the one dose, the
+  event with no equip event and the hook point (Measured, below), and
+  PoisonObject's arguments stay HYPOTHESIS (a person's Yes under the
+  watching trace, playtest fifteen):
   - Using a poison runs the per-form-type use switch (Address Library
     38001), whose ALCH case opens the box (40481) and skips its equip
     event: the engine sends no TESEquipEvent for a poison, so Skyrim
@@ -68,7 +72,8 @@ eight a second); one charge per hit.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
-- Hook point (HYPOTHESIS, the re-analyst's recommendation): a sink on
+- Hook point (the re-analyst's recommendation, CONFIRMED by
+  x-poison-probe6): a sink on
   PoisonedWeapon::Event at the source Address Library 41069 returns, in
   Skyrim Platform's native layer; on the event, the player's right-hand
   equipped entry (Actor::GetEquippedEntryData(false), include/RE/A/Actor.h:540)
@@ -285,9 +290,20 @@ the poison until then); built 2026-10-12 on fork m2-poison.
 - [x] native hook + T1 (Skyrim Platform's PoisonedWeapon sink,
       poisonApplied; T1 none)
 - [x] TS handler (sendInputsService.ts onPoisonApplied)
-- [ ] T2 green: the poison session identical but for its eight declared
+- [x] T2 green: the poison session identical but for its eight declared
       divergences (ONLY=poison on fork m2-poison 40ed43a5, 2026-10-12
-      23:46); every session at the merge
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-poison, by path twice, then
-      its own commit for Eli's review)
-- [ ] ledger and suppression registry updated (at the merge)
+      23:46); every session at the merge (m2-visuals 11c126b9; the first
+      full T2, on be69bf68, found the poison verb in magic-effects'
+      session, whose poison moved to this one)
+- [ ] T3 scenario green, no HYPOTHESIS tags: b-poison green by path twice
+      and in the merge sweep (thuum de09fdc, awaiting Eli's review); left
+      HYPOTHESIS: PoisonObject's arguments under a person's Yes and the
+      attacker's look at its target (Impose), both playtest fifteen's
+- [x] ledger and suppression registry updated: no native added (Skyrim
+      Platform's sink is an event, not a Papyrus native); the suppression
+      is magic-effects' (a poison from another's game lands nothing on the
+      player)
+- [x] merged on fork parity 11c126b9 (2026-10-13 05:31: the sweep of every
+      scenario on m2-visuals be69bf68, 40 of 40 green, and T2 green on
+      11c126b9, which adds a difftest session change alone), m2-visuals
+      stacked on m2-poison

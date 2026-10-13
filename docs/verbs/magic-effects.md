@@ -304,9 +304,12 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   poisoned hit applies the poison and spends its charge; a spell's dual
   effect; effects resume after a reload of the change form).
 - T1: none.
-- T2: a difftest session, a fortify drunk and a poison equipped: the
-  legacy server restores at once and drinks the poison as a heal; declared
-  (difftest sessions/magic-effects.yaml).
+- T2: a difftest session, a fortify drunk: the legacy server restores at
+  once; declared (difftest sessions/magic-effects.yaml). Its poison
+  equipped, which the legacy server drinks as a heal, moved to the poison
+  session on fork 11c126b9: the poison verb puts it on the right-hand weapon,
+  an inventory no declaration can tell from the legacy drink's
+  (docs/verbs/poison.md).
 - T3 scenario id: lab/scenarios/b-potion.yaml: c1, hurt, drinks a Potion
   of Minor Healing (RestoreHealth01 0x3EADD: 25 at once) and a Fortify
   Health (FortifyHealth05 0xFF9FC: 100 for 60 s): its health on the server
@@ -499,3 +502,7 @@ fifteen.
   - Lesser Ward against Flames: the server counted the stream whole (c2 at
     0.73, the unwarded band); a ward's absorption is the server's to add.
   - Healing Hands on the other player: the server healed it (0.51 to 0.77).
+- A Self spell cast on the caster's figure and a figure's spell dispelled
+  from the player at its hit: merged on fork parity 11c126b9 (2026-10-13
+  05:31: the sweep of every scenario on m2-visuals be69bf68, 40 of 40 green,
+  and T2 green on 11c126b9, which adds a difftest session change alone).

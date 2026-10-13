@@ -500,3 +500,7 @@ snippets).
     (20261013-092505) the breath still left the figure and c2's health
     followed the server's four ticks alone, 100 to 50; Unrelenting Force
     (20261013-092736) took the server's 50 on both sides.
+- The shout relay, the silent restore at login and the local damage counted
+  nothing: merged on fork parity 11c126b9 (2026-10-13 05:31: the sweep of
+  every scenario on m2-visuals be69bf68, 40 of 40 green, and T2 green on
+  11c126b9, which adds a difftest session change alone).

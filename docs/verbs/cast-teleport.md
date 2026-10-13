@@ -336,3 +336,9 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   observers' games are to play the same forms on their figure, told by the
   server when it takes the jump (which forms is the mod's data, read with
   lab/esm.py and the script's properties, never from memory).
+- The figure placed past 1024 units: merged on fork parity 11c126b9
+  (2026-10-13 05:31: the sweep of every scenario on m2-visuals be69bf68, 40
+  of 40 green, and T2 green on 11c126b9, which adds a difftest session
+  change alone). Not yet seen on the lab (a straight-up move is not applied
+  to a figure, docs/verbs/movement-speed.md); playtest fifteen's teleport
+  item.

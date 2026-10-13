@@ -599,3 +599,7 @@ health message. A second red within two sweeps makes it a bug.
   The figure's graph took none of the relayed cast events this run, where
   x-dual-cast2's took the left hand's: the hands' pose on the other screen
   is a playtest item.
+- Dual casting per hand and the relayed hand animation in order: merged on
+  fork parity 11c126b9 (2026-10-13 05:31: the sweep of every scenario on
+  m2-visuals be69bf68, 40 of 40 green, and T2 green on 11c126b9, which adds
+  a difftest session change alone).
