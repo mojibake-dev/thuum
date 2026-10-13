@@ -102,6 +102,7 @@ class Settings:
     # empty means no nightly.
     nightly_sweep_utc: str = ""
     nightly_quiet_s: float = 1800.0
+    nightly_window_s: float = 5400.0   # the nightly starts within this long after its minute, or not that day
     # Fault injection and capture, on sky-srv.
     netem_dev: str = "eth0"
     pcap_iface: str = "any"
@@ -271,6 +272,7 @@ class Settings:
             scenarios_dir=_env("SCENARIOS_DIR", d.scenarios_dir),
             nightly_sweep_utc=_env("NIGHTLY_SWEEP_UTC", d.nightly_sweep_utc),
             nightly_quiet_s=float(_env("NIGHTLY_QUIET_S", str(d.nightly_quiet_s))),
+            nightly_window_s=float(_env("NIGHTLY_WINDOW_S", str(d.nightly_window_s))),
             netem_dev=_env("NETEM_DEV", d.netem_dev),
             pcap_iface=_env("PCAP_IFACE", d.pcap_iface),
             game_port=int(_env("GAME_PORT", str(d.game_port))),

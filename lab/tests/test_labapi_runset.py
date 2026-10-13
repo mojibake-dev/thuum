@@ -154,29 +154,62 @@ class RunSetTests(RunTests):
         self.assertEqual(body["scenarios"], ["t2-green-one", "t2-green-two"])
         self.assertEqual(body["verdict"], "green")
 
-    def test_the_nightly_starts_once_when_due_and_the_lab_is_idle(self):
+    def test_the_nightly_starts_once_within_its_window_when_the_lab_has_been_idle(self):
         rs = self.runsets
-        rs.s = dataclasses.replace(self.settings, nightly_sweep_utc="10:30", nightly_quiet_s=1800.0)
+        rs.s = dataclasses.replace(self.settings, nightly_sweep_utc="10:30", nightly_quiet_s=1800.0, nightly_window_s=5400.0)
         utc = timezone.utc
-        self.assertIsNone(rs.maybe_nightly(datetime(2026, 10, 14, 10, 29, tzinfo=utc)), "not yet")
-        # the last run ended a moment ago: somebody is working, wait
-        self.services.runner._last_run_ended_wall = time.time()
-        self.assertIsNone(rs.maybe_nightly(datetime(2026, 10, 14, 10, 31, tzinfo=utc)), "the lab was busy a moment ago")
-        self.services.runner._last_run_ended_wall = time.time() - 3600
-        self.services.runner.maintenance = "snapshot"
-        self.assertIsNone(rs.maybe_nightly(datetime(2026, 10, 14, 10, 31, tzinfo=utc)), "a snapshot is in progress")
-        self.services.runner.maintenance = None
-        night = rs.maybe_nightly(datetime(2026, 10, 14, 10, 31, tzinfo=utc))
-        self.assertIsNotNone(night)
+        runner = self.services.runner
+
+        clocks = [rs]  # every RunSets instance under test reads the same test clock
+
+        def at(*hm, day=14):
+            """The clock set to that UTC time on 2026-10-<day>; returns it."""
+            now = datetime(2026, 10, day, *hm, tzinfo=utc)
+            for inst in clocks:
+                inst._wall = lambda now=now: now.timestamp()
+            return now
+
+        # lab-api started an hour ago, the last run ended an hour ago: a quiet lab
+        rs._started_wall = at(9, 0).timestamp()
+        runner._last_run_ended_wall = at(9, 30).timestamp()
+        self.assertIsNone(rs.maybe_nightly(at(10, 29)), "not yet")
+        runner._last_run_ended_wall = at(10, 25).timestamp()
+        self.assertIsNone(rs.maybe_nightly(at(10, 31)), "a run ended minutes ago: somebody is working")
+        runner._last_run_ended_wall = at(9, 30).timestamp()
+        runner.maintenance = "snapshot"
+        self.assertIsNone(rs.maybe_nightly(at(10, 31)), "a snapshot is in progress")
+        runner.maintenance = None
+        night = rs.maybe_nightly(at(10, 31))
+        self.assertIsNotNone(night, "due, idle, nothing ran today")
         self.assertEqual(night.name, "nightly")
         self.assertEqual(night.scenarios, rs.list_scenarios())
+        self.assertTrue(night.id.startswith("20261014-"))
         rs.active = None  # the test does not play it
-        self.assertIsNone(rs.maybe_nightly(datetime(2026, 10, 14, 23, 0, tzinfo=utc)), "once a day")
-        self.assertIsNotNone(rs.maybe_nightly(datetime(2026, 10, 15, 10, 30, tzinfo=utc)), "the next day again")
-        rs.active = None
-        rs.s = dataclasses.replace(self.settings, nightly_sweep_utc="")
-        self.assertIsNone(rs.maybe_nightly(datetime(2026, 10, 16, 12, 0, tzinfo=utc)), "no nightly configured")
-
+        self.assertIsNone(rs.maybe_nightly(at(10, 45)), "once a day, by the record under results/runsets")
+        # a restart later the same day remembers through the record
+        self.services.runsets = fresh = type(rs)(rs.s, runner)
+        fresh.scenarios_dir = self.scen
+        clocks.append(fresh)
+        fresh._started_wall = at(11, 0).timestamp() - 7200
+        self.assertIsNone(fresh.maybe_nightly(at(11, 0)), "a restart after the due minute does not run it again")
+        # the next day: outside the window nothing starts, inside it does
+        runner._last_run_ended_wall = at(9, 0, day=15).timestamp()
+        fresh._started_wall = runner._last_run_ended_wall
+        self.assertIsNone(fresh.maybe_nightly(at(12, 30, day=15)), "the window (90 min) has closed")
+        self.assertIsNotNone(fresh.maybe_nightly(at(10, 30, day=15)), "the next day, on the minute")
+        fresh.active = None
+        # a lab-api that just started counts its own start as activity
+        later = type(rs)(rs.s, runner)
+        later.scenarios_dir = self.scen
+        clocks.append(later)
+        later._started_wall = at(10, 40, day=16).timestamp()
+        runner._last_run_ended_wall = None
+        self.assertIsNone(later.maybe_nightly(at(10, 45, day=16)), "started five minutes ago: wait the quiet spell")
+        later._started_wall = at(10, 0, day=16).timestamp()
+        self.assertIsNotNone(later.maybe_nightly(at(10, 45, day=16)), "idle since its start half an hour ago")
+        later.active = None
+        later.s = dataclasses.replace(self.settings, nightly_sweep_utc="")
+        self.assertIsNone(later.maybe_nightly(at(10, 31, day=17)), "no nightly configured")
 
 if __name__ == "__main__":
     unittest.main()

@@ -117,6 +117,7 @@ game.
 | SCENARIOS_DIR | lab/scenarios | the committed scenarios a run set plays by id (sky-srv: the deployed tree) |
 | NIGHTLY_SWEEP_UTC | (unset) | the nightly sweep's start, HH:MM UTC; unset means no nightly |
 | NIGHTLY_QUIET_S | 1800 | the lab must have been idle this long before the nightly starts |
+| NIGHTLY_WINDOW_S | 5400 | the nightly starts within this long after its minute, or not that day (a restart after the window never runs it) |
 | TIME_SCALE | 1.0 | multiplies `wait:` and the scenario timeout |
 
 ## Running

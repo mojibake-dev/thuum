@@ -15,7 +15,7 @@ import asyncio
 import json
 import time
 from dataclasses import asdict, dataclass, field
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -85,7 +85,7 @@ class RunSets:
         self.active: RunSet | None = None
         self.sets: dict[str, RunSet] = {}
         self.poll_s = 2.0                      # waiting for a hand-posted run or a snapshot to finish
-        self.last_nightly: date | None = None
+        self._started_wall = self._wall()      # lab-api's own start: the last activity it knows of until a run ends
 
     # ----- the catalogue ---------------------------------------------------------
 
@@ -260,28 +260,40 @@ class RunSets:
     # ----- the nightly ------------------------------------------------------------
 
     def maybe_nightly(self, now: datetime) -> RunSet | None:
-        """The nightly sweep's start, if its time has come today, nothing ran
-        it yet, and the lab is idle and has been for nightly_quiet_s (nobody
-        playtesting or staging). The caller executes the set it returns."""
+        """The nightly sweep's start, if now is within nightly_window_s after
+        the due minute, no nightly set exists for today under results/runsets
+        (so a restart remembers), and the lab is idle and has been for
+        nightly_quiet_s (nobody playtesting or staging), counting lab-api's own
+        start as activity. The caller executes the set it returns. The first
+        version fired the moment lab-api came up at 15:54 PDT on 2026-10-13: past
+        the due minute, with the restart having forgotten the day, it saw a due,
+        idle lab."""
         when = (self.s.nightly_sweep_utc or "").strip()
         if not when:
             return None
         hh, mm = when.split(":")
         now = now.astimezone(timezone.utc)
-        if self.last_nightly == now.date():
+        due = now.replace(hour=int(hh), minute=int(mm), second=0, microsecond=0)
+        if not (due <= now < due + timedelta(seconds=self.s.nightly_window_s)):
             return None
-        if (now.hour, now.minute) < (int(hh), int(mm)):
+        if self.nightly_ran(now.date()):
             return None
         if self.active is not None or self.runner.active is not None or self.runner.maintenance is not None:
             return None
         ended = getattr(self.runner, "_last_run_ended_wall", None)
-        if ended is not None and self._wall() - ended < self.s.nightly_quiet_s:
+        last_activity = ended if ended is not None else self._started_wall
+        if self._wall() - last_activity < self.s.nightly_quiet_s:
             return None
-        self.last_nightly = now.date()
         try:
             return self.start("nightly", "all")
         except RunSetError:
             return None
+
+    def nightly_ran(self, day: date) -> bool:
+        """Whether a set named nightly was started on that UTC day, by the run
+        set records, which outlive a restart."""
+        stamp = day.strftime("%Y%m%d")
+        return any(p.stem.startswith(f"{stamp}-") for p in self._dir().glob(f"{stamp}-*-nightly*.json"))
 
 
 def _iso(ts: float) -> str:
