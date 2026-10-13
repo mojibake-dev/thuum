@@ -494,14 +494,21 @@ health message. A second red within two sweeps makes it a bug.
     effectiveness as though cast normally, but twice". HYPOTHESIS: whether
     two streams of one spell from one caster both damage one target, or the
     second only refreshes the first's effect (a forum answer says a fire
-    spell's effect overwrites itself). The masters cannot say.
-  - Dynamic plan (rule 8): a Frida trace in c1's game of the engine's Health
-    damage to c2's figure. The engine damages a figure like any actor; the
-    client only keeps it immortal (1,000,000 Health, formView.ts:302) and
-    steers its percentage from its player's reports (movementApply.ts:147),
-    which a trace of the damage calls does not count. One hand for 4 s, then
-    both: about 8 Health a second for one stream, then 16 if both count or
-    8 if the second refreshes the first.
+    spell's effect overwrites itself). The masters cannot say. The static
+    read leans to both: Flames' damage (MGEF 0x13CA9) is a Value Modifier on
+    Health (DATA EffectType 0, PrimaryAV 24; lab/esm.py with UESP's MGEF
+    layout), and CommonLibSSE-NG annotates
+    ValueModifierEffect::GetAllowMultipleCastingSourceStacking (vfunc 0x11,
+    include/RE/V/ValueModifierEffect.h:18) as { return 1; } where
+    ActiveEffect's (A/ActiveEffect.h:79) is { return 0; }.
+  - Dynamic plan (rule 8): lab/frida/effect-stack-trace.js in c1's game
+    (probe x-dual-stack) counts the engine's value-modifier effects of
+    Flames on c2's figure by hand, and their Update and ModifyActorValue
+    calls. The engine damages a figure like any actor; the client only keeps
+    it immortal (1,000,000 Health, formView.ts:302) and steers its percentage
+    from its player's reports (movementApply.ts:147). One hand for 3 s, then
+    both for 4 s: one effect object (hand 1), then two (hands 1 and 0) both
+    modifying if both count, or one if the second refreshes the first.
 - The slice, by that answer:
   - both count: the client keeps a magic hit unless it repeats the caster,
     target and spell within the frame (the doubled event, 0 to 2 ms apart
