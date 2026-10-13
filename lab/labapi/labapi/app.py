@@ -165,9 +165,12 @@ def create_app(services: Services) -> FastAPI:
     # A playtest's second pair of hands (playtest fourteen, 2026-10-12: one
     # person plays both seats): one input step in one client's game while the
     # person plays the other, such as test 2 holding its block (End, the
-    # clones' left attack) while test 1 swings. Input steps only; refused
+    # clones' left attack) while test 1 swings, or a console line typed into
+    # a seat's game as its player would type it (playtest fifteen, Eli: the
+    # checklist's player.addshout and its words), which the server's console
+    # verb checks against that seat's own rank. Input steps only; refused
     # while a run owns the clients.
-    ASSIST_ACTIONS = {"hold-key", "tap-key", "anim-event", "draw-weapon"}
+    ASSIST_ACTIONS = {"hold-key", "tap-key", "anim-event", "draw-weapon", "console"}
 
     @router.post("/clients/{client}/assist")
     async def assist(client: str, request: Request):

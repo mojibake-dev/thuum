@@ -349,7 +349,8 @@ playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
 
 # In a playtest, one input step in a player's game while the person plays the other seat (lab-api's assist: hold-key,
-# tap-key, anim-event, draw-weapon): `just playtest-assist c2 hold-key '{"code":207,"ms":15000}'` holds test 2's block (End).
+# tap-key, anim-event, draw-weapon, console): `just playtest-assist c2 hold-key '{"code":207,"ms":15000}'` holds test 2's
+# block (End); `just playtest-assist c1 console '{"text":"player.addshout 3f9ea"}'` types a console line as test 1.
 playtest-assist client action args="{}":
     @curl -fsS -m 60 -X POST "{{lab_api}}/clients/{{client}}/assist" -H 'content-type: application/json' -d '{"action":"{{action}}","args":{{args}}}'; echo
 

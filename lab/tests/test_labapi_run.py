@@ -947,8 +947,23 @@ class ProbeSteps(RunTests):
         self.assertTrue(out["r"].json()["ok"])
         self.assertIn(("c2", "hold-key", {"code": 207, "ms": 8000}), self.doubles.seen)
 
+    def test_an_assist_types_a_console_line_as_the_seat_s_player(self):
+        import threading
+
+        out = {}
+        body = {"action": "console", "args": {"text": "player.addshout 3f9ea"}}
+        t = threading.Thread(target=lambda: out.update(r=self.client.post("/lab/clients/c1/assist", json=body)))
+        t.start()
+        deadline = time.time() + 10
+        while t.is_alive() and time.time() < deadline:
+            self.doubles.turn()
+            time.sleep(0.02)
+        t.join(5)
+        self.assertEqual(out["r"].status_code, 200, out["r"].text)
+        self.assertIn(("c1", "console", {"text": "player.addshout 3f9ea"}), self.doubles.seen)
+
     def test_an_assist_sends_input_and_nothing_else(self):
-        for other in ("console", "equip", "dump-state"):
+        for other in ("equip", "dump-state", "poisons"):
             r = self.client.post("/lab/clients/c1/assist", json={"action": other})
             self.assertEqual(r.status_code, 400, other)
         self.assertEqual(self.client.post("/lab/clients/c9/assist", json={"action": "tap-key", "args": {"code": 28}}).status_code, 404)
