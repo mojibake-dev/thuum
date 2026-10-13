@@ -1,0 +1,109 @@
+# b-self-cast (M2, docs/verbs/self-cast.md; drafted as x-self-cast,
+# 2026-10-13): a spell a player casts on itself runs on the server.
+# Skyrim.esm (thuum lab/esm.py; docs/verbs/magic-effects.md's table):
+# Oakflesh SPEL 0x5AD5C (MGEF 0x51B15 ArmorFFSelf0, a peak value modifier on
+# DamageResist, 60 s), Invisibility SPEL 0x27EB6 (MGEF 0x1EA6A
+# InvisibillityFFSelf, a state), Become Ethereal SHOU 0x32920 (word 0x32917,
+# spell 0x5F6EB, MGEF 0x64D68 VoiceMakeEthereal, a state), Iron Sword
+# 0x12EB7. c1 casts Oakflesh and Invisibility: the server runs both; c1
+# waits an hour (the Wait menu, as a-rest): both end on the server. Then
+# c1, Invisibility still readied in its hand, shouts Become Ethereal (the
+# shout's release with magic readied, x-shout-drawn2) and c2's sword swings
+# at it from 100 units, drawn two seconds before as b-stagger's are: c2's
+# own game plays the attack (IsAttacking) while the server still runs the
+# state, and the server takes nothing from c1; once the state has run out,
+# the same swing from the same spot lands, so the first was no miss. (The
+# server's refusal of a hit on an ethereal target is SelfCastTest's, T0;
+# here either game may be the one that lets the swing through.) The hits
+# come after the wait, which a fight would refuse. The server's state is
+# waited for with until (B7), not fixed sleeps; screenshots for the looks.
+id: b-self-cast
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: learn-spell {spellId: 372060}
+  - c1: learn-spell {spellId: 163510}
+  - c1: console {text: "player.addshout 32920"}
+  - c1: console {text: "player.teachword 32917"}
+  - c1: console {text: "player.unlockword 32917"}
+  - c2: give {item: "0x12eb7", count: 1}
+  - wait: 3
+  - c2: console {text: "player.equipitem 12eb7"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - wait: 2
+  # Oakflesh, then Invisibility, on the server
+  - c1: console {text: "player.equipspell 5ad5c right"}
+  - c1: draw-weapon
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 1500}
+  - until:
+      within: 8
+      expect:
+        - server.effects(c1).magnitude("0x51b15") > 0
+  - c2: screenshot
+  - assert:
+      - server.effects(c1).left("0x51b15") > 40
+  - c1: console {text: "player.equipspell 27eb6 right"}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 2000}
+  - until:
+      within: 8
+      expect:
+        - server.effects(c1).left("0x1ea6a") > 10
+  - c2: screenshot
+  - c1: screenshot
+  # an hour's wait ends both, on the server as in c1's game
+  - c1: tap-key {code: 20}
+  - wait: 2
+  - c1: tap-key {code: 28}
+  - until:
+      within: 20
+      expect:
+        - server.effects(c1).left("0x1ea6a") == 0
+        - server.effects(c1).left("0x51b15") == 0
+  - c2: screenshot
+  # Become Ethereal with Invisibility readied: c2's swing, which its own
+  # game plays while the server runs the state, takes nothing
+  - c2: draw-weapon
+  - c1: equip {formId: 0x32920}
+  - wait: 2
+  - c1: set-percentages {health: 1}
+  - wait: 1
+  - c1: hold-key {code: 44, ms: 300}
+  - until:
+      within: 6
+      expect:
+        - server.effects(c1).left("0x64d68") > 1
+  - c2: watch-start {bools: [IsAttacking]}
+  - c2: anim-event {name: attackStart}
+  - wait: 2
+  - c2: watch-stop
+  - assert:
+      - c2.watched_self().ever("IsAttacking")
+      - server.effects(c1).left("0x64d68") > 0
+      - server.actor(c1).healthPercentage > 0.999
+  - c2: screenshot
+  # once it has run out, the same swing from the same spot lands
+  - until:
+      within: 30
+      expect:
+        - server.effects(c1).left("0x64d68") == 0
+  - c2: watch-start {bools: [IsAttacking]}
+  - c2: anim-event {name: attackStart}
+  - until:
+      within: 6
+      expect:
+        - server.actor(c1).healthPercentage < 0.99
+  - c2: watch-stop
+  - assert:
+      - c2.watched_self().ever("IsAttacking")
+artifacts: [server.log, c1.log, c2.log, screenshots]
