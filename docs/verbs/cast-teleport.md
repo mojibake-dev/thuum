@@ -342,3 +342,10 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   change alone). Not yet seen on the lab (a straight-up move is not applied
   to a figure, docs/verbs/movement-speed.md); playtest fifteen's teleport
   item.
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Passed: a cast well past 15 m, and test 2 saw the figure blink to the
+  landing (the placement past 1024 units, fork 7769ec57, CONFIRMED at T4); a
+  short hop still glides. The vanish and appear effects are not on the other
+  screen yet (a later slice).

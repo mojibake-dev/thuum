@@ -45,8 +45,8 @@ eight a second); one charge per hit.
   function size checked). Each step HYPOTHESIS until a Frida trace on
   1.6.1170; the lab has since CONFIRMED the right hand, the one dose, the
   event with no equip event and the hook point (Measured, below), and
-  PoisonObject's arguments stay HYPOTHESIS (a person's Yes under the
-  watching trace, playtest fifteen):
+  playtest fifteen CONFIRMED PoisonObject's arguments under a person's Yes
+  (the watching trace, below):
   - Using a poison runs the per-form-type use switch (Address Library
     38001), whose ALCH case opens the box (40481) and skips its equip
     event: the engine sends no TESEquipEvent for a poison, so Skyrim
@@ -95,8 +95,10 @@ eight a second); one charge per hit.
   charge spent (its ExtraPoison through sync/inventory.ts).
 - Visual without simulation achieved by: the poison's hit shader on the
   target from MagicEffects.
-- Side effects: HYPOTHESIS (the attacker's game showing its own poison on
-  the figure as well).
+- Side effects: none seen. Playtest fifteen asked both players what the
+  poison's landing looked like on its target, and neither reported
+  anything (the attacker's game showing its own poison on the figure was
+  the open question).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -182,7 +184,8 @@ eight a second); one charge per hit.
 - Measured in playtest thirteen (2026-10-11, Eli, parity f828279f): applying
   the poison through the game's box unequipped the Steel Sword and left the
   poison in test 2's inventory; the server's log has no line for the poison
-  (none of its paths logs at info). HYPOTHESIS, a reading of the code: the
+  (none of its paths logs at info). HYPOTHESIS (RESOLVED by the verb,
+  Measured below), a reading of the code: the
   game used the poison up and marked the sword, the server's inventory
   record still held the poison and the sword without it, and the next
   inventory sync put the poison back and unequipped the sword
@@ -205,7 +208,7 @@ eight a second); one charge per hit.
   re-equip loop. The server's log has no line for it: the poison's OnEquip
   info line (fork b3682b71) never fired, so the client reports nothing
   when the game poisons a weapon (not an equip event). That fits the
-  HYPOTHESIS above: the server's inventory keeps the poison and an
+  HYPOTHESIS above (RESOLVED): the server's inventory keeps the poison and an
   unpoisoned sword, and each sync puts the game back. Next (static, then
   dynamic): the engine function that applies a poison to a stack
   (ExtraPoison, CommonLibSSE-NG include/RE/E/ExtraPoison.h) for the
@@ -230,8 +233,8 @@ eight a second); one charge per hit.
   step). CONFIRMED: the right hand and one dose without perks. The trace
   logged the opener and the answer but not the callback, PoisonObject or
   the event: Frida's hooks do not fire for calls made inside another hook,
-  so those stay HYPOTHESIS until a person answers under the watching
-  copy. No equip event during the poisoning (consistent with the read).
+  so those stayed HYPOTHESIS until a person answered under the watching
+  copy (playtest fifteen, CONFIRMED). No equip event during the poisoning (consistent with the read).
   Not reproduced here: playtest fourteen's equip loop (the sword stayed
   poisoned and worn 12 s later); the swing landed no hit, so no dose was
   spent. A scenario can poison a weapon once lab-api can start a Frida
@@ -255,9 +258,9 @@ eight a second); one charge per hit.
   41044's send), the right hand and one dose, the event with no equip
   event, the game's dose spent on the hit and its ExtraPoison gone (the
   attacker's game shows its own poison spent), and the server's mark
-  carried by the hit. Still HYPOTHESIS, unread under a hook: the callback's
-  own steps (PoisonObject's arguments), since Frida's hooks do not fire on
-  calls made inside another hook.
+  carried by the hit. Unread under a hook then, since Frida's hooks do not
+  fire on calls made inside another hook: the callback's own steps
+  (PoisonObject's arguments), CONFIRMED at playtest fifteen (below).
 - The box (x-poison-probe4, -probe5): close-menu posts kHide, which
   MessageBoxMenu ignores, and neither a tapped Enter nor E answered it, so
   an open box held c2 in menu mode and its swing never came. The trace now
@@ -296,9 +299,12 @@ the poison until then); built 2026-10-12 on fork m2-poison.
       full T2, on be69bf68, found the poison verb in magic-effects'
       session, whose poison moved to this one)
 - [ ] T3 scenario green, no HYPOTHESIS tags: b-poison green by path twice
-      and in the merge sweep (thuum de09fdc, awaiting Eli's review); left
-      HYPOTHESIS: PoisonObject's arguments under a person's Yes and the
-      attacker's look at its target (Impose), both playtest fifteen's
+      and in the merge sweep (thuum de09fdc; its playtest item passed in
+      fifteen, the approval Eli's); the mechanics' last tags answered at
+      playtest fifteen (PoisonObject's arguments CONFIRMED, the target's
+      look none); open: the poisoned sword's look on the figure and in its
+      owner's hand (Playtest fifteen, HYPOTHESIS until the lab reproduces
+      it)
 - [x] ledger and suppression registry updated: no native added (Skyrim
       Platform's sink is an event, not a Papyrus native); the suppression
       is magic-effects' (a poison from another's game lands nothing on the
@@ -307,3 +313,32 @@ the poison until then); built 2026-10-12 on fork m2-poison.
       scenario on m2-visuals be69bf68, 40 of 40 green, and T2 green on
       11c126b9, which adds a difftest session change alone), m2-visuals
       stacked on m2-poison
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Passed, all three checks: test 2 poisoned its Steel Sword through the
+  game's box and kept swinging it as a sword (fourteen's punches and equip
+  loop gone), the poison left the inventory; the poisoned hit ran the
+  poison on test 1; the next hit carried the sword's share alone. Server:
+  "MpActor::ApplyPoison ff000001 - poison 58cfb on 13989, 1 dose(s)"
+  (19:43:57 UTC), the hit 4.8 s later for 7.83 with "its effects run on
+  ff000000, a dose spent", test 1 at 0.346 fifteen seconds on (the sword's
+  7.8 and about 58 of the poison's 60), the second hit 7.83 and no poison.
+  Test 1 poisoned and hit test 2 the same way, twice (19:44:51, 19:45:54).
+- CONFIRMED under a person's Yes (lab/frida/poison-trace.js on test 2,
+  watching only): the opener (40481), the callback (40482) with 2 from the
+  game's own menu (not the trace's), PoisonObject (16024) on the Steel
+  Sword (0x13989) with DB03Poison (0x58CFB) and 1 dose, the PoisonedWeapon
+  event's send (41044), and no equip event during the poisoning.
+- Found: rotfern's sword left her figure on test 2's screen while it
+  carried her poison. Test 2's trace counts the equip events in test 2's
+  game: six at each of the server's marks of her sword (19:44:51 and
+  19:45:54, by the trace's clock less its 1.8 s lead), so test 2's game
+  applied her figure's equipment again at each mark and lost the sword in
+  it; a later read (dump-state through lab-api's probe) had the figure
+  holding it again. Later still, after a relaunch and a server restart,
+  the sword showed on her figure and not in rotfern's own hand, though both
+  games' Papyrus read it equipped in her right hand (GetEquippedObject 1 =
+  0x13989): a desync of the weapon's look, HYPOTHESIS, to reproduce on the
+  lab before a fix (the figure's right hand and both screens, before and
+  after a mark and a spent dose).

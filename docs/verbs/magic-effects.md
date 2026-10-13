@@ -506,3 +506,24 @@ fifteen.
   from the player at its hit: merged on fork parity 11c126b9 (2026-10-13
   05:31: the sweep of every scenario on m2-visuals be69bf68, 40 of 40 green,
   and T2 green on 11c126b9, which adds a difftest session change alone).
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Candlelight, then Oakflesh, cast by test 1: the check ticked without a
+  note.
+- Invisibility: test 1's figure stayed visible on test 2's screen (known).
+  Found: once test 1 waited, Invisibility ended in test 1's game, and its
+  look stayed on the figure in test 2's game. The figure's copy of the spell
+  (the relayed Self cast, 31b56fc9) runs on its own clock in the observer's
+  game, and the caster's wait (a skip of game time) never reaches it. The
+  self-cast slice: the server holds a Self spell's effects and their time
+  (MagicEffects), and the figure's copy ends when the server's does.
+- b-magic-restart's check was inconclusive: test 1 drank the Fortify Health
+  at 13:16:41 PDT (test 1's Skyrim Platform log: a potion's
+  TESSpellCastEvent, logged as "spell not a MagicItem"), the restart came 37
+  s later (by hand, from chat), the server listened 12 s after it and logged
+  test 1 in 24 s after it: 61 s from the drink, past the effect's 60. After
+  the login test 1's change form held no effect and the server's maximum
+  health read 100. To redo with the restart fired when the server records
+  the drink.
+- Become Ethereal: docs/verbs/shouts.md, Playtest fifteen.

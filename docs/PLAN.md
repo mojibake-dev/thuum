@@ -991,14 +991,31 @@ it carries a HYPOTHESIS tag.
     - damage another actor deals the player counts only on the server:
       locally it counts nothing (ADR-028), so a figure's shout or spell no
       longer hurts its target twice (docs/verbs/shouts.md).
-  - Next, from Eli's spell visuals and tonight's reads: the self-cast
-    slice (the server runs a self spell's effects on its caster:
-    Invisibility hidden, Become Ethereal spared, Oakflesh's armor; wards'
-    absorption), the pushes and paralysis decided by the server as
-    staggers are (Unrelenting Force's ragdoll), the spell relay sent as the
-    server resolved it (fork m2-relay 184bcc6f: a cast naming 0x14 made
-    neighbours cast; docs/verbs/spell-cast.md), the teleport's vanish and
-    appear on observers, then Apocalypse (ADR-029) and headshots.
+  - Playtest fifteen (2026-10-13, Eli, on 11c126b9; each verb doc's
+    "Playtest fifteen"): passed poison end to end (its trace CONFIRMED the
+    game's poisoning under a person's Yes), Fire Breath on the other
+    screen with the server's damage alone, the silent relaunch, dual
+    casting, the teleport's blink past 15 m, the crouch, stagger both
+    ways, TCL and tim. Found: Unrelenting Force never reported by the
+    shouter's client (its hits refused, no shout drawn or counted); the
+    server's shout recovery without slack (a shout refused 18 ms early);
+    a poisoned sword's look lost on the figure and later in its owner's
+    hand; no concentration pose on figures; Invisibility's look outliving
+    a wait on the figure; Become Ethereal not sparing damage; TCL's
+    figure pushed out of the ground; the block-and-stagger look on the
+    figure (small). Inconclusive: b-magic-restart's check (the restart
+    came after the effect ran out).
+  - Next, toward playtest sixteen: Unrelenting Force's report and the
+    recovery's slack, the poisoned sword's look, the self-cast slice (the
+    server runs a self spell's effects on its caster: Invisibility hidden
+    and ended with its time, Become Ethereal spared, Oakflesh's armor;
+    wards' absorption), the spell relay sent as the server resolved it
+    (fork m2-relay 1aa96a8f, docs/verbs/spell-cast.md), a server-side lab
+    command for shouts and words in place of the assist's console; then
+    the concentration pose, TCL on observers, the pushes and paralysis
+    decided by the server as staggers are (Unrelenting Force's ragdoll),
+    the teleport's vanish and appear on observers, then Apocalypse
+    (ADR-029, Ghostwalk's filter first) and headshots.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
   visible to an observer), `b-magic-restart` (active effects survive a
   restart with remaining duration).

@@ -488,3 +488,18 @@ m1-tcl from parity 89db8732:
 - [x] the merge sweep, then fork parity: on fork m1-tcl 90294654, 30 of
       30 green with no rerun (runs 20261009-210818 to -222623, a-console
       first); fork parity fast-forwarded to 90294654, 2026-10-09
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Passed: tcl on test 1, through a wall, tcl again (the server:
+  "ConsoleCommands: ff000000 toggles its game's collision" at 20:13:37 and
+  20:14:24 UTC).
+- Found: through the ground, test 1's figure on test 2's screen rose back to
+  the surface. The toggle is the caller's game's alone (R3 the state), so
+  test 2's game keeps the figure's collision and pushes it out of the
+  ground. A fix tells observers of the toggle, so a figure follows its
+  reports through geometry (R0 who, as now; the state relayed).
+- The playtest's shout and word lines were typed into both games through
+  lab-api's playtest assist (thuum 20199c7). Eli judged it the wrong shape:
+  a server-side lab command is to replace it, and console to leave the
+  assist again.

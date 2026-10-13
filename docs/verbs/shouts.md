@@ -504,3 +504,33 @@ snippets).
   nothing: merged on fork parity 11c126b9 (2026-10-13 05:31: the sweep of
   every scenario on m2-visuals be69bf68, 40 of 40 green, and T2 green on
   11c126b9, which adds a difftest session change alone).
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Passed: test 1's Fire Breath left its figure toward test 2 on test 2's
+  screen and took about 50, once (the server: "shouts 3f9ea, variation 0
+  (spell 3f9eb); recovers in 30.0 s" at 19:49:45 and 19:53:59 UTC); turned
+  away, the fire went where test 1 faced. A silent relaunch passed: no word-
+  of-power notice at the login, and Fire Breath still shouted.
+- Found: Unrelenting Force (its three words recorded at 19:58 by the
+  console) reached the server only as hits: "E_SPELL_NO_CAST: ff000000 hits
+  ff000001 with spell 13f3a 352 units away; refused", twice at 20:00:54 and
+  twice at 20:07:06 (after a relaunch), and no line of a UF shout, accepted
+  or refused. Test 1's client never reported it: shoutService reports a
+  release (MT_BreathExhale*) only within chargeMs (3000 ms) of shoutStart,
+  and only when the voice recovery names one of the shout's three variations
+  (else E_SHOUT_UNREAD, in the game's console). With no cast the server
+  counted nothing, relayed nothing (test 2 saw no shout) and nothing pushed.
+  The lab's Unrelenting Force (x-uf-ethereal, a 2 s hold) was reported;
+  HYPOTHESIS: a person's hold, or rotfern's recovery, falls outside those
+  windows. To reproduce on the lab: holds of 1.5, 3.5 and 6 s, and the
+  console's history for E_SHOUT.
+- Found: one of test 2's Become Ethereal shouts was refused at 19.98 s of
+  its 20.0 s recovery (accepted 20:06:04.608, then "E_SHOUT_RECOVERY ...
+  refused" at 20:06:24.590): the game let it go and the server's clock had
+  18 ms left. The recovery check needs the network's slack, as the other
+  validators have one; a refused shout is not relayed, so test 1 saw no
+  ghost that time, which may be the look Eli found unreliable.
+- Found: Become Ethereal did not stop damage. The server still damages an
+  ethereal player when a hit is reported (the self-cast slice,
+  docs/verbs/magic-effects.md).

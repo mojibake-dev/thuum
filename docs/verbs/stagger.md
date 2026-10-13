@@ -388,3 +388,14 @@ promoted.
   it by 0.24" on a 12.99 hit, c2 staggering in its own game (IsStaggering)
   and on c1's screen (the figure took staggerStart). Eli's own install
   needs the same file (the server checks a plugin's size and CRC).
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Passed, both ways: the server's "attackpowerstartinplace on ff000001
+  staggers it by 0.24" at 20:06:33 and 20:06:36 UTC, and test 2's power
+  attack on test 1 at 20:10:20. Blocked: test 1's power attacks on test 2's
+  raised shield at 20:11:08 and 20:11:13, blocked share 0.331, stagger
+  0.109.
+- Found (small): with test 2's shield raised, its block-and-stagger
+  animation shows whole on test 2's own screen and not on the figure on test
+  1's.

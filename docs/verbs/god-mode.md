@@ -178,3 +178,8 @@ first run) and the joint merge sweep (scratchpad merge-m2-god.sh).
       a-melee-reach's red green twice, a watch item by ADR-027
       (docs/verbs/magic-effects.md, Status); fork parity fast-forwarded to
       35acc275, both clones' clean-m1 promoted
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Passed: tim twice on test 1, the second turned it off, and test 1 could be
+  killed again (b-god's playtest item).

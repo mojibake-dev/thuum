@@ -127,3 +127,8 @@ unchecked (the next movement verb).
   disagrees, and merged on fork parity 11c126b9 (2026-10-13 05:31: the sweep
   of every scenario on m2-visuals be69bf68, 40 of 40 green, and T2 green on
   11c126b9, which adds a difftest session change alone).
+
+## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
+
+- Passed: with magic readied, test 1's crouch and its stand showed on test
+  2's screen within about a quarter second.
