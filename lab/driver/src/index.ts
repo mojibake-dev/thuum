@@ -199,7 +199,7 @@ type WatchedSelf = {
   health: number[][];
   events: Array<[number, string]>;
   casts: Array<[number, number]>;
-  hits: Array<[number, number, number]>;
+  hits: Array<[number, number, number, number, number]>;
   taken: Array<[number, number, number]>;
   effects: Array<[number, number, number]>;
   bools: Record<string, Array<[number, boolean]>>;
@@ -434,11 +434,18 @@ on("spellCast", (e) => {
   }
 });
 
+// A hit's projectile base and its flags (power 1, sneak 2, bash 4, blocked
+// 8) ride along: a magic stream's hit event comes twice in a frame
+// (skymp5-client hitService.ts drops the second by time, which also drops a
+// second hand's hits, docs/verbs/spell-cast.md), and the copies' fields are
+// what can tell the double from the other hand.
 on("hit", (e) => {
   if (!watching) return;
   const source = e.source ? e.source.getFormID() : 0;
   if (e.aggressor && e.aggressor.getFormID() === 0x14 && watching.self.hits.length < WATCH_SELF_MAX) {
-    watching.self.hits.push([watchedMs(), e.target ? e.target.getFormID() : 0, source]);
+    const projectile = e.projectile ? e.projectile.getFormID() : 0;
+    const flags = (e.isPowerAttack ? 1 : 0) | (e.isSneakAttack ? 2 : 0) | (e.isBashAttack ? 4 : 0) | (e.isHitBlocked ? 8 : 0);
+    watching.self.hits.push([watchedMs(), e.target ? e.target.getFormID() : 0, source, projectile, flags]);
   }
   if (e.target && e.target.getFormID() === 0x14 && watching.self.taken.length < WATCH_SELF_MAX) {
     watching.self.taken.push([watchedMs(), e.aggressor ? e.aggressor.getFormID() : 0, source]);
@@ -456,13 +463,15 @@ on("magicEffectApply", (e) => {
 // docs/verbs/stagger.md, docs/verbs/shouts.md, docs/verbs/marksman.md: which
 // bow events the target's game plays on the shooter's figure;
 // docs/verbs/movement-relay.md: when the figure's SneakStop arrives against
-// its player's own, the crouch fix's delay):
+// its player's own, the crouch fix's delay; docs/verbs/spell-cast.md: which
+// of its player's cast events reach a figure, a concentration cast's start
+// among them):
 // one hook per pattern over the figures' range, filtered in native (rule 9)
 // and added at load, before skymp5-client's services add theirs, so each sees
 // the name its sender gave: deathService blanks every figure's staggerStart,
 // and Skyrim Platform hands later hooks the blanked name. Recorded at leave,
 // with whether the graph took the event once every hook had run.
-for (const pattern of ["stagger*", "recoil*", "shout*", "bow*", "Bow*", "arrow*", "Arrow*", "Sneak*", "sneak*"]) {
+for (const pattern of ["stagger*", "recoil*", "shout*", "bow*", "Bow*", "arrow*", "Arrow*", "Sneak*", "sneak*", "MRh_*", "MLh_*", "MLH_*", "BeginCast*"]) {
   hooks.sendAnimationEvent.add({
     enter: () => {},
     leave: (ctx) => {
