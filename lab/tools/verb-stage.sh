@@ -22,7 +22,7 @@ cd "$(dirname "$0")/../.."
 branch=${1:?fork branch}; shift
 probes=("$@")
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
-fork=skymp
+fork=${FORK_DIR:-skymp}   # the fork checkout to fetch, read and push from; a worktree without the submodule names the shared one
 srv_ssh="ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -J root@core.gaussing.tv eli@10.10.70.10"
 git -C "$fork" fetch -q origin "$branch"
 sha=$(git -C "$fork" rev-parse "origin/$branch"); sha8=${sha:0:8}

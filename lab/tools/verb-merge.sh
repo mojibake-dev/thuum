@@ -18,7 +18,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 branch=${1:?fork branch}; shift
-fork=skymp
+fork=${FORK_DIR:-skymp}   # the fork checkout to fetch, read and push from; a worktree without the submodule names the shared one
 git -C "$fork" fetch -q origin "$branch" parity
 head=$(git -C "$fork" rev-parse --short=8 "origin/$branch")
 echo "== verb-merge $branch ($head) $(date +%H:%M:%S)"
@@ -61,12 +61,14 @@ runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"]
 watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1]))["watch"]))' "$setfile")
 
 echo "== 4. parity -> $branch $head $(date +%H:%M:%S)"
+old_parity=$(git -C "$fork" rev-parse origin/parity)
 git -C "$fork" push -q origin "origin/$branch:parity"
 git -C "$fork" fetch -q origin parity
 [ "$(git -C "$fork" rev-parse --short=8 origin/parity)" = "$head" ] || { echo "== parity did not land on $head" >&2; exit 1; }
-echo "   fork parity = $head"
+echo "   fork parity = $head (was ${old_parity:0:8})"
 
-client_changed=$(git -C "$fork" diff --name-only "origin/parity~1" "origin/$branch" -- skymp5-client skyrim-platform skymp-wire/crates/wire-client-ffi 2>/dev/null | head -1 || true)
+# what the branch changed on the client side since the parity it grew from
+client_changed=$(git -C "$fork" diff --name-only "$old_parity" "origin/$branch" -- skymp5-client skyrim-platform skymp-wire/crates/wire-client-ffi 2>/dev/null | head -1 || true)
 promote=${PROMOTE:-}
 [ -n "$promote" ] || { [ -n "$client_changed" ] && promote=1 || promote=0; }
 if [ "$promote" = 1 ]; then
