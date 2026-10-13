@@ -59,6 +59,22 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   REL::RelocateMember is (SE and AE, VR), and a RelocateMemberIfNewer shifts
   every field comment of its struct by the newer start.
 
+- poison-trace.js: the game's poisoning of a weapon (docs/verbs/poison.md):
+  the poison box's opener and its callback, InventoryEntryData::PoisonObject,
+  the PoisonedWeapon event's send, and the equip event's send, which a
+  poisoning never reaches. With params {ANSWER_YES: true} (a scenario's frida
+  step) it answers the box itself, calling the callback with Yes on the
+  opener's return. Address Library ids 40481, 40482, 16024, 41044, 38386,
+  1.6.1170 only.
+
+- effect-stack-trace.js: whether two streams of one spell from one caster
+  both work on one target (docs/verbs/spell-cast.md, dual casting). Hooks
+  ValueModifierEffect's Update and ModifyActorValue through its vtable
+  (Address Library 206143) and prints, for one spell (params {SPELL}, Flames
+  by default), each effect object as it first updates (hand, target,
+  magnitude) and every 500 ms each effect's call counts. Offsets are
+  CommonLibSSE-NG's, cited per field; 1.6.1170 only.
+
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as
 frida/<client>-<script>.jsonl; one started outside a run is fetched by the next
