@@ -445,7 +445,13 @@ health message. A second red within two sweeps makes it a bug.
   got the release alone; a fire-and-forget cast's BeginCast and its fire
   come seconds apart, and both went. Fork m2-visuals 4cb2082e sends the
   events the graph took in order, one a frame (a burst keeps its newest
-  eight); x-dual-cast2's watch of the figure is to show the start arrive.
+  eight). CONFIRMED (x-dual-cast2 20261013-072430, m2-visuals 140ed04d's
+  client): c2's watch saw the figure get MRh_SpellAimedConcentrationStart
+  and its release one frame apart (237 and 252 ms), then the left hand's
+  (486 and 504 ms); its graph took the left hand's and refused the
+  right's, and c2's screenshot mid-cast shows the figure with both hands
+  raised and burning, where x-dual-cast's showed one stream from a hand at
+  its side. Why the graph refused the right hand's start is open.
 - Dual casting (Eli, 2026-10-12: "we'll also have to account for dual
   casting as well"): unread today on both ends. The client reports
   isDualCasting (magicSyncService.ts:113), but the server never reads it, so
@@ -535,7 +541,13 @@ health message. A second red within two sweeps makes it a bug.
     other hand's hit is what the lab watch now records (each hit's
     projectile and flags, lab-driver b915f1b, probe x-dual-cast2): a time
     window alone would also drop the second hand of a two-button press,
-    whose hits fall in the same frame as the first's;
+    whose hits fall in the same frame as the first's. Read
+    (x-dual-cast2): a double carries the same target, spell, projectile
+    (0x12FCF) and flags as its original, 0 to 1 ms apart, so nothing but
+    the frame tells them apart; the client keeps every other copy of a
+    caster, target and spell within a frame (m2-visuals 7da7210f), and a
+    double that slips across a frame's edge adds nothing to a stream the
+    server counts by its time;
   - the server counts each hand's stream on its own clock (a hit claims the
     open stream of its spell with the oldest counted hit; one hand that
     misses can then overcount, bounded by MAX_TICK_MS); T0 for two hands,

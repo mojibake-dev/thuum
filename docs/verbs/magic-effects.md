@@ -434,3 +434,51 @@ ARTO: a client native if a playtest wants it), the sweep.
       (-051934, -052147), a watch item by ADR-027 (docs/verbs/
       melee-reach.md); fork parity fast-forwarded to 35acc275, both clones'
       clean-m1 promoted
+
+## Spell visuals to confirm (Eli, 2026-10-13)
+
+Eli: "there's a number of spell visuals we'll need to confirm. first that
+comes to mind is like, ghost walk and invisibility ... and ofc ... does
+unrelenting force ragdoll". The records, read with lab/esm.py from
+Skyrim.esm (MGEF DATA by UESP's layout: type at 0x40, actor value 0x44,
+hit shader 0x20, light 0x18, cast type 0x50, delivery 0x54):
+
+| Spell | SPEL | Its effect (MGEF) | Archetype | What to confirm |
+| --- | --- | --- | --- | --- |
+| Invisibility | 0x27EB6 | 0x1EA6A InvisibillityFFSelf | 11 Invisibility (AV 54), hit shader 0x2DF92 | the figure vanishes on the other screen |
+| Oakflesh | 0x5AD5C | 0x51B15 ArmorFFSelf0 | 34 Peak Value Mod (AV 39 DamageResist), hit shader 0x56AC9 | the skin on the figure; the armor in the server's damage |
+| Candlelight | 0x43324 | 0x1EA6C LightFFSelf | 12 Light, light 0x41F09 | the other player sees the light |
+| Paralyze | 0x5AD5F | 0x1EA6E ParalysisFFAimed, 0xA44C0 StaggerPushFFAimed | 21 Paralysis (AV 53), 33 Stagger | the target drops and stays down in its own game |
+| Lesser Ward | 0x13018 | 0x14C WardConcSelf0, 0xFCC62 ShieldConcSelf | 32 Accumulate Magnitude (AV 63 WardPower), 34 | a ward absorbs a spell's damage on the server |
+| Healing Hands | 0x4D3F2 | 0x1CEA5 RestoreHealthConcActor | 0 Value Mod (Health), delivery 3 target actor | the target's health rises on the server |
+| Become Ethereal (1 word) | 0x5F6EB (SHOU 0x32920) | 0x64D68 VoiceMakeEthereal | 41 Etherealize, hit shader 0x64D67 | the ghost look on the figure; no damage taken |
+| Unrelenting Force (3 words) | 0x13F3A (SHOU 0x13E07) | 0x7F82F, 0x7F82E VoiceUnrelentingForceEffect03/02; 0xEA075 | 33 Stagger; 0 Value Mod (Health) | the push lands in the target's own game |
+| Frostbite | 0x2B96B | 0x13CAA FrostDamageConcAimed, 0xB729D FrostSlowConcAimed | 5 Dual Value Mod (Health), 34 (AV 30 SpeedMult) | the slow in the target's game, within the movement budget |
+
+What the server does today (code read, MpActor::ApplyEffects and
+EffectFactsOf): it runs effects of three archetypes only (Value Mod, Peak
+Value Mod, Dual Value Mod) and only from a hit or a drink; a spell a player
+casts on itself is recorded as a cast and relayed, and its effects run in
+the caster's game alone (OnSpellCast's "apply magic effects if this is not
+a fireball-like spell" TODO). So a self spell's look reaches the other
+screen only as far as the relayed cast draws it on the figure, and an
+Etherealize, Invisibility or Paralysis is no server state: the server
+would still damage an ethereal player. Probes x-self-visuals,
+x-target-spells and x-uf-ethereal read each row; the rows the probes find
+missing become the self-cast slice (the server runs a self spell's effects
+on its caster, and every game sees them as MagicEffects), after playtest
+fifteen.
+- x-self-visuals (20261013-073054, m2-visuals 140ed04d): c1 cast
+  Candlelight, Oakflesh and Invisibility, each relayed (the server relays
+  every cast of an equipped spell). On c2's screen the figure held only the
+  readied spell's hand glow: no light over it, no skin, and fully visible
+  after Invisibility, while c1's own first-person hands shimmered invisible.
+  The relayed cast had nothing to land on: a self spell's cast names no
+  target, and castSpellImmediate launches a non-concentration spell as a
+  projectile (Skyrim Platform MagicApi.cpp). Since m2-visuals 31b56fc9 a
+  spell of Self delivery is cast on the figure itself (MagicCaster's
+  CastSpellImmediate with the actor as its target), so the observer's own
+  engine draws it there as the caster's did; the second staging's
+  x-self-visuals reads it. The engine's state on the figure (invisible,
+  ethereal) is a look in that game alone: the server still neither hides
+  an invisible player nor spares an ethereal one (the self-cast slice).
