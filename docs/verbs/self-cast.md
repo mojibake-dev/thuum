@@ -83,7 +83,14 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   Oakflesh's skin 0x56AC9: Skyrim.esm, magic-effects.md's table).
 - Side effects: HYPOTHESIS (the caster's own game plays the server's shader
   beside its engine's own look; magic-effects' rule for the player's own
-  effects).
+  effects). Known: the caster's own game also holds the server's sum of a
+  Self spell's buff beside its engine's own (MagicEffects' modifiers, which
+  the player's game adds to its values for the potions its engine is kept
+  from drinking), so Oakflesh's armor shows twice in the caster's own armor
+  rating while it runs; the server's damage reads the server's record alone
+  and an actor's damage counts nothing in the player's game (ADR-028), so
+  it is a number on the caster's screen, to split out (the modifiers of the
+  caster's own spells left out of its own game's sums) in a later pass.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
