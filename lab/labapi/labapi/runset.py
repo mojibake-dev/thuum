@@ -128,7 +128,7 @@ class RunSets:
         if scenarios == "all":
             wanted = known
         else:
-            wanted = [str(x) for x in scenarios]
+            wanted = list(dict.fromkeys(str(x) for x in scenarios))  # once each, in the order given
             missing = [x for x in wanted if x not in known]
             if missing:
                 raise RunSetError(f"E_RUNSET_SCENARIO: not in {self.scenarios_dir}: {', '.join(missing)}")

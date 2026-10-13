@@ -1,0 +1,11 @@
+# ADR-030's merge gate (docs/DECISIONS.md). `just verb-merge <branch> <scenario>...`
+# runs `always`, the scenarios named on its command line (the merging verb's own
+# and those of the verbs the branch touched), and `watch`: the scenarios with an
+# open ADR-027 watch item, each named with the verb doc that holds the item; take
+# one out in the commit that closes its item. The full sweep is the nightly's.
+always: [smoke-two-players, a-restart-persistence]
+watch:
+  - a-melee-reach      # docs/verbs/melee-reach.md, red once in the m2-god sweep (2026-10-10)
+  - a-racemenu         # docs/verbs/racemenu-sync.md, a figure's head scale after a reconnect (2026-10-09)
+  - a-movement-speed   # docs/verbs/movement-speed.md, the held run's distance on the RaceMenu client stack (2026-10-08)
+  - b-spell            # docs/verbs/spell-cast.md, red once in the m2-stagger sweep (2026-10-11)

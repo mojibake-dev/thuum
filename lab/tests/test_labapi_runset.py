@@ -148,6 +148,12 @@ class RunSetTests(RunTests):
         rs = self.runsets
         self.assertEqual(rs.list_scenarios(), sorted(p.stem for p in self.scen.glob("*.yaml")))
 
+    def test_a_scenario_named_twice_runs_once(self):
+        rid = self._start(["t2-green-one", "t2-green-one", "t2-green-two"])
+        body = self._wait(rid)
+        self.assertEqual(body["scenarios"], ["t2-green-one", "t2-green-two"])
+        self.assertEqual(body["verdict"], "green")
+
     def test_the_nightly_starts_once_when_due_and_the_lab_is_idle(self):
         rs = self.runsets
         rs.s = dataclasses.replace(self.settings, nightly_sweep_utc="10:30", nightly_quiet_s=1800.0)

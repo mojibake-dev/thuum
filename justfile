@@ -419,6 +419,25 @@ client-bringup vmid base client="c1" profile="1":
     just client-identity {{vmid}} {{client}} {{profile}}
     just client-launch-test {{vmid}}
 
+# --- the verb loop's shape (ADR-030; lab/tools/runset.sh, verb-merge.sh, verb-stage.sh) ---
+
+# A run set through lab-api: every committed scenario, or the ones named, one after another with the lab-fault and ADR-027
+# reruns applied by lab-api; the set's record lands in lab/results/runsets/<id>.json; exit 0 for green or watch.
+sweep name="sweep" *scenarios:
+    @lab/tools/runset.sh "{{name}}" {{scenarios}}
+
+# A verb branch's merge the ADR-030 way: deploy-srv, the full T2 on the branch's image (T2=skip to cite one), the gate
+# (lab/gate.yaml's always, the scenarios named, the watch items) as one run set, fork parity fast-forwarded, both clones
+# promoted when the branch changed the client (PROMOTE=1 or 0 to decide), a dated docs/LOG.md entry to finish by hand.
+verb-merge branch *scenarios:
+    @lab/tools/verb-merge.sh "{{branch}}" {{scenarios}}
+
+# A verb branch staged on the lab: its Windows build and fork pipeline waited for (LABAPI=<thuum pipeline> for a lab-api
+# image too), the lab tree deployed, the server on the branch's image, the client and driver on both clones, both
+# snapshotted as clean-m1-next, then the probes named (scenario ids or paths).
+verb-stage branch *probes:
+    @lab/tools/verb-stage.sh "{{branch}}" {{probes}}
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.
