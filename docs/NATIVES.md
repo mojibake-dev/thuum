@@ -642,7 +642,7 @@ Status meanings:
 | `Form.SendModEvent` (method) | missing |  |  |  |
 | `Form.SetGoldValue` (method) | missing |  |  |  |
 | `Form.SetName` (method) | missing |  |  |  |
-| `Form.SetPlayerKnows` (method) | missing |  |  |  |
+| `Form.SetPlayerKnows` (method) | missing | R3 | Not on the server VM yet. The server sends it to a player's own client as an SpSnippet after every login, for each known word in its record: the word's known flag without Game.TeachWord's word-of-power message (x-reteach-probe; docs/verbs/shouts.md). | shouts |
 | `Form.SetWeight` (method) | missing |  |  |  |
 | `Form.SetWorldModelNthTextureSet` (method) | missing |  |  |  |
 | `Form.SetWorldModelPath` (method) | missing |  |  |  |
@@ -802,7 +802,7 @@ Status meanings:
 | `Game.ShowTitleSequenceMenu` (global) | missing |  |  |  |
 | `Game.ShowTrainingMenu` (global) | missing |  |  |  |
 | `Game.StartTitleSequence` (global) | missing |  |  |  |
-| `Game.TeachWord` (global) | missing | R3 | Not on the server VM yet (a global with no player until a word wall's activation names one; the word walls' slice). The server sends it to a player's own client as an SpSnippet after an admin's TeachWord and after every login, for each known word in its record (docs/verbs/shouts.md). | shouts |
+| `Game.TeachWord` (global) | missing | R3 | Not on the server VM yet (a global with no player until a word wall's activation names one; the word walls' slice). The server sends it to a player's own client as an SpSnippet after an admin's TeachWord; a login restores a known word by Form.SetPlayerKnows instead, as TeachWord shows the game's word-of-power message (docs/verbs/shouts.md). | shouts |
 | `Game.TriggerScreenBlood` (global) | missing |  |  |  |
 | `Game.UnbindObjectHotkey` (global) | missing |  |  |  |
 | `Game.UnlockWord` (global) | missing | R3 | As Game.TeachWord, for each unlocked word in the server's record (docs/verbs/shouts.md). | shouts |
