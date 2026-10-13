@@ -13,7 +13,15 @@
 // pending poison is set (the opener sets it on the confirm path). The box
 // then stays on screen until closed, and its own answer finds nothing
 // pending. Started by hand it only watches, for a person at the box; a
-// scenario's frida step passes ANSWER_YES. Run: `just frida poison-trace.js c2`
+// scenario's frida step passes ANSWER_YES. With ANSWER_YES the box is also
+// kept from opening: neither close-menu (kHide) nor a tapped Enter or E
+// dismissed it (x-poison-probe4, -probe5), and an open box held the game in
+// menu mode, so the next swing never came. Within a second of the opener,
+// UIMessageQueue::AddMessage (Address Library 13631) asked to show
+// "MessageBoxMenu" (kShow 1) is asked to force-hide it instead (kForceHide
+// 4, CommonLibSSE-NG include/RE/U/UIMessage.h:9-15), which a menu not open
+// ignores; the menu name is a BSFixedString whose first field is its C
+// string (B/BSFixedString.h:232). Run: `just frida poison-trace.js c2`
 // while the game runs. Offsets per runtime resolved with lab/addr.py from
 // addrlib/ on 2026-10-12; the runtime is the exe's file version, as SKSE
 // reads it.
@@ -31,6 +39,7 @@ const OFFSETS = {
     poisonObject: 0x2248d0, // 16024
     sendPoisoned: 0x759c40, // 41044
     sendEquip: 0x6b0070,    // 38386
+    addMessage: 0x1af260,   // 13631
   },
 };
 
@@ -71,8 +80,27 @@ if (at === undefined) {
 } else {
   const callback = new NativeFunction(exe.base.add(at.callback), 'void', ['uint32']);
   let answering = false;
+  let hideUntil = 0;
+  if (ANSWER_YES) {
+    Interceptor.attach(exe.base.add(at.addMessage), {
+      onEnter(args) {
+        if (Date.now() > hideUntil || args[2].toInt32() !== 1) return;
+        try {
+          if (args[1].readPointer().readCString() !== 'MessageBoxMenu') return;
+        } catch (e) {
+          return;
+        }
+        args[2] = ptr(4);
+        hideUntil = 0;
+        emit({ boxKeptShut: true, tid: this.threadId });
+      },
+    });
+  }
   Interceptor.attach(exe.base.add(at.open), {
-    onEnter() { emit({ open: true, tid: this.threadId }); },
+    onEnter() {
+      if (ANSWER_YES) hideUntil = Date.now() + 1000;
+      emit({ open: true, tid: this.threadId });
+    },
     onLeave() {
       if (ANSWER_YES && !answering) {
         answering = true;
