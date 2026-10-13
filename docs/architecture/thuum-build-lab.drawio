@@ -1,0 +1,1103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" agent="thuum generator" version="24.7.17" type="device" compressed="false">
+  <diagram id="thuum-b1" name="1 Repos and CI">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1415" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="b1-0" />
+        <mxCell id="b1-1" parent="b1-0" />
+        <mxCell id="b1-title" value="&lt;b&gt;Repos and CI: where the code lives, what builds it, where each artifact goes&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="Baseline: fork mojibake-dev/skymp at parity c918a7a1, fork branches m2-poison (40ed43a5, on parity) and m2-visuals (0f4e3b75, on m2-poison) in flight, 2026-10-13 (heads at drawing time). GitLab on the estate is canonical for both repositories and runs their pipelines on one runner, sky-ci; GitHub mirrors both and builds the fork's Windows client. Hover a shape for its source." tooltip="Source: git rev-parse and git merge-base in skymp/ (origin/parity c918a7a1, origin/m2-poison 40ed43a5, origin/m2-visuals 0f4e3b75); memory thuum-m2-poison-visuals.md; docs/DECISIONS.md ADR-016" id="b1-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-1">
+            <mxGeometry x="20" y="50" width="1190" height="55" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-1">
+          <mxGeometry x="1230" y="14" width="570" height="196" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-lt0" value="Lab and CI: the runner, lab-api, lab-driver, the lab's VMs" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="46" y="26" width="230" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="10" y="64" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-lt1" value="Rust: the skymp-wire jobs" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="46" y="62" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="10" y="87" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-lt2" value="C++ core: the server image and its T0" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="46" y="85" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="10" y="110" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-lt3" value="Skyrim Platform, skymp5-client: the Windows client build" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="46" y="108" width="230" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-l4" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="10" y="146" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-lt4" value="Images, artifacts and files on disk" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="46" y="144" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-l5" value="" style="whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#8C8C8C;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="10" y="169" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-lt5" value="Defined, but off" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="46" y="167" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-ea0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="290" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-eb0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="320" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-leg-ea0" target="b1-leg-eb0">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-leg-rt0" value="push, trigger, or a recipe that moves files" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="326" y="26" width="234" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-ea1" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="290" y="72" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-eb1" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="320" y="72" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-leg-ea1" target="b1-leg-eb1">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-leg-rt1" value="an artifact or an image written or read" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="326" y="62" width="234" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-s2" value="" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="b1-leg">
+          <mxGeometry x="290" y="87" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-rt2" value="dashed outline: M2, in flight" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="326" y="85" width="234" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-p3" value="&lt;b&gt;lint&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-leg">
+          <mxGeometry x="290" y="111" width="39" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-rt3" value="the CI stage a job runs in" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="335" y="108" width="225" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-s4" value="" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="290" y="133" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-leg-rt4" value="a trap the session met" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-leg">
+          <mxGeometry x="326" y="131" width="234" height="21" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;GitLab on the estate (VM 110), gitlab.gaussing.tv: canonical for both repositories (ADR-016)&lt;/b&gt;" tooltip="Source: docs/DECISIONS.md ADR-016; lab/tools/glab.py:9-10 (API at https://gitlab.gaussing.tv/api/v4, projects thuum 6 and skymp 7)" id="b1-gl">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-1">
+            <mxGeometry x="970" y="240" width="830" height="188" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;root/thuum, project 6&lt;/b&gt;&lt;br&gt;The superproject: docs/, lab/ (lab-api, lab-driver, gamemode, scenarios, tools) and the justfile; branch main. Submodules skymp (the fork, branch parity) and CommonLibSSE-NG." tooltip="Source: CLAUDE.md (Workspace layout); .gitmodules; lab/tools/glab.py:9-10 (PROJECTS)" id="b1-p6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-gl">
+            <mxGeometry x="10" y="26" width="290" height="152" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;root/skymp, project 7: the fork (ADR-015, ADR-016)&lt;/b&gt;" tooltip="Source: docs/DECISIONS.md ADR-015 (skymp-wire lives in the fork), ADR-016 (branches); lab/tools/glab.py:9-10" id="b1-p7">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-gl">
+            <mxGeometry x="320" y="26" width="500" height="152" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;main&lt;/b&gt;&lt;br&gt;Mirrors upstream skyrim-multiplayer/skymp; never committed to directly." tooltip="Source: docs/DECISIONS.md ADR-013, ADR-016; git remote -v in skymp/ (upstream)" id="b1-br0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-p7">
+            <mxGeometry x="10" y="25" width="235" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;parity c918a7a1&lt;/b&gt;&lt;br&gt;Ours: the integration branch, with skymp-wire/. A verb's merge fast-forwards it." tooltip="Source: docs/DECISIONS.md ADR-015, ADR-016; git rev-parse origin/parity in skymp/; session scratchpad merge-m2-visuals.sh:75 (git merge-base --is-ancestor, then a plain push)" id="b1-br1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-p7">
+            <mxGeometry x="255" y="25" width="235" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;m2-poison 40ed43a5&lt;/b&gt;&lt;br&gt;Stacked on parity: the poison verb." tooltip="M2, in flight. Source: git merge-base --is-ancestor c918a7a1 origin/m2-poison in skymp/; memory thuum-m2-poison-visuals.md" id="b1-br2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="b1-p7">
+            <mxGeometry x="10" y="95" width="235" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;m2-visuals 0f4e3b75&lt;/b&gt;&lt;br&gt;Stacked on m2-poison: figures, the shout relay, two-handed streams." tooltip="M2, in flight. Source: git merge-base --is-ancestor origin/m2-poison origin/m2-visuals in skymp/; memory thuum-m2-poison-visuals.md" id="b1-br3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="b1-p7">
+            <mxGeometry x="255" y="95" width="235" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-ci, VM 702, 10.10.70.12: GitLab runner thuum-docker&lt;/b&gt;" tooltip="Source: docs/LAB.md:55, 86-87 (sky-ci, the only runner for this project's jobs); session scratchpad job logs p1115.log:2 and job5217.log:2 ('on thuum-docker (sky-ci VM702)'); .gitlab-ci.yml:1-3; skymp/.gitlab-ci.yml:1-3" id="b1-ci">
+          <mxCell style="swimlane;horizontal=0;startSize=30;html=1;whiteSpace=wrap;fillColor=#B0E3E6;swimlaneFillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;fontStyle=1;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-1">
+            <mxGeometry x="970" y="502" width="830" height="622" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;thuum pipeline: .gitlab-ci.yml, stages lint and gate&lt;/b&gt;" tooltip="Source: .gitlab-ci.yml" id="b1-tp">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-ci">
+            <mxGeometry x="40" y="12" width="360" height="389" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;fork pipeline: skymp/.gitlab-ci.yml, stages image, wire, server&lt;/b&gt;" tooltip="Source: skymp/.gitlab-ci.yml" id="b1-fp">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-ci">
+            <mxGeometry x="420" y="12" width="370" height="498" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;docs-lint&lt;/b&gt;&lt;br&gt;Every branch pipeline. Rule 11: no em dash in .md, .yaml, .yml, .json or the justfile; just --list must parse (alpine 3.20, just 1.58.0)." tooltip="Source: .gitlab-ci.yml:16-49" id="b1-tp-j0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-tp">
+            <mxGeometry x="10" y="39" width="340" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-tp-j0-s" value="&lt;b&gt;lint&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-tp-j0">
+          <mxGeometry x="297" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;lab-tests, labapi-tests&lt;/b&gt;&lt;br&gt;Every branch pipeline. lab/tests under Python unittest and the gamemode's node test; lab-api's tests under uv, Python 3.12." tooltip="Source: .gitlab-ci.yml:51-65" id="b1-tp-j1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-tp">
+            <mxGeometry x="10" y="109" width="340" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-tp-j1-s" value="&lt;b&gt;lint&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-tp-j1">
+          <mxGeometry x="297" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;driver-build&lt;/b&gt;&lt;br&gt;Every branch pipeline. npm ci and build in lab/driver: lab-driver.js kept 3 months, for the client template. The clones get the Mac's own build (just build-driver)." tooltip="Source: .gitlab-ci.yml:84-93; lab/tools/client-driver.sh:14-15; justfile:113-115, 388-391" id="b1-tp-j2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-tp">
+            <mxGeometry x="10" y="179" width="340" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-tp-j2-s" value="&lt;b&gt;lint&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-tp-j2">
+          <mxGeometry x="297" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;scenario-gate&lt;/b&gt;&lt;br&gt;Merge requests. Fails a commit that touches lab/scenarios/*.yaml together with any other path (ADR-009, ADR-016)." tooltip="Source: .gitlab-ci.yml:95-124; docs/DECISIONS.md ADR-009, ADR-016" id="b1-tp-j3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-tp">
+            <mxGeometry x="10" y="249" width="340" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-tp-j3-s" value="&lt;b&gt;gate&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-tp-j3">
+          <mxGeometry x="297" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;labapi-image&lt;/b&gt;&lt;br&gt;main with a change under lab/labapi/, a schedule, or an API pipeline on main (just ci-run thuum). Builds lab/labapi and pushes thuum/lab-api:&amp;lt;sha&amp;gt; and :latest." tooltip="Source: .gitlab-ci.yml:67-82; lab/tools/glab.py:5-8 (an API pipeline counts every changes: rule as matched)" id="b1-tp-j4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-tp">
+            <mxGeometry x="10" y="319" width="340" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-tp-j4-s" value="&lt;b&gt;gate&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-tp-j4">
+          <mxGeometry x="297" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;rust-image&lt;/b&gt;&lt;br&gt;skymp-wire changes or a schedule. thuum/rust-ci:latest, built on the runner host's own daemon for the wire jobs." tooltip="Source: skymp/.gitlab-ci.yml:16-28" id="b1-fp-j0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-fp">
+            <mxGeometry x="10" y="39" width="350" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-fp-j0-s" value="&lt;b&gt;image&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-fp-j0">
+          <mxGeometry x="302" y="3" width="44" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;wire-test&lt;/b&gt;&lt;br&gt;Same gate. cargo test, clippy -D warnings, cargo deny check, and a fresh cbindgen header must equal the committed one." tooltip="Source: skymp/.gitlab-ci.yml:30-56" id="b1-fp-j1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-fp">
+            <mxGeometry x="10" y="96" width="350" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-fp-j1-s" value="&lt;b&gt;wire&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-fp-j1">
+          <mxGeometry x="307" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;wire-fuzz, four targets&lt;/b&gt;&lt;br&gt;Same gate. codec_decode, validate, transport_ingest, json_recognize: 120 s each per push, an hour on the nightly schedule; a crash input kept on failure." tooltip="Source: skymp/.gitlab-ci.yml:11-14, 75-89" id="b1-fp-j2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-fp">
+            <mxGeometry x="10" y="166" width="350" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-fp-j2-s" value="&lt;b&gt;wire&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-fp-j2">
+          <mxGeometry x="307" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;difftest-build&lt;/b&gt;&lt;br&gt;skymp-wire or .gitlab-ci.yml changes, or a schedule. The release difftest and its sessions: difftest-dist/, 30 days." tooltip="Source: skymp/.gitlab-ci.yml:58-73" id="b1-fp-j3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-fp">
+            <mxGeometry x="10" y="236" width="350" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-fp-j3-s" value="&lt;b&gt;wire&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-fp-j3">
+          <mxGeometry x="307" y="3" width="39" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;client-build&lt;/b&gt;&lt;br&gt;Runs only when the project variable CLIENT_BUILD_WINDOWS is 1, on sky-build (VM 720, tag windows); absent from the fork's pipelines of 2026-10-08. The lab's dist comes from GitHub." tooltip="Source: skymp/.gitlab-ci.yml:140-182; justfile:50-59; docs/LAB.md:60; memory thuum-hosting-and-estate.md (2026-10-08: a fork pipeline is rust-image, wire-test, four fuzz jobs, difftest-build, server-build)" id="b1-fp-j4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#8C8C8C;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-fp">
+            <mxGeometry x="10" y="293" width="350" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-fp-j4-s" value="&lt;b&gt;server&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-fp-j4">
+          <mxGeometry x="296" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;server-build: T0&lt;/b&gt;&lt;br&gt;Merge requests, a schedule, parity outside skymp-wire, and every push to an m&amp;lt;N&amp;gt;- branch. docker build of ci/server.Dockerfile on upstream's skymp-vcpkg-deps:733f2d5; ctest inside when the five masters download from SKYRIM_DATA_URL (persist's esm/ through Caddy, for sky-ci only); pushes skymp-server:&amp;lt;branch&amp;gt; and :&amp;lt;branch&amp;gt;-&amp;lt;sha&amp;gt;." tooltip="Source: skymp/.gitlab-ci.yml:90-138; skymp/ci/server.Dockerfile:10-11, 51-56; memory thuum-hosting-and-estate.md (SKYRIM_DATA_URL is Caddy's https://thuum.gaussing.tv/persist/esm/, sky-ci only)" id="b1-fp-j5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-fp">
+            <mxGeometry x="10" y="376" width="350" height="112" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-fp-j5-s" value="&lt;b&gt;server&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b1-fp-j5">
+          <mxGeometry x="296" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;registry:2 on sky-ci, 10.10.70.12:5000&lt;/b&gt;&lt;br&gt;Jobs push to localhost:5000; sky-srv pulls. skymp-server:&amp;lt;branch&amp;gt; and :&amp;lt;branch&amp;gt;-&amp;lt;sha&amp;gt;; skymp-server:parity-legacy, the last RakNet image (T2's oracle); thuum/lab-api:latest and :&amp;lt;sha&amp;gt;." tooltip="Source: lab/deploy/sky-srv/env.example:5 (REGISTRY); lab/deploy/sky-srv/docker-compose.yml:10, 40, 60, 73; .gitlab-ci.yml:67-82; skymp/.gitlab-ci.yml:132-138; memory thuum-hosting-and-estate.md (a registry:2 container on sky-ci)" id="b1-reg">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="b1-ci">
+            <mxGeometry x="40" y="435" width="360" height="87" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;One runner for both projects&lt;/b&gt;&lt;br&gt;Tag sky, docker executor with the host's socket, permanent egress (GitHub, crates.io, vcpkg sources). It takes one job at a time across both projects, first come first served: a thuum push queues its jobs ahead of a fork server-build on a staging's critical path." tooltip="Source: memory thuum-hosting-and-estate.md (2026-10-08: one job at a time across both projects), thuum-m2-poison-visuals.md (2026-10-13: first come first served); .gitlab-ci.yml:1-3; skymp/.gitlab-ci.yml:1-3; docs/LAB.md:133-134 (egress)" id="b1-qnote">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-ci">
+            <mxGeometry x="420" y="524" width="370" height="86" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;GitHub, mojibake-dev: public mirrors (ADR-016)&lt;/b&gt;" tooltip="Source: docs/DECISIONS.md ADR-016 (each repository mirrors to a public GitHub repository under mojibake-dev); .gitmodules; git remote -v in thuum and skymp" id="b1-gh">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-1">
+            <mxGeometry x="20" y="240" width="490" height="448" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;mojibake-dev/thuum&lt;/b&gt;&lt;br&gt;The superproject's mirror; no workflows (no .github/)." tooltip="Source: git remote -v (push URL https://github.com/mojibake-dev/thuum.git); ls .github: none" id="b1-ght">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-gh">
+            <mxGeometry x="10" y="26" width="170" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;mojibake-dev/skymp&lt;/b&gt;&lt;br&gt;The fork's mirror; upstream is skyrim-multiplayer/skymp (ADR-013). The superproject's skymp submodule URL." tooltip="Source: .gitmodules (url https://github.com/mojibake-dev/skymp.git, branch parity); git remote -v in skymp/; docs/DECISIONS.md ADR-013" id="b1-ghs">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-gh">
+            <mxGeometry x="190" y="26" width="290" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;GitHub Actions on the fork: GitHub-hosted runners, the three workflows enabled since 2026-10-08&lt;/b&gt;" tooltip="Source: skymp/.github/workflows/; memory thuum-hosting-and-estate.md (2026-10-08: the 13 inherited upstream workflows disabled; parity-windows.yml, formatting.yml and prettier.yml active)" id="b1-act">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-gh">
+            <mxGeometry x="10" y="142" width="470" height="296" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Parity Windows Flatrim (AE/SE)&lt;/b&gt;&lt;br&gt;parity-windows.yml, runs-on windows-2022. On a push to parity, or workflow_dispatch: an m2-* branch builds only when dispatched. One run per branch: a new one cancels the running one.&lt;br&gt;Upstream's pr_base action, unchanged: skymp5-client (yarn build), CMake with vcpkg (its binary cache kept by actions/cache), the build, ctest.&lt;br&gt;Uploads dist (build/dist: client/ with Skyrim Platform, skymp5-client.js and MpClientPlugin.dll, the Rust wire client; server/; papyrus-vm/), server-dist and more. A failed run uploads no dist." tooltip="Source: skymp/.github/workflows/parity-windows.yml:15-79; skymp/.github/actions/pr_base/action.yml:83-88, 229-268, 319-366, 383-386; docs/WIRE.md:67 (MpClientPlugin.dll is the wire-client-ffi cdylib); skymp/build/dist-client as downloaded 2026-10-13 (client/, server/, papyrus-vm/); memory thuum-hosting-and-estate.md (2026-10-07: a failed run uploads no client artifact)" id="b1-win">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-act">
+            <mxGeometry x="170" y="39" width="290" height="190" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Formatting check&lt;/b&gt;&lt;br&gt;formatting.yml, ubuntu-latest, every push and pull request: upstream's linter, pinned by SHA-256. Fork C++ is held to clang-format 21.1.8; a red here is debt, not a gate." tooltip="Source: skymp/.github/workflows/formatting.yml; memory thuum-hosting-and-estate.md (2026-10-04: clang-format 21.1.8), thuum-m2-poison-visuals.md (2026-10-13: debt, not a gate)" id="b1-fmt">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-act">
+            <mxGeometry x="10" y="39" width="150" height="138" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Prettier&lt;/b&gt;&lt;br&gt;prettier.yml, ubuntu-latest, every push and pull request: yarn prettier-check with continue-on-error, so it never fails the run." tooltip="Source: skymp/.github/workflows/prettier.yml" id="b1-pret">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-act">
+            <mxGeometry x="10" y="187" width="150" height="99" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;dist: the run's artifact&lt;/b&gt;&lt;br&gt;build/dist of each successful run; just build-client takes the branch's newest." tooltip="Source: skymp/.github/actions/pr_base/action.yml:363-366; justfile:50-59" id="b1-dist">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="b1-1">
+            <mxGeometry x="200" y="752" width="290" height="61" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-c1 and sky-c2, the lab's Windows clients (page 2)&lt;/b&gt;&lt;br&gt;The dist laid into every game folder (install-lab.ps1); lab-driver.js in Data\Platform\Plugins. A staging then snapshots each clone as clean-m1-next (page 3)." tooltip="Source: lab/tools/client-dist.sh; lab/tools/client-driver.sh; lab/deploy/sky-client/README.md; docs/LAB.md:451-465" id="b1-cl">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-1">
+            <mxGeometry x="20" y="873" width="490" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;difftest-dist/&lt;/b&gt;&lt;br&gt;difftest and its sessions, a job artifact kept 30 days." tooltip="Source: skymp/.gitlab-ci.yml:58-73; lab/tools/test-proto.sh:76-96 (the commit's own artifact, else the branch's newest)" id="b1-dd">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="b1-1">
+            <mxGeometry x="1570" y="1188" width="230" height="61" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-srv, VM 700 (page 2)&lt;/b&gt;&lt;br&gt;docker compose pulls skymp-server:${SERVER_TAG} and thuum/lab-api:latest from the registry; the VM is dark, so images come only from sky-ci. T2 runs difftest from /srv/lab/difftest inside the server image (ADR-017)." tooltip="Source: lab/deploy/sky-srv/docker-compose.yml:1-10, 72-73; lab/deploy/sky-srv/README.md:21-22; lab/tools/test-proto.sh:20-23, 179-196; docs/DECISIONS.md ADR-017" id="b1-srv">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-1">
+            <mxGeometry x="970" y="1325" width="830" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Eli's Mac: Claude Code, the agent host (ADR-016)&lt;/b&gt;" tooltip="Source: docs/DECISIONS.md ADR-016; docs/LAB.md:96-98" id="b1-mac">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-1">
+            <mxGeometry x="570" y="240" width="340" height="1155" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;git push origin &amp;lt;branch&amp;gt;&lt;/b&gt;&lt;br&gt;One remote, two push URLs: GitLab (git@gitlab:root/&amp;lt;repo&amp;gt;.git) first, then GitHub; fetches come from GitHub. Never a force push: stacked branches take merges." tooltip="Source: git config remote.origin.pushurl in thuum and skymp; memory thuum-hosting-and-estate.md, feedback-no-force-push.md" id="b1-m0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-mac">
+            <mxGeometry x="10" y="42" width="320" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just ci, ci-run, ci-log&lt;/b&gt;&lt;br&gt;lab/tools/glab.py on projects 6 and 7 with Keychain tokens. ci-run &amp;lt;project&amp;gt; [ref] starts an API pipeline, where every changes: rule counts as matched, so the image jobs run." tooltip="Source: lab/tools/glab.py:1-8, 22-30; justfile:248-255" id="b1-m1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-mac">
+            <mxGeometry x="10" y="127" width="320" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;gh workflow run parity-windows.yml --ref &amp;lt;branch&amp;gt;&lt;/b&gt;&lt;br&gt;A feature branch's Windows build. Dispatch once a wanted run has finished: a new run cancels it." tooltip="Source: skymp/.github/workflows/parity-windows.yml:17-24; memory thuum-hosting-and-estate.md (2026-10-07)" id="b1-m2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-mac">
+            <mxGeometry x="10" y="212" width="320" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just build-client &amp;lt;branch&amp;gt;&lt;/b&gt;&lt;br&gt;gh run download -n dist: the newest successful run's dist into skymp/build/dist-client." tooltip="Source: justfile:50-59" id="b1-m3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-mac">
+            <mxGeometry x="10" y="512" width="320" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just build-driver, client-dist, client-driver&lt;/b&gt;&lt;br&gt;lab-driver.js built here; the dist and the driver reach a clone through the jump root@core.gaussing.tv and its guest agent, the dist (too big for the agent's stdin) through a throwaway http.server on sky-srv." tooltip="Source: justfile:113-115, 365-367, 388-391; lab/tools/stage-client.sh:35-63; lab/tools/client-dist.sh; lab/tools/client-driver.sh" id="b1-m5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-mac">
+            <mxGeometry x="10" y="633" width="320" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just deploy-srv&lt;/b&gt;&lt;br&gt;rsync of lab/ (gamemode, guests.yaml, Frida scripts), the compose file and the server settings to /srv/lab, over the jump." tooltip="Source: justfile:210-230" id="b1-m6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-mac">
+            <mxGeometry x="10" y="1085" width="320" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Traps the session met (session notes, 2026-10-02 to 2026-10-13)&lt;/b&gt;" tooltip="Source: memory thuum-hosting-and-estate.md, thuum-m2-poison-visuals.md; session scratchpad stage-branch.sh" id="b1-traps">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b1-1">
+            <mxGeometry x="20" y="986" width="490" height="247" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;A push pipeline judges changes: against the previous push only&lt;/b&gt;&lt;br&gt;So a superseded push can lose its image job. Push, then just ci-run, then push nothing until the image job has run." tooltip="Source: memory thuum-hosting-and-estate.md (2026-10-02); lab/tools/glab.py:5-8; session scratchpad stage-branch.sh:59-61" id="b1-t0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-traps">
+            <mxGeometry x="10" y="25" width="470" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;A commit outside skymp-wire builds no difftest&lt;/b&gt;&lt;br&gt;Only server-build runs (the Rust jobs are change-gated); T2 then takes the branch's newest difftest-build artifact." tooltip="Source: memory thuum-m2-poison-visuals.md (2026-10-13); lab/tools/test-proto.sh:76-88" id="b1-t1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-traps">
+            <mxGeometry x="10" y="80" width="470" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;The Windows run is flaky and cancellable&lt;/b&gt;&lt;br&gt;Its coverage test fails now and then, so a staging reruns a failed run up to twice; a dispatch during a wanted run cancels it." tooltip="Source: memory thuum-hosting-and-estate.md (2026-10-07); session scratchpad stage-branch.sh:33-46; skymp/.github/workflows/parity-windows.yml:22-24" id="b1-t2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-traps">
+            <mxGeometry x="10" y="135" width="470" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;The shared runner&lt;/b&gt;&lt;br&gt;Hold thuum doc pushes while a staging waits on a fork pipeline, or cancel their pipelines (1327 and 1329 were)." tooltip="Source: memory thuum-m2-poison-visuals.md (2026-10-13)" id="b1-t3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b1-traps">
+            <mxGeometry x="10" y="190" width="470" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b1-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.45;exitDx=0;exitDy=0;entryX=0;entryY=0.3981;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-m0" target="b1-gl">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.45;exitDx=0;exitDy=0;entryX=1;entryY=0.1671;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-m0" target="b1-gh">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e3" value="a push to main, or just ci-run thuum" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5172;exitY=1;exitDx=0;exitDy=0;entryX=0.3333;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-p6" target="b1-tp">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="110" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e4" value="a push per branch, or just ci-run skymp &amp;lt;ref&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.28;exitY=1;exitDx=0;exitDy=0;entryX=0.1081;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-p7" target="b1-fp">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="135.5" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e5" value="a push to parity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5155;exitY=1;exitDx=0;exitDy=0;entryX=0.55;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-ghs" target="b1-win">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="54" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.2868;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-m2" target="b1-win">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e7" value="thuum/lab-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-tp-j4" target="b1-reg">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="45.5" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.55;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-fp-j5" target="b1-reg">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="1380" y="946" /><mxPoint x="1380" y="984.85" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.913;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-fp-j3" target="b1-dd">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="1780" y="773.5" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e10" value="upload-artifact: dist" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-win" target="b1-dist">
+          <mxGeometry x="0.5" relative="1" as="geometry"><mxPoint x="68" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.3852;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-dist" target="b1-m3">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-m5" target="b1-cl">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-m6" target="b1-srv">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e14" value="docker compose pull" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2651;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-reg" target="b1-srv">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="62.5" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b1-e15" value="just test-proto: the GitLab API, then rsync to /srv/lab/difftest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.8614;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b1-1" source="b1-dd" target="b1-srv">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="-188.5" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="thuum-b2" name="2 The lab">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1219" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="b2-0" />
+        <mxCell id="b2-1" parent="b2-0" />
+        <mxCell id="b2-title" value="&lt;b&gt;The lab: the Proxmox estate where T2, T3 and T4 run&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="Eli's Mac reaches the lab only through Caddy's names and the SSH jump root@core.gaussing.tv; licensed game files live on rpool/sky/persist and never enter a repo. Baseline: fork mojibake-dev/skymp at parity c918a7a1, fork branches m2-poison (40ed43a5, on parity) and m2-visuals (0f4e3b75, on m2-poison) in flight, 2026-10-13 (heads at drawing time). Hover a shape for its source." tooltip="Source: docs/LAB.md:96-98, 100-114, 174; justfile:211; CLAUDE.md (just persist-game); git rev-parse and git merge-base in skymp/ (origin/parity c918a7a1, origin/m2-poison 40ed43a5, origin/m2-visuals 0f4e3b75); memory thuum-m2-poison-visuals.md" id="b2-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-1">
+            <mxGeometry x="20" y="50" width="1190" height="55" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b2-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b2-1">
+          <mxGeometry x="1230" y="14" width="570" height="183" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-lt0" value="Lab: lab-api, lab-driver, the lab's VMs, host services" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="46" y="26" width="230" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="10" y="64" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-lt1" value="Skyrim Platform, skymp5-client" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="46" y="62" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#DDDDDD;strokeColor=#4D4D4D;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="10" y="87" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-lt2" value="Game engine: SkyrimSE.exe, SKSE" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="46" y="85" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#8C8C8C;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="10" y="110" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-lt3" value="The server stack, in Docker" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="46" y="108" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-l4" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="10" y="133" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-lt4" value="Datasets and files on disk" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="46" y="131" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-l5" value="" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="10" y="156" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-lt5" value="Eli's machines, outside the lab's pool" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="46" y="154" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-ea0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="290" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-eb0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="320" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-leg-ea0" target="b2-leg-eb0">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-leg-rt0" value="lab control: HTTPS, the Proxmox API, the guest agent" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="326" y="26" width="234" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-ea1" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="290" y="72" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-eb1" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="320" y="72" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#D79B00;strokeWidth=4;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-leg-ea1" target="b2-leg-eb1">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-leg-rt1" value="UDP 7777 between hosts" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="326" y="62" width="234" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-ea2" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="290" y="95" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-eb2" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="320" y="95" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-leg-ea2" target="b2-leg-eb2">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-leg-rt2" value="a mount or a copy of files" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="326" y="85" width="234" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-ea3" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="290" y="118" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-eb3" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="320" y="118" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-leg-e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-leg-ea3" target="b2-leg-eb3">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-leg-rt3" value="ssh through the jump; the Moonlight stream" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-leg">
+          <mxGeometry x="326" y="108" width="234" height="34" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Proxmox host core, 10.0.0.10 (core.gaussing.tv on the tailnet): the SSH jump root@core.gaussing.tv&lt;/b&gt;" tooltip="Source: docs/LAB.md:17-47 (Topology), 100-121, 183-193; justfile:211 (srv_ssh: -J root@core.gaussing.tv)" id="b2-host">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b2-1">
+            <mxGeometry x="320" y="227" width="1480" height="963" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;VLAN 70 vsky, 10.10.70.0/24, dark by default&lt;/b&gt;" tooltip="Source: docs/LAB.md:22, 49-64, 123-142" id="b2-vlan">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#8C8C8C;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b2-host">
+            <mxGeometry x="340" y="54" width="820" height="891" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-srv, VM 700, 10.10.70.10: Debian 12 with Docker, no internet (images come only from sky-ci)&lt;/b&gt;" tooltip="Source: docs/LAB.md:53, 68-72; lab/deploy/sky-srv/README.md:21-22; lab/deploy/sky-srv/docker-compose.yml" id="b2-srv">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b2-vlan">
+            <mxGeometry x="10" y="27" width="800" height="390" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab-api: thuum/lab-api:latest&lt;/b&gt;&lt;br&gt;FastAPI on :80 under /lab, host network. One run at a time: it restores the server's world from a snapshot, rolls the clones back through the Proxmox API, waits for their heartbeats, checks their game version, feeds lab-driver its steps, judges the assertions, and writes result.json and the artifacts. Also GET /lab/game, a clone's snapshot and promote, assist and probe; tcpdump and tc netem on the VM's interface." tooltip="Source: lab/labapi/labapi/app.py; lab/labapi/labapi/runner.py:1-4, 191-218, 271-305, 368-451; docs/LAB.md:331-351, 520-557; lab/deploy/sky-srv/docker-compose.yml:72-101" id="b2-la">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-srv">
+            <mxGeometry x="10" y="25" width="430" height="171" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;skymp-server: skymp-server:${SERVER_TAG}&lt;/b&gt;&lt;br&gt;The lab's server; SERVER_TAG from /srv/lab/.env, compose's default parity. UDP 7777; 3000 for the lab gamemode's labState and labCommand RPCs. World /srv/lab/server/world; masters ESM_DIR, default /srv/persist/esm/1.6.1170." tooltip="Source: lab/deploy/sky-srv/docker-compose.yml:9-32; docs/LAB.md:562-566; lab/labapi/labapi/runner.py:191-201, 271-305" id="b2-sv">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#8C8C8C;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-srv">
+            <mxGeometry x="10" y="242" width="210" height="138" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Profile difftest (T2)&lt;/b&gt;&lt;br&gt;skymp-server-test (TEST_TAG, the build under test; RPC on 127.0.0.1:3100) and skymp-server-legacy (parity-legacy, the last RakNet image), each on its own world; the fakeclient and difftest run inside the images." tooltip="Source: lab/deploy/sky-srv/docker-compose.yml:34-70; lab/tools/test-proto.sh:1-26, 98-114, 178-196" id="b2-dt">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#8C8C8C;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-srv">
+            <mxGeometry x="266" y="242" width="174" height="138" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;/srv/lab on sky-srv&lt;/b&gt;&lt;br&gt;docker-compose.yml and .env: REGISTRY, SERVER_TAG, the Proxmox token.&lt;br&gt;server/world: the live world (the file driver).&lt;br&gt;snapshots/: clean, the lab's baseline world; playtest-&amp;lt;label&amp;gt;-&amp;lt;stamp&amp;gt;, Eli's worlds.&lt;br&gt;thuum/lab: the deployed lab tree (just deploy-srv).&lt;br&gt;difftest/: difftest and its sessions (just test-proto).&lt;br&gt;results/: rpool/sky/results over virtio-fs." tooltip="Source: lab/deploy/sky-srv/README.md:5-19; lab/deploy/sky-srv/env.example; justfile:210-230; lab/tools/test-proto.sh:91; lab/tools/playtest-world.sh:7; docs/LAB.md:164-166, 522-538" id="b2-files">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=note;size=12;boundedLbl=1;" vertex="1" parent="b2-srv">
+            <mxGeometry x="456" y="25" width="334" height="355" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-c1 and sky-c2&lt;/b&gt;" tooltip="Windows 11 linked clones of tpl-sky-client (VM 710). Source: docs/LAB.md:57-59, 86-91, 217-243; lab/labapi/labapi/guests.yaml" id="b2-cl">
+          <mxCell style="swimlane;horizontal=0;startSize=28;html=1;whiteSpace=wrap;fillColor=#B0E3E6;swimlaneFillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;fontStyle=1;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b2-vlan">
+            <mxGeometry x="10" y="501" width="530" height="378" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Windows 11 linked clones of tpl-sky-client (VM 710)&lt;/b&gt;&lt;br&gt;sky-c1: VM 711, 10.10.70.21, GTX 1050, client c1, profile 1. sky-c2: VM 712, 10.10.70.22, RTX 5060 Ti, client c2, profile 2. QEMU guest agent; the game is blocked outside 10.10.70.0/24." tooltip="Source: docs/LAB.md:57-59, 244; lab/labapi/labapi/guests.yaml:30-39; lab/deploy/sky-client/README.md:92-106, 248-256" id="b2-c0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-cl">
+            <mxGeometry x="38" y="10" width="482" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;SkyrimSE 1.6.1170, the default (ADR-025)&lt;/b&gt;&lt;br&gt;C:\Games\Skyrim Special Edition 1.6.1170 with SKSE 2.2.6; Steam's 1.7.104 folder (SKSE 2.3.1) kept for a smoke. At logon the task sky-lab-launch asks GET /lab/game which folder to start." tooltip="Source: lab/deploy/sky-client/README.md:135-173; docs/DECISIONS.md ADR-022, ADR-025" id="b2-c1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-cl">
+            <mxGeometry x="38" y="80" width="482" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Skyrim Platform and skymp5-client&lt;/b&gt;&lt;br&gt;The dist from GitHub in every game folder (just client-dist): SkyrimPlatform.dll, MpClientPlugin.dll (the Rust wire client), skymp5-client.js." tooltip="Source: lab/tools/client-dist.sh; skymp/build/dist-client (2026-10-13); docs/WIRE.md:67" id="b2-c2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-cl">
+            <mxGeometry x="38" y="150" width="482" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab-driver.js&lt;/b&gt;&lt;br&gt;A Skyrim Platform plugin: polls GET /lab/step on each update, runs the step in the game, posts its result to lab-api at http://10.10.70.10/lab." tooltip="Source: docs/LAB.md:315-322; lab/tools/client-driver.sh" id="b2-c3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-cl">
+            <mxGeometry x="38" y="207" width="482" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Disk snapshots, stacked&lt;/b&gt;&lt;br&gt;clean-sp (the RakNet baseline) under clean-m1 under clean-m1-next: lab-api rolls each clone back to clean-m1-next before a run. A staging retakes it; a merge promotes it into clean-m1." tooltip="Source: lab/labapi/labapi/guests.yaml:8-31; docs/LAB.md:219-243, 451-470" id="b2-c4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-cl">
+            <mxGeometry x="38" y="264" width="482" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Sunshine&lt;/b&gt;&lt;br&gt;Base port 48989 on sky-c1, 49989 on sky-c2." tooltip="Source: docs/LAB.md:175-195; justfile:257-260" id="b2-c5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-cl">
+            <mxGeometry x="38" y="334" width="482" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-ci, VM 702, 10.10.70.12 (page 1)&lt;/b&gt;&lt;br&gt;Debian 12 with Docker: the GitLab runner thuum-docker and the registry :5000 sky-srv pulls from; permanent egress." tooltip="Source: docs/LAB.md:55, 86-87, 133-134; lab/deploy/sky-srv/env.example:5" id="b2-ci">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-vlan">
+            <mxGeometry x="560" y="501" width="250" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-re, LXC 701, 10.10.70.11&lt;/b&gt;&lt;br&gt;Debian 12, Ghidra 12.1.4 and pyghidra-mcp: project skyrim on persist's ghidra/, one program per exe (SkyrimSE-1.6.1170.0.exe, SkyrimSE-1.7.104.0.exe). just ghidra-import runs analyzeHeadless in a transient unit with pyghidra-mcp stopped. Caddy serves it as ghidra.gaussing.tv/mcp." tooltip="Source: docs/LAB.md:54, 72-85, 108-109; lab/tools/ghidra-import.sh; justfile:72-91" id="b2-re">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-vlan">
+            <mxGeometry x="560" y="585" width="250" height="112" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Caddy on the host: LAN and tailnet only&lt;/b&gt;&lt;br&gt;thuum.gaussing.tv/lab to lab-api (sky-srv:80); /results/&amp;lt;run&amp;gt;/ read-only from rpool/sky/results; /persist/esm/ to sky-ci only (SKYRIM_DATA_URL); ghidra.gaussing.tv/mcp to sky-re:8080." tooltip="Source: docs/LAB.md:100-114; memory thuum-hosting-and-estate.md (/persist/esm/ for sky-ci only, SKYRIM_DATA_URL)" id="b2-caddy">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-host">
+            <mxGeometry x="10" y="106" width="250" height="99" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Proxmox API, https://10.0.0.10:8006&lt;/b&gt;&lt;br&gt;lab-api's token lab-api@pve!runner, scoped to pool sky: power, snapshots and rollback, guest agent exec and file read." tooltip="Source: docs/LAB.md:116-121; lab/deploy/sky-srv/env.example:6; lab/deploy/sky-srv/docker-compose.yml:80-84; lab/labapi/labapi/proxmox.py" id="b2-api">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-host">
+            <mxGeometry x="10" y="217" width="250" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sshd: the jump, root@core.gaussing.tv&lt;/b&gt;&lt;br&gt;ssh -J to sky-srv as eli; qm guest exec into a clone; pct exec 701 into sky-re; the persist dataset is written here (persist-game, persist-mods)." tooltip="Source: justfile:78-85, 211-230; lab/tools/client-dist.sh:12; lab/tools/playtest-relaunch.sh:23; lab/tools/persist-game.sh:15-16, 63; lab/tools/persist-mods.sh:64-65" id="b2-jmp">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-host">
+            <mxGeometry x="10" y="323" width="250" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;DNAT for Sunshine&lt;/b&gt;&lt;br&gt;From the LAN and the tailnet, each client's port family one to one: base 48989 to sky-c1, 49989 to sky-c2." tooltip="Source: docs/LAB.md:180-195" id="b2-dnat">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-host">
+            <mxGeometry x="10" y="889" width="250" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;rpool/sky/results&lt;/b&gt;&lt;br&gt;One folder per run, &amp;lt;UTC stamp&amp;gt;-&amp;lt;scenario&amp;gt;: result.json, server and client logs, screenshots, the world before and after, lab.pcap, Frida traces. Quota 500 GB, pruned after 30 days; at https://thuum.gaussing.tv/results/&amp;lt;run&amp;gt;/. In sky-srv at /srv/lab/results over virtio-fs, read-write, so a rollback never deletes a run." tooltip="Source: docs/LAB.md:106-107, 164-166, 351, 554-557; lab/labapi/labapi/runner.py:117-119" id="b2-res">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="b2-host">
+            <mxGeometry x="1200" y="54" width="270" height="152" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;rpool/sky/persist (200 GB, snapshotted daily)&lt;/b&gt;&lt;br&gt;esm/ (1.7.104's masters) and esm/1.6.1170/: the masters and the plugins each version's server loads.&lt;br&gt;game/: the exes, and 1.6.1170's three Steam depots.&lt;br&gt;mods/: the lab's mod layer (just persist-mods).&lt;br&gt;ghidra/: the Ghidra project. pve-root-ca.pem.&lt;br&gt;In sky-srv at /srv/persist, read-only; bind-mounted into sky-re. Licensed files never enter a repo." tooltip="Source: docs/LAB.md:42-44, 167-174; lab/deploy/sky-srv/README.md:16-18; lab/deploy/sky-srv/docker-compose.yml:100; lab/tools/persist-game.sh; lab/tools/persist-mods.sh:52-60; lab/tools/ghidra-import.sh:10; docs/DECISIONS.md ADR-022; memory thuum-hosting-and-estate.md (/srv/persist read-only on sky-srv)" id="b2-per">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="b2-host">
+            <mxGeometry x="1200" y="230" width="270" height="476.2" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;fenestrate, VM 220, VLAN 60&lt;/b&gt;&lt;br&gt;Eli's desktop, only ever a file source: just persist-game streams its five masters and the exe through the Mac into persist, hash-checked at both ends. It shares its RTX 5060 Ti with sky-c2; the agent never starts it." tooltip="Source: docs/LAB.md:92-95, 150-151, 244; lab/tools/persist-game.sh:1-17, 60-69; justfile:232-236; memory thuum-hosting-and-estate.md (sky-c2 starts only while fenestrate is off)" id="b2-fen">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-host">
+            <mxGeometry x="1200" y="746.2" width="270" height="99" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Eli's Mac&lt;/b&gt;" tooltip="Source: docs/LAB.md:34, 96-98; docs/DECISIONS.md ADR-016" id="b2-mac">
+          <mxCell style="swimlane;horizontal=0;startSize=30;html=1;whiteSpace=wrap;fillColor=#FFFFFF;swimlaneFillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;fontStyle=1;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b2-1">
+            <mxGeometry x="20" y="227" width="270" height="972" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Claude Code and the just recipes&lt;/b&gt;&lt;br&gt;Through Caddy (LAB_API): lab-up, lab-run, lab-status, client-snapshot, client-promote, probe, frida, playtest-start and -assist.&lt;br&gt;Through the jump: deploy-srv, test-proto, playtest-save and -restore, client-dist, client-driver, playtest-relaunch, persist-game, ghidra-import." tooltip="Source: justfile:11, 142-208, 210-246, 330-358, 365-391" id="b2-cc">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-mac">
+            <mxGeometry x="40" y="106" width="220" height="273.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Moonlight&lt;/b&gt;&lt;br&gt;Eli plays the clones: core.gaussing.tv:48989 is test 1 (sky-c1), :49989 test 2 (sky-c2); 10.0.0.10 on the LAN." tooltip="Source: docs/LAB.md:183-195; lab/deploy/sky-client/README.md:46-74; memory feedback-moonlight-check.md" id="b2-moon">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b2-mac">
+            <mxGeometry x="40" y="889" width="220" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b2-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.181;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-cc" target="b2-caddy">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.9269;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-cc" target="b2-jmp">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e3" value="/lab" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2895;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-caddy" target="b2-la">
+          <mxGeometry x="-0.55" relative="1" as="geometry"><mxPoint x="0" y="-12.5" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e4" value="/results, read-only" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-caddy" target="b2-res">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="455" y="265" /><mxPoint x="1655" y="265" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.8246;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-la" target="b2-api">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.082;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-api" target="b2-cl">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="630" y="492" /><mxPoint x="630" y="813" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.6767;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-jmp" target="b2-srv">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.1534;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-jmp" target="b2-cl">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="605" y="608.4" /><mxPoint x="605" y="840" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e9" value="UDP 7777" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#D79B00;strokeWidth=4;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=block;startFill=1;exitX=0.1972;exitY=0;exitDx=0;exitDy=0;entryX=0.45;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-cl" target="b2-sv">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="31.5" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e10" value="lab-driver: GET /lab/step" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.4585;exitY=0;exitDx=0;exitDy=0;entryX=0.5419;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-cl" target="b2-la">
+          <mxGeometry x="-0.62" relative="1" as="geometry"><mxPoint x="79" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e11" value="images: docker compose pull" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.8438;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-ci" target="b2-srv">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="85" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.1724;exitDx=0;exitDy=0;entryX=0;entryY=0.62;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-srv" target="b2-res">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.084;exitDx=0;exitDy=0;entryX=1;entryY=0.4846;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-per" target="b2-srv">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.9765;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-per" target="b2-re">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e15" value="just persist-game" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#9C7A00;strokeWidth=2;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-fen" target="b2-per">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="-57" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.2833;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-c5" target="b2-dnat">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b2-e17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.2833;exitDx=0;exitDy=0;entryX=1;entryY=0.2329;entryDx=0;entryDy=0;" edge="1" parent="b2-1" source="b2-dnat" target="b2-moon">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="thuum-b3" name="3 Stage, probe, merge">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1038" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="b3-0" />
+        <mxCell id="b3-1" parent="b3-0" />
+        <mxCell id="b3-title" value="&lt;b&gt;Stage, probe, merge: how a fork branch reaches parity&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="As practiced 2026-10-13 (session scripts): stage-branch.sh stages a stacked fork branch, here m2-visuals 0f4e3b75 (fork pipeline 1331, Windows run 38369522058, thuum pipeline 1322) on m2-poison 40ed43a5 on parity c918a7a1, and merge-m2-visuals.sh merges it. The scripts live in the session's scratchpad, not in the repo; each step names the recipe or file it runs. Hover a shape for its source." tooltip="Source: session scratchpad stage-branch.sh, stage3-chain.sh:2-12, merge-chain.sh:2-9, merge-m2-visuals.sh" id="b3-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-1">
+            <mxGeometry x="20" y="50" width="1190" height="55" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-1">
+          <mxGeometry x="1230" y="14" width="570" height="163" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-lt0" value="a step: a recipe, an API call or a wait" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="46" y="26" width="230" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="10" y="64" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-lt1" value="a gate: when it fails the script stops; in a merge, parity does not move" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="46" y="62" width="230" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="10" y="113" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-lt2" value="snapshots and saved worlds on disk" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="46" y="111" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="10" y="136" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-lt3" value="Eli's own part" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="46" y="134" width="230" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-ea0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="290" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-eb0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="320" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-leg-ea0" target="b3-leg-eb0">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-leg-rt0" value="the next step" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="326" y="26" width="234" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-p1" value="&lt;b&gt;S1&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-leg">
+          <mxGeometry x="290" y="52" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-rt1" value="the step's place in the order" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="326" y="49" width="234" height="21" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-p2" value="&lt;b&gt;sky-srv&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-leg">
+          <mxGeometry x="290" y="75" width="56" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-leg-rt2" value="where the step acts" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-leg">
+          <mxGeometry x="352" y="72" width="208" height="21" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Stage a branch: stage-branch.sh, as practiced 2026-10-13 (session scripts)&lt;/b&gt;" tooltip="Source: session scratchpad stage-branch.sh:1-9" id="b3-a">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-1">
+            <mxGeometry x="20" y="207" width="520" height="811" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Wait for the branch's Windows build&lt;/b&gt;&lt;br&gt;gh run view &amp;lt;run id&amp;gt; until the dispatched run completes; a failed run is rerun (gh run rerun --failed) up to twice, then the staging stops." tooltip="Source: session scratchpad stage-branch.sh:33-46; memory thuum-hosting-and-estate.md (2026-10-07: gh workflow run parity-windows.yml --ref &lt;branch&gt;)" id="b3-a-s0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="44" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s0-n" value="&lt;b&gt;S1&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s0">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s0-w" value="&lt;b&gt;GitHub&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s0">
+          <mxGeometry x="414" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Wait for the branch's fork pipeline (project 7)&lt;/b&gt;&lt;br&gt;Polled through the GitLab API with the read token: server-build has pushed skymp-server:&amp;lt;branch&amp;gt;. Failed or cancelled stops the staging." tooltip="Source: session scratchpad stage-branch.sh:17-31, 48-57; skymp/.gitlab-ci.yml:96-138" id="b3-a-s1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="115" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s1-n" value="&lt;b&gt;S2&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s1">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s1-w" value="&lt;b&gt;sky-ci&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s1">
+          <mxGeometry x="414" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Wait for thuum's API pipeline (project 6)&lt;/b&gt;&lt;br&gt;An API pipeline (just ci-run thuum), because a push pipeline judges changes: against the previous push only and may skip labapi-image (thuum/lab-api:latest)." tooltip="Source: session scratchpad stage-branch.sh:59-71; .gitlab-ci.yml:67-82; lab/tools/glab.py:5-8" id="b3-a-s2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="186" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s2-n" value="&lt;b&gt;S3&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s2">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s2-w" value="&lt;b&gt;sky-ci&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s2">
+          <mxGeometry x="414" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Wait for an idle lab&lt;/b&gt;&lt;br&gt;GET /lab/status until no run is active." tooltip="Source: session scratchpad stage-branch.sh:73-77; lab/labapi/labapi/app.py:111-113" id="b3-a-s3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="257" width="500" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s3-n" value="&lt;b&gt;S4&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s3">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s3-w" value="&lt;b&gt;lab-api&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s3">
+          <mxGeometry x="408" y="3" width="56" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;just deploy-srv&lt;/b&gt;&lt;br&gt;The lab tree, the compose file and the server settings to /srv/lab, after checking each settings file's load order against persist." tooltip="Source: session scratchpad stage-branch.sh:79; justfile:210-230" id="b3-a-s4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="315" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s4-n" value="&lt;b&gt;S5&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s4">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s4-w" value="&lt;b&gt;sky-srv&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s4">
+          <mxGeometry x="408" y="3" width="56" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Point the lab's server at the branch&lt;/b&gt;&lt;br&gt;SERVER_TAG=&amp;lt;branch&amp;gt; in /srv/lab/.env; docker compose pull skymp-server lab-api; up -d both." tooltip="Source: session scratchpad stage-branch.sh:80-81; lab/deploy/sky-srv/docker-compose.yml:10, 73" id="b3-a-s5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="386" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s5-n" value="&lt;b&gt;S6&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s5">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s5-w" value="&lt;b&gt;sky-srv&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s5">
+          <mxGeometry x="408" y="3" width="56" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;just build-client &amp;lt;branch&amp;gt;&lt;/b&gt;&lt;br&gt;The newest successful Parity Windows run's dist into skymp/build/dist-client." tooltip="Source: session scratchpad stage-branch.sh:83-84; justfile:50-59" id="b3-a-s6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="457" width="500" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s6-n" value="&lt;b&gt;S7&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s6">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s6-w" value="&lt;b&gt;Mac&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s6">
+          <mxGeometry x="431" y="3" width="33" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;client-dist.sh on 712, then 711&lt;/b&gt;&lt;br&gt;The game stopped, the dist and the lab files staged, install-lab.ps1 lays the dist into every game folder. Two tries each; a clone left without the dist's SkyrimPlatformImpl.dll stops the staging before any snapshot." tooltip="Source: session scratchpad stage-branch.sh:85-98; lab/tools/client-dist.sh" id="b3-a-s7">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="515" width="500" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s7-n" value="&lt;b&gt;S8&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s7">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s7-w" value="&lt;b&gt;clones&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s7">
+          <mxGeometry x="414" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;just client-driver 712 2, then 711 1&lt;/b&gt;&lt;br&gt;lab-driver built on the Mac, pushed through the guest agent into every game folder; a launch test until the profile is online and heartbeating; the game stopped." tooltip="Source: session scratchpad stage-branch.sh:99-100; lab/tools/client-driver.sh; justfile:388-391" id="b3-a-s8">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="599" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s8-n" value="&lt;b&gt;S9&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s8">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s8-w" value="&lt;b&gt;clones&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s8">
+          <mxGeometry x="414" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Snapshot c2, then c1, as clean-m1-next&lt;/b&gt;&lt;br&gt;POST /lab/clients/&amp;lt;c&amp;gt;/snapshot: cold (quiesce, a clean shutdown, no RAM, start, a guest agent check), stacked on clean-m1 in place of the last clean-m1-next; its description names the branch and head." tooltip="Source: session scratchpad stage-branch.sh:101-107; docs/LAB.md:451-465; lab/labapi/labapi/app.py:197-222" id="b3-a-s9">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="670" width="500" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s9-n" value="&lt;b&gt;S10&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s9">
+          <mxGeometry x="463" y="3" width="33" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s9-w" value="&lt;b&gt;lab-api&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s9">
+          <mxGeometry x="403" y="3" width="56" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Probes: just lab-run &amp;lt;path&amp;gt;/x-*.yaml&lt;/b&gt;&lt;br&gt;Exploratory runs by path; they never live in lab/scenarios (ADR-009). x-dual-cast3 for 0f4e3b75; the staging of 31b56fc9 before it ran six." tooltip="Source: session scratchpad stage-branch.sh:109-112; stage3-chain.sh:10-12; stage2-chain.sh:10-12; justfile:151-153" id="b3-a-s10">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-a">
+            <mxGeometry x="10" y="754" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-a-s10-n" value="&lt;b&gt;S11&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s10">
+          <mxGeometry x="463" y="3" width="33" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s10-w" value="&lt;b&gt;lab&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-a-s10">
+          <mxGeometry x="426" y="3" width="33" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-a-s1-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s0" target="b3-a-s1">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s2-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s1" target="b3-a-s2">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s3-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s2" target="b3-a-s3">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s4-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s3" target="b3-a-s4">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s5-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s4" target="b3-a-s5">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s6-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s5" target="b3-a-s6">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s7-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s6" target="b3-a-s7">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s8-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s7" target="b3-a-s8">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s9-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s8" target="b3-a-s9">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-a-s10-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s9" target="b3-a-s10">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Merge it: merge-m2-visuals.sh, as practiced 2026-10-13 (session scripts)&lt;/b&gt;" tooltip="Source: session scratchpad merge-m2-visuals.sh:1-9; merge-chain.sh:7-9" id="b3-b">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-1">
+            <mxGeometry x="640" y="207" width="520" height="540" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Sweep: just lab-run each lab/scenarios/*.yaml&lt;/b&gt;&lt;br&gt;Each file posted from the Mac's checkout (40 on main f54651c), on 1.6.1170, the lab's default (ADR-024, ADR-025), against the staged server and the clones' clean-m1-next." tooltip="Source: session scratchpad merge-m2-visuals.sh:2-5, 31-44; justfile:154-168 (lab-run posts lab/scenarios/&lt;name&gt;.yaml); docs/DECISIONS.md ADR-024, ADR-025; lab/scenarios (40 files at f54651c, only a-racemenu names a game, 1.6.1170); lab/labapi/labapi/config.py:152" id="b3-b-s0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-b">
+            <mxGeometry x="10" y="44" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-b-s0-n" value="&lt;b&gt;M1&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s0">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s0-w" value="&lt;b&gt;lab&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s0">
+          <mxGeometry x="431" y="3" width="33" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;A run with no verdict reruns once&lt;/b&gt;&lt;br&gt;Verdict error is the lab failing, not the verb; the rerun must be green." tooltip="Source: session scratchpad merge-m2-visuals.sh:45-55; lab/labapi/labapi/runner.py:1-4" id="b3-b-s1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-b">
+            <mxGeometry x="10" y="115" width="500" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-b-s1-n" value="&lt;b&gt;M2&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s1">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s1-w" value="&lt;b&gt;lab&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s1">
+          <mxGeometry x="431" y="3" width="33" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;ADR-027: a lone red reruns twice&lt;/b&gt;&lt;br&gt;Two greens make it a watch item, read and written into the verb doc; several reds, or a red rerun, stop." tooltip="Source: session scratchpad merge-m2-visuals.sh:56-65; docs/DECISIONS.md ADR-027" id="b3-b-s2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-b">
+            <mxGeometry x="10" y="173" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-b-s2-n" value="&lt;b&gt;M3&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s2">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s2-w" value="&lt;b&gt;lab&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s2">
+          <mxGeometry x="431" y="3" width="33" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Wait for the head's fork pipeline&lt;/b&gt;&lt;br&gt;T2 needs the branch's image and its difftest artifact." tooltip="Source: session scratchpad merge-m2-visuals.sh:66-69; lab/tools/test-proto.sh:76-96" id="b3-b-s3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-b">
+            <mxGeometry x="10" y="244" width="500" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-b-s3-n" value="&lt;b&gt;M4&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s3">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s3-w" value="&lt;b&gt;sky-ci&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s3">
+          <mxGeometry x="414" y="3" width="50" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;T2: just test-proto &amp;lt;branch&amp;gt;&lt;/b&gt;&lt;br&gt;From the clean world on skymp-server-test (the branch): the fakeclient smoke checked through labState; attributes across a restart; every difftest session on both stacks, legacy (parity-legacy, its C++ fakeclient) against wire (the branch). Anything but T2 green stops." tooltip="Source: session scratchpad merge-m2-visuals.sh:70-73; lab/tools/test-proto.sh:1-26, 98-204; justfile:61-63" id="b3-b-s4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-b">
+            <mxGeometry x="10" y="302" width="500" height="73" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-b-s4-n" value="&lt;b&gt;M5&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s4">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s4-w" value="&lt;b&gt;sky-srv&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s4">
+          <mxGeometry x="408" y="3" width="56" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Fork parity fast-forwards&lt;/b&gt;&lt;br&gt;Only when parity is an ancestor of the head: git push origin &amp;lt;branch&amp;gt;:parity through both push URLs, never a force push. The push runs parity's Windows build and its fork pipeline." tooltip="Source: session scratchpad merge-m2-visuals.sh:74-76; skymp/.github/workflows/parity-windows.yml:17-19; skymp/.gitlab-ci.yml:102-111; memory feedback-no-force-push.md" id="b3-b-s5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-b">
+            <mxGeometry x="10" y="399" width="500" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-b-s5-n" value="&lt;b&gt;M6&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s5">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s5-w" value="&lt;b&gt;GitLab, GitHub&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s5">
+          <mxGeometry x="369" y="3" width="95" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Promote clean-m1-next on c1, then c2&lt;/b&gt;&lt;br&gt;just client-promote &amp;lt;c&amp;gt; clean-m1-next: clean-m1 becomes bit-identical to it and clean-m1-next is taken again on top, so lab-api's table still names it." tooltip="Source: session scratchpad merge-m2-visuals.sh:77-80; justfile:131-133; docs/LAB.md:455-461; lab/labapi/labapi/guests.yaml:22-25" id="b3-b-s6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-b">
+            <mxGeometry x="10" y="483" width="500" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-b-s6-n" value="&lt;b&gt;M7&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s6">
+          <mxGeometry x="468" y="3" width="28" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s6-w" value="&lt;b&gt;lab-api&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="b3-b-s6">
+          <mxGeometry x="408" y="3" width="56" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-b-s1-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-b-s0" target="b3-b-s1">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-b-s2-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-b-s1" target="b3-b-s2">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-b-s3-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-b-s2" target="b3-b-s3">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-b-s4-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-b-s3" target="b3-b-s4">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-b-s5-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-b-s4" target="b3-b-s5">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-b-s6-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.08;exitY=1;exitDx=0;exitDy=0;entryX=0.08;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-b-s5" target="b3-b-s6">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;A clone's snapshots: disk only, and Proxmox rolls a disk back only to its newest&lt;/b&gt;" tooltip="Source: lab/labapi/labapi/guests.yaml:8-31; docs/LAB.md:219-243, 451-470" id="b3-snap">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-1">
+            <mxGeometry x="1240" y="207" width="560" height="229" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;clean-m1-next&lt;/b&gt;&lt;br&gt;What lab-api rolls each clone back to before a run. S10 replaces it; M7 folds it into clean-m1 and takes it again." tooltip="Source: lab/labapi/labapi/guests.yaml:8-31; docs/LAB.md:236-243, 451-461" id="b3-sn0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-snap">
+            <mxGeometry x="10" y="44" width="540" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;clean-m1&lt;/b&gt;&lt;br&gt;The merged clients; bit-identical to clean-m1-next right after a promote." tooltip="Source: lab/labapi/labapi/guests.yaml:8-31; docs/LAB.md:236-243, 451-461" id="b3-sn1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-snap">
+            <mxGeometry x="10" y="121" width="540" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;clean-sp&lt;/b&gt;&lt;br&gt;The RakNet baseline under both, kept." tooltip="Source: lab/labapi/labapi/guests.yaml:8-31; docs/LAB.md:236-243, 451-461" id="b3-sn2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-snap">
+            <mxGeometry x="10" y="185" width="540" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-sne0" value="stacked on" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.1111;exitY=1;exitDx=0;exitDy=0;entryX=0.1111;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-sn0" target="b3-sn1">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="37.5" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-sne1" value="stacked on" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.1111;exitY=1;exitDx=0;exitDy=0;entryX=0.1111;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-sn1" target="b3-sn2">
+          <mxGeometry x="0" relative="1" as="geometry"><mxPoint x="37.5" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Playtest (T4), outside any run: as practiced, after a merge&lt;/b&gt;" tooltip="Source: justfile:330-358; memory thuum-m2-poison-visuals.md (2026-10-13: merge, promote, then restore Eli's world for playtest fifteen), feedback-moonlight-check.md" id="b3-pt">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-1">
+            <mxGeometry x="1240" y="476" width="560" height="504" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Before&lt;/b&gt;" tooltip="Source: justfile:330-358 (the playtest recipes and their comments)" id="b3-g0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-pt">
+            <mxGeometry x="10" y="28" width="540" height="137" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just playtest-restore &amp;lt;name&amp;gt;&lt;/b&gt;&lt;br&gt;Stops skymp-server, puts a saved world from /srv/lab/snapshots/playtest-&amp;lt;label&amp;gt;-&amp;lt;stamp&amp;gt; in place, starts it; refused during a run; games still connected log in again." tooltip="Source: justfile:336-342; lab/tools/playtest-world.sh:25-39" id="b3-g0-i0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-g0">
+            <mxGeometry x="10" y="25" width="520" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just playtest-start&lt;/b&gt;&lt;br&gt;Both clients online: both characters to the hunters' camp southwest of the spawn at half health, magicka and stamina, three ingredients each." tooltip="Source: justfile:330-334; lab/tools/playtest-start.sh" id="b3-g0-i1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-g0">
+            <mxGeometry x="10" y="80" width="520" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;During&lt;/b&gt;" tooltip="Source: justfile:330-358 (the playtest recipes and their comments)" id="b3-g1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-pt">
+            <mxGeometry x="10" y="199" width="540" height="179" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Eli plays over Moonlight&lt;/b&gt;&lt;br&gt;Test 1 (sky-c1) on :48989, test 2 (sky-c2) on :49989." tooltip="Source: docs/LAB.md:183-193; memory feedback-moonlight-check.md" id="b3-g1-i0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-g1">
+            <mxGeometry x="10" y="25" width="520" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just playtest-relaunch c1|c2&lt;/b&gt;&lt;br&gt;Quits a player's game through the guest agent; its logon task starts it again; waits for the login." tooltip="Source: justfile:347-349; lab/tools/playtest-relaunch.sh" id="b3-g1-i1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-g1">
+            <mxGeometry x="10" y="67" width="520" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just playtest-assist &amp;lt;client&amp;gt; &amp;lt;action&amp;gt; [args]&lt;/b&gt;&lt;br&gt;One input step (hold-key, tap-key, anim-event, draw-weapon) in the seat Eli is not playing; playtest-race-menu and probe beside it." tooltip="Source: justfile:196-204, 351-358; lab/labapi/labapi/app.py:166-195" id="b3-g1-i2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-g1">
+            <mxGeometry x="10" y="122" width="520" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;After&lt;/b&gt;" tooltip="Source: justfile:330-358 (the playtest recipes and their comments)" id="b3-g2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="b3-pt">
+            <mxGeometry x="10" y="412" width="540" height="82" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just playtest-save &amp;lt;label&amp;gt;&lt;/b&gt;&lt;br&gt;Copies the live world to /srv/lab/snapshots/playtest-&amp;lt;label&amp;gt;-&amp;lt;UTC stamp&amp;gt;. Lab runs roll the server back to the clean world, so Eli's world is saved after and restored before." tooltip="Source: justfile:336-345; lab/tools/playtest-world.sh:1-23" id="b3-g2-i0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="b3-g2">
+            <mxGeometry x="10" y="25" width="520" height="47" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="b3-ge0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.1111;exitY=1;exitDx=0;exitDy=0;entryX=0.1111;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-g0" target="b3-g1">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-ge1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.1111;exitY=1;exitDx=0;exitDy=0;entryX=0.1111;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-g1" target="b3-g2">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-ab" value="merge-chain.sh" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-a-s10" target="b3-b-s0">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="590" y="984.5" /><mxPoint x="590" y="274.5" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="b3-bc" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.4712;entryDx=0;entryDy=0;" edge="1" parent="b3-1" source="b3-b-s6" target="b3-pt">
+          <mxGeometry x="0" relative="1" as="geometry"></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

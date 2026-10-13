@@ -1,0 +1,1049 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" agent="thuum generator" version="24.7.17" type="device" compressed="false">
+  <diagram id="thuum-re-p1" name="1 Static">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1426" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="re1-0" />
+        <mxCell id="re1-1" parent="re1-0" />
+        <mxCell id="re1-title" value="&lt;b&gt;Static RE: where an engine fact may come from&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="Baseline: thuum main at f54651c and fork mojibake-dev/skymp, branch parity at c918a7a1, with m2-poison (40ed43a5) and m2-visuals (31b56fc9) in flight, 2026-10-13. CommonLibSSE-NG pinned at b93280e8; the lab and the players run SkyrimSE 1.6.1170 (ADR-025). The columns follow hard rule 1's order, and every answer lands in a verb doc. Hover a shape for its source." tooltip="Source: git log (thuum f54651c; skymp parity c918a7a1, m2-poison 40ed43a5, m2-visuals 31b56fc9); CLAUDE.md:47-51 (Workspace layout); justfile:12 (runtime); docs/DECISIONS.md ADR-025" id="re1-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-1">
+            <mxGeometry x="20" y="50" width="1190" height="45" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re1-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+          <mxGeometry x="1230" y="14" width="570" height="168" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#DDDDDD;strokeColor=#4D4D4D;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-lt0" value="Engine and its map: SkyrimSE.exe, CommonLib" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="46" y="26" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="10" y="50" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-lt1" value="Lab: tools, guests, the re-analyst" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="46" y="48" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="10" y="72" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-lt2" value="Files on disk: databases, tables, masters" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="46" y="70" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="10" y="94" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-lt3" value="A verb doc or a note" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="46" y="92" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-l4" value="" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="10" y="116" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-lt4" value="A hard rule or decision record" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="46" y="114" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-ea0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="296" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-eb0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="326" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-leg-ea0" target="re1-leg-eb0">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-rt0" value="a fact or a hypothesis carried on" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="332" y="26" width="228" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-ea1" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="296" y="58" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-eb1" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="326" y="58" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;dashPattern=8 4;" edge="1" parent="re1-1" source="re1-leg-ea1" target="re1-leg-eb1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-rt1" value="left for the lab: page 2" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="332" y="48" width="228" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-bd0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re1-leg">
+          <mxGeometry x="10" y="140" width="73" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-bt0" value="read, not yet measured (rule 2)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="85" y="138" width="201" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-bd1" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re1-leg">
+          <mxGeometry x="296" y="140" width="69" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-leg-bt1" value="measured by a run or a trace" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-leg">
+          <mxGeometry x="367" y="138" width="193" height="20" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Hard rule 1 (CLAUDE.md)&lt;/b&gt;&lt;br&gt;No offsets, Address Library IDs, vtable indices, RVAs, or function signatures from memory. Ever. Sources, in this order: CommonLibSSE-NG headers in this tree, addrlib/, Ghidra via MCP. If none has it, the task becomes &quot;RE this&quot;, not &quot;guess this&quot;. lab/hooks/post-edit.sh catches the literal case: it warns on a hex literal of six or more digits in a .cpp, .h or .hpp file with no REL::ID, REL::Offset or addrlib: marker on its line." tooltip="Source: CLAUDE.md:61-65 (Hard rules 1); lab/hooks/post-edit.sh:12-21" id="re1-rule1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-1">
+            <mxGeometry x="20" y="105" width="590" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Hard rule 2 (CLAUDE.md)&lt;/b&gt;&lt;br&gt;Decompiler output is a hypothesis. Every inferred side effect is tagged HYPOTHESIS in the verb doc until a lab run or a Frida trace confirms it. A verb is done at T3 with a green scenario and no HYPOTHESIS tags left. Workflow 3: the re-analyst returns hypotheses; you file them." tooltip="Source: CLAUDE.md:66-67 (Hard rules 2), :100-101 (Workflow per verb 3), :155 (Testing tiers)" id="re1-rule2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-1">
+            <mxGeometry x="620" y="105" width="590" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1. CommonLibSSE-NG headers&lt;/b&gt;" tooltip="Source: CLAUDE.md:61-65 (Hard rules 1: the first source)" id="re1-col1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="20" y="206" width="330" height="639" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;CommonLibSSE-NG/ in this tree&lt;/b&gt;&lt;br&gt;A submodule at CharmedBaryon/CommonLibSSE-NG b93280e8 (2024-09-03): the commit skymp's vcpkg overlay port builds the client against. The engine map: classes, vtables, REL::ID. Never modified; repinned only when the port moves." tooltip="Source: CLAUDE.md:47-51 (Workspace layout); CommonLibSSE-NG git log -1 (b93280e8, 2024-09-03)" id="re1-a1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col1">
+            <mxGeometry x="10" y="33" width="310" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;What a header gives&lt;/b&gt;&lt;br&gt;• Members with offset comments: ActiveEffect's spell // 40, target // 50, magnitude // 78, castingSource // 88 (A/ActiveEffect.h:102-115)&lt;br&gt;• Vtable slots as comments, some with a body: ValueModifierEffect's Update // 04 (V/ValueModifierEffect.h:16), GetAllowMultipleCastingSourceStacking // 11 - { return 1; } (:18), ModifyActorValue // 20 (:36)&lt;br&gt;• Ids: RELOCATION_ID(se, ae) and REL::VariantID(se, ae, vr) in include/RE/Offsets.h, Offsets_VTABLE.h, Offsets_RTTI.h; UIMessageQueue::AddMessage is RELOCATION_ID(13530, 13631) (Offsets.h:569)" tooltip="Source: CommonLibSSE-NG include/RE/A/ActiveEffect.h:102-115; include/RE/V/ValueModifierEffect.h:16, :18, :36; include/RE/Offsets.h:569; include/RE/Offsets_VTABLE.h:1953" id="re1-a2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col1">
+            <mxGeometry x="10" y="139" width="310" height="160" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;The answer: file:line&lt;/b&gt;&lt;br&gt;Workflow 3: if CommonLib has the symbol, cite file:line in the verb doc. A body in a comment is still a reading: spell-cast.md's dual-cast HYPOTHESIS leaned on ValueModifierEffect's { return 1; } against ActiveEffect's { return 0; } (A/ActiveEffect.h:79) until effect-stack-trace.js measured it (page 3)." tooltip="Source: CLAUDE.md:100-101 (Workflow per verb 3); docs/verbs/spell-cast.md:513-519; lab/frida/effect-stack-trace.js:1-11" id="re1-a3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col1">
+            <mxGeometry x="10" y="329" width="310" height="110" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re1-a3-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re1-a3">
+          <mxGeometry x="8" y="90" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;2. addrlib/, lab/addr.py, lab/relid.py&lt;/b&gt;" tooltip="Source: CLAUDE.md:61-65 (Hard rules 1: the second source); justfile:94-100" id="re1-col2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="382" y="206" width="330" height="639" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab/relid.py: just relid&lt;/b&gt;&lt;br&gt;Indexes every Address Library id CommonLibSSE-NG names: RELOCATION_ID, REL::RelocationID, REL::ID and REL::VariantID sites in include/ and src/ (a function when a func_t decltype precedes the site), Offsets_VTABLE.h's arrays, Offsets_RTTI.h and Offsets_NiRTTI.h. Derived data: regenerated, never edited." tooltip="Source: lab/relid.py:2-18; justfile:98-100 (relid)" id="re1-b4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col2">
+            <mxGeometry x="10" y="33" width="310" height="100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab/relids.tsv&lt;/b&gt;&lt;br&gt;se, ae, vr, kind, name, slot, file, line: 17,941 rows, as 258043 206143 vtable VTABLE_ValueModifierEffect Offsets_VTABLE.h:1953. It names 13631 (UIMessageQueue::AddMessage), 16024 (InventoryEntryData::PoisonObject) and 104651 (NativeFunctionBase::Call), but not poison's 40481, 40482, 41044, 41069 or 38386, from the re-analyst's Ghidra read, nor 55631, 55500 and 51648, hud-trace.js's caller frames." tooltip="Source: lab/relids.tsv (17,942 lines with its header; looked up 2026-10-13); docs/verbs/poison.md:41-61; docs/verbs/shouts.md:450-458" id="re1-b5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=note;size=12;boundedLbl=1;" vertex="1" parent="re1-col2">
+            <mxGeometry x="10" y="163" width="310" height="124" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;addrlib/&lt;/b&gt;&lt;br&gt;The Address Library database for SkyrimSE 1.6.1170, versionlib-1-6-1170-0.bin (format 2). Gitignored, downloaded from Nexus by Eli, read-only to the agent." tooltip="Source: CLAUDE.md:52-53 (Workspace layout); lab/addr.py:2-21" id="re1-b1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="re1-col2">
+            <mxGeometry x="10" y="317" width="310" height="74" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab/addr.py: just addr &amp;lt;id&amp;gt;&lt;/b&gt;&lt;br&gt;Reads the database exactly as CommonLibSSE-NG's REL::IDDatabase does (REL/Relocation.h: header_t::read, unpack_file), tested against CommonLib's versionlib-1-6-353-0.bin fixture. Strict: a missing id is an error, where CommonLib's lower_bound returns the next id's offset (--commonlib-quirk reproduces that)." tooltip="Source: lab/addr.py:2-22; lab/tests/test_addr.py; justfile:94-96 (addr)" id="re1-b2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col2">
+            <mxGeometry x="10" y="421" width="310" height="100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;just addr 206143&lt;/b&gt;&lt;br&gt;id 206143 offset 0x18825b8 runtime 1.6.1170.0 entries 428461: VTABLE_ValueModifierEffect's AE id, the value effect-stack-trace.js keeps as valueModifierVtable, with // 206143 beside it." tooltip="Source: lab/addr.py, run read-only on 2026-10-13; CommonLibSSE-NG include/RE/Offsets_VTABLE.h:1953; lab/frida/effect-stack-trace.js:35-39" id="re1-b3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col2">
+            <mxGeometry x="10" y="551" width="310" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;3. Ghidra on sky-re, over MCP&lt;/b&gt;" tooltip="Source: CLAUDE.md:61-65 (Hard rules 1: the third source); docs/LAB.md:604-605" id="re1-col3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="744" y="206" width="330" height="639" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;From the Mac&lt;/b&gt;&lt;br&gt;GHIDRA_MCP_URL https://ghidra.gaussing.tv/mcp, Caddy to sky-re:8080: the ghidra server of .mcp.json.&lt;br&gt;• just ghidra: an MCP initialize; prints the server's name and version&lt;br&gt;• just ghidra-import &amp;lt;exe&amp;gt;: analyzeHeadless inside sky-re as a transient unit, pyghidra-mcp stopped around it&lt;br&gt;• just ghidra-query &amp;lt;program&amp;gt; decompile | xrefs | bytes &amp;lt;addr&amp;gt;: headless GhidraQuery.java, no MCP in the loop (the MCP server indexes the whole binary before its first answer)" tooltip="Source: docs/LAB.md:108-109; .mcp.json; justfile:69-92 (ghidra, ghidra-import, ghidra-query); lab/tools/ghidra-query.sh; lab/tools/GhidraQuery.java:1-6" id="re1-c2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col3">
+            <mxGeometry x="10" y="33" width="310" height="136" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;sky-re, LXC 701, 10.10.70.11&lt;/b&gt;&lt;br&gt;Ghidra 12.1.4, JDK 21 and pyghidra-mcp, serving one project on rpool/sky/persist over streamable HTTP, one program per exe: SkyrimSE-1.7.104.0.exe (imported 2026-09-29) and SkyrimSE-1.6.1170.0.exe (2026-10-04, from Steam's depot). CommonLib's names reach a program through just relid; its RTTI analyzer names classes and vtables from the binary. Powered on demand." tooltip="Source: docs/LAB.md:54 (Guests), :73-85 (sky-re)" id="re1-c1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col3">
+            <mxGeometry x="10" y="199" width="310" height="112" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Analysis runs only on sky-re&lt;/b&gt;&lt;br&gt;Ghidra, objdump, anything that reads the exe: never on the Proxmox host, not even read-only; the hypervisor is the estate's root of trust (2026-10-05). If pyghidra-mcp does not answer, stop and report; thuum-mundus brings sky-re up. Eli's rule: sky-re is down while both clients run." tooltip="Source: memory feedback-re-on-sky-re.md (2026-10-05, 2026-10-09); docs/LAB.md:604-605" id="re1-c3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col3">
+            <mxGeometry x="10" y="341" width="310" height="88" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;A read in the other program&lt;/b&gt;&lt;br&gt;Poison's static read (2026-10-12) was made in 1.7.104's bodies under the same Address Library ids: the 1.6.1170 program is still SteamStub-wrapped at rest, though its unwrapped sections agree on every function size checked. Every step stayed HYPOTHESIS until a Frida trace on 1.6.1170 (page 3)." tooltip="Source: docs/verbs/poison.md:41-47; lab/frida/poison-trace.js:1-4" id="re1-c4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col3">
+            <mxGeometry x="10" y="459" width="310" height="110" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re1-c4-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re1-c4">
+          <mxGeometry x="8" y="90" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;The re-analyst subagent&lt;/b&gt;" tooltip="Source: .claude/agents/re-analyst.md; CLAUDE.md:100-101" id="re1-col4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="1106" y="206" width="330" height="639" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;.claude/agents/re-analyst.md&lt;/b&gt;&lt;br&gt;For an engine surface still UNKNOWN or a side effect untagged. It reads and never writes source.&lt;br&gt;1. CommonLibSSE-NG headers first: a symbol there is answered with file:line, and it stops.&lt;br&gt;2. Otherwise the Ghidra MCP: strings and symbols, decompile the candidates, cross-references one level up and one down; rename only what it can prove.&lt;br&gt;3. Cross-check any address against addrlib/ for 1.6.1170; report the Address Library ID, never a raw RVA.&lt;br&gt;4. TiltedEvolution only for which function it hooks (rule 7, ADR-005)." tooltip="Source: .claude/agents/re-analyst.md:1-21; CLAUDE.md:76-77 (Hard rules 7), :100-101 (Workflow per verb 3)" id="re1-d1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col4">
+            <mxGeometry x="10" y="33" width="310" height="160" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Its whole answer: a hypothesis block&lt;/b&gt;&lt;br&gt;## Hypothesis: &amp;lt;verb&amp;gt; / &amp;lt;question&amp;gt;&lt;br&gt;• Candidate: a CommonLib name or an Address Library ID (confidence low, med or high)&lt;br&gt;• Evidence: strings, xrefs, CommonLib neighbors, callers&lt;br&gt;• Side effects (HYPOTHESIS)&lt;br&gt;• Suggested Frida trace: functions, args, the scenario step&lt;br&gt;• What would falsify this&lt;br&gt;Every address tagged HYPOTHESIS; nothing from memory; a tie returns both. The main session files it in the verb doc." tooltip="Source: .claude/agents/re-analyst.md:23-33; CLAUDE.md:100-101 (Workflow per verb 3)" id="re1-d2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col4">
+            <mxGeometry x="10" y="223" width="310" height="158" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re1-d2-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re1-d2">
+          <mxGeometry x="8" y="138" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Game records: lab/esm.py&lt;/b&gt;" tooltip="Source: lab/esm.py:2-8 (rule 1 in spirit)" id="re1-col5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="1468" y="206" width="330" height="639" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Master files on sky-srv&lt;/b&gt;&lt;br&gt;/srv/persist/esm for 1.7.104 and /srv/persist/esm/1.6.1170 for 1.6.1170 (ESM_DIR), from rpool/sky/persist. Licensed files never leave rpool/sky." tooltip="Source: docs/LAB.md:359-363 (Game versions: Server); lab/esm.py:6-8" id="re1-e1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="re1-col5">
+            <mxGeometry x="10" y="33" width="310" height="74" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab/esm.py, run on sky-srv&lt;/b&gt;&lt;br&gt;Reads a TES4 plugin's records by editor id, after UESP's Mod File Format: find, near, ref, id, races, attacks. The server's validators take game numbers from the master files, never from memory (rule 1 in spirit)." tooltip="Source: lab/esm.py:2-35" id="re1-e2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col5">
+            <mxGeometry x="10" y="137" width="310" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Read for dual casting (2026-10-12)&lt;/b&gt;&lt;br&gt;Flames' damage, MGEF 0x13CA9: a Value Modifier on Health (DATA EffectType 0, PrimaryAV 24). With a school's dual-casting perk (entry point 75) one overcharged cast: fMagicDualCastingEffectivenessBase 2.2 (GMST 0x361F6), fMagicDualCastingCostMult 2.8 (0x361F4). Without it, UESP: the same effectiveness as though cast normally, but twice." tooltip="Source: docs/verbs/spell-cast.md:499-519" id="re1-e3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-col5">
+            <mxGeometry x="10" y="243" width="310" height="100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;docs/verbs/&amp;lt;name&amp;gt;.md: the Engine surface, and the tags it carries (docs/VERB.md)&lt;/b&gt;" tooltip="Source: docs/VERB.md:21-25, :32, :38, :45, :85-95, :97-107" id="re1-f1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-1">
+            <mxGeometry x="20" y="885" width="1780" height="98" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re1-f1l" value="• CommonLibSSE-NG symbol(s): &amp;lt;path/to/header.h:line&amp;gt; or UNKNOWN&lt;br&gt;• Address Library ID(s): &amp;lt;from addrlib/, never from memory&amp;gt; or UNKNOWN&lt;br&gt;• If UNKNOWN: delegated to re-analyst on &amp;lt;date&amp;gt;; hypothesis block pasted below" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-f1">
+          <mxGeometry x="4" y="22" width="880" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-f1r" value="Observe, Impose and Suppress each close on &quot;Side effects: HYPOTHESIS | CONFIRMED (&amp;lt;run id&amp;gt;)&quot;. Status: engine surface cited or delegated; T3 scenario green, no HYPOTHESIS tags.&lt;br&gt;Reviewer checklist 2: does every address come from CommonLib, addrlib, or a Ghidra reference? 6: are the HYPOTHESIS tags gone, and were they cleared by evidence?" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-f1">
+          <mxGeometry x="896" y="22" width="880" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-f1-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re1-f1">
+          <mxGeometry x="8" y="78" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Reading CommonLibSSE-NG for 1.6.1170 (memory note, 2026-10-07)&lt;/b&gt;" tooltip="Source: memory commonlib-relocation-columns.md" id="re1-gcol">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="20" y="1019" width="560" height="273" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Two numbers in a comment: which overload?&lt;/b&gt;&lt;br&gt;REL::RelocateMember&amp;lt;T&amp;gt;(this, a, b) (REL/Relocation.h:633) takes a for SE and AE together and b for VR, and a header comment // 110, 138 is the same pair: NiNode::children 0x110, BSGeometry's runtime data 0x120 (not 0x160), NiAVObject::flags 0xF4 (not 0x10C)." tooltip="Source: memory commonlib-relocation-columns.md; CommonLibSSE-NG include/REL/Relocation.h:630-636; lab/frida/face-dump.js:45-60" id="re1-g1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-gcol">
+            <mxGeometry x="10" y="33" width="540" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;RelocateMemberIfNewer moves the comments&lt;/b&gt;&lt;br&gt;RelocateMemberIfNewer&amp;lt;T&amp;gt;(version, this, older, newer) picks newer on a runtime at or past version, and the field comments inside such a struct keep the older layout's offsets: Actor's runtime data starts at 0xE8 from 1.6.629 (Actor.h:712), so race /* 1F0 */ sits at 0x1F8 on 1.6.1170. TESObjectREFR's fixed members (data 0x40, loadedData 0x68) do not shift." tooltip="Source: memory commonlib-relocation-columns.md; CommonLibSSE-NG include/RE/A/Actor.h:712; lab/frida/face-dump.js:56" id="re1-g2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-gcol">
+            <mxGeometry x="10" y="109" width="540" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;And how it was learned&lt;/b&gt;&lt;br&gt;A NiTexture is a NiObject: its name sits at +0x20, a NiAVObject's at +0x10. Writing face-dump.js cost two attach rounds (2026-10-07): the first dump read VR and pre-1.6.629 offsets and walked nothing. When a header gives two numbers, check which overload the accessor uses before taking the second as AE." tooltip="Source: memory commonlib-relocation-columns.md (Why, How to apply); lab/frida/face-dump.js:36-60" id="re1-g3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-gcol">
+            <mxGeometry x="10" y="197" width="540" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Tonight's miss: where an Actor keeps its MagicTarget&lt;/b&gt;" tooltip="Source: docs/verbs/spell-cast.md:528-536; lab/frida/effect-stack-trace.js" id="re1-hcol">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="600" y="1019" width="600" height="377" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;effect-stack-trace.js read a comment&lt;/b&gt;&lt;br&gt;Its header: &quot;An Actor's MagicTarget at +0x98 on SE and AE (A/Actor.h:126; the second number there is VR's)&quot;. It took an effect's target actor as its MagicTarget* less 0x98, and checked that against ModifyActorValue's own Actor*." tooltip="Source: lab/frida/effect-stack-trace.js:15-17, :31, :71-84, :118-133" id="re1-h1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-hcol">
+            <mxGeometry x="10" y="33" width="580" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;x-dual-stack, run 20261013-061434: the check failed&lt;/b&gt;&lt;br&gt;A MagicTarget at Actor+0x98 read no form id on 1.6.1170. The stacking result stood on other evidence: all three effects read the same target field, and the first ModifyActorValue named the figure (ff00081d) as its own Actor. The offset was left to pin in a later run." tooltip="Source: docs/verbs/spell-cast.md:528-536; lab/results/20261013-061434-x-dual-stack.json" id="re1-h2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-hcol">
+            <mxGeometry x="10" y="111" width="580" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;What the header says&lt;/b&gt;&lt;br&gt;That comment, 098, 0A0, sits in the base list compiled without ENABLE_SKYRIM_AE (Actor.h:124-131). The accessor AsMagicTarget is RelocateMemberIfNewer(SKSE::RUNTIME_SSE_1_6_629, this, 0x98, 0xA0) (Actor.h:720-721): older and newer, not SE-and-AE and VR. By that reading 0xA0 on 1.6.1170, and MEASURED: in x-dual-cast3 (run 20261013-082306) the target field sat 160 (0xA0) past ModifyActorValue&#39;s own Actor*; the script now reads +0xA0 (thuum 444238d)." tooltip="Source: CommonLibSSE-NG include/RE/A/Actor.h:123-135, :720-725; lab/frida/effect-stack-trace.js (header); run 20261013-082306-x-dual-cast3, frida/c1-effect-stack-trace.js.jsonl (magicTargetInActor 160)" id="re1-h3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-hcol">
+            <mxGeometry x="10" y="201" width="580" height="86" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re1-h3-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re1-h3">
+          <mxGeometry x="8" y="66" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Measured, not read: thuum 101c71b&lt;/b&gt;&lt;br&gt;The script now prints magicTargetInActor, the effect's target field less ModifyActorValue's own Actor*, with its first modify; probe x-dual-cast3 runs it (no result yet)." tooltip="Source: git log 101c71b (2026-10-12 23:46 PDT); lab/frida/effect-stack-trace.js:121-133; session scratchpad x-dual-cast3.yaml:9-10; lab/results (no x-dual-cast3 run)" id="re1-h4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-hcol">
+            <mxGeometry x="10" y="313" width="580" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Hard rule 8 (CLAUDE.md): what is left goes to the lab&lt;/b&gt;&lt;br&gt;Blocked on in-game behavior: write the Dynamic section of the verb doc (Frida script or breakpoint plan plus expected observations) and stop. Do not guess and do not loop on it. Page 2." tooltip="Source: CLAUDE.md:78-80 (Hard rules 8); docs/VERB.md:77-83" id="re1-f2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-1">
+            <mxGeometry x="1220" y="1019" width="580" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Why the scripts check offsets at runtime&lt;/b&gt;" tooltip="Source: lab/frida/*.js headers; lab/frida/README.md" id="re1-icol">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re1-1">
+            <mxGeometry x="1220" y="1095" width="580" height="185" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Offsets per exe file version&lt;/b&gt;&lt;br&gt;console-trace, launch-trace, poison-trace, effect-stack-trace and hud-trace keep each offset per runtime with its Address Library id beside it, and read SkyrimSE.exe's own file version (GetFileVersionInfoW, VS_FIXEDFILEINFO), as SKSE does. Another build gets an error line (&quot;no offsets for this runtime&quot;) and no hook." tooltip="Source: lab/frida/console-trace.js:11-22, :52-57; launch-trace.js:18-20; poison-trace.js:35-44, :75-79; effect-stack-trace.js:35-39, :86-90; hud-trace.js:20-25, :63-67" id="re1-i1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-icol">
+            <mxGeometry x="10" y="33" width="560" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Checks against the running game&lt;/b&gt;&lt;br&gt;face-dump.js checks the player singleton's class name first and refuses to run when the module is not 1.6.1170; effect-stack-trace.js checks its derived target against the call's own Actor. A script that throws at load prints its error in the first lines of its .out: read them right after attaching." tooltip="Source: lab/frida/face-dump.js:20-23; lab/frida/effect-stack-trace.js:118-133; lab/frida/README.md:91-93" id="re1-i2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re1-icol">
+            <mxGeometry x="10" y="109" width="560" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re1-ea1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-a1" target="re1-a2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ea2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-a2" target="re1-a3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eab" value="ids" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-a1" target="re1-b4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eb45" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-b4" target="re1-b5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eb12" value="read" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-b1" target="re1-b2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eb23" value="an id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-b2" target="re1-b3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ebc" value="names" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-b5" target="re1-c1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ec21" value="MCP" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-c2" target="re1-c1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ecd" value="reads" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-c1" target="re1-d1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ed12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-d1" target="re1-d2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ee12" value="read in place" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-e1" target="re1-e2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ee23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-e2" target="re1-e3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eaf" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.0927;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-a3" target="re1-f1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ebf" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2961;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-b3" target="re1-f1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-edf" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7028;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-d2" target="re1-f1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eef" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.9062;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-e3" target="re1-f1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-ef12" value="a tag still HYPOTHESIS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.8371;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;dashPattern=8 4;" edge="1" parent="re1-1" source="re1-f1" target="re1-f2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eh12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-h1" target="re1-h2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eh23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-h2" target="re1-h3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1-eh34" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re1-1" source="re1-h3" target="re1-h4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="thuum-re-p2" name="2 Dynamic">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1386" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="re2-0" />
+        <mxCell id="re2-1" parent="re2-0" />
+        <mxCell id="re2-title" value="&lt;b&gt;Dynamic RE: Frida traces and lab probes&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="Baseline as page 1, 2026-10-13. A tag still HYPOTHESIS becomes the verb doc's Dynamic plan; the plan becomes a Frida script, a probe, or both; a run measures it; the verb doc then records CONFIRMED with the run id, keeps the HYPOTHESIS, or files a fix. Hover a shape for its source." tooltip="Source: docs/VERB.md:77-83; docs/LAB.md:587-605 (Dynamic RE lane); CLAUDE.md:94-111 (Workflow per verb); git log (thuum f54651c; skymp parity c918a7a1, m2-poison 40ed43a5, m2-visuals 31b56fc9); CLAUDE.md:47-51 (Workspace layout); justfile:12 (runtime); docs/DECISIONS.md ADR-025" id="re2-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="20" y="50" width="1190" height="45" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re2-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re2-1">
+          <mxGeometry x="1230" y="14" width="570" height="168" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-lt0" value="Lab: lab-api, lab-driver, Frida, guests" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="46" y="26" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#DDDDDD;strokeColor=#4D4D4D;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="10" y="50" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-lt1" value="Game engine: SkyrimSE.exe on a client" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="46" y="48" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="10" y="72" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-lt2" value="Files: probes, scenarios, run results" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="46" y="70" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="10" y="94" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-lt3" value="A verb doc" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="46" y="92" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-l4" value="" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="10" y="116" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-lt4" value="A hard rule or decision record" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="46" y="114" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-ea0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="296" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-eb0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="326" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-leg-ea0" target="re2-leg-eb0">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-rt0" value="a step, a call or an artifact" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="332" y="26" width="228" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-bd0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re2-leg">
+          <mxGeometry x="10" y="140" width="73" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-bt0" value="read, not yet measured (rule 2)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="85" y="138" width="201" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-bd1" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re2-leg">
+          <mxGeometry x="296" y="140" width="69" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-leg-bt1" value="measured by a run or a trace" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-leg">
+          <mxGeometry x="367" y="138" width="193" height="20" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Hard rule 8 (CLAUDE.md)&lt;/b&gt;&lt;br&gt;Blocked on in-game behavior: write the Dynamic section of the verb doc (Frida script or breakpoint plan plus expected observations) and stop. Do not guess and do not loop on it. Workflow 7: still unconfirmed after one lab run, hand the Dynamic plan to Eli and wait." tooltip="Source: CLAUDE.md:78-80 (Hard rules 8), :110 (Workflow per verb 7)" id="re2-rule8">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="20" y="105" width="386" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;ADR-004: Frida for the agent, x64dbg for humans&lt;/b&gt;&lt;br&gt;Frida scripts that hook by Address Library ID and log to jsonl can be written by the agent from a verb doc and run by the scenario runner unattended. Human breakpoint sessions are reserved for questions that need eyes." tooltip="Source: docs/DECISIONS.md:51-58 (ADR-004)" id="re2-adr4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="421" y="105" width="386" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;ADR-009 and hard rule 13&lt;/b&gt;&lt;br&gt;The scenario runner is the only thing that marks green; neither the agent nor a human marks a verb done by hand. Scenario YAML goes in commits of its own that Eli reviews; never turn a scenario green by weakening its assertions." tooltip="Source: docs/DECISIONS.md:99-105 (ADR-009); CLAUDE.md:90-92 (Hard rules 13)" id="re2-adr9">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="822" y="105" width="388" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;The verb doc's Dynamic plan (docs/VERB.md)&lt;/b&gt;&lt;br&gt;Filled while any tag is HYPOTHESIS: the Frida script, lab/frida/&amp;lt;name&amp;gt;.js (functions by Address Library ID, the args and return values to log, the scenario step that triggers them), or a breakpoint plan for a human session (function, condition, what to watch, the value that holds and the one that falsifies). Owner: agent (Frida) or Eli (x64dbg)." tooltip="Source: docs/VERB.md:77-83; docs/LAB.md:591-602 (Dynamic RE lane)" id="re2-m0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="20" y="210" width="520" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;A probe: x-&amp;lt;name&amp;gt;.yaml, run by path&lt;/b&gt;&lt;br&gt;just lab-run &amp;lt;path&amp;gt;: an exploratory x- probe, which never lives in lab/scenarios (ADR-009). One question each, kept in the session's scratchpad: x-dual-stack, x-reteach-probe, x-poison-probe3 to 6. With no assertions, green only says every step ran." tooltip="Source: justfile:150-154 (lab-run); session scratchpad x-*.yaml; lab/labapi/labapi/runner.py:162 (verdict)" id="re2-p1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=note;size=12;boundedLbl=1;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="210" width="560" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;A scenario: lab/scenarios/&amp;lt;id&amp;gt;.yaml&lt;/b&gt;&lt;br&gt;The T3 proof of a verb (smoke-, m0-, a-, b- and one t2-). Its own commit, which Eli reviews; CI refuses a commit that mixes scenario YAML with other files. b-poison went green twice by path, then was committed alone (de09fdc), awaiting review." tooltip="Source: CLAUDE.md:90-92; docs/LAB.md:568-571; lab/README.md (scenarios); git log de09fdc" id="re2-p2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=note;size=12;boundedLbl=1;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="294" width="560" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;One run: just lab-run &amp;lt;scenario or path&amp;gt; [game]&lt;/b&gt;&lt;br&gt;POST /lab/run; the run id is &amp;lt;UTC stamp&amp;gt;-&amp;lt;scenario id&amp;gt;. The server's world/ comes back from the scenario's snapshot, the clients are rolled back and started, and each SkyrimSE.exe's version is checked. Then the steps in order: client steps through lab-driver (GET /lab/step), server steps through the gamemode's labCommand, and screenshot, relaunch and frida by lab-api itself; then the assertions, the artifacts and result.json. The exit code is the verdict: green, red or error." tooltip="Source: justfile:154-195 (lab-run); lab/labapi/labapi/runner.py:110-170, :480-495; lab/labapi/labapi/scenario.py:15-27; docs/LAB.md:520-552" id="re2-r1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="1180" y="210" width="620" height="148" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab/frida: the scripts (Frida 17 API)&lt;/b&gt;" tooltip="Source: lab/frida/README.md; lab/frida/*.js headers" id="re2-cola">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re2-1">
+            <mxGeometry x="20" y="404" width="520" height="657" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re2-ga0" value="&lt;b&gt;Engine functions by Address Library id, offsets per exe file version&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+          <mxGeometry x="6" y="33" width="508" height="18" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;console-trace.js&lt;/b&gt; Every line the game's console prints, timed: RE::ConsoleLog::VPrint (RELOCATION_ID(50180, 51110)), 1.6.1170 and 1.7.104. Keeps skymp5-client's logTrace and logError." tooltip="Source: lab/frida/README.md:34-38; lab/frida/console-trace.js:1-22" id="re2-s00">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="51" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;launch-trace.js&lt;/b&gt; Every Projectile::Launch (44108) with a backtrace, and whether a SkyrimPlatformImpl.dll frame is in it or the engine launched alone: playtest thirteen's two arrows." tooltip="Source: lab/frida/README.md:40-45; lab/frida/launch-trace.js:1-14" id="re2-s01">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="99" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;poison-trace.js&lt;/b&gt; The poison box's opener (40481) and callback (40482), PoisonObject (16024), the PoisonedWeapon send (41044), the equip send (38386). With {ANSWER_YES: true} it answers Yes and keeps the box shut." tooltip="Source: lab/frida/README.md:62-68; lab/frida/poison-trace.js:1-31" id="re2-s02">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="147" width="500" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;effect-stack-trace.js&lt;/b&gt; Whether two streams of one spell from one caster both work on one target: ValueModifierEffect's Update and ModifyActorValue through its vtable (206143), per effect object, counted every 500 ms; params {SPELL}." tooltip="Source: lab/frida/README.md:70-76; lab/frida/effect-stack-trace.js:1-31" id="re2-s03">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="207" width="500" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;hud-trace.js&lt;/b&gt; What the HUD shows and who asked: UIMessageQueue::AddMessage (13631) and DebugNotification (52933), each with its caller's frames as module+offset." tooltip="Source: lab/frida/README.md:78-84; lab/frida/hud-trace.js:1-16" id="re2-s04">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="267" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re2-ga1" value="&lt;b&gt;Windows exports, no engine offsets&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+          <mxGeometry x="6" y="321" width="508" height="18" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;exit-trace.js&lt;/b&gt; Who ends the process: a first-chance exception handler (module+offset, backtrace, registers) and hooks on every orderly exit path. Found the 1.7.104 appearance crash (2026-10-01)." tooltip="Source: lab/frida/README.md:21-25; lab/frida/exit-trace.js:1-7" id="re2-s10">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="339" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;handle-trace.js&lt;/b&gt; Who leaks handles: the stacks of Event handles (NtCreateEvent, NtOpenEvent) still open after 10 s, every 30 s. Found the idle client's WinHTTP leak (2026-10-05)." tooltip="Source: lab/frida/README.md:26-33; lab/frida/handle-trace.js:1-10" id="re2-s11">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="387" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;texture-trace.js&lt;/b&gt; Every .dds path the game opens through KernelBase's CreateFileW and CreateFileA, and whether Windows found it loose (rotfern's shine, 2026-10-07)." tooltip="Source: lab/frida/texture-trace.js:1-12" id="re2-s12">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="435" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re2-ga2" value="&lt;b&gt;No hooks: samples and reads&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+          <mxGeometry x="6" y="489" width="508" height="18" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;thread-sample.js&lt;/b&gt; Where a busy or stuck game spends its time: every thread's instruction pointer twenty times in two seconds (rotfern's RaceMenu freeze, 2026-10-07)." tooltip="Source: lab/frida/thread-sample.js:1-6" id="re2-s20">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="507" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;settings-read.js&lt;/b&gt; Game settings' live values, found by name rather than address, so version-independent (activation-reach.md: confirm the re-analyst's defaults)." tooltip="Source: lab/frida/settings-read.js:1-7" id="re2-s21">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="555" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;face-dump.js&lt;/b&gt; A read-only walk of the player's and every figure's loaded 3D: per face geometry its shader flags, material and textures' live D3D11 formats. Found rotfern's gloss." tooltip="Source: lab/frida/README.md:47-60; lab/frida/face-dump.js:1-25" id="re2-s22">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-cola">
+            <mxGeometry x="10" y="603" width="500" height="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;By hand: just frida &amp;lt;script&amp;gt; &amp;lt;client&amp;gt;&lt;/b&gt;&lt;br&gt;POST /lab/frida with the client and an uploaded file (kept in lab/frida/uploads) or a script name under lab/frida; beside a run or outside one." tooltip="Source: justfile:136-138 (frida); lab/labapi/labapi/app.py:256-281" id="re2-m1a">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="404" width="270" height="88" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;At a step: frida {script, params}&lt;/b&gt;&lt;br&gt;- c2: frida {script: poison-trace.js, params: {ANSWER_YES: true}}. With params, _frida_start writes uploads/&amp;lt;stem&amp;gt;-&amp;lt;run&amp;gt;-&amp;lt;index&amp;gt;.js with globalThis.LAB_PARAMS = {...}; prepended (thuum d857159, 2026-10-12)." tooltip="Source: lab/labapi/labapi/runner.py:701-739; lab/scenarios/b-poison.yaml:38; git log d857159" id="re2-m1b">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="870" y="404" width="270" height="88" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab-api serves the script&lt;/b&gt;&lt;br&gt;GET /lab/frida/scripts/&amp;lt;name&amp;gt;, from lab/frida and then its uploads; the clients pull it inside the VLAN from http://10.10.70.10/lab." tooltip="Source: lab/labapi/labapi/app.py:246-254; lab/labapi/labapi/config.py:95-96" id="re2-m2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="526" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;A guest exec starts the watcher&lt;/b&gt;&lt;br&gt;Through the Proxmox guest agent, PowerShell downloads the script to C:\sky-lab\frida\&amp;lt;name&amp;gt;, writes C:\sky-lab\run.ps1 and starts the sky-lab-run task: the injector must run in the lab user's session, the game's (as SYSTEM it &quot;refused to load frida-agent&quot;, 2026-10-05)." tooltip="Source: lab/labapi/labapi/config.py:113-129; lab/frida/README.md:13-15" id="re2-m3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="608" width="560" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;run.ps1 attaches frida-inject&lt;/b&gt;&lt;br&gt;It waits for SkyrimSE, then five seconds more (attaching at process start once never loaded the agent), and runs frida-inject.exe -p &amp;lt;pid&amp;gt; -s &amp;lt;name&amp;gt;, stdout to C:\sky-lab\frida\&amp;lt;name&amp;gt;.out. frida-inject 17.19.0 for Windows x86_64 is staged in C:\sky-lab\frida by just client-frida &amp;lt;vmid&amp;gt;, its SHA-256 checked." tooltip="Source: lab/labapi/labapi/config.py:122-127; lab/frida/README.md:5-12; lab/tools/client-frida.sh; justfile:385-386 (client-frida)" id="re2-m4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="702" width="560" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;The script inside SkyrimSE.exe&lt;/b&gt;&lt;br&gt;An engine script picks its offsets by the exe's file version or refuses; each hooks with Interceptor.attach and prints JSON lines to stdout (console.log). Hooks do not fire for calls made inside another hook (x-poison-probe3). A script that walked the stack on every memory commit never reported: hook rarer functions, or sample." tooltip="Source: lab/frida/README.md:17-19, :93-95; docs/verbs/poison.md:220-233; lab/frida/effect-stack-trace.js:86-91" id="re2-m5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="796" width="560" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Collected with the run&lt;/b&gt;&lt;br&gt;At the artifacts phase _frida_trace copies each .out with a read that shares write access (the injector still holds it) and keeps frida/&amp;lt;client&amp;gt;-&amp;lt;script&amp;gt;.jsonl; a trace started outside a run is fetched before the next rollback as frida/&amp;lt;client&amp;gt;-&amp;lt;script&amp;gt;.before-run.jsonl. A trace ends with the game: never kill frida-inject under a running game (2026-10-05: sky-c1 crashed ten minutes later in frida-agent.dll_unloaded)." tooltip="Source: lab/labapi/labapi/runner.py:402-413, :802-804, :840-864; lab/frida/README.md:86-93" id="re2-m6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="890" width="560" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab-driver.js in the game: the observing steps&lt;/b&gt;" tooltip="Source: lab/driver/src/index.ts; docs/LAB.md:381-436" id="re2-colc">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re2-1">
+            <mxGeometry x="1180" y="404" width="620" height="433" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="A Skyrim Platform plugin: polls lab-api every tick, runs each step on an update, posts its result; the answer rides in the step's note." tooltip="Source: lab/driver/README.md; lab/driver/src/index.ts; docs/LAB.md:381" id="re2-w0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-colc">
+            <mxGeometry x="6" y="33" width="608" height="28" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;watch-start, watch-stop&lt;/b&gt;&lt;br&gt;From one to the other the client follows every actor near it each frame. A figure: first and last position, maxDisplacement, its largest move between two frames and when (maxStep, maxStepMs), health and magicka on change, its stagger, recoil, shout, bow, arrow, sneak, MRh_, MLh_ and BeginCast events with 1 if its graph took the event, and the graph bools named.&lt;br&gt;self, the player's own side, stamped in ms since watch-start: magicka and health, each animation event sent to its graph, each spell cast, each hit dealt as [ms, target, source, projectile, flags: power 1, sneak 2, bash 4, blocked 8], each hit taken, each magic effect applied." tooltip="Source: lab/driver/src/index.ts:165-214 (Watched, WatchedSelf), :382-441 (trackWatch), :443-498 (events), :1349-1384; git log ef3f95a, b915f1b; docs/LAB.md:411-424" id="re2-w1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-colc">
+            <mxGeometry x="10" y="63" width="600" height="100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;dump-state&lt;/b&gt;&lt;br&gt;The player's own state: position and angle, health, magicka, stamina, down, the controls enabled, the menus open, the hands, the game time, and the actors near it with their distance." tooltip="Source: lab/driver/src/index.ts:514-560 (dumpState), :257-272 (time globals); docs/LAB.md:390-391" id="re2-w2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-colc">
+            <mxGeometry x="10" y="173" width="600" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;console {text, match}&lt;/b&gt;&lt;br&gt;A line typed into the game's own console a key at a time (Input.TapKey); the note carries every line the console printed in the next 2.5 s, the server's ConsoleOutput included, and with match the last 20 matching lines since the game started, where skymp5-client's logError and logTrace go." tooltip="Source: lab/driver/src/index.ts:1495-1523, :740-748, :1669-1672; docs/LAB.md:428-436; memory skyrim-platform-native-rules.md" id="re2-w3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-colc">
+            <mxGeometry x="10" y="235" width="600" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;known {ids}, poisons&lt;/b&gt;&lt;br&gt;known: an ingredient's known effects as a mask, bit i for effect i, and 1 for a word of power that game has unlocked. poisons: each poisoned stack in the inventory as the game keeps it: the item, the poison, its count, worn right or left." tooltip="Source: lab/driver/src/index.ts:811-836 (known), :932-954 (poisons); docs/LAB.md:424-428" id="re2-w4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-colc">
+            <mxGeometry x="10" y="309" width="600" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;screenshot&lt;/b&gt;&lt;br&gt;A guest exec on a managed client, kept as screenshots/&amp;lt;index&amp;gt;-&amp;lt;client&amp;gt;.png (request-screenshot in the game is the fallback). One to three seconds each through the guest agent: too slow to time a one-second stream, which is why the watch stamps ms." tooltip="Source: lab/labapi/labapi/runner.py:741-768; docs/LAB.md:450-451; docs/verbs/spell-cast.md:312-313; lab/driver/src/index.ts:189-192" id="re2-w5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-colc">
+            <mxGeometry x="10" y="371" width="600" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;lab-api's assertions over the answers&lt;/b&gt;&lt;br&gt;Each client step's answer is its note in result.json, cut at 800 characters and kept whole in steps/. The assertions read the server and the clients' last answers: server.actor(c), server.inventory(c), server.effects(c); c.state, c.sees(other), c.view(other); c.watched(other) (maxDisplacement, samples, drainMs, took('staggerStart'), sent(), ever()); c.watched_self() (saw(), ever()); c.known(id), c.poison(id), c.marker(id), c.favorite(id), c.projectile(id); and form(&quot;File.esm:EditorID&quot;) through the item table." tooltip="Source: docs/LAB.md:476-514; lab/labapi/labapi/runner.py:262-276; lab/labapi/labapi/assertions.py" id="re2-asrt">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="1180" y="873" width="620" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;/srv/lab/results/&amp;lt;run&amp;gt;/ on sky-srv, browsed at https://thuum.gaussing.tv/results/&amp;lt;run&amp;gt;/&lt;/b&gt;&lt;br&gt;result.json (phases, each step with the brief of its answer, failures, artifacts, notes); steps/&amp;lt;index&amp;gt;-&amp;lt;client&amp;gt;-&amp;lt;action&amp;gt;.json (an answer longer than result.json's 800 characters); server.log (this run's lines alone); c1.log and c1-driver.log (Skyrim Platform's and lab-driver's); screenshots/; frida/&amp;lt;client&amp;gt;-&amp;lt;script&amp;gt;.jsonl; on request lab.pcap, world-before/, world-after/ and world-diff. just lab-run keeps result.json as lab/results/&amp;lt;run&amp;gt;.json on the Mac." tooltip="Source: lab/labapi/labapi/runner.py:38-41 (_brief), :73-87 (to_result), :262-276, :775-807; lab/labapi/labapi/config.py:68; docs/LAB.md:554-558, :106-107; lab/README.md (results/); justfile:154-195" id="re2-s1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;spacingTop=12;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="1107" width="1220" height="62" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Read the run (workflow 6), with readers kept in the session scratchpad&lt;/b&gt;&lt;br&gt;stack-read.py: effect-stack-trace.js's windows, grouped into phases. vis-read.py: each watch-stop (figures' maxStep and events; the player's hits with their fields), dump-state, the asserts, the frida lines and the server's cast, hit and shout lines. read-dumps.py: the newest run's dump-state and watch-stop files, over ssh to sky-srv. crouch-read.py: the player's own SneakStart and SneakStop against the figure's, on two clocks." tooltip="Source: CLAUDE.md:107-109 (Workflow per verb 6); session scratchpad stack-read.py, vis-read.py, read-dumps.py, crouch-read.py" id="re2-q">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="580" y="1215" width="560" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;The outcome, written in the verb doc&lt;/b&gt;" tooltip="Source: docs/VERB.md:32, :38, :45; CLAUDE.md:107-110, :155-160" id="re2-outc">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re2-1">
+            <mxGeometry x="1180" y="1215" width="620" height="141" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;CONFIRMED (&amp;lt;run id&amp;gt;)&lt;/b&gt;&lt;br&gt;The tag names its evidence: &quot;CONFIRMED (Frida, x-dual-stack 20261013-061434)&quot;." tooltip="Source: docs/VERB.md:32, :38, :45; docs/verbs/spell-cast.md:509-511" id="re2-o1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-outc">
+            <mxGeometry x="10" y="33" width="193.3333" height="98" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re2-o1-b0" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re2-o1">
+          <mxGeometry x="8" y="78" width="69" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Still HYPOTHESIS&lt;/b&gt;&lt;br&gt;Say so, with what the run did show, and plan the next probe; after one run, the Dynamic plan goes to Eli (workflow 7)." tooltip="Source: CLAUDE.md:110, :157-160; docs/verbs/poison.md:220-233" id="re2-o2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-outc">
+            <mxGeometry x="213.3333" y="33" width="193.3333" height="98" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re2-o2-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re2-o2">
+          <mxGeometry x="8" y="78" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;A fix&lt;/b&gt;&lt;br&gt;On a fork branch, inside-out: server logic and T0, the message and validator, the hook, the TS handler; T2; then a probe on the new build and a scenario." tooltip="Source: CLAUDE.md:102-106 (Workflow per verb 4, 5); memory thuum-m2-poison-visuals.md" id="re2-o3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-outc">
+            <mxGeometry x="416.6667" y="33" width="193.3333" height="98" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Where this runs among the tiers (CLAUDE.md)&lt;/b&gt;&lt;br&gt;• T1 host-less native: CommonLib-based plugin code against the SkyrimSE.exe module outside the game; proves offsets and layouts resolve.&lt;br&gt;• T3 lab: two Windows clients plus the server, the only tier that proves a verb. Probes, scenarios and Frida traces run here, unattended.&lt;br&gt;• T4 human: breakpoints and visual judgment. LAB.md's human lane: x64dbg on a sky-dbg snapshot of sky-c1, the verb doc's breakpoint plan its script, Moonlight to watch." tooltip="Source: CLAUDE.md:142-155 (Testing tiers); docs/LAB.md:591-602 (Dynamic RE lane)" id="re2-tiers">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re2-1">
+            <mxGeometry x="20" y="1107" width="520" height="100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re2-em0p" value="a probe" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.4211;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m0" target="re2-p1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-em0a" value="a script" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m0" target="re2-cola">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-ep1r" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2162;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-p1" target="re2-r1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-ep2r" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.7838;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-p2" target="re2-r1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-eam2" value="served" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.2253;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-cola" target="re2-m2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-er1m" value="a frida step" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.12;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-r1" target="re2-m1b">
+          <mxGeometry x="0" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1254.4" y="382" />
+              <mxPoint x="1005" y="382" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="re2-er1w" value="GET /lab/step" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-r1" target="re2-colc">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-em1a" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2411;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m1a" target="re2-m2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-em1b" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7589;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m1b" target="re2-m2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-ec0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m2" target="re2-m3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-ec1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m3" target="re2-m4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-ec2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m4" target="re2-m5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-ec3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m5" target="re2-m6">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-em6s" value="frida/*.jsonl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2295;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-m6" target="re2-s1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-ewa" value="the answers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-colc" target="re2-asrt">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-eas" value="notes, verdicts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7459;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-asrt" target="re2-s1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-esq" value="read" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.2295;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-s1" target="re2-q">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2-eqo" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2695;entryDx=0;entryDy=0;" edge="1" parent="re2-1" source="re2-q" target="re2-outc">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="thuum-re-p3" name="3 Three loops, 2026-10-12 and 13">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1285" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="re3-0" />
+        <mxCell id="re3-1" parent="re3-0" />
+        <mxCell id="re3-title" value="&lt;b&gt;Three loops, 2026-10-12 and 13&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="Worked examples from the night before playtest fifteen. Each lane reads left to right: what a playtest or a probe found, the static lead, the trace or probe that measured it, the fix on a fork branch (dashed: in flight on m2-poison 40ed43a5 and m2-visuals 31b56fc9, both stacked on parity c918a7a1), and the probe or scenario that checks it. Run ids are UTC stamps. Hover a shape for its source." tooltip="Source: docs/verbs/spell-cast.md:430-560; docs/verbs/shouts.md:408-464; docs/verbs/poison.md:167-273; memory thuum-m2-poison-visuals.md; lab/labapi/labapi/runner.py:117 (run id stamp, UTC); git log (thuum f54651c; skymp parity c918a7a1, m2-poison 40ed43a5, m2-visuals 31b56fc9); CLAUDE.md:47-51 (Workspace layout); justfile:12 (runtime); docs/DECISIONS.md ADR-025" id="re3-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-1">
+            <mxGeometry x="20" y="50" width="1190" height="45" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re3-1">
+          <mxGeometry x="1230" y="14" width="570" height="212" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-lt0" value="Lab: a probe, a trace, a static read" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="46" y="26" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#DDDDDD;strokeColor=#4D4D4D;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="50" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-lt1" value="Engine map: CommonLibSSE-NG" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="46" y="48" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="72" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-lt2" value="Rust: skymp-wire, wire-rules" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="46" y="70" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="94" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-lt3" value="C++ core: the server" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="46" y="92" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-l4" value="" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="116" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-lt4" value="Skyrim Platform, skymp5-client" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="46" y="114" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-l5" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="138" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-lt5" value="Files: a scenario" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="46" y="136" width="236" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-ea0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="296" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-eb0" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="326" y="36" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-leg-ea0" target="re3-leg-eb0">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-rt0" value="led to the next step" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="332" y="26" width="228" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-d1" value="" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="re3-leg">
+          <mxGeometry x="296" y="50" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-rt1" value="dashed: on a fork branch, in flight" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="332" y="48" width="228" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-bd0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="162" width="73" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-bt0" value="read, not yet measured (rule 2)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="85" y="160" width="201" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-bd1" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-leg">
+          <mxGeometry x="296" y="162" width="69" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-bt1" value="measured by a run or a trace" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="367" y="160" width="193" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-bd2" value="&lt;b&gt;NOT RUN YET&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#A6A6A6;strokeColor=#808080;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-leg">
+          <mxGeometry x="10" y="184" width="76" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-leg-bt2" value="written, no result yet" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-leg">
+          <mxGeometry x="88" y="182" width="198" height="20" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;The shape every loop took&lt;/b&gt;&lt;br&gt;Static first (hard rule 1), as a lead only (rule 2); then a probe run by path, with a Frida script beside it or at one of its steps (rule 8, ADR-004); the verb doc records CONFIRMED with the run id or keeps the HYPOTHESIS; a fix goes on a fork branch; a probe on the new build, then a scenario, checks it (ADR-009)." tooltip="Source: CLAUDE.md:61-67, :78-80, :94-111; docs/DECISIONS.md ADR-004, ADR-009; docs/LAB.md:587-605" id="re3-key">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-1">
+            <mxGeometry x="20" y="105" width="1190" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;a. Dual casting&lt;/b&gt;" tooltip="Source: docs/verbs/spell-cast.md (Playtest fourteen)" id="re3-la">
+          <mxCell style="swimlane;horizontal=0;startSize=34;html=1;whiteSpace=wrap;fillColor=#FFFFFF;swimlaneFillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;fontStyle=1;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re3-1">
+            <mxGeometry x="20" y="250" width="1780" height="300" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Eli, 2026-10-12: &quot;we'll also have to account for dual casting as well&quot;. The client reports isDualCasting and the server never read it. How many streams does the game run for two hands of one spell, and how many does the server count?" tooltip="Source: docs/verbs/spell-cast.md:455-466" id="re3-la-cap">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-la">
+            <mxGeometry x="44" y="8" width="1720" height="30" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1 Probe x-dual-cast, run 20261013-054049&lt;/b&gt;&lt;br&gt;On parity c918a7a1, c1 held Flames in both hands (Home and End, 4 s each, 234 ms apart) at c2 150 units ahead: two casts, not a dual cast, with no perk and no common press. c1's game charged both (24.2 magicka a second with both hands) and raised a hit series per hand every 200 ms, each event twice. The client sent one series: hitService.ts drops a caster's magic hit within 100 ms of its last. The server counted one stream, 19 hits and 3.63 stream-seconds (casts.rs claim() gives a hit to the first open stream of its spell). c2 lost 8.1 Health a second, ending at 0.734, inside b-spell's one-stream band." tooltip="Source: docs/verbs/spell-cast.md:467-498; session scratchpad x-dual-cast.yaml; lab/results/20261013-054049-x-dual-cast.json" id="re3-a1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-la">
+            <mxGeometry x="44" y="44" width="261.6667" height="212" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;2 The static lead&lt;/b&gt;&lt;br&gt;CommonLibSSE-NG annotates ValueModifierEffect's GetAllowMultipleCastingSourceStacking (vfunc 0x11, V/ValueModifierEffect.h:18) as { return 1; }, where ActiveEffect's (A/ActiveEffect.h:79) is { return 0; }: a value modifier from each hand would stack. Flames' damage, MGEF 0x13CA9, is a Value Modifier on Health (lab/esm.py). UESP: without the perk, the same effectiveness as though cast normally, but twice; a forum answer had said a fire spell's effect overwrites itself." tooltip="Source: docs/verbs/spell-cast.md:499-519; CommonLibSSE-NG include/RE/V/ValueModifierEffect.h:18, include/RE/A/ActiveEffect.h:79; lab/frida/effect-stack-trace.js:1-11" id="re3-a2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-la">
+            <mxGeometry x="335.6667" y="44" width="261.6667" height="212" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-a2-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-a2">
+          <mxGeometry x="8" y="192" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;3 Frida: effect-stack-trace.js in probe x-dual-stack, run 20261013-061434&lt;/b&gt;&lt;br&gt;In c1's game, on ValueModifierEffect's Update (vfunc 0x04) and ModifyActorValue (0x20) through its vtable, Address Library 206143. The right hand alone: one Flames effect on c2's figure (castingSource 1, magnitude -8), about 26 calls of each per 500 ms. Both hands: two effect objects at once, hands 1 and 0, each modifying about 25 times per 500 ms through 4.5 s. Its offset check failed at Actor+0x98 (page 1)." tooltip="Source: docs/verbs/spell-cast.md:509-536; lab/frida/effect-stack-trace.js; session scratchpad x-dual-stack.yaml, stack-read.py; lab/results/20261013-061434-x-dual-stack.json (frida/c1-effect-stack-trace.js.jsonl)" id="re3-a3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-la">
+            <mxGeometry x="627.3333" y="44" width="261.6667" height="212" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-a3-b0" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-a3">
+          <mxGeometry x="8" y="192" width="69" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;4 Fix, fork m2-visuals&lt;/b&gt;" tooltip="Source: skymp git log m2-visuals; docs/verbs/spell-cast.md:537-556; memory thuum-m2-poison-visuals.md" id="re3-a4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re3-la">
+            <mxGeometry x="919" y="44" width="261.6667" height="212" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;wire-rules casts, 1abfda55&lt;/b&gt;&lt;br&gt;With a stream of one spell in each hand, a hit claims the stream whose last counted hit is oldest, so each hand's stream counts its own time; a hand that misses lets the other count at most a tick more (MAX_TICK_MS)." tooltip="Source: skymp git log m2-visuals 1abfda55 (2026-10-12 23:39 PDT); docs/verbs/spell-cast.md:551-556" id="re3-a4r">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF7EE;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="re3-a4">
+            <mxGeometry x="8" y="28" width="245.6667" height="88" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;skymp5-client hitService.ts, 7da7210f&lt;/b&gt;&lt;br&gt;A magic hit's double is dropped by frame, not by the caster's last 100 ms: every other copy of one caster, target and spell within a frame. Two hands landing in one frame count twice." tooltip="Source: skymp git log m2-visuals 7da7210f (2026-10-12 23:47 PDT); docs/verbs/spell-cast.md:537-550" id="re3-a4c">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="re3-a4">
+            <mxGeometry x="8" y="124" width="245.6667" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;5 Probe x-dual-cast2, run 20261013-072430&lt;/b&gt;&lt;br&gt;On m2-visuals 140ed04d's client, the watch now recording each hit's projectile and flags (thuum ef3f95a): a double carries the same target, spell, projectile (0x12FCF) and flags as its original, 0 to 1 ms apart, so nothing but the frame tells them apart, which is what 7da7210f's filter goes by. c2's watch also saw each hand's concentration start reach the figure a frame before its release (237 and 252 ms; 486 and 504 ms)." tooltip="Source: docs/verbs/spell-cast.md:439-454, :537-550; session scratchpad x-dual-cast2.yaml; lab/results/20261013-072430-x-dual-cast2.json; git log ef3f95a" id="re3-a5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-la">
+            <mxGeometry x="1210.6667" y="44" width="261.6667" height="212" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6 Probe x-dual-cast3: the damage&lt;/b&gt;&lt;br&gt;Run 20261013-082306 on 31b56fc9: red. Both hands' series reached the server (36 hits) but counted one stream (3.63 s; c2 at 0.728): Skyrim Platform's spellCast event credited the second cast to the right hand, both hands reading as casting. The trace measured the MagicTarget at +0xA0. Fix 0f4e3b75 (the hand that began since the last cast event); its rerun is the third staging's." tooltip="Source: session scratchpad x-dual-cast3.yaml; memory thuum-m2-poison-visuals.md; lab/results (no x-dual-cast3 run as of 2026-10-13)" id="re3-a6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-la">
+            <mxGeometry x="1502.3333" y="44" width="261.6667" height="212" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-a6-b0" value="&lt;b&gt;NOT RUN YET&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#A6A6A6;strokeColor=#808080;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-a6">
+          <mxGeometry x="8" y="192" width="76" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="Still to build, from spell-cast.md's slice: the overcharge (a cast reported with isDualCasting while both hands hold its spell counts 2.2 times its magnitude; the perk gate is M5's, so the perk is recorded unvalidated, R2) and the observer's second hand. Verb doc: docs/verbs/spell-cast.md, Playtest fourteen." tooltip="Source: docs/verbs/spell-cast.md:537-560" id="re3-la-foot">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-la">
+            <mxGeometry x="44" y="264" width="1720" height="28" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-la-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-a1" target="re3-a2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-la-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-a2" target="re3-a3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-la-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-a3" target="re3-a4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-la-e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-a4" target="re3-a5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-la-e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-a5" target="re3-a6">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;b. The re-teach notice&lt;/b&gt;" tooltip="Source: docs/verbs/shouts.md (Playtest fourteen)" id="re3-lb">
+          <mxCell style="swimlane;horizontal=0;startSize=34;html=1;whiteSpace=wrap;fillColor=#FFFFFF;swimlaneFillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;fontStyle=1;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re3-1">
+            <mxGeometry x="20" y="574" width="1780" height="210" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Playtest fourteen (2026-10-12, Eli, parity ef3fb03c): after a relaunch, the login's re-teach (Actor.AddShout, Game.TeachWord, Game.UnlockWord for every recorded shout and word) showed the game's big learned notice for each. Which call raises it, and how can a game learn a word without it?" tooltip="Source: docs/verbs/shouts.md:421-425" id="re3-lb-cap">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lb">
+            <mxGeometry x="44" y="8" width="1720" height="30" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1 The static read&lt;/b&gt;&lt;br&gt;A word known and a word unlocked are runtime flags on the word's form, kKnown (1 &amp;lt;&amp;lt; 6) and kUnlocked (1 &amp;lt;&amp;lt; 0) (T/TESForm.h:67, :56): HYPOTHESIS that these are what Game.TeachWord and Game.UnlockWord set. The HUD's messages go through UIMessageQueue::AddMessage, RELOCATION_ID(13530, 13631) (Offsets.h:569); a HUDData carries its type, kWordOfPower1 = 21 (H/HUDData.h:34)." tooltip="Source: docs/verbs/shouts.md:73-76; CommonLibSSE-NG include/RE/T/TESForm.h:56, :67, include/RE/Offsets.h:569, :581, include/RE/H/HUDData.h:34, :53-55" id="re3-b1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lb">
+            <mxGeometry x="44" y="44" width="403" height="122" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-b1-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-b1">
+          <mxGeometry x="8" y="102" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;2 Frida: hud-trace.js in probe x-reteach-probe, run 20261013-061753&lt;/b&gt;&lt;br&gt;On AddMessage (13631) and DebugNotification (52933), with the caller's frames; c1 typed addshout, teachword and unlockword 5 s apart. Only Game.TeachWord raised a HUD message: type 21, 'Fire Breath', at 06:19:53.05, a second after the server's teachword (06:19:51.99); AddShout (06:19:38.8) and UnlockWord (06:20:04.2) raised none. The caller ran from a Papyrus native (NativeFunctionBase::Call, 104651) through ids 55631 and 55500 to the sender 51648, none named in CommonLib." tooltip="Source: docs/verbs/shouts.md:450-458; lab/frida/hud-trace.js; lab/frida/README.md:78-84; session scratchpad x-reteach-probe.yaml; lab/results/20261013-061753-x-reteach-probe.json (frida/c1-hud-trace.js.jsonl)" id="re3-b2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lb">
+            <mxGeometry x="483" y="44" width="403" height="122" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-b2-b0" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-b2">
+          <mxGeometry x="8" y="102" width="69" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;3 Fix, fork m2-visuals 140ed04d (server)&lt;/b&gt;&lt;br&gt;A login marks a known word with SKSE's Form.SetPlayerKnows (the form's known flag 0x40: skse64 GameForms.h kFlagPlayerKnows; CommonLib's kKnown), then unlocks it as before; the console's live teachword keeps the game's message (a word learned). NATIVES.md: Form.SetPlayerKnows, R3, sent as an SpSnippet after every login (thuum 5578fdd)." tooltip="Source: docs/verbs/shouts.md:458-462; skymp git log m2-visuals 140ed04d (2026-10-12 23:29 PDT); docs/NATIVES.md:645; git log 5578fdd" id="re3-b3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="re3-lb">
+            <mxGeometry x="922" y="44" width="403" height="122" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;4 Probe x-reteach2, run 20261013-072218&lt;/b&gt;&lt;br&gt;On m2-visuals: c1 recorded Fire Breath and its first word, relaunched, was screenshot at once and a second on, then read the word. Green: the record holds the word unlocked (server.actor(c1).wordsUnlocked == &quot;0x20e17&quot;) and c1's game reads it unlocked (c1.known(0x20e17) == 1). No trace ran, so the notice was checked by screenshot alone (one black, one in play without it), and x-reteach-probe's screenshot after teachword had shown none either, though its trace caught the message." tooltip="Source: session scratchpad x-reteach2.yaml; lab/results/20261013-072218-x-reteach2.json; session scratchpad reteach2/s-007-c1.png, s-009-c1.png and reteach/s-009-c1.png (viewed 2026-10-13)" id="re3-b4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lb">
+            <mxGeometry x="1361" y="44" width="403" height="122" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-b4-b0" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-b4">
+          <mxGeometry x="8" y="102" width="69" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="Still HYPOTHESIS in shouts.md: that the known flag is all TeachWord leaves on the word besides the message (b-shout's relaunch checks the word still reads unlocked). Verb doc: docs/verbs/shouts.md, Playtest fourteen." tooltip="Source: docs/verbs/shouts.md:462-464" id="re3-lb-foot">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lb">
+            <mxGeometry x="44" y="174" width="1720" height="28" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-lb-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-b1" target="re3-b2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-lb-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-b2" target="re3-b3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-lb-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-b3" target="re3-b4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;c. The poison box&lt;/b&gt;" tooltip="Source: docs/verbs/poison.md (Dynamic plan, Measured)" id="re3-lc">
+          <mxCell style="swimlane;horizontal=0;startSize=34;html=1;whiteSpace=wrap;fillColor=#FFFFFF;swimlaneFillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;fontStyle=1;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re3-1">
+            <mxGeometry x="20" y="808" width="1780" height="312" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Playtest fourteen (2026-10-12, Eli, parity ef3fb03c): the game's box poisoned the sword, then the sword swung as fists in an unequip and re-equip loop, and the server logged nothing: a poisoning is not an equip event. x-poison-probe2 had found the lab cannot answer the box: neither a tapped Enter nor E put the poison on." tooltip="Source: docs/verbs/poison.md:188-208" id="re3-lc-cap">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lc">
+            <mxGeometry x="44" y="8" width="1720" height="30" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1 Static read: the re-analyst&lt;/b&gt;&lt;br&gt;In 1.7.104's bodies under the same ids (page 1): using a poison runs the use switch (38001), whose ALCH case opens the box (40481) and skips the equip event; on Yes the callback (40482) calls InventoryEntryData::PoisonObject (16024) on the right hand's entry, and the PoisonedWeapon event goes out through 41044 from the source 41069. Doses: 1." tooltip="Source: docs/verbs/poison.md:41-61, :209-219" id="re3-c1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lc">
+            <mxGeometry x="44" y="44" width="223.4286" height="224" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-c1-b0" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-c1">
+          <mxGeometry x="8" y="204" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;2 Frida: poison-trace.js in x-poison-probe3, run 20261013-001004&lt;/b&gt;&lt;br&gt;Uploaded with ANSWER_YES: on the opener's return, on the game thread, it called the callback with 2, and c2's Steel Sword, worn in the right hand, carried DB03Poison with one dose: CONFIRMED the right hand and one dose without perks. The callback, PoisonObject and the event went unlogged: Frida's hooks do not fire for calls made inside another hook." tooltip="Source: docs/verbs/poison.md:220-233; lab/frida/poison-trace.js; session scratchpad x-poison-probe3.yaml; lab/results/20261013-001004-x-poison-probe3.json (frida/c2-poison-trace-yes.js.jsonl)" id="re3-c2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lc">
+            <mxGeometry x="293.4286" y="44" width="223.4286" height="224" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-c2-b0" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-c2">
+          <mxGeometry x="8" y="204" width="69" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-c2-b1" value="&lt;b&gt;HYPOTHESIS&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-c2">
+          <mxGeometry x="83" y="204" width="73" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;3 Fix, fork m2-poison&lt;/b&gt;" tooltip="Source: skymp git log m2-poison; docs/verbs/poison.md:116-143" id="re3-c3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re3-lc">
+            <mxGeometry x="542.8571" y="44" width="223.4286" height="224" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;server, e8c81949&lt;/b&gt;&lt;br&gt;MpActor::ApplyPoison takes a poison's OnEquip as the right-hand weapon's poisoning: one poison spent, one copy marked with one dose; OnWeaponHit runs the poison on the target and spends the dose." tooltip="Source: skymp git log m2-poison e8c81949 (2026-10-12 17:21 PDT); docs/verbs/poison.md:116-131" id="re3-c3s">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="re3-c3">
+            <mxGeometry x="8" y="28" width="207.4286" height="100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;client, 28402bcd&lt;/b&gt;&lt;br&gt;Skyrim Platform sinks the PoisonedWeapon event (source 41069) and emits poisonApplied; skymp5-client sends it as the poison's OnEquip." tooltip="Source: skymp git log m2-poison 28402bcd (2026-10-12 17:24 PDT); docs/verbs/poison.md:133-143" id="re3-c3c">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="re3-c3">
+            <mxGeometry x="8" y="136" width="207.4286" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;4 Probes x-poison-probe4 and 5: the box stays open&lt;/b&gt;&lt;br&gt;x-poison-probe4 (20261013-061132), the trace at a scenario step: Yes poisoned the sword and the server marked it, but the box stayed on screen and held c2 in menu mode, so its swing never came; close-menu posts kHide, which MessageBoxMenu ignores. x-poison-probe5 (20261013-062038), no trace: a tapped Enter (28), then E (18), did not answer it." tooltip="Source: docs/verbs/poison.md:256-259; lab/frida/poison-trace.js:16-20; session scratchpad x-poison-probe4.yaml, x-poison-probe5.yaml; lab/results/20261013-061132-x-poison-probe4.json, 20261013-062038-x-poison-probe5.json" id="re3-c4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lc">
+            <mxGeometry x="792.2857" y="44" width="223.4286" height="224" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;5 The trace keeps the box shut (thuum ad22fcc)&lt;/b&gt;&lt;br&gt;With ANSWER_YES, within a second of the opener, AddMessage (13631) asked to show MessageBoxMenu (kShow 1) is asked to force-hide it instead (kForceHide 4, U/UIMessage.h:9-15), which a menu not open ignores." tooltip="Source: lab/frida/poison-trace.js:16-27, :84-98; git log ad22fcc; CommonLibSSE-NG include/RE/U/UIMessage.h:9-15" id="re3-c5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lc">
+            <mxGeometry x="1041.7143" y="44" width="223.4286" height="224" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6 Probe x-poison-probe6, run 20261013-063057&lt;/b&gt;&lt;br&gt;End to end on m2-poison 25a6a7ad's client: the box answered and kept shut, the sword poisoned in c2's game, and &quot;MpActor::ApplyPoison ff000001 - poison 58cfb on 13989, 1 dose(s)&quot; on the server. c2's swing hit c1 for 7.42 and the poison ran from the server's mark: c1 at 0.326 ten seconds on (100 less 7.4 and 60); c2's sword clean." tooltip="Source: docs/verbs/poison.md:237-255; session scratchpad x-poison-probe6.yaml; lab/results/20261013-063057-x-poison-probe6.json" id="re3-c6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lc">
+            <mxGeometry x="1291.1429" y="44" width="223.4286" height="224" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-c6-b0" value="&lt;b&gt;CONFIRMED&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="re3-c6">
+          <mxGeometry x="8" y="204" width="69" height="15" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;7 Scenario b-poison&lt;/b&gt;&lt;br&gt;The same frida step: green twice by path (20261013-063530, -063823): the poison off the server's inventory and on c2's sword, c1 at 0.3258 after one swing, the sword clean, a second swing the sword's alone (0.9328). Committed alone (de09fdc), awaiting Eli's review." tooltip="Source: lab/scenarios/b-poison.yaml; lab/results/20261013-063530-b-poison.json, 20261013-063823-b-poison.json; git log de09fdc; docs/verbs/poison.md:275-293" id="re3-c7">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;shape=note;size=12;boundedLbl=1;" vertex="1" parent="re3-lc">
+            <mxGeometry x="1540.5714" y="44" width="223.4286" height="224" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Still HYPOTHESIS in poison.md: the callback's own steps (PoisonObject's arguments), unread under a hook. Verb doc: docs/verbs/poison.md, Dynamic plan and Measured." tooltip="Source: docs/verbs/poison.md:250-255" id="re3-lc-foot">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lc">
+            <mxGeometry x="44" y="276" width="1720" height="28" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="re3-lc-e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-c1" target="re3-c2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-lc-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-c2" target="re3-c3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-lc-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-c3" target="re3-c4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-lc-e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-c4" target="re3-c5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-lc-e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-c5" target="re3-c6">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3-lc-e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="re3-1" source="re3-c6" target="re3-c7">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;What the three loops show about the method&lt;/b&gt;" tooltip="Source: the three lanes above; CLAUDE.md:61-67, :78-80" id="re3-lessons">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="re3-1">
+            <mxGeometry x="20" y="1148" width="1780" height="107" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;a. A lead held; a reading did not&lt;/b&gt;&lt;br&gt;CommonLib's { return 1; } annotation held: two hands, two working effects, measured. In the same script a header comment read as (SE and AE, VR) put the MagicTarget at +0x98, and its own runtime check caught it; the script now measures the offset instead of reading it (page 1)." tooltip="Source: docs/verbs/spell-cast.md:509-536; lab/frida/effect-stack-trace.js:15-17, :118-133; git log 101c71b" id="re3-sa">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lessons">
+            <mxGeometry x="10" y="33" width="576" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;b. The trace saw what a screenshot missed&lt;/b&gt;&lt;br&gt;x-reteach-probe's screenshot after teachword and a 5 s wait shows no notice, while hud-trace.js caught the word-of-power message and its caller. The check on the fix asserts the word unlocked; its notice check rests on screenshots." tooltip="Source: docs/verbs/shouts.md:450-458; session scratchpad x-reteach-probe.yaml, reteach/s-009-c1.png, x-reteach2.yaml; lab/results/20261013-072218-x-reteach2.json" id="re3-sb">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lessons">
+            <mxGeometry x="602" y="33" width="576" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;c. A trace can act, not only watch&lt;/b&gt;&lt;br&gt;poison-trace.js answered the box by calling its callback, then kept it shut by rewriting its show message, where tapped keys and close-menu could not; b-poison keeps the same frida step, so the scenario depends on the script." tooltip="Source: lab/frida/poison-trace.js:11-27, :84-112; docs/verbs/poison.md:220-259; lab/scenarios/b-poison.yaml:38" id="re3-sc">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="re3-lessons">
+            <mxGeometry x="1194" y="33" width="576" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

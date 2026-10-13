@@ -1,0 +1,870 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" agent="thuum generator" version="24.7.17" type="device" compressed="false">
+  <diagram id="thuum-lc-p1" name="1 A verb's path">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1267" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="lc1-0" />
+        <mxCell id="lc1-1" parent="lc1-0" />
+        <mxCell id="lc1-title" value="&lt;b&gt;thuum: a verb's path, from a finding to merged parity and a playtest&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="Baseline 2026-10-13: thuum main 444238d, fork parity c918a7a1 (merged 2026-10-12 after a sweep of 39 of 39). The path as CLAUDE.md (workflow per verb, hard rules, testing tiers), docs/VERB.md and docs/DECISIONS.md state it and as M2's merges ran it; page 2 is tonight's stack. Numbers follow the path. Hover a shape for its source." tooltip="Source: CLAUDE.md; docs/VERB.md; docs/DECISIONS.md; docs/PLAN.md (M2); git log of thuum main" id="lc1-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="20" y="50" width="1190" height="44" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc1-1">
+          <mxGeometry x="1230" y="14" width="570" height="188" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-lt0" value="Lab and CI: a gate (lab-api, sky-srv, sky-ci)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="46" y="26" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="10" y="50" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-lt1" value="Rust: skymp-wire (wire-schema, wire-rules)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="46" y="48" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="10" y="72" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-lt2" value="C++ core: server, its unit tests" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="46" y="70" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="10" y="94" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-lt3" value="Skyrim Platform, skymp5-client" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="46" y="92" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-l4" value="" style="whiteSpace=wrap;html=1;fillColor=#DDDDDD;strokeColor=#4D4D4D;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="10" y="116" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-lt4" value="Game engine: SkyrimSE.exe, read for RE" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="46" y="114" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-l5" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="10" y="138" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-lt5" value="Files on disk: thuum's docs and forms" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="46" y="136" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-l6" value="" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="10" y="160" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-lt6" value="a hard rule or decision record" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="46" y="158" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-p0" value="&lt;b&gt;T0&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="290" y="29" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-pt0" value="T0 to T4: the testing tiers (CLAUDE.md)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="348" y="26" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-p1" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="290" y="51" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-pt1" value="Eli decides or does this step" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="348" y="48" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-p2" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="290" y="73" width="38" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-pt2" value="a gate passed (page 2)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="348" y="70" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-p3" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="290" y="95" width="52" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-pt3" value="a gate still to pass (page 2)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="348" y="92" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-ea4" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="290" y="124" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-eb4" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="338" y="124" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-et4" value="the next step" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="348" y="114" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-ea5" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="290" y="146" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-eb5" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="338" y="146" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-et5" value="a red: back to the branch" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="348" y="136" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-d6" value="" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="290" y="160" width="48" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-dt6" value="dashed outline: in flight (page 2)" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-leg">
+          <mxGeometry x="348" y="158" width="212" height="20" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;When a verb is done (CLAUDE.md)&lt;/b&gt;&lt;br&gt;It ships whole or not at all: its doc, native hook, SP binding, message, validator, server logic, client handler, T0 and T2 tests and a T3 scenario; a partial verb lives on a branch, never on main (rule 3). It is done at T3 with a green scenario and no HYPOTHESIS tags left. The scenario runner is the only thing that marks green; neither the agent nor a person marks a verb done by hand (ADR-009)." tooltip="Source: CLAUDE.md:68-70 (hard rule 3), :155 (Testing tiers); docs/DECISIONS.md:99-105 (ADR-009)" id="lc1-done">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="20" y="100" width="1190" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1. Where a verb comes from&lt;/b&gt;" tooltip="Source: CLAUDE.md:96 (workflow 1); docs/PLAN.md:72-78" id="lc1-src">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc1-1">
+            <mxGeometry x="20" y="182" width="270" height="226" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1a. A playtest finding&lt;/b&gt;&lt;br&gt;Eli plays both seats over Moonlight from a checklist in docs/private (playtest-m2-14.md): he ticks [x] when a check holds and writes what is odd under it. A finding becomes a docs/PLAN.md bullet and a section of its verb doc (Held, Found)." tooltip="Source: docs/private/playtest-m2-14.md:1-32 (the checklist, the tick); docs/PLAN.md:952-968 (Found in playtest fourteen); docs/verbs/spell-cast.md:430, docs/verbs/shouts.md:408 (Playtest fourteen)" id="lc1-s1a">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-src">
+            <mxGeometry x="10" y="28" width="250" height="89" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-s1a-b0" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-s1a">
+          <mxGeometry x="218" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;1b. A docs/PLAN.md item&lt;/b&gt;&lt;br&gt;The current milestone's next verb, in the order Eli set on its decisions form (M2: docs/private/decisions-m2.md, 2026-10-09). A milestone is done when its scenario set is green and no verb in it carries a HYPOTHESIS tag." tooltip="Source: CLAUDE.md:96 (workflow 1); docs/PLAN.md:72-78 (Milestones), :858-865 (Decisions taken)" id="lc1-s1b">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-src">
+            <mxGeometry x="10" y="127" width="250" height="89" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;2. Pick the next verb&lt;/b&gt;&lt;br&gt;From the current milestone in docs/PLAN.md. Decisions already made live in docs/DECISIONS.md: a session does not relitigate one; a reversal is a new ADR that supersedes it." tooltip="Source: CLAUDE.md:7-9, :96 (workflow 1); docs/DECISIONS.md:3-4" id="lc1-pick">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="312" y="210" width="190" height="101" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;3. /verb &amp;lt;name&amp;gt;&lt;/b&gt;&lt;br&gt;The skill in .claude/skills/verb creates docs/verbs/&amp;lt;name&amp;gt;.md from docs/VERB.md and greps CommonLibSSE-NG, Skyrim Platform, skymp/ROADMAP.md and docs/NATIVES.md for candidates. No code until the doc exists." tooltip="Source: .claude/skills/verb/SKILL.md:1-24; CLAUDE.md:97-99 (workflow 2)" id="lc1-scaf">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="526" y="210" width="250" height="89" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;4. The verb doc, docs/verbs/&amp;lt;name&amp;gt;.md&lt;/b&gt;&lt;br&gt;Filled before code, in VERB.md's order: Intent; Authority (the rung, R0 to R3, and why not the one above); Engine surface (file:line or UNKNOWN); Observe, Impose, Suppress; Message contract; Server; Client; Tests (T0 to T3 and the scenario id); Dynamic plan; Status. The doc is the PR body, read against VERB.md's reviewer checklist." tooltip="Source: docs/VERB.md:1-107; .claude/skills/verb/SKILL.md:20-24; CLAUDE.md:111 (workflow 8)" id="lc1-doc">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="800" y="182" width="410" height="89" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;5. Static and dynamic reads&lt;/b&gt;&lt;br&gt;The RE loop has its own diagram, docs/architecture/thuum-re-loop.drawio. Static: CommonLibSSE-NG's file:line, then addrlib, then Ghidra through the re-analyst; nothing from memory (rule 1); a decompiler's reading is a HYPOTHESIS (rule 2). Dynamic: a Frida trace in a lab run (the agent) or an x64dbg session (Eli). Blocked on in-game behavior: write the Dynamic plan and stop (rule 8); still unconfirmed after one lab run: hand the plan to Eli and wait (workflow 7)." tooltip="Source: CLAUDE.md:61-67 (rules 1, 2), :78-80 (rule 8), :100-101 (workflow 3), :110 (workflow 7); docs/VERB.md:21-25, :77-83; docs/DECISIONS.md:51-58 (ADR-004); docs/LAB.md:587-605 (Dynamic RE lane)" id="lc1-reads">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#DDDDDD;strokeColor=#4D4D4D;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="930" y="315" width="280" height="138" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6. Build inside out, on a fork branch&lt;/b&gt;" tooltip="Source: CLAUDE.md:102-105 (workflow 4), :68-70 (rule 3); docs/DECISIONS.md:107-131 (ADR-010); memory feedback-no-force-push.md (stacked branches take merges)" id="lc1-build">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc1-1">
+            <mxGeometry x="20" y="452" width="890" height="229" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="A branch m&amp;lt;N&amp;gt;-&amp;lt;verb&amp;gt;, stacked on its base. Server first: the only layer with a fast oracle. New server code is Rust (ADR-010); C++ handlers are legacy (workflow 4)." tooltip="Source: CLAUDE.md:102-105 (workflow 4); docs/DECISIONS.md:107-131 (ADR-010); memory feedback-no-force-push.md" id="lc1-bsub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-build">
+            <mxGeometry x="10" y="24" width="870" height="27" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6a. Server logic: the rule&lt;/b&gt;&lt;br&gt;A pure Rust function in wire-rules over a struct of facts, returning a decision and the bound it used (ADR-020); cargo tests in seconds." tooltip="Source: docs/DECISIONS.md:401-428 (ADR-020); CLAUDE.md:102-105" id="lc1-b6a1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-build">
+            <mxGeometry x="10" y="57" width="205" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6a. Server logic: the handler, T0&lt;/b&gt;&lt;br&gt;The C++ core gathers the facts from the world model and asks the rule through wire-bridge; its unit test lands with it (PoisonTest, ShoutsTest)." tooltip="Source: docs/DECISIONS.md:414-418 (ADR-020); docs/verbs/poison.md:116-131 (Server), :283; docs/verbs/shouts.md (Status: ShoutsTest)" id="lc1-b6a2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-build">
+            <mxGeometry x="10" y="143" width="205" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6b. The message and its validator&lt;/b&gt;&lt;br&gt;A message is a bounded Rust type in wire-schema, recognized in Rust before anything else sees it (ADR-012, rule 12). Widening the wire updates the contract and the validator in the same commit (rule 4). Often no new message: poison rides OnEquip." tooltip="Source: CLAUDE.md:71-72 (rule 4), :87-89 (rule 12); docs/DECISIONS.md:168-183 (ADR-012); docs/verbs/poison.md:105-114 (Message contract)" id="lc1-b6b">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-build">
+            <mxGeometry x="225" y="57" width="205" height="162" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6c. The Skyrim Platform native hook&lt;/b&gt;&lt;br&gt;Filtered in native before it crosses into JS (rule 9). A new Papyrus native, delegation or stub gets its docs/NATIVES.md line and rung (rule 10). Poison: a sink on the engine's PoisonedWeapon event." tooltip="Source: CLAUDE.md:81-85 (rules 9, 10); docs/verbs/poison.md:133-140 (Client)" id="lc1-b6c">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-build">
+            <mxGeometry x="440" y="57" width="205" height="162" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6d. The TS handler&lt;/b&gt;&lt;br&gt;skymp5-client sends the intent and renders the server's decision (poison: onPoisonApplied sends OnEquip; the inventory brings the mark back). Each verb names a kill switch key." tooltip="Source: docs/VERB.md:63-67 (Client); docs/verbs/poison.md:141-144, :287" id="lc1-b6d">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-build">
+            <mxGeometry x="655" y="57" width="205" height="162" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;The gates&lt;/b&gt;" tooltip="Source: CLAUDE.md:142-155 (Testing tiers); docs/DECISIONS.md:99-105 (ADR-009); docs/LAB.md:613" id="lc1-gates">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc1-1">
+            <mxGeometry x="20" y="725" width="1150" height="171" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Each green before the next. Only lab-api marks a scenario green (ADR-009). A red goes back to the branch as a new commit; a scenario that fails twice reopens its verb (docs/LAB.md)." tooltip="Source: docs/DECISIONS.md:99-105 (ADR-009); docs/LAB.md:613; CLAUDE.md:106 (workflow 5)" id="lc1-gsub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-gates">
+            <mxGeometry x="190" y="3" width="950" height="27" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;T0 unit&lt;/b&gt;&lt;br&gt;just test: ctest in the server's build image. just wire-test: cargo test, clippy with the deny set, cargo deny, the committed C header. On each push to an m&amp;lt;N&amp;gt;- branch the fork's CI server-build builds the server, runs ctest inside the build (given the masters) and pushes skymp-server:&amp;lt;branch&amp;gt;. Green before any lab time (workflow 5).&lt;br&gt;&lt;i&gt;Ticks: server logic + T0.&lt;/i&gt;" tooltip="Source: justfile:46-48 (test), :416-418 (wire-test); skymp/.gitlab-ci.yml:1-4, :44-55 (wire-test), :90-149 (server-build); CLAUDE.md:106 (workflow 5), :144" id="lc1-t0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-gates">
+            <mxGeometry x="10" y="35" width="252" height="126" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-t0-b0" value="&lt;b&gt;T0&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-t0">
+          <mxGeometry x="220" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;T1 host-less native&lt;/b&gt;&lt;br&gt;CommonLib plugin code loaded against SkyrimSE.exe outside the game: offsets and layouts resolve. Windows-only, on a lab client; no just recipe of its own. M2's verb docs record T1 none.&lt;br&gt;&lt;i&gt;Ticks: native hook + T1.&lt;/i&gt;" tooltip="Source: CLAUDE.md:145-146; justfile:45; docs/verbs/poison.md:152, :285-286; docs/verbs/spell-cast.md (Status: native hook + T1)" id="lc1-t1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-gates">
+            <mxGeometry x="270" y="35" width="186" height="126" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-t1-b0" value="&lt;b&gt;T1&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-t1">
+          <mxGeometry x="154" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;T2 protocol&lt;/b&gt;&lt;br&gt;just test-proto &amp;lt;tag&amp;gt; on sky-srv, with the branch's server image: the fakeclient smoke checked through labState; attributes across a restart; then every difftest session, each from the clean world, replayed into the legacy RakNet stack and the wire stack and diffed. A difference the port means to make is declared in the session with its counts and a reason, and reviewed like a validator change. ONLY=&amp;lt;session&amp;gt; ends &quot;T2 partial&quot;, never green: a verb's T2 is every session.&lt;br&gt;&lt;i&gt;Ticks: T2 green.&lt;/i&gt;" tooltip="Source: justfile:61-63; lab/tools/test-proto.sh:1-26, :178-204; docs/WIRE.md:214-248 (Differential harness); docs/DECISIONS.md:259-278 (ADR-017), :107-131 (ADR-010)" id="lc1-t2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-gates">
+            <mxGeometry x="464" y="35" width="330" height="126" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-t2-b0" value="&lt;b&gt;T2&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-t2">
+          <mxGeometry x="298" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;T3 lab&lt;/b&gt;&lt;br&gt;Staging: the branch's Windows client and server image on sky-srv and both clones, then a stacked snapshot clean-m1-next on each. Probes by path (just lab-run &amp;lt;path&amp;gt;; an x- probe never lives in lab/scenarios). The verb's scenario on 1.6.1170 plus smoke-two-players (ADR-025), green twice by path, then committed alone for Eli's review (rule 13; thuum CI's scenario-gate refuses a mixed commit). Each run's results update the HYPOTHESIS tags (workflow 6).&lt;br&gt;&lt;i&gt;Ticks: T3 scenario green, no HYPOTHESIS tags.&lt;/i&gt;" tooltip="Source: CLAUDE.md:90-92 (rule 13), :107-109 (workflow 6), :151-152; justfile:125-129, :149-154; docs/DECISIONS.md:611-614 (ADR-025), :253-257 (ADR-016); .gitlab-ci.yml:95-97 (scenario-gate); docs/verbs/poison.md:291-292; stage-branch.sh (session scratchpad)" id="lc1-t3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-gates">
+            <mxGeometry x="802" y="35" width="334" height="126" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-t3-b0" value="&lt;b&gt;T3&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-t3">
+          <mxGeometry x="302" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;The merge&lt;/b&gt;" tooltip="Source: docs/DECISIONS.md:560-580 (ADR-024), :671-701 (ADR-027)" id="lc1-merge">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc1-1">
+            <mxGeometry x="20" y="944" width="1150" height="159" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="The full sweep runs once, at the merge, not per verb; the merge commit names its runs, so &quot;green at merge&quot; stays checkable (ADR-024). The agent runs it, start to finish." tooltip="Source: docs/DECISIONS.md:571-580 (ADR-024); merge-m2-visuals.sh (session scratchpad)" id="lc1-msub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-merge">
+            <mxGeometry x="240" y="3" width="900" height="27" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;7. The merge sweep&lt;/b&gt;&lt;br&gt;Every scenario in lab/scenarios on the branch's staged build, on 1.6.1170: 40 today. A red blocks the merge. A run without a verdict (a lab error) reruns once (the merge script's rule). A lone red that was green on the branch and reruns green twice with nothing changed becomes a watch item with a HYPOTHESIS in the verb doc (ADR-027); the same red in either of the next two sweeps is a bug. Several reds stop it." tooltip="Source: docs/DECISIONS.md:560-580 (ADR-024), :671-701 (ADR-027), :611-614 (ADR-025); lab/scenarios (40 files on main 444238d); merge-m2-visuals.sh:4-6, :45-65 (session scratchpad)" id="lc1-m1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-merge">
+            <mxGeometry x="10" y="35" width="300" height="114" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;8. Full T2&lt;/b&gt;&lt;br&gt;Once the fork's pipeline for the swept head is green: just test-proto &amp;lt;branch&amp;gt; must end &quot;T2 green&quot;." tooltip="Source: merge-m2-visuals.sh:66-73 (session scratchpad); lab/tools/test-proto.sh:198-204" id="lc1-m2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-merge">
+            <mxGeometry x="318" y="35" width="156" height="114" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-m2-b0" value="&lt;b&gt;T2&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-m2">
+          <mxGeometry x="124" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;9. parity fast-forward&lt;/b&gt;&lt;br&gt;The branch head is pushed to the fork's parity only when parity is its ancestor. No force push, no amend or rebase of a pushed commit; a stacked branch takes its base by a merge." tooltip="Source: merge-m2-visuals.sh:74-76 (session scratchpad); memory feedback-no-force-push.md; docs/DECISIONS.md:243-245 (ADR-016: parity is ours)" id="lc1-m3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-merge">
+            <mxGeometry x="482" y="35" width="214" height="114" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;10. Snapshots promoted&lt;/b&gt;&lt;br&gt;just client-promote on sky-c1 and sky-c2: the staged clean-m1-next becomes clean-m1, which later runs roll back to. A change that touches every client gets the full sweep first (ADR-024)." tooltip="Source: justfile:131-133; merge-m2-visuals.sh:77-80 (session scratchpad); docs/DECISIONS.md:575-576 (ADR-024)" id="lc1-m4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-merge">
+            <mxGeometry x="704" y="35" width="206" height="114" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;11. thuum's merge commit&lt;/b&gt;&lt;br&gt;The skymp submodule at the new parity; just ledger regenerates docs/NATIVES.md from the fork, keeping its hand columns (Rung, Reason, Verb); docs/PLAN.md's DONE line with the sweep's runs; the verb doc's Status closed." tooltip="Source: justfile:101-103; docs/NATIVES.md:3-6; thuum commits ac78ed6, cb45398, 26de810 (MERGED); docs/DECISIONS.md:578-580 (ADR-024)" id="lc1-m5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-merge">
+            <mxGeometry x="918" y="35" width="210" height="114" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;12. T4 playtest&lt;/b&gt;&lt;br&gt;Eli on both seats over Moonlight, on the new parity, from a checklist the agent writes (docs/private/playtest-&amp;lt;m&amp;gt;-&amp;lt;n&amp;gt;.md): an item per new behavior and per scenario awaiting approval. What does not hold becomes a finding (1a)." tooltip="Source: CLAUDE.md:153; docs/private/playtest-m2-14.md:1-32; playtest-m2-15.md:101-112 (session scratchpad draft); memory feedback-scenario-approval.md, thuum-m2.md" id="lc1-p1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="20" y="1151" width="430" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-p1-b0" value="&lt;b&gt;T4&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-p1">
+          <mxGeometry x="368" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-p1-b1" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-p1">
+          <mxGeometry x="398" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;13. Scenario approved&lt;/b&gt;&lt;br&gt;When its playtest item works in Eli's hands (his rule, 2026-10-12). Each entry in docs/private/reviews-pending.md names its playtest item and whether it held; the tick is his alone (ADR-009). Eli is the required approver for lab/scenarios/ (ADR-016)." tooltip="Source: docs/private/reviews-pending.md:1-16; memory feedback-scenario-approval.md; docs/DECISIONS.md:99-105 (ADR-009), :253-257 (ADR-016)" id="lc1-p2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="880" y="1151" width="330" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-p2-b0" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-p2">
+          <mxGeometry x="298" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Who decides&lt;/b&gt;" tooltip="Source: CLAUDE.md:7-9, :94-111; docs/DECISIONS.md:3-4" id="lc1-who">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc1-1">
+            <mxGeometry x="1230" y="224" width="570" height="225" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Eli&lt;/b&gt;&lt;br&gt;• ADRs: a session proposes one; Eli accepts it, and its Status records his word (ADR-024: &quot;please yes that's great&quot;; ADR-027: his M2 form). ADR-029 is proposed and waits on his call.&lt;br&gt;• Decisions forms, docs/private/decisions-*.md: a box per question (decisions-m2.md, 2026-10-09: M2's order, ADR-027 and ADR-028).&lt;br&gt;• Scenario approvals: the required approver for lab/scenarios/, once the playtest item works.&lt;br&gt;• Playtests (T4), and an x64dbg session when a Dynamic plan needs eyes." tooltip="Source: docs/DECISIONS.md:3-4, :562 (ADR-024 Status), :742-748 (ADR-029 Status), :253-257 (ADR-016); docs/PLAN.md:858-865; docs/private/decisions-m2.md:1-8; docs/VERB.md:83 (Owner); memory feedback-scenario-approval.md" id="lc1-eli">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-who">
+            <mxGeometry x="10" y="28" width="550" height="101" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-eli-b0" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc1-eli">
+          <mxGeometry x="518" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;The agent: everything else&lt;/b&gt;&lt;br&gt;Picks the verb in Eli's order; writes the doc, the code and the tests; runs T0 to T3; commits each scenario alone; runs the merge; regenerates the ledger; updates PLAN; writes the next playtest's checklist.&lt;br&gt;Never: marks green by hand (ADR-009), weakens an assertion (rule 13), ticks Eli's boxes, force pushes or rewrites a pushed commit (stacked branches take merges)." tooltip="Source: CLAUDE.md:94-111 (Workflow per verb), :90-92 (rule 13); docs/DECISIONS.md:99-105 (ADR-009); memory feedback-scenario-approval.md, feedback-no-force-push.md, thuum-m2.md" id="lc1-agent">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-who">
+            <mxGeometry x="10" y="139" width="550" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Hard rules on this path (CLAUDE.md)&lt;/b&gt;&lt;br&gt;3: a verb ships whole; a partial verb lives on a branch, never on main.&lt;br&gt;4: the wire never widens without the message contract and the validator in the same commit.&lt;br&gt;10: every new Papyrus native, delegation or stub gets a docs/NATIVES.md line with its rung; a stub without one does not merge.&lt;br&gt;13: scenario YAML in commits of its own, reviewed by Eli; never green by a weakened assertion; CI refuses a commit that mixes a scenario with other files.&lt;br&gt;On the RE loop: 1 (nothing from memory), 2 (a decompiler's reading is a HYPOTHESIS), 8 (blocked: the Dynamic plan, then stop)." tooltip="Source: CLAUDE.md:59-92 (Hard rules)" id="lc1-rules">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="1230" y="471" width="570" height="126" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;VERB.md's Status, ticked along the path&lt;/b&gt;&lt;br&gt;[ ] doc complete, rung declared (4)&lt;br&gt;[ ] engine surface cited or delegated (5)&lt;br&gt;[ ] server logic + T0 (6a, T0)&lt;br&gt;[ ] message + validator, same commit (6b)&lt;br&gt;[ ] native hook + T1 (6c, T1)&lt;br&gt;[ ] TS handler (6d)&lt;br&gt;[ ] T2 green (T2: every session)&lt;br&gt;[ ] T3 scenario green, no HYPOTHESIS tags (T3)&lt;br&gt;[ ] ledger and suppression registry updated (11, at the merge)" tooltip="Source: docs/VERB.md:85-95; docs/verbs/poison.md:275-293 (the ledger box: at the merge)" id="lc1-status">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="1230" y="619" width="570" height="138" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;VERB.md's reviewer checklist&lt;/b&gt;&lt;br&gt;1 Is the rung right, and the reason for not one higher real? 2 Does every address come from CommonLib, addrlib or a Ghidra reference? 3 Any state the verb creates off a rung? 4 Does the validator reject the obvious forgery (wrong owner, out of range, too frequent)? 5 Does the restart scenario exist and pass? 6 Are the HYPOTHESIS tags gone, cleared by evidence? 7 Is the suppression reversible on host handoff? 8 Did the ledger change if a native did?" tooltip="Source: docs/VERB.md:97-107; CLAUDE.md:111 (workflow 8)" id="lc1-rev">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc1-1">
+            <mxGeometry x="1230" y="779" width="570" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc1-leg-e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-leg-ea4" target="lc1-leg-eb4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-leg-e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-leg-ea5" target="lc1-leg-eb5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.3473;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-src" target="lc1-pick">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.4406;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-pick" target="lc1-scaf">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.8146;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-scaf" target="lc1-doc">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=block;startFill=1;exitX=0.6585;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-doc" target="lc1-reads">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e5" value="the doc first" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.1463;exitY=1;exitDx=0;exitDy=0;entryX=0.9438;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-doc" target="lc1-build">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e6" value="push" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.1124;exitY=1;exitDx=0;exitDy=0;entryX=0.3571;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-build" target="lc1-t0">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e-t0t1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-t0" target="lc1-t1">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e-t1t2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-t1" target="lc1-t2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e-t2t3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-t2" target="lc1-t3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e7" value="a red: a new commit on the branch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.6609;exitY=0;exitDx=0;exitDy=0;entryX=0.8539;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-gates" target="lc1-build">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e8" value="the verb's scenario green twice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.1796;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-t3" target="lc1-m1">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="882" y="920" /><mxPoint x="180" y="920" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="lc1-e-m1m2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-m1" target="lc1-m2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e-m2m3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-m2" target="lc1-m3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e-m3m4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-m3" target="lc1-m4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e-m4m5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-m4" target="lc1-m5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e9" value="parity moved" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-m5" target="lc1-p1">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="1043" y="1127" /><mxPoint x="235" y="1127" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="lc1-e10" value="items held" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-p1" target="lc1-p2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc1-e11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0.9333;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-t3" target="lc1-p2">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="1188" y="867.1" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="lc1-e12" value="findings, back to 1a" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#0E8088;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc1-1" source="lc1-p1" target="lc1-src">
+          <mxGeometry x="-0.8" relative="1" as="geometry"><Array as="points"><mxPoint x="235" y="1253" /><mxPoint x="8" y="1253" /><mxPoint x="8" y="295" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="thuum-lc-p2" name="2 Tonight's stack, 2026-10-13">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1820" pageHeight="1610" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="lc2-0" />
+        <mxCell id="lc2-1" parent="lc2-0" />
+        <mxCell id="lc2-title" value="&lt;b&gt;Tonight's stack, 2026-10-13: m2-poison and m2-visuals toward playtest fifteen&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=20;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-1">
+          <mxGeometry x="20" y="12" width="1190" height="38" as="geometry" />
+        </mxCell>
+        <UserObject label="Fork mojibake-dev/skymp as of 01:40 PDT, read with read-only git log in the session's worktrees vis-wt and relay-wt (origin refs as last fetched): each branch sits on the one below, commits newest first, colored by the layer they touch. Left: what each branch holds and the gates it passed. Right: what is still to run, in order. Hover a shape for its source." tooltip="Source: git -C scratchpad/vis-wt log origin/parity..origin/m2-visuals; git -C scratchpad/relay-wt log 31b56fc9..origin/m2-relay; git merge-base --is-ancestor (parity, m2-poison, m2-visuals, m2-relay)" id="lc2-sub">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-1">
+            <mxGeometry x="20" y="50" width="1190" height="44" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-leg" value="&lt;b&gt;Legend&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc2-1">
+          <mxGeometry x="1230" y="14" width="570" height="166" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-l0" value="" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="10" y="28" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-lt0" value="Skyrim Platform, skymp5-client" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="46" y="26" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-l1" value="" style="whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="10" y="50" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-lt1" value="C++ core: server, unit tests" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="46" y="48" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-l2" value="" style="whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="10" y="72" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-lt2" value="Rust: wire-rules, difftest sessions" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="46" y="70" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-l3" value="" style="whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="10" y="94" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-lt3" value="Lab and CI: a gate" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="46" y="92" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-l4" value="" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="10" y="116" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-lt4" value="Files on disk: thuum's docs and forms" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="46" y="114" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-l5" value="" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="10" y="138" width="30" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-lt5" value="a hard rule or decision record" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="46" y="136" width="234" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-p0" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="290" y="29" width="38" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-pt0" value="a gate passed" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="348" y="26" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-p1" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="290" y="51" width="52" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-pt1" value="still to pass, or running" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="348" y="48" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-p2" value="&lt;b&gt;T0&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="290" y="73" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-pt2" value="T0 to T4: the testing tiers" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="348" y="70" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-p3" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="290" y="95" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-pt3" value="Eli decides or does this step" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="348" y="92" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-d4" value="" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="290" y="116" width="48" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-dt4" value="dashed outline: in flight, not on parity" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="348" y="114" width="212" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-ea5" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="290" y="146" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-eb5" value="" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="338" y="146" width="2" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-et5" value="sits on, or comes next" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontSize=10;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-leg">
+          <mxGeometry x="348" y="136" width="212" height="20" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Where tonight stands, 01:40 PDT&lt;/b&gt;&lt;br&gt;m2-poison passed its own gates: T0, its T2 session, b-poison green twice and committed alone; its full T2 comes with the merge. m2-visuals: the first staging's probes ran; the second staging of 31b56fc9 is through its builds and snapshots, and of its probes x-dual-cast3 was not green while x-shout-relay, x-uf-ethereal, x-snap-probe2 and x-self-visuals were, x-target-spells running; three commits since (0f4e3b75, ae8446a9, be69bf68) answer what they read. Pending, in order: the third staging of be69bf68, the merge sweep of 40, the full T2, parity's fast-forward to be69bf68, the snapshots, thuum's merge commit, Eli's world, playtest fifteen, Eli's approvals. m2-relay sits on 31b56fc9 and is not in tonight's merge." tooltip="Source: scratchpad stage2-chain.out, stage3-chain.sh, merge-chain.sh, merge-m2-visuals.sh, visuals-chain.out, spellvis-chain.out; docs/verbs/poison.md:275-293; thuum de09fdc; git log (vis-wt, relay-wt)" id="lc2-stat">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-1">
+            <mxGeometry x="20" y="100" width="1190" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;m2-relay&lt;/b&gt; on m2-visuals 31b56fc9 (not its head), head 184bcc6f" tooltip="Source: git -C scratchpad/relay-wt log 31b56fc9..origin/m2-relay (1 commit)" id="lc2-relay">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc2-1">
+            <mxGeometry x="20" y="188" width="1190" height="94" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;184bcc6f&lt;/b&gt; 10-13 00:43 [server, unit]&lt;br&gt;Every spell cast relayed as the server resolved it (RelayCast: its caster a form id, to every listener but the sender, reliably), its end included; SpellCastTest names the caster; spell-cast's difftest declarations to redraw from its first T2." tooltip="Source: git show 184bcc6f (fork, worktree relay-wt): its message and --stat" id="lc2-relay-184bcc6f">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-relay">
+            <mxGeometry x="10" y="30" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Not in tonight's merge&lt;/b&gt;&lt;br&gt;m2-relay sits on 31b56fc9, three commits below the head be69bf68; merge-chain.sh sweeps be69bf68 and fast-forwards parity only to it, the parity playtest fifteen plays. No pipeline, T2 or lab run of 184bcc6f read here." tooltip="Source: git (relay-wt): 184bcc6f's parent is 31b56fc9, and 0f4e3b75, ae8446a9, be69bf68 are not in m2-relay; scratchpad merge-chain.sh:9; merge-m2-visuals.sh:75; playtest-m2-15.md:3" id="lc2-relay-g">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-relay">
+            <mxGeometry x="590" y="30" width="590" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-relay-g-b0" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-relay-g">
+          <mxGeometry x="532" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;m2-visuals&lt;/b&gt; on m2-poison 40ed43a5, head be69bf68: fourteen's visual fixes and dual casting" tooltip="Source: git -C scratchpad/vis-wt log origin/m2-poison..origin/m2-visuals (12 commits); docs/PLAN.md:952-968 (the visual fixes, dual casting)" id="lc2-vis">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc2-1">
+            <mxGeometry x="20" y="306" width="1190" height="691" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;be69bf68&lt;/b&gt; 10-13 01:35 [client]&lt;br&gt;A hit from any actor counts nothing to the player in its own game (fDiffMultHPToPC* 0), as ADR-028 has the server compute all damage (x-uf-ethereal: Unrelenting Force took 50, the server's hit 10)." tooltip="Source: git show be69bf68 (fork, worktree vis-wt): its message and --stat" id="lc2-vis-be69bf68">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="30" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;ae8446a9&lt;/b&gt; 10-13 01:31 [client]&lt;br&gt;A figure's spell that lands on this game's player is dispelled at its hit: what it does to the player is the server's (x-shout-relay: Fire Breath took c2's game to 0.34, the server counted half)." tooltip="Source: git show ae8446a9 (fork, worktree vis-wt): its message and --stat" id="lc2-vis-ae8446a9">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="88" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;0f4e3b75&lt;/b&gt; 10-13 01:28 [skyrim-platform]&lt;br&gt;The spellCast event gives a cast to the hand that began casting since the last cast event, so a second hand's cast of the same spell no longer replaces the first's stream (x-dual-cast3)." tooltip="Source: git show 0f4e3b75 (fork, worktree vis-wt): its message and --stat" id="lc2-vis-0f4e3b75">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="146" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;31b56fc9&lt;/b&gt; 10-13 00:35 [skyrim-platform]&lt;br&gt;castSpellImmediate casts a spell of Self delivery on its actor, so a relayed self spell shows on the caster's figure (x-self-visuals: Invisibility, Oakflesh, Candlelight showed nothing)." tooltip="Source: git show 31b56fc9 (fork, worktree vis-wt): its message and --stat" id="lc2-vis-31b56fc9">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="204" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;2b6dd88f&lt;/b&gt; 10-13 00:13 [server, client, unit, difftest]&lt;br&gt;The shout relay reaches an observer's figure: the server relays the cast it resolved (the shouter's form id, not 0x14) to every game but the shouter's; the shout carries its graph variables." tooltip="Source: git show 2b6dd88f (fork, worktree vis-wt): its message and --stat" id="lc2-vis-2b6dd88f">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="262" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;717b071d&lt;/b&gt; 10-13 00:10 [client]&lt;br&gt;A shout's cast carries its shouter's facing as its aim (an observer's figure launched it north)." tooltip="Source: git show 717b071d (fork, worktree vis-wt): its message and --stat" id="lc2-vis-717b071d">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="320" width="560" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;7da7210f&lt;/b&gt; 10-12 23:47 [client]&lt;br&gt;A magic hit's double is dropped by frame, not by the caster's last 100 ms, so a second hand's hits reach the server (dual casting's client half)." tooltip="Source: git show 7da7210f (fork, worktree vis-wt): its message and --stat" id="lc2-vis-7da7210f">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="365" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;674c8a23&lt;/b&gt; 10-12 23:41 [unit]&lt;br&gt;PoisonTest's first include block in order (the fork's Formatting check)." tooltip="Source: git show 674c8a23 (fork, worktree vis-wt): its message and --stat" id="lc2-vis-674c8a23">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="423" width="560" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1abfda55&lt;/b&gt; 10-12 23:39 [wire-rules]&lt;br&gt;With a stream of one spell in each hand, a hit claims the stream whose last counted hit is oldest: each hand's stream counts its own time." tooltip="Source: git show 1abfda55 (fork, worktree vis-wt): its message and --stat" id="lc2-vis-1abfda55">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="468" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;140ed04d&lt;/b&gt; 10-12 23:29 [server, unit, difftest]&lt;br&gt;An accepted shout's cast relayed as a spell's; a login restores a known word by Form.SetPlayerKnows, without Game.TeachWord's word-of-power message." tooltip="Source: git show 140ed04d (fork, worktree vis-wt): its message and --stat" id="lc2-vis-140ed04d">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="526" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;7769ec57&lt;/b&gt; 10-12 23:29 [client]&lt;br&gt;A figure further from its report than any run covers (1024 units) is put there, not glided; an unchanged sneak report is told again at most once a second." tooltip="Source: git show 7769ec57 (fork, worktree vis-wt): its message and --stat" id="lc2-vis-7769ec57">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="584" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;4cb2082e&lt;/b&gt; 10-12 23:29 [client]&lt;br&gt;The animation relay sends the events the graph took in order, one a frame: a concentration cast's start reaches the figure." tooltip="Source: git show 4cb2082e (fork, worktree vis-wt): its message and --stat" id="lc2-vis-4cb2082e">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="10" y="642" width="560" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;T0&lt;/b&gt;&lt;br&gt;Fork pipelines green: 1320 on 140ed04d and 1328 on 31b56fc9 (server-build runs T0 inside the build). 1333 on the head be69bf68 is step 1 on the right." tooltip="Source: scratchpad visuals-chain.out:3, stage2-chain.out:3 (fork pipeline ok); stage3-chain.sh:2-4; skymp/.gitlab-ci.yml:1-4, :90-149" id="lc2-vis-t0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="590" y="30" width="290" height="89" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-vis-t0-b0" value="&lt;b&gt;T0&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-vis-t0">
+          <mxGeometry x="216" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-vis-t0-b1" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-vis-t0">
+          <mxGeometry x="246" y="3" width="38" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;First staging, 140ed04d&lt;/b&gt;&lt;br&gt;Windows run 38357247214, lab-driver b915f1b (thuum pipeline 1322); both clones' clean-m1-next at 00:15. Probes by path: x-shout-relay, x-reteach2, x-dual-cast2 green; x-snap-probe not (its setup on a slope); then x-uf-ethereal, x-self-visuals, x-target-spells green by 00:33." tooltip="Source: scratchpad visuals-chain.sh:2-12, visuals-chain.out:1-40, spellvis-chain.out:1-7; memory thuum-m2-poison-visuals.md:15" id="lc2-vis-s1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="890" y="30" width="290" height="89" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-vis-s1-b0" value="&lt;b&gt;T3&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-vis-s1">
+          <mxGeometry x="216" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-vis-s1-b1" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-vis-s1">
+          <mxGeometry x="246" y="3" width="38" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Second staging, 31b56fc9&lt;/b&gt;&lt;br&gt;Windows run 38363677357 built at 01:12; pipelines 1328 and 1322 green; both clones' clean-m1-next at 01:21 and 01:22. Probes: x-dual-cast3 not green; x-shout-relay, x-uf-ethereal, x-snap-probe2 and x-self-visuals green; x-target-spells running since 01:39." tooltip="Source: scratchpad stage2-chain.sh:10-13, stage2-chain.out (read at 01:40)" id="lc2-vis-s2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="590" y="127" width="290" height="126" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-vis-s2-b0" value="&lt;b&gt;T3&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-vis-s2">
+          <mxGeometry x="202" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-vis-s2-b1" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-vis-s2">
+          <mxGeometry x="232" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;What the probes read&lt;/b&gt;&lt;br&gt;x-dual-cast2: the figure takes a concentration cast's start and release a frame apart and raises both hands (4cb2082e, CONFIRMED). The shout relay as first built drew nothing: 717b071d, 2b6dd88f. Self spells drew nothing on the figure: 31b56fc9. x-dual-cast3: both hands' hits counted as one stream: 0f4e3b75. A figure's Fire Breath and Unrelenting Force also hurt their target in its own game, beyond the server's hit: ae8446a9, be69bf68." tooltip="Source: docs/verbs/spell-cast.md:439-454; docs/verbs/shouts.md:430-449; thuum 25c246c, f54651c; git show 31b56fc9, 0f4e3b75, ae8446a9, be69bf68 (their messages)" id="lc2-vis-read">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="890" y="127" width="290" height="126" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;thuum, alongside&lt;/b&gt;&lt;br&gt;5578fdd: NATIVES' Form.SetPlayerKnows row, by hand (R3; the login's word restore). 25c246c, f54651c, 9a32dd0: shouts.md, magic-effects.md and spell-cast.md with the probes' readings. b915f1b: the lab watch records each figure's largest step. 444238d: the Frida trace reads the MagicTarget at the offset x-dual-cast3 measured." tooltip="Source: git log ac78ed6..main (thuum): 5578fdd, 25c246c, f54651c, 9a32dd0, b915f1b, 444238d; docs/NATIVES.md:645" id="lc2-vis-docs">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-vis">
+            <mxGeometry x="590" y="261" width="590" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-vis-docs-b0" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-vis-docs">
+          <mxGeometry x="546" y="3" width="38" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;m2-poison&lt;/b&gt; on parity c918a7a1, head 40ed43a5: the poison verb (docs/verbs/poison.md)" tooltip="Source: git -C scratchpad/vis-wt log origin/parity..origin/m2-poison (6 commits); memory thuum-m2-poison-visuals.md:14" id="lc2-poi">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc2-1">
+            <mxGeometry x="20" y="1021" width="1190" height="343" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;40ed43a5&lt;/b&gt; 10-12 23:22 [difftest]&lt;br&gt;The poison session: c1 hits itself with the poisoned dagger, health compared as presence, the divergences declared." tooltip="Source: git show 40ed43a5 (fork, worktree vis-wt): its message and --stat" id="lc2-poi-40ed43a5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="10" y="30" width="560" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;56aaa27b&lt;/b&gt; 10-12 23:22 [server, unit]&lt;br&gt;A lone copy takes the mark and gives it back where it stands, so the inventory keeps its order (PoisonTest pins it)." tooltip="Source: git show 56aaa27b (fork, worktree vis-wt): its message and --stat" id="lc2-poi-56aaa27b">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="10" y="75" width="560" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;78acce95&lt;/b&gt; 10-12 23:02 [difftest]&lt;br&gt;The poison session's first draw: the fixed server marks the dagger and runs the poison on the hit; the legacy server drinks it." tooltip="Source: git show 78acce95 (fork, worktree vis-wt): its message and --stat" id="lc2-poi-78acce95">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="10" y="120" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;25a6a7ad&lt;/b&gt; 10-12 20:24 [unit]&lt;br&gt;PoisonTest includes ActionListener.h, which both builds of 28402bcd missed. Head of the verb as built." tooltip="Source: git show 25a6a7ad (fork, worktree vis-wt): its message and --stat" id="lc2-poi-25a6a7ad">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="10" y="178" width="560" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;28402bcd&lt;/b&gt; 10-12 17:24 [skyrim-platform, client]&lt;br&gt;The client's side: Skyrim Platform sinks the engine's PoisonedWeapon event and emits poisonApplied; skymp5-client sends it as the poison's OnEquip." tooltip="Source: git show 28402bcd (fork, worktree vis-wt): its message and --stat" id="lc2-poi-28402bcd">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="10" y="223" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;e8c81949&lt;/b&gt; 10-12 17:21 [server, unit]&lt;br&gt;The server's side: a poison's OnEquip marks the right-hand weapon (MpActor::ApplyPoison); a poisoned hit runs it through the effect rule and spends the dose." tooltip="Source: git show e8c81949 (fork, worktree vis-wt): its message and --stat" id="lc2-poi-e8c81949">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="10" y="281" width="560" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;T0&lt;/b&gt;&lt;br&gt;PoisonTest, four cases (25a6a7ad, 56aaa27b); fork pipeline 1319 green on 40ed43a5." tooltip="Source: docs/verbs/poison.md:283; scratchpad t2-poison-chain.out:1 (pipeline 1319 success 23:45:25)" id="lc2-poi-t0">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="590" y="30" width="290" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-poi-t0-b0" value="&lt;b&gt;T0&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-t0">
+          <mxGeometry x="216" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-poi-t0-b1" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-t0">
+          <mxGeometry x="246" y="3" width="38" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;T1&lt;/b&gt;&lt;br&gt;None: the hook is an event sink in Skyrim Platform's native layer; no Papyrus native touched." tooltip="Source: docs/verbs/poison.md:131, :152, :285-286" id="lc2-poi-t1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="890" y="30" width="290" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-poi-t1-b0" value="&lt;b&gt;T1&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-t1">
+          <mxGeometry x="258" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;T2, the poison session&lt;/b&gt;&lt;br&gt;ONLY=poison on 40ed43a5 (23:46): legacy against wire identical but for its 8 declared divergences (the marked dagger's inventory, the poison's MagicEffects in both games, the legacy drink on c1's figure, the console line, the clock, the departure). A &quot;T2 partial&quot;: the verb's T2 is every session, at the merge." tooltip="Source: scratchpad t2-poison-2.out (session poison: identical, 2 clients, 8 declared divergences; T2 partial); docs/verbs/poison.md:262-272, :288-290; thuum 246e0e4" id="lc2-poi-t2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="590" y="90" width="290" height="101" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-poi-t2-b0" value="&lt;b&gt;T2&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-t2">
+          <mxGeometry x="216" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-poi-t2-b1" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-t2">
+          <mxGeometry x="246" y="3" width="38" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;T3&lt;/b&gt;&lt;br&gt;x-poison-probe6 (20261013-063057): end to end, c1 at 0.326, the sword's 7.4 and the poison's 60. b-poison green twice by path (20261013-063530, -063823) on 25a6a7ad's client, then committed alone: thuum de09fdc." tooltip="Source: docs/verbs/poison.md:237-256; git show de09fdc (thuum: lab/scenarios/b-poison.yaml alone)" id="lc2-poi-t3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="890" y="90" width="290" height="101" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-poi-t3-b0" value="&lt;b&gt;T3&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-t3">
+          <mxGeometry x="216" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-poi-t3-b1" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-t3">
+          <mxGeometry x="246" y="3" width="38" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;poison.md's Status&lt;/b&gt;&lt;br&gt;Six of nine ticked. Open: T2 green (every session, at the merge); T3 with no HYPOTHESIS tags (the callback's own steps, unread under a hook); the ledger and suppression registry (at the merge)." tooltip="Source: docs/verbs/poison.md:253-254, :275-293" id="lc2-poi-st">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="590" y="199" width="290" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Eli's review of b-poison&lt;/b&gt;&lt;br&gt;de09fdc's entry in docs/private/reviews-pending.md: approved when playtest fifteen's poison item works (fourteen saw the loop from before the verb)." tooltip="Source: docs/private/reviews-pending.md:207-217; scratchpad playtest-m2-15.md:41-52; memory feedback-scenario-approval.md" id="lc2-poi-rev">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-poi">
+            <mxGeometry x="890" y="199" width="290" height="76" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-poi-rev-b0" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-rev">
+          <mxGeometry x="202" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-poi-rev-b1" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-poi-rev">
+          <mxGeometry x="232" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;parity&lt;/b&gt; c918a7a1, the base" tooltip="Source: git -C scratchpad/vis-wt log -1 origin/parity; docs/PLAN.md:954-961" id="lc2-par">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc2-1">
+            <mxGeometry x="20" y="1388" width="1190" height="94" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;c918a7a1&lt;/b&gt; 10-12 17:03 [client]&lt;br&gt;Movement relay: a figure stands up from a crouch with its hands readied (playtests thirteen and fourteen)." tooltip="Source: git show c918a7a1 (fork, worktree vis-wt): its message and --stat" id="lc2-par-c918a7a1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-par">
+            <mxGeometry x="10" y="30" width="560" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Merged 2026-10-12 22:38 (m2-fixes)&lt;/b&gt;&lt;br&gt;The sweep 39 of 39 green with no rerun, T2 green, both clones' clean-m1 promoted; thuum ac78ed6 (the submodule, NATIVES regenerated, PLAN). docs/NATIVES.md is generated from it." tooltip="Source: docs/PLAN.md:954-961; thuum ac78ed6; docs/NATIVES.md:3-4" id="lc2-par-m">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-par">
+            <mxGeometry x="590" y="30" width="590" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-par-m-b0" value="&lt;b&gt;DONE&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#1A1A1A;strokeColor=#1A1A1A;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-par-m">
+          <mxGeometry x="546" y="3" width="38" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;parity's M2 merges, by the same gates&lt;/b&gt;&lt;br&gt;marksman 7be31a9d: 31 of 31, no rerun. spell-cast 45839102: 32 of 32, no rerun. magic-effects with god-mode 35acc275: 33 of 35, a-time's missing verdict green on its rerun, a-melee-reach's lone red a watch item (ADR-027). blocking f828279f: 36 of 36. stagger f321a52f: 37 of 37, b-spell's lone red a watch item. shouts 3f9e4bc8: 38 of 38, two lab faults on sky-c1 green on rerun. cast-teleport ef3fb03c: 39 of 39. m2-fixes c918a7a1: 39 of 39." tooltip="Source: docs/PLAN.md:749, :769, :787-791, :813, :831, :850 (M2); thuum a22846f (cast-teleport, 39 of 39 on d1fb786c), ac78ed6; docs/PLAN.md:954" id="lc2-hist">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-1">
+            <mxGeometry x="20" y="1506" width="760" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Next in Eli's order&lt;/b&gt;&lt;br&gt;After the plugin spell's fix, poison and the visual fixes: Apocalypse, whose ADR-029 is proposed and waits on his call, and headshots." tooltip="Source: docs/PLAN.md:952-953; docs/DECISIONS.md:742-748 (ADR-029 Status)" id="lc2-next">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;" vertex="1" parent="lc2-1">
+            <mxGeometry x="800" y="1506" width="410" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-next-b0" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-next">
+          <mxGeometry x="378" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Still to run, in order (01:40 PDT)&lt;/b&gt;" tooltip="Source: scratchpad stage2-chain.out, stage3-chain.sh, merge-chain.sh, merge-m2-visuals.sh, playtest-m2-15.md" id="lc2-todo">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=12;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="lc2-1">
+            <mxGeometry x="1230" y="202" width="570" height="679" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1. Third staging, be69bf68&lt;/b&gt;&lt;br&gt;stage3-chain.sh, once the second staging's probes end: Windows run 38370354786, fork pipeline 1333, thuum 1322; the server and client deployed, clean-m1-next retaken on both clones; then x-dual-cast3 (c2 should lose about twice one hand's damage), x-shout-relay and x-uf-ethereal." tooltip="Source: scratchpad stage3-chain.sh:1-13, stage-branch.sh:33-113; memory thuum-m2-poison-visuals.md:19" id="lc2-q1">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="28" width="550" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q1-b0" value="&lt;b&gt;T3&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q1">
+          <mxGeometry x="462" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q1-b1" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q1">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;2. The merge sweep&lt;/b&gt;&lt;br&gt;merge-chain.sh, then merge-m2-visuals.sh: all 40 scenarios in lab/scenarios on the staged be69bf68, b-poison among them. A run without a verdict reruns once (the script's rule); one red reruns twice and becomes an ADR-027 watch item; several reds: stop, parity not moved." tooltip="Source: scratchpad merge-chain.sh:7-9, merge-m2-visuals.sh:1-9, :31-65; lab/scenarios (40 files); docs/DECISIONS.md:671-701 (ADR-027)" id="lc2-q2">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="114" width="550" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q2-b0" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q2">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;3. The full T2&lt;/b&gt;&lt;br&gt;After fork pipeline 1333: just test-proto m2-visuals, every session; anything but &quot;T2 green&quot; stops the merge." tooltip="Source: scratchpad merge-chain.sh:9 (T2P=1333), merge-m2-visuals.sh:66-73; lab/tools/test-proto.sh:198-204" id="lc2-q3">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="200" width="550" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q3-b0" value="&lt;b&gt;T2&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q3">
+          <mxGeometry x="462" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q3-b1" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q3">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;4. parity fast-forward to be69bf68&lt;/b&gt;&lt;br&gt;Only if origin/m2-visuals is still be69bf68 and parity its ancestor; m2-poison comes with it." tooltip="Source: scratchpad merge-chain.sh:9 (HEAD8=be69bf68), merge-m2-visuals.sh:74-76; git merge-base (vis-wt)" id="lc2-q4">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="261" width="550" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q4-b0" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q4">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;5. Snapshots promoted&lt;/b&gt;&lt;br&gt;clean-m1-next to clean-m1 on sky-c1 and sky-c2 (just client-promote)." tooltip="Source: scratchpad merge-m2-visuals.sh:77-80; justfile:131-133" id="lc2-q5">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="322" width="550" height="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q5-b0" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q5">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;6. thuum's merge commit&lt;/b&gt;&lt;br&gt;The skymp submodule at the new parity; just ledger regenerates NATIVES from it; PLAN's DONE lines; poison.md's last boxes." tooltip="Source: thuum ac78ed6, cb45398 (the pattern); justfile:101-103; docs/verbs/poison.md:288-293; memory thuum-m2-poison-visuals.md:25" id="lc2-q6">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="383" width="550" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q6-b0" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q6">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;7. Eli's world back&lt;/b&gt;&lt;br&gt;just playtest-restore playtest-m2-14-20261012T230738Z: rotfern on test 1 and the Nord on test 2, by the hunters' campfire." tooltip="Source: memory thuum-m2-poison-visuals.md:25; justfile:341-342; scratchpad playtest-m2-15.md:4-6" id="lc2-q7">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="457" width="550" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q7-b0" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q7">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;8. Playtest fifteen&lt;/b&gt;&lt;br&gt;About 45 minutes, both seats, 1.6.1170, on the merged parity. The checklist is drafted (scratchpad playtest-m2-15.md, its sha still PARITY_SHA): poison, shouts on the other screen, a silent relaunch, spells on the other screen, Teleportation, a crouch with magic readied, items carried for approvals. Target: the afternoon of 2026-10-13." tooltip="Source: scratchpad playtest-m2-15.md:1-119; memory thuum-m2-poison-visuals.md:11" id="lc2-q8">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E8088;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="531" width="550" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q8-b0" value="&lt;b&gt;T4&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#595959;strokeColor=#595959;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q8">
+          <mxGeometry x="432" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q8-b1" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q8">
+          <mxGeometry x="462" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q8-b2" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q8">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;9. Eli's approvals&lt;/b&gt;&lt;br&gt;b-poison (de09fdc) by fifteen's poison items; b-stagger, a-console's TCL, b-magic-restart and b-god by its carried items. The tick is his (ADR-009)." tooltip="Source: docs/private/reviews-pending.md:11-16, :207-217; scratchpad playtest-m2-15.md:101-112; memory feedback-scenario-approval.md" id="lc2-q9">
+          <mxCell style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#000000;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=2;fontFamily=Helvetica;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;dashPattern=8 4;" vertex="1" parent="lc2-todo">
+            <mxGeometry x="10" y="617" width="550" height="52" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="lc2-q9-b0" value="&lt;b&gt;ELI&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontColor=#FFFFFF;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q9">
+          <mxGeometry x="462" y="3" width="26" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q9-b1" value="&lt;b&gt;PENDING&lt;/b&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1A1A1A;fontColor=#000000;fontSize=9;align=center;verticalAlign=middle;spacingLeft=6;spacingRight=6;spacingTop=3;spacingBottom=3;strokeWidth=1;fontFamily=Helvetica;rounded=1;arcSize=50;spacingTop=0;spacingBottom=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="lc2-q9">
+          <mxGeometry x="492" y="3" width="52" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-leg-e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-leg-ea5" target="lc2-leg-eb5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q1" target="lc2-q2">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q2" target="lc2-q3">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q3" target="lc2-q4">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q4" target="lc2-q5">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q5" target="lc2-q6">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q6" target="lc2-q7">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q7" target="lc2-q8">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-q-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-q8" target="lc2-q9">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lc2-on-relay" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.8085;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-relay" target="lc2-vis-31b56fc9">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="10" y="264" /><mxPoint x="10" y="536" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="lc2-on-vis" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.974;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-vis" target="lc2-poi-40ed43a5">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="10" y="979" /><mxPoint x="10" y="1070.5" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="lc2-on-poi" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=0;exitY=0.9475;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-poi" target="lc2-par-c918a7a1">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="10" y="1346" /><mxPoint x="10" y="1437.5" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="lc2-to-q1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.0434;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-vis" target="lc2-q1">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="1220" y="336" /><mxPoint x="1220" y="262" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="lc2-rev-q9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontFamily=Helvetica;labelBackgroundColor=#FFFFFF;endArrow=block;endFill=1;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="lc2-1" source="lc2-poi-rev" target="lc2-q9">
+          <mxGeometry x="0" relative="1" as="geometry"><Array as="points"><mxPoint x="1220" y="1258" /><mxPoint x="1220" y="845" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
