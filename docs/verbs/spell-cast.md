@@ -585,6 +585,18 @@ health message. A second red within two sweeps makes it a bug.
   the caster, as OnPlayerBowShot's arrow relay), with the spell-cast and
   marksman sessions' declarations redrawn. Rule 5: client-reported
   anything is untrusted.
+- Built on fork m2-relay (184bcc6f, parity 11c126b9 merged in dd3f729c):
+  ActionListener::RelayCast sends the cast as the server resolved it, its
+  caster a form id, to every listener but the sender, for the spell's
+  start, its end and the shout alike; SpellCastTest pins the caster and
+  that the caster's own game is sent neither. Its first full T2
+  (2026-10-13, dd3f729c) differed in spell-cast alone, as built: the
+  legacy server echoes c1's start and end to c1 and passes c1's bytes
+  (caster 0x14) to c2, the fixed server sends c1 neither and names c1 by
+  its form id to c2; marksman stayed identical (the arrow relay was
+  already the server's). 1aa96a8f declares the three, and spell-cast is
+  identical with them (T2 partial, pipeline 1344). Left: the full T2,
+  staging and the merge sweep, after playtest fifteen.
 - Dual casting counted per hand, CONFIRMED on the lab (x-dual-cast3
   20261013-092233, fork m2-visuals be69bf68): two hands of Flames for 4 s
   reached the server as 38 hits, 7.15 stream-seconds in all (x-dual-cast:
