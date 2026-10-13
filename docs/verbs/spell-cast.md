@@ -560,3 +560,16 @@ health message. A second red within two sweeps makes it a bug.
   effects). Merged on fork parity c918a7a1 (2026-10-12): T0 SpellCastTest
   reaches a target 2000 units off with Dragonborn.esm's Miraak lightning
   storm (its projectile's 6144).
+- Found (2026-10-13, reading the shout relay): ActionListener::OnSpellCast
+  takes a cast whose caster is 0x14 as the sender's own actor and relays
+  the client's bytes unchanged (SendToNeighbours), so a neighbour's game
+  reads that caster as its own player: castSpellImmediate would make the
+  neighbour's player cast the sender's spell. skymp5-client's spell casts
+  name the server id (magicSyncService.ts, localIdToRemoteId), so honest
+  clients never hit it, but any client can (the difftest sessions' casts
+  say 20, and the wire stack relays them as they came). The shout relay
+  sends what the server resolved since m2-visuals 2b6dd88f; the spell relay
+  is to do the same (a server-built SpellCastMessage, every listener but
+  the caster, as OnPlayerBowShot's arrow relay), with the spell-cast and
+  marksman sessions' declarations redrawn. Rule 5: client-reported
+  anything is untrusted.

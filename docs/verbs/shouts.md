@@ -427,16 +427,26 @@ snippets).
   2026-10-12, "leave it in dungeons"; docs/PLAN.md M4).
 - Built on fork m2-visuals 140ed04d (2026-10-12), both to show on the lab
   before playtest fifteen:
-  - the relay: an accepted shout's cast goes to every game that sees the
-    shouter, as a spell's does (the shouter's own game finds no figure for
-    its player and casts nothing), so the observer's figure launches the
-    breath from its voice; the damage stays the server's, from the
-    shouter's hits. A refused shout is relayed to nobody. ShoutsTest: a
-    neighbour is sent the accepted cast reliably, nothing for the refused
-    one; difftest shouts declares the relay to both clients. Probe
-    x-shout-relay: c2's watch records a hit taken from the figure with the
-    shout's spell when the breath launches in c2's game, and c2's health
-    against the server's shows no second count.
+  - the relay: an accepted shout's cast goes to every other game that sees
+    the shouter, so the observer's figure launches the breath from its
+    voice; the damage stays the server's, from the shouter's hits. A refused
+    shout is relayed to nobody. As first built (140ed04d) it drew nothing:
+    the client's shout carried no graph variables, and an observer's
+    castSpellImmediate refuses a cast without them (Skyrim Platform
+    MagicApi.cpp, AnimationGraphMasterBehaviourDescriptor.h:158-161); and the
+    relay passed the client's bytes, whose caster is 0x14, which each
+    neighbour's game would read as its own player. Since 2b6dd88f the server
+    relays the cast it resolved (its caster the shouter's form id) to every
+    listener but the shouter, as a bow shot's relay does, and the client's
+    shout carries the shouter's graph variables and its facing as the aim
+    (717b071d: radians, the pitch within the validator's quarter turn).
+    ShoutsTest: the neighbour's cast names the shouter, the shouter is sent
+    none; difftest shouts declares c2's relay by its caster. Probes
+    x-shout-relay and x-uf-ethereal on 2b6dd88f: c2's watch records a hit
+    taken from the figure with the shout's spell when the breath launches
+    in c2's game, c2's health against the server's shows no second count,
+    and Unrelenting Force's push lands in the target's own game (Eli: "does
+    unrelenting force ragdoll").
   - the silent re-teach, read first (x-reteach-probe 20261013-061753, with
     lab/frida/hud-trace.js on UIMessageQueue::AddMessage): of the three
     calls, only Game.TeachWord raised a HUD message, the word-of-power one
