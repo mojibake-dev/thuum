@@ -436,6 +436,16 @@ health message. A second red within two sweeps makes it a bug.
   rise), where a fire-and-forget spell plays it on both screens. A visual
   slice (R3): which animation events a concentration cast fires and which
   the relay carries is to read.
+- Read (2026-10-12): a concentration cast sends the caster's graph its
+  start and its release in one frame (x-dual-cast:
+  MRh_SpellAimedConcentrationStart at 282 ms, MRh_SpellRelease_Event at
+  283), and the animation relay sent
+  the last event of each frame (skymp5-client sync/animation.ts,
+  AnimationSource, read once a frame by sendInputsService.ts), so a figure
+  got the release alone; a fire-and-forget cast's BeginCast and its fire
+  come seconds apart, and both went. Fork m2-visuals 4cb2082e sends the
+  events the graph took in order, one a frame (a burst keeps its newest
+  eight); x-dual-cast2's watch of the figure is to show the start arrive.
 - Dual casting (Eli, 2026-10-12: "we'll also have to account for dual
   casting as well"): unread today on both ends. The client reports
   isDualCasting (magicSyncService.ts:113), but the server never reads it, so
@@ -491,11 +501,11 @@ health message. A second red within two sweeps makes it a bug.
     (0x361F5). UESP agrees: "2.2x spell effectiveness for 2.8x spell cost"
     (https://en.uesp.net/wiki/Skyrim:Magic_Overview, Dual-Casting).
   - Without it, UESP: "casting a spell with both hands has the same
-    effectiveness as though cast normally, but twice". HYPOTHESIS: whether
-    two streams of one spell from one caster both damage one target, or the
-    second only refreshes the first's effect (a forum answer says a fire
-    spell's effect overwrites itself). The masters cannot say. The static
-    read leans to both: Flames' damage (MGEF 0x13CA9) is a Value Modifier on
+    effectiveness as though cast normally, but twice". CONFIRMED (Frida,
+    x-dual-stack 20261013-061434): two streams of one spell from one caster
+    both damage one target, each its own effect (a forum answer had said a
+    fire spell's effect overwrites itself). The static read had leaned
+    that way: Flames' damage (MGEF 0x13CA9) is a Value Modifier on
     Health (DATA EffectType 0, PrimaryAV 24; lab/esm.py with UESP's MGEF
     layout), and CommonLibSSE-NG annotates
     ValueModifierEffect::GetAllowMultipleCastingSourceStacking (vfunc 0x11,
@@ -509,15 +519,28 @@ health message. A second red within two sweeps makes it a bug.
     from its player's reports (movementApply.ts:147). One hand for 3 s, then
     both for 4 s: one effect object (hand 1), then two (hands 1 and 0) both
     modifying if both count, or one if the second refreshes the first.
-- The slice, by that answer:
-  - both count: the client keeps a magic hit unless it repeats the caster,
-    target and spell within the frame (the doubled event, 0 to 2 ms apart
-    here), and the server counts each hand's stream on its own clock (a hit
-    claims the open stream of its spell with the oldest counted hit; one
-    hand that misses can then overcount, bounded by MAX_TICK_MS); T0 for two
-    hands, one hand, and a hand that misses;
-  - one counts: today's count is the game's, and a T0 test pins it;
-  - either way, the overcharge: a cast reported with isDualCasting while
+  - The run: the right hand alone ran one effect of Flames on the figure
+    (castingSource 1, magnitude -8), Update and ModifyActorValue each about
+    26 times per 500 ms; both hands ran two effect objects at once, hands 1
+    and 0, each modifying about 25 times per 500 ms through the same 4.5 s.
+    The first effect's ModifyActorValue named the figure (ff00081d), and all
+    three effects read the same target field. The script's offset check
+    failed: a MagicTarget at Actor+0x98 read no form id on 1.6.1170, so the
+    target is known by that shared field and that call's own Actor, not by
+    the derived id (the offset is to pin in a later run).
+- The slice: both count, so the server owes a two-handed stream twice a
+  one-handed one's damage, and counts it once today. Its two halves:
+  - the client keeps a magic hit unless it is the engine's double of the
+    one before; which of a hit event's fields tell the double from the
+    other hand's hit is what the lab watch now records (each hit's
+    projectile and flags, lab-driver b915f1b, probe x-dual-cast2): a time
+    window alone would also drop the second hand of a two-button press,
+    whose hits fall in the same frame as the first's;
+  - the server counts each hand's stream on its own clock (a hit claims the
+    open stream of its spell with the oldest counted hit; one hand that
+    misses can then overcount, bounded by MAX_TICK_MS); T0 for two hands,
+    one hand, and a hand that misses;
+  - the overcharge: a cast reported with isDualCasting while
     both hands hold its spell counts 2.2 times its magnitude; the perk gate
     is M5's, so until then the perk is recorded unvalidated (R2, as Eli's
     headshot call);

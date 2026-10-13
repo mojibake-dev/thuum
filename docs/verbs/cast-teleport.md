@@ -318,3 +318,21 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   plays them in the caster's game only). A visual slice: the observers'
   games told to play the vanish where the caster stood and the appear
   where it lands, the figure placed at once.
+- Read (2026-10-12): the relay glides every figure to its report with
+  TranslateTo at the speed that covers the distance in 0.2 s
+  (skymp5-client sync/movementApply.ts, translateTo), and places one only
+  when it must respawn in another cell, so any jump plays as a 0.2 s
+  slide. Built on fork m2-visuals 7769ec57: a figure further from its
+  report than any run covers between two reports (1024 units; reports go
+  every 130 ms, and Whirlwind Sprint's longest dash spread 2140 units over
+  several, docs/verbs/movement-speed.md) is placed there at once; a
+  shorter teleport still glides. The lab's watch now records a figure's
+  largest move between two frames (maxStep), and x-snap-probe moves c1
+  2000 units under c2's watch: about 2000 for the placement, a frame's
+  share of 0.2 s for a glide.
+- Left for its own slice: the vanish and the appear themselves. The
+  marker's script plays an image space modifier and a vanish effect, then
+  an appear effect and a sound, in the caster's game (docs/MODS.md); the
+  observers' games are to play the same forms on their figure, told by the
+  server when it takes the jump (which forms is the mod's data, read with
+  lab/esm.py and the script's properties, never from memory).

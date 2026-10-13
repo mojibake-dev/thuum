@@ -425,3 +425,30 @@ snippets).
   the notice is to read).
 - A word wall teaching into the server's record: M4, with dungeons (Eli,
   2026-10-12, "leave it in dungeons"; docs/PLAN.md M4).
+- Built on fork m2-visuals 140ed04d (2026-10-12), both to show on the lab
+  before playtest fifteen:
+  - the relay: an accepted shout's cast goes to every game that sees the
+    shouter, as a spell's does (the shouter's own game finds no figure for
+    its player and casts nothing), so the observer's figure launches the
+    breath from its voice; the damage stays the server's, from the
+    shouter's hits. A refused shout is relayed to nobody. ShoutsTest: a
+    neighbour is sent the accepted cast reliably, nothing for the refused
+    one; difftest shouts declares the relay to both clients. Probe
+    x-shout-relay: c2's watch records a hit taken from the figure with the
+    shout's spell when the breath launches in c2's game, and c2's health
+    against the server's shows no second count.
+  - the silent re-teach, read first (x-reteach-probe 20261013-061753, with
+    lab/frida/hud-trace.js on UIMessageQueue::AddMessage): of the three
+    calls, only Game.TeachWord raised a HUD message, the word-of-power one
+    (HUDData type 21, kWordOfPower1, CommonLibSSE-NG H/HUDData.h:34, text
+    "Fire Breath") at 06:19:53.05, a second after the server's teachword at
+    06:19:51.99; AddShout (06:19:38.8) and UnlockWord (06:20:04.2) raised
+    none. Its caller ran from a Papyrus native (NativeFunctionBase::Call,
+    Address Library 104651) through ids 55631 and 55500 to the sender
+    51648, none named in CommonLib. A login now marks a known word with
+    SKSE's Form.SetPlayerKnows (the form's known flag 0x40: skse64
+    GameForms.h kFlagPlayerKnows; CommonLib T/TESForm.h:67 kKnown), then
+    unlocks it as before; the console's live teachword keeps the game's
+    message (a word learned). HYPOTHESIS: the known flag is all TeachWord
+    leaves on the word besides the message (b-shout's relaunch checks the
+    word still reads unlocked, x-reteach2 screenshots the login).

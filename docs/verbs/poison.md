@@ -232,17 +232,56 @@ eight a second); one charge per hit.
   spent. A scenario can poison a weapon once lab-api can start a Frida
   script at a scenario step (today it starts beside a run).
 
+## Measured (2026-10-12, fork m2-poison)
+
+- The verb end to end (x-poison-probe6 20261013-063057, fork m2-poison
+  25a6a7ad's client, 1.6.1170): c2 equipped DB03Poison holding its Steel
+  Sword; poison-trace.js answered Yes and kept the box shut; c2's game
+  poisoned the sword (its poisons step: 0x13989, poison 0x58CFB, one dose,
+  worn); Skyrim Platform's sink on the PoisonedWeapon event reached
+  skymp5-client, whose OnEquip of the poison reached the server:
+  "MpActor::ApplyPoison ff000001 - poison 58cfb on 13989, 1 dose(s)", the
+  poison gone from the server's inventory. c2's swing hit c1 for 7.42
+  ("health 1 -> 0.92576"), the fight began, and "13989 carried poison
+  58cfb: its effects run on ff000000, a dose spent"; c1 stood at 0.821 two
+  seconds on and 0.326 ten seconds on: 100 less the sword's 7.4 and the
+  poison's 6 a second for 10 s is 32.6. c2's own sword was clean after the
+  hit. CONFIRMED by it: the hook point (a sink on 41069's source, fired by
+  41044's send), the right hand and one dose, the event with no equip
+  event, the game's dose spent on the hit and its ExtraPoison gone (the
+  attacker's game shows its own poison spent), and the server's mark
+  carried by the hit. Still HYPOTHESIS, unread under a hook: the callback's
+  own steps (PoisonObject's arguments), since Frida's hooks do not fire on
+  calls made inside another hook.
+- The box (x-poison-probe4, -probe5): close-menu posts kHide, which
+  MessageBoxMenu ignores, and neither a tapped Enter nor E answered it, so
+  an open box held c2 in menu mode and its swing never came. The trace now
+  keeps it shut: within a second of the opener, AddMessage's kShow of
+  MessageBoxMenu becomes kForceHide (thuum ad22fcc).
+- T2: the first draw (78acce95, c1 poisoning its dagger and hitting c2)
+  showed the verb on the wire stack (MagicEffects of 0x10AA4A, magnitude 6
+  for 10 s, on c2; the fight) and two things to change: the poison's ticks
+  send health as the session's clock allows, which no count can declare,
+  and the spent dagger's entry moved to the end of the inventory, a
+  message apart from the legacy stack's after its drink. Since then
+  (56aaa27b, 40ed43a5) a lone copy takes the mark and gives it back in
+  place (PoisonTest pins the dagger's index), and the session hits c1 with
+  its own dagger and compares health as presence.
+
 ## Status
 
 Doc written 2026-10-10, split from magic-effects (whose Dynamic plan held
-the poison until then); blocked on playtest thirteen (CLAUDE.md rule 8).
+the poison until then); built 2026-10-12 on fork m2-poison.
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (the re-analyst's read on 1.7.104,
+      offsets resolved for 1.6.1170; x-poison-probe6)
+- [x] server logic + T0 (PoisonTest, four cases; fork 25a6a7ad, 56aaa27b)
+- [x] message + validator (same commit): no new message, a poison's OnEquip
+- [x] native hook + T1 (Skyrim Platform's PoisonedWeapon sink,
+      poisonApplied; T1 none)
+- [x] TS handler (sendInputsService.ts onPoisonApplied)
+- [ ] T2 green (the reworked session's first run is next)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-poison, by path twice, then
+      its own commit for Eli's review)
+- [ ] ledger and suppression registry updated (at the merge)
