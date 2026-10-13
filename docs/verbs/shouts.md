@@ -483,16 +483,20 @@ snippets).
     effect (VoiceUnrelentingForceEffect02 and 03, archetype 33), and the
     stagger verb has the server decide a player's staggers, so the engine's
     own does not move the player (Eli: "does unrelenting force ragdoll":
-    not yet, a slice of the server's stagger). c2 lost 50 on both sides
-    against the server's 10: the figure's hits hurt c2 locally and the
-    client's health report carried it to the server as world damage
-    (ADR-028). The first run, on 140ed04d where the cast relay drew
-    nothing, lost the same 50: since 4cb2082e a figure's graph gets the
-    shout's whole event order and fires the figure's equipped shout in the
-    observer's game by itself.
-  - The fixes, on m2-visuals: ae8446a9 dispels a figure's spell from the
-    player at its hit (an effect over time stops), and be69bf68 sets the
-    damage an actor deals the player to count nothing locally
-    (fDiffMultHPToPC*, skymp5-client ragdollService.ts), as ADR-028 has the
-    server count it; the third staging's x-shout-relay and x-uf-ethereal
-    read them.
+    not yet, a slice of the server's stagger). c2 lost 50, and that is the
+    game's own number: Dragonborn.esm overrides VoiceUnrelentingForce3 with
+    a fourth effect, MGEF 0x0201FF2B at 40 over 1 s beside Skyrim.esm's
+    instant 10 (lab/esm.py on Dragonborn.esm), which the server runs at its
+    250 ms tick (five steps of 10 in c2's game: 90, 80, 70, 60, 50). The
+    first run, on 140ed04d, lost the same 50 with no hit in c2's game; its
+    reading here as a figure firing its own shout was wrong.
+  - The fixes, on m2-visuals, for the breath's local burn: ae8446a9
+    dispels a figure's spell from the player at its hit (an effect over
+    time stops), and be69bf68 sets the damage an actor deals the player to
+    count nothing locally (fDiffMultHPToPC*, skymp5-client
+    ragdollService.ts), as ADR-028 has the server count it. Its commit and
+    comment cite x-uf-ethereal's 50 as evidence, wrongly (the 50 is the
+    server's, above); the evidence is x-shout-relay's 0.34. On be69bf68
+    (20261013-092505) the breath still left the figure and c2's health
+    followed the server's four ticks alone, 100 to 50; Unrelenting Force
+    (20261013-092736) took the server's 50 on both sides.

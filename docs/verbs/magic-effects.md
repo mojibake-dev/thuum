@@ -452,7 +452,7 @@ hit shader 0x20, light 0x18, cast type 0x50, delivery 0x54):
 | Lesser Ward | 0x13018 | 0x14C WardConcSelf0, 0xFCC62 ShieldConcSelf | 32 Accumulate Magnitude (AV 63 WardPower), 34 | a ward absorbs a spell's damage on the server |
 | Healing Hands | 0x4D3F2 | 0x1CEA5 RestoreHealthConcActor | 0 Value Mod (Health), delivery 3 target actor | the target's health rises on the server |
 | Become Ethereal (1 word) | 0x5F6EB (SHOU 0x32920) | 0x64D68 VoiceMakeEthereal | 41 Etherealize, hit shader 0x64D67 | the ghost look on the figure; no damage taken |
-| Unrelenting Force (3 words) | 0x13F3A (SHOU 0x13E07) | 0x7F82F, 0x7F82E VoiceUnrelentingForceEffect03/02; 0xEA075 | 33 Stagger; 0 Value Mod (Health) | the push lands in the target's own game |
+| Unrelenting Force (3 words) | 0x13F3A (SHOU 0x13E07; Dragonborn.esm's override wins) | 0x7F82F, 0x7F82E VoiceUnrelentingForceEffect03/02; 0xEA075 (10 at once); Dragonborn's 0x0201FF2B (40 over 1 s) | 33 Stagger; 0 Value Mod (Health) | the push lands in the target's own game |
 | Frostbite | 0x2B96B | 0x13CAA FrostDamageConcAimed, 0xB729D FrostSlowConcAimed | 5 Dual Value Mod (Health), 34 (AV 30 SpeedMult) | the slow in the target's game, within the movement budget |
 
 What the server does today (code read, MpActor::ApplyEffects and
