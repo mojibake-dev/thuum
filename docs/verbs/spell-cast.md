@@ -436,6 +436,18 @@ health message. A second red within two sweeps makes it a bug.
   rise), where a fire-and-forget spell plays it on both screens. A visual
   slice (R3): which animation events a concentration cast fires and which
   the relay carries is to read.
+- Dual casting (Eli, 2026-10-12: "we'll also have to account for dual
+  casting as well"): unread today on both ends. The client reports
+  isDualCasting (magicSyncService.ts:113), but the server never reads it, so
+  a dual cast counts as the reporting hand's cast. The observer's game plays
+  a relayed cast from one hand (remoteServer.ts, castSpellImmediate with
+  the message's castingSource). To measure in the lab before the slice:
+  - which spellCast events a dual cast fires, with what isDualCasting;
+  - what the hits report and what the server counts;
+  - the other screen.
+  The game's dual-cast power, cost and perk gate come from Skyrim.esm's
+  settings and perks, read with lab/esm.py, never from memory; perks are
+  M5's.
 - Found in the server log: every Lost Grimoire Teleportation cast logged
   "CastFactsFor - b0a86df: Record 0x50a86de doesn't exist; cast as
   fire-and-forget within 512 units". CastFactsFor (PartOne.cpp:1376-1420)
