@@ -895,9 +895,14 @@ it carries a HYPOTHESIS tag.
     wall the server places) and Milestones (five anchors one world shares).
     Scenario `b-apocalypse`: a vanilla-like Apocalypse spell and Raise
     Wall, seen by an observer and blocking him. Placed after
-    spell-cast and magic-effects (Eli, 2026-10-09), with a small step
-    before it that gives the server its global variables (ADR-021's
-    deferral ends there).
+    spell-cast and magic-effects (Eli, 2026-10-09). ADR-029 (accepted
+    2026-10-13, Eli: the hybrid) sets its shape: its effect scripts run
+    in the caster's game by default (the filter, with Ghostwalk its first
+    verb), its globals are each player's (the MCM settings among them)
+    but for a world-shared list (the small globals step, where ADR-021's
+    deferral ends), and a server-run allowlist of effect scripts grows
+    verb by verb, Nature's Balance first (docs/apocalypse-options.md,
+    sections 4 and 5).
   - Lost Grimoire 1.6 (Eli, 2026-10-10, from the stretch list; Nexus 4455,
     Fenestrate's version, so his own install matches the server): its
     Teleportation moves the caster to where the cast lands, in the

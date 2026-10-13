@@ -739,17 +739,21 @@ The server needs the game's formula for each kind of damage it takes over:
 the weapon's today, the arrow's with marksman, a spell's magnitude with its
 effects and resistances with magic-effects.
 
-## ADR-029: A player's own spells run their scripts in that player's game
+## ADR-029: Spell scripts run in the caster's game, an allowlist's on the server
 
-Status: proposed (2026-10-11), for Eli's call before Apocalypse (docs/PLAN.md M2).
+Status: accepted (2026-10-13, Eli's Apocalypse form, docs/private/
+decisions-m2-apocalypse.md: "hybrid: A by default, plus a server-run
+allowlist grown verb by verb", and the MCM settings "each player's own, like
+their progress"; proposed 2026-10-11).
 Eli, 2026-10-12: "for apocalypse, im unsure. im leaning the later for
 authoritativeness tbh, but like headshots im not opposed to trusting the
 client": a lean to the alternative below (the server's VM runs the effect
-scripts), not yet a decision. The costed comparison (2026-10-12,
-docs/apocalypse-options.md) prices this proposal at 7 to 12 sessions to
-b-apocalypse and the alternative at 25 to 40 for the mod, and recommends a
-hybrid: this proposal by default, with an allowlist of effect scripts the
-server's VM runs, added verb by verb (ADR-008's shape).
+scripts). The costed comparison (2026-10-12, docs/apocalypse-options.md)
+priced the first proposal (the player's game runs them) at 7 to 12 sessions
+to b-apocalypse and the alternative at 25 to 40 for the mod, and
+recommended the hybrid Eli chose: the first proposal by default, with an
+allowlist of effect scripts the server's VM runs, added verb by verb
+(ADR-008's shape).
 
 **Context.** M2's plan puts Apocalypse after a small step that gives the
 server its global variables, on the premise that most of its spells ride
@@ -775,30 +779,53 @@ clients run the scripts, and the server sorts the globals they write
 into personal and worldwide by a list, saving and relaying the shared
 ones (CoreScripts clientVariableScopes.lua, eventHandler.lua).
 
-**Decision (proposed).**
-- A player's game runs the scripts of the magic effects on its own player
-  and of those its player casts: their events pass the blank, while
-  references', quests' and aliases' stay blanked. The engine and the mod
-  do the work (the design law: we do not reimplement what a game runs for
-  us). The server's VM runs no magic effect script until a verb needs one
-  validated.
+**Decision.**
+- By default a player's game runs the scripts of the magic effects on its
+  own player and of those its player casts: their events pass the blank,
+  while references', quests' and aliases' stay blanked. The engine and the
+  mod do the work (the design law: we do not reimplement what a game runs
+  for us).
+- The server's VM runs the effect scripts an allowlist names, and every
+  game blanks those. The allowlist is data, not code. It starts empty and
+  grows one verb at a time where authority matters most, each entry
+  bringing the natives its script calls (a ledger line each, rule 10). Its
+  natural first entries are the scripts that change another actor's
+  attributes or life, ADR-028's ground (23 of Apocalypse's; Nature's
+  Balance the first), then the world mechanisms (Raise Wall, Cyclonic
+  Rift, Entomb, the Milestones). It is the shape ADR-008 gives quests and
+  TES3MP gives client globals.
 - A script's changes keep the rungs their state already has: damage and
-  restores between actors stay the server's (ADR-028), so a script's
-  change to another player's figure stays in that game, as a figure's
-  spell lands nothing there today (docs/verbs/spell-cast.md).
+  restores between actors stay the server's (ADR-028), so until its script
+  is on the allowlist a script's change to another player's figure stays
+  in that game, as a figure's spell lands nothing there today
+  (docs/verbs/spell-cast.md).
 - A global a player's game writes is that player's (R2, recorded
-  unvalidated): the server keeps it in the player's change form (a
-  migration, rule 6) and sets it in the game at login. A global a data
-  list names world-shared (the Milestones' anchors) is the server's one
-  value (R1: a game proposes a write, the server records and relays it).
-  The GLOB reader comes with the first verb that needs a record's value.
+  unvalidated), Apocalypse's 30 MCM settings included: the server keeps it
+  in the player's change form (a migration, rule 6) and sets it in the
+  game at login. A global a data list names world-shared (the Milestones'
+  anchors) is the server's one value (R1: a game proposes a write, the
+  server records and relays it). The GLOB reader comes with the first verb
+  that needs a record's value.
 
 **Consequences.** Apocalypse's scripted spells work in their caster's
-game, and its progress globals follow the player between sessions. What
-they put into the world for others (a summon, a wall, an anchor) is the
-summons' and placed objects' work (M3 hosting, M4), named in its verb
-doc. Unblocking runs mod code in a player's game, which is why the
-filter is the player's own effects only. The alternative, the server's
-VM running effect scripts, would mean implementing the natives those
-scripts call (102 of Apocalypse's 165 are missing on the server) for
-spells whose effects are mostly the caster's own.
+game, and its progress and settings follow the player between sessions.
+The first verb is the filter with Ghostwalk as its spell (its return
+taken as a permitted jump, as cast-teleport's landing), then the
+per-player globals (docs/apocalypse-options.md, section 5). The server's
+effect runtime (OnEffectStart and OnEffectFinish, timers, the effect's
+conditions or the engine's word that it started) is paid at the first
+allowlist entry, not up front, and every spell works in its caster's game
+meanwhile; promoting all 65 scripts that touch others or the world
+converges near the server-runs-all cost (22 to 35 sessions), spent in an
+order Eli can stop at. What spells put into the world for others (a
+summon, a wall, an anchor) is the summons' and placed objects' work (M3
+hosting, M4) unless the allowlist takes it first, named in each verb doc.
+Unblocking runs mod code in a player's game, which is why the filter is
+the player's own effects only. Running every effect script on the
+server's VM instead would mean implementing the natives those scripts
+call (102 of Apocalypse's 165 are missing on the server) for spells whose
+effects are mostly the caster's own, and 93 of the 157 live effect
+scripts call something only a game can do.
+Open for Eli at the first allowlist entry: whether b-apocalypse keeps
+Raise Wall, and whether the server evaluates an allowlisted effect's
+conditions or takes the engine's report that it started.
