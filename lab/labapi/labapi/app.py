@@ -106,9 +106,23 @@ def create_app(services: Services) -> FastAPI:
         app.state.tasks.add(task)
         task.add_done_callback(app.state.tasks.discard)
 
+    # the driver's polls, the status reads and the run watchers are the lab's
+    # own pulse; anything else that reaches lab-api is an operator at work
+    quiet_paths = {f"{router.prefix}/status", f"{router.prefix}/step", f"{router.prefix}/game", f"{router.prefix}/runsets"}
+
+    def _is_operator_call(request: Request) -> bool:
+        path = request.url.path.rstrip("/")
+        if path in quiet_paths or path.startswith(f"{router.prefix}/step/"):
+            return False
+        if request.method == "GET" and (path.startswith(f"{router.prefix}/run/") or path.startswith(f"{router.prefix}/runset/")):
+            return False
+        return True
+
     @app.middleware("http")
     async def access_log(request: Request, call_next):
         t0 = time.monotonic()
+        if _is_operator_call(request):
+            runner.touch()
         response = await call_next(request)
         fwd = request.headers.get("x-forwarded-for")
         peer = fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "-")
@@ -118,10 +132,34 @@ def create_app(services: Services) -> FastAPI:
     def _busy() -> JSONResponse:
         if runner.maintenance:
             return JSONResponse({"error": f"E_RUN_BUSY: {runner.maintenance} in progress"}, status_code=409)
+        if runner.active is None and runner.hold_active():
+            h = runner.hold_status() or {}
+            return JSONResponse({"error": f"E_RUN_HOLD: the lab is held ({h.get('reason')}) until {h.get('until')}; `just lab-release` ends it"}, status_code=409)
         return JSONResponse({"error": f"E_RUN_BUSY: run {runner.active.run_id if runner.active else '?'} is active"}, status_code=409)
 
     def _idle() -> bool:
-        return runner.active is None and runner.maintenance is None
+        return runner.active is None and runner.maintenance is None and not runner.hold_active()
+
+    # A hold: the lab is somebody's (a playtest, a staging writing the clones)
+    # until the minutes pass or a release; POST /run, /runset, /up and /down
+    # answer 409 E_RUN_HOLD meanwhile and the nightly does not start.
+    @router.post("/hold")
+    async def hold(request: Request):
+        body = await request.json()
+        if not isinstance(body, dict) or not isinstance(body.get("reason"), str):
+            raise HTTPException(400, "body must be {minutes, reason}")
+        try:
+            minutes = float(body.get("minutes", 180))
+        except (TypeError, ValueError):
+            raise HTTPException(400, "minutes must be a number")
+        if not (0 < minutes <= 24 * 60):
+            raise HTTPException(400, "minutes must be between 0 and 1440")
+        return {"ok": True, "hold": runner.hold(minutes, body["reason"])}
+
+    @router.post("/release")
+    async def release():
+        runner.release()
+        return {"ok": True, "hold": None}
 
     @router.post("/up")
     async def up():

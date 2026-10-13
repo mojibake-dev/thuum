@@ -148,6 +148,70 @@ class RunSetTests(RunTests):
         rs = self.runsets
         self.assertEqual(rs.list_scenarios(), sorted(p.stem for p in self.scen.glob("*.yaml")))
 
+    def test_a_hold_refuses_runs_and_run_sets_until_released(self):
+        r = self.client.post("/lab/hold", json={"minutes": 30, "reason": "playtest sixteen"})
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["hold"]["reason"], "playtest sixteen")
+        self.assertEqual(self.client.get("/lab/status").json()["hold"]["reason"], "playtest sixteen")
+        r = self.client.post("/lab/run", files={"scenario": ("s.yaml", GREEN.encode(), "text/yaml")})
+        self.assertEqual(r.status_code, 409, r.text)
+        self.assertIn("E_RUN_HOLD", r.text)
+        self.assertIn("playtest sixteen", r.text)
+        r = self.client.post("/lab/runset", json={"name": "gate", "scenarios": ["t2-green-one"]})
+        self.assertEqual(r.status_code, 409, r.text)
+        self.assertIn("E_RUN_HOLD", r.text)
+        r = self.client.post("/lab/up")
+        self.assertEqual(r.status_code, 409, r.text)
+        r = self.client.post("/lab/release")
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertIsNone(self.client.get("/lab/status").json()["hold"])
+        rid = self._start(["t2-green-one"])
+        self.assertEqual(self._wait(rid)["verdict"], "green")
+
+    def test_a_bad_hold_is_refused(self):
+        self.assertEqual(self.client.post("/lab/hold", json={"minutes": 0, "reason": "x"}).status_code, 400)
+        self.assertEqual(self.client.post("/lab/hold", json={"minutes": 10}).status_code, 400)
+        self.assertIsNone(self.client.get("/lab/status").json()["hold"])
+
+    def test_the_nightly_waits_for_a_hold_a_quiet_operator_and_fresh_heartbeats(self):
+        from labapi.guests import Guest
+
+        rs = self.runsets
+        runner = self.services.runner
+        rs.s = dataclasses.replace(self.settings, nightly_sweep_utc="10:30", nightly_quiet_s=1800.0, nightly_window_s=5400.0, heartbeat_fresh_s=120.0)
+        utc = timezone.utc
+        now = datetime(2026, 10, 20, 10, 40, tzinfo=utc)
+        rs._wall = lambda: now.timestamp()
+        rs._started_wall = now.timestamp() - 7200
+        runner._last_run_ended_wall = now.timestamp() - 7200
+        runner.last_activity_wall = now.timestamp() - 7200
+        # a hold stands: no nightly
+        runner.hold_until = now.timestamp() + 600
+        runner.hold_reason = "playtest"
+        self.assertIsNone(rs.maybe_nightly(now), "held")
+        runner.hold_until = None
+        # an operator did something a minute ago (a state RPC, an assist): wait
+        runner.last_activity_wall = now.timestamp() - 60
+        self.assertIsNone(rs.maybe_nightly(now), "an operator is at work")
+        runner.last_activity_wall = now.timestamp() - 7200
+        # a managed client whose game is not polling (a dist copy, a snapshot): wait
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        self.services.board._last_poll.pop("c1", None)
+        self.assertIsNone(rs.maybe_nightly(now), "c1's game is not polling")
+        self.doubles.turn()  # c1 polls
+        self.assertIsNotNone(rs.maybe_nightly(now), "idle, quiet, held by nobody, both games up")
+        rs.active = None
+
+    def test_an_operator_call_counts_as_activity_and_the_labs_pulse_does_not(self):
+        runner = self.services.runner
+        runner.last_activity_wall = 0.0
+        self.client.get("/lab/status")
+        self.client.get("/lab/step", params={"client": "c1"})
+        self.client.get("/lab/runsets")
+        self.assertEqual(runner.last_activity_wall, 0.0, "status, the driver's poll and the listing are the lab's own pulse")
+        self.client.post("/lab/release")
+        self.assertGreater(runner.last_activity_wall, 0.0, "an operator call")
+
     def test_a_scenario_named_twice_runs_once(self):
         rid = self._start(["t2-green-one", "t2-green-one", "t2-green-two"])
         body = self._wait(rid)
@@ -171,11 +235,11 @@ class RunSetTests(RunTests):
 
         # lab-api started an hour ago, the last run ended an hour ago: a quiet lab
         rs._started_wall = at(9, 0).timestamp()
-        runner._last_run_ended_wall = at(9, 30).timestamp()
+        runner.last_activity_wall = runner._last_run_ended_wall = at(9, 30).timestamp()
         self.assertIsNone(rs.maybe_nightly(at(10, 29)), "not yet")
-        runner._last_run_ended_wall = at(10, 25).timestamp()
+        runner.last_activity_wall = runner._last_run_ended_wall = at(10, 25).timestamp()
         self.assertIsNone(rs.maybe_nightly(at(10, 31)), "a run ended minutes ago: somebody is working")
-        runner._last_run_ended_wall = at(9, 30).timestamp()
+        runner.last_activity_wall = runner._last_run_ended_wall = at(9, 30).timestamp()
         runner.maintenance = "snapshot"
         self.assertIsNone(rs.maybe_nightly(at(10, 31)), "a snapshot is in progress")
         runner.maintenance = None
@@ -193,7 +257,7 @@ class RunSetTests(RunTests):
         fresh._started_wall = at(11, 0).timestamp() - 7200
         self.assertIsNone(fresh.maybe_nightly(at(11, 0)), "a restart after the due minute does not run it again")
         # the next day: outside the window nothing starts, inside it does
-        runner._last_run_ended_wall = at(9, 0, day=15).timestamp()
+        runner.last_activity_wall = runner._last_run_ended_wall = at(9, 0, day=15).timestamp()
         fresh._started_wall = runner._last_run_ended_wall
         self.assertIsNone(fresh.maybe_nightly(at(12, 30, day=15)), "the window (90 min) has closed")
         self.assertIsNotNone(fresh.maybe_nightly(at(10, 30, day=15)), "the next day, on the minute")
@@ -204,6 +268,7 @@ class RunSetTests(RunTests):
         clocks.append(later)
         later._started_wall = at(10, 40, day=16).timestamp()
         runner._last_run_ended_wall = None
+        runner.last_activity_wall = 0.0  # nothing since this lab-api started
         self.assertIsNone(later.maybe_nightly(at(10, 45, day=16)), "started five minutes ago: wait the quiet spell")
         later._started_wall = at(10, 0, day=16).timestamp()
         self.assertIsNotNone(later.maybe_nightly(at(10, 45, day=16)), "idle since its start half an hour ago")

@@ -14,11 +14,14 @@
 # stamina, so a rest's recovery shows on screen.
 set -euo pipefail
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
+# the lab is Eli's for the playtest: runs, run sets and the nightly wait (lab-api's hold, docs/LAB.md); `just lab-release` ends it
+hold() { curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d "{\"minutes\": 180, \"reason\": \"$1\"}" >/dev/null 2>&1 || true; }
 cmd() { curl -fsS -m 15 -X POST "$api/state/rpc/labCommand" -H 'content-type: application/json' -d "{\"payload\": $1}"; echo; }
 state() { curl -fsS -m 15 -X POST "$api/state/rpc/labState" -H 'content-type: application/json' -d "{\"payload\": $1}"; echo; }
 online=$(state '{"kind":"online"}')
 case "$online" in *'"profileId":1'*'"profileId":2'*|*'"profileId":2'*'"profileId":1'*) ;; *) echo "both clients must be online first: $online" >&2; exit 2;; esac
 active=$(curl -fsS -m 15 "$api/status" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("run") or "")')
+hold "playtest (playtest-start)"
 [ -z "$active" ] || { echo "a lab run is active: $active" >&2; exit 3; }
 cmd '{"kind":"teleport","profileId":1,"cell":"3c:Skyrim.esm","pos":[117900,-81480,11080],"rot":[0,0,322]}'
 cmd '{"kind":"teleport","profileId":2,"cell":"3c:Skyrim.esm","pos":[118180,-81760,11080],"rot":[0,0,130]}'

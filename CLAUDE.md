@@ -127,6 +127,10 @@ toolchain per layer, every feature the same shape.
   `just wire-diff <session>` / `just wire-header` / `just wire-header-check`
 - `just lab-up` / `just lab-status` / `just lab-run <scenario>` / `just lab-down`
                                  against LAB_API (default https://thuum.gaussing.tv/lab)
+- `just lab-hold <min> <reason>` / `just lab-release`: the lab is somebody's (a playtest,
+                                 a staging); runs, run sets and the nightly wait meanwhile
+- `just sweep [name] [scenarios]` / `just verb-merge <branch> <scenarios>` /
+  `just verb-stage <branch> [probes]`: ADR-030's run sets and the verb loop's one shape
 - `just frida <script> <client>` run a trace script on a lab client through lab-api
 - `just ghidra` ............... confirm GHIDRA_MCP_URL answers
 - `just ghidra-import <exe>` .. import an exe from rpool/sky/persist/game into the

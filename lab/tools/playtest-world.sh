@@ -14,6 +14,8 @@ set -euo pipefail
 host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
+# the lab is Eli's for the playtest: runs, run sets and the nightly wait (lab-api's hold, docs/LAB.md); `just lab-release` ends it
+hold() { curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d "{\"minutes\": 180, \"reason\": \"$1\"}" >/dev/null 2>&1 || true; }
 ssh_srv() { ssh -o BatchMode=yes -o ServerAliveInterval=15 -J "$jump" "$host" "$@"; }
 case "${1:-}" in
   save)
@@ -23,6 +25,7 @@ case "${1:-}" in
     ssh_srv "sudo cp -a /srv/lab/server/world /srv/lab/snapshots/$name && sudo chown -R eli:eli /srv/lab/snapshots/$name && echo \"saved $name (\$(ls /srv/lab/snapshots/$name/changeForms | wc -l | tr -d ' ') records)\""
     ;;
   restore)
+    hold "playtest (world restored)"
     name=${2:?name, from: just playtest-worlds}
     case "$name" in playtest-*) ;; *) echo "restore takes a saved playtest world (playtest-*), never the lab's own snapshots" >&2; exit 2;; esac
     case "$name" in *[!A-Za-z0-9-]*) echo "no such world name: $name" >&2; exit 2;; esac

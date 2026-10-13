@@ -349,13 +349,18 @@ pinned:
 | GET /lab/state/<query> | proxy to the lab gamemode's state endpoint on the server |
 | POST /lab/runset | `{name, scenarios: [ids] or "all", game?}`: the scenarios of the deployed tree played one after another with ADR-027's and the lab-fault reruns applied (ADR-030: the merge gate and the nightly sweep are both this); returns the set, `GET /lab/runset/<id>` its progress and verdict (green, watch, red, error), `GET /lab/runsets` the recent ones |
 | POST /lab/runset/<id>/stop, /resume | stop after the current run; go on from the scenario after the last one run |
+| POST /lab/hold `{minutes, reason}`, POST /lab/release | the lab is somebody's (a playtest, a staging writing the clones): /run, /runset, /up and /down answer 409 E_RUN_HOLD with the reason and the nightly does not start, until the minutes pass or the release; the playtest tools hold three hours by themselves, verb-stage while it writes the clones |
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/; a run set's
 record is results/runsets/<id>.json, written after every run. The nightly sweep
 (ADR-030) is the set named `nightly` over every committed scenario, started by
 lab-api's clock at NIGHTLY_SWEEP_UTC (10:30, which is 03:30 PDT) once no run or
 snapshot is in progress and nothing has run for NIGHTLY_QUIET_S (half an hour).
-`just sweep` runs the same set by hand; `just verb-merge` runs the gate.
+`just sweep` runs the same set by hand; `just verb-merge` runs the gate. The
+nightly also needs every managed client polling within HEARTBEAT_FRESH_S (its
+game up: a clone with its game stopped for a dist copy or shut down for a
+snapshot is not), no hold (above), and no operator call through lab-api (a
+state RPC, an assist, a probe) within the quiet spell.
 
 Game versions (ADR-022, ADR-025). A run plays one Skyrim version: the
 request's `game`, else the scenario's `game:`, else 1.6.1170, the version

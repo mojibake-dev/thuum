@@ -98,6 +98,9 @@ for _ in $(seq 1 120); do
 done
 [ "$idle" = True ] || { echo "== the lab stayed busy" >&2; exit 1; }
 
+# the lab is this staging's while the server switches and the clones are written: no run, no run set, no nightly
+# (the first nightly rolled a clone back under a client-dist, 2026-10-13); released before the probes
+curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d "{\"minutes\": 90, \"reason\": \"verb-stage $branch $sha8\"}" >/dev/null 2>&1 || echo "   (this lab-api has no hold yet)"
 echo "== 5. deploy-srv $(date +%H:%M:%S)"
 just deploy-srv 2>&1 | tail -1
 echo "== 6. server tag $branch, pulls $(date +%H:%M:%S)"
@@ -124,6 +127,7 @@ for c in c2 c1; do
   just client-snapshot "$c" clean-m1-next "$branch client $sha8, $(date +%F)" 2>&1 | tail -1 | cut -c1-120
 done
 
+curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1 || true
 if [ "${#probes[@]}" -gt 0 ]; then
   echo "== 9. probes"
   for probe in "${probes[@]}"; do

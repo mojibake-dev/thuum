@@ -109,14 +109,48 @@ class Runner:
         # spell (a playtest, hand probes), whose clients' logs are worth keeping
         self.last_run_ended: str | None = None
         self._last_run_ended_wall: float | None = None
+        # the last operator call lab-api saw (a run, a state RPC, an assist, a
+        # frida start, a probe): what "nobody is working" is measured from
+        self.last_activity_wall: float = self._wall()
+        # a hold: the lab is somebody's (a playtest, a staging that writes the
+        # clones) until this wall time or a release; runs and run sets wait
+        self.hold_until: float | None = None
+        self.hold_reason: str = ""
 
     # ----- public -------------------------------------------------------------
+
+    def hold_active(self) -> bool:
+        return self.hold_until is not None and self._wall() < self.hold_until
+
+    def hold(self, minutes: float, reason: str) -> dict[str, Any]:
+        self.hold_until = self._wall() + minutes * 60
+        self.hold_reason = reason
+        self.touch()
+        return self.hold_status()
+
+    def release(self) -> dict[str, Any]:
+        self.hold_until = None
+        self.hold_reason = ""
+        self.touch()
+        return self.hold_status()
+
+    def hold_status(self) -> dict[str, Any] | None:
+        if not self.hold_active():
+            return None
+        return {"until": _iso(self.hold_until), "reason": self.hold_reason, "seconds_left": round(self.hold_until - self._wall())}
+
+    def touch(self) -> None:
+        """An operator did something: the quiet spell starts over."""
+        self.last_activity_wall = self._wall()
 
     def prepare(self, scenario: Scenario, game: str | None = None) -> RunRecord:
         if self.active is not None:
             raise RunnerError(f"E_RUN_BUSY: run {self.active.run_id} is active")
         if self.maintenance is not None:
             raise RunnerError(f"E_RUN_BUSY: {self.maintenance} in progress")
+        if self.hold_active():
+            raise RunnerError(f"E_RUN_HOLD: the lab is held ({self.hold_reason}) until {_iso(self.hold_until)}; `just lab-release` ends it")
+        self.touch()
         version = game or scenario.game or self.s.game_default
         if version not in self.s.game_versions():
             raise RunnerError(f"E_RUN_GAME: unknown game version {version!r}; the lab plays {', '.join(self.s.game_versions())}")
@@ -177,6 +211,7 @@ class Runner:
     def _note_run_end(self) -> None:
         self.last_run_ended = _iso(self._wall())
         self._last_run_ended_wall = self._wall()
+        self.last_activity_wall = self._wall()
 
     def _after_quiet_spell(self) -> bool:
         """True when nothing ran for a while (or lab-api just started): what
@@ -243,6 +278,7 @@ class Runner:
             "heartbeats_s_ago": self.board.heartbeats(),
             "netem": self.netem_active,
             "memory": self.system.meminfo(),
+            "hold": self.hold_status(),
         }
 
     # ----- phases ---------------------------------------------------------------

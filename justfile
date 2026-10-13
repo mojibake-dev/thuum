@@ -212,6 +212,16 @@ probe client:
 lab-down:
     @curl -fsS -X POST "{{lab_api}}/down"
 
+# The lab is somebody's for a while (a playtest, a staging that writes the clones): runs, run sets, lab-up and the nightly
+# answer 409 E_RUN_HOLD with the reason until the minutes pass or `just lab-release`. The playtest tools hold three hours
+# by themselves (playtest-start, playtest-restore, playtest-relaunch); release when Eli says he is done.
+lab-hold minutes reason:
+    @python3 -c 'import json,sys; print(json.dumps({"minutes": float(sys.argv[1]), "reason": sys.argv[2]}))' {{minutes}} {{quote(reason)}} \
+      | curl -fsS -m 15 -X POST "{{lab_api}}/hold" -H 'content-type: application/json' --data-binary @-; echo
+
+lab-release:
+    @curl -fsS -m 15 -X POST "{{lab_api}}/release"; echo
+
 # Copy the lab tree and the sky-srv deployment files to /srv/lab on sky-srv (VM 700) through the host jump.
 srv_ssh := "ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -J root@core.gaussing.tv"
 deploy-srv:

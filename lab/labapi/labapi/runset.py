@@ -136,6 +136,9 @@ class RunSets:
             raise RunSetError("E_RUNSET_EMPTY: no scenarios")
         if game is not None and game not in self.s.game_versions():
             raise RunSetError(f"E_RUNSET_GAME: unknown game version {game!r}")
+        if self.runner.hold_active():
+            raise RunSetError(f"E_RUNSET_HOLD: the lab is held ({self.runner.hold_reason}); `just lab-release` ends it")
+        self.runner.touch()
         stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime(self._wall()))
         safe = "".join(c if c.isalnum() or c in "-_" else "-" for c in name)[:40] or "set"
         rid = f"{stamp}-{safe}"
@@ -280,10 +283,21 @@ class RunSets:
             return None
         if self.active is not None or self.runner.active is not None or self.runner.maintenance is not None:
             return None
-        ended = getattr(self.runner, "_last_run_ended_wall", None)
-        last_activity = ended if ended is not None else self._started_wall
+        if self.runner.hold_active():
+            return None  # a playtest's or a staging's lab (POST /lab/hold)
+        # the quiet spell is measured from the last thing an operator did through
+        # lab-api (a run's end, a state RPC, an assist), or from lab-api's own start
+        last_activity = max(getattr(self.runner, "last_activity_wall", 0.0), self._started_wall)
         if self._wall() - last_activity < self.s.nightly_quiet_s:
             return None
+        # every managed client's game must be up and polling: a clone with its game
+        # stopped for a dist copy, or shut down for a snapshot, is not (2026-10-13:
+        # the first nightly rolled a clone back under a staging's client-dist)
+        beats = self.runner.board.heartbeats()
+        for g in self.runner.tables.guests.values():
+            if g.role == "client" and g.managed and g.client:
+                if beats.get(g.client) is None or beats[g.client] > self.s.heartbeat_fresh_s:
+                    return None
         try:
             return self.start("nightly", "all")
         except RunSetError:
