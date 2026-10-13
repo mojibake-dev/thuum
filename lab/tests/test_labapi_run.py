@@ -464,6 +464,75 @@ class RelaunchSteps(RunTests):
         self.assertEqual(body["verdict"], "red", body)
         self.assertIn("E_RUN_RELAUNCH", str(body.get("failures")))
 
+FRIDA = """
+id: frida
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: frida {script: x-trace.js, params: {ANSWER_YES: true}}
+  - c1: frida {script: x-trace.js}
+  - c1: dump-state
+"""
+
+FRIDA_MISSING = """
+id: frida-missing
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: frida {script: missing.js}
+"""
+
+
+@needs_deps
+class FridaSteps(RunTests):
+    """A scenario's frida step starts a lab/frida script on the client's game
+    at that point, as POST /lab/frida does beside a run; params are prepended
+    as globalThis.LAB_PARAMS (thuum docs/verbs/poison.md: poison-trace.js's
+    ANSWER_YES answers the game's poison box)."""
+
+    def setUp(self):
+        super().setUp()
+        import dataclasses
+
+        from fastapi.testclient import TestClient
+        from labapi.app import build_fake, create_app
+
+        self.client.__exit__(None, None, None)
+        scripts = self.tmp / "frida"
+        scripts.mkdir()
+        (scripts / "x-trace.js").write_text("send({ ready: true });\n")
+        self.settings = dataclasses.replace(self.settings, frida_scripts_dir=str(scripts))
+        self.services = build_fake(self.settings, fake_state=self.state)
+        self.app = create_app(self.services)
+        self.client = TestClient(self.app).__enter__()
+        self.doubles = Doubles(self.client, self.state, ["c1", "c2"])
+
+    def test_a_frida_step_starts_its_script_with_its_params(self):
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        run_id, body = self._run(FRIDA)
+        self.assertEqual(body["verdict"], "green", body)
+        execs = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        started = [e for e in execs if "/frida/scripts/" in e]
+        self.assertEqual(len(started), 2, execs)
+        variants = list((self.tmp / "frida" / "uploads").glob("x-trace-*.js"))
+        self.assertEqual(len(variants), 1, variants)
+        self.assertTrue(variants[0].read_text().startswith('globalThis.LAB_PARAMS = {"ANSWER_YES": true};'))
+        self.assertIn(f"/frida/scripts/{variants[0].name}", started[0])
+        self.assertIn("/frida/scripts/x-trace.js", started[1])
+
+    def test_a_frida_step_needs_its_script(self):
+        run_id, body = self._run(FRIDA_MISSING)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertIn("E_RUN_FRIDA", str(body.get("failures")))
+
+
 OFFLINE = """
 id: offline
 clients: [c1]

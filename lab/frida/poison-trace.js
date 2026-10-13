@@ -12,13 +12,15 @@
 // thread, it calls the callback with 2, which acts only while the player's
 // pending poison is set (the opener sets it on the confirm path). The box
 // then stays on screen until closed, and its own answer finds nothing
-// pending. The repo's copy only watches, for a person at the box; the lab
-// uploads a copy with ANSWER_YES true. Run: `just frida poison-trace.js c2`
+// pending. Started by hand it only watches, for a person at the box; a
+// scenario's frida step passes ANSWER_YES. Run: `just frida poison-trace.js c2`
 // while the game runs. Offsets per runtime resolved with lab/addr.py from
 // addrlib/ on 2026-10-12; the runtime is the exe's file version, as SKSE
 // reads it.
 'use strict';
-const ANSWER_YES = false;
+// a scenario's frida step sets it: `frida {script: poison-trace.js, params:
+// {ANSWER_YES: true}}` (thuum lab-api runner _frida_start)
+const ANSWER_YES = !!(globalThis.LAB_PARAMS && globalThis.LAB_PARAMS.ANSWER_YES);
 
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 

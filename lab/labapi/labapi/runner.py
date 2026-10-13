@@ -485,6 +485,8 @@ class Runner:
             return await self._screenshot(rec, index, step.client)
         if step.action == "relaunch":
             return await self._relaunch(rec, index, step.client)
+        if step.action == "frida":
+            return await self._frida_start(rec, index, step.client, step.args)
         if step.action in ("connect", "reconnect"):
             return await self._wait_online(rec, index, step.client, step.action)
         try:
@@ -695,6 +697,46 @@ class Runner:
             return fail(f"E_RUN_RELAUNCH: {client} not in game: {qs.result.get('error', 'no dump-state')}")
         rec.notes.append(f"step {index}: {client} relaunched, in game after {self._clock() - started:.1f}s")
         return await self._wait_online(rec, index, client, "relaunch")
+
+    async def _frida_start(self, rec: RunRecord, index: int, client: str, args: dict[str, Any]) -> tuple[bool, str]:
+        """frida {script, params?}: a lab/frida script started on the client's
+        game at this step, as POST /lab/frida starts one beside a run, its
+        trace collected with the run's artifacts. `params` are prepended as
+        globalThis.LAB_PARAMS, so one script serves a person (none) and the lab
+        (poison-trace.js's ANSWER_YES answers the game's poison box: thuum
+        docs/verbs/poison.md)."""
+        def fail(msg: str) -> tuple[bool, str]:
+            rec.failures.append({"step": index, "kind": "lab", "error": msg})
+            rec.verdict = "error"
+            return False, msg
+
+        script = Path(str(args.get("script", ""))).name
+        src = Path(self.s.frida_scripts_dir) / script
+        if not script.endswith(".js") or not src.is_file():
+            return fail(f"E_RUN_FRIDA: no script {script!r} under {self.s.frida_scripts_dir}")
+        params = args.get("params") or {}
+        if not isinstance(params, dict):
+            return fail("E_RUN_FRIDA: params is a map")
+        name = script
+        if params:
+            name = f"{src.stem}-{rec.run_id}-{index}.js"
+            up = Path(self.s.frida_scripts_dir) / "uploads"
+            up.mkdir(parents=True, exist_ok=True)
+            (up / name).write_text(f"globalThis.LAB_PARAMS = {json.dumps(params)};\n" + src.read_text())
+        g = self.tables.guest_for_client(client)
+        if g is None or not g.managed:
+            return fail(f"E_RUN_FRIDA: {client} is not a managed guest")
+        url = f"{self.s.lab_api_internal_url.rstrip('/')}/frida/scripts/{name}"
+        cmd = ["powershell", "-NoProfile", "-Command",
+               self.s.frida_exec_template.format(url=url, name=name, lab_dir=self.s.client_lab_dir, out="")]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return fail(f"E_RUN_FRIDA: {e}")
+        if res.exitcode != 0:
+            return fail(f"E_RUN_FRIDA: {name} on {client} exited {res.exitcode}: {res.err.strip()[:200]}")
+        self.frida_started.append((client, name))
+        return True, f"frida {name} started"
 
     async def _screenshot(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
         shots = rec.dir / "screenshots"
