@@ -206,3 +206,21 @@ test("labCommand learn-spell runs the server's own Actor.AddSpell", () => {
   }
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "learn-spell", profileId: 9, spellId: 0x12fd0 }), { found: false, profileId: 9 });
 });
+
+test("labCommand console runs the server's console verb as the player", () => {
+  global.mp = fakeMp();
+  const calls = [];
+  mp.executeConsoleCommand = (actorId, name, args) => calls.push([actorId, name, args]);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const ok = mp.onHttpRpcRunAttempt("labCommand", { kind: "console", profileId: 1, name: "addshout", args: [20, 0x3f9ea] });
+  assert.deepStrictEqual(ok, { ok: true, actorId: 0xff000001, name: "addshout", args: [20, 0x3f9ea] });
+  assert.deepStrictEqual(calls, [[0xff000001, "addshout", [20, 0x3f9ea]]]);
+  for (const bad of [{ name: "" }, { name: "player.addshout" }, { name: "addshout", args: [1.5] }, { name: "addshout", args: [{}] }]) {
+    assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "console", profileId: 1, ...bad }).ok, false);
+  }
+  assert.strictEqual(calls.length, 1);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "console", profileId: 9, name: "addshout", args: [] }), { found: false, profileId: 9 });
+  delete mp.executeConsoleCommand;
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "console", profileId: 1, name: "addshout", args: [] }).ok, false);
+});

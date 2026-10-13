@@ -261,6 +261,27 @@ command["learn-spell"] = (payload) => {
   return { ok: true, actorId, spellId, learned: learned === true };
 };
 
+// A console command run on the server as the player would type it
+// (mp.executeConsoleCommand, fork m2-fifteen: the console verb's own path,
+// the player's rank checked, its reply sent to its game; thuum
+// docs/verbs/console-commands.md), for a playtest seat's setup such as its
+// shouts and words (playtest fifteen, Eli: on the server, not keystrokes in
+// a game). name is the command (addshout, teachword, unlockword, ...); args
+// as a client sends them: the player itself 0x14 (20), a form id a number.
+command.console = (payload) => {
+  const actorId = actorFor(payload.profileId);
+  if (!actorId) return notFound(payload.profileId);
+  if (typeof mp.executeConsoleCommand !== "function") return { ok: false, error: "this server has no executeConsoleCommand" };
+  const name = String(payload.name || "");
+  const args = Array.isArray(payload.args) ? payload.args : [];
+  if (!/^[A-Za-z]+$/.test(name)) return { ok: false, error: "console needs name, a command's letters" };
+  if (!args.every((a) => Number.isInteger(a) || typeof a === "string")) {
+    return { ok: false, error: "console args are integers or strings" };
+  }
+  mp.executeConsoleCommand(actorId, name, args);
+  return { ok: true, actorId, name, args };
+};
+
 // The server sends the client SetRaceMenuOpen and takes one UpdateAppearance
 // from it while the menu is open: the race menu a new character gets, opened
 // for a recorded one. The stock client shows the menu; closing it is the
@@ -323,7 +344,7 @@ mp.onHttpRpcRunAttempt = (name, payload) => {
   }
 };
 
-console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn, papyrus-av, staff-rank, learn-spell)");
+console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn, papyrus-av, staff-rank, learn-spell, console)");
 
 // For the unit test only; the server never reads this.
 if (typeof module !== "undefined") {

@@ -354,6 +354,12 @@ playtest-relaunch client:
 playtest-assist client action args="{}":
     @curl -fsS -m 60 -X POST "{{lab_api}}/clients/{{client}}/assist" -H 'content-type: application/json' -d '{"action":"{{action}}","args":{{args}}}'; echo
 
+# In a playtest, a console command run on the server as a seat's player would type it (the gamemode's labCommand console,
+# through the server's mp.executeConsoleCommand), never typed into the game: `just playtest-console 1 addshout 20 0x3f9ea`
+# gives profile 1 Fire Breath (20 is 0x14, the player itself; a hex or decimal number is a number, anything else a string).
+playtest-console profile name *args:
+    @python3 -c 'import json, re, sys; num = lambda x: int(x, 0) if re.fullmatch(r"-?(0[xX][0-9a-fA-F]+|[0-9]+)", x) else x; print(json.dumps({"payload": {"kind": "console", "profileId": int(sys.argv[1]), "name": sys.argv[2], "args": [num(x) for x in sys.argv[3:]]}}))' {{profile}} {{name}} {{args}} | curl -fsS -m 15 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' --data-binary @-; echo
+
 # In a playtest, open a player's race menu from the server (profile 1 or 2; the gamemode's labCommand open-race-menu).
 playtest-race-menu profile:
     @curl -fsS -m 15 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' -d '{"payload": {"kind":"open-race-menu","profileId":{{profile}}}}'; echo
