@@ -482,3 +482,20 @@ fifteen.
   x-self-visuals reads it. The engine's state on the figure (invisible,
   ethereal) is a look in that game alone: the server still neither hides
   an invisible player nor spares an ethereal one (the self-cast slice).
+- On m2-visuals 31b56fc9 (the second staging, 2026-10-13):
+  - Become Ethereal: drew on the figure (x-uf-ethereal, shouts.md).
+  - Invisibility: still drew nothing on the figure (x-self-visuals
+    20261013-083623: fully visible on c2's screen, c1's own hands
+    shimmering). HYPOTHESIS: the figure's relayed cast animation, arriving
+    after the relayed cast, counts as the figure casting, which ends
+    Invisibility at once; the self-cast slice (the server's MagicEffects
+    carrying the effect) is the place to fix it.
+  - Candlelight, Oakflesh: the daylight screenshots cannot tell; a
+    playtest item.
+  - Paralyze (x-target-spells 20261013-083935, with c1's magicka at 3000):
+    the server counted the hit once, and c2 was not paralyzed in its own
+    game (controls on, not down, on its spot): paralysis needs the server
+    to decide it, as staggers do.
+  - Lesser Ward against Flames: the server counted the stream whole (c2 at
+    0.73, the unwarded band); a ward's absorption is the server's to add.
+  - Healing Hands on the other player: the server healed it (0.51 to 0.77).

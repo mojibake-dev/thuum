@@ -462,3 +462,37 @@ snippets).
     message (a word learned). HYPOTHESIS: the known flag is all TeachWord
     leaves on the word besides the message (b-shout's relaunch checks the
     word still reads unlocked, x-reteach2 screenshots the login).
+- Read on the lab (2026-10-13):
+  - x-reteach2 (20261013-072218, 140ed04d): after a relaunch the word read
+    unlocked in c1's game (`known` 1) and on the server. Its screenshots
+    showed no notice, which is weak evidence alone (x-reteach-probe's
+    screenshot 5 s after the live teachword showed none either, the notice
+    having faded while hud-trace caught it); the absence follows from SKSE's
+    Form.SetPlayerKnows itself, which sets the form's flag and calls no UI
+    (skse64 PapyrusForm.cpp, SetPlayerKnows). Whether the flag alone serves
+    the shout after a relaunch is b-shout's to show in the sweep.
+  - x-shout-relay (20261013-082608, 31b56fc9): c2's game took three hits
+    from its figure of c1 with Fire Breath's spell (0x3F9EB): the breath
+    leaves the figure. It also burned c2 in its own game, down to 0.34
+    against the server's half.
+  - x-uf-ethereal (20261013-082909, 31b56fc9): Become Ethereal, shouted by
+    c2, drew on its figure in c1's game (dark and translucent, the shout's
+    swirl around it), and c1's punch from 80 units landed nothing (no hit
+    reached the server). Unrelenting Force's three words reached c2's game
+    (four hits from the figure) but did not push it: the push is a Stagger
+    effect (VoiceUnrelentingForceEffect02 and 03, archetype 33), and the
+    stagger verb has the server decide a player's staggers, so the engine's
+    own does not move the player (Eli: "does unrelenting force ragdoll":
+    not yet, a slice of the server's stagger). c2 lost 50 on both sides
+    against the server's 10: the figure's hits hurt c2 locally and the
+    client's health report carried it to the server as world damage
+    (ADR-028). The first run, on 140ed04d where the cast relay drew
+    nothing, lost the same 50: since 4cb2082e a figure's graph gets the
+    shout's whole event order and fires the figure's equipped shout in the
+    observer's game by itself.
+  - The fixes, on m2-visuals: ae8446a9 dispels a figure's spell from the
+    player at its hit (an effect over time stops), and be69bf68 sets the
+    damage an actor deals the player to count nothing locally
+    (fDiffMultHPToPC*, skymp5-client ragdollService.ts), as ADR-028 has the
+    server count it; the third staging's x-shout-relay and x-uf-ethereal
+    read them.

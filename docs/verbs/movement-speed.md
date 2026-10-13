@@ -163,3 +163,15 @@ lab-spawn): a 1 s hold of W moved c1 251 units on the server's record, a
 - [x] arrivals on fork parity 89db8732 (2026-10-09), after the m1-console
   merge sweep (docs/verbs/console-commands.md, Status); a-movement-speed's
   held run in it covered 411 units (20261009-072747)
+- Found (x-snap-probe2 20261013-083332, fork m2-visuals 31b56fc9): after an
+  owner's `player.setpos z 15800` lifted c1 1125 units above its spot (the
+  console answered "setpos done" and c1's game logged its teleport there),
+  c1 fell back to the ground in its own game, but c2's figure of c1 never
+  moved (largest step 1 unit, farthest 5, over 5 s), and the server logged
+  no refusal. Read: the arrival rule judges x and y alone, so the lift
+  passed it; the observer's movementApply moves a standing figure only when
+  it stands more than 8 units off its report in x and y, or runs, jumps,
+  turns or sits (skymp5-client sync/movementApply.ts, translateTo), so a
+  move straight up or down is not applied at all, and the probe could not
+  show m2-visuals' snap past 1024 units. A lab teleport 600 units down the
+  strip right after glided as it should (largest step 55, farthest 602).

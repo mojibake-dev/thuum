@@ -539,7 +539,7 @@ health message. A second red within two sweeps makes it a bug.
   - the client keeps a magic hit unless it is the engine's double of the
     one before; which of a hit event's fields tell the double from the
     other hand's hit is what the lab watch now records (each hit's
-    projectile and flags, lab-driver b915f1b, probe x-dual-cast2): a time
+    projectile and flags, lab-driver ef3f95a, probe x-dual-cast2): a time
     window alone would also drop the second hand of a two-button press,
     whose hits fall in the same frame as the first's. Read
     (x-dual-cast2): a double carries the same target, spell, projectile
