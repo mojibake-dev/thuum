@@ -448,6 +448,74 @@ health message. A second red within two sweeps makes it a bug.
   The game's dual-cast power, cost and perk gate come from Skyrim.esm's
   settings and perks, read with lab/esm.py, never from memory; perks are
   M5's.
+- x-dual-cast (run 20261013-054049, 2026-10-12, fork parity c918a7a1): c1
+  held Flames in both hands at c2 150 units ahead, Home (right) and End
+  (left) for 4 s each, pressed 234 ms apart: two casts, not a dual cast (c1
+  has no Dual Casting perk, and the presses were not together).
+  - c1's game: MRh_SpellAimedConcentrationStart at 282 ms and
+    MLh_SpellAimedConcentrationStart at 516 ms, a spellCast event per hand
+    (603 and 851 ms, both 0x12FCD), each hand's Equipped event as it stopped
+    (4303 and 4521 ms). It charged both: 12.4 magicka a second with the
+    right hand alone (617 to 833 ms), 24.2 with both (1.0 to 4.0 s), 12.7
+    with the left alone (4315 to 4466 ms).
+  - Its hit events came as two series, one per hand, each every 200 ms, the
+    left's 32 to 65 ms behind the right's, and every hit event twice, 0 to
+    2 ms apart.
+  - The client sent one series: hitService.ts:53-64 drops a caster's magic
+    hit within 100 ms of its last ("prevent double hit that happens for
+    some reason with magic projectiles"). Meant for the doubled event, it
+    drops the other hand's hits too.
+  - The server counted one stream: 19 hits from 05:42:53.007 to 56.635, each
+    about 0.2 of a stream-second, 3.63 in all; one more (56.889) came after
+    the left hand's stop and was refused E_SPELL_NO_CAST. Were both series
+    to arrive, the rule would still count one: casts.rs claim() gives a hit
+    to the first open stream of its spell (hands 0 to 3 in order) and counts
+    the time since that stream's last counted hit, so two hands' reports of
+    one spell add up to the wall clock once.
+  - c2 lost 8.1 Health a second (98.4 at 1.0 s to 74.2 at 4.0 s), one
+    stream at Flames' magnitude (EFIT 8 a second), and ended at 0.734, inside
+    b-spell's single-stream band (0.64 to 0.78).
+  - The observer: c2's screenshot mid-cast shows the figure's right hand
+    streaming and nothing in its left, and the figure's magicka on c2's
+    screen drained 6.2 a second, as in b-spell's one-hand run (20261013-044857),
+    though the server relayed both casts (OnSpellCast relays every cast of an
+    equipped spell; castingSource 1, then 0). c2's game runs one stream.
+- The game's rule (Skyrim.esm through lab/esm.py, and CommonLibSSE-NG):
+  - With the school's perk (AlterationDualCasting 0x153CD,
+    ConjurationDualCasting 0x153CE, DestructionDualCasting 0x153CF,
+    IllusionDualCasting 0x153D0, RestorationDualCasting 0x153D1: each an
+    entry point 75, kCanDualCastSpell, include/RE/B/BGSEntryPoint.h:88), a
+    cast from both hands at once is one overcharged cast:
+    fMagicDualCastingEffectivenessBase 2.2 (GMST 0x361F6),
+    fMagicDualCastingCostMult 2.8 (0x361F4), fMagicDualCastingTimeMult 1.0
+    (0x361F5). UESP agrees: "2.2x spell effectiveness for 2.8x spell cost"
+    (https://en.uesp.net/wiki/Skyrim:Magic_Overview, Dual-Casting).
+  - Without it, UESP: "casting a spell with both hands has the same
+    effectiveness as though cast normally, but twice". HYPOTHESIS: whether
+    two streams of one spell from one caster both damage one target, or the
+    second only refreshes the first's effect (a forum answer says a fire
+    spell's effect overwrites itself). The masters cannot say.
+  - Dynamic plan (rule 8): a Frida trace in c1's game of the engine's Health
+    damage to c2's figure. The engine damages a figure like any actor; the
+    client only keeps it immortal (1,000,000 Health, formView.ts:302) and
+    steers its percentage from its player's reports (movementApply.ts:147),
+    which a trace of the damage calls does not count. One hand for 4 s, then
+    both: about 8 Health a second for one stream, then 16 if both count or
+    8 if the second refreshes the first.
+- The slice, by that answer:
+  - both count: the client keeps a magic hit unless it repeats the caster,
+    target and spell within the frame (the doubled event, 0 to 2 ms apart
+    here), and the server counts each hand's stream on its own clock (a hit
+    claims the open stream of its spell with the oldest counted hit; one
+    hand that misses can then overcount, bounded by MAX_TICK_MS); T0 for two
+    hands, one hand, and a hand that misses;
+  - one counts: today's count is the game's, and a T0 test pins it;
+  - either way, the overcharge: a cast reported with isDualCasting while
+    both hands hold its spell counts 2.2 times its magnitude; the perk gate
+    is M5's, so until then the perk is recorded unvalidated (R2, as Eli's
+    headshot call);
+  - the observer's second hand joins the concentration-cast animation
+    slice above.
 - Found in the server log: every Lost Grimoire Teleportation cast logged
   "CastFactsFor - b0a86df: Record 0x50a86de doesn't exist; cast as
   fire-and-forget within 512 units". CastFactsFor (PartOne.cpp:1376-1420)
