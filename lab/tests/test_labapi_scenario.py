@@ -44,6 +44,31 @@ class ScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_scenario("id: t\nclients: [c1]\nsteps:\n  - server: explode\n")
 
+    def test_until_waits_for_a_condition_with_a_cap(self):
+        from labapi.scenario import load_scenario
+
+        block = load_scenario(
+            "id: t\nclients: [c1]\nsteps:\n  - until:\n      within: 12\n      expect:\n"
+            "        - server.actor(c1).healthPercentage < 0.6\n"
+        )
+        step = block.steps[0]
+        self.assertEqual((step.kind, step.seconds, step.every), ("until", 12.0, 1.0))
+        self.assertEqual(step.assertions, ["server.actor(c1).healthPercentage < 0.6"])
+        self.assertEqual(step.describe(), "until x1 within 12s")
+        flow = load_scenario('id: t\nclients: [c1]\nsteps:\n  - until: {within: 3, every: 0.25, expect: ["server.actor(c1).x > 0"]}\n')
+        self.assertEqual((flow.steps[0].seconds, flow.steps[0].every), (3.0, 0.25))
+        for bad in (
+            "until: [server.actor(c1).x > 0]",
+            "until: {expect: [server.actor(c1).x > 0]}",
+            "until: {within: 0, expect: [server.actor(c1).x > 0]}",
+            "until: {within: 5, expect: []}",
+            "until: {within: 5, every: -1, expect: [server.actor(c1).x > 0]}",
+            "until: {within: 5, expect: [server.actor(c1).x > 0], until: 3}",
+            "until: {within: true, expect: [server.actor(c1).x > 0]}",
+        ):
+            with self.assertRaises(ValueError, msg=bad):
+                load_scenario(f"id: t\nclients: [c1]\nsteps:\n  - {bad}\n")
+
     def test_netem_spec(self):
         from labapi.scenario import load_scenario
 

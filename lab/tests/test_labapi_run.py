@@ -325,6 +325,60 @@ steps:
 
 
 @needs_deps
+class UntilSteps(RunTests):
+    """until: a condition polled until it holds or its cap passes (the
+    process plan's B7)."""
+
+    def test_an_until_holds_once_the_server_does(self):
+        import threading
+
+        threading.Timer(0.3, lambda: setattr(self.state.actors[1], "healthPercentage", 0.3)).start()
+        run_id, body = self._run("""
+id: t2-until
+clients: [c1]
+steps:
+  - c1: connect
+  - until:
+      within: 10
+      every: 0.1
+      expect:
+        - server.actor(c1).healthPercentage < 0.5
+  - assert:
+      - server.actor(c1).healthPercentage < 0.5
+""")
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        self.assertIn("1 held after", body["steps"][1]["note"])
+        self.assertIn("server.actor(c1).healthPercentage = 0.3", body["steps"][1]["note"])
+
+    def test_an_until_that_never_holds_is_red_past_its_cap(self):
+        run_id, body = self._run("""
+id: t2-until-red
+clients: [c1]
+steps:
+  - c1: connect
+  - until: {within: 0.4, every: 0.1, expect: ["server.actor(c1).x == 12345"]}
+  - c1: move {dx: 1, dy: 0}
+""")
+        self.assertEqual(body["verdict"], "red", json.dumps(body, indent=1))
+        self.assertEqual(len(body["steps"]), 2, "the run stops at the until")
+        failure = body["failures"][0]
+        self.assertEqual((failure["kind"], failure["expr"]), ("until", "server.actor(c1).x == 12345"))
+        self.assertIn("after 0.4s", failure["error"])
+        self.assertIsInstance(failure["values"]["server.actor(c1).x"], float)
+
+    def test_an_until_that_cannot_parse_errs_at_once(self):
+        run_id, body = self._run("""
+id: t2-until-syntax
+clients: [c1]
+steps:
+  - c1: connect
+  - until: {within: 30, expect: ["server.actor(c1).x ==="]}
+""")
+        self.assertEqual(body["verdict"], "error", json.dumps(body, indent=1))
+        self.assertEqual(body["failures"][0]["kind"], "assertion-syntax")
+        self.assertLess(body["steps"][1]["seconds"], 5.0)
+
+
 class RollbackHeartbeat(RunTests):
     def test_a_heartbeat_from_before_the_restart_does_not_pass_the_phase(self):
         """The old session polls until the stop lands; that poll must not count
@@ -1007,23 +1061,8 @@ class ProbeSteps(RunTests):
         self.assertTrue(out["r"].json()["ok"])
         self.assertIn(("c2", "hold-key", {"code": 207, "ms": 8000}), self.doubles.seen)
 
-    def test_an_assist_types_a_console_line_as_the_seat_s_player(self):
-        import threading
-
-        out = {}
-        body = {"action": "console", "args": {"text": "player.addshout 3f9ea"}}
-        t = threading.Thread(target=lambda: out.update(r=self.client.post("/lab/clients/c1/assist", json=body)))
-        t.start()
-        deadline = time.time() + 10
-        while t.is_alive() and time.time() < deadline:
-            self.doubles.turn()
-            time.sleep(0.02)
-        t.join(5)
-        self.assertEqual(out["r"].status_code, 200, out["r"].text)
-        self.assertIn(("c1", "console", {"text": "player.addshout 3f9ea"}), self.doubles.seen)
-
     def test_an_assist_sends_input_and_nothing_else(self):
-        for other in ("equip", "dump-state", "poisons"):
+        for other in ("console", "equip", "dump-state", "poisons"):
             r = self.client.post("/lab/clients/c1/assist", json={"action": other})
             self.assertEqual(r.status_code, 400, other)
         self.assertEqual(self.client.post("/lab/clients/c9/assist", json={"action": "tap-key", "args": {"code": 28}}).status_code, 404)

@@ -537,6 +537,8 @@ class Runner:
                 return False, str(e)
         if step.kind == "assert":
             return await self._assert(rec, index, step)
+        if step.kind == "until":
+            return await self._until(rec, index, step)
         assert step.client and step.action
         if step.action == "teleport":
             return await self._teleport(rec, index, step)
@@ -699,36 +701,80 @@ class Runner:
                 return False, last
             await asyncio.sleep(1.0 * self.s.time_scale if self.s.time_scale else 0.01)
 
-    async def _assert(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+    async def _evaluate(self, rec: RunRecord, index: int, exprs: list[str]) -> tuple[list[dict[str, Any]], str, str | None]:
+        """`exprs` evaluated once against fresh views (a dump-state from each
+        client an expression reads): the failures, as an assert records them,
+        the readings as text, and the client whose dump-state timed out, if
+        one did (nothing is evaluated then)."""
         needed: set[str] = set()
-        for expr in step.assertions:
+        for expr in exprs:
             needed |= clients_needing_views(expr, rec.scenario.clients)  # fakeclients have no view
         if needed:
             results = await asyncio.gather(*(self.board.run_step(c, "dump-state", {}, self.s.step_timeout_s) for c in sorted(needed)))
             for qs in results:
                 if not qs.ok:
-                    rec.failures.append({"step": index, "kind": "timeout", "client": qs.client, "error": "dump-state before assert timed out"})
-                    rec.verdict = "red"
-                    return False, f"dump-state from {qs.client} timed out"
+                    return [], "", qs.client
         evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario))
-        failed = []
-        for expr in step.assertions:
+        failed: list[dict[str, Any]] = []
+        for expr in exprs:
             try:
                 held = await asyncio.to_thread(evaluator.evaluate, expr)
                 if not held:
                     failed.append({"step": index, "kind": "assertion", "expr": expr, "error": "false", "values": dict(evaluator.readings)})
             except AssertionSyntax as e:
                 failed.append({"step": index, "kind": "assertion-syntax", "expr": expr, "error": str(e)})
-                rec.verdict = "error"
             except (AssertionData, StateError) as e:
                 failed.append({"step": index, "kind": "assertion-data", "expr": expr, "error": str(e)})
-        read = "; ".join(f"{k} = {v}" for k, v in evaluator.readings.items())
+        return failed, "; ".join(f"{k} = {v}" for k, v in evaluator.readings.items()), None
+
+    async def _assert(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+        failed, read, slow = await self._evaluate(rec, index, step.assertions)
+        if slow:
+            rec.failures.append({"step": index, "kind": "timeout", "client": slow, "error": "dump-state before assert timed out"})
+            rec.verdict = "red"
+            return False, f"dump-state from {slow} timed out"
+        if any(f["kind"] == "assertion-syntax" for f in failed):
+            rec.verdict = "error"
         if failed:
             rec.failures.extend(failed)
             if rec.verdict == "running":
                 rec.verdict = "red"
             return False, f"{len(failed)} of {len(step.assertions)} failed" + (f" ({read})" if read else "")
         return True, f"{len(step.assertions)} held" + (f" ({read})" if read else "")
+
+    async def _until(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+        """until: the expressions polled every `every` seconds until all hold,
+        so a scenario waits for a condition, not for a sleep sized for the
+        slowest case (the process plan's B7). Past `within` (seconds, never
+        scaled, as the judged teleport's cap) the step fails as an assert
+        does, each failure of kind "until" with its last readings; a syntax
+        error fails at once."""
+        started = self._clock()
+        deadline = started + (step.seconds or 0.0)
+        polls = 0
+        while True:
+            polls += 1
+            failed, read, slow = await self._evaluate(rec, index, step.assertions)
+            if not failed and not slow:
+                note = f"{len(step.assertions)} held after {self._clock() - started:.1f}s, {polls} poll(s)" + (f" ({read})" if read else "")
+                return True, note
+            syntax = [f for f in failed if f["kind"] == "assertion-syntax"]
+            if syntax:
+                rec.failures.extend(syntax)
+                rec.verdict = "error"
+                return False, str(syntax[0]["error"])
+            if self._clock() >= deadline:
+                if slow:
+                    failed = [{"step": index, "kind": "timeout", "client": slow, "error": "dump-state during until timed out"}]
+                for f in failed:
+                    if f["kind"] == "assertion":
+                        f["kind"] = "until"
+                    f["error"] = f"{f['error']} after {step.seconds:g}s, {polls} poll(s)"
+                rec.failures.extend(failed)
+                if rec.verdict == "running":
+                    rec.verdict = "red"
+                return False, f"{len(failed)} of {len(step.assertions)} did not hold within {step.seconds:g}s" + (f" ({read})" if read else "")
+            await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
     async def _relaunch(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
         """relaunch: the player quits the game and starts it again, so its
