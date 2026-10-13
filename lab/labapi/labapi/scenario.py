@@ -1,6 +1,8 @@
 """Scenario files (lab/scenarios/*.yaml). The step notation is one key per
 step: `<client>: <verb> {flow mapping}`, `wait: <seconds>`, `assert: [...]`,
-`server: restart`. A bare `verb {a: 1}` value is not valid YAML (the colon
+`until: {within: <seconds>, expect: [...], every: <seconds>}` (the
+expressions polled until they hold or `within` passes; `every` defaults to a
+second), `server: restart`. A bare `verb {a: 1}` value is not valid YAML (the colon
 inside the braces ends the plain scalar), so the loader quotes such values
 before parsing; a quoted form in the file is accepted as well."""
 
@@ -54,11 +56,14 @@ class ServerSpec(BaseModel):
 
 
 class Step(BaseModel):
-    kind: Literal["client", "wait", "assert", "server"]
+    kind: Literal["client", "wait", "assert", "until", "server"]
     client: str | None = None
     action: str | None = None
     args: dict[str, Any] = Field(default_factory=dict)
+    # wait's seconds; until's cap (within)
     seconds: float | None = None
+    # until's poll interval
+    every: float | None = None
     assertions: list[str] = Field(default_factory=list)
 
     def describe(self) -> str:
@@ -68,6 +73,8 @@ class Step(BaseModel):
             return f"wait {self.seconds}"
         if self.kind == "assert":
             return f"assert x{len(self.assertions)}"
+        if self.kind == "until":
+            return f"until x{len(self.assertions)} within {self.seconds:g}s"
         return f"server: {self.action}"
 
 
@@ -108,6 +115,36 @@ def _parse_action(value: Any) -> tuple[str, dict[str, Any]]:
     return value, {}
 
 
+def _seconds(value: Any) -> float | None:
+    """A positive, finite number of seconds, or None."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value) if 0 < value < float("inf") else None
+
+
+def _until_step(value: Any) -> Step:
+    """until: a condition a step waits for instead of a sleep sized for the
+    slowest case (the process plan's B7, the judged teleport's shape): the
+    expressions, as assert's, polled every `every` seconds until all hold,
+    a failure past `within`."""
+    usage = "until takes {within: <seconds>, expect: [expressions], every: <seconds>}"
+    if not isinstance(value, dict):
+        raise ValueError(usage)
+    unknown = sorted(set(value) - {"within", "expect", "every"})
+    if unknown:
+        raise ValueError(f"{usage}, not {unknown}")
+    exprs = value.get("expect")
+    if not isinstance(exprs, list) or not exprs or not all(isinstance(x, str) for x in exprs):
+        raise ValueError("until's expect is a list of expressions")
+    within = _seconds(value.get("within"))
+    if within is None:
+        raise ValueError("until's within is a positive number of seconds")
+    every = _seconds(value.get("every", 1.0))
+    if every is None:
+        raise ValueError("until's every is a positive number of seconds")
+    return Step(kind="until", seconds=within, every=every, assertions=list(exprs))
+
+
 def parse_step(raw: Any, clients: list[str]) -> Step:
     if not isinstance(raw, dict) or len(raw) != 1:
         raise ValueError(f"each step is a one-key mapping, got {raw!r}")
@@ -119,6 +156,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         if not isinstance(value, list) or not all(isinstance(x, str) for x in value):
             raise ValueError("assert takes a list of expressions")
         return Step(kind="assert", assertions=list(value))
+    if key == "until":
+        return _until_step(value)
     if key == "server":
         action, args = _parse_action(value)
         if action not in SERVER_STEP_ACTIONS:
