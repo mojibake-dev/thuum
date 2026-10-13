@@ -548,7 +548,12 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    the ack or the timeout.
 5. Runs assertions: server-side through the lab gamemode's state endpoint
    and the database directory; client-side against what lab-driver reported;
-   wire-side against the pcap when a step asks for it.
+   wire-side against the pcap when a step asks for it. `assert: [...]`
+   judges its expressions once; `until: {within: <s>, expect: [...], every:
+   <s>}` polls the same expressions (every second by default) until they
+   hold and fails, as an assert does, if `within` passes first, so a
+   scenario waits for a condition rather than a `wait:` sized for the
+   slowest case (the process plan's B7, 2026-10-13).
 6. Collects artifacts and writes result.json. Exit code is the verdict.
 
 Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
