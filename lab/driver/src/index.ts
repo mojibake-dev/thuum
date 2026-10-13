@@ -175,6 +175,11 @@ type Watched = {
   last: number[];
   maxDisplacement: number;
   samples: number;
+  // the largest move between two frames and when (ms): a figure put at a
+  // teleport's landing moves its whole jump in one frame, a glide a frame's
+  // share of it (thuum docs/verbs/cast-teleport.md, the observer's view)
+  maxStep: number;
+  maxStepMs: number;
   health: number[][];
   magicka: number[][];
   events: Array<[number, string, number]>;
@@ -384,6 +389,14 @@ function trackWatch(): void {
     const dy = pos[1] - w.first[1];
     const dz = pos[2] - w.first[2];
     w.maxDisplacement = Math.max(w.maxDisplacement, Math.sqrt(dx * dx + dy * dy + dz * dz));
+    const sx = pos[0] - w.last[0];
+    const sy = pos[1] - w.last[1];
+    const sz = pos[2] - w.last[2];
+    const step = Math.sqrt(sx * sx + sy * sy + sz * sz);
+    if (step > w.maxStep) {
+      w.maxStep = step;
+      w.maxStepMs = Date.now() - (watching ? watching.startedAt : 0);
+    }
     w.last = pos;
     w.samples += 1;
     const health = actor.getActorValue("health");
@@ -1341,7 +1354,7 @@ function run(step: Step, player: Actor): unknown {
         const otherBools: Record<string, Array<[number, boolean]>> = {};
         for (const n of bools) otherBools[n] = [];
         actors.set(other.getFormID(), {
-          name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0,
+          name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
           health: [[0, other.getActorValue("health")]], magicka: [[0, other.getActorValue("magicka")]],
           events: [], bools: otherBools,
         });
