@@ -1430,6 +1430,11 @@ function run(step: Step, player: Actor): unknown {
       const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
       const actors = new Map<number, Watched>();
       for (const other of nearbyActors(player)) actors.set(other.getFormID(), newWatched(other, bools));
+      // a solo reference's placed NPC always, which the random search can
+      // miss among the wildlife (r-melee-power-a 20261014-064209 watched a
+      // fox and a wolf and not the bandit it hit)
+      const placed = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
+      if (placed && !actors.has(placedId)) actors.set(placedId, newWatched(placed, bools));
       watching = { startedAt: Date.now(), actors, self: newWatched(player, bools) };
       return { watching: actors.size };
     }
