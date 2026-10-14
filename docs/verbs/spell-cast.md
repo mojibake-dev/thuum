@@ -422,7 +422,12 @@ health message. A second red within two sweeps makes it a bug.
 - [x] ledger and suppression registry updated: no native added; no
       suppression for players (a figure's spell lands nothing on the player
       it targets, MEASURED), three untested candidates kept for the NPC
-      milestone
+      milestone. Changed 2026-10-14 (fork m2-push 4e8aa04c, docs/verbs/
+      push.md): that held only by skymp5-client's hit-time dispel (ae8446a9,
+      2026-10-13). Now a figure's spell runs on the player except its
+      Health, Magicka and Stamina value effects, which the player's
+      AddTarget refuses (the server's numbers; b-duel's Flames and Fire
+      Breath unchanged)
 - [x] merged: the sweep on fork m2-spell 45839102 went 32 of 32 green with
       no rerun (runs 20261010-122057 to -134720); fork parity fast-forwarded
       to 45839102, both clones' clean-m1 promoted
