@@ -1531,6 +1531,23 @@ function run(step: Step, player: Actor): unknown {
       Debug.sendAnimationEvent(target, name);
       return { sent: name, to: target.getFormID(), set: Object.keys(set) };
     }
+    case "combat-spell": {
+      // A spell's effects applied as a combat hit (Papyrus
+      // Actor.DoCombatSpellApply, CK wiki "DoCombatSpellApply - Actor"): with
+      // {other: true} the nearest other actor (a solo reference's placed NPC)
+      // applies it to the player, else the player to the nearest other. For
+      // ADR-031's references B of the shouts and spells an NPC will not cast
+      // on demand (thuum docs/verbs/push.md: Spell.Cast and the console's
+      // cast from a placed NPC applied nothing; a Draugr that knew the shout
+      // only meleed)
+      const spell = Spell.from(Game.getFormEx(num(a.formId)));
+      if (!spell) return { error: "no such spell" };
+      const other = nearestOther(player);
+      const caster = a.other ? other : player;
+      const target = a.other ? player : other;
+      caster.doCombatSpellApply(spell, target);
+      return { applied: spell.getFormID(), caster: caster.getFormID(), target: target.getFormID() };
+    }
     case "play-idle": {
       // One IDLE record played on the player, or with {other: true} on the
       // nearest other actor (Papyrus Actor.PlayIdle, CK wiki "PlayIdle -
