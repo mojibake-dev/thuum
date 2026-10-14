@@ -1155,3 +1155,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   snapshots for the retention period (mundus, 14i): within the license, never off the host,
   and the thing to know if the file ever has to go. With this every item of the audit's plan is decided; A5
   (sky-re always on) landed on Eli's go the afternoon before.
+- The first unattended nightly (run set 20261014-103014-nightly, 03:30 to 06:16 PDT): 42
+  scenarios, 36 green, none red; at 05:10 sky-c2's passthrough GPU (vfio 0000:01:00.0, the GTX
+  1050) fell to D3cold ("Unable to change power state from D3cold to D0", QEMU exit 1) and the
+  twelve runs after it ended in E_RUN_NO_HEARTBEAT on c2, so six scenarios never had a real
+  attempt (m0-appearance, m0-attributes, m0-death, m0-forge, m0-inventory,
+  smoke-two-players). Under ADR-030, by ADR-027's logic (a lab fault is a rerun, never a red),
+  the union of the 36 and a green completion set of the six on the same clean-m1-next content
+  is the full sweep for the recorder staging's promotion; it runs when mundus has c2 back. The
+  sweep's lesson goes into the runner: a set stops, resumable, after two consecutive lab
+  faults, so the next hardware fault costs ten minutes, not an hour.
