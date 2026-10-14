@@ -107,6 +107,29 @@ class RunSetTests(RunTests):
         self.assertEqual(entries[1]["rerun"], "lab-fault")
         self.assertEqual(body["runs"]["t2-green-one"][0]["verdict"], "green", "the set went on past the fault")
 
+    def test_two_lab_faults_in_a_row_stop_the_set_resumable(self):
+        """The first nightly lost a clone's GPU at its 31st scenario and spent an
+        hour on twelve heartbeat timeouts. Two consecutive scenarios ending in a
+        lab fault (after their rerun) stop the set, which resumes from the next
+        scenario once the lab is back; the verdicts already won stay."""
+        (self.scen / "t2-fault-two.yaml").write_text(LAB_FAULT.replace("id: t2-fault", "id: t2-fault-two"))
+        rid = self._start(["t2-green-one", "t2-fault", "t2-fault-two", "t2-green-two"])
+        body = self._wait(rid)
+        self.assertEqual(body["state"], "stopped", body["summary"])
+        self.assertIsNone(body["verdict"])
+        self.assertEqual(body["position"], 3, "stopped after the second fault, before t2-green-two")
+        self.assertEqual([e["verdict"] for e in body["runs"]["t2-fault"]], ["error", "error"])
+        self.assertEqual([e["verdict"] for e in body["runs"]["t2-fault-two"]], ["error", "error"])
+        self.assertNotIn("t2-green-two", body["runs"])
+        self.assertTrue(any("lab fault" in n and "resume" in n for n in body["notes"]), body["notes"])
+        # the lab is back (the faulting scenarios stay broken in this test): resume plays the rest
+        r = self.client.post(f"/lab/runset/{rid}/resume")
+        self.assertEqual(r.status_code, 200, r.text)
+        body = self._wait(rid)
+        self.assertEqual(body["state"], "done")
+        self.assertEqual(body["runs"]["t2-green-two"][0]["verdict"], "green")
+        self.assertEqual(body["verdict"], "error", "the two faults never got a verdict")
+
     def test_two_reds_are_red_with_no_rerun(self):
         rid = self._start(["t2-red", "t2-red-two"])
         body = self._wait(rid)

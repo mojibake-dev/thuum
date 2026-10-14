@@ -197,7 +197,8 @@ def create_app(services: Services) -> FastAPI:
         scenarios = body.get("scenarios", "all")
         if scenarios != "all" and not (isinstance(scenarios, list) and all(isinstance(x, str) for x in scenarios)):
             raise HTTPException(400, 'scenarios must be a list of ids or "all"')
-        policy = Policy(lab_fault_reruns=int(body.get("lab_fault_reruns", 1)), lone_red_reruns=int(body.get("lone_red_reruns", 2)))
+        policy = Policy(lab_fault_reruns=int(body.get("lab_fault_reruns", 1)), lone_red_reruns=int(body.get("lone_red_reruns", 2)),
+                        lab_fault_stop=int(body.get("lab_fault_stop", 2)))
         if not _idle() or runsets.active is not None:
             return _busy() if not _idle() else JSONResponse({"error": f"E_RUNSET_BUSY: run set {runsets.active.id} is active"}, status_code=409)
         try:

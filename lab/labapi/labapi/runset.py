@@ -27,6 +27,12 @@ from .scenario import load_scenario
 class Policy:
     lab_fault_reruns: int = 1   # a run without a verdict is rerun this often
     lone_red_reruns: int = 2    # the set's only red scenario reruns this often; all green makes it a watch item
+    # consecutive scenarios that end in a lab fault after their rerun before
+    # the set stops, resumable: the first nightly (20261014-103014) lost a
+    # clone's GPU at its 31st scenario and spent an hour on twelve heartbeat
+    # timeouts before it ended; a stopped set resumes from the next scenario
+    # once the lab is back (POST /lab/runset/<id>/resume)
+    lab_fault_stop: int = 2
 
 
 @dataclass
@@ -181,6 +187,7 @@ class RunSets:
 
     async def execute(self, rs: RunSet) -> RunSet:
         try:
+            faults_in_a_row = 0
             while rs.position < len(rs.scenarios):
                 if rs.state == "stopping":
                     rs.state = "stopped"
@@ -192,6 +199,16 @@ class RunSets:
                 while verdict == "error" and tries < rs.policy.lab_fault_reruns:
                     tries += 1
                     verdict = await self._run(rs, sid, rerun="lab-fault")
+                faults_in_a_row = faults_in_a_row + 1 if verdict == "error" else 0
+                if verdict == "error" and rs.policy.lab_fault_stop and faults_in_a_row >= rs.policy.lab_fault_stop:
+                    # the lab, not a scenario, is failing: stop here, resumable, with
+                    # the last fault named; the scenarios already run keep their verdicts
+                    last = (rs.runs.get(sid) or [{}])[-1].get("run")
+                    rs.state = "stopped"
+                    rs.notes.append(f"stopped after {faults_in_a_row} scenarios in a row ended in a lab fault (last {sid}, run {last}) at {_iso(self._wall())}; resume once the lab is back")
+                    rs.position += 1
+                    self.save(rs)
+                    return rs
                 rs.position += 1
                 self.save(rs)
             await self._settle(rs)
