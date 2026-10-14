@@ -1137,3 +1137,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   verb-merge's first live run found two faults of its own on the way, both fixed on
   main: gate.yaml read with PyYAML, which the Mac's python3 lacks (e1f63a8), and the
   nightly's start condition (24a526c, d7745a8).
+- Eli decided B5 of the process audit (2026-10-14, 06:1x UTC, "then yes"): the SteamStub-wrapped
+  1.6.1170 exe is unpacked for the Ghidra project, so the re-analyst reads the target version's
+  bodies instead of 1.7.104's under shared Address Library ids. The unpack runs inside sky-re
+  (Steamless under mono), the file stays under /srv/persist/game beside the pinned exe with its
+  checksum line, never in a repo or a registry; thuum-mundus specs the tool's arrival for core,
+  then the thuum layer runs the unpack and `just ghidra-import`. With this every item of the
+  audit's plan is decided; A5 (sky-re always on) landed on Eli's go the afternoon before.
