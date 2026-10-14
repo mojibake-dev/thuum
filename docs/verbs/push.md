@@ -146,23 +146,52 @@ an engine move, so its speed may need its own allowance: to measure).
   The trace above found why. The probe again on 4e8aa04c, with the trace,
   is the verb's next reading.
 
+## Lab (2026-10-14, the throw on 4e8aa04c)
+
+- x-push2 (20261014-152206, the trace on c2): the cone hit the player; the
+  engine asked for OnEffectStart on the player's effect (handle
+  0x0002000100000014) from the player's own update; the filter let it
+  through; PushActorAway ran from c1's figure (0xFF000837) onto the player;
+  KnockExplosion ran on the player from the figure's position, once
+  directly and once from the task queue. MEASURED: the whole chain the solo
+  control takes, in the multiplayer target's game.
+- Thrown north from lab-spawn, c2 tumbled about 3800 units down the
+  mountain (still down at 8.5 s). Thrown south (x-push-south
+  20261014-152858) it went 1131 units over flat ground, with StaggerPlayer,
+  Ragdoll and GetUpBegin 5 s apart in its own game, as the engine alone
+  throws a player (r-shout-uf3-b: 1224 units).
+- In c2's game only the push effect (0x7F82F) and the second word's
+  (0x7F82E) landed; the damage effects (0xEA075, Dragonborn's 0x0401FF2B,
+  Health value modifiers) were refused. c2's health followed the server's
+  (0.534 against its own 0.540).
+- b-duel (20261014-153159) on 4e8aa04c: green; c2's own health within 0.02
+  of the server through Flames (0.707, own 0.712) and Fire Breath (0.505,
+  own 0.514), so dropping the hit-time dispel let no local damage through.
+- b-push: green twice by path (20261014-155052 and -155344: the server's
+  record of c2 1237 and 1291 units south; c2's own Ragdoll and GetUpBegin;
+  c1's figure of c2 took the relayed Ragdoll). Committed alone, thuum
+  5b1e0d2. lab-api's c.watched(other) learned to find an actor the server
+  moved where it ended (74532e4): a thrown player's figure no longer begins
+  where the server has its player.
+- The figure on the shouter's screen: it takes the relayed Ragdoll
+  (skymp5-client's pushActorAway(figure, 0): it drops where it stood),
+  ignores movement while down, takes the relayed GetUpBegin, and a second
+  later moves to where its player landed (x-push-south: it ended at c2's
+  exact spot). The flight itself is not drawn.
+
 ## Next
 
-1. x-push2 on 4e8aa04c's client: the trace should show OnEffectStart on
-   the player's effect, the filter letting it through (the handle test is
-   the re-analyst's read: HandleIsType(142) on a handle like the solo
-   one), PushActorAway from c1's figure and KnockExplosion on the player;
-   c2's watch a Ragdoll and GetUpBegin and a flight past a stagger's.
-   Then b-push (its bounds from that run), committed alone.
-2. The filter's first test (ADR-029 A1, test 1), its target half only: an
-   event on an ActiveEffect handle whose target is the player passes
-   (include/RE/A/ActiveEffect.h:93-104), beside the named exceptions in
-   OnSendEventEnter (skyrim-platform FridaHooks.cpp:51-87). A1's caster
-   half (an effect the player cast on another) waits for Apocalypse's verb:
-   in the shouter's game it would run the script on the target's figure and
-   throw the figure locally, against the movement relay.
-3. The imposed hit in the target's game, if the trace shows the figure's
-   own shout does not land the effect there: the server's decided spell
-   cast from the shouter's figure onto the player (MagicCaster::
-   CastSpellImmediate, include/RE/M/MagicCaster.h:46).
+1. The merge to parity (numidium's gate, ADR-030), then playtest
+   seventeen's throw.
+2. The figure's flight on other screens (the inventory's last row). Two
+   shapes, both to weigh against ADR-029: run the push on the figure in the
+   other games too (the effect lands on the figure there from the
+   shouter's relayed cast; its script is blanked today, as an effect a
+   player does not bear; the shouter's own game is A1's caster half), or
+   carry the push (pusher, target, force) on the wire so every game
+   pushes the figure from the shouter's figure. Either way the movement
+   relay already stands down while the figure is down.
+3. The server's PlayStagger for the third word (fork 4a4c80e1) beside the
+   engine's own stagger, which now plays in the target's game: retire it
+   once a trace shows the engine's alone.
 4. The parity scenario p-shout-uf3, its later list the figure's flight.
