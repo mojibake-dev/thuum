@@ -192,6 +192,20 @@ an engine move, so its speed may need its own allowance: to measure).
   later moves to where its player landed (x-push-south: it ended at c2's
   exact spot). The flight itself is not drawn.
 
+## Lab (2026-10-14, the flight on fork m2-flight f3569b95)
+
+- x-push-flight (20261014-210908, lab/frida/push-trace.js on c1): in the
+  shouter's game the third word's effect started on c2's figure
+  (OnEffectStart on handle 0x20001ff00081f) and passed the event filter by
+  its caster half; PushActorAway ran from the player (0x14) onto the
+  figure, and KnockExplosion threw it from c1's position. MEASURED: c1's
+  figure of c2 flew 1406 units with frame steps to 70 (c2's own game: 1405,
+  71) and landed where c2 landed (x and y equal, z within 16 units); its
+  relayed Ragdoll came 12 ms after the local one and was refused (already
+  down). A screenshot 0.6 s after the release shows the figure gone from
+  where it stood.
+- b-push green on it (20261014-211219).
+
 ## Playtest seventeen (2026-10-14, Eli, parity 4e8aa04c)
 
 - Passed: in test 2's game, test 2 "flies backwards as expected" from test

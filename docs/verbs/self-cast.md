@@ -266,4 +266,12 @@ Every self-cast item passed:
   raises it on a figure as on the player, to read in the lab). A one-line
   condition beside isSneaking, with a lab check that the label goes and
   comes back with the effect.
+- Fixed on fork m2-flight f3569b95 and measured (x-invisible-name
+  20261014-211744): c1's figure's Invisibility in c2's game read 0 before
+  the cast, 1 while the server ran the effect (29.5 s left), 0 after the
+  hour's wait ended it (the driver's av-read {other}); c2's screenshots show
+  the floating name above the figure, none while it was invisible, and the
+  name again after. Still shown while invisible: the game's own crosshair
+  prompt ("E Talk / test 1") when c2 aims at the spot, the engine's
+  activation prompt, not our label. A finding of its own.
 

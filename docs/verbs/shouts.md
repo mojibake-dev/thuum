@@ -623,4 +623,14 @@ snippets).
   is not drawn. Its screenshots came 1.2 s late. Next probe: a screenshot
   at the release of each breath, and lab/frida/launch-trace.js on c2 to see
   whether the second breath launches a projectile there at all.
+- Traced (x-tgm-breath2 20261014-212025, lab/frida/launch-trace.js on c2): a
+  projectile is launched in c2's game for every breath, the second
+  included (at 0, 9.9 and 48.1 s), each by our relay (Skyrim Platform's
+  cast for the figure, a SkyrimPlatformImpl.dll frame), none by the
+  engine's own shout. So the second breath is cast and lands; what Eli
+  misses is its drawn fire. The screenshots, 0.4 and 0.8 s after each key,
+  caught no flames for any breath (the first's included), only embers after
+  the second: still too late for a half-second flame. Open: what the
+  launched projectile draws the second time (its art on the figure's
+  mouth node, the voice caster's state after the first cast).
 
