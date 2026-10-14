@@ -27,6 +27,7 @@ import {
   GlobalVariable,
   HttpClient,
   HttpResponse,
+  Idle,
   Ingredient,
   ExtraPoison,
   getAnimationVariablesFromActor,
@@ -1517,6 +1518,17 @@ function run(step: Step, player: Actor): unknown {
       if (!name) return { error: "no event name" };
       Debug.sendAnimationEvent(a.other ? nearestOther(player) : player, name);
       return "sent";
+    }
+    case "play-idle": {
+      // One IDLE record played on the player, or with {other: true} on the
+      // nearest other actor (Papyrus Actor.PlayIdle, CK wiki "PlayIdle -
+      // Actor"): a solo reference's NPC power-attacking the player (ADR-031,
+      // reference B) through the game's own PowerAttackForward 0x19B25 or
+      // PowerAttackStanding 0x19B26 (Skyrim.esm), since its AI makes no power
+      // attack on demand. Returns whether the actor took the idle.
+      const idle = Idle.from(Game.getFormEx(num(a.formId)));
+      if (!idle) return { error: "no such idle" };
+      return (a.other ? nearestOther(player) : player).playIdle(idle);
     }
     case "voice": {
       // The player's voice after a shout (thuum docs/verbs/shouts.md): the
