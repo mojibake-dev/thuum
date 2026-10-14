@@ -1193,3 +1193,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   adr031-recorder 479b22c with the recorder and solo-start, launch.ps1's solo boot, the
   m2-fifteen client unchanged), clean-m1-next restacked; the lab is thuum-magnus's for the
   m2-push staging.
+- m2-push merged to fork parity 4e8aa04c (2026-10-14T17:19Z, 10:19 PDT), the first verb built
+  the ADR-031 way and the second merge through `just verb-merge`, this one with no hand on it.
+  Verbs: push (docs/verbs/push.md: Unrelenting Force's throw as the engine's own, the server
+  imposing the shout's hit in the target's game and the client's Papyrus filter letting the
+  spell's VoicePushEffectScript run there, 2fe894e1; the player's AddTarget refusing only
+  another actor's Health, Magicka and Stamina value effects, no hit-time dispel of a figure's
+  spell, 4e8aa04c, which was the real blocker), the figure animation queue delivering a cast's
+  start and release in order (4f13fa50, the concentration pose), and the four-file
+  clang-format (83710f05). b-push committed alone (thuum 5b1e0d2), green twice by path before
+  the gate. T2 green on 4e8aa04c (19 min, every session identical). The gate: run set
+  20261014-161704-merge-m2-push, 20 of 20 green with no rerun (smoke-two-players,
+  a-restart-persistence, b-duel, b-push, b-stagger, b-block, b-marksman, b-shout,
+  a-sneak-damage, a-hostility, a-fight-end, b-self-cast, b-potion, b-magic-restart,
+  b-poison, b-teleport, b-god, a-melee-reach, a-racemenu, b-spell), 58 min. Both clones'
+  clean-m1-next promoted to clean-m1 (the 4e8aa04c client with main's driver). Known and
+  cosmetic, not a gate item: the queue relays a refused blockStart and SneakStop pair about
+  every 130 ms after a stagger.
