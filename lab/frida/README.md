@@ -75,6 +75,15 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   magnitude) and every 500 ms each effect's call counts. Offsets are
   CommonLibSSE-NG's, cited per field; 1.6.1170 only.
 
+- push-trace.js: where Unrelenting Force's throw stops in the target's game
+  (docs/verbs/push.md). Logs every OnEffect* and OnMagicEffectApply event the
+  VM is asked to send (SendEvent, Skyrim Platform's own hook point, 104800),
+  its handle split in halves; each Papyrus PushActorAway (56213, HYPOTHESIS)
+  with the pusher and the pushed; and each AIProcess::KnockExplosion (39895),
+  every ragdoll's entry, with its actor, source and backtrace. Hooked beside
+  Skyrim Platform's SendEvent hook, it runs first, so the names are the
+  engine's before the block. 1.6.1170 only.
+
 - hud-trace.js: what the game shows on its HUD and who asked
   (docs/verbs/shouts.md, the re-teach at login). Hooks
   UIMessageQueue::AddMessage (13631) for the HUD's notification, center,
