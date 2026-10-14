@@ -29,6 +29,7 @@ import {
   HttpResponse,
   Ingredient,
   ExtraPoison,
+  getAnimationVariablesFromActor,
   getExtraContainerChanges,
   Input,
   NetImmerse,
@@ -154,64 +155,89 @@ const CRAFTING_MENU = "Crafting Menu";
 // the 133 asked; the server's record then reached the target 3 s after the
 // scenario's wait had ended).
 let moving: { x: number; y: number; cx: number; cy: number; speed: number; last: number; until: number } | null = null;
-// watch-start to watch-stop: every frame, how far each actor near us at the
-// start has got from where it was (lab-api's c.watched(other)). Actors are
-// kept by form id, so one that jumps out of range is still followed.
-// health: each change of the actor's current health this game saw, [ms
-// since watch-start, value] (at most WATCH_HEALTH_MAX): the engine's own
-// damage to a figure shows for a frame or so before the server's
-// ChangeValues sets it (thuum docs/verbs/marksman.md, the draw's power).
-// magicka: the same for its magicka, on a change at most every
-// WATCH_SELF_MS (at most WATCH_SELF_MAX): a figure holds a million
-// (formView.ts) and a stream drains it, so a figure's falls while it
-// streams in this game (thuum docs/verbs/spell-cast.md)
-// events: its stagger, recoil and shout events as this game's engine or a relay
-// sent them, [ms, name, 1 if its graph took the event after every hook
-// else 0] (the figure hooks below; thuum docs/verbs/stagger.md), and bools:
-// the graph variables watch-start names, on each change, as for the player
+// watch-start to watch-stop: the recorder (thuum ADR-031, docs/VERB.md's
+// Inventory). Everything this game's engine does to the player and to each
+// actor near it at the start, one record shape for both (the player's is
+// `self`, the others `actors`, by form id, so one that jumps out of range is
+// still followed): the same record from a solo game (a reference,
+// lab/references) and from each multiplayer game is what a parity scenario
+// diffs. Fields, each [ms since watch-start, ...]:
+// - first, last, maxDisplacement, samples: where it was and how far it got;
+//   maxStep, maxStepMs: the largest move between two frames and when (a
+//   figure put at a teleport's landing moves its whole jump in one frame, a
+//   glide a frame's share of it; thuum docs/verbs/cast-teleport.md), a throw
+//   its flight;
+// - health: each change this game saw (a figure's on every change, at most
+//   WATCH_HEALTH_MAX: the engine's own damage to a figure shows for a frame
+//   or so before the server's ChangeValues sets it, thuum
+//   docs/verbs/marksman.md), magicka and stamina on a change at most every
+//   WATCH_SELF_MS (a figure holds a million magicka, formView.ts, and a stream
+//   drains it, so a figure's falls while it streams in this game, thuum
+//   docs/verbs/spell-cast.md);
+// - events: every animation event sent to its graph, [ms, name, 1 if the
+//   graph took it once every hook had run], from the load-time hooks below
+//   (no name list: a list grown one verb at a time is what kept missing
+//   pieces, ADR-031);
+// - vars: Skyrim Platform's snapshot of its master behavior variables
+//   (VAR_* below) on each change, [ms, value], floats on a change of more
+//   than VAR_EPSILON at most every WATCH_SELF_MS; bools: the graph variables
+//   watch-start names (args.bools), read by name, as before;
+// - casts [ms, spell], hits it dealt [ms, target, source, projectile, flags],
+//   hits it took [ms, aggressor, source, flags] and effects applied to it
+//   [ms, caster, effect], as the engine's events report them (flags: power
+//   1, sneak 2, bash 4, blocked 8).
 type Watched = {
   name: string;
   first: number[];
   last: number[];
   maxDisplacement: number;
   samples: number;
-  // the largest move between two frames and when (ms): a figure put at a
-  // teleport's landing moves its whole jump in one frame, a glide a frame's
-  // share of it (thuum docs/verbs/cast-teleport.md, the observer's view)
   maxStep: number;
   maxStepMs: number;
   health: number[][];
   magicka: number[][];
+  stamina: number[][];
   events: Array<[number, string, number]>;
+  vars: Record<string, number[][]>;
   bools: Record<string, Array<[number, boolean]>>;
-};
-const WATCH_HEALTH_MAX = 64;
-// self: the player's own side over the same span, for how long a held
-// stream flows (thuum docs/verbs/spell-cast.md; screenshots take one to
-// three seconds each through the guest agent, too slow to time it): its
-// magicka and health [ms, value] on a change at most every WATCH_SELF_MS
-// (a figure's spell hurting this player in its own game shows in health), each
-// animation event sent to its graph [ms, name] (a hook on the player alone,
-// rule 9, added at watch-start and removed at watch-stop: the names are what
-// the watch is for, so no pattern), each spell it cast, each hit it dealt
-// and each hit it took [ms, the other actor, source], and each magic effect
-// applied to it [ms, caster, effect], as the engine's events report them
-// (whether a figure's spell reaches this player in this game at all), and
-// the graph variables watch-start names (args.bools) [ms, value] on each
-// change
-type WatchedSelf = {
-  magicka: number[][];
-  health: number[][];
-  events: Array<[number, string]>;
   casts: Array<[number, number]>;
   hits: Array<[number, number, number, number, number]>;
-  taken: Array<[number, number, number]>;
+  taken: Array<[number, number, number, number]>;
   effects: Array<[number, number, number]>;
-  bools: Record<string, Array<[number, boolean]>>;
 };
+const WATCH_HEALTH_MAX = 512;
 const WATCH_SELF_MAX = 256;
+const WATCH_EVENTS_MAX = 4096;
 const WATCH_SELF_MS = 50;
-let watching: { startedAt: number; actors: Map<number, Watched>; self: WatchedSelf; hookId: number } | null = null;
+const VAR_EPSILON = 0.01;
+let watching: { startedAt: number; actors: Map<number, Watched>; self: Watched } | null = null;
+
+// The master behavior variables Skyrim Platform reads into
+// getAnimationVariablesFromActor's three buffers (uint8 booleans, float32
+// floats, uint32 integers), in its index order: the fork's
+// skyrim-platform/src/platform_se/skyrim_platform/Magic/AnimVariableMasterGraphIndexes.cpp
+// (CreateDefault), the set skymp5-client relays with a cast (thuum
+// docs/verbs/spell-cast.md, the concentration pose)
+const VAR_BOOLS = ["bEquipOk", "bMotionDriven", "IsBeastRace", "IsSneaking", "IsBleedingOut", "IsCastingDual", "Is1HM", "IsCastingRight", "IsCastingLeft", "IsBlockHit", "IsPlayer", "IsNPC", "bIsSynced", "bVoiceReady", "bWantCastLeft", "bWantCastRight", "bWantCastVoice", "b1HM_MLh_attack", "b1HMCombat", "bAnimationDriven", "bCastReady", "IsAttacking", "bAllowRotation", "bMagicDraw", "bMLh_Ready", "bMRh_Ready", "bInMoveState", "bSprintOK", "bIdlePlaying", "bIsDialogueExpressive", "bAnimObjectLoaded", "bEquipUnequip", "bAttached", "bIsH2HSolo", "bHeadTracking", "bIsRiding", "bTalkable", "bRitualSpellActive", "bInJumpState", "bHeadTrackSpine", "bLeftHandAttack", "bIsInMT", "bHumanoidFootIKEnable", "bHumanoidFootIKDisable", "bStaggerPlayerOverride", "bNoStagger", "bIsStaffLeftCasting", "bPerkShieldCharge", "bPerkQuickShot", "IsBlocking", "IsBashing", "IsStaggering", "IsRecoiling", "IsEquipping", "IsUnequipping", "isInFurniture", "bNeutralState", "bBowDrawn", "PitchOverride", "NotCasting"];
+const VAR_FLOATS = ["TurnDelta", "Direction", "SpeedSampled", "weapAdj", "Speed", "CastBlend", "PitchOffset", "SpeedDamped", "Pitch", "VelocityZ", "1stPRot", "1stPRotDamped", "CastBlendDamped", "AimPitchCurrent", "AimHeadingCurrent", "BowAimOffsetPitch", "BowAimOffsetHeading", "MagicAimOffsetHeading", "MagicAimOffsetPitch"];
+const VAR_INTS = ["iRightHandEquipped", "iLeftHandEquipped", "i1HMState", "iState", "iLeftHandType", "iRightHandType", "iSyncIdleLocomotion", "iSyncForwardState", "iSyncTurnState", "iIsInSneak", "iWantBlock", "iRegularAttack", "testint", "currentDefaultState"];
+
+function newWatched(actor: Actor, bools: string[]): Watched {
+  const pos = positionOf(actor);
+  const named: Record<string, Array<[number, boolean]>> = {};
+  for (const n of bools) named[n] = [];
+  return {
+    name: actor.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
+    health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
+    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [],
+  };
+}
+
+// the record of a watched actor (the player's own at 0x14), if any
+function watchedRecord(id: number): Watched | undefined {
+  if (!watching) return undefined;
+  return id === 0x14 ? watching.self : watching.actors.get(id);
+}
 const SCREENSHOT_WAIT_MS = 10000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -381,59 +407,81 @@ function positionOf(actor: Actor): number[] {
 
 function trackWatch(): void {
   if (!watching) return;
+  const ms = Date.now() - watching.startedAt;
   watching.actors.forEach((w, id) => {
     const actor = Actor.from(Game.getFormEx(id));
-    if (!actor) return;
-    const pos = positionOf(actor);
-    const dx = pos[0] - w.first[0];
-    const dy = pos[1] - w.first[1];
-    const dz = pos[2] - w.first[2];
-    w.maxDisplacement = Math.max(w.maxDisplacement, Math.sqrt(dx * dx + dy * dy + dz * dz));
-    const sx = pos[0] - w.last[0];
-    const sy = pos[1] - w.last[1];
-    const sz = pos[2] - w.last[2];
-    const step = Math.sqrt(sx * sx + sy * sy + sz * sz);
-    if (step > w.maxStep) {
-      w.maxStep = step;
-      w.maxStepMs = Date.now() - (watching ? watching.startedAt : 0);
-    }
-    w.last = pos;
-    w.samples += 1;
-    const health = actor.getActorValue("health");
-    const lastHealth = w.health.length > 0 ? w.health[w.health.length - 1][1] : NaN;
-    if (health !== lastHealth && w.health.length < WATCH_HEALTH_MAX) {
-      w.health.push([Date.now() - (watching ? watching.startedAt : 0), health]);
-    }
-    const magicka = actor.getActorValue("magicka");
-    const lastMagicka = w.magicka[w.magicka.length - 1];
-    const ms = Date.now() - (watching ? watching.startedAt : 0);
-    if (magicka !== lastMagicka[1] && ms - lastMagicka[0] >= WATCH_SELF_MS && w.magicka.length < WATCH_SELF_MAX) {
-      w.magicka.push([ms, magicka]);
-    }
-    for (const name of Object.keys(w.bools)) {
-      const seen = w.bools[name];
-      const value = actor.getAnimationVariableBool(name);
-      if ((seen.length === 0 || seen[seen.length - 1][1] !== value) && seen.length < WATCH_SELF_MAX) {
-        seen.push([ms, value]);
-      }
-    }
+    if (actor) trackWatched(actor, id, w, ms, false);
   });
   const me = Game.getPlayer();
-  if (!me) return;
-  const s = watching.self;
-  const ms = Date.now() - watching.startedAt;
-  for (const [av, seen] of [["magicka", s.magicka], ["health", s.health]] as Array<[string, number[][]]>) {
-    const value = me.getActorValue(av);
-    const last = seen[seen.length - 1];
-    if (value !== last[1] && ms - last[0] >= WATCH_SELF_MS && seen.length < WATCH_SELF_MAX) seen.push([ms, value]);
+  if (me) trackWatched(me, 0x14, watching.self, ms, true);
+}
+
+// One frame of a watched actor's record. The player's own health and
+// magicka keep their WATCH_SELF_MS pace (as before the recorder); another
+// actor's health is taken on every change (its one-frame engine damage).
+function trackWatched(actor: Actor, id: number, w: Watched, ms: number, own: boolean): void {
+  const pos = positionOf(actor);
+  const dx = pos[0] - w.first[0];
+  const dy = pos[1] - w.first[1];
+  const dz = pos[2] - w.first[2];
+  w.maxDisplacement = Math.max(w.maxDisplacement, Math.sqrt(dx * dx + dy * dy + dz * dz));
+  const sx = pos[0] - w.last[0];
+  const sy = pos[1] - w.last[1];
+  const sz = pos[2] - w.last[2];
+  const step = Math.sqrt(sx * sx + sy * sy + sz * sz);
+  if (step > w.maxStep) {
+    w.maxStep = step;
+    w.maxStepMs = ms;
   }
-  for (const name of Object.keys(s.bools)) {
-    const seen = s.bools[name];
-    const value = me.getAnimationVariableBool(name);
+  w.last = pos;
+  w.samples += 1;
+  for (const [av, seen] of [["health", w.health], ["magicka", w.magicka], ["stamina", w.stamina]] as Array<[string, number[][]]>) {
+    const value = actor.getActorValue(av);
+    const last = seen[seen.length - 1];
+    if (value === last[1]) continue;
+    if (av === "health" && !own) {
+      if (seen.length < WATCH_HEALTH_MAX) seen.push([ms, value]);
+    } else if (ms - last[0] >= WATCH_SELF_MS && seen.length < WATCH_SELF_MAX) {
+      seen.push([ms, value]);
+    }
+  }
+  for (const name of Object.keys(w.bools)) {
+    const seen = w.bools[name];
+    const value = actor.getAnimationVariableBool(name);
     if ((seen.length === 0 || seen[seen.length - 1][1] !== value) && seen.length < WATCH_SELF_MAX) {
       seen.push([ms, value]);
     }
   }
+  trackVars(id, w, ms);
+}
+
+// The actor's master behavior variables from Skyrim Platform's snapshot, on
+// change: a bool or an int on any change, a float on a change of more than
+// VAR_EPSILON at most every WATCH_SELF_MS (Speed and the aim angles move
+// every frame). The first sample opens every series.
+function trackVars(id: number, w: Watched, ms: number): void {
+  let snap: { booleans: ArrayBuffer; floats: ArrayBuffer; integers: ArrayBuffer } | undefined;
+  try {
+    snap = getAnimationVariablesFromActor(id);
+  } catch (e) {
+    return;
+  }
+  if (!snap) return;
+  const take = (names: string[], values: ArrayLike<number>, float: boolean) => {
+    for (let i = 0; i < names.length && i < values.length; i++) {
+      const value = values[i];
+      const seen = w.vars[names[i]] || (w.vars[names[i]] = []);
+      const last = seen[seen.length - 1];
+      if (last) {
+        if (float ? Math.abs(value - last[1]) <= VAR_EPSILON || ms - last[0] < WATCH_SELF_MS : value === last[1]) continue;
+        if (seen.length >= WATCH_SELF_MAX) continue;
+      }
+      seen.push([ms, float ? Math.round(value * 1000) / 1000 : value]);
+    }
+  };
+  take(VAR_BOOLS, new Uint8Array(snap.booleans), false);
+  take(VAR_FLOATS, new Float32Array(snap.floats), true);
+  take(VAR_INTS, new Uint32Array(snap.integers), false);
 }
 
 function watchedMs(): number {
@@ -441,10 +489,9 @@ function watchedMs(): number {
 }
 
 on("spellCast", (e) => {
-  if (!watching || !e.caster || e.caster.getFormID() !== 0x14) return;
-  if (watching.self.casts.length < WATCH_SELF_MAX) {
-    watching.self.casts.push([watchedMs(), e.spell ? e.spell.getFormID() : 0]);
-  }
+  if (!watching || !e.caster) return;
+  const w = watchedRecord(e.caster.getFormID());
+  if (w && w.casts.length < WATCH_SELF_MAX) w.casts.push([watchedMs(), e.spell ? e.spell.getFormID() : 0]);
 });
 
 // A hit's projectile base and its flags (power 1, sneak 2, bash 4, blocked
@@ -455,44 +502,45 @@ on("spellCast", (e) => {
 on("hit", (e) => {
   if (!watching) return;
   const source = e.source ? e.source.getFormID() : 0;
-  if (e.aggressor && e.aggressor.getFormID() === 0x14 && watching.self.hits.length < WATCH_SELF_MAX) {
-    const projectile = e.projectile ? e.projectile.getFormID() : 0;
-    const flags = (e.isPowerAttack ? 1 : 0) | (e.isSneakAttack ? 2 : 0) | (e.isBashAttack ? 4 : 0) | (e.isHitBlocked ? 8 : 0);
-    watching.self.hits.push([watchedMs(), e.target ? e.target.getFormID() : 0, source, projectile, flags]);
-  }
-  if (e.target && e.target.getFormID() === 0x14 && watching.self.taken.length < WATCH_SELF_MAX) {
-    watching.self.taken.push([watchedMs(), e.aggressor ? e.aggressor.getFormID() : 0, source]);
-  }
+  const projectile = e.projectile ? e.projectile.getFormID() : 0;
+  const flags = (e.isPowerAttack ? 1 : 0) | (e.isSneakAttack ? 2 : 0) | (e.isBashAttack ? 4 : 0) | (e.isHitBlocked ? 8 : 0);
+  const aggressor = e.aggressor ? e.aggressor.getFormID() : 0;
+  const target = e.target ? e.target.getFormID() : 0;
+  const dealt = watchedRecord(aggressor);
+  if (dealt && dealt.hits.length < WATCH_SELF_MAX) dealt.hits.push([watchedMs(), target, source, projectile, flags]);
+  const took = watchedRecord(target);
+  if (took && took.taken.length < WATCH_SELF_MAX) took.taken.push([watchedMs(), aggressor, source, flags]);
 });
 
 on("magicEffectApply", (e) => {
-  if (!watching || !e.target || e.target.getFormID() !== 0x14) return;
-  if (watching.self.effects.length < WATCH_SELF_MAX) {
-    watching.self.effects.push([watchedMs(), e.caster ? e.caster.getFormID() : 0, e.effect ? e.effect.getFormID() : 0]);
+  if (!watching || !e.target) return;
+  const w = watchedRecord(e.target.getFormID());
+  if (w && w.effects.length < WATCH_SELF_MAX) {
+    w.effects.push([watchedMs(), e.caster ? e.caster.getFormID() : 0, e.effect ? e.effect.getFormID() : 0]);
   }
 });
 
-// A watched figure's stagger, recoil, shout, bow and sneak events (thuum
-// docs/verbs/stagger.md, docs/verbs/shouts.md, docs/verbs/marksman.md: which
-// bow events the target's game plays on the shooter's figure;
-// docs/verbs/movement-relay.md: when the figure's SneakStop arrives against
-// its player's own, the crouch fix's delay; docs/verbs/spell-cast.md: which
-// of its player's cast events reach a figure, a concentration cast's start
-// among them):
-// one hook per pattern over the figures' range, filtered in native (rule 9)
-// and added at load, before skymp5-client's services add theirs, so each sees
-// the name its sender gave: deathService blanks every figure's staggerStart,
-// and Skyrim Platform hands later hooks the blanked name. Recorded at leave,
-// with whether the graph took the event once every hook had run.
-for (const pattern of ["stagger*", "recoil*", "shout*", "bow*", "Bow*", "arrow*", "Arrow*", "Sneak*", "sneak*", "MRh_*", "MLh_*", "MLH_*", "BeginCast*"]) {
+// Every animation event sent to a watched actor's graph (the recorder,
+// ADR-031). Two hooks, each filtered in native by its form id range (rule
+// 9): the 0xff range, which holds a multiplayer game's figures and a solo
+// game's placed NPCs alike, and the player. No name pattern: the list of
+// patterns this replaced (stagger*, recoil*, shout*, bow*, Sneak*, MRh_*,
+// ...) grew one verb at a time and saw only what a verb already knew to look
+// for. The handler returns at once outside a watch, and the driver runs on
+// lab clones only. Added at load, before skymp5-client's services add theirs,
+// so each sees the name its sender gave: deathService blanks every figure's
+// staggerStart, and Skyrim Platform hands later hooks the blanked name.
+// Recorded at leave, with whether the graph took the event once every hook
+// had run (thuum docs/verbs/stagger.md).
+for (const [minId, maxId] of [[0xff000000, 0xffffffff], [0x14, 0x14]]) {
   hooks.sendAnimationEvent.add({
     enter: () => {},
     leave: (ctx) => {
       if (!watching) return;
-      const w = watching.actors.get(ctx.selfId);
-      if (w && w.events.length < WATCH_SELF_MAX) w.events.push([watchedMs(), ctx.animEventName, ctx.animationSucceeded ? 1 : 0]);
+      const w = watchedRecord(ctx.selfId);
+      if (w && w.events.length < WATCH_EVENTS_MAX) w.events.push([watchedMs(), ctx.animEventName, ctx.animationSucceeded ? 1 : 0]);
     },
-  }, 0xff000000, 0xffffffff, pattern);
+  }, minId, maxId);
 }
 
 // Every menu CommonLibSSE-NG names (the MENU_NAME constants under
@@ -1349,38 +1397,21 @@ function run(step: Step, player: Actor): unknown {
     case "watch-start": {
       const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
       const actors = new Map<number, Watched>();
-      for (const other of nearbyActors(player)) {
-        const pos = positionOf(other);
-        const otherBools: Record<string, Array<[number, boolean]>> = {};
-        for (const n of bools) otherBools[n] = [];
-        actors.set(other.getFormID(), {
-          name: other.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
-          health: [[0, other.getActorValue("health")]], magicka: [[0, other.getActorValue("magicka")]],
-          events: [], bools: otherBools,
-        });
-      }
-      if (watching) hooks.sendAnimationEvent.remove(watching.hookId);
-      const self: WatchedSelf = { magicka: [[0, player.getActorValue("magicka")]], health: [[0, player.getActorValue("health")]], events: [], casts: [], hits: [], taken: [], effects: [], bools: {} };
-      for (const n of bools) self.bools[n] = [];
-      const hookId = hooks.sendAnimationEvent.add({
-        enter: (ctx) => {
-          if (watching && watching.self.events.length < WATCH_SELF_MAX) watching.self.events.push([watchedMs(), ctx.animEventName]);
-        },
-        leave: () => {},
-      }, 0x14, 0x14);
-      watching = { startedAt: Date.now(), actors, self, hookId };
+      for (const other of nearbyActors(player)) actors.set(other.getFormID(), newWatched(other, bools));
+      watching = { startedAt: Date.now(), actors, self: newWatched(player, bools) };
       return { watching: actors.size };
     }
     case "watch-stop": {
       if (!watching) return { error: "no watch-start before watch-stop" };
       const w = watching;
       watching = null;
-      hooks.sendAnimationEvent.remove(w.hookId);
-      w.self.magicka.push([Date.now() - w.startedAt, player.getActorValue("magicka")]);
-      w.self.health.push([Date.now() - w.startedAt, player.getActorValue("health")]);
+      const ms = Date.now() - w.startedAt;
+      for (const [av, seen] of [["magicka", w.self.magicka], ["health", w.self.health], ["stamina", w.self.stamina]] as Array<[string, number[][]]>) {
+        seen.push([ms, player.getActorValue(av)]);
+      }
       const actors: Array<Watched & { formId: number }> = [];
       w.actors.forEach((v, formId) => actors.push({ formId, ...v }));
-      return { seconds: (Date.now() - w.startedAt) / 1000, actors, self: w.self };
+      return { seconds: ms / 1000, actors, self: { formId: 0x14, ...w.self } };
     }
     case "equip": {
       const item = Game.getFormEx(num(a.formId));
