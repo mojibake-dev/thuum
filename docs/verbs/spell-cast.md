@@ -654,12 +654,11 @@ health message. A second red within two sweeps makes it a bug.
     of the behavior, where TiltedEvolution keys each descriptor to its
     graph. A behavior mod would shift every index; the lab's set has none
     (docs/MODS.md).
-  - HYPOTHESIS: the engine rewrites an actor's casting variables from its
-    own state every frame, so a figure keeps the caster's bWantCastRight
-    for a frame every 500 ms, and its graph refuses the relayed
-    MRh_SpellAimedConcentrationStart, whose transition wants the cast
-    held. Unread in the engine (the re-analyst's, on sky-re, if the probe
-    below shows the flicker).
+  - HYPOTHESIS, false (the parity read below): the engine rewrites an
+    actor's casting variables from its own state every frame, so a figure
+    keeps the caster's bWantCastRight for a frame every 500 ms, and its
+    graph refuses the relayed MRh_SpellAimedConcentrationStart, whose
+    transition wants the cast held.
 - The read (ADR-031, superseding the single probe x-cast-pose drafted the
   same day): the references r-spell-stream A and B (Flames from the player
   at a placed NPC, and from the NPC at the player) and the parity run over
@@ -671,3 +670,19 @@ health message. A second red within two sweeps makes it a bug.
   CastBlend, if the hypothesis holds). If the figure holds the caster's
   values and still refuses the start, the variables are not the gate and
   the next read is the state the figure's magic behavior is in.
+- Read (2026-10-14, ADR-031's first parity of a cast): x-recorder-flames
+  20261014-081353, c1's Flames for 4 s at c2, against r-spell-stream-a
+  20261014-081151, the same cast by the player in a solo game. On c2's
+  screen c1's figure held every casting variable the engine alone's caster
+  holds (IsCastingRight 1, bWantCastRight 1, CastBlend 1, NotCasting 0,
+  bMRh_Ready 0, iState 10), so the variables are not the gate. What it
+  lacked: the engine's caster takes MRh_SpellAimedConcentrationStart and
+  MRh_SpellRelease_Event in one frame (both at 1264 ms); the figure was
+  never sent the start and refused the release (1172 ms). The cause is the
+  receiver: remoteServer kept one animation per form (form.animation =
+  msg.data), and the view applied it once a frame, so a start and a release
+  reaching the observer within one of its frames left the release alone
+  (fifteen's x-dual-cast2 had them a frame apart, and both played). Fix on
+  fork m2-push 4f13fa50: the relayed events queue on the form, and the view
+  plays them all in order. To read again with the parity run on its
+  staging.
