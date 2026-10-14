@@ -1185,3 +1185,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   holds SkyrimSE-1.6.1170.0.exe.unpacked.exe: the re-analyst reads 1.6.1170 bodies at their own
   addresses from here, and the "read on 1.7.104 under shared ids" caveat ends for new notes.
   B5 done; every item of the process audit's plan is executed.
+- The sweep completed: run set 20261014-133332-nightly-completion, the six scenarios the
+  nightly never reached, all green on the same clean-m1-next (20261014-133332-m0-appearance to
+  -134628-smoke-two-players, 13 min); with the nightly's 36 that is every committed scenario
+  green with no red, the full sweep ADR-030 asks before a promotion that is not a verb's merge.
+  Both clones' clean-m1-next promoted to clean-m1 at 06:49:32 and 06:50:03 PDT (lab-driver
+  adr031-recorder 479b22c with the recorder and solo-start, launch.ps1's solo boot, the
+  m2-fifteen client unchanged), clean-m1-next restacked; the lab is thuum-magnus's for the
+  m2-push staging.
