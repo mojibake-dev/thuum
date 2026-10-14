@@ -1,0 +1,136 @@
+# b-duel (M2's exit, docs/PLAN.md: "server-authoritative damage between two
+# players, effects visible to an observer"; draft 2026-10-14). One duel through
+# M2's combat verbs, each phase reset to full twice and checked on both sides
+# first, each asserting three things: the server's number (the verb's own
+# bounds, from its scenario), the victim's own game within 0.02 of it (no
+# second damage path, ADR-028), and what the other game shows (the
+# observer's half; ADR-031's parity check joins it once lab-api has it). c1
+# and c2 hold Iron Swords (Skyrim.esm 0x12EB7), c2 also an Iron Shield
+# (0x12EB6), 100 units apart, facing. Phases, from the verbs' scenarios:
+# 1. a plain swing (b-stagger's second phase): c2 under 0.99, nobody staggers;
+# 2. a standing power attack (b-stagger): c2 under 0.9, c2's own game
+#    staggers, and c1's figure of c2 takes the relayed staggerStart;
+# 3. a swing on c2's raised shield (b-block): the shield's share, 0.962 to
+#    0.982;
+# 4. Flames for 4 s (b-spell; Skyrim.esm 0x12FCD, a new character's spell):
+#    c2 between 0.64 and 0.78, and c2's game shows c1's figure streaming
+#    (its magicka drains for more than 3 s);
+# 5. Fire Breath's first word (b-shout; SHOU 0x3F9EA, word 0x20E17): c2 under
+#    0.9, and c2's game played c1's figure shouting.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-duel
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 1500
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: give {item: "0x12eb7", count: 1}
+  - c2: give {item: "0x12eb7", count: 1}
+  - c2: give {item: "0x12eb6", count: 1}
+  - c1: console {text: "player.addshout 3f9ea"}
+  - c1: console {text: "player.teachword 20e17"}
+  - c1: console {text: "player.unlockword 20e17"}
+  - wait: 3
+  - c1: console {text: "player.equipitem 12eb7"}
+  - c2: console {text: "player.equipitem 12eb7"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - wait: 2
+  # 1. a plain swing: the sword's share, nobody staggers
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - c2.state.healthPercentage > 0.99
+  - c1: watch-start {bools: [IsStaggering]}
+  - c2: watch-start {bools: [IsStaggering]}
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.99
+      - server.actor(c2).healthPercentage > 0.9
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+      - not c2.watched_self().ever("IsStaggering")
+      - c1.watched(c2).took("staggerStart") == 0
+  # 2. a standing power attack: c2 staggers in its game and on c1's screen
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: watch-start {bools: [IsStaggering]}
+  - c2: watch-start {bools: [IsStaggering]}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.9
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+      - c2.watched_self().ever("IsStaggering")
+      - c1.watched(c2).took("staggerStart") >= 1
+  # 3. a swing on c2's raised shield: the shield's share
+  - c2: console {text: "player.equipitem 12eb6"}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: anim-event {name: blockStart}
+  - wait: 1
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage < 0.982
+      - server.actor(c2).healthPercentage > 0.962
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - c2: anim-event {name: blockStop}
+  # 4. Flames for 4 s: the stream by the time it held c2, the figure streaming
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - wait: 2
+  - c1: draw-weapon
+  - wait: 3
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+  - c2: watch-start
+  - c1: hold-key {code: 199, ms: 4000}
+  - wait: 5.5
+  - assert:
+      - server.actor(c2).healthPercentage < 0.78
+      - server.actor(c2).healthPercentage > 0.64
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - wait: 3
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).drainMs > 3000
+  # 5. Fire Breath's first word: the server's burn, the figure shouting
+  - c1: equip {formId: 0x3f9ea}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: watch-start
+  - c1: hold-key {code: 44, ms: 300}
+  - wait: 4
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.9
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+      - c2.watched(c1).took("shoutStart") >= 1
+artifacts: [server.log, c1.log, c2.log, screenshots]
