@@ -630,12 +630,19 @@ class _ClientRef:
     def watched(self, other: str) -> WatchView:
         """The watched actor that started where the server says `other` is
         (within SEE_RADIUS): a rejected move leaves the server's record where
-        it was, so the match holds even when the watcher saw the actor leave."""
+        it was, so the match holds even when the watcher saw the actor leave.
+        Failing that, the one that ended there: a move the server took
+        carries its record away from where the watch began (thuum
+        docs/verbs/push.md: a throw, 1100 units, x-push-south
+        20261014-152858, the figure ending where its player landed)."""
         fn = getattr(self._views, "watch", None)
         data = fn(self.name) if fn else None
         if not isinstance(data, dict):
             raise AssertionData(f"{self.name} has not reported a watch-stop yet")
-        best, origin = self._nearest(other, data.get("actors") or [], lambda a: a["first"])
+        actors = data.get("actors") or []
+        best, origin = self._nearest(other, actors, lambda a: a["first"])
+        if best is None:
+            best, origin = self._nearest(other, actors, lambda a: a["last"])
         if best is None:
             raise AssertionData(f"{self.name} watched no actor where the server has {other}")
         try:

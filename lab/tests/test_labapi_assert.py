@@ -710,6 +710,22 @@ class WatchTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             old.evaluate("c2.watched(c1).ever('IsStaggering')")
 
+    def test_watched_finds_an_actor_the_server_moved_where_it_ended(self):
+        """thuum docs/verbs/push.md: a throw carries the server's record of
+        the thrown player about 1100 units from where the watch began, and
+        its figure on the other screen ended there too (x-push-south
+        20261014-152858); an actor that neither began nor ended there is
+        not it."""
+        from labapi.assertions import AssertionData, Evaluator
+        views = WatchViews()
+        views.watches["c2"]["actors"][0]["first"] = [296.0 - 1100.0, 1.0, 0.0]
+        views.watches["c2"]["actors"][0]["events"] = [[2622, "Ragdoll", 1], [7622, "GetUpBegin", 1]]
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.watched(c1).took('Ragdoll') == 1"))
+        views.watches["c2"]["actors"][0]["last"] = [296.0 - 1100.0, 1.0, 0.0]
+        with self.assertRaises(AssertionData):
+            Evaluator(RichServer(), views, ["c1", "c2"]).evaluate("c2.watched(c1).took('Ragdoll') == 1")
+
     def test_a_watch_is_needed_and_is_not_a_dump(self):
         from labapi.assertions import AssertionData, Evaluator, clients_needing_views
         ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
