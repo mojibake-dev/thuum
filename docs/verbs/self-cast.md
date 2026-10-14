@@ -220,8 +220,11 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
       merge's gate (20261014-003546); HYPOTHESIS left: the engine's own end of
       Invisibility and Etherealize at the caster's attack or cast, an
       effect's time in a wait (180 or 360 s a game hour), the ethereal look
-      on the figure, the caster's shader beside its engine's own (playtest
-      sixteen's items, then the references and the parity run, ADR-031)
+      on the figure, the caster's shader beside its engine's own; playtest
+      sixteen passed every self-cast item by eye (below), so what stays
+      open is the rate of an effect's time in a wait (180 or 360 s a game
+      hour) and the caster's own shader, for the references and the parity
+      run (ADR-031)
 - [x] ledger and suppression registry updated: no Papyrus native on the
       server (Actor.dispelSpell is a Skyrim Platform binding in the
       client); the suppression is magicEffectsService's dispel of a
@@ -230,3 +233,21 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
       (2026-10-13 18:03, after the gate's run set
       20261014-002126-merge-m2-fifteen, 13 of 13 green); both clones'
       clean-m1 promoted with its client (18:02 and 18:03)
+
+## Playtest sixteen (2026-10-13, Eli, parity 8eb4e78e)
+
+Every self-cast item passed:
+- Oakflesh from test 1: the bark skin on its figure on test 2's screen for
+  about a minute, then gone.
+- Invisibility from test 1: the figure shimmered on test 2's screen, and
+  test 1's weapon hit on test 2 ended the shimmer at once (the server's
+  EndConcealment at an attack, as the game ends its own).
+- Invisibility and an hour's wait: the shimmer ended on test 2's screen
+  when test 1's own invisibility ended (fifteen's look that stayed is gone:
+  the figure's copy dispelled when the server's set drops it, c2a71793).
+- Candlelight: the light over the figure, gone when test 1's went.
+- Become Ethereal from test 2: the ghost look on its figure on test 1's
+  screen; test 1's swings took nothing while it lasted and landed after.
+  Ethereal test 2's own sword hit on test 1 ended the look at once and
+  counted (an ethereal player's game does swing, and the server ends the
+  state at its attack, as the game does).

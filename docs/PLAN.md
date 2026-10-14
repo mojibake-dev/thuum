@@ -209,19 +209,24 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   magic readied or a weapon drawn, the recovery's 400 ms slack, god mode's
   shouts, a shout reported from its own hit, the server's console for the
   lab's setup).
-- Playtest sixteen on parity 8eb4e78e. After it: the concentration pose on
-  figures, TCL's figure on observers, the ragdoll throw and paralysis
-  decided by the server as staggers are, the teleport's vanish and appear
-  on observers, then Apocalypse and headshots. The poisoned sword's look
-  (playtest fifteen) did not reproduce in the lab; sixteen watches for it.
+- Playtest sixteen (2026-10-13, parity 8eb4e78e): self-cast, Unrelenting
+  Force in both states and the restart of a running effect passed. Found:
+  a god-mode shout's second breath shows no fire on the other screen (the
+  figure's own voice recovery, probe x-tgm-breath), and the poisoned
+  sword's look once more, when a spell went to the left hand (probe
+  x-sword-left). Next (Eli, 2026-10-13: lab test scenarios before
+  Apocalypse, player-driven work after): ADR-031's references and parity
+  run with its gap list, the push verb (the ragdoll throw), then b-duel,
+  then Apocalypse and headshots.
 - Carried from M1 into this milestone's lab runs: melee reach's unmeasured
   cases (the bash, bare hands, the scale across races) and whether a power
   attack reaches by the pick alone (docs/verbs/melee-reach.md,
   damage-flags.md); Whirlwind Sprint's dash fits the burst (measured
   2026-10-12); Unrelenting Force's knockback is a later slice of shouts.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
-  visible to an observer) and `b-magic-restart` (green; its playtest check was
-  inconclusive in fifteen and runs again in sixteen).
+  visible to an observer; to write, with ADR-031's parity check as its
+  observer half) and `b-magic-restart` (green; its playtest check passed in
+  sixteen).
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 

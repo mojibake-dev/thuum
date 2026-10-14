@@ -572,3 +572,38 @@ snippets).
   (stagger.md).
   b-self-cast's Become Ethereal, shouted with Invisibility readied, was
   reported every time (four runs, 20261013-231616 to -232603).
+
+## Playtest sixteen (2026-10-13, Eli, parity 8eb4e78e)
+
+- Passed: Unrelenting Force's three words from test 1, once with the hands
+  down and once with Flames readied (fifteen's lost shout, now hooked at
+  CombatReady_BreathExhaleShort, 744fddb0): each time test 2 saw the shout
+  leave the figure, stumbled on both screens (the spell stagger at 1.5) and
+  lost about 50.
+- Passed: Become Ethereal, both items (docs/verbs/self-cast.md).
+- Found: test 1 in god mode breathed Fire Breath at test 2 twice in a row.
+  Both hits counted and test 1's figure's shout animation played on test
+  2's screen both times, but the fire showed only the first time (Eli: "fire
+  hits, test 1's animation plays, but doesnt show the particle effect of the
+  shout anymore. actually it only plays the fire fx for test 2 the first
+  time"). HYPOTHESIS: the figure keeps its own voice recovery in the
+  observer's game (Fire Breath's first word, 30 s), which god mode clears in
+  the shouter's game only, so the observer's engine refuses the relayed
+  second shout: the animation events play, the breath does not. Probe
+  x-tgm-breath (breaths at t, t+4 s and t+38 s) reads it. The same gap would
+  show without god mode wherever the shouter's recovery is shorter than the
+  figure's (a perk or an amulet the figure lacks). Under ADR-031 the
+  figure's local recovery must not gate a shout the server accepted.
+  - x-tgm-breath (20261014-052706, the lab's characters, breaths at 0, 5.7
+    and 41.3 s): the server took all three ("recovers in 0.0 s" in god
+    mode, each hit counted once); c2's game took the figure's shoutStart
+    all three times and applied the breath's effects to its player all
+    three times (fire 0x20E16 and StaggerPushFFAimed 0xA44C0, at 0.6, 6.3
+    and 41.9 s). So the figure's second shout 5.7 s after the first was
+    not refused in the lab, and the voice-recovery HYPOTHESIS is weakened.
+    The screenshots, taken 1.2 s plus the capture's two to three seconds
+    after each breath, came too late to show a one-second breath either
+    way. Open: the second breath's look (Eli saw it missing twice in a row,
+    on rotfern's figure, seconds apart, and back after a wait). The read
+    that settles it is the recorder's trace of the figure's events and
+    art (ADR-031), not a screenshot.
