@@ -612,3 +612,15 @@ snippets).
     on rotfern's figure, seconds apart, and back after a wait). The read
     that settles it is the recorder's trace of the figure's events and
     art (ADR-031), not a screenshot.
+
+## Playtest seventeen (2026-10-14, Eli, parity 4e8aa04c)
+
+- Still found: test 1 in god mode breathes Fire Breath at test 2 twice in a
+  row, and test 2 sees the fire once ("nope still only once"). x-tgm-breath
+  (20261014-141100, before the merge) had c2's game take the breath's hit
+  on all three breaths and the figure take shoutStart and
+  MT_BreathExhaleShort each time, so the second breath lands but its fire
+  is not drawn. Its screenshots came 1.2 s late. Next probe: a screenshot
+  at the release of each breath, and lab/frida/launch-trace.js on c2 to see
+  whether the second breath launches a projectile there at all.
+

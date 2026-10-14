@@ -192,6 +192,17 @@ an engine move, so its speed may need its own allowance: to measure).
   later moves to where its player landed (x-push-south: it ended at c2's
   exact spot). The flight itself is not drawn.
 
+## Playtest seventeen (2026-10-14, Eli, parity 4e8aa04c)
+
+- Passed: in test 2's game, test 2 "flies backwards as expected" from test
+  1's third word, and gets up; one and two words a stumble only; test 2's
+  health where it was in sixteen for each shout.
+- As expected (the inventory's later row): "in test 1's game, player 2
+  ragdolls where they stand and dont fly back, however when both complete
+  getting up, the effigy of player 2 in player 1's game snaps to the
+  location of player 2 in player 2s game". Fork m2-flight 320cfda8 (A1's
+  caster half) is the shouter's screen's fix; probe x-push-flight.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung

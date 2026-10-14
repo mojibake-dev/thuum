@@ -224,6 +224,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   Apocalypse, player-driven work after): ADR-031's references and parity
   run with its gap list, the push verb (the ragdoll throw), then b-duel,
   then Apocalypse and headshots.
+- Playtest seventeen (2026-10-14, parity 4e8aa04c; world
+  playtest-m2-17-20261014T181512Z): Unrelenting Force's throw passed in the
+  target's own game, one and two words a stumble only, the target's health
+  unchanged from sixteen; Flames and Fire Breath on a player unchanged; the
+  block hit and the stagger on the figure every time (the animation
+  queue). As expected, the thrown player's figure on the shouter's screen
+  drops where it stood and snaps to the landing once both are up (the
+  push verb's flight, fork m2-flight). Found: the god-mode second breath
+  still shows no fire on the other screen; an invisible player's name
+  still shows above its figure (self-cast). Next (Eli, 2026-10-14): the
+  hands first (the concentration pose), then the figure's flight.
 - Carried from M1 into this milestone's lab runs: melee reach's unmeasured
   cases (the bash, bare hands, the scale across races) and whether a power
   attack reaches by the pick alone (docs/verbs/melee-reach.md,

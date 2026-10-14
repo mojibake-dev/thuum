@@ -251,3 +251,19 @@ Every self-cast item passed:
   Ethereal test 2's own sword hit on test 1 ended the look at once and
   counted (an ethereal player's game does swing, and the server ends the
   state at its attack, as the game does).
+
+## Playtest seventeen (2026-10-14, Eli, parity 4e8aa04c)
+
+- Found: "when invisible player 1's name plaquard still shows". The
+  figure's name label (skymp5-client src/view/formView.ts, the
+  isDisplayingNicknames block) hides for a sneaking player, beyond 1000
+  units, out of line of sight and for the sweet-hide case, and never for
+  an invisible one. The figure is invisible in the observer's game (the
+  relayed Self cast runs Invisibility on it there, so its look shows), so
+  the label's test can read the figure's own state there: its Invisibility
+  actor value, which the Invisibility archetype sets (CommonLibSSE-NG
+  include/RE/A/ActorValues.h's kInvisibility; HYPOTHESIS that the archetype
+  raises it on a figure as on the player, to read in the lab). A one-line
+  condition beside isSneaking, with a lab check that the label goes and
+  comes back with the effect.
+
