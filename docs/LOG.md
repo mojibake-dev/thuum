@@ -1164,4 +1164,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the union of the 36 and a green completion set of the six on the same clean-m1-next content
   is the full sweep for the recorder staging's promotion; it runs when mundus has c2 back. The
   sweep's lesson goes into the runner: a set stops, resumable, after two consecutive lab
-  faults, so the next hardware fault costs ten minutes, not an hour.
+  faults, so the next hardware fault costs ten minutes, not an hour. The cause, read on the
+  host by thuum-mundus (06:27 PDT): a failed D3cold wake at 05:10 left garbage PCIe config on
+  the card at 0000:01:00.0 (fenestrate's RTX 5060 Ti on loan to sky-c2; the mapping names are
+  swapped), which vfio replayed at every start, so the guest's UEFI hung before Windows; not
+  memory. The card was re-enumerated and pinned out of D3cold until the next reboot; the
+  durable fix (vfio-pci disable_idle_d3=1) goes to core as IaC. 712 rolled back to
+  clean-m1-next and started at 06:27:10, agent up at 32 s.
+- B5's unpack ran on sky-c1 at 06:29 PDT under a lab hold, by mundus's gated script: verdict
+  PASS (SteamStub Variant 3.1 x64; .text entropy 8.0 in the original, 6.431 unpacked; the
+  source and the Steamless zip as pinned), out_sha256
+  80c1ea737d33c6bfac09b101b8d77ab0f9f6630128c3ed052f9d945bed54e7e4, 36,950,016 bytes; 711
+  shut down cleanly for core's pull and placement; the import on sky-re follows.
