@@ -686,3 +686,25 @@ health message. A second red within two sweeps makes it a bug.
   fork m2-push 4f13fa50: the relayed events queue on the form, and the view
   plays them all in order. To read again with the parity run on its
   staging.
+- Read (2026-10-14, the staging of m2-push 4f13fa50): the queue is not
+  enough. x-recorder-flames 20261014-140607: the figure was sent both
+  events, in order, at 1286 ms, and its graph refused both. Its casting
+  variables arrived 162 ms later with the relayed cast (castSpellImmediate
+  applies the sender's snapshot), where the engine's caster sets them in
+  the frame it takes the start. HYPOTHESIS that the want variable gates the
+  start: false. x-figure-cast 20261014-142425 sent c1's figure in c2's game
+  the start alone, with bWantCastRight set in the same tick, and with
+  IsCastingRight too, and the graph refused all three. The control,
+  x-cast-solo 20261014-142917, did the same to the player's own graph in a
+  solo game with no SkyMP client, and that graph refused all three too.
+  (The control's real cast did not fire, so that half says nothing; the
+  engine's own cast is r-spell-stream-a's.) So no graph takes
+  MRh_SpellAimedConcentrationStart from Debug.SendAnimationEvent: the
+  engine's caster gives the graph something a scripted event does not. The
+  pose is not the animation relay's to give. A figure makes the cast's
+  motion only if this game's engine casts for it through the caster's own
+  states, which castSpellImmediate skips (it fires the spell at once).
+  Next: read how ActorMagicCaster starts a concentration cast (its states
+  and what it hands the graph), so the relayed cast can start the figure's
+  caster the engine's way. Off playtest seventeen. The queue stays: no
+  relayed event is lost any more.

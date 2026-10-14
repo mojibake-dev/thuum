@@ -189,6 +189,14 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
   through the server's downtime.
 - A remote spell's effects land nothing on the player it targets (spell-
   cast, MEASURED), so the server's effects are the target's only ones.
+  Changed 2026-10-14 (fork m2-push 4e8aa04c, ADR-031; docs/verbs/push.md):
+  that held only by skymp5-client's dispel of a figure's whole spell at its
+  hit (ae8446a9), and it stopped every consequence of the cast, Unrelenting
+  Force's throw among them. The player's AddTarget hook below now refuses
+  only an effect that another actor's spell, power, shout or scroll lands
+  on the player and that changes Health, Magicka or Stamina (the value
+  modifier archetypes, by primary or second actor value). The rest of the
+  cast runs in the target's game as the engine plays it.
 - How: Skyrim Platform hooks the player's MagicTarget::AddTarget (vfunc
   01, include/RE/M/MagicTarget.h:78) and refuses an effect whose magic
   item's spell type is kAlchemy (AlchemyItem::GetSpellType,

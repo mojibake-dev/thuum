@@ -29,9 +29,9 @@ two words' spells carry no push):
 
 | consequence | seen in | disposition |
 | --- | --- | --- |
-| the throw: VoicePushEffectScript on MGEF 0x7F82F (PushForce 15), OnEffectStart: Caster.PushActorAway(Target, 15) | record (VMAD, the .pex) | native: the target's game runs the script on its own effect, ADR-029's A1 filter opening for it |
-| the stagger: VoiceUnrelentingForceEffect03 and Effect02 (MGEF 0x7F82F, 0x7F82E), archetype 33, magnitude 1.5 each | record | native in the target's game from the imposed hit; today imposed by the server's PlayStagger (fork 4a4c80e1), which retires when the trace shows the engine's own |
-| the damage: UnspecifiedDamageFFAimed (MGEF 0xEA075), Health (AV 24) 10 | record | suppressed in the target's game (be69bf68's fDiffMultHPToPC* 0); the server's number (ADR-028) |
+| the throw: VoicePushEffectScript on MGEF 0x7F82F (PushForce 15), OnEffectStart: Caster.PushActorAway(Target, 15) | record (VMAD, the .pex) | native: the target's game runs the script on its own effect, ADR-029's A1 filter opening for it (2fe894e1), once the effect is no longer dispelled at the hit (4e8aa04c) |
+| the stagger: VoiceUnrelentingForceEffect03 and Effect02 (MGEF 0x7F82F, 0x7F82E), archetype 33, magnitude 1.5 each | record | native in the target's game, now that the cast's effects run there (4e8aa04c); the server's PlayStagger (fork 4a4c80e1) still imposes one, to retire when the trace shows the engine's own |
+| the damage: UnspecifiedDamageFFAimed (MGEF 0xEA075), Health (AV 24) 10 | record | refused in the target's game: the player's AddTarget hook refuses another actor's Health, Magicka or Stamina value effect (fork m2-push 4e8aa04c), beside be69bf68's fDiffMultHPToPC* 0; the server's number (ADR-028) |
 | the cone: VoicePushProjectile03 and 02 (PROJ 0x14000, 0x13FFF; cone, speed 1536, range 10000 and 2000, impact force 85 and 65, no explosion) | record | native in the shouter's game and on its figure in other games (the shout relay) |
 | the projectiles' sounds: VOCShoutProjectilePush03SD, 02SD (SNDR 0x3C86C, 0x3C86B) | record | native with the cone |
 | the impact: VOCShoutPush01ImpactSet (IPDS 0x15C7B) | record | native where the cone lands |
@@ -68,6 +68,26 @@ an engine move, so its speed may need its own allowance: to measure).
 - The script's event reaches the game through the Papyrus event dispatch
   that skymp5-client's filter blanks today (skyrim-platform
   FridaHooks.cpp:16-98; docs/apocalypse-options.md 3.1).
+- MEASURED (2026-10-14, lab/frida/push-trace.js; offsets from the 1.6.1170
+  image base): in a solo game (x-push-solo 20261014-143127), the engine
+  asks the VM's SendEvent (104800) for OnEffectStart, then OnEffectFinish,
+  from the target's actor update (+0x5ae6a6, +0x5b052b, +0x5b03c6,
+  +0x9c3982). That is a thread of its own, not the projectile hit's, which
+  sends OnMagicEffectApply. The effect's handle carries the target's form
+  id in its low half (0x20001ff0008e6 on the bandit 0xFF0008E6).
+  PushActorAway (56213) then runs on the VM thread from the shouter, and
+  KnockExplosion (39895) throws the bandit from the shouter's position.
+- MEASURED: in the multiplayer target's game (x-push2 20261014-141607 and
+  -143427, fork m2-push 4f13fa50), the cone hit the player by the same
+  path (the same OnMagicEffectApply backtrace), and the VM was never asked
+  for OnEffectStart. skymp5-client's hit handler dispelled the figure's
+  whole spell from the player at its hit (ae8446a9, against a relayed Fire
+  Breath that had burned the player's own game), before the effects' first
+  update. Fork m2-push 4e8aa04c drops the dispel. The player's AddTarget
+  hook (skyrim-platform Hooks.cpp) now refuses only the effects that
+  another actor's spell, power, shout or scroll lands on the player and
+  that change Health, Magicka or Stamina. Every other effect runs, its
+  script included (ADR-031: cut at the number).
 - The filter's test, from CommonLibSSE-NG b93280e8:
   - IObjectHandlePolicy::HandleIsType and GetObjectForHandle take a VM type
     id (include/RE/I/IObjectHandlePolicy.h:20, :27);
@@ -93,11 +113,20 @@ an engine move, so its speed may need its own allowance: to measure).
 - The filter's change is fork m2-push 2fe894e1 (built on push); its probe
   is scratchpad x-push (c1's three words at c2 150 units off), after the
   nightly sweep.
+- m2-push's staging (2026-10-14, 4f13fa50's client): x-push 20261014-140325
+  threw nothing. c2 bore all four of the third word's effects from c1's
+  figure and staggered (the server's PlayStagger), and moved 0.001 units.
+  The trace above found why. The probe again on 4e8aa04c, with the trace,
+  is the verb's next reading.
 
 ## Next
 
-1. The references r-shout-uf3 A and B (ADR-031), then this inventory's
-   trace rows.
+1. x-push2 on 4e8aa04c's client: the trace should show OnEffectStart on
+   the player's effect, the filter letting it through (the handle test is
+   the re-analyst's read: HandleIsType(142) on a handle like the solo
+   one), PushActorAway from c1's figure and KnockExplosion on the player;
+   c2's watch a Ragdoll and GetUpBegin and a flight past a stagger's.
+   Then b-push (its bounds from that run), committed alone.
 2. The filter's first test (ADR-029 A1, test 1), its target half only: an
    event on an ActiveEffect handle whose target is the player passes
    (include/RE/A/ActiveEffect.h:93-104), beside the named exceptions in

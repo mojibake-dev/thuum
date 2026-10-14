@@ -500,6 +500,11 @@ snippets).
     (20261013-092505) the breath still left the figure and c2's health
     followed the server's four ticks alone, 100 to 50; Unrelenting Force
     (20261013-092736) took the server's 50 on both sides.
+  - Replaced 2026-10-14 (fork m2-push 4e8aa04c, docs/verbs/push.md): the
+    dispel also stopped every other consequence of a figure's shout on the
+    player, Unrelenting Force's throw among them. The player's AddTarget
+    hook now refuses only another actor's Health, Magicka or Stamina value
+    effects; the breath's burn is one, so it still counts nothing locally.
 - The shout relay, the silent restore at login and the local damage counted
   nothing: merged on fork parity 11c126b9 (2026-10-13 05:31: the sweep of
   every scenario on m2-visuals be69bf68, 40 of 40 green, and T2 green on
