@@ -265,6 +265,22 @@ function form(id: unknown): ObjectReference | null {
 
 // hold-key's keys and when to let each go; released in update
 const heldKeys: Array<{ code: number; until: number }> = [];
+// anim-event's {delayMs}: each event is sent from update once its time comes
+// (a Utility.wait continuation never sent one: x-figure-cast2
+// 20261014-182025, every delayed start missing from the figure's graph)
+const delayedEvents: Array<{ due: number; targetId: number; name: string }> = [];
+
+function sendDelayedEvents(): void {
+  const now = Date.now();
+  for (let i = delayedEvents.length - 1; i >= 0; i--) {
+    const d = delayedEvents[i];
+    if (now < d.due) continue;
+    delayedEvents.splice(i, 1);
+    const ref = ObjectReference.from(Game.getFormEx(d.targetId));
+    if (ref) Debug.sendAnimationEvent(ref, d.name);
+  }
+}
+
 function releaseHeldKeys(): void {
   const now = Date.now();
   for (let i = heldKeys.length - 1; i >= 0; i--) {
@@ -1535,7 +1551,7 @@ function run(step: Step, player: Actor): unknown {
       // (x-figure-cast 20261014-142425)
       const delayMs = typeof a.delayMs === "number" && a.delayMs > 0 ? a.delayMs : 0;
       if (delayMs > 0) {
-        Utility.wait(delayMs / 1000).then(() => Debug.sendAnimationEvent(target, name));
+        delayedEvents.push({ due: Date.now() + delayMs, targetId: target.getFormID(), name });
         return { sent: name, to: target.getFormID(), set: Object.keys(set), afterMs: delayMs };
       }
       Debug.sendAnimationEvent(target, name);
@@ -1817,6 +1833,7 @@ on("update", () => {
   if (!c) return;
   finishDeferred(c);
   releaseHeldKeys();
+  sendDelayedEvents();
   const me = Game.getPlayer();
   if (me) settleMove(me);
   if (me) finishCraft(c, me);
