@@ -30,8 +30,13 @@ try {
   $cfg = Get-Content 'C:\sky-lab\lab-driver-settings.txt' -Raw | ConvertFrom-Json
   $uri = $cfg.labApiBase + $cfg.labApiPath + '/game?client=' + $cfg.client
   $want = $null
+  $solo = $false
   for ($i = 0; $i -lt 10 -and -not $want; $i++) {
-    try { $want = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 5 -Uri $uri).Content | ConvertFrom-Json | ForEach-Object { $_.version } } catch { Start-Sleep -Seconds 3 }
+    try {
+      $ans = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 5 -Uri $uri).Content | ConvertFrom-Json
+      $want = $ans.version
+      $solo = [bool]$ans.solo
+    } catch { Start-Sleep -Seconds 3 }
   }
   $rec = if ($want) { Join-Path 'C:\sky-lab\games' ($want + '.txt') } else { $null }
   if ($rec -and (Test-Path $rec)) {
@@ -41,6 +46,23 @@ try {
   } elseif ($want) { Log ('game ' + $want + ' asked, no folder recorded for it; staying on ' + $game) }
   else { Log ('no answer from ' + $uri + '; staying on ' + $game) }
 } catch { Log ('game choice failed: ' + $_.Exception.Message + '; staying on ' + $game) }
+# A solo run (ADR-031's reference traces: the engine alone plays an action, on
+# a committed save) starts the game without skymp5-client: its plugin file is
+# moved aside for this boot, so Skyrim Platform loads SKSE, lab-driver and
+# nothing of the multiplayer. The clone's rollback before the next run puts the
+# file back; a boot that is not solo puts it back too, in case none happened.
+try {
+  $plugin = Join-Path $game 'Data\Platform\Plugins\skymp5-client.js'
+  $aside = $plugin + '.solo-off'
+  if ($solo) {
+    if (Test-Path $plugin) { Move-Item -LiteralPath $plugin -Destination $aside -Force; Log 'solo run: skymp5-client moved aside' }
+    elseif (Test-Path $aside) { Log 'solo run: skymp5-client already aside' }
+    else { Log 'solo run: no skymp5-client.js to move aside' }
+  } elseif (Test-Path $aside) {
+    if (-not (Test-Path $plugin)) { Move-Item -LiteralPath $aside -Destination $plugin -Force; Log 'skymp5-client put back' }
+    else { Remove-Item -LiteralPath $aside -Force; Log 'a stray skymp5-client.js.solo-off removed' }
+  }
+} catch { Log ('solo switch failed: ' + $_.Exception.Message) }
 # Skyrim Platform's writeLogs opens Data\Platform\Logs\<plugin>-logs.txt and never
 # creates the directory (ConsoleApi.cpp); without it lab-driver's log silently
 # does not exist (sky-c1, 2026-10-01). lab-api collects it as <client>-driver.log.

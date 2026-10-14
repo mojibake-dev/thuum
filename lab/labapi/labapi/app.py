@@ -356,7 +356,9 @@ def create_app(services: Services) -> FastAPI:
 
     @router.get("/game")
     async def game_version(client: str):
-        return {"client": client, "version": runner.game_for(client)}
+        # the clone's logon launcher asks which version to start and whether
+        # without skymp5-client (a solo run, ADR-031); see launch.ps1
+        return {"client": client, "version": runner.game_for(client), "solo": runner.solo_for(client)}
 
     @router.post("/step/{step_id}/result")
     async def step_result(step_id: str, request: Request):

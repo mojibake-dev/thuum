@@ -258,6 +258,12 @@ class Runner:
         run the same master files (ADR-022)."""
         return self.active.game if self.active is not None and self.active.game else self.s.game_default
 
+    def solo_for(self, client: str) -> bool:
+        """Whether a client's logon launcher starts the game without skymp5-client:
+        the active run is solo and names that client (ADR-031's reference
+        traces); a clone booting for anything else gets the multiplayer game."""
+        return self.active is not None and self.active.scenario.solo and client in self.active.scenario.clients
+
     def _compose_env(self, rec: RunRecord) -> dict[str, str]:
         """The run's master files and settings file for the server container
         (the compose file's ESM_DIR and SERVER_SETTINGS): docker compose takes
@@ -592,6 +598,8 @@ class Runner:
             return await self._relaunch(rec, index, step.client)
         if step.action == "frida":
             return await self._frida_start(rec, index, step.client, step.args)
+        if step.action in ("connect", "reconnect") and rec.scenario.solo:
+            raise RunnerError(f"E_RUN_SOLO: {step.action} has no meaning in a solo run (the game runs without skymp5-client); the clients' heartbeats are the gate")
         if step.action in ("connect", "reconnect"):
             return await self._wait_online(rec, index, step.client, step.action)
         try:

@@ -89,3 +89,13 @@ class AllScenariosParse(unittest.TestCase):
                 sc = load_scenario(f.read_text())
                 self.assertEqual(sc.id, f.stem)
                 self.assertTrue(sc.steps)
+
+
+@needs_deps
+class SoloFlag(unittest.TestCase):
+    def test_solo_is_read_and_defaults_off(self):
+        from labapi.scenario import load_scenario
+
+        self.assertFalse(load_scenario("id: plain\nclients: [c1]\nsteps: []\n").solo)
+        self.assertTrue(load_scenario("id: solo-ref\nsolo: true\nclients: [c1]\nsteps: []\n").solo)
+
