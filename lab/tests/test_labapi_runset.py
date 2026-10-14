@@ -191,6 +191,19 @@ class RunSetTests(RunTests):
         rid = self._start(["t2-green-one"])
         self.assertEqual(self._wait(rid)["verdict"], "green")
 
+    def test_a_hold_does_not_block_a_snapshot_or_a_promote(self):
+        """A hold is the holder's: its own snapshot of the clones it has just
+        written (verb-stage) goes through; only runs, run sets, up and down wait."""
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-m1", "c1")
+        self.assertEqual(self.client.post("/lab/hold", json={"minutes": 30, "reason": "staging"}).status_code, 200)
+        r = self.client.post("/lab/clients/c1/snapshot", json={"name": "clean-m1-next", "description": "test"})
+        self.assertNotEqual(r.status_code, 409, r.text)
+        self.assertNotIn("E_RUN_HOLD", r.text)
+        self.assertIsNotNone(self.client.get("/lab/status").json()["hold"], "the hold still stands after it")
+        self.client.post("/lab/release")
+
     def test_a_bad_hold_is_refused(self):
         self.assertEqual(self.client.post("/lab/hold", json={"minutes": 0, "reason": "x"}).status_code, 400)
         self.assertEqual(self.client.post("/lab/hold", json={"minutes": 10}).status_code, 400)

@@ -320,7 +320,11 @@ def create_app(services: Services) -> FastAPI:
     # stacks `from` again on top, so the table's name stands after a merge.
     # Minutes long; no run starts meanwhile.
     async def _maintain(what: str, fn, *args):
-        if not _idle():
+        # a snapshot or a promote is the holder's own work: a hold keeps runs,
+        # run sets, up and down out, not this (verb-stage's first live run held
+        # the lab and then could not snapshot the clones it had just written,
+        # 2026-10-14 06:5x); a run or another maintenance in progress still does
+        if runner.active is not None or runner.maintenance is not None:
             return _busy()
         runner.maintenance = what
         try:
