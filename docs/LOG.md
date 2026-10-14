@@ -1210,3 +1210,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   clean-m1-next promoted to clean-m1 (the 4e8aa04c client with main's driver). Known and
   cosmetic, not a gate item: the queue relays a refused blockStart and SneakStop pair about
   every 130 ms after a stagger.
+- m2-hands merged to fork parity 4f74c3e1 (2026-10-14T20:52Z, 13:52 PDT), the third merge
+  through `just verb-merge`, untouched. Two client-only commits on 4e8aa04c: the observer's
+  view holds a hand's spell start (MRh_, MLh_, DualMagic_ ...Spell...Start) and the events
+  behind it until the figure has carried its caster's casting state (IsCastingRight or Left)
+  since an earlier frame, at most a second, and the animation queue's cap goes from 8 to 32.
+  Why: the relay delivered a cast's start about 290 ms before the casting variables, so the
+  figure's graph refused it; playtest fifteen's missing grab-and-push pose, raised again by Eli
+  today. Staged by verb-stage (12:13 to 12:30); x-recorder-flames showed the figure taking the
+  start and the release in one frame as the engine's own caster does; x-recorder-firebolt is
+  still refused, a separate finding. b-spell strengthened (the figure takes the start) and
+  committed alone at thuum b04f625, green twice by path. T2 green on 4f74c3e1 (the server
+  unchanged). The gate: run set 20261014-195749-merge-m2-hands, 18 of 18 green with no rerun
+  (smoke-two-players, a-restart-persistence, b-duel, b-spell, b-self-cast, b-teleport,
+  b-magic-restart, b-god, b-push, b-shout, b-stagger, b-block, b-marksman, a-hostility,
+  a-fight-end, a-sneak-damage, a-melee-reach, a-racemenu), 50 min. Both clones' clean-m1-next
+  promoted to clean-m1 (the 4f74c3e1 client). Next from magnus: m2-flight (the throw's caster
+  half: the target's figure flies in the shouter's game), merged with m2-hands, so its merge is
+  a fast-forward after its own staging and probe.
