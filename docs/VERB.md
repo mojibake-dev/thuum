@@ -16,17 +16,22 @@ Milestone: <M0..M7>   Class: <A|B|C>
 Everything the engine plays for this action, listed before any authority
 question, from two sources: the reference trace (the recorder in a solo
 client run, kept as lab/references/<action>.json and reviewed like a
-scenario) and the records (lab/esm.py: WEAP, the race's ATKD, MGEF, SPEL,
-SHOU, PROJ, EXPL, IPDS). One row per consequence; each row has exactly one
-disposition. A row without one blocks the merge, as an undeclared rung does.
+scenario) and the records (lab/esm.py: WEAP, the race's ATKD, MGEF and the
+scripts its VMAD attaches, SPEL, SHOU, PROJ, EXPL, IPDS). A consequence can
+live in a record's script rather than in the engine's own path (Unrelenting
+Force's throw is VoicePushEffectScript on MGEF 0x7F82F, not its Stagger
+effect), so the inventory reads the scripts too. One row per consequence;
+each row has exactly one disposition. A row without one blocks the merge, as
+an undeclared rung does.
 
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | <a graph event or variable, an effect, a shader or art, a sound, an impact, a ragdoll or impulse, an actor value change, a HUD message> | trace / record / both | native (the host game plays it) / imposed (the server tells the game to) / suppressed: <reason> / later: <the slice that takes it> |
 
 The parity scenario (lab/scenarios/p-<action>.yaml) compares the multiplayer
-run's trace, per viewpoint (actor, target, bystander), with the reference;
-its `later:` list is this table's "later" rows and nothing else.
+run's trace, per viewpoint (actor and target; a bystander once the lab has a
+third client), with the reference; its `later:` list is this table's "later"
+rows and nothing else.
 
 ## Authority
 
