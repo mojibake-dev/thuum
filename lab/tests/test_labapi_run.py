@@ -197,6 +197,29 @@ steps:
         self.assertFalse((self.tmp / "results" / run_id / "server-before.log").exists())
         self.assertNotIn("server-before.log", body["artifacts"])
 
+    def test_a_solo_run_tells_the_launcher_and_refuses_connect(self):
+        """ADR-031's reference traces: the clone's launcher asks GET /lab/game and
+        starts the game without skymp5-client when the active run is solo and
+        names it; a connect step has no meaning there."""
+        r = self.client.get("/lab/game", params={"client": "c1"}).json()
+        self.assertEqual(r["solo"], False, "no run: the multiplayer game")
+        solo = """
+id: p-solo-ref
+solo: true
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: dump-state
+  - c1: connect
+artifacts: []
+"""
+        run_id, body = self._run(solo)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertIn("E_RUN_SOLO", json.dumps(body["failures"]))
+        self.assertTrue(any(s["action"] == "dump-state" and s["ok"] for s in body["steps"]), "the driver's own steps run")
+        self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["solo"], False, "after the run, the multiplayer game again")
+
     def test_green_run_end_to_end(self):
         run_id, body = self._run(GREEN)
         self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))

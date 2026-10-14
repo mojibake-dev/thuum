@@ -89,3 +89,23 @@ class AllScenariosParse(unittest.TestCase):
                 sc = load_scenario(f.read_text())
                 self.assertEqual(sc.id, f.stem)
                 self.assertTrue(sc.steps)
+
+
+@needs_deps
+class SoloFlag(unittest.TestCase):
+    def test_solo_is_read_and_defaults_off(self):
+        from labapi.scenario import load_scenario
+
+        self.assertFalse(load_scenario("id: plain\nclients: [c1]\nsteps: []\n").solo)
+        self.assertTrue(load_scenario("id: solo-ref\nsolo: true\nclients: [c1]\nsteps: []\n").solo)
+
+    def test_solo_start_is_a_client_step(self):
+        """lab-driver's solo-start (ADR-031): the driver loads the template save
+        at the main menu and places the player; a solo scenario opens with it
+        where a multiplayer one opens with connect."""
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: p-ref\nsolo: true\nclients: [c1]\nsteps:\n  - c1: solo-start {x: 0, y: -300, z: 0, rz: 180}\n")
+        self.assertEqual(sc.steps[0].action, "solo-start")
+        self.assertEqual(sc.steps[0].args["rz"], 180)
+

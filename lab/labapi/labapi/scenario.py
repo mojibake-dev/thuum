@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
 SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida"}
@@ -85,6 +85,11 @@ class Scenario(BaseModel):
     # a mod that loads on one build only. A run request's own version wins;
     # neither means lab-api's default.
     game: str | None = None
+    # A solo run (ADR-031's reference traces): the clients' games start without
+    # skymp5-client (their logon launcher asks GET /lab/game and moves the plugin
+    # aside), so the engine alone plays the action on a committed save; nobody
+    # logs in to the server, and a `connect` step is refused as meaningless.
+    solo: bool = False
     clients: list[str] = Field(default_factory=list)
     server: ServerSpec = Field(default_factory=ServerSpec)
     timeout_s: float = 600
@@ -183,6 +188,7 @@ def load_scenario(text: str) -> Scenario:
         id=str(data["id"]),
         milestone=(str(data["milestone"]) if data.get("milestone") is not None else None),
         game=(str(data["game"]) if data.get("game") is not None else None),
+        solo=bool(data.get("solo", False)),
         clients=clients,
         server=ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=(Netem(**server["netem"]) if server.get("netem") else None)),
         timeout_s=float(data.get("timeout_s", 600)),

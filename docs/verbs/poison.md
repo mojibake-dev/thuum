@@ -350,3 +350,31 @@ the poison until then); built 2026-10-12 on fork m2-poison.
   equipped throughout (the playtest's reads did too). Playtest sixteen
   watches for it, with a read of both seats on the spot (lab-api's probe) if
   it comes back.
+- Playtest sixteen (2026-10-13, parity 8eb4e78e), a lead: "when i initially
+  set oakflesh to the left hand her sword vanished for test 2, but
+  ultimately it looks normal now and i cant get that to reproduce" (Eli).
+  No poison this time: a spell going to the left hand, the first time in
+  the session, is enough. It fits fifteen's trace, where test 2's game
+  applied her figure's equipment again at each change and lost the sword in
+  it. HYPOTHESIS: re-applying a figure's equipment can drop the right-hand
+  weapon. Probe x-sword-left (a sword drawn in the right hand, then
+  Oakflesh to the left, twice; c2 reads the figure's equippedRight and
+  equippedLeft before and after) reads it on the lab characters; if they
+  keep the sword, the next run uses rotfern's saved world, as
+  x-poison-figure-rotfern3 did.
+  - x-sword-left (20261014-053018, the lab's Nord, an Iron Sword drawn,
+    Oakflesh to the left hand twice): not reproduced. c2's dump-state read
+    the figure with the sword in its right hand (0x12EB7) and Oakflesh
+    (0x5AD5C) in its left after each equip, as c1's own game held them.
+  - x-sword-left-rotfern (20261014-053332, rotfern on a copy of Eli's
+    playtest-sixteen world, her Steel Sword 0x13989 drawn, Oakflesh to the
+    left hand twice, from Candlelight): not reproduced either: c2's
+    dump-state read her figure with the sword in its right hand after each
+    equip, as her own game held it. Both reads are Papyrus's
+    (GetEquippedObject), which fifteen saw report the sword equipped while
+    its look was gone, so they cannot rule out a look-only loss; the
+    screenshots framed rotfern too low to show her hands, as the first
+    rotfern poison run did. Six lab runs across fifteen and sixteen have not
+    reproduced it. It stays a playtest watch item: at the next sighting,
+    both seats are read on the spot (lab-api's probe, dump-state) with a
+    screenshot from the observer's seat.

@@ -527,3 +527,16 @@ fifteen.
   health read 100. To redo with the restart fired when the server records
   the drink.
 - Become Ethereal: docs/verbs/shouts.md, Playtest fifteen.
+
+## Playtest sixteen (2026-10-13, Eli, parity 8eb4e78e)
+
+- Passed, b-magic-restart's check (fifteen's was inconclusive): test 1's
+  Fortify Health (FortifyHealth05, MGEF 0x3EAF3, 100 for 60 s) was on the
+  server's record with 47.97 s left when the restart was armed;
+  scratchpad restart-on-drink.sh restarted the server at 22:20:49 PDT with
+  41.4 s left. After the login the record still held it, 26.2 s left at
+  22:21:04: its time ran on the world's clock through the restart. Test 1
+  was back online by 22:21:17 with 12.7 s left, and the effect ended on
+  schedule at about 22:21:30. Eli ticked it. The drink came before the
+  watcher was armed, so the window after the login was 13 s, not the 45 s
+  a restart at the drink would leave.
