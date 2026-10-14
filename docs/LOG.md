@@ -1113,3 +1113,27 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - thuum-magnus: fork m2-fifteen (on m2-relay) staged on the lab toward
   playtest sixteen; x-uf-hold green; x-self-cast's missed Become Ethereal under
   investigation. Its merge runs ADR-030's first gate sweep.
+
+### 2026-10-14
+
+- m2-fifteen (on m2-relay) merged to fork parity 8eb4e78e (2026-10-14T01:03Z, 18:03
+  PDT), the first merge through ADR-030's gate and `just verb-merge`. Verbs: shouts
+  (Unrelenting Force reported from its own hits when the recovery cannot name it, a
+  shout's release with magic readied or a weapon drawn as CombatReady_BreathExhaleShort,
+  god mode's shouts without recovery, the recovery's 400 ms skew, the push through the
+  server's stagger: a spell's Stagger effect played at its magnitude), self-cast
+  (docs/verbs/self-cast.md: a Self spell's effects run on the server, Invisibility
+  and Etherealize as states, no damage to an ethereal player, a rest advancing the
+  effects, Oakflesh's armor in the damage; b-self-cast c260ff3), spell-cast's relay as
+  the server resolved it (m2-relay), and the server-side console call for the lab's
+  setup. T2 green on 8eb4e78e at 17:19 PDT, every session identical (the shouts
+  session declares the shout's stagger since 8eb4e78e, verified from the tree with
+  SESSIONS= before its commit). The gate: run set 20261014-002126-merge-m2-fifteen,
+  13 of 13 green with no rerun, 20261014-002126-smoke-two-players to
+  20261014-005854-a-racemenu (smoke-two-players, a-restart-persistence, b-shout,
+  b-stagger, b-spell, b-self-cast, b-potion, b-magic-restart, b-god, a-console,
+  a-movement-speed, a-melee-reach, a-racemenu), 37 min. Both clones' clean-m1-next
+  promoted to clean-m1 (the 744fddb0 client; 8eb4e78e changed a session file only).
+  verb-merge's first live run found two faults of its own on the way, both fixed on
+  main: gate.yaml read with PyYAML, which the Mac's python3 lacks (e1f63a8), and the
+  nightly's start condition (24a526c, d7745a8).
