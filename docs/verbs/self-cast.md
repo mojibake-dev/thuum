@@ -262,7 +262,7 @@ Every self-cast item passed:
   relayed Self cast runs Invisibility on it there, so its look shows), so
   the label's test can read the figure's own state there: its Invisibility
   actor value, which the Invisibility archetype sets (CommonLibSSE-NG
-  include/RE/A/ActorValues.h's kInvisibility; HYPOTHESIS that the archetype
+  include/RE/A/ActorValues.h:62, kInvisibility 54; HYPOTHESIS that the archetype
   raises it on a figure as on the player, to read in the lab). A one-line
   condition beside isSneaking, with a lab check that the label goes and
   comes back with the effect.
