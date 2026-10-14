@@ -224,9 +224,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   damage-flags.md); Whirlwind Sprint's dash fits the burst (measured
   2026-10-12); Unrelenting Force's knockback is a later slice of shouts.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
-  visible to an observer; to write, with ADR-031's parity check as its
-  observer half) and `b-magic-restart` (green; its playtest check passed in
-  sixteen).
+  visible to an observer) and `b-magic-restart`. MET 2026-10-14: b-duel
+  cbed9a7 green twice by path (20261014-080327, -080710: a plain swing, a
+  power attack's stagger on both screens, a block, Flames' stream, Fire
+  Breath, each by the server's number with the victim's game within 0.01);
+  b-magic-restart green, its playtest check passed in sixteen. The chart's
+  remaining items continue under M2: the push verb (fork m2-push), then
+  Apocalypse and headshots; ADR-031's parity assertion joins b-duel when
+  lab-api has it.
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 
