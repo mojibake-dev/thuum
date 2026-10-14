@@ -1141,6 +1141,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   1.6.1170 exe is unpacked for the Ghidra project, so the re-analyst reads the target version's
   bodies instead of 1.7.104's under shared Address Library ids. The unpack runs inside sky-re
   (Steamless under mono), the file stays under /srv/persist/game beside the pinned exe with its
-  checksum line, never in a repo or a registry; thuum-mundus specs the tool's arrival for core,
-  then the thuum layer runs the unpack and `just ghidra-import`. With this every item of the
-  audit's plan is decided; A5 (sky-re always on) landed on Eli's go the afternoon before.
+  checksum line, never in a repo or a registry. How, after thuum-mundus's reading of the tool
+  (2026-10-14 06:3x UTC): not under Mono on sky-re (Steamless under Mono writes a corrupt PE
+  signature, atom0s/Steamless issue 76, and the CT cannot write beside the pinned exe), but on
+  sky-c1, whose clean baseline already holds the 1.6.1170 exe, under a lab hold after the
+  nightly: the exe's SHA256 checked against game/SHA256SUMS, Steamless run on the client where
+  its runtime is native, the output gated (the PE signature, a clean parse, no .bind section,
+  .text entropy below the encrypted level), pulled by `sky-lab client pull` and placed by the
+  host; the clone's next rollback removes the tool and the file. The import, the analysis
+  proper, runs on sky-re. Steamless is CC BY-NC-ND 4.0: private, non-commercial use, never
+  redistributed, no modified build. With this every item of the audit's plan is decided; A5
+  (sky-re always on) landed on Eli's go the afternoon before.
