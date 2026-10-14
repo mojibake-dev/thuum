@@ -1148,7 +1148,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   nightly: the exe's SHA256 checked against game/SHA256SUMS, Steamless run on the client where
   its runtime is native, the output gated (the PE signature, a clean parse, no .bind section,
   .text entropy below the encrypted level), pulled by `sky-lab client pull` and placed by the
-  host; the clone's next rollback removes the tool and the file. The import, the analysis
-  proper, runs on sky-re. Steamless is CC BY-NC-ND 4.0: private, non-commercial use, never
-  redistributed, no modified build. With this every item of the audit's plan is decided; A5
+  host; the clone's next rollback (to its newest snapshot, clean-m1-next) removes the tool and
+  the file. The import, the analysis proper, runs on sky-re. Steamless is CC BY-NC-ND 4.0:
+  private, non-commercial use, never redistributed, no modified build. persist is under
+  sanoid's production policy, so the unpacked exe and its log also live in the host's private
+  snapshots for the retention period (mundus, 14i): within the license, never off the host,
+  and the thing to know if the file ever has to go. With this every item of the audit's plan is decided; A5
   (sky-re always on) landed on Eli's go the afternoon before.
