@@ -52,6 +52,8 @@ class Settings:
     # HTTP
     root_path: str = "/lab"
     listen_port: int = 80
+    # the commit this lab-api was built from (the image's LABAPI_VERSION), in GET /status
+    version: str = "dev"
     # Proxmox API, called directly by IP (Caddy 403s guest VLANs), pool-scoped token.
     pve_url: str = "https://10.0.0.10:8006"
     pve_token_id: str = ""  # user@realm!tokenname
@@ -249,6 +251,7 @@ class Settings:
         d = cls()
         return cls(
             root_path=_env("LAB_ROOT_PATH", d.root_path),
+            version=_env("LABAPI_VERSION", d.version),
             listen_port=int(_env("LAB_LISTEN_PORT", str(d.listen_port))),
             pve_url=_env("PVE_URL", d.pve_url),
             pve_token_id=_env("PVE_TOKEN_ID", d.pve_token_id),

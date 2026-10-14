@@ -285,6 +285,7 @@ class Runner:
             "netem": self.netem_active,
             "memory": self.system.meminfo(),
             "hold": self.hold_status(),
+            "version": self.s.version,
         }
 
     # ----- phases ---------------------------------------------------------------

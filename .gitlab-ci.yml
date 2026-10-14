@@ -80,7 +80,7 @@ labapi-image:
       changes: [lab/labapi/**/*]
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
-    - docker build -t "localhost:5000/thuum/lab-api:$CI_COMMIT_SHORT_SHA" lab/labapi
+    - docker build --build-arg "LABAPI_VERSION=$CI_COMMIT_SHORT_SHA" -t "localhost:5000/thuum/lab-api:$CI_COMMIT_SHORT_SHA" lab/labapi
     - docker tag "localhost:5000/thuum/lab-api:$CI_COMMIT_SHORT_SHA" localhost:5000/thuum/lab-api:latest
     - docker push "localhost:5000/thuum/lab-api:$CI_COMMIT_SHORT_SHA"
     - docker push localhost:5000/thuum/lab-api:latest

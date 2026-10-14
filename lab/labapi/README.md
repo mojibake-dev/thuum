@@ -120,6 +120,7 @@ game.
 | NIGHTLY_QUIET_S | 1800 | the lab must have been idle this long before the nightly starts |
 | NIGHTLY_WINDOW_S | 5400 | the nightly starts within this long after its minute, or not that day (a restart after the window never runs it) |
 | HEARTBEAT_FRESH_S | 120 | the nightly needs every managed client's poll this recent (its game up) |
+| LABAPI_VERSION | dev | the commit the image was built from (CI's build arg), shown by GET /status as `version` |
 | TIME_SCALE | 1.0 | multiplies `wait:` and the scenario timeout |
 
 ## Running

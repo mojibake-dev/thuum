@@ -18,6 +18,9 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY labapi ./labapi
 RUN uv sync --frozen --no-dev
-ENV PATH=/app/.venv/bin:$PATH GUESTS_FILE=/app/labapi/guests.yaml
+# the commit this image was built from, so GET /lab/status says which lab-api is
+# live (three pushes once landed on a red main and never became an image, 2026-10-14)
+ARG LABAPI_VERSION=dev
+ENV PATH=/app/.venv/bin:$PATH GUESTS_FILE=/app/labapi/guests.yaml LABAPI_VERSION=$LABAPI_VERSION
 EXPOSE 80
 CMD ["labapi"]

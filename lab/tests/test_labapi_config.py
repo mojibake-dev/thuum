@@ -31,3 +31,18 @@ class VerifySetting(unittest.TestCase):
         self.assertIs(self._load("False"), False)
         self.assertIs(self._load("0"), False)
         self.assertEqual(self._load("/etc/ssl/pve-root-ca.pem"), "/etc/ssl/pve-root-ca.pem")
+
+
+@needs_deps
+class Version(unittest.TestCase):
+    def test_the_images_commit_reaches_status(self):
+        import os
+        from labapi.config import Settings
+
+        os.environ["LABAPI_VERSION"] = "abc1234"
+        try:
+            self.assertEqual(Settings.from_env().version, "abc1234")
+        finally:
+            del os.environ["LABAPI_VERSION"]
+        self.assertEqual(Settings().version, "dev")
+
