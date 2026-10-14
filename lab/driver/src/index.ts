@@ -1514,10 +1514,22 @@ function run(step: Step, player: Actor): unknown {
       // attackStart lands a hit.
       // With {other: true}, on the nearest other actor's graph instead: a
       // solo reference's NPC swinging at the player (ADR-031, reference B)
+      // or the other player's figure. {set: {name: value}} first sets those
+      // graph variables on the same actor in the same tick (booleans
+      // through SetAnimationVariableBool, numbers through
+      // SetAnimationVariableFloat), as the engine's own caster sets
+      // bWantCastRight in the frame it sends MRh_SpellAimedConcentrationStart
+      // (r-spell-stream-a 20261014-081151; thuum docs/verbs/spell-cast.md)
       const name = typeof a.name === "string" ? a.name : "";
       if (!name) return { error: "no event name" };
-      Debug.sendAnimationEvent(a.other ? nearestOther(player) : player, name);
-      return "sent";
+      const target = a.other ? nearestOther(player) : player;
+      const set = a.set && typeof a.set === "object" ? (a.set as Record<string, unknown>) : {};
+      for (const [k, v] of Object.entries(set)) {
+        if (typeof v === "boolean") target.setAnimationVariableBool(k, v);
+        else if (typeof v === "number") target.setAnimationVariableFloat(k, v);
+      }
+      Debug.sendAnimationEvent(target, name);
+      return { sent: name, to: target.getFormID(), set: Object.keys(set) };
     }
     case "play-idle": {
       // One IDLE record played on the player, or with {other: true} on the
