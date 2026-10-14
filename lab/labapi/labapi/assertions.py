@@ -176,7 +176,11 @@ class WatchView:
     never fell), and drainEndMs when it last fell, in ms since watch-start
     (-1 when never): a figure holds a million magicka and a stream drains
     it, so the two time a figure's stream in the watcher's game
-    (docs/verbs/spell-cast.md)."""
+    (docs/verbs/spell-cast.md). maxStep is the largest move between two of
+    its samples and maxStepMs when it came (-1 when it never moved): a
+    figure thrown in the watcher's game flies, its largest step coming
+    with the throw, where one that only follows its player's position
+    moves once its player is up (docs/verbs/push.md)."""
 
     x: float
     y: float
@@ -185,6 +189,8 @@ class WatchView:
     samples: int
     drainMs: float = 0.0
     drainEndMs: float = -1.0
+    maxStep: float = 0.0
+    maxStepMs: float = -1.0
     # its stagger and recoil events in the watcher's game, (ms, name, 1 if
     # its graph took the event after every hook), and the graph bools the
     # watch sampled, (name, ((ms, value), ...)) (lab-driver bc5d76a; thuum
@@ -660,6 +666,8 @@ class _ClientRef:
                 float(first[0]) - origin[0], float(first[1]) - origin[1], float(first[2]) - origin[2],
                 maxDisplacement=float(best["maxDisplacement"]),
                 samples=int(best.get("samples", 0)),
+                maxStep=float(best.get("maxStep") or 0.0),
+                maxStepMs=float(best["maxStepMs"]) if best.get("maxStepMs") is not None else -1.0,
                 drainMs=falls[-1] - falls[0] if falls else 0.0,
                 drainEndMs=falls[-1] if falls else -1.0,
                 events=tuple((float(e[0]), str(e[1]), int(e[2])) for e in best.get("events") or []),
@@ -935,7 +943,7 @@ _ATTRS = {
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
                 "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
-    WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs"},
+    WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},

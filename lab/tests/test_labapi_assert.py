@@ -726,6 +726,21 @@ class WatchTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             Evaluator(RichServer(), views, ["c1", "c2"]).evaluate("c2.watched(c1).took('Ragdoll') == 1")
 
+    def test_watched_reports_the_largest_step_and_when(self):
+        """thuum docs/verbs/push.md: thrown in the watcher's game, a figure's
+        largest step comes with the throw (x-push-flight 20261014-210908: 70
+        units at 2851 ms); following its player, after the get-up (x-push-south
+        20261014-152858: 94 at 8952)."""
+        from labapi.assertions import Evaluator
+        views = WatchViews()
+        views.watches["c2"]["actors"][0]["maxStep"] = 70.1
+        views.watches["c2"]["actors"][0]["maxStepMs"] = 2851
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.watched(c1).maxStepMs < 5000"))
+        self.assertTrue(ev.evaluate("c2.watched(c1).maxStep < 150"))
+        old = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        self.assertTrue(old.evaluate("c2.watched(c1).maxStepMs == -1"))
+
     def test_a_watch_is_needed_and_is_not_a_dump(self):
         from labapi.assertions import AssertionData, Evaluator, clients_needing_views
         ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
