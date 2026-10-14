@@ -88,6 +88,33 @@ an engine move, so its speed may need its own allowance: to measure).
   another actor's spell, power, shout or scroll lands on the player and
   that change Health, Magicka or Stamina. Every other effect runs, its
   script included (ADR-031: cut at the number).
+- The dispatch, read statically by the re-analyst (2026-10-14, Ghidra on
+  the unpacked 1.6.1170; Address Library ids; HYPOTHESIS where not
+  MEASURED above):
+  - OnEffectStart and OnEffectFinish are sent only by SkyrimVM's sink for
+    TESActiveEffectApplyRemoveEvent (53960, slot 1 of VTABLE_SkyrimVM[3];
+    CommonLibSSE-NG include/RE/S/SkyrimVM.h:89). It binds the effect's
+    scripts to the handle and calls SendEvent (104800). The event comes
+    from 34092, an effect's per-frame step in MagicTarget's loop (34527),
+    after the effect's Start.
+  - 34092's first gate is the dispelled flag (bit 18). An effect dispelled
+    before its first update starts nothing and sends neither event, which
+    is how ae8446a9's dispel stopped the throw. The event also needs an
+    actor target and a base effect with a bound script (formFlags bit 22,
+    include/RE/T/TESForm.h:90).
+  - An effect's handle is 0x0002_iiii_<target form id> (53518), iiii being
+    the effect's id at +0x84: 0x0002000100000014 for the player's first.
+    HandleIsType(142, h) is true for it (53505), and GetObjectForHandle(142,
+    h) (53512) finds the live effect by its id in the target's list. So
+    2fe894e1's test holds as written. A cheaper equal test is
+    (h >> 48) == 2 and the low half 0x14.
+  - 56213 is ObjectReference.PushActorAway's body (registered by 56246).
+    It calls KnockExplosion (39895) from the pusher's position when the
+    pushed actor has a high process.
+  - An effect the new AddTarget refusal stops also sends no
+    OnMagicEffectApply and no hit event in the target's game (both come
+    after AddTarget, 38786 and 34526). The target never reports a figure's
+    hit (hitService.ts), so nothing waits on it.
 - The filter's test, from CommonLibSSE-NG b93280e8:
   - IObjectHandlePolicy::HandleIsType and GetObjectForHandle take a VM type
     id (include/RE/I/IObjectHandlePolicy.h:20, :27);
