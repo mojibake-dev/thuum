@@ -359,7 +359,15 @@ function nearbyActors(player: Actor): Actor[] {
 
 // the actor nearest the player other than itself (in the lab, the other
 // player's figure)
+// the NPC a solo reference's place-npc step put down (ADR-031): {other}
+// names it, not the nearest actor a random search finds
+let placedId = 0;
+
 function nearestOther(player: Actor): Actor {
+  if (placedId) {
+    const placed = Actor.from(Game.getFormEx(placedId));
+    if (placed) return placed;
+  }
   const others = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
   if (others.length === 0) throw new Error("no other actor nearby");
   return others[0];
@@ -1461,6 +1469,23 @@ function run(step: Step, player: Actor): unknown {
       const ref = form(a.refId);
       if (!ref) return { error: "no such ref" };
       return ref.activate(player, false);
+    }
+    case "place-npc": {
+      // A solo reference's NPC (ADR-031): Papyrus PlaceAtMe of {base}, moved
+      // to {x, y, z} from lab-spawn (solo-start's origin) and turned to {rz}
+      // degrees, unaggressive unless {aggressive: true} (Aggression 0: it
+      // opens no fight of its own), and kept as the actor {other: true}
+      // steps and console {other} name. The console's placeatme and a random
+      // search named a rabbit instead once (r-melee-power-a 20261014-061237)
+      const base = Game.getFormEx(num(a.base));
+      if (!base) return { error: "no such base" };
+      const npc = Actor.from(player.placeAtMe(base, 1, false, false));
+      if (!npc) return { error: "the base placed no actor" };
+      npc.setPosition(LAB_SPAWN.pos[0] + num(a.x), LAB_SPAWN.pos[1] + num(a.y), LAB_SPAWN.pos[2] + num(a.z));
+      npc.setAngle(0, 0, num(a.rz));
+      if (a.aggressive !== true) npc.setActorValue("Aggression", 0);
+      placedId = npc.getFormID();
+      return { formId: placedId };
     }
     case "draw-weapon":
       // the player's, or with {other: true} the nearest other actor's (a
