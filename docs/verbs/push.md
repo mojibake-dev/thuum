@@ -59,12 +59,17 @@ today (docs/verbs/shouts.md); the target's movement during and after the
 throw as its own movement report, under movement-speed's bounds (a throw is
 an engine move, so its speed may need its own allowance: to measure).
 
-## Engine surface (the decompiled path, HYPOTHESIS; docs/verbs/stagger.md)
+## Engine surface (MEASURED where marked, by lab/frida/push-trace.js; the re-analyst's static reads name the functions)
 
 - PushActorAway (ID 56213) calls AIProcess::KnockExplosion (ID 39895,
-  CommonLibSSE-NG src/RE/A/AIProcess.cpp:197-201) with the caster's position
-  as the source; a race flagged kNoKnockdowns (include/RE/T/TESRace.h:73)
-  is staggered instead.
+  CommonLibSSE-NG src/RE/A/AIProcess.cpp:197-201) with the pusher's position
+  as the source. MEASURED (x-push-solo 20261014-143127, x-push2
+  20261014-152206: the source is the shouter's position, and the call is
+  made from +0xa2f570 inside 56213).
+- A race flagged kNoKnockdowns (include/RE/T/TESRace.h:73) is staggered
+  instead. No player meets it: no playable race in the lab's load order sets
+  the flag (read 2026-10-14 with lab/esm.py's race_flags, scratchpad
+  race-knock.py: the ten vanilla races, rotfern and rotfernRaceVampire).
 - The script's event reaches the game through the Papyrus event dispatch
   that skymp5-client's filter blanks today (skyrim-platform
   FridaHooks.cpp:16-98; docs/apocalypse-options.md 3.1).
@@ -89,32 +94,40 @@ an engine move, so its speed may need its own allowance: to measure).
   that change Health, Magicka or Stamina. Every other effect runs, its
   script included (ADR-031: cut at the number).
 - The dispatch, read statically by the re-analyst (2026-10-14, Ghidra on
-  the unpacked 1.6.1170; Address Library ids; HYPOTHESIS where not
-  MEASURED above):
+  the unpacked 1.6.1170; Address Library ids), each part checked against
+  the traces:
   - OnEffectStart and OnEffectFinish are sent only by SkyrimVM's sink for
     TESActiveEffectApplyRemoveEvent (53960, slot 1 of VTABLE_SkyrimVM[3];
     CommonLibSSE-NG include/RE/S/SkyrimVM.h:89). It binds the effect's
     scripts to the handle and calls SendEvent (104800). The event comes
     from 34092, an effect's per-frame step in MagicTarget's loop (34527),
-    after the effect's Start.
+    after the effect's Start. MEASURED: both traces' OnEffectStart
+    backtraces run +0x9c3982 (53960), +0x5b03c6, +0x5b052b, +0x5ae6a6
+    (34092), +0x5c35fb (34527).
   - 34092's first gate is the dispelled flag (bit 18). An effect dispelled
     before its first update starts nothing and sends neither event, which
-    is how ae8446a9's dispel stopped the throw. The event also needs an
-    actor target and a base effect with a bound script (formFlags bit 22,
-    include/RE/T/TESForm.h:90).
+    is how ae8446a9's dispel stopped the throw (MEASURED: with the dispel,
+    no OnEffectStart; without it, OnEffectStart and the throw). The event
+    also needs an actor target and a base effect with a bound script
+    (formFlags bit 22, include/RE/T/TESForm.h:90).
   - An effect's handle is 0x0002_iiii_<target form id> (53518), iiii being
     the effect's id at +0x84: 0x0002000100000014 for the player's first.
     HandleIsType(142, h) is true for it (53505), and GetObjectForHandle(142,
     h) (53512) finds the live effect by its id in the target's list. So
     2fe894e1's test holds as written. A cheaper equal test is
-    (h >> 48) == 2 and the low half 0x14.
+    (h >> 48) == 2 and the low half 0x14. MEASURED: x-push2's OnEffectStart
+    on the player carried 0x2000100000014, and the event passed the
+    filter (the push ran).
   - 56213 is ObjectReference.PushActorAway's body (registered by 56246).
     It calls KnockExplosion (39895) from the pusher's position when the
-    pushed actor has a high process.
+    pushed actor has a high process. MEASURED: the push's KnockExplosion
+    returns into 56213, once directly and once from the task queue.
   - An effect the new AddTarget refusal stops also sends no
     OnMagicEffectApply and no hit event in the target's game (both come
-    after AddTarget, 38786 and 34526). The target never reports a figure's
-    hit (hitService.ts), so nothing waits on it.
+    after AddTarget, 38786 and 34526). MEASURED for OnMagicEffectApply:
+    x-push2 counted 164 calls with four effects landing (4f13fa50) and 84
+    with two (4e8aa04c). The target never reports a figure's hit
+    (hitService.ts), so nothing waits on its hit event.
 - The filter's test, from CommonLibSSE-NG b93280e8:
   - IObjectHandlePolicy::HandleIsType and GetObjectForHandle take a VM type
     id (include/RE/I/IObjectHandlePolicy.h:20, :27);
