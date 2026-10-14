@@ -167,8 +167,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 2. spell-cast: a cast's start and end as server state, a stream counted by the
    time it held its target, the observer casting the relayed spell, a spell
    hit starting a fight. DONE 2026-10-10 (45839102); b-spell 9ed66b8. The
-   relay as the server resolved it: BUILDING on fork m2-relay (1aa96a8f),
-   carried by m2-fifteen.
+   relay as the server resolved it: DONE 2026-10-13 (8eb4e78e, merged with
+   m2-fifteen).
 3. magic-effects: the server's effects from the records, persisted with their
    time, drinks through the rule, the engine's own application held out.
    DONE 2026-10-10 (35acc275, merged with god-mode); b-potion bc796d5 and
@@ -185,7 +185,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 6. shouts: shouts and words known as the server's record, a shout judged
    against the server's recovery, the breath relayed as resolved. DONE
    2026-10-11 (3f9e4bc8); b-shout db6ed77. Unrelenting Force's push through
-   the server's stagger: BUILDING on m2-fifteen.
+   the server's stagger: DONE 2026-10-13 (8eb4e78e) as a stagger of 1.5, a
+   stumble; the ragdoll throw is LATER (docs/verbs/stagger.md).
 7. Lag compensation (Bernier 2001): only if a playtest shows hits refused
    inside M1's slack. LATER.
 8. cast-teleport (Lost Grimoire's Teleportation, from the stretch list): one
@@ -193,8 +194,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    the caster's game alone. DONE 2026-10-12 (ef3fb03c); b-teleport 52d6195.
 9. self-cast: a Self spell's effects run on the server (Invisibility and
    Etherealize as states, no damage to an ethereal player, a rest advancing
-   the effects, Oakflesh's armor in the damage). BUILDING on fork m2-fifteen
-   (docs/verbs/self-cast.md; b-self-cast to write).
+   the effects, Oakflesh's armor in the damage). DONE 2026-10-13
+   (8eb4e78e); b-self-cast c260ff3.
 10. Apocalypse (ADR-029, accepted 2026-10-13): the caster's game runs its own
     spells' effect scripts; a server-run allowlist grows verb by verb. NEXT:
     Ghostwalk's filter (A1), per-player globals with the MCM settings (A2),
@@ -204,14 +205,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
   streams, Self casts on figures, the player's game counting no actor damage
-  under ADR-028).
-- Toward playtest sixteen, BUILDING on m2-fifteen (on m2-relay): Unrelenting
-  Force's report and the recovery's slack, self-cast, the relay as resolved,
-  the server-side console for the lab's setup. After it: the concentration pose
-  on figures, TCL's figure on observers, pushes and paralysis decided by the
-  server as staggers are, the teleport's vanish and appear on observers, then
-  Apocalypse and headshots. The poisoned sword's look (playtest fifteen) did
-  not reproduce in the lab; sixteen watches for it.
+  under ADR-028); m2-fifteen 2026-10-13 (8eb4e78e: a shout reported with
+  magic readied or a weapon drawn, the recovery's 400 ms slack, god mode's
+  shouts, a shout reported from its own hit, the server's console for the
+  lab's setup).
+- Playtest sixteen on parity 8eb4e78e. After it: the concentration pose on
+  figures, TCL's figure on observers, the ragdoll throw and paralysis
+  decided by the server as staggers are, the teleport's vanish and appear
+  on observers, then Apocalypse and headshots. The poisoned sword's look
+  (playtest fifteen) did not reproduce in the lab; sixteen watches for it.
 - Carried from M1 into this milestone's lab runs: melee reach's unmeasured
   cases (the bash, bare hands, the scale across races) and whether a power
   attack reaches by the pick alone (docs/verbs/melee-reach.md,

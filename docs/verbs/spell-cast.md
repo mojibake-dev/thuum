@@ -595,8 +595,10 @@ health message. A second red within two sweeps makes it a bug.
   (caster 0x14) to c2, the fixed server sends c1 neither and names c1 by
   its form id to c2; marksman stayed identical (the arrow relay was
   already the server's). 1aa96a8f declares the three, and spell-cast is
-  identical with them (T2 partial, pipeline 1344). Left: the full T2,
-  staging and the merge sweep, after playtest fifteen.
+  identical with them (T2 partial, pipeline 1344). Merged with m2-fifteen
+  (parity 8eb4e78e, 2026-10-13) after its full T2 (25 sessions identical)
+  and ADR-030's gate (run set 20261014-002126-merge-m2-fifteen, 13 of 13
+  green, no rerun).
 - Dual casting counted per hand, CONFIRMED on the lab (x-dual-cast3
   20261013-092233, fork m2-visuals be69bf68): two hands of Flames for 4 s
   reached the server as 38 hits, 7.15 stream-seconds in all (x-dual-cast:
@@ -629,3 +631,43 @@ health message. A second red within two sweeps makes it a bug.
   took the left hand's events, x-dual-cast3's none). To read: which events
   or graph variables start a caster's concentration push, and why the
   figure's graph refuses them.
+- Read (2026-10-13, static; the fork at m2-fifteen 744fddb0): the caster's
+  graph variables already travel. magicSyncService.ts sends
+  UpdateAnimVariables (MsgType 24) every 500 ms while magic is equipped
+  (:31, :196) and the same snapshot inside each SpellCast; the server
+  relays the first to the neighbours as it came
+  (ActionListener::OnUpdateAnimVariables); the observer writes it into the
+  figure's active graph (remoteServer.ts onUpdateAnimVariablesMessage,
+  Skyrim Platform applyAnimationVariablesToActor). The snapshot is the
+  master behavior's casting set: bWantCastLeft, bWantCastRight,
+  bWantCastVoice, IsCastingLeft, IsCastingRight, IsCastingDual,
+  bCastReady, bMagicDraw, bMLh_Ready, bMRh_Ready, NotCasting, CastBlend,
+  CastBlendDamped and the hand types, among 60 bools, 19 floats and 14
+  ints (skyrim-platform Magic/AnimVariableMasterGraphIndexes.cpp:3-100,
+  by index into the graph's variable set, AnimationVariablesForMasterBehavior.h,
+  bWantCastRight 72). TiltedEvolution syncs the same set for its remote
+  actors, several marked "added extra for spell cast sync"
+  (Code/encoding/Structs/Skyrim/AnimationGraphDescriptor_Master_Behavior.cpp;
+  a map only, ADR-005). Two things stand out:
+  - The write is by index alone: ApplyVariablesToActor
+    (Magic/AnimationGraphMasterBehaviourDescriptor.h) checks no identity
+    of the behavior, where TiltedEvolution keys each descriptor to its
+    graph. A behavior mod would shift every index; the lab's set has none
+    (docs/MODS.md).
+  - HYPOTHESIS: the engine rewrites an actor's casting variables from its
+    own state every frame, so a figure keeps the caster's bWantCastRight
+    for a frame every 500 ms, and its graph refuses the relayed
+    MRh_SpellAimedConcentrationStart, whose transition wants the cast
+    held. Unread in the engine (the re-analyst's, on sky-re, if the probe
+    below shows the flicker).
+- The read (ADR-031, superseding the single probe x-cast-pose drafted the
+  same day): the references r-spell-stream A and B (Flames from the player
+  at a placed NPC, and from the NPC at the player) and the parity run over
+  b-spell's action. The recorder samples Skyrim Platform's 93 variables
+  and every graph event on both games, so the actor-figure view's diff
+  names what the figure lacks: the refused
+  MRh_SpellAimedConcentrationStart, the variables the engine's caster
+  holds and the figure does not (bWantCastRight, IsCastingRight,
+  CastBlend, if the hypothesis holds). If the figure holds the caster's
+  values and still refuses the start, the variables are not the gate and
+  the next read is the state the figure's magic behavior is in.

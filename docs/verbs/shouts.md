@@ -557,3 +557,18 @@ snippets).
   Flames readied in rotfern's hand; the lab's earlier shouts were all made
   with the hands down. A wait was ruled out (x-shout-wait 20261013-220058).
   Fork m2-fifteen 744fddb0 hooks both releases.
+- On 744fddb0 (2026-10-13): x-shout-drawn (20261013-230348) had Fire Breath
+  reported in all three states, hands down, Flames readied and an Iron
+  Sword drawn ("shouts 3f9ea, variation 0 (spell 3f9eb); recovers in 30.0
+  s" each time). Each breath's first hit spent the cast ("at 1 times its
+  magnitudes (once)") and its duplicate report was refused (E_SPELL_NO_CAST,
+  the cast already spent); three breaths of 50 killed c2. Each also
+  staggered c2 by 0.05: Skyrim.esm's VoiceFireBreath1 (0x3F9EB) carries
+  StaggerPushFFAimed (MGEF 0xA44C0) at 0.05 beside its fire at 50 (lab/
+  esm.py on sky-srv), which the server now plays as a spell's stagger
+  (docs/verbs/stagger.md). x-uf-push (20261013-231113): Unrelenting
+  Force's three words stagger their target by 1.5, a stumble with no
+  throw and no move; the game's ragdoll throw is a later slice
+  (stagger.md).
+  b-self-cast's Become Ethereal, shouted with Invisibility readied, was
+  reported every time (four runs, 20261013-231616 to -232603).

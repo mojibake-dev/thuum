@@ -399,3 +399,62 @@ promoted.
 - Found (small): with test 2's shield raised, its block-and-stagger
   animation shows whole on test 2's own screen and not on the figure on test
   1's.
+
+## A spell's stagger (fork m2-fifteen 4a4c80e1, 2026-10-13)
+
+- A spell's Stagger effect (archetype 33, CommonLibSSE-NG
+  include/RE/E/EffectArchetypes.h; Unrelenting Force's push,
+  VoiceUnrelentingForceEffect02 and 03) staggers its target by the effect's
+  magnitude: the server's spell hit path calls PlayStagger, the weapon
+  stagger's tail (the target's game told through TESModPlatform.Stagger,
+  every game that sees the target sent the relayed staggerStart). The
+  engine's own push never moved a player, because the server decides a
+  player's staggers (playtest fifteen, Eli: "does unrelenting force
+  ragdoll"; x-uf-ethereal saw no push). ShoutsTest: a shout's hit tells the
+  target's game to stagger, and the shouter's figure of it staggers.
+- x-uf-push (20261013-231113, by path): c1 shouts Unrelenting Force's three
+  words (spell 0x13F3A, two Stagger effects at 1.5) at c2 150 units off.
+  The server: "stagger: ff000000's spell 13f3a on ff000001 staggers it by
+  1.5"; c1's figure of c2 took the relayed staggerStart; c2 stayed up in its
+  own game (dump-state's down false before and after) and did not move (y
+  -150.0 on the server); it lost the shout's damage (0.5401 on the server,
+  0.5445 in its game). HYPOTHESIS false: the graph's stagger at 1.5 does
+  not throw a player; it is a stumble.
+- The throw is a later slice, and it is not the stagger's. In the game,
+  Unrelenting Force's full shout ragdolls its target: thrown back by
+  physics, away from the shouter, and up again after (Eli, 2026-10-13: "more
+  than knockdown it's a whole ass ragdoll").
+  - Read directly (2026-10-13, the re-analyst on sky-re; lab/pex.py over
+    Skyrim - Misc.bsa, nothing left sky-re): Skyrim.esm VoiceUnrelentingForce3
+    (SPEL 0x13F3A, the third word only; the first two words' spells carry no
+    push) has three effects: VoiceUnrelentingForceEffect03 (MGEF 0x7F82F) at
+    1.5, 0xEA075 at 10, VoiceUnrelentingForceEffect02 (0x7F82E) at 1.5.
+    0x7F82F's VMAD attaches VoicePushEffectScript with PushForce 15. The
+    script's one event is OnEffectStart(Target, Caster), which calls
+    Caster.PushActorAway(Target, PushForce). Neither MGEF has an explosion.
+    The same script, at other forces, pushes for the dragons' Unrelenting
+    Force, the werewolf's knockback and howls, the shield charge, Dawnguard's
+    reflecting shield and Dragonborn's spectral dragon.
+  - HYPOTHESIS (decompiled; 1.7.104's bodies under the shared Address
+    Library ids, as 1.6.1170's .text is wrapped):
+    - StaggerEffect::Start (ID 34982) only staggers: the magnitude through
+      the mass formula (ID 44009) to the graph's stagger (ID 37710: clamped
+      to 1, staggerDirection 0 without a source, no new stagger while one
+      plays), about 0.54 for a player of Mass 1;
+    - every ragdoll goes through AIProcess::KnockExplosion (ID 39895), which
+      Papyrus PushActorAway (ID 56213) calls with the pusher's position as
+      the source; a race flagged kNoKnockdowns is staggered instead.
+  - Why a player is never thrown here: skymp5-client blanks the Papyrus
+    events of effects (docs/apocalypse-options.md 3.1), so the script's
+    OnEffectStart never runs in the target's game.
+  - Under ADR-031 the throw is not rebuilt. The target's game holds the
+    word's effects from the shouter's figure, and the client lets an effect
+    on its own player run its script (ADR-029's A1 filter). The vanilla
+    script then pushes from the figure's position with the vanilla force.
+    The server decides the shout and its hit; the target's game zeroes only
+    the damage (be69bf68's fDiffMultHPToPC*).
+  - Skyrim Platform's own pushActorAway (CallNative.cpp:344-372) passes the
+    target as the pusher, so it would push from the target's own feet; it
+    is not the path.
+  - The figure's flight on other screens is the slice's hard half: the
+    movement relay carries a position, not a ragdoll's pose.

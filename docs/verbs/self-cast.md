@@ -147,14 +147,18 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
 - T1: none.
 - T2: the difftest sessions identical but for what this verb declares (a
   session casting a Self spell, if one exists, gains MagicEffects).
-- T3 scenario id: lab/scenarios/b-self-cast.yaml: c1 casts Oakflesh: the
-  server's effects hold its DamageResist and c2's sword takes less from c1
-  than before; c1 shouts Become Ethereal: c2's hits take nothing from c1 on
-  the server; c1 casts Invisibility and waits an hour: the server's set
-  holds it, then not after the wait.
+- T3 scenario id: lab/scenarios/b-self-cast.yaml (thuum c260ff3): c1
+  casts Oakflesh and Invisibility: the server runs each; c1 waits an hour:
+  both end on the server; c1 shouts Become Ethereal with Invisibility
+  readied: c2's sword swing, which c2's own game plays (IsAttacking) while
+  the server still runs the state, takes nothing from c1, and the same
+  swing from the same spot lands once the state has run out. Oakflesh's
+  armor in the damage is SelfCastTest's (T0, the server's own
+  TES5DamageFormula), not a lab reading.
 - Assertions that would fail if the verb silently regressed: the server's
-  running effects after each cast (server.effects); the damage with and
-  without Oakflesh and while ethereal; Invisibility gone after the wait.
+  running effects after each cast and after the wait (server.effects); c1's
+  health after the swing in the ethereal window and after it; c2's own
+  attack in both (watched_self).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -167,6 +171,36 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   from 360 s a game hour.
 - Owner: agent.
 
+## Lab (2026-10-13, fork m2-fifteen 744fddb0)
+
+- x-self-cast (20261013-214827, 20261013-220500): Become Ethereal never
+  reached the server; the shout's release with magic readied is
+  CombatReady_BreathExhaleShort, which shoutService did not hook (the root
+  cause, docs/verbs/shouts.md; fixed in 744fddb0). On 744fddb0
+  (20261013-230751) the server ran it ("ff000000 casts 5f6eb on itself:
+  its effects run on the server"); the probe was red on its own timing
+  only (its console reads held the assert past the state's 8 s).
+- b-self-cast by path, green twice (20261013-232251, 20261013-232603),
+  identical readings: Oakflesh's DamageResist 40 with 56 of 60 s left;
+  Invisibility with 29.5 s left; both ended on the server within 2 and 3 s
+  of the hour's wait; Become Ethereal's state with 7.25 s left a second
+  after the shout; c2's own game attacked (IsAttacking) while the state had
+  5.0 and 4.7 s left and c1 kept 1.0; the same swing after the state
+  landed (0.935, an Iron Sword's 6.5 of 100).
+- CONFIRMED (b-self-cast, both runs; x-uf-ethereal's punch before them):
+  an observer's game lets a swing through an ethereal figure, so no hit
+  reaches the server while the state runs (the relayed cast runs the Self
+  spell on the figure, Engine surface). The server's refusal of a hit that
+  a client sends anyway is SelfCastTest's.
+- CONFIRMED (b-self-cast's c2 screenshots): Invisibility's shimmer on the
+  figure in the other game. Open: the ethereal look on the figure in c1's
+  shout with magic readied showed a few sparkles at night (045-c2), not
+  x-uf-ethereal's dark translucence; playtest sixteen's eye.
+- The first two green runs (20261013-231616, 20261013-231928) swung one
+  second after c2's draw and read nothing of c2's game, so their ethereal
+  assertion could have held on a miss; the scenario as committed draws
+  early and watches c2's attack.
+
 ## Status
 
 - [x] doc complete, rung declared
@@ -178,6 +212,21 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
 - [x] message + validator (same commit): no new message
 - [x] native hook + T1: none new
 - [x] TS handler (magicEffectsService.ts, fork c2a71793)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] ledger and suppression registry updated
+- [x] T2 green: the full T2 at the merge (8eb4e78e, 2026-10-13 17:19: all
+      25 sessions identical, shouts' three declarations of the spell
+      stagger committed first)
+- [x] T3 scenario green: b-self-cast (thuum c260ff3, awaiting Eli's
+      review) green twice by path (20261013-232251, -232603) and in the
+      merge's gate (20261014-003546); HYPOTHESIS left: the engine's own end of
+      Invisibility and Etherealize at the caster's attack or cast, an
+      effect's time in a wait (180 or 360 s a game hour), the ethereal look
+      on the figure, the caster's shader beside its engine's own (playtest
+      sixteen's items, then the references and the parity run, ADR-031)
+- [x] ledger and suppression registry updated: no Papyrus native on the
+      server (Actor.dispelSpell is a Skyrim Platform binding in the
+      client); the suppression is magicEffectsService's dispel of a
+      figure's Self spell (Suppress, above)
+- [x] merged: fork parity fast-forwarded to m2-fifteen 8eb4e78e
+      (2026-10-13 18:03, after the gate's run set
+      20261014-002126-merge-m2-fifteen, 13 of 13 green); both clones'
+      clean-m1 promoted with its client (18:02 and 18:03)
