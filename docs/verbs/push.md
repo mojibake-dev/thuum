@@ -205,6 +205,19 @@ an engine move, so its speed may need its own allowance: to measure).
   down). A screenshot 0.6 s after the release shows the figure gone from
   where it stood.
 - b-push green on it (20261014-211219).
+- Not every time: b-push with a check that the figure's largest step comes
+  with the throw went green once and red once (20261014-212731: 77 units
+  at 2682 ms; -213023: 1216 at 7634, the snap after the get-up). The race,
+  traced on four runs of x-push-flight (lab/frida/push-trace.js on c1, ms
+  after the effect's start in c1's game): the vanilla push at +20 to +22
+  every time; the client's zero-force PushActorAway for c2's relayed
+  Ragdoll at +12 (flew), +46 (snapped), +76 (flew), +41 (snapped). A zero
+  knock landing 20 to 50 ms after the vanilla one gives the figure a fresh
+  knock in place, and it never flies (MEASURED: the order of the calls;
+  INFERRED: why a zero knock then kills the flight, the knock's own state
+  in AIProcess not traced). Fix on m2-flight cadb5648: a relayed Ragdoll
+  leaves a figure this game has knocked down itself alone, holding only its
+  movement; a bystander's game, which runs no push, still knocks it.
 
 ## Playtest seventeen (2026-10-14, Eli, parity 4e8aa04c)
 
