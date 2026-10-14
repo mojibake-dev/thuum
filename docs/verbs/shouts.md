@@ -633,4 +633,24 @@ snippets).
   the second: still too late for a half-second flame. Open: what the
   launched projectile draws the second time (its art on the figure's
   mouth node, the voice caster's state after the first cast).
+- Read (2026-10-14, the re-analyst on sky-re, static; HYPOTHESIS until the
+  trace): Fire Breath's first word (SPEL 0x3F9EB, fire-and-forget, aimed)
+  fires PROJ 0x647BF, a cone (type 0x10, kCone, CommonLibSSE-NG
+  include/RE/B/BGSProjectile.h:38; model Magic\VoiceFlameWaveProject01.nif,
+  speed 1200), whose flames are most likely drawn by a shared master
+  particle system (ADDN MPSFireWaveFlames 0x647BC, addon index 64) that the
+  cone's model registers as an emitter. Skyrim Platform's relay does not
+  cast this word through MagicCaster::CastSpellImmediate: for an aimed
+  fire-and-forget spell it calls Projectile::Launch itself (MagicApi.cpp
+  :128-163, use-origin true, no target), so the figure's voice caster holds
+  nothing between breaths. The candidates for the missing second fire: the
+  second cone's emitter never joins particle system 64, or system 64 is
+  removed after the first breath ("destroy when unused") and rebuilt
+  without emitting. Fixes by the trace's answer: give ADDN 0x647BC the
+  addon's always-loaded flag at the client's start (BGSAddonNode's flags,
+  CommonLibSSE-NG include/RE/B/BGSAddonNode.h), or relay aimed
+  fire-and-forget casts through the engine's CastSpellImmediate as
+  concentration casts already are. The trace: on c2 and on c1 for
+  comparison, the particle system's slot 64 and the cone's emitter
+  registration across the breaths (ids in the re-analyst's report).
 
