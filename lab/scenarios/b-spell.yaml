@@ -17,7 +17,12 @@
 # magicka, which a figure holds a million of and a stream drains (from 852
 # to 6582 ms against c1's 264 to 6267 in that run, the end relayed): it
 # drains for most of the hold and stops well before the watch ends (a lost
-# end, playtest six's, drains until the watch stops). c2's health is read
+# end, playtest six's, drains until the watch stops), and the figure's graph
+# takes the cast's start, the grab and push of its hands (fork m2-hands: the
+# observer holds a hand's spell start until the figure holds the caster's
+# casting state; before it the figure refused the start every time and only
+# raised its hands, playtest fifteen; docs/verbs/spell-cast.md; green twice
+# by path with it, 20261014-193121 and -193403). c2's health is read
 # about a second after the stream ends, before its own regeneration can
 # run ahead of the server's cropped number. Then c1 learns
 # Firebolt (0x12FD0, fire-and-forget, FireDamageFFAimed 25, no area; its
@@ -61,6 +66,7 @@ steps:
   - assert:
       - c2.watched(c1).drainMs > 3000
       - c2.watched(c1).drainEndMs < 7500
+      - c2.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 1
   - c1: learn-spell {spellId: 77776}
   - c1: set-percentages {magicka: 1}
   - wait: 2
