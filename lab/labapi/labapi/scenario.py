@@ -26,7 +26,7 @@ SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida"}
 # fakeclient: the fork's headless legacy client logs in as a scenario client's
 # profile from inside the server image (T2 without a Windows client).
 SERVER_STEP_ACTIONS = {"restart", "fakeclient"}
-KNOWN_ARTIFACTS = {"server.log", "screenshots", "world-diff", "pcap"}
+KNOWN_ARTIFACTS = {"server.log", "screenshots", "world-diff", "pcap", "trace"}
 
 _FLOW_STEP = re.compile(r"^(?P<lead>\s*-\s+[\w-]+:\s+)(?P<value>[\w-]+\s+\{.*\})\s*(?P<comment>#.*)?$")
 
@@ -78,6 +78,31 @@ class Step(BaseModel):
         return f"server: {self.action}"
 
 
+class ParityCut(BaseModel):
+    """Where each record's consequences start to count (ADR-031): the first
+    mark of `kind` in that record's own watch (hit: the actor's first hit dealt,
+    the target's first hit taken; cast: the first cast; event:<name>: the first
+    event so named), less lead_ms so the windup before it counts too. A marker,
+    never a fixed time: the AI's and the relay's timing vary run to run."""
+    kind: str = "hit"
+    lead_ms: float = 700.0
+
+
+class ParitySpec(BaseModel):
+    """A parity scenario's block (ADR-031): the action's reference traces
+    (lab/references/<action>-a.json, the player acting on a placed NPC, and
+    -b.json, the NPC acting on the player), which client acts and which is the
+    target, the cut, the consequences a later slice takes (fnmatch globs over
+    "<view>/<channel>/<name>", the Inventory's later rows and nothing else),
+    and tolerances over parity.TOLERANCES."""
+    action: str
+    actor: str
+    target: str
+    cut: ParityCut = Field(default_factory=ParityCut)
+    later: list[str] = Field(default_factory=list)
+    tolerances: dict[str, float] = Field(default_factory=dict)
+
+
 class Scenario(BaseModel):
     id: str
     milestone: str | None = None
@@ -95,6 +120,7 @@ class Scenario(BaseModel):
     timeout_s: float = 600
     steps: list[Step] = Field(default_factory=list)
     artifacts: list[str] = Field(default_factory=list)
+    parity: ParitySpec | None = None
 
     @field_validator("id")
     @classmethod
@@ -184,6 +210,21 @@ def load_scenario(text: str) -> Scenario:
     steps = [parse_step(s, clients) for s in data.get("steps", [])]
     artifacts = [str(a) for a in data.get("artifacts", [])]
     server = data.get("server") or {}
+    parity = None
+    if data.get("parity") is not None:
+        block = data["parity"]
+        if not isinstance(block, dict):
+            raise ValueError("parity must be a mapping: {action, actor, target, cut?, later?, tolerances?}")
+        cut = block.get("cut") or {}
+        parity = ParitySpec(action=str(block["action"]), actor=str(block["actor"]), target=str(block["target"]),
+                            cut=ParityCut(**cut) if isinstance(cut, dict) else ParityCut(),
+                            later=[str(x) for x in block.get("later") or []],
+                            tolerances={str(k): float(v) for k, v in (block.get("tolerances") or {}).items()})
+        for who in (parity.actor, parity.target):
+            if who not in clients:
+                raise ValueError(f"parity names {who!r}, which is not one of the scenario's clients")
+        if parity.actor == parity.target:
+            raise ValueError("parity's actor and target must be two clients")
     return Scenario(
         id=str(data["id"]),
         milestone=(str(data["milestone"]) if data.get("milestone") is not None else None),
@@ -194,4 +235,5 @@ def load_scenario(text: str) -> Scenario:
         timeout_s=float(data.get("timeout_s", 600)),
         steps=steps,
         artifacts=artifacts,
+        parity=parity,
     )

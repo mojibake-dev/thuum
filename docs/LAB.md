@@ -508,7 +508,12 @@ graph took or was sent there, and `ever('IsStaggering')`, whether a graph
 bool the watch sampled was ever true),
 `c.watched_self()` (the player's own side of that watch: `saw(name)`, how
 many of its own animation events had that name, and `ever(name)` for its
-graph bools),
+graph bools), `parity.findings`, `parity.ok` and `parity.report` (ADR-031, in
+a scenario with a `parity:` block naming the action, the actor and the
+target: the run's four views, the actor's own record and the target's figure
+from the actor's watch, the target's own record and the actor's figure from
+the target's watch, each cut at its own mark, against the action's reference
+traces under lab/references; the report also lands in the step's readings),
 `c.marker(<form id>)` (the client's last `markers {ids: [...]}` step: the
 map marker's `visible` and `canTravel` on that player's own map),
 `c.known(<form id>)` (the client's last `known {ids: [...]}` step: the
@@ -572,6 +577,8 @@ Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/
 (copies of the server's `world/` directory, the `file` database driver;
 there is no sqlite), world-diff, lab.pcap, frida/*.jsonl, result.json.
+Also trace-<client>.json when the scenario lists `trace`: each client's last
+watch-stop whole (ADR-031's recorder), what a reference is made from.
 Also server-before.log: what the server logged between the previous run's
 end and this run's start, kept before the run replaces the world (a
 playtest's log lived only in the container until 2026-10-13, and the next

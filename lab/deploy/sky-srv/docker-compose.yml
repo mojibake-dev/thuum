@@ -95,6 +95,7 @@ services:
       # id (the merge gate, `just sweep`); the nightly sweep starts at 03:30 PDT
       # once the lab has been idle half an hour (ADR-030)
       SCENARIOS_DIR: /srv/lab/thuum/lab/scenarios
+      REFERENCES_DIR: /srv/lab/thuum/lab/references   # ADR-031's reference traces, deployed with the tree
       NIGHTLY_SWEEP_UTC: "10:30"
       NIGHTLY_QUIET_S: "1800"
       # the lab's tables from the deployed tree, like the Frida scripts: a

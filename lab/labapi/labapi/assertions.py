@@ -46,9 +46,13 @@ the lab can grep (E_ASSERT_*).
 from __future__ import annotations
 
 import ast
+import json
 import operator
 from dataclasses import dataclass
 from typing import Any, Protocol
+from pathlib import Path
+
+from . import parity as _parity
 
 
 class AssertionSyntax(Exception):
@@ -436,6 +440,132 @@ class _ServerRef:
         return EffectsView(tuple(e for e in entries if isinstance(e, dict)), self._f.base_id)
 
 
+def load_references(directory: str | Path, action: str) -> dict[str, tuple[dict | None, float]]:
+    """The action's reference views from lab/references/<action>-a.json (the
+    player acting on a placed NPC) and -b.json (the NPC acting on the player),
+    each `{"at": <ms of the action in that trace>, "npc": <form id, optional>,
+    "trace": <a watch-stop result>}`; a file not there leaves its views out
+    (parity.reference_views), so a half-taken reference still compares."""
+    directory = Path(directory)
+    parts: dict[str, tuple] = {}
+    for role in ("a", "b"):
+        path = directory / f"{action}-{role}.json"
+        if not path.is_file():
+            parts[role] = (None, None, 0.0)
+            continue
+        try:
+            d = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            raise AssertionData(f"reference {path.name} is unreadable: {e}") from e
+        trace = d.get("trace") if isinstance(d.get("trace"), dict) else d
+        actors = trace.get("actors") or []
+        npc = None
+        if d.get("npc") is not None:
+            npc = next((x for x in actors if str(x.get("formId")) == str(d["npc"])), None)
+        if npc is None and actors:
+            npc = actors[0]
+        parts[role] = (trace.get("self"), npc, float(d.get("at", 0.0)))
+    a_self, a_npc, a_at = parts["a"]
+    b_self, b_npc, b_at = parts["b"]
+    return _parity.reference_views(a_self, a_npc, a_at, b_self, b_npc, b_at)
+
+
+class _ParityRef:
+    """`parity` in an expression (ADR-031): the run's four views, the actor's
+    own record and the target's figure from the actor's watch, the target's
+    own record and the actor's figure from the target's watch (figures matched
+    to the server's positions as watched() does), each cut at its own mark,
+    against the action's reference views; `parity.findings` is how many
+    consequences are missing or extra outside the later list, `parity.ok`
+    whether that is none, and `parity.report` every finding's detail, which
+    also lands in the step's readings so a red is readable without the traces."""
+
+    ROLE_OF = {"actor-own": "actor", "actor-figure": "actor", "target-own": "target", "target-figure": "target"}
+
+    def __init__(self, spec: Any, views: ViewsFacade, server: ServerFacade, references_dir: str | Path, readings: dict[str, Any]):
+        self._spec = spec
+        self._views = views
+        self._server = server
+        self._dir = references_dir
+        self._readings = readings
+        self._result: list | None = None
+        self._compared: list[str] = []
+
+    def _mark(self, view: str, record: dict | None) -> float:
+        """The cut for a record: the first mark of the spec's kind, less the lead."""
+        cut = self._spec.cut
+        kind = str(cut.kind)
+        if not record:
+            raise AssertionData(f"parity: {view} has no record to cut")
+        rows: list = []
+        if kind == "hit":
+            rows = record.get("hits" if self.ROLE_OF[view] == "actor" else "taken") or []
+        elif kind == "cast":
+            rows = record.get("casts") or []
+        elif kind.startswith("event:"):
+            name = kind.split(":", 1)[1].lower()
+            rows = [e for e in record.get("events") or [] if str(e[1]).lower() == name]
+        else:
+            raise AssertionSyntax(f"E_ASSERT_SYNTAX: parity cut kind {kind!r} is not hit, cast or event:<name>")
+        if not rows:
+            raise AssertionData(f"parity: {view} shows no {kind} to cut at")
+        return max(0.0, float(rows[0][0]) - float(cut.lead_ms))
+
+    def _watch(self, client: str) -> dict[str, Any]:
+        fn = getattr(self._views, "watch", None)
+        data = fn(client) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"parity: {client} has not reported a watch-stop yet")
+        return data
+
+    def _views_of_run(self) -> dict[str, tuple[dict | None, float]]:
+        spec = self._spec
+        actor_watch, target_watch = self._watch(spec.actor), self._watch(spec.target)
+        actor_ref, target_ref = _ClientRef(spec.actor, self._views, self._server), _ClientRef(spec.target, self._views, self._server)
+        target_figure, _ = actor_ref._nearest(spec.target, actor_watch.get("actors") or [], lambda x: x["first"])
+        actor_figure, _ = target_ref._nearest(spec.actor, target_watch.get("actors") or [], lambda x: x["first"])
+        records = {
+            "actor-own": actor_watch.get("self"),
+            "target-figure": target_figure,
+            "target-own": target_watch.get("self"),
+            "actor-figure": actor_figure,
+        }
+        for view, rec in records.items():
+            if rec is None:
+                raise AssertionData(f"parity: no record for {view} ({'the figure was not where the server has its player' if view.endswith('figure') else 'the watch has no self'})")
+        return {view: (rec, self._mark(view, rec)) for view, rec in records.items()}
+
+    def _compute(self) -> list:
+        if self._result is None:
+            refs = load_references(self._dir, self._spec.action)
+            if not refs:
+                raise AssertionData(f"parity: no reference traces for {self._spec.action!r} under {self._dir}")
+            # a reference's `at` is its action's mark; the same lead as the run's
+            # cut, so the windup before the mark counts on both sides alike
+            lead = float(self._spec.cut.lead_ms)
+            refs = {view: (rec, max(0.0, float(at) - lead)) for view, (rec, at) in refs.items()}
+            views = self._views_of_run()
+            self._compared = [v for v in _parity.VIEWS if v in refs and v in views]
+            self._result = _parity.diff(views, refs, self._spec.later, self._spec.tolerances or None)
+            self._readings["parity"] = self.report
+        return self._result
+
+    @property
+    def findings(self) -> int:
+        return len(self._compute())
+
+    @property
+    def ok(self) -> bool:
+        return len(self._compute()) == 0
+
+    @property
+    def report(self) -> str:
+        found = self._compute()
+        if not found:
+            return f"parity: no findings ({len(self._compared)} views compared: {', '.join(self._compared)})"
+        return "; ".join(f.detail() for f in found)
+
+
 class _ClientRef:
     """A scenario client in an expression. `sees` and `view` come from the
     client's latest dump-state: either a `sees` map the driver built itself,
@@ -786,6 +916,7 @@ class _ClientRef:
 
 
 _ATTRS = {
+    _ParityRef: {"findings", "ok", "report"},
     ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex",
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
                 "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
@@ -827,7 +958,7 @@ _BIN = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, as
 
 
 class Evaluator:
-    def __init__(self, server: ServerFacade, views: ViewsFacade, clients: list[str]):
+    def __init__(self, server: ServerFacade, views: ViewsFacade, clients: list[str], parity: Any = None, references_dir: str | Path | None = None):
         self._names: dict[str, Any] = {"server": _ServerRef(server), "true": True, "false": False, "True": True, "False": False}
         self._server_facade = server
         for c in clients:
@@ -835,6 +966,9 @@ class Evaluator:
         # Every scalar an expression read, by its source text: the numbers
         # behind a verdict, which a reviewer reads in the step's note.
         self.readings: dict[str, Any] = {}
+        # `parity` (ADR-031), only in a scenario with a parity block
+        if parity is not None:
+            self._names["parity"] = _ParityRef(parity, views, server, references_dir or "lab/references", self.readings)
 
     def _read(self, node: ast.AST, value: Any) -> Any:
         if isinstance(value, float):

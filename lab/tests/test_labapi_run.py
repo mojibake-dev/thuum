@@ -220,6 +220,30 @@ artifacts: []
         self.assertTrue(any(s["action"] == "dump-state" and s["ok"] for s in body["steps"]), "the driver's own steps run")
         self.assertEqual(self.client.get("/lab/game", params={"client": "c1"}).json()["solo"], False, "after the run, the multiplayer game again")
 
+    def test_the_trace_artifact_keeps_each_clients_last_watch(self):
+        """ADR-031: `trace` among a scenario's artifacts writes trace-<client>.json,
+        the client's last watch-stop whole, what a reference is made from and what
+        the parity assertion read."""
+        run_id, body = self._run("""
+id: t2-trace
+clients: [c1, c2]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: watch-start
+  - wait: 1
+  - c1: watch-stop
+artifacts: [trace]
+""")
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        run_dir = self.tmp / "results" / run_id
+        self.assertTrue((run_dir / "trace-c1.json").is_file(), "c1 reported a watch-stop")
+        self.assertFalse((run_dir / "trace-c2.json").exists(), "c2 never watched")
+        self.assertIn("trace-c1.json", body["artifacts"])
+        self.assertFalse(any("unknown artifact" in n for n in body["notes"]), body["notes"])
+
     def test_green_run_end_to_end(self):
         run_id, body = self._run(GREEN)
         self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))

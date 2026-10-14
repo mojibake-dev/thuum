@@ -758,7 +758,7 @@ class Runner:
             for qs in results:
                 if not qs.ok:
                     return [], "", qs.client
-        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario))
+        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), parity=rec.scenario.parity, references_dir=self.s.references_dir)
         failed: list[dict[str, Any]] = []
         for expr in exprs:
             try:
@@ -956,10 +956,20 @@ class Runner:
                 await self._client_log(rec, client, name)
         if "screenshots" in wanted and (rec.dir / "screenshots").is_dir():
             rec.artifacts.append("screenshots")
+        if "trace" in wanted:
+            # each client's last watch-stop, whole (ADR-031's recorder): what the
+            # parity assertion read, and what a reference is made from
+            # (lab/references/<action>-<role>.json, committed by hand, reviewed)
+            for client in rec.scenario.clients:
+                data = self.board.watch(client)
+                if isinstance(data, dict):
+                    name = f"trace-{client}.json"
+                    (rec.dir / name).write_text(json.dumps(data, indent=1, sort_keys=True))
+                    rec.artifacts.append(name)
         for client, script in dict.fromkeys(self.frida_started):
             await self._frida_trace(rec, client, script)
         self.frida_started.clear()
-        unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap") and not n.endswith(".log")]
+        unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap", "trace") and not n.endswith(".log")]
         for n in unknown:
             rec.notes.append(f"unknown artifact {n!r} ignored")
 
