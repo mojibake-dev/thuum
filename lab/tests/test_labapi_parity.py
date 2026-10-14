@@ -121,13 +121,22 @@ class DiffTest(unittest.TestCase):
         ])
 
     def test_the_reference_views(self):
+        # a figure's oracle is the player's own record of the same role
         a_self, a_npc, b_self, b_npc = record(name="a"), record(name="a-npc"), record(name="b"), record(name="b-npc")
         views = parity.reference_views(a_self, a_npc, 1000, b_self, b_npc, 2000)
         self.assertEqual(views["actor-own"], (a_self, 1000))
-        self.assertEqual(views["target-figure"], (a_npc, 1000))
-        self.assertEqual(views["actor-figure"], (b_npc, 2000))
+        self.assertEqual(views["actor-figure"], (a_self, 1000))
         self.assertEqual(views["target-own"], (b_self, 2000))
-        self.assertEqual(set(parity.reference_views(a_self, a_npc, 1000, None, None, 0)), {"actor-own", "target-figure"})
+        self.assertEqual(views["target-figure"], (b_self, 2000))
+        self.assertEqual(set(parity.reference_views(a_self, a_npc, 1000, None, None, 0)), {"actor-own", "actor-figure"})
+        npc = parity.reference_views(a_self, a_npc, 1000, b_self, b_npc, 2000, npc=True)
+        self.assertEqual(npc["target-figure"], (a_npc, 1000))
+        self.assertEqual(npc["actor-figure"], (b_npc, 2000))
+
+    def test_a_bool_only_one_watch_named_is_not_compared(self):
+        ref = record(bools={"IsAttacking": [[0, False], [1300, True]], "IsStaggering": [[0, False]]})
+        run = record(bools={"IsStaggering": [[0, False]]})
+        self.assertEqual(parity.diff(self.views(actor_own=run), self.views(actor_own=ref)), [])
 
     def test_each_record_is_cut_at_its_own_action(self):
         # the multiplayer action came 600 ms later in its watch than in the reference

@@ -16,9 +16,15 @@ An action between two players is seen four ways, each a view:
 The references fill the same four keys from two solo runs, and nothing else
 is compared (reference_views builds the mapping):
 - reference A, the player acting on a placed NPC: actor-own from its player
-  (self), target-figure from its NPC record;
-- reference B, the NPC acting on the player: actor-figure from its NPC
-  record, target-own from its player (self).
+  (self), and actor-figure from that same player record;
+- reference B, the NPC acting on the player: target-own from its player
+  (self), and target-figure from that same player record.
+A figure stands for a player, so the oracle for a figure is what the engine
+does to that player in its own game, not what it does to an NPC: the first
+references (r-melee-power-a 20261014-065429) showed a placed NPC answering a
+power attack with its AI (a line, a drawn weapon, a counterattack) where a
+player has no AI at all. The NPC records stay in the trace (npc=True maps
+them instead, for what the engine shows of another actor).
 With a third client, a bystander's two figures would be two more views.
 
 Each record is cut at its action's moment (`at`, ms from the watch's start):
@@ -241,17 +247,21 @@ def matches_later(path: str, later: Iterable[str]) -> bool:
 
 
 def reference_views(a_self: dict | None, a_npc: dict | None, a_at: float,
-                    b_self: dict | None, b_npc: dict | None, b_at: float) -> dict[str, tuple[dict | None, float]]:
+                    b_self: dict | None, b_npc: dict | None, b_at: float,
+                    npc: bool = False) -> dict[str, tuple[dict | None, float]]:
     """The four reference views from the two solo runs (the module's
     docstring): A, the player acting on a placed NPC; B, the NPC acting on
-    the player. A run not taken yet is passed as None and its views left out."""
+    the player. A figure's oracle is the player's own record of the same
+    role (A's for the actor's figure, B's for the target's); with npc=True
+    the NPC records stand in for the figures instead. A run not taken yet is
+    passed as None and its views left out."""
     views: dict[str, tuple[dict | None, float]] = {}
     if a_self is not None or a_npc is not None:
         views["actor-own"] = (a_self, a_at)
-        views["target-figure"] = (a_npc, a_at)
+        views["actor-figure" if not npc else "target-figure"] = (a_self if not npc else a_npc, a_at)
     if b_self is not None or b_npc is not None:
-        views["actor-figure"] = (b_npc, b_at)
         views["target-own"] = (b_self, b_at)
+        views["target-figure" if not npc else "actor-figure"] = (b_self if not npc else b_npc, b_at)
     return views
 
 
@@ -277,6 +287,11 @@ def diff(views: dict[str, tuple[dict | None, float]],
         run_record, run_at = views[view]
         ref = consequences(ref_record, ref_at, tolerances)
         run = consequences(run_record, run_at, tolerances)
+        # the bools watch-start named: only those both watches sampled
+        named = set(((ref_record or {}).get("bools") or {}).keys()) & set(((run_record or {}).get("bools") or {}).keys())
+        for side in (ref, run):
+            for key in [k for k in side if k.startswith("bools/") and k[6:].split("=", 1)[0] not in named]:
+                del side[key]
         for key in ref.keys() - run.keys():
             f = Finding(view, "missing", key, ref[key], _observed(run_record, run_at, key))
             if not matches_later(f.path, later):
