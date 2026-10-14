@@ -1428,10 +1428,15 @@ function run(step: Step, player: Actor): unknown {
       return "ok";
     }
     case "cast": {
+      // Papyrus Spell.Cast: the spell's effects on the target at once, with
+      // no casting animation. With {other: true} the nearest other actor
+      // casts it, at the player unless {targetId} names another: a solo
+      // reference's NPC acting on the player (ADR-031, reference B)
       const spell = Spell.from(Game.getFormEx(num(a.spellId)));
       if (!spell) return { error: "no such spell" };
-      const target = form(a.targetId);
-      spell.cast(player, target);
+      const caster = a.other ? nearestOther(player) : player;
+      const target = a.other && a.targetId === undefined ? player : form(a.targetId);
+      spell.cast(caster, target);
       return "dispatched";
     }
     case "activate": {
@@ -1440,7 +1445,9 @@ function run(step: Step, player: Actor): unknown {
       return ref.activate(player, false);
     }
     case "draw-weapon":
-      player.drawWeapon();
+      // the player's, or with {other: true} the nearest other actor's (a
+      // solo reference's NPC)
+      (a.other ? nearestOther(player) : player).drawWeapon();
       return "drawn";
     case "anim-event": {
       // One animation event on the player's behavior graph (Papyrus
@@ -1450,9 +1457,11 @@ function run(step: Step, player: Actor): unknown {
       // (ghidra/notes/melee-reach-1-7-104.md). Names as skymp5-server's
       // AnimationSystem.cpp keys them from real clients. UNCONFIRMED: a sent
       // attackStart lands a hit.
+      // With {other: true}, on the nearest other actor's graph instead: a
+      // solo reference's NPC swinging at the player (ADR-031, reference B)
       const name = typeof a.name === "string" ? a.name : "";
       if (!name) return { error: "no event name" };
-      Debug.sendAnimationEvent(player, name);
+      Debug.sendAnimationEvent(a.other ? nearestOther(player) : player, name);
       return "sent";
     }
     case "voice": {
