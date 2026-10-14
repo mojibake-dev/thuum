@@ -141,9 +141,19 @@ class ParityAssertion(unittest.TestCase):
         from labapi.assertions import AssertionData
 
         w = run_watches()
-        w["c1"]["actors"][0]["first"] = [5000, 0, 0]  # c2's figure nowhere near where the server has c2
+        # c2's figure neither began nor ended near where the server has c2
+        w["c1"]["actors"][0]["first"] = [5000, 0, 0]
+        w["c1"]["actors"][0]["last"] = [5000, 0, 0]
         with self.assertRaises(AssertionData):
             self.evaluator(w).evaluate("parity.ok")
+
+    def test_a_figure_the_server_moved_is_matched_where_it_ended(self):
+        """thuum docs/verbs/push.md: a throw carries the server's record of
+        the thrown player about 1100 units from where the watch began; its
+        figure on the other screen ended there too."""
+        w = run_watches()
+        w["c1"]["actors"][0]["first"] = [100, 1100, 0]
+        self.assertTrue(self.evaluator(w).evaluate("parity.ok"))
 
     def test_the_cut_can_be_an_event(self):
         from labapi.scenario import ParityCut, ParitySpec

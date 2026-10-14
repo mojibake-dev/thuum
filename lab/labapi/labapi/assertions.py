@@ -522,8 +522,8 @@ class _ParityRef:
         spec = self._spec
         actor_watch, target_watch = self._watch(spec.actor), self._watch(spec.target)
         actor_ref, target_ref = _ClientRef(spec.actor, self._views, self._server), _ClientRef(spec.target, self._views, self._server)
-        target_figure, _ = actor_ref._nearest(spec.target, actor_watch.get("actors") or [], lambda x: x["first"])
-        actor_figure, _ = target_ref._nearest(spec.actor, target_watch.get("actors") or [], lambda x: x["first"])
+        target_figure, _ = actor_ref._watched_figure(spec.target, actor_watch.get("actors") or [])
+        actor_figure, _ = target_ref._watched_figure(spec.actor, target_watch.get("actors") or [])
         records = {
             "actor-own": actor_watch.get("self"),
             "target-figure": target_figure,
@@ -600,6 +600,16 @@ class _ClientRef:
             return sees.get(other), (0.0, 0.0, 0.0)
         return self._nearest(other, dump.get("near") or [], lambda n: n["pos"])
 
+    def _watched_figure(self, other: str, actors: list[Any]) -> tuple[dict[str, Any] | None, tuple[float, float, float]]:
+        """The watched actor that began where the server has `other`, else the
+        one that ended there (a move the server took, such as a throw, carries
+        its record away from where the watch began): watched() and parity's
+        figure views find a figure the same way."""
+        best, origin = self._nearest(other, actors, lambda a: a["first"])
+        if best is None:
+            best, origin = self._nearest(other, actors, lambda a: a["last"])
+        return best, origin
+
     def _nearest(self, other: str, entries: list[Any], pos_of: Any) -> tuple[dict[str, Any] | None, tuple[float, float, float]]:
         """The entry whose position (pos_of) is nearest where the server has
         `other`, within SEE_RADIUS, and the origin the server's coordinates
@@ -639,10 +649,7 @@ class _ClientRef:
         data = fn(self.name) if fn else None
         if not isinstance(data, dict):
             raise AssertionData(f"{self.name} has not reported a watch-stop yet")
-        actors = data.get("actors") or []
-        best, origin = self._nearest(other, actors, lambda a: a["first"])
-        if best is None:
-            best, origin = self._nearest(other, actors, lambda a: a["last"])
+        best, origin = self._watched_figure(other, data.get("actors") or [])
         if best is None:
             raise AssertionData(f"{self.name} watched no actor where the server has {other}")
         try:
