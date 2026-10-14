@@ -3,7 +3,7 @@
 # and those of the verbs the branch touched), and `watch`: the scenarios with an
 # open ADR-027 watch item, each named with the verb doc that holds the item; take
 # one out in the commit that closes its item. The full sweep is the nightly's.
-always: [smoke-two-players, a-restart-persistence]
+always: [smoke-two-players, a-restart-persistence, b-duel]   # M0's floor, M1's exit, M2's exit (server-authoritative damage between two players, 2026-10-14)
 watch:
   - a-melee-reach      # docs/verbs/melee-reach.md:141, red once in the m2-god sweep (2026-10-10)
   - a-racemenu         # docs/verbs/racemenu-sync.md:746, a figure's head scale after a reconnect (2026-10-09)
