@@ -45,10 +45,26 @@ else
 fi
 
 echo "== 3. the gate $(date +%H:%M:%S)"
+# lab/gate.yaml is two lists, `always: [a, b]` and `watch:` with one `- name` a
+# line (comments allowed); read with the standard library alone, since the Mac's
+# python3 has no PyYAML (the first live run stopped here, 2026-10-13 17:19)
 gate=$(python3 - lab/gate.yaml "$@" <<'PY'
-import sys, yaml
-g = yaml.safe_load(open(sys.argv[1]))
-order = list(g.get("always", [])) + list(sys.argv[2:]) + list(g.get("watch", []))
+import re, sys
+lists, cur = {}, None
+for raw in open(sys.argv[1], encoding="utf-8"):
+    line = raw.split("#", 1)[0].rstrip()
+    if not line.strip():
+        continue
+    m = re.match(r"^(\w+):\s*(.*)$", line)
+    if m:
+        cur = m.group(1)
+        inline = m.group(2).strip()
+        lists[cur] = [x.strip().strip("'\"") for x in inline.strip("[]").split(",") if x.strip()] if inline.startswith("[") else []
+        continue
+    m = re.match(r"^\s*-\s*(\S+)", line)
+    if m and cur:
+        lists[cur].append(m.group(1).strip("'\""))
+order = lists.get("always", []) + list(sys.argv[2:]) + lists.get("watch", [])
 print(" ".join(dict.fromkeys(order)))
 PY
 )
