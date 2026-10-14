@@ -759,3 +759,26 @@ health message. A second red within two sweeps makes it a bug.
   If a delayed start lands, the fix is the relay's: the observer applies
   the caster's variables and plays the start a frame later, with no new
   native. If not, the engine's CastSpell above.
+- Measured (2026-10-14, after playtest seventeen; the driver's anim-event
+  with a delay, main a69c74e):
+  - x-recorder-firebolt (20261014-182630): c1's own graph took every
+    Firebolt event (start, ready, release), and c1's figure on c2's screen
+    refused every one, on both casts. Its ready and release came with the
+    relayed casting variables already on the figure; its start had come
+    350 ms ahead of them. So Firebolt's look on the other screen is the
+    variables' pose and the bolt, not the relayed events.
+  - x-figure-cast2 (20261014-183340): bWantCastRight set alone on the
+    figure held its graph at iState 10 for one frame; starts sent 16 to
+    266 ms after it were all refused.
+  - x-figure-cast3 (20261014-182649): c1 really cast Flames. The relayed
+    start reached the figure at 1189 ms and was refused; the relayed
+    variables came at 1482 (IsCastingRight 1, NotCasting 0, iState 10,
+    held for the cast); a start c2's driver sent at 2073 was TAKEN.
+    MEASURED: the figure's graph takes a hand's spell start while it holds
+    the caster's casting state; the relay delivered the start first.
+- Fix on fork m2-hands (21f8e49d, 4f74c3e1): the observer's view holds a
+  hand's spell start (MRh_/MLh_/DualMagic_ ...Spell...Start), and the events
+  behind it, until the figure has been casting with that hand
+  (IsCastingRight or IsCastingLeft) since an earlier frame, at most a
+  second; the queue keeps 32 events. The probes on its staging:
+  x-recorder-flames, x-recorder-firebolt, b-spell.
