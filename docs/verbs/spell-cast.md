@@ -713,3 +713,27 @@ health message. A second red within two sweeps makes it a bug.
   and what it hands the graph), so the relayed cast can start the figure's
   caster the engine's way. Off playtest seventeen. The queue stays: no
   relayed event is lost any more.
+- Read (2026-10-14, the re-analyst on sky-re, static; HYPOTHESIS until the
+  probe): the engine's caster never sends the start by name. MagicCaster
+  CastSpell (34401, the entry the player's input and the combat AI share)
+  sets the spell and calls RequestCastImpl (34136), which sets
+  bWantCastRight (37950) and returns. The graph answers the variable with a
+  response event that the actor's Responses map (Meshes/Responses/
+  ActorResponse.txt) routes to RightHandSpellCastHandler (42820). That
+  handler moves the caster to StartChargeImpl (34137), which performs the
+  default action kActionRightAttack (SourceActionMap::DoAction, 34202,
+  CommonLibSSE-NG src/RE/S/SourceActionMap.cpp:27-31). The action's idle
+  tree picks the IDLE whose ENAM is MRh_SpellAimedConcentrationStart and
+  notifies the graph through the same vfunc Papyrus uses. So the scripted
+  start failed for its timing, not its path: sent in the tick that set the
+  variable, it reached the graph before the graph had answered.
+  castSpellImmediate (34404) fires the spell and starts none of this.
+  The figure's way to the motion is the engine's own entry: CastSpell on
+  the figure's right caster, after InterruptCast and SetSkipCheckCast
+  (ActorMagicCaster.h:33's kSkipCheckCast; it also stops the magicka
+  drain). The relay sends that or castSpellImmediate, never both. A full
+  local cast applies its effects in the observer's game; on the player
+  the AddTarget refusal (fork m2-push 4e8aa04c) keeps the numbers the
+  server's. The probe is x-figure-cast with that call through a Skyrim
+  Platform native, with a Frida trace on 34401, 37950, the response
+  dispatch (38447), 34202 and the notify (38048).
