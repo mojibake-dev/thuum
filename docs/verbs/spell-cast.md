@@ -737,3 +737,25 @@ health message. A second red within two sweeps makes it a bug.
   server's. The probe is x-figure-cast with that call through a Skyrim
   Platform native, with a Frida trace on 34401, 37950, the response
   dispatch (38447), 34202 and the notify (38048).
+- Correction (2026-10-14, Eli: "the cast for firebolt seems to do ok on
+  that at least some of the time"): the reading above, that no graph takes
+  a scripted start and the relay cannot give the pose, overreached. What
+  the runs show is narrower: a start sent with no casting variables, or in
+  the same tick as bWantCastRight, is refused (x-recorder-flames twice,
+  x-figure-cast, x-cast-solo). This doc already held the counter-evidence:
+  x-dual-cast2 (20261013-072430) had the figure take the left hand's
+  concentration events, and playtest fifteen saw Firebolt's wind-up on the
+  figure. HYPOTHESIS, consistent with the static read above: the start
+  lands only after the figure's graph has taken the caster's want-cast
+  variable on an earlier frame. Firebolt's charge spreads its events over
+  about 1.5 s (x-spell-observe: start at 250 ms, ready at 766, release at
+  1739), so the variables the caster sends every 500 ms often reach the
+  figure between them. Flames sends its start and release in one frame,
+  with its variables 162 ms behind, so its start lands early almost every
+  time. The probes, after playtest seventeen (which counts both for Eli):
+  the start sent one to ten frames after the variable is set on the figure
+  (the driver's anim-event with a delay), and Firebolt on the recorder
+  (which of its events the figure takes, and where the variables fell).
+  If a delayed start lands, the fix is the relay's: the observer applies
+  the caster's variables and plays the start a frame later, with no new
+  native. If not, the engine's CastSpell above.
