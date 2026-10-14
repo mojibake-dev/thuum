@@ -480,9 +480,26 @@ function trackVars(id: number, w: Watched, ms: number): void {
       seen.push([ms, float ? Math.round(value * 1000) / 1000 : value]);
     }
   };
-  take(VAR_BOOLS, new Uint8Array(snap.booleans), false);
-  take(VAR_FLOATS, new Float32Array(snap.floats), true);
-  take(VAR_INTS, new Uint32Array(snap.integers), false);
+  take(VAR_BOOLS, bytesOf(snap.booleans), false);
+  const floats = bytesOf(snap.floats);
+  take(VAR_FLOATS, new Float32Array(floats.buffer, 0, floats.length >> 2), true);
+  const ints = bytesOf(snap.integers);
+  take(VAR_INTS, new Uint32Array(ints.buffer, 0, ints.length >> 2), false);
+}
+
+// Skyrim Platform hands each snapshot buffer over as a Uint8Array of its
+// bytes (skyrim-platform JsUtils.h, AddObjProperty: Napi::Uint8Array), though
+// its typing says ArrayBuffer. A float or an int is four of those bytes, so
+// the typed view goes over a copy's buffer, never element by element (the
+// first lab run, x-recorder 20261014-055628, read single bytes as floats)
+function bytesOf(v: unknown): Uint8Array {
+  if (v instanceof Uint8Array) {
+    const copy = new Uint8Array(v.length);
+    copy.set(v);
+    return copy;
+  }
+  if (v instanceof ArrayBuffer) return new Uint8Array(v.slice(0));
+  return new Uint8Array(0);
 }
 
 function watchedMs(): number {
