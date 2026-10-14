@@ -1245,8 +1245,14 @@ function run(step: Step, player: Actor): unknown {
       // every frame from the server's clock (docs/verbs/time.md; run
       // 20261007-134550 read 21.4 back a few seconds after setting 12), so a
       // shot at a given hour is scheduled by the clock's formula instead
-      const g = GlobalVariable.from(Game.getFormEx(num(a.form)));
-      if (!g) throw new Error(`no global ${num(a.form).toString(16)}`);
+      // With {file}, form is that plugin's own id (Papyrus Game.GetFormFromFile):
+      // a light plugin's runtime id depends on the load order. The solo
+      // references mark Survival Mode's new-game prompt as asked
+      // (ccQDRSSE001-SurvivalMode.esl, Survival_PlayerHasBeenPrompted 0x8DF;
+      // lab/esm.py), whose message box held a solo game's input
+      // (r-melee-power-a 20261014-063324)
+      const g = GlobalVariable.from(typeof a.file === "string" ? Game.getFormFromFile(num(a.form), a.file) : Game.getFormEx(num(a.form)));
+      if (!g) throw new Error(`no global ${num(a.form).toString(16)}${typeof a.file === "string" ? " in " + a.file : ""}`);
       if (a.value !== undefined) g.setValue(num(a.value));
       return { form: g.getFormID(), value: g.getValue() };
     }
