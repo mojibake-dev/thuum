@@ -80,6 +80,7 @@ if (at === undefined) {
   emit({ error: 'no offsets for this runtime', version: version });
 } else {
   emit({ ready: true, version: version });
+  let applySeen = false;
   Interceptor.attach(exe.base.add(at.sendEvent), {
     onEnter(args) {
       let name;
@@ -90,13 +91,18 @@ if (at === undefined) {
       }
       if (!name || !(name.startsWith('OnEffect') || name === 'OnMagicEffectApply')) return;
       const handle = args[1];
-      emit({
+      const row = {
         event: name,
         handle: handle.toString(),
         hi: hex(handle.shr(32).and(0xffffffff).toUInt32()),
         lo: hex(handle.and(0xffffffff).toUInt32()),
         tid: this.threadId,
-      });
+      };
+      // who asks for an effect's own event (an actor's OnMagicEffectApply is
+      // relayed to every alias, so only its first call is placed)
+      if (name !== 'OnMagicEffectApply' || !applySeen) row.backtrace = where(this.context);
+      if (name === 'OnMagicEffectApply') applySeen = true;
+      emit(row);
     },
   });
   Interceptor.attach(exe.base.add(at.pushActorAway), {
