@@ -1,0 +1,77 @@
+# b-push (M2, docs/verbs/push.md, ADR-031's first verb, 2026-10-14):
+# Unrelenting Force's third word throws its target the way the game throws a
+# player. The vanilla VoicePushEffectScript (MGEF 0x7F82F) calls
+# Caster.PushActorAway(Target, 15) in the target's own game, from the
+# shouter's figure. That needs two things on fork m2-push: 4e8aa04c (the
+# client no longer dispels a figure's spell at its hit, and the player's
+# AddTarget refuses only another actor's Health, Magicka and Stamina value
+# effects) and 2fe894e1 (an event on an effect the player bears passes the
+# Papyrus event block). c1 shouts all three words (Skyrim.esm
+# UnrelentingForceShout 0x13E07, WordFus/Ro/Dah 0x13E22 to 0x13E24) at c2,
+# 150 units south of c1, so c2 is thrown south over flatter ground; thrown
+# north it tumbles about 3800 units down the mountain (x-push2
+# 20261014-152206). The server's positions here are relative to lab-spawn.
+# The engine alone throws a player 1224 units for this push and then gets
+# it up (reference r-shout-uf3-b 20261014-072653: Ragdoll, then
+# GetUpBegin). x-push-south (20261014-152858) threw c2 1131 units, with
+# StaggerPlayer, Ragdoll and GetUpBegin 5 s apart in its own game, and
+# c1's figure of c2 took the relayed Ragdoll and GetUpBegin and ended where
+# c2 landed. Asserted:
+# 1. the server takes the shout, and c2 loses its damage on the server
+#    (10, plus Dragonborn's 40 over 1 s), with c2's own game within 0.02;
+# 2. c2's own game throws c2 and gets it up again (Ragdoll, then
+#    GetUpBegin);
+# 3. the server's record of c2 moved more than 500 units south, away from
+#    c1 (c2's own movement reports carry the throw, R2), where a stagger's
+#    stumble moves under 64 (b-stagger);
+# 4. c1's figure of c2 goes down too (the relayed Ragdoll). How the figure
+#    flies is the verb's later row.
+# Green twice by path (20261014-155052 and -155344, fork m2-push 4e8aa04c's
+# client, lab-api bb9fed0): the server took 0.534 both times with c2's game
+# at 0.540, and the throw carried c2 1237 and 1291 units south.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-push
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.addshout 13e07"}
+  - c1: console {text: "player.teachword 13e22"}
+  - c1: console {text: "player.teachword 13e23"}
+  - c1: console {text: "player.teachword 13e24"}
+  - c1: console {text: "player.unlockword 13e22"}
+  - c1: console {text: "player.unlockword 13e23"}
+  - c1: console {text: "player.unlockword 13e24"}
+  - c1: equip {formId: 0x13e07}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - server.actor(c2).y < -100
+      - server.actor(c2).y > -200
+  - c1: watch-start {bools: [IsStaggering]}
+  - c2: watch-start {bools: [IsStaggering]}
+  - wait: 1
+  - c1: hold-key {code: 44, ms: 2000}
+  - wait: 12
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.9
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+      - c2.watched_self().saw("Ragdoll") >= 1
+      - c2.watched_self().saw("GetUpBegin") >= 1
+      - server.actor(c2).y < -650
+      - c1.watched(c2).took("Ragdoll") >= 1
+artifacts: [server.log, c1.log, c2.log, screenshots]
