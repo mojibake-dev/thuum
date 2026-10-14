@@ -1528,6 +1528,16 @@ function run(step: Step, player: Actor): unknown {
         if (typeof v === "boolean") target.setAnimationVariableBool(k, v);
         else if (typeof v === "number") target.setAnimationVariableFloat(k, v);
       }
+      // {delayMs} sends the event that long after the variables: the
+      // engine's caster sets bWantCastRight and sends the start only after
+      // the graph has answered it on a later frame (the re-analyst's read,
+      // HYPOTHESIS), and a start sent in the same tick was refused
+      // (x-figure-cast 20261014-142425)
+      const delayMs = typeof a.delayMs === "number" && a.delayMs > 0 ? a.delayMs : 0;
+      if (delayMs > 0) {
+        Utility.wait(delayMs / 1000).then(() => Debug.sendAnimationEvent(target, name));
+        return { sent: name, to: target.getFormID(), set: Object.keys(set), afterMs: delayMs };
+      }
       Debug.sendAnimationEvent(target, name);
       return { sent: name, to: target.getFormID(), set: Object.keys(set) };
     }
