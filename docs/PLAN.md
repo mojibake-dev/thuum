@@ -214,7 +214,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   lab's setup); m2-push 2026-10-14 (4e8aa04c: an effect the player bears runs its
   script, a figure plays every relayed animation event in order, and a
   figure's spell on the player runs there except its Health, Magicka and
-  Stamina numbers, which are the server's).
+  Stamina numbers, which are the server's); m2-hands 2026-10-14 (4f74c3e1: a
+  figure's hand spell start is held until the figure holds its caster's
+  casting state, so a concentration cast's grab and push shows on other
+  screens; b-spell b04f625 checks it).
 - Playtest sixteen (2026-10-13, parity 8eb4e78e): self-cast, Unrelenting
   Force in both states and the restart of a running effect passed. Found:
   a god-mode shout's second breath shows no fire on the other screen (the

@@ -801,3 +801,6 @@ health message. A second red within two sweeps makes it a bug.
     delay; x-figure-cast2's 16 ms came a frame late).
   - b-spell green, and green twice by path with the new check that the
     figure takes the start (b04f625: 20261014-193121, -193403).
+- Merged: fork parity fast-forwarded to 4f74c3e1 (2026-10-14; the gate run set merge-m2-hands went 18 of 18 green). The
+  concentration pose is DONE at T3 (b-spell b04f625); the next playtest's
+  Flames item is its T4. Firebolt's own wind-up stays LATER (above).
