@@ -1420,11 +1420,13 @@ function run(step: Step, player: Actor): unknown {
     }
     case "av-read": {
       // the player's actor values by name: {names}; base, current, maximum
-      // and percentage each
+      // and percentage each. With {other: true}, the nearest other actor's in
+      // this game (a figure's Invisibility, thuum docs/verbs/self-cast.md)
       const names = Array.isArray(a.names) ? a.names.map(String) : [];
+      const who = a.other ? nearestOther(player) : player;
       const values: Record<string, ReturnType<typeof readActorValue>> = {};
-      for (const n of names) values[n] = readActorValue(player, n);
-      return { values };
+      for (const n of names) values[n] = readActorValue(who, n);
+      return { values, of: who.getFormID() };
     }
     case "set-av": {
       // The console's setav on the player: an actor value in this client
