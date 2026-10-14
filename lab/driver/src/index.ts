@@ -32,6 +32,7 @@ import {
   getAnimationVariablesFromActor,
   getExtraContainerChanges,
   Input,
+  loadGame,
   NetImmerse,
   ObjectReference,
   Race,
@@ -1618,6 +1619,34 @@ function run(step: Step, player: Actor): unknown {
   }
 }
 
+// A solo game (thuum ADR-031's references: the engine alone, no
+// skymp5-client in the game) starts at the main menu: Skyrim Platform's
+// loadGame builds a save from its template at a place and loads it, as
+// skymp5-client does at a login (its LoadGameService), so no save file is
+// committed. args: {x, y, z, rz} in game units and degrees, from lab-spawn
+// (the server's start point, lab/deploy/sky-srv/server-settings.json:
+// [133857, -61130, 14662] in Tamriel 0x3C) unless {worldOrCell} names
+// another and the coordinates are absolute; {raceId, name} for the player
+// (ChangeFormNpc), else the template's. Run in tick: loadGame is Skyrim
+// Platform's, not Papyrus, so the main menu's context allows it.
+const LAB_SPAWN = { worldOrCell: 0x3c, pos: [133857, -61130, 14662] };
+function soloStart(c: Config, step: Step): void {
+  try {
+    const a = step.args || {};
+    const named = a.worldOrCell === undefined;
+    const origin = named ? LAB_SPAWN.pos : [0, 0, 0];
+    const pos = [origin[0] + num(a.x), origin[1] + num(a.y), origin[2] + num(a.z)];
+    const worldOrCell = named ? LAB_SPAWN.worldOrCell : num(a.worldOrCell);
+    const npc: { raceId?: number; name?: string } = {};
+    if (a.raceId !== undefined) npc.raceId = num(a.raceId);
+    if (typeof a.name === "string") npc.name = a.name;
+    loadGame(pos, [0, 0, num(a.rz)], worldOrCell, Object.keys(npc).length ? npc : undefined);
+    postResult(c, step, { ok: true, data: { loading: pos, worldOrCell } });
+  } catch (e) {
+    postResult(c, step, { ok: false, error: String(e) });
+  }
+}
+
 // Poll and receive in tick: fires in the main menu too, Papyrus forbidden,
 // and this is where HTTP callbacks are delivered.
 on("tick", () => {
@@ -1645,7 +1674,11 @@ on("tick", () => {
       inFlight = false;
       if (r.status === 200 && r.body) {
         const step = JSON.parse(r.body) as Step;
-        if (step && typeof step.id === "string" && typeof step.action === "string") pending = step;
+        if (step && typeof step.id === "string" && typeof step.action === "string") {
+          // a solo game starts from the main menu, where update never fires
+          if (step.action === "solo-start") soloStart(c, step);
+          else pending = step;
+        }
       } else if (r.status !== 204) {
         log("poll failed", r.status, r.error);
       }
