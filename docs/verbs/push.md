@@ -192,10 +192,41 @@ an engine move, so its speed may need its own allowance: to measure).
   later moves to where its player landed (x-push-south: it ended at c2's
   exact spot). The flight itself is not drawn.
 
+## Status
+
+- [x] doc complete, inventory listed with a disposition per row, rung
+      declared (R0 for the hit, R2 for the throw)
+- [x] engine surface cited or delegated: CommonLibSSE-NG file:line, the
+      re-analyst's read on sky-re, each part MEASURED by
+      lab/frida/push-trace.js or read from the records
+- [x] server logic + T0: none new; the shout and its hit are the shouts
+      verb's (b-shout), the damage ADR-028's
+- [x] message + validator (same commit): none; the wire is unchanged
+- [x] native hook + T1: Skyrim Platform's event filter lets an effect the
+      player bears run its script (fork 2fe894e1); the player's AddTarget
+      refuses only another actor's Health, Magicka and Stamina value
+      effects (4e8aa04c). T1 none: both are engine hooks in a running game,
+      proven at T3
+- [x] TS handler: skymp5-client's hit-time dispel of a figure's spell is
+      gone (4e8aa04c)
+- [x] T2 green: the full T2 at the merge (verb-merge m2-push, 2026-10-14)
+- [x] T3 scenario green, no HYPOTHESIS tags: b-push (thuum 5b1e0d2) green
+      twice by path (20261014-155052, -155344) and in the merge's gate
+- [ ] parity scenario green, or its later list reviewed with it (ADR-031):
+      p-shout-uf3 is owed. Its references are r-shout-uf3-a2 and -b2
+      (b2 through the driver's combat-spell, main 14ab558); its later list
+      is the figure's flight (target-figure/physics/jumped)
+- [x] ledger and suppression registry updated: NATIVES.md's
+      SetPotionEffectsBlocked note (the switch now also refuses another
+      actor's H/M/S value effects); the suppression is the AddTarget
+      refusal above, recorded in magic-effects.md, shouts.md and
+      spell-cast.md
+- [x] merged: the gate run set merge-m2-push (20261014-161704) went 20 of 20 green; fork parity fast-forwarded to 4e8aa04c (2026-10-14)
+
 ## Next
 
-1. The merge to parity (numidium's gate, ADR-030), then playtest
-   seventeen's throw.
+1. Playtest seventeen's throw, on parity 4e8aa04c (merged 2026-10-14,
+   the gate 20 of 20 green).
 2. The figure's flight on other screens (the inventory's last row).
    - On the shouter's screen it is ADR-029's A1 test 1, its caster half
      (docs/apocalypse-options.md 3.1: an effect passes when its caster or

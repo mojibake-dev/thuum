@@ -186,7 +186,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    against the server's recovery, the breath relayed as resolved. DONE
    2026-10-11 (3f9e4bc8); b-shout db6ed77. Unrelenting Force's push through
    the server's stagger: DONE 2026-10-13 (8eb4e78e) as a stagger of 1.5, a
-   stumble; the ragdoll throw is LATER (docs/verbs/stagger.md).
+   stumble. The ragdoll throw: DONE 2026-10-14 (4e8aa04c) as the game's own push
+   in the target's game (docs/verbs/push.md, ADR-031's first verb); b-push
+   5b1e0d2. The figure's flight on other screens and the parity scenario
+   p-shout-uf3 are LATER.
 7. Lag compensation (Bernier 2001): only if a playtest shows hits refused
    inside M1's slack. LATER.
 8. cast-teleport (Lost Grimoire's Teleportation, from the stretch list): one
@@ -208,7 +211,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   under ADR-028); m2-fifteen 2026-10-13 (8eb4e78e: a shout reported with
   magic readied or a weapon drawn, the recovery's 400 ms slack, god mode's
   shouts, a shout reported from its own hit, the server's console for the
-  lab's setup).
+  lab's setup); m2-push 2026-10-14 (4e8aa04c: an effect the player bears runs its
+  script, a figure plays every relayed animation event in order, and a
+  figure's spell on the player runs there except its Health, Magicka and
+  Stamina numbers, which are the server's).
 - Playtest sixteen (2026-10-13, parity 8eb4e78e): self-cast, Unrelenting
   Force in both states and the restart of a running effect passed. Found:
   a god-mode shout's second breath shows no fire on the other screen (the
@@ -229,9 +235,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   power attack's stagger on both screens, a block, Flames' stream, Fire
   Breath, each by the server's number with the victim's game within 0.01);
   b-magic-restart green, its playtest check passed in sixteen. The chart's
-  remaining items continue under M2: the push verb (fork m2-push), then
-  Apocalypse and headshots; ADR-031's parity assertion joins b-duel when
-  lab-api has it.
+  remaining items continue under M2: the push verb DONE 2026-10-14 (4e8aa04c),
+  then Apocalypse and headshots; ADR-031's parity assertion is in lab-api
+  (bb9fed0) and joins b-duel with its references.
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 
