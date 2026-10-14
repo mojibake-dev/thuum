@@ -782,3 +782,22 @@ health message. A second red within two sweeps makes it a bug.
   (IsCastingRight or IsCastingLeft) since an earlier frame, at most a
   second; the queue keeps 32 events. The probes on its staging:
   x-recorder-flames, x-recorder-firebolt, b-spell.
+- m2-hands staged (2026-10-14 12:13 to 12:30, 4f74c3e1's client):
+  - x-recorder-flames (20261014-192314): c1's figure on c2's screen took
+    MRh_SpellAimedConcentrationStart and MRh_SpellRelease_Event in one
+    frame (1468 ms, 22 ms after the relayed casting state landed), as the
+    engine alone's caster takes them (r-spell-stream-a: both at 1264). The
+    parity diff no longer lists them; the figure's diff keeps
+    MRh_Equipped_Event (never relayed at the cast's end) and the refused
+    IdleStop.
+  - x-recorder-firebolt (20261014-192536): the figure still refused
+    Firebolt's start, ready and release, the start now held until the
+    casting state was on the figure. A fire-and-forget start wants another
+    moment than a concentration start. In c1's own game the start is taken
+    in the frame the want variable switches, before the casting state is
+    held. Firebolt's look on the figure is unchanged (the variables' pose
+    and the bolt). A finding of its own, LATER: the start sent in the one
+    frame after bWantCastRight alone is set (the driver needs a frame-exact
+    delay; x-figure-cast2's 16 ms came a frame late).
+  - b-spell green, and green twice by path with the new check that the
+    figure takes the start (b04f625: 20261014-193121, -193403).
