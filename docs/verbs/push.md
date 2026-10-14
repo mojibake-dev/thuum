@@ -183,14 +183,25 @@ an engine move, so its speed may need its own allowance: to measure).
 
 1. The merge to parity (numidium's gate, ADR-030), then playtest
    seventeen's throw.
-2. The figure's flight on other screens (the inventory's last row). Two
-   shapes, both to weigh against ADR-029: run the push on the figure in the
-   other games too (the effect lands on the figure there from the
-   shouter's relayed cast; its script is blanked today, as an effect a
-   player does not bear; the shouter's own game is A1's caster half), or
-   carry the push (pusher, target, force) on the wire so every game
-   pushes the figure from the shouter's figure. Either way the movement
-   relay already stands down while the figure is down.
+2. The figure's flight on other screens (the inventory's last row).
+   - On the shouter's screen it is ADR-029's A1 test 1, its caster half
+     (docs/apocalypse-options.md 3.1: an effect passes when its caster or
+     its target is the player; 2fe894e1 built the target half). In the
+     shouter's game the third word lands on the target's figure with the
+     player as caster, so the vanilla script throws the figure there from
+     the shouter's position, the force the target's own game uses. The
+     test reads the effect's caster handle (CommonLibSSE-NG
+     include/RE/A/ActiveEffect.h:93-100). The movement relay already
+     stands down while the figure is down (the relayed Ragdoll sets
+     Variable10, movementApply.ts), and the two simulations land about
+     1100 to 1300 units out, so what is left after the get-up is a short
+     slide. It is PLAN's next A1 step (Apocalypse's filter), on a branch of
+     its own after playtest seventeen.
+   - On a third player's screen neither the caster nor the target is that
+     game's player. That is the bystander case of A1, open in
+     apocalypse-options.md's section 6, or the push on the wire (pusher,
+     target, force), so every game pushes the figure. Decide with
+     Apocalypse's own bystanders.
 3. The server's PlayStagger for the third word (fork 4a4c80e1) beside the
    engine's own stagger, which now plays in the target's game: retire it
    once a trace shows the engine's alone.
