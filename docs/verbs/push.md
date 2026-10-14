@@ -38,8 +38,11 @@ two words' spells carry no push):
 | the screen effect: MAGShoutPush01Imod (IMAD 0x9E586) | record | native in the target's game, from its own effect |
 | the release thunder: VOCShoutFXUnrelentingForceThunderC, B (SNDR 0xA0F54, 0xA0F53) | record | native in the shouter's game and on its figure |
 | the shouter's graph: shoutStart, then MT_ or CombatReady_BreathExhale* (docs/verbs/shouts.md) | trace (shouts' lab runs) | native in the shouter's game, relayed to its figure |
-| the target's ragdoll events (its graph) | trace, to read | after the references |
-| the target's position over the throw | trace, to read | after the references |
+| the target's ragdoll events (its graph): Ragdoll, then GetUpBegin | trace (r-shout-uf3-b 20261014-072653: PushActorAway(player, 15) from a placed NPC, as the script calls it, solo) | native in the target's game once the filter lets the script run (fork m2-push 2fe894e1) |
+| the target's flight: 1224 units, frame steps to 75 | trace (same) | native, the target's own game (its movement reports carry it to the server, R2) |
+| the landing's fall damage (about 4) | trace (same) | native in the target's game: world damage, ADR-028's victim's own |
+| a thrown NPC (reference A, the player's shout at a bandit): staggerStart, then Ragdoll; flung 4000 units; 10 damage; the four effects, Dragonborn's 0x0201FF2B included | trace (r-shout-uf3-a 20261014-071846) | the engine's own throw of an NPC; under parity.py's mapping a figure's oracle is the player's record, so this row shows what the engine does, not the figure's target |
+| the shouter's own graph: shoutStart, MT_BreathExhaleShort, bWantCastVoice 0 to 1 to 0 | trace (r-shout-uf3-a) | native in the shouter's game |
 | the target's figure on the shouter's screen during the throw | trace, to read | later: the movement relay carries a position, not a ragdoll's pose |
 
 ## Authority
@@ -75,6 +78,21 @@ an engine move, so its speed may need its own allowance: to measure).
   (include/RE/A/Actor.h:720-722, which relocates to +0xA0), never with
   ActiveEffect::GetTargetActor: that function's reinterpret_cast
   (src/RE/A/ActiveEffect.cpp:30-37) skips the base's offset.
+
+## Lab (2026-10-14, the references)
+
+- Scripted shouts from an NPC applied nothing to the player in a solo game:
+  Papyrus Spell.Cast of 0x13F3A from it (20261014-071655) and the console's
+  cast (-072145). A Draugr whose spell list carries the shout
+  (EncDraugr05Boss1H 0xDDD5D) only meleed in 20 s (-072419). Its hits did
+  show the player's own stagger event, which is StaggerPlayer, not
+  staggerStart.
+- The push itself, called as the script calls it (the console's
+  pushactoraway from a placed NPC at the player, force 15), threw the
+  player (-072653): the oracle for target-own's throw.
+- The filter's change is fork m2-push 2fe894e1 (built on push); its probe
+  is scratchpad x-push (c1's three words at c2 150 units off), after the
+  nightly sweep.
 
 ## Next
 
