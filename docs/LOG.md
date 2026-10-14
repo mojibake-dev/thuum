@@ -1175,4 +1175,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   PASS (SteamStub Variant 3.1 x64; .text entropy 8.0 in the original, 6.431 unpacked; the
   source and the Steamless zip as pinned), out_sha256
   80c1ea737d33c6bfac09b101b8d77ab0f9f6630128c3ed052f9d945bed54e7e4, 36,950,016 bytes; 711
-  shut down cleanly for core's pull and placement; the import on sky-re follows.
+  shut down cleanly for core's pull and placement. core placed it (06:30: persist/game/
+  SkyrimSE-1.6.1170.0.exe.unpacked.exe with its .log sidecar, SHA256SUMS three lines all OK,
+  verified again by mundus); 711 rolled back to clean-m1-next and started, the hold released
+  at 06:32:57; `just ghidra-import` ran on sky-re 06:32:59 to 06:41 (Analysis succeeded, Save
+  succeeded, the same shape as the 1.7.104 import). The section walk on sky-re: the first
+  .text 8.000 to 6.431 bits/byte, exactly the wrapped 1.7.104's unencrypted .text; the second
+  .text (6,408 bytes, 2.614) never encrypted and unchanged; .bind gone. The Ghidra project now
+  holds SkyrimSE-1.6.1170.0.exe.unpacked.exe: the re-analyst reads 1.6.1170 bodies at their own
+  addresses from here, and the "read on 1.7.104 under shared ids" caveat ends for new notes.
+  B5 done; every item of the process audit's plan is executed.
