@@ -1426,3 +1426,40 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   abe44a55 with x-cast-twice-fast, x-both-hands-relay, x-left-firebolt2 and b-spell, then the gate
   and nineteen again; the Apocalypse retry parked behind it (numidium). Eli's world saved as
   playtest-m2-19-20261015T174737Z. docs/verbs/cast-action.md's T3 box reopened.
+- m2-cast-action merged again, playtest nineteen's fix, to fork parity abe44a55 (2026-10-15T20:05Z, 13:05
+  PDT), through `just verb-merge` from thuum branch cast-action-2's worktree, which then landed on main.
+  Playtest nineteen ("every test only half works"): the figure took every other cast at Eli's rhythm
+  (400 to 700 ms between casts; the lab had never cast twice closer than 4 s), and two hands casting
+  separately streamed from one. The fix, three commits on parity e75ee5c8: one pending cast start per hand
+  (c7d49cc0); the figure's want variable falls with its exit and rises for every start, and the snapshot
+  leaves a figure's casting bits alone (867f0ac8); a refused action is tried again, variables then
+  action, for up to fifteen updates (abe44a55), since the graph may still be finishing its exit (the
+  strafing probe x-cast-twice-move 175846 refused a start with the want rising). Probes on abe44a55, all
+  green: x-cast-twice-fast 184857, x-both-hands-relay 185138, x-left-firebolt2 185440 (castingSource 0 on
+  both launches), b-spell 185722. Under ADR-033 the gate ran the rhythm as scenarios, committed alone on
+  cast-action-2: b-cast-rhythm (eight Flames casts 0.4 s apart, every start, release and exit taken on the
+  figure) and b-cast-both-hands (three starts and exits per hand). The first gate (run set
+  20261015-192503) went red on b-cast-rhythm alone because of the scenario: one assertion read the
+  caster's figure in its own game, c1.watched(c1), which is always 0. thuum-magnus dropped it (5e126a9,
+  for Eli's review: the claim stands on the figure's three checks, since eight starts on c2's figure need
+  eight casts by c1), and that set was stopped with 5 green. The gate again, with T2 skipped since T2 was
+  green on abe44a55 at 12:25: run set 20261015-194205-merge-m2-cast-action, 8 of 8 green (smoke-two-players,
+  a-restart-persistence, b-duel, b-spell, b-cast-rhythm 195257, b-cast-both-hands 195533, a-melee-reach,
+  a-racemenu). Both clones promoted to the abe44a55 client. Also this cycle, ADR-033's tooling on main:
+  the parity diff counts (5ded43ae), `just playtest-record` (b9f9ad31, c2c54bb0). Next: playtest
+  nineteen again, recorded into results/playtest-19-2.
+
+- cast-action's second merge (2026-10-15 13:04 PDT; docs/verbs/cast-action.md, ADR-033). The fixes for
+  nineteen's half on fork m2-cast-action (c7d49cc0 one pending cast start per hand; 867f0ac8 the want
+  variable dropped after an exit and before a start, the snapshot off a figure's casting booleans;
+  abe44a55 a refused action retried up to fifteen updates) staged at 11:49 and probed: x-cast-twice-fast
+  184857 24 of 24 (no retry fired), x-both-hands-relay 185138 (both hands' casts and both streams),
+  x-left-firebolt2 185440 (the left hand kept), b-spell 185722. ADR-033 accepted and written (a verb is
+  proved over its sequences and combinations; a playtest is recorded): numidium landed parity counts
+  (5ded43ae) and `just playtest-record <n>` (b9f9ad31, c2c54bb0) the same hour; the two probes became
+  gate scenarios on thuum branch cast-action-2 (b-cast-rhythm 8107fb8, b-cast-both-hands 95c1630; one
+  assertion of the first dropped, 5e126a9: the caster's own record is watched_self, not watched(c1)).
+  The gate (numidium, verb-merge from cast-action-2): the first set 5 green and 1 red on that
+  assertion, stopped; the rerun 194205, 8 of 8 green (smoke-two-players, a-restart-persistence,
+  b-duel, b-spell, b-cast-rhythm 195257, b-cast-both-hands, a-melee-reach, a-racemenu). Parity to
+  abe44a55 and the thuum landing by numidium's report; nineteen's second session next, recorded.

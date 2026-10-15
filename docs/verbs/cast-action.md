@@ -54,11 +54,11 @@ Tests.
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| Flames again at a person's rhythm (0.8 s held, 0.4 s apart, eight times), one hand, standing | x-cast-twice-fast | 20261015-180119 on e75ee5c8: casts 2, 4 and 6 of 8 refused whole (the half); 184857 on abe44a55: 24 of 24 taken, every start and exit, no retry needed |
+| Flames again at a person's rhythm (0.8 s held, 0.4 s apart, eight times), one hand, standing | b-cast-rhythm (from x-cast-twice-fast) | 20261015-180119 on e75ee5c8: casts 2, 4 and 6 of 8 refused whole (the half); 184857 on abe44a55: 24 of 24 taken, no retry needed; green in the gate (195257) |
 | the same, 1 s held, 0.7 s apart, five times, standing | x-cast-twice-relay, -replay, -both | 174811, 175053, 175554: 15 of 15 taken (the lab's rhythm hid the half) |
 | the same while the caster strafes | x-cast-twice-move | 175846 on e75ee5c8: one of five refused, 570 ms after a taken exit; the stage: pending as a scenario row |
 | each hand: right (b-spell), left (x-left-firebolt2), the Self cast (x-figure-action-self), the perk's dual cast (x-dual-relay) | b-spell; x-left-firebolt2; x-figure-action-self; x-dual-relay | 065943, 075606 (source 0 both launches), 060152, 070729, all green on e75ee5c8 |
-| both hands casting the same spell separately (Eli's "dual casting A") | x-both-hands-relay | 185138 on abe44a55: the right's start and release, the left's 0.5 s later, both exits, all taken, and the figure's two streams alternate hands in the launch trace (castingSource 1 and 0); on e75ee5c8 both casts were reported as the later hand (nineteen's one stream from the left hand) |
+| both hands casting the same spell separately (Eli's "dual casting A") | b-cast-both-hands (from x-both-hands-relay) | green in the gate (193846, 194205's set); 185138 on abe44a55: the right's start and release, the left's 0.5 s later, both exits, all taken, and the figure's two streams alternate hands in the launch trace (castingSource 1 and 0); on e75ee5c8 both casts were reported as the later hand (nineteen's one stream from the left hand) |
 | a cancelled charge (sheathed mid-charge), a stagger during a cast | none yet | open: the next row to probe after the stage |
 | both seats casting at each other | none yet | open: nineteen's seats did, the lab's never have; a scenario with c2 casting back |
 | after a login or a cell change (a figure that spawns mid-cast) | none yet | open |
@@ -495,6 +495,7 @@ and 8 a second only ever stops a flood.
 - [x] native hook + T1 (0d69f6fe; the probes 055039, 055907, 060152, 060444)
 - [x] TS handler (3f8d8f77)
 - [x] T2 green (26 sessions with cast-action among them, difftest job 6654 at e75ee5c8, the gate of 2026-10-15 01:30)
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell 0d44f4b green on the staged build, 20261015-065943, and again on the gate; REOPENED by playtest nineteen: the quick-succession refusals above, fixed on the fork, the stage with x-cast-twice-fast and b-spell pending)
+- [x] T3 scenario green, no HYPOTHESIS tags (b-spell, b-cast-rhythm and b-cast-both-hands green in the second gate, run set 20261015-194205, 8 of 8, on abe44a55; the first merge's b-spell 065943 and gate 083019 before nineteen reopened it)
 - [x] parity scenario green, or its later list reviewed with it (ADR-031): p-spell-bolt 5bf1d51 green by id (20261015-080752), its later list reviewed in docs/private/reviews-pending.md
 - [x] ledger and suppression registry updated (no Papyrus native; the suppression is the relay filter, named under Suppress)
+- [ ] sequences and combinations green, every checklist item with its scenario (ADR-033): the rhythm and both-hands rows green; interrupted casts, both seats at each other and a spawn mid-cast open; the checklist's items each have a scenario but the breath's (x-tgm-breath4 stays a probe)
