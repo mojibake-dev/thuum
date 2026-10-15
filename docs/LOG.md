@@ -1361,3 +1361,25 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the bolt's wind-up). On main: the spell-stream-a reference from its retake with combat AI off
   (060845). Windows build 38690816553 at 23:12; next the staged run of b-spell, p-spell-bolt and
   the left-hand and dual relays, then T2, references, the gate and playtest nineteen.
+- m2-cast-action merged to fork parity e75ee5c8 (2026-10-15T08:50Z, 01:50 PDT), through `just verb-merge`
+  run from thuum branch cast-action's worktree so the gate judged the branch's driver and b-spell; then
+  cast-action landed on main. The verb is the magic animation shape Eli asked to settle before Apocalypse
+  (playtest eighteen: the hands' cast never ended, a left-hand Firebolt left the right hand, a Self cast
+  showed nothing; docs/verbs/cast-action.md): the figure plays the caster's own actions through the
+  engine's action entry (a PerformAction hook and a performAction native, read on sky-re), carried by the
+  wire message UpdateAction (44) and the server's relay, replayed one frame after the action (a same-tick
+  replay is refused on an armed figure); a cast event's hand is the hand of the player's last action
+  (Skyrim Platform, e75ee5c8); every exhale arms the shout gate (the god-mode breath of playtests sixteen
+  and eighteen, ea57c551). Readings: x-figure-action, -bolt, -self, -dual and x-action-trace-input green;
+  x-left-firebolt2 green with castingSource 0 on both launches in c2's launch trace (20261015-075606; 1 on
+  both before e75ee5c8); x-dual-relay and x-tgm-breath4 green; b-spell green with its new assertions (the
+  figure's cast ends, a bolt's wind-up shows); p-spell-bolt, ADR-031's first parity scenario, green
+  (20261015-080752) against the retaken reference spell-bolt-a, its ten findings in the later list with
+  reasons (the target's stagger cascade, which the B reference cannot show yet; the caster's figure's hit,
+  ADR-028). T2 green with 26 sessions, the new cast-action session among them (difftest job 6654 at
+  e75ee5c8). The gate: run set 20261015-083019-merge-m2-cast-action, 6 of 6 green (smoke-two-players,
+  a-restart-persistence, b-duel, b-spell, a-melee-reach, a-racemenu); both clones promoted to the
+  e75ee5c8 client. Tooling found on the way, all on main: verb-stage runs from a branch's worktree and
+  every probe runs even after a red one; test-proto refuses a difftest artifact older than its branch's
+  skymp-wire (the first T2 here passed without the new session); lab-api's parity cut takes a list of
+  kinds and seeds a series' baseline from its first sample. Next: the Apocalypse retry, when Eli says.
