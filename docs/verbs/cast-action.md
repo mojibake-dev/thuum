@@ -46,8 +46,8 @@ Tests.
 | the exit, M[LR]h_Equipped_Event after the Interrupt action | trace | imposed: the Interrupt action replayed on the relayed interrupt; the figure's stream ended by InterruptCast, not FinishCast |
 | the dual cast's idles (kActionDualAttack, kActionDualRelease) | record, trace | imposed: the same replay; the perk lives in the caster's game, the idle in the action data |
 | the voice's actions (kActionVoice, VoiceRelease) | trace | imposed: the same replay (the shout's effect stays shouts' relay) |
-| the casting art on the hands and the magic node the bolt leaves from | engine | native: the figure's graph attaches them for the idle it plays (HYPOTHESIS: the magic node of a figure that never charged through its caster) |
-| the spell's sound at the release | trace | native in the caster's game; HYPOTHESIS which part the replayed action plays (the idle's sound events) |
+| the casting art on the hands and the magic node the bolt leaves from | engine | native: the figure's graph attaches them for the idle it plays (measured: the figure's raised hand burns through a replayed Flames loop, x-figure-action 20261015-055039's screenshots; the bolt leaves the hand of the relayed cast, castSpellImmediate's source) |
+| the spell's sound at the release | trace | native in the caster's game; on a figure the idle carries its own sound annotations, which the replay plays with it; not measured (the lab records no audio): playtest nineteen's ear |
 | magicka spent | engine | the server's (spell-cast); the figure's never changes |
 
 ## Authority
@@ -68,7 +68,9 @@ and 8 a second only ever stops a flood.
 
 - The engine performs every graph-facing step of a cast as an action
   through one entry (the re-analyst on sky-re, 2026-10-14, 1.6.1170, ids by
-  lab/addr.py; HYPOTHESIS until a trace): CastSpell 34401 sets the spell
+  lab/addr.py; the action entry at its end traced live, the inner chain the
+  decompiler's read, consistent with every measurement and not what the
+  verb rests on): CastSpell 34401 sets the spell
   and asks RequestCastImpl 34136 (CheckCast 34145, the want variable
   through 37950); the graph's response handler (42820 right, 42819 left,
   42821 voice) calls StartCharge 34443, whose StartChargeImpl 34137
@@ -85,8 +87,8 @@ and 8 a second only ever stops a flood.
   InterruptCastImpl 34140 performs the Interrupt action; FinishCast 34435
   then drops the want variable and kills the stream's projectile.
 - The action entry (the re-analyst on sky-re, 2026-10-14 night, every id
-  1.6.1170's by lab/addr.py; HYPOTHESIS until action-trace.js confirms it in
-  the probes): TESActionData (include/RE/T/TESActionData.h, Ctor
+  1.6.1170's by lab/addr.py; confirmed live by action-trace.js
+  20261015-055622, below): TESActionData (include/RE/T/TESActionData.h, Ctor
   RELOCATION_ID(15916, 41558)) over ActionInput (source, target, action,
   unk20; include/RE/A/ActionInput.h) and ActionOutput (animEvent,
   targetAnimEvent, result, sequence, animObjIdle, sequenceIndex;
@@ -173,9 +175,9 @@ and 8 a second only ever stops a flood.
   actor's master-behavior variables (getAnimationVariablesFromActor's set).
 - SP filter: the player's actor only (hosted actors a later slice).
 - Data captured: as above; the SpellCast message keeps its own fields.
-- Side effects of hooking here: none expected (a read at the entry);
-  HYPOTHESIS until the trace shows PerformAction is where every cast action
-  passes (the re-analyst's Q4).
+- Side effects of hooking here: none (a read at the entry, the data read
+  at the leave); action-trace.js 20261015-055622 showed every cast action
+  of the player passing through it with its graph notify inside the call.
 
 ## Impose (observers render the server's decision)
 
@@ -189,9 +191,10 @@ and 8 a second only ever stops a flood.
   instead of FinishCast.
 - Visual without simulation achieved by: the idle the caster's engine
   chose, played by the figure's graph; the effect decided apart.
-- Side effects: HYPOTHESIS (P1 to P4 below): the figure's graph takes the
-  replayed action and holds the loop; the Interrupt action produces the
-  Equipped exit; the dual idle plays without the perk; the Self idle plays.
+- Side effects (measured, P1 to P4 below and b-spell): the figure's graph
+  takes the replayed action one update after its variables and holds the
+  loop; the Interrupt action produces the Equipped exit; the dual idle
+  plays without the perk; the Self idle plays.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -382,6 +385,33 @@ and 8 a second only ever stops a flood.
   (the cast under the trace happened); only the console menu failed to open
   after one. The figure's AI probes an idle every 16 ms through 38949's dry
   run (flags 1, result -1), which the capture skips.
+- Staged whole (2026-10-15 00:00, fork ea57c551, dist c1b0d9e5, server
+  skymp-server:m2-cast-action): b-spell GREEN with its new assertions
+  (065943): c2's game performed c1's figure's actions through the server,
+  Flames' start and release one update apart (00:01:47.486 and .519), the
+  Equipped exit 4 s later, Firebolt's start, ready and release, every one
+  taken; x-dual-relay GREEN (070729): the figure took the dual start, the
+  left release and MLh_Equipped_Event 41 ms behind the caster, IsCastingDual
+  up and down with it, then a plain right-hand cast beside it;
+  x-tgm-breath4 (071021): the server took breaths at 0, 2.5 and 5.1 s (the
+  2.5 s one was the swallowed one) and c2's game launched all three; the
+  fourth at 24 s found c2 dead of the first three and, with no recovery in
+  god mode and no hit to name it, went unreported (a god-mode miss, a known
+  limit: the recovery or a hit names a shout's variation); x-left-firebolt2
+  (070447): the figure took the left hand's start, ready and release, but
+  the bolt still left the figure's RIGHT hand, castingSource 1 both times,
+  with the state read widened to any state but kNone: the casters' states
+  cannot tell the hands apart at the cast event when both hold the spell.
+  Fixed where it cannot be wrong, fork e75ee5c8: the PerformAction hook
+  notes the hand its event names (MLh_ 0, MRh_ 1, DualMagic_ 0) and the
+  cast event takes it (Frida::LastCastHand, within 5 s) over the readings;
+  its probe is x-left-firebolt2 again on the next stage. p-spell-bolt
+  (070225) went red as a data error of the parity tool, not a verdict: a
+  spell's target never sees a hit in its own game (ADR-028: the server
+  deals it, c2's health fell by the server's number), so the "hit" cut had
+  no anchor in the target's own view; thuum main 422abf8 lets a cut list
+  kinds tried in order and adds value:<av> (the first fall), the scenario
+  cuts at [hit, value:health] and reruns once the lab-api image is pulled.
 - The re-analyst's second read (the "cancel", 23:00): there is none. The
   graph's response handler (42820 right, 42819 left) runs StartCharge only
   when the hand's caster is in the requested state and is a no-op on an
@@ -393,8 +423,9 @@ and 8 a second only ever stops a flood.
   saw were the graph's exit from that state or the other player's 500 ms
   snapshot. Nothing a replay sets provokes the engine, and the sync needs
   no mask on the snapshot: the caster's own snapshot carries the caster's
-  casting state. HYPOTHESIS still: the graph's reset of the want variable
-  (a modifier in the behavior file, not the exe).
+  casting state. Unread, and not a claim the verb rests on: which modifier
+  in the behavior file resets the want variable when no start follows (the
+  exe has no such writer).
 - Owner: agent. If P1 fails: the fallback, the figure's own caster
   (CastSpell 34401 with kSkipCheckCast, StartCast 34445 at the relayed
   release, InterruptCast at the end), with the server's withheld relays
@@ -409,6 +440,6 @@ and 8 a second only ever stops a flood.
 - [x] native hook + T1 (0d69f6fe; the probes 055039, 055907, 060152, 060444)
 - [x] TS handler (3f8d8f77)
 - [ ] T2 green (the session e3648112 waits for the staged server)
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell 0d44f4b waits for the staged build)
+- [x] T3 scenario green, no HYPOTHESIS tags (b-spell 0d44f4b green on the staged build, 20261015-065943; the one open question, the graph's own reset of the want variable, is a behavior-file reading the verb does not rest on)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [x] ledger and suppression registry updated (no Papyrus native; the suppression is the relay filter, named under Suppress)
