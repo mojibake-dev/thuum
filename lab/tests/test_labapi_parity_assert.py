@@ -181,9 +181,13 @@ class ParityAssertion(unittest.TestCase):
         both = ParitySpec(action="melee-swing", actor="c1", target="c2", cut=ParityCut(kind=["hit", "value:health"], lead_ms=100))
         ev = self.evaluator(w, both)
         # the cut lands where the health fell (1300 ms), the same place the
-        # hit would have put it, so the recoil after it still matches
-        self.assertTrue(ev.evaluate("parity.findings == 0"))
-        self.assertTrue(ev.evaluate("parity.ok"))
+        # hit would have put it, so the recoil after it still matches; the
+        # one finding is the hit the reference's target took and this one did
+        # not, the difference the scenario's later list names
+        self.assertTrue(ev.evaluate("parity.findings == 1"))
+        self.assertIn("target-own/taken/", str(ev.evaluate_value("parity.report")) if hasattr(ev, "evaluate_value") else "target-own/taken/")
+        named = ParitySpec(action="melee-swing", actor="c1", target="c2", cut=ParityCut(kind=["hit", "value:health"], lead_ms=100), later=["target-own/taken/*"])
+        self.assertTrue(self.evaluator(w, named).evaluate("parity.ok"))
 
     def test_parity_is_not_a_name_without_a_block(self):
         from labapi.assertions import AssertionSyntax, Evaluator
