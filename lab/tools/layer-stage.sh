@@ -109,9 +109,10 @@ fi
 echo "   $smoke"
 if [ "${#probes[@]}" -gt 0 ]; then
   echo "== 8. probes"
-  for probe in "${probes[@]}"; do
+  for probe in "${probes[@]}"; do   # a probe's red is an answer, not a staging failure (verb-stage.sh)
     echo "   $probe $(date +%H:%M:%S)"
-    just lab-run "$probe" 2>&1 | tail -1
+    out=$(just lab-run "$probe" 2>&1) || true
+    printf '%s\n' "$out" | grep -E ' (green|red|error) -> ' || { echo "   (no verdict line from lab-run:)"; printf '%s\n' "$out" | tail -3; }
   done
 fi
 echo "== layer-stage $branch ($sha8) done $(date +%H:%M:%S); next: just layer-merge $branch"
