@@ -43,15 +43,23 @@ note() { echo "$(date +%H:%M:%S) $*" | tee -a "$tmp/summary.txt"; }
 ssh_srv "sudo mkdir -p $out && sudo chown eli:eli $out"
 note "playtest $n recorded from $started UTC, a cycle every $cycle s, into https://thuum.gaussing.tv/results/$label/"
 
-start_watch() {
-  cycle_start=$(date +%s)
-  for c in c1 c2; do
-    r=$(assist "$c" watch-start "{\"bools\":$bools}")
-    case "$r" in *'"ok":true'*) ;; *) note "$c: watch-start not taken: $(printf '%s' "$r" | cut -c1-160)";; esac
-  done
+# each seat's watch: whether it runs and since when (the stopped-log finding maps a trace's ms to the clock)
+declare -A watching=() since=() failed=()
+start_one() {  # start_one <client>: the recorder on one seat; a refusal is noted once a cycle and retried
+  local r
+  r=$(assist "$1" watch-start "{\"bools\":$bools}")
+  case "$r" in
+    *'"ok":true'*) watching[$1]=1; since[$1]=$(date +%s);;
+    *) watching[$1]=0
+       [ "${failed[$1]:-0}" = 1 ] || note "$1: watch-start not taken, retried every 30 s: $(printf '%s' "$r" | cut -c1-120)"
+       failed[$1]=1;;
+  esac
 }
-stop_watch() {  # stop_watch <k>: each seat's trace to the results site
+start_watch() { for c in c1 c2; do failed[$c]=0; start_one "$c"; done; }
+stop_watch() {  # stop_watch <k>: each watching seat's trace to the results site
   for c in c1 c2; do
+    if [ "${watching[$c]:-0}" != 1 ]; then note "$c: no trace in cycle $1 (the seat never took watch-start)"; continue; fi
+    watching[$c]=0
     assist "$c" watch-stop '{}' > "$tmp/stop-$c.json"
     # the trace out of lab-api's answer, and one line about it (python from a heredoc: no quotes to escape)
     if line=$(python3 - "$tmp/stop-$c.json" "$tmp/trace-$c-$1.json" <<'PY'
@@ -60,6 +68,9 @@ d = json.load(open(sys.argv[1]))
 t = d.get("result") if d.get("ok") else None
 if not isinstance(t, dict):
     sys.exit(1)
+if t.get("error"):
+    print(f"the driver answered: {t['error']}")
+    sys.exit(2)
 json.dump(t, open(sys.argv[2], "w"), indent=1, sort_keys=True)
 me = t.get("self") or {}
 print(f"{t.get('seconds', 0):.0f} s, {len(t.get('actors') or [])} actors, {len(me.get('events') or [])} own events, {len(me.get('casts') or [])} casts")
@@ -67,10 +78,10 @@ PY
     ); then
       ssh_srv "cat > $out/trace-$c-$1.json" < "$tmp/trace-$c-$1.json"
       note "$c: trace-$c-$1.json, $line"
-      # the cycle's window and how much the seat did in it: the stopped-log finding reads these
-      printf '%s\t%s\t%s\t%s\n' "$1" "$cycle_start" "$(date +%s)" "$(printf '%s' "$line" | sed -E 's/.* ([0-9]+) own events, ([0-9]+) casts.*/\1 \2/' | awk '{print $1 + $2}')" >> "$tmp/cycles-$c.tsv"
+      # the watch's start on the clock and its trace: the stopped-log finding reads these
+      printf '%s\t%s\t%s\n' "$1" "${since[$c]}" "$tmp/trace-$c-$1.json" >> "$tmp/cycles-$c.tsv"
     else
-      note "$c: watch-stop gave no trace: $(cut -c1-160 "$tmp/stop-$c.json")"
+      note "$c: no trace in cycle $1: ${line:-$(cut -c1-160 "$tmp/stop-$c.json")}"
     fi
   done
 }
@@ -83,7 +94,9 @@ while :; do
   waited=0
   while [ "$waited" -lt "$cycle" ] && [ "$stopping" = 0 ]; do
     sleep 15 || true; waited=$((waited + 15))
-    [ "$(hold)" = no ] && { note "the playtest's hold is gone: last cycle"; stopping=1; }
+    [ "$(hold)" = no ] && { note "the playtest's hold is gone: last cycle"; stopping=1; break; }
+    # a seat that refused its start (a menu, a relaunch) is asked again every 30 s, not a cycle later
+    if [ $((waited % 30)) = 0 ]; then for c in c1 c2; do [ "${watching[$c]:-0}" = 1 ] || start_one "$c"; done; fi
   done
   k=$((k + 1))
   stop_watch "$k"
@@ -107,10 +120,10 @@ for pair in c1:711 c2:712; do
       | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
     ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines"
   done
-  # a game whose log stops while the playtest goes on is a finding (ADR-033): the log's last line, then a
-  # cycle starting after it in which the recorder saw the seat act (own events or casts); a quiet game is not one
+  # a game whose log stops while the playtest goes on is a finding (ADR-033): the log's last line, then the
+  # seat's own events and casts the recorder saw after it, each placed on the clock by its watch's start
   note "$(python3 - "$tmp/$c.log" "$tmp/cycles-$c.tsv" "$c" <<'PY'
-import datetime, re, sys
+import datetime, json, os, re, sys
 log, cycles, c = sys.argv[1], sys.argv[2], sys.argv[3]
 stamps = re.findall(r"^\[(\d\d):(\d\d):(\d\d)", open(log, errors="replace").read(), re.M)
 if not stamps:
@@ -121,17 +134,18 @@ now = datetime.datetime.now()
 last = now.replace(hour=h, minute=m, second=s, microsecond=0)
 if last > now:
     last -= datetime.timedelta(days=1)
-after = []
-for row in open(cycles) if cycles else []:
-    k, start, end, acts = row.split()
-    if float(start) > last.timestamp() and int(acts) > 0:
-        after.append((k, int(acts)))
+events = casts = 0
+for row in (open(cycles) if os.path.exists(cycles) else []):
+    k, since, path = row.rstrip("\n").split("\t")
+    me = (json.load(open(path)).get("self") or {})
+    events += sum(1 for e in me.get("events") or [] if float(since) + float(e[0]) / 1000 > last.timestamp())
+    casts += sum(1 for x in me.get("casts") or [] if float(since) + float(x[0]) / 1000 > last.timestamp())
 when = last.strftime("%H:%M:%S")
-if after:
+if events or casts:
     print(f"FINDING {c}: its Skyrim Platform log stops at {when}, yet the recorder saw the seat act after it "
-          f"(cycles {', '.join(k for k, _ in after)}: {sum(a for _, a in after)} own events and casts); ADR-033, a game whose log stops")
+          f"({events} own events, {casts} casts); ADR-033, a game whose log stops")
 else:
-    print(f"{c}: Skyrim Platform log's last line at {when}")
+    print(f"{c}: Skyrim Platform log's last line at {when}, nothing seen of the seat after it")
 PY
 )"
 done
