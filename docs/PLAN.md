@@ -163,7 +163,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    claimed against a shot at the draw's power, the arrow's damage counted.
    DONE 2026-10-10 (7be31a9d); b-marksman 773716b. Headshot Kills (CIF) rides
    it: Eli (2026-10-12) trusts the shooter's game a little, bounded;
-   docs/verbs/headshot.md is NEXT after Apocalypse's first verb.
+   docs/verbs/headshot.md is NEXT after Apocalypse's first verb. Its mods
+   on thuum branch headshots (CIF 2.0.7 and Headshot Kills 1.2, whose
+   plugin is light by its header, FE003 on both ends), staged by their own
+   layer-stage after Apocalypse's: CIF's boot on 1.6.1170 is unverified.
 2. spell-cast: a cast's start and end as server state, a stream counted by the
    time it held its target, the observer casting the relayed spell, a spell
    hit starting a fight. DONE 2026-10-10 (45839102); b-spell 9ed66b8. The
