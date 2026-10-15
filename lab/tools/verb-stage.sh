@@ -23,6 +23,7 @@
 # deploy-srv would otherwise roll back main's lab tree on sky-srv.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+lab/tools/worktree-links.sh
 branch=${1:?fork branch}; shift
 probes=("$@")
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
@@ -113,15 +114,22 @@ echo "== 5. deploy-srv $(date +%H:%M:%S)"
 just deploy-srv 2>&1 | tail -1
 echo "== 6. server tag $branch, pulls $(date +%H:%M:%S)"
 $srv_ssh "cd /srv/lab && sed -i 's/^SERVER_TAG=.*/SERVER_TAG=$branch/' .env && grep '^SERVER_TAG' .env && docker compose pull -q skymp-server lab-api && docker compose up -d skymp-server lab-api >/dev/null 2>&1 && echo '   server and lab-api up'"
+# the pull restarts lab-api when its image changed, and a restart drops the hold taken above
+# (m2-cast-action's staging, 2026-10-14): take it again once lab-api answers
+for _ in $(seq 1 30); do curl -fsS -m 5 "$api/status" >/dev/null 2>&1 && break; sleep 2; done
+curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d "{\"minutes\": 90, \"reason\": \"verb-stage $branch $sha8\"}" >/dev/null 2>&1 && echo "   hold taken again after lab-api's restart" || echo "   (could not take the hold again)"
 
 echo "== 7. the client on both clones $(date +%H:%M:%S)"
+# client-dist stages the built driver bundle with the dist (stage-client.sh), so build it first: a fresh
+# worktree has none, and the main checkout's would be whatever was built last
+echo "   driver bundle: $(just build-driver 2>&1 | tail -1 | awk '{print $5, $NF}')"
 just build-client "$branch" 2>&1 | tail -1
 # where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
 echo "   dist js $(shasum -a 256 "skymp/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
 for v in 712 711; do
   ok=""
   for attempt in 1 2; do
-    last=$(lab/tools/client-dist.sh "$v" 2>&1 | tail -1)
+    last=$(lab/tools/client-dist.sh "$v" 2>&1 | tail -1) || true   # a failure is read below and retried, not fatal here
     echo "   $last" | cut -c1-140
     case "$last" in "dist laid into every game folder on VM $v:"*) ok=1; break;; esac
     echo "   client-dist $v failed (attempt $attempt)"
