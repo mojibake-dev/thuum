@@ -996,3 +996,72 @@ Two habits make it worse:
   - then Unrelenting Force's throw, the first verb built this way: the
     server imposes the spell's hit from the shouter's figure, and the
     engine throws.
+
+## ADR-032: A figure plays the caster's actions; the server decides the effect
+
+Status: accepted (2026-10-14, Eli, on the plan of that night: "we want the
+most wholistic fix that extends to how we do the rest of the magic system";
+"melee can stay how it is, withheld spells should also show anims because
+that's cool"; the research was his brief: "pin down how magic animations and
+effects are handled before doing apocalypse"). Built as the cast-action verb
+(docs/verbs/cast-action.md). Refines ADR-028 and ADR-031 for magic.
+
+**Context.** Playtest eighteen left three notes on the hands: a figure's
+Flames grab-and-push "initiates, but does not stop", a left-hand Firebolt
+left the figure's right hand, and a spell on oneself showed no cast at all;
+sixteen's and eighteen's god-mode breath showed once of twice. Each had its
+own cause (docs/verbs/spell-cast.md, "The hands, read whole"), and the
+causes shared a shape: the relay copied the caster's graph events one at a
+time (an unreliable channel, with the Equipped exit rewritten into a draw
+flag and lost), re-derived the hand from the casters' states, and held a
+start until the figure's variables caught up (fork m2-hands). The engine
+enters a hand's cast only through the actor's own MagicCaster, whose every
+graph-facing step is a BGSAction performed through one entry,
+ActorMediator::PerformAction (38949 on 1.6.1170: Attack, Ready, Release,
+Interrupt, the idle chosen from the actor's conditions, the event the idle
+names). TiltedEvolution hooks that entry and replays it (a map, never
+copied; ADR-005).
+
+**Decision.** Magic on a figure has two axes with one rule each.
+1. **Animation: the figure plays the caster's actions.** Skyrim Platform
+   reports every BGSAction the player's actor performs (the action, the
+   idle the engine chose, the graph event, the input type, the actor's
+   master-behavior variables as the graph was asked); the hands' cast
+   actions go to the server as UpdateAction (MsgType 44), reliable, in
+   order; the server relays them to the actor's neighbours but the sender
+   (R2); each neighbour's view performs them on the figure through the
+   engine's second entry (38953, a data performed as given), the caster's
+   variables one update before the action. The graph then does what it
+   does for the caster: the start idle, the loop, the Equipped exit, the
+   hand, the dual idle without the perk, the Self cast. A withheld spell
+   (the teleport's marker, later summons and walls) still plays its cast:
+   its animation is R3 visual state, its effect stays the server's.
+2. **Effect: the server decides, and relays only what every game may run.**
+   Unchanged: the cast is R1 at the server, the numbers are the server's
+   (ADR-028), the relayed SpellCast gives the figure its look
+   (castSpellImmediate, ending in FinishCast), and the server withholds the
+   relay where a spell's effect must not run in another game.
+3. **The sender reports what the engine did, never a guess**: the hand is
+   the hand whose action performed the cast (the hook's event name); a
+   shout is reported at its release, every exhale armed; the client sends
+   only the player's own casts and its hosted actors'.
+4. **Melee stays on the event relay** (attackStart and kin: the server's
+   AnimationSystem reads them for stamina, bash and stagger); the voice's
+   actions too for now (shoutStart works). Moving either is its own verb,
+   measured the same way.
+
+**Consequences.**
+- One shape for every cast a figure shows, hands and dual included, and
+  the same shape for every magic verb after it (Ghostwalk, Apocalypse's
+  summons and walls): the figure plays the action, the server decides the
+  spell.
+- The measured rule the view keeps: a cast's start sent in the same tick as
+  its variables is refused every time; one update later it is taken
+  (x-figure-action 20261015-055039 and kin). No engine path cancels a
+  foreign want variable (the re-analyst, 2026-10-14); the latency is the
+  graph's.
+- Dead with it: m2-hands' held start, m2-firebolt, m2-hands-exit,
+  m2-breath, the SkympFakeEquip rewrite of the hands' Equipped events.
+- The parity gate reads casts on figures (p-spell-bolt, ADR-031), so a
+  start the figure refuses or an exit it never takes fails a sweep, not a
+  playtest.
