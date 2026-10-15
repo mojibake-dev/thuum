@@ -664,4 +664,13 @@ snippets).
   x-tgm-breath3-fix (c2's script first sets ADDN 0x647BC's flags to
   kAlwaysLoaded, CommonLibSSE-NG include/RE/B/BGSAddonNode.h:12-16): fix
   (1)'s test, all three breaths drawn if (b) holds.
+- The addons' flags, read from Skyrim.esm on sky-srv (lab/esm.py,
+  2026-10-14): the breaths' MPSFireWaveFlames 0x647BC (index 64),
+  MPSFrostWaveProjectile 0x68BCF (65) and MPSDragonFireWave 0xE1532 (71)
+  carry DNAM flags 1; vanilla's common impacts (MPSFireBoltImpact01 0x2B95B,
+  MPSBloodSprayImpact01 0x1BFEE, MPSActorDustSpray01 0xF0EAB) carry 3,
+  kAlwaysLoaded. Fix (1) as a candidate: fork m2-breath f0e4f073 gives the
+  three breath addons the flag at the data load (Skyrim Platform's
+  EventHandler, kDataLoaded); it merges only if x-tgm-breath3-fix draws
+  every breath.
 
