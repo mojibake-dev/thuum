@@ -1,0 +1,62 @@
+# M2, cast-action (docs/verbs/cast-action.md, ADR-033's rhythm row): a
+# player's casts at a person's rhythm all show on the other screen. c1 holds
+# Flames at c2 for 0.8 s, lets go, and casts again 0.4 s later, eight times;
+# c2's figure of c1 must take all eight starts and all eight Equipped exits
+# (the engine's own action entry, performed on the figure with the caster's
+# variables one update before each, the want variable dropped after an exit
+# and before a start, a refused action retried while the graph settles).
+# Playtest nineteen (2026-10-15): every other cast refused whole at this
+# rhythm on fork parity e75ee5c8 (x-cast-twice-fast 20261015-180119: casts
+# two, four and six of eight); 24 of 24 taken on abe44a55 (184857). Any
+# refused start or exit fails here; the lab's slower rhythm (1.8 s apart)
+# never showed it. Both seats hold Flames drawn.
+id: b-cast-rhythm
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - c2: console {text: "player.equipspell 12fcd right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - wait: 4
+  - c1: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting, bCastReady]}
+  - c2: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting, bCastReady]}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c1: hold-key {code: 199, ms: 800}
+  - wait: 1.2
+  - c2: screenshot
+  - wait: 3
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 8
+      - c2.watched(c1).took("MRh_SpellRelease_Event") >= 8
+      - c2.watched(c1).took("MRh_Equipped_Event") >= 8
+      - c1.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 8
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]
