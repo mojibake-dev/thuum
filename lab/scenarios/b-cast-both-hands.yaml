@@ -1,0 +1,62 @@
+# M2, cast-action (docs/verbs/cast-action.md, ADR-033's combination row): both
+# hands casting the same spell separately (not the perk's dual cast) each show
+# on the other screen as their own hand's. c1 holds Flames in both hands and
+# casts with the right, then the left 0.4 s later, both held 2 s, three
+# times; c2's figure of c1 must take each hand's start and each hand's
+# Equipped exit, three of each, and c2's launch trace must show both hands'
+# streams (castingSource 0 and 1). Playtest nineteen: "only one stream from
+# the left hand", the cast event's hand taken from the latest start (fork
+# e75ee5c8); one pending start per hand since c7d49cc0 (x-both-hands-relay
+# 20261015-185138 on abe44a55: both hands, both streams). Both seats hold
+# Flames in both hands, drawn.
+id: b-cast-both-hands
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - c1: console {text: "player.equipspell 12fcd left"}
+  - c2: console {text: "player.equipspell 12fcd right"}
+  - c2: console {text: "player.equipspell 12fcd left"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 3
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - c2: frida {script: launch-source-trace.js}
+  - wait: 10
+  - c1: watch-start {bools: [IsCastingRight, IsCastingLeft, bWantCastRight, bWantCastLeft, NotCasting]}
+  - c2: watch-start {bools: [IsCastingRight, IsCastingLeft, bWantCastRight, bWantCastLeft, NotCasting]}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 0.4
+  - c1: hold-key {code: 207, ms: 2000}
+  - wait: 1.2
+  - c2: screenshot
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 0.4
+  - c1: hold-key {code: 207, ms: 2000}
+  - wait: 1.2
+  - c2: screenshot
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 0.4
+  - c1: hold-key {code: 207, ms: 2000}
+  - wait: 3.5
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 3
+      - c2.watched(c1).took("MLh_SpellAimedConcentrationStart") >= 3
+      - c2.watched(c1).took("MRh_Equipped_Event") >= 3
+      - c2.watched(c1).took("MLh_Equipped_Event") >= 3
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]
