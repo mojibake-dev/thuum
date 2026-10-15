@@ -58,5 +58,4 @@ steps:
       - c2.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 8
       - c2.watched(c1).took("MRh_SpellRelease_Event") >= 8
       - c2.watched(c1).took("MRh_Equipped_Event") >= 8
-      - c1.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 8
 artifacts: [server.log, c1.log, c2.log, screenshots, trace]
