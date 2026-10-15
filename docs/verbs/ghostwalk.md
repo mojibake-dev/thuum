@@ -14,7 +14,9 @@ Milestone: M2   Class: B
 
 From the records (read from the 10.2.3 plugin, Engine surface) and the two
 scripts as compiled (WB_Ghostwalk_Script and the ability's WB_inviseyefix,
-disassembled 2026-10-14 over lab/pex.py's instruction model).
+disassembled 2026-10-14 over lab/pex.py's instruction model, and
+independently by apocrypha the same day, instruction for instruction the
+same).
 The reference trace (the recorder in a solo client run with the layer,
 lab/references/ghostwalk.json) is step 1 of the Dynamic plan and may add
 rows.
@@ -25,11 +27,13 @@ rows.
 | the caster invisible for 10 s, with the effect's hit art (MGEF 0300AAE5, archetype 11) | record | imposed: the server runs it as a state (self-cast's archetype 11, R0); native in the caster's game; on the figure by the relayed Self cast, its name hidden (fork m2-flight f3569b95) |
 | OnEffectStart: the caster's X, Y, Z (properties of akTarget, the caster of a Self spell) and GetCurrentLocation recorded in the script | script | native in the caster's game: the filter passes an effect the player bears (ADR-029 A1, test 1) |
 | OnEffectFinish: Utility.Wait(WB_Wait, 0.4 s); the location check (IsSameLocation, else HasCommonParent) short-circuited by WB_CheckLocation False, so the return always runs; SetPosition(X, Y, Z) back to the cast point | script | native in the caster's game; the server takes the move as a permitted return (R1, Server) |
-| the return's sound (Sound.Play of SOUN 030207BF at the caster) and visual (VisualEffect.Play of RFCT 030207C1 on the caster for WB_TriggerVFXDur, 3 s) | script | native in the caster's game; later on other screens: the figure's script is blanked there (Suppress) |
+| the return's sound (Sound.Play of SOUN 030207BF, its descriptor SNDR 030207BE, at the caster) and visual (VisualEffect.Play of RFCT 030207C1 on the caster for WB_TriggerVFXDur, 3 s) | script | native in the caster's game; later on other screens: the figure's script is blanked there (Suppress) |
 | image spaces on the caster's screen (IMAD 030207BA, the effect's; 030207BC, applied at the return) | record, script | native (R3: the caster's screen only) |
 | a detection event at the return (CreateDetectionEvent from the caster, strength 75 less half the caster's Illusion, at least 5) | script | native in the caster's game; later: other games' NPCs hear nothing (NPC hosting, M3) |
 | the eyes-fix ability (SPEL 030CB7E1, AddSpell, silent, after the return): its WB_inviseyefix checks each second and, once its bearer's weapon is sheathed, calls QueueNiNodeUpdate and removes itself (RemoveSpell) | script | native in the caster's game; HYPOTHESIS that the server never records it (a script's AddSpell and RemoveSpell in the player's game, unreported); a transient, so nothing to persist |
 | the failure message (MESG 0300AAE6), shown only when the location check fails with WB_CheckLocation True | script | never shown with this VMAD (unreachable) |
+| a caster who changed cells during the effect: SetPosition (not MoveTo) puts it at the cast's coordinates in its current cell | script | later: the server permits the return in the cast's cell or worldspace only, so there the move is judged as any other (sent back if the budget refuses it); a rare edge, named here for the parity list |
+| an early end (the caster's own attack or cast drops the invisibility): the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | script | as the timed end; the permit's window opens at the cast |
 | the effect ended early by the caster's own attack or cast | engine (self-cast's HYPOTHESIS) | native, and the server's self-cast ends its state; the script returns the caster then, the permit's window opening at the cast |
 
 ## Authority
