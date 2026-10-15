@@ -1257,3 +1257,29 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   by hand twice becomes one command). Never the builder's judgment and never Eli's approvals
   (scenarios, ADRs, a non-verb layer he has not seen). The rest of the 2026-10-13 delineation
   stands: core the estate, thuum-mundus the sky lab's infrastructure, thuum-magnus the build.
+
+- Playtest eighteen (19:36 to 19:46 PDT, parity 05192845; world saved
+  playtest-m2-18-20261015T024812Z): the flight and the invisible name passed;
+  the hands did not (the figure's grab-and-push never stops, a left-hand
+  Firebolt's bolt leaves the figure's right hand, a Self cast shows no
+  animation), the god-mode breath's fire "sometimes" twice. The night's lab
+  (19:55 to 20:56, 24 runs, all green) and a research pass took each to a
+  cause: the relay rewrites the cast's exit event (M[LR]h_Equipped_Event) to
+  a fake equip, Skyrim Platform's castingSource falls back to the right hand
+  when the same spell is in both hands (x-left-firebolt2), a Self or
+  fire-and-forget start is taken when the caster's variables arrive first
+  and refused when they do not (x-self-anim, x-figure-cast4), and the breath
+  was never a rendering matter: shoutService's 3 s hit window swallows a
+  second shout in god mode (x-tgm-breath4, the server log). Eli's plan
+  (21:00): the cast-action verb (docs/verbs/cast-action.md), the figure
+  replaying the caster's actions through the engine's action entry, the
+  effect decided apart; melee stays on its event relay; withheld spells show
+  their animations; Ghostwalk and the per-player globals wait behind it. On
+  main the same night: b-push's flight check (6f90239), the driver's
+  delayFrames and globals steps, lab-api's globalValue, three Frida traces,
+  pex.py disasm, and the verb docs ghostwalk, player-globals and
+  natures-balance; fork branches m2-ghostwalk, m2-player-globals (T0 green),
+  m2-breath, m2-firebolt and m2-hands-exit (the last three dead or
+  superseded). The Apocalypse layer staged 20:57 to 21:02 (numidium), its
+  sweep running at the entry's time.
+
