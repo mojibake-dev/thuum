@@ -129,6 +129,14 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   action around it) and of each performAction replay on a figure. Layouts
   are CommonLibSSE-NG's, cited in the script; 1.6.1170 only.
 
+A frida step right before a console step on the same client leaves the
+console unopenable (x-figure-action 20261015-052852 and -053059: "the
+console did not open 3000 ms after the grave key", twice, with the attach
+one step earlier; every earlier scenario attached on the other client or
+followed the attach with Papyrus steps). Put a client's console steps
+before its frida step; whether injected key input (hold-key) survives the
+attach is x-action-trace-input's question.
+
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as
 frida/<client>-<script>.jsonl; one started outside a run is fetched by the next
