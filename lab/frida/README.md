@@ -103,6 +103,16 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   (44110). With params {ALWAYS_LOADED: true} it first sets the addon's flags
   to kAlwaysLoaded, the test of the fix. The function roles and the manager
   at 411270 are the re-analyst's static read (HYPOTHESIS). 1.6.1170 only.
+  mps-trace2.js is the same with the system's maxEmitterObj and
+  maxParticlesPerFrame read too (BSMasterParticleSystem.h 0x162, 0x164),
+  for breaths seconds apart (x-tgm-breath4: the emitter cap hypothesis).
+
+- launch-source-trace.js: launch-trace.js plus the LaunchData's fields that
+  say which hand and whose spell each launch is: origin, projectile base,
+  shooter, spell, castingSource (MagicSystem::CastingSource, 0 left hand, 1
+  right) and useOrigin (CommonLibSSE-NG include/RE/P/Projectile.h:81-107).
+  For playtest eighteen's left-hand Firebolt leaving the figure's right hand
+  (docs/verbs/spell-cast.md, x-left-firebolt). 1.6.1170 only.
 
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as

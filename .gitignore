@@ -21,8 +21,9 @@ __pycache__/
 # derived from the CommonLibSSE-NG submodule by `just relid`
 lab/relids.tsv
 
-# downloads staged into clients (SKSE archives)
-lab/.cache/
+# downloads staged into clients (SKSE archives, the mods' archives); no trailing slash, so a worktree's link
+# to the main checkout's (layer-stage makes one) is ignored too
+lab/.cache
 
 # Address Library database and its Nexus archive (CLAUDE.md: downloaded by Eli, never committed)
 addrlib/

@@ -1248,3 +1248,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-block, b-self-cast, b-teleport, b-magic-restart, b-god, b-marksman, b-poison, b-potion,
   a-hostility, a-fight-end, a-sneak-damage, a-melee-reach, a-racemenu), 53 min. Both clones'
   clean-m1-next promoted to clean-m1 (the 05192845 client). Playtest eighteen next.
+- numidium's role, Eli's word (2026-10-14 evening PDT): release and lab operations. Merges on
+  thuum-magnus's "go" (`just verb-merge`, `just layer-merge`: the gate's verdict, the
+  promotions, the LOG entry and the submodule pin; never whether a verb is done); the lab's
+  calendar (holds, the nightly, the order of a night's stagings and sweeps; thuum-mundus keeps
+  the lab's infrastructure); the CI operator (retries and cancellations with the api token, a
+  runner or route fault diagnosed and handed to core); the process tooling (a workflow scripted
+  by hand twice becomes one command). Never the builder's judgment and never Eli's approvals
+  (scenarios, ADRs, a non-verb layer he has not seen). The rest of the 2026-10-13 delineation
+  stands: core the estate, thuum-mundus the sky lab's infrastructure, thuum-magnus the build.

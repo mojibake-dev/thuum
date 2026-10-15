@@ -664,4 +664,36 @@ snippets).
   x-tgm-breath3-fix (c2's script first sets ADDN 0x647BC's flags to
   kAlwaysLoaded, CommonLibSSE-NG include/RE/B/BGSAddonNode.h:12-16): fix
   (1)'s test, all three breaths drawn if (b) holds.
+- The addons' flags, read from Skyrim.esm on sky-srv (lab/esm.py,
+  2026-10-14): the breaths' MPSFireWaveFlames 0x647BC (index 64),
+  MPSFrostWaveProjectile 0x68BCF (65) and MPSDragonFireWave 0xE1532 (71)
+  carry DNAM flags 1; vanilla's common impacts (MPSFireBoltImpact01 0x2B95B,
+  MPSBloodSprayImpact01 0x1BFEE, MPSActorDustSpray01 0xF0EAB) carry 3,
+  kAlwaysLoaded. Fix (1) as a candidate: fork m2-breath f0e4f073 gives the
+  three breath addons the flag at the data load (Skyrim Platform's
+  EventHandler, kDataLoaded); it merges only if x-tgm-breath3-fix draws
+  every breath.
+- Playtest eighteen (2026-10-14, Eli): "for the unresolved tgm+firebreath
+  issue, sometimes i can see the effect in screen 2 twice in a row, but its
+  still janky". So the second breath's fire is drawn some of the time,
+  which fits a system destroyed when not in use and rebuilt in time for
+  some second breaths (b) better than an emitter that never joins (a).
+- Traced (x-tgm-breath3 20261015-030033, lab/frida/mps-trace.js on both
+  games, breaths at 0, 10 and 48 s): (a) and (b) are both FALSE. In c2's
+  game every breath, the second included, registered its cone's emitters
+  (RegisterMPSEmitters returned 1 eighteen times per Init3D), raised
+  system 64's emitter count from 0 to 3 through AddEmitter, and emitted (33,
+  30 and 31 emits on that system in the 3 s after each launch), with no
+  rebuild and the system's slot never null across the run (polled every
+  50 ms; destroyWhenNotInUse 1 throughout, the flags 1). c1's own breaths
+  read the same. So the system's lifetime is not the missing fire, and the
+  always-loaded flag (fork m2-breath) changes nothing that matters; it stays
+  unmerged. What the probe did not reproduce is Eli's spacing: his breaths
+  come seconds apart in god mode, the probe's 10 s. HYPOTHESIS (c): a cone
+  launched while the previous cone's emitters are still registered meets
+  the system's emitter cap (BSMasterParticleSystem::maxEmitterObj, 0x162)
+  and its emitters are refused, so nothing emits for it; "sometimes" is
+  whether the previous cone's emitters were gone by the next breath.
+  x-tgm-breath4 (breaths at 0, 2.5, 5 and 20 s, mps-trace2.js reading the
+  cap) tests it.
 
