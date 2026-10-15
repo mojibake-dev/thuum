@@ -22,7 +22,8 @@ lab/pex.py, joined to the plugin's VMAD bindings and CTDA conditions):
 
 | consequence | seen in | disposition |
 | --- | --- | --- |
-| a progress global changed by its spell's script in the caster's game (25: the Craftlord's 13, the Battlemage's 5, the Avenging Wraith's 4, IsControlling, LocateValuables, BanishLiving) | record, script | imposed: recorded by the server per player (R2) and set in the player's game at login |
+| a progress global changed by its spell's script in the caster's game (23: the Craftlord's 13, the Battlemage's 5, the Avenging Wraith's 4, BanishLiving's counter) | record, script | imposed: recorded by the server per player (R2) and set in the player's game at login |
+| a running state's global (2: IsControlling, +1 and -1 around a mind control; LocateValuables' IsActive, set by a quest's stages, read by nothing) | script | suppressed: never saved, since what it describes ends with the session (a logout mid-control would strand IsControlling at 1, refusing every later control) |
 | an MCM setting changed in the player's game (30, written only by WB_MCMQuest_Script) | record, script | imposed: as progress (Eli, 2026-10-13: "each player's own, like their progress"); later for people: the MCM is a SkyUI menu, and the lab's layer has no SkyUI (docs/MODS.md:379) |
 | what reads them later: the scripts' GetValue at the next cast, 197 conditions over 35 globals (156 of them menu buttons) | record, script | native in the player's game, which holds the restored values |
 | a per-cast hand-off or lock (5: CorpseExplosion's BaseHP, XivilaiLord's MagickaLoss, SharedTrauma's lockout, MedorasMemory's Enabled, Crackle's cooldown) | script | suppressed: transient within a cast, never saved (a value from a crashed cast must not survive a login) |
@@ -115,8 +116,9 @@ watch), the rest refused by the validator.
 
 - Where the logic lives:
   - the list: a server setting, playerGlobals, FormDescs (data, not code:
-    the 55 of Apocalypse's progress and settings, by the survey's 4d), read
-    with the other settings;
+    53 of Apocalypse's, the 30 settings and 23 of progress, each checked a
+    GLOB record in the 10.2.3 plugin; thuum branch player-globals 07d7932),
+    read with the other settings;
   - the rule: wire-rules (Rust, ADR-010), the report's checks and the
     record's merge;
   - the record: the player's change form gains an optional list of
@@ -174,14 +176,31 @@ watch), the rest refused by the validator.
   fenestrate has it, INFERRED from the MCM being his), or do the settings
   stay at their defaults in multiplayer for now?
 
+## Built
+
+Fork branch m2-player-globals, stacked on m2-ghostwalk (2026-10-14):
+- 4def3146, the rule: wire-rules player_globals (the list, the report's
+  checks, the merge, the login's values) and wire-rules forms, the
+  FormDesc parse it shares with castTeleports; T0.
+- bf0339f8, the message and its validator (rule 4): PlayerGlobals, MsgType
+  44 (wire id 52), schema 14, its fixtures, the C++ and TypeScript types.
+- 2d3d0254, the record: the change form's playerGlobals, absent in older
+  records and read as none, with its round-trip test (rule 6's migration).
+- 35422e48, the server: the setting read at start, OnPlayerGlobals through
+  the bridge to the rule, the login's message on the first movement; its
+  test on Skyrim.esm's GameHour.
+- ee70094b, the client: PlayerGlobalsService.
+Rust tests and clippy green locally; the client type-checks; the C++ build
+and ctest are the fork pipeline's.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] engine surface cited or delegated
+- [ ] server logic + T0 (the C++ tests wait on the fork pipeline)
+- [x] message + validator (same commit)
+- [x] native hook + T1 (none needed: Skyrim Platform's GlobalVariable)
+- [x] TS handler
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
