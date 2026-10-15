@@ -18,7 +18,8 @@
     "/srv/skymp/esm/_ResourcePack.esl",
     "/srv/skymp/esm/RaceCompatibility.esm",
     "/srv/skymp/esm/rotfern.esp",
-    "/srv/skymp/esm/LostGrimoire.esp"
+    "/srv/skymp/esm/LostGrimoire.esp",
+    "/srv/skymp/esm/Apocalypse - Magic of Skyrim.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",
