@@ -1306,3 +1306,31 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the client stops at its staging instead of in the merge's sweep. Ghostwalk, m2-player-globals and
   the cast candidates wait (Eli, 20:30 PDT: the magic animation shape first; the next verb is
   cast-action, docs/verbs/cast-action.md).
+
+- The cast-action verb's engine read and build (21:07 to 22:00 PDT; docs/verbs/cast-action.md).
+  The re-analyst read the action path on sky-re (28 minutes, 115 tool calls): TiltedEvolution's
+  five numbers are 1.6.1170's own ids, each confirmed by `just addr` (38949 ActorMediator::
+  PerformAction, the one entry every BGSAction takes, reached from SourceActionMap::DoAction 34202
+  through TESActionData::Process 41557; 38953 its second entry, the tail that performs a data as
+  given, no validation, no idle selection, no code caller; 403567 the mediator singleton; 39004 the
+  post step both entries call, the ActorState bookkeeping keyed by the event name, not the
+  master-behavior variables). The data arrives with its event empty and leaves with the chosen
+  idle's event; unk20 is 2 on every engine action and read by nobody; flags bit 0 is the engine's
+  dry run. Ghidra names and plate comments saved. Built on fork m2-cast-action 0d69f6fe: the hook
+  on 38949 (the player's data only, dry runs and refused calls left out, read at the leave, a
+  per-thread stack; the JS event actionPerformed with the variables as they were when the graph was
+  asked) and the export performAction(actor, action, idle, eventName, type) through 38953, both
+  AE only; its Windows run 38683079932 started 21:44. Thuum cast-action feebd30: the driver keeps
+  the player's recent actions with their variables and figure-action replays them on a figure
+  ({replay: all} at the original spacing, the recorded variables applied first through
+  applyAnimationVariablesToActor); lab/frida/action-trace.js logs 38949, 38953 and the cast-shaped
+  events at 32901, the test of the read. The step's name alone went to main (7aa620a) so main's
+  lab-api image takes the probes. Twelve ADR-031 references committed alone on main
+  (ff74e6c..3381c42: spell-bolt-a/-b, self-invisibility-a, self-oakflesh-a, shout-firebreath-a/-b,
+  shout-uf3-a/-b, melee-power-a/-b, melee-swing-b, block-b), each from a solo run's watch-stop with
+  its cut and its bandit's id; melee-swing-a and spell-stream-a wait for retakes with combat AI off
+  (the bandit's counterattack was in the player's record), r-invisible-prompt for a redo in frame.
+  numidium started verb-stage m2-cast-action at 22:00 from the branch's worktree (merge 403fe5c9,
+  LABAPI 1533) with the four probes by path, x-figure-action, -bolt, -self, -dual (P1 to P4: c1
+  casts, its hook records, c1's driver replays on c2's figure in c1's own game); their reading
+  decides between the action replay and the fallback.
