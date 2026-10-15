@@ -272,16 +272,19 @@ function form(id: unknown): ObjectReference | null {
 
 // hold-key's keys and when to let each go; released in update
 const heldKeys: Array<{ code: number; until: number }> = [];
-// anim-event's {delayMs}: each event is sent from update once its time comes
-// (a Utility.wait continuation never sent one: x-figure-cast2
-// 20261014-182025, every delayed start missing from the figure's graph)
-const delayedEvents: Array<{ due: number; targetId: number; name: string }> = [];
+// anim-event's {delayMs} and {delayFrames}: each event is sent from update
+// once its time or its frame comes (a Utility.wait continuation never sent
+// one: x-figure-cast2 20261014-182025, every delayed start missing from the
+// figure's graph)
+const delayedEvents: Array<{ due: number; frames: number; targetId: number; name: string }> = [];
 
 function sendDelayedEvents(): void {
   const now = Date.now();
   for (let i = delayedEvents.length - 1; i >= 0; i--) {
     const d = delayedEvents[i];
-    if (now < d.due) continue;
+    if (d.frames > 0) {
+      if (--d.frames > 0) continue;
+    } else if (now < d.due) continue;
     delayedEvents.splice(i, 1);
     const ref = ObjectReference.from(Game.getFormEx(d.targetId));
     if (ref) Debug.sendAnimationEvent(ref, d.name);
@@ -1562,10 +1565,15 @@ function run(step: Step, player: Actor): unknown {
       // the graph has answered it on a later frame (the re-analyst's read,
       // HYPOTHESIS), and a start sent in the same tick was refused
       // (x-figure-cast 20261014-142425)
+      // {delayFrames} sends it that many updates later instead, to the
+      // frame: bWantCastRight set alone held the figure's graph at iState 10
+      // for one frame, and a start 16 ms later came a frame late
+      // (x-figure-cast2 20261014-183340)
       const delayMs = typeof a.delayMs === "number" && a.delayMs > 0 ? a.delayMs : 0;
-      if (delayMs > 0) {
-        delayedEvents.push({ due: Date.now() + delayMs, targetId: target.getFormID(), name });
-        return { sent: name, to: target.getFormID(), set: Object.keys(set), afterMs: delayMs };
+      const delayFrames = typeof a.delayFrames === "number" && a.delayFrames > 0 ? Math.floor(a.delayFrames) : 0;
+      if (delayMs > 0 || delayFrames > 0) {
+        delayedEvents.push({ due: Date.now() + delayMs, frames: delayFrames, targetId: target.getFormID(), name });
+        return { sent: name, to: target.getFormID(), set: Object.keys(set), afterMs: delayMs, afterFrames: delayFrames };
       }
       Debug.sendAnimationEvent(target, name);
       return { sent: name, to: target.getFormID(), set: Object.keys(set) };
