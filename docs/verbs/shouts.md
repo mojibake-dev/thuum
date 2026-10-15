@@ -696,4 +696,21 @@ snippets).
   whether the previous cone's emitters were gone by the next breath.
   x-tgm-breath4 (breaths at 0, 2.5, 5 and 20 s, mps-trace2.js reading the
   cap) tests it.
+- MEASURED (x-tgm-breath4 20261015-035032, breaths at 0, 2.5, 4.9 and 24 s):
+  (c) is false too, and the fire was never a rendering matter. Every breath
+  that reached the observer's game joined system 64 and emitted (about 30
+  emits in 3 s each, the cap untouched); but the observer's game launched
+  three breaths of the shouter's four: the 2.5 s one never arrived. The
+  server log says why: three shouts taken (03:52:55, 03:53:00, 03:53:19),
+  none at 03:52:57, where only that breath's hits came, refused as having
+  no cast (E_SPELL_NO_CAST). The shouter's own game never reported it: in
+  god mode the voice recovery is zero, so shoutService.ts reports a shout
+  from its own hit (reportFromHit), and a hit of the same spell within
+  chargeMs (3000 ms, shoutService.ts:263) of the last report counts as that
+  shout's and reports nothing (:171). A second breath under 3 s is
+  swallowed, one past 3 s goes through: Eli's "sometimes". The fix is the
+  sender's rule of the cast-action verb (docs/verbs/cast-action.md): the
+  client reports every shout release and the server judges it; its probe
+  is x-tgm-breath4 again, four launches in the observer's game. Fork
+  m2-breath (the always-loaded flag) fixes nothing and is deleted.
 

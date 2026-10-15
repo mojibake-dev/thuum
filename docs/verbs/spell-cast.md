@@ -914,4 +914,29 @@ health message. A second red within two sweeps makes it a bug.
   with references (the engine alone casting Flames and Firebolt from each
   hand, and a Self cast) and a parity scenario, since b-spell asserts only
   the start's taking.
+- Measured the same night, after the read above: x-left-firebolt
+  (20261015-031632, Firebolt in the left hand only) launched from the left
+  in the observer's game both times (casting source 0 in LaunchData), the
+  figure taking MLh_SpellAimedStart, Ready and Release; x-left-firebolt2
+  (-035333, Firebolt in both hands, cast with the left) launched from the
+  right both times (source 1): finding 2 is the sender's fallback,
+  CONFIRMED. x-self-anim (-031853): the figure took MRh_SpellSelfStart,
+  Ready and Release when the caster's variables landed 23 ms before the
+  start, so a Self cast's and a fire-and-forget's start are taken when the
+  whole casting snapshot is on the figure first; eighteen's missing Self
+  animation and Firebolt's wind-up are the order of arrival (the start on
+  the unreliable UpdateAnimation hop ahead of the variables, the 1 s hold
+  timing out), not a refusal in principle. x-flames-stop (-031410): the
+  figure's IsCastingRight stays 1 and NotCasting 0 for the whole 11 s
+  watch after the caster's release; finding 1 is the missing exit.
+- The shape (Eli, 2026-10-14 21:00, the plan approved): the figure plays
+  the caster's actions, captured at the engine's action entry on the player
+  and replayed on the figure with the caster's variables, the effect
+  decided apart by the server's relay; the verb is docs/verbs/cast-action.md,
+  which holds the engine's chain (the re-analyst's read of the night: every
+  graph-facing step of a cast is an action through DoAction 34202, the
+  concentration exit the Interrupt action, kReady held until a driver
+  releases), the measurements and the probes. Melee keeps its event relay;
+  withheld spells show their animations too. m2-hands' hold is the stopgap
+  it replaces; forks m2-firebolt and m2-hands-exit are deleted with it.
 
