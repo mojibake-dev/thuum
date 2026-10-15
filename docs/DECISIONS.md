@@ -1065,3 +1065,97 @@ copied; ADR-005).
 - The parity gate reads casts on figures (p-spell-bolt, ADR-031), so a
   start the figure refuses or an exit it never takes fails a sweep, not a
   playtest.
+
+## ADR-033: A verb is proved over its sequences and combinations, and a playtest is recorded
+
+Status: accepted (2026-10-15, Eli: "we ARE closer so i think something abt
+the method is working. but think about what abt the method needs to change
+because for the next legs we want to be as wholistic", then "write it up as
+the ADR"). Amends ADR-031 (the inventory and the parity check), ADR-030 (what
+the gate runs) and docs/VERB.md (the template and the reviewer's checklist).
+
+**Context.** The cast-action verb (ADR-032) shipped with the method as it
+stood: the engine's shape read on sky-re, four probes proving each
+capability once, the inventory of one cast's consequences, b-spell and the
+first parity scenario green, a gate of six, a merge. Playtest nineteen then
+found "every test only half works": the figure took every other cast
+(c2's log, 10:38 to 10:41; x-cast-twice-fast 20261015-180119 reproduced it:
+casts two, four and six of eight refused whole), both hands casting the same
+spell separately streamed from one hand, and the breath was as before. None
+of it was a wrong read of the engine. Every failure lived in a dimension the
+method had not asked about:
+- repetition: the probes and the scenario cast once, or four seconds
+  apart; a person casts again 400 to 700 ms after the last exit, where the
+  exit's variables had left the figure's want variable up (no rise for the
+  graph) and the graph was still finishing its exit (the caster's engine
+  waits for the graph's answer; the view performed one update later
+  regardless);
+- combination: the hand fix of the night before named every cast event
+  with the latest start's hand, right for one hand and wrong for two hands
+  casting separately, a case no probe ran; and "dual casting" meant two
+  things to Eli (both hands separately, the perk's combined cast) and one
+  to the verb;
+- context: the lab's caster stood still with nobody casting back; the
+  strafing probe (175846) was the first to refuse a start in the lab;
+- measurement: the reading came from Eli's notes and one game's log, the
+  other game's log having stopped silently at the restore, with no watch
+  on either seat;
+- the gate: the parity diff compares which events a figure took, not how
+  many, so three starts of five taken is the same key set as five.
+
+**Decision.**
+1. **The inventory has a second table: sequences and combinations.** Beside
+   the action's consequences (ADR-031), a verb's doc lists how the action
+   repeats and combines: the same action again at a person's rhythm (the
+   next within a second of the last), the action from each input that
+   performs it (each hand, both hands separately, the perk's dual cast,
+   the voice; sneaking, moving, on a mount where it applies), the action
+   interrupted (a cancelled charge, a sheathe mid-cast, a stagger during
+   it), both players doing it at each other, and the action after a login
+   or a cell change. Each row is a probe or a scenario, and a verb is not
+   done until every row has one green.
+2. **Scenarios do what the checklist asks, the way a person does it.** For
+   every item of a playtest checklist there is a scenario that performs it
+   as the item says: "a few times" is a few times, at a human rhythm with
+   jittered gaps, moving when a person would move, from both seats when
+   the item says both. The gate runs them before the playtest; the
+   playtest then measures what the lab cannot (feel, latency to the eye,
+   the look of a thing), not whether it works.
+3. **A playtest is recorded.** The driver runs in the players' games, so
+   the recorder (ADR-031's watch) runs on both seats for the whole
+   playtest, cycled every few minutes, its traces saved to the results
+   site like a run's; the server's log and both games' logs are fetched
+   at the end. The reading of a playtest starts from its traces, and Eli's
+   notes say what the traces cannot. A game whose log stops is itself a
+   finding.
+4. **The parity diff counts.** After the cut, each event, cast, hit and
+   effect key carries its count, and a count below the reference's is a
+   finding ("missing n of m") as a missing key is; the later list may name
+   a count difference as it names a key.
+5. **A measured constant carries its conditions, and the engine's
+   mechanism beats it.** A rule read off a measurement (one update between
+   the variables and the action) is written with the state it was
+   measured in (a settled graph) and gets a probe at its boundary before
+   it ships; where the engine has a handshake for the same thing (the
+   caster's wait for the graph's answer), the verb uses the handshake, not
+   the constant. A fix to a rule over hands, actors or seats enumerates
+   the combinations in its probe list before it merges (ADR-032's hand
+   rule regressed the one it did not probe).
+
+**Consequences.**
+- docs/VERB.md gains the second inventory table and, in the reviewer's
+  checklist, "every checklist item has its scenario" and "the sequence
+  rows are green".
+- The lab: the recorder's cycling during a playtest (`just
+  playtest-record`), a driver step that repeats an action at a jittered
+  rhythm, parity's counts (labapi parity.py), and a `scenario per
+  checklist item` check the gate can read. numidium's tooling, in that
+  order; the counts first, since p-spell-bolt runs today.
+- cast-action is the first verb reworked this way: its sequence table
+  (quick casts, both hands separately, strafing, both seats, a cancelled
+  charge), x-cast-twice-fast and x-both-hands-relay as scenarios in the
+  gate, the retry replaced by the graph's answer, nineteen played again
+  with the recorder on.
+- The cost: a verb's lab time grows by its sequence rows, an hour or two,
+  against a playtest found wanting and a day of re-staging; that is the
+  trade this ADR makes.
