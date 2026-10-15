@@ -804,3 +804,14 @@ health message. A second red within two sweeps makes it a bug.
 - Merged: fork parity fast-forwarded to 4f74c3e1 (2026-10-14; the gate run set merge-m2-hands went 18 of 18 green). The
   concentration pose is DONE at T3 (b-spell b04f625); the next playtest's
   Flames item is its T4. Firebolt's own wind-up stays LATER (above).
+- Firebolt's wind-up, prepared (2026-10-14, during playtest eighteen's
+  wait): the lab driver's anim-event {delayFrames} (thuum main 1903b67)
+  sends a start an exact number of updates after its variables, and probe
+  x-figure-cast4 sends c1's figure MRh_SpellAimedStart 0 to 3 updates after
+  bWantCastRight, twice each. The candidate fix, fork m2-firebolt 25e38e2f:
+  the view holds only a concentration start for the casting state; for a
+  fire-and-forget start it sets the hand's want variable (bWantCastRight,
+  bWantCastLeft or both: Skyrim Platform's master behavior variables 72 and
+  71) and plays the start fireAndForgetStartFrames updates later, 1 until
+  the probe says which. It merges only on the probe's word.
+
