@@ -12,22 +12,24 @@ Milestone: M2   Class: B
 
 ## Inventory (ADR-031: the action's consequences, before its rung)
 
-From the records and the script as apocrypha read them from the 10.2.3
-archive (docs/MODS.md, "Four spells"; docs/apocalypse-options.md 5.4).
+From the records (read from the 10.2.3 plugin, Engine surface) and the
+script as apocrypha read it (docs/MODS.md, "Four spells";
+docs/apocalypse-options.md 5.4).
 The reference trace (the recorder in a solo client run with the layer,
 lab/references/ghostwalk.json) is step 1 of the Dynamic plan and may add
 rows.
 
 | consequence | seen in | disposition |
 | --- | --- | --- |
-| the Self cast's hand animation and its magicka cost | record (SPEL 0300AAE8: Illusion, fire-and-forget, Self) | native in the caster's game; the cast is spell-cast's (R1), relayed so the figure plays it |
-| the caster invisible for 10 s (MGEF of the Invisibility archetype) | record | imposed: the server runs it as a state (self-cast's archetype 11, R0); native in the caster's game; on the figure by the relayed Self cast, its name hidden (fork m2-flight f3569b95) |
+| the Self cast's hand animation, its casting art and its magicka cost | record (SPEL 0300AAE8: Illusion, fire-and-forget, Self, cost 450) | native in the caster's game; the cast is spell-cast's (R1), relayed so the figure plays it |
+| the caster invisible for 10 s, with the effect's hit art (MGEF 0300AAE5, archetype 11) | record | imposed: the server runs it as a state (self-cast's archetype 11, R0); native in the caster's game; on the figure by the relayed Self cast, its name hidden (fork m2-flight f3569b95) |
 | OnEffectStart: the caster's X, Y, Z and location recorded in the script | record (WB_Ghostwalk_Script) | native in the caster's game: the filter passes an effect the player bears (ADR-029 A1, test 1) |
 | OnEffectFinish: a wait (WB_Wait, 0.4 s), then SetPosition back to the cast point | record | native in the caster's game; the server takes the move as a permitted return (R1, Server) |
-| a sound, a visual (FXEmptyActivator 000B79FF placed for it) and QueueNiNodeUpdate at the return | record | native in the caster's game; later on other screens: the figure's script is blanked there (Suppress) |
-| an image space on the caster's screen | record | native (R3: the caster's screen only) |
+| a sound, a visual (030207C1, at an FXEmptyActivator 000B79FF placed for it) and QueueNiNodeUpdate at the return | record | native in the caster's game; later on other screens: the figure's script is blanked there (Suppress) |
+| image spaces on the caster's screen (030207BA, the effect's; 030207BC, the return's) | record | native (R3: the caster's screen only) |
+| a failure message (0300AAE6) when the return is refused | record | native in the caster's game; HYPOTHESIS that WB_CheckLocation False never shows it |
 | a detection event at the return (CreateDetectionEvent) | record | native in the caster's game; later: other games' NPCs hear nothing (NPC hosting, M3) |
-| the Eye Fix ability added to the caster (AddSpell) | record | native in the caster's game; HYPOTHESIS that the server never learns it (a script's AddSpell is not reported); later: the learned-spells record if the reference shows the ability lasting |
+| the eyes-fix ability added to the caster (SPEL 030CB7E1, AddSpell) | record | native in the caster's game; HYPOTHESIS that the server never learns it (a script's AddSpell is not reported) and that it removes itself; later: the learned-spells record if the reference shows it lasting |
 | the effect ended early by the caster's own attack or cast | engine (self-cast's HYPOTHESIS) | native, and the server's self-cast ends its state; the script returns the caster then, the permit's window opening at the cast |
 
 ## Authority
@@ -54,12 +56,36 @@ positions' age.
 
 ## Engine surface
 
-- The spell (docs/MODS.md:147-150, apocrypha's read; HYPOTHESIS until
-  lab/esm.py reads the records on the layer): SPEL 0300AAE8 (the 03 is the
-  load slot in that read; the server names it as a FormDesc, local id plus
-  plugin name), 10 s, its effect of the Invisibility archetype carrying
-  WB_Ghostwalk_Script with WB_Wait 0.4 and WB_CheckLocation False in its
-  VMAD.
+- The records (Apocalypse - Magic of Skyrim.esp 10.2.3, the archive's md5
+  as docs/MODS.md's; read 2026-10-14 with lab/esm.py, the fields by UESP's
+  "Skyrim Mod:Mod File Format" SPEL, MGEF and VMAD layouts; ids with the
+  plugin's own index 03, which the server names as a FormDesc, the local id
+  and the plugin's name):
+  - SPEL 0300AAE8 WB_Ill_Invis4_Spell_Ghostwalk, "Ghostwalk": cost 450,
+    charge 0.5 s, fire-and-forget, Self, one effect for 10 s.
+  - MGEF 0300AAE5 WB_Ill_Invis4_Effect_Ghostwalk: Illusion (actor value
+    21), archetype 11, Invisibility, on actor value 54, Invisibility
+    (CommonLibSSE-NG include/RE/E/EffectArchetypes.h:21,
+    include/RE/A/ActorValues.h:29, :62); casting art 0311CC2D, hit art
+    0311CC2F, image space 030207BA. Its description: "Caster is invisible
+    for <dur> seconds or until broken, then teleports back to where the
+    spell was cast."
+  - Its VMAD: WB_Ghostwalk_Script (OnEffectStart, 8 instructions;
+    OnEffectFinish, 34; lab/pex.py dump), with WB_Wait 0.4,
+    WB_CheckLocation False, WB_TriggerVFXDur 3.0, WB_DetectionSoundBase
+    75.0 and WB_DetectionSoundMult 0.5, the return's image space 030207BC,
+    visual 030207C1 and marker script 030207BF, FXEmptyActivator 000B79FF,
+    a failure message 0300AAE6, and the ability
+    WB_S_I000_InvisFix_Spell_Ab_PC.
+  - That ability: SPEL 030CB7E1 WB_Ill_Invis4_Spell_Ghostwalk_InvisFix
+    (type 4, an ability), MGEF 030CB7E0 (archetype 1, Script) carrying
+    WB_inviseyefix with itself as its InvisibilityEyesFixSpell property: by
+    its names, the fix for an invisible actor's eyes, which removes itself
+    (INFERRED; its body unread).
+  - The bodies' calls are apocrypha's read (docs/MODS.md:147-150): the
+    position and location recorded at the start; at the finish the wait,
+    SetPosition back, a sound, a visual, the image space, a detection
+    event and the ability.
 - The script's calls, all in the caster's game (none on the server's VM):
   SetPosition, GetCurrentLocation, Location.HasCommonParent,
   ImageSpaceModifier.Apply, CreateDetectionEvent, RegisterForSingleUpdate,
@@ -187,8 +213,9 @@ positions' age.
   26fa3eb013175c09d12b5b52d5df09ac, its ESP appended to the server's load
   order and each clone's, its two BSAs beside it; `just deploy-srv`,
   `just client-mods 711` and `712`, stacked snapshots), after a playtest
-  that needs the world as it is. The records then read by lab/esm.py
-  (the spell's ids, duration, the VMAD).
+  that needs the world as it is. The archive is in lab/.cache/mods
+  already (fetched 2026-10-10, md5 checked 2026-10-14): the plugin and
+  "Apocalypse - Magic of Skyrim.bsa" and "... - Textures.bsa".
 - Step 1, the reference: c1 alone casts Ghostwalk under the recorder,
   walks away, and is returned; the trace is lab/references/ghostwalk.json.
 - Step 2, x-ghostwalk-relay on parity with the layer: c1 casts at c2's
