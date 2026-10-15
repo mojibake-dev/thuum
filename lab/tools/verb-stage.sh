@@ -17,6 +17,10 @@
 #   9. the probes named (scenario ids or paths), each through `just lab-run`.
 # Stops at the first failure; nothing is snapshotted over a clone whose dist did
 # not land. Never opens a Moonlight stream (Eli's seats are his).
+# Runs from the main checkout, or from a worktree of a thuum branch whose lab
+# tree the verb needs (ghostwalk's settings), with FORK_DIR naming the fork
+# checkout; either way the tree must contain origin/main, since step 5's
+# deploy-srv would otherwise roll back main's lab tree on sky-srv.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 branch=${1:?fork branch}; shift
@@ -27,6 +31,10 @@ srv_ssh="ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4
 git -C "$fork" fetch -q origin "$branch"
 sha=$(git -C "$fork" rev-parse "origin/$branch"); sha8=${sha:0:8}
 echo "== verb-stage $branch ($sha8) $(date +%H:%M:%S)"
+git fetch -q origin main
+if ! git merge-base --is-ancestor origin/main HEAD; then
+  echo "== this tree ($(git rev-parse --short=8 HEAD)) lacks origin/main: its deploy-srv would roll back main's lab tree on sky-srv; merge main into it first (never rebase)" >&2; exit 2
+fi
 
 echo "== 1. the Windows build of $sha8"
 reruns=0
@@ -108,7 +116,8 @@ $srv_ssh "cd /srv/lab && sed -i 's/^SERVER_TAG=.*/SERVER_TAG=$branch/' .env && g
 
 echo "== 7. the client on both clones $(date +%H:%M:%S)"
 just build-client "$branch" 2>&1 | tail -1
-echo "   dist js $(shasum -a 256 "$fork/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
+# where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
+echo "   dist js $(shasum -a 256 "skymp/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
 for v in 712 711; do
   ok=""
   for attempt in 1 2; do
