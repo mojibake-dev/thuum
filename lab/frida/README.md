@@ -114,6 +114,21 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   For playtest eighteen's left-hand Firebolt leaving the figure's right hand
   (docs/verbs/spell-cast.md, x-left-firebolt). 1.6.1170 only.
 
+- action-trace.js: the engine's action path, call by call
+  (docs/verbs/cast-action.md): every ActorMediator::PerformAction (38949,
+  the one entry every BGSAction goes through, a cast's four phases included)
+  with its TESActionData's source, action and index, input type, event,
+  idle, result and flags on entry and on exit and the return; every call of
+  the mediator's second entry (38953, the one Skyrim Platform's performAction
+  uses, which performs a data as given); and every cast-shaped graph event
+  (MRh_, MLh_, DualMagic, shout, Voice, Cast) sent to the player's or a
+  figure's holder (IAnimationGraphManagerHolder::NotifyAnimationGraph, 32901),
+  tagged with whether a PerformAction is open on that thread. The test of the
+  re-analyst's read of 2026-10-14 (the event empty on entry and chosen on
+  exit, the type 2, the indices 45..52 and 60..63, no cast event without an
+  action around it) and of each performAction replay on a figure. Layouts
+  are CommonLibSSE-NG's, cited in the script; 1.6.1170 only.
+
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as
 frida/<client>-<script>.jsonl; one started outside a run is fetched by the next

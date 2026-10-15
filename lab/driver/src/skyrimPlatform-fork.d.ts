@@ -14,6 +14,7 @@ declare module "skyrimPlatform" {
     integers: ArrayBuffer;
   }
   export function getAnimationVariablesFromActor(actorFormId: number): ActorAnimationVariables;
+  export function applyAnimationVariablesToActor(actorFormId: number, animationVariables: ActorAnimationVariables): boolean;
   // thuum docs/verbs/cast-action.md (fork m2-cast-action): an action the
   // player's actor performed, as Skyrim Platform's hook on the engine's
   // action entry reports it (the BGSAction, the idle the engine chose, the

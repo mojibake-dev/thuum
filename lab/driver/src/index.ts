@@ -49,6 +49,7 @@ import {
   on,
   printConsole,
   performAction,
+  applyAnimationVariablesToActor,
   settings,
   writeLogs,
 } from "skyrimPlatform";
@@ -303,6 +304,47 @@ function releaseHeldKeys(): void {
       Input.releaseKey(heldKeys[i].code);
       heldKeys.splice(i, 1);
     }
+  }
+}
+
+// figure-action's {replay: all}: the player's recorded actions performed on
+// a target at their original spacing, from update (thuum
+// docs/verbs/cast-action.md: the figure plays the caster's actions as the
+// sync will relay them)
+const scheduledReplays: Array<{ at: number; targetId: number; rec: RecordedAction; set: Record<string, unknown>; variables: boolean }> = [];
+
+// One action on an actor through the engine's action entry (the fork's
+// performAction): the recorded variables first when asked and present (the
+// caster's graph as it was when its engine chose the idle), then {set}'s
+// named variables, then the action. What was done, for the step's answer and
+// the client log.
+function replayOn(target: Actor, rec: RecordedAction, set: Record<string, unknown>, variables: boolean): Record<string, unknown> {
+  let applied: boolean | undefined;
+  if (variables && rec.variables) applied = applyAnimationVariablesToActor(target.getFormID(), rec.variables);
+  for (const [k, v] of Object.entries(set)) {
+    if (typeof v === "boolean") target.setAnimationVariableBool(k, v);
+    else if (typeof v === "number") target.setAnimationVariableFloat(k, v);
+  }
+  // an older Skyrim Platform has no such export: the binding is undefined
+  const perform: unknown = performAction;
+  if (typeof perform !== "function") return { error: "no performAction in this Skyrim Platform" };
+  const taken = (perform as typeof performAction)(target.getFormID(), rec.action, rec.idle, rec.eventName, rec.type);
+  const out = { performed: rec.action, idle: rec.idle, event: rec.eventName, type: rec.type, on: target.getFormID(), applied, taken, set: Object.keys(set), recordedAt: rec.ms };
+  printConsole("lab-driver: figure-action", JSON.stringify(out));
+  return out;
+}
+
+function runScheduledReplays(): void {
+  const now = Date.now();
+  for (let i = 0; i < scheduledReplays.length; ) {
+    const s = scheduledReplays[i];
+    if (s.at > now) {
+      i++;
+      continue;
+    }
+    scheduledReplays.splice(i, 1);
+    const target = Actor.from(Game.getFormEx(s.targetId));
+    if (target) replayOn(target, s.rec, s.set, s.variables);
   }
 }
 
@@ -561,9 +603,18 @@ on("spellCast", (e) => {
 // ones), with the idle it chose; the reference of what a figure must replay.
 // A client without the fork's hook has no such event, and the driver loads
 // all the same.
+// The player's latest actions, the variables kept, for figure-action's
+// replay: a figure playing the caster's own action with the caster's own
+// variables, as the sync will relay them (the probes x-figure-action*)
+type RecordedAction = { ms: number; action: number; idle: number; eventName: string; type: number; variables?: Parameters<typeof applyAnimationVariablesToActor>[1] };
+const recentActions: RecordedAction[] = [];
+const RECENT_ACTIONS_MAX = 64;
 try {
   on("actionPerformed", (e) => {
-    if (!watching || !e.actor) return;
+    if (!e.actor) return;
+    recentActions.push({ ms: Date.now(), action: e.action, idle: e.idle, eventName: e.eventName, type: e.type, variables: e.variables });
+    if (recentActions.length > RECENT_ACTIONS_MAX) recentActions.shift();
+    if (!watching) return;
     const w = watchedRecord(e.actor.getFormID());
     if (w && w.actions.length < WATCH_SELF_MAX) w.actions.push([watchedMs(), e.action, e.idle, e.eventName, e.type]);
   });
@@ -1575,22 +1626,45 @@ function run(step: Step, player: Actor): unknown {
     case "figure-action": {
       // thuum docs/verbs/cast-action.md: an action performed on the nearest
       // other actor's graph ({other: true}; the player's own otherwise)
-      // through the engine's action entry (the fork's performAction): the
-      // BGSAction {action}, the idle {idle} (0 for the engine's choice), the
-      // graph event {event} and the input type {type}, after {set} puts
-      // graph variables on it in the same tick, as anim-event does. The
-      // probe of whether a figure plays a replayed cast action.
+      // through the engine's action entry (the fork's performAction), the
+      // probe of whether a figure plays a replayed cast action. With
+      // {replay} it is the player's own recorded actions, played as the
+      // sync will relay them, each with its recorded variables put on the
+      // target first (applyAnimationVariablesToActor, the caster's graph as
+      // it was when its engine chose the idle) unless {variables: false}:
+      // {replay: all} every action of the last {sinceMs} (10 s by default),
+      // the first now and the rest at their original spacing, from update;
+      // {replay: {action: id}} (or a list of ids) the last one of that
+      // BGSAction; {replay: -n} the n-th from the end; {replay: last} the
+      // last of all. Without {replay}: the BGSAction {action}, the idle
+      // {idle}, the graph event {event} and the input type {type} as given.
+      // {set} puts named graph variables on the target after the variables
+      // and before the action, as anim-event does.
       const target = a.other ? nearestOther(player) : player;
       const set = a.set && typeof a.set === "object" ? (a.set as Record<string, unknown>) : {};
-      for (const [k, v] of Object.entries(set)) {
-        if (typeof v === "boolean") target.setAnimationVariableBool(k, v);
-        else if (typeof v === "number") target.setAnimationVariableFloat(k, v);
+      const variables = a.variables !== false;
+      const recorded = () => recentActions.map((r) => [r.ms, r.action, r.idle, r.eventName, r.type]);
+      if (a.replay === "all") {
+        const since = Date.now() - num(a.sinceMs, 10000);
+        const recs = recentActions.filter((r) => r.ms >= since);
+        if (recs.length === 0) return { error: "no recorded actions to replay", recorded: recorded() };
+        const now = Date.now();
+        for (const r of recs) scheduledReplays.push({ at: now + (r.ms - recs[0].ms), targetId: target.getFormID(), rec: r, set, variables });
+        return { scheduled: recs.map((r) => [r.ms - recs[0].ms, r.action, r.idle, r.eventName, r.type]), on: target.getFormID() };
       }
-      // an older Skyrim Platform has no such export: the binding is undefined
-      const perform: unknown = performAction;
-      if (typeof perform !== "function") return { error: "no performAction in this Skyrim Platform" };
-      const taken = (perform as typeof performAction)(target.getFormID(), num(a.action), num(a.idle ?? 0), typeof a.event === "string" ? a.event : "", num(a.type ?? 0));
-      return { performed: num(a.action), idle: num(a.idle ?? 0), on: target.getFormID(), taken, set: Object.keys(set) };
+      let rec: RecordedAction | undefined;
+      if (a.replay !== undefined) {
+        if (a.replay && typeof a.replay === "object") {
+          const want = (a.replay as Record<string, unknown>).action;
+          const wants = (Array.isArray(want) ? want : [want]).map((w) => num(w));
+          for (let i = recentActions.length - 1; i >= 0 && !rec; i--) if (wants.indexOf(recentActions[i].action) >= 0) rec = recentActions[i];
+        } else if (typeof a.replay === "number") rec = recentActions[recentActions.length + a.replay];
+        else rec = recentActions[recentActions.length - 1];
+        if (!rec) return { error: "no recorded action to replay", recorded: recorded() };
+      } else {
+        rec = { ms: 0, action: num(a.action), idle: num(a.idle ?? 0), eventName: typeof a.event === "string" ? a.event : "", type: num(a.type ?? 0) };
+      }
+      return replayOn(target, rec, set, variables);
     }
     case "anim-event": {
       // One animation event on the player's behavior graph (Papyrus
@@ -1911,6 +1985,7 @@ on("update", () => {
   finishDeferred(c);
   releaseHeldKeys();
   sendDelayedEvents();
+  runScheduledReplays();
   const me = Game.getPlayer();
   if (me) settleMove(me);
   if (me) finishCraft(c, me);
