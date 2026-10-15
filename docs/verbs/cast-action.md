@@ -84,17 +84,53 @@ and 8 a second only ever stops a flood.
   Release action. The concentration exit is InterruptCast 34408, whose
   InterruptCastImpl 34140 performs the Interrupt action; FinishCast 34435
   then drops the want variable and kills the stream's projectile.
-- The action entry: TESActionData (include/RE/T/TESActionData.h, Create and
-  Ctor RELOCATION_ID(15916, 41558)) over ActionInput (source, target,
-  action, include/RE/A/ActionInput.h) and ActionOutput (animEvent,
-  targetAnimEvent, result, sequence as the idle, animObjIdle,
-  include/RE/A/ActionOutput.h); the mediator that performs it
-  (ActorMediator: RTTI in include/RE/Offsets_RTTI.h:2486, no methods in the
-  headers). TiltedEvolution's map: PerformAction (SE 38949) is the capture
-  point, a sibling that performs a TESActionData whose idle is set (SE
-  38953) plus a variables step (SE 39004) is the replay. Their 1.6.1170
-  counterparts: UNKNOWN, delegated to the re-analyst 2026-10-14 (from
-  DoAction 34202's own call after it builds the TESActionData).
+- The action entry (the re-analyst on sky-re, 2026-10-14 night, every id
+  1.6.1170's by lab/addr.py; HYPOTHESIS until action-trace.js confirms it in
+  the probes): TESActionData (include/RE/T/TESActionData.h, Ctor
+  RELOCATION_ID(15916, 41558)) over ActionInput (source, target, action,
+  unk20; include/RE/A/ActionInput.h) and ActionOutput (animEvent,
+  targetAnimEvent, result, sequence, animObjIdle, sequenceIndex;
+  include/RE/A/ActionOutput.h), flags at 0x58, 0x60 in all, the layout the
+  decompiles use field for field. DoAction 34202 builds it on the stack
+  (unk20 = 2, the source and the action, no target, flags 0) and calls its
+  Process (vslot 5, 41557), which calls ActorMediator::PerformAction 38949
+  on the mediator singleton (403567 holds the pointer its constructor
+  38948 stores). TiltedEvolution's five numbers are these ids themselves,
+  no SE-to-AE translation. PerformAction, (ActorMediator*, TESActionData*)
+  -> bool: (1) false without a BSAnimationGraphManager; (2) unless flags
+  bit 1, the validators (39002: ragdoll, bIsSynced, the sprint, draw, bow
+  and sneak gates; 37147: the idle chosen from the actor's idle tree by the
+  action's index and its conditions, 24602, written as animEvent and
+  animObjIdle, UNLESS animEvent is already set, which it takes as is;
+  39003: the attack data's stamina; 32802: the paired manager); (3) flags
+  bit 0: flags = 2 and true, nothing performed (the engine's dry run); (4)
+  the perform: the sequencer for sequence idles (14999), the paired
+  counterpart (32803), NotifyAnimationGraph of animEvent on the source's
+  holder (43567, the virtual at 32901), then the post step 39004 with the
+  graph's answer. 38953 is the tail alone, steps (4) and the post step,
+  with no code caller in 1.6.1170: it performs a data as given, which is
+  what the figure needs (its own conditions would choose its own idle,
+  without the perk, in the wrong hand). 39004 is the engine's ActorState
+  bookkeeping keyed by the event name (sneak, block, bow draw, the sync
+  ints for sprint, move and turn); cast events match none of it, and both
+  entries call it already, so a replay never calls it again: it is not the
+  master-behavior variables, which Skyrim Platform's existing
+  applyAnimationVariablesToActor writes. The event is empty on entry and
+  chosen on exit for every DoAction-originated call, so the capture reads
+  the data at the leave; unk20 is read by nothing in the chain, so the
+  replay carries what the capture carried. Callers of 38949 besides
+  Process: 38951 (the sequencer's continuation), 38063 (an idle preset
+  from a TESIdleForm, unk20 0), nine Actor-region sites; of Process, 45,
+  the four caster impls (34137 Attack, 34138 Ready, 34139 Release, 34140
+  Interrupt, each indexing the per-source table at 380331: left 45..48,
+  right 49..52, voice 60..63) and PlayerControls::DoAction 42350 among
+  them. The bypass: NotifyAnimationGraph itself (32901, the base 24
+  vtables share; the Actor's thunk 38048 is where Skyrim Platform's
+  sendAnimationEvent hook sits), whose virtual callers cannot be listed
+  statically; whether DrawWeaponMagicHands goes through an action is
+  unread. A remote replay through 38953 can fail only on a missing graph
+  manager or the graph's own refusal of the event. Ghidra names and plate
+  comments saved on sky-re for all of these.
 - The records (Skyrim.esm by lab/esm.py on sky-srv, 2026-10-14): the
   actions are AACT forms, ActionLeftAttack 0x13004, ActionRightAttack
   0x13005, ActionVoice 0x13008, ActionLeftRelease 0x13451, ActionLeftReady
@@ -143,10 +179,12 @@ and 8 a second only ever stops a flood.
 
 ## Impose (observers render the server's decision)
 
-- Mechanism: a new Skyrim Platform native, TESModPlatform.PerformActionOnActor
-  (actor, actionId, idleId, eventName, type, variables), building a
-  TESActionData with the idle set, loading the variables, performing it
-  through the replay entry; the figure's relayed interrupt ends its stream
+- Mechanism: a Skyrim Platform export beside castSpellImmediate,
+  performAction(actor, action, idle, eventName, type) (MagicApi.cpp on fork
+  m2-cast-action), building the TESActionData on the stack with the event
+  and idle the caster's engine chose and performing it through the replay
+  entry 38953, after the caller has put the caster's variables on the
+  figure through the existing applyAnimationVariablesToActor; the figure's relayed interrupt ends its stream
   through MagicCaster::InterruptCast (include/RE/M/MagicCaster.h:79)
   instead of FinishCast.
 - Visual without simulation achieved by: the idle the caster's engine
@@ -191,8 +229,10 @@ and 8 a second only ever stops a flood.
   bytes to the neighbours (OnUpdateAnimation's shape); nothing recorded.
 - DB fields / migration: none.
 - Restart behavior: none.
-- Papyrus natives touched (ledger lines added): none on the server;
-  PerformActionOnActor is client-side (R3) and gets its NATIVES.md row.
+- Papyrus natives touched (ledger lines added): none; performAction is a
+  Skyrim Platform JavaScript export like castSpellImmediate, not a Papyrus
+  native, so rule 10's ledger has no row for it; this doc declares it R3
+  (client-local visual state).
 
 ## Client
 
@@ -206,7 +246,7 @@ and 8 a second only ever stops a flood.
   it, a message for a hand not casting falling back to castSpellImmediate;
   the interrupt ending it through InterruptCast); remoteServer.ts queues
   UpdateAction per form and view/formView.ts replays it through
-  PerformActionOnActor, the held-start logic gone (castStartWaiting,
+  performAction, the held-start logic gone (castStartWaiting,
   castStartHeldSince, castStartCastingSeen); magicSyncService.ts takes
   castingSource from the hand of the last cast action; shoutService.ts
   reports by release (its 3 s hit window dropped).
@@ -244,22 +284,34 @@ and 8 a second only ever stops a flood.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- Step 1 (read-only, in hand): the re-analyst resolves PerformAction, the
-  replay entry and the variables step for 1.6.1170, the TESActionData
-  fields a replay must set, and PerformAction's early returns on an NPC.
-- Step 2: the hook and the native on fork branch m2-cast-action, the Windows
-  build through the mirror; the driver's `figure-action {actionId, idleId,
-  eventName, type}` step (on the nearest other actor) and a solo capture
-  step that records the player's own actions.
-- Step 3, probes on the staged branch: x-figure-action (P1: c1 holds Flames
-  drawn; c2 replays the captured Attack action with c1's variables on c1's
-  figure, then the Interrupt action; the figure's IsCastingRight and events;
-  screenshots), x-figure-action-bolt (P3: the Attack, Ready and Release of
-  Firebolt, right and left), x-figure-action-dual (P2) and
-  x-figure-action-self (P4).
-- Expected: the figure's graph takes each replayed action and plays its
-  idle; the Interrupt produces MRh_Equipped_Event and the casting variables
-  fall; the dual and Self idles play.
+- Step 1 (done 2026-10-14 21:35): the re-analyst's read above; every id
+  confirmed against addrlib by `just addr`.
+- Step 2 (built 2026-10-14 21:40, fork m2-cast-action 0d69f6fe): the hook
+  on 38949 (the player's data only, dry runs and refused calls left out,
+  read at the leave, a per-thread stack for the mediator's re-entry; the JS
+  event actionPerformed with the action, idle, event, type, flags, result
+  and the variables as they were when the graph was asked) and the export
+  performAction(actor, action, idle, eventName, type), which builds the
+  TESActionData on the stack as DoAction does and calls 38953; both AE
+  only. The Windows build on the mirror (run 38683079932). Thuum branch
+  cast-action feebd30: the driver keeps the player's recent actions with
+  their variables and figure-action replays them ({replay: all} at the
+  original spacing, {replay: {action: id}} the last of one action), the
+  recorded variables applied to the target first through
+  applyAnimationVariablesToActor; lab/frida/action-trace.js logs 38949,
+  38953 and the cast-shaped events at 32901 on the player and the figures.
+- Step 3, the probes (x- files by path, ADR-009), each in c1's own game
+  with action-trace.js on c1: c1 casts, its hook records the actions, c1's
+  driver replays them on c2's figure. x-figure-action (P1: Flames 2 s then
+  4 s), x-figure-action-bolt (P3: Firebolt twice), x-figure-action-self
+  (P4: Invisibility twice), x-figure-action-dual (P2: Flames in both hands
+  with Destruction Dual Casting, both keys, the figure without the perk).
+- Expected: the trace shows the event empty on entry and chosen on exit,
+  type 2, indices 49..52 for the right hand, each replay one 38953 call
+  answered true; the figure's graph takes each replayed action and plays
+  its idle; the Interrupt produces MRh_Equipped_Event and the casting
+  variables fall; the dual and Self idles play. Which action a dual cast
+  performs is P2's first reading.
 - Owner: agent. If P1 fails: the fallback, the figure's own caster
   (CastSpell 34401 with kSkipCheckCast, StartCast 34445 at the relayed
   release, InterruptCast at the end), with the server's withheld relays
@@ -268,7 +320,7 @@ and 8 a second only ever stops a flood.
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated (delegated 2026-10-14: the action path's ids)
+- [x] engine surface cited or delegated (the action path read and its ids confirmed 2026-10-14; HYPOTHESIS until action-trace.js)
 - [ ] server logic + T0
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
