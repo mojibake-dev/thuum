@@ -79,17 +79,42 @@ cleanup() {
 trap cleanup EXIT
 # The commit's own artifact, else the branch's newest: difftest-build runs only
 # when skymp-wire changes (the fork's .gitlab-ci.yml), so a commit that left it
-# alone has none and its branch's last one is the same binary and sessions.
-job=$(curl -fsS -m 60 -H "PRIVATE-TOKEN: $tok" \
-  "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs?scope[]=success&per_page=100" \
-  | python3 -c "
-import sys, json
-jobs = [x for x in json.load(sys.stdin) if x['name'] == 'difftest-build' and x['ref'] == '$ref']
-own = [x for x in jobs if x['commit']['id'].startswith('$sha')]
+# alone has none and its branch's last one is the same binary and sessions. That
+# holds only if no commit since that artifact changed skymp-wire: a pipeline
+# cancelled by the next push leaves the branch's newest artifact older than its
+# sessions, and T2 then passes without them (m2-cast-action's cast-action session,
+# 2026-10-15: job 6608 at 3f8d8f77 served a head two session commits later). So
+# the pick is checked against the head (the tag's commit, else the branch's) with
+# GitLab's compare, and a stale one stops T2 with the way out named.
+job=$(TOK="$tok" python3 - "$project" "$ref" "$sha" <<'PY'
+import json, os, sys, urllib.parse, urllib.request
+project, ref, sha = sys.argv[1], sys.argv[2], sys.argv[3]
+G = f"https://gitlab.gaussing.tv/api/v4/projects/{project}"
+def get(path):
+    req = urllib.request.Request(G + path, headers={"PRIVATE-TOKEN": os.environ["TOK"]})
+    return json.load(urllib.request.urlopen(req, timeout=60))
+jobs = [x for x in get("/jobs?scope[]=success&per_page=100") if x["name"] == "difftest-build" and x["ref"] == ref]
+head = sha or get("/repository/branches/" + urllib.parse.quote(ref, safe=""))["commit"]["id"]
+own = [x for x in jobs if x["commit"]["id"].startswith(head)]
 pick = own or jobs
-if pick and not own:
-    print('   no difftest-build at $sha (it left skymp-wire alone): job %d from %s, the branch\'s newest' % (pick[0]['id'], pick[0]['commit']['id'][:8]), file=sys.stderr)
-print(pick[0]['id'] if pick else '')")
+if not pick:
+    print("")
+    sys.exit(0)
+at = pick[0]["commit"]["id"]
+if not own:
+    cmp = get("/repository/compare?" + urllib.parse.urlencode({"from": at, "to": head}))
+    wire = sorted({d["new_path"] for d in cmp.get("diffs", []) if d["new_path"].startswith("skymp-wire/")})
+    if wire:
+        print(f"   the branch's newest difftest-build (job {pick[0]['id']} at {at[:8]}) predates skymp-wire changes up to {head[:8]}: "
+              + ", ".join(wire[:4]) + ("..." if len(wire) > 4 else ""), file=sys.stderr)
+        print(f"   run the fork pipeline at the head first (POST /projects/{project}/pipeline?ref={ref}: an API pipeline builds difftest), then T2", file=sys.stderr)
+        print("STALE")
+        sys.exit(0)
+    print(f"   no difftest-build at {head[:8]} (it left skymp-wire alone): job {pick[0]['id']} from {at[:8]}, the same binary and sessions", file=sys.stderr)
+print(pick[0]["id"])
+PY
+)
+[ "$job" = STALE ] && { echo "== T2 not run: the difftest artifact is older than the branch's skymp-wire" >&2; exit 3; }
 if [ -n "$job" ] && curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
      "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs/$job/artifacts"; then
   (cd "$tmp" && unzip -q a.zip) && rsync -az --delete -e "ssh -J $jump" "$tmp/difftest-dist/" "$host:/srv/lab/difftest/" && echo "   job $job installed on sky-srv"
