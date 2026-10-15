@@ -123,7 +123,7 @@ echo "== 7. the client on both clones $(date +%H:%M:%S)"
 # client-dist stages the built driver bundle with the dist (stage-client.sh), so build it first: a fresh
 # worktree has none, and the main checkout's would be whatever was built last
 echo "   driver bundle: $(just build-driver 2>&1 | tail -1 | awk '{print $5, $NF}')"
-just build-client "$branch" 2>&1 | tail -1
+just build-client "$branch" "$sha" 2>&1 | grep -E "^run [0-9]+ " | cut -c1-120   # the build of this head, not the branch's newest
 # where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
 echo "   dist js $(shasum -a 256 "skymp/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
 for v in 712 711; do

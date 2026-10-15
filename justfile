@@ -49,14 +49,20 @@ test: build-image
 
 # Downloads the newest `dist` artifact from mojibake-dev/skymp into skymp/build/dist-client.
 # Client and Skyrim Platform: fetch what upstream's Windows workflow built on the GitHub mirror.
-build-client branch=client_branch:
+build-client branch=client_branch sha="":
     #!/usr/bin/env bash
     set -euo pipefail
-    run=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-    test -n "$run" || { echo "no successful Parity Windows run on the mirror for branch {{branch}} yet"; exit 1; }
+    # the run built from `sha` when given (verb-stage passes its head), else the branch's newest successful one: the
+    # newest is the wrong build whenever a later push on the branch built first (m2-cast-action's 0ce34196 was laid over
+    # abe44a55 by hand so, 2026-10-15)
+    sha="{{sha}}"
+    pick=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 30 \
+             --json databaseId,headSha --jq "[.[] | select(.headSha | startswith(\"$sha\"))][0] | if . == null then \"\" else \"\(.databaseId) \(.headSha[0:8])\" end")
+    test -n "$pick" || { echo "no successful Parity Windows run on the mirror for branch {{branch}}${sha:+ at $sha} yet"; exit 1; }
+    run=${pick%% *}; built=${pick#* }
     rm -rf {{skymp}}/build/dist-client && mkdir -p {{skymp}}/build/dist-client
     gh run download "$run" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
-    echo "run $run -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
+    echo "run $run ($built) -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
 
 # T2 on sky-srv (ADR-019): the server build SERVER_TAG (default the lab's) from the clean world, the fakeclient smoke checked through labState, then difftest's sessions against the legacy RakNet stack (LEGACY_TAG, default parity-legacy); lab/tools/test-proto.sh.
 test-proto tag="":
