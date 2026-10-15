@@ -517,24 +517,34 @@ class _ParityRef:
         self._compared: list[str] = []
 
     def _mark(self, view: str, record: dict | None) -> float:
-        """The cut for a record: the first mark of the spec's kind, less the lead."""
+        """The cut for a record: the first mark of the spec's kind (the first
+        kind of a list that the record shows), less the lead."""
         cut = self._spec.cut
-        kind = str(cut.kind)
+        kinds = [str(k) for k in cut.kind] if isinstance(cut.kind, list) else [str(cut.kind)]
         if not record:
             raise AssertionData(f"parity: {view} has no record to cut")
-        rows: list = []
-        if kind == "hit":
-            rows = record.get("hits" if self.ROLE_OF[view] == "actor" else "taken") or []
-        elif kind == "cast":
-            rows = record.get("casts") or []
-        elif kind.startswith("event:"):
-            name = kind.split(":", 1)[1].lower()
-            rows = [e for e in record.get("events") or [] if str(e[1]).lower() == name]
-        else:
-            raise AssertionSyntax(f"E_ASSERT_SYNTAX: parity cut kind {kind!r} is not hit, cast or event:<name>")
-        if not rows:
-            raise AssertionData(f"parity: {view} shows no {kind} to cut at")
-        return max(0.0, float(rows[0][0]) - float(cut.lead_ms))
+        for kind in kinds:
+            rows: list = []
+            if kind == "hit":
+                rows = record.get("hits" if self.ROLE_OF[view] == "actor" else "taken") or []
+            elif kind == "cast":
+                rows = record.get("casts") or []
+            elif kind.startswith("event:"):
+                name = kind.split(":", 1)[1].lower()
+                rows = [e for e in record.get("events") or [] if str(e[1]).lower() == name]
+            elif kind.startswith("value:"):
+                av = kind.split(":", 1)[1].lower()
+                if av not in ("health", "magicka", "stamina"):
+                    raise AssertionSyntax(f"E_ASSERT_SYNTAX: parity cut value {av!r} is not health, magicka or stamina")
+                series = record.get(av) or []
+                if series:
+                    first = float(series[0][1])
+                    rows = [r for r in series if float(r[1]) < first - 0.5]
+            else:
+                raise AssertionSyntax(f"E_ASSERT_SYNTAX: parity cut kind {kind!r} is not hit, cast, event:<name> or value:<av>")
+            if rows:
+                return max(0.0, float(rows[0][0]) - float(cut.lead_ms))
+        raise AssertionData(f"parity: {view} shows no {' or '.join(kinds)} to cut at")
 
     def _watch(self, client: str) -> dict[str, Any]:
         fn = getattr(self._views, "watch", None)
