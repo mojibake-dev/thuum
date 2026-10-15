@@ -208,25 +208,42 @@ and 8 a second only ever stops a flood.
 
 ## Message contract
 
-- Message name / numeric type: UpdateAction, MsgType 45 (wire id 53).
-- Direction: client to server, relayed to the neighbours as UpdateAnimation
-  is; reliable both hops (the start of a cast must arrive; UpdateAnimation's
-  unreliable hops are why the wind-up was lost).
+- Message name / numeric type: UpdateAction, MsgType 44 (wire id 52),
+  schema 14 (fork m2-cast-action 9de6f123). The plan said 45; the branch
+  leaves 05192845, where the last message is 43, and wire-schema's test
+  keeps the ids contiguous, so this verb takes 44 and the unmerged
+  PlayerGlobals renumbers to 45 when it lands: first to merge takes the
+  next number.
+- Direction: client to server, relayed to the actor's neighbours but the
+  sender (OnUpdateAction, as RelayCast skips the sender; UpdateAnimation
+  echoes to it); reliable both hops (the start of a cast must arrive;
+  UpdateAnimation's unreliable hops are why the wind-up was lost).
 - Fields: idx u32; action u32 (the BGSAction's form id); idle u32 (the
-  TESIdleForm's, 0 for none); eventName string (cap 64); type u8 (0 to 7);
-  variables (the ActorAnimationVariables shape SpellCast carries).
-- Validator rules: finite floats; eventName within its cap; type in range;
-  the variables' arrays within their caps; a budget of 16 at once, 8 a
-  second.
+  TESIdleForm's, 0 for none); eventName String<ANIM_EVENT> (128 bytes, the
+  same cap as UpdateAnimation's event); type u32, serialized "type" (the
+  ActionInput's unk20, 2 for everything the player does); actorAnimationVariables
+  (the ActorAnimationVariables shape SpellCast carries: three byte vectors,
+  8 KiB each at decode).
+- Validator rules (wire-validate, 9de6f123): action != 0, eventName not
+  empty (the replay entry sends the event as given), type <= 255
+  (E_VAL_RANGE); a budget of 12 at once, 6 a second (E_VAL_RATE: a cast is
+  three actions, from two hands at once); the strings and vectors bounded
+  at decode. The variables are packed bytes, so there is no float to check.
 - Idempotency / ordering: in order per sender on the reliable channel; the
-  observer replays in arrival order, one per update, the newest alone for a
-  figure it first sees.
-- Contract doc updated: with the commit (docs/WIRE.md, schema 15).
+  observer performs them in arrival order, one per two updates (its
+  variables, then the action), at most 16 queued per figure.
+- Contract doc: this section is the contract (docs/WIRE.md describes the
+  families, not each message); the fixtures 44-UpdateAction-0/1 and the C++
+  and TypeScript types came with the commit.
 
 ## Server
 
-- Where the logic lives: ActionListener::OnUpdateAction relays the raw
-  bytes to the neighbours (OnUpdateAnimation's shape); nothing recorded.
+- Where the logic lives: ActionListener::OnUpdateAction (fork 303a85d7)
+  relays the bytes as the wire validated them to every user listening to the
+  actor but the sender, reliably, for the actor the sender may update
+  (ActorUpdatableBy, OnUpdateAnimation's check); nothing recorded. The
+  validation is Rust's (wire-validate); the C++ handler is a relay, the
+  legacy shape, since the neighbours live in the C++ world state.
 - DB fields / migration: none.
 - Restart behavior: none.
 - Papyrus natives touched (ledger lines added): none; performAction is a
@@ -236,37 +253,61 @@ and 8 a second only ever stops a flood.
 
 ## Client
 
-- SP binding: the hook and the native above; Skyrim Platform's declarations
-  (codegen skyrimPlatform.ts, Definitions.txt), the .psc and .pex through
-  lab/pex.py add-native.
-- TS handler: a sender service beside magicSyncService.ts (actionPerformed
-  to UpdateAction, reliable, in order; magicSyncService sends only the
-  player's own casts); sync/figureCast.ts, one home per figure and hand
-  (the last action's hand and spell; the relayed SpellCast confirmed against
-  it, a message for a hand not casting falling back to castSpellImmediate;
-  the interrupt ending it through InterruptCast); remoteServer.ts queues
-  UpdateAction per form and view/formView.ts replays it through
-  performAction, the held-start logic gone (castStartWaiting,
-  castStartHeldSince, castStartCastingSeen); magicSyncService.ts takes
-  castingSource from the hand of the last cast action; shoutService.ts
-  reports by release (its 3 s hit window dropped).
+- SP binding (fork 0d69f6fe): the hook on 38949 and the export
+  performAction, JavaScript exports beside castSpellImmediate (no Papyrus
+  native, so no .psc); the codegen declares ActionPerformedEvent and
+  performAction; the client's typings (clientListener.ts) augment the npm
+  module as for poisonApplied. A handler of actionPerformed may make no
+  game call (Skyrim Platform's tick context: "'Form.getFormID' can't be
+  called in this context", x-figure-action 20261015-053450); the sender
+  builds its message there and sends it on the next update.
+- TS handler (fork 3f8d8f77): services/services/actionSyncService.ts sends
+  the hands' cast actions (events MRh_, MLh_, DualMagic_: the starts, ready,
+  release and the Equipped exit) as UpdateAction, reliable, in order;
+  remoteServer.ts queues them per form (actionQueue, 16 at most);
+  view/formView.ts performs each through performAction, the caster's
+  variables on one update and the action on the next (replayActions), the
+  held-start logic gone (castStartWaiting, castStartHeldSince,
+  castStartCastingSeen); sync/animation.ts no longer relays those events
+  (they would play twice, and the Equipped exit, rewritten into
+  SkympFakeEquip, never reached a figure); magicSyncService.ts sends only
+  the player's own casts and its hosted actors' (a figure's
+  castSpellImmediate raised the event too, refused by the server per cast).
+  The hand a cast reports is fixed where it was wrong, in Skyrim Platform's
+  EventHandler (fork 965cf222): any caster state but kNone names the hand,
+  since an idle hand holds its equipped spell as currentSpell too. The end
+  of a figure's stream stays FinishCast (the existing interruptCast native):
+  the Equipped exit arrives as the Interrupt action, so the caster's own
+  InterruptCast, which would perform that action a second time, is not
+  needed. No sync/figureCast.ts: the action carries its own variables and
+  the SpellCast its own spell, and nothing had to reconcile them in the
+  probes; it returns if a staged run shows the two fighting.
+- Not in this slice: the voice's actions (shoutStart keeps the event relay,
+  which works) and melee (Eli: attackStart and kin stay, the server's
+  AnimationSystem reads them); shoutService's 3 s hit window (the god-mode
+  breath, its own small change, next).
 - Kill switch config key: none planned; the relay filter is the switch
   (restoring the events restores today's look).
 
 ## Tests
 
-- T0: the UpdateAction validator (bounds, a string past its cap, a type out
-  of range, the budget); the sender's ordering.
-- T1: none (an engine call in a running game, as Stagger).
-- T2: difftest session cast-action: c1's UpdateAction relayed to c2 on the
-  wire stack, refused as an unknown MsgType on the legacy stack (the
-  divergence listed).
-- T3 scenario id: lab/scenarios/b-spell.yaml, grown past "the figure took
-  the start" (:67-69): took("MRh_Equipped_Event") >= 1 on the figure after
-  the Flames release; took("MRh_SpellAimedStart") >= 1 after Firebolt; a
-  left-hand cast's MLh_ events on the figure; the Self cast's start taken;
-  the dual cast's start the dual idle's; the drain pair as long as the
-  figure's magicka falls. Its own commit (ADR-009, ADR-016, rule 13).
+- T0 (green, 9de6f123): the UpdateAction validator (no action, an empty
+  event, a type past 255, the budget's thirteenth in a second refused, the
+  fourteenth a second later taken); wire-schema's id and fixture tests;
+  wire-json's round trip of the two generated fixtures.
+- T1: the lab's probes stand for it (an engine call in a running game, as
+  Stagger): the hook and performAction on 1.6.1170, x-figure-action and
+  kin below.
+- T2: difftest session cast-action (fork e3648112): c1's three cast actions
+  relayed to c2 on the wire stack (three UpdateAction, declared), none on
+  the legacy stack, which knows no MsgType 44; the declarations are the
+  first run's to confirm.
+- T3 scenario id: lab/scenarios/b-spell.yaml (thuum cast-action 0d44f4b,
+  its own commit, rule 13): took("MRh_Equipped_Event") >= 1 on c1's figure
+  after the Flames hold (finding 1), and a watch around the Firebolt cast
+  with took("MRh_SpellAimedStart") >= 1 and took("MRh_SpellRelease_Event")
+  >= 1 (the wind-up); the start and the drain pair stay. A left-hand cast,
+  the Self cast and the dual cast are the parity scenarios' below.
 - Parity (ADR-031): references of the engine alone, solo: r-spell-stream-a
   and r-spell-bolt-a (recorded 2026-10-14 night, green), their left-hand
   variants, dual-cast Flames with the perk, a Self cast (r-self-invisibility-a,
@@ -300,18 +341,60 @@ and 8 a second only ever stops a flood.
   recorded variables applied to the target first through
   applyAnimationVariablesToActor; lab/frida/action-trace.js logs 38949,
   38953 and the cast-shaped events at 32901 on the player and the figures.
-- Step 3, the probes (x- files by path, ADR-009), each in c1's own game
-  with action-trace.js on c1: c1 casts, its hook records the actions, c1's
-  driver replays them on c2's figure. x-figure-action (P1: Flames 2 s then
-  4 s), x-figure-action-bolt (P3: Firebolt twice), x-figure-action-self
-  (P4: Invisibility twice), x-figure-action-dual (P2: Flames in both hands
-  with Destruction Dual Casting, both keys, the figure without the perk).
-- Expected: the trace shows the event empty on entry and chosen on exit,
-  type 2, indices 49..52 for the right hand, each replay one 38953 call
-  answered true; the figure's graph takes each replayed action and plays
-  its idle; the Interrupt produces MRh_Equipped_Event and the casting
-  variables fall; the dual and Self idles play. Which action a dual cast
-  performs is P2's first reading.
+- Step 3, the probes (x- files by path, ADR-009), each in c1's own game:
+  c1 casts, its hook records the actions, c1's driver replays them on c2's
+  figure, c2 holding the same hands drawn (a caster's figure mirrors the
+  caster's hands; an unarmed figure has no cast transition and refused
+  every replay, 20261015-053450 and 053807 round one). x-figure-action
+  (P1), -bolt (P3), -self (P4), -dual (P2), and x-action-trace-input (the
+  trace, taken apart from the console steps: a frida step right before a
+  console step on the same client left the console unopenable, 052852 and
+  053059).
+- Measured 2026-10-14 22:28 to 23:08 PDT, all green: P1 holds, and with it
+  P2, P3 and P4, under one rule, the caster's variables on one update and
+  the action on the next. A replay in the same tick as its variables was
+  refused every time on an armed figure (P1 055039 round one, -self
+  054049 both rounds, -dual 054336); one update later (figure-action
+  delayFrames 1): Flames' start and release taken, the loop held the 4 s,
+  the Interrupt's Equipped exit taken and IsCastingRight down 196 ms
+  after, the engine's own timing (055039 round two; the screenshots show
+  the figure's raised, burning hand, then the hand down); Firebolt's start,
+  ready and release taken twice (055907); Invisibility's Self start, ready
+  and release taken twice (060152); the dual cast taken on a figure without
+  the perk (060444). The dual answer: the engine performs a dual cast as
+  the LEFT hand's actions carrying the dual idle (ActionLeftAttack 0x13004
+  with DualMagicConcentrationAimed0 0x35B9A, ActionLeftRelease 0x13451 with
+  ReleaseLeft 0x13465, ActionLeftInterrupt 0x13453 with InterruptLeft
+  0x13463); ActionDualAttack never appears, so the perk's idle travels in
+  the action data. The capture, every probe: Flames is Attack 0x13005 with
+  CastRightConcentrationAimed 0x1346F and Release 0x13454 with
+  MagicRightRelease 0x205F6 in one tick, then Interrupt 0x13456 with
+  InterruptRight 0x13460 at the key-up; Firebolt and Invisibility are
+  Attack with 0x1346C or 0x1407B, Ready 0x13455 with idle 0x42BEB, Release
+  with 0x205F6; type 2 always.
+- The trace (x-action-trace-input 055622, action-trace.js on c1): each of
+  the caster's actions enters 38949 with an empty event and leaves with the
+  chosen idle's event, type 2, result 0, the graph notified inside the call
+  (ret 1); each replay is one 38953 call answered true, its notify taken.
+  So the read holds, with one correction: BGSAction's index field is its
+  own numbering (right attack 65, release 53, interrupt 51), not the
+  DEFAULT_OBJECT positions. Injected key input survives a frida attach
+  (the cast under the trace happened); only the console menu failed to open
+  after one. The figure's AI probes an idle every 16 ms through 38949's dry
+  run (flags 1, result -1), which the capture skips.
+- The re-analyst's second read (the "cancel", 23:00): there is none. The
+  graph's response handler (42820 right, 42819 left) runs StartCharge only
+  when the hand's caster is in the requested state and is a no-op on an
+  idle one; the only writer of bWantCast false is FinishCastImpl 34141,
+  reached from FinishCast 34435 by paths that all need a current spell or a
+  caster state; the caster's Update never reads the want variable. So the
+  same-tick refusal is the graph's own one-update latency (it enters the
+  cast-request state at its next update), and the later resets the probes
+  saw were the graph's exit from that state or the other player's 500 ms
+  snapshot. Nothing a replay sets provokes the engine, and the sync needs
+  no mask on the snapshot: the caster's own snapshot carries the caster's
+  casting state. HYPOTHESIS still: the graph's reset of the want variable
+  (a modifier in the behavior file, not the exe).
 - Owner: agent. If P1 fails: the fallback, the figure's own caster
   (CastSpell 34401 with kSkipCheckCast, StartCast 34445 at the relayed
   release, InterruptCast at the end), with the server's withheld relays
@@ -319,13 +402,13 @@ and 8 a second only ever stops a flood.
 
 ## Status
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [x] engine surface cited or delegated (the action path read and its ids confirmed 2026-10-14; HYPOTHESIS until action-trace.js)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] doc complete, inventory listed with a disposition per row, rung declared
+- [x] engine surface cited or delegated (the action path read 2026-10-14, its ids confirmed by addr.py, the chain confirmed live by action-trace.js 20261015-055622)
+- [x] server logic + T0 (the relay 303a85d7; the validator's tests 9de6f123)
+- [x] message + validator (same commit, 9de6f123)
+- [x] native hook + T1 (0d69f6fe; the probes 055039, 055907, 060152, 060444)
+- [x] TS handler (3f8d8f77)
+- [ ] T2 green (the session e3648112 waits for the staged server)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell 0d44f4b waits for the staged build)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (no Papyrus native; the suppression is the relay filter, named under Suppress)
