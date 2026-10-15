@@ -311,19 +311,30 @@ function releaseHeldKeys(): void {
 // a target at their original spacing, from update (thuum
 // docs/verbs/cast-action.md: the figure plays the caster's actions as the
 // sync will relay them)
-const scheduledReplays: Array<{ at: number; targetId: number; rec: RecordedAction; set: Record<string, unknown>; variables: boolean }> = [];
+// an entry waits for its time (at) or, with frames > 0, that many updates
+const scheduledReplays: Array<{ at: number; frames: number; targetId: number; rec: RecordedAction; set: Record<string, unknown>; variables: boolean; delayFrames: number }> = [];
 
 // One action on an actor through the engine's action entry (the fork's
 // performAction): the recorded variables first when asked and present (the
 // caster's graph as it was when its engine chose the idle), then {set}'s
-// named variables, then the action. What was done, for the step's answer and
-// the client log.
-function replayOn(target: Actor, rec: RecordedAction, set: Record<string, unknown>, variables: boolean): Record<string, unknown> {
+// named variables, then the action; with delayFrames > 0 the action goes
+// that many updates after the variables instead of in the same tick (the
+// graph took a start whose variables landed a frame earlier, x-left-firebolt
+// 20261015-031632, and refused one sent in the same tick as its want
+// variable, x-figure-cast 20261014-142425). What was done, for the step's
+// answer and the client log.
+function replayOn(target: Actor, rec: RecordedAction, set: Record<string, unknown>, variables: boolean, delayFrames = 0): Record<string, unknown> {
   let applied: boolean | undefined;
   if (variables && rec.variables) applied = applyAnimationVariablesToActor(target.getFormID(), rec.variables);
   for (const [k, v] of Object.entries(set)) {
     if (typeof v === "boolean") target.setAnimationVariableBool(k, v);
     else if (typeof v === "number") target.setAnimationVariableFloat(k, v);
+  }
+  if (delayFrames > 0) {
+    scheduledReplays.push({ at: 0, frames: delayFrames, targetId: target.getFormID(), rec, set: {}, variables: false, delayFrames: 0 });
+    const out = { prepared: rec.action, idle: rec.idle, event: rec.eventName, type: rec.type, on: target.getFormID(), applied, set: Object.keys(set), performInFrames: delayFrames, recordedAt: rec.ms };
+    printConsole("lab-driver: figure-action", JSON.stringify(out));
+    return out;
   }
   // an older Skyrim Platform has no such export: the binding is undefined
   const perform: unknown = performAction;
@@ -336,15 +347,16 @@ function replayOn(target: Actor, rec: RecordedAction, set: Record<string, unknow
 
 function runScheduledReplays(): void {
   const now = Date.now();
-  for (let i = 0; i < scheduledReplays.length; ) {
-    const s = scheduledReplays[i];
-    if (s.at > now) {
-      i++;
-      continue;
-    }
-    scheduledReplays.splice(i, 1);
+  // the entries as they stand at this update: one replayOn adds the frame
+  // step of its own action, which must wait for the next update
+  for (const s of scheduledReplays.slice()) {
+    if (s.frames > 0) {
+      if (--s.frames > 0) continue;
+    } else if (s.at > now) continue;
+    const i = scheduledReplays.indexOf(s);
+    if (i >= 0) scheduledReplays.splice(i, 1);
     const target = Actor.from(Game.getFormEx(s.targetId));
-    if (target) replayOn(target, s.rec, s.set, s.variables);
+    if (target) replayOn(target, s.rec, s.set, s.variables, s.delayFrames);
   }
 }
 
@@ -611,11 +623,13 @@ const recentActions: RecordedAction[] = [];
 const RECENT_ACTIONS_MAX = 64;
 try {
   on("actionPerformed", (e) => {
-    if (!e.actor) return;
     recentActions.push({ ms: Date.now(), action: e.action, idle: e.idle, eventName: e.eventName, type: e.type, variables: e.variables });
     if (recentActions.length > RECENT_ACTIONS_MAX) recentActions.shift();
     if (!watching) return;
-    const w = watchedRecord(e.actor.getFormID());
+    // the player's record: the hook reports the player's own actions, and a
+    // Form method cannot be called in this event's context (x-figure-action
+    // 20261015-053450: "'Form.getFormID' can't be called in this context")
+    const w = watchedRecord(0x14);
     if (w && w.actions.length < WATCH_SELF_MAX) w.actions.push([watchedMs(), e.action, e.idle, e.eventName, e.type]);
   });
 } catch (err) {
@@ -1639,18 +1653,20 @@ function run(step: Step, player: Actor): unknown {
       // last of all. Without {replay}: the BGSAction {action}, the idle
       // {idle}, the graph event {event} and the input type {type} as given.
       // {set} puts named graph variables on the target after the variables
-      // and before the action, as anim-event does.
+      // and before the action, as anim-event does. {delayFrames: n} performs
+      // each action n updates after its variables instead of in one tick.
       const target = a.other ? nearestOther(player) : player;
       const set = a.set && typeof a.set === "object" ? (a.set as Record<string, unknown>) : {};
       const variables = a.variables !== false;
+      const delayFrames = Math.max(0, Math.floor(num(a.delayFrames, 0)));
       const recorded = () => recentActions.map((r) => [r.ms, r.action, r.idle, r.eventName, r.type]);
       if (a.replay === "all") {
         const since = Date.now() - num(a.sinceMs, 10000);
         const recs = recentActions.filter((r) => r.ms >= since);
         if (recs.length === 0) return { error: "no recorded actions to replay", recorded: recorded() };
         const now = Date.now();
-        for (const r of recs) scheduledReplays.push({ at: now + (r.ms - recs[0].ms), targetId: target.getFormID(), rec: r, set, variables });
-        return { scheduled: recs.map((r) => [r.ms - recs[0].ms, r.action, r.idle, r.eventName, r.type]), on: target.getFormID() };
+        for (const r of recs) scheduledReplays.push({ at: now + (r.ms - recs[0].ms), frames: 0, targetId: target.getFormID(), rec: r, set, variables, delayFrames });
+        return { scheduled: recs.map((r) => [r.ms - recs[0].ms, r.action, r.idle, r.eventName, r.type]), on: target.getFormID(), delayFrames };
       }
       let rec: RecordedAction | undefined;
       if (a.replay !== undefined) {
@@ -1664,7 +1680,7 @@ function run(step: Step, player: Actor): unknown {
       } else {
         rec = { ms: 0, action: num(a.action), idle: num(a.idle ?? 0), eventName: typeof a.event === "string" ? a.event : "", type: num(a.type ?? 0) };
       }
-      return replayOn(target, rec, set, variables);
+      return replayOn(target, rec, set, variables, delayFrames);
     }
     case "anim-event": {
       // One animation event on the player's behavior graph (Papyrus
