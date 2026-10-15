@@ -1383,3 +1383,28 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   every probe runs even after a red one; test-proto refuses a difftest artifact older than its branch's
   skymp-wire (the first T2 here passed without the new session); lab-api's parity cut takes a list of
   kinds and seeds a series' baseline from its first sample. Next: the Apocalypse retry, when Eli says.
+
+- cast-action DONE (2026-10-15 01:49 PDT; docs/verbs/cast-action.md, ADR-032). Stage two on ea57c551
+  (00:00): b-spell green with its new assertions (065943: the figure's Flames start and release one
+  update apart, the Equipped exit 4 s later, Firebolt's start, ready and release, all taken through
+  the real relay), x-dual-relay green (070729, the figure 41 ms behind the caster), x-tgm-breath4
+  (071021: the 2.5 s breath reported and shown; a god-mode miss with no hit stays unreported, a known
+  limit), x-left-firebolt2 (070447) still launching from the right with the state read widened, so
+  the hand moved into the action hook itself (fork e75ee5c8, Frida::LastCastHand; 075606: both
+  launches from the left), and p-spell-bolt red twice as the parity tool's (the target's own game
+  takes no hit, ADR-028, so a "hit" cut had no anchor there; the caster's figure none either; and a
+  reference cut at 0 made every variable's first sample a consequence). Tool fixes on main: a cut
+  lists kinds tried per view and value:<av> (34c2f3a, test fixed 422abf8, the image by API pipeline
+  1555: a lab-api push must have its tests green first), a series' first sample seeds its baseline
+  (3470159). References: spell-stream-a (060845) and melee-swing-a (061047) retaken with combat AI
+  off, spell-bolt-a retaken because the first take missed (080129). p-spell-bolt green by id on the
+  committed file (080752, 5bf1d51, its later list ADR-028's differences, the stagger the B
+  reference's Spell.Cast cannot show, the figures' refused idle probes): the first parity scenario
+  to pass. The gate (numidium, verb-merge from the cast-action worktree): T2 on the branch image
+  with the cast-action session, then run set 20261015-083019, 6 of 6 green (smoke-two-players,
+  a-restart-persistence, b-duel, b-spell, a-melee-reach, a-racemenu); parity to e75ee5c8, the
+  thuum landing by numidium's report. Playtest nineteen's checklist drafted (the hands whole, the
+  left hand, Self and dual casts, the breath). Left for later verbs: the voice's and melee's actions
+  (the event relay stays), a mage bandit's B reference for the spell staggers, p-spell-stream
+  (drafted; no streaming B yet), the invisible-prompt reading (no vantage yet), the Apocalypse layer
+  retry (m2-spaced-plugins), Ghostwalk and the per-player globals, now unblocked.

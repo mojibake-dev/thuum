@@ -171,14 +171,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    time it held its target, the observer casting the relayed spell, a spell
    hit starting a fight. DONE 2026-10-10 (45839102); b-spell 9ed66b8. The
    relay as the server resolved it: DONE 2026-10-13 (8eb4e78e, merged with
-   m2-fifteen). The figure's cast animation: BUILDING as the cast-action
-   verb (docs/verbs/cast-action.md; Eli's plan of 2026-10-14 21:00): the
-   figure plays the caster's actions through the engine's action entry, the
-   effect decided apart by the server's relay. The action path read on
-   sky-re and the hook plus performAction built on fork m2-cast-action
-   0d69f6fe (2026-10-14 21:40); the four replay probes staged that night
-   (verb-stage from thuum cast-action feebd30), their reading deciding the
-   shape; playtest eighteen's three findings
+   m2-fifteen). The figure's cast animation: DONE 2026-10-15 as the
+   cast-action verb (docs/verbs/cast-action.md, ADR-032; fork parity
+   e75ee5c8, the gate 6 of 6 at 01:49, run set 20261015-083019): the figure
+   plays the caster's actions through the engine's action entry, the
+   caster's variables one update before each, the effect decided apart by
+   the server's relay; b-spell 0d44f4b asserts the Equipped exit and the
+   bolt's wind-up, p-spell-bolt 5bf1d51 is the first parity scenario to
+   pass; the cast's hand comes from the action hook, a shout reports at its
+   release; playtest eighteen's three findings
    and the god-mode breath each measured to a cause that night (the exit
    event rewritten by the relay, Skyrim Platform's hand fallback, the order
    of a start and its variables, shoutService's 3 s hit window). Melee keeps

@@ -439,7 +439,7 @@ and 8 a second only ever stops a flood.
 - [x] message + validator (same commit, 9de6f123)
 - [x] native hook + T1 (0d69f6fe; the probes 055039, 055907, 060152, 060444)
 - [x] TS handler (3f8d8f77)
-- [ ] T2 green (the session e3648112 waits for the staged server)
+- [x] T2 green (26 sessions with cast-action among them, difftest job 6654 at e75ee5c8, the gate of 2026-10-15 01:30)
 - [x] T3 scenario green, no HYPOTHESIS tags (b-spell 0d44f4b green on the staged build, 20261015-065943; the one open question, the graph's own reset of the want variable, is a behavior-file reading the verb does not rest on)
-- [ ] parity scenario green, or its later list reviewed with it (ADR-031)
+- [x] parity scenario green, or its later list reviewed with it (ADR-031): p-spell-bolt 5bf1d51 green by id (20261015-080752), its later list reviewed in docs/private/reviews-pending.md
 - [x] ledger and suppression registry updated (no Papyrus native; the suppression is the relay filter, named under Suppress)
