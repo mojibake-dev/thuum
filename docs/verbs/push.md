@@ -320,4 +320,8 @@ Playtest eighteen (2026-10-14, Eli): both flight items ticked. On the
 shouter's screen the target's figure flies back as the target does in its
 own game and is where the target is once both are up, no snap; the
 target's own game throws it as in seventeen. T4 of the flight: passed.
+b-push's flight check (thuum 6f90239, its own commit): the figure has moved
+more than 100 units 5 s into the watch, green twice (20261015-025520 read
+150, -025801 read 1146). The inventory's last row is DONE for the shouter's
+screen.
 

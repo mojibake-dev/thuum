@@ -191,12 +191,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    the server's stagger: DONE 2026-10-13 (8eb4e78e) as a stagger of 1.5, a
    stumble. The ragdoll throw: DONE 2026-10-14 (4e8aa04c) as the game's own push
    in the target's game (docs/verbs/push.md, ADR-031's first verb); b-push
-   5b1e0d2. The figure's flight on the shouter's screen: merged 2026-10-14
+   5b1e0d2. The figure's flight on the shouter's screen: DONE 2026-10-14
    (05192845: the shouter's game runs the vanilla push on the target's figure,
-   ADR-029 A1's caster half); DONE once b-push's check that the figure
-   flies, by the recorder's track (c.watched().movedBy, main e1006cc), is
-   green and playtest eighteen sees it. A bystander's screen and the parity
-   scenario p-shout-uf3 are LATER.
+   ADR-029 A1's caster half; b-push 6f90239 checks that the figure flies, by
+   the recorder's track, green twice; playtest eighteen ticked it). A
+   bystander's screen and the parity scenario p-shout-uf3 are LATER.
 7. Lag compensation (Bernier 2001): only if a playtest shows hits refused
    inside M1's slack. LATER.
 8. cast-teleport (Lost Grimoire's Teleportation, from the stretch list): one
