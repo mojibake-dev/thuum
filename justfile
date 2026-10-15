@@ -359,6 +359,13 @@ playtest-restore name:
 playtest-worlds:
     @lab/tools/playtest-world.sh list
 
+# A playtest recorded like a run (ADR-033): the recorder on both seats, cycled every 5 min into
+# https://thuum.gaussing.tv/results/playtest-<n>/ (trace-<client>-<k>.json), the server's and both games' logs at the end,
+# summary.txt with any game whose log stopped. Start it in the background after playtest-restore; it ends with the
+# playtest's hold or on Ctrl-C, and refuses a number without docs/private/playtest-m2-<n>.md.
+playtest-record n:
+    @lab/tools/playtest-record.sh {{n}}
+
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}

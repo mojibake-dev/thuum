@@ -1108,6 +1108,25 @@ class ProbeSteps(RunTests):
         self.assertTrue(out["r"].json()["ok"])
         self.assertIn(("c2", "hold-key", {"code": 207, "ms": 8000}), self.doubles.seen)
 
+    def test_an_assist_runs_the_recorder_and_the_stop_answers_with_its_trace(self):
+        # ADR-033: a playtest is recorded through the assist (lab/tools/playtest-record.sh)
+        import threading
+
+        for action, args in (("watch-start", {"bools": ["IsCastingRight"]}), ("watch-stop", {})):
+            out = {}
+            t = threading.Thread(target=lambda: out.update(r=self.client.post("/lab/clients/c1/assist", json={"action": action, "args": args})))
+            t.start()
+            deadline = time.time() + 10
+            while t.is_alive() and time.time() < deadline:
+                self.doubles.turn()
+                time.sleep(0.02)
+            t.join(5)
+            self.assertEqual(out["r"].status_code, 200, out["r"].text)
+            self.assertTrue(out["r"].json()["ok"])
+            self.assertIn(("c1", action, args), self.doubles.seen)
+        # the driver's answer comes back as the result (the doubles answer {})
+        self.assertEqual(out["r"].json()["result"], {})
+
     def test_an_assist_sends_input_and_nothing_else(self):
         for other in ("console", "equip", "dump-state", "poisons"):
             r = self.client.post("/lab/clients/c1/assist", json={"action": other})
