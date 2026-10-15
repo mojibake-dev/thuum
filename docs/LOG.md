@@ -1228,3 +1228,23 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   promoted to clean-m1 (the 4f74c3e1 client). Next from magnus: m2-flight (the throw's caster
   half: the target's figure flies in the shouter's game), merged with m2-hands, so its merge is
   a fast-forward after its own staging and probe.
+
+### 2026-10-15
+
+- m2-flight merged to fork parity 05192845 (2026-10-15T01:18Z, 18:18 PDT), the fourth merge
+  through `just verb-merge`, untouched. On parity 4f74c3e1: 320cfda8 (skyrim-platform: ADR-029
+  A1 test 1's caster half, an event on an effect the player cast passes the Papyrus event
+  block, so the shouter's game runs the vanilla push on the target's figure and the figure
+  flies there), f3569b95 (an invisible figure shows no name), cadb5648 and 05192845 (a figure
+  its own game knocked down gets no relayed zero-force re-knock and no movement until its
+  get-up; sync/knockState.ts). Probed with lab/frida/push-trace.js: the relayed re-knock gone
+  from every trace, the figure flying in the shouter's game in most runs; when the two games'
+  flights land far apart the movement relay corrects the figure after its get-up, inherent
+  since the engine's own throw distance varies from 503 to 1,405 units run to run. No flight
+  assertion committed yet (a largest-step check is defeated by that correction; a track-based
+  one comes later); b-push as committed stayed green; x-invisible-name hid the label. T2 green
+  on 05192845. The gate: run set 20261015-002043-merge-m2-flight, 20 of 20 green with no rerun
+  (smoke-two-players, a-restart-persistence, b-duel, b-push, b-shout, b-spell, b-stagger,
+  b-block, b-self-cast, b-teleport, b-magic-restart, b-god, b-marksman, b-poison, b-potion,
+  a-hostility, a-fight-end, a-sneak-damage, a-melee-reach, a-racemenu), 53 min. Both clones'
+  clean-m1-next promoted to clean-m1 (the 05192845 client). Playtest eighteen next.

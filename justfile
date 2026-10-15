@@ -449,6 +449,15 @@ verb-merge branch *scenarios:
 verb-stage branch *probes:
     @lab/tools/verb-stage.sh "{{branch}}" {{probes}}
 
+# A mod-layer branch (persist-mods and the load orders) staged on the lab, from a worktree of the branch: T0, a hold,
+# persist-mods, deploy-srv, the server restarted on the new load order, client-mods on both clones, both snapshotted as
+# clean-m1-next, the probes named. Then layer-merge: the full sweep as the gate (ADR-030's non-verb promotion), both
+# clones promoted, thuum main fast-forwarded, a dated docs/LOG.md entry to finish by hand.
+layer-stage branch *probes:
+    @lab/tools/layer-stage.sh "{{branch}}" {{probes}}
+layer-merge branch:
+    @lab/tools/layer-merge.sh "{{branch}}"
+
 # --- wire (Rust edge, docs/WIRE.md; lives in the fork, ADR-015) ---------------
 
 # Build the workspace; the client cdylib and cxx bridge included.

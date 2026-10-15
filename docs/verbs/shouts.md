@@ -653,4 +653,15 @@ snippets).
   concentration casts already are. The trace: on c2 and on c1 for
   comparison, the particle system's slot 64 and the cone's emitter
   registration across the breaths (ids in the re-analyst's report).
+- The trace's script: lab/frida/mps-trace.js (main 4823973; ids resolved
+  with lab/addr.py, the fields cited to CommonLibSSE-NG's headers where
+  they name them, the rest the re-analyst's HYPOTHESIS). It polls slot 64's
+  system every 50 ms (its pointer, emitter and particle-object counts,
+  destroyWhenNotInUse) and logs the cone's launch, Init3D, emitter
+  registration, emits, a rebuild that changes the system and the cone's
+  Kill. Probes, after playtest eighteen: x-tgm-breath3 (the script on both
+  games, x-tgm-breath2's three breaths) for (a) against (b), then
+  x-tgm-breath3-fix (c2's script first sets ADDN 0x647BC's flags to
+  kAlwaysLoaded, CommonLibSSE-NG include/RE/B/BGSAddonNode.h:12-16): fix
+  (1)'s test, all three breaths drawn if (b) holds.
 

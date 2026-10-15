@@ -150,19 +150,23 @@ positions' age.
 ## Server
 
 - Where the logic lives:
-  - which spells return their caster: a server setting, castReturns, each
-    a spell as a FormDesc with its wait (the effect's duration plus the
-    script's: 10.4 s for Ghostwalk), beside castTeleports; the records
-    cannot say "returns".
-  - the permit: wire-rules movement's cast jump (cast-teleport's) gains a
-    landing at the cast point: within RANGE_SLACK of the caster's position
-    at the cast, in the cast's cell or worldspace, opening at the cast and
-    closing at the wait plus CAST_JUMP_WAIT_MS, consumed by its landing.
-    The window opens at the cast because the caster's own attack ends the
-    effect, and the script returns the caster then.
-  - the cast: ActionListener::OnSpellCast, for a named return the caster
-    has equipped, records the cast as now, permits the return, and relays
-    the cast (the figure's invisibility is self-cast's).
+  - which spells move their caster: cast-teleport's setting, castTeleports
+    (wire-rules teleports.rs), one list for both, its entries gaining two
+    optional fields: waitMs, how long the jump is permitted after the cast
+    (CAST_JUMP_WAIT_MS, 5 s, when absent), and relay, whether the cast is
+    still relayed (false when absent, cast-teleport's suppression).
+    Ghostwalk's entry: reach 0 (back to the cast point, within
+    CAST_JUMP_SLACK, 256 units), waitMs 15400 (the effect's 10 s, the
+    script's 0.4 s and CAST_JUMP_WAIT_MS for the report), relay true (the
+    figure's invisibility is self-cast's, and the script is blanked on the
+    figure). The records cannot say "teleports" or "returns".
+  - the permit: wire-rules movement's cast jump as it is, its wait taken
+    from the entry. It opens at the cast, because the caster's own attack
+    ends the effect early and the script returns the caster then; while it
+    waits, a move that is not the return is judged as any other.
+  - the cast: ActionListener::OnSpellCast, for a named spell the caster has
+    equipped, records the cast as now, permits the jump, and relays it if
+    the entry says so.
   - the check: MovementValidation's permitted-jump path, as COC's and
     cast-teleport's.
 - DB fields / migration: none (a permit is runtime; a login or a restart
@@ -178,15 +182,18 @@ positions' age.
 - SP binding: none new; the filter's effect test (fork m2-flight).
 - TS handler: none new; Apocalypse 10.2.3 in every client's mod layer and
   the server's load order (lab/tools/persist-mods.sh, Dynamic plan step 0).
-- Kill switch config key: the setting itself (no castReturns, no permit).
+- Kill switch config key: the setting itself (no castTeleports entry, no
+  permit).
 
 ## Tests
 
-- T0: wire-rules movement (a return lands once within the slack of the
-  cast point in its cell or worldspace; refused away from the cast point,
-  in another cell, after the window, a second time; a later cast replaces
-  the permit); the server (OnSpellCast of a named return permits it and
-  relays the cast; an unnamed spell permits nothing).
+- T0: wire-rules teleports (an entry's waitMs and relay read, absent ones
+  defaulted, a wait that is no positive number refused); wire-rules
+  movement (a jump with a reach of 0 lands once within the slack of the
+  cast point in its cell or worldspace; refused away from it, in another
+  cell, after its own wait, a second time); the server (OnSpellCast of an
+  entry with relay true permits the jump and relays the cast; cast-teleport's
+  entries unchanged).
 - T1: none.
 - T2: a difftest session, ghostwalk: c1 adds itself the spell (the
   console's AddSpell), equips it, casts, walks 3000 units away within the
@@ -226,11 +233,29 @@ positions' age.
   a long one is sent back until the permit lands; c2 unmoved.
 - Owner: agent.
 
+## Built
+
+- Server, fork m2-ghostwalk f43d1f91 (from parity 05192845): wire-rules
+  teleports reads an entry's waitMs and relay, movement's cast jump takes
+  its wait from the entry, the bridge and PartOne pass both, OnSpellCast
+  relays a teleport its entry relays. T0 green 2026-10-14: wire-rules (the
+  entry's fields; a return within the slack of the cast point within its
+  own wait) and the bridge locally, with clippy; fork pipeline 1479's
+  server build ran ctest on the master files, 13 of 13, CastTeleportTest's
+  relayed return among test_unit's 357 cases.
+- Settings: thuum branch ghostwalk 65cb4c8, Ghostwalk's castTeleports entry
+  in both settings files, stacked on branch apocalypse (the layer). It
+  deploys only with a server that has m2-ghostwalk: parity's teleports.rs
+  refuses unknown fields, and a refused entry stops the server at start.
+- Drafts in the session's scratchpad until their first runs: the difftest
+  session ghostwalk, the reference r-ghostwalk, the probe x-ghostwalk-relay
+  and b-ghostwalk.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
+- [x] engine surface cited or delegated
+- [x] server logic + T0
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
 - [ ] TS handler
