@@ -1334,3 +1334,30 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   LABAPI 1533) with the four probes by path, x-figure-action, -bolt, -self, -dual (P1 to P4: c1
   casts, its hook records, c1's driver replays on c2's figure in c1's own game); their reading
   decides between the action replay and the fallback.
+
+- The cast-action verb proved and built (22:28 to 23:15 PDT; docs/verbs/cast-action.md). The four
+  probes ran on the staged branch (numidium's verb-stage, with a step-7 fix of its own on the way:
+  a fresh worktree lacks the built driver, main 0f46a2d). Two false starts: a frida step right
+  before a console step on the same client left the console unopenable (052852, 053059), and the
+  figure's own player held no spell, so the figure had no cast transitions and refused every replay
+  (053450, 053807 round one). With the figure armed, a same-tick replay was still refused every
+  time (054049, 054336, 055039 round one); the caster's variables one update before the action
+  (the driver's delayFrames 1) was taken every time: Flames' start and release, the 4 s loop, the
+  Interrupt's Equipped exit and the casting state down 196 ms after (055039), Firebolt's start,
+  ready and release (055907), Invisibility's Self cast (060152), and the dual cast on a figure
+  without the perk (060444), which the engine performs as the left hand's actions carrying the dual
+  idle. action-trace.js (055622) confirmed the read live (the event empty on entry and chosen on
+  exit, type 2, the replay through 38953) and that key input survives a frida attach. The
+  re-analyst's second read found no engine cancel: the same-tick refusal is the graph's one-update
+  latency. P1 to P4 hold; the fallback (the figure's own caster) stays unbuilt. Built on fork
+  m2-cast-action, in order: 9de6f123 the wire message UpdateAction, MsgType 44 (wire id 52, schema
+  14, the branch leaving 05192845 where 43 is last; PlayerGlobals renumbers to 45 when it lands)
+  with its validator, fixtures and the C++ and TypeScript types; 303a85d7 the server relay to the
+  neighbours but the sender; 965cf222 Skyrim Platform's cast hand from any caster state but kNone
+  (eighteen's second finding); 3f8d8f77 the client (ActionSyncService, the view's two-update
+  replay, the event relay without the hands' cast events, the held-start logic removed,
+  magicSyncService sending only the player's own casts); e3648112 the T2 session. On thuum
+  cast-action: b-spell's new assertions (0d44f4b, its own commit: the Equipped exit on the figure,
+  the bolt's wind-up). On main: the spell-stream-a reference from its retake with combat AI off
+  (060845). Windows build 38690816553 at 23:12; next the staged run of b-spell, p-spell-bolt and
+  the left-hand and dual relays, then T2, references, the gate and playtest nineteen.
