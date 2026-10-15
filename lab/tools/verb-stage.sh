@@ -147,9 +147,13 @@ done
 curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1 || true
 if [ "${#probes[@]}" -gt 0 ]; then
   echo "== 9. probes"
+  # a probe is a question: its red is an answer for the verb doc, not a staging failure, so every
+  # probe runs and each prints its run id and verdict (m2-cast-action's first probe went red and,
+  # under set -e, took the other three with it, 2026-10-14)
   for probe in "${probes[@]}"; do
     echo "   $probe $(date +%H:%M:%S)"
-    just lab-run "$probe" 2>&1 | tail -1
+    out=$(just lab-run "$probe" 2>&1) || true
+    printf '%s\n' "$out" | grep -E ' (green|red|error) -> ' || { echo "   (no verdict line from lab-run:)"; printf '%s\n' "$out" | tail -3; }
   done
 fi
 echo "== verb-stage $branch ($sha8) done $(date +%H:%M:%S)"
