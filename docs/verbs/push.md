@@ -305,3 +305,14 @@ an engine move, so its speed may need its own allowance: to measure).
    engine's own stagger, which now plays in the target's game: retire it
    once a trace shows the engine's alone.
 4. The parity scenario p-shout-uf3, its later list the figure's flight.
+
+## Merged: the flight (fork parity 05192845, 2026-10-14)
+
+The gate run set merge-m2-flight went 20 of 20 green (20261015-002043, 17:20
+to 18:16). The shouter's screen now shows the target's figure thrown by the
+vanilla push (the two games' landings can differ, and the movement relay
+corrects the figure once it is up); b-push's flight check, by the recorder's
+track (movedBy), follows. The inventory's last row is merged for the
+shouter's screen, DONE with that check and playtest eighteen; a bystander's
+screen stays LATER (A1's bystanders, or the push on the wire).
+

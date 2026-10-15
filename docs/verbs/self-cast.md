@@ -274,4 +274,5 @@ Every self-cast item passed:
   name again after. Still shown while invisible: the game's own crosshair
   prompt ("E Talk / test 1") when c2 aims at the spot, the engine's
   activation prompt, not our label. A finding of its own.
+- Merged on fork parity 05192845 (2026-10-14): an invisible figure shows no name.
 
