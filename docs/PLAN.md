@@ -204,10 +204,23 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    the effects, Oakflesh's armor in the damage). DONE 2026-10-13
    (8eb4e78e); b-self-cast c260ff3.
 10. Apocalypse (ADR-029, accepted 2026-10-13): the caster's game runs its own
-    spells' effect scripts; a server-run allowlist grows verb by verb. NEXT:
-    Ghostwalk's filter (A1), per-player globals with the MCM settings (A2),
-    then the allowlist's first entry, Nature's Balance
+    spells' effect scripts; a server-run allowlist grows verb by verb
     (docs/apocalypse-options.md, sections 4 and 5). Scenario b-apocalypse.
+    - The mod on the lab: thuum branch apocalypse (10.2.3 into persist-mods
+      and both load orders), staged by numidium's `just layer-stage` with a
+      full sweep; NEXT after playtest eighteen's probes.
+    - A1, Ghostwalk (docs/verbs/ghostwalk.md): its return taken as a cast
+      jump (castTeleports with reach 0, a wait and the cast relayed), fork
+      m2-ghostwalk f43d1f91, T0 green; its settings entry on thuum branch
+      ghostwalk. Staged after the layer.
+    - A2, per-player globals (docs/verbs/player-globals.md): 53 globals kept
+      per player and set at login, fork m2-player-globals (rule, PlayerGlobals
+      MsgType 44, the change form's record, server, client), T0 green; the
+      list on thuum branch player-globals. Open for Eli: SkyUI for the MCM.
+    - B1, Nature's Balance (docs/verbs/natures-balance.md), drafted: the
+      server's effect runtime and the first allowlist entry. Open for Eli:
+      the conditions, evaluated by the server (recommended) or the engine's
+      word.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
