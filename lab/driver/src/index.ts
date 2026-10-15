@@ -168,7 +168,10 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 //   maxStep, maxStepMs: the largest move between two frames and when (a
 //   figure put at a teleport's landing moves its whole jump in one frame, a
 //   glide a frame's share of it; thuum docs/verbs/cast-teleport.md), a throw
-//   its flight;
+//   its flight; track: [ms, x, y, z] every WATCH_TRACK_MS, at most
+//   WATCH_TRACK_MAX, so how far it got by a moment reads off the record (a
+//   thrown figure's flight against its move once its player is up, thuum
+//   docs/verbs/push.md);
 // - health: each change this game saw (a figure's on every change, at most
 //   WATCH_HEALTH_MAX: the engine's own damage to a figure shows for a frame
 //   or so before the server's ChangeValues sets it, thuum
@@ -196,6 +199,7 @@ type Watched = {
   samples: number;
   maxStep: number;
   maxStepMs: number;
+  track: number[][];
   health: number[][];
   magicka: number[][];
   stamina: number[][];
@@ -211,6 +215,8 @@ const WATCH_HEALTH_MAX = 512;
 const WATCH_SELF_MAX = 256;
 const WATCH_EVENTS_MAX = 4096;
 const WATCH_SELF_MS = 50;
+const WATCH_TRACK_MS = 250;
+const WATCH_TRACK_MAX = 240;
 const VAR_EPSILON = 0.01;
 let watching: { startedAt: number; actors: Map<number, Watched>; self: Watched } | null = null;
 
@@ -230,6 +236,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
   for (const n of bools) named[n] = [];
   return {
     name: actor.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
+    track: [[0, pos[0], pos[1], pos[2]]],
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
     events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [],
   };
@@ -461,6 +468,10 @@ function trackWatched(actor: Actor, id: number, w: Watched, ms: number, own: boo
   }
   w.last = pos;
   w.samples += 1;
+  const lastTrack = w.track[w.track.length - 1];
+  if (ms - lastTrack[0] >= WATCH_TRACK_MS && w.track.length < WATCH_TRACK_MAX) {
+    w.track.push([ms, pos[0], pos[1], pos[2]]);
+  }
   for (const [av, seen] of [["health", w.health], ["magicka", w.magicka], ["stamina", w.stamina]] as Array<[string, number[][]]>) {
     const value = actor.getActorValue(av);
     const last = seen[seen.length - 1];

@@ -741,6 +741,21 @@ class WatchTests(unittest.TestCase):
         old = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
         self.assertTrue(old.evaluate("c2.watched(c1).maxStepMs == -1"))
 
+    def test_watched_reads_how_far_a_figure_got_by_a_moment(self):
+        """thuum docs/verbs/push.md: thrown in the watcher's game, the figure
+        has flown by 5 s; one that only follows its player has not moved by
+        then, and moves once its player is up."""
+        from labapi.assertions import AssertionData, Evaluator
+        views = WatchViews()
+        views.watches["c2"]["actors"][0]["track"] = [[0, 296.0, 1.0, 0.0], [2500, 296.0, -400.0, 0.0], [3000, 296.0, -900.0, -40.0], [9000, 296.0, -1100.0, -40.0]]
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.watched(c1).movedBy(5000) > 800"))
+        views.watches["c2"]["actors"][0]["track"] = [[0, 296.0, 1.0, 0.0], [2500, 296.0, 1.0, 0.0], [9000, 296.0, -1100.0, -40.0]]
+        snapped = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(snapped.evaluate("c2.watched(c1).movedBy(5000) < 1"))
+        with self.assertRaises(AssertionData):
+            Evaluator(RichServer(), WatchViews(), ["c1", "c2"]).evaluate("c2.watched(c1).movedBy(5000) > 1")
+
     def test_a_watch_is_needed_and_is_not_a_dump(self):
         from labapi.assertions import AssertionData, Evaluator, clients_needing_views
         ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])

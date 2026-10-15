@@ -191,12 +191,30 @@ class WatchView:
     drainEndMs: float = -1.0
     maxStep: float = 0.0
     maxStepMs: float = -1.0
+    # its position every 250 ms, ((ms, x, y, z), ...) (lab-driver's track;
+    # empty from a driver before it)
+    track: tuple = ()
     # its stagger and recoil events in the watcher's game, (ms, name, 1 if
     # its graph took the event after every hook), and the graph bools the
     # watch sampled, (name, ((ms, value), ...)) (lab-driver bc5d76a; thuum
     # docs/verbs/stagger.md)
     events: tuple = ()
     bools: tuple = ()
+
+    def movedBy(self, ms: float) -> float:
+        """The farthest the actor got from where the watch began by `ms` after
+        watch-start, from its track: a figure the watcher's game throws has
+        flown by then, one that follows its player's position moves only once
+        its player is up (docs/verbs/push.md)."""
+        if not self.track:
+            raise AssertionData("the watch has no track (a lab-driver before it)")
+        x0, y0, z0 = self.track[0][1], self.track[0][2], self.track[0][3]
+        best = 0.0
+        for t, x, y, z in self.track:
+            if t > float(ms):
+                break
+            best = max(best, ((x - x0) ** 2 + (y - y0) ** 2 + (z - z0) ** 2) ** 0.5)
+        return best
 
     def took(self, name: str) -> int:
         """How many of the actor's events named `name` its graph took in the
@@ -668,6 +686,7 @@ class _ClientRef:
                 samples=int(best.get("samples", 0)),
                 maxStep=float(best.get("maxStep") or 0.0),
                 maxStepMs=float(best["maxStepMs"]) if best.get("maxStepMs") is not None else -1.0,
+                track=tuple(tuple(float(v) for v in row[:4]) for row in best.get("track") or [] if len(row) >= 4),
                 drainMs=falls[-1] - falls[0] if falls else 0.0,
                 drainEndMs=falls[-1] if falls else -1.0,
                 events=tuple((float(e[0]), str(e[1]), int(e[2])) for e in best.get("events") or []),
@@ -955,6 +974,10 @@ _ATTRS = {
                 "movementControls", "menuControls", "lookingControls", "activateControls", "rested"},
     _ClientRef: {"state"},
 }
+# Methods that take a number: c2.watched(c1).movedBy(5000)
+_NUMBER_METHODS = {
+    WatchView: {"movedBy"},
+}
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
     _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison"},
@@ -969,7 +992,7 @@ _METHODS = {
     _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
     EffectsView: {"left", "magnitude"},
-    WatchView: {"took", "sent", "ever"},
+    WatchView: {"took", "sent", "ever", "movedBy"},
     SelfWatchView: {"saw", "ever"},
 }
 _CMP = {
@@ -1088,9 +1111,13 @@ class Evaluator:
                         args.append(self._eval(a))
                 # methods that take a form id: c.marker(0x00016223)
                 takes_id = node.func.attr in _ID_METHODS.get(type(obj), set())
+                takes_number = node.func.attr in _NUMBER_METHODS.get(type(obj), set())
                 if takes_id:
                     if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], int):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one form id")
+                elif takes_number:
+                    if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], (int, float)):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one number")
                 elif len(args) != 1 or not isinstance(args[0], str):
                     raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one client name or string")
                 return self._read(node, getattr(obj, node.func.attr)(args[0]))
