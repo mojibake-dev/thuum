@@ -171,7 +171,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    time it held its target, the observer casting the relayed spell, a spell
    hit starting a fight. DONE 2026-10-10 (45839102); b-spell 9ed66b8. The
    relay as the server resolved it: DONE 2026-10-13 (8eb4e78e, merged with
-   m2-fifteen).
+   m2-fifteen). The figure's cast animation: NEXT as one shape, the
+   figure's own caster started by the observer through the engine's
+   CastSpell (docs/verbs/spell-cast.md, "The hands, read whole"), after
+   playtest eighteen's three findings and x-figure-cast4 showed no scripted
+   start lands; m2-hands' held start is the stopgap it replaces.
 3. magic-effects: the server's effects from the records, persisted with their
    time, drinks through the rule, the engine's own application held out.
    DONE 2026-10-10 (35acc275, merged with god-mode); b-potion bc796d5 and
