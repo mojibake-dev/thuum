@@ -450,8 +450,9 @@ verb-stage branch *probes:
 
 # A mod-layer branch (persist-mods and the load orders) staged on the lab, from a worktree of the branch: T0, a hold,
 # persist-mods, deploy-srv, the server restarted on the new load order, client-mods on both clones, both snapshotted as
-# clean-m1-next, the probes named. Then layer-merge: the full sweep as the gate (ADR-030's non-verb promotion), both
-# clones promoted, thuum main fast-forwarded, a dated docs/LOG.md entry to finish by hand.
+# clean-m1-next, the probes named. Then layer-merge: the full sweep as the gate (ADR-030's non-verb promotion), thuum
+# main given the branch (a fast-forward, or a merge commit when main moved meanwhile), both clones promoted after it, a
+# dated docs/LOG.md entry to finish by hand. Between the two, nothing deploys from a tree without the branch.
 layer-stage branch *probes:
     @lab/tools/layer-stage.sh "{{branch}}" {{probes}}
 layer-merge branch:

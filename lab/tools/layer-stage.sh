@@ -22,8 +22,13 @@
 #      back to (lab/labapi/labapi/guests.yaml);
 #   7. the hold released; the probes named (scenario ids or paths) run.
 # Then `just layer-merge <branch>`: the full sweep as the gate (a load order
-# touches every verb, ADR-030), both clones promoted, main fast-forwarded.
-# Never opens a Moonlight stream (Eli's seats are his).
+# touches every verb, ADR-030), main given the branch, both clones promoted.
+# Until layer-merge reports, the lab's deployed tree is the branch's: nothing
+# runs deploy-srv from a tree without the branch (main included), or the
+# server's load order reverts under clones that keep the plugin. thuum main
+# takes docs all evening, so merge main into the branch just before staging
+# (step 0 refuses a branch without it: its deploy-srv would revert main's lab
+# tree on sky-srv). Never opens a Moonlight stream (Eli's seats are his).
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 branch=${1:?thuum branch}; shift
