@@ -33,8 +33,7 @@ rows.
 | the eyes-fix ability (SPEL 030CB7E1, AddSpell, silent, after the return): its WB_inviseyefix checks each second and, once its bearer's weapon is sheathed, calls QueueNiNodeUpdate and removes itself (RemoveSpell) | script | native in the caster's game; HYPOTHESIS that the server never records it (a script's AddSpell and RemoveSpell in the player's game, unreported); a transient, so nothing to persist |
 | the failure message (MESG 0300AAE6), shown only when the location check fails with WB_CheckLocation True | script | never shown with this VMAD (unreachable) |
 | a caster who changed cells during the effect: SetPosition (not MoveTo) puts it at the cast's coordinates in its current cell | script | later: the server permits the return in the cast's cell or worldspace only, so there the move is judged as any other (sent back if the budget refuses it); a rare edge, named here for the parity list |
-| an early end (the caster's own attack or cast drops the invisibility): the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | script | as the timed end; the permit's window opens at the cast |
-| the effect ended early by the caster's own attack or cast | engine (self-cast's HYPOTHESIS) | native, and the server's self-cast ends its state; the script returns the caster then, the permit's window opening at the cast |
+| the effect ended early by the caster's own attack or cast: the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | engine (self-cast's HYPOTHESIS), script | native, and the server's self-cast ends its state; the script returns the caster then, the permit's window opening at the cast |
 
 ## Authority
 
