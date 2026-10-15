@@ -80,6 +80,7 @@ class ViewsFacade(Protocol):
     def known(self, observer: str) -> dict[str, Any] | None: ...
     def favorites(self, observer: str) -> dict[str, Any] | None: ...
     def held(self, observer: str) -> dict[str, Any] | None: ...
+    def globals(self, observer: str) -> dict[str, Any] | None: ...
     def projectiles(self, observer: str) -> dict[str, Any] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
@@ -759,6 +760,19 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s held step did not read {int(ref_id):#x}")
         return n
 
+    def globalValue(self, desc: str) -> float:
+        """c.globalValue("<hex id>:<plugin>"): the value that client's game
+        holds for a global variable, from its last `globals` step
+        (docs/verbs/player-globals.md)."""
+        fn = getattr(self._views, "globals", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a globals step yet")
+        v = data.get(desc)
+        if not isinstance(v, (int, float)) or isinstance(v, bool):
+            raise AssertionData(f"{self.name}'s globals step did not read {desc}")
+        return float(v)
+
     def projectile(self, ref_id: int) -> ProjectileView:
         """c.projectile(id): the nearest reference of that projectile base in
         that client's game, from its last `projectiles` step."""
@@ -989,7 +1003,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time"},
-    _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
+    _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "movedBy"},

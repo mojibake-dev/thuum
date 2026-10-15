@@ -394,6 +394,34 @@ class HeldTests(unittest.TestCase):
             ev.evaluate("c2.held(0x5ACE4) == 1")
 
 
+class GlobalViews(NearViews):
+    """c1's last globals step (docs/verbs/player-globals.md): the Craftlord's
+    unspent points at 3, a global its game lacks."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {"0b1c19:Apocalypse - Magic of Skyrim.esp": 3.0, "123:Missing.esp": None}}
+
+    def globals(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class GlobalTests(unittest.TestCase):
+    def test_global_value_reads_the_game_s_value_from_the_last_globals_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), GlobalViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c1.globalValue("0b1c19:Apocalypse - Magic of Skyrim.esp") == 3'))
+
+    def test_an_unread_or_missing_global_or_client_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), GlobalViews(), ["c1", "c2"])
+        for expr in ('c1.globalValue("123:Missing.esp") == 0', 'c1.globalValue("1:Other.esp") == 0',
+                     'c2.globalValue("0b1c19:Apocalypse - Magic of Skyrim.esp") == 3'):
+            with self.assertRaises(AssertionData):
+                ev.evaluate(expr)
+
+
 class PoisonViews(NearViews):
     """The last poisons steps (docs/verbs/magic-effects.md): c1's Steel Sword
     (0x13989) carries DB03Poison (0x58CFB) with one charge, c1 holds no other

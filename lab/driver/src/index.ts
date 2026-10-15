@@ -939,6 +939,22 @@ function run(step: Step, player: Actor): unknown {
       }
       return out;
     }
+    case "globals": {
+      // thuum docs/verbs/player-globals.md: the values this player's game
+      // holds for global variables named as FormDescs, "<hex id>:<plugin>"
+      // (Papyrus Game.GetFormFromFile, so the load order does not matter),
+      // keyed by that text (lab-api's c.globalValue(desc)); null for one the
+      // game does not have
+      const forms = Array.isArray(step.args?.forms) ? (step.args?.forms as unknown[]) : [];
+      const out: Record<string, number | null> = {};
+      for (const desc of forms) {
+        const text = String(desc);
+        const at = text.indexOf(":");
+        const g = at > 0 ? GlobalVariable.from(Game.getFormFromFile(parseInt(text.slice(0, at), 16), text.slice(at + 1))) : null;
+        out[text] = g ? g.getValue() : null;
+      }
+      return out;
+    }
     case "held": {
       // How many of each form this player's game holds (getItemCount), keyed
       // by its decimal form id (lab-api's c.held(id)); null for a form the
