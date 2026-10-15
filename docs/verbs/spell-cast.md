@@ -814,4 +814,26 @@ health message. A second red within two sweeps makes it a bug.
   bWantCastLeft or both: Skyrim Platform's master behavior variables 72 and
   71) and plays the start fireAndForgetStartFrames updates later, 1 until
   the probe says which. It merges only on the probe's word.
+- Playtest eighteen (2026-10-14, Eli, parity 05192845): the hands items not
+  ticked. Three notes: the figure's grab-and-push "initiates, but does not
+  stop"; "charging and casting with the left hand still emits the bolt from
+  the right hand"; "spells like invisibility also aren't accompanied by a
+  spell animation" on the figure. HYPOTHESES, one per note, probed the same
+  night: the figure's casting variables are set from the cast's snapshot
+  and never set back, so a figure whose graph now takes the start stays
+  casting (x-flames-stop: the figure's IsCastingRight and events through
+  the cast and 10 s after); the relay's casting source reaches the
+  observer's launch as the right hand's, or the left caster's magic node is
+  not the one used (x-left-firebolt: launch-source-trace.js reads the
+  LaunchData's castingSource, 0 left and 1 right, and origin in c2's game);
+  a Self cast's start is a fire-and-forget start (MRh_SpellSelfStart) and
+  meets the same refusal as Firebolt's (x-self-anim: the events c1's own
+  graph sends and the figure takes). Eli's ask: "something about how we're
+  doing animations overall is a little iffy ... see how our past things
+  that work are doing it"; a research pass over the client's cast relay,
+  the engine's own casting path and what works (swings, blocks, staggers,
+  shouts) is in hand. numidium's point stands: b-spell asserts only the
+  start's taking, so the hands fix ships with references (the engine alone
+  casting Flames and Firebolt from each hand, and a Self cast) and a parity
+  scenario that would have seen all three.
 

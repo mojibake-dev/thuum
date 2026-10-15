@@ -261,6 +261,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   still shows no fire on the other screen; an invisible player's name
   still shows above its figure (self-cast). Next (Eli, 2026-10-14): the
   hands first (the concentration pose), then the figure's flight.
+- Playtest eighteen (2026-10-14, parity 05192845; world
+  playtest-m2-18-20261015T024812Z): the flight passed (the thrown figure
+  flies on the shouter's screen and is where its player is once both are
+  up); the invisible player's name is gone. The hands did not pass: the
+  figure's grab-and-push starts and does not stop, a left-hand Firebolt's
+  bolt leaves the figure's right hand, and a Self cast shows no cast
+  animation on the figure; the god-mode breath's fire shows "sometimes"
+  twice now, still janky. Eli: look at how the animations that work are
+  done. Probes x-flames-stop, x-left-firebolt and x-self-anim read the
+  three; the hands fix ships with references and a parity scenario, since
+  b-spell asserts only the start (docs/verbs/spell-cast.md).
 - Carried from M1 into this milestone's lab runs: melee reach's unmeasured
   cases (the bash, bare hands, the scale across races) and whether a power
   attack reaches by the pick alone (docs/verbs/melee-reach.md,

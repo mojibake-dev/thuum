@@ -316,3 +316,8 @@ track (movedBy), follows. The inventory's last row is merged for the
 shouter's screen, DONE with that check and playtest eighteen; a bystander's
 screen stays LATER (A1's bystanders, or the push on the wire).
 
+Playtest eighteen (2026-10-14, Eli): both flight items ticked. On the
+shouter's screen the target's figure flies back as the target does in its
+own game and is where the target is once both are up, no snap; the
+target's own game throws it as in seventeen. T4 of the flight: passed.
+

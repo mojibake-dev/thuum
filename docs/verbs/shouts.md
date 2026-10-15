@@ -673,4 +673,9 @@ snippets).
   three breath addons the flag at the data load (Skyrim Platform's
   EventHandler, kDataLoaded); it merges only if x-tgm-breath3-fix draws
   every breath.
+- Playtest eighteen (2026-10-14, Eli): "for the unresolved tgm+firebreath
+  issue, sometimes i can see the effect in screen 2 twice in a row, but its
+  still janky". So the second breath's fire is drawn some of the time,
+  which fits a system destroyed when not in use and rebuilt in time for
+  some second breaths (b) better than an emitter that never joins (a).
 
