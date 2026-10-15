@@ -82,9 +82,15 @@ class ParityCut(BaseModel):
     """Where each record's consequences start to count (ADR-031): the first
     mark of `kind` in that record's own watch (hit: the actor's first hit dealt,
     the target's first hit taken; cast: the first cast; event:<name>: the first
-    event so named), less lead_ms so the windup before it counts too. A marker,
-    never a fixed time: the AI's and the relay's timing vary run to run."""
-    kind: str = "hit"
+    event so named; value:<health|magicka|stamina>: the first reading of that
+    value below its first by more than half a point), less lead_ms so the
+    windup before it counts too. A list of kinds is tried in order per record,
+    for an action whose views mark it differently: a spell's hit never reaches
+    the target's own game (ADR-028: the server deals it, and that view's mark
+    is its health falling), where the other three views show a hit
+    (p-spell-bolt 20261015-070225). A marker, never a fixed time: the AI's and
+    the relay's timing vary run to run."""
+    kind: str | list[str] = "hit"
     lead_ms: float = 700.0
 
 

@@ -165,6 +165,26 @@ class ParityAssertion(unittest.TestCase):
         with self.assertRaises(AssertionData):
             self.evaluator(w, spec).evaluate("parity.ok")
 
+    def test_a_list_of_cut_kinds_anchors_a_spells_target_on_its_health(self):
+        # a spell's target never sees a hit in its own game (ADR-028: the
+        # server deals it), so its own view has no taken row and its mark is
+        # its health falling; the other views still cut at the hit
+        # (p-spell-bolt 20261015-070225, docs/verbs/cast-action.md)
+        from labapi.assertions import AssertionData
+        from labapi.scenario import ParityCut, ParitySpec
+
+        w = run_watches()
+        w["c2"]["self"]["taken"] = []
+        only_hit = ParitySpec(action="melee-swing", actor="c1", target="c2", cut=ParityCut(kind="hit", lead_ms=100))
+        with self.assertRaises(AssertionData):
+            self.evaluator(w, only_hit).evaluate("parity.ok")
+        both = ParitySpec(action="melee-swing", actor="c1", target="c2", cut=ParityCut(kind=["hit", "value:health"], lead_ms=100))
+        ev = self.evaluator(w, both)
+        # the cut lands where the health fell (1300 ms), the same place the
+        # hit would have put it, so the recoil after it still matches
+        self.assertTrue(ev.evaluate("parity.findings == 0"))
+        self.assertTrue(ev.evaluate("parity.ok"))
+
     def test_parity_is_not_a_name_without_a_block(self):
         from labapi.assertions import AssertionSyntax, Evaluator
 
