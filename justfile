@@ -366,6 +366,18 @@ playtest-worlds:
 playtest-record n:
     @lab/tools/playtest-record.sh {{n}}
 
+# Every item of docs/private/playtest-m2-<n>.md names its scenario in backticks (`b-cast-rhythm`, committed under
+# lab/scenarios), or says the lab cannot measure it, "(feel)" or "(no scenario: why)" (ADR-033, decision 2).
+playtest-check n:
+    @lab/tools/playtest-check.py {{n}}
+
+# The gate before a playtest (ADR-033): the scenarios its checklist names, as one run set, refused while an item is uncovered.
+playtest-gate n:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    scenarios=$(lab/tools/playtest-check.py {{n}} --scenarios)
+    lab/tools/runset.sh "playtest-{{n}}" $scenarios
+
 # End a recorded playtest before its save and release: the recorder's last cycle and the logs, the hold still up.
 playtest-record-stop:
     @pkill -TERM -f 'lab/tools/playtest-record.sh' || { echo "no recorder running"; exit 1; }; while pgrep -f 'lab/tools/playtest-record.sh' >/dev/null; do sleep 2; done; echo "recorder done: the logs are in; now playtest-save and lab-release"
