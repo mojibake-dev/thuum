@@ -1408,3 +1408,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (the event relay stays), a mage bandit's B reference for the spell staggers, p-spell-stream
   (drafted; no streaming B yet), the invisible-prompt reading (no vantage yet), the Apocalypse layer
   retry (m2-spaced-plugins), Ghostwalk and the per-player globals, now unblocked.
+
+- Playtest nineteen (2026-10-15 10:36 to 10:45 PDT, parity e75ee5c8; docs/private/playtest-m2-19.md):
+  "basically every test only half works". Read from c2's log (251 replays on test 1's figure): the
+  casts alternate, one refused whole and the next taken whole, at Eli's rhythm of 400 to 700 ms
+  between a cast's exit and the next start; the lab's probes had never cast closer than four
+  seconds. Four probes at that rhythm (174811, 175053, 175554, 175846): only the strafing one
+  refused, a start 570 ms after a taken exit. Two causes in the view's timing against the graph
+  (the want variable left up by the exit's variables, so the next start's want has no rise; the
+  start performed one update after its variables whatever the graph's state, where the caster's
+  engine waits for the graph's answer) and one regression of the last hand fix (every cast event
+  named with the latest start's hand, so both hands casting the same spell separately streamed from
+  one hand). Fixed on fork m2-cast-action: c7d49cc0 one pending start per hand, 867f0ac8 the want
+  dropped after an exit and before a start, the snapshot off a figure's casting booleans, abe44a55
+  a refused action retried for up to fifteen updates. Eli's word on the term: "dual casting" is two
+  things, both hands separately (A) and the perk's (B); the probes had covered B. The stage of
+  abe44a55 with x-cast-twice-fast, x-both-hands-relay, x-left-firebolt2 and b-spell, then the gate
+  and nineteen again; the Apocalypse retry parked behind it (numidium). Eli's world saved as
+  playtest-m2-19-20261015T174737Z. docs/verbs/cast-action.md's T3 box reopened.

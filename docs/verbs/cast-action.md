@@ -412,6 +412,48 @@ and 8 a second only ever stops a flood.
   no anchor in the target's own view; thuum main 422abf8 lets a cut list
   kinds tried in order and adds value:<av> (the first fall), the scenario
   cuts at [hit, value:health] and reruns once the lab-api image is pulled.
+- Playtest nineteen (2026-10-15 10:36 to 10:45, parity e75ee5c8): Eli,
+  "basically every test only half works": "each animation only fires
+  roughly half the time"; "when both hands are casting there is only one
+  stream from the left hand" (both hands casting separately, not the perk's
+  dual cast: Eli's distinction, the two are different things); Invisibility
+  "only launches roughly half the time, maybe every third"; the breath
+  "same as before". c2's log (the figure of test 1 in test 2's game, 251
+  replays) showed the casts alternating: one refused whole (its start, its
+  release and its exit a second later, taken 0), the next taken whole; a
+  start about 200 ms after a refused cast's exit taken, one 400 to 700 ms
+  after a taken cast's exit refused. The lab's casts had never come closer
+  than four seconds. Four probes at the playtest's rhythm (1 s held, casts
+  1.8 s apart): through the relay (x-cast-twice-relay 174811), replayed by
+  the driver alone (175053), with both hands holding Flames as the
+  playtest's characters did (175554), all 15 of 15 taken; with the caster
+  strafing (175846), the second cast refused: its start 570 ms after the
+  first's exit, the want variable rising properly 4 ms before it, the
+  other three casts 800 ms after their exits and taken. Two causes, both
+  of the view's timing against the graph:
+  1. The exit's variables are the caster's from before its own FinishCast
+     drops the want variable, so the figure kept the want up after a cast,
+     and a want already up when the next cast's variables land gives the
+     graph no rise; whether the caster's 500 ms snapshot had dropped it
+     first was the coin (the relay probe's figure: want up at the exit's
+     variables, down at the next snapshot 350 ms later, the next start
+     800 ms after the exit).
+  2. The caster's engine sets the want and performs the start only when the
+     graph answers; the view performed one update later regardless, and a
+     graph still finishing its exit refuses it.
+  Fixed on fork m2-cast-action: the view drops the hand's want after an
+  exit (both after the perk's dual cast) as the engine's sequence does,
+  drops a want still up one update before a start lands, no longer lets
+  the 500 ms snapshot write a figure's seven casting booleans (867f0ac8),
+  and retries a refused action, variables then action, for up to fifteen
+  updates (abe44a55). The one stream from the left hand was the hand fix
+  of e75ee5c8 naming every cast event with the latest start's hand, so two
+  hands casting the same spell separately both went out as the later
+  hand; now one pending start per hand, taken by cast events in start
+  order, a hand's exit dropping its pending start (c7d49cc0,
+  Frida::TakeCastStart). The playtest-rhythm probe (x-cast-twice-fast) and
+  both hands separately (x-both-hands-relay) are the next stage's probes
+  before nineteen is played again.
 - The re-analyst's second read (the "cancel", 23:00): there is none. The
   graph's response handler (42820 right, 42819 left) runs StartCharge only
   when the hand's caster is in the requested state and is a no-op on an
@@ -440,6 +482,6 @@ and 8 a second only ever stops a flood.
 - [x] native hook + T1 (0d69f6fe; the probes 055039, 055907, 060152, 060444)
 - [x] TS handler (3f8d8f77)
 - [x] T2 green (26 sessions with cast-action among them, difftest job 6654 at e75ee5c8, the gate of 2026-10-15 01:30)
-- [x] T3 scenario green, no HYPOTHESIS tags (b-spell 0d44f4b green on the staged build, 20261015-065943; the one open question, the graph's own reset of the want variable, is a behavior-file reading the verb does not rest on)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell 0d44f4b green on the staged build, 20261015-065943, and again on the gate; REOPENED by playtest nineteen: the quick-succession refusals above, fixed on the fork, the stage with x-cast-twice-fast and b-spell pending)
 - [x] parity scenario green, or its later list reviewed with it (ADR-031): p-spell-bolt 5bf1d51 green by id (20261015-080752), its later list reviewed in docs/private/reviews-pending.md
 - [x] ledger and suppression registry updated (no Papyrus native; the suppression is the relay filter, named under Suppress)
