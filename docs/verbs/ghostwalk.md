@@ -233,11 +233,29 @@ positions' age.
   a long one is sent back until the permit lands; c2 unmoved.
 - Owner: agent.
 
+## Built
+
+- Server, fork m2-ghostwalk f43d1f91 (from parity 05192845): wire-rules
+  teleports reads an entry's waitMs and relay, movement's cast jump takes
+  its wait from the entry, the bridge and PartOne pass both, OnSpellCast
+  relays a teleport its entry relays. T0 green 2026-10-14: wire-rules (the
+  entry's fields; a return within the slack of the cast point within its
+  own wait) and the bridge locally, with clippy; fork pipeline 1479's
+  server build ran ctest on the master files, 13 of 13, CastTeleportTest's
+  relayed return among test_unit's 357 cases.
+- Settings: thuum branch ghostwalk 65cb4c8, Ghostwalk's castTeleports entry
+  in both settings files, stacked on branch apocalypse (the layer). It
+  deploys only with a server that has m2-ghostwalk: parity's teleports.rs
+  refuses unknown fields, and a refused entry stops the server at start.
+- Drafts in the session's scratchpad until their first runs: the difftest
+  session ghostwalk, the reference r-ghostwalk, the probe x-ghostwalk-relay
+  and b-ghostwalk.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
+- [x] engine surface cited or delegated
+- [x] server logic + T0
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
 - [ ] TS handler
