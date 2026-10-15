@@ -129,6 +129,22 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   action around it) and of each performAction replay on a figure. Layouts
   are CommonLibSSE-NG's, cited in the script; 1.6.1170 only.
 
+- figure-cast-trace.js: what the engine does for a figure's cast in the
+  observer's game (docs/verbs/cast-action.md: the interrupted and the
+  spawned-mid-cast rows). Every hook filters to the figures (dynamic ACHRs,
+  ids 0xFF......) and logs: each graph event the figure's holder is sent and
+  whether the graph took it (NotifyAnimationGraph, 32901); each
+  PerformAction (38949, dry runs skipped) and each replay through the second
+  entry (38953) with the action, the event chosen, the idle and the return;
+  the figure's own caster's FinishCast (34435), InterruptCast (34408),
+  StartCharge (34443), CastSpell (34401), RequestCastImpl (34136) and
+  CastSpellImmediate (slot 01 of ActorMagicCaster's vtable, 205828, checked
+  against 34404 at attach), each with the hand; and the begin-cast response
+  handlers (42820 right, 42819 left) with a backtrace, the actor decoded
+  when the handlers' vtables confirm IHandlerFunctor's signature, raw and
+  capped at 200 emits otherwise. Layouts are CommonLibSSE-NG's, cited in the
+  script; 1.6.1170 only.
+
 A frida step right before a console step on the same client leaves the
 console unopenable (x-figure-action 20261015-052852 and -053059: "the
 console did not open 3000 ms after the grave key", twice, with the attach
