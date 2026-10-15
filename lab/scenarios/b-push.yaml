@@ -24,8 +24,18 @@
 # 3. the server's record of c2 moved more than 500 units south, away from
 #    c1 (c2's own movement reports carry the throw, R2), where a stagger's
 #    stumble moves under 64 (b-stagger);
-# 4. c1's figure of c2 goes down too (the relayed Ragdoll). How the figure
-#    flies is the verb's later row.
+# 4. c1's figure of c2 is thrown too, in c1's own game: the third word lands
+#    on the figure there with c1 as caster, and the vanilla script throws it
+#    from c1's position (fork m2-flight, ADR-029 A1's caster half). It goes
+#    down and has flown more than a stumble 5 s into the watch, before its
+#    player is up (the recorder's track, c.watched().movedBy); before
+#    m2-flight it dropped where it stood and moved only once c2 was up. The
+#    two games' landings can differ, and the movement relay corrects the
+#    figure after its get-up (docs/verbs/push.md), so the check is the
+#    distance by a moment, not the largest step. The bar, 100 units: the
+#    shortest flight measured in the shouter's game was about 150 units
+#    (x-push-flight 20261014-225505), and a figure that only follows its
+#    player has not moved before its player is up.
 # Green twice by path (20261014-155052 and -155344, fork m2-push 4e8aa04c's
 # client, lab-api bb9fed0): the server took 0.534 both times with c2's game
 # at 0.540, and the throw carried c2 1237 and 1291 units south.
@@ -74,4 +84,5 @@ steps:
       - c2.watched_self().saw("GetUpBegin") >= 1
       - server.actor(c2).y < -650
       - c1.watched(c2).took("Ragdoll") >= 1
+      - c1.watched(c2).movedBy(5000) > 100
 artifacts: [server.log, c1.log, c2.log, screenshots]
