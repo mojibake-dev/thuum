@@ -109,14 +109,18 @@ if (off === undefined) {
   Interceptor.attach(exe.base.add(off.notify), {
     onEnter(args) {
       this.skip = true;
-      const name = fixedString(args[1].readPointer());
-      if (!CAST_EVENT.test(name)) return;
-      const id = formId(args[0].sub(0x38));
-      if (id !== 0x14 && (id >>> 24) !== 0xff) return;
-      this.skip = false;
-      this.name = name;
-      this.actor = hex(id);
-      this.inPerform = open[this.threadId] || 0;
+      try {
+        const name = fixedString(args[1].readPointer());
+        if (!CAST_EVENT.test(name)) return;
+        // the base function serves holders that are not actors (a weapon's,
+        // a furniture's); their id read is garbage and filtered by value
+        const id = formId(args[0].sub(0x38));
+        if (id !== 0x14 && (id >>> 24) !== 0xff) return;
+        this.skip = false;
+        this.name = name;
+        this.actor = hex(id);
+        this.inPerform = open[this.threadId] || 0;
+      } catch (e) { this.skip = true; }
     },
     onLeave(retval) {
       if (this.skip) return;
