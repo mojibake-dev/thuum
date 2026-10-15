@@ -131,6 +131,8 @@ toolchain per layer, every feature the same shape.
                                  a staging); runs, run sets and the nightly wait meanwhile
 - `just sweep [name] [scenarios]` / `just verb-merge <branch> <scenarios>` /
   `just verb-stage <branch> [probes]`: ADR-030's run sets and the verb loop's one shape
+- `just layer-stage <branch> [probes]` / `just layer-merge <branch>`: a mod layer's (a
+                                 thuum branch changing persist-mods and the load orders)
 - `just frida <script> <client>` run a trace script on a lab client through lab-api
 - `just ghidra` ............... confirm GHIDRA_MCP_URL answers
 - `just ghidra-import <exe>` .. import an exe from rpool/sky/persist/game into the
