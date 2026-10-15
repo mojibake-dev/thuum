@@ -21,7 +21,8 @@
     "/srv/skymp/esm/RaceMenu.esp",
     "/srv/skymp/esm/RaceMenuPlugin.esp",
     "/srv/skymp/esm/LostGrimoire.esp",
-    "/srv/skymp/esm/Apocalypse - Magic of Skyrim.esp"
+    "/srv/skymp/esm/Apocalypse - Magic of Skyrim.esp",
+    "/srv/skymp/esm/Headshot Kills.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",
