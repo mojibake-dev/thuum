@@ -21,7 +21,10 @@ srv=${SRV_HOST:-eli@10.10.70.10}
 cycle=${PLAYTEST_CYCLE_S:-300}
 # the bools the recorder samples on each actor (watch-start's `bools`): casting, staggering, attacking, blocking
 bools=${PLAYTEST_BOOLS:-'["IsCastingRight","IsCastingLeft","bWantCastRight","bWantCastLeft","IsStaggering","IsAttacking","IsBlocking"]'}
-out=/srv/lab/results/playtest-$n
+# the results directory: playtest-<n>, or PLAYTEST_LABEL for a second recording or a test (never over a playtest's own)
+label=${PLAYTEST_LABEL:-playtest-$n}
+case "$label" in *[!A-Za-z0-9-]*) echo "PLAYTEST_LABEL is letters, digits and dashes" >&2; exit 2;; esac
+out=/srv/lab/results/$label
 spl='C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform.log'
 started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 tmp=$(mktemp -d)
@@ -38,9 +41,10 @@ note() { echo "$(date +%H:%M:%S) $*" | tee -a "$tmp/summary.txt"; }
 
 [ "$(hold)" = yes ] || { echo "no playtest hold on the lab: start this after just playtest-restore (or playtest-start)" >&2; exit 2; }
 ssh_srv "sudo mkdir -p $out && sudo chown eli:eli $out"
-note "playtest $n recorded from $started UTC, a cycle every $cycle s, into https://thuum.gaussing.tv/results/playtest-$n/"
+note "playtest $n recorded from $started UTC, a cycle every $cycle s, into https://thuum.gaussing.tv/results/$label/"
 
 start_watch() {
+  cycle_start=$(date +%s)
   for c in c1 c2; do
     r=$(assist "$c" watch-start "{\"bools\":$bools}")
     case "$r" in *'"ok":true'*) ;; *) note "$c: watch-start not taken: $(printf '%s' "$r" | cut -c1-160)";; esac
@@ -63,6 +67,8 @@ PY
     ); then
       ssh_srv "cat > $out/trace-$c-$1.json" < "$tmp/trace-$c-$1.json"
       note "$c: trace-$c-$1.json, $line"
+      # the cycle's window and how much the seat did in it: the stopped-log finding reads these
+      printf '%s\t%s\t%s\t%s\n' "$1" "$cycle_start" "$(date +%s)" "$(printf '%s' "$line" | sed -E 's/.* ([0-9]+) own events, ([0-9]+) casts.*/\1 \2/' | awk '{print $1 + $2}')" >> "$tmp/cycles-$c.tsv"
     else
       note "$c: watch-stop gave no trace: $(cut -c1-160 "$tmp/stop-$c.json")"
     fi
@@ -101,13 +107,34 @@ for pair in c1:711 c2:712; do
       | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
     ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines"
   done
-  # a game whose log stops while the playtest goes on is a finding (ADR-033)
-  last=$(grep -o '^\[[0-9][0-9]:[0-9][0-9]:[0-9][0-9]' "$tmp/$c.log" | tail -1 | tr -d '[')
-  if [ -n "$last" ]; then
-    gap=$(python3 -c 'import sys,datetime as d; now=d.datetime.now(); h,m,s=map(int,sys.argv[1].split(":")); t=now.replace(hour=h,minute=m,second=s,microsecond=0); print(int((now-t).total_seconds()//60))' "$last")
-    [ "$gap" -gt $((cycle / 60)) ] && note "FINDING $c: its Skyrim Platform log's last line is at $last, $gap min before the recording's end (ADR-033: a game whose log stops)"
-  fi
+  # a game whose log stops while the playtest goes on is a finding (ADR-033): the log's last line, then a
+  # cycle starting after it in which the recorder saw the seat act (own events or casts); a quiet game is not one
+  note "$(python3 - "$tmp/$c.log" "$tmp/cycles-$c.tsv" "$c" <<'PY'
+import datetime, re, sys
+log, cycles, c = sys.argv[1], sys.argv[2], sys.argv[3]
+stamps = re.findall(r"^\[(\d\d):(\d\d):(\d\d)", open(log, errors="replace").read(), re.M)
+if not stamps:
+    print(f"{c}: no Skyrim Platform log lines")
+    sys.exit()
+h, m, s = map(int, stamps[-1])
+now = datetime.datetime.now()
+last = now.replace(hour=h, minute=m, second=s, microsecond=0)
+if last > now:
+    last -= datetime.timedelta(days=1)
+after = []
+for row in open(cycles) if cycles else []:
+    k, start, end, acts = row.split()
+    if float(start) > last.timestamp() and int(acts) > 0:
+        after.append((k, int(acts)))
+when = last.strftime("%H:%M:%S")
+if after:
+    print(f"FINDING {c}: its Skyrim Platform log stops at {when}, yet the recorder saw the seat act after it "
+          f"(cycles {', '.join(k for k, _ in after)}: {sum(a for _, a in after)} own events and casts); ADR-033, a game whose log stops")
+else:
+    print(f"{c}: Skyrim Platform log's last line at {when}")
+PY
+)"
 done
 ssh_srv "cat > $out/summary.txt" < "$tmp/summary.txt"
-echo "playtest $n recorded: https://thuum.gaussing.tv/results/playtest-$n/ ($k cycles)"
+echo "playtest $n recorded: https://thuum.gaussing.tv/results/$label/ ($k cycles)"
 rm -rf "$tmp"
