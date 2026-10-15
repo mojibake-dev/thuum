@@ -95,6 +95,25 @@ and 8 a second only ever stops a flood.
   38953) plus a variables step (SE 39004) is the replay. Their 1.6.1170
   counterparts: UNKNOWN, delegated to the re-analyst 2026-10-14 (from
   DoAction 34202's own call after it builds the TESActionData).
+- The records (Skyrim.esm by lab/esm.py on sky-srv, 2026-10-14): the
+  actions are AACT forms, ActionLeftAttack 0x13004, ActionRightAttack
+  0x13005, ActionVoice 0x13008, ActionLeftRelease 0x13451, ActionLeftReady
+  0x13452, ActionLeftInterrupt 0x13453, ActionRightRelease 0x13454,
+  ActionRightReady 0x13455, ActionRightInterrupt 0x13456, ActionVoiceRelease
+  0x13457, ActionVoiceReady 0x13458, ActionVoiceInterrupt 0x13459,
+  ActionDualAttack 0x50C96, ActionDualRelease 0x50C97 (the DEFAULT_OBJECTs
+  SourceActionMap names). The idles carry the graph event in their ENAM:
+  CastRightConcentrationAimed 0x1346F (MRh_SpellAimedConcentrationStart),
+  CastRightFireForgetAimed 0x1346C (MRh_SpellAimedStart),
+  CastRightFireForgetSelf 0x1407B (MRh_SpellSelfStart), ReadyLeft 0x13464
+  (MLh_SpellReady_Event), MagicRightRelease 0x205F6 (MRh_SpellRelease_Event),
+  ReleaseLeft 0x13465, InterruptRight 0x13460 (MRh_Equipped_Event),
+  InterruptLeft 0x13463, CastLeftConcentrationAimed 0x13469,
+  CastLeftFireForgetAimed 0x13467, DualMagicConcentrationAimed0 0x35B9A
+  (DualMagic_SpellAimedConcentrationStart), DualMagicFireForgetAimed 0x35B95,
+  DualMagicFireForgetSelf 0x35B96, VoiceStart 0x13F40 (shoutStart); 94 idles
+  name a cast event in all. The probes replay these by id until the hook's
+  capture names the ones the caster's engine chose.
 - Casters and graphs update only for actors with AI processing on
   (kProcessMe) in high or middle-high process; a figure is an NPC in high
   process with AI on (skymp5-client never disables it; formView.ts sets

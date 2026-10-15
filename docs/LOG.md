@@ -1283,3 +1283,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   superseded). The Apocalypse layer staged 20:57 to 21:02 (numidium), its
   sweep running at the entry's time.
 
+- The Apocalypse layer (thuum branch apocalypse f84a5d23, main merged in) staged and went red;
+  withdrawn (21:03 to 21:36 PDT). `just layer-stage apocalypse` ran clean in five minutes:
+  persist-mods, deploy-srv with the spaced name, the m2-flight server restarted on the new load
+  order, add-mods on both clones reporting all eight plugins, clean-m1-next "apocalypse layer
+  f84a5d23". Then `just layer-merge`'s full sweep (run set 20261015-040243-layer-apocalypse) went
+  red on its first three runs (a-activation-reach, a-actor-values, a-character-creation: c1
+  connected and never answered), and numidium stopped it: nothing promoted, main not moved. The
+  cause is on the client. Skyrim Platform's `ValidateFilename` takes only [0-9A-Za-z._-]
+  (skyrim-platform/src/platform_lib/Validators.cpp:3-13) and `getFileInfo` applies it
+  (FileInfoApi.cpp:12), so "Apocalypse - Magic of Skyrim.esp" throws and the client's load-order
+  check (skymp5-client loadOrderVerificationService.ts) fails in once('update'); c1.log: "'Apocalypse
+  - Magic of Skyrim.esp' is not a valid argument for 'filename'". The server took the spaced name
+  cleanly. The fix is thuum-magnus's, on fork branch m2-spaced-plugins (spaces allowed in
+  getFileInfo; the client's catch). The lab is back on main for the cast-action probes: deploy-srv
+  from main 7f8f9836 and the server restarted without Apocalypse; persist-mods from main; each
+  clone's layer snapshot deleted, the clone rolled back to clean-m1 (05192845), main's driver laid
+  by client-driver (main's lab/driver is 26a7d1a's), clean-m1-next retaken; smoke-two-players green
+  on it (20261015-043315). The Apocalypse ESP stays unreferenced in persist's esm directories. The
+  retry, once Eli clears the magic animation shape: `verb-stage` of the fix's client, then
+  `layer-stage apocalypse`, which now ends in a smoke run with the layer, so a layer that breaks
+  the client stops at its staging instead of in the merge's sweep. Ghostwalk, m2-player-globals and
+  the cast candidates wait (Eli, 20:30 PDT: the magic animation shape first; the next verb is
+  cast-action, docs/verbs/cast-action.md).
