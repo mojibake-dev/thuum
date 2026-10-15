@@ -284,6 +284,47 @@ const heldKeys: Array<{ code: number; until: number }> = [];
 // figure's graph)
 const delayedEvents: Array<{ due: number; frames: number; targetId: number; name: string }> = [];
 
+// repeat's state: one step performed `times` times at a person's rhythm (thuum ADR-033, the sequence
+// rows: a cast again 400 to 700 ms after the last exit, which the lab's one-cast probes never did and
+// playtest nineteen did every few seconds), each repetition from update once its time comes, a
+// hold-key's hold counted before the gap. The gaps come from a small generator seeded by the step (or
+// the clock), so a run's result lists them and a seed gives the same rhythm again.
+const REPEATABLE = new Set(["hold-key", "tap-key", "anim-event", "cast", "equip", "draw-weapon", "activate", "figure-action"]);
+let repeating: {
+  step: Step; inner: Step; times: number; done: number; nextAt: number; gapMin: number; gapMax: number;
+  seed: number; startedAt: number; at: number[]; gaps: number[];
+} | null = null;
+
+function finishRepeat(c: Config, player: Actor): void {
+  const r = repeating;
+  if (!r || Date.now() < r.nextAt) return;
+  const now = Date.now();
+  try {
+    const out = run(r.inner, player);
+    if (out === DEFERRED || (out && typeof out === "object" && "error" in (out as Record<string, unknown>))) {
+      repeating = null;
+      const why = out === DEFERRED ? "a step that finishes later" : String((out as Record<string, unknown>).error);
+      postResult(c, r.step, { ok: false, error: `repetition ${r.done + 1} of ${r.times}: ${why}` });
+      return;
+    }
+    r.at.push(now - r.startedAt);
+    r.done++;
+    if (r.done >= r.times) {
+      repeating = null;
+      postResult(c, r.step, { ok: true, data: { times: r.done, at: r.at, gaps: r.gaps, seed: r.seed } });
+      return;
+    }
+    const held = r.inner.action === "hold-key" ? num((r.inner.args || {}).ms, 0) : 0;
+    r.seed = (r.seed * 1103515245 + 12345) & 0x7fffffff;
+    const gap = Math.round(r.gapMin + (r.gapMax - r.gapMin) * (r.seed / 0x7fffffff));
+    r.gaps.push(gap);
+    r.nextAt = now + held + gap;
+  } catch (e) {
+    repeating = null;
+    postResult(c, r.step, { ok: false, error: `repetition ${r.done + 1} of ${r.times}: ${String(e)}` });
+  }
+}
+
 function sendDelayedEvents(): void {
   const now = Date.now();
   for (let i = delayedEvents.length - 1; i >= 0; i--) {
@@ -1878,6 +1919,24 @@ function run(step: Step, player: Actor): unknown {
       }
       return "holding";
     }
+    case "repeat": {
+      // args (lab-api's scenario.py normalizes them): {times, gapMs: [min, max], step: {action, args}, seed?};
+      // the step's result comes when the last repetition is done: {times, at: [ms from the first], gaps, seed}
+      if (repeating) return { error: "a repeat is still running" };
+      const inner = (a.step || {}) as { action?: unknown; args?: unknown };
+      const action = typeof inner.action === "string" ? inner.action : "";
+      if (!REPEATABLE.has(action)) return { error: `repeat takes one of ${[...REPEATABLE].join(", ")}` };
+      const gaps = Array.isArray(a.gapMs) ? (a.gapMs as unknown[]) : [a.gapMs, a.gapMs];
+      const gapMin = Math.max(0, num(gaps[0], 0));
+      const gapMax = Math.max(gapMin, num(gaps[1], gapMin));
+      const now = Date.now();
+      repeating = {
+        step, inner: { id: `${step.id}-repeated`, action, args: (inner.args || {}) as Record<string, unknown> },
+        times: Math.max(1, Math.min(100, num(a.times, 1))), done: 0, nextAt: now, gapMin, gapMax,
+        seed: num(a.seed, now) & 0x7fffffff, startedAt: now, at: [], gaps: [],
+      };
+      return DEFERRED;
+    }
     case "close-menu": {
       // Close a menu through the engine's UI message queue: Skyrim
       // Platform's TESModPlatform.CloseMenu native posts a kHide message for
@@ -2012,6 +2071,7 @@ on("update", () => {
   if (me) finishCraft(c, me);
   if (me) finishRacePick(c, me);
   finishConsole(c);
+  if (me) finishRepeat(c, me);
   if (me) readAfterRest(me);
   trackWatch();
   const step = pending;

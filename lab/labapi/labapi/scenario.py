@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start", "place-npc", "play-idle", "combat-spell"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start", "place-npc", "play-idle", "combat-spell"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
 SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida"}
@@ -152,6 +152,36 @@ def _parse_action(value: Any) -> tuple[str, dict[str, Any]]:
     return value, {}
 
 
+# the client steps the driver performs at once, which repeat may perform again and again (lab/driver's REPEATABLE)
+REPEATABLE = {"hold-key", "tap-key", "anim-event", "cast", "equip", "draw-weapon", "activate", "figure-action"}
+
+
+def _repeat_args(args: dict[str, Any]) -> dict[str, Any]:
+    """repeat {times, gapMs, step, seed?}: one client step performed `times` times (1 to 100) at a
+    person's rhythm (ADR-033, a verb's sequence rows), the gap before each next one drawn from gapMs ([min,
+    max] ms, or one number of ms; a hold-key's hold comes before its gap). `step` is one step as a scenario
+    writes it ({hold-key: {code: 199, ms: 800}}, or the same as a string), of the actions the driver
+    performs at once (REPEATABLE); `seed` gives the same gaps run to run. Normalized for the driver to
+    {times, gapMs: [min, max], step: {action, args}, seed?}."""
+    times = args.get("times")
+    if isinstance(times, bool) or not isinstance(times, int) or not 1 <= times <= 100:
+        raise ValueError("repeat's times is a whole number from 1 to 100")
+    gap = args.get("gapMs", 0)
+    gaps = gap if isinstance(gap, list) else [gap, gap]
+    if (len(gaps) != 2 or any(isinstance(g, bool) or not isinstance(g, (int, float)) or not 0 <= g <= 60000 for g in gaps)
+            or gaps[0] > gaps[1]):
+        raise ValueError("repeat's gapMs is a number of ms or [min, max], each 0 to 60000, min first")
+    if args.get("step") is None:
+        raise ValueError("repeat needs its step: {hold-key: {code, ms}} and the like")
+    action, inner = _parse_action(args["step"])
+    if action not in REPEATABLE:
+        raise ValueError(f"repeat's step is one of {sorted(REPEATABLE)}, got {action!r}")
+    out: dict[str, Any] = {"times": times, "gapMs": [float(gaps[0]), float(gaps[1])], "step": {"action": action, "args": inner}}
+    if "seed" in args:
+        out["seed"] = int(args["seed"])
+    return out
+
+
 def _seconds(value: Any) -> float | None:
     """A positive, finite number of seconds, or None."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -205,6 +235,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
     action, args = _parse_action(value)
     if action not in CLIENT_ACTIONS | SERVER_ACTIONS | SPECIAL_ACTIONS:
         raise ValueError(f"unknown client step {action!r} for {key}")
+    if action == "repeat":
+        args = _repeat_args(args)
     return Step(kind="client", client=key, action=action, args=args)
 
 
