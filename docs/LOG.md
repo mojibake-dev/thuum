@@ -1463,3 +1463,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   assertion, stopped; the rerun 194205, 8 of 8 green (smoke-two-players, a-restart-persistence,
   b-duel, b-spell, b-cast-rhythm 195257, b-cast-both-hands, a-melee-reach, a-racemenu). Parity to
   abe44a55 and the thuum landing by numidium's report; nineteen's second session next, recorded.
+- A correction to commit 1dc55906's message (build-client by commit): its example is wrong. The hand restage
+  that laid 0ce34196 over abe44a55 (2026-10-15 14:2x) did not go through build-client; thuum-magnus ran a
+  by-id `gh run download` into a dist folder an earlier stage had left full, it stopped on "file exists",
+  and the restage went on with the old folder until client-dist's DLL hash showed it. The fix stands on
+  its own: without a commit, build-client takes the branch's newest successful build (0ce34196 for
+  m2-cast-action then, checked), which a stage of an older head would have laid the same way;
+  `just build-client <branch> <sha>` clears the folder, downloads by commit and prints what it got.
