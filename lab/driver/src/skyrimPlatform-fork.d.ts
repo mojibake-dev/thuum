@@ -14,4 +14,21 @@ declare module "skyrimPlatform" {
     integers: ArrayBuffer;
   }
   export function getAnimationVariablesFromActor(actorFormId: number): ActorAnimationVariables;
+  // thuum docs/verbs/cast-action.md (fork m2-cast-action): an action the
+  // player's actor performed, as Skyrim Platform's hook on the engine's
+  // action entry reports it (the BGSAction, the idle the engine chose, the
+  // graph event it sends, the input type bits, the actor's graph variables
+  // at that moment)
+  export interface ActionPerformedEvent {
+    actor: Actor | null;
+    action: number;
+    idle: number;
+    eventName: string;
+    type: number;
+    variables: ActorAnimationVariables;
+  }
+  export function on(eventName: "actionPerformed", callback: (event: ActionPerformedEvent) => void): EventHandle;
+  // performs an action on an actor through the engine's action entry, the
+  // idle given; true when the engine took it
+  export function performAction(actorFormId: number, actionFormId: number, idleFormId: number, eventName: string, type: number): boolean;
 }

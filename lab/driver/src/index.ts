@@ -48,6 +48,7 @@ import {
   hooks,
   on,
   printConsole,
+  performAction,
   settings,
   writeLogs,
 } from "skyrimPlatform";
@@ -210,6 +211,10 @@ type Watched = {
   hits: Array<[number, number, number, number, number]>;
   taken: Array<[number, number, number, number]>;
   effects: Array<[number, number, number]>;
+  // the actions the engine performed for it [ms, action, idle, eventName,
+  // type] (the player's only: the platform's hook reports the player's own;
+  // thuum docs/verbs/cast-action.md)
+  actions: Array<[number, number, number, string, number]>;
 };
 const WATCH_HEALTH_MAX = 512;
 const WATCH_SELF_MAX = 256;
@@ -238,7 +243,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
     name: actor.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
     track: [[0, pos[0], pos[1], pos[2]]],
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
-    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [],
+    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], actions: [],
   };
 }
 
@@ -550,6 +555,21 @@ on("spellCast", (e) => {
   const w = watchedRecord(e.caster.getFormID());
   if (w && w.casts.length < WATCH_SELF_MAX) w.casts.push([watchedMs(), e.spell ? e.spell.getFormID() : 0]);
 });
+
+// thuum docs/verbs/cast-action.md: the actions the engine performs for the
+// player (a hand's attack, ready, release, interrupt; the dual and voice
+// ones), with the idle it chose; the reference of what a figure must replay.
+// A client without the fork's hook has no such event, and the driver loads
+// all the same.
+try {
+  on("actionPerformed", (e) => {
+    if (!watching || !e.actor) return;
+    const w = watchedRecord(e.actor.getFormID());
+    if (w && w.actions.length < WATCH_SELF_MAX) w.actions.push([watchedMs(), e.action, e.idle, e.eventName, e.type]);
+  });
+} catch (err) {
+  printConsole("lab-driver: no actionPerformed event in this Skyrim Platform:", String(err));
+}
 
 // A hit's projectile base and its flags (power 1, sneak 2, bash 4, blocked
 // 8) ride along: a magic stream's hit event comes twice in a frame
@@ -1552,6 +1572,26 @@ function run(step: Step, player: Actor): unknown {
       // solo reference's NPC)
       (a.other ? nearestOther(player) : player).drawWeapon();
       return "drawn";
+    case "figure-action": {
+      // thuum docs/verbs/cast-action.md: an action performed on the nearest
+      // other actor's graph ({other: true}; the player's own otherwise)
+      // through the engine's action entry (the fork's performAction): the
+      // BGSAction {action}, the idle {idle} (0 for the engine's choice), the
+      // graph event {event} and the input type {type}, after {set} puts
+      // graph variables on it in the same tick, as anim-event does. The
+      // probe of whether a figure plays a replayed cast action.
+      const target = a.other ? nearestOther(player) : player;
+      const set = a.set && typeof a.set === "object" ? (a.set as Record<string, unknown>) : {};
+      for (const [k, v] of Object.entries(set)) {
+        if (typeof v === "boolean") target.setAnimationVariableBool(k, v);
+        else if (typeof v === "number") target.setAnimationVariableFloat(k, v);
+      }
+      // an older Skyrim Platform has no such export: the binding is undefined
+      const perform: unknown = performAction;
+      if (typeof perform !== "function") return { error: "no performAction in this Skyrim Platform" };
+      const taken = (perform as typeof performAction)(target.getFormID(), num(a.action), num(a.idle ?? 0), typeof a.event === "string" ? a.event : "", num(a.type ?? 0));
+      return { performed: num(a.action), idle: num(a.idle ?? 0), on: target.getFormID(), taken, set: Object.keys(set) };
+    }
     case "anim-event": {
       // One animation event on the player's behavior graph (Papyrus
       // Debug.SendAnimationEvent), the way the controls start an attack:
