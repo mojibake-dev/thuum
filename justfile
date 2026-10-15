@@ -366,6 +366,10 @@ playtest-worlds:
 playtest-record n:
     @lab/tools/playtest-record.sh {{n}}
 
+# End a recorded playtest before its save and release: the recorder's last cycle and the logs, the hold still up.
+playtest-record-stop:
+    @pkill -TERM -f 'lab/tools/playtest-record.sh' || { echo "no recorder running"; exit 1; }; while pgrep -f 'lab/tools/playtest-record.sh' >/dev/null; do sleep 2; done; echo "recorder done: the logs are in; now playtest-save and lab-release"
+
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}

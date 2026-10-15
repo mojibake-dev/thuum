@@ -9,7 +9,10 @@
 # while the playtest went on (a finding, ADR-033; playtest nineteen's c1 log stopped at the restore).
 # Refuses without docs/private/playtest-m2-<n>.md (the number and the checklist are one thing) and without a
 # playtest's hold (start it after `just playtest-restore`). Run it in the background; the only steps it
-# sends a game are the recorder's own.
+# sends a game are the recorder's own. End a playtest with `just playtest-record-stop` before the world's
+# save and the hold's release, so the logs are fetched while the hold still keeps every run (and its
+# rollback, which erases a clone's files: Sunshine's log of playtest nineteen's second session was lost so)
+# off the clones; if the hold goes first, the recorder takes one of its own for its last cycle and fetch.
 set -uo pipefail
 n=${1:?playtest number, as in docs/private/playtest-m2-<n>.md}
 here=$(cd "$(dirname "$0")/../.." && pwd)
@@ -87,6 +90,7 @@ PY
 }
 
 stopping=0
+own_hold=0
 trap 'stopping=1' INT TERM
 start_watch
 k=0
@@ -94,7 +98,11 @@ while :; do
   waited=0
   while [ "$waited" -lt "$cycle" ] && [ "$stopping" = 0 ]; do
     sleep 15 || true; waited=$((waited + 15))
-    [ "$(hold)" = no ] && { note "the playtest's hold is gone: last cycle"; stopping=1; break; }
+    if [ "$(hold)" = no ]; then
+      # nothing may roll a clone back before the logs are in: a hold of the recorder's own until they are
+      curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d '{"minutes": 10, "reason": "playtest-record: last cycle and logs"}' >/dev/null 2>&1 && own_hold=1
+      note "the playtest's hold is gone: last cycle"; stopping=1; break
+    fi
     # a seat that refused its start (a menu, a relaunch) is asked again every 30 s, not a cycle later
     if [ $((waited % 30)) = 0 ]; then for c in c1 c2; do [ "${watching[$c]:-0}" = 1 ] || start_one "$c"; done; fi
   done
@@ -112,7 +120,7 @@ ended=$(date +%s)
 for pair in c1:711 c2:712; do
   c=${pair%%:*}; vmid=${pair#*:}
   # copied first, as lab-api's runner does: the game holds its logs open without read sharing
-  for spec in "$c.log|'$spl'" "$c-driver.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')"; do
+  for spec in "$c.log|'$spl'" "$c-driver.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')" "$c-sunshine.log|'C:\\Program Files\\Sunshine\\config\\sunshine.log'"; do
     name=${spec%%|*}; src=${spec#*|}
     copy="C:\\sky-lab\\playtest-$n-$name"
     ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Copy-Item -LiteralPath $src -Destination '$copy' -Force\"" > /dev/null 2>&1
@@ -150,5 +158,6 @@ PY
 )"
 done
 ssh_srv "cat > $out/summary.txt" < "$tmp/summary.txt"
+[ "$own_hold" = 1 ] && curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1
 echo "playtest $n recorded: https://thuum.gaussing.tv/results/$label/ ($k cycles)"
 rm -rf "$tmp"
