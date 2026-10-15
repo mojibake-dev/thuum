@@ -48,6 +48,16 @@ class ConsequencesTest(unittest.TestCase):
         quiet = record(vars={"CastBlend": [[0, 0.0], [500, 0.02], [1300, 0.03]]})
         self.assertEqual(set(parity.consequences(quiet, 1000)), set())
 
+    def test_a_series_first_sample_is_the_baseline_even_after_the_cut(self):
+        # a cut at 0 (a reference's action less a longer lead) must not make
+        # every variable's first value a consequence (p-spell-bolt 20261015-073742)
+        r = record(vars={"iState": [[13, 0], [1200, 10]]}, bools={"IsCastingRight": [[14, False], [1300, True]]})
+        keys = set(parity.consequences(r, 0))
+        self.assertIn("vars/iState=10", keys)
+        self.assertIn("bools/IsCastingRight=1", keys)
+        self.assertNotIn("vars/iState=0", keys)
+        self.assertNotIn("bools/IsCastingRight=0", keys)
+
     def test_a_stumble_is_not_a_throw(self):
         # a stagger's few steps stay under the move tolerance; a throw does not
         self.assertNotIn("physics/moved", parity.consequences(record(maxDisplacement=40.0), 1000))

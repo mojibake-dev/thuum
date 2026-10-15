@@ -136,6 +136,12 @@ def _norm(v: Any) -> Any:
 def _series(channel: str, series: dict, at: float, floats: bool, tol: dict, out: dict) -> None:
     for name, rows in (series or {}).items():
         before, after = _split(rows, at)
+        if not before and after:
+            # the first sample is the state at the watch's start, not a change:
+            # a cut at or before it (a reference cut at its action less a lead
+            # longer than its watch had run) made every variable's first value
+            # a consequence (p-spell-bolt 20261015-073742, 377 of them)
+            before, after = after[:1], after[1:]
         if not after:
             continue
         is_float = floats and any(isinstance(r[1], float) and not float(r[1]).is_integer() for r in rows)
