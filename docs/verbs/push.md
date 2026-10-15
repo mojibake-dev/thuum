@@ -218,6 +218,23 @@ an engine move, so its speed may need its own allowance: to measure).
   in AIProcess not traced). Fix on m2-flight cadb5648: a relayed Ragdoll
   leaves a figure this game has knocked down itself alone, holding only its
   movement; a bystander's game, which runs no push, still knocks it.
+- A second cause (m2-flight 05192845): with the zero knock gone, a figure
+  still flew about 150 units and moved 1064 in one frame after its get-up
+  (x-push-flight 20261014-225505): the movement relay, paused only when the
+  relayed Ragdoll came, moved it toward its player's reported positions in
+  the 40 to 80 ms between (INFERRED). A figure this game knocked down now
+  takes no movement until its get-up (sync/knockState.ts).
+- What stays (MEASURED, 05192845's staging): the two games simulate the same
+  throw apart, and their landings differ run to run. c2's own flights went
+  503 to 1405 units over the day's runs; x-push-flight 20261014-235126's
+  figure flew about 200 units in c1's game where c2 flew 1312, and the
+  movement relay moved it the 1104 between once both were up. So the
+  figure flies on the shouter's screen, and lands where its player lands
+  only when the two flights agree; the correction after the get-up is
+  inherent to two simulations, and a jump when they disagree widely.
+  The scenario check of the flight is the figure's distance by a moment
+  (c.watched().movedBy, main e1006cc), not its largest step, which the
+  correction can exceed.
 
 ## Playtest seventeen (2026-10-14, Eli, parity 4e8aa04c)
 
