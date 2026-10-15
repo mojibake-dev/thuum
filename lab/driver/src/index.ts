@@ -1849,12 +1849,17 @@ function run(step: Step, player: Actor): unknown {
       // A key held down through the engine's input system (SKSE
       // Input.HoldKey) and released ms later from the update loop: real
       // movement under the controls (W 17 forward, Left Shift 42 sprint),
-      // where move only sets a position. args: {code, ms}
-      const code = num(a.code, 0);
+      // where move only sets a position. args: {code, ms}, or {codes: [..],
+      // ms} for keys pressed in the same tick (both attack keys for a dual
+      // cast, which the engine takes only when the second press is close to
+      // the first; thuum docs/verbs/cast-action.md, P2)
+      const codes = Array.isArray(a.codes) ? (a.codes as unknown[]).map((c) => num(c, 0)).filter((c) => c > 0) : [num(a.code, 0)].filter((c) => c > 0);
       const ms = num(a.ms, 0);
-      if (code <= 0 || ms <= 0) return { error: "hold-key needs code and ms" };
-      Input.holdKey(code);
-      heldKeys.push({ code, until: Date.now() + ms });
+      if (codes.length === 0 || ms <= 0) return { error: "hold-key needs code (or codes) and ms" };
+      for (const code of codes) {
+        Input.holdKey(code);
+        heldKeys.push({ code, until: Date.now() + ms });
+      }
       return "holding";
     }
     case "close-menu": {
