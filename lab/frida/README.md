@@ -92,6 +92,18 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   (x-reteach-probe) that Game.TeachWord raises the word-of-power message
   (HUD type 21) and AddShout and UnlockWord raise none. 1.6.1170 only.
 
+- mps-trace.js: what draws Fire Breath's flames, breath by breath
+  (docs/verbs/shouts.md, the god-mode second breath). Polls the master
+  particle system of addon index 64 (ADDN MPSFireWaveFlames 0x647BC) every
+  50 ms, checked by its vtable (238521), with its emitter and particle-object
+  counts and destroyWhenNotInUse (CommonLibSSE-NG
+  include/RE/B/BSMasterParticleSystem.h); logs the cone's launches (44108),
+  Init3D (44222), emitter registration (19633, 16817, 76597), the emits on
+  that system (76893), a rebuild that changes it (76603) and the cone's Kill
+  (44110). With params {ALWAYS_LOADED: true} it first sets the addon's flags
+  to kAlwaysLoaded, the test of the fix. The function roles and the manager
+  at 411270 are the re-analyst's static read (HYPOTHESIS). 1.6.1170 only.
+
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as
 frida/<client>-<script>.jsonl; one started outside a run is fetched by the next
