@@ -190,14 +190,17 @@ Fork branch m2-player-globals, stacked on m2-ghostwalk (2026-10-14):
   the bridge to the rule, the login's message on the first movement; its
   test on Skyrim.esm's GameHour.
 - ee70094b, the client: PlayerGlobalsService.
-Rust tests and clippy green locally; the client type-checks; the C++ build
-and ctest are the fork pipeline's.
+- 45da81ac, PlayerGlobal's operator<, which the change form's tuple
+  ordering needs (fork pipeline 1499's build).
+T0 green 2026-10-14: Rust tests, clippy and cargo deny locally; the client
+type-checks; fork pipeline 1504's server build ran ctest on the master
+files, 13 of 13, test_unit's 359 cases with this verb's two.
 
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated
-- [ ] server logic + T0 (the C++ tests wait on the fork pipeline)
+- [x] server logic + T0
 - [x] message + validator (same commit)
 - [x] native hook + T1 (none needed: Skyrim Platform's GlobalVariable)
 - [x] TS handler
