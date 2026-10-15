@@ -50,6 +50,12 @@ mapfile -t plugins < <(python3 -c 'import re,shlex,sys; s=open(sys.argv[1]).read
 echo "   plugins: ${plugins[*]}"
 python3 -m unittest discover -s lab/tests 2>&1 | grep -E "^OK" >/dev/null || { python3 -m unittest discover -s lab/tests 2>&1 | tail -5; echo "== T0 not green" >&2; exit 1; }
 echo "   T0 green"
+# lab/.cache (ignored: the mods' archives persist-mods checks by md5) lives in the main checkout; a worktree
+# shares it by a link, or persist-mods would fetch every archive from Nexus again (CBBE's alone is 475 MB)
+main_root=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+if [ ! -e lab/.cache ] && [ -d "$main_root/lab/.cache" ]; then
+  ln -s "$main_root/lab/.cache" lab/.cache && echo "   lab/.cache -> $main_root/lab/.cache"
+fi
 
 echo "== 1. an idle lab"
 for _ in $(seq 1 120); do
