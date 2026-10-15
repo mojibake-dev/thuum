@@ -20,7 +20,11 @@
 #      retried once;
 #   6. both clones snapshotted as clean-m1-next, the snapshot every run rolls
 #      back to (lab/labapi/labapi/guests.yaml);
-#   7. the hold released; the probes named (scenario ids or paths) run.
+#   7. the hold released; smoke-two-players with the layer, whose red stops the
+#      staging (both clones boot with it, the client's load-order check included:
+#      the apocalypse layer of 2026-10-14 staged clean, then went red on the
+#      sweep's first runs, Skyrim Platform refusing its spaced plugin name);
+#   8. the probes named (scenario ids or paths) run.
 # Then `just layer-merge <branch>`: the full sweep as the gate (a load order
 # touches every verb, ADR-030), main given the branch, both clones promoted.
 # Until layer-merge reports, the lab's deployed tree is the branch's: nothing
@@ -102,8 +106,13 @@ for c in c2 c1; do
 done
 
 curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1 || true
+echo "== 7. smoke-two-players with the layer $(date +%H:%M:%S)"
+if ! smoke=$(just lab-run smoke-two-players 2>&1 | tail -1); then
+  echo "   $smoke"; echo "== the smoke is not green with the layer: no probes, no merge (its run's c1.log and c2.log say why)" >&2; exit 1
+fi
+echo "   $smoke"
 if [ "${#probes[@]}" -gt 0 ]; then
-  echo "== 7. probes"
+  echo "== 8. probes"
   for probe in "${probes[@]}"; do
     echo "   $probe $(date +%H:%M:%S)"
     just lab-run "$probe" 2>&1 | tail -1
