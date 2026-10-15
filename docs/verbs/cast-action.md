@@ -54,11 +54,11 @@ Tests.
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| Flames again at a person's rhythm (0.8 s held, 0.4 s apart, eight times), one hand, standing | x-cast-twice-fast | 20261015-180119 on e75ee5c8: casts 2, 4 and 6 of 8 refused whole (the half); the stage of abe44a55: pending |
+| Flames again at a person's rhythm (0.8 s held, 0.4 s apart, eight times), one hand, standing | x-cast-twice-fast | 20261015-180119 on e75ee5c8: casts 2, 4 and 6 of 8 refused whole (the half); 184857 on abe44a55: 24 of 24 taken, every start and exit, no retry needed |
 | the same, 1 s held, 0.7 s apart, five times, standing | x-cast-twice-relay, -replay, -both | 174811, 175053, 175554: 15 of 15 taken (the lab's rhythm hid the half) |
 | the same while the caster strafes | x-cast-twice-move | 175846 on e75ee5c8: one of five refused, 570 ms after a taken exit; the stage: pending as a scenario row |
 | each hand: right (b-spell), left (x-left-firebolt2), the Self cast (x-figure-action-self), the perk's dual cast (x-dual-relay) | b-spell; x-left-firebolt2; x-figure-action-self; x-dual-relay | 065943, 075606 (source 0 both launches), 060152, 070729, all green on e75ee5c8 |
-| both hands casting the same spell separately (Eli's "dual casting A") | x-both-hands-relay | the stage of abe44a55: pending; on e75ee5c8 both casts were reported as the later hand (nineteen's one stream from the left hand) |
+| both hands casting the same spell separately (Eli's "dual casting A") | x-both-hands-relay | 185138 on abe44a55: the right's start and release, the left's 0.5 s later, both exits, all taken, and the figure's two streams alternate hands in the launch trace (castingSource 1 and 0); on e75ee5c8 both casts were reported as the later hand (nineteen's one stream from the left hand) |
 | a cancelled charge (sheathed mid-charge), a stagger during a cast | none yet | open: the next row to probe after the stage |
 | both seats casting at each other | none yet | open: nineteen's seats did, the lab's never have; a scenario with c2 casting back |
 | after a login or a cell change (a figure that spawns mid-cast) | none yet | open |
