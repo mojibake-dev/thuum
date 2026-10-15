@@ -57,7 +57,7 @@ Tests.
 | Flames again at a person's rhythm (0.8 s held, 0.4 s apart, eight times), one hand, standing | b-cast-rhythm (from x-cast-twice-fast) | 20261015-180119 on e75ee5c8: casts 2, 4 and 6 of 8 refused whole (the half); 184857 on abe44a55: 24 of 24 taken, no retry needed; green in the gate (195257) |
 | the same, 1 s held, 0.7 s apart, five times, standing | x-cast-twice-relay, -replay, -both | 174811, 175053, 175554: 15 of 15 taken (the lab's rhythm hid the half) |
 | the same while the caster strafes | x-cast-twice-move | 175846 on e75ee5c8: one of five refused, 570 ms after a taken exit; the stage: pending as a scenario row |
-| Flames again within 1.5 s of the figure's last TAKEN exit (a person's rhythm, strafing or not) | x-cast-human; playtest nineteen's second session (c2's log 13:13 to 13:18); x-cast-gap with lab/frida/figure-cast-trace.js | RED on abe44a55. 202506: starts 1394 and 1469 ms after a taken exit refused, 1683, 1817 and 5540 ms taken (T T T R T R). Nineteen-2: every start 534 to 1334 ms after a taken exit refused (eight of eight), every start after a refused cast taken (183 to 553 ms), so the half alternates; Firebolt, which has no exit action, took 20 of 24 at 650 to 1300 ms. The figure refuses a start for about 1.5 s after it takes an Equipped exit and never after a refused one; its IsCastingRight falls 100 to 232 ms after a taken exit (trace-c2), so the graph has left the loop. Cause: HYPOTHESIS (the figure's own caster's FinishCast landing before the exit, or the replayed exit's idle on the figure's process); x-cast-gap decides whether a refused start dies before the graph or in it |
+| Flames again at a person's rhythm while the seats MOVE (strafing, turning) | x-cast-human; playtest nineteen's second session (c2's log 13:13 to 13:18); x-cast-gap and x-cast-replay-gap with lab/frida/figure-cast-trace.js | RED on abe44a55, the handshake (34bdf0c3) pending its stage. Nineteen-2: starts refused and taken in alternation (eight of eight after a taken exit refused at 534 to 1334 ms, every one after a refused cast taken at 183 to 553 ms); x-cast-human 202506 (strafing and turning): T T T R T R; Firebolt 20 of 24. Read first as a 1.5 s window after a taken exit and WITHDRAWN by x-cast-gap 213755: standing still, 17 of 17 starts taken through the relay at every gap from 513 to 2651 ms, each 4 to 7 ms after the figure's graph answered the want variable's rise with BeginCastRight (34 of 34 asks, the exits' rises answered too), FinishCast from the interrupt message 33 to 54 ms before every exit and harmless. x-cast-replay-gap 214106 (the driver's replay, no relay): 5 of 6 starts refused in the graph itself (NotifyAnimationGraph false) because the driver's replay never drops the want, so the graph gets no rise and no answer. The fault: the view performed a start one update after its variables, a timer, where the engine's caster waits for the graph's answer; a still figure answers within a frame, a moving one later. Fix: the start waits for the answer (castReady, the response handlers hooked) |
 | each hand: right (b-spell), left (x-left-firebolt2), the Self cast (x-figure-action-self), the perk's dual cast (x-dual-relay) | b-spell; x-left-firebolt2; x-figure-action-self; x-dual-relay | 065943, 075606 (source 0 both launches), 060152, 070729, all green on e75ee5c8 |
 | both hands casting the same spell separately (Eli's "dual casting A") | b-cast-both-hands (from x-both-hands-relay) | green in the gate (193846, 194205's set); 185138 on abe44a55: the right's start and release, the left's 0.5 s later, both exits, all taken, and the figure's two streams alternate hands in the launch trace (castingSource 1 and 0); on e75ee5c8 both casts were reported as the later hand (nineteen's one stream from the left hand) |
 | a cancelled charge (sheathed mid-charge), a stagger during a cast | none yet | open: the next row to probe after the stage |
@@ -181,6 +181,23 @@ and 8 a second only ever stops a flood.
   from the right in the observer's game both times (Skyrim Platform's
   castingSource fallback, EventHandler.cpp ~1346-1451).
 
+- The graph's answer to a cast request (the handshake, 34bdf0c3): the
+  caster's RequestCast sets the hand's want variable; the graph, in a state
+  that can begin a cast, sends BeginCastRight (BeginCastLeft, BeginCastVoice)
+  back as a graph event; the hand's handler, an
+  IHandlerFunctor<Actor, BSFixedString> (RightHandSpellCastHandler,
+  LeftHandSpellCastHandler, VoiceSpellCastHandler: CommonLibSSE-NG
+  include/RE/Offsets_VTABLE.h:2392-2394; ExecuteHandler the one virtual
+  after the destructor, include/RE/I/IHandlerFunctor.h:16-19, called as
+  (this, Actor&, const BSFixedString& tag)), starts the charge, which
+  performs the Attack action. Measured on a figure (x-cast-gap 213755,
+  figure-cast-trace.js): the answer 0 to 3 ms after every want rise the
+  view writes, including the exits' (whose variables carry the caster's
+  want still up), 34 of 34; the start asked 4 to 7 ms after it, taken 34 of
+  34 standing still. The fork hooks the three handlers' ExecuteHandler
+  (one hook per distinct address; the tag names the hand) and records the
+  answer per actor; the player's own are not recorded.
+
 ## Observe (host or acting client sees the intent before the engine acts)
 
 - Hook point: ActorMediator::PerformAction in Skyrim Platform, native,
@@ -200,15 +217,29 @@ and 8 a second only ever stops a flood.
   m2-cast-action), building the TESActionData on the stack with the event
   and idle the caster's engine chose and performing it through the replay
   entry 38953, after the caller has put the caster's variables on the
-  figure through the existing applyAnimationVariablesToActor; the figure's relayed interrupt ends its stream
-  through MagicCaster::InterruptCast (include/RE/M/MagicCaster.h:79)
-  instead of FinishCast.
+  figure through the existing applyAnimationVariablesToActor. The perform is
+  queued to the game thread (drained right after the JS tick; performed
+  inside the JS call it re-entered Skyrim Platform's hooks and hung the
+  game, 0ce34196) and its answer read on the next update
+  (performActionResult). A cast START waits for the graph's answer first,
+  the engine's own handshake: the caster's engine performs the Attack only
+  when the graph answers the want variable's rise with BeginCastRight
+  (BeginCastLeft, BeginCastVoice), handled by the hand's IHandlerFunctor;
+  the fork hooks the three handlers' ExecuteHandler, castReady(actor, hand)
+  takes the answer, and the view performs the start on it (34bdf0c3). The
+  figure's relayed interrupt ends its stream through FinishCast (the
+  existing interruptCast native); the Equipped exit arrives as the
+  Interrupt action.
 - Visual without simulation achieved by: the idle the caster's engine
   chose, played by the figure's graph; the effect decided apart.
-- Side effects (measured, P1 to P4 below and b-spell): the figure's graph
-  takes the replayed action one update after its variables and holds the
-  loop; the Interrupt action produces the Equipped exit; the dual idle
-  plays without the perk; the Self idle plays.
+- Side effects (measured, P1 to P4 below, b-spell, x-cast-gap 213755): the
+  figure's graph answers the want variable's rise with BeginCastRight within
+  a frame when still (34 of 34, the answer 4 to 7 ms before each ask) and
+  takes the start asked after the answer; a start asked one update after
+  its variables, without the answer, is taken when still and refused about
+  half the time while the figure moves (playtest nineteen); the replayed
+  action holds the loop; the Interrupt action produces the Equipped exit;
+  the dual idle plays without the perk; the Self idle plays.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -282,10 +313,15 @@ and 8 a second only ever stops a flood.
   the hands' cast actions (events MRh_, MLh_, DualMagic_: the starts, ready,
   release and the Equipped exit) as UpdateAction, reliable, in order;
   remoteServer.ts queues them per form (actionQueue, 16 at most);
-  view/formView.ts performs each through performAction, the caster's
-  variables on one update and the action on the next (replayActions), the
-  held-start logic gone (castStartWaiting, castStartHeldSince,
-  castStartCastingSeen); sync/animation.ts no longer relays those events
+  view/formView.ts performs each through performAction (replayActions): the
+  caster's variables on one update; a start then waits for the graph's
+  answer (castReady, the engine's handshake; a second without one and the
+  want rises again, twice, then the start goes without), any other action
+  goes on the next update; the perform is queued and its answer read on the
+  update after (performActionResult), a refused action tried again with a
+  fresh rise; the want dropped after an Equipped exit and before a start
+  whose want is still up; the held-start logic gone (castStartWaiting,
+  castStartHeldSince, castStartCastingSeen); sync/animation.ts no longer relays those events
   (they would play twice, and the Equipped exit, rewritten into
   SkympFakeEquip, never reached a figure); magicSyncService.ts sends only
   the player's own casts and its hosted actors' (a figure's

@@ -1470,3 +1470,44 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its own: without a commit, build-client takes the branch's newest successful build (0ce34196 for
   m2-cast-action then, checked), which a stage of an older head would have laid the same way;
   `just build-client <branch> <sha>` clears the folder, downloads by commit and prints what it got.
+- Playtest nineteen's second session (13:13 to 13:18, abe44a55, recorded as playtest-19-2): Eli's
+  reading "reliability is almost every other cast. improved, but not perfect": Flames, Invisibility
+  and the perk's dual cast about half, Firebolt almost every time, the streams right in number and
+  placement, the breath about half. c2's log: the figure's Flames casts refused and taken in strict
+  alternation (eight of eight after a taken exit refused at 534 to 1334 ms, every one after a
+  refused cast taken at 183 to 553 ms); Firebolt 20 of 24. Read first as a 1.5 s window after a
+  taken exit (x-cast-human 202506, strafing and turning, agreed: 1394 and 1469 ms refused, 1683 and
+  1817 taken). Two fork pushes chased it: 0ce34196 performed the action synchronously inside the JS
+  update so the view's retry could read the graph's answer, and HUNG the game at the first replay
+  on its stage (x-cast-gap 211105, x-cast-human 211518: the action's graph event re-entered Skyrim
+  Platform's sendAnimationEvent hook, a JS call from within a JS call); caff3e04 put the perform
+  back on the game-thread queue (drained right after the JS tick) with performActionResult read
+  on the next update, and carries 6a7fdd52, the log sink that reopens its file after a failed
+  write (numidium's stopped-log chase: InitLog flushes every line, so one failed fwrite leaving
+  the CRT's error flag set is the mechanism that fits; the trigger is still in the guest, the
+  recorder now captures handle64 and Defender's events live). The window itself was WITHDRAWN by
+  two abe44a55 probes with lab/frida/figure-cast-trace.js (the figure's graph events with the
+  graph's answer, its own caster's calls, the action entries, the begin-cast handlers): x-cast-gap
+  213755 standing still took 17 of 17 starts through the relay at every gap from 513 to 2651 ms,
+  each 4 to 7 ms after the figure's graph answered the want variable's rise with BeginCastRight
+  (34 of 34 rises answered, FinishCast from the interrupt message 33 to 54 ms before every exit
+  and harmless); x-cast-replay-gap 214106 (the driver's replay, no relay) refused 5 of 6 starts in
+  the graph itself because that replay never drops the want, so the graph gets no rise. The fault,
+  then: the view performed a start one update after its variables, a timer, where the engine's
+  caster waits for the graph's answer; a still figure answers within a frame, a moving one later,
+  and nineteen's seats move. The fix is the engine's own handshake on the figure, fork 34bdf0c3:
+  a hook on the three spell-cast response handlers' ExecuteHandler (vtables from CommonLib's
+  Offsets_VTABLE.h, slot 1 per IHandlerFunctor.h) records each BeginCast for a non-player actor,
+  castReady(actor, hand) takes it, formView performs a start only on it (a second without one and
+  the want rises again, twice, then the start goes as before). Eli's directions today: name which
+  dual casting is meant (A, both hands separately; B, the perk's, its own animation; B rides the
+  action data's idle and needs no perk on the figure, its effect multiplier waits for server-owned
+  perks); spin up agents for reads and scripts to save context (the probe readings, the Moonlight
+  times from the Mac's unified log, the trace script were theirs); and, at 14:5x, stop juggling
+  the lab: from then numidium runs stages, probes and builds (caff3e04 staged 15:05, 34bdf0c3
+  chained behind its probes) and thuum-magnus writes the fix and reads results. Lab lessons of
+  the hand restage (lab/frida/figure-cast-trace.js committed 8a79b33, the red row 0852f7f): a
+  scenario's frida step reads only the deployed lab tree, uploads serve `just frida` attaches;
+  verb-stage from a worktree needs FORK_DIR; a by-id `gh run download` into a full folder stops on
+  "file exists" and a background task hides it, so check the DLL hash before client-dist; the Bash
+  tool's ten-minute cap kills a stage run through it.
