@@ -41,6 +41,47 @@ assist() {  # assist <client> <action> <args json>: the step's answer as lab-api
   curl -sS -m 120 -X POST "$api/clients/$1/assist" -H 'content-type: application/json' -d "{\"action\":\"$2\",\"args\":$3}"
 }
 note() { echo "$(date +%H:%M:%S) $*" | tee -a "$tmp/summary.txt"; }
+gexec() {  # gexec <vmid> <powershell>: its output; read-only work on a clone through the guest agent
+  local enc
+  enc=$(printf '%s' "$2" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n')
+  ssh -o BatchMode=yes "$jump" "qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $enc" 2>/dev/null \
+    | python3 -c 'import json,sys; print(json.load(sys.stdin).get("out-data",""))' 2>/dev/null
+}
+vmid_of() { case "$1" in c1) echo 711;; c2) echo 712;; esac; }
+# the live capture of a stopped Skyrim Platform log (both seats' logs stopped mid-play in both of playtest
+# nineteen's sessions, and every rollback erased the evidence): each cycle reads the log's length through a
+# handle that denies nobody and takes no oplock; the first cycle a seat's log has not grown while the
+# recorder saw that seat's game act, its open handles on the file (handle64, beside the injector: client-frida
+# stages it) and Defender's and the Application log's recent events are saved as capture-<client>-<k>.txt
+declare -A logsize=() captured=()
+live_check() {  # live_check <client> <k>
+  local c=$1 k=$2 vmid size acts
+  vmid=$(vmid_of "$c")
+  size=$(gexec "$vmid" "\$f = [IO.File]::Open('$spl', 'Open', 'Read', 'ReadWrite, Delete'); \$f.Length; \$f.Close()" | tr -d '\r\n ')
+  acts=$(python3 - "$tmp/trace-$c-$k.json" <<'PY'
+import json, sys
+t = json.load(open(sys.argv[1]))
+me = t.get("self") or {}
+print(len(me.get("events") or []) + len(me.get("casts") or []) + sum(len(a.get("events") or []) for a in t.get("actors") or []))
+PY
+)
+  case "$size" in ''|*[!0-9]*) return;; esac
+  if [ -n "${logsize[$c]:-}" ] && [ "$size" = "${logsize[$c]}" ] && [ "${acts:-0}" -gt 0 ] && [ "${captured[$c]:-0}" = 0 ]; then
+    captured[$c]=1
+    if [ "$(gexec "$vmid" "Test-Path 'C:\\sky-lab\\frida\\handle64.exe'" | tr -d '\r\n')" != True ]; then
+      "$here/lab/tools/client-frida.sh" "$vmid" > /dev/null 2>&1 || note "$c: could not stage handle64.exe for the capture"
+    fi
+    gexec "$vmid" "\$l = '$spl'
+'== the file'; Get-Item -LiteralPath \$l | Format-List FullName, Length, LastWriteTime, Attributes | Out-String
+'== the game''s handles on it (handle64 -p SkyrimSE.exe)'; & 'C:\\sky-lab\\frida\\handle64.exe' -accepteula -nobanner -p SkyrimSE.exe skyrim-platform 2>&1 | Out-String
+'== every process holding it'; & 'C:\\sky-lab\\frida\\handle64.exe' -accepteula -nobanner skyrim-platform.log 2>&1 | Out-String
+'== Defender, the last 10 minutes'; Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Windows Defender/Operational'; StartTime=(Get-Date).AddMinutes(-10)} -ErrorAction SilentlyContinue | Select-Object -First 40 | ForEach-Object { \$_.TimeCreated.ToString('HH:mm:ss') + ' ' + \$_.Id + ' ' + (\$_.Message -split [char]10)[0] }
+'== Application errors, the last 10 minutes'; Get-WinEvent -FilterHashtable @{LogName='Application'; Level=2; StartTime=(Get-Date).AddMinutes(-10)} -ErrorAction SilentlyContinue | Select-Object -First 20 | ForEach-Object { \$_.TimeCreated.ToString('HH:mm:ss') + ' ' + \$_.ProviderName + ' ' + (\$_.Message -split [char]10)[0] }" > "$tmp/capture-$c-$k.txt"
+    ssh_srv "cat > $out/capture-$c-$k.txt" < "$tmp/capture-$c-$k.txt"
+    note "FINDING (live) $c: its Skyrim Platform log has not grown since the last cycle ($size bytes) while the recorder saw the seat act ($acts events); capture-$c-$k.txt has the game's handles on it and the recent Defender and Application events"
+  fi
+  logsize[$c]=$size
+}
 
 [ "$(hold)" = yes ] || { echo "no playtest hold on the lab: start this after just playtest-restore (or playtest-start)" >&2; exit 2; }
 ssh_srv "sudo mkdir -p $out && sudo chown eli:eli $out"
@@ -81,6 +122,7 @@ PY
     ); then
       ssh_srv "cat > $out/trace-$c-$1.json" < "$tmp/trace-$c-$1.json"
       note "$c: trace-$c-$1.json, $line"
+      live_check "$c" "$1"
       # the watch's start on the clock and its trace: the stopped-log finding reads these
       printf '%s\t%s\t%s\n' "$1" "${since[$c]}" "$tmp/trace-$c-$1.json" >> "$tmp/cycles-$c.tsv"
     else
