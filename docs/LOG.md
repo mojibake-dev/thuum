@@ -1536,3 +1536,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   5df863fd on m2-cast-action (typed vtable swaps), is staged after playtest nineteen's third session.
   Main gains b-cast-moving (1bdd23e), b-cast-dual (d82b6d2), lab/frida/figure-cast-trace.js and the
   doc's afternoon text (416e04f).
+- Correction to the stopped-log finding of playtest nineteen (numidium; 3d0ee21's and 6087069's messages,
+  6a7fdd52's premise): the Skyrim Platform log never stopped. What writes a seat's log during play is its
+  game replaying the other seat's spell actions (cast-action's performAction lines with their onResult and
+  latent-callback lines); a seat's own casts and moves write nothing to its own log. The recorder's rule
+  counted the seat's own events after the log's last line, so every "stop" it reported was a quiet log.
+  Judged by the other seat's spell actions: in session two, c1's last spell action was 13:18:01.325 and c2's
+  last line, its replay, 13:18:01.443, and c2 made no spell action in that cycle, so c1's log had nothing to
+  hold; in session three (17:38 to 18:02 PDT, results/playtest-19-3), c1's last action of any kind was
+  17:56:35 with c2's log to 17:56:47, c2's last 17:56:54 with c1's log to 17:57:21, and both logs had
+  silences of about 330 s mid-session that ended with the next spell actions; in session one, c2's log
+  replays c1's Self casts to 10:41:12 (shouts are not replayed). Session three's live capture
+  (capture-c1-5.txt) found the game alone holding the file and no Defender or Application event, which fits.
+  lab/tools/log-stop.py now judges a log by the other seat's spell actions after its last line (2 s for the
+  replay, counted only in cycles where the seat's own trace shows a figure), and the recorder's live check
+  does the same per cycle once both seats' traces are in; lab/tests/test_log_stop.py. Replayed on session
+  three's traces: no finding on either log, and a finding on c2's log cut at 17:50 (50 spell actions of c1
+  after its last line at 17:45:23). 6a7fdd52's sink reopen is harmless and stays.

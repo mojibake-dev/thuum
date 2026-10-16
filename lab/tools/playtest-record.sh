@@ -6,7 +6,12 @@
 # is gone (the world saved and the hold released) or on Ctrl-C, with a last cycle; then it fetches the
 # server's log since its start and each game's Skyrim Platform log and lab-driver log into the same
 # directory, and writes summary.txt: every cycle's traces, and any game whose Skyrim Platform log stopped
-# while the playtest went on (a finding, ADR-033; playtest nineteen's c1 log stopped at the restore).
+# while the playtest went on (a finding, ADR-033). What writes a seat's log during play is its game replaying
+# the OTHER seat's spell actions on that seat's figure (cast-action's performAction lines with their onResult
+# and latent-callback lines); a seat's own casts, turns and sneaks write nothing to its own log, so a log is
+# stopped only when the other seat made spell actions after its last line while its figure was in this
+# seat's game (until 2026-10-15 the rule counted the seat's own events, and every "stop" it found in
+# playtest nineteen's three sessions was a quiet log: no spell action of the other seat after the last line).
 # Refuses without docs/private/playtest-m2-<n>.md (the number and the checklist are one thing) and without a
 # playtest's hold (start it after `just playtest-restore`). Run it in the background; the only steps it
 # sends a game are the recorder's own. End a playtest with `just playtest-record-stop` before the world's
@@ -48,24 +53,31 @@ gexec() {  # gexec <vmid> <powershell>: its output; read-only work on a clone th
     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("out-data",""))' 2>/dev/null
 }
 vmid_of() { case "$1" in c1) echo 711;; c2) echo 712;; esac; }
-# the live capture of a stopped Skyrim Platform log (both seats' logs stopped mid-play in both of playtest
-# nineteen's sessions, and every rollback erased the evidence): each cycle reads the log's length through a
-# handle that denies nobody and takes no oplock; the first cycle a seat's log has not grown while the
-# recorder saw that seat's game act, its open handles on the file (handle64, beside the injector: client-frida
+other_of() { case "$1" in c1) echo c2;; c2) echo c1;; esac; }
+# the live capture of a stopped Skyrim Platform log: each cycle reads the log's length through a handle that
+# denies nobody and takes no oplock; the first cycle a seat's log has not grown while the other seat made
+# spell actions that seat's game replays (the other seat's own trace, 3 s or more before its watch ended; this
+# seat's trace showing a figure), its open handles on the file (handle64, beside the injector: client-frida
 # stages it) and Defender's and the Application log's recent events are saved as capture-<client>-<k>.txt
 declare -A logsize=() captured=()
-live_check() {  # live_check <client> <k>
-  local c=$1 k=$2 vmid size acts
+live_check() {  # live_check <client> <k>: after both seats' traces of cycle k are in
+  local c=$1 k=$2 o vmid size acts
+  o=$(other_of "$c")
   vmid=$(vmid_of "$c")
   size=$(gexec "$vmid" "\$f = [IO.File]::Open('$spl', 'Open', 'Read', 'ReadWrite, Delete'); \$f.Length; \$f.Close()" | tr -d '\r\n ')
-  acts=$(python3 - "$tmp/trace-$c-$k.json" <<'PY'
-import json, sys
-t = json.load(open(sys.argv[1]))
-me = t.get("self") or {}
-print(len(me.get("events") or []) + len(me.get("casts") or []) + sum(len(a.get("events") or []) for a in t.get("actors") or []))
+  acts=$(python3 - "$tmp/trace-$c-$k.json" "$tmp/trace-$o-$k.json" <<'PY'
+import json, os, re, sys
+mine, theirs = sys.argv[1], sys.argv[2]
+if not (os.path.exists(mine) and os.path.exists(theirs)) or not json.load(open(mine)).get("actors"):
+    print(0)  # no figure in this seat's game, or no trace of the other seat: nothing this log should hold
+    sys.exit()
+t = json.load(open(theirs))
+end_ms = float(t.get("seconds") or 0) * 1000 - 3000
+print(sum(1 for a in (t.get("self") or {}).get("actions") or []
+          if float(a[0]) < end_ms and re.search(r"spell|equipped|dualmagic", str(a[3]), re.I)))
 PY
 )
-  case "$size" in ''|*[!0-9]*) return;; esac
+  case "$size" in ''|*[!0-9]*) logsize[$c]=; return;; esac
   if [ -n "${logsize[$c]:-}" ] && [ "$size" = "${logsize[$c]}" ] && [ "${acts:-0}" -gt 0 ] && [ "${captured[$c]:-0}" = 0 ]; then
     captured[$c]=1
     if [ "$(gexec "$vmid" "Test-Path 'C:\\sky-lab\\frida\\handle64.exe'" | tr -d '\r\n')" != True ]; then
@@ -78,7 +90,7 @@ PY
 '== Defender, the last 10 minutes'; Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Windows Defender/Operational'; StartTime=(Get-Date).AddMinutes(-10)} -ErrorAction SilentlyContinue | Select-Object -First 40 | ForEach-Object { \$_.TimeCreated.ToString('HH:mm:ss') + ' ' + \$_.Id + ' ' + (\$_.Message -split [char]10)[0] }
 '== Application errors, the last 10 minutes'; Get-WinEvent -FilterHashtable @{LogName='Application'; Level=2; StartTime=(Get-Date).AddMinutes(-10)} -ErrorAction SilentlyContinue | Select-Object -First 20 | ForEach-Object { \$_.TimeCreated.ToString('HH:mm:ss') + ' ' + \$_.ProviderName + ' ' + (\$_.Message -split [char]10)[0] }" > "$tmp/capture-$c-$k.txt"
     ssh_srv "cat > $out/capture-$c-$k.txt" < "$tmp/capture-$c-$k.txt"
-    note "FINDING (live) $c: its Skyrim Platform log has not grown since the last cycle ($size bytes) while the recorder saw the seat act ($acts events); capture-$c-$k.txt has the game's handles on it and the recent Defender and Application events"
+    note "FINDING (live) $c: its Skyrim Platform log has not grown since the last cycle ($size bytes) while $o made $acts spell actions its game replays; capture-$c-$k.txt has the game's handles on it and the recent Defender and Application events"
   fi
   logsize[$c]=$size
 }
@@ -122,13 +134,14 @@ PY
     ); then
       ssh_srv "cat > $out/trace-$c-$1.json" < "$tmp/trace-$c-$1.json"
       note "$c: trace-$c-$1.json, $line"
-      live_check "$c" "$1"
       # the watch's start on the clock and its trace: the stopped-log finding reads these
       printf '%s\t%s\t%s\n' "$1" "${since[$c]}" "$tmp/trace-$c-$1.json" >> "$tmp/cycles-$c.tsv"
     else
       note "$c: no trace in cycle $1: ${line:-$(cut -c1-160 "$tmp/stop-$c.json")}"
     fi
   done
+  # each seat's log against the other seat's trace of the same cycle, so both traces first
+  for c in c1 c2; do live_check "$c" "$1"; done
 }
 
 stopping=0
@@ -170,34 +183,14 @@ for pair in c1:711 c2:712; do
       | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
     ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines"
   done
+done
+for c in c1 c2; do
   # a game whose log stops while the playtest goes on is a finding (ADR-033): the log's last line, then the
-  # seat's own events and casts the recorder saw after it, each placed on the clock by its watch's start
-  note "$(python3 - "$tmp/$c.log" "$tmp/cycles-$c.tsv" "$c" <<'PY'
-import datetime, json, os, re, sys
-log, cycles, c = sys.argv[1], sys.argv[2], sys.argv[3]
-stamps = re.findall(r"^\[(\d\d):(\d\d):(\d\d)", open(log, errors="replace").read(), re.M)
-if not stamps:
-    print(f"{c}: no Skyrim Platform log lines")
-    sys.exit()
-h, m, s = map(int, stamps[-1])
-now = datetime.datetime.now()
-last = now.replace(hour=h, minute=m, second=s, microsecond=0)
-if last > now:
-    last -= datetime.timedelta(days=1)
-events = casts = 0
-for row in (open(cycles) if os.path.exists(cycles) else []):
-    k, since, path = row.rstrip("\n").split("\t")
-    me = (json.load(open(path)).get("self") or {})
-    events += sum(1 for e in me.get("events") or [] if float(since) + float(e[0]) / 1000 > last.timestamp())
-    casts += sum(1 for x in me.get("casts") or [] if float(since) + float(x[0]) / 1000 > last.timestamp())
-when = last.strftime("%H:%M:%S")
-if events or casts:
-    print(f"FINDING {c}: its Skyrim Platform log stops at {when}, yet the recorder saw the seat act after it "
-          f"({events} own events, {casts} casts); ADR-033, a game whose log stops")
-else:
-    print(f"{c}: Skyrim Platform log's last line at {when}, nothing seen of the seat after it")
-PY
-)"
+  # other seat's spell actions after it (its own trace, each placed on the clock by its watch's start, 2 s of
+  # replay allowed), counted only in cycles where this seat's trace shows a figure; a seat's own actions
+  # write nothing to its own log, so they say nothing here
+  o=$(other_of "$c")
+  note "$(python3 "$here/lab/tools/log-stop.py" "$tmp/$c.log" "$tmp/cycles-$c.tsv" "$tmp/cycles-$o.tsv" "$c" "$o")"
 done
 ssh_srv "cat > $out/summary.txt" < "$tmp/summary.txt"
 [ "$own_hold" = 1 ] && curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1
