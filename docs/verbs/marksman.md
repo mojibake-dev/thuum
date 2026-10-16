@@ -209,10 +209,24 @@ a rate budget (none today).
   shooter's aim, which is what playtest nineteen's third session saw as
   arrows leaving the figure's hand "ever so slightly to the right" of where
   the shooter's own flew (eight of eleven struck the same object in both
-  games, 22 to 43 ms apart; the recording playtest-19-3). HYPOTHESIS until
-  x-arrow-path: Launch with useOrigin starts the arrow at the origin given
-  and reads nothing else of the shooter that bends its path (the
-  re-analyst's read pending).
+  games, 22 to 43 ms apart; the recording playtest-19-3). The angles come
+  from the arrow's first update, not from Launch's entry (fork m2-arrow-path
+  13a58aed): the re-analyst on sky-re (2026-10-16, 1.6.1170, HYPOTHESIS until
+  x-arrow-path) read the player's release path as arrowRelease, the
+  ArrowReleaseHandler (42859), 18102 (origin at the weapon node, angles from
+  the view less f1PArrowTiltUpAngle or f3PArrowTiltUpAngle), Launch 44108
+  with autoAim set; the player's arrow then takes its final angles on its
+  first update (Init 44222, 44200, the player's auto-aim 41248), and
+  InitVelocity 44184 sets its velocity from them. The fork hooks 44184
+  (projectileFlight) for the player's and the figures' arrows, and the shot
+  sends the launch's origin with the flight's angles. Launch with useOrigin
+  starts an arrow where it is told (the constructor applies the origin and
+  both angles; useOrigin only sets a flag, and Init's snap to the magic node
+  needs a spell); what the replay does not carry: the strafing shooter's own
+  velocity, which 44184 adds for the player only, and NPCs' random spread
+  (fBowNPCSpreadAngle in 18102), which a direct Launch never runs. The draw's
+  power changes speed and drop alike (44184, 43698), and the shot carries
+  it.
 - The draw and the release: the relayed animation events, as now. The
   sender keeps one animation event per update (skymp5-client animation.ts),
   so a draw and its release in one update can collapse; the lab watches for
