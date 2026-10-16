@@ -220,6 +220,10 @@ type Watched = {
   // (the fork's projectileLaunched event, Projectile::Launch's LaunchData;
   // thuum docs/verbs/marksman.md: the arrow's path identical on both screens)
   launches: Array<[number, number, number, number, number, number, number, number, number, number]>;
+  // its arrows' flights as they start [ms, ammo, x, y, z, angleX, angleZ,
+  // power]: the arrow's first update, its angles after the player's
+  // auto-aim (the fork's projectileFlight event; the path the arrow flies)
+  flights: Array<[number, number, number, number, number, number, number, number]>;
   // the actions the engine performed for it [ms, action, idle, eventName,
   // type] (the player's only: the platform's hook reports the player's own;
   // thuum docs/verbs/cast-action.md)
@@ -252,7 +256,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
     name: actor.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
     track: [[0, pos[0], pos[1], pos[2]]],
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
-    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], launches: [], actions: [],
+    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], launches: [], flights: [], actions: [],
   };
 }
 
@@ -668,6 +672,16 @@ try {
   });
 } catch (err) {
   printConsole(`lab-driver: no projectileLaunched event on this Skyrim Platform (${err}); launches are not recorded`);
+}
+try {
+  on("projectileFlight", (e) => {
+    const w = watchedRecord(e.shooter);
+    if (w && w.flights.length < WATCH_SELF_MAX) {
+      w.flights.push([watchedMs(), e.ammo, e.x, e.y, e.z, e.angleX, e.angleZ, e.power]);
+    }
+  });
+} catch (err) {
+  printConsole(`lab-driver: no projectileFlight event on this Skyrim Platform (${err}); flights are not recorded`);
 }
 
 on("spellCast", (e) => {

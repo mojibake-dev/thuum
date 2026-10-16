@@ -50,4 +50,19 @@ declare module "skyrimPlatform" {
     useOrigin: boolean;
   }
   export function on(eventName: "projectileLaunched", callback: (event: ProjectileLaunchedEvent) => void): EventHandle;
+  // an arrow's flight as it starts: its first update's angles (after the
+  // player's auto-aim), fork m2-arrow-path
+  export interface ProjectileFlightEvent {
+    shooter: number;
+    projectile: number;
+    weapon: number;
+    ammo: number;
+    x: number;
+    y: number;
+    z: number;
+    angleX: number;
+    angleZ: number;
+    power: number;
+  }
+  export function on(eventName: "projectileFlight", callback: (event: ProjectileFlightEvent) => void): EventHandle;
 }
