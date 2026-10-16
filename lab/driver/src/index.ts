@@ -599,7 +599,10 @@ function trackWatched(actor: Actor, id: number, w: Watched, ms: number, own: boo
   }
   for (const name of Object.keys(w.bools)) {
     const seen = w.bools[name];
-    const value = actor.getAnimationVariableBool(name);
+    // "av:Name" is an actor value above zero, not a graph variable: a
+    // figure's Invisibility (docs/verbs/self-cast.md: the effect raises it,
+    // formView reads it for the name) is the recast row's measure
+    const value = name.startsWith("av:") ? actor.getActorValue(name.slice(3)) > 0 : actor.getAnimationVariableBool(name);
     if ((seen.length === 0 || seen[seen.length - 1][1] !== value) && seen.length < WATCH_SELF_MAX) {
       seen.push([ms, value]);
     }
