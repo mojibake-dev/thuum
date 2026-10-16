@@ -55,8 +55,8 @@ class LogStop(unittest.TestCase):
         v = self.judge([(30_000, "DualMagic_SpellAimedStart"), (90_000, "TurnLeft"), (95_000, "SneakStart")])
         self.assertIn("a quiet log, no finding", v)
 
-    def test_the_replay_has_two_seconds(self):
-        v = self.judge([(61_500, "MRh_SpellRelease_Event")])
+    def test_the_replay_and_the_clocks_have_five_seconds(self):
+        v = self.judge([(64_500, "MRh_SpellRelease_Event")])
         self.assertIn("no finding", v)
 
     def test_no_figure_in_this_game_is_no_finding(self):

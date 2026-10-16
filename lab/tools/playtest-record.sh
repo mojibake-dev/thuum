@@ -186,9 +186,9 @@ for pair in c1:711 c2:712; do
 done
 for c in c1 c2; do
   # a game whose log stops while the playtest goes on is a finding (ADR-033): the log's last line, then the
-  # other seat's spell actions after it (its own trace, each placed on the clock by its watch's start, 2 s of
-  # replay allowed), counted only in cycles where this seat's trace shows a figure; a seat's own actions
-  # write nothing to its own log, so they say nothing here
+  # other seat's spell actions after it (its own trace, each placed on the clock by its watch's start, 5 s
+  # allowed for the replay and the guests' clocks), counted only in cycles where this seat's trace shows a
+  # figure; a seat's own actions write nothing to its own log, so they say nothing here
   o=$(other_of "$c")
   note "$(python3 "$here/lab/tools/log-stop.py" "$tmp/$c.log" "$tmp/cycles-$c.tsv" "$tmp/cycles-$o.tsv" "$c" "$o")"
 done

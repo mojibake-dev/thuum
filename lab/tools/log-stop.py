@@ -5,7 +5,8 @@ log stop while the playtest went on (thuum ADR-033, a game whose log stops; lab/
 What writes a seat's log during play is its game replaying the OTHER seat's spell actions on that seat's
 figure: cast-action's performAction lines, with their onResult and latent-callback lines. A seat's own casts,
 turns and sneaks write nothing to its own log. So the log stopped when the other seat made spell actions after
-its last line (2 s allowed for the replay) in a cycle where this seat's trace shows a figure; a quiet log after
+its last line (5 s allowed for the replay and the clocks: the guests run 1 to 2 s off the server and
+each other, x-tgm-breath4 20261016-010539) in a cycle where this seat's trace shows a figure; a quiet log after
 the last spell action is no finding. Until 2026-10-15 the recorder counted the seat's own events instead, and
 every "stop" it reported in playtest nineteen's three sessions was a quiet log.
 
@@ -21,7 +22,7 @@ import re
 import sys
 
 SPELL = re.compile(r"spell|equipped|dualmagic", re.I)
-REPLAY_S = 2.0
+REPLAY_S = 5.0
 
 
 def last_line(text: str, anchor: float) -> float | None:
