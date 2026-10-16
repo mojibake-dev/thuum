@@ -1553,3 +1553,27 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   does the same per cycle once both seats' traces are in; lab/tests/test_log_stop.py. Replayed on session
   three's traces: no finding on either log, and a finding on c2's log cut at 17:50 (50 spell actions of c1
   after its last line at 17:45:23). 6a7fdd52's sink reopen is harmless and stays.
+- m2-cast-action 5df863fd (the handshake as typed vtable swaps on the three spell-cast response handlers) staged
+  18:09 to 18:39 PDT from main and withdrawn: the figure's starts wait for castReady and none ever came. Readings on
+  c2, the observer (scratchpad cast-readings.py): x-cast-human 20261016-011836 took 0 of 1 start (9 asks about 3.1 s
+  apart, then no later start; caff3e04 took 6 of 6 on the same probe), x-cast-gap 012117 1 of 2, b-cast-moving 012428
+  red 1 of 2, b-cast-dual 012709 red 0 of 1, b-spell 012940 red 0 of 1, b-cast-rhythm 013353 red 2 of 3,
+  b-cast-both-hands 013624 red with 5 of 5 starts taken at the first ask (its red lies elsewhere); no castReady line in
+  any run, no hang, no crash. magnus's slot-probe.js on c2's 5df863fd game (18:39): slot 1 of the left, right and voice
+  spell-cast handler vtables points into skse64_1_6_1170.dll (+0xd800, +0xd760, +0xd930), not into
+  SkyrimPlatformImpl.dll or SkyrimSE.exe; the response dispatcher hands BeginCastRight to the figure about once a
+  second while the view re-raises its want (15 lines from two Flames holds by assist), and x-cast-gap's
+  figure-cast-trace has 46 beginCastRight calls, each from skse64_1_6_1170.dll+0xd7e6. So the graph answers and SKSE's
+  own function owns the slot; the swap's thunk was never in the chain (magnus: the handshake stands, the hook's point
+  was wrong). The event SKSE's thunk exists for is in CommonLib: SKSE::ActionEvent (include/SKSE/Events.h:37-67,
+  kSpellCast and kVoiceCast with a slot) through SKSE::GetActionEventSource (include/SKSE/API.h:31); magnus's
+  a930968b listens there with no vtable write, and a start waits four updates at most before caff3e04's timing
+  (1de955e6). The lab went back to parity caff3e04 at 18:49 (server tag parity-caff3e04, both clones' clean-m1-next
+  retaken from clean-m1 with main's driver; smoke-two-players 20261016-014644 green), and a930968b is staged over it
+  with the same seven runs, the lab returned to parity after them for the 03:30 nightly. Also run tonight on
+  caff3e04 for Eli's notes from playtest nineteen's third session (17:36 to 18:02, recorded into
+  results/playtest-19-3, world playtest-m2-19-3-20261016T010249Z): b-marksman 20261016-010247 green (c2's game shows
+  c1's arrows, 2633 units against c1's own 2555 at a full draw, 1328 against 1445 at a half; the playtest's five shots
+  were the same Long Bow and iron arrows, every one taken by the server), and x-tgm-breath4 010539 green (breaths one
+  to three drawn on c2, each cone 0 to 3 emitters of 20, so the emitter cap is not the missing fire; the fourth, the
+  control, came while c2 was dead from the third, hit nothing and never reached the server, so it was never relayed).
