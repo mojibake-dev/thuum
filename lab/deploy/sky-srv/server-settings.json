@@ -28,7 +28,16 @@
   "gamemodePath": "/srv/skymp/gamemode/gamemode.js",
   "enableConsoleCommandsForAll": true,
   "castTeleports": [
-    { "spell": "0a86df:LostGrimoire.esp", "reach": 8000 },
+    {
+      "spell": "0a86df:LostGrimoire.esp",
+      "reach": 8000,
+      "look": {
+        "vanish": "102731:Skyrim.esm",
+        "appear": "102730:Skyrim.esm",
+        "appearSeconds": 1.75,
+        "sound": "010ec4:Dawnguard.esm"
+      }
+    },
     { "spell": "00aae8:Apocalypse - Magic of Skyrim.esp", "reach": 0, "waitMs": 15400, "relay": true }
   ],
   "startPoints": [
