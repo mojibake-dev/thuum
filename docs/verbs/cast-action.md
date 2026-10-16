@@ -203,11 +203,12 @@ and 8 a second only ever stops a flood.
   2026-10-16 01:40Z): the dispatcher hands BeginCastRight to the figure once
   per want rise the view writes, 34 of 34 and 15 of 15, the answer 0 to 3 ms
   after the rise, the start asked 4 to 7 ms after it taken 34 of 34 standing
-  still. SKSE owns the slot: skse64 writes its own function into slot 1 of
-  all three handlers for its action events (slot-probe.js found
-  skse64_1_6_1170.dll+0xd760, +0xd800, +0xd930 there; every 42820 call's
-  backtrace passes skse64+0xd7e6), over any plugin's write, which is why
-  5df863fd's write_vfunc never fired (seven runs, no castReady). So the fork
+  still. SKSE holds the slot: slot 1 of all three handlers held skse64's own
+  function for its action events while 5df863fd's swap was installed
+  (slot-probe.js found skse64_1_6_1170.dll+0xd760, +0xd800, +0xd930 there;
+  every 42820 call's backtrace passes skse64+0xd7e6), so a plugin's write
+  is not in the chain (the order of the writes was not measured), which is
+  why 5df863fd's write_vfunc never fired (seven runs, no castReady). So the fork
   reads the answer where SKSE publishes it, SKSE::ActionEvent kSpellCast
   (slot left or right) and kVoiceCast (include/SKSE/Events.h:37-67) through
   SKSE::GetActionEventSource() (API.h:31), a sink registered at kDataLoaded,

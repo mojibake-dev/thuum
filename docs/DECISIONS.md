@@ -1163,15 +1163,17 @@ method had not asked about:
 ## ADR-034: An engine moment comes from SKSE's event where SKSE publishes one
 
 Status: accepted (2026-10-15 night, Eli: "i would imagine hooking SKSE is
-gonna be the lazy answer for a LOT of these things"). Refines ADR-005 (the
+gonna be the lazy answer for a LOT of these things", and when asked whether
+that was a decision, "id call it largely a decision"). Refines ADR-005 (the
 engine map) and the design law's first line.
 
 **Context.** The cast-action handshake needed the moment a figure's graph
 answers a cast request (BeginCastRight and kin). Three builds reached for it:
 a Frida interceptor on the handler (34bdf0c3) crashed the game at the first
-answer; a vtable swap on the handler's slot (5df863fd) never fired, because
-skse64 writes its own function into that slot for its action events and
-overwrites any plugin's (slot-probe.js, 2026-10-16 01:40Z); a sink on
+answer; a vtable swap on the handler's slot (5df863fd) never fired: skse64 holds
+its own function in that slot for its action events, so a plugin's write
+is not in the chain (slot-probe.js, 2026-10-16 01:40Z, read while the
+swap was installed; the order of the two writes was not measured); a sink on
 SKSE::ActionEvent (a930968b) took 49 of 49 starts 1 to 2 ms after the
 answer. SKSE already hooks the engine at the points we keep reaching for and
 CommonLibSSE-NG hands them to a plugin as event sources (include/SKSE/Events.h:
