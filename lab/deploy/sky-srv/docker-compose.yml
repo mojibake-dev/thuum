@@ -15,7 +15,11 @@ services:
     # rescue.
     user: "${SERVER_USER:-1001:1001}"
     working_dir: /srv/skymp
-    command: ["node", "dist_back/skymp5-server.js"]
+    # stdout line-buffered: the server logs through spdlog's stdout sink, which never flushes on its own, and under
+    # docker stdout is a pipe, so the C library held the last lines until its buffer filled and a run's server.log
+    # (docker logs at the run's end) lost its tail (x-invis-recast 20261016-074205: the last line 07:44:06.769, the
+    # run's end 07:44:53, its casts' lines missing). stdbuf is in the image (/usr/bin/stdbuf, uutils coreutils).
+    command: ["stdbuf", "-oL", "-eL", "node", "dist_back/skymp5-server.js"]
     ports:
       - "7777:7777/udp"
       - "3000:3000"
