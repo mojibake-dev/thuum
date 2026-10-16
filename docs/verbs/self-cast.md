@@ -65,7 +65,11 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   wait on the figure).
 
 - How an act ends concealment (the re-analyst on sky-re, 2026-10-16,
-  1.6.1170, ids by lab/addr.py; HYPOTHESIS until x-invis-recast): the engine
+  1.6.1170, ids by lab/addr.py; the recast's consequence measured by
+  x-invis-recast: on parity a930968b the figure went visible at the recast
+  and stayed so, 20261016-124840; on fork 2d983dd0 and 0636f14e it stayed
+  invisible through two recasts, 132551 and 135452, the server logging no
+  end): the engine
   ends an actor's Invisibility (archetype 11) and Etherealize (41) through
   Actor::DispelAlteredStates 38819 (CommonLibSSE-NG src/RE/A/Actor.cpp:
   209-214), which dispels every live effect of the archetype (34510, through

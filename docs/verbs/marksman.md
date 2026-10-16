@@ -16,7 +16,7 @@ Milestone: M2, its first verb (docs/PLAN.md, the M2 chart)   Class: B
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| the arrow's path on both screens: the shooter's own arrow against its figure's, launch by launch, first and third person, level and angled | x-arrow-path (ten shots, five per view, the recorder's `launches` on both seats; lab/driver d734e3f) | open: on parity the figure's arrow leaves its fire node along the aim (playtest nineteen's third session: "ever so slightly to the right"); fork m2-arrow-path launches it at the shooter's own origin and angles; the bound a parity scenario asserts follows x-arrow-path's reading |
+| the arrow's path on both screens: the shooter's own arrow against its figure's, shot by shot, both views, three headings | b-arrow-path (from x-arrow-path; the recorder's `flights` and `launches`, lab-api's flights_match) | GREEN on fork 0636f14e (x-arrow-path 20261016-134528): 10 of 10 of the shooter's flights paired with the figure's, 0.0 units apart at the start and 0.00 degrees in pitch and heading; at Launch's entry the same shots differed by up to 11.5 degrees (pitch -0.244 against the flight's -0.044 rad), the engine's auto-aim, which is why the shot carries the flight's angles; b-marksman 134247 green (full draw 2680 against 2898, half 1508 against 1477, both hits landing). Strafing (the shooter's own velocity, which only the player's arrow carries) is not measured |
 | a bow shot after a long run of spells (both hands, the perk's dual cast, Invisibility) | none yet | open: playtest nineteen's third session, the arrows were there (eight of eleven hit in both games) but the lab's b-marksman starts from a drawn bow |
 
 ## Authority
@@ -211,8 +211,7 @@ a rate budget (none today).
   the shooter's own flew (eight of eleven struck the same object in both
   games, 22 to 43 ms apart; the recording playtest-19-3). The angles come
   from the arrow's first update, not from Launch's entry (fork m2-arrow-path
-  13a58aed): the re-analyst on sky-re (2026-10-16, 1.6.1170, HYPOTHESIS until
-  x-arrow-path) read the player's release path as arrowRelease, the
+  13a58aed): the re-analyst on sky-re (2026-10-16, 1.6.1170, measured by x-arrow-path 20261016-134528: the paths match) read the player's release path as arrowRelease, the
   ArrowReleaseHandler (42859), 18102 (origin at the weapon node, angles from
   the view less f1PArrowTiltUpAngle or f3PArrowTiltUpAngle), Launch 44108
   with autoAim set; the player's arrow then takes its final angles on its
