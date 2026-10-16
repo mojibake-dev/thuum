@@ -184,6 +184,14 @@ Fork branch m2-player-globals, stacked on m2-ghostwalk (2026-10-14):
   FormDesc parse it shares with castTeleports; T0.
 - bf0339f8, the message and its validator (rule 4): PlayerGlobals, MsgType
   44 (wire id 52), schema 14, its fixtures, the C++ and TypeScript types.
+- Renumbered on fork branch m2-player-globals-next (2026-10-16): the
+  cast-action verb took MsgType 44, wire id 52 and schema 14 for UpdateAction
+  on parity (a930968b), so f6dc57a3 (on m2-cast-action 35a3975f) moves
+  PlayerGlobals to MsgType 45, wire id 53, schema 15, its fixtures renamed,
+  the contiguous-id test green. Parity's next schema is 16 (the marksman
+  launch fields, m2-arrow-path), so PlayerGlobals takes 17 when it meets
+  parity; m2-ghostwalk-next 42904fb8 carries Ghostwalk with cast-action and
+  the spaced-filename fix for the Apocalypse layer.
 - 2d3d0254, the record: the change form's playerGlobals, absent in older
   records and read as none, with its round-trip test (rule 6's migration).
 - 35422e48, the server: the setting read at start, OnPlayerGlobals through
