@@ -1,0 +1,72 @@
+# b-arrow-path (docs/verbs/marksman.md; Eli, 2026-10-15: "i'd like the
+# arrows paths to be as close to identical as possible in both players
+# worlds"; from x-arrow-path 20261016-134528 on fork 0636f14e): c1 shoots
+# c2 ten times, five from its starting view and five after toggling it,
+# aiming at three headings; both games record every arrow's flight as it
+# starts (the arrow's first update, its angles after the player's
+# auto-aim). The claim: each of c1's own arrows is paired with its figure's
+# arrow in c2's game, starting from the same point (under 1 unit) at the
+# same pitch and heading (under half a degree). Read: 10 of 10 paired, 0.0
+# units and 0.00 degrees; the Launch call's angles, before auto-aim, would
+# have differed by up to 11.5 degrees.
+id: b-arrow-path
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.additem 3b562 1"}
+  - c1: console {text: "player.additem 1397d 40"}
+  - c1: console {text: "player.equipitem 3b562"}
+  - c1: console {text: "player.equipitem 1397d"}
+  - c2: console {text: "player.setav health 100000"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start {bools: [IsAttacking, bBowDrawn]}
+  - c2: watch-start {bools: [IsAttacking, bBowDrawn]}
+  - wait: 1
+  - c1: look {pitch: 0, heading: 180}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 2.5
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 2.5
+  - c1: look {pitch: 0, heading: 185}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 2.5
+  - c1: hold-key {code: 199, ms: 600}
+  - wait: 2.5
+  - c1: look {pitch: 0, heading: 175}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 2.5
+  - c2: screenshot
+  - c1: tap-key {code: 33}
+  - wait: 2
+  - c1: look {pitch: 0, heading: 180}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 2.5
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 2.5
+  - c1: look {pitch: 0, heading: 185}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 2.5
+  - c1: hold-key {code: 199, ms: 600}
+  - wait: 2.5
+  - c1: look {pitch: 0, heading: 175}
+  - c1: hold-key {code: 199, ms: 1200}
+  - wait: 3
+  - c2: screenshot
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).flights_match(c1.watched_self(), "position") < 1
+      - c2.watched(c1).flights_match(c1.watched_self(), "angle") < 0.5
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]
