@@ -350,7 +350,7 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   short hop still glides. The vanish and appear effects are not on the other
   screen yet (a later slice).
 
-## The look on other screens (2026-10-16, fork m2-teleport-look)
+## The look on other screens (2026-10-16, fork m2-teleport-look-main)
 
 - The mod's sequence, in the caster's game alone (Lost Grimoire's marker
   script, read 2026-10-16): vfxDisappear, VisualEffect Skyrim.esm 0x00102731
@@ -364,10 +364,10 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
 - The setting: a castTeleports entry's optional look, {vanish, appear,
   appearSeconds, sound}, each form written as the spell is, at least one of
   the three, appearSeconds from 0 to 10 (1.75 when absent; wire-rules
-  teleports, afa0371e). The lab's Teleportation entry, in both settings
+  teleports, a7ed583f; first built as afa0371e on the Ghostwalk line). The lab's Teleportation entry, in both settings
   files: {"vanish": "102731:Skyrim.esm", "appear": "102730:Skyrim.esm",
   "appearSeconds": 1.75, "sound": "010ec4:Dawnguard.esm"}.
-- At the cast (57ecbae6): OnSpellCast's teleport branch, beside the permit,
+- At the cast (055e66b8, first 57ecbae6): OnSpellCast's teleport branch, beside the permit,
   sends every listener of the caster with a user but the caster's own an
   SpSnippet VisualEffect.Play on the vanish: the caster's figure, the jump's
   wait in seconds (5 for Teleportation, so a teleport that never lands ends
@@ -413,14 +413,14 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   glide a frame's share of 0.2 s), the server's PlayTeleportVanish and
   PlayTeleportLanding lines naming one neighbour, and no "SpSnippet ...
   failed" in c2's client log.
-- Deploying: a server built before fork afa0371e refuses an entry with a
+- Deploying: a server built before fork a7ed583f (on the Ghostwalk line afa0371e) refuses an entry with a
   look (an unknown key, and a bad castTeleports entry stops the server), so
-  these settings reach the lab with the fork branch's server (57ecbae6),
+  these settings reach the lab with the fork branch's server (055e66b8),
   never before it.
-  T2's teleports session declares the five snippets c2 receives (57ecbae6):
+  T2's teleports session declares the five snippets c2 receives (055e66b8):
   green with these settings deployed, red without them.
 
-### Measured (fork m2-teleport-look 2540be96, x-teleport-look 20261016-203244)
+### Measured (fork m2-teleport-look 2540be96 on the Ghostwalk line, the same look code as m2-teleport-look-main; x-teleport-look 20261016-203244, T2 green 14:07)
 
 - The server sent the look in both phases: at the cast "vanish 102731 for
   5.0 s in 1 neighbour(s)' games" (20:35:02.824 UTC, beside the cast's "not
