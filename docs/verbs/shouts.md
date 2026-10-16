@@ -25,7 +25,7 @@ walls, who may learn words at all (the roadmap's "Dovakin").
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| a second Fire Breath within three seconds of the first, in god mode | x-tgm-breath4 (four breaths at 0, 2.5, 4.9 and 24 s; its control confounded by c2's death at the third), x-tgm-breath5 (five at 0, 2, 4, 6, 10 s at a c2 with 100000 health) | RED on caff3e04 and a930968b: breaths two and three of breath4 010539 were drawn on c2 only because they hit it (reported from the hit); playtest nineteen's third session, 13 of 18 releases never reached the server. The fire-report build (35a3975f) is staged with breath5: five server lines and five cones expected |
+| a second Fire Breath within three seconds of the first, in god mode | x-tgm-breath4 (four breaths at 0, 2.5, 4.9 and 24 s; its control confounded by c2's death at the third), x-tgm-breath5 (five at 0, 2, 4, 6, 10 s at a c2 with 100000 health) | RED on caff3e04 and a930968b (breath4 010539; playtest nineteen's third session, 13 of 18 releases never reached the server). On 2d983dd0 breath5 (130541) read five of five, but its breaths hit c2; breath6 (0636f14e, 135744), into empty air, read one of five. The launch report (m2-breath-launch 9f297fca) is next; b-shout-repeat (from breath6, `c2.watched(c1).launched("0x3f9eb") >= 5`) gates it once it reads five |
 | a shout while the voice recovery of the previous still runs (any mode) | none yet | open: the recovery read names no variation; the fire's source form should (35a3975f) |
 
 ## Authority
@@ -177,7 +177,10 @@ bounds on casts.
 - Side effects of hooking here: none expected.
 
 - The release reported at the engine's own fire of the voice (fork
-  35a3975f, ADR-034; HYPOTHESIS until x-tgm-breath5 on its stage): SKSE's
+  35a3975f, ADR-034; it reported NOTHING: x-tgm-breath6 20261016-135744, five
+  god-mode breaths into empty air, one server line, the recovery read's;
+  the voice fire's event names the shout, not the variation's spell, and
+  the handler reports only a spell; superseded by the launch report below): SKSE's
   action event kVoiceFire (CommonLibSSE-NG include/SKSE/Events.h:37-67,
   through SKSE::GetActionEventSource(), API.h:31) reaches the plugin once
   per shout the engine casts, with the actor and a source form; the plugin
@@ -195,6 +198,18 @@ bounds on casts.
   recovery after all (x-tgm-breath4 20261016-010539 read 22.75 s at the
   fourth breath), so the recovery read names no variation for a second
   breath under the first's recovery; the fire's source form names it.
+
+- The release reported from its own projectile (fork m2-breath-launch
+  9f297fca; HYPOTHESIS until x-tgm-breath6 on it): the shouter's game
+  launches a breath's projectile from the voice (castingSource kOther,
+  CommonLibSSE-NG include/RE/M/MagicSystem.h) with the variation's spell in
+  LaunchData (x-tgm-breath6: five launches of 0x3f9eb for five breaths), so
+  ShoutService reports the player's voice launch of a spell that is one of
+  the equipped shout's variations, deduplicated with the recovery read
+  within 500 ms. A shout with no projectile (Become Ethereal, Whirlwind
+  Sprint) still goes by the recovery read. x-tgm-breath5 (20261016-130541,
+  breaths that hit c2) put five lines on the server through the hit-based
+  report, which breath6's empty air takes away.
 
 ## Impose (observers render the server's decision)
 
