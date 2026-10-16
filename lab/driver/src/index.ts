@@ -656,12 +656,19 @@ function watchedMs(): number {
 // every projectile the engine launched for a watched actor (the shooter's
 // own arrow and the figure's replay alike): the recorder's measure of the
 // arrow's path on both screens. No game call here (the event's context).
-on("projectileLaunched", (e) => {
-  const w = watchedRecord(e.shooter);
-  if (w && w.launches.length < WATCH_SELF_MAX) {
-    w.launches.push([watchedMs(), e.projectile, e.ammo, e.spell, e.originX, e.originY, e.originZ, e.angleX, e.angleZ, e.power]);
-  }
-});
+// Only a Skyrim Platform with the event has it (fork m2-arrow-path):
+// subscribing to an unknown event throws (EventManager::Subscribe), and the
+// driver must load on parity too, where `launches` stays empty.
+try {
+  on("projectileLaunched", (e) => {
+    const w = watchedRecord(e.shooter);
+    if (w && w.launches.length < WATCH_SELF_MAX) {
+      w.launches.push([watchedMs(), e.projectile, e.ammo, e.spell, e.originX, e.originY, e.originZ, e.angleX, e.angleZ, e.power]);
+    }
+  });
+} catch (err) {
+  printConsole(`lab-driver: no projectileLaunched event on this Skyrim Platform (${err}); launches are not recorded`);
+}
 
 on("spellCast", (e) => {
   if (!watching || !e.caster) return;
