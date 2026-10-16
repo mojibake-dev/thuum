@@ -153,9 +153,15 @@ Rate limit / bounds: one per claimed shot; the report's budget is OnHit's.
 
 - Step 0, the mods on the lab: CIF 2.0.7 and Headshot Kills (Nexus 148579
   file 622326) into rpool/sky/persist/mods by `just persist-mods` (md5s in
-  docs/MODS.md), onto both clones by `just client-mods`, Headshot Kills.esl
-  into the server's load order (a light plugin, docs/verbs/
-  light-plugins.md). One boot: skse64.log says whether CIF loads on
+  docs/MODS.md), onto both clones by `just client-mods`, Headshot Kills.esp
+  into the server's load order (light by its header, TES4 flags 0x200,
+  master Skyrim.esm, read from the archive 2026-10-14; libespm takes the
+  flag, docs/verbs/light-plugins.md). Written as thuum branch headshots
+  (8396866, stacked on the Apocalypse layer): the server loads it after
+  Apocalypse's plugin and the clients before CBBE.esp, so both number it
+  FE003. The archive's other files: the CIF rule
+  SKSE/CoreImpactFramework/headshot.json and the effect's script
+  scripts/instantdeathmagiceffectscript.pex. One boot: skse64.log says whether CIF loads on
   1.6.1170, and CIF's log at iVerboseMode=1.
 - x-headshot-probe: c1 at Archery 60 (the actor-values verb) and Overdraw 4
   (Papyrus Actor.AddPerk in c1's game, a driver step; client-local, which is

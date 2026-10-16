@@ -15,6 +15,7 @@ from typing import Any
 
 from fastapi import APIRouter, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
+import yaml
 from pydantic import ValidationError
 
 from .board import StepBoard
@@ -23,6 +24,7 @@ from .guests import Tables, load_tables
 from .proxmox import GuestControl, ProxmoxError
 from .runner import Runner, RunnerError
 from .runset import Policy, RunSetError, RunSets
+from . import scenario as scenario_mod
 from .scenario import load_scenario
 from .state import RpcStateClient, ServerState, StateError
 from .system import RealSystem, System
@@ -291,8 +293,10 @@ def create_app(services: Services) -> FastAPI:
     # clones' left attack) while test 1 swings. Input steps only, never a
     # console line: a seat's setup goes through the server (the gamemode's
     # labCommand console, just playtest-console), not keystrokes in a game
-    # (playtest fifteen, Eli). Refused while a run owns the clients.
-    ASSIST_ACTIONS = {"hold-key", "tap-key", "anim-event", "draw-weapon"}
+    # (playtest fifteen, Eli). Refused while a run owns the clients. The
+    # recorder's watch-start and watch-stop too (ADR-033: a playtest is
+    # recorded, lab/tools/playtest-record.sh): the stop answers with the trace.
+    ASSIST_ACTIONS = {"hold-key", "tap-key", "anim-event", "draw-weapon", "watch-start", "watch-stop"}
 
     @router.post("/clients/{client}/assist")
     async def assist(client: str, request: Request):
@@ -310,6 +314,34 @@ def create_app(services: Services) -> FastAPI:
         if not done.ok:
             return JSONResponse({"ok": False, "client": client, "error": done.result.get("error", "no answer")}, status_code=504)
         return {"ok": True, "client": client, "result": done.result.get("data")}
+
+    # A playtest's step on one seat, written as a scenario writes it (Eli, 2026-10-16: he plays both
+    # seats, so the lab casts on one while he staggers it from the other): `equip {formId: 0x12fd0}`,
+    # `repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}`. Input and its rhythm
+    # only (scenario.PLAYTEST_STEPS), and only inside a playtest's hold, so it never fires into a run;
+    # the answer is the driver's, a repeat's when its last repetition is done.
+    @router.post("/clients/{client}/playtest-step")
+    async def playtest_step(client: str, request: Request):
+        if runner.active:
+            return _busy()
+        held = runner.hold_status() or {}
+        if not str(held.get("reason", "")).startswith("playtest"):
+            return JSONResponse({"ok": False, "error": "E_NO_PLAYTEST: a playtest step needs a playtest's hold (just playtest-restore or playtest-start)"},
+                                status_code=409)
+        body = await request.json()
+        if not isinstance(body, dict) or "step" not in body:
+            raise HTTPException(400, "body must be {step}, the step as a scenario writes it")
+        try:
+            action, args = scenario_mod.playtest_step(body["step"])
+        except (ValueError, TypeError, yaml.YAMLError) as e:
+            raise HTTPException(400, str(e))
+        if runner.tables.guest_for_client(client) is None:
+            raise HTTPException(404, f"no client {client!r}")
+        runner.touch()
+        done = await board.run_step(client, action, args, scenario_mod.step_seconds(action, args, s.step_timeout_s))
+        if not done.ok:
+            return JSONResponse({"ok": False, "client": client, "action": action, "error": done.result.get("error", "no answer")}, status_code=504)
+        return {"ok": True, "client": client, "action": action, "result": done.result.get("data")}
 
     # The client's logon launcher asks which game version to start (ADR-022):
     # the active run's, else the default. It keeps one game folder per version.

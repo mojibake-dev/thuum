@@ -48,6 +48,16 @@ class ConsequencesTest(unittest.TestCase):
         quiet = record(vars={"CastBlend": [[0, 0.0], [500, 0.02], [1300, 0.03]]})
         self.assertEqual(set(parity.consequences(quiet, 1000)), set())
 
+    def test_a_series_first_sample_is_the_baseline_even_after_the_cut(self):
+        # a cut at 0 (a reference's action less a longer lead) must not make
+        # every variable's first value a consequence (p-spell-bolt 20261015-073742)
+        r = record(vars={"iState": [[13, 0], [1200, 10]]}, bools={"IsCastingRight": [[14, False], [1300, True]]})
+        keys = set(parity.consequences(r, 0))
+        self.assertIn("vars/iState=10", keys)
+        self.assertIn("bools/IsCastingRight=1", keys)
+        self.assertNotIn("vars/iState=0", keys)
+        self.assertNotIn("bools/IsCastingRight=0", keys)
+
     def test_a_stumble_is_not_a_throw(self):
         # a stagger's few steps stay under the move tolerance; a throw does not
         self.assertNotIn("physics/moved", parity.consequences(record(maxDisplacement=40.0), 1000))
@@ -149,6 +159,64 @@ class DiffTest(unittest.TestCase):
         refs = {"actor-own": (record(), 1000)}
         run = self.views(target_own=record(events=[[1100, "Ragdoll", 1]]))
         self.assertEqual(parity.diff(run, refs), [])
+
+
+class CountTest(unittest.TestCase):
+    """ADR-033: a key both sides show, the run fewer times, is a finding."""
+
+    def views(self, actor_figure, at=1000):
+        return {"actor-figure": (actor_figure, at)}
+
+    def casts(self, n, start=1100, gap=600):
+        return [[start + i * gap, 0x12FD0] for i in range(n)]  # the recorder's casts rows: [ms, spell]
+
+    def test_a_count_below_the_references_is_missing_n_of_m(self):
+        # playtest nineteen: every other cast refused whole, the key set unchanged
+        ref = record(casts=self.casts(5))
+        run = record(casts=self.casts(3))
+        found = parity.diff(self.views(run), self.views(ref))
+        self.assertEqual([str(f) for f in found], ["actor-figure/casts/12fd0 missing 2 of 5"])
+        self.assertEqual(found[0].kind, "missing")
+        self.assertEqual(found[0].count, (3, 5))
+        self.assertIn("(reference: 5 times; run: 3 times)", found[0].detail())
+
+    def test_as_many_or_more_is_not_a_finding(self):
+        ref = record(casts=self.casts(5))
+        self.assertEqual(parity.diff(self.views(record(casts=self.casts(5))), self.views(ref)), [])
+        self.assertEqual(parity.diff(self.views(record(casts=self.casts(7))), self.views(ref)), [])
+
+    def test_each_counted_channel(self):
+        def taken_events(n):
+            return [[1100 + i * 500, "MRh_SpellAimedStart", 1] for i in range(n)]
+        ref = record(events=taken_events(4), hits=[[1200 + i, 0xFF000002, 0x12FD0, 0, 0] for i in range(4)],
+                     taken=[[1200 + i, 0xFF000002, 0x12FD0, 0] for i in range(4)],
+                     effects=[[1300 + i, 0xFF000002, 0x7F82F] for i in range(4)])
+        run = record(events=taken_events(2) + [[2100, "MRh_SpellAimedStart", 0]],
+                     hits=[[1200, 0xFF000002, 0x12FD0, 0, 0]], taken=[[1200, 0xFF000002, 0x12FD0, 0]],
+                     effects=[[1300 + i, 0xFF000002, 0x7F82F] for i in range(4)])
+        found = {str(f) for f in parity.diff(self.views(run), self.views(ref))}
+        self.assertEqual(found, {
+            "actor-figure/events/MRh_SpellAimedStart missing 2 of 4",  # a refused one is not taken
+            "actor-figure/hits/12fd0/plain missing 3 of 4",
+            "actor-figure/taken/12fd0/plain missing 3 of 4",
+        })
+
+    def test_counts_start_at_the_cut(self):
+        ref = record(casts=self.casts(3))
+        run = record(casts=[[400, 0x12FD0]] + self.casts(2))  # one before the cut
+        self.assertEqual([str(f) for f in parity.diff(self.views(run), self.views(ref))],
+                         ["actor-figure/casts/12fd0 missing 1 of 3"])
+
+    def test_the_later_list_covers_a_count_as_it_covers_a_key(self):
+        ref = record(casts=self.casts(5))
+        run = record(casts=self.casts(3))
+        self.assertEqual(parity.diff(self.views(run), self.views(ref), ["*/casts/12fd0"]), [])
+        self.assertEqual(parity.diff(self.views(run), self.views(ref), ["actor-figure/casts/*#count"]), [])
+
+    def test_a_count_line_never_excuses_the_keys_absence(self):
+        ref = record(casts=self.casts(5))
+        found = parity.diff(self.views(record()), self.views(ref), ["actor-figure/casts/12fd0#count"])
+        self.assertEqual([str(f) for f in found], ["actor-figure/casts/12fd0 missing"])
 
 
 if __name__ == "__main__":

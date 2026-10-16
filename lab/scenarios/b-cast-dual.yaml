@@ -1,0 +1,57 @@
+# b-cast-dual (docs/verbs/cast-action.md, ADR-033's dual row; from
+# x-dual-relay 20261015-070729): the perk's dual cast (Eli's "dual casting
+# B") on a figure. c1 takes the Destruction Dual Casting perk (153cf, a perk
+# is the player's own; the server sets none) and holds Flames with both
+# buttons at c2 four times at a person's rhythm, moving a little between;
+# the engine performs a dual cast as the LEFT hand's actions carrying the
+# dual idle, so the figure in c2's game plays the two-handed pose without
+# the perk and ends it with the left hand's Equipped exit. The claim: every
+# dual start, release and exit is taken on the figure. The effect's
+# multiplier is not in play (the server reads no isDualCasting until perks
+# are server-owned; docs/verbs/cast-action.md, Authority).
+id: b-cast-dual
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: console {text: "player.addperk 153cf"}
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - c1: console {text: "player.equipspell 12fcd left"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 4
+  - c1: watch-start {bools: [IsCastingRight, IsCastingLeft, IsCastingDual, bWantCastRight, bWantCastLeft, NotCasting]}
+  - c2: watch-start {bools: [IsCastingRight, IsCastingLeft, IsCastingDual, bWantCastRight, bWantCastLeft, NotCasting]}
+  - wait: 1
+  - c1: hold-key {codes: [199, 207], ms: 2500}
+  - wait: 1.5
+  - c2: screenshot
+  - wait: 2.5
+  - c1: hold-key {code: 30, ms: 1200}
+  - c1: hold-key {codes: [199, 207], ms: 2000}
+  - wait: 3.6
+  - c1: look {pitch: 0, heading: 10}
+  - c1: hold-key {codes: [199, 207], ms: 2000}
+  - wait: 3.4
+  - c1: hold-key {code: 32, ms: 1200}
+  - c1: hold-key {codes: [199, 207], ms: 2500}
+  - wait: 1.5
+  - c2: screenshot
+  - wait: 3
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("DualMagic_SpellAimedConcentrationStart") >= 4
+      - c2.watched(c1).took("MLH_SpellRelease_event") >= 4
+      - c2.watched(c1).took("MLh_Equipped_Event") >= 4
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]

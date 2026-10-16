@@ -103,6 +103,55 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   (44110). With params {ALWAYS_LOADED: true} it first sets the addon's flags
   to kAlwaysLoaded, the test of the fix. The function roles and the manager
   at 411270 are the re-analyst's static read (HYPOTHESIS). 1.6.1170 only.
+  mps-trace2.js is the same with the system's maxEmitterObj and
+  maxParticlesPerFrame read too (BSMasterParticleSystem.h 0x162, 0x164),
+  for breaths seconds apart (x-tgm-breath4: the emitter cap hypothesis).
+
+- launch-source-trace.js: launch-trace.js plus the LaunchData's fields that
+  say which hand and whose spell each launch is: origin, projectile base,
+  shooter, spell, castingSource (MagicSystem::CastingSource, 0 left hand, 1
+  right) and useOrigin (CommonLibSSE-NG include/RE/P/Projectile.h:81-107).
+  For playtest eighteen's left-hand Firebolt leaving the figure's right hand
+  (docs/verbs/spell-cast.md, x-left-firebolt). 1.6.1170 only.
+
+- action-trace.js: the engine's action path, call by call
+  (docs/verbs/cast-action.md): every ActorMediator::PerformAction (38949,
+  the one entry every BGSAction goes through, a cast's four phases included)
+  with its TESActionData's source, action and index, input type, event,
+  idle, result and flags on entry and on exit and the return; every call of
+  the mediator's second entry (38953, the one Skyrim Platform's performAction
+  uses, which performs a data as given); and every cast-shaped graph event
+  (MRh_, MLh_, DualMagic, shout, Voice, Cast) sent to the player's or a
+  figure's holder (IAnimationGraphManagerHolder::NotifyAnimationGraph, 32901),
+  tagged with whether a PerformAction is open on that thread. The test of the
+  re-analyst's read of 2026-10-14 (the event empty on entry and chosen on
+  exit, the type 2, the indices 45..52 and 60..63, no cast event without an
+  action around it) and of each performAction replay on a figure. Layouts
+  are CommonLibSSE-NG's, cited in the script; 1.6.1170 only.
+
+- figure-cast-trace.js: what the engine does for a figure's cast in the
+  observer's game (docs/verbs/cast-action.md: the interrupted and the
+  spawned-mid-cast rows). Every hook filters to the figures (dynamic ACHRs,
+  ids 0xFF......) and logs: each graph event the figure's holder is sent and
+  whether the graph took it (NotifyAnimationGraph, 32901); each
+  PerformAction (38949, dry runs skipped) and each replay through the second
+  entry (38953) with the action, the event chosen, the idle and the return;
+  the figure's own caster's FinishCast (34435), InterruptCast (34408),
+  StartCharge (34443), CastSpell (34401), RequestCastImpl (34136) and
+  CastSpellImmediate (slot 01 of ActorMagicCaster's vtable, 205828, checked
+  against 34404 at attach), each with the hand; and the begin-cast response
+  handlers (42820 right, 42819 left) with a backtrace, the actor decoded
+  when the handlers' vtables confirm IHandlerFunctor's signature, raw and
+  capped at 200 emits otherwise. Layouts are CommonLibSSE-NG's, cited in the
+  script; 1.6.1170 only.
+
+A frida step right before a console step on the same client leaves the
+console unopenable (x-figure-action 20261015-052852 and -053059: "the
+console did not open 3000 ms after the grave key", twice, with the attach
+one step earlier; every earlier scenario attached on the other client or
+followed the attach with Papyrus steps). Put a client's console steps
+before its frida step; whether injected key input (hold-key) survives the
+attach is x-action-trace-input's question.
 
 A trace ends with the game: restart it (or let the next rollback do so) once
 the .out has what you need. A run collects the traces started during it as

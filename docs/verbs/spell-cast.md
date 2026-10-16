@@ -151,6 +151,31 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   wire-schema skymp.rs:784-816), with no validator check and no budget
   (wire-validate lib.rs).
 
+- A stream's aim on a figure (the re-analyst on sky-re, 2026-10-16, 1.6.1170,
+  ids by lab/addr.py; HYPOTHESIS until a recorded playtest's launches or a
+  Frida trace on 37930): the figure's own caster launches its stream
+  (MagicCaster::UpdateImpl 34400 calls 34450 whenever its projectile timer
+  runs out), taking angleZ from Actor::GetAimHeading 37929 and angleX from
+  Actor::GetAimAngle 37930; the stream then re-aims every frame from the same
+  two (FlameProjectile UpdateImpl 43894, BeamProjectile UpdateImpl 43749,
+  angleX clamped to plus or minus 1.553343 by 44174). 37930 returns
+  -AimPitchCurrent when the actor's graph has bAimActive and the reference's
+  angle.x otherwise (CommonLibSSE-NG src/RE/A/Actor.cpp:275-296,
+  include/RE/F/FixedStrings.h:187-200); the observer's castSpellImmediate
+  passes no angle a stream uses (MagicApi.cpp's CastSpellImmediate: no
+  angles, FindTargets 34410 launches only target-location effects), and
+  nothing set the figure's pitch while it stood (movementApply passes only a
+  heading offset). So playtest nineteen's Flames aimed straight up flew
+  level on the other screen, the damage, the caster's own, going up. A bolt
+  differs: Skyrim Platform's spell LaunchData sets the angles with useOrigin
+  and no auto-aim, and a missile never reads its shooter's aim again
+  (src/RE/P/Projectile.cpp:213-222), which is why Firebolt aimed right. The
+  fix (fork m2-arrow-path 13a58aed): setActorAimPitch writes a figure's
+  reference pitch and its AimPitchCurrent each update from its player's
+  movement (formView, forms another game drives), so either branch of 37930
+  reads the caster's pitch. HYPOTHESIS: the behavior graph does not overwrite
+  AimPitchCurrent between updates (the behavior files say, not the exe).
+
 ## Observe (host or acting client sees the intent before the engine acts)
 
 - Hook point: Skyrim Platform's `spellCast` for the start; the hand's
@@ -804,3 +829,139 @@ health message. A second red within two sweeps makes it a bug.
 - Merged: fork parity fast-forwarded to 4f74c3e1 (2026-10-14; the gate run set merge-m2-hands went 18 of 18 green). The
   concentration pose is DONE at T3 (b-spell b04f625); the next playtest's
   Flames item is its T4. Firebolt's own wind-up stays LATER (above).
+- Firebolt's wind-up, prepared (2026-10-14, during playtest eighteen's
+  wait): the lab driver's anim-event {delayFrames} (thuum main 1903b67)
+  sends a start an exact number of updates after its variables, and probe
+  x-figure-cast4 sends c1's figure MRh_SpellAimedStart 0 to 3 updates after
+  bWantCastRight, twice each. The candidate fix, fork m2-firebolt 25e38e2f:
+  the view holds only a concentration start for the casting state; for a
+  fire-and-forget start it sets the hand's want variable (bWantCastRight,
+  bWantCastLeft or both: Skyrim Platform's master behavior variables 72 and
+  71) and plays the start fireAndForgetStartFrames updates later, 1 until
+  the probe says which. It merges only on the probe's word.
+- Playtest eighteen (2026-10-14, Eli, parity 05192845): the hands items not
+  ticked. Three notes: the figure's grab-and-push "initiates, but does not
+  stop"; "charging and casting with the left hand still emits the bolt from
+  the right hand"; "spells like invisibility also aren't accompanied by a
+  spell animation" on the figure. HYPOTHESES, one per note, probed the same
+  night: the figure's casting variables are set from the cast's snapshot
+  and never set back, so a figure whose graph now takes the start stays
+  casting (x-flames-stop: the figure's IsCastingRight and events through
+  the cast and 10 s after); the relay's casting source reaches the
+  observer's launch as the right hand's, or the left caster's magic node is
+  not the one used (x-left-firebolt: launch-source-trace.js reads the
+  LaunchData's castingSource, 0 left and 1 right, and origin in c2's game);
+  a Self cast's start is a fire-and-forget start (MRh_SpellSelfStart) and
+  meets the same refusal as Firebolt's (x-self-anim: the events c1's own
+  graph sends and the figure takes). Eli's ask: "something about how we're
+  doing animations overall is a little iffy ... see how our past things
+  that work are doing it"; a research pass over the client's cast relay,
+  the engine's own casting path and what works (swings, blocks, staggers,
+  shouts) is in hand. numidium's point stands: b-spell asserts only the
+  start's taking, so the hands fix ships with references (the engine alone
+  casting Flames and Firebolt from each hand, and a Self cast) and a parity
+  scenario that would have seen all three.
+- x-figure-cast4 (20261015-030717, the driver's delayFrames): the figure
+  refused MRh_SpellAimedStart at every offset, 0, 1, 2 and 3 updates after
+  bWantCastRight was set on it (twice each; the graph at iState 9 before
+  each, the want variable 1 from offset 1 on). So no script sends a
+  fire-and-forget start at a moment the graph takes it, and fork m2-firebolt
+  (the want variable, then the start a frame later) is dead; it stays
+  unmerged.
+- The hands, read whole (2026-10-14 night, after playtest eighteen; a
+  research pass over skymp5-client, Skyrim Platform, the engine's headers,
+  TiltedEvolution's map and the x-recorder-flames recordings, with the
+  three findings of the playtest as its questions). The pipeline: the
+  caster's game sends three things on two channels, the SpellCast with a
+  snapshot of the caster's graph variables (magicSyncService.ts, reliable),
+  the graph events the player's own graph took (sync/animation.ts'
+  AnimationSource, one per update, unreliable) and the snapshot again every
+  500 ms while magic is equipped; the observer applies the variables by
+  index onto the figure's graph, plays the events through
+  Debug.sendAnimationEvent, and casts the spell through castSpellImmediate
+  from GetMagicCaster(castingSource). One cause under the three findings:
+  the engine enters a hand's cast only through the actor's own
+  MagicCaster (CastSpell sets the want variable, the graph answers within
+  the frame, the caster performs the hand's default action, whose idle
+  sends the start; the re-analyst's read above), and it leaves the loop on
+  a graph event, M[LR]h_Equipped_Event (the engine alone's caster: taken at
+  5269 ms, the want variable false 12 ms later, IsCastingRight false 195 ms
+  after; x-recorder-flames' reference, parity3/ref-a.json). Each finding:
+  1. The cast that never stops: the relay rewrites every event whose name
+     contains "equip" to SkympFakeEquip (sync/animation.ts, the equip
+     rewrite), which the observer turns into applyWeapDrawn and never gives
+     the graph, so the figure never gets the exit; before m2-hands the
+     figure never entered the loop, so it did not matter. The figure's
+     variables do return, late and in two steps (bWantCastRight 0 with the
+     interrupt's snapshot, IsCastingRight 0 with the next 500 ms one, 586 ms
+     apart in the recording); whether the graph would leave on them alone is
+     HYPOTHESIS (tonight it did not). The observer also ends a figure's cast
+     with FinishCast (MagicApi.cpp), where the engine's end, and
+     TiltedEvolution's, is InterruptCast.
+  2. The left-hand bolt from the right hand: Skyrim Platform derives
+     castingSource at the spellCast event from the two hand casters' states
+     (EventHandler.cpp), with a fallback that gives the right slot the cast
+     when neither caster reads as charging or casting, which a
+     fire-and-forget's event can meet; the server clamps it to 0..3 and
+     relays it verbatim, the Rust side only range-checks it, and the
+     observer launches from GetMagicCaster(castingSource)'s magic node, so a
+     message saying right is launched right. HYPOTHESIS: the fallback,
+     which the same spell in both hands (eighteen's seats had Flames and
+     Firebolt) makes likely; x-left-firebolt (Firebolt in the left hand
+     only) tests the left caster's node, a second probe with the spell in
+     both hands tests the fallback.
+  3. The Self cast without an animation: a Self spell on a figure is
+     castSpellImmediate on the figure itself (MagicApi.cpp), which plays no
+     action, and its start event is held like any hand's and refused like
+     Firebolt's.
+  What works (attackStart, the block by the movement report's isBlocking,
+  the relayed staggerStart, shoutStart) are states the graph enters on an
+  input event; a hand's cast is the one state it enters only through the
+  caster. The one shape, then ("the figure's cast is its own caster's"): on
+  a relayed cast the observer starts the figure's own caster for the
+  relayed hand through a new Skyrim Platform native (GetMagicCaster(source),
+  SetSkipCheckCast, dual casting from the message, then the engine's
+  CastSpell, 34401 by the re-analyst's read, resolved through addrlib before
+  use), and ends it on the relayed interrupt with InterruptCast(false); the
+  engine then plays the want variable, the response, the action, the start,
+  the loop and the Equipped exit itself, for a concentration, a
+  fire-and-forget or a Self cast alike. It drops the held start, the
+  relayed M[LR]h_/DualMagic_ events for figures and the casting variables
+  written by index onto figures; the wire does not change. To probe, in
+  order, on a fork branch with the native: H1 CastSpell with
+  kSkipCheckCast on a figure's hand caster plays the start and holds a
+  concentration loop; H2 InterruptCast sends the Equipped exit; H3 a
+  fire-and-forget CastSpell on an actor without input fires at the charge's
+  end (which decides whether the figure's bolt stays Projectile::Launch);
+  H4 the Self variant. The interim, if a playtest needs Flames to stop
+  first: let M[LR]h_Equipped_Event through the equip rewrite by name, as the
+  torch's events are, the engine's own exit by hand. The hands fix ships
+  with references (the engine alone casting Flames and Firebolt from each
+  hand, and a Self cast) and a parity scenario, since b-spell asserts only
+  the start's taking.
+- Measured the same night, after the read above: x-left-firebolt
+  (20261015-031632, Firebolt in the left hand only) launched from the left
+  in the observer's game both times (casting source 0 in LaunchData), the
+  figure taking MLh_SpellAimedStart, Ready and Release; x-left-firebolt2
+  (-035333, Firebolt in both hands, cast with the left) launched from the
+  right both times (source 1): finding 2 is the sender's fallback,
+  CONFIRMED. x-self-anim (-031853): the figure took MRh_SpellSelfStart,
+  Ready and Release when the caster's variables landed 23 ms before the
+  start, so a Self cast's and a fire-and-forget's start are taken when the
+  whole casting snapshot is on the figure first; eighteen's missing Self
+  animation and Firebolt's wind-up are the order of arrival (the start on
+  the unreliable UpdateAnimation hop ahead of the variables, the 1 s hold
+  timing out), not a refusal in principle. x-flames-stop (-031410): the
+  figure's IsCastingRight stays 1 and NotCasting 0 for the whole 11 s
+  watch after the caster's release; finding 1 is the missing exit.
+- The shape (Eli, 2026-10-14 21:00, the plan approved): the figure plays
+  the caster's actions, captured at the engine's action entry on the player
+  and replayed on the figure with the caster's variables, the effect
+  decided apart by the server's relay; the verb is docs/verbs/cast-action.md,
+  which holds the engine's chain (the re-analyst's read of the night: every
+  graph-facing step of a cast is an action through DoAction 34202, the
+  concentration exit the Interrupt action, kReady held until a driver
+  releases), the measurements and the probes. Melee keeps its event relay;
+  withheld spells show their animations too. m2-hands' hold is the stopgap
+  it replaces; forks m2-firebolt and m2-hands-exit are deleted with it.
+

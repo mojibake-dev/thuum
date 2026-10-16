@@ -1108,11 +1108,68 @@ class ProbeSteps(RunTests):
         self.assertTrue(out["r"].json()["ok"])
         self.assertIn(("c2", "hold-key", {"code": 207, "ms": 8000}), self.doubles.seen)
 
+    def test_an_assist_runs_the_recorder_and_the_stop_answers_with_its_trace(self):
+        # ADR-033: a playtest is recorded through the assist (lab/tools/playtest-record.sh)
+        import threading
+
+        for action, args in (("watch-start", {"bools": ["IsCastingRight"]}), ("watch-stop", {})):
+            out = {}
+            t = threading.Thread(target=lambda: out.update(r=self.client.post("/lab/clients/c1/assist", json={"action": action, "args": args})))
+            t.start()
+            deadline = time.time() + 10
+            while t.is_alive() and time.time() < deadline:
+                self.doubles.turn()
+                time.sleep(0.02)
+            t.join(5)
+            self.assertEqual(out["r"].status_code, 200, out["r"].text)
+            self.assertTrue(out["r"].json()["ok"])
+            self.assertIn(("c1", action, args), self.doubles.seen)
+        # the driver's answer comes back as the result (the doubles answer {})
+        self.assertEqual(out["r"].json()["result"], {})
+
     def test_an_assist_sends_input_and_nothing_else(self):
         for other in ("console", "equip", "dump-state", "poisons"):
             r = self.client.post("/lab/clients/c1/assist", json={"action": other})
             self.assertEqual(r.status_code, 400, other)
         self.assertEqual(self.client.post("/lab/clients/c9/assist", json={"action": "tap-key", "args": {"code": 28}}).status_code, 404)
+
+    def _hold(self, reason="playtest (a test)"):
+        self.assertEqual(self.client.post("/lab/hold", json={"minutes": 10, "reason": reason}).status_code, 200)
+
+    def test_a_playtest_step_runs_one_seat_s_step_inside_a_playtest_hold(self):
+        # Eli, 2026-10-16: the lab casts on one seat while he staggers it from the other
+        import threading
+
+        self._hold()
+        cases = (
+            ("equip {formId: 0x12fd0}", ("c2", "equip", {"formId": 0x12FD0})),
+            ({"hold-key": {"code": 199, "ms": 3000}}, ("c2", "hold-key", {"code": 199, "ms": 3000})),
+            ("repeat {times: 2, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}",
+             ("c2", "repeat", {"times": 2, "gapMs": [3000.0, 3000.0], "step": {"action": "hold-key", "args": {"code": 199, "ms": 3000}}})),
+        )
+        for step, want in cases:
+            out = {}
+            t = threading.Thread(target=lambda: out.update(r=self.client.post("/lab/clients/c2/playtest-step", json={"step": step})))
+            t.start()
+            deadline = time.time() + 10
+            while t.is_alive() and time.time() < deadline:
+                self.doubles.turn()
+                time.sleep(0.02)
+            t.join(5)
+            self.assertEqual(out["r"].status_code, 200, out["r"].text)
+            self.assertTrue(out["r"].json()["ok"])
+            self.assertIn(want, self.doubles.seen)
+
+    def test_a_playtest_step_needs_a_playtest_hold_and_sends_input_only(self):
+        step = {"step": "equip {formId: 0x12fd0}"}
+        self.assertEqual(self.client.post("/lab/clients/c2/playtest-step", json=step).status_code, 409)
+        self._hold(reason="numidium: a staging")
+        self.assertEqual(self.client.post("/lab/clients/c2/playtest-step", json=step).status_code, 409)
+        self._hold()
+        for bad in ('console {text: "tgm"}', "connect", "teleport {cell: lab-spawn}",
+                    "repeat {times: 2, step: {console: {text: tgm}}}", "equip {formId", 7):
+            self.assertEqual(self.client.post("/lab/clients/c2/playtest-step", json={"step": bad}).status_code, 400, bad)
+        self.assertEqual(self.client.post("/lab/clients/c9/playtest-step", json={"step": "tap-key {code: 28}"}).status_code, 404)
 
 
 @needs_deps

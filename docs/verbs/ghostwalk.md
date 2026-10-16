@@ -12,9 +12,11 @@ Milestone: M2   Class: B
 
 ## Inventory (ADR-031: the action's consequences, before its rung)
 
-From the records (read from the 10.2.3 plugin, Engine surface) and the
-script as apocrypha read it (docs/MODS.md, "Four spells";
-docs/apocalypse-options.md 5.4).
+From the records (read from the 10.2.3 plugin, Engine surface) and the two
+scripts as compiled (WB_Ghostwalk_Script and the ability's WB_inviseyefix,
+disassembled 2026-10-14 over lab/pex.py's instruction model, and
+independently by apocrypha the same day, instruction for instruction the
+same).
 The reference trace (the recorder in a solo client run with the layer,
 lab/references/ghostwalk.json) is step 1 of the Dynamic plan and may add
 rows.
@@ -23,14 +25,15 @@ rows.
 | --- | --- | --- |
 | the Self cast's hand animation, its casting art and its magicka cost | record (SPEL 0300AAE8: Illusion, fire-and-forget, Self, cost 450) | native in the caster's game; the cast is spell-cast's (R1), relayed so the figure plays it |
 | the caster invisible for 10 s, with the effect's hit art (MGEF 0300AAE5, archetype 11) | record | imposed: the server runs it as a state (self-cast's archetype 11, R0); native in the caster's game; on the figure by the relayed Self cast, its name hidden (fork m2-flight f3569b95) |
-| OnEffectStart: the caster's X, Y, Z and location recorded in the script | record (WB_Ghostwalk_Script) | native in the caster's game: the filter passes an effect the player bears (ADR-029 A1, test 1) |
-| OnEffectFinish: a wait (WB_Wait, 0.4 s), then SetPosition back to the cast point | record | native in the caster's game; the server takes the move as a permitted return (R1, Server) |
-| a sound, a visual (030207C1, at an FXEmptyActivator 000B79FF placed for it) and QueueNiNodeUpdate at the return | record | native in the caster's game; later on other screens: the figure's script is blanked there (Suppress) |
-| image spaces on the caster's screen (030207BA, the effect's; 030207BC, the return's) | record | native (R3: the caster's screen only) |
-| a failure message (0300AAE6) when the return is refused | record | native in the caster's game; HYPOTHESIS that WB_CheckLocation False never shows it |
-| a detection event at the return (CreateDetectionEvent) | record | native in the caster's game; later: other games' NPCs hear nothing (NPC hosting, M3) |
-| the eyes-fix ability added to the caster (SPEL 030CB7E1, AddSpell) | record | native in the caster's game; HYPOTHESIS that the server never learns it (a script's AddSpell is not reported) and that it removes itself; later: the learned-spells record if the reference shows it lasting |
-| the effect ended early by the caster's own act | engine: Actor::DispelAlteredStates 38819, from the caster's SpellCast at the fire (sparing the archetype the cast spell carries), a weapon's hit frame that finds an actor, a bow's release, an activation (pick-up included) and a force-greet; not a melee miss, not a cast's start or charge (the re-analyst on sky-re, 2026-10-16, docs/verbs/self-cast.md; HYPOTHESIS until a lab run) | native, and the server's EndConcealment ends its state on the same acts (a cast, a hit, a bow's release and the player's activation since fork 2d983dd0; a recast of the same archetype spared); the script returns the caster then, the permit's window opening at the cast. An ethereal target refuses most spells (Actor's AddTarget 38786 for an IsGhost actor), so a recast of an ethereal spell is refused, not swapped |
+| OnEffectStart: the caster's X, Y, Z (properties of akTarget, the caster of a Self spell) and GetCurrentLocation recorded in the script | script | native in the caster's game: the filter passes an effect the player bears (ADR-029 A1, test 1) |
+| OnEffectFinish: Utility.Wait(WB_Wait, 0.4 s); the location check (IsSameLocation, else HasCommonParent) short-circuited by WB_CheckLocation False, so the return always runs; SetPosition(X, Y, Z) back to the cast point | script | native in the caster's game; the server takes the move as a permitted return (R1, Server) |
+| the return's sound (Sound.Play of SOUN 030207BF, its descriptor SNDR 030207BE, at the caster) and visual (VisualEffect.Play of RFCT 030207C1 on the caster for WB_TriggerVFXDur, 3 s) | script | native in the caster's game; later on other screens: the figure's script is blanked there (Suppress) |
+| image spaces on the caster's screen (IMAD 030207BA, the effect's; 030207BC, applied at the return) | record, script | native (R3: the caster's screen only) |
+| a detection event at the return (CreateDetectionEvent from the caster, strength 75 less half the caster's Illusion, at least 5) | script | native in the caster's game; later: other games' NPCs hear nothing (NPC hosting, M3) |
+| the eyes-fix ability (SPEL 030CB7E1, AddSpell, silent, after the return): its WB_inviseyefix checks each second and, once its bearer's weapon is sheathed, calls QueueNiNodeUpdate and removes itself (RemoveSpell) | script | native in the caster's game; HYPOTHESIS that the server never records it (a script's AddSpell and RemoveSpell in the player's game, unreported); a transient, so nothing to persist |
+| the failure message (MESG 0300AAE6), shown only when the location check fails with WB_CheckLocation True | script | never shown with this VMAD (unreachable) |
+| a caster who changed cells during the effect: SetPosition (not MoveTo) puts it at the cast's coordinates in its current cell | script | later: the server permits the return in the cast's cell or worldspace only, so there the move is judged as any other (sent back if the budget refuses it); a rare edge, named here for the parity list |
+| the effect ended early by the caster's own act: the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | engine: Actor::DispelAlteredStates 38819, from the caster's SpellCast at the fire (sparing the archetype the cast spell carries), a weapon's hit frame that finds an actor, a bow's release, an activation (pick-up included) and a force-greet; not a melee miss, not a cast's start or charge (the re-analyst on sky-re, 2026-10-16, docs/verbs/self-cast.md; HYPOTHESIS until a lab run), script | native, and the server's EndConcealment ends its state on the same acts (a cast, a hit, a bow's release and the player's activation since fork 2d983dd0; a recast of the same archetype spared); the script returns the caster then, the permit's window opening at the cast. An ethereal target refuses most spells (Actor's AddTarget 38786 for an IsGhost actor), so a recast of an ethereal spell is refused, not swapped |
 
 ## Authority
 
@@ -82,14 +85,16 @@ positions' age.
     WB_inviseyefix with itself as its InvisibilityEyesFixSpell property: by
     its names, the fix for an invisible actor's eyes, which removes itself
     (INFERRED; its body unread).
-  - The bodies' calls are apocrypha's read (docs/MODS.md:147-150): the
-    position and location recorded at the start; at the finish the wait,
-    SetPosition back, a sound, a visual, the image space, a detection
-    event and the ability.
-- The script's calls, all in the caster's game (none on the server's VM):
-  SetPosition, GetCurrentLocation, Location.HasCommonParent,
-  ImageSpaceModifier.Apply, CreateDetectionEvent, RegisterForSingleUpdate,
-  PlaceAtMe, AddSpell and Actor.QueueNiNodeUpdate (SKSE, a visual refresh).
+  - The bodies: Inventory (the compiled scripts, read 2026-10-14).
+- The scripts' calls, all in the caster's game (none on the server's VM):
+  WB_Ghostwalk_Script's Utility.Wait, GetCurrentLocation,
+  Location.IsSameLocation and HasCommonParent, SetPosition, Sound.Play,
+  VisualEffect.Play, ImageSpaceModifier.Apply, GetActorValue,
+  CreateDetectionEvent, Message.Show (unreachable) and AddSpell;
+  WB_inviseyefix's IsWeaponDrawn, Actor.QueueNiNodeUpdate (SKSE, a visual
+  refresh), RemoveSpell and RegisterForSingleUpdate. The script has no
+  OnUpdate, so a blanked OnEffectStart leaves nothing running; the
+  FXEmptyActivator property is unused by its functions.
 - The filter that lets the script run: skyrim-platform FridaHooks.cpp
   OnSendEventEnter, the effect test (fork m2-flight 05192845, :44-70): an
   event on an ActiveEffect (VM type id, caster and target: CommonLibSSE-NG
