@@ -60,7 +60,8 @@ Tests.
 | Flames again at a person's rhythm while the seats MOVE (strafing, turning) | x-cast-human; playtest nineteen's second session (c2's log 13:13 to 13:18); x-cast-gap and x-cast-replay-gap with lab/frida/figure-cast-trace.js | GREEN on caff3e04 with the retry alone (b-cast-moving 20261015-233639 and the gate's 20261016-001226: 6 of 6, three of them taken after a retry, the latest 267 ms after its first ask; merged to parity caff3e04); the handshake MERGED as parity a930968b (2026-10-15 20:30 PDT, gate 10 of 10; the answer read from SKSE's action events): on its stage 49 of 49 starts taken over seven runs (x-cast-human 021749, x-cast-gap 022241, b-cast-moving 022553, b-cast-dual 022834, b-spell 023116, b-cast-rhythm 023357, b-cast-both-hands 023628), 45 on the first ask and 4 on the second, castReady 1 to 2 ms before every taken start; 34bdf0c3's Frida interceptors had crashed the observer at the first answer and 5df863fd's vtable swap never fired, SKSE owning the slot. Nineteen's third session on caff3e04 ticked every hands item, with starts a beat late at times (the retry). Nineteen-2: starts refused and taken in alternation (eight of eight after a taken exit refused at 534 to 1334 ms, every one after a refused cast taken at 183 to 553 ms); x-cast-human 202506 (strafing and turning): T T T R T R; Firebolt 20 of 24. Read first as a 1.5 s window after a taken exit and WITHDRAWN by x-cast-gap 213755: standing still, 17 of 17 starts taken through the relay at every gap from 513 to 2651 ms, each 4 to 7 ms after the figure's graph answered the want variable's rise with BeginCastRight (34 of 34 asks, the exits' rises answered too), FinishCast from the interrupt message 33 to 54 ms before every exit and harmless. x-cast-replay-gap 214106 (the driver's replay, no relay): 5 of 6 starts refused in the graph itself (NotifyAnimationGraph false) because the driver's replay never drops the want, so the graph gets no rise and no answer. The fault: the view performed a start one update after its variables, a timer, where the engine's caster waits for the graph's answer; a still figure answers within a frame, a moving one later. Fix: the start waits for the answer (castReady, the response handlers hooked) |
 | each hand: right (b-spell), left (x-left-firebolt2), the Self cast (x-figure-action-self), the perk's dual cast (x-dual-relay) | b-spell; x-left-firebolt2; x-figure-action-self; x-dual-relay | 065943, 075606 (source 0 both launches), 060152, 070729, all green on e75ee5c8 |
 | both hands casting the same spell separately (Eli's "dual casting A") | b-cast-both-hands (from x-both-hands-relay) | green in the gate (193846, 194205's set); 185138 on abe44a55: the right's start and release, the left's 0.5 s later, both exits, all taken, and the figure's two streams alternate hands in the launch trace (castingSource 1 and 0); on e75ee5c8 both casts were reported as the later hand (nineteen's one stream from the left hand) |
-| a cancelled charge (sheathed mid-charge), a stagger during a cast | none yet | open: the next row to probe after the stage |
+| a cancelled charge (sheathed mid-charge, three times, then a whole cast) | b-cast-sheathe | 20261016-163330 on 84db2c4e: every cast ended with the caster's, 5 of 5 starts taken, each redraw; green on parity 84db2c4e (180842) |
+| a stagger during a cast (a held Flames, a Firebolt charge) | x-stagger-cast, the Dynamic plan's step for it; playtest twenty-one's staggered charge | open: the figure holds its cast about 1.6 s after its player's ended; HYPOTHESIS, from the engine read: the staggered graph refuses the hand's Interrupt action, which the capture leaves out |
 | both seats casting at each other | none yet | open: nineteen's seats did, the lab's never have; a scenario with c2 casting back |
 | after a login or a cell change (a figure that spawns mid-cast) | none yet | open |
 
@@ -542,6 +543,53 @@ and 8 a second only ever stops a flood.
   casting state. Unread, and not a claim the verb rests on: which modifier
   in the behavior file resets the want variable when no start follows (the
   exe has no such writer).
+- The stagger during a cast (the re-analyst on sky-re, 2026-10-16; every id
+  by `just addr` for 1.6.1170; HYPOTHESIS until the trace below). The
+  stagger's start (37710, called by TESModPlatform.Stagger, StaggerEffect's
+  Start 34982, the hit reaction 38586 and KnockExplosion 39895) performs
+  kActionStaggerStart through 38949, sets the staggered bit only once that
+  action is taken, and calls no caster. The cast ends a graph update later,
+  from InterruptCastHandler 42862 (slot 1 of its vtable; that the
+  stagger's graph event reaches it is unread, from the response files):
+  Actor::InterruptCast 38757 with refund = !staggered, MagicCaster::
+  InterruptCast 34408 on each caster holding a spell (MagicCaster.h:79),
+  InterruptCastImpl 34140, which performs the hand's Interrupt action
+  through DoAction 34202 and so always enters 38949 (kActionRightInterrupt
+  52, Left 48, Voice 63), ignores its answer, and FinishCast 34435 drops the
+  want variable and the stream's projectile whatever the graph said. The
+  capture leaves refused calls out (FridaHooks.cpp:364-365 on 4a2b386b), so
+  if the staggered graph refuses the Interrupt action, the figure hears
+  neither that action nor its exit, and holds the cast until its own
+  relayed stagger ends (IsStaggering 1.7 to 1.75 s in stagger.md, near the
+  measured 1.6 s). A staggered charge is not refunded (the bit read in
+  42862), so the server's spell-cast must not refund one either.
+  - The fix, if the trace agrees: the capture also reports a refused,
+    non-dry call of a hand's Interrupt action, with the hand's Interrupt
+    idle's event when the graph chose none (MRh_Equipped_Event by
+    InterruptRight 0x13460, MLh_ by InterruptLeft 0x13463); the figure
+    replays it through the existing performAction over 38953 with
+    ActionRightInterrupt 0x13456 (left 0x13453), then the FinishCast
+    native. Not 34408 on the figure: it reads a stale currentSpell and
+    would ask for the exit twice. If the figure's own stagger refuses the
+    replayed exit too, its FinishCast and want drop still end the stream,
+    and the pose is the stagger's.
+  - The trace (x-stagger-cast): c2 holds Flames, then charges Firebolt, and
+    c1 power attacks c2 (b-stagger's step). On c2, lab/frida/action-trace.js
+    plus player-filtered interceptors on 37710 (enter, leave, the staggered
+    bit), 38757 (its bool, a backtrace through 38447 to 42862), 34408 (the
+    hand, currentSpell, state, the bool) and 34435; not on 42862 itself
+    (an interceptor on 42820 crashed a game, 34bdf0c3). Expected on c2:
+    37710, then 38757(0) from 42862, 34408(0), 38949 for
+    ActionRightInterrupt refused or with no event, 34435. On c1,
+    lab/frida/figure-cast-trace.js: the relayed staggerStart taken, no
+    Interrupt replay, the figure's own 34408 for Flames only.
+  - It is wrong if: 38757 is not called at the stagger, or from something
+    but 42862 (the knockdown path 39894 also calls it); its bool is 1 (the
+    handler ran inside 37710's action); c2's Interrupt is taken with
+    MRh_Equipped_Event (then the capture relays it and the linger is in the
+    figure's replay); or 34408 runs with no 38949 call for that hand.
+  - Owner: agent, after playtest twenty-one; then read the response files'
+    line naming InterruptCastHandler on sky-re.
 - Owner: agent. If P1 fails: the fallback, the figure's own caster
   (CastSpell 34401 with kSkipCheckCast, StartCast 34445 at the relayed
   release, InterruptCast at the end), with the server's withheld relays
