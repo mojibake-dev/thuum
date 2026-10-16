@@ -996,3 +996,205 @@ Two habits make it worse:
   - then Unrelenting Force's throw, the first verb built this way: the
     server imposes the spell's hit from the shouter's figure, and the
     engine throws.
+
+## ADR-032: A figure plays the caster's actions; the server decides the effect
+
+Status: accepted (2026-10-14, Eli, on the plan of that night: "we want the
+most wholistic fix that extends to how we do the rest of the magic system";
+"melee can stay how it is, withheld spells should also show anims because
+that's cool"; the research was his brief: "pin down how magic animations and
+effects are handled before doing apocalypse"). Built as the cast-action verb
+(docs/verbs/cast-action.md). Refines ADR-028 and ADR-031 for magic.
+
+**Context.** Playtest eighteen left three notes on the hands: a figure's
+Flames grab-and-push "initiates, but does not stop", a left-hand Firebolt
+left the figure's right hand, and a spell on oneself showed no cast at all;
+sixteen's and eighteen's god-mode breath showed once of twice. Each had its
+own cause (docs/verbs/spell-cast.md, "The hands, read whole"), and the
+causes shared a shape: the relay copied the caster's graph events one at a
+time (an unreliable channel, with the Equipped exit rewritten into a draw
+flag and lost), re-derived the hand from the casters' states, and held a
+start until the figure's variables caught up (fork m2-hands). The engine
+enters a hand's cast only through the actor's own MagicCaster, whose every
+graph-facing step is a BGSAction performed through one entry,
+ActorMediator::PerformAction (38949 on 1.6.1170: Attack, Ready, Release,
+Interrupt, the idle chosen from the actor's conditions, the event the idle
+names). TiltedEvolution hooks that entry and replays it (a map, never
+copied; ADR-005).
+
+**Decision.** Magic on a figure has two axes with one rule each.
+1. **Animation: the figure plays the caster's actions.** Skyrim Platform
+   reports every BGSAction the player's actor performs (the action, the
+   idle the engine chose, the graph event, the input type, the actor's
+   master-behavior variables as the graph was asked); the hands' cast
+   actions go to the server as UpdateAction (MsgType 44), reliable, in
+   order; the server relays them to the actor's neighbours but the sender
+   (R2); each neighbour's view performs them on the figure through the
+   engine's second entry (38953, a data performed as given), the caster's
+   variables one update before the action. The graph then does what it
+   does for the caster: the start idle, the loop, the Equipped exit, the
+   hand, the dual idle without the perk, the Self cast. A withheld spell
+   (the teleport's marker, later summons and walls) still plays its cast:
+   its animation is R3 visual state, its effect stays the server's.
+2. **Effect: the server decides, and relays only what every game may run.**
+   Unchanged: the cast is R1 at the server, the numbers are the server's
+   (ADR-028), the relayed SpellCast gives the figure its look
+   (castSpellImmediate, ending in FinishCast), and the server withholds the
+   relay where a spell's effect must not run in another game.
+3. **The sender reports what the engine did, never a guess**: the hand is
+   the hand whose action performed the cast (the hook's event name); a
+   shout is reported at its release, every exhale armed; the client sends
+   only the player's own casts and its hosted actors'.
+4. **Melee stays on the event relay** (attackStart and kin: the server's
+   AnimationSystem reads them for stamina, bash and stagger); the voice's
+   actions too for now (shoutStart works). Moving either is its own verb,
+   measured the same way.
+
+**Consequences.**
+- One shape for every cast a figure shows, hands and dual included, and
+  the same shape for every magic verb after it (Ghostwalk, Apocalypse's
+  summons and walls): the figure plays the action, the server decides the
+  spell.
+- The measured rule the view keeps: a cast's start sent in the same tick as
+  its variables is refused every time; one update later it is taken
+  (x-figure-action 20261015-055039 and kin). No engine path cancels a
+  foreign want variable (the re-analyst, 2026-10-14); the latency is the
+  graph's.
+- Dead with it: m2-hands' held start, m2-firebolt, m2-hands-exit,
+  m2-breath, the SkympFakeEquip rewrite of the hands' Equipped events.
+- The parity gate reads casts on figures (p-spell-bolt, ADR-031), so a
+  start the figure refuses or an exit it never takes fails a sweep, not a
+  playtest.
+
+## ADR-033: A verb is proved over its sequences and combinations, and a playtest is recorded
+
+Status: accepted (2026-10-15, Eli: "we ARE closer so i think something abt
+the method is working. but think about what abt the method needs to change
+because for the next legs we want to be as wholistic", then "write it up as
+the ADR"). Amends ADR-031 (the inventory and the parity check), ADR-030 (what
+the gate runs) and docs/VERB.md (the template and the reviewer's checklist).
+
+**Context.** The cast-action verb (ADR-032) shipped with the method as it
+stood: the engine's shape read on sky-re, four probes proving each
+capability once, the inventory of one cast's consequences, b-spell and the
+first parity scenario green, a gate of six, a merge. Playtest nineteen then
+found "every test only half works": the figure took every other cast
+(c2's log, 10:38 to 10:41; x-cast-twice-fast 20261015-180119 reproduced it:
+casts two, four and six of eight refused whole), both hands casting the same
+spell separately streamed from one hand, and the breath was as before. None
+of it was a wrong read of the engine. Every failure lived in a dimension the
+method had not asked about:
+- repetition: the probes and the scenario cast once, or four seconds
+  apart; a person casts again 400 to 700 ms after the last exit, where the
+  exit's variables had left the figure's want variable up (no rise for the
+  graph) and the graph was still finishing its exit (the caster's engine
+  waits for the graph's answer; the view performed one update later
+  regardless);
+- combination: the hand fix of the night before named every cast event
+  with the latest start's hand, right for one hand and wrong for two hands
+  casting separately, a case no probe ran; and "dual casting" meant two
+  things to Eli (both hands separately, the perk's combined cast) and one
+  to the verb;
+- context: the lab's caster stood still with nobody casting back; the
+  strafing probe (175846) was the first to refuse a start in the lab;
+- measurement: the reading came from Eli's notes and one game's log, the
+  other game's log having stopped silently at the restore, with no watch
+  on either seat;
+- the gate: the parity diff compares which events a figure took, not how
+  many, so three starts of five taken is the same key set as five.
+
+**Decision.**
+1. **The inventory has a second table: sequences and combinations.** Beside
+   the action's consequences (ADR-031), a verb's doc lists how the action
+   repeats and combines: the same action again at a person's rhythm (the
+   next within a second of the last), the action from each input that
+   performs it (each hand, both hands separately, the perk's dual cast,
+   the voice; sneaking, moving, on a mount where it applies), the action
+   interrupted (a cancelled charge, a sheathe mid-cast, a stagger during
+   it), both players doing it at each other, and the action after a login
+   or a cell change. Each row is a probe or a scenario, and a verb is not
+   done until every row has one green.
+2. **Scenarios do what the checklist asks, the way a person does it.** For
+   every item of a playtest checklist there is a scenario that performs it
+   as the item says: "a few times" is a few times, at a human rhythm with
+   jittered gaps, moving when a person would move, from both seats when
+   the item says both. The gate runs them before the playtest; the
+   playtest then measures what the lab cannot (feel, latency to the eye,
+   the look of a thing), not whether it works.
+3. **A playtest is recorded.** The driver runs in the players' games, so
+   the recorder (ADR-031's watch) runs on both seats for the whole
+   playtest, cycled every few minutes, its traces saved to the results
+   site like a run's; the server's log and both games' logs are fetched
+   at the end. The reading of a playtest starts from its traces, and Eli's
+   notes say what the traces cannot. A game whose log stops is itself a
+   finding.
+4. **The parity diff counts.** After the cut, each event, cast, hit and
+   effect key carries its count, and a count below the reference's is a
+   finding ("missing n of m") as a missing key is; the later list may name
+   a count difference as it names a key.
+5. **A measured constant carries its conditions, and the engine's
+   mechanism beats it.** A rule read off a measurement (one update between
+   the variables and the action) is written with the state it was
+   measured in (a settled graph) and gets a probe at its boundary before
+   it ships; where the engine has a handshake for the same thing (the
+   caster's wait for the graph's answer), the verb uses the handshake, not
+   the constant. A fix to a rule over hands, actors or seats enumerates
+   the combinations in its probe list before it merges (ADR-032's hand
+   rule regressed the one it did not probe).
+
+**Consequences.**
+- docs/VERB.md gains the second inventory table and, in the reviewer's
+  checklist, "every checklist item has its scenario" and "the sequence
+  rows are green".
+- The lab: the recorder's cycling during a playtest (`just
+  playtest-record`), a driver step that repeats an action at a jittered
+  rhythm, parity's counts (labapi parity.py), and a `scenario per
+  checklist item` check the gate can read. numidium's tooling, in that
+  order; the counts first, since p-spell-bolt runs today.
+- cast-action is the first verb reworked this way: its sequence table
+  (quick casts, both hands separately, strafing, both seats, a cancelled
+  charge), x-cast-twice-fast and x-both-hands-relay as scenarios in the
+  gate, the retry replaced by the graph's answer, nineteen played again
+  with the recorder on.
+- The cost: a verb's lab time grows by its sequence rows, an hour or two,
+  against a playtest found wanting and a day of re-staging; that is the
+  trade this ADR makes.
+
+## ADR-034: An engine moment comes from SKSE's event where SKSE publishes one
+
+Status: accepted (2026-10-15 night, Eli: "i would imagine hooking SKSE is
+gonna be the lazy answer for a LOT of these things", and when asked whether
+that was a decision, "id call it largely a decision"). Refines ADR-005 (the
+engine map) and the design law's first line.
+
+**Context.** The cast-action handshake needed the moment a figure's graph
+answers a cast request (BeginCastRight and kin). Three builds reached for it:
+a Frida interceptor on the handler (34bdf0c3) crashed the game at the first
+answer; a vtable swap on the handler's slot (5df863fd) never fired: skse64 holds
+its own function in that slot for its action events, so a plugin's write
+is not in the chain (slot-probe.js, 2026-10-16 01:40Z, read while the
+swap was installed; the order of the two writes was not measured); a sink on
+SKSE::ActionEvent (a930968b) took 49 of 49 starts 1 to 2 ms after the
+answer. SKSE already hooks the engine at the points we keep reaching for and
+CommonLibSSE-NG hands them to a plugin as event sources (include/SKSE/Events.h:
+action events per actor for weapon swing, spell cast and fire per hand,
+voice cast and fire, bow draw and release, draw and sheathe begin and end;
+camera, crosshair, mod callback and NiNode update events; API.h:28-33).
+
+**Decision.** When the fork needs the moment an engine action happens, it
+takes SKSE's event for it if SKSE publishes one, through a BSTEventSink on
+the CommonLib source, filtered in native, before it writes a hook of its own.
+Our own hooks (Frida interceptors or vtable swaps) are for data SKSE does not
+publish: the action's idle and variables (the PerformAction hook), a
+projectile's launch data, a native's result. A verb doc's engine surface
+names which of the two each moment uses and why.
+
+**Consequences.** The breath report moves to SKSE's voice fire with the
+shout as its source form (the hit-based report under god mode is the open
+row of playtest nineteen); the cast's hand can come from spell fire per slot
+instead of the pending-start bookkeeping in the PerformAction hook; a
+figure's draw state can come from the draw and sheathe events. Each is a
+measured change, not a rewrite: the row's probe first. Writing into a slot
+SKSE owns is a known failure now, not a mystery: a swap that never fires
+is checked against the slot's owner (slot-probe.js) before anything else.
+

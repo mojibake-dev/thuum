@@ -45,6 +45,7 @@ class StepBoard:
         self._favorites: dict[str, dict[str, Any]] = {}
         # a held step's answer: form id (decimal) -> the game's count
         self._held: dict[str, dict[str, Any]] = {}
+        self._globals: dict[str, dict[str, Any]] = {}
         # a projectiles step's answer: {worldOrCell, refs: projectile base id
         # (decimal) -> the nearest reference's formId, pos, distance, or null}
         self._projectiles: dict[str, dict[str, Any]] = {}
@@ -96,6 +97,8 @@ class StepBoard:
             self._favorites[step.client] = body["data"]
         if step.action == "held" and isinstance(body.get("data"), dict):
             self._held[step.client] = body["data"]
+        if step.action == "globals" and isinstance(body.get("data"), dict):
+            self._globals[step.client] = body["data"]
         if step.action == "projectiles" and isinstance(body.get("data"), dict):
             self._projectiles[step.client] = body["data"]
         if step.action == "poisons" and isinstance(body.get("data"), dict):
@@ -176,6 +179,9 @@ class StepBoard:
     def held(self, observer: str) -> dict[str, Any] | None:
         return self._held.get(observer)
 
+    def globals(self, observer: str) -> dict[str, Any] | None:
+        return self._globals.get(observer)
+
     def projectiles(self, observer: str) -> dict[str, Any] | None:
         return self._projectiles.get(observer)
 
@@ -204,6 +210,7 @@ class StepBoard:
         self._known.clear()
         self._favorites.clear()
         self._held.clear()
+        self._globals.clear()
         self._projectiles.clear()
         self._poisons.clear()
         self._skills.clear()

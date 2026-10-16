@@ -2,7 +2,11 @@
 # client-frida.sh <vmid>: stage Frida's standalone injector (lab/.cache/frida/
 # frida-inject.exe, from the frida release matching lab/frida/README.md) into
 # C:\sky-lab\frida on a Windows lab client through the in-VLAN hop, so lab-api's
-# POST /lab/frida and `just frida <script> <client>` can attach to the game.
+# POST /lab/frida and `just frida <script> <client>` can attach to the game; and
+# beside it the Sysinternals tools in lab/.cache/sysinternals when present
+# (handle64.exe, which open handles a process holds: playtest-record's live
+# capture of a stopped Skyrim Platform log; procdump64.exe, client-dump-arm's),
+# from Microsoft's download, never a repo. Nothing here touches the game.
 set -euo pipefail
 vmid=${1:?vmid}
 jump=${JUMP_HOST:-root@core.gaussing.tv}; srv=${SRV_HOST:-eli@10.10.70.10}; srv_ip=${SRV_IP:-10.10.70.10}; port=${DIST_PORT:-8765}
@@ -19,3 +23,14 @@ got=$(run "New-Item -ItemType Directory -Force -Path 'C:\\sky-lab\\frida' | Out-
 ssh -o BatchMode=yes -J "$jump" "$srv" "kill \$(cat /srv/lab/handover/.http.pid) 2>/dev/null; rm -f /srv/lab/handover/frida-inject.exe /srv/lab/handover/.http.pid"
 [ "$want" = "$got" ] || { echo "hash mismatch: $want vs $got" >&2; exit 3; }
 echo "staged C:\\sky-lab\\frida\\frida-inject.exe $got"
+for tool in handle64.exe procdump64.exe; do
+  t="$here/lab/.cache/sysinternals/$tool"
+  [ -f "$t" ] || continue
+  want=$(shasum -a 256 "$t" | awk '{print $1}')
+  scp -q -o BatchMode=yes -J "$jump" "$t" "$srv:/srv/lab/handover/$tool"
+  ssh -o BatchMode=yes -J "$jump" "$srv" "cd /srv/lab/handover && (nohup python3 -m http.server $port --bind $srv_ip >/dev/null 2>&1 & echo \$! > .http.pid)"
+  got=$(run "\$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri 'http://$srv_ip:$port/$tool' -OutFile 'C:\\sky-lab\\frida\\$tool'; (Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\frida\\$tool').Hash.ToLower()" | tr -d '\r\n')
+  ssh -o BatchMode=yes -J "$jump" "$srv" "kill \$(cat /srv/lab/handover/.http.pid) 2>/dev/null; rm -f /srv/lab/handover/$tool /srv/lab/handover/.http.pid"
+  [ "$want" = "$got" ] || { echo "hash mismatch for $tool: $want vs $got" >&2; exit 3; }
+  echo "staged C:\\sky-lab\\frida\\$tool $got"
+done

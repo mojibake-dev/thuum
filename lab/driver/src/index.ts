@@ -48,6 +48,8 @@ import {
   hooks,
   on,
   printConsole,
+  performAction,
+  applyAnimationVariablesToActor,
   settings,
   writeLogs,
 } from "skyrimPlatform";
@@ -210,6 +212,10 @@ type Watched = {
   hits: Array<[number, number, number, number, number]>;
   taken: Array<[number, number, number, number]>;
   effects: Array<[number, number, number]>;
+  // the actions the engine performed for it [ms, action, idle, eventName,
+  // type] (the player's only: the platform's hook reports the player's own;
+  // thuum docs/verbs/cast-action.md)
+  actions: Array<[number, number, number, string, number]>;
 };
 const WATCH_HEALTH_MAX = 512;
 const WATCH_SELF_MAX = 256;
@@ -238,7 +244,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
     name: actor.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
     track: [[0, pos[0], pos[1], pos[2]]],
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
-    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [],
+    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], actions: [],
   };
 }
 
@@ -278,6 +284,47 @@ const heldKeys: Array<{ code: number; until: number }> = [];
 // figure's graph)
 const delayedEvents: Array<{ due: number; frames: number; targetId: number; name: string }> = [];
 
+// repeat's state: one step performed `times` times at a person's rhythm (thuum ADR-033, the sequence
+// rows: a cast again 400 to 700 ms after the last exit, which the lab's one-cast probes never did and
+// playtest nineteen did every few seconds), each repetition from update once its time comes, a
+// hold-key's hold counted before the gap. The gaps come from a small generator seeded by the step (or
+// the clock), so a run's result lists them and a seed gives the same rhythm again.
+const REPEATABLE = new Set(["hold-key", "tap-key", "anim-event", "cast", "equip", "draw-weapon", "activate", "figure-action"]);
+let repeating: {
+  step: Step; inner: Step; times: number; done: number; nextAt: number; gapMin: number; gapMax: number;
+  seed: number; startedAt: number; at: number[]; gaps: number[];
+} | null = null;
+
+function finishRepeat(c: Config, player: Actor): void {
+  const r = repeating;
+  if (!r || Date.now() < r.nextAt) return;
+  const now = Date.now();
+  try {
+    const out = run(r.inner, player);
+    if (out === DEFERRED || (out && typeof out === "object" && "error" in (out as Record<string, unknown>))) {
+      repeating = null;
+      const why = out === DEFERRED ? "a step that finishes later" : String((out as Record<string, unknown>).error);
+      postResult(c, r.step, { ok: false, error: `repetition ${r.done + 1} of ${r.times}: ${why}` });
+      return;
+    }
+    r.at.push(now - r.startedAt);
+    r.done++;
+    if (r.done >= r.times) {
+      repeating = null;
+      postResult(c, r.step, { ok: true, data: { times: r.done, at: r.at, gaps: r.gaps, seed: r.seed } });
+      return;
+    }
+    const held = r.inner.action === "hold-key" ? num((r.inner.args || {}).ms, 0) : 0;
+    r.seed = (r.seed * 1103515245 + 12345) & 0x7fffffff;
+    const gap = Math.round(r.gapMin + (r.gapMax - r.gapMin) * (r.seed / 0x7fffffff));
+    r.gaps.push(gap);
+    r.nextAt = now + held + gap;
+  } catch (e) {
+    repeating = null;
+    postResult(c, r.step, { ok: false, error: `repetition ${r.done + 1} of ${r.times}: ${String(e)}` });
+  }
+}
+
 function sendDelayedEvents(): void {
   const now = Date.now();
   for (let i = delayedEvents.length - 1; i >= 0; i--) {
@@ -298,6 +345,59 @@ function releaseHeldKeys(): void {
       Input.releaseKey(heldKeys[i].code);
       heldKeys.splice(i, 1);
     }
+  }
+}
+
+// figure-action's {replay: all}: the player's recorded actions performed on
+// a target at their original spacing, from update (thuum
+// docs/verbs/cast-action.md: the figure plays the caster's actions as the
+// sync will relay them)
+// an entry waits for its time (at) or, with frames > 0, that many updates
+const scheduledReplays: Array<{ at: number; frames: number; targetId: number; rec: RecordedAction; set: Record<string, unknown>; variables: boolean; delayFrames: number }> = [];
+
+// One action on an actor through the engine's action entry (the fork's
+// performAction): the recorded variables first when asked and present (the
+// caster's graph as it was when its engine chose the idle), then {set}'s
+// named variables, then the action; with delayFrames > 0 the action goes
+// that many updates after the variables instead of in the same tick (the
+// graph took a start whose variables landed a frame earlier, x-left-firebolt
+// 20261015-031632, and refused one sent in the same tick as its want
+// variable, x-figure-cast 20261014-142425). What was done, for the step's
+// answer and the client log.
+function replayOn(target: Actor, rec: RecordedAction, set: Record<string, unknown>, variables: boolean, delayFrames = 0): Record<string, unknown> {
+  let applied: boolean | undefined;
+  if (variables && rec.variables) applied = applyAnimationVariablesToActor(target.getFormID(), rec.variables);
+  for (const [k, v] of Object.entries(set)) {
+    if (typeof v === "boolean") target.setAnimationVariableBool(k, v);
+    else if (typeof v === "number") target.setAnimationVariableFloat(k, v);
+  }
+  if (delayFrames > 0) {
+    scheduledReplays.push({ at: 0, frames: delayFrames, targetId: target.getFormID(), rec, set: {}, variables: false, delayFrames: 0 });
+    const out = { prepared: rec.action, idle: rec.idle, event: rec.eventName, type: rec.type, on: target.getFormID(), applied, set: Object.keys(set), performInFrames: delayFrames, recordedAt: rec.ms };
+    printConsole("lab-driver: figure-action", JSON.stringify(out));
+    return out;
+  }
+  // an older Skyrim Platform has no such export: the binding is undefined
+  const perform: unknown = performAction;
+  if (typeof perform !== "function") return { error: "no performAction in this Skyrim Platform" };
+  const taken = (perform as typeof performAction)(target.getFormID(), rec.action, rec.idle, rec.eventName, rec.type);
+  const out = { performed: rec.action, idle: rec.idle, event: rec.eventName, type: rec.type, on: target.getFormID(), applied, taken, set: Object.keys(set), recordedAt: rec.ms };
+  printConsole("lab-driver: figure-action", JSON.stringify(out));
+  return out;
+}
+
+function runScheduledReplays(): void {
+  const now = Date.now();
+  // the entries as they stand at this update: one replayOn adds the frame
+  // step of its own action, which must wait for the next update
+  for (const s of scheduledReplays.slice()) {
+    if (s.frames > 0) {
+      if (--s.frames > 0) continue;
+    } else if (s.at > now) continue;
+    const i = scheduledReplays.indexOf(s);
+    if (i >= 0) scheduledReplays.splice(i, 1);
+    const target = Actor.from(Game.getFormEx(s.targetId));
+    if (target) replayOn(target, s.rec, s.set, s.variables, s.delayFrames);
   }
 }
 
@@ -550,6 +650,32 @@ on("spellCast", (e) => {
   const w = watchedRecord(e.caster.getFormID());
   if (w && w.casts.length < WATCH_SELF_MAX) w.casts.push([watchedMs(), e.spell ? e.spell.getFormID() : 0]);
 });
+
+// thuum docs/verbs/cast-action.md: the actions the engine performs for the
+// player (a hand's attack, ready, release, interrupt; the dual and voice
+// ones), with the idle it chose; the reference of what a figure must replay.
+// A client without the fork's hook has no such event, and the driver loads
+// all the same.
+// The player's latest actions, the variables kept, for figure-action's
+// replay: a figure playing the caster's own action with the caster's own
+// variables, as the sync will relay them (the probes x-figure-action*)
+type RecordedAction = { ms: number; action: number; idle: number; eventName: string; type: number; variables?: Parameters<typeof applyAnimationVariablesToActor>[1] };
+const recentActions: RecordedAction[] = [];
+const RECENT_ACTIONS_MAX = 64;
+try {
+  on("actionPerformed", (e) => {
+    recentActions.push({ ms: Date.now(), action: e.action, idle: e.idle, eventName: e.eventName, type: e.type, variables: e.variables });
+    if (recentActions.length > RECENT_ACTIONS_MAX) recentActions.shift();
+    if (!watching) return;
+    // the player's record: the hook reports the player's own actions, and a
+    // Form method cannot be called in this event's context (x-figure-action
+    // 20261015-053450: "'Form.getFormID' can't be called in this context")
+    const w = watchedRecord(0x14);
+    if (w && w.actions.length < WATCH_SELF_MAX) w.actions.push([watchedMs(), e.action, e.idle, e.eventName, e.type]);
+  });
+} catch (err) {
+  printConsole("lab-driver: no actionPerformed event in this Skyrim Platform:", String(err));
+}
 
 // A hit's projectile base and its flags (power 1, sneak 2, bash 4, blocked
 // 8) ride along: a magic stream's hit event comes twice in a frame
@@ -936,6 +1062,22 @@ function run(step: Step, player: Actor): unknown {
           }
         }
         out[String(Number(id))] = ingredient ? mask : null;
+      }
+      return out;
+    }
+    case "globals": {
+      // thuum docs/verbs/player-globals.md: the values this player's game
+      // holds for global variables named as FormDescs, "<hex id>:<plugin>"
+      // (Papyrus Game.GetFormFromFile, so the load order does not matter),
+      // keyed by that text (lab-api's c.globalValue(desc)); null for one the
+      // game does not have
+      const forms = Array.isArray(step.args?.forms) ? (step.args?.forms as unknown[]) : [];
+      const out: Record<string, number | null> = {};
+      for (const desc of forms) {
+        const text = String(desc);
+        const at = text.indexOf(":");
+        const g = at > 0 ? GlobalVariable.from(Game.getFormFromFile(parseInt(text.slice(0, at), 16), text.slice(at + 1))) : null;
+        out[text] = g ? g.getValue() : null;
       }
       return out;
     }
@@ -1536,6 +1678,51 @@ function run(step: Step, player: Actor): unknown {
       // solo reference's NPC)
       (a.other ? nearestOther(player) : player).drawWeapon();
       return "drawn";
+    case "figure-action": {
+      // thuum docs/verbs/cast-action.md: an action performed on the nearest
+      // other actor's graph ({other: true}; the player's own otherwise)
+      // through the engine's action entry (the fork's performAction), the
+      // probe of whether a figure plays a replayed cast action. With
+      // {replay} it is the player's own recorded actions, played as the
+      // sync will relay them, each with its recorded variables put on the
+      // target first (applyAnimationVariablesToActor, the caster's graph as
+      // it was when its engine chose the idle) unless {variables: false}:
+      // {replay: all} every action of the last {sinceMs} (10 s by default),
+      // the first now and the rest at their original spacing, from update;
+      // {replay: {action: id}} (or a list of ids) the last one of that
+      // BGSAction; {replay: -n} the n-th from the end; {replay: last} the
+      // last of all. Without {replay}: the BGSAction {action}, the idle
+      // {idle}, the graph event {event} and the input type {type} as given.
+      // {set} puts named graph variables on the target after the variables
+      // and before the action, as anim-event does. {delayFrames: n} performs
+      // each action n updates after its variables instead of in one tick.
+      const target = a.other ? nearestOther(player) : player;
+      const set = a.set && typeof a.set === "object" ? (a.set as Record<string, unknown>) : {};
+      const variables = a.variables !== false;
+      const delayFrames = Math.max(0, Math.floor(num(a.delayFrames, 0)));
+      const recorded = () => recentActions.map((r) => [r.ms, r.action, r.idle, r.eventName, r.type]);
+      if (a.replay === "all") {
+        const since = Date.now() - num(a.sinceMs, 10000);
+        const recs = recentActions.filter((r) => r.ms >= since);
+        if (recs.length === 0) return { error: "no recorded actions to replay", recorded: recorded() };
+        const now = Date.now();
+        for (const r of recs) scheduledReplays.push({ at: now + (r.ms - recs[0].ms), frames: 0, targetId: target.getFormID(), rec: r, set, variables, delayFrames });
+        return { scheduled: recs.map((r) => [r.ms - recs[0].ms, r.action, r.idle, r.eventName, r.type]), on: target.getFormID(), delayFrames };
+      }
+      let rec: RecordedAction | undefined;
+      if (a.replay !== undefined) {
+        if (a.replay && typeof a.replay === "object") {
+          const want = (a.replay as Record<string, unknown>).action;
+          const wants = (Array.isArray(want) ? want : [want]).map((w) => num(w));
+          for (let i = recentActions.length - 1; i >= 0 && !rec; i--) if (wants.indexOf(recentActions[i].action) >= 0) rec = recentActions[i];
+        } else if (typeof a.replay === "number") rec = recentActions[recentActions.length + a.replay];
+        else rec = recentActions[recentActions.length - 1];
+        if (!rec) return { error: "no recorded action to replay", recorded: recorded() };
+      } else {
+        rec = { ms: 0, action: num(a.action), idle: num(a.idle ?? 0), eventName: typeof a.event === "string" ? a.event : "", type: num(a.type ?? 0) };
+      }
+      return replayOn(target, rec, set, variables, delayFrames);
+    }
     case "anim-event": {
       // One animation event on the player's behavior graph (Papyrus
       // Debug.SendAnimationEvent), the way the controls start an attack:
@@ -1719,13 +1906,36 @@ function run(step: Step, player: Actor): unknown {
       // A key held down through the engine's input system (SKSE
       // Input.HoldKey) and released ms later from the update loop: real
       // movement under the controls (W 17 forward, Left Shift 42 sprint),
-      // where move only sets a position. args: {code, ms}
-      const code = num(a.code, 0);
+      // where move only sets a position. args: {code, ms}, or {codes: [..],
+      // ms} for keys pressed in the same tick (both attack keys for a dual
+      // cast, which the engine takes only when the second press is close to
+      // the first; thuum docs/verbs/cast-action.md, P2)
+      const codes = Array.isArray(a.codes) ? (a.codes as unknown[]).map((c) => num(c, 0)).filter((c) => c > 0) : [num(a.code, 0)].filter((c) => c > 0);
       const ms = num(a.ms, 0);
-      if (code <= 0 || ms <= 0) return { error: "hold-key needs code and ms" };
-      Input.holdKey(code);
-      heldKeys.push({ code, until: Date.now() + ms });
+      if (codes.length === 0 || ms <= 0) return { error: "hold-key needs code (or codes) and ms" };
+      for (const code of codes) {
+        Input.holdKey(code);
+        heldKeys.push({ code, until: Date.now() + ms });
+      }
       return "holding";
+    }
+    case "repeat": {
+      // args (lab-api's scenario.py normalizes them): {times, gapMs: [min, max], step: {action, args}, seed?};
+      // the step's result comes when the last repetition is done: {times, at: [ms from the first], gaps, seed}
+      if (repeating) return { error: "a repeat is still running" };
+      const inner = (a.step || {}) as { action?: unknown; args?: unknown };
+      const action = typeof inner.action === "string" ? inner.action : "";
+      if (!REPEATABLE.has(action)) return { error: `repeat takes one of ${[...REPEATABLE].join(", ")}` };
+      const gaps = Array.isArray(a.gapMs) ? (a.gapMs as unknown[]) : [a.gapMs, a.gapMs];
+      const gapMin = Math.max(0, num(gaps[0], 0));
+      const gapMax = Math.max(gapMin, num(gaps[1], gapMin));
+      const now = Date.now();
+      repeating = {
+        step, inner: { id: `${step.id}-repeated`, action, args: (inner.args || {}) as Record<string, unknown> },
+        times: Math.max(1, Math.min(100, num(a.times, 1))), done: 0, nextAt: now, gapMin, gapMax,
+        seed: num(a.seed, now) & 0x7fffffff, startedAt: now, at: [], gaps: [],
+      };
+      return DEFERRED;
     }
     case "close-menu": {
       // Close a menu through the engine's UI message queue: Skyrim
@@ -1855,11 +2065,13 @@ on("update", () => {
   finishDeferred(c);
   releaseHeldKeys();
   sendDelayedEvents();
+  runScheduledReplays();
   const me = Game.getPlayer();
   if (me) settleMove(me);
   if (me) finishCraft(c, me);
   if (me) finishRacePick(c, me);
   finishConsole(c);
+  if (me) finishRepeat(c, me);
   if (me) readAfterRest(me);
   trackWatch();
   const step = pending;

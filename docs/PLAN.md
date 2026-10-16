@@ -163,12 +163,29 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    claimed against a shot at the draw's power, the arrow's damage counted.
    DONE 2026-10-10 (7be31a9d); b-marksman 773716b. Headshot Kills (CIF) rides
    it: Eli (2026-10-12) trusts the shooter's game a little, bounded;
-   docs/verbs/headshot.md is NEXT after Apocalypse's first verb.
+   docs/verbs/headshot.md is NEXT after Apocalypse's first verb. Its mods
+   on thuum branch headshots (CIF 2.0.7 and Headshot Kills 1.2, whose
+   plugin is light by its header, FE003 on both ends), staged by their own
+   layer-stage after Apocalypse's: CIF's boot on 1.6.1170 is unverified.
 2. spell-cast: a cast's start and end as server state, a stream counted by the
    time it held its target, the observer casting the relayed spell, a spell
    hit starting a fight. DONE 2026-10-10 (45839102); b-spell 9ed66b8. The
    relay as the server resolved it: DONE 2026-10-13 (8eb4e78e, merged with
-   m2-fifteen).
+   m2-fifteen). The figure's cast animation: DONE 2026-10-15 as the
+   cast-action verb (docs/verbs/cast-action.md, ADR-032; fork parity
+   e75ee5c8, the gate 6 of 6 at 01:49, run set 20261015-083019): the figure
+   plays the caster's actions through the engine's action entry, the
+   caster's variables one update before each, the effect decided apart by
+   the server's relay; b-spell 0d44f4b asserts the Equipped exit and the
+   bolt's wind-up, p-spell-bolt 5bf1d51 is the first parity scenario to
+   pass; the cast's hand comes from the action hook, a shout reports at its
+   release; playtest eighteen's three findings
+   and the god-mode breath each measured to a cause that night (the exit
+   event rewritten by the relay, Skyrim Platform's hand fallback, the order
+   of a start and its variables, shoutService's 3 s hit window). Melee keeps
+   its event relay; withheld spells show their animations. Ghostwalk and the
+   per-player globals wait behind it ("pin down how magic animations and
+   effects are handled before Apocalypse").
 3. magic-effects: the server's effects from the records, persisted with their
    time, drinks through the rule, the engine's own application held out.
    DONE 2026-10-10 (35acc275, merged with god-mode); b-potion bc796d5 and
@@ -188,12 +205,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    the server's stagger: DONE 2026-10-13 (8eb4e78e) as a stagger of 1.5, a
    stumble. The ragdoll throw: DONE 2026-10-14 (4e8aa04c) as the game's own push
    in the target's game (docs/verbs/push.md, ADR-031's first verb); b-push
-   5b1e0d2. The figure's flight on the shouter's screen: merged 2026-10-14
+   5b1e0d2. The figure's flight on the shouter's screen: DONE 2026-10-14
    (05192845: the shouter's game runs the vanilla push on the target's figure,
-   ADR-029 A1's caster half); DONE once b-push's check that the figure
-   flies, by the recorder's track (c.watched().movedBy, main e1006cc), is
-   green and playtest eighteen sees it. A bystander's screen and the parity
-   scenario p-shout-uf3 are LATER.
+   ADR-029 A1's caster half; b-push 6f90239 checks that the figure flies, by
+   the recorder's track, green twice; playtest eighteen ticked it). A
+   bystander's screen and the parity scenario p-shout-uf3 are LATER.
 7. Lag compensation (Bernier 2001): only if a playtest shows hits refused
    inside M1's slack. LATER.
 8. cast-teleport (Lost Grimoire's Teleportation, from the stretch list): one
@@ -204,10 +220,23 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    the effects, Oakflesh's armor in the damage). DONE 2026-10-13
    (8eb4e78e); b-self-cast c260ff3.
 10. Apocalypse (ADR-029, accepted 2026-10-13): the caster's game runs its own
-    spells' effect scripts; a server-run allowlist grows verb by verb. NEXT:
-    Ghostwalk's filter (A1), per-player globals with the MCM settings (A2),
-    then the allowlist's first entry, Nature's Balance
+    spells' effect scripts; a server-run allowlist grows verb by verb
     (docs/apocalypse-options.md, sections 4 and 5). Scenario b-apocalypse.
+    - The mod on the lab: thuum branch apocalypse (10.2.3 into persist-mods
+      and both load orders), staged by numidium's `just layer-stage` with a
+      full sweep; NEXT after playtest eighteen's probes.
+    - A1, Ghostwalk (docs/verbs/ghostwalk.md): its return taken as a cast
+      jump (castTeleports with reach 0, a wait and the cast relayed), fork
+      m2-ghostwalk f43d1f91, T0 green; its settings entry on thuum branch
+      ghostwalk. Staged after the layer.
+    - A2, per-player globals (docs/verbs/player-globals.md): 53 globals kept
+      per player and set at login, fork m2-player-globals (rule, PlayerGlobals
+      MsgType 44, the change form's record, server, client), T0 green; the
+      list on thuum branch player-globals. Open for Eli: SkyUI for the MCM.
+    - B1, Nature's Balance (docs/verbs/natures-balance.md), drafted: the
+      server's effect runtime and the first allowlist entry. Open for Eli:
+      the conditions, evaluated by the server (recommended) or the engine's
+      word.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
@@ -245,6 +274,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   still shows no fire on the other screen; an invisible player's name
   still shows above its figure (self-cast). Next (Eli, 2026-10-14): the
   hands first (the concentration pose), then the figure's flight.
+- Playtest eighteen (2026-10-14, parity 05192845; world
+  playtest-m2-18-20261015T024812Z): the flight passed (the thrown figure
+  flies on the shouter's screen and is where its player is once both are
+  up); the invisible player's name is gone. The hands did not pass: the
+  figure's grab-and-push starts and does not stop, a left-hand Firebolt's
+  bolt leaves the figure's right hand, and a Self cast shows no cast
+  animation on the figure; the god-mode breath's fire shows "sometimes"
+  twice now, still janky. Eli: look at how the animations that work are
+  done. Probes x-flames-stop, x-left-firebolt and x-self-anim read the
+  three; the hands fix ships with references and a parity scenario, since
+  b-spell asserts only the start (docs/verbs/spell-cast.md).
 - Carried from M1 into this milestone's lab runs: melee reach's unmeasured
   cases (the bash, bare hands, the scale across races) and whether a power
   attack reaches by the pick alone (docs/verbs/melee-reach.md,

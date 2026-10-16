@@ -45,7 +45,11 @@ A consequence is a key, channel/name:
 - physics/moved: displaced more than the move tolerance over the watch (a
   throw; a stagger's stumble stays under it); physics/jumped: a single
   frame's step over the step tolerance (a teleport, a snap).
-Event timing is not compared, only which events. The tolerances are
+Event timing is not compared: which events, and how many (ADR-033). After
+the cut each events, casts, hits, taken and effects key carries its count
+(counts), and for a key both sides show, a run's count below the reference's
+is a finding too, "missing n of m": three cast starts taken of five is not
+five. A count above the reference's is not a finding. The tolerances are
 TOLERANCES, each overridable from the p-scenario (`tolerances:`).
 The other actor's form id is never part of a key: a figure and a placed NPC
 have different ids for the same role.
@@ -55,8 +59,10 @@ reference shows it and the run does not; extra, the run shows it and the
 reference does not. Findings sort by view (VIEWS' order), then key. A finding
 whose "<view>/<channel>/<name>" a line of the scenario's `later` list matches
 (a glob: "*/events/staggerStart" in every view, "target-own/physics/*") is
-dropped. That list is the verb's Inventory rows marked later (docs/VERB.md),
-reviewed with the scenario.
+dropped; a count finding is dropped by a line matching its path, as a key's
+is, or by one matching "<path>#count", which excuses the count alone and never
+the key's absence. That list is the verb's Inventory rows marked later
+(docs/VERB.md), reviewed with the scenario.
 """
 from __future__ import annotations
 
@@ -78,6 +84,7 @@ NOISY_FLOATS = frozenset({
 })
 HIT_KINDS = ((1, "power"), (2, "sneak"), (4, "bash"), (8, "blocked"))
 CHANNELS = ("events", "refused", "vars", "bools", "effects", "casts", "hits", "taken", "values", "physics")
+COUNTED = ("events", "effects", "casts", "hits", "taken")  # the channels whose keys carry a count (ADR-033)
 
 
 @dataclass(frozen=True)
@@ -87,16 +94,20 @@ class Finding:
     key: str
     reference: str = ""  # what the reference showed for the key
     run: str = ""  # what the run showed for it
+    count: tuple[int, int] | None = None  # a count finding: (the run's count, the reference's)
 
     @property
     def path(self) -> str:
         return f"{self.view}/{self.key}"
 
     def __str__(self) -> str:
+        if self.count:
+            n, m = self.count
+            return f"{self.path} missing {m - n} of {m}"
         return f"{self.path} {self.kind}"
 
     def detail(self) -> str:
-        return f"{self.path} {self.kind} (reference: {self.reference or 'nothing'}; run: {self.run or 'nothing'})"
+        return f"{self} (reference: {self.reference or 'nothing'}; run: {self.run or 'nothing'})"
 
 
 def _hex(form_id: Any) -> str:
@@ -136,6 +147,12 @@ def _norm(v: Any) -> Any:
 def _series(channel: str, series: dict, at: float, floats: bool, tol: dict, out: dict) -> None:
     for name, rows in (series or {}).items():
         before, after = _split(rows, at)
+        if not before and after:
+            # the first sample is the state at the watch's start, not a change:
+            # a cut at or before it (a reference cut at its action less a lead
+            # longer than its watch had run) made every variable's first value
+            # a consequence (p-spell-bolt 20261015-073742, 377 of them)
+            before, after = after[:1], after[1:]
         if not after:
             continue
         is_float = floats and any(isinstance(r[1], float) and not float(r[1]).is_integer() for r in rows)
@@ -212,6 +229,36 @@ def consequences(record: dict | None, at: float, tolerances: dict | None = None)
     step = float(record.get("maxStep") or 0)
     if step > tol["step"] and float(record.get("maxStepMs") or -1) >= at:
         out["physics/jumped"] = f"{step:g} units in a frame at {record.get('maxStepMs')} ms"
+    return out
+
+
+def counts(record: dict | None, at: float) -> dict[str, int]:
+    """How many times each countable key occurs from `at` on (ADR-033): a
+    taken event by name, an effect by magic effect, a cast by spell, a hit or
+    a taken hit by source and kind, keyed as consequences keys them. diff
+    compares the counts of the keys both sides show as consequences."""
+    out: dict[str, int] = {}
+    if not record:
+        return out
+
+    def bump(key: str) -> None:
+        out[key] = out.get(key, 0) + 1
+
+    for e in _split(record.get("events") or [], at)[1]:
+        if len(e) < 3 or int(e[2]):
+            bump(f"events/{e[1]}")
+    for e in _split(record.get("effects") or [], at)[1]:
+        if len(e) > 2:
+            bump(f"effects/{_hex(e[2])}")
+    for c in _split(record.get("casts") or [], at)[1]:
+        if len(c) > 1:
+            bump(f"casts/{_hex(c[1])}")
+    for h in _split(record.get("hits") or [], at)[1]:
+        if len(h) > 2:
+            bump(f"hits/{_hex(h[2])}/{_kind(h[4] if len(h) > 4 else 0)}")
+    for t in _split(record.get("taken") or [], at)[1]:
+        if len(t) > 2:
+            bump(f"taken/{_hex(t[2])}/{_kind(t[3] if len(t) > 3 else 0)}")
     return out
 
 
@@ -300,4 +347,14 @@ def diff(views: dict[str, tuple[dict | None, float]],
             f = Finding(view, "extra", key, _observed(ref_record, ref_at, key), run[key])
             if not matches_later(f.path, later):
                 findings.append(f)
+        # how many: a key both sides show, the run fewer times (ADR-033)
+        ref_n, run_n = counts(ref_record, ref_at), counts(run_record, run_at)
+        for key in ref.keys() & run.keys():
+            if key.split("/", 1)[0] not in COUNTED:
+                continue
+            m, n = ref_n.get(key, 0), run_n.get(key, 0)
+            if n < m:
+                f = Finding(view, "missing", key, f"{m} times", f"{n} times", count=(n, m))
+                if not (matches_later(f.path, later) or matches_later(f.path + "#count", later)):
+                    findings.append(f)
     return sorted(findings, key=_order)

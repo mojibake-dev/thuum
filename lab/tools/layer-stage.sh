@@ -20,10 +20,19 @@
 #      retried once;
 #   6. both clones snapshotted as clean-m1-next, the snapshot every run rolls
 #      back to (lab/labapi/labapi/guests.yaml);
-#   7. the hold released; the probes named (scenario ids or paths) run.
+#   7. the hold released; smoke-two-players with the layer, whose red stops the
+#      staging (both clones boot with it, the client's load-order check included:
+#      the apocalypse layer of 2026-10-14 staged clean, then went red on the
+#      sweep's first runs, Skyrim Platform refusing its spaced plugin name);
+#   8. the probes named (scenario ids or paths) run.
 # Then `just layer-merge <branch>`: the full sweep as the gate (a load order
-# touches every verb, ADR-030), both clones promoted, main fast-forwarded.
-# Never opens a Moonlight stream (Eli's seats are his).
+# touches every verb, ADR-030), main given the branch, both clones promoted.
+# Until layer-merge reports, the lab's deployed tree is the branch's: nothing
+# runs deploy-srv from a tree without the branch (main included), or the
+# server's load order reverts under clones that keep the plugin. thuum main
+# takes docs all evening, so merge main into the branch just before staging
+# (step 0 refuses a branch without it: its deploy-srv would revert main's lab
+# tree on sky-srv). Never opens a Moonlight stream (Eli's seats are his).
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 branch=${1:?thuum branch}; shift
@@ -45,6 +54,8 @@ mapfile -t plugins < <(python3 -c 'import re,shlex,sys; s=open(sys.argv[1]).read
 echo "   plugins: ${plugins[*]}"
 python3 -m unittest discover -s lab/tests 2>&1 | grep -E "^OK" >/dev/null || { python3 -m unittest discover -s lab/tests 2>&1 | tail -5; echo "== T0 not green" >&2; exit 1; }
 echo "   T0 green"
+# the main checkout's ignored inputs (lab/.cache's archives, addrlib/), linked into a worktree
+lab/tools/worktree-links.sh
 
 echo "== 1. an idle lab"
 for _ in $(seq 1 120); do
@@ -91,11 +102,17 @@ for c in c2 c1; do
 done
 
 curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1 || true
+echo "== 7. smoke-two-players with the layer $(date +%H:%M:%S)"
+if ! smoke=$(just lab-run smoke-two-players 2>&1 | tail -1); then
+  echo "   $smoke"; echo "== the smoke is not green with the layer: no probes, no merge (its run's c1.log and c2.log say why)" >&2; exit 1
+fi
+echo "   $smoke"
 if [ "${#probes[@]}" -gt 0 ]; then
-  echo "== 7. probes"
-  for probe in "${probes[@]}"; do
+  echo "== 8. probes"
+  for probe in "${probes[@]}"; do   # a probe's red is an answer, not a staging failure (verb-stage.sh)
     echo "   $probe $(date +%H:%M:%S)"
-    just lab-run "$probe" 2>&1 | tail -1
+    out=$(just lab-run "$probe" 2>&1) || true
+    printf '%s\n' "$out" | grep -E ' (green|red|error) -> ' || { echo "   (no verdict line from lab-run:)"; printf '%s\n' "$out" | tail -3; }
   done
 fi
 echo "== layer-stage $branch ($sha8) done $(date +%H:%M:%S); next: just layer-merge $branch"
