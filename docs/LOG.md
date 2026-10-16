@@ -1624,3 +1624,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   031528, b-cast-rhythm 031805, b-cast-both-hands, a-melee-reach, a-racemenu); both clones promoted to the a930968b
   client. The 03:30 nightly judges this parity; the verb doc's merge line and the SKSE-events decision are magnus's for
   the morning.
+- m2-arrow-path merged to fork parity 0636f14e (2026-10-16T15:09Z, 08:09 PDT) through `just verb-merge` from thuum
+  branch lab-launches with main merged, on magnus's go. It carries:
+  - the arrow's path identical on both screens: the shooter's first-update flight, after the engine's auto-aim, is
+    sent with the shot (PlayerBowShot and ArrowShot gain has_launch, origin and the launch angles, wire schema 16, the
+    validator in the same commit; the server refuses an origin more than 512 units from its shooter, E_SHOT_ORIGIN),
+    and the figure's arrow is launched there through LaunchArrowAt, now declared in the shipped TESModPlatform.pex
+    (2d983dd0's b-marksman 130329 was red without it: no figure arrow on c2);
+  - a figure's stream following its player's pitch (setActorAimPitch);
+  - the Invisibility recast fix: a cast ends concealment except the archetype it carries, and a bow release or an
+    activation ends it as the engine does;
+  - 35a3975f's breath report at the engine's voice fire. It sends nothing for a breath into empty air (x-tgm-breath6
+    20261016-135744: one server line for five breaths, one cone on c2); its fix is fork m2-breath-launch.
+  Readings on 0636f14e's stage: b-marksman 134247 green (full draw 2680 own, 2898 on c2; half 1508 and 1477);
+  x-arrow-path 134528 flights 10 of 10 paired at 0.0 units and 0.00 degrees, the Launch entries differing by up to
+  11.5 degrees of pitch before auto-aim; x-invis-recast 135452 the figure invisible through the recast, no "acts:
+  ... end" line (parity's 124840 showed it visible from the recast on); x-cast-interrupt 134830: no exit reaches a
+  figure after its caster's sheathe, its cast up about 5 s longer (the fix also rides m2-breath-launch). T2 green
+  with 26 sessions (difftest job 6949). The gate: run set 20261016-142307-merge-m2-arrow-path, 16 of 16 green
+  (smoke-two-players, a-restart-persistence, b-duel, b-marksman, b-arrow-path, the cast five, b-cast-crossfire,
+  b-self-cast, b-shout, b-invis-recast, a-melee-reach, a-racemenu). b-arrow-path and b-invis-recast are the first
+  gates to assert with lab-api's flights_match and drops (main 7130921e, 2cfdf2fa). Both clones promoted to the
+  0636f14e client. Main gains lab-launches: the recorder's launches, flights and av: watch bools, and the scenarios
+  b-cast-crossfire, b-arrow-path and b-invis-recast.
