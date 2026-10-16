@@ -1609,3 +1609,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   invisibility probe, the stream pitch, the arrow-path parity, the handshake's landing, the two
   open cast-action rows (an interrupted cast; both seats casting at each other); then the layer
   retry on Eli's word, player-globals renumbered, Ghostwalk.
+- m2-cast-action merged to fork parity a930968b (2026-10-16T03:30Z, 20:30 PDT) through `just verb-merge` from
+  main 44f59cf5, on magnus's conditional go (the seven stage runs green first): the engine's handshake for a figure's
+  cast start. The answer comes from SKSE's action events: a BSTEventSink on SKSE::GetActionEventSource()
+  (CommonLibSSE-NG include/SKSE/API.h:31, include/SKSE/Events.h:37-67), registered at kDataLoaded, notes kSpellCast
+  (left or right) and kVoiceCast for every actor but the player, and castReady(actor, hand) takes it; a start waits four
+  updates at most for it, then goes with caff3e04's timing and retry (1de955e6). No vtable write: 5df863fd's swap never
+  sat in the chain, since SKSE's own function owns slot 1 of the spell-cast handler vtables. The stage (18:49 to 19:41)
+  took 49 of 49 starts on the figure (45 at the first ask, 4 at the second), castReady 1 to 2 ms before every taken
+  start: x-cast-human 20261016-021749 6 of 6, x-cast-gap 022241 17 of 17, b-cast-moving 022553 6 of 6, b-cast-dual
+  022834 4 of 4, b-spell 023116 2 of 2, b-cast-rhythm 023357 8 of 8, b-cast-both-hands 023628 6 of 6. T2 green with 26
+  sessions, cast-action's among them (difftest job 6654). The gate: run set 20261016-030133-merge-m2-cast-action, 10
+  of 10 green (smoke-two-players, a-restart-persistence, b-duel, b-cast-moving 031001, b-cast-dual 031244, b-spell
+  031528, b-cast-rhythm 031805, b-cast-both-hands, a-melee-reach, a-racemenu); both clones promoted to the a930968b
+  client. The 03:30 nightly judges this parity; the verb doc's merge line and the SKSE-events decision are magnus's for
+  the morning.
