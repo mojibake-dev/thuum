@@ -1159,3 +1159,40 @@ method had not asked about:
 - The cost: a verb's lab time grows by its sequence rows, an hour or two,
   against a playtest found wanting and a day of re-staging; that is the
   trade this ADR makes.
+
+## ADR-034: An engine moment comes from SKSE's event where SKSE publishes one
+
+Status: accepted (2026-10-15 night, Eli: "i would imagine hooking SKSE is
+gonna be the lazy answer for a LOT of these things"). Refines ADR-005 (the
+engine map) and the design law's first line.
+
+**Context.** The cast-action handshake needed the moment a figure's graph
+answers a cast request (BeginCastRight and kin). Three builds reached for it:
+a Frida interceptor on the handler (34bdf0c3) crashed the game at the first
+answer; a vtable swap on the handler's slot (5df863fd) never fired, because
+skse64 writes its own function into that slot for its action events and
+overwrites any plugin's (slot-probe.js, 2026-10-16 01:40Z); a sink on
+SKSE::ActionEvent (a930968b) took 49 of 49 starts 1 to 2 ms after the
+answer. SKSE already hooks the engine at the points we keep reaching for and
+CommonLibSSE-NG hands them to a plugin as event sources (include/SKSE/Events.h:
+action events per actor for weapon swing, spell cast and fire per hand,
+voice cast and fire, bow draw and release, draw and sheathe begin and end;
+camera, crosshair, mod callback and NiNode update events; API.h:28-33).
+
+**Decision.** When the fork needs the moment an engine action happens, it
+takes SKSE's event for it if SKSE publishes one, through a BSTEventSink on
+the CommonLib source, filtered in native, before it writes a hook of its own.
+Our own hooks (Frida interceptors or vtable swaps) are for data SKSE does not
+publish: the action's idle and variables (the PerformAction hook), a
+projectile's launch data, a native's result. A verb doc's engine surface
+names which of the two each moment uses and why.
+
+**Consequences.** The breath report moves to SKSE's voice fire with the
+shout as its source form (the hit-based report under god mode is the open
+row of playtest nineteen); the cast's hand can come from spell fire per slot
+instead of the pending-start bookkeeping in the PerformAction hook; a
+figure's draw state can come from the draw and sheathe events. Each is a
+measured change, not a rewrite: the row's probe first. Writing into a slot
+SKSE owns is a known failure now, not a mystery: a swap that never fires
+is checked against the slot's owner (slot-probe.js) before anything else.
+
