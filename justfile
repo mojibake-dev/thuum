@@ -359,6 +359,9 @@ playtest-start:
 playtest-save label:
     @lab/tools/playtest-world.sh save {{label}}
 
+# A saved playtest world back on the lab server, then both seats' games relaunched onto it, so a playtest starts on a
+# fresh launch (a game logging in again as another character keeps the previous skeleton's node bases: playtest twenty's
+# rotfern). PLAYTEST_NO_RELAUNCH=1 keeps the running games.
 playtest-restore name:
     @lab/tools/playtest-world.sh restore {{name}}
 
