@@ -252,6 +252,16 @@ positions' age.
   in both settings files, stacked on branch apocalypse (the layer). It
   deploys only with a server that has m2-ghostwalk: parity's teleports.rs
   refuses unknown fields, and a refused entry stops the server at start.
+- On the main line, 2026-10-16: fork m2-ghostwalk-main 18b181f3, the
+  server commit cherry-picked onto the teleport look's main-line head
+  (m2-teleport-look-main 09a1ab9f, parity 4a2b386b merged). Its three
+  conflicting files are taken as on m2-teleport-look 2540be96, where the
+  commit and the look ran together, so the tree is 2540be96 plus parity's
+  twenty-one fixes; wire-rules and the bridge green with clippy. Settings:
+  thuum branch ghostwalk-main, ghostwalk merged with apocalypse b3f6d602
+  and teleport-look-main 8118b9e: both files carry Lost Grimoire's entry
+  with its look and Ghostwalk's return; test_server_settings OK. It stages
+  after the teleport look merges, with the Apocalypse layer on main.
 - Drafts in the session's scratchpad until their first runs: the difftest
   session ghostwalk, the reference r-ghostwalk, the probe x-ghostwalk-relay
   and b-ghostwalk.
