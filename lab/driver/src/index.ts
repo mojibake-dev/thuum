@@ -1086,7 +1086,9 @@ function run(step: Step, player: Actor): unknown {
       // knows of each ingredient, bit i for effect i, keyed by its decimal
       // form id (lab-api's c.known(id)); a word of power reads 1 when the
       // engine has it unlocked (Game.IsWordUnlocked, docs/verbs/shouts.md);
-      // null for a form that is neither
+      // a spell 1 when the player has it (Actor.HasSpell: playtest twenty's
+      // Firebolt, on the server's record and missing from the game's list);
+      // null for a form that is none of these
       const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
       const out: Record<string, number | null> = {};
       for (const id of ids) {
@@ -1094,6 +1096,10 @@ function run(step: Step, player: Actor): unknown {
         const word = WordOfPower.from(form);
         if (word) {
           out[String(Number(id))] = Game.isWordUnlocked(word) ? 1 : 0;
+          continue;
+        }
+        if (Spell.from(form)) {
+          out[String(Number(id))] = hasSpell(player, Number(id)) ? 1 : 0;
           continue;
         }
         const ingredient = Ingredient.from(form);

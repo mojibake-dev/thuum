@@ -156,6 +156,8 @@ class PlaytestStepTests(unittest.TestCase):
         self.assertEqual(step_seconds("equip", {"formId": 1}, 60.0), 60.0)
         # reads go too: a node's scale on the player or its figure
         self.assertEqual(playtest_step('node-scale {node: "NPC Root [Root]", other: true}'), ("node-scale", {"node": "NPC Root [Root]", "other": True}))
+        # and whether the player has a spell: known answers a spell form 1 or 0 (Firebolt, playtest twenty)
+        self.assertEqual(playtest_step("known {ids: [0x12fd0, 0x0B0A86DF]}"), ("known", {"ids": [0x12FD0, 0x0B0A86DF]}))
         for bad in ('console {text: "tgm"}', "connect", "set-av {name: Health, value: 1}"):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 playtest_step(bad)

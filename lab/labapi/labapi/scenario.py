@@ -185,7 +185,7 @@ def _repeat_args(args: dict[str, Any]) -> dict[str, Any]:
 # the driver steps a playtest may send one seat outside a run (lab-api's playtest-step): input and its
 # rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby), never
 # a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
-PLAYTEST_READS = {"node-scale", "dump-state", "head-parts", "voice", "held", "projectiles", "graph-vars", "skills"}
+PLAYTEST_READS = {"node-scale", "dump-state", "head-parts", "voice", "held", "known", "projectiles", "graph-vars", "skills"}
 PLAYTEST_STEPS = REPEATABLE | {"repeat", "look"} | PLAYTEST_READS
 
 
