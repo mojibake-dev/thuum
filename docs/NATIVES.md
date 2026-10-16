@@ -1334,6 +1334,7 @@ Status meanings:
 | `TESModPlatform.GetSkinColor` (global) | missing |  |  |  |
 | `TESModPlatform.IsPlayerRunningEnabled` (global) | missing |  |  |  |
 | `TESModPlatform.LaunchArrow` (global) | missing | R3 | Client only: Skyrim Platform's native that launches a neighbour's arrow from its figure along the shooter's aim when the server relays a shot it took (ArrowShot); the arrow is that game's picture of the shot and is never reported; never a server native (docs/verbs/marksman.md). [not in SP's dump; declared in TESModPlatform.psc] | marksman |
+| `TESModPlatform.LaunchArrowAt` (global) | missing | R3 | Client only: Skyrim Platform's native (fork m2-arrow-path) that launches a neighbour's arrow at the origin and with the pitch and heading the shooter's own engine launched it, when the relayed shot carries its launch (ArrowShot's has_launch), so both screens fly one path; LaunchArrow remains the fallback; the arrow is that game's picture of the shot and is never reported; never a server native (docs/verbs/marksman.md). [not in SP's dump; declared in TESModPlatform.psc] | marksman |
 | `TESModPlatform.ModPlayerActorValue` (global) | missing | R0 | Client only: applies the server's running buff sums (MagicEffects' modifiers) to the player's actor values through ActorValueOwner::ModActorValue; never a server native (docs/verbs/magic-effects.md). [not in SP's dump; declared in TESModPlatform.psc] | magic-effects |
 | `TESModPlatform.MoveRefrToPosition` (global) | missing |  |  |  |
 | `TESModPlatform.PushTintMask` (global) | missing |  |  |  |
