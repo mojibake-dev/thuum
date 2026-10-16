@@ -259,11 +259,26 @@ class WatchView:
         """Whether the graph bool `name` was true at any sample."""
         return _ever(self.bools, name)
 
+    def drops(self, name: str) -> int:
+        """How many times the sampled bool `name` went from true to false: a
+        figure's "av:Invisibility" (the actor value above zero, lab-launches'
+        recorder) that drops once where its player stayed invisible is the
+        recast bug (docs/verbs/self-cast.md)."""
+        return _drops(self.bools, name)
+
 
 def _ever(bools: tuple, name: str) -> bool:
     for n, series in bools:
         if str(n).lower() == name.lower():
             return any(bool(v) for _, v in series)
+    raise AssertionData(f"the watch sampled no graph bool {name}")
+
+
+def _drops(bools: tuple, name: str) -> int:
+    for n, series in bools:
+        if str(n).lower() == name.lower():
+            values = [bool(v) for _, v in series]
+            return sum(1 for was, now in zip(values, values[1:]) if was and not now)
     raise AssertionData(f"the watch sampled no graph bool {name}")
 
 
@@ -341,6 +356,10 @@ class SelfWatchView:
         """How many of the player's own launches name the form `spec` as their
         spell, projectile or ammo."""
         return _launched(self.launches, spec)
+
+    def drops(self, name: str) -> int:
+        """How many times the player's sampled bool `name` went from true to false."""
+        return _drops(self.bools, name)
 
 
 @dataclass(frozen=True)
@@ -1114,8 +1133,8 @@ _METHODS = {
     _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
     EffectsView: {"left", "magnitude"},
-    WatchView: {"took", "sent", "ever", "movedBy", "launched", "flights_match"},
-    SelfWatchView: {"saw", "ever", "launched"},
+    WatchView: {"took", "sent", "ever", "drops", "movedBy", "launched", "flights_match"},
+    SelfWatchView: {"saw", "ever", "drops", "launched"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
