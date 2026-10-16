@@ -1647,3 +1647,29 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   gates to assert with lab-api's flights_match and drops (main 7130921e, 2cfdf2fa). Both clones promoted to the
   0636f14e client. Main gains lab-launches: the recorder's launches, flights and av: watch bools, and the scenarios
   b-cast-crossfire, b-arrow-path and b-invis-recast.
+- m2-breath-launch merged to fork parity 84db2c4e (2026-10-16T18:07Z, 11:07 PDT) through `just verb-merge` from thuum
+  branch lab-launches with main merged. The merge was decided on its stage's readings against thuum-magnus's
+  criteria. It carries:
+  - the shout reported from the player's own voice projectile launch of one of the equipped shout's variation
+    spells: SKSE's voice-fire event names the shout, not the spell, which is why 35a3975f's report sent nothing;
+  - the sheathe and redraw on a figure: a sheathed caster's figure drops its pending ready, release and exit
+    actions, and the relayed sheathe flag forces the drawn state for one second, then the caster's movement
+    decides. Before, the relayed SkympFakeUnequip stayed the figure's last animation, held it sheathed against
+    the redraw (an engine action, Magic_Equip, with no graph event), and the figure refused every cast until a
+    stagger re-equipped it.
+  Readings on 84db2c4e's stage:
+  - x-tgm-breath6 20261016-162045: five server shout lines and five figure launches for five breaths into empty
+    air. 0636f14e gave one of five.
+  - x-tgm-breath5 162436: five of five. b-shout 162818 green.
+  - x-cast-interrupt 163330, the three sheathes: the figure's cast ends 28, 56 and 60 ms before c1's, once the two
+    watches' 125 ms offset is taken out. Casts 2 and 3 start on the figure (5 of 5 starts taken, castReady 8).
+    Each redraw reaches it within about 40 ms (Magic_Equip 4773, 10499, 16233 against c1's 4868, 10585, 16319).
+    Ready refusals fell from 64 on 0636f14e to 2.
+  - Still open, the stagger attempt: the figure's cast breaks at its own stagger, rises again and stays up about
+    1.6 s past c1's release.
+  T2 green with 26 sessions (difftest job 7042). The gate: run set 20261016-170039-merge-m2-breath-launch, 16 of 16
+  green (smoke-two-players, a-restart-persistence, b-duel, b-shout, b-shout-repeat, b-self-cast, the cast five,
+  b-cast-crossfire, b-invis-recast, b-arrow-path, a-melee-reach, a-racemenu). b-shout-repeat, the breath row,
+  asserts with lab-api's launched(). Both clones promoted to the 84db2c4e client.
+  Lab note: from 84db2c4e's stage on, a run's client rollback takes 142 to 264 s against 73 to 75 s on 5474291f.
+  Both are cold snapshots, and the launcher shows no retry, so the cause is not found yet.
