@@ -1673,3 +1673,40 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   asserts with lab-api's launched(). Both clones promoted to the 84db2c4e client.
   Lab note: from 84db2c4e's stage on, a run's client rollback takes 142 to 264 s against 73 to 75 s on 5474291f.
   Both are cold snapshots, and the launcher shows no retry, so the cause is not found yet.
+- m2-spaced-on-21 merged to fork parity 4a2b386b (2026-10-16T22:38Z, 15:38 PDT) through `just verb-merge` from main
+  8aa07cac, on thuum-magnus's go. The head is m2-twenty-one e15770fb with m2-spaced-plugins merged in, magnus's offer,
+  taken so one stage and one gate carry both. It carries:
+  - the same character logging in again with the same look is neither reset nor reloaded (e15770fb,
+    docs/verbs/racemenu-sync.md, playtest twenty);
+  - twenty's first fixes (3d9129e9, with 457817d7 and 3486b2f1 putting back what its clang-format pass changed): an
+    invisible figure's crosshair prompt hidden through ExtraFlags kBlockActivateText (Eli: "yes hide it"; HYPOTHESIS
+    still, since the probe's crosshair never lay on the figure); the latent-call log naming its native, the first three
+    calls of each and every 1000th (playtest twenty had 19,889 unnamed pairs in 16 minutes on c2); and the latent
+    SetWeaponDrawnMode asked only on a change of the wanted draw state or after a second;
+  - a plugin file name may hold spaces (m2-spaced-plugins 3ff99181): Skyrim Platform's ValidateFilename refused
+    `Apocalypse - Magic of Skyrim.esp`, the red of the Apocalypse layer's first gate (2026-10-14).
+  Readings on e15770fb's stage (12:37 to 12:54 PDT):
+  - x-invis-recast 20261016-193722, a-racemenu 194014, a-character-creation 194345, b-cast-moving 194606 and
+    b-self-cast 194858 green.
+  - The rotfern probe on the playtest-twenty world, node scales through playtest-step. After the world's restore,
+    which logs the running games in again (A at login, B 30 s later), c1's own skeleton stood at 1.0 where her race
+    scales Root 0.6, Pelvis 0.72, Spine 0.83, Spine1 0.89 and Spine2 1.10, while c2's figure of her was right. After
+    c1's relaunch (C) both were right. So e15770fb does not cover a login as another character inside one game;
+    `just playtest-restore` now relaunches both seats after the restore (main 8aa07cac), and the character switch
+    stays open for a code fix.
+  T2 green with 26 sessions (difftest job 7154). The gate: run set 20261016-215533-merge-m2-spaced-on-21, 14 of 14
+  green (smoke-two-players, a-restart-persistence, b-duel, a-racemenu, a-character-creation, b-self-cast,
+  b-invis-recast, the cast five, b-cast-crossfire, a-melee-reach). Both clones promoted to the 4a2b386b client.
+  Also staged today and not merged: fork m2-teleport-look 2540be96 from thuum branch teleport-look, for the
+  teleport's look on other screens; its readings went to the verb doc, and the look moves to the main line as
+  m2-teleport-look-main.
+  Lab notes:
+  - The slow client rollback of the entry above followed one disk image, not a build. It was sky-c2's clean-m1-next
+    from 84db2c4e's stage (16:19Z), promoted to clean-m1 by that merge. That image added 65 to 70 s between the guest
+    agent's answer and the game's start, while c1 stayed at its usual time. It ended at the next retake (e15770fb's
+    stage, 19:37Z); this gate's rollbacks took 63 to 87 s.
+  - Snapshots follow a clean ACPI shutdown (lab-api proxmox.py snapshot_clone), so some state saved in that image
+    replayed at every boot. Which state, Steam or a Windows task, is still unread; the clone's C:\sky-lab\launch.log
+    holds the timings.
+  - On teleport-look's stage, b-cast-moving 20261016-203757 timed out on c2's first console step after c2's game
+    logged nothing past PostLoadGame, a load freeze. Its rerun was green (204406).
