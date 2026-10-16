@@ -95,7 +95,11 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   figure's fresh cast had replaced the old copy, so it ended the new one.
   Fix (fork m2-arrow-path a3672b82): EndConcealment(actor, castSpell) spares
   the archetype the cast spell carries, as the engine does; the hit path
-  passes none.
+  passes none. And (2d983dd0) the server now also ends a player's
+  concealment on a bow's release and on its own activation, two of the
+  engine's callers it had missed: a player who shot or activated while
+  invisible stayed invisible on the server and in every other game while
+  visible in its own.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
