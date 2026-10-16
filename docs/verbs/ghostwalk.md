@@ -30,7 +30,7 @@ rows.
 | a failure message (0300AAE6) when the return is refused | record | native in the caster's game; HYPOTHESIS that WB_CheckLocation False never shows it |
 | a detection event at the return (CreateDetectionEvent) | record | native in the caster's game; later: other games' NPCs hear nothing (NPC hosting, M3) |
 | the eyes-fix ability added to the caster (SPEL 030CB7E1, AddSpell) | record | native in the caster's game; HYPOTHESIS that the server never learns it (a script's AddSpell is not reported) and that it removes itself; later: the learned-spells record if the reference shows it lasting |
-| the effect ended early by the caster's own attack or cast | engine (self-cast's HYPOTHESIS) | native, and the server's self-cast ends its state; the script returns the caster then, the permit's window opening at the cast |
+| the effect ended early by the caster's own act | engine: Actor::DispelAlteredStates 38819, from the caster's SpellCast at the fire (sparing the archetype the cast spell carries), a weapon's hit frame that finds an actor, a bow's release, an activation (pick-up included) and a force-greet; not a melee miss, not a cast's start or charge (the re-analyst on sky-re, 2026-10-16, docs/verbs/self-cast.md; HYPOTHESIS until a lab run) | native, and the server's EndConcealment ends its state on the same acts (a cast, a hit, a bow's release and the player's activation since fork 2d983dd0; a recast of the same archetype spared); the script returns the caster then, the permit's window opening at the cast. An ethereal target refuses most spells (Actor's AddTarget 38786 for an IsGhost actor), so a recast of an ethereal spell is refused, not swapped |
 
 ## Authority
 
