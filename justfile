@@ -327,6 +327,7 @@ client-display vmid w="1920" h="1080" hz="60":
 # The game's traffic outside the lab on a clone (game-firewall.ps1): block SkyrimSE.exe outside 10.10.70.0/24 so
 # bethesda.net connects fail at once instead of stalling Skyrim Platform's first tick, and set a machine WinHTTP
 # proxy that never resolves so the Bethesda.net request fails with an error the game closes, not one it retries.
+# Also answers Steam's three update hosts with 0.0.0.0 (hosts file), so a startup update check fails at once.
 client-game-firewall vmid:
     @lab/tools/client-game-firewall.sh {{vmid}}
 

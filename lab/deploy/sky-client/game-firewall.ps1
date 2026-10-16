@@ -1,6 +1,7 @@
 # Make the game's reach outside the lab fail fast, and fail the way the game
-# gives up on. Machine-wide, so it runs as SYSTEM through the guest agent
-# (`just client-game-firewall`); README, "The game's traffic outside the lab".
+# gives up on; Steam's startup update check too (3). Machine-wide, so it runs
+# as SYSTEM through the guest agent (`just client-game-firewall`); README,
+# "The game's traffic outside the lab".
 #
 # 1. The firewall rule. The lab VLAN is dark, and SkyrimSE.exe opens TCP
 # connections to bethesda.net from the main menu (Creations, the bnet login);
@@ -23,7 +24,23 @@
 # flat, and a fresh launch logged in with 1,500 handles that did not grow. The
 # lab itself bypasses the proxy. The firewall rule stays for any connection
 # that does not go through WinHTTP.
-$exe = 'C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\SkyrimSE.exe'
+#
+# 3. Steam's update hosts. An image that Steam saved in a "check for update on
+# startup" state asks its three update hosts for a client manifest at every
+# boot ("Checking for update on startup" in Steam\logs\bootstrap_log.txt), and
+# in the dark lab each ask failed only after 21 to 22 s ("http error 0"): the
+# web helper, and the game after it, came 64 s late on every boot of that
+# image (sky-c2, 2026-10-16: client rollbacks of 142 to 264 s against 61 to
+# 87). Steam's bootstrapper does not take the WinHTTP proxy. The hosts file
+# answers the three names with 0.0.0.0 before any DNS, so the check fails at
+# the connect, and the boot goes on.
+$hosts = "$env:SystemRoot\System32\drivers\etc\hosts"
+$updateHosts = 'client-update.fastly.steamstatic.com', 'client-update.akamai.steamstatic.com', 'client-update.steamstatic.com'
+$kept = @(Get-Content $hosts | Where-Object { $_ -notmatch '# sky-lab: Steam update host$' })
+Set-Content -Path $hosts -Encoding ascii -Value ($kept + ($updateHosts | ForEach-Object { "0.0.0.0 $_ # sky-lab: Steam update host" }))
+Clear-DnsClientCache
+Write-Output ('hosts ' + ((Get-Content $hosts | Select-String -Pattern '# sky-lab: Steam update host$' | ForEach-Object { ($_.Line -replace ' # sky-lab: Steam update host$', '') }) -join '; '))
+$exe ='C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\SkyrimSE.exe'
 $name = 'sky-lab: SkyrimSE outside the lab'
 Get-NetFirewallRule -DisplayName $name -ErrorAction SilentlyContinue | Remove-NetFirewallRule
 $rule = New-NetFirewallRule -DisplayName $name -Direction Outbound -Action Block -Program $exe -RemoteAddress '0.0.0.0-10.10.69.255', '10.10.71.0-255.255.255.255' -Profile Any -Enabled True
