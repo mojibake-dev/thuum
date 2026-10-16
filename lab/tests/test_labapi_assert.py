@@ -790,3 +790,102 @@ class WatchTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate("c1.watched(c2).maxDisplacement < 1")
         self.assertEqual(clients_needing_views("c2.watched(c1).maxDisplacement < 500", ["c1", "c2"]), set())
+
+
+class LaunchViews(WatchViews):
+    """c2 watched c1's figure launch the breath five times and shoot two arrows;
+    c1's own watch holds the same five breaths and its two arrows' flights."""
+
+    BREATH, CONE, ARROW = 0x3F9EB, 0x647BF, 0x1397D
+
+    def __init__(self, figure_flights=None, own_flights=None):
+        super().__init__()
+        breaths = [[t, self.CONE, 0, self.BREATH, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0] for t in (1500, 3700, 5900, 8000, 12100)]
+        arrows = [[20000, 0x3BE11, self.ARROW, 0, 0.0, 0.0, 0.0, 0.1, 3.14, 1.0], [24000, 0x3BE11, self.ARROW, 0, 0.0, 0.0, 0.0, 0.0, 6.2, 0.35]]
+        self.watches["c2"]["actors"][0]["launches"] = breaths + arrows
+        self.watches["c2"]["actors"][0]["flights"] = figure_flights if figure_flights is not None else [
+            [20100, self.ARROW, 3.0, 4.0, 0.0, 0.12, 3.15, 1.0], [24200, self.ARROW, 10.0, 0.0, 0.0, 0.0, 0.05, 0.35]]
+        self.watches["c1"] = {"actors": [], "self": {
+            "events": [], "bools": {},
+            "launches": [[t - 40, self.CONE, 0, self.BREATH, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0] for t in (1500, 3700, 5900, 8000, 12100)],
+            "flights": own_flights if own_flights is not None else [
+                [20000, self.ARROW, 0.0, 0.0, 0.0, 0.10, 3.14, 1.0], [24000, self.ARROW, 10.0, 0.0, 0.0, 0.0, 6.20, 0.35]]}}
+
+
+@needs_deps
+class LaunchTests(unittest.TestCase):
+    def test_launched_counts_a_spell_projectile_or_ammo_given_as_a_number_or_a_string(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), LaunchViews(), ["c1", "c2"])
+        for expr in ['c2.watched(c1).launched("0x3f9eb") == 5', "c2.watched(c1).launched(0x3f9eb) == 5",
+                     'c2.watched(c1).launched("0x647bf") == 5', 'c2.watched(c1).launched("0x1397d") == 2',
+                     'c2.watched(c1).launched("0x12fcd") == 0', 'c1.watched_self().launched("0x3f9eb") >= 5']:
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+
+    def test_launched_refuses_what_is_not_a_form_id(self):
+        from labapi.assertions import AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), LaunchViews(), ["c1", "c2"])
+        for expr in ['c2.watched(c1).launched("breath") == 0', "c2.watched(c1).launched(true) == 0", "c2.watched(c1).launched() == 0"]:
+            with self.subTest(expr=expr), self.assertRaises(AssertionSyntax):
+                ev.evaluate(expr)
+
+    def test_a_watch_without_launches_counts_none(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c2.watched(c1).launched("0x3f9eb") == 0'))
+
+    def test_flights_match_pairs_each_own_flight_and_returns_the_largest_gap(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), LaunchViews(), ["c1", "c2"])
+        # positions 5 and 0 units apart; angles 0.02 rad and, across the circle, 0.133 rad (7.6 degrees)
+        self.assertTrue(ev.evaluate('abs(c2.watched(c1).flights_match(c1.watched_self(), "position") - 5) < 0.001'))
+        self.assertTrue(ev.evaluate('c2.watched(c1).flights_match(c1.watched_self(), "angle") > 7.5'))
+        self.assertTrue(ev.evaluate('c2.watched(c1).flights_match(c1.watched_self(), "angle") < 7.7'))
+
+    def test_a_shooter_s_flight_without_a_pair_fails(self):
+        from labapi.assertions import AssertionData, Evaluator
+        late = LaunchViews(figure_flights=[[20700, LaunchViews.ARROW, 0.0, 0.0, 0.0, 0.1, 3.14, 1.0],
+                                           [24200, LaunchViews.ARROW, 10.0, 0.0, 0.0, 0.0, 0.05, 0.35]])
+        other_ammo = LaunchViews(figure_flights=[[20100, 0x139C0, 0.0, 0.0, 0.0, 0.1, 3.14, 1.0],
+                                                 [24200, LaunchViews.ARROW, 10.0, 0.0, 0.0, 0.0, 0.05, 0.35]])
+        none_shot = LaunchViews(own_flights=[])
+        for views in (late, other_ammo, none_shot):
+            with self.subTest(views=views), self.assertRaises(AssertionData):
+                Evaluator(RichServer(), views, ["c1", "c2"]).evaluate('c2.watched(c1).flights_match(c1.watched_self(), "position") < 100')
+
+    def test_flights_match_refuses_a_bad_measure_or_argument_and_degrees(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), LaunchViews(), ["c1", "c2"])
+        for expr in ['c2.watched(c1).flights_match(c1.watched_self(), "speed") < 1',
+                     'c2.watched(c1).flights_match("c1", "angle") < 1',
+                     "c2.watched(c1).flights_match(c1.watched_self()) < 1"]:
+            with self.subTest(expr=expr), self.assertRaises(AssertionSyntax):
+                ev.evaluate(expr)
+        degrees = LaunchViews(own_flights=[[20000, LaunchViews.ARROW, 0.0, 0.0, 0.0, 10.0, 180.0, 1.0]])
+        with self.assertRaises(AssertionData):
+            Evaluator(RichServer(), degrees, ["c1", "c2"]).evaluate('c2.watched(c1).flights_match(c1.watched_self(), "angle") < 1')
+
+
+@needs_deps
+class DropTests(unittest.TestCase):
+    def views(self, series):
+        v = WatchViews()
+        v.watches["c2"]["actors"][0]["bools"] = {"av:Invisibility": series}
+        v.watches["c2"]["self"] = {"events": [], "bools": {"IsCastingLeft": [[0, False], [400, True], [900, False], [1500, True], [2100, False]]}}
+        return v
+
+    def test_drops_counts_true_to_false_changes(self):
+        from labapi.assertions import Evaluator
+        recast_bug = Evaluator(RichServer(), self.views([[0, False], [500, True], [6000, False], [6050, True], [12000, True]]), ["c1", "c2"])
+        self.assertTrue(recast_bug.evaluate('c2.watched(c1).ever("av:Invisibility") == 1'))
+        self.assertTrue(recast_bug.evaluate('c2.watched(c1).drops("av:Invisibility") == 1'))
+        fixed = Evaluator(RichServer(), self.views([[0, False], [500, True], [6000, True], [12000, True]]), ["c1", "c2"])
+        self.assertTrue(fixed.evaluate('c2.watched(c1).drops("av:Invisibility") == 0'))
+        self.assertTrue(fixed.evaluate("c2.watched_self().drops('IsCastingLeft') == 2"))
+
+    def test_drops_of_an_unsampled_bool_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), self.views([[0, True]]), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.watched(c1).drops("av:Ethereal") == 0')

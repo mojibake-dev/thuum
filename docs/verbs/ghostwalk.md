@@ -33,7 +33,7 @@ rows.
 | the eyes-fix ability (SPEL 030CB7E1, AddSpell, silent, after the return): its WB_inviseyefix checks each second and, once its bearer's weapon is sheathed, calls QueueNiNodeUpdate and removes itself (RemoveSpell) | script | native in the caster's game; HYPOTHESIS that the server never records it (a script's AddSpell and RemoveSpell in the player's game, unreported); a transient, so nothing to persist |
 | the failure message (MESG 0300AAE6), shown only when the location check fails with WB_CheckLocation True | script | never shown with this VMAD (unreachable) |
 | a caster who changed cells during the effect: SetPosition (not MoveTo) puts it at the cast's coordinates in its current cell | script | later: the server permits the return in the cast's cell or worldspace only, so there the move is judged as any other (sent back if the budget refuses it); a rare edge, named here for the parity list |
-| the effect ended early by the caster's own attack or cast: the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | engine (self-cast's HYPOTHESIS), script | native, and the server's self-cast ends its state; the script returns the caster then, the permit's window opening at the cast |
+| the effect ended early by the caster's own act: the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | engine: Actor::DispelAlteredStates 38819, from the caster's SpellCast at the fire (sparing the archetype the cast spell carries), a weapon's hit frame that finds an actor, a bow's release, an activation (pick-up included) and a force-greet; not a melee miss, not a cast's start or charge (the re-analyst on sky-re, 2026-10-16, docs/verbs/self-cast.md; HYPOTHESIS until a lab run), script | native, and the server's EndConcealment ends its state on the same acts (a cast, a hit, a bow's release and the player's activation since fork 2d983dd0; a recast of the same archetype spared); the script returns the caster then, the permit's window opening at the cast. An ethereal target refuses most spells (Actor's AddTarget 38786 for an IsGhost actor), so a recast of an ethereal spell is refused, not swapped |
 
 ## Authority
 
@@ -252,6 +252,16 @@ positions' age.
   in both settings files, stacked on branch apocalypse (the layer). It
   deploys only with a server that has m2-ghostwalk: parity's teleports.rs
   refuses unknown fields, and a refused entry stops the server at start.
+- On the main line, 2026-10-16: fork m2-ghostwalk-main 18b181f3, the
+  server commit cherry-picked onto the teleport look's main-line head
+  (m2-teleport-look-main 09a1ab9f, parity 4a2b386b merged). Its three
+  conflicting files are taken as on m2-teleport-look 2540be96, where the
+  commit and the look ran together, so the tree is 2540be96 plus parity's
+  twenty-one fixes; wire-rules and the bridge green with clippy. Settings:
+  thuum branch ghostwalk-main, ghostwalk merged with apocalypse b3f6d602
+  and teleport-look-main 8118b9e: both files carry Lost Grimoire's entry
+  with its look and Ghostwalk's return; test_server_settings OK. It stages
+  after the teleport look merges, with the Apocalypse layer on main.
 - Drafts in the session's scratchpad until their first runs: the difftest
   session ghostwalk, the reference r-ghostwalk, the probe x-ghostwalk-relay
   and b-ghostwalk.

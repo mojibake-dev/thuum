@@ -1624,3 +1624,89 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   031528, b-cast-rhythm 031805, b-cast-both-hands, a-melee-reach, a-racemenu); both clones promoted to the a930968b
   client. The 03:30 nightly judges this parity; the verb doc's merge line and the SKSE-events decision are magnus's for
   the morning.
+- m2-arrow-path merged to fork parity 0636f14e (2026-10-16T15:09Z, 08:09 PDT) through `just verb-merge` from thuum
+  branch lab-launches with main merged, on magnus's go. It carries:
+  - the arrow's path identical on both screens: the shooter's first-update flight, after the engine's auto-aim, is
+    sent with the shot (PlayerBowShot and ArrowShot gain has_launch, origin and the launch angles, wire schema 16, the
+    validator in the same commit; the server refuses an origin more than 512 units from its shooter, E_SHOT_ORIGIN),
+    and the figure's arrow is launched there through LaunchArrowAt, now declared in the shipped TESModPlatform.pex
+    (2d983dd0's b-marksman 130329 was red without it: no figure arrow on c2);
+  - a figure's stream following its player's pitch (setActorAimPitch);
+  - the Invisibility recast fix: a cast ends concealment except the archetype it carries, and a bow release or an
+    activation ends it as the engine does;
+  - 35a3975f's breath report at the engine's voice fire. It sends nothing for a breath into empty air (x-tgm-breath6
+    20261016-135744: one server line for five breaths, one cone on c2); its fix is fork m2-breath-launch.
+  Readings on 0636f14e's stage: b-marksman 134247 green (full draw 2680 own, 2898 on c2; half 1508 and 1477);
+  x-arrow-path 134528 flights 10 of 10 paired at 0.0 units and 0.00 degrees, the Launch entries differing by up to
+  11.5 degrees of pitch before auto-aim; x-invis-recast 135452 the figure invisible through the recast, no "acts:
+  ... end" line (parity's 124840 showed it visible from the recast on); x-cast-interrupt 134830: no exit reaches a
+  figure after its caster's sheathe, its cast up about 5 s longer (the fix also rides m2-breath-launch). T2 green
+  with 26 sessions (difftest job 6949). The gate: run set 20261016-142307-merge-m2-arrow-path, 16 of 16 green
+  (smoke-two-players, a-restart-persistence, b-duel, b-marksman, b-arrow-path, the cast five, b-cast-crossfire,
+  b-self-cast, b-shout, b-invis-recast, a-melee-reach, a-racemenu). b-arrow-path and b-invis-recast are the first
+  gates to assert with lab-api's flights_match and drops (main 7130921e, 2cfdf2fa). Both clones promoted to the
+  0636f14e client. Main gains lab-launches: the recorder's launches, flights and av: watch bools, and the scenarios
+  b-cast-crossfire, b-arrow-path and b-invis-recast.
+- m2-breath-launch merged to fork parity 84db2c4e (2026-10-16T18:07Z, 11:07 PDT) through `just verb-merge` from thuum
+  branch lab-launches with main merged. The merge was decided on its stage's readings against thuum-magnus's
+  criteria. It carries:
+  - the shout reported from the player's own voice projectile launch of one of the equipped shout's variation
+    spells: SKSE's voice-fire event names the shout, not the spell, which is why 35a3975f's report sent nothing;
+  - the sheathe and redraw on a figure: a sheathed caster's figure drops its pending ready, release and exit
+    actions, and the relayed sheathe flag forces the drawn state for one second, then the caster's movement
+    decides. Before, the relayed SkympFakeUnequip stayed the figure's last animation, held it sheathed against
+    the redraw (an engine action, Magic_Equip, with no graph event), and the figure refused every cast until a
+    stagger re-equipped it.
+  Readings on 84db2c4e's stage:
+  - x-tgm-breath6 20261016-162045: five server shout lines and five figure launches for five breaths into empty
+    air. 0636f14e gave one of five.
+  - x-tgm-breath5 162436: five of five. b-shout 162818 green.
+  - x-cast-interrupt 163330, the three sheathes: the figure's cast ends 28, 56 and 60 ms before c1's, once the two
+    watches' 125 ms offset is taken out. Casts 2 and 3 start on the figure (5 of 5 starts taken, castReady 8).
+    Each redraw reaches it within about 40 ms (Magic_Equip 4773, 10499, 16233 against c1's 4868, 10585, 16319).
+    Ready refusals fell from 64 on 0636f14e to 2.
+  - Still open, the stagger attempt: the figure's cast breaks at its own stagger, rises again and stays up about
+    1.6 s past c1's release.
+  T2 green with 26 sessions (difftest job 7042). The gate: run set 20261016-170039-merge-m2-breath-launch, 16 of 16
+  green (smoke-two-players, a-restart-persistence, b-duel, b-shout, b-shout-repeat, b-self-cast, the cast five,
+  b-cast-crossfire, b-invis-recast, b-arrow-path, a-melee-reach, a-racemenu). b-shout-repeat, the breath row,
+  asserts with lab-api's launched(). Both clones promoted to the 84db2c4e client.
+  Lab note: from 84db2c4e's stage on, a run's client rollback takes 142 to 264 s against 73 to 75 s on 5474291f.
+  Both are cold snapshots, and the launcher shows no retry, so the cause is not found yet.
+- m2-spaced-on-21 merged to fork parity 4a2b386b (2026-10-16T22:38Z, 15:38 PDT) through `just verb-merge` from main
+  8aa07cac, on thuum-magnus's go. The head is m2-twenty-one e15770fb with m2-spaced-plugins merged in, magnus's offer,
+  taken so one stage and one gate carry both. It carries:
+  - the same character logging in again with the same look is neither reset nor reloaded (e15770fb,
+    docs/verbs/racemenu-sync.md, playtest twenty);
+  - twenty's first fixes (3d9129e9, with 457817d7 and 3486b2f1 putting back what its clang-format pass changed): an
+    invisible figure's crosshair prompt hidden through ExtraFlags kBlockActivateText (Eli: "yes hide it"; HYPOTHESIS
+    still, since the probe's crosshair never lay on the figure); the latent-call log naming its native, the first three
+    calls of each and every 1000th (playtest twenty had 19,889 unnamed pairs in 16 minutes on c2); and the latent
+    SetWeaponDrawnMode asked only on a change of the wanted draw state or after a second;
+  - a plugin file name may hold spaces (m2-spaced-plugins 3ff99181): Skyrim Platform's ValidateFilename refused
+    `Apocalypse - Magic of Skyrim.esp`, the red of the Apocalypse layer's first gate (2026-10-14).
+  Readings on e15770fb's stage (12:37 to 12:54 PDT):
+  - x-invis-recast 20261016-193722, a-racemenu 194014, a-character-creation 194345, b-cast-moving 194606 and
+    b-self-cast 194858 green.
+  - The rotfern probe on the playtest-twenty world, node scales through playtest-step. After the world's restore,
+    which logs the running games in again (A at login, B 30 s later), c1's own skeleton stood at 1.0 where her race
+    scales Root 0.6, Pelvis 0.72, Spine 0.83, Spine1 0.89 and Spine2 1.10, while c2's figure of her was right. After
+    c1's relaunch (C) both were right. So e15770fb does not cover a login as another character inside one game;
+    `just playtest-restore` now relaunches both seats after the restore (main 8aa07cac), and the character switch
+    stays open for a code fix.
+  T2 green with 26 sessions (difftest job 7154). The gate: run set 20261016-215533-merge-m2-spaced-on-21, 14 of 14
+  green (smoke-two-players, a-restart-persistence, b-duel, a-racemenu, a-character-creation, b-self-cast,
+  b-invis-recast, the cast five, b-cast-crossfire, a-melee-reach). Both clones promoted to the 4a2b386b client.
+  Also staged today and not merged: fork m2-teleport-look 2540be96 from thuum branch teleport-look, for the
+  teleport's look on other screens; its readings went to the verb doc, and the look moves to the main line as
+  m2-teleport-look-main.
+  Lab notes:
+  - The slow client rollback of the entry above followed one disk image, not a build. It was sky-c2's clean-m1-next
+    from 84db2c4e's stage (16:19Z), promoted to clean-m1 by that merge. That image added 65 to 70 s between the guest
+    agent's answer and the game's start, while c1 stayed at its usual time. It ended at the next retake (e15770fb's
+    stage, 19:37Z); this gate's rollbacks took 63 to 87 s.
+  - Snapshots follow a clean ACPI shutdown (lab-api proxmox.py snapshot_clone), so some state saved in that image
+    replayed at every boot. Which state, Steam or a Windows task, is still unread; the clone's C:\sky-lab\launch.log
+    holds the timings.
+  - On teleport-look's stage, b-cast-moving 20261016-203757 timed out on c2's first console step after c2's game
+    logged nothing past PostLoadGame, a load freeze. Its rerun was green (204406).
