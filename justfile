@@ -398,6 +398,13 @@ playtest-relaunch client:
 playtest-assist client action args="{}":
     @curl -fsS -m 60 -X POST "{{lab_api}}/clients/{{client}}/assist" -H 'content-type: application/json' -d '{"action":"{{action}}","args":{{args}}}'; echo
 
+# In a playtest, one driver step on a seat as a scenario writes it (lab-api's playtest-step, refused without a playtest
+# hold): input and its rhythm, `just playtest-step 2 'repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}'`
+# (the lab casts on test 2 while the person staggers it from test 1), or a read, `just playtest-step 1 'node-scale {node: "NPC Root [Root]"}'`.
+# Never a console line: a seat's setup is playtest-console's, on the server.
+playtest-step seat step:
+    @python3 -c 'import json, sys; print(json.dumps({"step": sys.argv[1]}))' '{{step}}' | curl -fsS -m 900 -X POST "{{lab_api}}/clients/c$(echo '{{seat}}' | tr -d 'c')/playtest-step" -H 'content-type: application/json' --data-binary @-; echo
+
 # In a playtest, a console command run on the server as a seat's player would type it (the gamemode's labCommand console,
 # through the server's mp.executeConsoleCommand), never typed into the game: `just playtest-console 1 addshout 20 0x3f9ea`
 # gives profile 1 Fire Breath (20 is 0x14, the player itself; a hex or decimal number is a number, anything else a string).
