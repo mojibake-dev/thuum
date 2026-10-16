@@ -6,9 +6,10 @@
 # summary and run ids (for a merge commit or a LOG.md entry), saves the set's
 # record to lab/results/runsets/<id>.json, and exits 0 for green or watch,
 # 1 otherwise. RUNSET_WAIT_S (default 600) bounds the wait for an idle lab.
-# RUNSET_AFTER=<set id> runs the rest of a set that stopped (a lab fault took a
-# clone away mid-set, 2026-10-16): every scenario whose last verdict there is not
-# green, on the same staged lab; the two sets together are the sweep.
+# RUNSET_AFTER=<set id> runs the rest of a set that stopped or ended without a
+# verdict of its own (a lab fault took a clone away mid-set, 2026-10-16): every
+# scenario whose last verdict there is not green, on the same staged lab; the two
+# sets together are the sweep.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
@@ -28,9 +29,11 @@ if [ -n "${RUNSET_AFTER:-}" ]; then
   rest_list=$(printf '%s' "$prev" | python3 -c '
 import json, sys
 rs = json.load(sys.stdin)
-rid, state = rs["id"], rs["state"]
-if state != "stopped":
-    sys.exit(f"run set {rid} is {state}, not stopped: its rest is not a set of its own")
+rid, state, verdict = rs["id"], rs["state"], rs.get("verdict")
+# stopped by hand or by two lab faults in a row, or ended early (a lab error such as E_RUN_HOLD refusing a rerun):
+# never one still running
+if not (state == "stopped" or (state == "done" and verdict not in ("green", "watch"))):
+    sys.exit(f"run set {rid} is {state} ({verdict}): its rest is not a set of its own")
 for s in rs["scenarios"]:
     if (rs["runs"].get(s) or [{}])[-1].get("verdict") != "green":
         print(s)
