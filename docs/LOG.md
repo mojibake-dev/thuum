@@ -1577,3 +1577,35 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   were the same Long Bow and iron arrows, every one taken by the server), and x-tgm-breath4 010539 green (breaths one
   to three drawn on c2, each cone 0 to 3 emitters of 20, so the emitter cap is not the missing fire; the fourth, the
   control, came while c2 was dead from the third, hit nothing and never reached the server, so it was never relayed).
+- Playtest nineteen's third session (17:42 to 17:57 PDT, parity caff3e04, recorded playtest-19-3,
+  world playtest-m2-19-3-20261016T010249Z): every Flames, Firebolt, Invisibility and dual item
+  ticked, the first time since eighteen; the hands hold at T4 on the retry alone. c1's first game of
+  the session exited silently at 17:38:42, 15 s after its stream opened and 3 s after the recorder's
+  watch-start, no crash or hang report; relaunched at 17:41:39 and fine after (one stream per seat,
+  opened by thuum-magnus alone, the time noted). Eli's findings and the recording's reading (an
+  agent over the traces and server.log): rotfern's arrows "not visible on test 2" were there (eight
+  of eleven struck the same object in both games, 22 to 43 ms apart; b-marksman 010247 green on the
+  same build), leaving from the figure's hand along its facing where his own left along the
+  crosshair; Eli's requirement follows, the arrow's path identical on both screens (report the
+  engine's launch, origin and angles and power, replay exactly, the server checking the origin at
+  the shooter; a parity scenario). The god-mode second breath "not fixed": 13 of his 18 releases
+  never reached the server, including every second breath within three seconds; caff3e04's
+  shoutService reports a release only from a hit when the voice recovery reads zero, and breaths
+  that hit nobody are never reported (x-tgm-breath4 010539 agrees, its control confounded by c2's
+  death); the fix is the one the verb doc names, the release reported from the engine's voice cast.
+  Recasting Invisibility while invisible "made me visible on the other screen": the recording has
+  only test 2 recasting, 13 times, each arriving on test 1's screen as the server's end and a fresh
+  effect 60 to 81 ms later; a probe with screenshots next. A Flames stream aimed straight up shows
+  forward on the other screen (the damage goes up): the figure's stream ignores pitch; a probe next.
+  The handshake chase after the session: 5df863fd's vtable swap never fired (seven runs, no
+  castReady, the view's three-second fallback then refused); the re-analyst read the path (the
+  dispatcher 38447 calls the handler's slot 1, which is 42820 and kin, the only way in) and
+  slot-probe.js on the running game found SKSE's own function in that slot (skse64+0xd760 and kin,
+  its action events), over any plugin's write; a930968b reads the answer from SKSE::ActionEvent
+  (kSpellCast, kVoiceCast) with a sink at kDataLoaded and waits four updates at most before
+  caff3e04's timing (1de955e6); staged tonight by numidium over the restored parity, the lab back
+  on parity before the nightly. Eli's direction at 14:5x stands: numidium runs the lab, thuum-magnus
+  writes the fix and reads the results. The order before Apocalypse: the breath report, the
+  invisibility probe, the stream pitch, the arrow-path parity, the handshake's landing, the two
+  open cast-action rows (an interrupted cast; both seats casting at each other); then the layer
+  retry on Eli's word, player-globals renumbered, Ghostwalk.

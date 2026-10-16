@@ -57,7 +57,7 @@ Tests.
 | Flames again at a person's rhythm (0.8 s held, 0.4 s apart, eight times), one hand, standing | b-cast-rhythm (from x-cast-twice-fast) | 20261015-180119 on e75ee5c8: casts 2, 4 and 6 of 8 refused whole (the half); 184857 on abe44a55: 24 of 24 taken, no retry needed; green in the gate (195257) |
 | the same, 1 s held, 0.7 s apart, five times, standing | x-cast-twice-relay, -replay, -both | 174811, 175053, 175554: 15 of 15 taken (the lab's rhythm hid the half) |
 | the same while the caster strafes | x-cast-twice-move | 175846 on e75ee5c8: one of five refused, 570 ms after a taken exit; the stage: pending as a scenario row |
-| Flames again at a person's rhythm while the seats MOVE (strafing, turning) | x-cast-human; playtest nineteen's second session (c2's log 13:13 to 13:18); x-cast-gap and x-cast-replay-gap with lab/frida/figure-cast-trace.js | GREEN on caff3e04 with the retry alone (b-cast-moving 20261015-233639 and the gate's 20261016-001226: 6 of 6, three of them taken after a retry, the latest 267 ms after its first ask; merged to parity caff3e04); the handshake (5df863fd, typed vtable swaps on the response handlers, after 34bdf0c3's Frida interceptors crashed the observer at the first answer: an access violation in the interceptor's argument handling, procdump 15:57) staged after nineteen's third session, to take the retries out. Nineteen-2: starts refused and taken in alternation (eight of eight after a taken exit refused at 534 to 1334 ms, every one after a refused cast taken at 183 to 553 ms); x-cast-human 202506 (strafing and turning): T T T R T R; Firebolt 20 of 24. Read first as a 1.5 s window after a taken exit and WITHDRAWN by x-cast-gap 213755: standing still, 17 of 17 starts taken through the relay at every gap from 513 to 2651 ms, each 4 to 7 ms after the figure's graph answered the want variable's rise with BeginCastRight (34 of 34 asks, the exits' rises answered too), FinishCast from the interrupt message 33 to 54 ms before every exit and harmless. x-cast-replay-gap 214106 (the driver's replay, no relay): 5 of 6 starts refused in the graph itself (NotifyAnimationGraph false) because the driver's replay never drops the want, so the graph gets no rise and no answer. The fault: the view performed a start one update after its variables, a timer, where the engine's caster waits for the graph's answer; a still figure answers within a frame, a moving one later. Fix: the start waits for the answer (castReady, the response handlers hooked) |
+| Flames again at a person's rhythm while the seats MOVE (strafing, turning) | x-cast-human; playtest nineteen's second session (c2's log 13:13 to 13:18); x-cast-gap and x-cast-replay-gap with lab/frida/figure-cast-trace.js | GREEN on caff3e04 with the retry alone (b-cast-moving 20261015-233639 and the gate's 20261016-001226: 6 of 6, three of them taken after a retry, the latest 267 ms after its first ask; merged to parity caff3e04); the handshake staged the night after nineteen's third session as a930968b (the answer read from SKSE's action events), after 34bdf0c3's Frida interceptors crashed the observer at the first answer and 5df863fd's vtable swap never fired, SKSE owning the slot; nineteen's third session on caff3e04 ticked every hands item, with starts a beat late at times (the retry). Nineteen-2: starts refused and taken in alternation (eight of eight after a taken exit refused at 534 to 1334 ms, every one after a refused cast taken at 183 to 553 ms); x-cast-human 202506 (strafing and turning): T T T R T R; Firebolt 20 of 24. Read first as a 1.5 s window after a taken exit and WITHDRAWN by x-cast-gap 213755: standing still, 17 of 17 starts taken through the relay at every gap from 513 to 2651 ms, each 4 to 7 ms after the figure's graph answered the want variable's rise with BeginCastRight (34 of 34 asks, the exits' rises answered too), FinishCast from the interrupt message 33 to 54 ms before every exit and harmless. x-cast-replay-gap 214106 (the driver's replay, no relay): 5 of 6 starts refused in the graph itself (NotifyAnimationGraph false) because the driver's replay never drops the want, so the graph gets no rise and no answer. The fault: the view performed a start one update after its variables, a timer, where the engine's caster waits for the graph's answer; a still figure answers within a frame, a moving one later. Fix: the start waits for the answer (castReady, the response handlers hooked) |
 | each hand: right (b-spell), left (x-left-firebolt2), the Self cast (x-figure-action-self), the perk's dual cast (x-dual-relay) | b-spell; x-left-firebolt2; x-figure-action-self; x-dual-relay | 065943, 075606 (source 0 both launches), 060152, 070729, all green on e75ee5c8 |
 | both hands casting the same spell separately (Eli's "dual casting A") | b-cast-both-hands (from x-both-hands-relay) | green in the gate (193846, 194205's set); 185138 on abe44a55: the right's start and release, the left's 0.5 s later, both exits, all taken, and the figure's two streams alternate hands in the launch trace (castingSource 1 and 0); on e75ee5c8 both casts were reported as the later hand (nineteen's one stream from the left hand) |
 | a cancelled charge (sheathed mid-charge), a stagger during a cast | none yet | open: the next row to probe after the stage |
@@ -181,26 +181,41 @@ and 8 a second only ever stops a flood.
   from the right in the observer's game both times (Skyrim Platform's
   castingSource fallback, EventHandler.cpp ~1346-1451).
 
-- The graph's answer to a cast request (the handshake, 5df863fd; 34bdf0c3
-  hooked the same functions with Frida interceptors and the observer's game
-  died at the first answer, an access violation reading a stack address
-  through a 32-bit type in the interceptor path, procdump 2026-10-15
-  15:57): the
-  caster's RequestCast sets the hand's want variable; the graph, in a state
-  that can begin a cast, sends BeginCastRight (BeginCastLeft, BeginCastVoice)
-  back as a graph event; the hand's handler, an
-  IHandlerFunctor<Actor, BSFixedString> (RightHandSpellCastHandler,
-  LeftHandSpellCastHandler, VoiceSpellCastHandler: CommonLibSSE-NG
-  include/RE/Offsets_VTABLE.h:2392-2394; ExecuteHandler the one virtual
-  after the destructor, include/RE/I/IHandlerFunctor.h:16-19, called as
-  (this, Actor&, const BSFixedString& tag)), starts the charge, which
-  performs the Attack action. Measured on a figure (x-cast-gap 213755,
-  figure-cast-trace.js): the answer 0 to 3 ms after every want rise the
-  view writes, including the exits' (whose variables carry the caster's
-  want still up), 34 of 34; the start asked 4 to 7 ms after it, taken 34 of
-  34 standing still. The fork hooks the three handlers' ExecuteHandler
-  (one hook per distinct address; the tag names the hand) and records the
-  answer per actor; the player's own are not recorded.
+- The graph's answer to a cast request (the handshake; fork a930968b after
+  34bdf0c3 and 5df863fd): the caster's RequestCast sets the hand's want
+  variable; the graph, in a state that can begin a cast, sends BeginCastRight
+  (BeginCastLeft, BeginCastVoice) back as a BSAnimationGraphEvent; Actor's
+  sink for it (VTABLE_Actor[2] slot 1, 37997) takes the middle-high
+  process's animResponse (MiddleHighProcessData.h:146, a BSResponse) and the
+  dispatcher 38447 looks the tag up in the response's map, built from
+  Meshes/Responses/ActorResponse.txt (the line pairing BeginCastRight with
+  RightHandSpellCastHandler: HYPOTHESIS on the exact line, the loader 42790
+  reads "event : handler" lines), and calls the handler's slot 1 as
+  (handler, Actor*, payload*): RightHandSpellCastHandler's is 42820,
+  LeftHand's 42819, Voice's 42821 (the vtables 208829, 208827, 208831:
+  CommonLibSSE-NG include/RE/Offsets_VTABLE.h:2392-2394, two slots each, slot
+  0 the destructor, per IHandlerFunctor.h:16-19), with no direct caller
+  anywhere. 42820 (decompiler read, HYPOTHESIS on the body): GetMagicCaster
+  for its hand; if the caster's state is 1 (the request), StartCharge 34443
+  (state 2, StartChargeImpl, the Attack action); returns whether currentSpell
+  is set. The re-analyst on sky-re, 2026-10-15 night. Measured on a figure
+  (x-cast-gap 213755, figure-cast-trace.js on 42820; slot-probe.js on 38447,
+  2026-10-16 01:40Z): the dispatcher hands BeginCastRight to the figure once
+  per want rise the view writes, 34 of 34 and 15 of 15, the answer 0 to 3 ms
+  after the rise, the start asked 4 to 7 ms after it taken 34 of 34 standing
+  still. SKSE owns the slot: skse64 writes its own function into slot 1 of
+  all three handlers for its action events (slot-probe.js found
+  skse64_1_6_1170.dll+0xd760, +0xd800, +0xd930 there; every 42820 call's
+  backtrace passes skse64+0xd7e6), over any plugin's write, which is why
+  5df863fd's write_vfunc never fired (seven runs, no castReady). So the fork
+  reads the answer where SKSE publishes it, SKSE::ActionEvent kSpellCast
+  (slot left or right) and kVoiceCast (include/SKSE/Events.h:37-67) through
+  SKSE::GetActionEventSource() (API.h:31), a sink registered at kDataLoaded,
+  every actor but the player; HYPOTHESIS until its stage: SKSE raises the
+  event for non-player actors. 34bdf0c3 had hooked 42820 and kin with Frida
+  interceptors and the observer's game died at the first answer (procdump:
+  an access violation reading a stack address through a 32-bit type in the
+  interceptor path).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -230,8 +245,8 @@ and 8 a second only ever stops a flood.
   when the graph answers the want variable's rise with BeginCastRight
   (BeginCastLeft, BeginCastVoice), handled by the hand's IHandlerFunctor;
   the fork hooks the three handlers' ExecuteHandler, castReady(actor, hand)
-  takes the answer, and the view performs the start on it (5df863fd, staged
-  after nineteen's third session; parity caff3e04 carries the retry alone: a
+  takes the answer, and the view performs the start on it (a930968b, staged
+  the night after nineteen's third session; parity caff3e04 carries the retry alone: a
   refused start asked again every other update, fifteen times at most). The
   figure's relayed interrupt ends its stream through FinishCast (the
   existing interruptCast native); the Equipped exit arrives as the
@@ -321,9 +336,9 @@ and 8 a second only ever stops a flood.
   remoteServer.ts queues them per form (actionQueue, 16 at most);
   view/formView.ts performs each through performAction (replayActions): the
   caster's variables on one update; a start then waits for the graph's
-  answer (castReady, the engine's handshake, 5df863fd, staged after
-  nineteen's third session; a second without one and the want rises again,
-  twice, then the start goes without; on parity caff3e04 the start goes on
+  answer (castReady, the engine's handshake, a930968b, staged the night after
+  nineteen's third session; four updates without one and the start goes as
+  caff3e04's, the retry behind it; on parity caff3e04 the start goes on
   the next update and a refused one is asked again), any other action
   goes on the next update; the perform is queued and its answer read on the
   update after (performActionResult), a refused action tried again with a
