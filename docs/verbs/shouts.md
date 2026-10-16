@@ -21,6 +21,13 @@ Force's push imposed on its victim (on stagger's impose path, docs/verbs/
 stagger.md), unlocking a word with a dragon soul in the Magic menu, word
 walls, who may learn words at all (the roadmap's "Dovakin").
 
+### Sequences and combinations (ADR-033)
+
+| sequence or combination | probe or scenario | result |
+| --- | --- | --- |
+| a second Fire Breath within three seconds of the first, in god mode | x-tgm-breath4 (four breaths at 0, 2.5, 4.9 and 24 s; its control confounded by c2's death at the third), x-tgm-breath5 (five at 0, 2, 4, 6, 10 s at a c2 with 100000 health) | RED on caff3e04 and a930968b: breaths two and three of breath4 010539 were drawn on c2 only because they hit it (reported from the hit); playtest nineteen's third session, 13 of 18 releases never reached the server. The fire-report build (35a3975f) is staged with breath5: five server lines and five cones expected |
+| a shout while the voice recovery of the previous still runs (any mode) | none yet | open: the recovery read names no variation; the fire's source form should (35a3975f) |
+
 ## Authority
 
 Rung: R0 for what a player knows and for its recovery; R1 for the cast.
@@ -168,6 +175,26 @@ bounds on casts.
 - Data captured: the shout in the voice slot (equipment), the variation,
   the caster's position.
 - Side effects of hooking here: none expected.
+
+- The release reported at the engine's own fire of the voice (fork
+  35a3975f, ADR-034; HYPOTHESIS until x-tgm-breath5 on its stage): SKSE's
+  action event kVoiceFire (CommonLibSSE-NG include/SKSE/Events.h:37-67,
+  through SKSE::GetActionEventSource(), API.h:31) reaches the plugin once
+  per shout the engine casts, with the actor and a source form; the plugin
+  raises the player's own as skseAction to JS and ShoutService reports the
+  source form's spell as the voice's cast when that form is a spell,
+  whatever the recovery reads and whether or not the shout hits anything.
+  The recovery read above and the hit-based report stay as the fallback
+  when the source form is not a spell (then the shout alone is named, and
+  its variation still comes from the recovery). Why: playtest nineteen's
+  third session (2026-10-15, parity caff3e04, recording playtest-19-3): 13
+  of Eli's 18 god-mode Fire Breaths never reached the server, every second
+  breath within three seconds among them; with a zero recovery the release
+  was reported only from a hit of the shout's spell (reportFromHeld), and
+  a breath that hits nobody has none. God mode does set the 30 s voice
+  recovery after all (x-tgm-breath4 20261016-010539 read 22.75 s at the
+  fourth breath), so the recovery read names no variation for a second
+  breath under the first's recovery; the fire's source form names it.
 
 ## Impose (observers render the server's decision)
 
