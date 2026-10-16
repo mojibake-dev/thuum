@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import ast
 import json
+import math
 import operator
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -201,6 +202,32 @@ class WatchView:
     # docs/verbs/stagger.md)
     events: tuple = ()
     bools: tuple = ()
+    # the projectiles the watcher's game launched for the actor and their
+    # flights as they start (thuum branch lab-launches' recorder, the fork's
+    # projectileLaunched and projectileFlight events): launches rows
+    # (ms, projectile, ammo, spell, x, y, z, angleX, angleZ, power), flights
+    # rows (ms, ammo, x, y, z, angleX, angleZ, power), angles in radians as
+    # the engine keeps them; empty from a driver before it or on parity
+    launches: tuple = ()
+    flights: tuple = ()
+
+    def launched(self, spec) -> int:
+        """How many of the actor's launches in the watcher's game name the
+        form `spec` as their spell, projectile or ammo (0x3f9eb or "0x3f9eb"):
+        c2.watched(c1).launched("0x3f9eb") >= 5, five breaths drawn on c2."""
+        return _launched(self.launches, spec)
+
+    def flights_match(self, own: "SelfWatchView", what: str) -> float:
+        """How far the figure's arrows flew from the shooter's own: each of the
+        shooter's flights (own, its c.watched_self()) is paired with the
+        figure's flight of the same ammo nearest in time, within
+        FLIGHT_PAIR_MS, and the largest gap of all pairs is returned:
+        "position", the distance between the two starts in units; "angle",
+        the larger of the pitch and heading differences in degrees, the
+        heading taken around the circle. A shooter's flight with no pair, or
+        a shooter with no flight, fails the assertion
+        (docs/verbs/marksman.md, the arrow's path on both screens)."""
+        return _flights_match(own.flights, self.flights, what)
 
     def movedBy(self, ms: float) -> float:
         """The farthest the actor got from where the watch began by `ms` after
@@ -240,14 +267,67 @@ def _ever(bools: tuple, name: str) -> bool:
     raise AssertionData(f"the watch sampled no graph bool {name}")
 
 
+# a figure's arrow flies some network time after its shooter's: pairs within this
+FLIGHT_PAIR_MS = 500.0
+
+
+def _rows(rows, width: int) -> tuple:
+    """A trace's launches or flights as tuples of numbers, rows shorter than `width` left out."""
+    return tuple(tuple(float(v) for v in row[:width]) for row in rows or [] if isinstance(row, (list, tuple)) and len(row) >= width)
+
+
+def _form_spec(spec) -> int:
+    if isinstance(spec, bool):
+        raise AssertionSyntax("E_ASSERT_SYNTAX: launched takes a form id, 0x3f9eb or \"0x3f9eb\"")
+    if isinstance(spec, int):
+        return spec
+    if isinstance(spec, str):
+        try:
+            return int(spec.strip(), 0)
+        except ValueError:
+            pass
+    raise AssertionSyntax(f"E_ASSERT_SYNTAX: launched takes a form id, 0x3f9eb or \"0x3f9eb\", not {spec!r}")
+
+
+def _launched(launches: tuple, spec) -> int:
+    fid = _form_spec(spec)
+    return sum(1 for row in launches if fid in (int(row[1]), int(row[2]), int(row[3])))
+
+
+def _flights_match(own: tuple, figure: tuple, what: str) -> float:
+    if what not in ("position", "angle"):
+        raise AssertionSyntax(f"E_ASSERT_SYNTAX: flights_match measures \"position\" or \"angle\", not {what!r}")
+    if not own:
+        raise AssertionData("the shooter's own watch has no flights (a driver before lab-launches, or no arrow)")
+    worst = 0.0
+    for o in own:
+        near = [f for f in figure if int(f[1]) == int(o[1]) and abs(float(f[0]) - float(o[0])) <= FLIGHT_PAIR_MS]
+        if not near:
+            raise AssertionData(f"the shooter's flight at {float(o[0]):.0f} ms (ammo {int(o[1]):#x}) has no figure flight "
+                                f"of that ammo within {FLIGHT_PAIR_MS:.0f} ms")
+        f = min(near, key=lambda f: abs(float(f[0]) - float(o[0])))
+        if what == "position":
+            gap = math.dist((float(o[2]), float(o[3]), float(o[4])), (float(f[2]), float(f[3]), float(f[4])))
+        else:
+            if any(abs(float(a)) > 2 * math.pi + 0.1 for a in (o[5], o[6], f[5], f[6])):
+                raise AssertionData("a flight's angle is beyond 2 pi: the trace's angles are not radians")
+            pitch = abs(float(f[5]) - float(o[5]))
+            heading = abs((float(f[6]) - float(o[6]) + math.pi) % (2 * math.pi) - math.pi)
+            gap = math.degrees(max(pitch, heading))
+        worst = max(worst, gap)
+    return worst
+
+
 @dataclass(frozen=True)
 class SelfWatchView:
     """c.watched_self(): the player's own side of its last watch, the
-    animation events its graph was sent (ms, name) and the graph bools
-    watch-start named."""
+    animation events its graph was sent (ms, name), the graph bools
+    watch-start named, and its own launches and flights (rows as WatchView's)."""
 
     events: tuple = ()
     bools: tuple = ()
+    launches: tuple = ()
+    flights: tuple = ()
 
     def saw(self, name: str) -> int:
         """How many of the player's own animation events were named `name`."""
@@ -256,6 +336,11 @@ class SelfWatchView:
     def ever(self, name: str) -> bool:
         """Whether the player's graph bool `name` was true at any sample."""
         return _ever(self.bools, name)
+
+    def launched(self, spec) -> int:
+        """How many of the player's own launches name the form `spec` as their
+        spell, projectile or ammo."""
+        return _launched(self.launches, spec)
 
 
 @dataclass(frozen=True)
@@ -702,6 +787,8 @@ class _ClientRef:
                 drainEndMs=falls[-1] if falls else -1.0,
                 events=tuple((float(e[0]), str(e[1]), int(e[2])) for e in best.get("events") or []),
                 bools=_bool_series(best.get("bools")),
+                launches=_rows(best.get("launches"), 10),
+                flights=_rows(best.get("flights"), 8),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s watch of {other} lacks {e}") from e
@@ -717,6 +804,8 @@ class _ClientRef:
             return SelfWatchView(
                 events=tuple((float(e[0]), str(e[1])) for e in own.get("events") or []),
                 bools=_bool_series(own.get("bools")),
+                launches=_rows(own.get("launches"), 10),
+                flights=_rows(own.get("flights"), 8),
             )
         except (IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s own watch lacks {e}") from e
@@ -1006,6 +1095,15 @@ _NUMBER_METHODS = {
 _ID_METHODS = {
     _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison"},
 }
+# Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
+_FORM_SPEC_METHODS = {
+    WatchView: {"launched"},
+    SelfWatchView: {"launched"},
+}
+# Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
+_PAIR_METHODS = {
+    WatchView: {"flights_match"},
+}
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
@@ -1016,8 +1114,8 @@ _METHODS = {
     _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
     EffectsView: {"left", "magnitude"},
-    WatchView: {"took", "sent", "ever", "movedBy"},
-    SelfWatchView: {"saw", "ever"},
+    WatchView: {"took", "sent", "ever", "movedBy", "launched", "flights_match"},
+    SelfWatchView: {"saw", "ever", "launched"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
@@ -1133,6 +1231,14 @@ class Evaluator:
                         args.append(a.id)  # a client name is passed as its name
                     else:
                         args.append(self._eval(a))
+                if node.func.attr in _PAIR_METHODS.get(type(obj), set()):
+                    if len(args) != 2 or not isinstance(args[0], SelfWatchView) or not isinstance(args[1], str):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a client's watched_self() and a string")
+                    return self._read(node, getattr(obj, node.func.attr)(args[0], args[1]))
+                if node.func.attr in _FORM_SPEC_METHODS.get(type(obj), set()):
+                    if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], (int, str)):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one form id, 0x3f9eb or \"0x3f9eb\"")
+                    return self._read(node, getattr(obj, node.func.attr)(args[0]))
                 # methods that take a form id: c.marker(0x00016223)
                 takes_id = node.func.attr in _ID_METHODS.get(type(obj), set())
                 takes_number = node.func.attr in _NUMBER_METHODS.get(type(obj), set())
