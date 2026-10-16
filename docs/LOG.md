@@ -1511,3 +1511,28 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   verb-stage from a worktree needs FORK_DIR; a by-id `gh run download` into a full folder stops on
   "file exists" and a background task hides it, so check the DLL hash before client-dist; the Bash
   tool's ten-minute cap kills a stage run through it.
+
+### 2026-10-16
+
+- m2-cast-action-retry merged to fork parity caff3e04 (2026-10-16T00:34Z, 17:34 PDT), through `just
+  verb-merge` run from thuum branch cast-action-2's worktree so the gate judged its b-cast-moving and
+  b-cast-dual; then cast-action-2 landed on main. The merge carries playtest nineteen's moving case by a
+  retry, not by the handshake: 0ce34196 (performAction returns the graph's answer, so the view tries a
+  refused start again with a fresh rise), caff3e04 (the perform back on the game thread's queue, drained
+  right after the JS tick, its answer read on the next update; performed inside the JS update, 0ce34196
+  hung c2 at the first replay) and 6a7fdd52 (Skyrim Platform's log sink reopens its file after a failed
+  write). Readings, caff3e04 staged twice: as m2-cast-action at 15:05, x-cast-human 20261015-221432 green
+  with 6 of 6 starts taken while both seats strafe and turn (asks per start 1, 1, 1, 2, 6, 2), x-cast-gap
+  221733, b-spell 222044, b-cast-rhythm 222326 and b-cast-both-hands 222607 green; as its own branch at
+  16:01, once m2-cast-action had moved on to the handshake, b-cast-moving 20261015-233639 green (6 of 6,
+  asks 1, 1, 1, 2, 5, 4, the slowest taken 267 ms after its first ask) and b-cast-dual 233941 green. T2
+  green with 26 sessions, cast-action's among them (difftest job 6833 at caff3e04). The gate: run set
+  20261016-000313-merge-m2-cast-action-retry, 10 of 10 green (smoke-two-players, a-restart-persistence,
+  b-duel, b-cast-moving 001226, b-cast-dual, b-spell, b-cast-rhythm, b-cast-both-hands, a-melee-reach,
+  a-racemenu); both clones promoted to the caff3e04 client. Not in this merge: the engine's handshake
+  (castReady on the three spell-cast response handlers), which docs/verbs/cast-action.md names as the
+  moving row's fix. 34bdf0c3 hung and then crashed c2 (a first-chance access violation in
+  SkyrimPlatformImpl.dll reading the low half of a stack address, a truncated pointer); its replacement,
+  5df863fd on m2-cast-action (typed vtable swaps), is staged after playtest nineteen's third session.
+  Main gains b-cast-moving (1bdd23e), b-cast-dual (d82b6d2), lab/frida/figure-cast-trace.js and the
+  doc's afternoon text (416e04f).
