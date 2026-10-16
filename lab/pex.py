@@ -32,10 +32,14 @@ Format (UESP, "Skyrim Mod:Compiled Script File Format"):
   its fixed ones with a count, itself an integer value, and that many values.
 
 Only that much of the format is modeled; anything else is a parse error.
-`dump` prints a script's functions; `add-native` declares a global native
-function in an object's default state and writes the file back.
+`dump` prints a script's functions; `disasm` prints each function's
+instructions too, by opcode name with their arguments resolved (how a mod's
+effect script is read for a verb's inventory, ADR-031: docs/verbs/
+ghostwalk.md); `add-native` declares a global native function in an
+object's default state and writes the file back.
 
     pex.py dump <file.pex>
+    pex.py disasm <file.pex>
     pex.py add-native <file.pex> <object> <function> <returnType> [name:Type ...]
 """
 
@@ -59,6 +63,14 @@ OPCODES: list[tuple[int, bool]] = [
     (3, False), (3, False), (3, False), (3, False), (1, False), (2, False), (2, False), (3, True),
     (2, True), (3, True), (1, False), (3, False), (3, False), (3, False), (2, False), (2, False),
     (3, False), (3, False), (4, False), (4, False),
+]
+
+# The opcodes' names, in OPCODES' order (UESP's opcode table)
+OPNAMES = [
+    "nop", "iadd", "fadd", "isub", "fsub", "imul", "fmul", "idiv", "fdiv", "imod", "not", "ineg", "fneg",
+    "assign", "cast", "cmp_eq", "cmp_lt", "cmp_le", "cmp_gt", "cmp_ge", "jmp", "jmpt", "jmpf",
+    "callmethod", "callparent", "callstatic", "return", "strcat", "propget", "propset",
+    "array_create", "array_length", "array_getelement", "array_setelement", "array_findelement", "array_rfindelement",
 ]
 
 FLAG_GLOBAL = 1
@@ -440,9 +452,47 @@ def describe(p: Pex) -> str:
     return "\n".join(out)
 
 
+def show_value(p: Pex, v: Value) -> str:
+    """An instruction argument as text: an identifier bare, a string
+    quoted, a number or a bool as written, None for null."""
+    if v.kind == 0:
+        return "None"
+    if v.kind in (1, 2):
+        s = p.string(struct.unpack(">H", v.payload)[0])
+        return s if v.kind == 1 else repr(s)
+    if v.kind == 3:
+        return str(struct.unpack(">i", v.payload)[0])
+    if v.kind == 4:
+        return f"{struct.unpack('>f', v.payload)[0]:g}"
+    return str(bool(v.payload[0]))
+
+
+def disassemble(p: Pex) -> str:
+    """describe's lines, each function followed by its instructions: index,
+    opcode name, the fixed arguments, then "|" and the variable ones (a
+    call's arguments; the count is left out). Jumps are relative to their own
+    index."""
+    out = [describe(p).split("\n", 1)[0]]
+    for o in p.objects:
+        out.append(f"object {p.string(o.name)} extends {p.string(o.parent) or '(none)'}")
+        for st in o.states:
+            for n, f in st.functions:
+                params = ", ".join(f"{p.string(t)} {p.string(pn)}" for pn, t in f.params)
+                out.append(f"  [{p.string(st.name)}] {p.string(f.return_type)} {p.string(n)}({params})")
+                for k, ins in enumerate(f.instructions):
+                    args = [show_value(p, a) for a in ins.args]
+                    if ins.varargs is not None:
+                        args += ["|"] + [show_value(p, a) for a in ins.varargs[1:]]
+                    out.append(f"    {k:3} {OPNAMES[ins.opcode]:<12} {' '.join(args)}".rstrip())
+    return "\n".join(out)
+
+
 def main(argv: list[str]) -> int:
     if len(argv) >= 3 and argv[1] == "dump":
         print(describe(parse(open(argv[2], "rb").read())))
+        return 0
+    if len(argv) >= 3 and argv[1] == "disasm":
+        print(disassemble(parse(open(argv[2], "rb").read())))
         return 0
     if len(argv) >= 6 and argv[1] == "add-native":
         path, obj, fn, ret = argv[2:6]
@@ -463,7 +513,7 @@ def main(argv: list[str]) -> int:
         print(describe(p))
         return 0
     print(__doc__.split("\n    pex.py", 1)[0].rstrip())
-    print("\n    pex.py dump <file.pex>\n    pex.py add-native <file.pex> <object> <function> <returnType> [name:Type ...]")
+    print("\n    pex.py dump <file.pex>\n    pex.py disasm <file.pex>\n    pex.py add-native <file.pex> <object> <function> <returnType> [name:Type ...]")
     return 2
 
 

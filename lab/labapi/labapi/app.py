@@ -291,8 +291,10 @@ def create_app(services: Services) -> FastAPI:
     # clones' left attack) while test 1 swings. Input steps only, never a
     # console line: a seat's setup goes through the server (the gamemode's
     # labCommand console, just playtest-console), not keystrokes in a game
-    # (playtest fifteen, Eli). Refused while a run owns the clients.
-    ASSIST_ACTIONS = {"hold-key", "tap-key", "anim-event", "draw-weapon"}
+    # (playtest fifteen, Eli). Refused while a run owns the clients. The
+    # recorder's watch-start and watch-stop too (ADR-033: a playtest is
+    # recorded, lab/tools/playtest-record.sh): the stop answers with the trace.
+    ASSIST_ACTIONS = {"hold-key", "tap-key", "anim-event", "draw-weapon", "watch-start", "watch-stop"}
 
     @router.post("/clients/{client}/assist")
     async def assist(client: str, request: Request):

@@ -18,11 +18,13 @@
 # to 6582 ms against c1's 264 to 6267 in that run, the end relayed): it
 # drains for most of the hold and stops well before the watch ends (a lost
 # end, playtest six's, drains until the watch stops), and the figure's graph
-# takes the cast's start, the grab and push of its hands (fork m2-hands: the
-# observer holds a hand's spell start until the figure holds the caster's
-# casting state; before it the figure refused the start every time and only
-# raised its hands, playtest fifteen; docs/verbs/spell-cast.md; green twice
-# by path with it, 20261014-193121 and -193403). c2's health is read
+# takes the cast's start, the grab and push of its hands, and the Equipped
+# exit at the caster's stop (docs/verbs/cast-action.md: the figure performs
+# the caster's own actions through the engine's action entry, the caster's
+# variables one update before each; before it the figure refused the start
+# every time and only raised its hands, playtest fifteen, and once m2-hands
+# held the start for it the exit never came, so it cast on after the caster
+# stopped, playtest eighteen). c2's health is read
 # about a second after the stream ends, before its own regeneration can
 # run ahead of the server's cropped number. Then c1 learns
 # Firebolt (0x12FD0, fire-and-forget, FireDamageFFAimed 25, no area; its
@@ -67,6 +69,7 @@ steps:
       - c2.watched(c1).drainMs > 3000
       - c2.watched(c1).drainEndMs < 7500
       - c2.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 1
+      - c2.watched(c1).took("MRh_Equipped_Event") >= 1
   - c1: learn-spell {spellId: 77776}
   - c1: set-percentages {magicka: 1}
   - wait: 2
@@ -78,12 +81,17 @@ steps:
   - assert:
       - server.actor(c2).healthPercentage > 0.99
       - c2.state.healthPercentage > 0.99
+  - c2: watch-start
   - c1: hold-key {code: 199, ms: 1500}
   - wait: 4
   - assert:
       - server.actor(c2).healthPercentage < 0.78
       - server.actor(c2).healthPercentage > 0.74
       - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("MRh_SpellAimedStart") >= 1
+      - c2.watched(c1).took("MRh_SpellRelease_Event") >= 1
   - c1: screenshot
   - c2: screenshot
 artifacts: [server.log, c1.log, c2.log, screenshots]

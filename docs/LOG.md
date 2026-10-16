@@ -1248,3 +1248,379 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-block, b-self-cast, b-teleport, b-magic-restart, b-god, b-marksman, b-poison, b-potion,
   a-hostility, a-fight-end, a-sneak-damage, a-melee-reach, a-racemenu), 53 min. Both clones'
   clean-m1-next promoted to clean-m1 (the 05192845 client). Playtest eighteen next.
+- numidium's role, Eli's word (2026-10-14 evening PDT): release and lab operations. Merges on
+  thuum-magnus's "go" (`just verb-merge`, `just layer-merge`: the gate's verdict, the
+  promotions, the LOG entry and the submodule pin; never whether a verb is done); the lab's
+  calendar (holds, the nightly, the order of a night's stagings and sweeps; thuum-mundus keeps
+  the lab's infrastructure); the CI operator (retries and cancellations with the api token, a
+  runner or route fault diagnosed and handed to core); the process tooling (a workflow scripted
+  by hand twice becomes one command). Never the builder's judgment and never Eli's approvals
+  (scenarios, ADRs, a non-verb layer he has not seen). The rest of the 2026-10-13 delineation
+  stands: core the estate, thuum-mundus the sky lab's infrastructure, thuum-magnus the build.
+
+- Playtest eighteen (19:36 to 19:46 PDT, parity 05192845; world saved
+  playtest-m2-18-20261015T024812Z): the flight and the invisible name passed;
+  the hands did not (the figure's grab-and-push never stops, a left-hand
+  Firebolt's bolt leaves the figure's right hand, a Self cast shows no
+  animation), the god-mode breath's fire "sometimes" twice. The night's lab
+  (19:55 to 20:56, 24 runs, all green) and a research pass took each to a
+  cause: the relay rewrites the cast's exit event (M[LR]h_Equipped_Event) to
+  a fake equip, Skyrim Platform's castingSource falls back to the right hand
+  when the same spell is in both hands (x-left-firebolt2), a Self or
+  fire-and-forget start is taken when the caster's variables arrive first
+  and refused when they do not (x-self-anim, x-figure-cast4), and the breath
+  was never a rendering matter: shoutService's 3 s hit window swallows a
+  second shout in god mode (x-tgm-breath4, the server log). Eli's plan
+  (21:00): the cast-action verb (docs/verbs/cast-action.md), the figure
+  replaying the caster's actions through the engine's action entry, the
+  effect decided apart; melee stays on its event relay; withheld spells show
+  their animations; Ghostwalk and the per-player globals wait behind it. On
+  main the same night: b-push's flight check (6f90239), the driver's
+  delayFrames and globals steps, lab-api's globalValue, three Frida traces,
+  pex.py disasm, and the verb docs ghostwalk, player-globals and
+  natures-balance; fork branches m2-ghostwalk, m2-player-globals (T0 green),
+  m2-breath, m2-firebolt and m2-hands-exit (the last three dead or
+  superseded). The Apocalypse layer staged 20:57 to 21:02 (numidium), its
+  sweep running at the entry's time.
+
+- The Apocalypse layer (thuum branch apocalypse f84a5d23, main merged in) staged and went red;
+  withdrawn (21:03 to 21:36 PDT). `just layer-stage apocalypse` ran clean in five minutes:
+  persist-mods, deploy-srv with the spaced name, the m2-flight server restarted on the new load
+  order, add-mods on both clones reporting all eight plugins, clean-m1-next "apocalypse layer
+  f84a5d23". Then `just layer-merge`'s full sweep (run set 20261015-040243-layer-apocalypse) went
+  red on its first three runs (a-activation-reach, a-actor-values, a-character-creation: c1
+  connected and never answered), and numidium stopped it: nothing promoted, main not moved. The
+  cause is on the client. Skyrim Platform's `ValidateFilename` takes only [0-9A-Za-z._-]
+  (skyrim-platform/src/platform_lib/Validators.cpp:3-13) and `getFileInfo` applies it
+  (FileInfoApi.cpp:12), so "Apocalypse - Magic of Skyrim.esp" throws and the client's load-order
+  check (skymp5-client loadOrderVerificationService.ts) fails in once('update'); c1.log: "'Apocalypse
+  - Magic of Skyrim.esp' is not a valid argument for 'filename'". The server took the spaced name
+  cleanly. The fix is thuum-magnus's, on fork branch m2-spaced-plugins (spaces allowed in
+  getFileInfo; the client's catch). The lab is back on main for the cast-action probes: deploy-srv
+  from main 7f8f9836 and the server restarted without Apocalypse; persist-mods from main; each
+  clone's layer snapshot deleted, the clone rolled back to clean-m1 (05192845), main's driver laid
+  by client-driver (main's lab/driver is 26a7d1a's), clean-m1-next retaken; smoke-two-players green
+  on it (20261015-043315). The Apocalypse ESP stays unreferenced in persist's esm directories. The
+  retry, once Eli clears the magic animation shape: `verb-stage` of the fix's client, then
+  `layer-stage apocalypse`, which now ends in a smoke run with the layer, so a layer that breaks
+  the client stops at its staging instead of in the merge's sweep. Ghostwalk, m2-player-globals and
+  the cast candidates wait (Eli, 20:30 PDT: the magic animation shape first; the next verb is
+  cast-action, docs/verbs/cast-action.md).
+
+- The cast-action verb's engine read and build (21:07 to 22:00 PDT; docs/verbs/cast-action.md).
+  The re-analyst read the action path on sky-re (28 minutes, 115 tool calls): TiltedEvolution's
+  five numbers are 1.6.1170's own ids, each confirmed by `just addr` (38949 ActorMediator::
+  PerformAction, the one entry every BGSAction takes, reached from SourceActionMap::DoAction 34202
+  through TESActionData::Process 41557; 38953 its second entry, the tail that performs a data as
+  given, no validation, no idle selection, no code caller; 403567 the mediator singleton; 39004 the
+  post step both entries call, the ActorState bookkeeping keyed by the event name, not the
+  master-behavior variables). The data arrives with its event empty and leaves with the chosen
+  idle's event; unk20 is 2 on every engine action and read by nobody; flags bit 0 is the engine's
+  dry run. Ghidra names and plate comments saved. Built on fork m2-cast-action 0d69f6fe: the hook
+  on 38949 (the player's data only, dry runs and refused calls left out, read at the leave, a
+  per-thread stack; the JS event actionPerformed with the variables as they were when the graph was
+  asked) and the export performAction(actor, action, idle, eventName, type) through 38953, both
+  AE only; its Windows run 38683079932 started 21:44. Thuum cast-action feebd30: the driver keeps
+  the player's recent actions with their variables and figure-action replays them on a figure
+  ({replay: all} at the original spacing, the recorded variables applied first through
+  applyAnimationVariablesToActor); lab/frida/action-trace.js logs 38949, 38953 and the cast-shaped
+  events at 32901, the test of the read. The step's name alone went to main (7aa620a) so main's
+  lab-api image takes the probes. Twelve ADR-031 references committed alone on main
+  (ff74e6c..3381c42: spell-bolt-a/-b, self-invisibility-a, self-oakflesh-a, shout-firebreath-a/-b,
+  shout-uf3-a/-b, melee-power-a/-b, melee-swing-b, block-b), each from a solo run's watch-stop with
+  its cut and its bandit's id; melee-swing-a and spell-stream-a wait for retakes with combat AI off
+  (the bandit's counterattack was in the player's record), r-invisible-prompt for a redo in frame.
+  numidium started verb-stage m2-cast-action at 22:00 from the branch's worktree (merge 403fe5c9,
+  LABAPI 1533) with the four probes by path, x-figure-action, -bolt, -self, -dual (P1 to P4: c1
+  casts, its hook records, c1's driver replays on c2's figure in c1's own game); their reading
+  decides between the action replay and the fallback.
+
+- The cast-action verb proved and built (22:28 to 23:15 PDT; docs/verbs/cast-action.md). The four
+  probes ran on the staged branch (numidium's verb-stage, with a step-7 fix of its own on the way:
+  a fresh worktree lacks the built driver, main 0f46a2d). Two false starts: a frida step right
+  before a console step on the same client left the console unopenable (052852, 053059), and the
+  figure's own player held no spell, so the figure had no cast transitions and refused every replay
+  (053450, 053807 round one). With the figure armed, a same-tick replay was still refused every
+  time (054049, 054336, 055039 round one); the caster's variables one update before the action
+  (the driver's delayFrames 1) was taken every time: Flames' start and release, the 4 s loop, the
+  Interrupt's Equipped exit and the casting state down 196 ms after (055039), Firebolt's start,
+  ready and release (055907), Invisibility's Self cast (060152), and the dual cast on a figure
+  without the perk (060444), which the engine performs as the left hand's actions carrying the dual
+  idle. action-trace.js (055622) confirmed the read live (the event empty on entry and chosen on
+  exit, type 2, the replay through 38953) and that key input survives a frida attach. The
+  re-analyst's second read found no engine cancel: the same-tick refusal is the graph's one-update
+  latency. P1 to P4 hold; the fallback (the figure's own caster) stays unbuilt. Built on fork
+  m2-cast-action, in order: 9de6f123 the wire message UpdateAction, MsgType 44 (wire id 52, schema
+  14, the branch leaving 05192845 where 43 is last; PlayerGlobals renumbers to 45 when it lands)
+  with its validator, fixtures and the C++ and TypeScript types; 303a85d7 the server relay to the
+  neighbours but the sender; 965cf222 Skyrim Platform's cast hand from any caster state but kNone
+  (eighteen's second finding); 3f8d8f77 the client (ActionSyncService, the view's two-update
+  replay, the event relay without the hands' cast events, the held-start logic removed,
+  magicSyncService sending only the player's own casts); e3648112 the T2 session. On thuum
+  cast-action: b-spell's new assertions (0d44f4b, its own commit: the Equipped exit on the figure,
+  the bolt's wind-up). On main: the spell-stream-a reference from its retake with combat AI off
+  (060845). Windows build 38690816553 at 23:12; next the staged run of b-spell, p-spell-bolt and
+  the left-hand and dual relays, then T2, references, the gate and playtest nineteen.
+- m2-cast-action merged to fork parity e75ee5c8 (2026-10-15T08:50Z, 01:50 PDT), through `just verb-merge`
+  run from thuum branch cast-action's worktree so the gate judged the branch's driver and b-spell; then
+  cast-action landed on main. The verb is the magic animation shape Eli asked to settle before Apocalypse
+  (playtest eighteen: the hands' cast never ended, a left-hand Firebolt left the right hand, a Self cast
+  showed nothing; docs/verbs/cast-action.md): the figure plays the caster's own actions through the
+  engine's action entry (a PerformAction hook and a performAction native, read on sky-re), carried by the
+  wire message UpdateAction (44) and the server's relay, replayed one frame after the action (a same-tick
+  replay is refused on an armed figure); a cast event's hand is the hand of the player's last action
+  (Skyrim Platform, e75ee5c8); every exhale arms the shout gate (the god-mode breath of playtests sixteen
+  and eighteen, ea57c551). Readings: x-figure-action, -bolt, -self, -dual and x-action-trace-input green;
+  x-left-firebolt2 green with castingSource 0 on both launches in c2's launch trace (20261015-075606; 1 on
+  both before e75ee5c8); x-dual-relay and x-tgm-breath4 green; b-spell green with its new assertions (the
+  figure's cast ends, a bolt's wind-up shows); p-spell-bolt, ADR-031's first parity scenario, green
+  (20261015-080752) against the retaken reference spell-bolt-a, its ten findings in the later list with
+  reasons (the target's stagger cascade, which the B reference cannot show yet; the caster's figure's hit,
+  ADR-028). T2 green with 26 sessions, the new cast-action session among them (difftest job 6654 at
+  e75ee5c8). The gate: run set 20261015-083019-merge-m2-cast-action, 6 of 6 green (smoke-two-players,
+  a-restart-persistence, b-duel, b-spell, a-melee-reach, a-racemenu); both clones promoted to the
+  e75ee5c8 client. Tooling found on the way, all on main: verb-stage runs from a branch's worktree and
+  every probe runs even after a red one; test-proto refuses a difftest artifact older than its branch's
+  skymp-wire (the first T2 here passed without the new session); lab-api's parity cut takes a list of
+  kinds and seeds a series' baseline from its first sample. Next: the Apocalypse retry, when Eli says.
+
+- cast-action DONE (2026-10-15 01:49 PDT; docs/verbs/cast-action.md, ADR-032). Stage two on ea57c551
+  (00:00): b-spell green with its new assertions (065943: the figure's Flames start and release one
+  update apart, the Equipped exit 4 s later, Firebolt's start, ready and release, all taken through
+  the real relay), x-dual-relay green (070729, the figure 41 ms behind the caster), x-tgm-breath4
+  (071021: the 2.5 s breath reported and shown; a god-mode miss with no hit stays unreported, a known
+  limit), x-left-firebolt2 (070447) still launching from the right with the state read widened, so
+  the hand moved into the action hook itself (fork e75ee5c8, Frida::LastCastHand; 075606: both
+  launches from the left), and p-spell-bolt red twice as the parity tool's (the target's own game
+  takes no hit, ADR-028, so a "hit" cut had no anchor there; the caster's figure none either; and a
+  reference cut at 0 made every variable's first sample a consequence). Tool fixes on main: a cut
+  lists kinds tried per view and value:<av> (34c2f3a, test fixed 422abf8, the image by API pipeline
+  1555: a lab-api push must have its tests green first), a series' first sample seeds its baseline
+  (3470159). References: spell-stream-a (060845) and melee-swing-a (061047) retaken with combat AI
+  off, spell-bolt-a retaken because the first take missed (080129). p-spell-bolt green by id on the
+  committed file (080752, 5bf1d51, its later list ADR-028's differences, the stagger the B
+  reference's Spell.Cast cannot show, the figures' refused idle probes): the first parity scenario
+  to pass. The gate (numidium, verb-merge from the cast-action worktree): T2 on the branch image
+  with the cast-action session, then run set 20261015-083019, 6 of 6 green (smoke-two-players,
+  a-restart-persistence, b-duel, b-spell, a-melee-reach, a-racemenu); parity to e75ee5c8, the
+  thuum landing by numidium's report. Playtest nineteen's checklist drafted (the hands whole, the
+  left hand, Self and dual casts, the breath). Left for later verbs: the voice's and melee's actions
+  (the event relay stays), a mage bandit's B reference for the spell staggers, p-spell-stream
+  (drafted; no streaming B yet), the invisible-prompt reading (no vantage yet), the Apocalypse layer
+  retry (m2-spaced-plugins), Ghostwalk and the per-player globals, now unblocked.
+
+- Playtest nineteen (2026-10-15 10:36 to 10:45 PDT, parity e75ee5c8; docs/private/playtest-m2-19.md):
+  "basically every test only half works". Read from c2's log (251 replays on test 1's figure): the
+  casts alternate, one refused whole and the next taken whole, at Eli's rhythm of 400 to 700 ms
+  between a cast's exit and the next start; the lab's probes had never cast closer than four
+  seconds. Four probes at that rhythm (174811, 175053, 175554, 175846): only the strafing one
+  refused, a start 570 ms after a taken exit. Two causes in the view's timing against the graph
+  (the want variable left up by the exit's variables, so the next start's want has no rise; the
+  start performed one update after its variables whatever the graph's state, where the caster's
+  engine waits for the graph's answer) and one regression of the last hand fix (every cast event
+  named with the latest start's hand, so both hands casting the same spell separately streamed from
+  one hand). Fixed on fork m2-cast-action: c7d49cc0 one pending start per hand, 867f0ac8 the want
+  dropped after an exit and before a start, the snapshot off a figure's casting booleans, abe44a55
+  a refused action retried for up to fifteen updates. Eli's word on the term: "dual casting" is two
+  things, both hands separately (A) and the perk's (B); the probes had covered B. The stage of
+  abe44a55 with x-cast-twice-fast, x-both-hands-relay, x-left-firebolt2 and b-spell, then the gate
+  and nineteen again; the Apocalypse retry parked behind it (numidium). Eli's world saved as
+  playtest-m2-19-20261015T174737Z. docs/verbs/cast-action.md's T3 box reopened.
+- m2-cast-action merged again, playtest nineteen's fix, to fork parity abe44a55 (2026-10-15T20:05Z, 13:05
+  PDT), through `just verb-merge` from thuum branch cast-action-2's worktree, which then landed on main.
+  Playtest nineteen ("every test only half works"): the figure took every other cast at Eli's rhythm
+  (400 to 700 ms between casts; the lab had never cast twice closer than 4 s), and two hands casting
+  separately streamed from one. The fix, three commits on parity e75ee5c8: one pending cast start per hand
+  (c7d49cc0); the figure's want variable falls with its exit and rises for every start, and the snapshot
+  leaves a figure's casting bits alone (867f0ac8); a refused action is tried again, variables then
+  action, for up to fifteen updates (abe44a55), since the graph may still be finishing its exit (the
+  strafing probe x-cast-twice-move 175846 refused a start with the want rising). Probes on abe44a55, all
+  green: x-cast-twice-fast 184857, x-both-hands-relay 185138, x-left-firebolt2 185440 (castingSource 0 on
+  both launches), b-spell 185722. Under ADR-033 the gate ran the rhythm as scenarios, committed alone on
+  cast-action-2: b-cast-rhythm (eight Flames casts 0.4 s apart, every start, release and exit taken on the
+  figure) and b-cast-both-hands (three starts and exits per hand). The first gate (run set
+  20261015-192503) went red on b-cast-rhythm alone because of the scenario: one assertion read the
+  caster's figure in its own game, c1.watched(c1), which is always 0. thuum-magnus dropped it (5e126a9,
+  for Eli's review: the claim stands on the figure's three checks, since eight starts on c2's figure need
+  eight casts by c1), and that set was stopped with 5 green. The gate again, with T2 skipped since T2 was
+  green on abe44a55 at 12:25: run set 20261015-194205-merge-m2-cast-action, 8 of 8 green (smoke-two-players,
+  a-restart-persistence, b-duel, b-spell, b-cast-rhythm 195257, b-cast-both-hands 195533, a-melee-reach,
+  a-racemenu). Both clones promoted to the abe44a55 client. Also this cycle, ADR-033's tooling on main:
+  the parity diff counts (5ded43ae), `just playtest-record` (b9f9ad31, c2c54bb0). Next: playtest
+  nineteen again, recorded into results/playtest-19-2.
+
+- cast-action's second merge (2026-10-15 13:04 PDT; docs/verbs/cast-action.md, ADR-033). The fixes for
+  nineteen's half on fork m2-cast-action (c7d49cc0 one pending cast start per hand; 867f0ac8 the want
+  variable dropped after an exit and before a start, the snapshot off a figure's casting booleans;
+  abe44a55 a refused action retried up to fifteen updates) staged at 11:49 and probed: x-cast-twice-fast
+  184857 24 of 24 (no retry fired), x-both-hands-relay 185138 (both hands' casts and both streams),
+  x-left-firebolt2 185440 (the left hand kept), b-spell 185722. ADR-033 accepted and written (a verb is
+  proved over its sequences and combinations; a playtest is recorded): numidium landed parity counts
+  (5ded43ae) and `just playtest-record <n>` (b9f9ad31, c2c54bb0) the same hour; the two probes became
+  gate scenarios on thuum branch cast-action-2 (b-cast-rhythm 8107fb8, b-cast-both-hands 95c1630; one
+  assertion of the first dropped, 5e126a9: the caster's own record is watched_self, not watched(c1)).
+  The gate (numidium, verb-merge from cast-action-2): the first set 5 green and 1 red on that
+  assertion, stopped; the rerun 194205, 8 of 8 green (smoke-two-players, a-restart-persistence,
+  b-duel, b-spell, b-cast-rhythm 195257, b-cast-both-hands, a-melee-reach, a-racemenu). Parity to
+  abe44a55 and the thuum landing by numidium's report; nineteen's second session next, recorded.
+- A correction to commit 1dc55906's message (build-client by commit): its example is wrong. The hand restage
+  that laid 0ce34196 over abe44a55 (2026-10-15 14:2x) did not go through build-client; thuum-magnus ran a
+  by-id `gh run download` into a dist folder an earlier stage had left full, it stopped on "file exists",
+  and the restage went on with the old folder until client-dist's DLL hash showed it. The fix stands on
+  its own: without a commit, build-client takes the branch's newest successful build (0ce34196 for
+  m2-cast-action then, checked), which a stage of an older head would have laid the same way;
+  `just build-client <branch> <sha>` clears the folder, downloads by commit and prints what it got.
+- Playtest nineteen's second session (13:13 to 13:18, abe44a55, recorded as playtest-19-2): Eli's
+  reading "reliability is almost every other cast. improved, but not perfect": Flames, Invisibility
+  and the perk's dual cast about half, Firebolt almost every time, the streams right in number and
+  placement, the breath about half. c2's log: the figure's Flames casts refused and taken in strict
+  alternation (eight of eight after a taken exit refused at 534 to 1334 ms, every one after a
+  refused cast taken at 183 to 553 ms); Firebolt 20 of 24. Read first as a 1.5 s window after a
+  taken exit (x-cast-human 202506, strafing and turning, agreed: 1394 and 1469 ms refused, 1683 and
+  1817 taken). Two fork pushes chased it: 0ce34196 performed the action synchronously inside the JS
+  update so the view's retry could read the graph's answer, and HUNG the game at the first replay
+  on its stage (x-cast-gap 211105, x-cast-human 211518: the action's graph event re-entered Skyrim
+  Platform's sendAnimationEvent hook, a JS call from within a JS call); caff3e04 put the perform
+  back on the game-thread queue (drained right after the JS tick) with performActionResult read
+  on the next update, and carries 6a7fdd52, the log sink that reopens its file after a failed
+  write (numidium's stopped-log chase: InitLog flushes every line, so one failed fwrite leaving
+  the CRT's error flag set is the mechanism that fits; the trigger is still in the guest, the
+  recorder now captures handle64 and Defender's events live). The window itself was WITHDRAWN by
+  two abe44a55 probes with lab/frida/figure-cast-trace.js (the figure's graph events with the
+  graph's answer, its own caster's calls, the action entries, the begin-cast handlers): x-cast-gap
+  213755 standing still took 17 of 17 starts through the relay at every gap from 513 to 2651 ms,
+  each 4 to 7 ms after the figure's graph answered the want variable's rise with BeginCastRight
+  (34 of 34 rises answered, FinishCast from the interrupt message 33 to 54 ms before every exit
+  and harmless); x-cast-replay-gap 214106 (the driver's replay, no relay) refused 5 of 6 starts in
+  the graph itself because that replay never drops the want, so the graph gets no rise. The fault,
+  then: the view performed a start one update after its variables, a timer, where the engine's
+  caster waits for the graph's answer; a still figure answers within a frame, a moving one later,
+  and nineteen's seats move. The fix is the engine's own handshake on the figure, fork 34bdf0c3:
+  a hook on the three spell-cast response handlers' ExecuteHandler (vtables from CommonLib's
+  Offsets_VTABLE.h, slot 1 per IHandlerFunctor.h) records each BeginCast for a non-player actor,
+  castReady(actor, hand) takes it, formView performs a start only on it (a second without one and
+  the want rises again, twice, then the start goes as before). Eli's directions today: name which
+  dual casting is meant (A, both hands separately; B, the perk's, its own animation; B rides the
+  action data's idle and needs no perk on the figure, its effect multiplier waits for server-owned
+  perks); spin up agents for reads and scripts to save context (the probe readings, the Moonlight
+  times from the Mac's unified log, the trace script were theirs); and, at 14:5x, stop juggling
+  the lab: from then numidium runs stages, probes and builds (caff3e04 staged 15:05, 34bdf0c3
+  chained behind its probes) and thuum-magnus writes the fix and reads results. Lab lessons of
+  the hand restage (lab/frida/figure-cast-trace.js committed 8a79b33, the red row 0852f7f): a
+  scenario's frida step reads only the deployed lab tree, uploads serve `just frida` attaches;
+  verb-stage from a worktree needs FORK_DIR; a by-id `gh run download` into a full folder stops on
+  "file exists" and a background task hides it, so check the DLL hash before client-dist; the Bash
+  tool's ten-minute cap kills a stage run through it.
+
+### 2026-10-16
+
+- m2-cast-action-retry merged to fork parity caff3e04 (2026-10-16T00:34Z, 17:34 PDT), through `just
+  verb-merge` run from thuum branch cast-action-2's worktree so the gate judged its b-cast-moving and
+  b-cast-dual; then cast-action-2 landed on main. The merge carries playtest nineteen's moving case by a
+  retry, not by the handshake: 0ce34196 (performAction returns the graph's answer, so the view tries a
+  refused start again with a fresh rise), caff3e04 (the perform back on the game thread's queue, drained
+  right after the JS tick, its answer read on the next update; performed inside the JS update, 0ce34196
+  hung c2 at the first replay) and 6a7fdd52 (Skyrim Platform's log sink reopens its file after a failed
+  write). Readings, caff3e04 staged twice: as m2-cast-action at 15:05, x-cast-human 20261015-221432 green
+  with 6 of 6 starts taken while both seats strafe and turn (asks per start 1, 1, 1, 2, 6, 2), x-cast-gap
+  221733, b-spell 222044, b-cast-rhythm 222326 and b-cast-both-hands 222607 green; as its own branch at
+  16:01, once m2-cast-action had moved on to the handshake, b-cast-moving 20261015-233639 green (6 of 6,
+  asks 1, 1, 1, 2, 5, 4, the slowest taken 267 ms after its first ask) and b-cast-dual 233941 green. T2
+  green with 26 sessions, cast-action's among them (difftest job 6833 at caff3e04). The gate: run set
+  20261016-000313-merge-m2-cast-action-retry, 10 of 10 green (smoke-two-players, a-restart-persistence,
+  b-duel, b-cast-moving 001226, b-cast-dual, b-spell, b-cast-rhythm, b-cast-both-hands, a-melee-reach,
+  a-racemenu); both clones promoted to the caff3e04 client. Not in this merge: the engine's handshake
+  (castReady on the three spell-cast response handlers), which docs/verbs/cast-action.md names as the
+  moving row's fix. 34bdf0c3 hung and then crashed c2 (a first-chance access violation in
+  SkyrimPlatformImpl.dll reading the low half of a stack address, a truncated pointer); its replacement,
+  5df863fd on m2-cast-action (typed vtable swaps), is staged after playtest nineteen's third session.
+  Main gains b-cast-moving (1bdd23e), b-cast-dual (d82b6d2), lab/frida/figure-cast-trace.js and the
+  doc's afternoon text (416e04f).
+- Correction to the stopped-log finding of playtest nineteen (numidium; 3d0ee21's and 6087069's messages,
+  6a7fdd52's premise): the Skyrim Platform log never stopped. What writes a seat's log during play is its
+  game replaying the other seat's spell actions (cast-action's performAction lines with their onResult and
+  latent-callback lines); a seat's own casts and moves write nothing to its own log. The recorder's rule
+  counted the seat's own events after the log's last line, so every "stop" it reported was a quiet log.
+  Judged by the other seat's spell actions: in session two, c1's last spell action was 13:18:01.325 and c2's
+  last line, its replay, 13:18:01.443, and c2 made no spell action in that cycle, so c1's log had nothing to
+  hold; in session three (17:38 to 18:02 PDT, results/playtest-19-3), c1's last action of any kind was
+  17:56:35 with c2's log to 17:56:47, c2's last 17:56:54 with c1's log to 17:57:21, and both logs had
+  silences of about 330 s mid-session that ended with the next spell actions; in session one, c2's log
+  replays c1's Self casts to 10:41:12 (shouts are not replayed). Session three's live capture
+  (capture-c1-5.txt) found the game alone holding the file and no Defender or Application event, which fits.
+  lab/tools/log-stop.py now judges a log by the other seat's spell actions after its last line (2 s for the
+  replay, counted only in cycles where the seat's own trace shows a figure), and the recorder's live check
+  does the same per cycle once both seats' traces are in; lab/tests/test_log_stop.py. Replayed on session
+  three's traces: no finding on either log, and a finding on c2's log cut at 17:50 (50 spell actions of c1
+  after its last line at 17:45:23). 6a7fdd52's sink reopen is harmless and stays.
+- m2-cast-action 5df863fd (the handshake as typed vtable swaps on the three spell-cast response handlers) staged
+  18:09 to 18:39 PDT from main and withdrawn: the figure's starts wait for castReady and none ever came. Readings on
+  c2, the observer (scratchpad cast-readings.py): x-cast-human 20261016-011836 took 0 of 1 start (9 asks about 3.1 s
+  apart, then no later start; caff3e04 took 6 of 6 on the same probe), x-cast-gap 012117 1 of 2, b-cast-moving 012428
+  red 1 of 2, b-cast-dual 012709 red 0 of 1, b-spell 012940 red 0 of 1, b-cast-rhythm 013353 red 2 of 3,
+  b-cast-both-hands 013624 red with 5 of 5 starts taken at the first ask (its red lies elsewhere); no castReady line in
+  any run, no hang, no crash. magnus's slot-probe.js on c2's 5df863fd game (18:39): slot 1 of the left, right and voice
+  spell-cast handler vtables points into skse64_1_6_1170.dll (+0xd800, +0xd760, +0xd930), not into
+  SkyrimPlatformImpl.dll or SkyrimSE.exe; the response dispatcher hands BeginCastRight to the figure about once a
+  second while the view re-raises its want (15 lines from two Flames holds by assist), and x-cast-gap's
+  figure-cast-trace has 46 beginCastRight calls, each from skse64_1_6_1170.dll+0xd7e6. So the graph answers and SKSE's
+  own function owns the slot; the swap's thunk was never in the chain (magnus: the handshake stands, the hook's point
+  was wrong). The event SKSE's thunk exists for is in CommonLib: SKSE::ActionEvent (include/SKSE/Events.h:37-67,
+  kSpellCast and kVoiceCast with a slot) through SKSE::GetActionEventSource (include/SKSE/API.h:31); magnus's
+  a930968b listens there with no vtable write, and a start waits four updates at most before caff3e04's timing
+  (1de955e6). The lab went back to parity caff3e04 at 18:49 (server tag parity-caff3e04, both clones' clean-m1-next
+  retaken from clean-m1 with main's driver; smoke-two-players 20261016-014644 green), and a930968b is staged over it
+  with the same seven runs, the lab returned to parity after them for the 03:30 nightly. Also run tonight on
+  caff3e04 for Eli's notes from playtest nineteen's third session (17:36 to 18:02, recorded into
+  results/playtest-19-3, world playtest-m2-19-3-20261016T010249Z): b-marksman 20261016-010247 green (c2's game shows
+  c1's arrows, 2633 units against c1's own 2555 at a full draw, 1328 against 1445 at a half; the playtest's five shots
+  were the same Long Bow and iron arrows, every one taken by the server), and x-tgm-breath4 010539 green (breaths one
+  to three drawn on c2, each cone 0 to 3 emitters of 20, so the emitter cap is not the missing fire; the fourth, the
+  control, came while c2 was dead from the third, hit nothing and never reached the server, so it was never relayed).
+- Playtest nineteen's third session (17:42 to 17:57 PDT, parity caff3e04, recorded playtest-19-3,
+  world playtest-m2-19-3-20261016T010249Z): every Flames, Firebolt, Invisibility and dual item
+  ticked, the first time since eighteen; the hands hold at T4 on the retry alone. c1's first game of
+  the session exited silently at 17:38:42, 15 s after its stream opened and 3 s after the recorder's
+  watch-start, no crash or hang report; relaunched at 17:41:39 and fine after (one stream per seat,
+  opened by thuum-magnus alone, the time noted). Eli's findings and the recording's reading (an
+  agent over the traces and server.log): rotfern's arrows "not visible on test 2" were there (eight
+  of eleven struck the same object in both games, 22 to 43 ms apart; b-marksman 010247 green on the
+  same build), leaving from the figure's hand along its facing where his own left along the
+  crosshair; Eli's requirement follows, the arrow's path identical on both screens (report the
+  engine's launch, origin and angles and power, replay exactly, the server checking the origin at
+  the shooter; a parity scenario). The god-mode second breath "not fixed": 13 of his 18 releases
+  never reached the server, including every second breath within three seconds; caff3e04's
+  shoutService reports a release only from a hit when the voice recovery reads zero, and breaths
+  that hit nobody are never reported (x-tgm-breath4 010539 agrees, its control confounded by c2's
+  death); the fix is the one the verb doc names, the release reported from the engine's voice cast.
+  Recasting Invisibility while invisible "made me visible on the other screen": the recording has
+  only test 2 recasting, 13 times, each arriving on test 1's screen as the server's end and a fresh
+  effect 60 to 81 ms later; a probe with screenshots next. A Flames stream aimed straight up shows
+  forward on the other screen (the damage goes up): the figure's stream ignores pitch; a probe next.
+  The handshake chase after the session: 5df863fd's vtable swap never fired (seven runs, no
+  castReady, the view's three-second fallback then refused); the re-analyst read the path (the
+  dispatcher 38447 calls the handler's slot 1, which is 42820 and kin, the only way in) and
+  slot-probe.js on the running game found SKSE's own function in that slot (skse64+0xd760 and kin,
+  its action events), over any plugin's write; a930968b reads the answer from SKSE::ActionEvent
+  (kSpellCast, kVoiceCast) with a sink at kDataLoaded and waits four updates at most before
+  caff3e04's timing (1de955e6); staged tonight by numidium over the restored parity, the lab back
+  on parity before the nightly. Eli's direction at 14:5x stands: numidium runs the lab, thuum-magnus
+  writes the fix and reads the results. The order before Apocalypse: the breath report, the
+  invisibility probe, the stream pitch, the arrow-path parity, the handshake's landing, the two
+  open cast-action rows (an interrupted cast; both seats casting at each other); then the layer
+  retry on Eli's word, player-globals renumbered, Ghostwalk.
+- m2-cast-action merged to fork parity a930968b (2026-10-16T03:30Z, 20:30 PDT) through `just verb-merge` from
+  main 44f59cf5, on magnus's conditional go (the seven stage runs green first): the engine's handshake for a figure's
+  cast start. The answer comes from SKSE's action events: a BSTEventSink on SKSE::GetActionEventSource()
+  (CommonLibSSE-NG include/SKSE/API.h:31, include/SKSE/Events.h:37-67), registered at kDataLoaded, notes kSpellCast
+  (left or right) and kVoiceCast for every actor but the player, and castReady(actor, hand) takes it; a start waits four
+  updates at most for it, then goes with caff3e04's timing and retry (1de955e6). No vtable write: 5df863fd's swap never
+  sat in the chain, since SKSE's own function owns slot 1 of the spell-cast handler vtables. The stage (18:49 to 19:41)
+  took 49 of 49 starts on the figure (45 at the first ask, 4 at the second), castReady 1 to 2 ms before every taken
+  start: x-cast-human 20261016-021749 6 of 6, x-cast-gap 022241 17 of 17, b-cast-moving 022553 6 of 6, b-cast-dual
+  022834 4 of 4, b-spell 023116 2 of 2, b-cast-rhythm 023357 8 of 8, b-cast-both-hands 023628 6 of 6. T2 green with 26
+  sessions, cast-action's among them (difftest job 6654). The gate: run set 20261016-030133-merge-m2-cast-action, 10
+  of 10 green (smoke-two-players, a-restart-persistence, b-duel, b-cast-moving 031001, b-cast-dual 031244, b-spell
+  031528, b-cast-rhythm 031805, b-cast-both-hands, a-melee-reach, a-racemenu); both clones promoted to the a930968b
+  client. The 03:30 nightly judges this parity; the verb doc's merge line and the SKSE-events decision are magnus's for
+  the morning.

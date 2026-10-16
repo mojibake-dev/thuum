@@ -1,0 +1,2805 @@
+{
+ "at": 1314,
+ "npc": 4278192388,
+ "trace": {
+  "actors": [
+   {
+    "bools": {
+     "IsStaggering": [
+      [
+       14,
+       false
+      ]
+     ]
+    },
+    "casts": [],
+    "effects": [],
+    "events": [],
+    "first": [
+     136850.28125,
+     -63339.2109375,
+     13456.8173828125
+    ],
+    "formId": 549138,
+    "health": [
+     [
+      0,
+      22
+     ]
+    ],
+    "hits": [],
+    "last": [
+     136850.28125,
+     -63339.2109375,
+     13456.8173828125
+    ],
+    "magicka": [
+     [
+      0,
+      0
+     ]
+    ],
+    "maxDisplacement": 0,
+    "maxStep": 0,
+    "maxStepMs": -1,
+    "name": "wolf",
+    "samples": 388,
+    "stamina": [
+     [
+      0,
+      205
+     ]
+    ],
+    "taken": [],
+    "vars": {
+     "1stPRot": [
+      [
+       14,
+       0
+      ]
+     ],
+     "1stPRotDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "AimHeadingCurrent": [
+      [
+       14,
+       0
+      ]
+     ],
+     "AimPitchCurrent": [
+      [
+       14,
+       0
+      ]
+     ],
+     "BowAimOffsetHeading": [
+      [
+       14,
+       0
+      ]
+     ],
+     "BowAimOffsetPitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "CastBlend": [
+      [
+       14,
+       0
+      ]
+     ],
+     "CastBlendDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "Direction": [
+      [
+       14,
+       0.2
+      ]
+     ],
+     "Is1HM": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsAttacking": [
+      [
+       14,
+       1
+      ]
+     ],
+     "IsBashing": [
+      [
+       14,
+       72
+      ]
+     ],
+     "IsBeastRace": [
+      [
+       14,
+       194
+      ]
+     ],
+     "IsBleedingOut": [
+      [
+       14,
+       255
+      ]
+     ],
+     "IsBlockHit": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBlocking": [
+      [
+       14,
+       1
+      ]
+     ],
+     "IsCastingDual": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsCastingLeft": [
+      [
+       14,
+       60
+      ]
+     ],
+     "IsCastingRight": [
+      [
+       14,
+       91
+      ]
+     ],
+     "IsEquipping": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsNPC": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsPlayer": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsRecoiling": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsSneaking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsStaggering": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsUnequipping": [
+      [
+       14,
+       0
+      ]
+     ],
+     "MagicAimOffsetHeading": [
+      [
+       14,
+       0
+      ]
+     ],
+     "MagicAimOffsetPitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "NotCasting": [
+      [
+       14,
+       0
+      ]
+     ],
+     "Pitch": [
+      [
+       14,
+       0.5
+      ]
+     ],
+     "PitchOffset": [
+      [
+       14,
+       -91.664
+      ]
+     ],
+     "PitchOverride": [
+      [
+       14,
+       205
+      ]
+     ],
+     "Speed": [
+      [
+       14,
+       0
+      ]
+     ],
+     "SpeedDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "SpeedSampled": [
+      [
+       14,
+       0
+      ]
+     ],
+     "TurnDelta": [
+      [
+       14,
+       5
+      ]
+     ],
+     "VelocityZ": [
+      [
+       14,
+       0
+      ]
+     ],
+     "b1HMCombat": [
+      [
+       14,
+       0
+      ]
+     ],
+     "b1HM_MLh_attack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAllowRotation": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAnimObjectLoaded": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAnimationDriven": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAttached": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bBowDrawn": [
+      [
+       14,
+       1
+      ]
+     ],
+     "bCastReady": [
+      [
+       14,
+       10
+      ]
+     ],
+     "bEquipOk": [
+      [
+       14,
+       247
+      ]
+     ],
+     "bEquipUnequip": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bHeadTrackSpine": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bHeadTracking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bHumanoidFootIKDisable": [
+      [
+       14,
+       194
+      ]
+     ],
+     "bHumanoidFootIKEnable": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIdlePlaying": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bInJumpState": [
+      [
+       14,
+       96
+      ]
+     ],
+     "bInMoveState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsDialogueExpressive": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsH2HSolo": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsInMT": [
+      [
+       14,
+       17
+      ]
+     ],
+     "bIsRiding": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsStaffLeftCasting": [
+      [
+       14,
+       205
+      ]
+     ],
+     "bIsSynced": [
+      [
+       14,
+       1
+      ]
+     ],
+     "bLeftHandAttack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMLh_Ready": [
+      [
+       14,
+       21
+      ]
+     ],
+     "bMRh_Ready": [
+      [
+       14,
+       255
+      ]
+     ],
+     "bMagicDraw": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMotionDriven": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bNeutralState": [
+      [
+       14,
+       240
+      ]
+     ],
+     "bNoStagger": [
+      [
+       14,
+       146
+      ]
+     ],
+     "bPerkQuickShot": [
+      [
+       14,
+       12
+      ]
+     ],
+     "bPerkShieldCharge": [
+      [
+       14,
+       1
+      ]
+     ],
+     "bRitualSpellActive": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bSprintOK": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bStaggerPlayerOverride": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bTalkable": [
+      [
+       14,
+       104
+      ]
+     ],
+     "bVoiceReady": [
+      [
+       14,
+       10
+      ]
+     ],
+     "bWantCastLeft": [
+      [
+       14,
+       40
+      ]
+     ],
+     "bWantCastRight": [
+      [
+       14,
+       50
+      ]
+     ],
+     "bWantCastVoice": [
+      [
+       14,
+       70
+      ]
+     ],
+     "currentDefaultState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "i1HMState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iIsInSneak": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iLeftHandEquipped": [
+      [
+       14,
+       1065353216
+      ]
+     ],
+     "iLeftHandType": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iRegularAttack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iRightHandEquipped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iRightHandType": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iState": [
+      [
+       14,
+       4294967295
+      ]
+     ],
+     "iSyncForwardState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iSyncIdleLocomotion": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iSyncTurnState": [
+      [
+       14,
+       10
+      ]
+     ],
+     "iWantBlock": [
+      [
+       14,
+       0
+      ]
+     ],
+     "isInFurniture": [
+      [
+       14,
+       126
+      ]
+     ],
+     "testint": [
+      [
+       14,
+       0
+      ]
+     ],
+     "weapAdj": [
+      [
+       14,
+       0
+      ]
+     ]
+    }
+   },
+   {
+    "bools": {
+     "IsStaggering": [
+      [
+       14,
+       false
+      ]
+     ]
+    },
+    "casts": [],
+    "effects": [],
+    "events": [],
+    "first": [
+     132434.578125,
+     -62293.89453125,
+     13955.541015625
+    ],
+    "formId": 1080569,
+    "health": [
+     [
+      0,
+      5
+     ]
+    ],
+    "hits": [],
+    "last": [
+     131549.78125,
+     -61763.796875,
+     13426.44140625
+    ],
+    "magicka": [
+     [
+      0,
+      -25
+     ]
+    ],
+    "maxDisplacement": 1159.2305343685036,
+    "maxStep": 6.676996271177802,
+    "maxStepMs": 6413,
+    "name": "rabbit",
+    "samples": 388,
+    "stamina": [
+     [
+      0,
+      25
+     ]
+    ],
+    "taken": [],
+    "vars": {
+     "1stPRot": [
+      [
+       14,
+       0
+      ]
+     ],
+     "1stPRotDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "AimHeadingCurrent": [
+      [
+       14,
+       0
+      ]
+     ],
+     "AimPitchCurrent": [
+      [
+       14,
+       0.5
+      ]
+     ],
+     "BowAimOffsetHeading": [
+      [
+       14,
+       0
+      ]
+     ],
+     "BowAimOffsetPitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "CastBlend": [
+      [
+       14,
+       0
+      ]
+     ],
+     "CastBlendDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "Direction": [
+      [
+       14,
+       0.2
+      ]
+     ],
+     "Is1HM": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsAttacking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBashing": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBeastRace": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBleedingOut": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBlockHit": [
+      [
+       14,
+       204
+      ]
+     ],
+     "IsBlocking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsCastingDual": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsCastingLeft": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsCastingRight": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsEquipping": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsNPC": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsPlayer": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsRecoiling": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsSneaking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsStaggering": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsUnequipping": [
+      [
+       14,
+       208
+      ]
+     ],
+     "MagicAimOffsetHeading": [
+      [
+       14,
+       0
+      ]
+     ],
+     "MagicAimOffsetPitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "NotCasting": [
+      [
+       14,
+       208
+      ]
+     ],
+     "Pitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "PitchOffset": [
+      [
+       14,
+       0
+      ]
+     ],
+     "PitchOverride": [
+      [
+       14,
+       0
+      ]
+     ],
+     "Speed": [
+      [
+       14,
+       0.4
+      ]
+     ],
+     "SpeedDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "SpeedSampled": [
+      [
+       14,
+       0
+      ]
+     ],
+     "TurnDelta": [
+      [
+       14,
+       0.5
+      ]
+     ],
+     "VelocityZ": [
+      [
+       14,
+       0
+      ]
+     ],
+     "b1HMCombat": [
+      [
+       14,
+       0
+      ]
+     ],
+     "b1HM_MLh_attack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAllowRotation": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAnimObjectLoaded": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bAnimationDriven": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAttached": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bBowDrawn": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bCastReady": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bEquipOk": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bEquipUnequip": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bHeadTrackSpine": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bHeadTracking": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bHumanoidFootIKDisable": [
+      [
+       14,
+       80
+      ]
+     ],
+     "bHumanoidFootIKEnable": [
+      [
+       14,
+       1
+      ]
+     ],
+     "bIdlePlaying": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bInJumpState": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bInMoveState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsDialogueExpressive": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bIsH2HSolo": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bIsInMT": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsRiding": [
+      [
+       14,
+       128
+      ]
+     ],
+     "bIsStaffLeftCasting": [
+      [
+       14,
+       205
+      ]
+     ],
+     "bIsSynced": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bLeftHandAttack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMLh_Ready": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMRh_Ready": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMagicDraw": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMotionDriven": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bNeutralState": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bNoStagger": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bPerkQuickShot": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bPerkShieldCharge": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bRitualSpellActive": [
+      [
+       14,
+       208
+      ]
+     ],
+     "bSprintOK": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bStaggerPlayerOverride": [
+      [
+       14,
+       1
+      ]
+     ],
+     "bTalkable": [
+      [
+       14,
+       128
+      ]
+     ],
+     "bVoiceReady": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bWantCastLeft": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bWantCastRight": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bWantCastVoice": [
+      [
+       14,
+       0
+      ]
+     ],
+     "currentDefaultState": [
+      [
+       14,
+       720
+      ]
+     ],
+     "i1HMState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iIsInSneak": [
+      [
+       14,
+       2389378048
+      ]
+     ],
+     "iLeftHandEquipped": [
+      [
+       14,
+       2389213184
+      ]
+     ],
+     "iLeftHandType": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iRegularAttack": [
+      [
+       14,
+       720
+      ]
+     ],
+     "iRightHandEquipped": [
+      [
+       14,
+       720
+      ]
+     ],
+     "iRightHandType": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iSyncForwardState": [
+      [
+       14,
+       720
+      ]
+     ],
+     "iSyncIdleLocomotion": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iSyncTurnState": [
+      [
+       14,
+       2569577144
+      ]
+     ],
+     "iWantBlock": [
+      [
+       14,
+       0
+      ]
+     ],
+     "isInFurniture": [
+      [
+       14,
+       208
+      ]
+     ],
+     "testint": [
+      [
+       14,
+       720
+      ]
+     ],
+     "weapAdj": [
+      [
+       14,
+       0
+      ]
+     ]
+    }
+   },
+   {
+    "bools": {
+     "IsStaggering": [
+      [
+       14,
+       false
+      ],
+      [
+       2398,
+       true
+      ],
+      [
+       2613,
+       false
+      ]
+     ]
+    },
+    "casts": [],
+    "effects": [
+     [
+      2383,
+      20,
+      522287
+     ],
+     [
+      2384,
+      20,
+      958581
+     ],
+     [
+      2384,
+      20,
+      522286
+     ],
+     [
+      2384,
+      20,
+      67239723
+     ]
+    ],
+    "events": [
+     [
+      1414,
+      "DialogueGeneric",
+      1
+     ],
+     [
+      2384,
+      "staggerStart",
+      1
+     ],
+     [
+      2386,
+      "IdleStop",
+      0
+     ],
+     [
+      2398,
+      "moveStart",
+      0
+     ],
+     [
+      2418,
+      "Ragdoll",
+      1
+     ]
+    ],
+    "first": [
+     133837.65625,
+     -61270.8203125,
+     14664.39453125
+    ],
+    "formId": 4278192388,
+    "health": [
+     [
+      0,
+      35
+     ],
+     [
+      2398,
+      25
+     ]
+    ],
+    "hits": [],
+    "last": [
+     133584.03125,
+     -58646.28515625,
+     11656.31640625
+    ],
+    "magicka": [
+     [
+      0,
+      25
+     ]
+    ],
+    "maxDisplacement": 4000.1305520096125,
+    "maxStep": 73.07354303709184,
+    "maxStepMs": 2447,
+    "name": "bandit",
+    "samples": 388,
+    "stamina": [
+     [
+      0,
+      70
+     ]
+    ],
+    "taken": [
+     [
+      2384,
+      20,
+      81722,
+      0
+     ],
+     [
+      2384,
+      20,
+      81722,
+      0
+     ],
+     [
+      2384,
+      20,
+      81722,
+      0
+     ],
+     [
+      2384,
+      20,
+      81722,
+      0
+     ]
+    ],
+    "vars": {
+     "1stPRot": [
+      [
+       14,
+       0
+      ]
+     ],
+     "1stPRotDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "AimHeadingCurrent": [
+      [
+       14,
+       0
+      ]
+     ],
+     "AimPitchCurrent": [
+      [
+       14,
+       0
+      ]
+     ],
+     "BowAimOffsetHeading": [
+      [
+       14,
+       0
+      ]
+     ],
+     "BowAimOffsetPitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "CastBlend": [
+      [
+       14,
+       0
+      ]
+     ],
+     "CastBlendDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "Direction": [
+      [
+       14,
+       0.701
+      ],
+      [
+       64,
+       0.423
+      ],
+      [
+       114,
+       0.337
+      ],
+      [
+       380,
+       0
+      ],
+      [
+       2398,
+       0.384
+      ]
+     ],
+     "Is1HM": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsAttacking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBashing": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBeastRace": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBleedingOut": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBlockHit": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsBlocking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsCastingDual": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsCastingLeft": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsCastingRight": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsEquipping": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsNPC": [
+      [
+       14,
+       1
+      ]
+     ],
+     "IsPlayer": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsRecoiling": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsSneaking": [
+      [
+       14,
+       0
+      ]
+     ],
+     "IsStaggering": [
+      [
+       14,
+       0
+      ],
+      [
+       2398,
+       1
+      ],
+      [
+       2613,
+       0
+      ]
+     ],
+     "IsUnequipping": [
+      [
+       14,
+       0
+      ]
+     ],
+     "MagicAimOffsetHeading": [
+      [
+       14,
+       0
+      ]
+     ],
+     "MagicAimOffsetPitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "NotCasting": [
+      [
+       14,
+       1
+      ]
+     ],
+     "Pitch": [
+      [
+       14,
+       0
+      ]
+     ],
+     "PitchOffset": [
+      [
+       14,
+       0
+      ]
+     ],
+     "PitchOverride": [
+      [
+       14,
+       0
+      ]
+     ],
+     "Speed": [
+      [
+       14,
+       1.864
+      ],
+      [
+       64,
+       1.017
+      ],
+      [
+       114,
+       2.103
+      ],
+      [
+       165,
+       2.087
+      ],
+      [
+       232,
+       2.023
+      ],
+      [
+       297,
+       1.915
+      ],
+      [
+       347,
+       1.811
+      ],
+      [
+       398,
+       0
+      ],
+      [
+       2398,
+       44.725
+      ]
+     ],
+     "SpeedDamped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "SpeedSampled": [
+      [
+       14,
+       0.113
+      ],
+      [
+       64,
+       0.071
+      ],
+      [
+       114,
+       0.134
+      ],
+      [
+       281,
+       0.124
+      ],
+      [
+       364,
+       0.014
+      ],
+      [
+       414,
+       0
+      ],
+      [
+       2398,
+       74.895
+      ]
+     ],
+     "TurnDelta": [
+      [
+       14,
+       0
+      ]
+     ],
+     "VelocityZ": [
+      [
+       14,
+       -15.449
+      ]
+     ],
+     "b1HMCombat": [
+      [
+       14,
+       0
+      ]
+     ],
+     "b1HM_MLh_attack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAllowRotation": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAnimObjectLoaded": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bAnimationDriven": [
+      [
+       14,
+       1
+      ],
+      [
+       2581,
+       0
+      ],
+      [
+       2597,
+       1
+      ],
+      [
+       2613,
+       0
+      ]
+     ],
+     "bAttached": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bBowDrawn": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bCastReady": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bEquipOk": [
+      [
+       14,
+       1
+      ],
+      [
+       2398,
+       0
+      ],
+      [
+       2613,
+       1
+      ]
+     ],
+     "bEquipUnequip": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bHeadTrackSpine": [
+      [
+       14,
+       0
+      ],
+      [
+       2581,
+       1
+      ]
+     ],
+     "bHeadTracking": [
+      [
+       14,
+       0
+      ],
+      [
+       1430,
+       1
+      ],
+      [
+       2413,
+       0
+      ]
+     ],
+     "bHumanoidFootIKDisable": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bHumanoidFootIKEnable": [
+      [
+       14,
+       1
+      ]
+     ],
+     "bIdlePlaying": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bInJumpState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bInMoveState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsDialogueExpressive": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsH2HSolo": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsInMT": [
+      [
+       14,
+       1
+      ],
+      [
+       2581,
+       0
+      ]
+     ],
+     "bIsRiding": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsStaffLeftCasting": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bIsSynced": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bLeftHandAttack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMLh_Ready": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMRh_Ready": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMagicDraw": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bMotionDriven": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bNeutralState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bNoStagger": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bPerkQuickShot": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bPerkShieldCharge": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bRitualSpellActive": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bSprintOK": [
+      [
+       14,
+       1
+      ]
+     ],
+     "bStaggerPlayerOverride": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bTalkable": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bVoiceReady": [
+      [
+       14,
+       1
+      ],
+      [
+       2581,
+       0
+      ]
+     ],
+     "bWantCastLeft": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bWantCastRight": [
+      [
+       14,
+       0
+      ]
+     ],
+     "bWantCastVoice": [
+      [
+       14,
+       0
+      ]
+     ],
+     "currentDefaultState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "i1HMState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iIsInSneak": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iLeftHandEquipped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iLeftHandType": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iRegularAttack": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iRightHandEquipped": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iRightHandType": [
+      [
+       14,
+       3
+      ]
+     ],
+     "iState": [
+      [
+       14,
+       0
+      ]
+     ],
+     "iSyncForwardState": [
+      [
+       14,
+       1
+      ],
+      [
+       380,
+       0
+      ],
+      [
+       2398,
+       1
+      ]
+     ],
+     "iSyncIdleLocomotion": [
+      [
+       14,
+       0
+      ],
+      [
+       2398,
+       1
+      ]
+     ],
+     "iSyncTurnState": [
+      [
+       14,
+       1
+      ]
+     ],
+     "iWantBlock": [
+      [
+       14,
+       0
+      ]
+     ],
+     "isInFurniture": [
+      [
+       14,
+       0
+      ]
+     ],
+     "testint": [
+      [
+       14,
+       0
+      ]
+     ],
+     "weapAdj": [
+      [
+       14,
+       0.525
+      ]
+     ]
+    }
+   }
+  ],
+  "seconds": 6.467,
+  "self": {
+   "bools": {
+    "IsStaggering": [
+     [
+      14,
+      false
+     ]
+    ]
+   },
+   "casts": [],
+   "effects": [],
+   "events": [
+    [
+     1314,
+     "shoutStart",
+     1
+    ],
+    [
+     2196,
+     "MT_BreathExhaleShort",
+     1
+    ]
+   ],
+   "first": [
+    133852.890625,
+    -61429.95703125,
+    14673.6875
+   ],
+   "formId": 20,
+   "health": [
+    [
+     0,
+     100
+    ],
+    [
+     6467,
+     100
+    ]
+   ],
+   "hits": [
+    [
+     2384,
+     4278192388,
+     81722,
+     81920,
+     0
+    ],
+    [
+     2384,
+     4278192388,
+     81722,
+     0,
+     0
+    ],
+    [
+     2384,
+     4278192388,
+     81722,
+     81919,
+     0
+    ],
+    [
+     2384,
+     4278192388,
+     81722,
+     81920,
+     0
+    ]
+   ],
+   "last": [
+    133852.890625,
+    -61429.95703125,
+    14673.6875
+   ],
+   "magicka": [
+    [
+     0,
+     100
+    ],
+    [
+     6467,
+     100
+    ]
+   ],
+   "maxDisplacement": 0,
+   "maxStep": 0,
+   "maxStepMs": -1,
+   "name": "Prisoner",
+   "samples": 388,
+   "stamina": [
+    [
+     0,
+     100
+    ],
+    [
+     6467,
+     100
+    ]
+   ],
+   "taken": [],
+   "vars": {
+    "1stPRot": [
+     [
+      14,
+      0
+     ]
+    ],
+    "1stPRotDamped": [
+     [
+      14,
+      0
+     ]
+    ],
+    "AimHeadingCurrent": [
+     [
+      14,
+      0
+     ]
+    ],
+    "AimPitchCurrent": [
+     [
+      14,
+      0
+     ]
+    ],
+    "BowAimOffsetHeading": [
+     [
+      14,
+      0
+     ]
+    ],
+    "BowAimOffsetPitch": [
+     [
+      14,
+      0
+     ]
+    ],
+    "CastBlend": [
+     [
+      14,
+      0
+     ]
+    ],
+    "CastBlendDamped": [
+     [
+      14,
+      0
+     ]
+    ],
+    "Direction": [
+     [
+      14,
+      0
+     ]
+    ],
+    "Is1HM": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsAttacking": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsBashing": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsBeastRace": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsBleedingOut": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsBlockHit": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsBlocking": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsCastingDual": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsCastingLeft": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsCastingRight": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsEquipping": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsNPC": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsPlayer": [
+     [
+      14,
+      1
+     ]
+    ],
+    "IsRecoiling": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsSneaking": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsStaggering": [
+     [
+      14,
+      0
+     ]
+    ],
+    "IsUnequipping": [
+     [
+      14,
+      0
+     ]
+    ],
+    "MagicAimOffsetHeading": [
+     [
+      14,
+      0
+     ]
+    ],
+    "MagicAimOffsetPitch": [
+     [
+      14,
+      0
+     ]
+    ],
+    "NotCasting": [
+     [
+      14,
+      1
+     ]
+    ],
+    "Pitch": [
+     [
+      14,
+      0
+     ]
+    ],
+    "PitchOffset": [
+     [
+      14,
+      0
+     ],
+     [
+      2233,
+      -0.018
+     ],
+     [
+      2299,
+      -0.282
+     ],
+     [
+      2364,
+      -0.825
+     ],
+     [
+      2430,
+      -0.43
+     ],
+     [
+      2480,
+      -0.537
+     ],
+     [
+      2531,
+      -0.622
+     ],
+     [
+      2581,
+      -0.678
+     ],
+     [
+      2647,
+      -0.69
+     ],
+     [
+      2699,
+      -0.642
+     ],
+     [
+      2763,
+      -0.553
+     ],
+     [
+      2813,
+      -0.495
+     ],
+     [
+      2865,
+      -0.443
+     ],
+     [
+      2931,
+      -0.376
+     ],
+     [
+      2998,
+      -0.307
+     ],
+     [
+      3065,
+      -0.236
+     ],
+     [
+      3130,
+      -0.161
+     ],
+     [
+      3180,
+      -0.101
+     ],
+     [
+      3231,
+      -0.039
+     ],
+     [
+      3281,
+      0
+     ]
+    ],
+    "PitchOverride": [
+     [
+      14,
+      0
+     ]
+    ],
+    "Speed": [
+     [
+      14,
+      0
+     ]
+    ],
+    "SpeedDamped": [
+     [
+      14,
+      0
+     ]
+    ],
+    "SpeedSampled": [
+     [
+      14,
+      0
+     ]
+    ],
+    "TurnDelta": [
+     [
+      14,
+      0
+     ]
+    ],
+    "VelocityZ": [
+     [
+      14,
+      -15.449
+     ]
+    ],
+    "b1HMCombat": [
+     [
+      14,
+      0
+     ]
+    ],
+    "b1HM_MLh_attack": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bAllowRotation": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bAnimObjectLoaded": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bAnimationDriven": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bAttached": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bBowDrawn": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bCastReady": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bEquipOk": [
+     [
+      14,
+      1
+     ],
+     [
+      1315,
+      0
+     ],
+     [
+      3447,
+      1
+     ]
+    ],
+    "bEquipUnequip": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bHeadTrackSpine": [
+     [
+      14,
+      1
+     ]
+    ],
+    "bHeadTracking": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bHumanoidFootIKDisable": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bHumanoidFootIKEnable": [
+     [
+      14,
+      1
+     ]
+    ],
+    "bIdlePlaying": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bInJumpState": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bInMoveState": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bIsDialogueExpressive": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bIsH2HSolo": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bIsInMT": [
+     [
+      14,
+      1
+     ]
+    ],
+    "bIsRiding": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bIsStaffLeftCasting": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bIsSynced": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bLeftHandAttack": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bMLh_Ready": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bMRh_Ready": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bMagicDraw": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bMotionDriven": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bNeutralState": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bNoStagger": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bPerkQuickShot": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bPerkShieldCharge": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bRitualSpellActive": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bSprintOK": [
+     [
+      14,
+      1
+     ]
+    ],
+    "bStaggerPlayerOverride": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bTalkable": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bVoiceReady": [
+     [
+      14,
+      1
+     ]
+    ],
+    "bWantCastLeft": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bWantCastRight": [
+     [
+      14,
+      0
+     ]
+    ],
+    "bWantCastVoice": [
+     [
+      14,
+      0
+     ],
+     [
+      1315,
+      1
+     ],
+     [
+      2282,
+      0
+     ]
+    ],
+    "currentDefaultState": [
+     [
+      14,
+      0
+     ]
+    ],
+    "i1HMState": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iIsInSneak": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iLeftHandEquipped": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iLeftHandType": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iRegularAttack": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iRightHandEquipped": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iRightHandType": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iState": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iSyncForwardState": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iSyncIdleLocomotion": [
+     [
+      14,
+      0
+     ]
+    ],
+    "iSyncTurnState": [
+     [
+      14,
+      1
+     ]
+    ],
+    "iWantBlock": [
+     [
+      14,
+      0
+     ]
+    ],
+    "isInFurniture": [
+     [
+      14,
+      0
+     ]
+    ],
+    "testint": [
+     [
+      14,
+      0
+     ]
+    ],
+    "weapAdj": [
+     [
+      14,
+      0.7
+     ]
+    ]
+   }
+  }
+ }
+}

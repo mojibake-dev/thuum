@@ -275,4 +275,7 @@ Every self-cast item passed:
   prompt ("E Talk / test 1") when c2 aims at the spot, the engine's
   activation prompt, not our label. A finding of its own.
 - Merged on fork parity 05192845 (2026-10-14): an invisible figure shows no name.
+- Playtest eighteen (2026-10-14, Eli): ticked; no name over the invisible
+  player's figure, back when the effect ends. Found: a Self cast shows no
+  cast animation on the figure (docs/verbs/spell-cast.md, the hands).
 

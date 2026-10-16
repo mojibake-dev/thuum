@@ -49,14 +49,20 @@ test: build-image
 
 # Downloads the newest `dist` artifact from mojibake-dev/skymp into skymp/build/dist-client.
 # Client and Skyrim Platform: fetch what upstream's Windows workflow built on the GitHub mirror.
-build-client branch=client_branch:
+build-client branch=client_branch sha="":
     #!/usr/bin/env bash
     set -euo pipefail
-    run=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-    test -n "$run" || { echo "no successful Parity Windows run on the mirror for branch {{branch}} yet"; exit 1; }
+    # the run built from `sha` when given (verb-stage passes its head), else the branch's newest successful one: the
+    # newest is the wrong build whenever a later push on the branch built first (m2-cast-action's 0ce34196 was laid over
+    # abe44a55 by hand so, 2026-10-15)
+    sha="{{sha}}"
+    pick=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 30 \
+             --json databaseId,headSha --jq "[.[] | select(.headSha | startswith(\"$sha\"))][0] | if . == null then \"\" else \"\(.databaseId) \(.headSha[0:8])\" end")
+    test -n "$pick" || { echo "no successful Parity Windows run on the mirror for branch {{branch}}${sha:+ at $sha} yet"; exit 1; }
+    run=${pick%% *}; built=${pick#* }
     rm -rf {{skymp}}/build/dist-client && mkdir -p {{skymp}}/build/dist-client
     gh run download "$run" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
-    echo "run $run -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
+    echo "run $run ($built) -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
 
 # T2 on sky-srv (ADR-019): the server build SERVER_TAG (default the lab's) from the clean world, the fakeclient smoke checked through labState, then difftest's sessions against the legacy RakNet stack (LEGACY_TAG, default parity-legacy); lab/tools/test-proto.sh.
 test-proto tag="":
@@ -360,6 +366,29 @@ playtest-restore name:
 playtest-worlds:
     @lab/tools/playtest-world.sh list
 
+# A playtest recorded like a run (ADR-033): the recorder on both seats, cycled every 5 min into
+# https://thuum.gaussing.tv/results/playtest-<n>/ (trace-<client>-<k>.json), the server's and both games' logs at the end,
+# summary.txt with any game whose log stopped. Start it in the background after playtest-restore; it ends with the
+# playtest's hold or on Ctrl-C, and refuses a number without docs/private/playtest-m2-<n>.md.
+playtest-record n:
+    @lab/tools/playtest-record.sh {{n}}
+
+# Every item of docs/private/playtest-m2-<n>.md names its scenario in backticks (`b-cast-rhythm`, committed under
+# lab/scenarios), or says the lab cannot measure it, "(feel)" or "(no scenario: why)" (ADR-033, decision 2).
+playtest-check n:
+    @lab/tools/playtest-check.py {{n}}
+
+# The gate before a playtest (ADR-033): the scenarios its checklist names, as one run set, refused while an item is uncovered.
+playtest-gate n:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    scenarios=$(lab/tools/playtest-check.py {{n}} --scenarios)
+    lab/tools/runset.sh "playtest-{{n}}" $scenarios
+
+# End a recorded playtest before its save and release: the recorder's last cycle and the logs, the hold still up.
+playtest-record-stop:
+    @pkill -TERM -f 'lab/tools/playtest-record.sh' || { echo "no recorder running"; exit 1; }; while pgrep -f 'lab/tools/playtest-record.sh' >/dev/null; do sleep 2; done; echo "recorder done: the logs are in; now playtest-save and lab-release"
+
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
@@ -451,8 +480,9 @@ verb-stage branch *probes:
 
 # A mod-layer branch (persist-mods and the load orders) staged on the lab, from a worktree of the branch: T0, a hold,
 # persist-mods, deploy-srv, the server restarted on the new load order, client-mods on both clones, both snapshotted as
-# clean-m1-next, the probes named. Then layer-merge: the full sweep as the gate (ADR-030's non-verb promotion), both
-# clones promoted, thuum main fast-forwarded, a dated docs/LOG.md entry to finish by hand.
+# clean-m1-next, the probes named. Then layer-merge: the full sweep as the gate (ADR-030's non-verb promotion), thuum
+# main given the branch (a fast-forward, or a merge commit when main moved meanwhile), both clones promoted after it, a
+# dated docs/LOG.md entry to finish by hand. Between the two, nothing deploys from a tree without the branch.
 layer-stage branch *probes:
     @lab/tools/layer-stage.sh "{{branch}}" {{probes}}
 layer-merge branch:

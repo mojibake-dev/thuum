@@ -1,0 +1,69 @@
+# b-cast-moving (docs/verbs/cast-action.md, ADR-033's moving row; from
+# x-cast-human 20261015-202506): Flames the way a person casts it in a fight.
+# c1 strafes left and right (A 30, D 32) and turns a little (look) while
+# holding Flames at c2 for 2 to 3 s, letting go, and casting again about a
+# second and a half later, six times; c2 strafes too, so c1's figure in c2's
+# game moves while it plays. The claim: every cast's start, release and
+# Equipped exit is taken on the figure. On abe44a55 this took 4 of 6
+# (T T T R T R), the half of playtest nineteen: the view performed a start
+# one update after its variables where the engine waits for the graph's
+# answer, which a moving figure gives later; the handshake (fork 34bdf0c3)
+# performs the start on that answer.
+id: b-cast-moving
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - c2: console {text: "player.equipspell 12fcd right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - wait: 4
+  - c1: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting, IsStaggering]}
+  - c2: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting, IsStaggering]}
+  - wait: 1
+  - c1: hold-key {code: 30, ms: 1500}
+  - c2: hold-key {code: 32, ms: 1500}
+  - c1: hold-key {code: 199, ms: 2500}
+  - wait: 1.8
+  - c1: look {pitch: 0, heading: 10}
+  - wait: 1.7
+  - c1: hold-key {code: 32, ms: 1500}
+  - c2: hold-key {code: 30, ms: 1500}
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 3.2
+  - c1: look {pitch: 0, heading: 350}
+  - c1: hold-key {code: 30, ms: 1200}
+  - c1: hold-key {code: 199, ms: 3000}
+  - wait: 4.1
+  - c1: hold-key {code: 32, ms: 1200}
+  - c2: hold-key {code: 32, ms: 1500}
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 1.5
+  - c2: screenshot
+  - wait: 1.6
+  - c1: look {pitch: 5, heading: 0}
+  - c1: hold-key {code: 199, ms: 2500}
+  - wait: 3.4
+  - c1: hold-key {code: 30, ms: 1500}
+  - c2: hold-key {code: 30, ms: 1500}
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 6
+      - c2.watched(c1).took("MRh_SpellRelease_Event") >= 6
+      - c2.watched(c1).took("MRh_Equipped_Event") >= 6
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]
