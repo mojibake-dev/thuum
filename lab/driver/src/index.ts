@@ -193,6 +193,9 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 //   hits it took [ms, aggressor, source, flags] and effects applied to it
 //   [ms, caster, effect], as the engine's events report them (flags: power
 //   1, sneak 2, bash 4, blocked 8).
+// - launches [ms, projectile, ammo, spell, originX, originY, originZ,
+//   angleX, angleZ, power]: every projectile the engine launched for it, as
+//   the fork's projectileLaunched event reports Projectile::Launch's data.
 type Watched = {
   name: string;
   first: number[];
@@ -212,6 +215,11 @@ type Watched = {
   hits: Array<[number, number, number, number, number]>;
   taken: Array<[number, number, number, number]>;
   effects: Array<[number, number, number]>;
+  // the projectiles it launched [ms, projectile, ammo, spell, originX,
+  // originY, originZ, angleX, angleZ, power], as the engine launched them
+  // (the fork's projectileLaunched event, Projectile::Launch's LaunchData;
+  // thuum docs/verbs/marksman.md: the arrow's path identical on both screens)
+  launches: Array<[number, number, number, number, number, number, number, number, number, number]>;
   // the actions the engine performed for it [ms, action, idle, eventName,
   // type] (the player's only: the platform's hook reports the player's own;
   // thuum docs/verbs/cast-action.md)
@@ -244,7 +252,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
     name: actor.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
     track: [[0, pos[0], pos[1], pos[2]]],
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
-    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], actions: [],
+    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], launches: [], actions: [],
   };
 }
 
@@ -644,6 +652,16 @@ function bytesOf(v: unknown): Uint8Array {
 function watchedMs(): number {
   return watching ? Date.now() - watching.startedAt : 0;
 }
+
+// every projectile the engine launched for a watched actor (the shooter's
+// own arrow and the figure's replay alike): the recorder's measure of the
+// arrow's path on both screens. No game call here (the event's context).
+on("projectileLaunched", (e) => {
+  const w = watchedRecord(e.shooter);
+  if (w && w.launches.length < WATCH_SELF_MAX) {
+    w.launches.push([watchedMs(), e.projectile, e.ammo, e.spell, e.originX, e.originY, e.originZ, e.angleX, e.angleZ, e.power]);
+  }
+});
 
 on("spellCast", (e) => {
   if (!watching || !e.caster) return;
