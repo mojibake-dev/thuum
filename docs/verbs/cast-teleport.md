@@ -419,3 +419,29 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   never before it.
   T2's teleports session declares the five snippets c2 receives (57ecbae6):
   green with these settings deployed, red without them.
+
+### Measured (fork m2-teleport-look 2540be96, x-teleport-look 20261016-203244)
+
+- The server sent the look in both phases: at the cast "vanish 102731 for
+  5.0 s in 1 neighbour(s)' games" (20:35:02.824 UTC, beside the cast's "not
+  relayed"), and at the landing 493 ms later "placed, vanish 102731 stopped,
+  appear 102730 for 1.75 s, sound 2010ec4" (20:35:03.317).
+- The vanish shows: c2's screenshot during it has c1's figure at its start
+  as a dark, semi-transparent silhouette with blue-white flecks and a
+  refraction ripple on the ground behind it.
+- The near teleport pops: the figure's largest step in c2's game is 525.38
+  units in one frame (6177 ms), at the server's landing (c2's clock 2.4 to
+  2.5 s behind the server's). It is not a pure pop yet: about 42 units of
+  motion back toward the start fall inside the same 250 ms window, then a
+  forward glide of 88.9 units ends at c1's own position 0.5 s later. Reading
+  (numidium's, to confirm): the movement sync competes with the
+  SetPosition, a movement update from before the landing pulling the figure
+  back and the ones after gliding it forward (the snippets ride the
+  reliable channel, the movements the unreliable one). A short guard in the
+  view (no glide for a figure for a few hundred milliseconds after a large
+  placement) or the server's SetPosition at the caster's latest report would
+  remove it; neither is built.
+- The appear (1.75 s) was not caught: every screenshot step takes three to
+  four seconds, and none started within a second of the landing. Eli's eyes
+  in a playtest, or a screenshot timed to the landing, close it.
+- b-teleport 203525 and b-self-cast 204048 green on the same head.
