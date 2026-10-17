@@ -1807,3 +1807,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     C:\sky-lab\dumps should be kept the same way.
 - The lab was back on parity ef44a1d8 at 22:19 PDT with the Steam-fixed clean-m1-next (smoke 20261017-051935 green) for the
   03:30 nightly.
+- M3's first lab work, on Eli's "fire at will" (relayed by thuum-magnus; 00:47 to 01:10 PDT on 10-17).
+  - Thuum m3-npc-probe 5801c6cf on main by fast-forward, with lab-api 5801c6cf: the driver's npc-ai step (Papyrus
+    EnableAI on the placed NPC), its npc-state step (AI state, package, combat target, flags, position, head node) and
+    their names in scenario.py's action list.
+  - The driver laid on both clones and clean-m1-next retaken; smoke 20261017-075637 green.
+  - Solo on c1, by path, all green: x-npc-puppet 20261017-075909, r-npc-packages 080111, r-npc-fight 080443 and
+    r-cell-leave 080655. They are readings for thuum-magnus; nothing merges from them.
+  - The 03:30 nightly is the driver change's full sweep before clean-m1 is promoted (ADR-030).
