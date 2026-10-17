@@ -237,16 +237,19 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       server's effect runtime and the first allowlist entry. Open for Eli:
       the conditions, evaluated by the server (recommended) or the engine's
       word.
-    - By class, not by spell (Eli, 2026-10-16, after playtest twenty-one:
-      "the delineation of what spells go where ... fine adjustments to the
-      plan"). A census sorts the learnable spells, 175 of the plugin's 373,
+    - By class, not by spell (proposed 2026-10-16 in answer to Eli's "do we
+      wanna do those in one big pass?"; the census's class table goes to him
+      before anything is built from it). A census sorts the learnable
+      spells, 175 of the plugin's 373,
       into classes by the engine's own parts: cast type, delivery,
       projectile, effect archetype, and what a script does to a shared
       world. Each class is fixed once, as a verb, in the order of how many
       spells it unblocks; one parameterized scenario runs each class's
       representatives against the engine alone (ADR-031), and the nightly
-      runs every spell. A playtest checks one spell per class. The classes
-      that act on players finish here; those that act on NPCs (summons,
+      runs every spell. A playtest checks one spell per class. The split
+      (Eli, 2026-10-16: "the delineation of what spells go where ... fine
+      adjustments to the plan"): the classes that act on players finish
+      here; those that act on NPCs (summons,
       calm, fear and frenzy, a spell's detection event) move to M3, which
       hosts the NPCs they need. Twenty-one's first two class gaps:
       Scattershock's concentration missiles drawn backward on the other
