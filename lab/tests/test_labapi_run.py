@@ -638,8 +638,17 @@ class HangEvidence(RunTests):
             if body.get("finished"):
                 break
             time.sleep(0.05)
-        # after the run nothing more is taken
-        self.assertEqual(self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", content=b"MDMP").status_code, 409)
+        # after the run, with nothing active, the last run takes a by-hand dump and the seat's two logs
+        # (lab/tools/hang-dump.sh: a freeze outside a run's steps), and nothing else under any other name
+        self.assertEqual(self.client.get("/lab/status").json()["last_run"], run_id)
+        late = self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", content=b"MDMP late")
+        self.assertEqual(late.status_code, 200, late.text)
+        self.assertEqual((self.tmp / "results" / run_id / "c1-SkyrimSE.dmp").read_bytes(), b"MDMP late")
+        log = self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", params={"name": "skse64.log"}, content=b"SKSE64\n")
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual((self.tmp / "results" / run_id / "c1-skse64.log").read_bytes(), b"SKSE64\n")
+        self.assertEqual(self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", params={"name": "../result.json"}, content=b"x").status_code, 400)
+        self.assertEqual(self.client.put("/lab/clients/c1/hang-dump/20200101-000000-older", content=b"MDMP").status_code, 409)
 
     def test_only_a_seat_that_never_answered_counts_as_hung(self):
         from types import SimpleNamespace
@@ -648,11 +657,15 @@ class HangEvidence(RunTests):
             {"step": 3, "kind": "timeout", "client": "c2", "error": "timeout"},
             {"step": 4, "kind": "timeout", "client": "c1", "error": "dump-state before assert timed out"},
             {"step": 5, "kind": "timeout", "client": "c1", "error": "timeout"},
-            {"step": 6, "kind": "timeout", "client": "c3", "error": "E_RUN_TELEPORT: c3 never settled at the target within 60s"},
+            {"step": 6, "kind": "timeout", "client": "c3", "error": 'E_RUN_TELEPORT: c3 never settled at the target within 60s (4 attempts, last {"client": {"x": 1.0}, "server": {"x": 0.0}})'},
             {"step": 7, "kind": "timeout", "client": "c4", "error": "E_RUN_CONNECT: not online after 60s"},
             {"step": "", "kind": "lab", "error": "E_RUN_NO_HEARTBEAT: c2 (sky-c2) did not poll within 300s"},
+            # the nightly of 2026-10-17: b-push's c2 and a-rotfern's c1, silent after their game loaded
+            {"step": 12, "kind": "timeout", "client": "c5", "error": 'E_RUN_TELEPORT: c5 never settled at the target within 60s (1 attempts, last {"client": "timeout", "server": {"cell": "lab-spawn"}})'},
+            {"step": 17, "kind": "lab", "client": "c6", "error": "E_RUN_RELAUNCH: c6 not in game: timeout"},
+            {"step": 18, "kind": "lab", "client": "c7", "error": "E_RUN_RELAUNCH: c7 (sky-c7): the guest agent did not answer"},
         ]
-        self.assertEqual(self.services.runner._hung_clients(SimpleNamespace(failures=failures)), ["c2", "c1"])
+        self.assertEqual(self.services.runner._hung_clients(SimpleNamespace(failures=failures)), ["c2", "c1", "c5", "c6"])
 
 
 @needs_deps

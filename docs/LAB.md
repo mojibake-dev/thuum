@@ -593,7 +593,12 @@ seat's skse64.log as <client>-skse64.log and a full dump of its game as
 rollback erases them. The seat writes the dump itself with dbghelp's
 MiniDumpWriteDump, 4.5 GB in 15 s on sky-c1, and uploads it to
 PUT /lab/clients/<client>/hang-dump/<run>, which takes a body only for the
-active run.
+active run, or with none active for the last finished one. A seat counts as
+hung when a step timed out on it, its teleport's last dump-state went
+unanswered, or its relaunch never came back in game (the nightly of
+2026-10-17 lost two freezes to a narrower rule). Outside a run, as in a
+playtest, `just hang-dump <c1|c2>` takes the same evidence by hand into the
+last finished run, before anything rolls the clone back.
 During M0 and M1 the pcap is also the source for difftest sessions:
 `pcap2session` runs on it and the resulting YAML lands in
 skymp/skymp-wire/difftest/sessions/ (docs/WIRE.md).

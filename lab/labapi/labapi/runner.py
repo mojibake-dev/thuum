@@ -157,6 +157,7 @@ class Runner:
         # on the wall clock, to tell a sweep's next run from one after a quiet
         # spell (a playtest, hand probes), whose clients' logs are worth keeping
         self.last_run_ended: str | None = None
+        self.last_run: RunRecord | None = None  # a by-hand hang dump goes into it while nothing runs
         self._last_run_ended_wall: float | None = None
         # the last operator call lab-api saw (a run, a state RPC, an assist, a
         # frida start, a probe): what "nobody is working" is measured from
@@ -253,6 +254,7 @@ class Runner:
             rec.phase = "done"
             (rec.dir / "result.json").write_text(json.dumps(rec.to_result(), indent=2))
             self.board.clear()
+            self.last_run = rec
             self.active = None
             self._note_run_end()
         return rec
@@ -335,6 +337,7 @@ class Runner:
             "memory": self.system.meminfo(),
             "hold": self.hold_status(),
             "version": self.s.version,
+            "last_run": self.last_run.run_id if self.last_run else None,
         }
 
     # ----- phases ---------------------------------------------------------------
@@ -1027,13 +1030,19 @@ class Runner:
             rec.notes.append(f"unknown artifact {n!r} ignored")
 
     def _hung_clients(self, rec: RunRecord) -> list[str]:
-        """The clients a step timed out on because the seat never answered: the board's own
-        timeout, or a dump-state before an assert that timed out. A teleport that never settled
-        or a connect that never came online is not a hang."""
+        """The clients whose seat stopped answering: the board's own timeout, a dump-state before
+        an assert that timed out, a teleport whose last dump-state got no answer from the seat
+        (E_RUN_TELEPORT with the client's "timeout"), or a relaunch whose game never came back in
+        game (E_RUN_RELAUNCH "not in game"). The nightly of 2026-10-17 lost b-push's and
+        a-rotfern's freezes to a narrower rule. A teleport the seat answered but never settled,
+        or a connect that never came online, is not a hang."""
         hung: list[str] = []
         for f in rec.failures:
-            client, error = f.get("client"), str(f.get("error") or "")
-            if f.get("kind") == "timeout" and client and (error == "timeout" or "timed out" in error) and client not in hung:
+            client, error, kind = f.get("client"), str(f.get("error") or ""), f.get("kind")
+            silent = (kind == "timeout" and (error == "timeout" or "timed out" in error
+                                              or (error.startswith("E_RUN_TELEPORT") and '"client": "timeout"' in error))) \
+                or (kind == "lab" and error.startswith("E_RUN_RELAUNCH") and "not in game" in error)
+            if silent and client and client not in hung:
                 hung.append(client)
         return hung
 
