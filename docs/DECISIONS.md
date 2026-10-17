@@ -1198,3 +1198,55 @@ measured change, not a rewrite: the row's probe first. Writing into a slot
 SKSE owns is a known failure now, not a mystery: a swap that never fires
 is checked against the slot's owner (slot-probe.js) before anything else.
 
+
+## ADR-036: A run relaunches the game; the client VM is rolled back only when it must be
+
+Status: proposed (2026-10-17, for Eli; from thuum-mundus's reading of three
+GPU failures and the run timings of 2026-10-16 and 17). Amends docs/LAB.md's
+run order (step 3, each named client rolled back and started) and ADR-030's
+sweep cost.
+
+**Context.** Each lab run rolls both client VMs back to their snapshot: a
+stop, a disk rollback, a cold boot (docs/LAB.md, "Connected" is not a
+snapshot). With the GPUs passed through, each stop and each start is a vfio
+slot reset, so a run costs each card two resets. Three times in 36 hours a
+card's PCIe link failed to retrain after one of them ("device inaccessible",
+the kernel's own retrain at 2.5 GT/s failing too): c2's RTX 5060 Ti on
+2026-10-14 and 10-16, c1's GTX 1050 on 10-17, on both root ports, with both
+cards (thuum-mundus, 2026-10-17: the host's reset path, not one card; no
+software setting it tested prevents it). The last one wedged the card until
+a power cycle of core. The rollback is also the larger part of a run: 68 to
+78 s of the clients' restore and 11 s of the server's, against 44 to 89 s of
+the test itself (b-teleport, b-teleport-look, b-cast-sheathe, b-self-cast,
+2026-10-17). A game relaunch, which stops the game process and starts it
+again through the guest agent with the VM left running (docs/LAB.md's
+relaunch step), took both seats from the start to back online in 28 s on
+2026-10-16 (20:05:28 to 20:05:56), with no slot reset. What the cold
+rollback adds beyond a relaunch is a clean disk: files a run left on the
+client.
+
+**Decision** (proposed).
+1. By default a run restores the server as today and relaunches the game on
+   each seat: the game process stopped, the lab's per-run client paths
+   cleaned (C:\sky-lab's run files, the game's and SKSE's logs, the
+   RaceMenu presets the driver writes), the launch task started, the run
+   held until each driver answers in game.
+2. A client VM is still rolled back cold, two resets: at the start of a run
+   set; for a scenario that declares it (a `client: rollback` key, for one
+   that writes outside the cleaned paths or changes the image); after a
+   client fault (a hang, a failed relaunch, a lost heartbeat), before the
+   rerun; and at least every 20 runs of a set, as a floor.
+3. Before it is the default, one full sweep runs in relaunch mode beside the
+   last rollback-mode nightly. The verdicts must agree under ADR-027's
+   rules; the time and the reset count are measured and logged.
+
+**Consequences.** A nightly of 54 scenarios drops from 216 slot resets to a
+few at its start and after its faults, and each run sheds about 40 s. The
+cost is isolation: a run inherits what the last one left in the game's
+files, and state one test leaves behind is a classic cause of flaky results
+in the next (Fowler, "Eradicating Non-Determinism in Tests", 2011; Luo,
+Hariri, Eloussi and Marinov, "An Empirical Analysis of Flaky Tests", FSE
+2014). The cleaned paths and the floor of 20 bound it, and the trial
+sweep measures it. The hardware levers stay Eli's (the BIOS's Gen3 cap on
+root port 00:01.1, its reason first; the seating and the risers); this ADR
+only spends fewer resets.
