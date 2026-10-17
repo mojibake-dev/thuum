@@ -1209,12 +1209,12 @@ sweep cost.
 **Context.** Each lab run rolls both client VMs back to their snapshot: a
 stop, a disk rollback, a cold boot (docs/LAB.md, "Connected" is not a
 snapshot). With the GPUs passed through, each stop and each start is a vfio
-slot reset, so a run costs each card two resets. Three times in 36 hours a
-card's PCIe link failed to retrain after one of them ("device inaccessible",
-the kernel's own retrain at 2.5 GT/s failing too): c2's RTX 5060 Ti on
-2026-10-14 and 10-16, c1's GTX 1050 on 10-17, on both root ports, with both
-cards (thuum-mundus, 2026-10-17: the host's reset path, not one card; no
-software setting it tested prevents it). The last one wedged the card until
+slot reset, so a run costs each card two resets. Three times since core's
+last boot a card's PCIe link failed to retrain after one of them ("device
+inaccessible", the kernel's own retrain at 2.5 GT/s failing too), on both
+root ports and with both cards, c2's RTX 5060 Ti and c1's GTX 1050, the
+last on 2026-10-17 (thuum-mundus, that day: the host's reset path, not one
+card; no software setting it tested prevents it). The last one wedged the card until
 a power cycle of core. The rollback is also the larger part of a run: 68 to
 78 s of the clients' restore and 11 s of the server's, against 44 to 89 s of
 the test itself (b-teleport, b-teleport-look, b-cast-sheathe, b-self-cast,
