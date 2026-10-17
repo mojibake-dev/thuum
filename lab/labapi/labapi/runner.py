@@ -41,6 +41,55 @@ def _brief(value: Any, limit: int = 800) -> str:
     return text if len(text) <= limit else text[: limit - 3] + "..."
 
 
+# A hung seat's dump (Settings.hang_evidence), run on the seat as SYSTEM through the guest
+# agent as -EncodedCommand, so no quoting reaches PowerShell. MiniDumpWriteDump's signature and
+# the MINIDUMP_TYPE bits are Microsoft's (learn.microsoft.com, minidumpapiset.h): WithFullMemory
+# 0x2, WithHandleData 0x4, WithUnloadedModules 0x20, WithFullMemoryInfo 0x800, WithThreadInfo
+# 0x1000 and IgnoreInaccessibleMemory 0x20000, called from a separate process as the page asks.
+# The inbox curl.exe streams it up as a PUT, then it leaves the seat's disk. The last stdout
+# line is one JSON object for the run's notes. Placeholders: @LAB_DIR@ @URL@ @UPLOAD_S@.
+_HANG_DUMP_PS = r"""
+$ErrorActionPreference = 'Stop'
+$p = [Diagnostics.Process]::GetProcessesByName('SkyrimSE') | Select-Object -First 1
+if (-not $p) { Write-Output '{"dumped": false, "why": "no SkyrimSE process"}'; exit 2 }
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+public static class LabHangDump {
+    [DllImport("dbghelp.dll", SetLastError = true)]
+    public static extern bool MiniDumpWriteDump(IntPtr hProcess, uint processId, SafeFileHandle hFile, uint dumpType,
+        IntPtr exceptionParam, IntPtr userStreamParam, IntPtr callbackParam);
+}
+'@
+$dir = '@LAB_DIR@\hang'
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+$path = Join-Path $dir 'SkyrimSE.dmp'
+$sw = [Diagnostics.Stopwatch]::StartNew()
+$fs = [IO.File]::Create($path)
+$ok = [LabHangDump]::MiniDumpWriteDump($p.Handle, [uint32]$p.Id, $fs.SafeFileHandle, 0x21826, [IntPtr]::Zero, [IntPtr]::Zero, [IntPtr]::Zero)
+$err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+$fs.Close()
+$dumpMs = $sw.ElapsedMilliseconds
+if (-not $ok) {
+    Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+    Write-Output ('{"dumped": false, "why": "MiniDumpWriteDump failed, last error 0x' + $err.ToString('x8') + '"}')
+    exit 3
+}
+$bytes = (Get-Item -LiteralPath $path).Length
+# a native program's stderr under a redirected PowerShell 5.1 becomes an error record, and Stop
+# would end the script there with the dump left on the disk
+$ErrorActionPreference = 'Continue'
+$sw.Restart()
+& "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $path '@URL@'
+$curl = $LASTEXITCODE
+$upMs = $sw.ElapsedMilliseconds
+Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+Write-Output ('{"dumped": true, "pid": ' + $p.Id + ', "bytes": ' + $bytes + ', "dump_ms": ' + $dumpMs + ', "upload_ms": ' + $upMs + ', "curl": ' + $curl + '}')
+if ($curl -ne 0) { exit 4 }
+"""
+
+
 
 class RunnerError(Exception):
     """E_RUN: the lab itself failed; the verdict is error, not red."""
@@ -108,6 +157,7 @@ class Runner:
         # on the wall clock, to tell a sweep's next run from one after a quiet
         # spell (a playtest, hand probes), whose clients' logs are worth keeping
         self.last_run_ended: str | None = None
+        self.last_run: RunRecord | None = None  # a by-hand hang dump goes into it while nothing runs
         self._last_run_ended_wall: float | None = None
         # the last operator call lab-api saw (a run, a state RPC, an assist, a
         # frida start, a probe): what "nobody is working" is measured from
@@ -204,6 +254,7 @@ class Runner:
             rec.phase = "done"
             (rec.dir / "result.json").write_text(json.dumps(rec.to_result(), indent=2))
             self.board.clear()
+            self.last_run = rec
             self.active = None
             self._note_run_end()
         return rec
@@ -286,6 +337,7 @@ class Runner:
             "memory": self.system.meminfo(),
             "hold": self.hold_status(),
             "version": self.s.version,
+            "last_run": self.last_run.run_id if self.last_run else None,
         }
 
     # ----- phases ---------------------------------------------------------------
@@ -970,9 +1022,57 @@ class Runner:
         for client, script in dict.fromkeys(self.frida_started):
             await self._frida_trace(rec, client, script)
         self.frida_started.clear()
+        if self.s.hang_evidence:
+            for client in self._hung_clients(rec):
+                await self._hang_evidence(rec, client)
         unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap", "trace") and not n.endswith(".log")]
         for n in unknown:
             rec.notes.append(f"unknown artifact {n!r} ignored")
+
+    def _hung_clients(self, rec: RunRecord) -> list[str]:
+        """The clients whose seat stopped answering: the board's own timeout, a dump-state before
+        an assert that timed out, a teleport whose last dump-state got no answer from the seat
+        (E_RUN_TELEPORT with the client's "timeout"), or a relaunch whose game never came back in
+        game (E_RUN_RELAUNCH "not in game"). The nightly of 2026-10-17 lost b-push's and
+        a-rotfern's freezes to a narrower rule. A teleport the seat answered but never settled,
+        or a connect that never came online, is not a hang."""
+        hung: list[str] = []
+        for f in rec.failures:
+            client, error, kind = f.get("client"), str(f.get("error") or ""), f.get("kind")
+            silent = (kind == "timeout" and (error == "timeout" or "timed out" in error
+                                              or (error.startswith("E_RUN_TELEPORT") and '"client": "timeout"' in error))) \
+                or (kind == "lab" and error.startswith("E_RUN_RELAUNCH") and "not in game" in error)
+            if silent and client and client not in hung:
+                hung.append(client)
+        return hung
+
+    async def _hang_evidence(self, rec: RunRecord, client: str) -> None:
+        """A hung seat's skse64.log and a full dump of its game, taken before the next run's
+        rollback erases them (Settings.hang_evidence; the load freeze of 2026-10-16). The seat
+        uploads the dump to PUT /clients/<client>/hang-dump/<run> itself, a few GB over the
+        LAN, which the guest agent's file read could never carry. Every failure is a note."""
+        g = self.tables.guest_for_client(client)
+        if g is None or not g.managed:
+            rec.notes.append(f"hang evidence: {client} is unmanaged or unmapped; nothing taken")
+            return
+        skse = f"(Join-Path (Split-Path -Parent '{self.s.client_driver_log}') 'skse64.log')"
+        await self._fetch_client_file(rec, g, f"{client}-skse64.log", skse)
+        url = f"{self.s.client_lab_api_url}/clients/{client}/hang-dump/{rec.run_id}"
+        script = (_HANG_DUMP_PS.replace("@LAB_DIR@", self.s.client_lab_dir).replace("@URL@", url)
+                  .replace("@UPLOAD_S@", str(max(60, int(self.s.hang_dump_timeout_s * 0.6)))))
+        cmd = ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand",
+               base64.b64encode(script.encode("utf-16-le")).decode()]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.hang_dump_timeout_s)
+        except ProxmoxError as e:
+            rec.notes.append(f"hang dump {client}: {e}")
+            return
+        lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
+        rec.notes.append(f"hang dump {client}: {(lines[-1] if lines else 'no output')[:300]}"
+                         + ("" if res.exitcode == 0 else f" (exit {res.exitcode}: {res.err.strip()[:200]})"))
+        name = f"{client}-SkyrimSE.dmp"
+        if (rec.dir / name).is_file():
+            rec.artifacts.append(name)
 
     async def _client_log(self, rec: RunRecord, client: str, name: str) -> None:
         """<client>.log is Skyrim Platform's log; <client>-driver.log is

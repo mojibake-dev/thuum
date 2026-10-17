@@ -1785,3 +1785,45 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   - Smoke 20261017-033542 green, with an 83 s client rollback. clean-m1 is promoted after a green nightly (ADR-030).
   - The first try left c2's hosts file empty: Set-Content truncated it, then lost its second open to another process.
     6c91f38 writes it in one open with retries and checks the count.
+- Ghostwalk's first stage, no merge (thuum-magnus's ask; 20:44 to 21:48 PDT on 10-16): fork m2-ghostwalk-main 6d09befe
+  from thuum ghostwalk-main 6bcc0ff.
+  - Probes r-ghostwalk 20261017-042234 and x-ghostwalk-relay 042445 green.
+  - T2 red as expected: 26 sessions identical, and the ghostwalk session had 4 differences. Both seats get two effect
+    messages at t 43, an empty one and one for effect 0x0C00AAE5 from Apocalypse's spell 0x0C00AAE8, that the legacy
+    server never sends. magnus declared them in 728ca163.
+- docs-m2-21 landed on main (1b778552), with hud-trace.js taking LAB_PARAMS.TYPES on top (CommonLibSSE-NG
+  include/RE/H/HUDData.h:16-37). The superseded docs-te-map and docs-racemenu-row were deleted; their tips are in main.
+- The crosshair fix (fork m2-crosshair 50d7c718, an invisible figure's display name emptied), staged from main, no merge.
+  - x-crosshair-invis 20261017-045850 measured nothing of the invisible state: c2's game died 46 ms after c1's
+    Invisibility reached the server, and launch.ps1 started it again. The middle point caught the reload, and the HUD
+    trace was empty.
+  - Its WER dump was lost to the restore's rollback.
+  - A rerun without Frida was cancelled mid-stage when Eli parked the fix for after the alpha ("we can pass on that for
+    now"). m2-crosshair stays unmerged.
+- The hang-evidence lab-api is live (main d23fefcd, version d23fefcd at 22:15 PDT). A run whose step timed out naming a
+  seat keeps that seat's skse64.log and a full dump of SkyrimSE.exe: dbghelp's MiniDumpWriteDump, 4.5 GB in 15 s on
+  sky-c1, uploaded by the seat to PUT /lab/clients/<client>/hang-dump/<run>.
+  - Still missing, after tonight's crash: a game that died and was relaunched mid-run. Its WER minidumps in
+    C:\sky-lab\dumps should be kept the same way.
+- The lab was back on parity ef44a1d8 at 22:19 PDT with the Steam-fixed clean-m1-next (smoke 20261017-051935 green) for the
+  03:30 nightly.
+- M3's first lab work, on Eli's "fire at will" (relayed by thuum-magnus; 00:47 to 01:10 PDT on 10-17).
+  - Thuum m3-npc-probe 5801c6cf on main by fast-forward, with lab-api 5801c6cf: the driver's npc-ai step (Papyrus
+    EnableAI on the placed NPC), its npc-state step (AI state, package, combat target, flags, position, head node) and
+    their names in scenario.py's action list.
+  - The driver laid on both clones and clean-m1-next retaken; smoke 20261017-075637 green.
+  - Correction (01:30): the first four solo c1 runs (x-npc-puppet 20261017-075909, r-npc-packages 080111, r-npc-fight
+    080443, r-cell-leave 080655) ran paused and measured nothing. The drafts lacked the global step every solo
+    reference has after solo-start, which marks Survival Mode's first prompt (0x8DF, ccQDRSSE001-SurvivalMode.esl)
+    answered, so "Enable Survival Mode?" held each game for the whole run. Every watched actor stood still with no
+    events, and r-cell-leave's game hour stayed at 7.90. They passed green only because their asserts check nothing.
+  - The reruns with the fixed drafts replace them, all green and all live:
+    - x-npc-puppet 20261017-082859: the bandit moved 122 units with 2 graph events in a 4.5 s watch.
+    - r-npc-packages 083112: Gerdur, Faendal and Hod walked 2469, 1690 and 918 units in a 90 s watch.
+    - r-npc-fight 083447: the two bandits had 91 and 71 graph events, and the player moved 41 units.
+    - r-cell-leave 083700: Sven and Faendal moved 520 and 1086 units in a 15 s watch. Its lab-run lost the connection
+      when this Mac's Tailscale was logged out of headscale.gaussing.tv (01:47 to 03:29), but the run went on.
+    They are readings for thuum-magnus; nothing merges from them.
+  - Owed to lab-api: fail a run whose watch shows every actor standing still with no events for more than a few
+    seconds (a paused game), never pass it green.
+  - The 03:30 nightly is the driver change's full sweep before clean-m1 is promoted (ADR-030).

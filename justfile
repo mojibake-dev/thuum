@@ -361,6 +361,11 @@ playtest-start:
 playtest-save label:
     @lab/tools/playtest-world.sh save {{label}}
 
+# A frozen seat's game dumped by hand while no run is active (a playtest's freeze, or one after a run ended), into the
+# last finished run with the seat's skse64.log and skyrim-platform.log; inside a run the runner does this itself.
+hang-dump client:
+    @lab/tools/hang-dump.sh {{client}}
+
 # A saved playtest world back on the lab server, then both seats' games relaunched onto it, so a playtest starts on a
 # fresh launch (a game logging in again as another character keeps the previous skeleton's node bases: playtest twenty's
 # rotfern). PLAYTEST_NO_RELAUNCH=1 keeps the running games.

@@ -217,6 +217,16 @@ class Settings:
     # runs are seconds apart and the clients hold only the previous run's log;
     # 0 turns the fetch off (the server's own log is kept regardless)
     before_logs_quiet_s: float = 600.0
+    # A seat that stops answering mid-run (a step that times out naming it: the load freeze of
+    # 2026-10-16, a game silent after PostLoadGame) holds the only evidence of why, and the next
+    # run's rollback erases it. With hang_evidence on, that run's artifacts take the seat's
+    # skse64.log and a full dump of SkyrimSE.exe (dbghelp's MiniDumpWriteDump from PowerShell
+    # as SYSTEM: nothing installed), which the seat uploads itself to
+    # PUT {client_lab_api_url}/clients/<client>/hang-dump/<run>: <client>-SkyrimSE.dmp, a few GB.
+    hang_evidence: bool = True
+    hang_dump_timeout_s: float = 900.0
+    # lab-api as the clones reach it (lab-driver-settings.txt: labApiBase + labApiPath)
+    client_lab_api_url: str = "http://10.10.70.10/lab"
     # relaunch: a player quits the game and starts it again (docs/verbs/
     # map-markers.md). The guest agent stops the game and starts the logon
     # launch task (sky-lab-launch, as `lab` on the desktop); the launcher
@@ -300,6 +310,9 @@ class Settings:
             server_ready_timeout_s=float(_env("SERVER_READY_TIMEOUT_S", str(d.server_ready_timeout_s))),
             guest_task_timeout_s=float(_env("GUEST_TASK_TIMEOUT_S", str(d.guest_task_timeout_s))),
             before_logs_quiet_s=float(_env("BEFORE_LOGS_QUIET_S", str(d.before_logs_quiet_s))),
+            hang_evidence=_env_bool("HANG_EVIDENCE", d.hang_evidence),
+            hang_dump_timeout_s=float(_env("HANG_DUMP_TIMEOUT_S", str(d.hang_dump_timeout_s))),
+            client_lab_api_url=_env("CLIENT_LAB_API_URL", d.client_lab_api_url),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),

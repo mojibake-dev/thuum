@@ -118,6 +118,8 @@ def create_app(services: Services) -> FastAPI:
             return False
         if request.method == "GET" and (path.startswith(f"{router.prefix}/run/") or path.startswith(f"{router.prefix}/runset/")):
             return False
+        if request.method == "PUT" and "/hang-dump/" in path:
+            return False  # a hung seat's dump, sent by the seat inside its own run
         return True
 
     @app.middleware("http")
@@ -396,6 +398,30 @@ def create_app(services: Services) -> FastAPI:
         # the clone's logon launcher asks which version to start and whether
         # without skymp5-client (a solo run, ADR-031); see launch.ps1
         return {"client": client, "version": runner.game_for(client), "solo": runner.solo_for(client)}
+
+    @router.put("/clients/{client}/hang-dump/{run_id}")
+    async def hang_dump(client: str, run_id: str, request: Request, name: str = "SkyrimSE.dmp"):
+        # A hung seat uploads its game's dump here itself while its run takes the artifacts
+        # (Runner._hang_evidence), or by hand while nothing runs (lab/tools/hang-dump.sh) into the
+        # last finished run. Only into that one run's directory and only under the three names
+        # (the dump, the seat's skse64.log and skyrim-platform.log), so nothing else can be
+        # written this way; the body streams to disk (a few GB).
+        rec = runner.active or runner.last_run
+        if rec is None or rec.run_id != run_id:
+            raise HTTPException(409, f"E_HANG_DUMP: {run_id} is neither the active run nor, with none active, the last one")
+        if name not in ("SkyrimSE.dmp", "skse64.log", "skyrim-platform.log"):
+            raise HTTPException(400, f"E_HANG_DUMP: {name!r} is not a hang evidence name")
+        if runner.tables.guest_for_client(client) is None:
+            raise HTTPException(404, f"no guest plays client {client}")
+        dest = rec.dir / f"{client}-{name}"
+        part = dest.with_name(dest.name + ".part")
+        size = 0
+        with part.open("wb") as f:
+            async for chunk in request.stream():
+                f.write(chunk)
+                size += len(chunk)
+        part.replace(dest)
+        return {"ok": True, "client": client, "run": run_id, "bytes": size}
 
     @router.post("/step/{step_id}/result")
     async def step_result(step_id: str, request: Request):

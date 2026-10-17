@@ -124,6 +124,7 @@ class RunTests(unittest.TestCase):
             server_world_dir=str(self.tmp / "world"), server_snapshots_dir=str(self.tmp / "snapshots"),
             step_timeout_s=5, heartbeat_timeout_s=5, server_ready_timeout_s=1, connect_timeout_s=1, time_scale=0.0,
             before_logs_quiet_s=0.0,  # the clients' before-run logs are fetched only where a test turns it on
+            hang_evidence=False,  # a hung seat's dump is taken only where a test turns it on
         )
         self.state = FakeState()
         self.state.spawn(1, 0, 0, 0)
@@ -553,6 +554,118 @@ class ClientLogs(RunTests):
         self.assertNotIn("c1-before.log", body2["artifacts"])
         self.assertFalse(any(c[0] == "exec" and "c1-before.log" in " ".join(c[2]) for c in pve.calls))
 
+
+
+@needs_deps
+class HangEvidence(RunTests):
+    """A seat that stops answering mid-run (the load freeze of 2026-10-16: the game silent after
+    PostLoadGame, the first console step timing out) is rolled back by the next run with all its
+    evidence. Its run's artifacts take the seat's skse64.log and a full dump of its game, which
+    the seat uploads itself to PUT /clients/<client>/hang-dump/<run>."""
+
+    HUNG = "id: t2-hang\nclients: [c1]\nsteps:\n  - c1: dump-state\n"
+
+    def _hung_run(self, text):
+        r = self.client.post("/lab/run", files={"scenario": ("s.yaml", text.encode(), "text/yaml")})
+        self.assertEqual(r.status_code, 200, r.text)
+        run_id = r.json()["run"]
+        deadline = time.time() + 30
+        while time.time() < deadline:
+            self.client.get("/lab/step", params={"client": "c1"})  # a heartbeat that never answers
+            body = self.client.get(f"/lab/run/{run_id}").json()
+            if body["verdict"] != "running" and body.get("finished"):
+                return run_id, body
+            time.sleep(0.05)
+        self.fail(f"run {run_id} did not finish: {body}")
+
+    def test_a_hung_seat_leaves_its_skse_log_and_a_dump_of_its_game(self):
+        import dataclasses
+        import re
+        from labapi.guests import Guest
+        from labapi.proxmox import ExecResult
+
+        self.services.runner.s = dataclasses.replace(self.settings, hang_evidence=True)
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.files[r"C:\sky-lab\c1-skse64.log"] = "SKSE64 runtime: initialize\n"
+        scripts = []
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "-EncodedCommand" not in command:
+                return plain_exec(guest, command, timeout)
+            pve.calls.append(("exec", guest.vmid, tuple(command)))
+            script = base64.b64decode(command[command.index("-EncodedCommand") + 1]).decode("utf-16-le")
+            scripts.append(script)
+            # the seat's own upload, as curl.exe makes it: into the run named in the URL
+            run = re.search(r"/clients/c1/hang-dump/([^']+)'", script).group(1)
+            (self.tmp / "results" / run / "c1-SkyrimSE.dmp").write_bytes(b"MDMP fake dump")
+            return ExecResult(0, '{"dumped": true, "pid": 4242, "bytes": 14, "dump_ms": 1, "upload_ms": 1, "curl": 0}\r\n', "")
+
+        pve.exec = exec_
+        run_id, body = self._hung_run(self.HUNG)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual(body["failures"][0]["kind"], "timeout", body["failures"])
+        self.assertIn("c1-skse64.log", body["artifacts"])
+        self.assertEqual((self.tmp / "results" / run_id / "c1-skse64.log").read_text(), "SKSE64 runtime: initialize\n")
+        self.assertIn("c1-SkyrimSE.dmp", body["artifacts"])
+        self.assertTrue(any(n.startswith('hang dump c1: {"dumped": true') for n in body["notes"]), body["notes"])
+        # the seat finds its own lab-api at the clones' address, for this run
+        self.assertEqual(len(scripts), 1)
+        self.assertIn(f"'http://10.10.70.10/lab/clients/c1/hang-dump/{run_id}'", scripts[0])
+        self.assertIn("0x21826", scripts[0])  # full memory, handles, unloaded modules, memory and thread info
+        self.assertIn("C:\\sky-lab\\hang", scripts[0])
+        # the skse log beside skyrim-platform.log, copied before it is read
+        copy = next(c for c in pve.calls if c[0] == "exec" and "c1-skse64.log" in " ".join(c[2]))
+        self.assertIn("skse64.log", " ".join(copy[2]))
+        self.assertIn("skyrim-platform.log", " ".join(copy[2]))
+
+    def test_the_dump_goes_only_into_the_active_run(self):
+        r = self.client.post("/lab/run", files={"scenario": ("s.yaml", self.HUNG.encode(), "text/yaml")})
+        run_id = r.json()["run"]
+        self.client.get("/lab/step", params={"client": "c1"})  # the step is out: the run is active
+        put = self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", content=b"MDMP" + b"x" * 70000)
+        self.assertEqual(put.status_code, 200, put.text)
+        self.assertEqual(put.json()["bytes"], 70004)
+        self.assertEqual((self.tmp / "results" / run_id / "c1-SkyrimSE.dmp").read_bytes()[:4], b"MDMP")
+        self.assertFalse((self.tmp / "results" / run_id / "c1-SkyrimSE.dmp.part").exists())
+        self.assertEqual(self.client.put("/lab/clients/c1/hang-dump/20200101-000000-other", content=b"MDMP").status_code, 409)
+        self.assertEqual(self.client.put(f"/lab/clients/c9/hang-dump/{run_id}", content=b"MDMP").status_code, 404)
+        deadline = time.time() + 30
+        while time.time() < deadline:
+            self.client.get("/lab/step", params={"client": "c1"})
+            body = self.client.get(f"/lab/run/{run_id}").json()
+            if body.get("finished"):
+                break
+            time.sleep(0.05)
+        # after the run, with nothing active, the last run takes a by-hand dump and the seat's two logs
+        # (lab/tools/hang-dump.sh: a freeze outside a run's steps), and nothing else under any other name
+        self.assertEqual(self.client.get("/lab/status").json()["last_run"], run_id)
+        late = self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", content=b"MDMP late")
+        self.assertEqual(late.status_code, 200, late.text)
+        self.assertEqual((self.tmp / "results" / run_id / "c1-SkyrimSE.dmp").read_bytes(), b"MDMP late")
+        log = self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", params={"name": "skse64.log"}, content=b"SKSE64\n")
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual((self.tmp / "results" / run_id / "c1-skse64.log").read_bytes(), b"SKSE64\n")
+        self.assertEqual(self.client.put(f"/lab/clients/c1/hang-dump/{run_id}", params={"name": "../result.json"}, content=b"x").status_code, 400)
+        self.assertEqual(self.client.put("/lab/clients/c1/hang-dump/20200101-000000-older", content=b"MDMP").status_code, 409)
+
+    def test_only_a_seat_that_never_answered_counts_as_hung(self):
+        from types import SimpleNamespace
+
+        failures = [
+            {"step": 3, "kind": "timeout", "client": "c2", "error": "timeout"},
+            {"step": 4, "kind": "timeout", "client": "c1", "error": "dump-state before assert timed out"},
+            {"step": 5, "kind": "timeout", "client": "c1", "error": "timeout"},
+            {"step": 6, "kind": "timeout", "client": "c3", "error": 'E_RUN_TELEPORT: c3 never settled at the target within 60s (4 attempts, last {"client": {"x": 1.0}, "server": {"x": 0.0}})'},
+            {"step": 7, "kind": "timeout", "client": "c4", "error": "E_RUN_CONNECT: not online after 60s"},
+            {"step": "", "kind": "lab", "error": "E_RUN_NO_HEARTBEAT: c2 (sky-c2) did not poll within 300s"},
+            # the nightly of 2026-10-17: b-push's c2 and a-rotfern's c1, silent after their game loaded
+            {"step": 12, "kind": "timeout", "client": "c5", "error": 'E_RUN_TELEPORT: c5 never settled at the target within 60s (1 attempts, last {"client": "timeout", "server": {"cell": "lab-spawn"}})'},
+            {"step": 17, "kind": "lab", "client": "c6", "error": "E_RUN_RELAUNCH: c6 not in game: timeout"},
+            {"step": 18, "kind": "lab", "client": "c7", "error": "E_RUN_RELAUNCH: c7 (sky-c7): the guest agent did not answer"},
+        ]
+        self.assertEqual(self.services.runner._hung_clients(SimpleNamespace(failures=failures)), ["c2", "c1", "c5", "c6"])
 
 
 @needs_deps
