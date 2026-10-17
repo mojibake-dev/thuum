@@ -577,6 +577,9 @@ Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/
 (copies of the server's `world/` directory, the `file` database driver;
 there is no sqlite), world-diff, lab.pcap, frida/*.jsonl, result.json.
+Also <client>-skse64.log beside <client>.log in every run: SKSE's log prints
+the game's image base, which the load freeze's hypothesis of 2026-10-17 ties
+to the hang, so every run tests it.
 Also trace-<client>.json when the scenario lists `trace`: each client's last
 watch-stop whole (ADR-031's recorder), what a reference is made from.
 Also server-before.log: what the server logged between the previous run's

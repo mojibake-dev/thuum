@@ -68,6 +68,10 @@ foreach ($g in $targets) {
   if (-not (Test-Path $plugins)) { throw "no Skyrim Platform at $plugins after laying the dist" }
   # writeLogs (Skyrim Platform) needs this directory to exist; it never creates it.
   New-Item -ItemType Directory -Force -Path (Join-Path $g 'Data\Platform\Logs') | Out-Null
+  # Skyrim Platform's DirectoryMonitor watches PluginsDev and, while it is missing, retries in a tight loop ("failed
+  # with code 2" in its log) that burns a core in every game (thuum-magnus, the hang dump of 2026-10-17); an empty one
+  # stops it until the fork's own fix lands.
+  New-Item -ItemType Directory -Force -Path (Join-Path $g 'Data\Platform\PluginsDev') | Out-Null
   foreach ($f in 'lab-driver.js', 'lab-driver-settings.txt', 'skymp5-client-settings.txt') {
     Copy-Item (Join-Path $lab $f) (Join-Path $plugins $f) -Force
   }
