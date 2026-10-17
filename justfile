@@ -243,7 +243,8 @@ deploy-srv:
     # its next start (2026-10-07: RaceMenu.esp deployed before persist-mods, mid-sweep): check before copying
     for pair in "server-settings.json:/srv/persist/esm/1.6.1170" "server-settings-1.7.104.json:/srv/persist/esm"; do
       file=${pair%%:*}; dir=${pair#*:}
-      names=$(python3 -c 'import json,sys,os; print(" ".join(os.path.basename(p) for p in json.load(open(sys.argv[1]))["loadOrder"]))' "lab/deploy/sky-srv/$file")
+      # shell-quoted for the host's loop: a plugin's name may hold spaces (Apocalypse's)
+      names=$(python3 -c 'import json,sys,os,shlex; print(" ".join(shlex.quote(os.path.basename(p)) for p in json.load(open(sys.argv[1]))["loadOrder"]))' "lab/deploy/sky-srv/$file")
       {{srv_ssh}} "$host" "cd $dir && for n in $names; do test -f \"\$n\" || { echo \"$file names \$n, which $dir lacks (just persist-mods first)\" >&2; exit 2; }; done"
     done
     rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/server-settings.json lab/deploy/sky-srv/server-settings-1.7.104.json "$host:/srv/lab/server/"

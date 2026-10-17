@@ -20,13 +20,25 @@
     "/srv/skymp/esm/rotfern.esp",
     "/srv/skymp/esm/RaceMenu.esp",
     "/srv/skymp/esm/RaceMenuPlugin.esp",
-    "/srv/skymp/esm/LostGrimoire.esp"
+    "/srv/skymp/esm/LostGrimoire.esp",
+    "/srv/skymp/esm/Apocalypse - Magic of Skyrim.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",
   "gamemodePath": "/srv/skymp/gamemode/gamemode.js",
   "enableConsoleCommandsForAll": true,
-  "castTeleports": [{ "spell": "0a86df:LostGrimoire.esp", "reach": 8000 }],
+  "castTeleports": [
+    {
+      "spell": "0a86df:LostGrimoire.esp",
+      "reach": 8000,
+      "look": {
+        "vanish": "102731:Skyrim.esm",
+        "appear": "102730:Skyrim.esm",
+        "appearSeconds": 1.75,
+        "sound": "010ec4:Dawnguard.esm"
+      }
+    }
+  ],
   "startPoints": [
     { "pos": [133857, -61130, 14662], "worldOrCell": "0x3c", "angleZ": 72 }
   ]

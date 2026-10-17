@@ -4,6 +4,7 @@ both end with the mod layer's plugins in persist-mods.sh's order, which is the
 order the clones' plugins.txt enables them in (add-mods.ps1)."""
 import json
 import re
+import shlex
 import unittest
 from pathlib import Path
 
@@ -46,7 +47,8 @@ class ServerSettings(unittest.TestCase):
 
     def test_the_mod_layer_closes_the_load_order_in_its_own_order(self):
         script = (ROOT / "lab" / "tools" / "persist-mods.sh").read_text()
-        plugins = re.search(r"^plugins=\(([^)]*)\)", script, re.M).group(1).split()
+        # shell words: a plugin's name may hold spaces, quoted (Apocalypse's)
+        plugins = shlex.split(re.search(r"^plugins=\(([^)]*)\)", script, re.M).group(1))
         self.assertEqual(plugins[-len(CLIENT_ONLY):], CLIENT_ONLY)
         served = plugins[: -len(CLIENT_ONLY)]
         self.assertEqual(names(self.main)[-len(served):], served)

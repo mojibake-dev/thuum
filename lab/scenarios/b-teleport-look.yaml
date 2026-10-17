@@ -1,0 +1,51 @@
+# M2, cast-teleport (docs/verbs/cast-teleport.md, the look on other
+# screens; Eli, playtest twenty: "what we need is for near teleports to
+# vanish not slide"): b-teleport's short teleport watched from c2. c1 casts
+# Lost Grimoire's Teleportation (0x0B0A86DF, 185239263) level at c2 from
+# y -300 and lands about 550 units south; at the landing the server places
+# c1's figure in c2's game (SetPosition, then the mod's appear effect and
+# sound), so the figure arrives in one jump instead of gliding there over
+# the next updates. lab-driver's watch reads the largest move of c1's figure
+# between two of c2's frames: a pop is one step of most of the distance, a
+# glide many short ones (x-teleport-look 20261016-203244 on fork
+# m2-teleport-look 2540be96: one 525-unit step at the landing, then a short
+# settle). 400 units leaves the settle its room and fails a glide at any
+# frame rate the lab runs. The effects themselves are screenshots' and
+# Eli's (playtest twenty-one). Positions are relative to the lab spawn.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-teleport-look
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 185239263}
+  - c1: console {text: "player.setav magicka 3000"}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c1: console {text: "player.equipspell b0a86df right"}
+  - c1: draw-weapon
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -900, z: 0, rot: [0, 0, 0]}
+  - wait: 5
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 64
+      - abs(server.actor(c2).y - (-900)) < 64
+  - c2: watch-start {bools: [IsCastingRight]}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 8
+  - c2: watch-stop
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - server.actor(c1).y < -700
+      - c2.watched(c1).maxStep >= 400
+      - abs(c2.view(c1).y - server.actor(c1).y) < 128
+artifacts: [server.log, c1.log, c2.log, trace]

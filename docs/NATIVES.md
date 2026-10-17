@@ -1130,7 +1130,7 @@ Status meanings:
 | `ObjectReference.SetMotionType` (method, latent) | missing |  |  |  |
 | `ObjectReference.SetNoFavorAllowed` (method) | missing |  |  |  |
 | `ObjectReference.SetOpen` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970] |  |
-| `ObjectReference.SetPosition` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:962] |  |
+| `ObjectReference.SetPosition` (method, latent) | delegated |  | The server also sends it itself, to the other players' games at a cast teleport's landing: the caster's figure placed there at once, not glided (R3 there; the record moves with the caster's own report; docs/verbs/cast-teleport.md, the look on other screens). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:962] | cast-teleport |
 | `ObjectReference.SetScale` (method, latent) | stub | R0 | decided (Eli, 2026-10-04): a verb, not a stub fix: the reference's scale becomes server state with a property on the wire and a renderer on the client (CreateActor carries node scale, not reference scale); GetScale returns 1.0 until then. [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:941] | scale |
 | `ObjectReference.SplineTranslateTo` (method) | missing |  |  |  |
 | `ObjectReference.SplineTranslateToRefNode` (method) | missing |  |  |  |
@@ -1264,7 +1264,7 @@ Status meanings:
 | `SoulGem.GetGemSize` (method) | missing |  |  |  |
 | `SoulGem.GetSoulSize` (method) | missing |  |  |  |
 | `Sound.GetDescriptor` (method) | missing |  |  |  |
-| `Sound.Play` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSound.cpp:38] |  |
+| `Sound.Play` (method) | delegated |  | The server also sends it itself, to the other players' games at a cast teleport's landing: the look's sound on the caster's figure (R3 there: recorded nowhere; docs/verbs/cast-teleport.md, the look on other screens). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusSound.cpp:38] | cast-teleport |
 | `Sound.PlayAndWait` (method, latent) | missing |  |  |  |
 | `Sound.SetInstanceVolume` (global) | missing |  |  |  |
 | `Sound.StopInstance` (global) | missing |  |  |  |
@@ -1426,8 +1426,8 @@ Status meanings:
 | `Utility.Wait` (global, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:175] |  |
 | `Utility.WaitGameTime` (global, latent) | implemented | R0 | game hours at the clock's time scale: 3600 / TimeScale real seconds each [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:177] | time |
 | `Utility.WaitMenuMode` (global, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusUtility.cpp:176] |  |
-| `VisualEffect.Play` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusEffectBase.cpp:30] |  |
-| `VisualEffect.Stop` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusEffectBase.cpp:31] |  |
+| `VisualEffect.Play` (method) | implemented |  | The server also sends it itself, to the other players' games: a cast teleport's look plays its vanish on the caster's figure at the cast and its appear at the landing (R3 there: recorded nowhere; docs/verbs/cast-teleport.md, the look on other screens). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusEffectBase.cpp:30] | cast-teleport |
+| `VisualEffect.Stop` (method) | implemented |  | The server also sends it itself, to the other players' games at a cast teleport's landing: the look's vanish stopped on the caster's figure (R3 there: recorded nowhere; docs/verbs/cast-teleport.md, the look on other screens). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusEffectBase.cpp:31] | cast-teleport |
 | `WEAPON.Fire` (method) | missing |  |  |  |
 | `WEAPON.GetBaseDamage` (method) | missing |  |  |  |
 | `WEAPON.GetCritDamage` (method) | missing |  |  |  |

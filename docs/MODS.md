@@ -66,6 +66,15 @@ without them, picked per run by lab-api (SERVER_SETTINGS, like ESM_DIR).
 plugins.txt is shared by both game folders and lists every plugin once; a
 game skips a listed plugin its Data folder lacks.
 
+Apocalypse 10.2.3 joins the layer for ADR-029 (its first verb
+docs/verbs/ghostwalk.md): Nexus mod 1090 file 758998, checked against the
+md5 above, its plugin and its two BSAs (the archive holds nothing else) in
+both game versions. The plugin is full (masters Skyrim, Update,
+Dragonborn) and loads after LostGrimoire.esp, at 0C on 1.6.1170 and 0A on
+1.7.104 (without RaceMenu's two), before CBBE's client-only pair, so no
+plugin before it moves. Its name holds spaces, which persist-mods' place
+and deploy-srv's load-order check quote.
+
 ## Apocalypse - Magic of Skyrim
 
 What it is:
