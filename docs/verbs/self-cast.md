@@ -313,6 +313,25 @@ Every self-cast item passed:
   name again after. Still shown while invisible: the game's own crosshair
   prompt ("E Talk / test 1") when c2 aims at the spot, the engine's
   activation prompt, not our label. A finding of its own.
+- The crosshair prompt, PARKED until after the alpha (Eli, 2026-10-16,
+  after playtest twenty-one: "the crosshair fix might not be worth the
+  effort. we can pass on that for now and document as a later thing after
+  we get our alpha version working"). Playtest twenty asked for it hidden
+  ("yes hide it"). Fork parity ef44a1d8's setActivateTextHidden sets
+  ExtraFlags' kBlockActivateText, which nothing on 1.6.1170 reads (the
+  re-analyst on sky-re, 2026-10-16: the crosshair pick 26127, its filter
+  26130, TESNPC's GetActivateText 24716; no reader of the flag's bit), so
+  it changes nothing, and twenty-one still showed the prompt. The engine
+  keeps a reference out of the crosshair when its display name is empty
+  (26130's own test). Fork m2-crosshair 50d7c718, unmerged, empties the
+  figure's name while it is invisible and drops the dead native; its first
+  probe, x-crosshair-invis 20261017-045850 with a Frida HUD trace
+  attached, lost c2's game about 46 ms after c1's cast, the cause unread
+  (the build or the trace), and the rerun was cancelled with the park. The
+  read's runner-up: Actor::AllowPCDialogue(false) removes "Talk" but can
+  leave "Pickpocket" or "Attack" with the name, and a prompt already shown
+  stays until the target changes. Until then the dead native stays on
+  parity, a no-op.
 - Merged on fork parity 05192845 (2026-10-14): an invisible figure shows no name.
 - Playtest eighteen (2026-10-14, Eli): ticked; no name over the invisible
   player's figure, back when the effect ends. Found: a Self cast shows no
