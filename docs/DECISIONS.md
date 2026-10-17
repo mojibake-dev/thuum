@@ -1280,7 +1280,12 @@ sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
    Skyrim Together skips its remotes' (a lead only), and combat stopped on
    demotion and on a combat event. A lab probe, x-npc-puppet, decides it
    against Skyrim Together's other shape, AI on with each output blocked,
-   which leaks wherever a block is missing. HYPOTHESIS until measured.
+   which leaks wherever a block is missing. Measured 2026-10-17 on the
+   engine alone (x-npc-puppet 20261017-082859, docs/research/m3/
+   readings-2026-10-17.md): AI off froze the bandit at rest; a hit's
+   stagger was taken but not played; the movement step slid it away from
+   the push; it went into combat with AI off. So the whole set is needed.
+   The puppet with the animation pass put back is the next probe.
 5. On the host, the engine runs the NPCs under their packages, and the host
    reports what they do as R2 records, bounded where cheap (R1: the
    movement budget players have). Movement rides the existing movement
