@@ -243,7 +243,8 @@ deploy-srv:
     # its next start (2026-10-07: RaceMenu.esp deployed before persist-mods, mid-sweep): check before copying
     for pair in "server-settings.json:/srv/persist/esm/1.6.1170" "server-settings-1.7.104.json:/srv/persist/esm"; do
       file=${pair%%:*}; dir=${pair#*:}
-      names=$(python3 -c 'import json,sys,os; print(" ".join(os.path.basename(p) for p in json.load(open(sys.argv[1]))["loadOrder"]))' "lab/deploy/sky-srv/$file")
+      # shell-quoted for the host's loop: a plugin's name may hold spaces (Apocalypse's)
+      names=$(python3 -c 'import json,sys,os,shlex; print(" ".join(shlex.quote(os.path.basename(p)) for p in json.load(open(sys.argv[1]))["loadOrder"]))' "lab/deploy/sky-srv/$file")
       {{srv_ssh}} "$host" "cd $dir && for n in $names; do test -f \"\$n\" || { echo \"$file names \$n, which $dir lacks (just persist-mods first)\" >&2; exit 2; }; done"
     done
     rsync -az -e "{{srv_ssh}}" lab/deploy/sky-srv/server-settings.json lab/deploy/sky-srv/server-settings-1.7.104.json "$host:/srv/lab/server/"
@@ -327,6 +328,7 @@ client-display vmid w="1920" h="1080" hz="60":
 # The game's traffic outside the lab on a clone (game-firewall.ps1): block SkyrimSE.exe outside 10.10.70.0/24 so
 # bethesda.net connects fail at once instead of stalling Skyrim Platform's first tick, and set a machine WinHTTP
 # proxy that never resolves so the Bethesda.net request fails with an error the game closes, not one it retries.
+# Also answers Steam's three update hosts with 0.0.0.0 (hosts file), so a startup update check fails at once.
 client-game-firewall vmid:
     @lab/tools/client-game-firewall.sh {{vmid}}
 

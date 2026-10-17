@@ -43,6 +43,13 @@
 #   carry, so nothing reads it), in both game versions. LostGrimoire.esp is
 #   full (masters Skyrim, Update, Dawnguard, HearthFires, Dragonborn) and the
 #   server loads it, before CBBE's client-only pair.
+# - Apocalypse - Magic of Skyrim 10.2.3, ADR-029's mod (Eli's stretch list,
+#   docs/MODS.md; its first verb docs/verbs/ghostwalk.md): Nexus mod 1090
+#   file 758998, the version apocrypha read, checked against its md5 in
+#   docs/MODS.md; its plugin and its two BSAs (the archive holds nothing
+#   else), in both game versions. The plugin is full (masters Skyrim, Update,
+#   Dragonborn) and the server loads it after Lost Grimoire's, before CBBE's
+#   client-only pair, so every plugin before it keeps its index.
 #
 # A mod directory named <mod>@<version> installs only into that game
 # version's folder on a clone (add-mods.ps1), and its plugins go only into
@@ -86,13 +93,18 @@ cb_options="Vanilla Shape|Vanilla Outfits|RaceMenu Morphs (BodyMorph)|Morph File
 lg_zip="$cache/LostGrimoire-1.6.zip"
 lg_md5=9ff6e8c0ba4be4689406305ac509ee89
 lg_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/4455/files/746543
+# Apocalypse 10.2.3, Nexus mod 1090 file 758998 (apocrypha's md5, docs/MODS.md)
+ap_zip="$cache/Apocalypse-10.2.3.zip"
+ap_md5=26fa3eb013175c09d12b5b52d5df09ac
+ap_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/1090/files/758998
+ap_esp="Apocalypse - Magic of Skyrim.esp"
 # the load order after the masters and the Creation Club plugins: the server's
 # loadOrder (server-settings.json for 1.6.1170, server-settings-1.7.104.json
 # without RaceMenu's) lists the same plugins in the same order. CBBE's two
 # come last and on the clients only (above: each the last of its kind, no
 # server state names their forms), so the server's list stays the clients'
 # first plugins.
-plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp LostGrimoire.esp RaceMenuMorphsCBBE.esp CBBE.esp)
+plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp LostGrimoire.esp "Apocalypse - Magic of Skyrim.esp" RaceMenuMorphsCBBE.esp CBBE.esp)
 
 mkdir -p "$cache"
 if [ ! -f "$rc_zip" ] || [ "$(md5 -q "$rc_zip")" != "$rc_md5" ]; then
@@ -134,6 +146,15 @@ if [ ! -f "$lg_zip" ]; then
   mv "$lg_zip.part" "$lg_zip"
 fi
 [ "$(md5 -q "$lg_zip")" = "$lg_md5" ] || { echo "Lost Grimoire archive md5 is not $lg_md5" >&2; exit 2; }
+if [ ! -f "$ap_zip" ]; then
+  echo "fetching Apocalypse 10.2.3 from Nexus"
+  url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
+    | curl -fsS -m 30 -H @- "$ap_api/download_link.json" \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["URI"])')
+  curl -fsS -m 900 -o "$ap_zip.part" "${url// /%20}"
+  mv "$ap_zip.part" "$ap_zip"
+fi
+[ "$(md5 -q "$ap_zip")" = "$ap_md5" ] || { echo "Apocalypse archive md5 is not $ap_md5" >&2; exit 2; }
 command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu and CBBE (brew install sevenzip)" >&2; exit 2; }
 [ -f "$rotfern/rotfern.esp" ] || { echo "no rotfern.esp in $rotfern" >&2; exit 2; }
 
@@ -219,6 +240,8 @@ done < "$cbx/plan.tsv"
 echo "CBBE: $(wc -l < "$cbx/plan.tsv" | tr -d ' ') installer folders, $(find "$cb" -type f | wc -l | tr -d ' ') files"
 lg="$stage/tree/lostgrimoire-1.6"; mkdir -p "$lg"
 unzip -q "$lg_zip" "LostGrimoire.esp" "LostGrimoire.bsa" "LostGrimoire - Textures.bsa" "LostGrimoire_ANIO.ini" -d "$lg"
+ap="$stage/tree/apocalypse-10.2.3"; mkdir -p "$ap"
+unzip -q "$ap_zip" "$ap_esp" "Apocalypse - Magic of Skyrim.bsa" "Apocalypse - Magic of Skyrim - Textures.bsa" -d "$ap"
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
@@ -238,14 +261,14 @@ place() { # <esm dir> <mods-relative plugin paths...>
   ssh -o BatchMode=yes "$dst" "set -e; cd '$persist/$dir'
     $(for n in "$@"; do printf "cp '%s/mods/%s' .; " "$persist" "$n"; done)
     grep -v -E '  ($pattern)\$' SHA256SUMS > SHA256SUMS.new || true
-    sha256sum ${names[*]} >> SHA256SUMS.new
+    sha256sum $(printf "'%s' " "${names[@]}") >> SHA256SUMS.new
     mv SHA256SUMS.new SHA256SUMS
     sha256sum -c --quiet SHA256SUMS"
   echo "$dir: ${names[*]} in place, SHA256SUMS checked"
 }
 place esm racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
-  lostgrimoire-1.6/LostGrimoire.esp
+  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp"
 place esm/1.6.1170 racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
   racemenu-0.4.20.0@1.6.1170/RaceMenu.esp racemenu-0.4.20.0@1.6.1170/RaceMenuPlugin.esp \
-  lostgrimoire-1.6/LostGrimoire.esp
+  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp"
 ssh -o BatchMode=yes "$dst" "cd '$persist/mods' && sha256sum -c --quiet SHA256SUMS && echo 'mods: SHA256SUMS checked on the host'"
