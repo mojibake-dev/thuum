@@ -1721,6 +1721,41 @@ function run(step: Step, player: Actor): unknown {
       placedId = npc.getFormID();
       return { formId: placedId };
     }
+    case "npc-ai": {
+      // thuum docs/DECISIONS.md ADR-035 (proposed), point 4, the puppet
+      // probe x-npc-puppet: the placed NPC's AI switched (Papyrus
+      // Actor.EnableAI; the engine's Actor::EnableAI, ID 37504, clears its
+      // kProcessMe bit, the re-analyst on sky-re, 2026-10-16). Returns the
+      // state after
+      const npc = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
+      if (!npc) return { error: "no placed npc" };
+      npc.enableAI(a.enabled === true);
+      return { aiEnabled: npc.isAIEnabled() };
+    }
+    case "npc-state": {
+      // the placed NPC as its engine has it, for the puppet probe: whether
+      // its AI runs, its package and combat target (form ids, 0 for none),
+      // whether it is in combat or staggering, its position, and its head
+      // node's world position: two reads apart during an idle tell whether
+      // its graph still animates it (EnableAI(false) drops an actor from the
+      // animation pass, the same read, HYPOTHESIS)
+      const npc = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
+      if (!npc) return { error: "no placed npc" };
+      const head = "NPC Head [Head]";
+      return {
+        aiEnabled: npc.isAIEnabled(),
+        package: npc.getCurrentPackage()?.getFormID() ?? 0,
+        inCombat: npc.isInCombat(),
+        combatTarget: npc.getCombatTarget()?.getFormID() ?? 0,
+        staggering: npc.getAnimationVariableBool("IsStaggering"),
+        pos: [npc.getPositionX(), npc.getPositionY(), npc.getPositionZ()],
+        head: [
+          NetImmerse.getNodeWorldPositionX(npc, head, false),
+          NetImmerse.getNodeWorldPositionY(npc, head, false),
+          NetImmerse.getNodeWorldPositionZ(npc, head, false),
+        ],
+      };
+    }
     case "draw-weapon":
       // the player's, or with {other: true} the nearest other actor's (a
       // solo reference's NPC)
