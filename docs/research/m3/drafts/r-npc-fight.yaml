@@ -1,0 +1,32 @@
+# r-npc-fight (M3; ADR-031's reference of a host's simulation): the engine
+# alone runs a fight between two bandits and the player, solo. Two bandits
+# (EncBandit01Melee1HNordM 0x1BCD8, as r-block-b places it, aggressive) stand
+# 300 units ahead; the player, given health to last (setav health 3000),
+# holds an Iron Sword (Skyrim.esm 0x12EB7) and does not fight back; both
+# start combat on it (the console's startcombat on {other}, as r-block-b
+# does, for the last placed one; the first joins on its own). The recorder
+# watches both for 20 s: their approach, attacks, recoils, staggers and
+# combat movement. Draft, 2026-10-16.
+id: r-npc-fight
+milestone: M3
+solo: true
+clients: [c1]
+timeout_s: 600
+steps:
+  - c1: solo-start {x: 0, y: -300, z: 0, rz: 180}
+  - wait: 8
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: console {text: "player.additem 12eb7 1"}
+  - c1: console {text: "player.equipitem 12eb7"}
+  - c1: console {text: "player.setav health 3000"}
+  - c1: place-npc {base: 0x1bcd8, x: -100, y: -600, z: 0, rz: 0, aggressive: true}
+  - c1: place-npc {base: 0x1bcd8, x: 100, y: -600, z: 0, rz: 0, aggressive: true}
+  - wait: 3
+  - c1: draw-weapon
+  - c1: watch-start {bools: [IsAttacking, IsRecoiling, IsStaggering, IsBlocking]}
+  - wait: 1
+  - c1: console {text: "{other}.startcombat 14"}
+  - wait: 20
+  - c1: watch-stop
+  - c1: screenshot
+artifacts: [c1.log, screenshots, trace]

@@ -12,3 +12,9 @@ of ADR-035 (proposed). Each note cites its source by path and line or URL.
 - re-ai-puppet.md: the engine's AI switches for an NPC that renders but runs
   no AI (the re-analyst on sky-re, 1.6.1170); every id by `just addr`, every
   inference tagged HYPOTHESIS.
+
+- drafts/: the first M3 lab runs, by path and solo on c1: x-npc-puppet (needs
+  the driver's npc-ai and npc-state steps, thuum branch m3-npc-probe), and
+  the engine-alone references r-npc-packages, r-npc-fight and r-cell-leave.
+  Copies of the scratchpad files numidium runs; a reference that reads right
+  is committed alone under lab/ as ADR-031 asks.

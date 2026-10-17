@@ -1,0 +1,35 @@
+# r-cell-leave (M3; ADR-031's reference of a host's simulation): what the
+# engine alone does with Riverwood's NPCs while the player is away, solo.
+# ADR-035 (proposed) freezes a cell nobody is in at its last recorded state;
+# the engine instead keeps a left cell's schedules going in its own
+# low-process way, and this records the difference. The player stands in
+# Riverwood at 7.9 in the morning and watches 15 s, goes into the Sleeping
+# Giant Inn (coc, as a-console does) for 60 s, comes back (coc riverwood)
+# and watches 15 s more: where each NPC the two watches share was, and
+# where it is. Draft, 2026-10-16.
+id: r-cell-leave
+milestone: M3
+solo: true
+clients: [c1]
+timeout_s: 600
+steps:
+  - c1: solo-start {x: 0, y: -300, z: 0, rz: 0}
+  - wait: 8
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: console {text: "coc riverwood"}
+  - wait: 15
+  - c1: console {text: "set gamehour to 7.9"}
+  - wait: 2
+  - c1: watch-start
+  - wait: 15
+  - c1: watch-stop
+  - c1: screenshot
+  - c1: console {text: "coc RiverwoodSleepingGiantInn"}
+  - wait: 60
+  - c1: console {text: "coc riverwood"}
+  - wait: 15
+  - c1: watch-start
+  - wait: 15
+  - c1: watch-stop
+  - c1: screenshot
+artifacts: [c1.log, screenshots, trace]

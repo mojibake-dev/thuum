@@ -1,0 +1,53 @@
+# x-npc-puppet (M3; docs/DECISIONS.md ADR-035, proposed, point 4): what the
+# engine's own AI switch leaves of an NPC, solo, the engine alone. The
+# re-analyst on sky-re (2026-10-16, 1.6.1170, scratchpad
+# m3-research/re-ai-puppet.md): Actor::EnableAI(false), ID 37504, clears the
+# actor's kProcessMe bit, which stops its packages, combat behavior,
+# detection and chatter, and drops it from the animation pass, so it would
+# freeze in pose; staggers, hits and PerformAction do not read the bit. A
+# bandit (EncBandit01Melee1HNordM 0x1BCD8, as r-block-b places it,
+# unaggressive) stands 150 units in front of the player. The reading, with
+# the driver's npc-state at each point: AI on, its package and its head
+# moving through a forward power attack idle (PowerAttackForward 0x19B25,
+# the driver's play-idle); AI off, its package, and whether its head moves
+# through the same idle; Unrelenting Force's first word on it (spell 0x13E09,
+# the driver's combat-spell) and whether it staggers (the watch); AI on
+# again and its package back. The asserts hold whatever the values. Run by
+# path (ADR-009), on a driver with the npc-ai and npc-state steps.
+id: x-npc-puppet
+milestone: M3
+solo: true
+clients: [c1]
+timeout_s: 600
+steps:
+  - c1: solo-start {x: 0, y: -300, z: 0, rz: 180}
+  - wait: 8
+  - c1: console {text: "player.setav health 3000"}
+  - c1: place-npc {base: 0x1bcd8, x: 0, y: -450, z: 0, rz: 0}
+  - wait: 3
+  - c1: close-menu {name: MessageBoxMenu}
+  - wait: 2
+  - c1: npc-state
+  - c1: play-idle {other: true, formId: 0x19b25}
+  - wait: 0.4
+  - c1: npc-state
+  - wait: 3
+  - c1: npc-ai {enabled: false}
+  - wait: 1
+  - c1: npc-state
+  - c1: play-idle {other: true, formId: 0x19b25}
+  - wait: 0.4
+  - c1: npc-state
+  - wait: 3
+  - c1: screenshot
+  - c1: watch-start {bools: [IsStaggering, IsRecoiling]}
+  - wait: 1
+  - c1: combat-spell {formId: 0x13e09}
+  - wait: 3
+  - c1: watch-stop
+  - c1: npc-state
+  - c1: npc-ai {enabled: true}
+  - wait: 2
+  - c1: npc-state
+  - c1: screenshot
+artifacts: [c1.log, screenshots, trace]

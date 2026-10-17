@@ -1,0 +1,29 @@
+# r-npc-packages (M3; docs/PLAN.md M3 "How it starts": ADR-031's reference
+# of a host's simulation, before any code): the engine alone runs
+# Riverwood's own NPCs under their packages, solo (no skymp5-client, so its
+# world cleaner deletes nothing). The player goes to Riverwood (the
+# console's own coc, as a-console uses it), the clock is set to just before
+# 8 in the morning (set gamehour, the vanilla console), when the schedules
+# send the townsfolk to their work, and the recorder watches up to eight
+# nearby actors (the driver's random search) for 90 s, three game hours'
+# worth of minutes at the lab's timescale: their tracks, graph events and
+# actions. Screenshots at the start and the end. Draft, 2026-10-16.
+id: r-npc-packages
+milestone: M3
+solo: true
+clients: [c1]
+timeout_s: 600
+steps:
+  - c1: solo-start {x: 0, y: -300, z: 0, rz: 0}
+  - wait: 8
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: console {text: "coc riverwood"}
+  - wait: 15
+  - c1: console {text: "set gamehour to 7.9"}
+  - wait: 2
+  - c1: screenshot
+  - c1: watch-start
+  - wait: 90
+  - c1: watch-stop
+  - c1: screenshot
+artifacts: [c1.log, screenshots, trace]
