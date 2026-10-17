@@ -1268,11 +1268,19 @@ sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
    from an older epoch. This adds a field to the reserved HostGrant and
    HostedActorState, with its validator (rule 4).
 4. Off the host, the cell's NPCs are puppets: their AI is off and they
-   show the host's stream. Which engine switch makes the puppet, EnableAI
-   or Skyrim Together's set of output gates, is a lab probe's decision
-   (x-npc-puppet), not this ADR's: the Creation Kit wiki notes that
-   EnableAI(false) also stops the actor's Havok physics, which a hittable,
-   colliding puppet needs. HYPOTHESIS until measured.
+   show the host's stream. The engine has no single switch for that (the
+   re-analyst on sky-re, 2026-10-16, 1.6.1170, scratchpad
+   m3-research/re-ai-puppet.md). Actor::EnableAI(false), ID 37504, clears
+   the actor's kProcessMe bit, which stops its packages, combat behavior,
+   detection requests and chatter, but also drops it from the animation
+   pass, so it would freeze in pose; hits, staggers, PerformAction and
+   SetPosition do not read the bit. The candidate set is EnableAI(false),
+   the puppet put back into the animation pass (the engine's own animation
+   job queued for it), the engine's movement step skipped for it, as
+   Skyrim Together skips its remotes' (a lead only), and combat stopped on
+   demotion and on a combat event. A lab probe, x-npc-puppet, decides it
+   against Skyrim Together's other shape, AI on with each output blocked,
+   which leaks wherever a block is missing. HYPOTHESIS until measured.
 5. On the host, the engine runs the NPCs under their packages, and the host
    reports what they do as R2 records, bounded where cheap (R1: the
    movement budget players have). Movement rides the existing movement
@@ -1291,9 +1299,15 @@ sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
    the server (TES3MP's ProcessorObjectSpawn.hpp:21-26).
 7. A handoff runs in TES3MP's order: the server sends the cell's recorded
    state, then the grant with a new epoch; the new host turns its puppets
-   live from its own copies (AI on, packages re-evaluated, combat targets
-   from the record) and sends a full HostedActorState for each; the old
-   host gets HostRelease and turns its actors to puppets.
+   live from its own copies and sends a full HostedActorState for each;
+   the old host gets HostRelease and turns its actors to puppets. In the
+   engine (the same read, its order a HYPOTHESIS): going live is
+   SetPosition to the recorded point, AI on, the package evaluated at once
+   (CommonLib's EvaluatePackage(true, false), which runs the package check
+   then and not at the next AI tick), then StartCombat on the recorded
+   target, since an evaluation that resets also stops combat. Going puppet
+   is combat and alarm stopped, StopMoving, the keep-offset cleared, then
+   AI off, the actor kept in high process.
 8. A cell nobody is in freezes at its last recorded state; the server
    simulates nothing there (as today). The next attach runs point 7.
 9. The loader brings in the NPCs a schedule needs, the essential, unique
