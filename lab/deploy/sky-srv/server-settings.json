@@ -20,7 +20,8 @@
     "/srv/skymp/esm/rotfern.esp",
     "/srv/skymp/esm/RaceMenu.esp",
     "/srv/skymp/esm/RaceMenuPlugin.esp",
-    "/srv/skymp/esm/LostGrimoire.esp"
+    "/srv/skymp/esm/LostGrimoire.esp",
+    "/srv/skymp/esm/Apocalypse - Magic of Skyrim.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",
