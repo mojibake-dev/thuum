@@ -34,16 +34,24 @@
 # 87). Steam's bootstrapper does not take the WinHTTP proxy. The hosts file
 # answers the three names with 0.0.0.0 before any DNS, so the check fails at
 # the connect, and the boot goes on.
-$hosts = "$env:SystemRoot\System32\drivers\etc\hosts"
-$updateHosts = 'client-update.fastly.steamstatic.com', 'client-update.akamai.steamstatic.com', 'client-update.steamstatic.com'
-$kept = @(Get-Content $hosts | Where-Object { $_ -notmatch '# sky-lab: Steam update host$' })
-Set-Content -Path $hosts -Encoding ascii -Value ($kept + ($updateHosts | ForEach-Object { "0.0.0.0 $_ # sky-lab: Steam update host" }))
-Clear-DnsClientCache
-Write-Output ('hosts ' + ((Get-Content $hosts | Select-String -Pattern '# sky-lab: Steam update host$' | ForEach-Object { ($_.Line -replace ' # sky-lab: Steam update host$', '') }) -join '; '))
-$exe ='C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\SkyrimSE.exe'
+$exe = 'C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\SkyrimSE.exe'
 $name = 'sky-lab: SkyrimSE outside the lab'
 Get-NetFirewallRule -DisplayName $name -ErrorAction SilentlyContinue | Remove-NetFirewallRule
 $rule = New-NetFirewallRule -DisplayName $name -Direction Outbound -Action Block -Program $exe -RemoteAddress '0.0.0.0-10.10.69.255', '10.10.71.0-255.255.255.255' -Profile Any -Enabled True
 Write-Output ('rule ' + $rule.DisplayName + ': ' + $rule.Direction + ' ' + $rule.Action + ' enabled=' + $rule.Enabled + ' remote=' + (($rule | Get-NetFirewallAddressFilter).RemoteAddress -join ','))
 netsh winhttp set proxy proxy-server="bnet-off.invalid:3128" bypass-list="<local>;10.10.70.*" | Out-Null
 Write-Output ('winhttp ' + ((netsh winhttp show proxy | Select-String -Pattern 'Proxy Server|Bypass List' | ForEach-Object { ($_.Line -replace '\s+', ' ').Trim() }) -join '; '))
+# The file is written in one open, retried: Set-Content truncated it, then lost its second open to whoever re-reads
+# the file on a change ("being used by another process", sky-c2, 2026-10-16), leaving it empty; and a write that
+# did not land fails the script instead of printing an empty list.
+$hosts = "$env:SystemRoot\System32\drivers\etc\hosts"
+$updateHosts = 'client-update.fastly.steamstatic.com', 'client-update.akamai.steamstatic.com', 'client-update.steamstatic.com'
+$kept = @([IO.File]::ReadAllLines($hosts) | Where-Object { $_ -notmatch '# sky-lab: Steam update host$' })
+$text = (($kept + ($updateHosts | ForEach-Object { "0.0.0.0 $_ # sky-lab: Steam update host" })) -join "`r`n") + "`r`n"
+for ($try = 1; $try -le 20; $try++) {
+  try { [IO.File]::WriteAllText($hosts, $text, [Text.Encoding]::ASCII); break } catch { Start-Sleep -Milliseconds 250 }
+}
+Clear-DnsClientCache
+$written = @([IO.File]::ReadAllLines($hosts) | Where-Object { $_ -match '# sky-lab: Steam update host$' } | ForEach-Object { $_ -replace ' # sky-lab: Steam update host$', '' })
+Write-Output ('hosts ' + ($written -join '; '))
+if ($written.Count -ne $updateHosts.Count) { Write-Output "hosts: $($written.Count) of $($updateHosts.Count) entries written"; exit 1 }
