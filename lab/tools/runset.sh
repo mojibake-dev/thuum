@@ -6,6 +6,10 @@
 # summary and run ids (for a merge commit or a LOG.md entry), saves the set's
 # record to lab/results/runsets/<id>.json, and exits 0 for green or watch,
 # 1 otherwise. RUNSET_WAIT_S (default 600) bounds the wait for an idle lab.
+# RUNSET_AFTER=<set id> runs the rest of a set that stopped or ended without a
+# verdict of its own (a lab fault took a clone away mid-set, 2026-10-16): every
+# scenario whose last verdict there is not green, on the same staged lab; the two
+# sets together are the sweep.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
@@ -18,6 +22,27 @@ for _ in $(seq 1 $(( ${RUNSET_WAIT_S:-600} / 10 ))); do
   [ "$idle" = True ] && break
   sleep 10
 done
+
+if [ -n "${RUNSET_AFTER:-}" ]; then
+  # read failures stop here: an empty rest must mean every scenario there is green, never an unread set
+  prev=$(curl -fsS -m 30 "$api/runset/$RUNSET_AFTER") || { echo "run set $RUNSET_AFTER is not readable" >&2; exit 1; }
+  rest_list=$(printf '%s' "$prev" | python3 -c '
+import json, sys
+rs = json.load(sys.stdin)
+rid, state, verdict = rs["id"], rs["state"], rs.get("verdict")
+# stopped by hand or by two lab faults in a row, or ended early (a lab error such as E_RUN_HOLD refusing a rerun):
+# never one still running
+if not (state == "stopped" or (state == "done" and verdict not in ("green", "watch"))):
+    sys.exit(f"run set {rid} is {state} ({verdict}): its rest is not a set of its own")
+for s in rs["scenarios"]:
+    if (rs["runs"].get(s) or [{}])[-1].get("verdict") != "green":
+        print(s)
+') || { echo "run set $RUNSET_AFTER: no rest taken" >&2; exit 1; }
+  [ -n "$rest_list" ] || { echo "run set $RUNSET_AFTER has nothing left that is not green"; exit 0; }
+  mapfile -t rest <<< "$rest_list"
+  echo "the rest of run set $RUNSET_AFTER: ${#rest[@]} scenarios"
+  set -- "${rest[@]}"
+fi
 
 body=$(python3 - "$name" "$@" <<'PY'
 import json, sys
