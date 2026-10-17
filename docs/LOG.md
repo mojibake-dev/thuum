@@ -1771,3 +1771,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   at 60 s. Seen twice today, once per seat and on both fork lines: c2 in 20261016-203757 on 2540be96, and c1 in
   20261017-024554 here. The next one gets a full dump of SkyrimSE.exe and the seat's logs before the rollback, a lab-api
   change after playtest twenty-one.
+- Playtest twenty-one (2026-10-16, 20:03 to about 20:24 PDT) on parity ef44a1d8 with the Apocalypse layer.
+  - Twenty's world restored by `just playtest-restore`, the first restore with its relaunch of both seats (main 8aa07cac).
+  - SunshineService restarted on both seats, one stream per seat, then both games relaunched under the streams. Both
+    heartbeats were live.
+  - The world saved as playtest-m2-21-20261017T032431Z. The evidence, taken before any rollback, is at
+    results/playtest-21/: the server's log since the hold, and both seats' skyrim-platform.log and skse64.log.
+- The Steam update-host fix on both clones' clean-m1-next (main 960ef27 and 6c91f38; 20:31 to 20:38 PDT).
+  - Each clone was rolled back to its clean-m1-next first, so nothing the playtest left on the live disks reached an
+    image. Then game-firewall.ps1 ran and the snapshot was retaken.
+  - A connect to client-update.steamstatic.com:443 took about 21.2 s before: the name resolves (146.75.95.82) and the
+    SYN goes unanswered. After the fix it took 79 ms on c2 and 82 ms on c1.
+  - Smoke 20261017-033542 green, with an 83 s client rollback. clean-m1 is promoted after a green nightly (ADR-030).
+  - The first try left c2's hosts file empty: Set-Content truncated it, then lost its second open to another process.
+    6c91f38 writes it in one open with retries and checks the count.
