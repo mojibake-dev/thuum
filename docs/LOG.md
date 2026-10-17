@@ -1827,3 +1827,40 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   - Owed to lab-api: fail a run whose watch shows every actor standing still with no events for more than a few
     seconds (a paused game), never pass it green.
   - The 03:30 nightly is the driver change's full sweep before clean-m1 is promoted (ADR-030).
+- m2-train-22 merged to fork parity 3536ba43 (2026-10-17T22:09Z, 15:09 PDT) through `just verb-merge`, from thuum branch
+  ghostwalk-main with main merged in, on thuum-magnus's go. A merge train of three fork branches, staged together:
+  - m2-ghostwalk-main 728ca163: Ghostwalk, Apocalypse's first verb, with its return {reach 0, waitMs 15400, relay true} in
+    both server-settings files, its difftest session, and the four t 43 effect lines T2 first found, now declared.
+  - m2-perk-riders 93358eea: libespm reads whether a magic effect's own conditions call HasPerk, and the server keeps
+    such a rider out of ApplyEffects and the spell stagger loop. That covers Firebolt's Impact stagger, measured on 67 of
+    91 lab hits, and Disintegrate's 200 Health.
+  - m2-stream-aim 8c241d93: a figure's relayed aimed stream is cast with no target and the caster's desiredTarget
+    cleared, so Scattershock no longer runs backward on the other screen.
+  Readings on the stage (thuum-magnus's reads):
+  - x-firebolt-riders 20261017-135254: no stagger in three hits, against 0.25 a hit earlier the same day; damage
+    unchanged at about 0.757 left.
+  - b-ghostwalk 135747: every assert held, and server.log has "made its cast teleport's jump" for the 2206-unit return,
+    with no send-back.
+  - x-stream-aim 135526: the figure's missile and Flames follow its aim, at a constant 2.75 degree heading offset (a
+    follow-up row). Scattershock's 2.5 s charge left one missile in a 3 s hold.
+  T2 green with 27 sessions on skymp-server:m2-train-22.
+  The gate ran on one staging in two run sets:
+  - 20261017-142215-merge-m2-train-22: 8 green (smoke-two-players, a-restart-persistence, b-duel, b-ghostwalk, b-spell,
+    b-self-cast, b-invis-recast, b-teleport). Then sky-c1's GTX 1050 failed at a slot reset (07:45:49 PDT, "device
+    inaccessible", QEMU exit 1), so b-teleport-look and b-cast-moving ran without a working c1.
+  - Its rest, 20261017-214345-merge-m2-train-22, after core's warm reboot of the host had cleared the card: 7 of 7 (the
+    two above, b-cast-dual, b-cast-rhythm, b-cast-both-hands, a-melee-reach, a-racemenu).
+  Both clones promoted to the 3536ba43 client. clean-m1 now also carries the Steam update-host fix and the 5801c6cf
+  driver: the nightly of 10-17 went red on two load freezes, so they were not promoted before.
+  The nightly 20261017-103000-nightly, 52 of 54: a-rotfern and b-push froze at load. Their reruns: a-rotfern 132848 froze
+  again, giving the first dump of the freeze (see below), then 133453 green; b-push 133201 and 133855 green.
+  Lab notes:
+  - The load freeze's first dump: 20261017-132848-a-rotfern, c1-SkyrimSE.dmp, 4.35 GB. thuum-magnus's HYPOTHESIS: an
+    engine pathing loop on a stale return address, NaN only for some randomized image bases. Every run now keeps each
+    seat's skse64.log, which prints the image base (lab-api dc0b63f). The existing AI Pathing Freeze Fix (Nexus 190049)
+    patches the call, and is proposed to Eli as a layer.
+  - sky-c1's card was wedged from 07:45 to 14:36: it answered reads and ignored writes, and only a host reboot could
+    clear it (thuum-mundus). core rebooted the host on Eli's go. The warm reboot cleared it, and both cards are clean.
+  - sky-srv (onboot 0) did not come back with the host and was started by hand. Its cloud-init flip gave it a new SSH
+    host key, SHA256:Gk6ckTwF..., checked against core's guest-agent reading before the re-key.
+  - core's sky-ci runner change waits for a stable home link.
