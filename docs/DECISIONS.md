@@ -1220,10 +1220,14 @@ a power cycle of core. The rollback is also the larger part of a run: 68 to
 the test itself (b-teleport, b-teleport-look, b-cast-sheathe, b-self-cast,
 2026-10-17). A game relaunch, which stops the game process and starts it
 again through the guest agent with the VM left running (docs/LAB.md's
-relaunch step), took both seats from the start to back online in 28 s on
-2026-10-16 (20:05:28 to 20:05:56), with no slot reset. What the cold
-rollback adds beyond a relaunch is a clean disk: files a run left on the
-client.
+relaunch step), takes a median 31.5 s a step with a fresh launch (156 of
+c1's 239 relaunch steps, 2026-10-05 to 10-17: 30.5 to 35.7 s, in game a
+median 27.6 s after the command; numidium's review), with no slot reset,
+against 62 to 90 s for a cold rollback. What the cold rollback adds beyond a
+relaunch is a clean disk, and a fresh randomized image base: Windows gives
+an executable's image one base on first use and tends to keep it for later
+instances within a boot (Mandiant, "Six facts about address space layout
+randomization on Windows", 2020), so a relaunch keeps the boot's base.
 
 **Decision** (proposed).
 1. By default a run restores the server as today and relaunches the game on
@@ -1238,10 +1242,39 @@ client.
    rerun; and at least every 20 runs of a set, as a floor.
 3. Before it is the default, one full sweep runs in relaunch mode beside the
    last rollback-mode nightly. The verdicts must agree under ADR-027's
-   rules; the time and the reset count are measured and logged.
+   rules; the time, the reset count and every relaunch's image base (the
+   seat's skse64.log, fetched every run since dc0b63f) are measured and
+   logged.
+4. Preconditions for that trial (numidium's review, 2026-10-17):
+   - the load freeze's fix is in first (AI Pathing Freeze Fix, a mod layer,
+     if Eli accepts it; docs/research/load-freeze.md), since under the
+     freeze's hypothesis a bad image base kept across relaunches would
+     freeze every relaunch until the next cold rollback;
+   - a relaunch starts a fresh launch: today sky-lab-launch is registered
+     IgnoreNew (install-lab.ps1:104-106) and launch.ps1 keeps running 60 s
+     after the game's window appears (launch.ps1:117-119), so a run shorter
+     than about 75 s relaunches through the last run's launch, with its
+     game folder and solo setting. The relaunch stops the task first, as
+     the quiesce does (config.py:243-247), and retries as the game check
+     does (runner.py:593-600); sky-lab-run gets the same;
+   - the cleaning list names files, never a wildcard (launch.ps1 needs
+     C:\sky-lab\game-dir.txt): the run's frida outputs after their fetch, the
+     kept WER dumps after their per-run collection, the generated
+     TESMODPLATFORM-<guid>.ess a killed game leaves, skymp5-client's
+     thuum-<id>.jslot; the game's INIs need none (a relaunch kills the
+     game, so nothing writes them at exit). The save is already safe:
+     Skyrim Platform loads its template under a fresh generated name
+     (LoadGame.cpp:110-119);
+   - the runner's log and trace fetches, inside its rollback today
+     (runner.py:556-558), move before the cleaning.
 
 **Consequences.** A nightly of 54 scenarios drops from 216 slot resets to a
-few at its start and after its faults, and each run sheds about 40 s. The
+few at its start and after its faults, and each run sheds 30 to 55 s. A
+promote's gate (ADR-030) keeps its verdicts from the snapshot as staged: its
+set starts from a cold rollback, and a red counts only after a cold-rollback
+rerun. docs/LAB.md's per-run rollback and its "under C:\sky-lab and nowhere
+else" are amended (the latter is already false: the saves, Skyrim
+Platform's CEF temp). The
 cost is isolation: a run inherits what the last one left in the game's
 files, and state one test leaves behind is a classic cause of flaky results
 in the next (Fowler, "Eradicating Non-Determinism in Tests", 2011; Luo,
