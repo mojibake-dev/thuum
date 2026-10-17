@@ -30,6 +30,9 @@ class FakeProxmox:
         # folder) unless a test says otherwise
         self.game = ExecResult(0, "C:\\Games\\Skyrim Special Edition 1.6.1170\\SkyrimSE.exe\r\n1.6.1170.0\r\n", "")
         self.game_misses = 0
+        # what a seat's SKSE folder holds beside skyrim-platform.log (Runner._skse_logs lists it,
+        # copying each into the lab directory as <client>-<name>)
+        self.skse_logs = ["skse64.log"]
         # self-service snapshots: each clone's snapshot tree as PVE lists it,
         # `current` included; a shutdown's exit status and task log
         self.snaps: dict[int, list[dict[str, Any]]] = {}
@@ -68,6 +71,8 @@ class FakeProxmox:
                 self.game_misses -= 1
                 raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: qga command 'guest-exec' failed - got timeout")
             return self.game
+        if any("-Filter '*.log'" in c for c in command):
+            return ExecResult(0, "".join(f"{n}\r\n" for n in self.skse_logs), "")
         return self.exec_result
 
     def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]:
