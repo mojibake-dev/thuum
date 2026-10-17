@@ -17,6 +17,14 @@ Roadmap reference: none (SkyMP's appearance sync stops at vanilla data)
 Milestone: Stretch, chosen by Eli 2026-10-06 (docs/PLAN.md)   Class: B (a
 player's own data, shown on every client)
 
+### Sequences and combinations (ADR-033)
+
+| sequence or combination | probe or scenario | result |
+| --- | --- | --- |
+| the same character logging in again inside one game | fork m2-twenty-one e15770fb (raceMenuService: the reset and the reload skipped when the look is the one already applied) | built; a-racemenu and a-character-creation green on it (20261016-194014, 194345); not yet probed with a custom-skeleton race |
+| another character logging in inside one game (how a world restore over a running game begins), a race whose skeleton scales its bones | numidium's rotfern probe on world playtest-m2-20-20261016T183616Z (node-scale on the player and on her figure, at login, +30 s, after a relaunch) | OPEN: after the switch, her own Root, Pelvis, Spine and Spine1 read 1.0 against her race's 0.6, 0.72, 0.83 and 0.89 under the NPC node's 1.6 (two to three times her size, playtest twenty), unchanged on e15770fb; a fresh launch and her figure in the other game keep the race's values. HYPOTHESIS: NiOverride's stored node bases are the previous skeleton's, and her look re-applies over them. To try: Actor.QueueNiNodeUpdate on the player after the look, NiOverride's UpdateAllReferenceTransforms, or the reset without UpdateNodeTransform. Meanwhile the lab relaunches the seats after a playtest restore |
+| learned spells at a login | the same probe, known {ids} | Firebolt and Teleportation present at every moment (20261016, e15770fb); playtest twenty's missing Firebolt did not reproduce, a watch item |
+
 ## Authority
 
 Rung: R2, bounded. The look is the player's choice, computed by RaceMenu
