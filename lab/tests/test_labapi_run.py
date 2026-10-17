@@ -505,8 +505,10 @@ class ArtifactFailures(RunTests):
 class ClientLogs(RunTests):
     def test_managed_client_yields_the_platform_log_and_the_driver_log(self):
         """c1.log is Skyrim Platform's log; c1-driver.log is lab-driver's own
-        (writeLogs under the game directory named in game-dir.txt). Both are
-        copied into the lab directory first and read from there."""
+        (writeLogs under the game directory named in game-dir.txt); c1-skse64.log is
+        SKSE's, which prints the game's image base (the load freeze's hypothesis,
+        2026-10-17). All three are copied into the lab directory first and read from
+        there."""
         from labapi.guests import Guest
 
         tables = self.services.tables
@@ -514,16 +516,20 @@ class ClientLogs(RunTests):
         pve = self.services.control._b
         pve.files[r"C:\sky-lab\c1.log"] = "platform log\n"
         pve.files[r"C:\sky-lab\c1-driver.log"] = "2026-10-01T00:00:00Z loaded\n"
+        pve.files[r"C:\sky-lab\c1-skse64.log"] = "imagebase = 00007FF7AB420000\n"
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn("c1.log", body["artifacts"])
         self.assertIn("c1-driver.log", body["artifacts"])
+        self.assertIn("c1-skse64.log", body["artifacts"])
         run_dir = self.tmp / "results" / run_id
         self.assertEqual((run_dir / "c1-driver.log").read_text(), "2026-10-01T00:00:00Z loaded\n")
+        self.assertEqual((run_dir / "c1-skse64.log").read_text(), "imagebase = 00007FF7AB420000\n")
         copies = [c for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
-        self.assertEqual(len(copies), 2, pve.calls)
+        self.assertEqual(len(copies), 3, pve.calls)
         self.assertIn("game-dir.txt", " ".join(copies[1][2]))
         self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
+        self.assertIn("skse64.log", " ".join(copies[2][2]))
 
     def test_after_a_quiet_spell_the_clients_logs_are_kept_before_the_rollback(self):
         """A playtest's Skyrim Platform log is on the clone until the next run

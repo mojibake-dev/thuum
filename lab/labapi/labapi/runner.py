@@ -1055,8 +1055,8 @@ class Runner:
         if g is None or not g.managed:
             rec.notes.append(f"hang evidence: {client} is unmanaged or unmapped; nothing taken")
             return
-        skse = f"(Join-Path (Split-Path -Parent '{self.s.client_driver_log}') 'skse64.log')"
-        await self._fetch_client_file(rec, g, f"{client}-skse64.log", skse)
+        if f"{client}-skse64.log" not in rec.artifacts:  # a run that lists <client>.log has it already
+            await self._fetch_client_file(rec, g, f"{client}-skse64.log", self._skse_log_source())
         url = f"{self.s.client_lab_api_url}/clients/{client}/hang-dump/{rec.run_id}"
         script = (_HANG_DUMP_PS.replace("@LAB_DIR@", self.s.client_lab_dir).replace("@URL@", url)
                   .replace("@UPLOAD_S@", str(max(60, int(self.s.hang_dump_timeout_s * 0.6)))))
@@ -1074,6 +1074,10 @@ class Runner:
         if (rec.dir / name).is_file():
             rec.artifacts.append(name)
 
+    def _skse_log_source(self) -> str:
+        """skse64.log's path on a client, as a PowerShell expression: beside skyrim-platform.log."""
+        return f"(Join-Path (Split-Path -Parent '{self.s.client_driver_log}') 'skse64.log')"
+
     async def _client_log(self, rec: RunRecord, client: str, name: str) -> None:
         """<client>.log is Skyrim Platform's log; <client>-driver.log is
         lab-driver's own (writeLogs), found under the game directory the client
@@ -1087,6 +1091,9 @@ class Runner:
         await self._fetch_client_file(rec, g, name, f"'{self.s.client_driver_log}'")
         game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
         await self._fetch_client_file(rec, g, f"{client}-driver.log", f"(Join-Path {game_dir} '{self.s.client_plugin_log}')")
+        # skse64.log beside it in every run: it prints the game's image base, which the load freeze's
+        # hypothesis (thuum-magnus, 2026-10-17) ties to the hang, so every run tests it, not only a hung one
+        await self._fetch_client_file(rec, g, f"{client}-skse64.log", self._skse_log_source())
 
     async def _fetch_client_file(self, rec: RunRecord, g: Guest, name: str, source: str) -> None:
         """Copy the file at the PowerShell path expression `source` on the
