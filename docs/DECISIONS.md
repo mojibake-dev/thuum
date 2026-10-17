@@ -1198,3 +1198,117 @@ measured change, not a rewrite: the row's probe first. Writing into a slot
 SKSE owns is a known failure now, not a mystery: a swap that never fires
 is checked against the slot's owner (slot-probe.js) before anything else.
 
+
+## ADR-035: A cell's own NPCs, hosted by one player's game per cell
+
+Status: proposed (2026-10-16 night, for Eli; drafted from the M3 research of
+that night, scratchpad m3-research/: skymp-hosting.md, tes3mp.md,
+te-npcs.md). Amends ADR-012's reserved cell-host family; retires SkyMP's
+actor-level host model for the cells it covers.
+
+**Context.** M3 (docs/PLAN.md) hosts the world by cell, TES3MP's way: one
+player's game runs a cell's NPCs under their packages, every other game
+shows them, the server decides what an NPC does to anyone and keeps what
+it is. SkyMP does something else today (fork parity ef44a1d8):
+- It hosts one actor at a time, not a cell: a client asks for an NPC about
+  1.5 s after it shows unhosted, and anyone may take it once its reports
+  are 2 s old (skymp5-client view/formView.ts:429-496;
+  ActionListener.cpp:1958-2051). A disconnect releases nothing
+  (PartOne.cpp:558-582), and the night of 2026-10-16 the host path aborted
+  the server (fixed on ef44a1d8, unit/HostAttemptTest.cpp).
+- It does not run the game's own NPCs. Every client deletes each engine
+  actor within 8192 units the server did not make (worldCleanerService.ts:
+  37-108) and shows each server NPC as a PlaceAtMe copy of its base
+  (formView.ts:145-305; "all skymp npcs are FF+", hitService.ts:21). A copy
+  loses what a schedule leans on: linked references, quest aliases, the
+  editor location, the reference's scripts (untested; to read in the lab).
+- Its loader drops the NPCs M3's exits need: essential, protected and
+  unique ones, crime-faction members, every playable race
+  (WorldState.cpp:459-585), so Riverwood's residents and every humanoid
+  bandit; and the lab server never sets npcEnabled.
+- Its handoff signal cannot reach a master-file NPC: the hosted-by-other
+  flag rides a property update whose id is 32 bits (wire-schema
+  skymp.rs:426), and the relay echoes a host's own reports back to it
+  (ActionListener.cpp:108-118).
+TES3MP runs the engine's own actors. Each cell has one authority, the first
+player to load it; on leave it passes to the remaining visitor with the
+lowest ping (CoreScripts 0.8.1 scripts/logicHandler.lua:869-932). Only the
+authority's packets about its actors are accepted. Every client starts with
+the engine's AI off and turns it on only for actors in the cells it hosts,
+so the rest are displays of what the server relays (TES3MP 0.8.1
+apps/openmw/mwmechanics/actors.cpp:2172-2248, apps/openmw/mwmp/
+DedicatedActor.cpp:56-162). A handoff sends the saved state first, then the
+grant, then the new authority's full update (logicHandler.lua:871-894; the
+0.8.0 changelog's late-grant desync fix). Skyrim Together, read as a map
+only (ADR-005, docs/TE-MAP.md), leaves AI running on every copy it does not
+own and blocks each output instead: actions, movement, transforms, equips,
+casts. Its open bugs are that leftover state breaking NPCs at a handoff
+(issue 810), duplicates from a stale echo (906), and owners fighting over
+an NPC, fixed with an epoch on every grant (pull request 887). The wire
+already reserves this milestone's messages, defined and validated, with no
+sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
+(wire-schema lib.rs:224-240 and 293-301; docs/WIRE.md:172-175).
+
+**Decision** (proposed).
+1. A cell's NPCs are its own actors. In a cell the server hosts, a client
+   keeps the engine's references from the master files and the server knows
+   each by its own form id; the world cleaner stops deleting them, and the
+   PlaceAtMe copy stays only for actors the server makes (other players'
+   figures, server spawns).
+2. The unit is the cell, an interior or one exterior grid cell. The server
+   grants it to the first player whose game attaches it (Skyrim Platform's
+   cellAttach and cellFullyLoaded events, ADR-034's event first). When the
+   host leaves the cell or disconnects, the server waits a grace window,
+   then grants it to the remaining visitor with the lowest round trip. A
+   newcomer takes over only by a clear ping margin, if at all (TES3MP's
+   40 ms), so hosts do not churn.
+3. Every grant carries an epoch, a fencing token (Kleppmann, "How to do
+   distributed locking", 2016; Burrows, "The Chubby lock service", OSDI
+   2006). Every host message carries it, and the server drops a message
+   from an older epoch. This adds a field to the reserved HostGrant and
+   HostedActorState, with its validator (rule 4).
+4. Off the host, the cell's NPCs are puppets: their AI is off and they
+   show the host's stream. Which engine switch makes the puppet, EnableAI
+   or Skyrim Together's set of output gates, is a lab probe's decision
+   (x-npc-puppet), not this ADR's: the Creation Kit wiki notes that
+   EnableAI(false) also stops the actor's Havok physics, which a hittable,
+   colliding puppet needs. HYPOTHESIS until measured.
+5. On the host, the engine runs the NPCs under their packages, and the host
+   reports what they do as R2 records, bounded where cheap (R1: the
+   movement budget players have). Movement rides the existing movement
+   relay; actions ride cast-action's action replay (ADR-032), extended from
+   players' figures to NPCs; health, equipment and inventory ride
+   HostedActorState. Per-tick state goes on an unreliable channel with the
+   epoch; grants and full updates go reliable and ordered (renet,
+   ADR-011), since one ordered channel for 25 ms positions stalls behind a
+   lost packet (TES3MP's ActorPacket.cpp:11-13; RFC 9000 section 13).
+6. The server decides what an NPC does to anyone and what it is (R0):
+   hits on and by NPCs under the rules players have (reach, cone, the
+   server's numbers), deaths that persist (not SkyMP's 25 s respawn at the
+   editor location, MpActor.cpp:1893-1975), inventories, and spawns. A
+   client proposes a spawn and deletes its own copy; the server assigns the
+   id and sends it to everyone; a leveled list is rolled once per cell, by
+   the server (TES3MP's ProcessorObjectSpawn.hpp:21-26).
+7. A handoff runs in TES3MP's order: the server sends the cell's recorded
+   state, then the grant with a new epoch; the new host turns its puppets
+   live from its own copies (AI on, packages re-evaluated, combat targets
+   from the record) and sends a full HostedActorState for each; the old
+   host gets HostRelease and turns its actors to puppets.
+8. A cell nobody is in freezes at its last recorded state; the server
+   simulates nothing there (as today). The next attach runs point 7.
+9. The loader brings in the NPCs a schedule needs, the essential, unique
+   and humanoid ones its filters drop today, behind npcEnabled, first on a
+   probe-only lab setting.
+
+**Consequences.** M3's first verbs follow the points: cell-host (2, 3),
+npc-puppet (4), npc-stream (5), npc-handoff (7), npc-fate (6: hits,
+deaths, spawns). Each starts with ADR-031's references of the engine alone:
+an NPC under its packages, a fight with bandits, a cell entered and left,
+recorded before any code. SkyMP's actor-level host path (OnHostAttempt,
+hosters, the 2 s lapse), the world cleaner's deletion of master-file NPCs
+and the copies for them are retired in hosted cells, and the echo of a
+host's own reports stops. The risk to measure first is Skyrim Together's:
+state a puppet keeps that breaks it when it goes live; x-npc-puppet and the
+handoff reference read it before any handoff code. The model is the
+general one for a replicated world, one primary copy per object migrated
+between machines (Bharambe, Pang and Seshan, "Colyseus", NSDI 2006).
