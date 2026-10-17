@@ -1785,3 +1785,25 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   - Smoke 20261017-033542 green, with an 83 s client rollback. clean-m1 is promoted after a green nightly (ADR-030).
   - The first try left c2's hosts file empty: Set-Content truncated it, then lost its second open to another process.
     6c91f38 writes it in one open with retries and checks the count.
+- Ghostwalk's first stage, no merge (thuum-magnus's ask; 20:44 to 21:48 PDT on 10-16): fork m2-ghostwalk-main 6d09befe
+  from thuum ghostwalk-main 6bcc0ff.
+  - Probes r-ghostwalk 20261017-042234 and x-ghostwalk-relay 042445 green.
+  - T2 red as expected: 26 sessions identical, and the ghostwalk session had 4 differences. Both seats get two effect
+    messages at t 43, an empty one and one for effect 0x0C00AAE5 from Apocalypse's spell 0x0C00AAE8, that the legacy
+    server never sends. magnus declared them in 728ca163.
+- docs-m2-21 landed on main (1b778552), with hud-trace.js taking LAB_PARAMS.TYPES on top (CommonLibSSE-NG
+  include/RE/H/HUDData.h:16-37). The superseded docs-te-map and docs-racemenu-row were deleted; their tips are in main.
+- The crosshair fix (fork m2-crosshair 50d7c718, an invisible figure's display name emptied), staged from main, no merge.
+  - x-crosshair-invis 20261017-045850 measured nothing of the invisible state: c2's game died 46 ms after c1's
+    Invisibility reached the server, and launch.ps1 started it again. The middle point caught the reload, and the HUD
+    trace was empty.
+  - Its WER dump was lost to the restore's rollback.
+  - A rerun without Frida was cancelled mid-stage when Eli parked the fix for after the alpha ("we can pass on that for
+    now"). m2-crosshair stays unmerged.
+- The hang-evidence lab-api is live (main d23fefcd, version d23fefcd at 22:15 PDT). A run whose step timed out naming a
+  seat keeps that seat's skse64.log and a full dump of SkyrimSE.exe: dbghelp's MiniDumpWriteDump, 4.5 GB in 15 s on
+  sky-c1, uploaded by the seat to PUT /lab/clients/<client>/hang-dump/<run>.
+  - Still missing, after tonight's crash: a game that died and was relaunched mid-run. Its WER minidumps in
+    C:\sky-lab\dumps should be kept the same way.
+- The lab was back on parity ef44a1d8 at 22:19 PDT with the Steam-fixed clean-m1-next (smoke 20261017-051935 green) for the
+  03:30 nightly.
