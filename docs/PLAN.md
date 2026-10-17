@@ -218,7 +218,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 9. self-cast: a Self spell's effects run on the server (Invisibility and
    Etherealize as states, no damage to an ethereal player, a rest advancing
    the effects, Oakflesh's armor in the damage). DONE 2026-10-13
-   (8eb4e78e); b-self-cast c260ff3.
+   (8eb4e78e); b-self-cast c260ff3. The invisible figure's crosshair
+   prompt: PARKED until after the alpha (Eli, 2026-10-16); the state and
+   the parked fork branch m2-crosshair in docs/verbs/self-cast.md.
 10. Apocalypse (ADR-029, accepted 2026-10-13): the caster's game runs its own
     spells' effect scripts; a server-run allowlist grows verb by verb
     (docs/apocalypse-options.md, sections 4 and 5). Scenario b-apocalypse.

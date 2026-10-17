@@ -1864,3 +1864,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   - sky-srv (onboot 0) did not come back with the host and was started by hand. Its cloud-init flip gave it a new SSH
     host key, SHA256:Gk6ckTwF..., checked against core's guest-agent reading before the re-key.
   - core's sky-ci runner change waits for a stable home link.
+- Playtest twenty-two (2026-10-17, 15:22 to 15:33 PDT) on parity 3536ba43 (the lab server on skymp-server:m2-train-22, the
+  same commit) with the Apocalypse layer.
+  - Twenty-one's world restored by `just playtest-restore` with its relaunch of both seats (main b23bb8b).
+  - SunshineService restarted on both seats, one stream per seat (thuum-magnus), then both games relaunched under the
+    streams at 15:26. Both heartbeats were live, and labState listed profiles 1 and 2.
+  - Eli ticked all four items: Ghostwalk's long and short returns, Firebolt without its stagger, and Scattershock forward.
+    His one note: a short Ghostwalk return slides on the other screen where a long one snaps, the teleport's old problem.
+    thuum-magnus takes it as a follow-up branch (castTeleports' pop, and the return's own visual and sound).
+  - The world saved as playtest-m2-22-20261017T223252Z (7 records, like twenty's and twenty-one's), then the hold
+    released. No evidence was taken, since nothing failed.
+  - core's sky-ci runner change landed during the restore: gitlab-runner and its helper images held at 19.4.1, sky-ci
+    rebooted at 15:24, and both lanes (sky and sky-light) back online. The restore and relaunch pushed nothing and pulled
+    nothing from the registry.
