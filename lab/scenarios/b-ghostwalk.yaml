@@ -1,0 +1,69 @@
+# M2, ghostwalk (docs/verbs/ghostwalk.md, ADR-029's first verb): a player
+# casts Apocalypse's Ghostwalk, the mod's own script runs in its game, and
+# the server takes the return through the cast's permit. c1 learns Ghostwalk
+# from the server ("Apocalypse - Magic of Skyrim.esp" SPEL 00AAE8 at full
+# slot 0C of the lab's load order: 0x0C00AAE8, 201370344; castTeleports
+# names it with reach 0, waitMs 15400, relay true), gets the magicka to cast
+# it (cost 450), casts it at the lab spawn beside c2 and walks south for
+# 8 s, about 2440 units (305 units a second in x-ghostwalk-relay
+# 20261017-042445). That is past the ground budget's 2048-unit burst, so the
+# script's return, a jump back to the cast point about 11 s after the cast
+# (11.03 s there, 11.07 s in the engine alone, r-ghostwalk 20261017-042234),
+# stands only by the permit; without it the server sends c1 back. During the
+# effect c2's figure of c1 is invisible (its Invisibility actor value, the
+# watch's av: bool); c1 is back at the cast point on the server and in its
+# own game, stays there five seconds later (no snap-back), and c2 has not
+# moved. Positions are relative to the lab spawn. Assertions are evaluated
+# by lab-api only (ADR-009).
+id: b-ghostwalk
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 201370344}
+  - c1: console {text: "player.setav magicka 3000"}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c1: console {text: "player.equipspell c00aae8 right"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 200, y: -300, z: 0, rot: [0, 0, 270]}
+  - c1: draw-weapon
+  - wait: 5
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 64
+  - c2: watch-start {bools: ["av:Invisibility"]}
+  - c1: hold-key {code: 199, ms: 1000}
+  - until:
+      within: 6
+      expect:
+        - server.effects(c1).left("0xc00aae5") > 5
+  - c1: hold-key {code: 17, ms: 8000}
+  - wait: 8.5
+  - assert:
+      - server.actor(c1).y < -2300
+  - wait: 4
+  - c1: dump-state
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 128
+      - abs(server.actor(c1).x) < 128
+      - abs(c1.state.y - server.actor(c1).y) < 64
+  - wait: 5
+  - c2: watch-stop
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 128
+      - abs(c1.state.y - server.actor(c1).y) < 64
+      - abs(c2.view(c1).y - server.actor(c1).y) < 128
+      - c2.watched(c1).ever("av:Invisibility") == 1
+      - abs(server.actor(c2).x - 200) < 64
+      - abs(c2.state.x - 200) < 64
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]
