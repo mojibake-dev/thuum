@@ -19,6 +19,8 @@
 #      failed after main is a rerun of `just client-promote`);
 #   5. a dated entry appended to docs/LOG.md with the run ids, to finish by
 #      hand.
+# GATE_AFTER=<set id>: the gate is that stopped set plus a set of its rest (runset.sh's
+# RUNSET_AFTER), on the same staging, when a lab fault stopped the first one.
 # Never force-pushes, never rebases, never switches the shared checkout.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -42,7 +44,7 @@ for pair in c1:711 c2:712; do
 done
 
 echo "== 2. the gate: the full sweep $(date +%H:%M:%S)"
-if ! lab/tools/runset.sh "layer-$branch"; then
+if ! RUNSET_AFTER="${GATE_AFTER:-}" lab/tools/runset.sh "layer-$branch"; then
   echo "== the sweep is not green: nothing promoted, main not moved" >&2; exit 1
 fi
 setfile=$(ls -t lab/results/runsets/*-layer-"$branch"*.json | head -1)
@@ -76,7 +78,7 @@ for c in c1 c2; do
   just client-promote "$c" clean-m1-next 2>&1 | tail -1 | cut -c1-160
 done
 
-entry="- $branch (a mod layer) merged to main ${landed:0:8} by $how ($(date -u +%Y-%m-%dT%H:%MZ)): the full sweep $(basename "${setfile%.json}"), $runs${watch:+; watch items: $watch}; both clones promoted. Plugins: (fill in)."
+entry="- $branch (a mod layer) merged to main ${landed:0:8} by $how ($(date -u +%Y-%m-%dT%H:%MZ)): the full sweep ${GATE_AFTER:+$GATE_AFTER (stopped by a lab fault) and its rest }$(basename "${setfile%.json}"), $runs${watch:+; watch items: $watch}; both clones promoted. Plugins: (fill in)."
 today="### $(date -u +%Y-%m-%d)"
 grep -q "^$today\$" docs/LOG.md || printf '\n%s\n\n' "$today" >> docs/LOG.md
 printf '%s\n' "$entry" >> docs/LOG.md
