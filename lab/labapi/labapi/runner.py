@@ -7,12 +7,14 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import calendar
 import difflib
 import hashlib
 import json
+import re
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 from .assertions import AssertionData, AssertionSyntax, Evaluator, clients_needing_views
@@ -89,6 +91,32 @@ Write-Output ('{"dumped": true, "pid": ' + $p.Id + ', "bytes": ' + $bytes + ', "
 if ($curl -ne 0) { exit 4 }
 """
 
+# A seat's game at a run's end (Runner._crash_check), run as the hang dump is: each SkyrimSE
+# process's identity now, pid@start in UTC as Settings.game_check_cmd prints it, and the dumps
+# Windows Error Reporting wrote for SkyrimSE.exe since the run began. LocalDumps names them
+# <exe>.<pid>.dmp under its DumpFolder (Microsoft, "Collecting User-Mode Dumps",
+# learn.microsoft.com/windows/win32/wer/collecting-user-mode-dumps; crash-dumps.ps1 sets it). The
+# newest goes up through the inbox curl.exe as the hang dump does. The last stdout line is one
+# JSON object. Placeholders: @DUMP_DIR@ @SINCE@ (Unix seconds) @URL@ @UPLOAD_S@.
+_CRASH_PS = r"""
+$ErrorActionPreference = 'Stop'
+$since = [DateTimeOffset]::FromUnixTimeSeconds(@SINCE@).UtcDateTime
+$games = @()
+try {
+    $games = @([Diagnostics.Process]::GetProcessesByName('SkyrimSE') | ForEach-Object { '"' + $_.Id + '@' + $_.StartTime.ToUniversalTime().ToString('o') + '"' })
+} catch { $games = @('"unreadable"') }
+$dumps = @(Get-ChildItem -LiteralPath '@DUMP_DIR@' -Filter 'SkyrimSE.exe.*.dmp' -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTimeUtc -ge $since } | Sort-Object LastWriteTimeUtc)
+$list = @($dumps | ForEach-Object { '{"name": "' + $_.Name + '", "bytes": ' + $_.Length + ', "utc": "' + $_.LastWriteTimeUtc.ToString('o') + '"}' }) -join ', '
+$curl = -1
+if ($dumps.Count -gt 0) {
+    $ErrorActionPreference = 'Continue'
+    & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $dumps[-1].FullName '@URL@'
+    $curl = $LASTEXITCODE
+}
+Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + '}')
+"""
+
 
 
 class RunnerError(Exception):
@@ -113,6 +141,11 @@ class RunRecord:
     # the game version this run plays (ADR-022); "" on the lab-up and
     # lab-down records, which run on the default
     game: str = ""
+    # each managed seat's game process as the version check found it (pid@start,
+    # UTC; a relaunch step reads the new one), which the run's end compares
+    games: dict[str, str] = field(default_factory=dict)
+    # the seats whose SKSE folder logs this run already fetched
+    skse_fetched: set[str] = field(default_factory=set)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -125,6 +158,7 @@ class RunRecord:
             "scenario": self.scenario.id,
             "milestone": self.scenario.milestone,
             "game": self.game,
+            "games": self.games,
             "verdict": self.verdict,
             "started": self.started_at,
             "finished": self.finished_at,
@@ -604,6 +638,8 @@ class Runner:
             path, version = lines[-2], lines[-1]
             if version != rec.game and not version.startswith(rec.game + "."):
                 raise RunnerError(f"E_RUN_GAME: {client} ({g.name}) runs SkyrimSE.exe {version} from {path}; the run plays {rec.game}")
+            if len(lines) >= 3 and "@" in lines[-3]:
+                rec.games[client] = lines[-3]
             return f"{client}={version}"
 
         async def go():
@@ -811,6 +847,9 @@ class Runner:
             for qs in results:
                 if not qs.ok:
                     return [], "", qs.client
+            paused = self._paused(sorted(needed), index)
+            if paused:
+                return paused, "", None
         evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), parity=rec.scenario.parity, references_dir=self.s.references_dir)
         failed: list[dict[str, Any]] = []
         for expr in exprs:
@@ -824,6 +863,20 @@ class Runner:
                 failed.append({"step": index, "kind": "assertion-data", "expr": expr, "error": str(e)})
         return failed, "; ".join(f"{k} = {v}" for k, v in evaluator.readings.items()), None
 
+    def _paused(self, clients: list[str], index: int | str) -> list[dict[str, Any]]:
+        """The seats among `clients` whose last dump-state shows a message box: the game sits
+        paused under MessageBoxMenu, nothing it would measure moves, and an assert about it can
+        hold while measuring nothing (2026-10-14: r-melee-power-a went green twice under Survival
+        Mode's first-load prompt; solo runs now answer it, thuum-solo-survival-prompt). Of the 454
+        dump-states the lab kept from 10-14 to 10-17, only those two showed the box."""
+        out: list[dict[str, Any]] = []
+        for c in clients:
+            menus = (self.board.view(c) or {}).get("menus")
+            if isinstance(menus, list) and "MessageBoxMenu" in menus:
+                out.append({"step": index, "kind": "paused", "client": c,
+                            "error": f"E_RUN_PAUSED: {c}'s game is paused under a message box (menus: {', '.join(map(str, menus))}), so it measured nothing"})
+        return out
+
     async def _assert(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         failed, read, slow = await self._evaluate(rec, index, step.assertions)
         if slow:
@@ -836,6 +889,8 @@ class Runner:
             rec.failures.extend(failed)
             if rec.verdict == "running":
                 rec.verdict = "red"
+            if failed[0]["kind"] == "paused":
+                return False, str(failed[0]["error"])
             return False, f"{len(failed)} of {len(step.assertions)} failed" + (f" ({read})" if read else "")
         return True, f"{len(step.assertions)} held" + (f" ({read})" if read else "")
 
@@ -860,6 +915,13 @@ class Runner:
                 rec.failures.extend(syntax)
                 rec.verdict = "error"
                 return False, str(syntax[0]["error"])
+            # a message box waits for a key that no step presses: no poll would ever see it close
+            paused = [f for f in failed if f["kind"] == "paused"]
+            if paused:
+                rec.failures.extend(paused)
+                if rec.verdict == "running":
+                    rec.verdict = "red"
+                return False, str(paused[0]["error"])
             if self._clock() >= deadline:
                 if slow:
                     failed = [{"step": index, "kind": "timeout", "client": slow, "error": "dump-state during until timed out"}]
@@ -906,7 +968,23 @@ class Runner:
         if not qs.ok:
             return fail(f"E_RUN_RELAUNCH: {client} not in game: {qs.result.get('error', 'no dump-state')}")
         rec.notes.append(f"step {index}: {client} relaunched, in game after {self._clock() - started:.1f}s")
+        # the new game is the one the run's end compares (Runner._crash_check)
+        rec.games.pop(client, None)
+        identity = await self._game_identity(g)
+        if identity:
+            rec.games[client] = identity
         return await self._wait_online(rec, index, client, "relaunch")
+
+    async def _game_identity(self, g: Guest) -> str:
+        """The seat's game process as Settings.game_check_cmd's first line prints it (pid@start,
+        UTC), or "" when none runs or the read fails."""
+        cmd = ["powershell", "-NoProfile", "-Command", self.s.game_check_cmd]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError:
+            return ""
+        lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
+        return lines[-3] if res.exitcode == 0 and len(lines) >= 3 and "@" in lines[-3] else ""
 
     async def _frida_start(self, rec: RunRecord, index: int, client: str, args: dict[str, Any]) -> tuple[bool, str]:
         """frida {script, params?}: a lab/frida script started on the client's
@@ -1025,6 +1103,15 @@ class Runner:
         if self.s.hang_evidence:
             for client in self._hung_clients(rec):
                 await self._hang_evidence(rec, client)
+        # each seat's game at the end: a crash, or a game replaced or gone, is a lab fault, so a run
+        # that would have been green is error and its run set reruns it (ADR-030); a red stays red
+        green = rec.verdict == "running" and not rec.failures
+        faulted = await asyncio.gather(*(self._crash_check(rec, c) for c in rec.scenario.clients))
+        if any(faulted) and green:
+            rec.verdict = "error"
+        # a seat whose last dump-state shows a message box sat paused: the run measured nothing there
+        flagged = {f.get("client") for f in rec.failures if f.get("kind") == "paused"}
+        rec.failures.extend(self._paused([c for c in rec.scenario.clients if c not in flagged], "end"))
         unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap", "trace") and not n.endswith(".log")]
         for n in unknown:
             rec.notes.append(f"unknown artifact {n!r} ignored")
@@ -1055,8 +1142,7 @@ class Runner:
         if g is None or not g.managed:
             rec.notes.append(f"hang evidence: {client} is unmanaged or unmapped; nothing taken")
             return
-        if f"{client}-skse64.log" not in rec.artifacts:  # a run that lists <client>.log has it already
-            await self._fetch_client_file(rec, g, f"{client}-skse64.log", self._skse_log_source())
+        await self._skse_logs(rec, g, client)  # a run that lists <client>.log has them already
         url = f"{self.s.client_lab_api_url}/clients/{client}/hang-dump/{rec.run_id}"
         script = (_HANG_DUMP_PS.replace("@LAB_DIR@", self.s.client_lab_dir).replace("@URL@", url)
                   .replace("@UPLOAD_S@", str(max(60, int(self.s.hang_dump_timeout_s * 0.6)))))
@@ -1074,9 +1160,108 @@ class Runner:
         if (rec.dir / name).is_file():
             rec.artifacts.append(name)
 
-    def _skse_log_source(self) -> str:
-        """skse64.log's path on a client, as a PowerShell expression: beside skyrim-platform.log."""
-        return f"(Join-Path (Split-Path -Parent '{self.s.client_driver_log}') 'skse64.log')"
+    async def _crash_check(self, rec: RunRecord, client: str) -> bool:
+        """A managed seat's game at the run's end, True when it failed the run: a dump Windows
+        Error Reporting wrote for SkyrimSE.exe since the run began (crash-dumps.ps1's LocalDumps),
+        which the seat uploads as <client>-SkyrimSE-crash.dmp, and its game process against the
+        one the version check found or a relaunch step started. A seat whose game was replaced
+        (launch.ps1 starts the game again when it dies within a minute of its window, and the run
+        went on against the new one) or gone at the end failed the same way. Its launch.log and
+        SKSE logs come with the failure. Every read failure is a note."""
+        g = self.tables.guest_for_client(client)
+        if g is None or not g.managed:
+            return False
+        url = f"{self.s.client_lab_api_url}/clients/{client}/hang-dump/{rec.run_id}?name=SkyrimSE-crash.dmp"
+        script = (_CRASH_PS.replace("@DUMP_DIR@", self.s.client_dump_dir).replace("@SINCE@", str(self._since(rec)))
+                  .replace("@URL@", url).replace("@UPLOAD_S@", str(max(30, int(self.s.crash_check_timeout_s * 0.8)))))
+        cmd = ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand",
+               base64.b64encode(script.encode("utf-16-le")).decode()]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.crash_check_timeout_s)
+        except ProxmoxError as e:
+            rec.notes.append(f"crash check {client}: {e}")
+            return False
+        lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
+        try:
+            seen = json.loads(lines[-1]) if lines else None
+        except ValueError:
+            seen = None
+        if not isinstance(seen, dict):
+            rec.notes.append(f"crash check {client}: no answer ({(lines[-1] if lines else res.err.strip())[:200]})")
+            return False
+        errors: list[str] = []
+        dumps = [d for d in seen.get("dumps") or [] if isinstance(d, dict)]
+        if dumps:
+            name = f"{client}-SkyrimSE-crash.dmp"
+            kept = (rec.dir / name).is_file()
+            if kept:
+                rec.artifacts.append(name)
+            last = dumps[-1]
+            errors.append(f"E_RUN_CRASH: {client}'s game crashed: Windows Error Reporting wrote {len(dumps)} dump(s) "
+                          f"since the run began, the newest {last.get('name')} ({last.get('bytes')} bytes, {last.get('utc')}), "
+                          + (f"kept as {name}" if kept else f"not kept (curl {seen.get('curl')})"))
+        was = rec.games.get(client)
+        games = [x for x in seen.get("games") or [] if isinstance(x, str)]
+        if was and "unreadable" not in games:
+            if not games:
+                errors.append(f"E_RUN_GAME_LOST: {client}'s game ({was}) was not running at the run's end")
+            elif was not in games:
+                errors.append(f"E_RUN_GAME_REPLACED: {client}'s game was {was} at the version check and {', '.join(games)} at the run's end")
+        if not errors:
+            return False
+        for error in errors:
+            rec.failures.append({"step": "end", "kind": "lab", "client": client, "error": error})
+        await self._fetch_client_file(rec, g, f"{client}-launch.log", f"'{self.s.client_lab_dir}\\launch.log'")
+        await self._skse_logs(rec, g, client)
+        return True
+
+    def _since(self, rec: RunRecord) -> int:
+        """Unix seconds a few minutes before the run began: the dumps a run's end collects (a
+        clone's clock after its cold boot can sit behind lab-api's by a little)."""
+        try:
+            return calendar.timegm(time.strptime(rec.started_at, "%Y-%m-%dT%H:%M:%SZ")) - 300
+        except ValueError:
+            return int(self._wall()) - 3600
+
+    async def _skse_logs(self, rec: RunRecord, g: Guest, client: str) -> None:
+        """Every *.log in the seat's SKSE folder, the one skyrim-platform.log is in, as
+        <client>-<file>: skse64.log prints the game's image base, which the load freeze's
+        hypothesis ties to the hang (thuum-magnus, 2026-10-17), and each SKSE plugin writes its
+        own log there (TMS_AIPathingFreezeFix.log is the freeze fix layer's evidence), so a new
+        layer's log needs no edit here. skyrim-platform.log itself is <client>.log. Copied into
+        the lab directory first, as _fetch_client_file does, then read one by one; a failure is
+        a note, never a failed run."""
+        if client in rec.skse_fetched:
+            return
+        rec.skse_fetched.add(client)
+        folder = PureWindowsPath(self.s.client_driver_log).parent
+        own = PureWindowsPath(self.s.client_driver_log).name
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"Get-ChildItem -LiteralPath '{folder}' -Filter '*.log' -File -ErrorAction SilentlyContinue | "
+               f"Where-Object {{ $_.Name -ne '{own}' }} | ForEach-Object {{ "
+               f"Copy-Item -LiteralPath $_.FullName -Destination (Join-Path '{self.s.client_lab_dir}' ('{client}-' + $_.Name)) -Force; $_.Name }}"]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            rec.notes.append(f"{client} SKSE logs: {e}")
+            return
+        if res.exitcode != 0:
+            rec.notes.append(f"{client} SKSE logs: exit {res.exitcode}: {res.err.strip()[:200]}")
+            return
+        for line in res.out.splitlines():
+            log = line.strip()
+            if not re.fullmatch(r"[A-Za-z0-9_.-][A-Za-z0-9 _.-]*\.log", log):
+                continue
+            name = f"{client}-{log.replace(' ', '_')}"
+            if name in rec.artifacts or name in (f"{client}-driver.log", f"{client}-launch.log", f"{client}-before.log"):
+                continue
+            try:
+                text = await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\{client}-{log}")
+            except ProxmoxError as e:
+                rec.notes.append(f"{name}: {e}")
+                continue
+            (rec.dir / name).write_text(text)
+            rec.artifacts.append(name)
 
     async def _client_log(self, rec: RunRecord, client: str, name: str) -> None:
         """<client>.log is Skyrim Platform's log; <client>-driver.log is
@@ -1091,9 +1276,8 @@ class Runner:
         await self._fetch_client_file(rec, g, name, f"'{self.s.client_driver_log}'")
         game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
         await self._fetch_client_file(rec, g, f"{client}-driver.log", f"(Join-Path {game_dir} '{self.s.client_plugin_log}')")
-        # skse64.log beside it in every run: it prints the game's image base, which the load freeze's
-        # hypothesis (thuum-magnus, 2026-10-17) ties to the hang, so every run tests it, not only a hung one
-        await self._fetch_client_file(rec, g, f"{client}-skse64.log", self._skse_log_source())
+        # the SKSE folder's logs beside it in every run (skse64.log's image base, each plugin's own)
+        await self._skse_logs(rec, g, client)
 
     async def _fetch_client_file(self, rec: RunRecord, g: Guest, name: str, source: str) -> None:
         """Copy the file at the PowerShell path expression `source` on the

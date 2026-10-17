@@ -403,13 +403,14 @@ def create_app(services: Services) -> FastAPI:
     async def hang_dump(client: str, run_id: str, request: Request, name: str = "SkyrimSE.dmp"):
         # A hung seat uploads its game's dump here itself while its run takes the artifacts
         # (Runner._hang_evidence), or by hand while nothing runs (lab/tools/hang-dump.sh) into the
-        # last finished run. Only into that one run's directory and only under the three names
-        # (the dump, the seat's skse64.log and skyrim-platform.log), so nothing else can be
-        # written this way; the body streams to disk (a few GB).
+        # last finished run; a crashed seat uploads Windows Error Reporting's dump of its game the
+        # same way (Runner._crash_check). Only into that one run's directory and only under the
+        # four names (the two dumps, the seat's skse64.log and skyrim-platform.log), so nothing
+        # else can be written this way; the body streams to disk (a few GB).
         rec = runner.active or runner.last_run
         if rec is None or rec.run_id != run_id:
             raise HTTPException(409, f"E_HANG_DUMP: {run_id} is neither the active run nor, with none active, the last one")
-        if name not in ("SkyrimSE.dmp", "skse64.log", "skyrim-platform.log"):
+        if name not in ("SkyrimSE.dmp", "SkyrimSE-crash.dmp", "skse64.log", "skyrim-platform.log"):
             raise HTTPException(400, f"E_HANG_DUMP: {name!r} is not a hang evidence name")
         if runner.tables.guest_for_client(client) is None:
             raise HTTPException(404, f"no guest plays client {client}")
