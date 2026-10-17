@@ -41,12 +41,27 @@ code reads are disassembly from the dump). HYPOTHESIS until confirmed below.
    waiting for an unlucky base.
 4. Ghidra on sky-re: 90711 decompiled, the ignored result confirmed.
 
-## The fix
+## The fix: an existing plugin
 
-An existing engine-fix plugin first (the lazy rule; a search is running).
-If none patches it: a hook at 90711's call that refuses a non-finite vector,
-or the local zeroed before the call. The lab can also keep wolves away from
-the spawn, which hides the bug from the lab only.
+AI Pathing Freeze Fix (cashboxs; Nexus SSE mod 190049, main file 801783,
+v1.1 of 2026-09-07; github.com/cashboxs/TMS_AIPathingFreezeFix, GPL-3.0 or
+later, on CommonLibSSE-NG) fixes this exact hang on 1.6.1170, found on its
+own: its README describes the worker spinning on a NaN after the producer
+returned false and left its output unwritten, animals making it more
+frequent. It finds the angle routine by RelocationID(68820, 70172) and
+redirects the call at SkyrimSE+0x11B0CEA, 90711's call to 93210, the call
+the dump names: the original runs, and a false result with a non-finite
+output gets its output zeroed. It checks the loop's bytes and a unique call
+site before arming, logs each repair, and is 1.6.1170 only (not 1.7.99 or
+later). SSE Engine Fixes, Scrambled Bugs, Bug Fixes SSE and po3's Tweaks
+have nothing for it; the 2026 freeze fixes for 1.6.1170 (Interrupt Package
+and Combat Group deadlocks, cell load, block condition) are other bugs.
+
+So the lazy fix is a mod-layer row, Apocalypse's way, for Eli to accept:
+docs/MODS.md and persist-mods, and its repair log then is the lab's check
+(a repair only on boots whose image base makes the slot a NaN). Still to
+confirm in Ghidra (rule 2): that 93210 takes two arguments and writes a 3D
+vector, since the plugin writes 12 bytes.
 
 ## Found beside it
 
