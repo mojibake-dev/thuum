@@ -23,7 +23,10 @@ const OFFSETS = {
     debugNotification: 0x97a5e0, // 52933
   },
 };
-const KEPT = new Set([1, 4, 14, 15, 16, 17, 18, 19, 20, 21, 22]);
+// LAB_PARAMS.TYPES, when a run's frida step gives it, replaces the kept types: the crosshair's
+// prompt is kActivate 2 and kActivateNoLabel 3, and kCrosshairHide 23 (CommonLibSSE-NG
+// include/RE/H/HUDData.h:16-37), for an invisible figure's "Talk" prompt (playtest twenty-one).
+const KEPT = new Set((globalThis.LAB_PARAMS || {}).TYPES || [1, 4, 14, 15, 16, 17, 18, 19, 20, 21, 22]);
 
 function fileVersion(path) {
   const ver = Module.load('version.dll');
