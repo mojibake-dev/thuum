@@ -1812,6 +1812,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     EnableAI on the placed NPC), its npc-state step (AI state, package, combat target, flags, position, head node) and
     their names in scenario.py's action list.
   - The driver laid on both clones and clean-m1-next retaken; smoke 20261017-075637 green.
-  - Solo on c1, by path, all green: x-npc-puppet 20261017-075909, r-npc-packages 080111, r-npc-fight 080443 and
-    r-cell-leave 080655. They are readings for thuum-magnus; nothing merges from them.
+  - Correction (01:30): the first four solo c1 runs (x-npc-puppet 20261017-075909, r-npc-packages 080111, r-npc-fight
+    080443, r-cell-leave 080655) ran paused and measured nothing. The drafts lacked the global step every solo
+    reference has after solo-start, which marks Survival Mode's first prompt (0x8DF, ccQDRSSE001-SurvivalMode.esl)
+    answered, so "Enable Survival Mode?" held each game for the whole run. Every watched actor stood still with no
+    events, and r-cell-leave's game hour stayed at 7.90. They passed green only because their asserts check nothing.
+  - The reruns with the fixed drafts replace them, all green and all live:
+    - x-npc-puppet 20261017-082859: the bandit moved 122 units with 2 graph events in a 4.5 s watch.
+    - r-npc-packages 083112: Gerdur, Faendal and Hod walked 2469, 1690 and 918 units in a 90 s watch.
+    - r-npc-fight 083447: the two bandits had 91 and 71 graph events, and the player moved 41 units.
+    - r-cell-leave 083700: Sven and Faendal moved 520 and 1086 units in a 15 s watch. Its lab-run lost the connection
+      when this Mac's Tailscale was logged out of headscale.gaussing.tv (01:47 to 03:29), but the run went on.
+    They are readings for thuum-magnus; nothing merges from them.
+  - Owed to lab-api: fail a run whose watch shows every actor standing still with no events for more than a few
+    seconds (a paused game), never pass it green.
   - The 03:30 nightly is the driver change's full sweep before clean-m1 is promoted (ADR-030).
