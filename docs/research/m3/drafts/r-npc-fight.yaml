@@ -6,7 +6,9 @@
 # start combat on it (the console's startcombat on {other}, as r-block-b
 # does, for the last placed one; the first joins on its own). The recorder
 # watches both for 20 s: their approach, attacks, recoils, staggers and
-# combat movement. Draft, 2026-10-16.
+# combat movement. Draft, 2026-10-16; Survival Mode's first
+# prompt marked answered after solo-start (the first run, 2026-10-17 01:0x,
+# ran paused under its box).
 id: r-npc-fight
 milestone: M3
 solo: true
@@ -14,6 +16,7 @@ clients: [c1]
 timeout_s: 600
 steps:
   - c1: solo-start {x: 0, y: -300, z: 0, rz: 180}
+  - c1: global {form: 0x8df, file: "ccQDRSSE001-SurvivalMode.esl", value: 1}
   - wait: 8
   - c1: close-menu {name: MessageBoxMenu}
   - c1: console {text: "player.additem 12eb7 1"}

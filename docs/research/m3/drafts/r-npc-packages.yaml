@@ -7,7 +7,9 @@
 # send the townsfolk to their work, and the recorder watches up to eight
 # nearby actors (the driver's random search) for 90 s, three game hours'
 # worth of minutes at the lab's timescale: their tracks, graph events and
-# actions. Screenshots at the start and the end. Draft, 2026-10-16.
+# actions. Screenshots at the start and the end. Draft, 2026-10-16; Survival Mode's first
+# prompt marked answered after solo-start (the first run, 2026-10-17 01:0x,
+# ran paused under its box).
 id: r-npc-packages
 milestone: M3
 solo: true
@@ -15,6 +17,7 @@ clients: [c1]
 timeout_s: 600
 steps:
   - c1: solo-start {x: 0, y: -300, z: 0, rz: 0}
+  - c1: global {form: 0x8df, file: "ccQDRSSE001-SurvivalMode.esl", value: 1}
   - wait: 8
   - c1: close-menu {name: MessageBoxMenu}
   - c1: console {text: "coc riverwood"}
