@@ -1202,8 +1202,8 @@ is checked against the slot's owner (slot-probe.js) before anything else.
 ## ADR-035: A cell's own NPCs, hosted by one player's game per cell
 
 Status: proposed (2026-10-16 night, for Eli; drafted from the M3 research of
-that night, scratchpad m3-research/: skymp-hosting.md, tes3mp.md,
-te-npcs.md). Amends ADR-012's reserved cell-host family; retires SkyMP's
+that night, docs/research/m3/: skymp-hosting.md, tes3mp.md, te-npcs.md,
+re-ai-puppet.md). Amends ADR-012's reserved cell-host family; retires SkyMP's
 actor-level host model for the cells it covers.
 
 **Context.** M3 (docs/PLAN.md) hosts the world by cell, TES3MP's way: one
@@ -1269,8 +1269,8 @@ sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
    HostedActorState, with its validator (rule 4).
 4. Off the host, the cell's NPCs are puppets: their AI is off and they
    show the host's stream. The engine has no single switch for that (the
-   re-analyst on sky-re, 2026-10-16, 1.6.1170, scratchpad
-   m3-research/re-ai-puppet.md). Actor::EnableAI(false), ID 37504, clears
+   re-analyst on sky-re, 2026-10-16, 1.6.1170,
+   docs/research/m3/re-ai-puppet.md). Actor::EnableAI(false), ID 37504, clears
    the actor's kProcessMe bit, which stops its packages, combat behavior,
    detection requests and chatter, but also drops it from the animation
    pass, so it would freeze in pose; hits, staggers, PerformAction and
