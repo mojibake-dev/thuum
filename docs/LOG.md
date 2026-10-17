@@ -1710,3 +1710,37 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     holds the timings.
   - On teleport-look's stage, b-cast-moving 20261016-203757 timed out on c2's first console step after c2's game
     logged nothing past PostLoadGame, a load freeze. Its rerun was green (204406).
+
+### 2026-10-17
+
+- The Apocalypse layer merged to main 5160fb8c (2026-10-17T01:40Z, 18:40 PDT on 10-16) through `just layer-merge`, on
+  Eli's "yes please retry" (relayed by thuum-magnus at 13:58 PDT). Thuum branch apocalypse b3f6d602 (088bf901 with main
+  674ef33) on fork parity 4a2b386b, whose Skyrim Platform takes a spaced plugin name (m2-spaced-plugins 3ff99181).
+  - Plugins: `Apocalypse - Magic of Skyrim.esp` after LostGrimoire.esp in both server-settings load orders, so Lost
+    Grimoire keeps its 0x0B index and Teleportation stays 0x0B0A86DF. persist-mods placed it and client-mods laid it on
+    both clones (6 files fetched on each). Ghostwalk, Apocalypse's first verb, does not ride with it.
+  - The staging: layer-stage clean in about 7 minutes. Its load check, smoke-two-players with the layer, went green
+    (20261016-224453); that is the check the layer's first gate failed on 2026-10-14.
+  - The gate is the full sweep on one staging, in two run sets:
+    - 20261016-224726-layer-apocalypse: 14 green, then sky-c2's GPU dropped at a slot reset (lab notes). a-movement-reject
+      232344 went red: c2's game ran at under one frame a second (3 watch frames in 6.7 s against about 260) and saw no
+      player figure. a-racemenu 233318 and its rerun, and a-rest 233920, were lab faults. The set was stopped by hand
+      and then ended by the hold.
+    - Its rest, 20261016-234932-layer-apocalypse: 39 of 39 green (a-movement-reject 234932 to t2-fakeclient-restart
+      20261017-013849), through runset.sh RUNSET_AFTER and layer-merge.sh GATE_AFTER (main 55253f9 and 452db6a), so the
+      14 greens were not rerun on the same image.
+  - Both clones promoted to the layer: clean-m1 is the 4a2b386b client with Apocalypse.
+  Lab notes:
+  - A known lab fault, not a test result: sky-c2 can drop its GPU at a slot reset. thuum-mundus traced both incidents
+    (2026-10-14, and today from 16:24 to 16:33 PDT) to a link that fails to retrain after a vfio reset ("Data Link
+    Layer Link Active not set"). vfio then finds the BARs wiped, and a later start meets an inaccessible card, which the
+    kernel names D3cold, so the 10-14 pins could not prevent it.
+  - Each lab-api rollback resets the slot twice, and about one reset in a few hundred fails. The recovery is mundus's:
+    a remove and rescan under root port 00:01.1 (16:43), then one controlled start (16:45: agent in 16 s, the game
+    running 84 s after logon). A retry is another reset, so a run set is stopped at the first failed start. The levers
+    are Eli's: the root port tops out at 8 GT/s for a Gen5 card (a BIOS cap or a riser), and the card is a loan.
+  - The sweep found a server crash under a green run. 20261016-233122-a-movement-speed's server aborted (libstdc++'s
+    bounds assertion in a vector of optional time points, signal 6) when c2's leftover game reconnected without an
+    actor and then logged in. thuum-magnus traced it to OnHostAttempt writing lastMovUpdateByIdx at the hosted form's
+    index past the vector's size, and fixed it on fork m2-teleport-look-main ef44a1d8 with HostAttemptTest; upstream
+    main has the same write.
