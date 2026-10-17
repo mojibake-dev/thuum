@@ -32,4 +32,37 @@ declare module "skyrimPlatform" {
   // performs an action on an actor through the engine's action entry, the
   // idle given; true when the engine took it
   export function performAction(actorFormId: number, actionFormId: number, idleFormId: number, eventName: string, type: number): boolean;
+  // thuum docs/verbs/marksman.md (fork m2-arrow-path): a projectile the
+  // engine launched, Projectile::Launch's LaunchData as the fork reads it
+  export interface ProjectileLaunchedEvent {
+    shooter: number;
+    projectile: number;
+    weapon: number;
+    ammo: number;
+    spell: number;
+    castingSource: number;
+    originX: number;
+    originY: number;
+    originZ: number;
+    angleX: number;
+    angleZ: number;
+    power: number;
+    useOrigin: boolean;
+  }
+  export function on(eventName: "projectileLaunched", callback: (event: ProjectileLaunchedEvent) => void): EventHandle;
+  // an arrow's flight as it starts: its first update's angles (after the
+  // player's auto-aim), fork m2-arrow-path
+  export interface ProjectileFlightEvent {
+    shooter: number;
+    projectile: number;
+    weapon: number;
+    ammo: number;
+    x: number;
+    y: number;
+    z: number;
+    angleX: number;
+    angleZ: number;
+    power: number;
+  }
+  export function on(eventName: "projectileFlight", callback: (event: ProjectileFlightEvent) => void): EventHandle;
 }

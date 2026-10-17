@@ -193,6 +193,9 @@ let moving: { x: number; y: number; cx: number; cy: number; speed: number; last:
 //   hits it took [ms, aggressor, source, flags] and effects applied to it
 //   [ms, caster, effect], as the engine's events report them (flags: power
 //   1, sneak 2, bash 4, blocked 8).
+// - launches [ms, projectile, ammo, spell, originX, originY, originZ,
+//   angleX, angleZ, power]: every projectile the engine launched for it, as
+//   the fork's projectileLaunched event reports Projectile::Launch's data.
 type Watched = {
   name: string;
   first: number[];
@@ -212,6 +215,15 @@ type Watched = {
   hits: Array<[number, number, number, number, number]>;
   taken: Array<[number, number, number, number]>;
   effects: Array<[number, number, number]>;
+  // the projectiles it launched [ms, projectile, ammo, spell, originX,
+  // originY, originZ, angleX, angleZ, power], as the engine launched them
+  // (the fork's projectileLaunched event, Projectile::Launch's LaunchData;
+  // thuum docs/verbs/marksman.md: the arrow's path identical on both screens)
+  launches: Array<[number, number, number, number, number, number, number, number, number, number]>;
+  // its arrows' flights as they start [ms, ammo, x, y, z, angleX, angleZ,
+  // power]: the arrow's first update, its angles after the player's
+  // auto-aim (the fork's projectileFlight event; the path the arrow flies)
+  flights: Array<[number, number, number, number, number, number, number, number]>;
   // the actions the engine performed for it [ms, action, idle, eventName,
   // type] (the player's only: the platform's hook reports the player's own;
   // thuum docs/verbs/cast-action.md)
@@ -244,7 +256,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
     name: actor.getDisplayName(), first: pos, last: pos, maxDisplacement: 0, samples: 0, maxStep: 0, maxStepMs: -1,
     track: [[0, pos[0], pos[1], pos[2]]],
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
-    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], actions: [],
+    events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], launches: [], flights: [], actions: [],
   };
 }
 
@@ -587,7 +599,10 @@ function trackWatched(actor: Actor, id: number, w: Watched, ms: number, own: boo
   }
   for (const name of Object.keys(w.bools)) {
     const seen = w.bools[name];
-    const value = actor.getAnimationVariableBool(name);
+    // "av:Name" is an actor value above zero, not a graph variable: a
+    // figure's Invisibility (docs/verbs/self-cast.md: the effect raises it,
+    // formView reads it for the name) is the recast row's measure
+    const value = name.startsWith("av:") ? actor.getActorValue(name.slice(3)) > 0 : actor.getAnimationVariableBool(name);
     if ((seen.length === 0 || seen[seen.length - 1][1] !== value) && seen.length < WATCH_SELF_MAX) {
       seen.push([ms, value]);
     }
@@ -643,6 +658,33 @@ function bytesOf(v: unknown): Uint8Array {
 
 function watchedMs(): number {
   return watching ? Date.now() - watching.startedAt : 0;
+}
+
+// every projectile the engine launched for a watched actor (the shooter's
+// own arrow and the figure's replay alike): the recorder's measure of the
+// arrow's path on both screens. No game call here (the event's context).
+// Only a Skyrim Platform with the event has it (fork m2-arrow-path):
+// subscribing to an unknown event throws (EventManager::Subscribe), and the
+// driver must load on parity too, where `launches` stays empty.
+try {
+  on("projectileLaunched", (e) => {
+    const w = watchedRecord(e.shooter);
+    if (w && w.launches.length < WATCH_SELF_MAX) {
+      w.launches.push([watchedMs(), e.projectile, e.ammo, e.spell, e.originX, e.originY, e.originZ, e.angleX, e.angleZ, e.power]);
+    }
+  });
+} catch (err) {
+  printConsole(`lab-driver: no projectileLaunched event on this Skyrim Platform (${err}); launches are not recorded`);
+}
+try {
+  on("projectileFlight", (e) => {
+    const w = watchedRecord(e.shooter);
+    if (w && w.flights.length < WATCH_SELF_MAX) {
+      w.flights.push([watchedMs(), e.ammo, e.x, e.y, e.z, e.angleX, e.angleZ, e.power]);
+    }
+  });
+} catch (err) {
+  printConsole(`lab-driver: no projectileFlight event on this Skyrim Platform (${err}); flights are not recorded`);
 }
 
 on("spellCast", (e) => {
@@ -1044,7 +1086,9 @@ function run(step: Step, player: Actor): unknown {
       // knows of each ingredient, bit i for effect i, keyed by its decimal
       // form id (lab-api's c.known(id)); a word of power reads 1 when the
       // engine has it unlocked (Game.IsWordUnlocked, docs/verbs/shouts.md);
-      // null for a form that is neither
+      // a spell 1 when the player has it (Actor.HasSpell: playtest twenty's
+      // Firebolt, on the server's record and missing from the game's list);
+      // null for a form that is none of these
       const ids = Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : [];
       const out: Record<string, number | null> = {};
       for (const id of ids) {
@@ -1052,6 +1096,10 @@ function run(step: Step, player: Actor): unknown {
         const word = WordOfPower.from(form);
         if (word) {
           out[String(Number(id))] = Game.isWordUnlocked(word) ? 1 : 0;
+          continue;
+        }
+        if (Spell.from(form)) {
+          out[String(Number(id))] = hasSpell(player, Number(id)) ? 1 : 0;
           continue;
         }
         const ingredient = Ingredient.from(form);
@@ -1672,6 +1720,41 @@ function run(step: Step, player: Actor): unknown {
       if (a.aggressive !== true) npc.setActorValue("Aggression", 0);
       placedId = npc.getFormID();
       return { formId: placedId };
+    }
+    case "npc-ai": {
+      // thuum docs/DECISIONS.md ADR-035 (proposed), point 4, the puppet
+      // probe x-npc-puppet: the placed NPC's AI switched (Papyrus
+      // Actor.EnableAI; the engine's Actor::EnableAI, ID 37504, clears its
+      // kProcessMe bit, the re-analyst on sky-re, 2026-10-16). Returns the
+      // state after
+      const npc = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
+      if (!npc) return { error: "no placed npc" };
+      npc.enableAI(a.enabled === true);
+      return { aiEnabled: npc.isAIEnabled() };
+    }
+    case "npc-state": {
+      // the placed NPC as its engine has it, for the puppet probe: whether
+      // its AI runs, its package and combat target (form ids, 0 for none),
+      // whether it is in combat or staggering, its position, and its head
+      // node's world position: two reads apart during an idle tell whether
+      // its graph still animates it (EnableAI(false) drops an actor from the
+      // animation pass, the same read, HYPOTHESIS)
+      const npc = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
+      if (!npc) return { error: "no placed npc" };
+      const head = "NPC Head [Head]";
+      return {
+        aiEnabled: npc.isAIEnabled(),
+        package: npc.getCurrentPackage()?.getFormID() ?? 0,
+        inCombat: npc.isInCombat(),
+        combatTarget: npc.getCombatTarget()?.getFormID() ?? 0,
+        staggering: npc.getAnimationVariableBool("IsStaggering"),
+        pos: [npc.getPositionX(), npc.getPositionY(), npc.getPositionZ()],
+        head: [
+          NetImmerse.getNodeWorldPositionX(npc, head, false),
+          NetImmerse.getNodeWorldPositionY(npc, head, false),
+          NetImmerse.getNodeWorldPositionZ(npc, head, false),
+        ],
+      };
     }
     case "draw-weapon":
       // the player's, or with {other: true} the nearest other actor's (a

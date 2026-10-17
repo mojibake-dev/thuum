@@ -151,6 +151,31 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   wire-schema skymp.rs:784-816), with no validator check and no budget
   (wire-validate lib.rs).
 
+- A stream's aim on a figure (the re-analyst on sky-re, 2026-10-16, 1.6.1170,
+  ids by lab/addr.py; HYPOTHESIS until a recorded playtest's launches or a
+  Frida trace on 37930): the figure's own caster launches its stream
+  (MagicCaster::UpdateImpl 34400 calls 34450 whenever its projectile timer
+  runs out), taking angleZ from Actor::GetAimHeading 37929 and angleX from
+  Actor::GetAimAngle 37930; the stream then re-aims every frame from the same
+  two (FlameProjectile UpdateImpl 43894, BeamProjectile UpdateImpl 43749,
+  angleX clamped to plus or minus 1.553343 by 44174). 37930 returns
+  -AimPitchCurrent when the actor's graph has bAimActive and the reference's
+  angle.x otherwise (CommonLibSSE-NG src/RE/A/Actor.cpp:275-296,
+  include/RE/F/FixedStrings.h:187-200); the observer's castSpellImmediate
+  passes no angle a stream uses (MagicApi.cpp's CastSpellImmediate: no
+  angles, FindTargets 34410 launches only target-location effects), and
+  nothing set the figure's pitch while it stood (movementApply passes only a
+  heading offset). So playtest nineteen's Flames aimed straight up flew
+  level on the other screen, the damage, the caster's own, going up. A bolt
+  differs: Skyrim Platform's spell LaunchData sets the angles with useOrigin
+  and no auto-aim, and a missile never reads its shooter's aim again
+  (src/RE/P/Projectile.cpp:213-222), which is why Firebolt aimed right. The
+  fix (fork m2-arrow-path 13a58aed): setActorAimPitch writes a figure's
+  reference pitch and its AimPitchCurrent each update from its player's
+  movement (formView, forms another game drives), so either branch of 37930
+  reads the caster's pitch. HYPOTHESIS: the behavior graph does not overwrite
+  AimPitchCurrent between updates (the behavior files say, not the exe).
+
 ## Observe (host or acting client sees the intent before the engine acts)
 
 - Hook point: Skyrim Platform's `spellCast` for the start; the hand's

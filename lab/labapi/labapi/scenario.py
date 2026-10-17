@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start", "place-npc", "play-idle", "combat-spell"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start", "place-npc", "npc-ai", "npc-state", "play-idle", "combat-spell"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
 SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida"}
@@ -180,6 +180,35 @@ def _repeat_args(args: dict[str, Any]) -> dict[str, Any]:
     if "seed" in args:
         out["seed"] = int(args["seed"])
     return out
+
+
+# the driver steps a playtest may send one seat outside a run (lab-api's playtest-step): input and its
+# rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby), never
+# a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
+PLAYTEST_READS = {"node-scale", "dump-state", "head-parts", "voice", "held", "known", "projectiles", "graph-vars", "skills"}
+PLAYTEST_STEPS = REPEATABLE | {"repeat", "look"} | PLAYTEST_READS
+
+
+def playtest_step(value: Any) -> tuple[str, dict[str, Any]]:
+    """One client step written as a scenario writes it ('equip {formId: 0x12fd0}', or {hold-key: {...}}),
+    for a seat during a playtest (Eli, 2026-10-16: the lab casts on one seat while he staggers it from the
+    other): (action, args) normalized as a scenario's would be, of PLAYTEST_STEPS only."""
+    action, args = _parse_action(value)
+    if action not in PLAYTEST_STEPS:
+        raise ValueError(f"a playtest step is one of {sorted(PLAYTEST_STEPS)}, got {action!r}")
+    if action == "repeat":
+        args = _repeat_args(args)
+    return action, args
+
+
+def step_seconds(action: str, args: dict[str, Any], base: float) -> float:
+    """How long the driver may take to answer a step: a repeat's repetitions with their holds and longest
+    gaps (it answers once the last is done) and half a minute more, else `base`."""
+    if action != "repeat":
+        return base
+    inner = args["step"]
+    hold_ms = float(inner["args"].get("ms", 0)) if inner["action"] == "hold-key" else 0.0
+    return max(base, args["times"] * (hold_ms + float(args["gapMs"][1])) / 1000.0 + 30.0)
 
 
 def _seconds(value: Any) -> float | None:

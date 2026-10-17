@@ -1624,3 +1624,256 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   031528, b-cast-rhythm 031805, b-cast-both-hands, a-melee-reach, a-racemenu); both clones promoted to the a930968b
   client. The 03:30 nightly judges this parity; the verb doc's merge line and the SKSE-events decision are magnus's for
   the morning.
+- m2-arrow-path merged to fork parity 0636f14e (2026-10-16T15:09Z, 08:09 PDT) through `just verb-merge` from thuum
+  branch lab-launches with main merged, on magnus's go. It carries:
+  - the arrow's path identical on both screens: the shooter's first-update flight, after the engine's auto-aim, is
+    sent with the shot (PlayerBowShot and ArrowShot gain has_launch, origin and the launch angles, wire schema 16, the
+    validator in the same commit; the server refuses an origin more than 512 units from its shooter, E_SHOT_ORIGIN),
+    and the figure's arrow is launched there through LaunchArrowAt, now declared in the shipped TESModPlatform.pex
+    (2d983dd0's b-marksman 130329 was red without it: no figure arrow on c2);
+  - a figure's stream following its player's pitch (setActorAimPitch);
+  - the Invisibility recast fix: a cast ends concealment except the archetype it carries, and a bow release or an
+    activation ends it as the engine does;
+  - 35a3975f's breath report at the engine's voice fire. It sends nothing for a breath into empty air (x-tgm-breath6
+    20261016-135744: one server line for five breaths, one cone on c2); its fix is fork m2-breath-launch.
+  Readings on 0636f14e's stage: b-marksman 134247 green (full draw 2680 own, 2898 on c2; half 1508 and 1477);
+  x-arrow-path 134528 flights 10 of 10 paired at 0.0 units and 0.00 degrees, the Launch entries differing by up to
+  11.5 degrees of pitch before auto-aim; x-invis-recast 135452 the figure invisible through the recast, no "acts:
+  ... end" line (parity's 124840 showed it visible from the recast on); x-cast-interrupt 134830: no exit reaches a
+  figure after its caster's sheathe, its cast up about 5 s longer (the fix also rides m2-breath-launch). T2 green
+  with 26 sessions (difftest job 6949). The gate: run set 20261016-142307-merge-m2-arrow-path, 16 of 16 green
+  (smoke-two-players, a-restart-persistence, b-duel, b-marksman, b-arrow-path, the cast five, b-cast-crossfire,
+  b-self-cast, b-shout, b-invis-recast, a-melee-reach, a-racemenu). b-arrow-path and b-invis-recast are the first
+  gates to assert with lab-api's flights_match and drops (main 7130921e, 2cfdf2fa). Both clones promoted to the
+  0636f14e client. Main gains lab-launches: the recorder's launches, flights and av: watch bools, and the scenarios
+  b-cast-crossfire, b-arrow-path and b-invis-recast.
+- m2-breath-launch merged to fork parity 84db2c4e (2026-10-16T18:07Z, 11:07 PDT) through `just verb-merge` from thuum
+  branch lab-launches with main merged. The merge was decided on its stage's readings against thuum-magnus's
+  criteria. It carries:
+  - the shout reported from the player's own voice projectile launch of one of the equipped shout's variation
+    spells: SKSE's voice-fire event names the shout, not the spell, which is why 35a3975f's report sent nothing;
+  - the sheathe and redraw on a figure: a sheathed caster's figure drops its pending ready, release and exit
+    actions, and the relayed sheathe flag forces the drawn state for one second, then the caster's movement
+    decides. Before, the relayed SkympFakeUnequip stayed the figure's last animation, held it sheathed against
+    the redraw (an engine action, Magic_Equip, with no graph event), and the figure refused every cast until a
+    stagger re-equipped it.
+  Readings on 84db2c4e's stage:
+  - x-tgm-breath6 20261016-162045: five server shout lines and five figure launches for five breaths into empty
+    air. 0636f14e gave one of five.
+  - x-tgm-breath5 162436: five of five. b-shout 162818 green.
+  - x-cast-interrupt 163330, the three sheathes: the figure's cast ends 28, 56 and 60 ms before c1's, once the two
+    watches' 125 ms offset is taken out. Casts 2 and 3 start on the figure (5 of 5 starts taken, castReady 8).
+    Each redraw reaches it within about 40 ms (Magic_Equip 4773, 10499, 16233 against c1's 4868, 10585, 16319).
+    Ready refusals fell from 64 on 0636f14e to 2.
+  - Still open, the stagger attempt: the figure's cast breaks at its own stagger, rises again and stays up about
+    1.6 s past c1's release.
+  T2 green with 26 sessions (difftest job 7042). The gate: run set 20261016-170039-merge-m2-breath-launch, 16 of 16
+  green (smoke-two-players, a-restart-persistence, b-duel, b-shout, b-shout-repeat, b-self-cast, the cast five,
+  b-cast-crossfire, b-invis-recast, b-arrow-path, a-melee-reach, a-racemenu). b-shout-repeat, the breath row,
+  asserts with lab-api's launched(). Both clones promoted to the 84db2c4e client.
+  Lab note: from 84db2c4e's stage on, a run's client rollback takes 142 to 264 s against 73 to 75 s on 5474291f.
+  Both are cold snapshots, and the launcher shows no retry, so the cause is not found yet.
+- m2-spaced-on-21 merged to fork parity 4a2b386b (2026-10-16T22:38Z, 15:38 PDT) through `just verb-merge` from main
+  8aa07cac, on thuum-magnus's go. The head is m2-twenty-one e15770fb with m2-spaced-plugins merged in, magnus's offer,
+  taken so one stage and one gate carry both. It carries:
+  - the same character logging in again with the same look is neither reset nor reloaded (e15770fb,
+    docs/verbs/racemenu-sync.md, playtest twenty);
+  - twenty's first fixes (3d9129e9, with 457817d7 and 3486b2f1 putting back what its clang-format pass changed): an
+    invisible figure's crosshair prompt hidden through ExtraFlags kBlockActivateText (Eli: "yes hide it"; HYPOTHESIS
+    still, since the probe's crosshair never lay on the figure); the latent-call log naming its native, the first three
+    calls of each and every 1000th (playtest twenty had 19,889 unnamed pairs in 16 minutes on c2); and the latent
+    SetWeaponDrawnMode asked only on a change of the wanted draw state or after a second;
+  - a plugin file name may hold spaces (m2-spaced-plugins 3ff99181): Skyrim Platform's ValidateFilename refused
+    `Apocalypse - Magic of Skyrim.esp`, the red of the Apocalypse layer's first gate (2026-10-14).
+  Readings on e15770fb's stage (12:37 to 12:54 PDT):
+  - x-invis-recast 20261016-193722, a-racemenu 194014, a-character-creation 194345, b-cast-moving 194606 and
+    b-self-cast 194858 green.
+  - The rotfern probe on the playtest-twenty world, node scales through playtest-step. After the world's restore,
+    which logs the running games in again (A at login, B 30 s later), c1's own skeleton stood at 1.0 where her race
+    scales Root 0.6, Pelvis 0.72, Spine 0.83, Spine1 0.89 and Spine2 1.10, while c2's figure of her was right. After
+    c1's relaunch (C) both were right. So e15770fb does not cover a login as another character inside one game;
+    `just playtest-restore` now relaunches both seats after the restore (main 8aa07cac), and the character switch
+    stays open for a code fix.
+  T2 green with 26 sessions (difftest job 7154). The gate: run set 20261016-215533-merge-m2-spaced-on-21, 14 of 14
+  green (smoke-two-players, a-restart-persistence, b-duel, a-racemenu, a-character-creation, b-self-cast,
+  b-invis-recast, the cast five, b-cast-crossfire, a-melee-reach). Both clones promoted to the 4a2b386b client.
+  Also staged today and not merged: fork m2-teleport-look 2540be96 from thuum branch teleport-look, for the
+  teleport's look on other screens; its readings went to the verb doc, and the look moves to the main line as
+  m2-teleport-look-main.
+  Lab notes:
+  - The slow client rollback of the entry above followed one disk image, not a build. It was sky-c2's clean-m1-next
+    from 84db2c4e's stage (16:19Z), promoted to clean-m1 by that merge. That image added 65 to 70 s between the guest
+    agent's answer and the game's start, while c1 stayed at its usual time. It ended at the next retake (e15770fb's
+    stage, 19:37Z); this gate's rollbacks took 63 to 87 s.
+  - Snapshots follow a clean ACPI shutdown (lab-api proxmox.py snapshot_clone), so some state saved in that image
+    replayed at every boot. Which state, Steam or a Windows task, is still unread; the clone's C:\sky-lab\launch.log
+    holds the timings.
+  - On teleport-look's stage, b-cast-moving 20261016-203757 timed out on c2's first console step after c2's game
+    logged nothing past PostLoadGame, a load freeze. Its rerun was green (204406).
+
+### 2026-10-17
+
+- The Apocalypse layer merged to main 5160fb8c (2026-10-17T01:40Z, 18:40 PDT on 10-16) through `just layer-merge`, on
+  Eli's "yes please retry" (relayed by thuum-magnus at 13:58 PDT). Thuum branch apocalypse b3f6d602 (088bf901 with main
+  674ef33) on fork parity 4a2b386b, whose Skyrim Platform takes a spaced plugin name (m2-spaced-plugins 3ff99181).
+  - Plugins: `Apocalypse - Magic of Skyrim.esp` after LostGrimoire.esp in both server-settings load orders, so Lost
+    Grimoire keeps its 0x0B index and Teleportation stays 0x0B0A86DF. persist-mods placed it and client-mods laid it on
+    both clones (6 files fetched on each). Ghostwalk, Apocalypse's first verb, does not ride with it.
+  - The staging: layer-stage clean in about 7 minutes. Its load check, smoke-two-players with the layer, went green
+    (20261016-224453); that is the check the layer's first gate failed on 2026-10-14.
+  - The gate is the full sweep on one staging, in two run sets:
+    - 20261016-224726-layer-apocalypse: 14 green, then sky-c2's GPU dropped at a slot reset (lab notes). a-movement-reject
+      232344 went red: c2's game ran at under one frame a second (3 watch frames in 6.7 s against about 260) and saw no
+      player figure. a-racemenu 233318 and its rerun, and a-rest 233920, were lab faults. The set was stopped by hand
+      and then ended by the hold.
+    - Its rest, 20261016-234932-layer-apocalypse: 39 of 39 green (a-movement-reject 234932 to t2-fakeclient-restart
+      20261017-013849), through runset.sh RUNSET_AFTER and layer-merge.sh GATE_AFTER (main 55253f9 and 452db6a), so the
+      14 greens were not rerun on the same image.
+  - Both clones promoted to the layer: clean-m1 is the 4a2b386b client with Apocalypse.
+  Lab notes:
+  - A known lab fault, not a test result: sky-c2 can drop its GPU at a slot reset. thuum-mundus traced both incidents
+    (2026-10-14, and today from 16:24 to 16:33 PDT) to a link that fails to retrain after a vfio reset ("Data Link
+    Layer Link Active not set"). vfio then finds the BARs wiped, and a later start meets an inaccessible card, which the
+    kernel names D3cold, so the 10-14 pins could not prevent it.
+  - Each lab-api rollback resets the slot twice, and about one reset in a few hundred fails. The recovery is mundus's:
+    a remove and rescan under root port 00:01.1 (16:43), then one controlled start (16:45: agent in 16 s, the game
+    running 84 s after logon). A retry is another reset, so a run set is stopped at the first failed start. The levers
+    are Eli's: the root port tops out at 8 GT/s for a Gen5 card (a BIOS cap or a riser), and the card is a loan.
+  - The sweep found a server crash under a green run. 20261016-233122-a-movement-speed's server aborted (libstdc++'s
+    bounds assertion in a vector of optional time points, signal 6) when c2's leftover game reconnected without an
+    actor and then logged in. thuum-magnus traced it to OnHostAttempt writing lastMovUpdateByIdx at the hosted form's
+    index past the vector's size, and fixed it on fork m2-teleport-look-main ef44a1d8 with HostAttemptTest; upstream
+    main has the same write.
+- m2-teleport-look-main merged to fork parity ef44a1d8 (2026-10-17T03:03Z, 20:03 PDT on 10-16) through `just verb-merge`
+  from thuum branch teleport-look-main (0d41c85: the look in both server-settings files, with main and the Apocalypse
+  layer merged in), on thuum-magnus's go. It carries:
+  - the teleport's look on other screens (docs/verbs/cast-teleport.md): at the cast, the server plays the vanish
+    (MGTeleportOutEffect on the caster's figure in each neighbour's game); at the landing it places the figure, a pop
+    and not a glide, stops the vanish, and plays the appear (MGTeleportInEffect, 1.75 s) and the sound. Ported from
+    m2-teleport-look 2540be96 on Ghostwalk's line onto the main line as a7ed583f and 055e66b8; server snippets only, no
+    client change.
+  - the OnHostAttempt fix (ef44a1d8): the hosting path wrote lastMovUpdateByIdx at the hosted form's index past the
+    vector's size. That aborted 20261016-233122's server when a game reconnected without an actor. The fix grows the
+    vector first, as OnUpdateMovement does; HostAttemptTest covers it.
+  Readings on its stage (ef44a1d8 with the layer):
+  - x-teleport-look 20261017-015128: maxStep 517 at the landing, the pop onto the server's landing point. Then the known
+    settle: about 37 units back and an 80-unit glide to c1's own spot. The out effect shows on c2's screen. A 5.4-unit
+    creep after the landing goes to the settle row, after twenty-one.
+  - b-teleport 015349, b-teleport-look 015610 (asserts maxStep >= 400) and b-self-cast 015832: green.
+  T2 green with 26 sessions on skymp-server:m2-teleport-look-main (difftest job 7242, from API pipeline 1703 at the head;
+  teleports identical with 15 declared divergences). The gate: run set 20261017-022224-merge-m2-teleport-look-main, 13
+  scenarios, verdict watch (smoke-two-players, a-restart-persistence, b-duel, b-teleport, b-teleport-look, the cast
+  five, b-self-cast, a-melee-reach, a-racemenu). b-cast-both-hands 024554 went red on c1's load freeze (below), was
+  green on both ADR-027 reruns, and is the watch item. The branch changed no client, so the clones were not promoted;
+  clean-m1 holds the same client.
+  Lab note: a seat's game can freeze right after loading the save. Its skyrim-platform log stops at PostLoadGame (skse
+  message type 3, about 38 lines), the seat counted online at its connect step, and the first console step times out
+  at 60 s. Seen twice today, once per seat and on both fork lines: c2 in 20261016-203757 on 2540be96, and c1 in
+  20261017-024554 here. The next one gets a full dump of SkyrimSE.exe and the seat's logs before the rollback, a lab-api
+  change after playtest twenty-one.
+- Playtest twenty-one (2026-10-16, 20:03 to about 20:24 PDT) on parity ef44a1d8 with the Apocalypse layer.
+  - Twenty's world restored by `just playtest-restore`, the first restore with its relaunch of both seats (main 8aa07cac).
+  - SunshineService restarted on both seats, one stream per seat, then both games relaunched under the streams. Both
+    heartbeats were live.
+  - The world saved as playtest-m2-21-20261017T032431Z. The evidence, taken before any rollback, is at
+    results/playtest-21/: the server's log since the hold, and both seats' skyrim-platform.log and skse64.log.
+- The Steam update-host fix on both clones' clean-m1-next (main 960ef27 and 6c91f38; 20:31 to 20:38 PDT).
+  - Each clone was rolled back to its clean-m1-next first, so nothing the playtest left on the live disks reached an
+    image. Then game-firewall.ps1 ran and the snapshot was retaken.
+  - A connect to client-update.steamstatic.com:443 took about 21.2 s before: the name resolves (146.75.95.82) and the
+    SYN goes unanswered. After the fix it took 79 ms on c2 and 82 ms on c1.
+  - Smoke 20261017-033542 green, with an 83 s client rollback. clean-m1 is promoted after a green nightly (ADR-030).
+  - The first try left c2's hosts file empty: Set-Content truncated it, then lost its second open to another process.
+    6c91f38 writes it in one open with retries and checks the count.
+- Ghostwalk's first stage, no merge (thuum-magnus's ask; 20:44 to 21:48 PDT on 10-16): fork m2-ghostwalk-main 6d09befe
+  from thuum ghostwalk-main 6bcc0ff.
+  - Probes r-ghostwalk 20261017-042234 and x-ghostwalk-relay 042445 green.
+  - T2 red as expected: 26 sessions identical, and the ghostwalk session had 4 differences. Both seats get two effect
+    messages at t 43, an empty one and one for effect 0x0C00AAE5 from Apocalypse's spell 0x0C00AAE8, that the legacy
+    server never sends. magnus declared them in 728ca163.
+- docs-m2-21 landed on main (1b778552), with hud-trace.js taking LAB_PARAMS.TYPES on top (CommonLibSSE-NG
+  include/RE/H/HUDData.h:16-37). The superseded docs-te-map and docs-racemenu-row were deleted; their tips are in main.
+- The crosshair fix (fork m2-crosshair 50d7c718, an invisible figure's display name emptied), staged from main, no merge.
+  - x-crosshair-invis 20261017-045850 measured nothing of the invisible state: c2's game died 46 ms after c1's
+    Invisibility reached the server, and launch.ps1 started it again. The middle point caught the reload, and the HUD
+    trace was empty.
+  - Its WER dump was lost to the restore's rollback.
+  - A rerun without Frida was cancelled mid-stage when Eli parked the fix for after the alpha ("we can pass on that for
+    now"). m2-crosshair stays unmerged.
+- The hang-evidence lab-api is live (main d23fefcd, version d23fefcd at 22:15 PDT). A run whose step timed out naming a
+  seat keeps that seat's skse64.log and a full dump of SkyrimSE.exe: dbghelp's MiniDumpWriteDump, 4.5 GB in 15 s on
+  sky-c1, uploaded by the seat to PUT /lab/clients/<client>/hang-dump/<run>.
+  - Still missing, after tonight's crash: a game that died and was relaunched mid-run. Its WER minidumps in
+    C:\sky-lab\dumps should be kept the same way.
+- The lab was back on parity ef44a1d8 at 22:19 PDT with the Steam-fixed clean-m1-next (smoke 20261017-051935 green) for the
+  03:30 nightly.
+- M3's first lab work, on Eli's "fire at will" (relayed by thuum-magnus; 00:47 to 01:10 PDT on 10-17).
+  - Thuum m3-npc-probe 5801c6cf on main by fast-forward, with lab-api 5801c6cf: the driver's npc-ai step (Papyrus
+    EnableAI on the placed NPC), its npc-state step (AI state, package, combat target, flags, position, head node) and
+    their names in scenario.py's action list.
+  - The driver laid on both clones and clean-m1-next retaken; smoke 20261017-075637 green.
+  - Correction (01:30): the first four solo c1 runs (x-npc-puppet 20261017-075909, r-npc-packages 080111, r-npc-fight
+    080443, r-cell-leave 080655) ran paused and measured nothing. The drafts lacked the global step every solo
+    reference has after solo-start, which marks Survival Mode's first prompt (0x8DF, ccQDRSSE001-SurvivalMode.esl)
+    answered, so "Enable Survival Mode?" held each game for the whole run. Every watched actor stood still with no
+    events, and r-cell-leave's game hour stayed at 7.90. They passed green only because their asserts check nothing.
+  - The reruns with the fixed drafts replace them, all green and all live:
+    - x-npc-puppet 20261017-082859: the bandit moved 122 units with 2 graph events in a 4.5 s watch.
+    - r-npc-packages 083112: Gerdur, Faendal and Hod walked 2469, 1690 and 918 units in a 90 s watch.
+    - r-npc-fight 083447: the two bandits had 91 and 71 graph events, and the player moved 41 units.
+    - r-cell-leave 083700: Sven and Faendal moved 520 and 1086 units in a 15 s watch. Its lab-run lost the connection
+      when this Mac's Tailscale was logged out of headscale.gaussing.tv (01:47 to 03:29), but the run went on.
+    They are readings for thuum-magnus; nothing merges from them.
+  - Owed to lab-api: fail a run whose watch shows every actor standing still with no events for more than a few
+    seconds (a paused game), never pass it green.
+  - The 03:30 nightly is the driver change's full sweep before clean-m1 is promoted (ADR-030).
+- m2-train-22 merged to fork parity 3536ba43 (2026-10-17T22:09Z, 15:09 PDT) through `just verb-merge`, from thuum branch
+  ghostwalk-main with main merged in, on thuum-magnus's go. A merge train of three fork branches, staged together:
+  - m2-ghostwalk-main 728ca163: Ghostwalk, Apocalypse's first verb, with its return {reach 0, waitMs 15400, relay true} in
+    both server-settings files, its difftest session, and the four t 43 effect lines T2 first found, now declared.
+  - m2-perk-riders 93358eea: libespm reads whether a magic effect's own conditions call HasPerk, and the server keeps
+    such a rider out of ApplyEffects and the spell stagger loop. That covers Firebolt's Impact stagger, measured on 67 of
+    91 lab hits, and Disintegrate's 200 Health.
+  - m2-stream-aim 8c241d93: a figure's relayed aimed stream is cast with no target and the caster's desiredTarget
+    cleared, so Scattershock no longer runs backward on the other screen.
+  Readings on the stage (thuum-magnus's reads):
+  - x-firebolt-riders 20261017-135254: no stagger in three hits, against 0.25 a hit earlier the same day; damage
+    unchanged at about 0.757 left.
+  - b-ghostwalk 135747: every assert held, and server.log has "made its cast teleport's jump" for the 2206-unit return,
+    with no send-back.
+  - x-stream-aim 135526: the figure's missile and Flames follow its aim, at a constant 2.75 degree heading offset (a
+    follow-up row). Scattershock's 2.5 s charge left one missile in a 3 s hold.
+  T2 green with 27 sessions on skymp-server:m2-train-22.
+  The gate ran on one staging in two run sets:
+  - 20261017-142215-merge-m2-train-22: 8 green (smoke-two-players, a-restart-persistence, b-duel, b-ghostwalk, b-spell,
+    b-self-cast, b-invis-recast, b-teleport). Then sky-c1's GTX 1050 failed at a slot reset (07:45:49 PDT, "device
+    inaccessible", QEMU exit 1), so b-teleport-look and b-cast-moving ran without a working c1.
+  - Its rest, 20261017-214345-merge-m2-train-22, after core's warm reboot of the host had cleared the card: 7 of 7 (the
+    two above, b-cast-dual, b-cast-rhythm, b-cast-both-hands, a-melee-reach, a-racemenu).
+  Both clones promoted to the 3536ba43 client. clean-m1 now also carries the Steam update-host fix and the 5801c6cf
+  driver: the nightly of 10-17 went red on two load freezes, so they were not promoted before.
+  The nightly 20261017-103000-nightly, 52 of 54: a-rotfern and b-push froze at load. Their reruns: a-rotfern 132848 froze
+  again, giving the first dump of the freeze (see below), then 133453 green; b-push 133201 and 133855 green.
+  Lab notes:
+  - The load freeze's first dump: 20261017-132848-a-rotfern, c1-SkyrimSE.dmp, 4.35 GB. thuum-magnus's HYPOTHESIS: an
+    engine pathing loop on a stale return address, NaN only for some randomized image bases. Every run now keeps each
+    seat's skse64.log, which prints the image base (lab-api dc0b63f). The existing AI Pathing Freeze Fix (Nexus 190049)
+    patches the call, and is proposed to Eli as a layer.
+  - sky-c1's card was wedged from 07:45 to 14:36: it answered reads and ignored writes, and only a host reboot could
+    clear it (thuum-mundus). core rebooted the host on Eli's go. The warm reboot cleared it, and both cards are clean.
+  - sky-srv (onboot 0) did not come back with the host and was started by hand. Its cloud-init flip gave it a new SSH
+    host key, SHA256:Gk6ckTwF..., checked against core's guest-agent reading before the re-key.
+  - core's sky-ci runner change waits for a stable home link.
+- Playtest twenty-two (2026-10-17, 15:22 to 15:33 PDT) on parity 3536ba43 (the lab server on skymp-server:m2-train-22, the
+  same commit) with the Apocalypse layer.
+  - Twenty-one's world restored by `just playtest-restore` with its relaunch of both seats (main b23bb8b).
+  - SunshineService restarted on both seats, one stream per seat (thuum-magnus), then both games relaunched under the
+    streams at 15:26. Both heartbeats were live, and labState listed profiles 1 and 2.
+  - Eli ticked all four items: Ghostwalk's long and short returns, Firebolt without its stagger, and Scattershock forward.
+    His one note: a short Ghostwalk return slides on the other screen where a long one snaps, the teleport's old problem.
+    thuum-magnus takes it as a follow-up branch (castTeleports' pop, and the return's own visual and sound).
+  - The world saved as playtest-m2-22-20261017T223252Z (7 records, like twenty's and twenty-one's), then the hold
+    released. No evidence was taken, since nothing failed.
+  - core's sky-ci runner change landed during the restore: gitlab-runner and its helper images held at 19.4.1, sky-ci
+    rebooted at 15:24, and both lanes (sky and sky-light) back online. The restore and relaunch pushed nothing and pulled
+    nothing from the registry.

@@ -173,12 +173,15 @@ class Settings:
         "1.7.104=/srv/lab/server/server-settings-1.7.104.json;"
         "1.6.1170=/srv/lab/server/server-settings.json"
     )
-    # Run through the guest agent after a client's first heartbeat: the path
-    # and file version of the SkyrimSE.exe that is running, one per line.
-    # The logon launcher picks the folder; this checks what it started.
+    # Run through the guest agent after a client's first heartbeat: the game
+    # process's identity (pid@start, UTC), then the path and file version of the
+    # SkyrimSE.exe that is running, one per line. The logon launcher picks the
+    # folder; this checks what it started, and the run's end reads the identity
+    # again (a game replaced or lost mid-run is a lab fault, Runner._crash_check).
     game_check_cmd: str = (
         "$p = Get-Process SkyrimSE -ErrorAction SilentlyContinue | Select-Object -First 1; "
         "if (-not $p) { Write-Error 'no SkyrimSE process'; exit 3 }; "
+        "'' + $p.Id + '@' + $p.StartTime.ToUniversalTime().ToString('o'); "
         "$p.Path; (Get-Item -LiteralPath $p.Path).VersionInfo.FileVersion"
     )
     # Timeouts and budgets (seconds); time_scale shrinks scenario waits in tests.
@@ -217,6 +220,22 @@ class Settings:
     # runs are seconds apart and the clients hold only the previous run's log;
     # 0 turns the fetch off (the server's own log is kept regardless)
     before_logs_quiet_s: float = 600.0
+    # A seat that stops answering mid-run (a step that times out naming it: the load freeze of
+    # 2026-10-16, a game silent after PostLoadGame) holds the only evidence of why, and the next
+    # run's rollback erases it. With hang_evidence on, that run's artifacts take the seat's
+    # skse64.log and a full dump of SkyrimSE.exe (dbghelp's MiniDumpWriteDump from PowerShell
+    # as SYSTEM: nothing installed), which the seat uploads itself to
+    # PUT {client_lab_api_url}/clients/<client>/hang-dump/<run>: <client>-SkyrimSE.dmp, a few GB.
+    hang_evidence: bool = True
+    hang_dump_timeout_s: float = 900.0
+    # lab-api as the clones reach it (lab-driver-settings.txt: labApiBase + labApiPath)
+    client_lab_api_url: str = "http://10.10.70.10/lab"
+    # where Windows Error Reporting writes SkyrimSE.exe's crash dumps on a clone (LocalDumps'
+    # DumpFolder, lab/deploy/sky-client/crash-dumps.ps1), which every run's end reads; the read
+    # and the upload of a minidump (about 80 MB) fit well inside the timeout, which bounds a run's
+    # end on a seat whose guest agent stopped answering
+    client_dump_dir: str = r"C:\sky-lab\dumps"
+    crash_check_timeout_s: float = 300.0
     # relaunch: a player quits the game and starts it again (docs/verbs/
     # map-markers.md). The guest agent stops the game and starts the logon
     # launch task (sky-lab-launch, as `lab` on the desktop); the launcher
@@ -229,11 +248,19 @@ class Settings:
     relaunch_timeout_s: float = 300.0
     # Before a self-service snapshot (proxmox.GuestControl.snapshot_clone):
     # stop the game, its loader and Windows Error Reporting, and any running
-    # sky-lab task, so the clone shuts down quiet (thuum-mundus's recipe).
+    # sky-lab task, so the clone shuts down quiet (thuum-mundus's recipe). Then
+    # empty the crash dump folders and WER's report queues, so no image carries
+    # an old crash into every run that rolls back to it (2026-10-17: c2's
+    # clean-m1 held five Skyrim dumps of 10-15 under C:\sky-lab\dumps, c1's a
+    # queued WER report of 10-06, and sunshine.exe dumps sat under SYSTEM's
+    # CrashDumps on both).
     quiesce_cmd: str = (
         "Get-Process SkyrimSE, skse64_loader, WerFault -ErrorAction SilentlyContinue | Stop-Process -Force; "
         "Get-ScheduledTask -TaskName 'sky-lab*' -ErrorAction SilentlyContinue | "
-        "Where-Object { $_.State -eq 'Running' } | Stop-ScheduledTask"
+        "Where-Object { $_.State -eq 'Running' } | Stop-ScheduledTask; "
+        r"Remove-Item -Recurse -Force -ErrorAction SilentlyContinue -Path 'C:\sky-lab\dumps\*', "
+        r"'C:\Windows\System32\config\systemprofile\AppData\Local\CrashDumps\*', 'C:\Users\*\AppData\Local\CrashDumps\*', "
+        r"'C:\ProgramData\Microsoft\Windows\WER\ReportQueue\*', 'C:\ProgramData\Microsoft\Windows\WER\ReportArchive\*'"
     )
     time_scale: float = 1.0
     extra: dict = field(default_factory=dict)
@@ -300,6 +327,11 @@ class Settings:
             server_ready_timeout_s=float(_env("SERVER_READY_TIMEOUT_S", str(d.server_ready_timeout_s))),
             guest_task_timeout_s=float(_env("GUEST_TASK_TIMEOUT_S", str(d.guest_task_timeout_s))),
             before_logs_quiet_s=float(_env("BEFORE_LOGS_QUIET_S", str(d.before_logs_quiet_s))),
+            hang_evidence=_env_bool("HANG_EVIDENCE", d.hang_evidence),
+            hang_dump_timeout_s=float(_env("HANG_DUMP_TIMEOUT_S", str(d.hang_dump_timeout_s))),
+            client_lab_api_url=_env("CLIENT_LAB_API_URL", d.client_lab_api_url),
+            client_dump_dir=_env("CLIENT_DUMP_DIR", d.client_dump_dir),
+            crash_check_timeout_s=float(_env("CRASH_CHECK_TIMEOUT_S", str(d.crash_check_timeout_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),

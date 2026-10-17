@@ -141,3 +141,23 @@ class RepeatStep(unittest.TestCase):
                     "repeat {times: 3, gapMs: 400, step: {repeat: {times: 2}}}"):
             with self.assertRaises(ValueError, msg=bad):
                 self.load(bad)
+
+
+@needs_deps
+class PlaytestStepTests(unittest.TestCase):
+    def test_a_playtest_step_is_input_normalized_as_a_scenario_s(self):
+        from labapi.scenario import playtest_step, step_seconds
+        self.assertEqual(playtest_step("equip {formId: 0x12fd0}"), ("equip", {"formId": 0x12FD0}))
+        action, args = playtest_step("repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}")
+        self.assertEqual(action, "repeat")
+        self.assertEqual(args["step"], {"action": "hold-key", "args": {"code": 199, "ms": 3000}})
+        # twelve 3 s charges with 3 s gaps answer after 72 s; the driver gets half a minute more
+        self.assertEqual(step_seconds(action, args, 60.0), 102.0)
+        self.assertEqual(step_seconds("equip", {"formId": 1}, 60.0), 60.0)
+        # reads go too: a node's scale on the player or its figure
+        self.assertEqual(playtest_step('node-scale {node: "NPC Root [Root]", other: true}'), ("node-scale", {"node": "NPC Root [Root]", "other": True}))
+        # and whether the player has a spell: known answers a spell form 1 or 0 (Firebolt, playtest twenty)
+        self.assertEqual(playtest_step("known {ids: [0x12fd0, 0x0B0A86DF]}"), ("known", {"ids": [0x12FD0, 0x0B0A86DF]}))
+        for bad in ('console {text: "tgm"}', "connect", "set-av {name: Health, value: 1}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                playtest_step(bad)

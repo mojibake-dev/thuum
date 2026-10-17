@@ -5,8 +5,12 @@
 # her skills, what she carries) is saved beside the lab's snapshots, and put
 # back before the next playtest.
 #   save <label>    copy the live world to /srv/lab/snapshots/playtest-<label>-<UTC stamp>
-#   restore <name>  stop the lab server, replace its world with that snapshot, start it;
-#                   the games still connected log in again to the restored world
+#   restore <name>  stop the lab server, replace its world with that snapshot, start it,
+#                   then relaunch both seats' games and wait for both to be online again: a
+#                   game that logs in again as another character keeps the previous skeleton's
+#                   node bases (playtest twenty: rotfern at 1.0 where her race scales 0.6, about
+#                   three times her size in her own game), and a fresh launch is always right.
+#                   PLAYTEST_NO_RELAUNCH=1 keeps the running games (they log in again)
 #   list            the saved playtest worlds, newest last
 # restore refuses while a lab run is active; save copies the running server's
 # files, as each save so far did (playtests ten to twelve).
@@ -39,6 +43,15 @@ case "${1:-}" in
       for i in \$(seq 1 45); do docker logs --since \$since lab-skymp-server-1 2>&1 | grep -q 'listening on' && break; sleep 2; done
       docker logs --since \$since lab-skymp-server-1 2>&1 | grep -E 'AttachSaveStorage took|listening on' | cut -c1-160
       echo 'restored $name'"
+    if [ "${PLAYTEST_NO_RELAUNCH:-}" != 1 ]; then
+      here=$(cd "$(dirname "$0")/../.." && pwd)
+      # both seats at once, each its own clone; each relaunch waits for its player online again
+      "$here/lab/tools/playtest-relaunch.sh" c1 & r1=$!
+      "$here/lab/tools/playtest-relaunch.sh" c2 & r2=$!
+      ok=0; wait "$r1" || ok=1; wait "$r2" || ok=1
+      [ "$ok" = 0 ] || { echo "a seat did not come back after its relaunch (just playtest-relaunch c1 or c2 again)" >&2; exit 5; }
+      echo "both seats relaunched on the restored world"
+    fi
     ;;
   list)
     # by the stamp at the end of each name

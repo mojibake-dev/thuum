@@ -328,6 +328,7 @@ client-display vmid w="1920" h="1080" hz="60":
 # The game's traffic outside the lab on a clone (game-firewall.ps1): block SkyrimSE.exe outside 10.10.70.0/24 so
 # bethesda.net connects fail at once instead of stalling Skyrim Platform's first tick, and set a machine WinHTTP
 # proxy that never resolves so the Bethesda.net request fails with an error the game closes, not one it retries.
+# Also answers Steam's three update hosts with 0.0.0.0 (hosts file), so a startup update check fails at once.
 client-game-firewall vmid:
     @lab/tools/client-game-firewall.sh {{vmid}}
 
@@ -360,6 +361,14 @@ playtest-start:
 playtest-save label:
     @lab/tools/playtest-world.sh save {{label}}
 
+# A frozen seat's game dumped by hand while no run is active (a playtest's freeze, or one after a run ended), into the
+# last finished run with the seat's skse64.log and skyrim-platform.log; inside a run the runner does this itself.
+hang-dump client:
+    @lab/tools/hang-dump.sh {{client}}
+
+# A saved playtest world back on the lab server, then both seats' games relaunched onto it, so a playtest starts on a
+# fresh launch (a game logging in again as another character keeps the previous skeleton's node bases: playtest twenty's
+# rotfern). PLAYTEST_NO_RELAUNCH=1 keeps the running games.
 playtest-restore name:
     @lab/tools/playtest-world.sh restore {{name}}
 
@@ -398,6 +407,13 @@ playtest-relaunch client:
 # (End). A seat's setup is playtest-console's, on the server.
 playtest-assist client action args="{}":
     @curl -fsS -m 60 -X POST "{{lab_api}}/clients/{{client}}/assist" -H 'content-type: application/json' -d '{"action":"{{action}}","args":{{args}}}'; echo
+
+# In a playtest, one driver step on a seat as a scenario writes it (lab-api's playtest-step, refused without a playtest
+# hold): input and its rhythm, `just playtest-step 2 'repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}'`
+# (the lab casts on test 2 while the person staggers it from test 1), or a read, `just playtest-step 1 'node-scale {node: "NPC Root [Root]"}'`.
+# Never a console line: a seat's setup is playtest-console's, on the server.
+playtest-step seat step:
+    @python3 -c 'import json, sys; print(json.dumps({"step": sys.argv[1]}))' '{{step}}' | curl -fsS -m 900 -X POST "{{lab_api}}/clients/c$(echo '{{seat}}' | tr -d 'c')/playtest-step" -H 'content-type: application/json' --data-binary @-; echo
 
 # In a playtest, a console command run on the server as a seat's player would type it (the gamemode's labCommand console,
 # through the server's mp.executeConsoleCommand), never typed into the game: `just playtest-console 1 addshout 20 0x3f9ea`

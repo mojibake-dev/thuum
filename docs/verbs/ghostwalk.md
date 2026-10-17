@@ -33,7 +33,7 @@ rows.
 | the eyes-fix ability (SPEL 030CB7E1, AddSpell, silent, after the return): its WB_inviseyefix checks each second and, once its bearer's weapon is sheathed, calls QueueNiNodeUpdate and removes itself (RemoveSpell) | script | native in the caster's game; HYPOTHESIS that the server never records it (a script's AddSpell and RemoveSpell in the player's game, unreported); a transient, so nothing to persist |
 | the failure message (MESG 0300AAE6), shown only when the location check fails with WB_CheckLocation True | script | never shown with this VMAD (unreachable) |
 | a caster who changed cells during the effect: SetPosition (not MoveTo) puts it at the cast's coordinates in its current cell | script | later: the server permits the return in the cast's cell or worldspace only, so there the move is judged as any other (sent back if the budget refuses it); a rare edge, named here for the parity list |
-| the effect ended early by the caster's own attack or cast: the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | engine (self-cast's HYPOTHESIS), script | native, and the server's self-cast ends its state; the script returns the caster then, the permit's window opening at the cast |
+| the effect ended early by the caster's own act: the same OnEffectFinish, the 0.4 s wait included (the script has no other end handler) | engine: Actor::DispelAlteredStates 38819, from the caster's SpellCast at the fire (sparing the archetype the cast spell carries), a weapon's hit frame that finds an actor, a bow's release, an activation (pick-up included) and a force-greet; not a melee miss, not a cast's start or charge (the re-analyst on sky-re, 2026-10-16, docs/verbs/self-cast.md; HYPOTHESIS until a lab run), script | native, and the server's EndConcealment ends its state on the same acts (a cast, a hit, a bow's release and the player's activation since fork 2d983dd0; a recast of the same archetype spared); the script returns the caster then, the permit's window opening at the cast. An ethereal target refuses most spells (Actor's AddTarget 38786 for an IsGhost actor), so a recast of an ethereal spell is refused, not swapped |
 
 ## Authority
 
@@ -112,9 +112,12 @@ positions' age.
   return under the budget passes as is; one past it (a sprint for 10 s
   covers more than 2048) needs the permit.
 - What a neighbour sees: the figure invisible by the relayed Self cast
-  (self-cast), then the return by the movement relay, a TranslateTo over
-  0.2 s in the same cell (skymp5-client sync/movementApply.ts): a dash, not
-  the caster's blink.
+  (self-cast), then the return by the movement relay. A return of more
+  than 1024 units is a one-frame jump, setPosition and setAngle
+  (skymp5-client sync/movementApply.ts:196 and :239-242), so the figure
+  blinks back as its caster does (x-ghostwalk-relay 20261017-042445: 1834
+  units in one frame, then a 6-unit settle onto the ground); a shorter one
+  glides there over 0.2 s.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -129,8 +132,9 @@ positions' age.
 
 - Mechanism: the relayed Self cast (the figure's invisibility) and the
   movement relay of the return the server took.
-- Visual without simulation achieved by: the figure's TranslateTo; the
-  return's sound and visual are not shown to others (Inventory, later).
+- Visual without simulation achieved by: the movement relay's jump for
+  a long return, its glide for a short one; the return's sound and visual
+  are not shown to others (Inventory, later).
 - Side effects: HYPOTHESIS that the relayed cast's effect on the figure in
   an observer's game is blanked by the filter (the figure is its caster and
   target, the observer's player neither), so no observer's game runs the
@@ -237,6 +241,30 @@ positions' age.
 - Expected: c1 returned in its own game; a short walk passes on the budget,
   a long one is sent back until the permit lands; c2 unmoved.
 - Owner: agent.
+- Measured 2026-10-16, fork m2-ghostwalk-main 6d09befe with thuum
+  ghostwalk-main 6bcc0ff and the Apocalypse layer:
+  - The reference (r-ghostwalk 20261017-042234, the engine alone): the
+    hand's Self start, ready and release, magicka 3000 to 2603.25, the
+    effect 0C00AAE5 at the cast; the return one frame of 1116.5 units
+    11.07 s after the effect (its 10 s, the script's 0.4 s wait and about
+    0.67 s more), to where the caster stood about 76 ms after the effect
+    began, 129 units from where its cast began (the walk had started),
+    within the cast jump's 256-unit slack; the eyes-fix ability's effect
+    0C0CB7E0 90 ms after the return.
+  - x-ghostwalk-relay 20261017-042445: the script ran in c1's game (the
+    return 11.03 s after the cast, 0.035 units from the cast point, in its
+    own game and on the server); the server logged the cast "relayed" and
+    no send-back; c2's figure of c1 invisible (its Invisibility 1 at
+    2.3 s, 0 at 17.7 s), with the reference's own three hand actions taken;
+    c2 unmoved (0.004 units). The return, 1834 units, passed on the ground
+    budget, so the permit was not exercised: b-ghostwalk walks 8 s, past
+    the burst. The figure's own script did not return it (it landed on its
+    player's relayed point, 4.8 units from its own effect start, with no
+    eyes-fix ability), which supports Impose's HYPOTHESIS; the timing alone
+    cannot tell the two apart.
+  - Unread in both: the image spaces, the return's sound and visual, and
+    the detection event (the recorder keeps no track for them, nor for an
+    actor value other than Health, Magicka and Stamina).
 
 ## Built
 
@@ -252,6 +280,16 @@ positions' age.
   in both settings files, stacked on branch apocalypse (the layer). It
   deploys only with a server that has m2-ghostwalk: parity's teleports.rs
   refuses unknown fields, and a refused entry stops the server at start.
+- On the main line, 2026-10-16: fork m2-ghostwalk-main 18b181f3, the
+  server commit cherry-picked onto the teleport look's main-line head
+  (m2-teleport-look-main 09a1ab9f, parity 4a2b386b merged). Its three
+  conflicting files are taken as on m2-teleport-look 2540be96, where the
+  commit and the look ran together, so the tree is 2540be96 plus parity's
+  twenty-one fixes; wire-rules and the bridge green with clippy. Settings:
+  thuum branch ghostwalk-main, ghostwalk merged with apocalypse b3f6d602
+  and teleport-look-main 8118b9e: both files carry Lost Grimoire's entry
+  with its look and Ghostwalk's return; test_server_settings OK. It stages
+  after the teleport look merges, with the Apocalypse layer on main.
 - Drafts in the session's scratchpad until their first runs: the difftest
   session ghostwalk, the reference r-ghostwalk, the probe x-ghostwalk-relay
   and b-ghostwalk.

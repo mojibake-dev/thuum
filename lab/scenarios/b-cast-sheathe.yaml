@@ -1,0 +1,64 @@
+# b-cast-sheathe (docs/verbs/cast-action.md, ADR-033's interrupted-cast
+# row; from x-cast-interrupt): c1 charges Firebolt and sheathes about 300 ms
+# in, three times, redrawing between, then casts it once whole. The claim:
+# every start is taken on c1's figure in c2's game, the figure redraws after
+# each sheathe (its own engine's Magic_Equip, from c1's movement), and its
+# cast ends at each sheathe and after the last cast. On fork 0636f14e the
+# figure's cast stayed up about 5 s after the first sheathe and it never
+# redrew, so casts 2 and 3 never started (20261016-134830, 2 starts taken);
+# on m2-breath-launch 84db2c4e each cast ended 28 to 60 ms before c1's,
+# each redraw came within about 40 ms of c1's, and 5 of 5 starts were taken
+# (163330). The stagger attempts of the probe stay a probe: a cast broken by
+# a stagger lingers on the figure about 1.6 s past the caster's release.
+id: b-cast-sheathe
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: learn-spell {spellId: 77776}
+  - c1: console {text: "player.equipspell 12fd0 right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start {bools: [IsCastingRight, bWantCastRight, bCastReady, NotCasting, IsStaggering]}
+  - c2: watch-start {bools: [IsCastingRight, bWantCastRight, bCastReady, NotCasting, IsStaggering]}
+  - wait: 1
+  # three cancelled charges: the hold runs in the background, the sheathe lands 300 ms in
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 0.3
+  - c1: tap-key {code: 19}
+  - wait: 3
+  - c1: draw-weapon
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 0.3
+  - c1: tap-key {code: 19}
+  - wait: 3
+  - c1: draw-weapon
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 0.3
+  - c1: tap-key {code: 19}
+  - wait: 3
+  - c1: draw-weapon
+  - wait: 2
+  # and one full cast after the last redraw
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("MRh_SpellAimedStart") >= 4
+      - c2.watched(c1).took("Magic_Equip") >= 3
+      - c2.watched(c1).drops("IsCastingRight") >= 4
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]

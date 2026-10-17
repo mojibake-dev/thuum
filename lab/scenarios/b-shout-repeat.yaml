@@ -1,0 +1,51 @@
+# b-shout-repeat (docs/verbs/shouts.md, ADR-033's row "a second Fire Breath
+# within three seconds, in god mode"; from x-tgm-breath6): c1 in god mode
+# breathes Fire Breath five times (0, 2, 4, 6, 10 s) facing away from c2, so
+# no breath hits anyone. The claim: every breath reaches the server and the
+# other game draws it, so c1's figure launches the breath's spell five times
+# in c2's game. Before the report at the engine's voice fire (fork 35a3975f,
+# SKSE kVoiceFire, ADR-034) a god-mode breath was reported only from a hit,
+# and one that hit nobody never left the shooter's game (playtest
+# nineteen's third session: 13 of 18). Read: on fork 0636f14e one of five
+# (x-tgm-breath6 20261016-135744); on m2-breath-launch 5474291f, which reports
+# a shout from its own projectile's launch, five of five (152014).
+id: b-shout-repeat
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.addshout 3f9ea"}
+  - c1: console {text: "player.teachword 20e17"}
+  - c1: console {text: "player.unlockword 20e17"}
+  - c1: equip {formId: 0x3f9ea}
+  - c2: console {text: "player.setav health 100000"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -100, z: 0, rot: [0, 0, 180]}
+  - wait: 3
+  - c1: console {text: "tgm"}
+  - wait: 4
+  - c1: watch-start {bools: [bWantCastVoice, bVoiceReady, IsCastingDual]}
+  - c2: watch-start {bools: [bWantCastVoice, bVoiceReady, IsCastingDual]}
+  - wait: 1
+  - c1: hold-key {code: 44, ms: 200}
+  - wait: 2
+  - c1: hold-key {code: 44, ms: 200}
+  - wait: 2
+  - c1: hold-key {code: 44, ms: 200}
+  - wait: 2
+  - c1: hold-key {code: 44, ms: 200}
+  - wait: 4
+  - c1: hold-key {code: 44, ms: 200}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - c1: voice
+  - assert:
+      - c2.watched(c1).launched("0x3f9eb") >= 5
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]

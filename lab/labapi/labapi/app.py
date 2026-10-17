@@ -15,6 +15,7 @@ from typing import Any
 
 from fastapi import APIRouter, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
+import yaml
 from pydantic import ValidationError
 
 from .board import StepBoard
@@ -23,6 +24,7 @@ from .guests import Tables, load_tables
 from .proxmox import GuestControl, ProxmoxError
 from .runner import Runner, RunnerError
 from .runset import Policy, RunSetError, RunSets
+from . import scenario as scenario_mod
 from .scenario import load_scenario
 from .state import RpcStateClient, ServerState, StateError
 from .system import RealSystem, System
@@ -116,6 +118,8 @@ def create_app(services: Services) -> FastAPI:
             return False
         if request.method == "GET" and (path.startswith(f"{router.prefix}/run/") or path.startswith(f"{router.prefix}/runset/")):
             return False
+        if request.method == "PUT" and "/hang-dump/" in path:
+            return False  # a hung seat's dump, sent by the seat inside its own run
         return True
 
     @app.middleware("http")
@@ -313,6 +317,34 @@ def create_app(services: Services) -> FastAPI:
             return JSONResponse({"ok": False, "client": client, "error": done.result.get("error", "no answer")}, status_code=504)
         return {"ok": True, "client": client, "result": done.result.get("data")}
 
+    # A playtest's step on one seat, written as a scenario writes it (Eli, 2026-10-16: he plays both
+    # seats, so the lab casts on one while he staggers it from the other): `equip {formId: 0x12fd0}`,
+    # `repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}`. Input and its rhythm
+    # only (scenario.PLAYTEST_STEPS), and only inside a playtest's hold, so it never fires into a run;
+    # the answer is the driver's, a repeat's when its last repetition is done.
+    @router.post("/clients/{client}/playtest-step")
+    async def playtest_step(client: str, request: Request):
+        if runner.active:
+            return _busy()
+        held = runner.hold_status() or {}
+        if not str(held.get("reason", "")).startswith("playtest"):
+            return JSONResponse({"ok": False, "error": "E_NO_PLAYTEST: a playtest step needs a playtest's hold (just playtest-restore or playtest-start)"},
+                                status_code=409)
+        body = await request.json()
+        if not isinstance(body, dict) or "step" not in body:
+            raise HTTPException(400, "body must be {step}, the step as a scenario writes it")
+        try:
+            action, args = scenario_mod.playtest_step(body["step"])
+        except (ValueError, TypeError, yaml.YAMLError) as e:
+            raise HTTPException(400, str(e))
+        if runner.tables.guest_for_client(client) is None:
+            raise HTTPException(404, f"no client {client!r}")
+        runner.touch()
+        done = await board.run_step(client, action, args, scenario_mod.step_seconds(action, args, s.step_timeout_s))
+        if not done.ok:
+            return JSONResponse({"ok": False, "client": client, "action": action, "error": done.result.get("error", "no answer")}, status_code=504)
+        return {"ok": True, "client": client, "action": action, "result": done.result.get("data")}
+
     # The client's logon launcher asks which game version to start (ADR-022):
     # the active run's, else the default. It keeps one game folder per version.
     # Self-service cold snapshots and promotes of a lab client (thuum-mundus's
@@ -366,6 +398,31 @@ def create_app(services: Services) -> FastAPI:
         # the clone's logon launcher asks which version to start and whether
         # without skymp5-client (a solo run, ADR-031); see launch.ps1
         return {"client": client, "version": runner.game_for(client), "solo": runner.solo_for(client)}
+
+    @router.put("/clients/{client}/hang-dump/{run_id}")
+    async def hang_dump(client: str, run_id: str, request: Request, name: str = "SkyrimSE.dmp"):
+        # A hung seat uploads its game's dump here itself while its run takes the artifacts
+        # (Runner._hang_evidence), or by hand while nothing runs (lab/tools/hang-dump.sh) into the
+        # last finished run; a crashed seat uploads Windows Error Reporting's dump of its game the
+        # same way (Runner._crash_check). Only into that one run's directory and only under the
+        # four names (the two dumps, the seat's skse64.log and skyrim-platform.log), so nothing
+        # else can be written this way; the body streams to disk (a few GB).
+        rec = runner.active or runner.last_run
+        if rec is None or rec.run_id != run_id:
+            raise HTTPException(409, f"E_HANG_DUMP: {run_id} is neither the active run nor, with none active, the last one")
+        if name not in ("SkyrimSE.dmp", "SkyrimSE-crash.dmp", "skse64.log", "skyrim-platform.log"):
+            raise HTTPException(400, f"E_HANG_DUMP: {name!r} is not a hang evidence name")
+        if runner.tables.guest_for_client(client) is None:
+            raise HTTPException(404, f"no guest plays client {client}")
+        dest = rec.dir / f"{client}-{name}"
+        part = dest.with_name(dest.name + ".part")
+        size = 0
+        with part.open("wb") as f:
+            async for chunk in request.stream():
+                f.write(chunk)
+                size += len(chunk)
+        part.replace(dest)
+        return {"ok": True, "client": client, "run": run_id, "bytes": size}
 
     @router.post("/step/{step_id}/result")
     async def step_result(step_id: str, request: Request):

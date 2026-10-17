@@ -132,6 +132,19 @@ leveled off the same way. Nothing outside the guest changes. Skyrim Platform's
 HttpClient (cpp-httplib over plain sockets) and the game's UDP to the server
 do not use WinHTTP, so the lab-driver and skymp are untouched.
 
+Steam has its own reach. An image that Steam saved in a "check for update on
+startup" state asks three update hosts (client-update.fastly, .akamai and plain
+client-update.steamstatic.com) for a client manifest at every boot, and in the
+dark lab each ask failed only after 21 to 22 s, so the web helper, and the game
+after it, came 64 s late on every boot of that image (sky-c2's
+clean-m1-next of 2026-10-16 16:19Z: Steam\logs\bootstrap_log.txt, "Checking
+for update on startup", three "Download failed: http error 0", then "exhausted
+list of download hosts"; client rollbacks of 142 to 264 s against 61 to 87). A
+boot that does not save that state clears it, which is why the next snapshot
+was fast. Steam's bootstrapper does not take the WinHTTP proxy, so
+game-firewall.ps1 also answers the three names with 0.0.0.0 in the hosts file,
+before any DNS: the check fails at the connect and the boot goes on.
+
 ## Two game versions
 
 thuum supports and tests Skyrim 1.7.104 and 1.6.1170 (ADR-022). Each clone
@@ -198,6 +211,11 @@ part of bring-up. The game left the desktop three times on 2026-10-01 with
 no dialog, no application error event and nothing for WER to catch; with the
 policy in place a crash leaves a dump, and an exit that still leaves nothing
 was a deliberate ExitProcess, which narrows the search to the plugins.
+Every run's end collects the dumps written since it began (docs/LAB.md).
+It also caps sunshine.exe at one stacks-only dump. NVIDIA's installer's
+subkeys make LocalDumps exist, which is the global setting at its defaults.
+On top of that, a short-lived Sunshine child crashes about every 21 s on both
+clones without harming the streams, and each crash wrote a 4 to 38 MB dump.
 
 ## Tracing the game
 
