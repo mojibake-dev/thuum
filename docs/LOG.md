@@ -1744,3 +1744,30 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     actor and then logged in. thuum-magnus traced it to OnHostAttempt writing lastMovUpdateByIdx at the hosted form's
     index past the vector's size, and fixed it on fork m2-teleport-look-main ef44a1d8 with HostAttemptTest; upstream
     main has the same write.
+- m2-teleport-look-main merged to fork parity ef44a1d8 (2026-10-17T03:03Z, 20:03 PDT on 10-16) through `just verb-merge`
+  from thuum branch teleport-look-main (0d41c85: the look in both server-settings files, with main and the Apocalypse
+  layer merged in), on thuum-magnus's go. It carries:
+  - the teleport's look on other screens (docs/verbs/cast-teleport.md): at the cast, the server plays the vanish
+    (MGTeleportOutEffect on the caster's figure in each neighbour's game); at the landing it places the figure, a pop
+    and not a glide, stops the vanish, and plays the appear (MGTeleportInEffect, 1.75 s) and the sound. Ported from
+    m2-teleport-look 2540be96 on Ghostwalk's line onto the main line as a7ed583f and 055e66b8; server snippets only, no
+    client change.
+  - the OnHostAttempt fix (ef44a1d8): the hosting path wrote lastMovUpdateByIdx at the hosted form's index past the
+    vector's size. That aborted 20261016-233122's server when a game reconnected without an actor. The fix grows the
+    vector first, as OnUpdateMovement does; HostAttemptTest covers it.
+  Readings on its stage (ef44a1d8 with the layer):
+  - x-teleport-look 20261017-015128: maxStep 517 at the landing, the pop onto the server's landing point. Then the known
+    settle: about 37 units back and an 80-unit glide to c1's own spot. The out effect shows on c2's screen. A 5.4-unit
+    creep after the landing goes to the settle row, after twenty-one.
+  - b-teleport 015349, b-teleport-look 015610 (asserts maxStep >= 400) and b-self-cast 015832: green.
+  T2 green with 26 sessions on skymp-server:m2-teleport-look-main (difftest job 7242, from API pipeline 1703 at the head;
+  teleports identical with 15 declared divergences). The gate: run set 20261017-022224-merge-m2-teleport-look-main, 13
+  scenarios, verdict watch (smoke-two-players, a-restart-persistence, b-duel, b-teleport, b-teleport-look, the cast
+  five, b-self-cast, a-melee-reach, a-racemenu). b-cast-both-hands 024554 went red on c1's load freeze (below), was
+  green on both ADR-027 reruns, and is the watch item. The branch changed no client, so the clones were not promoted;
+  clean-m1 holds the same client.
+  Lab note: a seat's game can freeze right after loading the save. Its skyrim-platform log stops at PostLoadGame (skse
+  message type 3, about 38 lines), the seat counted online at its connect step, and the first console step times out
+  at 60 s. Seen twice today, once per seat and on both fork lines: c2 in 20261016-203757 on 2540be96, and c1 in
+  20261017-024554 here. The next one gets a full dump of SkyrimSE.exe and the seat's logs before the rollback, a lab-api
+  change after playtest twenty-one.
