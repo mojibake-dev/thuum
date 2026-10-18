@@ -977,6 +977,22 @@ health message. A second red within two sweeps makes it a bug.
 - Scorching Hands (Apocalypse 0x0C02388C, a flame stream whose effect has
   an area of 3) launched 16 flame projectiles in c1's game and c1 reported
   no hit at all, where vanilla Flames (area 0) reports one per tick.
+  Explained statically and fixed (fork m2-area-report 244893ba, on
+  train-25): the explosion read (docs/research/apocalypse/
+  target-location.md) shows an explosion's own hit event names its weapon
+  as the source, Unarmed (0x1F4) when it has none, which is the "unarmed
+  hit" x-class-self counted at every Self burst (3.71 of unarmed damage),
+  while the spell's effects land on the actors in the area through
+  AddTarget (34461), which raises no hit event for the caster's game to
+  send. hitService now reports the player's magicEffectApply on another
+  player's figure as a hit of the equipped spell that carries the effect
+  (once per target and spell within two frames beside any hit event, the
+  shout and cast-order rules kept) and drops an Unarmed hit that lands
+  beside such an apply on the same target. The server then claims it as a
+  spell hit against the recorded cast, an area cast covering its targets
+  within the splash window as built. HYPOTHESIS until x-area-hit: the
+  apply fires in the caster's game for each actor the area took, and the
+  Unarmed stand-in is the explosion's every time.
   Not a range matter: vanilla Flames' projectile reaches 768 units
   (Skyrim.esm PROJ 0x12FCF DATA, lab/esm.py on sky-srv) and c2 stood 400
   away; the mod has one Scorching Hands spell record (its editor id ends in
