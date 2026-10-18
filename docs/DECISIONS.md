@@ -1226,12 +1226,18 @@ Platform, both filtered in native (rule 9):
 1. The AddTarget refusal takes an EnchantmentItem whose caster is a figure
    as it takes a spell (the refusal's IsCast widened to kEnchantment and
    kStaffEnchantment when the caster is not the player).
-2. The explosion pass's damage is refused when the explosion's actorOwner
-   is a figure and the target is the player: a hook on Actor::DamageActor
-   (37335, the function Skyrim Together hooks for the same reason,
-   docs/TE-MAP.md) that drops a damage whose attacker is a figure's
-   explosion, or on 43849 before its damage call. The hook point is the
-   lab's to choose (the first is one function, already mapped).
+2. Health damage to the player from a figure is refused where the engine
+   hands it to the actor: PlayerCharacter's Actor::HandleHealthDamage
+   (CommonLibSSE-NG include/RE/A/Actor.h:458, vfunc 0x104, taking the
+   attacker and the damage), overridden on the player's vtable the way the
+   AddTarget refusal is (Hooks.cpp), returning without the call when the
+   attacker is a figure. This covers the explosion's damage (its attacker
+   is the owner, the figure) and every other engine path that reaches the
+   player's health with a figure as attacker; the server's own numbers
+   arrive as value changes, not through it. HYPOTHESIS until the lab: that
+   this virtual is where the number is applied, not a notification after it
+   (Skyrim Together gates the same chain one call earlier, at 37335,
+   docs/TE-MAP.md; that is the fallback, a Frida hook on it).
 Everything else the explosion does to the player stays native: knockdown,
 impulse, image space, camera shake, sounds, the placed object. The
 server's number for the cast arrives as today (the spell's effects through
@@ -1240,7 +1246,13 @@ spell's area effects to the targets the caster's game reports, as a Self
 burst's).
 
 Consequences. The observer feels an Apocalypse explosion (knockdown and
-look) and loses exactly the server's number, once. Without this, two
+look) and loses exactly the server's number, once. Gate 1 also refuses a
+figure's weapon enchantment's Health, Magicka and Stamina effects in the
+victim's game (an EnchantmentItem cast by a figure), which the server does
+not compute yet: an enchanted weapon's extra number is lost between
+players until enchantments become a server number (M5), where today it
+landed unvalidated. Gate 2 changes nothing for melee and arrows, whose
+figure damage is already zero (attackDamageMult 0). Without this, two
 numbers land. The EXPL records that carry damage or an enchantment among
 the 27 target-location spells are unread; the gates cost nothing where
 none does. A figure's explosion that should hurt its own caster (none in
