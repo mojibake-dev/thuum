@@ -262,8 +262,21 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       branch on train m2-train-24 unless named otherwise:
       - target actor and touch: the relayed cast named the player by its
         server id, which the client made 0, so the figure's spell landed on
-        nobody (Azure Reconstruction healed the figure itself); fixed,
-        m2-target-actor.
+        nobody (Azure Reconstruction healed the figure itself);
+        m2-target-actor, half measured: on train-24 (x-class-target2
+        20261018-105815) the server counts Finger of Death's, Decompose's,
+        Leech Seed's and Shadowbond's hits on the other player, which
+        parity refused, but in that player's own game the relayed casts
+        still land on nobody (Azure's stream healed the figure itself, 15
+        applies, none on the player). HYPOTHESIS: the relayed cast carries
+        target 0 for these deliveries (the sender fills it from Skyrim
+        Platform's spellCast event, which names no target at cast time);
+        the fix after the big playtest names the target from the aimed-at
+        actor. Azure's heal raises no hit event, so its number waits on
+        train-25's apply path. Also measured: an Apocalypse script that
+        reads a figure's Health value misjudges it (figures hold a
+        million): Finger of Death's self-damage branch took its caster
+        from 10000 to 1 (docs/verbs/spell-cast.md).
       - second-hand (cloaks, procs; 30 spells): the caster's game reported
         every proc hit, the server dropped them all as hits of an unequipped
         spell; fixed by claiming a hit against the recorded cast whose

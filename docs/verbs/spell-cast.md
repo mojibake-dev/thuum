@@ -1017,6 +1017,37 @@ health message. A second red within two sweeps makes it a bug.
   no hit; Hailstone, Static Dome and Crackle never released at a 300 ms
   hold (charge 0 spells need the hold to cover the cast, 900 ms now).
 
+- x-class-target2 20261018-105815 on train m2-train-24 (its first cut,
+  x-class-target 012152 and 101320, cast one spell of five: the first hold
+  from empty hands drew instead of casting and Shadowbond's script moved
+  the caster onto the target, so the later blocks aimed at nobody): every
+  block cast; the server counted Finger of Death, Decompose, Leech Seed
+  and Shadowbond on c2 (OnSpellHit, a fight begun; parity refused them
+  E_SPELL_NO_CAST), Leech Seed's second hit message of the same cast
+  refused as consumed (harmless). In c2's own game nothing landed on c2's
+  player in any block: Azure Reconstruction's relayed stream applied its
+  heal to c1's figure itself (15 applies of 0x0c126da1, caster the figure,
+  none on 0x14), Finger of Death and Shadowbond applied nothing, exactly
+  the shape m2-target-actor set out to fix. HYPOTHESIS: the relayed
+  SpellCast carried target 0 for these spells (magicSyncService fills it
+  from Skyrim Platform's spellCast event, which names no target when the
+  engine picks it later; the server relays the field untranslated and the
+  receiver routes to 0x14 only when it names c2); the run has no pcap and
+  the server does not log the field. The fix after the big playtest: the
+  sender names the aimed-at actor (the crosshair reference or the
+  projectile's target) when the event has none. Azure's heal stream raised
+  no hit event in c1's game, so the server never saw a heal to apply: its
+  number is train-25's apply path (m2-area-report). Shadowbond did not
+  move c1 this time (0.5 units over 158 s; the script polls before its
+  MoveTo, so ambiguous against the earlier runs' 46 units). Two findings
+  beyond the verb: Finger of Death's script read c2's figure at a million
+  Health, failed its threshold and ran its self-damage branch, taking c1
+  from 10000 to 1 (an ADR-029 class of its own: a script that reads a
+  figure's values judges the lab's million, not the player's number); and
+  a server-side set-percentages upward is reverted by the client's stale
+  report within about 2 s (7 of 11 cases), so a probe must set downward or
+  read at once (lab-api, numidium).
+
 ## The stream's heading, read and fixed (2026-10-17 evening)
 
 The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
