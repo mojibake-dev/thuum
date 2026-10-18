@@ -274,3 +274,26 @@ message-path HYPOTHESIS (CIF's kill spell reported as a hit of 801:Headshot
 Kills.esp) is untested until the rerun. Lab follow-ups: papyrus-av should
 refuse a name the server does not index; c1's CIF log read hit the guest
 agent's timeout.
+
+The rerun with Marksman set (x-headshot-probe 20261018-190159) and b-headshot
+191414 on train-26's stage read the same: CIF's hooks ran at every hit (its
+blood-spray feature launches a runtime projectile, 0xFF000CFD with spell
+0xFF000D99, from the impact point in both games; the shipped
+CoreImpactFramework.ini's [BloodSpray] bStatus true, fSpread 0.15), but the
+headshot rule never fired in the shooter's game: no effect on the figure by
+any caster, no spell cast, only the bow's hit of 13 counted once on the
+server. The filter it fails is most likely the helmet: the lab character
+wears the whole iron set, and the server's armor rating was 60 at every
+hit tonight, the full set's total with the Iron Helmet's 15, so no bare
+head was ever shot; the probe's "helmet" half added nothing. Marksman 60
+in the shooter's game is unverified (lab-api discards a server step's
+answer). Both drafts now take the helmet off c2 first and read c1's base
+Marksman back by the console; the message-path HYPOTHESIS waits on that
+run. If it still fails bare, the next steps are CIF's iVerboseMode 2 or 3
+(a layer change, Eli's review: the struck slot, each filter's verdict, the
+spell and its caster) and a solo reference against a placed Nord. A
+caution for the contract's first candidate: if CIF casts the kill spell
+from the victim's caster the way it launches the blood spray from the
+impact point, the aggressor in the shooter's game is the figure and
+hitService never sends it; the report would have to come from the figure's
+apply or from the limb instead.
