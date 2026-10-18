@@ -54,6 +54,20 @@ was cut short when Ghidra dropped at 01:41 PDT, so no renames were saved.
   c1, 34413 and 43829's records against the pick; on c2, 34413 at c1's point
   and every AddTarget on c2's player.
 
+## The explosions' own numbers, read (lab/esm.py on sky-srv, 2026-10-18)
+
+ADR-037's two paths need an EXPL that carries damage or an enchantment.
+Among Apocalypse's 87 explosion records, 3 carry damage (Detonate Lock 1,
+Skull Trap 1, Frozen Orb's end 2) and none an enchantment; Lightning
+Strike's (0x030f5058, force 512, radius 300) and Thrumming Stone's (four
+records, force 128 to 256) carry neither. Lost Grimoire: 10 of 54, five
+with enchantments. Skyrim.esm: the fire and shock rune explosions carry
+damage 2, Fireball's impact explosion damage 2, the frost rune explosion
+0x44089 the enchantment SlowFrostRune 0xb72a2 (40 frost, 50 slow for 5 s).
+The gates' probe (x-explosion-gate) therefore uses the vanilla runes, which
+both games know without a layer, and runs ungated on train-25 first. The
+full list is in the ADR.
+
 ## The observer's call, read (the re-analyst on sky-re, 2026-10-17 evening)
 
 Every id by `just addr` on 1.6.1170; the signature CONFIRMED-STATIC, the
