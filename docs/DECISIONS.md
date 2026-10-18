@@ -1201,15 +1201,16 @@ is checked against the slot's owner (slot-probe.js) before anything else.
 
 ## ADR-037: A figure's explosion applies no number to a player (ADR-028 extended)
 
-Status: PROPOSED 2026-10-17 (the class pass's target-location spells). Eli
-decides (docs/private/decisions-m2-apocalypse.md, question 5). His first
-answer (2026-10-18) was "not yet, friendly fire is fine for now", which
-answers whether the server's number lands on a friend (it does, gates or
-not) rather than who applies it; the question is re-asked there as how
-many times the standing player takes a figure's explosion (once, from the
-server, with the gates; twice without, their own game's copy accepted by
-OnChangeValues as a plain drop). The gates (fork m2-explosion-gate
-a42d5512) ride no train until he ticks.
+Status: ACCEPTED 2026-10-18 (Eli's tick in docs/private/decisions-m2-apocalypse.md,
+question 5, re-asked). PROPOSED 2026-10-17 from the class pass's
+target-location spells. His first answer, "not yet, friendly fire is fine
+for now", answered whether the server's number lands on a friend (it does,
+gates or not) rather than who applies it; re-asked as how many times the
+standing player takes a figure's explosion (once, from the server, with the
+gates; twice without, their own game's copy accepted by OnChangeValues as a
+plain drop), he took the gates. They ride fork train m2-train-26
+(f2f26ec3, m2-explosion-gate a42d5512 merged), behind the headshots layer;
+their probe is x-explosion-gate, run ungated on train-25's stage first.
 
 Context. ADR-028 made the server the only source of a player's Health,
 Magicka and Stamina changes from another player's magic: in each game, a
@@ -1260,10 +1261,35 @@ not compute yet: an enchanted weapon's extra number is lost between
 players until enchantments become a server number (M5), where today it
 landed unvalidated. Gate 2 changes nothing for melee and arrows, whose
 figure damage is already zero (attackDamageMult 0). Without this, two
-numbers land. The EXPL records that carry damage or an enchantment among
-the 27 target-location spells are unread; the gates cost nothing where
-none does. A figure's explosion that should hurt its own caster (none in
+numbers land. A figure's explosion that should hurt its own caster (none in
 the census) is unaffected: the caster is not the player in that game.
+
+Measured in the records (2026-10-18, lab/esm.py on sky-srv, every EXPL of
+the three plugins): of Apocalypse's 87 explosions, 3 carry damage (1 or 2,
+flat: Detonate Lock's, Skull Trap's, Frozen Orb's end) and none an
+enchantment; Lightning Strike's and Thrumming Stone's carry neither, so
+the class pass's placed explosions never carried a number of their own.
+Lost Grimoire: 10 of 54, five with enchantments (Firebomb, Shattering
+Crystal, Flameheart's end, Detonate Minion, Supercharge Minion; Kinetic
+Rune's is Skyrim.esm's EnchStagger 0x72674, no number). Skyrim.esm: 59 of
+143, among the player's spells Fireball's impact explosion (damage 2), the
+fire and shock rune explosions (damage 2) and the frost rune explosion
+0x44089, whose enchantment SlowFrostRune 0xb72a2 carries
+HazardFrostDamageFFContact 40 and FrostSlowFFContact 50 for 5 s: gate 1's
+case, 40 Health and Stamina from the standing player's own game before
+the gate. So the double count is small for the Apocalypse placers and real
+for the vanilla runes and the five Lost Grimoire explosions.
+
+A consequence to carry: a number that lives in an explosion's enchantment
+reaches the server through nothing today. The caster's game reports the
+trigger as a hit of the enchantment, which is no spell the caster cast, so
+the server refuses it (HYPOTHESIS until x-explosion-gate's before run on
+train-25), and with gate 1 the standing player's game applies nothing
+either: vanilla Frost Rune and those five Lost Grimoire spells do nothing
+to another player until second-hand's reach (docs/verbs/second-hand.md)
+follows a hazard to its explosion and the explosion to its enchantment.
+That is the right order: the server's number, validated, instead of the
+client's, unvalidated, which is what landed before.
 
 Alternatives. (a) Never place a figure's explosion: the observer sees
 nothing, as today. (b) Place it with no owner (a NonActorMagicCaster): the
