@@ -168,6 +168,25 @@ class ProxmoxerExecTests(unittest.TestCase):
             res = b.exec(g, ["cmd"], 5.0)
         self.assertEqual((res.exitcode, res.out), (0, "ok"))
 
+    def test_exec_status_of_a_pid_the_agent_no_longer_knows_ends_at_once(self):
+        """The agent reaps a pid once exec-status reports its exit; after an answer lost on its way back
+        the pid is unknown for good (sky-c2, run 20261018-204244 spent 120 s asking): no more asking."""
+        import time
+        from unittest import mock
+
+        from labapi.guests import Guest
+        from labapi.proxmox import ProxmoxError
+
+        g = Guest("sky-c2", 712, "10.10.70.22", "qemu", "client", True, "clean-m1", "c2")
+        gone = RuntimeError("500 Internal Server Error: VM 712 qga command 'guest-exec-status' failed - PID lld does not exist")
+        b = self._backend([RuntimeError("got timeout"), gone])
+        t0 = time.monotonic()
+        with mock.patch("labapi.proxmox.time.sleep"), self.assertRaises(ProxmoxError) as cm:
+            b.exec(g, ["cmd"], 120.0)
+        self.assertIn("E_PVE_EXEC_LOST: pid 42 on sky-c2", str(cm.exception))
+        self.assertIn("does not exist", str(cm.exception))
+        self.assertLess(time.monotonic() - t0, 5.0)
+
     def test_exec_status_that_never_answers_names_the_last_error(self):
         from unittest import mock
 

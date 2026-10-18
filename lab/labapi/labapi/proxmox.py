@@ -324,6 +324,13 @@ class ProxmoxerGuests:
             try:
                 st = agent("exec-status").get(pid=pid)
             except Exception as e:  # proxmoxer raises ResourceException and requests errors
+                # The agent reaps a process's record when exec-status reports its exit (QEMU's guest
+                # agent protocol, guest-exec-status), so after an answer lost on its way back the pid
+                # is unknown for good: "PID ... does not exist" on sky-c2 cost run 20261018-204244 the
+                # whole 120 s of a screenshot. The command is over and its answer gone; say so now.
+                if "does not exist" in str(e):
+                    raise ProxmoxError(f"E_PVE_EXEC_LOST: pid {pid} on {guest.name}: the guest agent no longer knows it "
+                                       f"({type(e).__name__}: {str(e)[:160]}); the command ended and its answer is lost") from e
                 # A busy guest agent answers exec-status with "got timeout" now
                 # and then while the command runs on (sky-c1 at a game launch,
                 # sky-c2 at a quiet-down, 2026-10-03): ask again until the deadline.
