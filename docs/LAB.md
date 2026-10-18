@@ -422,7 +422,11 @@ negative control), close-menu
 TESModPlatform.CloseMenu; `name: "RaceSex Menu"` ends the race menu and
 skymp5-client sends its result), and watch-start / watch-stop (the
 client follows every actor near it at watch-start, by form id, each frame
-until watch-stop, and reports how far each got from where it began, with
+until watch-stop, and any actor {formIds: [...]} names (a cell's own NPCs,
+which the random search catches in a different set each run; a named
+actor's animation events get their own hook, and a reference reads it
+with `watched_id(<form id>)`, no server position needed), keeping
+{trackMax} position samples of 250 ms (240 by default, 2400 at most), and reports how far each got from where it began, with
 each one's stagger, recoil, shout and bow events as this game's engine or a relay sent
 them (the name, and whether its graph took the event once every hook had
 run: deathService refuses every figure's staggerStart) and the graph

@@ -699,6 +699,18 @@ class WatchTests(unittest.TestCase):
         still = Evaluator(RichServer(), WatchViews(c1_max=3.0), ["c1", "c2"])
         self.assertTrue(still.evaluate("c2.watched(c1).maxDisplacement < 500"))
 
+    def test_watched_id_finds_an_actor_by_form_id_without_the_server(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), WatchViews(), ["c1", "c2"])
+        # the guard, named by its form id: no server position is needed
+        self.assertTrue(ev.evaluate("c2.watched_id(4278190089).maxDisplacement < 1"))
+        self.assertTrue(ev.evaluate("abs(c2.watched_id(4278190089).x - 5000) < 1"))
+        self.assertTrue(ev.evaluate("c2.watched_id(4278190081).maxDisplacement > 4000"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.watched_id(4278190090).samples > 0")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.watched_id(4278190089).samples > 0")
+
     def test_watched_times_the_figure_s_magicka_drain(self):
         """c1's figure streamed in c2's game from 900 ms to 4600 ms, then
         its magicka came back to a million."""

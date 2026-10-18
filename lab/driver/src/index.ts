@@ -235,8 +235,10 @@ const WATCH_EVENTS_MAX = 4096;
 const WATCH_SELF_MS = 50;
 const WATCH_TRACK_MS = 250;
 const WATCH_TRACK_MAX = 240;
+// the most a watch may ask for in {trackMax}: ten minutes at WATCH_TRACK_MS
+const WATCH_TRACK_MAX_CAP = 2400;
 const VAR_EPSILON = 0.01;
-let watching: { startedAt: number; actors: Map<number, Watched>; self: Watched } | null = null;
+let watching: { startedAt: number; actors: Map<number, Watched>; self: Watched; trackMax: number } | null = null;
 
 // The master behavior variables Skyrim Platform reads into
 // getAnimationVariablesFromActor's three buffers (uint8 booleans, float32
@@ -584,7 +586,7 @@ function trackWatched(actor: Actor, id: number, w: Watched, ms: number, own: boo
   w.last = pos;
   w.samples += 1;
   const lastTrack = w.track[w.track.length - 1];
-  if (ms - lastTrack[0] >= WATCH_TRACK_MS && w.track.length < WATCH_TRACK_MAX) {
+  if (ms - lastTrack[0] >= WATCH_TRACK_MS && w.track.length < (watching ? watching.trackMax : WATCH_TRACK_MAX)) {
     w.track.push([ms, pos[0], pos[1], pos[2]]);
   }
   for (const [av, seen] of [["health", w.health], ["magicka", w.magicka], ["stamina", w.stamina]] as Array<[string, number[][]]>) {
@@ -757,15 +759,32 @@ on("magicEffectApply", (e) => {
 // staggerStart, and Skyrim Platform hands later hooks the blanked name.
 // Recorded at leave, with whether the graph took the event once every hook
 // had run (thuum docs/verbs/stagger.md).
+const animationEventRecorder = {
+  enter: () => {},
+  leave: (ctx: { selfId: number; animEventName: string; animationSucceeded: boolean }) => {
+    if (!watching) return;
+    const w = watchedRecord(ctx.selfId);
+    if (w && w.events.length < WATCH_EVENTS_MAX) w.events.push([watchedMs(), ctx.animEventName, ctx.animationSucceeded ? 1 : 0]);
+  },
+};
 for (const [minId, maxId] of [[0xff000000, 0xffffffff], [0x14, 0x14]]) {
-  hooks.sendAnimationEvent.add({
-    enter: () => {},
-    leave: (ctx) => {
-      if (!watching) return;
-      const w = watchedRecord(ctx.selfId);
-      if (w && w.events.length < WATCH_EVENTS_MAX) w.events.push([watchedMs(), ctx.animEventName, ctx.animationSucceeded ? 1 : 0]);
-    },
-  }, minId, maxId);
+  hooks.sendAnimationEvent.add(animationEventRecorder, minId, maxId);
+}
+// A cell's own NPC (a plugin's form id, outside both ranges) gets its own
+// hook, filtered in native to that one id (rule 9), the first time a
+// watch-start names it in {formIds}; the hook stays for the game session
+// and records only while that actor is watched (docs/research/m3, the
+// 2026-10-17 readings: Riverwood's NPCs showed no events).
+const namedEventHooks = new Set<number>();
+function hookNamedActor(id: number): void {
+  if (id === 0x14 || id >= 0xff000000 || namedEventHooks.has(id)) return;
+  hooks.sendAnimationEvent.add(animationEventRecorder, id, id);
+  namedEventHooks.add(id);
+}
+// the actor a step names: {formId}, else the placed NPC (place-npc), else none
+function namedNpc(a: Record<string, unknown>): Actor | null {
+  const id = num(a.formId) || placedId;
+  return id ? Actor.from(Game.getFormEx(id)) : null;
 }
 
 // Every menu CommonLibSSE-NG names (the MENU_NAME constants under
@@ -1658,8 +1677,26 @@ function run(step: Step, player: Actor): unknown {
       // fox and a wolf and not the bandit it hit)
       const placed = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
       if (placed && !actors.has(placedId)) actors.set(placedId, newWatched(placed, bools));
-      watching = { startedAt: Date.now(), actors, self: newWatched(player, bools) };
-      return { watching: actors.size };
+      // the actors a reference names by form id ({formIds}: a cell's own
+      // NPCs, which the random search catches in a different set each run),
+      // each with its own animation-event hook; a name the game has no
+      // actor for is reported, not an error (a schedule may have moved it)
+      const named = Array.isArray(a.formIds) ? (a.formIds as unknown[]).map((x) => num(x)).filter((x) => x > 0) : [];
+      const missing: number[] = [];
+      for (const id of named) {
+        const actor = Actor.from(Game.getFormEx(id));
+        if (!actor) {
+          missing.push(id);
+          continue;
+        }
+        hookNamedActor(id);
+        if (!actors.has(id)) actors.set(id, newWatched(actor, bools));
+      }
+      // the track's cap in samples ({trackMax}, 250 ms each): the default
+      // covers a minute, a schedule reference wants more
+      const trackMax = Math.min(WATCH_TRACK_MAX_CAP, Math.max(1, Math.floor(num(a.trackMax, WATCH_TRACK_MAX))));
+      watching = { startedAt: Date.now(), actors, self: newWatched(player, bools), trackMax };
+      return { watching: actors.size, named: named.length - missing.length, missing, trackMax };
     }
     case "watch-stop": {
       if (!watching) return { error: "no watch-start before watch-stop" };
@@ -1727,10 +1764,10 @@ function run(step: Step, player: Actor): unknown {
       // Actor.EnableAI; the engine's Actor::EnableAI, ID 37504, clears its
       // kProcessMe bit, the re-analyst on sky-re, 2026-10-16). Returns the
       // state after
-      const npc = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
-      if (!npc) return { error: "no placed npc" };
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
       npc.enableAI(a.enabled === true);
-      return { aiEnabled: npc.isAIEnabled() };
+      return { formId: npc.getFormID(), aiEnabled: npc.isAIEnabled() };
     }
     case "npc-state": {
       // the placed NPC as its engine has it, for the puppet probe: whether
@@ -1739,10 +1776,11 @@ function run(step: Step, player: Actor): unknown {
       // node's world position: two reads apart during an idle tell whether
       // its graph still animates it (EnableAI(false) drops an actor from the
       // animation pass, the same read, HYPOTHESIS)
-      const npc = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
-      if (!npc) return { error: "no placed npc" };
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
       const head = "NPC Head [Head]";
       return {
+        formId: npc.getFormID(),
         aiEnabled: npc.isAIEnabled(),
         package: npc.getCurrentPackage()?.getFormID() ?? 0,
         inCombat: npc.isInCombat(),
@@ -1864,6 +1902,16 @@ function run(step: Step, player: Actor): unknown {
       const target = a.other ? player : other;
       caster.doCombatSpellApply(spell, target);
       return { applied: spell.getFormID(), caster: caster.getFormID(), target: target.getFormID() };
+    }
+    case "start-combat": {
+      // An NPC opens combat against the player (Papyrus Actor.StartCombat,
+      // CK wiki "StartCombat - Actor"): the actor {formId} names, else the
+      // placed NPC, else the nearest other. Replaces the console's
+      // `startcombat 14`, which paused the game about 3.5 s inside a watch
+      // (docs/research/m3, r-npc-fight 20261017-083447)
+      const npc = namedNpc(a) ?? nearestOther(player);
+      npc.startCombat(player);
+      return { actor: npc.getFormID(), inCombat: npc.isInCombat(), combatTarget: npc.getCombatTarget()?.getFormID() ?? 0 };
     }
     case "play-idle": {
       // One IDLE record played on the player, or with {other: true} on the
