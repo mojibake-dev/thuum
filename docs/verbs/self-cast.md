@@ -351,10 +351,14 @@ the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
   goes two updates after its event (skymp5-client hitService.ts), behind
   any cast this frame or the next sends. Weapon hits and a shout's held
   hits are unchanged.
-- MEASURED (r-shock-nova 20261018-013824, the engine alone, solo): two
-  Shock Novas beside a placed bandit left the caster's health at 1.0 at
-  every dump-state while the bandit took all four of the burst's effects
-  and ragdolled. So the engine spares a Self burst's own caster, and
+- MEASURED (r-shock-nova 20261018-013824 and its repeat with the trace,
+  20261018-074819, the engine alone, solo): two Shock Novas beside a placed
+  bandit left the caster's health at 100 of 100 in every sample while the
+  bandit took all four of the burst's effects (35 to dead, ragdolled). The
+  caster's game also raised the explosion's hit events with the player
+  itself among the targets (source Unarmed 0x1F4 and the rim effect's
+  spell), which the engine did not turn into damage: a second reason the
+  client drops the explosion's Unarmed stand-in (fork m2-area-report). So the engine spares a Self burst's own caster, and
   RunSelfSpell (ActionListener.cpp), which applies every effect of a
   fire-and-forget Self spell to its caster, the area's hostile ones
   included, hurts Shock Nova's, Frost Nova's and Life's Finale's casters on
