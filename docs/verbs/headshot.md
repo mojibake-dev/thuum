@@ -137,10 +137,15 @@ Rate limit / bounds: one per claimed shot; the report's budget is OnHit's.
   target's head slots, its race, the shooter's Archery); the C++ core reads
   the facts (equipment and ARMO BOD2, appearance, the actor-values record)
   and kills through MpActor::Kill.
-- Where the mod's rule comes from: its CIF config (a data file the mod
-  ships). The server reads the conditions it can check from it rather than
-  from code, so a second CIF mod would need no new rule. HYPOTHESIS: the
-  config's format (MODS.md read 1.x's keys; 2.x changed AND to OR).
+- Where the mod's rule comes from: server-settings.json's `headshot` block
+  (thuum branch headshots, both settings files): the spells whose hit
+  reports a headshot (801:Headshot Kills.esp), the victim races the mod's
+  rule names (the ten playable and ElderRace), and the shooter's base
+  Archery floor (60: headshot.json's Overdraw60 condition is base Archery
+  60 and HasPerk Overdraw40, Engine surface). Read from CIF's own json was
+  the first idea; the json names its conditions as perks whose conditions
+  CIF evaluates, which the server cannot, so the server's facts are written
+  out as settings, the way castTeleports and playerGlobals are.
 - DB fields / migration: none (a death is already state).
 - Restart behavior: none.
 - Papyrus natives touched: Actor.Kill on the server (R0, MpActor::Kill), a
@@ -218,10 +223,27 @@ in this doc as unvalidated client input (CLAUDE.md rule 5).
 
 Doc written 2026-10-10, before any code.
 
-- [ ] doc complete, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [x] doc complete, rung declared
+- [x] engine surface cited or delegated (CIF's source, 2026-10-17)
+- [x] server logic + T0 (fork m2-headshot 8b6d04fe, 2026-10-17 evening:
+      wire-rules headshots and its five tests; PartOne's facts from the
+      records; OnHit's headshot branch; HeadshotTest on Skyrim.esm with
+      Firebolt standing in for the mod's spell; GitLab pipeline 1844 green,
+      the four cases with the facts logged at each claim; the `headshot`
+      server setting on thuum branch headshots 84905c18: spells, races,
+      minArchery)
+- [x] message + validator (same commit): OnHit as it is, with the mod's
+      spell as its source. The report comes from the effect's apply, not a
+      hit event (x-class-target 20261018-012152 saw no hit event for a
+      target-actor spell applied directly): fork m2-area-report (on train-25,
+      b2bc2e94) has Skyrim Platform's magicEffectApply name the applying
+      spell from the target's active effect (ActiveEffect's spell), and
+      hitService report the player's apply on a figure as a hit of that
+      spell; CIF casts its kill spell from the shooter at the victim, so the
+      report carries 801:Headshot Kills.esp and the server's headshot branch
+      takes it. HYPOTHESIS until x-headshot-probe: the apply fires in the
+      shooter's game for CIF's cast (CastSpellImmediate with the figure as
+      target), with the shooter as its caster
 - [ ] native hook + T1
 - [ ] TS handler
 - [ ] T2 green

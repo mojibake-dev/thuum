@@ -577,8 +577,10 @@ Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/
 (copies of the server's `world/` directory, the `file` database driver;
 there is no sqlite), world-diff, lab.pcap, frida/*.jsonl, result.json.
-Also every other log in the seat's SKSE folder (the one skyrim-platform.log
-is in) as <client>-<name>, beside <client>.log in every run: skse64.log
+Also every other log in the seat's SKSE folders (the one skyrim-platform.log
+is in, then any other My Games\<folder>\SKSE, where a CommonLibSSE-NG plugin
+such as the freeze fix writes under Skyrim.INI) as <client>-<name>, beside
+<client>.log in every run: skse64.log
 prints the game's image base, which the load freeze's hypothesis of
 2026-10-17 ties to the hang, so every run tests it, and each SKSE plugin
 writes its own log there (TMS_AIPathingFreezeFix.log for the freeze fix

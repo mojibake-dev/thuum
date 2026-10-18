@@ -965,3 +965,69 @@ health message. A second red within two sweeps makes it a bug.
   withheld spells show their animations too. m2-hands' hold is the stopgap
   it replaces; forks m2-firebolt and m2-hands-exit are deleted with it.
 
+
+## The class pass (2026-10-18 01:30 UTC, parity ef02c565)
+
+- x-class-streams 20261018-013048: Creeping Cold, Howling Blast and
+  Scattershock counted by the stream's time (0.10, 0.17 and 0.25 s a tick;
+  two Scattershock hits after its stop refused E_SPELL_NO_CAST, as built);
+  the figure's launches matched c1's within one for every stream (Sleet
+  Storm 0, Creeping Cold 26 and 27, Howling Blast 7 and 8, Scorching Hands
+  16 and 18, Scattershock 18 and 18).
+- Scorching Hands (Apocalypse 0x0C02388C, a flame stream whose effect has
+  an area of 3) launched 16 flame projectiles in c1's game and c1 reported
+  no hit at all, where vanilla Flames (area 0) reports one per tick.
+  Explained statically and fixed (fork m2-area-report 244893ba, on
+  train-25): the explosion read (docs/research/apocalypse/
+  target-location.md) shows an explosion's own hit event names its weapon
+  as the source, Unarmed (0x1F4) when it has none, which is the "unarmed
+  hit" x-class-self counted at every Self burst (3.71 of unarmed damage),
+  while the spell's effects land on the actors in the area through
+  AddTarget (34461), which raises no hit event for the caster's game to
+  send. hitService now reports the player's magicEffectApply on another
+  player's figure as a hit of the equipped spell that carries the effect
+  (once per target and spell within two frames beside any hit event, the
+  shout and cast-order rules kept) and drops an Unarmed hit that lands
+  beside such an apply on the same target. The server then claims it as a
+  spell hit against the recorded cast, an area cast covering its targets
+  within the splash window as built. HYPOTHESIS until x-area-hit: the
+  apply fires in the caster's game for each actor the area took, and the
+  Unarmed stand-in is the explosion's every time.
+  Not a range matter: vanilla Flames' projectile reaches 768 units
+  (Skyrim.esm PROJ 0x12FCF DATA, lab/esm.py on sky-srv) and c2 stood 400
+  away; the mod has one Scorching Hands spell record (its editor id ends in
+  _NPC), and its effect's own projectile is unread (esm.py prints a DATA's
+  first 32 bytes). HYPOTHESIS: an area effect's targets are gathered by the
+  projectile's explosion (FindTargets' area pass, 34461), which raises no
+  TESHitEvent on the caster's side, so hitService sees nothing to send and
+  the server counts nothing for an area stream; the "Self burst" rows share
+  the cause. Next: the recorder's hits dealt against magicEffectApply on the
+  target for one area spell, with c2 at 150 units.
+- x-class-bolts 20261018-012605: Bolide and Rift Bolt counted once; Rift
+  Bolt's scripted proc refused (second-hand covers it); Nature's Balance's
+  bolt counted and swapped nothing (B1 unbuilt); Thundercrack launched with
+  no hit; Hailstone, Static Dome and Crackle never released at a 300 ms
+  hold (charge 0 spells need the hold to cover the cast, 900 ms now).
+
+## The stream's heading, read and fixed (2026-10-17 evening)
+
+The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
+Actor::GetAimHeading (37929) returns GetHeading(false) minus the graph
+float AimHeadingCurrent (CommonLibSSE-NG include/RE/F/FixedStrings.h:187;
+src/RE/A/Actor.cpp:288-296), with no bAimActive branch and no camera term;
+GetHeading(false) on a Character is the reference's angle.z (37206; the
+player's override adds a seat's heading delta, zero on foot). MagicCaster's
+launch (34450, then 34452) reads it at every relaunch into LaunchData's
+angleZ, unless the caster is in combat (the combat aim point, 418638) or
+has a desiredTarget (47286); FlameProjectile and BeamProjectile read it
+every frame. So a figure's missiles left along its body's heading, and the
+2.75 degrees of x-stream-aim is the caster's own AimHeadingCurrent, which
+its graph's direct-at modifier sets with a per-node offset (HYPOTHESIS).
+Fix, fork m2-area-effect 9437980f (train-25): the native setActorAimHeading
+writes the figure's AimHeadingCurrent to angle.z minus the caster's relayed
+aimHeading, wrapped to [-pi, pi], so GetAimHeading returns the caster's
+heading and the body stays the movement's; the relayed cast's aimHeading
+is held per figure (sync/figureAim.ts) and written each update until the
+cast's end. HYPOTHESIS until x-stream-aim's rerun: the graph does not write
+the float back between the write and the caster's read (the fallback is a
+trampoline on 37929 for figure form ids).
