@@ -1,0 +1,56 @@
+# M2, ghostwalk (docs/verbs/ghostwalk.md; playtest twenty-two, Eli: "short
+# distances and they slide"): a short Ghostwalk return watched from c2. c1
+# casts Apocalypse's Ghostwalk (0x0C00AAE8, 201370344) at the lab spawn and
+# walks south for 3 s, about 900 units (305 units a second in
+# x-ghostwalk-relay 20261017-042445), and the mod's script pulls it back
+# about 11 s after the cast. A return under 1024 units used to glide on the
+# other screen (the movement relay's translateTo over 0.2 s); with
+# Ghostwalk's look the server pops the figure to the landing (SetPosition)
+# and plays the return's visual and sound there, as b-teleport-look asserts
+# for Lost Grimoire's teleport. lab-driver's watch reads the largest move of
+# c1's figure between two of c2's frames: a pop is one step of most of the
+# distance, a glide many short ones. 600 units leaves room and fails a
+# glide. Positions are relative to the lab spawn. Assertions are evaluated
+# by lab-api only (ADR-009).
+id: b-ghostwalk-look
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 201370344}
+  - c1: console {text: "player.setav magicka 3000"}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c1: console {text: "player.equipspell c00aae8 right"}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 200, y: -300, z: 0, rot: [0, 0, 270]}
+  - c1: draw-weapon
+  - wait: 5
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 64
+  - c2: watch-start
+  - c1: hold-key {code: 199, ms: 1000}
+  - until:
+      within: 6
+      expect:
+        - server.effects(c1).left("0xc00aae5") > 5
+  - c1: hold-key {code: 17, ms: 3000}
+  - wait: 3.5
+  - assert:
+      - server.actor(c1).y < -900
+  - wait: 9
+  - c2: watch-stop
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 128
+      - abs(c2.view(c1).y - server.actor(c1).y) < 128
+      - c2.watched(c1).maxStep >= 600
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]

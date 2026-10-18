@@ -3,7 +3,9 @@ doubles that poll /lab/step and answer, the server state is FakeState behind
 the real RpcStateClient, Proxmox and the system are recording fakes."""
 
 import base64
+import calendar
 import json
+import re
 import tempfile
 import time
 import unittest
@@ -72,6 +74,7 @@ class Doubles:
         self.profile = {"c1": 1, "c2": 2}
         self.seen: list[tuple[str, str, dict]] = []
         self.stale_dumps = 0  # dump-states that report the client far from where the server's record says
+        self.menus: dict[str, list[str]] = {}  # the menus a client's dump-state reports open
 
     def turn(self):
         for name in self.names:
@@ -99,6 +102,8 @@ class Doubles:
                 data = {"pos": [me.x, me.y, me.z], "worldOrCell": 60,
                         "self": {"x": me.x, "y": me.y, "z": me.z, "cell": me.cell},
                         "sees": {o: {"x": a.x, "y": a.y, "z": a.z} for pid, a in self.state.actors.items() for o, p in self.profile.items() if p == pid and o != name}}
+                if name in self.menus:
+                    data["menus"] = list(self.menus[name])
             elif step["action"] == "request-screenshot":
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
             elif step["action"] == "av-table":
@@ -505,31 +510,39 @@ class ArtifactFailures(RunTests):
 class ClientLogs(RunTests):
     def test_managed_client_yields_the_platform_log_and_the_driver_log(self):
         """c1.log is Skyrim Platform's log; c1-driver.log is lab-driver's own
-        (writeLogs under the game directory named in game-dir.txt); c1-skse64.log is
-        SKSE's, which prints the game's image base (the load freeze's hypothesis,
-        2026-10-17). All three are copied into the lab directory first and read from
-        there."""
+        (writeLogs under the game directory named in game-dir.txt); every other log
+        in the SKSE folder comes as c1-<name>: skse64.log, which prints the game's
+        image base (the load freeze's hypothesis, 2026-10-17), and each SKSE plugin's
+        own (TMS_AIPathingFreezeFix.log, the freeze fix layer's evidence). All are
+        copied into the lab directory first and read from there."""
         from labapi.guests import Guest
 
         tables = self.services.tables
         tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
+        pve.skse_logs = ["skse64.log", "TMS_AIPathingFreezeFix.log"]
         pve.files[r"C:\sky-lab\c1.log"] = "platform log\n"
         pve.files[r"C:\sky-lab\c1-driver.log"] = "2026-10-01T00:00:00Z loaded\n"
         pve.files[r"C:\sky-lab\c1-skse64.log"] = "imagebase = 00007FF7AB420000\n"
+        pve.files[r"C:\sky-lab\c1-TMS_AIPathingFreezeFix.log"] = "patched 1 call\n"
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn("c1.log", body["artifacts"])
         self.assertIn("c1-driver.log", body["artifacts"])
         self.assertIn("c1-skse64.log", body["artifacts"])
+        self.assertIn("c1-TMS_AIPathingFreezeFix.log", body["artifacts"])
         run_dir = self.tmp / "results" / run_id
         self.assertEqual((run_dir / "c1-driver.log").read_text(), "2026-10-01T00:00:00Z loaded\n")
         self.assertEqual((run_dir / "c1-skse64.log").read_text(), "imagebase = 00007FF7AB420000\n")
+        self.assertEqual((run_dir / "c1-TMS_AIPathingFreezeFix.log").read_text(), "patched 1 call\n")
         copies = [c for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
         self.assertEqual(len(copies), 3, pve.calls)
         self.assertIn("game-dir.txt", " ".join(copies[1][2]))
         self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
-        self.assertIn("skse64.log", " ".join(copies[2][2]))
+        # one listing of the folder skyrim-platform.log is in, itself left out (it is c1.log)
+        listing = " ".join(copies[2][2])
+        self.assertIn(r"'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE' -Filter '*.log'", listing)
+        self.assertIn("-ne 'skyrim-platform.log'", listing)
 
     def test_after_a_quiet_spell_the_clients_logs_are_kept_before_the_rollback(self):
         """A playtest's Skyrim Platform log is on the clone until the next run
@@ -595,6 +608,7 @@ class HangEvidence(RunTests):
         pve = self.services.control._b
         pve.files[r"C:\sky-lab\c1-skse64.log"] = "SKSE64 runtime: initialize\n"
         scripts = []
+        checks = []
         plain_exec = pve.exec
 
         def exec_(guest, command, timeout):
@@ -602,6 +616,9 @@ class HangEvidence(RunTests):
                 return plain_exec(guest, command, timeout)
             pve.calls.append(("exec", guest.vmid, tuple(command)))
             script = base64.b64decode(command[command.index("-EncodedCommand") + 1]).decode("utf-16-le")
+            if "MiniDumpWriteDump" not in script:
+                checks.append(script)  # the run's end reads the seat's game and crash dumps too
+                return ExecResult(0, '{"games": [], "dumps": [], "curl": -1}\r\n', "")
             scripts.append(script)
             # the seat's own upload, as curl.exe makes it: into the run named in the URL
             run = re.search(r"/clients/c1/hang-dump/([^']+)'", script).group(1)
@@ -621,10 +638,11 @@ class HangEvidence(RunTests):
         self.assertIn(f"'http://10.10.70.10/lab/clients/c1/hang-dump/{run_id}'", scripts[0])
         self.assertIn("0x21826", scripts[0])  # full memory, handles, unloaded modules, memory and thread info
         self.assertIn("C:\\sky-lab\\hang", scripts[0])
-        # the skse log beside skyrim-platform.log, copied before it is read
-        copy = next(c for c in pve.calls if c[0] == "exec" and "c1-skse64.log" in " ".join(c[2]))
-        self.assertIn("skse64.log", " ".join(copy[2]))
-        self.assertIn("skyrim-platform.log", " ".join(copy[2]))
+        self.assertEqual(len(checks), 1)
+        # the SKSE folder's logs, the one skyrim-platform.log is in, copied before they are read
+        listing = next(c for c in pve.calls if c[0] == "exec" and "-Filter '*.log'" in " ".join(c[2]))
+        self.assertIn("SKSE", " ".join(listing[2]))
+        self.assertIn("skyrim-platform.log", " ".join(listing[2]))
 
     def test_the_dump_goes_only_into_the_active_run(self):
         r = self.client.post("/lab/run", files={"scenario": ("s.yaml", self.HUNG.encode(), "text/yaml")})
@@ -672,6 +690,129 @@ class HangEvidence(RunTests):
             {"step": 18, "kind": "lab", "client": "c7", "error": "E_RUN_RELAUNCH: c7 (sky-c7): the guest agent did not answer"},
         ]
         self.assertEqual(self.services.runner._hung_clients(SimpleNamespace(failures=failures)), ["c2", "c1", "c5", "c6"])
+
+
+@needs_deps
+class CrashEvidence(RunTests):
+    """A seat's game at a run's end: a dump Windows Error Reporting wrote for SkyrimSE.exe since
+    the run began (crash-dumps.ps1's LocalDumps) comes up as <client>-SkyrimSE-crash.dmp, and the
+    game process is compared with the one the version check found, since launch.ps1 starts the
+    game again when it dies within a minute and a run then goes on against the new one. Either
+    fault turns a would-be green into error, which its run set reruns; a red stays red."""
+
+    WAS = "4242@2026-10-17T22:00:00.0000000Z"
+    RUN = "id: t2-crash\nclients: [c1]\nserver: {snapshot: clean}\ntimeout_s: 30\nsteps:\n  - c1: connect\n  - c1: dump-state\n"
+
+    def _seat(self, answer, upload=False):
+        import re
+        from labapi.guests import Guest
+        from labapi.proxmox import ExecResult
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.game = ExecResult(0, f"{self.WAS}\r\nC:\\Games\\Skyrim Special Edition 1.6.1170\\SkyrimSE.exe\r\n1.6.1170.0\r\n", "")
+        pve.files[r"C:\sky-lab\c1-launch.log"] = "12:00:00.000 running pid 4242\n"
+        pve.files[r"C:\sky-lab\c1-skse64.log"] = "imagebase = 00007FF7AB420000\n"
+        scripts = []
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "-EncodedCommand" not in command:
+                return plain_exec(guest, command, timeout)
+            pve.calls.append(("exec", guest.vmid, tuple(command)))
+            script = base64.b64decode(command[command.index("-EncodedCommand") + 1]).decode("utf-16-le")
+            scripts.append(script)
+            if upload:  # the seat's own upload into the run named in the URL, as curl.exe makes it
+                run = re.search(r"/clients/c1/hang-dump/([^?']+)\?name=SkyrimSE-crash\.dmp'", script).group(1)
+                (self.tmp / "results" / run / "c1-SkyrimSE-crash.dmp").write_bytes(b"MDMP crash")
+            return ExecResult(0, json.dumps(answer) + "\r\n", "")
+
+        pve.exec = exec_
+        return scripts
+
+    def test_a_crash_since_the_run_began_is_kept_and_a_green_run_is_error(self):
+        dump = {"name": "SkyrimSE.exe.4242.dmp", "bytes": 80537918, "utc": "2026-10-17T22:01:00.0000000Z"}
+        scripts = self._seat({"games": [], "dumps": [dump], "curl": 0}, upload=True)
+        run_id, body = self._run(self.RUN)
+        self.assertEqual(body["verdict"], "error", body)
+        errors = [f["error"] for f in body["failures"]]
+        self.assertTrue(errors[0].startswith("E_RUN_CRASH: c1's game crashed"), errors)
+        self.assertIn("SkyrimSE.exe.4242.dmp (80537918 bytes", errors[0])
+        self.assertIn("kept as c1-SkyrimSE-crash.dmp", errors[0])
+        self.assertEqual(errors[1], f"E_RUN_GAME_LOST: c1's game ({self.WAS}) was not running at the run's end")
+        self.assertTrue(all(f["kind"] == "lab" and f["client"] == "c1" for f in body["failures"]), body["failures"])
+        for name in ("c1-SkyrimSE-crash.dmp", "c1-launch.log", "c1-skse64.log"):
+            self.assertIn(name, body["artifacts"])
+        self.assertEqual(body["games"], {"c1": self.WAS})
+        # the seat reads LocalDumps' folder for dumps written since a few minutes before the run began
+        self.assertEqual(len(scripts), 1)
+        self.assertIn("-LiteralPath 'C:\\sky-lab\\dumps' -Filter 'SkyrimSE.exe.*.dmp'", scripts[0])
+        self.assertIn(f"'http://10.10.70.10/lab/clients/c1/hang-dump/{run_id}?name=SkyrimSE-crash.dmp'", scripts[0])
+        since = int(re.search(r"FromUnixTimeSeconds\((\d+)\)", scripts[0]).group(1))
+        started = calendar.timegm(time.strptime(body["started"], "%Y-%m-%dT%H:%M:%SZ"))
+        self.assertEqual(since, started - 300)
+
+    def test_a_game_replaced_mid_run_is_a_lab_fault(self):
+        now = "5151@2026-10-17T22:00:40.0000000Z"
+        self._seat({"games": [now], "dumps": [], "curl": -1})
+        run_id, body = self._run(self.RUN)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_GAME_REPLACED: c1's game was {self.WAS} at the version check and {now} at the run's end"])
+        self.assertIn("c1-launch.log", body["artifacts"])
+
+    def test_the_same_game_and_no_dump_leave_the_run_green(self):
+        self._seat({"games": [self.WAS], "dumps": [], "curl": -1})
+        run_id, body = self._run(self.RUN)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(body["failures"], [])
+        self.assertNotIn("c1-launch.log", body["artifacts"])
+
+    def test_a_red_run_stays_red_and_gains_the_crash(self):
+        dump = {"name": "SkyrimSE.exe.4242.dmp", "bytes": 10, "utc": "2026-10-17T22:01:00.0000000Z"}
+        self._seat({"games": [self.WAS], "dumps": [dump], "curl": 7})
+        run_id, body = self._run(RED.replace("id: t2-red", "id: t2-red-crash"))
+        self.assertEqual(body["verdict"], "red", body)
+        kinds = [f["kind"] for f in body["failures"]]
+        self.assertEqual(kinds, ["assertion", "lab"], body["failures"])
+        self.assertIn("not kept (curl 7)", body["failures"][1]["error"])
+
+
+@needs_deps
+class PausedGames(RunTests):
+    """A seat whose game sits under a message box (MessageBoxMenu) is paused: an assert about it
+    can hold while measuring nothing (r-melee-power-a went green twice under Survival Mode's first
+    load prompt, 2026-10-14). The HUD's own menus are no pause."""
+
+    TWO = "id: t2-paused\nclients: [c1, c2]\nserver: {snapshot: clean}\ntimeout_s: 30\nsteps:\n  - c1: connect\n  - c2: connect\n"
+
+    def test_an_assert_over_a_paused_seat_fails(self):
+        self.doubles.menus["c1"] = ["Cursor Menu", "HUD Menu", "MessageBoxMenu"]
+        run_id, body = self._run(self.TWO + "  - assert:\n      - c1.sees(c2) == true\n")
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual(len(body["failures"]), 1, body["failures"])
+        f = body["failures"][0]
+        self.assertEqual((f["kind"], f["client"], f["step"]), ("paused", "c1", 2))
+        self.assertEqual(f["error"], "E_RUN_PAUSED: c1's game is paused under a message box (menus: Cursor Menu, HUD Menu, MessageBoxMenu), so it measured nothing")
+        self.assertEqual(body["steps"][2]["note"], f["error"])
+
+    def test_an_until_over_a_paused_seat_fails_at_its_first_poll(self):
+        self.doubles.menus["c2"] = ["HUD Menu", "MessageBoxMenu"]
+        run_id, body = self._run(self.TWO + "  - until: {within: 30, every: 0.1, expect: [\"c2.sees(c1) == false\"]}\n")
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual([(f["kind"], f["client"]) for f in body["failures"]], [("paused", "c2")])
+        self.assertLess(body["steps"][2]["seconds"], 10)
+
+    def test_a_dump_state_that_ends_paused_turns_a_green_run_red(self):
+        self.doubles.menus["c1"] = ["HUD Menu", "MessageBoxMenu"]
+        run_id, body = self._run(self.TWO + "  - c1: dump-state\n  - assert:\n      - server.actor(c1).x == 0\n")
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual([(f["kind"], f["client"], f["step"]) for f in body["failures"]], [("paused", "c1", "end")])
+
+    def test_the_hud_and_a_fade_are_no_pause(self):
+        self.doubles.menus["c1"] = ["Fader Menu", "HUD Menu"]
+        run_id, body = self._run(self.TWO + "  - c1: dump-state\n  - assert:\n      - c1.sees(c2) == true\n")
+        self.assertEqual(body["verdict"], "green", body)
 
 
 @needs_deps
