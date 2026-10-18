@@ -31,6 +31,17 @@ placed objects). The class probes' readings fill the trace column.
 | the proc's non-H/M/S effects (a slow, an absorb's gain) | record | later: the census's cross-cutting rows (absorb, the rider twice) |
 | a hazard's ticks (SpawnHazard) | record | later: M4, placed objects |
 
+### Sequences and combinations (ADR-033)
+
+| sequence or combination | probe or scenario | result |
+| --- | --- | --- |
+| a cloak's proc reported at the engine's rhythm (about 5 a second for a concentration spell) | b-second-hand, x-class-self | pending: counted by time, never throttled (T0 a_cloaks_concentration_spell_counts_the_time_it_held_each_target) |
+| the same cloak cast again while the first lingers | x-class-self (Sotha's Maelstrom twice) | pending: the newest cast claims |
+| the caster walks off with its cloak | b-second-hand (c2 steps out) | pending: judged from where the caster stands now (T0 a_proc_is_judged_from_where_the_caster_stands_now) |
+| a concentration cloak released (Blood Boil) | x-class-self | pending: its procs stop with its stream (T0 a_concentration_cloak_lingers_while_its_stream_is_open) |
+| both seats cloaked beside each other | later: a two-cloak probe | |
+| the caster reconnects mid-cloak | later: forget() clears its casts on leave | |
+
 ## Authority
 
 Rung: R1 for the proc's hit, R0 for its number.
@@ -136,9 +147,11 @@ probe reads the cadence); OnHit's own budget.
 - T2: difftest session second-hand: c1 casts a cloak, then reports its
   proc's hit on c2: the wire stack claims and damages, the legacy stack
   drops it (declared).
-- T3 scenario id: b-second-hand: c1's cloak near c2, c2's health falling on
-  the server by the proc's number per tick; a script proc (Creeping Cold)
-  the same.
+- T3 scenario id: b-second-hand (scratchpad draft, 2026-10-17): vanilla
+  Flame Cloak beside c2 (the cloak deals nothing itself, so every point c2
+  loses is FlameCloakDmg's), then Sotha's Maelstrom; c2's health falls on
+  the server and c2's game agrees. A script proc (Creeping Cold) is read in
+  x-class-streams.
 - Assertions that would fail if the verb silently regressed: c2's health on
   the server after the cloak's seconds.
 
@@ -155,9 +168,11 @@ probe reads the cadence); OnHit's own budget.
 
 ## Status
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
+- [x] doc complete, inventory listed with a disposition per row, rung declared
+- [x] engine surface cited or delegated
+- [ ] server logic + T0 (fork m2-second-hand ca641d55: wire-rules
+      claim_reached with 8 tests, the bridge's, SecondHandTest on Skyrim.esm's
+      Flame Cloak; GitLab pipeline pending)
 - [ ] message + validator (same commit) (none: OnHit unchanged)
 - [ ] native hook + T1 (none)
 - [ ] TS handler (none)
