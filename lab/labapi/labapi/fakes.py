@@ -249,7 +249,8 @@ class FakeState:
             if kind == "give":
                 base = int(payload["baseId"])
                 actor.inventory[base] = actor.inventory.get(base, 0) + int(payload.get("count", 1))
-                return {"ok": True}
+                # the gamemode's answer: the count the player now carries
+                return {"ok": True, "baseId": base, "count": actor.inventory[base]}
             if kind == "set-appearance":
                 # presets are files next to the real gamemode; the fake knows one
                 if payload.get("preset") != "lab-nord-1":

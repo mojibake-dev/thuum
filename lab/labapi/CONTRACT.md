@@ -125,7 +125,7 @@ them by name.
 {"payload": {"kind": "set-percentages", "profileId": 1, "health": 0.5, "magicka": 0.25, "stamina": 0.75}}
 {"payload": {"kind": "kill", "profileId": 1}}
 {"payload": {"kind": "respawn", "profileId": 1}}
-{"payload": {"kind": "papyrus-av", "profileId": 1, "how": "set", "name": "Archery", "value": 45}}
+{"payload": {"kind": "papyrus-av", "profileId": 1, "how": "set", "name": "Marksman", "value": 45}}
 {"payload": {"kind": "staff-rank", "profileId": 2, "rank": 0}}
 {"payload": {"kind": "learn-spell", "profileId": 1, "spellId": 77776}}
 ```
@@ -151,7 +151,10 @@ to its spawn point. `papyrus-av` runs an actor value native on the player's
 actor through the server's own Papyrus VM (`mp.callPapyrusFunction`, the
 path a script takes; docs/verbs/actor-values.md): `how` is get, base or max
 (answers `value`) or set, mod or force (answers the `base` and `current`
-the server then reads back). `staff-rank` sets the player's staff rank, the
+the server then reads back). A set whose `base` does not read back as the
+value is refused (`ok: false`): a name the server does not index, or a value
+its rule would not take. The archery skill is `Marksman` to the server, and
+`Archery` once answered ok and changed nothing (20261018-164202). `staff-rank` sets the player's staff rank, the
 server's property `staffRank` (0 player, 1 moderator, 2 admin, 3 owner;
 docs/verbs/console-commands.md), which the server's console table reads
 when the server's `enableConsoleCommandsForAll` is off. `learn-spell` has

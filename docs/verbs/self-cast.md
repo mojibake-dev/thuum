@@ -65,7 +65,8 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   wait on the figure).
 
 - How an act ends concealment (the re-analyst on sky-re, 2026-10-16,
-  1.6.1170, ids by lab/addr.py; HYPOTHESIS until x-invis-recast): the engine
+  1.6.1170, ids by lab/addr.py; the callers' list HYPOTHESIS, the recast
+  order measured by x-invis-recast 20261016-135452, below): the engine
   ends an actor's Invisibility (archetype 11) and Etherealize (41) through
   Actor::DispelAlteredStates 38819 (CommonLibSSE-NG src/RE/A/Actor.cpp:
   209-214), which dispels every live effect of the archetype (34510, through
@@ -100,6 +101,21 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   engine's callers it had missed: a player who shot or activated while
   invisible stayed invisible on the server and in every other game while
   visible in its own.
+- Measured: x-invis-recast 20261016-135452 on 0636f14e, the figure's
+  av:Invisibility true at 6914 ms and never false again through two
+  recasts; b-invis-recast green at every gate since (eleven runs to
+  20261018-180744, each with its three releases about 7 and 12 s apart).
+  The train-26 gate's run 20261018-204244 read one drop, at 37195 ms, with
+  no cast near it: the next cast came 94 s later, because c2's screenshot
+  step before it (step 18) waited the full 120 s on sky-c2's guest agent
+  ("PID lld does not exist", the exec's pid lost on the agent's side), so
+  cast one and cast two were 124.5 s apart instead of about 7 and the
+  spell's own 30 s ran out in between (Invisibility 0x27EB6 lasts 30 s).
+  The run's real recast pair, cast two to cast three 11.9 s apart, dropped
+  nothing, as in every green run. The lab's pacing, not the build; the
+  scenario's claim holds only while its casts stay inside the spell's
+  duration, which its steps keep when no step stalls. A gate.yaml watch
+  item when its ADR-027 reruns pass.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 

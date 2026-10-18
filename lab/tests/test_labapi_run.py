@@ -278,6 +278,9 @@ artifacts: [trace]
         self.assertIn('"distance": 300.0', move["note"], move)
         teleport = next(s for s in result["steps"] if s["action"] == "teleport")
         self.assertIn("landed after 1 attempt", teleport["note"], teleport)
+        # a server command's answer is its step's note (a no-op set shows in the run's own result)
+        given = next(s for s in result["steps"] if s["action"] == "give")
+        self.assertIn('"count": 1', given["note"], given)
         self.assertNotIn("pos", next(s for s in result["steps"] if s["kind"] == "wait"))
         # the fake state saw the two server verbs and the RPC contract's shapes
         kinds = [(n, p["kind"]) for n, p in self.state.rpc_log]
@@ -850,6 +853,64 @@ class FridaTraces(RunTests):
         self.assertLess(reads[0], rollback)
         self.assertEqual(runner.frida_started, [])
         self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
+
+SHOT = """
+id: shot
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: screenshot
+"""
+
+
+@needs_deps
+class ScreenshotSteps(RunTests):
+    def _managed_c1(self, raise_with):
+        """c1 managed; its screenshot helper writes the shot's .b64, then the exec raises `raise_with`."""
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        real = pve.exec
+
+        def exec_(guest, command, timeout):
+            m = re.search(r"'([^']+\.png)\.b64'", " ".join(command))
+            if not m:
+                return real(guest, command, timeout)
+            pve.files[m.group(1) + ".b64"] = base64.b64encode(b"\x89PNG shot").decode()
+            raise raise_with
+
+        pve.exec = exec_
+
+    def _shot(self, run_id, body):
+        shot = next(s for s in body["steps"] if s["action"] == "screenshot")
+        pngs = sorted((self.tmp / "results" / run_id / "screenshots").glob("*.png"))
+        return shot, pngs
+
+    def test_a_helper_whose_exec_answer_was_lost_is_read_from_its_file(self):
+        """The agent reaps a pid once exec-status reports its exit, so an answer lost on the way back reads
+        "PID ... does not exist" (sky-c2, run 20261018-204244): the helper has ended and its file holds the shot."""
+        from labapi.proxmox import ProxmoxError
+
+        self._managed_c1(ProxmoxError("E_PVE_EXEC_LOST: pid 7 on fake-c1: the guest agent no longer knows it"))
+        run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        shot, pngs = self._shot(run_id, body)
+        self.assertIn("read from its file", shot["note"], shot)
+        self.assertEqual([p.read_bytes() for p in pngs], [b"\x89PNG shot"])
+
+    def test_any_other_exec_failure_still_skips_the_shot(self):
+        from labapi.proxmox import ProxmoxError
+
+        self._managed_c1(ProxmoxError("E_PVE_EXEC: pid 7 on fake-c1 did not exit in 120s"))
+        run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        shot, pngs = self._shot(run_id, body)
+        self.assertIn("screenshot skipped: E_PVE_EXEC", shot["note"], shot)
+        self.assertEqual(pngs, [])
+
 
 RELAUNCH = """
 id: relaunch
