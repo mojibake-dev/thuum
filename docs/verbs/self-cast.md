@@ -358,9 +358,11 @@ the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
   RunSelfSpell (ActionListener.cpp), which applies every effect of a
   fire-and-forget Self spell to its caster, the area's hostile ones
   included, hurts Shock Nova's, Frost Nova's and Life's Finale's casters on
-  the server where the engine does not. The fix: RunSelfSpell skips a
-  detrimental effect with an area (the burst's hostile part; the server's
-  claim of the burst's targets is unchanged). In x-class-self 20261018-011427
+  the server where the engine does not. The fix, fork m2-self-burst
+  d0befa07 (in train m2-train-24): RunSelfSpell skips a detrimental effect
+  with an area (MpActor::IsHostileArea, the burst's hostile part; the
+  server's claim of the burst's targets is unchanged), with a SelfCastTest
+  case on Fireball's area effect against Oakflesh's. In x-class-self 20261018-011427
   the server's Shock Nova line ("casts c00186d on itself") came with the
   caster's health at 1.0 in both games, which only says the lab's casters
   have more health than the burst takes.
