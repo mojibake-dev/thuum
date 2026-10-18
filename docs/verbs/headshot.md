@@ -225,11 +225,13 @@ Doc written 2026-10-10, before any code.
 
 - [x] doc complete, rung declared
 - [x] engine surface cited or delegated (CIF's source, 2026-10-17)
-- [x] server logic + T0 (fork m2-headshot, 2026-10-17 evening: wire-rules
-      headshots and its five tests; PartOne's facts from the records;
-      OnHit's headshot branch; HeadshotTest on Skyrim.esm with Firebolt
-      standing in for the mod's spell; the `headshot` server setting:
-      spells, races, minArchery)
+- [x] server logic + T0 (fork m2-headshot 8b6d04fe, 2026-10-17 evening:
+      wire-rules headshots and its five tests; PartOne's facts from the
+      records; OnHit's headshot branch; HeadshotTest on Skyrim.esm with
+      Firebolt standing in for the mod's spell; GitLab pipeline 1844 green,
+      the four cases with the facts logged at each claim; the `headshot`
+      server setting on thuum branch headshots 84905c18: spells, races,
+      minArchery)
 - [ ] message + validator (same commit): candidate 1, OnHit as it is with
       the mod's spell as its source, built; HYPOTHESIS until x-headshot-probe
       shows the shooter's game raises that hit (x-class-target 20261018-012152
