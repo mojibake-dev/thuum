@@ -1198,3 +1198,57 @@ measured change, not a rewrite: the row's probe first. Writing into a slot
 SKSE owns is a known failure now, not a mystery: a swap that never fires
 is checked against the slot's owner (slot-probe.js) before anything else.
 
+
+## ADR-037: A figure's explosion applies no number to a player (ADR-028 extended)
+
+Status: PROPOSED 2026-10-17 (the class pass's target-location spells). Eli
+decides (docs/private/decisions-m2-apocalypse.md, question 5).
+
+Context. ADR-028 made the server the only source of a player's Health,
+Magicka and Stamina changes from another player's magic: in each game, a
+figure's spell-type effects that modify those values are refused at
+AddTarget (Skyrim Platform Hooks.cpp), and the server's number arrives
+instead. The class pass makes figures place target-location explosions in
+other games (docs/research/apocalypse/target-location.md, fork
+m2-area-effect): the explosion appears where the caster aimed, owned by
+the figure. The re-analyst's read of the explosion's own pass (43847,
+43849 on 1.6.1170) found two number paths that bypass the AddTarget
+refusal: the EXPL record's DATA damage, dealt through Actor::DamageActor
+(37335) with no AddTarget at all, and the EXPL's enchantment, cast by the
+owner's instant caster as an EnchantmentItem, whose spell type the refusal
+does not list. So a figure-owned explosion would hurt the observer's own
+player locally, beside the server's number for the same cast.
+
+Decision (proposed). ADR-028's rule covers an explosion as it covers a
+spell: in a game, an explosion owned by a figure applies no Health,
+Magicka or Stamina change to that game's player. Two gates, both in Skyrim
+Platform, both filtered in native (rule 9):
+1. The AddTarget refusal takes an EnchantmentItem whose caster is a figure
+   as it takes a spell (the refusal's IsCast widened to kEnchantment and
+   kStaffEnchantment when the caster is not the player).
+2. The explosion pass's damage is refused when the explosion's actorOwner
+   is a figure and the target is the player: a hook on Actor::DamageActor
+   (37335, the function Skyrim Together hooks for the same reason,
+   docs/TE-MAP.md) that drops a damage whose attacker is a figure's
+   explosion, or on 43849 before its damage call. The hook point is the
+   lab's to choose (the first is one function, already mapped).
+Everything else the explosion does to the player stays native: knockdown,
+impulse, image space, camera shake, sounds, the placed object. The
+server's number for the cast arrives as today (the spell's effects through
+the claimed hit; for an explosion-only spell the server applies the
+spell's area effects to the targets the caster's game reports, as a Self
+burst's).
+
+Consequences. The observer feels an Apocalypse explosion (knockdown and
+look) and loses exactly the server's number, once. Without this, two
+numbers land. The EXPL records that carry damage or an enchantment among
+the 27 target-location spells are unread; the gates cost nothing where
+none does. A figure's explosion that should hurt its own caster (none in
+the census) is unaffected: the caster is not the player in that game.
+
+Alternatives. (a) Never place a figure's explosion: the observer sees
+nothing, as today. (b) Place it with no owner (a NonActorMagicCaster): the
+enchantment path then has no actor caster and the refusal cannot tell it
+from a trap's; the damage path still runs. (c) Strip the EXPL's damage and
+enchantment from the records on the clients: a mod edit per spell, against
+the law.
