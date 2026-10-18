@@ -247,7 +247,10 @@ Doc written 2026-10-10, before any code.
 - [ ] native hook + T1
 - [ ] TS handler
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T3 scenario green: b-headshot 20261018-192338 on train-26's stage (the
+      kill on the server from the claimed bow hit, a helmet and a low skill
+      refusing it); HYPOTHESIS tags left: the first candidate confirmed,
+      the figure-cast caveat moot for this mod
 - [ ] ledger and suppression registry updated
 
 ## The layer's first probe (x-headshot-probe 20261018-164202, headshots layer on parity b352b82d)
@@ -297,3 +300,20 @@ from the victim's caster the way it launches the blood spray from the
 impact point, the aggressor in the shooter's game is the figure and
 hitService never sends it; the report would have to come from the figure's
 apply or from the limb instead.
+
+MEASURED (b-headshot 20261018-192338 on train-26 d5b05e89 over the merged
+layer, the helmet off and Marksman 60 read back): the whole chain. The
+bow shot (OnPlayerBowShot 19:25:32.761, power 0.84), its hit counted once
+(OnWeaponHit .889, 11.15 damage), then the mod's kill spell reported by
+c1's game as a hit of fe003801 (Headshot Kills.esp at the clients' load
+index FE003) and claimed on the server against that bow hit:
+"PartOne::ClaimHeadshot - ff000000 on ff000001: head bare true (worn
+12e46/8 12e49/4 12e4b/80 13790), race 13747:Skyrim.esm, archery 60" at
+.916 and "OnHit - headshot: ff000000 kills ff000001 with fe003801 on a
+claimed bow hit" at .917; c2 dead on the server. The helmeted shot after
+it and the Marksman 40 shot landed the arrow's damage alone. So the
+message path is the hit of the kill spell (the contract's first candidate),
+Core Impact Framework fires its rule in the shooter's game against a
+bare-headed figure, and every red before this one was the lab's: the
+character's iron helmet, and an actor value set by a name the server does
+not know.
