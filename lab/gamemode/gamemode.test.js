@@ -173,6 +173,28 @@ test("labCommand papyrus-av runs the server's own actor value natives", () => {
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 9, how: "set", name: "Archery", value: 1 }), { found: false, profileId: 9 });
 });
 
+test("labCommand papyrus-av refuses a set the server's base does not read back", () => {
+  global.mp = fakeMp();
+  // the server indexes Marksman, not Archery: its natives take an unknown name and change nothing
+  const bases = { Marksman: 15 };
+  mp.getDescFromId = (id) => id.toString(16);
+  mp.callPapyrusFunction = (callType, className, fn, self, args) => {
+    if (!(args[0] in bases)) return 0;
+    if (fn === "SetActorValue") bases[args[0]] = args[1];
+    return bases[args[0]];
+  };
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const no = mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "set", name: "Archery", value: 60 });
+  assert.strictEqual(no.ok, false);
+  assert.strictEqual(no.base, 0);
+  assert.match(no.error, /Archery 60: the server's base reads 0/);
+  const yes = mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "set", name: "Marksman", value: 60 });
+  assert.deepStrictEqual(yes, { ok: true, actorId: 0xff000001, how: "set", name: "Marksman", value: 60, base: 60, current: 60 });
+  // a mod or a force changes no base (the game's semantics), so neither is checked
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "papyrus-av", profileId: 1, how: "mod", name: "Archery", value: 5 }).ok, true);
+});
+
 test("labCommand staff-rank sets the server's staffRank property", () => {
   global.mp = fakeMp();
   delete require.cache[require.resolve("./gamemode.js")];

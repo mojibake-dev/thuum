@@ -675,8 +675,11 @@ class Runner:
             return await self._teleport(rec, index, step)
         if step.action in SERVER_ACTIONS:
             try:
-                await asyncio.to_thread(self.state.command, step.client, step.action, step.args)
-                return True, ""
+                body = await asyncio.to_thread(self.state.command, step.client, step.action, step.args)
+                # the server's answer is the step's note (papyrus-av's base and current, learn-spell's learned,
+                # give's count): a set the server took as a no-op shows in the run's own result
+                # (x-headshot-probe's "Archery" step answered ok and changed nothing, 20261018-164202)
+                return True, self._answer(rec, index, step, body)
             except StateError as e:
                 rec.failures.append({"step": index, "kind": "server-command", "error": str(e)})
                 rec.verdict = "red"
@@ -1031,13 +1034,20 @@ class Runner:
         shots.mkdir(exist_ok=True)
         target = shots / f"{index:03d}-{client}.png"
         g = self.tables.guest_for_client(client)
+        lost = ""
         try:
             if g is not None and g.managed:
                 remote = f"{self.s.client_lab_dir}\\shots\\{index:03d}.png"
                 cmd = ["powershell", "-NoProfile", "-Command", self.s.screenshot_cmd_template.format(lab_dir=self.s.client_lab_dir, out=remote)]
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                if res.exitcode != 0:
-                    return True, f"screenshot helper exited {res.exitcode}: {res.err.strip()[:200]}"
+                try:
+                    res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                    if res.exitcode != 0:
+                        return True, f"screenshot helper exited {res.exitcode}: {res.err.strip()[:200]}"
+                except ProxmoxError as e:
+                    # a helper whose pid the agent lost has ended: its file says whether it wrote the shot
+                    if "E_PVE_EXEC_LOST" not in str(e):
+                        raise
+                    lost = " (the helper's exec answer was lost; read from its file)"
                 b64 = await asyncio.to_thread(self.control.file_read, g, remote + ".b64")
                 target.write_bytes(base64.b64decode(b64))
             else:
@@ -1046,7 +1056,7 @@ class Runner:
                 if not b64:
                     return True, f"no screenshot from {client}: {qs.result.get('error', 'no png_b64 in result')}"
                 target.write_bytes(base64.b64decode(b64))
-            return True, target.name
+            return True, target.name + lost
         except (ProxmoxError, ValueError) as e:
             return True, f"screenshot skipped: {e}"
 

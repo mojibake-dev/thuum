@@ -15,6 +15,7 @@ from typing import Any, Protocol
 from .guests import Guest
 
 FILE_READ_MAX = 16 * 1024 * 1024  # the guest-agent file-read cap
+FILE_READ_PAUSES = (2.0, 5.0)  # before a file-read's second and third tries, after a guest agent's "got timeout"
 
 # Self-service snapshots and promotes of the lab clients (thuum-mundus's
 # recipe and guardrails, 2026-10-05, mirroring `sky-lab client baseline` and
@@ -114,7 +115,18 @@ class GuestControl:
 
     def file_read(self, guest: Guest, path: str) -> str:
         self._managed(guest, "read a file from")
-        content = self._call("E_PVE_FILE", guest, self._b.file_read, guest, path)
+        for pause in (*FILE_READ_PAUSES, None):
+            try:
+                content = self._call("E_PVE_FILE", guest, self._b.file_read, guest, path)
+                break
+            except ProxmoxError as e:
+                # A busy guest agent answers a read's open, read or close with "got timeout" now and then
+                # (guest-file-read on 711, guest-file-close on 712, 2026-10-17: train-23's smoke lost
+                # c2-skse64.log to one): asked again; any other refusal is the answer
+                if pause is None or "got timeout" not in str(e):
+                    raise
+                log.info("file-read %s on %s: %s; again in %.0f s", path, guest.name, str(e)[-60:], pause)
+                time.sleep(pause)
         if len(content.encode("utf-8", errors="replace")) > FILE_READ_MAX:
             raise ProxmoxError(f"E_PVE_FILE_TOO_BIG: {path} on {guest.name} exceeds the 16 MiB guest-agent cap")
         return content
@@ -312,6 +324,13 @@ class ProxmoxerGuests:
             try:
                 st = agent("exec-status").get(pid=pid)
             except Exception as e:  # proxmoxer raises ResourceException and requests errors
+                # The agent reaps a process's record when exec-status reports its exit (QEMU's guest
+                # agent protocol, guest-exec-status), so after an answer lost on its way back the pid
+                # is unknown for good: "PID ... does not exist" on sky-c2 cost run 20261018-204244 the
+                # whole 120 s of a screenshot. The command is over and its answer gone; say so now.
+                if "does not exist" in str(e):
+                    raise ProxmoxError(f"E_PVE_EXEC_LOST: pid {pid} on {guest.name}: the guest agent no longer knows it "
+                                       f"({type(e).__name__}: {str(e)[:160]}); the command ended and its answer is lost") from e
                 # A busy guest agent answers exec-status with "got timeout" now
                 # and then while the command runs on (sky-c1 at a game launch,
                 # sky-c2 at a quiet-down, 2026-10-03): ask again until the deadline.

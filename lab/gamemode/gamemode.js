@@ -220,11 +220,18 @@ command["papyrus-av"] = (payload) => {
   const value = Number(payload.value);
   if (!Number.isFinite(value)) return { ok: false, error: "papyrus-av needs a finite value" };
   call(fn, [name, value]);
-  return {
+  const answer = {
     ok: true, actorId, how: payload.how, name, value,
     base: call("GetBaseActorValue", [name]),
     current: call("GetActorValue", [name]),
   };
+  // The server's SetActorValue sets its base (docs/verbs/actor-values.md), so a set whose base does not read back
+  // is refused, not answered ok: a name the server does not index, or a value it would not take (x-headshot-probe's
+  // "Archery" answered ok and changed nothing, 20261018-164202; the skill is Marksman to the server)
+  if (payload.how === "set" && !(typeof answer.base === "number" && Math.abs(answer.base - value) < 1e-3)) {
+    return { ...answer, ok: false, error: `papyrus-av set ${name} ${value}: the server's base reads ${answer.base} after the set (a name it does not index, or a value it would not take)` };
+  }
+  return answer;
 };
 
 // A player's staff rank (thuum docs/verbs/console-commands.md: 0 player,
