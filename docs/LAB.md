@@ -452,6 +452,13 @@ steps too (`c1: give {...}`) but go to the gamemode's labCommand RPC as
 rung R0: teleport, give, set-appearance, open-race-menu (the server opens
 the client's race menu and takes one race menu result from it),
 set-percentages, kill, respawn.
+A set-percentages that raises a value can fail to stick: in 7 of 11 upward
+sets across x-class-target2's runs (20261018-103809, 105815), it held about
+2 s and then reverted. The seat's next stale ChangeValues report sat below the
+new value and was taken as a fall, and its later report of the set value was
+cropped by CropHealthRegeneration (thuum-magnus). A set downward is safe. Until
+the server lets an owner's set win over reports that predate it (a server fix,
+not a lab-api one), a scenario that raises a value reads it right after the set.
 A teleport's `rot` reaches the client in degrees, and MoveRefrToPosition
 takes radians (CommonLibSSE-NG TESObjectREFR::MoveTo_Impl): `rot: [0, 0,
 180]` once left c1 facing 233.24 degrees, 180 radians (run
