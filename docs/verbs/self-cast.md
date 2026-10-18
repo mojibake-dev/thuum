@@ -351,10 +351,16 @@ the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
   goes two updates after its event (skymp5-client hitService.ts), behind
   any cast this frame or the next sends. Weapon hits and a shout's held
   hits are unchanged.
-- INFERRED from code (ActionListener.cpp RunSelfSpell): the server applies
-  every effect of a fire-and-forget Self spell to its caster, the area's
-  hostile ones included, so Shock Nova, Frost Nova and Life's Finale would
-  hurt their own caster on the server. What the engine itself keeps off a
-  burst's caster is the class pass's engine-alone reference (Shock Nova
-  beside a placed NPC, solo); the server's rule follows it on the same
-  branch.
+- MEASURED (r-shock-nova 20261018-013824, the engine alone, solo): two
+  Shock Novas beside a placed bandit left the caster's health at 1.0 at
+  every dump-state while the bandit took all four of the burst's effects
+  and ragdolled. So the engine spares a Self burst's own caster, and
+  RunSelfSpell (ActionListener.cpp), which applies every effect of a
+  fire-and-forget Self spell to its caster, the area's hostile ones
+  included, hurts Shock Nova's, Frost Nova's and Life's Finale's casters on
+  the server where the engine does not. The fix: RunSelfSpell skips a
+  detrimental effect with an area (the burst's hostile part; the server's
+  claim of the burst's targets is unchanged). In x-class-self 20261018-011427
+  the server's Shock Nova line ("casts c00186d on itself") came with the
+  caster's health at 1.0 in both games, which only says the lab's casters
+  have more health than the burst takes.

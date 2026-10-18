@@ -93,3 +93,15 @@ scratchpad (re34413/).
   explosion pass skips damage and enchantment when its owner is a figure (or
   37335 refuses a figure attacker). Which spells it matters for depends on
   each placer's EXPL record (DATA damage, EITM), unread.
+
+## Measured on parity ef02c565 (x-class-location 20261018-013501)
+
+Thrumming Stone, Lightning Strike and Acceleration Rune cast at the ground
+300 units ahead of c1: in c2's game the figure launched nothing (0 launches
+in its watch) and c2's screenshots after each cast show no explosion, strike
+or rune anywhere, not even misplaced; the server logged no cast and no hit
+for any of the three. So today an observer sees a target-location spell's
+cast animation and nothing else. The fix is the observer's call above, with
+m2-spell-launch's relayed point for the projectile ones (Lightning Strike's
+lobber, the rune).
+
