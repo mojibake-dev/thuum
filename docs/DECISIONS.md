@@ -1201,10 +1201,13 @@ is checked against the slot's owner (slot-probe.js) before anything else.
 
 ## ADR-035: A cell's own NPCs, hosted by one player's game per cell
 
-Status: proposed (2026-10-16 night, for Eli; drafted from the M3 research of
-that night, docs/research/m3/: skymp-hosting.md, tes3mp.md, te-npcs.md,
-re-ai-puppet.md). Amends ADR-012's reserved cell-host family; retires SkyMP's
-actor-level host model for the cells it covers.
+Status: ACCEPTED 2026-10-18 (Eli, docs/private/decisions-m3.md, all three
+boxes: the cell's own NPCs, TES3MP's way; a grace window of about 5 s and
+no takeover by ping; the whole as proposed). Proposed 2026-10-16 night,
+drafted from the M3 research of that night, docs/research/m3/:
+skymp-hosting.md, tes3mp.md, te-npcs.md, re-ai-puppet.md. Amends ADR-012's
+reserved cell-host family; retires SkyMP's actor-level host model for the
+cells it covers.
 
 **Context.** M3 (docs/PLAN.md) hosts the world by cell, TES3MP's way: one
 player's game runs a cell's NPCs under their packages, every other game
@@ -1249,7 +1252,7 @@ already reserves this milestone's messages, defined and validated, with no
 sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
 (wire-schema lib.rs:224-240 and 293-301; docs/WIRE.md:172-175).
 
-**Decision** (proposed).
+**Decision** (accepted 2026-10-18).
 1. A cell's NPCs are its own actors. In a cell the server hosts, a client
    keeps the engine's references from the master files and the server knows
    each by its own form id; the world cleaner stops deleting them, and the
@@ -1258,10 +1261,11 @@ sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
 2. The unit is the cell, an interior or one exterior grid cell. The server
    grants it to the first player whose game attaches it (Skyrim Platform's
    cellAttach and cellFullyLoaded events, ADR-034's event first). When the
-   host leaves the cell or disconnects, the server waits a grace window,
-   then grants it to the remaining visitor with the lowest round trip. A
-   newcomer takes over only by a clear ping margin, if at all (TES3MP's
-   40 ms), so hosts do not churn.
+   host leaves the cell or disconnects, the server waits a grace window
+   of about 5 s (a player stepping out and back keeps the cell), then
+   grants it to the remaining visitor with the lowest round trip. No
+   takeover by ping (TES3MP's 40 ms margin is not taken): a host changes
+   only when it leaves, so hosts never churn. Eli's choice, 2026-10-18.
 3. Every grant carries an epoch, a fencing token (Kleppmann, "How to do
    distributed locking", 2016; Burrows, "The Chubby lock service", OSDI
    2006). Every host message carries it, and the server drops a message
