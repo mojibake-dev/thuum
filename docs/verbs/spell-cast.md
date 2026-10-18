@@ -1111,6 +1111,34 @@ health message. A second red within two sweeps makes it a bug.
   are the two shapes; neither tonight (the T2 declarations name today's
   factors).
 
+- x-class-target2 20261018-191615 on train-26 d5b05e89 (fork m2-cast-target:
+  the sender names the actor under the crosshair for a touch or
+  target-actor cast): the old symptom is gone (no cast applied to the
+  figure itself in c2's game), and Azure Reconstruction at 180 units is
+  counted by the server for the first time (13 OnSpellHit at 0.25 s, 30.2
+  Health computed; c2's own health rose beyond regen by about 15 of it,
+  its game agreeing with the server within 0.4 %). Whether c2's game also
+  cast the heal at its own player cannot be told from the artifacts: its
+  number is a figure's Health effect, which the AddTarget refusal blocks by
+  design, so "cast at 0x14 and refused" and "cast at nobody" look alike;
+  consistent with landing, not demonstrated. Finger of Death and Shadowbond
+  at 300 units named target 0: Game.getCurrentCrosshairRef was null at that
+  distance while the engine's own target-actor pick hit the figure in c1's
+  game (HYPOTHESIS: the crosshair pick's activation reach is shorter than
+  the spells' 1500 and 750); the server still counts their hits, c2's game
+  still shows nothing. Follow-up: name the engine's own picked target (the
+  hand's MagicCaster::desiredTarget read in ProcessEvent, or a ray to the
+  spell's range) instead of the activate pick, and log the resolved target
+  in OnSpellCast and the refusal in the AddTarget hook so a landing is
+  observable. Two findings beside the verb: a heal from another player
+  began a fight (OnSpellHit's hostility notice takes every spell hit, its
+  own comment saying "a heal from another included, for now"), which then
+  cut c2's regeneration from 7.0 to 4.9 a second for the rest of the run,
+  more than the heal gave; and each imposed tick re-based c2 onto the
+  server's last-reported value, forfeiting about a quarter second of
+  regeneration per tick (HYPOTHESIS). Finger of Death's self-damage branch
+  again took c1 from 10000 to 1 (decisions-m2-apocalypse.md, question 6).
+
 ## The stream's heading, read and fixed (2026-10-17 evening)
 
 The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
