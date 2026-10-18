@@ -137,10 +137,15 @@ Rate limit / bounds: one per claimed shot; the report's budget is OnHit's.
   target's head slots, its race, the shooter's Archery); the C++ core reads
   the facts (equipment and ARMO BOD2, appearance, the actor-values record)
   and kills through MpActor::Kill.
-- Where the mod's rule comes from: its CIF config (a data file the mod
-  ships). The server reads the conditions it can check from it rather than
-  from code, so a second CIF mod would need no new rule. HYPOTHESIS: the
-  config's format (MODS.md read 1.x's keys; 2.x changed AND to OR).
+- Where the mod's rule comes from: server-settings.json's `headshot` block
+  (thuum branch headshots, both settings files): the spells whose hit
+  reports a headshot (801:Headshot Kills.esp), the victim races the mod's
+  rule names (the ten playable and ElderRace), and the shooter's base
+  Archery floor (60: headshot.json's Overdraw60 condition is base Archery
+  60 and HasPerk Overdraw40, Engine surface). Read from CIF's own json was
+  the first idea; the json names its conditions as perks whose conditions
+  CIF evaluates, which the server cannot, so the server's facts are written
+  out as settings, the way castTeleports and playerGlobals are.
 - DB fields / migration: none (a death is already state).
 - Restart behavior: none.
 - Papyrus natives touched: Actor.Kill on the server (R0, MpActor::Kill), a
