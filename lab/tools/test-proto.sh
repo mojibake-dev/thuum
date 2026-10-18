@@ -26,8 +26,9 @@
 # partial", never "T2 green", since a verb's T2 is every session. SESSIONS=tree
 # (or SESSIONS=<dir>, a worktree's difftest/sessions) runs the working tree's
 # sessions on the artifact's binary, so a declaration edit is tried by this run
-# alone with no pipeline between the edit and the run; the verdict then says the
-# sessions were not the artifact's, since nobody has committed them yet.
+# alone with no pipeline between the edit and the run. Such a run ends "T2 trial"
+# while its sessions are not the head's as committed, and "T2 green" once they
+# are byte for byte (the session commit then needs no pipeline of its own).
 set -euo pipefail
 host=${SRV_HOST:-eli@10.10.70.10}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
@@ -85,7 +86,11 @@ trap cleanup EXIT
 # sessions, and T2 then passes without them (m2-cast-action's cast-action session,
 # 2026-10-15: job 6608 at 3f8d8f77 served a head two session commits later). So
 # the pick is checked against the head (the tag's commit, else the branch's) with
-# GitLab's compare, and a stale one stops T2 with the way out named.
+# GitLab's compare, and a stale one stops T2 with the way out named. Under
+# SESSIONS the sessions come from the tree, so only the rest of skymp-wire (the
+# binary's sources, divergences.yaml) can make the artifact stale: an artifact
+# whose only lag is in difftest/sessions/ runs (train-26's head waited on an API
+# pipeline for a session commit alone, 2026-10-18).
 job=$(TOK="$tok" python3 - "$project" "$ref" "$sha" <<'PY'
 import json, os, sys, urllib.parse, urllib.request
 project, ref, sha = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -104,17 +109,23 @@ at = pick[0]["commit"]["id"]
 if not own:
     cmp = get("/repository/compare?" + urllib.parse.urlencode({"from": at, "to": head}))
     wire = sorted({d["new_path"] for d in cmp.get("diffs", []) if d["new_path"].startswith("skymp-wire/")})
-    if wire:
+    tree = os.environ.get("SESSIONS", "") != ""
+    binary = [p for p in wire if not (tree and p.startswith("skymp-wire/difftest/sessions/"))]
+    if binary:
         print(f"   the branch's newest difftest-build (job {pick[0]['id']} at {at[:8]}) predates skymp-wire changes up to {head[:8]}: "
-              + ", ".join(wire[:4]) + ("..." if len(wire) > 4 else ""), file=sys.stderr)
+              + ", ".join(binary[:4]) + ("..." if len(binary) > 4 else ""), file=sys.stderr)
         print(f"   run the fork pipeline at the head first (POST /projects/{project}/pipeline?ref={ref}: an API pipeline builds difftest), then T2", file=sys.stderr)
         print("STALE")
         sys.exit(0)
-    print(f"   no difftest-build at {head[:8]} (it left skymp-wire alone): job {pick[0]['id']} from {at[:8]}, the same binary and sessions", file=sys.stderr)
-print(pick[0]["id"])
+    if wire:
+        print(f"   difftest-build job {pick[0]['id']} at {at[:8]} has the binary of {head[:8]}; only {len(wire)} session file(s) changed since, and SESSIONS supplies the sessions", file=sys.stderr)
+    else:
+        print(f"   no difftest-build at {head[:8]} (it left skymp-wire alone): job {pick[0]['id']} from {at[:8]}, the same binary and sessions", file=sys.stderr)
+print(pick[0]["id"], head)
 PY
 )
 [ "$job" = STALE ] && { echo "== T2 not run: the difftest artifact is older than the branch's skymp-wire" >&2; exit 3; }
+read -r job head_commit <<<"$job"
 if [ -n "$job" ] && curl -fsS -m 120 -H "PRIVATE-TOKEN: $tok" -o "$tmp/a.zip" \
      "https://gitlab.gaussing.tv/api/v4/projects/$project/jobs/$job/artifacts"; then
   (cd "$tmp" && unzip -q a.zip) && rsync -az --delete -e "ssh -J $jump" "$tmp/difftest-dist/" "$host:/srv/lab/difftest/" && echo "   job $job installed on sky-srv"
@@ -139,6 +150,21 @@ if [ -n "$sessions_from" ]; then
   else
     rsync -az --delete -e "ssh -J $jump" "$sessions_from/" "$host:/srv/lab/difftest/sessions/"
     echo "   sessions from $sessions_from (the working tree, uncommitted edits included)"
+  fi
+fi
+# A tree's sessions that are byte for byte the head's committed ones make this the
+# head's own T2 (its binary checked above); anything else is a trial of the edit.
+own_sessions=0
+if [ -n "$sessions_from" ] && [ -n "${head_commit:-}" ]; then
+  mkdir -p "$tmp/head-sessions"
+  # from the checkout's top: run inside a subdirectory, git archive keeps only that prefix of the tree it is given
+  top=$(git -C "$sessions_from" rev-parse --show-toplevel 2>/dev/null || true)
+  if [ -n "$top" ] && git -C "$top" archive "$head_commit:skymp-wire/difftest/sessions" 2>/dev/null | tar -x -C "$tmp/head-sessions" 2>/dev/null \
+     && [ -n "$(ls -A "$tmp/head-sessions")" ] && diff -rq "$tmp/head-sessions" "$sessions_from" >/dev/null 2>&1; then
+    own_sessions=1
+    echo "   the sessions are ${head_commit:0:8}'s own as committed: this run is its T2"
+  else
+    echo "   the sessions differ from ${head_commit:0:8}'s commit (or it is not fetched here): this run is a trial, not the verb's T2"
   fi
 fi
 
@@ -248,6 +274,9 @@ red=""
 [ "$attr_rc" = 0 ] || red="$red attributes-across-restart"
 [ "$rc" = 0 ] || red="$red difftest"
 if [ -n "$red" ]; then echo "T2 red:$red"; exit 1; fi
-tree_note=""
-[ -z "$sessions_from" ] || tree_note=" (sessions from $sessions_from, not the artifact's: commit them and rerun for the verb's T2)"
-if [ -z "${ONLY:-}" ]; then echo "T2 green$tree_note"; else echo "T2 partial (sessions: $ONLY): not a verb's T2"; fi
+# "T2 green" is a verb's T2 and nothing else (verb-merge greps for it): every session,
+# each the head's as committed. A tree's edits not yet committed end "T2 trial".
+if [ -n "${ONLY:-}" ]; then echo "T2 partial (sessions: $ONLY): not a verb's T2"
+elif [ -z "$sessions_from" ]; then echo "T2 green"
+elif [ "$own_sessions" = 1 ]; then echo "T2 green (sessions from $sessions_from, ${head_commit:0:8}'s own as committed, on job $job's binary)"
+else echo "T2 trial (sessions from $sessions_from, not ${head_commit:0:8}'s commit: commit them and rerun for the verb's T2)"; fi
