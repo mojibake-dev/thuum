@@ -105,3 +105,21 @@ cast animation and nothing else. The fix is the observer's call above, with
 m2-spell-launch's relayed point for the projectile ones (Lightning Strike's
 lobber, the rune).
 
+
+## Built (fork m2-area-effect 5a7d2478, 2026-10-17 evening, on train-24)
+
+- Skyrim Platform: game/Offsets.h PlaceAreaEffect (REL::ID(34413), AE only);
+  a Frida hook on it filtered to the player's caster raising areaEffectPlaced
+  (spell, effect, point, dual); the native placeAreaEffect(actor, spell,
+  hand, x, y, z, dual) making the call as read above, on the game thread,
+  with the point's attached cell and the spell's largest-area non-Aimed
+  effect.
+- skymp5-client: the sender carries the placed point as the cast's launch
+  (angles zero) and waits for it as for a projectile's; the observer calls
+  placeAreaEffect at the relayed point for a spell whose area effect has no
+  projectile, after castSpellImmediate.
+- Still HYPOTHESIS, for the rerun of x-class-location on the branch: the
+  explosion appears at c1's point in c2's game and is owned by the figure;
+  what its record's damage and enchantment do to c2 standing in it (the
+  ADR-028 extension is not built; Thrumming Stone's stagger on c2 is the
+  first reading).
