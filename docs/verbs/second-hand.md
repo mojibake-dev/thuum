@@ -149,11 +149,26 @@ probe reads the cadence); OnHit's own budget.
 - T2: difftest session second-hand: c1 casts a cloak, then reports its
   proc's hit on c2: the wire stack claims and damages, the legacy stack
   drops it (declared).
-- T3 scenario id: b-second-hand (scratchpad draft, 2026-10-17): vanilla
-  Flame Cloak beside c2 (the cloak deals nothing itself, so every point c2
-  loses is FlameCloakDmg's), then Sotha's Maelstrom; c2's health falls on
-  the server and c2's game agrees. A script proc (Creeping Cold) is read in
-  x-class-streams.
+- T3 scenario id: b-second-hand (scratchpad draft, re-cut 2026-10-18 after
+  three red first runs on train-24's stage): Blood Boil, a concentration
+  Self cloak held 4 s beside c2 (its ticks on c2 reported as hits by the
+  caster's game, 8 claimed at 500 ms in x-class-self 20261018-100816), then
+  Crackle, an aimed bolt whose proc keeps ticking on c2 (66 claimed at
+  150 ms in x-class-bolts 101733); c2's health on the server falls after
+  each cast, read before regeneration hides it, and c2's game agrees within
+  2 %. The first draft's vanilla Flame Cloak could not pass on train-24 and
+  the runs said why in three steps: FlameCloakLeftHand 0xDE511 never casts
+  from the right hand (runs 102930, 103607; the player's spell is 0x3AE9F,
+  the tome's); the cast then arrived but no proc did (104248); and
+  x-two-cloaks 104500 showed the reason: a cloak's contact damage applies to
+  the neighbour's figure through AddTarget with no hit event (30
+  applications of FireDamageConcAimedCloak on the figure in the caster's
+  game, 0 hits dealt), so only the apply path reports it. That is
+  b-cloak-apply (train-25, fork m2-area-report): Flame Cloak beside c2 for
+  6 s, c2's health down on the server and in its game. A script proc
+  (Creeping Cold) is read in x-class-streams. Sotha's Maelstrom's procs are
+  claimed (22 of 22) but move no number: its proc is a script casting a
+  ResistMagic debuff, so it asserts nothing about health.
 - Assertions that would fail if the verb silently regressed: c2's health on
   the server after the cloak's seconds.
 
