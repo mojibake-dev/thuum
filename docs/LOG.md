@@ -2043,3 +2043,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   25 of 25 with b-push a watch item (red at 155712, the same saddle landing, then green on both reruns).
   20261018-151626-smoke-two-players to 20261018-161634-a-racemenu. Both clones promoted to the b352b82d client at 09:24 and
   09:25 PDT. Where b-push throws c2 is Eli's decisions-lab.md question 4.
+- headshots (a mod layer) merged to main e6495a7f by fast-forward (2026-10-18T19:01Z, 12:01 PDT) through `just
+  layer-merge`. Its gate was the full sweep 20261018-164415-layer-headshots, 58 of 58 green with no rerun,
+  20261018-164415-a-activation-reach to 20261018-190034-t2-fakeclient-restart. Both clones promoted at 12:01 PDT.
+  Plugins and files:
+  - Headshot Kills.esp, last in both load orders.
+  - CIF (Core Impact Framework 2.0.7, its DLL and headshot.json), from persist-mods.
+  - A `headshot` block in both server-settings files: the mod's spell 801, the ten playable races and ElderRace,
+    minArchery 60. The parity server ignores the block, and the headshot verb (fork m2-headshot, on train-26) reads it.
+  The branch took main in by a merge (e6495a7). Its three conflicts, the two settings files and persist-mods.sh, kept
+  both sides: the freeze fix and CIF, the playerGlobals, Ghostwalk's look and the layer's load order (thuum-magnus).
+  The stage at e6495a7 was clean:
+  - smoke 20261018-163447, b-marksman 163659 and b-arrow-path 163920 green.
+  - Both seats' skse64.log load CoreImpactFramework.dll and TMS_AIPathingFreezeFix.dll. lab-api kept both plugins' own
+    logs from My Games\Skyrim.INI\SKSE.
+  - x-headshot-probe 164202, a reading, went red at step 28: an iron helmet the items table lacks. Its bare-head half
+    tested nothing, since `papyrus-av {set, Archery, 60}` named the skill by a name the server doesn't index (Papyrus
+    calls it Marksman) and was delegated silently. Both headshot drafts now say Marksman and equip the helmet through the
+    console. The probe reruns on the merged layer before train-26's stage.
+  - The r-push-ground reading for Eli's question 4 ran green before it, 20261018-162536.
