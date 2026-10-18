@@ -175,6 +175,14 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   movement (formView, forms another game drives), so either branch of 37930
   reads the caster's pitch. HYPOTHESIS: the behavior graph does not overwrite
   AimPitchCurrent between updates (the behavior files say, not the exe).
+  MEASURED (x-class-streams 20261018-102216 on train m2-train-24 against
+  013048 on parity): the figure's stream in c2's game left at heading
+  3.1427 rad against c1's own 3.1416 (0.06 degrees), where parity gave
+  3.0865 (3.16 degrees off) for all four streams; bolts left at 3.1416 on
+  both screens in both runs. Which change on the train closed the heading
+  is unread (the aim-heading fix is pinned to train-25, x-stream-aim2 its
+  probe), so the cause stays HYPOTHESIS; the pitch's measurement is
+  train-25's.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 

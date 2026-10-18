@@ -25,7 +25,7 @@ placed objects). The class probes' readings fill the trace column.
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | the parent spell's own hit and number | record | native, imposed as today (spell-cast, magic-effects) |
-| the proc's hit on the target, reported by the caster's game | record; trace pending (x-class-self, -target, -bolts, -streams) | imposed: claimed against the parent's cast (this verb) |
+| the proc's hit on the target, reported by the caster's game | record; trace: x-class-self 20261018-100816 (Sotha's Maelstrom 22 of 22, Blood Boil 8 of 8, Inferno's two Ember Bolts), x-class-bolts 20261018-101733 (Crackle's proc, 66 ticks), on train-24 | imposed: claimed against the parent's cast (this verb) |
 | the proc's Health, Magicka or Stamina number on the target | record | imposed: the server's effect runtime, as any spell hit |
 | the proc landing on the target's own player in the target's game (the figure's copy of the cloak or script) | inferred from code (Hooks.cpp's AddTarget refusal) | suppressed: H/M/S refused there, the server's number arrives instead |
 | the proc's non-H/M/S effects (a slow, an absorb's gain) | record | later: the census's cross-cutting rows (absorb, the rider twice) |
@@ -36,11 +36,12 @@ placed objects). The class probes' readings fill the trace column.
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| a cloak's proc reported at the engine's rhythm (about 5 a second for a concentration spell) | b-second-hand, x-class-self | pending: counted by time, never throttled (T0 a_cloaks_concentration_spell_counts_the_time_it_held_each_target) |
-| the same cloak cast again while the first lingers | x-class-self (Sotha's Maelstrom twice) | pending: the newest cast claims |
+| a cloak's proc reported at the engine's rhythm (about 5 a second for a concentration spell) | b-second-hand, x-class-self | MEASURED on train-24 (x-class-self 20261018-100816): Sotha's Maelstrom's 22 procs claimed at 497 to 518 ms apart (mean 501) over 10.5 s, each at 0.497 to 0.518 of its magnitudes; Blood Boil's 8 at 498 to 504 ms; none refused or throttled (T0 a_cloaks_concentration_spell_counts_the_time_it_held_each_target) |
+| the same cloak cast again while the first lingers | x-class-self (Sotha's Maelstrom twice) | pending: the newest cast claims (the stage's run cast it once; x-two-cloaks reads the two-caster case) |
 | the caster walks off with its cloak | b-second-hand (c2 steps out) | pending: judged from where the caster stands now (T0 a_proc_is_judged_from_where_the_caster_stands_now) |
-| a concentration cloak released (Blood Boil) | x-class-self | pending: its procs stop with its stream (T0 a_concentration_cloak_lingers_while_its_stream_is_open) |
-| both seats cloaked beside each other | later: a two-cloak probe | |
+| a concentration cloak released (Blood Boil) | x-class-self | MEASURED on train-24: Blood Boil's 8 procs claimed 10:11:36.133 to 10:11:39.629, none after its release (T0 a_concentration_cloak_lingers_while_its_stream_is_open) |
+| both seats cloaked beside each other | x-two-cloaks (train-24's stage) | pending its read |
+| a bolt's proc on the target (Crackle's, a script property's spell) | x-class-bolts | MEASURED on train-24 (20261018-101733): 66 ticks claimed at a 150 ms median cadence (42 of 65 gaps in 145 to 155 ms) over 13.85 s, factor sum 10.9, with one 4005 ms pause that coincides with c1's dispelallspells console step and ended on its own; the parity run cast nothing (its 300 ms hold) |
 | the caster reconnects mid-cloak | later: forget() clears its casts on leave | |
 
 ## Authority

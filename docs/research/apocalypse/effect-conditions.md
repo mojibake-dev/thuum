@@ -46,6 +46,16 @@ sky-srv with lab/esm.py and a CTDA decoder (the session's scratchpad).
   cast applies regardless. The census counts 247 of Apocalypse's 556
   effects with conditions (docs/private/apocalypse-census.md).
 
+## A measured case beyond the riders (train-24, 2026-10-18)
+
+x-class-self 20261018-100816: Shock Nova (030D1E61, Health and Magicka
+40) carries two rim effects of 20 each, gated on GetDistance at least 256
+and at least 425 units (the census TSV). c1 cast it 250 units from c2 and
+the server took 80 from c2's Health and Magicka, both rims included; the
+engine, reading the conditions, applies 40 there. The server's number is
+wrong by the conditions it does not read, not by the riders alone, which
+is what the evaluator below fixes for every conditioned effect.
+
 ## What the vanilla riders ask (Skyrim.esm, CTDAs decoded)
 
 None of Firebolt, Lightning Bolt, Sparks, Flames, Ice Spike or Fireball
