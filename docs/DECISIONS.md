@@ -1202,7 +1202,14 @@ is checked against the slot's owner (slot-probe.js) before anything else.
 ## ADR-037: A figure's explosion applies no number to a player (ADR-028 extended)
 
 Status: PROPOSED 2026-10-17 (the class pass's target-location spells). Eli
-decides (docs/private/decisions-m2-apocalypse.md, question 5).
+decides (docs/private/decisions-m2-apocalypse.md, question 5). His first
+answer (2026-10-18) was "not yet, friendly fire is fine for now", which
+answers whether the server's number lands on a friend (it does, gates or
+not) rather than who applies it; the question is re-asked there as how
+many times the standing player takes a figure's explosion (once, from the
+server, with the gates; twice without, their own game's copy accepted by
+OnChangeValues as a plain drop). The gates (fork m2-explosion-gate
+a42d5512) ride no train until he ticks.
 
 Context. ADR-028 made the server the only source of a player's Health,
 Magicka and Stamina changes from another player's magic: in each game, a

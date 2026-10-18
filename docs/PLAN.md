@@ -417,6 +417,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 - Skills, experience, and leveling from the documented formulas, computed
   R0; the client's own leveling disabled.
 - Perks, enchanting, alchemy, pickpocketing as server transactions.
+- Vampirism and lycanthropy as declared state (R0; Eli's caveat on
+  Nature's Balance, 2026-10-18): the race swap accepted from the player's
+  game against the known vampire variant of its race and relayed to every
+  figure, the spells and the feeding counters with it. Today the server
+  takes an appearance only from the race menu (OnUpdateAppearance), so a
+  turned player stays mortal to the server and to every other game, and
+  every condition that reads ActorTypeUndead judges them wrong until then.
 - From M1 (Eli, 2026-10-08: "keep leveling in 5 with progression"): what a
   level above 1 does in the game (the Stats menu, the HUD, leveled lists),
   the console's SetLevel and AdvSkill, and a skill's next use continuing
