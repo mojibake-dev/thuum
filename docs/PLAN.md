@@ -301,6 +301,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - the staggered cast (twenty-one): r-stagger-cast's bandit never
         attacked; rerun queued with an aggressive one.
       - per-player globals (A2) ride train-24 with these.
+      - target actor, second cut (fork m2-cast-target, train-26; x-class-target2
+        20261018-191615): the sender names the actor under the crosshair, so
+        the self-landing is gone and Azure Reconstruction at 180 units is
+        counted and healed by the server; at 300 units the crosshair pick
+        names nobody while the engine's own pick hits (HYPOTHESIS: the
+        activate reach), so Finger of Death and Shadowbond still land on
+        nobody in the target's game. Follow-ups: name the engine's picked
+        target (desiredTarget or a ray to the spell's range); a heal from
+        another player must not begin a fight (OnSpellHit's hostility notice
+        takes every spell hit); the imposed tick's re-basing forfeits the
+        victim's regeneration since its last report (HYPOTHESIS).
       - found on the way (x-class-target2 20261018-105815, read 2026-10-18):
         a server-set rise in a player's Health is reverted within about 2 s
         by the client's stale report (OnChangeValues takes the lower report
