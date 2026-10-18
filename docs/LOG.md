@@ -2062,3 +2062,33 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     calls it Marksman) and was delegated silently. Both headshot drafts now say Marksman and equip the helmet through the
     console. The probe reruns on the merged layer before train-26's stage.
   - The r-push-ground reading for Eli's question 4 ran green before it, 20261018-162536.
+- m2-train-26 merged to fork parity d5b05e89 (2026-10-18T21:06Z, 14:06 PDT) through `just verb-merge`, from origin/main
+  (no thuum branch), on thuum-magnus's go:
+  - The headshot rule on the server (m2-headshot 0ff620c9, thuum docs/verbs/headshot.md). The shooter's game reports a
+    head hit as Headshot Kills' instant death spell on the victim. The server kills, once per claimed hit, when a bow hit
+    it claimed on that victim came within 1500 ms, the victim's head and hair slots are bare by its equipment record, its
+    race is one the rule names, and the shooter's base archery (Marksman) reaches the floor. The facts are logged at each
+    claim (60e9e2ae).
+  - ADR-037's explosion gates (m2-explosion-gate a42d5512, accepted by Eli 2026-10-18). In a game, an explosion owned by
+    another player's figure changes none of the player's Health, Magicka or Stamina: AddTarget's refusal is widened to a
+    figure's EnchantmentItems, and PlayerCharacter::HandleHealthDamage drops a figure's damage. The knockdown, the look
+    and the placed object stay, and the server's number arrives once.
+  - m2-cast-target 9359e2c7: a target-delivered cast names the actor under the crosshair.
+  - m2-unarmed-window 6edb8c9b: the explosion's Unarmed stand-in is dropped within ten updates of the player's own effect
+    on the same figure, not one.
+  - The apply report withdrawn (bf73bf53): a cloak on a peaceful neighbour's figure is an application the engine turns
+    into no hit, and inside a fight its ticks are hits the server claims (b-cloak-fight).
+  T2 green on d5b05e89 (12:49 PDT, all 29 sessions identical), on API pipeline 1934's difftest. The first try at 12:23
+  stopped at test-proto's staleness guard: the branch's newest difftest artifact predated its head's skymp-wire.
+  Readings on the stage at d5b05e89 (thuum-magnus's reads):
+  - x-headshot-probe 20261018-190159 green on the merged headshots layer, before the stage.
+  - b-headshot 191414 red: the iron set kept c2's head helmeted. Green at 192338 with the helmet taken off first and c1's
+    Marksman read back before the shot.
+  - x-class-target2 191615 and b-cloak-fight 192059 green.
+  The gate 20261018-195009-merge-m2-train-26: 27 of 27 with b-invis-recast a watch item: b-invis-recast (red 204244,
+  green 210056, green 210313). 20261018-195009-smoke-two-players to 20261018-210313-b-invis-recast.
+  b-invis-recast's red was the lab's pacing, not the build (thuum-magnus's read). c2's screenshot step waited the whole
+  120 s on a pid the guest agent no longer knew ("PID ... does not exist"), which spaced the first cast and the recast
+  past Invisibility's 30 s. The run's real recast pair, 11.9 s apart, dropped nothing. lab-api now ends such an exec at
+  once (labapi-owed, E_PVE_EXEC_LOST).
+  Both clones promoted to the d5b05e89 client at 14:05 and 14:06 PDT.
