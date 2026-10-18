@@ -1976,3 +1976,39 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   - The first starts after the swap were clean (c2's agent after 15 s, c1's after 13 s), sky-srv came back on its known
     host key, and the solo references reran green: r-stagger-cast 20261018-074517 with the aggressive bandit and the
     trace, r-shock-nova 074819.
+- m2-train-24 merged to fork parity a86238ed (2026-10-18T12:16Z, 05:16 PDT) through `just verb-merge`, from thuum branch
+  player-globals 647228f with main merged in, on thuum-magnus's go. A merge train, staged as one:
+  - m2-player-globals-main 91b3f9c7: per-player globals, wire schema 17 (Apocalypse's settings and counters are each
+    player's own and survive a restart; 53 playerGlobals in both server-settings files).
+  - m2-spell-launch a33b5ffc: a cast carries its launch fields, the same schema 17 bump. f3dff3e9 gives the ghostwalk
+    session's cast those fields.
+  - m2-self-burst 7ea47e5c and d0befa07: a Self burst's first hit no longer races its cast, and RunSelfSpell drops its
+    hostile area effects before applying the spell to its caster (r-shock-nova: the engine spares the caster).
+  - m2-second-hand ca641d55 and 2b3478df: a hit by a spell the caster's own recorded cast reaches through the records (a
+    cloak's spell, a bolt's proc) is claimed against that cast, at the engine's measured cadence (cloak procs every 496
+    to 504 ms in x-class-self).
+  - m2-target-actor ea213315: a relayed touch or target-actor spell at another player lands on that player in its game.
+  - The fork's two Formatting-check faults fixed (Hooks.cpp at clang-format 21.1.8, Definitions.txt), so parity's
+    Formatting check is green again.
+  - T2's declarations: a71fc88a (the PlayerGlobals message for every seat that moves, in 27 session files) and a86238ed
+    (second-hand's proc Health change matched by shape). T2 green on a86238ed, 03:57 to 04:20 PDT.
+  Readings on the stage (thuum-magnus's reads; the staged client was 14d70eb1's, the same code as a86238ed):
+  - The class pass again as the "after": x-class-self 20261018-100816, x-class-target 101320, x-class-bolts 101733,
+    x-class-streams 102216 and x-class-location 102618 green, then x-class-target2 103809 and 105815 (the re-cut).
+  - b-player-globals 103133 green, committed alone. x-two-cloaks 103345 and 104500 green as readings: both cloaks cast,
+    but Flame Cloak's contact damage applies through AddTarget with no hit event, so train-25's apply path reports it.
+  - b-second-hand went red five times on the draft, never the verb: the draw swallowed the first cast (102930), the
+    left-hand Flame Cloak 0xDE511 never cast from the right hand (103607), the cloak's procs had no hit event (104248),
+    and a look after the draw left the hands sheathed (104931, 105614). Re-cut to Crackle alone, it read the claims on
+    the server ("hits ff000001 with spell c0b2c83, claimed as a spell its cast reaches") and missed its bound by a hair
+    at 2000 Health (110714). It was green at 1000 (111322) and is committed alone.
+  The gate 20261018-112123-merge-m2-train-24: 23 of 23 green with no rerun, 20261018-112123-smoke-two-players to
+  20261018-121220-a-racemenu. Both clones promoted to the 14d70eb1 client, at 05:15 and 05:16 PDT.
+  Lab notes:
+  - The stage's first try (02:30) stopped at step 7 when c2's client-dist got empty guest-agent answers twice. Laid by
+    hand clean at 02:38, the second try (02:58) went through. lab-api 1650da4d came with it, so every run now keeps the
+    SKSE logs of every My Games\<folder>\SKSE, the freeze fix's included.
+  - An upward set-percentages can revert within about 2 s (7 of 11 in x-class-target2's runs). docs/LAB.md says to read
+    right after the set; the server fix is a later verb row.
+  - test-proto's staleness guard refused SESSIONS=dir on session-only changes (03:04). Each declaration ran T2 from its
+    head's pipeline instead.
