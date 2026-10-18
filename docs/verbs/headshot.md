@@ -232,12 +232,18 @@ Doc written 2026-10-10, before any code.
       the four cases with the facts logged at each claim; the `headshot`
       server setting on thuum branch headshots 84905c18: spells, races,
       minArchery)
-- [ ] message + validator (same commit): candidate 1, OnHit as it is with
-      the mod's spell as its source, built; HYPOTHESIS until x-headshot-probe
-      shows the shooter's game raises that hit (x-class-target 20261018-012152
-      saw no hit event for a target-actor spell applied directly, so the
-      fallback is a report from magicEffectApply on the figure, a client
-      change only)
+- [x] message + validator (same commit): OnHit as it is, with the mod's
+      spell as its source. The report comes from the effect's apply, not a
+      hit event (x-class-target 20261018-012152 saw no hit event for a
+      target-actor spell applied directly): fork m2-area-report (on train-25,
+      b2bc2e94) has Skyrim Platform's magicEffectApply name the applying
+      spell from the target's active effect (ActiveEffect's spell), and
+      hitService report the player's apply on a figure as a hit of that
+      spell; CIF casts its kill spell from the shooter at the victim, so the
+      report carries 801:Headshot Kills.esp and the server's headshot branch
+      takes it. HYPOTHESIS until x-headshot-probe: the apply fires in the
+      shooter's game for CIF's cast (CastSpellImmediate with the figure as
+      target), with the shooter as its caster
 - [ ] native hook + T1
 - [ ] TS handler
 - [ ] T2 green
