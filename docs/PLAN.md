@@ -256,6 +256,38 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       hosts the NPCs they need. Twenty-one's first two class gaps:
       Scattershock's concentration missiles drawn backward on the other
       screen, and Decompose's cloak unseen by its own target.
+    - The pass's probes ran 2026-10-18 01:14 to 01:40 UTC on parity ef02c565
+      (x-class-self, -target, -bolts, -streams, -location, r-shock-nova,
+      r-stagger-cast; docs/LOG.md), one class per row, each fix a fork
+      branch on train m2-train-24 unless named otherwise:
+      - target actor and touch: the relayed cast named the player by its
+        server id, which the client made 0, so the figure's spell landed on
+        nobody (Azure Reconstruction healed the figure itself); fixed,
+        m2-target-actor.
+      - second-hand (cloaks, procs; 30 spells): the caster's game reported
+        every proc hit, the server dropped them all as hits of an unequipped
+        spell; fixed by claiming a hit against the recorded cast whose
+        records reach its spell, m2-second-hand (docs/verbs/second-hand.md).
+      - Self bursts: the first hit refused for arriving with its cast
+        (m2-self-burst); the engine spares the burst's own caster where
+        RunSelfSpell hurt it (r-shock-nova; m2-self-burst).
+      - target location: an observer's game showed nothing for Thrumming
+        Stone, Lightning Strike or the rune; the explosion is now placed at
+        the caster's point by the engine's own placer (34413), the
+        projectile ones at the relayed launch (m2-spell-launch on train-24,
+        m2-area-effect on train-25, docs/research/apocalypse/
+        target-location.md); the explosion's own numbers are ADR-037,
+        proposed.
+      - aimed streams: counted by time as built; Scattershock's 2.75 degree
+        heading offset read to the figure's AimHeadingCurrent and fixed
+        (m2-area-effect); an area stream (Scorching Hands) registers no hit
+        on the caster's side at all, HYPOTHESIS under probe x-area-hit.
+      - aimed bolts and beams: counted as built; Nature's Balance's swap
+        waits on B1 (the conditions question, decisions-m2-apocalypse.md
+        section 4).
+      - the staggered cast (twenty-one): r-stagger-cast's bandit never
+        attacked; rerun queued with an aggressive one.
+      - per-player globals (A2) ride train-24 with these.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
