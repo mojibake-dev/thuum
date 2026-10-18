@@ -278,6 +278,9 @@ artifacts: [trace]
         self.assertIn('"distance": 300.0', move["note"], move)
         teleport = next(s for s in result["steps"] if s["action"] == "teleport")
         self.assertIn("landed after 1 attempt", teleport["note"], teleport)
+        # a server command's answer is its step's note (a no-op set shows in the run's own result)
+        given = next(s for s in result["steps"] if s["action"] == "give")
+        self.assertIn('"count": 1', given["note"], given)
         self.assertNotIn("pos", next(s for s in result["steps"] if s["kind"] == "wait"))
         # the fake state saw the two server verbs and the RPC contract's shapes
         kinds = [(n, p["kind"]) for n, p in self.state.rpc_log]

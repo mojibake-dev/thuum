@@ -675,8 +675,11 @@ class Runner:
             return await self._teleport(rec, index, step)
         if step.action in SERVER_ACTIONS:
             try:
-                await asyncio.to_thread(self.state.command, step.client, step.action, step.args)
-                return True, ""
+                body = await asyncio.to_thread(self.state.command, step.client, step.action, step.args)
+                # the server's answer is the step's note (papyrus-av's base and current, learn-spell's learned,
+                # give's count): a set the server took as a no-op shows in the run's own result
+                # (x-headshot-probe's "Archery" step answered ok and changed nothing, 20261018-164202)
+                return True, self._answer(rec, index, step, body)
             except StateError as e:
                 rec.failures.append({"step": index, "kind": "server-command", "error": str(e)})
                 rec.verdict = "red"
