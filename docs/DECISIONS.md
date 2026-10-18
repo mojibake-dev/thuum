@@ -1211,6 +1211,12 @@ gates; twice without, their own game's copy accepted by OnChangeValues as a
 plain drop), he took the gates. They ride fork train m2-train-26
 (f2f26ec3, m2-explosion-gate a42d5512 merged), behind the headshots layer;
 their probe is x-explosion-gate, run ungated on train-25's stage first.
+That run (20261018-140111) measured nothing: both runes fizzled because the
+lab's look step does not pitch the first-person view, so the casts found no
+ground point within range (docs/research/apocalypse/target-location.md,
+the lab's aim). The gates' evidence comes from the big playtest by eye
+(twenty-three's Frost Rune item) and from the probe once the driver can aim
+down; the gates ride train-26 regardless, the rule being ADR-028's.
 
 Context. ADR-028 made the server the only source of a player's Health,
 Magicka and Stamina changes from another player's magic: in each game, a

@@ -1068,6 +1068,49 @@ health message. A second red within two sweeps makes it a bug.
   report within about 2 s (7 of 11 cases), so a probe must set downward or
   read at once (lab-api, numidium).
 
+- x-area-hit 20261018-135726 on train-25 b352b82d, c2 at 150 units: vanilla
+  Flames counted 14 hits at 5.4 a second (median factor 0.2), Scorching
+  Hands 12 hits at about 6 a second (factors 0.15 to 0.2), both with the
+  caster's hit events present in pairs per tick and the apply reported
+  beside them, nothing doubled (same-source server lines at least 149 ms
+  apart). So Scorching Hands counts now; whether the apply path or the hit
+  events carried it cannot be told from the trace, and the parity run's
+  silence had c2 at 400 units, so distance is not excluded as its cause
+  (HYPOTHESIS either way). Shock Nova: its own hit counted once; the
+  explosion's Unarmed 3.712 OnWeaponHit still reached the server, landing
+  115 ms (about seven updates) after the apply, past the one-update drop
+  window: widened to ten updates on train-26 (fork m2-unarmed-window).
+
+- A stream's number under dropped hit reports (b-duel's Flames phase read
+  across 27 runs since 10-14, 2026-10-18): the server's number is exactly
+  8 a second times the factor sum, each report's factor the time since the
+  last counted report capped at MAX_TICK_MS 250 ms (wire-rules casts.rs),
+  and a full 4 s hold yields 20 or 21 reports at the engine's 0.183 s
+  cadence on every build. Today's two reds (20261018-082158 on parity's
+  client, 142100 on train-25's) had 13 reports: gaps of exactly two or
+  three cadences where no hit event reached the client at all, each gap
+  capped, 7.6 to 8 of 100 Health lost against the 0.78 bound. Not today's
+  code (one red predates every hit-path change; the number per tick is
+  identical on every build). One or two such gaps sit in six greens since
+  10-14; four or five only today, both on c1 after the GPU slot swap put
+  the 1050 on one lane. c1's frame pacing was the suspect and is untested,
+  not disproved: in every window the recorder kept (phases 1 and 2 of all
+  three runs) c1 ran 60.0 updates a second with no interval above 37 ms,
+  but no c1 series covers the Flames hold in either red (they stopped at
+  the failed assert) and the recorder keeps no per-frame timestamps; a
+  per-update series or the client's hit events with their frame index
+  across one hold would settle it (the cards' link speeds are mundus's
+  read). The
+  design gap underneath, for a later verb: the engine applies a
+  concentration spell's damage every frame it touches the target whatever
+  the hit events do, so a client that drops hit events under slow frames
+  undercounts on the server where the engine would not (ADR-031). The
+  stream's start and end are reliable messages already; counting the
+  held time between them while reports confirm the target, or a cap of a
+  cadence and a half (about 400 ms) so one missed report costs nothing,
+  are the two shapes; neither tonight (the T2 declarations name today's
+  factors).
+
 ## The stream's heading, read and fixed (2026-10-17 evening)
 
 The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
@@ -1090,3 +1133,11 @@ is held per figure (sync/figureAim.ts) and written each update until the
 cast's end. HYPOTHESIS until x-stream-aim's rerun: the graph does not write
 the float back between the write and the caster's read (the fallback is a
 trampoline on 37929 for figure form ids).
+MEASURED (x-stream-aim2 20261018-135515 on train-25 b352b82d): the figure's
+Scattershock launches in c2's game left at heading 180.00 degrees on 13 of
+16 and 179.42 on 3 against c1's own 180.00 (the parity runs: 177.25 and
+177.41 on every launch, 2.75 and 2.59 degrees off); Flames 180.00 on 15 of
+15. The offset is gone; the fix stands. Pitch was not exercised: the probe
+has no look step, and the look step as built does not pitch the view (see
+docs/research/apocalypse/target-location.md, the lab's aim), so the pitch
+half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.

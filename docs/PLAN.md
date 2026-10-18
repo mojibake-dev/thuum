@@ -521,6 +521,14 @@ stays runnable for a smoke when Steam or RaceMenu changes. One version per run
   load order.
 - Suppression registry: every engine behavior we suppress is listed with the
   hook that does it and the condition that releases it.
+- Lab aim (2026-10-18): the driver's look step does not pitch the
+  first-person view (SetAngle on the player, readback pitch 0), so a probe
+  cannot cast a short-range target-location spell at the ground: Lightning
+  Strike and the runes fizzled in every class-pass run and b-target-location
+  and x-explosion-gate wait on it (docs/research/apocalypse/target-location.md).
+  Needed: a step that really pitches the aim (mouse input through the
+  driver, or a Skyrim Platform native setting the player's look pitch), then
+  the two scenarios run as drafted.
 
 ## Risks
 
