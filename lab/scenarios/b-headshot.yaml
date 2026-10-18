@@ -1,0 +1,84 @@
+# b-headshot (docs/verbs/headshot.md; Eli 2026-10-12: "for headshots i think
+# it's ok to trust the client a little"): Headshot Kills - CIF works between
+# players. c1 at base Archery 60 with Overdraw40 (Skyrim.esm PERK 0x7934B,
+# the CIF rule's condition read through its named perk; headshot.md), a
+# Long Bow (0x3B562) and iron arrows (0x1397D), shoots c2's bare head from
+# 300 units, level (a level shot from the crosshair meets a same-height
+# head): c2 dies on the server. Then c2 respawns in an Iron Helmet (0x12E4D,
+# ARMO BOD2 slot 30) and takes the same shot: the arrow's damage alone. Then
+# c1 at Archery 40 shoots the bare head again: no kill. Needs the headshots
+# layer (CIF 2.0.7, Headshot Kills 1.2), the `headshot` server settings and
+# fork m2-headshot. The kill's message is the mod's spell as the hit's
+# source (HYPOTHESIS until x-headshot-probe; the fallback changes the
+# client, not this scenario).
+# The archery skill's actor value is Marksman (the Papyrus name wire-rules indexes;
+# "Archery" is unknown to the server and was delegated to the game as a no-op,
+# so 20261018-164202's shooter kept its race default and CIF's rule could not
+# match; docs/verbs/actor-values.md).
+# The lab character wears the iron set, helmet included (the server's armor
+# rating 60 at every hit, 20261018-164202 and 190159), so the "bare" head
+# was never bare: c2 takes the Iron Helmet off first (unequipitem 12e4d),
+# and c1's base Marksman is read back by the console before the shot.
+id: b-headshot
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: papyrus-av {how: set, name: Marksman, value: 60}
+  - c1: console {text: "player.addperk 7934b"}
+  - c1: give {item: "0x3b562", count: 1}
+  - c1: give {item: "0x1397d", count: 40}
+  - c1: console {text: "player.equipitem 3b562"}
+  - c1: console {text: "player.equipitem 1397d"}
+  - c1: console {text: "player.getbaseav marksman"}
+  - c2: console {text: "player.unequipitem 12e4d"}
+  - c2: set-percentages {health: 1}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - c1: look {pitch: 0, heading: 180}
+  - c1: watch-start
+  - c2: watch-start
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - c2: dump-state
+  - assert:
+      - server.actor(c2).isDead == True
+  - c2: respawn
+  - wait: 12
+  - c2: give {item: "0x12e4d", count: 1}
+  - c2: console {text: "player.equipitem 12e4d"}
+  - c2: set-percentages {health: 1}
+  - wait: 3
+  - c2: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: look {pitch: 0, heading: 180}
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - c2: dump-state
+  - assert:
+      - server.actor(c2).healthPercentage > 0.5
+      - server.actor(c2).healthPercentage < 1
+  - c2: console {text: "player.unequipitem 12e4d"}
+  - c2: set-percentages {health: 1}
+  - c1: papyrus-av {how: set, name: Marksman, value: 40}
+  - wait: 3
+  - c1: look {pitch: 0, heading: 180}
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - c2: dump-state
+  - assert:
+      - server.actor(c2).healthPercentage > 0.5
+artifacts: [server.log, c1.log, c2.log, trace]
