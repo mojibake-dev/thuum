@@ -9,7 +9,6 @@
 # (the save template holds GameHour alone), so without the verb c1's game
 # reads the record's 0 again. Needs the Apocalypse layer and fork
 # m2-player-globals. Assertions are evaluated by lab-api only (ADR-009).
-# DRAFT: commit alone after its first runs (ADR-009, ADR-016).
 id: b-player-globals
 milestone: M2
 clients: [c1, c2]
