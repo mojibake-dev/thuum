@@ -13,6 +13,7 @@
 # tome's spell) and stands 8 s (the 6 s stand gave 0.9655). Each block
 # starts c2 at full and reads the server's number against c2's own game
 # right after. Order: look, equip, draw-weapon, wait, cast. Runs in
+# train-26's stage and gate.
 id: b-cloak-fight
 milestone: M2
 clients: [c1, c2]
