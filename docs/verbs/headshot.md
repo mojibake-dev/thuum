@@ -249,3 +249,28 @@ Doc written 2026-10-10, before any code.
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] ledger and suppression registry updated
+
+## The layer's first probe (x-headshot-probe 20261018-164202, headshots layer on parity b352b82d)
+
+The run tested no headshot: its Archery step was a no-op. The server indexes
+the archery skill under its Papyrus name, Marksman (wire-rules
+actor_values.rs), and a name it does not index is delegated to the game as
+a SetActorValue snippet, which knows no "Archery" either (server.log
+16:43:19.600 "executes locally", .601 "the server holds no value for
+'Archery'"), so the shooter kept its race default of 15 and Core Impact
+Framework's rule (base Archery 60 and the Overdraw perk) could not match.
+What did happen: one shot, the arrow at head height on c2's figure (+121 to
++127 units over the feet, the crown), counted once as a bow hit of 13 (c2
+0.87 on the server, its game agreeing), no kill spell anywhere (no FE003
+id in any artifact), CIF 2.0.7 loaded on both seats with headshot.json
+parsed and its ArrowCollision and MissileCollision hooks installed. A
+runtime projectile (0xFF000CFD) with a runtime spell (0xFF000D99) left the
+impact point in both games 113 to 132 ms after the hit and struck a static
+behind c2: HYPOTHESIS, CIF's own impact projectile for an arrow on an actor
+(confirm with a run without CIF or with its iVerboseMode). The probe and
+b-headshot now say Marksman; the helmet half, which the items table
+refused (E_RUN_ITEM), equips 0x12E4D by the console as b-headshot does. The
+message-path HYPOTHESIS (CIF's kill spell reported as a hit of 801:Headshot
+Kills.esp) is untested until the rerun. Lab follow-ups: papyrus-av should
+refuse a name the server does not index; c1's CIF log read hit the guest
+agent's timeout.
