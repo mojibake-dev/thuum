@@ -2012,3 +2012,34 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     right after the set; the server fix is a later verb row.
   - test-proto's staleness guard refused SESSIONS=dir on session-only changes (03:04). Each declaration ran T2 from its
     head's pipeline instead.
+- m2-area-effect (train-25) merged to fork parity b352b82d (2026-10-18T16:25Z, 09:25 PDT) through `just verb-merge`,
+  from origin/main (no thuum branch), on thuum-magnus's go:
+  - A target-location spell placed where its caster aimed on the other screen, through the engine's placer 34413 and the
+    native placeAreaEffect.
+  - A figure's aimed streams leaving along the caster's aim heading (setActorAimHeading, the 2.75 degree offset gone).
+  - m2-area-report: the player's spell effects on another player's figure reported from the effect's apply, and the
+    explosion's Unarmed stand-in dropped.
+  - m2-area-event 707231fc: areaEffectPlaced registered in Skyrim Platform's EventManager::InitCustom. d0ccf852's client
+    refused the name, its startup broke before NetworkingService, and c2 never came online, which stopped the first stage
+    at 06:04.
+  T2 green on d0ccf852 (06:04 to 06:27 PDT, all 29 sessions identical). It stands for b352b82d: the fix since is the client
+  DLL alone.
+  Readings on the stage at b352b82d (thuum-magnus's reads):
+  - x-class-location 20261018-135152, x-stream-aim2 135515, x-area-hit 135726, x-explosion-gate 140111 and
+    x-second-hand-cloak2 140554 green. The placer is measured on Thrumming Stone, placed in c2's game at the relayed point.
+    The stream heading offset is gone, and Scorching Hands now counts.
+  - b-target-location 135949 and 140829 red, both on the probe. First its learn-spell ids were miscomputed. Then the
+    driver's look step never pitches the first-person aim, so the two short-range target-location spells fizzled for want
+    of a ground point. They wait on a driver step that really pitches the view, and the playtest covers them by eye.
+  - b-cloak-apply 140353 red: a cloak on a peaceful neighbour is an application the engine turns into no hit and no damage.
+    x-second-hand-cloak2 measured that once a fight has begun, the ticks are hits the server claims. So the apply report
+    was withdrawn on train-26 (m2-apply-start-off), and b-cloak-fight replaces the probe.
+  The gate 20261018-141630-merge-m2-area-effect went red on two reds:
+  - b-duel 142100: 13 hit reports where every green has 18 to 21, gaps at the engine's cadence. It's a stream-count jitter,
+    and the design fix is filed in spell-cast.md. c1's link and fps are unchanged by the slot swap (thuum-mundus; c2's RTX
+    is on one lane now).
+  - b-push 145328: c2 rolled off the spawn's ridge and never got up.
+  Two reds give ADR-027 nothing to rerun, so the whole gate ran again as a fresh set: 20261018-151626-merge-m2-area-effect,
+  25 of 25 with b-push a watch item (red at 155712, the same saddle landing, then green on both reruns).
+  20261018-151626-smoke-two-players to 20261018-161634-a-racemenu. Both clones promoted to the b352b82d client at 09:24 and
+  09:25 PDT. Where b-push throws c2 is Eli's decisions-lab.md question 4.
