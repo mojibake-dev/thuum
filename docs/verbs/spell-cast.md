@@ -965,3 +965,30 @@ health message. A second red within two sweeps makes it a bug.
   withheld spells show their animations too. m2-hands' hold is the stopgap
   it replaces; forks m2-firebolt and m2-hands-exit are deleted with it.
 
+
+## The class pass (2026-10-18 01:30 UTC, parity ef02c565)
+
+- x-class-streams 20261018-013048: Creeping Cold, Howling Blast and
+  Scattershock counted by the stream's time (0.10, 0.17 and 0.25 s a tick;
+  two Scattershock hits after its stop refused E_SPELL_NO_CAST, as built);
+  the figure's launches matched c1's within one for every stream (Sleet
+  Storm 0, Creeping Cold 26 and 27, Howling Blast 7 and 8, Scorching Hands
+  16 and 18, Scattershock 18 and 18).
+- Scorching Hands (Apocalypse 0x0C02388C, a flame stream whose effect has
+  an area of 3) launched 16 flame projectiles in c1's game and c1 reported
+  no hit at all, where vanilla Flames (area 0) reports one per tick.
+  Not a range matter: vanilla Flames' projectile reaches 768 units
+  (Skyrim.esm PROJ 0x12FCF DATA, lab/esm.py on sky-srv) and c2 stood 400
+  away; the mod has one Scorching Hands spell record (its editor id ends in
+  _NPC), and its effect's own projectile is unread (esm.py prints a DATA's
+  first 32 bytes). HYPOTHESIS: an area effect's targets are gathered by the
+  projectile's explosion (FindTargets' area pass, 34461), which raises no
+  TESHitEvent on the caster's side, so hitService sees nothing to send and
+  the server counts nothing for an area stream; the "Self burst" rows share
+  the cause. Next: the recorder's hits dealt against magicEffectApply on the
+  target for one area spell, with c2 at 150 units.
+- x-class-bolts 20261018-012605: Bolide and Rift Bolt counted once; Rift
+  Bolt's scripted proc refused (second-hand covers it); Nature's Balance's
+  bolt counted and swapped nothing (B1 unbuilt); Thundercrack launched with
+  no hit; Hailstone, Static Dome and Crackle never released at a 300 ms
+  hold (charge 0 spells need the hold to cover the cast, 900 ms now).
