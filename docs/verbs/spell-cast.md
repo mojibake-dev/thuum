@@ -1081,6 +1081,30 @@ health message. A second red within two sweeps makes it a bug.
   115 ms (about seven updates) after the apply, past the one-update drop
   window: widened to ten updates on train-26 (fork m2-unarmed-window).
 
+- A stream's number under dropped hit reports (b-duel's Flames phase read
+  across 27 runs since 10-14, 2026-10-18): the server's number is exactly
+  8 a second times the factor sum, each report's factor the time since the
+  last counted report capped at MAX_TICK_MS 250 ms (wire-rules casts.rs),
+  and a full 4 s hold yields 20 or 21 reports at the engine's 0.183 s
+  cadence on every build. Today's two reds (20261018-082158 on parity's
+  client, 142100 on train-25's) had 13 reports: gaps of exactly two or
+  three cadences where no hit event reached the client at all, each gap
+  capped, 7.6 to 8 of 100 Health lost against the 0.78 bound. Not today's
+  code (one red predates every hit-path change; the number per tick is
+  identical on every build). One or two such gaps sit in six greens since
+  10-14; four or five only today, both on c1 after the GPU slot swap put
+  the 1050 on one lane: c1's frame pacing is the suspect (its update
+  intervals from the traces, and the cards' link speeds, being read). The
+  design gap underneath, for a later verb: the engine applies a
+  concentration spell's damage every frame it touches the target whatever
+  the hit events do, so a client that drops hit events under slow frames
+  undercounts on the server where the engine would not (ADR-031). The
+  stream's start and end are reliable messages already; counting the
+  held time between them while reports confirm the target, or a cap of a
+  cadence and a half (about 400 ms) so one missed report costs nothing,
+  are the two shapes; neither tonight (the T2 declarations name today's
+  factors).
+
 ## The stream's heading, read and fixed (2026-10-17 evening)
 
 The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
