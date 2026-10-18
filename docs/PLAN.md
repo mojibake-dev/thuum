@@ -290,7 +290,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         projectile ones at the relayed launch (m2-spell-launch on train-24,
         m2-area-effect on train-25, docs/research/apocalypse/
         target-location.md); the explosion's own numbers are ADR-037,
-        proposed.
+        accepted 2026-10-18 (its gates ride train-26).
       - aimed streams: counted by time as built; Scattershock's 2.75 degree
         heading offset read to the figure's AimHeadingCurrent and fixed
         (m2-area-effect); an area stream (Scorching Hands) registers no hit
@@ -301,6 +301,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - the staggered cast (twenty-one): r-stagger-cast's bandit never
         attacked; rerun queued with an aggressive one.
       - per-player globals (A2) ride train-24 with these.
+      - found on the way (x-class-target2 20261018-105815, read 2026-10-18):
+        a server-set rise in a player's Health is reverted within about 2 s
+        by the client's stale report (OnChangeValues takes the lower report
+        as a fall, then crops the client's later report of the set value
+        back down and sends it back; 7 of 11 upward sets in two runs); a
+        server-applied heal would snap back the same way. A verb fix on a
+        later train: an owner's set and the server's own changes win over
+        reports that predate them (a sequence or a grace window in
+        OnChangeValues); until then a scenario sets downward or reads at
+        once (docs/LAB.md, numidium's note).
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
