@@ -221,7 +221,14 @@ files, 13 of 13, test_unit's 359 cases with this verb's two.
 - [x] message + validator (same commit)
 - [x] native hook + T1 (none needed: Skyrim Platform's GlobalVariable)
 - [x] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T2 green: train-24's T2 at fork a86238ed (2026-10-18): the
+      player-globals session identical with its five declared divergences,
+      and the PlayerGlobals message declared in the 27 other sessions whose
+      seats move (sent on a seat's first movement after a login, so a seat
+      that never moves receives none)
+- [x] T3 scenario green: b-player-globals 20261018-103133 on train-24
+      (c1's global 3, c2's 0, before and after the server restart), in the
+      merge gate 20261018-112123-merge-m2-train-24 (23 of 23); the MCM
+      itself waits on SkyUI (Eli's essentials list)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] ledger and suppression registry updated

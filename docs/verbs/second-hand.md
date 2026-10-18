@@ -193,11 +193,21 @@ probe reads the cadence); OnHit's own budget.
       claim_reached with 8 tests and the bridge's; SecondHandTest on
       Skyrim.esm's Flame Cloak; GitLab pipeline 1800 green, test_unit's 369
       cases and the integration tests; in train m2-train-24 c42ba771)
-- [ ] message + validator (same commit) (none: OnHit unchanged)
-- [ ] native hook + T1 (none)
-- [ ] TS handler (none)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] message + validator (same commit) (none: OnHit unchanged)
+- [x] native hook + T1 (none)
+- [x] TS handler (none)
+- [x] T2 green: train-24's T2 at fork a86238ed (2026-10-18 03:57 to 04:20
+      PDT, pipeline 1883's artifact): every session identical against
+      parity-legacy, second-hand's twelve declared divergences holding
+      (the second proc's Health change declared by shape, since a
+      concentration proc's claim counts the time since the last report)
+- [x] T3 scenario green: b-second-hand 20261018-111322 on train-24
+      14d70eb1 (Crackle's bolt and its proc's 150 ms ticks claimed, c2 down
+      5 % of 1000 Health, its game agreeing within 0.2 %), in the merge
+      gate 20261018-112123-merge-m2-train-24 (23 of 23). HYPOTHESIS left: a
+      cloak's applied spell raises a hit event in the caster's game only
+      against a target in combat with it (x-second-hand-cloak2 probes it);
+      the apply path (train-25) reports the rest either way
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
