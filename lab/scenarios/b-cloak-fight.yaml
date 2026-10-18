@@ -1,0 +1,78 @@
+# b-cloak-fight (thuum docs/verbs/second-hand.md): a cloak's ticks count as
+# the caster's hits inside a fight, claimed against the cloak's cast. The
+# engine applies a cloak's spell to a peaceful neighbour as an application
+# that is no hit and no damage (b-cloak-apply 20261018-140353: nine
+# applications of FireDamageConcAimedCloak on the figure, nothing taken,
+# nothing on the server), and as hit events, local damage and the server's
+# claims once a fight has begun (x-second-hand-cloak2 140554: Blood Boil's
+# four and Flame Cloak's eleven ticks claimed after one Firebolt). So c1
+# first lands a Firebolt (0x12FD0) on c2, 150 units south, and the fight
+# begins; then holds Blood Boil (Apocalypse 0x0C044D44, a concentration Self
+# cloak) 4 s beside c2 at 1000 Health (measured there: 0.9557 on the server,
+# c2's own game within 0.25 %); then casts vanilla Flame Cloak (0x3AE9F, the
+# tome's spell) and stands 8 s (the 6 s stand gave 0.9655). Each block
+# starts c2 at full and reads the server's number against c2's own game
+# right after. Order: look, equip, draw-weapon, wait, cast. Runs in
+id: b-cloak-fight
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 77776}
+  - c1: learn-spell {spellId: 201608516}
+  - c1: learn-spell {spellId: 241311}
+  - c1: console {text: "player.setav magicka 3000"}
+  - c2: console {text: "player.setav health 1000"}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c2: set-percentages {health: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: look {pitch: 0, heading: 180}
+  - wait: 1
+  - c1: console {text: "player.equipspell 12fd0 right"}
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start
+  - c2: watch-start
+  - wait: 1.5
+  # one plain hit: a fight begins
+  - c1: hold-key {code: 199, ms: 1000}
+  - wait: 3
+  # Blood Boil inside the fight
+  - c2: set-percentages {health: 1}
+  - c1: console {text: "player.equipspell c044d44 right"}
+  - c1: set-percentages {magicka: 1}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 4000}
+  - wait: 4.5
+  - c2: dump-state
+  - assert:
+      - server.actor(c2).healthPercentage < 0.97
+      - server.actor(c2).healthPercentage > 0.3
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+  - c1: console {text: "player.dispelallspells"}
+  - c2: console {text: "player.dispelallspells"}
+  - c1: set-percentages {magicka: 1}
+  - wait: 2
+  # vanilla Flame Cloak inside the fight
+  - c2: set-percentages {health: 1}
+  - c1: console {text: "player.equipspell 3ae9f right"}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 8
+  - c2: dump-state
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.97
+      - server.actor(c2).healthPercentage > 0.3
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+artifacts: [server.log, c1.log, c2.log, trace]
