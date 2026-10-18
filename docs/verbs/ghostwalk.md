@@ -132,9 +132,17 @@ positions' age.
 
 - Mechanism: the relayed Self cast (the figure's invisibility) and the
   movement relay of the return the server took.
-- Visual without simulation achieved by: the movement relay's jump for
-  a long return, its glide for a short one; the return's sound and visual
-  are not shown to others (Inventory, later).
+- Visual without simulation achieved by: the cast-teleport look
+  (docs/verbs/cast-teleport.md, the look on other screens), given to
+  Ghostwalk's castTeleports entry after playtest twenty-two (2026-10-17,
+  Eli: "similar to teleportation, long distances and the character snaps
+  back, short distances and they slide"). At the return the server pops
+  the figure to the landing (SetPosition, so a short return no longer
+  glides) and plays the return's own visual (RFCT 030207C1, its script's
+  VisualEffect.Play for WB_TriggerVFXDur, 3 s) and sound (SOUN 030207BF,
+  its Sound.Play) on the figure in every other game; there is no vanish,
+  since the figure is already invisible. Before the look, a return past
+  1024 units jumped by the movement relay and a shorter one glided.
 - Side effects: HYPOTHESIS that the relayed cast's effect on the figure in
   an observer's game is blanked by the filter (the figure is its caster and
   target, the observer's player neither), so no observer's game runs the

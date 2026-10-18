@@ -38,7 +38,17 @@
         "sound": "010ec4:Dawnguard.esm"
       }
     },
-    { "spell": "00aae8:Apocalypse - Magic of Skyrim.esp", "reach": 0, "waitMs": 15400, "relay": true }
+    {
+      "spell": "00aae8:Apocalypse - Magic of Skyrim.esp",
+      "reach": 0,
+      "waitMs": 15400,
+      "relay": true,
+      "look": {
+        "appear": "0207c1:Apocalypse - Magic of Skyrim.esp",
+        "appearSeconds": 3,
+        "sound": "0207bf:Apocalypse - Magic of Skyrim.esp"
+      }
+    }
   ],
   "playerGlobals": [
     "043cef:Apocalypse - Magic of Skyrim.esp",
