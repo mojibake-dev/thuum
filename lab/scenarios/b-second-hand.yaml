@@ -5,11 +5,12 @@
 # bolt whose proc spell keeps ticking on its target after the hit, 66 ticks
 # claimed at a 150 ms cadence there (the parity run cast nothing). c1 shoots
 # it at c2 400 units south, as that probe did; c2 holds 1000 Health so the
-# ticks show and nobody dies (the first run, 20261018-110714 at 2000, took
-# about 51 net after 8 s of ticks against the server's regeneration, 2.5 %,
-# a hair short of the 3 % the bound asks; at 1000 the same number is 5 %);
-# the server's number on c2 is read 8 s after the shot and c2's own game
-# must agree within 2 %. Order: look, equip,
+# ticks show and nobody dies. The server's number is the exact claim sum,
+# the bolt's 10 plus 5 times the ticks' factors, with no regeneration inside
+# it (run 20261018-110714 at 2000 Health: 51.09 after 8 s, 0.9745 read, the
+# ticks still going; the bound's 3 % needs the proc's full linger, so at
+# 1000 Health the same 51 is 5 %, run 111322 green). The number on c2 is
+# read 8 s after the shot and c2's own game must agree within 2 %. Order: look, equip,
 # draw-weapon, wait, cast (a hold from empty hands only draws); the watches
 # stop before the assertion so the traces are kept whatever it reads. The
 # cloak shapes (Blood Boil, vanilla Flame Cloak) are read in
