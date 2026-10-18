@@ -111,7 +111,8 @@ script run per hit.
   scripts or MGEFs as FormDescs); the effect runtime in the server's VM (C++
   today, ADR-010's strangling order: the VM is papyrus-vm's); the
   conditions evaluated by the server against the state it owns (Decided,
-  below).
+  below; the build and the records' facts in
+  docs/research/apocalypse/effect-conditions.md).
 - DB fields / migration: none for a NoDuration effect. A script kind in
   magic.rs and the change form comes with the first allowlisted effect
   that lasts (rule 6).

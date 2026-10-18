@@ -30,6 +30,7 @@ placed objects). The class probes' readings fill the trace column.
 | the proc landing on the target's own player in the target's game (the figure's copy of the cloak or script) | inferred from code (Hooks.cpp's AddTarget refusal) | suppressed: H/M/S refused there, the server's number arrives instead |
 | the proc's non-H/M/S effects (a slow, an absorb's gain) | record | later: the census's cross-cutting rows (absorb, the rider twice) |
 | a hazard's ticks (SpawnHazard) | record | later: M4, placed objects |
+| a number that lives in an explosion's enchantment (vanilla Frost Rune's SlowFrostRune 0xb72a2: HazardFrostDamageFFContact 40; Lost Grimoire's Firebomb, Shattering Crystal, Flameheart's end, Detonate and Supercharge Minion), reached hazard to explosion to EITM | record (lab/esm.py, 2026-10-18); trace pending (x-explosion-gate on train-25) | later: the reach follows MGEF to its explosion and EXPL to its enchantment; until then the server refuses the enchantment's hit as no cast and ADR-037's gate keeps the client's copy out, so the spell does nothing to another player (ADR-037, Consequences) |
 
 ### Sequences and combinations (ADR-033)
 
