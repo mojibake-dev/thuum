@@ -203,6 +203,15 @@ Fork branch m2-player-globals, stacked on m2-ghostwalk (2026-10-14):
 T0 green 2026-10-14: Rust tests, clippy and cargo deny locally; the client
 type-checks; fork pipeline 1504's server build ran ctest on the master
 files, 13 of 13, test_unit's 359 cases with this verb's two.
+- On parity 2026-10-17: fork m2-player-globals-main 91b3f9c7 merges parity
+  3536ba43 (train-22) in; GitLab pipeline 1784 and the Windows build green.
+  It rides fork train m2-train-24 with m2-spell-launch, which also moved
+  SpellCast's schema past 16: both changes share schema 17 (neither had
+  shipped). The train adds this verb's difftest session (player-globals,
+  MsgType 45: a listed global recorded, an unlisted one refused, each
+  login's PlayerGlobals on the wire stack; the divergences beyond the
+  expected three are declared from its first T2 run) and stages with the
+  draft T3 b-player-globals by path.
 
 ## Status
 
