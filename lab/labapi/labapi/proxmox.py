@@ -15,6 +15,7 @@ from typing import Any, Protocol
 from .guests import Guest
 
 FILE_READ_MAX = 16 * 1024 * 1024  # the guest-agent file-read cap
+FILE_READ_PAUSES = (2.0, 5.0)  # before a file-read's second and third tries, after a guest agent's "got timeout"
 
 # Self-service snapshots and promotes of the lab clients (thuum-mundus's
 # recipe and guardrails, 2026-10-05, mirroring `sky-lab client baseline` and
@@ -114,7 +115,18 @@ class GuestControl:
 
     def file_read(self, guest: Guest, path: str) -> str:
         self._managed(guest, "read a file from")
-        content = self._call("E_PVE_FILE", guest, self._b.file_read, guest, path)
+        for pause in (*FILE_READ_PAUSES, None):
+            try:
+                content = self._call("E_PVE_FILE", guest, self._b.file_read, guest, path)
+                break
+            except ProxmoxError as e:
+                # A busy guest agent answers a read's open, read or close with "got timeout" now and then
+                # (guest-file-read on 711, guest-file-close on 712, 2026-10-17: train-23's smoke lost
+                # c2-skse64.log to one): asked again; any other refusal is the answer
+                if pause is None or "got timeout" not in str(e):
+                    raise
+                log.info("file-read %s on %s: %s; again in %.0f s", path, guest.name, str(e)[-60:], pause)
+                time.sleep(pause)
         if len(content.encode("utf-8", errors="replace")) > FILE_READ_MAX:
             raise ProxmoxError(f"E_PVE_FILE_TOO_BIG: {path} on {guest.name} exceeds the 16 MiB guest-agent cap")
         return content

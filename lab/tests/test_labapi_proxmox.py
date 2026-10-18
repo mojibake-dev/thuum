@@ -75,6 +75,47 @@ class GuestControlTests(unittest.TestCase):
             control.start(g)
         self.assertIn("E_PVE_START", str(cm.exception))
 
+    def test_file_read_asks_again_after_an_agent_timeout(self):
+        """A busy guest agent answers "got timeout" now and then (guest-file-close on 712, 2026-10-17):
+        the read is asked again, up to three times in all; any other refusal is not."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.fakes import FakeProxmox
+        from labapi.guests import Guest
+        from labapi.proxmox import GuestControl, ProxmoxError
+
+        timeout = "500 Internal Server Error: VM 712 qga command 'guest-file-close' failed - got timeout"
+
+        class Backend(FakeProxmox):
+            def __init__(self, answers):
+                super().__init__()
+                self.answers = list(answers)
+
+            def file_read(self, guest, path):
+                self.calls.append(("file_read", guest.vmid, path))
+                a = self.answers.pop(0)
+                if isinstance(a, Exception):
+                    raise a
+                return a
+
+        g = Guest("sky-c2", 712, "10.10.70.22", "qemu", "client", True, "clean-sp", "c2")
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            b = Backend([RuntimeError(timeout), RuntimeError(timeout), "skse64 log"])
+            self.assertEqual(GuestControl(b).file_read(g, "C:\\sky-lab\\c2-skse64.log"), "skse64 log")
+            self.assertEqual(len(b.calls), 3)
+
+            b = Backend([RuntimeError(timeout)] * 3)
+            with self.assertRaises(ProxmoxError) as cm:
+                GuestControl(b).file_read(g, "C:\\x")
+            self.assertIn("got timeout", str(cm.exception))
+            self.assertEqual(len(b.calls), 3)
+
+            b = Backend([RuntimeError("500 Internal Server Error: VM 712 qga command 'guest-file-open' failed - No such file"), "never read"])
+            with self.assertRaises(ProxmoxError):
+                GuestControl(b).file_read(g, "C:\\x")
+            self.assertEqual(len(b.calls), 1)
+
     def test_empty_snapshot_name_is_refused(self):
         from labapi.guests import Guest
         from labapi.proxmox import ProxmoxError
