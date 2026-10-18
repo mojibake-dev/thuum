@@ -992,3 +992,26 @@ health message. A second red within two sweeps makes it a bug.
   bolt counted and swapped nothing (B1 unbuilt); Thundercrack launched with
   no hit; Hailstone, Static Dome and Crackle never released at a 300 ms
   hold (charge 0 spells need the hold to cover the cast, 900 ms now).
+
+## The stream's heading, read and fixed (2026-10-17 evening)
+
+The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
+Actor::GetAimHeading (37929) returns GetHeading(false) minus the graph
+float AimHeadingCurrent (CommonLibSSE-NG include/RE/F/FixedStrings.h:187;
+src/RE/A/Actor.cpp:288-296), with no bAimActive branch and no camera term;
+GetHeading(false) on a Character is the reference's angle.z (37206; the
+player's override adds a seat's heading delta, zero on foot). MagicCaster's
+launch (34450, then 34452) reads it at every relaunch into LaunchData's
+angleZ, unless the caster is in combat (the combat aim point, 418638) or
+has a desiredTarget (47286); FlameProjectile and BeamProjectile read it
+every frame. So a figure's missiles left along its body's heading, and the
+2.75 degrees of x-stream-aim is the caster's own AimHeadingCurrent, which
+its graph's direct-at modifier sets with a per-node offset (HYPOTHESIS).
+Fix, fork m2-area-effect 9437980f (train-25): the native setActorAimHeading
+writes the figure's AimHeadingCurrent to angle.z minus the caster's relayed
+aimHeading, wrapped to [-pi, pi], so GetAimHeading returns the caster's
+heading and the body stays the movement's; the relayed cast's aimHeading
+is held per figure (sync/figureAim.ts) and written each update until the
+cast's end. HYPOTHESIS until x-stream-aim's rerun: the graph does not write
+the float back between the write and the caster's read (the fallback is a
+trampoline on 37929 for figure form ids).
