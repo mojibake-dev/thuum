@@ -170,9 +170,10 @@ probe reads the cadence); OnHit's own budget.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated
-- [ ] server logic + T0 (fork m2-second-hand ca641d55: wire-rules
-      claim_reached with 8 tests, the bridge's, SecondHandTest on Skyrim.esm's
-      Flame Cloak; GitLab pipeline pending)
+- [x] server logic + T0 (fork m2-second-hand 21967b08, ca641d55: wire-rules
+      claim_reached with 8 tests and the bridge's; SecondHandTest on
+      Skyrim.esm's Flame Cloak; GitLab pipeline 1800 green, test_unit's 369
+      cases and the integration tests; in train m2-train-24 c42ba771)
 - [ ] message + validator (same commit) (none: OnHit unchanged)
 - [ ] native hook + T1 (none)
 - [ ] TS handler (none)
