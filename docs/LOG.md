@@ -1877,3 +1877,40 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   - core's sky-ci runner change landed during the restore: gitlab-runner and its helper images held at 19.4.1, sky-ci
     rebooted at 15:24, and both lanes (sky and sky-light) back online. The restore and relaunch pushed nothing and pulled
     nothing from the registry.
+
+### 2026-10-18
+
+- m2-train-23 merged to fork parity ef02c565 (2026-10-18T01:14Z, 18:14 PDT on 10-17) through `just verb-merge`, from
+  thuum branch ghostwalk-look with main merged in, on thuum-magnus's go. A merge train of three fork branches, staged
+  together:
+  - m2-look-settle f98700aa: for 600 ms after a cast teleport's pop, a figure leaves unapplied any movement report
+    nearer its pre-pop spot than the pop, so the stale pre-landing reports no longer pull it back (movementApply.ts).
+    Ghostwalk's castTeleports entry gains the cast-teleport look (appear 0207c1, sound 0207bf) in both server-settings
+    files, and its difftest session declares the three lines the look adds for c2. This answers playtest twenty-two's
+    note: a short Ghostwalk return slid on the other screen where a long one snapped.
+  - m2-quiver 5207d2e8: a figure wears its quiver again (1000 of the shooter's worn ammo). Skyrim Platform's launch hook
+    drops the figure's own engine arrow unless a relayed launch opened its scope, so a shot stays one arrow.
+  - m2-dirmonitor 01ec9927: Skyrim Platform's DirectoryMonitor waits 5 s before retrying and closes its change
+    notifications. In the freeze dump its watcher for the absent Data/Platform/PluginsDev had used 72.4 s of kernel CPU.
+  Readings (thuum-magnus's reads):
+  - The look stage on m2-look-settle alone: x-teleport-look 20261017-231105, b-teleport-look 231320, b-ghostwalk-look
+    231524 and b-ghostwalk 231728, all green, and T2 green. In b-ghostwalk-look the short return's figure moved 851.7
+    units in one frame of a ~930-unit return and ended within 0.003 units of the server's y. On parity it slid the
+    whole way. The last 50 to 80 units still glide in about half a second, the figure catching up to its caster's last
+    reports, left to Eli's eyes at the M2 close.
+  - The train's stage: x-quiver 20261018-001041 showed c1's figure wearing its quiver on c2's screen. It had 5 launches
+    against c1's 5 (not 10), flights paired at 0.0 units and 0.0 degrees, and 5 "a figure's own arrow dropped" lines in
+    c2.log with nothing crashed. b-arrow-path 001318, b-marksman 001555, x-teleport-look 001820 and b-ghostwalk-look
+    002025 were green.
+  T2 green on skymp-server:m2-train-23 (17:45 PDT). The gate 20261018-004536-merge-m2-train-23 was 12 of 12 green with no
+  rerun, 20261018-004536-smoke-two-players to 20261018-011120-b-spell. Both clones promoted to the ef02c565 client.
+  Lab notes:
+  - lab-api 8ef063a1, deployed before the train's stage (its smoke 20261017-235551 green). Every run's end now reads each
+    managed seat's game: SkyrimSE crash dumps since the run began, uploaded as <client>-SkyrimSE-crash.dmp, and the game
+    process against the version check's pid@start. A crash, or a game replaced or lost, turns a would-be green into
+    error. Every log in the seat's SKSE folder is kept. An assert or until over a seat paused under MessageBoxMenu fails
+    (E_RUN_PAUSED). A snapshot's quiesce empties the dump folders and WER's queues.
+  - crash-dumps.ps1 caps sunshine.exe at one stacks-only dump (thuum-mundus). A short-lived Sunshine child had crashed
+    about every 21 s on both clones, a 4 to 38 MB dump each time, under the global LocalDumps setting that NVIDIA's
+    installer's subkeys create. The train's clean-m1-next carries the cap and none of the old dumps (c1's of 10-05 to
+    10-07, c2's five of 10-15, a queued WER report of 10-06).
