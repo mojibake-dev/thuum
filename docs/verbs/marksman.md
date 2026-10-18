@@ -238,9 +238,16 @@ a rate budget (none today).
 - What is suppressed: the damage of a figure's arrow in the observer's
   game (attackDamageMult 0 on figures, HYPOTHESIS for arrows), and its hit
   report there (skymp5-client hitService.ts drops hits by figures the game
-  does not host). The shooter's game reports the hit, as for melee.
-- How: as above, nothing new unless the lab shows the arrow hurting.
-- Release condition: none.
+  does not host). The shooter's game reports the hit, as for melee. And
+  the figure's own arrow: a figure wears its quiver, so its bow releasing
+  in the observer's game launches an arrow of its own beside the relayed
+  one; Skyrim Platform's launch hook drops it (The quiver, below).
+- How: as above for the damage. For the figure's own arrow, Skyrim
+  Platform's Frida listener on Projectile::Launch (44108): a figure's arrow
+  launched outside TESModPlatform's RelayedArrowScope enters with
+  LaunchData's projectileBase cleared (CommonLibSSE-NG
+  include/RE/P/Projectile.h:83) and leaves with it put back.
+- Release condition: none (a figure is never this game's to simulate).
 
 ## Message contract
 
@@ -428,3 +435,30 @@ arrow spent). Two findings:
   and later hits for 13.24 unblocked and 6.43 on a raised shield (blocked
   share 0.502). Thirteen's no-fire stays unexplained (the arrows not
   equipped is the likely reading); closed unless it comes back.
+
+## The quiver (Eli, 2026-10-17)
+
+"arrow appearance was never fixed. on player 2's screen rotfern still has
+no arrows." Playtest thirteen's fix (4198fe78) gave a figure no arrows, so
+its bow drew empty and only the relayed arrow flew; it also took the
+figure's quiver and its nocked arrow off every other screen.
+
+Fix on fork m2-quiver 5207d2e8 (in train m2-train-23): a figure wears its
+quiver again, 1000 of the shooter's worn ammo as upstream gave it
+(skymp5-client sync/equipment.ts). Its own arrow is dropped in Skyrim
+Platform instead of never existing: TESModPlatform.LaunchArrow and
+LaunchArrowAt open a RelayedArrowScope around their Projectile::Launch
+call (FridaHooks.h), and the launch hook clears LaunchData's projectileBase
+for any other arrow a figure launches, puts it back at the leave, logs "a
+figure's own arrow dropped" and reports nothing (nothing flew).
+- CONFIRMED by x-quiver 20261018-001041 (m2-train-23's stage): Launch builds
+  nothing for a LaunchData with no projectile and its caller takes the empty
+  handle. c2.log has five "a figure's own arrow dropped" lines, one per shot;
+  c2's game launched five iron arrows for c1's figure against c1's five (not
+  ten), every flight paired at 0.0 units and 0.0 degrees, and no game was
+  lost. (The re-analyst's static read of 44108 never finished.)
+- CONFIRMED by the same run's screenshots: the figure wears its quiver,
+  arrows up behind its head (017, from behind), and after the five shots its
+  bowstring is empty (039): the nocked arrow leaves the bow at the release
+  though the launch built none.
+
