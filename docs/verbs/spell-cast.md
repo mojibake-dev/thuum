@@ -1068,6 +1068,19 @@ health message. A second red within two sweeps makes it a bug.
   report within about 2 s (7 of 11 cases), so a probe must set downward or
   read at once (lab-api, numidium).
 
+- x-area-hit 20261018-135726 on train-25 b352b82d, c2 at 150 units: vanilla
+  Flames counted 14 hits at 5.4 a second (median factor 0.2), Scorching
+  Hands 12 hits at about 6 a second (factors 0.15 to 0.2), both with the
+  caster's hit events present in pairs per tick and the apply reported
+  beside them, nothing doubled (same-source server lines at least 149 ms
+  apart). So Scorching Hands counts now; whether the apply path or the hit
+  events carried it cannot be told from the trace, and the parity run's
+  silence had c2 at 400 units, so distance is not excluded as its cause
+  (HYPOTHESIS either way). Shock Nova: its own hit counted once; the
+  explosion's Unarmed 3.712 OnWeaponHit still reached the server, landing
+  115 ms (about seven updates) after the apply, past the one-update drop
+  window: widened to ten updates on train-26 (fork m2-unarmed-window).
+
 ## The stream's heading, read and fixed (2026-10-17 evening)
 
 The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
@@ -1090,3 +1103,11 @@ is held per figure (sync/figureAim.ts) and written each update until the
 cast's end. HYPOTHESIS until x-stream-aim's rerun: the graph does not write
 the float back between the write and the caster's read (the fallback is a
 trampoline on 37929 for figure form ids).
+MEASURED (x-stream-aim2 20261018-135515 on train-25 b352b82d): the figure's
+Scattershock launches in c2's game left at heading 180.00 degrees on 13 of
+16 and 179.42 on 3 against c1's own 180.00 (the parity runs: 177.25 and
+177.41 on every launch, 2.75 and 2.59 degrees off); Flames 180.00 on 15 of
+15. The offset is gone; the fix stands. Pitch was not exercised: the probe
+has no look step, and the look step as built does not pitch the view (see
+docs/research/apocalypse/target-location.md, the lab's aim), so the pitch
+half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.

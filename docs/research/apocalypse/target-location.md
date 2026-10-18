@@ -137,3 +137,30 @@ lobber, the rune).
   what its record's damage and enchantment do to c2 standing in it (the
   ADR-028 extension is not built; Thrumming Stone's stagger on c2 is the
   first reading).
+
+## Measured on train-25 b352b82d (x-class-location 20261018-135152, against train-24's 102618)
+
+- Thrumming Stone: cast (the probe's draw-weapon first), and placed in c2's
+  game: the figure's launch with projectile 0 and the spell at the relayed
+  point (133759.86, -61909.27, 14642.74; 490 units from c1, behind c2), the
+  figure's three hit events 31 ms later on c2's player, itself and a world
+  reference, and c2's own `taken` from the figure with the explosion's spell
+  0x0c0a5391. No stagger anywhere (the spawner's script is blanked in every
+  game, as the census says), nothing in the screenshots (the point was
+  behind the camera), c2's health flat. Train-24's run cast nothing (its
+  first hold drew). So the relay places the explosion where the caster's
+  engine did; the look of it on the other screen is for the playtest's
+  eyes.
+- Lightning Strike and Acceleration Rune: no spellCast event in c1's game
+  in either run, the figure replaying a full cast (the action relay) and the
+  magicka refunded (the rune: 3000 to 1898 and back): the casts fizzled for
+  want of a ground point within range. Cause: the lab's aim. The driver's
+  look step (ObjectReference.SetAngle on the player) reads back pitch 0 and
+  does not pitch the first-person view, so every "20 degrees down" in the
+  class pass and in b-target-location was level, the pick ran out to 490
+  units, and the two short-range spells had nowhere to land (Thrumming Stone
+  reaches). b-target-location (20261018-135949 on bad ids, 140829 on good
+  ones: zero launches of either spell) and x-explosion-gate's runes cannot
+  pass in the lab until the driver can aim down: a lab item (a mouse or
+  camera-pitch step, or a native that sets the player's look pitch), filed
+  in docs/PLAN.md. The playtest measures them by eye meanwhile.
