@@ -53,3 +53,43 @@ was cut short when Ghidra dropped at 01:41 PDT, so no renames were saved.
 - The probe: c1 casts Volcano and a summon at a marker 400 units ahead; on
   c1, 34413 and 43829's records against the pick; on c2, 34413 at c1's point
   and every AddTarget on c2's player.
+
+## The observer's call, read (the re-analyst on sky-re, 2026-10-17 evening)
+
+Every id by `just addr` on 1.6.1170; the signature CONFIRMED-STATIC, the
+behavior HYPOTHESIS until a trace. Decompile dumps in the session's
+scratchpad (re34413/).
+
+- 34413 is `void (MagicCaster* caster, const NiPoint3* point, TESObjectCELL*
+  cell, MagicItem* spell, Effect* effect, BSScrapArray<NiPointer<TESObjectREFR>>*
+  targets)`, the last two on the stack. FindTargets 34410 passes
+  MagicItemDataCollector's largestAreaEffect, and calls it only when that
+  effect's delivery is not Aimed. It reads the caster through three virtuals
+  (GetCasterAsActor, GetMagicNode, GetIsDualCasting) and desiredTarget, never
+  currentSpell or state. Use REL::ID(34413) on 1.6.1170 alone: CommonLib binds
+  SE 34413 to DialogueItem::Ctor.
+- It gathers nothing (41425 filled the list) and applies no number: it
+  creates the explosion (43829: factory 43812, constructor 43827, Initialize
+  43830, which places the EXPL's impactPlacedObject through 13723), owned by
+  the caster's actor, radius the EXPL's or area x 22, the dual cast's
+  explosion and scale when dual casting. A Spawn Scripted Ref effect
+  (archetype 43) pushes its placed object into the list. The spell's own
+  effects reach actors through 34461, after 34413, which a direct call never
+  runs.
+- Calling it from the observer's game: the figure's GetMagicCaster(hand) (its
+  actor owns the explosion), the relayed point, TES::GetCell(point) (skip
+  when null or not attached), the spell, the largest-area effect of a
+  MagicItemDataCollector traverse, an empty BSScrapArray; on the main thread
+  (SKSE TaskInterface::AddTask); the dual-cast flag mirrored.
+- What else lands on the observer's player inside the radius: the
+  explosion's own pass (43847, 43849) always lists the player, then deals
+  the EXPL record's DATA damage through Actor::DamageActor 37335 and casts its
+  enchantment through the owner's instant caster: both outside the fork's
+  AddTarget refusal (Hooks.cpp: a figure's spell-type H/M/S effects), the
+  first never touching AddTarget, the second an EnchantmentItem. So a figure
+  owned explosion would apply its record's numbers locally beside the
+  server's. ADR-028's rule (the server's numbers alone reach a player)
+  extends to both paths: the refusal covers a figure's enchantments, and the
+  explosion pass skips damage and enchantment when its owner is a figure (or
+  37335 refuses a figure attacker). Which spells it matters for depends on
+  each placer's EXPL record (DATA damage, EITM), unread.
