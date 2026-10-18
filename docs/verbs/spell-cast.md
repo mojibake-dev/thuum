@@ -977,13 +977,16 @@ health message. A second red within two sweeps makes it a bug.
 - Scorching Hands (Apocalypse 0x0C02388C, a flame stream whose effect has
   an area of 3) launched 16 flame projectiles in c1's game and c1 reported
   no hit at all, where vanilla Flames (area 0) reports one per tick.
-  HYPOTHESIS: an area effect's targets are gathered by the projectile's
-  explosion (FindTargets' area pass, 34461), which raises no TESHitEvent on
-  the caster's side, so hitService sees nothing to send; the server counts
-  nothing for an area stream. The census's "Self burst" and "area" rows
-  share the cause. A read of what the caster's game raises for an area hit
-  is the next step (the recorder's hits dealt, with magicEffectApply on the
-  target).
+  Not a range matter: vanilla Flames' projectile reaches 768 units
+  (Skyrim.esm PROJ 0x12FCF DATA, lab/esm.py on sky-srv) and c2 stood 400
+  away; the mod has one Scorching Hands spell record (its editor id ends in
+  _NPC), and its effect's own projectile is unread (esm.py prints a DATA's
+  first 32 bytes). HYPOTHESIS: an area effect's targets are gathered by the
+  projectile's explosion (FindTargets' area pass, 34461), which raises no
+  TESHitEvent on the caster's side, so hitService sees nothing to send and
+  the server counts nothing for an area stream; the "Self burst" rows share
+  the cause. Next: the recorder's hits dealt against magicEffectApply on the
+  target for one area spell, with c2 at 150 units.
 - x-class-bolts 20261018-012605: Bolide and Rift Bolt counted once; Rift
   Bolt's scripted proc refused (second-hand covers it); Nature's Balance's
   bolt counted and swapped nothing (B1 unbuilt); Thundercrack launched with
