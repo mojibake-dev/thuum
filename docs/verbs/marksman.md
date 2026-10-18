@@ -451,15 +451,14 @@ LaunchArrowAt open a RelayedArrowScope around their Projectile::Launch
 call (FridaHooks.h), and the launch hook clears LaunchData's projectileBase
 for any other arrow a figure launches, puts it back at the leave, logs "a
 figure's own arrow dropped" and reports nothing (nothing flew).
-- HYPOTHESIS: Launch builds nothing for a LaunchData with no projectile,
-  and the engine's caller handles the empty handle (the re-analyst's read
-  of 44108 and its callers, pending).
-- HYPOTHESIS: the nocked arrow's 3D leaves the bow at the release whether
-  or not the launch built one.
-- Probe x-quiver (scratchpad, in m2-train-23's stage): c2's screenshots of
-  c1's figure from the side, the back and mid-draw; c2's launches of the
-  iron arrow by c1's figure against c1's own (five and five expected; ten
-  would be thirteen's double arrow back); c2.log's drop lines (five
-  expected); the arrows standing in each cell; the paired flights within
-  b-arrow-path's bounds.
+- CONFIRMED by x-quiver 20261018-001041 (m2-train-23's stage): Launch builds
+  nothing for a LaunchData with no projectile and its caller takes the empty
+  handle. c2.log has five "a figure's own arrow dropped" lines, one per shot;
+  c2's game launched five iron arrows for c1's figure against c1's five (not
+  ten), every flight paired at 0.0 units and 0.0 degrees, and no game was
+  lost. (The re-analyst's static read of 44108 never finished.)
+- CONFIRMED by the same run's screenshots: the figure wears its quiver,
+  arrows up behind its head (017, from behind), and after the five shots its
+  bowstring is empty (039): the nocked arrow leaves the bow at the release
+  though the launch built none.
 
