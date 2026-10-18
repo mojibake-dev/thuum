@@ -3,10 +3,9 @@
 # (EncBandit01Melee1HNordM 0x1BCD8, as r-block-b places it, aggressive) stand
 # 300 units ahead; the player, given health to last (setav health 3000),
 # holds an Iron Sword (Skyrim.esm 0x12EB7) and does not fight back; both
-# start combat on it (the console's startcombat on {other}, as r-block-b
-# does, for the last placed one; the first joins on its own). The recorder
-# watches both for 20 s: their approach, attacks, recoils, staggers and
-# combat movement. Draft, 2026-10-16; Survival Mode's first
+# start combat on it (for the last placed one; the first joins on its own).
+# The recorder watches both for 20 s: their approach, attacks, recoils,
+# staggers and combat movement. Draft, 2026-10-16; Survival Mode's first
 # prompt marked answered after solo-start (the first run, 2026-10-17 01:0x,
 # ran paused under its box).
 id: r-npc-fight
@@ -28,7 +27,12 @@ steps:
   - c1: draw-weapon
   - c1: watch-start {bools: [IsAttacking, IsRecoiling, IsStaggering, IsBlocking]}
   - wait: 1
-  - c1: console {text: "{other}.startcombat 14"}
+  # start-combat (the driver's action, lab/driver/src/index.ts, case
+  # "start-combat"): Actor.StartCombat with no {formId}, which falls back to
+  # the last npc placed above, the same one the console's `{other}.startcombat
+  # 14` targeted. Replaces that console line: it paused the game about 3.5 s
+  # inside a watch (docs/research/m3, r-npc-fight run 20261017-083447).
+  - c1: start-combat
   - wait: 20
   - c1: watch-stop
   - c1: screenshot

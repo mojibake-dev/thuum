@@ -25,7 +25,32 @@ steps:
   - c1: console {text: "set gamehour to 7.9"}
   - wait: 2
   - c1: screenshot
-  - c1: watch-start
+  # Riverwood's named townsfolk, by their placed ACHR (REFR) form id: lab/esm.py
+  # against /srv/persist/esm/Skyrim.esm on sky-srv, 2026-10-18 (read-only, over
+  # the host jump). Every one is a persistent reference placed inside their
+  # home interior cell, not in the exterior grid cells (Riverwood,
+  # Riverwood01-06, RiverwoodPath, RiverwoodBridge, RiverwoodEdge01); their
+  # morning package is what walks them outside once this scenario's gamehour
+  # lands, which is the point of watching them by name instead of by the
+  # driver's old random nearby-actor search.
+  #   0x13482 Alvor             base NPC_ 0x13475  RiverwoodAlvorsHouse
+  #   0x13483 Sigrid            base NPC_ 0x13476  RiverwoodAlvorsHouse
+  #   0x13484 Dorthe            base NPC_ 0x13477  RiverwoodAlvorsHouse
+  #   0x13489 Gerdur            base NPC_ 0x1347c  RiverwoodGerdursHouse
+  #   0x1348a Hod               base NPC_ 0x1347d  RiverwoodGerdursHouse
+  #   0x1348b Frodnar           base NPC_ 0x1347e  RiverwoodGerdursHouse
+  #   0x1348c Faendal           base NPC_ 0x13480  RiverwoodFaendalsHouse
+  #   0x35534 Hilde             base NPC_ 0x35533  RiverwoodSvensHouse
+  #   0x13491 Sven              base NPC_ 0x1347f  RiverwoodSvensHouse
+  #   0x13488 Camilla Valerius  base NPC_ 0x1347b  RiverwoodRiverwoodTrader
+  #   0x13487 Lucan Valerius    base NPC_ 0x1347a  RiverwoodRiverwoodTrader
+  #   0x13486 Orgnar            base NPC_ 0x13479  RiverwoodSleepingGiantInn
+  #   0x13485 Delphine          base NPC_ 0x13478  RiverwoodSleepingGiantInn
+  #   0x3550c Embry             base NPC_ 0x3550b  RiverwoodSleepingGiantInn
+  # Ralof's one placed ACHR anywhere in Skyrim.esm (0x2bf9e, base NPC_
+  # 0x2bf9d) sits far from Riverwood (z=8450 against these at 0-240; likely
+  # his Helgen placement), so he is left out of this list.
+  - c1: watch-start {formIds: [0x13482, 0x13483, 0x13484, 0x13489, 0x1348a, 0x1348b, 0x1348c, 0x35534, 0x13491, 0x13488, 0x13487, 0x13486, 0x13485, 0x3550c], trackMax: 480}
   - wait: 90
   - c1: watch-stop
   - c1: screenshot
