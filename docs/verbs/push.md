@@ -366,3 +366,15 @@ reach. The ground's fix is a start that lands short of the saddle, Eli's
 question 4 in decisions-lab.md; the build's trace, if it stays suspected:
 the engine's get-up decision for a knocked player (the re-analyst), a Frida
 probe of its inputs on c2, and a sweep alternating the two builds.
+
+r-push-ground 20261018-162536 (solo, the player at the spawn shouting the
+three words at a placed bandit 150 units east, then west): neither throw
+connected. The spawn floor ends within 150 units on both sides (east a
+107-unit drop to a cliff face, the bandit warped back onto the navmesh by
+the engine; west an 82-unit drop onto a slope with a pine in the line of
+fire), both bandits stood under the cone's level line and took nothing,
+and the screenshots show valley floor far below where a 1300-unit throw
+would land. So the south saddle is the only landing the lab has for this
+throw; the start question (decisions-lab.md, Eli) is between keeping the
+coin flip under ADR-027 and a shorter, different measurement, until the
+driver can pitch the view and a start can be chosen by eye.
