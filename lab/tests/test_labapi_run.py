@@ -539,10 +539,13 @@ class ClientLogs(RunTests):
         self.assertEqual(len(copies), 3, pve.calls)
         self.assertIn("game-dir.txt", " ".join(copies[1][2]))
         self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
-        # one listing of the folder skyrim-platform.log is in, itself left out (it is c1.log)
+        # one listing: the folder skyrim-platform.log is in, itself left out (it is c1.log), then every other
+        # My Games\<folder>\SKSE (the freeze fix logs under Skyrim.INI\SKSE), a name kept from its first folder
         listing = " ".join(copies[2][2])
-        self.assertIn(r"'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE' -Filter '*.log'", listing)
-        self.assertIn("-ne 'skyrim-platform.log'", listing)
+        self.assertIn(r"$main = 'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE'", listing)
+        self.assertIn("Join-Path $_.FullName 'SKSE'", listing)
+        self.assertIn("-Filter '*.log'", listing)
+        self.assertIn("$_.Extension -eq '.log' -and $_.Name -ne 'skyrim-platform.log' -and -not $seen.ContainsKey($_.Name)", listing)
 
     def test_after_a_quiet_spell_the_clients_logs_are_kept_before_the_rollback(self):
         """A playtest's Skyrim Platform log is on the clone until the next run

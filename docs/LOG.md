@@ -1914,3 +1914,38 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     about every 21 s on both clones, a 4 to 38 MB dump each time, under the global LocalDumps setting that NVIDIA's
     installer's subkeys create. The train's clean-m1-next carries the cap and none of the old dumps (c1's of 10-05 to
     10-07, c2's five of 10-15, a queued WER report of 10-06).
+- The class pass (2026-10-18T01:14Z to 01:43Z, 18:14 to 18:43 PDT on 10-17), thuum-magnus's probes, one for each
+  Apocalypse spell family that acts on players, on parity ef02c565 with the Apocalypse layer. Seven runs by path, 7 of 7
+  green: readings, not gates, every assert >= 0. thuum-magnus's reads:
+  - x-class-self 20261018-011427:
+    - Shock Nova's and Battletide's area hits hit the race again, E_SPELL_NO_CAST in the same millisecond as the cast
+      (m2-self-burst, in train-24). Each burst also produced a spurious unarmed weapon hit (source 0x1F4) that the
+      server counted as 3.71 damage, a new finding.
+    - Sotha's Maelstrom's procs hit c2's figure 22 times in c1's game and Blood Boil's 8, and the server applied none
+      (m2-second-hand, in train-24). The engine's cloak proc reports came every 496 to 504 ms per target, which set
+      second-hand's claim cadence (b532b86c).
+    - Inferno's granted Ember Bolt was refused twice ("not found in equipment"), and its 4 hits dropped. Shock Nova left
+      its caster's health at exactly 1.0.
+  - x-class-target 012152:
+    - A relayed touch or target-actor spell at the other player named it by its server id, which the client turned into
+      0. So in the target's game Azure Reconstruction healed the casting figure and Shadowbond landed nowhere
+      (m2-target-actor, in train-24).
+    - Shadowbond's hit was refused E_SPELL_NO_CAST: its script's remote cast arrives as a hit of an unlisted spell, which
+      second-hand covers once its reach set includes it.
+    - Decompose's cloak left c2 at 0.565 of its 0.5 start in its own game and the server unmoved (Cloak is not in
+      EffectFactsOf, as the census said). Leech Seed's absorb ran in c1's game only (c1 0.54, c2 untouched). Finger of
+      Death did nothing visible on either side.
+  - x-class-bolts 012605: Bolide and Rift Bolt hit and counted once. Rift Bolt's scripted teleport proc was refused
+    E_SPELL_NO_CAST (second-hand's reach). Nature's Balance's bolt counted but swapped nothing (c1 stayed 0.33, c2 1.0;
+    its B1 is unbuilt). Thundercrack launched with no hit. Hailstone, Static Dome and Crackle never released: the probe's
+    300 ms holds were too short for these charge-0 spells, and it now holds 900 ms.
+  - x-class-streams 013048: Creeping Cold and Howling Blast counted by time (0.1 and 0.17 s a tick), Scattershock 0.25 a
+    tick with two hits refused after its stop. Scorching Hands launched 16 times against c2's 18, with no hit registered.
+    The figure's launches matched c1's within one for every stream.
+  - x-class-location 013501: nothing on c2's screen for Thrumming Stone, Lightning Strike or the rune, no figure launch
+    and no server line. The observer sees the cast animation and nothing else.
+  - r-shock-nova 013824 (solo): the caster's health stayed 1.0 at every dump-state across two bursts, while the bandit
+    took all four effects and ragdolled. The engine spares the caster, so the server's RunSelfSpell applying a hostile
+    area to its caster is a measured server bug (for train-25).
+  - r-stagger-cast 014025 (solo): inconclusive, since its bandit never attacked. It reruns after train-24's stage with an
+    aggressive bandit, and both r- probes now keep the trace artifact.

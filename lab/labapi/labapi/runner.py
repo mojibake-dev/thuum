@@ -1234,11 +1234,18 @@ class Runner:
         if client in rec.skse_fetched:
             return
         rec.skse_fetched.add(client)
+        # skyrim-platform.log's folder first, then every other My Games\<folder>\SKSE: a CommonLibSSE-NG
+        # plugin can log under My Games\Skyrim.INI\SKSE (the freeze fix's TMS_AIPathingFreezeFix.log does,
+        # 2026-10-17); a name already taken by an earlier folder keeps the first. Extension, since -Filter
+        # '*.log' also matches the rotated skse64.log0 and .log1
         folder = PureWindowsPath(self.s.client_driver_log).parent
         own = PureWindowsPath(self.s.client_driver_log).name
         cmd = ["powershell", "-NoProfile", "-Command",
-               f"Get-ChildItem -LiteralPath '{folder}' -Filter '*.log' -File -ErrorAction SilentlyContinue | "
-               f"Where-Object {{ $_.Name -ne '{own}' }} | ForEach-Object {{ "
+               f"$main = '{folder}'; $seen = @{{}}; "
+               f"@($main) + @(Get-ChildItem -LiteralPath (Split-Path -Parent (Split-Path -Parent $main)) -Directory -ErrorAction SilentlyContinue | "
+               f"ForEach-Object {{ Join-Path $_.FullName 'SKSE' }} | Where-Object {{ $_ -ne $main -and (Test-Path -LiteralPath $_) }}) | "
+               f"ForEach-Object {{ Get-ChildItem -LiteralPath $_ -Filter '*.log' -File -ErrorAction SilentlyContinue }} | "
+               f"Where-Object {{ $_.Extension -eq '.log' -and $_.Name -ne '{own}' -and -not $seen.ContainsKey($_.Name) }} | ForEach-Object {{ $seen[$_.Name] = 1; "
                f"Copy-Item -LiteralPath $_.FullName -Destination (Join-Path '{self.s.client_lab_dir}' ('{client}-' + $_.Name)) -Force; $_.Name }}"]
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
