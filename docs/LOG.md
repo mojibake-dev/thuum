@@ -1949,3 +1949,97 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     area to its caster is a measured server bug (for train-25).
   - r-stagger-cast 014025 (solo): inconclusive, since its bandit never attacked. It reruns after train-24's stage with an
     aggressive bandit, and both r- probes now keep the trace artifact.
+- freeze-fix (a mod layer) merged to main e7780cf1 by merge commit (2026-10-18T09:29Z, 02:29 PDT) through `just
+  layer-merge`, the gate in two sets:
+  - 20261018-021041-layer-freeze-fix: 17 green, then stopped by hand when sky-c1's GPU wedged. That set's a-racemenu
+    hit a failed start of 711 (024729, error) and its lab-fault rerun 024835 was green.
+  - Its rest 20261018-075013-layer-freeze-fix: 39 of 39, 20261018-075013-a-restart-persistence to
+    20261018-092228-t2-fakeclient-restart, verdict watch. b-duel 082158 went red at step 65,
+    `server.actor(c2).healthPercentage < 0.78` read 0.7869 (c2's own game 0.7905): one hit short, not the layer
+    (thuum-magnus). It was green on both ADR-027 reruns and is now a watch item.
+  Both clones promoted. Plugins: none new. AI Pathing Freeze Fix 1.1 (cashboxs, Nexus 190049 file 801783, GPL-3.0) is one
+  SKSE DLL, TMS_AIPathingFreezeFix.dll, in the 1.6.1170 folder's Data\SKSE\Plugins (persist-mods.sh, docs/MODS.md). The
+  load orders and the server settings are unchanged. Each seat's skse64.log in the stage, smoke 20261018-020545 and
+  b-marksman 020807, reads "plugin TMS_AIPathingFreezeFix.dll (00000001 AI Pathing Freeze Fix 01000000) loaded
+  correctly". The plugin's own log is under My Games\Skyrim.INI\SKSE, which lab-api 27e847f fetches from train-24's
+  stage on: empty mid-run means loaded, no repair (thuum-magnus).
+  Lab notes:
+  - sky-c1's GTX 1050 wedged again at 19:47 PDT on 10-17: a slot reset's link retrain failed, "invalid PCI interrupt pin
+    255", QEMU exit 1. Its DevCtl then read 0x79ff, the replayed all-ones state that came before the morning's wedge,
+    and thuum-mundus's remove and rescan at 19:58 did not stick (the card ignores config writes).
+  - Eli's calls: the host reboot, plus hardware and ADR-036 (relaunch instead of a per-run rollback) as the structural
+    fixes. A reboot alone won't hold, since the 1050 has no FLR and every reset is a slot reset: about one link failure
+    in 750 resets, about 5 h of sweeps.
+  - Eli and core then swapped the two cards' slots (the cable-tension theory) with two full power-offs. After a reseat
+    the 1050 is at 0a:00 and the RTX at 0b:00, both on x1 ports (the x16 slot did not link). core pushed the new
+    addresses through the IaC, and DevCtl read 0x293f on all four functions.
+  - The first starts after the swap were clean (c2's agent after 15 s, c1's after 13 s), sky-srv came back on its known
+    host key, and the solo references reran green: r-stagger-cast 20261018-074517 with the aggressive bandit and the
+    trace, r-shock-nova 074819.
+- m2-train-24 merged to fork parity a86238ed (2026-10-18T12:16Z, 05:16 PDT) through `just verb-merge`, from thuum branch
+  player-globals 647228f with main merged in, on thuum-magnus's go. A merge train, staged as one:
+  - m2-player-globals-main 91b3f9c7: per-player globals, wire schema 17 (Apocalypse's settings and counters are each
+    player's own and survive a restart; 53 playerGlobals in both server-settings files).
+  - m2-spell-launch a33b5ffc: a cast carries its launch fields, the same schema 17 bump. f3dff3e9 gives the ghostwalk
+    session's cast those fields.
+  - m2-self-burst 7ea47e5c and d0befa07: a Self burst's first hit no longer races its cast, and RunSelfSpell drops its
+    hostile area effects before applying the spell to its caster (r-shock-nova: the engine spares the caster).
+  - m2-second-hand ca641d55 and 2b3478df: a hit by a spell the caster's own recorded cast reaches through the records (a
+    cloak's spell, a bolt's proc) is claimed against that cast, at the engine's measured cadence (cloak procs every 496
+    to 504 ms in x-class-self).
+  - m2-target-actor ea213315: a relayed touch or target-actor spell at another player lands on that player in its game.
+  - The fork's two Formatting-check faults fixed (Hooks.cpp at clang-format 21.1.8, Definitions.txt), so parity's
+    Formatting check is green again.
+  - T2's declarations: a71fc88a (the PlayerGlobals message for every seat that moves, in 27 session files) and a86238ed
+    (second-hand's proc Health change matched by shape). T2 green on a86238ed, 03:57 to 04:20 PDT.
+  Readings on the stage (thuum-magnus's reads; the staged client was 14d70eb1's, the same code as a86238ed):
+  - The class pass again as the "after": x-class-self 20261018-100816, x-class-target 101320, x-class-bolts 101733,
+    x-class-streams 102216 and x-class-location 102618 green, then x-class-target2 103809 and 105815 (the re-cut).
+  - b-player-globals 103133 green, committed alone. x-two-cloaks 103345 and 104500 green as readings: both cloaks cast,
+    but Flame Cloak's contact damage applies through AddTarget with no hit event, so train-25's apply path reports it.
+  - b-second-hand went red five times on the draft, never the verb: the draw swallowed the first cast (102930), the
+    left-hand Flame Cloak 0xDE511 never cast from the right hand (103607), the cloak's procs had no hit event (104248),
+    and a look after the draw left the hands sheathed (104931, 105614). Re-cut to Crackle alone, it read the claims on
+    the server ("hits ff000001 with spell c0b2c83, claimed as a spell its cast reaches") and missed its bound by a hair
+    at 2000 Health (110714). It was green at 1000 (111322) and is committed alone.
+  The gate 20261018-112123-merge-m2-train-24: 23 of 23 green with no rerun, 20261018-112123-smoke-two-players to
+  20261018-121220-a-racemenu. Both clones promoted to the 14d70eb1 client, at 05:15 and 05:16 PDT.
+  Lab notes:
+  - The stage's first try (02:30) stopped at step 7 when c2's client-dist got empty guest-agent answers twice. Laid by
+    hand clean at 02:38, the second try (02:58) went through. lab-api 1650da4d came with it, so every run now keeps the
+    SKSE logs of every My Games\<folder>\SKSE, the freeze fix's included.
+  - An upward set-percentages can revert within about 2 s (7 of 11 in x-class-target2's runs). docs/LAB.md says to read
+    right after the set; the server fix is a later verb row.
+  - test-proto's staleness guard refused SESSIONS=dir on session-only changes (03:04). Each declaration ran T2 from its
+    head's pipeline instead.
+- m2-area-effect (train-25) merged to fork parity b352b82d (2026-10-18T16:25Z, 09:25 PDT) through `just verb-merge`,
+  from origin/main (no thuum branch), on thuum-magnus's go:
+  - A target-location spell placed where its caster aimed on the other screen, through the engine's placer 34413 and the
+    native placeAreaEffect.
+  - A figure's aimed streams leaving along the caster's aim heading (setActorAimHeading, the 2.75 degree offset gone).
+  - m2-area-report: the player's spell effects on another player's figure reported from the effect's apply, and the
+    explosion's Unarmed stand-in dropped.
+  - m2-area-event 707231fc: areaEffectPlaced registered in Skyrim Platform's EventManager::InitCustom. d0ccf852's client
+    refused the name, its startup broke before NetworkingService, and c2 never came online, which stopped the first stage
+    at 06:04.
+  T2 green on d0ccf852 (06:04 to 06:27 PDT, all 29 sessions identical). It stands for b352b82d: the fix since is the client
+  DLL alone.
+  Readings on the stage at b352b82d (thuum-magnus's reads):
+  - x-class-location 20261018-135152, x-stream-aim2 135515, x-area-hit 135726, x-explosion-gate 140111 and
+    x-second-hand-cloak2 140554 green. The placer is measured on Thrumming Stone, placed in c2's game at the relayed point.
+    The stream heading offset is gone, and Scorching Hands now counts.
+  - b-target-location 135949 and 140829 red, both on the probe. First its learn-spell ids were miscomputed. Then the
+    driver's look step never pitches the first-person aim, so the two short-range target-location spells fizzled for want
+    of a ground point. They wait on a driver step that really pitches the view, and the playtest covers them by eye.
+  - b-cloak-apply 140353 red: a cloak on a peaceful neighbour is an application the engine turns into no hit and no damage.
+    x-second-hand-cloak2 measured that once a fight has begun, the ticks are hits the server claims. So the apply report
+    was withdrawn on train-26 (m2-apply-start-off), and b-cloak-fight replaces the probe.
+  The gate 20261018-141630-merge-m2-area-effect went red on two reds:
+  - b-duel 142100: 13 hit reports where every green has 18 to 21, gaps at the engine's cadence. It's a stream-count jitter,
+    and the design fix is filed in spell-cast.md. c1's link and fps are unchanged by the slot swap (thuum-mundus; c2's RTX
+    is on one lane now).
+  - b-push 145328: c2 rolled off the spawn's ridge and never got up.
+  Two reds give ADR-027 nothing to rerun, so the whole gate ran again as a fresh set: 20261018-151626-merge-m2-area-effect,
+  25 of 25 with b-push a watch item (red at 155712, the same saddle landing, then green on both reruns).
+  20261018-151626-smoke-two-players to 20261018-161634-a-racemenu. Both clones promoted to the b352b82d client at 09:24 and
+  09:25 PDT. Where b-push throws c2 is Eli's decisions-lab.md question 4.

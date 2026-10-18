@@ -458,3 +458,20 @@ promoted.
     is not the path.
   - The figure's flight on other screens is the slice's hard half: the
     movement relay carries a position, not a ragdoll's pose.
+
+## The staggered cast (playtest twenty-one; the engine alone, 2026-10-18)
+
+Twenty-one's note on the staggered caster ("staggers and yet is still able
+to cast") is the engine's own behavior. r-stagger-cast 20261018-074517
+(solo, parity ef02c565 with the freeze fix layer): an aggressive bandit
+(EncBandit01Melee1HNordM with an Iron Sword) fought the player for 55 s
+while the player charged vanilla Firebolt eight times for 3 s each. Four
+StaggerPlayer events landed (8.9, 15.4, 26.2 and 33.4 s into the watch);
+two of them fell on a charged spell (the charge's start at 24.9 and 31.5 s,
+ready at 25.4 and 32.0 s), and both casts still released at key-up (27.9
+and 34.5 s) and fired (28.0 and 34.7 s). The graph shows no interrupt: the
+stagger plays over the held charge and IsCastingRight stays true until the
+release. So a staggered player keeps its charge in Skyrim itself, and the
+server's imposed stagger (TESModPlatform.Stagger) doing the same is parity,
+not a gap. No fix; the big playtest's item becomes a check that both games
+agree with this.

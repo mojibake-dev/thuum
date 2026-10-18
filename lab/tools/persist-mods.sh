@@ -61,6 +61,14 @@
 #   extension. The server loads it after Apocalypse's, and the clients
 #   before CBBE.esp, so both number it the fourth light plugin (FE003) and
 #   CBBE.esp stays the last of its kind on the clients.
+# - AI Pathing Freeze Fix 1.1 (cashboxs; Eli, 2026-10-17), for the lab's load
+#   freeze (docs/research/load-freeze.md): Nexus mod 190049 file 801783,
+#   checked against the md5 Nexus's md5 search gives for that file (the
+#   file's VirusTotal link names the same archive's SHA-256). An SKSE plugin
+#   and nothing else: its DLL, the archive's only file, into SKSE\Plugins
+#   for 1.6.1170 only (its file notes: not 1.7.99 or later; ADR-025). No
+#   plugin file, so no load order and no esm directory; the clients alone
+#   load it.
 #
 # A mod directory named <mod>@<version> installs only into that game
 # version's folder on a clone (add-mods.ps1), and its plugins go only into
@@ -118,6 +126,10 @@ hk_esp="Headshot Kills.esp"
 cif_zip="$cache/CIF-2.0.7.zip"
 cif_md5=280692a00e60890fc8a16826cceb56f1
 cif_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/146873/files/801478
+# AI Pathing Freeze Fix 1.1, Nexus mod 190049 file 801783 (Nexus's md5_search, docs/MODS.md)
+ff_zip="$cache/AIPathingFreezeFix-1.1.zip"
+ff_md5=54804a9e4e9117450921ea78332dbc5c
+ff_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/190049/files/801783
 # the load order after the masters and the Creation Club plugins: the server's
 # loadOrder (server-settings.json for 1.6.1170, server-settings-1.7.104.json
 # without RaceMenu's) lists the same plugins in the same order. CBBE's two
@@ -188,6 +200,15 @@ for pair in "$hk_7z|$hk_api|Headshot Kills - CIF 1.2" "$cif_zip|$cif_api|Core Im
 done
 [ "$(md5 -q "$hk_7z")" = "$hk_md5" ] || { echo "Headshot Kills archive md5 is not $hk_md5" >&2; exit 2; }
 [ "$(md5 -q "$cif_zip")" = "$cif_md5" ] || { echo "CIF archive md5 is not $cif_md5" >&2; exit 2; }
+if [ ! -f "$ff_zip" ]; then
+  echo "fetching AI Pathing Freeze Fix 1.1 from Nexus"
+  url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
+    | curl -fsS -m 30 -H @- "$ff_api/download_link.json" \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["URI"])')
+  curl -fsS -m 300 -o "$ff_zip.part" "${url// /%20}"
+  mv "$ff_zip.part" "$ff_zip"
+fi
+[ "$(md5 -q "$ff_zip")" = "$ff_md5" ] || { echo "AI Pathing Freeze Fix archive md5 is not $ff_md5" >&2; exit 2; }
 command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu and CBBE (brew install sevenzip)" >&2; exit 2; }
 [ -f "$rotfern/rotfern.esp" ] || { echo "no rotfern.esp in $rotfern" >&2; exit 2; }
 
@@ -281,6 +302,9 @@ hk="$stage/tree/headshotkills-1.2"; mkdir -p "$hk"
 cif="$stage/tree/cif-2.0.7"; mkdir -p "$stage/cif-x" "$cif"
 unzip -q "$cif_zip" "Data/*" -d "$stage/cif-x"
 rsync -a "$stage/cif-x/Data/" "$cif/"
+# the fix's DLL in its archive's own Data layout, SKSE/Plugins, for the 1.6.1170 folder alone
+ff="$stage/tree/aipathingfreezefix-1.1@1.6.1170"; mkdir -p "$ff"
+unzip -q "$ff_zip" "SKSE/Plugins/TMS_AIPathingFreezeFix.dll" -d "$ff"
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)

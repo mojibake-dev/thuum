@@ -175,6 +175,14 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   movement (formView, forms another game drives), so either branch of 37930
   reads the caster's pitch. HYPOTHESIS: the behavior graph does not overwrite
   AimPitchCurrent between updates (the behavior files say, not the exe).
+  MEASURED (x-class-streams 20261018-102216 on train m2-train-24 against
+  013048 on parity): the figure's stream in c2's game left at heading
+  3.1427 rad against c1's own 3.1416 (0.06 degrees), where parity gave
+  3.0865 (3.16 degrees off) for all four streams; bolts left at 3.1416 on
+  both screens in both runs. Which change on the train closed the heading
+  is unread (the aim-heading fix is pinned to train-25, x-stream-aim2 its
+  probe), so the cause stays HYPOTHESIS; the pitch's measurement is
+  train-25's.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -221,6 +229,26 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
 - SpellCast (MsgType 23), both directions, unchanged fields (caster,
   target, spell, isDualCasting, interruptCast, castingSource, aimAngle,
   aimHeading, actorAnimationVariables).
+- `target` (read 2026-10-18, fork m2-cast-target 9359e2c7 on train-26):
+  Skyrim Platform fills the spellCast event's target from the caster's own
+  MagicTarget (EventHandler.cpp; Actor::GetTargetStatsObject is the actor
+  itself, CommonLibSSE-NG include/RE/A/Actor.h:354), so until that fix
+  every cast named its caster, the server relayed it verbatim
+  (ActionListener.cpp's RelayCast rewrites only a legacy 0x14), and a
+  relayed touch or target-actor spell was cast at the figure that cast it
+  (x-class-target2 20261018-105815: Azure Reconstruction healed c1's
+  figure 15 times in c2's game, nothing on c2). Now the player's own cast
+  of a spell delivered to its target names the actor under the crosshair
+  at the cast, by server id (a figure's through the view, an NPC's as is),
+  or 0 when none; every other cast keeps the event's word. Rung R2:
+  client-reported, recorded and relayed, unvalidated (rule 5; the wire
+  validator takes any u32, wire-validate's check_spell_cast); the numbers
+  still come only through the hit path's claims. Follow-up: the server
+  checks the named target is within the spell's reach of the caster at
+  the cast (R1), and SP reads the hand's MagicCaster::desiredTarget
+  synchronously in ProcessEvent (CommonLibSSE-NG include/RE/M/MagicCaster.h:87)
+  instead of the crosshair a tick later (HYPOTHESIS that it holds the
+  picked actor at the event).
 - Validator rules (new, fork ba22a406): castingSource within 0 to 3;
   aimAngle finite and within plus or minus a quarter turn; every float
   finite; spell not 0; a cast budget per client, eight at once and four a
@@ -977,6 +1005,22 @@ health message. A second red within two sweeps makes it a bug.
 - Scorching Hands (Apocalypse 0x0C02388C, a flame stream whose effect has
   an area of 3) launched 16 flame projectiles in c1's game and c1 reported
   no hit at all, where vanilla Flames (area 0) reports one per tick.
+  Explained statically and fixed (fork m2-area-report 244893ba, on
+  train-25): the explosion read (docs/research/apocalypse/
+  target-location.md) shows an explosion's own hit event names its weapon
+  as the source, Unarmed (0x1F4) when it has none, which is the "unarmed
+  hit" x-class-self counted at every Self burst (3.71 of unarmed damage),
+  while the spell's effects land on the actors in the area through
+  AddTarget (34461), which raises no hit event for the caster's game to
+  send. hitService now reports the player's magicEffectApply on another
+  player's figure as a hit of the equipped spell that carries the effect
+  (once per target and spell within two frames beside any hit event, the
+  shout and cast-order rules kept) and drops an Unarmed hit that lands
+  beside such an apply on the same target. The server then claims it as a
+  spell hit against the recorded cast, an area cast covering its targets
+  within the splash window as built. HYPOTHESIS until x-area-hit: the
+  apply fires in the caster's game for each actor the area took, and the
+  Unarmed stand-in is the explosion's every time.
   Not a range matter: vanilla Flames' projectile reaches 768 units
   (Skyrim.esm PROJ 0x12FCF DATA, lab/esm.py on sky-srv) and c2 stood 400
   away; the mod has one Scorching Hands spell record (its editor id ends in
@@ -992,3 +1036,108 @@ health message. A second red within two sweeps makes it a bug.
   bolt counted and swapped nothing (B1 unbuilt); Thundercrack launched with
   no hit; Hailstone, Static Dome and Crackle never released at a 300 ms
   hold (charge 0 spells need the hold to cover the cast, 900 ms now).
+
+- x-class-target2 20261018-105815 on train m2-train-24 (its first cut,
+  x-class-target 012152 and 101320, cast one spell of five: the first hold
+  from empty hands drew instead of casting and Shadowbond's script moved
+  the caster onto the target, so the later blocks aimed at nobody): every
+  block cast; the server counted Finger of Death, Decompose, Leech Seed
+  and Shadowbond on c2 (OnSpellHit, a fight begun; parity refused them
+  E_SPELL_NO_CAST), Leech Seed's second hit message of the same cast
+  refused as consumed (harmless). In c2's own game nothing landed on c2's
+  player in any block: Azure Reconstruction's relayed stream applied its
+  heal to c1's figure itself (15 applies of 0x0c126da1, caster the figure,
+  none on 0x14), Finger of Death and Shadowbond applied nothing, exactly
+  the shape m2-target-actor set out to fix. HYPOTHESIS: the relayed
+  SpellCast carried target 0 for these spells (magicSyncService fills it
+  from Skyrim Platform's spellCast event, which names no target when the
+  engine picks it later; the server relays the field untranslated and the
+  receiver routes to 0x14 only when it names c2); the run has no pcap and
+  the server does not log the field. The fix after the big playtest: the
+  sender names the aimed-at actor (the crosshair reference or the
+  projectile's target) when the event has none. Azure's heal stream raised
+  no hit event in c1's game, so the server never saw a heal to apply: its
+  number is train-25's apply path (m2-area-report). Shadowbond did not
+  move c1 this time (0.5 units over 158 s; the script polls before its
+  MoveTo, so ambiguous against the earlier runs' 46 units). Two findings
+  beyond the verb: Finger of Death's script read c2's figure at a million
+  Health, failed its threshold and ran its self-damage branch, taking c1
+  from 10000 to 1 (an ADR-029 class of its own: a script that reads a
+  figure's values judges the lab's million, not the player's number); and
+  a server-side set-percentages upward is reverted by the client's stale
+  report within about 2 s (7 of 11 cases), so a probe must set downward or
+  read at once (lab-api, numidium).
+
+- x-area-hit 20261018-135726 on train-25 b352b82d, c2 at 150 units: vanilla
+  Flames counted 14 hits at 5.4 a second (median factor 0.2), Scorching
+  Hands 12 hits at about 6 a second (factors 0.15 to 0.2), both with the
+  caster's hit events present in pairs per tick and the apply reported
+  beside them, nothing doubled (same-source server lines at least 149 ms
+  apart). So Scorching Hands counts now; whether the apply path or the hit
+  events carried it cannot be told from the trace, and the parity run's
+  silence had c2 at 400 units, so distance is not excluded as its cause
+  (HYPOTHESIS either way). Shock Nova: its own hit counted once; the
+  explosion's Unarmed 3.712 OnWeaponHit still reached the server, landing
+  115 ms (about seven updates) after the apply, past the one-update drop
+  window: widened to ten updates on train-26 (fork m2-unarmed-window).
+
+- A stream's number under dropped hit reports (b-duel's Flames phase read
+  across 27 runs since 10-14, 2026-10-18): the server's number is exactly
+  8 a second times the factor sum, each report's factor the time since the
+  last counted report capped at MAX_TICK_MS 250 ms (wire-rules casts.rs),
+  and a full 4 s hold yields 20 or 21 reports at the engine's 0.183 s
+  cadence on every build. Today's two reds (20261018-082158 on parity's
+  client, 142100 on train-25's) had 13 reports: gaps of exactly two or
+  three cadences where no hit event reached the client at all, each gap
+  capped, 7.6 to 8 of 100 Health lost against the 0.78 bound. Not today's
+  code (one red predates every hit-path change; the number per tick is
+  identical on every build). One or two such gaps sit in six greens since
+  10-14; four or five only today, both on c1 after the GPU slot swap put
+  the 1050 on one lane. c1's frame pacing was the suspect and is untested,
+  not disproved: in every window the recorder kept (phases 1 and 2 of all
+  three runs) c1 ran 60.0 updates a second with no interval above 37 ms,
+  but no c1 series covers the Flames hold in either red (they stopped at
+  the failed assert) and the recorder keeps no per-frame timestamps; a
+  per-update series or the client's hit events with their frame index
+  across one hold would settle it (the cards' link speeds are mundus's
+  read). The
+  design gap underneath, for a later verb: the engine applies a
+  concentration spell's damage every frame it touches the target whatever
+  the hit events do, so a client that drops hit events under slow frames
+  undercounts on the server where the engine would not (ADR-031). The
+  stream's start and end are reliable messages already; counting the
+  held time between them while reports confirm the target, or a cap of a
+  cadence and a half (about 400 ms) so one missed report costs nothing,
+  are the two shapes; neither tonight (the T2 declarations name today's
+  factors).
+
+## The stream's heading, read and fixed (2026-10-17 evening)
+
+The re-analyst on sky-re (1.6.1170, CONFIRMED-STATIC unless tagged):
+Actor::GetAimHeading (37929) returns GetHeading(false) minus the graph
+float AimHeadingCurrent (CommonLibSSE-NG include/RE/F/FixedStrings.h:187;
+src/RE/A/Actor.cpp:288-296), with no bAimActive branch and no camera term;
+GetHeading(false) on a Character is the reference's angle.z (37206; the
+player's override adds a seat's heading delta, zero on foot). MagicCaster's
+launch (34450, then 34452) reads it at every relaunch into LaunchData's
+angleZ, unless the caster is in combat (the combat aim point, 418638) or
+has a desiredTarget (47286); FlameProjectile and BeamProjectile read it
+every frame. So a figure's missiles left along its body's heading, and the
+2.75 degrees of x-stream-aim is the caster's own AimHeadingCurrent, which
+its graph's direct-at modifier sets with a per-node offset (HYPOTHESIS).
+Fix, fork m2-area-effect 9437980f (train-25): the native setActorAimHeading
+writes the figure's AimHeadingCurrent to angle.z minus the caster's relayed
+aimHeading, wrapped to [-pi, pi], so GetAimHeading returns the caster's
+heading and the body stays the movement's; the relayed cast's aimHeading
+is held per figure (sync/figureAim.ts) and written each update until the
+cast's end. HYPOTHESIS until x-stream-aim's rerun: the graph does not write
+the float back between the write and the caster's read (the fallback is a
+trampoline on 37929 for figure form ids).
+MEASURED (x-stream-aim2 20261018-135515 on train-25 b352b82d): the figure's
+Scattershock launches in c2's game left at heading 180.00 degrees on 13 of
+16 and 179.42 on 3 against c1's own 180.00 (the parity runs: 177.25 and
+177.41 on every launch, 2.75 and 2.59 degrees off); Flames 180.00 on 15 of
+15. The offset is gone; the fix stands. Pitch was not exercised: the probe
+has no look step, and the look step as built does not pitch the view (see
+docs/research/apocalypse/target-location.md, the lab's aim), so the pitch
+half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.

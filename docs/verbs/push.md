@@ -325,3 +325,44 @@ more than 100 units 5 s into the watch, green twice (20261015-025520 read
 150, -025801 read 1146). The inventory's last row is DONE for the shouter's
 screen.
 
+## b-push's landing (2026-10-18, read from the merge gate of train-25)
+
+b-push 20261018-145328 went red with no GetUpBegin and the figure match
+failing, and the read against four greens (120201, 084420, 20261017-133855,
+005732) puts it on the lab's ground, not the verb: c2's start, the cone's
+launch, the hit, the shout's own damage effects and the 1280-unit flight
+south match the greens sample for sample, and all five land on the same
+ridge lip 1250 to 1300 units south of the spawn. The greens slid 10 to 300
+units there and got up in 3.8 to 7.8 s; this body rolled east down a
+950-unit face for 7 s, never came to rest, and the engine's get-up never
+came (HYPOTHESIS: the get-up waits for rest, consistent with all five). The
+figure match failed only because c1's figure of c2 is held still while its
+player is down (the relayed Ragdoll's Variable10 hold, released a second
+after the relayed GetUpBegin), while the server's record followed c2's own
+reports 1900 units away. Health was the shout's 10 then 40 over a second
+(0xEA075 and Dragonborn's 0x0402032B), inside the greens' band; no fall
+damage registered. So the scenario's landing spot is a coin flip on the
+ridge; moving c2's start so the flight lands short of it is a scenario
+change for Eli's review (docs/private/decisions-lab.md), not a weakening.
+One thing the greens never show, worth a push-trace if it recurs: c1's
+figure of c2 took a second, refused Ragdoll 72 ms after its own and barely
+flew (peak 74 units, 160 units by 5 s against 1120 to 1140), the signature
+of the zero-force re-knock cadb5648 fixed; it did not cause this red.
+
+The second red, 20261018-155712 in the fresh gate of the same build, read
+the same way: identical knock timing (hit to StaggerPlayer 8 to 12 ms,
+StaggerPlayer to Ragdoll 39 to 42 ms in all six runs), identical flight
+(peak 160 to 171 units, landing at 4.6 to 4.7 s), the same health, the
+same frame cadence, nothing reaching c2 after the Ragdoll in any run, one
+Ragdoll on the figure this time; what varied was the landing on a saddle
+1250 units south of the spawn (three greens settled on top at x 70 to 84;
+084420 slid west and got up at 7.8 s on a flat spot; 155712 slid west 120
+units north of that and never slowed below about 15 units a second;
+145328 went down the east face). HYPOTHESIS from all six: the player gets
+up once its body is at or under about 15 units a second for a sample or
+two. The build is not excluded by a count of two; the victim's game shows
+no fingerprint of train-25's changes anywhere the recorder or the logs
+reach. The ground's fix is a start that lands short of the saddle, Eli's
+question 4 in decisions-lab.md; the build's trace, if it stays suspected:
+the engine's get-up decision for a knocked player (the re-analyst), a Frida
+probe of its inputs on c2, and a sweep alternating the two builds.

@@ -351,10 +351,14 @@ the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
   goes two updates after its event (skymp5-client hitService.ts), behind
   any cast this frame or the next sends. Weapon hits and a shout's held
   hits are unchanged.
-- MEASURED (r-shock-nova 20261018-013824, the engine alone, solo): two
-  Shock Novas beside a placed bandit left the caster's health at 1.0 at
-  every dump-state while the bandit took all four of the burst's effects
-  and ragdolled. So the engine spares a Self burst's own caster, and
+- MEASURED (r-shock-nova 20261018-013824 and its repeat with the trace,
+  20261018-074819, the engine alone, solo): two Shock Novas beside a placed
+  bandit left the caster's health at 100 of 100 in every sample while the
+  bandit took all four of the burst's effects (35 to dead, ragdolled). The
+  caster's game also raised the explosion's hit events with the player
+  itself among the targets (source Unarmed 0x1F4 and the rim effect's
+  spell), which the engine did not turn into damage: a second reason the
+  client drops the explosion's Unarmed stand-in (fork m2-area-report). So the engine spares a Self burst's own caster, and
   RunSelfSpell (ActionListener.cpp), which applies every effect of a
   fire-and-forget Self spell to its caster, the area's hostile ones
   included, hurts Shock Nova's, Frost Nova's and Life's Finale's casters on
@@ -366,3 +370,24 @@ the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
   the server's Shock Nova line ("casts c00186d on itself") came with the
   caster's health at 1.0 in both games, which only says the lab's casters
   have more health than the burst takes.
+
+Measured on train m2-train-24 14d70eb1 (x-class-self 20261018-100816 against
+the parity run 011427, read 2026-10-18): both fixes hold. Shock Nova's and
+Battletide's first hits were counted (OnSpellHit at 10:12:31.433 and
+10:12:56.915, 33 ms and 32 ms after their casts; no E_SPELL_NO_CAST in the
+run, where the parity run refused both at 249 and 252 units), and the
+caster's figure in c2's game no longer dips after a burst (the parity run's
+dipped to 99.516 % in the Shock Nova block while the caster's own game held
+10000; a lerped figure series, so HYPOTHESIS-grade). Shock Nova took 80 of
+c2's 100000 on the server, and c2's own game agreed (-72 sampled under
+regen, magicka 100 to 20): the spell's 40 plus both rim effects' 20, whose
+GetDistance conditions (at least 256 and 425 units) the server does not read
+at 250 units, where the engine would apply 40 alone
+(docs/research/apocalypse/effect-conditions.md, Eli's decision 4). The
+rider the caster's game applied to the figure (0x0c023df1, Health 200)
+the server skipped. The caster's game still reported each burst's
+explosion as an Unarmed hit on c2 (OnWeaponHit with 1f4 for 3.712, both
+runs), which train-25's m2-area-report drops. The three self-targeted hit
+events the caster's game raised (Shock Nova's two, Battletide's one) left
+no server line in either run; whether the client dropped them or the
+server did silently is not in the artifacts.
