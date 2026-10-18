@@ -25,7 +25,7 @@ placed objects). The class probes' readings fill the trace column.
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | the parent spell's own hit and number | record | native, imposed as today (spell-cast, magic-effects) |
-| the proc's hit on the target, reported by the caster's game | record; trace pending (x-class-self, -target, -bolts, -streams) | imposed: claimed against the parent's cast (this verb) |
+| the proc's hit on the target, reported by the caster's game | record; trace: x-class-self 20261018-100816 (Sotha's Maelstrom 22 of 22, Blood Boil 8 of 8, Inferno's two Ember Bolts), x-class-bolts 20261018-101733 (Crackle's proc, 66 ticks), on train-24 | imposed: claimed against the parent's cast (this verb) |
 | the proc's Health, Magicka or Stamina number on the target | record | imposed: the server's effect runtime, as any spell hit |
 | the proc landing on the target's own player in the target's game (the figure's copy of the cloak or script) | inferred from code (Hooks.cpp's AddTarget refusal) | suppressed: H/M/S refused there, the server's number arrives instead |
 | the proc's non-H/M/S effects (a slow, an absorb's gain) | record | later: the census's cross-cutting rows (absorb, the rider twice) |
@@ -36,11 +36,14 @@ placed objects). The class probes' readings fill the trace column.
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| a cloak's proc reported at the engine's rhythm (about 5 a second for a concentration spell) | b-second-hand, x-class-self | pending: counted by time, never throttled (T0 a_cloaks_concentration_spell_counts_the_time_it_held_each_target) |
-| the same cloak cast again while the first lingers | x-class-self (Sotha's Maelstrom twice) | pending: the newest cast claims |
+| a cloak's proc reported at the engine's rhythm (about 5 a second for a concentration spell) | b-second-hand, x-class-self | MEASURED on train-24 (x-class-self 20261018-100816): Sotha's Maelstrom's 22 procs claimed at 497 to 518 ms apart (mean 501) over 10.5 s, each at 0.497 to 0.518 of its magnitudes; Blood Boil's 8 at 498 to 504 ms; none refused or throttled (T0 a_cloaks_concentration_spell_counts_the_time_it_held_each_target) |
+| the same cloak cast again while the first lingers | x-class-self (Sotha's Maelstrom twice) | pending: the newest cast claims (the stage's run cast it once; x-two-cloaks reads the two-caster case) |
 | the caster walks off with its cloak | b-second-hand (c2 steps out) | pending: judged from where the caster stands now (T0 a_proc_is_judged_from_where_the_caster_stands_now) |
-| a concentration cloak released (Blood Boil) | x-class-self | pending: its procs stop with its stream (T0 a_concentration_cloak_lingers_while_its_stream_is_open) |
-| both seats cloaked beside each other | later: a two-cloak probe | |
+| a concentration cloak released (Blood Boil) | x-class-self | MEASURED on train-24: Blood Boil's 8 procs claimed 10:11:36.133 to 10:11:39.629, none after its release (T0 a_concentration_cloak_lingers_while_its_stream_is_open) |
+| both seats cloaked beside each other | x-two-cloaks 20261018-104500 (Flame Cloak 0x3AE9F) | MEASURED: both casts recorded; each cloak applied FireDamageConcAimedCloak to the other's figure every 500 ms (30 applications in c1's game) with no hit event, so nothing reached the server on train-24 (the apply path, train-25) |
+| a cloak on a neighbour not in combat with the caster | x-second-hand-cloak 20261018-110916 (Blood Boil at 150 and 299 units, Flame Cloak at 150) | MEASURED: the proc effect applied to the figure every 500 ms at every distance (4, 4 and 10 applications) and the caster's game raised no hit event, where x-class-self 100816 raised one per application 52 s after a fight had begun. HYPOTHESIS: the engine raises a hit event for a cloak's applied spell only against a target in combat with the caster; probe: one plain hit before the hold. Until the apply path (train-25) the server counts a cloak's ticks only inside a fight |
+| a bolt's proc on the target (Crackle's, a script property's spell) | x-class-bolts | MEASURED on train-24 (20261018-101733): 66 ticks claimed at a 150 ms median cadence (42 of 65 gaps in 145 to 155 ms) over 13.85 s, factor sum 10.9, with one 4005 ms pause that coincides with c1's dispelallspells console step and ended on its own; the parity run cast nothing (its 300 ms hold) |
+| the server's number for a proc train | b-second-hand 20261018-110714 and 111322 | MEASURED: exactly the claim sum, the bolt's 10 plus 5 times the factors (8.218 in 110714: 51.09 of 2000, the assert read 0.9745) with no server-side regeneration inside 0.5 Health; c2's own game agreed within 0.0011, each claim's push resetting its regeneration |
 | the caster reconnects mid-cloak | later: forget() clears its casts on leave | |
 
 ## Authority
@@ -148,11 +151,26 @@ probe reads the cadence); OnHit's own budget.
 - T2: difftest session second-hand: c1 casts a cloak, then reports its
   proc's hit on c2: the wire stack claims and damages, the legacy stack
   drops it (declared).
-- T3 scenario id: b-second-hand (scratchpad draft, 2026-10-17): vanilla
-  Flame Cloak beside c2 (the cloak deals nothing itself, so every point c2
-  loses is FlameCloakDmg's), then Sotha's Maelstrom; c2's health falls on
-  the server and c2's game agrees. A script proc (Creeping Cold) is read in
-  x-class-streams.
+- T3 scenario id: b-second-hand (scratchpad draft, re-cut 2026-10-18 after
+  three red first runs on train-24's stage): Blood Boil, a concentration
+  Self cloak held 4 s beside c2 (its ticks on c2 reported as hits by the
+  caster's game, 8 claimed at 500 ms in x-class-self 20261018-100816), then
+  Crackle, an aimed bolt whose proc keeps ticking on c2 (66 claimed at
+  150 ms in x-class-bolts 101733); c2's health on the server falls after
+  each cast, read before regeneration hides it, and c2's game agrees within
+  2 %. The first draft's vanilla Flame Cloak could not pass on train-24 and
+  the runs said why in three steps: FlameCloakLeftHand 0xDE511 never casts
+  from the right hand (runs 102930, 103607; the player's spell is 0x3AE9F,
+  the tome's); the cast then arrived but no proc did (104248); and
+  x-two-cloaks 104500 showed the reason: a cloak's contact damage applies to
+  the neighbour's figure through AddTarget with no hit event (30
+  applications of FireDamageConcAimedCloak on the figure in the caster's
+  game, 0 hits dealt), so only the apply path reports it. That is
+  b-cloak-apply (train-25, fork m2-area-report): Flame Cloak beside c2 for
+  6 s, c2's health down on the server and in its game. A script proc
+  (Creeping Cold) is read in x-class-streams. Sotha's Maelstrom's procs are
+  claimed (22 of 22) but move no number: its proc is a script casting a
+  ResistMagic debuff, so it asserts nothing about health.
 - Assertions that would fail if the verb silently regressed: c2's health on
   the server after the cloak's seconds.
 

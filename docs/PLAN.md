@@ -262,8 +262,21 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       branch on train m2-train-24 unless named otherwise:
       - target actor and touch: the relayed cast named the player by its
         server id, which the client made 0, so the figure's spell landed on
-        nobody (Azure Reconstruction healed the figure itself); fixed,
-        m2-target-actor.
+        nobody (Azure Reconstruction healed the figure itself);
+        m2-target-actor, half measured: on train-24 (x-class-target2
+        20261018-105815) the server counts Finger of Death's, Decompose's,
+        Leech Seed's and Shadowbond's hits on the other player, which
+        parity refused, but in that player's own game the relayed casts
+        still land on nobody (Azure's stream healed the figure itself, 15
+        applies, none on the player). HYPOTHESIS: the relayed cast carries
+        target 0 for these deliveries (the sender fills it from Skyrim
+        Platform's spellCast event, which names no target at cast time);
+        the fix after the big playtest names the target from the aimed-at
+        actor. Azure's heal raises no hit event, so its number waits on
+        train-25's apply path. Also measured: an Apocalypse script that
+        reads a figure's Health value misjudges it (figures hold a
+        million): Finger of Death's self-damage branch took its caster
+        from 10000 to 1 (docs/verbs/spell-cast.md).
       - second-hand (cloaks, procs; 30 spells): the caster's game reported
         every proc hit, the server dropped them all as hits of an unequipped
         spell; fixed by claiming a hit against the recorded cast whose
@@ -277,7 +290,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         projectile ones at the relayed launch (m2-spell-launch on train-24,
         m2-area-effect on train-25, docs/research/apocalypse/
         target-location.md); the explosion's own numbers are ADR-037,
-        proposed.
+        accepted 2026-10-18 (its gates ride train-26).
       - aimed streams: counted by time as built; Scattershock's 2.75 degree
         heading offset read to the figure's AimHeadingCurrent and fixed
         (m2-area-effect); an area stream (Scorching Hands) registers no hit
@@ -288,6 +301,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - the staggered cast (twenty-one): r-stagger-cast's bandit never
         attacked; rerun queued with an aggressive one.
       - per-player globals (A2) ride train-24 with these.
+      - found on the way (x-class-target2 20261018-105815, read 2026-10-18):
+        a server-set rise in a player's Health is reverted within about 2 s
+        by the client's stale report (OnChangeValues takes the lower report
+        as a fall, then crops the client's later report of the set value
+        back down and sends it back; 7 of 11 upward sets in two runs); a
+        server-applied heal would snap back the same way. A verb fix on a
+        later train: an owner's set and the server's own changes win over
+        reports that predate them (a sequence or a grace window in
+        OnChangeValues); until then a scenario sets downward or reads at
+        once (docs/LAB.md, numidium's note).
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
