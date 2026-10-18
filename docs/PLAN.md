@@ -318,6 +318,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   remaining items continue under M2: the push verb DONE 2026-10-14 (4e8aa04c),
   then Apocalypse and headshots; ADR-031's parity assertion is in lab-api
   (bb9fed0) and joins b-duel with its references.
+- The close (Eli, 2026-10-17: "can we roll 23 and 24 into one test? id
+  rather just knock them all out if that's the last of m2"): one playtest
+  checks everything M2 has left: both teleports' landing without the slide
+  and Ghostwalk's look, the shooter's quiver on other screens, the load
+  freeze fix, headshots, per-player globals, the staggered cast, and one
+  spell per Apocalypse class that acts on players. It follows the class
+  pass's probes (each class's gap measured before it is built) and the
+  fixes they call for. SkyUI moves to the shared set's essentials, which
+  Eli picks from his own mod list (a mod layer, checked by its sweep).
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 

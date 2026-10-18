@@ -337,3 +337,24 @@ Every self-cast item passed:
   player's figure, back when the effect ends. Found: a Self cast shows no
   cast animation on the figure (docs/verbs/spell-cast.md, the hands).
 
+
+## Self bursts (the class pass, 2026-10-17)
+
+The census's Self burst class (13 learnable Apocalypse spells, an area at
+the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
+- MEASURED (playtest twenty-one, server.log 03:14:05.326): Battletide's
+  area hit on test 2 reached the server in the same millisecond as its
+  cast, ahead of it, and was refused, E_SPELL_NO_CAST. The engine raises a
+  burst's hits in the frame it casts the spell, and the hit's event can
+  come first; both go on one reliable channel, so the client's order is the
+  server's. Fix on fork m2-self-burst 7ea47e5c: the player's own spell hit
+  goes two updates after its event (skymp5-client hitService.ts), behind
+  any cast this frame or the next sends. Weapon hits and a shout's held
+  hits are unchanged.
+- INFERRED from code (ActionListener.cpp RunSelfSpell): the server applies
+  every effect of a fire-and-forget Self spell to its caster, the area's
+  hostile ones included, so Shock Nova, Frost Nova and Life's Finale would
+  hurt their own caster on the server. What the engine itself keeps off a
+  burst's caster is the class pass's engine-alone reference (Shock Nova
+  beside a placed NPC, solo); the server's rule follows it on the same
+  branch.
