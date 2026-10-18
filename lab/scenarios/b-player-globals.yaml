@@ -1,0 +1,41 @@
+# M2, player-globals (docs/verbs/player-globals.md, ADR-029's A2): a global a
+# player's game writes for its player is kept by the server and set in its
+# game again after a server restart and a reconnect, and the other player's
+# game keeps its own. The global: Apocalypse's Craftlord's unspent points
+# ("0b1c19:Apocalypse - Magic of Skyrim.esp", a short, 0 by its record; one
+# of server-settings.json's playerGlobals). c1's driver writes 3, as the
+# mod's script would; the client's watch reports it within a second. After
+# the restart each game loads its login save, which carries no such global
+# (the save template holds GameHour alone), so without the verb c1's game
+# reads the record's 0 again. Needs the Apocalypse layer and fork
+# m2-player-globals. Assertions are evaluated by lab-api only (ADR-009).
+# DRAFT: commit alone after its first runs (ADR-009, ADR-016).
+id: b-player-globals
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: global {form: 0x0b1c19, file: "Apocalypse - Magic of Skyrim.esp", value: 3}
+  - wait: 4
+  - c1: globals {forms: ["0b1c19:Apocalypse - Magic of Skyrim.esp"]}
+  - c2: globals {forms: ["0b1c19:Apocalypse - Magic of Skyrim.esp"]}
+  - assert:
+      - c1.globalValue("0b1c19:Apocalypse - Magic of Skyrim.esp") == 3
+      - c2.globalValue("0b1c19:Apocalypse - Magic of Skyrim.esp") == 0
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 10
+  - c1: globals {forms: ["0b1c19:Apocalypse - Magic of Skyrim.esp"]}
+  - c2: globals {forms: ["0b1c19:Apocalypse - Magic of Skyrim.esp"]}
+  - assert:
+      - c1.globalValue("0b1c19:Apocalypse - Magic of Skyrim.esp") == 3
+      - c2.globalValue("0b1c19:Apocalypse - Magic of Skyrim.esp") == 0
+artifacts: [server.log, c1.log, c2.log, world-diff]
