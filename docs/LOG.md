@@ -1949,3 +1949,30 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     area to its caster is a measured server bug (for train-25).
   - r-stagger-cast 014025 (solo): inconclusive, since its bandit never attacked. It reruns after train-24's stage with an
     aggressive bandit, and both r- probes now keep the trace artifact.
+- freeze-fix (a mod layer) merged to main e7780cf1 by merge commit (2026-10-18T09:29Z, 02:29 PDT) through `just
+  layer-merge`, the gate in two sets:
+  - 20261018-021041-layer-freeze-fix: 17 green, then stopped by hand when sky-c1's GPU wedged. That set's a-racemenu
+    hit a failed start of 711 (024729, error) and its lab-fault rerun 024835 was green.
+  - Its rest 20261018-075013-layer-freeze-fix: 39 of 39, 20261018-075013-a-restart-persistence to
+    20261018-092228-t2-fakeclient-restart, verdict watch. b-duel 082158 went red at step 65,
+    `server.actor(c2).healthPercentage < 0.78` read 0.7869 (c2's own game 0.7905): one hit short, not the layer
+    (thuum-magnus). It was green on both ADR-027 reruns and is now a watch item.
+  Both clones promoted. Plugins: none new. AI Pathing Freeze Fix 1.1 (cashboxs, Nexus 190049 file 801783, GPL-3.0) is one
+  SKSE DLL, TMS_AIPathingFreezeFix.dll, in the 1.6.1170 folder's Data\SKSE\Plugins (persist-mods.sh, docs/MODS.md). The
+  load orders and the server settings are unchanged. Each seat's skse64.log in the stage, smoke 20261018-020545 and
+  b-marksman 020807, reads "plugin TMS_AIPathingFreezeFix.dll (00000001 AI Pathing Freeze Fix 01000000) loaded
+  correctly". The plugin's own log is under My Games\Skyrim.INI\SKSE, which lab-api 27e847f fetches from train-24's
+  stage on: empty mid-run means loaded, no repair (thuum-magnus).
+  Lab notes:
+  - sky-c1's GTX 1050 wedged again at 19:47 PDT on 10-17: a slot reset's link retrain failed, "invalid PCI interrupt pin
+    255", QEMU exit 1. Its DevCtl then read 0x79ff, the replayed all-ones state that came before the morning's wedge,
+    and thuum-mundus's remove and rescan at 19:58 did not stick (the card ignores config writes).
+  - Eli's calls: the host reboot, plus hardware and ADR-036 (relaunch instead of a per-run rollback) as the structural
+    fixes. A reboot alone won't hold, since the 1050 has no FLR and every reset is a slot reset: about one link failure
+    in 750 resets, about 5 h of sweeps.
+  - Eli and core then swapped the two cards' slots (the cable-tension theory) with two full power-offs. After a reseat
+    the 1050 is at 0a:00 and the RTX at 0b:00, both on x1 ports (the x16 slot did not link). core pushed the new
+    addresses through the IaC, and DevCtl read 0x293f on all four functions.
+  - The first starts after the swap were clean (c2's agent after 15 s, c1's after 13 s), sky-srv came back on its known
+    host key, and the solo references reran green: r-stagger-cast 20261018-074517 with the aggressive bandit and the
+    trace, r-shock-nova 074819.
