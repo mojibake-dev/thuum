@@ -18,8 +18,11 @@ RACEMENU = ["RaceMenu.esp", "RaceMenuPlugin.esp"]
 CLIENT_ONLY = ["RaceMenuMorphsCBBE.esp", "CBBE.esp"]
 # the light plugins the server loads, in the order the clones' engine
 # numbers them (x-light-probe, run 20261008-101512: Skyrim.ccc's order;
-# docs/verbs/light-plugins.md)
-LIGHT = ["ccQDRSSE001-SurvivalMode.esl", "ccBGSSSE037-Curios.esl", "_ResourcePack.esl"]
+# docs/verbs/light-plugins.md), then the mod layer's light ones in its order
+LIGHT = ["ccQDRSSE001-SurvivalMode.esl", "ccBGSSSE037-Curios.esl", "_ResourcePack.esl", "Headshot Kills.esp"]
+# light by its header (TES4 flags 0x200), not by its extension, as libespm
+# reads it (Combiner.cpp: the flag or ".esl")
+FLAGGED_LIGHT = {"Headshot Kills.esp"}
 
 
 def load(name):
@@ -58,7 +61,7 @@ class ServerSettings(unittest.TestCase):
 
     def test_light_plugins_load_in_the_engine_s_order(self):
         for settings in (self.main, self.old):
-            light = [n for n in names(settings) if n.lower().endswith(".esl")]
+            light = [n for n in names(settings) if n.lower().endswith(".esl") or n in FLAGGED_LIGHT]
             self.assertEqual(light, LIGHT)
             # each between the full plugins Skyrim.ccc puts around it
             order = names(settings)

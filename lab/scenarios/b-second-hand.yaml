@@ -1,0 +1,55 @@
+# b-second-hand (thuum docs/verbs/second-hand.md): a proc the caster never
+# cast by hand counts as the caster's hit, claimed against the parent cast
+# the server recorded. The shape the stage measured on train-24
+# (x-class-bolts 20261018-101733): Crackle (Apocalypse 0x0C109653), an aimed
+# bolt whose proc spell keeps ticking on its target after the hit, 66 ticks
+# claimed at a 150 ms cadence there (the parity run cast nothing). c1 shoots
+# it at c2 400 units south, as that probe did; c2 holds 1000 Health so the
+# ticks show and nobody dies. The server's number is the exact claim sum,
+# the bolt's 10 plus 5 times the ticks' factors, with no regeneration inside
+# it (run 20261018-110714 at 2000 Health: 51.09 after 8 s, 0.9745 read, the
+# ticks still going; the bound's 3 % needs the proc's full linger, so at
+# 1000 Health the same 51 is 5 %, run 111322 green). The number on c2 is
+# read 8 s after the shot and c2's own game must agree within 2 %. Order: look, equip,
+# draw-weapon, wait, cast (a hold from empty hands only draws); the watches
+# stop before the assertion so the traces are kept whatever it reads. The
+# cloak shapes (Blood Boil, vanilla Flame Cloak) are read in
+# x-second-hand-cloak and gated by b-cloak-apply on train-25.
+id: b-second-hand
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 202413651}
+  - c1: console {text: "player.setav magicka 3000"}
+  - c2: console {text: "player.setav health 1000"}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c2: set-percentages {health: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -700, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: look {pitch: 0, heading: 180}
+  - wait: 1
+  - c1: console {text: "player.equipspell c109653 right"}
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start
+  - c2: watch-start
+  - wait: 1.5
+  - c1: hold-key {code: 199, ms: 900}
+  - wait: 8
+  - c2: dump-state
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c2).healthPercentage < 0.97
+      - server.actor(c2).healthPercentage > 0.3
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
+artifacts: [server.log, c1.log, c2.log, trace]

@@ -24,7 +24,7 @@ what the engine plays besides.
 | --- | --- | --- |
 | the cast: a 2 s charge, fire-and-forget, aimed, cost 750 (SPEL 030012DC) | record | native in the caster's game; spell-cast's (R1), relayed so the figure plays it |
 | the bolt (PROJ 0302F104) and its hit on the target | record | native in the caster's game; the hit is spell-cast's claim against the recorded cast (R1) |
-| the effect's six conditions (CTDA 353 == 1, 46 == 0, 560 on ActorTypeDwarven, ActorTypeDaedra and ActorTypeUndead each == 0, 715 == 0; read as IsActor, GetDead, HasKeyword three times and IsUndead in docs/apocalypse-options.md 5.4) | record | Eli's decision (below): evaluated by the server (R0) or the engine's report taken (R1) |
+| the effect's six conditions (CTDA 353 == 1, 46 == 0, 560 on ActorTypeDwarven, ActorTypeDaedra and ActorTypeUndead each == 0, 715 == 0; read as IsActor, GetDead, HasKeyword three times and IsUndead in docs/apocalypse-options.md 5.4) | record | evaluated by the server (R0), Eli's decision below: by whoever owns the state a condition reads |
 | both actors' Health percentage and Health read (GetActorValuePercentage, GetActorValue) | script | the server's: its own records (ADR-028) |
 | the swap: each moved to the other's percentage, times WB_Mult (1.0), by RestoreActorValue and DamageActorValue on Health; which one rises follows the two percentages and WB_Merge (True), so with this VMAD the percentages always swap | script | the server's (R0): the change reaches both games as ChangeValues |
 | EffectShader.Play, green on the one that rises and red on the one that falls (Apoc_FXS_Green and _Red), 2 s | script | imposed: the server's EffectShader.Play, already a native it runs, played in every game that sees them |
@@ -110,7 +110,9 @@ script run per hit.
 - Where the logic lives: the allowlist as data (a server setting naming
   scripts or MGEFs as FormDescs); the effect runtime in the server's VM (C++
   today, ADR-010's strangling order: the VM is papyrus-vm's); the
-  conditions by Eli's decision.
+  conditions evaluated by the server against the state it owns (Decided,
+  below; the build and the records' facts in
+  docs/research/apocalypse/effect-conditions.md).
 - DB fields / migration: none for a NoDuration effect. A script kind in
   magic.rs and the change form comes with the first allowlisted effect
   that lasts (rule 6).
@@ -128,7 +130,8 @@ script run per hit.
 
 - T0: the runtime on a fixture script (no compiler on CI: a hand-assembled
   .pex through lab/pex.py's writer, or the mod's own when present), the
-  swap's arithmetic against the script's, the conditions (by the decision).
+  swap's arithmetic against the script's, the conditions (a vampire race
+  target refused, a mortal one swapped).
 - T2: a difftest session: c1 casts at c2, the hit lands; the wire stack's
   ChangeValues swap the two Health percentages.
 - T3 scenario id: lab/scenarios/b-natures-balance.yaml: c1 at 30 % and c2
@@ -153,6 +156,26 @@ Daedra or Undead) decide whether the swap happens at all. Either:
 
 Recommended: 1, the server's own evaluation, so the swap rests on nothing a
 client says beyond the validated hit.
+
+## Decided (Eli, 2026-10-18)
+
+Option 1, in the words that decide it: a condition is evaluated by whoever
+owns the state it reads. The server evaluates the six for the swap (R0),
+against its own death record and the target's race record; each game keeps
+the engine's own evaluation for what it shows (the effect's art), which we
+leave alone. The vampire races carry the keyword the undead conditions read:
+NordRaceVampire's KWDA in Skyrim.esm is ActorTypeNPC 0x13794, Vampire
+0xA82BB, ActorTypeUndead 0x13796 (lab/esm.py on sky-srv, 2026-10-18).
+Taking a game's word (option 2) is out: the target's game has a stake in the
+answer (rule 5).
+
+Eli's caveat, recorded: a player who turns vampire changes race in their own
+game alone (the vampire quest's Actor.SetRace), and the server takes an
+appearance only while the race menu is open and only for a race it offers
+(ActionListener::OnUpdateAppearance, E_APPEARANCE_RACE), so until vampirism
+is declared state (docs/PLAN.md, M5) the server judges a turned player as
+mortal and every other game's figure of them stays mortal too. No lab seat
+is a vampire; nothing on the M2 path depends on it.
 
 ## Status
 

@@ -1335,3 +1335,108 @@ state a puppet keeps that breaks it when it goes live; x-npc-puppet and the
 handoff reference read it before any handoff code. The model is the
 general one for a replicated world, one primary copy per object migrated
 between machines (Bharambe, Pang and Seshan, "Colyseus", NSDI 2006).
+
+## ADR-037: A figure's explosion applies no number to a player (ADR-028 extended)
+
+Status: ACCEPTED 2026-10-18 (Eli's tick in docs/private/decisions-m2-apocalypse.md,
+question 5, re-asked). PROPOSED 2026-10-17 from the class pass's
+target-location spells. His first answer, "not yet, friendly fire is fine
+for now", answered whether the server's number lands on a friend (it does,
+gates or not) rather than who applies it; re-asked as how many times the
+standing player takes a figure's explosion (once, from the server, with the
+gates; twice without, their own game's copy accepted by OnChangeValues as a
+plain drop), he took the gates. They ride fork train m2-train-26
+(f2f26ec3, m2-explosion-gate a42d5512 merged), behind the headshots layer;
+their probe is x-explosion-gate, run ungated on train-25's stage first.
+That run (20261018-140111) measured nothing: both runes fizzled because the
+lab's look step does not pitch the first-person view, so the casts found no
+ground point within range (docs/research/apocalypse/target-location.md,
+the lab's aim). The gates' evidence comes from the big playtest by eye
+(twenty-three's Frost Rune item) and from the probe once the driver can aim
+down; the gates ride train-26 regardless, the rule being ADR-028's.
+
+Context. ADR-028 made the server the only source of a player's Health,
+Magicka and Stamina changes from another player's magic: in each game, a
+figure's spell-type effects that modify those values are refused at
+AddTarget (Skyrim Platform Hooks.cpp), and the server's number arrives
+instead. The class pass makes figures place target-location explosions in
+other games (docs/research/apocalypse/target-location.md, fork
+m2-area-effect): the explosion appears where the caster aimed, owned by
+the figure. The re-analyst's read of the explosion's own pass (43847,
+43849 on 1.6.1170) found two number paths that bypass the AddTarget
+refusal: the EXPL record's DATA damage, dealt through Actor::DamageActor
+(37335) with no AddTarget at all, and the EXPL's enchantment, cast by the
+owner's instant caster as an EnchantmentItem, whose spell type the refusal
+does not list. So a figure-owned explosion would hurt the observer's own
+player locally, beside the server's number for the same cast.
+
+Decision (proposed). ADR-028's rule covers an explosion as it covers a
+spell: in a game, an explosion owned by a figure applies no Health,
+Magicka or Stamina change to that game's player. Two gates, both in Skyrim
+Platform, both filtered in native (rule 9):
+1. The AddTarget refusal takes an EnchantmentItem whose caster is a figure
+   as it takes a spell (the refusal's IsCast widened to kEnchantment and
+   kStaffEnchantment when the caster is not the player).
+2. Health damage to the player from a figure is refused where the engine
+   hands it to the actor: PlayerCharacter's Actor::HandleHealthDamage
+   (CommonLibSSE-NG include/RE/A/Actor.h:458, vfunc 0x104, taking the
+   attacker and the damage), overridden on the player's vtable the way the
+   AddTarget refusal is (Hooks.cpp), returning without the call when the
+   attacker is a figure. This covers the explosion's damage (its attacker
+   is the owner, the figure) and every other engine path that reaches the
+   player's health with a figure as attacker; the server's own numbers
+   arrive as value changes, not through it. HYPOTHESIS until the lab: that
+   this virtual is where the number is applied, not a notification after it
+   (Skyrim Together gates the same chain one call earlier, at 37335,
+   docs/TE-MAP.md; that is the fallback, a Frida hook on it).
+Everything else the explosion does to the player stays native: knockdown,
+impulse, image space, camera shake, sounds, the placed object. The
+server's number for the cast arrives as today (the spell's effects through
+the claimed hit; for an explosion-only spell the server applies the
+spell's area effects to the targets the caster's game reports, as a Self
+burst's).
+
+Consequences. The observer feels an Apocalypse explosion (knockdown and
+look) and loses exactly the server's number, once. Gate 1 also refuses a
+figure's weapon enchantment's Health, Magicka and Stamina effects in the
+victim's game (an EnchantmentItem cast by a figure), which the server does
+not compute yet: an enchanted weapon's extra number is lost between
+players until enchantments become a server number (M5), where today it
+landed unvalidated. Gate 2 changes nothing for melee and arrows, whose
+figure damage is already zero (attackDamageMult 0). Without this, two
+numbers land. A figure's explosion that should hurt its own caster (none in
+the census) is unaffected: the caster is not the player in that game.
+
+Measured in the records (2026-10-18, lab/esm.py on sky-srv, every EXPL of
+the three plugins): of Apocalypse's 87 explosions, 3 carry damage (1 or 2,
+flat: Detonate Lock's, Skull Trap's, Frozen Orb's end) and none an
+enchantment; Lightning Strike's and Thrumming Stone's carry neither, so
+the class pass's placed explosions never carried a number of their own.
+Lost Grimoire: 10 of 54, five with enchantments (Firebomb, Shattering
+Crystal, Flameheart's end, Detonate Minion, Supercharge Minion; Kinetic
+Rune's is Skyrim.esm's EnchStagger 0x72674, no number). Skyrim.esm: 59 of
+143, among the player's spells Fireball's impact explosion (damage 2), the
+fire and shock rune explosions (damage 2) and the frost rune explosion
+0x44089, whose enchantment SlowFrostRune 0xb72a2 carries
+HazardFrostDamageFFContact 40 and FrostSlowFFContact 50 for 5 s: gate 1's
+case, 40 Health and Stamina from the standing player's own game before
+the gate. So the double count is small for the Apocalypse placers and real
+for the vanilla runes and the five Lost Grimoire explosions.
+
+A consequence to carry: a number that lives in an explosion's enchantment
+reaches the server through nothing today. The caster's game reports the
+trigger as a hit of the enchantment, which is no spell the caster cast, so
+the server refuses it (HYPOTHESIS until x-explosion-gate's before run on
+train-25), and with gate 1 the standing player's game applies nothing
+either: vanilla Frost Rune and those five Lost Grimoire spells do nothing
+to another player until second-hand's reach (docs/verbs/second-hand.md)
+follows a hazard to its explosion and the explosion to its enchantment.
+That is the right order: the server's number, validated, instead of the
+client's, unvalidated, which is what landed before.
+
+Alternatives. (a) Never place a figure's explosion: the observer sees
+nothing, as today. (b) Place it with no owner (a NonActorMagicCaster): the
+enchantment path then has no actor caster and the refusal cannot tell it
+from a trap's; the damage path still runs. (c) Strip the EXPL's damage and
+enchantment from the records on the clients: a mod edit per spell, against
+the law.

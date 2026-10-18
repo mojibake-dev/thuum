@@ -211,6 +211,11 @@ part of bring-up. The game left the desktop three times on 2026-10-01 with
 no dialog, no application error event and nothing for WER to catch; with the
 policy in place a crash leaves a dump, and an exit that still leaves nothing
 was a deliberate ExitProcess, which narrows the search to the plugins.
+Every run's end collects the dumps written since it began (docs/LAB.md).
+It also caps sunshine.exe at one stacks-only dump. NVIDIA's installer's
+subkeys make LocalDumps exist, which is the global setting at its defaults.
+On top of that, a short-lived Sunshine child crashes about every 21 s on both
+clones without harming the streams, and each crash wrote a 4 to 38 MB dump.
 
 ## Tracing the game
 

@@ -31,6 +31,7 @@ Nexus files, for re-pulling (`/v1/games/skyrimspecialedition/mods/{mod}/files/{f
 | RaceMenu | 19080 | 743640 | 0.4.20.0 | 92f8e9de4b2a1ef8a442752dab460ada |
 | Goam's Elven Ears Proper RaceMenu Integration | 122236 | 696384 | 1.1.0 | 43f58837afbc2e7cca970a76e7ce3e81 |
 | Racemenu Misc Slider | 66544 | 277217 | 0.1.0 | aba9b887926b1629f51f1d0c5b0d4b45 |
+| AI Pathing Freeze Fix | 190049 | 801783 | 1.1, the lab's (1.6.1170 only) | 54804a9e4e9117450921ea78332dbc5c |
 
 Third-party mods never enter a repo or a lab image except through
 rpool/sky/persist, like the master files (Nexus terms; docs/PLAN.md,
@@ -74,6 +75,15 @@ Dragonborn) and loads after LostGrimoire.esp, at 0C on 1.6.1170 and 0A on
 1.7.104 (without RaceMenu's two), before CBBE's client-only pair, so no
 plugin before it moves. Its name holds spaces, which persist-mods' place
 and deploy-srv's load-order check quote.
+
+AI Pathing Freeze Fix 1.1 joins the layer for the load freeze (Eli,
+2026-10-17; its section below): Nexus mod 190049 file 801783, checked
+against the md5 above, which Nexus's md5 search returns for that file alone
+(the file's VirusTotal link names the same archive's SHA-256, 4984aca3...).
+The archive holds one file, SKSE\Plugins\TMS_AIPathingFreezeFix.dll, laid
+out as it is in a folder named aipathingfreezefix-1.1@1.6.1170, so only the
+1.6.1170 game folder takes it. No plugin file: no load order, no esm
+directory, nothing on the server.
 
 ## Apocalypse - Magic of Skyrim
 
@@ -414,3 +424,39 @@ What it needs from thuum:
     clones carry a 1.6.1170 folder beside Steam's, where RaceMenu will be
     installed for its verb.
   - Rotfern's own look does not need RaceMenu.
+
+## AI Pathing Freeze Fix (taken 2026-10-17)
+
+- **What it is.** An SKSE plugin by cashboxs, one DLL on CommonLibSSE-NG
+  and the Address Library: Nexus SSE mod 190049, main file 801783, v1.1 of
+  2026-09-07. Source at github.com/cashboxs/TMS_AIPathingFreezeFix
+  (ef0e76d5), GPL-3.0-or-later (its LICENSE and README). It fixes one
+  engine hang: a pathing calculation returns false without writing its
+  output, the caller hands the stale value to the angle normalization, and
+  a NaN there spins its "add 2pi while below 0" loop forever on a job
+  thread while the main thread waits. Its hook calls the original; only a
+  false result with a non-finite X or Y has its output zeroed, and the
+  result stays false.
+- **Why thuum takes it.** It is the lab's load freeze, about one run in a
+  hundred (docs/research/load-freeze.md): the dump of 20261017-132848
+  names the same call, a wolf's path follower handing the angle routine a
+  slot it never wrote. An existing plugin fixes it, so we write nothing.
+  It adds no state and no message: it keeps the engine's own actor
+  movement (R2, host computes, server records) from hanging.
+- **Runtime.** 1.6.1170 only in the lab: its file notes say tested on
+  1.6.1170 and not compatible with 1.7.99 or later. It declares Address
+  Library independence to SKSE, so the gate is its own: it arms only when
+  the angle routine's loop bytes match and exactly one call site matches,
+  and otherwise logs "NOT armed" and patches nothing. SKSE reads its
+  version as 1.0.0.0 (its CMake version); its own log says v1.1.
+- **The lab's check.** Its log, My Games\Skyrim Special
+  Edition\SKSE\TMS_AIPathingFreezeFix.log, beside skse64.log: an
+  "installed runtime=1-6-1170-0 kind=AE" line on every boot, then "AI
+  FREEZE FIX repair=N" for the first three repairs and a summary at most
+  once a minute. A repair should show only on boots whose image base makes
+  the stale slot a NaN (the research's prediction, which skse64.log's image
+  base tests; lab-api keeps skse64.log from every run, and keeping this log
+  beside it makes every run the check), and no seat should go silent after
+  PostLoadGame again. HYPOTHESIS until a lab run shows both. Still open from
+  the research (rule 2): Ghidra's read that the producer takes two
+  arguments and writes a 3D vector, since the plugin writes 12 bytes.

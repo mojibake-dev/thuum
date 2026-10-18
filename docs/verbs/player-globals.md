@@ -184,6 +184,14 @@ Fork branch m2-player-globals, stacked on m2-ghostwalk (2026-10-14):
   FormDesc parse it shares with castTeleports; T0.
 - bf0339f8, the message and its validator (rule 4): PlayerGlobals, MsgType
   44 (wire id 52), schema 14, its fixtures, the C++ and TypeScript types.
+- Renumbered on fork branch m2-player-globals-next (2026-10-16): the
+  cast-action verb took MsgType 44, wire id 52 and schema 14 for UpdateAction
+  on parity (a930968b), so f6dc57a3 (on m2-cast-action 35a3975f) moves
+  PlayerGlobals to MsgType 45, wire id 53, schema 15, its fixtures renamed,
+  the contiguous-id test green. Parity's next schema is 16 (the marksman
+  launch fields, m2-arrow-path), so PlayerGlobals takes 17 when it meets
+  parity; m2-ghostwalk-next 42904fb8 carries Ghostwalk with cast-action and
+  the spaced-filename fix for the Apocalypse layer.
 - 2d3d0254, the record: the change form's playerGlobals, absent in older
   records and read as none, with its round-trip test (rule 6's migration).
 - 35422e48, the server: the setting read at start, OnPlayerGlobals through
@@ -195,6 +203,15 @@ Fork branch m2-player-globals, stacked on m2-ghostwalk (2026-10-14):
 T0 green 2026-10-14: Rust tests, clippy and cargo deny locally; the client
 type-checks; fork pipeline 1504's server build ran ctest on the master
 files, 13 of 13, test_unit's 359 cases with this verb's two.
+- On parity 2026-10-17: fork m2-player-globals-main 91b3f9c7 merges parity
+  3536ba43 (train-22) in; GitLab pipeline 1784 and the Windows build green.
+  It rides fork train m2-train-24 with m2-spell-launch, which also moved
+  SpellCast's schema past 16: both changes share schema 17 (neither had
+  shipped). The train adds this verb's difftest session (player-globals,
+  MsgType 45: a listed global recorded, an unlisted one refused, each
+  login's PlayerGlobals on the wire stack; the divergences beyond the
+  expected three are declared from its first T2 run) and stages with the
+  draft T3 b-player-globals by path.
 
 ## Status
 
@@ -204,7 +221,14 @@ files, 13 of 13, test_unit's 359 cases with this verb's two.
 - [x] message + validator (same commit)
 - [x] native hook + T1 (none needed: Skyrim Platform's GlobalVariable)
 - [x] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T2 green: train-24's T2 at fork a86238ed (2026-10-18): the
+      player-globals session identical with its five declared divergences,
+      and the PlayerGlobals message declared in the 27 other sessions whose
+      seats move (sent on a seat's first movement after a login, so a seat
+      that never moves receives none)
+- [x] T3 scenario green: b-player-globals 20261018-103133 on train-24
+      (c1's global 3, c2's 0, before and after the server restart), in the
+      merge gate 20261018-112123-merge-m2-train-24 (23 of 23); the MCM
+      itself waits on SkyUI (Eli's essentials list)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] ledger and suppression registry updated

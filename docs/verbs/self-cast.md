@@ -313,8 +313,81 @@ Every self-cast item passed:
   name again after. Still shown while invisible: the game's own crosshair
   prompt ("E Talk / test 1") when c2 aims at the spot, the engine's
   activation prompt, not our label. A finding of its own.
+- The crosshair prompt, PARKED until after the alpha (Eli, 2026-10-16,
+  after playtest twenty-one: "the crosshair fix might not be worth the
+  effort. we can pass on that for now and document as a later thing after
+  we get our alpha version working"). Playtest twenty asked for it hidden
+  ("yes hide it"). Fork parity ef44a1d8's setActivateTextHidden sets
+  ExtraFlags' kBlockActivateText, which nothing on 1.6.1170 reads (the
+  re-analyst on sky-re, 2026-10-16: the crosshair pick 26127, its filter
+  26130, TESNPC's GetActivateText 24716; no reader of the flag's bit), so
+  it changes nothing, and twenty-one still showed the prompt. The engine
+  keeps a reference out of the crosshair when its display name is empty
+  (26130's own test). Fork m2-crosshair 50d7c718, unmerged, empties the
+  figure's name while it is invisible and drops the dead native; its first
+  probe, x-crosshair-invis 20261017-045850 with a Frida HUD trace
+  attached, lost c2's game about 46 ms after c1's cast, the cause unread
+  (the build or the trace), and the rerun was cancelled with the park. The
+  read's runner-up: Actor::AllowPCDialogue(false) removes "Talk" but can
+  leave "Pickpocket" or "Attack" with the name, and a prompt already shown
+  stays until the target changes. Until then the dead native stays on
+  parity, a no-op.
 - Merged on fork parity 05192845 (2026-10-14): an invisible figure shows no name.
 - Playtest eighteen (2026-10-14, Eli): ticked; no name over the invisible
   player's figure, back when the effect ends. Found: a Self cast shows no
   cast animation on the figure (docs/verbs/spell-cast.md, the hands).
 
+
+## Self bursts (the class pass, 2026-10-17)
+
+The census's Self burst class (13 learnable Apocalypse spells, an area at
+the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
+- MEASURED (playtest twenty-one, server.log 03:14:05.326): Battletide's
+  area hit on test 2 reached the server in the same millisecond as its
+  cast, ahead of it, and was refused, E_SPELL_NO_CAST. The engine raises a
+  burst's hits in the frame it casts the spell, and the hit's event can
+  come first; both go on one reliable channel, so the client's order is the
+  server's. Fix on fork m2-self-burst 7ea47e5c: the player's own spell hit
+  goes two updates after its event (skymp5-client hitService.ts), behind
+  any cast this frame or the next sends. Weapon hits and a shout's held
+  hits are unchanged.
+- MEASURED (r-shock-nova 20261018-013824 and its repeat with the trace,
+  20261018-074819, the engine alone, solo): two Shock Novas beside a placed
+  bandit left the caster's health at 100 of 100 in every sample while the
+  bandit took all four of the burst's effects (35 to dead, ragdolled). The
+  caster's game also raised the explosion's hit events with the player
+  itself among the targets (source Unarmed 0x1F4 and the rim effect's
+  spell), which the engine did not turn into damage: a second reason the
+  client drops the explosion's Unarmed stand-in (fork m2-area-report). So the engine spares a Self burst's own caster, and
+  RunSelfSpell (ActionListener.cpp), which applies every effect of a
+  fire-and-forget Self spell to its caster, the area's hostile ones
+  included, hurts Shock Nova's, Frost Nova's and Life's Finale's casters on
+  the server where the engine does not. The fix, fork m2-self-burst
+  d0befa07 (in train m2-train-24): RunSelfSpell skips a detrimental effect
+  with an area (MpActor::IsHostileArea, the burst's hostile part; the
+  server's claim of the burst's targets is unchanged), with a SelfCastTest
+  case on Fireball's area effect against Oakflesh's. In x-class-self 20261018-011427
+  the server's Shock Nova line ("casts c00186d on itself") came with the
+  caster's health at 1.0 in both games, which only says the lab's casters
+  have more health than the burst takes.
+
+Measured on train m2-train-24 14d70eb1 (x-class-self 20261018-100816 against
+the parity run 011427, read 2026-10-18): both fixes hold. Shock Nova's and
+Battletide's first hits were counted (OnSpellHit at 10:12:31.433 and
+10:12:56.915, 33 ms and 32 ms after their casts; no E_SPELL_NO_CAST in the
+run, where the parity run refused both at 249 and 252 units), and the
+caster's figure in c2's game no longer dips after a burst (the parity run's
+dipped to 99.516 % in the Shock Nova block while the caster's own game held
+10000; a lerped figure series, so HYPOTHESIS-grade). Shock Nova took 80 of
+c2's 100000 on the server, and c2's own game agreed (-72 sampled under
+regen, magicka 100 to 20): the spell's 40 plus both rim effects' 20, whose
+GetDistance conditions (at least 256 and 425 units) the server does not read
+at 250 units, where the engine would apply 40 alone
+(docs/research/apocalypse/effect-conditions.md, Eli's decision 4). The
+rider the caster's game applied to the figure (0x0c023df1, Health 200)
+the server skipped. The caster's game still reported each burst's
+explosion as an Unarmed hit on c2 (OnWeaponHit with 1f4 for 3.712, both
+runs), which train-25's m2-area-report drops. The three self-targeted hit
+events the caster's game raised (Shock Nova's two, Battletide's one) left
+no server line in either run; whether the client dropped them or the
+server did silently is not in the artifacts.

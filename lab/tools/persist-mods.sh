@@ -50,6 +50,25 @@
 #   else), in both game versions. The plugin is full (masters Skyrim, Update,
 #   Dragonborn) and the server loads it after Lost Grimoire's, before CBBE's
 #   client-only pair, so every plugin before it keeps its index.
+# - Headshot Kills - CIF 1.2 and Core Impact Framework 2.0.7, the headshot
+#   verb's mods (docs/verbs/headshot.md, step 0; Eli's stretch list): Nexus
+#   148579 file 622326 and 146873 file 801478, each checked against its md5
+#   in docs/MODS.md. CIF is an SKSE plugin (its DLL, its ini and its biped
+#   mappings) that the clients alone load; CIF 2.0.7 reads Address Library
+#   formats 1, 2 and 5, so both game versions take it. Headshot Kills is its
+#   rule (a CIF json), its effect's script and "Headshot Kills.esp", which is
+#   light by its header (TES4 flags 0x200; master Skyrim.esm), not by its
+#   extension. The server loads it after Apocalypse's, and the clients
+#   before CBBE.esp, so both number it the fourth light plugin (FE003) and
+#   CBBE.esp stays the last of its kind on the clients.
+# - AI Pathing Freeze Fix 1.1 (cashboxs; Eli, 2026-10-17), for the lab's load
+#   freeze (docs/research/load-freeze.md): Nexus mod 190049 file 801783,
+#   checked against the md5 Nexus's md5 search gives for that file (the
+#   file's VirusTotal link names the same archive's SHA-256). An SKSE plugin
+#   and nothing else: its DLL, the archive's only file, into SKSE\Plugins
+#   for 1.6.1170 only (its file notes: not 1.7.99 or later; ADR-025). No
+#   plugin file, so no load order and no esm directory; the clients alone
+#   load it.
 #
 # A mod directory named <mod>@<version> installs only into that game
 # version's folder on a clone (add-mods.ps1), and its plugins go only into
@@ -98,13 +117,26 @@ ap_zip="$cache/Apocalypse-10.2.3.zip"
 ap_md5=26fa3eb013175c09d12b5b52d5df09ac
 ap_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/1090/files/758998
 ap_esp="Apocalypse - Magic of Skyrim.esp"
+# Headshot Kills - CIF 1.2, Nexus mod 148579 file 622326; Core Impact Framework
+# 2.0.7, Nexus mod 146873 file 801478 (docs/MODS.md's md5s)
+hk_7z="$cache/HeadshotKills-CIF-1.2.7z"
+hk_md5=bd394ef49f6830d0d48e88c2cb0cb19c
+hk_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/148579/files/622326
+hk_esp="Headshot Kills.esp"
+cif_zip="$cache/CIF-2.0.7.zip"
+cif_md5=280692a00e60890fc8a16826cceb56f1
+cif_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/146873/files/801478
+# AI Pathing Freeze Fix 1.1, Nexus mod 190049 file 801783 (Nexus's md5_search, docs/MODS.md)
+ff_zip="$cache/AIPathingFreezeFix-1.1.zip"
+ff_md5=54804a9e4e9117450921ea78332dbc5c
+ff_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/190049/files/801783
 # the load order after the masters and the Creation Club plugins: the server's
 # loadOrder (server-settings.json for 1.6.1170, server-settings-1.7.104.json
 # without RaceMenu's) lists the same plugins in the same order. CBBE's two
 # come last and on the clients only (above: each the last of its kind, no
 # server state names their forms), so the server's list stays the clients'
 # first plugins.
-plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp LostGrimoire.esp "Apocalypse - Magic of Skyrim.esp" RaceMenuMorphsCBBE.esp CBBE.esp)
+plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp LostGrimoire.esp "Apocalypse - Magic of Skyrim.esp" "Headshot Kills.esp" RaceMenuMorphsCBBE.esp CBBE.esp)
 
 mkdir -p "$cache"
 if [ ! -f "$rc_zip" ] || [ "$(md5 -q "$rc_zip")" != "$rc_md5" ]; then
@@ -155,6 +187,28 @@ if [ ! -f "$ap_zip" ]; then
   mv "$ap_zip.part" "$ap_zip"
 fi
 [ "$(md5 -q "$ap_zip")" = "$ap_md5" ] || { echo "Apocalypse archive md5 is not $ap_md5" >&2; exit 2; }
+for pair in "$hk_7z|$hk_api|Headshot Kills - CIF 1.2" "$cif_zip|$cif_api|Core Impact Framework 2.0.7"; do
+  IFS='|' read -r file api what <<< "$pair"
+  if [ ! -f "$file" ]; then
+    echo "fetching $what from Nexus"
+    url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
+      | curl -fsS -m 30 -H @- "$api/download_link.json" \
+      | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["URI"])')
+    curl -fsS -m 900 -o "$file.part" "${url// /%20}"
+    mv "$file.part" "$file"
+  fi
+done
+[ "$(md5 -q "$hk_7z")" = "$hk_md5" ] || { echo "Headshot Kills archive md5 is not $hk_md5" >&2; exit 2; }
+[ "$(md5 -q "$cif_zip")" = "$cif_md5" ] || { echo "CIF archive md5 is not $cif_md5" >&2; exit 2; }
+if [ ! -f "$ff_zip" ]; then
+  echo "fetching AI Pathing Freeze Fix 1.1 from Nexus"
+  url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
+    | curl -fsS -m 30 -H @- "$ff_api/download_link.json" \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["URI"])')
+  curl -fsS -m 300 -o "$ff_zip.part" "${url// /%20}"
+  mv "$ff_zip.part" "$ff_zip"
+fi
+[ "$(md5 -q "$ff_zip")" = "$ff_md5" ] || { echo "AI Pathing Freeze Fix archive md5 is not $ff_md5" >&2; exit 2; }
 command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu and CBBE (brew install sevenzip)" >&2; exit 2; }
 [ -f "$rotfern/rotfern.esp" ] || { echo "no rotfern.esp in $rotfern" >&2; exit 2; }
 
@@ -242,6 +296,15 @@ lg="$stage/tree/lostgrimoire-1.6"; mkdir -p "$lg"
 unzip -q "$lg_zip" "LostGrimoire.esp" "LostGrimoire.bsa" "LostGrimoire - Textures.bsa" "LostGrimoire_ANIO.ini" -d "$lg"
 ap="$stage/tree/apocalypse-10.2.3"; mkdir -p "$ap"
 unzip -q "$ap_zip" "$ap_esp" "Apocalypse - Magic of Skyrim.bsa" "Apocalypse - Magic of Skyrim - Textures.bsa" -d "$ap"
+hk="$stage/tree/headshotkills-1.2"; mkdir -p "$hk"
+7zz x -y -o"$hk" "$hk_7z" "$hk_esp" scripts/instantdeathmagiceffectscript.pex SKSE/CoreImpactFramework/headshot.json >/dev/null
+# CIF's archive holds a Data/ folder: unpacked beside the tree, its contents laid in
+cif="$stage/tree/cif-2.0.7"; mkdir -p "$stage/cif-x" "$cif"
+unzip -q "$cif_zip" "Data/*" -d "$stage/cif-x"
+rsync -a "$stage/cif-x/Data/" "$cif/"
+# the fix's DLL in its archive's own Data layout, SKSE/Plugins, for the 1.6.1170 folder alone
+ff="$stage/tree/aipathingfreezefix-1.1@1.6.1170"; mkdir -p "$ff"
+unzip -q "$ff_zip" "SKSE/Plugins/TMS_AIPathingFreezeFix.dll" -d "$ff"
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
@@ -267,8 +330,8 @@ place() { # <esm dir> <mods-relative plugin paths...>
   echo "$dir: ${names[*]} in place, SHA256SUMS checked"
 }
 place esm racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
-  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp"
+  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp" "headshotkills-1.2/$hk_esp"
 place esm/1.6.1170 racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
   racemenu-0.4.20.0@1.6.1170/RaceMenu.esp racemenu-0.4.20.0@1.6.1170/RaceMenuPlugin.esp \
-  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp"
+  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp" "headshotkills-1.2/$hk_esp"
 ssh -o BatchMode=yes "$dst" "cd '$persist/mods' && sha256sum -c --quiet SHA256SUMS && echo 'mods: SHA256SUMS checked on the host'"

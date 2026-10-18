@@ -155,3 +155,7 @@ Rate limit / bounds:
     person's rhythm, each input that performs it, interrupted, both seats),
     and does every item of the playtest checklist have a scenario that does
     it the way a person does (ADR-033)?
+11. Was `just fork-lint <fork tree>` clean before each fork push, and is the
+    head's GitHub Formatting check green? Parity was red there from 10-15 to
+    10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
+    clang-format, and skyrimPlatform.ts edited without Definitions.txt.
