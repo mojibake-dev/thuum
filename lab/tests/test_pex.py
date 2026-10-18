@@ -47,6 +47,16 @@ class PexTests(unittest.TestCase):
         with self.assertRaises(pex.PexError):
             pex.add_native(p, "NoSuchScript", "X", "None", [])
 
+    def test_disassembly_names_each_instruction_and_its_arguments(self):
+        # GotoState's compiled body: onEndState on self, the State variable
+        # assigned, onBeginState on self (the compiler's boilerplate)
+        text = pex.disassemble(pex.parse(self.data))
+        lines = [l.split() for l in text.splitlines()]
+        self.assertIn(["0", "callmethod", "onEndState", "self", "::NoneVar", "|"], lines)
+        self.assertIn(["1", "assign", "::State", "newState"], lines)
+        self.assertIn(["2", "callmethod", "onBeginState", "self", "::NoneVar", "|"], lines)
+        self.assertEqual(len(pex.OPNAMES), len(pex.OPCODES))
+
     def test_truncated_and_trailing_input_is_refused(self):
         with self.assertRaises(pex.PexError):
             pex.parse(self.data[:-1])

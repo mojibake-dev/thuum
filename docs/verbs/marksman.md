@@ -12,6 +12,13 @@ remove 1 arrow after each shot") and "Damage" ("Remove incorrect range
 check for shooting").
 Milestone: M2, its first verb (docs/PLAN.md, the M2 chart)   Class: B
 
+### Sequences and combinations (ADR-033)
+
+| sequence or combination | probe or scenario | result |
+| --- | --- | --- |
+| the arrow's path on both screens: the shooter's own arrow against its figure's, launch by launch, first and third person, level and angled | x-arrow-path (ten shots, five per view, the recorder's `launches` on both seats; lab/driver d734e3f) | open: on parity the figure's arrow leaves its fire node along the aim (playtest nineteen's third session: "ever so slightly to the right"); fork m2-arrow-path launches it at the shooter's own origin and angles; the bound a parity scenario asserts follows x-arrow-path's reading |
+| a bow shot after a long run of spells (both hands, the perk's dual cast, Invisibility) | none yet | open: playtest nineteen's third session, the arrows were there (eight of eleven hit in both games) but the lab's b-marksman starts from a drawn bow |
+
 ## Authority
 
 Rung: R1. The shooter's game computes the shot and the arrow's flight; the
@@ -29,8 +36,14 @@ What the server validates:
   record, PROJ, read from the masters);
 - the damage: the server's, the bow's and the arrow's together (ADR-028,
   proposed).
-What it records unvalidated (R2): the aim, relayed for drawing only (where
-a player looked is its own; a forged aim misleads only the picture).
+- the launch (fork m2-arrow-path; Eli, 2026-10-15: the arrow's path
+  identical on both screens): when the shot carries its launch, the origin
+  within 512 units of the server's own position of the shooter (a shot
+  launched from elsewhere is refused, E_SHOT_ORIGIN), the pitch within a
+  quarter turn, every component finite and bounded (the validator).
+What it records unvalidated (R2): the aim and the launch's angles, relayed
+for drawing only (where a player looked is its own; a forged angle
+misleads only the picture, the hit is still the server's to judge).
 Rate limit / bounds: shots by the draw time; hits one per shot; OnHit gets
 a rate budget (none today).
 
@@ -182,10 +195,38 @@ a rate budget (none today).
 ## Impose (observers render the server's decision)
 
 - Mechanism: the server sends each neighbour of the shooter the shot
-  (reliable); the observer's game launches the arrow from the shooter's
-  figure with LaunchArrow, the origin at the figure's fire node and the
-  angles the shooter's aim, through a new Skyrim Platform native beside
-  MagicApi's spell launch.
+  (reliable); the observer's game launches the figure's arrow where the
+  shooter's own left: the shooter's client reads its own engine's launch
+  (the fork's projectileLaunched event: a Frida hook on Projectile::Launch,
+  CommonLibSSE-NG src/RE/P/Projectile.cpp:255-258, reading the LaunchData's
+  origin, angleX, angleZ and power at entry, include/RE/P/Projectile.h:
+  78-107) and sends it with the shot (has_launch, origin, launch angles);
+  the observer launches through TESModPlatform.LaunchArrowAt with that
+  origin and those angles (LaunchData's useOrigin set by its constructor),
+  so the engine's own physics flies one path from one point on both
+  screens. A shot without its launch (the event late or missing) falls back
+  to LaunchArrow: the origin at the figure's fire node and the angles the
+  shooter's aim, which is what playtest nineteen's third session saw as
+  arrows leaving the figure's hand "ever so slightly to the right" of where
+  the shooter's own flew (eight of eleven struck the same object in both
+  games, 22 to 43 ms apart; the recording playtest-19-3). The angles come
+  from the arrow's first update, not from Launch's entry (fork m2-arrow-path
+  13a58aed): the re-analyst on sky-re (2026-10-16, 1.6.1170, HYPOTHESIS until
+  x-arrow-path) read the player's release path as arrowRelease, the
+  ArrowReleaseHandler (42859), 18102 (origin at the weapon node, angles from
+  the view less f1PArrowTiltUpAngle or f3PArrowTiltUpAngle), Launch 44108
+  with autoAim set; the player's arrow then takes its final angles on its
+  first update (Init 44222, 44200, the player's auto-aim 41248), and
+  InitVelocity 44184 sets its velocity from them. The fork hooks 44184
+  (projectileFlight) for the player's and the figures' arrows, and the shot
+  sends the launch's origin with the flight's angles. Launch with useOrigin
+  starts an arrow where it is told (the constructor applies the origin and
+  both angles; useOrigin only sets a flag, and Init's snap to the magic node
+  needs a spell); what the replay does not carry: the strafing shooter's own
+  velocity, which 44184 adds for the player only, and NPCs' random spread
+  (fBowNPCSpreadAngle in 18102), which a direct Launch never runs. The draw's
+  power changes speed and drop alike (44184, 43698), and the shot carries
+  it.
 - The draw and the release: the relayed animation events, as now. The
   sender keeps one animation event per update (skymp5-client animation.ts),
   so a draw and its release in one update can collapse; the lab watches for
@@ -197,18 +238,33 @@ a rate budget (none today).
 - What is suppressed: the damage of a figure's arrow in the observer's
   game (attackDamageMult 0 on figures, HYPOTHESIS for arrows), and its hit
   report there (skymp5-client hitService.ts drops hits by figures the game
-  does not host). The shooter's game reports the hit, as for melee.
-- How: as above, nothing new unless the lab shows the arrow hurting.
-- Release condition: none.
+  does not host). The shooter's game reports the hit, as for melee. And
+  the figure's own arrow: a figure wears its quiver, so its bow releasing
+  in the observer's game launches an arrow of its own beside the relayed
+  one; Skyrim Platform's launch hook drops it (The quiver, below).
+- How: as above for the damage. For the figure's own arrow, Skyrim
+  Platform's Frida listener on Projectile::Launch (44108): a figure's arrow
+  launched outside TESModPlatform's RelayedArrowScope enters with
+  LaunchData's projectileBase cleared (CommonLibSSE-NG
+  include/RE/P/Projectile.h:83) and leaves with it put back.
+- Release condition: none (a figure is never this game's to simulate).
 
 ## Message contract
 
 - PlayerBowShot (MsgType 22, client to server): adds aim_angle (f32,
   radians, within plus or minus a quarter turn) and aim_heading (f32,
-  finite). Sent reliable, as the contract already says
-  (wire-schema skymp.rs:735); the client sends it unreliable today.
+  finite). Sent reliable (wire-schema skymp.rs:737-758;
+  playerBowShotService.ts sends it reliable).
 - A new message, server to client: the shot as the neighbours draw it (the
   shooter's server id, bow, arrow, power, aim angle, aim heading).
+- Both gain the launch (fork m2-arrow-path, one commit with the validator):
+  has_launch (bool), origin_x, origin_y, origin_z (f32, world units),
+  launch_angle_x (f32, the pitch the shooter's engine launched with,
+  radians) and launch_angle_z (f32, its heading); when has_launch is false
+  the five are zero. Validator: when has_launch, the pitch within a quarter
+  turn and each origin component within 1e6 in magnitude; when not, all
+  five exactly zero; the server then checks the origin against its own
+  position of the shooter (512 units).
 - Validator rules: finite values, power within 0 to 1, the aim's bounds, a
   shot budget per second; OnHit gets a budget too.
 - Idempotency / ordering: a shot is not idempotent (one arrow each);
@@ -379,3 +435,30 @@ arrow spent). Two findings:
   and later hits for 13.24 unblocked and 6.43 on a raised shield (blocked
   share 0.502). Thirteen's no-fire stays unexplained (the arrows not
   equipped is the likely reading); closed unless it comes back.
+
+## The quiver (Eli, 2026-10-17)
+
+"arrow appearance was never fixed. on player 2's screen rotfern still has
+no arrows." Playtest thirteen's fix (4198fe78) gave a figure no arrows, so
+its bow drew empty and only the relayed arrow flew; it also took the
+figure's quiver and its nocked arrow off every other screen.
+
+Fix on fork m2-quiver 5207d2e8 (in train m2-train-23): a figure wears its
+quiver again, 1000 of the shooter's worn ammo as upstream gave it
+(skymp5-client sync/equipment.ts). Its own arrow is dropped in Skyrim
+Platform instead of never existing: TESModPlatform.LaunchArrow and
+LaunchArrowAt open a RelayedArrowScope around their Projectile::Launch
+call (FridaHooks.h), and the launch hook clears LaunchData's projectileBase
+for any other arrow a figure launches, puts it back at the leave, logs "a
+figure's own arrow dropped" and reports nothing (nothing flew).
+- CONFIRMED by x-quiver 20261018-001041 (m2-train-23's stage): Launch builds
+  nothing for a LaunchData with no projectile and its caller takes the empty
+  handle. c2.log has five "a figure's own arrow dropped" lines, one per shot;
+  c2's game launched five iron arrows for c1's figure against c1's five (not
+  ten), every flight paired at 0.0 units and 0.0 degrees, and no game was
+  lost. (The re-analyst's static read of 44108 never finished.)
+- CONFIRMED by the same run's screenshots: the figure wears its quiver,
+  arrows up behind its head (017, from behind), and after the five shots its
+  bowstring is empty (039): the nocked arrow leaves the bow at the release
+  though the launch built none.
+

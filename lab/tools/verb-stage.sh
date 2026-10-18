@@ -17,8 +17,13 @@
 #   9. the probes named (scenario ids or paths), each through `just lab-run`.
 # Stops at the first failure; nothing is snapshotted over a clone whose dist did
 # not land. Never opens a Moonlight stream (Eli's seats are his).
+# Runs from the main checkout, or from a worktree of a thuum branch whose lab
+# tree the verb needs (ghostwalk's settings), with FORK_DIR naming the fork
+# checkout; either way the tree must contain origin/main, since step 5's
+# deploy-srv would otherwise roll back main's lab tree on sky-srv.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+lab/tools/worktree-links.sh
 branch=${1:?fork branch}; shift
 probes=("$@")
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
@@ -27,6 +32,10 @@ srv_ssh="ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4
 git -C "$fork" fetch -q origin "$branch"
 sha=$(git -C "$fork" rev-parse "origin/$branch"); sha8=${sha:0:8}
 echo "== verb-stage $branch ($sha8) $(date +%H:%M:%S)"
+git fetch -q origin main
+if ! git merge-base --is-ancestor origin/main HEAD; then
+  echo "== this tree ($(git rev-parse --short=8 HEAD)) lacks origin/main: its deploy-srv would roll back main's lab tree on sky-srv; merge main into it first (never rebase)" >&2; exit 2
+fi
 
 echo "== 1. the Windows build of $sha8"
 reruns=0
@@ -105,14 +114,22 @@ echo "== 5. deploy-srv $(date +%H:%M:%S)"
 just deploy-srv 2>&1 | tail -1
 echo "== 6. server tag $branch, pulls $(date +%H:%M:%S)"
 $srv_ssh "cd /srv/lab && sed -i 's/^SERVER_TAG=.*/SERVER_TAG=$branch/' .env && grep '^SERVER_TAG' .env && docker compose pull -q skymp-server lab-api && docker compose up -d skymp-server lab-api >/dev/null 2>&1 && echo '   server and lab-api up'"
+# the pull restarts lab-api when its image changed, and a restart drops the hold taken above
+# (m2-cast-action's staging, 2026-10-14): take it again once lab-api answers
+for _ in $(seq 1 30); do curl -fsS -m 5 "$api/status" >/dev/null 2>&1 && break; sleep 2; done
+curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d "{\"minutes\": 90, \"reason\": \"verb-stage $branch $sha8\"}" >/dev/null 2>&1 && echo "   hold taken again after lab-api's restart" || echo "   (could not take the hold again)"
 
 echo "== 7. the client on both clones $(date +%H:%M:%S)"
-just build-client "$branch" 2>&1 | tail -1
-echo "   dist js $(shasum -a 256 "$fork/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
+# client-dist stages the built driver bundle with the dist (stage-client.sh), so build it first: a fresh
+# worktree has none, and the main checkout's would be whatever was built last
+echo "   driver bundle: $(just build-driver 2>&1 | tail -1 | awk '{print $5, $NF}')"
+just build-client "$branch" "$sha" 2>&1 | grep -E "^run [0-9]+ " | cut -c1-120   # the build of this head, not the branch's newest
+# where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
+echo "   dist js $(shasum -a 256 "skymp/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
 for v in 712 711; do
   ok=""
   for attempt in 1 2; do
-    last=$(lab/tools/client-dist.sh "$v" 2>&1 | tail -1)
+    last=$(lab/tools/client-dist.sh "$v" 2>&1 | tail -1) || true   # a failure is read below and retried, not fatal here
     echo "   $last" | cut -c1-140
     case "$last" in "dist laid into every game folder on VM $v:"*) ok=1; break;; esac
     echo "   client-dist $v failed (attempt $attempt)"
@@ -130,9 +147,13 @@ done
 curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1 || true
 if [ "${#probes[@]}" -gt 0 ]; then
   echo "== 9. probes"
+  # a probe is a question: its red is an answer for the verb doc, not a staging failure, so every
+  # probe runs and each prints its run id and verdict (m2-cast-action's first probe went red and,
+  # under set -e, took the other three with it, 2026-10-14)
   for probe in "${probes[@]}"; do
     echo "   $probe $(date +%H:%M:%S)"
-    just lab-run "$probe" 2>&1 | tail -1
+    out=$(just lab-run "$probe" 2>&1) || true
+    printf '%s\n' "$out" | grep -E ' (green|red|error) -> ' || { echo "   (no verdict line from lab-run:)"; printf '%s\n' "$out" | tail -3; }
   done
 fi
 echo "== verb-stage $branch ($sha8) done $(date +%H:%M:%S)"

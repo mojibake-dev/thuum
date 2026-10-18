@@ -1,0 +1,58 @@
+# b-cast-crossfire (docs/verbs/cast-action.md, ADR-033's row "both seats
+# casting at each other"; from x-cast-crossfire 20261016-124558): c1 and c2
+# face each other and both hold Flames at the other for three seconds at the
+# same time, three times. Each game replays the other's figure casting while
+# its own player casts, so each view performs actions and sends its own in
+# the same updates. The claim: on each seat, the other's figure takes all
+# three starts, releases and Equipped exits (on parity a930968b every one on
+# the first ask, castReady 1 to 2 ms ahead, 15 hits a round on each side,
+# nothing refused).
+id: b-cast-crossfire
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c2: console {text: "player.setav magicka 3000"}
+  - c1: console {text: "player.setav health 100000"}
+  - c2: console {text: "player.setav health 100000"}
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - c2: console {text: "player.equipspell 12fcd right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - wait: 4
+  - c1: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting, IsStaggering]}
+  - c2: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting, IsStaggering]}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 3000}
+  - c2: hold-key {code: 199, ms: 3000}
+  - wait: 4
+  - c2: screenshot
+  - c1: hold-key {code: 199, ms: 3000}
+  - c2: hold-key {code: 199, ms: 3000}
+  - wait: 1.5
+  - c1: screenshot
+  - wait: 2.5
+  - c1: hold-key {code: 199, ms: 3000}
+  - c2: hold-key {code: 199, ms: 3000}
+  - wait: 4
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("MRh_SpellAimedConcentrationStart") >= 3
+      - c2.watched(c1).took("MRh_SpellRelease_Event") >= 3
+      - c2.watched(c1).took("MRh_Equipped_Event") >= 3
+      - c1.watched(c2).took("MRh_SpellAimedConcentrationStart") >= 3
+      - c1.watched(c2).took("MRh_SpellRelease_Event") >= 3
+      - c1.watched(c2).took("MRh_Equipped_Event") >= 3
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]

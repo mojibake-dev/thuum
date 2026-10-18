@@ -64,6 +64,43 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   the spell (playtest fifteen: Invisibility's look outlived the caster's
   wait on the figure).
 
+- How an act ends concealment (the re-analyst on sky-re, 2026-10-16,
+  1.6.1170, ids by lab/addr.py; HYPOTHESIS until x-invis-recast): the engine
+  ends an actor's Invisibility (archetype 11) and Etherealize (41) through
+  Actor::DispelAlteredStates 38819 (CommonLibSSE-NG src/RE/A/Actor.cpp:
+  209-214), which dispels every live effect of the archetype (34510, through
+  ActiveEffect::Dispel 34061), for any actor, player or not. Its callers:
+  the caster's SpellCast (ActorMagicCaster vslot 9, 34144), run by Fire
+  34407 after the effects landed, never at the request, the charge, the
+  Attack, Ready or Release actions; a successful activation (ActivateRef
+  19796, pick-up included); a weapon's hit frame that finds an actor
+  (38603); a bow's release (ArrowReleaseHandler 42859); a force-greet
+  (37200). SpellCast passes one exception, the archetype the cast spell
+  itself carries (Invisibility before Etherealize); the others pass none.
+  So the engine's own recast of Invisibility, in order: the new cast's
+  effect pass (34547) dispels the running copy of the same spell from the
+  same caster (its Finish restores the refraction), inserts the new one,
+  then SpellCast's DispelAlteredStates spares archetype 11, and the new
+  copy starts. A replayed action on a figure (38953) and an animation event
+  run no caster code; CastSpellImmediate (34404) on a figure skips
+  SpellCast and so DispelAlteredStates, and replaces a running copy of the
+  same spell the same way. Actor.DispelSpell (Papyrus 54648) is queued as a
+  task and runs later in the frame, dispelling every live effect of the
+  spell from any caster.
+- The recast bug this explains (playtest nineteen's third session: "if i
+  REcast it i lose invisibility on the other players screen but not my
+  own"): the server ended the caster's concealment with no exception and
+  told every game at once; the observer dispelled the figure's copy
+  (magicEffectsService's dispelEnded), and that dispel, queued, ran after the
+  figure's fresh cast had replaced the old copy, so it ended the new one.
+  Fix (fork m2-arrow-path a3672b82): EndConcealment(actor, castSpell) spares
+  the archetype the cast spell carries, as the engine does; the hit path
+  passes none. And (2d983dd0) the server now also ends a player's
+  concealment on a bow's release and on its own activation, two of the
+  engine's callers it had missed: a player who shot or activated while
+  invisible stayed invisible on the server and in every other game while
+  visible in its own.
+
 ## Observe (host or acting client sees the intent before the engine acts)
 
 - Hook point: spell-cast's (the SpellCast message) and shouts' (the shout's
@@ -120,7 +157,9 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   its entries kept for their duration, no value changed);
   EffectFactsOf (the state archetypes); OnWeaponHit and the spell hit path
   (no damage to an ethereal target, logged); the end of an ethereal or
-  invisible player's effects on its own attack or cast; OnRestIntent
+  invisible player's effects on its own attack or cast, sparing the
+  concealment its own cast spell carries (ConcealmentExceptionOf, the
+  engine's exception); OnRestIntent
   (AdvanceEffects by the rested seconds); TES5DamageFormula's opponent
   armor rating (the target's running DamageResist modifier).
 - DB fields / migration: none (running effects are in the change form
@@ -274,5 +313,56 @@ Every self-cast item passed:
   name again after. Still shown while invisible: the game's own crosshair
   prompt ("E Talk / test 1") when c2 aims at the spot, the engine's
   activation prompt, not our label. A finding of its own.
+- The crosshair prompt, PARKED until after the alpha (Eli, 2026-10-16,
+  after playtest twenty-one: "the crosshair fix might not be worth the
+  effort. we can pass on that for now and document as a later thing after
+  we get our alpha version working"). Playtest twenty asked for it hidden
+  ("yes hide it"). Fork parity ef44a1d8's setActivateTextHidden sets
+  ExtraFlags' kBlockActivateText, which nothing on 1.6.1170 reads (the
+  re-analyst on sky-re, 2026-10-16: the crosshair pick 26127, its filter
+  26130, TESNPC's GetActivateText 24716; no reader of the flag's bit), so
+  it changes nothing, and twenty-one still showed the prompt. The engine
+  keeps a reference out of the crosshair when its display name is empty
+  (26130's own test). Fork m2-crosshair 50d7c718, unmerged, empties the
+  figure's name while it is invisible and drops the dead native; its first
+  probe, x-crosshair-invis 20261017-045850 with a Frida HUD trace
+  attached, lost c2's game about 46 ms after c1's cast, the cause unread
+  (the build or the trace), and the rerun was cancelled with the park. The
+  read's runner-up: Actor::AllowPCDialogue(false) removes "Talk" but can
+  leave "Pickpocket" or "Attack" with the name, and a prompt already shown
+  stays until the target changes. Until then the dead native stays on
+  parity, a no-op.
 - Merged on fork parity 05192845 (2026-10-14): an invisible figure shows no name.
+- Playtest eighteen (2026-10-14, Eli): ticked; no name over the invisible
+  player's figure, back when the effect ends. Found: a Self cast shows no
+  cast animation on the figure (docs/verbs/spell-cast.md, the hands).
 
+
+## Self bursts (the class pass, 2026-10-17)
+
+The census's Self burst class (13 learnable Apocalypse spells, an area at
+the caster: Shock Nova, Battletide, Frost Nova, Life's Finale) has two gaps.
+- MEASURED (playtest twenty-one, server.log 03:14:05.326): Battletide's
+  area hit on test 2 reached the server in the same millisecond as its
+  cast, ahead of it, and was refused, E_SPELL_NO_CAST. The engine raises a
+  burst's hits in the frame it casts the spell, and the hit's event can
+  come first; both go on one reliable channel, so the client's order is the
+  server's. Fix on fork m2-self-burst 7ea47e5c: the player's own spell hit
+  goes two updates after its event (skymp5-client hitService.ts), behind
+  any cast this frame or the next sends. Weapon hits and a shout's held
+  hits are unchanged.
+- MEASURED (r-shock-nova 20261018-013824, the engine alone, solo): two
+  Shock Novas beside a placed bandit left the caster's health at 1.0 at
+  every dump-state while the bandit took all four of the burst's effects
+  and ragdolled. So the engine spares a Self burst's own caster, and
+  RunSelfSpell (ActionListener.cpp), which applies every effect of a
+  fire-and-forget Self spell to its caster, the area's hostile ones
+  included, hurts Shock Nova's, Frost Nova's and Life's Finale's casters on
+  the server where the engine does not. The fix, fork m2-self-burst
+  d0befa07 (in train m2-train-24): RunSelfSpell skips a detrimental effect
+  with an area (MpActor::IsHostileArea, the burst's hostile part; the
+  server's claim of the burst's targets is unchanged), with a SelfCastTest
+  case on Fireball's area effect against Oakflesh's. In x-class-self 20261018-011427
+  the server's Shock Nova line ("casts c00186d on itself") came with the
+  caster's health at 1.0 in both games, which only says the lab's casters
+  have more health than the burst takes.

@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start", "place-npc", "play-idle", "combat-spell"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start", "place-npc", "npc-ai", "npc-state", "play-idle", "combat-spell"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
 SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida"}
@@ -82,9 +82,15 @@ class ParityCut(BaseModel):
     """Where each record's consequences start to count (ADR-031): the first
     mark of `kind` in that record's own watch (hit: the actor's first hit dealt,
     the target's first hit taken; cast: the first cast; event:<name>: the first
-    event so named), less lead_ms so the windup before it counts too. A marker,
-    never a fixed time: the AI's and the relay's timing vary run to run."""
-    kind: str = "hit"
+    event so named; value:<health|magicka|stamina>: the first reading of that
+    value below its first by more than half a point), less lead_ms so the
+    windup before it counts too. A list of kinds is tried in order per record,
+    for an action whose views mark it differently: a spell's hit never reaches
+    the target's own game (ADR-028: the server deals it, and that view's mark
+    is its health falling), where the other three views show a hit
+    (p-spell-bolt 20261015-070225). A marker, never a fixed time: the AI's and
+    the relay's timing vary run to run."""
+    kind: str | list[str] = "hit"
     lead_ms: float = 700.0
 
 
@@ -146,6 +152,65 @@ def _parse_action(value: Any) -> tuple[str, dict[str, Any]]:
     return value, {}
 
 
+# the client steps the driver performs at once, which repeat may perform again and again (lab/driver's REPEATABLE)
+REPEATABLE = {"hold-key", "tap-key", "anim-event", "cast", "equip", "draw-weapon", "activate", "figure-action"}
+
+
+def _repeat_args(args: dict[str, Any]) -> dict[str, Any]:
+    """repeat {times, gapMs, step, seed?}: one client step performed `times` times (1 to 100) at a
+    person's rhythm (ADR-033, a verb's sequence rows), the gap before each next one drawn from gapMs ([min,
+    max] ms, or one number of ms; a hold-key's hold comes before its gap). `step` is one step as a scenario
+    writes it ({hold-key: {code: 199, ms: 800}}, or the same as a string), of the actions the driver
+    performs at once (REPEATABLE); `seed` gives the same gaps run to run. Normalized for the driver to
+    {times, gapMs: [min, max], step: {action, args}, seed?}."""
+    times = args.get("times")
+    if isinstance(times, bool) or not isinstance(times, int) or not 1 <= times <= 100:
+        raise ValueError("repeat's times is a whole number from 1 to 100")
+    gap = args.get("gapMs", 0)
+    gaps = gap if isinstance(gap, list) else [gap, gap]
+    if (len(gaps) != 2 or any(isinstance(g, bool) or not isinstance(g, (int, float)) or not 0 <= g <= 60000 for g in gaps)
+            or gaps[0] > gaps[1]):
+        raise ValueError("repeat's gapMs is a number of ms or [min, max], each 0 to 60000, min first")
+    if args.get("step") is None:
+        raise ValueError("repeat needs its step: {hold-key: {code, ms}} and the like")
+    action, inner = _parse_action(args["step"])
+    if action not in REPEATABLE:
+        raise ValueError(f"repeat's step is one of {sorted(REPEATABLE)}, got {action!r}")
+    out: dict[str, Any] = {"times": times, "gapMs": [float(gaps[0]), float(gaps[1])], "step": {"action": action, "args": inner}}
+    if "seed" in args:
+        out["seed"] = int(args["seed"])
+    return out
+
+
+# the driver steps a playtest may send one seat outside a run (lab-api's playtest-step): input and its
+# rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby), never
+# a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
+PLAYTEST_READS = {"node-scale", "dump-state", "head-parts", "voice", "held", "known", "projectiles", "graph-vars", "skills"}
+PLAYTEST_STEPS = REPEATABLE | {"repeat", "look"} | PLAYTEST_READS
+
+
+def playtest_step(value: Any) -> tuple[str, dict[str, Any]]:
+    """One client step written as a scenario writes it ('equip {formId: 0x12fd0}', or {hold-key: {...}}),
+    for a seat during a playtest (Eli, 2026-10-16: the lab casts on one seat while he staggers it from the
+    other): (action, args) normalized as a scenario's would be, of PLAYTEST_STEPS only."""
+    action, args = _parse_action(value)
+    if action not in PLAYTEST_STEPS:
+        raise ValueError(f"a playtest step is one of {sorted(PLAYTEST_STEPS)}, got {action!r}")
+    if action == "repeat":
+        args = _repeat_args(args)
+    return action, args
+
+
+def step_seconds(action: str, args: dict[str, Any], base: float) -> float:
+    """How long the driver may take to answer a step: a repeat's repetitions with their holds and longest
+    gaps (it answers once the last is done) and half a minute more, else `base`."""
+    if action != "repeat":
+        return base
+    inner = args["step"]
+    hold_ms = float(inner["args"].get("ms", 0)) if inner["action"] == "hold-key" else 0.0
+    return max(base, args["times"] * (hold_ms + float(args["gapMs"][1])) / 1000.0 + 30.0)
+
+
 def _seconds(value: Any) -> float | None:
     """A positive, finite number of seconds, or None."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -199,6 +264,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
     action, args = _parse_action(value)
     if action not in CLIENT_ACTIONS | SERVER_ACTIONS | SPECIAL_ACTIONS:
         raise ValueError(f"unknown client step {action!r} for {key}")
+    if action == "repeat":
+        args = _repeat_args(args)
     return Step(kind="client", client=key, action=action, args=args)
 
 

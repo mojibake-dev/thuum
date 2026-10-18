@@ -49,14 +49,20 @@ test: build-image
 
 # Downloads the newest `dist` artifact from mojibake-dev/skymp into skymp/build/dist-client.
 # Client and Skyrim Platform: fetch what upstream's Windows workflow built on the GitHub mirror.
-build-client branch=client_branch:
+build-client branch=client_branch sha="":
     #!/usr/bin/env bash
     set -euo pipefail
-    run=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-    test -n "$run" || { echo "no successful Parity Windows run on the mirror for branch {{branch}} yet"; exit 1; }
+    # the run built from `sha` when given (verb-stage passes its head), else the branch's newest successful one: the
+    # newest is the wrong build whenever a later push on the branch built first (m2-cast-action's 0ce34196 was laid over
+    # abe44a55 by hand so, 2026-10-15)
+    sha="{{sha}}"
+    pick=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 30 \
+             --json databaseId,headSha --jq "[.[] | select(.headSha | startswith(\"$sha\"))][0] | if . == null then \"\" else \"\(.databaseId) \(.headSha[0:8])\" end")
+    test -n "$pick" || { echo "no successful Parity Windows run on the mirror for branch {{branch}}${sha:+ at $sha} yet"; exit 1; }
+    run=${pick%% *}; built=${pick#* }
     rm -rf {{skymp}}/build/dist-client && mkdir -p {{skymp}}/build/dist-client
     gh run download "$run" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
-    echo "run $run -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
+    echo "run $run ($built) -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
 
 # T2 on sky-srv (ADR-019): the server build SERVER_TAG (default the lab's) from the clean world, the fakeclient smoke checked through labState, then difftest's sessions against the legacy RakNet stack (LEGACY_TAG, default parity-legacy); lab/tools/test-proto.sh.
 test-proto tag="":
@@ -322,6 +328,7 @@ client-display vmid w="1920" h="1080" hz="60":
 # The game's traffic outside the lab on a clone (game-firewall.ps1): block SkyrimSE.exe outside 10.10.70.0/24 so
 # bethesda.net connects fail at once instead of stalling Skyrim Platform's first tick, and set a machine WinHTTP
 # proxy that never resolves so the Bethesda.net request fails with an error the game closes, not one it retries.
+# Also answers Steam's three update hosts with 0.0.0.0 (hosts file), so a startup update check fails at once.
 client-game-firewall vmid:
     @lab/tools/client-game-firewall.sh {{vmid}}
 
@@ -354,11 +361,42 @@ playtest-start:
 playtest-save label:
     @lab/tools/playtest-world.sh save {{label}}
 
+# A frozen seat's game dumped by hand while no run is active (a playtest's freeze, or one after a run ended), into the
+# last finished run with the seat's skse64.log and skyrim-platform.log; inside a run the runner does this itself.
+hang-dump client:
+    @lab/tools/hang-dump.sh {{client}}
+
+# A saved playtest world back on the lab server, then both seats' games relaunched onto it, so a playtest starts on a
+# fresh launch (a game logging in again as another character keeps the previous skeleton's node bases: playtest twenty's
+# rotfern). PLAYTEST_NO_RELAUNCH=1 keeps the running games.
 playtest-restore name:
     @lab/tools/playtest-world.sh restore {{name}}
 
 playtest-worlds:
     @lab/tools/playtest-world.sh list
+
+# A playtest recorded like a run (ADR-033): the recorder on both seats, cycled every 5 min into
+# https://thuum.gaussing.tv/results/playtest-<n>/ (trace-<client>-<k>.json), the server's and both games' logs at the end,
+# summary.txt with any game whose log stopped. Start it in the background after playtest-restore; it ends with the
+# playtest's hold or on Ctrl-C, and refuses a number without docs/private/playtest-m2-<n>.md.
+playtest-record n:
+    @lab/tools/playtest-record.sh {{n}}
+
+# Every item of docs/private/playtest-m2-<n>.md names its scenario in backticks (`b-cast-rhythm`, committed under
+# lab/scenarios), or says the lab cannot measure it, "(feel)" or "(no scenario: why)" (ADR-033, decision 2).
+playtest-check n:
+    @lab/tools/playtest-check.py {{n}}
+
+# The gate before a playtest (ADR-033): the scenarios its checklist names, as one run set, refused while an item is uncovered.
+playtest-gate n:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    scenarios=$(lab/tools/playtest-check.py {{n}} --scenarios)
+    lab/tools/runset.sh "playtest-{{n}}" $scenarios
+
+# End a recorded playtest before its save and release: the recorder's last cycle and the logs, the hold still up.
+playtest-record-stop:
+    @pkill -TERM -f 'lab/tools/playtest-record.sh' || { echo "no recorder running"; exit 1; }; while pgrep -f 'lab/tools/playtest-record.sh' >/dev/null; do sleep 2; done; echo "recorder done: the logs are in; now playtest-save and lab-release"
 
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
 playtest-relaunch client:
@@ -369,6 +407,13 @@ playtest-relaunch client:
 # (End). A seat's setup is playtest-console's, on the server.
 playtest-assist client action args="{}":
     @curl -fsS -m 60 -X POST "{{lab_api}}/clients/{{client}}/assist" -H 'content-type: application/json' -d '{"action":"{{action}}","args":{{args}}}'; echo
+
+# In a playtest, one driver step on a seat as a scenario writes it (lab-api's playtest-step, refused without a playtest
+# hold): input and its rhythm, `just playtest-step 2 'repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}'`
+# (the lab casts on test 2 while the person staggers it from test 1), or a read, `just playtest-step 1 'node-scale {node: "NPC Root [Root]"}'`.
+# Never a console line: a seat's setup is playtest-console's, on the server.
+playtest-step seat step:
+    @python3 -c 'import json, sys; print(json.dumps({"step": sys.argv[1]}))' '{{step}}' | curl -fsS -m 900 -X POST "{{lab_api}}/clients/c$(echo '{{seat}}' | tr -d 'c')/playtest-step" -H 'content-type: application/json' --data-binary @-; echo
 
 # In a playtest, a console command run on the server as a seat's player would type it (the gamemode's labCommand console,
 # through the server's mp.executeConsoleCommand), never typed into the game: `just playtest-console 1 addshout 20 0x3f9ea`
@@ -451,8 +496,9 @@ verb-stage branch *probes:
 
 # A mod-layer branch (persist-mods and the load orders) staged on the lab, from a worktree of the branch: T0, a hold,
 # persist-mods, deploy-srv, the server restarted on the new load order, client-mods on both clones, both snapshotted as
-# clean-m1-next, the probes named. Then layer-merge: the full sweep as the gate (ADR-030's non-verb promotion), both
-# clones promoted, thuum main fast-forwarded, a dated docs/LOG.md entry to finish by hand.
+# clean-m1-next, the probes named. Then layer-merge: the full sweep as the gate (ADR-030's non-verb promotion), thuum
+# main given the branch (a fast-forward, or a merge commit when main moved meanwhile), both clones promoted after it, a
+# dated docs/LOG.md entry to finish by hand. Between the two, nothing deploys from a tree without the branch.
 layer-stage branch *probes:
     @lab/tools/layer-stage.sh "{{branch}}" {{probes}}
 layer-merge branch:
@@ -479,6 +525,12 @@ wire-diff session:
 # Regenerate the committed C header the SP client includes (cbindgen is a CLI, not a build-dep).
 wire-header:
     @cd {{wire}}/crates/wire-client-ffi && cbindgen --config cbindgen.toml --crate wire-client-ffi --output include/skymp_wire.h
+
+# lab/tools/fork-lint.sh: changed C++ as clang-format 21.1.8 writes it, and
+# skyrimPlatform.ts regenerated byte for byte; tree defaults to the submodule.
+# Run the fork's Formatting check here, before a push.
+fork-lint tree=skymp:
+    @lab/tools/fork-lint.sh {{tree}}
 
 # Fail if the committed header is stale.
 wire-header-check:

@@ -1,0 +1,56 @@
+# b-invis-recast (docs/verbs/self-cast.md; playtest nineteen's third
+# session: "if i REcast it i lose invisibility on the other players screen
+# but not my own"; from x-invis-recast): c1 casts Invisibility, recasts it
+# while invisible, then once more; c2 records c1's figure's Invisibility
+# actor value (the driver's av: bool) and screenshots. The claim: the figure
+# goes invisible at the first cast and never visible again through the two
+# recasts. Parity a930968b read a drop at the recast (20261016-124840: the
+# server ended the state with no exception and the observer's queued dispel
+# killed the figure's fresh copy); the engine spares the archetype its own
+# spell carries (DispelAlteredStates 38819), as the server does since fork
+# a3672b82; on 0636f14e (x-invis-recast 20261016-135452) the figure's
+# av:Invisibility went true at 6914 ms and never dropped.
+id: b-invis-recast
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: learn-spell {spellId: 163510}
+  - c1: console {text: "player.equipspell 27eb6 right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -100, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting]}
+  - c2: watch-start {bools: [IsCastingRight, bWantCastRight, NotCasting, "av:Invisibility"]}
+  - wait: 1
+  - c2: screenshot
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  - c2: screenshot
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 2.5
+  - c2: screenshot
+  - wait: 1.5
+  - c2: screenshot
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 6
+  - c2: screenshot
+  - wait: 1
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).took("MRh_SpellSelfStart") >= 3
+      - c2.watched(c1).ever("av:Invisibility") == 1
+      - c2.watched(c1).drops("av:Invisibility") == 0
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]

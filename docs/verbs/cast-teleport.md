@@ -349,3 +349,99 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   landing (the placement past 1024 units, fork 7769ec57, CONFIRMED at T4); a
   short hop still glides. The vanish and appear effects are not on the other
   screen yet (a later slice).
+
+## The look on other screens (2026-10-16, fork m2-teleport-look-main)
+
+- The mod's sequence, in the caster's game alone (Lost Grimoire's marker
+  script, read 2026-10-16): vfxDisappear, VisualEffect Skyrim.esm 0x00102731
+  (MGTeleportOutEffect), played on the player with duration -1; then
+  Utility.Wait(0.12); MoveTo the marker; vfxDisappear.Stop(player);
+  vfxAppear, VisualEffect Skyrim.esm 0x00102730 (MGTeleportInEffect), played
+  on the player for 1.75 s; sndAppear, Sound Dawnguard.esm 0x00010EC4 in the
+  file (MAGPowersSupernaturalReflexesInMarker; 0x02010EC4 at Dawnguard's
+  usual index), played on the player. Its image space modifier is the
+  caster's own screen: not replayed.
+- The setting: a castTeleports entry's optional look, {vanish, appear,
+  appearSeconds, sound}, each form written as the spell is, at least one of
+  the three, appearSeconds from 0 to 10 (1.75 when absent; wire-rules
+  teleports, a7ed583f; first built as afa0371e on the Ghostwalk line). The lab's Teleportation entry, in both settings
+  files: {"vanish": "102731:Skyrim.esm", "appear": "102730:Skyrim.esm",
+  "appearSeconds": 1.75, "sound": "010ec4:Dawnguard.esm"}.
+- At the cast (055e66b8, first 57ecbae6): OnSpellCast's teleport branch, beside the permit,
+  sends every listener of the caster with a user but the caster's own an
+  SpSnippet VisualEffect.Play on the vanish: the caster's figure, the jump's
+  wait in seconds (5 for Teleportation, so a teleport that never lands ends
+  its effect itself), None for the facing object. The server keeps the look
+  for the landing until that wait runs out.
+- At the landing, to the same games, in order: ObjectReference.SetPosition
+  on the figure at the landing (the pop), VisualEffect.Stop on the vanish,
+  VisualEffect.Play on the appear for appearSeconds, Sound.Play on the
+  sound; once per cast. The pop is for a near teleport: the relay glides a
+  figure within 1024 units of its report in 0.2 s (skymp5-client
+  sync/movementApply.ts translateTo) and places a farther one at once.
+- The landing: MovementValidation's cast jump Landed sees only the moves
+  the bounds or the budget refuse, and most landings stay within the
+  budget's burst (b-teleport's 550 units, every landing of playtest
+  fourteen), so a move the budget takes lands a waiting look by its step:
+  more than 256 units over the ground from the last report (wire-rules
+  teleports LOOK_LANDING_STEP, about three reports' run at MAX_SPEED).
+  HYPOTHESIS: no run makes that step while a look waits (a report stalled
+  400 ms at full speed would).
+- The calls as Skyrim Platform's dump declares them (skyrim-platform
+  codegen FunctionsDump.txt): VisualEffect.Play(ObjectReference, Float,
+  ObjectReference), VisualEffect.Stop(ObjectReference),
+  Sound.Play(ObjectReference) returning Int, and
+  ObjectReference.SetPosition(Float, Float, Float), latent.
+  spSnippetService's runMethod finds each on sp[class].from(self) by its
+  Papyrus name (sp3.js registers both spellings), self a load-order form id
+  or a server id resolved to its figure. CallNative refuses a call short
+  of its parameters, so the facing object goes as an object argument
+  naming form 0, which deserializeArg turns into null (a JSON null throws
+  there). HYPOTHESIS: Game.getFormEx(0) finds no form in the client, so the
+  facing object is None.
+- HYPOTHESIS: the landing's snippets reach the observer's game before the
+  landing's relayed movement, so the figure pops rather than glides.
+  Against it in the code: SpSnippet::Execute queues a snippet on the user's
+  deferred channel, sent at the server's next tick
+  (PartOne::TickDeferredMessages), while the movement relay leaves at once,
+  unreliable, and spSnippetService runs a snippet at the client's next
+  update; a movement first starts the glide and the pop cuts it short. To
+  measure with a scenario taking screenshots at the landing: c1 casts
+  Teleportation level at c2 600 units down the strip (b-teleport's aim), c2
+  watching c1's figure, frames at the cast and at the landing, the watch's
+  maxStep for the figure (a pop moves it the whole jump in one frame, a
+  glide a frame's share of 0.2 s), the server's PlayTeleportVanish and
+  PlayTeleportLanding lines naming one neighbour, and no "SpSnippet ...
+  failed" in c2's client log.
+- Deploying: a server built before fork a7ed583f (on the Ghostwalk line afa0371e) refuses an entry with a
+  look (an unknown key, and a bad castTeleports entry stops the server), so
+  these settings reach the lab with the fork branch's server (055e66b8),
+  never before it.
+  T2's teleports session declares the five snippets c2 receives (055e66b8):
+  green with these settings deployed, red without them.
+
+### Measured (fork m2-teleport-look 2540be96 on the Ghostwalk line, the same look code as m2-teleport-look-main; x-teleport-look 20261016-203244, T2 green 14:07)
+
+- The server sent the look in both phases: at the cast "vanish 102731 for
+  5.0 s in 1 neighbour(s)' games" (20:35:02.824 UTC, beside the cast's "not
+  relayed"), and at the landing 493 ms later "placed, vanish 102731 stopped,
+  appear 102730 for 1.75 s, sound 2010ec4" (20:35:03.317).
+- The vanish shows: c2's screenshot during it has c1's figure at its start
+  as a dark, semi-transparent silhouette with blue-white flecks and a
+  refraction ripple on the ground behind it.
+- The near teleport pops: the figure's largest step in c2's game is 525.38
+  units in one frame (6177 ms), at the server's landing (c2's clock 2.4 to
+  2.5 s behind the server's). It is not a pure pop yet: about 42 units of
+  motion back toward the start fall inside the same 250 ms window, then a
+  forward glide of 88.9 units ends at c1's own position 0.5 s later. Reading
+  (numidium's, to confirm): the movement sync competes with the
+  SetPosition, a movement update from before the landing pulling the figure
+  back and the ones after gliding it forward (the snippets ride the
+  reliable channel, the movements the unreliable one). A short guard in the
+  view (no glide for a figure for a few hundred milliseconds after a large
+  placement) or the server's SetPosition at the caster's latest report would
+  remove it; neither is built.
+- The appear (1.75 s) was not caught: every screenshot step takes three to
+  four seconds, and none started within a second of the landing. Eli's eyes
+  in a playtest, or a screenshot timed to the landing, close it.
+- b-teleport 203525 and b-self-cast 204048 green on the same head.

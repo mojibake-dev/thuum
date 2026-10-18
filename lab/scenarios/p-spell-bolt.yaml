@@ -1,0 +1,86 @@
+# p-spell-bolt (ADR-031 parity, docs/verbs/cast-action.md, spell-cast.md): a
+# player's Firebolt at another, seen four ways against the engine alone
+# (lab/references/spell-bolt-a.json: the player's Firebolt at a placed
+# bandit, cut at MRh_SpellAimedStart; spell-bolt-b.json: a bandit's Firebolt
+# on the player). c1 learns Firebolt (Skyrim.esm 0x12FD0, 77776), equips it
+# and draws, c2 stands 150 units in front at full health; both watch; c1
+# charges and releases once (hold-key 199, 1500 ms). The actor-figure view
+# (c1's figure in c2's game) must show what the caster's own graph took: the
+# start, the ready and the release (the figure performs the caster's actions,
+# cast-action) and the cast; the target views the hit and its effects. The
+# cut is each record's first hit less the wind-up (the start event comes
+# about 1.8 s before the bolt lands, r-spell-bolt-a), so the charge counts on
+# both sides alike; the target's own game sees no hit (ADR-028: the server deals it) and
+# cuts at its health's first fall instead, and the caster's figure sees
+# neither (its bolt lands nothing in the other game, ADR-028) and cuts at
+# its release event. Later-list entries are the verb docs'
+# known differences, each reviewed with this file.
+id: p-spell-bolt
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 300
+parity:
+  action: spell-bolt
+  actor: c1
+  target: c2
+  cut: {kind: [hit, "value:health", "event:MRh_SpellRelease_Event"], lead_ms: 2500}
+  later:
+    # ADR-028: the server deals a spell's hit; the target's own game takes
+    # none and runs none of its effects (the reference's bandit, cast at
+    # through Spell.Cast, took them itself)
+    - "target-own/taken/*"
+    - "target-own/effects/*"
+    # the caster's figure casts through castSpellImmediate, which raises no
+    # cast event, and holds a million magicka with no cost on that cast
+    - "actor-figure/casts/*"
+    - "actor-figure/values/magicka-fell"
+    # the B reference's Spell.Cast fires no projectile, so its player never
+    # staggers; the run's target staggers by the server's stagger verb and
+    # its figure by the engine's own hit, with the stagger's cascade of graph
+    # variables (20261015-080438; a mage bandit's B reference retakes this)
+    - "target-own/bools/IsStaggering=*"
+    - "target-own/vars/IsStaggering=*"
+    - "target-figure/events/staggerStart"
+    - "target-figure/bools/IsStaggering=*"
+    - "target-figure/vars/IsStaggering=*"
+    - "target-figure/vars/bAnimationDriven=*"
+    - "target-figure/vars/bEquipOk=*"
+    - "target-figure/vars/bIsInMT=*"
+    - "target-figure/vars/bVoiceReady=*"
+    - "target-figure/vars/iSyncIdleLocomotion=*"
+    - "target-figure/vars/bHeadTracking=*"
+    - "target-figure/vars/iSyncForwardState=*"
+    # ADR-028 again: the caster's figure's bolt lands nothing in the other
+    # game, so that view records no hit (the reference's player hit its bandit)
+    - "actor-figure/hits/*"
+    # the figures' AI probes idles every frame; refused, not sync
+    - "*/refused/Idle*"
+    - "*/refused/move*"
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 77776}
+  - c1: console {text: "player.setav magicka 3000"}
+  - wait: 1
+  - c1: console {text: "player.equipspell 12fd0 right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0, rot: [0, 0, 180]}
+  - c2: set-percentages {health: 1}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start {bools: [IsCastingRight, bWantCastRight, IsStaggering]}
+  - c2: watch-start {bools: [IsCastingRight, bWantCastRight, IsStaggering]}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 6
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - parity.ok
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]

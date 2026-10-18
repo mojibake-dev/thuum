@@ -21,6 +21,13 @@ Force's push imposed on its victim (on stagger's impose path, docs/verbs/
 stagger.md), unlocking a word with a dragon soul in the Magic menu, word
 walls, who may learn words at all (the roadmap's "Dovakin").
 
+### Sequences and combinations (ADR-033)
+
+| sequence or combination | probe or scenario | result |
+| --- | --- | --- |
+| a second Fire Breath within three seconds of the first, in god mode | x-tgm-breath4 (four breaths at 0, 2.5, 4.9 and 24 s; its control confounded by c2's death at the third), x-tgm-breath5 (five at 0, 2, 4, 6, 10 s at a c2 with 100000 health) | RED on caff3e04 and a930968b: breaths two and three of breath4 010539 were drawn on c2 only because they hit it (reported from the hit); playtest nineteen's third session, 13 of 18 releases never reached the server. The fire-report build (35a3975f) is staged with breath5: five server lines and five cones expected |
+| a shout while the voice recovery of the previous still runs (any mode) | none yet | open: the recovery read names no variation; the fire's source form should (35a3975f) |
+
 ## Authority
 
 Rung: R0 for what a player knows and for its recovery; R1 for the cast.
@@ -168,6 +175,26 @@ bounds on casts.
 - Data captured: the shout in the voice slot (equipment), the variation,
   the caster's position.
 - Side effects of hooking here: none expected.
+
+- The release reported at the engine's own fire of the voice (fork
+  35a3975f, ADR-034; HYPOTHESIS until x-tgm-breath5 on its stage): SKSE's
+  action event kVoiceFire (CommonLibSSE-NG include/SKSE/Events.h:37-67,
+  through SKSE::GetActionEventSource(), API.h:31) reaches the plugin once
+  per shout the engine casts, with the actor and a source form; the plugin
+  raises the player's own as skseAction to JS and ShoutService reports the
+  source form's spell as the voice's cast when that form is a spell,
+  whatever the recovery reads and whether or not the shout hits anything.
+  The recovery read above and the hit-based report stay as the fallback
+  when the source form is not a spell (then the shout alone is named, and
+  its variation still comes from the recovery). Why: playtest nineteen's
+  third session (2026-10-15, parity caff3e04, recording playtest-19-3): 13
+  of Eli's 18 god-mode Fire Breaths never reached the server, every second
+  breath within three seconds among them; with a zero recovery the release
+  was reported only from a hit of the shout's spell (reportFromHeld), and
+  a breath that hits nobody has none. God mode does set the 30 s voice
+  recovery after all (x-tgm-breath4 20261016-010539 read 22.75 s at the
+  fourth breath), so the recovery read names no variation for a second
+  breath under the first's recovery; the fire's source form names it.
 
 ## Impose (observers render the server's decision)
 
@@ -664,4 +691,53 @@ snippets).
   x-tgm-breath3-fix (c2's script first sets ADDN 0x647BC's flags to
   kAlwaysLoaded, CommonLibSSE-NG include/RE/B/BGSAddonNode.h:12-16): fix
   (1)'s test, all three breaths drawn if (b) holds.
+- The addons' flags, read from Skyrim.esm on sky-srv (lab/esm.py,
+  2026-10-14): the breaths' MPSFireWaveFlames 0x647BC (index 64),
+  MPSFrostWaveProjectile 0x68BCF (65) and MPSDragonFireWave 0xE1532 (71)
+  carry DNAM flags 1; vanilla's common impacts (MPSFireBoltImpact01 0x2B95B,
+  MPSBloodSprayImpact01 0x1BFEE, MPSActorDustSpray01 0xF0EAB) carry 3,
+  kAlwaysLoaded. Fix (1) as a candidate: fork m2-breath f0e4f073 gives the
+  three breath addons the flag at the data load (Skyrim Platform's
+  EventHandler, kDataLoaded); it merges only if x-tgm-breath3-fix draws
+  every breath.
+- Playtest eighteen (2026-10-14, Eli): "for the unresolved tgm+firebreath
+  issue, sometimes i can see the effect in screen 2 twice in a row, but its
+  still janky". So the second breath's fire is drawn some of the time,
+  which fits a system destroyed when not in use and rebuilt in time for
+  some second breaths (b) better than an emitter that never joins (a).
+- Traced (x-tgm-breath3 20261015-030033, lab/frida/mps-trace.js on both
+  games, breaths at 0, 10 and 48 s): (a) and (b) are both FALSE. In c2's
+  game every breath, the second included, registered its cone's emitters
+  (RegisterMPSEmitters returned 1 eighteen times per Init3D), raised
+  system 64's emitter count from 0 to 3 through AddEmitter, and emitted (33,
+  30 and 31 emits on that system in the 3 s after each launch), with no
+  rebuild and the system's slot never null across the run (polled every
+  50 ms; destroyWhenNotInUse 1 throughout, the flags 1). c1's own breaths
+  read the same. So the system's lifetime is not the missing fire, and the
+  always-loaded flag (fork m2-breath) changes nothing that matters; it stays
+  unmerged. What the probe did not reproduce is Eli's spacing: his breaths
+  come seconds apart in god mode, the probe's 10 s. HYPOTHESIS (c): a cone
+  launched while the previous cone's emitters are still registered meets
+  the system's emitter cap (BSMasterParticleSystem::maxEmitterObj, 0x162)
+  and its emitters are refused, so nothing emits for it; "sometimes" is
+  whether the previous cone's emitters were gone by the next breath.
+  x-tgm-breath4 (breaths at 0, 2.5, 5 and 20 s, mps-trace2.js reading the
+  cap) tests it.
+- MEASURED (x-tgm-breath4 20261015-035032, breaths at 0, 2.5, 4.9 and 24 s):
+  (c) is false too, and the fire was never a rendering matter. Every breath
+  that reached the observer's game joined system 64 and emitted (about 30
+  emits in 3 s each, the cap untouched); but the observer's game launched
+  three breaths of the shouter's four: the 2.5 s one never arrived. The
+  server log says why: three shouts taken (03:52:55, 03:53:00, 03:53:19),
+  none at 03:52:57, where only that breath's hits came, refused as having
+  no cast (E_SPELL_NO_CAST). The shouter's own game never reported it: in
+  god mode the voice recovery is zero, so shoutService.ts reports a shout
+  from its own hit (reportFromHit), and a hit of the same spell within
+  chargeMs (3000 ms, shoutService.ts:263) of the last report counts as that
+  shout's and reports nothing (:171). A second breath under 3 s is
+  swallowed, one past 3 s goes through: Eli's "sometimes". The fix is the
+  sender's rule of the cast-action verb (docs/verbs/cast-action.md): the
+  client reports every shout release and the server judges it; its probe
+  is x-tgm-breath4 again, four launches in the observer's game. Fork
+  m2-breath (the always-loaded flag) fixes nothing and is deleted.
 

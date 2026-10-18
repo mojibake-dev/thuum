@@ -577,6 +577,14 @@ Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/
 (copies of the server's `world/` directory, the `file` database driver;
 there is no sqlite), world-diff, lab.pcap, frida/*.jsonl, result.json.
+Also every other log in the seat's SKSE folders (the one skyrim-platform.log
+is in, then any other My Games\<folder>\SKSE, where a CommonLibSSE-NG plugin
+such as the freeze fix writes under Skyrim.INI) as <client>-<name>, beside
+<client>.log in every run: skse64.log
+prints the game's image base, which the load freeze's hypothesis of
+2026-10-17 ties to the hang, so every run tests it, and each SKSE plugin
+writes its own log there (TMS_AIPathingFreezeFix.log for the freeze fix
+layer), so a new layer's evidence needs no edit to lab-api.
 Also trace-<client>.json when the scenario lists `trace`: each client's last
 watch-stop whole (ADR-031's recorder), what a reference is made from.
 Also server-before.log: what the server logged between the previous run's
@@ -586,6 +594,38 @@ run recreated it); lab-up and lab-down keep theirs under
 results/server-before/. After a quiet spell (BEFORE_LOGS_QUIET_S, 600 s) a
 run also keeps each client's Skyrim Platform log as <client>-before.log
 before rolling the clone back; inside a sweep nothing is fetched.
+A run in which a seat stopped answering (a step that timed out naming it: the
+load freeze of 2026-10-16, a game silent after PostLoadGame) also keeps that
+seat's skse64.log as <client>-skse64.log and a full dump of its game as
+<client>-SkyrimSE.dmp (HANG_EVIDENCE, on by default), before the next run's
+rollback erases them. The seat writes the dump itself with dbghelp's
+MiniDumpWriteDump, 4.5 GB in 15 s on sky-c1, and uploads it to
+PUT /lab/clients/<client>/hang-dump/<run>, which takes a body only for the
+active run, or with none active for the last finished one. A seat counts as
+hung when a step timed out on it, its teleport's last dump-state went
+unanswered, or its relaunch never came back in game (the nightly of
+2026-10-17 lost two freezes to a narrower rule). Outside a run, as in a
+playtest, `just hang-dump <c1|c2>` takes the same evidence by hand into the
+last finished run, before anything rolls the clone back.
+Every run's end also reads each managed seat's game:
+- The crash dumps Windows Error Reporting wrote for SkyrimSE.exe since the run
+  began (LocalDumps under C:\sky-lab\dumps, set by crash-dumps.ps1). The seat
+  uploads the newest through the same PUT as <client>-SkyrimSE-crash.dmp
+  (E_RUN_CRASH).
+- The game process against the one the version check found, as pid@start
+  (`games` in result.json), or the one a relaunch step started. A game gone
+  at the end is E_RUN_GAME_LOST. A different one is E_RUN_GAME_REPLACED:
+  launch.ps1 starts the game again when it dies within a minute of its
+  window, and the run went on against the new one.
+Any of the three keeps the seat's launch.log as <client>-launch.log and turns
+a run that would have been green into error, which a run set reruns once as
+a lab fault. A red run stays red and gains the failure.
+A seat whose dump-state shows MessageBoxMenu open is paused. Either the
+dump-state an assert or until takes, or the run's last one from that seat,
+counts. That is E_RUN_PAUSED, and the run is red: an assert about a paused
+game can hold while it measures nothing, as r-melee-power-a did twice under
+Survival Mode's first-load prompt on 2026-10-14. A snapshot's quiesce empties
+the dump folders and WER's report queues, so no image carries an old crash.
 During M0 and M1 the pcap is also the source for difftest sessions:
 `pcap2session` runs on it and the resulting YAML lands in
 skymp/skymp-wire/difftest/sessions/ (docs/WIRE.md).

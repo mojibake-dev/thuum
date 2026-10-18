@@ -109,3 +109,55 @@ class SoloFlag(unittest.TestCase):
         self.assertEqual(sc.steps[0].action, "solo-start")
         self.assertEqual(sc.steps[0].args["rz"], 180)
 
+
+
+@needs_deps
+class RepeatStep(unittest.TestCase):
+    """ADR-033: a step performed again at a person's rhythm (the driver's repeat)."""
+
+    def load(self, step):
+        from labapi.scenario import load_scenario
+
+        return load_scenario("id: x-repeat\nclients: [c1]\nsteps:\n  - c1: " + step + "\n")
+
+    def test_a_repeat_is_normalized_for_the_driver(self):
+        sc = self.load("repeat {times: 8, gapMs: [400, 700], step: {hold-key: {code: 199, ms: 800}}, seed: 7}")
+        step = sc.steps[0]
+        self.assertEqual(step.action, "repeat")
+        self.assertEqual(step.args, {"times": 8, "gapMs": [400.0, 700.0], "step": {"action": "hold-key", "args": {"code": 199, "ms": 800}}, "seed": 7})
+
+    def test_one_gap_and_a_string_step(self):
+        sc = self.load("repeat {times: 3, gapMs: 500, step: 'tap-key {code: 57}'}")
+        self.assertEqual(sc.steps[0].args, {"times": 3, "gapMs": [500.0, 500.0], "step": {"action": "tap-key", "args": {"code": 57}}})
+
+    def test_what_repeat_refuses(self):
+        for bad in ("repeat {times: 0, gapMs: 400, step: {tap-key: {code: 57}}}",
+                    "repeat {times: 101, gapMs: 400, step: {tap-key: {code: 57}}}",
+                    "repeat {times: 2.5, gapMs: 400, step: {tap-key: {code: 57}}}",
+                    "repeat {times: 3, gapMs: [700, 400], step: {tap-key: {code: 57}}}",
+                    "repeat {times: 3, gapMs: [400, 70000], step: {tap-key: {code: 57}}}",
+                    "repeat {times: 3, gapMs: 400}",
+                    "repeat {times: 3, gapMs: 400, step: {console: {text: qqq}}}",
+                    "repeat {times: 3, gapMs: 400, step: {repeat: {times: 2}}}"):
+            with self.assertRaises(ValueError, msg=bad):
+                self.load(bad)
+
+
+@needs_deps
+class PlaytestStepTests(unittest.TestCase):
+    def test_a_playtest_step_is_input_normalized_as_a_scenario_s(self):
+        from labapi.scenario import playtest_step, step_seconds
+        self.assertEqual(playtest_step("equip {formId: 0x12fd0}"), ("equip", {"formId": 0x12FD0}))
+        action, args = playtest_step("repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}")
+        self.assertEqual(action, "repeat")
+        self.assertEqual(args["step"], {"action": "hold-key", "args": {"code": 199, "ms": 3000}})
+        # twelve 3 s charges with 3 s gaps answer after 72 s; the driver gets half a minute more
+        self.assertEqual(step_seconds(action, args, 60.0), 102.0)
+        self.assertEqual(step_seconds("equip", {"formId": 1}, 60.0), 60.0)
+        # reads go too: a node's scale on the player or its figure
+        self.assertEqual(playtest_step('node-scale {node: "NPC Root [Root]", other: true}'), ("node-scale", {"node": "NPC Root [Root]", "other": True}))
+        # and whether the player has a spell: known answers a spell form 1 or 0 (Firebolt, playtest twenty)
+        self.assertEqual(playtest_step("known {ids: [0x12fd0, 0x0B0A86DF]}"), ("known", {"ids": [0x12FD0, 0x0B0A86DF]}))
+        for bad in ('console {text: "tgm"}', "connect", "set-av {name: Health, value: 1}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                playtest_step(bad)
