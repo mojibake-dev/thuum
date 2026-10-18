@@ -229,6 +229,26 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
 - SpellCast (MsgType 23), both directions, unchanged fields (caster,
   target, spell, isDualCasting, interruptCast, castingSource, aimAngle,
   aimHeading, actorAnimationVariables).
+- `target` (read 2026-10-18, fork m2-cast-target 9359e2c7 on train-26):
+  Skyrim Platform fills the spellCast event's target from the caster's own
+  MagicTarget (EventHandler.cpp; Actor::GetTargetStatsObject is the actor
+  itself, CommonLibSSE-NG include/RE/A/Actor.h:354), so until that fix
+  every cast named its caster, the server relayed it verbatim
+  (ActionListener.cpp's RelayCast rewrites only a legacy 0x14), and a
+  relayed touch or target-actor spell was cast at the figure that cast it
+  (x-class-target2 20261018-105815: Azure Reconstruction healed c1's
+  figure 15 times in c2's game, nothing on c2). Now the player's own cast
+  of a spell delivered to its target names the actor under the crosshair
+  at the cast, by server id (a figure's through the view, an NPC's as is),
+  or 0 when none; every other cast keeps the event's word. Rung R2:
+  client-reported, recorded and relayed, unvalidated (rule 5; the wire
+  validator takes any u32, wire-validate's check_spell_cast); the numbers
+  still come only through the hit path's claims. Follow-up: the server
+  checks the named target is within the spell's reach of the caster at
+  the cast (R1), and SP reads the hand's MagicCaster::desiredTarget
+  synchronously in ProcessEvent (CommonLibSSE-NG include/RE/M/MagicCaster.h:87)
+  instead of the crosshair a tick later (HYPOTHESIS that it holds the
+  picked actor at the event).
 - Validator rules (new, fork ba22a406): castingSource within 0 to 3;
   aimAngle finite and within plus or minus a quarter turn; every float
   finite; spell not 0; a cast budget per client, eight at once and four a
