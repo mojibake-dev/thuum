@@ -1093,8 +1093,14 @@ health message. A second red within two sweeps makes it a bug.
   code (one red predates every hit-path change; the number per tick is
   identical on every build). One or two such gaps sit in six greens since
   10-14; four or five only today, both on c1 after the GPU slot swap put
-  the 1050 on one lane: c1's frame pacing is the suspect (its update
-  intervals from the traces, and the cards' link speeds, being read). The
+  the 1050 on one lane. c1's frame pacing was the suspect and is untested,
+  not disproved: in every window the recorder kept (phases 1 and 2 of all
+  three runs) c1 ran 60.0 updates a second with no interval above 37 ms,
+  but no c1 series covers the Flames hold in either red (they stopped at
+  the failed assert) and the recorder keeps no per-frame timestamps; a
+  per-update series or the client's hit events with their frame index
+  across one hold would settle it (the cards' link speeds are mundus's
+  read). The
   design gap underneath, for a later verb: the engine applies a
   concentration spell's damage every frame it touches the target whatever
   the hit events do, so a client that drops hit events under slow frames
