@@ -1650,7 +1650,9 @@ which is the day itself.
 
 ## ADR-041: Turbo mode: a live session's immediate turnaround
 
-Status: proposed (2026-10-19, Eli: "taking a look at the overall process,
+Status: ACCEPTED 2026-10-19 01:4x PDT (Eli: "accept 41 and implement if it allows us to
+ramp up development. i feel like we can be doing a lot of this quicker");
+proposed 2026-10-19 (Eli: "taking a look at the overall process,
 what's the fastest we could do this? just immediate turnaround?"). Extends
 ADR-040 (branch adr040-cycle-time, proposed the same morning: the three-hour
 loop and its tooling) and ADR-030 (the gate and the nightly stay the net);
