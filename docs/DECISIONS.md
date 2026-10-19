@@ -1562,33 +1562,47 @@ other).
 
 **Decision.**
 1. **The playtest runs on the stage.** A train is staged (its build deployed,
-   both clones promoted, its probes read) and goes to Eli's seats from there.
-   The gate sweep and the merge to parity follow the playtest, when the lab
-   is free again (feedback: a reported checklist frees the seats), or at
-   night. ADR-033's record of the playtest is evidence for the train's rows
-   either way; a gate red after a playtest does not undo the findings, it
-   holds the merge. Parity therefore lags the seats by one train; LOG.md
-   names which build each playtest ran on, as it does today.
+   the staged client on the live clones, its probes read) and goes to Eli's
+   seats from there: `playtest-restore` relaunches the live clones, so the
+   playtest needs no snapshot and nothing is promoted at the stage; clean-m1
+   stays parity's client, the base every other stage and the nightly stack
+   on, promoted at the merge as now. The gate sweep and the merge to parity
+   follow the playtest, when the lab is free again (feedback: a reported
+   checklist frees the seats), or at night. ADR-033's record of the playtest
+   is evidence for the train's rows either way; a gate red after a playtest
+   does not undo the findings, it holds the merge. Parity therefore lags the
+   seats by one train; LOG.md names which build each playtest ran on, as it
+   does today.
 2. **The gate for a train is its own rows.** ADR-030's always set
    (`smoke-two-players`, `a-restart-persistence`), the scenarios of the
    train's rows, and every open ADR-027 watch item: target eight runs,
    about twenty minutes. The "every verb whose files the branch touched"
    expansion moves to the nightly sweep, which runs every scenario anyway.
    A single verb's merge keeps ADR-030's selection as written.
-3. **A stage waits for no client build it does not need.** `verb-stage` and
-   `build-client` reuse the last successful Windows run's dist when the
-   client tree (skymp5-client, skyrim-platform, the client settings in the
-   deploy tree) is unchanged since that run's commit, and say which run they
-   took; the Windows workflow still runs for the record. A head that changes
-   the client waits as today, with the server stage running meanwhile.
-4. **A compile oracle before the pipeline.** A persistent incremental build
-   of the Linux server (the CI image's compiler, a kept build directory on
-   sky-ci or a build container) answers `just compile <branch>` in minutes,
-   so a C++ slip costs a minute, not a pipeline; CI stays the merge's oracle.
-5. **A probe reruns alone.** When only a probe's YAML changed, it reruns on
-   the current stage through lab-api (`just lab-run`); a re-stage is for a
-   new head. T2 runs on sky-srv while the probes run on the clones, not after
-   them.
+3. **The client build gets faster; a stage reuses one it does not need.**
+   The Windows build is 35 to 36 minutes from scratch and every head of the
+   night needed it (the client FFI links wire-schema, wire-json,
+   wire-validate and wire-transport, so a wire change is a client change).
+   So the lever is the build itself: measure its steps from a run's timings
+   (vcpkg restore, CMake and C++, cargo, the TypeScript bundle) and cache
+   what repeats (vcpkg binary caching and cargo's target through
+   actions/cache, or a warm self-hosted Windows builder), aiming under
+   fifteen minutes. The trivial case stays: `verb-stage` and `build-client`
+   reuse the last successful run's dist when nothing the client links
+   changed since its commit, naming the run they took.
+4. **A fast T0 oracle.** Of the night's three red heads one was tests that
+   had never run and two were compile errors, so the oracle must build and
+   run T0, not compile alone. Its cheapest form is the fork's own
+   server-build made incremental: a BuildKit cache mount for the CMake build
+   directory in the build stage, so a few changed files rebuild and test in
+   minutes and the push stays the one oracle, with no new tool. Failing that,
+   a kept build directory on sky-ci behind `just t0 <branch>`.
+5. **A probe reruns alone; T2 runs beside the probes.** When only a probe's
+   YAML changed, it reruns on the current stage through lab-api (`just
+   lab-run <path>`, as the night's headshot reruns did); a re-stage is for a
+   new head. T2's servers are their own containers, so T2 runs on sky-srv
+   while the probes run on the clones (23.6 minutes after the stage tonight),
+   once a stage has shown sky-srv's load leaves the probe timings alone.
 6. **A playtest is set up by one command.** `just playtest-setup <n>` reads a
    profile (lab/playtests/<n>.yaml: the world to restore, each seat's spells,
    items and values, the hold's length) and does the restore, the relaunch,
@@ -1600,17 +1614,21 @@ other).
    moves to the next train instead of holding the stage; a verb still ships
    whole (rule 3), on whichever train carries it.
 8. **Measured.** LOG.md's train entry records findings-in to seats-ready in
-   hours; the target is three hours with the client unchanged and three and a
-   half with a client build, two to three playtests a day when Eli has the
-   time. Reviewed after ten trains or at M3's start, whichever is first.
+   hours (tonight: findings at 18:55, stage 2's last probe at 23:59, five
+   hours, of which the red heads were 1.5, the Windows waits 1.0 and T2 0.4
+   a stage). The target is three hours, two to three playtests a day when
+   Eli has the time. Reviewed after ten trains or at M3's start, whichever
+   is first.
 
 **Consequences.** Eli plays a build parity has not taken yet, so a train can
 be withdrawn after a playtest and its findings still stand; the nightly
 sweep, not the gate, is the cross-verb regression net, which is where
 ADR-030 already put it, with ADR-027's two-sweep rule tolerating a lone red.
-Items 3 to 6 are tooling for numidium (verb-stage, build-client, a compile
-recipe on sky-ci, lab-api's single-probe run, the playtest profile); until
-each exists, the step it replaces is done by hand and the LOG says so. The
+Items 3 to 6 are tooling for numidium, in this order: the T0 oracle (4),
+item 1 alongside (policy, no tooling), T2 beside the probes (5), the client
+build's speed (3), the playtest profile (6), the gate's selection (2) last
+since it mostly saves lab time once item 1 holds; until each exists, the
+step it replaces is done by hand and the LOG says so. The
 time saved on 2026-10-18's shape: about 35 minutes per server-only stage
 (none that night: every staged head changed the client side),
 about forty minutes per gate, a pipeline per compile slip, twenty minutes
