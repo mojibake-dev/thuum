@@ -20,6 +20,7 @@ from typing import Any
 from .assertions import AssertionData, AssertionSyntax, Evaluator, clients_needing_views
 from .board import StepBoard
 from .config import Settings
+from . import mouse
 from .guests import Tables
 from .proxmox import GuestControl, ProxmoxError
 from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
@@ -690,6 +691,8 @@ class Runner:
             return await self._relaunch(rec, index, step.client)
         if step.action == "frida":
             return await self._frida_start(rec, index, step.client, step.args)
+        if step.action == "mouse":
+            return await self._mouse(rec, index, step)
         if step.action in ("connect", "reconnect") and rec.scenario.solo:
             raise RunnerError(f"E_RUN_SOLO: {step.action} has no meaning in a solo run (the game runs without skymp5-client); the clients' heartbeats are the gate")
         if step.action in ("connect", "reconnect"):
@@ -1059,6 +1062,37 @@ class Runner:
             return True, target.name + lost
         except (ProxmoxError, ValueError) as e:
             return True, f"screenshot skipped: {e}"
+
+    async def _mouse(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+        """A relative mouse move in the seat's own desktop session (scenario.py's mouse; mouse.py): what the
+        driver's look cannot do to a first-person pitch. A move not made is a lab error, as a relaunch
+        that fails is: the run's measurement would be of a view nobody turned."""
+        client = step.client or ""
+
+        def fail(err: str) -> tuple[bool, str]:
+            rec.failures.append({"step": index, "kind": "lab", "client": client, "error": err})
+            rec.verdict = "error"
+            return False, err
+
+        g = self.tables.guest_for_client(client)
+        if g is None or not g.managed:
+            return fail(f"E_RUN_MOUSE: {client} is unmanaged or unmapped; lab-api moves a managed seat's mouse only")
+        cmd = mouse.command(step.args, self.s.client_lab_dir, self.s.client_lab_user)
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return fail(f"E_RUN_MOUSE: {client} ({g.name}): {e}")
+        if res.exitcode != 0:
+            return fail(f"E_RUN_MOUSE: {client} ({g.name}): the move exited {res.exitcode}: {res.err.strip()[:300]}")
+        try:
+            data = json.loads(res.out.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            return fail(f"E_RUN_MOUSE: {client} ({g.name}): no answer from the move ({res.out.strip()[:200]!r})")
+        want = mouse.events(step.args)
+        if not isinstance(data, dict) or data.get("sent") != want:
+            # SendInput takes nothing from a locked desktop, or across a higher integrity level (UIPI)
+            return fail(f"E_RUN_MOUSE: {client} ({g.name}): SendInput took {data.get('sent') if isinstance(data, dict) else data} of {want} events")
+        return True, self._answer(rec, index, step, data)
 
     # ----- artifacts ------------------------------------------------------------
 

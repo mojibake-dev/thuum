@@ -22,7 +22,7 @@ from pydantic import BaseModel, Field, field_validator
 CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "look", "solo-start", "place-npc", "npc-ai", "npc-state", "play-idle", "combat-spell", "start-combat"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
-SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida"}
+SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse"}
 # fakeclient: the fork's headless legacy client logs in as a scenario client's
 # profile from inside the server image (T2 without a Windows client).
 SERVER_STEP_ACTIONS = {"restart", "fakeclient"}
@@ -182,6 +182,29 @@ def _repeat_args(args: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _mouse_args(args: dict[str, Any]) -> dict[str, Any]:
+    """mouse {dx, dy, steps?, ms?, wake?}: a relative mouse move in the seat's own desktop session, the way a
+    player's hand turns the view (dy > 0 looks down): what the driver's look cannot do to a first-person
+    pitch (x-rune-cast 20261019-032920 aimed level and its rune fizzled). dx and dy are pixels, from -10000
+    to 10000; the move goes as `steps` equal parts (1 to 200, default 8) `ms` apart (0 to 1000, default 16).
+    `wake` (0 to 2000 px, default 0) first moves the view that far down and back: an idle seat's camera is
+    in vanity mode, and the first input only leaves it (c1, 2026-10-18 22:08)."""
+    out: dict[str, Any] = {}
+    for k, lo, hi, default in (("dx", -10000, 10000, 0), ("dy", -10000, 10000, 0), ("steps", 1, 200, 8), ("ms", 0, 1000, 16), ("wake", 0, 2000, 0)):
+        v = args.get(k, default)
+        if isinstance(v, bool) or not isinstance(v, int) or not lo <= v <= hi:
+            raise ValueError(f"mouse's {k} is a whole number from {lo} to {hi}")
+        out[k] = v
+    unknown = sorted(set(args) - set(out))
+    if unknown:
+        raise ValueError(f"mouse takes dx, dy, steps, ms and wake, not {unknown}")
+    if out["dx"] == 0 and out["dy"] == 0:
+        raise ValueError("mouse needs a dx or a dy")
+    if (out["steps"] - 1) * out["ms"] > 5000:
+        raise ValueError("mouse's steps and ms spread one move over at most 5 s")
+    return out
+
+
 # the driver steps a playtest may send one seat outside a run (lab-api's playtest-step): input and its
 # rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby), never
 # a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
@@ -266,6 +289,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         raise ValueError(f"unknown client step {action!r} for {key}")
     if action == "repeat":
         args = _repeat_args(args)
+    if action == "mouse":
+        args = _mouse_args(args)
     return Step(kind="client", client=key, action=action, args=args)
 
 
