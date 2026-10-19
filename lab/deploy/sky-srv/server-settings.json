@@ -52,23 +52,23 @@
     }
   ],
   "headshot": {
-      "spells": [
-          "801:Headshot Kills.esp"
-      ],
-      "races": [
-          "13740:Skyrim.esm",
-          "13741:Skyrim.esm",
-          "13742:Skyrim.esm",
-          "13743:Skyrim.esm",
-          "13744:Skyrim.esm",
-          "13745:Skyrim.esm",
-          "13746:Skyrim.esm",
-          "13747:Skyrim.esm",
-          "13748:Skyrim.esm",
-          "13749:Skyrim.esm",
-          "67cd8:Skyrim.esm"
-      ],
-      "minArchery": 60
+    "spells": [
+      "801:Headshot Kills.esp"
+    ],
+    "races": [
+      "13740:Skyrim.esm",
+      "13741:Skyrim.esm",
+      "13742:Skyrim.esm",
+      "13743:Skyrim.esm",
+      "13744:Skyrim.esm",
+      "13745:Skyrim.esm",
+      "13746:Skyrim.esm",
+      "13747:Skyrim.esm",
+      "13748:Skyrim.esm",
+      "13749:Skyrim.esm",
+      "67cd8:Skyrim.esm"
+    ],
+    "minArchery": 60
   },
   "playerGlobals": [
     "043cef:Apocalypse - Magic of Skyrim.esp",
@@ -126,6 +126,19 @@
     "01a60e:Apocalypse - Magic of Skyrim.esp"
   ],
   "startPoints": [
-    { "pos": [133857, -61130, 14662], "worldOrCell": "0x3c", "angleZ": 72 }
+    {
+      "pos": [
+        133857,
+        -61130,
+        14662
+      ],
+      "worldOrCell": "0x3c",
+      "angleZ": 72
+    }
+  ],
+  "bonds": [
+    {
+      "spell": "31C4D:Apocalypse - Magic of Skyrim.esp"
+    }
   ]
 }
