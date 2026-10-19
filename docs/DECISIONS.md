@@ -1519,7 +1519,11 @@ finding, not a bug, until its function is built.
 
 Status: proposed (2026-10-19 00:1x PDT, Eli: "yes please draft those process
 changes. all day for 1 playtest is rough and seems to be increasing in time.
-ideally we'd have 2 or 3 a day"; drafted from the night of train-27). Amends
+ideally we'd have 2 or 3 a day"; drafted from the night of train-27); item 1
+in effect from 2026-10-19 00:17 by Eli's choice of the day's plan ("lets go
+with your 2 playtest suggestion": twenty-four on the staged train-27 in the
+morning, twenty-five on the essentials layer and train-28 in the evening);
+the tooling items under way on his "fire at will" to numidium. Amends
 ADR-030 (the gate's selection for a train) and the stage's shape in
 docs/LAB.md; leaves ADR-024, ADR-027 and ADR-033 as they are.
 
