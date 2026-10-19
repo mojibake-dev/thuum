@@ -92,9 +92,14 @@ Roles:
   the wrapper, by a forced command on every key). It imports the unpacked exe from /srv/persist/game into an
   ephemeral Ghidra project per server process (about eight minutes at a
   session's first provider-backed call, milliseconds per answer after) and
-  every answer carries its provenance and confidence. pyghidra-mcp keeps
-  the named project (names, comments, renames). The trial and its measured
-  check are in docs/research/tools/rea-trial.md.
+  every answer carries its provenance and confidence. Its project starts
+  with CommonLibSSE-NG's names: `just rea-seeds` resolves every ID
+  `just relid` indexes through the Address Library into a seed file on the
+  dataset (tools/rea/seeds-<runtime>.tsv), which the wrapper hands REA as
+  REA_GHIDRA_SEED_FILE (614 functions and 15,843 labels for 1.6.1170,
+  about twelve seconds on the import). pyghidra-mcp keeps the named project
+  (its comments and renames). The trial and its measured checks are in
+  docs/research/tools/rea-trial.md.
 - sky-ci: the only runner that executes this project's jobs. The estate's own
   runner holds root on the host and never runs a fork job.
 - sky-c1 and sky-c2: Windows 11 linked clones of tpl-sky-client, each with
