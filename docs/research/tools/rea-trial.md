@@ -67,3 +67,15 @@ pyghidra-mcp and the Ghidra project are untouched; the exe stays on sky-re
 its own analysis database). The install script is kept beside this note as
 install-rea-in-ct.sh.
 
+## The check's addresses on 1.6.1170 (lab/addr.py, `just addr`, 2026-10-18)
+
+RVAs in SkyrimSE 1.6.1170.0 (the image base 0x140000000 added for a
+Ghidra address): DispelAlteredStates 38819 at 0x6c6d90; the callers the
+2026-10-16 read named: SpellCast 34144 at 0x5b1290 (run by Fire 34407 at
+0x5bbd40), ActivateRef 19796 at 0x2eac20, the weapon hit frame 38603 at
+0x6b9460, ArrowReleaseHandler 42859 at 0x7b9230, the force-greet 37200 at
+0x660410; the dispel chain 34510 at 0x5c2780 and ActiveEffect::Dispel 34061
+at 0x5ac880. REA's first open of the exe (its own auto-analysis) started at
+21:07 PDT; the comparison runs on its procedure_references and
+resolve_native_call_targets at 0x1406c6d90 against those six.
+
