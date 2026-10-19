@@ -7,6 +7,11 @@
 # figure of c1 spawns after c1's record exists (the other login order); then
 # the server sets c1's health to half and c2's figure shows that share
 # against the real maximum (the bar moves only by the server's number).
+# Ground: the hunters' camp flat (lab-spawn-relative (-15957, -20350, -3582),
+# x-rune-trip2's), c2 150 units north of c1. The first run (20261019-215534)
+# placed c2 150 units north of the spawn itself and it fell down the ridge's
+# north slope (1,180 units below the target, E_RUN_TELEPORT), as every c2
+# placed north of the spawn does.
 id: b-figure-values
 milestone: M2
 clients: [c1, c2]
@@ -18,8 +23,8 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 0]}
-  - c2: teleport {cell: lab-spawn, x: 0, y: 150, z: 0, rot: [0, 0, 180]}
+  - c1: teleport {cell: lab-spawn, x: -15957, y: -20350, z: -3582, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: -15957, y: -20200, z: -3582, rot: [0, 0, 180]}
   - wait: 6
   - c1: av-read {names: [health, magicka, stamina]}
   - c2: av-read {names: [health, magicka, stamina], other: true}
@@ -30,7 +35,7 @@ steps:
       - abs(c2.av_of(c1).stamina - c1.av().stamina) < 1
   - c2: reconnect
   - wait: 10
-  - c2: teleport {cell: lab-spawn, x: 0, y: 150, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: -15957, y: -20200, z: -3582, rot: [0, 0, 180]}
   - wait: 6
   - c2: av-read {names: [health, magicka, stamina], other: true}
   - assert:
