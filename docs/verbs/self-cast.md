@@ -116,6 +116,13 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   scenario's claim holds only while its casts stay inside the spell's
   duration, which its steps keep when no step stalls. A gate.yaml watch
   item when its ADR-027 reruns pass.
+- A Papyrus `Spell.Cast` of a spell the actor has not equipped raises no
+  spellCast event in Skyrim Platform: its TESSpellCastEvent handler raises
+  the event only when the spell sits in one of the actor's selected slots
+  (EventHandler.cpp:1495-1512, isCastValid). So the server never hears a
+  mod script's Self cast (Shadowbond's invisibility proc, playtest
+  twenty-four), and a Self effect a script imposes is the server's to
+  record and impose itself when it matters (shadowbond.md, train-28).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
