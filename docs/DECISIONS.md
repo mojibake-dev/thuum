@@ -1632,7 +1632,15 @@ Items 3 to 6 are tooling for numidium, in this order: the T0 oracle (4),
 item 1 alongside (policy, no tooling), T2 beside the probes (5), the client
 build's speed (3), the playtest profile (6), the gate's selection (2) last
 since it mostly saves lab time once item 1 holds; until each exists, the
-step it replaces is done by hand and the LOG says so. The
+step it replaces is done by hand and the LOG says so. Landed the same night
+(numidium, 2026-10-19 00:xx): the playtest profile (`just playtest-setup`,
+`playtest-ready`, `playtest-profile-check`, branch playtest-setup); the dist
+reuse for server-only heads (`REUSE_DIST=1` on verb-stage); T2 beside the
+probes, measured at no cost (118 and 122 s per probe against 115 and 123 s
+alone); the T0 oracle's first form (a BuildKit cache mount) measured at 399
+against 476 s cold, the CMake tree rebuilding 245 objects on a one-line
+change because the runner's working copy is shared across branches, so
+ccache is the next step. The
 time saved on 2026-10-18's shape: about 35 minutes per server-only stage
 (none that night: every staged head changed the client side),
 about forty minutes per gate, a pipeline per compile slip, twenty minutes
