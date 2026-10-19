@@ -1,7 +1,7 @@
 # M2, cast-teleport (docs/verbs/cast-teleport.md, the look on other
 # screens; Eli, playtest twenty: "what we need is for near teleports to
 # vanish not slide"): b-teleport's short teleport watched from c2. c1 casts
-# Lost Grimoire's Teleportation (0x0B0A86DF, 185239263) level at c2 from
+# Lost Grimoire's Teleportation (LostGrimoire.esp's 0a86df) level at c2 from
 # y -300 and lands about 550 units south; at the landing the server places
 # c1's figure in c2's game (SetPosition, then the mod's appear effect and
 # sound), so the figure arrives in one jump instead of gliding there over
@@ -24,7 +24,7 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: learn-spell {spellId: 185239263}
+  - c1: learn-spell {spellId: "0a86df:LostGrimoire.esp"}
   - c1: console {text: "player.setav magicka 3000"}
   - wait: 2
   - c1: set-percentages {magicka: 1}

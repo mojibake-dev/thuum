@@ -24,49 +24,13 @@ from __future__ import annotations
 
 import json
 import os
-import struct
 import sys
 from pathlib import Path
 
-ESM, ESL = 0x1, 0x200
-
-
-def header(path: Path) -> tuple[int, list[str]]:
-    """A plugin's TES4 record flags and its masters (MAST fields), in order."""
-    with open(path, "rb") as f:
-        h = f.read(24)
-        if h[:4] != b"TES4":
-            raise ValueError(f"{path}: not a TES4 plugin")
-        size, flags = struct.unpack("<II", h[4:12])
-        data = f.read(size)
-    masters, i = [], 0
-    while i + 6 <= len(data):
-        typ, n = data[i:i + 4], struct.unpack("<H", data[i + 4:i + 6])[0]
-        if typ == b"MAST":
-            masters.append(data[i + 6:i + 6 + n].rstrip(b"\0").decode("cp1252"))
-        i += 6 + n
-    return flags, masters
-
-
-def is_master(name: str, flags: int) -> bool:
-    return name.lower().endswith((".esm", ".esl")) or bool(flags & ESM)
-
-
-def is_light(name: str, flags: int) -> bool:
-    return name.lower().endswith(".esl") or bool(flags & ESL)
-
-
-def slots(order: list[str], flags: dict[str, int]) -> tuple[list[str], dict[str, str]]:
-    """The engine's order (master-type first) and each plugin's slot in it: 'xx' for a full one, 'FExxx' for a light."""
-    f = lambda n: flags.get(n.lower(), 0)
-    engine = [n for n in order if is_master(n, f(n))] + [n for n in order if not is_master(n, f(n))]
-    out, full, light = {}, 0, 0
-    for n in engine:
-        if is_light(n, f(n)):
-            out[n.lower()] = f"FE{light:03X}"; light += 1
-        else:
-            out[n.lower()] = f"{full:02X}"; full += 1
-    return engine, out
+# the slot math is lab-api's (lab/labapi/labapi/slots.py), the one the runner resolves plugin-relative form
+# names with; layer-stage ships both files to sky-srv in this tree's layout
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "labapi" / "labapi"))
+from slots import ESL, ESM, engine_order, header, label, slots  # noqa: E402,F401
 
 
 def check(mods: Path, settings: Path) -> tuple[list[str], str]:
@@ -95,7 +59,8 @@ def check(mods: Path, settings: Path) -> tuple[list[str], str]:
         if n.lower() not in files and n.lower() not in {b.lower() for b in base}:
             problems.append(f"{n} is enabled but no mod under {mods} holds it")
     client = base + [n for n in enabled if n.lower() not in {b.lower() for b in base}]
-    engine, cslot = slots(client, flags)
+    engine = engine_order(client, flags)
+    cslot = {k: label(v) for k, v in slots(client, flags).items()}
     # a plugin loads only when every master is a base entry or a plugin that loads before it; the engine disables
     # one whose master is not in Data at all, and a plugin over a master it disabled stops the boot (both seen on
     # 2026-10-19), so neither may be enabled
@@ -109,7 +74,8 @@ def check(mods: Path, settings: Path) -> tuple[list[str], str]:
                 problems.append(f"{n} needs {m}, which no mod holds: the engine disables {n}")
             else:
                 problems.append(f"{n} needs {m}, which does not load before it: the clients' engine stops booting")
-    sengine, sslot = slots(served, flags)
+    sengine = engine_order(served, flags)
+    sslot = {k: label(v) for k, v in slots(served, flags).items()}
     if [n.lower() for n in sengine] != [n.lower() for n in served]:
         problems.append("the server's loadOrder is not in the engine's order (master-type plugins first)")
     for n in served:

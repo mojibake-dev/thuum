@@ -608,7 +608,18 @@ reference of that projectile base, a PROJ, nearest its player lies in its
 own game, or with `other: true` nearest its figure of the other player,
 as `distance`; Papyrus reads no position of a projectile, so the step
 narrows the search's radius; docs/verbs/marksman.md), and
-`form("File.esm:EditorID")` through lab-api's item table. Coordinates in a
+`form("File.esm:EditorID")` through lab-api's item table. A mod's record is
+named as skymp's FormDesc names it, its local id and its plugin,
+`"aae8:Apocalypse - Magic of Skyrim.esp"` (the shape the server's settings and
+guests.yaml's cells already use), wherever a step or an assertion takes a form
+(`form()`, `learn-spell`'s spellId, `give` and `equip`'s item,
+`effects(c).left()`): the runner reads the run's load order (its version's
+settings file and the master files the server mounts) and composes the id from
+the plugin's slot in it (lab/labapi/labapi/slots.py, the slot math layer-stage's
+load-order check shares), so a mod layer that moves a plugin changes no
+scenario. A slot written into a scenario breaks at the next layer: the
+essentials layer moved Apocalypse from 0C to 1A and LostGrimoire from 0B to 28.
+Coordinates in a
 scenario are offsets from a named cell's origin (`cells` in lab-api's
 guests.yaml; `lab-spawn` is the server's default start point until lab.esp
 provides a cell); lab-api converts to and from the engine's absolute
