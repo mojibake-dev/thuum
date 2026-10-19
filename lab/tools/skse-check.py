@@ -3,7 +3,8 @@
 <client>-skse64.log artifacts (lab-api collects them, docs/LAB.md). SKSE logs "checking plugin X.dll" for
 every DLL in Data\\SKSE\\Plugins and then, per DLL, "plugin X.dll (...) loaded correctly" or why it did not
 load; a DLL checked and never loaded is listed with SKSE's own line. MpClientPlugin.dll is skymp's, loaded
-by Skyrim Platform rather than SKSE, so its "no version data" is expected. Exits 1 when a seat left any
+by Skyrim Platform rather than SKSE, and msdia140.dll is the DIA SDK that CrashLogger reads its PDBs with,
+shipped beside it; SKSE checks both and their "no version data" is expected. Exits 1 when a seat left any
 other DLL unloaded, so a layer stage can gate on it (the essentials layer: every @1.6.1170 folder's DLL
 loads on the 1.6.1170 seat, docs/MODS.md)."""
 import re
@@ -11,7 +12,7 @@ import sys
 import urllib.request
 
 RESULTS = "https://thuum.gaussing.tv/results"
-NOT_SKSE = {"MpClientPlugin.dll"}
+NOT_SKSE = {"MpClientPlugin.dll", "msdia140.dll"}
 
 
 def read(run: str, client: str) -> str | None:
@@ -23,13 +24,15 @@ def read(run: str, client: str) -> str | None:
 
 
 def check(text: str) -> tuple[list[str], dict[str, str], str]:
-    checked = re.findall(r"^checking plugin (\S+\.dll)", text, re.M | re.I)
+    # a DLL's name may hold spaces (Fuz Ro D'oh.dll); its version block is "(<hex8> <name> <hex8>)", and the
+    # name may hold parentheses (Achievements Mods Enabler Loader (SKSE64, AE))
+    checked = re.findall(r"^checking plugin (.+?\.dll)\s*$", text, re.M | re.I)
     verdict: dict[str, str] = {}
     for line in text.splitlines():
-        m = re.match(r"\s*plugin (\S+\.dll) \(.*?\)\s*(.*)$", line, re.I)
+        m = re.match(r"\s*plugin (.+?\.dll) \([0-9A-Fa-f]{8} .*?[0-9A-Fa-f]{8}\)\s*(.*)$", line, re.I)
         if m and m.group(1) not in verdict:
             verdict[m.group(1)] = m.group(2).strip()
-        m = re.match(r"\s*couldn't load plugin (\S+\.dll)(.*)$", line, re.I)
+        m = re.match(r"\s*couldn't load plugin (.+?\.dll)(.*)$", line, re.I)
         if m:
             verdict[m.group(1)] = "couldn't load" + m.group(2)
     runtime = ""
