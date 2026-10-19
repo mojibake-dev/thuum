@@ -125,7 +125,9 @@
     }
   ],
   "bonds": [
-    {"spell": "31C4D:Apocalypse - Magic of Skyrim.esp"}
+    {
+      "spell": "31C4D:Apocalypse - Magic of Skyrim.esp"
+    }
   ],
   "headshot": {
     "spells": [
