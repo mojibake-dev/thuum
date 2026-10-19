@@ -462,3 +462,29 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   (01:22:57 to 01:23:18 UTC, "OnHit - MpObjectReference not found for
   hitData.target 0"): the spell's own hit names no target; low priority,
   the handler should drop a target-0 hit quietly.
+
+## The teleport snap, built (train-27, fork m2-train-27 d39bde9c, 2026-10-18 night)
+
+- A new server-to-client message, ActorJump (MsgType 46, wire id 54,
+  reliable, `idx`): MovementValidation marks a move the server vouches for
+  as a jump (an arrival after its own teleport, a cast teleport's permitted
+  landing, a permitted console jump) and OnUpdateMovement sends the mark to
+  every other game that sees the actor just before the report's relay; the
+  client marks that idx and the view places the figure at the report that
+  follows (movementApply's placement branch, now `distance > 1024 or
+  placed`) instead of gliding it. The mover's own game is told nothing. A
+  mark older than a second is dropped unused.
+- Why a message and not a flag on the relayed report: the server forwards a
+  client's movement bytes unparsed (RelayToListeners); a flag would mean
+  re-serializing every accepted report, and the server-only message follows
+  the shape Teleport2 and MagicEffects already have. Shadowbond's two jumps
+  ride the same mark once its verb permits them.
+- Tests: the unit test "A cast teleport's landing tells the other game to
+  place the figure before the report's relay" (the mark to the other game
+  before the relayed report, none to the mover, none for a plain step); the
+  teleports and ghostwalk difftest sessions declare one placement to c2
+  (the legacy server relays the report alone); T3: b-teleport-look's short
+  hop (and Ghostwalk's return in b-ghostwalk-look) with maxStep about the
+  jump's length in one frame where the glide spread it over 0.2 s, the
+  claim playtest twenty-three left open.
+

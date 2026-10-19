@@ -3,6 +3,21 @@
     "ghidra": {
       "type": "http",
       "url": "${GHIDRA_MCP_URL:-https://ghidra.gaussing.tv/mcp}"
+    },
+    "rea": {
+      "type": "stdio",
+      "command": "ssh",
+      "args": [
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=20",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-J",
+        "root@core.gaussing.tv",
+        "rea@10.10.70.11"
+      ]
     }
   }
 }

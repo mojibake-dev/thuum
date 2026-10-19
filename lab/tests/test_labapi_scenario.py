@@ -144,6 +144,30 @@ class RepeatStep(unittest.TestCase):
 
 
 @needs_deps
+class MouseStep(unittest.TestCase):
+    """A relative mouse move in the seat's desktop session (lab-api's mouse step, mouse.py)."""
+
+    def load(self, step):
+        from labapi.scenario import load_scenario
+
+        return load_scenario("id: x-mouse\nclients: [c1]\nsteps:\n  - c1: " + step + "\n")
+
+    def test_a_move_is_normalized_with_its_defaults(self):
+        step = self.load("mouse {dy: 300}").steps[0]
+        self.assertEqual((step.kind, step.action), ("client", "mouse"))
+        self.assertEqual(step.args, {"dx": 0, "dy": 300, "steps": 8, "ms": 16, "wake": 0})
+        step = self.load("mouse {dx: -40, dy: 120, steps: 4, ms: 0, wake: 400}").steps[0]
+        self.assertEqual(step.args, {"dx": -40, "dy": 120, "steps": 4, "ms": 0, "wake": 400})
+
+    def test_what_mouse_refuses(self):
+        for bad in ("mouse {}", "mouse {dx: 0, dy: 0}", "mouse {dy: 1.5}", "mouse {dy: true}", "mouse {dy: 20000}",
+                    "mouse {dy: 10, steps: 0}", "mouse {dy: 10, steps: 201}", "mouse {dy: 10, ms: -1}",
+                    "mouse {dy: 10, wake: 5000}", "mouse {dy: 10, pitch: 30}", "mouse {dy: 10, steps: 200, ms: 100}"):
+            with self.assertRaises(ValueError, msg=bad):
+                self.load(bad)
+
+
+@needs_deps
 class PlaytestStepTests(unittest.TestCase):
     def test_a_playtest_step_is_input_normalized_as_a_scenario_s(self):
         from labapi.scenario import playtest_step, step_seconds

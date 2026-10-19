@@ -334,3 +334,40 @@ not know.
   spell is 0xFE003801's), the server confirms through the record as today
   or refuses, and a refusal stands the figure back up. Train-27's row; its
   probe shoots a helmeted head to force the revert and times it.
+
+## The kill played ahead (train-27, fork m2-train-27, 2026-10-18 night; ADR-038)
+
+- Trigger: Headshot Kills' kill spell applying to a figure this player hit
+  (Skyrim Platform's magicEffectApply with its spell, the same event
+  hitService reports the kill spell's hit from; the spells named by the
+  client settings' "headshot-spells", "801:Headshot Kills.esp" in the
+  server block's spelling, resolved against this game's load order at
+  first use).
+- Play: DeathService.predictFigureDeath ragdolls the figure (PushActorAway
+  with no force, as the local player's own death is played) and marks it
+  predicted; nothing is killed, the figure's million and startDeferredKill
+  stand, so the server's state is untouched (ADR-028).
+- Confirm: the server's death reaches this game as today (the victim's
+  isDead through its movement report, or CreateActor at a subscribe);
+  applyDeathState clears the mark and the real kill plays over the
+  ragdoll. The server sends no refusal on a failed claim, so the revert is
+  by time: 1.2 s without the word (four times the slowest measured kill,
+  168 to 316 ms from the release), then DeathService.revertPredictedDeath
+  removes the ragdoll and sends GetUpBegin on the figure where it fell.
+- What makes the prediction wrong, and how the revert covers it: the
+  shooter's copy of the victim's armour can lag the server's equipment
+  record, and the mod's own Overdraw check runs against the shooter's local
+  skill while the server checks its recorded Archery (the lab's first probe
+  hit exactly that); both end in the same revert, since the server rebuilds
+  its four checks from its own records regardless.
+- Tests: no T0 or T2 (client playback only). T3: x-headshot-predict, then
+  b-headshot grows: the shooter's watch of the figure shows the ragdoll
+  within a frame of the bow hit (events or the track's fall) and the
+  server's kill after it; the helmeted shot shows the ragdoll and a
+  GetUpBegin within 1.3 s with no death on the server. The lab's client
+  settings carry "headshot-spells" (lab/deploy/sky-client); the layer's
+  install puts it on every seat.
+- Status: built, unmeasured; HYPOTHESIS on the ragdoll's look against the
+  mod's own kill (the engine's death animation differs from a push's
+  ragdoll; Eli judges the feel at twenty-four).
+
