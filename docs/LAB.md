@@ -720,9 +720,34 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
     online. skymp5-client reconnects and logs in by itself.
   - Measured on 2026-10-19 with the image already built: the server listening
     22 s after the push, both seats back online at 33 s.
-- `just turbo-back [--world]`: the reverse of the last push in turbo.log, a
-  tag back (31 s measured) or a kept client file. `--world` also restores the
-  newest saved turbo world, which relaunches both seats.
+- `just turbo-client <fork ref>`: a TypeScript client push.
+  - It builds skymp5-client.js on the Mac from a sparse fork worktree in
+    lab/.cache/turbo-fork (yarn 1 through npx; webpack 5 s).
+  - It sends the bundle over the in-VLAN hop with its SHA256 checked in the
+    guest, stops the game, and swaps the bundle into every game folder of each
+    clone, keeping the replaced file under C:\sky-lab\turbo\<stamp>\.
+  - It relaunches the seats and waits for each back online.
+    `TURBO_CLIENTS="c1:711"` pushes one seat.
+  - Measured on 2026-10-19 (fork 88c43e77): both seats back online 65 s after
+    the push, one seat 32 s. The bundle syncs like the Windows build's: a
+    600 px turn moved c1's server rot 27 degrees on either.
+  - A push relaunches, not hot-reloads (ADR-041's condition). Skyrim
+    Platform does reload a running game's plugins 8 ms after a last-write
+    change under Data/Platform/Plugins (DirectoryMonitor.cpp). But on
+    2026-10-19 the reloaded skymp5-client logged nothing on the server and
+    sent no movement: two turns left c1's rot at 0, while c2's control
+    turned 26.9 degrees.
+  - HYPOTHESIS: the reload starts with an empty storage
+    (assets/storageProxy.js makes a new Proxy over {}), so there is no world
+    model. skympClient.ts's establishConnectionConditional then finds the
+    native client still connected and skips the login, so no createActor
+    ever arrives.
+- `just turbo-back [--world]`: the reverse of the last push in turbo.log.
+  - A server push goes back to its previous tag (31 s measured).
+  - A client push stops each pushed seat's game, puts the kept file back and
+    relaunches only those seats (44 s for both, 37 to 74 s for one).
+  - `--world` also restores the newest saved turbo world, which relaunches
+    both seats.
 
 ## Network faults
 

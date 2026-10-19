@@ -421,9 +421,9 @@ turbo-srv tag:
     @lab/tools/turbo-srv.sh {{tag}}
 
 # A client push: skymp5-client.js built on this Mac from a fork ref in seconds (no Windows build), laid into every game
-# folder of both clones with the replaced file kept, then both seats relaunched; --hot writes into the running games.
-turbo-client ref *args:
-    @lab/tools/turbo-client.sh {{ref}} {{args}}
+# folder of both clones with the replaced file kept, then both seats relaunched (TURBO_CLIENTS="c1:711" for one).
+turbo-client ref:
+    @lab/tools/turbo-client.sh {{ref}}
 
 # The bundle alone, built from a fork ref (its path is the last line).
 turbo-client-build ref:
