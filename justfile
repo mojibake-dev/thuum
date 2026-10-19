@@ -75,11 +75,11 @@ test-proto tag="":
 ghidra:
     @curl -sS -m 20 -X POST -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' "${GHIDRA_MCP_URL:-https://ghidra.gaussing.tv/mcp}" -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"thuum","version":"0"}}}' | sed -n 's/^data: //p' | python3 -c 'import sys,json; d=json.load(sys.stdin); si=d["result"]["serverInfo"]; print("ghidra mcp ok:", si["name"], si["version"])'
 
-# The re-analyst's default static RE route (docs/LAB.md): the restricted `rea` user on sky-re through the host jump,
+# The re-analyst's default static RE route (docs/LAB.md): the restricted `rea` user on sky-re through core's forwarding-only `skyjump`,
 # whose forced command serves REA or runs its doctor; no Ghidra import, about three seconds.
 # Confirm REA answers on sky-re (REA's own MCP doctor: server identity, the 207-tool inventory, one target-free request).
 rea:
-    @ssh -o BatchMode=yes -o ConnectTimeout=20 -o StrictHostKeyChecking=accept-new -J root@core.gaussing.tv rea@10.10.70.11 doctor --format json | python3 -c 'import sys,json; d=json.load(sys.stdin); s=d["server"]; t=d["inventory"]["tools"]; print("rea mcp", "ok:" if d.get("healthy") else "UNHEALTHY:", s["name"], s["version"], "tools", t["observed"], "of", t["expected"])'
+    @ssh -o BatchMode=yes -o ConnectTimeout=20 -o StrictHostKeyChecking=accept-new -J skyjump@core.gaussing.tv rea@10.10.70.11 doctor --format json | python3 -c 'import sys,json; d=json.load(sys.stdin); s=d["server"]; t=d["inventory"]["tools"]; print("rea mcp", "ok:" if d.get("healthy") else "UNHEALTHY:", s["name"], s["version"], "tools", t["observed"], "of", t["expected"])'
 
 # Rebuild REA's seed file (CommonLibSSE-NG's names through the Address Library, lab/tools/rea-seeds.py) and
 # install it on the persist dataset, where sky-re's rea-mcp wrapper reads it at the next import (docs/LAB.md).

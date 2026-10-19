@@ -88,8 +88,9 @@ Roles:
   docs/research/tools/install-rea-in-ct.sh on 2026-10-18) is the
   re-analyst's default for reads since 2026-10-18 (Eli's call): the `rea`
   MCP server in .mcp.json reaches it as the restricted user `rea` over
-  ssh through the host jump (stdio, no port; the user's only command is
-  the wrapper, by a forced command on every key). It imports the unpacked exe from /srv/persist/game into an
+  ssh through core's forwarding-only jump user (stdio, no port, no root
+  anywhere; the user's only command is the wrapper, by a forced command
+  on every key). It imports the unpacked exe from /srv/persist/game into an
   ephemeral Ghidra project per server process (about eight minutes at a
   session's first provider-backed call, milliseconds per answer after) and
   every answer carries its provenance and confidence. Its project starts
@@ -125,11 +126,14 @@ Names used from the Mac are Caddy vhosts on the host, LAN and tailnet only,
 - `GHIDRA_MCP_URL=https://ghidra.gaussing.tv/mcp` proxies to sky-re:8080
   (pyghidra-mcp, streamable HTTP). `.mcp.json` names it as a URL-type server.
 - The `rea` MCP server has no URL: `.mcp.json` runs it as stdio over
-  `ssh -J root@core.gaussing.tv rea@10.10.70.11`. The `rea` user on
-  sky-re is a system account with a locked password whose authorized
-  keys are the host's root principals, each under `restrict,command=
-  "/usr/local/bin/rea-mcp"`, so the key serves REA or runs its doctor
-  and nothing else (the jump only forwards the connection). `just rea`
+  `ssh -J skyjump@core.gaussing.tv rea@10.10.70.11`. `skyjump` is core's
+  forwarding-only jump user (the estate's proxmox-host role, core
+  2026-10-19: nologin, no pty, no agent or X11 forwarding, a direct-tcpip
+  channel to 10.10.70.11:22 and nothing else; it takes the operator key).
+  The `rea` user on sky-re is a system account with a locked password
+  whose authorized keys are the host's root principals, each under
+  `restrict,command="/usr/local/bin/rea-mcp"`, so the key serves REA or
+  runs its doctor and nothing else. `just rea`
   runs that doctor (server identity, tool inventory, one target-free
   request; no import, about three seconds). The install, the user and
   the wrapper are docs/research/tools/install-rea-in-ct.sh; its two
