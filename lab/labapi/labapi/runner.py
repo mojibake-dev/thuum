@@ -990,6 +990,16 @@ class Runner:
         started = self._clock()
         if not await self.board.wait_heartbeat(client, started, self.s.relaunch_timeout_s):
             return fail(f"E_RUN_RELAUNCH: {client} ({g.name}) did not poll within {self.s.relaunch_timeout_s}s")
+        if rec.scenario.solo:
+            # a solo game (ADR-031: no skymp5-client) comes back at the main menu, where lab-driver polls (tick)
+            # but runs no step (update) and no login follows; the run's next solo-start loads it
+            rec.notes.append(f"step {index}: {client} relaunched solo, polling after {self._clock() - started:.1f}s")
+            # the new game is the one the run's end compares (Runner._crash_check)
+            rec.games.pop(client, None)
+            identity = await self._game_identity(g)
+            if identity:
+                rec.games[client] = identity
+            return True, f"{client} relaunched solo, at the main menu for the next solo-start"
         left = max(1.0, self.s.relaunch_timeout_s - (self._clock() - started))
         qs = await self.board.run_step(client, "dump-state", {}, left)
         if not qs.ok:
@@ -1000,9 +1010,6 @@ class Runner:
         identity = await self._game_identity(g)
         if identity:
             rec.games[client] = identity
-        if rec.scenario.solo:
-            # a solo run's game starts without skymp5-client (ADR-031), so no login follows; in game is the end
-            return True, f"{client} relaunched solo, in game"
         return await self._wait_online(rec, index, client, "relaunch")
 
     async def _game_identity(self, g: Guest) -> str:
