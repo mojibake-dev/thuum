@@ -250,8 +250,8 @@ the explosion, none from the effect (No Magnitude, Painless); any hurt comes fro
 **Against vanilla Frost Rune 0006796F**, read from Skyrim.esm on sky-srv by thuum-magnus's
 reader (raw subrecord hex, 2026-10-18, decoded here with the same code; the file is kept as
 chim/.scratch/frost-rune-records-20261018.txt). The vanilla rune's explosion is not on its
-MGEF (DATA+76 is 0) but on its projectile (PROJ DATA+36 = EXPL 00044089); that EXPL's bytes
-are still to come (Open items), the rest is read:
+MGEF (DATA+76 is 0) but on its projectile (PROJ DATA+36 = EXPL 00044089), read the same way
+(chim/.scratch/frost-rune-explosion-20261018.txt):
 
 | field | Acceleration Rune (Apocalypse) | Frost Rune (Skyrim.esm) |
 | --- | --- | --- |
@@ -263,7 +263,7 @@ are still to come (Open items), the rest is read:
 | MGEF script | WB_AccelerationRune_Script (PushActorAway 32 from a box behind the actor) | none |
 | MGEF explosion field | 0 | 0 |
 | PROJ | 0312494C: Lobber, Explosion + Alt. Trigger, **proximity 75**, timer 0, speed 1000, range 10000, collision radius 50, relaunch 0.25, fade 0.5, layer 00100F2F, decal WB_DecalRune_Telekinesis | 0005FBBF RuneFrostProjectile: Lobber, Explosion + Alt. Trigger, **proximity 150**, timer 0, speed 1000, range 10000, collision radius 50, relaunch 0.25, fade 0.5, layer 00100F2F, decal 0003AC49 |
-| EXPL (from the PROJ) | 03124ED8: damage 0, force 8, radius 128, IS radius 1024, vertical offset x-10, Ignore LOS Check, no knockdown flags, no placed object | 00044089: pending the bytes |
+| EXPL (from the PROJ) | 03124ED8: damage 0, force 8, radius 128, IS radius 1024, vertical offset x-10, Ignore LOS Check, no knockdown flags, no placed object | 00044089 ExplosionRuneFrost01: damage 0, force 128, radius 320, IS radius 1024, vertical offset x0, Ignore Image Space Swap (raw flags include 0x1 as on the Apocalypse one), no knockdown flags, no placed object, no spawn projectile; enchantment EITM 000B72A2, imod 0004408A, model Magic\\ExplosionFrost01.nif |
 
 So the rune mechanism itself is vanilla's, down to the collision layer, speed, range and
 relaunch interval: a Lobber that sits where it lands and sets off its explosion when an actor
@@ -272,8 +272,10 @@ comes within the alt-trigger proximity. Three things differ. The trigger radius 
 is a script, not an effect: vanilla hurts through its Dual Value Modifier (50 Health and
 Stamina, frost) applied to the actors the explosion reaches, with no script and no
 conditions; Acceleration Rune's effect has no magnitude and is Painless, is gated by a
-keyword test on the actor, and does its work with PushActorAway. Whether the two explosions
-differ in radius or knockdown waits on EXPL 00044089.
+keyword test on the actor, and does its work with PushActorAway. The explosions differ too: vanilla's
+ExplosionRuneFrost01 reaches radius 320 with force 128 and no Ignore LOS flag, Apocalypse's
+reaches 128 with force 8 and ignores line of sight; neither deals explosion damage and neither
+sets a knockdown flag, so in both the hurt or the push is the effect's, not the explosion's.
 
 ## 4. Azure Reconstruction, SPEL 03088694 (WB_Con_Heal1_Spell_AzureReconstruction)
 
@@ -388,11 +390,8 @@ loops (Frozen Orb, Volcano) and the spawners also never spawn what they are mean
 
 ## Open items
 
-1. **Vanilla Frost Rune's explosion**: EXPL 00044089 (named by PROJ 0005FBBF's DATA+36) in
-   Skyrim.esm on sky-srv; its DATA (52 bytes) and EDID fill the last row of the section 3
-   table. The SPEL, MGEF and PROJ arrived 2026-10-18 and are in the table.
-2. **Which effect lends Lightning Strike its projectile** (section 2): an engine read.
-3. **Vanilla names not resolved here**: KYWD 0001EA6F (MagicInvisibility is the script
+1. **Which effect lends Lightning Strike its projectile** (section 2): an engine read.
+2. **Vanilla names not resolved here**: KYWD 0001EA6F (MagicInvisibility is the script
    property's name for it), 0001CEAF, 000A9B1F, 00109D79, 000806E1, 000172AC, 00000EDF,
    0001CEB0; PERK 000F3F0E; PROJ 00012FDC; COLL 00100F2F; SOUN 00053A60; EFSH 000D22FB;
    FLST 000F6534; the perks 000C44C4, 000C44C1, 000C44BA, 000F2CA7. All Skyrim.esm.
