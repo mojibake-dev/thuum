@@ -5,10 +5,10 @@
 # folder the clone records (C:\sky-lab\games\<version>.txt, ADR-022), or,
 # for a mod directory named <mod>@<version>, only that version's (RaceMenu
 # loads on 1.6.1170 only, ADR-025), and is checked against its hash; a file
-# already in place with the right hash is kept. Then the plugins are enabled
-# in the lab user's plugins.txt, which every game folder shares (it lives in
-# the user's AppData), after what it lists; a game skips a listed plugin its
-# Data folder lacks.
+# already in place with the right hash is kept. Then the lab user's
+# plugins.txt, which every game folder shares (it lives in the user's AppData),
+# lists exactly these plugins, enabled, under the game's own comment lines; a
+# game skips a listed plugin its Data folder lacks.
 # The engine loads them after the masters and the Creation Club plugins
 # Skyrim.ccc lists; the server's loadOrder holds the same full-slot plugins in
 # the same order (docs/LAB.md), so form ids agree.
@@ -49,12 +49,15 @@ foreach ($folder in $folders) {
     $r.fetched++; $r.bytes += (Get-Item $dest).Length
   }
 }
-# plugins.txt: "*Name" enables a plugin; the game's own header lines stay
+# plugins.txt: "*Name" enables a plugin; the game's own comment lines stay and
+# nothing else does, so a plugin an earlier layer enabled and this one dropped
+# goes (keeping every line the list did not name left such a plugin enabled on
+# a stacked snapshot, 2026-10-19)
 $plugins = @(((& curl.exe -sS -f "$From/plugins.txt") -join "`n") -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 if (-not $plugins) { throw "no plugins.txt at $From" }
 $lines = @()
 if (Test-Path $PluginsTxt) {
-  $lines = @(Get-Content $PluginsTxt | Where-Object { $plugins -notcontains $_.TrimStart('*').Trim() })
+  $lines = @(Get-Content $PluginsTxt | Where-Object { $_.TrimStart().StartsWith('#') })
 } else {
   New-Item -ItemType Directory -Force -Path (Split-Path $PluginsTxt) | Out-Null
 }
