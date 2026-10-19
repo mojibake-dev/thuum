@@ -21,7 +21,7 @@ flowchart LR
   subgraph pve["Proxmox host core, 10.0.0.10"]
     subgraph vsky["VLAN 70 vsky, 10.10.70.0/24, dark by default"]
       srv["sky-srv 700 / .10\nDebian 12 VM + Docker\nskymp5-server x2, lab-api\ntcpdump, tc netem"]
-      re["sky-re 701 / .11\nDebian 12 LXC\nGhidra 12.1.4 + pyghidra-mcp"]
+      re["sky-re 701 / .11\nDebian 12 LXC\nGhidra 12.1.4 + pyghidra-mcp + REA"]
       ci["sky-ci 702 / .12\nDebian 12 VM + Docker\nGitLab runner, permanent egress"]
       tpl["tpl-sky-client 710 / .20\nWindows 11 template"]
       c1["sky-c1 711 / .21\nWindows 11 linked clone\nGPU passthrough, Skyrim + SP + lab-driver"]
@@ -51,7 +51,7 @@ flowchart LR
 | name | VMID | IP | kind | power |
 | --- | --- | --- | --- | --- |
 | sky-srv | 700 | 10.10.70.10 | Debian 12 VM + Docker | on demand (`sky-lab up`) |
-| sky-re | 701 | 10.10.70.11 | Debian 12 LXC, Ghidra 12.1.4 + JDK 21 + pyghidra-mcp | on demand |
+| sky-re | 701 | 10.10.70.11 | Debian 12 LXC, Ghidra 12.1.4 + JDK 21 + pyghidra-mcp + REA 6.7.0 | on demand |
 | sky-ci | 702 | 10.10.70.12 | Debian 12 VM + Docker, dedicated GitLab runner | always on |
 | sky-agent | 703 | 10.10.70.13 | reserved, not built | (M1) |
 | tpl-sky-client | 710 | 10.10.70.20 | Windows 11 template | template |
@@ -83,6 +83,18 @@ Roles:
   Library database for that exe version; the RTTI analyzer already names
   classes and vtables from the binary itself. CommonLib's C++ types are not
   fed to Ghidra's C parser (templates); the labels are the import.
+  Beside it, REA (morluto/rea 6.7.0 at /opt/rea, Node 22 at /opt/node, the
+  wrapper /usr/local/bin/rea-mcp; installed offline from a bundle by
+  docs/research/tools/install-rea-in-ct.sh on 2026-10-18) is the
+  re-analyst's default for reads since 2026-10-18 (Eli's call): the `rea`
+  MCP server in .mcp.json reaches it as the restricted user `rea` over
+  ssh through the host jump (stdio, no port; the user's only command is
+  the wrapper, by a forced command on every key). It imports the unpacked exe from /srv/persist/game into an
+  ephemeral Ghidra project per server process (about eight minutes at a
+  session's first provider-backed call, milliseconds per answer after) and
+  every answer carries its provenance and confidence. pyghidra-mcp keeps
+  the named project (names, comments, renames). The trial and its measured
+  check are in docs/research/tools/rea-trial.md.
 - sky-ci: the only runner that executes this project's jobs. The estate's own
   runner holds root on the host and never runs a fork job.
 - sky-c1 and sky-c2: Windows 11 linked clones of tpl-sky-client, each with
@@ -107,6 +119,17 @@ Names used from the Mac are Caddy vhosts on the host, LAN and tailnet only,
   read-only, straight off the dataset.
 - `GHIDRA_MCP_URL=https://ghidra.gaussing.tv/mcp` proxies to sky-re:8080
   (pyghidra-mcp, streamable HTTP). `.mcp.json` names it as a URL-type server.
+- The `rea` MCP server has no URL: `.mcp.json` runs it as stdio over
+  `ssh -J root@core.gaussing.tv rea@10.10.70.11`. The `rea` user on
+  sky-re is a system account with a locked password whose authorized
+  keys are the host's root principals, each under `restrict,command=
+  "/usr/local/bin/rea-mcp"`, so the key serves REA or runs its doctor
+  and nothing else (the jump only forwards the connection). `just rea`
+  runs that doctor (server identity, tool inventory, one target-free
+  request; no import, about three seconds). The install, the user and
+  the wrapper are docs/research/tools/install-rea-in-ct.sh; its two
+  offline archives live on the persist dataset under tools/rea, so a
+  rebuilt sky-re gets REA back with one run and no egress.
 
 Pi-hole holds `sky-srv.gaussing.tv` style A records for every guest, but
 those addresses are only routable from the host, from the tailnet with
@@ -683,8 +706,10 @@ Two speeds:
   doc's breakpoint plan is the script for the session; Moonlight to watch;
   findings go back into the verb doc as CONFIRMED with the run id.
 
-Static RE is pyghidra-mcp on sky-re, reached at GHIDRA_MCP_URL; the
-re-analyst subagent's procedure is unchanged, only the transport.
+Static RE is REA on sky-re (the `rea` MCP server, the default for reads
+since 2026-10-18) beside pyghidra-mcp at GHIDRA_MCP_URL for the named
+project; the re-analyst subagent's procedure (.claude/agents/re-analyst.md)
+names the order: CommonLib headers, REA, pyghidra-mcp, addrlib.
 
 ## CI
 
@@ -720,7 +745,7 @@ re-analyst subagent's procedure is unchanged, only the transport.
    steps (t2-fakeclient-restart) runs through lab-api with no Windows
    client at all; the server image is the T2 runtime (fakeclient and
    difftest both execute inside it).
-2. sky-re with pyghidra-mcp.
+2. sky-re with pyghidra-mcp (REA beside it since 2026-10-18).
 3. sky-c1 with the 1050, sky-c2 with the second adapter;
    `smoke-two-players` green, unattended once both clones boot to connected.
    Done 2026-10-01: run 20261001-233455 (17 of 17 steps, 3 min 10 s wall,
@@ -731,6 +756,7 @@ re-analyst subagent's procedure is unchanged, only the transport.
 - Proxmox PCI(e) passthrough: https://pve.proxmox.com/wiki/PCI(e)_Passthrough
 - i915 SR-IOV DKMS (Intel iGPU option, not used here): https://github.com/strongtz/i915-sriov-dkms
 - pyghidra-mcp: https://github.com/clearbluejar/pyghidra-mcp
+- REA (Reverse Engineer Anything): https://github.com/morluto/rea
 - GhidraMCP (GUI plugin; superseded here by pyghidra-mcp): https://github.com/LaurieWired/GhidraMCP
 - Ghidra releases: https://github.com/NationalSecurityAgency/ghidra/releases
 - Frida: https://frida.re
