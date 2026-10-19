@@ -28,7 +28,7 @@ WB_InvisProcTeleport_Script, which runs on the TARGET's effect.
 | OnEffectStart: an FXEmptyActivator placed at the target, a 0.25 s wait, then the caster and the target each cast the Self proc 03055B32 on themselves (effect 03055B31, archetype Invisibility, 600 s, keyword MagicInvisibility 0x1EA6F) | script | native in each game that runs the script: with the target-by-first-hit relay the target's game casts the figure's Shadowbond at its own player, so the script runs there too and the target's own game turns its player invisible (playtest twenty-three: it never did, the relay named nobody) |
 | the two invisibilities on the server's effect record (MagicEffects) and their shimmer on every other screen | magic-effects verb | imposed, already: the server records the proc from each player's own Self cast report |
 | the poll every 0.2 s: the swap fires the first time EITHER actor no longer has MagicInvisibility; WB_CheckLocation false | script | native in each game; the break the server sees is its own EndConcealment on an act (a cast, an attack, an activation, a bow release), so the server knows the moment within one report |
-| the swap: box.MoveTo(caster), caster.MoveTo(target), target.MoveTo(box), rotations matched, then sound and VFX on both, an image space modifier, Dispel on self | script | the two POSITIONS are the server's (R1): each game's script moves its own player; the server permits both jumps at the break (PermitCastJump for the caster to the target's recorded position and for the target to the caster's, within a slack, for about 1.5 s) and validates each landing; a figure's MoveTo in the other game is overwritten by the relay as today and is harmless |
+| the swap: box.MoveTo(caster), caster.MoveTo(target), target.MoveTo(box), rotations matched, then sound and VFX on both, an image space modifier, Dispel on self | script | the two POSITIONS are the server's (R0 since 2026-10-19): at the break the server teleports both players to each other's places itself (MpActor::Teleport, the lab's own teleport path), because the script runs in the CASTER's game only (ADR-029) and so moves the caster and the target's FIGURE there, while the target's own game never moves: x-shadowbond 20261019-073758 on 4c7e6998 swapped c1 alone (its permitted landing taken) and c2 stayed put with no self events. The caster's own script move lands on the spot the server chose and reads as the arrival; the figure's MoveTo in the caster's game is overwritten by the relay as today. The permits of the first build are gone |
 | the look of the swap on the other screens | relay | imposed through the teleport snap (train-27's row): both accepted jumps are relayed as placements, so neither slides |
 | OnEffectFinish at 20 s with no break: dispels the proc on both, deletes the box, nobody moves | script | native in each game; the server ends the bond with the effect's duration |
 | a target that is an NPC | script | later: M3 (the host's game runs the script; the server permits the NPC's jump as a hosted move) |
@@ -45,9 +45,9 @@ WB_InvisProcTeleport_Script, which runs on the TARGET's effect.
 
 ## Authority
 
-Rung: R1 for both positions (each game moves its own player by the mod's
-script; the server permits and validates the two jumps against each other's
-recorded position at the break), R0 for the bond itself (the server records
+Rung: R0 for both positions (the server moves both players at the break;
+the caster's game's script move is the same spot and reads as the arrival,
+the target's game is moved by the server alone), R0 for the bond itself (the server records
 it at the Shadowbond hit's claim and ends it at the break or at 20 s).
 Why this rung and not the one above it: the mod's script performs the move
 in each game anyway (as Lost Grimoire's Teleportation does, cast-teleport);

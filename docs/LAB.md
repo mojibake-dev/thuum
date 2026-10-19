@@ -686,6 +686,16 @@ Two speeds:
 Static RE is pyghidra-mcp on sky-re, reached at GHIDRA_MCP_URL; the
 re-analyst subagent's procedure is unchanged, only the transport.
 
+The driver's `mouse {dx, dy, steps, ms, wake}` step (numidium, main 353b4d3,
+2026-10-19) moves the view through SendInput, the only input that reaches
+the first-person camera and exits the auto-vanity camera an idle seat drifts
+into (so `wake` sends a throwaway move first). Calibrated on x-rune-cast2
+20261019-074009 from the graph's Pitch variable sampled through the moves:
+0.04946 degrees per px, 20.2 px per degree, linear across 60 degrees; +dy
+pitches DOWN and Pitch reads negative for down (AimPitchCurrent and 1stPRot
+stay 0, so Pitch is the variable to read). A move before `draw-weapon`
+leaves the draw alone; a move after it is untested.
+
 ## CI
 
 - GitLab CI on sky-ci (ADR-016). T0 and the wire tests on every push; bounded
