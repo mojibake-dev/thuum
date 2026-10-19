@@ -15,7 +15,7 @@
         "-o",
         "StrictHostKeyChecking=accept-new",
         "-J",
-        "root@core.gaussing.tv",
+        "skyjump@core.gaussing.tv",
         "rea@10.10.70.11"
       ]
     }

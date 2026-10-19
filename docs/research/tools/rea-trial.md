@@ -248,3 +248,18 @@ vtable-reached). 0x14365bbe8 still has no name. The analysis profile records
 the seed commitment (sha256 661be793..., 614 function and 15,843 label
 entries), so an answer says which names it was given.
 
+## The jump, non-root (core, 2026-10-19 00:0x PDT)
+
+Eli routed the lab's infrastructure asks to the core session ("given the lab
+is a part of CORE just pass anything you need mundus to do to core
+instead"), and core delivered both: sky-re's memory ceiling is 12 GiB (the
+Terraform provider rebooted the CT for it at 00:00:30, about a minute; a
+memory change on this CT restarts it, now noted in sky.tf, so the next one
+waits for an idle RE lane), and `skyjump` on core is a forwarding-only user
+(nologin, no pty, no agent or X11 forwarding, no remote forwards, a
+direct-tcpip channel to 10.10.70.11:22 only, its own root-owned key file;
+estate commit 0a3618f on sky-phase3). The .mcp.json entry and `just rea`
+now jump through it: `ssh -J skyjump@core.gaussing.tv rea@10.10.70.11`. No
+session holds root anywhere on the route. Imports no longer need
+serializing against pyghidra-mcp; the heap stays 4 GB.
+
