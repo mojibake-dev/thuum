@@ -19,9 +19,19 @@ case "$label" in *[!A-Za-z0-9._-]*) echo "a label is letters, digits, dot, dash 
 here=$(cd "$(dirname "$0")/../.." && pwd)
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-run() {  # run <timeout> <powershell>: the guest's output, its exit code passed on
-  ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout $1 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" \
-    | python3 -c 'import sys,json; d=json.load(sys.stdin, strict=False); print((d.get("out-data") or d.get("err-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'
+run() {  # run <timeout> <powershell>: the guest's output, its exit code passed on; an answer that is no JSON (the
+  # guest agent's status read timed out, as on the first live captures, 2026-10-19 12:01) is asked again, since a
+  # capture is safe to repeat (turbo-client.sh's rule)
+  local out try
+  for try in 1 2 3; do
+    out=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout $1 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" 2>&1 || true)
+    printf '%s' "$out" | python3 -c 'import sys,json; json.load(sys.stdin, strict=False)' 2>/dev/null && break
+    sleep 5
+  done
+  printf '%s' "$out" | python3 -c 'import sys,json
+try: d = json.load(sys.stdin, strict=False)
+except Exception: print("no answer from the guest agent"); sys.exit(1)
+print((d.get("out-data") or d.get("err-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'
 }
 pm=$(ls "$here"/lab/.cache/presentmon/PresentMon-*-x64.exe 2>/dev/null | sort -V | tail -1 || true)
 [ -n "$pm" ] || { echo "no PresentMon in lab/.cache/presentmon: gh release download -R GameTechDev/PresentMon -p 'PresentMon-*-x64.exe' -D lab/.cache/presentmon" >&2; exit 2; }
