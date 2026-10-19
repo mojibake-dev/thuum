@@ -1646,10 +1646,26 @@ function run(step: Step, player: Actor): unknown {
       // and percentage each. With {other: true}, the nearest other actor's in
       // this game (a figure's Invisibility, thuum docs/verbs/self-cast.md)
       const names = Array.isArray(a.names) ? a.names.map(String) : [];
-      const who = a.other ? nearestOther(player) : player;
-      const values: Record<string, ReturnType<typeof readActorValue>> = {};
-      for (const n of names) values[n] = readActorValue(who, n);
-      return { values, of: who.getFormID() };
+      const readAll = (who: Actor) => {
+        const values: Record<string, ReturnType<typeof readActorValue>> = {};
+        for (const n of names) values[n] = readActorValue(who, n);
+        return values;
+      };
+      if (!a.other) return { values: readAll(player), of: player.getFormID() };
+      // with other, every actor nearby comes back too (id, enabled, 3D, pos,
+      // values), so lab-api can judge the figure nearest where the server has
+      // the other client, as node-scale {other: true} is judged
+      // (thuum docs/verbs/figure-values.md, c2.av_of(c1))
+      const near = nearbyActors(player).sort((x, y) => distanceTo(player, x) - distanceTo(player, y));
+      if (near.length === 0) throw new Error("no other actor nearby");
+      const all = near.map((o) => ({
+        id: o.getFormID(),
+        enabled: !o.isDisabled(),
+        loaded: o.is3DLoaded(),
+        pos: [o.getPositionX(), o.getPositionY(), o.getPositionZ()],
+        values: readAll(o),
+      }));
+      return { values: all[0].values, of: all[0].id, all };
     }
     case "set-av": {
       // The console's setav on the player: an actor value in this client

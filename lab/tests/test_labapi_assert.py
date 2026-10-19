@@ -542,6 +542,28 @@ class NodeScaleViews(NearViews):
         return self.read.get(observer)
 
 
+class AvViews(NearViews):
+    """c1 read its own Health at base 250 (200 of it left); c2 read every
+    actor near it: a stale disabled reference at the million where the
+    server has c1 (290, 0, 0), the live figure beside it at 250, and a guard
+    far off (thuum docs/verbs/figure-values.md)."""
+
+    def __init__(self):
+        super().__init__()
+        av = lambda base, current: {"base": base, "current": current, "maximum": base, "percentage": current / base}
+        self.read = {
+            "c1": {"self": {"of": 20, "values": {"health": av(250.0, 200.0), "magicka": av(120.0, 120.0)}}},
+            "c2": {"other": {"of": 0xFF0008DC, "values": {"health": av(1000000.0, 1000000.0)}, "all": [
+                {"id": 0xFF0008DC, "enabled": False, "loaded": True, "pos": [290.0, 0.0, 0.0], "values": {"health": av(1000000.0, 1000000.0)}},
+                {"id": 0xFF0008DD, "enabled": True, "loaded": True, "pos": [292.0, 1.0, 0.0], "values": {"health": av(250.0, 200.0), "magicka": av(120.0, 120.0)}},
+                {"id": 0xFF000009, "enabled": True, "loaded": True, "pos": [5000.0, 0.0, 0.0], "values": {"health": av(100.0, 100.0)}},
+            ]}},
+        }
+
+    def av_reads(self, observer):
+        return self.read.get(observer)
+
+
 class PresetViews(NearViews):
     """c2 saved its own look twice, the same, and c1 its own, another."""
 
@@ -686,6 +708,30 @@ class NodeScaleTests(unittest.TestCase):
             ev.evaluate("c2.node_scale() > 1")
         with self.assertRaises(AssertionData):
             ev.evaluate("c1.node_scale_of(c2) > 1")
+
+
+@needs_deps
+class AvReadTests(unittest.TestCase):
+    def test_a_figure_s_values_are_read_where_the_server_has_the_other_client(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), AvViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("abs(c1.av().health - 250) < 0.01"))
+        self.assertTrue(ev.evaluate("abs(c1.av().healthCurrent - 200) < 0.01"))
+        self.assertTrue(ev.evaluate("abs(c1.av().healthPercentage - 0.8) < 0.01"))
+        # the disabled reference at the million sits nearer; the live figure is judged
+        self.assertTrue(ev.evaluate("abs(c2.av_of(c1).health - c1.av().health) < 1"))
+        self.assertTrue(ev.evaluate("c2.av_of(c1).health < 100000"))
+        self.assertTrue(ev.evaluate("abs(c2.av_of(c1).magicka - 120) < 0.01"))
+
+    def test_a_missing_step_or_name_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), AvViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.av().stamina > 1")  # not read
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.av().health > 1")  # c2 read no self step
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.av_of(c2).health > 1")  # c1 read no other step
 
 
 @needs_deps

@@ -21,6 +21,10 @@ the lab can grep (E_ASSERT_*).
   <client>.node_scale_of(<client>)                   the same on its figure of the other client
                                                      (node-scale {other: true}): the enabled actor with
                                                      3D nearest where the server has that client
+  <client>.av().health | .healthCurrent | .healthMax  the actor values its last av-read {names} step read
+    | .healthPercentage (magicka, stamina likewise)    on its own player (base, current, maximum, share)
+  <client>.av_of(<client>).health ...                 the same on its figure of the other client (av-read
+                                                     {other: true}), the figure chosen as node_scale_of's
   <client>.preset("<name>").bytes | .sha256 | .look  the RaceMenu preset its racemenu-save {name} wrote
   server.actor(<client>).headParts                   the appearance's head parts, "0x..,0x.." sorted
   <client>.head_parts()                              the parts on its player's base from its last head-parts
@@ -86,6 +90,7 @@ class ViewsFacade(Protocol):
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
+    def av_reads(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
     def consoles(self, observer: str) -> dict[str, Any] | None: ...
     def head_parts(self, observer: str) -> dict[str, Any] | None: ...
@@ -429,6 +434,75 @@ class TimeView:
     daysPassed: float
     timeScale: float
 
+
+
+class AvView:
+    """An av-read step's values (thuum docs/verbs/figure-values.md): for
+    health, magicka and stamina, <name> is the base value, <name>Current the
+    current one, <name>Max the maximum and <name>Percentage the share, as the
+    driver read them on the player (c.av()) or on its figure of another client
+    (c.av_of(o))."""
+
+    def __init__(self, who: str, values: dict[str, Any]):
+        self._who = who
+        self._values = values
+
+    def _field(self, name: str, field: str) -> float:
+        v = self._values.get(name)
+        if not isinstance(v, dict) or field not in v:
+            raise AssertionData(f"{self._who}'s av-read did not read {name}'s {field}")
+        try:
+            return float(v[field])
+        except (TypeError, ValueError) as e:
+            raise AssertionData(f"{self._who}'s av-read {name} {field} is not a number") from e
+
+    @property
+    def health(self) -> float:
+        return self._field("health", "base")
+
+    @property
+    def magicka(self) -> float:
+        return self._field("magicka", "base")
+
+    @property
+    def stamina(self) -> float:
+        return self._field("stamina", "base")
+
+    @property
+    def healthCurrent(self) -> float:
+        return self._field("health", "current")
+
+    @property
+    def magickaCurrent(self) -> float:
+        return self._field("magicka", "current")
+
+    @property
+    def staminaCurrent(self) -> float:
+        return self._field("stamina", "current")
+
+    @property
+    def healthMax(self) -> float:
+        return self._field("health", "maximum")
+
+    @property
+    def magickaMax(self) -> float:
+        return self._field("magicka", "maximum")
+
+    @property
+    def staminaMax(self) -> float:
+        return self._field("stamina", "maximum")
+
+    @property
+    def healthPercentage(self) -> float:
+        return self._field("health", "percentage")
+
+    @property
+    def magickaPercentage(self) -> float:
+        return self._field("magicka", "percentage")
+
+    @property
+    def staminaPercentage(self) -> float:
+        return self._field("stamina", "percentage")
 
 @dataclass(frozen=True)
 class StateView:
@@ -1037,6 +1111,37 @@ class _ClientRef:
         figure chosen as node_scale_of chooses it."""
         return self._node_scale(other, "morph")
 
+    def av(self) -> AvView:
+        """c.av(): the actor values its last `av-read {names}` step read on
+        its own player (base, current, maximum and percentage each)."""
+        return self._av(None)
+
+    def av_of(self, other: str) -> AvView:
+        """c.av_of(o): the same on that client's figure of client o, from its
+        last `av-read {names, other: true}`: of the actors it read, the
+        enabled one with 3D nearest where the server has o (within
+        SEE_RADIUS), as node_scale_of chooses (thuum docs/verbs/
+        figure-values.md: the figure's base Health is its player's)."""
+        return self._av(other)
+
+    def _av(self, other: str | None) -> AvView:
+        fn = getattr(self._views, "av_reads", None)
+        data = fn(self.name) if fn else None
+        kind = "self" if other is None else "other"
+        read = data.get(kind) if isinstance(data, dict) else None
+        if not isinstance(read, dict):
+            step = "av-read" if other is None else "av-read {other: true}"
+            raise AssertionData(f"{self.name} has not reported an {step} step yet")
+        if other is not None:
+            live = [n for n in read.get("all") or [] if isinstance(n, dict) and n.get("enabled") and n.get("loaded")]
+            read, _ = self._nearest(other, live, lambda n: n["pos"])
+            if read is None:
+                raise AssertionData(f"{self.name} read no enabled actor with 3D where the server has {other}")
+        values = read.get("values")
+        if not isinstance(values, dict):
+            raise AssertionData(f"{self.name}'s av-read step lacks values")
+        return AvView(self.name, values)
+
     def _node_scale(self, other: str | None, field: str = "engine") -> float:
         fn = getattr(self._views, "node_scales", None)
         data = fn(self.name) if fn else None
@@ -1126,6 +1231,8 @@ _ATTRS = {
     SkillView: {"base", "xp", "legendary"},
     PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
+    AvView: {"health", "magicka", "stamina", "healthCurrent", "magickaCurrent", "staminaCurrent",
+             "healthMax", "magickaMax", "staminaMax", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
                 "movementControls", "menuControls", "lookingControls", "activateControls", "rested"},
@@ -1151,11 +1258,11 @@ _PAIR_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self"},
+    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "movedBy", "launched", "flights_match"},

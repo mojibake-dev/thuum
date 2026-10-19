@@ -57,6 +57,8 @@ class StepBoard:
         # node-scale answers: "self" (the player's) and "other" ({other: true},
         # every actor nearby under "all")
         self._node_scales: dict[str, dict[str, Any]] = {}
+        # av-read answers, "self" and "other", the same way
+        self._av_reads: dict[str, dict[str, Any]] = {}
         # racemenu-save answers by the name saved: {bytes, sha256, saved}
         self._presets: dict[str, dict[str, Any]] = {}
         # a console step's answer: {typed, lines, keys}
@@ -108,6 +110,12 @@ class StepBoard:
         if step.action == "node-scale" and isinstance(body.get("data"), dict):
             kind = "other" if (step.args or {}).get("other") else "self"
             self._node_scales.setdefault(step.client, {})[kind] = body["data"]
+        if step.action == "av-read" and isinstance(body.get("data"), dict):
+            # actor values read on the player ("self") or the nearest other
+            # actor ("other", with every actor nearby): thuum docs/verbs/
+            # figure-values.md, c1.av() and c2.av_of(c1)
+            kind = "other" if (step.args or {}).get("other") else "self"
+            self._av_reads.setdefault(step.client, {})[kind] = body["data"]
         if step.action == "console" and isinstance(body.get("data"), dict):
             self._consoles[step.client] = body["data"]
         if step.action == "head-parts" and not (step.args or {}).get("other") and isinstance(body.get("data"), dict):
@@ -194,6 +202,9 @@ class StepBoard:
     def node_scales(self, observer: str) -> dict[str, Any] | None:
         return self._node_scales.get(observer)
 
+    def av_reads(self, observer: str) -> dict[str, Any] | None:
+        return self._av_reads.get(observer)
+
     def presets(self, observer: str) -> dict[str, Any] | None:
         return self._presets.get(observer)
 
@@ -215,6 +226,7 @@ class StepBoard:
         self._poisons.clear()
         self._skills.clear()
         self._node_scales.clear()
+        self._av_reads.clear()
         self._presets.clear()
         self._consoles.clear()
         self._head_parts.clear()
