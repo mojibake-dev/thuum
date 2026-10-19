@@ -42,8 +42,32 @@ if ! git merge-base --is-ancestor origin/main HEAD; then
 fi
 
 echo "== 1. the Windows build of $sha8"
+# REUSE_DIST=1 (ADR-040 item 3): a head that changed nothing on the client side since a successful Windows run on the
+# branch takes that run's dist instead of waiting for its own (35 to 36 min a head on 2026-10-18). The client side is
+# what the dist is built from: skymp5-client, skyrim-platform, and the wire crates wire-client-ffi links
+# (skymp-wire/crates/{wire-client-ffi,wire-schema,wire-json,wire-validate,wire-transport,wire-codec}, from their
+# Cargo.toml path dependencies), with the build's own inputs (CMake, vcpkg, overlay ports, the workflow). Anything
+# under those, or outside the server-only paths below, keeps the wait.
+dist_sha=$sha
+if [ "${REUSE_DIST:-}" = 1 ]; then
+  server_only='^(skymp5-server/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
+  while read -r rid rsha; do
+    [ -n "$rid" ] && [ "$rsha" != "$sha" ] || continue   # the head's own run is the wait below
+    git -C "$fork" cat-file -e "$rsha^{commit}" 2>/dev/null || continue
+    git -C "$fork" merge-base --is-ancestor "$rsha" "$sha" || continue
+    changed=$(git -C "$fork" diff --name-only "$rsha" "$sha")
+    if [ -z "$(printf '%s\n' "$changed" | grep -v '^$' | grep -Ev "$server_only")" ]; then
+      dist_sha=$rsha
+      echo "   REUSE_DIST: run $rid at ${rsha:0:8} has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
+      break
+    fi
+  done < <(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch "$branch" --status success --limit 30 \
+             --json databaseId,headSha --jq '.[] | "\(.databaseId) \(.headSha)"')
+  [ "$dist_sha" != "$sha" ] || echo "   REUSE_DIST: no earlier run has this head's client; waiting for its own"
+fi
 reruns=0
 for i in $(seq 1 120); do
+  [ "$dist_sha" = "$sha" ] || { st=completed; con=success; break; }
   line=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch "$branch" --limit 10 \
            --json databaseId,headSha,status,conclusion --jq ".[] | select(.headSha==\"$sha\") | \"\(.databaseId) \(.status) \(.conclusion)\"" | head -1)
   if [ -z "$line" ]; then
@@ -140,7 +164,7 @@ echo "== 7. the client on both clones $(date +%H:%M:%S)"
 # client-dist stages the built driver bundle with the dist (stage-client.sh), so build it first: a fresh
 # worktree has none, and the main checkout's would be whatever was built last
 echo "   driver bundle: $(just build-driver 2>&1 | tail -1 | awk '{print $5, $NF}')"
-just build-client "$branch" "$sha" 2>&1 | grep -E "^run [0-9]+ " | cut -c1-120   # the build of this head, not the branch's newest
+just build-client "$branch" "$dist_sha" 2>&1 | grep -E "^run [0-9]+ " | cut -c1-120   # the build of this head (or of the run REUSE_DIST took), not the branch's newest
 # where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
 echo "   dist js $(shasum -a 256 "skymp/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
 for v in 712 711; do

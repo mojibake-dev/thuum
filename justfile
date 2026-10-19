@@ -414,6 +414,20 @@ playtest-record-stop:
     @pkill -TERM -f 'lab/tools/playtest-record.sh' || { echo "no recorder running"; exit 1; }; while pgrep -f 'lab/tools/playtest-record.sh' >/dev/null; do sleep 2; done; echo "recorder done: the logs are in; now playtest-save and lab-release"
 
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
+# A playtest's seats from its profile, lab/playtests/<n>.yaml (ADR-040 item 6): the world restored with both seats
+# relaunched, the hold, the camp, each seat's spells, values, items and bars set server-side and read back, Sunshine
+# restarted; then the Moonlight streams, then playtest-ready. `check` only reads the profile.
+playtest-setup n:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py setup {{n}}
+
+# After the streams are up: both games relaunched under them, then the profile's checks (online, heartbeats, values,
+# items, bars, one window per stream).
+playtest-ready n:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py ready {{n}}
+
+playtest-profile-check n:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py check {{n}}
+
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
 
