@@ -75,8 +75,8 @@ test-proto tag="":
 ghidra:
     @curl -sS -m 20 -X POST -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' "${GHIDRA_MCP_URL:-https://ghidra.gaussing.tv/mcp}" -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"thuum","version":"0"}}}' | sed -n 's/^data: //p' | python3 -c 'import sys,json; d=json.load(sys.stdin); si=d["result"]["serverInfo"]; print("ghidra mcp ok:", si["name"], si["version"])'
 
-# Confirm REA answers on sky-re (its own MCP doctor over ssh and pct exec: server identity, the 207-tool
-# inventory, one target-free request; no Ghidra import, about three seconds). The re-analyst's default (docs/LAB.md).
+# The re-analyst's default static RE route (docs/LAB.md); its doctor runs over ssh and pct exec, no Ghidra import, about three seconds.
+# Confirm REA answers on sky-re (REA's own MCP doctor: server identity, the 207-tool inventory, one target-free request).
 rea:
     @ssh -o BatchMode=yes -o ConnectTimeout=20 root@core.gaussing.tv 'pct exec 701 -- /usr/local/bin/rea-mcp doctor --format json' | python3 -c 'import sys,json; d=json.load(sys.stdin); s=d["server"]; t=d["inventory"]["tools"]; print("rea mcp", "ok:" if d.get("healthy") else "UNHEALTHY:", s["name"], s["version"], "tools", t["observed"], "of", t["expected"])'
 
