@@ -79,3 +79,16 @@ at 0x5ac880. REA's first open of the exe (its own auto-analysis) started at
 21:07 PDT; the comparison runs on its procedure_references and
 resolve_native_call_targets at 0x1406c6d90 against those six.
 
+## What the first open taught (21:10 PDT)
+
+open_binary answers at once with the file's facts (PE, x86_64, its
+SHA-256); the Ghidra import and auto-analysis run at the first
+provider-backed call (list_procedures), and REA's project is session-private
+under the system temp directory, removed when the server process closes or a
+call fails (docs/installation.md): every MCP server process imports the exe
+again, so one import per agent session, and REA_GHIDRA_STARTUP_TIMEOUT_MS
+(330 s by default, covering import, analysis and the bridge; a timeout
+restarts the analysis next call) is raised to 30 minutes in the wrapper. The
+first attempt at the default cut the analysis at 300 s; the timed run
+follows.
+

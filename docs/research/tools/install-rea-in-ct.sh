@@ -31,6 +31,10 @@ export JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64
 export PATH=/opt/node/bin:\$JAVA_HOME/bin:\$PATH
 export REA_PROVIDER=ghidra
 export GHIDRA_HEADLESS_MAXMEM=4G
+# the import and auto-analysis of the 37 MB exe outlive the 330 s default
+# (REA_GHIDRA_STARTUP_TIMEOUT_MS covers import, analysis and the bridge; a
+# timeout restarts the analysis on the next call, docs/installation.md)
+export REA_GHIDRA_STARTUP_TIMEOUT_MS=1800000
 export REA_MCP_INPUT_SCHEMA_PROFILE=compact
 export HOME=/var/lib/rea
 export XDG_CACHE_HOME=/var/lib/rea/cache
