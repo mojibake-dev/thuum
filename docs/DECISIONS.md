@@ -1524,29 +1524,32 @@ ADR-030 (the gate's selection for a train) and the stage's shape in
 docs/LAB.md; leaves ADR-024, ADR-027 and ADR-033 as they are.
 
 **Context.** One playtest a day, and the day is lengthening. Playtest
-twenty-three ran 17:30 to 18:55 PDT on 2026-10-18 on a build merged at 14:05;
-its findings became train-27 (six rows) built from about 20:30 to 22:30, and
-that train's first staged build reached the lab at 22:55 and its last probe
-read at 00:00; the gate and merge are a morning job, so playtest twenty-four
-is the next evening at the earliest: about 24 hours from findings to seats.
+twenty-three ran 17:30 to 18:55 PDT on 2026-10-18 on a build merged at 14:05
+(seats ready at 14:10); its findings became train-27 (six rows). The train's
+first stage (rows 1 and 2, 2b4d5b27) reached the lab at 20:18 and read its
+probes by 20:31, T2 by 20:55; the second (rows 3 to 6, c32cf0bd, after three
+red heads) reached it at 23:37 and read its last probe at 23:59; the gate and
+merge are a morning job, so playtest twenty-four is the next evening at the
+earliest: about 24 hours from findings to seats.
 Where the hours went, measured on the night:
 
 | step | cost on 2026-10-18 | what it bought |
 | --- | --- | --- |
 | building the six rows (Rust, C++, TS, tests, docs) | about two hours | the fixes |
-| two compile slips, each a full pipeline (the C++ server builds only in CI) | about 20 min each | nothing |
-| the Windows client build, waited on by every stage, for heads that changed only the server | 33 min, four times | nothing: the client was unchanged |
-| a stage of six probes and the deploy | 65 min, 33 of them that wait | the four green rows, two bugs of mine, two probe faults |
+| three red heads in the C++ CI (dd1b5483: four new unit tests that had never run; 43675022 and 44e959e9: compile errors), the server building and testing only in CI | server-build named each 7 to 8 min after its push; 21:30 to 23:01 from the first red push to the green one, the fixes included | nothing |
+| the Windows client build, GitHub's hosted runner building from scratch, waited on by every stage | 35 to 36 min a head (runs 39191168626 at 2b4d5b27, 39207598638 at c32cf0bd); the stages waited 35.6 and 27.5 min of it | the client: every staged head changed it (skymp5-client, or the wire crates wire-client-ffi links: wire-schema, wire-json, wire-validate) |
+| a stage: the deploy, both clients and the snapshots, then the probes | 9 to 9.5 min to lay, about 2.2 min a probe; stage 2 (six probes) 50 min from verb-stage's start, 27.5 of them on the Windows build | the four green rows, two bugs of mine, two probe faults |
+| T2 after the stage's probes | 23.6 min a stage (20:31 to 20:55) | the wire's differential oracle |
 | a probe fault (a cast hold too short, an unmeasured pitch) | one lab cycle each | the probe |
-| the gate sweep, ADR-030's selection | train-23 12 runs, train-24 23 runs (about an hour) | a regression net the nightly also casts |
-| playtest setup by hand from the checklist's Setup section | about 30 min | the seats |
+| the gate sweep, ADR-030's selection | train-23 12 runs; train-24 23 runs in 51 min; train-26 27 scenarios and 2 reruns in 75 min (12:50 to 14:05) | a regression net the nightly also casts |
+| playtest setup from the checklist's Setup section | scripted while the gate ran (one clarification round), then 1 min 40 s of setup: seats ready 4 min after the merge (14:06 to 14:10) | the seats |
 
 The checks themselves earned their keep: the T0 set caught a regression that
 would have failed the cloak row in Eli's hands (a vanilla effect gating on a
 condition function the server did not know, docs/research/apocalypse/
 effect-conditions.md), and the stage caught a validator refusing the first
 actor's snap. What is slow is latency and serial shape, not coverage: the
-first stage of a train waits half an hour on a client build it does not need,
+first stage of a train waits half an hour on a client build made from scratch,
 the gate grew from ten runs to twenty-three because a train touches
 ActionListener.cpp and ADR-030's "every verb whose files the branch touched"
 then names most verbs, the playtest waits for the gate and the merge it does
@@ -1608,7 +1611,8 @@ ADR-030 already put it, with ADR-027's two-sweep rule tolerating a lone red.
 Items 3 to 6 are tooling for numidium (verb-stage, build-client, a compile
 recipe on sky-ci, lab-api's single-probe run, the playtest profile); until
 each exists, the step it replaces is done by hand and the LOG says so. The
-time saved on 2026-10-18's shape: about 33 minutes per server-only stage,
+time saved on 2026-10-18's shape: about 35 minutes per server-only stage
+(none that night: every staged head changed the client side),
 about forty minutes per gate, a pipeline per compile slip, twenty minutes
 per playtest setup, and the gate and merge off the playtest's critical path,
 which is the day itself.
