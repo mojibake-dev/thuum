@@ -854,6 +854,76 @@ class FridaTraces(RunTests):
         self.assertEqual(runner.frida_started, [])
         self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
 
+MOUSE = """
+id: mouse
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: mouse {dy: 300, wake: 400}
+"""
+
+
+@needs_deps
+class MouseSteps(RunTests):
+    def _managed_c1(self, answer):
+        """c1 managed; the mouse command's exec answers `answer` (an ExecResult); the others pass through."""
+        from labapi import mouse
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        real = pve.exec
+        self.scripts = []
+
+        def exec_(guest, command, timeout):
+            if "-EncodedCommand" in command and mouse.TASK in mouse.decode(command):
+                self.scripts.append(mouse.decode(command))
+                return answer
+            return real(guest, command, timeout)
+
+        pve.exec = exec_
+
+    def test_a_move_runs_in_the_seat_s_session_and_its_answer_is_the_note(self):
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, '{"sent":24,"dx":0,"dy":300,"steps":8,"wake":400,"at":"2026-10-19T05:30:00Z"}', ""))
+        run_id, body = self._run(MOUSE)
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s["action"] == "mouse")
+        self.assertIn('"sent": 24', step["note"], step)
+        script = self.scripts[0]
+        # the task is the lab user's, headless, registered with -Force at this use; the request carries the args
+        self.assertIn("Register-ScheduledTask -TaskName 'sky-lab-input'", script)
+        self.assertIn("-Force", script)
+        self.assertIn("conhost.exe", script)
+        self.assertIn("-UserId 'lab' -LogonType Interactive", script)
+        self.assertIn('{"dx": 0, "dy": 300, "steps": 8, "ms": 16, "wake": 400}', script)
+
+    def test_a_move_sendinput_did_not_take_is_a_lab_error(self):
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, '{"sent":0,"dx":0,"dy":300,"steps":8,"wake":400,"at":"x"}', ""))
+        run_id, body = self._run(MOUSE)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertIn("SendInput took 0 of 24 events", str(body["failures"]))
+
+    def test_a_move_whose_task_never_answered_is_a_lab_error(self):
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(3, "", "no done.json in 30 s; the task's last result 267011"))
+        run_id, body = self._run(MOUSE)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertIn("E_RUN_MOUSE", str(body["failures"]))
+        self.assertIn("no done.json", str(body["failures"]))
+
+    def test_an_unmanaged_seat_has_no_mouse_step(self):
+        run_id, body = self._run(MOUSE)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertIn("E_RUN_MOUSE: c1 is unmanaged", str(body["failures"]))
+
+
 SHOT = """
 id: shot
 clients: [c1]

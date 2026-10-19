@@ -115,6 +115,8 @@ class Settings:
     game_port: int = 7777
     # Inside a Windows client (template build, Track L2).
     client_lab_dir: str = r"C:\sky-lab"
+    # the Windows account the clones' games run as (install-lab.ps1's -User): the mouse step's task runs as it
+    client_lab_user: str = "lab"
     # The client log artifact (c1.log): Skyrim Platform's own log, which always
     # exists and carries plugin load, JavaScript exceptions and latent-call
     # traces. lab-driver's writeLogs sink (Data\Platform\Logs\lab-driver-logs.txt
@@ -313,6 +315,7 @@ class Settings:
             pcap_iface=_env("PCAP_IFACE", d.pcap_iface),
             game_port=int(_env("GAME_PORT", str(d.game_port))),
             client_lab_dir=_env("CLIENT_LAB_DIR", d.client_lab_dir),
+            client_lab_user=_env("CLIENT_LAB_USER", d.client_lab_user),
             client_driver_log=_env("CLIENT_DRIVER_LOG", d.client_driver_log),
             client_plugin_log=_env("CLIENT_PLUGIN_LOG", d.client_plugin_log),
             frida_exec_template=_env("FRIDA_EXEC_TEMPLATE", d.frida_exec_template),

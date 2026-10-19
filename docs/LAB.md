@@ -519,7 +519,28 @@ guest agent stops the game and starts the sky-lab-launch task), and the
 step holds until the new process polls, answers a dump-state in game and
 is back on the server's online list. It is how a scenario gets a fresh
 save: after a reconnect an in-game client keeps its world and only moves
-its player (skymp5-client remoteServer.ts). Assertions read `server.actor(c)` (the record, and
+its player (skymp5-client remoteServer.ts).
+`mouse {dx, dy, steps, ms, wake}` turns a managed seat's view the way a hand
+on the mouse does (dy > 0 looks down). The driver's `look` cannot do that to
+a first-person pitch: x-rune-cast (20261019-032920) aimed level and its rune
+fizzled. The guest agent runs in session 0, which has no desktop, so:
+- lab-api stages input.ps1 and runs it as the lab user through the on-demand
+  task sky-lab-input. It registers the task with -Force at each use, so no
+  snapshot carries it, and runs it headless as sky-lab-screenshot does.
+- input.ps1 sends relative MOUSEEVENTF_MOVE events through user32 SendInput,
+  which DirectInput takes as a device's motion. On c1 (2026-10-18), one move
+  took the game out of its vanity camera and a second pitched the
+  first-person view.
+- The move goes as `steps` equal parts `ms` apart (8 and 16 by default).
+  `wake` first moves the view that far down and back: an idle seat's camera
+  drifts into vanity mode, and the first input only leaves it.
+- Pixels per degree come from the player's own pitch, the `rot` of its
+  record (labState's actor), read before and after a move.
+- A move SendInput did not take whole, or one the seat never answered, is a
+  lab error (E_RUN_MOUSE).
+- Until a move after draw-weapon is shown not to sheathe the weapon, a probe
+  pitches before the draw: look, mouse, equip, draw-weapon, wait, hold.
+Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
 server's verdicts on the client's race menu results; `shouts`,
 `wordsKnown` and `wordsUnlocked`, the shouts record's form ids sorted, hex
