@@ -2,8 +2,9 @@
 
 Drafted 2026-10-18 during playtest twenty-three's wait, from Eli's decision
 of the same day (docs/private/decisions-m2-apocalypse.md §6: "figures carry
-their player's real base values") and a read of fork parity d5b05e89. Not
-built yet; the first verb after the big playtest.
+their player's real base values") and a read of fork parity d5b05e89. Built
+the night of 2026-10-19 on fork m2-train-28 (train-28, playtest twenty-five's
+evening train) as the sections below say; the lab reads are the stage's.
 
 ## Intent
 
@@ -98,6 +99,16 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
   percentage then scales against them. A player with no record yet (a new
   character before its first ActorValues report) keeps the engine's race
   defaults until the record arrives; the million is not set at all.
+  BUILT (fork m2-train-28): MpActor::RecordedMaxima (the recorded bases 24,
+  25, 26 with the running buffs, GetMaximumValues, once any of the three is
+  recorded) fills CreateActor's health, magicka and stamina props under
+  OnlyPublic; MpActor::SendMaximaToListeners sends the three as property
+  updates (t 7) when the record changes (ActionListener::OnActorValues) and
+  when a buff moves a maximum (ApplyAttributeDeltas); formView.ts's
+  applyFigureMaxima sets each as the figure's base once per value, restores
+  the value and re-applies the fraction it showed before the set (the engine
+  keeps the current value across a base change, so the share would jump
+  otherwise); the million is gone, startDeferredKill stays.
 - Visual without simulation achieved by: the figure's values are set, never
   simulated; regeneration on the figure is the engine's own and is
   overwritten by each percentage, as today.
@@ -129,7 +140,16 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 - How: a Skyrim Platform hook (the figure's HandleHealthDamage, vfunc 0x104
   on the figure's Actor vtable, by Address Library id from lab/addr.py, never
   from memory) or a client-side restore of the figure's value on its own hit
-  event (worse: a visible dip).
+  event (worse: a visible dip). BUILT (fork m2-train-28, Hooks.cpp
+  FigureHealthDamage on CommonLibSSE-NG's VTABLE_Character[0], vfunc 0x104 as
+  include/RE/A/Actor.h:458 numbers it, beside ADR-037's PlayerHealthDamage):
+  the damage is dropped when the victim is a figure; the hit event, impact,
+  blood and stagger come earlier in the chain and stay. The figure is known
+  by the mark skymp5-client puts on every figure at spawn, attackDamageMult
+  0 (formView.ts), which no other actor carries; HYPOTHESIS until
+  x-figure-values-hit that the mark is tight enough (a summon or a placed NPC
+  with that value by some effect would be spared too), with a registry
+  native as the follow-up if it is not.
 - Release condition: none; figures are never hosted by their observer.
 - Side effects: HYPOTHESIS until the probe.
 
@@ -151,7 +171,8 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
   percentage arriving before the maxima scales against the race default and
   is corrected by the next percentage after the maxima land (one frame of a
   wrong bar at most, HYPOTHESIS).
-- Contract doc updated: not yet.
+- Contract doc updated: docs/WIRE.md (CreateActor's props for an observer,
+  the three maxima, and the property updates that follow them).
 
 ## Server
 
@@ -204,12 +225,12 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated (fork parity d5b05e89, 2026-10-18)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] server logic + T0 (unit/FigureValuesTest.cpp: no maxima before a record, the owner's race bases unchanged, the three property updates on a record, the maxima in a later CreateActor)
+- [x] message + validator (same commit: no new message, CreateActor's optional props filled for observers; docs/WIRE.md)
+- [x] native hook + T1 (Hooks.cpp FigureHealthDamage; T1 is the Windows build's)
+- [x] TS handler (formView.ts applyFigureMaxima)
+- [ ] T2 green (difftest session figure-values: the three property updates declared against the legacy stack)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-figure-values; x-figure-values-hit for the victim case)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
