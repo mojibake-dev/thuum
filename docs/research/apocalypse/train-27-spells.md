@@ -247,13 +247,33 @@ So the "launch" direction is the actor's facing (GetAngleZ), not its velocity, d
 description, and the force is PushActorAway's 32, not the explosion's 8. Damage: none from
 the explosion, none from the effect (No Magnitude, Painless); any hurt comes from the fall.
 
-**Against vanilla Frost Rune 0006796F**: the comparison needs Skyrim.esm (Open items).
-What the Apocalypse side already shows: it uses its own projectile and explosion records
-(0312494C, 03124ED8), not the vanilla rune's; and its payload is a script's PushActorAway
-rather than an explosion's damage or knockdown flags. The fields to compare once the vanilla
-chain is read: the MGEF archetype and whether it carries a script; the PROJ type, flags,
-alt-trigger proximity and timer; the EXPL damage, force, radius and knockdown flags; and
-the collision layer.
+**Against vanilla Frost Rune 0006796F**, read from Skyrim.esm on sky-srv by thuum-magnus's
+reader (raw subrecord hex, 2026-10-18, decoded here with the same code; the file is kept as
+chim/.scratch/frost-rune-records-20261018.txt). The vanilla rune's explosion is not on its
+MGEF (DATA+76 is 0) but on its projectile (PROJ DATA+36 = EXPL 00044089); that EXPL's bytes
+are still to come (Open items), the rest is read:
+
+| field | Acceleration Rune (Apocalypse) | Frost Rune (Skyrim.esm) |
+| --- | --- | --- |
+| SPEL | 03124EC9, Target Location, FF, range 20, charge 3.0, cost 1250, Ignore Resistance | 0006796F FrostRune, Target Location, FF, range 20, charge 0.5, cost 293, Ignore Resistance |
+| effect on the spell | magnitude 0, area 0, duration 0 | magnitude 50, area 0, duration 1 |
+| MGEF | 03124955, archetype **Script**, No Magnitude, Painless, No Recast, Hostile, Detrimental, No Duration, No Death Dispel; min skill 100 | 0006796D RuneFrostFFLocation, archetype **Dual Value Modifier** (Health 24 and Stamina 26), Hostile, Detrimental, FX Persist, No Recast, Power Affects Magnitude, No Death Dispel; base cost 50, resist 43 (frost), min skill 25 |
+| MGEF keyword(s) | 00109D79, 000806E1, WB_Alteration_Disable, WB_Alteration | 00109D79 only |
+| MGEF conditions | `HasKeyword(000172AC) == 0` on Subject | none |
+| MGEF script | WB_AccelerationRune_Script (PushActorAway 32 from a box behind the actor) | none |
+| MGEF explosion field | 0 | 0 |
+| PROJ | 0312494C: Lobber, Explosion + Alt. Trigger, **proximity 75**, timer 0, speed 1000, range 10000, collision radius 50, relaunch 0.25, fade 0.5, layer 00100F2F, decal WB_DecalRune_Telekinesis | 0005FBBF RuneFrostProjectile: Lobber, Explosion + Alt. Trigger, **proximity 150**, timer 0, speed 1000, range 10000, collision radius 50, relaunch 0.25, fade 0.5, layer 00100F2F, decal 0003AC49 |
+| EXPL (from the PROJ) | 03124ED8: damage 0, force 8, radius 128, IS radius 1024, vertical offset x-10, Ignore LOS Check, no knockdown flags, no placed object | 00044089: pending the bytes |
+
+So the rune mechanism itself is vanilla's, down to the collision layer, speed, range and
+relaunch interval: a Lobber that sits where it lands and sets off its explosion when an actor
+comes within the alt-trigger proximity. Three things differ. The trigger radius is half
+(75 against 150). The charge time is six times longer (3.0 s against 0.5). And the payload
+is a script, not an effect: vanilla hurts through its Dual Value Modifier (50 Health and
+Stamina, frost) applied to the actors the explosion reaches, with no script and no
+conditions; Acceleration Rune's effect has no magnitude and is Painless, is gated by a
+keyword test on the actor, and does its work with PushActorAway. Whether the two explosions
+differ in radius or knockdown waits on EXPL 00044089.
 
 ## 4. Azure Reconstruction, SPEL 03088694 (WB_Con_Heal1_Spell_AzureReconstruction)
 
@@ -340,11 +360,9 @@ chim/.scratch/train27.py's run (apocrypha's scratch), reproducible from the esp.
 
 ## Open items
 
-1. **Vanilla Frost Rune**: SPEL 0006796F and its chain are in Skyrim.esm on sky-srv
-   (/srv/persist/esm). Needed, as raw bytes or an esm.py dump: the SPEL's SPIT and EFID
-   list; its MGEF's DATA (152 bytes; projectile at offset 72, explosion at 76) and VMAD;
-   that PROJ's DATA (92 bytes); that EXPL's DATA (52 bytes). Asked of thuum-magnus
-   2026-10-18; this note gets a table when they arrive.
+1. **Vanilla Frost Rune's explosion**: EXPL 00044089 (named by PROJ 0005FBBF's DATA+36) in
+   Skyrim.esm on sky-srv; its DATA (52 bytes) and EDID fill the last row of the section 3
+   table. The SPEL, MGEF and PROJ arrived 2026-10-18 and are in the table.
 2. **Which effect lends Lightning Strike its projectile** (section 2): an engine read.
 3. **Vanilla names not resolved here**: KYWD 0001EA6F (MagicInvisibility is the script
    property's name for it), 0001CEAF, 000A9B1F, 00109D79, 000806E1, 000172AC, 00000EDF,
