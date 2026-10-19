@@ -694,7 +694,12 @@ into (so `wake` sends a throwaway move first). Calibrated on x-rune-cast2
 0.04946 degrees per px, 20.2 px per degree, linear across 60 degrees; +dy
 pitches DOWN and Pitch reads negative for down (AimPitchCurrent and 1stPRot
 stay 0, so Pitch is the variable to read). A move before `draw-weapon`
-leaves the draw alone; a move after it is untested.
+leaves the draw alone; a move after it is untested. Runes: from a standing
+first-person view at the lab spawn facing north, Frost Rune finds a ground
+point at 60 degrees down (1213 px) and not at 30 or 45 (x-rune-cast2 and
+x-rune-cast3, 2026-10-19): about 70 units out at eye height; the placement
+relays to the other game to the last digit (train-25). Probes that place a
+rune pitch 60 degrees down, with a wake.
 
 ## CI
 
