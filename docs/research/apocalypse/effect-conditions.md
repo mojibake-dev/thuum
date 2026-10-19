@@ -139,3 +139,38 @@ open and for a race it offers (ActionListener::OnUpdateAppearance,
 E_APPEARANCE_RACE), so every condition that reads ActorTypeUndead judges a
 turned player mortal until vampirism and lycanthropy are declared state
 (docs/PLAN.md, M5). No lab seat is a vampire.
+
+## Built (train-27, fork m2-train-27, 2026-10-18 night; ADR-039 accepted that evening)
+
+- The records keep their conditions now: libespm's MGEF::Data::conditions
+  (every CTDA on the effect record) and Effects::Effect::conditions (the
+  CTDAs after each effect item), beside the old callsHasPerk and
+  hasConditions flags.
+- MpActor::EffectConditionsHold judges both lists for an effect another
+  actor applies: Subject is the actor the effect lands on, Target its
+  caster (HYPOTHESIS until a Target row is read in the lab; the census says
+  all but HasPerk run on Subject, HasPerk on Target, the caster); a
+  function the server lacks refuses the effect with one warning,
+  E_CONDITION_UNKNOWN, naming the function index, the effect, the spell,
+  the caster and the victim; conditions that evaluate false refuse it with
+  an info line. ApplyEffects takes it for another actor's effects and the
+  stagger rider in OnSpellHit the same way; a self effect keeps the old
+  gate (ADR-029's default: the caster's own game runs it).
+- Functions (UESP "Skyrim Mod:Function Indices"): GetDead 46 (the death
+  record), IsActor 353 (true: every actor here is one), HasKeyword 560 (the
+  race's and the base record's KWDA; a player's race keywords), IsUndead
+  715 (ActorTypeUndead 0x13796 by the same read; a player's vampirism waits
+  on its M5 verb), HasMagicEffectKeyword 699 (the running effects' records),
+  IsCommandedActor 700 (false until summons exist). Left to refuse and log:
+  HasPerk 448 (no perk record before M5: the Impact rider is refused where
+  it was skipped), GetGlobalValue 74 (the recorded globals could answer, but
+  an unrecorded one has no "unknown" return yet), IsHostileToActor 719 (the
+  fights record is symmetric; a directional read waits).
+- Tests: unit/EffectConditionsTest: Firebolt's rider refused on another
+  player while its fire damage holds; Azure Reconstruction's shape
+  (IsCommandedActor == 1 on the Subject, then GetActorValuePercent < 1 with
+  the OR flag) refused on a player; IsActor, GetDead and HasKeyword
+  answering from the records. T3: b-azure-player (to write: Azure on the
+  other player heals nothing on the server and the log names the
+  refusal), and Azure on a summon once summons exist.
+
