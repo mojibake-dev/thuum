@@ -135,3 +135,32 @@ its effort, at eight minutes of startup per session. A fair default for
 the re-analyst's reads, with pyghidra-mcp kept for the analyzed project's
 names and comments (REA's project is ephemeral and unnamed).
 
+## Decided (Eli, 2026-10-18 21:5x PDT: "i say we make REA the default too")
+
+REA is the re-analyst's default for reads; pyghidra-mcp keeps the named
+project. What changed on this branch for it: .claude/agents/re-analyst.md
+(step 2 asks REA first and says which tools, and never list_procedures on
+the whole exe), docs/LAB.md (sky-re's row, the static RE paragraph, the
+`rea` server beside GHIDRA_MCP_URL, the reference), the justfile's `just
+rea` (REA's own MCP doctor: identity, 207 tools, a target-free request,
+about three seconds, no import).
+
+Cost to know: the import is paid once per server process, and Claude Code
+keeps a stdio server for the session, so a session's first REA question
+costs about eight minutes and the rest milliseconds.
+
+Follow-ups, not taken yet:
+- REA_GHIDRA_DISABLED_ANALYZERS can skip expensive analyzers at import
+  (REA names it in its own remediation text); a timed run would say what
+  it saves against the 462 s.
+- REA_GHIDRA_SEED_FILE takes `address<TAB>kind[<TAB>name]` lines (kinds
+  function, code, label; format rea-ghidra-seeds-v1, up to a million
+  entries) applied before analysis. `just relid` already produces every
+  Address Library ID CommonLibSSE-NG names with its name, and addrlib
+  resolves them for 1.6.1170: a seed file from those two would give REA's
+  ephemeral project CommonLib's names at import, the one thing the named
+  pyghidra project has over it.
+- The data reference to DispelAlteredStates from 0x14365bbe8 (what holds
+  it) and SpellCast's spared archetype: asked of REA in a second
+  background run on 2026-10-18 night, result pending.
+
