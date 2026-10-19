@@ -1235,6 +1235,22 @@ half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.
   target-actor spell at c2 from close with the server log's "relayed at its
   first hit" line, and c2's own game shows the spell's effect on itself:
   watched_self effects; Shadowbond's invisibility is the playtest claim).
+  HYPOTHESIS, and for a fire-and-forget spell FALSE as the relay stands
+  (playtest twenty-four, x-shadowbond 20261019-093744: c2's own watch held
+  no effect and no cast): castSpellImmediate's non-Self fire-and-forget
+  branch launches the spell's projectile with the named target as the
+  desired one (skyrim-platform MagicApi.cpp:254-302, Projectile::Launch at
+  :302) and never calls CastSpellImmediate with the target, as the Self
+  (:224) and concentration (:248-250) branches do; a spell with no
+  projectile (Shadowbond, Leech Seed, Finger of Death) applies nothing in
+  the target's game. The row to build: apply a projectile-less spell
+  delivered to its target directly on the named target (the figure's
+  caster's CastSpellImmediate), with x-target-by-hit's self.effects
+  assertion and a 1500 ms hold; run b-shadowbond on it before merging,
+  since the mod's script would then run a second instance in the
+  target's game (the server's pin covers the second move: HYPOTHESIS).
+  Shadowbond's own concealment no longer waits for it (shadowbond.md,
+  train-28: the server records and imposes the proc).
 - Consequences: a touch or target-actor spell's look reaches the other
   screens one hop after the hit (about the hit report's latency plus the
   relay's); a miss shows nothing but the animation. Azure Reconstruction's
@@ -1242,4 +1258,110 @@ half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.
   ADR-039's evaluator lands (its own row).
 - Status: built and pushed (fork m2-train-27, first commit); Rust T0 green
   (176 + 17 tests); server T0 and T2 at the stage; T3 unwritten.
+
+## Target location after playtest twenty-four (2026-10-19; fork m2-train28-castfix abe87806; the research memo of the day, re-read with the records on sky-srv and the re-analyst's REA read)
+
+Eli, test 2's seat: "the effect works, but there is no visible placed rune
+on player 2's screen. i can see the cast and the initial rune, but not
+after it's set"; Lightning Strike: "played effect on player 1, not on 2,
+the bolt looks the same and hangs." His theory: placed world objects not
+propagating. The records say otherwise, and split the finding in four.
+
+- The records (lab/esm.py on sky-srv). Frost Rune 0x6796F: SPEL to MGEF
+  0x6796D to PROJ RuneFrostProjectile 0x5FBBF (a Grenade, flags Explosion
+  and Alt Trigger, proximity 150, timer 0, lifetime 0, no hit art) to EXPL
+  0x44089 (placedObject 0, damage 0, force 128, enchantment SlowFrostRune
+  0xB72A2). The glyph on the ground IS the parked projectile; no ACTI,
+  HAZD or script exists anywhere in the chain, so nothing is "placed" that
+  could fail to propagate. Fire Rune 0x5DB90 is the same shape. Lightning
+  Strike 0x0C002878 is the same object one step longer: a Grenade on a
+  2.5 s timer (proximity 0, a no-collision layer) whose explosion places
+  ACTI 0x0C0FADFF carrying WB_DestroyAfterDelay_Script (OnLoad, wait 0.3 s,
+  Disable, Delete). Skyrim.esm's GMST iMaxPlayerRunes is 1, and CommonLib
+  puts `runesCast` on PlayerCharacter alone (include/RE/P/PlayerCharacter.h
+  :649).
+- The relay works. x-rune-trip2 (20261019-094024) re-read: the observer's
+  game launched the figure's rune at the relayed point (c2's watch: the
+  figure's launch at the recorded origin and the 60 degree pitch) and the
+  rune was ARMED there: it tripped on c2's own player 368 ms later in c2's
+  own game (FrostSlowFFContact applied, the explosion's hits taken, Health
+  and Stamina refused by the gates, the server's number landing). The run
+  tripped at once because c2 stood 154 units from the point (150 proximity
+  plus the PROJ's 50 collision radius); nothing has yet watched a rune
+  left standing. So "the effect works" is the relay, and the server's one
+  claim per trip (playtest twenty-four: four trips, four claims).
+- Fixed, 1: the observer's exception. Every relayed rune and Lightning
+  Strike cast ended remoteServer's once('update') callback with "Cannot
+  read properties of undefined (reading 'prototype')" (c2.log 151, 157,
+  162, 167, 173; the five of the session's thirty figure releases):
+  RemoteServer.placesAnExplosion called effect.getProjectile(), which
+  Skyrim Platform wraps by the VM class name PROJECTILE its class list may
+  lack (assets/sp3.js wrapObject, Object.create(sp[type].prototype)), the
+  same throw magicSyncService's sender-side guard already catches. The
+  throw came after the figure's launch and placed nothing wrong; it was a
+  false lead in every log read. Now guarded the same way (a throw counts
+  as a projectile, logged once per spell).
+- Fixed, 2: the caster's hanging bolt. ACTI 0x0C0FADFF's
+  WB_DestroyAfterDelay_Script never received OnLoad under Skyrim
+  Platform's SendEvent block (FridaHooks.cpp OnSendEventEnter; the
+  whitelist named SKI_, RaceMenu, GRIM_ALT_TeleportationMarker and
+  defaultDisableHavokOnLoad), so the bolt's activator stayed in the sky of
+  whichever game placed it (playtests twenty-one to twenty-four). The
+  whitelist admits the script: it touches no state but its own
+  reference's life, R3, visual, in every game. The vain shape the census
+  argues for (docs/research/apocalypse/train-27-spells.md: all thirteen
+  Apocalypse placed activators carry an OnLoad script and nothing else) is
+  "OnLoad passes for a script on a reference whose base is an explosion's
+  placed object"; it needs an ADR line and waits.
+- Not fixed, HYPOTHESIS: the observer's undressed rune. The re-analyst's
+  read (REA on sky-re, 2026-10-19, ids by lab/addr.py) kills "removed
+  later": the rune registration 40674 registers a rune only when the
+  shooter is the player, the limit sweep never takes grenades, fMineAgeMax
+  is 0, and no caller of the projectile kill 44110 is shooter-conditioned
+  beyond the player's cap. What stands is "kept but undressed": the
+  figure's rune sits armed, and the one player test in its set look is the
+  impact-effects pass 44213's quality tier (the player gets tier 0 or 4,
+  anyone else 0xC), where the ground decal and the particles come from.
+  That fits every word of the report, the frost at the walk-in included.
+  The fix shape, if the read holds: a Skyrim Platform hook on that pass
+  that lets a figure shooter (a dynamic form id, the mark every figure
+  carries) take the player's tier, filtered in native (rule 9), plus a
+  per-figure rune cap, since the engine will never register a figure's
+  runes (four casts leave four armed glyphs in the observer's game, one in
+  the caster's). A verb-sized change to this section.
+- Not fixed, HYPOTHESIS: the observer's silent Lightning Strike. The relay
+  launches the lobber from the relayed origin with the relayed angles,
+  exactly as the rune; statically the figure's lobber should count its
+  2.5 s down and explode in the observer's game (the trigger tick 44216
+  returns early only on a null parentCell or a null explosion pointer),
+  and the caster-side timing agrees with the records (the hit reached the
+  server 3.07 s after the release: the timer plus the flight). Three
+  one-read candidates: a null parentCell on the figure's launch, a model
+  that never "arrives" so the timer never starts, or a no-collision lobber
+  launched from the picked point with the caster's angles that dives
+  below the ground and explodes out of sight and out of its 300 unit
+  radius.
+
+### Dynamic plan for the undressed rune and the silent strike
+
+- Probe x-rune-visible (lab/.cache/probes, the hunters' camp shape of
+  x-rune-trip2 with c2 at 350 units, about 405 from the point, outside the
+  trigger): both games sample the rune projectile near the point every
+  second for 30 s (the driver's projectiles step: the form id and the
+  bisected distance; the fuller variant wants a refs-near step: Cell
+  getNumRefs and getNthRef with the disabled and deleted flags, specified
+  in the memo), screenshots at three marks, then c1 steps aside and c2
+  walks through with an until on the server's health. Read: the rune
+  listed in c2's game for the whole 30 s with no glyph on its screenshots
+  says undressed; absent after a sample says removed, and the sample's
+  moment names the killer; c1's series is the control. Runs at train-28's
+  stage.
+- Frida, c2's seat, after the probe: a read of the impact-effects pass
+  44213 at a figure's rune landing (the tier chosen, against the player's
+  own rune), the rune trigger tick 44216 and 44217, the arrival 44163, the
+  kill 44110 with a backtrace if the rune ever leaves, and 43919; for the
+  strike, the lobber's parentCell and explosion pointer at 44216's entry
+  and its position at the timer's end.
+- Owner: agent (the probe), then the re-analyst (the pass's tier test and
+  the hook point, static) and Eli's seat (the Frida read).
 
