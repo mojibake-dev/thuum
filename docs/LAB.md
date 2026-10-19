@@ -426,7 +426,7 @@ until watch-stop, and any actor {formIds: [...]} names (a cell's own NPCs,
 which the random search catches in a different set each run; a named
 actor's animation events get their own hook, and a reference reads it
 with `watched_id(<form id>)`, no server position needed), keeping
-{trackMax} position samples of 250 ms (240 by default, 2400 at most), and reports how far each got from where it began, with
+{trackMax} position samples of 250 ms (240 by default, 2400 at most), every NPC a place-npc step placed, and reports how far each got from where it began (a step past 5000 units in one update is a cell's coordinate frame changing under the actor, recorded in frameChanges and not counted as a move; `loaded` says whether its 3D was loaded at the start and at the stop, so an actor in an unloaded cell is told from one standing still), with
 each one's stagger, recoil, shout and bow events as this game's engine or a relay sent
 them (the name, and whether its graph took the event once every hook had
 run: deathService refuses every figure's staggerStart) and the graph

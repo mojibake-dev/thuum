@@ -228,6 +228,16 @@ type Watched = {
   // type] (the player's only: the platform's hook reports the player's own;
   // thuum docs/verbs/cast-action.md)
   actions: Array<[number, number, number, string, number]>;
+  // frame changes [ms, step]: a step past WATCH_FRAME_JUMP_UNITS in one
+  // update is a cell's coordinate frame changing under the actor (Embry
+  // through the inn's door read as a 50032-unit jump, docs/research/m3
+  // readings 2026-10-18), not a move; it is recorded here, `first` and
+  // `last` re-based, and maxDisplacement and maxStep left alone
+  frameChanges: Array<[number, number]>;
+  // whether the actor's 3D was loaded at watch-start and at watch-stop
+  // (Papyrus ObjectReference.Is3DLoaded): an actor in an unloaded cell
+  // reads motionless; this tells it from one sitting still
+  loaded: [boolean, boolean];
 };
 const WATCH_HEALTH_MAX = 512;
 const WATCH_SELF_MAX = 256;
@@ -238,6 +248,10 @@ const WATCH_TRACK_MAX = 240;
 // the most a watch may ask for in {trackMax}: ten minutes at WATCH_TRACK_MS
 const WATCH_TRACK_MAX_CAP = 2400;
 const VAR_EPSILON = 0.01;
+// no actor moves this far in one update (Whirlwind Sprint's longest dash
+// spread 2140 units over several reports, docs/verbs/movement-speed.md); a
+// larger step is the coordinate frame changing
+const WATCH_FRAME_JUMP_UNITS = 5000;
 let watching: { startedAt: number; actors: Map<number, Watched>; self: Watched; trackMax: number } | null = null;
 
 // The master behavior variables Skyrim Platform reads into
@@ -259,6 +273,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
     track: [[0, pos[0], pos[1], pos[2]]],
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
     events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], launches: [], flights: [], actions: [],
+    frameChanges: [], loaded: [actor.is3DLoaded(), false],
   };
 }
 
@@ -503,6 +518,11 @@ function nearbyActors(player: Actor): Actor[] {
 // the NPC a solo reference's place-npc step put down (ADR-031): {other}
 // names it, not the nearest actor a random search finds
 let placedId = 0;
+// every NPC placed this session (place-npc), oldest first: a watch names
+// them all (r-npc-fight's random search missed one of two bandits,
+// docs/research/m3 readings 2026-10-18); placedId stays the last for the
+// steps that act on one
+const placedIds: number[] = [];
 
 function nearestOther(player: Actor): Actor {
   if (placedId) {
@@ -571,14 +591,21 @@ function trackWatch(): void {
 // actor's health is taken on every change (its one-frame engine damage).
 function trackWatched(actor: Actor, id: number, w: Watched, ms: number, own: boolean): void {
   const pos = positionOf(actor);
-  const dx = pos[0] - w.first[0];
-  const dy = pos[1] - w.first[1];
-  const dz = pos[2] - w.first[2];
-  w.maxDisplacement = Math.max(w.maxDisplacement, Math.sqrt(dx * dx + dy * dy + dz * dz));
   const sx = pos[0] - w.last[0];
   const sy = pos[1] - w.last[1];
   const sz = pos[2] - w.last[2];
   const step = Math.sqrt(sx * sx + sy * sy + sz * sz);
+  if (step > WATCH_FRAME_JUMP_UNITS) {
+    if (w.frameChanges.length < WATCH_SELF_MAX) w.frameChanges.push([ms, step]);
+    w.first = pos;
+    w.last = pos;
+    w.samples += 1;
+    return;
+  }
+  const dx = pos[0] - w.first[0];
+  const dy = pos[1] - w.first[1];
+  const dz = pos[2] - w.first[2];
+  w.maxDisplacement = Math.max(w.maxDisplacement, Math.sqrt(dx * dx + dy * dy + dz * dz));
   if (step > w.maxStep) {
     w.maxStep = step;
     w.maxStepMs = ms;
@@ -1675,8 +1702,10 @@ function run(step: Step, player: Actor): unknown {
       // a solo reference's placed NPC always, which the random search can
       // miss among the wildlife (r-melee-power-a 20261014-064209 watched a
       // fox and a wolf and not the bandit it hit)
-      const placed = placedId ? Actor.from(Game.getFormEx(placedId)) : null;
-      if (placed && !actors.has(placedId)) actors.set(placedId, newWatched(placed, bools));
+      for (const id of placedIds) {
+        const placed = Actor.from(Game.getFormEx(id));
+        if (placed && !actors.has(id)) actors.set(id, newWatched(placed, bools));
+      }
       // the actors a reference names by form id ({formIds}: a cell's own
       // NPCs, which the random search catches in a different set each run),
       // each with its own animation-event hook; a name the game has no
@@ -1707,7 +1736,12 @@ function run(step: Step, player: Actor): unknown {
         seen.push([ms, player.getActorValue(av)]);
       }
       const actors: Array<Watched & { formId: number }> = [];
-      w.actors.forEach((v, formId) => actors.push({ formId, ...v }));
+      w.actors.forEach((v, formId) => {
+        const actor = Actor.from(Game.getFormEx(formId));
+        v.loaded = [v.loaded[0], actor ? actor.is3DLoaded() : false];
+        actors.push({ formId, ...v });
+      });
+      w.self.loaded = [w.self.loaded[0], player.is3DLoaded()];
       return { seconds: ms / 1000, actors, self: { formId: 0x14, ...w.self } };
     }
     case "equip": {
@@ -1756,6 +1790,7 @@ function run(step: Step, player: Actor): unknown {
       npc.setAngle(0, 0, num(a.rz));
       if (a.aggressive !== true) npc.setActorValue("Aggression", 0);
       placedId = npc.getFormID();
+      placedIds.push(placedId);
       return { formId: placedId };
     }
     case "npc-ai": {
