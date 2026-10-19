@@ -18,3 +18,9 @@ of ADR-035 (proposed). Each note cites its source by path and line or URL.
   the engine-alone references r-npc-packages, r-npc-fight and r-cell-leave.
   Copies of the scratchpad files numidium runs; a reference that reads right
   is committed alone under lab/ as ADR-031 asks.
+- readings-2026-10-17.md and readings-2026-10-18.md: the first live lab
+  readings (the engine alone on 2026-10-17; the three references again on
+  the new driver on 2026-10-18: Riverwood's fourteen by reference id, the
+  start-combat step, the puppet probe reproduced), each closing with what
+  the tools could not see; riverwood-ids.md names the residents.
+
