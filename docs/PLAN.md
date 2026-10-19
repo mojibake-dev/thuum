@@ -310,6 +310,25 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - the staggered cast (twenty-one): r-stagger-cast's bandit never
         attacked; rerun queued with an aggressive one.
       - per-player globals (A2) ride train-24 with these.
+    - Train-27 (playtest twenty-three's findings, 2026-10-18 evening; Eli:
+      "go build train-27"), in build order, each its verb doc's row:
+      - rune and Lightning Strike casts: the caster's client throws at the
+        cast and at the trip, so no cast reaches the server and the hits
+        are refused (target-location.md); handlers made safe, a solo probe,
+        then the observer's placement and the server's number re-read.
+      - target actor by first hit: the relayed cast carries the target its
+        first hit names, one hop later (spell-cast.md); the crosshair field
+        a hint only.
+      - effect conditions (ADR-039): the server evaluates CTDAs on effects
+        aimed at another player, unknown functions refuse and log; Azure
+        Reconstruction on a player the T3 claim (effect-conditions.md).
+      - teleport snap: a server-vouched jump is relayed as a placement at
+        any distance (cast-teleport.md); Shadowbond's swap as the server's
+        move of both actors, once apocrypha's script read says what the
+        swap does (docs/research/apocalypse/train-27-spells.md).
+      - headshot prediction (ADR-038): the shooter's game plays the kill at
+        once, the server confirms or reverts (headshot.md).
+      - figure-values (decided above) follows the train with its own doc.
       - target actor, second cut (fork m2-cast-target, train-26; x-class-target2
         20261018-191615): the sender names the actor under the crosshair, so
         the self-landing is gone and Azure Reconstruction at 180 units is

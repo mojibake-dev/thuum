@@ -1440,3 +1440,77 @@ enchantment path then has no actor caster and the refusal cannot tell it
 from a trap's; the damage path still runs. (c) Strip the EXPL's damage and
 enchantment from the records on the clients: a mod edit per spell, against
 the law.
+
+## ADR-038: Marksman consequences the shooter's game plays at once, the server confirms
+
+Status: ACCEPTED 2026-10-18 (Eli, after playtest twenty-three: "headshots
+are an instance where the timeliness of it matters. id say whatever design
+makes it as seamless as possible. for a lot of stuff server authority wins
+out, but for marksman combat, some elements at least, the feel is more
+important").
+
+**Context.** The headshot kill (docs/verbs/headshot.md) is the server's
+(R0): the shooter's game reports the bow hit, the server claims the headshot
+(head bare by worn armour, race, archery 60) and kills, and every game plays
+the death from the record. Playtest twenty-three measured it (results/
+playtest-23, server.log): eight kills, none refused, 27 to 50 ms from the
+arrow's landing to the kill on the server, 168 to 316 ms from the release.
+Eli: "it WORKS but there's a little bit of a lag. it feels less organic than
+in the game." In Skyrim itself the kill is Headshot Kills' own, in the
+shooter's game, in the hit's frame.
+
+**Decision.** For a marksman consequence whose feel depends on its moment,
+the headshot kill first, the shooter's game plays the consequence at once
+from the same rule the server applies (the mod's own kill attempt on the
+figure is the trigger: its kill spell applying to the figure), and the
+server stays the authority over the state: it validates the report as
+today and confirms (the kill record, the death to every game) or refuses,
+and a refusal reverts the prediction (the figure stands back up, the revert
+logged and counted in the lab). The state keeps its rung (R0); the
+prediction is R3 visual state until the confirmation lands. Each further
+marksman element takes this shape by its own verb doc, case by case; it is
+not a general licence to predict.
+
+**Consequences.** headshot.md gains the predicted kill and its revert; the
+lab measures both (a bare head predicted and confirmed; a helmeted or
+under-skill shot the shooter's game predicts wrongly must revert within the
+round trip); the parity scenario compares the shooter's view against the
+engine alone's timing. ADR-028 (the server's numbers alone) stands: the
+prediction changes no value, only the moment the death is seen.
+
+## ADR-039: The server evaluates an effect's conditions; unknown functions refuse and log
+
+Status: ACCEPTED 2026-10-18 (Eli: the morning's decision that the server
+evaluates conditions because it owns the state, docs/private/
+decisions-m2-apocalypse.md section 4; and that evening, on the policy for a
+function the server cannot evaluate yet: "refuse and log").
+
+**Context.** The server applies a spell's effects to another player from the
+caster's hit report without reading the effects' conditions (CTDA), except
+HasPerk (fork 93358eea); its condition evaluator has 17 functions and two
+callers (docs/research/apocalypse/effect-conditions.md). Playtest
+twenty-three: Azure Reconstruction, whose effect heals only a summoned
+creature, healed player two through the server (23 ticks at a quarter of
+its magnitude) while the caster's own engine refused it on its conditions
+and printed "Prisoner resisted azure reconstruction". Apocalypse's class
+spells lean on conditions throughout; vampirism and the rest of the race
+state are undeclared on the server (M5).
+
+**Decision.** Before applying an effect from one player to another, the
+server evaluates the effect's conditions against its own record (the
+Subject and Target reading measured first, HYPOTHESIS until then). A
+condition function the server implements decides as the engine would; an
+effect aimed at another player that carries a function the server cannot
+evaluate is REFUSED and LOGGED (one warning naming the function, the spell
+and the effect), so each gap surfaces in the lab and the playtests instead
+of as a silent false positive. Self effects stay the caster's game's
+(ADR-029's default) and are not evaluated here. The implemented set grows by
+the census's ranking of functions on effects aimed at others (apocrypha's
+read), the first being the ones Azure Reconstruction and Nature's Balance
+need.
+
+**Consequences.** The effect-conditions verb rides train-27 with a T0 oracle
+per function (the engine's documented semantics, CK wiki, UESP), its T3
+claim Azure refused on a player and accepted on a summon once summons
+exist; the server log gains E_CONDITION_UNKNOWN; a refused heal or harm is a
+finding, not a bug, until its function is built.

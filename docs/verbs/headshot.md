@@ -317,3 +317,20 @@ Core Impact Framework fires its rule in the shooter's game against a
 bare-headed figure, and every red before this one was the lab's: the
 character's iron helmet, and an actor value set by a name the server does
 not know.
+
+## Playtest twenty-three (2026-10-18, Eli, parity d5b05e89 + the layer)
+
+- Ticked: "it WORKS but there's a little bit of a lag. it feels less
+  organic than in the game." Measured (results/playtest-23/server.log):
+  eight ClaimHeadshot kills, none refused (head bare, archery 60 each);
+  OnWeaponHit to the kill 27 to 50 ms (mean about 38); OnPlayerBowShot to
+  the kill 168 to 316 ms (the arrow's flight included). The rest of the
+  felt lag is the death played from the server's record on the shooter's
+  screen instead of the mod's own kill in the hit's frame.
+- Decision: ADR-038 (Eli: feel first for marksman): the shooter's game
+  plays the kill at once when Headshot Kills' own kill spell applies to the
+  figure (the trigger this game already sees, x-headshot-probe: its spell
+  0xFF000D99 and projectile at every hit are CIF's blood spray, the kill
+  spell is 0xFE003801's), the server confirms through the record as today
+  or refuses, and a refusal stands the figure back up. Train-27's row; its
+  probe shoots a helmeted head to force the revert and times it.

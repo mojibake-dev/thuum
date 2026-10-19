@@ -164,3 +164,28 @@ lobber, the rune).
   pass in the lab until the driver can aim down: a lab item (a mouse or
   camera-pitch step, or a native that sets the player's look pitch), filed
   in docs/PLAN.md. The playtest measures them by eye meanwhile.
+
+## Playtest twenty-three (2026-10-18, Eli, parity d5b05e89; results/playtest-23)
+
+- Eli: the rune is invisible to player two; when tripped, player two's
+  figure collapses on the caster's screen only and player two sees no
+  damage; Lightning Strike is invisible to player two, deals no damage, and
+  its bolt from the sky stays animated on the caster's screen after the
+  strike.
+- The logs: no SpellCast ever reached the server for 0x6796F or 0xC124EC9;
+  the caster's Skyrim Platform log (c1.log) shows the cause, three
+  on('spellCast') exceptions ("Cannot read properties of undefined (reading
+  'prototype')", 18:48:25, 18:49:50, 18:49:58 PDT) and two on('hit')
+  exceptions ("Bad call result 4", 18:49:55) in this window and nowhere
+  else; the rune's hits on the figure then arrived with no cast to claim
+  against and were refused (E_SPELL_NO_CAST, 331 to 496 units away). So
+  nothing of this was the relay or the pitch: the caster's client threw.
+  MEASURED for the exceptions and the refusals; HYPOTHESIS that the same
+  throw hides Lightning Strike and leaves its bolt (its casts were never
+  logged either), and for where the throw is (the target-location cast
+  path's MagicEffect.getProjectile wrapper, or the hit's getBaseObject on
+  a projectile target, LAB.md's "any call on a projectile reference
+  aborts"). Train-27's first row: a solo probe casting Frost Rune level from
+  the spawn reproduces the cast-time throw without pitch, with the stack
+  logged; the handlers made safe; then the observer's placement and the
+  server's number read again.
