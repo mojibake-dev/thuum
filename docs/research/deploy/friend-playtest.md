@@ -953,31 +953,39 @@ half, 8 straddles, 9 comes after M3's first verbs.
    then the first friend playtest on the DMZ server with the recorder
    (ADR-033) running on Eli's seats.
 
-**Eli's decisions**, listed apart:
+**Eli's decisions**, listed apart (answered 2026-10-19 13:00 PDT in his
+decisions page; the options he did not take are kept in the parentheses
+for the record):
 
-- D1. Identity: shared password plus per-friend profile ids now
+- D1. Identity: DECIDED, shared password plus per-friend profile ids now
   (vvardenfell's posture; among friends, an id is a name, not a secret),
   the token issuer later; upstream's master and Discord OAuth not pursued.
-  Or the issuer first.
-- D2. Mod delivery, with section 2.1's facts: the layer's files from a
-  token path (the vvardenfell precedent, and the only one-script path for
-  a free account); a Nexus collection installed by Vortex (the plan's
-  stated track; one click for Premium, a click per mod otherwise; no
-  headless install); the friend's own Nexus key in our script (Premium
-  only). The hashes are the same in all three; the terms differ.
-- D3. Server placement: the DMZ sibling on VM 520's stub, promoted from the
-  lab's gate (core's recommendation), and where Eli's own seat sits for a
-  friend playtest.
-- D4. Game version for friends: 1.6.1170 by the downgrade (ADR-025), with
-  the downgrade scripted or documented.
+  (Not taken: the issuer first.)
+- D2. Mod delivery: DECIDED, the friend's own Nexus key in our one script
+  (Premium only; the hashes verified as in every path). (Not taken: the
+  layer's files from a token path, the vvardenfell precedent and the only
+  one-script path for a free account; a Nexus collection installed by
+  Vortex, one click for Premium and a click per mod otherwise.) A friend
+  without Premium is therefore out of the first playtests, or gets the
+  token path later as a second script.
+- D3. Server placement: DECIDED, the DMZ sibling on VM 520's stub, promoted
+  from the lab's gate (core's recommendation; the lab stays dark), and
+  where Eli's own seat sits for a friend playtest.
+- D4. Game version for friends: DECIDED, 1.6.1170 by the scripted
+  downgrade (ADR-025).
 - D5. Settled: the existing bot and channel (Eli, 2026-10-19).
-- D6. Operator tooling on the friend server: the lab gamemode's console
-  through a non-public RPC, or none.
-- D7. The starting kit: no helmet and a visible face, by the gamemode, by a
-  server setting, or by a layer plugin (section 2.2).
-- D8. Alternate Start - Live Another Life: in or out; if in, whether the
-  server offers the choice and the mod supplies the places, or the mod runs
-  as written and the lab measures what breaks (section 2.2).
+- D6. Operator tooling on the friend server: DECIDED, the lab gamemode's
+  console through a non-public RPC. (Not taken: none.)
+- D7. The starting kit: DECIDED, no helmet and a visible face by a SERVER
+  SETTING (section 2.2; the source stays HYPOTHESIS until read: the
+  vanilla Player base record's outfit). (Not taken: the gamemode, a layer
+  plugin.)
+- D8. Alternate Start - Live Another Life: DECIDED, in. The sub-choice
+  (the server offers the choice and the mod supplies the places, or the
+  mod runs as written and the lab measures what breaks) was left open; the
+  working default is the lazy one, the mod as written first with the lab
+  measuring, the server-offered choice only if the measure demands it,
+  until Eli says otherwise.
 
 ## 4. The friend's experience, in order (the target)
 
