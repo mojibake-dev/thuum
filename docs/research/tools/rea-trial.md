@@ -49,3 +49,21 @@ Hard rule 1 stands whatever the result: CommonLibSSE-NG first, then
 addrlib, then Ghidra by either tool; every inferred side effect HYPOTHESIS
 until the lab confirms it. Eli decides the re-analyst's default from the
 comparison.
+
+## Installed (2026-10-18 21:0x PDT, by thuum-magnus on Eli's word)
+
+The sky-re container has no internet, so the bundle was built on the Mac
+(node v22.23.3 linux-x64 and `npm install --os=linux --cpu=x64
+rea-agents@6.7.0`, 30 MB and 37 MB) and pushed through the host (scp to
+core, `pct push`): /opt/node, /opt/rea, and the wrapper
+/usr/local/bin/rea-mcp (GHIDRA_INSTALL_DIR=/opt/ghidra, Temurin 21,
+REA_PROVIDER=ghidra, GHIDRA_HEADLESS_MAXMEM=4G, REA's home and database
+under /var/lib/rea since /srv/persist is read-only there). REA is
+stdio-only, so no Caddy route: thuum's .mcp.json runs it as
+`ssh root@core.gaussing.tv pct exec 701 -- /usr/local/bin/rea-mcp`, and an
+MCP initialize from the Mac answers with the server's name and version.
+pyghidra-mcp and the Ghidra project are untouched; the exe stays on sky-re
+(REA reads /srv/persist/game/SkyrimSE-1.6.1170.0.exe.unpacked.exe and keeps
+its own analysis database). The install script is kept beside this note as
+install-rea-in-ct.sh.
+
