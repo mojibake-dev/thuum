@@ -47,8 +47,14 @@ echo "== 1. the Windows build of $sha8"
 # what the dist is built from: skymp5-client, skyrim-platform, and the wire crates wire-client-ffi links
 # (skymp-wire/crates/{wire-client-ffi,wire-schema,wire-json,wire-validate,wire-transport,wire-codec}, from their
 # Cargo.toml path dependencies), with the build's own inputs (CMake, vcpkg, overlay ports, the workflow). Anything
-# under those, or outside the server-only paths below, keeps the wait.
-dist_sha=$sha
+# under those, or outside the server-only paths below, keeps the wait, with one exception: a head whose client-side
+# changes since the run are all TypeScript sources (skymp5-client/src/) takes the run's dist with skymp5-client.js
+# built here at the head (turbo-client-build.sh, step 7). That file is the only one webpack emits, and the Mac build
+# equals the Windows one but for line endings: at 88c43e77 its code was byte-identical, after CRLF to LF, to run
+# 39217995449's (9fb0732f, the same client source), and its inline source map's sources, mappings and all 105
+# sourcesContent entries matched (2026-10-19).
+# package.json, yarn.lock and webpack.config.js sit outside src/, so a dependency or bundler change keeps the wait.
+dist_sha=$sha; overlay=
 if [ "${REUSE_DIST:-}" = 1 ]; then
   server_only='^(skymp5-server/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
   while read -r rid rsha; do
@@ -56,9 +62,15 @@ if [ "${REUSE_DIST:-}" = 1 ]; then
     git -C "$fork" cat-file -e "$rsha^{commit}" 2>/dev/null || continue
     git -C "$fork" merge-base --is-ancestor "$rsha" "$sha" || continue
     changed=$(git -C "$fork" diff --name-only "$rsha" "$sha")
-    if [ -z "$(printf '%s\n' "$changed" | grep -v '^$' | grep -Ev "$server_only")" ]; then
+    client=$(printf '%s\n' "$changed" | grep -v '^$' | grep -Ev "$server_only" || true)
+    if [ -z "$(printf '%s\n' "$client" | grep -v '^$' | grep -Ev '^skymp5-client/src/' || true)" ]; then
       dist_sha=$rsha
-      echo "   REUSE_DIST: run $rid at ${rsha:0:8} has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
+      if [ -z "$client" ]; then
+        echo "   REUSE_DIST: run $rid at ${rsha:0:8} has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
+      else
+        overlay=1
+        echo "   REUSE_DIST: run $rid at ${rsha:0:8}, then $(printf '%s\n' "$client" | grep -c .) TypeScript file(s) in skymp5-client/src: its dist, with skymp5-client.js built here at $sha8 over it (step 7)"
+      fi
       break
     fi
   done < <(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch "$branch" --status success --limit 30 \
@@ -166,6 +178,13 @@ echo "== 7. the client on both clones $(date +%H:%M:%S)"
 echo "   driver bundle: $(just build-driver 2>&1 | tail -1 | awk '{print $5, $NF}')"
 just build-client "$branch" "$dist_sha" 2>&1 | grep -E "^run [0-9]+ " | cut -c1-120   # the build of this head (or of the run REUSE_DIST took), not the branch's newest
 # where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
+if [ -n "$overlay" ]; then
+  blog=lab/results/runsets/overlay-$branch-$sha8.log; mkdir -p lab/results/runsets
+  bundle=$(FORK_DIR="$fork" lab/tools/turbo-client-build.sh "$sha" 2>"$blog" | tail -1) || true
+  [ -s "$bundle" ] || { tail -5 "$blog"; echo "== no skymp5-client.js built at $sha8 for the overlay ($blog): stop before any client is touched" >&2; exit 1; }
+  cp "$bundle" "skymp/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js"
+  echo "   overlay: skymp5-client.js built here at $sha8 over run ${dist_sha:0:8}'s dist"
+fi
 echo "   dist js $(shasum -a 256 "skymp/build/dist-client/client/Data/Platform/Plugins/skymp5-client.js" | cut -c1-16)"
 for v in 712 711; do
   ok=""

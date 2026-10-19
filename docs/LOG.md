@@ -2122,3 +2122,43 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     thuum-magnus reads them.
   - The world was saved as playtest-m2-23-20261019T015813Z (7 records). The hold, playtest-relaunch's 180 minutes from
     14:09, had lapsed at 17:09, before the playtest began. Nothing was queued.
+
+### 2026-10-19
+
+- Playtest twenty-four (2026-10-19, about 10:50 to 11:12 PDT) on train-27's stage, not merged: the server of fork
+  m2-train-27-snap ab14087f (the branch head 88c43e77 adds only CI) with 9fb0732f's client dist, and the
+  Apocalypse, freeze-fix and Headshot Kills layers. The first playtest on a stage (ADR-040 item 1).
+  - Set up server-side by `just playtest-setup 24` (lab/playtests/24.yaml), 07:28 to 07:29:41 PDT, all ok in 82 s:
+    - Twenty-three's world playtest-m2-23-20261019T015813Z restored, with both seats relaunched on it.
+    - The camp's two teleports.
+    - Test 1: its thirteen spells, and Marksman 60, read back as 60 on the server.
+    - Test 2: its four spells, and a third 0x12e4d.
+    - All bars full on both seats; SunshineService restarted on both.
+  - One stream per seat (thuum-magnus, 10:02:28). Then `just playtest-ready 24`, 10:03:15 to 10:03:49:
+    - both games relaunched under the streams, and every check ok;
+    - the hold renewed to 13:03.
+    Eli's ask for the streams, about 07:0x, reached numidium only at 10:02.
+  - Eli's results (docs/private/playtest-m2-24.md):
+    - Held:
+      - one-blink arrivals for short and long teleports and Ghostwalk's return (b-teleport-look, b-ghostwalk-look);
+      - Azure Reconstruction refused on a player (x-azure-player, "seems to behave correctly?");
+      - Finger of Death kept off the list;
+      - a rune's trip counted once (x-rune-cast);
+      - headshots and the helmet case (b-headshot: "lag is noticably better");
+      - Flame Cloak only inside a fight (b-cloak-fight);
+      - Crackle's proc, then Blood Boil (b-second-hand).
+    - Noted:
+      - Shadowbond's swap "works perfect, we're still both visibile on player 2's screen": the bond's invisibility
+        does not reach the observer.
+      - The placed rune is not visible on test 2's screen once set: "i can see the cast and the initial rune, but
+        not after it's set".
+      - Lightning Strike "played effect on player 1, not on 2, the bolt looks the same and hangs. check those logs."
+      - thuum-magnus reads all three as gaps twenty-three already had, not train-27's.
+    - Not run: per-player globals (b-player-globals), "skyui still not present", since the essentials layer was not
+      yet staged.
+  - Evidence kept by hand before any run (no recorder ran): https://thuum.gaussing.tv/results/playtest-24/ holds the
+    server log since the world's restore (14:28Z, 924 lines) and each seat's Skyrim Platform, lab-driver and Sunshine
+    logs. thuum-magnus reads them.
+  - The world was saved as playtest-m2-24-20261019T181352Z (7 records) at 11:13; lab/playtests/25.yaml restores it.
+- m2-train-27-snap merged to fork parity 88c43e77 (2026-10-19T20:46Z): the gate 20261019-200334-merge-m2-train-27-snap, 20261019-200334-smoke-two-players to 20261019-203756-b-invis-recast (16 runs); watch items: a-melee-reach; T2 cited, not rerun: ab14087f's, 30 of 30 green on the guard's own sessions (88c43e77 adds only .github, no wire path); clones promoted. Verbs: train-27's rows (docs/PLAN.md), each in its verb doc: target-location casts that no longer throw at the cast or the trip, with the observer's placement relayed and the server's 600 s claim window for a placed trigger (target-location.md); the relayed cast naming the target its first hit names (spell-cast.md); effect conditions the server evaluates, unknown functions refused and logged (ADR-039: Azure Reconstruction on a player refused); a server-vouched jump relayed as a placement at any distance (cast-teleport.md), and Shadowbond's swap as the server's move of both actors with the pin (shadowbond.md); headshot prediction, the shooter's game playing the kill and the server confirming or reverting (ADR-038); the Windows build's coverage made optional while chocolatey is down (ci-cppcov-optional). Playtest twenty-four held every row it ran (above).
+  - The first gate, 20261019-181550 (11:15 to 11:57 PDT), went 13 of 14 green: b-push red twice on its health band only (0.9412 and 0.9377 against under 0.9). The band encoded damage the server applied without judging Dragonborn's conditions; train-27's evaluator gives the shout's vanilla 10. Eli approved the new band (under 0.97, above 0.8; docs/private/decisions-2026-10-19.md section 3, 13:01), main cc37349 merged it alone, and the gate ran again. gate.yaml's watch list only adds scenarios: ADR-027's set rule passes a red that goes green on its reruns, and red twice blocks.

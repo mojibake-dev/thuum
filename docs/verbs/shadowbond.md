@@ -25,10 +25,10 @@ WB_InvisProcTeleport_Script, which runs on the TARGET's effect.
 
 | consequence | seen in | disposition |
 | --- | --- | --- |
-| OnEffectStart: an FXEmptyActivator placed at the target, a 0.25 s wait, then the caster and the target each cast the Self proc 03055B32 on themselves (effect 03055B31, archetype Invisibility, 600 s, keyword MagicInvisibility 0x1EA6F) | script | native in each game that runs the script: with the target-by-first-hit relay the target's game casts the figure's Shadowbond at its own player, so the script runs there too and the target's own game turns its player invisible (playtest twenty-three: it never did, the relay named nobody) |
-| the two invisibilities on the server's effect record (MagicEffects) and their shimmer on every other screen | magic-effects verb | imposed, already: the server records the proc from each player's own Self cast report |
+| OnEffectStart: an FXEmptyActivator placed at the target, a 0.25 s wait, then the caster and the target each cast the Self proc 03055B32 on themselves (effect 03055B31, archetype Invisibility, 600 s, keyword MagicInvisibility 0x1EA6F) | script | native in the CASTER's game only. The relay's fire-and-forget target path applies nothing to the target's own player: castSpellImmediate launches the spell's projectile with the named target as the desired one (skyrim-platform MagicApi.cpp:254-302), and Shadowbond has no projectile, so the script never starts in the target's game (playtest twenty-four: "we're still both visible on player 2's screen"; x-shadowbond 20261019-093744: c2's own watch held no effect and no cast). The spell-cast row that applies a projectile-less target spell directly (CastSpellImmediate on the figure's caster, as the Self and concentration branches do) is filed on spell-cast.md, not here: it would run a second script instance, which the pin would then have to cover |
+| the two invisibilities on the server's effect record (MagicEffects) and their shimmer on every other screen | magic-effects verb | IMPOSED since train-28 (fork train28-bond): no Self cast report exists for the proc, because Skyrim Platform raises spellCast only for a spell in one of the actor's selected slots (EventHandler.cpp:1495-1512, isCastValid) and the script's Papyrus cast is of an unequipped one (playtest twenty-four: the proc 0C055B32 reached no log from either game). So the bonds entry names its `proc`, PartOne::RecordBond records the proc's effect on both actors for the bond's 20 s (ApplyEffects with the duration overridden; self-expiring, a restart included) and sends `Spell.Cast` as an SpSnippet to every game that sees either actor but the caster's own, where the script already cast both: the target's own player (0x14 there) and the figures (by server id). The break, a recast at another target and the bond running out (PartOne::TickBonds, the bonds rule's `expired`) end the records by source (MpActor::EndRunningEffectsOfSource) and send `Actor.DispelSpell` to the target's own game; the figures' copies follow the records (magicEffectsService dispelEnded) and the caster's are the script's own |
 | the poll every 0.2 s: the swap fires the first time EITHER actor no longer has MagicInvisibility; WB_CheckLocation false | script | native in each game; the break the server sees is its own EndConcealment on an act (a cast, an attack, an activation, a bow release), so the server knows the moment within one report |
-| the swap: box.MoveTo(caster), caster.MoveTo(target), target.MoveTo(box), rotations matched, then sound and VFX on both, an image space modifier, Dispel on self | script | the two POSITIONS are the server's (R1): each game's script moves its own player; the server permits both jumps at the break (PermitCastJump for the caster to the target's recorded position and for the target to the caster's, within a slack, for about 1.5 s) and validates each landing; a figure's MoveTo in the other game is overwritten by the relay as today and is harmless |
+| the swap: box.MoveTo(caster), caster.MoveTo(target), target.MoveTo(box), rotations matched, then sound and VFX on both, an image space modifier, Dispel on self | script | the two POSITIONS are the server's (R0 since 2026-10-19): at the break the server teleports both players to each other's places itself (MpActor::Teleport, the lab's own teleport path), because the script runs in the CASTER's game only (ADR-029) and so moves the caster and the target's FIGURE there, while the target's own game never moves: x-shadowbond 20261019-073758 on 4c7e6998 swapped c1 alone (its permitted landing taken) and c2 stayed put with no self events. The caster's own script move lands on the spot the server chose and reads as the arrival; the figure's MoveTo in the caster's game is overwritten by the relay as today. The permits of the first build are gone. Second iteration (x-shadowbond 20261019-083537 on 13acbb35): the swap fired and c2 landed, but the script's poll in c1's game then moved c1 once more, to where c2's figure now stood (c1's own old spot), undoing c1's half (c1's track: its spot, c2's spot at 13419 ms, its own again at 13672). So the server holds both at the swap's places for 1.5 s (wire-rules Budgets::pin; a report from farther than the arrival radius meanwhile is sent back with Teleport2, MovementValidation), and the script's second move is refused; HYPOTHESIS that 1.5 s covers the script's poll, the next run says |
 | the look of the swap on the other screens | relay | imposed through the teleport snap (train-27's row): both accepted jumps are relayed as placements, so neither slides |
 | OnEffectFinish at 20 s with no break: dispels the proc on both, deletes the box, nobody moves | script | native in each game; the server ends the bond with the effect's duration |
 | a target that is an NPC | script | later: M3 (the host's game runs the script; the server permits the NPC's jump as a hosted move) |
@@ -45,9 +45,10 @@ WB_InvisProcTeleport_Script, which runs on the TARGET's effect.
 
 ## Authority
 
-Rung: R1 for both positions (each game moves its own player by the mod's
-script; the server permits and validates the two jumps against each other's
-recorded position at the break), R0 for the bond itself (the server records
+Rung: R0 for both positions (the server moves both players at the break
+and holds them there for 1.5 s; the caster's game's script move is the same
+spot and reads as the arrival, its second move is sent back, the target's
+game is moved by the server alone), R0 for the bond itself (the server records
 it at the Shadowbond hit's claim and ends it at the break or at 20 s).
 Why this rung and not the one above it: the mod's script performs the move
 in each game anyway (as Lost Grimoire's Teleportation does, cast-teleport);
@@ -80,12 +81,21 @@ MoveTo instant, the report cadence 130 ms).
 ## Impose (observers render the server's decision)
 
 - Mechanism: the teleport snap's placement relay for the two accepted
-  jumps; the invisibility through MagicEffects as today.
+  jumps; the concealment through the server's two records (MagicEffects
+  to every listener) and two SpSnippets: `Spell.Cast` of the proc on the
+  target's own player and on each figure in every game but the caster's,
+  `Actor.DispelSpell` of it on the target's own player at the end
+  (train-28; PartOne::ConcealBond and UnconcealBond).
 - Visual without simulation achieved by: the script's own sound, VFX and
-  image space modifier play in the two games that run it; the other
-  screens see the placements and the shimmer (the mod's effects on figures:
-  later, as cast-teleport's vanish and appear).
-- Side effects: HYPOTHESIS until b-shadowbond.
+  image space modifier play in the one game that runs it (the caster's);
+  the other screens see the placements and the proc's own shimmer, cast
+  there by the snippet, which the engine renders as it renders any
+  Invisibility effect.
+- Side effects: HYPOTHESIS until b-shadowbond: that a second Papyrus cast of
+  a running Self spell by the same caster replaces the copy rather than
+  stacking (the reason the caster's own game gets no snippet; harmless
+  either way), and that the target's own imposed copy breaks under the
+  engine's DispelAlteredStates at the target's act as a cast one does.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -102,14 +112,18 @@ MoveTo instant, the report cadence 130 ms).
 
 ## Server
 
-- Where the logic lives: a Rust rule beside casts (wire-rules
-  shadowbond.rs or a bonds table in the teleports rule): record at the
-  claim, break at EndConcealment, permit both, expire at 20 s; the C++
-  glue in OnHit and EndConcealment.
-- DB fields / migration: none (a bond does not survive a restart; a
-  restart mid-bond leaves both visible and unmoved, as the mod's own
-  effect would end).
-- Restart behavior: as above.
+- Where the logic lives: the Rust rule wire-rules bonds (the entry with
+  its `proc`, record, supersede, break_of, expired, forget; the bridge's
+  BondBreak carries the bond's facts and its proc) and the C++ glue:
+  OnHit records at the claim, EndConcealment breaks at an act,
+  PartOne::RecordBond, BreakBondsOf, TickBonds, ConcealBond and
+  UnconcealBond.
+- DB fields / migration: none. The bond itself does not survive a restart
+  (a restart mid-bond swaps nobody); the two concealment records do, as
+  running effects do (magic-effects.md), and end by their own 20 s.
+- Restart behavior: as above; the target's own imposed copy outlives a
+  restart until its 600 s or its player's next act, a known gap of the
+  cheapest shape (an `expired` after a restart finds no bond to dispel).
 - Papyrus natives touched (ledger lines added): none.
 
 ## Client
@@ -121,21 +135,35 @@ MoveTo instant, the report cadence 130 ms).
 
 ## Tests
 
-- T0: the bond rule (record, break by either, two permits with the right
-  destinations, expiry, one bond per caster).
+- T0: the bond rule (wire-rules bonds, six tests: the entry with and
+  without its proc, record, break by either, a bond that ran out returned
+  once and a broken one never, a recast superseding the caster's own
+  bond alone) and the server (unit/BondTest, eight cases: the swap and the
+  hold as before; a claimed hit records the concealment on both and casts
+  it in the target's game alone, on its player and on the caster's
+  figure; the break ends both records and dispels the target's once; a
+  bond left alone runs out with no swap and one dispel; a recast at the
+  same target refreshes without a dispel). Skyrim.esm's
+  dunHonningbrewSkeeverPoison 0x10FC22 and Invisibility 0x27EB6 stand in
+  for the mod's spell and proc, which the test's load order lacks.
 - T1: none.
-- T2: a difftest session shadowbond: the cast with target 0, the hit on c2,
-  the two proc casts, a weapon hit by c1 (the break), two movement reports
-  landing at each other's positions: the wire stack accepts both, the
-  legacy stack snaps both back (declared).
+- T2: a difftest session shadowbond on target-by-hit's shape: the cast
+  with target 0, the hit on c2 (the claim: two MagicEffects records and
+  the Spell.Cast snippets to c2), a Flames cast by c1 (the break: both
+  Teleports, the DispelSpell snippet to c2, the sets without the proc);
+  the legacy stack, which never learned the spell, emits none of them
+  (declared).
 - T3 scenario id: lab/scenarios/b-shadowbond.yaml (both seats: c1 casts at
-  c2 from close, both bools av:Invisibility true on each own game and each
-  figure; c1 attacks; within 1.5 s c1 stands where c2 stood and c2 where
-  c1 stood, on the server and on both watches, each as one step (maxStep
-  about the distance), nobody snapped back; then the 20 s no-break case).
+  c2 from 150 units with the 1500 ms hold; av:Invisibility true on each
+  own player and on each figure, the server's two records with more than
+  10 s left; c1 casts Flames; c1 stands where c2 stood and c2 where c1
+  stood, every invisibility dropped, the records gone; then a second bond
+  left alone 20 s: no swap, records gone, both visible).
 - Assertions that would fail if the verb silently regressed: a landing
-  refused (server.actor positions unchanged after the break); a slide
-  (maxStep under the distance); the target's own game never invisible.
+  refused (server.actor positions unchanged after the break); the target's
+  own game never invisible (c2.watched_self().ever("av:Invisibility"),
+  twenty-four's finding); the caster's figure never invisible on the
+  target's screen; a record outliving the break or the 20 s.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -150,12 +178,21 @@ MoveTo instant, the report cadence 130 ms).
       three tests; PartOne::SetBondSettings, IsBondSpell, RecordBond,
       BreakBondsOf; EndConcealment breaking the acting actor's bond; OnHit
       recording it at the claim; unit/BondTest, three cases; the lab's
-      server-settings name Shadowbond on thuum lab-bonds-setting)
+      server-settings name Shadowbond on thuum lab-bonds-setting. Train-28,
+      fork train28-bond b28517ed: the server swaps both itself and holds
+      them (ab14087f), and owns the concealment: the entry's `proc`,
+      ConcealBond and UnconcealBond, TickBonds, EndRunningEffectsOfSource;
+      six Rust and eight server tests; the lab's entry names the proc on
+      thuum lab-bonds-proc 35a2b66)
 - [x] message + validator (same commit): no new message
 - [ ] native hook + T1: none
-- [x] TS handler: none new (the first-hit relay and the snap carry it)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] TS handler: none new (the first-hit relay, the snap and the two
+      snippets carry it; spSnippetService resolves them)
+- [ ] T2 green (session shadowbond: to write on train28-bond)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-shadowbond on thuum
+      lab-bonds-proc 9e061dd; first run at train-28's stage)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (NATIVES.md: SPELL.Cast and
+      Actor.DispelSpell as the two snippets the server sends; nothing
+      suppressed)

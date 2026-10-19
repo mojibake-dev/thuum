@@ -90,7 +90,7 @@ Status meanings:
 | `Actor.DamageActorValue` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:999] |  |
 | `Actor.Dismount` (method) | missing |  |  |  |
 | `Actor.DispelAllSpells` (method) | missing |  |  |  |
-| `Actor.DispelSpell` (method) | missing |  |  |  |
+| `Actor.DispelSpell` (method) | missing | R0 | Not on the server VM. The server itself sends it to the bonded target's own client as an SpSnippet when a bond's concealment ends (the break, a recast, the 20 s): the game's copy of the proc follows the server's record, which is R0 (PartOne::UnconcealBond). | shadowbond |
 | `Actor.DoCombatSpellApply` (method) | missing |  |  |  |
 | `Actor.DrawWeapon` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:993] |  |
 | `Actor.EnableAI` (method) | missing |  |  |  |
@@ -1282,7 +1282,7 @@ Status meanings:
 | `SoundDescriptor.SetDecibelVariance` (method) | missing |  |  |  |
 | `SoundDescriptor.SetFrequencyShift` (method) | missing |  |  |  |
 | `SoundDescriptor.SetFrequencyVariance` (method) | missing |  |  |  |
-| `SPELL.Cast` (method, latent) | missing |  |  |  |
+| `SPELL.Cast` (method, latent) | missing | R0 | Not on the server VM. The server itself sends it as an SpSnippet when it records a bond's concealment: the proc cast on the target's own player and on each figure in every game but the caster's, each game's copy following the server's record, which is R0 (PartOne::ConcealBond). | shadowbond |
 | `SPELL.GetCastTime` (method) | missing |  |  |  |
 | `SPELL.GetCostliestEffectIndex` (method) | missing |  |  |  |
 | `SPELL.GetEffectAreas` (method) | missing |  |  |  |

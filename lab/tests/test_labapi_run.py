@@ -250,6 +250,14 @@ artifacts: [trace]
         self.assertIn("trace-c1.json", body["artifacts"])
         self.assertFalse(any("unknown artifact" in n for n in body["notes"]), body["notes"])
 
+    def test_a_build_read_that_fails_is_noted_in_the_build_never_the_runs_failure(self):
+        self.services.system.server_image = ""   # docker inspect answers nothing
+        run_id, body = self._run(GREEN)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        result = json.loads((self.tmp / "results" / run_id / "result.json").read_text())
+        self.assertIn("error", result["build"]["server"])
+        self.assertNotIn("image", result["build"]["server"])
+
     def test_green_run_end_to_end(self):
         run_id, body = self._run(GREEN)
         self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
@@ -262,6 +270,8 @@ artifacts: [trace]
         self.assertEqual(result["verdict"], "green")
         for key in ("run", "scenario", "verdict", "started", "finished", "phases", "steps", "failures", "artifacts"):
             self.assertIn(key, result)
+        # the run names what it played: the server container's image reference and id
+        self.assertEqual(result["build"]["server"], {"image": "10.10.70.12:5000/skymp-server:parity", "id": "sha256:5e7ve7"})
         self.assertIn("server.log", result["artifacts"])
         self.assertIn("world-diff", result["artifacts"])
         self.assertIn("lab.pcap", result["artifacts"])
@@ -375,9 +385,11 @@ artifacts: [trace]
 
         asyncio.run(go())
         pve = self.services.control._b
-        self.assertEqual(pve.calls, [("stop", 711), ("rollback", 711, "clean-sp"), ("start", 711)])
+        # the snapshot list read last is the run's provenance: which snapshot, and its description
+        self.assertEqual(pve.calls, [("stop", 711), ("rollback", 711, "clean-sp"), ("start", 711), ("snapshots", 711)])
         self.assertTrue(rec.phases[0]["ok"], rec.phases)
         self.assertIn("unmanaged", rec.phases[0]["note"])
+        self.assertEqual(rec.build["clients"], {"c1": {"snapshot": "clean-sp", "description": ""}})
 
 
 @needs_deps
@@ -1013,6 +1025,45 @@ class RelaunchSteps(RunTests):
         self.assertEqual(len(relaunches), 1, execs)
         self.assertIn("Stop-Process", relaunches[0])
         self.assertTrue([n for n in body.get("notes", []) if "relaunched" in n], body.get("notes"))
+
+    def test_a_relaunch_changes_its_files_in_the_stopped_game_first(self):
+        """The essentials layer's FSMP off and vsync off readings: a DLL renamed and an ini key set in the run's
+        game folder while the game is stopped, then the relaunch as always."""
+        import base64
+
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        files = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {files: [{rename: Data/SKSE/Plugins/hdtsmp64.dll, to: hdtsmp64.dll.off}, "
+                                 "{ini: Data/SKSE/Plugins/SSEDisplayTweaks.ini, section: Render, key: EnableVSync, value: false}]}\n")
+        run_id, body = self._run(files)
+        self.assertEqual(body["verdict"], "green", body)
+        execs = [c[2] for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        at = next(i for i, c in enumerate(execs) if "-EncodedCommand" in c and "Rename-Item" in base64.b64decode(c[-1]).decode("utf-16-le"))
+        script = base64.b64decode(execs[at][-1]).decode("utf-16-le")
+        self.assertIn("Stop-Process", script)
+        self.assertIn("1.6.1170.txt", script)
+        self.assertIn("Data\\SKSE\\Plugins\\hdtsmp64.dll", script)
+        self.assertIn("'EnableVSync=false'", script)
+        relaunch = next(i for i, c in enumerate(execs) if "sky-lab-launch" in " ".join(c))
+        self.assertLess(at, relaunch, "the files change before the game starts again")
+        self.assertTrue([n for n in body.get("notes", []) if "files before the relaunch" in n], body.get("notes"))
+
+    def test_a_solo_relaunch_ends_in_game_without_a_login(self):
+        """A solo run's game has no skymp5-client (ADR-031): the relaunch holds for the new process's poll and an
+        in-game dump-state, never for the server's online list, which a solo seat never joins."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        solo = RELAUNCH.replace("server: {snapshot: clean}\n", "server: {snapshot: clean}\nsolo: true\n").replace("  - c1: connect\n", "")
+        self.services.state.online = lambda client: False   # the solo seat never logs in
+        run_id, body = self._run(solo)
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s.get("action") == "relaunch")
+        self.assertIn("relaunched solo", str(step.get("note")), step)
 
     def test_relaunch_needs_a_managed_client(self):
         run_id, body = self._run(RELAUNCH)
