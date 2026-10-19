@@ -68,6 +68,9 @@ export HOME=/var/lib/rea
 export XDG_CACHE_HOME=/var/lib/rea/cache
 export XDG_DATA_HOME=/var/lib/rea/data
 export XDG_CONFIG_HOME=/var/lib/rea/config
+# CommonLibSSE-NG's names for the fresh project (lab/tools/rea-seeds.py writes the file onto the dataset)
+seeds=/srv/persist/tools/rea/seeds-1.6.1170.tsv
+[ -r "\$seeds" ] && export REA_GHIDRA_SEED_FILE="\$seeds"
 cd /var/lib/rea
 case "\${SSH_ORIGINAL_COMMAND:-}" in
   "") set -- "\$@" ;;

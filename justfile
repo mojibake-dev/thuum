@@ -81,6 +81,15 @@ ghidra:
 rea:
     @ssh -o BatchMode=yes -o ConnectTimeout=20 -o StrictHostKeyChecking=accept-new -J root@core.gaussing.tv rea@10.10.70.11 doctor --format json | python3 -c 'import sys,json; d=json.load(sys.stdin); s=d["server"]; t=d["inventory"]["tools"]; print("rea mcp", "ok:" if d.get("healthy") else "UNHEALTHY:", s["name"], s["version"], "tools", t["observed"], "of", t["expected"])'
 
+# Rebuild REA's seed file (CommonLibSSE-NG's names through the Address Library, lab/tools/rea-seeds.py) and
+# install it on the persist dataset, where sky-re's rea-mcp wrapper reads it at the next import (docs/LAB.md).
+rea-seeds:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    python3 lab/tools/rea-seeds.py --relids lab/relids.tsv --addrlib "{{addrlib}}" --runtime "{{runtime}}" --out lab/.cache/rea-seeds-{{runtime}}.tsv
+    scp -q -o BatchMode=yes lab/.cache/rea-seeds-{{runtime}}.tsv root@core.gaussing.tv:/rpool/sky/persist/tools/rea/seeds-{{runtime}}.tsv
+    ssh -o BatchMode=yes root@core.gaussing.tv 'cd /rpool/sky/persist/tools/rea && chgrp sky seeds-{{runtime}}.tsv && chmod 664 seeds-{{runtime}}.tsv && sha256sum node.tar.xz rea-bundle.tar.xz seeds-{{runtime}}.tsv > SHA256SUMS && sha256sum -c SHA256SUMS'
+
 # Import an exe from /srv/persist/game into the Ghidra project on sky-re (LXC 701) as a transient
 # systemd unit; pyghidra-mcp is stopped for the analysis and restarted after. Hours for SkyrimSE.
 # Runs lab/tools/ghidra-import.sh inside sky-re for one exe, e.g. `just ghidra-import SkyrimSE-1.7.104.0.exe`.

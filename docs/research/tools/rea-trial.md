@@ -214,3 +214,37 @@ then retired so one Ghidra serves; one REA import at a time meanwhile.
   open_binary answers in 0.1 s; the import runs at the first provider-backed
   call.
 
+## Seeds: CommonLib's names at import (2026-10-18 22:26 PDT)
+
+lab/tools/rea-seeds.py turns lab/relids.tsv (`just relid`) into REA's
+rea-ghidra-seeds-v1 file through lab/addr.py: 614 functions (CommonLib's
+function relocations and Offsets.h) and 15,843 labels (data, vtables, RTTI
+and NiRTTI) for 1.6.1170 at the image base; 1,278 IDs CommonLib names are
+not in the 1.6.1170 database and 196 rows have no AE ID; eight aliases share
+an address and are joined with `__or__` (REA admits one seed per address
+and kind, and refuses the whole file on a duplicate: the first attempt
+failed that way, reported as `provider_unavailable` / `version_unresolved`
+with every check green, since a seed-file error surfaces as a configuration
+error). `just rea-seeds` regenerates and installs the file; the wrapper
+exports REA_GHIDRA_SEED_FILE when the file is readable.
+
+Measured on the second attempt, as the rea user over the jump: import 474 s
+(462 to 468 unseeded), then address_name 0x1406c6d90 answers
+`Actor::DispelAlteredStates` and the dossier reads
+
+    void Actor__DispelAlteredStates(longlong param_1, int param_2) {
+      if (((*(byte *)(param_1 + 0xb0) & 2) != 0) && (param_2 != 0xb))
+        FUN_1405c2780(param_1 + 0xa0, 0xb);
+      cVar1 = Actor__GetGhost(param_1);
+      if ((cVar1 != '\0') && (param_2 != 0x29))
+        FUN_1405c2780(param_1 + 0xa0, 0x29);
+    }
+
+so the ethereal check of the earlier read is Actor::GetGhost (CommonLib's
+name for 0x140662c90), and ActivateRef is named among the callers; SpellCast,
+the force-greet, the weapon hit frame and ArrowReleaseHandler stay FUN_
+because CommonLib carries no relocation ID for them (virtual or
+vtable-reached). 0x14365bbe8 still has no name. The analysis profile records
+the seed commitment (sha256 661be793..., 614 function and 15,843 label
+entries), so an answer says which names it was given.
+
