@@ -464,7 +464,7 @@ What it needs from thuum:
 ## The essentials layer (Eli's set, staged 2026-10-19)
 
 Eli's ticked essentials from his own Skyrim (docs/private/mods-fenestrate.md, 113 ticks
-of 210 on 2026-10-18, and his six decisions on the dependency gaps; the plan is
+of 210 on 2026-10-18, and his decisions on the dependency gaps; the plan is
 docs/research/mod-layer-plan.md). Built by apocrypha on branch
 `apocrypha/layer-essentials`; `just layer-stage apocrypha/layer-essentials` stages it.
 
@@ -473,7 +473,9 @@ layer's existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoir
 Apocalypse, Headshot Kills with CIF 2.0.7, AI Pathing Freeze Fix): 94 plugins in
 the clients' order (80 served, 14 client-only at the tail), 49 of them light;
 29 mod folders scoped `@1.6.1170` (every SKSE DLL mod: all of them loaded on Fenestrate's
-1.6.1170 under SKSE 2.2.6, none has run on 1.7.104; FSMP among them). 113 mod folders, 6,194 files, 4.4 GB on disk (the DLL mods' .pdb files kept: Crash Logger with PDB support is in the set and reads them).
+1.6.1170 under SKSE 2.2.6, none has run on 1.7.104; FSMP among them). 113 mod folders,
+about 6,200 files, 4.5 GB on disk (the DLL mods' .pdb files kept: Crash Logger with PDB
+support is in the set and reads them).
 
 **Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
 lab/tools/persist-mods.sh after its hand-written blocks:
@@ -491,6 +493,8 @@ lab/tools/persist-mods.sh after its hand-written blocks:
   md5 (each confirmed by Nexus's md5_search on 2026-10-19) and lay out the installer folders
   the `take` column lists, read from each FOMOD ModuleConfig.xml by hand. Cloaks of Skyrim's
   RAR uses a method 7zz refuses, so persist-mods needs `unar` (brew install unar).
+- `local` rows copy a folder made by hand under lab/.cache/mods and check its tree hash
+  (for the Nemesis output below).
 - The load order lives once, in `lab/layer/load-order.tsv` (mod folder, light flag from
   the TES4 header, game versions, served or client-only). `lab/tools/layer-render.py`
   writes it into persist-mods' `plugins=(...)` array and both server-settings files;
@@ -502,30 +506,28 @@ lab/tools/persist-mods.sh after its hand-written blocks:
 - `PERSIST_LOCAL=1 lab/tools/persist-mods.sh` builds and checks the tree without touching
   the host (the dry run this branch was validated with).
 
-**Decisions carried, verbatim from Eli (2026-10-18):** "1. ditch the patch 2. untick the
+**Decisions carried, verbatim from Eli:** 2026-10-18, "1. ditch the patch 2. untick the
 integration 3. ditch the armor mod 4. add the cloaks and hdt 5. untick. 6. if it needs it
 add em. if not no action." and '"No Guards", FSMP in. i feel like my spare 1050 is like,,
-the oldest card we'll have to account for.' So: out are the Apocalypse/Tomebound patch,
-Goam's Elven Ears RaceMenu Integration (the ears themselves stay), Armor and Clothing for
-Kids and the NARC Dremora addon; in, for the Survival Mode Patch Collection's two cloak
-patches, are Cloaks of Skyrim 1.2.1, Winter Is Coming SSE - Cloaks 2.4 in its No Guards
-file, Artesian Cloaks of Skyrim 1.3.0 (its Cloaks of Skyrim and Winter Is Coming physics
+the oldest card we'll have to account for.'; 2026-10-19, on the hole the archives showed
+(below), "id like cloaks to give survival warmth." So: out are the Apocalypse/Tomebound
+patch, Goam's Elven Ears RaceMenu Integration (the ears themselves stay), Armor and Clothing
+for Kids and the NARC Dremora addon; in, for the Survival Mode Patch Collection's two cloak
+patches, are Cloaks of Skyrim 1.2.1, Winter Is Coming SSE - Cloaks 2.4 in its Full file,
+Artesian Cloaks of Skyrim 1.3.0 (its Cloaks of Skyrim and Winter Is Coming physics
 packages) and FSMP 4.1.1 (the AVX build; the installer has no runtime step). The spare
 GTX 1050 seat (c1) is the hardware floor: FSMP's frame cost is read there at the stage.
 
 **Read from the archives, not from the plan:** "SMP_Patch" is Artesian's naming
 (HDT-SMP), one plugin per base-mod variant; the Survival Mode Patch 14 esps are
 same-named replacements of Artesian's Full-variant plugins with warmth keywords added, and
-master the Full plugins (Cloaks.esp and Cloaks - Dawnguard.esp; 1nivWICCloaks.esp). The
-No Guards file ships `1nivWICCloaksNoGuards.esp`, so the collection's WIC esp cannot load
-with it: the layer takes Artesian's own No Guards `1nivWICCloaks_SMP_Patch.esp` (physics,
-no Survival warmth for WIC cloaks) and leaves the collection's WIC esp out, while the
-Cloaks of Skyrim half is intact (CoS Full, Artesian Full meshes, the collection's
-`Cloaks_SMP_Patch.esp` replacing Artesian's plugin; Artesian's plugin keeps the base mesh
-paths, its physics meshes replace files in place, so the replacement loses no path).
-**Open for Eli:** keep No Guards as built, or take WIC Full (Nexus 4933 file 10466) so
-both halves of the Survival patch load and guards wear cloaks; either is a one-row change
-in essentials.tsv and load-order.tsv.
+master the Full plugins (Cloaks.esp and Cloaks - Dawnguard.esp; 1nivWICCloaks.esp).
+Winter Is Coming's No Guards file ships `1nivWICCloaksNoGuards.esp`, so the collection's
+WIC esp could not load with Eli's first pick; his second ("survival warmth") picks the Full
+file, and both halves load: the base plugins, Artesian's meshes and physics configs, and
+the collection's two esps replacing Artesian's plugins (Artesian's plugins keep the base
+mesh paths, its physics meshes replace files in place, so the replacement loses no path).
+Cloaks of Skyrim's own `Cloaks - USSEP Patch.esp` comes along (USSEP is in the set).
 
 **Not placed (rows with source `out`, not dropped silently):**
 - sse-engine-fixes-skse64-plugin-7: part 2 only (the game-root preloader d3dx9_42.dll); add-mods.ps1 installs under Data, and part 1, the SKSE plugin, was never on Fenestrate; Nexus 17230 file 725261
@@ -556,12 +558,62 @@ add them to both settings files' heads in Skyrim.ccc order, flip the four rows t
   the deployment manifest (chim/.scratch, apocrypha).
 - Every DLL mod enters at 1.6.1170 only; the 1.7.104 set has none of them (its server
   list has 76 plugins). A seat test per DLL moves it to both.
-- Nemesis: True Directional Movement is the only mod in the set with a Nemesis patch
-  (Nemesis_Engine\mod\tdmv, 195 files, in its folder); its behaviour output is not in the
-  layer and has to be generated once on a seat with exactly the layer's mods (Nemesis is
-  a Windows tool), then shipped as a `nemesis-output` folder (docs/research/mod-layer-plan.md).
-  Until then TDM's movement works without its animation patch.
+- Nemesis: True Directional Movement is the only mod in the set with Nemesis patches (three
+  folders under Nemesis_Engine\mod in its mod folder: `tdmv` "True Directional Movement -
+  Headtracking" and `tdmlen` "True Directional Movement - Procedural Leaning", both marked
+  auto for TrueDirectionalMovement.esp, and `tdmh` "True Directional Movement - 360 Horse
+  Archery", manual). Their behaviour output is not in the layer yet; the procedure below
+  generates it once and ships it. Until then TDM's movement works without its animation
+  patches. Fenestrate's own Nemesis output was never under Vortex's management (the manifest
+  attributes only the engine's templates and scripts to the Nemesis mod), so nothing to copy
+  from there.
 - Light plugins: the server now loads 39 light plugins after the three Creation Club
   ones; the light-plugins verb's index mapping is what keeps FE form ids agreeing.
 - The server's esm directories receive 80 plugins (76 for 1.7.104); persist-mods
   places them from the manifest at the stage.
+
+### The Nemesis output for True Directional Movement: the seat procedure
+
+Nemesis Unlimited Behavior Engine is a Windows tool that rewrites the game's behaviour
+graphs from the patches installed under Data\Nemesis_Engine\mod; its output must be the
+same on every client that runs the same patch set, so the layer ships one generated set
+rather than running the tool per client (docs/research/mod-layer-plan.md). Steps, for a
+scratch clone of c1 (the GTX 1050 seat) that has the layer installed (`just client-mods`)
+and nothing else:
+
+1. The engine build: the one Eli ran, Nexus 60033 "Project New Reign - Nemesis Unlimited
+   Behavior Engine" v0.84-beta, file 248867, archive
+   `Nemesis Unlimited Behavior Engine-60033-v0-84-beta-1639426722.rar`, md5
+   a3d069d01333a8cdd09ddf669044ce76 (Vortex's record on Fenestrate; fetch it with the
+   Keychain's Nexus key as persist-mods fetches, or copy Fenestrate's archive). Unpack its
+   `Nemesis_Engine\` folder into the clone's 1.6.1170 game folder under Data (by hand on the
+   seat, through the guest agent: it is a tool, not a layer mod, and the clone's snapshot
+   rolls it back afterwards). The patches it will see are TDM's three folders, already in
+   Data\Nemesis_Engine\mod from the layer.
+2. Run `Data\Nemesis_Engine\Nemesis Unlimited Behavior Engine.exe` in the seat's desktop
+   session (it is a GUI). Click "Update Engine" and wait for it to finish. Tick the two TDM
+   patches marked auto, "True Directional Movement - Headtracking" (tdmv) and "True
+   Directional Movement - Procedural Leaning" (tdmlen); leave "360 Horse Archery" (tdmh)
+   unticked unless Eli asks for it (it rewrites the mounted behaviours too). Click "Launch
+   Nemesis Behavior Engine" and wait for "Behavior generation complete". Write down the
+   engine version and the two patch names.
+3. Collect the output from the seat's Data, in Data layout: every file Nemesis wrote or
+   changed, which is `meshes\actors\character\behaviors\*.hkx`,
+   `meshes\actors\character\_1stperson\behaviors\*.hkx`,
+   `meshes\actors\character\characters\defaultmale.hkx` and
+   `meshes\actors\character\characters female\defaultfemale.hkx` if present,
+   `meshes\animationdatasinglefile.txt`, `meshes\animationsetdatasinglefile.txt`, and
+   `Scripts\Nemesis*.pex` (the engine's Papyrus side; TDM's patches add no animation
+   variables, so the Nemesis_AA scripts stay inert). Take only files whose modification time
+   is after step 2 started, plus the two singlefile txts. Leave the engine's own folder,
+   its cache and its `Nemesis_*.xml` templates out.
+4. Put them on this Mac as `lab/.cache/mods/nemesis-output/<path inside Data>` (the clone's
+   files come out through the lab's handover, as a run's logs do), then add one row to
+   lab/layer/essentials.tsv:
+   `nemesis-output-tdm-<engine version>	local	nemesis-output	tree:<hash>				Nemesis <version> output for TDM's tdmv and tdmlen patches, generated on <seat>, <date>`
+   where the hash is `(cd lab/.cache/mods/nemesis-output && find . -type f | sed 's|^\./||' | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)`,
+   the same tree hash persist-mods checks. The folder has no plugins, so load-order.tsv does
+   not change; `PERSIST_LOCAL=1 lab/tools/persist-mods.sh` proves the row, then commit.
+5. Regenerate whenever a mod with a Nemesis patch joins or leaves the set (today only TDM;
+   XPMSSE, Precision and Ultimate Combat would, if Eli ever ticks them), and note the engine
+   version in the row: two generations from different engine builds must not be mixed.

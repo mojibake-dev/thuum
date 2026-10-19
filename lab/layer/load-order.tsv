@@ -9,8 +9,8 @@ order	plugin	mod	light	versions	server	why
 6	Cloaks.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
 7	Cloaks - Dawnguard.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
 8	Cloaks - USSEP Patch.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
-9	1nivWICCloaksNoGuards.esp	winter-is-coming-cloaks-noguards-2.4	full	all	yes	
-10	1nivWICCloaks_SMP_Patch.esp	artesian-cloaks-of-skyrim-wic-1.3.0	light	all	yes	
+9	1nivWICCloaks.esp	winter-is-coming-cloaks-2.4	full	all	yes	
+10	1nivWICCloaks_SMP_Patch.esp	survival-mode-patch-collection-1.0	light	all	yes	
 11	Cloaks_SMP_Patch.esp	survival-mode-patch-collection-1.0	light	all	yes	
 12	Thaumaturgy.esp	thaumaturgy-an-enchanting-overhaul-1.4.5	full	all	yes	
 13	MysticismMagic.esp	mysticism-a-magic-overhaul-2.4.2	full	all	yes	
