@@ -1514,3 +1514,101 @@ per function (the engine's documented semantics, CK wiki, UESP), its T3
 claim Azure refused on a player and accepted on a summon once summons
 exist; the server log gains E_CONDITION_UNKNOWN; a refused heal or harm is a
 finding, not a bug, until its function is built.
+
+## ADR-040: A playtest runs on the stage; the loop from findings to seats is three hours
+
+Status: proposed (2026-10-19 00:1x PDT, Eli: "yes please draft those process
+changes. all day for 1 playtest is rough and seems to be increasing in time.
+ideally we'd have 2 or 3 a day"; drafted from the night of train-27). Amends
+ADR-030 (the gate's selection for a train) and the stage's shape in
+docs/LAB.md; leaves ADR-024, ADR-027 and ADR-033 as they are.
+
+**Context.** One playtest a day, and the day is lengthening. Playtest
+twenty-three ran 17:30 to 18:55 PDT on 2026-10-18 on a build merged at 14:05;
+its findings became train-27 (six rows) built from about 20:30 to 22:30, and
+that train's first staged build reached the lab at 22:55 and its last probe
+read at 00:00; the gate and merge are a morning job, so playtest twenty-four
+is the next evening at the earliest: about 24 hours from findings to seats.
+Where the hours went, measured on the night:
+
+| step | cost on 2026-10-18 | what it bought |
+| --- | --- | --- |
+| building the six rows (Rust, C++, TS, tests, docs) | about two hours | the fixes |
+| two compile slips, each a full pipeline (the C++ server builds only in CI) | about 20 min each | nothing |
+| the Windows client build, waited on by every stage, for heads that changed only the server | 33 min, four times | nothing: the client was unchanged |
+| a stage of six probes and the deploy | 65 min, 33 of them that wait | the four green rows, two bugs of mine, two probe faults |
+| a probe fault (a cast hold too short, an unmeasured pitch) | one lab cycle each | the probe |
+| the gate sweep, ADR-030's selection | train-23 12 runs, train-24 23 runs (about an hour) | a regression net the nightly also casts |
+| playtest setup by hand from the checklist's Setup section | about 30 min | the seats |
+
+The checks themselves earned their keep: the T0 set caught a regression that
+would have failed the cloak row in Eli's hands (a vanilla effect gating on a
+condition function the server did not know, docs/research/apocalypse/
+effect-conditions.md), and the stage caught a validator refusing the first
+actor's snap. What is slow is latency and serial shape, not coverage: the
+first stage of a train waits half an hour on a client build it does not need,
+the gate grew from ten runs to twenty-three because a train touches
+ActionListener.cpp and ADR-030's "every verb whose files the branch touched"
+then names most verbs, the playtest waits for the gate and the merge it does
+not need, and a compile error costs a pipeline. Keeping a fast commit stage
+in front of slower acceptance stages, and shortening lead time rather than
+cutting checks, is the standard shape of this problem (Humble and Farley,
+Continuous Delivery, ch. 5; Forsgren, Humble and Kim, Accelerate, 2018,
+where lead time and change failure rate improve together, not one for the
+other).
+
+**Decision.**
+1. **The playtest runs on the stage.** A train is staged (its build deployed,
+   both clones promoted, its probes read) and goes to Eli's seats from there.
+   The gate sweep and the merge to parity follow the playtest, when the lab
+   is free again (feedback: a reported checklist frees the seats), or at
+   night. ADR-033's record of the playtest is evidence for the train's rows
+   either way; a gate red after a playtest does not undo the findings, it
+   holds the merge. Parity therefore lags the seats by one train; LOG.md
+   names which build each playtest ran on, as it does today.
+2. **The gate for a train is its own rows.** ADR-030's always set
+   (`smoke-two-players`, `a-restart-persistence`), the scenarios of the
+   train's rows, and every open ADR-027 watch item: target eight runs,
+   about twenty minutes. The "every verb whose files the branch touched"
+   expansion moves to the nightly sweep, which runs every scenario anyway.
+   A single verb's merge keeps ADR-030's selection as written.
+3. **A stage waits for no client build it does not need.** `verb-stage` and
+   `build-client` reuse the last successful Windows run's dist when the
+   client tree (skymp5-client, skyrim-platform, the client settings in the
+   deploy tree) is unchanged since that run's commit, and say which run they
+   took; the Windows workflow still runs for the record. A head that changes
+   the client waits as today, with the server stage running meanwhile.
+4. **A compile oracle before the pipeline.** A persistent incremental build
+   of the Linux server (the CI image's compiler, a kept build directory on
+   sky-ci or a build container) answers `just compile <branch>` in minutes,
+   so a C++ slip costs a minute, not a pipeline; CI stays the merge's oracle.
+5. **A probe reruns alone.** When only a probe's YAML changed, it reruns on
+   the current stage through lab-api (`just lab-run`); a re-stage is for a
+   new head. T2 runs on sky-srv while the probes run on the clones, not after
+   them.
+6. **A playtest is set up by one command.** `just playtest-setup <n>` reads a
+   profile (lab/playtests/<n>.yaml: the world to restore, each seat's spells,
+   items and values, the hold's length) and does the restore, the relaunch,
+   the server-side setup through labCommand, the Moonlight check and the
+   hold; the checklist's Setup section becomes that file. Setup stays
+   server-side (feedback 2026-10-13), never typed into a seat.
+7. **A train is cut when its fixes are ready, not when every finding is.**
+   A row that needs a probe iteration or a measurement (the rune's pitch)
+   moves to the next train instead of holding the stage; a verb still ships
+   whole (rule 3), on whichever train carries it.
+8. **Measured.** LOG.md's train entry records findings-in to seats-ready in
+   hours; the target is three hours with the client unchanged and three and a
+   half with a client build, two to three playtests a day when Eli has the
+   time. Reviewed after ten trains or at M3's start, whichever is first.
+
+**Consequences.** Eli plays a build parity has not taken yet, so a train can
+be withdrawn after a playtest and its findings still stand; the nightly
+sweep, not the gate, is the cross-verb regression net, which is where
+ADR-030 already put it, with ADR-027's two-sweep rule tolerating a lone red.
+Items 3 to 6 are tooling for numidium (verb-stage, build-client, a compile
+recipe on sky-ci, lab-api's single-probe run, the playtest profile); until
+each exists, the step it replaces is done by hand and the LOG says so. The
+time saved on 2026-10-18's shape: about 33 minutes per server-only stage,
+about forty minutes per gate, a pipeline per compile slip, twenty minutes
+per playtest setup, and the gate and merge off the playtest's critical path,
+which is the day itself.
