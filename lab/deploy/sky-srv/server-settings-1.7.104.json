@@ -16,11 +16,82 @@
     "/srv/skymp/esm/ccBGSSSE037-Curios.esl",
     "/srv/skymp/esm/ccBGSSSE025-AdvDSGS.esm",
     "/srv/skymp/esm/_ResourcePack.esl",
+    "/srv/skymp/esm/unofficial skyrim special edition patch.esp",
+    "/srv/skymp/esm/GeneralDisplays.esm",
+    "/srv/skymp/esm/ApachiiHair.esm",
+    "/srv/skymp/esm/Conjuration Summoner Perk Applies to All Creatures.esl",
     "/srv/skymp/esm/RaceCompatibility.esm",
-    "/srv/skymp/esm/rotfern.esp",
-    "/srv/skymp/esm/LostGrimoire.esp",
+    "/srv/skymp/esm/Cloaks.esp",
+    "/srv/skymp/esm/Cloaks - Dawnguard.esp",
+    "/srv/skymp/esm/Cloaks - USSEP Patch.esp",
+    "/srv/skymp/esm/1nivWICCloaksNoGuards.esp",
+    "/srv/skymp/esm/1nivWICCloaks_SMP_Patch.esp",
+    "/srv/skymp/esm/Cloaks_SMP_Patch.esp",
+    "/srv/skymp/esm/Thaumaturgy.esp",
+    "/srv/skymp/esm/MysticismMagic.esp",
+    "/srv/skymp/esm/ExtraDwemerHighFurniture.esp",
+    "/srv/skymp/esm/Odin - Skyrim Magic Overhaul.esp",
+    "/srv/skymp/esm/MoreCraftableEquipment.esp",
+    "/srv/skymp/esm/Playable Headparts All Races.esp",
+    "/srv/skymp/esm/DigitigradeKhajiit+ArgonianRaptor.esp",
+    "/srv/skymp/esm/SpellAbsorptionAndTwinSoulsFix_SE.esp",
+    "/srv/skymp/esm/SimplyBiggerTreesSE.esp",
+    "/srv/skymp/esm/LetMeDropIt.esp",
+    "/srv/skymp/esm/Vanilla Civil War Dialogue Fix.esp",
+    "/srv/skymp/esm/BlackBookNoQuest.esp",
+    "/srv/skymp/esm/ElderScrollNoQuest.esp",
+    "/srv/skymp/esm/_001_SelfFillingBookshelves.esp",
+    "/srv/skymp/esm/mihailcrowsandravens.esp",
+    "/srv/skymp/esm/rmp_telvannihearthfires.esp",
+    "/srv/skymp/esm/SummonsOfApocrypha.esp",
+    "/srv/skymp/esm/EVE - House Telvanni Banners Restored.esp",
+    "/srv/skymp/esm/TrueDirectionalMovement.esp",
+    "/srv/skymp/esm/Prometheus_BeastSkeletons.esp",
     "/srv/skymp/esm/Apocalypse - Magic of Skyrim.esp",
-    "/srv/skymp/esm/Headshot Kills.esp"
+    "/srv/skymp/esm/mihailringneckedpheasant.esp",
+    "/srv/skymp/esm/Better Stealth AI for Followers.esp",
+    "/srv/skymp/esm/Jewelry limiter.esp",
+    "/srv/skymp/esm/Vampiric Grip.esp",
+    "/srv/skymp/esm/mihailatmoranremains.esp",
+    "/srv/skymp/esm/mihailmagicladder.esp",
+    "/srv/skymp/esm/LRD.esp",
+    "/srv/skymp/esm/StealthKillDetectionFix.esp",
+    "/srv/skymp/esm/Portal.esp",
+    "/srv/skymp/esm/All Eyes for All Races.esp",
+    "/srv/skymp/esm/SimpleFireWyrmFix.esp",
+    "/srv/skymp/esm/Ring of Namira - Improved.esp",
+    "/srv/skymp/esm/Better Vampire Lord plus Serana Fix EN.esp",
+    "/srv/skymp/esm/ChitinGoggles.esp",
+    "/srv/skymp/esm/Dynamic Activation Key.esp",
+    "/srv/skymp/esm/Dwemer Goggles & Scouter.esp",
+    "/srv/skymp/esm/DualCastingCostPowerTweak.esp",
+    "/srv/skymp/esm/ArchmageRobeLearn.esp",
+    "/srv/skymp/esm/LoweredFurHoods.esp",
+    "/srv/skymp/esm/NARC SE for Vanilla.esp",
+    "/srv/skymp/esm/Cloaks&Capes.esp",
+    "/srv/skymp/esm/NB-FurHoods.esp",
+    "/srv/skymp/esm/LostGrimoire.esp",
+    "/srv/skymp/esm/dremora_merchant_upgrade.esp",
+    "/srv/skymp/esm/Headshot Kills.esp",
+    "/srv/skymp/esm/Silent Reanimated Corpses.esp",
+    "/srv/skymp/esm/SunAffectsNPCVampires.esp",
+    "/srv/skymp/esm/SunAffectsNPCVampires-Hooded.esp",
+    "/srv/skymp/esm/Survival Mode Vampire Patch.esp",
+    "/srv/skymp/esm/Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire.esp",
+    "/srv/skymp/esm/UndeadFX.esp",
+    "/srv/skymp/esm/SummonsReleveled.esp",
+    "/srv/skymp/esm/mihailhelhest.esp",
+    "/srv/skymp/esm/Stab the heart.esp",
+    "/srv/skymp/esm/VampireFeedingTweaks.esp",
+    "/srv/skymp/esm/MoreCraftableEquipment_BYOHLooms.esp",
+    "/srv/skymp/esm/MoreCraftableEquipment_CloaksandCapes.esp",
+    "/srv/skymp/esm/MoreCraftableEquipment_Fish.esp",
+    "/srv/skymp/esm/MoreCraftableEquipment_USSEP.esp",
+    "/srv/skymp/esm/VampireLordsCanActivate.esp",
+    "/srv/skymp/esm/LoweredHoods.esp",
+    "/srv/skymp/esm/LoweredHoods_MoreCraftableEquipment.esp",
+    "/srv/skymp/esm/vampireinverterdg.esp",
+    "/srv/skymp/esm/rotfern.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",
@@ -50,23 +121,23 @@
     }
   ],
   "headshot": {
-      "spells": [
-          "801:Headshot Kills.esp"
-      ],
-      "races": [
-          "13740:Skyrim.esm",
-          "13741:Skyrim.esm",
-          "13742:Skyrim.esm",
-          "13743:Skyrim.esm",
-          "13744:Skyrim.esm",
-          "13745:Skyrim.esm",
-          "13746:Skyrim.esm",
-          "13747:Skyrim.esm",
-          "13748:Skyrim.esm",
-          "13749:Skyrim.esm",
-          "67cd8:Skyrim.esm"
-      ],
-      "minArchery": 60
+    "spells": [
+      "801:Headshot Kills.esp"
+    ],
+    "races": [
+      "13740:Skyrim.esm",
+      "13741:Skyrim.esm",
+      "13742:Skyrim.esm",
+      "13743:Skyrim.esm",
+      "13744:Skyrim.esm",
+      "13745:Skyrim.esm",
+      "13746:Skyrim.esm",
+      "13747:Skyrim.esm",
+      "13748:Skyrim.esm",
+      "13749:Skyrim.esm",
+      "67cd8:Skyrim.esm"
+    ],
+    "minArchery": 60
   },
   "playerGlobals": [
     "043cef:Apocalypse - Magic of Skyrim.esp",
@@ -124,6 +195,14 @@
     "01a60e:Apocalypse - Magic of Skyrim.esp"
   ],
   "startPoints": [
-    { "pos": [133857, -61130, 14662], "worldOrCell": "0x3c", "angleZ": 72 }
+    {
+      "pos": [
+        133857,
+        -61130,
+        14662
+      ],
+      "worldOrCell": "0x3c",
+      "angleZ": 72
+    }
   ]
 }

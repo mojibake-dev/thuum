@@ -460,3 +460,108 @@ What it needs from thuum:
   PostLoadGame again. HYPOTHESIS until a lab run shows both. Still open from
   the research (rule 2): Ghidra's read that the producer takes two
   arguments and writes a 3D vector, since the plugin writes 12 bytes.
+
+## The essentials layer (Eli's set, staged 2026-10-19)
+
+Eli's ticked essentials from his own Skyrim (docs/private/mods-fenestrate.md, 113 ticks
+of 210 on 2026-10-18, and his six decisions on the dependency gaps; the plan is
+docs/research/mod-layer-plan.md). Built by apocrypha on branch
+`apocrypha/layer-essentials`; `just layer-stage apocrypha/layer-essentials` stages it.
+
+**What it is.** 99 mods copied from Fenestrate, 5 fetched from Nexus, on top of the
+layer's existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire,
+Apocalypse, Headshot Kills with CIF 2.0.7, AI Pathing Freeze Fix): 94 plugins in
+the clients' order (80 served, 14 client-only at the tail), 49 of them light;
+29 mod folders scoped `@1.6.1170` (every SKSE DLL mod: all of them loaded on Fenestrate's
+1.6.1170 under SKSE 2.2.6, none has run on 1.7.104; FSMP among them). 113 mod folders, 6,194 files, 4.4 GB on disk (the DLL mods' .pdb files kept: Crash Logger with PDB support is in the set and reads them).
+
+**Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
+lab/tools/persist-mods.sh after its hand-written blocks:
+
+- `fenestrate` rows copy the mod's Vortex staging folder, pulled read-only off VM 220's disk
+  (the host-side mount, Eli's OK of 2026-10-18 via thuum-magnus; nothing written there)
+  into `lab/.cache/mods/fenestrate/<folder>`. A staging folder is the mod as Vortex
+  installed it, FOMOD choices already made, so the layer carries the files Eli's game ran:
+  every file Fenestrate's deployment manifest lists for the mod is there and all 87
+  plugins match Fenestrate's Data byte for byte over their first 64 KiB (apocrypha's check
+  against the plugin heads pulled with the mod list). Each row records a tree hash of the
+  folder after exclusions and persist-mods refuses a copy that differs. The manager's
+  own top-level files (readmes, pictures, meta.ini, Vortex's marker) are excluded.
+- `nexus` rows fetch the archive the row names with the Keychain's Nexus key, check its
+  md5 (each confirmed by Nexus's md5_search on 2026-10-19) and lay out the installer folders
+  the `take` column lists, read from each FOMOD ModuleConfig.xml by hand. Cloaks of Skyrim's
+  RAR uses a method 7zz refuses, so persist-mods needs `unar` (brew install unar).
+- The load order lives once, in `lab/layer/load-order.tsv` (mod folder, light flag from
+  the TES4 header, game versions, served or client-only). `lab/tools/layer-render.py`
+  writes it into persist-mods' `plugins=(...)` array and both server-settings files;
+  `lab/tests/test_server_settings.py` fails when the three disagree. The order is Eli's
+  loadorder.txt order for his plugins, with the new cloak plugins placed before the two
+  cloak patches and the client-only plugins last (CBBE's pair the very last, as before).
+  Every plugin's index moves against the current lab; server and clients take the new
+  list together, as every layer change does.
+- `PERSIST_LOCAL=1 lab/tools/persist-mods.sh` builds and checks the tree without touching
+  the host (the dry run this branch was validated with).
+
+**Decisions carried, verbatim from Eli (2026-10-18):** "1. ditch the patch 2. untick the
+integration 3. ditch the armor mod 4. add the cloaks and hdt 5. untick. 6. if it needs it
+add em. if not no action." and '"No Guards", FSMP in. i feel like my spare 1050 is like,,
+the oldest card we'll have to account for.' So: out are the Apocalypse/Tomebound patch,
+Goam's Elven Ears RaceMenu Integration (the ears themselves stay), Armor and Clothing for
+Kids and the NARC Dremora addon; in, for the Survival Mode Patch Collection's two cloak
+patches, are Cloaks of Skyrim 1.2.1, Winter Is Coming SSE - Cloaks 2.4 in its No Guards
+file, Artesian Cloaks of Skyrim 1.3.0 (its Cloaks of Skyrim and Winter Is Coming physics
+packages) and FSMP 4.1.1 (the AVX build; the installer has no runtime step). The spare
+GTX 1050 seat (c1) is the hardware floor: FSMP's frame cost is read there at the stage.
+
+**Read from the archives, not from the plan:** "SMP_Patch" is Artesian's naming
+(HDT-SMP), one plugin per base-mod variant; the Survival Mode Patch 14 esps are
+same-named replacements of Artesian's Full-variant plugins with warmth keywords added, and
+master the Full plugins (Cloaks.esp and Cloaks - Dawnguard.esp; 1nivWICCloaks.esp). The
+No Guards file ships `1nivWICCloaksNoGuards.esp`, so the collection's WIC esp cannot load
+with it: the layer takes Artesian's own No Guards `1nivWICCloaks_SMP_Patch.esp` (physics,
+no Survival warmth for WIC cloaks) and leaves the collection's WIC esp out, while the
+Cloaks of Skyrim half is intact (CoS Full, Artesian Full meshes, the collection's
+`Cloaks_SMP_Patch.esp` replacing Artesian's plugin; Artesian's plugin keeps the base mesh
+paths, its physics meshes replace files in place, so the replacement loses no path).
+**Open for Eli:** keep No Guards as built, or take WIC Full (Nexus 4933 file 10466) so
+both halves of the Survival patch load and guards wear cloaks; either is a one-row change
+in essentials.tsv and load-order.tsv.
+
+**Not placed (rows with source `out`, not dropped silently):**
+- sse-engine-fixes-skse64-plugin-7: part 2 only (the game-root preloader d3dx9_42.dll); add-mods.ps1 installs under Data, and part 1, the SKSE plugin, was never on Fenestrate; Nexus 17230 file 725261
+- Fenestrate's Core Impact Framework 1.2.8 is not copied: the layer keeps CIF 2.0.7, which
+  the lab validated on both versions (above); rotfern stays the standalone fork, not
+  Fenestrate's 15-master plugin; SKSE is the lab's own install.
+
+**Client-only, with the reason (load-order.tsv's `why`):** SkyUI_SE.esp, RLAiO.esp,
+UnreadBooksGlow.esp, NMNEB.esp, MCMHelper.esp, DisableSpellLight_Prebuilt.esp, TrueHUD.esl
+(interface and visuals no server state names), the four plugins that master Creation Club
+content the server's esm directories do not hold (MoreCraftableEquipment_AdvCyrus.esp needs
+ccBGSSSE031-AdvCyrus.esm; LoweredHoods_CCNecromanticGrimoire.esp,
+LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp and Necromantic Grimoire -
+Mysticism Rebalance.esp need ccvsvsse003-necroarts.esl), then RaceMenuMiscSlider.esp and
+CBBE's pair. To move the four server-side: copy the two Creation Club files off a clone's
+Data into /srv/persist/esm and /srv/persist/esm/1.6.1170 (as the five there were, docs/LAB.md),
+add them to both settings files' heads in Skyrim.ccc order, flip the four rows to `yes`, render.
+
+**What the layer needs from the game side (the fork and the lab), in the order it will bite:**
+- SkyUI's MCM is the first use (the per-player globals check): SkyUI_SE.esp is client-only
+  and its scripts run on the client; MCM Helper (1.6.1170) carries the config-file menus
+  that TrueHUD, Stealth Detection Fixes and others register through.
+- 24 of the mods ship Papyrus scripts (loose .pex) and skymp5-client blocks Papyrus events
+  on objects the server did not make, OnUpdate aside (docs/verbs/racemenu-sync.md's
+  whitelist); Jewelry Limiter, Dynamic Activation Key, Extended Vanilla Menus, Reading List,
+  Unread Books Glow, Self Filling Bookshelves, Portal, IDRC and the vampire tweaks are
+  script-driven and will show what the block costs. Their scripts are listed per mod in
+  the deployment manifest (chim/.scratch, apocrypha).
+- Every DLL mod enters at 1.6.1170 only; the 1.7.104 set has none of them (its server
+  list has 76 plugins). A seat test per DLL moves it to both.
+- Nemesis: True Directional Movement is the only mod in the set with a Nemesis patch
+  (Nemesis_Engine\mod\tdmv, 195 files, in its folder); its behaviour output is not in the
+  layer and has to be generated once on a seat with exactly the layer's mods (Nemesis is
+  a Windows tool), then shipped as a `nemesis-output` folder (docs/research/mod-layer-plan.md).
+  Until then TDM's movement works without its animation patch.
+- Light plugins: the server now loads 39 light plugins after the three Creation Club
+  ones; the light-plugins verb's index mapping is what keeps FE form ids agreeing.
+- The server's esm directories receive 80 plugins (76 for 1.7.104); persist-mods
+  places them from the manifest at the stage.

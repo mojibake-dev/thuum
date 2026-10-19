@@ -70,6 +70,18 @@
 #   plugin file, so no load order and no esm directory; the clients alone
 #   load it.
 #
+# - The essentials layer (Eli's ticked set, docs/MODS.md "The essentials
+#   layer", docs/research/mod-layer-plan.md): every other mod comes from
+#   lab/layer/essentials.tsv, one row per mod folder. A fenestrate row copies
+#   the mod's Vortex staging folder, pulled read-only off Fenestrate's disk
+#   into lab/.cache/mods/fenestrate (apocrypha, 2026-10-19: the files Eli's
+#   game ran, FOMOD choices already made), and checks it against the tree
+#   hash the row records; a nexus row fetches the archive the row names,
+#   checks its md5, and lays out the installer folders the row lists. The
+#   load order lives in lab/layer/load-order.tsv; lab/tools/layer-render.py
+#   writes it into the plugins array below and both server-settings files
+#   (lab/tests checks the three agree).
+#
 # A mod directory named <mod>@<version> installs only into that game
 # version's folder on a clone (add-mods.ps1), and its plugins go only into
 # that version's esm directory; a plugin the other version's folder lacks is
@@ -136,7 +148,7 @@ ff_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/190049/files
 # come last and on the clients only (above: each the last of its kind, no
 # server state names their forms), so the server's list stays the clients'
 # first plugins.
-plugins=(RaceCompatibility.esm rotfern.esp RaceMenu.esp RaceMenuPlugin.esp LostGrimoire.esp "Apocalypse - Magic of Skyrim.esp" "Headshot Kills.esp" RaceMenuMorphsCBBE.esp CBBE.esp)
+plugins=("unofficial skyrim special edition patch.esp" GeneralDisplays.esm ApachiiHair.esm "Conjuration Summoner Perk Applies to All Creatures.esl" RaceCompatibility.esm Cloaks.esp "Cloaks - Dawnguard.esp" "Cloaks - USSEP Patch.esp" 1nivWICCloaksNoGuards.esp 1nivWICCloaks_SMP_Patch.esp Cloaks_SMP_Patch.esp Thaumaturgy.esp MysticismMagic.esp ExtraDwemerHighFurniture.esp "Odin - Skyrim Magic Overhaul.esp" MoreCraftableEquipment.esp "Playable Headparts All Races.esp" DigitigradeKhajiit+ArgonianRaptor.esp SpellAbsorptionAndTwinSoulsFix_SE.esp SimplyBiggerTreesSE.esp LetMeDropIt.esp "Vanilla Civil War Dialogue Fix.esp" BlackBookNoQuest.esp ElderScrollNoQuest.esp _001_SelfFillingBookshelves.esp mihailcrowsandravens.esp rmp_telvannihearthfires.esp SummonsOfApocrypha.esp "EVE - House Telvanni Banners Restored.esp" TrueDirectionalMovement.esp Prometheus_BeastSkeletons.esp "Apocalypse - Magic of Skyrim.esp" mihailringneckedpheasant.esp IntuitiveDragonRideControl.esp "Better Stealth AI for Followers.esp" "Jewelry limiter.esp" "Vampiric Grip.esp" mihailatmoranremains.esp mihailmagicladder.esp LRD.esp StealthKillDetectionFix.esp Portal.esp "All Eyes for All Races.esp" SimpleFireWyrmFix.esp "Ring of Namira - Improved.esp" "Better Vampire Lord plus Serana Fix EN.esp" ChitinGoggles.esp "Dynamic Activation Key.esp" "Dwemer Goggles & Scouter.esp" RaceMenu.esp RaceMenuPlugin.esp DualCastingCostPowerTweak.esp ArchmageRobeLearn.esp LoweredFurHoods.esp "NARC SE for Vanilla.esp" "Next-Gen Decapitations.esp" "Cloaks&Capes.esp" NB-FurHoods.esp LostGrimoire.esp dremora_merchant_upgrade.esp "Headshot Kills.esp" "Silent Reanimated Corpses.esp" SunAffectsNPCVampires.esp SunAffectsNPCVampires-Hooded.esp "Survival Mode Vampire Patch.esp" "Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire.esp" UndeadFX.esp SummonsReleveled.esp mihailhelhest.esp "Stab the heart.esp" VampireFeedingTweaks.esp MoreCraftableEquipment_BYOHLooms.esp MoreCraftableEquipment_CloaksandCapes.esp MoreCraftableEquipment_Fish.esp MoreCraftableEquipment_USSEP.esp VampireLordsCanActivate.esp LoweredHoods.esp LoweredHoods_MoreCraftableEquipment.esp vampireinverterdg.esp rotfern.esp SkyUI_SE.esp RLAiO.esp UnreadBooksGlow.esp NMNEB.esp MCMHelper.esp DisableSpellLight_Prebuilt.esp TrueHUD.esl MoreCraftableEquipment_AdvCyrus.esp LoweredHoods_CCNecromanticGrimoire.esp LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp "Necromantic Grimoire - Mysticism Rebalance.esp" RaceMenuMiscSlider.esp RaceMenuMorphsCBBE.esp CBBE.esp)
 
 mkdir -p "$cache"
 if [ ! -f "$rc_zip" ] || [ "$(md5 -q "$rc_zip")" != "$rc_md5" ]; then
@@ -210,6 +222,11 @@ if [ ! -f "$ff_zip" ]; then
 fi
 [ "$(md5 -q "$ff_zip")" = "$ff_md5" ] || { echo "AI Pathing Freeze Fix archive md5 is not $ff_md5" >&2; exit 2; }
 command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu and CBBE (brew install sevenzip)" >&2; exit 2; }
+command -v unar >/dev/null || { echo "unar is needed to unpack Cloaks of Skyrim's RAR, a method 7zz refuses (brew install unar)" >&2; exit 2; }
+layer_tsv="$root/lab/layer/essentials.tsv"
+order_tsv="$root/lab/layer/load-order.tsv"
+fen_cache="$cache/fenestrate"
+[ -f "$layer_tsv" ] && [ -f "$order_tsv" ] || { echo "no lab/layer/essentials.tsv or load-order.tsv" >&2; exit 2; }
 [ -f "$rotfern/rotfern.esp" ] || { echo "no rotfern.esp in $rotfern" >&2; exit 2; }
 
 stage=$(mktemp -d "${TMPDIR:-/tmp}/persist-mods.XXXXXX")
@@ -305,10 +322,78 @@ rsync -a "$stage/cif-x/Data/" "$cif/"
 # the fix's DLL in its archive's own Data layout, SKSE/Plugins, for the 1.6.1170 folder alone
 ff="$stage/tree/aipathingfreezefix-1.1@1.6.1170"; mkdir -p "$ff"
 unzip -q "$ff_zip" "SKSE/Plugins/TMS_AIPathingFreezeFix.dll" -d "$ff"
+# --- the essentials layer: lab/layer/essentials.tsv, row by row ---------------
+# Files a mod manager never puts under Data: a mod's top-level readmes,
+# pictures and manager metadata (the staging folders carry them).
+junk=(--exclude '__folder_managed_by_vortex' --exclude '/*.jpg' --exclude '/*.jpeg' --exclude '/*.png' --exclude '/*.docx'
+      --exclude '/*.modgroups' --exclude '/*.txt' --exclude '/*.md' --exclude '/*.pdf' --exclude '/meta.ini')
+tree_hash() { # <dir>: sha256 over the sorted "sha256  path" lines of its files, as the manifest's tree: value
+  (cd "$1" && find . -type f | sed 's|^\./||' | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)
+}
+nexus_fetch() { # <archive path> <mod id/file id>
+  local file=$1 api="https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/${2%/*}/files/${2#*/}"
+  echo "fetching $(basename "$file") from Nexus ($2)"
+  local url
+  url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
+    | curl -fsS -m 30 -H @- "$api/download_link.json" \
+    | python3 -c 'import sys,json,urllib.parse; print(urllib.parse.quote(json.load(sys.stdin)[0]["URI"], safe=":/?&=%"))')
+  curl -fsS -m 1800 -o "$file.part" "$url"
+  mv "$file.part" "$file"
+}
+n_fen=0; n_nx=0
+# the rows as unit-separated fields: bash's read would collapse an empty tab-separated field
+# (tab is IFS whitespace), shifting the columns after it
+rows=$(python3 -c '
+import csv, sys
+for r in csv.reader((l for l in open(sys.argv[1]) if not l.startswith("#")), delimiter="\t"):
+    if r and r[0] != "folder": print("\x1f".join(r))' "$layer_tsv")
+while IFS=$'\x1f' read -r folder source ref check take exclude plugins_ note; do
+  dest="$stage/tree/$folder"
+  excl=("${junk[@]}")
+  if [ -n "$exclude" ]; then IFS=';' read -ra more <<< "$exclude"; for e in "${more[@]}"; do excl+=(--exclude "$e"); done; fi
+  case "$source" in
+    out) echo "not placed: $folder ($note)";;
+    fenestrate)
+      src="$fen_cache/$ref"
+      [ -d "$src" ] || { echo "no $src: the Fenestrate staging folders are not in lab/.cache/mods/fenestrate (docs/MODS.md, the essentials layer)" >&2; exit 2; }
+      mkdir -p "$dest"
+      rsync -a "${excl[@]}" "$src/" "$dest/"
+      got=$(tree_hash "$dest")
+      [ "tree:$got" = "$check" ] || { echo "$folder: tree hash $got is not ${check#tree:} (the staging copy differs from the one the manifest was built from)" >&2; exit 2; }
+      n_fen=$((n_fen + 1));;
+    nexus)
+      ids=${ref%%|*}; archive="$cache/${ref#*|}"
+      [ -f "$archive" ] || nexus_fetch "$archive" "$ids"
+      [ "$(md5 -q "$archive")" = "${check#md5:}" ] || { echo "$(basename "$archive") md5 is not ${check#md5:}" >&2; exit 2; }
+      xdir="$stage/x/$folder"; mkdir -p "$xdir" "$dest"
+      case "$archive" in
+        *.rar) unar -q -D -o "$xdir" "$archive";;
+        *) 7zz x -y -o"$xdir" "$archive" >/dev/null;;
+      esac
+      IFS=';' read -ra takes <<< "$take"
+      for t in "${takes[@]}"; do
+        from=${t%%->*}; into=${t#*->}
+        [ -d "$xdir/$from" ] || { echo "$folder: no folder '$from' in $(basename "$archive")" >&2; exit 2; }
+        mkdir -p "$dest/$into"
+        rsync -a "${excl[@]}" --exclude 'fomod/' --exclude 'FOMOD/' "$xdir/$from/" "$dest/$into/"
+      done
+      n_nx=$((n_nx + 1));;
+    *) echo "$folder: unknown source '$source'" >&2; exit 2;;
+  esac
+  # every plugin the row names is in place
+  if [ -n "$plugins_" ]; then IFS=';' read -ra ps <<< "$plugins_"; for pl in "${ps[@]}"; do [ -f "$dest/$pl" ] || { echo "$folder: plugin $pl not in its folder" >&2; exit 2; }; done; fi
+done <<< "$rows"
+echo "essentials layer: $n_fen mods from Fenestrate's staging, $n_nx from Nexus archives"
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
 echo "mod layer: $(wc -l < "$stage/tree/SHA256SUMS" | tr -d ' ') files, $(du -sh "$stage/tree" | cut -f1)"
+if [ -n "${PERSIST_LOCAL:-}" ]; then
+  # the tree built and checked, nothing sent: for a branch's dry run (docs/MODS.md)
+  trap - EXIT
+  echo "PERSIST_LOCAL: tree kept at $stage/tree, host untouched"
+  exit 0
+fi
 
 ssh -o BatchMode=yes "$dst" "install -d -m 2775 -g sky '$persist/mods'"
 # -rlt, not -a: the host's own modes, and group sky from the setgid directory
@@ -320,7 +405,7 @@ place() { # <esm dir> <mods-relative plugin paths...>
   local dir=$1; shift
   local names=() n
   for n in "$@"; do names+=("$(basename "$n")"); done
-  local pattern; pattern=$(printf '%s|' "${names[@]}" | sed 's/|$//; s/\./\\./g')
+  local pattern; pattern=$(printf '%s\n' "${names[@]}" | sed 's/[][\.*^$+?(){}|\\]/\\&/g' | paste -sd '|' -)
   ssh -o BatchMode=yes "$dst" "set -e; cd '$persist/$dir'
     $(for n in "$@"; do printf "cp '%s/mods/%s' .; " "$persist" "$n"; done)
     grep -v -E '  ($pattern)\$' SHA256SUMS > SHA256SUMS.new || true
@@ -329,9 +414,13 @@ place() { # <esm dir> <mods-relative plugin paths...>
     sha256sum -c --quiet SHA256SUMS"
   echo "$dir: ${names[*]} in place, SHA256SUMS checked"
 }
-place esm racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
-  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp" "headshotkills-1.2/$hk_esp"
-place esm/1.6.1170 racecompatibility-2.16/RaceCompatibility.esm rotfern/rotfern.esp \
-  racemenu-0.4.20.0@1.6.1170/RaceMenu.esp racemenu-0.4.20.0@1.6.1170/RaceMenuPlugin.esp \
-  lostgrimoire-1.6/LostGrimoire.esp "apocalypse-10.2.3/$ap_esp" "headshotkills-1.2/$hk_esp"
+# the served plugins, from lab/layer/load-order.tsv: every version's for esm/, those plus the 1.6.1170-only for esm/1.6.1170
+served() { python3 -c '
+import csv, sys
+for r in csv.DictReader((l for l in open(sys.argv[1]) if not l.startswith("#")), delimiter="\t"):
+    if r["server"] == "yes" and r["versions"] in ("all", sys.argv[2]): print(r["mod"] + "/" + r["plugin"])' "$order_tsv" "$1"; }
+mapfile -t place_all < <(served 1.7.104)
+mapfile -t place_1170 < <(served 1.6.1170)
+place esm "${place_all[@]}"
+place esm/1.6.1170 "${place_1170[@]}"
 ssh -o BatchMode=yes "$dst" "cd '$persist/mods' && sha256sum -c --quiet SHA256SUMS && echo 'mods: SHA256SUMS checked on the host'"
