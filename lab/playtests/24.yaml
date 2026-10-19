@@ -1,0 +1,55 @@
+# Playtest twenty-four's seats (thuum ADR-040 item 6: `just playtest-setup 24`;
+# the checklist is docs/private/playtest-m2-24.md). Train-27 on the stage,
+# twenty-three's world, the same seats as twenty-three: Apocalypse loads at
+# 0x0C in the lab, so its ids are 0x0Cxxxxxx. Everything here is server-side
+# (labCommand through playtest-console, set-percentages); the one thing a
+# seat types itself is test 1's `player.addperk 7934b` (Overdraw40, the
+# headshot rule's perk, which lives in the shooter's game).
+id: 24
+build: "fork m2-train-27-snap 4c7e6998 on the stage (not merged); layers Apocalypse, freeze-fix, Headshot Kills"
+world: playtest-m2-23-20261019T015813Z
+hold:
+  minutes: 180
+  reason: "playtest twenty-four: train-27 on the stage"
+camp:
+  # the camp's two teleports from playtest-start, only those (the script's
+  # half bars and ingredients would undo the rest)
+  teleports: playtest-start
+seats:
+  - profile: 1
+    name: "test 1 (rotfern; the bow and arrows are on it)"
+    spells:
+      - 0x0C00186D   # Shock Nova
+      - 0x0C05ECEE   # Battletide
+      - 0x0C109653   # Crackle
+      - 0x0C044D44   # Blood Boil
+      - 0x0C088694   # Azure Reconstruction
+      - 0x0C031C4D   # Shadowbond
+      - 0x0C01F1FB   # Decompose
+      - 0x0C124EC9   # Acceleration Rune
+      - 0x0C002878   # Lightning Strike
+      - 0x0C124EC7   # Thrumming Stone
+      - 0x0003AE9F   # Flame Cloak (the tome's spell, not the 0xDE511 hand variant)
+      - 0x0006796F   # Frost Rune
+      - 0x0005DB90   # Fire Rune
+    values:
+      Marksman: 60   # the headshot rule's floor; "Archery" does nothing on the server
+    percentages: {health: 1, magicka: 1, stamina: 1}
+    by_hand: "player.addperk 7934b once in game"
+  - profile: 2
+    name: "test 2"
+    spells:
+      - 0x0C088694   # Azure Reconstruction
+      - 0x0C00186D   # Shock Nova
+      - 0x00012FD0   # Firebolt (the staggered cast)
+      - 0x0003AE9F   # Flame Cloak
+    items:
+      - {id: 0x00012E4D, count: 1}   # Iron Helmet, for the helmeted headshot check
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  # a set upward can revert within 2 s: read the bars back and set again if they did
+  readback: percentages
