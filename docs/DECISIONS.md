@@ -1514,3 +1514,135 @@ per function (the engine's documented semantics, CK wiki, UESP), its T3
 claim Azure refused on a player and accepted on a summon once summons
 exist; the server log gains E_CONDITION_UNKNOWN; a refused heal or harm is a
 finding, not a bug, until its function is built.
+
+## ADR-040: A playtest runs on the stage; the loop from findings to seats is three hours
+
+Status: proposed (2026-10-19 00:1x PDT, Eli: "yes please draft those process
+changes. all day for 1 playtest is rough and seems to be increasing in time.
+ideally we'd have 2 or 3 a day"; drafted from the night of train-27); item 1
+in effect from 2026-10-19 00:17 by Eli's choice of the day's plan ("lets go
+with your 2 playtest suggestion": twenty-four on the staged train-27 in the
+morning, twenty-five on the essentials layer and train-28 in the evening);
+the tooling items under way on his "fire at will" to numidium. Amends
+ADR-030 (the gate's selection for a train) and the stage's shape in
+docs/LAB.md; leaves ADR-024, ADR-027 and ADR-033 as they are.
+
+**Context.** One playtest a day, and the day is lengthening. Playtest
+twenty-three ran 17:30 to 18:55 PDT on 2026-10-18 on a build merged at 14:05
+(seats ready at 14:10); its findings became train-27 (six rows). The train's
+first stage (rows 1 and 2, 2b4d5b27) reached the lab at 20:18 and read its
+probes by 20:31, T2 by 20:55; the second (rows 3 to 6, c32cf0bd, after three
+red heads) reached it at 23:37 and read its last probe at 23:59; the gate and
+merge are a morning job, so playtest twenty-four is the next evening at the
+earliest: about 24 hours from findings to seats.
+Where the hours went, measured on the night:
+
+| step | cost on 2026-10-18 | what it bought |
+| --- | --- | --- |
+| building the six rows (Rust, C++, TS, tests, docs) | about two hours | the fixes |
+| three red heads in the C++ CI (dd1b5483: four new unit tests that had never run; 43675022 and 44e959e9: compile errors), the server building and testing only in CI | server-build named each 7 to 8 min after its push; 21:30 to 23:01 from the first red push to the green one, the fixes included | nothing |
+| the Windows client build, GitHub's hosted runner building from scratch, waited on by every stage | 35 to 36 min a head (runs 39191168626 at 2b4d5b27, 39207598638 at c32cf0bd); the stages waited 35.6 and 27.5 min of it | the client: every staged head changed it (skymp5-client, or the wire crates wire-client-ffi links: wire-schema, wire-json, wire-validate) |
+| a stage: the deploy, both clients and the snapshots, then the probes | 9 to 9.5 min to lay, about 2.2 min a probe; stage 2 (six probes) 50 min from verb-stage's start, 27.5 of them on the Windows build | the four green rows, two bugs of mine, two probe faults |
+| T2 after the stage's probes | 23.6 min a stage (20:31 to 20:55) | the wire's differential oracle |
+| a probe fault (a cast hold too short, an unmeasured pitch) | one lab cycle each | the probe |
+| the gate sweep, ADR-030's selection | train-23 12 runs; train-24 23 runs in 51 min; train-26 27 scenarios and 2 reruns in 75 min (12:50 to 14:05) | a regression net the nightly also casts |
+| playtest setup from the checklist's Setup section | scripted while the gate ran (one clarification round), then 1 min 40 s of setup: seats ready 4 min after the merge (14:06 to 14:10) | the seats |
+
+The checks themselves earned their keep: the T0 set caught a regression that
+would have failed the cloak row in Eli's hands (a vanilla effect gating on a
+condition function the server did not know, docs/research/apocalypse/
+effect-conditions.md), and the stage caught a validator refusing the first
+actor's snap. What is slow is latency and serial shape, not coverage: the
+first stage of a train waits half an hour on a client build made from scratch,
+the gate grew from ten runs to twenty-three because a train touches
+ActionListener.cpp and ADR-030's "every verb whose files the branch touched"
+then names most verbs, the playtest waits for the gate and the merge it does
+not need, and a compile error costs a pipeline. Keeping a fast commit stage
+in front of slower acceptance stages, and shortening lead time rather than
+cutting checks, is the standard shape of this problem (Humble and Farley,
+Continuous Delivery, ch. 5; Forsgren, Humble and Kim, Accelerate, 2018,
+where lead time and change failure rate improve together, not one for the
+other).
+
+**Decision.**
+1. **The playtest runs on the stage.** A train is staged (its build deployed,
+   the staged client on the live clones, its probes read) and goes to Eli's
+   seats from there: `playtest-restore` relaunches the live clones, so the
+   playtest needs no snapshot and nothing is promoted at the stage; clean-m1
+   stays parity's client, the base every other stage and the nightly stack
+   on, promoted at the merge as now. The gate sweep and the merge to parity
+   follow the playtest, when the lab is free again (feedback: a reported
+   checklist frees the seats), or at night. ADR-033's record of the playtest
+   is evidence for the train's rows either way; a gate red after a playtest
+   does not undo the findings, it holds the merge. Parity therefore lags the
+   seats by one train; LOG.md names which build each playtest ran on, as it
+   does today.
+2. **The gate for a train is its own rows.** ADR-030's always set
+   (`smoke-two-players`, `a-restart-persistence`), the scenarios of the
+   train's rows, and every open ADR-027 watch item: target eight runs,
+   about twenty minutes. The "every verb whose files the branch touched"
+   expansion moves to the nightly sweep, which runs every scenario anyway.
+   A single verb's merge keeps ADR-030's selection as written.
+3. **The client build gets faster; a stage reuses one it does not need.**
+   The Windows build is 35 to 36 minutes from scratch and every head of the
+   night needed it (the client FFI links wire-schema, wire-json,
+   wire-validate and wire-transport, so a wire change is a client change).
+   So the lever is the build itself: measure its steps from a run's timings
+   (vcpkg restore, CMake and C++, cargo, the TypeScript bundle) and cache
+   what repeats (vcpkg binary caching and cargo's target through
+   actions/cache, or a warm self-hosted Windows builder), aiming under
+   fifteen minutes. The trivial case stays: `verb-stage` and `build-client`
+   reuse the last successful run's dist when nothing the client links
+   changed since its commit, naming the run they took.
+4. **A fast T0 oracle.** Of the night's three red heads one was tests that
+   had never run and two were compile errors, so the oracle must build and
+   run T0, not compile alone. Its cheapest form is the fork's own
+   server-build made incremental: a BuildKit cache mount for the CMake build
+   directory in the build stage, so a few changed files rebuild and test in
+   minutes and the push stays the one oracle, with no new tool. Failing that,
+   a kept build directory on sky-ci behind `just t0 <branch>`.
+5. **A probe reruns alone; T2 runs beside the probes.** When only a probe's
+   YAML changed, it reruns on the current stage through lab-api (`just
+   lab-run <path>`, as the night's headshot reruns did); a re-stage is for a
+   new head. T2's servers are their own containers, so T2 runs on sky-srv
+   while the probes run on the clones (23.6 minutes after the stage tonight),
+   once a stage has shown sky-srv's load leaves the probe timings alone.
+6. **A playtest is set up by one command.** `just playtest-setup <n>` reads a
+   profile (lab/playtests/<n>.yaml: the world to restore, each seat's spells,
+   items and values, the hold's length) and does the restore, the relaunch,
+   the server-side setup through labCommand, the Moonlight check and the
+   hold; the checklist's Setup section becomes that file. Setup stays
+   server-side (feedback 2026-10-13), never typed into a seat.
+7. **A train is cut when its fixes are ready, not when every finding is.**
+   A row that needs a probe iteration or a measurement (the rune's pitch)
+   moves to the next train instead of holding the stage; a verb still ships
+   whole (rule 3), on whichever train carries it.
+8. **Measured.** LOG.md's train entry records findings-in to seats-ready in
+   hours (tonight: findings at 18:55, stage 2's last probe at 23:59, five
+   hours, of which the red heads were 1.5, the Windows waits 1.0 and T2 0.4
+   a stage). The target is three hours, two to three playtests a day when
+   Eli has the time. Reviewed after ten trains or at M3's start, whichever
+   is first.
+
+**Consequences.** Eli plays a build parity has not taken yet, so a train can
+be withdrawn after a playtest and its findings still stand; the nightly
+sweep, not the gate, is the cross-verb regression net, which is where
+ADR-030 already put it, with ADR-027's two-sweep rule tolerating a lone red.
+Items 3 to 6 are tooling for numidium, in this order: the T0 oracle (4),
+item 1 alongside (policy, no tooling), T2 beside the probes (5), the client
+build's speed (3), the playtest profile (6), the gate's selection (2) last
+since it mostly saves lab time once item 1 holds; until each exists, the
+step it replaces is done by hand and the LOG says so. Landed the same night
+(numidium, 2026-10-19 00:xx): the playtest profile (`just playtest-setup`,
+`playtest-ready`, `playtest-profile-check`, branch playtest-setup); the dist
+reuse for server-only heads (`REUSE_DIST=1` on verb-stage); T2 beside the
+probes, measured at no cost (118 and 122 s per probe against 115 and 123 s
+alone); the T0 oracle's first form (a BuildKit cache mount) measured at 399
+against 476 s cold, the CMake tree rebuilding 245 objects on a one-line
+change because the runner's working copy is shared across branches, so
+ccache is the next step. The
+time saved on 2026-10-18's shape: about 35 minutes per server-only stage
+(none that night: every staged head changed the client side),
+about forty minutes per gate, a pipeline per compile slip, twenty minutes
+per playtest setup, and the gate and merge off the playtest's critical path,
+which is the day itself.
