@@ -1,0 +1,102 @@
+# b-shadowbond (thuum docs/verbs/shadowbond.md, train-27 and train-28): c1
+# casts Shadowbond (Apocalypse 0x0C031C4D in the lab's order, decimal
+# 201530445) at c2 standing 150 units in front, then casts Flames, the act
+# that breaks the bond. The server records the bond at the claimed hit and,
+# since train-28, records the proc's invisibility (effect 0x0C055B31 of the
+# Self spell 0x0C055B32) on both for the bond's 20 s and casts the proc in
+# every game but the caster's own, where the mod's script already cast
+# both (the script runs there alone and no client reports a Papyrus cast;
+# playtest twenty-four: "we're still both visible on player 2's screen"), so
+# av:Invisibility goes true on each own player and on each figure. At the
+# break the server swaps the two and holds them 1.5 s (train-27, from the
+# probe x-shadowbond 20261019-093744 on ab14087f with its 1500 ms hold, past
+# any Apocalypse charge time), ends both records and dispels the target's
+# own copy: both visible again, the positions swapped. Second half: a bond
+# cast again from the swapped places and left alone runs out at 20 s with no
+# swap, the records gone and both visible.
+id: b-shadowbond
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 201530445}
+  - c1: learn-spell {spellId: 77773}
+  - c1: console {text: "player.setav magicka 3000"}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - assert:
+      - abs(server.actor(c1).y - (-300)) < 64
+      - abs(server.actor(c2).y - (-450)) < 64
+  - c1: look {pitch: 0, heading: 180}
+  - wait: 1
+  - c1: console {text: "player.equipspell c031c4d right"}
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start {bools: [IsCastingRight, "av:Invisibility"]}
+  - c2: watch-start {bools: [IsCastingRight, "av:Invisibility"]}
+  - wait: 1.5
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.effects(c1).left("0xc055b31") > 10
+      - server.effects(c2).left("0xc055b31") > 10
+  - c1: dump-state
+  - c2: dump-state
+  - c1: console {text: "player.equipspell 12fcd right"}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 600}
+  - wait: 5
+  - c1: dump-state
+  - c2: dump-state
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c1).y < -400
+      - server.actor(c2).y > -350
+      - c1.watched_self().ever("av:Invisibility") == 1
+      - c1.watched(c2).ever("av:Invisibility") == 1
+      - c2.watched_self().ever("av:Invisibility") == 1
+      - c2.watched(c1).ever("av:Invisibility") == 1
+      - c1.watched_self().drops("av:Invisibility") >= 1
+      - c2.watched_self().drops("av:Invisibility") >= 1
+      - c2.watched(c1).drops("av:Invisibility") >= 1
+      - server.effects(c1).left("0xc055b31") == 0
+      - server.effects(c2).left("0xc055b31") == 0
+  # a bond left alone: cast again from the swapped places (c1 now south of
+  # c2, facing north; the look sheathes, so draw again), nobody acts, the
+  # bond runs out at 20 s: no swap, the records gone, both visible
+  - c1: look {pitch: 0, heading: 0}
+  - wait: 1
+  - c1: console {text: "player.equipspell c031c4d right"}
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start {bools: ["av:Invisibility"]}
+  - c2: watch-start {bools: ["av:Invisibility"]}
+  - wait: 1.5
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.effects(c2).left("0xc055b31") > 10
+  - wait: 20
+  - c1: dump-state
+  - c2: dump-state
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - server.actor(c1).y < -400
+      - server.actor(c2).y > -350
+      - server.effects(c1).left("0xc055b31") == 0
+      - server.effects(c2).left("0xc055b31") == 0
+      - c2.watched_self().ever("av:Invisibility") == 1
+      - c2.watched_self().drops("av:Invisibility") >= 1
+      - c2.watched(c1).drops("av:Invisibility") >= 1
+artifacts: [server.log, c1.log, c2.log, trace]
