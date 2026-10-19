@@ -1,8 +1,8 @@
 # M2, ghostwalk (docs/verbs/ghostwalk.md, ADR-029's first verb): a player
 # casts Apocalypse's Ghostwalk, the mod's own script runs in its game, and
 # the server takes the return through the cast's permit. c1 learns Ghostwalk
-# from the server ("Apocalypse - Magic of Skyrim.esp" SPEL 00AAE8 at full
-# slot 0C of the lab's load order: 0x0C00AAE8, 201370344; castTeleports
+# from the server ("Apocalypse - Magic of Skyrim.esp" SPEL 00AAE8, named as
+# a FormDesc so its slot is the run's load order's; castTeleports
 # names it with reach 0, waitMs 15400, relay true), gets the magicka to cast
 # it (cost 450), casts it at the lab spawn beside c2 and walks south for
 # 8 s, about 2440 units (305 units a second in x-ghostwalk-relay
@@ -26,7 +26,7 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: learn-spell {spellId: 201370344}
+  - c1: learn-spell {spellId: "00aae8:Apocalypse - Magic of Skyrim.esp"}
   - c1: console {text: "player.setav magicka 3000"}
   - wait: 2
   - c1: set-percentages {magicka: 1}
@@ -42,7 +42,7 @@ steps:
   - until:
       within: 6
       expect:
-        - server.effects(c1).left("0xc00aae5") > 5
+        - server.effects(c1).left("00aae5:Apocalypse - Magic of Skyrim.esp") > 5
   - c1: hold-key {code: 17, ms: 8000}
   - wait: 8.5
   - assert:
