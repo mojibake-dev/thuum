@@ -10,6 +10,9 @@
 #      clones are written; it stands if a step fails, `just lab-release` ends it);
 #   2. `just persist-mods`: the host's persist/mods rebuilt from the branch's
 #      script, the plugins placed in both game versions' esm directories;
+#      2b. the load order the clients will enable against the server's
+#      (load-order-check.py on persist's mods/): every enabled plugin loads,
+#      and every plugin the server loads sits on the clients' slot;
 #   3. `just deploy-srv`: the lab tree and both server-settings files (their
 #      load-order check passes once step 2 has placed the plugins);
 #   4. the server restarted on the new load order and answering, before any
@@ -71,11 +74,22 @@ echo "== 2. persist-mods $(date +%H:%M:%S)"
 last=$(just persist-mods 2>&1 | tee /dev/stderr | tail -1)
 case "$last" in "mods: SHA256SUMS checked on the host"*) ;; *) echo "== persist-mods did not end with the host's check" >&2; exit 1;; esac
 
+echo "== 2b. the load order the clients enable $(date +%H:%M:%S)"
+# persist's plugins.txt and plugin headers against this tree's 1.6.1170 settings: the essentials layer's first
+# stage (2026-10-19) booted neither clone, a Creation Club patch enabled over a master the engine disabled, and its
+# client-only TrueHUD.esl moved 38 light plugins to other slots than the server's
+$srv_ssh "mkdir -p /srv/lab/handover && cat > /srv/lab/handover/load-order-check.json" < lab/deploy/sky-srv/server-settings.json
+$srv_ssh "python3 - /srv/persist/mods /srv/lab/handover/load-order-check.json" < lab/tools/load-order-check.py | sed 's/^/   /' \
+  || { echo "== the clients' load order does not hold (above): stop before deploy-srv (the hold stands)" >&2; exit 1; }
+
 echo "== 3. deploy-srv $(date +%H:%M:%S)"
 just deploy-srv 2>&1 | tail -1
 
 echo "== 4. the server on the new load order $(date +%H:%M:%S)"
-$srv_ssh "cd /srv/lab && docker compose restart skymp-server >/dev/null 2>&1 && for _ in \$(seq 1 24); do (exec 3<>/dev/tcp/127.0.0.1/3000) 2>/dev/null && { echo '   server answers on 3000'; exit 0; }; sleep 5; done; docker compose logs --tail 30 skymp-server | tail -15; echo '   server not answering on 3000 within 120 s' >&2; exit 1"
+# the game server's own "listening on :7777", not port 3000: the resources server answers on 3000 before the
+# plugins load, and the essentials layer's first try (2026-10-19 14:00) passed there while every start died on
+# "unresolved dependency" and "Stopping the server"; it must also still be up 10 s later (no restart loop)
+$srv_ssh "cd /srv/lab && since=\$(date -u +%Y-%m-%dT%H:%M:%SZ) && docker compose restart skymp-server >/dev/null 2>&1 && for _ in \$(seq 1 60); do l=\$(docker logs --since \$since lab-skymp-server-1 2>&1); if echo \"\$l\" | grep -q 'Stopping the server'; then echo \"\$l\" | grep -E '\\[error\\]' | tail -4 | cut -c1-200 | sed 's/^/   /'; echo '   the server refused the load order' >&2; exit 1; fi; if echo \"\$l\" | grep -q 'listening on :7777'; then echo \"\$l\" | grep -m1 'listening on :7777' | cut -c1-120 | sed 's/^/   /'; sleep 10; if docker logs --since \$since lab-skymp-server-1 2>&1 | grep -q 'Stopping the server'; then echo '   the server stopped after it listened' >&2; exit 1; fi; echo '   listening on 7777 and still up 10 s later'; exit 0; fi; sleep 2; done; docker compose logs --tail 30 skymp-server | tail -15; echo '   server not listening on 7777 within 120 s' >&2; exit 1"
 
 echo "== 5. the layer on both clones $(date +%H:%M:%S)"
 for v in 712 711; do
