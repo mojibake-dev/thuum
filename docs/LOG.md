@@ -2092,3 +2092,33 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   past Invisibility's 30 s. The run's real recast pair, 11.9 s apart, dropped nothing. lab-api now ends such an exec at
   once (labapi-owed, E_PVE_EXEC_LOST).
   Both clones promoted to the d5b05e89 client at 14:05 and 14:06 PDT.
+- Playtest twenty-three, the M2 close (2026-10-18, about 17:30 to 18:55 PDT) on parity d5b05e89 (train-26) with the
+  Apocalypse, freeze-fix and Headshot Kills layers.
+  - Set up server-side after train-26's merge, 14:06 to 14:08 PDT:
+    - Twenty-two's world restored by `just playtest-restore`, with its relaunch of both seats.
+    - playtest-start's two camp teleports, and nothing else of it.
+    - Test 1: its thirteen spells, and Marksman 60, read back as 60 on the server.
+    - Test 2: its four spells and an Iron Helmet. It then carried two, because the restored world held one.
+    - All three bars full on both seats, holding at the first set.
+    - SunshineService restarted on both seats.
+  - One stream per seat (thuum-magnus, 14:08), then both games relaunched under them at 14:09. Both were online with
+    live heartbeats, and the setup was unchanged in the relaunched games.
+  - Eli's results (docs/private/playtest-m2-23.md):
+    - Held: the quiver (x-quiver); Crackle's proc, then Blood Boil's ticks (b-second-hand); Flame Cloak inside a fight
+      (b-cloak-fight); Shock Nova beside test 2 (x-class-self, ticked "xw"); and the headshot kill ("it WORKS but
+      there's a little bit of a lag").
+    - Not as expected, in his notes:
+      - The teleport and Ghostwalk still slide.
+      - The globals check needs SkyUI.
+      - Azure Reconstruction read "Prisoner resisted azure reconstruction".
+      - Shadowbond's invisibility and its jump showed on test 1's screen alone.
+      - Test 2 could not see Acceleration Rune. When it tripped, test 2 collapsed on test 1's screen only.
+      - Test 2 seemed to take no damage from vanilla Frost Rune.
+    - Not tried: the staggered cast.
+    - His question: is the short slide of Ghostwalk, the teleport and Shadowbond the spells' own movement in vanilla,
+      rather than the relay?
+  - Evidence kept at 18:57 PDT, before any run, since no recorder ran: https://thuum.gaussing.tv/results/playtest-23/
+    holds the window's server log, the whole session's, and each seat's Skyrim Platform, driver and Sunshine logs.
+    thuum-magnus reads them.
+  - The world was saved as playtest-m2-23-20261019T015813Z (7 records). The hold, playtest-relaunch's 180 minutes from
+    14:09, had lapsed at 17:09, before the playtest began. Nothing was queued.
