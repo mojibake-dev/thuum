@@ -92,3 +92,46 @@ restarts the analysis next call) is raised to 30 minutes in the wrapper. The
 first attempt at the default cut the analysis at 300 s; the timed run
 follows.
 
+## The check, measured (2026-10-18 21:2x PDT)
+
+- Time: 462 s from the first provider-backed call to a usable answer
+  (REA's import and Ghidra auto-analysis of the 37 MB exe, 4 cores, 4 GB
+  heap; 465 s the run before), then 10 ms for procedure_references and 36 ms
+  for analyze_function. pyghidra-mcp's 2026-10-16 read took the re-analyst
+  a session of prompting on an already-analyzed project (minutes of agent
+  time; the project's own analysis was paid once, years of lab-time ago).
+- Callers: REA's incoming references to 0x1406c6d90 (DispelAlteredStates,
+  38819) are ten: five UNCONDITIONAL_CALLs, from 0x1402eb36a in 0x1402eac20
+  (ActivateRef 19796), 0x1405b1475 in 0x1405b1290 (SpellCast 34144),
+  0x14066065b in 0x140660410 (the force-greet 37200), 0x1406b98c7 in
+  0x1406b9460 (the weapon hit frame 38603) and 0x1407b938d in 0x1407b9230
+  (ArrowReleaseHandler 42859): the five pyghidra-mcp named, none missing,
+  none extra; four CONDITIONAL_JUMPs inside the function's own body; and
+  one DATA reference from 0x14365bbe8 with no procedure (a pointer to the
+  function in data, HYPOTHESIS a vtable slot or a function table; the
+  2026-10-16 read did not mention it: a finding to check, not a caller).
+  Fire 34407 is rightly absent as a direct caller (it calls SpellCast).
+- The exception: REA's pseudocode of the function is the read itself: if
+  the flags byte at +0xb0 has bit 2 and param_2 != 0xb, dispel archetype
+  0xb (Invisibility, 11) on the MagicTarget at +0xa0 through FUN_1405c2780
+  (34510, 0x5c2780); if FUN_140662c90(this) (the ethereal check) and
+  param_2 != 0x29, dispel archetype 0x29 (Etherealize, 41) the same way. So
+  the one exception is the archetype passed in, exactly as self-cast.md
+  says, and the MagicTarget at +0xA0 matches the lab's measured offset
+  (memory: commonlib-relocation-columns).
+- Evidence quality: every reference carries its kind (type, call, jump,
+  data, indirect, computed, conditional), provenance (ghidra-reference-
+  manager), and the result carries confidence "observed" and authority
+  "shipped-artifact", with unresolved_calls listed (none here). The dossier
+  has pseudocode, assembly, callers, callees, both reference directions,
+  strings, names, basic blocks, native value flow and a limitations list.
+- Agent effort: one session, four tool calls, no prompting; the cost is
+  the import per server process (eight minutes) and result envelopes too
+  large for a character cap (parse structuredContent; list_procedures on
+  the whole exe exceeds the stdio budget by design).
+
+Verdict for Eli: on this question REA equals pyghidra-mcp's depth and beats
+its effort, at eight minutes of startup per session. A fair default for
+the re-analyst's reads, with pyghidra-mcp kept for the analyzed project's
+names and comments (REA's project is ephemeral and unnamed).
+
