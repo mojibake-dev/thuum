@@ -1,6 +1,11 @@
 {
   "server-ip": "10.10.70.10",
   "server-port": 7777,
-  "gameData": { "profileId": 1 },
-  "server-info-ignore": true
+  "gameData": {
+    "profileId": 1
+  },
+  "server-info-ignore": true,
+  "headshot-spells": [
+    "801:Headshot Kills.esp"
+  ]
 }
