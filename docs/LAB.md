@@ -381,6 +381,7 @@ pinned:
 | GET /lab/state/<query> | proxy to the lab gamemode's state endpoint on the server |
 | POST /lab/runset | `{name, scenarios: [ids] or "all", game?}`: the scenarios of the deployed tree played one after another with ADR-027's and the lab-fault reruns applied (ADR-030: the merge gate and the nightly sweep are both this); returns the set, `GET /lab/runset/<id>` its progress and verdict (green, watch, red, error), `GET /lab/runsets` the recent ones |
 | POST /lab/runset/<id>/stop, /resume | stop after the current run; go on from the scenario after the last one run |
+| POST /lab/clients/<c>/rollback `{to}` | a live session's client-only rollback (ADR-041 item 5): the clone back to `to`, its newest lab snapshot, by a stop, a disk rollback and a start, then the guest agent; allowed under a hold, refused beside a run or a snapshot (`just client-rollback c1`) |
 | POST /lab/hold `{minutes, reason}`, POST /lab/release | the lab is somebody's (a playtest, a staging writing the clones): /run, /runset, /up and /down answer 409 E_RUN_HOLD with the reason and the nightly does not start, until the minutes pass or the release; the playtest tools hold three hours by themselves, verb-stage while it writes the clones |
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/; a run set's
@@ -458,7 +459,7 @@ until watch-stop, and any actor {formIds: [...]} names (a cell's own NPCs,
 which the random search catches in a different set each run; a named
 actor's animation events get their own hook, and a reference reads it
 with `watched_id(<form id>)`, no server position needed), keeping
-{trackMax} position samples of 250 ms (240 by default, 2400 at most), and reports how far each got from where it began, with
+{trackMax} position samples of 250 ms (240 by default, 2400 at most), every NPC a place-npc step placed, and reports how far each got from where it began (a step past 5000 units in one update is a cell's coordinate frame changing under the actor, recorded in frameChanges and not counted as a move; `loaded` says whether its 3D was loaded at the start and at the stop, so an actor in an unloaded cell is told from one standing still), with
 each one's stagger, recoil, shout and bow events as this game's engine or a relay sent
 them (the name, and whether its graph took the event once every hook had
 run: deathService refuses every figure's staggerStart) and the graph
@@ -518,6 +519,11 @@ and sky-c2, only clean-m1 names, never clean-sp; a stacked snapshot goes
 directly on clean-m1 or replaces itself there, never on top of another one
 (promote or delete that first); no run starts while one is in progress
 (`just client-snapshot c1 clean-m1-x`, `just client-promote c1 clean-m1-x`).
+`POST /lab/clients/<c>/rollback {to}` (ADR-041 item 5) returns a clone to its
+newest snapshot, the only one ZFS rolls back to, with the same guards: a
+stop, a disk rollback, a start and the guest agent, allowed under a
+playtest's hold. `just client-rollback c1` (clean-m1-next by default) then
+waits for the seat back online.
 A shutdown that times out leaves the clone running, game stopped, with no
 snapshot taken. If a promote fails between deleting `from` and creating
 `to`, the clone runs `from`'s content with no `to`: the repair is a cold
@@ -636,6 +642,11 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    scenario waits for a condition rather than a `wait:` sized for the
    slowest case (the process plan's B7, 2026-10-13).
 6. Collects artifacts and writes result.json. Exit code is the verdict.
+   result.json's `build` names what the run played: `server`, the server
+   container's image reference and id (docker inspect after the rollback's
+   start), and `clients`, each managed clone's snapshot with the description
+   its staging wrote (the branch, the client's commit, the date). A read that
+   fails is an `error` there, never the run's failure.
 
 Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/
@@ -705,6 +716,53 @@ a scenario green (ADR-009). Scenario YAML is review-gated (ADR-016): a
 change travels in its own commit, Eli approves it, and CI refuses a commit
 that mixes scenario YAML with other files.
 
+## Turbo mode (ADR-041)
+
+A live session's pushes, while Eli is at the seats under a playtest hold. A
+push touches the server and the two seats and nothing else: no run, no
+snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
+- `just turbo-srv <ref-slug>-<sha8>`: a server push.
+  - It switches skymp-server alone (never lab-api, whose hold lives in its
+    memory) to a fixed tag the fork's server-build pushed.
+  - It pulls the image first, so a tag the registry lacks changes nothing.
+  - It saves the live world as playtest-turbo-<tag>-<UTC stamp> before the
+    switch.
+  - It waits for the server's listening line and for every seat that was
+    online. skymp5-client reconnects and logs in by itself.
+  - Measured on 2026-10-19 with the image already built: the server listening
+    22 s after the push, both seats back online at 33 s.
+- `just turbo-client <fork ref>`: a TypeScript client push.
+  - It builds skymp5-client.js on the Mac from a sparse fork worktree in
+    lab/.cache/turbo-fork (yarn 1 through npx; webpack 5 s).
+  - It sends the bundle over the in-VLAN hop with its SHA256 checked in the
+    guest, stops the game, and swaps the bundle into every game folder of each
+    clone, keeping the replaced file under C:\sky-lab\turbo\<stamp>\.
+  - It relaunches the seats and waits for each back online.
+    `TURBO_CLIENTS="c1:711"` pushes one seat.
+  - Measured on 2026-10-19 (fork 88c43e77): both seats back online 65 s after
+    the push, one seat 32 s. The bundle syncs like the Windows build's: a
+    600 px turn moved c1's server rot 27 degrees on either.
+  - A push relaunches, not hot-reloads (ADR-041's condition). Skyrim
+    Platform does reload a running game's plugins 8 ms after a last-write
+    change under Data/Platform/Plugins (DirectoryMonitor.cpp). But on
+    2026-10-19 the reloaded skymp5-client logged nothing on the server and
+    sent no movement: two turns left c1's rot at 0, while c2's control
+    turned 26.9 degrees.
+  - HYPOTHESIS: the reload starts with an empty storage
+    (assets/storageProxy.js makes a new Proxy over {}), so there is no world
+    model. skympClient.ts's establishConnectionConditional then finds the
+    native client still connected and skips the login, so no createActor
+    ever arrives.
+- `just client-rollback <c1|c2> [snapshot]`: a seat's whole clone back to
+  its newest snapshot (clean-m1-next, what the stage laid), for anything a
+  kept file cannot undo; the server and the other seat stay as they are.
+- `just turbo-back [--world]`: the reverse of the last push in turbo.log.
+  - A server push goes back to its previous tag (31 s measured).
+  - A client push stops each pushed seat's game, puts the kept file back and
+    relaunches only those seats (44 s for both, 37 to 74 s for one).
+  - `--world` also restores the newest saved turbo world, which relaunches
+    both seats.
+
 ## Network faults
 
 Inside sky-srv, per scenario:
@@ -740,6 +798,21 @@ Static RE is REA on sky-re (the `rea` MCP server, the default for reads
 since 2026-10-18) beside pyghidra-mcp at GHIDRA_MCP_URL for the named
 project; the re-analyst subagent's procedure (.claude/agents/re-analyst.md)
 names the order: CommonLib headers, REA, pyghidra-mcp, addrlib.
+
+The driver's `mouse {dx, dy, steps, ms, wake}` step (numidium, main 353b4d3,
+2026-10-19) moves the view through SendInput, the only input that reaches
+the first-person camera and exits the auto-vanity camera an idle seat drifts
+into (so `wake` sends a throwaway move first). Calibrated on x-rune-cast2
+20261019-074009 from the graph's Pitch variable sampled through the moves:
+0.04946 degrees per px, 20.2 px per degree, linear across 60 degrees; +dy
+pitches DOWN and Pitch reads negative for down (AimPitchCurrent and 1stPRot
+stay 0, so Pitch is the variable to read). A move before `draw-weapon`
+leaves the draw alone; a move after it is untested. Runes: from a standing
+first-person view at the lab spawn facing north, Frost Rune finds a ground
+point at 60 degrees down (1213 px) and not at 30 or 45 (x-rune-cast2 and
+x-rune-cast3, 2026-10-19): about 70 units out at eye height; the placement
+relays to the other game to the last digit (train-25). Probes that place a
+rune pitch 60 degrees down, with a wake.
 
 ## CI
 

@@ -205,6 +205,51 @@ def _mouse_args(args: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+_GAME_PATH = re.compile(r"^[A-Za-z0-9 _.\-]+(?:[/\\][A-Za-z0-9 _.\-]+)*$")
+_BARE = re.compile(r"^[A-Za-z0-9 _.\-]+$")
+
+
+def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
+    """relaunch {files?}: the seat's game quit and started again, with `files` changed in the run's game folder
+    while it is stopped, since a DLL and an ini load at a launch (the essentials layer's FSMP off and vsync off
+    readings, 2026-10-19). Each entry is {rename: <path in the game folder>, to: <new file name beside it>} or
+    {ini: <path of an .ini>, section, key, value}, which sets a key the file already has. Paths are relative,
+    without '..'; the next run's rollback restores the clone."""
+    unknown = sorted(set(args) - {"files"})
+    if unknown:
+        raise ValueError(f"relaunch takes files, not {unknown}")
+    files = args.get("files")
+    if files is None:
+        return {}
+    if not isinstance(files, list) or not 1 <= len(files) <= 8:
+        raise ValueError("relaunch's files is a list of one to eight changes")
+    out = []
+    for f in files:
+        if not isinstance(f, dict):
+            raise ValueError("a relaunch file change is a mapping")
+        path = f.get("rename", f.get("ini"))
+        if not isinstance(path, str) or not _GAME_PATH.match(path) or ".." in path.replace("\\", "/").split("/"):
+            raise ValueError(f"a relaunch file change names a relative path in the game folder, not {path!r}")
+        if set(f) == {"rename", "to"}:
+            if not isinstance(f["to"], str) or not _BARE.match(f["to"]) or f["to"] in (".", ".."):
+                raise ValueError(f"rename's to is a bare file name, not {f['to']!r}")
+            out.append({"rename": path, "to": f["to"]})
+        elif set(f) == {"ini", "section", "key", "value"}:
+            if not path.lower().endswith(".ini"):
+                raise ValueError(f"ini names an .ini file, not {path!r}")
+            for k in ("section", "key"):
+                if not isinstance(f[k], str) or not _BARE.match(f[k]):
+                    raise ValueError(f"ini's {k} is letters, digits, space, dot, dash or underscore, not {f[k]!r}")
+            v = f["value"]
+            v = str(v).lower() if isinstance(v, bool) else str(v)
+            if any(c in v for c in "'\"`$\r\n"):
+                raise ValueError(f"ini's value carries no quotes, backticks, dollar signs or line breaks: {v!r}")
+            out.append({"ini": path, "section": f["section"], "key": f["key"], "value": v})
+        else:
+            raise ValueError(f"a relaunch file change is {{rename, to}} or {{ini, section, key, value}}, not {sorted(f)}")
+    return {"files": out}
+
+
 # the driver steps a playtest may send one seat outside a run (lab-api's playtest-step): input and its
 # rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby), never
 # a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
@@ -291,6 +336,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _repeat_args(args)
     if action == "mouse":
         args = _mouse_args(args)
+    if action == "relaunch":
+        args = _relaunch_args(args)
     return Step(kind="client", client=key, action=action, args=args)
 
 

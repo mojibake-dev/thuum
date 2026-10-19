@@ -131,6 +131,10 @@ class GuestControl:
             raise ProxmoxError(f"E_PVE_FILE_TOO_BIG: {path} on {guest.name} exceeds the 16 MiB guest-agent cap")
         return content
 
+    def snapshot_list(self, guest: Guest) -> list[dict[str, Any]]:
+        """The guest's snapshots as PVE lists them (name, parent, description), `current` included."""
+        return self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+
     def rollback_sequence(self, guest: Guest, snapshot: str) -> None:
         """Disk-only rollback (docs/LAB.md): stop, rollback, start."""
         self.stop(guest)
@@ -258,6 +262,26 @@ class GuestControl:
         if self._children(snaps, to) != [frm] or self._children(snaps, frm) != ["current"]:
             raise ProxmoxError(f"E_PVE_SNAPSHOT: {frm} on {guest.name} is not the newest, directly on {to}, after the promote")
         return {"ok": True, "guest": guest.name, "promoted": frm, "to": to, "parent": self._parent(snaps, to), "restacked": frm}
+
+    def rollback_clone(self, guest: Guest, to: str, boot_timeout: float) -> dict[str, Any]:
+        """A live session's client-only rollback (thuum ADR-041 item 5): the
+        clone's disk back to `to`, stopped, rolled back and started as a run's
+        rollback is (rollback_sequence), then the guest agent waited on. `to`
+        is a lab name (clean-m1 or a stacked clean-m1-<x>, never clean-sp) and
+        the clone's newest snapshot, since ZFS rolls back only to the newest
+        (docs/LAB.md); the refusal names it before anything stops. The clone's
+        logon launcher starts the game and the seat logs in by itself; the
+        caller waits for it on the online list (lab/tools/client-rollback.sh)."""
+        self._snapshot_guard(guest, to)
+        snaps = self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+        if not any(s.get("name") == to for s in snaps):
+            raise ProxmoxError(f"E_PVE_GUARD: {guest.name} has no snapshot {to}")
+        if self._children(snaps, to) != ["current"]:
+            raise ProxmoxError(f"E_PVE_GUARD: {to} is not the newest snapshot on {guest.name} (ZFS rolls back only to the newest)")
+        t0 = time.monotonic()
+        self.rollback_sequence(guest, to)
+        self._await_agent(guest, boot_timeout)
+        return {"ok": True, "guest": guest.name, "rolledBack": to, "seconds": round(time.monotonic() - t0, 1)}
 
 
 class ProxmoxerGuests:

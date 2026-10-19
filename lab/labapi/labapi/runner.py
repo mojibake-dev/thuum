@@ -21,7 +21,7 @@ from .assertions import AssertionData, AssertionSyntax, Evaluator, clients_needi
 from .board import StepBoard
 from .config import Settings
 from . import mouse
-from .guests import Tables
+from .guests import Guest, Tables
 from .proxmox import GuestControl, ProxmoxError
 from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
 from .state import ServerState, StateError
@@ -147,6 +147,10 @@ class RunRecord:
     games: dict[str, str] = field(default_factory=dict)
     # the seats whose SKSE folder logs this run already fetched
     skse_fetched: set[str] = field(default_factory=set)
+    # what the run played (provenance): the server container's image reference
+    # and id, and each managed clone's snapshot with its description (verb-stage
+    # writes the branch, the client's commit and the date there)
+    build: dict[str, Any] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -160,6 +164,7 @@ class RunRecord:
             "milestone": self.scenario.milestone,
             "game": self.game,
             "games": self.games,
+            "build": self.build,
             "verdict": self.verdict,
             "started": self.started_at,
             "finished": self.finished_at,
@@ -450,6 +455,7 @@ class Runner:
                 # a run on another version's master files recreates the
                 # container (its mount changed); the same version only starts it
                 await asyncio.to_thread(self.system.run, self._compose("up", "-d", self.s.compose_service), env=env)
+                rec.build["server"] = await asyncio.to_thread(self._server_build, env)
                 host = "127.0.0.1"
             ready = await asyncio.to_thread(self.system.tcp_ready, host, self.s.server_ui_port, self.s.server_ready_timeout_s)
             if not ready:
@@ -584,6 +590,7 @@ class Runner:
                 # clone was still booting (run 20261001-233852: the phase passed
                 # at 74 s and c2 was not online 60 s later).
                 since = self._clock()
+                rec.build.setdefault("clients", {})[client] = await asyncio.to_thread(self._client_build, g)
             if not await self.board.wait_heartbeat(client, since, self.s.heartbeat_timeout_s):
                 raise RunnerError(f"E_RUN_NO_HEARTBEAT: {client} ({g.name}) did not poll within {self.s.heartbeat_timeout_s}s")
             return f"{client}={g.name}{'' if g.managed else ' (unmanaged, heartbeat only)'}"
@@ -688,7 +695,7 @@ class Runner:
         if step.action == "screenshot":
             return await self._screenshot(rec, index, step.client)
         if step.action == "relaunch":
-            return await self._relaunch(rec, index, step.client)
+            return await self._relaunch(rec, index, step.client, step.args.get("files"))
         if step.action == "frida":
             return await self._frida_start(rec, index, step.client, step.args)
         if step.action == "mouse":
@@ -941,7 +948,7 @@ class Runner:
                 return False, f"{len(failed)} of {len(step.assertions)} did not hold within {step.seconds:g}s" + (f" ({read})" if read else "")
             await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
-    async def _relaunch(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
+    async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, str]] | None = None) -> tuple[bool, str]:
         """relaunch: the player quits the game and starts it again, so its
         client loads a fresh generated save at the next login, as a player
         coming back another day does. A reconnect is not that: an in-game
@@ -959,6 +966,20 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return fail(f"E_RUN_RELAUNCH: {client} is not a managed client")
+        if files:
+            # the step's file changes, made in the run's game folder while the game is stopped: a DLL and an
+            # ini load at a launch (scenario._relaunch_args); the next run's rollback undoes them
+            script = _relaunch_files_ps(self.s.client_lab_dir, rec.game or self.s.game_default, files)
+            encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded],
+                                              self.s.guest_task_timeout_s)
+            except ProxmoxError as e:
+                return fail(f"E_RUN_RELAUNCH: {g.name}: the file changes: {e}")
+            if res.exitcode != 0:
+                return fail(f"E_RUN_RELAUNCH: {g.name}: the file changes: exit {res.exitcode}: {(res.err or res.out).strip()[:200]}")
+            done = " / ".join(ln.strip() for ln in res.out.splitlines() if ln.strip())
+            rec.notes.append(f"step {index}: {client} files before the relaunch: {done[:400]}")
         cmd = ["powershell", "-NoProfile", "-Command", self.s.relaunch_cmd]
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
@@ -969,6 +990,16 @@ class Runner:
         started = self._clock()
         if not await self.board.wait_heartbeat(client, started, self.s.relaunch_timeout_s):
             return fail(f"E_RUN_RELAUNCH: {client} ({g.name}) did not poll within {self.s.relaunch_timeout_s}s")
+        if rec.scenario.solo:
+            # a solo game (ADR-031: no skymp5-client) comes back at the main menu, where lab-driver polls (tick)
+            # but runs no step (update) and no login follows; the run's next solo-start loads it
+            rec.notes.append(f"step {index}: {client} relaunched solo, polling after {self._clock() - started:.1f}s")
+            # the new game is the one the run's end compares (Runner._crash_check)
+            rec.games.pop(client, None)
+            identity = await self._game_identity(g)
+            if identity:
+                rec.games[client] = identity
+            return True, f"{client} relaunched solo, at the main menu for the next solo-start"
         left = max(1.0, self.s.relaunch_timeout_s - (self._clock() - started))
         qs = await self.board.run_step(client, "dump-state", {}, left)
         if not qs.ok:
@@ -1434,6 +1465,59 @@ class Runner:
 
     def _compose(self, *args: str) -> list[str]:
         return ["docker", "compose", "-f", self.s.compose_file, *args]
+
+    def _server_build(self, env: dict[str, str] | None = None) -> dict[str, str]:
+        """The server image this run plays, for result.json's build: the compose
+        service's container, its image reference and image id. A read that
+        fails is the answer's error, never the run's."""
+        try:
+            r = self.system.run(self._compose("ps", "-q", self.s.compose_service), env=env)
+            ids = (r.stdout or "").split()
+            if not ids:
+                return {"error": "no container for " + self.s.compose_service}
+            r = self.system.run(["docker", "inspect", "--format", "{{.Config.Image}} {{.Image}}", ids[0]])
+            ref, _, iid = (r.stdout or "").strip().partition(" ")
+            return {"image": ref, "id": iid} if ref else {"error": (r.stderr or "docker inspect said nothing").strip()[:200]}
+        except Exception as e:  # provenance never fails a run
+            return {"error": str(e)[:200]}
+
+    def _client_build(self, g: Guest) -> dict[str, str]:
+        """The snapshot a managed clone was rolled back to, with the description
+        its staging wrote, for result.json's build; never fails a run."""
+        try:
+            snaps = self.control.snapshot_list(g)
+            description = next((str(e.get("description") or "").strip() for e in snaps if e.get("name") == g.snapshot), "")
+            return {"snapshot": g.snapshot, "description": description}
+        except Exception as e:  # provenance never fails a run
+            return {"snapshot": g.snapshot, "error": str(e)[:200]}
+
+
+def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, str]]) -> str:
+    """A relaunch's file changes as one PowerShell script: the game stopped, then each change in the run's game
+    folder (<lab_dir>\\games\\<version>.txt names it), one line printed per change. The paths, names, sections, keys
+    and values are scenario._relaunch_args's, so none carries a quote."""
+    out = [
+        "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'",
+        "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3",
+        f"$g = (Get-Content '{lab_dir}\\games\\{game}.txt' -Raw).Trim()",
+    ]
+    for f in files:
+        rel = (f.get("rename") or f["ini"]).replace("/", "\\")
+        out.append(f"$p = Join-Path $g '{rel}'")
+        if "rename" in f:
+            to = f["to"]
+            out.append(f"$t = Join-Path (Split-Path $p) '{to}'")
+            out.append(f"if (Test-Path $p) {{ Rename-Item $p '{to}'; 'renamed ' + $p + ' to {to}' }} "
+                       f"elseif (Test-Path $t) {{ 'already ' + $t }} else {{ throw ('no ' + $p) }}")
+        else:
+            sec, key, val = f["section"], f["key"], f["value"]
+            out.append("if (-not (Test-Path $p)) { throw ('no ' + $p) }")
+            out.append("$l = [System.Collections.Generic.List[string]]([System.IO.File]::ReadAllLines($p)); $cur = ''; $hit = $false")
+            out.append(f"for ($i = 0; $i -lt $l.Count; $i++) {{ $t = $l[$i].Trim(); if ($t -match '^\\[(.+)\\]$') {{ $cur = $Matches[1].Trim(); continue }}; "
+                       f"if ($cur -eq '{sec}' -and $t -match '^{re.escape(key)}\\s*=') {{ $l[$i] = '{key}={val}'; $hit = $true; break }} }}")
+            out.append(f"if (-not $hit) {{ throw ('no {key} in [{sec}] of ' + $p) }}")
+            out.append(f"[System.IO.File]::WriteAllLines($p, $l); 'set {key}={val} in [{sec}] of ' + $p")
+    return "\n".join(out)
 
 
 def _iso(ts: float) -> str:

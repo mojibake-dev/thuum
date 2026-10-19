@@ -8,7 +8,7 @@
 # headshot rule's perk, which lives in the shooter's game).
 id: 25
 build: "fork m2-train-28 on the stage (not merged) with the essentials layer; the Apocalypse, freeze-fix and Headshot Kills layers"
-world: playtest-m2-24   # twenty-four's world, named after its restore
+world: playtest-m2-24-20261019T181352Z   # twenty-four's world, saved 11:13 PDT after its checklist
 hold:
   minutes: 180
   reason: "playtest twenty-five: the essentials layer and train-28 on the stage"
