@@ -57,7 +57,10 @@ legacy=${LEGACY_TAG:-parity-legacy}
 # found nothing, and T2 skipped the diff (2026-10-04).
 ref=${DIFFTEST_REF:-$(printf '%s' "$tag" | sed -E 's/-[0-9a-f]{8}$//')}
 sha=$(printf '%s' "$tag" | sed -nE 's/.*-([0-9a-f]{8})$/\1/p')
-dc="cd /srv/lab && TEST_TAG=$tag LEGACY_TAG=$legacy docker compose --profile difftest"
+# T2's settings are its own (server-settings-t2.json and the legacy copy, written below at its start): a
+# deploy during a run (the essentials layer's layer-stage, 2026-10-19 15:15) swapped the live file under the
+# server under test and broke the teleports session with 144 differences
+dc="cd /srv/lab && TEST_TAG=$tag LEGACY_TAG=$legacy SERVER_SETTINGS=/srv/lab/server/server-settings-t2.json LEGACY_SETTINGS=/srv/lab/server/server-settings-legacy.json docker compose --profile difftest"
 echo "== server under test: skymp-server:$tag; legacy stack: skymp-server:$legacy; difftest from $ref"
 
 # world/ belongs to the image's user (uid 1001): restore it from a root shell in
@@ -170,16 +173,26 @@ fi
 
 echo "== clean world, server under test"
 ssh_srv "$dc pull -q skymp-server-test skymp-server-legacy"
+# T2's inputs are the two stacks' alone, never a mod layer's (thuum-magnus, 2026-10-19): both run on
+# lab/deploy/sky-srv/server-settings-t2-load-order.json, the pre-layer load order pinned in the tree, with
+# every other key taken from the deployed stage's settings at T2's start (the bond's proc for a branch that
+# knows it), into server-settings-t2.json. The frozen legacy image could not load the essentials layer anyway
+# (its libespm matches master names by exact case, and USSEP spells them in lower case).
 # The legacy server refuses a light plugin by name ("'ccQDRSSE001-SurvivalMode.esl'
-# is not a valid esp or esm name", 2026-10-08): it runs on the lab's settings
+# is not a valid esp or esm name", 2026-10-08): it runs on those settings
 # without the .esl files, which keeps every full plugin's index, since the
 # server under test numbers light plugins apart (docs/verbs/light-plugins.md).
 # No session names a light plugin's form.
-ssh_srv "python3 - ${SERVER_SETTINGS:-/srv/lab/server/server-settings.json} /srv/lab/server/server-settings-legacy.json" <<'PY'
+ssh_srv "cat > /srv/lab/server/t2-load-order.json" < lab/deploy/sky-srv/server-settings-t2-load-order.json
+ssh_srv "python3 - /srv/lab/server/server-settings.json /srv/lab/server/t2-load-order.json /srv/lab/server/server-settings-t2.json /srv/lab/server/server-settings-legacy.json" <<'PY'
 import json, sys
-d = json.load(open(sys.argv[1]))
+deployed, pinned, t2, legacy = sys.argv[1:5]
+d = json.load(open(deployed))
+d["loadOrder"] = json.load(open(pinned))
+json.dump(d, open(t2, "w"), indent=2)
 d["loadOrder"] = [p for p in d["loadOrder"] if not p.lower().endswith(".esl")]
-json.dump(d, open(sys.argv[2], "w"), indent=2)
+json.dump(d, open(legacy, "w"), indent=2)
+print(f"   T2 settings: {len(json.load(open(t2))['loadOrder'])} plugins pinned (legacy {len(d['loadOrder'])}), the other keys the deployed stage's")
 PY
 stop_t2
 restore server-test/world

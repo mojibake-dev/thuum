@@ -1,0 +1,61 @@
+# Playtest twenty-six's seats (thuum ADR-040 item 6: `just playtest-setup 26`;
+# the checklist is docs/private/playtest-m2-26.md): the essentials layer's session. The essentials layer on train-28's stage,
+# twenty-five's world, twenty-five's seats. Under the layer Apocalypse loads at
+# 0x1A (its full-slot index in the layer's served order; Cloaks.esp at 0x0B, as
+# apocrypha read), so its ids are 0x1Axxxxxx. Everything here is server-side
+# (labCommand through playtest-console, set-percentages); the one thing a
+# seat types itself is test 1's `player.addperk 7934b` (Overdraw40, the
+# headshot rule's perk, which lives in the shooter's game).
+id: 26
+build: "fork m2-train-28 2f8839ec on the stage (not merged) with the essentials layer (thuum stage-layer-train28: the layer and the bond's proc); the Apocalypse, freeze-fix and Headshot Kills layers"
+world: playtest-m2-25-20261019T214234Z   # twenty-five's world, saved 14:42 PDT after its checklist
+hold:
+  minutes: 180
+  reason: "playtest twenty-six: the essentials layer on train-28's stage"
+camp:
+  # the camp's two teleports from playtest-start, only those (the script's
+  # half bars and ingredients would undo the rest)
+  teleports: playtest-start
+seats:
+  - profile: 1
+    name: "test 1 (rotfern; the bow and arrows are on it)"
+    spells:
+      - 0x1A00186D   # Shock Nova
+      - 0x1A05ECEE   # Battletide
+      - 0x1A109653   # Crackle
+      - 0x1A044D44   # Blood Boil
+      - 0x1A088694   # Azure Reconstruction
+      - 0x1A031C4D   # Shadowbond
+      - 0x1A01F1FB   # Decompose
+      - 0x1A124EC9   # Acceleration Rune
+      - 0x1A002878   # Lightning Strike
+      - 0x1A124EC7   # Thrumming Stone
+      - 0x0003AE9F   # Flame Cloak (the tome's spell, not the 0xDE511 hand variant)
+      - 0x0006796F   # Frost Rune
+      - 0x0005DB90   # Fire Rune
+      - 0x1A035452   # Finger of Death (figure-values makes its threshold real)
+    items:
+      - {id: 0x00012EB7, count: 1}   # Iron Sword (Skyrim.esm IronSword, esm.py 2026-10-19), for the figure hit check
+      - {id: 0x0B0147C6, count: 1}   # Cloaks of Skyrim's Cape - Whiterun (Cloaks.esp CloakShortWhiterun, local 0x0147C6 at the layer's 0x0B), for the cloak row
+    values:
+      Marksman: 60   # the headshot rule's floor; "Archery" does nothing on the server
+    percentages: {health: 1, magicka: 1, stamina: 1}
+    by_hand: "player.addperk 7934b once in game"
+  - profile: 2
+    name: "test 2"
+    spells:
+      - 0x1A088694   # Azure Reconstruction
+      - 0x1A00186D   # Shock Nova
+      - 0x00012FD0   # Firebolt (the staggered cast)
+      - 0x0003AE9F   # Flame Cloak
+    items:
+      - {id: 0x00012E4D, count: 1}   # Iron Helmet, for the helmeted headshot check
+      - {id: 0x0E00234B, count: 1}   # Winter Is Coming's cloak (1nivWICCloaks.esp 1nivCloakWolfSkinTrimBTimber, local 0x00234B at the layer's 0x0E), for the cloak row
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  # a set upward can revert within 2 s: read the bars back and set again if they did
+  readback: percentages
