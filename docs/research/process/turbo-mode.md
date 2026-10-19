@@ -47,7 +47,10 @@ plus `Flatrim_skymp5-client.js` alone (1 MiB; action.yml:369-381),
 `server-dist`, the SP nexus archive (150 MiB). `just build-client` downloads
 `dist`, or since 2026-10-19 the fork's own client-build job's `build/dist` from
 GitLab when sky-build built the commit (lab/tools/client-builds.py lists both
-sources). MpClientPlugin.dll is skymp-wire's cargo build copied
+sources; verified with job 8957 at 04dce744: a 188 MB zip with client/,
+server/ and papyrus-vm/ under build/dist, downloaded and laid in 13.5 s; the
+cold build took 24 min, a kept tree 8 to 10 min). MpClientPlugin.dll is
+skymp-wire's cargo build copied
 (skymp5-server/cpp/CMakeLists.txt:15-19; cmake/wire.cmake:21 names wire-bridge
 and wire-client-ffi on Windows): 73 crates, "Finished release in 27.67s" on
 the runner. The fork's own GitLab `client-build` job on a Windows shell runner
