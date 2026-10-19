@@ -1196,3 +1196,50 @@ half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.
   the server and the hits were refused (E_SPELL_NO_CAST at 01:48:49,
   01:49:55, 01:50:07 UTC).
 - Shock Nova beside player two ticked "xw" (asked what the w means).
+
+## The target by first hit (train-27, fork m2-train-27; built 2026-10-18 evening)
+
+- Rule: a cast whose every effect is delivered to its target (MGEF delivery
+  1 touch or 3 target actor; libespm MGEF::DATA::delivery at DATA 0x54, the
+  casting type at 0x50, UESP "Skyrim Mod:Mod File Format/MGEF", checked on
+  Flames (2) and Healing (0) against Skyrim.esm on sky-srv) is relayed to
+  the other games only at its first hit, with the target that hit names;
+  a cast that hits nobody within the cast window (17 s) is never relayed,
+  and a stream delivered to its target that ends before any hit relays
+  neither its start nor its end. Every other cast relays at once, as
+  before. Rung: R1 for the target (the caster's game reports the hit, the
+  server validates it against the recorded cast and the target's recorded
+  position before it names it); the sender's crosshair field stays a hint.
+- Why: the figure's cast in the target's own game lands on the player only
+  when the relay names it (remoteServer casts at its own player when named;
+  the class pass); the crosshair guess was 0 at every one of Eli's casts
+  (playtest twenty-three), so Shadowbond's script and Azure's look never
+  ran in player two's game. The hit path already names the target the
+  server trusts, one hop later; the figure's animation is cast-action's and
+  plays at once regardless.
+- Where: wire-rules casts.rs (CastFacts::lands_on_target; Casts::start
+  returns whether the relay waits; CastCheck::Claimed carries relay for the
+  first claim only, fire-and-forget and streams alike; five tests),
+  wire-bridge rules.rs (the fields through the FFI), PartOne::CastFactsFor
+  (the deliveries from the records), ActionListener::OnSpellCast
+  (pendingCastRelays per caster and hand; the stream's end drops an unsent
+  one) and OnHit (RelayCast at the claim with relay set, the target set to
+  the hit's). No wire field changes; the schema's SpellCastData.target doc
+  states the semantics (rule 4: the contract text moved in the commit).
+- Tests: T0 Rust (the five casts.rs tests), T0 server (unit/SpellCastTest
+  "A cast delivered to its target reaches the neighbour at its first hit":
+  dunHonningbrewSkeeverPoison 0x10FC22, no relay at the cast, one at the
+  hit with the target, none at a second hit), T2 difftest target-by-hit
+  (the legacy stack relays at once with target 0, the wire stack at the hit
+  with c2's id, declared), T3 b-cast-target-hit (to write: c1 casts a
+  target-actor spell at c2 from close with the server log's "relayed at its
+  first hit" line, and c2's own game shows the spell's effect on itself:
+  watched_self effects; Shadowbond's invisibility is the playtest claim).
+- Consequences: a touch or target-actor spell's look reaches the other
+  screens one hop after the hit (about the hit report's latency plus the
+  relay's); a miss shows nothing but the animation. Azure Reconstruction's
+  heal on a player is still the server's and still unconditional until
+  ADR-039's evaluator lands (its own row).
+- Status: built and pushed (fork m2-train-27, first commit); Rust T0 green
+  (176 + 17 tests); server T0 and T2 at the stage; T3 unwritten.
+
