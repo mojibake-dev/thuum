@@ -189,3 +189,37 @@ lobber, the rune).
   the spawn reproduces the cast-time throw without pitch, with the stack
   logged; the handlers made safe; then the observer's placement and the
   server's number read again.
+
+## The rune row, built (train-27, fork m2-train-27 2b4d5b27, 2026-10-18 evening)
+
+- The caster's client: MagicEffect.getProjectile threw at the rune's cast
+  (the agent's read of Skyrim Platform's sp3.js: wrapObject does
+  Object.create(sp[type].prototype) with the VM's own class name for the
+  returned form, PROJECTILE, a class with no natives that the list may not
+  carry; HYPOTHESIS until the probe's log line), and the throw ended the
+  spellCast handler. Now a throw counts as a projectile (every rune has
+  one), logged once per spell ("getProjectile threw for spell 6796f"), and
+  the cast waits for its launch as a target-location cast should. The hit
+  handler's "Bad call result 4" (kFailedAbort: a Papyrus call on a
+  projectile reference) came five times in the playtest, three before any
+  rune, so it is any projectile hit's; such a hit is dropped and logged
+  once, the handler goes on.
+- The server: a rune's hit comes when an actor trips it, minutes after the
+  cast, and the bolt window (17 s) refused it. libespm's PROJ now reads the
+  flags, the alternate trigger's proximity and timer and the explosion
+  (xEdit wbDefinitionsTES5.pas wbRecord PROJ, UESP agreeing; apocrypha's
+  read of the three runes: vanilla RuneFrostProjectile proximity 150, timer
+  0; Acceleration Rune 75, 0; Lightning Strike 0, 2.5); a cast whose
+  effect's projectile is a placed trigger (alternate trigger, a proximity,
+  no timer) claims its hit for ten minutes (kHazardWindowMs; the records
+  give no lifetime, PROJ Lifetime is 0 on all three, so the engine's own
+  rune persistence is HYPOTHESIS and the bound is ours).
+- What the probes read: x-rune-cast (the cast reaches the server with its
+  launch; c2's game launches the rune from the figure), then a two-seat
+  trip once the lab can aim down or a slope gives the rune a surface; the
+  observer's rune and the explosion's server number are the remaining
+  claims, Lightning Strike's stuck bolt beside them (HYPOTHESIS: the placed
+  strike activator's OnLoad never ran under the client's Papyrus event
+  block; apocrypha's census: thirteen of Apocalypse's placed activators
+  carry an OnLoad script).
+
