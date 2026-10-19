@@ -1000,6 +1000,9 @@ class Runner:
         identity = await self._game_identity(g)
         if identity:
             rec.games[client] = identity
+        if rec.scenario.solo:
+            # a solo run's game starts without skymp5-client (ADR-031), so no login follows; in game is the end
+            return True, f"{client} relaunched solo, in game"
         return await self._wait_online(rec, index, client, "relaunch")
 
     async def _game_identity(self, g: Guest) -> str:

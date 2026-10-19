@@ -1051,6 +1051,20 @@ class RelaunchSteps(RunTests):
         self.assertLess(at, relaunch, "the files change before the game starts again")
         self.assertTrue([n for n in body.get("notes", []) if "files before the relaunch" in n], body.get("notes"))
 
+    def test_a_solo_relaunch_ends_in_game_without_a_login(self):
+        """A solo run's game has no skymp5-client (ADR-031): the relaunch holds for the new process's poll and an
+        in-game dump-state, never for the server's online list, which a solo seat never joins."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        solo = RELAUNCH.replace("server: {snapshot: clean}\n", "server: {snapshot: clean}\nsolo: true\n").replace("  - c1: connect\n", "")
+        self.services.state.online = lambda client: False   # the solo seat never logs in
+        run_id, body = self._run(solo)
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s.get("action") == "relaunch")
+        self.assertIn("relaunched solo", str(step.get("note")), step)
+
     def test_relaunch_needs_a_managed_client(self):
         run_id, body = self._run(RELAUNCH)
         self.assertEqual(body["verdict"], "red", body)
