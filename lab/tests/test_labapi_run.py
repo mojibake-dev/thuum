@@ -250,6 +250,14 @@ artifacts: [trace]
         self.assertIn("trace-c1.json", body["artifacts"])
         self.assertFalse(any("unknown artifact" in n for n in body["notes"]), body["notes"])
 
+    def test_a_build_read_that_fails_is_noted_in_the_build_never_the_runs_failure(self):
+        self.services.system.server_image = ""   # docker inspect answers nothing
+        run_id, body = self._run(GREEN)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        result = json.loads((self.tmp / "results" / run_id / "result.json").read_text())
+        self.assertIn("error", result["build"]["server"])
+        self.assertNotIn("image", result["build"]["server"])
+
     def test_green_run_end_to_end(self):
         run_id, body = self._run(GREEN)
         self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
@@ -262,6 +270,8 @@ artifacts: [trace]
         self.assertEqual(result["verdict"], "green")
         for key in ("run", "scenario", "verdict", "started", "finished", "phases", "steps", "failures", "artifacts"):
             self.assertIn(key, result)
+        # the run names what it played: the server container's image reference and id
+        self.assertEqual(result["build"]["server"], {"image": "10.10.70.12:5000/skymp-server:parity", "id": "sha256:5e7ve7"})
         self.assertIn("server.log", result["artifacts"])
         self.assertIn("world-diff", result["artifacts"])
         self.assertIn("lab.pcap", result["artifacts"])
@@ -375,9 +385,11 @@ artifacts: [trace]
 
         asyncio.run(go())
         pve = self.services.control._b
-        self.assertEqual(pve.calls, [("stop", 711), ("rollback", 711, "clean-sp"), ("start", 711)])
+        # the snapshot list read last is the run's provenance: which snapshot, and its description
+        self.assertEqual(pve.calls, [("stop", 711), ("rollback", 711, "clean-sp"), ("start", 711), ("snapshots", 711)])
         self.assertTrue(rec.phases[0]["ok"], rec.phases)
         self.assertIn("unmanaged", rec.phases[0]["note"])
+        self.assertEqual(rec.build["clients"], {"c1": {"snapshot": "clean-sp", "description": ""}})
 
 
 @needs_deps

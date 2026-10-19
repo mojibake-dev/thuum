@@ -21,7 +21,7 @@ from .assertions import AssertionData, AssertionSyntax, Evaluator, clients_needi
 from .board import StepBoard
 from .config import Settings
 from . import mouse
-from .guests import Tables
+from .guests import Guest, Tables
 from .proxmox import GuestControl, ProxmoxError
 from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
 from .state import ServerState, StateError
@@ -147,6 +147,10 @@ class RunRecord:
     games: dict[str, str] = field(default_factory=dict)
     # the seats whose SKSE folder logs this run already fetched
     skse_fetched: set[str] = field(default_factory=set)
+    # what the run played (provenance): the server container's image reference
+    # and id, and each managed clone's snapshot with its description (verb-stage
+    # writes the branch, the client's commit and the date there)
+    build: dict[str, Any] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -160,6 +164,7 @@ class RunRecord:
             "milestone": self.scenario.milestone,
             "game": self.game,
             "games": self.games,
+            "build": self.build,
             "verdict": self.verdict,
             "started": self.started_at,
             "finished": self.finished_at,
@@ -450,6 +455,7 @@ class Runner:
                 # a run on another version's master files recreates the
                 # container (its mount changed); the same version only starts it
                 await asyncio.to_thread(self.system.run, self._compose("up", "-d", self.s.compose_service), env=env)
+                rec.build["server"] = await asyncio.to_thread(self._server_build, env)
                 host = "127.0.0.1"
             ready = await asyncio.to_thread(self.system.tcp_ready, host, self.s.server_ui_port, self.s.server_ready_timeout_s)
             if not ready:
@@ -584,6 +590,7 @@ class Runner:
                 # clone was still booting (run 20261001-233852: the phase passed
                 # at 74 s and c2 was not online 60 s later).
                 since = self._clock()
+                rec.build.setdefault("clients", {})[client] = await asyncio.to_thread(self._client_build, g)
             if not await self.board.wait_heartbeat(client, since, self.s.heartbeat_timeout_s):
                 raise RunnerError(f"E_RUN_NO_HEARTBEAT: {client} ({g.name}) did not poll within {self.s.heartbeat_timeout_s}s")
             return f"{client}={g.name}{'' if g.managed else ' (unmanaged, heartbeat only)'}"
@@ -1434,6 +1441,31 @@ class Runner:
 
     def _compose(self, *args: str) -> list[str]:
         return ["docker", "compose", "-f", self.s.compose_file, *args]
+
+    def _server_build(self, env: dict[str, str] | None = None) -> dict[str, str]:
+        """The server image this run plays, for result.json's build: the compose
+        service's container, its image reference and image id. A read that
+        fails is the answer's error, never the run's."""
+        try:
+            r = self.system.run(self._compose("ps", "-q", self.s.compose_service), env=env)
+            ids = (r.stdout or "").split()
+            if not ids:
+                return {"error": "no container for " + self.s.compose_service}
+            r = self.system.run(["docker", "inspect", "--format", "{{.Config.Image}} {{.Image}}", ids[0]])
+            ref, _, iid = (r.stdout or "").strip().partition(" ")
+            return {"image": ref, "id": iid} if ref else {"error": (r.stderr or "docker inspect said nothing").strip()[:200]}
+        except Exception as e:  # provenance never fails a run
+            return {"error": str(e)[:200]}
+
+    def _client_build(self, g: Guest) -> dict[str, str]:
+        """The snapshot a managed clone was rolled back to, with the description
+        its staging wrote, for result.json's build; never fails a run."""
+        try:
+            snaps = self.control.snapshot_list(g)
+            description = next((str(e.get("description") or "").strip() for e in snaps if e.get("name") == g.snapshot), "")
+            return {"snapshot": g.snapshot, "description": description}
+        except Exception as e:  # provenance never fails a run
+            return {"snapshot": g.snapshot, "error": str(e)[:200]}
 
 
 def _iso(ts: float) -> str:

@@ -642,6 +642,11 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    scenario waits for a condition rather than a `wait:` sized for the
    slowest case (the process plan's B7, 2026-10-13).
 6. Collects artifacts and writes result.json. Exit code is the verdict.
+   result.json's `build` names what the run played: `server`, the server
+   container's image reference and id (docker inspect after the rollback's
+   start), and `clients`, each managed clone's snapshot with the description
+   its staging wrote (the branch, the client's commit, the date). A read that
+   fails is an `error` there, never the run's failure.
 
 Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/

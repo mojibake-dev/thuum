@@ -131,6 +131,10 @@ class GuestControl:
             raise ProxmoxError(f"E_PVE_FILE_TOO_BIG: {path} on {guest.name} exceeds the 16 MiB guest-agent cap")
         return content
 
+    def snapshot_list(self, guest: Guest) -> list[dict[str, Any]]:
+        """The guest's snapshots as PVE lists them (name, parent, description), `current` included."""
+        return self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
+
     def rollback_sequence(self, guest: Guest, snapshot: str) -> None:
         """Disk-only rollback (docs/LAB.md): stop, rollback, start."""
         self.stop(guest)
