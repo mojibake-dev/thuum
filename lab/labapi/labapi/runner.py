@@ -695,7 +695,7 @@ class Runner:
         if step.action == "screenshot":
             return await self._screenshot(rec, index, step.client)
         if step.action == "relaunch":
-            return await self._relaunch(rec, index, step.client)
+            return await self._relaunch(rec, index, step.client, step.args.get("files"))
         if step.action == "frida":
             return await self._frida_start(rec, index, step.client, step.args)
         if step.action == "mouse":
@@ -948,7 +948,7 @@ class Runner:
                 return False, f"{len(failed)} of {len(step.assertions)} did not hold within {step.seconds:g}s" + (f" ({read})" if read else "")
             await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
-    async def _relaunch(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
+    async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, str]] | None = None) -> tuple[bool, str]:
         """relaunch: the player quits the game and starts it again, so its
         client loads a fresh generated save at the next login, as a player
         coming back another day does. A reconnect is not that: an in-game
@@ -966,6 +966,20 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return fail(f"E_RUN_RELAUNCH: {client} is not a managed client")
+        if files:
+            # the step's file changes, made in the run's game folder while the game is stopped: a DLL and an
+            # ini load at a launch (scenario._relaunch_args); the next run's rollback undoes them
+            script = _relaunch_files_ps(self.s.client_lab_dir, rec.game or self.s.game_default, files)
+            encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded],
+                                              self.s.guest_task_timeout_s)
+            except ProxmoxError as e:
+                return fail(f"E_RUN_RELAUNCH: {g.name}: the file changes: {e}")
+            if res.exitcode != 0:
+                return fail(f"E_RUN_RELAUNCH: {g.name}: the file changes: exit {res.exitcode}: {(res.err or res.out).strip()[:200]}")
+            done = " / ".join(ln.strip() for ln in res.out.splitlines() if ln.strip())
+            rec.notes.append(f"step {index}: {client} files before the relaunch: {done[:400]}")
         cmd = ["powershell", "-NoProfile", "-Command", self.s.relaunch_cmd]
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
@@ -1466,6 +1480,34 @@ class Runner:
             return {"snapshot": g.snapshot, "description": description}
         except Exception as e:  # provenance never fails a run
             return {"snapshot": g.snapshot, "error": str(e)[:200]}
+
+
+def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, str]]) -> str:
+    """A relaunch's file changes as one PowerShell script: the game stopped, then each change in the run's game
+    folder (<lab_dir>\\games\\<version>.txt names it), one line printed per change. The paths, names, sections, keys
+    and values are scenario._relaunch_args's, so none carries a quote."""
+    out = [
+        "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'",
+        "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3",
+        f"$g = (Get-Content '{lab_dir}\\games\\{game}.txt' -Raw).Trim()",
+    ]
+    for f in files:
+        rel = (f.get("rename") or f["ini"]).replace("/", "\\")
+        out.append(f"$p = Join-Path $g '{rel}'")
+        if "rename" in f:
+            to = f["to"]
+            out.append(f"$t = Join-Path (Split-Path $p) '{to}'")
+            out.append(f"if (Test-Path $p) {{ Rename-Item $p '{to}'; 'renamed ' + $p + ' to {to}' }} "
+                       f"elseif (Test-Path $t) {{ 'already ' + $t }} else {{ throw ('no ' + $p) }}")
+        else:
+            sec, key, val = f["section"], f["key"], f["value"]
+            out.append("if (-not (Test-Path $p)) { throw ('no ' + $p) }")
+            out.append("$l = [System.Collections.Generic.List[string]]([System.IO.File]::ReadAllLines($p)); $cur = ''; $hit = $false")
+            out.append(f"for ($i = 0; $i -lt $l.Count; $i++) {{ $t = $l[$i].Trim(); if ($t -match '^\\[(.+)\\]$') {{ $cur = $Matches[1].Trim(); continue }}; "
+                       f"if ($cur -eq '{sec}' -and $t -match '^{re.escape(key)}\\s*=') {{ $l[$i] = '{key}={val}'; $hit = $true; break }} }}")
+            out.append(f"if (-not $hit) {{ throw ('no {key} in [{sec}] of ' + $p) }}")
+            out.append(f"[System.IO.File]::WriteAllLines($p, $l); 'set {key}={val} in [{sec}] of ' + $p")
+    return "\n".join(out)
 
 
 def _iso(ts: float) -> str:

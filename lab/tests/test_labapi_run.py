@@ -1026,6 +1026,31 @@ class RelaunchSteps(RunTests):
         self.assertIn("Stop-Process", relaunches[0])
         self.assertTrue([n for n in body.get("notes", []) if "relaunched" in n], body.get("notes"))
 
+    def test_a_relaunch_changes_its_files_in_the_stopped_game_first(self):
+        """The essentials layer's FSMP off and vsync off readings: a DLL renamed and an ini key set in the run's
+        game folder while the game is stopped, then the relaunch as always."""
+        import base64
+
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        files = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {files: [{rename: Data/SKSE/Plugins/hdtsmp64.dll, to: hdtsmp64.dll.off}, "
+                                 "{ini: Data/SKSE/Plugins/SSEDisplayTweaks.ini, section: Render, key: EnableVSync, value: false}]}\n")
+        run_id, body = self._run(files)
+        self.assertEqual(body["verdict"], "green", body)
+        execs = [c[2] for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        at = next(i for i, c in enumerate(execs) if "-EncodedCommand" in c and "Rename-Item" in base64.b64decode(c[-1]).decode("utf-16-le"))
+        script = base64.b64decode(execs[at][-1]).decode("utf-16-le")
+        self.assertIn("Stop-Process", script)
+        self.assertIn("1.6.1170.txt", script)
+        self.assertIn("Data\\SKSE\\Plugins\\hdtsmp64.dll", script)
+        self.assertIn("'EnableVSync=false'", script)
+        relaunch = next(i for i, c in enumerate(execs) if "sky-lab-launch" in " ".join(c))
+        self.assertLess(at, relaunch, "the files change before the game starts again")
+        self.assertTrue([n for n in body.get("notes", []) if "files before the relaunch" in n], body.get("notes"))
+
     def test_relaunch_needs_a_managed_client(self):
         run_id, body = self._run(RELAUNCH)
         self.assertEqual(body["verdict"], "red", body)
