@@ -57,8 +57,11 @@ echo "== 1. the Windows build of $sha8"
 dist_sha=$sha; overlay=
 if [ "${REUSE_DIST:-}" = 1 ]; then
   server_only='^(skymp5-server/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
-  while read -r rid rsha; do
-    [ -n "$rid" ] && [ "$rsha" != "$sha" ] || continue   # the head's own run is the wait below
+  # the builds walked are both sources' (lab/tools/client-builds.py: the fork's client-build job on sky-build and
+  # the mirror's Parity Windows run, newest first, GitLab first for a commit both built); step 7's `just build-client`
+  # downloads from whichever source built the commit it is given
+  while read -r rsrc rid rsha; do
+    [ -n "$rid" ] && [ "$rsha" != "$sha" ] || continue   # the head's own build is the wait below
     git -C "$fork" cat-file -e "$rsha^{commit}" 2>/dev/null || continue
     git -C "$fork" merge-base --is-ancestor "$rsha" "$sha" || continue
     changed=$(git -C "$fork" diff --name-only "$rsha" "$sha")
@@ -66,20 +69,24 @@ if [ "${REUSE_DIST:-}" = 1 ]; then
     if [ -z "$(printf '%s\n' "$client" | grep -v '^$' | grep -Ev '^skymp5-client/src/' || true)" ]; then
       dist_sha=$rsha
       if [ -z "$client" ]; then
-        echo "   REUSE_DIST: run $rid at ${rsha:0:8} has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
+        echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8} has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
       else
         overlay=1
-        echo "   REUSE_DIST: run $rid at ${rsha:0:8}, then $(printf '%s\n' "$client" | grep -c .) TypeScript file(s) in skymp5-client/src: its dist, with skymp5-client.js built here at $sha8 over it (step 7)"
+        echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8}, then $(printf '%s\n' "$client" | grep -c .) TypeScript file(s) in skymp5-client/src: its dist, with skymp5-client.js built here at $sha8 over it (step 7)"
       fi
       break
     fi
-  done < <(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch "$branch" --status success --limit 30 \
-             --json databaseId,headSha --jq '.[] | "\(.databaseId) \(.headSha)"')
-  [ "$dist_sha" != "$sha" ] || echo "   REUSE_DIST: no earlier run has this head's client; waiting for its own"
+  done < <(python3 lab/tools/client-builds.py "$branch")
+  [ "$dist_sha" != "$sha" ] || echo "   REUSE_DIST: no earlier build has this head's client; waiting for its own"
 fi
 reruns=0
 for i in $(seq 1 120); do
   [ "$dist_sha" = "$sha" ] || { st=completed; con=success; break; }
+  # the fork's own client-build job (sky-build) counts as the head's build when it has succeeded, whatever the
+  # mirror's run is doing; the mirror's run is dispatched and reread as before
+  if [ -n "$(python3 lab/tools/client-builds.py "$branch" --sha "$sha" --source gitlab 2>/dev/null | head -1)" ]; then
+    echo "   GitLab client-build of $sha8 ok $(date +%H:%M:%S)"; st=completed; con=success; break
+  fi
   line=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch "$branch" --limit 10 \
            --json databaseId,headSha,status,conclusion --jq ".[] | select(.headSha==\"$sha\") | \"\(.databaseId) \(.status) \(.conclusion)\"" | head -1)
   if [ -z "$line" ]; then

@@ -52,17 +52,28 @@ test: build-image
 build-client branch=client_branch sha="":
     #!/usr/bin/env bash
     set -euo pipefail
-    # the run built from `sha` when given (verb-stage passes its head), else the branch's newest successful one: the
-    # newest is the wrong build whenever a later push on the branch built first (m2-cast-action's 0ce34196 was laid over
-    # abe44a55 by hand so, 2026-10-15)
+    # the build of `sha` when given (verb-stage passes its head), else the branch's newest successful one: the newest is
+    # the wrong build whenever a later push on the branch built first (m2-cast-action's 0ce34196 was laid over abe44a55
+    # by hand so, 2026-10-15). Two sources build the same dist from the same commit (lab/tools/client-builds.py): the
+    # fork's client-build job on sky-build (GitLab, artifact build/dist; since 2026-10-19) and the mirror's Parity
+    # Windows run (GitHub, artifact dist); GitLab is taken when both have the commit.
     sha="{{sha}}"
-    pick=$(gh run list -R mojibake-dev/skymp --workflow parity-windows.yml --branch {{branch}} --status success --limit 30 \
-             --json databaseId,headSha --jq "[.[] | select(.headSha | startswith(\"$sha\"))][0] | if . == null then \"\" else \"\(.databaseId) \(.headSha[0:8])\" end")
-    test -n "$pick" || { echo "no successful Parity Windows run on the mirror for branch {{branch}}${sha:+ at $sha} yet"; exit 1; }
-    run=${pick%% *}; built=${pick#* }
+    pick=$(python3 lab/tools/client-builds.py {{branch}} ${sha:+--sha "$sha"} | head -1)
+    test -n "$pick" || { echo "no successful client build (GitLab client-build or the mirror's Parity Windows run) for branch {{branch}}${sha:+ at $sha} yet"; exit 1; }
+    read -r src id built <<<"$pick"; built=${built:0:8}
     rm -rf {{skymp}}/build/dist-client && mkdir -p {{skymp}}/build/dist-client
-    gh run download "$run" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client
-    echo "run $run ($built) -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
+    case "$src" in
+      github) gh run download "$id" -R mojibake-dev/skymp -n dist -D {{skymp}}/build/dist-client ;;
+      gitlab)
+        tok=$(security find-generic-password -s gitlab-thuum-readapi -a skymp -w)
+        tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+        curl -fsS -m 600 -H "PRIVATE-TOKEN: $tok" -o "$tmp/dist.zip" "https://gitlab.gaussing.tv/api/v4/projects/${GITLAB_PROJECT:-7}/jobs/$id/artifacts"
+        (cd "$tmp" && unzip -q dist.zip)
+        # the job's artifact path is build/dist: lay its contents where the mirror's artifact lands (client/ at the top)
+        cp -a "$tmp/build/dist/." {{skymp}}/build/dist-client/ ;;
+      *) echo "unknown build source $src"; exit 1 ;;
+    esac
+    echo "$src $id ($built) -> {{skymp}}/build/dist-client (client/ is what a lab client needs)"; ls {{skymp}}/build/dist-client
 
 # T2 on sky-srv (ADR-019): the server build SERVER_TAG (default the lab's) from the clean world, the fakeclient smoke checked through labState, then difftest's sessions against the legacy RakNet stack (LEGACY_TAG, default parity-legacy); lab/tools/test-proto.sh.
 test-proto tag="":
