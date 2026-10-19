@@ -1603,7 +1603,7 @@ what changed, move it one hop, let the seat take it) and a path today:
 | (c) wire schema (wire-schema, wire-json, wire-validate, wire-transport, wire-codec, wire-client-ffi) | both ends: the image, and MpClientPlugin.dll, which the Windows build makes from cargo (skymp5-server/cpp/CMakeLists.txt:15-19; cmake/wire.cmake:21; skymp-wire/crates/wire-client-ffi/Cargo.toml:17-20); a stale seat fails closed, since the netcode protocol id carries SCHEMA_VERSION (skymp-wire/crates/wire-transport/src/lib.rs:186-190) and the validator refuses the Hello (wire-validate/src/lib.rs:23, :549) | the Windows and the server build in parallel, the dist laid, a relaunch: 25 to 45 min | the Windows build cached (ADR-040 item 3, aiming under 15): 15 to 20 min, estimated | cargo builds the crates in 28 s on the runner; a DLL-only lay would give (b)'s shape plus a relaunch, about 5 min, estimated; no tooling for it |
 | (d) Skyrim Platform native (skyrim-platform/src) | SkyrimPlatform.dll and SkyrimPlatformImpl.dll inside the 179 MiB dist | the Windows build, client-dist, a relaunch: 25 to 45 min | a warm builder: the fork's `client-build` job on a Windows shell runner exists and has never run (skymp/.gitlab-ci.yml:151-182, gated on CLIENT_BUILD_WINDOWS); on a kept tree MSBuild rebuilds SP's objects only: 5 to 10 min, estimated | that build, the lay, a relaunch: about 5 min, estimated |
 | (e) scenario or probe only | a YAML into lab-api | `just lab-run <path>`, 2 to 4 min when the lab is free | none needed | not a live class: a run rolls both seats back, and under a playtest hold it is refused (docs/LAB.md:384) |
-| (f) mod layer (persist-mods, the load orders) | plugins into every game folder, the server's load order | layer-stage's steps 2 to 5 (lab/tools/layer-stage.sh:70-97): 5 to 7 min measured with the smoke included, then the seats' relaunch | the same without the snapshots and the smoke: about 5 min, estimated | the same |
+| (f) mod layer (persist-mods, the load orders) | plugins into every game folder, the server's load order | layer-stage's steps 2 to 5 (lab/tools/layer-stage.sh:70-97): 5 to 7 min measured with the smoke included, for the Apocalypse layer's few hundred files, then the seats' relaunch; add-mods scales with the files, and the essentials layer moves 6,195 a clone, unmeasured | the same without the snapshots and the smoke: about 5 min, estimated | the same |
 
 What today's shape adds above the floors is not the checks but their
 placement and grain: a one-file change rides a half-hour build, the stage
@@ -1629,7 +1629,10 @@ the acceptance stages moved behind the session instead of removed.
    else: no snapshot, no promotion, no run, no stream opened.
 2. **What flows, and how.** Every path ends with both seats back on the
    server's online list, read as `_wait_online` reads it (runner.py:816-823).
-   (a) TypeScript client: `yarn build` in the fork checkout; `just
+   (a) TypeScript client: `yarn build` in the fork checkout's skymp5-client
+   (its Skyrim Platform typings are the npm package @skyrim-platform/skyrim-platform
+   in node_modules, skymp5-client/tsconfig.json:15, so no C++ configure is needed,
+   only one `yarn install`); `just
    turbo-client` lays skymp5-client.js into every game folder of both clones
    the way client-driver.sh lays lab-driver.js, keeping the file it replaces;
    the seats relaunch. Once a lab measurement shows skymp5-client whole
@@ -1637,9 +1640,15 @@ the acceptance stages moved behind the session instead of removed.
    (b) Server: the branch pushed, the fork's server-build the one wait (its
    ctest is T0 and stays: ADR-040's three red heads were compile errors and
    tests that had never run); `just turbo-srv <branch>-<sha8>` sets
-   SERVER_TAG and runs `compose pull && up -d` as verb-stage.sh:157 does; the
+   SERVER_TAG and runs `compose pull && up -d` as verb-stage.sh:157 does, for
+   skymp-server alone: that line also pulls and restarts lab-api, whose hold
+   lives in its memory (a restart drops it, and verb-stage's step 6 takes it
+   again), and a live session has no reason to restart it; the
    seats reconnect by themselves. A gamemode-only change is `just
-   deploy-srv`; the watcher does the rest (index.ts:151-179).
+   deploy-srv`; the watcher does the rest (index.ts:151-179). deploy-srv also
+   writes the server's settings files, which the server reads only at its
+   start, so a settings change is a server push with the restart, not the
+   watcher's.
    (c) Wire schema: both ends in one commit (rule 4); the server as (b), the
    client as (d); the seats relaunch after both are in place, never between
    (a seat on the old client fails closed, correct and useless mid-session).
@@ -1657,8 +1666,8 @@ the acceptance stages moved behind the session instead of removed.
    (rule 13 and the scenario-gate job, .gitlab-ci.yml:99-134); the first
    build of a new verb's message (a new wire id lands through a stage with
    T2's differential oracle, ADR-010; a turbo push may fix an existing
-   message, never add one); the game, SKSE, Skyrim Platform's build or the
-   driver stack, which ADR-030 reserves for a full sweep before promotion.
+   message, never add one); the game, SKSE, an upstream Skyrim Platform version (item 2's (d) is the
+   fork's own Skyrim Platform source) or the driver stack, which ADR-030 reserves for a full sweep before promotion.
 4. **What is recorded.** Every push gets a line in docs/LOG.md's playtest
    entry when it lands: the class, the head (sha8, fork or thuum), what it
    replaced, and the minutes from the ask to the seats playable. The pushes
