@@ -791,6 +791,31 @@ class _ClientRef:
         best, origin = self._watched_figure(other, data.get("actors") or [])
         if best is None:
             raise AssertionData(f"{self.name} watched no actor where the server has {other}")
+        return self._watch_view(best, origin, f"{self.name}'s watch of {other}")
+
+    def watched_id(self, form_id: int) -> WatchView:
+        """The watched actor with this form id, as the watcher's own game has
+        it: for a cell's own NPC in a solo reference (watch-start {formIds}),
+        where no server position exists to match against. Positions are the
+        client's own coordinates (no cell origin is subtracted)."""
+        fn = getattr(self._views, "watch", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a watch-stop yet")
+        wanted = int(form_id)
+        best = None
+        for e in data.get("actors") or []:
+            try:
+                if int(e.get("formId")) == wanted:
+                    best = e
+                    break
+            except (AttributeError, TypeError, ValueError):
+                continue
+        if best is None:
+            raise AssertionData(f"{self.name} watched no actor with form id {wanted:#x}")
+        return self._watch_view(best, (0.0, 0.0, 0.0), f"{self.name}'s watch of {wanted:#x}")
+
+    def _watch_view(self, best: dict[str, Any], origin: tuple[float, float, float], label: str) -> WatchView:
         try:
             first = best["first"]
             series = best.get("magicka") or []
@@ -810,7 +835,7 @@ class _ClientRef:
                 flights=_rows(best.get("flights"), 8),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
-            raise AssertionData(f"{self.name}'s watch of {other} lacks {e}") from e
+            raise AssertionData(f"{label} lacks {e}") from e
 
     def watched_self(self) -> SelfWatchView:
         """The player's own side of the client's last watch."""
@@ -1112,7 +1137,7 @@ _NUMBER_METHODS = {
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison"},
+    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
 _FORM_SPEC_METHODS = {
@@ -1130,7 +1155,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time"},
-    _ClientRef: {"sees", "view", "watched", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "preset", "printed", "head_parts"},
     InventoryView: {"count"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "movedBy", "launched", "flights_match"},
