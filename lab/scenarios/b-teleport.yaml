@@ -1,7 +1,7 @@
 # M2, cast-teleport (docs/verbs/cast-teleport.md): a teleport a player casts
 # lands it where it aimed and stands at the server's word. c1 learns Lost
-# Grimoire's Teleportation from the server (LostGrimoire.esp SPEL 0A86DF at
-# full slot 0B of the lab's load order: 0x0B0A86DF, 185239263; the server's
+# Grimoire's Teleportation from the server (LostGrimoire.esp SPEL 0A86DF,
+# named as a FormDesc so its slot is the run's load order's; the server's
 # castTeleports names it), gets the magicka to cast it (the console's setav,
 # the server's), equips it, and casts it level at c2, who stands 600 units
 # down the level strip south of the lab spawn: a target-location cast stops
@@ -28,7 +28,7 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: learn-spell {spellId: 185239263}
+  - c1: learn-spell {spellId: "0a86df:LostGrimoire.esp"}
   - c1: console {text: "player.setav magicka 3000"}
   - wait: 2
   - c1: set-percentages {magicka: 1}

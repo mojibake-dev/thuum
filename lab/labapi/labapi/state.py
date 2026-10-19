@@ -129,6 +129,12 @@ class ServerState:
                 payload["baseId"] = int(self.base_id(str(args["item"])))
             except KeyError as e:
                 raise StateError(f"E_STATE: {e}") from e
+        if action == "learn-spell" and isinstance(args.get("spellId"), str):
+            # a mod's spell as a FormDesc, "0a86df:LostGrimoire.esp", through the run's load order
+            try:
+                payload["spellId"] = int(self.base_id(args["spellId"]))
+            except KeyError as e:
+                raise StateError(f"E_STATE: {e}") from e
         body = self._backend.rpc("labCommand", payload)
         if not body.get("ok"):
             raise StateError(f"E_STATE: {action} for {client} refused: {body.get('error', 'no reason')}")
