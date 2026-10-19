@@ -3,9 +3,9 @@
 # persist-mods`) onto a clone, into every game folder it keeps, with its
 # plugins enabled (add-mods.ps1). sky-srv serves /srv/persist/mods inside VLAN
 # 70 through a throwaway HTTP server, as client-game.sh serves the depots.
-# Run after `just client-dist <vmid>`, which stages add-mods.ps1. Ends in a
-# snapshot of the clone (a stacked clean-m1-<x>); lab-api's rollback erases it
-# otherwise.
+# The task runs this tree's add-mods.ps1 (as a script block), so a change to
+# it needs no client-dist first. Ends in a snapshot of the clone (a
+# stacked clean-m1-<x>); lab-api's rollback erases it otherwise.
 set -euo pipefail
 vmid=${1:?vmid}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
@@ -18,6 +18,8 @@ sleep 1
 # a one-shot SYSTEM task (guest-task.sh): the guest agent's exec can end
 # before a long script does
 here=$(cd "$(dirname "$0")/../.." && pwd)
+script=$(cat "$here/lab/deploy/sky-client/add-mods.ps1")
 "$here/lab/tools/guest-task.sh" "$vmid" add-mods "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force
-if (-not (Test-Path 'C:\\sky-lab\\add-mods.ps1')) { throw 'no C:\\sky-lab\\add-mods.ps1 (just client-dist)' }
-& 'C:\\sky-lab\\add-mods.ps1' -From 'http://$srv_ip:$port'" 20
+& {
+$script
+} -From 'http://$srv_ip:$port'" 20

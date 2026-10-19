@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""load-order-check.py <mods dir> <server-settings.json>: the load order the clients will enable, checked against the
+server's before deploy-srv (layer-stage step 2b). It runs where persist's mods/ is, on sky-srv, read from stdin
+(`python3 - <mods dir> <settings>`), because the plugins it reads the headers of live there.
+
+The clients enable <mods dir>/plugins.txt after the masters and the Creation Club plugins (add-mods.ps1). The engine
+sorts every master-type plugin (an .esm or .esl, or the ESM flag 0x1 in its TES4 header) before the rest, keeping the
+listed order within each group, and gives a light plugin (an .esl, or the ESL flag 0x200) the next FE slot and every
+other plugin the next full slot (UESP, "Skyrim Mod:Mod File Format"; libespm reads light the same way, Combiner.cpp).
+A form id carries its plugin's slot, so each plugin the server loads must sit on the slot the clients' engine gives
+it. The base entries (the server's loadOrder entries with no file under <mods dir>: the masters, the Creation Club
+plugins, _ResourcePack.esl) are taken as the clients load them, in the server's order (x-light-probe, run
+20261008-101512, matched the Creation Club lights to Skyrim.ccc's order). Refused, exit 1:
+  - an enabled plugin with a master that is neither a base entry nor enabled before it: the engine never finishes
+    booting (the essentials layer, 2026-10-19: LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp over a
+    patch whose Creation Club master the lab lacks, SkyrimSE.exe+01D74A0 on InitTESThread on both clones);
+  - a plugin the server loads that the clients do not enable, or enable on another slot (a client-only plugin that
+    sorts before a served one of its kind shifts it: TrueHUD.esl, an .esl and so a master, took FE004 on the clients
+    the same night);
+  - a server list the engine's master-first sort would reorder;
+  - two copies of one plugin under <mods dir> (the clients' Data keeps one of them).
+"""
+from __future__ import annotations
+
+import json
+import os
+import struct
+import sys
+from pathlib import Path
+
+ESM, ESL = 0x1, 0x200
+
+
+def header(path: Path) -> tuple[int, list[str]]:
+    """A plugin's TES4 record flags and its masters (MAST fields), in order."""
+    with open(path, "rb") as f:
+        h = f.read(24)
+        if h[:4] != b"TES4":
+            raise ValueError(f"{path}: not a TES4 plugin")
+        size, flags = struct.unpack("<II", h[4:12])
+        data = f.read(size)
+    masters, i = [], 0
+    while i + 6 <= len(data):
+        typ, n = data[i:i + 4], struct.unpack("<H", data[i + 4:i + 6])[0]
+        if typ == b"MAST":
+            masters.append(data[i + 6:i + 6 + n].rstrip(b"\0").decode("cp1252"))
+        i += 6 + n
+    return flags, masters
+
+
+def is_master(name: str, flags: int) -> bool:
+    return name.lower().endswith((".esm", ".esl")) or bool(flags & ESM)
+
+
+def is_light(name: str, flags: int) -> bool:
+    return name.lower().endswith(".esl") or bool(flags & ESL)
+
+
+def slots(order: list[str], flags: dict[str, int]) -> tuple[list[str], dict[str, str]]:
+    """The engine's order (master-type first) and each plugin's slot in it: 'xx' for a full one, 'FExxx' for a light."""
+    f = lambda n: flags.get(n.lower(), 0)
+    engine = [n for n in order if is_master(n, f(n))] + [n for n in order if not is_master(n, f(n))]
+    out, full, light = {}, 0, 0
+    for n in engine:
+        if is_light(n, f(n)):
+            out[n.lower()] = f"FE{light:03X}"; light += 1
+        else:
+            out[n.lower()] = f"{full:02X}"; full += 1
+    return engine, out
+
+
+def check(mods: Path, settings: Path) -> tuple[list[str], str]:
+    served = [Path(p).name for p in json.loads(settings.read_text())["loadOrder"]]
+    enabled = [ln.strip() for ln in (mods / "plugins.txt").read_text(encoding="utf-8").splitlines()
+               if ln.strip() and not ln.strip().startswith("#")]
+    enabled = [n[1:] if n.startswith("*") else n for n in enabled]
+    files: dict[str, list[Path]] = {}
+    for d, _, fs in os.walk(mods):
+        for name in fs:
+            if name.lower().endswith((".esp", ".esm", ".esl")):
+                files.setdefault(name.lower(), []).append(Path(d) / name)
+    problems = []
+    for k, ps in sorted(files.items()):
+        ps.sort()
+        if len(ps) > 1:
+            problems.append(f"two copies of {ps[0].name}: " + ", ".join(str(p.relative_to(mods)) for p in ps))
+    base = [n for n in served if n.lower() not in files]
+    flags: dict[str, int] = {}
+    masters: dict[str, list[str]] = {}
+    for n in enabled + served:
+        ps = files.get(n.lower())
+        if ps and n.lower() not in flags:
+            flags[n.lower()], masters[n.lower()] = header(ps[0])
+    for n in enabled:
+        if n.lower() not in files and n.lower() not in {b.lower() for b in base}:
+            problems.append(f"{n} is enabled but no mod under {mods} holds it")
+    client = base + [n for n in enabled if n.lower() not in {b.lower() for b in base}]
+    engine, cslot = slots(client, flags)
+    # a plugin loads only when every master is a base entry or a plugin that loads before it; the engine disables
+    # one whose master is not in Data at all, and a plugin over a master it disabled stops the boot (both seen on
+    # 2026-10-19), so neither may be enabled
+    loads = {b.lower() for b in base}
+    for n in engine:
+        missing = [m for m in masters.get(n.lower(), []) if m.lower() not in loads]
+        if not missing:
+            loads.add(n.lower())
+        for m in missing:
+            if m.lower() not in files:
+                problems.append(f"{n} needs {m}, which no mod holds: the engine disables {n}")
+            else:
+                problems.append(f"{n} needs {m}, which does not load before it: the clients' engine stops booting")
+    sengine, sslot = slots(served, flags)
+    if [n.lower() for n in sengine] != [n.lower() for n in served]:
+        problems.append("the server's loadOrder is not in the engine's order (master-type plugins first)")
+    for n in served:
+        c = cslot.get(n.lower())
+        if c is None:
+            problems.append(f"{n} is on the server, not enabled on the clients")
+        elif c != sslot[n.lower()]:
+            problems.append(f"{n} is on slot {c} on the clients and {sslot[n.lower()]} on the server")
+    light = sum(1 for v in cslot.values() if v.startswith("FE"))
+    summary = (f"load order: {len(client)} on the clients ({len(client) - light} full, {light} light), "
+               f"{len(served)} on the server, every served plugin on the clients' slot")
+    return problems, summary
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 2:
+        print(__doc__.split("\n\n")[0], file=sys.stderr)
+        return 2
+    problems, summary = check(Path(argv[0]), Path(argv[1]))
+    for p in problems:
+        print(p)
+    print(summary if not problems else f"{len(problems)} load-order problem(s)")
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
