@@ -146,10 +146,14 @@ MoveTo instant, the report cadence 130 ms).
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated (the records and the script, apocrypha 2026-10-18)
-- [ ] server logic + T0
-- [ ] message + validator (same commit): no new message
+- [x] server logic + T0 (fork m2-train-27 4b126048: wire-rules bonds with
+      three tests; PartOne::SetBondSettings, IsBondSpell, RecordBond,
+      BreakBondsOf; EndConcealment breaking the acting actor's bond; OnHit
+      recording it at the claim; unit/BondTest, three cases; the lab's
+      server-settings name Shadowbond on thuum lab-bonds-setting)
+- [x] message + validator (same commit): no new message
 - [ ] native hook + T1: none
-- [ ] TS handler: none new
+- [x] TS handler: none new (the first-hit relay and the snap carry it)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
