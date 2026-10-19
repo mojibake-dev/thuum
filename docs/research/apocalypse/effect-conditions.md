@@ -161,12 +161,38 @@ turned player mortal until vampirism and lycanthropy are declared state
   race's and the base record's KWDA; a player's race keywords), IsUndead
   715 (ActorTypeUndead 0x13796 by the same read; a player's vampirism waits
   on its M5 verb), HasMagicEffectKeyword 699 (the running effects' records),
-  IsCommandedActor 700 (false until summons exist). Left to refuse and log:
-  HasPerk 448 (no perk record before M5: the Impact rider is refused where
-  it was skipped), GetGlobalValue 74 (the recorded globals could answer, but
-  an unrecorded one has no "unknown" return yet), IsHostileToActor 719 (the
-  fights record is symmetric; a directional read waits).
-- Tests: unit/EffectConditionsTest: Firebolt's rider refused on another
+  IsCommandedActor 700 (false until summons exist), IsHostileToActor 719
+  (added the same night, below). Left to refuse and log: HasPerk 448 (no
+  perk record before M5: the Impact rider is refused where it was skipped),
+  GetGlobalValue 74 (the recorded globals could answer, but an unrecorded
+  one has no "unknown" return yet).
+- IsHostileToActor 719, found by the first T0 run of the set (fork CI 1987,
+  2026-10-18 21:37 PDT): the vanilla cloaks' damage effect (FlameCloakDmg
+  0x2B385's FireDamageConcAimedCloak 0x10CBDD) gates on it, so the
+  second-hand verb's oracle (unit/SecondHandTest: a cloak's proc claimed
+  against its cast damages the target) was refused as E_CONDITION_UNKNOWN
+  and its damage went to zero. That is the engine's rule second-hand.md
+  measured and could not separate from the hostility relay (x-second-hand-
+  cloak, b-cloak-apply: no fight, no hit; one Firebolt first, every tick
+  claimed): the gate is the effect's own condition. Built from ADR-023's
+  record: wire-rules Fights::between (symmetric, as the record is; "is the
+  subject hostile to the other" reads as "are they in a fight"), through
+  the bridge into WorldState::fightBetween, which PartOne installs; the
+  evaluator context names the effect's pair (victim and caster), and the
+  function answers for the other end of the effect (a CTDA naming a third
+  actor as its parameter is not read; HYPOTHESIS that none in the masters
+  does). For the other callers (a perk's or a recipe's conditions) it
+  answers true, the evaluator's old answer for a function it lacked, until
+  they name their pair. With it, one rule in OnSpellHit: a spell hit whose
+  every effect its conditions refuse begins no fight, since the engine never
+  reports a cloak's proc on a peaceful neighbour at all. A refused proc
+  report still spends its claim's cadence (the claim precedes the judgment);
+  no engine ever sends one, so the only reader of that detail is a forged
+  report. HasPerk 448 still refuses the cloak's IntenseFlames rider 0xF392F,
+  as it should before M5.
+- Tests: unit/SecondHandTest: the cloak's proc counts within a fight
+  another hit began, and a proc on a neighbour not in a fight is refused and
+  begins none. unit/EffectConditionsTest: Firebolt's rider refused on another
   player while its fire damage holds; Azure Reconstruction's shape
   (IsCommandedActor == 1 on the Subject, then GetActorValuePercent < 1 with
   the OR flag) refused on a player; IsActor, GetDead and HasKeyword
