@@ -22,6 +22,7 @@ from .board import StepBoard
 from .config import Settings
 from . import mouse
 from .guests import Guest, Tables
+from . import slots as plugin_slots
 from .proxmox import GuestControl, ProxmoxError
 from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
 from .state import ServerState, StateError
@@ -180,6 +181,8 @@ class Runner:
     def __init__(self, settings: Settings, tables: Tables, control: GuestControl, system: System, state: ServerState, board: StepBoard, clock=time.monotonic, wall=time.time):
         self.s = settings
         self.tables = tables
+        # a FormDesc form name outside a run (a probe, a lab command) resolves on the default version
+        self._refresh_slots(self.s.game_default)
         self.control = control
         self.system = system
         self.state = state
@@ -355,6 +358,19 @@ class Runner:
         traces); a clone booting for anything else gets the multiplayer game."""
         return self.active is not None and self.active.scenario.solo and client in self.active.scenario.clients
 
+    def _refresh_slots(self, version: str) -> int | None:
+        """The version's load order (its settings file and the master files the server mounts) as the slots
+        every FormDesc form name resolves through, `<local hex>:File.esp` (guests.Tables.base_id):
+        the plugins' count, or None when the files cannot be read and no such name resolves."""
+        settings, esm = self.s.game_settings_files().get(version), self.s.game_versions().get(version)
+        try:
+            new = plugin_slots.for_settings(Path(settings), Path(esm)) if settings and esm else None
+        except (OSError, ValueError, KeyError):
+            new = None
+        self.tables.slots.clear()
+        self.tables.slots.update(new or {})
+        return len(new) if new else None
+
     def _compose_env(self, rec: RunRecord) -> dict[str, str]:
         """The run's master files and settings file for the server container
         (the compose file's ESM_DIR and SERVER_SETTINGS): docker compose takes
@@ -460,7 +476,11 @@ class Runner:
             ready = await asyncio.to_thread(self.system.tcp_ready, host, self.s.server_ui_port, self.s.server_ready_timeout_s)
             if not ready:
                 raise RunnerError(f"E_RUN_SERVER_NOT_READY: {host}:{self.s.server_ui_port} in {self.s.server_ready_timeout_s}s")
-            return f"snapshot {snapshot}, mode {self.s.server_rollback_mode}, game {rec.game or self.s.game_default}"
+            version = rec.game or self.s.game_default
+            plugins = self._refresh_slots(version)
+            if plugins is None:
+                rec.notes.append(f"no plugin slots for {version}: FormDesc form names do not resolve this run")
+            return f"snapshot {snapshot}, mode {self.s.server_rollback_mode}, game {version}" + (f", {plugins} plugins in its load order" if plugins else "")
 
         await self._phase(rec, "rollback-server", go())
 
