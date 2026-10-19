@@ -296,6 +296,15 @@ bounded by casts as arrows are by shots; OnHit keeps marksman's budget.
   own casts, read from its own graph; fork 5ea5468a); remoteServer.ts (the
   message's spell and hand; 5ea5468a).
 - Kill switch config key: `spellSync` under skymp5-client's settings.
+- Two rules added by shadowbond (train28-bond3, remoteServer.ts
+  onSpellCastMessage): a relayed cast whose caster is this game's own
+  player is the server's imposition on it (a bond's concealment proc, cast
+  through the player's instant caster, castingSource 3) and is cast on
+  0x14, the sibling of the rule that maps a named target to 0x14; and a
+  relay carrying no animation variables (the server holds none) takes the
+  actor's own current set, since castSpellImmediate casts nothing when the
+  set does not apply. No game ever relays a player's cast back to it, so a
+  caster id equal to the player's can only be the server's.
 
 ## Tests
 
