@@ -158,6 +158,11 @@ client-snapshot client name description="":
 client-promote client from to="clean-m1":
     @curl -fsS -m 900 -X POST "{{lab_api}}/clients/{{client}}/promote" -H 'content-type: application/json' -d '{"from": "{{from}}", "to": "{{to}}"}'
 
+# A live session's client-only rollback (ADR-041 item 5): the clone back to its newest snapshot, then the wait for its
+# seat online; allowed under the playtest's hold.
+client-rollback client to="clean-m1-next":
+    @lab/tools/client-rollback.sh {{client}} {{to}}
+
 # Run a Frida trace script on a lab client through lab-api.
 frida script client:
     @curl -fsS -X POST "{{lab_api}}/frida" -F "client={{client}}" -F "file=@{{script}}"

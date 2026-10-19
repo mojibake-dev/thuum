@@ -381,6 +381,7 @@ pinned:
 | GET /lab/state/<query> | proxy to the lab gamemode's state endpoint on the server |
 | POST /lab/runset | `{name, scenarios: [ids] or "all", game?}`: the scenarios of the deployed tree played one after another with ADR-027's and the lab-fault reruns applied (ADR-030: the merge gate and the nightly sweep are both this); returns the set, `GET /lab/runset/<id>` its progress and verdict (green, watch, red, error), `GET /lab/runsets` the recent ones |
 | POST /lab/runset/<id>/stop, /resume | stop after the current run; go on from the scenario after the last one run |
+| POST /lab/clients/<c>/rollback `{to}` | a live session's client-only rollback (ADR-041 item 5): the clone back to `to`, its newest lab snapshot, by a stop, a disk rollback and a start, then the guest agent; allowed under a hold, refused beside a run or a snapshot (`just client-rollback c1`) |
 | POST /lab/hold `{minutes, reason}`, POST /lab/release | the lab is somebody's (a playtest, a staging writing the clones): /run, /runset, /up and /down answer 409 E_RUN_HOLD with the reason and the nightly does not start, until the minutes pass or the release; the playtest tools hold three hours by themselves, verb-stage while it writes the clones |
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/; a run set's
@@ -518,6 +519,11 @@ and sky-c2, only clean-m1 names, never clean-sp; a stacked snapshot goes
 directly on clean-m1 or replaces itself there, never on top of another one
 (promote or delete that first); no run starts while one is in progress
 (`just client-snapshot c1 clean-m1-x`, `just client-promote c1 clean-m1-x`).
+`POST /lab/clients/<c>/rollback {to}` (ADR-041 item 5) returns a clone to its
+newest snapshot, the only one ZFS rolls back to, with the same guards: a
+stop, a disk rollback, a start and the guest agent, allowed under a
+playtest's hold. `just client-rollback c1` (clean-m1-next by default) then
+waits for the seat back online.
 A shutdown that times out leaves the clone running, game stopped, with no
 snapshot taken. If a promote fails between deleting `from` and creating
 `to`, the clone runs `from`'s content with no `to`: the repair is a cold
@@ -742,6 +748,9 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
     model. skympClient.ts's establishConnectionConditional then finds the
     native client still connected and skips the login, so no createActor
     ever arrives.
+- `just client-rollback <c1|c2> [snapshot]`: a seat's whole clone back to
+  its newest snapshot (clean-m1-next, what the stage laid), for anything a
+  kept file cannot undo; the server and the other seat stay as they are.
 - `just turbo-back [--world]`: the reverse of the last push in turbo.log.
   - A server push goes back to its previous tag (31 s measured).
   - A client push stops each pushed seat's game, puts the kept file back and

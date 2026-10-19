@@ -1,6 +1,7 @@
 """Self-service snapshots and promotes of the lab clients (thuum-mundus's
-recipe and guardrails, 2026-10-05): proxmox.GuestControl.snapshot_clone and
-promote_clone over the fake backend, and the endpoints' busy rules."""
+recipe and guardrails, 2026-10-05): proxmox.GuestControl.snapshot_clone,
+promote_clone and rollback_clone (ADR-041 item 5) over the fake backend, and
+the endpoints' busy rules."""
 
 import unittest
 
@@ -175,6 +176,34 @@ class SnapshotTests(unittest.TestCase):
             self.assertIn("E_PVE_GUARD", str(e.exception))
         self.assertNotIn("stop", self.kinds())
 
+    def test_a_rollback_returns_the_clone_to_its_newest_snapshot_and_waits_for_the_agent(self):
+        self.pve.snaps[711] = tree("clean-sp", "clean-m1", "clean-m1-next")
+        out = self.control.rollback_clone(self.c1, "clean-m1-next", 5)
+        self.assertEqual(out["rolledBack"], "clean-m1-next")
+        k = [c for c in self.pve.calls if c[0] in ("stop", "rollback", "start", "agent_ping")]
+        self.assertEqual(k[:3], [("stop", 711), ("rollback", 711, "clean-m1-next"), ("start", 711)])
+        self.assertIn("agent_ping", [c[0] for c in k[3:]])
+        # the snapshots are left as they were: a rollback is no promote
+        self.assertNotIn("snapshot_delete", self.kinds())
+        self.assertNotIn("snapshot_create", self.kinds())
+        self.assertEqual(self.names()[-2:], [("clean-m1-next", "clean-m1"), ("current", "clean-m1-next")])
+
+    def test_a_rollback_goes_only_to_the_newest_lab_snapshot_and_touches_nothing_otherwise(self):
+        from labapi.proxmox import ProxmoxError
+
+        self.pve.snaps[711] = tree("clean-sp", "clean-m1", "clean-m1-next")
+        self.pve.snaps[713] = tree("clean-sp", "clean-m1")
+        for guest, to, why in ((self.c1, "clean-m1", "not the newest"),     # ZFS rolls back only to the newest
+                               (self.c1, "clean-sp", "is not clean-m1 or"),  # never clean-sp
+                               (self.c1, "clean-m1-gone", "has no snapshot"),
+                               (self.other, "clean-m1", "is not a lab client clone")):
+            with self.assertRaises(ProxmoxError, msg=to) as e:
+                self.control.rollback_clone(guest, to, 5)
+            self.assertIn("E_PVE_GUARD", str(e.exception))
+            self.assertIn(why, str(e.exception))
+        for kind in ("stop", "rollback", "start"):
+            self.assertNotIn(kind, self.kinds())
+
 
 @needs_deps
 class SnapshotEndpointTests(unittest.TestCase):
@@ -217,4 +246,20 @@ class SnapshotEndpointTests(unittest.TestCase):
         self.assertEqual(r.status_code, 409)
         self.assertIn("in progress", r.json()["error"])
         r = self.client.post("/lab/clients/c1/promote", json={"from": "clean-m1-x", "to": "clean-m1"})
+        self.assertEqual(r.status_code, 409)
+
+    def test_a_rollback_through_the_api_under_a_hold_but_not_beside_maintenance(self):
+        self.services.control._b.snaps[711] = tree("clean-sp", "clean-m1", "clean-m1-next")
+        r = self.client.post("/lab/clients/c1/rollback", json={"to": "clean-m1-next"})
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["rolledBack"], "clean-m1-next")
+        self.assertIsNone(self.services.runner.maintenance)
+        self.assertEqual(self.client.post("/lab/clients/c1/rollback", json={}).status_code, 400)
+        # a playtest's hold keeps runs out, not the holder's own rollback (promote's rule)
+        r = self.client.post("/lab/hold", json={"minutes": 30, "reason": "playtest"})
+        self.assertEqual(r.status_code, 200, r.text)
+        r = self.client.post("/lab/clients/c1/rollback", json={"to": "clean-m1-next"})
+        self.assertEqual(r.status_code, 200, r.text)
+        self.services.runner.maintenance = "promote clean-m1-next to clean-m1 on sky-c1"
+        r = self.client.post("/lab/clients/c1/rollback", json={"to": "clean-m1-next"})
         self.assertEqual(r.status_code, 409)

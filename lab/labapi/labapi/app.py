@@ -351,7 +351,9 @@ def create_app(services: Services) -> FastAPI:
     # recipe and guardrails in proxmox.GuestControl): POST
     # /clients/<c>/snapshot {name, description?} takes a stacked clean-m1-<x>;
     # POST /clients/<c>/promote {from, to} makes `to` bit-identical to it and
-    # stacks `from` again on top, so the table's name stands after a merge.
+    # stacks `from` again on top, so the table's name stands after a merge;
+    # POST /clients/<c>/rollback {to} returns the clone to its newest snapshot,
+    # a live session's client-only rollback (thuum ADR-041 item 5).
     # Minutes long; no run starts meanwhile.
     async def _maintain(what: str, fn, *args):
         # a snapshot or a promote is the holder's own work: a hold keeps runs,
@@ -392,6 +394,15 @@ def create_app(services: Services) -> FastAPI:
         g = _client_guest(client)
         return await _maintain(f"promote {body['from']} to {body['to']} on {g.name}", services.control.promote_clone, g,
                                body["from"], body["to"], s.heartbeat_timeout_s)
+
+    @router.post("/clients/{client}/rollback")
+    async def client_rollback(client: str, request: Request):
+        body = await request.json()
+        if not isinstance(body, dict) or not isinstance(body.get("to"), str):
+            raise HTTPException(400, "body must be {to}")
+        g = _client_guest(client)
+        return await _maintain(f"rollback of {g.name} to {body['to']}", services.control.rollback_clone, g, body["to"],
+                               s.heartbeat_timeout_s)
 
     @router.get("/game")
     async def game_version(client: str):
