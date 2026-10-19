@@ -1514,3 +1514,241 @@ per function (the engine's documented semantics, CK wiki, UESP), its T3
 claim Azure refused on a player and accepted on a summon once summons
 exist; the server log gains E_CONDITION_UNKNOWN; a refused heal or harm is a
 finding, not a bug, until its function is built.
+
+## ADR-041: Turbo mode: a live session's immediate turnaround
+
+Status: proposed (2026-10-19, Eli: "taking a look at the overall process,
+what's the fastest we could do this? just immediate turnaround?"). Extends
+ADR-040 (branch adr040-cycle-time, proposed the same morning: the three-hour
+loop and its tooling) and ADR-030 (the gate and the nightly stay the net);
+leaves CLAUDE.md's rules 3, 4, 5, 12 and 13 as they are and says how. Fork
+line numbers are at parity d5b05e89; the measurements and their sources are
+in docs/research/process/turbo-mode.md.
+
+**Context.** ADR-040's loop is findings to seats in three hours: the fixes
+built, the fork's CI green, a stage (the Windows client build waited on, the
+server switched, the dist laid into both clones, two snapshots, the probes),
+T2 beside the probes, the playtest on the stage, the gate and the merge
+after. The question here is a different one: Eli is at the seats, sees a
+bug, and wants the fix in his hands before the session ends. What is the
+physical floor for that, class by class, and what does today's shape add
+above it?
+
+The seats are the clones. Test 1 is sky-c1 (VM 711, profile 1, stream
+48989) and test 2 is sky-c2 (VM 712, profile 2, stream 49989)
+(lab/tools/playtest-relaunch.sh:11; lab/playtests/24.yaml:49-52;
+docs/LAB.md:57-59). Everything that reaches them goes through three doors:
+the server container on sky-srv, whose image tag is `SERVER_TAG` in
+/srv/lab/.env (lab/deploy/sky-srv/docker-compose.yml:10; the switch is two
+lines, lab/tools/verb-stage.sh:156-157); files written into the clones' game
+folders through the guest agent, small ones by its stdin and anything past a
+few hundred KB zipped over the in-VLAN HTTP hop from sky-srv
+(lab/tools/stage-client.sh:12-17 and :38-52;
+lab/deploy/sky-client/README.md:37-40); and the mod layer
+(lab/tools/client-mods.sh:10-21). A seat takes a change one of three ways.
+After a server restart skymp5-client reconnects and logs in by itself
+(skymp5-client/src/services/services/networkingService.ts:57-58 and :83-85;
+lab-api relies on it, lab/labapi/labapi/runner.py:816-823), in about 40 s
+(docs/LOG.md:37; lab/labapi/labapi/config.py:191-197); the world survives
+because it is a bind mount the restart never touches
+(docker-compose.yml:32), and a-restart-persistence is the proof of what it
+keeps (lab/scenarios/a-restart-persistence.yaml:31-45). A relaunch of the
+game is a median 31.5 s a step (ADR-036's measurement over 156 of 239 steps,
+branch adr036-relaunch), bounded at five minutes
+(lab/tools/playtest-relaunch.sh:35-36). And Skyrim Platform reloads its
+plugins by itself: a watcher thread per plugin folder waits on last-write
+changes (skyrim-platform/src/platform_se/skyrim_platform/DirectoryMonitor.cpp:10-16),
+and the next tick that sees one clears the platform's state and re-evaluates
+every plugin in every folder (SkyrimPlatform.cpp:113-129; the folders are
+`Data/Platform/Plugins;Data/Platform/PluginsDev`, Settings.cpp:33-34). It is
+always on; no setting gates it. What the clear drops is every event and hook
+handler (EventsApi.cpp:82), which skymp5-client registers again at its start
+(skymp5-client/src/services/services/skympClient.ts:82, sync/animation.ts:362);
+what it keeps is documented as `storage` (docs/skyrim_platform/features.md:3-5),
+but in this tree the storage proxy is created per plugin load (Sp3Api.cpp:136),
+so skymp5-client would take its "no AuthGameData" branch (skympClient.ts:31-36)
+and log in again. Whether it does, and how long a reload takes on a seat, is
+unmeasured. The server has the same for the gamemode: a chokidar watcher on
+the gamemode path with a one-second debounce re-requires gamemode.js on
+change (skymp5-server/ts/index.ts:151-179), and the lab mounts lab/gamemode
+read-only into the container (docker-compose.yml:36), rsynced by `just
+deploy-srv` (justfile:255).
+
+The two builds the loop waits on, measured from the runs and jobs themselves
+(2026-10-11 to 10-19; the detail is in the research note):
+
+| build | measured | notes |
+| --- | --- | --- |
+| the Windows client (Parity Windows Flatrim), 31 green runs in 29.7 h | 22:22 min best, 34:07 median, 36:08 max | MSBuild is 16 to 25 min of it and the spread is runner speed on the same inputs; `yarn build` 16 to 23 s; ctest 3 to 4 min; vcpkg's binary cache hit every run from one 398 MB entry of 2026-10-02; no ccache or sccache anywhere in the build; queue median 3 s, one 26 min outlier; a newer push on the branch cancels a running build (parity-windows.yml:27-29) |
+| server-build (GitLab, sky-ci, one job at a time), 180 green jobs | 6 to 9 min for 153 of them, median 7:42 off parity | inside one job: the Rust toolchain 49 s, configure and ninja 342 s, ctest 57 s (T0 runs here); a parity push after a fast-forward merge is fully layer-cached, 11 s; the cache-mount trial saved about a minute (6:39 warm against 7:57 cold) and still rebuilt 216 objects for a one-line change |
+
+And the lab's own steps: a stage lays in 9 to 9.5 min and a probe is about
+2.2 min (ADR-040's table); T2 is 23 min (docs/LOG.md:1994, :2025); a gate
+ran 23 runs in 51 min, 25 in 60, 27 in 73 (docs/LOG.md:2005-2006,
+:2042-2044, :2088-2094); a run's client rollback is 63 to 90 s
+(docs/LOG.md:1707, :1785); playtest setup is 2 min server side
+(docs/LOG.md:2097-2105); a layer stage ran in 5 and in about 7 min
+(docs/LOG.md:1287, :1722). Unmeasured: the server's start to listening
+(bounded 90 to 120 s, lab/tools/playtest-world.sh:43, config.py:217), the
+image pull on sky-srv, client-dist.sh end to end (bounded by its 20 min
+task, lab/tools/client-dist.sh:18), a local `yarn build`.
+
+A change is one of six classes by what it touches. Each has a floor (build
+what changed, move it one hop, let the seat take it) and a path today:
+
+| class | what moves | today, to both seats | with the mechanisms above | the floor |
+| --- | --- | --- | --- | --- |
+| (a) TypeScript client only (skymp5-client/src) | one file, skymp5-client.js, 1.6 MB with its source map | the whole Windows build for a 20 s webpack step, since `build-client` knows only the `dist` artifact (justfile:52-65), then client-dist and a relaunch: 25 to 45 min (the build measured, the lay estimated from the stage's 9 to 9.5) | `yarn build` (16 to 23 s in CI, local unmeasured), the file over the hop and into every game folder as client-driver.sh:36 lays lab-driver.js, a relaunch (31.5 s): about 2 min, estimated | under 1 min if the hot reload carries skymp5-client (unmeasured) |
+| (b) server C++, Rust rules, gamemode | the server image; or gamemode.js alone | server-build 6 to 9 min with T0 inside, the tag switch and `compose pull && up -d` (the pull unmeasured, a VLAN hop), the 40 s reconnect: 8 to 11 min; gamemode.js alone: `deploy-srv` and the watcher's second, about 1 min, estimated | an incremental build on a kept tree (ADR-040 item 4): 3 to 5 min, estimated | ninja on a few objects, the link, push, pull, restart, reconnect: 2 to 3 min, estimated |
+| (c) wire schema (wire-schema, wire-json, wire-validate, wire-transport, wire-codec, wire-client-ffi) | both ends: the image, and MpClientPlugin.dll, which the Windows build makes from cargo (skymp5-server/cpp/CMakeLists.txt:15-19; cmake/wire.cmake:21; skymp-wire/crates/wire-client-ffi/Cargo.toml:17-20); a stale seat fails closed, since the netcode protocol id carries SCHEMA_VERSION (skymp-wire/crates/wire-transport/src/lib.rs:186-190) and the validator refuses the Hello (wire-validate/src/lib.rs:23, :549) | the Windows and the server build in parallel, the dist laid, a relaunch: 25 to 45 min | the Windows build cached (ADR-040 item 3, aiming under 15): 15 to 20 min, estimated | cargo builds the crates in 28 s on the runner; a DLL-only lay would give (b)'s shape plus a relaunch, about 5 min, estimated; no tooling for it |
+| (d) Skyrim Platform native (skyrim-platform/src) | SkyrimPlatform.dll and SkyrimPlatformImpl.dll inside the 179 MiB dist | the Windows build, client-dist, a relaunch: 25 to 45 min | a warm builder: the fork's `client-build` job on a Windows shell runner exists and has never run (skymp/.gitlab-ci.yml:151-182, gated on CLIENT_BUILD_WINDOWS); on a kept tree MSBuild rebuilds SP's objects only: 5 to 10 min, estimated | that build, the lay, a relaunch: about 5 min, estimated |
+| (e) scenario or probe only | a YAML into lab-api | `just lab-run <path>`, 2 to 4 min when the lab is free | none needed | not a live class: a run rolls both seats back, and under a playtest hold it is refused (docs/LAB.md:384) |
+| (f) mod layer (persist-mods, the load orders) | plugins into every game folder, the server's load order | layer-stage's steps 2 to 5 (lab/tools/layer-stage.sh:70-97): 5 to 7 min measured with the smoke included, then the seats' relaunch | the same without the snapshots and the smoke: about 5 min, estimated | the same |
+
+What today's shape adds above the floors is not the checks but their
+placement and grain: a one-file change rides a half-hour build, the stage
+snapshots and probes before anyone plays, and nothing pushes one file to a
+seat. The lab already owns every primitive: the one-file copy
+(client-driver.sh), the tag switch (verb-stage.sh:157), the hop
+(stage-client.sh), the relaunch (playtest-relaunch.sh), the world's save and
+restore (playtest-world.sh:25-45), the hold (docs/LAB.md:384). The shape the
+literature gives this problem is a fast commit stage in front of slower
+acceptance stages, never fewer checks (Fowler, "Continuous Integration",
+martinfowler.com, 2024 revision; Humble and Farley, Continuous Delivery,
+2010, ch. 5 and 10), with the evidence that lead time and change failure
+rate move together rather than trading (Forsgren, Humble and Kim, Accelerate,
+2018). Turbo mode is that commit stage cut to what the physics allow, with
+the acceptance stages moved behind the session instead of removed.
+
+**Decision** (proposed).
+1. **When it applies.** Turbo mode is a state of the lab, not of a branch:
+   Eli is at the seats under a playtest hold and asks for a fix now. It
+   begins at the ask and ends when he reports the checklist (a reported
+   checklist frees the seats), after which the normal loop takes what
+   accumulated. A turbo push touches the server and the two seats and nothing
+   else: no snapshot, no promotion, no run, no stream opened.
+2. **What flows, and how.** Every path ends with both seats back on the
+   server's online list, read as `_wait_online` reads it (runner.py:816-823).
+   (a) TypeScript client: `yarn build` in the fork checkout; `just
+   turbo-client` lays skymp5-client.js into every game folder of both clones
+   the way client-driver.sh lays lab-driver.js, keeping the file it replaces;
+   the seats relaunch. Once a lab measurement shows skymp5-client whole
+   across a hot reload, the relaunch is dropped and the push is the write.
+   (b) Server: the branch pushed, the fork's server-build the one wait (its
+   ctest is T0 and stays: ADR-040's three red heads were compile errors and
+   tests that had never run); `just turbo-srv <branch>-<sha8>` sets
+   SERVER_TAG and runs `compose pull && up -d` as verb-stage.sh:157 does; the
+   seats reconnect by themselves. A gamemode-only change is `just
+   deploy-srv`; the watcher does the rest (index.ts:151-179).
+   (c) Wire schema: both ends in one commit (rule 4); the server as (b), the
+   client as (d); the seats relaunch after both are in place, never between
+   (a seat on the old client fails closed, correct and useless mid-session).
+   (d) Skyrim Platform native: the Windows build waited on, `just
+   build-client <branch> <sha>` and client-dist.sh on 712 then 711 as the
+   stage does (verb-stage.sh:170-179), a relaunch, no snapshot.
+   (e) Scenario or probe: does not flow during the session; it runs on the
+   stage after.
+   (f) Mod layer: layer-stage.sh's steps 2 to 5 (persist-mods, deploy-srv,
+   the server restarted, client-mods on both clones) without 6 and 7, the
+   world saved first (item 5).
+3. **What never flows this way.** A database schema change (rule 6 wants a
+   migration and a restart-persistence scenario, and a live world is not the
+   place to find out); anything under docs/DECISIONS.md or lab/scenarios
+   (rule 13 and the scenario-gate job, .gitlab-ci.yml:99-134); the first
+   build of a new verb's message (a new wire id lands through a stage with
+   T2's differential oracle, ADR-010; a turbo push may fix an existing
+   message, never add one); the game, SKSE, Skyrim Platform's build or the
+   driver stack, which ADR-030 reserves for a full sweep before promotion.
+4. **What is recorded.** Every push gets a line in docs/LOG.md's playtest
+   entry when it lands: the class, the head (sha8, fork or thuum), what it
+   replaced, and the minutes from the ask to the seats playable. The pushes
+   accumulate on one branch, the session's train, merged by `just verb-merge`
+   after the session like any train; nothing a turbo push laid is promoted.
+   The checklist names the sha8 each tick was played on (ADR-033's record).
+5. **Rollback is one command, prepared before the first push.** Before a
+   session's first turbo push, `just playtest-save turbo-<n>` keeps the live
+   world (playtest-world.sh:25-30). `just turbo-back` returns the seats to the
+   last good build: the previous SERVER_TAG and `compose up -d` (the image is
+   still local), the kept file or dist for the client, a relaunch; a world a
+   server push damaged is `just playtest-restore turbo-<n>` (which relaunches
+   both seats, playtest-world.sh:38-53). The fallback, when a file-level
+   revert is not trusted, is the cold rollback to clean-m1-next, the stage's
+   snapshot that every run returns to (lab/labapi/labapi/guests.yaml:30-31),
+   through the client-only route the Consequences name. A turbo lay is
+   ephemeral by construction: the next run's rollback erases it
+   (client-driver.sh:4-6), so the nightly sweeps the stage, never a turbo
+   build.
+6. **The checks run after, on the train.** At the checklist, the accumulated
+   train is staged as any train (`verb-stage` under ADR-040: dist reuse,
+   probes, T2 beside them), gated (ADR-030 as ADR-040 item 2 scopes it) and
+   merged; the nightly stays the cross-verb net. A gate red holds the merge
+   and reopens the finding; the playtest's ticks stand as evidence of what
+   was played, as ADR-040 item 1 already has it. T0 is never skipped: it runs
+   inside server-build for (b) and (c) and inside the Windows build's ctest
+   for (d), and turbo waits for both.
+7. **The law holds.** A verb ships whole at its merge (rule 3): a turbo push
+   is a stage of a branch, not a merge, and the branch merges whole or not at
+   all. Client-reported anything stays untrusted (rule 5): turbo changes
+   where a build runs, not what a validator accepts, and a push that loosens
+   one is reviewed on the train like any change. Scenario YAML is reviewed and
+   travels alone (rule 13): turbo carries none. The wire widens only with its
+   contract and validator (rule 4) and bytes are recognized in Rust first
+   (rule 12): the same crates are built. ADR-030's "no promotion without its
+   gate" holds because turbo promotes nothing.
+8. **Measured.** Per push, LOG.md carries "asked HH:MM, playable HH:MM, N
+   min, class, sha8"; the session's line sums them. Targets: (a) 2 min, (b)
+   10 today and 5 with the incremental build, (c) and (d) 40 today and 15
+   with the cached Windows build, (f) 6 to 8. Reviewed after five sessions
+   that used it.
+
+**Consequences.** A broken seat mid-session costs the minutes its push
+took, since the push is file-level and `turbo-back` is its reverse; the
+worst case is the cold rollback to the stage's snapshot (63 to 90 s and the
+boot), which loses nothing the world holds, and a seat not back online in
+five minutes is the signal (playtest-relaunch.sh:36). An untested server
+change against persistence meets a saved world: the file driver writes one
+JSON per changeForm (docker-compose.yml:32; lab/tools/test-proto.sh:235), a
+server that reads them wrongly is caught by a-restart-persistence on the
+train and by the restore during the session, and schema changes never enter
+(item 3). Divergence between what was played and what merges is bounded by
+item 4: the train is the sum of the pushes and nothing else, every push
+named by sha8 in the LOG and the checklist, and the stage after the session
+lays the train's head afresh (not the turbo files), so what merges is what
+the gate ran, and what was played is on record against the shas it was; a
+gate red means a finding was played on a build that does not merge, which
+ADR-040 item 1 already accepts. The build levers are the real clock: without
+them (c) and (d) stay at half an hour, and they belong to ADR-040 (ccache or
+a kept build directory for server-build, its item 4; a warm Windows builder
+or sccache on the hosted one, its item 3); this ADR adds the paths that let
+(a), (b) and (f) run at their floors now. A hot push would also reload
+lab-driver.js, which shares the folder (SkyrimPlatform.cpp:127-129), so
+turbo never runs beside a run; the hold already forbids it (item 1).
+
+The tooling, numidium's (the lab's tooling is its since 2026-10-15;
+thuum-magnus builds the fix and reads the results), in this order:
+`just turbo-client`, a local `yarn build` and the one-file lay into every
+game folder of both clones with the replaced file kept under
+`C:\sky-lab\turbo\<stamp>\`, a relaunch per seat with the online check, and a
+`--hot` form that writes without the relaunch once measured;
+`just turbo-srv <tag>`, the tag switch, `compose pull && up -d`, the ready
+wait, the previous tag kept in `/srv/lab/turbo.log`;
+`just turbo-back`, item 5's reverse of the last push;
+`just turbo-log <class> <sha8> <asked> <playable>`, item 8's LOG.md line;
+lab-api `POST /lab/clients/<c>/rollback {to}`, a stop, a disk rollback and a
+start as `rollback_sequence` does (lab/labapi/labapi/proxmox.py:134-138),
+allowed under a playtest hold as promote is (lab/labapi/labapi/app.py:356-369);
+and the hot-reload measurement, a probe that writes a changed
+skymp5-client.js into one seat's Plugins folder and reads that seat's Skyrim
+Platform log and the online list; until it is green every (a) push
+relaunches. Until each recipe exists its step is done by hand from the
+primitives named above, and the LOG line says so.
+
+In plain words: today, with no new tooling, a TypeScript fix reaches both
+seats in 25 to 45 minutes (the Windows build), a server fix in 8 to 11 (the
+server build and the reconnect), a mod layer in 5 to 7, a wire or Skyrim
+Platform fix in 25 to 45. With the one-file lay and the tag switch asked for
+here, a TypeScript fix is about two minutes and a server fix stays near ten
+until the build is incremental (then about five); the wire and native
+classes drop under fifteen only when the Windows build is cached or built
+warm. Nothing goes under about two minutes, one build, one hop, one
+relaunch, and nothing skips T0.
