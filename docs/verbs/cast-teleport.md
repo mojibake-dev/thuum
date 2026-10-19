@@ -445,3 +445,20 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   four seconds, and none started within a second of the landing. Eli's eyes
   in a playtest, or a screenshot timed to the landing, close it.
 - b-teleport 203525 and b-self-cast 204048 green on the same head.
+
+## Playtest twenty-three (2026-10-18, Eli, parity d5b05e89)
+
+- Found again: a short teleport, Ghostwalk's return and Shadowbond's jump
+  each slide on the other screen ("still a slide"); Eli asked whether the
+  slide is the spells' own. It is ours: the relay glides every figure to its
+  report over 0.2 s and places it outright only past 1024 units (the
+  2026-10-12 read above), so every jump under about 15 m plays as a glide
+  whatever moved the actor. Fix for train-27: a jump the server vouches for
+  (a movement report that follows a castTeleports cast within its waitMs,
+  or the server's own move of an actor) is relayed as a placement, not a
+  movement, and observers place the figure at once at any distance; the
+  mechanism is the server's decision, not a client heuristic on distance.
+- Six error lines on the server during six rapid Teleportation casts
+  (01:22:57 to 01:23:18 UTC, "OnHit - MpObjectReference not found for
+  hitData.target 0"): the spell's own hit names no target; low priority,
+  the handler should drop a target-0 hit quietly.

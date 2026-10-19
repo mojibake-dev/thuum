@@ -1169,3 +1169,30 @@ Scattershock launches in c2's game left at heading 180.00 degrees on 13 of
 has no look step, and the look step as built does not pitch the view (see
 docs/research/apocalypse/target-location.md, the lab's aim), so the pitch
 half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.
+
+## Playtest twenty-three (2026-10-18, Eli, parity d5b05e89; results/playtest-23)
+
+- Target actor at close range, in a human's hands: every Shadowbond
+  (0xC031C4D, three casts) and Azure Reconstruction (0xC088694, two casts)
+  went out with target 0 ("OnSpellCast - MpObjectReference not found for
+  spellCastData.target 0" before each), while their hits named player two
+  (OnSpellHit, Target ff000001) and were counted. So the crosshair naming
+  (train-26) is not enough: the figure's cast in player two's game landed
+  on nobody; nobody went invisible on player two's screen and Shadowbond's
+  swap ran only in the caster's game. Fix for train-27: the server relays a
+  cast whose effects land on their target (touch, target actor) only once
+  its first hit names the target, one hop later, with that target; the
+  sender's crosshair field stays as a hint and is never trusted alone.
+- Azure healed a non-summon: the server applied its Restore Health to
+  player two (23 ticks at 0.25 magnitude, two bursts) while the caster's
+  engine refused the effect on its conditions ("Prisoner resisted azure
+  reconstruction", Eli: "it shouldn't have because prisoner is not a
+  summon"). ADR-039: the server evaluates conditions, unknown functions
+  refuse and log. Its first hit also opened a fight ("a fight begins; the
+  victim's game is told"), the heal-begins-a-fight follow-up.
+- Runes (Frost Rune 0x6796F, Acceleration Rune 0xC124EC9) and Lightning
+  Strike: see docs/research/apocalypse/target-location.md: the caster's
+  own client threw at the cast and at the trip, so no cast record reached
+  the server and the hits were refused (E_SPELL_NO_CAST at 01:48:49,
+  01:49:55, 01:50:07 UTC).
+- Shock Nova beside player two ticked "xw" (asked what the w means).
