@@ -358,6 +358,34 @@ GetVATSBackAreaFree). 58 MGEF-level rows in the plugin carry the OR flag; 3 comp
 against a GLOB instead of a constant. The full per-row output is in
 chim/.scratch/train27.py's run (apocrypha's scratch), reproducible from the esp.
 
+## 6. Census: what Apocalypse's explosions place, and which of those carry scripts
+
+For the stuck-bolt hypothesis (a client that does not run Papyrus events on objects the
+server did not make). Counted over the plugin's 87 EXPL records (placed object at DATA+16),
+with the placed object's VMAD and the event names present in its .pex string table:
+
+- 29 explosions place an object; 28 distinct objects: **13 ACTI, 12 EXPL** (sub-explosions
+  chained from a parent, Meteor, Frost Nova, Shock Nova, Scorching Hands, Corpse Explosion,
+  Skull Trap, Thrumming Stone), **2 HAZD** (Static Dome, Talons of Nirn) and one Skyrim.esm
+  object (00055926, from EXPL 030AC53E). 24 MGEFs reach such an explosion directly or through
+  their projectile.
+- **All 13 placed activators carry a script, and every one of those scripts handles
+  OnLoad**; none of the sub-explosions or hazards carries one. The thirteen: Lightning Strike
+  030FADFF and Fingers of the Mountain 031124AE (both WB_DestroyAfterDelay_Script, OnLoad
+  only); Frozen Orb 0302C583 (WB_FrozenOrb2_Script, OnLoad, OnUpdate, OnUnload); Volcano
+  controller 030834AD (WB_VolcanoController2_Script, OnLoad, OnUpdate, OnUnload); Thrumming
+  Stone spawners 030A5390 and 030A5393 (WB_ThrummingStone_Spawner_Script, OnLoad,
+  OnUpdate); Wizardfire 0305C717 (WB_WizardfireSelfDamage_Script, OnLoad); Drop Zone 03084542
+  (WB_SoftLanding_Script, OnLoad); Wellocs Instant Forest spawner 030AD578
+  (WB_PillarSpawner_Simple_Script, OnLoad); Entomb 030AE5AB (WB_Entomb_Activator_Script,
+  OnLoad); Milestones spawner 030AE5BD (WB_MilestonesSpawner_Script, OnLoad); Cyclonic Rift
+  spawner 030B5D19 (WB_CyclonicRift_Spawner_Script, OnLoad); Detonate Lock 0300857A
+  (WB_LockActivator_Script, OnLoad).
+
+So if a placed object's OnLoad does not fire, the Lightning Strike bolt is one of thirteen
+Apocalypse placements that never clean up or never start their work; the two with OnUpdate
+loops (Frozen Orb, Volcano) and the spawners also never spawn what they are meant to.
+
 ## Open items
 
 1. **Vanilla Frost Rune's explosion**: EXPL 00044089 (named by PROJ 0005FBBF's DATA+36) in
