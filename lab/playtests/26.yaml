@@ -36,6 +36,7 @@ seats:
       - 0x1A035452   # Finger of Death (figure-values makes its threshold real)
     items:
       - {id: 0x00012EB7, count: 1}   # Iron Sword (Skyrim.esm IronSword, esm.py 2026-10-19), for the figure hit check
+      - {id: 0x0B0147C6, count: 1}   # Cloaks of Skyrim's Cape - Whiterun (Cloaks.esp CloakShortWhiterun, local 0x0147C6 at the layer's 0x0B), for the cloak row
     values:
       Marksman: 60   # the headshot rule's floor; "Archery" does nothing on the server
     percentages: {health: 1, magicka: 1, stamina: 1}
@@ -49,6 +50,7 @@ seats:
       - 0x0003AE9F   # Flame Cloak
     items:
       - {id: 0x00012E4D, count: 1}   # Iron Helmet, for the helmeted headshot check
+      - {id: 0x0E00234B, count: 1}   # Winter Is Coming's cloak (1nivWICCloaks.esp 1nivCloakWolfSkinTrimBTimber, local 0x00234B at the layer's 0x0E), for the cloak row
     percentages: {health: 1, magicka: 1, stamina: 1}
 streams:
   # Moonlight: confirm each stream window runs before "seats ready"
