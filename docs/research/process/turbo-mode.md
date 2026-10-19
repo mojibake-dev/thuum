@@ -175,3 +175,39 @@ listening; `client-dist.sh` end to end; `client-snapshot` and
 fork's `client-build` job on a Windows runner (never ran); an incremental
 MSBuild of skyrim-platform alone; a DLL-only lay of MpClientPlugin.dll (no
 tooling).
+
+## The hot reload, measured (2026-10-19 02:5x to 03:19 PDT)
+
+numidium's live test of `turbo-client --hot` on c1: Skyrim Platform's
+DirectoryMonitor reloaded skymp5-client.js 8 ms after a touch of its
+last-write time; skympClient's establishConnectionConditional skipped the
+login because the native client was still connected; and the reloaded client
+sent no movement (two 600 px turns left the server's rot at 0, while the
+control seat gave 26.9 degrees). The cause, read in the trees (an agent,
+03:1x): the embedded assets/storageProxy.js runs on every plugin (re)load
+and built `new Proxy({}, ...)`, so `sp.storage` was empty after a reload,
+against docs/skyrim_platform/features.md:5 ("all variables are reset,
+except for storage and its properties"), which skymp5-client is written to
+(its world model, id manager, auth data, view and server address live
+there). With the storage empty and `isConnected()` (a Rust static,
+wire-client-ffi/src/lib.rs) still true, no login ran, no CreateActor isMe
+came, `playerCharacterFormIdx` stayed -1, and NetworkingService dropped
+every idx-addressed send (networkingService.ts:40-42): movement,
+animation, equipment, actions; SpellCast went out with caster 0;
+PlayerGlobals and the clock, sent once per login, stayed stuck.
+
+The fix (fork m2-train-28 b93e8b37): the Proxy's target lives on
+`globalThis.__skyrimPlatformStorage`, which ClearState never touches, so
+storage survives the reload as documented; one storage shared by every
+plugin in the folder, as before SP3 (lab-driver reads no storage key). It
+needs the Skyrim Platform build (class (d)), then the probe: touch the
+bundle, expect "Recovered AuthGameData from storage" and "Previous View
+destroyed" in the SP log with no "Form with idx N not found", about 27
+degrees of server rot after a 600 px turn on both seats, a Hit with the
+right target, a SpellCast with the player's refr id as caster, an equip
+toggle seen. Still lost across a reload even then: magicEffectsService's
+held sums (a class field; a double-apply on the next MagicEffects),
+deathService's state, pending promises and `once('update')` callbacks, and
+about a second of view while the new view waits. Until the probe passes,
+every TypeScript push relaunches (65 s to both seats, measured; 32 s for
+one), which `turbo-client` does by default.
