@@ -1594,7 +1594,14 @@ other).
    actions/cache, or a warm self-hosted Windows builder), aiming under
    fifteen minutes. The trivial case stays: `verb-stage` and `build-client`
    reuse the last successful run's dist when nothing the client links
-   changed since its commit, naming the run they took.
+   changed since its commit, naming the run they took. Since 2026-10-19 the
+   build has two sources, read together by lab/tools/client-builds.py: the
+   fork's own client-build job on sky-build (VM 720, the GitLab Windows
+   runner, warm vcpkg and cargo caches on its disk) and the mirror's run;
+   a commit both built is taken from GitLab, and the head's wait ends at
+   whichever source goes green first. The job runs on a push that carries
+   `CLIENT_BUILD_WINDOWS=1` (the push option) until the project variable is
+   set, after its first green run.
 4. **A fast T0 oracle.** Of the night's three red heads one was tests that
    had never run and two were compile errors, so the oracle must build and
    run T0, not compile alone. Its cheapest form is the fork's own
