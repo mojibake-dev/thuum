@@ -705,6 +705,25 @@ a scenario green (ADR-009). Scenario YAML is review-gated (ADR-016): a
 change travels in its own commit, Eli approves it, and CI refuses a commit
 that mixes scenario YAML with other files.
 
+## Turbo mode (ADR-041)
+
+A live session's pushes, while Eli is at the seats under a playtest hold. A
+push touches the server and the two seats and nothing else: no run, no
+snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
+- `just turbo-srv <ref-slug>-<sha8>`: a server push.
+  - It switches skymp-server alone (never lab-api, whose hold lives in its
+    memory) to a fixed tag the fork's server-build pushed.
+  - It pulls the image first, so a tag the registry lacks changes nothing.
+  - It saves the live world as playtest-turbo-<tag>-<UTC stamp> before the
+    switch.
+  - It waits for the server's listening line and for every seat that was
+    online. skymp5-client reconnects and logs in by itself.
+  - Measured on 2026-10-19 with the image already built: the server listening
+    22 s after the push, both seats back online at 33 s.
+- `just turbo-back [--world]`: the reverse of the last push in turbo.log, a
+  tag back (31 s measured) or a kept client file. `--world` also restores the
+  newest saved turbo world, which relaunches both seats.
+
 ## Network faults
 
 Inside sky-srv, per scenario:

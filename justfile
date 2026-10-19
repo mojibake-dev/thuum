@@ -414,6 +414,16 @@ playtest-record-stop:
     @pkill -TERM -f 'lab/tools/playtest-record.sh' || { echo "no recorder running"; exit 1; }; while pgrep -f 'lab/tools/playtest-record.sh' >/dev/null; do sleep 2; done; echo "recorder done: the logs are in; now playtest-save and lab-release"
 
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
+# Turbo mode (ADR-041): a live session's pushes, every one logged in /srv/lab/turbo.log.
+# A server push: skymp-server alone switched to a fixed <ref-slug>-<sha8> tag the fork's server-build pushed, the world
+# saved first, then the wait for both seats back online (they reconnect by themselves).
+turbo-srv tag:
+    @lab/tools/turbo-srv.sh {{tag}}
+
+# The reverse of the last turbo push (server tag or client file); --world also restores the newest saved turbo world.
+turbo-back *args:
+    @lab/tools/turbo-back.sh {{args}}
+
 # A playtest's seats from its profile, lab/playtests/<n>.yaml (ADR-040 item 6): the world restored with both seats
 # relaunched, the hold, the camp, each seat's spells, values, items and bars set server-side and read back, Sunshine
 # restarted; then the Moonlight streams, then playtest-ready. `check` only reads the profile.
