@@ -55,7 +55,7 @@ CLIENT_BUILD_WINDOWS; zero jobs in the 800-job window).
 ## 2. The server image
 
 skymp/ci/server.Dockerfile, built by skymp/.gitlab-ci.yml's `server-build`
-(:96-138) on runner thuum-docker (sky-ci, VM 702), one job at a time, pushed
+(:101-149) on runner thuum-docker (sky-ci, VM 702), one job at a time, pushed
 to sky-ci's registry (10.10.70.12:5000, lab/deploy/sky-srv/env.example:5) as
 `skymp-server:<ref-slug>-<sha8>` and `:<ref-slug>`. GitLab root/skymp,
 2026-10-11 to 10-19: 203 server-build jobs, 180 green. 153 of the green ones
@@ -124,9 +124,9 @@ lab/tools/playtest-world.sh:43, 120 s in lab/labapi/labapi/config.py:217).
   sync/animation.ts:362); its entry is deferred to the first tick with a note
   about hot reload (skymp5-client/src/index.ts:150-152); `storage` is
   documented as kept (docs/skyrim_platform/features.md:3-5) but the proxy is
-  created per plugin load in this tree (Sp3Api.cpp:136), so skympClient.ts:31-36
+  created per plugin load in this tree (Sp3Api.cpp:136), so skympClient.ts:31-46
   would find no AuthGameData and log in again; `writePlugin` writes into the
-  first folder (DevApi.cpp:138) and a folder outside the list is not watched
+  first folder (DevApi.cpp:112, GetPluginPath's `pluginFolders->front()`) and a folder outside the list is not watched
   (DevApi.cpp:91).
 - The server's gamemode reload: a chokidar watcher with `awaitWriteFinish`
   and a one-second debounce re-requires gamemode.js
@@ -146,11 +146,11 @@ lab/tools/playtest-world.sh:43, 120 s in lab/labapi/labapi/config.py:217).
   lab/deploy/sky-client/README.md:37-40). The one-file precedent is
   lab-driver.js, copied into every game folder's Data\Platform\Plugins with
   the game stopped (lab/tools/client-driver.sh:29-36). skymp5-client.js is
-  1.6 MB with its inline source map (skymp5-client/webpack.config.js:8-9, a
-  development-mode bundle), so it takes the hop.
+  1.6 MB with its inline source map (skymp5-client/webpack.config.js:66-67, a
+  development-mode bundle with `devtool: 'inline-source-map'`), so it takes the hop.
 - The stage's lay: lab/tools/verb-stage.sh:154-186 (deploy-srv, the tag
   switch and `compose pull && up -d`, the hold retaken after lab-api's
-  restart, `build-client`, client-dist on 712 then 711 twice each, the
+  restart, `build-client`, client-dist on 712 then 711, up to two attempts each and the second only after a failure (:172-177), the
   driver, two snapshots); REUSE_DIST at :45-67; the Windows wait at :68-93.
 - The seats: c1 is VM 711 profile 1 and c2 is VM 712 profile 2
   (lab/tools/playtest-relaunch.sh:11); streams test1 48989 and test2 49989

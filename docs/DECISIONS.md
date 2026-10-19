@@ -1672,8 +1672,8 @@ The seats are the clones. Test 1 is sky-c1 (VM 711, profile 1, stream
 (lab/tools/playtest-relaunch.sh:11; lab/playtests/24.yaml:49-52;
 docs/LAB.md:57-59). Everything that reaches them goes through three doors:
 the server container on sky-srv, whose image tag is `SERVER_TAG` in
-/srv/lab/.env (lab/deploy/sky-srv/docker-compose.yml:10; the switch is two
-lines, lab/tools/verb-stage.sh:156-157); files written into the clones' game
+/srv/lab/.env (lab/deploy/sky-srv/docker-compose.yml:10; the switch is one
+line, lab/tools/verb-stage.sh:157); files written into the clones' game
 folders through the guest agent, small ones by its stdin and anything past a
 few hundred KB zipped over the in-VLAN HTTP hop from sky-srv
 (lab/tools/stage-client.sh:12-17 and :38-52;
@@ -1699,7 +1699,7 @@ handler (EventsApi.cpp:82), which skymp5-client registers again at its start
 (skymp5-client/src/services/services/skympClient.ts:82, sync/animation.ts:362);
 what it keeps is documented as `storage` (docs/skyrim_platform/features.md:3-5),
 but in this tree the storage proxy is created per plugin load (Sp3Api.cpp:136),
-so skymp5-client would take its "no AuthGameData" branch (skympClient.ts:31-36)
+so skymp5-client would take its "no AuthGameData" branch (skympClient.ts:31-46)
 and log in again. Whether it does, and how long a reload takes on a seat, is
 unmeasured. The server has the same for the gamemode: a chokidar watcher on
 the gamemode path with a one-second debounce re-requires gamemode.js on
@@ -1773,7 +1773,9 @@ the acceptance stages moved behind the session instead of removed.
    (b) Server: the branch pushed, the fork's server-build the one wait (its
    ctest is T0 and stays: ADR-040's three red heads were compile errors and
    tests that had never run); `just turbo-srv <branch>-<sha8>` sets
-   SERVER_TAG and runs `compose pull && up -d` as verb-stage.sh:157 does, for
+   SERVER_TAG to that fixed tag (verb-stage.sh:157 sets the moving `<branch>`;
+   the fork's server-build pushes both, `<ref-slug>-<sha8>` and `<ref-slug>`, so
+   the fixed one names the build played) and runs `compose pull && up -d`, for
    skymp-server alone: that line also pulls and restarts lab-api, whose hold
    lives in its memory (a restart drops it, and verb-stage's step 6 takes it
    again), and a live session has no reason to restart it; the
@@ -1795,8 +1797,10 @@ the acceptance stages moved behind the session instead of removed.
    world saved first (item 5).
 3. **What never flows this way.** A database schema change (rule 6 wants a
    migration and a restart-persistence scenario, and a live world is not the
-   place to find out); anything under docs/DECISIONS.md or lab/scenarios
-   (rule 13 and the scenario-gate job, .gitlab-ci.yml:99-134); the first
+   place to find out); anything under lab/scenarios (rule 13 and the
+   scenario-gate job, .gitlab-ci.yml:99-135, which refuses a commit mixing a
+   scenario with other paths) or docs/DECISIONS.md (Eli's decisions, through
+   their own commits); the first
    build of a new verb's message (a new wire id lands through a stage with
    T2's differential oracle, ADR-010; a turbo push may fix an existing
    message, never add one); the game, SKSE, an upstream Skyrim Platform version (item 2's (d) is the
@@ -1809,11 +1813,12 @@ the acceptance stages moved behind the session instead of removed.
    The checklist names the sha8 each tick was played on (ADR-033's record).
 5. **Rollback is one command, prepared before the first push.** Before a
    session's first turbo push, `just playtest-save turbo-<n>` keeps the live
-   world (playtest-world.sh:25-30). `just turbo-back` returns the seats to the
+   world as playtest-turbo-<n>-<UTC stamp> (playtest-world.sh:25-30). `just turbo-back` returns the seats to the
    last good build: the previous SERVER_TAG and `compose up -d` (the image is
    still local), the kept file or dist for the client, a relaunch; a world a
-   server push damaged is `just playtest-restore turbo-<n>` (which relaunches
-   both seats, playtest-world.sh:38-53). The fallback, when a file-level
+   server push damaged is `just playtest-restore playtest-turbo-<n>-<stamp>`,
+   the full name `just playtest-worlds` lists (restore takes only playtest-
+   names, playtest-world.sh:34; it relaunches both seats, :38-53). The fallback, when a file-level
    revert is not trusted, is the cold rollback to clean-m1-next, the stage's
    snapshot that every run returns to (lab/labapi/labapi/guests.yaml:30-31),
    through the client-only route the Consequences name. A turbo lay is
