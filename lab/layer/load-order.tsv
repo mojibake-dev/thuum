@@ -3,95 +3,91 @@
 order	plugin	mod	light	versions	server	why
 1	unofficial skyrim special edition patch.esp	unofficial-skyrim-special-edition-patch-ussep-4.3.8a	full	all	yes	
 2	GeneralDisplays.esm	general-displays-2.5.se.1	full	all	yes	
-3	ApachiiHair.esm	apachii-sky-hair-1.6.full	full	all	yes	
-4	Conjuration Summoner Perk Applies to All Creatures.esl	conjuration-summoner-perk-applies-to-all-creatur-1.0.0	light	all	yes	
-5	RaceCompatibility.esm	racecompatibility-2.16	full	all	yes	
-6	Cloaks.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
-7	Cloaks - Dawnguard.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
-8	Cloaks - USSEP Patch.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
-9	1nivWICCloaks.esp	winter-is-coming-cloaks-2.4	full	all	yes	
-10	1nivWICCloaks_SMP_Patch.esp	survival-mode-patch-collection-1.0	light	all	yes	
-11	Cloaks_SMP_Patch.esp	survival-mode-patch-collection-1.0	light	all	yes	
-12	Thaumaturgy.esp	thaumaturgy-an-enchanting-overhaul-1.4.5	full	all	yes	
-13	MysticismMagic.esp	mysticism-a-magic-overhaul-2.4.2	full	all	yes	
-14	ExtraDwemerHighFurniture.esp	dwemer-high-furniture-1.0	full	all	yes	
-15	Odin - Skyrim Magic Overhaul.esp	odin-skyrim-magic-overhaul-3.1.5	full	all	yes	
-16	MoreCraftableEquipment.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	full	all	yes	
-17	Playable Headparts All Races.esp	playable-headparts-all-races-1.0.0.0	full	all	yes	
-18	DigitigradeKhajiit+ArgonianRaptor.esp	digitigrade-beast-races-for-skyrim-1.0	full	all	yes	
-19	SpellAbsorptionAndTwinSoulsFix_SE.esp	spell-absorb-and-twin-souls-fix-se-port-0.9.1	light	all	yes	
-20	SimplyBiggerTreesSE.esp	simply-bigger-trees-se-lush-vanilla-forests-1.0se	full	all	yes	
-21	LetMeDropIt.esp	let-me-drop-it-removable-quest-items-1.5	light	all	yes	
-22	Vanilla Civil War Dialogue Fix.esp	vanilla-civil-war-dialogue-fix-1.0	light	all	yes	
-23	BlackBookNoQuest.esp	droppable-black-books-and-elder-scrolls-1.0.1	light	all	yes	
-24	ElderScrollNoQuest.esp	droppable-black-books-and-elder-scrolls-1.0.1	light	all	yes	
-25	_001_SelfFillingBookshelves.esp	self-filling-bookshelves-1.0	full	all	yes	
-26	mihailcrowsandravens.esp	crows-and-ravens-mihail-monsters-and-animals-se-1	light	all	yes	
-27	rmp_telvannihearthfires.esp	tel-jerdein-telvanni-sorcerer-tower-1.2sse	full	all	yes	
-28	SummonsOfApocrypha.esp	summons-of-solstheim-lurkers-werebears-and-more-1	light	all	yes	
-29	EVE - House Telvanni Banners Restored.esp	house-telvanni-banners-restored-cut-content-rest-1.0	light	all	yes	
-30	TrueDirectionalMovement.esp	true-directional-movement-2.2.7	light	all	yes	
-31	Prometheus_BeastSkeletons.esp	beast-skeletons-6.1	full	all	yes	
-32	Apocalypse - Magic of Skyrim.esp	apocalypse-10.2.3	full	all	yes	
-33	mihailringneckedpheasant.esp	ring-necked-pheasants-mihail-monsters-and-animal-1	light	all	yes	
-34	IntuitiveDragonRideControl.esp	intuitive-dragon-ride-control-7.0.1@1.6.1170	light	1.6.1170	yes	
-35	Better Stealth AI for Followers.esp	better-stealth-ai-for-followers-3.5	full	all	yes	
-36	Jewelry limiter.esp	jewelry-limiter-another-multiple-rings-and-amule-3.6	full	all	yes	
-37	Vampiric Grip.esp	vampiric-grip-as-a-destruction-spell-harkon	full	all	yes	
-38	mihailatmoranremains.esp	ancient-atmoran-remains-mihail-s-shards-of-immer-1	light	all	yes	
-39	mihailmagicladder.esp	mystic-steps-mihail-powers-and-spells-se-ae-alte-1beta	light	all	yes	
-40	LRD.esp	let-s-ride-durnehviir-1.1b	full	all	yes	
-41	StealthKillDetectionFix.esp	stealth-detection-fixes-2.2	light	all	yes	
-42	Portal.esp	portal-dynamically-placed-teleportation-1.4.1	full	all	yes	
-43	All Eyes for All Races.esp	all-eyes-for-all-races-1	light	all	yes	
-44	SimpleFireWyrmFix.esp	dragonborn-dlc-fixes-1.1	light	all	yes	
-45	Ring of Namira - Improved.esp	ring-of-namira-improved-1.0.0	light	all	yes	
-46	Better Vampire Lord plus Serana Fix EN.esp	better-vampire-lord-plus-serana-fix-english-1.0	full	all	yes	
-47	ChitinGoggles.esp	chitin-goggles-1	full	all	yes	
-48	Dynamic Activation Key.esp	dynamic-activation-key-1.02	light	all	yes	
-49	Dwemer Goggles & Scouter.esp	dwemer-goggles-and-scouter-1.3	full	all	yes	
-50	RaceMenu.esp	racemenu-0.4.20.0@1.6.1170	full	1.6.1170	yes	
-51	RaceMenuPlugin.esp	racemenu-0.4.20.0@1.6.1170	full	1.6.1170	yes	
-52	DualCastingCostPowerTweak.esp	dual-casting-cost-vs-power-tweak-1.0	full	all	yes	
-53	ArchmageRobeLearn.esp	learnable-archmage-robes-enchantment-1.1	light	all	yes	
-54	LoweredFurHoods.esp	lowered-fur-hoods-1.0.0	light	all	yes	
-55	NARC SE for Vanilla.esp	narc-remade-no-animals-report-crimes-for-skyrim-1.1.0	light	all	yes	
-56	Next-Gen Decapitations.esp	next-gen-decapitations-1.4.3@1.6.1170	light	1.6.1170	yes	
-57	Cloaks&Capes.esp	cloaks-and-capes-fsmp-xpmsse-1.4	full	all	yes	
-58	NB-FurHoods.esp	northborn-fur-hoods-1.4	full	all	yes	
-59	LostGrimoire.esp	lostgrimoire-1.6	full	all	yes	
-60	dremora_merchant_upgrade.esp	better-dremora-merchant-and-merchant-gold-tweaks-1.2	light	all	yes	
-61	Headshot Kills.esp	headshotkills-1.2	light	all	yes	
-62	Silent Reanimated Corpses.esp	silent-reanimated-corpses-1.1	full	all	yes	
-63	SunAffectsNPCVampires.esp	sun-affects-npc-vampires-2.1.1	light	all	yes	
-64	SunAffectsNPCVampires-Hooded.esp	sun-affects-npc-vampires-2.1.1	light	all	yes	
-65	Survival Mode Vampire Patch.esp	survival-mod-vampire-patch-1.0.0	full	all	yes	
-66	Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire.esp	supernatural-survival-tweaks-werewolf-werebear-a-1.9omega	light	all	yes	
-67	UndeadFX.esp	undead-fx-4.2	full	all	yes	
-68	SummonsReleveled.esp	summons-releveled-1.1	full	all	yes	
-69	mihailhelhest.esp	draugr-horse-mount-mihail-monsters-and-animals-s-1.1	light	all	yes	
-70	Stab the heart.esp	stab-the-heart-cif-1.1	light	all	yes	
-71	VampireFeedingTweaks.esp	vampire-feeding-tweaks-1.13	light	all	yes	
-72	MoreCraftableEquipment_BYOHLooms.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
-73	MoreCraftableEquipment_CloaksandCapes.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
-74	MoreCraftableEquipment_Fish.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
-75	MoreCraftableEquipment_USSEP.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
-76	VampireLordsCanActivate.esp	vampire-lords-can-activate-1.0	full	all	yes	
-77	LoweredHoods.esp	lowered-hoods-1.9.0	light	all	yes	
-78	LoweredHoods_MoreCraftableEquipment.esp	lowered-hoods-1.9.0	light	all	yes	
-79	vampireinverterdg.esp	vampirism-inverter-dawnguard-1.01	full	all	yes	
-80	rotfern.esp	rotfern	full	all	yes	
-81	SkyUI_SE.esp	skyui-6.11	light	all	client-only	UI
-82	RLAiO.esp	reading-list-1.0	full	all	client-only	book-tracking UI
-83	UnreadBooksGlow.esp	unread-books-glow-sse-with-mcm-2.21	full	all	client-only	book glow
-84	NMNEB.esp	no-more-night-eye-blur-1.1	full	all	client-only	image space only
-85	MCMHelper.esp	mcm-helper-1.6.2@1.6.1170	light	1.6.1170	client-only	UI config
-86	DisableSpellLight_Prebuilt.esp	stealth-detection-fixes-2.2	light	all	client-only	spell light removal, visual
-87	TrueHUD.esl	truehud-hud-additions-1.1.9@1.6.1170	light	1.6.1170	client-only	HUD
-88	MoreCraftableEquipment_AdvCyrus.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	client-only	masters ccBGSSSE031-AdvCyrus.esm, not in the server esm dir
-89	LoweredHoods_CCNecromanticGrimoire.esp	lowered-hoods-1.9.0	light	all	client-only	masters ccvsvsse003-necroarts.esl, not in the server esm dir
-90	LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp	lowered-hoods-1.9.0	light	all	client-only	masters ccvsvsse003-necroarts.esl
-91	Necromantic Grimoire - Mysticism Rebalance.esp	necromantic-grimoire-mysticism-rebalance-1.2.1	light	all	client-only	masters ccvsvsse003-necroarts.esl
-92	RaceMenuMiscSlider.esp	racemenu-misc-slider-more-bodymorph-slider-for-r-0.1.0	light	all	client-only	RaceMenu sliders
-93	RaceMenuMorphsCBBE.esp	cbbe-2.0.3@1.6.1170	full	1.6.1170	client-only	RaceMenu sliders (existing)
-94	CBBE.esp	cbbe-2.0.3@1.6.1170	light	1.6.1170	client-only	body, existing
+3	TrueHUD.esl	truehud-hud-additions-1.1.9@1.6.1170	light	1.6.1170	yes	
+4	ApachiiHair.esm	apachii-sky-hair-1.6.full	full	all	yes	
+5	Conjuration Summoner Perk Applies to All Creatures.esl	conjuration-summoner-perk-applies-to-all-creatur-1.0.0	light	all	yes	
+6	RaceCompatibility.esm	racecompatibility-2.16	full	all	yes	
+7	Cloaks.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
+8	Cloaks - Dawnguard.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
+9	Cloaks - USSEP Patch.esp	cloaks-of-skyrim-1.2.1	full	all	yes	
+10	1nivWICCloaks.esp	winter-is-coming-cloaks-2.4	full	all	yes	
+11	1nivWICCloaks_SMP_Patch.esp	survival-mode-patch-collection-1.0	light	all	yes	
+12	Cloaks_SMP_Patch.esp	survival-mode-patch-collection-1.0	light	all	yes	
+13	Thaumaturgy.esp	thaumaturgy-an-enchanting-overhaul-1.4.5	full	all	yes	
+14	MysticismMagic.esp	mysticism-a-magic-overhaul-2.4.2	full	all	yes	
+15	ExtraDwemerHighFurniture.esp	dwemer-high-furniture-1.0	full	all	yes	
+16	Odin - Skyrim Magic Overhaul.esp	odin-skyrim-magic-overhaul-3.1.5	full	all	yes	
+17	MoreCraftableEquipment.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	full	all	yes	
+18	Playable Headparts All Races.esp	playable-headparts-all-races-1.0.0.0	full	all	yes	
+19	DigitigradeKhajiit+ArgonianRaptor.esp	digitigrade-beast-races-for-skyrim-1.0	full	all	yes	
+20	SpellAbsorptionAndTwinSoulsFix_SE.esp	spell-absorb-and-twin-souls-fix-se-port-0.9.1	light	all	yes	
+21	SimplyBiggerTreesSE.esp	simply-bigger-trees-se-lush-vanilla-forests-1.0se	full	all	yes	
+22	LetMeDropIt.esp	let-me-drop-it-removable-quest-items-1.5	light	all	yes	
+23	Vanilla Civil War Dialogue Fix.esp	vanilla-civil-war-dialogue-fix-1.0	light	all	yes	
+24	BlackBookNoQuest.esp	droppable-black-books-and-elder-scrolls-1.0.1	light	all	yes	
+25	ElderScrollNoQuest.esp	droppable-black-books-and-elder-scrolls-1.0.1	light	all	yes	
+26	_001_SelfFillingBookshelves.esp	self-filling-bookshelves-1.0	full	all	yes	
+27	mihailcrowsandravens.esp	crows-and-ravens-mihail-monsters-and-animals-se-1	light	all	yes	
+28	rmp_telvannihearthfires.esp	tel-jerdein-telvanni-sorcerer-tower-1.2sse	full	all	yes	
+29	SummonsOfApocrypha.esp	summons-of-solstheim-lurkers-werebears-and-more-1	light	all	yes	
+30	EVE - House Telvanni Banners Restored.esp	house-telvanni-banners-restored-cut-content-rest-1.0	light	all	yes	
+31	TrueDirectionalMovement.esp	true-directional-movement-2.2.7	light	all	yes	
+32	Prometheus_BeastSkeletons.esp	beast-skeletons-6.1	full	all	yes	
+33	Apocalypse - Magic of Skyrim.esp	apocalypse-10.2.3	full	all	yes	
+34	mihailringneckedpheasant.esp	ring-necked-pheasants-mihail-monsters-and-animal-1	light	all	yes	
+35	IntuitiveDragonRideControl.esp	intuitive-dragon-ride-control-7.0.1@1.6.1170	light	1.6.1170	yes	
+36	Better Stealth AI for Followers.esp	better-stealth-ai-for-followers-3.5	full	all	yes	
+37	Jewelry limiter.esp	jewelry-limiter-another-multiple-rings-and-amule-3.6	full	all	yes	
+38	Vampiric Grip.esp	vampiric-grip-as-a-destruction-spell-harkon	full	all	yes	
+39	mihailatmoranremains.esp	ancient-atmoran-remains-mihail-s-shards-of-immer-1	light	all	yes	
+40	mihailmagicladder.esp	mystic-steps-mihail-powers-and-spells-se-ae-alte-1beta	light	all	yes	
+41	LRD.esp	let-s-ride-durnehviir-1.1b	full	all	yes	
+42	StealthKillDetectionFix.esp	stealth-detection-fixes-2.2	light	all	yes	
+43	Portal.esp	portal-dynamically-placed-teleportation-1.4.1	full	all	yes	
+44	All Eyes for All Races.esp	all-eyes-for-all-races-1	light	all	yes	
+45	SimpleFireWyrmFix.esp	dragonborn-dlc-fixes-1.1	light	all	yes	
+46	Ring of Namira - Improved.esp	ring-of-namira-improved-1.0.0	light	all	yes	
+47	Better Vampire Lord plus Serana Fix EN.esp	better-vampire-lord-plus-serana-fix-english-1.0	full	all	yes	
+48	ChitinGoggles.esp	chitin-goggles-1	full	all	yes	
+49	Dynamic Activation Key.esp	dynamic-activation-key-1.02	light	all	yes	
+50	Dwemer Goggles & Scouter.esp	dwemer-goggles-and-scouter-1.3	full	all	yes	
+51	RaceMenu.esp	racemenu-0.4.20.0@1.6.1170	full	1.6.1170	yes	
+52	RaceMenuPlugin.esp	racemenu-0.4.20.0@1.6.1170	full	1.6.1170	yes	
+53	DualCastingCostPowerTweak.esp	dual-casting-cost-vs-power-tweak-1.0	full	all	yes	
+54	ArchmageRobeLearn.esp	learnable-archmage-robes-enchantment-1.1	light	all	yes	
+55	LoweredFurHoods.esp	lowered-fur-hoods-1.0.0	light	all	yes	
+56	NARC SE for Vanilla.esp	narc-remade-no-animals-report-crimes-for-skyrim-1.1.0	light	all	yes	
+57	Next-Gen Decapitations.esp	next-gen-decapitations-1.4.3@1.6.1170	light	1.6.1170	yes	
+58	Cloaks&Capes.esp	cloaks-and-capes-fsmp-xpmsse-1.4	full	all	yes	
+59	NB-FurHoods.esp	northborn-fur-hoods-1.4	full	all	yes	
+60	LostGrimoire.esp	lostgrimoire-1.6	full	all	yes	
+61	dremora_merchant_upgrade.esp	better-dremora-merchant-and-merchant-gold-tweaks-1.2	light	all	yes	
+62	Headshot Kills.esp	headshotkills-1.2	light	all	yes	
+63	Silent Reanimated Corpses.esp	silent-reanimated-corpses-1.1	full	all	yes	
+64	SunAffectsNPCVampires.esp	sun-affects-npc-vampires-2.1.1	light	all	yes	
+65	SunAffectsNPCVampires-Hooded.esp	sun-affects-npc-vampires-2.1.1	light	all	yes	
+66	Survival Mode Vampire Patch.esp	survival-mod-vampire-patch-1.0.0	full	all	yes	
+67	Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire.esp	supernatural-survival-tweaks-werewolf-werebear-a-1.9omega	light	all	yes	
+68	UndeadFX.esp	undead-fx-4.2	full	all	yes	
+69	SummonsReleveled.esp	summons-releveled-1.1	full	all	yes	
+70	mihailhelhest.esp	draugr-horse-mount-mihail-monsters-and-animals-s-1.1	light	all	yes	
+71	Stab the heart.esp	stab-the-heart-cif-1.1	light	all	yes	
+72	VampireFeedingTweaks.esp	vampire-feeding-tweaks-1.13	light	all	yes	
+73	MoreCraftableEquipment_BYOHLooms.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
+74	MoreCraftableEquipment_CloaksandCapes.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
+75	MoreCraftableEquipment_Fish.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
+76	MoreCraftableEquipment_USSEP.esp	more-craftable-equipment-unenchanted-clothing-an-1.4.0	light	all	yes	
+77	VampireLordsCanActivate.esp	vampire-lords-can-activate-1.0	full	all	yes	
+78	LoweredHoods.esp	lowered-hoods-1.9.0	light	all	yes	
+79	LoweredHoods_MoreCraftableEquipment.esp	lowered-hoods-1.9.0	light	all	yes	
+80	vampireinverterdg.esp	vampirism-inverter-dawnguard-1.01	full	all	yes	
+81	rotfern.esp	rotfern	full	all	yes	
+82	SkyUI_SE.esp	skyui-6.11	light	all	client-only	UI
+83	RLAiO.esp	reading-list-1.0	full	all	client-only	book-tracking UI
+84	UnreadBooksGlow.esp	unread-books-glow-sse-with-mcm-2.21	full	all	client-only	book glow
+85	NMNEB.esp	no-more-night-eye-blur-1.1	full	all	client-only	image space only
+86	MCMHelper.esp	mcm-helper-1.6.2@1.6.1170	light	1.6.1170	client-only	UI config
+87	DisableSpellLight_Prebuilt.esp	stealth-detection-fixes-2.2	light	all	client-only	spell light removal, visual
+88	RaceMenuMiscSlider.esp	racemenu-misc-slider-more-bodymorph-slider-for-r-0.1.0	light	all	client-only	RaceMenu sliders
+89	RaceMenuMorphsCBBE.esp	cbbe-2.0.3@1.6.1170	full	1.6.1170	client-only	RaceMenu sliders (existing)
+90	CBBE.esp	cbbe-2.0.3@1.6.1170	light	1.6.1170	client-only	body, existing

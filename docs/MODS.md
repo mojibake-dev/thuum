@@ -470,10 +470,10 @@ docs/research/mod-layer-plan.md). Built by apocrypha on branch
 
 **What it is.** 99 mods copied from Fenestrate, 5 fetched from Nexus, on top of the
 layer's existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire,
-Apocalypse, Headshot Kills with CIF 2.0.7, AI Pathing Freeze Fix): 94 plugins in
-the clients' order (80 served, 14 client-only at the tail), 49 of them light;
+Apocalypse, Headshot Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in
+the clients' order (81 served, 9 client-only at the tail), 45 of them light;
 29 mod folders scoped `@1.6.1170` (every SKSE DLL mod: all of them loaded on Fenestrate's
-1.6.1170 under SKSE 2.2.6, none has run on 1.7.104; FSMP among them). 113 mod folders,
+1.6.1170 under SKSE 2.2.6, none has run on 1.7.104; FSMP among them). 112 mod folders,
 about 6,200 files, 4.5 GB on disk (the DLL mods' .pdb files kept: Crash Logger with PDB
 support is in the set and reads them).
 
@@ -536,15 +536,23 @@ Cloaks of Skyrim's own `Cloaks - USSEP Patch.esp` comes along (USSEP is in the s
   Fenestrate's 15-master plugin; SKSE is the lab's own install.
 
 **Client-only, with the reason (load-order.tsv's `why`):** SkyUI_SE.esp, RLAiO.esp,
-UnreadBooksGlow.esp, NMNEB.esp, MCMHelper.esp, DisableSpellLight_Prebuilt.esp, TrueHUD.esl
-(interface and visuals no server state names), the four plugins that master Creation Club
-content the server's esm directories do not hold (MoreCraftableEquipment_AdvCyrus.esp needs
-ccBGSSSE031-AdvCyrus.esm; LoweredHoods_CCNecromanticGrimoire.esp,
-LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp and Necromantic Grimoire -
-Mysticism Rebalance.esp need ccvsvsse003-necroarts.esl), then RaceMenuMiscSlider.esp and
-CBBE's pair. To move the four server-side: copy the two Creation Club files off a clone's
-Data into /srv/persist/esm and /srv/persist/esm/1.6.1170 (as the five there were, docs/LAB.md),
-add them to both settings files' heads in Skyrim.ccc order, flip the four rows to `yes`, render.
+UnreadBooksGlow.esp, NMNEB.esp, MCMHelper.esp, DisableSpellLight_Prebuilt.esp (interface and
+visuals no server state names), then RaceMenuMiscSlider.esp and CBBE's pair. Two rules learned
+on the first stage (2026-10-19, numidium's bisect on c1): an `.esl` can never be client-only,
+because the engine loads every master-type file (ESM flag, `.esm`, `.esl`) before the rest
+whatever plugins.txt says, so a client-only `.esl` shifts every later light index on the
+clients against the server (TrueHUD.esl took FE004 on the clients while the server's Headshot
+Kills.esp sat one index lower); TrueHUD.esl is served, third in the order among the masters.
+And the lab's clones carry only the free Creation Club set (ccBGSSSE001-Fish, ccQDRSSE001-
+SurvivalMode, ccBGSSSE037-Curios, ccBGSSSE025-AdvDSGS, _ResourcePack), not Fenestrate's
+Anniversary Edition content, so the four plugins mastering ccBGSSSE031-AdvCyrus.esm or
+ccvsvsse003-necroarts.esl (MoreCraftableEquipment_AdvCyrus.esp, LoweredHoods_CCNecromanticGrimoire.esp,
+LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp, Necromantic Grimoire - Mysticism
+Rebalance.esp) are out of the layer, not client-only: the engine disabled the three whose master
+is missing, and the fourth, enabled with its master inactive, was the boot CTD of the first stage
+(SkyrimSE.exe+01D74A0, both clones). The first three are excluded from their mods' folders in
+essentials.tsv; the Necro rebalance mod is an `out` row. They return only if the clones ever
+carry those two Creation Club files.
 
 **What the layer needs from the game side (the fork and the lab), in the order it will bite:**
 - SkyUI's MCM is the first use (the per-player globals check): SkyUI_SE.esp is client-only
@@ -567,9 +575,9 @@ add them to both settings files' heads in Skyrim.ccc order, flip the four rows t
   patches. Fenestrate's own Nemesis output was never under Vortex's management (the manifest
   attributes only the engine's templates and scripts to the Nemesis mod), so nothing to copy
   from there.
-- Light plugins: the server now loads 39 light plugins after the three Creation Club
+- Light plugins: the server now loads 40 light plugins after the three Creation Club
   ones; the light-plugins verb's index mapping is what keeps FE form ids agreeing.
-- The server's esm directories receive 80 plugins (76 for 1.7.104); persist-mods
+- The server's esm directories receive 81 plugins (76 for 1.7.104); persist-mods
   places them from the manifest at the stage.
 
 ### The Nemesis output for True Directional Movement: the seat procedure
