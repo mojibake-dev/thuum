@@ -1,17 +1,17 @@
 # Playtest twenty-five's seats (thuum ADR-040 item 6: `just playtest-setup 25`;
-# the checklist is docs/private/playtest-m2-25.md). The essentials layer and
-# train-28 on the stage, twenty-four's world, twenty-four's seats plus Finger
+# the checklist is docs/private/playtest-m2-25.md). Train-28 on the stage
+# (the essentials layer waits for the loader fix), twenty-four's world, twenty-four's seats plus Finger
 # of Death and an Iron Sword on test 1: Apocalypse loads at
 # 0x0C in the lab, so its ids are 0x0Cxxxxxx. Everything here is server-side
 # (labCommand through playtest-console, set-percentages); the one thing a
 # seat types itself is test 1's `player.addperk 7934b` (Overdraw40, the
 # headshot rule's perk, which lives in the shooter's game).
 id: 25
-build: "fork m2-train-28 on the stage (not merged) with the essentials layer; the Apocalypse, freeze-fix and Headshot Kills layers"
+build: "fork m2-train-28 c0fd719e on the stage (not merged), without the essentials layer (the server refused its load order on libespm's exact-case master match, fixed after this playtest); the Apocalypse, freeze-fix and Headshot Kills layers"
 world: playtest-m2-24-20261019T181352Z   # twenty-four's world, saved 11:13 PDT after its checklist
 hold:
   minutes: 180
-  reason: "playtest twenty-five: the essentials layer and train-28 on the stage"
+  reason: "playtest twenty-five: train-28 on the stage"
 camp:
   # the camp's two teleports from playtest-start, only those (the script's
   # half bars and ingredients would undo the rest)
