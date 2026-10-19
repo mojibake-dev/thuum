@@ -12,12 +12,11 @@
         "BatchMode=yes",
         "-o",
         "ConnectTimeout=20",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-J",
         "root@core.gaussing.tv",
-        "pct",
-        "exec",
-        "701",
-        "--",
-        "/usr/local/bin/rea-mcp"
+        "rea@10.10.70.11"
       ]
     }
   }

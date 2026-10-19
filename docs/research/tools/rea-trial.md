@@ -164,3 +164,25 @@ Follow-ups, not taken yet:
   it) and SpellCast's spared archetype: asked of REA in a second
   background run on 2026-10-18 night, result pending.
 
+## The transport, changed (Eli, 2026-10-18 22:0x PDT: "i agree with numidium go ahead and set that up. im ok accepting defaults, meaaning your recommendations on all that.")
+
+numidium's point: the first .mcp.json entry ran `ssh root@core.gaussing.tv
+pct exec 701`, so every Claude session in the repo held a root session on
+the Proxmox host for its lifetime. Now the entry is `ssh -J
+root@core.gaussing.tv rea@10.10.70.11`: the jump only forwards a TCP
+connection (there is no route from a Mac into VLAN 70 otherwise, docs/LAB.md),
+and the session is the system user `rea` on sky-re, locked password, whose
+authorized_keys are the host's root principals (whoever could run REA
+before) each under `restrict,command="/usr/local/bin/rea-mcp"`. The wrapper
+reads SSH_ORIGINAL_COMMAND: `doctor` or `doctor --format json` runs REA's
+MCP doctor, nothing else is offered, and with no command it serves. sky-re's
+host key was verified out of band (`pct exec 701 -- cat
+/etc/ssh/ssh_host_ed25519_key.pub` against the pin the first connect made)
+before `just rea` and an MCP open_binary were run over the route.
+
+Defaults accepted with that message (my recommendations): REA the default;
+sky-re's memory ceiling raised rather than pyghidra-mcp retired now (mundus,
+sky.tf; a ceiling, not a reservation), pyghidra-mcp kept until a seed file
+built from `just relid` and addrlib gives REA's project CommonLib's names,
+then retired so one Ghidra serves; one REA import at a time meanwhile.
+
