@@ -186,3 +186,31 @@ sky.tf; a ceiling, not a reservation), pyghidra-mcp kept until a seed file
 built from `just relid` and addrlib gives REA's project CommonLib's names,
 then retired so one Ghidra serves; one REA import at a time meanwhile.
 
+## The second question, answered (2026-10-18 22:09 PDT, the import 468 s, the queries 0.0 to 0.1 s)
+
+- SpellCast (0x1405b1290, 34144) chooses the spared archetype itself: it asks
+  FUN_14014bf40(spell, 0xb) and, failing that, FUN_14014bf40(spell, 0x29)
+  (HYPOTHESIS: "does this magic item carry an effect of this archetype"), and
+  calls DispelAlteredStates(actor, archetype) with 0xb (Invisibility), 0x29
+  (Etherealize) or 0xffffffff (spare nothing). So a cast whose spell carries
+  Invisibility keeps the caster's Invisibility, and any other cast ends it:
+  the reading self-cast.md and the recast fix (fork 0636f14e) rest on, now
+  read by a second tool from the same bytes. Still a static read: the verb
+  doc's tags come off only with a lab run or a trace (rule 2).
+- SpellCast's incoming references are 33: 31 jumps inside its own body and
+  two DATA references, no direct calls. It is a virtual method (CommonLib's
+  MagicCaster::SpellCast; the two DATA references are its vtable slots,
+  HYPOTHESIS), so Fire (34407) reaches it through the vtable, which is why
+  the 2026-10-16 read could name Fire as a caller only by reading Fire.
+- address_name on 0x14365bbe8 (the data reference to DispelAlteredStates)
+  returned no name: the address carries no label in REA's fresh project.
+  What holds it (a vtable, a function table) is a question for the named
+  pyghidra project or for REA's search around that address; still open.
+- The lesson of the stalled first attempt, for anyone driving REA by hand:
+  its JSON-RPC parsing is strict, and a request with an unknown top-level
+  key (a client's own bookkeeping field) gets no answer at all, not an
+  error. Initialize went through because it was clean; every tools/call
+  hung. `rea mcp doctor` (`just rea`) proves the server without an import;
+  open_binary answers in 0.1 s; the import runs at the first provider-backed
+  call.
+
