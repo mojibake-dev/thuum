@@ -134,6 +134,8 @@ class FakeSystem:
         self.log_text = "fake server log\n"
         self.chowned: list[tuple[str, int, int]] = []
         self.envs: list[dict[str, str]] = []  # the env each command ran with, beside commands
+        # what `docker inspect` says of the server's container (a run's build provenance)
+        self.server_image = "10.10.70.12:5000/skymp-server:parity sha256:5e7ve7"
 
     fakeclient_rc = 0
 
@@ -142,6 +144,10 @@ class FakeSystem:
         self.envs.append(dict(env or {}))
         if cmd[:2] == ["docker", "compose"] and "logs" in cmd:
             return Completed(0, self.log_text, "")
+        if cmd[:2] == ["docker", "compose"] and cmd[-3:-1] == ["ps", "-q"]:
+            return Completed(0, "c0ffee000001\n", "")
+        if cmd[:2] == ["docker", "inspect"]:
+            return Completed(0, self.server_image + "\n", "")
         if any(c.endswith("fakeclient") for c in cmd):
             events = ['{"event": "actor", "idx": 0, "pos": [0, 0, 0], "rot": [0, 0, 0], "worldOrCell": 60}']
             if self.fakeclient_rc:

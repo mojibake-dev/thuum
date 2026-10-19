@@ -6,7 +6,7 @@
 # seat types itself is test 1's `player.addperk 7934b` (Overdraw40, the
 # headshot rule's perk, which lives in the shooter's game).
 id: 24
-build: "fork m2-train-27-snap 4c7e6998 on the stage (not merged); layers Apocalypse, freeze-fix, Headshot Kills"
+build: "fork m2-train-27-snap on the stage (not merged): server ab14087f (the branch head 88c43e77 adds only CI), client dist 9fb0732f's; layers Apocalypse, freeze-fix, Headshot Kills"
 world: playtest-m2-23-20261019T015813Z
 hold:
   minutes: 180

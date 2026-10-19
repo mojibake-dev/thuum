@@ -158,6 +158,11 @@ client-snapshot client name description="":
 client-promote client from to="clean-m1":
     @curl -fsS -m 900 -X POST "{{lab_api}}/clients/{{client}}/promote" -H 'content-type: application/json' -d '{"from": "{{from}}", "to": "{{to}}"}'
 
+# A live session's client-only rollback (ADR-041 item 5): the clone back to its newest snapshot, then the wait for its
+# seat online; allowed under the playtest's hold.
+client-rollback client to="clean-m1-next":
+    @lab/tools/client-rollback.sh {{client}} {{to}}
+
 # Run a Frida trace script on a lab client through lab-api.
 frida script client:
     @curl -fsS -X POST "{{lab_api}}/frida" -F "client={{client}}" -F "file=@{{script}}"
@@ -419,6 +424,19 @@ playtest-record-stop:
 # saved first, then the wait for both seats back online (they reconnect by themselves).
 turbo-srv tag:
     @lab/tools/turbo-srv.sh {{tag}}
+
+# A client push: skymp5-client.js built on this Mac from a fork ref in seconds (no Windows build), laid into every game
+# folder of both clones with the replaced file kept, then both seats relaunched (TURBO_CLIENTS="c1:711" for one).
+turbo-client ref:
+    @lab/tools/turbo-client.sh {{ref}}
+
+# The bundle alone, built from a fork ref (its path is the last line).
+turbo-client-build ref:
+    @lab/tools/turbo-client-build.sh {{ref}}
+
+# One push's line for the playtest's LOG entry (ADR-041 item 8): `just turbo-log srv 0f231fd2 02:10 02:11 "the swap pin"`.
+turbo-log class sha8 asked playable what="":
+    @python3 -c 'import sys, datetime as d; c, s, a, p, w = sys.argv[1:6]; m = (d.datetime.strptime(p, "%H:%M") - d.datetime.strptime(a, "%H:%M")).seconds // 60; print(f"  - turbo {c} {s}: asked {a}, playable {p}, {m} min" + (f" ({w})" if w else ""))' {{class}} {{sha8}} {{asked}} {{playable}} "{{what}}"
 
 # The reverse of the last turbo push (server tag or client file); --world also restores the newest saved turbo world.
 turbo-back *args:

@@ -381,6 +381,7 @@ pinned:
 | GET /lab/state/<query> | proxy to the lab gamemode's state endpoint on the server |
 | POST /lab/runset | `{name, scenarios: [ids] or "all", game?}`: the scenarios of the deployed tree played one after another with ADR-027's and the lab-fault reruns applied (ADR-030: the merge gate and the nightly sweep are both this); returns the set, `GET /lab/runset/<id>` its progress and verdict (green, watch, red, error), `GET /lab/runsets` the recent ones |
 | POST /lab/runset/<id>/stop, /resume | stop after the current run; go on from the scenario after the last one run |
+| POST /lab/clients/<c>/rollback `{to}` | a live session's client-only rollback (ADR-041 item 5): the clone back to `to`, its newest lab snapshot, by a stop, a disk rollback and a start, then the guest agent; allowed under a hold, refused beside a run or a snapshot (`just client-rollback c1`) |
 | POST /lab/hold `{minutes, reason}`, POST /lab/release | the lab is somebody's (a playtest, a staging writing the clones): /run, /runset, /up and /down answer 409 E_RUN_HOLD with the reason and the nightly does not start, until the minutes pass or the release; the playtest tools hold three hours by themselves, verb-stage while it writes the clones |
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/; a run set's
@@ -518,6 +519,11 @@ and sky-c2, only clean-m1 names, never clean-sp; a stacked snapshot goes
 directly on clean-m1 or replaces itself there, never on top of another one
 (promote or delete that first); no run starts while one is in progress
 (`just client-snapshot c1 clean-m1-x`, `just client-promote c1 clean-m1-x`).
+`POST /lab/clients/<c>/rollback {to}` (ADR-041 item 5) returns a clone to its
+newest snapshot, the only one ZFS rolls back to, with the same guards: a
+stop, a disk rollback, a start and the guest agent, allowed under a
+playtest's hold. `just client-rollback c1` (clean-m1-next by default) then
+waits for the seat back online.
 A shutdown that times out leaves the clone running, game stopped, with no
 snapshot taken. If a promote fails between deleting `from` and creating
 `to`, the clone runs `from`'s content with no `to`: the repair is a cold
@@ -636,6 +642,11 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    scenario waits for a condition rather than a `wait:` sized for the
    slowest case (the process plan's B7, 2026-10-13).
 6. Collects artifacts and writes result.json. Exit code is the verdict.
+   result.json's `build` names what the run played: `server`, the server
+   container's image reference and id (docker inspect after the rollback's
+   start), and `clients`, each managed clone's snapshot with the description
+   its staging wrote (the branch, the client's commit, the date). A read that
+   fails is an `error` there, never the run's failure.
 
 Artifacts per run, under /srv/lab/results/<timestamp>-<scenario>/:
 server.log, c1.log, c2.log, screenshots/, world-before/ and world-after/
@@ -720,9 +731,37 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
     online. skymp5-client reconnects and logs in by itself.
   - Measured on 2026-10-19 with the image already built: the server listening
     22 s after the push, both seats back online at 33 s.
-- `just turbo-back [--world]`: the reverse of the last push in turbo.log, a
-  tag back (31 s measured) or a kept client file. `--world` also restores the
-  newest saved turbo world, which relaunches both seats.
+- `just turbo-client <fork ref>`: a TypeScript client push.
+  - It builds skymp5-client.js on the Mac from a sparse fork worktree in
+    lab/.cache/turbo-fork (yarn 1 through npx; webpack 5 s).
+  - It sends the bundle over the in-VLAN hop with its SHA256 checked in the
+    guest, stops the game, and swaps the bundle into every game folder of each
+    clone, keeping the replaced file under C:\sky-lab\turbo\<stamp>\.
+  - It relaunches the seats and waits for each back online.
+    `TURBO_CLIENTS="c1:711"` pushes one seat.
+  - Measured on 2026-10-19 (fork 88c43e77): both seats back online 65 s after
+    the push, one seat 32 s. The bundle syncs like the Windows build's: a
+    600 px turn moved c1's server rot 27 degrees on either.
+  - A push relaunches, not hot-reloads (ADR-041's condition). Skyrim
+    Platform does reload a running game's plugins 8 ms after a last-write
+    change under Data/Platform/Plugins (DirectoryMonitor.cpp). But on
+    2026-10-19 the reloaded skymp5-client logged nothing on the server and
+    sent no movement: two turns left c1's rot at 0, while c2's control
+    turned 26.9 degrees.
+  - HYPOTHESIS: the reload starts with an empty storage
+    (assets/storageProxy.js makes a new Proxy over {}), so there is no world
+    model. skympClient.ts's establishConnectionConditional then finds the
+    native client still connected and skips the login, so no createActor
+    ever arrives.
+- `just client-rollback <c1|c2> [snapshot]`: a seat's whole clone back to
+  its newest snapshot (clean-m1-next, what the stage laid), for anything a
+  kept file cannot undo; the server and the other seat stay as they are.
+- `just turbo-back [--world]`: the reverse of the last push in turbo.log.
+  - A server push goes back to its previous tag (31 s measured).
+  - A client push stops each pushed seat's game, puts the kept file back and
+    relaunches only those seats (44 s for both, 37 to 74 s for one).
+  - `--world` also restores the newest saved turbo world, which relaunches
+    both seats.
 
 ## Network faults
 
