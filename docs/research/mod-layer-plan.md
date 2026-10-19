@@ -4,19 +4,20 @@ Plan for lab/tools/persist-mods.sh, drawn by apocrypha from Eli's ticks in docs/
 
 ## Eli's decisions
 
-Verbatim: "1. ditch the patch 2. untick the integration 3. ditch the armor mod 4. add the cloaks and hdt 5. untick. 6. if it needs it add em. if not no action."
+Verbatim, 2026-10-18: "1. ditch the patch 2. untick the integration 3. ditch the armor mod 4. add the cloaks and hdt 5. untick. 6. if it needs it add em. if not no action." and, on the two choices that followed: '"No Guards", FSMP in. i feel like my spare 1050 is like,, the oldest card we'll have to account for.'
 
 - **Out: Apocalypse and Tomebound Duplicate Spells Patch - Lore Magic of Skyrim** (decision 1, "ditch the patch": Tomebound is not in the set and the patch plugin masters Tomebound.esp).
 - **Out: Goam's Elven Ears - Proper RaceMenu Integration** (decision 2, "untick the integration": its plugin masters GoamElvenEars.esp from the old Goam's Elven Ears, which is not in the set; the Ears slider goes, the ears themselves (Goam Elven Ears - Redone) stay).
 - **Out: Armor and Clothing for Kids SE** (decision 3, "ditch the armor mod": RS Children Overhaul is not in the set and the plugin masters RSkyrimChildren.esm and RSChildren.esp).
 - **Out: Animals Report No Crimes - Dremora Merchant Addon (SkyPatcher)** (decision 5, "untick": a SkyPatcher config, and SkyPatcher is not installed).
-- **In, decision 4, "add the cloaks and hdt": the Survival Mode Patch Collection stays**, and five things come with it: Cloaks of Skyrim 1.2.1 and Winter Is Coming SSE - Cloaks 2.4, the masters its two patch plugins name; the WIC page's Cloaks of Skyrim leveled-list patch (optional, recommended); Artesian Cloaks of Skyrim 1.3.0, the HDT-SMP physics the patch file was made for ("Patch for Artesian Cloaks HDT esps for WIC and Cloaks for Skyrim", its Nexus description); and FSMP 4.1.1, the physics runtime. The two patch plugins were read whole (35 KB and 64 KB, in fen-heads): they override only records of the base mods, with the base mods' own mesh paths and no Artesian or HDT path, so the records require the two base mods and nothing else; Artesian and FSMP are the "hdt" Eli asked for, not a record requirement. The patch file's note "Load this after the other survival patches" applies; where Artesian's own ESP-FE plugins sit against the two patches is a lab check (both touch ARMA records of the same cloaks; the later one wins).
+- **In, decision 4, "add the cloaks and hdt": the Survival Mode Patch Collection stays**, and four things come with it: Cloaks of Skyrim 1.2.1 and Winter Is Coming SSE - Cloaks 2.4 in its "No Guards" main file (Eli's pick; the WIC page's Cloaks of Skyrim leveled-list patch is for the Full file only, so it stays out), the masters its two patch plugins name; Artesian Cloaks of Skyrim 1.3.0, the HDT-SMP physics the patch file was made for ("Patch for Artesian Cloaks HDT esps for WIC and Cloaks for Skyrim", its Nexus description); and FSMP 4.1.1, the physics runtime. The two patch plugins were read whole (35 KB and 64 KB, in fen-heads): they override only records of the base mods, with the base mods' own mesh paths and no Artesian or HDT path, so the records require the two base mods and nothing else; Artesian and FSMP are the "hdt" Eli asked for, not a record requirement. The patch file's note "Load this after the other survival patches" applies; where Artesian's own ESP-FE plugins sit against the two patches is a lab check (both touch ARMA records of the same cloaks; the later one wins).
 - **Decision 6, Cloaks and Capes, "if it needs it add em. if not no action": no action.** Fenestrate's file is Nexus 2019 file 35552, the 1.4 main archive; its 43 deployed files are 34 textures, 8 meshes and Cloaks&Capes.esp, with no SMP physics configs, so it needs neither FSMP nor XPMSSE (the page's current title describes the 1.5.1 All In One; the 1.4 "Faster HDT-SMP (FSMP)" file 811914 is not installed). With FSMP now in the set anyway, that file could be added later if Eli wants those capes to swing too.
-- **Parity on Fenestrate**: a dedicated Vortex profile mirroring this layer (magnus's proposal). Against Eli's current profile it gains the five additions (Cloaks of Skyrim, Winter Is Coming SSE - Cloaks and its CoS patch, Artesian Cloaks of Skyrim, FSMP) and loses the four that are out (the Apocalypse and Tomebound patch, Goam's Elven Ears - Proper RaceMenu Integration, Armor and Clothing for Kids, the NARC Dremora addon), and the 37 plugin-carrying mods Eli runs but did not tick come off it; client-only extras without plugins (ENB preset, textures, meshes) can stay.
+- **Hardware floor**: Eli's spare GTX 1050 (the c1 seat) is the oldest card the set has to run on, so it is the floor for every layer check from here on; the layer stage reads FSMP's cost there as a measured line (frame time with a cloaked NPC in view), not a guess.
+- **Parity on Fenestrate**: a dedicated Vortex profile mirroring this layer (magnus's proposal). Against Eli's current profile it gains the four additions (Cloaks of Skyrim, Winter Is Coming SSE - Cloaks, Artesian Cloaks of Skyrim, FSMP) and loses the four that are out (the Apocalypse and Tomebound patch, Goam's Elven Ears - Proper RaceMenu Integration, Armor and Clothing for Kids, the NARC Dremora addon), and the 37 plugin-carrying mods Eli runs but did not tick come off it; client-only extras without plugins (ENB preset, textures, meshes) can stay.
 
 ## Size of the set
 
-- 109 ticked mods kept plus 5 added = 114 mods; 96 plugins (42 full slots, 49 light, 5 new ones whose headers are read at fetch), 31 SKSE DLLs among the ticked (FSMP adds one), about 3.8 GB installed on Fenestrate (Vortex's modSize sum; the additions are about 160 MB more). Six of them are already in the layer (SKSE, RaceCompatibility, RaceMenu, CBBE, Lost Grimoire, Apocalypse) plus rotfern's fork.
+- 109 ticked mods kept plus 4 added = 113 mods; 95 plugins (42 full slots, 49 light, 4 new ones whose headers are read at fetch), 31 SKSE DLLs among the ticked (FSMP adds one), about 3.8 GB installed on Fenestrate (Vortex's modSize sum; the additions are about 180 MB of archives more). Six of them are already in the layer (SKSE, RaceCompatibility, RaceMenu, CBBE, Lost Grimoire, Apocalypse) plus rotfern's fork.
 - Creation Club content the set's plugins master, which the lab's game folders and the server's load order must carry: _resourcepack.esl, ccbgssse001-fish.esm, ccbgssse025-advdsgs.esm, ccbgssse031-advcyrus.esm, ccbgssse037-curios.esl, ccqdrsse001-survivalmode.esl, ccvsvsse003-necroarts.esl (counts: _resourcepack.esl x2, ccbgssse001-fish.esm x3, ccbgssse025-advdsgs.esm x2, ccbgssse031-advcyrus.esm x1, ccbgssse037-curios.esl x2, ccqdrsse001-survivalmode.esl x4, ccvsvsse003-necroarts.esl x2). The server already loads the full-slot CC plugins (docs/LAB.md) and reads light ones since the light-plugins verb; the ESL ones here (curios, survivalmode, necroarts, _ResourcePack) are light.
 - All 31 DLLs loaded correctly on 1.6.1170 under SKSE 2.2.6 (Fenestrate's skse64.log, 2026-07-22). None has been run on 1.7.104; RaceMenu (skee64.dll) and CIF 1.2.8 are known 1.6.1170-only (docs/MODS.md). So the DLL mods enter the 1.6.1170 folder first (`<mod>@1.6.1170` where a 1.7.104 build is not confirmed) and the 1.7.104 set takes each one after a seat test; the Address Library "all game versions" file is the first thing to test there.
 
@@ -36,94 +37,93 @@ Client-only proposal (docs/MODS.md's CBBE rule: a plugin stays on the clients wh
 | 6 (new, before @092) | Cloaks.esp | read at fetch | Cloaks of Skyrim | yes |
 | 7 (new, before @092) | Cloaks - Dawnguard.esp | read at fetch | Cloaks of Skyrim | yes |
 | 8 (new, before @092) | 1nivWICCloaks.esp | read at fetch | Winter Is Coming SSE - Cloaks | yes |
-| 9 (new, before @092) | (its plugin, name from the archive) | read at fetch | Winter Is Coming SSE - Cloaks, Cloaks of Skyrim patch | yes |
-| 10 (new, before @092) | (one ESP-FE plugin per package, names from the archives) | read at fetch | Artesian Cloaks of Skyrim | yes |
-| 11 (@092) | 1nivWICCloaks_SMP_Patch.esp | ESP, light | Survival Mode Patch Collection | yes |
-| 12 (@093) | Cloaks_SMP_Patch.esp | ESP, light | Survival Mode Patch Collection | yes |
-| 13 (@097) | Thaumaturgy.esp | ESP | Thaumaturgy - An Enchanting Overhaul | yes |
-| 14 (@098) | MysticismMagic.esp | ESP | Mysticism - A Magic Overhaul | yes |
-| 15 (@100) | ExtraDwemerHighFurniture.esp | ESP | Dwemer High Furniture | yes |
-| 16 (@101) | Odin - Skyrim Magic Overhaul.esp | ESP | Odin - Skyrim Magic Overhaul | yes |
-| 17 (@102) | MoreCraftableEquipment.esp | ESP | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
-| 18 (@104) | Playable Headparts All Races.esp | ESP | Playable Headparts All Races SE | yes |
-| 19 (@105) | DigitigradeKhajiit+ArgonianRaptor.esp | ESP | Digitigrade Beast Races for Skyrim SE | yes |
-| 20 (@107) | SpellAbsorptionAndTwinSoulsFix_SE.esp | ESP, light | Spell Absorb and Twin Souls Fix - SE Port | yes |
-| 21 (@108) | SimplyBiggerTreesSE.esp | ESP | Simply Bigger Trees SE - Lush Vanilla Forests | yes |
-| 22 (@111) | LetMeDropIt.esp | ESP, light | Let Me Drop It (Removable Quest Items) | yes |
-| 23 (@112) | Vanilla Civil War Dialogue Fix.esp | ESP, light | Vanilla Civil War Dialogue Fix | yes |
-| 24 (@118) | BlackBookNoQuest.esp | ESP, light | Droppable Black Books and Elder Scrolls | yes |
-| 25 (@119) | ElderScrollNoQuest.esp | ESP, light | Droppable Black Books and Elder Scrolls | yes |
-| 26 (@122) | _001_SelfFillingBookshelves.esp | ESP | Self Filling Bookshelves SE | yes |
-| 27 (@124) | mihailcrowsandravens.esp | ESP, light | Crows and Ravens- Mihail Monsters and Animals (SE-AE version) | yes |
-| 28 (@125) | Necromantic Grimoire - Mysticism Rebalance.esp | ESP, light | Necromantic Grimoire - Mysticism Rebalance | yes |
-| 29 (@127) | rmp_telvannihearthfires.esp | ESP | Tel Jerdein - Telvanni Sorcerer Tower | yes |
-| 30 (@129) | SummonsOfApocrypha.esp | ESP, light | Summons of Solstheim Lurkers Werebears and more - SE Conversion | yes |
-| 31 (@130) | EVE - House Telvanni Banners Restored.esp | ESP, light | House Telvanni Banners Restored - Cut Content Restoration | yes |
-| 32 (@131) | TrueDirectionalMovement.esp | ESP, light | True Directional Movement | yes |
-| 33 (@133) | Prometheus_BeastSkeletons.esp | ESP | Beast Skeletons | yes |
-| 34 (@134) | Apocalypse - Magic of Skyrim.esp | ESP | Apocalypse - Magic of Skyrim | yes |
-| 35 (@135) | mihailringneckedpheasant.esp | ESP, light | Ring-necked Pheasants - Mihail Monsters and Animals (SE-AE version) | yes |
-| 36 (@138) | IntuitiveDragonRideControl.esp | ESP, light | Intuitive Dragon Ride Control (SE) | yes |
-| 37 (@139) | Better Stealth AI for Followers.esp | ESP | Better Stealth AI for Followers | yes |
-| 38 (@140) | Jewelry limiter.esp | ESP | Jewelry Limiter - Another Multiple Rings and Amulets Mod | yes |
-| 39 (@141) | Vampiric Grip.esp | ESP | Vampiric Grip as a Destruction Spell | yes |
-| 40 (@145) | mihailatmoranremains.esp | ESP, light | Ancient Atmoran Remains- Mihail's Shards of Immersion (SE-AE version) | yes |
-| 41 (@146) | mihailmagicladder.esp | ESP, light | Mystic Steps- Mihail Powers and Spells (SE-AE) (''alteration'') | yes |
-| 42 (@148) | LRD.esp | ESP | Let's Ride Durnehviir | yes |
-| 43 (@154) | StealthKillDetectionFix.esp | ESP, light | Stealth Detection Fixes | yes |
-| 44 (@155) | Portal.esp | ESP | Portal - Dynamically Placed Teleportation SE | yes |
-| 45 (@157) | All Eyes for All Races.esp | ESP, light | All Eyes for All Races | yes |
-| 46 (@159) | SimpleFireWyrmFix.esp | ESP, light | Dragonborn DLC fixes | yes |
-| 47 (@161) | Ring of Namira - Improved.esp | ESP, light | Ring of Namira - Improved | yes |
-| 48 (@162) | Better Vampire Lord plus Serana Fix EN.esp | ESP | Better Vampire Lord plus Serana Fix (English) | yes |
-| 49 (@163) | ChitinGoggles.esp | ESP | Chitin Goggles | yes |
-| 50 (@164) | Dynamic Activation Key.esp | ESP, light | Dynamic Activation Key | yes |
-| 51 (@165) | Dwemer Goggles & Scouter.esp | ESP | Dwemer Goggles and Scouter | yes |
-| 52 (@168) | RaceMenu.esp | ESP | RaceMenu | yes |
-| 53 (@169) | RaceMenuPlugin.esp | ESP | RaceMenu | yes |
-| 54 (@171) | DualCastingCostPowerTweak.esp | ESP | Dual Casting Cost vs. Power Tweak | yes |
-| 55 (@174) | ArchmageRobeLearn.esp | ESP, light | Learnable Archmage Robes Enchantment | yes |
-| 56 (@175) | LoweredFurHoods.esp | ESP, light | Lowered Fur Hoods | yes |
-| 57 (@177) | NARC SE for Vanilla.esp | ESP, light | NARC Remade  - No Animals Report Crimes for Skyrim SE | yes |
-| 58 (@178) | Next-Gen Decapitations.esp | ESP, light | Next-Gen Decapitations | yes |
-| 59 (@179) | Cloaks&Capes.esp | ESP | Cloaks and Capes - FSMP - XPMSSE | yes |
-| 60 (@180) | NB-FurHoods.esp | ESP | Northborn Fur Hoods | yes |
-| 61 (@181) | LostGrimoire.esp | ESP | Lost Grimoire SSE | yes |
-| 62 (@182) | dremora_merchant_upgrade.esp | ESP, light | Better Dremora Merchant and merchant gold tweaks | yes |
-| 63 (@183) | Headshot Kills.esp | ESP, light | Headshot Kills - CIF | yes |
-| 64 (@187) | Silent Reanimated Corpses.esp | ESP | Silent Reanimated Corpses | yes |
-| 65 (@188) | SunAffectsNPCVampires.esp | ESP, light | Sun Affects NPC Vampires | yes |
-| 66 (@189) | SunAffectsNPCVampires-Hooded.esp | ESP, light | Sun Affects NPC Vampires | yes |
-| 67 (@190) | Survival Mode Vampire Patch.esp | ESP | Survival Mod Vampire Patch | yes |
-| 68 (@191) | Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire.esp | ESP, light | Supernatural Survival Tweaks - Werewolf Werebear and Vampire Cold Survival | yes |
-| 69 (@192) | UndeadFX.esp | ESP | Undead FX | yes |
-| 70 (@193) | SummonsReleveled.esp | ESP | Summons Releveled | yes |
-| 71 (@196) | mihailhelhest.esp | ESP, light | Draugr Horse Mount- Mihail Monsters and Animals (SE-AE version) (''undead'') | yes |
-| 72 (@197) | Stab the heart.esp | ESP, light | Stab The Heart - CIF | yes |
-| 73 (@198) | VampireFeedingTweaks.esp | ESP, light | Vampire Feeding Tweaks | yes |
-| 74 (@200) | RaceCompatibilityUSKPOverride.esp | ESP | RaceCompatibility for Skyrim Special Edition | yes |
-| 75 (@201) | MoreCraftableEquipment_AdvCyrus.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
-| 76 (@202) | MoreCraftableEquipment_BYOHLooms.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
-| 77 (@203) | MoreCraftableEquipment_CloaksandCapes.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
-| 78 (@204) | MoreCraftableEquipment_Fish.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
-| 79 (@205) | MoreCraftableEquipment_USSEP.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
-| 80 (@206) | VampireLordsCanActivate.esp | ESP | Vampire Lords Can Activate | yes |
-| 81 (@207) | LoweredHoods.esp | ESP, light | Lowered Hoods | yes |
-| 82 (@208) | LoweredHoods_CCNecromanticGrimoire.esp | ESP, light | Lowered Hoods | yes |
-| 83 (@209) | LoweredHoods_MoreCraftableEquipment.esp | ESP, light | Lowered Hoods | yes |
-| 84 (@210) | LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp | ESP, light | Lowered Hoods | yes |
-| 85 (@214) | vampireinverterdg.esp | ESP | Vampirism Inverter Dawnguard | yes |
-| 86 (@229) | rotfern.esp | ESP | rotfern | yes |
-| 87 (@083) | TrueHUD.esl | ESP, light | TrueHUD - HUD Additions | client-only (proposed) |
-| 88 (@091) | SkyUI_SE.esp | ESP, light | SkyUI | client-only (proposed) |
-| 89 (@120) | RLAiO.esp | ESP | Reading List SSE | client-only (proposed) |
-| 90 (@121) | UnreadBooksGlow.esp | ESP | Unread Books Glow SSE with MCM | client-only (proposed) |
-| 91 (@151) | NMNEB.esp | ESP | No More Night Eye Blur | client-only (proposed) |
-| 92 (@152) | MCMHelper.esp | ESP, light | MCM Helper | client-only (proposed) |
-| 93 (@153) | DisableSpellLight_Prebuilt.esp | ESP, light | Stealth Detection Fixes | client-only (proposed) |
-| 94 (@167) | CBBE.esp | ESP, light | Caliente's Beautiful Bodies Enhancer -CBBE- | client-only (proposed) |
-| 95 (@170) | RaceMenuMorphsCBBE.esp | ESP | Caliente's Beautiful Bodies Enhancer -CBBE- | client-only (proposed) |
-| 96 (@184) | RaceMenuMiscSlider.esp | ESP, light | Racemenu Misc Slider - More Bodymorph Slider for Racemenu | client-only (proposed) |
+| 9 (new, before @092) | (one ESP-FE plugin per package, names from the archives) | read at fetch | Artesian Cloaks of Skyrim | yes |
+| 10 (@092) | 1nivWICCloaks_SMP_Patch.esp | ESP, light | Survival Mode Patch Collection | yes |
+| 11 (@093) | Cloaks_SMP_Patch.esp | ESP, light | Survival Mode Patch Collection | yes |
+| 12 (@097) | Thaumaturgy.esp | ESP | Thaumaturgy - An Enchanting Overhaul | yes |
+| 13 (@098) | MysticismMagic.esp | ESP | Mysticism - A Magic Overhaul | yes |
+| 14 (@100) | ExtraDwemerHighFurniture.esp | ESP | Dwemer High Furniture | yes |
+| 15 (@101) | Odin - Skyrim Magic Overhaul.esp | ESP | Odin - Skyrim Magic Overhaul | yes |
+| 16 (@102) | MoreCraftableEquipment.esp | ESP | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
+| 17 (@104) | Playable Headparts All Races.esp | ESP | Playable Headparts All Races SE | yes |
+| 18 (@105) | DigitigradeKhajiit+ArgonianRaptor.esp | ESP | Digitigrade Beast Races for Skyrim SE | yes |
+| 19 (@107) | SpellAbsorptionAndTwinSoulsFix_SE.esp | ESP, light | Spell Absorb and Twin Souls Fix - SE Port | yes |
+| 20 (@108) | SimplyBiggerTreesSE.esp | ESP | Simply Bigger Trees SE - Lush Vanilla Forests | yes |
+| 21 (@111) | LetMeDropIt.esp | ESP, light | Let Me Drop It (Removable Quest Items) | yes |
+| 22 (@112) | Vanilla Civil War Dialogue Fix.esp | ESP, light | Vanilla Civil War Dialogue Fix | yes |
+| 23 (@118) | BlackBookNoQuest.esp | ESP, light | Droppable Black Books and Elder Scrolls | yes |
+| 24 (@119) | ElderScrollNoQuest.esp | ESP, light | Droppable Black Books and Elder Scrolls | yes |
+| 25 (@122) | _001_SelfFillingBookshelves.esp | ESP | Self Filling Bookshelves SE | yes |
+| 26 (@124) | mihailcrowsandravens.esp | ESP, light | Crows and Ravens- Mihail Monsters and Animals (SE-AE version) | yes |
+| 27 (@125) | Necromantic Grimoire - Mysticism Rebalance.esp | ESP, light | Necromantic Grimoire - Mysticism Rebalance | yes |
+| 28 (@127) | rmp_telvannihearthfires.esp | ESP | Tel Jerdein - Telvanni Sorcerer Tower | yes |
+| 29 (@129) | SummonsOfApocrypha.esp | ESP, light | Summons of Solstheim Lurkers Werebears and more - SE Conversion | yes |
+| 30 (@130) | EVE - House Telvanni Banners Restored.esp | ESP, light | House Telvanni Banners Restored - Cut Content Restoration | yes |
+| 31 (@131) | TrueDirectionalMovement.esp | ESP, light | True Directional Movement | yes |
+| 32 (@133) | Prometheus_BeastSkeletons.esp | ESP | Beast Skeletons | yes |
+| 33 (@134) | Apocalypse - Magic of Skyrim.esp | ESP | Apocalypse - Magic of Skyrim | yes |
+| 34 (@135) | mihailringneckedpheasant.esp | ESP, light | Ring-necked Pheasants - Mihail Monsters and Animals (SE-AE version) | yes |
+| 35 (@138) | IntuitiveDragonRideControl.esp | ESP, light | Intuitive Dragon Ride Control (SE) | yes |
+| 36 (@139) | Better Stealth AI for Followers.esp | ESP | Better Stealth AI for Followers | yes |
+| 37 (@140) | Jewelry limiter.esp | ESP | Jewelry Limiter - Another Multiple Rings and Amulets Mod | yes |
+| 38 (@141) | Vampiric Grip.esp | ESP | Vampiric Grip as a Destruction Spell | yes |
+| 39 (@145) | mihailatmoranremains.esp | ESP, light | Ancient Atmoran Remains- Mihail's Shards of Immersion (SE-AE version) | yes |
+| 40 (@146) | mihailmagicladder.esp | ESP, light | Mystic Steps- Mihail Powers and Spells (SE-AE) (''alteration'') | yes |
+| 41 (@148) | LRD.esp | ESP | Let's Ride Durnehviir | yes |
+| 42 (@154) | StealthKillDetectionFix.esp | ESP, light | Stealth Detection Fixes | yes |
+| 43 (@155) | Portal.esp | ESP | Portal - Dynamically Placed Teleportation SE | yes |
+| 44 (@157) | All Eyes for All Races.esp | ESP, light | All Eyes for All Races | yes |
+| 45 (@159) | SimpleFireWyrmFix.esp | ESP, light | Dragonborn DLC fixes | yes |
+| 46 (@161) | Ring of Namira - Improved.esp | ESP, light | Ring of Namira - Improved | yes |
+| 47 (@162) | Better Vampire Lord plus Serana Fix EN.esp | ESP | Better Vampire Lord plus Serana Fix (English) | yes |
+| 48 (@163) | ChitinGoggles.esp | ESP | Chitin Goggles | yes |
+| 49 (@164) | Dynamic Activation Key.esp | ESP, light | Dynamic Activation Key | yes |
+| 50 (@165) | Dwemer Goggles & Scouter.esp | ESP | Dwemer Goggles and Scouter | yes |
+| 51 (@168) | RaceMenu.esp | ESP | RaceMenu | yes |
+| 52 (@169) | RaceMenuPlugin.esp | ESP | RaceMenu | yes |
+| 53 (@171) | DualCastingCostPowerTweak.esp | ESP | Dual Casting Cost vs. Power Tweak | yes |
+| 54 (@174) | ArchmageRobeLearn.esp | ESP, light | Learnable Archmage Robes Enchantment | yes |
+| 55 (@175) | LoweredFurHoods.esp | ESP, light | Lowered Fur Hoods | yes |
+| 56 (@177) | NARC SE for Vanilla.esp | ESP, light | NARC Remade  - No Animals Report Crimes for Skyrim SE | yes |
+| 57 (@178) | Next-Gen Decapitations.esp | ESP, light | Next-Gen Decapitations | yes |
+| 58 (@179) | Cloaks&Capes.esp | ESP | Cloaks and Capes - FSMP - XPMSSE | yes |
+| 59 (@180) | NB-FurHoods.esp | ESP | Northborn Fur Hoods | yes |
+| 60 (@181) | LostGrimoire.esp | ESP | Lost Grimoire SSE | yes |
+| 61 (@182) | dremora_merchant_upgrade.esp | ESP, light | Better Dremora Merchant and merchant gold tweaks | yes |
+| 62 (@183) | Headshot Kills.esp | ESP, light | Headshot Kills - CIF | yes |
+| 63 (@187) | Silent Reanimated Corpses.esp | ESP | Silent Reanimated Corpses | yes |
+| 64 (@188) | SunAffectsNPCVampires.esp | ESP, light | Sun Affects NPC Vampires | yes |
+| 65 (@189) | SunAffectsNPCVampires-Hooded.esp | ESP, light | Sun Affects NPC Vampires | yes |
+| 66 (@190) | Survival Mode Vampire Patch.esp | ESP | Survival Mod Vampire Patch | yes |
+| 67 (@191) | Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire.esp | ESP, light | Supernatural Survival Tweaks - Werewolf Werebear and Vampire Cold Survival | yes |
+| 68 (@192) | UndeadFX.esp | ESP | Undead FX | yes |
+| 69 (@193) | SummonsReleveled.esp | ESP | Summons Releveled | yes |
+| 70 (@196) | mihailhelhest.esp | ESP, light | Draugr Horse Mount- Mihail Monsters and Animals (SE-AE version) (''undead'') | yes |
+| 71 (@197) | Stab the heart.esp | ESP, light | Stab The Heart - CIF | yes |
+| 72 (@198) | VampireFeedingTweaks.esp | ESP, light | Vampire Feeding Tweaks | yes |
+| 73 (@200) | RaceCompatibilityUSKPOverride.esp | ESP | RaceCompatibility for Skyrim Special Edition | yes |
+| 74 (@201) | MoreCraftableEquipment_AdvCyrus.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
+| 75 (@202) | MoreCraftableEquipment_BYOHLooms.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
+| 76 (@203) | MoreCraftableEquipment_CloaksandCapes.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
+| 77 (@204) | MoreCraftableEquipment_Fish.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
+| 78 (@205) | MoreCraftableEquipment_USSEP.esp | ESP, light | More Craftable Equipment - Unenchanted Clothing and Specialty Gear | yes |
+| 79 (@206) | VampireLordsCanActivate.esp | ESP | Vampire Lords Can Activate | yes |
+| 80 (@207) | LoweredHoods.esp | ESP, light | Lowered Hoods | yes |
+| 81 (@208) | LoweredHoods_CCNecromanticGrimoire.esp | ESP, light | Lowered Hoods | yes |
+| 82 (@209) | LoweredHoods_MoreCraftableEquipment.esp | ESP, light | Lowered Hoods | yes |
+| 83 (@210) | LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp | ESP, light | Lowered Hoods | yes |
+| 84 (@214) | vampireinverterdg.esp | ESP | Vampirism Inverter Dawnguard | yes |
+| 85 (@229) | rotfern.esp | ESP | rotfern | yes |
+| 86 (@083) | TrueHUD.esl | ESP, light | TrueHUD - HUD Additions | client-only (proposed) |
+| 87 (@091) | SkyUI_SE.esp | ESP, light | SkyUI | client-only (proposed) |
+| 88 (@120) | RLAiO.esp | ESP | Reading List SSE | client-only (proposed) |
+| 89 (@121) | UnreadBooksGlow.esp | ESP | Unread Books Glow SSE with MCM | client-only (proposed) |
+| 90 (@151) | NMNEB.esp | ESP | No More Night Eye Blur | client-only (proposed) |
+| 91 (@152) | MCMHelper.esp | ESP, light | MCM Helper | client-only (proposed) |
+| 92 (@153) | DisableSpellLight_Prebuilt.esp | ESP, light | Stealth Detection Fixes | client-only (proposed) |
+| 93 (@167) | CBBE.esp | ESP, light | Caliente's Beautiful Bodies Enhancer -CBBE- | client-only (proposed) |
+| 94 (@170) | RaceMenuMorphsCBBE.esp | ESP | Caliente's Beautiful Bodies Enhancer -CBBE- | client-only (proposed) |
+| 95 (@184) | RaceMenuMiscSlider.esp | ESP, light | Racemenu Misc Slider - More Bodymorph Slider for Racemenu | client-only (proposed) |
 
 ## Nemesis: how True Directional Movement's behaviour output travels
 
@@ -264,7 +264,7 @@ Nexus mod and file ids and the archive md5 are Vortex's own records of what Fene
 | Lowered Fur Hoods | 1.0.0 | 48200 / 196485 | a5cbd3bc29c1d6ce98d864fc36e667d6 | 1 plugin, assets | none recorded |  |
 | Lowered Hoods | 1.9.0 | 29661 / 437494 | 86f6aaf9db56dee669b98ef0e35b4e5a | 4 plugins, assets | Lowered Hoods, Necromantic Grimoire, More Craftable Equipment, More Craftable Equipment - CC Necromantic Grimoire |  |
 | Northborn Fur Hoods | 1.4 | 1184 / 3099 | 77efec98cad0479752a142b1ca282e99 | 1 plugin, assets | none recorded |  |
-| Winter Is Coming SSE - Cloaks | 2.4 (Full; No Guards 10467 and Craft Only 10470 are the alternatives, "PICK ONE") | 4933 / 10466 | from Nexus at fetch | 1 plugin, assets |  | added for decision 4: master of 1nivWICCloaks_SMP_Patch.esp (63 ARMO and 21 ARMA overrides, all of 1nivWICCloaks.esp records, mesh paths under 1nivCloaks\BearClaw and 1nivCloaks\WolfSkin) |
+| Winter Is Coming SSE - Cloaks | 2.4, the No Guards main file (Eli's pick; Full 10466 and Craft Only 10470 are the other two, the page says PICK ONE) | 4933 / 10467 | from Nexus at fetch | 1 plugin, assets |  | added for decision 4: master of 1nivWICCloaks_SMP_Patch.esp (63 ARMO and 21 ARMA overrides, all of 1nivWICCloaks.esp records, mesh paths under 1nivCloaks\BearClaw and 1nivCloaks\WolfSkin) |
 
 ### Creatures
 
@@ -307,7 +307,6 @@ Nexus mod and file ids and the archive md5 are Vortex's own records of what Fene
 | Necromantic Grimoire - Mysticism Rebalance | 1.2.1 | 78651 / 356948 | 1689a7ffa16b09a7c5883582afeda03b | 1 plugin, 1 pex | none recorded |  |
 | Survival Mod Vampire Patch | 1.0.0 | 64780 / 269285 | 18651732ac4902779a059da0074c89c6 | 1 plugin | none recorded |  |
 | Survival Mode Patch Collection | 1.0 | 19154 / 349444 | 29992a06c82f75c5f6e35967f18c2388 | 2 plugins | none recorded |  |
-| Winter Is Coming SSE - Cloaks, Cloaks of Skyrim patch | 2.4 (optional file "WIC Cloaks SSE COS PATCH 2_4", for the Full main file only) | 4933 / 18481 | from Nexus at fetch | 1 plugin |  | added for decision 4, optional: the two cloak mods share leveled lists; the WIC page ships this patch for exactly this pairing |
 
 ## Out by Eli's decisions
 
@@ -318,8 +317,7 @@ Nexus mod and file ids and the archive md5 are Vortex's own records of what Fene
 
 ## Still open (install choices, not decisions)
 
-- Winter Is Coming SSE - Cloaks: which 2.4 main file, Full (10466, the default here), No Guards (10467) or Craft Only (10470); the Cloaks of Skyrim patch 18481 is for the Full file only.
-- Artesian Cloaks of Skyrim: the two optional packages (58845, 58846) or the FOMOD 58843 with those two chosen; and the load-order place of its ESP-FE plugins against the two Survival patches (a lab check: both override ARMA records of the same cloaks).
-- FSMP: 4.1.1 is taken (the 3.5.0 MCM build needs JContainers); its installer offers one DLL per runtime, so the 1.6.1170 build is chosen for the players' set and the 1.7.104 one tested on a seat like every other DLL.
+- Artesian Cloaks of Skyrim: the two optional packages (58845, 58846) or the FOMOD 58843 with those two chosen; and the load-order place of its ESP-FE plugins against the two Survival patches, which the lab checks at the layer stage (a clean install order, then the ARMA winner read in game).
+- FSMP: 4.1.1 (the 3.5.0 MCM build needs JContainers); its installer offers one DLL per runtime, so the 1.6.1170 build enters first like every DLL and the 1.7.104 one is tested on a seat; its frame-time cost is measured on the GTX 1050 seat.
 - The new plugins' headers (ESM/light flags, exact plugin names of the WIC patch and Artesian's packages) are read when persist-mods fetches the archives; the fetch table's "read at fetch" cells fill then.
 - Dedicated Vortex profile on Fenestrate: magnus's proposal, awaiting Eli; if declined, the 37 unticked plugin-carrying mods either join the layer (about 29 more plugins) or Eli's own game stops matching the shared order.
