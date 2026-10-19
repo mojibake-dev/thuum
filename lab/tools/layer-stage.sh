@@ -10,6 +10,9 @@
 #      clones are written; it stands if a step fails, `just lab-release` ends it);
 #   2. `just persist-mods`: the host's persist/mods rebuilt from the branch's
 #      script, the plugins placed in both game versions' esm directories;
+#      2b. the load order the clients will enable against the server's
+#      (load-order-check.py on persist's mods/): every enabled plugin loads,
+#      and every plugin the server loads sits on the clients' slot;
 #   3. `just deploy-srv`: the lab tree and both server-settings files (their
 #      load-order check passes once step 2 has placed the plugins);
 #   4. the server restarted on the new load order and answering, before any
@@ -70,6 +73,14 @@ echo "   held 90 min"
 echo "== 2. persist-mods $(date +%H:%M:%S)"
 last=$(just persist-mods 2>&1 | tee /dev/stderr | tail -1)
 case "$last" in "mods: SHA256SUMS checked on the host"*) ;; *) echo "== persist-mods did not end with the host's check" >&2; exit 1;; esac
+
+echo "== 2b. the load order the clients enable $(date +%H:%M:%S)"
+# persist's plugins.txt and plugin headers against this tree's 1.6.1170 settings: the essentials layer's first
+# stage (2026-10-19) booted neither clone, a Creation Club patch enabled over a master the engine disabled, and its
+# client-only TrueHUD.esl moved 38 light plugins to other slots than the server's
+$srv_ssh "mkdir -p /srv/lab/handover && cat > /srv/lab/handover/load-order-check.json" < lab/deploy/sky-srv/server-settings.json
+$srv_ssh "python3 - /srv/persist/mods /srv/lab/handover/load-order-check.json" < lab/tools/load-order-check.py | sed 's/^/   /' \
+  || { echo "== the clients' load order does not hold (above): stop before deploy-srv (the hold stands)" >&2; exit 1; }
 
 echo "== 3. deploy-srv $(date +%H:%M:%S)"
 just deploy-srv 2>&1 | tail -1

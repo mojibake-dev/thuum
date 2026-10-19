@@ -310,6 +310,16 @@ where (real since 2026-10-01):
    (SurvivalMode, Curios, _ResourcePack) live in the FE space, which no
    full slot depends on; they stay client-only until libespm handles light
    plugins (a port item), since the server would give them full indices.
+   A mod layer's plugins keep one rule, checked before any clone is
+   touched (layer-stage step 2b, lab/tools/load-order-check.py): every
+   plugin the clients enable loads, its masters loading before it, and every
+   plugin the server loads sits on the slot the clients' engine gives it,
+   full or light. A client-only plugin is allowed only where it sorts after
+   every served plugin of its kind, so never an .esl, which the engine sorts
+   with the masters. The essentials layer's first stage (2026-10-19) broke
+   both halves: a Creation Club patch enabled over a master the engine had
+   disabled booted neither clone, and the client-only TrueHUD.esl moved 38
+   light plugins off the server's slots.
    Also open: Skyrim Platform logs "on('update'): failed to get key 'data':
    failed to call custom Serialize for type struct Equipment: ... class
    Inventory" once per login on the 1.7.104 client (c1.log of run
