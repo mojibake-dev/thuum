@@ -1421,8 +1421,22 @@ gate and the merges after).
   context; every other caller leaves it false, so a 724 rider holds only on
   a claimed dual cast. No wire change (the message carried the flag; the
   record is rule state). T0: the same test file; Rust 186 + 17 green.
-  HYPOTHESIS until a seat dual casts one of the thirteen at the other
-  (playtest twenty-seven's row, the setup naming the spell and the perk).
+  Read the same night against the records (a scan of every CTDA in the
+  Apocalypse esp with esm.py's parser, 1643 rows): all thirteen "724
+  spells" carry the same one effect, vanilla's Impact rider 0x153D3, gated
+  EffectWasDualCast == 1 AND HasPerk(Impact) == 1, and the only other 724s
+  are two orphan copies of that rider used by no spell. The server refuses
+  on the first unknown function and HasPerk is unknown by design, so no
+  724 effect is observable at T3 or T4 before M5; the gain is correctness
+  and the T0 proof, not a visible change. What a dual cast does show on
+  this build, playtest twenty-seven's row: Electrosphere (0x1A001879 under
+  the layer) dual cast with Destruction Dual Casting (Skyrim.esm 0x153CF) is
+  one ball and one hit, 55 Health and 55 Magicka applied once (the flag
+  rides the claim; nothing in wire-rules scales by the engine's 2.2), two
+  balls and 110 without the perk. Found on the way, a train-30 candidate:
+  Hailstone's own two effects are gated on GetActorValue (14) and
+  HasMagicEffect (214), which the server lacks, so it applies nothing on
+  the server today.
 - Scattershock (row 6), measured, no code: x-scattershock-6s
   20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
   launched on both seats (the PROJ 083a24 of Apocalypse) and the server
