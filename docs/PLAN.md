@@ -380,10 +380,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         loads and frame rate held; no MCM, cloaks without physics, no
         warmth, bare aspens, rotfern undressed by the slot shift (ADR-043
         PROPOSED; the layer's three fixes render 2026-10-20 06:23).
-    - Train-29 (built overnight 2026-10-20 on Eli's word, fork m2-train-29
-      18c0e603 on parity 602a2dd2, staged under the layer for playtest
-      twenty-seven; each row's facts in docs/research/train-29-rows.md), in
-      build order; the state of each row as of 01:30 PDT:
+    - Train-29 (built overnight 2026-10-20 on Eli's word; fork m2-train-29
+      709c90b0: 18c0e603's client and server content, a rune try measured
+      and reverted, and the CI fresh-tree fix merged with parity d5f478c3;
+      staged 04:02 with its gate's always set green and both clones' clean
+      snapshot retaken on it, the essentials layer to stack on it for
+      playtest twenty-seven; each row's facts in
+      docs/research/train-29-rows.md), in build order:
       - the client's Papyrus event filter: BUILT (b2db6354, docs/verbs/
         papyrus-events.md): a parent-chain walk so every MCM passes, the
         layer's plugin list read at Skyrim Platform's load, OnUpdate per
@@ -398,15 +401,20 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         ADR-029's default, until the allowlist verb.
       - a player's own dent on a figure's bar: READ (x-figure-values-hit-frida
         20261020-085705): the fork's guard works and the vfunc it blocks is a
-        post-write notification inside DamageActor 37335; the hook point is
-        37335's entry, after the re-analyst resolves its signature (no hook
-        before that; train-30).
+        post-write notification inside DamageActor 37335; signature
+        resolved by the re-analyst (bool (Actor*, float, Actor*, bool),
+        returns IsDead); train-30: a Gum interceptor-replace at 37335
+        returning false for a figure victim (docs/verbs/figure-values.md).
       - the rune's glyph on the observer: READ (x-rune-visible-frida
         20261020-085906): the landing's look never runs for the relayed rune
         (no 44213, no 43919; arrived from the trigger tick, not a collision),
         so the tier is not the cause; the rune stands as a PROJ-based
-        reference (refs-near); next the caster-seat trace and the arrival
-        path's static read (train-30).
+        reference (refs-near); the glyph is the decal 34452 places through
+        44186 after the caster's own launch, which the relay skips:
+        CONFIRMED by x-rune-decal-frida 20261020-102818 (one decal call on
+        the caster with normal and material, none on the observer); a
+        launch-flag try measured a no-op and was reverted; train-30: relay
+        the normal and material and call 44186 after the relayed launch.
       - Scattershock's hits: MEASURED and closed (x-scattershock-6s
         20261020-080751: thirteen missiles on both seats, the server records
         the hits; the 2.5 s hold had matched the charge); the missile's

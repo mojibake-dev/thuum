@@ -217,6 +217,36 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
 - Frida script: lab/frida/figure-dent-trace.js, RUN on train-29's stage (x-figure-values-hit-frida 20261020-085705, the hitter's seat; docs/research/frida-reads-train29.md section A). CONFIRMED: the guard works as written (victim 0xff0008f5, attacker 0x14, kAttackDamageMult 0, the engine call dropped) and the bar still moved, because the slot-0x104 vfunc is reached from inside DamageActor 37335 after the write: Health 100 at 37335's entry, 93.83 at its leave, already 93.83 when the vfunc is entered. The vfunc is a post-write notification (ADR-037's caveat). The blocking point is 37335's entry, the gate Skyrim Together uses (docs/TE-MAP.md:62); its parameters, return and side effects are the re-analyst's question before any hook (rule 1): the trace saw args[1] = 0x3, the damage in an XMM register, return 0, and cannot say whether the hit event's dispatch is inside it. The fourteen other handler rows in the run are the client's own writes toward the server's percentage (attacker null, damages 0.75 down to 0.009, frames through SkyrimPlatformImpl.dll: HYPOTHESIS sync/movementApply.ts's quarter-gap damageActorValue), which the guard also silences.
+- The static read (the re-analyst on REA, 2026-10-20, docs/research/
+  re-37335-and-rune-landing.md, HYPOTHESIS from pseudocode, consistent with
+  the trace): 37335 is `bool (Actor* this, float damage in XMM1, Actor*
+  attacker in R8, bool killMove in R9B)`, TE's lead exactly; it returns
+  IsDead(false) after the damage; the trace's args[1] = 3 is the float's
+  dead integer slot. Inside, in order: IsInvulnerable and kIsInKillMove gate
+  (return false touching nothing), the essential-down reset, the difficulty
+  multiplier, the combat notice and trackedDamage, THE WRITE through 38468
+  (which itself calls slot 0x104 after writing: the frame the trace saw),
+  whose slot-0x104 body holds the bleedout and the deferred kill, then the
+  destructible task. Outside and before the call, in the callers: the
+  TESHitEvent, blood and impact, sneak and critical UI; after it: the
+  enchantment cast, armor and perk passes, stagger, knockdown, animation
+  reactions. So a gate at 37335's entry that returns false for a figure
+  victim skips the number, the bleedout and the kill and keeps every visible
+  reaction, and covers melee, magic (35086), fall, drowning and the
+  explosion pass (ADR-037) in one place. CommonLib does not name 37335; the
+  SE id is unknown; the fork's idiom for AE-only ids is a bare REL::ID
+  (game/Offsets.h). Hook shape for train-30: replace 37335 through Frida
+  Gum's interceptor-replace (the fork's Frida layer; a detour that keeps the
+  original callable), the replacement returning false when `this` is a
+  figure by the same mark (dynamic form id, kAttackDamageMult 0), else
+  calling the original; the slot-0x104 guard then goes, since the write it
+  tried to stop happens before it. The alternative, MagicTarget::
+  IsInvulnerable's vfunc on Character (37335's first gate), is rejected
+  for its reach: invulnerability is read by the magic system too and would
+  touch the figure's imposed effects (HYPOTHESIS). T3: x-figure-values-hit
+  with the figure's bar unmoved on the hitter's screen until the server's
+  number, and the hit event, blood and stagger still seen (the trace's
+  stations). Not in train-29: the morning's stage stays the playtested head.
   (the figure's value after a set, the victim case).
 - Breakpoint plan for a human session: none.
 - Owner: agent (lab probes).

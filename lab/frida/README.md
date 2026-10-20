@@ -174,6 +174,27 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   cell, explosion, spell, timers, flags); the ready row self-tests the
   layout by resolving *(403520) to the player. 1.6.1170 only.
 
+- rune-decal-trace.js: the rune's glyph as a decal, read on the CASTER
+  (docs/verbs/spell-cast.md, the target-location section; train-29 row 5;
+  the re-analyst's REA read of 2026-10-20, question 2: the glyph is a decal
+  placed by 44186 from inside the target-location launch 34452 after
+  Projectile::Launch, a path the relay's bare Launch never takes). Logs the
+  decal placement 44186 at its entry (args 0 to 7 raw, arg 0 as the
+  projectile with its shooter resolved, args 1 and 2 as NiPoint3 position
+  and scaled normal, arg 3 as the material id, the return address relative
+  to 34452 and whether a 34452 call is open on the thread) and at its leave;
+  the material lookup 44190 (raw args, the return read both as a
+  BGSMaterialType and as the id; every call inside a 34452 bracket, the
+  first 24 outside it); 34452 at its entry (args 0 to 8 raw, the pick
+  struct's normal, collidable and flag by the memo's offsets, HYPOTHESIS)
+  and at its leave with the bracket's launch, material and decal counts;
+  and Projectile::Launch (44108) as rune-tier-trace.js does, plus
+  contactNormal, angles, autoAim and useOrigin. The ready row lists every
+  id with its RVA and checks that 34452 and 44186 lie inside SkyrimSE.exe.
+  The hypothesis stands on one decal row per cast from inside 34452 on the
+  caster and none on the observer; a decal row from elsewhere falsifies it.
+  Ids by lab/addr.py, cited per line to the memo; 1.6.1170 only.
+
 A frida step right before a console step on the same client leaves the
 console unopenable (x-figure-action 20261015-052852 and -053059: "the
 console did not open 3000 ms after the grave key", twice, with the attach
