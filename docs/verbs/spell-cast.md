@@ -1374,3 +1374,60 @@ propagating. The records say otherwise, and split the finding in four.
 - Owner: agent (the probe), then the re-analyst (the pass's tier test and
   the hook point, static) and Eli's seat (the Frida read).
 
+
+## Train-29 (2026-10-20 night; fork m2-train-29 18c0e603 on parity 602a2dd2; the rows of docs/research/train-29-rows.md)
+
+Built overnight on Eli's word ("go ahead and run tonight to do the biggest
+lump"), each row from the reads of 2026-10-19, for the morning's stage
+under the essentials layer (ADR-040: playtest twenty-seven on the stage, the
+gate and the merges after).
+
+- Lightning Strike on the observer (row 4): CommonLib's spell LaunchData
+  takes the AV effect's projectile (src/RE/P/Projectile.cpp:213-222) and
+  Lightning Strike's AV effect has none, so the observer's launch recorded
+  projectile 0 and nothing flew (x-lightning-strike 20261019-220431, the
+  launch row `[13929, 0, 0, ...]`). MagicApi.cpp (07b33046) takes the first
+  effect whose base effect carries a projectile (include/RE/E/Effect.h:39,
+  include/RE/E/EffectSetting.h:90) when the constructor left it null; area
+  stays as set, the explosion comes from the PROJ. HYPOTHESIS until the
+  probe: with the lobber flying in the observer's game its explosion
+  places the bolt there, and the WB_DestroyAfterDelay_Script admission
+  deletes it; the probe is x-lightning-strike re-grounded at the camp with
+  c2.watched(c1).launched(201588224) >= 1 and both seats' screenshots at
+  the strike. If the lobber flies and never explodes, the REA read's three
+  candidates stand (a null parentCell on the figure's launch, a model that
+  never arrives, a dive below ground).
+- Finger of Death, the condition half (row 2b): IsEssential (354) is a
+  server condition function now (eea3a5d5; a player is never essential, an
+  NPC by its base record's flag, libespm NPC_.h isEssential; HYPOTHESIS: a
+  runtime essential flag is not seen), so the spell's one effect is no
+  longer refused as unknown and its hit holds (a fight begins). The kill
+  stays the script's in the caster's game (the ash pile on test 1's screen
+  while test 2 lives), ADR-029's default; the allowlist's server-side kill
+  (MpActor::Kill, the headshot's primitive) is the next verb on that
+  ground, not this train's. T0: unit/EffectConditionsTest.cpp.
+- EffectWasDualCast (724; row 7b): thirteen Apocalypse spells and the
+  Impact rider gate on it. The flag travels SpellCastMessage.isDualCasting,
+  PartOne::StartCast, wire-rules casts::CastFacts::dual, the claim's dual,
+  OnSpellHit, MpActor::ApplyEffects, EffectConditionsHold, the evaluator
+  context; every other caller leaves it false, so a 724 rider holds only on
+  a claimed dual cast. No wire change (the message carried the flag; the
+  record is rule state). T0: the same test file; Rust 186 + 17 green.
+  HYPOTHESIS until a seat dual casts one of the thirteen at the other
+  (playtest twenty-seven's row, the setup naming the spell and the perk).
+- Scattershock (row 6), measured, no code: x-scattershock-6s
+  20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
+  launched on both seats (the PROJ 083a24 of Apocalypse) and the server
+  recorded the hits (c2 at 0.78 Health); twenty-five's "hits not reported"
+  was a 2.5 s hold equal to the charge. The missile angle on the observer
+  stays unmeasured: the lab's flights record covers arrows only, a driver
+  item for a later train.
+- The rune glyph (row 5) and the local dent (row 3) wait for their Frida
+  reads (lab/frida/rune-tier-trace.js and figure-dent-trace.js, thuum
+  branch lab-frida-train29), run on this train's stage; no hook before the
+  read (rule 8).
+- The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
+  (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
+  second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
+  OnTrigger about 30 and OnUpdate 13 to 22 per 5 s), so the parent walk is
+  noise.
