@@ -118,3 +118,23 @@ Rate limit / bounds: the reach above; rate unchanged.
 - [x] T3 scenario green, no HYPOTHESIS tags on the values the bound uses
   (the scenario approved by Eli, 2026-10-05)
 - [x] on fork parity (b095fca6, 2026-10-03)
+
+## The OpenContainer wait after a swap (train-29, 2026-10-20; fork m2-train-29 18c0e603)
+
+Playtest twenty-five's c1.log counted 2000 latent Utility.wait calls from
+Shadowbond's break onward, five a second (lab read, pt25/log-read.md
+unexplained 4): the break was an activation of a container (server.log
+ProcessActivate, no occupant) and the swap moved test 1 away in the same
+instant, so the client's OpenContainer handler (remoteServer.ts
+onOpenContainerMessage) activated the reference, waited for ContainerMenu to
+open, and waited forever; the server kept test 1 as the object's occupant
+(MpObjectReference::occupant) until a destroy or disable, and HYPOTHESIS
+refused the next player by the occupant distance check. Fix (18c0e603): the
+first wait has a 15 s deadline; on giving up the handler skips the menu wait
+and still sends the second Activate, which the server takes without the
+reach check (ActionListener OnActivate's second-activation path) and which
+clears the occupant. Probe to run: c1 activates a container and is
+teleported away within a second; c1.log shows no "Utility.wait (call 1000)";
+c2 then opens the container. HYPOTHESIS until that probe: the second
+activation on a container whose menu never opened clears the occupant
+without side effects (the server's CONT branch).

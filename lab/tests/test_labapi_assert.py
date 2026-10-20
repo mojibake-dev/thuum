@@ -489,6 +489,109 @@ class ProjectileTests(unittest.TestCase):
             ev.evaluate("c1.projectile(0x3BE11).formId == 1")
 
 
+class RefsNearViews(NearViews):
+    """The last refs-near steps (docs/research/train-29-rows.md row 7c): c1's
+    game counts one projectile reference in its cell (50 PROJ: a Frost Rune,
+    RuneFrostProjectile 0x5FBBF, which its ids search found 52.5 units off),
+    lists an activator (base 0x3E8F0) 55 units off and a disabled placed
+    hazard (base 0x5FBC0) 60 units off beside one hazard whose read aborted;
+    c2's game found no rune within its radius, lists nothing of the types,
+    asked for the reference class 65 by mistake, and its search for one base
+    aborted."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {
+            "c1": {
+                "from": 0x14, "pos": [0.0, 0.0, 0.0], "radius": 600, "cell": 0x9A3C,
+                "types": {
+                    "50": {"inCell": 1},
+                    "24": {"inCell": 7, "near": 1, "refs": [
+                        {"formId": 0xFF000F10, "baseId": 0x3E8F0, "baseType": 24, "disabled": False, "deleted": False, "pos": [0.0, 55.0, 0.0], "distance": 55.0},
+                    ]},
+                    "51": {"inCell": 2, "near": 1, "refs": [
+                        {"formId": 0xFF000F11, "baseId": 0x5FBC0, "baseType": 51, "disabled": True, "deleted": False, "pos": [0.0, 60.0, 0.0], "distance": 60.0},
+                        {"index": 1, "error": "Error: Bad call result 4"},
+                    ]},
+                },
+                "ids": {str(0x5FBBF): {"formId": 0xFF000F12, "distance": 52.5}},
+            },
+            "c2": {
+                "from": 0xFF000ACB, "pos": [0.0, -350.0, 0.0], "radius": 1200, "cell": 0x9A3C,
+                "types": {
+                    "50": {"inCell": 0},
+                    "24": {"inCell": 7, "near": 0, "refs": []},
+                    "65": {"inCell": 0, "note": "reference class 65: SKSE filters by the base form's type, ask for 50"},
+                },
+                "ids": {str(0x5FBBF): None, str(0x3BE12): {"error": "Error: Bad call result 4"}},
+            },
+        }
+
+    def refs_near(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class RefsNearTests(unittest.TestCase):
+    def test_count_has_and_distance_read_the_last_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), RefsNearViews(), ["c1", "c2"])
+        # a count-only type is the cell's count; a listed type the references within the radius
+        self.assertTrue(ev.evaluate("c1.refs_near().count(50) == 1"))
+        self.assertTrue(ev.evaluate("c1.refs_near().count(24) == 1"))
+        self.assertTrue(ev.evaluate("c1.refs_near().count(51) == 1"))
+        self.assertTrue(ev.evaluate("c2.refs_near().count(24) == 0"))
+        # has: listed under its type (a disabled one counts), or found by the ids search
+        self.assertTrue(ev.evaluate("c1.refs_near().has(0x3E8F0)"))
+        self.assertTrue(ev.evaluate("c1.refs_near().has(0x5FBC0)"))
+        self.assertTrue(ev.evaluate("c1.refs_near().has(0x5FBBF)"))
+        # distance: the listing's exact figure, else the search's bisected one
+        self.assertTrue(ev.evaluate("abs(c1.refs_near().distance(0x3E8F0) - 55) < 0.01"))
+        self.assertTrue(ev.evaluate("c1.refs_near().distance(0x5FBBF) < 300"))
+        self.assertEqual(ev.readings["c1.refs_near().count(50)"], 1)
+        self.assertEqual(ev.readings["c1.refs_near().distance(392127)"], 52.5)
+
+    def test_none_within_the_radius_is_false_and_no_distance(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), RefsNearViews(), ["c1", "c2"])
+        # searched by id and not found; not searched and not among the listed types
+        self.assertTrue(ev.evaluate("not c2.refs_near().has(0x5FBBF)"))
+        self.assertTrue(ev.evaluate("c2.refs_near().has(0x3E8F0) == false"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.refs_near().distance(0x5FBBF) < 1200")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.refs_near().distance(0x3E8F0) < 1200")
+
+    def test_unlisted_types_aborted_searches_and_reference_classes_are_data_errors(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), RefsNearViews(), ["c1", "c2"])
+        # a type the step did not list
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.refs_near().count(43) == 0")
+        # a search the step caught
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.refs_near().has(0x3BE12)")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.refs_near().distance(0x3BE12) < 1")
+        # a reference class (65 PGRE) matches no base, SKSE filtering by the base
+        # form's type: the step's note is the finding, never a 0 that reads as "gone"
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.refs_near().count(65) >= 1")
+        # a client with no refs-near step
+        other = Evaluator(RichServer(), ProjectileViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            other.evaluate("c1.refs_near().count(50) == 1")
+        # the shapes the language refuses
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c1.refs_near(1).count(50) == 1")
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate('c1.refs_near().count("50") == 1')
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c1.refs_near().has(1.5)")
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c1.refs_near().inCell(50) == 1")
+
+
 class SkillViews(NearViews):
     """c1's last skills step: One-Handed at 41 with some experience, Archery
     made legendary once, level 12."""

@@ -44,6 +44,14 @@ class ScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_scenario("id: t\nclients: [c1]\nsteps:\n  - server: explode\n")
 
+    def test_refs_near_is_a_client_verb_with_its_args(self):
+        from labapi.scenario import load_scenario
+
+        block = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: refs-near {radius: 600, from: self, formTypes: [50, 24, 51], ids: [392127]}\n")
+        step = block.steps[0]
+        self.assertEqual((step.kind, step.client, step.action), ("client", "c1", "refs-near"))
+        self.assertEqual(step.args, {"radius": 600, "from": "self", "formTypes": [50, 24, 51], "ids": [392127]})
+
     def test_until_waits_for_a_condition_with_a_cap(self):
         from labapi.scenario import load_scenario
 

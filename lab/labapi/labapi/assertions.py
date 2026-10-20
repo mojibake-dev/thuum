@@ -38,6 +38,21 @@ the lab can grep (E_ASSERT_*).
                                                      player, lies in its own game, from its last
                                                      projectiles step (docs/verbs/marksman.md); none is
                                                      a data error
+  <client>.refs_near().count(<form type>)           how many references of that base type (FormTypes.h:
+                                                     24 ACTI, 50 PROJ, 51 HAZD; SKSE's Cell.GetNumRefs
+                                                     filters by the base form's type) its last refs-near
+                                                     {radius, from, formTypes, ids} step listed within
+                                                     the radius of its player, or with from: other of
+                                                     its figure of the other player; 50 PROJ counts the
+                                                     whole cell, since Papyrus reads nothing of a
+                                                     projectile reference; a reference class such as 65
+                                                     PGRE is a data error, not a 0
+  <client>.refs_near().has(<form id>)               whether a reference of that base stood within the
+                                                     radius: listed under its type, or found by the
+                                                     step's ids search; false when neither
+  <client>.refs_near().distance(<form id>)          how far the nearest one lies (the listing's exact
+                                                     figure before the search's bisected one); none is
+                                                     a data error
   <client>.poison(<form id>).count | .poisonId      the poison on that item's stack in that client's
                                                      inventory and its charges, from its last poisons
                                                      step (docs/verbs/magic-effects.md); 0 and 0 when
@@ -87,6 +102,7 @@ class ViewsFacade(Protocol):
     def held(self, observer: str) -> dict[str, Any] | None: ...
     def globals(self, observer: str) -> dict[str, Any] | None: ...
     def projectiles(self, observer: str) -> dict[str, Any] | None: ...
+    def refs_near(self, observer: str) -> dict[str, Any] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
@@ -386,6 +402,84 @@ class ProjectileView:
     reads no position of a projectile; docs/verbs/marksman.md)."""
 
     distance: float
+
+
+_UNSEARCHED = object()
+
+
+class RefsNearView:
+    """c.refs_near(): what stood within the radius of that client's player
+    (or, with the step's {from: other}, of its figure of the other player)
+    at its last `refs-near` step, by base type (SKSE's Cell.GetNumRefs and
+    GetNthRef filter on the base form's type): count(formType) the
+    references listed within the radius, or the cell's count for a type the
+    step cannot read (50 PROJ: Papyrus aborts on a projectile reference);
+    has(baseId) whether one of that base stood there, listed under its type
+    or found by the step's ids search; distance(baseId) how far the nearest
+    one lies, the listing's exact figure before the search's bisected one
+    (docs/research/train-29-rows.md row 7c)."""
+
+    def __init__(self, client: str, data: dict[str, Any]):
+        self._client = client
+        types = data.get("types")
+        self._types: dict[str, Any] = types if isinstance(types, dict) else {}
+        ids = data.get("ids")
+        self._ids: dict[str, Any] = ids if isinstance(ids, dict) else {}
+
+    def _listed(self, base_id: int) -> list[float]:
+        """The distances of every listed reference of that base, nearest first."""
+        out: list[float] = []
+        for rows in self._types.values():
+            refs = rows.get("refs") if isinstance(rows, dict) else None
+            for ref in refs if isinstance(refs, list) else []:
+                if isinstance(ref, dict) and "distance" in ref and ref.get("baseId") == int(base_id):
+                    out.append(float(ref["distance"]))
+        return sorted(out)
+
+    def _searched(self, base_id: int) -> Any:
+        """The ids search's entry for that base: a found dict, None for none
+        within the radius, an {error} dict, or _UNSEARCHED when the step did
+        not search it."""
+        return self._ids.get(str(int(base_id)), _UNSEARCHED)
+
+    def count(self, form_type: int) -> int:
+        rows = self._types.get(str(int(form_type)))
+        if not isinstance(rows, dict):
+            raise AssertionData(f"{self._client}'s refs-near step did not list form type {int(form_type)}")
+        if "note" in rows:
+            raise AssertionData(f"{self._client}'s refs-near step counts nothing of form type {int(form_type)}: {rows['note']}")
+        n = rows.get("near", rows.get("inCell"))
+        if isinstance(n, bool) or not isinstance(n, int):
+            raise AssertionData(f"{self._client}'s refs-near step has no count for form type {int(form_type)}")
+        return n
+
+    def has(self, base_id: int) -> bool:
+        if self._listed(base_id):
+            return True
+        found = self._searched(base_id)
+        if found is _UNSEARCHED:
+            if not self._types:
+                raise AssertionData(f"{self._client}'s refs-near step did not look for {int(base_id):#x}")
+            return False
+        if isinstance(found, dict) and "error" in found:
+            raise AssertionData(f"{self._client}'s refs-near step could not search for {int(base_id):#x}: {found['error']}")
+        return isinstance(found, dict)
+
+    def distance(self, base_id: int) -> float:
+        listed = self._listed(base_id)
+        if listed:
+            return listed[0]
+        found = self._searched(base_id)
+        if isinstance(found, dict) and "error" in found:
+            raise AssertionData(f"{self._client}'s refs-near step could not search for {int(base_id):#x}: {found['error']}")
+        if isinstance(found, dict):
+            try:
+                return float(found["distance"])
+            except (KeyError, TypeError, ValueError) as e:
+                raise AssertionData(f"{self._client}'s refs-near search for {int(base_id):#x} lacks {e}") from e
+        if found is _UNSEARCHED and not self._types:
+            raise AssertionData(f"{self._client}'s refs-near step did not look for {int(base_id):#x}")
+        raise AssertionData(f"{self._client}'s game holds no {int(base_id):#x} within its refs-near step's radius")
 
 
 @dataclass(frozen=True)
@@ -1011,6 +1105,16 @@ class _ClientRef:
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s projectile {int(ref_id):#x} lacks {e}") from e
 
+    def refs_near(self) -> RefsNearView:
+        """c.refs_near(): what stood near that client's player (or its figure
+        of the other player, with the step's {from: other}) at its last
+        `refs-near` step: count(formType), has(baseId), distance(baseId)."""
+        fn = getattr(self._views, "refs_near", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("types"), dict):
+            raise AssertionData(f"{self.name} has not reported a refs-near step yet")
+        return RefsNearView(self.name, data)
+
     def poison(self, item_id: int) -> PoisonView:
         """c.poison(id): the poison on that item's stack in that client's
         inventory, from its last `poisons` step."""
@@ -1241,10 +1345,12 @@ _ATTRS = {
 # Methods that take a number: c2.watched(c1).movedBy(5000)
 _NUMBER_METHODS = {
     WatchView: {"movedBy"},
+    RefsNearView: {"count"},
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
     _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id"},
+    RefsNearView: {"has", "distance"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
 _FORM_SPEC_METHODS = {
@@ -1258,12 +1364,13 @@ _PAIR_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av"},
+    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
+    RefsNearView: {"count", "has", "distance"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "movedBy", "launched", "flights_match"},
     SelfWatchView: {"saw", "ever", "drops", "launched"},

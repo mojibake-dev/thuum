@@ -1374,3 +1374,111 @@ propagating. The records say otherwise, and split the finding in four.
 - Owner: agent (the probe), then the re-analyst (the pass's tier test and
   the hook point, static) and Eli's seat (the Frida read).
 
+
+## Train-29 (2026-10-20 night; fork m2-train-29 18c0e603 on parity 602a2dd2; the rows of docs/research/train-29-rows.md)
+
+Built overnight on Eli's word ("go ahead and run tonight to do the biggest
+lump"), each row from the reads of 2026-10-19, for the morning's stage
+under the essentials layer (ADR-040: playtest twenty-seven on the stage, the
+gate and the merges after).
+
+- Lightning Strike on the observer (row 4): CommonLib's spell LaunchData
+  takes the AV effect's projectile (src/RE/P/Projectile.cpp:213-222) and
+  Lightning Strike's AV effect has none, so the observer's launch recorded
+  projectile 0 and nothing flew (x-lightning-strike 20261019-220431, the
+  launch row `[13929, 0, 0, ...]`). MagicApi.cpp (07b33046) takes the first
+  effect whose base effect carries a projectile (include/RE/E/Effect.h:39,
+  include/RE/E/EffectSetting.h:90) when the constructor left it null; area
+  stays as set, the explosion comes from the PROJ. CONFIRMED on the launch
+  (x-lightning-strike 20261020-085414 on the train's stage: both
+  c1.watched_self().launched("0xc0cfe00") and c2.watched(c1).launched(
+  "0xc0cfe00") held, the figure's launch carrying
+  WB_DestructionShock_Projectile_LightningStrike instead of 0, so the pick
+  took the strike's effect, not the rider's). Still HYPOTHESIS until a seat
+  or the probe's screenshots say so: the lobber explodes in the observer's
+  game and places the bolt, which the WB_DestroyAfterDelay_Script
+  admission then deletes (playtest twenty-seven's row). The probe is
+  x-lightning-strike re-grounded at the camp asserting the
+  lobber's launch on both seats, c1.watched_self().launched("0xc0cfe00")
+  and c2.watched(c1).launched("0xc0cfe00") (PROJ 030cfe00
+  WB_DestructionShock_Projectile_LightningStrike by lab/esm.py, 0x0C0CFE00
+  in the layer-free order; numidium's correction of a transposed id), with
+  both seats' screenshots at the strike. The records as esm.py reads them
+  tonight: the spell's effects are 030fadfd (the AV effect) and 03100ba6
+  (the perk rider, whose own projectile is 03100ba9, the _2C variant), so if
+  the fix's first-with-a-projectile pick takes the rider's, the observer
+  launches 0x0c100ba9 and the second line goes red naming it: the probe
+  tells which effect carries the lobber. If the lobber flies and never explodes, the REA read's three
+  candidates stand (a null parentCell on the figure's launch, a model that
+  never arrives, a dive below ground).
+- Finger of Death, the condition half (row 2b): IsEssential (354) is a
+  server condition function now (eea3a5d5; a player is never essential, an
+  NPC by its base record's flag, libespm NPC_.h isEssential; HYPOTHESIS: a
+  runtime essential flag is not seen), so the spell's one effect is no
+  longer refused as unknown and its hit holds (a fight begins). The kill
+  stays the script's in the caster's game (the ash pile on test 1's screen
+  while test 2 lives), ADR-029's default; the allowlist's server-side kill
+  (MpActor::Kill, the headshot's primitive) is the next verb on that
+  ground, not this train's. T0: unit/EffectConditionsTest.cpp.
+- EffectWasDualCast (724; row 7b): thirteen Apocalypse spells and the
+  Impact rider gate on it. The flag travels SpellCastMessage.isDualCasting,
+  PartOne::StartCast, wire-rules casts::CastFacts::dual, the claim's dual,
+  OnSpellHit, MpActor::ApplyEffects, EffectConditionsHold, the evaluator
+  context; every other caller leaves it false, so a 724 rider holds only on
+  a claimed dual cast. No wire change (the message carried the flag; the
+  record is rule state). T0: the same test file; Rust 186 + 17 green.
+  Read the same night against the records (a scan of every CTDA in the
+  Apocalypse esp with esm.py's parser, 1643 rows): all thirteen "724
+  spells" carry the same one effect, vanilla's Impact rider 0x153D3, gated
+  EffectWasDualCast == 1 AND HasPerk(Impact) == 1, and the only other 724s
+  are two orphan copies of that rider used by no spell. The server refuses
+  on the first unknown function and HasPerk is unknown by design, so no
+  724 effect is observable at T3 or T4 before M5; the gain is correctness
+  and the T0 proof, not a visible change. What a dual cast does show on
+  this build, playtest twenty-seven's row: Electrosphere (0x1A001879 under
+  the layer) dual cast with Destruction Dual Casting (Skyrim.esm 0x153CF) is
+  one ball and one hit, 55 Health and 55 Magicka applied once (the flag
+  rides the claim; nothing in wire-rules scales by the engine's 2.2), two
+  balls and 110 without the perk. Found on the way, a train-30 candidate:
+  Hailstone's own two effects are gated on GetActorValue (14) and
+  HasMagicEffect (214), which the server lacks, so it applies nothing on
+  the server today.
+- Scattershock (row 6), measured, no code: x-scattershock-6s
+  20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
+  launched on both seats (the PROJ 083a24 of Apocalypse) and the server
+  recorded the hits (c2 at 0.78 Health); twenty-five's "hits not reported"
+  was a 2.5 s hold equal to the charge. The missile angle on the observer
+  stays unmeasured: the lab's flights record covers arrows only, a driver
+  item for a later train.
+- The rune glyph (row 5) and the local dent (row 3): their Frida reads ran
+  on this train's stage (x-rune-visible-frida 20261020-085906 on c2,
+  x-figure-values-hit-frida 20261020-085705 on c1; lab/frida/
+  rune-tier-trace.js and figure-dent-trace.js), the traces under read; no
+  hook before the read (rule 8). The refs-near step (the driver's, train-29)
+  settled the rune's other half: x-rune-visible 20261020-090323, the
+  observer's game holds the figure's rune as a reference whose base is the
+  PROJ (c2.refs_near().count(50) == 1 at 440 units, the same 30 s later)
+  and its trip deals the server's number, so the missing glyph is a
+  drawing matter, not a removal. The tier trace then read on the observer
+  (x-rune-visible-frida 20261020-085906, docs/research/frida-reads-train29.md
+  section B): the landing's look never runs for the relayed rune at all,
+  the tier compare 44213 and the settle 43919 were never entered in two
+  minutes, bit 20 of the flags stayed clear, and the rune was "arrived"
+  (44163) 35 ms after the launch from inside the first trigger tick's test,
+  not from a collision, then stood 3185 ticks with cell and explosion
+  non-null until the trip (one kill from the tick, a second 4 ms later).
+  The REA read's tier mechanism (H3b) is NOT the cause: nothing was dressed
+  and then undressed; the look is skipped upstream of 44213, and the
+  caster's own engine launched its rune from the identical point, so the
+  origin does not discriminate. Rule 8's next read: the same script on the
+  caster's seat for its own rune (do 44213 and 43919 fire, from where), and
+  the re-analyst on the arrival path (what sends a rune born at rest to
+  44163 at its first tick, what bit 20 is, and what the smallest change to
+  the relayed launch would be). Still wanted: a per-figure rune cap in the
+  observer's game, since the registration gate (43934) admits the player's
+  runes alone and a figure's four casts would leave four armed runes.
+- The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
+  (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
+  second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
+  OnTrigger about 30 and OnUpdate 13 to 22 per 5 s), so the parent walk is
+  noise.

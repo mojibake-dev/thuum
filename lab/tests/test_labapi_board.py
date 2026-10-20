@@ -48,6 +48,12 @@ class BoardTests(unittest.TestCase):
             board.complete(arrows.id, {"ok": True, "data": {"from": 20, "refs": {"245265": None}}})
             self.assertIsNone(board.projectiles("c2")["refs"]["245265"])
             self.assertIsNone(board.projectiles("c1"))
+            # refs-near results too, the last per observer
+            near = board.enqueue("c2", "refs-near", {"radius": 1200, "formTypes": [50, 24], "ids": [392127]})
+            board.poll("c2")
+            board.complete(near.id, {"ok": True, "data": {"from": 20, "types": {"50": {"inCell": 1}, "24": {"inCell": 3, "near": 0, "refs": []}}, "ids": {"392127": None}}})
+            self.assertEqual(board.refs_near("c2")["types"]["50"]["inCell"], 1)
+            self.assertIsNone(board.refs_near("c1"))
             # a client's own node-scale and its {other: true} one are kept side by side
             own = board.enqueue("c1", "node-scale", {})
             board.poll("c1")
@@ -65,6 +71,7 @@ class BoardTests(unittest.TestCase):
             board.clear_views()
             self.assertIsNone(board.held("c1"))
             self.assertIsNone(board.projectiles("c2"))
+            self.assertIsNone(board.refs_near("c2"))
             self.assertIsNone(board.node_scales("c1"))
             self.assertIsNone(board.presets("c1"))
             # a timed-out step is cancelled and a late result is ignored

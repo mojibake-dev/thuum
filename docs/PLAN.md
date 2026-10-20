@@ -380,29 +380,43 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         loads and frame rate held; no MCM, cloaks without physics, no
         warmth, bare aspens, rotfern undressed by the slot shift (ADR-043
         PROPOSED; the layer's three fixes render 2026-10-20 06:23).
-    - Train-29 (next; each row's facts in docs/research/train-29-rows.md with
-      its build tier), in build order:
-      - the client's Papyrus event filter: a parent-chain walk so every MCM
-        passes (SKI_ConfigBase's and MCM Helper's descendants), a plugin
-        list and OnUpdate per ADR-044 (ACCEPTED 2026-10-19; Survival Mode the first
-        case, x-survival-probe 20261020-020321); playtest twenty-seven's
-        MCM question decides before the build (Windows).
-      - Lightning Strike on the observer: the relayed launch picks the
-        effect whose projectile is set, not the AV effect's zero
-        (MagicApi.cpp; Windows).
-      - Finger of Death: IsEssential (354) evaluated on the server, and the
-        mod's scripted kill of a figure kept in its game or refused
-        (server; ADR-029's default today).
-      - a player's own dent on a figure's bar: FigureHealthDamage is in the
-        dist and still failed, so a Frida read before any change (lab, then
-        Windows).
-      - the rune's glyph on the observer: the Frida read of the player tier
-        first (spell-cast.md's section; lab).
-      - Scattershock's hits: a re-grounded 6 s probe before any code (the
-        2.5 s hold matched the charge; lab).
-      - small: the OpenContainer wait loop after a swap, EffectWasDualCast
-        (724) with the dual flag in the evaluator's context, the refs-near
-        driver step.
+    - Train-29 (built overnight 2026-10-20 on Eli's word, fork m2-train-29
+      18c0e603 on parity 602a2dd2, staged under the layer for playtest
+      twenty-seven; each row's facts in docs/research/train-29-rows.md), in
+      build order; the state of each row as of 01:30 PDT:
+      - the client's Papyrus event filter: BUILT (b2db6354, docs/verbs/
+        papyrus-events.md): a parent-chain walk so every MCM passes, the
+        layer's plugin list read at Skyrim Platform's load, OnUpdate per
+        script (ADR-044 ACCEPTED 2026-10-19, CONFIRMED by x-survival-unblock3
+        20261020-024406); b-papyrus-events awaits Eli's review.
+      - Lightning Strike on the observer: BUILT (07b33046) and the launch
+        CONFIRMED (x-lightning-strike 20261020-085414: the observer's game
+        launches the lobber 0x0c0cfe00); the bolt's appearance there is
+        twenty-seven's row.
+      - Finger of Death: IsEssential (354) BUILT on the server (eea3a5d5,
+        T0); the scripted kill stays the caster's game's (the ash pile),
+        ADR-029's default, until the allowlist verb.
+      - a player's own dent on a figure's bar: READ (x-figure-values-hit-frida
+        20261020-085705): the fork's guard works and the vfunc it blocks is a
+        post-write notification inside DamageActor 37335; the hook point is
+        37335's entry, after the re-analyst resolves its signature (no hook
+        before that; train-30).
+      - the rune's glyph on the observer: READ (x-rune-visible-frida
+        20261020-085906): the landing's look never runs for the relayed rune
+        (no 44213, no 43919; arrived from the trigger tick, not a collision),
+        so the tier is not the cause; the rune stands as a PROJ-based
+        reference (refs-near); next the caster-seat trace and the arrival
+        path's static read (train-30).
+      - Scattershock's hits: MEASURED and closed (x-scattershock-6s
+        20261020-080751: thirteen missiles on both seats, the server records
+        the hits; the 2.5 s hold had matched the charge); the missile's
+        angle on the observer waits for a flights record for spell
+        projectiles (driver, later).
+      - small: the OpenContainer wait loop's 15 s deadline BUILT
+        (18c0e603, activation-reach.md); EffectWasDualCast (724) BUILT with
+        the dual flag from the cast message through the cast record to the
+        evaluator (eea3a5d5, T0); the refs-near driver step on thuum branch
+        lab-refs-near (agent, in progress).
 
     - ADR-043's build (ACCEPTED 2026-10-19; the world stores every form as a
       FormDesc, a saved world carries its order and migrates, a login whose
