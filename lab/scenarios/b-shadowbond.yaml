@@ -72,8 +72,20 @@ steps:
       - server.effects(c1).left("055b31:Apocalypse - Magic of Skyrim.esp") == 0
       - server.effects(c2).left("055b31:Apocalypse - Magic of Skyrim.esp") == 0
   # a bond left alone: cast again from the swapped places (c1 now south of
-  # c2, facing north; the look sheathes, so draw again), nobody acts, the
-  # bond runs out at 20 s: no swap, the records gone, both visible
+  # c2, facing north), nobody acts, the bond runs out at 20 s: no swap, the
+  # records gone, both visible. The swap drops each player onto the spot
+  # where the other's figure still stands in their own game, and the engine
+  # pushes them out of its capsule (20261020-014021: c2 stood 41 units east
+  # of its swap spot, so a heading of 0 aimed 15 degrees left of it at 156
+  # units and the cast named nobody, no hit, no bond); so the two are put
+  # back on exact spots first, swapped places kept, placed as the first half
+  # placed them. The look sheathes, so draw again.
+  - c1: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - wait: 4
+  - assert:
+      - abs(server.actor(c1).y - (-450)) < 64
+      - abs(server.actor(c2).y - (-300)) < 64
   - c1: look {pitch: 0, heading: 0}
   - wait: 1
   - c1: console {text: "player.equipspell {031c4d:Apocalypse - Magic of Skyrim.esp} right"}
