@@ -1470,11 +1470,24 @@ gate and the merges after).
   The REA read's tier mechanism (H3b) is NOT the cause: nothing was dressed
   and then undressed; the look is skipped upstream of 44213, and the
   caster's own engine launched its rune from the identical point, so the
-  origin does not discriminate. Rule 8's next read: the same script on the
-  caster's seat for its own rune (do 44213 and 43919 fire, from where), and
-  the re-analyst on the arrival path (what sends a rune born at rest to
-  44163 at its first tick, what bit 20 is, and what the smallest change to
-  the relayed launch would be). Still wanted: a per-figure rune cap in the
+  origin does not discriminate. The caster-seat read followed the same
+  night (x-rune-visible-frida2 20261020-092130, both seats; the memo's
+  section D): the caster's OWN rune never ran 43919 or 44213 either, so
+  the tier compare is dead for runes on both seats and the glyph does not
+  come from it; both runes are born at rest at the point (velocity and
+  origin excluded); the first divergence is the runtime flags at Init3D's
+  entry, 0x210000 (kAutoAim, Projectile.h:157) for the engine's cast path
+  against 0x20010000 (kUseOrigin, :165) for the relay, the pair CommonLib's
+  spell LaunchData constructor sets (useOrigin true, autoAim false,
+  Projectile.cpp:220-221), and the arrival then takes a different branch of
+  44217 for each (+0x247 against +0x1c3). Built the same night on
+  m2-train-29: a relayed launch with delivery kTargetLocation takes the
+  engine's pair (MagicApi.cpp). HYPOTHESIS until the probe reruns on that
+  build: bit 21 on the observer's rune, the arrival from the caster's
+  branch, the glyph in c2's screenshot; the probe's distance line catches a
+  rune moved to the figure's hand, and x-lightning-strike measures the
+  lobber on the same path. The re-analyst reads the arrival path
+  statically beside it. Still wanted: a per-figure rune cap in the
   observer's game, since the registration gate (43934) admits the player's
   runes alone and a figure's four casts would leave four armed runes.
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
