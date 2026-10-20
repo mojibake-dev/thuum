@@ -1,0 +1,79 @@
+# b-hailstone (thuum docs/verbs/spell-cast.md, train-30's Hailstone row, and
+# docs/verbs/magic-effects.md, Resistance; the M2 closeout set, docs/M2-CLOSE.md;
+# red by design until fork m2-train-30 carries m2-train30-conditions and
+# m2-train30-resist): Apocalypse's Hailstone (SPEL 02E634 of
+# the plugin, Novice frost bolt) carries two effects, the base
+# WB_Des_Frost1_Effect_Hailstone (15 Health and Stamina) gated on
+# Subject.GetActorValue(ResistFrost) > 0 and its Shatter (15, area 10) gated
+# on Subject.HasMagicEffect(the base) == 0, both instant. The server now
+# evaluates both (GetActorValue 14 with the race's abilities in its modifier,
+# HasMagicEffect 214 with the record's own index space mapped). Two casts:
+# 1. c1 (lab-nord-1, a Nord: Resist Frost 50 from the race ability 000AA020)
+#    casts at c2 (lab-orc-2, an Orc: no frost resistance). Expected on the
+#    server: the base effect refused (ResistFrost 0), the Shatter applied
+#    (nothing of the base running): 15 Health off c2's 100, 0.85. The engine
+#    on c2's game agrees, no resistance to halve it.
+# 2. c2 casts at c1. Expected on the server: both effects applied (ResistFrost
+#    50 > 0; the base has no running entry), 30 before resistance, then the
+#    resistance rule (fork m2-train30-resist, docs/verbs/magic-effects.md)
+#    halves it on the Nord's 50 ResistFrost: 15, 0.85, as the engine's own
+#    30 x 0.5. So both seats read 0.85 by different paths: the Orc by the
+#    Shatter alone, the Nord by both effects halved. 0.70 on the Nord means
+#    the resistance rule did not run; 0.85 on the Orc with 1.00 on the Nord
+#    means the base effect's gate refused the Nord (no race ability seen).
+# Spell ids as FormDescs so the lab composes the run's id (the layer's slot).
+id: b-hailstone
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: "02e634:Apocalypse - Magic of Skyrim.esp"}
+  - c2: learn-spell {spellId: "02e634:Apocalypse - Magic of Skyrim.esp"}
+  - c1: console {text: "player.equipspell {02e634:Apocalypse - Magic of Skyrim.esp} right"}
+  - c2: console {text: "player.equipspell {02e634:Apocalypse - Magic of Skyrim.esp} right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - c1: set-percentages {health: 1, stamina: 1}
+  - c2: set-percentages {health: 1, stamina: 1}
+  - wait: 4
+  - c1: draw-weapon
+  - c2: draw-weapon
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage > 0.99
+      - server.actor(c1).healthPercentage > 0.99
+  # 1. the Nord casts at the Orc: Shatter alone, 0.85 on both
+  - c1: watch-start
+  - c2: watch-start
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 5
+  - c1: watch-stop
+  - c2: watch-stop
+  - c2: av-read {names: [health, stamina]}
+  - assert:
+      - server.actor(c2).healthPercentage < 0.99
+      - server.actor(c2).healthPercentage > 0.80
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.03
+  # 2. the Orc casts at the Nord: both effects, halved by its resistance: 0.85 on the server and in c1's own game
+  - c1: set-percentages {health: 1, stamina: 1}
+  - c2: set-percentages {health: 1, stamina: 1}
+  - wait: 3
+  - c1: watch-start
+  - c2: watch-start
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 5
+  - c1: watch-stop
+  - c2: watch-stop
+  - c1: av-read {names: [health, stamina]}
+  - assert:
+      - server.actor(c1).healthPercentage < 0.99
+      - server.actor(c1).healthPercentage > 0.80
+      - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.03
+artifacts: [server.log, c1.log, c2.log, screenshots]
