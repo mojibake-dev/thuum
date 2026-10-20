@@ -641,9 +641,12 @@ above keep a hostile preset from carrying anything but a look.
   bits on the plugin's 805 HDPT DATA bytes (| 0x06: 01x533 to 07, 09x202
   to 0f, 11x55 to 17, 18 to 1e, 19x12 to 1f; the records are uncompressed,
   the file 276,478 B as before), as 790d3b6c did for rotfern's parts;
-  HYPOTHESIS until racemenu-load of lab-nord-1 then head-parts on a layer
-  seat reads eight (probe x-layer-headparts). Eli, 2026-10-20 13:40:
-  "patch it" (over dropping the mod), so the patch row and the mod stay.
+  CONFIRMED by x-layer-headparts 20261020-210719 on the cf363c44 layer
+  stage (c1's head parts equal to the server's record at login and again
+  after a relaunch, c2's too; the stage's smoke 20261020-210408 green with
+  the layer and no hdtsmp64 log among its artifacts, so FSMP is gone). Eli,
+  2026-10-20 13:40: "patch it" (over dropping the mod), so the patch row
+  and the mod stay.
 
 ## Message contract
 

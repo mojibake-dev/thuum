@@ -111,6 +111,21 @@ answers (docs/verbs/time.md; `mp.get(0, "gameTime")`), or `{"found": false,
 "error": ...}` from a server without the clock. Scenarios read it as
 `server.time().hour` and so on, evaluated when the assert runs.
 
+### spell
+
+Request: `{"payload": {"kind": "spell", "formId": <int>}}`. Answer: `{"found":
+true, "formId", "editorId", "effects": [{"mgef": <global form id>, "magnitude":
+<float>, "area": <int>, "duration": <int>, "conditions": <CTDA count>}, ...],
+"mgefs": {"<mgef id>": {"editorId", "flags", "archetype", "primaryAV",
+"secondAVWeight", "secondaryAV", "conditions"} | null}}`: the winning plugin's
+SPEL with each EFID mapped through its masters and each MGEF's DATA fields, as
+the server's espm resolves them (`mp.lookupEspmRecordById`; the offsets are
+cited in gamemode.js), or `{"found": false, "formId"}` for a form the server
+does not load. Scenarios read `server.spell(0x12FD0).magnitude` (or a FormDesc,
+`server.spell("12fd0:Skyrim.esm")`): the Health damage that lands at once by the
+server's rule (assertions.py SpellView), with `overTime` and `conditional` beside
+it, so a bound holds under any layer's override of the record.
+
 ## labCommand
 
 The server-side scenario verbs (rung R0) go here rather than to the client;

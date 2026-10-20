@@ -8,6 +8,7 @@
 //
 //   labState   {kind: "actor" | "inventory" | "online", profileId}
 //              {kind: "time"}: the server's game clock now
+//              {kind: "spell", formId}: a spell's effects and their MGEFs as the server resolves them
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -139,7 +140,64 @@ const state = {
       return { found: false, error: String((e && e.message) || e) };
     }
   },
+
+  // A spell's effects as the server's espm resolves them (lab-api's server.spell): the
+  // winning plugin's SPEL (libespm CombineBrowser.cpp:61-72, the last match in load order)
+  // with each EFID mapped through that plugin's masters, its EFIT as libespm reads it
+  // (Effects.cpp:38-45: magnitude float @0, area u32 @4, duration u32 @8), the CTDAs after
+  // it counted (Effects.cpp:46-53), and each MGEF's DATA fields the server's damage path
+  // reads (MGEF.cpp:15-54: flags u32 @0x00, archetype u32 @0x40, primaryAV u32 @0x44; the
+  // second AV's weight float @0x3C and secondary AV u32 @0x58 when DATA is long enough),
+  // its own CTDAs counted. lab-api decides what counts as Health damage, as ApplyEffects does.
+  spell(payload) {
+    const formId = Number(payload.formId);
+    const spel = mp.lookupEspmRecordById(formId);
+    if (!spel || !spel.record) return { found: false, formId };
+    const effects = [];
+    let current = null;
+    for (const field of spel.record.fields || []) {
+      if (field.type === "EFID") {
+        current = { mgef: spel.toGlobalRecordId(u32(field.data, 0)), magnitude: 0, area: 0, duration: 0, conditions: 0 };
+        effects.push(current);
+      } else if (field.type === "EFIT" && current) {
+        current.magnitude = f32(field.data, 0);
+        current.area = u32(field.data, 4);
+        current.duration = u32(field.data, 8);
+      } else if (field.type === "CTDA" && current) {
+        current.conditions += 1;
+      }
+    }
+    const mgefs = {};
+    for (const effect of effects) {
+      const key = String(effect.mgef);
+      if (key in mgefs) continue;
+      const mgef = mp.lookupEspmRecordById(effect.mgef);
+      const fields = (mgef && mgef.record && mgef.record.fields) || [];
+      const data = fields.find((f) => f.type === "DATA");
+      mgefs[key] = data && data.data.length >= 0x48 ? {
+        editorId: mgef.record.editorId,
+        flags: u32(data.data, 0x00),
+        archetype: u32(data.data, 0x40),
+        primaryAV: u32(data.data, 0x44),
+        secondAVWeight: data.data.length >= 0x40 ? f32(data.data, 0x3c) : 0,
+        secondaryAV: data.data.length >= 0x5c ? u32(data.data, 0x58) : -1,
+        conditions: fields.filter((f) => f.type === "CTDA").length,
+      } : null;
+    }
+    return { found: true, formId, editorId: spel.record.editorId, effects, mgefs };
+  },
 };
+
+// Little-endian reads from an espm field's bytes (a Uint8Array from lookupEspmRecordById).
+function view(bytes) {
+  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+function u32(bytes, at) {
+  return view(bytes).getUint32(at, true);
+}
+function f32(bytes, at) {
+  return view(bytes).getFloat32(at, true);
+}
 
 const command = {
   teleport(payload) {
