@@ -633,10 +633,17 @@ above keep a hostile preset from carrying anything but a look.
   Eyes for All Races.esp, slot 35, keeps 03 on 0x24244). The wire was the
   green run's byte for byte (the same 8747-byte preset recorded and
   relayed; the ADR-026 rule checks RNAM, not the gender bit), and c2's own
-  look changed at its re-login by the same skip. Fix asked of apocrypha
-  for the no-FSMP render: both gender bits on the plugin's HDPT overrides
-  (flags | 0x06), as 790d3b6c did for rotfern's parts; HYPOTHESIS until
-  racemenu-load of lab-nord-1 then head-parts on a layer seat reads eight.
+  look changed at its re-login by the same skip. Fix in the no-FSMP
+  render, apocrypha/layer-essentials cf363c44 (13:26): a build-time,
+  size-preserving plugin patch (lab/layer/plugin-patches.tsv,
+  lab/tools/plugin-patch.py, applied before the esm copies and the
+  SHA256SUMS, so server and clients hold the same bytes) sets both gender
+  bits on the plugin's 805 HDPT DATA bytes (| 0x06: 01x533 to 07, 09x202
+  to 0f, 11x55 to 17, 18 to 1e, 19x12 to 1f; the records are uncompressed,
+  the file 276,478 B as before), as 790d3b6c did for rotfern's parts;
+  HYPOTHESIS until racemenu-load of lab-nord-1 then head-parts on a layer
+  seat reads eight (probe x-layer-headparts). Eli, 2026-10-20 13:40:
+  "patch it" (over dropping the mod), so the patch row and the mod stay.
 
 ## Message contract
 

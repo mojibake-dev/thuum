@@ -519,7 +519,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   full sweep follow the report (ADR-040). Eli's call after the report
   (13:05 PDT): FSMP out, the cape physics worked but looked jank; the
   cloaks go back to vanilla capes in apocrypha's next render, which the
-  layer stage and sweep take.
+  layer stage and sweep take. Rendered 13:26: apocrypha/layer-essentials
+  cf363c44 (FSMP, both Artesian physics packages and the Survival
+  collection's HDT patch pair out; warmth kept by the collection's non-HDT
+  patches, patched light at build so they hold slots 11 and 12 and no
+  other plugin moves; nothing else in the layer leaned on FSMP), carrying
+  the layer sweep's a-racemenu fix too: Playable Headparts All Races'
+  head-part flags given both gender bits by a build-time plugin patch
+  (lab/layer/plugin-patches.tsv; Eli 13:40: "patch it", over dropping the
+  mod), HYPOTHESIS until the lab reads eight parts on a layer seat
+  (racemenu-sync.md).
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals

@@ -16,3 +16,4 @@ watch:
   - b-invis-recast     # docs/verbs/self-cast.md:104, a 120 s guest-agent stall spaced the casts past the spell's 30 s (2026-10-18)
 pending:
   - b-spells-reconnect   # docs/verbs/learned-spells.md:40, the reconnect spell loss (a server restart under a running game), train-30's fork m2-train30-spells (2026-10-20)
+  - b-figure-values      # docs/verbs/figure-values.md, rises("health") == 0 after three hits: the figure dent, red until train-30's fork m2-train30-dent e6a8270a stages (2026-10-20)

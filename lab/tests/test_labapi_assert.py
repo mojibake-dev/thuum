@@ -1045,6 +1045,20 @@ class DropTests(unittest.TestCase):
         self.assertTrue(fixed.evaluate('c2.watched(c1).drops("av:Invisibility") == 0'))
         self.assertTrue(fixed.evaluate("c2.watched_self().drops('IsCastingLeft') == 2"))
 
+    def test_rises_counts_increases_in_a_watched_actor_value_series(self):
+        from labapi.assertions import AssertionData, Evaluator
+        v = WatchViews()
+        # the dent: the figure's bar dips below the server's step and climbs back once
+        v.watches["c2"]["actors"][0]["health"] = [[0, 100.0], [400, 80.0], [450, 90.0], [3400, 70.0], [6400, 60.0]]
+        v.watches["c2"]["self"] = {"events": [], "bools": {}, "health": [[0, 100.0], [500, 75.0], [3500, 50.0]]}
+        v.watches["c2"]["actors"][0].pop("stamina", None)
+        ev = Evaluator(RichServer(), v, ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c2.watched(c1).rises("health") == 1'))
+        self.assertTrue(ev.evaluate("c2.watched_self().rises('Health') == 0"))
+        for expr in ('c2.watched(c1).rises("speed") == 0', 'c2.watched(c1).rises("stamina") == 0'):
+            with self.subTest(expr=expr), self.assertRaises(AssertionData):
+                ev.evaluate(expr)  # not an actor value the watch samples; a series the driver did not send
+
     def test_drops_of_an_unsampled_bool_is_a_data_error(self):
         from labapi.assertions import AssertionData, Evaluator
         ev = Evaluator(RichServer(), self.views([[0, True]]), ["c1", "c2"])
