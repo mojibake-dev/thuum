@@ -119,7 +119,7 @@ Rate limit / bounds: the reach above; rate unchanged.
   (the scenario approved by Eli, 2026-10-05)
 - [x] on fork parity (b095fca6, 2026-10-03)
 
-## The OpenContainer wait after a swap (train-29, 2026-10-20; fork m2-train-29 18c0e603)
+## The OpenContainer wait after a swap (train-29, 2026-10-20; fork m2-train-29 18c0e603, merged to parity 4720d0d3 at 13:40)
 
 Playtest twenty-five's c1.log counted 2000 latent Utility.wait calls from
 Shadowbond's break onward, five a second (lab read, pt25/log-read.md

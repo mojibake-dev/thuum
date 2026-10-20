@@ -286,7 +286,8 @@ of fork 50a56e4a, x-survival-restore-timing 20261020-185534, 185906 and
 when it rode the first movement report), no box on the caster's 8 s
 screenshots, the two-seat asserts holding after the fresh relaunch (the
 lab's other login sends stay at the first movement). Fork m2-train-29, server
-only; the T0 case now logs the actor in a second time, as a reconnect does,
+only, MERGED to parity 4720d0d3 (2026-10-20 13:40; its T2 declaration moved
+to difftest's common file); the T0 case now logs the actor in a second time, as a reconnect does,
 and reads the send. The default from the section above stays the belt.
 The proper cure for every script that reads a global before any update
 (train-30): the server's globals travel with the own player's CreateActor
