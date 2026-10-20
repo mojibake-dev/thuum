@@ -37,7 +37,7 @@ steps:
   - wait: 4
   - c1: look {pitch: 0, heading: 180}
   - wait: 1
-  - c1: console {text: "player.equipspell c109653 right"}
+  - c1: console {text: "player.equipspell {109653:Apocalypse - Magic of Skyrim.esp} right"}
   - c1: draw-weapon
   - wait: 3
   - c1: watch-start

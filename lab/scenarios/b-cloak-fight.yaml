@@ -49,7 +49,7 @@ steps:
   - wait: 3
   # Blood Boil inside the fight
   - c2: set-percentages {health: 1}
-  - c1: console {text: "player.equipspell c044d44 right"}
+  - c1: console {text: "player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"}
   - c1: set-percentages {magicka: 1}
   - wait: 2
   - c1: hold-key {code: 199, ms: 4000}

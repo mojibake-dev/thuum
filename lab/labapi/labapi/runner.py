@@ -121,6 +121,10 @@ Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + ']
 
 
 
+# a FormDesc in braces inside a console step's text (guests.PLUGIN_RELATIVE's shape), typed as the run's id
+_CONSOLE_FORM = re.compile(r"\{([0-9a-f]{1,6}:[^{}]+?\.(?:esp|esm|esl))\}", re.I)
+
+
 class RunnerError(Exception):
     """E_RUN: the lab itself failed; the verdict is error, not red."""
 
@@ -1442,9 +1446,13 @@ class Runner:
         the driver carries no item table. equip's item becomes formId, craft's
         recipe becomes the recipe's form id (its station passes through: a
         reference id, or a name a later refs table resolves), race-pick's
-        race its form id."""
+        race its form id, and a FormDesc in braces inside console text the
+        run's id in the console's hex ("player.equipspell {044d44:Apocalypse -
+        Magic of Skyrim.esp} right" types 1a044d44 under the essentials layer)."""
         out = dict(args or {})
         try:
+            if action == "console" and isinstance(out.get("text"), str):
+                out["text"] = _CONSOLE_FORM.sub(lambda m: f"{self.tables.base_id(m.group(1)):x}", out["text"])
             if action == "equip" and "item" in out:
                 out["formId"] = self.tables.base_id(str(out.pop("item")))
             if action == "craft" and isinstance(out.get("recipe"), str):
