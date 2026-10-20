@@ -5,8 +5,10 @@ head d0693ef4) must migrate: eight change forms written in the raw shape
 (every form a runtime id of the load order they were saved under, no
 `formVersion`), beside a hand-written `load-order.json` in the slice's own
 format naming that order. `lab/scenarios/b-formdesc-world.yaml` restores it
-through its `server: {world: adr043-preslice-25}` field (the restore is a
-lab-api addition beside the scenario; a teammate adds it), logs the two
+through its `server: {world: adr043-preslice-25}` field (lab-api main
+3fd7ae5: rollback-server lays `fixtures/worlds/<name>/`, the whole
+directory, where it lays a snapshot; a scenario names a snapshot or a
+world, not both; a missing fixture is E_RUN_WORLD), logs the two
 players in under the lab's deployed order, and asserts, before and after a
 server restart, that each stored form still means what it meant when it was
 written. Hard rule 6: a DB schema change ships with a migration and a
