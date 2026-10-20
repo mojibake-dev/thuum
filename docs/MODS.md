@@ -463,19 +463,20 @@ What it needs from thuum:
 
 ## The essentials layer (Eli's set, staged 2026-10-19)
 
-Eli's ticked essentials from his own Skyrim (docs/private/mods-fenestrate.md, 113 ticks
-of 210 on 2026-10-18, and his decisions on the dependency gaps; the plan is
+Eli's ticked essentials from their own Skyrim (docs/private/mods-fenestrate.md, 113 ticks
+of 210 on 2026-10-18, and their decisions on the dependency gaps; the plan is
 docs/research/mod-layer-plan.md). Built by apocrypha on branch
 `apocrypha/layer-essentials`; `just layer-stage apocrypha/layer-essentials` stages it.
 
-**What it is.** 99 mods copied from Fenestrate, 5 fetched from Nexus, on top of the
-layer's existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire,
-Apocalypse, Headshot Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in
-the clients' order (81 served, 9 client-only at the tail), 45 of them light;
-29 mod folders scoped `@1.6.1170` (every SKSE DLL mod: all of them loaded on Fenestrate's
-1.6.1170 under SKSE 2.2.6, none has run on 1.7.104; FSMP among them). 112 mod folders,
-about 6,200 files, 4.5 GB on disk (the DLL mods' .pdb files kept: Crash Logger with PDB
-support is in the set and reads them).
+**What it is.** 98 mods copied from Fenestrate, 6 fetched from Nexus (the five of
+decision 4 and Realistic Aspen Trees, below), on top of the layer's existing eight
+(RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot Kills with
+CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
+client-only at the tail), 45 of them light; 29 mod folders scoped `@1.6.1170` (every SKSE
+DLL mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on
+1.7.104; FSMP among them). 113 mod folders, 5,778 files once the install-order rule (below)
+has dropped the 414 replaced copies, 4.5 GB on disk (the DLL mods' .pdb files kept: Crash
+Logger with PDB support is in the set and reads them).
 
 **Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
 lab/tools/persist-mods.sh after its hand-written blocks:
@@ -499,7 +500,7 @@ lab/tools/persist-mods.sh after its hand-written blocks:
   the TES4 header, game versions, served or client-only). `lab/tools/layer-render.py`
   writes it into persist-mods' `plugins=(...)` array and both server-settings files;
   `lab/tests/test_server_settings.py` fails when the three disagree. The order is Eli's
-  loadorder.txt order for his plugins, with the new cloak plugins placed before the two
+  loadorder.txt order for their plugins, with the new cloak plugins placed before the two
   cloak patches and the client-only plugins last (CBBE's pair the very last, as before).
   Every plugin's index moves against the current lab; server and clients take the new
   list together, as every layer change does.
@@ -523,11 +524,53 @@ GTX 1050 seat (c1) is the hardware floor: FSMP's frame cost is read there at the
 same-named replacements of Artesian's Full-variant plugins with warmth keywords added, and
 master the Full plugins (Cloaks.esp and Cloaks - Dawnguard.esp; 1nivWICCloaks.esp).
 Winter Is Coming's No Guards file ships `1nivWICCloaksNoGuards.esp`, so the collection's
-WIC esp could not load with Eli's first pick; his second ("survival warmth") picks the Full
+WIC esp could not load with Eli's first pick; the second ("survival warmth") picks the Full
 file, and both halves load: the base plugins, Artesian's meshes and physics configs, and
 the collection's two esps replacing Artesian's plugins (Artesian's plugins keep the base
-mesh paths, its physics meshes replace files in place, so the replacement loses no path).
+mesh paths; its physics meshes replace the base files at the same paths, 391 of Cloaks of
+Skyrim's 469 meshes and 16 of Winter Is Coming's 209, by the install-order rule below).
 Cloaks of Skyrim's own `Cloaks - USSEP Patch.esp` comes along (USSEP is in the set).
+
+**Install order, learned from the clones (2026-10-19, playtest 26):** rows install in
+order, as a mod manager does. A later row's file replaces an earlier row's (or a folder
+laid above the rows) at the same Data path, and persist-mods drops the replaced copy from
+the tree, so SHA256SUMS lists each Data path once and the build names what it replaced
+(`replaced: N files of <row> by <row>`). Before this rule add-mods.ps1 applied SHA256SUMS
+in its sorted order and kept the last copy it fetched, so `cloaks-of-skyrim-1.2.1` sorted
+after `artesian-cloaks-of-skyrim-cos-1.3.0` and the base meshes won on the clones, with
+both copies refetched on every run (407 files). A folder scoped to a game version
+(`<mod>@<version>`) loses to a later row of its scope or of none; a folder of no scope keeps
+its copy against a later scoped row, with a `kept both` note, since the other version still
+needs it. What the rule replaces today, all of it as Fenestrate ran it: the 391 and 16 base
+cloak meshes; CBBE's three female `_sk` skin textures, replaced by Goam's "No ENB user SK
+fix" copies (Fenestrate's Vortex rule put CBBE before Goam for exactly this); and three
+byte-identical overlaps that change nothing (the two Artesian packages' `cloak.xml`, the two
+Apachii witcher hair textures rotfern bundles, the one script Headshot Kills and Stab The
+Heart share).
+
+**Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
+textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
+Aspen Trees - Loose)" (Nexus 5281 file 11503), whose file description reads "REQUIRES
+REALISTIC ASPEN TREES. Install this AFTER R.A.T. and overwrite - LOD is included". The mod
+page lists no requirement, so the tick list said "needs: nothing beyond the game" and
+Realistic Aspen Trees SE 4.0 (Nexus 4423 file 58810; enabled on Fenestrate, with a Vortex
+rule placing it before SBT) went unticked. SBT's treeaspen02 to 05 meshes reference
+`textures\landscape\trees\treeaspenbranchcomp01.dds` to `04.dds`, which only RAT ships
+(vanilla has the one `treeaspenbranchcomp.dds`), hence the untextured aspens; the pine and
+reach trees reference vanilla names. The fix is the nexus row `realistic-aspen-trees-se-4.0`:
+Fenestrate's FOMOD choices were 2048x2048 and the Vanilla tree LOD (12 files), of which SBT
+overwrites the six meshes and the LOD atlas, leaving the five textures Fenestrate's
+deployment manifest attributes to RAT (the four variants and `treeaspenbranchcomp_n.dds`),
+which is all the row takes, so it conflicts with nothing. Lesson for the tick list: a Nexus
+file's own description can carry a requirement the mod page does not. The same scan of
+Fenestrate's Vortex rules and Nexus requirements across the layer boundary found one more,
+for Eli's call: Intuitive Dragon Ride Control 7.0.1 lists True Directional Movement - Target
+Lock Extension Patch for TDM 2.2.6 (Nexus 160556 file 694401, unticked; it replaces TDM's
+DLL with one extending target lock for camera height, dragon riding and camera behind the
+target), which Fenestrate ran; the layer ships TDM 2.2.7's own DLL. Page-listed extras
+outside the layer (Light Placer for Stealth Detection Fixes, Media Keys Fix for Alt-Tab
+Stuck Key Fix, Paired Animation Improvements for Open Animation Replacer, BodySlide for
+Racemenu Misc Slider) are optional on their pages.
 
 **Not placed (rows with source `out`, not dropped silently):**
 - sse-engine-fixes-skse64-plugin-7: part 2 only (the game-root preloader d3dx9_42.dll); add-mods.ps1 installs under Data, and part 1, the SKSE plugin, was never on Fenestrate; Nexus 17230 file 725261
