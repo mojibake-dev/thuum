@@ -440,7 +440,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       parked whole in a per-record list and written back when their plugin
       returns; a raw record re-based from the saved order at the first load
       that sees it; seven T0 cases (round trip, save under A load under B,
-      v1 under a saved order, the parked plugin, the drivers). Left for
+      v1 under a saved order, the parked plugin, the drivers). Its rule-6
+      scenario DRAFTED 2026-10-20: b-formdesc-world on branch
+      scenario-b-formdesc-world 973a412c (Eli's review), the fixture
+      adr043-preslice-25 on main ebc4d726 (twenty-five's eight raw records
+      with the order they were written under); it proves the migration on
+      a stage whose order differs from the fixture's, the layer stage, and
+      waits on two lab-api pieces (`server: world:`, FormDesc ids in the
+      known step). Left for
       slice two: decision 3 (the login refusal; the record is kept but
       LoadChangeForm still skips an unresolved race, so the 17:25 hazard
       stands until then), the six keep-on-miss fixes on fields already
