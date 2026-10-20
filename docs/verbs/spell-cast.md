@@ -1470,11 +1470,62 @@ gate and the merges after).
   The REA read's tier mechanism (H3b) is NOT the cause: nothing was dressed
   and then undressed; the look is skipped upstream of 44213, and the
   caster's own engine launched its rune from the identical point, so the
-  origin does not discriminate. Rule 8's next read: the same script on the
-  caster's seat for its own rune (do 44213 and 43919 fire, from where), and
-  the re-analyst on the arrival path (what sends a rune born at rest to
-  44163 at its first tick, what bit 20 is, and what the smallest change to
-  the relayed launch would be). Still wanted: a per-figure rune cap in the
+  origin does not discriminate. The caster-seat read followed the same
+  night (x-rune-visible-frida2 20261020-092130, both seats; the memo's
+  section D): the caster's OWN rune never ran 43919 or 44213 either, so
+  the tier compare is dead for runes on both seats and the glyph does not
+  come from it; both runes are born at rest at the point (velocity and
+  origin excluded); the first divergence is the runtime flags at Init3D's
+  entry, 0x210000 (kAutoAim, Projectile.h:157) for the engine's cast path
+  against 0x20010000 (kUseOrigin, :165) for the relay, the pair CommonLib's
+  spell LaunchData constructor sets (useOrigin true, autoAim false,
+  Projectile.cpp:220-221), and the arrival then takes a different branch of
+  44217 for each (+0x247 against +0x1c3). Built the same night on
+  m2-train-29 as a relayed launch with delivery kTargetLocation taking the
+  engine's pair (99c39e3e), measured on its stage and REVERTED (d34053e0):
+  no glyph, and the static read says why the flags could not matter. The
+  static read then came in (the re-analyst on
+  REA the same night, docs/research/re-37335-and-rune-landing.md, question
+  2; HYPOTHESIS from pseudocode): 44163 is not an arrival but the trigger
+  test's per-candidate validity check (44217 calls it for each nearby actor
+  at +0x1be and then for the local player at +0x242), so +0x247 against
+  +0x1c3 is WHICH actor stood within 150 units (the caster's own player on
+  c1, the caster's figure on c2), not a shooter branch; both returned 0
+  because the candidate was the shooter (iProjectileMineShooterCanTrigger
+  0). The flag flip was a no-op, as predicted: Launch sets kAutoAim only for
+  a player shooter, and kUseOrigin's one reader is the position snap for
+  non-grenades; on 99c39e3e's own stage x-rune-visible-frida2
+  20261020-101636 showed no glyph in the observer's view at any of four
+  marks, and the commit is reverted (m2-train-29 d34053e0; the projectile
+  pick stays). 43919 is the grenade's Havok
+  deactivation callback and 44213 is fed by the collision landing; a
+  target-location rune is born at rest (speed 0) in both games, so neither
+  runs anywhere, as measured. The glyph is a DECAL: the caster's own
+  target-location launch 34452 calls the decal placement 44186 after
+  Projectile::Launch, with the pick's position, its normal scaled, the
+  material id from 44190 and the grenade's own decal group (slot 0x9F),
+  gated on the projectile's slot 0xAE; 44186's only callers are 34452 and
+  44213, and the relay's bare Launch (MagicApi.cpp) never passes through
+  34452. CONFIRMED by rule 8's read the same night (x-rune-decal-frida
+  20261020-102818, rune-decal-trace.js on both seats, on 99c39e3e's stage):
+  the caster's game entered 34452 from the player's cast, launched inside
+  it (autoAim 1, useOrigin 0), looked the material up (44190: materialID
+  0xe4d39ca3, form 0x12f37) and placed ONE decal (44186: the rune PGRE, the
+  pick's position, the normal (5.83, -69.75, 0) of length 69.99, return
+  0x10000); the observer's game had one launch row from the relay (the
+  figure as shooter, 99c39e3e's flags in effect, contact normal (0, 0, 1))
+  and no 34452, material or decal row. Two side facts for the row: the
+  caster's normal was nearly horizontal, so that probe's aim put the rune
+  on the tent's south face, not the ground (the screenshots' weak control),
+  and the relay today sends (0, 0, 1) for every launch. Train-30's row:
+  relay the caster's contactNormal (34452
+  copies the pick's normal into LaunchData, which the Launch-entry reader
+  already sees) and the material id with the cast (a wire change: the
+  SpellCast message and its validator in one commit, rule 4), and after the
+  relayed Launch call 44186 as 34452 does when the new projectile's slot
+  0xAE is true; a relayed material failing, the landscape's at the point
+  (what 44190 does for the land shape). Native only, filtered on a
+  dynamic-form shooter (rule 9). Still wanted: a per-figure rune cap in the
   observer's game, since the registration gate (43934) admits the player's
   runes alone and a figure's four casts would leave four armed runes.
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
