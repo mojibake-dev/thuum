@@ -428,10 +428,26 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 
     - ADR-043's build (ACCEPTED 2026-10-19; the world stores every form as a
       FormDesc, a saved world carries its order and migrates, a login whose
-      appearance does not resolve is refused): three server sessions plus
-      one lab session, sized in docs/research/formdesc-world-map.md; before
-      the next layer that moves a plugin's slot, since until it lands a
-      restored world is re-based by hand or not restored.
+      appearance does not resolve is refused): sized in
+      docs/research/formdesc-world-map.md. Slice one BUILT overnight
+      2026-10-20 on fork m2-formdesc-world d0693ef4 (not merged; CI green,
+      13 of 13, 401 test cases): formVersion 2 with the presence guard;
+      the load order saved beside the records (load-order.json for the file
+      and zip drivers, a loadOrder document for mongo, passed through the
+      migration driver); the twelve raw fields as "<hex>:<plugin>" on disk
+      with runtime ids in memory, converted at the record boundary, the
+      appearance's forms in a sibling appearanceForms; unresolved forms
+      parked whole in a per-record list and written back when their plugin
+      returns; a raw record re-based from the saved order at the first load
+      that sees it; seven T0 cases (round trip, save under A load under B,
+      v1 under a saved order, the parked plugin, the drivers). Left for
+      slice two: decision 3 (the login refusal; the record is kept but
+      LoadChangeForm still skips an unresolved race, so the 17:25 hazard
+      stands until then), the six keep-on-miss fixes on fields already
+      FormDesc, the rule 6 T3 scenario (restart persistence with a load
+      order change on a stacked snapshot, Eli's review), the thuum side of
+      playtest-restore, the legacy effects map (deletable). Merge after the
+      scenario, through the gate.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
