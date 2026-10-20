@@ -486,8 +486,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         server condition functions, since Hailstone's own effects gate on
         them and apply nothing today (spell-cast.md).
       - the lab: a flights record for spell projectiles in the driver (the
-        Scattershock angle), and the arrows step counting PROJ 50 by base
-        id (its PARW count was always 0).
+        Scattershock angle), and the arrows step counting PROJ 50 (its PARW
+        count was always 0): the count BUILT 2026-10-20 on thuum main,
+        rides the next driver deploy; one base's presence stays the
+        projectiles step's (marksman.md).
 
 - Playtest twenty-seven (2026-10-20 morning, fork m2-train-29 709c90b0 under
   the essentials layer 29d83a0b; world playtest-m2-26-20261020T004645Z):
