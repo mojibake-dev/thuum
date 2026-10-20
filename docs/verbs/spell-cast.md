@@ -1476,11 +1476,26 @@ gate and the merges after).
   holds for Skyrim.esm's forms only. HYPOTHESIS, the gap: a Nord's 50 ResistFrost is
   a racial ability's constant effect, not a base, so the client's report
   carries 0 and the server never applied it; the engine answers 50 and
-  applies the base effect, the server refuses it. The row's second half,
-  before Hailstone is DONE: the race's abilities read from the records
-  (RACE SPLO, the SPEL's effects on the resist values) into the server's
-  modifier, then a Hailstone probe on a Nord seat comparing the server's
-  applied damage with the engine's own on a solo reference.
+  applies the base effect, the server refuses it. The row's second half
+  BUILT 2026-10-20 on fork m2-train30-conditions 52ea63f8: the race's
+  constant abilities (RACE SPLO, each an Ability spell of constant cast
+  type; libespm already parsed the list) are read once per race from the
+  records into the rule's facts (MpActor.cpp RaceAbilityFactsOf) and summed
+  by wire-rules magic.rs constant_modifier (no buff filter, no give-back)
+  under the running effects in MpActor::GetEffectModifier, the one modifier
+  the maxima, the regeneration rates, the damage formula and GetActorValue
+  read; so a Nord answers 50 on ResistFrost with no record and no running
+  effect, and an Altmer's maximum Magicka carries Highborn's 50, which the
+  server had run short by (every figure's bar and every magicka check of an
+  Altmer, a quieter gap the same source closes). T0: the record chain for
+  a Nord and an Altmer appearance (unit/EffectConditionsTest.cpp; CI is the
+  oracle, the Altmer's 50 a reading of UESP's Skyrim:High Elf until it
+  passes). Left for the probe x-hailstone, after this branch stages: the
+  server applies Hailstone's effects at their magnitudes with no resistance
+  multiplier (ApplyEffects takes none), where the engine halves frost
+  damage on a Nord; the probe measures both seats (c1 Nord, c2 Orc) against
+  the engine's own numbers and names the resistance rule as its own row if
+  the gap shows.
 - Scattershock (row 6), measured, no code: x-scattershock-6s
   20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
   launched on both seats (the PROJ 083a24 of Apocalypse) and the server
