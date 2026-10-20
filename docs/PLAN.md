@@ -501,7 +501,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         blanked, or the ash pile stays as the documented default.
       - Hailstone and kin: GetActorValue (14) and HasMagicEffect (214) as
         server condition functions, since Hailstone's own effects gate on
-        them and apply nothing today (spell-cast.md).
+        them and apply nothing today (spell-cast.md). BUILT 2026-10-20 on
+        fork m2-train30-conditions f2c0ba33 with T0 (the current Health,
+        Magicka or Stamina; any other value from the player's record plus
+        the server's own modifiers; a running effect by its MGEF); two
+        HYPOTHESES in the doc (the parameter's encoding, a racial
+        ability's resistance unseen by the server) and a Hailstone probe
+        for its T3.
       - the lab: a flights record for spell projectiles in the driver (the
         Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
         951b5bbc raises projectileFlight for a spell's projectiles, the
