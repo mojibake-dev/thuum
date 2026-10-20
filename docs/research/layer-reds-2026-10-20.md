@@ -84,7 +84,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   (HYPOTHESIS), and apocrypha's gender-bits-from-masters patch the one fix
   for all three menu reds; the re-stage's a-racemenu and a-rotfern decide,
   with the seat's files hashed first against stale snapshots.
-- apocrypha's audit of the laid tree (16:4x): the mechanism. skee64.dll and
+- apocrypha's audit of the laid tree (16:39): the mechanism. skee64.dll and
   skee64.ini are RaceMenu's own (every [Features] flag on), nothing loose
   shadows RaceMenu.bsa, and the archives share exactly one path:
   SkyUI_SE.bsa carries interface/racesex_menu.swf too (35,416 B against
