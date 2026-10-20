@@ -10,7 +10,7 @@
 # seat types itself is test 1's `player.addperk 7934b` (Overdraw40, the
 # headshot rule's perk, which lives in the shooter's game).
 id: 27
-build: "fork m2-train-29 18c0e603 on the stage (not merged) with the essentials layer (apocrypha/layer-essentials 29d83a0b or later, after the rotfern stagger revert; the line is finished at setup)"
+build: "fork m2-train-29 709c90b0 on the stage (not merged; 18c0e603's client and server sources, the night's 99c39e3e launch-flag try reverted in d34053e0, plus the CI fresh-tree fix 6591a0c0 with parity d5f478c3) with the essentials layer (apocrypha/layer-essentials 29d83a0b as thuum stage-layer-train29 1496763, staged 2026-10-20 after rotfern's stagger revert: rotfern.esp CRC32 F483303D)"
 world: playtest-m2-26-20261020T004645Z   # twenty-six's world, saved 17:46 PDT after its checklist (rotfern restored in the layer's slots at 17:33)
 hold:
   minutes: 180
