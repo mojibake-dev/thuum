@@ -1,7 +1,7 @@
 """The layer's build-time plugin patches (lab/layer/plugin-patches.tsv, lab/tools/plugin-patch.py): every row names a
 plugin of the load order and a known patch; the esl patch sets only the header's light flag and refuses a plugin with
-records of its own above 0xFFF; the HDPT patch sets both gender bits on every head part's DATA byte, keeps every other
-bit and the file's size, refuses a compressed record, and both are idempotent."""
+records of its own above 0xFFF; the HDPT patch gives every override its master record's gender bits, keeps every other
+bit and the file's size, refuses a compressed record or a missing master, and all are idempotent."""
 import csv
 import importlib.util
 import struct
@@ -51,18 +51,18 @@ class Rows(unittest.TestCase):
 class Esl(unittest.TestCase):
     def test_sets_only_the_light_flag_on_an_override_only_plugin(self):
         p = plugin([record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))])
-        new, what = plugin_patch.patch_esl(p)
+        new, what = plugin_patch.patch_esl(p, {})
         self.assertEqual(len(new), len(p))
         self.assertEqual(struct.unpack_from("<I", new, 8)[0], 0x200)
         self.assertEqual(new[:8] + new[12:], p[:8] + p[12:])
-        again, what2 = plugin_patch.patch_esl(new)
+        again, what2 = plugin_patch.patch_esl(new, {})
         self.assertEqual(again, new)
         self.assertEqual(what2, "already light")
 
     def test_refuses_a_plugin_with_its_own_records_above_0xfff(self):
         p = plugin([record(b"ARMO", 0x01001000, sub(b"EDID", b"New\0"))])  # index 01 = the plugin's own (one master)
         with self.assertRaises(SystemExit):
-            plugin_patch.patch_esl(p)
+            plugin_patch.patch_esl(p, {})
 
 
 class DropRecord(unittest.TestCase):
@@ -70,18 +70,18 @@ class DropRecord(unittest.TestCase):
         keep = record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))
         gone = record(b"NPC_", 0x00000007, sub(b"EDID", b"Player\0"))
         p = plugin([gone, keep])
-        new, what = plugin_patch.patch_drop_record(p, "00000007")
+        new, what = plugin_patch.patch_drop_record(p, {}, "00000007")
         self.assertEqual(len(new), len(p) - len(gone))
         self.assertEqual([(t, f) for _, t, _, f, _ in plugin_patch.walk(new) if t != b"TES4"], [(b"ARMO", 0x00000D62)])
         grp = new.index(b"GRUP")
         self.assertEqual(struct.unpack_from("<I", new, grp + 4)[0], 24 + len(keep))
         self.assertIn("1 record(s) 00000007", what)
-        self.assertEqual(plugin_patch.patch_drop_record(new, "00000007")[0], new)
+        self.assertEqual(plugin_patch.patch_drop_record(new, {}, "00000007")[0], new)
 
     def test_an_emptied_group_goes_and_the_header_count_follows(self):
         gone = record(b"NPC_", 0x00000007, sub(b"EDID", b"Player\0"))
         p = plugin([gone])
-        new, what = plugin_patch.patch_drop_record(p, "00000007")
+        new, what = plugin_patch.patch_drop_record(p, {}, "00000007")
         self.assertNotIn(b"GRUP", new)
         hedr = new.index(b"HEDR")
         self.assertEqual(struct.unpack_from("<I", new, hedr + 6 + 4)[0], 0)  # 1 record and 1 group gone from a count of 1, floored at 0
@@ -89,36 +89,46 @@ class DropRecord(unittest.TestCase):
 
     def test_leaves_a_plugin_without_the_record_alone(self):
         p = plugin([record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))])
-        new, what = plugin_patch.patch_drop_record(p, "00000007")
+        new, what = plugin_patch.patch_drop_record(p, {}, "00000007")
         self.assertEqual(new, p)
         self.assertEqual(what, "00000007 already absent")
 
 
-class HdptGenderBoth(unittest.TestCase):
-    def test_sets_both_bits_and_keeps_the_rest(self):
-        recs = [record(b"HDPT", 0x00010000 + i, sub(b"EDID", b"Part\0") + sub(b"DATA", bytes([v])) + sub(b"PNAM", b"\x03\0\0\0"))
-                for i, v in enumerate((0x01, 0x05, 0x09, 0x11, 0x18, 0x19))]
-        p = plugin(recs)
-        new, what = plugin_patch.patch_hdpt_gender_both(p)
-        self.assertEqual(len(new), len(p))
-        values = []
-        for o, typ, flags, fid, size in plugin_patch.walk(new):
-            if typ == b"HDPT":
-                q, end = o + 24, o + 24 + size
-                while q + 6 <= end:
-                    sig = new[q:q + 4]
-                    sz = struct.unpack_from("<H", new, q + 4)[0]
-                    if sig == b"DATA":
-                        values.append(new[q + 6])
-                    q += 6 + sz
-        self.assertEqual(values, [0x07, 0x07, 0x0F, 0x17, 0x1E, 0x1F])
-        self.assertIn("6 HDPT DATA bytes", what)
-        self.assertEqual(plugin_patch.patch_hdpt_gender_both(new)[0], new)
+class HdptGenderFromMaster(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self.dir = Path(tempfile.mkdtemp())
+        master = plugin([record(b"HDPT", 0x00010000, sub(b"EDID", b"HairMaleNord1\0") + sub(b"DATA", bytes([0x03]))),
+                         record(b"HDPT", 0x00010001, sub(b"EDID", b"HairFemaleNord1\0") + sub(b"DATA", bytes([0x05]))),
+                         record(b"HDPT", 0x00010002, sub(b"EDID", b"MaleBrows\0") + sub(b"DATA", bytes([0x13])))], masters=())
+        (self.dir / "Skyrim.esm").write_bytes(master)
+        self.ctx = {"game_dir": str(self.dir)}
 
-    def test_refuses_a_compressed_record(self):
-        p = plugin([record(b"HDPT", 0x00010000, sub(b"DATA", b"\x01"), flags=0x40000)])
+    def test_copies_the_master_s_gender_bits_and_keeps_the_rest(self):
+        p = plugin([record(b"HDPT", 0x00010000, sub(b"DATA", bytes([0x01]))),
+                    record(b"HDPT", 0x00010001, sub(b"DATA", bytes([0x01]))),
+                    record(b"HDPT", 0x00010002, sub(b"DATA", bytes([0x19])))], masters=("Skyrim.esm",))
+        new, what = plugin_patch.patch_hdpt_gender_from_master(p, self.ctx)
+        self.assertEqual(len(new), len(p))
+        values = [new[o + 24 + 6] for o, typ, _, _, _ in plugin_patch.walk(new) if typ == b"HDPT"]
+        self.assertEqual(values, [0x03, 0x05, 0x1B])
+        self.assertIn("3 from Skyrim.esm", what)
+        self.assertEqual(plugin_patch.patch_hdpt_gender_from_master(new, self.ctx)[0], new)
+
+    def test_refuses_an_override_without_a_master_record(self):
+        p = plugin([record(b"HDPT", 0x00010009, sub(b"DATA", bytes([0x01])))], masters=("Skyrim.esm",))
         with self.assertRaises(SystemExit):
-            plugin_patch.patch_hdpt_gender_both(p)
+            plugin_patch.patch_hdpt_gender_from_master(p, self.ctx)
+
+    def test_refuses_a_missing_master_file(self):
+        p = plugin([record(b"HDPT", 0x00010000, sub(b"DATA", bytes([0x01])))], masters=("Dawnguard.esm",))
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_hdpt_gender_from_master(p, self.ctx)
+
+    def test_names_the_masters_a_plugin_needs(self):
+        p = plugin([record(b"HDPT", 0x00010000, sub(b"DATA", b"\x01")), record(b"HDPT", 0x01000005, sub(b"DATA", b"\x01")),
+                    record(b"HDPT", 0x02000001, sub(b"DATA", b"\x01"))], masters=("Skyrim.esm", "Dawnguard.esm"))
+        self.assertEqual(plugin_patch.hdpt_masters_needed(p), ["Dawnguard.esm", "Skyrim.esm"])  # 02 = the plugin's own, not a master
 
 
 if __name__ == "__main__":

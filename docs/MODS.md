@@ -475,8 +475,8 @@ existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apoca
 Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
 client-only at the tail), 45 of them light; 28 mod folders scoped `@1.6.1170` (every SKSE DLL
 mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on 1.7.104).
-111 mod folders and the Papyrus map's, 5,753 files once the install-order rule (below) has
-dropped the six replaced copies, 4.2 GB on disk (the DLL mods' .pdb files kept: Crash Logger
+111 mod folders and the Papyrus map's, 5,754 files once the install-order rule (below) has
+dropped the six replaced copies, 4.1 GB on disk (the DLL mods' .pdb files kept: Crash Logger
 with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, never
 removes one: a render that drops a file (FSMP's DLL and configs on 2026-10-20) relies on the
 clone being laid from a base without it, which the stage's snapshot discipline gives.
@@ -571,18 +571,22 @@ few plugins are patched at the byte level after persist-mods lays them, size kep
 so the server's esm copies and the clients' SHA256SUMS carry the same bytes; these plugins
 differ from their archive or Fenestrate bytes by design. `esl` sets the TES4 light flag on the
 two Survival warmth patches, which define no record of their own (override-only, so the FE
-space holds nothing of theirs), to keep the light slots the HDT pair held. `hdpt-gender-both`
-sets both gender bits (0x02 male, 0x04 female) on every head part of Playable Headparts All
-Races.esp, every other bit kept: its 805 HDPT overrides clear the gender bits (DATA 01/05/09/
-11/18/19 across them) and RaceMenu's ApplyPresetData applies a part only when its gender flag
-matches the actor (docs/verbs/racemenu-sync.md, rotfern's own root cause), so under the layer
-every preset load seated the race defaults for hair, hairline, beard, brows and marks
-(thuum-magnus, a-racemenu red 20261020-193623; c1's base held five parts against the preset's
-eight, the eyes surviving only through All Eyes for All Races, later in the order). Eli's call,
-2026-10-20: "patch it". CONFIRMED by x-layer-headparts 20261020-210719 on the first stage that
-carried it (stage-layer-train29 7d2f806): both seats' head parts equal the server's record at login
-and again after a relaunch; that stage's smoke 20261020-210408 ran with no hdtsmp64 log among its
-artifacts, FSMP gone as intended. `drop-record <formid>` removes one record, the groups around
+space holds nothing of theirs), to keep the light slots the HDT pair held. `hdpt-gender-from-master`
+gives every head part of Playable Headparts All Races.esp the gender bits (0x02 male, 0x04 female)
+of the record it overrides in its master, 766 from Skyrim.esm and 39 from Dawnguard.esm (read from
+lab/.cache/game, pulled off the host like the Survival esl), every other bit and the all-races RNAM
+kept. Why: the mod clears the bits on its 805 overrides (DATA 01/05/09/11/18/19 across them), and
+RaceMenu's ApplyPresetData applies a part only when its gender flag matches the actor
+(docs/verbs/racemenu-sync.md, rotfern's own root cause), so under the layer every preset load
+seated the race defaults for hair, hairline, beard, brows and marks (thuum-magnus, a-racemenu red
+20261020-193623; c1's base held five parts against the preset's eight, the eyes surviving only
+through All Eyes for All Races, later in the order). Eli's call, 2026-10-20: "patch it". The first
+patch set both bits on every part: that fixed the preset load (x-layer-headparts 20261020-210719,
+both seats) and broke the vanilla race menu for males, whose rebuild at open reads a part with the
+female bit as female and takes the first valid alternative where one exists, so a male's hair
+swapped to ApachiiHairM01 at menu open (a-racemenu 20261020-224305, step 18; magnus's read). The
+master's own bits are right for both paths. HYPOTHESIS until a-racemenu is green on this render.
+`drop-record <formid>` removes one record, the groups around
 it shrinking and the header's count following (the one patch that changes a file's size); it
 carries the layer's rule that **no served plugin may override the player's base record NPC_
 0x00000007 (nor PlayerRef 0x14)**: in SkyMP every player shares 0x7 and the server builds each
@@ -615,6 +619,24 @@ SurvivalModeMainQuest restarted, its 5 s check ran and the Creation's own "Enabl
 appeared in a connected game (numidium, x-survival-unblock3 20261020-024406), so admitting its names
 from the first tick is enough. The file is regenerated at every build and listed in SHA256SUMS like every layer file.
 `lab/tests/test_papyrus_map.py` checks the rows and the VMAD reader's layouts.
+
+**RaceMenu's menu under the layer (2026-10-20, the a-rotfern CTD and a-racemenu's hair swap):**
+SkyUI_SE.bsa carries `interface/racesex_menu.swf` too, the one file the two archives share, and in
+the layer SkyUI_SE.esp is client-only at the tail (slot 82) after RaceMenu.esp (23), so among
+archives SkyUI's copy won and every layer seat ran SkyUI's vanilla-style race menu instead of
+RaceMenu's: skee64's chargen never initialised (no `RaceMap::CreateDefaultMap` in a layer seat's
+skee64.log, where the no-layer run has it), a-rotfern's race-pick walked the vanilla menu's
+name-sorted list onto rotfern's vampire twin, a-racemenu's menu open rebuilt the hair, and the
+a-rotfern CTD (SkyrimSE.exe+095A263, run 20261020-224918) is that vanilla menu's slider rebuild
+indexing the player's tint array past its end for rotfernRaceVampire's 33 male tint layers
+(thuum-magnus's read). Fenestrate had SkyUI at 93 and RaceMenu at 170, as RaceMenu's own install
+notes require; without the layer the lab has no SkyUI at all. The fix keeps every slot where it is:
+persist-mods lays RaceMenu's copy of the file loose in RaceMenu's folder, extracted from
+RaceMenu.bsa by lab/tools/bsa-extract.py (a stdlib BSA reader with its own LZ4 frame decoder;
+`lab/tests/test_bsa_extract.py`), and a loose file beats every archive whatever the plugins'
+order. Rule learned: when two archives carry the same path and the plugins' order cannot be the
+installer's, lay the winner's copy loose. HYPOTHESIS until `RaceMap::CreateDefaultMap` appears in
+a layer seat's skee64.log and a-rotfern and a-racemenu are green.
 
 **Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
 textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
