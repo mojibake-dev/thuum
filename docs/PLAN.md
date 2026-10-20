@@ -389,9 +389,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         layer's plugin list read at Skyrim Platform's load, OnUpdate per
         script (ADR-044 ACCEPTED 2026-10-19, CONFIRMED by x-survival-unblock3
         20261020-024406); b-papyrus-events awaits Eli's review.
-      - Lightning Strike on the observer: BUILT (07b33046): the relayed
-        launch picks the effect that carries a projectile; HYPOTHESIS until
-        x-lightning-strike names the lobber 0x0c0cfe00 on the observer.
+      - Lightning Strike on the observer: BUILT (07b33046) and the launch
+        CONFIRMED (x-lightning-strike 20261020-085414: the observer's game
+        launches the lobber 0x0c0cfe00); the bolt's appearance there is
+        twenty-seven's row.
       - Finger of Death: IsEssential (354) BUILT on the server (eea3a5d5,
         T0); the scripted kill stays the caster's game's (the ash pile),
         ADR-029's default, until the allowlist verb.
