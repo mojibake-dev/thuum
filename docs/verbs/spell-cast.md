@@ -1392,9 +1392,17 @@ gate and the merges after).
   stays as set, the explosion comes from the PROJ. HYPOTHESIS until the
   probe: with the lobber flying in the observer's game its explosion
   places the bolt there, and the WB_DestroyAfterDelay_Script admission
-  deletes it; the probe is x-lightning-strike re-grounded at the camp with
-  c2.watched(c1).launched(201588224) >= 1 and both seats' screenshots at
-  the strike. If the lobber flies and never explodes, the REA read's three
+  deletes it; the probe is x-lightning-strike re-grounded at the camp asserting the
+  lobber's launch on both seats, c1.watched_self().launched("0xc0cfe00")
+  and c2.watched(c1).launched("0xc0cfe00") (PROJ 030cfe00
+  WB_DestructionShock_Projectile_LightningStrike by lab/esm.py, 0x0C0CFE00
+  in the layer-free order; numidium's correction of a transposed id), with
+  both seats' screenshots at the strike. The records as esm.py reads them
+  tonight: the spell's effects are 030fadfd (the AV effect) and 03100ba6
+  (the perk rider, whose own projectile is 03100ba9, the _2C variant), so if
+  the fix's first-with-a-projectile pick takes the rider's, the observer
+  launches 0x0c100ba9 and the second line goes red naming it: the probe
+  tells which effect carries the lobber. If the lobber flies and never explodes, the REA read's three
   candidates stand (a null parentCell on the figure's launch, a model that
   never arrives, a dive below ground).
 - Finger of Death, the condition half (row 2b): IsEssential (354) is a
