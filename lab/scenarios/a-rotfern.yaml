@@ -1,7 +1,9 @@
 # M1, Eli's rotfern race (docs/PLAN.md M1; docs/MODS.md). rotfern.esp and its
 # master RaceCompatibility.esm load on the server and both clients in the same
 # order, after the full-slot Creation Club plugins (docs/LAB.md), so rotfern's
-# race is RACE 0x0800AA00 everywhere. The server opens c1's race menu; the
+# race, RACE 00aa00 of rotfern.esp (lab-api's items table names it as a
+# FormDesc, its slot the run's load order's), is one id everywhere. The server
+# opens c1's race menu; the
 # driver moves the menu's selection down until c1's race is rotfern
 # (race-pick, which reads the race after each press instead of counting
 # presses) and closes the menu; skymp5-client sends the menu's result, and the

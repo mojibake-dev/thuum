@@ -1,6 +1,6 @@
 # M2, ghostwalk (docs/verbs/ghostwalk.md; playtest twenty-two, Eli: "short
 # distances and they slide"): a short Ghostwalk return watched from c2. c1
-# casts Apocalypse's Ghostwalk (0x0C00AAE8, 201370344) at the lab spawn and
+# casts Apocalypse's Ghostwalk (its SPEL 00aae8) at the lab spawn and
 # walks south for 3 s, about 900 units (305 units a second in
 # x-ghostwalk-relay 20261017-042445), and the mod's script pulls it back
 # about 11 s after the cast. A return under 1024 units used to glide on the
@@ -23,11 +23,11 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: learn-spell {spellId: 201370344}
+  - c1: learn-spell {spellId: "00aae8:Apocalypse - Magic of Skyrim.esp"}
   - c1: console {text: "player.setav magicka 3000"}
   - wait: 2
   - c1: set-percentages {magicka: 1}
-  - c1: console {text: "player.equipspell c00aae8 right"}
+  - c1: console {text: "player.equipspell {00aae8:Apocalypse - Magic of Skyrim.esp} right"}
   - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
   - c2: teleport {cell: lab-spawn, x: 200, y: -300, z: 0, rot: [0, 0, 270]}
   - c1: draw-weapon
@@ -39,7 +39,7 @@ steps:
   - until:
       within: 6
       expect:
-        - server.effects(c1).left("0xc00aae5") > 5
+        - server.effects(c1).left("00aae5:Apocalypse - Magic of Skyrim.esp") > 5
   - c1: hold-key {code: 17, ms: 3000}
   - wait: 3.5
   - assert:

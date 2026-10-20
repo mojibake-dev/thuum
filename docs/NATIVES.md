@@ -1282,7 +1282,7 @@ Status meanings:
 | `SoundDescriptor.SetDecibelVariance` (method) | missing |  |  |  |
 | `SoundDescriptor.SetFrequencyShift` (method) | missing |  |  |  |
 | `SoundDescriptor.SetFrequencyVariance` (method) | missing |  |  |  |
-| `SPELL.Cast` (method, latent) | missing | R0 | Not on the server VM. The server itself sends it as an SpSnippet when it records a bond's concealment: the proc cast on the target's own player and on each figure in every game but the caster's, each game's copy following the server's record, which is R0 (PartOne::ConcealBond). | shadowbond |
+| `SPELL.Cast` (method, latent) | missing |  | Not on the server VM, and the server sends it as no snippet either: sent so for a bond's concealment proc (train28-bond), it completed in the target's game and applied nothing (b-shadowbond 20261019-215816), as the driver's own Spell.Cast applied nothing in push.md; Skyrim Platform's latent dispatch of this native has no green run. The proc travels as a SpellCast relay since train28-bond3 (castSpellImmediate's Self branch in each game). | shadowbond |
 | `SPELL.GetCastTime` (method) | missing |  |  |  |
 | `SPELL.GetCostliestEffectIndex` (method) | missing |  |  |  |
 | `SPELL.GetEffectAreas` (method) | missing |  |  |  |
