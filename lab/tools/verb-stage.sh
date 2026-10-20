@@ -183,7 +183,7 @@ echo "== 7. the client on both clones $(date +%H:%M:%S)"
 # client-dist stages the built driver bundle with the dist (stage-client.sh), so build it first: a fresh
 # worktree has none, and the main checkout's would be whatever was built last
 echo "   driver bundle: $(just build-driver 2>&1 | tail -1 | awk '{print $5, $NF}')"
-just build-client "$branch" "$dist_sha" 2>&1 | grep -E "^run [0-9]+ " | cut -c1-120   # the build of this head (or of the run REUSE_DIST took), not the branch's newest
+just build-client "$branch" "$dist_sha" 2>&1 | grep -E "^(run|github|gitlab) [0-9]+ " | cut -c1-120   # the build of this head (or of the one REUSE_DIST took), not the branch's newest; build-client names its source first since verb-stage-gitlab (main f7f4bf1), and a filter that matched nothing stopped train-29's stage at step 7 under pipefail (2026-10-20 01:31)
 # where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
 if [ -n "$overlay" ]; then
   blog=lab/results/runsets/overlay-$branch-$sha8.log; mkdir -p lab/results/runsets

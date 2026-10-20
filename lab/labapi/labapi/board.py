@@ -49,6 +49,10 @@ class StepBoard:
         # a projectiles step's answer: {worldOrCell, refs: projectile base id
         # (decimal) -> the nearest reference's formId, pos, distance, or null}
         self._projectiles: dict[str, dict[str, Any]] = {}
+        # a refs-near step's answer: {from, pos, radius, cell, types: base type
+        # (decimal) -> {inCell, near, refs: [...]}, ids: base id (decimal) ->
+        # the nearest reference's formId and distance, or null} (docs/LAB.md)
+        self._refs_near: dict[str, dict[str, Any]] = {}
         # a poisons step's answer: {poisons: [{baseId, poisonId, count, worn,
         # wornLeft}]}
         self._poisons: dict[str, dict[str, Any]] = {}
@@ -103,6 +107,8 @@ class StepBoard:
             self._globals[step.client] = body["data"]
         if step.action == "projectiles" and isinstance(body.get("data"), dict):
             self._projectiles[step.client] = body["data"]
+        if step.action == "refs-near" and isinstance(body.get("data"), dict):
+            self._refs_near[step.client] = body["data"]
         if step.action == "poisons" and isinstance(body.get("data"), dict):
             self._poisons[step.client] = body["data"]
         if step.action == "skills" and isinstance(body.get("data"), dict):
@@ -193,6 +199,9 @@ class StepBoard:
     def projectiles(self, observer: str) -> dict[str, Any] | None:
         return self._projectiles.get(observer)
 
+    def refs_near(self, observer: str) -> dict[str, Any] | None:
+        return self._refs_near.get(observer)
+
     def poisons(self, observer: str) -> dict[str, Any] | None:
         return self._poisons.get(observer)
 
@@ -223,6 +232,7 @@ class StepBoard:
         self._held.clear()
         self._globals.clear()
         self._projectiles.clear()
+        self._refs_near.clear()
         self._poisons.clear()
         self._skills.clear()
         self._node_scales.clear()

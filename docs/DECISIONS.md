@@ -2131,7 +2131,12 @@ UI, or per-player state the server declares R3 or records as R2.
    rest stay blanked. The list is consulted for OnUpdate too, so the hook
    pays one table lookup per OnUpdate under the block; the first build
    counts the rate (a Frida counter on the hook) and caps nothing until
-   the count says it must.
+   the count says it must. Counted the same night, before the build (numidium,
+   lab/frida/sendevent-rate.js at Skyrim Platform's own hook point, c1
+   connected and idle at the camp, 5 s windows): 50 to 67 events a window,
+   10 to 13 a second, OnTrigger about 30 and OnUpdate 13 to 22 of them; a
+   sixteen-deep parent walk on each is noise. To be read again on the
+   layer, which adds scripts.
 4. State keeps its rung. A script admitted by plugin changes nothing about
    authority: a global it writes is that player's (R2, player-globals), a
    value it reads is its game's, damage or regen it applies to its own
