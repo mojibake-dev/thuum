@@ -1904,7 +1904,7 @@ relaunch, and nothing skips T0.
 
 ## ADR-044: The client's Papyrus event filter admits scripts by what they are, not by their name
 
-Status: PROPOSED 2026-10-19 20:15 PDT (thuum-magnus, from playtest twenty-six's
+Status: PROPOSED 2026-10-19 19:19 PDT (thuum-magnus, from playtest twenty-six's
 missing Apocalypse MCM and the lab's Survival Mode reads of the same
 evening). Eli decides. Refines ADR-029's first decision (which events a
 game's scripts receive) and keeps ADR-008 (quests per player, world-shared
