@@ -222,10 +222,14 @@ type Watched = {
   // (the fork's projectileLaunched event, Projectile::Launch's LaunchData;
   // thuum docs/verbs/marksman.md: the arrow's path identical on both screens)
   launches: Array<[number, number, number, number, number, number, number, number, number, number]>;
-  // its arrows' flights as they start [ms, ammo, x, y, z, angleX, angleZ,
-  // power]: the arrow's first update, its angles after the player's
-  // auto-aim (the fork's projectileFlight event; the path the arrow flies)
-  flights: Array<[number, number, number, number, number, number, number, number]>;
+  // its projectiles' flights as they start [ms, ammo, x, y, z, angleX,
+  // angleZ, power, projectile, spell]: the projectile's first update, its
+  // angles after the player's auto-aim (the fork's projectileFlight event;
+  // the path the arrow flies). Arrows since m2-arrow-path (ammo set, spell
+  // 0); a spell's projectiles since m2-train30-flights (ammo 0, spell set:
+  // Scattershock's heading on the observer, docs/verbs/spell-cast.md). The
+  // first eight columns are lab-api's pairing (assertions.py _rows(.., 8))
+  flights: Array<[number, number, number, number, number, number, number, number, number, number]>;
   // the actions the engine performed for it [ms, action, idle, eventName,
   // type] (the player's only: the platform's hook reports the player's own;
   // thuum docs/verbs/cast-action.md)
@@ -746,7 +750,7 @@ try {
   on("projectileFlight", (e) => {
     const w = watchedRecord(e.shooter);
     if (w && w.flights.length < WATCH_SELF_MAX) {
-      w.flights.push([watchedMs(), e.ammo, e.x, e.y, e.z, e.angleX, e.angleZ, e.power]);
+      w.flights.push([watchedMs(), e.ammo, e.x, e.y, e.z, e.angleX, e.angleZ, e.power, e.projectile, e.spell]);
     }
   });
 } catch (err) {

@@ -1454,8 +1454,15 @@ gate and the merges after).
   launched on both seats (the PROJ 083a24 of Apocalypse) and the server
   recorded the hits (c2 at 0.78 Health); twenty-five's "hits not reported"
   was a 2.5 s hold equal to the charge. The missile angle on the observer
-  stays unmeasured: the lab's flights record covers arrows only, a driver
-  item for a later train.
+  stays unmeasured: the lab's flights record covered arrows only. Train-30
+  BUILT 2026-10-20: the projectileFlight hook admits a spell's projectiles
+  (fork m2-train30-flights 951b5bbc: the spell source in place of the ammo,
+  the spell's id in the event; the bow service already ignores a flight
+  without ammo) and the driver's flights rows carry projectile and spell as
+  columns nine and ten (thuum main; lab-api pairs on the first eight, so an
+  arrow's flights_match reads as before, and a spell's pairing by projectile
+  is lab-api's follow-up). The measurement is a stage with both seats
+  watching a Scattershock cast.
 - The rune glyph (row 5) and the local dent (row 3): their Frida reads ran
   on this train's stage (x-rune-visible-frida 20261020-085906 on c2,
   x-figure-values-hit-frida 20261020-085705 on c1; lab/frida/
