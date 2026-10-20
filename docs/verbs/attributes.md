@@ -72,7 +72,7 @@ value was then cropped to the regeneration model and sent back; a
 server-applied heal snapped back the same way. Nothing recorded when the
 server last set a value and the report carries no stamp.
 
-The fix, fork m2-snapback 8ba160e1 (the train after playtest twenty-eight;
+The fix, fork m2-snapback 1fb5f2f9 (the train after playtest twenty-eight;
 Eli 2026-10-20: the snap-back fix STAYS in M2): the bases' rule applied to
 the percentages. A value the server RAISED holds against the client's
 reports until one reaches it, the same shape as actor_values.rs's hold on a
