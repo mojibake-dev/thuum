@@ -60,8 +60,12 @@ steps:
   - c1: hold-key {code: 199, ms: 4000}
   - wait: 5.5
   - assert:
-      - server.actor(c2).healthPercentage < 0.78
-      - server.actor(c2).healthPercentage > 0.64
+      # the band around the SERVED Firebolt's instant Health damage (lab-api
+      # server.spell, the server's own rule; the layer's Mysticism and Odin
+      # rewrite the record to 20 where Skyrim.esm says 25, 2026-10-20's layer
+      # read), the same width as the vanilla constants 0.78 and 0.64 had
+      - server.actor(c2).healthPercentage < 1 - server.spell(0x12FD0).magnitude / 100 + 0.03
+      - server.actor(c2).healthPercentage > 1 - server.spell(0x12FD0).magnitude / 100 - 0.11
       - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
   - wait: 3
   - c2: watch-stop
