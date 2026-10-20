@@ -1450,10 +1450,16 @@ gate and the merges after).
   was a 2.5 s hold equal to the charge. The missile angle on the observer
   stays unmeasured: the lab's flights record covers arrows only, a driver
   item for a later train.
-- The rune glyph (row 5) and the local dent (row 3) wait for their Frida
-  reads (lab/frida/rune-tier-trace.js and figure-dent-trace.js, thuum
-  branch lab-frida-train29), run on this train's stage; no hook before the
-  read (rule 8).
+- The rune glyph (row 5) and the local dent (row 3): their Frida reads ran
+  on this train's stage (x-rune-visible-frida 20261020-085906 on c2,
+  x-figure-values-hit-frida 20261020-085705 on c1; lab/frida/
+  rune-tier-trace.js and figure-dent-trace.js), the traces under read; no
+  hook before the read (rule 8). The refs-near step (the driver's, train-29)
+  settled the rune's other half: x-rune-visible 20261020-090323, the
+  observer's game holds the figure's rune as a reference whose base is the
+  PROJ (c2.refs_near().count(50) == 1 at 440 units, the same 30 s later)
+  and its trip deals the server's number, so the missing glyph is a
+  drawing matter, not a removal.
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
   (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
   second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
