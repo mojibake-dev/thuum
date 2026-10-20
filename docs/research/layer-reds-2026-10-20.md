@@ -50,7 +50,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   0x09002317, the last two parts of the layer's full slot 0x09; c1's game
   shows another set. A new shape past the gender-flag fix (x-layer-headparts
   20261020-210719 read eight parts equal before and after a relaunch).
-- Read 16:25 PDT: both c1's base (steps/015, nine parts) and the record
+- Read 16:24 PDT: both c1's base (steps/015, nine parts) and the record
   carry ApachiiHairM01 (0x09002317) and ApachiiHairLineM01 (0x09002314) in
   place of HairMaleNord01, with one orphan vanilla hairline left on the
   base; the preset c1 saved 0.25 s after the close was 8849 bytes against
