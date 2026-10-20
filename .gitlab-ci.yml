@@ -55,6 +55,11 @@ docs-lint:
 lab-tests:
   extends: .base
   stage: lint
+  rules: &lab-changes
+    # a docs-only push skips the suites (69 jobs once queued on the one light lane, 2026-10-20);
+    # anything under lab/ (scenarios too: the suites parse them) or this file runs them
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - changes: [lab/**/*, .gitlab-ci.yml]
   script:
     - apk add --no-cache nodejs
     - python3 -m unittest discover -s lab/tests -v
@@ -65,6 +70,7 @@ labapi-tests:
   stage: lint
   tags: [sky-light]
   image: ghcr.io/astral-sh/uv:python3.12-alpine
+  rules: *lab-changes
   script:
     - uv run --project lab/labapi python -m unittest discover -s lab/tests -v
 
@@ -90,6 +96,9 @@ driver-build:
   stage: lint
   tags: [sky-light]
   image: node:22-alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - changes: [lab/driver/**/*, .gitlab-ci.yml]
   script:
     - cd lab/driver && npm ci && npm run build
   artifacts:
