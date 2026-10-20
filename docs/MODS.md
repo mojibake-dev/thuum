@@ -558,7 +558,10 @@ classes of quests, perks, dialogue, packages and scenes) and, for a plugin from 
 folder's compiled scripts too (loose `scripts/*.pex` and the `scripts\` entries of its BSAs' name
 tables; nothing extracted or decompiled). A `game` row is one of the game's own plugins: its file is
 pulled off the host's persist esm directory into lab/.cache/game and read there. The first row is
-ccQDRSSE001-SurvivalMode.esl. The file is regenerated at every build and sits outside SHA256SUMS,
+ccQDRSSE001-SurvivalMode.esl, and the first measured case: with the block lifted and
+SurvivalModeMainQuest restarted, its 5 s check ran and the Creation's own "Enable Survival Mode?" box
+appeared in a connected game (numidium, x-survival-unblock3 20261020-024406), so admitting its names
+from the first tick is enough. The file is regenerated at every build and sits outside SHA256SUMS,
 like plugins.txt, because add-mods.ps1 installs every SHA256SUMS entry into Data.
 `lab/tests/test_papyrus_map.py` checks the rows and the VMAD reader's layouts.
 
