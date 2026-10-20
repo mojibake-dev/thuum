@@ -69,7 +69,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   asked of apocrypha and numidium. Decider: "RaceMap::CreateDefaultMap" in
   a layer seat's c1-skee64.log, then a-rotfern green. The 0x7 rule stands
   on its own ground.
-- numidium's deploy read (16:4x): persist is clean. SHA256SUMS holds one
+- numidium's deploy read (16:37): persist is clean. SHA256SUMS holds one
   copy each of RaceMenu.bsa, RaceMenu.esp, RaceMenuPlugin.esp, skee64.dll
   and skee64.ini, all from racemenu-0.4.20.0@1.6.1170, nothing loose at
   the interface paths; the one BSA overlap (SkyUI_SE.bsa's
