@@ -1448,7 +1448,31 @@ gate and the merges after).
   balls and 110 without the perk. Found on the way, a train-30 candidate:
   Hailstone's own two effects are gated on GetActorValue (14) and
   HasMagicEffect (214), which the server lacks, so it applies nothing on
-  the server today.
+  the server today. BUILT 2026-10-20 on fork m2-train30-conditions
+  f2c0ba33 (server only, T0 in unit/EffectConditionsTest.cpp): the base
+  effect WB_Des_Frost1_Effect_Hailstone (030B2C7F, 15 Health and Stamina,
+  duration 0) gates on Subject.GetActorValue(ResistFrost) > 0 and its
+  Shatter (030B374E, 15 with area 10, duration 0) on
+  Subject.HasMagicEffect(030B2C7F) == 0 (the census,
+  docs/private/apocalypse-census-spells.tsv:77). GetActorValue answers the
+  current Health, Magicka or Stamina as the maximum (the base with the
+  running buffs) times the kept percentage, and any other actor value as
+  the player's recorded base (the client's ActorValues report, 0 to 163)
+  plus the modifier of the effects the server applied, 0 with no record;
+  HasMagicEffect answers from the running effects by the MGEF's runtime
+  id, and an instant effect has no running entry (wire-rules magic.rs), so
+  the Shatter's check reads false on the same hit as the engine's does.
+  HYPOTHESIS, the parameter: the actor value's index (ResistFrost 43,
+  CommonLibSSE-NG include/RE/A/ActorValues.h) until Hailstone's own CTDA
+  bytes are read on sky-srv (upstream's GetActorValuePercent reads
+  0x3E8-style ids instead). HYPOTHESIS, the gap: a Nord's 50 ResistFrost is
+  a racial ability's constant effect, not a base, so the client's report
+  carries 0 and the server never applied it; the engine answers 50 and
+  applies the base effect, the server refuses it. The row's second half,
+  before Hailstone is DONE: the race's abilities read from the records
+  (RACE SPLO, the SPEL's effects on the resist values) into the server's
+  modifier, then a Hailstone probe on a Nord seat comparing the server's
+  applied damage with the engine's own on a solo reference.
 - Scattershock (row 6), measured, no code: x-scattershock-6s
   20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
   launched on both seats (the PROJ 083a24 of Apocalypse) and the server
