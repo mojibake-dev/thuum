@@ -50,7 +50,7 @@ ctest green at the train's head (the condition functions, the race
 abilities, the resistance rule, formdesc's 401 cases, the dent's client
 build). Both were DONE for 1d88a6b7 on 2026-10-20 (pipeline 2309 green in
 every job; T2 at 16:05 PDT identical across 32 sessions); the head then
-moved once, to 44372078 at 16:53, for clang-format alone (the fork's
+moved once, to 44372078 at 16:51, for clang-format alone (the fork's
 Formatting check, three files, no code change), so its pipeline and a T2
 at 44372078 are the ones the merge cites (ADR-042 check 4).
 
