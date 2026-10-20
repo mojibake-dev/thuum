@@ -246,3 +246,38 @@ test("labCommand console runs the server's console verb as the player", () => {
   delete mp.executeConsoleCommand;
   assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "console", profileId: 1, name: "addshout", args: [] }).ok, false);
 });
+
+test("labState spell reads the winning SPEL's effects and their MGEFs as the server's espm resolves them", () => {
+  const bytes = (n, fill) => {
+    const b = new Uint8Array(n);
+    fill(new DataView(b.buffer));
+    return b;
+  };
+  const efit = (magnitude, area, duration) => bytes(12, (d) => { d.setFloat32(0, magnitude, true); d.setUint32(4, area, true); d.setUint32(8, duration, true); });
+  const efid = (local) => bytes(4, (d) => d.setUint32(0, local, true));
+  const mgefData = (flags, archetype, primaryAV) => bytes(0x98, (d) => { d.setUint32(0x00, flags, true); d.setUint32(0x40, archetype, true); d.setUint32(0x44, primaryAV, true); d.setFloat32(0x3c, 0.5, true); d.setUint32(0x58, 0xffffffff, true); });
+  const records = {
+    [0x12fd0]: {
+      record: { editorId: "Firebolt", fields: [
+        { type: "EFID", data: efid(0x0103b3) }, { type: "EFIT", data: efit(25, 0, 0) },
+        { type: "EFID", data: efid(0x0103b4) }, { type: "EFIT", data: efit(10, 0, 0) }, { type: "CTDA", data: new Uint8Array(32) },
+      ] },
+      toGlobalRecordId: (local) => 0x01000000 + (local & 0xffffff),
+    },
+    [0x010103b3]: { record: { editorId: "FireDamageFFAimed", fields: [{ type: "DATA", data: mgefData(0x5, 0, 24) }] } },
+    [0x010103b4]: { record: { editorId: "PerkRider", fields: [{ type: "DATA", data: mgefData(0x5, 0, 24) }, { type: "CTDA", data: new Uint8Array(32) }] } },
+  };
+  global.mp = { ...fakeMp(), lookupEspmRecordById: (id) => records[id] || {} };
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const spell = mp.onHttpRpcRunAttempt("labState", { kind: "spell", formId: 0x12fd0 });
+  assert.strictEqual(spell.found, true);
+  assert.strictEqual(spell.editorId, "Firebolt");
+  assert.deepStrictEqual(spell.effects, [
+    { mgef: 0x010103b3, magnitude: 25, area: 0, duration: 0, conditions: 0 },
+    { mgef: 0x010103b4, magnitude: 10, area: 0, duration: 0, conditions: 1 },
+  ]);
+  assert.deepStrictEqual(spell.mgefs[String(0x010103b3)], { editorId: "FireDamageFFAimed", flags: 5, archetype: 0, primaryAV: 24, secondAVWeight: 0.5, secondaryAV: 0xffffffff, conditions: 0 });
+  assert.strictEqual(spell.mgefs[String(0x010103b4)].conditions, 1);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "spell", formId: 0x99 }), { found: false, formId: 0x99 });
+});
