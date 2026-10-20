@@ -216,7 +216,7 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- Frida script: none planned; every hypothesis here is a lab measurement
+- Frida script: lab/frida/figure-dent-trace.js (train-29, on main f038d7c): run on the hitter's seat during x-figure-values-hit; it replaces the slot-0x104 health-damage functions of Character's and PlayerCharacter's vtables to read the float damage with the victim's Health before and after, and logs DamageActor 37335 and the explosion pass 43849 raw, so one run tells a post-write notification from a guard never reached (the two hypotheses of docs/research/train-29-rows.md row 3)
   (the figure's value after a set, the victim case).
 - Breakpoint plan for a human session: none.
 - Owner: agent (lab probes).
