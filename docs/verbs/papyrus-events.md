@@ -172,7 +172,7 @@ first build counts the rate with a Frida tracer, ADR-044 decision 3).
 - [x] engine surface cited or delegated (CommonLibSSE-NG ObjectTypeInfo.h, VirtualMachine.h; the fork's Offsets.h)
 - [x] server logic + T0: none, no server half (ADR-044)
 - [x] message + validator (same commit): no new message
-- [ ] native hook + T1 (fork m2-train29-filter: the Windows build)
+- [x] native hook + T1 (fork m2-train-29 b2db6354, merged to parity 4720d0d3 on 2026-10-20 13:40; T1 is the Windows build's, green)
 - [x] TS handler: none
 - [x] T2 green: no wire change
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events approved by Eli 2026-10-20 and on main, d1d8370, asserting the Creation's check ran connected with the prompt flag from the per-player default; its first run is the layer-merge sweep; x-mcm-register's HUD count still to read)
