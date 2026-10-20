@@ -354,7 +354,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         back down and sends it back; 7 of 11 upward sets in two runs); a
         server-applied heal would snap back the same way. STAYS in M2
         (Eli 2026-10-20), a verb fix on a train: BUILT 2026-10-20 on fork
-        m2-snapback 1fb5f2f9 (the percentage hold, attributes.md; T0; its
+        m2-snapback eef10842 (the percentage hold, attributes.md; T0; its
         scenario b-snapback on review), for the train after twenty-eight.
         The rule: an owner's set and the
         server's own changes win over
