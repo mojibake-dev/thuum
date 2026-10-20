@@ -1462,10 +1462,18 @@ gate and the merges after).
   HasMagicEffect answers from the running effects by the MGEF's runtime
   id, and an instant effect has no running entry (wire-rules magic.rs), so
   the Shatter's check reads false on the same hit as the engine's does.
-  HYPOTHESIS, the parameter: the actor value's index (ResistFrost 43,
-  CommonLibSSE-NG include/RE/A/ActorValues.h) until Hailstone's own CTDA
-  bytes are read on sky-srv (upstream's GetActorValuePercent reads
-  0x3E8-style ids instead). HYPOTHESIS, the gap: a Nord's 50 ResistFrost is
+  The parameters CONFIRMED by the record bytes (numidium's esm.py walk on
+  sky-srv, 2026-10-20, decoded per libespm CTDA.h:57-68): MGEF 030B2C7F's
+  one CTDA is function 14, operator 0x40 (">"), value 0, param1 0x2B = 43,
+  run on Subject, so GetActorValue's parameter is the plain actor value
+  index (upstream's GetActorValuePercent reads 0x3E8-style ids; not this
+  function's encoding); the Shatter's CTDA is function 214, "==", value 0,
+  param1 0x030B2C7F, the MGEF's id in the FILE's own index space (the third
+  master byte Apocalypse's own), so HasMagicEffect's parameter is mapped to
+  the global id through the record that owns the condition before the
+  compare (ConditionFunction::IsFormParameter, MpActor::EffectConditionsHold;
+  fork 39affd73); the older functions compare their parameters raw, which
+  holds for Skyrim.esm's forms only. HYPOTHESIS, the gap: a Nord's 50 ResistFrost is
   a racial ability's constant effect, not a base, so the client's report
   carries 0 and the server never applied it; the engine answers 50 and
   applies the base effect, the server refuses it. The row's second half,
