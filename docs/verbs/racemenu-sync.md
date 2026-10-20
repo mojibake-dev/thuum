@@ -660,7 +660,7 @@ above keep a hostile preset from carrying anything but a look.
   the layer (no "RaceMap::CreateDefaultMap" in any layer seat's skee64.log),
   so the server-opened menu this verb relies on (its presets, its Done) is
   not RaceMenu's there; the layer's RaceMenu install is the first fix.
-  Found (apocrypha, 16:4x): SkyUI_SE.bsa carries interface/racesex_menu.swf
+  Found (apocrypha, 16:39): SkyUI_SE.bsa carries interface/racesex_menu.swf
   too, and the layer's SkyUI_SE.esp loads last as a client-only plugin
   must, so its copy beat RaceMenu's in every layer seat; the render lays
   RaceMenu's copy loose (a loose file beats every archive), the rule being
