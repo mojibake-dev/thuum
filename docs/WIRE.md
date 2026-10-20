@@ -258,7 +258,12 @@ normalized away: `divergences` lists a message one client receives a
 different number of times on each stack, with the counts and the reason.
 Declarations apply legacy against wire only and are reviewed like validator
 changes; one that stops occurring as declared is itself a difference, so it
-cannot outlive its cause. The first, from T2 on 2026-10-02: in the smoke
+cannot outlive its cause. A message every client of every session shows
+is declared once, in `difftest/divergences.yaml`, which the binary compiles
+in (two entries: the game clock at login, ADR-021, and since train-29 the
+player's globals at login, docs/verbs/player-globals.md); a change there
+needs a fresh difftest-build before T2, where a sessions-only change runs
+from the tree (`SESSIONS=`, lab/tools/test-proto.sh). The first, from T2 on 2026-10-02: in the smoke
 session c2 sees c1's actor destroyed on the wire and not on RakNet, because
 the C++ fakeclient exits without closing its connection (the legacy server
 waits out RakNet's timeout) while the Rust fakeclient's close reaches the

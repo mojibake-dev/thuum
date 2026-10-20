@@ -225,7 +225,12 @@ files, 13 of 13, test_unit's 359 cases with this verb's two.
       player-globals session identical with its five declared divergences,
       and the PlayerGlobals message declared in the 27 other sessions whose
       seats move (sent on a seat's first movement after a login, so a seat
-      that never moves receives none)
+      that never moves receives none). Since the login-time send (train-29,
+      above) every seat receives it at its login, so fork 4720d0d3 declares
+      it once, for every client of every session, in difftest's
+      divergences.yaml beside the login clock, and the 37 per-session
+      entries are gone (T2 on 50a56e4a had shown c1's undeclared in every
+      session where c1 never moved)
 - [x] T3 scenario green: b-player-globals 20261018-103133 on train-24
       (c1's global 3, c2's 0, before and after the server restart), in the
       merge gate 20261018-112123-merge-m2-train-24 (23 of 23); the MCM
