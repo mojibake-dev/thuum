@@ -1459,7 +1459,24 @@ gate and the merges after).
   observer's game holds the figure's rune as a reference whose base is the
   PROJ (c2.refs_near().count(50) == 1 at 440 units, the same 30 s later)
   and its trip deals the server's number, so the missing glyph is a
-  drawing matter, not a removal.
+  drawing matter, not a removal. The tier trace then read on the observer
+  (x-rune-visible-frida 20261020-085906, docs/research/frida-reads-train29.md
+  section B): the landing's look never runs for the relayed rune at all,
+  the tier compare 44213 and the settle 43919 were never entered in two
+  minutes, bit 20 of the flags stayed clear, and the rune was "arrived"
+  (44163) 35 ms after the launch from inside the first trigger tick's test,
+  not from a collision, then stood 3185 ticks with cell and explosion
+  non-null until the trip (one kill from the tick, a second 4 ms later).
+  The REA read's tier mechanism (H3b) is NOT the cause: nothing was dressed
+  and then undressed; the look is skipped upstream of 44213, and the
+  caster's own engine launched its rune from the identical point, so the
+  origin does not discriminate. Rule 8's next read: the same script on the
+  caster's seat for its own rune (do 44213 and 43919 fire, from where), and
+  the re-analyst on the arrival path (what sends a rune born at rest to
+  44163 at its first tick, what bit 20 is, and what the smallest change to
+  the relayed launch would be). Still wanted: a per-figure rune cap in the
+  observer's game, since the registration gate (43934) admits the player's
+  runes alone and a figure's four casts would leave four armed runes.
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
   (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
   second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
