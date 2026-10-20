@@ -450,7 +450,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       returns; a raw record re-based from the saved order at the first load
       that sees it; seven T0 cases (round trip, save under A load under B,
       v1 under a saved order, the parked plugin, the drivers). Its rule-6
-      scenario b-formdesc-world APPROVED by Eli 2026-10-20 13:48 and on
+      scenario b-formdesc-world APPROVED by Eli 2026-10-20 13:49 and on
       main de069a7b (scenario 973a412c; the fixture adr043-preslice-25 on main
       ebc4d726, twenty-five's eight raw records with the order they were
       written under; lab-api's `server: world:` restore and FormDesc ids in
