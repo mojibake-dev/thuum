@@ -405,9 +405,10 @@ echo "essentials layer: $n_fen mods from Fenestrate's staging, $n_nx from Nexus 
 # Byte-level patches on laid plugins (lab/layer/plugin-patches.tsv, lab/tools/plugin-patch.py):
 # the light flag on the two override-only Survival cloak patches, so they keep the light slots
 # the HDT pair held and no later plugin moves; both gender bits on Playable Headparts All Races'
-# head parts, which RaceMenu otherwise never seats from a preset. Size-preserving, idempotent,
-# applied to the tree before the server's esm copies and the clients' SHA256SUMS are taken from
-# it, so both ends get the same bytes.
+# head parts, which RaceMenu otherwise never seats from a preset; the Player base record
+# NPC_ 0x7 dropped from Supernatural Survival Tweaks (no served plugin may override it: the
+# server owns it for every player). Idempotent, applied to the tree before the server's esm
+# copies and the clients' SHA256SUMS are taken from it, so both ends get the same bytes.
 python3 "$root/lab/tools/plugin-patch.py" "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv"
 # Rows install in order, as a mod manager does: a later row's file replaces an
 # earlier row's (or a folder laid above the rows) at the same Data path. The

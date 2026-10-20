@@ -44,7 +44,7 @@ class Rows(unittest.TestCase):
         self.assertTrue(patches)
         for r in patches:
             self.assertIn(r["plugin"].lower(), order, r["plugin"])
-            self.assertIn(r["patch"], plugin_patch.PATCHES, r["patch"])
+            self.assertIn(r["patch"].split()[0], plugin_patch.PATCHES, r["patch"])
             self.assertTrue(r["why"].strip())
 
 
@@ -63,6 +63,35 @@ class Esl(unittest.TestCase):
         p = plugin([record(b"ARMO", 0x01001000, sub(b"EDID", b"New\0"))])  # index 01 = the plugin's own (one master)
         with self.assertRaises(SystemExit):
             plugin_patch.patch_esl(p)
+
+
+class DropRecord(unittest.TestCase):
+    def test_drops_the_record_and_shrinks_its_group(self):
+        keep = record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))
+        gone = record(b"NPC_", 0x00000007, sub(b"EDID", b"Player\0"))
+        p = plugin([gone, keep])
+        new, what = plugin_patch.patch_drop_record(p, "00000007")
+        self.assertEqual(len(new), len(p) - len(gone))
+        self.assertEqual([(t, f) for _, t, _, f, _ in plugin_patch.walk(new) if t != b"TES4"], [(b"ARMO", 0x00000D62)])
+        grp = new.index(b"GRUP")
+        self.assertEqual(struct.unpack_from("<I", new, grp + 4)[0], 24 + len(keep))
+        self.assertIn("1 record(s) 00000007", what)
+        self.assertEqual(plugin_patch.patch_drop_record(new, "00000007")[0], new)
+
+    def test_an_emptied_group_goes_and_the_header_count_follows(self):
+        gone = record(b"NPC_", 0x00000007, sub(b"EDID", b"Player\0"))
+        p = plugin([gone])
+        new, what = plugin_patch.patch_drop_record(p, "00000007")
+        self.assertNotIn(b"GRUP", new)
+        hedr = new.index(b"HEDR")
+        self.assertEqual(struct.unpack_from("<I", new, hedr + 6 + 4)[0], 0)  # 1 record and 1 group gone from a count of 1, floored at 0
+        self.assertIn("emptied group", what)
+
+    def test_leaves_a_plugin_without_the_record_alone(self):
+        p = plugin([record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))])
+        new, what = plugin_patch.patch_drop_record(p, "00000007")
+        self.assertEqual(new, p)
+        self.assertEqual(what, "00000007 already absent")
 
 
 class HdptGenderBoth(unittest.TestCase):
