@@ -77,8 +77,10 @@ case "$last" in "mods: SHA256SUMS checked on the host"*) ;; *) echo "== persist-
 echo "== 2b. the load order the clients enable $(date +%H:%M:%S)"
 # persist's plugins.txt and plugin headers against this tree's 1.6.1170 settings: the essentials layer's first
 # stage (2026-10-19) booted neither clone, a Creation Club patch enabled over a master the engine disabled, and its
-# client-only TrueHUD.esl moved 38 light plugins to other slots than the server's
-# (the check and lab-api's slot math it imports, shipped in this tree's layout, with the settings it reads)
+# client-only TrueHUD.esl moved 38 light plugins to other slots than the server's; the next layer (2026-10-20) served a
+# survival tweak's copy of the player's base record, NPC_ 0x7, which every seat's player is built on
+# (the check, lab-api's slot math and lab/esm.py's record walk it imports, shipped in this tree's layout, with the
+# settings it reads)
 (cd lab && tar -cf - esm.py labapi/labapi/slots.py tools/load-order-check.py deploy/sky-srv/server-settings.json) \
   | $srv_ssh "d=/srv/lab/handover/load-order-check; mkdir -p \$d && tar -C \$d -xf - && python3 \$d/tools/load-order-check.py /srv/persist/mods \$d/deploy/sky-srv/server-settings.json" \
   | sed 's/^/   /' || { echo "== the clients' load order does not hold (above): stop before deploy-srv (the hold stands)" >&2; exit 1; }
