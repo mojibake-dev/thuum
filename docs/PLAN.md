@@ -380,25 +380,34 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         loads and frame rate held; no MCM, cloaks without physics, no
         warmth, bare aspens, rotfern undressed by the slot shift (ADR-043
         PROPOSED; the layer's three fixes render 2026-10-20 06:23).
-    - Train-29 (built overnight 2026-10-20 on Eli's word; fork m2-train-29
-      709c90b0: 18c0e603's client and server content, a rune try measured
-      and reverted, and the CI fresh-tree fix merged with parity d5f478c3;
-      staged 04:02 with its gate's always set green and both clones' clean
-      snapshot retaken on it, the essentials layer to stack on it for
-      playtest twenty-seven; each row's facts in
-      docs/research/train-29-rows.md), in build order:
-      - the client's Papyrus event filter: BUILT (b2db6354, docs/verbs/
+    - Train-29 MERGED 2026-10-20 13:40, fork parity 4720d0d3 (built
+      overnight on Eli's word; fork m2-train-29 709c90b0: 18c0e603's client
+      and server content, a rune try measured and reverted, and the CI
+      fresh-tree fix merged with parity d5f478c3; staged 04:02 with its
+      gate's always set green and both clones' clean snapshot retaken on
+      it, the essentials layer stacked on it for playtest twenty-seven;
+      after the report, the 8df default and the login-time globals send
+      (50a56e4a) and the T2 declaration move (4720d0d3) joined it; the
+      layered gate's three reds read to the layer's headparts plugin, the
+      served Firebolt and a refused second Ragdoll, and the layer-free gate
+      20261020-201530-merge-m2-train-29 ran 10 of 10 green with T2
+      identical across 32 sessions; both clones promoted; docs/LOG.md;
+      each row's facts in docs/research/train-29-rows.md), in build order:
+      - the client's Papyrus event filter: MERGED (b2db6354, docs/verbs/
         papyrus-events.md): a parent-chain walk so every MCM passes, the
         layer's plugin list read at Skyrim Platform's load, OnUpdate per
         script (ADR-044 ACCEPTED 2026-10-19, CONFIRMED by x-survival-unblock3
-        20261020-024406); b-papyrus-events awaits Eli's review.
-      - Lightning Strike on the observer: BUILT (07b33046) and the launch
+        20261020-024406 and by twenty-seven's Survival box and eight MCM
+        entries); b-papyrus-events approved by Eli 2026-10-20 and in the
+        layer sweep.
+      - Lightning Strike on the observer: MERGED (07b33046) and the launch
         CONFIRMED (x-lightning-strike 20261020-085414: the observer's game
-        launches the lobber 0x0c0cfe00); the bolt's appearance there is
-        twenty-seven's row.
-      - Finger of Death: IsEssential (354) BUILT on the server (eea3a5d5,
-        T0); the scripted kill stays the caster's game's (the ash pile),
-        ADR-029's default, until the allowlist verb.
+        launches the lobber 0x0c0cfe00); the bolt seen on test 2's screen in
+        twenty-seven.
+      - Finger of Death: IsEssential (354) MERGED on the server (eea3a5d5,
+        T0; twenty-seven: the fail branch hurt the caster alone); the
+        scripted kill stays the caster's game's (the ash pile), ADR-029's
+        default, until the allowlist verb.
       - a player's own dent on a figure's bar: READ (x-figure-values-hit-frida
         20261020-085705): the fork's guard works and the vfunc it blocks is a
         post-write notification inside DamageActor 37335; signature
@@ -420,11 +429,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         the hits; the 2.5 s hold had matched the charge); the missile's
         angle on the observer waits for a flights record for spell
         projectiles (Train-30's lab row, BUILT 2026-10-20).
-      - small: the OpenContainer wait loop's 15 s deadline BUILT
-        (18c0e603, activation-reach.md); EffectWasDualCast (724) BUILT with
-        the dual flag from the cast message through the cast record to the
-        evaluator (eea3a5d5, T0); the refs-near driver step on thuum branch
-        lab-refs-near (agent, in progress).
+      - small, all MERGED: the OpenContainer wait loop's 15 s deadline
+        (18c0e603, activation-reach.md); EffectWasDualCast (724) with the
+        dual flag from the cast message through the cast record to the
+        evaluator (eea3a5d5, T0); the refs-near and papyrus-events driver
+        steps on thuum main.
 
     - ADR-043's build (ACCEPTED 2026-10-19; the world stores every form as a
       FormDesc, a saved world carries its order and migrates, a login whose
@@ -441,13 +450,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       returns; a raw record re-based from the saved order at the first load
       that sees it; seven T0 cases (round trip, save under A load under B,
       v1 under a saved order, the parked plugin, the drivers). Its rule-6
-      scenario DRAFTED 2026-10-20: b-formdesc-world on branch
-      scenario-b-formdesc-world 973a412c (Eli's review), the fixture
-      adr043-preslice-25 on main ebc4d726 (twenty-five's eight raw records
-      with the order they were written under); it proves the migration on
-      a stage whose order differs from the fixture's, the layer stage, and
-      waits on two lab-api pieces (`server: world:`, FormDesc ids in the
-      known step). Left for
+      scenario b-formdesc-world APPROVED by Eli 2026-10-20 13:49 and on
+      main de069a7b (scenario 973a412c; the fixture adr043-preslice-25 on main
+      ebc4d726, twenty-five's eight raw records with the order they were
+      written under; lab-api's `server: world:` restore and FormDesc ids in
+      the known step on main 3fd7ae5); it proves the migration on a stage
+      whose order differs from the fixture's, the layer stage, so it sits in
+      gate.yaml's pending until the formdesc branch stages there; the branch
+      carries parity 4720d0d3 since its merge 80cf1e35 (pipeline 2279). Left for
       slice two: decision 3 (the login refusal; the record is kept but
       LoadChangeForm still skips an unresolved race, so the 17:25 hazard
       stands until then), the six keep-on-miss fixes on fields already
@@ -519,7 +529,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   full sweep follow the report (ADR-040). Eli's call after the report
   (13:05 PDT): FSMP out, the cape physics worked but looked jank; the
   cloaks go back to vanilla capes in apocrypha's next render, which the
-  layer stage and sweep take.
+  layer stage and sweep take. Rendered 13:26: apocrypha/layer-essentials
+  cf363c44 (FSMP, both Artesian physics packages and the Survival
+  collection's HDT patch pair out; warmth kept by the collection's non-HDT
+  patches, patched light at build so they hold slots 11 and 12 and no
+  other plugin moves; nothing else in the layer leaned on FSMP), carrying
+  the layer sweep's a-racemenu fix too: Playable Headparts All Races'
+  head-part flags given both gender bits by a build-time plugin patch
+  (lab/layer/plugin-patches.tsv; Eli 13:40: "patch it", over dropping the
+  mod), CONFIRMED 14:07 by x-layer-headparts 20261020-210719 on the layer
+  stage (racemenu-sync.md); the stage's smoke green with no FSMP log.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals

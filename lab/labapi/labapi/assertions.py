@@ -231,6 +231,9 @@ class WatchView:
     # the engine keeps them; empty from a driver before it or on parity
     launches: tuple = ()
     flights: tuple = ()
+    # its health (every change in the watcher's game), magicka and stamina (every 50 ms
+    # of change), ((name, ((ms, value), ...)), ...), each series starting at watch-start
+    avs: tuple = ()
 
     def launched(self, spec) -> int:
         """How many of the actor's launches in the watcher's game name the
@@ -287,6 +290,13 @@ class WatchView:
         recast bug (docs/verbs/self-cast.md)."""
         return _drops(self.bools, name)
 
+    def rises(self, av: str) -> int:
+        """How many times the actor's `av` (health, magicka or stamina) rose
+        between two samples in the watcher's game: a figure hit three times shows
+        a dent (its bar below the server's step, then climbing back) as a rise,
+        where a clean bar only falls (train-30's figure dent)."""
+        return _rises(self.avs, av)
+
 
 def _ever(bools: tuple, name: str) -> bool:
     for n, series in bools:
@@ -301,6 +311,26 @@ def _drops(bools: tuple, name: str) -> int:
             values = [bool(v) for _, v in series]
             return sum(1 for was, now in zip(values, values[1:]) if was and not now)
     raise AssertionData(f"the watch sampled no graph bool {name}")
+
+
+WATCH_AVS = ("health", "magicka", "stamina")
+
+
+def _rises(avs: tuple, av: str) -> int:
+    if av.lower() not in WATCH_AVS:
+        raise AssertionData(f"rises reads one of {', '.join(WATCH_AVS)}, got {av!r}")
+    for n, series in avs:
+        if n == av.lower():
+            values = [float(v) for _, v in series]
+            return sum(1 for was, now in zip(values, values[1:]) if now > was)
+    raise AssertionData(f"the watch carried no {av.lower()} series (a driver before the watch's actor values)")
+
+
+def _av_series(entry: dict[str, Any]) -> tuple:
+    """A watch entry's actor-value series, the driver's health/magicka/stamina rows
+    ([[ms, value], ...], the first at watch-start), as ((name, ((ms, value), ...)), ...)."""
+    return tuple((av, tuple((float(r[0]), float(r[1])) for r in entry[av] if len(r) >= 2))
+                 for av in WATCH_AVS if isinstance(entry.get(av), list))
 
 
 # a figure's arrow flies some network time after its shooter's: pairs within this
@@ -364,6 +394,8 @@ class SelfWatchView:
     bools: tuple = ()
     launches: tuple = ()
     flights: tuple = ()
+    # its own health, magicka and stamina as the watch sampled them ((name, ((ms, value), ...)), ...)
+    avs: tuple = ()
 
     def saw(self, name: str) -> int:
         """How many of the player's own animation events were named `name`."""
@@ -381,6 +413,12 @@ class SelfWatchView:
     def drops(self, name: str) -> int:
         """How many times the player's sampled bool `name` went from true to false."""
         return _drops(self.bools, name)
+
+    def rises(self, av: str) -> int:
+        """How many times the player's own `av` (health, magicka or stamina) rose
+        between two of the watch's samples: hit three times and never healed, its
+        health only falls."""
+        return _rises(self.avs, av)
 
 
 @dataclass(frozen=True)
@@ -1001,6 +1039,7 @@ class _ClientRef:
                 bools=_bool_series(best.get("bools")),
                 launches=_rows(best.get("launches"), 10),
                 flights=_rows(best.get("flights"), 8),
+                avs=_av_series(best),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{label} lacks {e}") from e
@@ -1018,6 +1057,7 @@ class _ClientRef:
                 bools=_bool_series(own.get("bools")),
                 launches=_rows(own.get("launches"), 10),
                 flights=_rows(own.get("flights"), 8),
+                avs=_av_series(own),
             )
         except (IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s own watch lacks {e}") from e
@@ -1372,8 +1412,8 @@ _METHODS = {
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance"},
     EffectsView: {"left", "magnitude"},
-    WatchView: {"took", "sent", "ever", "drops", "movedBy", "launched", "flights_match"},
-    SelfWatchView: {"saw", "ever", "drops", "launched"},
+    WatchView: {"took", "sent", "ever", "drops", "rises", "movedBy", "launched", "flights_match"},
+    SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,

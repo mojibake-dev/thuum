@@ -17,6 +17,16 @@
 # lab-api runs as `connect` (a wait for the seat to be online; skymp5-client
 # logs in by itself), so no new login happened and the figure kept its id;
 # `relaunch` is the step that quits and restarts the game.
+# Train-30 (the victim case, docs/verbs/figure-values.md): after the
+# percentages group, c1 draws an Iron Sword and swings three times at c2's
+# figure from 150 units while both watch. The figure's bar in c1's game must
+# fall only at the server's numbers: no dent below them and no climb back
+# (the engine's own DamageActor write, gated for a figure victim on fork
+# m2-train30-dent), so the watched health series shows no rise
+# (c1.watched(c2).rises("health"), lab-api), the server took the hits, and
+# the bar rests at the server's percentage. The probe x-figure-values-hit
+# measured the dent on train-28's guard (20261020-085705 with the Frida
+# trace: the write before the hook the guard dropped).
 id: b-figure-values
 milestone: M2
 clients: [c1, c2]
@@ -52,4 +62,24 @@ steps:
   - assert:
       - abs(c2.av_of(c1).healthPercentage - 0.5) < 0.05
       - abs(c2.av_of(c1).health - c1.av().health) < 1
-artifacts: [server.log, c1.log, c2.log]
+  - c2: set-percentages {health: 1}
+  - c1: equip {item: "Skyrim.esm:IronSword"}
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start
+  - c2: watch-start
+  - wait: 1
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - c1: anim-event {name: attackStart}
+  - wait: 3
+  - c1: watch-stop
+  - c2: watch-stop
+  - c1: av-read {names: [health], other: true}
+  - assert:
+      - server.actor(c2).healthPercentage < 0.99
+      - c1.watched(c2).rises("health") == 0
+      - abs(c1.av_of(c2).healthPercentage - server.actor(c2).healthPercentage) < 0.05
+artifacts: [server.log, c1.log, c2.log, trace]
