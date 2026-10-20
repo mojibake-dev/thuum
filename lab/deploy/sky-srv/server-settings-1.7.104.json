@@ -124,7 +124,9 @@
     "01751e:Apocalypse - Magic of Skyrim.esp",
     "01751f:Apocalypse - Magic of Skyrim.esp",
     "017520:Apocalypse - Magic of Skyrim.esp",
-    "01a60e:Apocalypse - Magic of Skyrim.esp"
+    "01a60e:Apocalypse - Magic of Skyrim.esp",
+    "828:ccQDRSSE001-SurvivalMode.esl",
+    "8df:ccQDRSSE001-SurvivalMode.esl"
   ],
   "startPoints": [
     { "pos": [133857, -61130, 14662], "worldOrCell": "0x3c", "angleZ": 72 }
