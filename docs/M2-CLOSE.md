@@ -104,12 +104,20 @@ Survival race (lifted by the 8df default's smoke).
 
 ## 6. Order
 
-1. The layer gate runs to its end as the layer's full measurement (red at
-   25 of 62, 16:13; ends about 18:45). Its reds go to apocrypha: the
-   player-base override patched out of the Survival Tweaks plugin (or the
-   plugin dropped, Eli's call) and a 2b check refusing any served plugin
-   that overrides NPC_ 0x7; the head-parts read decides its own fix. The
-   fixed layer re-renders and re-stages; it merges by its own gate.
+1. The layer gate (red at 25 of 62, 16:13) was STOPPED at 38 of 62 at
+   16:47 on Eli's word to reach twenty-eight tonight: its head could not
+   merge, and the runs it had left are measured by tonight's m2-close
+   nightly over the final stage. Its four reds are read
+   (docs/research/layer-reds-2026-10-20.md): the vanilla race menu under
+   the layer (SkyUI's archive shadowing RaceMenu's menu SWF) behind
+   a-rotfern's CTD and a-racemenu's hair swap, the gender-both head-part
+   patch's own side effect, the player-base override found on the way and
+   banned by rule (numidium's 2b check), b-duel's late first contact as a
+   likely one-off, b-god under read. The fixed layer, apocrypha's
+   c38a3b04 (the 0x7 drop-record, the head parts on their masters' gender
+   bits, RaceMenu's menu laid loose; no slot moves), re-stages with
+   a-rotfern, a-racemenu and b-duel as its deciders on the parity image
+   alone; it merges by its own gate after twenty-eight.
 2. m2-train-30 1d88a6b7 (assembled, CI 2309 green, T2 identical) staged
    once on the staged layer (numidium, verb-stage from the layer's
    worktree); the probes in order, b-formdesc-world first, green on the
@@ -126,11 +134,12 @@ Survival race (lifted by the 8df default's smoke).
    under its own label when twenty-eight ends.
 4. Eli's report; findings to the train or to section 4.
 5. The m2-close set (lab/gate.yaml names it, main 95aee33: "all" on the
-   train's stage with pending emptied) runs as the 03:30 nightly over the
-   stage, which stands overnight before twenty-eight, each of the four
-   leaving pending as its probe goes green on the stage (b-hailstone joins
-   pending when its branch merges after Eli's tick); or by name, `just
-   sweep m2-close`, about 4 h. `just verb-merge m2-train-30` then cites
+   train's stage with the four train-30 scenarios out of pending and
+   b-snapback staying pending for the train after twenty-eight) runs as
+   the 03:30 nightly over the stage, each of the four leaving pending as
+   its probe goes green on the stage (b-hailstone is approved and on main);
+   or by name, `just sweep m2-close`, about 4 h. `just verb-merge
+   m2-train-30` then cites
    that sweep with GATE_SET (ADR-042's own case, its first use; numidium
    merges adr042-gate-set fbca257 first), T2 beside it. Green: M2 DONE in
    PLAN and LOG, the carries moved to M3's chart.
