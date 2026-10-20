@@ -1243,14 +1243,18 @@ function run(step: Step, player: Actor): unknown {
     }
     case "arrows": {
       // thuum docs/verbs/marksman.md (playtest thirteen: the target's screen
-      // shows two arrows per shot): how many arrow projectiles stand in the
-      // player's cell (ArrowProjectile, form type 0x40 PARW, CommonLibSSE-NG
-      // include/RE/F/FormTypes.h:204), by SKSE's Cell.GetNumRefs. Only the
-      // count: any Papyrus call on a projectile reference aborts (the
-      // projectiles step's note)
+      // shows two arrows per shot): how many projectiles stand in the
+      // player's cell, by SKSE's Cell.GetNumRefs, which filters on the BASE
+      // form's type (REFERENCE_CLASS_BASE's note above): 0x32 PROJ, an
+      // arrow's base (Skyrim.esm ArrowIronProjectile 0x0003BE11) as a rune's
+      // grenade's, CommonLibSSE-NG include/RE/F/FormTypes.h:190. Until
+      // train-30 the step asked for 0x40 PARW, the reference class, and
+      // counted nothing (x-double-arrow 20261012-022022). Only the count:
+      // any Papyrus call on a projectile reference aborts, so one base's
+      // presence is the projectiles step's question
       const cell = player.getParentCell();
       if (!cell) return { error: "no cell" };
-      return { count: cell.getNumRefs(0x40) };
+      return { count: cell.getNumRefs(0x32) };
     }
     case "projectiles": {
       // thuum docs/verbs/marksman.md: for each projectile base (a PROJ:
