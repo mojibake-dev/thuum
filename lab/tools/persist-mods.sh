@@ -19,7 +19,9 @@
 #   that runtime, docs/verbs/racemenu-sync.md): Nexus mod 19080 file 743640,
 #   fetched the same way and checked against the SHA-256 Nexus's own
 #   VirusTotal link names; its two plugins, its BSA and skee64.dll with its
-#   ini, without the ModderResource header.
+#   ini, without the ModderResource header, plus its racesex_menu.swf laid
+#   loose out of the BSA (SkyUI's archive carries the same file and loads
+#   later as client-only; loose beats every archive).
 # - CBBE 2.0.3, for every player (Eli, 2026-10-07: body morphs are how armor
 #   is fitted, and a look carries them): Nexus mod 198 file 489053, checked
 #   against the md5 Nexus names for the file, laid out as its installer does
@@ -272,6 +274,12 @@ rm="$stage/tree/racemenu-0.4.20.0@1.6.1170"
 mkdir -p "$rm/SKSE/Plugins"
 cp "$rmx/RaceMenu.esp" "$rmx/RaceMenuPlugin.esp" "$rmx/RaceMenu.bsa" "$rm/"
 cp "$rmx/SKSE/Plugins/skee64.dll" "$rmx/SKSE/Plugins/skee64.ini" "$rm/SKSE/Plugins/"
+# RaceMenu's race menu laid loose (2026-10-20, docs/MODS.md "RaceMenu's menu under the layer"):
+# SkyUI_SE.bsa carries interface/racesex_menu.swf too, and SkyUI loads last as a client-only
+# plugin, so among archives its copy won and the seats ran SkyUI's vanilla-style menu (skee64's
+# chargen never initialised; the a-rotfern CTD was that menu's tint rebuild). A loose file beats
+# every archive whatever the order, and no slot moves.
+python3 "$root/lab/tools/bsa-extract.py" "$rm/RaceMenu.bsa" "interface/racesex_menu.swf" "$rm/Interface/racesex_menu.swf"
 # CBBE as its installer lays it out for the choices above: the FOMOD's
 # required files, the chosen options' folders and the conditional folders
 # whose flags those choices set, in the installer's order (a later folder
@@ -402,14 +410,22 @@ while IFS=$'\x1f' read -r folder source ref check take exclude plugins_ note; do
   if [ -n "$plugins_" ]; then IFS=';' read -ra ps <<< "$plugins_"; for pl in "${ps[@]}"; do [ -f "$dest/$pl" ] || { echo "$folder: plugin $pl not in its folder" >&2; exit 2; }; done; fi
 done <<< "$rows"
 echo "essentials layer: $n_fen mods from Fenestrate's staging, $n_nx from Nexus archives"
+game_cache="$cache/../game"; mkdir -p "$game_cache"
 # Byte-level patches on laid plugins (lab/layer/plugin-patches.tsv, lab/tools/plugin-patch.py):
 # the light flag on the two override-only Survival cloak patches, so they keep the light slots
 # the HDT pair held and no later plugin moves; both gender bits on Playable Headparts All Races'
-# head parts, which RaceMenu otherwise never seats from a preset; the Player base record
-# NPC_ 0x7 dropped from Supernatural Survival Tweaks (no served plugin may override it: the
-# server owns it for every player). Idempotent, applied to the tree before the server's esm
-# copies and the clients' SHA256SUMS are taken from it, so both ends get the same bytes.
-python3 "$root/lab/tools/plugin-patch.py" "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv"
+# head parts given their master records' gender bits (RaceMenu and the race menu both read
+# them); the Player base record NPC_ 0x7 dropped from Supernatural Survival Tweaks (no served
+# plugin may override it: the server owns it for every player). Idempotent, applied to the
+# tree before the server's esm copies and the clients' SHA256SUMS are taken from it, so both
+# ends get the same bytes. A patch that reads the game's own masters (Skyrim.esm, Dawnguard.esm)
+# finds them in lab/.cache/game, pulled off the host's persist esm directory like the Survival esl.
+while IFS= read -r m; do
+  [ -n "$m" ] || continue
+  [ -f "$game_cache/$m" ] || rsync -t "$dst:$persist/esm/$m" "$game_cache/" \
+    || { echo "could not pull $m off $dst:$persist/esm (lab/.cache/game)" >&2; exit 2; }
+done < <(python3 "$root/lab/tools/plugin-patch.py" --needs "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv")
+python3 "$root/lab/tools/plugin-patch.py" "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv" "$game_cache"
 # Rows install in order, as a mod manager does: a later row's file replaces an
 # earlier row's (or a folder laid above the rows) at the same Data path. The
 # clients apply SHA256SUMS in its sorted order and keep the last copy they
@@ -464,7 +480,6 @@ printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 # Data\Platform\papyrus-scripts.txt in every game folder, where Skyrim Platform reads it at its
 # load (train-29). A `game` row's plugin (the Creation Club set) is read from a copy pulled off the
 # host's persist esm directory into lab/.cache/game (a copy, read here; nothing runs on the host).
-game_cache="$cache/../game"; mkdir -p "$game_cache"
 while IFS=$'\t' read -r plugin source _; do
   [ "$source" = game ] || continue
   [ -f "$game_cache/$plugin" ] || rsync -t "$dst:$persist/esm/$plugin" "$game_cache/" \
