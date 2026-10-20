@@ -2057,10 +2057,7 @@ reads each script's leaf class name and never its parents, and OnUpdate
 skips the list, so under the block OnUpdate reaches no script at all. The
 read is docs/research/papyrus-event-filter.md; it corrects "blanks every
 Papyrus event but OnUpdate" in ADR-029's context and in
-apocalypse-options.md 3.1, which read the guard backwards (HYPOTHESIS
-until the lab's unblock probe and a HUD trace for SkyUI's own OnUpdate
-line; the brace structure is unambiguous and has been so since upstream's
-2021 version of the hook).
+apocalypse-options.md 3.1, which read the guard backwards (CONFIRMED the same night by the lab: x-survival-unblock 20261020-023907 lifted the block after login and nothing re-armed, since the first OnUpdate had already been blanked and the chain ends there; x-survival-unblock3 20261020-024406 lifted it and re-armed the quest, and the check ran, Survival_ModeCanBeEnabled went to 1 and the Creation's own "Enable Survival Mode?" box appeared, the single-player behavior; the brace structure has been so since upstream's 2021 version of the hook).
 
 Two findings of 2026-10-19 are this one rule. Apocalypse's MCM is missing
 under the essentials layer because WB_MCMQuest_Script extends
@@ -2149,10 +2146,7 @@ UI, or per-player state the server declares R3 or records as R2.
    its decision).
 
 **Consequences.** One Skyrim Platform change (train-29's row, a Windows
-build): the parent walk, the plugin list read from a setting the client
-receives at login, OnUpdate through the list. One server change: the list
-in server-settings beside playerGlobals and castTeleports, sent with the
-login. One layer change: the manifest's disposition column. Tests: T1
+build): the parent walk, the plugin list read from the served file (mods/papyrus-scripts.txt, apocrypha's persist-mods beside plugins.txt, one line per admitted plugin and its script class names) at Skyrim Platform's load, before the first tick, since a script whose first OnUpdate is blanked never re-arms its chain (x-survival-unblock 20261020-023907: a block lifted after login changed nothing), so a list that arrived with the login would be too late; OnUpdate through the list. No server change: the list rides the mods root with the load order. One layer change: the manifest's disposition column. Tests: T1
 none (the VM runs only in a game); the lab's x-mcm-register (a HUD trace
 asserting "MCM: Registered N new menu(s)." with N the layer's eight) and
 x-survival-probe's round trip extended to Survival_ModeEnabled = 1;
