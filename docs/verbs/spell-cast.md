@@ -1389,10 +1389,16 @@ gate and the merges after).
   launch row `[13929, 0, 0, ...]`). MagicApi.cpp (07b33046) takes the first
   effect whose base effect carries a projectile (include/RE/E/Effect.h:39,
   include/RE/E/EffectSetting.h:90) when the constructor left it null; area
-  stays as set, the explosion comes from the PROJ. HYPOTHESIS until the
-  probe: with the lobber flying in the observer's game its explosion
-  places the bolt there, and the WB_DestroyAfterDelay_Script admission
-  deletes it; the probe is x-lightning-strike re-grounded at the camp asserting the
+  stays as set, the explosion comes from the PROJ. CONFIRMED on the launch
+  (x-lightning-strike 20261020-085414 on the train's stage: both
+  c1.watched_self().launched("0xc0cfe00") and c2.watched(c1).launched(
+  "0xc0cfe00") held, the figure's launch carrying
+  WB_DestructionShock_Projectile_LightningStrike instead of 0, so the pick
+  took the strike's effect, not the rider's). Still HYPOTHESIS until a seat
+  or the probe's screenshots say so: the lobber explodes in the observer's
+  game and places the bolt, which the WB_DestroyAfterDelay_Script
+  admission then deletes (playtest twenty-seven's row). The probe is
+  x-lightning-strike re-grounded at the camp asserting the
   lobber's launch on both seats, c1.watched_self().launched("0xc0cfe00")
   and c2.watched(c1).launched("0xc0cfe00") (PROJ 030cfe00
   WB_DestructionShock_Projectile_LightningStrike by lab/esm.py, 0x0C0CFE00
