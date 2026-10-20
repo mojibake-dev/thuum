@@ -1,0 +1,1316 @@
+{
+  "actorValueRecord": {
+    "bases": [
+      {
+        "av": 0,
+        "base": 0.0
+      },
+      {
+        "av": 1,
+        "base": 0.0
+      },
+      {
+        "av": 2,
+        "base": 50.0
+      },
+      {
+        "av": 3,
+        "base": 3.0
+      },
+      {
+        "av": 4,
+        "base": 0.0
+      },
+      {
+        "av": 5,
+        "base": 0.0
+      },
+      {
+        "av": 6,
+        "base": 45.0
+      },
+      {
+        "av": 7,
+        "base": 25.0
+      },
+      {
+        "av": 8,
+        "base": 60.0
+      },
+      {
+        "av": 9,
+        "base": 20.0
+      },
+      {
+        "av": 10,
+        "base": 20.0
+      },
+      {
+        "av": 11,
+        "base": 15.0
+      },
+      {
+        "av": 12,
+        "base": 20.0
+      },
+      {
+        "av": 13,
+        "base": 15.0
+      },
+      {
+        "av": 14,
+        "base": 15.0
+      },
+      {
+        "av": 15,
+        "base": 15.0
+      },
+      {
+        "av": 16,
+        "base": 15.0
+      },
+      {
+        "av": 17,
+        "base": 20.0
+      },
+      {
+        "av": 18,
+        "base": 15.0
+      },
+      {
+        "av": 19,
+        "base": 15.0
+      },
+      {
+        "av": 20,
+        "base": 15.0
+      },
+      {
+        "av": 21,
+        "base": 15.0
+      },
+      {
+        "av": 22,
+        "base": 15.0
+      },
+      {
+        "av": 23,
+        "base": 15.0
+      },
+      {
+        "av": 24,
+        "base": 100.0
+      },
+      {
+        "av": 25,
+        "base": 120.0
+      },
+      {
+        "av": 26,
+        "base": 100.0
+      },
+      {
+        "av": 27,
+        "base": 0.800000011920929
+      },
+      {
+        "av": 28,
+        "base": 6.0
+      },
+      {
+        "av": 29,
+        "base": 5.0
+      },
+      {
+        "av": 30,
+        "base": 100.0
+      },
+      {
+        "av": 31,
+        "base": 121.40000915527344
+      },
+      {
+        "av": 32,
+        "base": 300.0
+      },
+      {
+        "av": 33,
+        "base": 0.0
+      },
+      {
+        "av": 34,
+        "base": 0.0
+      },
+      {
+        "av": 35,
+        "base": 4.0
+      },
+      {
+        "av": 36,
+        "base": 1.0
+      },
+      {
+        "av": 37,
+        "base": 100.0
+      },
+      {
+        "av": 38,
+        "base": 5.0
+      },
+      {
+        "av": 39,
+        "base": 0.0
+      },
+      {
+        "av": 40,
+        "base": 0.0
+      },
+      {
+        "av": 41,
+        "base": 0.0
+      },
+      {
+        "av": 42,
+        "base": 0.0
+      },
+      {
+        "av": 43,
+        "base": 0.0
+      },
+      {
+        "av": 44,
+        "base": 0.0
+      },
+      {
+        "av": 45,
+        "base": 0.0
+      },
+      {
+        "av": 46,
+        "base": 100.0
+      },
+      {
+        "av": 47,
+        "base": 100.0
+      },
+      {
+        "av": 48,
+        "base": 100.0
+      },
+      {
+        "av": 49,
+        "base": 100.0
+      },
+      {
+        "av": 50,
+        "base": 100.0
+      },
+      {
+        "av": 51,
+        "base": 100.0
+      },
+      {
+        "av": 52,
+        "base": 100.0
+      },
+      {
+        "av": 53,
+        "base": 0.0
+      },
+      {
+        "av": 54,
+        "base": 0.0
+      },
+      {
+        "av": 55,
+        "base": 0.0
+      },
+      {
+        "av": 56,
+        "base": 0.0
+      },
+      {
+        "av": 57,
+        "base": 0.0
+      },
+      {
+        "av": 58,
+        "base": 0.0
+      },
+      {
+        "av": 59,
+        "base": 0.0
+      },
+      {
+        "av": 60,
+        "base": 0.0
+      },
+      {
+        "av": 61,
+        "base": 0.0
+      },
+      {
+        "av": 62,
+        "base": 0.0
+      },
+      {
+        "av": 63,
+        "base": 0.0
+      },
+      {
+        "av": 64,
+        "base": 0.0
+      },
+      {
+        "av": 65,
+        "base": 0.0
+      },
+      {
+        "av": 66,
+        "base": 0.0
+      },
+      {
+        "av": 67,
+        "base": 0.0
+      },
+      {
+        "av": 68,
+        "base": 0.0
+      },
+      {
+        "av": 69,
+        "base": 0.0
+      },
+      {
+        "av": 70,
+        "base": 0.0
+      },
+      {
+        "av": 71,
+        "base": 0.0
+      },
+      {
+        "av": 72,
+        "base": 0.0
+      },
+      {
+        "av": 73,
+        "base": 0.0
+      },
+      {
+        "av": 74,
+        "base": 0.0
+      },
+      {
+        "av": 75,
+        "base": 0.0
+      },
+      {
+        "av": 76,
+        "base": 0.0
+      },
+      {
+        "av": 77,
+        "base": 0.0
+      },
+      {
+        "av": 78,
+        "base": 1.0
+      },
+      {
+        "av": 79,
+        "base": 0.0
+      },
+      {
+        "av": 80,
+        "base": 0.0
+      },
+      {
+        "av": 81,
+        "base": 0.0
+      },
+      {
+        "av": 82,
+        "base": 0.0
+      },
+      {
+        "av": 83,
+        "base": 0.0
+      },
+      {
+        "av": 84,
+        "base": 0.0
+      },
+      {
+        "av": 85,
+        "base": 0.0
+      },
+      {
+        "av": 86,
+        "base": 1.0
+      },
+      {
+        "av": 87,
+        "base": 0.0
+      },
+      {
+        "av": 88,
+        "base": 0.0
+      },
+      {
+        "av": 89,
+        "base": 0.0
+      },
+      {
+        "av": 90,
+        "base": 0.0
+      },
+      {
+        "av": 91,
+        "base": 0.0
+      },
+      {
+        "av": 92,
+        "base": 1.0
+      },
+      {
+        "av": 93,
+        "base": 0.0
+      },
+      {
+        "av": 94,
+        "base": 0.0
+      },
+      {
+        "av": 95,
+        "base": 0.0
+      },
+      {
+        "av": 96,
+        "base": 0.0
+      },
+      {
+        "av": 97,
+        "base": 0.0
+      },
+      {
+        "av": 98,
+        "base": 0.0
+      },
+      {
+        "av": 99,
+        "base": 0.0
+      },
+      {
+        "av": 100,
+        "base": 0.0
+      },
+      {
+        "av": 101,
+        "base": 0.0
+      },
+      {
+        "av": 102,
+        "base": 0.0
+      },
+      {
+        "av": 103,
+        "base": 0.0
+      },
+      {
+        "av": 104,
+        "base": 0.0
+      },
+      {
+        "av": 105,
+        "base": 0.0
+      },
+      {
+        "av": 106,
+        "base": 0.0
+      },
+      {
+        "av": 107,
+        "base": 0.0
+      },
+      {
+        "av": 108,
+        "base": 0.0
+      },
+      {
+        "av": 109,
+        "base": 0.0
+      },
+      {
+        "av": 110,
+        "base": 0.0
+      },
+      {
+        "av": 111,
+        "base": 0.0
+      },
+      {
+        "av": 112,
+        "base": 0.0
+      },
+      {
+        "av": 113,
+        "base": 0.0
+      },
+      {
+        "av": 114,
+        "base": 0.0
+      },
+      {
+        "av": 115,
+        "base": 0.0
+      },
+      {
+        "av": 116,
+        "base": 0.0
+      },
+      {
+        "av": 117,
+        "base": 0.0
+      },
+      {
+        "av": 118,
+        "base": 0.0
+      },
+      {
+        "av": 119,
+        "base": 0.0
+      },
+      {
+        "av": 120,
+        "base": 0.0
+      },
+      {
+        "av": 121,
+        "base": 0.0
+      },
+      {
+        "av": 122,
+        "base": 0.0
+      },
+      {
+        "av": 123,
+        "base": 0.0
+      },
+      {
+        "av": 124,
+        "base": 0.0
+      },
+      {
+        "av": 125,
+        "base": 0.0
+      },
+      {
+        "av": 126,
+        "base": 0.0
+      },
+      {
+        "av": 127,
+        "base": 0.0
+      },
+      {
+        "av": 128,
+        "base": 0.0
+      },
+      {
+        "av": 129,
+        "base": 0.0
+      },
+      {
+        "av": 130,
+        "base": 0.0
+      },
+      {
+        "av": 131,
+        "base": 0.0
+      },
+      {
+        "av": 132,
+        "base": 0.0
+      },
+      {
+        "av": 133,
+        "base": 0.0
+      },
+      {
+        "av": 134,
+        "base": 0.0
+      },
+      {
+        "av": 135,
+        "base": 0.0
+      },
+      {
+        "av": 136,
+        "base": 0.0
+      },
+      {
+        "av": 137,
+        "base": 0.0
+      },
+      {
+        "av": 138,
+        "base": 0.0
+      },
+      {
+        "av": 139,
+        "base": 0.0
+      },
+      {
+        "av": 140,
+        "base": 0.0
+      },
+      {
+        "av": 141,
+        "base": 0.0
+      },
+      {
+        "av": 142,
+        "base": 0.0
+      },
+      {
+        "av": 143,
+        "base": 0.0
+      },
+      {
+        "av": 144,
+        "base": 0.0
+      },
+      {
+        "av": 145,
+        "base": 0.0
+      },
+      {
+        "av": 146,
+        "base": 0.0
+      },
+      {
+        "av": 147,
+        "base": 0.0
+      },
+      {
+        "av": 148,
+        "base": 0.0
+      },
+      {
+        "av": 149,
+        "base": 0.0
+      },
+      {
+        "av": 150,
+        "base": 0.0
+      },
+      {
+        "av": 151,
+        "base": 0.0
+      },
+      {
+        "av": 152,
+        "base": 0.0
+      },
+      {
+        "av": 153,
+        "base": 0.0
+      },
+      {
+        "av": 154,
+        "base": 1.0
+      },
+      {
+        "av": 155,
+        "base": 100.0
+      },
+      {
+        "av": 156,
+        "base": 100.0
+      },
+      {
+        "av": 157,
+        "base": 100.0
+      },
+      {
+        "av": 158,
+        "base": 0.0
+      },
+      {
+        "av": 159,
+        "base": 0.0
+      },
+      {
+        "av": 160,
+        "base": 0.0
+      },
+      {
+        "av": 161,
+        "base": 0.0
+      },
+      {
+        "av": 162,
+        "base": 0.0
+      },
+      {
+        "av": 163,
+        "base": 0.0
+      }
+    ],
+    "legendary": [],
+    "level": 1,
+    "skills": [
+      {
+        "level": 20.0,
+        "skill": 0,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 25.0,
+        "skill": 1,
+        "threshold": 1064.175048828125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 2,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 3,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 4,
+        "threshold": 386.08917236328125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 5,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 6,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 7,
+        "threshold": 299.1267395019531,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 8,
+        "threshold": 349.1267395019531,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 9,
+        "threshold": 218.2534942626953,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 10,
+        "threshold": 379.41119384765625,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 11,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 12,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 13,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 14,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 15,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 16,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 17,
+        "threshold": 366.5069885253906,
+        "xp": 0.0
+      }
+    ],
+    "threshold": 100.0,
+    "xp": 0.0
+  },
+  "angle": [
+    20.454601287841797,
+    0.0,
+    150.06134033203125
+  ],
+  "appearanceDump": {
+    "hairColor": 6185079,
+    "headTextureSetId": 134406416,
+    "headpartIds": [
+      134406423,
+      134406422,
+      134406428,
+      967090,
+      134406426,
+      134406425,
+      134302726,
+      937384
+    ],
+    "isFemale": true,
+    "name": "rotfern",
+    "options": [
+      0.9000000357627869,
+      -0.30000001192092896,
+      -0.12000000476837158,
+      0.6000000238418579,
+      0.0,
+      0.0,
+      0.4000000059604645,
+      -0.30000001192092896,
+      0.20000000298023224,
+      -0.699999988079071,
+      -1.0,
+      0.10000000149011612,
+      -0.30000001192092896,
+      0.0,
+      0.20000000298023224,
+      -1.0,
+      -0.18000000715255737,
+      0.30000001192092896,
+      3.4028234663852886e+38
+    ],
+    "presets": [
+      1.0,
+      -1.0,
+      22.0,
+      15.0
+    ],
+    "raceId": 134261248,
+    "skinColor": 10928338,
+    "tints": [
+      {
+        "argb": -274086440,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\SkinTone.dds",
+        "type": 6
+      },
+      {
+        "argb": -16777216,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleUpperEyeSocket.dds",
+        "type": 4
+      },
+      {
+        "argb": -16777216,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleLowerEyeSocket.dds",
+        "type": 5
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHead_Cheeks.dds",
+        "type": 2
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHead_Cheeks2.dds",
+        "type": 9
+      },
+      {
+        "argb": -918354943,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHead_FrownLines.dds",
+        "type": 8
+      },
+      {
+        "argb": 1494156352,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadNord_Lips.dds",
+        "type": 1
+      },
+      {
+        "argb": -13688813,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadHuman_Nose.dds",
+        "type": 10
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadHuman_ForeHead.dds",
+        "type": 13
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadHuman_Chin.dds",
+        "type": 11
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadHuman_Neck.dds",
+        "type": 12
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_01.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_02.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_03.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_04.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_05.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_06.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_07.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_08.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_09.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadWarPaint_10.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadForswornTattoo_01.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadForswornTattoo_02.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadForswornTattoo_03.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadForswornTattoo_04.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadHighElfWarPaint_03.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleNordEyeLinerStyle_01.dds",
+        "type": 3
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadDirt_01.dds",
+        "type": 14
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadDirt_02.dds",
+        "type": 14
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\FemaleHeadDirt_03.dds",
+        "type": 14
+      }
+    ],
+    "weight": 50.0
+  },
+  "baseContainerAdded": true,
+  "baseDesc": "7:Skyrim.esm",
+  "consoleCommandsAllowed": false,
+  "count": 0,
+  "dynamicFields": {
+    "private.discordRoles": []
+  },
+  "effects": [],
+  "equipmentDump": {
+    "instantSpell": 0,
+    "inv": {
+      "entries": [
+        {
+          "baseId": 850080,
+          "count": 1,
+          "worn": true
+        },
+        {
+          "baseId": 80253,
+          "count": 1,
+          "worn": true
+        },
+        {
+          "baseId": 77495,
+          "count": 1,
+          "worn": true
+        },
+        {
+          "baseId": 80253,
+          "count": 34
+        },
+        {
+          "baseId": 77382,
+          "count": 1
+        },
+        {
+          "baseId": 77385,
+          "count": 1
+        },
+        {
+          "baseId": 77387,
+          "count": 1
+        },
+        {
+          "baseId": 77494,
+          "count": 1
+        },
+        {
+          "baseId": 79760,
+          "count": 1
+        },
+        {
+          "baseId": 80254,
+          "count": 1
+        },
+        {
+          "baseId": 243042,
+          "count": 1
+        },
+        {
+          "baseId": 256810,
+          "count": 1
+        },
+        {
+          "baseId": 256819,
+          "count": 1
+        },
+        {
+          "baseId": 1017598,
+          "count": 1
+        },
+        {
+          "baseId": 850089,
+          "count": 1
+        },
+        {
+          "baseId": 850079,
+          "count": 1
+        },
+        {
+          "baseId": 80265,
+          "count": 1
+        },
+        {
+          "baseId": 120044,
+          "count": 2
+        },
+        {
+          "baseId": 236362,
+          "count": 2
+        },
+        {
+          "baseId": 77495,
+          "count": 2
+        },
+        {
+          "baseId": 285736,
+          "count": 3
+        },
+        {
+          "baseId": 491036,
+          "count": 3
+        },
+        {
+          "baseId": 307386,
+          "count": 3
+        },
+        {
+          "baseId": 256733,
+          "count": 4
+        },
+        {
+          "baseId": 256736,
+          "count": 5
+        },
+        {
+          "baseId": 256741,
+          "count": 5
+        },
+        {
+          "baseId": 10,
+          "count": 10
+        },
+        {
+          "baseId": 15,
+          "count": 140
+        }
+      ]
+    },
+    "leftSpell": 201544786,
+    "numChanges": 13,
+    "rightSpell": 0,
+    "voiceSpell": 81415
+  },
+  "favorites": {
+    "entries": [
+      {
+        "formDesc": "12fcd:Skyrim.esm",
+        "hotkey": -1
+      }
+    ]
+  },
+  "formDesc": "0",
+  "healthPercentage": 0.3156663477420807,
+  "healthRespawnPercentage": 1.0,
+  "inv": {
+    "entries": [
+      {
+        "baseId": 10,
+        "count": 10
+      },
+      {
+        "baseId": 15,
+        "count": 140
+      },
+      {
+        "baseId": 77382,
+        "count": 1
+      },
+      {
+        "baseId": 77385,
+        "count": 1
+      },
+      {
+        "baseId": 77387,
+        "count": 1
+      },
+      {
+        "baseId": 77494,
+        "count": 1
+      },
+      {
+        "baseId": 77495,
+        "count": 3
+      },
+      {
+        "baseId": 79760,
+        "count": 1
+      },
+      {
+        "baseId": 80254,
+        "count": 1
+      },
+      {
+        "baseId": 120044,
+        "count": 2
+      },
+      {
+        "baseId": 236362,
+        "count": 2
+      },
+      {
+        "baseId": 243042,
+        "count": 1
+      },
+      {
+        "baseId": 256733,
+        "count": 4
+      },
+      {
+        "baseId": 256736,
+        "count": 5
+      },
+      {
+        "baseId": 256741,
+        "count": 5
+      },
+      {
+        "baseId": 256810,
+        "count": 1
+      },
+      {
+        "baseId": 256819,
+        "count": 1
+      },
+      {
+        "baseId": 1017598,
+        "count": 1
+      },
+      {
+        "baseId": 285736,
+        "count": 3
+      },
+      {
+        "baseId": 491036,
+        "count": 3
+      },
+      {
+        "baseId": 307386,
+        "count": 3
+      },
+      {
+        "baseId": 850080,
+        "count": 1
+      },
+      {
+        "baseId": 850089,
+        "count": 1
+      },
+      {
+        "baseId": 850079,
+        "count": 1
+      },
+      {
+        "baseId": 80265,
+        "count": 1
+      },
+      {
+        "baseId": 80253,
+        "count": 35
+      }
+    ]
+  },
+  "isDead": false,
+  "isDeleted": false,
+  "isDisabled": false,
+  "isHarvested": false,
+  "isOpen": false,
+  "isRaceMenuOpen": false,
+  "learnedSpells": [
+    77776,
+    163510,
+    241311,
+    275236,
+    372060,
+    383888,
+    424303,
+    185239263,
+    201332845,
+    201336952,
+    201370344,
+    201454075,
+    201477705,
+    201516596,
+    201530445,
+    201544786,
+    201608516,
+    201714926,
+    201865762,
+    201885332,
+    202413651,
+    202526407,
+    202526409
+  ],
+  "magickaPercentage": 1.0,
+  "magickaRespawnPercentage": 1.0,
+  "mapMarkers": {
+    "entries": [
+      {
+        "canTravel": true,
+        "formDesc": "162a4:Skyrim.esm"
+      }
+    ]
+  },
+  "nextRelootDatetime": 0,
+  "position": [
+    117354.0234375,
+    -81826.390625,
+    11008.98046875
+  ],
+  "profileId": 1,
+  "raceMenuPreset": "{\n   \"actor\" : {\n      \"hairColor\" : 6185079,\n      \"headTexture\" : \"rotfern.esp|02E110\",\n      \"weight\" : 50\n   },\n   \"bodyMorphs\" : [\n      {\n         \"keys\" : [\n            {\n               \"key\" : \"RaceMenuMorphsCBBE.esp\",\n               \"value\" : -1.100000023841858\n            }\n         ],\n         \"name\" : \"Breasts\"\n      },\n      {\n         \"keys\" : [\n            {\n               \"key\" : \"RaceMenuMorphsCBBE.esp\",\n               \"value\" : 0.3600000143051147\n            }\n         ],\n         \"name\" : \"BreastFlatness\"\n      },\n      {\n         \"keys\" : [\n            {\n               \"key\" : \"RaceMenuMorphsCBBE.esp\",\n               \"value\" : 0.5199999809265137\n            }\n         ],\n         \"name\" : \"BreastsSmall\"\n      },\n      {\n         \"keys\" : [\n            {\n               \"key\" : \"RaceMenuMorphsCBBE.esp\",\n               \"value\" : 0.4099999964237213\n            }\n         ],\n         \"name\" : \"BreastFlatness2\"\n      }\n   ],\n   \"faceTextures\" : [\n      {\n         \"index\" : 0,\n         \"texture\" : \"actors\\\\character\\\\rotfern\\\\head.dds\"\n      },\n      {\n         \"index\" : 1,\n         \"texture\" : \"actors\\\\character\\\\rotfern\\\\head_msn.dds\"\n      },\n      {\n         \"index\" : 2,\n         \"texture\" : \"actors\\\\character\\\\rotfern\\\\head_sk.dds\"\n      },\n      {\n         \"index\" : 3,\n         \"texture\" : \"Actors\\\\Character\\\\Male\\\\BlankDetailmap.dds\"\n      },\n      {\n         \"index\" : 7,\n         \"texture\" : \"actors\\\\character\\\\rotfern\\\\head_s.dds\"\n      }\n   ],\n   \"headParts\" : [\n      {\n         \"formId\" : 134406423,\n         \"formIdentifier\" : \"rotfern.esp|02E117\",\n         \"type\" : 0\n      },\n      {\n         \"formId\" : 134406422,\n         \"formIdentifier\" : \"rotfern.esp|02E116\",\n         \"type\" : 1\n      },\n      {\n         \"formId\" : 134406428,\n         \"formIdentifier\" : \"rotfern.esp|02E11C\",\n         \"type\" : 2\n      },\n      {\n         \"formId\" : 967090,\n         \"formIdentifier\" : \"Skyrim.esm|0EC1B2\",\n         \"type\" : 3\n      },\n      {\n         \"formId\" : 134406426,\n         \"formIdentifier\" : \"rotfern.esp|02E11A\",\n         \"type\" : 4\n      },\n      {\n         \"formId\" : 134302726,\n         \"formIdentifier\" : \"rotfern.esp|014C06\",\n         \"type\" : 6\n      },\n      {\n         \"formId\" : 937384,\n         \"formIdentifier\" : \"Skyrim.esm|0E4DA8\",\n         \"type\" : 7\n      }\n   ],\n   \"modNames\" : [ \"Skyrim.esm\", \"rotfern.esp\" ],\n   \"mods\" : [\n      {\n         \"index\" : 0,\n         \"name\" : \"Skyrim.esm\"\n      },\n      {\n         \"index\" : 8,\n         \"name\" : \"rotfern.esp\"\n      }\n   ],\n   \"morphs\" : {\n      \"custom\" : [\n         {\n            \"name\" : \"CME_ElfEar\",\n            \"value\" : 0.02999999932944775\n         },\n         {\n            \"name\" : \"ECE_EarSize\",\n            \"value\" : -3\n         },\n         {\n            \"name\" : \"RANs_ForeheadBackForward\",\n            \"value\" : 0.1899999976158142\n         },\n         {\n            \"name\" : \"RANs_Age\",\n            \"value\" : 0.03999999910593033\n         },\n         {\n            \"name\" : \"NSK_JawShape\",\n            \"value\" : 0.2699999809265137\n         },\n         {\n            \"name\" : \"CME_EyesSize\",\n            \"value\" : 2.429999828338623\n         },\n         {\n            \"name\" : \"CME_EyeballSize\",\n            \"value\" : -2.470000028610229\n         },\n         {\n            \"name\" : \"CME_EyesSlope\",\n            \"value\" : -0.4699999988079071\n         },\n         {\n            \"name\" : \"CME_BrowArch\",\n            \"value\" : -1.329999923706055\n         },\n         {\n            \"name\" : \"CME_BrowSlope\",\n            \"value\" : -0.1400000005960464\n         },\n         {\n            \"name\" : \"CME_BrowInOut\",\n            \"value\" : -1.360000014305115\n         },\n         {\n            \"name\" : \"CME_Breton\",\n            \"value\" : -0.009999999776482582\n         },\n         {\n            \"name\" : \"CME_ElfEyesType\",\n            \"value\" : 32\n         },\n         {\n            \"name\" : \"CME_EyeballUpDown\",\n            \"value\" : 0.6599999666213989\n         },\n         {\n            \"name\" : \"CME_EyesBackForward\",\n            \"value\" : -0.009999999776482582\n         },\n         {\n            \"name\" : \"CME_EyesHeight\",\n            \"value\" : -0.009999999776482582\n         },\n         {\n            \"name\" : \"NSK_EyelidOpen\",\n            \"value\" : 3\n         },\n         {\n            \"name\" : \"NSK_EyeSize\",\n            \"value\" : 0.1499999910593033\n         },\n         {\n            \"name\" : \"CME_EyeballInOut\",\n            \"value\" : -0.8700000047683716\n         },\n         {\n            \"name\" : \"CME_BrowBackForward\",\n            \"value\" : -2.519999980926514\n         },\n         {\n            \"name\" : \"RANs_LipDuckly\",\n            \"value\" : 0.4699999988079071\n         },\n         {\n            \"name\" : \"NSK_MouthSmile\",\n            \"value\" : -0.119999997317791\n         }\n      ],\n      \"default\" : {\n         \"morphs\" : [\n            0.9000000357627869,\n            -0.300000011920929,\n            -0.1200000047683716,\n            0.6000000238418579,\n            0,\n            0,\n            0.4000000059604645,\n            -0.300000011920929,\n            0.2000000029802322,\n            -0.699999988079071,\n            -1,\n            0.1000000014901161,\n            -0.300000011920929,\n            0,\n            0.2000000029802322,\n            -1,\n            -0.1800000071525574,\n            0.300000011920929,\n            3.402823466385289e+38\n         ],\n         \"presets\" : [ 1, 4294967295, 22, 15 ]\n      },\n      \"sculpt\" : [\n         {\n            \"data\" : [\n               [ 549, 721, -427, 1975 ],\n               [ 862, 31, -5, 20 ],\n               [ 46, -6, -176, 278 ],\n               [ 548, 1923, -3758, 930 ],\n               [ 931, 538, -527, -139 ],\n               [ 495, 264, -181, -248 ],\n               [ 96, -1251, -525, 2393 ],\n               [ 32, 131, 11, 11 ],\n               [ 431, 177, 6, -232 ],\n               [ 410, -458, -79, -30 ],\n               [ 97, -1, -2097, -699 ],\n               [ 912, 538, -527, -139 ],\n               [ 99, 13, -3860, 735 ],\n               [ 517, 1182, -417, 1173 ],\n               [ 109, -6, 76, -1058 ],\n               [ 924, 0, 0, -5 ],\n               [ 45, -192, -351, 223 ],\n               [ 731, 35, 24, 35 ],\n               [ 182, -8, -2723, 3865 ],\n               [ 499, -697, -1488, 1558 ],\n               [ 909, 35, 100, -55 ],\n               [ 518, 2489, -4205, 1026 ],\n               [ 941, 3, 4, -3 ],\n               [ 550, -215, -1385, 1463 ],\n               [ 411, -137, -302, 108 ],\n               [ 28, 272, 70, -6 ],\n               [ 557, 69, 130, -115 ],\n               [ 621, 12, 223, -12 ],\n               [ 412, -342, -238, 34 ],\n               [ 949, 205, -188, -84 ],\n               [ 558, 26, 697, 201 ],\n               [ 559, -398, -142, 1385 ],\n               [ 498, 219, -321, 192 ],\n               [ 631, 1262, -74, -142 ],\n               [ 721, -215, -207, 309 ],\n               [ 719, -260, 165, 400 ],\n               [ 832, -298, -370, 361 ],\n               [ 833, 317, -48, -53 ],\n               [ 240, 233, 107, -82 ],\n               [ 489, -3041, 1271, -757 ],\n               [ 98, 176, -1491, 1614 ],\n               [ 986, 381, -449, -121 ],\n               [ 95, -2037, -4056, 1093 ],\n               [ 400, -201, -222, -232 ],\n               [ 107, 352, -210, 1597 ],\n               [ 950, 272, -261, -78 ],\n               [ 43, 23, -3236, 2235 ],\n               [ 822, 156, -166, -179 ],\n               [ 428, -35, 22, -5 ],\n               [ 573, -15, 19, 6 ],\n               [ 954, 8, 9, -6 ],\n               [ 63, -2578, -4521, 1161 ],\n               [ 496, 250, -152, 3 ],\n               [ 432, -1, -4, 2 ],\n               [ 44, 697, -1627, 1713 ],\n               [ 108, -42, 658, 209 ],\n               [ 64, -1479, -589, 1443 ],\n               [ 849, 33, 21, -4 ],\n               [ 192, 1970, 822, -268 ],\n               [ 399, -365, -65, -301 ],\n               [ 65, 187, -401, 898 ],\n               [ 409, 315, -430, 442 ],\n               [ 42, -281, -203, -268 ],\n               [ 433, -53, 12, 294 ],\n               [ 497, 49, -311, 77 ],\n               [ 106, -100, 105, -84 ],\n               [ 200, -1289, 6, -163 ],\n               [ 856, 0, 0, -2 ],\n               [ 41, -279, -181, 8 ],\n               [ 290, 227, -206, 332 ],\n               [ 984, 560, -580, -98 ],\n               [ 516, -184, -316, 725 ],\n               [ 899, -117, -119, 38 ],\n               [ 835, 276, -182, 24 ],\n               [ 834, 100, -230, 72 ],\n               [ 413, 308, 675, 532 ],\n               [ 401, 23, 355, -554 ],\n               [ 40, -46, -324, 81 ],\n               [ 732, 41, 16, -6 ],\n               [ 429, 30, -85, 15 ],\n               [ 430, 51, -20, -179 ],\n               [ 444, 0, -8, 27 ],\n               [ 836, -315, 630, 494 ],\n               [ 821, 331, -47, -276 ],\n               [ 164, 4, -1372, 97 ],\n               [ 823, -44, 413, -648 ],\n               [ 723, 270, -34, 566 ],\n               [ 852, -198, 6, -255 ],\n               [ 729, 219, -170, -385 ],\n               [ 850, -53, -21, -176 ],\n               [ 812, 189, 19, -485 ],\n               [ 391, -1, 113, 3 ],\n               [ 388, -135, 8, -339 ],\n               [ 533, 611, 163, -255 ],\n               [ 402, -1, 0, -5 ],\n               [ 783, 89, 151, 311 ],\n               [ 138, 9, -1257, -829 ],\n               [ 139, -212, -594, -47 ],\n               [ 80, -614, 211, -212 ],\n               [ 291, 29, -143, 342 ],\n               [ 434, -272, 75, 21 ],\n               [ 302, 35, -100, -63 ],\n               [ 181, -264, 262, -43 ],\n               [ 735, -31, -94, -59 ],\n               [ 848, 0, 3, 2 ],\n               [ 33, 412, 228, -120 ],\n               [ 39, -198, -5, -18 ],\n               [ 930, 560, -580, -98 ],\n               [ 726, -29, 210, 247 ],\n               [ 331, 392, 337, -193 ],\n               [ 398, -22, 39, 122 ],\n               [ 728, 732, -476, 182 ],\n               [ 34, 3048, 1341, -744 ],\n               [ 35, 607, 128, -406 ],\n               [ 942, 3, 4, -3 ],\n               [ 330, 4256, 2639, -1393 ],\n               [ 730, 0, 4, -9 ],\n               [ 351, -24, -212, 111 ],\n               [ 329, 3103, 2301, -1163 ],\n               [ 760, -2834, 1946, -1129 ],\n               [ 764, -1628, 885, -20 ],\n               [ 333, 1881, 1058, -100 ],\n               [ 335, 800, 471, -467 ],\n               [ 350, 49, 54, 204 ],\n               [ 66, 107, 83, -53 ],\n               [ 67, 454, 575, -368 ],\n               [ 974, -119, -122, 33 ],\n               [ 328, 1794, 1782, -118 ],\n               [ 198, 521, 704, 72 ],\n               [ 68, -2, -27, -6 ],\n               [ 334, 840, 1041, 88 ],\n               [ 199, 150, 27, -392 ],\n               [ 191, 951, 608, 344 ],\n               [ 304, -97, 16, -20 ],\n               [ 193, 225, 381, -229 ],\n               [ 600, -1, -2, -30 ],\n               [ 297, -457, 0, 1857 ],\n               [ 78, -675, -328, -714 ],\n               [ 79, -686, -177, -606 ],\n               [ 970, -1, -2, -31 ],\n               [ 793, -35, 26, 6 ],\n               [ 136, -1150, 737, 851 ],\n               [ 194, -515, -19, -57 ],\n               [ 287, -211, 279, -73 ],\n               [ 292, -450, 76, 770 ],\n               [ 293, -568, -458, 270 ],\n               [ 596, 122, -356, -475 ],\n               [ 979, 560, -580, -98 ],\n               [ 295, 388, 182, 156 ],\n               [ 296, -780, -359, -86 ],\n               [ 332, -844, -548, -60 ],\n               [ 960, 31, 37, -29 ],\n               [ 81, -1126, 184, -60 ],\n               [ 312, -616, 19, 1465 ],\n               [ 135, -498, -527, 132 ],\n               [ 131, 40, -138, 72 ],\n               [ 132, -636, -375, 207 ],\n               [ 789, -370, 95, -218 ],\n               [ 137, -957, 274, 148 ],\n               [ 288, -195, 270, 829 ],\n               [ 142, -636, -672, 76 ],\n               [ 144, -500, -878, -675 ],\n               [ 422, -11, 23, 0 ],\n               [ 423, -55, -63, -30 ],\n               [ 31, 132, -6, -13 ],\n               [ 922, -3, -4, -55 ],\n               [ 249, 285, 89, -65 ],\n               [ 134, -505, -640, 522 ],\n               [ 385, -115, -66, 295 ],\n               [ 384, 42, 106, -715 ],\n               [ 286, 8, 60, -521 ],\n               [ 289, -147, 147, -301 ],\n               [ 592, -600, -201, -1063 ],\n               [ 991, -400, -289, 35 ],\n               [ 885, -666, -181, -460 ],\n               [ 309, 870, -956, -199 ],\n               [ 311, -785, 193, 623 ],\n               [ 680, -508, 176, -37 ],\n               [ 313, 249, -89, 38 ],\n               [ 365, -656, -418, 435 ],\n               [ 366, -1366, -406, 1252 ],\n               [ 143, 1331, -1508, -181 ],\n               [ 141, 365, -1191, 114 ],\n               [ 153, -108, -392, -452 ],\n               [ 980, 17, -78, 3 ],\n               [ 165, 1130, -1356, -342 ],\n               [ 167, 498, -1222, -54 ],\n               [ 357, -249, 217, 199 ],\n               [ 761, -637, 463, -303 ],\n               [ 882, -804, -564, -186 ],\n               [ 367, 231, -1005, -54 ],\n               [ 379, 436, -96, -155 ],\n               [ 380, 330, 55, -255 ],\n               [ 879, 377, -897, -458 ],\n               [ 140, 32, -965, -367 ],\n               [ 154, -6, -16, 250 ],\n               [ 355, 8, -4, 130 ],\n               [ 166, 4, -917, -408 ],\n               [ 403, -4, -325, 10 ],\n               [ 883, -773, -411, -336 ],\n               [ 602, -451, -1212, -53 ],\n               [ 791, 1277, -286, 1147 ],\n               [ 146, 824, -301, -837 ],\n               [ 743, 605, 116, 1365 ],\n               [ 792, -208, -939, -71 ],\n               [ 589, -306, -1148, -212 ],\n               [ 601, -1039, -1333, -347 ],\n               [ 765, -914, 1066, -105 ],\n               [ 886, -322, -917, -85 ],\n               [ 587, 232, -586, -46 ],\n               [ 588, -211, -1134, 84 ],\n               [ 971, 0, 0, -5 ],\n               [ 583, 445, -564, 433 ],\n               [ 591, 1247, -717, -405 ],\n               [ 145, -47, -19, -344 ],\n               [ 790, 663, -411, 387 ],\n               [ 593, -218, -100, -332 ],\n               [ 584, 900, 242, 116 ],\n               [ 983, 516, -507, -134 ],\n               [ 147, -12, 248, -152 ],\n               [ 148, -16, 489, 430 ],\n               [ 157, -55, -103, 113 ],\n               [ 158, 0, -94, 173 ],\n               [ 740, -1095, -1144, -244 ],\n               [ 744, 715, 273, 529 ],\n               [ 590, 762, -726, 100 ],\n               [ 981, 17, -78, 3 ],\n               [ 742, 116, 110, 312 ],\n               [ 830, 359, -663, -253 ],\n               [ 805, -289, 94, -244 ],\n               [ 585, 999, 243, 427 ],\n               [ 532, 1134, 156, -115 ],\n               [ 915, -1, -2, -30 ],\n               [ 581, 1099, -237, -134 ],\n               [ 582, 61, -162, -52 ],\n               [ 973, -370, -373, 102 ],\n               [ 586, 427, -458, 20 ],\n               [ 977, -442, -424, 105 ],\n               [ 809, 83, 12, 166 ],\n               [ 810, -27, 83, -670 ],\n               [ 534, 637, -237, -699 ],\n               [ 925, 187, -174, -75 ],\n               [ 727, 684, 108, 1037 ],\n               [ 531, 741, -392, -929 ],\n               [ 725, 516, -549, 87 ],\n               [ 846, 47, -50, -25 ],\n               [ 718, 95, 64, -295 ],\n               [ 763, 212, -785, 195 ],\n               [ 892, 1, 2, -1 ],\n               [ 722, -95, -162, 316 ],\n               [ 188, -20, 223, -12 ],\n               [ 781, 104, 108, 46 ],\n               [ 364, 237, 314, -233 ],\n               [ 597, 100, 49, 87 ],\n               [ 189, 55, 192, 9 ],\n               [ 310, 42, 50, -40 ],\n               [ 620, 1, 122, -50 ],\n               [ 598, 15, -39, 16 ],\n               [ 989, 17, -78, 3 ],\n               [ 720, 51, 380, 483 ],\n               [ 788, 42, 27, 40 ],\n               [ 804, -416, -12, -77 ],\n               [ 717, 26, -137, -472 ],\n               [ 782, -29, -69, 60 ],\n               [ 619, 68, -83, 0 ],\n               [ 807, -350, -143, 39 ],\n               [ 162, 1, 2, -1 ],\n               [ 555, -8, -41, -58 ],\n               [ 556, -3, -18, -64 ],\n               [ 939, -103, -105, 35 ],\n               [ 745, 9, -27, 58 ],\n               [ 553, 27, -121, 61 ],\n               [ 785, -22, 100, 1 ],\n               [ 484, -6, -33, 10 ],\n               [ 629, -207, 108, -421 ],\n               [ 554, -68, 53, 239 ],\n               [ 945, 205, -188, -84 ],\n               [ 622, -700, 443, -87 ],\n               [ 625, -2512, 1260, -666 ],\n               [ 628, -124, 260, -276 ],\n               [ 630, -525, 644, 29 ],\n               [ 759, -2279, 1988, -315 ],\n               [ 623, 193, -307, -150 ],\n               [ 490, -644, 346, -242 ],\n               [ 762, -4296, 2545, -1412 ],\n               [ 624, -376, 336, -131 ],\n               [ 196, -370, -373, 102 ],\n               [ 853, 42, 12, 223 ],\n               [ 733, 113, 23, -23 ],\n               [ 854, 231, 70, 1 ],\n               [ 190, -76, -100, 1 ],\n               [ 356, 35, -8, 130 ],\n               [ 382, 217, -19, -32 ],\n               [ 197, 94, 243, -260 ],\n               [ 155, 0, -44, -6 ],\n               [ 156, -19, -55, 22 ],\n               [ 363, -42, 26, 39 ],\n               [ 594, 0, -1, 0 ],\n               [ 985, -27, 44, -306 ],\n               [ 784, 5, -8, 35 ],\n               [ 671, -4, 0, 15 ],\n               [ 786, 0, 0, 2 ],\n               [ 734, -29, 125, -133 ],\n               [ 521, 2, -22, -5 ],\n               [ 522, -341, 441, -337 ],\n               [ 913, 233, -214, -93 ],\n               [ 748, -8, -8, 0 ],\n               [ 873, 13, -55, 30 ],\n               [ 851, -35, -105, 19 ],\n               [ 863, 0, -36, 118 ],\n               [ 824, 4, -1, -21 ],\n               [ 615, 214, 239, -43 ],\n               [ 494, 188, 1, -18 ],\n               [ 487, -165, 34, -9 ],\n               [ 820, 18, 37, 111 ],\n               [ 488, -446, 82, -306 ],\n               [ 766, -574, 341, -353 ],\n               [ 779, 15, -128, 67 ],\n               [ 780, -70, 43, 116 ],\n               [ 483, -182, 27, 24 ],\n               [ 519, 13, 30, -26 ],\n               [ 486, 0, 0, 1 ],\n               [ 845, 10, 24, 0 ],\n               [ 643, -19, -40, 10 ],\n               [ 670, -91, -86, 25 ],\n               [ 679, -75, -17, -32 ],\n               [ 672, -233, -41, -71 ],\n               [ 673, -152, -59, 4 ],\n               [ 818, -306, 68, -73 ],\n               [ 847, 2, -40, 19 ],\n               [ 298, -209, -142, -390 ],\n               [ 358, 17, 96, 2 ],\n               [ 102, 68, 12, -36 ],\n               [ 920, -1, -2, -30 ],\n               [ 105, 5, -1, -57 ],\n               [ 104, 55, -21, 77 ],\n               [ 103, 51, 40, 204 ],\n               [ 994, -62, -35, 0 ],\n               [ 149, 0, -2, 0 ],\n               [ 359, -3, -6, 25 ],\n               [ 299, 0, 3, -5 ],\n               [ 314, 49, 21, 84 ],\n               [ 300, -23, 13, 22 ],\n               [ 303, 24, 111, -126 ],\n               [ 360, 22, 12, 13 ],\n               [ 301, -42, 15, -6 ],\n               [ 987, 560, -580, -98 ],\n               [ 317, 4, -4, 0 ],\n               [ 890, -117, -119, 38 ],\n               [ 900, -117, -119, 38 ],\n               [ 936, -370, -373, 102 ],\n               [ 992, 35, 102, -57 ],\n               [ 241, 119, 32, -39 ],\n               [ 248, 398, 150, -72 ],\n               [ 396, 162, 75, -54 ],\n               [ 130, -132, -135, 44 ],\n               [ 976, -62, -35, 0 ],\n               [ 972, -442, -424, 105 ],\n               [ 908, 35, 100, -55 ],\n               [ 995, -400, -289, 35 ],\n               [ 906, -403, -405, 110 ],\n               [ 294, -443, -425, 106 ],\n               [ 988, 379, -447, -122 ],\n               [ 907, -442, -424, 105 ],\n               [ 990, -442, -424, 105 ],\n               [ 993, -442, -424, 105 ],\n               [ 133, -403, -405, 110 ],\n               [ 889, -403, -405, 110 ],\n               [ 975, -119, -122, 33 ],\n               [ 576, -138, 162, 53 ],\n               [ 911, -403, -405, 110 ],\n               [ 910, -117, -119, 38 ],\n               [ 938, -119, -122, 33 ],\n               [ 943, -119, -122, 33 ],\n               [ 888, -132, -135, 44 ],\n               [ 898, -132, -135, 44 ],\n               [ 195, -103, -105, 35 ],\n               [ 937, -103, -105, 35 ],\n               [ 944, -103, -105, 35 ],\n               [ 946, 516, -507, -134 ],\n               [ 935, 560, -580, -98 ],\n               [ 951, 272, -261, -78 ],\n               [ 982, 272, -261, -78 ],\n               [ 934, -27, 44, -306 ],\n               [ 724, 561, -581, -97 ],\n               [ 580, 538, -527, -139 ],\n               [ 626, 516, -507, -134 ],\n               [ 947, 272, -261, -78 ],\n               [ 914, 187, -174, -75 ],\n               [ 978, 516, -507, -134 ],\n               [ 932, 187, -174, -75 ],\n               [ 933, 187, -174, -75 ],\n               [ 579, 233, -214, -93 ],\n               [ 627, 205, -188, -84 ],\n               [ 921, 233, -214, -93 ],\n               [ 926, 233, -214, -93 ],\n               [ 940, 31, 37, -29 ],\n               [ 881, 8, 9, -6 ],\n               [ 884, 31, 37, -29 ],\n               [ 893, 2, 2, -2 ],\n               [ 894, 2, 2, -2 ],\n               [ 958, 3, 4, -3 ],\n               [ 897, 42, 50, -40 ],\n               [ 961, 8, 9, -6 ],\n               [ 901, 2, 2, -2 ],\n               [ 574, -55, 70, 24 ],\n               [ 902, 42, 50, -40 ],\n               [ 903, 1, 2, -1 ],\n               [ 568, -154, 184, 61 ],\n               [ 904, 42, 50, -40 ],\n               [ 905, 2, 2, -2 ],\n               [ 959, 8, 9, -6 ],\n               [ 962, 3, 4, -3 ],\n               [ 966, 0, 0, -5 ],\n               [ 741, -3, -4, -55 ],\n               [ 831, -1, -2, -31 ],\n               [ 887, -2, -3, -41 ],\n               [ 919, 0, 0, -5 ],\n               [ 923, 0, 0, -5 ],\n               [ 540, -146, 179, 62 ],\n               [ 927, -3, -4, -55 ],\n               [ 928, -1, -2, -30 ],\n               [ 929, 0, 0, -5 ],\n               [ 948, -1, -2, -31 ],\n               [ 952, 0, 0, -5 ],\n               [ 953, -1, -2, -31 ],\n               [ 964, -2, -3, -41 ],\n               [ 965, 0, 0, -5 ],\n               [ 969, -2, -3, -41 ],\n               [ 575, -142, 176, 61 ],\n               [ 795, -91, 103, 32 ],\n               [ 361, 27, 22, 23 ],\n               [ 185, -9, 21, 13 ],\n               [ 617, -43, 67, 44 ],\n               [ 774, -6, 6, 5 ],\n               [ 796, -122, 129, 37 ]\n            ],\n            \"host\" : \"actors\\\\character\\\\rotfern\\\\childheadchargen.tri\",\n            \"vertices\" : 996\n         }\n      ],\n      \"sculptDivisor\" : 10000\n   },\n   \"overrides\" : [\n      {\n         \"node\" : \"Body [Ovl0]\",\n         \"values\" : [\n            {\n               \"data\" : -1,\n               \"index\" : -1,\n               \"key\" : 7,\n               \"type\" : 3\n            },\n            {\n               \"data\" : 1,\n               \"index\" : -1,\n               \"key\" : 8,\n               \"type\" : 4\n            }\n         ]\n      }\n   ],\n   \"tintInfo\" : [\n      {\n         \"color\" : 4020880856,\n         \"index\" : 0,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\SkinTone.dds\"\n      },\n      {\n         \"color\" : 4278190080,\n         \"index\" : 1,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleUpperEyeSocket.dds\"\n      },\n      {\n         \"color\" : 4278190080,\n         \"index\" : 2,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleLowerEyeSocket.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 3,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHead_Cheeks.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 4,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHead_Cheeks2.dds\"\n      },\n      {\n         \"color\" : 3376612353,\n         \"index\" : 5,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHead_FrownLines.dds\"\n      },\n      {\n         \"color\" : 1494156352,\n         \"index\" : 6,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadNord_Lips.dds\"\n      },\n      {\n         \"color\" : 4281278483,\n         \"index\" : 7,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadHuman_Nose.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 8,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadHuman_ForeHead.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 9,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadHuman_Chin.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 10,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadHuman_Neck.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 11,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_01.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 12,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_02.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 13,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_03.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 14,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_04.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 15,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_05.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 16,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_06.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 17,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_07.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 18,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_08.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 19,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_09.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 20,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadWarPaint_10.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 21,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadForswornTattoo_01.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 22,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadForswornTattoo_02.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 23,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadForswornTattoo_03.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 24,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadForswornTattoo_04.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 25,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadHighElfWarPaint_03.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 26,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleNordEyeLinerStyle_01.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 27,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadDirt_01.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 28,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadDirt_02.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 29,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\FemaleHeadDirt_03.dds\"\n      }\n   ],\n   \"transforms\" : [\n      {\n         \"firstPerson\" : false,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 0.9700000286102295,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"NPC\"\n      },\n      {\n         \"firstPerson\" : false,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 0.9399999976158142,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"NPC Head [Head]\"\n      },\n      {\n         \"firstPerson\" : false,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 1.169999957084656,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"QUIVER\"\n      },\n      {\n         \"firstPerson\" : false,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 1.25,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"WeaponBow\"\n      },\n      {\n         \"firstPerson\" : true,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 0.9700000286102295,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"NPC\"\n      },\n      {\n         \"firstPerson\" : true,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 0.9399999976158142,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"NPC Head [Head]\"\n      },\n      {\n         \"firstPerson\" : true,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 1.169999957084656,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"QUIVER\"\n      },\n      {\n         \"firstPerson\" : true,\n         \"keys\" : [\n            {\n               \"name\" : \"RSMPlugin\",\n               \"values\" : [\n                  {\n                     \"data\" : 1.25,\n                     \"index\" : 0,\n                     \"key\" : 30,\n                     \"type\" : 4\n                  }\n               ]\n            }\n         ],\n         \"node\" : \"WeaponBow\"\n      }\n   ],\n   \"version\" : {\n      \"formatVersion\" : 3,\n      \"runtimeVersion\" : 17039392,\n      \"signature\" : 1163086675,\n      \"skseVersion\" : 33685600\n   }\n}\n",
+  "recType": 1,
+  "shoutRecord": {
+    "shouts": [
+      "3f9ea:Skyrim.esm",
+      "13e07:Skyrim.esm"
+    ],
+    "wordsKnown": [
+      "20e17:Skyrim.esm",
+      "13e22:Skyrim.esm",
+      "13e23:Skyrim.esm",
+      "13e24:Skyrim.esm"
+    ],
+    "wordsUnlocked": [
+      "20e17:Skyrim.esm",
+      "13e22:Skyrim.esm",
+      "13e23:Skyrim.esm",
+      "13e24:Skyrim.esm"
+    ]
+  },
+  "spawnDelay": 25.0,
+  "spawnPoint_cellOrWorldDesc": "3c:Skyrim.esm",
+  "spawnPoint_pos": [
+    133857.0,
+    -61130.0,
+    14662.0
+  ],
+  "spawnPoint_rot": [
+    0.0,
+    0.0,
+    72.0
+  ],
+  "staffRank": 3,
+  "staminaPercentage": 1.0,
+  "staminaRespawnPercentage": 1.0,
+  "worldOrCellDesc": "3c:Skyrim.esm"
+}
