@@ -456,7 +456,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       written under; lab-api's `server: world:` restore and FormDesc ids in
       the known step on main 3fd7ae5); it proves the migration on a stage
       whose order differs from the fixture's, the layer stage, so it sits in
-      gate.yaml's pending until the formdesc branch stages there. Left for
+      gate.yaml's pending until the formdesc branch stages there; the branch
+      carries parity 4720d0d3 since its merge 80cf1e35 (pipeline 2279). Left for
       slice two: decision 3 (the login refusal; the record is kept but
       LoadChangeForm still skips an unresolved race, so the 17:25 hazard
       stands until then), the six keep-on-miss fixes on fields already
