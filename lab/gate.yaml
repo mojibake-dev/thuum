@@ -8,8 +8,9 @@
 # layer-merge's gate) leaves them out; a merge that names one still runs it; take
 # one out in the commit whose T3 turns it green.
 # m2-close (docs/M2-CLOSE.md): the set whose green closes M2 is "all" on the m2-train-30
-# stage under the merged layer, `pending` emptied as the train carries each fix: `just sweep
-# m2-close`, or the nightly over that stage, cited by GATE_SET at the train's merge (ADR-042).
+# stage under the merged layer, `pending` emptied of the four the train carries (b-snapback
+# stays: its fix is the train after twenty-eight): `just sweep m2-close`, or the nightly over
+# that stage, cited by GATE_SET at the train's merge (ADR-042).
 always: [smoke-two-players, a-restart-persistence, b-duel]   # M0's floor, M1's exit, M2's exit (server-authoritative damage between two players, 2026-10-14)
 watch:
   - a-melee-reach      # docs/verbs/melee-reach.md:141, red once in the m2-god sweep (2026-10-10)
@@ -22,3 +23,4 @@ pending:
   - b-figure-values      # docs/verbs/figure-values.md, rises("health") == 0 after three hits: the figure dent, red until train-30's fork m2-train30-dent e6a8270a stages (2026-10-20)
   - b-formdesc-world     # ADR-043 (docs/DECISIONS.md), a world saved in the raw shape loaded under the layer's order: parity 4720d0d3 has no slice, so red until fork m2-formdesc-world d0693ef4 stages under the layer, its proving ground (2026-10-20)
   - b-hailstone          # docs/M2-CLOSE.md, the server evaluates an effect's own conditions and resists a hostile effect as the engine does (0.85 on both seats): red on parity until fork m2-train-30 1d88a6b7 (the conditions and resist rows) stages (2026-10-20)
+  - b-snapback           # docs/verbs/attributes.md:100, a percentage the server raises holds against the seat's stale reports until one reaches it: red until fork m2-snapback 1fb5f2f9 stages, the train after twenty-eight, not m2-train-30, so it stays here through M2's close (2026-10-20)
