@@ -646,7 +646,15 @@ above keep a hostile preset from carrying anything but a look.
   after a relaunch, c2's too; the stage's smoke 20261020-210408 green with
   the layer and no hdtsmp64 log among its artifacts, so FSMP is gone). Eli,
   2026-10-20 13:40: "patch it" (over dropping the mod), so the patch row
-  and the mod stay.
+  and the mod stay. The layer's first full gate then read the patch's own
+  side effect (a-racemenu 20261020-224305, step 18, before any relaunch):
+  with both gender bits on every vanilla Nord male part, the vanilla menu's
+  rebuild at a menu open rejects them for a male and seats the first valid
+  alternative, ApachiiHair's male hair (slot 0x09), and the record follows
+  that look (HYPOTHESIS, the mechanism; docs/research/layer-reds-2026-10-20.md).
+  The patch becomes "each override's gender bits copied from its master
+  record, the all-races RNAM kept", in apocrypha's next render; a-racemenu
+  on it is the decider.
 
 ## Message contract
 

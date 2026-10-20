@@ -50,13 +50,24 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   0x09002317, the last two parts of the layer's full slot 0x09; c1's game
   shows another set. A new shape past the gender-flag fix (x-layer-headparts
   20261020-210719 read eight parts equal before and after a relaunch).
-- Under read (a reader on the run); the candidates: the flags patch made a
-  layer plugin's hair parts valid picks for a Nord male and the menu's open
-  seated them; the preset naming a hair that resolves to the layer's part;
-  the menu's rebuild with the layer's defaults. The fix follows the read: a
-  layer patch, a server-side filter of a look's parts to the preset's
-  plugins, or a scenario expectation. Decider: the read's named line, then
-  a-racemenu on the patched layer.
+- Read 16:25 PDT: both c1's base (steps/015, nine parts) and the record
+  carry ApachiiHairM01 (0x09002317) and ApachiiHairLineM01 (0x09002314) in
+  place of HairMaleNord01, with one orphan vanilla hairline left on the
+  base; the preset c1 saved 0.25 s after the close was 8849 bytes against
+  the green runs' 8747, so c1's game sent the swap and the server derived
+  nothing (racemenu.rs derived_head_parts emits every listed part and drops
+  none). The unpatched 01 flags passed a male's menu (193623 held step 18)
+  and failed rotfern (female); the patched 07 flags fail a male's menu open.
+  HYPOTHESIS, the mechanism: the vanilla menu's rebuild at open reads a
+  part with kFemale set as female and rejects every 07 part for a male,
+  taking the first valid alternative where one exists; only hair has one
+  (ApachiiHairM01, DATA 03, the first of 32 male Apachii hairs), so head,
+  mouth, beard, brows and marks stay and the hair swaps. Fix (apocrypha's
+  render): a size-preserving patch copying each of the 805 overrides'
+  gender bits from its master record (766 Skyrim.esm, 39 Dawnguard.esm),
+  keeping the all-races RNAM, right by construction for RaceMenu's preset
+  load and the menu's rebuild. Deciders: a-racemenu on the re-render; a
+  head-parts read with the menu still open for the mechanism.
 
 ## Consequence for M2's close
 
