@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # playtest-logs.sh <n> <since UTC, 2026-10-19T23:28:25Z>: a playtest's logs kept on the results site when no recorder
 # ran (playtest-record.sh fetches the same set at its end): the server's log since the session's start and each seat's
-# Skyrim Platform, skse64, lab-driver and Sunshine logs, into /srv/lab/results/playtest-<n>/
+# Skyrim Platform, skse64, lab-driver and Sunshine logs and every CrashLogger log written since, into
+# /srv/lab/results/playtest-<n>/
 # (https://thuum.gaussing.tv/results/playtest-<n>/). Run it before anything replaces the server container or rolls a
 # clone back: a turbo-srv push recreates the container and its log goes with it, and a rollback erases a clone's
 # files (Sunshine's log of playtest nineteen's second session was lost so). Read-only on the games: each log is
@@ -19,9 +20,15 @@ ssh_srv "cd /srv/lab && docker compose logs --no-color --since $since skymp-serv
 ssh_srv "cat > $out/server.log" < "$local_dir/server.log"
 echo "server.log: $(wc -l < "$local_dir/server.log" | tr -d ' ') lines since $since"
 skse='C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE'
+enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 for pair in c1:711 c2:712; do
   c=${pair%%:*}; vmid=${pair#*:}
-  for spec in "$c.log|'$skse\\skyrim-platform.log'" "$c-skse64.log|'$skse\\skse64.log'" \
+  # CrashLogger's logs written since the session's start (the clone's clock is local time), each kept by its name
+  crashes=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "\$t = [datetime]::Parse('$since').ToLocalTime(); Get-ChildItem -LiteralPath '$skse' -Filter 'crash-*.log' | Where-Object { \$_.LastWriteTime -ge \$t } | ForEach-Object { \$_.Name }")" 2>/dev/null \
+    | python3 -c 'import json,sys; print(" ".join((json.load(sys.stdin).get("out-data") or "").split()))' 2>/dev/null || true)
+  extra=()
+  for f in $crashes; do extra+=("$c-$f|'$skse\\$f'"); done
+  for spec in "$c.log|'$skse\\skyrim-platform.log'" "$c-skse64.log|'$skse\\skse64.log'" ${extra[@]+"${extra[@]}"} \
               "$c-driver.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')" \
               "$c-sunshine.log|'C:\\Program Files\\Sunshine\\config\\sunshine.log'"; do
     name=${spec%%|*}; src=${spec#*|}
