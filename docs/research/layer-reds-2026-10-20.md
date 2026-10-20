@@ -102,6 +102,15 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   archive whatever the order. The rule: when two archives share a path and
   the plugins' order cannot be the installer's, lay the winner's copy
   loose. Same render as the master-bits head-parts patch and the 0x7 drop.
+- The render: apocrypha/layer-essentials c38a3b04 (16:4x PDT; contains main
+  fd20b1e6), no slot moves: the NPC_ 0x7 drop-record; the head parts on
+  their masters' gender bits (766 Skyrim.esm, 39 Dawnguard.esm: the 805
+  DATA bytes 01x533 05x2 09x202 11x55 18x1 19x12 become 01x5 03x307 05x223
+  09x7 0bx118 0dx77 13x25 15x30 1ax1 1bx9 1dx3); RaceMenu's
+  racesex_menu.swf laid loose. docs/MODS.md and plugin-patches.tsv carry
+  all three with HYPOTHESIS tags pending the deciders: a-rotfern,
+  a-racemenu and b-duel on the fixed layer alone (layer-stage's probes),
+  then the train stage.
 
 ## 3. b-duel 20261020-232356 and b-god 20261020-233136 (under read)
 
