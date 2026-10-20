@@ -509,7 +509,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   restored it; Train-30's first row, b-spells-reconnect); Survival's login
   restore losing its race to the 5 s check once in two relaunches (the
   template-save fixture). Train-29's gate, its verb-merge and the layer's
-  full sweep follow the report (ADR-040).
+  full sweep follow the report (ADR-040). Eli's call after the report
+  (13:05 PDT): FSMP out, the cape physics worked but looked jank; the
+  cloaks go back to vanilla capes in apocrypha's next render, which the
+  layer stage and sweep take.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
