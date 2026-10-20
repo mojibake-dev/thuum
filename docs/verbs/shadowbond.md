@@ -188,13 +188,17 @@ MoveTo instant, the report cadence 130 ms).
   solo probe that would have told the shapes apart is no longer needed; the
   first shape's failure (b-shadowbond 20261019-215816, the latent Spell.Cast
   snippet applying nothing) stays recorded as the reason for the relay.
-- Still HYPOTHESIS, with their plans beside them: the .pex read's order of
-  the script's steps (Inventory, two rows: a Frida trace of the Papyrus
-  calls in the caster's game, or the lab's watch timing against the 0.25 s
-  wait), the replace-not-stack and the target's own act (Impose, side
-  effects: twenty-seven's row, then a scenario phase with c2 acting), and
-  the figure's one-frame hop (Suppress, side effects: a frame capture at
-  the break). None blocks play; all block "done".
+- The target's own act: CONFIRMED at T4 (Eli, playtest twenty-seven,
+  2026-10-20: test 2 broke the bond by acting, the swap fired and both
+  turned visible on both screens, ticked); a scenario phase with c2 acting
+  is still owed for T3. Still HYPOTHESIS, with their plans beside them: the
+  .pex read's order of the script's steps (Inventory, two rows: a Frida
+  trace of the Papyrus calls in the caster's game, or the lab's watch timing
+  against the 0.25 s wait), the replace-not-stack in the caster's game
+  (Impose, side effects: unmeasurable by eye; a Frida count of AddTarget
+  on 0x14 at a recast), and the figure's one-frame hop (Suppress, side
+  effects: a frame capture at the break). None blocks play; all block
+  "done".
 - Frida script: none; the lab's watches measure the order.
 - Owner: agent (lab probes); Eli's eyes for the target's act (twenty-seven).
 
@@ -229,8 +233,10 @@ MoveTo instant, the report cadence 130 ms).
 - [ ] T3 scenario green, no HYPOTHESIS tags: the scenario IS green
       (b-shadowbond 20261020-015430 and 20261020-015709 on e3806870's
       stage, after 20261020-014021 red at step 44 on its own aim; placement
-      fixed by thuum 1131d57, main 8a2cb11); four HYPOTHESIS tags remain
-      (Dynamic plan), so the box stays open until they are measured
+      fixed by thuum 1131d57, main 8a2cb11); T4 ticked whole in playtest
+      twenty-seven (both screens, the break by either seat, the 20 s run
+      out); three HYPOTHESIS tags remain (Dynamic plan), so the box stays
+      open until they are measured
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: SPELL.Cast and
