@@ -1,11 +1,13 @@
 """lab/tools/load-order-check.py (layer-stage step 2b): the clients' load order against the server's, on plugins
-written here with the TES4 header fields the check reads (flags, MAST)."""
+written here with the TES4 header fields the check reads (flags, MAST) and the top-level groups the player check
+walks."""
 import importlib.util
 import json
 import shutil
 import struct
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 
 _spec = importlib.util.spec_from_file_location(
@@ -23,6 +25,19 @@ def plugin(path: Path, flags: int = 0, masters=()):
         fields += b"MAST" + struct.pack("<H", len(z)) + z + b"DATA" + struct.pack("<HQ", 8, 0)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(b"TES4" + struct.pack("<IIIIHH", len(fields), flags, 0, 0, 44, 0) + fields)
+
+
+def record(rtype: str, fid: int, rflags: int = 0, body: bytes = b"") -> bytes:
+    return rtype.encode() + struct.pack("<IIIHHHH", len(body), rflags, fid, 0, 44, 0, 0) + body
+
+
+def grup(label: bytes, gtype: int, body: bytes) -> bytes:
+    return b"GRUP" + struct.pack("<I4siHHI", 24 + len(body), label, gtype, 0, 0, 0) + body
+
+
+def append(path: Path, *groups: bytes):
+    with path.open("ab") as f:
+        f.write(b"".join(groups))
 
 
 class LoadOrderCheck(unittest.TestCase):
@@ -77,6 +92,36 @@ class LoadOrderCheck(unittest.TestCase):
         plugin(self.mods / "b2" / "B.esp", 0, ["Skyrim.esm", "A.esm"])
         problems, _ = self.run_check(["A.esm", "B.esp"], ["A.esm", "B.esp"])
         self.assertEqual(problems, ["two copies of B.esp: b/B.esp, b2/B.esp"])
+
+    def test_a_plugin_over_the_players_records(self):
+        # S.esp as the survival tweak ships it: light, Skyrim.esm first, the NPC_ 0x7 compressed (0x40000). T.esp names
+        # Skyrim.esm second, so the player is 0x010000xx in its numbering, and holds PlayerRef where a reference
+        # lives, in its own cell's persistent children (block 2, sub-block 3, children 6, persistent 8)
+        edid = b"EDID" + struct.pack("<H", 7) + b"Player\0"
+        s, t = self.mods / "s" / "S.esp", self.mods / "t" / "T.esp"
+        plugin(s, loc.ESL, ["Skyrim.esm", "Update.esm"])
+        packed = struct.pack("<I", len(edid)) + zlib.compress(edid)
+        append(s, grup(b"NPC_", 0, record("NPC_", 0x00000007, 0x40000, packed)))
+        plugin(t, 0, ["A.esm", "Skyrim.esm"])
+        cell = struct.pack("<I", 0x02000800)
+        append(t, grup(b"NPC_", 0, record("NPC_", 0x01000007, 0, edid)),
+               grup(b"CELL", 0, grup(b"\0\0\0\0", 2, grup(b"\0\0\0\0", 3, record("CELL", 0x02000800) + grup(
+                   cell, 6, grup(cell, 8, record("ACHR", 0x01000014)))))))
+        problems, _ = self.run_check(["A.esm", "B.esp", "S.esp", "T.esp"], ["A.esm", "B.esp", "S.esp", "T.esp"])
+        base = "the player's base record (Skyrim.esm's NPC_ 0x7), which every seat's player is built on"
+        ref = "the player's reference (Skyrim.esm's 0x14, PlayerRef), which the engine makes for every seat"
+        self.assertEqual(problems, [f"S.esp overrides {base}: patch the override out or drop the plugin",
+                                    f"T.esp overrides {base}: patch the override out or drop the plugin",
+                                    f"T.esp overrides {ref}: patch the override out or drop the plugin"])
+
+    def test_a_0x7_or_0x14_that_is_not_the_players(self):
+        # Update.esm's 0x7 and 0x14, Skyrim.esm's 0x8, and the plugin's own new 0x7 and 0x14
+        n = self.mods / "n" / "N.esp"
+        plugin(n, 0, ["Skyrim.esm", "Update.esm"])
+        append(n, grup(b"NPC_", 0, b"".join(record("NPC_", f) for f in (0x01000007, 0x00000008, 0x02000007))),
+               grup(b"ACHR", 0, record("ACHR", 0x01000014) + record("ACHR", 0x02000014)))
+        problems, _ = self.run_check(["A.esm", "B.esp", "N.esp"], ["A.esm", "B.esp", "N.esp"])
+        self.assertEqual(problems, [])
 
     def test_starred_lines_and_comments(self):
         problems, _ = self.run_check(["# This file is used by Skyrim", "*A.esm", "*B.esp"], ["A.esm", "B.esp"])

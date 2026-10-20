@@ -646,7 +646,26 @@ above keep a hostile preset from carrying anything but a look.
   after a relaunch, c2's too; the stage's smoke 20261020-210408 green with
   the layer and no hdtsmp64 log among its artifacts, so FSMP is gone). Eli,
   2026-10-20 13:40: "patch it" (over dropping the mod), so the patch row
-  and the mod stay.
+  and the mod stay. The layer's first full gate then read the patch's own
+  side effect (a-racemenu 20261020-224305, step 18, before any relaunch):
+  with both gender bits on every vanilla Nord male part, the vanilla menu's
+  rebuild at a menu open rejects them for a male and seats the first valid
+  alternative, ApachiiHair's male hair (slot 0x09), and the record follows
+  that look (HYPOTHESIS, the mechanism; docs/research/layer-reds-2026-10-20.md).
+  The patch becomes "each override's gender bits copied from its master
+  record, the all-races RNAM kept", in apocrypha's next render; a-racemenu
+  on it is the decider. Under it all (the a-rotfern crash read of the same
+  gate, docs/research/layer-reds-2026-10-20.md): the menu that opened was
+  the VANILLA RaceSexMenu, since RaceMenu's chargen never initialises under
+  the layer (no "RaceMap::CreateDefaultMap" in any layer seat's skee64.log),
+  so the server-opened menu this verb relies on (its presets, its Done) is
+  not RaceMenu's there; the layer's RaceMenu install is the first fix.
+  Found (apocrypha, 16:39): SkyUI_SE.bsa carries interface/racesex_menu.swf
+  too, and the layer's SkyUI_SE.esp loads last as a client-only plugin
+  must, so its copy beat RaceMenu's in every layer seat; the render lays
+  RaceMenu's copy loose (a loose file beats every archive), the rule being
+  "when two archives share a path and the plugins' order cannot be the
+  installer's, lay the winner's copy loose". Deciders unchanged.
 
 ## Message contract
 
