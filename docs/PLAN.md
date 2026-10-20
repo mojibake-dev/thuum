@@ -537,8 +537,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the layer sweep's a-racemenu fix too: Playable Headparts All Races'
   head-part flags given both gender bits by a build-time plugin patch
   (lab/layer/plugin-patches.tsv; Eli 13:40: "patch it", over dropping the
-  mod), HYPOTHESIS until the lab reads eight parts on a layer seat
-  (racemenu-sync.md).
+  mod), CONFIRMED 14:07 by x-layer-headparts 20261020-210719 on the layer
+  stage (racemenu-sync.md); the stage's smoke green with no FSMP log.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
