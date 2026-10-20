@@ -419,7 +419,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         20261020-080751: thirteen missiles on both seats, the server records
         the hits; the 2.5 s hold had matched the charge); the missile's
         angle on the observer waits for a flights record for spell
-        projectiles (driver, later).
+        projectiles (Train-30's lab row, BUILT 2026-10-20).
       - small: the OpenContainer wait loop's 15 s deadline BUILT
         (18c0e603, activation-reach.md); EffectWasDualCast (724) BUILT with
         the dual flag from the cast message through the cast record to the
@@ -486,7 +486,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         server condition functions, since Hailstone's own effects gate on
         them and apply nothing today (spell-cast.md).
       - the lab: a flights record for spell projectiles in the driver (the
-        Scattershock angle), and the arrows step counting PROJ 50 (its PARW
+        Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
+        951b5bbc raises projectileFlight for a spell's projectiles, the
+        driver records projectile and spell as columns nine and ten,
+        spell-cast.md), and the arrows step counting PROJ 50 (its PARW
         count was always 0): the count BUILT 2026-10-20 on thuum main,
         rides the next driver deploy; one base's presence stays the
         projectiles step's (marksman.md).
