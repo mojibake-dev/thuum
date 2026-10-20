@@ -40,7 +40,91 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   load-order-check.py). Eli's alternative: drop the plugin (one row to
   `out`); the patch is the default since the override's feature never
   worked connected. Eli, 16:20 PDT: "patch it".
-- Decider: a-rotfern green on the patched layer's stage.
+- Read 16:32 PDT, the crash's path (a reader on the crash log, Ghidra on
+  the unpacked 1.6.1170 per rule 2, HYPOTHESIS until a-rotfern reruns):
+  the fault is the VANILLA RaceSexMenu's slider rebuild, 52346
+  (AdvanceMovie's rebuild) to 52409 (the sliders, RBP "ChangeFaceDetails",
+  RSP+E8 "Complexion") to 52412+0x123, which finds the Nth tint of a type
+  in race->faceRelatedData[sex]->tintMasks and indexes
+  PlayerCharacter::tintMasks by that position with no size check (RCX 31,
+  type 0xE Dirt, the second dirt layer); rotfern.esp's races carry 33 male
+  tint layers with dirt at 30 to 32 and the player's tint array has no
+  entry 31; RBX the TESRace rotfernRaceVampire (0x2F019D08), incidental
+  (the base race carries the same list). The 0x7 override is on the stack
+  as data ("Modified by" the Survival Tweaks esp) with no path to the read.
+  Why the vanilla menu was up: under the layer RaceMenu's chargen never
+  initialises. Every layer run's c1-skee64.log holds only "NetImmerse
+  Override Enabled" and "Reverting...", where the no-layer run
+  20261020-121634's has the DataLoaded init ("RaceMap::CreateDefaultMap -
+  Added default slider maps for rotfernRaceVampire from NordRace", the
+  RacePartDefaultGen lines). So a-rotfern's race-pick (DirectInput Down
+  every 1.2 s) walked the vanilla menu's name-sorted list onto the vampire
+  twin at the third press (RaceMenu's menu ignored the presses in every
+  green run and the setRace fallback made the pick); a-character-creation
+  under the layer moved Nord to Orc with one press (220511); and
+  a-racemenu's hair swap at a menu open is the vanilla menu's rebuild too.
+  The layer defect to fix first: RaceMenu's install under the layer
+  (skee64.dll, skee64.ini, RaceMenu.bsa, the interface files; the install
+  order's winners for those paths; lab/tools/persist-mods.sh:247-248),
+  asked of apocrypha and numidium. Decider: "RaceMap::CreateDefaultMap" in
+  a layer seat's c1-skee64.log, then a-rotfern green. The 0x7 rule stands
+  on its own ground.
+- numidium's deploy read (16:37): persist is clean. SHA256SUMS holds one
+  copy each of RaceMenu.bsa, RaceMenu.esp, RaceMenuPlugin.esp, skee64.dll
+  and skee64.ini, all from racemenu-0.4.20.0@1.6.1170, nothing loose at
+  the interface paths; the one BSA overlap (SkyUI_SE.bsa's
+  interface\racesex_menu.swf, SkyUI loading last as a client-only plugin
+  must) is in both heads and latent. Under the previous layer stage
+  1496763f skee DID initialise (29 CreateDefaultMap lines in 192512 and
+  193623, RacePartDefaultGen at +5 s); under 68a56247 its race-part pass
+  never ran. The heads differ client-side in FSMP out, the two esl-flagged
+  Survival patches, and plugin-patch's hdpt-gender-both on Playable
+  Headparts All Races.esp, the only new input to skee's head-part pass: so
+  the gender-both flags are the candidate for the inert chargen too
+  (HYPOTHESIS), and apocrypha's gender-bits-from-masters patch the one fix
+  for all three menu reds; the re-stage's a-racemenu and a-rotfern decide,
+  with the seat's files hashed first against stale snapshots.
+- apocrypha's audit of the laid tree (16:39): the mechanism. skee64.dll and
+  skee64.ini are RaceMenu's own (every [Features] flag on), nothing loose
+  shadows RaceMenu.bsa, and the archives share exactly one path:
+  SkyUI_SE.bsa carries interface/racesex_menu.swf too (35,416 B against
+  RaceMenu's 105,756). In the layer SkyUI_SE.esp is client-only at the
+  tail (slot 82) and RaceMenu.esp is served at 23, so among archives
+  SkyUI's copy wins and every layer seat ran SkyUI's vanilla-style race
+  menu: no RaceMap::CreateDefaultMap, the race pick walking the vanilla
+  list, the hair rebuild at open, the tint crash. Fenestrate has SkyUI at
+  93 and RaceMenu at 170 (RaceMenu's install notes: after SkyUI), and the
+  no-layer lab has no SkyUI, which is why only layer runs show it. The fix
+  keeps every slot: persist-mods extracts RaceMenu's racesex_menu.swf from
+  RaceMenu.bsa and lays it loose in RaceMenu's folder (lab/tools/
+  bsa-extract.py, a stdlib BSA reader with its own LZ4 frame decoder,
+  byte-identical to the lz4 library's), since a loose file beats every
+  archive whatever the order. The rule: when two archives share a path and
+  the plugins' order cannot be the installer's, lay the winner's copy
+  loose. Same render as the master-bits head-parts patch and the 0x7 drop.
+
+## 3. b-duel 20261020-232356 and b-god 20261020-233136 (under read)
+
+- b-duel, the Flames row (step 65): 0.822 against the green 0.7293 (layer
+  1496763f) and 0.7198 to 0.7358 (no layer); server and seat agree, so
+  less damage applied, not a desync. Read 16:43 PDT: the server took 12
+  hits summing 2.339 s (red) against 19 summing 3.418 s (green), the same
+  183 ms cadence, the same one capped 365 ms gap, no refusal (the ADR-039
+  warning on 0xF392F's HasPerk rider is in both and damage followed it),
+  the same regen and base on c2, the same 8df entry on both servers, and
+  the hold itself 4.001 s in both (c2's replay of c1's figure's
+  MRh_SpellAimedConcentrationStart to MRh_Equipped_Event). The shortfall is
+  seven hits, all at the start: the first hit came 2.09 s after the hold
+  (green 1.07 s) with a first count of 0.25 (the cast had been open 250 ms
+  or more), where every other stationary Flames stream today, seven of them
+  on this stage minutes earlier, opened within 60 to 77 ms. So c1's flames
+  did not register on c2's figure for about a second after the cast: a c1
+  stall or a miss, likeliest a one-off. The 0.78 bound stays. Decider: the
+  rerun on the re-staged layer with c1 watched; a first hit about a second
+  after the hold with 19 hits says one-off, about two seconds with 12 says
+  the stage changes c1's first contact.
+- b-god (step 46): after god mode off, c2's arrow left c1 at 1.0 on the
+  server and the seat; the no-layer run 125817 was green.
 
 ## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
 
@@ -50,13 +134,24 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   0x09002317, the last two parts of the layer's full slot 0x09; c1's game
   shows another set. A new shape past the gender-flag fix (x-layer-headparts
   20261020-210719 read eight parts equal before and after a relaunch).
-- Under read (a reader on the run); the candidates: the flags patch made a
-  layer plugin's hair parts valid picks for a Nord male and the menu's open
-  seated them; the preset naming a hair that resolves to the layer's part;
-  the menu's rebuild with the layer's defaults. The fix follows the read: a
-  layer patch, a server-side filter of a look's parts to the preset's
-  plugins, or a scenario expectation. Decider: the read's named line, then
-  a-racemenu on the patched layer.
+- Read 16:24 PDT: both c1's base (steps/015, nine parts) and the record
+  carry ApachiiHairM01 (0x09002317) and ApachiiHairLineM01 (0x09002314) in
+  place of HairMaleNord01, with one orphan vanilla hairline left on the
+  base; the preset c1 saved 0.25 s after the close was 8849 bytes against
+  the green runs' 8747, so c1's game sent the swap and the server derived
+  nothing (racemenu.rs derived_head_parts emits every listed part and drops
+  none). The unpatched 01 flags passed a male's menu (193623 held step 18)
+  and failed rotfern (female); the patched 07 flags fail a male's menu open.
+  HYPOTHESIS, the mechanism: the vanilla menu's rebuild at open reads a
+  part with kFemale set as female and rejects every 07 part for a male,
+  taking the first valid alternative where one exists; only hair has one
+  (ApachiiHairM01, DATA 03, the first of 32 male Apachii hairs), so head,
+  mouth, beard, brows and marks stay and the hair swaps. Fix (apocrypha's
+  render): a size-preserving patch copying each of the 805 overrides'
+  gender bits from its master record (766 Skyrim.esm, 39 Dawnguard.esm),
+  keeping the all-races RNAM, right by construction for RaceMenu's preset
+  load and the menu's rebuild. Deciders: a-racemenu on the re-render; a
+  head-parts read with the menu still open for the mechanism.
 
 ## Consequence for M2's close
 

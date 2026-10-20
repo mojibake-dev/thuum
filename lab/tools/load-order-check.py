@@ -18,7 +18,12 @@ plugins, _ResourcePack.esl) are taken as the clients load them, in the server's 
     sorts before a served one of its kind shifts it: TrueHUD.esl, an .esl and so a master, took FE004 on the clients
     the same night);
   - a server list the engine's master-first sort would reorder;
-  - two copies of one plugin under <mods dir> (the clients' Data keeps one of them).
+  - two copies of one plugin under <mods dir> (the clients' Data keeps one of them);
+  - an enabled or served plugin that carries a record of the player's, Skyrim.esm's NPC_ 0x7 (the base every seat's
+    player is built on, so one plugin's copy changes every player at once) or 0x14 (PlayerRef, which the engine makes
+    itself: no record in Skyrim.esm holds it); the essentials layer's survival tweak carried an 0x7, a vanilla copy
+    plus its own script, the suspect in a-rotfern's CTD of run 20261020-224918 (2026-10-20,
+    docs/research/layer-reds-2026-10-20.md).
 """
 from __future__ import annotations
 
@@ -31,6 +36,25 @@ from pathlib import Path
 # names with; layer-stage ships both files to sky-srv in this tree's layout
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "labapi" / "labapi"))
 from slots import ESL, ESM, engine_order, header, label, slots  # noqa: E402,F401
+# the record walk is lab/esm.py's, shipped beside the tools/ directory as in this tree
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import esm  # noqa: E402
+
+# the player's two forms in Skyrim.esm's numbering, read from Skyrim.esm 1.6.1170 with esm.headers (2026-10-20: NPC_
+# 0x7 is a record, 0x14 is in none of its 869,688)
+PLAYER = {0x000007: "the player's base record (Skyrim.esm's NPC_ 0x7), which every seat's player is built on",
+          0x000014: "the player's reference (Skyrim.esm's 0x14, PlayerRef), which the engine makes for every seat"}
+
+
+def player_records(path: Path, masters: list[str]) -> list[int]:
+    """The PLAYER forms a plugin carries a record for, of any type and in any group, numbered in the plugin's own
+    master list (the top byte is Skyrim.esm's index among its MAST entries)."""
+    lower = [m.lower() for m in masters]
+    if "skyrim.esm" not in lower:
+        return []
+    want = {(lower.index("skyrim.esm") << 24) | k: k for k in PLAYER}
+    buf = path.read_bytes()
+    return sorted({want[fid] for _, fid, _, _ in esm.headers(buf, 0, len(buf), None) if fid in want})
 
 
 def check(mods: Path, settings: Path) -> tuple[list[str], str]:
@@ -58,6 +82,10 @@ def check(mods: Path, settings: Path) -> tuple[list[str], str]:
     for n in enabled:
         if n.lower() not in files and n.lower() not in {b.lower() for b in base}:
             problems.append(f"{n} is enabled but no mod under {mods} holds it")
+    for n in {n.lower(): n for n in enabled + served}.values():
+        ps = files.get(n.lower())
+        for k in player_records(ps[0], masters.get(n.lower(), [])) if ps else []:
+            problems.append(f"{n} overrides {PLAYER[k]}: patch the override out or drop the plugin")
     client = base + [n for n in enabled if n.lower() not in {b.lower() for b in base}]
     engine = engine_order(client, flags)
     cslot = {k: label(v) for k, v in slots(client, flags).items()}
