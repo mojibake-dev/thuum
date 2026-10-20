@@ -102,7 +102,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   archive whatever the order. The rule: when two archives share a path and
   the plugins' order cannot be the installer's, lay the winner's copy
   loose. Same render as the master-bits head-parts patch and the 0x7 drop.
-- The render: apocrypha/layer-essentials c38a3b04 (16:4x PDT; contains main
+- The render: apocrypha/layer-essentials c38a3b04 (16:45 PDT; contains main
   fd20b1e6), no slot moves: the NPC_ 0x7 drop-record; the head parts on
   their masters' gender bits (766 Skyrim.esm, 39 Dawnguard.esm: the 805
   DATA bytes 01x533 05x2 09x202 11x55 18x1 19x12 become 01x5 03x307 05x223
