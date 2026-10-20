@@ -1,0 +1,66 @@
+# The essentials layer's reds of 2026-10-20
+
+The layer's first full gate (`just layer-merge stage-layer-train29`, run set
+20261020-220005-layer-stage-layer-train29 on render cf363c44: FSMP out, the
+head-parts gender flags patched) ended red at 25 of 62 with two reds, after
+the morning's three (docs/verbs/racemenu-sync.md's LAYER FINDING; b-spell's
+served band; b-push's refused Ragdoll, probe x-push-knock-frida) had been
+read. Both are the same family: a layer plugin reaching a player's base or
+record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
+
+## 1. a-rotfern 20261020-224918: a CTD at the mid-game appearance step
+
+- c1's game died around step 7 (lab-api E_RUN_GAME_REPLACED: pid 10580 at
+  the version check, 420 at the run's end). The crash log
+  c1-crash-2026-10-20-15-50-56.log: EXCEPTION_ACCESS_VIOLATION at
+  SkyrimSE.exe+095A263 (`mov ebx, [rdx+0x08]`); RSP+78 holds the TESNPC
+  "test 1" [0x00000007], the Player base, "last overridden by Supernatural
+  Survival Tweaks - Cold Resist Werebeast and Vampire.esp" (GetFullName
+  "Rotfern"); RBX the TESRace rotfernRaceVampire (0x2F019D08); the function
+  is Address Library id 52412, the fault at +0x123 (numidium's and
+  apocrypha's reads of the crash log; HYPOTHESIS for the path until a-rotfern
+  reruns on the patched layer).
+- The layer fact (apocrypha): of 93 layer plugins exactly one overrides
+  NPC_ 0x00000007, that esp (light, 7,729 B, 14 records): a whole copy of
+  the vanilla Player record (Prisoner, NordRace, male, one head part
+  0x00051507, the vanilla spells, perks, inventory, tint layers) plus a VMAD
+  attaching SST_PlayerScriptAddRemoveAbilities, the mod's headline feature
+  (cold resist when the player turns vampire or werebeast). Connected, that
+  script was outside the admitted list, so it never ran; the plugin's other
+  records (the Creation's Survival_NeedColdQuest and freezing-water effect
+  overrides, the Argonian racial spell, two effects, five messages) keep
+  working to the extent the Creation's scripts do.
+- The rule, the class not the instance: in SkyMP every player shares the
+  Player base 0x7 and the server builds a player's values and appearance
+  from it, so no served plugin may override NPC_ 0x7 (nor PlayerRef 0x14).
+  Fix: a third build-time patch kind in persist-mods, drop-record, removes
+  the override (the group sizes and the header's count follow; idempotent;
+  no slot moves); and lab-api's load-order check refuses a served plugin
+  that overrides 0x7 before deploy-srv (numidium, lab/tools/
+  load-order-check.py). Eli's alternative: drop the plugin (one row to
+  `out`); the patch is the default since the override's feature never
+  worked connected. Eli, 16:20 PDT: "patch it".
+- Decider: a-rotfern green on the patched layer's stage.
+
+## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
+
+- `server.actor(c1).headParts == c1.head_parts()` false after c1's menu
+  open and close (a scale and a morph), BEFORE any relaunch: the server
+  holds 0x24244, 0x510b4, 0x51508, 0x5162f, 0x51631, 0x8555f, 0x09002314,
+  0x09002317, the last two parts of the layer's full slot 0x09; c1's game
+  shows another set. A new shape past the gender-flag fix (x-layer-headparts
+  20261020-210719 read eight parts equal before and after a relaunch).
+- Under read (a reader on the run); the candidates: the flags patch made a
+  layer plugin's hair parts valid picks for a Nord male and the menu's open
+  seated them; the preset naming a hair that resolves to the layer's part;
+  the menu's rebuild with the layer's defaults. The fix follows the read: a
+  layer patch, a server-side filter of a look's parts to the preset's
+  plugins, or a scenario expectation. Decider: the read's named line, then
+  a-racemenu on the patched layer.
+
+## Consequence for M2's close
+
+docs/M2-CLOSE.md: the train stages on the staged layer (the probes do not
+depend on these fixes); playtest twenty-eight's world restore waits for the
+patched layer staged on top; the layer merges by its own gate after its
+fixes, before M2 is called done.

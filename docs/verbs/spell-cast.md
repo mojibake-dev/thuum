@@ -1448,7 +1448,58 @@ gate and the merges after).
   balls and 110 without the perk. Found on the way, a train-30 candidate:
   Hailstone's own two effects are gated on GetActorValue (14) and
   HasMagicEffect (214), which the server lacks, so it applies nothing on
-  the server today.
+  the server today. BUILT 2026-10-20 on fork m2-train30-conditions
+  f2c0ba33 (server only, T0 in unit/EffectConditionsTest.cpp): the base
+  effect WB_Des_Frost1_Effect_Hailstone (030B2C7F, 15 Health and Stamina,
+  duration 0) gates on Subject.GetActorValue(ResistFrost) > 0 and its
+  Shatter (030B374E, 15 with area 10, duration 0) on
+  Subject.HasMagicEffect(030B2C7F) == 0 (the census,
+  docs/private/apocalypse-census-spells.tsv:77). GetActorValue answers the
+  current Health, Magicka or Stamina as the maximum (the base with the
+  running buffs) times the kept percentage, and any other actor value as
+  the player's recorded base (the client's ActorValues report, 0 to 163)
+  plus the modifier of the effects the server applied, 0 with no record;
+  HasMagicEffect answers from the running effects by the MGEF's runtime
+  id, and an instant effect has no running entry (wire-rules magic.rs), so
+  the Shatter's check reads false on the same hit as the engine's does.
+  The parameters CONFIRMED by the record bytes (numidium's esm.py walk on
+  sky-srv, 2026-10-20, decoded per libespm CTDA.h:57-68): MGEF 030B2C7F's
+  one CTDA is function 14, operator 0x40 (">"), value 0, param1 0x2B = 43,
+  run on Subject, so GetActorValue's parameter is the plain actor value
+  index (upstream's GetActorValuePercent reads 0x3E8-style ids; not this
+  function's encoding); the Shatter's CTDA is function 214, "==", value 0,
+  param1 0x030B2C7F, the MGEF's id in the FILE's own index space (the third
+  master byte Apocalypse's own), so HasMagicEffect's parameter is mapped to
+  the global id through the record that owns the condition before the
+  compare (ConditionFunction::IsFormParameter, MpActor::EffectConditionsHold;
+  fork 39affd73); the older functions compare their parameters raw, which
+  holds for Skyrim.esm's forms only. HYPOTHESIS, the gap: a Nord's 50 ResistFrost is
+  a racial ability's constant effect, not a base, so the client's report
+  carries 0 and the server never applied it; the engine answers 50 and
+  applies the base effect, the server refuses it. The row's second half
+  BUILT 2026-10-20 on fork m2-train30-conditions 52ea63f8: the race's
+  constant abilities (RACE SPLO, each an Ability spell of constant cast
+  type; libespm already parsed the list) are read once per race from the
+  records into the rule's facts (MpActor.cpp RaceAbilityFactsOf) and summed
+  by wire-rules magic.rs constant_modifier (no buff filter, no give-back)
+  under the running effects in MpActor::GetEffectModifier, the one modifier
+  the maxima, the regeneration rates, the damage formula and GetActorValue
+  read; so a Nord answers 50 on ResistFrost with no record and no running
+  effect, and an Altmer's maximum Magicka carries Highborn's 50, which the
+  server had run short by (every figure's bar and every magicka check of an
+  Altmer, a quieter gap the same source closes). T0: the record chain for
+  a Nord and an Altmer appearance (unit/EffectConditionsTest.cpp), green
+  in ctest on the train's head (fork m2-train-30 1d88a6b7, pipeline 2309):
+  the Nord reads 50 on ResistFrost from Skyrim.esm's own records and the
+  Altmer's maximum Magicka carries Highborn's 50 (UESP's Skyrim:High Elf
+  confirmed by the record). The gap it exposed next, the server applying Hailstone's
+  effects at their magnitudes with no resistance multiplier where the
+  engine halves frost damage on a Nord (the engine's resistance never runs
+  on a player's imposed damage), is the resistance rule, BUILT the same
+  day on fork m2-train30-resist 8219604e, stacked on this branch
+  (docs/verbs/magic-effects.md, Resistance). The probe x-hailstone, on that
+  branch's stage: both seats land at 0.85, the Orc by the Shatter alone and
+  the Nord by both effects halved.
 - Scattershock (row 6), measured, no code: x-scattershock-6s
   20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
   launched on both seats (the PROJ 083a24 of Apocalypse) and the server

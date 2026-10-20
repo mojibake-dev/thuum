@@ -209,9 +209,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    (05192845: the shouter's game runs the vanilla push on the target's figure,
    ADR-029 A1's caster half; b-push 6f90239 checks that the figure flies, by
    the recorder's track, green twice; playtest eighteen ticked it). A
-   bystander's screen and the parity scenario p-shout-uf3 are LATER.
-7. Lag compensation (Bernier 2001): only if a playtest shows hits refused
-   inside M1's slack. LATER.
+   bystander's screen and the parity scenario p-shout-uf3 move to M3, when
+   there are three seats (the friend playtests; Eli 2026-10-20, through
+   numidium's session: "agree with all of those").
+7. Lag compensation (Bernier 2001): moves to M3 (Eli 2026-10-20), still only
+   if a playtest shows hits refused inside M1's slack.
 8. cast-teleport (Lost Grimoire's Teleportation, from the stretch list): one
    permitted jump at the recorded cast, the mod's marker script let through in
    the caster's game alone. DONE 2026-10-12 (ef3fb03c); b-teleport 52d6195.
@@ -219,8 +221,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
    Etherealize as states, no damage to an ethereal player, a rest advancing
    the effects, Oakflesh's armor in the damage). DONE 2026-10-13
    (8eb4e78e); b-self-cast c260ff3. The invisible figure's crosshair
-   prompt: PARKED until after the alpha (Eli, 2026-10-16); the state and
-   the parked fork branch m2-crosshair in docs/verbs/self-cast.md.
+   prompt: PARKED until after the alpha (Eli, 2026-10-16; out of M2,
+   reaffirmed 2026-10-20); the state and the parked fork branch
+   m2-crosshair in docs/verbs/self-cast.md.
 10. Apocalypse (ADR-029, accepted 2026-10-13): the caster's game runs its own
     spells' effect scripts; a server-run allowlist grows verb by verb
     (docs/apocalypse-options.md, sections 4 and 5). Scenario b-apocalypse.
@@ -234,14 +237,18 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
     - A2, per-player globals (docs/verbs/player-globals.md): 53 globals kept
       per player and set at login, fork m2-player-globals (rule, PlayerGlobals
       MsgType 44, the change form's record, server, client), T0 green; the
-      list on thuum branch player-globals. Open for Eli: SkyUI for the MCM.
+      list on thuum branch player-globals. SkyUI is in the essentials layer
+      and playtest twenty-seven recorded and restored an Apocalypse MCM
+      setting (test 1's 40bef:Apocalypse = 1): resolved.
     - B1, Nature's Balance (docs/verbs/natures-balance.md), drafted: the
-      server's effect runtime and the first allowlist entry. Open for Eli:
-      the conditions, evaluated by the server (recommended) or the engine's
-      word.
+      server's effect runtime and the first allowlist entry. The conditions
+      settled by ADR-039 (ACCEPTED 2026-10-18: the server evaluates them,
+      an unknown function refuses and logs), built across trains 27, 29
+      and 30.
     - By class, not by spell (proposed 2026-10-16 in answer to Eli's "do we
-      wanna do those in one big pass?"; the census's class table goes to him
-      before anything is built from it). A census sorts the learnable
+      wanna do those in one big pass?"; the class table passed on his
+      2026-10-16 split, player classes in M2 and NPC classes to M3, probes
+      2026-10-18, fixes from train-24). A census sorts the learnable
       spells, 175 of the plugin's 373,
       into classes by the engine's own parts: cast type, delivery,
       projectile, effect archetype, and what a script does to a shared
@@ -345,8 +352,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         by the client's stale report (OnChangeValues takes the lower report
         as a fall, then crops the client's later report of the set value
         back down and sends it back; 7 of 11 upward sets in two runs); a
-        server-applied heal would snap back the same way. A verb fix on a
-        later train: an owner's set and the server's own changes win over
+        server-applied heal would snap back the same way. STAYS in M2
+        (Eli 2026-10-20), a verb fix on a train: an owner's set and the
+        server's own changes win over
         reports that predate them (a sequence or a grace window in
         OnChangeValues); until then a scenario sets downward or reads at
         once (docs/LAB.md, numidium's note).
@@ -378,8 +386,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         ash pile, the rune's undressed glyph and Lightning Strike unseen by
         test 2 go to train-29. Playtest twenty-six (the essentials layer):
         loads and frame rate held; no MCM, cloaks without physics, no
-        warmth, bare aspens, rotfern undressed by the slot shift (ADR-043
-        PROPOSED; the layer's three fixes render 2026-10-20 06:23).
+        warmth, bare aspens, rotfern undressed by the slot shift (ADR-043,
+        ACCEPTED 2026-10-19; the layer's three fixes render 2026-10-20 06:23).
     - Train-29 MERGED 2026-10-20 13:40, fork parity 4720d0d3 (built
       overnight on Eli's word; fork m2-train-29 709c90b0: 18c0e603's client
       and server content, a rune try measured and reverted, and the CI
@@ -457,17 +465,21 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       the known step on main 3fd7ae5); it proves the migration on a stage
       whose order differs from the fixture's, the layer stage, so it sits in
       gate.yaml's pending until the formdesc branch stages there; the branch
-      carries parity 4720d0d3 since its merge 80cf1e35 (pipeline 2279). Left for
-      slice two: decision 3 (the login refusal; the record is kept but
-      LoadChangeForm still skips an unresolved race, so the 17:25 hazard
-      stands until then), the six keep-on-miss fixes on fields already
-      FormDesc, the rule 6 T3 scenario (restart persistence with a load
-      order change on a stacked snapshot, Eli's review), the thuum side of
-      playtest-restore, the legacy effects map (deletable). Merge after the
-      scenario, through the gate.
+      carries parity 4720d0d3 since its merge 80cf1e35 (pipeline 2279, green).
+      Slice one stays in M2 and merges through its stage's gate. Slice two
+      moves to M3, before the friend deploys (Eli 2026-10-20): decision 3
+      (the login refusal; the record is kept but LoadChangeForm still skips
+      an unresolved race, so the 17:25 hazard stands until then), the six
+      keep-on-miss fixes on fields already FormDesc, the thuum side of
+      playtest-restore, the legacy effects map (deletable).
 
     - Train-30 (the rows found on 2026-10-20 before and during playtest
-      twenty-seven; each to its verb doc as it is built), in build order:
+      twenty-seven; each to its verb doc as it is built), ASSEMBLED 15:13
+      as fork m2-train-30 1d88a6b7 (four merges on parity 4720d0d3: the
+      spells fix, ADR-043 slice one, the dent gate, the Hailstone
+      conditions with the resistance rule; pipeline 2309 green, ctest
+      included; T2 on the head), the one stage
+      for playtest twenty-eight (docs/M2-CLOSE.md), in build order:
       - learned spells lost on a RECONNECT (playtest twenty-seven, 11:21: a
         server restart with the game process up): the client's login path
         removes every spell and re-adds the server's list (remoteServer.ts,
@@ -501,7 +513,27 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         blanked, or the ash pile stays as the documented default.
       - Hailstone and kin: GetActorValue (14) and HasMagicEffect (214) as
         server condition functions, since Hailstone's own effects gate on
-        them and apply nothing today (spell-cast.md).
+        them and apply nothing today (spell-cast.md). BUILT 2026-10-20 on
+        fork m2-train30-conditions f2c0ba33 with T0 (the current Health,
+        Magicka or Stamina; any other value from the player's record plus
+        the server's own modifiers; a running effect by its MGEF); two
+        HYPOTHESES in the doc, since resolved: the parameters CONFIRMED
+        from the record bytes (the actor value index; the MGEF id in the
+        file's own index space, mapped through the owning record,
+        39affd73), and the race's constant abilities read from the records
+        into the one modifier (52ea63f8: a Nord's 50 ResistFrost, an
+        Altmer's Highborn magicka), T0 for both; a Hailstone probe for its
+        T3 after the branch stages.
+      - the resistance rule, found by the Hailstone row: the server imposes
+        another actor's damage on a player and the player's engine refuses
+        those effects, so the engine's resistance never ran on them. BUILT
+        2026-10-20 on fork m2-train30-resist 8219604e, stacked on the
+        conditions branch (libespm reads the MGEF's resist value; wire-rules
+        resistance_factor, the element after Magic Resistance, each capped at
+        the player's 85; MpActor::ResistanceFactorOf at ApplyEffects' one
+        entry; T0 unit/ResistanceTest.cpp on Firebolt against a recorded
+        Resist Fire and Resist Magic; magic-effects.md); HYPOTHESIS for a
+        dual modifier's second value until x-hailstone, the same probe.
       - the lab: a flights record for spell projectiles in the driver (the
         Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
         951b5bbc raises projectileFlight for a spell's projectiles, the
@@ -591,7 +623,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 - Carried from M1 into this milestone's lab runs: melee reach's unmeasured
   cases (the bash, bare hands, the scale across races) and whether a power
   attack reaches by the pick alone (docs/verbs/melee-reach.md,
-  damage-flags.md); Whirlwind Sprint's dash fits the burst (measured
+  damage-flags.md); they STAY in M2 as nightly or probe measurements (Eli
+  2026-10-20). Whirlwind Sprint's dash fits the burst (measured
   2026-10-12); Unrelenting Force's knockback is a later slice of shouts.
 - Exit: `b-duel` (server-authoritative damage between two players, effects
   visible to an observer) and `b-magic-restart`. MET 2026-10-14: b-duel
@@ -611,6 +644,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   pass's probes (each class's gap measured before it is built) and the
   fixes they call for. SkyUI moves to the shared set's essentials, which
   Eli picks from his own mod list (a mod layer, checked by its sweep).
+  Named (Eli 2026-10-20, through numidium's session): playtest twenty-eight
+  closes M2, the list above plus train-30's rows, on a stage carrying them
+  (the essentials layer merged, the reconnect spell fix, ADR-043 slice one,
+  the dent gate, the Hailstone conditions and the resistance rule as they
+  land); after it the HYPOTHESIS probes and the snap-back fix. Nothing else
+  in M2 waits on him. The closeout set, the scenarios and T4 items whose
+  green closes M2 and the carries to M3 by name: docs/M2-CLOSE.md (Eli,
+  2026-10-20: "cook on a closeout set of tests, that if it passes we call
+  m2 done").
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 
