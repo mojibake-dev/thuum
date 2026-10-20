@@ -2,8 +2,11 @@
 
 Drafted 2026-10-18 evening from playtest twenty-three and apocrypha's read of
 the mod's records and script (docs/research/apocalypse/train-27-spells.md,
-branch apocrypha/train-27-spells). Not built; train-27's row after the
-target-by-first-hit relay and the teleport snap, which it stands on.
+branch apocrypha/train-27-spells). Built in two trains: train-27 (the bond
+and the server's swap) and train-28 (the concealment, third shape), merged
+to fork parity e3806870 (2026-10-20T02:00Z); b-shadowbond green twice on
+that tree (20261020-015430, 20261020-015709) after one red on its own aim
+(20261020-014021 step 44; the scenario's placement fixed on main 8a2cb11).
 
 ## Intent
 
@@ -93,11 +96,16 @@ MoveTo instant, the report cadence 130 ms).
   the other screens see the placements and the proc's own shimmer, cast
   there by the snippet, which the engine renders as it renders any
   Invisibility effect.
-- Side effects: HYPOTHESIS until b-shadowbond: that a second Papyrus cast of
-  a running Self spell by the same caster replaces the copy rather than
-  stacking (the reason the caster's own game gets no snippet; harmless
-  either way), and that the target's own imposed copy breaks under the
-  engine's DispelAlteredStates at the target's act as a cast one does.
+- Side effects: HYPOTHESIS, unmeasured by b-shadowbond (its target never
+  acts, and a watch of av:Invisibility cannot tell one copy from two): that
+  a second Papyrus cast of a running Self spell by the same caster replaces
+  the copy rather than stacking (the reason the caster's own game gets no
+  relay; harmless either way), and that the target's own imposed copy
+  breaks under the engine's DispelAlteredStates at the target's act as a
+  cast one does. Measured next by playtest twenty-seven's "test 2 breaks
+  it" row (the server ends the records at either's act regardless, so
+  the engine's part is the target's own screen in the frames before the
+  dispel lands), then by a scenario phase in which c2 casts while bonded.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -169,19 +177,26 @@ MoveTo instant, the report cadence 130 ms).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- The own-player half of the relay is HYPOTHESIS until b-shadowbond is
-  green on train28-bond3: castSpellImmediate's Self branch is proven on
-  figures (b-invis-recast), not yet on a game's own player through the
-  instant caster. The decisive solo probe, ten minutes on one seat: three
-  casts of Skyrim.esm's Invisibility 0x27EB6 on the player, each under a
-  watch of av:Invisibility, by (1) the driver's `cast` (Skyrim Platform's
-  latent Spell.Cast, the first shape's path), (2) a self `combat-spell`
-  (Actor.DoCombatSpellApply, SP's direct native path), (3) a new driver
-  action `cast-immediate {spellId, source: 3}` over castSpellImmediate on
-  0x14. If 1 stays false and 3 goes true, the first shape's failure and the
-  third shape's own-player half are both explained in one run.
+- The own-player half of the relay: CONFIRMED on e3806870's stage.
+  b-shadowbond 20261020-014021 (step 33), 20261020-015430 and
+  20261020-015709 all read c2.watched_self().ever("av:Invisibility") == 1
+  and c1.watched_self().ever(...) == 1 with the server casting the proc only
+  into the game that is not the caster's (server.log "CastBondProc: c055b32
+  relayed as ff000000's and ff000001's own instant cast to 2 game(s)"), so
+  castSpellImmediate's Self branch works on a game's own player (0x14)
+  through the instant caster as it does on figures (b-invis-recast). The
+  solo probe that would have told the shapes apart is no longer needed; the
+  first shape's failure (b-shadowbond 20261019-215816, the latent Spell.Cast
+  snippet applying nothing) stays recorded as the reason for the relay.
+- Still HYPOTHESIS, with their plans beside them: the .pex read's order of
+  the script's steps (Inventory, two rows: a Frida trace of the Papyrus
+  calls in the caster's game, or the lab's watch timing against the 0.25 s
+  wait), the replace-not-stack and the target's own act (Impose, side
+  effects: twenty-seven's row, then a scenario phase with c2 acting), and
+  the figure's one-frame hop (Suppress, side effects: a frame capture at
+  the break). None blocks play; all block "done".
 - Frida script: none; the lab's watches measure the order.
-- Owner: agent (lab probes).
+- Owner: agent (lab probes); Eli's eyes for the target's act (twenty-seven).
 
 ## Status
 
@@ -207,9 +222,15 @@ MoveTo instant, the report cadence 130 ms).
       relayed cast whose caster is this game's own player is cast on 0x14
       (the server's imposition), and a relay carrying no animation
       variables takes the actor's own current set
-- [ ] T2 green (session shadowbond: to write on train28-bond)
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-shadowbond on thuum
-      lab-bonds-proc 9e061dd; first run at train-28's stage)
+- [x] T2 green (session shadowbond.yaml, 19 declarations, on train28-bond3;
+      e3806870's T2 green beside the gate, 32 sessions identical, difftest
+      job 9056; b81ce2a9's first T2 red on a declaration slip, two relay
+      messages matching one declaration, fixed sessions-only in e3806870)
+- [ ] T3 scenario green, no HYPOTHESIS tags: the scenario IS green
+      (b-shadowbond 20261020-015430 and 20261020-015709 on e3806870's
+      stage, after 20261020-014021 red at step 44 on its own aim; placement
+      fixed by thuum 1131d57, main 8a2cb11); four HYPOTHESIS tags remain
+      (Dynamic plan), so the box stays open until they are measured
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: SPELL.Cast and
