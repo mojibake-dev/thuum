@@ -103,6 +103,12 @@ Survival race (lifted by the 8df default's smoke).
    server if a migration goes wrong, and the migrated live world is saved
    under its own label when twenty-eight ends.
 4. Eli's report; findings to the train or to section 4.
-5. `just verb-merge m2-train-30` with the four scenarios leaving pending;
-   T2 beside it. Green: M2 DONE in PLAN and LOG, the carries moved to M3's
-   chart.
+5. The m2-close set (lab/gate.yaml names it, main 95aee33: "all" on the
+   train's stage with pending emptied) runs as the 03:30 nightly over the
+   stage, which stands overnight before twenty-eight, each of the four
+   leaving pending as its probe goes green on the stage (b-hailstone joins
+   pending when its branch merges after Eli's tick); or by name, `just
+   sweep m2-close`, about 4 h. `just verb-merge m2-train-30` then cites
+   that sweep with GATE_SET (ADR-042's own case, its first use; numidium
+   merges adr042-gate-set fbca257 first), T2 beside it. Green: M2 DONE in
+   PLAN and LOG, the carries moved to M3's chart.
