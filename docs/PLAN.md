@@ -406,10 +406,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         20261020-085906): the landing's look never runs for the relayed rune
         (no 44213, no 43919; arrived from the trigger tick, not a collision),
         so the tier is not the cause; the rune stands as a PROJ-based
-        reference (refs-near); the static read names the glyph as the decal
-        34452 places through 44186 after the caster's own launch, which the
-        relay skips; train-30: relay the normal and material and call 44186
-        after the relayed launch, after rune-decal-trace.js's read.
+        reference (refs-near); the glyph is the decal 34452 places through
+        44186 after the caster's own launch, which the relay skips:
+        CONFIRMED by x-rune-decal-frida 20261020-102818 (one decal call on
+        the caster with normal and material, none on the observer); a
+        launch-flag try measured a no-op and was reverted; train-30: relay
+        the normal and material and call 44186 after the relayed launch.
       - Scattershock's hits: MEASURED and closed (x-scattershock-6s
         20261020-080751: thirteen missiles on both seats, the server records
         the hits; the 2.5 s hold had matched the charge); the missile's
