@@ -450,13 +450,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       returns; a raw record re-based from the saved order at the first load
       that sees it; seven T0 cases (round trip, save under A load under B,
       v1 under a saved order, the parked plugin, the drivers). Its rule-6
-      scenario DRAFTED 2026-10-20: b-formdesc-world on branch
-      scenario-b-formdesc-world 973a412c (Eli's review), the fixture
-      adr043-preslice-25 on main ebc4d726 (twenty-five's eight raw records
-      with the order they were written under); it proves the migration on
-      a stage whose order differs from the fixture's, the layer stage, and
-      waits on two lab-api pieces (`server: world:`, FormDesc ids in the
-      known step). Left for
+      scenario b-formdesc-world APPROVED by Eli 2026-10-20 13:48 and on
+      main de069a7b (scenario 973a412c; the fixture adr043-preslice-25 on main
+      ebc4d726, twenty-five's eight raw records with the order they were
+      written under; lab-api's `server: world:` restore and FormDesc ids in
+      the known step on main 3fd7ae5); it proves the migration on a stage
+      whose order differs from the fixture's, the layer stage, so it sits in
+      gate.yaml's pending until the formdesc branch stages there. Left for
       slice two: decision 3 (the login refusal; the record is kept but
       LoadChangeForm still skips an unresolved race, so the 17:25 hazard
       stands until then), the six keep-on-miss fixes on fields already
