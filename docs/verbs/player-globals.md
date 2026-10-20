@@ -275,9 +275,12 @@ asked again). So the send moves: PlayerGlobals goes out at the login
 itself (PartOne::SetUserActor, with the clock's send), not with the other
 login sends at the first movement report; the client's service holds the
 message as pending and applies it at its first in-game update, a few
-seconds before the Creation's check (HYPOTHESIS until
-x-survival-restore-timing's three reruns on the new server; the lab's
-other login sends stay at the first movement). Fork m2-train-29, server
+seconds before the Creation's check. CONFIRMED the same day: on the server
+of fork 50a56e4a, x-survival-restore-timing 20261020-185534, 185906 and
+190218 all green, the send 37 to 74 ms after the connect (against 4,200 ms
+when it rode the first movement report), no box on the caster's 8 s
+screenshots, the two-seat asserts holding after the fresh relaunch (the
+lab's other login sends stay at the first movement). Fork m2-train-29, server
 only; the T0 case now logs the actor in a second time, as a reconnect does,
 and reads the send. The default from the section above stays the belt.
 The proper cure for every script that reads a global before any update
