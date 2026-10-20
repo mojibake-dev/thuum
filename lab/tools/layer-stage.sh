@@ -79,7 +79,7 @@ echo "== 2b. the load order the clients enable $(date +%H:%M:%S)"
 # stage (2026-10-19) booted neither clone, a Creation Club patch enabled over a master the engine disabled, and its
 # client-only TrueHUD.esl moved 38 light plugins to other slots than the server's
 # (the check and lab-api's slot math it imports, shipped in this tree's layout, with the settings it reads)
-(cd lab && tar -cf - labapi/labapi/slots.py tools/load-order-check.py deploy/sky-srv/server-settings.json) \
+(cd lab && tar -cf - esm.py labapi/labapi/slots.py tools/load-order-check.py deploy/sky-srv/server-settings.json) \
   | $srv_ssh "d=/srv/lab/handover/load-order-check; mkdir -p \$d && tar -C \$d -xf - && python3 \$d/tools/load-order-check.py /srv/persist/mods \$d/deploy/sky-srv/server-settings.json" \
   | sed 's/^/   /' || { echo "== the clients' load order does not hold (above): stop before deploy-srv (the hold stands)" >&2; exit 1; }
 
