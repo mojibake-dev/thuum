@@ -398,15 +398,18 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         ADR-029's default, until the allowlist verb.
       - a player's own dent on a figure's bar: READ (x-figure-values-hit-frida
         20261020-085705): the fork's guard works and the vfunc it blocks is a
-        post-write notification inside DamageActor 37335; the hook point is
-        37335's entry, after the re-analyst resolves its signature (no hook
-        before that; train-30).
+        post-write notification inside DamageActor 37335; signature
+        resolved by the re-analyst (bool (Actor*, float, Actor*, bool),
+        returns IsDead); train-30: a Gum interceptor-replace at 37335
+        returning false for a figure victim (docs/verbs/figure-values.md).
       - the rune's glyph on the observer: READ (x-rune-visible-frida
         20261020-085906): the landing's look never runs for the relayed rune
         (no 44213, no 43919; arrived from the trigger tick, not a collision),
         so the tier is not the cause; the rune stands as a PROJ-based
-        reference (refs-near); next the caster-seat trace and the arrival
-        path's static read (train-30).
+        reference (refs-near); the static read names the glyph as the decal
+        34452 places through 44186 after the caster's own launch, which the
+        relay skips; train-30: relay the normal and material and call 44186
+        after the relayed launch, after rune-decal-trace.js's read.
       - Scattershock's hits: MEASURED and closed (x-scattershock-6s
         20261020-080751: thirteen missiles on both seats, the server records
         the hits; the 2.5 s hold had matched the charge); the missile's

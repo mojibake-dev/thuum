@@ -1486,8 +1486,36 @@ gate and the merges after).
   build: bit 21 on the observer's rune, the arrival from the caster's
   branch, the glyph in c2's screenshot; the probe's distance line catches a
   rune moved to the figure's hand, and x-lightning-strike measures the
-  lobber on the same path. The re-analyst reads the arrival path
-  statically beside it. Still wanted: a per-figure rune cap in the
+  lobber on the same path. The static read then came in (the re-analyst on
+  REA the same night, docs/research/re-37335-and-rune-landing.md, question
+  2; HYPOTHESIS from pseudocode): 44163 is not an arrival but the trigger
+  test's per-candidate validity check (44217 calls it for each nearby actor
+  at +0x1be and then for the local player at +0x242), so +0x247 against
+  +0x1c3 is WHICH actor stood within 150 units (the caster's own player on
+  c1, the caster's figure on c2), not a shooter branch; both returned 0
+  because the candidate was the shooter (iProjectileMineShooterCanTrigger
+  0). The flag flip is predicted a no-op for a figure's rune: Launch sets
+  kAutoAim only for a player shooter, and kUseOrigin's one reader is the
+  position snap for non-grenades; the probe on 99c39e3e decides, and if no
+  glyph shows the commit is reverted. 43919 is the grenade's Havok
+  deactivation callback and 44213 is fed by the collision landing; a
+  target-location rune is born at rest (speed 0) in both games, so neither
+  runs anywhere, as measured. The glyph is a DECAL: the caster's own
+  target-location launch 34452 calls the decal placement 44186 after
+  Projectile::Launch, with the pick's position, its normal scaled, the
+  material id from 44190 and the grenade's own decal group (slot 0x9F),
+  gated on the projectile's slot 0xAE; 44186's only callers are 34452 and
+  44213, and the relay's bare Launch (MagicApi.cpp) never passes through
+  34452. Train-30's row, after rule 8's read (lab/frida/rune-decal-trace.js
+  on the caster's seat: one 44186 call per cast from inside 34452, the
+  normal and the material id): relay the caster's contactNormal (34452
+  copies the pick's normal into LaunchData, which the Launch-entry reader
+  already sees) and the material id with the cast (a wire change: the
+  SpellCast message and its validator in one commit, rule 4), and after the
+  relayed Launch call 44186 as 34452 does when the new projectile's slot
+  0xAE is true; a relayed material failing, the landscape's at the point
+  (what 44190 does for the land shape). Native only, filtered on a
+  dynamic-form shooter (rule 9). Still wanted: a per-figure rune cap in the
   observer's game, since the registration gate (43934) admits the player's
   runes alone and a figure's four casts would leave four armed runes.
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
