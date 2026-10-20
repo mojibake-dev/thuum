@@ -7,6 +7,9 @@
 # named with the verb doc that holds the fix. The full sweep ("all": the nightly,
 # layer-merge's gate) leaves them out; a merge that names one still runs it; take
 # one out in the commit whose T3 turns it green.
+# m2-close (docs/M2-CLOSE.md): the set whose green closes M2 is "all" on the m2-train-30
+# stage under the merged layer, `pending` emptied as the train carries each fix: `just sweep
+# m2-close`, or the nightly over that stage, cited by GATE_SET at the train's merge (ADR-042).
 always: [smoke-two-players, a-restart-persistence, b-duel]   # M0's floor, M1's exit, M2's exit (server-authoritative damage between two players, 2026-10-14)
 watch:
   - a-melee-reach      # docs/verbs/melee-reach.md:141, red once in the m2-god sweep (2026-10-10)
