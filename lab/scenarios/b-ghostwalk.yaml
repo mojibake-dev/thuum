@@ -30,7 +30,7 @@ steps:
   - c1: console {text: "player.setav magicka 3000"}
   - wait: 2
   - c1: set-percentages {magicka: 1}
-  - c1: console {text: "player.equipspell c00aae8 right"}
+  - c1: console {text: "player.equipspell {00aae8:Apocalypse - Magic of Skyrim.esp} right"}
   - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
   - c2: teleport {cell: lab-spawn, x: 200, y: -300, z: 0, rot: [0, 0, 270]}
   - c1: draw-weapon
