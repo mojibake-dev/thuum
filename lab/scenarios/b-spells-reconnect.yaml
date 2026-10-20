@@ -1,0 +1,44 @@
+# b-spells-reconnect (thuum docs/PLAN.md Train-30, the first row; the verb
+# doc to come with its fix): a spell the server taught survives a RECONNECT
+# with the game process up. Playtest twenty-seven (2026-10-20 11:21 PDT): the
+# server was restarted in place while both games stayed up; afterwards test 1
+# knew only its save's two base spells (Flames 0x12fcd, Healing 0x12fcc) and
+# none of the server's fifteen, while the server's record held all fifteen,
+# sent them at the reconnect and logged no RemoveSpell; a fresh relaunch
+# restored all seventeen. The client's login path (remoteServer.ts: the own
+# player's CreateActor, then a 1 s wait, removeAllSpells, learnSpells of the
+# server's list) removed every spell and the re-add did not land on that
+# path alone (HYPOTHESIS: an ordering race with a save reload on reconnect).
+# The same shape was seen once before (the driver's `known` comment:
+# playtest twenty's Firebolt, on the server's record and missing from the
+# game's list). This scenario is RED on the build that showed it and goes
+# green with the fix; a-restart-persistence takes the same assertion once
+# the fix is in, so the gate keeps it. Firebolt 0x12fd0 (77776) is the
+# taught spell: not in the template save, taught by the server's AddSpell
+# (learn-spell), so its presence after the reconnect is the server's list
+# landing; Flames 0x12fcd (77773) is the control the base record owns.
+id: b-spells-reconnect
+milestone: M2
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 77776}
+  - wait: 3
+  - c1: known {ids: [77776, 77773]}
+  - assert:
+      - c1.known(77776) >= 1
+      - c1.known(77773) >= 1
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - wait: 15
+  - c1: known {ids: [77776, 77773]}
+  - assert:
+      - c1.known(77776) >= 1
+      - c1.known(77773) >= 1
+artifacts: [server.log, c1.log]
