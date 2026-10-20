@@ -5,10 +5,18 @@ lab-api only waits for its heartbeat. fenestrate is the standing example."""
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
+
+from .slots import compose
+
+# a record named by its local id and plugin, skymp's FormDesc ("aae8:Apocalypse - Magic of Skyrim.esp", the
+# shape the server's settings and the cells table already use): the run's load order gives the slot
+# (slots.py), so no scenario or table carries one
+PLUGIN_RELATIVE = re.compile(r"([0-9a-f]{1,6}):(.+\.(?:esp|esm|esl))", re.I)
 
 
 @dataclass(frozen=True)
@@ -37,8 +45,11 @@ class Cell:
 class Tables:
     guests: dict[str, Guest]
     profile_ids: dict[str, int]  # scenario client name to profileId
-    items: dict[str, int]  # lowercased "file:editorid" to base form id
+    items: dict[str, int | str]  # lowercased "file:editorid" to a base form id or a FormDesc
     cells: dict[str, Cell] = field(default_factory=dict)  # lowercased name to cell
+    # the running load order's slots (slots.for_settings), lowercased plugin name to (light, index): the
+    # runner refreshes them for each run's game version, in place, since every resolver holds this object
+    slots: dict[str, tuple[bool, int]] = field(default_factory=dict)
 
     def cell(self, name: str) -> Cell | None:
         return self.cells.get(name.strip().lower())
@@ -83,15 +94,28 @@ class Tables:
             raise KeyError(f"client {client!r} has no profile_id in the clients table") from None
 
     def base_id(self, spec: str) -> int:
-        """`File.esm:EditorID` through the table, or a plain int / 0x-hex form id."""
+        """`File.esm:EditorID` through the table, a FormDesc `<local hex>:File.esp` through the running load
+        order's slots, or a plain int / 0x-hex form id. A table value may itself be a FormDesc, so a mod's
+        record keeps no slot in guests.yaml."""
         s = spec.strip()
         try:
             return int(s, 0)
         except ValueError:
             pass
+        m = PLUGIN_RELATIVE.fullmatch(s)
+        if m:
+            slot = self.slots.get(m.group(2).lower())
+            if slot is None:
+                why = "" if self.slots else " (no load order read)"
+                raise KeyError(f"{m.group(2)} is not in the running load order{why}")
+            try:
+                return compose(slot, int(m.group(1), 16))
+            except ValueError as e:
+                raise KeyError(f"{spec!r}: {e}") from None
         key = s.lower()
         if key in self.items:
-            return self.items[key]
+            v = self.items[key]
+            return v if isinstance(v, int) else self.base_id(v)
         raise KeyError(f"item {spec!r} is not in the items table; add it to guests.yaml")
 
 
@@ -113,7 +137,12 @@ def load_tables(path: str | Path) -> Tables:
             raise ValueError(f"guest {g.name}: kind must be qemu or lxc")
         guests[g.name] = g
     profile_ids = {str(k): int(v["profile_id"]) for k, v in (data.get("clients") or {}).items()}
-    items = {str(k).lower(): int(v, 0) if isinstance(v, str) else int(v) for k, v in (data.get("items") or {}).items()}
+    items: dict[str, int | str] = {}
+    for k, v in (data.get("items") or {}).items():
+        if isinstance(v, str) and PLUGIN_RELATIVE.fullmatch(v.strip()):
+            items[str(k).lower()] = v.strip()
+        else:
+            items[str(k).lower()] = int(v, 0) if isinstance(v, str) else int(v)
     cells: dict[str, Cell] = {}
     for name, row in (data.get("cells") or {}).items():
         origin = tuple(float(v) for v in row.get("origin", [0, 0, 0]))

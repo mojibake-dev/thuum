@@ -73,11 +73,11 @@ items:
   "Skyrim.esm:NordRace": 0x00013746
   "Skyrim.esm:OrcRace": 0x00013747
   # Eli's rotfern race (docs/MODS.md): RACE 0x0200AA00 in rotfern.esp's own
-  # numbering (masters Skyrim.esm, RaceCompatibility.esm), at full slot 08 in
-  # the lab's load order (the five masters, the two full-slot Creation Club
-  # plugins, RaceCompatibility.esm, rotfern.esp; docs/LAB.md); Playable flag
-  # set (lab/esm.py, 2026-10-06)
-  "rotfern.esp:rotfern": 0x0800AA00
+  # numbering (masters Skyrim.esm, RaceCompatibility.esm), so local id 00aa00,
+  # a FormDesc as the server's settings write them; its slot comes from the
+  # run's load order (slots.py), since a mod layer moves it (08 before the
+  # essentials layer, 2F with it); Playable flag set (lab/esm.py, 2026-10-06)
+  "rotfern.esp:rotfern": "00aa00:rotfern.esp"
   # an ingredient for a-learned-effects (docs/verbs/learned-effects.md); lab/esm.py
   # find INGR Wheat, 2026-10-05
   "Skyrim.esm:Wheat": 0x0004B0BA

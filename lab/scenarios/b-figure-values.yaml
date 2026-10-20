@@ -1,0 +1,55 @@
+# b-figure-values (thuum docs/verbs/figure-values.md, train-28): another
+# game's figure of a player carries the player's recorded maxima as its base
+# Health, Magicka and Stamina, not a million, so a script there reads
+# Skyrim's number. c1 and c2 spawn in sight of each other; c2 reads its
+# figure of c1 (av-read {other: true}, judged where the server has c1) against
+# c1's own read of its player, the record's source; then c2's game quits and
+# starts again (the relaunch step: a fresh login, the driver's own) so its
+# figure of c1 spawns after c1's record exists (the other login order); then
+# the server sets c1's health to half and c2's figure shows that share
+# against the real maximum (the bar moves only by the server's number).
+# Ground: the hunters' camp flat (lab-spawn-relative (-15957, -20350, -3582),
+# x-rune-trip2's), c2 150 units north of c1. The first run (20261019-215534)
+# placed c2 150 units north of the spawn itself and it fell down the ridge's
+# north slope (1,180 units below the target, E_RUN_TELEPORT), as every c2
+# placed north of the spawn does. The second run (20261019-220657) was green
+# but its middle group measured nothing: the step was `reconnect`, which
+# lab-api runs as `connect` (a wait for the seat to be online; skymp5-client
+# logs in by itself), so no new login happened and the figure kept its id;
+# `relaunch` is the step that quits and restarts the game.
+id: b-figure-values
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: teleport {cell: lab-spawn, x: -15957, y: -20350, z: -3582, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: -15957, y: -20200, z: -3582, rot: [0, 0, 180]}
+  - wait: 6
+  - c1: av-read {names: [health, magicka, stamina]}
+  - c2: av-read {names: [health, magicka, stamina], other: true}
+  - assert:
+      - c2.av_of(c1).health < 100000
+      - abs(c2.av_of(c1).health - c1.av().health) < 1
+      - abs(c2.av_of(c1).magicka - c1.av().magicka) < 1
+      - abs(c2.av_of(c1).stamina - c1.av().stamina) < 1
+  - c2: relaunch
+  - wait: 10
+  - c2: teleport {cell: lab-spawn, x: -15957, y: -20200, z: -3582, rot: [0, 0, 180]}
+  - wait: 6
+  - c2: av-read {names: [health, magicka, stamina], other: true}
+  - assert:
+      - c2.av_of(c1).health < 100000
+      - abs(c2.av_of(c1).health - c1.av().health) < 1
+  - c1: set-percentages {health: 0.5}
+  - wait: 3
+  - c2: av-read {names: [health], other: true}
+  - assert:
+      - abs(c2.av_of(c1).healthPercentage - 0.5) < 0.05
+      - abs(c2.av_of(c1).health - c1.av().health) < 1
+artifacts: [server.log, c1.log, c2.log]

@@ -7,7 +7,7 @@
 # claims once a fight has begun (x-second-hand-cloak2 140554: Blood Boil's
 # four and Flame Cloak's eleven ticks claimed after one Firebolt). So c1
 # first lands a Firebolt (0x12FD0) on c2, 150 units south, and the fight
-# begins; then holds Blood Boil (Apocalypse 0x0C044D44, a concentration Self
+# begins; then holds Blood Boil (Apocalypse's 044d44, a concentration Self
 # cloak) 4 s beside c2 at 1000 Health (measured there: 0.9557 on the server,
 # c2's own game within 0.25 %); then casts vanilla Flame Cloak (0x3AE9F, the
 # tome's spell) and stands 8 s (the 6 s stand gave 0.9655). Each block
@@ -26,7 +26,7 @@ steps:
   - c2: connect
   - wait: 10
   - c1: learn-spell {spellId: 77776}
-  - c1: learn-spell {spellId: 201608516}
+  - c1: learn-spell {spellId: "044d44:Apocalypse - Magic of Skyrim.esp"}
   - c1: learn-spell {spellId: 241311}
   - c1: console {text: "player.setav magicka 3000"}
   - c2: console {text: "player.setav health 1000"}
@@ -49,7 +49,7 @@ steps:
   - wait: 3
   # Blood Boil inside the fight
   - c2: set-percentages {health: 1}
-  - c1: console {text: "player.equipspell c044d44 right"}
+  - c1: console {text: "player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"}
   - c1: set-percentages {magicka: 1}
   - wait: 2
   - c1: hold-key {code: 199, ms: 4000}

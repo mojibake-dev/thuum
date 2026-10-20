@@ -1,7 +1,7 @@
 # b-second-hand (thuum docs/verbs/second-hand.md): a proc the caster never
 # cast by hand counts as the caster's hit, claimed against the parent cast
 # the server recorded. The shape the stage measured on train-24
-# (x-class-bolts 20261018-101733): Crackle (Apocalypse 0x0C109653), an aimed
+# (x-class-bolts 20261018-101733): Crackle (Apocalypse's 109653), an aimed
 # bolt whose proc spell keeps ticking on its target after the hit, 66 ticks
 # claimed at a 150 ms cadence there (the parity run cast nothing). c1 shoots
 # it at c2 400 units south, as that probe did; c2 holds 1000 Health so the
@@ -26,7 +26,7 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: learn-spell {spellId: 202413651}
+  - c1: learn-spell {spellId: "109653:Apocalypse - Magic of Skyrim.esp"}
   - c1: console {text: "player.setav magicka 3000"}
   - c2: console {text: "player.setav health 1000"}
   - wait: 2
@@ -37,7 +37,7 @@ steps:
   - wait: 4
   - c1: look {pitch: 0, heading: 180}
   - wait: 1
-  - c1: console {text: "player.equipspell c109653 right"}
+  - c1: console {text: "player.equipspell {109653:Apocalypse - Magic of Skyrim.esp} right"}
   - c1: draw-weapon
   - wait: 3
   - c1: watch-start
