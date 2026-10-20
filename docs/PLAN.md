@@ -644,7 +644,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   (the essentials layer merged, the reconnect spell fix, ADR-043 slice one,
   the dent gate, the Hailstone conditions and the resistance rule as they
   land); after it the HYPOTHESIS probes and the snap-back fix. Nothing else
-  in M2 waits on him.
+  in M2 waits on him. The closeout set, the scenarios and T4 items whose
+  green closes M2 and the carries to M3 by name: docs/M2-CLOSE.md (Eli,
+  2026-10-20: "cook on a closeout set of tests, that if it passes we call
+  m2 done").
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 

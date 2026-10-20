@@ -1,0 +1,102 @@
+# M2 closeout: the set whose green closes the milestone
+
+Asked by Eli, 2026-10-20 ("wanna cook on a closeout set of tests? that if it
+passes we call m2 done?"), beside the scope calls of the same day (PLAN, the
+M2 close). The rule: M2 is DONE when every row below is green on ONE stage,
+fork m2-train-30 under the merged essentials layer, and playtest twenty-eight
+on that stage is reported with every T4 item ticked. Anything red is fixed
+on the train or carried to M3 by name, in this file, before the word "done"
+is used. Nothing here is graded by feel; a T4 item is a yes or a no.
+
+## 1. The scenarios (the lab's T3, `just verb-merge m2-train-30`)
+
+The deployed set, "all" in lab/gate.yaml, as it stands after the layer
+merges (65 files in lab/scenarios: smoke, a-, b-, m0-, p-), with the four
+scenarios now in `pending` leaving it as the train carries their fixes:
+
+| scenario | proves | carried by |
+| --- | --- | --- |
+| b-spells-reconnect | a server-taught spell survives a reconnect with the game up (playtest 27's loss) | fork m2-train30-spells 096d2cd8 |
+| b-figure-values (the hit steps) | a figure's bar never dents below the server's number on the hitter's screen | fork m2-train30-dent e6a8270a |
+| b-formdesc-world | a world saved under one load order reads right under another, and after a restart (ADR-043 slice one, rule 6) | fork m2-formdesc-world 80cf1e35 |
+| b-hailstone (new, from probe x-hailstone; Eli's review) | the server evaluates an effect's own conditions (GetActorValue with the race's abilities, HasMagicEffect) and resists a hostile effect as the engine does: 0.85 on both seats by different paths | fork m2-train30-resist on m2-train30-conditions |
+
+Plus every scenario already green on parity 4720d0d3 and on the layer gate
+of 2026-10-20 (the full sweep; b-spell on the served band). A red in a
+scenario that was green before the train is the train's, not a carry.
+
+Not in the set, by Eli's calls of 2026-10-20: p-shout-uf3 (the bystander's
+screen, M3 with three seats), anything of the crosshair prompt (post-alpha),
+ADR-043 slice two's scenarios (M3).
+
+## 2. T2 and T0
+
+`just test-proto m2-train-30` identical across every difftest session (the
+common file carries the login clock and the login globals; a train that
+widens the wire declares its divergence in the same commit). The fork's
+ctest green at the train's head (the condition functions, the race
+abilities, the resistance rule, formdesc's 401 cases, the dent's client
+build).
+
+## 3. Playtest twenty-eight (T4, Eli, both seats, on the train's stage)
+
+The seven items PLAN named for M2's one closing playtest, plus train-30's
+rows. Each is ticked or written up as a finding:
+
+1. Both teleports land without the slide; Ghostwalk's return look (b-teleport-look, b-ghostwalk-look hold them green already).
+2. The shooter's quiver on the other screen (b-arrow-path's figure).
+3. The load freeze fix: both seats load and relaunch without the hang (a-restart-persistence's relaunches).
+4. Headshots, including the helmet case (b-headshot).
+5. Per-player globals: an Apocalypse MCM setting kept across a restart (b-player-globals; twenty-seven ticked it).
+6. The staggered cast (b-stagger; twenty-one's "still able to cast" measured since).
+7. One spell per Apocalypse class that acts on players (the class pass's representatives; twenty-seven ticked Shadowbond, Lightning Strike, Electrosphere, Finger of Death's fail branch).
+8. Train-30: a reconnect keeps the taught spells (test 1 on rotfern, twenty-seven's finding); your own sword leaves no dent on the figure's bar; Survival's box asks once and never after a relaunch (the 8df default); the MCM lists all eight menus; Hailstone's numbers on both seats; cloaks as vanilla capes with FSMP gone; rotfern's look and spells intact under the layer's order (ADR-043 slice one on your own world: b-formdesc-world's proof on the fixture, then your record).
+
+## 4. Carried to M3, by name
+
+- Spells that instantiate world objects: runes (the glyph's decal on the
+  observer, spell-cast.md's train-30 row, drops with it), Raise Wall and
+  kin. A two-seat game instantiates them from the relayed launch in both
+  engines and they measure green (placement, the trip counted once); what
+  M2 lacks is the server knowing the object (position, lifetime, owner),
+  which a late joiner and a wall's collision parity need, and that is
+  ADR-035's cell authority. Eli, 2026-10-20: "provided you're confident",
+  with this reasoning.
+- The shouts' bystander screen and p-shout-uf3; lag compensation (only if
+  a playtest shows hits refused inside M1's slack).
+- The invisible figure's crosshair prompt (post-alpha).
+- ADR-043 slice two (the login refusal, the keep-on-miss fixes,
+  playtest-restore's thuum side, the legacy effects map), before the
+  friend deploys.
+- Finger of Death's scripted kill: ADR-029's documented default (the
+  caster's game runs the script; the victim lives) stands through M2 unless
+  playtest twenty-eight calls it out; the allowlisted server kill is M3's
+  first allowlist entry otherwise.
+- The health snap-back fix STAYS in M2 (a train fix), as do melee reach's
+  unmeasured cases (nightly or probe measurements).
+
+## 5. HYPOTHESIS tags
+
+A verb's HYPOTHESIS tag at the close is either lifted by the closeout runs
+(the probe named beside it) or carried with one line in its doc naming the
+M3 row that lifts it. The count per doc before the close is in `git grep -c
+HYPOTHESIS docs/verbs`; the close's commit lists what was lifted and what
+was carried. The ones the train's probes lift: the dent's calling convention
+and hit reactions (b-figure-values), Hailstone's parameters (lifted by the
+record bytes already), the resistance rule's dual second value
+(x-hailstone), the headparts patch (lifted 2026-10-20), the layer's
+Survival race (lifted by the 8df default's smoke).
+
+## 6. Order
+
+1. The layer gate merges and promotes (running, ends about 18:50).
+2. m2-train-30 assembled by merges from the four heads, each CI-green;
+   staged once under the layer (numidium); b-formdesc-world green on the
+   stage before the playtest world is restored onto it.
+3. Playtest twenty-eight's setup (lab/playtests/28.yaml: twenty-seven's
+   world restored under the layer's order through slice one; seats and
+   spells server-side), the checklist as docs/private/playtest-m2-28.md.
+4. Eli's report; findings to the train or to section 4.
+5. `just verb-merge m2-train-30` with the four scenarios leaving pending;
+   T2 beside it. Green: M2 DONE in PLAN and LOG, the carries moved to M3's
+   chart.
