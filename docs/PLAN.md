@@ -450,13 +450,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       returns; a raw record re-based from the saved order at the first load
       that sees it; seven T0 cases (round trip, save under A load under B,
       v1 under a saved order, the parked plugin, the drivers). Its rule-6
-      scenario DRAFTED 2026-10-20: b-formdesc-world on branch
-      scenario-b-formdesc-world 973a412c (Eli's review), the fixture
-      adr043-preslice-25 on main ebc4d726 (twenty-five's eight raw records
-      with the order they were written under); it proves the migration on
-      a stage whose order differs from the fixture's, the layer stage, and
-      waits on two lab-api pieces (`server: world:`, FormDesc ids in the
-      known step). Left for
+      scenario b-formdesc-world APPROVED by Eli 2026-10-20 13:49 and on
+      main de069a7b (scenario 973a412c; the fixture adr043-preslice-25 on main
+      ebc4d726, twenty-five's eight raw records with the order they were
+      written under; lab-api's `server: world:` restore and FormDesc ids in
+      the known step on main 3fd7ae5); it proves the migration on a stage
+      whose order differs from the fixture's, the layer stage, so it sits in
+      gate.yaml's pending until the formdesc branch stages there; the branch
+      carries parity 4720d0d3 since its merge 80cf1e35 (pipeline 2279). Left for
       slice two: decision 3 (the login refusal; the record is kept but
       LoadChangeForm still skips an unresolved race, so the 17:25 hazard
       stands until then), the six keep-on-miss fixes on fields already
@@ -500,7 +501,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         blanked, or the ash pile stays as the documented default.
       - Hailstone and kin: GetActorValue (14) and HasMagicEffect (214) as
         server condition functions, since Hailstone's own effects gate on
-        them and apply nothing today (spell-cast.md).
+        them and apply nothing today (spell-cast.md). BUILT 2026-10-20 on
+        fork m2-train30-conditions f2c0ba33 with T0 (the current Health,
+        Magicka or Stamina; any other value from the player's record plus
+        the server's own modifiers; a running effect by its MGEF); two
+        HYPOTHESES in the doc (the parameter's encoding, a racial
+        ability's resistance unseen by the server) and a Hailstone probe
+        for its T3.
       - the lab: a flights record for spell projectiles in the driver (the
         Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
         951b5bbc raises projectileFlight for a spell's projectiles, the
@@ -536,8 +543,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the layer sweep's a-racemenu fix too: Playable Headparts All Races'
   head-part flags given both gender bits by a build-time plugin patch
   (lab/layer/plugin-patches.tsv; Eli 13:40: "patch it", over dropping the
-  mod), HYPOTHESIS until the lab reads eight parts on a layer seat
-  (racemenu-sync.md).
+  mod), CONFIRMED 14:07 by x-layer-headparts 20261020-210719 on the layer
+  stage (racemenu-sync.md); the stage's smoke green with no FSMP log.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
