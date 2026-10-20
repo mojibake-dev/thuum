@@ -7,6 +7,14 @@ fork m2-train-30 under the merged essentials layer, and playtest twenty-eight
 on that stage is reported with every T4 item ticked. Anything red is fixed
 on the train or carried to M3 by name, in this file, before the word "done"
 is used. Nothing here is graded by feel; a T4 item is a yes or a no.
+"Under the merged layer" became "under the staged layer" on 2026-10-20
+16:13, when the layer's own gate (20261020-220005) ended red at 25 of 62
+(a-rotfern: c1's game died at the mid-game appearance step, the player's
+shared base record 0x7 overridden by a layer plugin, Supernatural Survival
+Tweaks' werebeast patch; a-racemenu: the layer's slot-0x09 head parts in
+c1's record after a menu close): the layer merges by its own gate after
+its fixes, before M2 is called done, and twenty-eight runs on the fixed
+layer staged.
 
 ## 1. The scenarios (the lab's T3, `just verb-merge m2-train-30`)
 
@@ -92,10 +100,17 @@ Survival race (lifted by the 8df default's smoke).
 
 ## 6. Order
 
-1. The layer gate merges and promotes (running, ends about 18:50).
-2. m2-train-30 assembled by merges from the four heads, each CI-green;
-   staged once under the layer (numidium); b-formdesc-world green on the
-   stage before the playtest world is restored onto it.
+1. The layer gate runs to its end as the layer's full measurement (red at
+   25 of 62, 16:13; ends about 18:45). Its reds go to apocrypha: the
+   player-base override patched out of the Survival Tweaks plugin (or the
+   plugin dropped, Eli's call) and a 2b check refusing any served plugin
+   that overrides NPC_ 0x7; the head-parts read decides its own fix. The
+   fixed layer re-renders and re-stages; it merges by its own gate.
+2. m2-train-30 1d88a6b7 (assembled, CI 2309 green, T2 identical) staged
+   once on the staged layer (numidium, verb-stage from the layer's
+   worktree); the probes in order, b-formdesc-world first, green on the
+   stage before the playtest world is restored onto it. If the layer's fix
+   moves plugin slots, the train re-stages on the fixed layer.
 3. Playtest twenty-eight's setup (lab/playtests/28.yaml: twenty-seven's
    world restored under the layer's order through slice one; seats and
    spells server-side), the checklist as docs/private/playtest-m2-28.md.
