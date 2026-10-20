@@ -487,6 +487,23 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         Scattershock angle), and the arrows step counting PROJ 50 by base
         id (its PARW count was always 0).
 
+- Playtest twenty-seven (2026-10-20 morning, fork m2-train-29 709c90b0 under
+  the essentials layer 29d83a0b; world playtest-m2-26-20261020T004645Z):
+  every row ticked. The layer's three fixes (aspens, Artesian's cloaks under
+  FSMP, rotfern whole with her stagger patch reverted); Survival Mode's own
+  box on both seats, the first in a connected game, warmth from a WIC
+  cloak, and the choice surviving a server restart; the MCM listing all
+  eight menus with an Apocalypse setting surviving the restart;
+  Shadowbond's concealment on both screens with the break by either seat;
+  Lightning Strike visible on test 2; Electrosphere dual cast as the row
+  said; Finger of Death's fail branch hurting the caster alone with test 2
+  at full health. Found: a server-taught spell list lost on a RECONNECT
+  with the game process up (the server's record intact; a relaunch
+  restored it; Train-30's first row, b-spells-reconnect); Survival's login
+  restore losing its race to the 5 s check once in two relaunches (the
+  template-save fixture). Train-29's gate, its verb-merge and the layer's
+  full sweep follow the report (ADR-040).
+
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand

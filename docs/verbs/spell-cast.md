@@ -1394,10 +1394,11 @@ gate and the merges after).
   c1.watched_self().launched("0xc0cfe00") and c2.watched(c1).launched(
   "0xc0cfe00") held, the figure's launch carrying
   WB_DestructionShock_Projectile_LightningStrike instead of 0, so the pick
-  took the strike's effect, not the rider's). Still HYPOTHESIS until a seat
-  or the probe's screenshots say so: the lobber explodes in the observer's
-  game and places the bolt, which the WB_DestroyAfterDelay_Script
-  admission then deletes (playtest twenty-seven's row). The probe is
+  took the strike's effect, not the rider's). CONFIRMED at T4 (Eli, playtest
+  twenty-seven, 2026-10-20: "on test 2's screen the strike is visible now,
+  the bolt and its lightning, and the bolt is gone within a second on both
+  screens", ticked): the lobber explodes in the observer's game and places
+  the bolt, which the WB_DestroyAfterDelay_Script admission then deletes. The probe is
   x-lightning-strike re-grounded at the camp asserting the
   lobber's launch on both seats, c1.watched_self().launched("0xc0cfe00")
   and c2.watched(c1).launched("0xc0cfe00") (PROJ 030cfe00
@@ -1416,10 +1417,15 @@ gate and the merges after).
   NPC by its base record's flag, libespm NPC_.h isEssential; HYPOTHESIS: a
   runtime essential flag is not seen), so the spell's one effect is no
   longer refused as unknown and its hit holds (a fight begins). The kill
-  stays the script's in the caster's game (the ash pile on test 1's screen
-  while test 2 lives), ADR-029's default; the allowlist's server-side kill
-  (MpActor::Kill, the headshot's primitive) is the next verb on that
-  ground, not this train's. T0: unit/EffectConditionsTest.cpp.
+  stays the script's in the caster's game, ADR-029's default; the
+  allowlist's server-side kill (MpActor::Kill, the headshot's primitive) is
+  the next verb on that ground, not this train's. T0:
+  unit/EffectConditionsTest.cpp. T4 (Eli, playtest twenty-seven): "only
+  affected test 1": with test 2 at full health the script took its fail
+  branch, which hurts the caster instead of killing the target (the mod's
+  own rule, and twenty-three's reading of the same branch at a million
+  Health); no ash pile this time, test 2 untouched, as the row expected
+  for a target above the threshold.
 - EffectWasDualCast (724; row 7b): thirteen Apocalypse spells and the
   Impact rider gate on it. The flag travels SpellCastMessage.isDualCasting,
   PartOne::StartCast, wire-rules casts::CastFacts::dual, the claim's dual,
