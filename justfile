@@ -402,6 +402,12 @@ playtest-worlds:
 playtest-record n:
     @lab/tools/playtest-record.sh {{n}}
 
+# A playtest's logs kept on the results site when no recorder ran: the server's log since <since> (UTC, the world
+# restore) and each seat's Skyrim Platform, skse64, lab-driver and Sunshine logs, into results/playtest-<n>/; before
+# a turbo-srv push or any rollback, which take them away
+playtest-logs n since:
+    @lab/tools/playtest-logs.sh {{n}} {{since}}
+
 # Every item of docs/private/playtest-m2-<n>.md names its scenario in backticks (`b-cast-rhythm`, committed under
 # lab/scenarios), or says the lab cannot measure it, "(feel)" or "(no scenario: why)" (ADR-033, decision 2).
 playtest-check n:
