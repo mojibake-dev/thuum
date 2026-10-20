@@ -766,7 +766,7 @@ no magic effect, quest, alias or perk script runs there; each client's
 game blanks every Papyrus event but OnUpdate unless a script on the
 handle is SkyUI's, RaceMenu's or defaultDisableHavokOnLoad
 (skyrim-platform FridaHooks.cpp:43-87, set by skymp5-client
-blockPapyrusEventsService.ts). Apocalypse 10.2.3 is 206 scripts, 162 of
+blockPapyrusEventsService.ts). [Erratum 2026-10-19, ADR-044: OnUpdate is blanked too; the hook consults its allow list for every event but OnUpdate and blanks whatever it did not clear (docs/research/papyrus-event-filter.md).] Apocalypse 10.2.3 is 206 scripts, 162 of
 them ActiveMagicEffect scripts; 114 of its 265 global uses run from
 OnEffectStart, 82 from its MCM. Its 99 globals sort into settings (30,
 written by the MCM), static tuning (13), a caster's build or progress
@@ -1594,7 +1594,14 @@ other).
    actions/cache, or a warm self-hosted Windows builder), aiming under
    fifteen minutes. The trivial case stays: `verb-stage` and `build-client`
    reuse the last successful run's dist when nothing the client links
-   changed since its commit, naming the run they took.
+   changed since its commit, naming the run they took. Since 2026-10-19 the
+   build has two sources, read together by lab/tools/client-builds.py: the
+   fork's own client-build job on sky-build (VM 720, the GitLab Windows
+   runner, warm vcpkg and cargo caches on its disk) and the mirror's run;
+   a commit both built is taken from GitLab, and the head's wait ends at
+   whichever source goes green first. The job runs on a push that carries
+   `CLIENT_BUILD_WINDOWS=1` (the push option) until the project variable is
+   set, after its first green run.
 4. **A fast T0 oracle.** Of the night's three red heads one was tests that
    had never run and two were compile errors, so the oracle must build and
    run T0, not compile alone. Its cheapest form is the fork's own
@@ -1901,3 +1908,268 @@ until the build is incremental (then about five); the wire and native
 classes drop under fifteen only when the Windows build is cached or built
 warm. Nothing goes under about two minutes, one build, one hop, one
 relaunch, and nothing skips T0.
+
+## ADR-043: The world stores every form plugin-relative; a load order change migrates a world, never undresses it
+
+Status: ACCEPTED 2026-10-19 19:32 PDT (Eli: "accept those ADRs"); proposed 2026-10-19 17:50 PDT (Eli, playtest twenty-six, the essentials layer:
+"its likely an unacceptable state of affairs that any mod added will fuck
+up rotferns appearance and items. however we handle mod layers, it cannot
+break the game every time a new mod is added, because single player doesnt
+work that way."). Accepted the same evening. Extends ADR-026 (the appearance follows its
+look) and ADR-029 (mod layers); touches rule 6 (a schema change ships with
+a migration and a restart-persistence scenario).
+
+**Context.** The world (the change forms the server saves) names forms by
+their runtime id: the load order's slot in the top byte, the plugin's local
+id below. Tonight the essentials layer moved every plugin's slot (Apocalypse
+from 0C to 1A, LostGrimoire from 0B to 28, rotfern.esp from 08 to 2F), and
+the twenty-five world restored under it broke in four ways at once: test 1's
+appearance named rotfern's race by the old slot, so her race did not resolve
+and the server ACCEPTED the client's default Nord as a new appearance and
+wrote it over her record, taking her RaceMenu preset, favorites, map
+markers, shouts and staff rank with it (numidium's read of the 17:25 event);
+her rotfern.esp items and her Apocalypse spells became dead ids in the
+record; the lab's own scenarios named mod forms by slot and went red
+(fixed the same evening: lab-api resolves "<local hex>:<plugin>" against the
+run's order, main 74c4844 and f473a97). Restoring her took a hand re-base of
+eight head parts, a race and a texture set, a server stop, a record patch
+and a relaunch, four minutes of two sessions' work for one character; every
+player and every world would need the same at every layer. Single player
+has no such problem because the engine resolves a save's forms by plugin
+name at load (a save carries its plugin list and remaps), and that is the
+shape to copy.
+
+What the world already stores plugin-relative: the RaceMenu preset (RaceMenu's
+own "plugin|id"), favorites, map markers, the shout record and the staff
+rank (all FormDesc since their verbs), and every server setting (bonds,
+castTeleports, headshot, playerGlobals). What it does not: the appearance
+(race, head parts, texture set), the inventory and the equipment, learned
+spells, running effects and their sources, and anything else a change form
+keeps as a raw form id.
+
+**Decision.**
+
+1. Every form the world stores is a FormDesc, "<local hex>:<plugin>", the
+   shape the settings and the lab already use, including the appearance's
+   race, head parts and texture set, the inventory's and equipment's base
+   forms, learned spells, running effects (the MGEF and its source), and any
+   field a later verb adds; a raw runtime id in a change form is a bug.
+   Resolution to the runtime id happens at load against the live load
+   order (one function, FormDesc::ToFormId; a plugin that is not loaded
+   resolves to nothing and the entry is kept, not dropped, so the record
+   survives a plugin's absence and a return).
+2. A saved world carries the load order it was saved under (its espm file
+   list), and a migration converts a world written in the raw shape into
+   the plugin-relative one using that order; `just playtest-restore` and the
+   server's own load migrate on the way in, once, and mark the world
+   migrated. Worlds already saved tonight and before are migrated by the
+   order their snapshot's settings name.
+3. The server refuses a login appearance whose race or parts do not resolve
+   in its order, and keeps the record it holds; it never accepts a client's
+   default and never overwrites a record from a login. The client is told
+   (the race menu may open; what it sends from there is judged the same).
+4. The wire keeps runtime ids: a message is one session's, both ends share
+   the order, and the server translates at its edge as it does today. Only
+   what is written to disk changes.
+5. A mod layer render stops caring about slots: it never re-bases a world,
+   a profile or a scenario; the lab's profiles (lab/playtests) and
+   scenarios name forms as FormDesc already, and the server does the same.
+
+**Consequences.** A schema change (rule 6): the change form's structs, their
+JSON, a migration with a version mark, a T0 that saves a world under one
+order and loads it under another with identical state, and the
+restart-persistence scenario extended with a load order change (a stacked
+snapshot, as the rest verb's schema change ran). Load time: one string
+match per stored form at load, negligible. Until it lands, a world
+restored under a changed order is re-based by hand as tonight, or not
+restored.
+
+The map (docs/research/formdesc-world-map.md, read against fork e3806870
+the same evening) sizes the work. Twelve raw fields in five structs hold a
+runtime id: the appearance's race, head parts and texture set (stored as
+JSON text inside appearanceDump), the inventory entry's base, enchantment
+and poison (appearing twice, under inv and under equipmentDump), the
+equipment's four spell slots, learnedSpells, and the legacy effects map
+(a dead write path, deletable). Nineteen fields are FormDesc already, but
+six of them still drop or throw on a missing plugin (running effects are
+dropped and the record rewritten without them; the login sends for map
+markers, learned effects, favorites and shouts convert with no try), so
+decision 1's "kept, not dropped" is work there too; playerGlobals is the
+one field that behaves as asked and is the template. Today an appearance
+whose race does not resolve skips the WHOLE change form at load, the
+gamemode then creates a fresh actor with the race menu open, and the
+lowest free id is handed out again, which is how the 17:25 overwrite
+happened (HYPOTHESIS on the id coincidence; the mechanics are read).
+Stale learned spells are worse than wrong: the server refuses them in a
+hand and sends Actor.RemoveSpell to the player's own game. There is no
+version mark in the record and nothing persists the load order; the
+pattern for an optional field is presence (at_pointer), and the one
+in-memory migration (legacy effects to running effects) re-runs on every
+load. The trap that sets the cost: Appearance, Inventory and Equipment are
+the same structs on the record and on the wire, so retyping their fields
+would change the wire against decision 4. Two shapes avoid it: stored
+twins (FormDesc fields living only in the change form, converted at the
+MpActor and MpObjectReference accessors against the live order, every
+runtime API keeping its uint32), or conversion at the record boundary
+(after parse in WorldState::LoadChangeForm and before upsert in
+TickSaveStorage, since JsonToChangeForm is static and order-less and the
+drivers call it with no world in reach). The world's order is saved beside
+the records as the first non-change-form file in world/, and the version
+mark is one top-level key read with the same presence guard. Cost,
+re-estimated from the map: three sessions of server work (the twins or the
+boundary conversion with the appearanceDump rewrite; the migration, the
+order file and the version mark; the appearance refusal, the six
+keep-on-miss fixes and the tests) and one lab session (the scenario). The
+earlier estimate of two was made before the map.
+
+**Alternatives.** Pin the slots forever (a layer may only append plugins
+after every existing one): brittle, since any master-ordered plugin, an
+.esl among the masters, or a dropped mod moves slots, as the layer did
+tonight for three reasons. Re-base worlds by tool at each layer (tonight's
+four minutes made a script): the same slot math, but run at every layer for
+every world and every player, with the raw shape still underneath. Store the
+raw ids plus the order and translate only when the order differs: the
+decision's migration half without its durable half, and a second code path
+at every read.
+
+- [x] accept (Eli, 2026-10-19 19:32 PDT: "accept those ADRs")
+- [ ] accept with changes (say what)
+- [ ] not yet
+
+## ADR-044: The client's Papyrus event filter admits scripts by what they are, not by their name
+
+Status: ACCEPTED 2026-10-19 19:32 PDT (Eli: "accept those ADRs"); proposed 2026-10-19 19:19 PDT (thuum-magnus, from playtest twenty-six's
+missing Apocalypse MCM and the lab's Survival Mode reads of the same
+evening); accepted the same evening. Refines ADR-029's first decision (which events a
+game's scripts receive) and keeps ADR-008 (quests per player, world-shared
+by allowlist) and ADR-029's server-side allowlist as they are.
+
+**Context.** Every connected game runs under Skyrim Platform's Papyrus
+event block: skymp5-client sets it at its first tick
+(skymp5-client/src/services/services/blockPapyrusEventsService.ts), and
+the SendEvent hook (skyrim-platform FridaHooks.cpp, OnSendEventEnter)
+then replaces the name of every Papyrus event with "" unless the event is
+an ActiveEffect's with the player as target or caster (ADR-031's halves),
+or the event is not OnUpdate and one of the scripts attached to the
+handle is NAMED SKI_*, RaceMenu*, GRIM_ALT_TeleportationMarker,
+WB_DestroyAfterDelay_Script or defaultDisableHavokOnLoad. The compare
+reads each script's leaf class name and never its parents, and OnUpdate
+skips the list, so under the block OnUpdate reaches no script at all. The
+read is docs/research/papyrus-event-filter.md; it corrects "blanks every
+Papyrus event but OnUpdate" in ADR-029's context and in
+apocalypse-options.md 3.1, which read the guard backwards (HYPOTHESIS
+until the lab's unblock probe and a HUD trace for SkyUI's own OnUpdate
+line; the brace structure is unambiguous and has been so since upstream's
+2021 version of the hook).
+
+Two findings of 2026-10-19 are this one rule. Apocalypse's MCM is missing
+under the essentials layer because WB_MCMQuest_Script extends
+SKI_ConfigBase and its own name is not SKI_; the same holds for every one
+of the layer's seven MCMs, MCM Helper's included (MCM_ConfigBase extends
+SKI_ConfigBase), so the Mod Configuration list shows SkyUI alone. Survival
+Mode never enables in a connected game (x-survival-probe 20261020-020321,
+x-survival-why 20261020-020729: the quest runs, MQ101 at 0, exterior, the
+switch at 1, Survival_ModeEnabled and the prompt at 0 twelve seconds on,
+while a solo run of the same save, which loads no skymp5-client and so no
+block, shows the prompt) because its 5 s check is RegisterForSingleUpdate
+then OnUpdate. Behind them stands the essentials layer itself: a hundred
+mods whose quests and aliases run on these events the way single player
+runs them, and Eli's standing on layers (ADR-043's context): "it cannot
+break the game every time a new mod is added, because single player
+doesnt work that way". Admitting them one name at a time is the shape the
+law forbids (one name per mod per playtest, each a client build), and
+ADR-029's "quests' and aliases' stay blanked" was written for vanilla's
+and Apocalypse's world mechanisms, not for a settings menu or a needs
+meter.
+
+The layer in numbers (apocrypha's census, docs/research/layer-papyrus.md on
+apocrypha/layer-essentials, each script's parent class read from its .pex
+header, regenerated with the layer): 2,421 scripts in 44 of the 113 mod
+folders; 19 mods blocked outright because their behavior is their own
+quest, alias, object or perk scripts (Jewelry Limiter, Dynamic Activation
+Key and the feeding tweaks keyed off it, Self Filling Bookshelves, Portal,
+Reading List, General Displays, the IDRC quests and scenes among them; four
+of the 19 are fixes to vanilla scripts a connected game does not run
+anyway); 12 mixed, their effects running on the player and everything else
+blanked, which is every magic mod (Apocalypse 162 effect scripts against
+44 others, Lost Grimoire 96 against 51, Odin 50 against 27); TrueHUD, TDM
+and MCM Helper losing only their menus; 69 folders shipping no script.
+Three of its points shape the decision: a plugin carries its scripts
+through its forms' VMAD, so admission by plugin needs the plugin's script
+names (a map the census generates); OnUpdate is its own axis (Survival's
+needs, Jewelry Limiter's checks and Unread Books Glow's scans are update
+loops); and the ActiveEffect exemption admits an effect on the player
+alone, so a magic mod's effects cast on others (mind control, thralls, a
+cloak on a target) stay blanked even where its self-casts run, which is
+ADR-029's server-side allowlist's ground, not this decision's.
+
+What the filter is FOR, stated once: a game whose state the server owns
+must not run scripts that change that state behind the server's back
+(vanilla's quests, Apocalypse's world mechanisms, anything on ADR-029's
+server-side allowlist). It has no business with scripts whose effects are
+UI, or per-player state the server declares R3 or records as R2.
+
+**Decision.**
+
+1. Admission by class. A script passes the filter if it, or any class it
+   extends, is on the admitted list; the hook walks ObjectTypeInfo's
+   parent chain (CommonLibSSE-NG include/RE/O/ObjectTypeInfo.h, GetParent)
+   where it reads the leaf name today. SKI_ stays the admitted root, so
+   every MCM (SKI_ConfigBase and MCM Helper's MCM_ConfigBase descendants)
+   and every SkyUI widget passes without a name of its own. RaceMenu,
+   GRIM_ALT_TeleportationMarker, WB_DestroyAfterDelay_Script and
+   defaultDisableHavokOnLoad stay as named entries until a root covers
+   them.
+2. Admission by plugin. A data list, served by the server with the load
+   order (the layer manifest's per-plugin disposition, apocrypha's
+   persist-mods rows; ADR-008's "data, not code"), names the plugins whose
+   scripts run in every game: the Survival Mode Creation first. Since the
+   hook sees a script's class name and not its plugin, an admitted plugin
+   expands to the script class names its folder ships (the census's map,
+   regenerated with the layer), and the hook keeps one set lookup. A
+   script of an admitted plugin passes whatever its class. The list is
+   reviewed like a scenario (rule 13): a plugin enters it with one line
+   saying what its scripts touch and which rung that state already has.
+3. OnUpdate follows the script. An admitted script receives OnUpdate; the
+   rest stay blanked. The list is consulted for OnUpdate too, so the hook
+   pays one table lookup per OnUpdate under the block; the first build
+   counts the rate (a Frida counter on the hook) and caps nothing until
+   the count says it must.
+4. State keeps its rung. A script admitted by plugin changes nothing about
+   authority: a global it writes is that player's (R2, player-globals), a
+   value it reads is its game's, damage or regen it applies to its own
+   player reaches the server only where a verb carries it (none today, so
+   Survival's needs are R3 until a verb says otherwise: cosmetic in a
+   connected game, with warmth, cold, hunger and fatigue shown and felt in
+   that game alone), and anything it would do to another actor stays in
+   its game as ADR-029 already says. Vanilla's quests, aliases and
+   references stay blanked; ADR-029's server-side effect allowlist is
+   untouched.
+5. ADR-029's context is corrected in place (an erratum line, no change to
+   its decision).
+
+**Consequences.** One Skyrim Platform change (train-29's row, a Windows
+build): the parent walk, the plugin list read from a setting the client
+receives at login, OnUpdate through the list. One server change: the list
+in server-settings beside playerGlobals and castTeleports, sent with the
+login. One layer change: the manifest's disposition column. Tests: T1
+none (the VM runs only in a game); the lab's x-mcm-register (a HUD trace
+asserting "MCM: Registered N new menu(s)." with N the layer's eight) and
+x-survival-probe's round trip extended to Survival_ModeEnabled = 1;
+playtest twenty-seven's section 4 asks the decisive question before any
+build. Until it lands, no mod's MCM and no Papyrus-driven mod works in a
+connected game, which is the state the essentials layer is in tonight.
+
+**Alternatives.** Keep adding names (today's shape): one client build per
+mod per playtest, and a mod's own base classes never covered. Lift the
+block for layer games: vanilla's quests run (Unbound, the Civil War, every
+radiant quest) against a server that owns none of their state, which
+ADR-008 exists to prevent. Run the mods' scripts on the server's VM
+(ADR-029's allowlist): right for world mechanisms, wrong for a settings
+menu or a needs meter, which have no server half. Admit by event name
+(let OnUpdate through for everyone): wakes every vanilla quest's polling
+loop, the one thing the block is for.
+
+- [x] accept (Eli, 2026-10-19 19:32 PDT: "accept those ADRs")
+- [ ] accept with changes (say what)
+- [ ] not yet

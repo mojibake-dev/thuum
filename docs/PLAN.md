@@ -384,7 +384,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       its build tier), in build order:
       - the client's Papyrus event filter: a parent-chain walk so every MCM
         passes (SKI_ConfigBase's and MCM Helper's descendants), a plugin
-        list and OnUpdate per ADR-044 (PROPOSED; Survival Mode the first
+        list and OnUpdate per ADR-044 (ACCEPTED 2026-10-19; Survival Mode the first
         case, x-survival-probe 20261020-020321); playtest twenty-seven's
         MCM question decides before the build (Windows).
       - Lightning Strike on the observer: the relayed launch picks the
@@ -403,6 +403,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - small: the OpenContainer wait loop after a swap, EffectWasDualCast
         (724) with the dual flag in the evaluator's context, the refs-near
         driver step.
+
+    - ADR-043's build (ACCEPTED 2026-10-19; the world stores every form as a
+      FormDesc, a saved world carries its order and migrates, a login whose
+      appearance does not resolve is refused): three server sessions plus
+      one lab session, sized in docs/research/formdesc-world-map.md; before
+      the next layer that moves a plugin's slot, since until it lands a
+      restored world is re-based by hand or not restored.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
