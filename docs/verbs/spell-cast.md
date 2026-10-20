@@ -1374,3 +1374,175 @@ propagating. The records say otherwise, and split the finding in four.
 - Owner: agent (the probe), then the re-analyst (the pass's tier test and
   the hook point, static) and Eli's seat (the Frida read).
 
+
+## Train-29 (2026-10-20 night; fork m2-train-29 18c0e603 on parity 602a2dd2; the rows of docs/research/train-29-rows.md)
+
+Built overnight on Eli's word ("go ahead and run tonight to do the biggest
+lump"), each row from the reads of 2026-10-19, for the morning's stage
+under the essentials layer (ADR-040: playtest twenty-seven on the stage, the
+gate and the merges after).
+
+- Lightning Strike on the observer (row 4): CommonLib's spell LaunchData
+  takes the AV effect's projectile (src/RE/P/Projectile.cpp:213-222) and
+  Lightning Strike's AV effect has none, so the observer's launch recorded
+  projectile 0 and nothing flew (x-lightning-strike 20261019-220431, the
+  launch row `[13929, 0, 0, ...]`). MagicApi.cpp (07b33046) takes the first
+  effect whose base effect carries a projectile (include/RE/E/Effect.h:39,
+  include/RE/E/EffectSetting.h:90) when the constructor left it null; area
+  stays as set, the explosion comes from the PROJ. CONFIRMED on the launch
+  (x-lightning-strike 20261020-085414 on the train's stage: both
+  c1.watched_self().launched("0xc0cfe00") and c2.watched(c1).launched(
+  "0xc0cfe00") held, the figure's launch carrying
+  WB_DestructionShock_Projectile_LightningStrike instead of 0, so the pick
+  took the strike's effect, not the rider's). CONFIRMED at T4 (Eli, playtest
+  twenty-seven, 2026-10-20: "on test 2's screen the strike is visible now,
+  the bolt and its lightning, and the bolt is gone within a second on both
+  screens", ticked): the lobber explodes in the observer's game and places
+  the bolt, which the WB_DestroyAfterDelay_Script admission then deletes. The probe is
+  x-lightning-strike re-grounded at the camp asserting the
+  lobber's launch on both seats, c1.watched_self().launched("0xc0cfe00")
+  and c2.watched(c1).launched("0xc0cfe00") (PROJ 030cfe00
+  WB_DestructionShock_Projectile_LightningStrike by lab/esm.py, 0x0C0CFE00
+  in the layer-free order; numidium's correction of a transposed id), with
+  both seats' screenshots at the strike. The records as esm.py reads them
+  tonight: the spell's effects are 030fadfd (the AV effect) and 03100ba6
+  (the perk rider, whose own projectile is 03100ba9, the _2C variant), so if
+  the fix's first-with-a-projectile pick takes the rider's, the observer
+  launches 0x0c100ba9 and the second line goes red naming it: the probe
+  tells which effect carries the lobber. If the lobber flies and never explodes, the REA read's three
+  candidates stand (a null parentCell on the figure's launch, a model that
+  never arrives, a dive below ground).
+- Finger of Death, the condition half (row 2b): IsEssential (354) is a
+  server condition function now (eea3a5d5; a player is never essential, an
+  NPC by its base record's flag, libespm NPC_.h isEssential; HYPOTHESIS: a
+  runtime essential flag is not seen), so the spell's one effect is no
+  longer refused as unknown and its hit holds (a fight begins). The kill
+  stays the script's in the caster's game, ADR-029's default; the
+  allowlist's server-side kill (MpActor::Kill, the headshot's primitive) is
+  the next verb on that ground, not this train's. T0:
+  unit/EffectConditionsTest.cpp. T4 (Eli, playtest twenty-seven): "only
+  affected test 1": with test 2 at full health the script took its fail
+  branch, which hurts the caster instead of killing the target (the mod's
+  own rule, and twenty-three's reading of the same branch at a million
+  Health); no ash pile this time, test 2 untouched, as the row expected
+  for a target above the threshold.
+- EffectWasDualCast (724; row 7b): thirteen Apocalypse spells and the
+  Impact rider gate on it. The flag travels SpellCastMessage.isDualCasting,
+  PartOne::StartCast, wire-rules casts::CastFacts::dual, the claim's dual,
+  OnSpellHit, MpActor::ApplyEffects, EffectConditionsHold, the evaluator
+  context; every other caller leaves it false, so a 724 rider holds only on
+  a claimed dual cast. No wire change (the message carried the flag; the
+  record is rule state). T0: the same test file; Rust 186 + 17 green.
+  Read the same night against the records (a scan of every CTDA in the
+  Apocalypse esp with esm.py's parser, 1643 rows): all thirteen "724
+  spells" carry the same one effect, vanilla's Impact rider 0x153D3, gated
+  EffectWasDualCast == 1 AND HasPerk(Impact) == 1, and the only other 724s
+  are two orphan copies of that rider used by no spell. The server refuses
+  on the first unknown function and HasPerk is unknown by design, so no
+  724 effect is observable at T3 or T4 before M5; the gain is correctness
+  and the T0 proof, not a visible change. What a dual cast does show on
+  this build, playtest twenty-seven's row: Electrosphere (0x1A001879 under
+  the layer) dual cast with Destruction Dual Casting (Skyrim.esm 0x153CF) is
+  one ball and one hit, 55 Health and 55 Magicka applied once (the flag
+  rides the claim; nothing in wire-rules scales by the engine's 2.2), two
+  balls and 110 without the perk. Found on the way, a train-30 candidate:
+  Hailstone's own two effects are gated on GetActorValue (14) and
+  HasMagicEffect (214), which the server lacks, so it applies nothing on
+  the server today.
+- Scattershock (row 6), measured, no code: x-scattershock-6s
+  20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
+  launched on both seats (the PROJ 083a24 of Apocalypse) and the server
+  recorded the hits (c2 at 0.78 Health); twenty-five's "hits not reported"
+  was a 2.5 s hold equal to the charge. The missile angle on the observer
+  stays unmeasured: the lab's flights record covered arrows only. Train-30
+  BUILT 2026-10-20: the projectileFlight hook admits a spell's projectiles
+  (fork m2-train30-flights 951b5bbc: the spell source in place of the ammo,
+  the spell's id in the event; the bow service already ignores a flight
+  without ammo) and the driver's flights rows carry projectile and spell as
+  columns nine and ten (thuum main; lab-api pairs on the first eight, so an
+  arrow's flights_match reads as before, and a spell's pairing by projectile
+  is lab-api's follow-up). The measurement is a stage with both seats
+  watching a Scattershock cast.
+- The rune glyph (row 5) and the local dent (row 3): their Frida reads ran
+  on this train's stage (x-rune-visible-frida 20261020-085906 on c2,
+  x-figure-values-hit-frida 20261020-085705 on c1; lab/frida/
+  rune-tier-trace.js and figure-dent-trace.js), the traces under read; no
+  hook before the read (rule 8). The refs-near step (the driver's, train-29)
+  settled the rune's other half: x-rune-visible 20261020-090323, the
+  observer's game holds the figure's rune as a reference whose base is the
+  PROJ (c2.refs_near().count(50) == 1 at 440 units, the same 30 s later)
+  and its trip deals the server's number, so the missing glyph is a
+  drawing matter, not a removal. The tier trace then read on the observer
+  (x-rune-visible-frida 20261020-085906, docs/research/frida-reads-train29.md
+  section B): the landing's look never runs for the relayed rune at all,
+  the tier compare 44213 and the settle 43919 were never entered in two
+  minutes, bit 20 of the flags stayed clear, and the rune was "arrived"
+  (44163) 35 ms after the launch from inside the first trigger tick's test,
+  not from a collision, then stood 3185 ticks with cell and explosion
+  non-null until the trip (one kill from the tick, a second 4 ms later).
+  The REA read's tier mechanism (H3b) is NOT the cause: nothing was dressed
+  and then undressed; the look is skipped upstream of 44213, and the
+  caster's own engine launched its rune from the identical point, so the
+  origin does not discriminate. The caster-seat read followed the same
+  night (x-rune-visible-frida2 20261020-092130, both seats; the memo's
+  section D): the caster's OWN rune never ran 43919 or 44213 either, so
+  the tier compare is dead for runes on both seats and the glyph does not
+  come from it; both runes are born at rest at the point (velocity and
+  origin excluded); the first divergence is the runtime flags at Init3D's
+  entry, 0x210000 (kAutoAim, Projectile.h:157) for the engine's cast path
+  against 0x20010000 (kUseOrigin, :165) for the relay, the pair CommonLib's
+  spell LaunchData constructor sets (useOrigin true, autoAim false,
+  Projectile.cpp:220-221), and the arrival then takes a different branch of
+  44217 for each (+0x247 against +0x1c3). Built the same night on
+  m2-train-29 as a relayed launch with delivery kTargetLocation taking the
+  engine's pair (99c39e3e), measured on its stage and REVERTED (d34053e0):
+  no glyph, and the static read says why the flags could not matter. The
+  static read then came in (the re-analyst on
+  REA the same night, docs/research/re-37335-and-rune-landing.md, question
+  2; HYPOTHESIS from pseudocode): 44163 is not an arrival but the trigger
+  test's per-candidate validity check (44217 calls it for each nearby actor
+  at +0x1be and then for the local player at +0x242), so +0x247 against
+  +0x1c3 is WHICH actor stood within 150 units (the caster's own player on
+  c1, the caster's figure on c2), not a shooter branch; both returned 0
+  because the candidate was the shooter (iProjectileMineShooterCanTrigger
+  0). The flag flip was a no-op, as predicted: Launch sets kAutoAim only for
+  a player shooter, and kUseOrigin's one reader is the position snap for
+  non-grenades; on 99c39e3e's own stage x-rune-visible-frida2
+  20261020-101636 showed no glyph in the observer's view at any of four
+  marks, and the commit is reverted (m2-train-29 d34053e0; the projectile
+  pick stays). 43919 is the grenade's Havok
+  deactivation callback and 44213 is fed by the collision landing; a
+  target-location rune is born at rest (speed 0) in both games, so neither
+  runs anywhere, as measured. The glyph is a DECAL: the caster's own
+  target-location launch 34452 calls the decal placement 44186 after
+  Projectile::Launch, with the pick's position, its normal scaled, the
+  material id from 44190 and the grenade's own decal group (slot 0x9F),
+  gated on the projectile's slot 0xAE; 44186's only callers are 34452 and
+  44213, and the relay's bare Launch (MagicApi.cpp) never passes through
+  34452. CONFIRMED by rule 8's read the same night (x-rune-decal-frida
+  20261020-102818, rune-decal-trace.js on both seats, on 99c39e3e's stage):
+  the caster's game entered 34452 from the player's cast, launched inside
+  it (autoAim 1, useOrigin 0), looked the material up (44190: materialID
+  0xe4d39ca3, form 0x12f37) and placed ONE decal (44186: the rune PGRE, the
+  pick's position, the normal (5.83, -69.75, 0) of length 69.99, return
+  0x10000); the observer's game had one launch row from the relay (the
+  figure as shooter, 99c39e3e's flags in effect, contact normal (0, 0, 1))
+  and no 34452, material or decal row. Two side facts for the row: the
+  caster's normal was nearly horizontal, so that probe's aim put the rune
+  on the tent's south face, not the ground (the screenshots' weak control),
+  and the relay today sends (0, 0, 1) for every launch. Train-30's row:
+  relay the caster's contactNormal (34452
+  copies the pick's normal into LaunchData, which the Launch-entry reader
+  already sees) and the material id with the cast (a wire change: the
+  SpellCast message and its validator in one commit, rule 4), and after the
+  relayed Launch call 44186 as 34452 does when the new projectile's slot
+  0xAE is true; a relayed material failing, the landscape's at the point
+  (what 44190 does for the land shape). Native only, filtered on a
+  dynamic-form shooter (rule 9). Still wanted: a per-figure rune cap in the
+  observer's game, since the registration gate (43934) admits the player's
+  runes alone and a figure's four casts would leave four armed runes.
+- The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
+  (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
+  second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
+  OnTrigger about 30 and OnUpdate 13 to 22 per 5 s), so the parent walk is
+  noise.

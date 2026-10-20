@@ -380,36 +380,146 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         loads and frame rate held; no MCM, cloaks without physics, no
         warmth, bare aspens, rotfern undressed by the slot shift (ADR-043
         PROPOSED; the layer's three fixes render 2026-10-20 06:23).
-    - Train-29 (next; each row's facts in docs/research/train-29-rows.md with
-      its build tier), in build order:
-      - the client's Papyrus event filter: a parent-chain walk so every MCM
-        passes (SKI_ConfigBase's and MCM Helper's descendants), a plugin
-        list and OnUpdate per ADR-044 (ACCEPTED 2026-10-19; Survival Mode the first
-        case, x-survival-probe 20261020-020321); playtest twenty-seven's
-        MCM question decides before the build (Windows).
-      - Lightning Strike on the observer: the relayed launch picks the
-        effect whose projectile is set, not the AV effect's zero
-        (MagicApi.cpp; Windows).
-      - Finger of Death: IsEssential (354) evaluated on the server, and the
-        mod's scripted kill of a figure kept in its game or refused
-        (server; ADR-029's default today).
-      - a player's own dent on a figure's bar: FigureHealthDamage is in the
-        dist and still failed, so a Frida read before any change (lab, then
-        Windows).
-      - the rune's glyph on the observer: the Frida read of the player tier
-        first (spell-cast.md's section; lab).
-      - Scattershock's hits: a re-grounded 6 s probe before any code (the
-        2.5 s hold matched the charge; lab).
-      - small: the OpenContainer wait loop after a swap, EffectWasDualCast
-        (724) with the dual flag in the evaluator's context, the refs-near
-        driver step.
+    - Train-29 (built overnight 2026-10-20 on Eli's word; fork m2-train-29
+      709c90b0: 18c0e603's client and server content, a rune try measured
+      and reverted, and the CI fresh-tree fix merged with parity d5f478c3;
+      staged 04:02 with its gate's always set green and both clones' clean
+      snapshot retaken on it, the essentials layer to stack on it for
+      playtest twenty-seven; each row's facts in
+      docs/research/train-29-rows.md), in build order:
+      - the client's Papyrus event filter: BUILT (b2db6354, docs/verbs/
+        papyrus-events.md): a parent-chain walk so every MCM passes, the
+        layer's plugin list read at Skyrim Platform's load, OnUpdate per
+        script (ADR-044 ACCEPTED 2026-10-19, CONFIRMED by x-survival-unblock3
+        20261020-024406); b-papyrus-events awaits Eli's review.
+      - Lightning Strike on the observer: BUILT (07b33046) and the launch
+        CONFIRMED (x-lightning-strike 20261020-085414: the observer's game
+        launches the lobber 0x0c0cfe00); the bolt's appearance there is
+        twenty-seven's row.
+      - Finger of Death: IsEssential (354) BUILT on the server (eea3a5d5,
+        T0); the scripted kill stays the caster's game's (the ash pile),
+        ADR-029's default, until the allowlist verb.
+      - a player's own dent on a figure's bar: READ (x-figure-values-hit-frida
+        20261020-085705): the fork's guard works and the vfunc it blocks is a
+        post-write notification inside DamageActor 37335; signature
+        resolved by the re-analyst (bool (Actor*, float, Actor*, bool),
+        returns IsDead); train-30: a Gum interceptor-replace at 37335
+        returning false for a figure victim (docs/verbs/figure-values.md).
+      - the rune's glyph on the observer: READ (x-rune-visible-frida
+        20261020-085906): the landing's look never runs for the relayed rune
+        (no 44213, no 43919; arrived from the trigger tick, not a collision),
+        so the tier is not the cause; the rune stands as a PROJ-based
+        reference (refs-near); the glyph is the decal 34452 places through
+        44186 after the caster's own launch, which the relay skips:
+        CONFIRMED by x-rune-decal-frida 20261020-102818 (one decal call on
+        the caster with normal and material, none on the observer); a
+        launch-flag try measured a no-op and was reverted; train-30: relay
+        the normal and material and call 44186 after the relayed launch.
+      - Scattershock's hits: MEASURED and closed (x-scattershock-6s
+        20261020-080751: thirteen missiles on both seats, the server records
+        the hits; the 2.5 s hold had matched the charge); the missile's
+        angle on the observer waits for a flights record for spell
+        projectiles (Train-30's lab row, BUILT 2026-10-20).
+      - small: the OpenContainer wait loop's 15 s deadline BUILT
+        (18c0e603, activation-reach.md); EffectWasDualCast (724) BUILT with
+        the dual flag from the cast message through the cast record to the
+        evaluator (eea3a5d5, T0); the refs-near driver step on thuum branch
+        lab-refs-near (agent, in progress).
 
     - ADR-043's build (ACCEPTED 2026-10-19; the world stores every form as a
       FormDesc, a saved world carries its order and migrates, a login whose
-      appearance does not resolve is refused): three server sessions plus
-      one lab session, sized in docs/research/formdesc-world-map.md; before
-      the next layer that moves a plugin's slot, since until it lands a
-      restored world is re-based by hand or not restored.
+      appearance does not resolve is refused): sized in
+      docs/research/formdesc-world-map.md. Slice one BUILT overnight
+      2026-10-20 on fork m2-formdesc-world d0693ef4 (not merged; CI green,
+      13 of 13, 401 test cases): formVersion 2 with the presence guard;
+      the load order saved beside the records (load-order.json for the file
+      and zip drivers, a loadOrder document for mongo, passed through the
+      migration driver); the twelve raw fields as "<hex>:<plugin>" on disk
+      with runtime ids in memory, converted at the record boundary, the
+      appearance's forms in a sibling appearanceForms; unresolved forms
+      parked whole in a per-record list and written back when their plugin
+      returns; a raw record re-based from the saved order at the first load
+      that sees it; seven T0 cases (round trip, save under A load under B,
+      v1 under a saved order, the parked plugin, the drivers). Its rule-6
+      scenario DRAFTED 2026-10-20: b-formdesc-world on branch
+      scenario-b-formdesc-world 973a412c (Eli's review), the fixture
+      adr043-preslice-25 on main ebc4d726 (twenty-five's eight raw records
+      with the order they were written under); it proves the migration on
+      a stage whose order differs from the fixture's, the layer stage, and
+      waits on two lab-api pieces (`server: world:`, FormDesc ids in the
+      known step). Left for
+      slice two: decision 3 (the login refusal; the record is kept but
+      LoadChangeForm still skips an unresolved race, so the 17:25 hazard
+      stands until then), the six keep-on-miss fixes on fields already
+      FormDesc, the rule 6 T3 scenario (restart persistence with a load
+      order change on a stacked snapshot, Eli's review), the thuum side of
+      playtest-restore, the legacy effects map (deletable). Merge after the
+      scenario, through the gate.
+
+    - Train-30 (the rows found on 2026-10-20 before and during playtest
+      twenty-seven; each to its verb doc as it is built), in build order:
+      - learned spells lost on a RECONNECT (playtest twenty-seven, 11:21: a
+        server restart with the game process up): the client's login path
+        removes every spell and re-adds the server's list (remoteServer.ts,
+        sync/spell.ts), and on a reconnect the re-add did not land (test 1
+        knew only its save's Flames and Healing; the server's record held
+        all fifteen and sent them; a fresh relaunch restored all seventeen).
+        Read: there is no reload on a reconnect; the one difference from a
+        launch is removing and re-adding the same spells in one frame
+        (HYPOTHESIS). BUILT 2026-10-20 on fork m2-train30-spells 096d2cd8
+        (client only, pipeline 2236 green): the list applied as a diff with
+        a second pass a second later (docs/verbs/learned-spells.md); T3
+        b-spells-reconnect approved by Eli and on main (red by design until
+        this stages); a-restart-persistence takes the assertion after.
+      - Survival's login race: the record's restore of 828 and 8df rode the
+        login send and lost to the Creation's 5 s check once in two
+        relaunches (test 2, 18:23Z), so the per-global default (built,
+        fork m2-train30-globals-default edb2608c, thuum
+        lab-survival-prompt-default bac34a7) is the belt and the lab's
+        fixture is the clones' template save carrying 8df = 1 and 828 = 0
+        (numidium's snapshot retake after the playtest).
+      - a player's own dent on a figure's bar: a Gum interceptor-replace at
+        DamageActor 37335 returning false for a figure victim (signature
+        resolved; figure-values.md); the slot-0x104 guard goes.
+      - the rune's glyph on the observer: relay the caster's contactNormal
+        and material id with the cast (a wire change, message plus
+        validator in one commit) and call the decal placement 44186 after
+        the relayed launch for a grenade projectile (spell-cast.md); a
+        per-figure rune cap in the observer's game.
+      - Finger of Death's kill: the allowlisted server-side kill (ADR-029's
+        ground; MpActor::Kill is the primitive) with the client's script
+        blanked, or the ash pile stays as the documented default.
+      - Hailstone and kin: GetActorValue (14) and HasMagicEffect (214) as
+        server condition functions, since Hailstone's own effects gate on
+        them and apply nothing today (spell-cast.md).
+      - the lab: a flights record for spell projectiles in the driver (the
+        Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
+        951b5bbc raises projectileFlight for a spell's projectiles, the
+        driver records projectile and spell as columns nine and ten,
+        spell-cast.md), and the arrows step counting PROJ 50 (its PARW
+        count was always 0): the count BUILT 2026-10-20 on thuum main,
+        rides the next driver deploy; one base's presence stays the
+        projectiles step's (marksman.md).
+
+- Playtest twenty-seven (2026-10-20 morning, fork m2-train-29 709c90b0 under
+  the essentials layer 29d83a0b; world playtest-m2-26-20261020T004645Z):
+  every row ticked. The layer's three fixes (aspens, Artesian's cloaks under
+  FSMP, rotfern whole with her stagger patch reverted); Survival Mode's own
+  box on both seats, the first in a connected game, warmth from a WIC
+  cloak, and the choice surviving a server restart; the MCM listing all
+  eight menus with an Apocalypse setting surviving the restart;
+  Shadowbond's concealment on both screens with the break by either seat;
+  Lightning Strike visible on test 2; Electrosphere dual cast as the row
+  said; Finger of Death's fail branch hurting the caster alone with test 2
+  at full health. Found: a server-taught spell list lost on a RECONNECT
+  with the game process up (the server's record intact; a relaunch
+  restored it; Train-30's first row, b-spells-reconnect); Survival's login
+  restore losing its race to the 5 s check once in two relaunches (the
+  template-save fixture). Train-29's gate, its verb-merge and the layer's
+  full sweep follow the report (ADR-040). Eli's call after the report
+  (13:05 PDT): FSMP out, the cape physics worked but looked jank; the
+  cloaks go back to vanilla capes in apocrypha's next render, which the
+  layer stage and sweep take.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals

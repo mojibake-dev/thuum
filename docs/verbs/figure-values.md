@@ -199,7 +199,9 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 - T0: the property visitor emits the three maxima under OnlyPublic when a
   record exists and nothing when it does not; a change of base 24 marks the
   public props dirty.
-- T1: none (no native).
+- T1: the Windows build's compile of the native gate (train-28's vfunc
+  guard, then train-30's DamageActor replace); a Replace that Gum refuses
+  logs critical at install.
 - T2: a difftest session where c1 reports bases, c2 receives c1's CreateActor
   with the three maxima (the legacy stack sends none: the divergence listed).
 - T3 scenario id: lab/scenarios/b-figure-values.yaml: c2's figure of c1 reads
@@ -216,7 +218,49 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- Frida script: none planned; every hypothesis here is a lab measurement
+- Frida script: lab/frida/figure-dent-trace.js, RUN on train-29's stage (x-figure-values-hit-frida 20261020-085705, the hitter's seat; docs/research/frida-reads-train29.md section A). CONFIRMED: the guard works as written (victim 0xff0008f5, attacker 0x14, kAttackDamageMult 0, the engine call dropped) and the bar still moved, because the slot-0x104 vfunc is reached from inside DamageActor 37335 after the write: Health 100 at 37335's entry, 93.83 at its leave, already 93.83 when the vfunc is entered. The vfunc is a post-write notification (ADR-037's caveat). The blocking point is 37335's entry, the gate Skyrim Together uses (docs/TE-MAP.md:62); its parameters, return and side effects are the re-analyst's question before any hook (rule 1): the trace saw args[1] = 0x3, the damage in an XMM register, return 0, and cannot say whether the hit event's dispatch is inside it. The fourteen other handler rows in the run are the client's own writes toward the server's percentage (attacker null, damages 0.75 down to 0.009, frames through SkyrimPlatformImpl.dll: HYPOTHESIS sync/movementApply.ts's quarter-gap damageActorValue), which the guard also silences.
+- The static read (the re-analyst on REA, 2026-10-20, docs/research/
+  re-37335-and-rune-landing.md, HYPOTHESIS from pseudocode, consistent with
+  the trace): 37335 is `bool (Actor* this, float damage in XMM1, Actor*
+  attacker in R8, bool killMove in R9B)`, TE's lead exactly; it returns
+  IsDead(false) after the damage; the trace's args[1] = 3 is the float's
+  dead integer slot. Inside, in order: IsInvulnerable and kIsInKillMove gate
+  (return false touching nothing), the essential-down reset, the difficulty
+  multiplier, the combat notice and trackedDamage, THE WRITE through 38468
+  (which itself calls slot 0x104 after writing: the frame the trace saw),
+  whose slot-0x104 body holds the bleedout and the deferred kill, then the
+  destructible task. Outside and before the call, in the callers: the
+  TESHitEvent, blood and impact, sneak and critical UI; after it: the
+  enchantment cast, armor and perk passes, stagger, knockdown, animation
+  reactions. So a gate at 37335's entry that returns false for a figure
+  victim skips the number, the bleedout and the kill and keeps every visible
+  reaction, and covers melee, magic (35086), fall, drowning and the
+  explosion pass (ADR-037) in one place. CommonLib does not name 37335; the
+  SE id is unknown; the fork's idiom for AE-only ids is a bare REL::ID
+  (game/Offsets.h). Hook shape for train-30: replace 37335 through Frida
+  Gum's interceptor-replace (the fork's Frida layer; a detour that keeps the
+  original callable), the replacement returning false when `this` is a
+  figure by the same mark (dynamic form id, kAttackDamageMult 0), else
+  calling the original; the slot-0x104 guard then goes, since the write it
+  tried to stop happens before it. BUILT 2026-10-20 on fork m2-train30-dent
+  e6a8270a: HookHandler::Replace (gum_interceptor_replace, frida-gum
+  16.0.19 gum/guminterceptor.h:49-51; the fork's Frida layer had attach-style
+  hooks only until this), game/Offsets.h DamageActor REL::ID(37335) AE only
+  as PerformAction, the replacement and its install in FridaHooks.cpp
+  (InstallDamageActorHook), Hooks.cpp's FigureHealthDamage removed.
+  HYPOTHESIS until the hit steps run: the replacement's calling convention
+  is the function's (Windows x64, the float second argument in XMM1) and the
+  figure's hit reactions stay. T3 for it: b-figure-values gains three sword
+  hits on c2's figure with `c1.watched(c2).rises("health") == 0` (a count of
+  the rises in the watched health series the driver already records, a
+  lab-api read to add) beside the probe's weak asserts; its stage follows
+  the spells branch. The alternative, MagicTarget::
+  IsInvulnerable's vfunc on Character (37335's first gate), is rejected
+  for its reach: invulnerability is read by the magic system too and would
+  touch the figure's imposed effects (HYPOTHESIS). T3: x-figure-values-hit
+  with the figure's bar unmoved on the hitter's screen until the server's
+  number, and the hit event, blood and stagger still seen (the trace's
+  stations). Not in train-29: the morning's stage stays the playtested head.
   (the figure's value after a set, the victim case).
 - Breakpoint plan for a human session: none.
 - Owner: agent (lab probes).
@@ -227,7 +271,7 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 - [x] engine surface cited or delegated (fork parity d5b05e89, 2026-10-18)
 - [x] server logic + T0 (unit/FigureValuesTest.cpp: no maxima before a record, the owner's race bases unchanged, the three property updates on a record, the maxima in a later CreateActor)
 - [x] message + validator (same commit: no new message, CreateActor's optional props filled for observers; docs/WIRE.md)
-- [x] native hook + T1 (Hooks.cpp FigureHealthDamage; T1 is the Windows build's)
+- [x] native hook + T1 (train-28's Hooks.cpp FigureHealthDamage, replaced by train-30's DamageActor gate on fork m2-train30-dent e6a8270a; T1 is the Windows build's)
 - [x] TS handler (formView.ts applyFigureMaxima)
 - [ ] T2 green (difftest session figure-values: the three property updates declared against the legacy stack)
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-figure-values; x-figure-values-hit for the victim case)

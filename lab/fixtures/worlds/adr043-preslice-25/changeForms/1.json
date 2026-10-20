@@ -1,0 +1,1225 @@
+{
+  "actorValueRecord": {
+    "bases": [
+      {
+        "av": 0,
+        "base": 0.0
+      },
+      {
+        "av": 1,
+        "base": 0.0
+      },
+      {
+        "av": 2,
+        "base": 50.0
+      },
+      {
+        "av": 3,
+        "base": 3.0
+      },
+      {
+        "av": 4,
+        "base": 0.0
+      },
+      {
+        "av": 5,
+        "base": 0.0
+      },
+      {
+        "av": 6,
+        "base": 20.0
+      },
+      {
+        "av": 7,
+        "base": 25.0
+      },
+      {
+        "av": 8,
+        "base": 15.0
+      },
+      {
+        "av": 9,
+        "base": 20.0
+      },
+      {
+        "av": 10,
+        "base": 20.0
+      },
+      {
+        "av": 11,
+        "base": 15.0
+      },
+      {
+        "av": 12,
+        "base": 20.0
+      },
+      {
+        "av": 13,
+        "base": 15.0
+      },
+      {
+        "av": 14,
+        "base": 15.0
+      },
+      {
+        "av": 15,
+        "base": 15.0
+      },
+      {
+        "av": 16,
+        "base": 15.0
+      },
+      {
+        "av": 17,
+        "base": 20.0
+      },
+      {
+        "av": 18,
+        "base": 15.0
+      },
+      {
+        "av": 19,
+        "base": 15.0
+      },
+      {
+        "av": 20,
+        "base": 15.0
+      },
+      {
+        "av": 21,
+        "base": 15.0
+      },
+      {
+        "av": 22,
+        "base": 15.0
+      },
+      {
+        "av": 23,
+        "base": 15.0
+      },
+      {
+        "av": 24,
+        "base": 100.0
+      },
+      {
+        "av": 25,
+        "base": 100.0
+      },
+      {
+        "av": 26,
+        "base": 100.0
+      },
+      {
+        "av": 27,
+        "base": 0.699999988079071
+      },
+      {
+        "av": 28,
+        "base": 3.0
+      },
+      {
+        "av": 29,
+        "base": 5.0
+      },
+      {
+        "av": 30,
+        "base": 100.0
+      },
+      {
+        "av": 31,
+        "base": 149.5
+      },
+      {
+        "av": 32,
+        "base": 300.0
+      },
+      {
+        "av": 33,
+        "base": 0.0
+      },
+      {
+        "av": 34,
+        "base": 0.0
+      },
+      {
+        "av": 35,
+        "base": 4.0
+      },
+      {
+        "av": 36,
+        "base": 1.0
+      },
+      {
+        "av": 37,
+        "base": 100.0
+      },
+      {
+        "av": 38,
+        "base": 5.0
+      },
+      {
+        "av": 39,
+        "base": 49.0
+      },
+      {
+        "av": 40,
+        "base": 0.0
+      },
+      {
+        "av": 41,
+        "base": 0.0
+      },
+      {
+        "av": 42,
+        "base": 0.0
+      },
+      {
+        "av": 43,
+        "base": 0.0
+      },
+      {
+        "av": 44,
+        "base": 0.0
+      },
+      {
+        "av": 45,
+        "base": 0.0
+      },
+      {
+        "av": 46,
+        "base": 100.0
+      },
+      {
+        "av": 47,
+        "base": 100.0
+      },
+      {
+        "av": 48,
+        "base": 100.0
+      },
+      {
+        "av": 49,
+        "base": 100.0
+      },
+      {
+        "av": 50,
+        "base": 100.0
+      },
+      {
+        "av": 51,
+        "base": 100.0
+      },
+      {
+        "av": 52,
+        "base": 100.0
+      },
+      {
+        "av": 53,
+        "base": 0.0
+      },
+      {
+        "av": 54,
+        "base": 0.0
+      },
+      {
+        "av": 55,
+        "base": 0.0
+      },
+      {
+        "av": 56,
+        "base": 0.0
+      },
+      {
+        "av": 57,
+        "base": 0.0
+      },
+      {
+        "av": 58,
+        "base": 0.0
+      },
+      {
+        "av": 59,
+        "base": 0.0
+      },
+      {
+        "av": 60,
+        "base": 0.0
+      },
+      {
+        "av": 61,
+        "base": 0.0
+      },
+      {
+        "av": 62,
+        "base": 0.0
+      },
+      {
+        "av": 63,
+        "base": 0.0
+      },
+      {
+        "av": 64,
+        "base": 0.0
+      },
+      {
+        "av": 65,
+        "base": 0.0
+      },
+      {
+        "av": 66,
+        "base": 0.0
+      },
+      {
+        "av": 67,
+        "base": 0.0
+      },
+      {
+        "av": 68,
+        "base": 0.0
+      },
+      {
+        "av": 69,
+        "base": 0.0
+      },
+      {
+        "av": 70,
+        "base": 0.0
+      },
+      {
+        "av": 71,
+        "base": 0.0
+      },
+      {
+        "av": 72,
+        "base": 0.0
+      },
+      {
+        "av": 73,
+        "base": 0.0
+      },
+      {
+        "av": 74,
+        "base": 0.0
+      },
+      {
+        "av": 75,
+        "base": 0.0
+      },
+      {
+        "av": 76,
+        "base": 0.0
+      },
+      {
+        "av": 77,
+        "base": 0.0
+      },
+      {
+        "av": 78,
+        "base": 1.0
+      },
+      {
+        "av": 79,
+        "base": 0.0
+      },
+      {
+        "av": 80,
+        "base": 0.0
+      },
+      {
+        "av": 81,
+        "base": 0.0
+      },
+      {
+        "av": 82,
+        "base": 0.0
+      },
+      {
+        "av": 83,
+        "base": 0.0
+      },
+      {
+        "av": 84,
+        "base": 0.0
+      },
+      {
+        "av": 85,
+        "base": 0.0
+      },
+      {
+        "av": 86,
+        "base": 1.0
+      },
+      {
+        "av": 87,
+        "base": 0.0
+      },
+      {
+        "av": 88,
+        "base": 0.0
+      },
+      {
+        "av": 89,
+        "base": 0.0
+      },
+      {
+        "av": 90,
+        "base": 0.0
+      },
+      {
+        "av": 91,
+        "base": 0.0
+      },
+      {
+        "av": 92,
+        "base": 1.0
+      },
+      {
+        "av": 93,
+        "base": 0.0
+      },
+      {
+        "av": 94,
+        "base": 0.0
+      },
+      {
+        "av": 95,
+        "base": 0.0
+      },
+      {
+        "av": 96,
+        "base": 0.0
+      },
+      {
+        "av": 97,
+        "base": 0.0
+      },
+      {
+        "av": 98,
+        "base": 0.0
+      },
+      {
+        "av": 99,
+        "base": 0.0
+      },
+      {
+        "av": 100,
+        "base": 0.0
+      },
+      {
+        "av": 101,
+        "base": 0.0
+      },
+      {
+        "av": 102,
+        "base": 0.0
+      },
+      {
+        "av": 103,
+        "base": 0.0
+      },
+      {
+        "av": 104,
+        "base": 0.0
+      },
+      {
+        "av": 105,
+        "base": 0.0
+      },
+      {
+        "av": 106,
+        "base": 0.0
+      },
+      {
+        "av": 107,
+        "base": 0.0
+      },
+      {
+        "av": 108,
+        "base": 0.0
+      },
+      {
+        "av": 109,
+        "base": 0.0
+      },
+      {
+        "av": 110,
+        "base": 0.0
+      },
+      {
+        "av": 111,
+        "base": 0.0
+      },
+      {
+        "av": 112,
+        "base": 0.0
+      },
+      {
+        "av": 113,
+        "base": 0.0
+      },
+      {
+        "av": 114,
+        "base": 0.0
+      },
+      {
+        "av": 115,
+        "base": 0.0
+      },
+      {
+        "av": 116,
+        "base": 0.0
+      },
+      {
+        "av": 117,
+        "base": 0.0
+      },
+      {
+        "av": 118,
+        "base": 0.0
+      },
+      {
+        "av": 119,
+        "base": 0.0
+      },
+      {
+        "av": 120,
+        "base": 0.0
+      },
+      {
+        "av": 121,
+        "base": 0.0
+      },
+      {
+        "av": 122,
+        "base": 0.0
+      },
+      {
+        "av": 123,
+        "base": 0.0
+      },
+      {
+        "av": 124,
+        "base": 0.0
+      },
+      {
+        "av": 125,
+        "base": 0.0
+      },
+      {
+        "av": 126,
+        "base": 0.0
+      },
+      {
+        "av": 127,
+        "base": 0.0
+      },
+      {
+        "av": 128,
+        "base": 0.0
+      },
+      {
+        "av": 129,
+        "base": 0.0
+      },
+      {
+        "av": 130,
+        "base": 0.0
+      },
+      {
+        "av": 131,
+        "base": 0.0
+      },
+      {
+        "av": 132,
+        "base": 0.0
+      },
+      {
+        "av": 133,
+        "base": 0.0
+      },
+      {
+        "av": 134,
+        "base": 0.0
+      },
+      {
+        "av": 135,
+        "base": 0.0
+      },
+      {
+        "av": 136,
+        "base": 0.0
+      },
+      {
+        "av": 137,
+        "base": 0.0
+      },
+      {
+        "av": 138,
+        "base": 0.0
+      },
+      {
+        "av": 139,
+        "base": 0.0
+      },
+      {
+        "av": 140,
+        "base": 0.0
+      },
+      {
+        "av": 141,
+        "base": 0.0
+      },
+      {
+        "av": 142,
+        "base": 0.0
+      },
+      {
+        "av": 143,
+        "base": 0.0
+      },
+      {
+        "av": 144,
+        "base": 0.0
+      },
+      {
+        "av": 145,
+        "base": 0.0
+      },
+      {
+        "av": 146,
+        "base": 0.0
+      },
+      {
+        "av": 147,
+        "base": 0.0
+      },
+      {
+        "av": 148,
+        "base": 0.0
+      },
+      {
+        "av": 149,
+        "base": 0.0
+      },
+      {
+        "av": 150,
+        "base": 0.0
+      },
+      {
+        "av": 151,
+        "base": 0.0
+      },
+      {
+        "av": 152,
+        "base": 0.0
+      },
+      {
+        "av": 153,
+        "base": 0.0
+      },
+      {
+        "av": 154,
+        "base": 1.0
+      },
+      {
+        "av": 155,
+        "base": 100.0
+      },
+      {
+        "av": 156,
+        "base": 100.0
+      },
+      {
+        "av": 157,
+        "base": 100.0
+      },
+      {
+        "av": 158,
+        "base": 0.0
+      },
+      {
+        "av": 159,
+        "base": 0.0
+      },
+      {
+        "av": 160,
+        "base": 0.0
+      },
+      {
+        "av": 161,
+        "base": 0.0
+      },
+      {
+        "av": 162,
+        "base": 0.0
+      },
+      {
+        "av": 163,
+        "base": 0.0
+      }
+    ],
+    "legendary": [],
+    "level": 1,
+    "skills": [
+      {
+        "level": 20.0,
+        "skill": 0,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 25.0,
+        "skill": 1,
+        "threshold": 1064.175048828125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 2,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 3,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 4,
+        "threshold": 386.08917236328125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 5,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 6,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 7,
+        "threshold": 299.1267395019531,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 8,
+        "threshold": 349.1267395019531,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 9,
+        "threshold": 218.2534942626953,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 10,
+        "threshold": 379.41119384765625,
+        "xp": 0.0
+      },
+      {
+        "level": 20.0,
+        "skill": 11,
+        "threshold": 688.7134399414063,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 12,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 13,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 14,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 15,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 16,
+        "threshold": 393.01397705078125,
+        "xp": 0.0
+      },
+      {
+        "level": 15.0,
+        "skill": 17,
+        "threshold": 366.5069885253906,
+        "xp": 0.0
+      }
+    ],
+    "threshold": 100.0,
+    "xp": 0.0
+  },
+  "angle": [
+    43.99790573120117,
+    0.0,
+    238.7484893798828
+  ],
+  "appearanceDump": {
+    "hairColor": 3685164,
+    "headTextureSetId": 242977,
+    "headpartIds": [
+      333359,
+      333361,
+      546143,
+      333063,
+      333061,
+      331956,
+      148036,
+      333064
+    ],
+    "isFemale": false,
+    "name": "Prisoner",
+    "options": [
+      0.05999999865889549,
+      0.10000000149011612,
+      0.07999999821186066,
+      -1.0,
+      0.03999999910593033,
+      0.019999999552965164,
+      0.5,
+      0.5,
+      -0.05999999865889549,
+      -1.0,
+      0.0,
+      -0.23999999463558197,
+      0.6600000262260437,
+      0.1599999964237213,
+      -0.3400000035762787,
+      -0.4000000059604645,
+      0.18000000715255737,
+      -0.6399999856948853,
+      3.4028234663852886e+38
+    ],
+    "presets": [
+      1.0,
+      -1.0,
+      1.0,
+      19.0
+    ],
+    "raceId": 79686,
+    "skinColor": 13021352,
+    "tints": [
+      {
+        "argb": -3755864,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\SkinTone.dds",
+        "type": 6
+      },
+      {
+        "argb": 1799554049,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleUpperEyeSocket.dds",
+        "type": 4
+      },
+      {
+        "argb": 1621709906,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleLowerEyeSocket.dds",
+        "type": 5
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Cheeks.dds",
+        "type": 2
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Cheeks2.dds",
+        "type": 9
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_FrownLines.dds",
+        "type": 8
+      },
+      {
+        "argb": 816403538,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNord_Lips.dds",
+        "type": 1
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Nose.dds",
+        "type": 10
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadHuman_ForeHead.dds",
+        "type": 13
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadHuman_Chin.dds",
+        "type": 11
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadHuman_Neck.dds",
+        "type": 12
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHead_Frekles_01.dds",
+        "type": 0
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_01.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_02.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_03.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_04.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_05.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_06.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_07.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_08.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_09.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadWarPaint_10.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_01.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_02.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_03.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_04.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadNordWarPaint_05.dds",
+        "type": 7
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadBothiahTattoo_01.dds",
+        "type": 0
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadBlackBloodTattoo_01.dds",
+        "type": 0
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadBlackBloodTattoo_02.dds",
+        "type": 0
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\RedGuardMaleEyeLinerStyle_01.dds",
+        "type": 3
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadDirt_01.dds",
+        "type": 14
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadDirt_02.dds",
+        "type": 14
+      },
+      {
+        "argb": 16777215,
+        "texturePath": "Actors\\Character\\Character Assets\\TintMasks\\MaleHeadDirt_03.dds",
+        "type": 14
+      }
+    ],
+    "weight": 75.0
+  },
+  "baseContainerAdded": true,
+  "baseDesc": "7:Skyrim.esm",
+  "consoleCommandsAllowed": false,
+  "count": 0,
+  "dynamicFields": {
+    "private.discordRoles": []
+  },
+  "effects": [],
+  "equipmentDump": {
+    "instantSpell": 0,
+    "inv": {
+      "entries": [
+        {
+          "baseId": 77382,
+          "count": 1,
+          "worn": true
+        },
+        {
+          "baseId": 77385,
+          "count": 1,
+          "worn": true
+        },
+        {
+          "baseId": 77387,
+          "count": 1,
+          "worn": true
+        },
+        {
+          "baseId": 80253,
+          "count": 1,
+          "worn": true
+        }
+      ]
+    },
+    "leftSpell": 201370344,
+    "numChanges": 6,
+    "rightSpell": 77776,
+    "voiceSpell": 207136
+  },
+  "formDesc": "1",
+  "healthPercentage": 0.993674099445343,
+  "healthRespawnPercentage": 1.0,
+  "ingredientEffects": {
+    "entries": [
+      {
+        "formDesc": "81e:ccBGSSSE037-Curios.esl",
+        "mask": 1
+      }
+    ]
+  },
+  "inv": {
+    "entries": [
+      {
+        "baseId": 10,
+        "count": 10
+      },
+      {
+        "baseId": 15,
+        "count": 140
+      },
+      {
+        "baseId": 77382,
+        "count": 1
+      },
+      {
+        "baseId": 77385,
+        "count": 1
+      },
+      {
+        "baseId": 77387,
+        "count": 1
+      },
+      {
+        "baseId": 77389,
+        "count": 4
+      },
+      {
+        "baseId": 77494,
+        "count": 2
+      },
+      {
+        "baseId": 77495,
+        "count": 2
+      },
+      {
+        "baseId": 79760,
+        "count": 1
+      },
+      {
+        "baseId": 80253,
+        "count": 54
+      },
+      {
+        "baseId": 80254,
+        "count": 1
+      },
+      {
+        "baseId": 120044,
+        "count": 2
+      },
+      {
+        "baseId": 236362,
+        "count": 2
+      },
+      {
+        "baseId": 243042,
+        "count": 2
+      },
+      {
+        "baseId": 256733,
+        "count": 6
+      },
+      {
+        "baseId": 256736,
+        "count": 5
+      },
+      {
+        "baseId": 256741,
+        "count": 5
+      },
+      {
+        "baseId": 256810,
+        "count": 1
+      },
+      {
+        "baseId": 256819,
+        "count": 1
+      },
+      {
+        "baseId": 1017598,
+        "count": 1
+      },
+      {
+        "baseId": 285736,
+        "count": 3
+      },
+      {
+        "baseId": 491036,
+        "count": 3
+      },
+      {
+        "baseId": 307386,
+        "count": 3
+      },
+      {
+        "baseId": 80265,
+        "count": 1
+      },
+      {
+        "baseId": 4261419038,
+        "count": 1
+      },
+      {
+        "baseId": 363771,
+        "count": 1
+      }
+    ]
+  },
+  "isDead": false,
+  "isDeleted": false,
+  "isDisabled": false,
+  "isHarvested": false,
+  "isOpen": false,
+  "isRaceMenuOpen": false,
+  "learnedSpells": [
+    77776,
+    163510,
+    241311,
+    275236,
+    372060,
+    185239263,
+    201332845,
+    201370344,
+    201454075,
+    201477705,
+    201516596,
+    201714926,
+    201865762,
+    201885332
+  ],
+  "magickaPercentage": 1.0,
+  "magickaRespawnPercentage": 1.0,
+  "mapMarkers": {
+    "entries": [
+      {
+        "canTravel": true,
+        "formDesc": "162a4:Skyrim.esm"
+      }
+    ]
+  },
+  "nextRelootDatetime": 0,
+  "position": [
+    117509.8046875,
+    -82068.2265625,
+    11001.8291015625
+  ],
+  "profileId": 2,
+  "raceMenuPreset": "{\n   \"actor\" : {\n      \"hairColor\" : 3685164,\n      \"headTexture\" : \"Skyrim.esm|03B521\",\n      \"weight\" : 75\n   },\n   \"faceTextures\" : [\n      {\n         \"index\" : 0,\n         \"texture\" : \"Actors\\\\Character\\\\Male\\\\MaleHead.dds\"\n      },\n      {\n         \"index\" : 1,\n         \"texture\" : \"Actors\\\\Character\\\\Male\\\\MaleHead_msn.dds\"\n      },\n      {\n         \"index\" : 2,\n         \"texture\" : \"Actors\\\\Character\\\\Male\\\\MaleHead_sk.dds\"\n      },\n      {\n         \"index\" : 3,\n         \"texture\" : \"Actors\\\\Character\\\\Male\\\\BlankDetailmap.dds\"\n      },\n      {\n         \"index\" : 7,\n         \"texture\" : \"Actors\\\\Character\\\\Male\\\\MaleHead_S.dds\"\n      }\n   ],\n   \"headParts\" : [\n      {\n         \"formId\" : 333361,\n         \"formIdentifier\" : \"Skyrim.esm|051631\",\n         \"type\" : 0\n      },\n      {\n         \"formId\" : 333359,\n         \"formIdentifier\" : \"Skyrim.esm|05162F\",\n         \"type\" : 1\n      },\n      {\n         \"formId\" : 546143,\n         \"formIdentifier\" : \"Skyrim.esm|08555F\",\n         \"type\" : 2\n      },\n      {\n         \"formId\" : 333063,\n         \"formIdentifier\" : \"Skyrim.esm|051507\",\n         \"type\" : 3\n      },\n      {\n         \"formId\" : 331956,\n         \"formIdentifier\" : \"Skyrim.esm|0510B4\",\n         \"type\" : 5\n      },\n      {\n         \"formId\" : 148036,\n         \"formIdentifier\" : \"Skyrim.esm|024244\",\n         \"type\" : 6\n      },\n      {\n         \"formId\" : 333064,\n         \"formIdentifier\" : \"Skyrim.esm|051508\",\n         \"type\" : 7\n      }\n   ],\n   \"modNames\" : [ \"Skyrim.esm\" ],\n   \"mods\" : [\n      {\n         \"index\" : 0,\n         \"name\" : \"Skyrim.esm\"\n      }\n   ],\n   \"morphs\" : {\n      \"custom\" : null,\n      \"default\" : {\n         \"morphs\" : [\n            0.05999999865889549,\n            0.1000000014901161,\n            0.07999999821186066,\n            -1,\n            0.03999999910593033,\n            0.01999999955296516,\n            0.5,\n            0.5,\n            -0.05999999865889549,\n            -1,\n            0,\n            -0.239999994635582,\n            0.6600000262260437,\n            0.1599999964237213,\n            -0.3400000035762787,\n            -0.4000000059604645,\n            0.1800000071525574,\n            -0.6399999856948853,\n            3.402823466385289e+38\n         ],\n         \"presets\" : [ 1, 4294967295, 1, 19 ]\n      },\n      \"sculpt\" : null,\n      \"sculptDivisor\" : 10000\n   },\n   \"tintInfo\" : [\n      {\n         \"color\" : 4291211432,\n         \"index\" : 0,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\SkinTone.dds\"\n      },\n      {\n         \"color\" : 1799554049,\n         \"index\" : 1,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\MaleUpperEyeSocket.dds\"\n      },\n      {\n         \"color\" : 1621709906,\n         \"index\" : 2,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\MaleLowerEyeSocket.dds\"\n      },\n      {\n         \"color\" : 16777215,\n         \"index\" : 3,\n         \"texture\" : \"Actors\\\\Character\\\\Character Assets\\\\TintMasks\\\\MaleHeadNord_Lips.dds\"\n      }\n   ],\n   \"version\" : {\n      \"formatVersion\" : 3,\n      \"runtimeVersion\" : 17039392,\n      \"signature\" : 1163086675,\n      \"skseVersion\" : 33685600\n   }\n}\n",
+  "recType": 1,
+  "shoutRecord": {
+    "shouts": [
+      "32920:Skyrim.esm"
+    ],
+    "wordsKnown": [
+      "32917:Skyrim.esm"
+    ],
+    "wordsUnlocked": [
+      "32917:Skyrim.esm"
+    ]
+  },
+  "spawnDelay": 25.0,
+  "spawnPoint_cellOrWorldDesc": "3c:Skyrim.esm",
+  "spawnPoint_pos": [
+    133857.0,
+    -61130.0,
+    14662.0
+  ],
+  "spawnPoint_rot": [
+    0.0,
+    0.0,
+    72.0
+  ],
+  "staffRank": 2,
+  "staminaPercentage": 1.0,
+  "staminaRespawnPercentage": 1.0,
+  "worldOrCellDesc": "3c:Skyrim.esm"
+}
