@@ -1375,7 +1375,7 @@ propagating. The records say otherwise, and split the finding in four.
   the hook point, static) and Eli's seat (the Frida read).
 
 
-## Train-29 (2026-10-20 night; fork m2-train-29 18c0e603 on parity 602a2dd2; the rows of docs/research/train-29-rows.md)
+## Train-29 (2026-10-20 night; fork m2-train-29 18c0e603 on parity 602a2dd2; the rows of docs/research/train-29-rows.md; MERGED to parity 4720d0d3 at 13:40, gate 10 of 10)
 
 Built overnight on Eli's word ("go ahead and run tonight to do the biggest
 lump"), each row from the reads of 2026-10-19, for the morning's stage
