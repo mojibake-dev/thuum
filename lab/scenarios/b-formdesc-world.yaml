@@ -1,0 +1,106 @@
+# b-formdesc-world (thuum docs/DECISIONS.md ADR-043, hard rule 6: the
+# schema change of slice one, fork m2-formdesc-world d0693ef4, ships with a
+# migration AND this restart-persistence scenario). A world saved in the raw
+# shape under one load order is read by a server running another: every
+# stored form keeps the meaning it had when it was written, and a server
+# restart keeps the result. The world is the committed fixture
+# lab/fixtures/worlds/adr043-preslice-25 (its README): the eight records of
+# playtest twenty-five's world (2026-10-19, raw slot ids, no formVersion)
+# beside a hand-written load-order.json naming the 17-plugin order they were
+# written under (rotfern.esp 08, LostGrimoire.esp 0B, Apocalypse 0C, Rare
+# Curios FE001). `server: world:` restores it into the server's world/
+# before the start (lab-api's restore comes beside this scenario). The
+# server then runs the lab's deployed order; at its first load the slice
+# re-bases each raw record from the fixture's order (RecordReader) and
+# writes it back as version 2, and the restart reads the plugin-relative
+# records. c1 is profile 1 (test 1, "rotfern": rotfern race, Finger of Death
+# in the left hand), c2 profile 2 ("Prisoner", a Nord: Ghostwalk left,
+# Firebolt right, one Sload Soap), as the lab's clones log in.
+# Every mod form is named as a FormDesc, "<local hex>:<plugin>", so lab-api
+# composes the run's id from the running order (docs/LAB.md, slots.py) and
+# the assert is the same under any layer. What the raw id would have meant
+# had the migration taken it as the running order's, under the essentials
+# layer (Apocalypse 0C to 1A, LostGrimoire 0B to 28, rotfern.esp 08 to 2F;
+# ADR-043, LAB.md): rotfern's race 0x0800AA00 reads as GeneralDisplays.esm
+# aa00 (no race: the record would be skipped and c1 would land in the race
+# menu as a Nord), Finger of Death 0x0C035452 and Ghostwalk 0x0C00AAE8 as
+# Cloaks - Dawnguard.esp forms (no spells: Actor.HasSpell false, the hands
+# empty), Teleportation 0x0B0A86DF as Cloaks.esp a86df. The Sload Soap
+# 0xFE00181E keeps FE001 under both orders (a control for the light
+# numbering), Firebolt, the steel swords and the gold are Skyrim.esm
+# (controls for the record loading at all). Under main's own order, which
+# is the fixture's (main 916860e), the re-base is from A to A and these hold
+# with or without the migration: the scenario proves it only on a stage
+# whose order differs (ADR-043's stacked snapshot, the layer's).
+# Relaunch, not reconnect, after the restart: a fresh save proves the
+# server's record (a-light-plugin, a-racemenu), and the reconnect spell loss
+# of b-spells-reconnect (Train-30) would otherwise mask a spell assert.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-formdesc-world
+milestone: M2
+game: 1.6.1170
+clients: [c1, c2]
+server:
+  world: adr043-preslice-25
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: known {ids: ["35452:Apocalypse - Magic of Skyrim.esp", "a86df:LostGrimoire.esp", "12fd0:Skyrim.esm"]}
+  - c2: known {ids: ["aae8:Apocalypse - Magic of Skyrim.esp", "a86df:LostGrimoire.esp", "81e:ccBGSSSE037-Curios.esl"]}
+  - c1: head-parts
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      # the appearance: rotfern's race and head parts, on the server's record, in c1's own game, on c2's figure of c1
+      - server.actor(c1).raceId == form("aa00:rotfern.esp")
+      - c1.state.raceId == form("aa00:rotfern.esp")
+      - c2.view(c1).raceId == form("aa00:rotfern.esp")
+      - server.actor(c1).headParts == c1.head_parts()
+      # learned spells: one Apocalypse spell per player, Lost Grimoire's Teleportation on both, Firebolt as the Skyrim.esm control
+      - c1.known(form("35452:Apocalypse - Magic of Skyrim.esp")) == 1
+      - c1.known(form("a86df:LostGrimoire.esp")) == 1
+      - c1.known(form("12fd0:Skyrim.esm")) == 1
+      - c2.known(form("aae8:Apocalypse - Magic of Skyrim.esp")) == 1
+      - c2.known(form("a86df:LostGrimoire.esp")) == 1
+      # the equipment's spell slots (skymp5-client sync/equipment.ts equips the record's hand spells)
+      - c1.state.equippedLeft == form("35452:Apocalypse - Magic of Skyrim.esp")
+      - c2.state.equippedLeft == form("aae8:Apocalypse - Magic of Skyrim.esp")
+      - c2.state.equippedRight == form("12fd0:Skyrim.esm")
+      # the inventory: the light plugin's ingredient and the record's learned effect of it (already a FormDesc, untouched by the migration), two Skyrim.esm controls
+      - server.inventory(c2).count("81e:ccBGSSSE037-Curios.esl") == 1
+      - c2.known(form("81e:ccBGSSSE037-Curios.esl")) == 1
+      - server.inventory(c1).count("Skyrim.esm:SteelSword") == 1
+      - server.inventory(c2).count("Skyrim.esm:SteelSword") == 1
+      - server.inventory(c1).count("Skyrim.esm:Gold001") == 140
+  - server: restart
+  - wait: 20
+  - c1: relaunch
+  - c2: relaunch
+  - wait: 12
+  - c1: known {ids: ["35452:Apocalypse - Magic of Skyrim.esp", "a86df:LostGrimoire.esp", "12fd0:Skyrim.esm"]}
+  - c2: known {ids: ["aae8:Apocalypse - Magic of Skyrim.esp", "a86df:LostGrimoire.esp", "81e:ccBGSSSE037-Curios.esl"]}
+  - c1: head-parts
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - server.actor(c1).raceId == form("aa00:rotfern.esp")
+      - c1.state.raceId == form("aa00:rotfern.esp")
+      - c2.view(c1).raceId == form("aa00:rotfern.esp")
+      - server.actor(c1).headParts == c1.head_parts()
+      - c1.known(form("35452:Apocalypse - Magic of Skyrim.esp")) == 1
+      - c1.known(form("a86df:LostGrimoire.esp")) == 1
+      - c1.known(form("12fd0:Skyrim.esm")) == 1
+      - c2.known(form("aae8:Apocalypse - Magic of Skyrim.esp")) == 1
+      - c2.known(form("a86df:LostGrimoire.esp")) == 1
+      - c1.state.equippedLeft == form("35452:Apocalypse - Magic of Skyrim.esp")
+      - c2.state.equippedLeft == form("aae8:Apocalypse - Magic of Skyrim.esp")
+      - c2.state.equippedRight == form("12fd0:Skyrim.esm")
+      - server.inventory(c2).count("81e:ccBGSSSE037-Curios.esl") == 1
+      - c2.known(form("81e:ccBGSSSE037-Curios.esl")) == 1
+      - server.inventory(c1).count("Skyrim.esm:SteelSword") == 1
+      - server.inventory(c2).count("Skyrim.esm:SteelSword") == 1
+      - server.inventory(c1).count("Skyrim.esm:Gold001") == 140
+artifacts: [server.log, c1.log, c2.log, world-diff]
