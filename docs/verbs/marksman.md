@@ -378,6 +378,11 @@ arrow spent). Two findings:
   them; c2's game played only bowAttackStart on the shooter's figure (no
   release event is relayed), so a figure's own arrow would be the engine
   finishing that attack by itself. CONFIRMED by x-double-arrow2
+  Read on 2026-10-20 (train-29's refs-near step): SKSE's Cell.GetNumRefs
+  and GetNthRef filter on the BASE form's type (skse64 PapyrusCell.cpp:25,
+  :46), and the arrows step asks for the reference class 0x40 PARW, which
+  no base form has, so it always answers 0; a count of arrows in flight
+  wants PROJ 50 (every projectile) filtered by base id.
   20261012-022726 with lab/frida/launch-trace.js on the target: for one
   shot the server took, the target's game called Projectile::Launch twice,
   once from the engine alone (the figure's bow) and once through
