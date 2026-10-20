@@ -107,6 +107,12 @@ class ServerState:
         body = self._backend.rpc("labState", {"kind": "time"})
         return body if body.get("found") else None
 
+    def spell(self, form_id: int) -> dict[str, Any] | None:
+        """A spell's effects and their MGEFs as the server's espm resolves them
+        (labState kind spell), or None for a form the server does not load."""
+        body = self._backend.rpc("labState", {"kind": "spell", "formId": int(form_id)})
+        return body if body.get("found") else None
+
     def inventory(self, client: str) -> list[dict[str, Any]] | None:
         body = self._backend.rpc("labState", {"kind": "inventory", "profileId": self._profile(client)})
         if not body.get("found"):
