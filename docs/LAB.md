@@ -458,6 +458,16 @@ to 207 End, lab/deploy/sky-client/controlmap.ps1, since SKSE's HoldKey on a
 mouse button does nothing), arrows (how many arrow projectiles stand in the
 player's cell: a count only, since any call on a projectile reference
 aborts),
+refs-near {radius, from: self | other, formTypes: [...], ids: [...]} (what
+stands within the radius of the player, or with `from: other` of the
+nearest other actor, by base type through the origin's parent cell with
+SKSE's Cell.GetNumRefs and GetNthRef, which filter on the base form's type:
+24 ACTI, 50 PROJ, 51 HAZD, never a reference class such as 65 PGRE, which
+matches no base and answers 0 with a note; each listed reference's form id,
+base, base type, disabled and deleted flags, position and distance, nearest
+first; 50 PROJ counts only, since any call on a projectile reference
+aborts; `ids` are bases searched the projectiles step's way; the whole
+answer lands in steps/<n>-<client>-refs-near.json),
 set-gmst {name, value} and set-av {name, value} (what a player's console
 does with setgs and setav, in this client only: a validation verb's
 negative control), close-menu
@@ -607,7 +617,13 @@ hotkey}` step marks one as the player would), `c.projectile(<form id>)`
 reference of that projectile base, a PROJ, nearest its player lies in its
 own game, or with `other: true` nearest its figure of the other player,
 as `distance`; Papyrus reads no position of a projectile, so the step
-narrows the search's radius; docs/verbs/marksman.md), and
+narrows the search's radius; docs/verbs/marksman.md), `c.refs_near()`
+(the client's last `refs-near {radius, from, formTypes, ids}` step:
+`.count(<base type>)` how many references of that type stood within the
+radius, the cell's count for 50 PROJ; `.has(<base id>)` whether one of
+that base stood there, listed under its type or found by the ids search;
+`.distance(<base id>)` how far the nearest one lies, none a data error;
+docs/research/train-29-rows.md row 7c), and
 `form("File.esm:EditorID")` through lab-api's item table. A mod's record is
 named as skymp's FormDesc names it, its local id and its plugin,
 `"aae8:Apocalypse - Magic of Skyrim.esp"` (the shape the server's settings and
