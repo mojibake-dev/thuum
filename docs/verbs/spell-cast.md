@@ -1481,12 +1481,10 @@ gate and the merges after).
   spell LaunchData constructor sets (useOrigin true, autoAim false,
   Projectile.cpp:220-221), and the arrival then takes a different branch of
   44217 for each (+0x247 against +0x1c3). Built the same night on
-  m2-train-29: a relayed launch with delivery kTargetLocation takes the
-  engine's pair (MagicApi.cpp). HYPOTHESIS until the probe reruns on that
-  build: bit 21 on the observer's rune, the arrival from the caster's
-  branch, the glyph in c2's screenshot; the probe's distance line catches a
-  rune moved to the figure's hand, and x-lightning-strike measures the
-  lobber on the same path. The static read then came in (the re-analyst on
+  m2-train-29 as a relayed launch with delivery kTargetLocation taking the
+  engine's pair (99c39e3e), measured on its stage and REVERTED (d34053e0):
+  no glyph, and the static read says why the flags could not matter. The
+  static read then came in (the re-analyst on
   REA the same night, docs/research/re-37335-and-rune-landing.md, question
   2; HYPOTHESIS from pseudocode): 44163 is not an arrival but the trigger
   test's per-candidate validity check (44217 calls it for each nearby actor
@@ -1494,10 +1492,12 @@ gate and the merges after).
   +0x1c3 is WHICH actor stood within 150 units (the caster's own player on
   c1, the caster's figure on c2), not a shooter branch; both returned 0
   because the candidate was the shooter (iProjectileMineShooterCanTrigger
-  0). The flag flip is predicted a no-op for a figure's rune: Launch sets
-  kAutoAim only for a player shooter, and kUseOrigin's one reader is the
-  position snap for non-grenades; the probe on 99c39e3e decides, and if no
-  glyph shows the commit is reverted. 43919 is the grenade's Havok
+  0). The flag flip was a no-op, as predicted: Launch sets kAutoAim only for
+  a player shooter, and kUseOrigin's one reader is the position snap for
+  non-grenades; on 99c39e3e's own stage x-rune-visible-frida2
+  20261020-101636 showed no glyph in the observer's view at any of four
+  marks, and the commit is reverted (m2-train-29 d34053e0; the projectile
+  pick stays). 43919 is the grenade's Havok
   deactivation callback and 44213 is fed by the collision landing; a
   target-location rune is born at rest (speed 0) in both games, so neither
   runs anywhere, as measured. The glyph is a DECAL: the caster's own
