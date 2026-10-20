@@ -250,11 +250,14 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
   (InstallDamageActorHook), Hooks.cpp's FigureHealthDamage removed.
   HYPOTHESIS until the hit steps run: the replacement's calling convention
   is the function's (Windows x64, the float second argument in XMM1) and the
-  figure's hit reactions stay. T3 for it: b-figure-values gains three sword
-  hits on c2's figure with `c1.watched(c2).rises("health") == 0` (a count of
-  the rises in the watched health series the driver already records, a
-  lab-api read to add) beside the probe's weak asserts; its stage follows
-  the spells branch. The alternative, MagicTarget::
+  figure's hit reactions stay. T3 for it, landed 2026-10-20 13:38:
+  b-figure-values gains three sword hits on c2's figure with
+  `c1.watched(c2).rises("health") == 0` (lab-api rises(), the count of the
+  rises in the watched health series the driver records, main b7b0429),
+  `server.actor(c2).healthPercentage < 0.99` and the bar at the server's
+  percentage (scenario 52f06e1e, main 5f64b26; in gate.yaml's pending
+  until the dent branch stages, after the spells branch). The alternative,
+  MagicTarget::
   IsInvulnerable's vfunc on Character (37335's first gate), is rejected
   for its reach: invulnerability is read by the magic system too and would
   touch the figure's imposed effects (HYPOTHESIS). T3: x-figure-values-hit
