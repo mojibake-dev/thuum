@@ -217,6 +217,50 @@ it (an outfit, a hotkey chug) and a refusal leaves a drink unconsumed
 - Side effects: a poison hitting the player from an NPC's weapon applies
   nothing either, until the poison verb (the server takes no poison yet).
 
+## Resistance (train-30, 2026-10-20)
+
+The server imposes another actor's Health, Magicka and Stamina damage on a
+player (R0: remoteServer.ts takes the server's percentages, and Skyrim
+Platform's AddTarget hook refuses those value effects when another actor
+cast them, Hooks.cpp), so the engine's own resistance never runs on them:
+Hailstone's 30 on a Nord would land whole where the engine halves frost
+damage. The rule, built on fork m2-train30-resist 8219604e (stacked on
+m2-train30-conditions, whose GetActorValue and race-ability modifier it
+reads):
+
+- Only a Hostile effect is resisted (MGEF flag 0x1, libespm MGEF.h). A spell
+  flagged IgnoreResistance (SPEL flags 0x100000, libespm SPEL.h) is not.
+- The element's resist value is the MGEF's ResistanceAV (DATA 0x10, UESP
+  "Skyrim Mod:Mod File Format/MGEF": "generally 39-45 or -1"; libespm reads
+  it since this branch as `resistValue`), read on the target as its current
+  value (MpActor::GetCurrentActorValue: the recorded base plus the one
+  modifier, the race's abilities included, so a Nord's 50 ResistFrost
+  counts). Magic Resistance (ResistMagic 44, CommonLibSSE-NG ActorValues.h)
+  applies to a spell's or an enchantment's effect and not to a poison's or
+  a potion's (an ALCH source).
+- Each is a percentage off, the element after the magic (UESP
+  "Skyrim:Resist Frost": "applied after damage reduction from Resist
+  Magic"; 85 and 85 leave 2.25 of 100), capped at the player's 85
+  (fPlayerMaxResistance's executable default, which the masters do not set:
+  ActionListener BlockSettingsOf's constant, ghidra/notes/block-formula.md)
+  and at 100 for an NPC (immunity); a negative value is a weakness that
+  adds. wire-rules magic.rs `resistance_factor(element, magic, cap)`,
+  tested; the bridge exports it.
+- The factor scales the effect's magnitude at the one entry
+  (MpActor::ResistanceFactorOf, multiplied into apply_effect's scale in
+  ApplyEffects and into the MagicEffects copy), so a running entry keeps
+  the resisted magnitude and a dual value modifier's second value follows
+  the first; it never touches the race abilities' facts.
+- T0: unit/ResistanceTest.cpp, Firebolt's 25 on a player's record of Resist
+  Fire and Resist Magic (0.75, 0.875, 0.9375, the cap holding 100 at 85, a
+  weakness at 0.5), and a Fortify Health potion untouched under Resist
+  Magic. T3: x-hailstone (both seats, the Nord's 15 and the Orc's 15 by
+  different paths) on the branch's stage, then b-hailstone as its scenario.
+- HYPOTHESIS until x-hailstone: the engine's order and cap for a dual value
+  modifier's second value (the Stamina half of Hailstone), and whether the
+  engine resists a Self spell's own hostile effect on its caster the same
+  way (the server does).
+
 ## Message contract
 
 - MagicEffects, MsgType 43 (the next after ArrowShot's 42), server to

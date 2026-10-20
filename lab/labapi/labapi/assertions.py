@@ -91,6 +91,7 @@ class ServerFacade(Protocol):
     def inventory(self, client: str) -> list[dict[str, Any]] | None: ...
     def base_id(self, spec: str) -> int: ...
     def time(self) -> dict[str, Any] | None: ...
+    def spell(self, form_id: int) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -567,6 +568,61 @@ class TimeView:
     timeScale: float
 
 
+@dataclass(frozen=True)
+class SpellView:
+    """server.spell(id): the Health damage a spell's served record deals on a hit,
+    by the server's own rule (labState kind spell; skymp5-server MpActor.cpp
+    ApplyEffects and wire-rules magic.rs). magnitude is what lands at once,
+    overTime what its lasting effects deal over their durations, conditional how
+    many Health effects carry a condition (theirs not counted: the server
+    evaluates them, and refuses one whose function it lacks, a perk rider's
+    HasPerk), effects how many effects the record has. A scenario under a layer
+    asserts against magnitude instead of a vanilla constant."""
+
+    magnitude: float
+    overTime: float
+    conditional: int
+    effects: int
+
+
+# The server counts only these archetypes as changing a value (MpActor.cpp:2448-2471):
+# ValueMod 0, Dual 5, PeakValueMod 34 (libespm MGEF.h EffectType); Health is actor value
+# 24 (libespm ActorValue.h:33); the sign is Detrimental's alone (MGEF.h Flags 0x4,
+# magic.rs sign()); an effect lands at once when it has no duration (duration <= 0 or
+# the MGEF's NoDuration 0x200), else it deals magnitude per second over its duration
+# (magic.rs:176, 193, 207-219); the amount is max(0, magnitude) (magic.rs:173).
+SPELL_VALUE_ARCHETYPES = (0, 5, 34)
+SPELL_DUAL = 5
+AV_HEALTH = 24
+MGEF_DETRIMENTAL = 0x4
+MGEF_NO_DURATION = 0x200
+
+
+def _spell_view(d: dict[str, Any]) -> SpellView:
+    mgefs = d.get("mgefs") or {}
+    now = later = 0.0
+    conditional = 0
+    effects = d.get("effects") or []
+    for e in effects:
+        m = mgefs.get(str(int(e["mgef"])))
+        if not m or int(m["archetype"]) not in SPELL_VALUE_ARCHETYPES or not int(m["flags"]) & MGEF_DETRIMENTAL:
+            continue
+        weight = 1.0 if int(m["primaryAV"]) == AV_HEALTH else 0.0
+        if int(m["archetype"]) == SPELL_DUAL and int(m.get("secondaryAV", -1)) == AV_HEALTH:
+            weight += float(m.get("secondAVWeight") or 0.0)
+        if weight == 0.0:
+            continue
+        if int(e.get("conditions") or 0) or int(m.get("conditions") or 0):
+            conditional += 1
+            continue
+        amount = max(0.0, float(e["magnitude"])) * weight
+        if int(e.get("duration") or 0) <= 0 or int(m["flags"]) & MGEF_NO_DURATION:
+            now += amount
+        else:
+            later += amount * int(e["duration"])
+    return SpellView(magnitude=now, overTime=later, conditional=conditional, effects=len(effects))
+
+
 
 class AvView:
     """An av-read step's values (thuum docs/verbs/figure-values.md): for
@@ -758,6 +814,17 @@ class _ServerRef:
                             float(d["daysPassed"]), float(d["timeScale"]))
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"game clock lacks {e}") from e
+
+    def spell(self, spec) -> SpellView:
+        form_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
+        fn = getattr(self._f, "spell", None)
+        d = fn(form_id) if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData(f"server resolves no spell {form_id:#x}")
+        try:
+            return _spell_view(d)
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"spell {form_id:#x}'s record lacks {e}") from e
 
     def inventory(self, client: str) -> InventoryView:
         entries = self._f.inventory(client)
@@ -1375,6 +1442,7 @@ _ATTRS = {
     SkillView: {"base", "xp", "legendary"},
     PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
+    SpellView: {"magnitude", "overTime", "conditional", "effects"},
     AvView: {"health", "magicka", "stamina", "healthCurrent", "magickaCurrent", "staminaCurrent",
              "healthMax", "magickaMax", "staminaMax", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
@@ -1396,6 +1464,7 @@ _ID_METHODS = {
 _FORM_SPEC_METHODS = {
     WatchView: {"launched"},
     SelfWatchView: {"launched"},
+    _ServerRef: {"spell"},
 }
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {
@@ -1407,7 +1476,7 @@ _NULLARY = {
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "effects", "time"},
+    _ServerRef: {"actor", "inventory", "effects", "time", "spell"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance"},

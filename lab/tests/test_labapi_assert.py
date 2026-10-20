@@ -1064,3 +1064,54 @@ class DropTests(unittest.TestCase):
         ev = Evaluator(RichServer(), self.views([[0, True]]), ["c1", "c2"])
         with self.assertRaises(AssertionData):
             ev.evaluate('c2.watched(c1).drops("av:Ethereal") == 0')
+
+
+class SpellServer(RichServer):
+    """labState spell answers in the gamemode's shape (lab/gamemode/gamemode.js state.spell)."""
+
+    def __init__(self):
+        super().__init__()
+        H, DET = 24, 0x5          # Health; Hostile | Detrimental
+        mg = lambda flags, arch, av, cond=0, second=-1, weight=0.0: {
+            "editorId": "m", "flags": flags, "archetype": arch, "primaryAV": av,
+            "secondAVWeight": weight, "secondaryAV": second, "conditions": cond}
+        self.spells = {
+            # Firebolt under a layer: its damage at 20, a perk rider with a HasPerk CTDA, a
+            # non-Health stagger, a beneficial heal, a Dual whose secondary is Health at 0.5,
+            # a damage-over-time effect of 4 per second for 3 s
+            0x12FD0: {"found": True, "effects": [
+                {"mgef": 1, "magnitude": 20.0, "area": 0, "duration": 0, "conditions": 0},
+                {"mgef": 2, "magnitude": 10.0, "area": 0, "duration": 0, "conditions": 1},
+                {"mgef": 3, "magnitude": 99.0, "area": 0, "duration": 0, "conditions": 0},
+                {"mgef": 4, "magnitude": 50.0, "area": 0, "duration": 0, "conditions": 0},
+                {"mgef": 5, "magnitude": 8.0, "area": 0, "duration": 0, "conditions": 0},
+                {"mgef": 6, "magnitude": 4.0, "area": 0, "duration": 3, "conditions": 0},
+            ], "mgefs": {"1": mg(DET, 0, H), "2": mg(DET, 0, H), "3": mg(DET, 0, 25), "4": mg(0x0, 0, H),
+                         "5": mg(DET, 5, 26, second=H, weight=0.5), "6": mg(DET, 0, H)}},
+        }
+
+    def spell(self, form_id):
+        return self.spells.get(form_id, {"found": False})
+
+    def base_id(self, spec):
+        return 0x12FD0 if spec == "12fd0:Skyrim.esm" else super().base_id(spec)
+
+
+@needs_deps
+class SpellTests(unittest.TestCase):
+    def test_a_spells_health_damage_follows_the_servers_rule(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(SpellServer(), NearViews(), ["c1", "c2"])
+        # 20 (damage) + 8 x 0.5 (the Dual's Health share) at once; the rider is conditional; 4 x 3 over time
+        self.assertTrue(ev.evaluate("server.spell(0x12FD0).magnitude == 24"))
+        self.assertTrue(ev.evaluate("server.spell(0x12FD0).overTime == 12"))
+        self.assertTrue(ev.evaluate("server.spell(0x12FD0).conditional == 1"))
+        self.assertTrue(ev.evaluate("server.spell(0x12FD0).effects == 6"))
+        self.assertTrue(ev.evaluate('server.spell("12fd0:Skyrim.esm").magnitude == 24'))
+        self.assertTrue(ev.evaluate("server.actor(c1).healthPercentage < 1 - server.spell(0x12FD0).magnitude / 100 + 0.77"))
+
+    def test_a_spell_the_server_does_not_load_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(SpellServer(), NearViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("server.spell(0x99).magnitude == 0")
