@@ -1506,9 +1506,19 @@ gate and the merges after).
   material id from 44190 and the grenade's own decal group (slot 0x9F),
   gated on the projectile's slot 0xAE; 44186's only callers are 34452 and
   44213, and the relay's bare Launch (MagicApi.cpp) never passes through
-  34452. Train-30's row, after rule 8's read (lab/frida/rune-decal-trace.js
-  on the caster's seat: one 44186 call per cast from inside 34452, the
-  normal and the material id): relay the caster's contactNormal (34452
+  34452. CONFIRMED by rule 8's read the same night (x-rune-decal-frida
+  20261020-102818, rune-decal-trace.js on both seats, on 99c39e3e's stage):
+  the caster's game entered 34452 from the player's cast, launched inside
+  it (autoAim 1, useOrigin 0), looked the material up (44190: materialID
+  0xe4d39ca3, form 0x12f37) and placed ONE decal (44186: the rune PGRE, the
+  pick's position, the normal (5.83, -69.75, 0) of length 69.99, return
+  0x10000); the observer's game had one launch row from the relay (the
+  figure as shooter, 99c39e3e's flags in effect, contact normal (0, 0, 1))
+  and no 34452, material or decal row. Two side facts for the row: the
+  caster's normal was nearly horizontal, so that probe's aim put the rune
+  on the tent's south face, not the ground (the screenshots' weak control),
+  and the relay today sends (0, 0, 1) for every launch. Train-30's row:
+  relay the caster's contactNormal (34452
   copies the pick's normal into LaunchData, which the Launch-entry reader
   already sees) and the material id with the cast (a wire change: the
   SpellCast message and its validator in one commit, rule 4), and after the
