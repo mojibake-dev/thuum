@@ -145,6 +145,35 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   capped at 200 emits otherwise. Layouts are CommonLibSSE-NG's, cited in the
   script; 1.6.1170 only.
 
+- figure-dent-trace.js: where the hitter's own game writes its sword hit
+  into a FIGURE's Health (docs/verbs/figure-values.md; train-29 row 3, the
+  local dent). Replaces the function in slot 0x104 (Actor::HandleHealthDamage,
+  CommonLibSSE-NG Actor.h:458) of VTABLE_Character[0] (207886),
+  VTABLE_PlayerCharacter[0] (208040) and VTABLE_Actor[0] (207511) with a
+  NativeCallback of the header's signature, so the float damage is read as
+  passed, and logs the victim, the attacker, the damage, the victim's Health
+  before and after through its own ActorValueOwner, its kAttackDamageMult
+  (the fork's guard test), which slot's function ran and how many nested
+  calls it made; Actor::DamageActor (37335, TE's gate, docs/TE-MAP.md) with
+  raw arguments and Health before and after; the explosion pass (43849,
+  ADR-037) raw. The ready row says whether the fork's thunk sits in each
+  slot. Run on the hitter's seat; the seq order of a hit's rows tells whether
+  the vfunc is a pre-write gate or a post-write notification. 1.6.1170 only.
+
+- rune-tier-trace.js: the tier test in a landed rune's look on the OBSERVER
+  (docs/verbs/spell-cast.md, the target-location section; train-29 row 5,
+  the undressed glyph). Logs Projectile::Launch (44108) for a player's or a
+  figure's shooter with the new handle resolved; the impact-effects pass
+  (44213) once per landing with the shooter handle against *(403520), the
+  tier the REA read says that compare grants (0 or 4 the player, 0xC anyone
+  else), bit 20 before and after, the raw arguments and the return; the
+  trigger tick (44216) and test (44217) for grenades, deduped; the arrival
+  (44163), Init3D (44222) and settle (43919); the kill (44110) with a
+  backtrace; AddRune (40674) and its gate (43934) against *(401069). Every
+  row carries the projectile's summary (shooter resolved from its handle,
+  cell, explosion, spell, timers, flags); the ready row self-tests the
+  layout by resolving *(403520) to the player. 1.6.1170 only.
+
 A frida step right before a console step on the same client leaves the
 console unopenable (x-figure-action 20261015-052852 and -053059: "the
 console did not open 3000 ms after the grave key", twice, with the attach
