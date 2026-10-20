@@ -36,7 +36,10 @@ common file carries the login clock and the login globals; a train that
 widens the wire declares its divergence in the same commit). The fork's
 ctest green at the train's head (the condition functions, the race
 abilities, the resistance rule, formdesc's 401 cases, the dent's client
-build).
+build). Both DONE for 1d88a6b7 on 2026-10-20: pipeline 2309 green in every
+job, and T2 at 16:05 PDT identical across 32 sessions (numidium's run on
+2309's artifact); they stand while the head stays 1d88a6b7 (ADR-042
+check 4).
 
 ## 3. Playtest twenty-eight (T4, Eli, both seats, on the train's stage)
 
