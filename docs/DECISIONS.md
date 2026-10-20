@@ -766,7 +766,7 @@ no magic effect, quest, alias or perk script runs there; each client's
 game blanks every Papyrus event but OnUpdate unless a script on the
 handle is SkyUI's, RaceMenu's or defaultDisableHavokOnLoad
 (skyrim-platform FridaHooks.cpp:43-87, set by skymp5-client
-blockPapyrusEventsService.ts). Apocalypse 10.2.3 is 206 scripts, 162 of
+blockPapyrusEventsService.ts). [Erratum 2026-10-19, ADR-044: OnUpdate is blanked too; the hook consults its allow list for every event but OnUpdate and blanks whatever it did not clear (docs/research/papyrus-event-filter.md).] Apocalypse 10.2.3 is 206 scripts, 162 of
 them ActiveMagicEffect scripts; 114 of its 265 global uses run from
 OnEffectStart, 82 from its MCM. Its 99 globals sort into settings (30,
 written by the MCM), static tuning (13), a caster's build or progress
@@ -1911,11 +1911,11 @@ relaunch, and nothing skips T0.
 
 ## ADR-043: The world stores every form plugin-relative; a load order change migrates a world, never undresses it
 
-Status: PROPOSED 2026-10-19 17:50 PDT (Eli, playtest twenty-six, the essentials layer:
+Status: ACCEPTED 2026-10-19 19:32 PDT (Eli: "accept those ADRs"); proposed 2026-10-19 17:50 PDT (Eli, playtest twenty-six, the essentials layer:
 "its likely an unacceptable state of affairs that any mod added will fuck
 up rotferns appearance and items. however we handle mod layers, it cannot
 break the game every time a new mod is added, because single player doesnt
-work that way."). Eli decides. Extends ADR-026 (the appearance follows its
+work that way."). Accepted the same evening. Extends ADR-026 (the appearance follows its
 look) and ADR-029 (mod layers); touches rule 6 (a schema change ships with
 a migration and a restart-persistence scenario).
 
@@ -2032,7 +2032,144 @@ raw ids plus the order and translate only when the order differs: the
 decision's migration half without its durable half, and a second code path
 at every read.
 
-- [ ] accept
+- [x] accept (Eli, 2026-10-19 19:32 PDT: "accept those ADRs")
 - [ ] accept with changes (say what)
 - [ ] not yet
 
+## ADR-044: The client's Papyrus event filter admits scripts by what they are, not by their name
+
+Status: ACCEPTED 2026-10-19 19:32 PDT (Eli: "accept those ADRs"); proposed 2026-10-19 19:19 PDT (thuum-magnus, from playtest twenty-six's
+missing Apocalypse MCM and the lab's Survival Mode reads of the same
+evening); accepted the same evening. Refines ADR-029's first decision (which events a
+game's scripts receive) and keeps ADR-008 (quests per player, world-shared
+by allowlist) and ADR-029's server-side allowlist as they are.
+
+**Context.** Every connected game runs under Skyrim Platform's Papyrus
+event block: skymp5-client sets it at its first tick
+(skymp5-client/src/services/services/blockPapyrusEventsService.ts), and
+the SendEvent hook (skyrim-platform FridaHooks.cpp, OnSendEventEnter)
+then replaces the name of every Papyrus event with "" unless the event is
+an ActiveEffect's with the player as target or caster (ADR-031's halves),
+or the event is not OnUpdate and one of the scripts attached to the
+handle is NAMED SKI_*, RaceMenu*, GRIM_ALT_TeleportationMarker,
+WB_DestroyAfterDelay_Script or defaultDisableHavokOnLoad. The compare
+reads each script's leaf class name and never its parents, and OnUpdate
+skips the list, so under the block OnUpdate reaches no script at all. The
+read is docs/research/papyrus-event-filter.md; it corrects "blanks every
+Papyrus event but OnUpdate" in ADR-029's context and in
+apocalypse-options.md 3.1, which read the guard backwards (HYPOTHESIS
+until the lab's unblock probe and a HUD trace for SkyUI's own OnUpdate
+line; the brace structure is unambiguous and has been so since upstream's
+2021 version of the hook).
+
+Two findings of 2026-10-19 are this one rule. Apocalypse's MCM is missing
+under the essentials layer because WB_MCMQuest_Script extends
+SKI_ConfigBase and its own name is not SKI_; the same holds for every one
+of the layer's seven MCMs, MCM Helper's included (MCM_ConfigBase extends
+SKI_ConfigBase), so the Mod Configuration list shows SkyUI alone. Survival
+Mode never enables in a connected game (x-survival-probe 20261020-020321,
+x-survival-why 20261020-020729: the quest runs, MQ101 at 0, exterior, the
+switch at 1, Survival_ModeEnabled and the prompt at 0 twelve seconds on,
+while a solo run of the same save, which loads no skymp5-client and so no
+block, shows the prompt) because its 5 s check is RegisterForSingleUpdate
+then OnUpdate. Behind them stands the essentials layer itself: a hundred
+mods whose quests and aliases run on these events the way single player
+runs them, and Eli's standing on layers (ADR-043's context): "it cannot
+break the game every time a new mod is added, because single player
+doesnt work that way". Admitting them one name at a time is the shape the
+law forbids (one name per mod per playtest, each a client build), and
+ADR-029's "quests' and aliases' stay blanked" was written for vanilla's
+and Apocalypse's world mechanisms, not for a settings menu or a needs
+meter.
+
+The layer in numbers (apocrypha's census, docs/research/layer-papyrus.md on
+apocrypha/layer-essentials, each script's parent class read from its .pex
+header, regenerated with the layer): 2,421 scripts in 44 of the 113 mod
+folders; 19 mods blocked outright because their behavior is their own
+quest, alias, object or perk scripts (Jewelry Limiter, Dynamic Activation
+Key and the feeding tweaks keyed off it, Self Filling Bookshelves, Portal,
+Reading List, General Displays, the IDRC quests and scenes among them; four
+of the 19 are fixes to vanilla scripts a connected game does not run
+anyway); 12 mixed, their effects running on the player and everything else
+blanked, which is every magic mod (Apocalypse 162 effect scripts against
+44 others, Lost Grimoire 96 against 51, Odin 50 against 27); TrueHUD, TDM
+and MCM Helper losing only their menus; 69 folders shipping no script.
+Three of its points shape the decision: a plugin carries its scripts
+through its forms' VMAD, so admission by plugin needs the plugin's script
+names (a map the census generates); OnUpdate is its own axis (Survival's
+needs, Jewelry Limiter's checks and Unread Books Glow's scans are update
+loops); and the ActiveEffect exemption admits an effect on the player
+alone, so a magic mod's effects cast on others (mind control, thralls, a
+cloak on a target) stay blanked even where its self-casts run, which is
+ADR-029's server-side allowlist's ground, not this decision's.
+
+What the filter is FOR, stated once: a game whose state the server owns
+must not run scripts that change that state behind the server's back
+(vanilla's quests, Apocalypse's world mechanisms, anything on ADR-029's
+server-side allowlist). It has no business with scripts whose effects are
+UI, or per-player state the server declares R3 or records as R2.
+
+**Decision.**
+
+1. Admission by class. A script passes the filter if it, or any class it
+   extends, is on the admitted list; the hook walks ObjectTypeInfo's
+   parent chain (CommonLibSSE-NG include/RE/O/ObjectTypeInfo.h, GetParent)
+   where it reads the leaf name today. SKI_ stays the admitted root, so
+   every MCM (SKI_ConfigBase and MCM Helper's MCM_ConfigBase descendants)
+   and every SkyUI widget passes without a name of its own. RaceMenu,
+   GRIM_ALT_TeleportationMarker, WB_DestroyAfterDelay_Script and
+   defaultDisableHavokOnLoad stay as named entries until a root covers
+   them.
+2. Admission by plugin. A data list, served by the server with the load
+   order (the layer manifest's per-plugin disposition, apocrypha's
+   persist-mods rows; ADR-008's "data, not code"), names the plugins whose
+   scripts run in every game: the Survival Mode Creation first. Since the
+   hook sees a script's class name and not its plugin, an admitted plugin
+   expands to the script class names its folder ships (the census's map,
+   regenerated with the layer), and the hook keeps one set lookup. A
+   script of an admitted plugin passes whatever its class. The list is
+   reviewed like a scenario (rule 13): a plugin enters it with one line
+   saying what its scripts touch and which rung that state already has.
+3. OnUpdate follows the script. An admitted script receives OnUpdate; the
+   rest stay blanked. The list is consulted for OnUpdate too, so the hook
+   pays one table lookup per OnUpdate under the block; the first build
+   counts the rate (a Frida counter on the hook) and caps nothing until
+   the count says it must.
+4. State keeps its rung. A script admitted by plugin changes nothing about
+   authority: a global it writes is that player's (R2, player-globals), a
+   value it reads is its game's, damage or regen it applies to its own
+   player reaches the server only where a verb carries it (none today, so
+   Survival's needs are R3 until a verb says otherwise: cosmetic in a
+   connected game, with warmth, cold, hunger and fatigue shown and felt in
+   that game alone), and anything it would do to another actor stays in
+   its game as ADR-029 already says. Vanilla's quests, aliases and
+   references stay blanked; ADR-029's server-side effect allowlist is
+   untouched.
+5. ADR-029's context is corrected in place (an erratum line, no change to
+   its decision).
+
+**Consequences.** One Skyrim Platform change (train-29's row, a Windows
+build): the parent walk, the plugin list read from a setting the client
+receives at login, OnUpdate through the list. One server change: the list
+in server-settings beside playerGlobals and castTeleports, sent with the
+login. One layer change: the manifest's disposition column. Tests: T1
+none (the VM runs only in a game); the lab's x-mcm-register (a HUD trace
+asserting "MCM: Registered N new menu(s)." with N the layer's eight) and
+x-survival-probe's round trip extended to Survival_ModeEnabled = 1;
+playtest twenty-seven's section 4 asks the decisive question before any
+build. Until it lands, no mod's MCM and no Papyrus-driven mod works in a
+connected game, which is the state the essentials layer is in tonight.
+
+**Alternatives.** Keep adding names (today's shape): one client build per
+mod per playtest, and a mod's own base classes never covered. Lift the
+block for layer games: vanilla's quests run (Unbound, the Civil War, every
+radiant quest) against a server that owns none of their state, which
+ADR-008 exists to prevent. Run the mods' scripts on the server's VM
+(ADR-029's allowlist): right for world mechanisms, wrong for a settings
+menu or a needs meter, which have no server half. Admit by event name
+(let OnUpdate through for everyone): wakes every vanilla quest's polling
+loop, the one thing the block is for.
+
+- [x] accept (Eli, 2026-10-19 19:32 PDT: "accept those ADRs")
+- [ ] accept with changes (say what)
+- [ ] not yet
