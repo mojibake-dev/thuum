@@ -84,6 +84,24 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   (HYPOTHESIS), and apocrypha's gender-bits-from-masters patch the one fix
   for all three menu reds; the re-stage's a-racemenu and a-rotfern decide,
   with the seat's files hashed first against stale snapshots.
+- apocrypha's audit of the laid tree (16:4x): the mechanism. skee64.dll and
+  skee64.ini are RaceMenu's own (every [Features] flag on), nothing loose
+  shadows RaceMenu.bsa, and the archives share exactly one path:
+  SkyUI_SE.bsa carries interface/racesex_menu.swf too (35,416 B against
+  RaceMenu's 105,756). In the layer SkyUI_SE.esp is client-only at the
+  tail (slot 82) and RaceMenu.esp is served at 23, so among archives
+  SkyUI's copy wins and every layer seat ran SkyUI's vanilla-style race
+  menu: no RaceMap::CreateDefaultMap, the race pick walking the vanilla
+  list, the hair rebuild at open, the tint crash. Fenestrate has SkyUI at
+  93 and RaceMenu at 170 (RaceMenu's install notes: after SkyUI), and the
+  no-layer lab has no SkyUI, which is why only layer runs show it. The fix
+  keeps every slot: persist-mods extracts RaceMenu's racesex_menu.swf from
+  RaceMenu.bsa and lays it loose in RaceMenu's folder (lab/tools/
+  bsa-extract.py, a stdlib BSA reader with its own LZ4 frame decoder,
+  byte-identical to the lz4 library's), since a loose file beats every
+  archive whatever the order. The rule: when two archives share a path and
+  the plugins' order cannot be the installer's, lay the winner's copy
+  loose. Same render as the master-bits head-parts patch and the 0x7 drop.
 
 ## 3. b-duel 20261020-232356 and b-god 20261020-233136 (under read)
 
