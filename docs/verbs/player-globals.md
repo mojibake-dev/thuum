@@ -232,3 +232,32 @@ files, 13 of 13, test_unit's 359 cases with this verb's two.
       itself waits on SkyUI (Eli's essentials list)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] ledger and suppression registry updated
+
+## A default for a silent record (train-30, 2026-10-20; fork m2-train30-globals-default, thuum lab-survival-prompt-default)
+
+The essentials layer's first stage under train-29's event filter (06:41)
+put the Survival Mode Creation's own "Enable Survival Mode?" box on both lab
+clones: the verb working (docs/verbs/papyrus-events.md) and every lab
+scenario paused under it (layer-stage smoke 20261020-134134, E_RUN_PAUSED).
+The lab measured the two facts the fix rests on: the layer is sound past
+the box (x-smoke-layer-survival 20261020-134606, each seat answering No),
+and a value the server sends at login lands before the Creation's 5 s
+check even in a fresh game (x-survival-restore-timing 20261020-135028: the
+restore at 13:52:35.7, no box 25 s later, where a first login's box shows
+within about 8 s).
+
+So a `playerGlobals` entry may be an object, `{"global": "<hex>:<plugin>",
+"default": n}`, beside the plain strings: the login sends the default to a
+player whose record holds no value for that global, and a recorded value
+always wins (wire-rules player_globals.rs; the bridge and the server pass
+the entries through). Data per deployment: the lab's settings give the
+Prompted flag (8df of ccQDRSSE001-SurvivalMode.esl) the default 1, so lab
+seats never see the box; a players' deployment leaves it unset and each
+player gets the box once, as the Creation intends. The alternatives, a
+lab-api step answering the box at connect or the flag written into the
+clean world's records, were set aside: the first is UI automation in every
+scenario, the second a fixture that a snapshot retake must carry. Rung
+unchanged: the default is the deployment's data, the record stays R2. T0:
+two Rust tests (the object form and its refusals; the default only where the
+record is silent). T3: the layer-merge sweep running without a pause, and
+b-papyrus-events's reads of 8df (1 from the default on a lab seat).
