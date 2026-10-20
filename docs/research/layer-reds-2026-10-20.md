@@ -69,6 +69,30 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   asked of apocrypha and numidium. Decider: "RaceMap::CreateDefaultMap" in
   a layer seat's c1-skee64.log, then a-rotfern green. The 0x7 rule stands
   on its own ground.
+- numidium's deploy read (16:4x): persist is clean. SHA256SUMS holds one
+  copy each of RaceMenu.bsa, RaceMenu.esp, RaceMenuPlugin.esp, skee64.dll
+  and skee64.ini, all from racemenu-0.4.20.0@1.6.1170, nothing loose at
+  the interface paths; the one BSA overlap (SkyUI_SE.bsa's
+  interface\racesex_menu.swf, SkyUI loading last as a client-only plugin
+  must) is in both heads and latent. Under the previous layer stage
+  1496763f skee DID initialise (29 CreateDefaultMap lines in 192512 and
+  193623, RacePartDefaultGen at +5 s); under 68a56247 its race-part pass
+  never ran. The heads differ client-side in FSMP out, the two esl-flagged
+  Survival patches, and plugin-patch's hdpt-gender-both on Playable
+  Headparts All Races.esp, the only new input to skee's head-part pass: so
+  the gender-both flags are the candidate for the inert chargen too
+  (HYPOTHESIS), and apocrypha's gender-bits-from-masters patch the one fix
+  for all three menu reds; the re-stage's a-racemenu and a-rotfern decide,
+  with the seat's files hashed first against stale snapshots.
+
+## 3. b-duel 20261020-232356 and b-god 20261020-233136 (under read)
+
+- b-duel, the Flames row (step 65): 0.822 against the green 0.7293 (layer
+  1496763f) and 0.7198 to 0.7358 (no layer); server and seat agree, so
+  less damage applied, not a desync; the stage's differences are the 8df
+  default (the box's absence), the two Survival patches and plugin-patch.
+- b-god (step 46): after god mode off, c2's arrow left c1 at 1.0 on the
+  server and the seat; the no-layer run 125817 was green.
 
 ## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
 
