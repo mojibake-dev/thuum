@@ -53,6 +53,9 @@ class Netem(BaseModel):
 class ServerSpec(BaseModel):
     snapshot: str = "clean"
     netem: Netem | None = None
+    # a committed fixture world (lab/fixtures/worlds/<name>/) laid in place of the
+    # snapshot's: ADR-043's rule-6 scenario, a world saved under another load order
+    world: str | None = None
 
 
 class Step(BaseModel):
@@ -341,6 +344,23 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
     return Step(kind="client", client=key, action=action, args=args)
 
 
+_WORLD_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+
+
+def _server_spec(server: dict[str, Any]) -> ServerSpec:
+    """`server: {snapshot | world, netem}`: a world is a committed fixture laid in
+    place of a snapshot's, so a scenario names one source, never both."""
+    netem = Netem(**server["netem"]) if server.get("netem") else None
+    world = server.get("world")
+    if world is None:
+        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem)
+    if "snapshot" in server:
+        raise ValueError("server takes a snapshot or a world, not both")
+    if not isinstance(world, str) or not _WORLD_NAME.fullmatch(world):
+        raise ValueError(f"server.world names a directory under lab/fixtures/worlds, got {world!r}")
+    return ServerSpec(world=world, netem=netem)
+
+
 def load_scenario(text: str) -> Scenario:
     data = yaml.safe_load(quote_flow_steps(text))
     if not isinstance(data, dict):
@@ -370,7 +390,7 @@ def load_scenario(text: str) -> Scenario:
         game=(str(data["game"]) if data.get("game") is not None else None),
         solo=bool(data.get("solo", False)),
         clients=clients,
-        server=ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=(Netem(**server["netem"]) if server.get("netem") else None)),
+        server=_server_spec(server),
         timeout_s=float(data.get("timeout_s", 600)),
         steps=steps,
         artifacts=artifacts,
