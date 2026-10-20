@@ -3,6 +3,10 @@
 # and those of the verbs the branch touched), and `watch`: the scenarios with an
 # open ADR-027 watch item, each named with the verb doc that holds the item; take
 # one out in the commit that closes its item. The full sweep is the nightly's.
+# `pending`: committed scenarios red by design until their verb's fix lands, each
+# named with the verb doc that holds the fix. The full sweep ("all": the nightly,
+# layer-merge's gate) leaves them out; a merge that names one still runs it; take
+# one out in the commit whose T3 turns it green.
 always: [smoke-two-players, a-restart-persistence, b-duel]   # M0's floor, M1's exit, M2's exit (server-authoritative damage between two players, 2026-10-14)
 watch:
   - a-melee-reach      # docs/verbs/melee-reach.md:141, red once in the m2-god sweep (2026-10-10)
@@ -10,3 +14,5 @@ watch:
   - b-spell            # docs/verbs/spell-cast.md:394, red once in the m2-stagger sweep (2026-10-11)
   - b-push             # docs/verbs/push.md:328, c2's landing on the spawn's saddle, red twice in train-25's gates (2026-10-18)
   - b-invis-recast     # docs/verbs/self-cast.md:104, a 120 s guest-agent stall spaced the casts past the spell's 30 s (2026-10-18)
+pending:
+  - b-spells-reconnect   # docs/verbs/learned-spells.md:40, the reconnect spell loss (a server restart under a running game), train-30's fork m2-train30-spells (2026-10-20)

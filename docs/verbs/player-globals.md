@@ -225,10 +225,71 @@ files, 13 of 13, test_unit's 359 cases with this verb's two.
       player-globals session identical with its five declared divergences,
       and the PlayerGlobals message declared in the 27 other sessions whose
       seats move (sent on a seat's first movement after a login, so a seat
-      that never moves receives none)
+      that never moves receives none). Since the login-time send (train-29,
+      above) every seat receives it at its login, so fork 4720d0d3 declares
+      it once, for every client of every session, in difftest's
+      divergences.yaml beside the login clock, and the 37 per-session
+      entries are gone (T2 on 50a56e4a had shown c1's undeclared in every
+      session where c1 never moved)
 - [x] T3 scenario green: b-player-globals 20261018-103133 on train-24
       (c1's global 3, c2's 0, before and after the server restart), in the
       merge gate 20261018-112123-merge-m2-train-24 (23 of 23); the MCM
       itself waits on SkyUI (Eli's essentials list)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] ledger and suppression registry updated
+
+## A default for a silent record (train-30, 2026-10-20; fork m2-train30-globals-default, thuum lab-survival-prompt-default)
+
+The essentials layer's first stage under train-29's event filter (06:41)
+put the Survival Mode Creation's own "Enable Survival Mode?" box on both lab
+clones: the verb working (docs/verbs/papyrus-events.md) and every lab
+scenario paused under it (layer-stage smoke 20261020-134134, E_RUN_PAUSED).
+The lab measured the two facts the fix rests on: the layer is sound past
+the box (x-smoke-layer-survival 20261020-134606, each seat answering No),
+and a value the server sends at login lands before the Creation's 5 s
+check even in a fresh game (x-survival-restore-timing 20261020-135028: the
+restore at 13:52:35.7, no box 25 s later, where a first login's box shows
+within about 8 s).
+
+So a `playerGlobals` entry may be an object, `{"global": "<hex>:<plugin>",
+"default": n}`, beside the plain strings: the login sends the default to a
+player whose record holds no value for that global, and a recorded value
+always wins (wire-rules player_globals.rs; the bridge and the server pass
+the entries through). Data per deployment: the lab's settings give the
+Prompted flag (8df of ccQDRSSE001-SurvivalMode.esl) the default 1, so lab
+seats never see the box; a players' deployment leaves it unset and each
+player gets the box once, as the Creation intends. The alternatives, a
+lab-api step answering the box at connect or the flag written into the
+clean world's records, were set aside: the first is UI automation in every
+scenario, the second a fixture that a snapshot retake must carry. Rung
+unchanged: the default is the deployment's data, the record stays R2. T0:
+two Rust tests (the object form and its refusals; the default only where the
+record is silent). T3: the layer-merge sweep running without a pause, and
+b-papyrus-events's reads of 8df (1 from the default on a lab seat).
+
+## The login's race, and the send moved to the login (2026-10-20, after playtest twenty-seven)
+
+Two facts closed the fixture: the clones hold no save file (Skyrim
+Platform's template.ess is compiled into SkyrimPlatformImpl.dll and
+LoadGame::Run patches a copy per login, deleting it seconds later; a
+snapshot carries nothing of it), and the login restore can lose its race
+to the Survival Creation's 5 s check (won at 13:52Z by x-survival-restore-
+timing 20261020-135028, lost at 18:23Z on test 2's relaunch, when the
+restore rode the first movement report 4.2 s after the connect and the box
+asked again). So the send moves: PlayerGlobals goes out at the login
+itself (PartOne::SetUserActor, with the clock's send), not with the other
+login sends at the first movement report; the client's service holds the
+message as pending and applies it at its first in-game update, a few
+seconds before the Creation's check. CONFIRMED the same day: on the server
+of fork 50a56e4a, x-survival-restore-timing 20261020-185534, 185906 and
+190218 all green, the send 37 to 74 ms after the connect (against 4,200 ms
+when it rode the first movement report), no box on the caster's 8 s
+screenshots, the two-seat asserts holding after the fresh relaunch (the
+lab's other login sends stay at the first movement). Fork m2-train-29, server
+only; the T0 case now logs the actor in a second time, as a reconnect does,
+and reads the send. The default from the section above stays the belt.
+The proper cure for every script that reads a global before any update
+(train-30): the server's globals travel with the own player's CreateActor
+(a wire change, message and validator in one commit) and LoadGame::Run
+writes them into the generated save's globals, so the first frame reads
+them; it also spares a player the re-ask after a relaunch.

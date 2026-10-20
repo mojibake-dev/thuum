@@ -171,6 +171,18 @@ class RunSetTests(RunTests):
         rs = self.runsets
         self.assertEqual(rs.list_scenarios(), sorted(p.stem for p in self.scen.glob("*.yaml")))
 
+    def test_all_leaves_out_the_gates_pending_scenarios_and_a_named_one_still_runs(self):
+        (self.tmp / "gate.yaml").write_text("always: [t2-green-one]\npending:\n  - t2-red   # red by design until its fix\n")
+        rs = self.runsets
+        self.assertEqual(rs.pending(), ["t2-red"])
+        swept = rs.start("sweep", "all")
+        self.assertNotIn("t2-red", swept.scenarios)
+        self.assertEqual(len(swept.scenarios), len(rs.list_scenarios()) - 1)
+        rs.active = None
+        named = rs.start("t3", ["t2-red"])
+        self.assertEqual(named.scenarios, ["t2-red"])
+        rs.active = None
+
     def test_a_hold_refuses_runs_and_run_sets_until_released(self):
         r = self.client.post("/lab/hold", json={"minutes": 30, "reason": "playtest sixteen"})
         self.assertEqual(r.status_code, 200, r.text)
@@ -218,6 +230,7 @@ class RunSetTests(RunTests):
         utc = timezone.utc
         now = datetime(2026, 10, 20, 10, 40, tzinfo=utc)
         rs._wall = lambda: now.timestamp()
+        runner._wall = rs._wall   # the hold's clock too: on the real one this hold ended at 10:50Z on the day the test is dated
         rs._started_wall = now.timestamp() - 7200
         runner._last_run_ended_wall = now.timestamp() - 7200
         runner.last_activity_wall = now.timestamp() - 7200

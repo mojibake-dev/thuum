@@ -389,6 +389,16 @@ promoted.
   and on c1's screen (the figure took staggerStart). Eli's own install
   needs the same file (the server checks a plugin's size and CRC).
 
+Reverted 2026-10-20 06:23 PDT (Eli, after playtest twenty-six: "given it's
+tested now, take stagger from her as well"): the lab now runs rotfern.esp
+CRC32 F483303D (99,409 bytes, sha256 790d3b6c1a877fc31de8a487b8bca5fe7f25
+3f709f2fcf86de62c8d40053036a), byte-identical to the pre-stagger file of
+2026-10-12 (apocrypha; the Nord-values file F57D6BFD is kept as
+backups/rotfern.esp.pre-staggerrevert-20261020.bak). Her child unarmed
+damage and reach stay as authored. The server checks a plugin by size and
+CRC32, so every player's install, Eli's Fenestrate included, needs the
+F483303D file from the layer.
+
 ## Playtest fifteen (2026-10-13, Eli, parity 11c126b9)
 
 - Passed, both ways: the server's "attackpowerstartinplace on ff000001

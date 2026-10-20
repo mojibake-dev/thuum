@@ -35,10 +35,10 @@ x-survival-unblock 20261020-023907, x-survival-unblock3 20261020-024406):
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| the admitted quest's chain from the game's first tick (a blanked first OnUpdate never re-arms) | b-papyrus-events (a0f within 20 s of the connect) | to run on the branch's stage |
-| the same after a relaunch and a login with the record restoring 828 and 8df (no box, Survival on) | b-papyrus-events phase two (HYPOTHESIS) and playtest twenty-eight's Survival row | |
+| the admitted quest's chain from the game's first tick (a blanked first OnUpdate never re-arms) | b-papyrus-events (a0f within 20 s of the connect) | T4 CONFIRMED, playtest twenty-seven (the Creation's box within a minute on both seats, the first ever in a connected game; the lab's layer stage saw it on both clones at 06:41); the scenario runs after the template-save fixture lands (its 8df read becomes 1) |
+| the same after a relaunch and a login with the record restoring 828 and 8df (no box, Survival on) | b-papyrus-events phase two and playtest twenty-seven's restart row | T4 ticked (the server restart and test 2's relaunch kept Survival on); the restore can lose the race to the 5 s check (test 2 at 18:23Z saw the box once more), so the lab's fixture is the template save carrying 8df = 1 and the per-player default the belt (docs/verbs/player-globals.md) |
 | a client without the layer (no file): today's behavior | the stage's smoke without the layer | |
-| the MCM list with the layer (eight menus, SkyUI plus seven) | x-mcm-register (hud-trace "MCM: Registered N new menu(s)."), layer stage | |
+| the MCM list with the layer (eight menus, SkyUI plus seven) | x-mcm-register (hud-trace "MCM: Registered N new menu(s)."), layer stage | T4 CONFIRMED, playtest twenty-seven (the list showed the eight; an Apocalypse setting changed on test 1 survived the server restart and a relaunch, b-player-globals' row); the HUD count still to read |
 
 ## Authority
 
@@ -175,7 +175,7 @@ first build counts the rate with a Frida tracer, ADR-044 decision 3).
 - [ ] native hook + T1 (fork m2-train29-filter: the Windows build)
 - [x] TS handler: none
 - [x] T2 green: no wire change
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events; x-mcm-register on the layer stage)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events approved by Eli 2026-10-20 and on main, d1d8370, asserting the Creation's check ran connected with the prompt flag from the per-player default; its first run is the layer-merge sweep; x-mcm-register's HUD count still to read)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031): not applicable, no player action
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (no native; the Suppress section above is the registry entry; NATIVES.md unchanged)

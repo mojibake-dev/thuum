@@ -1,0 +1,45 @@
+# b-papyrus-events (thuum docs/verbs/papyrus-events.md, train-29, ADR-044):
+# a connected game runs the scripts the mod layer admits. The Survival Mode
+# Creation is the first admitted plugin: its main quest's 5 s check
+# (Survival_MainScript, RegisterForSingleUpdate then OnUpdate) sets
+# Survival_ModeCanBeEnabled (a0f) when it runs, and on parity it never ran in
+# a connected game, because skymp5-client's Papyrus event block blanked its
+# first OnUpdate and the chain never re-armed (x-survival-why
+# 20261020-020729 and x-survival-unblock 20261020-023907: a0f at 0 for 25 s;
+# x-survival-unblock3 20261020-024406: the block lifted and the quest
+# re-armed, a0f 1 and the Creation's own "Enable Survival Mode?" box). With
+# the Creation's line in Data/Platform/papyrus-scripts.txt (the layer's
+# file, so this scenario needs a stage that lays the layer) the check runs
+# under the block from the game's first tick: a0f reads 1 by the first read
+# after the connect, the switch (828) stays 0 and the mode (826) 0, and the
+# prompt flag (8df) reads 1 because the lab's clones carry it in their
+# template save (the fixture of 2026-10-20: a connected game's login restore
+# can lose the race to the 5 s check, so the lab never meets the box; the
+# per-player default in the settings is the belt, docs/verbs/
+# player-globals.md). Playtest twenty-seven ticked the box itself on both
+# seats, the first ever in a connected game.
+id: b-papyrus-events
+milestone: M2
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 420
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: move {dx: 0, dy: 60, duration_s: 1}
+  - wait: 4
+  - c1: globals {forms: ["a0f:ccQDRSSE001-SurvivalMode.esl", "828:ccQDRSSE001-SurvivalMode.esl", "8df:ccQDRSSE001-SurvivalMode.esl", "826:ccQDRSSE001-SurvivalMode.esl"]}
+  - c1: screenshot
+  - assert:
+      - c1.globalValue("a0f:ccQDRSSE001-SurvivalMode.esl") == 1
+      - c1.globalValue("828:ccQDRSSE001-SurvivalMode.esl") == 0
+      - c1.globalValue("8df:ccQDRSSE001-SurvivalMode.esl") == 1
+      - c1.globalValue("826:ccQDRSSE001-SurvivalMode.esl") == 0
+  - wait: 10
+  - c1: globals {forms: ["a0f:ccQDRSSE001-SurvivalMode.esl", "826:ccQDRSSE001-SurvivalMode.esl"]}
+  - assert:
+      - c1.globalValue("a0f:ccQDRSSE001-SurvivalMode.esl") == 1
+      - c1.globalValue("826:ccQDRSSE001-SurvivalMode.esl") == 0
+artifacts: [server.log, c1.log, screenshots]
