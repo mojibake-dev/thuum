@@ -39,7 +39,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   that overrides 0x7 before deploy-srv (numidium, lab/tools/
   load-order-check.py). Eli's alternative: drop the plugin (one row to
   `out`); the patch is the default since the override's feature never
-  worked connected. Eli, 16:3x PDT: "patch it".
+  worked connected. Eli, 16:20 PDT: "patch it".
 - Decider: a-rotfern green on the patched layer's stage.
 
 ## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
