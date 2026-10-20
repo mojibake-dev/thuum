@@ -97,7 +97,8 @@ what was imposed"):
   restoration potions work") goes: its case is this rule's, per value.
 - T0: unit/ChangeValuesTest.cpp, a raise holds against two stale reports,
   the report that carries it ends the hold, a later fall is taken, a lowered
-  value is cropped and not held. T3: b-snapback (Eli's review): a seat at
+  value is cropped and not held. T3: b-snapback (approved by Eli 2026-10-20,
+  main b10fc5bf; pending until the fix stages): a seat at
   half Health set to full by the server reads full on the server and in its
   own game 4 s later, two client reports past the set.
 - HYPOTHESIS until b-snapback: the client's report after applying a raise
