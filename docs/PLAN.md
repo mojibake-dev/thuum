@@ -354,7 +354,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         back down and sends it back; 7 of 11 upward sets in two runs); a
         server-applied heal would snap back the same way. STAYS in M2
         (Eli 2026-10-20), a verb fix on a train: BUILT 2026-10-20 on fork
-        m2-snapback 1fb5f2f9 (the percentage hold, attributes.md; T0; its
+        m2-snapback eef10842 (the percentage hold, attributes.md; T0; its
         scenario b-snapback on review), for the train after twenty-eight.
         The rule: an owner's set and the
         server's own changes win over
@@ -481,7 +481,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       as fork m2-train-30 1d88a6b7 (four merges on parity 4720d0d3: the
       spells fix, ADR-043 slice one, the dent gate, the Hailstone
       conditions with the resistance rule; pipeline 2309 green, ctest
-      included; T2 on the head), the one stage
+      included, T2 identical at 32 sessions; then 44372078, clang-format
+      alone over three files for the fork's Formatting check, CI and T2
+      rerun at it), the one stage
       for playtest twenty-eight (docs/M2-CLOSE.md), in build order:
       - learned spells lost on a RECONNECT (playtest twenty-seven, 11:21: a
         server restart with the game process up): the client's login path
