@@ -350,6 +350,60 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         reports that predate them (a sequence or a grace window in
         OnChangeValues); until then a scenario sets downward or reads at
         once (docs/LAB.md, numidium's note).
+    - Train-28 (playtests twenty-four and twenty-five's findings, 2026-10-19;
+      merged to fork parity e3806870 2026-10-20T02:00Z, gate 20261020-013037
+      ten green with b-shadowbond the watch item, T2 32 sessions identical),
+      each its verb doc's row:
+      - figure values: a figure carries its player's recorded maxima, not a
+        million (figure-values.md; b-figure-values green; a player's own
+        dent on a figure's bar is NOT fixed, train-29).
+      - Shadowbond's concealment, third shape: the server records the proc's
+        invisibility on both at the hit and relays it as each actor's own
+        instant cast to every game but the caster's; the break or 20 s
+        dispels it (shadowbond.md; b-shadowbond green twice after one red
+        on its own aim, placement fixed main 8a2cb11; the own-player half
+        CONFIRMED, four HYPOTHESIS tags left with plans).
+      - the plugin loader matches a master's name without case (the
+        Unofficial Patch's lower-case Creation Club masters), which lets the
+        essentials layer load (libespm CombineBrowser).
+      - the observer's guard against a projectile-less effect and the
+        script-event whitelist admitting WB_DestroyAfterDelay_Script, so
+        Lightning Strike's bolt no longer hangs on the caster's screen
+        (spell-cast.md).
+      - log hygiene (an unknown condition function warned once, then debug)
+        and T2's pinned load order (server-settings-t2-load-order.json).
+      - playtest twenty-five (the stage, no layer): figure values and
+        Scattershock ticked; the concealment on test 2 failed (the Papyrus
+        snippet applied nothing, hence the third shape); Finger of Death's
+        ash pile, the rune's undressed glyph and Lightning Strike unseen by
+        test 2 go to train-29. Playtest twenty-six (the essentials layer):
+        loads and frame rate held; no MCM, cloaks without physics, no
+        warmth, bare aspens, rotfern undressed by the slot shift (ADR-043
+        PROPOSED; the layer's three fixes render 2026-10-20 06:23).
+    - Train-29 (next; each row's facts in docs/research/train-29-rows.md with
+      its build tier), in build order:
+      - the client's Papyrus event filter: a parent-chain walk so every MCM
+        passes (SKI_ConfigBase's and MCM Helper's descendants), a plugin
+        list and OnUpdate per ADR-044 (PROPOSED; Survival Mode the first
+        case, x-survival-probe 20261020-020321); playtest twenty-seven's
+        MCM question decides before the build (Windows).
+      - Lightning Strike on the observer: the relayed launch picks the
+        effect whose projectile is set, not the AV effect's zero
+        (MagicApi.cpp; Windows).
+      - Finger of Death: IsEssential (354) evaluated on the server, and the
+        mod's scripted kill of a figure kept in its game or refused
+        (server; ADR-029's default today).
+      - a player's own dent on a figure's bar: FigureHealthDamage is in the
+        dist and still failed, so a Frida read before any change (lab, then
+        Windows).
+      - the rune's glyph on the observer: the Frida read of the player tier
+        first (spell-cast.md's section; lab).
+      - Scattershock's hits: a re-grounded 6 s probe before any code (the
+        2.5 s hold matched the charge; lab).
+      - small: the OpenContainer wait loop after a swap, EffectWasDualCast
+        (724) with the dual flag in the evaluator's context, the refs-near
+        driver step.
+
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
