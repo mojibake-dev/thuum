@@ -7,7 +7,10 @@
 #      T2=skip when a T2 of this head is already recorded);
 #   3. the gate: lab/gate.yaml's `always`, the scenarios named here (the verb's
 #      own and the touched verbs'), and `watch` (the open ADR-027 items), as one
-#      run set; a red stops everything before parity moves;
+#      run set; a red stops everything before parity moves. GATE_SET=<run set id>
+#      cites a finished set instead (ADR-042: a nightly or a layer's sweep of this
+#      exact stage), when lab/tools/gate-cite.py's five checks hold; else the gate
+#      runs;
 #   4. fork parity fast-forwarded to the branch (a plain push; a branch that is
 #      not ahead of parity stops here);
 #   5. both clones' clean-m1-next promoted to clean-m1 when the branch changed
@@ -69,10 +72,24 @@ print(" ".join(dict.fromkeys(order)))
 PY
 )
 echo "   $gate"
-if ! lab/tools/runset.sh "merge-$branch" $gate; then
-  echo "== the gate is not green: parity not moved" >&2; exit 1
+setfile=""; cited=""
+if [ -n "${GATE_SET:-}" ]; then
+  echo "   citing run set $GATE_SET (ADR-042)"
+  if FORK_DIR="$fork" python3 lab/tools/gate-cite.py "$GATE_SET" "$branch" $gate; then
+    mkdir -p lab/results/runsets
+    curl -fsS -m 30 "${LAB_API:-https://thuum.gaussing.tv/lab}/runset/$GATE_SET" > "lab/results/runsets/$GATE_SET.json"
+    setfile=lab/results/runsets/$GATE_SET.json; cited=" (cited, ADR-042)"
+    echo "   the cited set stands for the gate: no gate run"
+  else
+    echo "   the cited set does not stand for the gate (above): the gate runs"
+  fi
 fi
-setfile=$(ls -t lab/results/runsets/*-merge-"$branch"*.json | head -1)
+if [ -z "$setfile" ]; then
+  if ! lab/tools/runset.sh "merge-$branch" $gate; then
+    echo "== the gate is not green: parity not moved" >&2; exit 1
+  fi
+  setfile=$(ls -t lab/results/runsets/*-merge-"$branch"*.json | head -1)
+fi
 runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"] for s in rs["scenarios"] for e in rs["runs"].get(s,[]) if e.get("run")]; print(f"{r[0]} to {r[-1]} ({len(r)} runs)" if r else "")' "$setfile")
 watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1]))["watch"]))' "$setfile")
 
@@ -96,7 +113,7 @@ else
   echo "== 5. no client change on the branch: clones not promoted (PROMOTE=1 to force)"
 fi
 
-entry="- $branch merged to fork parity $head ($(date -u +%Y-%m-%dT%H:%MZ)): the gate $(basename "${setfile%.json}"), $runs${watch:+; watch items: $watch}; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
+entry="- $branch merged to fork parity $head ($(date -u +%Y-%m-%dT%H:%MZ)): the gate $(basename "${setfile%.json}")$cited, $runs${watch:+; watch items: $watch}; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
 today="### $(date -u +%Y-%m-%d)"
 grep -q "^$today\$" docs/LOG.md || printf '\n%s\n\n' "$today" >> docs/LOG.md
 printf '%s\n' "$entry" >> docs/LOG.md
