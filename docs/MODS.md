@@ -725,6 +725,13 @@ FSMP left).
   ones; the light-plugins verb's index mapping is what keeps FE form ids agreeing.
 - The server's esm directories receive 81 plugins (76 for 1.7.104); persist-mods
   places them from the manifest at the stage.
+- First-person arrows launch about 3.8 units higher over the feet at the same pitch under the
+  layer (b-arrow-path 20261020-225948 against the no-layer 122620: 133.4 against 129.6 units; both
+  seats also stand about a unit higher on the camp flat), which turned b-god's marginal shot at the
+  top of a head 250 units away into a miss while shots at the taller Orc kept hitting. Improved
+  Camera SE is the only layer DLL hooking the camera, so it is the candidate (HYPOTHESIS,
+  thuum-magnus 2026-10-20). A player aims; the lab's scenario moves its shooter closer. If arrows
+  fly high in first person under the layer, this is the thread.
 
 ### The Nemesis output for True Directional Movement: the seat procedure
 
