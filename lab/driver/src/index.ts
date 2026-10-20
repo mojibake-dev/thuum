@@ -19,6 +19,7 @@ import {
   Actor,
   ActorBase,
   ActorValueInfo,
+  blockPapyrusEvents,
   callNative,
   Cell,
   ConstructibleObject,
@@ -1844,6 +1845,22 @@ function run(step: Step, player: Actor): unknown {
           NetImmerse.getNodeWorldPositionZ(npc, head, false),
         ],
       };
+    }
+    case "papyrus-events": {
+      // Skyrim Platform's Papyrus event block. skymp5-client turns it on at
+      // its first tick in every connected game (blockPapyrusEventsService.ts),
+      // and the SendEvent hook (skyrim-platform FridaHooks.cpp,
+      // OnSendEventEnter) then blanks every event a script would receive
+      // unless the script's name is on its short list, and blanks OnUpdate
+      // for every script. A probe lifts it in a connected game to tell a
+      // blocked event from a quest that never runs (x-survival-why
+      // 20261020-020729: Survival's 5 s check is RegisterForSingleUpdate,
+      // then OnUpdate, and never fires connected). {block: false} lifts the
+      // block, {block: true} (the default) restores it. Lab games only; a
+      // lifted block lets every vanilla quest script run.
+      const block = !(a.block === false || a.block === "false" || a.block === 0);
+      blockPapyrusEvents(block);
+      return block ? "blocked" : "unblocked";
     }
     case "draw-weapon":
       // the player's, or with {other: true} the nearest other actor's (a
