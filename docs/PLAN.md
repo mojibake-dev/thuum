@@ -396,12 +396,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - Finger of Death: IsEssential (354) BUILT on the server (eea3a5d5,
         T0); the scripted kill stays the caster's game's (the ash pile),
         ADR-029's default, until the allowlist verb.
-      - a player's own dent on a figure's bar: the Frida read first
-        (lab/frida/figure-dent-trace.js, on main), on this train's stage;
-        no hook before it.
-      - the rune's glyph on the observer: the Frida read of the player tier
-        first (lab/frida/rune-tier-trace.js, on main), on this train's
-        stage.
+      - a player's own dent on a figure's bar: READ (x-figure-values-hit-frida
+        20261020-085705): the fork's guard works and the vfunc it blocks is a
+        post-write notification inside DamageActor 37335; the hook point is
+        37335's entry, after the re-analyst resolves its signature (no hook
+        before that; train-30).
+      - the rune's glyph on the observer: READ (x-rune-visible-frida
+        20261020-085906): the landing's look never runs for the relayed rune
+        (no 44213, no 43919; arrived from the trigger tick, not a collision),
+        so the tier is not the cause; the rune stands as a PROJ-based
+        reference (refs-near); next the caster-seat trace and the arrival
+        path's static read (train-30).
       - Scattershock's hits: MEASURED and closed (x-scattershock-6s
         20261020-080751: thirteen missiles on both seats, the server records
         the hits; the 2.5 s hold had matched the charge); the missile's
