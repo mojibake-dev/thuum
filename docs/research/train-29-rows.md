@@ -303,7 +303,12 @@ effects gated on 724 alone (which of the 13: a census read) and a shorter unknow
 EffectConditionsTest (Row helper). T2: a difftest session with a dual cast whose 724 rider holds.
 Server-only.
 
-The `refs-near` driver step. Specified in pt24/placed-objects.md section 6 ("The step to add"): args
+The `refs-near` driver step. BUILT 2026-10-20 (thuum lab-refs-near 048242d, merged main e7dd556): args
+{radius, from: self|other, formTypes, ids, precision}, the view c.refs_near().count/has/distance. One finding
+corrects the spec: SKSE's Cell.GetNumRefs filters on the BASE form's type (skse64 PapyrusCell.cpp:25, :46), so
+the types to ask for are PROJ 50, ACTI 24 and HAZD 51, not the reference classes 65 and 70, and
+x-rune-visible-refs-near's formTypes and count() change to match; the same explains the arrows step's constant
+0 (marksman.md). The original spec follows. Specified in pt24/placed-objects.md section 6 ("The step to add"): args
 {radius, from: self|other, formTypes, ids}; Cell.getNumRefs per form type, getNthRef for the non-projectile
 types with formId, baseId, baseType, disabled, deleted, pos and distance, counts only for projectile types
 (every Papyrus call on a projectile reference aborts), and the projectiles step's findClosestReferenceOfType
