@@ -105,7 +105,7 @@ Survival race (lifted by the 8df default's smoke).
 ## 6. Order
 
 1. The layer gate (red at 25 of 62, 16:13) was STOPPED at 38 of 62 at
-   16:50 on Eli's word to reach twenty-eight tonight: its head could not
+   16:47 on Eli's word to reach twenty-eight tonight: its head could not
    merge, and the runs it had left are measured by tonight's m2-close
    nightly over the final stage. Its four reds are read
    (docs/research/layer-reds-2026-10-20.md): the vanilla race menu under
