@@ -13,6 +13,12 @@ lab/layer/load-order.tsv. Every patch is idempotent, keeps the file's size, and 
                     flag matches the actor, so a part with neither bit never seats from a preset
                     (docs/verbs/racemenu-sync.md). The records must be uncompressed (they are, in
                     Playable Headparts All Races); a compressed one is an error, not a silent skip.
+  drop-record <formid>
+                    remove the record with that form id (hex, as the plugin numbers it) from the
+                    plugin: the groups around it shrink, a group left empty goes too, and the
+                    header's record count follows. The file gets shorter, the one patch that changes
+                    the size. For the layer's rule that no served plugin overrides the player's base
+                    record NPC_ 0x00000007 (SkyMP's server owns it for every player).
 """
 import csv
 import struct
@@ -95,7 +101,52 @@ def patch_hdpt_gender_both(buf):
     return bytes(buf), f'{n} HDPT DATA bytes, {fmt(before)} -> {fmt(after)}'
 
 
-PATCHES = {'esl': patch_esl, 'hdpt-gender-both': patch_hdpt_gender_both}
+def patch_drop_record(buf, fid_hex):
+    fid = int(fid_hex, 16)
+    dropped = {'records': 0, 'groups': 0}
+
+    def build(start, end):
+        chunks, o = [], start
+        while o + 24 <= end:
+            typ = buf[o:o + 4]
+            if typ == b'GRUP':
+                size = struct.unpack_from('<I', buf, o + 4)[0]
+                inner = build(o + 24, o + size)
+                if inner:
+                    hdr = bytearray(buf[o:o + 24])
+                    struct.pack_into('<I', hdr, 4, 24 + len(inner))
+                    chunks.append(bytes(hdr) + inner)
+                else:
+                    dropped['groups'] += 1
+                o += size
+                continue
+            size, flags, rfid = struct.unpack_from('<III', buf, o + 4)
+            if typ != b'TES4' and rfid == fid:
+                dropped['records'] += 1
+            else:
+                chunks.append(buf[o:o + 24 + size])
+            o += 24 + size
+        return b''.join(chunks)
+
+    new = bytearray(build(0, len(buf)))
+    if not dropped['records']:
+        return buf, f'{fid:08X} already absent'
+    # the TES4 header's record count (HEDR: version f32, count u32) follows the removals
+    size = struct.unpack_from('<I', new, 4)[0]
+    p, end = 24, 24 + size
+    while p + 6 <= end:
+        sig = new[p:p + 4]
+        n = struct.unpack_from('<H', new, p + 4)[0]
+        if sig == b'HEDR':
+            count = struct.unpack_from('<I', new, p + 6 + 4)[0]
+            struct.pack_into('<I', new, p + 6 + 4, max(0, count - dropped['records'] - dropped['groups']))
+            break
+        p += 6 + n
+    return bytes(new), f"dropped {dropped['records']} record(s) {fid:08X}" + (f" and {dropped['groups']} emptied group(s)" if dropped['groups'] else '') + f', {len(buf)} -> {len(new)} B'
+
+
+PATCHES = {'esl': patch_esl, 'hdpt-gender-both': patch_hdpt_gender_both, 'drop-record': patch_drop_record}
+RESIZES = {'drop-record'}
 
 
 def main():
@@ -104,7 +155,8 @@ def main():
     tsv, tree, order_tsv = sys.argv[1:]
     folder_of = {r['plugin'].lower(): r['mod'] for r in rows(order_tsv)}
     for r in rows(tsv):
-        plugin, kind = r['plugin'], r['patch']
+        plugin = r['plugin']
+        kind, *args = r['patch'].split()
         if kind not in PATCHES:
             raise SystemExit(f'{plugin}: unknown patch {kind!r}')
         folder = folder_of.get(plugin.lower())
@@ -114,11 +166,11 @@ def main():
         if not path.is_file():
             raise SystemExit(f'{plugin}: not at {path}')
         old = path.read_bytes()
-        new, what = PATCHES[kind](old)
+        new, what = PATCHES[kind](old, *args)
         if new != old:
-            assert len(new) == len(old)
+            assert kind in RESIZES or len(new) == len(old)
             path.write_bytes(new)
-        print(f'patched: {plugin}: {kind} ({what})')
+        print(f'patched: {plugin}: {r["patch"]} ({what})')
 
 
 if __name__ == '__main__':

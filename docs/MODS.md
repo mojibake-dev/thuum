@@ -582,8 +582,20 @@ eight, the eyes surviving only through All Eyes for All Races, later in the orde
 2026-10-20: "patch it". CONFIRMED by x-layer-headparts 20261020-210719 on the first stage that
 carried it (stage-layer-train29 7d2f806): both seats' head parts equal the server's record at login
 and again after a relaunch; that stage's smoke 20261020-210408 ran with no hdtsmp64 log among its
-artifacts, FSMP gone as intended.
-`lab/tests/test_plugin_patch.py` holds the patches to their contracts.
+artifacts, FSMP gone as intended. `drop-record <formid>` removes one record, the groups around
+it shrinking and the header's count following (the one patch that changes a file's size); it
+carries the layer's rule that **no served plugin may override the player's base record NPC_
+0x00000007 (nor PlayerRef 0x14)**: in SkyMP every player shares 0x7 and the server builds each
+player's values and appearance from it, so a layer override changes every player's base under
+the server's feet (thuum-magnus, 2026-10-20; layer-stage's 2b refuses one, numidium). Of the
+layer's 93 plugins exactly one did, Supernatural Survival Tweaks - Cold Resist Werebeast and
+Vampire.esp: a whole copy of the vanilla Player record plus a VMAD attaching
+SST_PlayerScriptAddRemoveAbilities, the script that gives vampires and werebeasts their cold
+resist, and the record on the stack of the a-rotfern CTD (SkyrimSE.exe+095A263, run
+20261020-224918, the mid-game look step). The patch drops that override (7,729 to 6,962 B, 13
+records left); the plugin keeps its Survival quest, effect and spell overrides, and loses the
+ability script, which never ran connected anyway (outside the admitted list). Eli's call,
+2026-10-20: "patch it". `lab/tests/test_plugin_patch.py` holds the patches to their contracts.
 
 **Papyrus admission by plugin (ADR-044, accepted by Eli 2026-10-19):** persist-mods ships
 `papyrus-admitted/Platform/papyrus-scripts.txt` as a layer file, so add-mods.ps1 installs it,
