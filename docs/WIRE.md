@@ -186,6 +186,19 @@ repeat inside the window. Schema export (`just wire-schema`) writes a JSON
 description consumed by the napi layer for the TypeScript gamemode and by
 docs; C++ never sees bytes, only structs across the bridge.
 
+### CreateActor's props for an observer (figure-values, train-28)
+
+CreateActor's optional props `health`, `magicka` and `stamina` travel to an
+observer too, once the actor's player has an actor-values record: they are
+the player's recorded maxima (bases 24, 25, 26 with the running buffs),
+which the other game sets as its figure's base values instead of the million
+the client used to set (thuum docs/verbs/figure-values.md). A change of the
+record or of a buff that moves a maximum follows as three UpdateProperty
+messages (t 7) named `health`, `magicka` and `stamina`, to every game that
+sees the actor. The owner's own CreateActor carries the race's bases and the
+percentages as before. No field is new, so the validator is unchanged: the
+props were optional finite floats already.
+
 ## Bridge and client FFI
 
 Server: `wire-bridge` links into the existing C++ server through cxx and
