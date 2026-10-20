@@ -457,11 +457,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         sync/spell.ts), and on a reconnect the re-add did not land (test 1
         knew only its save's Flames and Healing; the server's record held
         all fifteen and sent them; a fresh relaunch restored all seventeen).
-        HYPOTHESIS: an ordering race with a save reload on reconnect. Fix:
-        apply the list after the reload lands, and log the path to the SP
-        log (sync/spell.ts prints to the in-game console today, so the lab
-        could not read it); a-restart-persistence gains a learned-spell
-        assertion across its restart (scenario change, Eli's review).
+        Read: there is no reload on a reconnect; the one difference from a
+        launch is removing and re-adding the same spells in one frame
+        (HYPOTHESIS). BUILT 2026-10-20 on fork m2-train30-spells 096d2cd8
+        (client only, pipeline 2236 green): the list applied as a diff with
+        a second pass a second later (docs/verbs/learned-spells.md); T3
+        b-spells-reconnect approved by Eli and on main (red by design until
+        this stages); a-restart-persistence takes the assertion after.
       - Survival's login race: the record's restore of 828 and 8df rode the
         login send and lost to the Creation's 5 s check once in two
         relaunches (test 2, 18:23Z), so the per-global default (built,
