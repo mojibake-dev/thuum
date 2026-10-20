@@ -4,7 +4,9 @@
 # that encoded this nine times with a new bug each). In order:
 #   1. the lab tree deployed (the gate's scenarios and lab/gate.yaml on sky-srv);
 #   2. the full T2 on the branch's server image (`just test-proto <branch>`;
-#      T2=skip when a T2 of this head is already recorded);
+#      T2=skip when a T2 of this head is already recorded, or with
+#      T2_LOG=<log> when one runs beside the gate: step 3b waits for that log
+#      to end green before parity moves);
 #   3. the gate: lab/gate.yaml's `always`, the scenarios named here (the verb's
 #      own and the touched verbs'), and `watch` (the open ADR-027 items), as one
 #      run set; a red stops everything before parity moves;
@@ -75,6 +77,14 @@ fi
 setfile=$(ls -t lab/results/runsets/*-merge-"$branch"*.json | head -1)
 runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"] for s in rs["scenarios"] for e in rs["runs"].get(s,[]) if e.get("run")]; print(f"{r[0]} to {r[-1]} ({len(r)} runs)" if r else "")' "$setfile")
 watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1]))["watch"]))' "$setfile")
+
+if [ -n "${T2_LOG:-}" ]; then
+  # a T2 run beside the gate (T2=skip with T2_LOG=<its log>): parity moves only once that log ends green
+  echo "== 3b. the T2 beside the gate ($T2_LOG) $(date +%H:%M:%S)"
+  until grep -q -E '^T2 (green|red|partial|trial)|^T2 exit [0-9]' "$T2_LOG" 2>/dev/null; do sleep 20; done
+  grep -q '^T2 green' "$T2_LOG" || { grep -E '^T2 ' "$T2_LOG" | tail -2; echo "== the T2 beside the gate is not green: parity not moved" >&2; exit 1; }
+  echo "   $(grep -m1 '^T2 green' "$T2_LOG")"
+fi
 
 echo "== 4. parity -> $branch $head $(date +%H:%M:%S)"
 old_parity=$(git -C "$fork" rev-parse origin/parity)
