@@ -107,7 +107,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
 
 - b-duel, the Flames row (step 65): 0.822 against the green 0.7293 (layer
   1496763f) and 0.7198 to 0.7358 (no layer); server and seat agree, so
-  less damage applied, not a desync. Read 16:5x PDT: the server took 12
+  less damage applied, not a desync. Read 16:43 PDT: the server took 12
   hits summing 2.339 s (red) against 19 summing 3.418 s (green), the same
   183 ms cadence, the same one capped 365 ms gap, no refusal (the ADR-039
   warning on 0xF392F's HasPerk rider is in both and damage followed it),
