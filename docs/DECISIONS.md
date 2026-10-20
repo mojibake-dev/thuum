@@ -1972,12 +1972,48 @@ keeps as a raw form id.
 JSON, a migration with a version mark, a T0 that saves a world under one
 order and loads it under another with identical state, and the
 restart-persistence scenario extended with a load order change (a stacked
-snapshot, as the rest verb's schema change ran). Cost, estimated: two
-sessions of server work (the structs and serializer, the migration, the
-appearance refusal, the tests) and one lab session (the scenario). Load
-time: one string match per stored form at load, negligible. Until it
-lands, a world restored under a changed order is re-based by hand as
-tonight, or not restored.
+snapshot, as the rest verb's schema change ran). Load time: one string
+match per stored form at load, negligible. Until it lands, a world
+restored under a changed order is re-based by hand as tonight, or not
+restored.
+
+The map (docs/research/formdesc-world-map.md, read against fork e3806870
+the same evening) sizes the work. Twelve raw fields in five structs hold a
+runtime id: the appearance's race, head parts and texture set (stored as
+JSON text inside appearanceDump), the inventory entry's base, enchantment
+and poison (appearing twice, under inv and under equipmentDump), the
+equipment's four spell slots, learnedSpells, and the legacy effects map
+(a dead write path, deletable). Nineteen fields are FormDesc already, but
+six of them still drop or throw on a missing plugin (running effects are
+dropped and the record rewritten without them; the login sends for map
+markers, learned effects, favorites and shouts convert with no try), so
+decision 1's "kept, not dropped" is work there too; playerGlobals is the
+one field that behaves as asked and is the template. Today an appearance
+whose race does not resolve skips the WHOLE change form at load, the
+gamemode then creates a fresh actor with the race menu open, and the
+lowest free id is handed out again, which is how the 17:25 overwrite
+happened (HYPOTHESIS on the id coincidence; the mechanics are read).
+Stale learned spells are worse than wrong: the server refuses them in a
+hand and sends Actor.RemoveSpell to the player's own game. There is no
+version mark in the record and nothing persists the load order; the
+pattern for an optional field is presence (at_pointer), and the one
+in-memory migration (legacy effects to running effects) re-runs on every
+load. The trap that sets the cost: Appearance, Inventory and Equipment are
+the same structs on the record and on the wire, so retyping their fields
+would change the wire against decision 4. Two shapes avoid it: stored
+twins (FormDesc fields living only in the change form, converted at the
+MpActor and MpObjectReference accessors against the live order, every
+runtime API keeping its uint32), or conversion at the record boundary
+(after parse in WorldState::LoadChangeForm and before upsert in
+TickSaveStorage, since JsonToChangeForm is static and order-less and the
+drivers call it with no world in reach). The world's order is saved beside
+the records as the first non-change-form file in world/, and the version
+mark is one top-level key read with the same presence guard. Cost,
+re-estimated from the map: three sessions of server work (the twins or the
+boundary conversion with the appearanceDump rewrite; the migration, the
+order file and the version mark; the appearance refusal, the six
+keep-on-miss fixes and the tests) and one lab session (the scenario). The
+earlier estimate of two was made before the map.
 
 **Alternatives.** Pin the slots forever (a layer may only append plugins
 after every existing one): brittle, since any master-ordered plugin, an
