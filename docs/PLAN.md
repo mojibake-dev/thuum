@@ -505,9 +505,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         fork m2-train30-conditions f2c0ba33 with T0 (the current Health,
         Magicka or Stamina; any other value from the player's record plus
         the server's own modifiers; a running effect by its MGEF); two
-        HYPOTHESES in the doc (the parameter's encoding, a racial
-        ability's resistance unseen by the server) and a Hailstone probe
-        for its T3.
+        HYPOTHESES in the doc, since resolved: the parameters CONFIRMED
+        from the record bytes (the actor value index; the MGEF id in the
+        file's own index space, mapped through the owning record,
+        39affd73), and the race's constant abilities read from the records
+        into the one modifier (52ea63f8: a Nord's 50 ResistFrost, an
+        Altmer's Highborn magicka), T0 for both; a Hailstone probe for its
+        T3 after the branch stages, the resistance multiplier its likely
+        next row.
       - the lab: a flights record for spell projectiles in the driver (the
         Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
         951b5bbc raises projectileFlight for a spell's projectiles, the
