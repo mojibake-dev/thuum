@@ -95,10 +95,11 @@
 #   mods/<mod>/<path inside Data>   every file, as the game's Data folder takes it
 #   mods/SHA256SUMS                 "<hash>  <mod>/<path>", what a clone fetches
 #   mods/plugins.txt                the plugins to enable, in load order
-#   mods/papyrus-scripts.txt        ADR-044: "<plugin>: <script class> ..." per admitted plugin
+#   mods/papyrus-admitted/Platform/papyrus-scripts.txt
+#                                   ADR-044: "<plugin>: <script class> ..." per admitted plugin
 #                                   (lab/layer/papyrus-admitted.tsv), what skymp5-client admits
-#                                   through its Papyrus event block at login; outside SHA256SUMS
-#                                   like plugins.txt (not a Data file)
+#                                   through its Papyrus event block; a layer file like the rest,
+#                                   so a clone gets it at Data\Platform\papyrus-scripts.txt
 #   esm/ and esm/1.6.1170/          the plugins again, where each game version's
 #                                   server loads them (server-settings.json), with
 #                                   their SHA256SUMS lines replaced
@@ -450,17 +451,20 @@ for (f, winner), n in sorted(kept.items()):
 EOF
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 # ADR-044: the Papyrus script class names of the admitted plugins (lab/layer/papyrus-admitted.tsv),
-# served beside plugins.txt as papyrus-scripts.txt for skymp5-client to admit at login. A `game`
-# row's plugin (the Creation Club set) is read from a copy pulled off the host's persist esm
-# directory into lab/.cache/game (a copy, read here; nothing runs on the host).
+# shipped as a layer file of its own folder, papyrus-admitted/Platform/papyrus-scripts.txt, so
+# add-mods.ps1 installs it like any other (hash-checked, refreshed with each stage) at
+# Data\Platform\papyrus-scripts.txt in every game folder, where Skyrim Platform reads it at its
+# load (train-29). A `game` row's plugin (the Creation Club set) is read from a copy pulled off the
+# host's persist esm directory into lab/.cache/game (a copy, read here; nothing runs on the host).
 game_cache="$cache/../game"; mkdir -p "$game_cache"
 while IFS=$'\t' read -r plugin source _; do
   [ "$source" = game ] || continue
   [ -f "$game_cache/$plugin" ] || rsync -t "$dst:$persist/esm/$plugin" "$game_cache/" \
     || { echo "could not pull $plugin off $dst:$persist/esm (lab/.cache/game)" >&2; exit 2; }
 done < <(grep -v '^#' "$root/lab/layer/papyrus-admitted.tsv" | tail -n +2)
-python3 "$root/lab/tools/papyrus-map.py" "$stage/tree" "$root/lab/layer/papyrus-admitted.tsv" "$order_tsv" "$game_cache" "$stage/tree/papyrus-scripts.txt"
-(cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt ! -name papyrus-scripts.txt | sed 's|^\./||' | LC_ALL=C sort \
+mkdir -p "$stage/tree/papyrus-admitted/Platform"
+python3 "$root/lab/tools/papyrus-map.py" "$stage/tree" "$root/lab/layer/papyrus-admitted.tsv" "$order_tsv" "$game_cache" "$stage/tree/papyrus-admitted/Platform/papyrus-scripts.txt"
+(cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
 echo "mod layer: $(wc -l < "$stage/tree/SHA256SUMS" | tr -d ' ') files, $(du -sh "$stage/tree" | cut -f1)"
 if [ -n "${PERSIST_LOCAL:-}" ]; then

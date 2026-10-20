@@ -474,7 +474,7 @@ decision 4 and Realistic Aspen Trees, below), on top of the layer's existing eig
 CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
 client-only at the tail), 45 of them light; 29 mod folders scoped `@1.6.1170` (every SKSE
 DLL mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on
-1.7.104; FSMP among them). 113 mod folders, 5,778 files once the install-order rule (below)
+1.7.104; FSMP among them). 113 mod folders and the Papyrus map's, 5,779 files once the install-order rule (below)
 has dropped the 414 replaced copies, 4.5 GB on disk (the DLL mods' .pdb files kept: Crash
 Logger with PDB support is in the set and reads them).
 
@@ -548,10 +548,13 @@ byte-identical overlaps that change nothing (the two Artesian packages' `cloak.x
 Apachii witcher hair textures rotfern bundles, the one script Headshot Kills and Stab The
 Heart share).
 
-**Papyrus admission by plugin (ADR-044, accepted by Eli 2026-10-19):** persist-mods serves
-`mods/papyrus-scripts.txt` beside plugins.txt, one line per admitted plugin, `<plugin>: <script
-class> <script class> ...`, the names skymp5-client admits through its event block at login
-(train-29's Skyrim Platform row reads it; the hook sees class names, not plugins). The admitted
+**Papyrus admission by plugin (ADR-044, accepted by Eli 2026-10-19):** persist-mods ships
+`papyrus-admitted/Platform/papyrus-scripts.txt` as a layer file, so add-mods.ps1 installs it,
+hash-checked and refreshed with each stage, at `Data\Platform\papyrus-scripts.txt` in every game
+folder; Skyrim Platform reads it there at its load, before the first tick (train-29's row), and a
+client without the layer has no file and admits nothing. One line per admitted plugin, `<plugin>:
+<script class> <script class> ...` after `#` comment lines, the names skymp5-client admits through
+its event block (the hook sees class names, not plugins). The admitted
 plugins are the rows of `lab/layer/papyrus-admitted.tsv` (plugin, source, why). lab/tools/papyrus-map.py
 reads each plugin's VMAD records (the scripts on its forms, a quest's alias scripts, the fragment
 classes of quests, perks, dialogue, packages and scenes) and, for a plugin from a layer folder, the
@@ -561,8 +564,7 @@ pulled off the host's persist esm directory into lab/.cache/game and read there.
 ccQDRSSE001-SurvivalMode.esl, and the first measured case: with the block lifted and
 SurvivalModeMainQuest restarted, its 5 s check ran and the Creation's own "Enable Survival Mode?" box
 appeared in a connected game (numidium, x-survival-unblock3 20261020-024406), so admitting its names
-from the first tick is enough. The file is regenerated at every build and sits outside SHA256SUMS,
-like plugins.txt, because add-mods.ps1 installs every SHA256SUMS entry into Data.
+from the first tick is enough. The file is regenerated at every build and listed in SHA256SUMS like every layer file.
 `lab/tests/test_papyrus_map.py` checks the rows and the VMAD reader's layouts.
 
 **Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
