@@ -19,7 +19,7 @@ scenarios now in `pending` leaving it as the train carries their fixes:
 | b-spells-reconnect | a server-taught spell survives a reconnect with the game up (playtest 27's loss) | fork m2-train30-spells 096d2cd8 |
 | b-figure-values (the hit steps) | a figure's bar never dents below the server's number on the hitter's screen | fork m2-train30-dent e6a8270a |
 | b-formdesc-world | a world saved under one load order reads right under another, and after a restart (ADR-043 slice one, rule 6) | fork m2-formdesc-world 80cf1e35 |
-| b-hailstone (new, from probe x-hailstone; Eli's review) | the server evaluates an effect's own conditions (GetActorValue with the race's abilities, HasMagicEffect) and resists a hostile effect as the engine does: 0.85 on both seats by different paths | fork m2-train30-resist on m2-train30-conditions |
+| b-hailstone (new, from probe x-hailstone; approved by Eli 2026-10-20, main a6991674) | the server evaluates an effect's own conditions (GetActorValue with the race's abilities, HasMagicEffect) and resists a hostile effect as the engine does: 0.85 on both seats by different paths | fork m2-train30-resist on m2-train30-conditions |
 
 Plus every scenario already green on parity 4720d0d3 and on the layer gate
 of 2026-10-20 (the full sweep; b-spell on the served band). A red in a
