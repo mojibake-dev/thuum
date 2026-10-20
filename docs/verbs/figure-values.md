@@ -199,7 +199,9 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 - T0: the property visitor emits the three maxima under OnlyPublic when a
   record exists and nothing when it does not; a change of base 24 marks the
   public props dirty.
-- T1: none (no native).
+- T1: the Windows build's compile of the native gate (train-28's vfunc
+  guard, then train-30's DamageActor replace); a Replace that Gum refuses
+  logs critical at install.
 - T2: a difftest session where c1 reports bases, c2 receives c1's CreateActor
   with the three maxima (the legacy stack sends none: the divergence listed).
 - T3 scenario id: lab/scenarios/b-figure-values.yaml: c2's figure of c1 reads
@@ -240,7 +242,19 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
   original callable), the replacement returning false when `this` is a
   figure by the same mark (dynamic form id, kAttackDamageMult 0), else
   calling the original; the slot-0x104 guard then goes, since the write it
-  tried to stop happens before it. The alternative, MagicTarget::
+  tried to stop happens before it. BUILT 2026-10-20 on fork m2-train30-dent
+  e6a8270a: HookHandler::Replace (gum_interceptor_replace, frida-gum
+  16.0.19 gum/guminterceptor.h:49-51; the fork's Frida layer had attach-style
+  hooks only until this), game/Offsets.h DamageActor REL::ID(37335) AE only
+  as PerformAction, the replacement and its install in FridaHooks.cpp
+  (InstallDamageActorHook), Hooks.cpp's FigureHealthDamage removed.
+  HYPOTHESIS until the hit steps run: the replacement's calling convention
+  is the function's (Windows x64, the float second argument in XMM1) and the
+  figure's hit reactions stay. T3 for it: b-figure-values gains three sword
+  hits on c2's figure with `c1.watched(c2).rises("health") == 0` (a count of
+  the rises in the watched health series the driver already records, a
+  lab-api read to add) beside the probe's weak asserts; its stage follows
+  the spells branch. The alternative, MagicTarget::
   IsInvulnerable's vfunc on Character (37335's first gate), is rejected
   for its reach: invulnerability is read by the magic system too and would
   touch the figure's imposed effects (HYPOTHESIS). T3: x-figure-values-hit
@@ -257,7 +271,7 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 - [x] engine surface cited or delegated (fork parity d5b05e89, 2026-10-18)
 - [x] server logic + T0 (unit/FigureValuesTest.cpp: no maxima before a record, the owner's race bases unchanged, the three property updates on a record, the maxima in a later CreateActor)
 - [x] message + validator (same commit: no new message, CreateActor's optional props filled for observers; docs/WIRE.md)
-- [x] native hook + T1 (Hooks.cpp FigureHealthDamage; T1 is the Windows build's)
+- [x] native hook + T1 (train-28's Hooks.cpp FigureHealthDamage, replaced by train-30's DamageActor gate on fork m2-train30-dent e6a8270a; T1 is the Windows build's)
 - [x] TS handler (formView.ts applyFigureMaxima)
 - [ ] T2 green (difftest session figure-values: the three property updates declared against the legacy stack)
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-figure-values; x-figure-values-hit for the victim case)

@@ -127,6 +127,7 @@ class RunTests(unittest.TestCase):
         self.settings = Settings(
             results_dir=str(self.tmp / "results"), guests_file=str(self.tmp / "guests.yaml"),
             server_world_dir=str(self.tmp / "world"), server_snapshots_dir=str(self.tmp / "snapshots"),
+            fixture_worlds_dir=str(self.tmp / "fixtures"),
             step_timeout_s=5, heartbeat_timeout_s=5, server_ready_timeout_s=1, connect_timeout_s=1, time_scale=0.0,
             before_logs_quiet_s=0.0,  # the clients' before-run logs are fetched only where a test turns it on
             hang_evidence=False,  # a hung seat's dump is taken only where a test turns it on
@@ -345,6 +346,28 @@ artifacts: [trace]
         run_id, body = self._run(text)
         self.assertEqual(body["verdict"], "error")
         self.assertIn("E_RUN_SNAPSHOT", body["failures"][0]["error"])
+
+    def test_a_fixture_world_is_laid_in_place_of_the_snapshot(self):
+        fx = self.tmp / "fixtures" / "preslice" / "changeForms"
+        fx.mkdir(parents=True)
+        (fx / "0.json").write_text('{"profileId": 1}')
+        (fx.parent / "load-order.json").write_text('{"files": [{"name": "Skyrim.esm", "light": false}]}')
+        run_id, body = self._run("id: t2-world\nclients: [c1]\nserver: {world: preslice}\nsteps: []\n")
+        self.assertEqual(body["verdict"], "green", body.get("failures"))
+        world = self.tmp / "world"
+        self.assertEqual((world / "changeForms" / "0.json").read_text(), '{"profileId": 1}')
+        self.assertTrue((world / "load-order.json").is_file())
+        self.assertFalse((world / "actors.json").exists(), "the clean snapshot's file is not laid")
+        self.assertIn("fixture world preslice", body["phases"][0]["note"])
+
+    def test_a_missing_fixture_world_is_error_and_world_with_snapshot_is_refused(self):
+        run_id, body = self._run("id: t2-noworld\nclients: [c1]\nserver: {world: nope}\nsteps: []\n")
+        self.assertEqual(body["verdict"], "error")
+        self.assertIn("E_RUN_WORLD", body["failures"][0]["error"])
+        for server in ("{world: preslice, snapshot: clean}", "{world: ../up}"):
+            r = self.client.post("/lab/run", files={"scenario": ("s.yaml", f"id: t\nclients: [c1]\nserver: {server}\nsteps: []\n".encode(), "text/yaml")})
+            self.assertEqual(r.status_code, 400, server)
+            self.assertIn("E_SCENARIO", r.text)
 
     def test_bad_scenario_is_400(self):
         r = self.client.post("/lab/run", files={"scenario": ("s.yaml", b"id: t\nclients: [c1]\nsteps:\n  - c9: connect\n", "text/yaml")})

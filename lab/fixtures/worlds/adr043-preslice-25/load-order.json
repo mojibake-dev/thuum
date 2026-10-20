@@ -1,0 +1,72 @@
+{
+  "files": [
+    {
+      "light": false,
+      "name": "Skyrim.esm"
+    },
+    {
+      "light": false,
+      "name": "Update.esm"
+    },
+    {
+      "light": false,
+      "name": "Dawnguard.esm"
+    },
+    {
+      "light": false,
+      "name": "HearthFires.esm"
+    },
+    {
+      "light": false,
+      "name": "Dragonborn.esm"
+    },
+    {
+      "light": false,
+      "name": "ccBGSSSE001-Fish.esm"
+    },
+    {
+      "light": true,
+      "name": "ccQDRSSE001-SurvivalMode.esl"
+    },
+    {
+      "light": true,
+      "name": "ccBGSSSE037-Curios.esl"
+    },
+    {
+      "light": false,
+      "name": "ccBGSSSE025-AdvDSGS.esm"
+    },
+    {
+      "light": true,
+      "name": "_ResourcePack.esl"
+    },
+    {
+      "light": false,
+      "name": "RaceCompatibility.esm"
+    },
+    {
+      "light": false,
+      "name": "rotfern.esp"
+    },
+    {
+      "light": false,
+      "name": "RaceMenu.esp"
+    },
+    {
+      "light": false,
+      "name": "RaceMenuPlugin.esp"
+    },
+    {
+      "light": false,
+      "name": "LostGrimoire.esp"
+    },
+    {
+      "light": false,
+      "name": "Apocalypse - Magic of Skyrim.esp"
+    },
+    {
+      "light": true,
+      "name": "Headshot Kills.esp"
+    }
+  ]
+}

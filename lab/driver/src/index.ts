@@ -222,10 +222,14 @@ type Watched = {
   // (the fork's projectileLaunched event, Projectile::Launch's LaunchData;
   // thuum docs/verbs/marksman.md: the arrow's path identical on both screens)
   launches: Array<[number, number, number, number, number, number, number, number, number, number]>;
-  // its arrows' flights as they start [ms, ammo, x, y, z, angleX, angleZ,
-  // power]: the arrow's first update, its angles after the player's
-  // auto-aim (the fork's projectileFlight event; the path the arrow flies)
-  flights: Array<[number, number, number, number, number, number, number, number]>;
+  // its projectiles' flights as they start [ms, ammo, x, y, z, angleX,
+  // angleZ, power, projectile, spell]: the projectile's first update, its
+  // angles after the player's auto-aim (the fork's projectileFlight event;
+  // the path the arrow flies). Arrows since m2-arrow-path (ammo set, spell
+  // 0); a spell's projectiles since m2-train30-flights (ammo 0, spell set:
+  // Scattershock's heading on the observer, docs/verbs/spell-cast.md). The
+  // first eight columns are lab-api's pairing (assertions.py _rows(.., 8))
+  flights: Array<[number, number, number, number, number, number, number, number, number, number]>;
   // the actions the engine performed for it [ms, action, idle, eventName,
   // type] (the player's only: the platform's hook reports the player's own;
   // thuum docs/verbs/cast-action.md)
@@ -746,7 +750,7 @@ try {
   on("projectileFlight", (e) => {
     const w = watchedRecord(e.shooter);
     if (w && w.flights.length < WATCH_SELF_MAX) {
-      w.flights.push([watchedMs(), e.ammo, e.x, e.y, e.z, e.angleX, e.angleZ, e.power]);
+      w.flights.push([watchedMs(), e.ammo, e.x, e.y, e.z, e.angleX, e.angleZ, e.power, e.projectile, e.spell]);
     }
   });
 } catch (err) {
@@ -1243,14 +1247,18 @@ function run(step: Step, player: Actor): unknown {
     }
     case "arrows": {
       // thuum docs/verbs/marksman.md (playtest thirteen: the target's screen
-      // shows two arrows per shot): how many arrow projectiles stand in the
-      // player's cell (ArrowProjectile, form type 0x40 PARW, CommonLibSSE-NG
-      // include/RE/F/FormTypes.h:204), by SKSE's Cell.GetNumRefs. Only the
-      // count: any Papyrus call on a projectile reference aborts (the
-      // projectiles step's note)
+      // shows two arrows per shot): how many projectiles stand in the
+      // player's cell, by SKSE's Cell.GetNumRefs, which filters on the BASE
+      // form's type (REFERENCE_CLASS_BASE's note above): 0x32 PROJ, an
+      // arrow's base (Skyrim.esm ArrowIronProjectile 0x0003BE11) as a rune's
+      // grenade's, CommonLibSSE-NG include/RE/F/FormTypes.h:190. Until
+      // train-30 the step asked for 0x40 PARW, the reference class, and
+      // counted nothing (x-double-arrow 20261012-022022). Only the count:
+      // any Papyrus call on a projectile reference aborts, so one base's
+      // presence is the projectiles step's question
       const cell = player.getParentCell();
       if (!cell) return { error: "no cell" };
-      return { count: cell.getNumRefs(0x40) };
+      return { count: cell.getNumRefs(0x32) };
     }
     case "projectiles": {
       // thuum docs/verbs/marksman.md: for each projectile base (a PROJ:

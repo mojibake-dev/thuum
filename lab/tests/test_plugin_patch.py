@@ -1,0 +1,96 @@
+"""The layer's build-time plugin patches (lab/layer/plugin-patches.tsv, lab/tools/plugin-patch.py): every row names a
+plugin of the load order and a known patch; the esl patch sets only the header's light flag and refuses a plugin with
+records of its own above 0xFFF; the HDPT patch sets both gender bits on every head part's DATA byte, keeps every other
+bit and the file's size, refuses a compressed record, and both are idempotent."""
+import csv
+import importlib.util
+import struct
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+spec = importlib.util.spec_from_file_location("plugin_patch", ROOT / "lab" / "tools" / "plugin-patch.py")
+plugin_patch = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(plugin_patch)
+
+
+def rows(path):
+    with open(path, newline="") as f:
+        return [r for r in csv.DictReader((l for l in f if not l.startswith("#")), delimiter="\t")]
+
+
+def sub(sig, data):
+    return sig + struct.pack("<H", len(data)) + data
+
+
+def record(typ, fid, data, flags=0):
+    return typ + struct.pack("<IIIIHH", len(data), flags, fid, 0, 0, 0) + data
+
+
+def group(records):
+    body = b"".join(records)
+    return b"GRUP" + struct.pack("<I", 24 + len(body)) + b"HDPT" + struct.pack("<IIHH", 0, 0, 0, 0) + body
+
+
+def plugin(records, masters=("Skyrim.esm",), flags=0):
+    tes4 = b"".join(sub(b"MAST", m.encode() + b"\0") + sub(b"DATA", b"\0" * 8) for m in masters)
+    return record(b"TES4", 0, sub(b"HEDR", struct.pack("<fIi", 1.7, len(records), 0x800)) + tes4, flags) + group(records)
+
+
+class Rows(unittest.TestCase):
+    def test_every_row_names_a_load_order_plugin_and_a_known_patch(self):
+        order = {r["plugin"].lower() for r in rows(ROOT / "lab" / "layer" / "load-order.tsv")}
+        patches = rows(ROOT / "lab" / "layer" / "plugin-patches.tsv")
+        self.assertTrue(patches)
+        for r in patches:
+            self.assertIn(r["plugin"].lower(), order, r["plugin"])
+            self.assertIn(r["patch"], plugin_patch.PATCHES, r["patch"])
+            self.assertTrue(r["why"].strip())
+
+
+class Esl(unittest.TestCase):
+    def test_sets_only_the_light_flag_on_an_override_only_plugin(self):
+        p = plugin([record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))])
+        new, what = plugin_patch.patch_esl(p)
+        self.assertEqual(len(new), len(p))
+        self.assertEqual(struct.unpack_from("<I", new, 8)[0], 0x200)
+        self.assertEqual(new[:8] + new[12:], p[:8] + p[12:])
+        again, what2 = plugin_patch.patch_esl(new)
+        self.assertEqual(again, new)
+        self.assertEqual(what2, "already light")
+
+    def test_refuses_a_plugin_with_its_own_records_above_0xfff(self):
+        p = plugin([record(b"ARMO", 0x01001000, sub(b"EDID", b"New\0"))])  # index 01 = the plugin's own (one master)
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_esl(p)
+
+
+class HdptGenderBoth(unittest.TestCase):
+    def test_sets_both_bits_and_keeps_the_rest(self):
+        recs = [record(b"HDPT", 0x00010000 + i, sub(b"EDID", b"Part\0") + sub(b"DATA", bytes([v])) + sub(b"PNAM", b"\x03\0\0\0"))
+                for i, v in enumerate((0x01, 0x05, 0x09, 0x11, 0x18, 0x19))]
+        p = plugin(recs)
+        new, what = plugin_patch.patch_hdpt_gender_both(p)
+        self.assertEqual(len(new), len(p))
+        values = []
+        for o, typ, flags, fid, size in plugin_patch.walk(new):
+            if typ == b"HDPT":
+                q, end = o + 24, o + 24 + size
+                while q + 6 <= end:
+                    sig = new[q:q + 4]
+                    sz = struct.unpack_from("<H", new, q + 4)[0]
+                    if sig == b"DATA":
+                        values.append(new[q + 6])
+                    q += 6 + sz
+        self.assertEqual(values, [0x07, 0x07, 0x0F, 0x17, 0x1E, 0x1F])
+        self.assertIn("6 HDPT DATA bytes", what)
+        self.assertEqual(plugin_patch.patch_hdpt_gender_both(new)[0], new)
+
+    def test_refuses_a_compressed_record(self):
+        p = plugin([record(b"HDPT", 0x00010000, sub(b"DATA", b"\x01"), flags=0x40000)])
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_hdpt_gender_both(p)
+
+
+if __name__ == "__main__":
+    unittest.main()
