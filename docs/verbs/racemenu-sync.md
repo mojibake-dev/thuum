@@ -654,7 +654,12 @@ above keep a hostile preset from carrying anything but a look.
   that look (HYPOTHESIS, the mechanism; docs/research/layer-reds-2026-10-20.md).
   The patch becomes "each override's gender bits copied from its master
   record, the all-races RNAM kept", in apocrypha's next render; a-racemenu
-  on it is the decider.
+  on it is the decider. Under it all (the a-rotfern crash read of the same
+  gate, docs/research/layer-reds-2026-10-20.md): the menu that opened was
+  the VANILLA RaceSexMenu, since RaceMenu's chargen never initialises under
+  the layer (no "RaceMap::CreateDefaultMap" in any layer seat's skee64.log),
+  so the server-opened menu this verb relies on (its presets, its Done) is
+  not RaceMenu's there; the layer's RaceMenu install is the first fix.
 
 ## Message contract
 

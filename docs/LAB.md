@@ -516,6 +516,9 @@ new value and was taken as a fall, and its later report of the set value was
 cropped by CropHealthRegeneration (thuum-magnus). A set downward is safe. Until
 the server lets an owner's set win over reports that predate it (a server fix,
 not a lab-api one), a scenario that raises a value reads it right after the set.
+The fix is built (fork m2-snapback 8ba160e1, 2026-10-20: a raised percentage
+holds until the client's report reaches it; docs/verbs/attributes.md); the
+read-right-after stays until it merges.
 A teleport's `rot` reaches the client in degrees, and MoveRefrToPosition
 takes radians (CommonLibSSE-NG TESObjectREFR::MoveTo_Impl): `rot: [0, 0,
 180]` once left c1 facing 233.24 degrees, 180 radians (run
