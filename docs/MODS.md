@@ -604,12 +604,21 @@ the cloak meshes that had kept Artesian's physics off the clones among them).
 - SkyUI's MCM is the first use (the per-player globals check): SkyUI_SE.esp is client-only
   and its scripts run on the client; MCM Helper (1.6.1170) carries the config-file menus
   that TrueHUD, Stealth Detection Fixes and others register through.
-- 24 of the mods ship Papyrus scripts (loose .pex) and skymp5-client blocks Papyrus events
-  on objects the server did not make, OnUpdate aside (docs/verbs/racemenu-sync.md's
-  whitelist); Jewelry Limiter, Dynamic Activation Key, Extended Vanilla Menus, Reading List,
-  Unread Books Glow, Self Filling Bookshelves, Portal, IDRC and the vampire tweaks are
-  script-driven and will show what the block costs. Their scripts are listed per mod in
-  the deployment manifest (chim/.scratch, apocrypha).
+- 44 of the 113 mod folders ship Papyrus scripts (2,421, loose or in BSAs), and in a connected
+  game skymp5-client's event block drops OnUpdate for every script, admitted names included
+  (HYPOTHESIS until numidium's unblock probe; the code reading is
+  docs/research/papyrus-event-filter.md), and every other event for a script not named
+  SKI_*, RaceMenu*, GRIM_ALT_TeleportationMarker, WB_DestroyAfterDelay_Script or
+  defaultDisableHavokOnLoad, sparing only ActiveMagicEffect events on the player.
+  docs/research/layer-papyrus.md is the census, one verdict per mod from each script's parent
+  class: 19 mods blocked outright (Jewelry Limiter, Dynamic Activation Key, Vampire Feeding
+  Tweaks, Self Filling Bookshelves, Portal, Let's Ride Durnehviir, Reading List, General
+  Displays, Tel Jerdein's activators, RaceCompatibility's quests, IDRC's quests and scenes
+  among them; four of the 19 only fix vanilla scripts a connected game never runs), 12 magic
+  mods whose spell effects work on the player alone, 3 that lose only their MCM, 69 without a
+  script. ADR-044 (thuum-magnus, PROPOSED) puts admission by plugin to Eli; if accepted,
+  persist-mods serves a plugin-to-scripts list beside the load order, regenerated with the
+  layer.
 - Every DLL mod enters at 1.6.1170 only; the 1.7.104 set has none of them (its server
   list has 76 plugins). A seat test per DLL moves it to both.
 - Nemesis: True Directional Movement is the only mod in the set with Nemesis patches (three
