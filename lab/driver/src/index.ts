@@ -24,6 +24,7 @@ import {
   Cell,
   ConstructibleObject,
   Debug,
+  Form,
   Game,
   GlobalVariable,
   HttpClient,
@@ -570,6 +571,41 @@ function distanceTo(a: Actor, b: Actor): number {
   const dy = a.getPositionY() - b.getPositionY();
   const dz = a.getPositionZ() - b.getPositionZ();
   return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+// SKSE's Cell.GetNumRefs and GetNthRef filter on the BASE form's type (skse64
+// 2.2.6 PapyrusCell.cpp:25 and :46, ref->baseForm->formType == formType;
+// lab/.cache/skse64_2_02_06-unpacked), so a refs-near type names what a
+// reference is an instance of, FormTypes.h's base rows (CommonLibSSE-NG
+// include/RE/F/FormTypes.h): 0x18 ACTI an activator (:164), 0x2B NPC_ an
+// actor (:183), 0x32 PROJ any projectile, an arrow or a rune's grenade (:190),
+// 0x33 HAZD a placed hazard (:191). The reference classes, 0x3D REFR to 0x46
+// PHZD (:201-210), match no base: the arrows step's 0x40 PARW counted nothing
+// for that reason (docs/verbs/marksman.md, x-double-arrow 20261012-022022). A
+// refs-near step asked for one answers its 0 with a note naming the base type.
+const REFERENCE_CLASS_BASE: Record<number, number> = {
+  0x3e: 0x2b, 0x3f: 0x32, 0x40: 0x32, 0x41: 0x32, 0x42: 0x32, 0x43: 0x32, 0x44: 0x32, 0x45: 0x32, 0x46: 0x33,
+};
+// Base types whose references refs-near counts without listing: Papyrus
+// aborts every call on a projectile reference (the projectiles step's note)
+const COUNT_ONLY_BASE_TYPES = new Set([0x32]);
+
+// The nearest reference of a base within radius units of (fx, fy, fz),
+// Papyrus Game.FindClosestReferenceOfType, its distance narrowed to precision
+// units by bisecting the radius (Papyrus reads no position of a projectile
+// reference, so the search is the one call that answers); null for none. The
+// projectiles and refs-near steps' one search.
+function closestOfBase(base: Form, fx: number, fy: number, fz: number, radius: number, precision: number): { formId: number; distance: number } | null {
+  const nearest = Game.findClosestReferenceOfType(base, fx, fy, fz, radius);
+  if (!nearest) return null;
+  let lo = 0;
+  let hi = radius;
+  while (hi - lo > precision) {
+    const mid = (lo + hi) / 2;
+    if (Game.findClosestReferenceOfType(base, fx, fy, fz, mid)) hi = mid;
+    else lo = mid;
+  }
+  return { formId: nearest.getFormID(), distance: hi };
 }
 
 function positionOf(actor: Actor): number[] {
@@ -1252,24 +1288,101 @@ function run(step: Step, player: Actor): unknown {
           continue;
         }
         try {
-          const nearest = Game.findClosestReferenceOfType(base, fx, fy, fz, radius);
-          if (!nearest) {
-            refs[key] = null;
-            continue;
-          }
-          let lo = 0;
-          let hi = radius;
-          while (hi - lo > precision) {
-            const mid = (lo + hi) / 2;
-            if (Game.findClosestReferenceOfType(base, fx, fy, fz, mid)) hi = mid;
-            else lo = mid;
-          }
-          refs[key] = { formId: nearest.getFormID(), distance: hi };
+          refs[key] = closestOfBase(base, fx, fy, fz, radius, precision);
         } catch (e) {
           refs[key] = { error: String(e) };
         }
       }
       return { from: from.getFormID(), refs };
+    }
+    case "refs-near": {
+      // docs/research/train-29-rows.md row 7c (x-rune-visible: does another
+      // player's rune stay in the observer's game once set?): what stands
+      // within {radius} units (600 by default) of this player ({from: self},
+      // the default) or of the nearest other actor ({from: other}, the
+      // figure or placed NPC draw-weapon's {other: true} takes), by base
+      // type, through the origin's parent cell with SKSE's Cell.GetNumRefs
+      // and GetNthRef (one cell: an exterior radius past the cell's edge,
+      // 4096 units square, misses the neighbours). {formTypes: [...]} base
+      // types (REFERENCE_CLASS_BASE's note above): each answers {inCell,
+      // near, refs: [{formId, baseId, baseType, disabled, deleted, pos,
+      // distance}]}, the references within the radius nearest first;
+      // COUNT_ONLY_BASE_TYPES (0x32 PROJ) answer {inCell} alone, and a
+      // reference whose read aborts under another type is one {index,
+      // error} row. {ids: [...]} bases searched the projectiles step's way,
+      // Game.FindClosestReferenceOfType bisected to {precision} units (10):
+      // `ids`, decimal base id -> {formId, distance}, null for none. lab-api:
+      // c.refs_near().count(type) | .has(baseId) | .distance(baseId); the
+      // whole answer lands in steps/<n>-<client>-refs-near.json.
+      if (a.from !== undefined && a.from !== "self" && a.from !== "other") throw new Error("refs-near: from is self or other");
+      const radius = num(a.radius, 600);
+      const precision = Math.max(1, num(a.precision, 10));
+      const from: Actor = a.from === "other" || a.other === true ? nearestOther(player) : player;
+      const cell = from.getParentCell();
+      if (!cell) throw new Error("no cell");
+      const fx = from.getPositionX();
+      const fy = from.getPositionY();
+      const fz = from.getPositionZ();
+      type NearRef = { formId: number; baseId: number | null; baseType: number | null; disabled: boolean; deleted: boolean; pos: number[]; distance: number };
+      type NearRow = NearRef | { index: number; error: string };
+      type TypeRows = { inCell: number; near?: number; refs?: NearRow[]; note?: string };
+      const types: Record<string, TypeRows> = {};
+      const formTypes = Array.isArray(a.formTypes) ? (a.formTypes as unknown[]).map(Number).filter((t) => Number.isInteger(t) && t >= 0) : [];
+      for (const t of formTypes) {
+        const key = String(t);
+        const inCell = cell.getNumRefs(t);
+        if (t === 0x3d || t in REFERENCE_CLASS_BASE) {
+          const base = REFERENCE_CLASS_BASE[t];
+          types[key] = { inCell, note: `reference class ${t}: SKSE filters by the base form's type, ask for ${base === undefined ? "the base's own type" : base}` };
+          continue;
+        }
+        if (COUNT_ONLY_BASE_TYPES.has(t)) {
+          types[key] = { inCell };
+          continue;
+        }
+        const refs: NearRow[] = [];
+        for (let i = 0; i < inCell; ++i) {
+          try {
+            const ref = cell.getNthRef(i, t);
+            if (!ref) continue;
+            const x = ref.getPositionX();
+            const y = ref.getPositionY();
+            const z = ref.getPositionZ();
+            const distance = Math.sqrt((x - fx) * (x - fx) + (y - fy) * (y - fy) + (z - fz) * (z - fz));
+            if (distance > radius) continue;
+            const base = ref.getBaseObject();
+            refs.push({
+              formId: ref.getFormID(),
+              baseId: base ? base.getFormID() : null,
+              baseType: base ? base.getType() : null,
+              disabled: ref.isDisabled(),
+              deleted: ref.isDeleted(),
+              pos: [x, y, z],
+              distance,
+            });
+          } catch (e) {
+            refs.push({ index: i, error: String(e) });
+          }
+        }
+        refs.sort((p, q) => ("distance" in p ? p.distance : Infinity) - ("distance" in q ? q.distance : Infinity));
+        types[key] = { inCell, near: refs.filter((r) => "distance" in r).length, refs };
+      }
+      const ids = Array.isArray(a.ids) ? (a.ids as unknown[]) : [];
+      const found: Record<string, { formId: number; distance: number } | { error: string } | null> = {};
+      for (const id of ids) {
+        const key = String(Number(id));
+        const base = Game.getFormEx(Number(id));
+        if (!base) {
+          found[key] = null;
+          continue;
+        }
+        try {
+          found[key] = closestOfBase(base, fx, fy, fz, radius, precision);
+        } catch (e) {
+          found[key] = { error: String(e) };
+        }
+      }
+      return { from: from.getFormID(), pos: [fx, fy, fz], radius, cell: cell.getFormID(), types, ids: found };
     }
     case "poisons": {
       // thuum docs/verbs/magic-effects.md: each poisoned stack in the
