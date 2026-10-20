@@ -32,7 +32,7 @@ steps:
   - c1: console {text: "player.setav magicka 3000"}
   - wait: 2
   - c1: set-percentages {magicka: 1}
-  - c1: console {text: "player.equipspell b0a86df right"}
+  - c1: console {text: "player.equipspell {0a86df:LostGrimoire.esp} right"}
   - c1: draw-weapon
   - wait: 2
   - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
