@@ -3,8 +3,10 @@
 
 ADR-044's served list: the Papyrus script class names each admitted plugin brings, one line per
 plugin, for skymp5-client's event block to admit at login (the hook sees script class names, not
-plugins). Written by persist-mods beside plugins.txt as mods/papyrus-scripts.txt, regenerated at
-every build, outside SHA256SUMS (add-mods.ps1 installs every SHA256SUMS entry into Data).
+plugins). Written by persist-mods as the layer file papyrus-admitted/Platform/papyrus-scripts.txt,
+regenerated at every build and listed in SHA256SUMS like every layer file, so add-mods.ps1 installs
+it hash-checked at Data\\Platform\\papyrus-scripts.txt in every game folder, where Skyrim Platform reads
+it at its load (train-29); a client without the layer has no file and admits nothing.
 
 Format, one plugin per line, names sorted, unique, case as the plugin or the .pex spells them:
   <plugin file name>: <class name> <class name> ...
@@ -305,7 +307,8 @@ def main():
     lines, summary = build(tree, admitted, load_order, game_dir)
     header = ('# Papyrus script class names admitted by plugin (ADR-044): "<plugin>: <class> <class> ...", one line per admitted\n'
               '# plugin (lab/layer/papyrus-admitted.tsv), read from the plugin\'s VMAD records and its layer folder\'s .pex files by\n'
-              '# lab/tools/papyrus-map.py at every persist-mods build. skymp5-client admits these names at login.\n')
+              '# lab/tools/papyrus-map.py at every persist-mods build; add-mods.ps1 installs it at Data\\Platform\\papyrus-scripts.txt, where Skyrim Platform\n'
+              '# reads it at its load and admits these names through its Papyrus event block.\n')
     Path(out).write_text(header + '\n'.join(lines) + '\n', encoding='utf-8')
     for s in summary:
         print('papyrus: ' + s)
