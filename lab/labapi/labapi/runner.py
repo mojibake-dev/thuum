@@ -404,7 +404,7 @@ class Runner:
 
     async def _execute_inner(self, rec: RunRecord) -> None:
         sc = rec.scenario
-        await self._rollback_server(rec, sc.server.snapshot)
+        await self._rollback_server(rec, sc.server.snapshot, fixture=sc.server.world)
         if "world-diff" in sc.artifacts:
             self._snapshot_world(rec, "world-before")
         if "pcap" in sc.artifacts:
@@ -453,9 +453,11 @@ class Runner:
             return f"{brief} (the whole answer was not kept: {e})"
         return f"{brief} (whole: steps/{name})"
 
-    async def _rollback_server(self, rec: RunRecord, snapshot: str) -> None:
+    async def _rollback_server(self, rec: RunRecord, snapshot: str, fixture: str | None = None) -> None:
         async def go():
             if self.s.server_rollback_mode == "vm":
+                if fixture is not None:
+                    raise RunnerError(f"E_RUN_WORLD: a fixture world ({fixture}) needs the state rollback mode, not vm")
                 g = self.tables.server_guest()
                 if g is None:
                     raise RunnerError("E_RUN_NO_SERVER_GUEST: no guest with role server")
@@ -465,9 +467,14 @@ class Runner:
                 env = self._compose_env(rec)
                 await self._keep_outgoing_server_log(rec)
                 await asyncio.to_thread(self.system.run, self._compose("stop", self.s.compose_service), env=env)
-                snap = Path(self.s.server_snapshots_dir) / snapshot
-                if not snap.is_dir():
-                    raise RunnerError(f"E_RUN_SNAPSHOT: no world snapshot {snapshot!r} under {self.s.server_snapshots_dir}")
+                if fixture is not None:
+                    snap = Path(self.s.fixture_worlds_dir) / fixture
+                    if not (snap / "changeForms").is_dir():
+                        raise RunnerError(f"E_RUN_WORLD: no fixture world {fixture!r} (changeForms/) under {self.s.fixture_worlds_dir}")
+                else:
+                    snap = Path(self.s.server_snapshots_dir) / snapshot
+                    if not snap.is_dir():
+                        raise RunnerError(f"E_RUN_SNAPSHOT: no world snapshot {snapshot!r} under {self.s.server_snapshots_dir}")
                 world = Path(self.s.server_world_dir)
                 self.system.rmtree(world)
                 self.system.copytree(snap, world)
@@ -484,7 +491,8 @@ class Runner:
             plugins = self._refresh_slots(version)
             if plugins is None:
                 rec.notes.append(f"no plugin slots for {version}: FormDesc form names do not resolve this run")
-            return f"snapshot {snapshot}, mode {self.s.server_rollback_mode}, game {version}" + (f", {plugins} plugins in its load order" if plugins else "")
+            source = f"fixture world {fixture}" if fixture is not None else f"snapshot {snapshot}"
+            return f"{source}, mode {self.s.server_rollback_mode}, game {version}" + (f", {plugins} plugins in its load order" if plugins else "")
 
         await self._phase(rec, "rollback-server", go())
 
@@ -1446,9 +1454,10 @@ class Runner:
         the driver carries no item table. equip's item becomes formId, craft's
         recipe becomes the recipe's form id (its station passes through: a
         reference id, or a name a later refs table resolves), race-pick's
-        race its form id, and a FormDesc in braces inside console text the
-        run's id in the console's hex ("player.equipspell {044d44:Apocalypse -
-        Magic of Skyrim.esp} right" types 1a044d44 under the essentials layer)."""
+        race its form id, known's and held's ids theirs, and a FormDesc in braces
+        inside console text the run's id in the console's hex ("player.equipspell
+        {044d44:Apocalypse - Magic of Skyrim.esp} right" types 1a044d44 under the
+        essentials layer)."""
         out = dict(args or {})
         try:
             if action == "console" and isinstance(out.get("text"), str):
@@ -1461,6 +1470,8 @@ class Runner:
                 out["race"] = self.tables.base_id(out["race"])
             if action in ("global", "weather") and isinstance(out.get("form"), str):
                 out["form"] = self.tables.base_id(out["form"])
+            if action in ("known", "held") and isinstance(out.get("ids"), list):
+                out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
         except KeyError as e:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None
         return out

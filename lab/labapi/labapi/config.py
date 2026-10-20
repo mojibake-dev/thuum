@@ -99,6 +99,10 @@ class Settings:
     # The committed scenarios as `just deploy-srv` put them on sky-srv: what a run
     # set (POST /lab/runset, the merge gate and the nightly sweep) plays by id.
     scenarios_dir: str = str(LAB_DIR / "scenarios")
+    # The committed fixture worlds (ADR-043's rule-6 scenario): lab/fixtures/worlds/<name>/,
+    # a world directory (changeForms/ and its load-order.json) a scenario's `server: {world:
+    # <name>}` lays in place of a snapshot's, reviewed in git rather than kept on sky-srv alone.
+    fixture_worlds_dir: str = str(LAB_DIR / "fixtures" / "worlds")
     # The committed reference traces (ADR-031): lab/references/<action>-a.json and
     # -b.json, reviewed like scenarios, read by a parity scenario's assertion.
     references_dir: str = str(LAB_DIR / "references")
@@ -306,6 +310,7 @@ class Settings:
             lab_api_internal_url=_env("LAB_API_INTERNAL_URL", d.lab_api_internal_url),
             frida_scripts_dir=_env("FRIDA_SCRIPTS_DIR", d.frida_scripts_dir),
             scenarios_dir=_env("SCENARIOS_DIR", d.scenarios_dir),
+            fixture_worlds_dir=_env("FIXTURE_WORLDS_DIR", d.fixture_worlds_dir),
             references_dir=_env("REFERENCES_DIR", d.references_dir),
             nightly_sweep_utc=_env("NIGHTLY_SWEEP_UTC", d.nightly_sweep_utc),
             nightly_quiet_s=float(_env("NIGHTLY_QUIET_S", str(d.nightly_quiet_s))),
