@@ -548,6 +548,20 @@ byte-identical overlaps that change nothing (the two Artesian packages' `cloak.x
 Apachii witcher hair textures rotfern bundles, the one script Headshot Kills and Stab The
 Heart share).
 
+**Papyrus admission by plugin (ADR-044, accepted by Eli 2026-10-19):** persist-mods serves
+`mods/papyrus-scripts.txt` beside plugins.txt, one line per admitted plugin, `<plugin>: <script
+class> <script class> ...`, the names skymp5-client admits through its event block at login
+(train-29's Skyrim Platform row reads it; the hook sees class names, not plugins). The admitted
+plugins are the rows of `lab/layer/papyrus-admitted.tsv` (plugin, source, why). lab/tools/papyrus-map.py
+reads each plugin's VMAD records (the scripts on its forms, a quest's alias scripts, the fragment
+classes of quests, perks, dialogue, packages and scenes) and, for a plugin from a layer folder, the
+folder's compiled scripts too (loose `scripts/*.pex` and the `scripts\` entries of its BSAs' name
+tables; nothing extracted or decompiled). A `game` row is one of the game's own plugins: its file is
+pulled off the host's persist esm directory into lab/.cache/game and read there. The first row is
+ccQDRSSE001-SurvivalMode.esl. The file is regenerated at every build and sits outside SHA256SUMS,
+like plugins.txt, because add-mods.ps1 installs every SHA256SUMS entry into Data.
+`lab/tests/test_papyrus_map.py` checks the rows and the VMAD reader's layouts.
+
 **Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
 textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
 Aspen Trees - Loose)" (Nexus 5281 file 11503), whose file description reads "REQUIRES

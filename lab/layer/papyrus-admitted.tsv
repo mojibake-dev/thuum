@@ -1,0 +1,6 @@
+# ADR-044 (accepted by Eli, 2026-10-19): the plugins whose Papyrus scripts skymp5-client admits through its event block in a connected game.
+# lab/tools/papyrus-map.py turns each row into one line of mods/papyrus-scripts.txt (the plugin, then its script class names) at every persist-mods build.
+# source layer: the plugin comes from a layer folder (lab/layer/load-order.tsv names it); names from its VMAD records and the folder's .pex files.
+# source game: one of the game's own plugins (the Creation Club set the clones carry); names from its VMAD records, the file pulled off the host's persist esm directory into lab/.cache/game.
+plugin	source	why
+ccQDRSSE001-SurvivalMode.esl	game	the first admitted plugin (thuum-magnus, 2026-10-19): Survival Mode's needs and its start check are its own quest scripts, which the block kept from running (x-survival-why 20261020-020729); its compiled scripts live in the game's own BSA, so only its VMAD names are read
