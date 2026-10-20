@@ -474,7 +474,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       playtest-restore, the legacy effects map (deletable).
 
     - Train-30 (the rows found on 2026-10-20 before and during playtest
-      twenty-seven; each to its verb doc as it is built), in build order:
+      twenty-seven; each to its verb doc as it is built), ASSEMBLED 15:13
+      as fork m2-train-30 1d88a6b7 (four merges on parity 4720d0d3: the
+      spells fix, ADR-043 slice one, the dent gate, the Hailstone
+      conditions with the resistance rule; pipeline 2309), the one stage
+      for playtest twenty-eight (docs/M2-CLOSE.md), in build order:
       - learned spells lost on a RECONNECT (playtest twenty-seven, 11:21: a
         server restart with the game process up): the client's login path
         removes every spell and re-adds the server's list (remoteServer.ts,
