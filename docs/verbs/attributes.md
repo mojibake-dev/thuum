@@ -61,6 +61,49 @@ this verb only persists what the server holds.
 
 - Nothing; the engine regenerates and the server crops what it reports.
 
+## The hold on a server's raise (the snap-back fix, 2026-10-20)
+
+The finding (x-class-target2 20261018-103809 and 105815, read 2026-10-18;
+docs/LAB.md): a server-set rise in a player's Health reverted within about
+2 s in 7 of 11 upward sets. The client reports its percentages every 2 s
+(sendInputsService.ts), a report that predates the server's raise reads as
+a fall, which OnChangeValues took whole; its later report of the raised
+value was then cropped to the regeneration model and sent back; a
+server-applied heal snapped back the same way. Nothing recorded when the
+server last set a value and the report carries no stamp.
+
+The fix, fork m2-snapback 8ba160e1 (the train after playtest twenty-eight;
+Eli 2026-10-20: the snap-back fix STAYS in M2): the bases' rule applied to
+the percentages. A value the server RAISED holds against the client's
+reports until one reaches it, the same shape as actor_values.rs's hold on a
+server-set base ("a report for that value is taken only once it matches
+what was imposed"):
+
+- wire-rules attributes.rs: `hold(holds, av, value, now_ms)` arms a hold
+  (one per actor value, a new one replaces the old); `report(holds, av,
+  reported, now_ms)` answers whether a report is taken: lapsed holds go
+  first (HOLD_MS 10 s, the arrival's wait in movement.rs), no hold means
+  taken, a report at or above the held value (APPLIED_WITHIN 2e-3) ends the
+  hold and is taken, since the client applied it and may have regenerated
+  since, a report below it is stale and dropped. Tested.
+- MpActor::SetPercentages arms the hold for each value that rose (an
+  owner's or the lab's set, a heal or a drink through ApplyAttributeDeltas,
+  every server set passes through it); a lowered value arms nothing, since
+  the regeneration crop already takes a stale higher report.
+  ActionListener::OnChangeValues asks the hold per reported value before
+  the crop and drops a stale report with a debug line.
+- The drink's 5 s blanket drop of every report (UpdateNextRestorationTime,
+  ShouldSkipRestoration, upstream's "hot fix attempt to make permanent
+  restoration potions work") goes: its case is this rule's, per value.
+- T0: unit/ChangeValuesTest.cpp, a raise holds against two stale reports,
+  the report that carries it ends the hold, a later fall is taken, a lowered
+  value is cropped and not held. T3: b-snapback (Eli's review): a seat at
+  half Health set to full by the server reads full on the server and in its
+  own game 4 s later, two client reports past the set.
+- HYPOTHESIS until b-snapback: the client's report after applying a raise
+  is at or above the value within 2e-3 (the engine's float round trip and
+  its regeneration both push upward).
+
 ## Message contract
 
 - Message name / numeric type: ChangeValues (MsgType 16, wire-schema

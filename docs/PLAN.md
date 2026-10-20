@@ -353,7 +353,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         as a fall, then crops the client's later report of the set value
         back down and sends it back; 7 of 11 upward sets in two runs); a
         server-applied heal would snap back the same way. STAYS in M2
-        (Eli 2026-10-20), a verb fix on a train: an owner's set and the
+        (Eli 2026-10-20), a verb fix on a train: BUILT 2026-10-20 on fork
+        m2-snapback 8ba160e1 (the percentage hold, attributes.md; T0; its
+        scenario b-snapback on review), for the train after twenty-eight.
+        The rule: an owner's set and the
         server's own changes win over
         reports that predate them (a sequence or a grace window in
         OnChangeValues); until then a scenario sets downward or reads at
