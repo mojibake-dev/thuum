@@ -26,7 +26,7 @@ WB_InvisProcTeleport_Script, which runs on the TARGET's effect.
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | OnEffectStart: an FXEmptyActivator placed at the target, a 0.25 s wait, then the caster and the target each cast the Self proc 03055B32 on themselves (effect 03055B31, archetype Invisibility, 600 s, keyword MagicInvisibility 0x1EA6F) | script | native in the CASTER's game only. The relay's fire-and-forget target path applies nothing to the target's own player: castSpellImmediate launches the spell's projectile with the named target as the desired one (skyrim-platform MagicApi.cpp:254-302), and Shadowbond has no projectile, so the script never starts in the target's game (playtest twenty-four: "we're still both visible on player 2's screen"; x-shadowbond 20261019-093744: c2's own watch held no effect and no cast). The spell-cast row that applies a projectile-less target spell directly (CastSpellImmediate on the figure's caster, as the Self and concentration branches do) is filed on spell-cast.md, not here: it would run a second script instance, which the pin would then have to cover |
-| the two invisibilities on the server's effect record (MagicEffects) and their shimmer on every other screen | magic-effects verb | IMPOSED since train-28 (fork train28-bond): no Self cast report exists for the proc, because Skyrim Platform raises spellCast only for a spell in one of the actor's selected slots (EventHandler.cpp:1495-1512, isCastValid) and the script's Papyrus cast is of an unequipped one (playtest twenty-four: the proc 0C055B32 reached no log from either game). So the bonds entry names its `proc`, PartOne::RecordBond records the proc's effect on both actors for the bond's 20 s (ApplyEffects with the duration overridden; self-expiring, a restart included) and sends `Spell.Cast` as an SpSnippet to every game that sees either actor but the caster's own, where the script already cast both: the target's own player (0x14 there) and the figures (by server id). The break, a recast at another target and the bond running out (PartOne::TickBonds, the bonds rule's `expired`) end the records by source (MpActor::EndRunningEffectsOfSource) and send `Actor.DispelSpell` to the target's own game; the figures' copies follow the records (magicEffectsService dispelEnded) and the caster's are the script's own |
+| the two invisibilities on the server's effect record (MagicEffects) and their shimmer on every other screen | magic-effects verb | IMPOSED since train-28 (fork train28-bond): no Self cast report exists for the proc, because Skyrim Platform raises spellCast only for a spell in one of the actor's selected slots (EventHandler.cpp:1495-1512, isCastValid) and the script's Papyrus cast is of an unequipped one (playtest twenty-four: the proc 0C055B32 reached no log from either game). So the bonds entry names its `proc`, PartOne::RecordBond records the proc's effect on both actors for the bond's 20 s (ApplyEffects with the duration overridden; self-expiring, a restart included) and, 500 ms later (the mod's own script waits 0.25 s after OnEffectStart before its casts), relays the proc as each bonded actor's OWN instant cast (a SpellCast message with the actor as caster and target, castingSource 3, no launch) to every game that sees the actor but the caster's own, where the script already cast both: an observer's game casts it on the actor's figure through castSpellImmediate's Self branch (b-invis-recast's nightly primitive), and the target's own game maps a caster that is itself to 0x14 (remoteServer.ts). The first shape, a Papyrus `Spell.Cast` SpSnippet, completed in the target's game and applied nothing (b-shadowbond 20261019-215816, playtest twenty-five: av:Invisibility never true on c2's player or c1's figure there), as the driver's own Spell.Cast never applied anything (push.md); Skyrim Platform's latent dispatch of that native has no green run anywhere. The break, a recast at another target and the bond running out (PartOne::TickBonds, the bonds rule's `expired`) end the records by source (MpActor::EndRunningEffectsOfSource) and send `Actor.DispelSpell` to the target's own game; the figures' copies follow the records (magicEffectsService dispelEnded) and the caster's are the script's own |
 | the poll every 0.2 s: the swap fires the first time EITHER actor no longer has MagicInvisibility; WB_CheckLocation false | script | native in each game; the break the server sees is its own EndConcealment on an act (a cast, an attack, an activation, a bow release), so the server knows the moment within one report |
 | the swap: box.MoveTo(caster), caster.MoveTo(target), target.MoveTo(box), rotations matched, then sound and VFX on both, an image space modifier, Dispel on self | script | the two POSITIONS are the server's (R0 since 2026-10-19): at the break the server teleports both players to each other's places itself (MpActor::Teleport, the lab's own teleport path), because the script runs in the CASTER's game only (ADR-029) and so moves the caster and the target's FIGURE there, while the target's own game never moves: x-shadowbond 20261019-073758 on 4c7e6998 swapped c1 alone (its permitted landing taken) and c2 stayed put with no self events. The caster's own script move lands on the spot the server chose and reads as the arrival; the figure's MoveTo in the caster's game is overwritten by the relay as today. The permits of the first build are gone. Second iteration (x-shadowbond 20261019-083537 on 13acbb35): the swap fired and c2 landed, but the script's poll in c1's game then moved c1 once more, to where c2's figure now stood (c1's own old spot), undoing c1's half (c1's track: its spot, c2's spot at 13419 ms, its own again at 13672). So the server holds both at the swap's places for 1.5 s (wire-rules Budgets::pin; a report from farther than the arrival radius meanwhile is sent back with Teleport2, MovementValidation), and the script's second move is refused; HYPOTHESIS that 1.5 s covers the script's poll, the next run says |
 | the look of the swap on the other screens | relay | imposed through the teleport snap (train-27's row): both accepted jumps are relayed as placements, so neither slides |
@@ -82,10 +82,12 @@ MoveTo instant, the report cadence 130 ms).
 
 - Mechanism: the teleport snap's placement relay for the two accepted
   jumps; the concealment through the server's two records (MagicEffects
-  to every listener) and two SpSnippets: `Spell.Cast` of the proc on the
-  target's own player and on each figure in every game but the caster's,
-  `Actor.DispelSpell` of it on the target's own player at the end
-  (train-28; PartOne::ConcealBond and UnconcealBond).
+  to every listener), the proc relayed as each actor's own instant cast
+  (SpellCast, castingSource 3) to every game but the caster's, which casts
+  it on the figure or, when the caster named is the game's own player, on
+  0x14 (train-28, fork train28-bond3; PartOne::ConcealBond, CastBondProc,
+  remoteServer.ts onSpellCastMessage), and one SpSnippet, `Actor.DispelSpell`
+  of it on the target's own player at the end (UnconcealBond).
 - Visual without simulation achieved by: the script's own sound, VFX and
   image space modifier play in the one game that runs it (the caster's);
   the other screens see the placements and the proc's own shimmer, cast
@@ -149,7 +151,7 @@ MoveTo instant, the report cadence 130 ms).
 - T1: none.
 - T2: a difftest session shadowbond on target-by-hit's shape: the cast
   with target 0, the hit on c2 (the claim: two MagicEffects records and
-  the Spell.Cast snippets to c2), a Flames cast by c1 (the break: both
+  the two SpellCast relays to c2), a Flames cast by c1 (the break: both
   Teleports, the DispelSpell snippet to c2, the sets without the proc);
   the legacy stack, which never learned the spell, emits none of them
   (declared).
@@ -167,6 +169,17 @@ MoveTo instant, the report cadence 130 ms).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+- The own-player half of the relay is HYPOTHESIS until b-shadowbond is
+  green on train28-bond3: castSpellImmediate's Self branch is proven on
+  figures (b-invis-recast), not yet on a game's own player through the
+  instant caster. The decisive solo probe, ten minutes on one seat: three
+  casts of Skyrim.esm's Invisibility 0x27EB6 on the player, each under a
+  watch of av:Invisibility, by (1) the driver's `cast` (Skyrim Platform's
+  latent Spell.Cast, the first shape's path), (2) a self `combat-spell`
+  (Actor.DoCombatSpellApply, SP's direct native path), (3) a new driver
+  action `cast-immediate {spellId, source: 3}` over castSpellImmediate on
+  0x14. If 1 stays false and 3 goes true, the first shape's failure and the
+  third shape's own-player half are both explained in one run.
 - Frida script: none; the lab's watches measure the order.
 - Owner: agent (lab probes).
 
@@ -183,11 +196,17 @@ MoveTo instant, the report cadence 130 ms).
       them (ab14087f), and owns the concealment: the entry's `proc`,
       ConcealBond and UnconcealBond, TickBonds, EndRunningEffectsOfSource;
       six Rust and eight server tests; the lab's entry names the proc on
-      thuum lab-bonds-proc 35a2b66)
+      thuum lab-bonds-proc 35a2b66. Then train28-bond2 62f95f5e: the casts
+      500 ms after the claim on a timer with an epoch guard; and
+      train28-bond3 e3a5b367: the proc as a SpellCast relay in place of the
+      Papyrus snippet, BondTest reading the relays, after b-shadowbond
+      20261019-215816 read the snippet applying nothing)
 - [x] message + validator (same commit): no new message
 - [ ] native hook + T1: none
-- [x] TS handler: none new (the first-hit relay, the snap and the two
-      snippets carry it; spSnippetService resolves them)
+- [x] TS handler: remoteServer.ts onSpellCastMessage (train28-bond3): a
+      relayed cast whose caster is this game's own player is cast on 0x14
+      (the server's imposition), and a relay carrying no animation
+      variables takes the actor's own current set
 - [ ] T2 green (session shadowbond: to write on train28-bond)
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-shadowbond on thuum
       lab-bonds-proc 9e061dd; first run at train-28's stage)
