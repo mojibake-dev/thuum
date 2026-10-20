@@ -618,6 +618,26 @@ above keep a hostile preset from carrying anything but a look.
 
 - Nothing.
 
+- LAYER FINDING 2026-10-20 (the essentials layer's first a-racemenu runs,
+  20261020-192512 and 193623, both red at step 32 with the same values;
+  every earlier run was on 17-plugin servers): Playable Headparts All
+  Races.esp (layer slot 1B) overrides all eight of lab-nord-1's Nord male
+  parts with HDPT DATA flags that carry no gender bit (01, hairline 09;
+  over its 805 HDPT overrides the tally is 01/05/09/11/18/19, never kMale
+  02, CommonLibSSE-NG include/RE/B/BGSHeadPart.h:27), the rotfern root
+  cause above for every Nord male: RaceMenu's ApplyPresetData skipped
+  hair, hairline, beard, brows and marks at every load (the login reset,
+  the server's look on a figure), and the race defaults seated instead
+  (c1's base after the relaunch: five parts, HairMaleNord10 and
+  HairLineMaleNord10 for the preset's 01; the eyes survived because All
+  Eyes for All Races.esp, slot 35, keeps 03 on 0x24244). The wire was the
+  green run's byte for byte (the same 8747-byte preset recorded and
+  relayed; the ADR-026 rule checks RNAM, not the gender bit), and c2's own
+  look changed at its re-login by the same skip. Fix asked of apocrypha
+  for the no-FSMP render: both gender bits on the plugin's HDPT overrides
+  (flags | 0x06), as 790d3b6c did for rotfern's parts; HYPOTHESIS until
+  racemenu-load of lab-nord-1 then head-parts on a layer seat reads eight.
+
 ## Message contract
 
 - Its own message, RaceMenuPreset, both ways, not SkyMP's property

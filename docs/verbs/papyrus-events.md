@@ -175,7 +175,7 @@ first build counts the rate with a Frida tracer, ADR-044 decision 3).
 - [ ] native hook + T1 (fork m2-train29-filter: the Windows build)
 - [x] TS handler: none
 - [x] T2 green: no wire change
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events; x-mcm-register on the layer stage)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events approved by Eli 2026-10-20 and on main, d1d8370, asserting the Creation's check ran connected with the prompt flag from the per-player default; its first run is the layer-merge sweep; x-mcm-register's HUD count still to read)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031): not applicable, no player action
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (no native; the Suppress section above is the registry entry; NATIVES.md unchanged)

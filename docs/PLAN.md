@@ -419,7 +419,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         20261020-080751: thirteen missiles on both seats, the server records
         the hits; the 2.5 s hold had matched the charge); the missile's
         angle on the observer waits for a flights record for spell
-        projectiles (driver, later).
+        projectiles (Train-30's lab row, BUILT 2026-10-20).
       - small: the OpenContainer wait loop's 15 s deadline BUILT
         (18c0e603, activation-reach.md); EffectWasDualCast (724) BUILT with
         the dual flag from the cast message through the cast record to the
@@ -440,7 +440,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       parked whole in a per-record list and written back when their plugin
       returns; a raw record re-based from the saved order at the first load
       that sees it; seven T0 cases (round trip, save under A load under B,
-      v1 under a saved order, the parked plugin, the drivers). Left for
+      v1 under a saved order, the parked plugin, the drivers). Its rule-6
+      scenario DRAFTED 2026-10-20: b-formdesc-world on branch
+      scenario-b-formdesc-world 973a412c (Eli's review), the fixture
+      adr043-preslice-25 on main ebc4d726 (twenty-five's eight raw records
+      with the order they were written under); it proves the migration on
+      a stage whose order differs from the fixture's, the layer stage, and
+      waits on two lab-api pieces (`server: world:`, FormDesc ids in the
+      known step). Left for
       slice two: decision 3 (the login refusal; the record is kept but
       LoadChangeForm still skips an unresolved race, so the 17:25 hazard
       stands until then), the six keep-on-miss fixes on fields already
@@ -457,11 +464,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         sync/spell.ts), and on a reconnect the re-add did not land (test 1
         knew only its save's Flames and Healing; the server's record held
         all fifteen and sent them; a fresh relaunch restored all seventeen).
-        HYPOTHESIS: an ordering race with a save reload on reconnect. Fix:
-        apply the list after the reload lands, and log the path to the SP
-        log (sync/spell.ts prints to the in-game console today, so the lab
-        could not read it); a-restart-persistence gains a learned-spell
-        assertion across its restart (scenario change, Eli's review).
+        Read: there is no reload on a reconnect; the one difference from a
+        launch is removing and re-adding the same spells in one frame
+        (HYPOTHESIS). BUILT 2026-10-20 on fork m2-train30-spells 096d2cd8
+        (client only, pipeline 2236 green): the list applied as a diff with
+        a second pass a second later (docs/verbs/learned-spells.md); T3
+        b-spells-reconnect approved by Eli and on main (red by design until
+        this stages); a-restart-persistence takes the assertion after.
       - Survival's login race: the record's restore of 828 and 8df rode the
         login send and lost to the Creation's 5 s check once in two
         relaunches (test 2, 18:23Z), so the per-global default (built,
@@ -484,8 +493,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         server condition functions, since Hailstone's own effects gate on
         them and apply nothing today (spell-cast.md).
       - the lab: a flights record for spell projectiles in the driver (the
-        Scattershock angle), and the arrows step counting PROJ 50 by base
-        id (its PARW count was always 0).
+        Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
+        951b5bbc raises projectileFlight for a spell's projectiles, the
+        driver records projectile and spell as columns nine and ten,
+        spell-cast.md), and the arrows step counting PROJ 50 (its PARW
+        count was always 0): the count BUILT 2026-10-20 on thuum main,
+        rides the next driver deploy; one base's presence stays the
+        projectiles step's (marksman.md).
 
 - Playtest twenty-seven (2026-10-20 morning, fork m2-train-29 709c90b0 under
   the essentials layer 29d83a0b; world playtest-m2-26-20261020T004645Z):
@@ -502,7 +516,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   restored it; Train-30's first row, b-spells-reconnect); Survival's login
   restore losing its race to the 5 s check once in two relaunches (the
   template-save fixture). Train-29's gate, its verb-merge and the layer's
-  full sweep follow the report (ADR-040).
+  full sweep follow the report (ADR-040). Eli's call after the report
+  (13:05 PDT): FSMP out, the cape physics worked but looked jank; the
+  cloaks go back to vanilla capes in apocrypha's next render, which the
+  layer stage and sweep take.
 
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals

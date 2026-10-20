@@ -1909,6 +1909,58 @@ classes drop under fifteen only when the Windows build is cached or built
 warm. Nothing goes under about two minutes, one build, one hop, one
 relaunch, and nothing skips T0.
 
+## ADR-042: A merge's gate may cite the nightly that swept its build
+
+Status: ACCEPTED 2026-10-20 12:24 PDT (Eli: "accept 42 and 43"); proposed 2026-10-19 (numidium). Amends ADR-030 (the gate
+at the merge) and ADR-040 item 2 (a train's gate scoped to its rows). The
+nightly, ADR-027's watch rule, T2 and the clones' promotion stay as they are.
+
+**Context.** Under ADR-040 item 1 the playtest runs on the stage, so a stage
+stands from the evening through the next morning's playtest. The nightly
+(ADR-030: every committed scenario, from 03:30 PDT) sweeps exactly that build.
+The morning's `just verb-merge` then reruns a subset of the same scenarios on
+the same build. That costs 51 to 75 minutes of lab before the next stage can
+start (ADR-040's table: train-24's gate 23 runs in 51 min, train-26's 27
+scenarios and 2 reruns in 75 min). Until 2026-10-19 a run's record named only
+the game version, so nothing could show which build a sweep swept. Since main
+7bf200a every result.json carries `build`: the server container's image id,
+and each managed clone's snapshot with the description its staging wrote
+(verb-stage: the branch, the client's commit, the date).
+
+**Decision.** `GATE_SET=<run set id> just verb-merge <branch> [scenario...]`
+cites a finished run set instead of running the gate. The tool checks five
+things before parity moves:
+
+1. The set's verdict is green or watch (ADR-027). It holds every scenario the
+   gate would run: `always`, the named ones, and `watch`.
+2. Its runs played one build: the same `build.server.id` and the same clone
+   snapshot descriptions in every run.
+3. That build is the branch's stage. The server id equals the image id of the
+   registry's `skymp-server:<branch slug>-<staged sha8>`, and the descriptions
+   name `<branch> client <staged sha8>`.
+4. The branch head is the staged commit, or differs from it in docs only. A
+   change to anything that builds runs the gate: server, client, CI, or the
+   workflow (88c43e77's .github action would have).
+5. Nothing replaced the stage after the set began: no verb-stage, layer-stage
+   or turbo push (/srv/lab/turbo.log, the stage's log).
+
+If any check fails, the gate runs as it does today, and the tool says which
+check failed. The LOG entry names the cited set and its run ids.
+
+**Consequences.** A morning merge after a nightly costs no lab time beyond
+the T2 it already cites, and the lab goes straight to the next stage: about
+an hour back on each two-playtest day. The net stays the same net, since the
+nightly is a superset of the gate on the same build.
+
+What could differ is a regression that would show only in a rerun between the
+nightly and the merge. Checks 4 and 5 keep anything that builds from changing
+in that window, so what is left is nondeterminism, which ADR-027's watch rule
+already handles.
+
+The first citable nightly is the one after the next lab-api pull, which
+brings the `build` field (main 7bf200a). The tooling: verb-merge's
+`GATE_SET` and its checks, numidium's.
+
 ## ADR-043: The world stores every form plugin-relative; a load order change migrates a world, never undresses it
 
 Status: ACCEPTED 2026-10-19 19:32 PDT (Eli: "accept those ADRs"); proposed 2026-10-19 17:50 PDT (Eli, playtest twenty-six, the essentials layer:

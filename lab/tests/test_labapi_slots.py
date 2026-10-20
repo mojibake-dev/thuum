@@ -115,6 +115,10 @@ class Slots(unittest.TestCase):
         self.assertEqual(runner._client_args("console", {"text": "player.equipspell 12fcd right"})["text"], "player.equipspell 12fcd right")
         with self.assertRaisesRegex(RunnerError, "E_RUN_ITEM"):
             runner._client_args("console", {"text": "player.equipspell {0a86df:LostGrimoire.esp} right"})
+        # known's and held's ids compose the same way; a number passes through
+        for action in ("known", "held"):
+            self.assertEqual(runner._client_args(action, {"ids": ["044d44:Apocalypse - Magic of Skyrim.esp", 0x12FCD]})["ids"],
+                             [0x03044D44, 0x12FCD])
 
     def test_the_runner_reads_each_versions_load_order(self):
         from labapi.app import build_fake

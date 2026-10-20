@@ -468,15 +468,18 @@ of 210 on 2026-10-18, and their decisions on the dependency gaps; the plan is
 docs/research/mod-layer-plan.md). Built by apocrypha on branch
 `apocrypha/layer-essentials`; `just layer-stage apocrypha/layer-essentials` stages it.
 
-**What it is.** 98 mods copied from Fenestrate, 6 fetched from Nexus (the five of
-decision 4 and Realistic Aspen Trees, below), on top of the layer's existing eight
-(RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot Kills with
-CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
-client-only at the tail), 45 of them light; 29 mod folders scoped `@1.6.1170` (every SKSE
-DLL mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on
-1.7.104; FSMP among them). 113 mod folders and the Papyrus map's, 5,779 files once the install-order rule (below)
-has dropped the 414 replaced copies, 4.5 GB on disk (the DLL mods' .pdb files kept: Crash
-Logger with PDB support is in the set and reads them).
+**What it is.** 97 mods copied from Fenestrate, 5 fetched from Nexus (Cloaks of Skyrim and
+Winter Is Coming from decision 4, Realistic Aspen Trees after playtest 26, the Survival
+collection's two non-HDT warmth patches after playtest 27, all below), on top of the layer's
+existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot
+Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
+client-only at the tail), 45 of them light; 28 mod folders scoped `@1.6.1170` (every SKSE DLL
+mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on 1.7.104).
+111 mod folders and the Papyrus map's, 5,753 files once the install-order rule (below) has
+dropped the six replaced copies, 4.2 GB on disk (the DLL mods' .pdb files kept: Crash Logger
+with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, never
+removes one: a render that drops a file (FSMP's DLL and configs on 2026-10-20) relies on the
+clone being laid from a base without it, which the stage's snapshot discipline gives.
 
 **Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
 lab/tools/persist-mods.sh after its hand-written blocks:
@@ -487,7 +490,8 @@ lab/tools/persist-mods.sh after its hand-written blocks:
   installed it, FOMOD choices already made, so the layer carries the files Eli's game ran:
   every file Fenestrate's deployment manifest lists for the mod is there and all 87
   plugins match Fenestrate's Data byte for byte over their first 64 KiB (apocrypha's check
-  against the plugin heads pulled with the mod list). Each row records a tree hash of the
+  against the plugin heads pulled with the mod list; Playable Headparts All Races.esp has
+  since gained its build-time patch, below). Each row records a tree hash of the
   folder after exclusions and persist-mods refuses a copy that differs. The manager's
   own top-level files (readmes, pictures, meta.ini, Vortex's marker) are excluded.
 - `nexus` rows fetch the archive the row names with the Keychain's Nexus key, check its
@@ -511,13 +515,15 @@ lab/tools/persist-mods.sh after its hand-written blocks:
 integration 3. ditch the armor mod 4. add the cloaks and hdt 5. untick. 6. if it needs it
 add em. if not no action." and '"No Guards", FSMP in. i feel like my spare 1050 is like,,
 the oldest card we'll have to account for.'; 2026-10-19, on the hole the archives showed
-(below), "id like cloaks to give survival warmth." So: out are the Apocalypse/Tomebound
-patch, Goam's Elven Ears RaceMenu Integration (the ears themselves stay), Armor and Clothing
-for Kids and the NARC Dremora addon; in, for the Survival Mode Patch Collection's two cloak
-patches, are Cloaks of Skyrim 1.2.1, Winter Is Coming SSE - Cloaks 2.4 in its Full file,
-Artesian Cloaks of Skyrim 1.3.0 (its Cloaks of Skyrim and Winter Is Coming physics
-packages) and FSMP 4.1.1 (the AVX build; the installer has no runtime step). The spare
-GTX 1050 seat (c1) is the hardware floor: FSMP's frame cost is read there at the stage.
+(below), "id like cloaks to give survival warmth."; 2026-10-20, after playtest 27's cloaks,
+"the cape physics worked but it looked jank. lets go back to using not fsmp". So: out are the
+Apocalypse/Tomebound patch, Goam's Elven Ears RaceMenu Integration (the ears themselves stay),
+Armor and Clothing for Kids and the NARC Dremora addon; in are Cloaks of Skyrim 1.2.1 and
+Winter Is Coming SSE - Cloaks 2.4 in its Full file, with the Survival Mode Patch Collection's
+non-HDT warmth patches 01 and 02 over them. Artesian Cloaks of Skyrim 1.3.0 (its Cloaks of
+Skyrim and Winter Is Coming physics packages) and FSMP 4.1.1 came in with them for decision 4's
+"hdt" and left again on 2026-10-20, taking the collection's HDT patch file with them. The spare
+GTX 1050 seat (c1) stays the hardware floor for every layer check.
 
 **Read from the archives, not from the plan:** "SMP_Patch" is Artesian's naming
 (HDT-SMP), one plugin per base-mod variant; the Survival Mode Patch 14 esps are
@@ -527,9 +533,21 @@ Winter Is Coming's No Guards file ships `1nivWICCloaksNoGuards.esp`, so the coll
 WIC esp could not load with Eli's first pick; the second ("survival warmth") picks the Full
 file, and both halves load: the base plugins, Artesian's meshes and physics configs, and
 the collection's two esps replacing Artesian's plugins (Artesian's plugins keep the base
-mesh paths; its physics meshes replace the base files at the same paths, 391 of Cloaks of
+mesh paths; its physics meshes replaced the base files at the same paths, 391 of Cloaks of
 Skyrim's 469 meshes and 16 of Winter Is Coming's 209, by the install-order rule below).
-Cloaks of Skyrim's own `Cloaks - USSEP Patch.esp` comes along (USSEP is in the set).
+Cloaks of Skyrim's own `Cloaks - USSEP Patch.esp` comes along (USSEP is in the set). Since
+2026-10-20 none of the physics half is in the layer. The HDT patch esps could not stay without
+Artesian (besides the warmth keywords they carry Artesian's body-slot and armature edits), so
+the collection's non-HDT patches replace them: "Survival Mode Patch 01 - Cloaks Of Skyrim"
+(file 66092, `Survival Mode Patches - Cloaks Of Skyrim.esp`) and "02 - Winter Is Coming" (file
+66093, `Survival Mode Patches - Winter Is Coming.esp`), each a full esp with nothing but ARMO
+overrides (122 and 183) that rename the cloaks vanilla-style and add the warmth keywords (their
+MODL and TNAM fields are the same armature and template ids under their own master order).
+Both are ESL-flagged at build (plugin patches, below), so they sit on the two light slots the
+HDT pair held and no later plugin moves. Nothing else in the layer leaned on FSMP: no other
+mod ships an SMP config, CBBE 2.0.3's vanilla shape has no body physics, and Cloaks and Capes,
+whose folder name carries Fenestrate's Vortex label "FSMP - XPMSSE", is the plain 1.4 file
+(Nexus 2019 file 35552, md5 0853b94a…) with no physics in it.
 
 **Install order, learned from the clones (2026-10-19, playtest 26):** rows install in
 order, as a mod manager does. A later row's file replaces an earlier row's (or a folder
@@ -541,12 +559,28 @@ after `artesian-cloaks-of-skyrim-cos-1.3.0` and the base meshes won on the clone
 both copies refetched on every run (407 files). A folder scoped to a game version
 (`<mod>@<version>`) loses to a later row of its scope or of none; a folder of no scope keeps
 its copy against a later scoped row, with a `kept both` note, since the other version still
-needs it. What the rule replaces today, all of it as Fenestrate ran it: the 391 and 16 base
-cloak meshes; CBBE's three female `_sk` skin textures, replaced by Goam's "No ENB user SK
-fix" copies (Fenestrate's Vortex rule put CBBE before Goam for exactly this); and three
-byte-identical overlaps that change nothing (the two Artesian packages' `cloak.xml`, the two
-Apachii witcher hair textures rotfern bundles, the one script Headshot Kills and Stab The
-Heart share).
+needs it. What the rule replaced on 2026-10-19, all of it as Fenestrate ran it: the 391 and 16
+base cloak meshes (until Artesian left the next day); CBBE's three female `_sk` skin textures,
+replaced by Goam's "No ENB user SK fix" copies (Fenestrate's Vortex rule put CBBE before Goam
+for exactly this); and byte-identical overlaps that change nothing (the two Apachii witcher
+hair textures rotfern bundles, the one script Headshot Kills and Stab The Heart share, and
+while Artesian was in, its two packages' `cloak.xml`). Today the rule replaces six copies.
+
+**Plugin patches at build (`lab/layer/plugin-patches.tsv`, lab/tools/plugin-patch.py):** a
+few plugins are patched at the byte level after persist-mods lays them, size kept, idempotent,
+so the server's esm copies and the clients' SHA256SUMS carry the same bytes; these plugins
+differ from their archive or Fenestrate bytes by design. `esl` sets the TES4 light flag on the
+two Survival warmth patches, which define no record of their own (override-only, so the FE
+space holds nothing of theirs), to keep the light slots the HDT pair held. `hdpt-gender-both`
+sets both gender bits (0x02 male, 0x04 female) on every head part of Playable Headparts All
+Races.esp, every other bit kept: its 805 HDPT overrides clear the gender bits (DATA 01/05/09/
+11/18/19 across them) and RaceMenu's ApplyPresetData applies a part only when its gender flag
+matches the actor (docs/verbs/racemenu-sync.md, rotfern's own root cause), so under the layer
+every preset load seated the race defaults for hair, hairline, beard, brows and marks
+(thuum-magnus, a-racemenu red 20261020-193623; c1's base held five parts against the preset's
+eight, the eyes surviving only through All Eyes for All Races, later in the order). HYPOTHESIS
+until magnus's racemenu-load of lab-nord-1's look then head-parts on a layer seat shows eight.
+`lab/tests/test_plugin_patch.py` holds the patches to their contracts.
 
 **Papyrus admission by plugin (ADR-044, accepted by Eli 2026-10-19):** persist-mods ships
 `papyrus-admitted/Platform/papyrus-scripts.txt` as a layer file, so add-mods.ps1 installs it,
@@ -616,8 +650,9 @@ is missing, and the fourth, enabled with its master inactive, was the boot CTD o
 essentials.tsv; the Necro rebalance mod is an `out` row. They return only if the clones ever
 carry those two Creation Club files. The third rule came from playtest 26 the same evening and
 is the install order above: rows install in order and a later row's file replaces an earlier
-row's at the same Data path, the replaced copy leaving the tree (414 copies in today's layer,
-the cloak meshes that had kept Artesian's physics off the clones among them).
+row's at the same Data path, the replaced copy leaving the tree (414 copies in the 2026-10-19
+layer, the cloak meshes that had kept Artesian's physics off the clones among them; six since
+FSMP left).
 
 **What the layer needs from the game side (the fork and the lab), in the order it will bite:**
 - SkyUI's MCM is the first use (the per-player globals check): SkyUI_SE.esp is client-only

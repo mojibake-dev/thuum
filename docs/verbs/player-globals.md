@@ -225,7 +225,12 @@ files, 13 of 13, test_unit's 359 cases with this verb's two.
       player-globals session identical with its five declared divergences,
       and the PlayerGlobals message declared in the 27 other sessions whose
       seats move (sent on a seat's first movement after a login, so a seat
-      that never moves receives none)
+      that never moves receives none). Since the login-time send (train-29,
+      above) every seat receives it at its login, so fork 4720d0d3 declares
+      it once, for every client of every session, in difftest's
+      divergences.yaml beside the login clock, and the 37 per-session
+      entries are gone (T2 on 50a56e4a had shown c1's undeclared in every
+      session where c1 never moved)
 - [x] T3 scenario green: b-player-globals 20261018-103133 on train-24
       (c1's global 3, c2's 0, before and after the server restart), in the
       merge gate 20261018-112123-merge-m2-train-24 (23 of 23); the MCM
@@ -275,9 +280,12 @@ asked again). So the send moves: PlayerGlobals goes out at the login
 itself (PartOne::SetUserActor, with the clock's send), not with the other
 login sends at the first movement report; the client's service holds the
 message as pending and applies it at its first in-game update, a few
-seconds before the Creation's check (HYPOTHESIS until
-x-survival-restore-timing's three reruns on the new server; the lab's
-other login sends stay at the first movement). Fork m2-train-29, server
+seconds before the Creation's check. CONFIRMED the same day: on the server
+of fork 50a56e4a, x-survival-restore-timing 20261020-185534, 185906 and
+190218 all green, the send 37 to 74 ms after the connect (against 4,200 ms
+when it rode the first movement report), no box on the caster's 8 s
+screenshots, the two-seat asserts holding after the fresh relaunch (the
+lab's other login sends stay at the first movement). Fork m2-train-29, server
 only; the T0 case now logs the actor in a second time, as a reconnect does,
 and reads the send. The default from the section above stays the belt.
 The proper cure for every script that reads a global before any update
