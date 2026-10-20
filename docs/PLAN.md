@@ -380,10 +380,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         loads and frame rate held; no MCM, cloaks without physics, no
         warmth, bare aspens, rotfern undressed by the slot shift (ADR-043
         PROPOSED; the layer's three fixes render 2026-10-20 06:23).
-    - Train-29 (built overnight 2026-10-20 on Eli's word, fork m2-train-29
-      18c0e603 on parity 602a2dd2, staged under the layer for playtest
-      twenty-seven; each row's facts in docs/research/train-29-rows.md), in
-      build order; the state of each row as of 01:30 PDT:
+    - Train-29 (built overnight 2026-10-20 on Eli's word; fork m2-train-29
+      709c90b0: 18c0e603's client and server content, a rune try measured
+      and reverted, and the CI fresh-tree fix merged with parity d5f478c3;
+      staged 04:02 with its gate's always set green and both clones' clean
+      snapshot retaken on it, the essentials layer to stack on it for
+      playtest twenty-seven; each row's facts in
+      docs/research/train-29-rows.md), in build order:
       - the client's Papyrus event filter: BUILT (b2db6354, docs/verbs/
         papyrus-events.md): a parent-chain walk so every MCM passes, the
         layer's plugin list read at Skyrim Platform's load, OnUpdate per
