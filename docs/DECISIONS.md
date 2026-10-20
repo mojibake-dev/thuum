@@ -1908,3 +1908,131 @@ until the build is incremental (then about five); the wire and native
 classes drop under fifteen only when the Windows build is cached or built
 warm. Nothing goes under about two minutes, one build, one hop, one
 relaunch, and nothing skips T0.
+
+## ADR-043: The world stores every form plugin-relative; a load order change migrates a world, never undresses it
+
+Status: PROPOSED 2026-10-19 17:50 PDT (Eli, playtest twenty-six, the essentials layer:
+"its likely an unacceptable state of affairs that any mod added will fuck
+up rotferns appearance and items. however we handle mod layers, it cannot
+break the game every time a new mod is added, because single player doesnt
+work that way."). Eli decides. Extends ADR-026 (the appearance follows its
+look) and ADR-029 (mod layers); touches rule 6 (a schema change ships with
+a migration and a restart-persistence scenario).
+
+**Context.** The world (the change forms the server saves) names forms by
+their runtime id: the load order's slot in the top byte, the plugin's local
+id below. Tonight the essentials layer moved every plugin's slot (Apocalypse
+from 0C to 1A, LostGrimoire from 0B to 28, rotfern.esp from 08 to 2F), and
+the twenty-five world restored under it broke in four ways at once: test 1's
+appearance named rotfern's race by the old slot, so her race did not resolve
+and the server ACCEPTED the client's default Nord as a new appearance and
+wrote it over her record, taking her RaceMenu preset, favorites, map
+markers, shouts and staff rank with it (numidium's read of the 17:25 event);
+her rotfern.esp items and her Apocalypse spells became dead ids in the
+record; the lab's own scenarios named mod forms by slot and went red
+(fixed the same evening: lab-api resolves "<local hex>:<plugin>" against the
+run's order, main 74c4844 and f473a97). Restoring her took a hand re-base of
+eight head parts, a race and a texture set, a server stop, a record patch
+and a relaunch, four minutes of two sessions' work for one character; every
+player and every world would need the same at every layer. Single player
+has no such problem because the engine resolves a save's forms by plugin
+name at load (a save carries its plugin list and remaps), and that is the
+shape to copy.
+
+What the world already stores plugin-relative: the RaceMenu preset (RaceMenu's
+own "plugin|id"), favorites, map markers, the shout record and the staff
+rank (all FormDesc since their verbs), and every server setting (bonds,
+castTeleports, headshot, playerGlobals). What it does not: the appearance
+(race, head parts, texture set), the inventory and the equipment, learned
+spells, running effects and their sources, and anything else a change form
+keeps as a raw form id.
+
+**Decision.**
+
+1. Every form the world stores is a FormDesc, "<local hex>:<plugin>", the
+   shape the settings and the lab already use, including the appearance's
+   race, head parts and texture set, the inventory's and equipment's base
+   forms, learned spells, running effects (the MGEF and its source), and any
+   field a later verb adds; a raw runtime id in a change form is a bug.
+   Resolution to the runtime id happens at load against the live load
+   order (one function, FormDesc::ToFormId; a plugin that is not loaded
+   resolves to nothing and the entry is kept, not dropped, so the record
+   survives a plugin's absence and a return).
+2. A saved world carries the load order it was saved under (its espm file
+   list), and a migration converts a world written in the raw shape into
+   the plugin-relative one using that order; `just playtest-restore` and the
+   server's own load migrate on the way in, once, and mark the world
+   migrated. Worlds already saved tonight and before are migrated by the
+   order their snapshot's settings name.
+3. The server refuses a login appearance whose race or parts do not resolve
+   in its order, and keeps the record it holds; it never accepts a client's
+   default and never overwrites a record from a login. The client is told
+   (the race menu may open; what it sends from there is judged the same).
+4. The wire keeps runtime ids: a message is one session's, both ends share
+   the order, and the server translates at its edge as it does today. Only
+   what is written to disk changes.
+5. A mod layer render stops caring about slots: it never re-bases a world,
+   a profile or a scenario; the lab's profiles (lab/playtests) and
+   scenarios name forms as FormDesc already, and the server does the same.
+
+**Consequences.** A schema change (rule 6): the change form's structs, their
+JSON, a migration with a version mark, a T0 that saves a world under one
+order and loads it under another with identical state, and the
+restart-persistence scenario extended with a load order change (a stacked
+snapshot, as the rest verb's schema change ran). Load time: one string
+match per stored form at load, negligible. Until it lands, a world
+restored under a changed order is re-based by hand as tonight, or not
+restored.
+
+The map (docs/research/formdesc-world-map.md, read against fork e3806870
+the same evening) sizes the work. Twelve raw fields in five structs hold a
+runtime id: the appearance's race, head parts and texture set (stored as
+JSON text inside appearanceDump), the inventory entry's base, enchantment
+and poison (appearing twice, under inv and under equipmentDump), the
+equipment's four spell slots, learnedSpells, and the legacy effects map
+(a dead write path, deletable). Nineteen fields are FormDesc already, but
+six of them still drop or throw on a missing plugin (running effects are
+dropped and the record rewritten without them; the login sends for map
+markers, learned effects, favorites and shouts convert with no try), so
+decision 1's "kept, not dropped" is work there too; playerGlobals is the
+one field that behaves as asked and is the template. Today an appearance
+whose race does not resolve skips the WHOLE change form at load, the
+gamemode then creates a fresh actor with the race menu open, and the
+lowest free id is handed out again, which is how the 17:25 overwrite
+happened (HYPOTHESIS on the id coincidence; the mechanics are read).
+Stale learned spells are worse than wrong: the server refuses them in a
+hand and sends Actor.RemoveSpell to the player's own game. There is no
+version mark in the record and nothing persists the load order; the
+pattern for an optional field is presence (at_pointer), and the one
+in-memory migration (legacy effects to running effects) re-runs on every
+load. The trap that sets the cost: Appearance, Inventory and Equipment are
+the same structs on the record and on the wire, so retyping their fields
+would change the wire against decision 4. Two shapes avoid it: stored
+twins (FormDesc fields living only in the change form, converted at the
+MpActor and MpObjectReference accessors against the live order, every
+runtime API keeping its uint32), or conversion at the record boundary
+(after parse in WorldState::LoadChangeForm and before upsert in
+TickSaveStorage, since JsonToChangeForm is static and order-less and the
+drivers call it with no world in reach). The world's order is saved beside
+the records as the first non-change-form file in world/, and the version
+mark is one top-level key read with the same presence guard. Cost,
+re-estimated from the map: three sessions of server work (the twins or the
+boundary conversion with the appearanceDump rewrite; the migration, the
+order file and the version mark; the appearance refusal, the six
+keep-on-miss fixes and the tests) and one lab session (the scenario). The
+earlier estimate of two was made before the map.
+
+**Alternatives.** Pin the slots forever (a layer may only append plugins
+after every existing one): brittle, since any master-ordered plugin, an
+.esl among the masters, or a dropped mod moves slots, as the layer did
+tonight for three reasons. Re-base worlds by tool at each layer (tonight's
+four minutes made a script): the same slot math, but run at every layer for
+every world and every player, with the raw shape still underneath. Store the
+raw ids plus the order and translate only when the order differs: the
+decision's migration half without its durable half, and a second code path
+at every read.
+
+- [ ] accept
+- [ ] accept with changes (say what)
+- [ ] not yet
+
