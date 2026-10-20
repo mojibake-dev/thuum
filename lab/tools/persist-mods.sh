@@ -80,7 +80,11 @@
 #   checks its md5, and lays out the installer folders the row lists. The
 #   load order lives in lab/layer/load-order.tsv; lab/tools/layer-render.py
 #   writes it into the plugins array below and both server-settings files
-#   (lab/tests checks the three agree).
+#   (lab/tests checks the three agree). Rows install in order, as a mod
+#   manager does: a later row's file replaces an earlier one's at the same
+#   Data path and the replaced copy leaves the tree, so SHA256SUMS lists each
+#   path once (Artesian's physics meshes replace the base cloak meshes this
+#   way; the clients used to keep whichever copy sorted last).
 #
 # A mod directory named <mod>@<version> installs only into that game
 # version's folder on a clone (add-mods.ps1), and its plugins go only into
@@ -393,6 +397,53 @@ while IFS=$'\x1f' read -r folder source ref check take exclude plugins_ note; do
   if [ -n "$plugins_" ]; then IFS=';' read -ra ps <<< "$plugins_"; for pl in "${ps[@]}"; do [ -f "$dest/$pl" ] || { echo "$folder: plugin $pl not in its folder" >&2; exit 2; }; done; fi
 done <<< "$rows"
 echo "essentials layer: $n_fen mods from Fenestrate's staging, $n_nx from Nexus archives"
+# Rows install in order, as a mod manager does: a later row's file replaces an
+# earlier row's (or a folder laid above the rows) at the same Data path. The
+# clients apply SHA256SUMS in its sorted order and keep the last copy they
+# fetch, which made Cloaks of Skyrim's base meshes replace Artesian's physics
+# meshes on the clones (playtest 26, 2026-10-19) and refetched both copies on
+# every run; so the replaced copies leave the tree here and each Data path is
+# in SHA256SUMS once. A folder scoped to a game version (<mod>@<version>)
+# loses to a later row of the same scope or of none (the winner reaches every
+# version the loser did); a folder of no scope keeps its copy against a later
+# scoped row, with a note, since the other version still needs it.
+python3 - "$stage/tree" "$layer_tsv" <<'EOF'
+import csv, os, sys, collections
+tree, tsv = sys.argv[1], sys.argv[2]
+rows = [r[0] for r in csv.reader((l for l in open(tsv) if not l.startswith('#')), delimiter='\t') if r and r[0] != 'folder']
+folders = sorted(d for d in os.listdir(tree) if os.path.isdir(os.path.join(tree, d)))
+order = [f for f in folders if f not in rows] + [f for f in rows if f in folders]  # the folders laid above the rows, then the rows in order
+scope = lambda f: f.split('@', 1)[1] if '@' in f else ''
+copies = collections.defaultdict(list)  # Data path, case-folded -> [(install rank, folder, path)]
+for rank, f in enumerate(order):
+    base = os.path.join(tree, f)
+    for d, _, names in os.walk(base):
+        for n in names:
+            rel = os.path.relpath(os.path.join(d, n), base)
+            copies[rel.lower()].append((rank, f, rel))
+replaced = collections.Counter()
+kept = collections.Counter()
+for same in copies.values():
+    if len(same) < 2:
+        continue
+    same.sort()
+    winner = same[-1][1]
+    for _, f, rel in same[:-1]:
+        if scope(winner) and scope(f) != scope(winner):
+            kept[(f, winner)] += 1   # the other version keeps reading the unscoped copy
+            continue
+        os.remove(os.path.join(tree, f, rel))
+        replaced[(f, winner)] += 1
+for f in order:  # directories the removals emptied
+    base = os.path.join(tree, f)
+    for d, _, _ in os.walk(base, topdown=False):
+        if d != base and not os.listdir(d):
+            os.rmdir(d)
+for (f, winner), n in sorted(replaced.items()):
+    print(f"replaced: {n} files of {f} by {winner} (same Data paths; the later row wins)")
+for (f, winner), n in sorted(kept.items()):
+    print(f"kept both: {n} files of {f} (every version) and {winner} (its version only); the clients keep whichever sorts last")
+EOF
 printf '%s\n' "${plugins[@]}" > "$stage/tree/plugins.txt"
 (cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
