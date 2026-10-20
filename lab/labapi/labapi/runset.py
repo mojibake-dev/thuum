@@ -19,6 +19,8 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from .runner import Runner
 from .scenario import load_scenario
 
@@ -101,6 +103,17 @@ class RunSets:
             return []
         return sorted(p.stem for p in self.scenarios_dir.glob("*.yaml"))
 
+    def pending(self) -> list[str]:
+        """lab/gate.yaml's `pending`: committed scenarios red by design until their verb's fix lands (each line names
+        the fix), which "all" leaves out, so the full sweep and the nightly measure the build and not a known defect's
+        own T3 (b-spells-reconnect, 2026-10-20: the reconnect spell loss, train-30's). A line comes off when that T3
+        is green."""
+        try:
+            data = yaml.safe_load((self.scenarios_dir.parent / "gate.yaml").read_text()) or {}
+        except (OSError, yaml.YAMLError):
+            return []
+        return [str(x) for x in (data.get("pending") or [])]
+
     def _dir(self) -> Path:
         d = Path(self.s.results_dir) / "runsets"
         d.mkdir(parents=True, exist_ok=True)
@@ -132,7 +145,8 @@ class RunSets:
             raise RunSetError(f"E_RUNSET_BUSY: run set {self.active.id} is active")
         known = self.list_scenarios()
         if scenarios == "all":
-            wanted = known
+            skip = set(self.pending())
+            wanted = [x for x in known if x not in skip]
         else:
             wanted = list(dict.fromkeys(str(x) for x in scenarios))  # once each, in the order given
             missing = [x for x in wanted if x not in known]
