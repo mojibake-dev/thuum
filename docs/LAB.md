@@ -613,7 +613,9 @@ named as skymp's FormDesc names it, its local id and its plugin,
 `"aae8:Apocalypse - Magic of Skyrim.esp"` (the shape the server's settings and
 guests.yaml's cells already use), wherever a step or an assertion takes a form
 (`form()`, `learn-spell`'s spellId, `give` and `equip`'s item,
-`effects(c).left()`): the runner reads the run's load order (its version's
+`effects(c).left()`, and in braces inside a `console` step's text,
+`player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right`, which the
+driver types as the run's id in hex): the runner reads the run's load order (its version's
 settings file and the master files the server mounts) and composes the id from
 the plugin's slot in it (lab/labapi/labapi/slots.py, the slot math layer-stage's
 load-order check shares), so a mod layer that moves a plugin changes no
