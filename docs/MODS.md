@@ -595,7 +595,10 @@ Rebalance.esp) are out of the layer, not client-only: the engine disabled the th
 is missing, and the fourth, enabled with its master inactive, was the boot CTD of the first stage
 (SkyrimSE.exe+01D74A0, both clones). The first three are excluded from their mods' folders in
 essentials.tsv; the Necro rebalance mod is an `out` row. They return only if the clones ever
-carry those two Creation Club files.
+carry those two Creation Club files. The third rule came from playtest 26 the same evening and
+is the install order above: rows install in order and a later row's file replaces an earlier
+row's at the same Data path, the replaced copy leaving the tree (414 copies in today's layer,
+the cloak meshes that had kept Artesian's physics off the clones among them).
 
 **What the layer needs from the game side (the fork and the lab), in the order it will bite:**
 - SkyUI's MCM is the first use (the per-player globals check): SkyUI_SE.esp is client-only
