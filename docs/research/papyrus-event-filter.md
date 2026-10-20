@@ -38,8 +38,7 @@ the SKSE mod-event callback `OnConfigManagerReady`, the one call that registers 
   consulted for every event but OnUpdate. Since the blank at :147-150 applies whenever `blockEvents`
   is still set, an OnUpdate under the block is blanked for EVERY script, admitted names included: it
   is the one event the list never clears (the lead's read of the brace structure, 2026-10-19 evening,
-  which corrects this memo's first draft and the two older docs quoted below; the lab's unblock probe
-  and a HUD trace for SkyUI's own OnUpdate line are the measurements). This is the only place the
+  which corrects this memo's first draft and the two older docs quoted below; CONFIRMED by x-survival-unblock3 20261020-024406, the block lifted and the quest re-armed, the check ran and the prompt appeared, while x-survival-unblock 20261020-023907 showed a lift after login re-arms nothing; a HUD trace for SkyUI's own OnUpdate line remains the one unmeasured corner). This is the only place the
   EVENT NAME matters.
   - :86-89 takes `vm->attachedScriptsLock`, finds the handle in `vm->attachedScripts`.
   - :92-141 loops over the scripts attached to the handle and reads, per script,
