@@ -1948,6 +1948,27 @@ ADR-029's "quests' and aliases' stay blanked" was written for vanilla's
 and Apocalypse's world mechanisms, not for a settings menu or a needs
 meter.
 
+The layer in numbers (apocrypha's census, docs/research/layer-papyrus.md on
+apocrypha/layer-essentials, each script's parent class read from its .pex
+header, regenerated with the layer): 2,421 scripts in 44 of the 113 mod
+folders; 19 mods blocked outright because their behavior is their own
+quest, alias, object or perk scripts (Jewelry Limiter, Dynamic Activation
+Key and the feeding tweaks keyed off it, Self Filling Bookshelves, Portal,
+Reading List, General Displays, the IDRC quests and scenes among them; four
+of the 19 are fixes to vanilla scripts a connected game does not run
+anyway); 12 mixed, their effects running on the player and everything else
+blanked, which is every magic mod (Apocalypse 162 effect scripts against
+44 others, Lost Grimoire 96 against 51, Odin 50 against 27); TrueHUD, TDM
+and MCM Helper losing only their menus; 69 folders shipping no script.
+Three of its points shape the decision: a plugin carries its scripts
+through its forms' VMAD, so admission by plugin needs the plugin's script
+names (a map the census generates); OnUpdate is its own axis (Survival's
+needs, Jewelry Limiter's checks and Unread Books Glow's scans are update
+loops); and the ActiveEffect exemption admits an effect on the player
+alone, so a magic mod's effects cast on others (mind control, thralls, a
+cloak on a target) stay blanked even where its self-casts run, which is
+ADR-029's server-side allowlist's ground, not this decision's.
+
 What the filter is FOR, stated once: a game whose state the server owns
 must not run scripts that change that state behind the server's back
 (vanilla's quests, Apocalypse's world mechanisms, anything on ADR-029's
@@ -1968,10 +1989,13 @@ UI, or per-player state the server declares R3 or records as R2.
 2. Admission by plugin. A data list, served by the server with the load
    order (the layer manifest's per-plugin disposition, apocrypha's
    persist-mods rows; ADR-008's "data, not code"), names the plugins whose
-   scripts run in every game: the Survival Mode Creation first. A script
-   of an admitted plugin passes whatever its class. The list is reviewed
-   like a scenario (rule 13): a plugin enters it with one line saying what
-   its scripts touch and which rung that state already has.
+   scripts run in every game: the Survival Mode Creation first. Since the
+   hook sees a script's class name and not its plugin, an admitted plugin
+   expands to the script class names its folder ships (the census's map,
+   regenerated with the layer), and the hook keeps one set lookup. A
+   script of an admitted plugin passes whatever its class. The list is
+   reviewed like a scenario (rule 13): a plugin enters it with one line
+   saying what its scripts touch and which rung that state already has.
 3. OnUpdate follows the script. An admitted script receives OnUpdate; the
    rest stay blanked. The list is consulted for OnUpdate too, so the hook
    pays one table lookup per OnUpdate under the block; the first build
