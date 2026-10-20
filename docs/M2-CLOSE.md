@@ -96,6 +96,12 @@ Survival race (lifted by the 8df default's smoke).
 3. Playtest twenty-eight's setup (lab/playtests/28.yaml: twenty-seven's
    world restored under the layer's order through slice one; seats and
    spells server-side), the checklist as docs/private/playtest-m2-28.md.
+   Safety (numidium, 2026-10-20): the restore COPIES the saved world
+   (/srv/lab/snapshots/playtest-m2-27-20261020T183558Z, raw slot ids) into
+   the live world directory, so slice one's one-way migration rewrites the
+   live copy only; the snapshot stays raw and restores onto a pre-slice
+   server if a migration goes wrong, and the migrated live world is saved
+   under its own label when twenty-eight ends.
 4. Eli's report; findings to the train or to section 4.
 5. `just verb-merge m2-train-30` with the four scenarios leaving pending;
    T2 beside it. Green: M2 DONE in PLAN and LOG, the carries moved to M3's
