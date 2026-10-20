@@ -107,8 +107,22 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
 
 - b-duel, the Flames row (step 65): 0.822 against the green 0.7293 (layer
   1496763f) and 0.7198 to 0.7358 (no layer); server and seat agree, so
-  less damage applied, not a desync; the stage's differences are the 8df
-  default (the box's absence), the two Survival patches and plugin-patch.
+  less damage applied, not a desync. Read 16:5x PDT: the server took 12
+  hits summing 2.339 s (red) against 19 summing 3.418 s (green), the same
+  183 ms cadence, the same one capped 365 ms gap, no refusal (the ADR-039
+  warning on 0xF392F's HasPerk rider is in both and damage followed it),
+  the same regen and base on c2, the same 8df entry on both servers, and
+  the hold itself 4.001 s in both (c2's replay of c1's figure's
+  MRh_SpellAimedConcentrationStart to MRh_Equipped_Event). The shortfall is
+  seven hits, all at the start: the first hit came 2.09 s after the hold
+  (green 1.07 s) with a first count of 0.25 (the cast had been open 250 ms
+  or more), where every other stationary Flames stream today, seven of them
+  on this stage minutes earlier, opened within 60 to 77 ms. So c1's flames
+  did not register on c2's figure for about a second after the cast: a c1
+  stall or a miss, likeliest a one-off. The 0.78 bound stays. Decider: the
+  rerun on the re-staged layer with c1 watched; a first hit about a second
+  after the hold with 19 hits says one-off, about two seconds with 12 says
+  the stage changes c1's first contact.
 - b-god (step 46): after god mode off, c2's arrow left c1 at 1.0 on the
   server and the seat; the no-layer run 125817 was green.
 
