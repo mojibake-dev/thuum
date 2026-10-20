@@ -9,10 +9,14 @@ on the train or carried to M3 by name, in this file, before the word "done"
 is used. Nothing here is graded by feel; a T4 item is a yes or a no.
 "Under the merged layer" became "under the staged layer" on 2026-10-20
 16:13, when the layer's own gate (20261020-220005) ended red at 25 of 62
-(a-rotfern: c1's game died at the mid-game appearance step, the player's
-shared base record 0x7 overridden by a layer plugin, Supernatural Survival
-Tweaks' werebeast patch; a-racemenu: the layer's slot-0x09 head parts in
-c1's record after a menu close): the layer merges by its own gate after
+(a-rotfern: c1's game died at the mid-game race pick in the VANILLA race
+menu's slider rebuild on rotfern's tint list, up because RaceMenu's chargen
+never initialises under the layer; the player's shared base record 0x7
+overridden by a layer plugin, Supernatural Survival Tweaks' werebeast
+patch, found on the way and ruled out as a rule; a-racemenu: the layer's
+slot-0x09 head parts in c1's record after a menu close, the same vanilla
+menu's rebuild; docs/research/layer-reds-2026-10-20.md): the layer merges
+by its own gate after
 its fixes, before M2 is called done, and twenty-eight runs on the fixed
 layer staged.
 

@@ -40,7 +40,35 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   load-order-check.py). Eli's alternative: drop the plugin (one row to
   `out`); the patch is the default since the override's feature never
   worked connected. Eli, 16:20 PDT: "patch it".
-- Decider: a-rotfern green on the patched layer's stage.
+- Read 16:32 PDT, the crash's path (a reader on the crash log, Ghidra on
+  the unpacked 1.6.1170 per rule 2, HYPOTHESIS until a-rotfern reruns):
+  the fault is the VANILLA RaceSexMenu's slider rebuild, 52346
+  (AdvanceMovie's rebuild) to 52409 (the sliders, RBP "ChangeFaceDetails",
+  RSP+E8 "Complexion") to 52412+0x123, which finds the Nth tint of a type
+  in race->faceRelatedData[sex]->tintMasks and indexes
+  PlayerCharacter::tintMasks by that position with no size check (RCX 31,
+  type 0xE Dirt, the second dirt layer); rotfern.esp's races carry 33 male
+  tint layers with dirt at 30 to 32 and the player's tint array has no
+  entry 31; RBX the TESRace rotfernRaceVampire (0x2F019D08), incidental
+  (the base race carries the same list). The 0x7 override is on the stack
+  as data ("Modified by" the Survival Tweaks esp) with no path to the read.
+  Why the vanilla menu was up: under the layer RaceMenu's chargen never
+  initialises. Every layer run's c1-skee64.log holds only "NetImmerse
+  Override Enabled" and "Reverting...", where the no-layer run
+  20261020-121634's has the DataLoaded init ("RaceMap::CreateDefaultMap -
+  Added default slider maps for rotfernRaceVampire from NordRace", the
+  RacePartDefaultGen lines). So a-rotfern's race-pick (DirectInput Down
+  every 1.2 s) walked the vanilla menu's name-sorted list onto the vampire
+  twin at the third press (RaceMenu's menu ignored the presses in every
+  green run and the setRace fallback made the pick); a-character-creation
+  under the layer moved Nord to Orc with one press (220511); and
+  a-racemenu's hair swap at a menu open is the vanilla menu's rebuild too.
+  The layer defect to fix first: RaceMenu's install under the layer
+  (skee64.dll, skee64.ini, RaceMenu.bsa, the interface files; the install
+  order's winners for those paths; lab/tools/persist-mods.sh:247-248),
+  asked of apocrypha and numidium. Decider: "RaceMap::CreateDefaultMap" in
+  a layer seat's c1-skee64.log, then a-rotfern green. The 0x7 rule stands
+  on its own ground.
 
 ## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
 
