@@ -133,7 +133,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   after the hold with 19 hits says one-off, about two seconds with 12 says
   the stage changes c1's first contact.
 - b-god (step 46): after god mode off, c2's arrow left c1 at 1.0 on the
-  server and the seat; the no-layer run 125817 was green. Read 17:0x PDT:
+  server and the seat; the no-layer run 125817 was green. Read 16:54 PDT:
   the toggle worked (server.log "god mode off" 22 s before the shot in both
   runs) and the shot was recorded (OnPlayerBowShot ff000001, power 1.00,
   aim 0.000 heading 0.000), but no hit claim ever came from c2's game in
@@ -150,8 +150,10 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   mark) hits. Improved Camera SE is the only layer DLL hooking the camera
   (HYPOTHESIS for the lift). So b-god's shot is a brittle aim, not a server
   fault: the scenario's fix is to aim c2 at c1's body (a pitch down), as
-  b-headshot aims at the head on purpose. Decider: b-god with the aim fix
-  on the train stage, with c2 watched and a projectiles step after the shot.
+  b-headshot aims at the head on purpose. Since the look step cannot pitch
+  a seat's aim, the fix is the range: c2 shoots from 150 units (main 7f65c0c9,
+  scenario ad41f03b; a routine strengthening, bounds unchanged). Decider: b-god
+  in the train stage's probes.
 
 ## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
 
