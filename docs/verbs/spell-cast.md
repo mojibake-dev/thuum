@@ -1488,9 +1488,11 @@ gate and the merges after).
   effect, and an Altmer's maximum Magicka carries Highborn's 50, which the
   server had run short by (every figure's bar and every magicka check of an
   Altmer, a quieter gap the same source closes). T0: the record chain for
-  a Nord and an Altmer appearance (unit/EffectConditionsTest.cpp; CI is the
-  oracle, the Altmer's 50 a reading of UESP's Skyrim:High Elf until it
-  passes). The gap it exposed next, the server applying Hailstone's
+  a Nord and an Altmer appearance (unit/EffectConditionsTest.cpp), green
+  in ctest on the train's head (fork m2-train-30 1d88a6b7, pipeline 2309):
+  the Nord reads 50 on ResistFrost from Skyrim.esm's own records and the
+  Altmer's maximum Magicka carries Highborn's 50 (UESP's Skyrim:High Elf
+  confirmed by the record). The gap it exposed next, the server applying Hailstone's
   effects at their magnitudes with no resistance multiplier where the
   engine halves frost damage on a Nord (the engine's resistance never runs
   on a player's imposed damage), is the resistance rule, BUILT the same
