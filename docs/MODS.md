@@ -578,8 +578,11 @@ Races.esp, every other bit kept: its 805 HDPT overrides clear the gender bits (D
 matches the actor (docs/verbs/racemenu-sync.md, rotfern's own root cause), so under the layer
 every preset load seated the race defaults for hair, hairline, beard, brows and marks
 (thuum-magnus, a-racemenu red 20261020-193623; c1's base held five parts against the preset's
-eight, the eyes surviving only through All Eyes for All Races, later in the order). HYPOTHESIS
-until magnus's racemenu-load of lab-nord-1's look then head-parts on a layer seat shows eight.
+eight, the eyes surviving only through All Eyes for All Races, later in the order). Eli's call,
+2026-10-20: "patch it". CONFIRMED by x-layer-headparts 20261020-210719 on the first stage that
+carried it (stage-layer-train29 7d2f806): both seats' head parts equal the server's record at login
+and again after a relaunch; that stage's smoke 20261020-210408 ran with no hdtsmp64 log among its
+artifacts, FSMP gone as intended.
 `lab/tests/test_plugin_patch.py` holds the patches to their contracts.
 
 **Papyrus admission by plugin (ADR-044, accepted by Eli 2026-10-19):** persist-mods ships
