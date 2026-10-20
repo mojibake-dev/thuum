@@ -133,7 +133,25 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   after the hold with 19 hits says one-off, about two seconds with 12 says
   the stage changes c1's first contact.
 - b-god (step 46): after god mode off, c2's arrow left c1 at 1.0 on the
-  server and the seat; the no-layer run 125817 was green.
+  server and the seat; the no-layer run 125817 was green. Read 17:0x PDT:
+  the toggle worked (server.log "god mode off" 22 s before the shot in both
+  runs) and the shot was recorded (OnPlayerBowShot ff000001, power 1.00,
+  aim 0.000 heading 0.000), but no hit claim ever came from c2's game in
+  either god-mode block of the red run (no OnWeaponHit, no refusal; a
+  refusal logs at warn, the client's hitService drops silently), while c1's
+  arrows at c2 kept hitting under the same layer (b-arrow-path 6 of 10,
+  b-headshot 3 of 3, b-marksman 2 of 2). The measured difference: c1's own
+  first-person launches sit 3.8 units higher over its feet under the layer
+  (b-arrow-path 225948 against 122620: 133.4 against 129.6 at the same
+  pitch -0.0349), both seats stand about a unit higher, and c2's crosshair
+  on c1 already sat at the very top of c1's head without the layer (the
+  screenshots); under the layer it clears the head by about 8 units. c2 at
+  c1 (a Nord on the lower mark) misses; c1 at c2 (an Orc on the higher
+  mark) hits. Improved Camera SE is the only layer DLL hooking the camera
+  (HYPOTHESIS for the lift). So b-god's shot is a brittle aim, not a server
+  fault: the scenario's fix is to aim c2 at c1's body (a pitch down), as
+  b-headshot aims at the head on purpose. Decider: b-god with the aim fix
+  on the train stage, with c2 watched and a projectiles step after the shot.
 
 ## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
 
