@@ -261,3 +261,27 @@ unchanged: the default is the deployment's data, the record stays R2. T0:
 two Rust tests (the object form and its refusals; the default only where the
 record is silent). T3: the layer-merge sweep running without a pause, and
 b-papyrus-events's reads of 8df (1 from the default on a lab seat).
+
+## The login's race, and the send moved to the login (2026-10-20, after playtest twenty-seven)
+
+Two facts closed the fixture: the clones hold no save file (Skyrim
+Platform's template.ess is compiled into SkyrimPlatformImpl.dll and
+LoadGame::Run patches a copy per login, deleting it seconds later; a
+snapshot carries nothing of it), and the login restore can lose its race
+to the Survival Creation's 5 s check (won at 13:52Z by x-survival-restore-
+timing 20261020-135028, lost at 18:23Z on test 2's relaunch, when the
+restore rode the first movement report 4.2 s after the connect and the box
+asked again). So the send moves: PlayerGlobals goes out at the login
+itself (PartOne::SetUserActor, with the clock's send), not with the other
+login sends at the first movement report; the client's service holds the
+message as pending and applies it at its first in-game update, a few
+seconds before the Creation's check (HYPOTHESIS until
+x-survival-restore-timing's three reruns on the new server; the lab's
+other login sends stay at the first movement). Fork m2-train-29, server
+only; the T0 case now logs the actor in a second time, as a reconnect does,
+and reads the send. The default from the section above stays the belt.
+The proper cure for every script that reads a global before any update
+(train-30): the server's globals travel with the own player's CreateActor
+(a wire change, message and validator in one commit) and LoadGame::Run
+writes them into the generated save's globals, so the first frame reads
+them; it also spares a player the re-ask after a relaunch.
