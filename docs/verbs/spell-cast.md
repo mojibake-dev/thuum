@@ -1490,12 +1490,14 @@ gate and the merges after).
   Altmer, a quieter gap the same source closes). T0: the record chain for
   a Nord and an Altmer appearance (unit/EffectConditionsTest.cpp; CI is the
   oracle, the Altmer's 50 a reading of UESP's Skyrim:High Elf until it
-  passes). Left for the probe x-hailstone, after this branch stages: the
-  server applies Hailstone's effects at their magnitudes with no resistance
-  multiplier (ApplyEffects takes none), where the engine halves frost
-  damage on a Nord; the probe measures both seats (c1 Nord, c2 Orc) against
-  the engine's own numbers and names the resistance rule as its own row if
-  the gap shows.
+  passes). The gap it exposed next, the server applying Hailstone's
+  effects at their magnitudes with no resistance multiplier where the
+  engine halves frost damage on a Nord (the engine's resistance never runs
+  on a player's imposed damage), is the resistance rule, BUILT the same
+  day on fork m2-train30-resist 8219604e, stacked on this branch
+  (docs/verbs/magic-effects.md, Resistance). The probe x-hailstone, on that
+  branch's stage: both seats land at 0.85, the Orc by the Shatter alone and
+  the Nord by both effects halved.
 - Scattershock (row 6), measured, no code: x-scattershock-6s
   20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
   launched on both seats (the PROJ 083a24 of Apocalypse) and the server
