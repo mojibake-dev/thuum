@@ -99,6 +99,23 @@ class Slots(unittest.TestCase):
         state.command("c1", "learn-spell", {"spellId": 201608516})
         self.assertEqual(backend.calls[-1][1]["spellId"], 201608516)
 
+    def test_console_text_types_the_runs_id_for_a_formdesc_in_braces(self):
+        from labapi.app import build_fake
+        from labapi.config import Settings
+        from labapi.runner import RunnerError
+
+        s = Settings(guests_file=str(ROOT / "lab" / "labapi" / "labapi" / "guests.yaml"),
+                     results_dir=str(self.dir / "results"),
+                     game_esm_dirs=f"1.6.1170={self.esm}", game_server_settings=f"1.6.1170={self.settings}")
+        runner = build_fake(s).runner
+        args = runner._client_args("console", {"text": "player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"})
+        self.assertEqual(args["text"], "player.equipspell 3044d44 right")
+        self.assertEqual(runner._client_args("console", {"text": "player.additem {801:Headshot Kills.esp} 2"})["text"],
+                         "player.additem fe002801 2")
+        self.assertEqual(runner._client_args("console", {"text": "player.equipspell 12fcd right"})["text"], "player.equipspell 12fcd right")
+        with self.assertRaisesRegex(RunnerError, "E_RUN_ITEM"):
+            runner._client_args("console", {"text": "player.equipspell {0a86df:LostGrimoire.esp} right"})
+
     def test_the_runner_reads_each_versions_load_order(self):
         from labapi.app import build_fake
         from labapi.config import Settings
