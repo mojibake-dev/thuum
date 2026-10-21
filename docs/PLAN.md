@@ -749,8 +749,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   closes M2, the list above plus train-30's rows, on a stage carrying them
   (the essentials layer merged, the reconnect spell fix, ADR-043 slice one,
   the dent gate, the Hailstone conditions and the resistance rule as they
-  land); after it the HYPOTHESIS probes and the snap-back fix. Nothing else
-  in M2 waits on him. The closeout set, the scenarios and T4 items whose
+  land); after it the HYPOTHESIS probes and the snap-back fix. Moved by Eli
+  after twenty-eight's report (2026-10-20, before 18:55: "lets aim to close
+  this out on test 29"): twenty-eight's findings make Train-31 the closing
+  train, built on the morning's merged base (the train and the layer under
+  ADR-042a), staged, probed, and playtest twenty-nine on that stage closes
+  M2 with every T4 item ticked. Nothing else in M2 waits on him. The
+  closeout set, the scenarios and T4 items whose
   green closes M2 and the carries to M3 by name: docs/M2-CLOSE.md (Eli,
   2026-10-20: "cook on a closeout set of tests, that if it passes we call
   m2 done").
