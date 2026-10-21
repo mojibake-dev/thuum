@@ -1,0 +1,69 @@
+# Playtest twenty-nine's seats (thuum ADR-040 item 6: `just playtest-setup 29`; the checklist is
+# docs/private/playtest-m2-29.md; M2's close, docs/M2-CLOSE.md): fork m2-train-31 on its stage under the
+# merged essentials layer. Twenty-eight's world as saved after its report, in its cleaned copy (profile 2's
+# dangling 'a86df:Cloaks.esp' learned spell removed, 2026-10-20): its records are formVersion 2 already, so
+# slice one re-bases nothing at the load. Items top up to their counts (playtest-setup, main 485c4ee), so
+# twenty-eight's piles do not grow; Survival is on in both records (828 = 1). Under the layer Apocalypse holds full slot 0x1A
+# (lab-api's slots.py over the deployed settings, 2026-10-20 15:3x), so its ids are 0x1Axxxxxx; rotfern
+# 0x2F, Cloaks.esp 0x0B, Winter Is Coming 0x0E. Everything here is server-side (labCommand through
+# playtest-console, set-percentages); the one thing a seat types itself is test 1's `player.addperk 7934b`
+# (Overdraw40, the headshot rule's perk, which lives in the shooter's game).
+id: 29
+build: "(filled at setup: fork m2-train-31 on its stage under the merged essentials layer)"
+world: playtest-m2-28-cleaned-20261021T012503Z   # twenty-eight's world saved 18:24 PDT after its report, cleaned (profile 2's dangling learned spell)
+hold:
+  minutes: 180
+  reason: "playtest twenty-nine: M2's close on m2-train-31's stage under the merged layer"
+camp:
+  # the camp's two teleports from playtest-start, only those (the script's
+  # half bars and ingredients would undo the rest)
+  teleports: playtest-start
+seats:
+  - profile: 1
+    name: "test 1 (rotfern; the bow and arrows are on it)"
+    spells:
+      - 0x1A00186D   # Shock Nova
+      - 0x1A05ECEE   # Battletide
+      - 0x1A109653   # Crackle
+      - 0x1A044D44   # Blood Boil
+      - 0x1A088694   # Azure Reconstruction
+      - 0x1A031C4D   # Shadowbond
+      - 0x1A01F1FB   # Decompose
+      - 0x1A124EC9   # Acceleration Rune
+      - 0x1A002878   # Lightning Strike
+      - 0x1A124EC7   # Thrumming Stone
+      - 0x0003AE9F   # Flame Cloak (the tome's spell, not the 0xDE511 hand variant)
+      - 0x0006796F   # Frost Rune
+      - 0x0005DB90   # Fire Rune
+      - 0x1A035452   # Finger of Death
+      - 0x1A001879   # Electrosphere
+      - 0x1A02E634   # Hailstone (02e634:Apocalypse - Magic of Skyrim.esp), b-hailstone's rows: the Nord at the Orc, then the reverse
+      - 0x0004D3F2   # Healing Hands (Skyrim.esm), Train-31's heal by the record on another player (Eli, 2026-10-20)
+      - 0x00012FD0   # Firebolt
+    items:
+      - {id: 0x00012EB7, count: 1}   # Iron Sword (Skyrim.esm IronSword), for the figure hit and dent checks
+      - {id: 0x0B0147C6, count: 1}   # Cloaks of Skyrim's Cape - Whiterun (Cloaks.esp, local 0x0147C6 at the layer's 0x0B), the vanilla cape now
+    values:
+      Marksman: 60   # the headshot rule's floor; "Archery" does nothing on the server
+      Magicka: 400   # as in twenty-seven
+    percentages: {health: 1, magicka: 1, stamina: 1}
+    by_hand: "player.addperk 7934b once in game (Overdraw40, for the headshot row)"
+  - profile: 2
+    name: "test 2"
+    spells:
+      - 0x1A088694   # Azure Reconstruction
+      - 0x1A00186D   # Shock Nova
+      - 0x00012FD0   # Firebolt (the staggered cast)
+      - 0x0003AE9F   # Flame Cloak
+      - 0x1A02E634   # Hailstone (02e634:Apocalypse - Magic of Skyrim.esp), b-hailstone's reverse row
+    items:
+      - {id: 0x00012E4D, count: 1}   # Iron Helmet, for the helmeted headshot check
+      - {id: 0x0E00234B, count: 1}   # Winter Is Coming's cloak (local 0x00234B at the layer's 0x0E), for the warmth row
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  # a set upward can revert within 2 s: read the bars back and set again if they did
+  readback: percentages
