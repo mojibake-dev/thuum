@@ -314,9 +314,12 @@ class Runner:
         return rec
 
     def _note_run_end(self) -> None:
-        self.last_run_ended = _iso(self._wall())
-        self._last_run_ended_wall = self._wall()
-        self.last_activity_wall = self._wall()
+        # the run's own end stamp, so the next run's outgoing log starts where result.json says this one
+        # finished (two clock reads straddled a second boundary in the suite, 2026-10-21)
+        now = self._wall()
+        self.last_run_ended = (self.last_run.finished_at if self.last_run is not None else None) or _iso(now)
+        self._last_run_ended_wall = now
+        self.last_activity_wall = now
 
     def _after_quiet_spell(self) -> bool:
         """True when nothing ran for a while (or lab-api just started): what
