@@ -361,7 +361,10 @@ the host's stream keeps its own budgets.
   step): coc to Riverwood, walk east across (4,-12) to (5,-11) and back at a
   person's rhythm, into the inn and out; a driver step cell-events logs
   cellFullyLoaded, cellAttach and cellDetach with ids, the player's parent
-  cell per 250 ms and isAttached() of every cell seen. Decides H1 (which
+  cell per 250 ms and isAttached() of every cell seen (written 2026-10-21:
+  the driver's cell-events-start and cell-events-stop, main 4b69e9c, and
+  lab/.cache/probes/x-cell-attach.yaml; its run waits for a stage-client
+  with the new driver after the M2 merges). Decides H1 (which
   cells fire, once each, at a load and a shift), H2 (isAttached tracks the
   detach), the grid math at negative coordinates (floor, not truncation: y
   -44000 is row -11; Riverwood 0x9732 at (4,-12) is the check) and the
@@ -387,7 +390,7 @@ Doc drafted 2026-10-21, before any code.
 - [ ] native hook + T1 (none: events through Skyrim Platform)
 - [x] TS handler (HostService, fork m3-cell-host 5f10768c 2026-10-21 07:22: the loaded set as CellLoaded from cellFullyLoaded plus Cell.isAttached once a second, reported anew when the player's own actor is created; grants and releases per cell with the monotonic epoch; isHostedHere and isMine for formView, hitService, magicSyncService and sendInputsService; tryHost, hostAttempts.ts and the HostStart/HostStop handlers retired; the cellHost settings key; tsc clean)
 - [ ] T2 green (difftest session cell-host.yaml written, fork 5fef550a: c1's grant at epoch 1, c2's nothing, c1's unload and departure, c2's grant at epoch 2 at the deadline; its run waits on the branch's image and a slot on sky-srv after the M2 merges)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-cell-host written 2026-10-21, main 9a5272e, in reviews-pending for Eli: Tamriel (30,-20) 0x9810 and its leveled predator 0x85547; waits on lab-api's server.host, server.ref, a snapshot compare and the run's own npcEnabled, specified to numidium; the probe x-cell-attach written in lab/.cache/probes with the driver's cell-events steps, main 4b69e9c, runs first)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated

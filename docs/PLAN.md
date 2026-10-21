@@ -964,9 +964,18 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   (5f10768c, 07:22: CellLoaded from cellFullyLoaded plus the attach poll,
   the grants with the monotonic epoch, isHostedHere and isMine at the four
   sites; tryHost and the HostStart/HostStop handling retired; tsc clean).
-  Next: CI green on 8145082b, the round trip through the bridge after
-  wire-renet-clock merges, the lab's cell-events driver step and
-  server.host fact, then x-cell-attach and b-cell-host.
+  Then (07:25 to 07:50): the round trip (wire-renet-clock merged into
+  the branch, client_rtt_ms through IServer::GetRttMs to the table every
+  tick, f2b59a33), the T2 session cell-host.yaml at the spawn's cell
+  0xbbb1 (5fef550a), the host table listed for the lab (38f29158 and the
+  gamemode's labState cellHost and ref, main 6c1adbe), libespm's exterior
+  index guarded against a worldspace's persistent cell (29a7b56e, the
+  doc's HYPOTHESIS measured), the driver's cell-events steps (4b69e9c),
+  the probe x-cell-attach and the scenario b-cell-host (9a5272e, Eli's
+  review). CI 2481 green at 8145082b; the later heads building. Waits:
+  lab-api's server.host, server.ref, a snapshot compare and the run's
+  npcEnabled (numidium, after the M2 merges), a stage-client with the new
+  driver, then x-cell-attach, b-cell-host and the verb's T2 run on sky-srv.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
