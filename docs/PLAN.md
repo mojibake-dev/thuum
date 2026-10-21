@@ -597,9 +597,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   Finger of Death's ash on test 1's screen only (the documented default,
   overruled by Eli at the report: "if it kills them by effect of the
   spell, yes kill them. why on earth would i want them dead in only one
-  game"); the headshot row unticked (the log: four bow shots by test 1
-  reached the server, 18:12:47 to 18:12:59, none followed by a hit claim,
-  a verdict or a refusal; Eli's word on what he saw pending);
+  game"); the headshot row not tested by hand (Eli: the four bow shots in
+  the log were a check of the marksman bug, not at the player; b-headshot
+  green on the stage stands);
   Teleportation missing on test 1 (lost before tonight, in the slot-shift
   days; test 2's copy mis-based by the migration of a world saved without
   its order: slice two's first row); Survival's hunger, cold and fatigue
@@ -620,7 +620,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         summon); a scripted heal joins the allowlist instead (the record
         read of the three spells decides which Azure Reconstruction is);
         the snap-back fix beneath it (fork m2-snapback eef10842,
-        b-snapback) so an applied heal survives a stale report.
+        b-snapback) so an applied heal survives a stale report. The code
+        read (docs/research/train-31-reads.md): another player's heal is
+        applied end to end already, so the row fixes its two defects (a
+        held heal counts as hostility and starts a fight; the effect's
+        conditions need their functions in the evaluator) and widens
+        RunSelfSpell's FireAndForget-only gate to Concentration with the
+        hold beneath; the probe x-self-heal first, since no Self cast of
+        test 2's reached the server at all.
       - spell projectiles' aim parity: the caster's launch angles sent with
         the cast and the observer's figure launching from them, as arrows do
         (docs/verbs/marksman.md's shape; the flights record of this train
@@ -636,10 +643,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         kills them by effect of the spell, yes kill them"): when the
         script's kill fires in the caster's game the victim dies on the
         server and so in both games, ADR-029's first allowlist entry; the
-        shape (the kill as a claim the server validates against the
-        effect's conditions, or the server running the kill itself from
-        the hit) decided by the record and code reads, then its verb doc.
-      - the headshot row's read, once Eli says what he saw.
+        shape from the code read (docs/research/train-31-reads.md):
+        MpActor::Kill is the primitive the headshot uses; a fourth
+        server-settings table in the headshot list's shape (scriptedEffects,
+        kill: true) consulted in OnSpellHit after the claim and the
+        effect's conditions; the client's script blanked by ADR-044's
+        filter; the record read names the conditions.
+      - the headshot row: not tested in twenty-eight (Eli: the bow shots
+        were a check of the marksman bug); the next checklist carries it,
+        b-headshot its proof.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
