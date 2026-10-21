@@ -59,3 +59,15 @@ past the bound, b-spell's assertion), and a lost teach or ChangeValues
 shows as a missing effect; with the fix every end arrives within the resend
 time. Also `server.client_rtt_ms` through a stats line, once the bridge
 exposes it (the cell-host verb's `IServer::GetRttMs`).
+
+## Measured on parity before the fix (2026-10-21, numidium)
+
+- x-renet-loss 20261021-182102 on merged parity 9ad635cd (no clock fix),
+  both seats in tgm, 25 percent egress loss from the setup on, six 3 s
+  Flames holds: red at round one, c2's figure of c1 never cast (drainMs 0,
+  drainEndMs -1): a start never sent again under loss.
+- x-renet-loss-control 20261021-182443, the same with no loss: green, all
+  six rounds. So the before-reading's red is the loss and the missing
+  resend, not the probe. The after-reading runs on cell-host's stage
+  (fork m3-cell-host carries wire-renet-clock); a red there stages
+  wire-renet-clock alone.

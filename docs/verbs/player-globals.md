@@ -320,4 +320,20 @@ restore has to land before the toggle starts the need quests, or the first
 tick reads the record's default and the restored value arrives one tick late
 (a cold tick is 0.0834 game hours). The two message timers (0x821, 0x812)
 and the help-shown flags per need (0x8E0 to 0x8E2) are left as the game's.
-T4: playtest twenty-nine item 7 (what the bars show after a restart).
+T4: playtest twenty-nine item 7 (what the bars show after a restart): Eli,
+2026-10-20 22:4x: a no, "those reset when test 2 came back".
+MEASURED 2026-10-21 (x-survival-needs-relaunch 20261021-182745 on merged
+parity 9ad635cd, numidium; the first run 181741 red on the probe's own
+bound, cold falling in a warm spot): before the relaunch the three read
+500, 560, 600 as set; the server restored them at the relaunched login
+("sent 58 to watch, 5 values after a login") and at +5, +30 and +90 s the
+game read {828: 1, 826: 0, 81a: 500, 81b: 560, 816: 600}: the restore held
+only because nothing ticked. Survival_ModeEnabled 0x826 stayed 0 for 90 s
+with the restored toggle 0x828 at 1, and cold stopped falling: the
+Creation had not re-enabled Survival in a relaunched game within 90 s.
+HYPOTHESIS (the row's cause): when it does start, later, StartNeed writes
+the start values (145, 55, 140) over the restored ones, which is the
+reset Eli saw. The next probe reads out to five minutes with an assert on
+0x826, to catch the start and whether it overwrites; the fix shape on the
+client side of this verb stands: re-apply the server's three once 0x826
+turns 1 (the need quests started), not only at the login.
