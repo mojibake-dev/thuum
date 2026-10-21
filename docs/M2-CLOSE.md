@@ -255,3 +255,16 @@ Survival race (lifted by the 8df default's smoke).
    under ADR-042a after the 03:30 sweep of the re-laid train-30 stage, then
    m2-train-31 staged on main's merged layer and swept, then its merge) is
    what remains before the word.
+   2026-10-21 06:37: the 03:30 sweep ended red (five of 65, four held on a
+   rerun: a-melee-reach, a sword claim never reaching the server on
+   train-30 over the layer, a regression under read; b-cloak-fight, its
+   0.97 bound calibrated on Firebolt's perk riders the server now rightly
+   refuses, to re-derive; b-push, the layer's known refused second
+   Ragdoll, Eli's word; b-spell, the layer's Firebolt 20 against the
+   vanilla constant, fixed on main aa2dd21), so neither merge can cite it
+   (gate-cite check 1). The path chosen (numidium's sequence, the train
+   folded): main merged into the stage branch, the layer re-staged at its
+   new head with its three deciders for a fresh LAYER_RUN, the fixed
+   m2-train-31 head staged on it, one full sweep, then `just verb-merge
+   m2-train-31` (which carries train-30) and the layer's merge citing that
+   sweep under 42a, both promotes. One stage, one sweep, as the rule says.
