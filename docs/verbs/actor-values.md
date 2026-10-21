@@ -324,5 +324,9 @@ Fork m2-train-31 6f7b7a06, four parts, one shape:
 
 T0: wire-rules tests (the shortfall, an uncompared base), unit/
 ActorValuesTest.cpp "A relaunch's login holds the record from the fresh
-session's first report until the echo". T3: b-relaunch-reports (from the
-probe, Eli's review). T4: playtest twenty-nine item 4.
+session's first report until the echo". T3: b-relaunch-reports GREEN
+20261021-041549 on the tonight stage of m2-train-31 3b579f41: each
+relaunch's early report refused with the base named, the client's echo taken
+about 0.1 s later ("recorded 164 bases"), the One-Handed set after the first
+relaunch surviving the second restart and relaunch. T4: playtest twenty-nine
+item 4.
