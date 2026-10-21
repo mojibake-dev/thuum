@@ -976,6 +976,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   lab-api's server.host, server.ref, a snapshot compare and the run's
   npcEnabled (numidium, after the M2 merges), a stage-client with the new
   driver, then x-cell-attach, b-cell-host and the verb's T2 run on sky-srv.
+  The second verb's doc, docs/verbs/npc-puppet.md, drafted the same
+  morning (08:10): puppets as the engine's own references with AI off on
+  the non-host games, the cleaner and the copies retired, the loader's
+  bans lifted; its code waits on the re-analyst's prototypes (41370,
+  41453, 37356) and cell-host's probes.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
