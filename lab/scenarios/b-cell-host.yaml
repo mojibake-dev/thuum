@@ -1,0 +1,101 @@
+# b-cell-host (M3, docs/verbs/cell-host.md, ADR-035): one player's game runs
+# a cell's NPCs and the server decides which. The cell is Tamriel (30,-20),
+# 0x9810, two squares east of the hunters' camp flat (b-figure-values'
+# ground): its placed creature is the leveled forest predator ACHR 0x85547
+# (LvlAnimalForestPredator, Skyrim.esm, at (123592, -80301, 10705)), which
+# the server spawns under npcEnabled (a creature passes AttachEspmRecord's
+# filters; docs/research/m3/skymp-hosting.md). c1 arrives first: it hosts
+# the cell at epoch 1 (server.host(cell), lab-api's fact from the gamemode's
+# labState cellHost). c2 arrives beside it: still c1. c1 teleports two cells
+# east (out of its 3x3 reach while its game still has the cell loaded) and
+# back within 4 s: still c1, epoch 1 (the grace disarmed). c1 away for 7 s:
+# the grace runs out, c2 hosts at epoch 2 and c1's game logs the release.
+# c2's game relaunches with c1 still away: the cell goes unhosted and the
+# predator's record (server.ref) does not move over 10 s, the freeze. c1
+# back: epoch 3. A server restart and both reconnecting: a grant within 10 s,
+# at epoch 1 again (the table is in memory). Both teleport in from outside
+# in one step: one grant. The npcEnabled setting is the run's own (ADR-035
+# point 9: lab-api's server.npcEnabled overlay on the version's settings).
+id: b-cell-host
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  # c2 far away first, so c1 is the first loader
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - wait: 15
+  - assert:
+      - server.host(0x9810).hosted == true
+      - server.host(0x9810).client == "c1"
+      - server.host(0x9810).epoch == 1
+  # c2 beside c1: a hosted cell gives it nothing
+  - c2: teleport {cell: lab-spawn, x: -10457, y: -19020, z: -3957, rot: [0, 0, 180]}
+  - wait: 15
+  - assert:
+      - server.host(0x9810).client == "c1"
+      - server.host(0x9810).epoch == 1
+  # two cells east and back inside the grace: still c1
+  - c1: teleport {cell: lab-spawn, x: -2265, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - wait: 3
+  - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - wait: 4
+  - assert:
+      - server.host(0x9810).client == "c1"
+      - server.host(0x9810).epoch == 1
+  # away past the grace: c2 takes it at epoch 2, c1's game is told
+  - c1: teleport {cell: lab-spawn, x: -2265, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - wait: 8
+  - assert:
+      - server.host(0x9810).client == "c2"
+      - server.host(0x9810).epoch == 2
+  - c1: console {text: "getglobalvalue gamehour", match: "released cell 9810"}
+  - assert:
+      - c1.printed("released cell 9810")
+  # the host's game gone, nobody in reach: unhosted, the record frozen
+  - server: snapshot {name: predator, of: "server.ref(0x85547)"}
+  - c2: relaunch
+  - wait: 8
+  - assert:
+      - server.host(0x9810).hosted == false
+      - server.host(0x9810).epoch == 2
+  - wait: 10
+  - assert:
+      - server.host(0x9810).hosted == false
+      - server.ref(0x85547).x == snapshot("predator").x
+      - server.ref(0x85547).y == snapshot("predator").y
+  # c1 back: the next epoch
+  - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - wait: 15
+  - assert:
+      - server.host(0x9810).client == "c1"
+      - server.host(0x9810).epoch == 3
+  # a restart: the table starts over, a grant within 10 s of the reconnects
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 10
+  - assert:
+      - server.host(0x9810).hosted == true
+      - server.host(0x9810).epoch == 1
+  # both in from outside in one step: one grant
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 10
+  - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: -10457, y: -19020, z: -3957, rot: [0, 0, 180]}
+  - wait: 15
+  - assert:
+      - server.host(0x9810).hosted == true
+      - server.host(0x9810).epoch == 2
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
