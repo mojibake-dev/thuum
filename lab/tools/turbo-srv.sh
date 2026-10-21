@@ -9,6 +9,9 @@
 # - then the wait for the server's "listening on" line and for every seat that was online to be back
 #   (skymp5-client reconnects and logs in by itself, ADR-041's context).
 # TURBO_BACK=1 is turbo-back's reverse switch: no world save, logged as "back".
+# The new container keeps the live one's settings file and master files (its mounts, read back), so a playtest
+# whose profile gave its server its own setting (playtest thirty's npcEnabled overlay) keeps it across the push;
+# a bare up -d mounted the default settings, NPCs off (2026-10-21, caught before the first such push).
 set -euo pipefail
 tag=${1:?tag: a fixed skymp-server tag, <ref-slug>-<sha8> (just turbo-srv m2-train-27-snap-13acbb35)}
 case "$tag" in *[!a-z0-9._-]*|"") echo "no such tag: $tag" >&2; exit 2;; esac
@@ -37,7 +40,10 @@ ssh_srv "set -e; cd /srv/lab
   sed -i 's/^SERVER_TAG=.*/SERVER_TAG=$tag/' .env
   echo \"\$(date -u +%Y-%m-%dT%H:%M:%SZ) srv $prev $tag ${TURBO_BACK:+back}\" >> /srv/lab/turbo.log
   since=\$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  docker compose up -d --no-deps skymp-server >/dev/null 2>&1
+  settings=\$(docker inspect --format '{{range .Mounts}}{{if eq .Destination \"/srv/skymp/server-settings.json\"}}{{.Source}}{{end}}{{end}}' lab-skymp-server-1 2>/dev/null || true)
+  esm=\$(docker inspect --format '{{range .Mounts}}{{if eq .Destination \"/srv/skymp/esm\"}}{{.Source}}{{end}}{{end}}' lab-skymp-server-1 2>/dev/null || true)
+  echo \"   settings \${settings:-the default} and masters \${esm:-the default} kept\"
+  SERVER_SETTINGS=\${settings:-/srv/lab/server/server-settings.json} ESM_DIR=\${esm:-/srv/persist/esm/1.6.1170} docker compose up -d --no-deps skymp-server >/dev/null 2>&1
   for i in \$(seq 1 60); do docker logs --since \$since lab-skymp-server-1 2>&1 | grep -q 'listening on' && break; sleep 2; done
   docker logs --since \$since lab-skymp-server-1 2>&1 | grep -m1 'listening on' | cut -c1-120 | sed 's/^/   /'" \
   || { echo "== the server did not come up on $tag: just turbo-back" >&2; exit 5; }
