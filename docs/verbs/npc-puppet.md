@@ -132,10 +132,214 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 - Address Library IDs: every id above is the research's, resolved there by
   `just addr` (re-ai-puppet.md:9-14: RVAs are supporting data and
   HYPOTHESIS; the id is the answer). None is written here from memory.
-- UNKNOWN: the prototypes of 41370, 41453 and 37356 for the two detours (the
-  research gives rcx as the Actor* for Frida, :358-359, and the push's four
-  arguments, :272; no types). Delegated to the re-analyst (REA) on
-  2026-10-21; hypothesis block to be pasted here before the hooks are coded.
+- The prototypes of 41370, 41453 and 37356 for the two detours, and the push
+  69349's arguments (the research gave rcx as the Actor* for Frida, :358-359,
+  which holds for 37356 and not for 41370 or 41453, and the push's four
+  arguments, :272, of which the fourth is dead).
+  Resolved 2026-10-21 (the re-analyst, REA 6.7.0 over Ghidra 12.1.4 on
+  sky-re, program SkyrimSE-1.6.1170.0.exe.unpacked.exe, seeded with
+  CommonLib's names: 614 functions, 15,843 labels; every REA answer
+  "observed", "shipped-artifact"; every id resolved with `just addr`, the
+  RVA supporting data and HYPOTHESIS, the id the answer; CONFIRMED-STATIC
+  means the instruction or decompiled line is in the binary as read, not
+  that the game behaves so; none of the four target functions has a
+  CommonLib or seed name):
+  - 41370 (SkyrimSE.exe+0x7709c0, 729 bytes; HYPOTHESIS name
+    ProcessLists_QueueActorAnimation): `void (RE::ProcessLists* self /* rcx
+    */, JobList* jobs /* rdx */)`. self is the ProcessLists singleton (the
+    caller loads 400315, ProcessLists::GetSingleton::singleton,
+    src/RE/P/ProcessLists.cpp:13); 41370 reads self+0x1E6 (runAnimations,
+    include/RE/P/ProcessLists.h:96) and self+0x40 (highActorHandles' size:
+    the array at +0x30, :69; a BSTArray's size at +0x10,
+    include/RE/B/BSTArray.h:374-376, :140-141). jobs is the stage's job
+    list, passed verbatim as the first argument of both pushes; the stage
+    takes it from the table 403091 at index 5 through 35404 and runs it
+    through 69352 into 69376 after 41370 returns; CommonLib only
+    forward-declares BSJobs::JobList (include/RE/I/IVirtualMachine.h:13-15,
+    :65), so the name is HYPOTHESIS and the layout CONFIRMED-STATIC. Gates in
+    41370 itself: runAnimations != 0 and the size != 0, nothing else; no
+    read of +0xE8 (kProcessMe) in its 213 instructions. CONFIRMED-STATIC.
+    Body: two BSScrapArray<Actor*> (68160, 68162), 41466(&highActorHandles,
+    &{&listA, &listB}); for every Actor* in list A an ActorHandle minted
+    inline (the +0x28 refcount test under 0x3ff, else 12325, the sentinel
+    400312 for a zero count) and 69349(jobs, 41453, handle, 0); for list B
+    the same with 41454; then the arrays' references released.
+    CONFIRMED-STATIC. Callers: exactly one, the stage function 39054
+    (+0x6d2670), the main loop's table entry 380490 named "Actor animation"
+    (206263); the other incoming reference is .pdata, so 41370 is not
+    virtual. CONFIRMED-STATIC.
+  - 41466 (+0x777480; HYPOTHESIS name ProcessLists_PartitionAnimatedActors):
+    `bool (RE::BSTArray<RE::ActorHandle>* highActors /* rcx */,
+    RE::BSScrapArray<RE::Actor*>* out[2] /* rdx */)`, returns true always.
+    Per handle it resolves the actor (17201) and admits it to list A when
+    all hold: boolBits bit 9 clear (+0xE8, kInTempChangeList, Actor.h:168),
+    formFlags bit 21 clear (+0x10, kStillLoading, TESForm.h:89), boolBits
+    bit 1 set (kProcessMe, Actor.h:160; the instructions at +0x7774e8 and
+    +0x777505), currentProcess non-null (+0xF8, Actor.h:651 with the
+    1.6.1170 shift :712), Get3D2() and its parent non-null (slot 0x70,
+    TESObjectREFR.h:308; NiAVObject::parent +0x30, NiAVObject.h:153),
+    formFlags bits 5 and 11 clear (kDeleted TESForm.h:62, kDisabled :75),
+    parentCell non-null (+0x60, TESObjectREFR.h:496) with cellState 7
+    (kAttached, TESObjectCELL.h:139, :259); and to list B as well when the
+    cell's formFlags bit 13 is set (the pin's generic names for bit 13,
+    TESForm.h:80-81; the CELL meaning not named there). CONFIRMED-STATIC.
+    This is the only kProcessMe test on the animation path.
+  - 41453 (+0x776a90, 199 bytes; HYPOTHESIS name
+    ProcessLists_ActorAnimationJob): `void (RE::RefHandle handle /* ecx: the
+    32-bit ActorHandle value */)`. Only ECX is read before the lookup; rcx is
+    NOT an Actor* (the research's :358-359 is wrong for it). The handle is
+    resolved by 12922, which checks the handle's age against
+    BSPointerHandleManager's entries and fills a NiPointer<Actor>; null
+    returns. CONFIRMED-STATIC. Body, with the actor: delta =
+    GetSecondsSinceLastFrame (410199, src/RE/M/Misc.cpp:82-86) times
+    44302(VATS singleton 400883) (HYPOTHESIS: 1.0 outside VATS; 37361 and
+    37363 apply it only in VATS mode 4 for the VATS target); then
+    37364(actor) (HYPOTHESIS: the transform into the graph manager),
+    20121(actor) and 20122(actor) (HYPOTHESIS: attached-node bookkeeping and
+    loadedData's timed entries, +0x68, TESObjectREFR.h:497), 20123(actor,
+    delta): a BSAnimationUpdateData on the stack (deltaTime,
+    include/RE/B/BSAnimationUpdateData.h:9-27), slot 0x79
+    ModifyAnimationUpdateData (Actor.h:322) and
+    IAnimationGraphManagerHolder::UpdateAnimationGraphManager on actor+0x38
+    (32899, src/RE/I/IAnimationGraphManagerHolder.cpp:65-70; the holder at
+    +0x38, TESObjectREFR.h:112): the graph tick; then
+    39896(currentProcess, actor) (HYPOTHESIS: the knock-state machine,
+    returning at once for a null middleHigh, AIProcess.h:196, or kNormal),
+    then 37363(actor, delta) (its only caller; when not sitting, knocked or
+    bleeding out, and the char controller's lodDistance, +0x29C,
+    bhkCharacterController.h:142, within settings 370871 or 370879, slots
+    0x122 and 0x123 with delta, then 37976); finally the handle's reference
+    released. CONFIRMED-STATIC for the sequence. Against vtable 0x7D
+    UpdateAnimation (37361, Actor.h:326): a sibling with the same core, not
+    the vtable body unrolled (37361 gates on Get3D2, its parent and
+    currentProcess itself, uses 20119, inlines 37363's body, adds 37976 and
+    a cell-flag-13 branch, 37287). CONFIRMED-STATIC. Hidden gates for hook
+    2a: no instruction in 41453, 37364, 20121, 20122, 20123 or 37363 reads
+    +0xE8; 39896 reads it once and tests only bit 31 (kParalyzed,
+    Actor.h:190) inside the knockState path; so a 41453 queued for an AI-off
+    actor runs the graph tick. CONFIRMED-STATIC for those six bodies, their
+    callees not walked (HYPOTHESIS that none re-tests the bit; IsAIEnabled is
+    inline in CommonLib, src/RE/A/Actor.cpp:741-744, so only a +0xE8 read
+    could hide it). Callers: none by call; 41370 takes its address; the
+    consumer calling fn(arg) is 69376's thread code, not read (HYPOTHESIS:
+    the job argument arrives in rcx as stored).
+  - 41454 (+0x776b60), the list-B job: `void (RE::RefHandle handle /* ecx
+    */)`: the same lookup, one call 37286(actor), the release; not an
+    animation update (HYPOTHESIS: the per-frame step for actors whose cell
+    has form flag 13). CONFIRMED-STATIC for the body.
+  - 69349 (+0xcf66b0; HYPOTHESIS name JobList_AddJob): `void (JobList* jobs
+    /* rcx */, void (*job)(std::uint64_t) /* rdx */, std::uint64_t arg /* r8
+    */)`. The list's first qword points at a BSTArray<Job> {data +0,
+    capacity +8, size +0x10}, grown by one 16-byte element through 68163
+    with the heap allocator functor (186376, include/RE/Offsets_VTABLE.h:30),
+    then [elem+0] = job and [elem+8] = arg; the TLS slot +0x768 is set to
+    0x59 around the growth and restored (HYPOTHESIS: a memory-manager context
+    tag). The fourth argument is dead: every caller zeroes r9d and 69349
+    never reads r9 (HYPOTHESIS: a source parameter this build ignores); a
+    detour may pass 0. The handle rides in the low 32 bits of arg. Thirty
+    callers, among them 41306 (the movement queue), 41367, 41374, 41380,
+    41301. CONFIRMED-STATIC.
+  - 37356 (+0x6698d0, 3986 bytes, 27 virtual calls; HYPOTHESIS name
+    Actor_MovementStep; Skyrim Together's lead docs/TE-MAP.md:57): `void
+    (RE::Actor* self /* rcx */, float delta /* xmm1 */)`. It reads +0xF8
+    currentProcess, +0x38 the graph holder, +0x150 movementController
+    (Actor.h:667 with the shift), +0xC8 and +0xCC actorState1 and 2
+    (ActorState at +0xC0, Actor.h:737-741; ActorState.h:203-204), +0x60
+    parentCell, +0x48 to +0x5C angle and location (OBJ_REFR at +0x40,
+    TESObjectREFR.h:73-80, :495), +0x10 formFlags; delta is the per-actor
+    delta from the movement table. CONFIRMED-STATIC. Gates, none on
+    kProcessMe (no read of +0xE8): the movement runs when currentProcess is
+    null, or when the actor is not Actor::IsInRagdollState (37491), not
+    actorState2.reanimating (bit 4 of +0xCC, ActorState.h:128) and knockState
+    != kGetUp (:115, :60), else it only flags the char controller (+0x218 |=
+    0x1000); skipped for a sitting rider (sitSleepState kIsSitting, :112,
+    :71, with 17965: not boolFlags kIsAMount, Actor.h:197, and
+    ExtraDataList's kInteraction 0xA9, ExtraDataTypes.h:343); with the graph
+    variable bIsSynced (FixedStrings +0x578, FixedStrings.h:193; holder slot
+    0x12, IAnimationGraphManagerHolder.h:42) set and processLevel kHigh
+    (process+0x137 == 0, AIProcess.h:225, :26) the translation and rotation
+    come from 39589 and 39597, else from the movement controller (slot 7 on
+    +0x150, with delta and an output block) after bSpeedSynced (+0x580, :194)
+    and Speed (+0x508, :179; holder slot 0x10, :40) scaled by
+    TESObjectREFR::GetScale into 39873, with 39878 and the setters 39880,
+    39882, 39884, 39886. CONFIRMED-STATIC. Then slot 0x11A
+    ModifyMovementData(delta, &translation, &rotation) (Actor.h:480); the
+    rider variables HasTweenSpeed, TweenSpeed, bTweenUpdate (FixedStrings.h:
+    161-163); if parentCell is null or not kAttached, or 40413(player)
+    holds, the position is written through 19790 (the data-position writer
+    the research saw inside SetPosition) and it returns; else
+    Actor::SetRotationZ (37230) with the rotation, a pitch clamp (settings
+    371032, 380228, 371029, 371026, 382579), then the position: formFlags bit
+    4 clear means slot 0xC8 Move(delta, &translation) (Actor.h:398), set
+    means a rotation matrix (70233) and slot 0xA9 SetPosition(&pos, true)
+    (Actor.h:367); then, with flyState (bits 18 to 20, ActorState.h:113) 0
+    or 5 and the global byte 389168 clear, slot 0x11D
+    ComputeMotionFeedbackSpeedAndDirection (Actor.h:483) and on true slot
+    0x11E UpdateFeedbackGraphSpeedAndDirection (:484). CONFIRMED-STATIC for
+    the calls, HYPOTHESIS for the data block's field meanings. Callers:
+    exactly one, 37350 (+0x669010); the other reference is .pdata, so 37356
+    is not virtual. The chain: stage 39053 calls 41306(ProcessLists* /* rcx
+    */, float delta /* xmm1 */, JobList* /* r8 */), which, when runMovement
+    (+0x1E5, ProcessLists.h:95) is set, fills the static table 404437 of
+    16-byte entries {Actor* +0, float delta +8, bool +0xC} for the first
+    min(size, 128) high actors and pushes 69349(jobs, 41444, index, 0) per
+    actor and 41445 for the player; 41444 is `void (std::uint32_t index /*
+    ecx */)`: the entry's actor, its currentProcess and the flag required,
+    then 39447(process, -1) and 37350(actor, entry.delta); 37350 is `void
+    (RE::Actor* /* rcx */, float delta /* xmm1 */)`: 39447 again, a VATS
+    delta substitution (delta 0, processLevel kHigh, VATS mode 4, the VATS
+    target), 41717(movementController) (the message pump, controller fields
+    only), and for delta > 0: 37355(actor) (the controller mode from
+    bAnimationDriven +0x568 and bAllowRotation +0x570, FixedStrings.h:
+    191-192, through 32716, 32717, 32718 and 37997), 37356(actor, delta),
+    slot 0x11B (Actor.h:481), the kMountPointClear logic on +0x204 bit 2
+    (:198), slot 0x11C on the char controller (:482; the getter 39856,
+    HYPOTHESIS AIProcess::GetCharController, MiddleHighProcessData.h:183),
+    slots 0xAF and 0xB0 (:373, :374), 39548(process, actor); always
+    39448(process) == -1 then 39599(process). kProcessMe: no read of +0xE8 in
+    41306, 41444, 37350, 37355, 37356 or 41717 (every instruction of the six
+    bodies read): the research's :131 stands, and the two job wrappers above
+    it are ungated too. CONFIRMED-STATIC.
+  - Handles for the detour: CommonLib's actor->GetHandle() (Actor.h:546;
+    src/RE/A/Actor.cpp:458-461; BSPointerHandle.h:106-108 to :180) is
+    BSPointerHandleManagerInterface::GetHandle, 16212 (BSPointerHandle.h:
+    210-215): the sentinel 400312 for a zero refcount under 0x3ff, else
+    CreateRefHandle (seed-named), the same test 41370 inlines; 41453's
+    lookup 12922 checks the same manager entries and age bits. HYPOTHESIS
+    that the two paths yield the same handle value.
+    LookupReferenceByHandle (Misc.cpp:88-91, include/RE/Offsets.h:582) is
+    12332, a third entry point.
+  - Side effects (HYPOTHESIS): a detour on 41370 that calls the original and
+    then pushes 69349(jobs, 41453, GetHandle(puppet), 0) per flagged puppet
+    gives the puppet the engine's graph tick (20123) in the engine's own
+    stage and thread model, plus 37364, 39896 (a knocked-down puppet goes
+    through get-up) and 37363; harmless on an actor without a graph manager,
+    but the detour should still require 41466's other terms (3D with a
+    parent, an attached cell, not deleted or disabled, currentProcess
+    non-null) before queuing. A detour on 37356 that returns early for
+    puppets removes the controller output, Move and SetPosition,
+    SetRotationZ, the pitch clamp, the tween variables and the feedback into
+    39873, 39878 and slot 0x11E, while 37350 still runs slots 0x11C, 0xAF and
+    0xB0 on the char controller; it also removes the 19790 fallback write
+    for a puppet whose cell is not attached. The relayed SetPosition stands
+    either way.
+  - The Frida trace that confirms it (module base plus `just addr`): 41370
+    entry (rcx ProcessLists*, rdx jobs; one call a frame expected); 41466
+    exit (the two lists' sizes at +0x10 of each BSScrapArray); 20123 entry
+    (its only caller is 41453; rcx Actor*, formID at +0x14, TESForm.h:354;
+    xmm1 delta): the "did the graph tick for actor X" counter, 37363 entry
+    the same way; 41453 entry (ecx handle, against CommonLib's GetHandle of
+    the test actor); 32899 entry (rcx holder = actor+0x38, rdx the update
+    data, deltaTime at +0); 37356 entry (rcx Actor*, xmm1 delta) and 41444
+    entry (ecx index into 404437). P1 as written: expect 20123 and 37363 at
+    0 for the AI-off actor while 37356 stays per frame; with hook 2a on,
+    20123 per frame for the puppet. Falsified by: 32899 at 0 for the AI-off
+    actor while 20123 is called for it (a gate in a callee not walked);
+    12922 refusing handles minted by CommonLib's GetHandle; a crash or null
+    actor in a queued 41453; 41370 entered twice a frame or from another
+    caller; a +0xE8 read in the six movement bodies on another build (the
+    gate claim is for 1.6.1170 only); 37356's xmm1 unequal to 41444's entry
+    delta.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -373,7 +577,7 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 Doc drafted 2026-10-21, before any code.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
-- [ ] engine surface cited or delegated
+- [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:5x: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
 - [ ] server logic + T0
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
