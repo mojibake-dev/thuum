@@ -78,14 +78,25 @@ def ssh(*argv: str, srv: bool = True) -> str:
 
 
 def builds(rs: dict, results: dict[str, dict]) -> set:
-    out = set()
+    """The builds a set's runs played, as (server image, image id, ((client, clone description), ...)): one when
+    every run played one server and each client one clone. A run that played fewer clients names only those (a solo
+    scenario plays c1 alone: the m2-close sweep's eight, 2026-10-21, read as a second build before this); a client
+    seen on two descriptions, or two servers, makes more than one."""
+    servers: set = set()
+    per_client: dict[str, set] = {}
     for runs in rs.get("runs", {}).values():
         for e in runs:
             b = (results.get(e.get("run")) or {}).get("build") or {}
+            if not b:
+                continue  # checks() counts a run without a build on its own
             srv = b.get("server") or {}
-            descs = tuple(sorted((c, (d or {}).get("description", "")) for c, d in (b.get("clients") or {}).items()))
-            out.add((srv.get("image", ""), srv.get("id", ""), descs))
-    return out
+            servers.add((srv.get("image", ""), srv.get("id", "")))
+            for c, d in (b.get("clients") or {}).items():
+                per_client.setdefault(c, set()).add((d or {}).get("description", ""))
+    variants = [()]
+    for c in sorted(per_client):
+        variants = [v + ((c, d),) for v in variants for d in sorted(per_client[c])]
+    return {(image, sid, v) for image, sid in servers for v in variants}
 
 
 def staged_sha(branch: str, image: str, descs) -> str:
