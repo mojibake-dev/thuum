@@ -1963,7 +1963,7 @@ brings the `build` field (main 7bf200a). The tooling: verb-merge's
 
 ## ADR-042a: A layer merge may cite the nightly that swept its stage beside a train
 
-Status: PROPOSED 2026-10-20 17:5x PDT (thuum-magnus, from numidium's merge-order
+Status: PROPOSED 2026-10-20 17:56 PDT (thuum-magnus, from numidium's merge-order
 read); amends ADR-042 (the cited sweep served verb-merge only) for the case
 below. Eli's word at playtest twenty-eight's report.
 
