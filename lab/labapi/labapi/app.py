@@ -345,6 +345,33 @@ def create_app(services: Services) -> FastAPI:
             return JSONResponse({"ok": False, "client": client, "action": action, "error": done.result.get("error", "no answer")}, status_code=504)
         return {"ok": True, "client": client, "action": action, "result": done.result.get("data")}
 
+    # A playtest seat's perks (Eli, 2026-10-20: "you need to be writing what perks i need to give characters
+    # in playtests or giving them yourselves"): a perk lives in the player's game alone until M5's perk
+    # transactions, and every login's generated save drops it, so lab-driver keeps the list for the game it
+    # runs in (adding back any a load dropped) and lab-api sends it again to a game started since, on its
+    # first poll after a heartbeat gap (board.PERK_GAP_S). Only inside a playtest's hold, which the release
+    # ends; `{ids: []}` forgets them; the answer is the driver's {added, had, missing, refused, kept}.
+    @router.post("/clients/{client}/perks")
+    async def seat_perks(client: str, request: Request):
+        if runner.active:
+            return _busy()
+        held = runner.hold_status() or {}
+        if not str(held.get("reason", "")).startswith("playtest"):
+            return JSONResponse({"ok": False, "error": "E_NO_PLAYTEST: a seat's perks need a playtest's hold (just playtest-setup)"},
+                                status_code=409)
+        body = await request.json()
+        ids = body.get("ids") if isinstance(body, dict) else None
+        if not isinstance(ids, list) or not all(isinstance(x, int) and not isinstance(x, bool) and x > 0 for x in ids):
+            raise HTTPException(400, "body must be {ids: [perk form ids]}")
+        if runner.tables.guest_for_client(client) is None:
+            raise HTTPException(404, f"no client {client!r}")
+        runner.touch()
+        board.keep_perks(client, ids)
+        done = await board.run_step(client, "add-perks", {"ids": ids, "keep": True}, s.step_timeout_s)
+        if not done.ok:
+            return JSONResponse({"ok": False, "client": client, "error": done.result.get("error", "no answer")}, status_code=504)
+        return {"ok": True, "client": client, "result": done.result.get("data")}
+
     # The client's logon launcher asks which game version to start (ADR-022):
     # the active run's, else the default. It keeps one game folder per version.
     # Self-service cold snapshots and promotes of a lab client (thuum-mundus's

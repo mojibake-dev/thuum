@@ -222,6 +222,37 @@ class M0VocabularyTests(unittest.TestCase):
         from labapi.assertions import Evaluator
         self.ev = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
 
+    def test_the_cell_host_table_and_a_ref_and_a_snapshot(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        srv = RichServer()
+        srv.actors["c1"]["actorId"] = 0xFF000000
+        srv.actors["c2"]["actorId"] = 0xFF000001
+        rows = {0x9810: {"found": True, "cell": 0x9810, "hosted": True, "actorId": 0xFF000001, "epoch": 2}}
+        srv.cell_host = lambda cell: rows.get(cell, {"found": True, "cell": cell, "hosted": False, "actorId": 0, "epoch": 0})
+        refs = {0x85547: {"found": True, "actorId": 0x85547, "x": 10.0, "y": -20.0, "z": 5.0, "cell": "3c:Skyrim.esm",
+                          "isDead": False, "healthPercentage": 1.0}}
+        srv.ref = lambda actor_id: refs.get(actor_id, {"found": False})
+        kept = {}
+        ev = Evaluator(srv, NearViews(), ["c1", "c2"], snapshots=kept)
+        for expr in ('server.host(0x9810).hosted == true', 'server.host(0x9810).client == "c2"', "server.host(0x9810).epoch == 2",
+                     'server.host(0x1234).hosted == false', 'server.host(0x1234).client == ""',
+                     "server.ref(0x85547).x == 10", 'server.ref(0x85547).cell == "3c:Skyrim.esm"', "server.ref(0x85547).isDead == false"):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        kept["predator"] = ev.value("server.ref(0x85547)")
+        refs[0x85547] = dict(refs[0x85547], x=12.0)   # it moved
+        self.assertTrue(ev.evaluate('server.ref(0x85547).y == snapshot("predator").y'))
+        self.assertFalse(ev.evaluate('server.ref(0x85547).x == snapshot("predator").x'))
+        with self.assertRaises(AssertionData):
+            ev.evaluate('snapshot("prey").x == 0')             # never taken
+        with self.assertRaises(AssertionData):
+            ev.evaluate("server.ref(0x99999).x == 0")          # the server holds no record
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("snapshot(1).x == 0")
+        bare = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            bare.evaluate("server.host(0x9810).hosted == true")  # a server without the host table
+
     def test_the_server_actor_holds_all_three_bars(self):
         from labapi.assertions import AssertionData, Evaluator
         srv = RichServer()

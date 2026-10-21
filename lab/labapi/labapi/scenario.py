@@ -19,13 +19,18 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "npc-ai", "npc-state", "play-idle", "combat-spell", "start-combat", "papyrus-events"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "npc-ai", "npc-state", "play-idle", "combat-spell", "start-combat", "papyrus-events"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
 SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse"}
 # fakeclient: the fork's headless legacy client logs in as a scenario client's
 # profile from inside the server image (T2 without a Windows client).
-SERVER_STEP_ACTIONS = {"restart", "fakeclient"}
+# snapshot {name, of}: a server fact read now and kept under its name for a
+# later assert's snapshot("name") (docs/verbs/cell-host.md: the freeze, a
+# hosted NPC's record that must not move once its cell is unhosted).
+SERVER_STEP_ACTIONS = {"restart", "fakeclient", "snapshot", "netem"}
+_NETEM_KEYS = {"delay_ms", "jitter_ms", "loss_pct"}
+_SNAPSHOT_NAME = re.compile(r"[A-Za-z][A-Za-z0-9_-]*")
 KNOWN_ARTIFACTS = {"server.log", "screenshots", "world-diff", "pcap", "trace"}
 
 _FLOW_STEP = re.compile(r"^(?P<lead>\s*-\s+[\w-]+:\s+)(?P<value>[\w-]+\s+\{.*\})\s*(?P<comment>#.*)?$")
@@ -56,6 +61,9 @@ class ServerSpec(BaseModel):
     # a committed fixture world (lab/fixtures/worlds/<name>/) laid in place of the
     # snapshot's: ADR-043's rule-6 scenario, a world saved under another load order
     world: str | None = None
+    # the run's own npcEnabled (ADR-035 point 9): an overlay on the version's
+    # settings file for this run alone, so a creature cell loads; None keeps the file's
+    npcEnabled: bool | None = None
 
 
 class Step(BaseModel):
@@ -329,6 +337,19 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         action, args = _parse_action(value)
         if action not in SERVER_STEP_ACTIONS:
             raise ValueError(f"unknown server step {action!r}")
+        if action == "snapshot":
+            name, of = args.get("name"), args.get("of")
+            if not isinstance(name, str) or not _SNAPSHOT_NAME.fullmatch(name):
+                raise ValueError(f"snapshot takes a name (letters, digits, _ and -), got {name!r}")
+            if not isinstance(of, str) or not of.strip().startswith("server."):
+                raise ValueError(f"snapshot reads a server fact (of: \"server....\"), got {of!r}")
+        if action == "netem":
+            # a typo must not read as zero, which clears the impairment
+            if not args or set(args) - _NETEM_KEYS:
+                raise ValueError(f"netem takes {sorted(_NETEM_KEYS)} (all zero clears it), got {sorted(args)}")
+            for k, v in args.items():
+                if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0 or (k == "loss_pct" and v > 100):
+                    raise ValueError(f"netem's {k} is a number from 0{' to 100' if k == 'loss_pct' else ''}, got {v!r}")
         return Step(kind="server", action=action, args=args)
     if key not in clients:
         raise ValueError(f"step names client {key!r}, which is not in clients {clients}")
@@ -351,14 +372,17 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
     """`server: {snapshot | world, netem}`: a world is a committed fixture laid in
     place of a snapshot's, so a scenario names one source, never both."""
     netem = Netem(**server["netem"]) if server.get("netem") else None
+    npc = server.get("npcEnabled")
+    if npc is not None and not isinstance(npc, bool):
+        raise ValueError(f"server.npcEnabled is true or false, got {npc!r}")
     world = server.get("world")
     if world is None:
-        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem)
+        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc)
     if "snapshot" in server:
         raise ValueError("server takes a snapshot or a world, not both")
     if not isinstance(world, str) or not _WORLD_NAME.fullmatch(world):
         raise ValueError(f"server.world names a directory under lab/fixtures/worlds, got {world!r}")
-    return ServerSpec(world=world, netem=netem)
+    return ServerSpec(world=world, netem=netem, npcEnabled=npc)
 
 
 def load_scenario(text: str) -> Scenario:
