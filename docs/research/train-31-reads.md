@@ -434,7 +434,7 @@ read says which side dropped it: the client applying the record's 120 over
 the set's 400 before echoing, or the hold not armed by the setup's path).
 Setup's workaround: set the values after the echo.
 
-Found during twenty-nine (Eli, 22:05): Become Ethereal on the other screen
+Found during twenty-nine (Eli, 21:38): Become Ethereal on the other screen
 shows the wisps and not the translucency ("player two has whisps but never
 actually goes transparent"), so of the two visible effects of the shout only
 one reaches the figure. A row for the next train (PLAN); the record read of
