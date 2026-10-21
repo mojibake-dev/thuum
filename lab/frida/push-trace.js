@@ -3,15 +3,12 @@
 // carries VoicePushEffectScript, whose OnEffectStart calls
 // Caster.PushActorAway(Target, 15). Fork m2-push 2fe894e1 lets an event on an
 // effect the player bears through skymp5-client's Papyrus event block, yet
-// x-push (20261014-140325) staggered c2 and threw nothing. This logs the three
-// stations in order:
-// - every OnEffect* and OnMagicEffectApply event the VM is asked to send
-//   (BSScript::Internal::VirtualMachine::SendEvent, Skyrim Platform's own hook
-//   point: game/Offsets.h SendEvent, RELOCATION_ID(98077, 104800); called as
-//   (this, VMHandle, const BSFixedString&, IFunctionArguments*)), with the
-//   handle split in halves, since whether IObjectHandlePolicy::HandleIsType
-//   reads an ActiveEffect's handle as type 142 (CommonLibSSE-NG
-//   include/RE/A/ActiveEffect.h:31) is the filter's untested half;
+// x-push (20261014-140325) staggered c2 and threw nothing. This logs two
+// stations in order (a third, every OnEffect* and OnMagicEffectApply event
+// the VM is asked to send through Skyrim Platform's own hook point, SendEvent
+// 104800, was dropped on 2026-10-21 after the trace's first seat crashed 30 s
+// in; the note below; the effect events are in the seat's Skyrim Platform
+// log):
 // - the Papyrus native PushActorAway (Address Library 56213, the
 //   re-analyst's reading, HYPOTHESIS: (VM*, StackID, TESObjectREFR* self,
 //   Actor* target, float force)), the pusher's and the pushed's form ids;
@@ -20,9 +17,8 @@
 //   (AIProcess*, Actor*, const NiPoint3&, float)), the actor and the source.
 // A form's id at +0x14 (include/RE/T/TESForm.h:354); BSFixedString's first
 // member is its char pointer (include/RE/B/BSFixedString.h:232). Offsets resolved
-// with lab/addr.py from addrlib/ for 1.6.1170 on 2026-10-14. Hooking SendEvent
-// beside Skyrim Platform's own Frida hook runs this one first, so the names
-// logged are the engine's, before the block.
+// with lab/addr.py from addrlib/ for 1.6.1170 on 2026-10-14 (checked again
+// 2026-10-21: 0x14477f0, 0xa2f4f0, 0x710c80, all as the library has them).
 // Run: a scenario's `frida {script: push-trace.js}` step on the target, or
 // `just frida push-trace.js c2` while the game runs.
 'use strict';
@@ -80,31 +76,15 @@ if (at === undefined) {
   emit({ error: 'no offsets for this runtime', version: version });
 } else {
   emit({ ready: true, version: version });
-  let applySeen = false;
-  Interceptor.attach(exe.base.add(at.sendEvent), {
-    onEnter(args) {
-      let name;
-      try {
-        name = args[2].readPointer().readCString();
-      } catch (e) {
-        return;
-      }
-      if (!name || !(name.startsWith('OnEffect') || name === 'OnMagicEffectApply')) return;
-      const handle = args[1];
-      const row = {
-        event: name,
-        handle: handle.toString(),
-        hi: hex(handle.shr(32).and(0xffffffff).toUInt32()),
-        lo: hex(handle.and(0xffffffff).toUInt32()),
-        tid: this.threadId,
-      };
-      // who asks for an effect's own event (an actor's OnMagicEffectApply is
-      // relayed to every alias, so only its first call is placed)
-      if (name !== 'OnMagicEffectApply' || !applySeen) row.backtrace = where(this.context);
-      if (name === 'OnMagicEffectApply') applySeen = true;
-      emit(row);
-    },
-  });
+  // The SendEvent hook (104800, every Papyrus event the VM sends, through
+  // JS each time) is gone since 2026-10-21: the trace's first run on a seat
+  // (x-push-knock-frida 20261021-142913, c2) ended in the game's own crash
+  // about 30 s after the attach (EXCEPTION_ACCESS_VIOLATION in an input
+  // device path, 68782+0xF2, before one line was logged). HYPOTHESIS: the
+  // hot hook, not the two below (figure-cast-trace and launch-trace hook
+  // Skyrim Platform's own points too and run for minutes). The effect events
+  // are in the seat's Skyrim Platform log anyway; the knock's cause needs
+  // only the two calls below and their backtraces.
   Interceptor.attach(exe.base.add(at.pushActorAway), {
     onEnter(args) {
       emit({ pushActorAway: true, self: formId(args[2]), target: formId(args[3]), tid: this.threadId,

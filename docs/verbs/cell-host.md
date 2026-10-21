@@ -219,14 +219,18 @@ the host's stream keeps its own budgets.
   an EWMA 0.875/0.125), exposed as wire-transport Server::client_rtt_ms
   (None unless connected; try_from_secs_f64, no `as`), mirrored in
   wire-bridge beside client_ip, read in C++ as IServer::GetRttMs(userId)
-  through WireServer's clientsByUser table (WireServer.cpp:191-229); nothing
-  of it exists today. HYPOTHESIS from the static read, load-bearing beyond
-  this verb: wire-transport's poll calls transport.update(dt, renet) and
-  never renet.update(dt) (lib.rs:330, :582), so renet's connection clock
-  may stand at zero, which would read every rtt as 0 and, worse, never
-  resend a lost reliable packet (reliable.rs:112-113, :158-159) nor time a
-  connection out; settled by the read of renet's update and a T2 before
-  this verb leans on the round trip), Tick { now }. Decisions: Grant { player, cell,
+  through WireServer's clientsByUser table (WireServer.cpp:191-229). Built
+  2026-10-21 (fork m3-cell-host f2b59a33): wire-bridge Server::client_rtt_ms
+  (-1 while unknown), IServer::GetRttMs with that default, WireServer's and
+  the combined server's, PartOne::SetRoundTripSource installed by
+  ScampServer and read every cell-host tick; CellHostTest's third case ranks
+  two visitors by it. CONFIRMED and fixed on the way (docs/research/
+  transport-clock.md, fork wire-renet-clock cb6bedee, merged into this
+  branch 1c21308a): wire-transport's polls called transport.update(dt,
+  renet) and never renet.update(dt) (lib.rs:330, :582), so renet's
+  connection clock stood at zero, every rtt read 0 and no lost reliable
+  packet was ever resent (reliable.rs:112-113); a loopback T0 fails without
+  the fix), Tick { now }. Decisions: Grant { player, cell,
   epoch }, Release { player, cell, epoch }, Unhosted { cell }. Rules: a cell
   with no host goes to the first player with it loaded and in reach (either
   fact may come second: the game loads a 5x5 while the grid is a 3x3, so a
@@ -254,8 +258,15 @@ the host's stream keeps its own budgets.
   square in any file: unhostable, not 0. The server's own 4096-unit chunks
   truncate toward zero (MpObjectReference.cpp:152-155), a neighbourhood
   heuristic that stays as it is; cell_of floors, as the engine's grid does
-  (cell -1 spans -4096 to 0). HYPOTHESIS, a cheap T0: a worldspace's
-  persistent CELL under WORLD_CHILDREN carrying an XCLC takes a map slot.
+  (cell -1 spans -4096 to 0). MEASURED 2026-10-21 (Skyrim.esm's XCLCs
+  through lab/esm.py on sky-srv): Tamriel's persistent CELL 0xd74 sits
+  directly under WORLD_CHILDREN with an XCLC of (0, 0) and the persistent
+  flag, beside the map's 0x99a2 (BleakwindBasinExterior01) at the same
+  square; libespm's index assigned by file order and the map's cell came
+  later, which a plugin overriding the persistent cell would have undone
+  (CombineBrowser asks the last file first), so the index now takes only a
+  cell inside an exterior sub-block (fork 29a7b56e), pinned by EspmTest
+  (the origin 0x99a2, the T2 spawn's (32, -15) 0xbbb1, an empty square).
   The cell-change
   rule: a hosted NPC's report naming another cell is accepted when the sender
   hosts the destination and the origin is unhosted or the sender's
@@ -282,6 +293,15 @@ the host's stream keeps its own budgets.
   hosted cells with epochs; isHostedHere(refr) for formView, hitService,
   magicSyncService and sendInputsService in place of storage['hosted']; the
   HostGrant and HostRelease handlers; tryHost and hostAttempts.ts removed.
+  As built (5f10768c): isMine(form, refr) is what the four sites ask, the
+  grant and the server's own word on the actor (isHostedByOther, false
+  only on the host's screen for the cell's actors no user plays, flipped
+  at the grant) agreeing, so a player standing in a hosted cell is never
+  reported for; a release is applied when it names the grant held (the
+  monotonic rule is the grant's); the loaded set is re-sent when the
+  player's own CreateActor arrives (the moment the server has the actor,
+  after Welcome), and cells the engine detaches leave it by a once-a-second
+  Cell.isAttached read.
 - Kill switch config key: `cellHost` under skymp5-client's settings (off: no
   reports, so the server grants nothing; the per-actor path is gone either
   way).
@@ -365,8 +385,8 @@ Doc drafted 2026-10-21, before any code.
 - [x] server logic + T0 (the cell host table: wire-rules cells with seven T0 and reach as a fact with decisions, fork m3-cell-host afc792c1 and 8f17d7a4; the bridge's Cells; the core, 9aadeaea 2026-10-21 07:10: WorldState::CellOf and HostOf, PartOne's facts and senders, the hosted flag frozen by default, the cell-change rule, Host 14 ignored, hosters retired; unit/CellHostTest's two ESM-backed cases; wire-validate's tests for the three messages; CI 2477 pending at this write)
 - [x] message + validator (same commit): CellLoaded 47, HostGrant 48, HostRelease 49 with their validators, JSON forms, fixtures and C++ structs, fork m3-cell-host ea0e24d3
 - [ ] native hook + T1 (none: events through Skyrim Platform)
-- [ ] TS handler
-- [ ] T2 green
+- [x] TS handler (HostService, fork m3-cell-host 5f10768c 2026-10-21 07:22: the loaded set as CellLoaded from cellFullyLoaded plus Cell.isAttached once a second, reported anew when the player's own actor is created; grants and releases per cell with the monotonic epoch; isHostedHere and isMine for formView, hitService, magicSyncService and sendInputsService; tryHost, hostAttempts.ts and the HostStart/HostStop handlers retired; the cellHost settings key; tsc clean)
+- [ ] T2 green (difftest session cell-host.yaml written, fork 5fef550a: c1's grant at epoch 1, c2's nothing, c1's unload and departure, c2's grant at epoch 2 at the deadline; its run waits on the branch's image and a slot on sky-srv after the M2 merges)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
