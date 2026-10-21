@@ -656,6 +656,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
+        BUILT 2026-10-20 20:15 as lab/tools/world-repair.py (verdicts OK,
+        DANGLING-PLUGIN, DANGLING-FORM, MISBASED, AMBIGUOUS over every form a
+        record names, own records by MAST count, the server's numbering; a
+        repaired copy under --out, never in place; 35 self-checks, the
+        fixture clean); the read found the hand-cleaned entry was test 2's
+        Teleportation mis-based and eight Apocalypse spells named as Cloaks
+        - Dawnguard's beside it (docs/research/train-31-reads.md section 8);
+        numidium runs it on sky-srv against the raw 28 snapshot with main's
+        17-file order as the candidate, and the repaired copy may become
+        twenty-nine's world.
       - Finger of Death's kill as the server's (Eli at the report: "if it
         kills them by effect of the spell, yes kill them"): when the
         script's kill fires in the caster's game the victim dies on the
