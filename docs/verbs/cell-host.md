@@ -185,10 +185,13 @@ the host's stream keeps its own budgets.
 - HostedActorState, id 5, host to server, ReliableUnordered today
   (channels.rs:38), fields { actor, transform, health, inventory_delta }
   (lib.rs:227-242), validated at wire-validate lib.rs:557-566 (transform,
-  finite health, no zero delta); this verb adds `epoch: u32` and the rule
-  "the sender hosts the actor's cell at this epoch" (E_VAL_RANGE for an
-  older one). Its sender arrives with npc-stream, which also moves it to
-  Unreliable (ADR-035 point 5).
+  finite health, no zero delta); the `epoch: u32` field and the rule "the
+  sender hosts the actor's cell at this epoch" (the core's, through
+  accepts; the stateless validator can check only epoch above 0,
+  E_VAL_RANGE) go in with npc-stream, which gives the message its sender
+  and moves it to Unreliable (ADR-035 point 5): a field no sender fills and
+  no validator path reads would be dead wire (rule 4), so this verb leaves
+  the message as it is (decided 2026-10-21 07:15).
 - CellLoaded, new, id 55, MsgType 47, client to server, ReliableOrdered (a
   load then an unload keep their order), cap 16 bytes, fields { cell: u32,
   loaded: bool } (built 2026-10-21). Validator: the budget above as
@@ -225,12 +228,16 @@ the host's stream keeps its own budgets.
   connection out; settled by the read of renet's update and a T2 before
   this verb leans on the round trip), Tick { now }. Decisions: Grant { player, cell,
   epoch }, Release { player, cell, epoch }, Unhosted { cell }. Rules: a cell
-  with no host goes to the first Loaded whose Reach holds it, epoch plus one;
-  the host's Unloaded or Gone arms GRACE_MS; a Loaded from the same host
-  before the deadline disarms it; at the deadline the visitors with the cell
+  with no host goes to the first player with it loaded and in reach (either
+  fact may come second: the game loads a 5x5 while the grid is a 3x3, so a
+  cell is often loaded before it is reached, and Reach is a fact with
+  decisions too, built 2026-10-21 07:00, fork 8f17d7a4), epoch plus one;
+  the host's Unloaded, its Reach dropping the cell, or Gone arms GRACE_MS;
+  loaded and in reach again before the deadline disarms it (a Loaded while
+  out of reach disarms nothing); at the deadline the visitors with the cell
   loaded and in reach rank by Rtt, lowest first, earliest Loaded on a tie:
   the first gets Grant, the old host Release; none: Unhosted, epoch kept.
-  Queries: host_of(cell), accepts(cell, player, epoch).
+  Queries: host_of(cell), accepts(cell, player, epoch), epoch_of(cell).
 - The core (C++, legacy): `hosters` (WorldState.h:257) and
   lastMovUpdateByIdx's host role retire; ActorUpdatableBy (ActionListener.
   cpp:58-106), GetActorToSendTo (MpActor.cpp:527-528: Teleport, ChangeValues,
@@ -355,7 +362,7 @@ Doc drafted 2026-10-21, before any code.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references, to be re-read on the merged base)
 - [x] engine surface cited or delegated (the cell events and getters through Skyrim Platform; cell_of through libespm's index; the AI switches npc-puppet's)
-- [ ] server logic + T0 (the cell host table: wire-rules cells with six T0, fork m3-cell-host afc792c1; the bridge, PartOne's integration and the grants' senders next)
+- [x] server logic + T0 (the cell host table: wire-rules cells with seven T0 and reach as a fact with decisions, fork m3-cell-host afc792c1 and 8f17d7a4; the bridge's Cells; the core, 9aadeaea 2026-10-21 07:10: WorldState::CellOf and HostOf, PartOne's facts and senders, the hosted flag frozen by default, the cell-change rule, Host 14 ignored, hosters retired; unit/CellHostTest's two ESM-backed cases; wire-validate's tests for the three messages; CI 2477 pending at this write)
 - [x] message + validator (same commit): CellLoaded 47, HostGrant 48, HostRelease 49 with their validators, JSON forms, fixtures and C++ structs, fork m3-cell-host ea0e24d3
 - [ ] native hook + T1 (none: events through Skyrim Platform)
 - [ ] TS handler

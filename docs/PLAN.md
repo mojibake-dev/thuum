@@ -955,8 +955,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   49 with validators, fixtures and the C++ message layer, ea0e24d3); the
   verb doc's cell_of resolved to libespm's existing exterior-cell index;
   the round trip's exposure designed (Server::client_rtt_ms, on
-  wire-renet-clock). Next: the bridge's Cells, PartOne's election and
-  grants, the client's HostService, then x-cell-attach.
+  wire-renet-clock). The morning of 2026-10-21 (07:00 to 07:15): reach
+  made a fact with decisions (the 5x5 load against the 3x3 grid,
+  8f17d7a4), the bridge's Cells, the core's integration (9aadeaea:
+  CellOf and HostOf, the facts, HostGrant and HostRelease sent, the
+  hosted flag frozen by default, the cell-change rule, Host 14 ignored,
+  the hosters map retired, CellHostTest). Next: the client's HostService
+  (CellLoaded from cellFullyLoaded plus the attach poll, the grants with
+  the monotonic epoch, isHostedHere; tryHost and HostStart/HostStop
+  handling retired), the round trip through the bridge after
+  wire-renet-clock merges, then x-cell-attach.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
