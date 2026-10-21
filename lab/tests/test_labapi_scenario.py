@@ -77,11 +77,37 @@ class ScenarioTests(unittest.TestCase):
             with self.assertRaises(ValueError, msg=bad):
                 load_scenario(f"id: t\nclients: [c1]\nsteps:\n  - {bad}\n")
 
+    def test_npc_enabled_is_the_runs_own_and_a_snapshot_reads_a_server_fact(self):
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: t\nclients: [c1]\nserver: {snapshot: clean, npcEnabled: true}\n"
+                           "steps:\n  - server: snapshot {name: predator, of: \"server.ref(0x85547)\"}\n")
+        self.assertIs(sc.server.npcEnabled, True)
+        self.assertEqual((sc.steps[0].kind, sc.steps[0].action, sc.steps[0].args),
+                         ("server", "snapshot", {"name": "predator", "of": "server.ref(0x85547)"}))
+        self.assertIsNone(load_scenario("id: t\nclients: []\n").server.npcEnabled)
+        for bad in ("server: {npcEnabled: yes please}",
+                    "steps:\n  - server: snapshot {name: predator, of: \"c1.state.x\"}",
+                    "steps:\n  - server: snapshot {name: 9lives, of: \"server.ref(1)\"}",
+                    "steps:\n  - server: snapshot {of: \"server.ref(1)\"}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclients: [c1]\n{bad}\n")
+
     def test_netem_spec(self):
         from labapi.scenario import load_scenario
 
         sc = load_scenario("id: t\nclients: []\nserver: {snapshot: s, netem: {delay_ms: 60, jitter_ms: 15, loss_pct: 0.5}}\n")
         self.assertEqual((sc.server.netem.delay_ms, sc.server.netem.jitter_ms, sc.server.netem.loss_pct), (60, 15, 0.5))
+
+    def test_a_netem_step_takes_the_spec_s_own_keys_and_nothing_else(self):
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: t\nclients: []\nsteps:\n  - server: netem {loss_pct: 25}\n  - server: netem {loss_pct: 0}\n")
+        self.assertEqual([(st.action, st.args) for st in sc.steps], [("netem", {"loss_pct": 25}), ("netem", {"loss_pct": 0})])
+        for bad in ("netem {loss: 25}", "netem {}", "netem {loss_pct: 101}", "netem {delay_ms: -5}", "netem {loss_pct: lots}",
+                    "netem {loss_pct: true}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclients: []\nsteps:\n  - server: {bad}\n")
 
 
 @needs_deps

@@ -426,3 +426,47 @@ Not functions in Ghidra (left alone): 37349 (UpdateNoAI thunk), 54919
   callers fire for an NPC speaker.
 - Whether stage 39068 ("Ragdoll post physics") runs every frame (the table
   says it is a regular stage; frequency not measured).
+
+## Corrections from the prototypes read (re-analyst, REA, 2026-10-21)
+
+The full hypothesis block is in docs/verbs/npc-puppet.md (Engine surface).
+What it changes here:
+
+1. :144-150 "41453 is vtable 0x7D UpdateAnimation (37361) unrolled": no.
+   41453 is a sibling of 37361 with the same core (37364, the graph tick
+   through 20123 and UpdateAnimationGraphManager, 39896, 37363's logic);
+   37361 has its own 3D, parent and process gate, uses 20119 instead of
+   20121, 20122 and 20123, inlines 37363's body and adds 37976 and a
+   cell-flag-13 branch (37287). The reading of 20123 (BSAnimationUpdateData,
+   slot 0x79, the holder update at actor+0x38) stands.
+2. :358-359 "rcx is the Actor*; filter on its formID at +0x14": false for
+   41370 (rcx is the ProcessLists singleton, rdx the stage's job list),
+   41453 (ecx is the 32-bit ActorHandle value), 41466 (rcx the
+   highActorHandles array) and 41444 (ecx a table index); true for 37350,
+   37355 and 37356 (rcx Actor*, delta in xmm1 for 37350 and 37356). 41369,
+   37347 and 37348 were not re-read; P1's hook list is to be checked the
+   same way before it runs.
+3. :136-138 and :272-273: 41454 is not a second animation job; after the
+   lookup it makes one call, 37286. The push's fourth argument is dead:
+   every caller zeroes r9d and 69349 never reads r9. The job list is the
+   stage's table entry (403091 at index 5) through 35404, run through 69352
+   after 41370 returns; its first qword points at a BSTArray of 16-byte
+   {fn, arg} jobs.
+4. :139-143 stands, with two additions: 41466 also requires Get3D2()'s
+   parent to be non-null and returns true unconditionally; its kProcessMe
+   instructions are at +0x7774e8 and +0x777505 (the "function+0x85" here is
+   that second site).
+5. :122-132 stands and gains: the Move versus SetPosition choice is
+   formFlags bit 4; the step is skipped for a sitting rider (17965 with
+   kIsSitting) and reduced to a char-controller flag for ragdoll,
+   reanimating and get-up; when the parent cell is not attached the step
+   writes the data position through 19790 and returns; 37350 substitutes a
+   VATS delta when delta is 0 in VATS mode 4. "Movement controller slot 7
+   (id 91877)" was not re-read: the slot call is confirmed (vtable+0x38 on
+   +0x150), the slot's target id is not.
+6. :146 "times 44302 on singleton 400883": the singleton is VATS's (seed
+   name); 41453 applies the multiplier unconditionally, 37361 and 37363 only
+   in VATS mode 4 for the VATS target; 44302 returning 1.0 outside VATS is
+   a HYPOTHESIS this file did not state.
+7. :59-65, the stage table: confirmed for stage 39054 ("Actor animation",
+   string 206263, entry 380490); the stage's job-list index is 5.

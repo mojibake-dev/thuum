@@ -24,7 +24,7 @@ from . import mouse
 from .guests import Guest, Tables
 from . import slots as plugin_slots
 from .proxmox import GuestControl, ProxmoxError
-from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
+from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Netem, Scenario, Step
 from .state import ServerState, StateError
 from .system import Capture, System
 
@@ -156,6 +156,8 @@ class RunRecord:
     # and id, and each managed clone's snapshot with its description (verb-stage
     # writes the branch, the client's commit and the date there)
     build: dict[str, Any] = field(default_factory=dict)
+    # `server: snapshot {name, of}` values by name, for a later assert's snapshot("name")
+    snapshots: dict[str, Any] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -228,6 +230,7 @@ class Runner:
     def release(self) -> dict[str, Any]:
         self.hold_until = None
         self.hold_reason = ""
+        self.board.forget_perks()  # a playtest's seats are its own
         self.touch()
         return self.hold_status()
 
@@ -265,6 +268,8 @@ class Runner:
         rec = RunRecord(run_id=run_id, scenario=scenario, dir=run_dir, started_at=_iso(self._wall()), game=version)
         self.runs[run_id] = rec
         self.active = rec
+        # a run's clients get only its own steps, never a playtest's kept perks
+        self.board.forget_perks()
         return rec
 
     async def execute(self, rec: RunRecord) -> RunRecord:
@@ -383,6 +388,18 @@ class Runner:
         version = rec.game or self.s.game_default
         env = {"ESM_DIR": self.s.game_versions()[version]}
         settings = self.s.game_settings_files().get(version)
+        npc = rec.scenario.server.npcEnabled
+        if settings and npc is not None:
+            # ADR-035 point 9: the run's own npcEnabled over the version's file, laid
+            # beside the world for this run alone, so no second file is kept in step
+            try:
+                d = json.loads(Path(settings).read_text())
+            except (OSError, ValueError) as e:
+                raise RunnerError(f"E_RUN_SETTINGS: cannot read {settings} for the npcEnabled overlay: {e}") from e
+            d["npcEnabled"] = npc
+            overlay = Path(self.s.server_world_dir).parent / "server-settings-run.json"
+            overlay.write_text(json.dumps(d, indent=2) + "\n")
+            settings = str(overlay)
         if settings:
             env["SERVER_SETTINGS"] = settings
         return env
@@ -396,6 +413,7 @@ class Runner:
             "netem": self.netem_active,
             "memory": self.system.meminfo(),
             "hold": self.hold_status(),
+            "perks": self.board.seat_perks(),
             "version": self.s.version,
             "last_run": self.last_run.run_id if self.last_run else None,
         }
@@ -599,6 +617,23 @@ class Runner:
 
         await self._phase(rec, "netem", go())
 
+    async def _netem_step(self, spec) -> str:
+        """`server: netem {delay_ms, jitter_ms, loss_pct}`: the impairment from this step
+        on, so a measurement under loss connects clean first (docs/research/
+        transport-clock.md: a lost reliable message was never sent again); all
+        zero clears it, and the run's end clears it either way."""
+        if not (spec.delay_ms or spec.jitter_ms or spec.loss_pct):
+            if self.netem_active:
+                await asyncio.to_thread(self.system.run, ["tc", "qdisc", "del", "dev", self.s.netem_dev, "root"])
+                self.netem_active = False
+            return "netem cleared"
+        cmd = ["tc", "qdisc", "replace", "dev", self.s.netem_dev, "root", "netem", "delay", f"{spec.delay_ms:g}ms", f"{spec.jitter_ms:g}ms", "loss", f"{spec.loss_pct:g}%"]
+        r = await asyncio.to_thread(self.system.run, cmd)
+        if r.returncode != 0:
+            raise RunnerError(f"E_RUN_NETEM: tc exited {r.returncode}: {r.stderr.strip()}")
+        self.netem_active = True
+        return "netem " + " ".join(cmd[7:])
+
     async def _clear_netem(self, rec: RunRecord) -> None:
         await asyncio.to_thread(self.system.run, ["tc", "qdisc", "del", "dev", self.s.netem_dev, "root"])
         self.netem_active = False
@@ -699,6 +734,10 @@ class Runner:
                 if step.action == "fakeclient":
                     note = await self._fakeclient(rec, index, step)
                     rec.notes.append(f"step {index}: {note}")
+                elif step.action == "snapshot":
+                    return await self._snapshot(rec, index, step)
+                elif step.action == "netem":
+                    rec.notes.append(f"step {index}: {await self._netem_step(Netem(**step.args))}")
                 else:
                     await self._restart_server(rec)
                 return True, ""
@@ -895,7 +934,8 @@ class Runner:
             paused = self._paused(sorted(needed), index)
             if paused:
                 return paused, "", None
-        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), parity=rec.scenario.parity, references_dir=self.s.references_dir)
+        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), parity=rec.scenario.parity, references_dir=self.s.references_dir,
+                              snapshots=rec.snapshots)
         failed: list[dict[str, Any]] = []
         for expr in exprs:
             try:
@@ -907,6 +947,27 @@ class Runner:
             except (AssertionData, StateError) as e:
                 failed.append({"step": index, "kind": "assertion-data", "expr": expr, "error": str(e)})
         return failed, "; ".join(f"{k} = {v}" for k, v in evaluator.readings.items()), None
+
+    async def _snapshot(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+        """`server: snapshot {name, of}`: a server fact read now and kept by name for a
+        later assert's snapshot("name") (the freeze's evidence, docs/verbs/cell-host.md).
+        Judged as an assert's read is: a fact the server cannot give is red, an
+        expression that does not parse is the scenario's error."""
+        name, of = str(step.args["name"]), str(step.args["of"])
+        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), snapshots=rec.snapshots)
+        try:
+            value = await asyncio.to_thread(evaluator.value, of)
+        except AssertionSyntax as e:
+            rec.failures.append({"step": index, "kind": "assertion-syntax", "expr": of, "error": f"E_RUN_SNAPSHOT: {name}: {e}"})
+            rec.verdict = "error"
+            return False, str(e)
+        except (AssertionData, StateError) as e:
+            rec.failures.append({"step": index, "kind": "assertion-data", "expr": of, "error": f"E_RUN_SNAPSHOT: {name}: {e}"})
+            rec.verdict = "red"
+            return False, str(e)
+        rec.snapshots[name] = value
+        rec.notes.append(f"step {index}: snapshot {name} = {of}: {str(value)[:300]}")
+        return True, ""
 
     def _paused(self, clients: list[str], index: int | str) -> list[dict[str, Any]]:
         """The seats among `clients` whose last dump-state shows a message box: the game sits
@@ -1470,7 +1531,7 @@ class Runner:
                 out["race"] = self.tables.base_id(out["race"])
             if action in ("global", "weather") and isinstance(out.get("form"), str):
                 out["form"] = self.tables.base_id(out["form"])
-            if action in ("known", "held") and isinstance(out.get("ids"), list):
+            if action in ("known", "held", "add-perks") and isinstance(out.get("ids"), list):
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
         except KeyError as e:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None
