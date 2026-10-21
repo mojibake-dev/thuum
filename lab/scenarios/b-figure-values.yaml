@@ -80,6 +80,11 @@ steps:
   - c1: av-read {names: [health], other: true}
   - assert:
       - server.actor(c2).healthPercentage < 0.99
-      - c1.watched(c2).rises("health") == 0
+      # the figure's bar in c1's game never dented below the server's number
+      # and climbed back by a hit's size: no rise of a point or more in the
+      # watched series (the figure's own regeneration between the server's
+      # reports rises by hundredths, 30 times in 20261021-003901, and does
+      # not count; a dent's climb-back is the sword's five or six)
+      - c1.watched(c2).rises("health", 1) == 0
       - abs(c1.av_of(c2).healthPercentage - server.actor(c2).healthPercentage) < 0.05
 artifacts: [server.log, c1.log, c2.log, trace]
