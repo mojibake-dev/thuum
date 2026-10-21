@@ -24,7 +24,7 @@ from . import mouse
 from .guests import Guest, Tables
 from . import slots as plugin_slots
 from .proxmox import GuestControl, ProxmoxError
-from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Scenario, Step
+from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Netem, Scenario, Step
 from .state import ServerState, StateError
 from .system import Capture, System
 
@@ -617,6 +617,23 @@ class Runner:
 
         await self._phase(rec, "netem", go())
 
+    async def _netem_step(self, spec) -> str:
+        """`server: netem {delay_ms, jitter_ms, loss_pct}`: the impairment from this step
+        on, so a measurement under loss connects clean first (docs/research/
+        transport-clock.md: a lost reliable message was never sent again); all
+        zero clears it, and the run's end clears it either way."""
+        if not (spec.delay_ms or spec.jitter_ms or spec.loss_pct):
+            if self.netem_active:
+                await asyncio.to_thread(self.system.run, ["tc", "qdisc", "del", "dev", self.s.netem_dev, "root"])
+                self.netem_active = False
+            return "netem cleared"
+        cmd = ["tc", "qdisc", "replace", "dev", self.s.netem_dev, "root", "netem", "delay", f"{spec.delay_ms:g}ms", f"{spec.jitter_ms:g}ms", "loss", f"{spec.loss_pct:g}%"]
+        r = await asyncio.to_thread(self.system.run, cmd)
+        if r.returncode != 0:
+            raise RunnerError(f"E_RUN_NETEM: tc exited {r.returncode}: {r.stderr.strip()}")
+        self.netem_active = True
+        return "netem " + " ".join(cmd[7:])
+
     async def _clear_netem(self, rec: RunRecord) -> None:
         await asyncio.to_thread(self.system.run, ["tc", "qdisc", "del", "dev", self.s.netem_dev, "root"])
         self.netem_active = False
@@ -719,6 +736,8 @@ class Runner:
                     rec.notes.append(f"step {index}: {note}")
                 elif step.action == "snapshot":
                     return await self._snapshot(rec, index, step)
+                elif step.action == "netem":
+                    rec.notes.append(f"step {index}: {await self._netem_step(Netem(**step.args))}")
                 else:
                     await self._restart_server(rec)
                 return True, ""

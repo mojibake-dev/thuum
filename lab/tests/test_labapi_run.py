@@ -1325,6 +1325,37 @@ artifacts: [server.log]
 
 
 @needs_deps
+class NetemSteps(RunTests):
+    def _tc(self):
+        return [c for c in self.services.system.commands if c[:1] == ["tc"]]
+
+    def test_a_netem_step_impairs_from_that_step_and_zero_clears_it(self):
+        run_id, body = self._run("id: t-netem\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: netem {loss_pct: 25}\n"
+                                 "  - c1: dump-state\n  - server: netem {loss_pct: 0}\n  - c1: dump-state\n")
+        self.assertEqual(body["verdict"], "green", body)
+        dev = self.settings.netem_dev
+        self.assertEqual(self._tc(), [["tc", "qdisc", "replace", "dev", dev, "root", "netem", "delay", "0ms", "0ms", "loss", "25%"],
+                                      ["tc", "qdisc", "del", "dev", dev, "root"]])
+        self.assertTrue(any("netem delay 0ms 0ms loss 25%" in n for n in body["notes"]), body["notes"])
+        self.assertFalse(self.client.get("/lab/status").json()["netem"])
+
+    def test_a_netem_step_left_on_is_cleared_at_the_run_s_end(self):
+        run_id, body = self._run("id: t-netem-on\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: netem {delay_ms: 100, loss_pct: 10}\n")
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual([c[2] for c in self._tc()], ["replace", "del"])
+        self.assertFalse(self.client.get("/lab/status").json()["netem"])
+
+    def test_a_netem_step_tc_refuses_is_a_lab_error(self):
+        from labapi.fakes import Completed
+
+        real = self.services.system.run
+        self.services.system.run = lambda cmd, *a, **k: Completed(2, "", "RTNETLINK answers: Operation not permitted") if cmd[:3] == ["tc", "qdisc", "replace"] else real(cmd, *a, **k)
+        run_id, body = self._run("id: t-netem-no\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: netem {loss_pct: 25}\n")
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertIn("E_RUN_NETEM", body["failures"][0]["error"])
+
+
+@needs_deps
 class FakeclientSteps(RunTests):
     def test_t2_only_scenario_runs_the_fakeclient_inside_the_server_image(self):
         run_id, body = self._run(T2_ONLY)

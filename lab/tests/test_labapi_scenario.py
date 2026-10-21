@@ -99,6 +99,16 @@ class ScenarioTests(unittest.TestCase):
         sc = load_scenario("id: t\nclients: []\nserver: {snapshot: s, netem: {delay_ms: 60, jitter_ms: 15, loss_pct: 0.5}}\n")
         self.assertEqual((sc.server.netem.delay_ms, sc.server.netem.jitter_ms, sc.server.netem.loss_pct), (60, 15, 0.5))
 
+    def test_a_netem_step_takes_the_spec_s_own_keys_and_nothing_else(self):
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: t\nclients: []\nsteps:\n  - server: netem {loss_pct: 25}\n  - server: netem {loss_pct: 0}\n")
+        self.assertEqual([(st.action, st.args) for st in sc.steps], [("netem", {"loss_pct": 25}), ("netem", {"loss_pct": 0})])
+        for bad in ("netem {loss: 25}", "netem {}", "netem {loss_pct: 101}", "netem {delay_ms: -5}", "netem {loss_pct: lots}",
+                    "netem {loss_pct: true}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclients: []\nsteps:\n  - server: {bad}\n")
+
 
 @needs_deps
 class AllScenariosParse(unittest.TestCase):

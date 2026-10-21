@@ -814,7 +814,12 @@ Inside sky-srv, per scenario:
 tc qdisc add dev eth0 root netem delay 60ms 15ms loss 0.5%
 ```
 
-Cleared on teardown. Every M2+ scenario runs at least once with faults on,
+Cleared on teardown. A `- server: netem {delay_ms, jitter_ms, loss_pct}` step
+sets the impairment from that step on instead (`tc qdisc replace`), so a run
+measured under loss connects and sets up clean first, and the same step with
+every key zero clears it; the run's end clears it either way (the transport's
+frozen clock, docs/research/transport-clock.md, is measured this way: a lost
+reliable message was never sent again). Every M2+ scenario runs at least once with faults on,
 because lag compensation and host handoff are the things that only break
 under them. tcpdump on sky-srv's own interface gives the pcap; it sees only
 sky-srv's flows, which is all the game traffic, and T2 fake clients use the

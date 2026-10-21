@@ -69,7 +69,10 @@ step, as in an assert. `server: {npcEnabled: true}` beside `snapshot:` gives
 the run its own server setting: lab-api lays the run's version's settings
 file, with only npcEnabled changed, beside the world as
 server-settings-run.json and mounts that for the run (ADR-035 point 9); a run
-that names none mounts the version's file as it is.
+that names none mounts the version's file as it is. `- server: netem {loss_pct:
+25}` impairs the server's interface from that step on (delay_ms, jitter_ms and
+loss_pct as `server: {netem}` takes them; all zero clears it, and the run's end
+does too).
 
 The scenario step notation `- c1: teleport {cell: lab-spawn, x: 0}` is not
 plain YAML (the colon inside the braces ends the scalar); the loader quotes

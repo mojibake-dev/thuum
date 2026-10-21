@@ -28,7 +28,8 @@ SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse"}
 # snapshot {name, of}: a server fact read now and kept under its name for a
 # later assert's snapshot("name") (docs/verbs/cell-host.md: the freeze, a
 # hosted NPC's record that must not move once its cell is unhosted).
-SERVER_STEP_ACTIONS = {"restart", "fakeclient", "snapshot"}
+SERVER_STEP_ACTIONS = {"restart", "fakeclient", "snapshot", "netem"}
+_NETEM_KEYS = {"delay_ms", "jitter_ms", "loss_pct"}
 _SNAPSHOT_NAME = re.compile(r"[A-Za-z][A-Za-z0-9_-]*")
 KNOWN_ARTIFACTS = {"server.log", "screenshots", "world-diff", "pcap", "trace"}
 
@@ -342,6 +343,13 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
                 raise ValueError(f"snapshot takes a name (letters, digits, _ and -), got {name!r}")
             if not isinstance(of, str) or not of.strip().startswith("server."):
                 raise ValueError(f"snapshot reads a server fact (of: \"server....\"), got {of!r}")
+        if action == "netem":
+            # a typo must not read as zero, which clears the impairment
+            if not args or set(args) - _NETEM_KEYS:
+                raise ValueError(f"netem takes {sorted(_NETEM_KEYS)} (all zero clears it), got {sorted(args)}")
+            for k, v in args.items():
+                if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0 or (k == "loss_pct" and v > 100):
+                    raise ValueError(f"netem's {k} is a number from 0{' to 100' if k == 'loss_pct' else ''}, got {v!r}")
         return Step(kind="server", action=action, args=args)
     if key not in clients:
         raise ValueError(f"step names client {key!r}, which is not in clients {clients}")
