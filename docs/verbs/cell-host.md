@@ -282,6 +282,15 @@ the host's stream keeps its own budgets.
   hosted cells with epochs; isHostedHere(refr) for formView, hitService,
   magicSyncService and sendInputsService in place of storage['hosted']; the
   HostGrant and HostRelease handlers; tryHost and hostAttempts.ts removed.
+  As built (5f10768c): isMine(form, refr) is what the four sites ask, the
+  grant and the server's own word on the actor (isHostedByOther, false
+  only on the host's screen for the cell's actors no user plays, flipped
+  at the grant) agreeing, so a player standing in a hosted cell is never
+  reported for; a release is applied when it names the grant held (the
+  monotonic rule is the grant's); the loaded set is re-sent when the
+  player's own CreateActor arrives (the moment the server has the actor,
+  after Welcome), and cells the engine detaches leave it by a once-a-second
+  Cell.isAttached read.
 - Kill switch config key: `cellHost` under skymp5-client's settings (off: no
   reports, so the server grants nothing; the per-actor path is gone either
   way).
@@ -365,7 +374,7 @@ Doc drafted 2026-10-21, before any code.
 - [x] server logic + T0 (the cell host table: wire-rules cells with seven T0 and reach as a fact with decisions, fork m3-cell-host afc792c1 and 8f17d7a4; the bridge's Cells; the core, 9aadeaea 2026-10-21 07:10: WorldState::CellOf and HostOf, PartOne's facts and senders, the hosted flag frozen by default, the cell-change rule, Host 14 ignored, hosters retired; unit/CellHostTest's two ESM-backed cases; wire-validate's tests for the three messages; CI 2477 pending at this write)
 - [x] message + validator (same commit): CellLoaded 47, HostGrant 48, HostRelease 49 with their validators, JSON forms, fixtures and C++ structs, fork m3-cell-host ea0e24d3
 - [ ] native hook + T1 (none: events through Skyrim Platform)
-- [ ] TS handler
+- [x] TS handler (HostService, fork m3-cell-host 5f10768c 2026-10-21 07:22: the loaded set as CellLoaded from cellFullyLoaded plus Cell.isAttached once a second, reported anew when the player's own actor is created; grants and releases per cell with the monotonic epoch; isHostedHere and isMine for formView, hitService, magicSyncService and sendInputsService; tryHost, hostAttempts.ts and the HostStart/HostStop handlers retired; the cellHost settings key; tsc clean)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
