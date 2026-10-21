@@ -50,14 +50,14 @@ r-cell-leave; readings-2026-10-17.md and -18.md) and the records
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
-| the host steps out and back inside the grace: a door (an interior detaches at once); an exterior boundary (a cell leaves the loaded set only two grid cells away) | b-cell-host | |
-| the host leaves for longer than the grace; disconnects; relaunches | b-cell-host | |
-| two games load the cell in the same tick; both leave together (the freeze) | b-cell-host (c1 and c2 teleport in one step) | |
-| a player teleports in (no walk); a game still loading (docs/research/load-freeze.md) reports nothing and gets nothing | x-cell-attach | |
-| a game crossing an exterior boundary back and forth at a person's rhythm (no grant churn: the loaded set has the engine's hysteresis) | x-cell-attach | |
-| an NPC crossing into a cell the same host holds; into a cell another player holds | b-cell-host; later npc-handoff | |
-| a server restart with both seats in the cell (hosts rebuilt from the clients' reports) | b-cell-host | |
-| an exterior cell loaded by two players standing in neighbouring cells (first wins) | b-cell-host | |
+| the host steps out and back inside the grace: a door (an interior detaches at once); an exterior boundary (a cell leaves the loaded set only two grid cells away) | b-cell-host | green 20261021-201430 (the exterior case, two cells east and back in 3.7 s: still c1 at epoch 1); the door's case is x-cell-attach's measurement (the exterior stays loaded in the inn, so the grace comes from the grid moving to the interior) |
+| the host leaves for longer than the grace; disconnects; relaunches | b-cell-host | green 201430: epoch 2 to c2 past the grace with the release printed in c1's game; unhosted at epoch 2 six seconds after c2's game is gone; the relaunched game hosting at epoch 3 |
+| two games load the cell in the same tick; both leave together (the freeze) | b-cell-host (c1 and c2 teleport in one step) | green 201430: the double entry grants once (epoch 2); both out leaves it unhosted; the predator's record equal over 10 s with nobody in reach |
+| a player teleports in (no walk); a game still loading (docs/research/load-freeze.md) reports nothing and gets nothing | x-cell-attach | green 185728 (the coc's 25 cells fire within 2 ms once loaded, nothing before); b-cell-host's teleports grant within the next report |
+| a game crossing an exterior boundary back and forth at a person's rhythm (no grant churn: the loaded set has the engine's hysteresis) | x-cell-attach | green 185728: five cells fire per one-cell shift, the far column detaches one cell later than it attached (the 5x5 against the 3x3), no cell fired twice while loaded |
+| an NPC crossing into a cell the same host holds; into a cell another player holds | b-cell-host; later npc-handoff | the same host's case is CellHostTest's first case (the wolf 4500 units into a cell the host holds, accepted; into an unhosted cell, dropped); the other player's case is npc-handoff's |
+| a server restart with both seats in the cell (hosts rebuilt from the clients' reports) | b-cell-host | green 201430: a grant within 10 s of the reconnects at epoch 1 |
+| an exterior cell loaded by two players standing in neighbouring cells (first wins) | b-cell-host | green 201430: the second visitor gets nothing at epoch 1; the first loader keeps it |
 
 ## Authority
 
@@ -117,8 +117,8 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   and the combat manager are not gated, measured (the slide, the fight with
   AI off); EvaluatePackage (Actor.h:523; Actor.cpp:249) and
   StopCombatAndAlarmOnActor 41340 (ProcessLists.h:47; ProcessLists.cpp:108)
-  with the promote and demote order HYPOTHESIS (re-ai-puppet.md Q4). Cited
-  so the cut is explicit.
+  with the promote and demote order an open question of npc-puppet's
+  (re-ai-puppet.md Q4, its doc's H5). Cited so the cut is explicit.
 - The hostable set, a lead only (ADR-005): Skyrim Together's boundary is the
   high process list, ProcessLists::GetSingleton and highActorHandles
   (ProcessLists.h:36, :69; te-npcs.md:277-281). Not used here: the host's
@@ -163,8 +163,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
 - Visual without simulation achieved by: nothing new; observers keep today's
   shape for a hosted NPC (formView.ts:466-536) until npc-puppet.
 - Side effects: a grant clears the view's keep-offset and re-enables default
-  animations as HostStart does today (formView.ts:460-464); HYPOTHESIS until
-  b-cell-host that no NPC in a hosted cell is left unreported (H6).
+  animations as HostStart does today (formView.ts:460-464). Whether the
+  host's own set of actors equals the server's for the cell (H6) is
+  npc-stream's row, measured there with the stream's actor set; this verb
+  computes both sides from one CellOf, so a gap would be a copy the view
+  lacks, not an election fault.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -179,7 +182,10 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   (docs/verbs/validation.md:34-35).
 - How: the server's gate; the client's HostService.
 - Release condition: HostRelease, or the connection's end.
-- Side effects: HYPOTHESIS until b-cell-host (H6, H7).
+- Side effects: none seen in b-cell-host 20261021-201430 and 201045 (the
+  host's game ran the cell's copies, left, came back and relaunched without
+  a crash once a copy is disabled before its delete); H6 and H7 (the
+  host's set, each relayed animation played once) are npc-stream's rows.
 
 ## Message contract
 
@@ -395,13 +401,15 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   -44000 is row -11; Riverwood 0x9732 at (4,-12) is the check) and the
   CellLoaded budget. Falsified by a missing or doubled cellFullyLoaded, or an
   exterior cell that never detaches.
-- Before b-cell-host: H5, two seats on the lab LAN read the same round trip,
-  so the handoff pick is a tie; the scenario's netem knob on c2 makes it
-  deterministic and the pick is asserted both ways. H6, c1's hosted set
-  equals the server's NPCs in the cell (dump-state gains `hosting`). H7, c1's
-  own wolf plays each relayed animation once (the watch's counts, ADR-033
-  point 4). H8, r-cell-leave on two seats: the size of the old host's local
-  divergence after 60 s away, for npc-handoff's replay.
+- H5 (the handoff pick by round trip): not measurable with two seats, since
+  every handoff has one candidate; the ranking is T0's (wire-rules cells and
+  CellHostTest's third case: the lowest round trip, the earliest loaded on a
+  tie, the lower id on a full tie) and the round trip's source is measured
+  (IServer::GetRttMs through renet, non-zero since the clock fix). A third
+  seat, or a friend's connection, measures it later. H6, H7 (the host's
+  actor set against the server's; each relayed animation once): npc-stream's
+  rows. H8 (r-cell-leave on two seats, the old host's divergence after 60 s
+  away): npc-handoff's row. None of the four stands against this verb.
 - Breakpoint plan for a human session: none needed.
 
 ## Status
@@ -415,7 +423,7 @@ Doc drafted 2026-10-21, before any code.
 - [ ] native hook + T1 (none: events through Skyrim Platform)
 - [x] TS handler (HostService, fork m3-cell-host 5f10768c 2026-10-21 07:22: the loaded set as CellLoaded from cellFullyLoaded plus Cell.isAttached once a second, reported anew when the player's own actor is created; grants and releases per cell with the monotonic epoch; isHostedHere and isMine for formView, hitService, magicSyncService and sendInputsService; tryHost, hostAttempts.ts and the HostStart/HostStop handlers retired; the cellHost settings key; tsc clean)
 - [ ] T2 green (difftest session cell-host.yaml written, fork 5fef550a: c1's grant at epoch 1, c2's nothing, c1's unload and departure, c2's grant at epoch 2 at the deadline; its run waits on the branch's image and a slot on sky-srv after the M2 merges)
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-cell-host approved by Eli 2026-10-21 11:03; on cell-host's stages: 184501 red on the CellLoaded budget (fixed a591bdeb), 192314 red on the scenario's own away-and-back timing (the wait 0.5 s, main e6e9474) with the first two blocks held, 192835 lost c1's game to a copy deleted while the host's engine still ran its movement job (formView.destroy's outright delete at the teleport out of the spawn's hosted cells; fix 535544db, disable then delete; the cleaner's double-pick guard a896acf3 with it); 193557 held through the handoff with the printed() read a lab-api fault, fixed; x-cell-attach 185728 green and read)
-- [ ] parity scenario green, or its later list reviewed with it (ADR-031)
-- [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [ ] ledger and suppression registry updated
+- [x] T3 scenario green, no HYPOTHESIS tags (b-cell-host GREEN 20261021-201430 on the 535544db stage, all twelve asserts, no crash, the old shape 201045 clean through the handoff too; approved by Eli 11:03; the road there: 184501 red on the CellLoaded budget (fixed a591bdeb), 192314 red on the scenario's own away-and-back timing (the wait 0.5 s, main e6e9474), 192835 lost c1's game to a copy deleted while the host's engine still ran its movement job (fix 535544db, disable then delete; the cleaner's guard a896acf3), 193557 and 194846 held further each time, the freeze block reshaped around relaunch {until: gone} (main 7ef5522); x-cell-attach 185728 green and read; the tags that remained are npc-stream's and npc-handoff's by name, and H5 waits for a third seat)
+- [x] parity scenario green, or its later list reviewed with it (ADR-031): no parity scenario of this verb's own (the election adds no engine action; the host's NPCs run as the engine alone runs them, the references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 standing); the parity diff of a hosted cell against the engine alone is npc-stream's row, listed there
+- [x] sequences and combinations green, every checklist item with its scenario (ADR-033): the table above, each row with its run; the two rows that name later verbs carry by name
+- [x] ledger and suppression registry updated: no native touched (docs/NATIVES.md unchanged); the Suppress section above is the registry entry (the per-actor ask and grant retired from the senders, the ids kept)
