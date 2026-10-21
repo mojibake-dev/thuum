@@ -222,6 +222,16 @@ class M0VocabularyTests(unittest.TestCase):
         from labapi.assertions import Evaluator
         self.ev = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
 
+    def test_the_server_actor_holds_all_three_bars(self):
+        from labapi.assertions import AssertionData, Evaluator
+        srv = RichServer()
+        srv.actors["c1"].update({"magickaPercentage": 0.25, "staminaPercentage": 0.75})
+        ev = Evaluator(srv, NearViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("server.actor(c1).staminaPercentage > 0.7"))  # b-snapback's stamina hold
+        self.assertTrue(ev.evaluate("server.actor(c1).magickaPercentage < 0.3"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("server.actor(c2).staminaPercentage > 0.5")  # the gamemode did not report it
+
     def test_form_and_state_and_actor_fields(self):
         for expr in [
             'c1.state.equippedRight == form("Skyrim.esm:IronSword")',
