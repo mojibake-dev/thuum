@@ -609,8 +609,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   asked for on the server (the Creation's globals, a per-player globals
   row); the setup's gives stacking (fixed, idempotent, main 485c4ee). The
   m2-close nightly over this stage and the merges per ADR-042a follow.
-    - Train-31 (the rows of twenty-eight's report, for the train after the
-      close; each to its verb doc as it is built), in build order:
+    - Train-31 (the rows of twenty-eight's report; the closing train since
+      Eli's "lets aim to close this out on test 29": fork m2-train-31,
+      head 3b579f41 on 2026-10-20 20:10, every row below BUILT with its T0,
+      pipeline green, T2 from the lab side; it stages on the morning's
+      merged base and playtest twenty-nine runs on it; each row to its
+      verb doc as built), in build order:
       - heals by the record (Eli at the report, 2026-10-20: "azure
         reconstruction cast on another player should not heal them.
         they're not a summon. however i should be able to cast healing
