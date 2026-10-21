@@ -482,8 +482,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       spells fix, ADR-043 slice one, the dent gate, the Hailstone
       conditions with the resistance rule; pipeline 2309 green, ctest
       included, T2 identical at 32 sessions; then 44372078, clang-format
-      alone over three files for the fork's Formatting check, CI and T2
-      rerun at it), the one stage
+      alone over three files for the fork's Formatting check; its pipeline
+      2349 green in every job, T2 at it numidium's), the one stage
       for playtest twenty-eight (docs/M2-CLOSE.md), in build order:
       - learned spells lost on a RECONNECT (playtest twenty-seven, 11:21: a
         server restart with the game process up): the client's login path
