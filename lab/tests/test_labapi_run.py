@@ -1308,6 +1308,27 @@ class MoveSteps(RunTests):
         self.assertAlmostEqual(moves[0]["speed"], 300.0 / 2.25, delta=0.1)  # 300 units inside three quarters of 3 s
         self.assertEqual(moves[0]["duration_s"], 3)
 
+    def test_a_target_move_is_sent_as_written(self):
+        # x-cell-attach 20261021-185728: the offset path wrote the server's record over the written target
+        run_id, body = self._run("id: move-to\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: move {x: 20900, y: -44600, speed: 300}\n")
+        self.assertEqual(body["verdict"], "green", body)
+        moves = [a for _, action, a in self.doubles.seen if action == "move"]
+        self.assertEqual((moves[0]["x"], moves[0]["y"], moves[0]["speed"]), (20900.0, -44600.0, 300.0))
+
+    def test_a_move_with_an_offset_and_a_target_is_refused(self):
+        run_id, body = self._run("id: move-both\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: move {x: 1, y: 2, dx: 3}\n")
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertIn("E_RUN_MOVE", body["failures"][0]["error"])
+
+    def test_a_solo_runs_offset_move_starts_from_the_clients_own_report(self):
+        self.doubles.stale_dumps = 1  # the client reports (9999, 9999); the server's record is elsewhere
+        solo = ("id: move-solo\nsolo: true\nclients: [c1]\nserver: {snapshot: clean}\ntimeout_s: 30\n"
+                "steps:\n  - c1: dump-state\n  - c1: move {dx: 300, dy: -5}\nartifacts: []\n")
+        run_id, body = self._run(solo)
+        moves = [a for _, action, a in self.doubles.seen if action == "move"]
+        self.assertTrue(moves, body)
+        self.assertEqual((moves[0]["x"], moves[0]["y"]), (9999.0 + 300, 9999.0 - 5))
+
 
 T2_ONLY = """
 id: t2-fakeclient

@@ -1366,7 +1366,11 @@ class _ClientRef:
         """c.printed(text): whether a line the game's console printed during
         that client's last `console` step contains the text (Skyrim
         Platform's consoleMessage, which carries printConsole's lines and so
-        the server's ConsoleOutput; docs/verbs/console-commands.md)."""
+        the server's ConsoleOutput; docs/verbs/console-commands.md), or one of
+        the earlier lines its `match` brought back from the console's history
+        (skymp5-client's own traces print only there: b-cell-host
+        20261021-193557 read "released cell 9810" in the history and false
+        here, before this read it)."""
         fn = getattr(self._views, "consoles", None)
         data = fn(self.name) if fn else None
         if not isinstance(data, dict):
@@ -1374,7 +1378,8 @@ class _ClientRef:
         lines = data.get("lines")
         if not isinstance(lines, list):
             raise AssertionData(f"{self.name}'s console step reported no lines")
-        return any(isinstance(line, str) and str(text) in line for line in lines)
+        history = data.get("history") if isinstance(data.get("history"), list) else []
+        return any(isinstance(line, str) and str(text) in line for line in list(lines) + list(history))
 
     def node_scale(self) -> float:
         """c.node_scale(): the engine's scale of the node that client's last
