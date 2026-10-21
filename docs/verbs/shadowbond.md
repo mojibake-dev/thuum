@@ -242,3 +242,16 @@ MoveTo instant, the report cadence 130 ms).
 - [x] ledger and suppression registry updated (NATIVES.md: SPELL.Cast and
       Actor.DispelSpell as the two snippets the server sends; nothing
       suppressed)
+
+## The bond's hit begins no fight (train-31, 2026-10-20)
+
+Shadowbond's effect (MGEF 03055B2F: Recover, No Magnitude, No Area, FX
+Persist; neither Hostile nor Detrimental) is not one that begins a fight
+under train-31's rule (docs/verbs/magic-effects.md, "Hostility from an
+effect"): the server no longer sends the bonded player's game a StartCombat
+at the bond's hit, as the engine's own neighbours only remark on a
+non-hostile spell. Before the train every held effect began one, and the
+difftest session shadowbond declared that StartCombat; T2 at fork
+m2-train-31 3642bc32 showed it no longer occurring and the declaration went
+(the session's one edit). The bond, its concealment and the break are
+unchanged.
