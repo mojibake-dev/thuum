@@ -121,6 +121,13 @@ renet channels, configured in `wire-transport::channels`:
 | 1 `ReliableUnordered` | ReliableUnordered | the default of the reserved M0 families only (Hit, HostedActor, InventoryApply), which no sender uses today |
 | 2 `Unreliable` | Unreliable | every send marked unreliable (movement, animation, a client's ChangeValues) |
 
+A reliable send is resent by renet until acked only while renet's
+connection clock advances; until fork branch wire-renet-clock (2026-10-21,
+docs/research/transport-clock.md) the transport's polls never called
+`RenetServer::update` or `RenetClient::update`, so the clock stood at zero
+and a lost reliable packet was never resent; the fix calls both before the
+transport's update, renet's own order.
+
 SkyMP's senders choose per send (`reliable` true or false), and
 `wire-transport::channels::for_send` maps that choice: reliable to channel 0,
 unreliable to channel 2 (SkyMP's server sent reliable as RELIABLE_ORDERED and

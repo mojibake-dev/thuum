@@ -815,6 +815,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         anyway.
       - the login echo over a server set (section above) and Become
         Ethereal's translucency (section above).
+      - the transport's frozen clock (found 2026-10-21 00:5x on the way to
+        cell-host's round trip, docs/research/transport-clock.md): the
+        polls never called renet's own update, so no lost reliable packet
+        was ever resent and every round trip read 0; fixed on fork branch
+        wire-renet-clock (off 9ad635cd) with a T0 that fails without it;
+        no wire change. Ships with the first merge after Train-31 (its own
+        gate, ADR-030), before any friend plays over the internet; the lab
+        measures it under netem loss on b-spell's shape before and after.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
