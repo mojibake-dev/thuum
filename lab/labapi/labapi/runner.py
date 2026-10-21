@@ -156,6 +156,8 @@ class RunRecord:
     # and id, and each managed clone's snapshot with its description (verb-stage
     # writes the branch, the client's commit and the date there)
     build: dict[str, Any] = field(default_factory=dict)
+    # `server: snapshot {name, of}` values by name, for a later assert's snapshot("name")
+    snapshots: dict[str, Any] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -386,6 +388,18 @@ class Runner:
         version = rec.game or self.s.game_default
         env = {"ESM_DIR": self.s.game_versions()[version]}
         settings = self.s.game_settings_files().get(version)
+        npc = rec.scenario.server.npcEnabled
+        if settings and npc is not None:
+            # ADR-035 point 9: the run's own npcEnabled over the version's file, laid
+            # beside the world for this run alone, so no second file is kept in step
+            try:
+                d = json.loads(Path(settings).read_text())
+            except (OSError, ValueError) as e:
+                raise RunnerError(f"E_RUN_SETTINGS: cannot read {settings} for the npcEnabled overlay: {e}") from e
+            d["npcEnabled"] = npc
+            overlay = Path(self.s.server_world_dir).parent / "server-settings-run.json"
+            overlay.write_text(json.dumps(d, indent=2) + "\n")
+            settings = str(overlay)
         if settings:
             env["SERVER_SETTINGS"] = settings
         return env
@@ -703,6 +717,8 @@ class Runner:
                 if step.action == "fakeclient":
                     note = await self._fakeclient(rec, index, step)
                     rec.notes.append(f"step {index}: {note}")
+                elif step.action == "snapshot":
+                    return await self._snapshot(rec, index, step)
                 else:
                     await self._restart_server(rec)
                 return True, ""
@@ -899,7 +915,8 @@ class Runner:
             paused = self._paused(sorted(needed), index)
             if paused:
                 return paused, "", None
-        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), parity=rec.scenario.parity, references_dir=self.s.references_dir)
+        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), parity=rec.scenario.parity, references_dir=self.s.references_dir,
+                              snapshots=rec.snapshots)
         failed: list[dict[str, Any]] = []
         for expr in exprs:
             try:
@@ -911,6 +928,27 @@ class Runner:
             except (AssertionData, StateError) as e:
                 failed.append({"step": index, "kind": "assertion-data", "expr": expr, "error": str(e)})
         return failed, "; ".join(f"{k} = {v}" for k, v in evaluator.readings.items()), None
+
+    async def _snapshot(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+        """`server: snapshot {name, of}`: a server fact read now and kept by name for a
+        later assert's snapshot("name") (the freeze's evidence, docs/verbs/cell-host.md).
+        Judged as an assert's read is: a fact the server cannot give is red, an
+        expression that does not parse is the scenario's error."""
+        name, of = str(step.args["name"]), str(step.args["of"])
+        evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), snapshots=rec.snapshots)
+        try:
+            value = await asyncio.to_thread(evaluator.value, of)
+        except AssertionSyntax as e:
+            rec.failures.append({"step": index, "kind": "assertion-syntax", "expr": of, "error": f"E_RUN_SNAPSHOT: {name}: {e}"})
+            rec.verdict = "error"
+            return False, str(e)
+        except (AssertionData, StateError) as e:
+            rec.failures.append({"step": index, "kind": "assertion-data", "expr": of, "error": f"E_RUN_SNAPSHOT: {name}: {e}"})
+            rec.verdict = "red"
+            return False, str(e)
+        rec.snapshots[name] = value
+        rec.notes.append(f"step {index}: snapshot {name} = {of}: {str(value)[:300]}")
+        return True, ""
 
     def _paused(self, clients: list[str], index: int | str) -> list[dict[str, Any]]:
         """The seats among `clients` whose last dump-state shows a message box: the game sits
