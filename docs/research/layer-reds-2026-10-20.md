@@ -234,20 +234,27 @@ each read:
   HDPT 0xEC1B2's PNAM). Decision: the train stays m2-train-30; the crash
   reruns once as the risk for twenty-eight (Eli's rotfern look on test 2's
   figure under this layer); the scenario stays pending on the head-parts
-  assert.
+  assert. The rerun, 20261021-004815: NO crash (no crash file, no relaunch,
+  every known and view assert held; the one failure the head-parts
+  derivation gap), so the skee64 crash was a one-off; the seats proceed.
 - b-figure-values 003901: no dent. The figure's health in c1's game fell 38
   times (the three hits as declines of 1.7 down to 0.6 over about 1.4 s
   each) and rose 30 times, every rise between 0.009 and 0.048 (the figure's
   own regeneration between the server's reports); the end values agreed.
   The assert counted the jitter: it becomes rises("health", 1) == 0 with
-  lab-api's threshold argument (branch scenario-b-figure-values-rises).
+  lab-api's threshold argument (lab-api main a69d91d; scenario on main
+  cb9e4e00); the probe reruns when the lab-api image swaps after
+  twenty-eight.
+- b-god 20261021-004426 GREEN with the shooter at 150 units.
 - b-hailstone 004204: row 1 (the Nord at the Orc) green at 0.85; row 2 (the
   Orc at the Nord) 0.7892 = 15 x 0.5 + 15 less the wait's regeneration: both
   effects applied, the base effect's gate fired on the Nord's 50 ResistFrost
   (the race's abilities read) and was halved, the Shatter went through
-  whole. Decider: the Shatter MGEF's DATA (flags, resist value): not Hostile
-  or not frost means the server is faithful to the record and the row's band
-  moves to 0.775; Hostile with resist 43 means a resist-branch fix.
+  whole. The record (numidium's esm.py): the base effect has NO
+  resist value and the Shatter is resisted by ResistFrost, so the engine
+  halves the Shatter and lets the base effect through, the server's own
+  total; the band follows the record (main 053dd276) and the rerun
+  20261021-005051 is GREEN.
 
 ## Consequence for M2's close
 
