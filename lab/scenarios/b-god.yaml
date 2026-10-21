@@ -14,6 +14,14 @@
 # players go back on their marks before the arrow that follows the Firebolt
 # (one run of three had that arrow fly by c1). Assertions are evaluated by
 # lab-api only (ADR-009).
+# c2 shoots from 150 units (y -350; it was 250, y -450): at 250 c2's crosshair
+# sat at the very top of c1's head, and under the essentials layer a
+# first-person arrow launches about 4 units higher at the same pitch (the
+# layer gate's b-god 20261020-233136: the shot recorded, no hit claim, where
+# the no-layer run hit; docs/research/layer-reds-2026-10-20.md), so the
+# marginal shot became a miss; at 150 the arrow's rise is smaller than the
+# green run's margin. The look step cannot pitch a seat's aim, so the
+# range, not the pitch, carries the fix.
 id: b-god
 milestone: M2
 clients: [c1, c2]
@@ -36,7 +44,7 @@ steps:
   - c2: console {text: "player.equipitem 3b562"}
   - c2: console {text: "player.equipitem 1397d"}
   - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 90]}
-  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -350, z: 0, rot: [0, 0, 0]}
   - wait: 4
   # god mode on: c2's arrow and Firebolt change nothing
   - c1: console {text: "tgm"}
@@ -72,7 +80,7 @@ steps:
   # both back on their marks: in 20261011-032138 c2's arrow after the
   # Firebolt flew by c1 (the shot taken at full draw, no hit reported)
   - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 90]}
-  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -350, z: 0, rot: [0, 0, 0]}
   - wait: 3
   - c2: console {text: "player.equipitem 3b562"}
   - wait: 2
