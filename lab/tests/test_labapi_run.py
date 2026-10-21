@@ -1362,6 +1362,80 @@ class FakeclientSteps(RunTests):
         self.assertIn("c9", body["failures"][0]["error"])
 
 
+SNAPSHOT = """
+id: t-snapshot
+clients: [c1]
+steps:
+  - c1: connect
+  - server: snapshot {name: before, of: "server.actor(c1)"}
+  - c1: teleport {cell: lab-spawn, x: 300, y: 0, z: 0}
+  - assert:
+      - snapshot("before").x == 0
+      - server.actor(c1).x != snapshot("before").x
+      - server.ref(0x85547).healthPercentage == 0.5
+      - server.host(0x9810).client == "c1"
+      - server.host(0x9810).epoch == 1
+      - server.host(0x9811).hosted == false
+"""
+
+
+@needs_deps
+class CellHostSteps(RunTests):
+    """docs/verbs/cell-host.md's lab pieces: the host table and a ref through
+    labState, a server fact kept by a snapshot step for a later assert, and the
+    run's own npcEnabled laid over the version's settings."""
+
+    def test_a_snapshot_keeps_the_read_it_took_for_a_later_assert(self):
+        from labapi.fakes import FakeActor
+
+        self.state.refs[0x85547] = FakeActor(10.0, 20.0, 30.0, "tamriel", healthPercentage=0.5)
+        self.state.hosts[0x9810] = {"hosted": True, "actorId": 0xFF000001, "epoch": 1}
+        run_id, body = self._run(SNAPSHOT)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        self.assertTrue(any("snapshot before = server.actor(c1)" in n for n in body["notes"]), body["notes"])
+
+    def test_a_snapshot_of_a_record_the_server_lacks_is_red_not_a_lab_fault(self):
+        text = 'id: t-snap\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: snapshot {name: p, of: "server.ref(0x12345)"}\n'
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "red", body)
+        fail = body["failures"][0]
+        self.assertEqual(fail["kind"], "assertion-data", fail)
+        self.assertIn("E_RUN_SNAPSHOT: p", fail["error"])
+        self.assertEqual(len(body["steps"]), 2, "the run stops at the snapshot")
+
+    def _settings_files(self):
+        import dataclasses
+
+        files = {}
+        for version, name in (("1.6.1170", "server-settings.json"), ("1.7.104", "server-settings-1.7.104.json")):
+            f = self.tmp / name
+            f.write_text(json.dumps({"name": "thuum lab", "npcEnabled": False, "loadOrder": [version]}, indent=2) + "\n")
+            files[version] = f
+        spec = ";".join(f"{v}={f}" for v, f in files.items())
+        self.services.runner.s = dataclasses.replace(self.services.runner.s, game_server_settings=spec)
+        return files
+
+    def _up_env(self):
+        system = self.services.system
+        ups = [env for cmd, env in zip(system.commands, system.envs) if cmd[:2] == ["docker", "compose"] and "up" in cmd]
+        self.assertTrue(ups, system.commands)
+        return ups[-1]
+
+    def test_npc_enabled_is_laid_over_the_versions_settings_for_that_run(self):
+        files = self._settings_files()
+        run_id, body = self._run("id: t-npc\nclients: [c1]\nserver: {npcEnabled: true}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        overlay = self.tmp / "server-settings-run.json"
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(overlay))
+        laid = json.loads(overlay.read_text())
+        self.assertIs(laid["npcEnabled"], True)
+        self.assertEqual(laid["loadOrder"], ["1.6.1170"], "the run's version's file, the rest unchanged")
+        self.assertIs(json.loads(files["1.6.1170"].read_text())["npcEnabled"], False, "the version's own file is untouched")
+        # a run that names no npcEnabled mounts the version's file itself
+        run_id, body = self._run("id: t-plain\nclients: [c1]\nsteps:\n  - c1: connect\n")
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(files["1.6.1170"]))
+
+
 NAMED_ARGS = """
 id: t3-names
 clients: [c1]
