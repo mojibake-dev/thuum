@@ -20,7 +20,7 @@ every scenario of the set):
 6. the layer's own stage run (its smoke or a decider, named) is green, every clone it played was described
    "<thuum branch> layer <sha8>" with one <sha8>, and it began before the set did;
 7. the thuum branch's head carries that staged layer: every path it changed since <sha8> is a .md file or matches
-   origin/main's blob (a merge of main brought it);
+   main's blob at the branch's last merge of main (that merge brought it; main may have moved since);
 8. persist's mods are the ones laid: /srv/persist/mods/SHA256SUMS was last written before that run began.
 
 FORK_DIR (default skymp) is the fork checkout; LAB_API and RESULTS name lab-api and the results site."""
@@ -206,9 +206,12 @@ def main(argv: list[str]) -> int:
         if lsha8:
             subprocess.run(["git", "fetch", "-q", "origin", lbranch, "main"], capture_output=True)
             d = subprocess.run(["git", "diff", "--name-only", lsha8, f"origin/{lbranch}"], capture_output=True, text=True)
-            if d.returncode == 0:
+            # main as the branch last took it: a commit to main after that merge changes nothing the stage carried
+            mb = subprocess.run(["git", "merge-base", f"origin/{lbranch}", "origin/main"], capture_output=True, text=True)
+            if d.returncode == 0 and mb.returncode == 0:
+                base = mb.stdout.strip()
                 foreign = [p for p in d.stdout.splitlines() if p and not p.endswith(".md")
-                           and _blob(f"origin/{lbranch}", p) != _blob("origin/main", p)]
+                           and _blob(f"origin/{lbranch}", p) != _blob(base, p)]
         try:
             sums_written = datetime.datetime.fromtimestamp(
                 int(ssh("stat -c %Y /srv/persist/mods/SHA256SUMS").strip()), datetime.timezone.utc)
