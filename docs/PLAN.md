@@ -629,7 +629,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         (fork m2-snapback eef10842, b-snapback) so the server's raise
         survives the next stale report; and RunSelfSpell's
         FireAndForget-only gate widens to Concentration so vanilla Healing
-        on yourself is the server's too.
+        on yourself is the server's too. The hostility part BUILT
+        2026-10-20 19:05 on fork m2-train-31 b0e4ba38 (T0
+        unit/HealOtherTest.cpp; CI pending); the self stream next.
       - spell projectiles' aim parity: the caster's launch angles sent with
         the cast and the observer's figure launching from them, as arrows do
         (docs/verbs/marksman.md's shape; the flights record of this train
@@ -661,7 +663,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         (its player damage yields to the server's numbers already), the
         victim's game gets the death from the server. HYPOTHESIS:
         WB_IsResist's default, the figure's local kill racing a differing
-        server verdict.
+        server verdict. BUILT 2026-10-20 19:05 on fork m2-train-31 b0e4ba38
+        (docs/verbs/scripted-effects.md; wire-rules scripted_effects with
+        T0, PartOne::ClaimScriptedKill, unit/ScriptedKillTest.cpp; CI
+        pending; b-fod-kill to write).
       - the headshot row: not tested in twenty-eight (Eli: the bow shots
         were a check of the marksman bug); the next checklist carries it,
         b-headshot its proof.
