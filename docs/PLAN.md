@@ -664,6 +664,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         them; three entries in lab/deploy/sky-srv/server-settings.json's
         playerGlobals, deployed with the train's stage; HYPOTHESIS: the
         restore lands before the need quests start (twenty-nine's item 7).
+        Twenty-nine's answer (Eli, 22:42, correcting his tick): "those
+        reset when test 2 came back", so the three values did NOT survive
+        test 2's relaunch; NOT met. The log read (asked) says whether the
+        seats ever reported the three, what the login sent back, or
+        whether the Creation's start overwrote a restored value; the row
+        stays open for the next train.
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
@@ -757,7 +763,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the MCM shows eleven entries (apocalypse, goggles, idrc, jewelry limiter,
   reading list, skyui, stealth detection fixes, true directional movement,
   true HUD, undead fx, unread books glow). Section 5 empty: none of
-  twenty-eight's backsliding named. By the checklist's own rule a class
+  twenty-eight's backsliding named. Corrected after the report (Eli,
+  22:42): the Survival needs row is a NO, "those reset when test 2 came
+  back"; the need-globals row reopens. By the checklist's own rule a class
   spell that misbehaves is a finding, not a fail of the close, so the T4
   half of the close is met with the findings carried by name; the
   scenario half is the morning's sweep over the train staged on main's
