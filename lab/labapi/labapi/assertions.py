@@ -7,6 +7,13 @@ the lab can grep (E_ASSERT_*).
   server.inventory(<client>).count("<file>:<id>")   from the state endpoint
   server.time().hour | .day | .month | .year | .daysPassed | .timeScale
                                                      the server's game clock, read when the assert runs
+  server.host(<cell>).hosted | .client | .epoch      the server's host table row for a cell id
+                                                     (docs/verbs/cell-host.md): .client is the run's client
+                                                     whose player holds it, "" when none
+  server.ref(<id>).x | .y | .z | .cell | .healthPercentage | .isDead
+                                                     an actor's record by form id (a hosted NPC)
+  snapshot("<name>").<field>                         a server fact a `server: snapshot {name, of}` step
+                                                     kept earlier in the run (the freeze's evidence)
   <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
                                                      that client's time globals, from its dump-state
   <client>.state.down                                its player knocked down: skymp5-client's death,
@@ -92,6 +99,8 @@ class ServerFacade(Protocol):
     def base_id(self, spec: str) -> int: ...
     def time(self) -> dict[str, Any] | None: ...
     def spell(self, form_id: int) -> dict[str, Any] | None: ...
+    def cell_host(self, cell: int) -> dict[str, Any] | None: ...
+    def ref(self, actor_id: int) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -575,6 +584,34 @@ class TimeView:
 
 
 @dataclass(frozen=True)
+class HostView:
+    """server.host(cell): the server's host table row for a cell (labState kind
+    cellHost, docs/verbs/cell-host.md): whether a game hosts it, which of the
+    run's clients that game is ("" when none, or a player outside the run), the
+    grant's epoch, and the holder's actor id (0 when none)."""
+
+    hosted: bool
+    client: str
+    epoch: int
+    actorId: int
+
+
+@dataclass(frozen=True)
+class RefView:
+    """server.ref(id): an actor's record by form id (labState kind ref): a hosted
+    NPC's position and health; a snapshot keeps one to compare against."""
+
+    x: float
+    y: float
+    z: float
+    cell: str
+    isDead: bool | None = None
+    healthPercentage: float | None = None
+    magickaPercentage: float | None = None
+    staminaPercentage: float | None = None
+
+
+@dataclass(frozen=True)
 class SpellView:
     """server.spell(id): the Health damage a spell's served record deals on a hit,
     by the server's own rule (labState kind spell; skymp5-server MpActor.cpp
@@ -783,8 +820,9 @@ def _bool_series(raw: Any) -> tuple:
 
 
 class _ServerRef:
-    def __init__(self, facade: ServerFacade):
+    def __init__(self, facade: ServerFacade, clients: list[str] | None = None):
         self._f = facade
+        self._clients = list(clients or [])
 
     def actor(self, client: str) -> ActorView:
         d = self._f.actor(client)
@@ -822,6 +860,37 @@ class _ServerRef:
                             float(d["daysPassed"]), float(d["timeScale"]))
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"game clock lacks {e}") from e
+
+    def host(self, spec) -> HostView:
+        cell = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
+        fn = getattr(self._f, "cell_host", None)
+        d = fn(cell) if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData(f"server has no host table to read {cell:#x} from (no cell hosting)")
+        holder = int(d.get("actorId") or 0)
+        client = ""
+        if holder:
+            for c in self._clients:
+                a = self._f.actor(c)
+                if a and int(a.get("actorId") or 0) == holder:
+                    client = c
+                    break
+        return HostView(bool(d.get("hosted")), client, int(d.get("epoch") or 0), holder)
+
+    def ref(self, spec) -> RefView:
+        actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
+        fn = getattr(self._f, "ref", None)
+        d = fn(actor_id) if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData(f"server holds no record for {actor_id:#x}")
+        try:
+            return RefView(float(d["x"]), float(d["y"]), float(d["z"]), str(d.get("cell") or ""),
+                           isDead=_opt_bool(d.get("isDead")),
+                           healthPercentage=_opt_float(d.get("healthPercentage")),
+                           magickaPercentage=_opt_float(d.get("magickaPercentage")),
+                           staminaPercentage=_opt_float(d.get("staminaPercentage")))
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"{actor_id:#x}'s record lacks {e}") from e
 
     def spell(self, spec) -> SpellView:
         form_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
@@ -1452,6 +1521,8 @@ _ATTRS = {
     PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
+    HostView: {"hosted", "client", "epoch", "actorId"},
+    RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     AvView: {"health", "magicka", "stamina", "healthCurrent", "magickaCurrent", "staminaCurrent",
              "healthMax", "magickaMax", "staminaMax", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
@@ -1473,7 +1544,7 @@ _ID_METHODS = {
 _FORM_SPEC_METHODS = {
     WatchView: {"launched"},
     SelfWatchView: {"launched"},
-    _ServerRef: {"spell"},
+    _ServerRef: {"spell", "host", "ref"},
 }
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {
@@ -1490,7 +1561,7 @@ _NULLARY = {
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "effects", "time", "spell"},
+    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance"},
@@ -1506,9 +1577,12 @@ _BIN = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, as
 
 
 class Evaluator:
-    def __init__(self, server: ServerFacade, views: ViewsFacade, clients: list[str], parity: Any = None, references_dir: str | Path | None = None):
-        self._names: dict[str, Any] = {"server": _ServerRef(server), "true": True, "false": False, "True": True, "False": False}
+    def __init__(self, server: ServerFacade, views: ViewsFacade, clients: list[str], parity: Any = None, references_dir: str | Path | None = None,
+                 snapshots: dict[str, Any] | None = None):
+        self._names: dict[str, Any] = {"server": _ServerRef(server, clients), "true": True, "false": False, "True": True, "False": False}
         self._server_facade = server
+        # the run's `server: snapshot {name, of}` values, by name (runner.RunRecord.snapshots)
+        self._snapshots = snapshots if snapshots is not None else {}
         for c in clients:
             self._names[c] = _ClientRef(c, views, server)
         # Every scalar an expression read, by its source text: the numbers
@@ -1524,6 +1598,14 @@ class Evaluator:
         elif isinstance(value, (bool, int, str)):
             self.readings[ast.unparse(node)] = value
         return value
+
+    def value(self, expr: str) -> Any:
+        """What an expression reads, not a verdict: a snapshot step's server fact."""
+        try:
+            tree = ast.parse(expr.strip(), mode="eval")
+        except SyntaxError as e:
+            raise AssertionSyntax(f"E_ASSERT_SYNTAX: {e.msg} in {expr!r}") from e
+        return self._eval(tree.body)
 
     def evaluate(self, expr: str) -> bool:
         try:
@@ -1596,6 +1678,13 @@ class Evaluator:
                     if isinstance(spec, str):
                         return int(self._server_facade.base_id(spec))
                     raise AssertionSyntax("E_ASSERT_SYNTAX: form() takes a string")
+                if node.func.id == "snapshot" and len(node.args) == 1:
+                    name = self._eval(node.args[0])
+                    if not isinstance(name, str):
+                        raise AssertionSyntax("E_ASSERT_SYNTAX: snapshot() takes a name")
+                    if name not in self._snapshots:
+                        raise AssertionData(f"no snapshot {name!r} taken earlier in this run")
+                    return self._snapshots[name]
                 raise AssertionSyntax(f"E_ASSERT_SYNTAX: call to {node.func.id!r} not allowed")
             if isinstance(node.func, ast.Attribute):
                 obj = self._eval(node.func.value)

@@ -107,6 +107,18 @@ class ServerState:
         body = self._backend.rpc("labState", {"kind": "time"})
         return body if body.get("found") else None
 
+    def cell_host(self, cell: int) -> dict[str, Any] | None:
+        """Who hosts a cell on the server (labState kind cellHost, docs/verbs/cell-host.md):
+        {found, cell, hosted, actorId, epoch}, or None from a server without the host table."""
+        body = self._backend.rpc("labState", {"kind": "cellHost", "cell": int(cell)})
+        return body if body.get("found") else None
+
+    def ref(self, actor_id: int) -> dict[str, Any] | None:
+        """An actor's record by form id (labState kind ref: a hosted NPC's position and
+        health), or None for a form the server holds no record of."""
+        body = self._backend.rpc("labState", {"kind": "ref", "actorId": int(actor_id)})
+        return body if body.get("found") else None
+
     def spell(self, form_id: int) -> dict[str, Any] | None:
         """A spell's effects and their MGEFs as the server's espm resolves them
         (labState kind spell), or None for a form the server does not load."""
