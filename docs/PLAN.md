@@ -639,10 +639,20 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         measures the gap first). Eli at the report: "marksman check was
         great. just copy that for the spells": the arrows held on both
         screens in twenty-eight, so the row copies the arrow-path shape.
+        BUILT 2026-10-20 19:50 on fork m2-train-31 c3dae632, no wire change
+        (the cast carried the launch already; the caster's game now fills
+        it for every projectile and the figure's cast takes it; the
+        measured gap was 65 units of origin at equal angles,
+        docs/research/train-31-reads.md section 6); b-spell-aim for review.
       - Survival's need globals per player (hunger, cold, fatigue values
         and their states) in the playerGlobals list, R2 (docs/verbs/
         player-globals.md), after a read of which globals the Creation
-        keeps them in.
+        keeps them in. READ and BUILT 2026-10-20 19:50: the three values
+        are plain globals the need scripts write each tick (0x81A, 0x81B,
+        0x816 of the .esl), the stage a script variable recomputed from
+        them; three entries in lab/deploy/sky-srv/server-settings.json's
+        playerGlobals, deployed with the train's stage; HYPOTHESIS: the
+        restore lands before the need quests start (twenty-nine's item 7).
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.

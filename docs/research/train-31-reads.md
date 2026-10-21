@@ -282,3 +282,53 @@ per TESCondition.h's FunctionID. Nothing edited, no lab run.
   agree. HYPOTHESIS tags for the row: WB_IsResist's default, and the
   figure's local kill racing the server's verdict when the server's
   branch differs (an essential or resistant target).
+
+## 6. The spell flights read (2026-10-20 19:35 PDT)
+
+A read agent over the fork and sky-srv's results. The arrow shape: the
+shooter's client keeps the engine's launch (origin) and the arrow's first
+flight update (angles after the engine's auto-aim) and sends both with the
+shot (playerBowShotService.ts:102-157); the wire carries them in
+PlayerBowShot and the relay ArrowShot (wire-schema skymp.rs:737-818;
+validator wire-validate lib.rs:290-316); the server refuses an origin over
+512 units from its shooter (ActionListener.cpp:2046-2056) and relays; the
+observer's client launches the figure's arrow from them
+(arrowSyncService.ts:49-62, TESModPlatform.LaunchArrowAt,
+PapyrusTESModPlatform.cpp:1083-1113). The spell side carried the same five
+fields in SpellCastData (skymp.rs:907-951) and checked them the same way,
+but magicSyncService.ts:94 filled them for a target-location cast only, and
+MagicApi.cpp:270-282 read them only under `delivery == kTargetLocation`;
+for Firebolt the figure's bolt left the figure's magic node
+(MagicApi.cpp:257-266) along the relayed aim. No run had spell flights rows:
+m2-train30-flights 951b5bbc had never been staged (PLAN and LOG called it
+BUILT on its branch). The Launch-entry rows both seats record did measure
+the gap: b-hailstone 20261021-005051 (green) and -004204, four casts, the
+caster's own launch origin against the figure's in the observer's game 64.4,
+67.4, 66.9 and 67.7 units apart (about 50 to 59 behind the aim, 25 to 30
+right, 19 to 28 below), angles 0.00 degrees apart in every pair (the lab
+sets the aim; a human's pitch and any first-update re-aim are on top,
+unmeasured). The control: b-arrow-path 20261020-225948, ten of ten flights
+paired at 0.00 units and 0.00 degrees. Steps/artifacts under
+/srv/lab/results/20261021-005051-b-hailstone/steps/021-c1-watch-stop.json
+and 022-c2-watch-stop.json (cast 1), 032 and 033 (cast 2). The row's build
+is in docs/verbs/spell-cast.md ("A spell projectile flies the arrow's way").
+
+## 7. Survival Mode's need globals (2026-10-20 19:45 PDT)
+
+A read agent over /srv/persist/esm/1.6.1170/ccQDRSSE001-SurvivalMode.esl
+(61 GLOBs) and the 38 scripts of its archive, disassembled with lab/pex.py.
+The live amounts are globals, not script state: Survival_HungerNeedValue
+0x81A (145), Survival_ColdNeedValue 0x81B (55),
+Survival_ExhaustionNeedValue 0x816 (140), none constant, bound as each need
+quest's NeedValue and written every tick by Survival_NeedBase.IncrementNeed
+and DecrementNeed (NeedValue.SetValue); the maxima (0x80C, 0x84B, 0x84A:
+1000, 1000, 960), rates and intervals are constants; the stage is a script
+variable recomputed each tick from the value against literal thresholds
+(hunger 80/160/340/520/770, cold 50/120/300/500/800, exhaustion
+80/160/340/560/800) and expressed as the stage spell on the player; the
+HUD's percent globals (Update.esm 0x2EDE to 0x2EE0) and the temperature
+level (0x2EDD) are recomputed from it. Two message timers (0x821, 0x812) and
+three help-shown flags (0x8E0 to 0x8E2) are ordinary non-constant globals
+the server could keep but need not. Consequence: three playerGlobals
+entries (docs/verbs/player-globals.md, "Survival's needs"); HYPOTHESIS: the
+restore must land before the toggle starts the need quests.
