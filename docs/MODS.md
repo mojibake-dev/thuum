@@ -585,7 +585,9 @@ patch set both bits on every part: that fixed the preset load (x-layer-headparts
 both seats) and broke the vanilla race menu for males, whose rebuild at open reads a part with the
 female bit as female and takes the first valid alternative where one exists, so a male's hair
 swapped to ApachiiHairM01 at menu open (a-racemenu 20261020-224305, step 18; magnus's read). The
-master's own bits are right for both paths. HYPOTHESIS until a-racemenu is green on this render.
+master's own bits are right for both paths. CONFIRMED on stage-layer-train30 b53d922: a-racemenu
+20261021-000831 green (the preset's eight parts through the menu open, the relaunch and the
+reconnect), a-rotfern 20261021-000439 green.
 `drop-record <formid>` removes one record, the groups around
 it shrinking and the header's count following (the one patch that changes a file's size); it
 carries the layer's rule that **no served plugin may override the player's base record NPC_
@@ -635,8 +637,10 @@ persist-mods lays RaceMenu's copy of the file loose in RaceMenu's folder, extrac
 RaceMenu.bsa by lab/tools/bsa-extract.py (a stdlib BSA reader with its own LZ4 frame decoder;
 `lab/tests/test_bsa_extract.py`), and a loose file beats every archive whatever the plugins'
 order. Rule learned: when two archives carry the same path and the plugins' order cannot be the
-installer's, lay the winner's copy loose. HYPOTHESIS until `RaceMap::CreateDefaultMap` appears in
-a layer seat's skee64.log and a-rotfern and a-racemenu are green.
+installer's, lay the winner's copy loose. CONFIRMED on stage-layer-train30 b53d922: both seats'
+skee64.log carry 29 `RaceMap::CreateDefaultMap` and 51 RacePartDefaultGen lines (none under the
+previous layer stage), a-rotfern 20261021-000439 green with the race pick through RaceMenu's menu
+and no CTD, a-racemenu 20261021-000831 green.
 
 **Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
 textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
