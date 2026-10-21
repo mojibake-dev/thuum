@@ -831,10 +831,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - from the 03:30 sweep's read (2026-10-21 morning, the four reds,
         docs/research/layer-reds-2026-10-20.md's sequel): b-push's known
         refused second Ragdoll has its decisive probe written and never
-        run, lab/.cache/probes/x-push-knock-frida.yaml (HYPOTHESIS: the
+        read, lab/.cache/probes/x-push-knock-frida.yaml (HYPOTHESIS: the
         server's imposed stagger snippet lands after the victim's own
         Ragdoll and re-knocks it in place; the fix, skip PlayStagger for a
-        hit whose spell carries the push effect, waits on that run);
+        hit whose spell carries the push effect, waits on that run; the
+        probe's first run crashed c2 before a line, the trace is lighter
+        since). CARRIED TO M3 by Eli, 2026-10-21 11:03 ("carry b-push to
+        m3"): pending at the merge under ADR-042b, red twice in the M2
+        close sweep (20261021-144529-m2-close, 69 of 70 green otherwise);
+        the probe on the first free slot, the fix in M3's first train
+        (push.md's last section);
         x-melee-edge, the sword's edge re-measured under the layer (180
         units hit on the train-29 stage and missed twice on train-30 plus
         the layer at identical positions; the layer's bodies are the
