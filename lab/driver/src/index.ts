@@ -38,6 +38,7 @@ import {
   loadGame,
   NetImmerse,
   ObjectReference,
+  Perk,
   Race,
   Shout,
   Spell,
@@ -161,6 +162,15 @@ const CRAFTING_MENU = "Crafting Menu";
 // the 133 asked; the server's record then reached the target 3 s after the
 // scenario's wait had ended).
 let moving: { x: number; y: number; cx: number; cy: number; speed: number; last: number; until: number } | null = null;
+// A playtest seat's perks (add-perks with keep): perks are the player's game's
+// alone (no server path until M5's perk transactions), and every login loads a
+// generated save without them (skymp5-client's loadGameService on the
+// server's createActor), so the driver adds back any the player lacks every
+// PERKS_CHECK_MS for as long as this game runs; a relaunched game starts with
+// none kept, and lab-api sends the list again (its poll after a heartbeat gap)
+let keptPerks: number[] = [];
+let perksCheckedAt = 0;
+const PERKS_CHECK_MS = 2000;
 // watch-start to watch-stop: the recorder (thuum ADR-031, docs/VERB.md's
 // Inventory). Everything this game's engine does to the player and to each
 // actor near it at the start, one record shape for both (the player's is
@@ -939,6 +949,33 @@ function hasSpell(player: Actor, id: number): boolean {
   return !!spell && player.hasSpell(spell);
 }
 
+// Actor.AddPerk on each perk the player lacks, read back with HasPerk:
+// `refused` is one the engine did not take, `missing` a form that is no perk
+function addPerks(player: Actor, ids: number[]) {
+  const out = { added: [] as number[], had: [] as number[], missing: [] as number[], refused: [] as number[] };
+  for (const id of ids) {
+    const perk = Perk.from(Game.getFormEx(id));
+    if (!perk) {
+      out.missing.push(id);
+    } else if (player.hasPerk(perk)) {
+      out.had.push(id);
+    } else {
+      player.addPerk(perk);
+      (player.hasPerk(perk) ? out.added : out.refused).push(id);
+    }
+  }
+  return out;
+}
+
+function keepPerks(player: Actor): void {
+  if (!keptPerks.length) return;
+  const now = Date.now();
+  if (now - perksCheckedAt < PERKS_CHECK_MS) return;
+  perksCheckedAt = now;
+  const r = addPerks(player, keptPerks);
+  if (r.added.length || r.refused.length) log("kept perks added again", JSON.stringify(r));
+}
+
 function dumpState(player: Actor) {
   const cell = player.getParentCell();
   const world = player.getWorldSpace();
@@ -1236,6 +1273,17 @@ function run(step: Step, player: Actor): unknown {
   switch (step.action) {
     case "dump-state":
       return dumpState(player);
+    case "add-perks": {
+      // a seat's perks (docs/LAB.md): added now, and with keep: true kept for
+      // this game, added again whenever a load drops them (keepPerks); keep
+      // with no ids clears the kept list
+      const ids = (Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : []).map((x) => Number(x));
+      if (step.args?.keep === true) {
+        keptPerks = ids;
+        perksCheckedAt = Date.now();
+      }
+      return { ...addPerks(player, ids), kept: keptPerks };
+    }
     case "known": {
       // thuum docs/verbs/learned-effects.md: the effects this player's engine
       // knows of each ingredient, bit i for effect i, keyed by its decimal
@@ -2477,6 +2525,7 @@ on("update", () => {
   finishConsole(c);
   if (me) finishRepeat(c, me);
   if (me) readAfterRest(me);
+  if (me) keepPerks(me);
   trackWatch();
   trackCellEvents();
   const step = pending;

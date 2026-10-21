@@ -6,6 +6,30 @@ from _labapi import needs_deps
 
 @needs_deps
 class BoardTests(unittest.TestCase):
+    def test_a_seats_kept_perks_go_again_after_a_heartbeat_gap(self):
+        from labapi.board import PERK_GAP_S, StepBoard
+
+        clock = [100.0]
+        board = StepBoard(clock=lambda: clock[0])
+        self.assertEqual(board.poll("c1"), {})
+        board.keep_perks("c1", [0x7934B])
+        self.assertEqual(board.seat_perks(), {"c1": [0x7934B]})
+        clock[0] += 1
+        self.assertEqual(board.poll("c1"), {}, "a game polling all along has them from the route's own step")
+        clock[0] += PERK_GAP_S + 1  # the game was gone: a relaunch
+        got = board.poll("c1")
+        self.assertEqual((got["action"], got["args"]), ("add-perks", {"ids": [0x7934B], "keep": True}))
+        board.complete(got["id"], {"ok": True, "data": {"added": [0x7934B]}})
+        clock[0] += 1
+        self.assertEqual(board.poll("c1"), {})
+        clock[0] += PERK_GAP_S + 1
+        self.assertEqual(board.poll("c2"), {}, "another seat keeps nothing")
+        board.keep_perks("c1", [])
+        self.assertEqual(board.poll("c1"), {}, "an empty list forgets them")
+        board.keep_perks("c2", [1])
+        board.forget_perks()
+        self.assertEqual(board.seat_perks(), {})
+
     def test_queue_heartbeat_and_completion(self):
         from labapi.board import StepBoard
 
