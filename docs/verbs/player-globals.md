@@ -331,9 +331,177 @@ game read {828: 1, 826: 0, 81a: 500, 81b: 560, 816: 600}: the restore held
 only because nothing ticked. Survival_ModeEnabled 0x826 stayed 0 for 90 s
 with the restored toggle 0x828 at 1, and cold stopped falling: the
 Creation had not re-enabled Survival in a relaunched game within 90 s.
-HYPOTHESIS (the row's cause): when it does start, later, StartNeed writes
-the start values (145, 55, 140) over the restored ones, which is the
-reset Eli saw. The next probe reads out to five minutes with an assert on
-0x826, to catch the start and whether it overwrites; the fix shape on the
-client side of this verb stands: re-apply the server's three once 0x826
-turns 1 (the need quests started), not only at the login.
+The five-minute read (x-survival-relaunch-start 20261021-190130): the six
+reads at +5 to +300 s identical, 0x826 never 1. The cause, read from the
+scripts the same hour, is below; the earlier HYPOTHESIS (StartNeed writing
+the start values over the restored ones) is refuted there, and the
+client-side re-apply is not the fix.
+
+### Why a relaunched game never re-enables Survival (2026-10-21, a static read of the Creation's scripts with the two runs' screenshots)
+
+The cause, in one line: with the three need values restored before the
+start, StartSurvivalMode's first need tick opens the Creation's modal HUNGER
+help box and blocks there, two instructions before the one that sets
+Survival_ModeEnabled; the box pauses the game, so nothing ticks and the 5 s
+poll never re-arms. MEASURED: screenshots 022-c1.png
+(20261021-182745-x-survival-needs-relaunch) and 028-c1.png
+(20261021-190130-x-survival-relaunch-start) both show the HUNGER message box
+with its single Ok button standing at the end of the run (+90 s and +300 s
+after the relaunch), and every read in between held exactly {828: 1, 826: 0,
+81a: 500, 81b: 560, 816: 600}. The fresh leg of the same runs enabled within
+20 s because 145, 55 and 140 are all stage 1 and the box fires only at stage
+2 or more. Scripts read as disassembled by lab/pex.py on sky-srv
+(/tmp/thuum-survival/disasm/<script>.txt; "L" is a line of that file, "i"
+an instruction index), bindings from the esl's VMAD.
+
+1. Who sets Survival_ModeEnabled (0x826), and how the toggle is read.
+   Survival_MainScript on QUST SurvivalModeMainQuest 0x898 (VMAD:
+   Survival_ModeToggle 0x828, Survival_ModeEnabled 0x826,
+   Survival_PlayerHasBeenPrompted 0x8DF, Survival_ModeCanBeEnabled 0xA0F,
+   MQ101 0x0003372B, Survival_ModeEnabledShared 0x0100314A of Update.esm)
+   sets 0x826 to 1 in StartSurvivalMode, i7 (L8-L19), and to 0 in
+   StopSurvivalMode, i9 (L163-L175). MEASURED. The toggle is read by a
+   stateless 5 s poll, nothing else: OnInit (L48-L53) and the player
+   alias's OnPlayerLoadGame (Survival_MainQuestPlayerAlias L79-L89) call
+   RestartUpdateTimer, which is RegisterForSingleUpdate(5.0) (L107-L109);
+   OnUpdate (L139-L162) runs PromptToStartSurvivalMode (i0), canBeEnabled =
+   ModeCanBeEnabled() (i1), then "if ModeShouldBeEnabled() and canBeEnabled
+   and ModeIsDisabled(): StartSurvivalMode()" (i3-i12), "elseif
+   ModeShouldBeDisabled() and ModeIsEnabled(): StopSurvivalMode()"
+   (i14-i20), RestartUpdateTimer() (i22); ModeShouldBeEnabled is
+   0x828.GetValueInt() == 1 (L114-L117), ModeIsEnabled 0x826.GetValueInt()
+   == 1 (L103-L106). No remembered value, no OnInit read, no GlobalVariable
+   event (Papyrus has none), no message-box callback: the box's result only
+   sets 0x828 (point 3) and the same pass then starts the mode. MEASURED.
+   ModeCanBeEnabled (L80-L96) is MQ101.IsCompleted() or
+   (Game.IsFightingControlsEnabled() and not PlayerRef.IsInInterior()),
+   written to 0xA0F each pass; the fork never touches MQ101, so in our
+   games Survival switches on, or back on, only with fighting controls
+   enabled and the player outdoors; a player who relaunches inside an inn
+   waits, the poll retrying every 5 s, until they step out. MEASURED
+   (control flow); untested in the lab.
+2. Why a toggle already at 1 does not bring the mode on. It does enter the
+   start: at the first pass after the relaunch 0x8DF is 1 (no prompt),
+   0x828 is 1, 0xA0F true at lab-spawn (an exterior), 0x826 is 0, so i12
+   calls StartSurvivalMode. Nothing compares the toggle against a past
+   value. What fails is StartSurvivalMode itself: i6 StartSurvivalNeeds
+   (L76-L79: Hunger.StartNeed, Exhaustion.StartNeed, Cold.StartNeed) runs
+   each need's FIRST TICK synchronously on the main quest's thread before i7
+   writes 0x826. Survival_NeedBase.StartNeed (L84-L97): Start() if not
+   running (i0-i3), SetNeedStageValues (i5), OnUpdateGameTime() (i7),
+   RegisterForSingleUpdateGameTime(interval) (i8-i9), UpdateAttributePenalty
+   (i10-i11); OnUpdateGameTime (L405-L416) takes the lock (locked = True,
+   i3), calls NeedUpdateGameTime (i4), then re-arms and unlocks (i6-i8).
+   Survival_NeedHunger.NeedUpdateGameTime (L245-L296) calls
+   IncrementNeedByTick (i21; L91-L125: Utility.Wait(1.0) at i1, then on
+   firstUpdate returns value + 1 WITHOUT writing it, i13-i18) and
+   ApplyHungerStage(new, lastValue) (i23). ApplyHungerStage (L160-L232)
+   picks the stage from the literals (80, 160, 340, 520, 770;
+   SetNeedStageValues L73-L83), applies the stage spell, then at i57-i70: if
+   newStage >= 2 and Survival_HelpShown_Hunger (0x8E2) == 0 and not
+   PlayerRef.IsInCombat(): Survival_HelpHungerHigh.Show() (i69), 0x8E2 = 1
+   (i70). Survival_HelpHungerHigh (MESG 0x945), Survival_HelpColdHigh
+   (0x944) and Survival_HelpExhaustionHigh (0x943) carry DNAM 0x1, the
+   Message Box flag, with no ITXT (the default Ok) and no TNAM; every other
+   MESG of the Creation but the start prompt (0x946, DNAM 0x1 with two ITXT)
+   is DNAM 0, a corner notification. MEASURED (lab/esm.py over the esl).
+   Message.Show on a message-box MESG is latent and returns the pressed
+   button (the Creation's own prompt uses the return, L32-L33);
+   MessageBoxMenu's flags are kPausesGame, kAlwaysOpen, kUsesCursor, kModal
+   (CommonLibSSE-NG include/RE/M/MessageBoxMenu.h:8). So with hunger
+   restored at 500 (stage 3: 340 to 520) the first tick shows the HUNGER
+   box, the thread stops at NeedHunger i69 with Hunger's lock held,
+   StartSurvivalMode never reaches i7, OnUpdate never reaches i22, and
+   RegisterForSingleUpdate being single-shot the poll is dead; the paused
+   game also freezes the three values, which is why they "held". The same
+   gate exists for cold (ApplyColdStage L499-L574, i60-i73, flag 0x8E0;
+   restored 560 is stage 4 of 50, 120, 300, 500, 800) and exhaustion
+   (ApplyExhaustionStage L261-L360, i84-i97, flag 0x8E1; restored 600 is
+   stage 4 of 80, 160, 340, 560, 800): two more Oks wait behind the first.
+   MEASURED (disassembly plus the two screenshots). The fresh leg's start
+   had 145, 55 and 140, all stage 1, so no box and 0x826 turned 1 (step 7
+   of both runs). The cold tick that moved 600 to 560 before the relaunch
+   (step 12) ran ApplyColdStage into stage 4 and, by the same instructions,
+   opened Survival_HelpColdHigh and paused the fresh game too: HYPOTHESIS
+   (no screenshot before the relaunch; the lab's reads run on Skyrim
+   Platform's tick and work under a pause). The lab's cold script is
+   Supernatural Survival Tweaks' override of Survival_NeedCold.pex (served
+   from the esm folder, lab/layer/load-order.tsv); its source keeps the
+   identical gate (its Survival_NeedCold.psc lines 331-334). MEASURED.
+3. What 0x8DF gates. Survival_PlayerHasBeenPrompted gates only the opening
+   box: PromptToStartSurvivalMode (L24-L39) shows Survival_StartPrompt when
+   0x8DF == 0 and ModeCanBeEnabled() (i0-i7), sets 0x828 = 1 on button 0
+   (i9-i11) and 0x8DF = 1 on either button (i13); StartSurvivalMode also
+   writes 0x8DF = 1 (i0). The enabling branch (OnUpdate i3-i12) reads
+   0x828, 0xA0F's condition and 0x826 and never 0x8DF, so skipping the box
+   skips nothing of the enabling. MEASURED; the fresh leg of both runs is
+   the live proof.
+4. The smallest action that enables the mode with the restored values
+   intact: keep the three help-shown flags the way 0x8DF is kept,
+   playerGlobals entries for 8e0 (Survival_HelpShown_Cold), 8e1
+   (Survival_HelpShown_Exhaustion) and 8e2 (Survival_HelpShown_Hunger) of
+   ccQDRSSE001-SurvivalMode.esl with the lab default 1 (three lines in
+   lab/deploy/sky-srv/server-settings.json, no code; R2 per player like
+   every player global; a players' deployment leaves the default unset so
+   each character sees each help once, presses Ok, and the start continues,
+   the Creation's own behaviour, and the recorded flag stops the re-ask
+   after a relaunch). With the flags at 1 StartSurvivalMode runs through:
+   three first ticks (each Utility.Wait(1.0) plus WaitMenuMode(0.3) in
+   ApplyNeedStagePlayerEffects, NeedBase L233-L254), so 0x826 turns 1 about
+   4 s after the pass that entered the start, and the three values stay
+   exactly as sent, since the first tick writes nothing (point 5). The
+   restore at the login can stay before the start; the "set the three again
+   once 0x826 turns 1" fix is not needed for the enable. MEASURED (control
+   flow); the probe that confirms it is the relaunch read with the three
+   flags defaulted. The other candidates: 0x828 to 0 and back to 1 does
+   nothing while the start thread stands under the box (the poll is dead)
+   and, with the poll alive and the mode on, runs StopSurvivalMode (StopNeed
+   L207-L216: Stop, the spells removed, the penalty cleared, firstUpdate =
+   True, unregister; no NeedValue write) then StartSurvivalMode again, a
+   value-preserving restart (MEASURED); 0x826 = 1 written by the client
+   satisfies the gates that read it but arms no need chain, since ticks
+   exist only through StartNeed, OnUpdateGameTime and
+   RegisterForSingleUpdateGameTime (MEASURED); StartSurvivalMode called
+   again (cqf over the gamemode console) spins in WaitForUnlock (NeedBase
+   L167-L171) behind the first call's lock, a second hung thread (MEASURED
+   for the lock, HYPOTHESIS that nothing frees it); closing MessageBoxMenu
+   from the client hides the menu without a button, so the latent Show may
+   never return (HYPOTHESIS); pressing Ok (a lab click or a player)
+   continues the start through the Exhaustion and Cold boxes, 0x826 turns
+   1, the values stay, and every relaunch re-asks until the flags are kept
+   (MEASURED); restoring the three only after 0x826 turns 1 avoids the block
+   but not the boxes, which come on each need's next tick (MEASURED).
+5. Does any start path write 145, 55, 140 over existing values? No. The
+   literals appear nowhere as values in the 38 scripts (whole-word grep);
+   they are the GLOB records' own FLTV in the esl (0x81A 145, 0x81B 55,
+   0x816 140), what a game reads when nothing restored them. The only
+   writers of NeedValue are Survival_NeedBase.IncrementNeed (SetValue at
+   i26, L98-L133) and DecrementNeed (SetValue at i15, L133-L158); the three
+   children only GetValue it, and their eating, sleeping and warming paths
+   go through those two. StartNeed reads NeedValue for the penalty (NeedBase
+   i10-i11) and runs the first tick, which on firstUpdate returns value + 1
+   without SetValue (hunger, exhaustion and cold IncrementNeedByTick,
+   i13-i18 each); StopNeed writes nothing. So the start never resets the
+   values, and the step-7 reads of both runs (145, 55, 140 unchanged 20 s
+   after a fresh start) agree. MEASURED. The HYPOTHESIS above, "StartNeed
+   writes the start values over the restored ones", is refuted; the reset
+   Eli saw at playtest twenty-nine was the record defaults with no restore
+   yet. One hazard in the same path: NeedCold.CheckIfMaxCold (L87-L93,
+   called at every cold tick, L716) kills the player when the value is at or
+   above Survival_ColdNeedMaxValue (1000), so a restored cold of 1000 is a
+   death on the first tick. MEASURED (control flow).
+
+Sources for the engine facts: Message.Show is latent, returns the button and
+shows a notification unless the MESG is flagged as a box
+(https://ck.uesp.net/wiki/Show_-_Message); MESG DNAM 0x01 Message Box, 0x02
+Auto Display, TNAM display time, ITXT buttons
+(https://en.uesp.net/wiki/Skyrim_Mod:Mod_File_Format/MESG);
+RegisterForSingleUpdate fires once
+(https://ck.uesp.net/wiki/RegisterForSingleUpdate_-_Form); MessageBoxMenu's
+flags, CommonLibSSE-NG/include/RE/M/MessageBoxMenu.h:8. The disassemblies
+stay on sky-srv under /tmp/thuum-survival/ (nothing licensed left it).
+The fix as laid: the three flags as playerGlobals with default 1 in
+lab/deploy/sky-srv/server-settings.json and the 1.7.104 file (2026-10-21
+12:3x, numidium deploys); the probe to confirm is the relaunch read with
+them. A probe that sets high values with the flags at 0 cannot measure
+ticking (it pauses under the box).

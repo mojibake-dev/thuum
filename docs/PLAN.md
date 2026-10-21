@@ -688,11 +688,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         after, so neither side dropped them; the log carries counts, not
         values, and what is left is the Creation's start on the fresh save
         writing the defaults over the restored values before the first
-        report. Probe x-survival-needs-relaunch tomorrow on the train-31
-        stage (c2 with known need values, relaunched, the three read in its
-        game at +5, +30 and +90 s against the record); the likely fix on
-        the client side of player-globals: re-apply the three once the
-        toggle has started the need quests.
+        report. READ 2026-10-21 (x-survival-needs-relaunch 182745,
+        x-survival-relaunch-start 190130, the Creation's scripts): the
+        relaunched game's start runs each need's first tick before it sets
+        Survival_ModeEnabled, and restored values at stage 2 or more open
+        the Creation's modal help box, which pauses the game; the start
+        never overwrites the values. Fix laid without code: the three
+        help-shown flags 8e0, 8e1, 8e2 kept as playerGlobals with the lab
+        default 1 (server-settings.json; numidium deploys); the relaunch
+        read with them confirms (player-globals.md's Survival section).
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
