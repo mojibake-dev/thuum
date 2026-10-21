@@ -256,6 +256,32 @@ each read:
   total; the band follows the record (main 053dd276) and the rerun
   20261021-005051 is GREEN.
 
+## Playtest twenty-eight's findings as they land (2026-10-20 evening)
+
+- 18:12, Eli: "rotfern is missing teleport" after the server restart and
+  the reconnect. numidium's read: twenty-seven's raw snapshot
+  (playtest-m2-27-20261020T183558Z) already held 15 learned spells for
+  profile 1 and no Teleportation, so test 1's loss predates tonight (the
+  slot-shift days, the very case ADR-043 ends); re-taught server-side at
+  18:13 (0x280A86DF). Profile 2's record holds 'a86df:Cloaks.esp', a
+  mis-based FormDesc: its raw 0x0B0A86DF was written under the no-layer
+  order (LostGrimoire at 0x0B there, Cloaks.esp at 0x0B under the layer),
+  and setup's migration of a world with NO saved order re-based from the
+  running order (RecordReader.h:12-16, the only choice without a saved
+  order), so it landed on Cloaks.esp and nothing was parked, since
+  Cloaks.esp exists. Slice one's weak case: a raw world whose records were
+  written across two orders cannot be re-based by one assumed order. ADR-043
+  slice two's first row: a repair for the lab's legacy worlds (the ids the
+  no-layer era wrote outside the slots the two orders share), while worlds
+  saved by the slice carry their order from now on, so the case cannot
+  recur. Re-taught to profile 2 too; the dangling entry to clean after.
+  The 28.yaml spell lists did not carry Teleportation (as 27's did not),
+  so it alone depended on the record; the setup's learn-spell adds and
+  never replaces, and the reconnect sync is cleared of this one.
+- Setup's gives stack on a restored world across playtests (4 iron swords,
+  3 capes on test 1; 3 cloaks on test 2): the setup's give becomes
+  idempotent, topping up to a count (numidium, after 28).
+
 ## Consequence for M2's close
 
 docs/M2-CLOSE.md: the train stages on the staged layer (the probes do not
