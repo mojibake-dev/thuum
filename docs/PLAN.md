@@ -710,7 +710,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         (docs/research/train-31-reads.md section 9); setup sets after the
         echo meanwhile.
       - Become Ethereal's look on the other screen (Eli during twenty-nine,
-        2026-10-20 22:05: "there are actually TWO affects that should
+        2026-10-20 21:38: "there are actually TWO affects that should
         propagate to rotferns view but only one does. player two has
         whisps but never actually goes transparent"): the shout's relayed
         Self cast gives the figure the wisps and not the translucency.
