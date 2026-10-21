@@ -460,3 +460,314 @@ What it needs from thuum:
   PostLoadGame again. HYPOTHESIS until a lab run shows both. Still open from
   the research (rule 2): Ghidra's read that the producer takes two
   arguments and writes a 3D vector, since the plugin writes 12 bytes.
+
+## The essentials layer (Eli's set, staged 2026-10-19)
+
+Eli's ticked essentials from their own Skyrim (docs/private/mods-fenestrate.md, 113 ticks
+of 210 on 2026-10-18, and their decisions on the dependency gaps; the plan is
+docs/research/mod-layer-plan.md). Built by apocrypha on branch
+`apocrypha/layer-essentials`; `just layer-stage apocrypha/layer-essentials` stages it.
+
+**What it is.** 97 mods copied from Fenestrate, 5 fetched from Nexus (Cloaks of Skyrim and
+Winter Is Coming from decision 4, Realistic Aspen Trees after playtest 26, the Survival
+collection's two non-HDT warmth patches after playtest 27, all below), on top of the layer's
+existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot
+Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
+client-only at the tail), 45 of them light; 28 mod folders scoped `@1.6.1170` (every SKSE DLL
+mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on 1.7.104).
+111 mod folders and the Papyrus map's, 5,754 files once the install-order rule (below) has
+dropped the six replaced copies, 4.1 GB on disk (the DLL mods' .pdb files kept: Crash Logger
+with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, never
+removes one: a render that drops a file (FSMP's DLL and configs on 2026-10-20) relies on the
+clone being laid from a base without it, which the stage's snapshot discipline gives.
+
+**Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
+lab/tools/persist-mods.sh after its hand-written blocks:
+
+- `fenestrate` rows copy the mod's Vortex staging folder, pulled read-only off VM 220's disk
+  (the host-side mount, Eli's OK of 2026-10-18 via thuum-magnus; nothing written there)
+  into `lab/.cache/mods/fenestrate/<folder>`. A staging folder is the mod as Vortex
+  installed it, FOMOD choices already made, so the layer carries the files Eli's game ran:
+  every file Fenestrate's deployment manifest lists for the mod is there and all 87
+  plugins match Fenestrate's Data byte for byte over their first 64 KiB (apocrypha's check
+  against the plugin heads pulled with the mod list; Playable Headparts All Races.esp has
+  since gained its build-time patch, below). Each row records a tree hash of the
+  folder after exclusions and persist-mods refuses a copy that differs. The manager's
+  own top-level files (readmes, pictures, meta.ini, Vortex's marker) are excluded.
+- `nexus` rows fetch the archive the row names with the Keychain's Nexus key, check its
+  md5 (each confirmed by Nexus's md5_search on 2026-10-19) and lay out the installer folders
+  the `take` column lists, read from each FOMOD ModuleConfig.xml by hand. Cloaks of Skyrim's
+  RAR uses a method 7zz refuses, so persist-mods needs `unar` (brew install unar).
+- `local` rows copy a folder made by hand under lab/.cache/mods and check its tree hash
+  (for the Nemesis output below).
+- The load order lives once, in `lab/layer/load-order.tsv` (mod folder, light flag from
+  the TES4 header, game versions, served or client-only). `lab/tools/layer-render.py`
+  writes it into persist-mods' `plugins=(...)` array and both server-settings files;
+  `lab/tests/test_server_settings.py` fails when the three disagree. The order is Eli's
+  loadorder.txt order for their plugins, with the new cloak plugins placed before the two
+  cloak patches and the client-only plugins last (CBBE's pair the very last, as before).
+  Every plugin's index moves against the current lab; server and clients take the new
+  list together, as every layer change does.
+- `PERSIST_LOCAL=1 lab/tools/persist-mods.sh` builds and checks the tree without touching
+  the host (the dry run this branch was validated with).
+
+**Decisions carried, verbatim from Eli:** 2026-10-18, "1. ditch the patch 2. untick the
+integration 3. ditch the armor mod 4. add the cloaks and hdt 5. untick. 6. if it needs it
+add em. if not no action." and '"No Guards", FSMP in. i feel like my spare 1050 is like,,
+the oldest card we'll have to account for.'; 2026-10-19, on the hole the archives showed
+(below), "id like cloaks to give survival warmth."; 2026-10-20, after playtest 27's cloaks,
+"the cape physics worked but it looked jank. lets go back to using not fsmp". So: out are the
+Apocalypse/Tomebound patch, Goam's Elven Ears RaceMenu Integration (the ears themselves stay),
+Armor and Clothing for Kids and the NARC Dremora addon; in are Cloaks of Skyrim 1.2.1 and
+Winter Is Coming SSE - Cloaks 2.4 in its Full file, with the Survival Mode Patch Collection's
+non-HDT warmth patches 01 and 02 over them. Artesian Cloaks of Skyrim 1.3.0 (its Cloaks of
+Skyrim and Winter Is Coming physics packages) and FSMP 4.1.1 came in with them for decision 4's
+"hdt" and left again on 2026-10-20, taking the collection's HDT patch file with them. The spare
+GTX 1050 seat (c1) stays the hardware floor for every layer check.
+
+**Read from the archives, not from the plan:** "SMP_Patch" is Artesian's naming
+(HDT-SMP), one plugin per base-mod variant; the Survival Mode Patch 14 esps are
+same-named replacements of Artesian's Full-variant plugins with warmth keywords added, and
+master the Full plugins (Cloaks.esp and Cloaks - Dawnguard.esp; 1nivWICCloaks.esp).
+Winter Is Coming's No Guards file ships `1nivWICCloaksNoGuards.esp`, so the collection's
+WIC esp could not load with Eli's first pick; the second ("survival warmth") picks the Full
+file, and both halves load: the base plugins, Artesian's meshes and physics configs, and
+the collection's two esps replacing Artesian's plugins (Artesian's plugins keep the base
+mesh paths; its physics meshes replaced the base files at the same paths, 391 of Cloaks of
+Skyrim's 469 meshes and 16 of Winter Is Coming's 209, by the install-order rule below).
+Cloaks of Skyrim's own `Cloaks - USSEP Patch.esp` comes along (USSEP is in the set). Since
+2026-10-20 none of the physics half is in the layer. The HDT patch esps could not stay without
+Artesian (besides the warmth keywords they carry Artesian's body-slot and armature edits), so
+the collection's non-HDT patches replace them: "Survival Mode Patch 01 - Cloaks Of Skyrim"
+(file 66092, `Survival Mode Patches - Cloaks Of Skyrim.esp`) and "02 - Winter Is Coming" (file
+66093, `Survival Mode Patches - Winter Is Coming.esp`), each a full esp with nothing but ARMO
+overrides (122 and 183) that rename the cloaks vanilla-style and add the warmth keywords (their
+MODL and TNAM fields are the same armature and template ids under their own master order).
+Both are ESL-flagged at build (plugin patches, below), so they sit on the two light slots the
+HDT pair held and no later plugin moves. Nothing else in the layer leaned on FSMP: no other
+mod ships an SMP config, CBBE 2.0.3's vanilla shape has no body physics, and Cloaks and Capes,
+whose folder name carries Fenestrate's Vortex label "FSMP - XPMSSE", is the plain 1.4 file
+(Nexus 2019 file 35552, md5 0853b94a…) with no physics in it.
+
+**Install order, learned from the clones (2026-10-19, playtest 26):** rows install in
+order, as a mod manager does. A later row's file replaces an earlier row's (or a folder
+laid above the rows) at the same Data path, and persist-mods drops the replaced copy from
+the tree, so SHA256SUMS lists each Data path once and the build names what it replaced
+(`replaced: N files of <row> by <row>`). Before this rule add-mods.ps1 applied SHA256SUMS
+in its sorted order and kept the last copy it fetched, so `cloaks-of-skyrim-1.2.1` sorted
+after `artesian-cloaks-of-skyrim-cos-1.3.0` and the base meshes won on the clones, with
+both copies refetched on every run (407 files). A folder scoped to a game version
+(`<mod>@<version>`) loses to a later row of its scope or of none; a folder of no scope keeps
+its copy against a later scoped row, with a `kept both` note, since the other version still
+needs it. What the rule replaced on 2026-10-19, all of it as Fenestrate ran it: the 391 and 16
+base cloak meshes (until Artesian left the next day); CBBE's three female `_sk` skin textures,
+replaced by Goam's "No ENB user SK fix" copies (Fenestrate's Vortex rule put CBBE before Goam
+for exactly this); and byte-identical overlaps that change nothing (the two Apachii witcher
+hair textures rotfern bundles, the one script Headshot Kills and Stab The Heart share, and
+while Artesian was in, its two packages' `cloak.xml`). Today the rule replaces six copies.
+
+**Plugin patches at build (`lab/layer/plugin-patches.tsv`, lab/tools/plugin-patch.py):** a
+few plugins are patched at the byte level after persist-mods lays them, size kept, idempotent,
+so the server's esm copies and the clients' SHA256SUMS carry the same bytes; these plugins
+differ from their archive or Fenestrate bytes by design. `esl` sets the TES4 light flag on the
+two Survival warmth patches, which define no record of their own (override-only, so the FE
+space holds nothing of theirs), to keep the light slots the HDT pair held. `hdpt-gender-from-master`
+gives every head part of Playable Headparts All Races.esp the gender bits (0x02 male, 0x04 female)
+of the record it overrides in its master, 766 from Skyrim.esm and 39 from Dawnguard.esm (read from
+lab/.cache/game, pulled off the host like the Survival esl), every other bit and the all-races RNAM
+kept. Why: the mod clears the bits on its 805 overrides (DATA 01/05/09/11/18/19 across them), and
+RaceMenu's ApplyPresetData applies a part only when its gender flag matches the actor
+(docs/verbs/racemenu-sync.md, rotfern's own root cause), so under the layer every preset load
+seated the race defaults for hair, hairline, beard, brows and marks (thuum-magnus, a-racemenu red
+20261020-193623; c1's base held five parts against the preset's eight, the eyes surviving only
+through All Eyes for All Races, later in the order). Eli's call, 2026-10-20: "patch it". The first
+patch set both bits on every part: that fixed the preset load (x-layer-headparts 20261020-210719,
+both seats) and broke the vanilla race menu for males, whose rebuild at open reads a part with the
+female bit as female and takes the first valid alternative where one exists, so a male's hair
+swapped to ApachiiHairM01 at menu open (a-racemenu 20261020-224305, step 18; magnus's read). The
+master's own bits are right for both paths. HYPOTHESIS until a-racemenu is green on this render.
+`drop-record <formid>` removes one record, the groups around
+it shrinking and the header's count following (the one patch that changes a file's size); it
+carries the layer's rule that **no served plugin may override the player's base record NPC_
+0x00000007 (nor PlayerRef 0x14)**: in SkyMP every player shares 0x7 and the server builds each
+player's values and appearance from it, so a layer override changes every player's base under
+the server's feet (thuum-magnus, 2026-10-20; layer-stage's 2b refuses one, numidium). Of the
+layer's 93 plugins exactly one did, Supernatural Survival Tweaks - Cold Resist Werebeast and
+Vampire.esp: a whole copy of the vanilla Player record plus a VMAD attaching
+SST_PlayerScriptAddRemoveAbilities, the script that gives vampires and werebeasts their cold
+resist, and the record on the stack of the a-rotfern CTD (SkyrimSE.exe+095A263, run
+20261020-224918, the mid-game look step). The patch drops that override (7,729 to 6,962 B, 13
+records left); the plugin keeps its Survival quest, effect and spell overrides, and loses the
+ability script, which never ran connected anyway (outside the admitted list). Eli's call,
+2026-10-20: "patch it". `lab/tests/test_plugin_patch.py` holds the patches to their contracts.
+
+**Papyrus admission by plugin (ADR-044, accepted by Eli 2026-10-19):** persist-mods ships
+`papyrus-admitted/Platform/papyrus-scripts.txt` as a layer file, so add-mods.ps1 installs it,
+hash-checked and refreshed with each stage, at `Data\Platform\papyrus-scripts.txt` in every game
+folder; Skyrim Platform reads it there at its load, before the first tick (train-29's row), and a
+client without the layer has no file and admits nothing. One line per admitted plugin, `<plugin>:
+<script class> <script class> ...` after `#` comment lines, the names skymp5-client admits through
+its event block (the hook sees class names, not plugins). The admitted
+plugins are the rows of `lab/layer/papyrus-admitted.tsv` (plugin, source, why). lab/tools/papyrus-map.py
+reads each plugin's VMAD records (the scripts on its forms, a quest's alias scripts, the fragment
+classes of quests, perks, dialogue, packages and scenes) and, for a plugin from a layer folder, the
+folder's compiled scripts too (loose `scripts/*.pex` and the `scripts\` entries of its BSAs' name
+tables; nothing extracted or decompiled). A `game` row is one of the game's own plugins: its file is
+pulled off the host's persist esm directory into lab/.cache/game and read there. The first row is
+ccQDRSSE001-SurvivalMode.esl, and the first measured case: with the block lifted and
+SurvivalModeMainQuest restarted, its 5 s check ran and the Creation's own "Enable Survival Mode?" box
+appeared in a connected game (numidium, x-survival-unblock3 20261020-024406), so admitting its names
+from the first tick is enough. The file is regenerated at every build and listed in SHA256SUMS like every layer file.
+`lab/tests/test_papyrus_map.py` checks the rows and the VMAD reader's layouts.
+
+**RaceMenu's menu under the layer (2026-10-20, the a-rotfern CTD and a-racemenu's hair swap):**
+SkyUI_SE.bsa carries `interface/racesex_menu.swf` too, the one file the two archives share, and in
+the layer SkyUI_SE.esp is client-only at the tail (slot 82) after RaceMenu.esp (23), so among
+archives SkyUI's copy won and every layer seat ran SkyUI's vanilla-style race menu instead of
+RaceMenu's: skee64's chargen never initialised (no `RaceMap::CreateDefaultMap` in a layer seat's
+skee64.log, where the no-layer run has it), a-rotfern's race-pick walked the vanilla menu's
+name-sorted list onto rotfern's vampire twin, a-racemenu's menu open rebuilt the hair, and the
+a-rotfern CTD (SkyrimSE.exe+095A263, run 20261020-224918) is that vanilla menu's slider rebuild
+indexing the player's tint array past its end for rotfernRaceVampire's 33 male tint layers
+(thuum-magnus's read). Fenestrate had SkyUI at 93 and RaceMenu at 170, as RaceMenu's own install
+notes require; without the layer the lab has no SkyUI at all. The fix keeps every slot where it is:
+persist-mods lays RaceMenu's copy of the file loose in RaceMenu's folder, extracted from
+RaceMenu.bsa by lab/tools/bsa-extract.py (a stdlib BSA reader with its own LZ4 frame decoder;
+`lab/tests/test_bsa_extract.py`), and a loose file beats every archive whatever the plugins'
+order. Rule learned: when two archives carry the same path and the plugins' order cannot be the
+installer's, lay the winner's copy loose. HYPOTHESIS until `RaceMap::CreateDefaultMap` appears in
+a layer seat's skee64.log and a-rotfern and a-racemenu are green.
+
+**Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
+textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
+Aspen Trees - Loose)" (Nexus 5281 file 11503), whose file description reads "REQUIRES
+REALISTIC ASPEN TREES. Install this AFTER R.A.T. and overwrite - LOD is included". The mod
+page lists no requirement, so the tick list said "needs: nothing beyond the game" and
+Realistic Aspen Trees SE 4.0 (Nexus 4423 file 58810; enabled on Fenestrate, with a Vortex
+rule placing it before SBT) went unticked. SBT's treeaspen02 to 05 meshes reference
+`textures\landscape\trees\treeaspenbranchcomp01.dds` to `04.dds`, which only RAT ships
+(vanilla has the one `treeaspenbranchcomp.dds`), hence the untextured aspens; the pine and
+reach trees reference vanilla names. The fix is the nexus row `realistic-aspen-trees-se-4.0`:
+Fenestrate's FOMOD choices were 2048x2048 and the Vanilla tree LOD (12 files), of which SBT
+overwrites the six meshes and the LOD atlas, leaving the five textures Fenestrate's
+deployment manifest attributes to RAT (the four variants and `treeaspenbranchcomp_n.dds`),
+which is all the row takes, so it conflicts with nothing. Lesson for the tick list: a Nexus
+file's own description can carry a requirement the mod page does not. The same scan of
+Fenestrate's Vortex rules and Nexus requirements across the layer boundary found one more,
+for Eli's call: Intuitive Dragon Ride Control 7.0.1 lists True Directional Movement - Target
+Lock Extension Patch for TDM 2.2.6 (Nexus 160556 file 694401, unticked; it replaces TDM's
+DLL with one extending target lock for camera height, dragon riding and camera behind the
+target), which Fenestrate ran; the layer ships TDM 2.2.7's own DLL. Page-listed extras
+outside the layer (Light Placer for Stealth Detection Fixes, Media Keys Fix for Alt-Tab
+Stuck Key Fix, Paired Animation Improvements for Open Animation Replacer, BodySlide for
+Racemenu Misc Slider) are optional on their pages.
+
+**Not placed (rows with source `out`, not dropped silently):**
+- sse-engine-fixes-skse64-plugin-7: part 2 only (the game-root preloader d3dx9_42.dll); add-mods.ps1 installs under Data, and part 1, the SKSE plugin, was never on Fenestrate; Nexus 17230 file 725261
+- Fenestrate's Core Impact Framework 1.2.8 is not copied: the layer keeps CIF 2.0.7, which
+  the lab validated on both versions (above); rotfern stays the standalone fork, not
+  Fenestrate's 15-master plugin; SKSE is the lab's own install.
+
+**Client-only, with the reason (load-order.tsv's `why`):** SkyUI_SE.esp, RLAiO.esp,
+UnreadBooksGlow.esp, NMNEB.esp, MCMHelper.esp, DisableSpellLight_Prebuilt.esp (interface and
+visuals no server state names), then RaceMenuMiscSlider.esp and CBBE's pair. Two rules learned
+on the first stage (2026-10-19, numidium's bisect on c1): an `.esl` can never be client-only,
+because the engine loads every master-type file (ESM flag, `.esm`, `.esl`) before the rest
+whatever plugins.txt says, so a client-only `.esl` shifts every later light index on the
+clients against the server (TrueHUD.esl took FE004 on the clients while the server's Headshot
+Kills.esp sat one index lower); TrueHUD.esl is served, third in the order among the masters.
+And the lab's clones carry only the free Creation Club set (ccBGSSSE001-Fish, ccQDRSSE001-
+SurvivalMode, ccBGSSSE037-Curios, ccBGSSSE025-AdvDSGS, _ResourcePack), not Fenestrate's
+Anniversary Edition content, so the four plugins mastering ccBGSSSE031-AdvCyrus.esm or
+ccvsvsse003-necroarts.esl (MoreCraftableEquipment_AdvCyrus.esp, LoweredHoods_CCNecromanticGrimoire.esp,
+LoweredHoods_MoreCraftableEquipment_CCNecromanticGrimoire.esp, Necromantic Grimoire - Mysticism
+Rebalance.esp) are out of the layer, not client-only: the engine disabled the three whose master
+is missing, and the fourth, enabled with its master inactive, was the boot CTD of the first stage
+(SkyrimSE.exe+01D74A0, both clones). The first three are excluded from their mods' folders in
+essentials.tsv; the Necro rebalance mod is an `out` row. They return only if the clones ever
+carry those two Creation Club files. The third rule came from playtest 26 the same evening and
+is the install order above: rows install in order and a later row's file replaces an earlier
+row's at the same Data path, the replaced copy leaving the tree (414 copies in the 2026-10-19
+layer, the cloak meshes that had kept Artesian's physics off the clones among them; six since
+FSMP left).
+
+**What the layer needs from the game side (the fork and the lab), in the order it will bite:**
+- SkyUI's MCM is the first use (the per-player globals check): SkyUI_SE.esp is client-only
+  and its scripts run on the client; MCM Helper (1.6.1170) carries the config-file menus
+  that TrueHUD, Stealth Detection Fixes and others register through.
+- 44 of the 113 mod folders ship Papyrus scripts (2,421, loose or in BSAs), and in a connected
+  game skymp5-client's event block drops OnUpdate for every script, admitted names included
+  (HYPOTHESIS until numidium's unblock probe; the code reading is
+  docs/research/papyrus-event-filter.md), and every other event for a script not named
+  SKI_*, RaceMenu*, GRIM_ALT_TeleportationMarker, WB_DestroyAfterDelay_Script or
+  defaultDisableHavokOnLoad, sparing only ActiveMagicEffect events on the player.
+  docs/research/layer-papyrus.md is the census, one verdict per mod from each script's parent
+  class: 19 mods blocked outright (Jewelry Limiter, Dynamic Activation Key, Vampire Feeding
+  Tweaks, Self Filling Bookshelves, Portal, Let's Ride Durnehviir, Reading List, General
+  Displays, Tel Jerdein's activators, RaceCompatibility's quests, IDRC's quests and scenes
+  among them; four of the 19 only fix vanilla scripts a connected game never runs), 12 magic
+  mods whose spell effects work on the player alone, 3 that lose only their MCM, 69 without a
+  script. ADR-044 (thuum-magnus, PROPOSED) puts admission by plugin to Eli; if accepted,
+  persist-mods serves a plugin-to-scripts list beside the load order, regenerated with the
+  layer.
+- Every DLL mod enters at 1.6.1170 only; the 1.7.104 set has none of them (its server
+  list has 76 plugins). A seat test per DLL moves it to both.
+- Nemesis: True Directional Movement is the only mod in the set with Nemesis patches (three
+  folders under Nemesis_Engine\mod in its mod folder: `tdmv` "True Directional Movement -
+  Headtracking" and `tdmlen` "True Directional Movement - Procedural Leaning", both marked
+  auto for TrueDirectionalMovement.esp, and `tdmh` "True Directional Movement - 360 Horse
+  Archery", manual). Their behaviour output is not in the layer yet; the procedure below
+  generates it once and ships it. Until then TDM's movement works without its animation
+  patches. Fenestrate's own Nemesis output was never under Vortex's management (the manifest
+  attributes only the engine's templates and scripts to the Nemesis mod), so nothing to copy
+  from there.
+- Light plugins: the server now loads 40 light plugins after the three Creation Club
+  ones; the light-plugins verb's index mapping is what keeps FE form ids agreeing.
+- The server's esm directories receive 81 plugins (76 for 1.7.104); persist-mods
+  places them from the manifest at the stage.
+
+### The Nemesis output for True Directional Movement: the seat procedure
+
+Nemesis Unlimited Behavior Engine is a Windows tool that rewrites the game's behaviour
+graphs from the patches installed under Data\Nemesis_Engine\mod; its output must be the
+same on every client that runs the same patch set, so the layer ships one generated set
+rather than running the tool per client (docs/research/mod-layer-plan.md). Steps, for a
+scratch clone of c1 (the GTX 1050 seat) that has the layer installed (`just client-mods`)
+and nothing else:
+
+1. The engine build: the one Eli ran, Nexus 60033 "Project New Reign - Nemesis Unlimited
+   Behavior Engine" v0.84-beta, file 248867, archive
+   `Nemesis Unlimited Behavior Engine-60033-v0-84-beta-1639426722.rar`, md5
+   a3d069d01333a8cdd09ddf669044ce76 (Vortex's record on Fenestrate; fetch it with the
+   Keychain's Nexus key as persist-mods fetches, or copy Fenestrate's archive). Unpack its
+   `Nemesis_Engine\` folder into the clone's 1.6.1170 game folder under Data (by hand on the
+   seat, through the guest agent: it is a tool, not a layer mod, and the clone's snapshot
+   rolls it back afterwards). The patches it will see are TDM's three folders, already in
+   Data\Nemesis_Engine\mod from the layer.
+2. Run `Data\Nemesis_Engine\Nemesis Unlimited Behavior Engine.exe` in the seat's desktop
+   session (it is a GUI). Click "Update Engine" and wait for it to finish. Tick the two TDM
+   patches marked auto, "True Directional Movement - Headtracking" (tdmv) and "True
+   Directional Movement - Procedural Leaning" (tdmlen); leave "360 Horse Archery" (tdmh)
+   unticked unless Eli asks for it (it rewrites the mounted behaviours too). Click "Launch
+   Nemesis Behavior Engine" and wait for "Behavior generation complete". Write down the
+   engine version and the two patch names.
+3. Collect the output from the seat's Data, in Data layout: every file Nemesis wrote or
+   changed, which is `meshes\actors\character\behaviors\*.hkx`,
+   `meshes\actors\character\_1stperson\behaviors\*.hkx`,
+   `meshes\actors\character\characters\defaultmale.hkx` and
+   `meshes\actors\character\characters female\defaultfemale.hkx` if present,
+   `meshes\animationdatasinglefile.txt`, `meshes\animationsetdatasinglefile.txt`, and
+   `Scripts\Nemesis*.pex` (the engine's Papyrus side; TDM's patches add no animation
+   variables, so the Nemesis_AA scripts stay inert). Take only files whose modification time
+   is after step 2 started, plus the two singlefile txts. Leave the engine's own folder,
+   its cache and its `Nemesis_*.xml` templates out.
+4. Put them on this Mac as `lab/.cache/mods/nemesis-output/<path inside Data>` (the clone's
+   files come out through the lab's handover, as a run's logs do), then add one row to
+   lab/layer/essentials.tsv:
+   `nemesis-output-tdm-<engine version>	local	nemesis-output	tree:<hash>				Nemesis <version> output for TDM's tdmv and tdmlen patches, generated on <seat>, <date>`
+   where the hash is `(cd lab/.cache/mods/nemesis-output && find . -type f | sed 's|^\./||' | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)`,
+   the same tree hash persist-mods checks. The folder has no plugins, so load-order.tsv does
+   not change; `PERSIST_LOCAL=1 lab/tools/persist-mods.sh` proves the row, then commit.
+5. Regenerate whenever a mod with a Nemesis patch joins or leaves the set (today only TDM;
+   XPMSSE, Precision and Ultimate Combat would, if Eli ever ticks them), and note the engine
+   version in the row: two generations from different engine builds must not be mixed.
