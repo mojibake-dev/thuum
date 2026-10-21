@@ -1,8 +1,10 @@
 # Playtest twenty-nine's seats (thuum ADR-040 item 6: `just playtest-setup 29`; the checklist is
 # docs/private/playtest-m2-29.md; M2's close, docs/M2-CLOSE.md): fork m2-train-31 on its stage under the
-# merged essentials layer. Twenty-eight's world as saved after its report, in its cleaned copy (profile 2's
-# dangling 'a86df:Cloaks.esp' learned spell removed, 2026-10-20): its records are formVersion 2 already, so
-# slice one re-bases nothing at the load. Items top up to their counts (playtest-setup, main 485c4ee), so
+# merged essentials layer. Twenty-eight's world as saved after its report, repaired by lab/tools/world-repair.py
+# (2026-10-20: profile 2's learned spells written under main's 17-file order and re-based under the layer's
+# 91, Teleportation onto Cloaks.esp and eight Apocalypse spells onto Cloaks - Dawnguard.esp, re-based back;
+# the dry run read OK 222, MISBASED 9): its records are formVersion 2 already, so slice one re-bases nothing at
+# the load. Items top up to their counts (playtest-setup, main 485c4ee), so
 # twenty-eight's piles do not grow; Survival is on in both records (828 = 1). Under the layer Apocalypse holds full slot 0x1A
 # (lab-api's slots.py over the deployed settings, 2026-10-20 15:3x), so its ids are 0x1Axxxxxx; rotfern
 # 0x2F, Cloaks.esp 0x0B, Winter Is Coming 0x0E. Everything here is server-side (labCommand through
@@ -10,7 +12,7 @@
 # (Overdraw40, the headshot rule's perk, which lives in the shooter's game).
 id: 29
 build: "(filled at setup: fork m2-train-31 on its stage under the merged essentials layer)"
-world: playtest-m2-28-cleaned-20261021T012503Z   # twenty-eight's world saved 18:24 PDT after its report, cleaned (profile 2's dangling learned spell)
+world: playtest-m2-28-repaired-20261021T031739Z   # twenty-eight's world saved 18:24 PDT after its report, repaired by lab/tools/world-repair.py (profile 2's nine mis-based learned spells re-based from main's 17-file order)
 hold:
   minutes: 180
   reason: "playtest twenty-nine: M2's close on m2-train-31's stage under the merged layer"
