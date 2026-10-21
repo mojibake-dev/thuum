@@ -53,7 +53,10 @@ every job; T2 at 16:05 PDT identical across 32 sessions); the head then
 moved once, to 44372078 at 16:51, for clang-format alone (the fork's
 Formatting check, three files, no code change), so its pipeline and a T2
 at 44372078 are the ones the merge cites (ADR-042 check 4); pipeline 2349
-green in every job at 17:13, the Windows client included.
+green in every job at 17:13, the Windows client included, and T2 at
+44372078 identical across 32 sessions at 17:19 (the same difftest binary
+and sessions as 1d88a6b7's, since the format commit left skymp-wire alone).
+Both DONE.
 
 ## 3. Playtest twenty-eight (T4, Eli, both seats, on the train's stage)
 
