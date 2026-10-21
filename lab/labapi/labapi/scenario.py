@@ -226,12 +226,18 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
     readings, 2026-10-19). Each entry is {rename: <path in the game folder>, to: <new file name beside it>} or
     {ini: <path of an .ini>, section, key, value}, which sets a key the file already has. Paths are relative,
     without '..'; the next run's rollback restores the clone."""
-    unknown = sorted(set(args) - {"files"})
+    unknown = sorted(set(args) - {"files", "until"})
     if unknown:
-        raise ValueError(f"relaunch takes files, not {unknown}")
+        raise ValueError(f"relaunch takes files and until, not {unknown}")
+    # until: gone returns once the player is off the server's online list, so a scenario can read the server
+    # while that game is down (b-cell-host's unhosted window); a later connect waits for the new game's login
+    until = args.get("until")
+    if until is not None and until != "gone":
+        raise ValueError(f"relaunch's until is gone, not {until!r}")
+    head = {"until": "gone"} if until else {}
     files = args.get("files")
     if files is None:
-        return {}
+        return head
     if not isinstance(files, list) or not 1 <= len(files) <= 8:
         raise ValueError("relaunch's files is a list of one to eight changes")
     out = []
@@ -258,7 +264,7 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
             out.append({"ini": path, "section": f["section"], "key": f["key"], "value": v})
         else:
             raise ValueError(f"a relaunch file change is {{rename, to}} or {{ini, section, key, value}}, not {sorted(f)}")
-    return {"files": out}
+    return {**head, "files": out}
 
 
 # the driver steps a playtest may send one seat outside a run (lab-api's playtest-step): input and its

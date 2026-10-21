@@ -158,6 +158,8 @@ class RunRecord:
     build: dict[str, Any] = field(default_factory=dict)
     # `server: snapshot {name, of}` values by name, for a later assert's snapshot("name")
     snapshots: dict[str, Any] = field(default_factory=dict)
+    # clients a `relaunch {until: gone}` left starting a new game: their next connect takes its identity
+    pending_identity: set[str] = field(default_factory=set)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -766,7 +768,7 @@ class Runner:
         if step.action == "screenshot":
             return await self._screenshot(rec, index, step.client)
         if step.action == "relaunch":
-            return await self._relaunch(rec, index, step.client, step.args.get("files"))
+            return await self._relaunch(rec, index, step.client, step.args.get("files"), until=step.args.get("until"))
         if step.action == "frida":
             return await self._frida_start(rec, index, step.client, step.args)
         if step.action == "mouse":
@@ -904,6 +906,13 @@ class Runner:
             try:
                 if await asyncio.to_thread(self.state.online, client):
                     rec.notes.append(f"step {index}: {client} online after {self._clock() - started:.1f}s")
+                    if client in rec.pending_identity:
+                        # the game a relaunch {until: gone} started: the one the run's end compares (_crash_check)
+                        rec.pending_identity.discard(client)
+                        g = self.tables.guest_for_client(client)
+                        identity = await self._game_identity(g) if g is not None and g.managed else ""
+                        if identity:
+                            rec.games[client] = identity
                     # an optional pause after online (config.connect_settle_s); the teleport step judges itself
                     if self.s.connect_settle_s > 0:
                         await asyncio.sleep(self.s.connect_settle_s * self.s.time_scale)
@@ -1041,7 +1050,8 @@ class Runner:
                 return False, f"{len(failed)} of {len(step.assertions)} did not hold within {step.seconds:g}s" + (f" ({read})" if read else "")
             await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
-    async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, str]] | None = None) -> tuple[bool, str]:
+    async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, str]] | None = None,
+                        until: str | None = None) -> tuple[bool, str]:
         """relaunch: the player quits the game and starts it again, so its
         client loads a fresh generated save at the next login, as a player
         coming back another day does. A reconnect is not that: an in-game
@@ -1050,7 +1060,10 @@ class Runner:
         and starts the launch task; then the step holds for a poll from the
         new process (any poll after the stop is one), for a dump-state, which
         lab-driver answers only in-game (it runs steps on update), so the new
-        save is loaded, and for the server's online list."""
+        save is loaded, and for the server's online list. With until: gone the
+        step returns once the player is off that list, the new game still
+        starting, so a scenario reads the server while the game is down; a
+        later connect waits for its login and takes its identity."""
         def fail(error: str) -> tuple[bool, str]:
             rec.failures.append({"step": index, "kind": "lab", "client": client, "error": error})
             rec.verdict = "red"
@@ -1081,6 +1094,25 @@ class Runner:
         if res.exitcode != 0:
             return fail(f"E_RUN_RELAUNCH: {g.name}: exit {res.exitcode}: {res.err.strip()[:200]}")
         started = self._clock()
+        if until == "gone":
+            if rec.scenario.solo:
+                return fail("E_RUN_RELAUNCH: until: gone reads the server's online list, which a solo seat never joins")
+            deadline = started + self.s.relaunch_timeout_s
+            while True:
+                try:
+                    on = await asyncio.to_thread(self.state.online, client)
+                except StateError:
+                    on = True  # unread is not gone
+                if not on:
+                    break
+                if self._clock() >= deadline:
+                    return fail(f"E_RUN_RELAUNCH: {client} still on the server's online list {self.s.relaunch_timeout_s}s after its game was stopped")
+                await asyncio.sleep(0.5 * self.s.time_scale if self.s.time_scale else 0.01)
+            rec.games.pop(client, None)
+            rec.pending_identity.add(client)
+            gone = f"{client} off the server's online list {self._clock() - started:.1f}s after its game was stopped; its new game logs in by itself"
+            rec.notes.append(f"step {index}: {gone}")
+            return True, gone
         if not await self.board.wait_heartbeat(client, started, self.s.relaunch_timeout_s):
             return fail(f"E_RUN_RELAUNCH: {client} ({g.name}) did not poll within {self.s.relaunch_timeout_s}s")
         if rec.scenario.solo:

@@ -74,6 +74,12 @@ that names none mounts the version's file as it is. `- server: netem {loss_pct:
 loss_pct as `server: {netem}` takes them; all zero clears it, and the run's end
 does too).
 
+`- c2: relaunch` quits that seat's game and starts it again (a fresh generated
+save at the next login) and holds until the new game is in and logged in;
+`relaunch {until: gone}` returns as soon as the player is off the server's
+online list, so a scenario can read the server while that game is down, and a
+later `- c2: connect` waits for the new game's login.
+
 The scenario step notation `- c1: teleport {cell: lab-spawn, x: 0}` is not
 plain YAML (the colon inside the braces ends the scalar); the loader quotes
 such values before parsing, and the quoted form is accepted as well.

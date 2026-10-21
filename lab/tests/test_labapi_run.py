@@ -1091,6 +1091,34 @@ class RelaunchSteps(RunTests):
         step = next(s for s in body["steps"] if s.get("action") == "relaunch")
         self.assertIn("relaunched solo", str(step.get("note")), step)
 
+    def test_a_relaunch_until_gone_returns_while_the_game_is_down(self):
+        """b-cell-host 20261021-194846: the step returns once the player is off the server's online list, so the
+        scenario reads the server in the gap; the connect after it waits for the new game's login and takes its
+        identity for the run's end."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        real = self.services.state.online
+        reads = {"off": 0}
+
+        def online(client):
+            stopped = any(c[0] == "exec" and c[1] == 901 and "sky-lab-launch" in " ".join(c[2]) for c in pve.calls)
+            if stopped and reads["off"] < 3:  # the server sees the stopped game drop, then its new game log in
+                reads["off"] += 1
+                return False
+            return real(client)
+
+        self.services.state.online = online
+        text = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: gone}\n  - c1: connect\n")
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s.get("action") == "relaunch")
+        self.assertIn("off the server's online list", str(step.get("note")), step)
+        self.assertEqual(reads["off"], 3, "the connect after it waited through the gap")
+        self.assertTrue(any("c1 online after" in n for n in body.get("notes", [])), body.get("notes"))
+
     def test_relaunch_needs_a_managed_client(self):
         run_id, body = self._run(RELAUNCH)
         self.assertEqual(body["verdict"], "red", body)
