@@ -108,7 +108,10 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   68a56247, so RaceMenu's chargen initialises and the race menu is
   RaceMenu's again; a-rotfern, a-racemenu and b-duel decide the rest.
   a-rotfern GREEN on it, 20261021-000439 (no CTD; the race pick lands
-  through RaceMenu's menu): the crash's cause and fix CONFIRMED.
+  through RaceMenu's menu): the crash's cause and fix CONFIRMED. a-racemenu
+  GREEN on it, 20261021-000831 (the preset's eight parts through the menu
+  open and close, the relaunch and the reconnect): the head-part flags on
+  their masters' bits and RaceMenu's menu back, both CONFIRMED.
 - The render: apocrypha/layer-essentials c38a3b04 (16:45 PDT; contains main
   fd20b1e6), no slot moves: the NPC_ 0x7 drop-record; the head parts on
   their masters' gender bits (766 Skyrim.esm, 39 Dawnguard.esm: the 805
