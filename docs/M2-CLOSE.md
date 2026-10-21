@@ -156,8 +156,12 @@ Survival race (lifted by the 8df default's smoke).
    b-snapback staying pending for the train after twenty-eight) runs as
    the 03:30 nightly over the stage, each of the four leaving pending as
    its probe goes green on the stage (b-hailstone is approved and on main);
-   or by name, `just sweep m2-close`, about 4 h. `just verb-merge
-   m2-train-30` then cites
-   that sweep with GATE_SET (ADR-042's own case, its first use; numidium
-   merges adr042-gate-set fbca257 first), T2 beside it. Green: M2 DONE in
-   PLAN and LOG, the carries moved to M3's chart.
+   or by name, `just sweep m2-close`, about 4 h. Then the merge order (ADR-042a, PROPOSED
+   2026-10-20 for Eli's word at the report; numidium's read of the trap:
+   both clones' snapshot is the stage, layer and all, and main has no layer
+   yet): `just verb-merge m2-train-30` with GATE_SET on that sweep and
+   PROMOTE=0, then the layer to main citing the same sweep under the same
+   five checks, then both promotes; T2 at the head cited beside. Fallback
+   without the word: the train's merge with PROMOTE=0, then layer-merge's
+   own full sweep on a re-laid stage. Green: M2 DONE in PLAN and LOG, the
+   carries moved to M3's chart.
