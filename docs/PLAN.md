@@ -815,7 +815,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         anyway.
       - the login echo over a server set (section above) and Become
         Ethereal's translucency (section above).
-      - the transport's frozen clock (found 2026-10-21 00:5x on the way to
+      - the transport's frozen clock (found 2026-10-21 00:20 on the way to
         cell-host's round trip, docs/research/transport-clock.md): the
         polls never called renet's own update, so no lost reliable packet
         was ever resent and every round trip read 0; fixed on fork branch
