@@ -649,6 +649,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         it for every projectile and the figure's cast takes it; the
         measured gap was 65 units of origin at equal angles,
         docs/research/train-31-reads.md section 6); b-spell-aim for review.
+        Its first probe (20261021-042101, tonight's stage): the figure now
+        launches from the recorded origin exactly, 0.00 units and 0.0
+        degrees off; the 2.5 to 34.5 units left are the caster's own bolt
+        moving from the Launch call's origin before its first update, so
+        the cast now carries the flight's position as the origin (the
+        commit after 3b579f41 on m2-train-31, for the morning's stage).
       - Survival's need globals per player (hunger, cold, fatigue values
         and their states) in the playerGlobals list, R2 (docs/verbs/
         player-globals.md), after a read of which globals the Creation
@@ -696,6 +702,24 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - the headshot row: not tested in twenty-eight (Eli: the bow shots
         were a check of the marksman bug); the next checklist carries it,
         b-headshot its proof.
+      - a server set lost to the login echo (found at twenty-nine's setup,
+        numidium 21:31: test 1's Magicka set to 400 between the login send
+        and the client's echo of the applied record read 120 after the echo
+        was taken; a second set held): HYPOTHESIS until the log read says
+        which side dropped it; the held set must outrank the echo
+        (docs/research/train-31-reads.md section 9); setup sets after the
+        echo meanwhile.
+      - Become Ethereal's look on the other screen (Eli during twenty-nine,
+        2026-10-20 22:05: "there are actually TWO affects that should
+        propagate to rotferns view but only one does. player two has
+        whisps but never actually goes transparent"): the shout's relayed
+        Self cast gives the figure the wisps and not the translucency.
+        HYPOTHESIS until the record read: the word's spell 0x5F6EB
+        (VoiceMakeEtherealScript's spell; docs/verbs/shouts.md) carries the
+        Etherealize archetype whose translucency the engine applies to an
+        actor by a path the figure's cast misses (a second effect or shader
+        not relayed, or the archetype's alpha on a non-player actor); the
+        read names it, then the figure gets both.
       - a relaunched game's value reports not taken (numidium's grep of
         twenty-eight's log: after test 2's 18:08 relaunch "report before
         the login's record was applied, not taken" three times and no new
