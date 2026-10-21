@@ -50,6 +50,16 @@ class PlaytestProfile(unittest.TestCase):
         two = seat_commands(p["seats"][1])
         self.assertEqual(two[-1][1], {"kind": "console", "profileId": 2, "name": "AddItem", "args": [20, 0x12E4D, 1]})
 
+    def test_an_item_is_topped_up_to_its_count_not_added_again(self):
+        from playtest_setup import seat_commands
+
+        seat = self.load(PROFILE.replace("count: 1}", "count: 3}"))["seats"][1]
+        items = lambda have: [p for label, p in seat_commands(seat, have) if label.startswith("AddItem")]
+        self.assertEqual(items({0x12E4D: 1})[0]["args"], [20, 0x12E4D, 2])   # a restored world's one, topped up to three
+        self.assertEqual(items({0x12E4D: 3}), [])                            # already three: nothing given
+        self.assertEqual(items({0x12E4D: 5}), [])
+        self.assertEqual(items({})[0]["args"], [20, 0x12E4D, 3])
+
     def test_what_a_profile_refuses(self):
         from playtest_setup import ProfileError
 
