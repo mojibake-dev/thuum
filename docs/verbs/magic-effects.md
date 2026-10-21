@@ -600,3 +600,20 @@ fifteen.
   schedule at about 22:21:30. Eli ticked it. The drink came before the
   watcher was armed, so the window after the login was 13 s, not the 45 s
   a restart at the drink would leave.
+
+## Hostility from an effect (train-31, 2026-10-20)
+
+A spell hit begins a fight between players (ADR-023) only through an effect
+whose record is Hostile or Detrimental and whose conditions held. Before
+train-31 any held effect did, so Healing Hands on another player (0x4D3F2,
+RestoreHealthConcActor, neither flag) healed it through the server and
+started a fight at the same time; playtest twenty-eight's report (Eli: "i
+should be able to cast healing hands on them") made the heal a row, and the
+code read (docs/research/train-31-reads.md) found the heal applied end to
+end already with this one defect and the snap-back beneath it. The engine's
+own neighbours only remark on a non-hostile spell (SayOnHitByMagicEffectScript's
+non-hostile topic) and draw no weapon. An effect whose record the server
+cannot read counts as hostile, as before. Fork m2-train-31 b0e4ba38,
+ActionListener::OnSpellHit; T0 unit/HealOtherTest.cpp (Healing Hands heals
+10 of 250 at the stream's first hit with no StartCombat snippet; Firebolt
+still begins the fight); T3 b-heal-other (to write).
