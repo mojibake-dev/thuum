@@ -279,6 +279,8 @@ sets a knockdown flag, so in both the hurt or the push is the effect's, not the 
 
 ## 4. Azure Reconstruction, SPEL 03088694 (WB_Con_Heal1_Spell_AzureReconstruction)
 
+Correction (record read 2026-10-20, docs/research/train-31-reads.md section 5): SPIT flags are 0x00300000, IgnoreResistance (1<<20) plus NoAbsorb/Reflect (1<<21), not NoAbsorb alone; the conditions below stand.
+
 **Spell** (SPIT): Spell, **Concentration**, **delivery Target Actor**, range 200, charge
 0.5, cost 3, flags No Absorb/Reflect (+0x200000), half-cost perk 000F2CA7. One effect:
 MGEF 03126DA1, magnitude 10, area 0, duration 0. No spell-level conditions.
