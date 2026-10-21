@@ -414,3 +414,25 @@ runs), which train-25's m2-area-report drops. The three self-targeted hit
 events the caster's game raised (Shock Nova's two, Battletide's one) left
 no server line in either run; whether the client dropped them or the
 server did silently is not in the artifacts.
+
+## A Self concentration spell's stream (train-31, 2026-10-20)
+
+RunSelfSpell applied a Self spell's effects on the server for a
+fire-and-forget cast only; a concentration one (vanilla Healing, 0x12FCC, 10
+Health a second while held) applied nothing, so the caster's own game's rise
+was cropped away by the attribute model within a report (playtest
+twenty-eight, "test 2's heals are getting rejected", Azure Reconstruction's
+case aside; docs/research/train-31-reads.md section 2). Fork m2-train-31
+6f7b7a06: a Self concentration cast runs on the server as a stream, its
+effects as running entries at the record's magnitude a second for the
+cast's span (MpActor::ApplyEffects' `streamSeconds`, the record's own
+duration set aside), ended by the cast's end message (EndSelfStream, the
+interruptCast branch of OnSpellCast) or by wire-rules magic::
+SELF_STREAM_CAP_S (60 s) when that message is lost; a recast restarts the
+one stream; a fire-and-forget Self spell's end message ends nothing. The
+snap-back hold beneath (docs/verbs/attributes.md) keeps the server's raise
+over the next stale report. T0: unit/SelfCastTest.cpp "A Self concentration
+spell runs on the server as a stream for the cast's span". T3: b-self-cast's
+next edit or a probe, Healing on c1 at half Health for 3 s: the server's
+number up about 30 of 100 and c1's game within 0.03 of it. T4: a self-heal
+on either seat in playtest twenty-nine (item 1's neighbour).
