@@ -55,6 +55,16 @@ class GateCite(unittest.TestCase):
         self.assertFalse(run(results={r: result(desc=other) for r in RESULTS}, live_descs=other)[2][0])
         self.assertFalse(run(registry="sha256:repushed")[2][0])
 
+    def test_the_branchs_bare_tag_that_verb_stage_pins(self):
+        bare = "10.10.70.12:5000/skymp-server:m2-train-28"
+        results = {r: result(image=bare) for r in RESULTS}
+        rows = run(results=results)
+        self.assertTrue(all(ok for ok, _ in rows), rows)    # the clones name e3a5b367, the registry's tag has the id
+        self.assertFalse(run(results=results, registry="sha256:repushed")[2][0])
+        two = {"c1": DESC["c1"], "c2": DESC["c2"].replace("e3a5b367", "0badc0de")}
+        self.assertFalse(run(results={r: result(image=bare, desc=two) for r in RESULTS}, live_descs=two)[2][0])
+        self.assertFalse(run(results={r: result(image=bare.replace("m2-train-28", "parity")) for r in RESULTS})[2][0])
+
     def test_a_head_past_the_stage(self):
         self.assertFalse(run(head8="1234abcd", changed=["skymp5-client/src/x.ts", "docs/a.md"])[3][0])
         self.assertTrue(run(head8="1234abcd", changed=["docs/verbs/shadowbond.md"])[3][0])
