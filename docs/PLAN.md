@@ -934,7 +934,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   npc-fate (one leveled roll per cell, deaths that persist). The first
   doc's probes: x-cell-attach (solo, the cell events and the grid math),
   then b-cell-host on a creature cell; the exits c-riverwood and
-  c-dungeon-enemies after npc-handoff and npc-fate.
+  c-dungeon-enemies after npc-handoff and npc-fate. Built the first night
+  on fork m3-cell-host: the cell host table (wire-rules cells, afc792c1,
+  six T0) and the wire contract (CellLoaded 47, HostGrant 48, HostRelease
+  49 with validators, fixtures and the C++ message layer, ea0e24d3); the
+  verb doc's cell_of resolved to libespm's existing exterior-cell index;
+  the round trip's exposure designed (Server::client_rtt_ms, on
+  wire-renet-clock). Next: the bridge's Cells, PartOne's election and
+  grants, the client's HostService, then x-cell-attach.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
