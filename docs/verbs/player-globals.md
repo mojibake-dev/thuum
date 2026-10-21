@@ -294,3 +294,30 @@ The proper cure for every script that reads a global before any update
 (a wire change, message and validator in one commit) and LoadGame::Run
 writes them into the generated save's globals, so the first frame reads
 them; it also spares a player the re-ask after a relaunch.
+
+## Survival's needs (train-31, 2026-10-20)
+
+Eli at playtest twenty-eight: "with the addition of survival, are hunger,
+fatigue, and cold states kept on the server like health?" The read of the
+Creation's plugin and its 38 scripts on sky-srv (docs/research/train-31-reads.md
+section 7): the three live amounts are plain globals, written every tick by
+the need scripts (Survival_NeedBase.IncrementNeed ends in NeedValue.SetValue)
+and read back by them: Survival_HungerNeedValue 0x81A (145 at the start),
+Survival_ColdNeedValue 0x81B (55), Survival_ExhaustionNeedValue 0x816 (140),
+none constant. The STAGE is no global: ApplyXStage recomputes it from the
+value against thresholds the scripts hold as literals (hunger 80, 160, 340,
+520, 770; cold 50, 120, 300, 500, 800; exhaustion 80, 160, 340, 560, 800),
+keeps it in a script variable and expresses it as the stage spell on the
+player, and the HUD's percent globals in Update.esm are recomputed each tick
+from the value. So the server keeps the three values the way it keeps the
+mode toggle 0x828 and the help flag 0x8DF: three more entries in
+server-settings.json's playerGlobals (lab/deploy/sky-srv, R2 as every player
+global), nothing else; the login's send restores them before the Creation's
+quests start (docs/verbs/player-globals.md, the send at the login), and the
+first tick after StartNeed recomputes the stage and the penalty from the
+restored value (StartNeed sets oldStage to 99). HYPOTHESIS, for a probe: the
+restore has to land before the toggle starts the need quests, or the first
+tick reads the record's default and the restored value arrives one tick late
+(a cold tick is 0.0834 game hours). The two message timers (0x821, 0x812)
+and the help-shown flags per need (0x8E0 to 0x8E2) are left as the game's.
+T4: playtest twenty-nine item 7 (what the bars show after a restart).

@@ -1607,3 +1607,28 @@ gate and the merges after).
   second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
   OnTrigger about 30 and OnUpdate 13 to 22 per 5 s), so the parent walk is
   noise.
+
+## A spell projectile flies the arrow's way (train-31, 2026-10-20)
+
+Playtest twenty-eight: "a marksman like bug where the spells land in
+different places on different screens", while the arrows landed alike (Eli:
+"marksman check was great. just copy that for the spells"). The read
+(docs/research/train-31-reads.md section 6): the cast message already
+carried hasLaunch and the five launch fields, the validator checked them and
+the server relayed them (LaunchRay plus 512 units), but the caster's game
+filled them for a target-location cast only (magicSyncService's gate), and
+the figure's cast in the other game read them only for a target-location
+delivery (MagicApi.cpp): an aimed bolt left the figure's own third-person
+magic node along the relayed aim. b-hailstone 20261021-005051's launches on
+both seats put that node about 65 units from the caster's own (behind the
+aim, to the right, lower) at identical angles, so the two bolts flew
+parallel 65 units apart at any range. Fork m2-train-31 c3dae632, no wire
+change: the caster's own cast of a fire-and-forget projectile aimed or at a
+target actor (Firebolt, Electrosphere, Hailstone) waits for its launch and
+the projectile's flight as a target-location cast waits for its launch, and
+goes with the launch's origin and the flight's angles (the bow service's
+rule; m2-train30-flights 951b5bbc merged for the spell flights); the figure's
+cast takes the launch for any projectile. HYPOTHESIS: whether a player's
+spell bolt re-aims on its first update as an arrow does (the flight's angles
+cover it either way). T3: b-spell-aim (for review; b-arrow-path's claim,
+within 2 units and half a degree). T4: playtest twenty-nine item 7.
