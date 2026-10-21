@@ -1,0 +1,76 @@
+# b-spell-aim (docs/verbs/spell-cast.md, the aim parity row of train-31; Eli
+# after playtest twenty-eight: "marksman check was great. just copy that for
+# the spells"): b-arrow-path's claim for a spell's projectile. c1 casts
+# Firebolt (Skyrim.esm 0x12FD0, fire-and-forget, aimed, FireDamageFFAimed 25;
+# learned through the server's own AddSpell, decimal 77776) at c2 ten times,
+# five from its starting view and five after toggling it; both games record
+# every bolt's flight as it starts (the fork's projectileFlight, raised for a
+# spell's projectiles since m2-train30-flights). The claim: each of c1's own
+# bolts is paired with its figure's bolt in c2's game, starting from the same
+# point (under 2 units) at the same pitch and heading (under half a degree).
+# Before the train the figure's bolt left the figure's own magic node along
+# the relayed aim, about 65 units from the caster's at equal angles
+# (b-hailstone 20261021-005051's launches on both seats,
+# docs/research/train-31-reads.md), so it landed elsewhere; now the cast
+# carries the caster's launch and the figure launches from it, as arrows do.
+# The server sets c2's Health base high so ten bolts kill nobody, and c1's
+# Magicka base so ten casts are paid. No look between the casts: a look after
+# the draw sheathes the hands (the lab's first-cast order). Assertions are
+# evaluated by lab-api only (ADR-009).
+id: b-spell-aim
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 77776}
+  - c1: papyrus-av {how: set, name: Magicka, value: 2000}
+  - c2: papyrus-av {how: set, name: Health, value: 100000}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c2: set-percentages {health: 1}
+  - c1: console {text: "player.equipspell 12fd0 right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - c1: watch-start {bools: [IsAttacking]}
+  - c2: watch-start {bools: [IsAttacking]}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c2: screenshot
+  - c1: tap-key {code: 33}
+  - wait: 2
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 3.5
+  - c2: screenshot
+  - c1: watch-stop
+  - c2: watch-stop
+  - assert:
+      - c2.watched(c1).flights_match(c1.watched_self(), "position") < 2
+      - c2.watched(c1).flights_match(c1.watched_self(), "angle") < 0.5
+artifacts: [server.log, c1.log, c2.log, screenshots, trace]
