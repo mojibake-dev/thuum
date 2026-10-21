@@ -21,6 +21,12 @@
 #      hand.
 # GATE_AFTER=<set id>: the gate is that stopped set plus a set of its rest (runset.sh's
 # RUNSET_AFTER), on the same staging, when a lab fault stopped the first one.
+# GATE_SET=<set id> LAYER_RUN=<run id> TRAIN=<fork branch> (ADR-042a): the layer was
+# staged and the train staged over it, one sweep proving the pair; the train's
+# `GATE_SET=<id> PROMOTE=0 just verb-merge <train>` goes first (parity must have it),
+# then steps 1 and 2 are gate-cite.py --layer's eight checks over that set and the
+# layer stage's own green run (its smoke or a decider), and step 4 promotes the
+# pair's clean-m1-next.
 # Never force-pushes, never rebases, never switches the shared checkout.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -32,24 +38,40 @@ if git merge-base --is-ancestor "$sha" origin/main; then
   echo "== origin/$branch is in main already; nothing to merge" >&2; exit 2
 fi
 
-echo "== 1. the staged tree"
-jump=${JUMP_HOST:-root@core.gaussing.tv}
-for pair in c1:711 c2:712; do
-  c=${pair%%:*}; vmid=${pair#*:}
-  desc=$(ssh -o BatchMode=yes "$jump" "qm listsnapshot $vmid" | grep -E '`-> clean-m1-next ' | sed -E 's/^.*clean-m1-next +[0-9-]+ [0-9:]+ +//' || true)
-  case "$desc" in
-    *"$branch layer $sha8"*) echo "   $c clean-m1-next: $desc";;
-    *) echo "== $c's clean-m1-next is not this branch's staging (${desc:-no clean-m1-next}): just layer-stage $branch first" >&2; exit 2;;
-  esac
-done
+if [ -n "${GATE_SET:-}" ]; then
+  : "${LAYER_RUN:?GATE_SET for a layer names LAYER_RUN, a green run of the layer stage itself (its smoke or a decider)}"
+  : "${TRAIN:?GATE_SET for a layer names TRAIN, the fork branch staged over it}"
+  fork=${FORK_DIR:-skymp}
+  echo "== 1-2. the stage and its sweep, cited (ADR-042a): $GATE_SET with $TRAIN over the layer's run $LAYER_RUN"
+  git -C "$fork" fetch -q origin "$TRAIN" parity
+  git -C "$fork" merge-base --is-ancestor "origin/$TRAIN" origin/parity \
+    || { echo "== parity does not have $TRAIN yet: its \`GATE_SET=$GATE_SET PROMOTE=0 just verb-merge $TRAIN\` goes first" >&2; exit 2; }
+  FORK_DIR="$fork" python3 lab/tools/gate-cite.py --layer "$branch" "$LAYER_RUN" "$GATE_SET" "$TRAIN" | sed 's/^/ /' \
+    || { echo "== the citation does not hold (above): nothing merged; layer-merge's own sweep (no GATE_SET) on a stage laid for it" >&2; exit 1; }
+  setfile=$(mktemp -t layer-cite)
+  curl -fsS -m 60 "${LAB_API:-https://thuum.gaussing.tv/lab}/runset/$GATE_SET" > "$setfile"
+  sweep="$GATE_SET (cited with $TRAIN, ADR-042a; the layer's own run $LAYER_RUN)"
+else
+  echo "== 1. the staged tree"
+  jump=${JUMP_HOST:-root@core.gaussing.tv}
+  for pair in c1:711 c2:712; do
+    c=${pair%%:*}; vmid=${pair#*:}
+    desc=$(ssh -o BatchMode=yes "$jump" "qm listsnapshot $vmid" | grep -E '`-> clean-m1-next ' | sed -E 's/^.*clean-m1-next +[0-9-]+ [0-9:]+ +//' || true)
+    case "$desc" in
+      *"$branch layer $sha8"*) echo "   $c clean-m1-next: $desc";;
+      *) echo "== $c's clean-m1-next is not this branch's staging (${desc:-no clean-m1-next}): just layer-stage $branch first" >&2; exit 2;;
+    esac
+  done
 
-echo "== 2. the gate: the full sweep $(date +%H:%M:%S)"
-if ! RUNSET_AFTER="${GATE_AFTER:-}" lab/tools/runset.sh "layer-$branch"; then
-  echo "== the sweep is not green: nothing promoted, main not moved" >&2; exit 1
+  echo "== 2. the gate: the full sweep $(date +%H:%M:%S)"
+  if ! RUNSET_AFTER="${GATE_AFTER:-}" lab/tools/runset.sh "layer-$branch"; then
+    echo "== the sweep is not green: nothing promoted, main not moved" >&2; exit 1
+  fi
+  setfile=$(ls -t lab/results/runsets/*-layer-"$branch"*.json | head -1)
+  sweep=$(basename "${setfile%.json}")
 fi
-setfile=$(ls -t lab/results/runsets/*-layer-"$branch"*.json | head -1)
 runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"] for s in rs["scenarios"] for e in rs["runs"].get(s,[]) if e.get("run")]; print(f"{r[0]} to {r[-1]} ({len(r)} runs)" if r else "")' "$setfile")
-watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1]))["watch"]))' "$setfile")
+watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1])).get("watch") or []))' "$setfile")
 
 echo "== 3. $branch into main $(date +%H:%M:%S)"
 landed=""; how=""; was=""
@@ -63,7 +85,7 @@ for attempt in 1 2 3; do
   else
     tree=$(git merge-tree --write-tree "$main" "$sha" | head -1) \
       || { echo "== $branch does not merge cleanly into main ${main:0:8}: nothing promoted; merge main into the branch, layer-stage it again" >&2; exit 1; }
-    target=$(git commit-tree "$tree" -p "$main" -p "$sha" -m "Merge branch '$branch' into main: a mod layer, its full sweep $(basename "${setfile%.json}") green")
+    target=$(git commit-tree "$tree" -p "$main" -p "$sha" -m "Merge branch '$branch' into main: a mod layer, its full sweep $sweep green")
     how="merge commit"
   fi
   if out=$(git push -q origin "${target}:refs/heads/main" 2>&1); then landed=$target; break; fi
@@ -78,7 +100,7 @@ for c in c1 c2; do
   just client-promote "$c" clean-m1-next 2>&1 | tail -1 | cut -c1-160
 done
 
-entry="- $branch (a mod layer) merged to main ${landed:0:8} by $how ($(date -u +%Y-%m-%dT%H:%MZ)): the full sweep ${GATE_AFTER:+$GATE_AFTER (stopped by a lab fault) and its rest }$(basename "${setfile%.json}"), $runs${watch:+; watch items: $watch}; both clones promoted. Plugins: (fill in)."
+entry="- $branch (a mod layer) merged to main ${landed:0:8} by $how ($(date -u +%Y-%m-%dT%H:%MZ)): the full sweep ${GATE_AFTER:+$GATE_AFTER (stopped by a lab fault) and its rest }$sweep, $runs${watch:+; watch items: $watch}; both clones promoted. Plugins: (fill in)."
 today="### $(date -u +%Y-%m-%d)"
 grep -q "^$today\$" docs/LOG.md || printf '\n%s\n\n' "$today" >> docs/LOG.md
 printf '%s\n' "$entry" >> docs/LOG.md
