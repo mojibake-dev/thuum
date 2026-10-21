@@ -12,7 +12,7 @@
 # Riverwood's residents, the guards and the bandits do not (npc-puppet lifts those bans). Everything
 # here is server-side (labCommand through playtest-console, set-percentages); the seats type nothing.
 id: 30
-build: "fork m3-cell-host 29a7b56e (CI 2481, 2483, 2487, 2488 green) on its stage over the merged Train-31 and layer: FILLED AT SETUP with the stage's head, T2's log and the probes' runs"
+build: "fork parity 535544db, cell-host merged 2026-10-21 13:47 (the gate 20261021-202319-merge-m3-cell-host 8 of 8 green, T2 33 identical, b-cell-host green 201430 and 203119, x-cell-attach 185728); the lab's server image m3-cell-host is the same build; this server alone with npcEnabled on"
 world: playtest-m2-29-20261021T053403Z   # twenty-nine's world saved 2026-10-21 05:34Z after its report
 hold:
   minutes: 180
