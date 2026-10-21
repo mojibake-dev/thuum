@@ -260,6 +260,74 @@ const VAR_EPSILON = 0.01;
 const WATCH_FRAME_JUMP_UNITS = 5000;
 let watching: { startedAt: number; actors: Map<number, Watched>; self: Watched; trackMax: number } | null = null;
 
+// thuum docs/verbs/cell-host.md (the Dynamic plan's x-cell-attach): the
+// engine's cell events as this game sees them between cell-events-start and
+// cell-events-stop: every cellFullyLoaded with its cell; cellAttach and
+// cellDetach counted per cell (they fire per reference, hundreds a cell);
+// the player's parent cell sampled every WATCH_TRACK_MS; and isAttached() of
+// every cell seen, read at each sample. Decides which cells fire, once each,
+// at a load and a shift, and whether isAttached tracks the detach.
+type CellSeen = { interior: boolean; attached: Array<[number, boolean]>; attach: number; detach: number; firstAttachMs: number; lastDetachMs: number };
+let cellEvents: { startedAt: number; lastSample: number; loaded: Array<[number, number]>; seen: Map<number, CellSeen>; parent: Array<[number, number]> } | null = null;
+const CELL_EVENTS_SAMPLES_MAX = 2400; // ten minutes at WATCH_TRACK_MS
+
+function cellSeen(id: number, interior: boolean): CellSeen {
+  if (!cellEvents) throw new Error("no cell-events");
+  let s = cellEvents.seen.get(id);
+  if (!s) {
+    s = { interior, attached: [], attach: 0, detach: 0, firstAttachMs: -1, lastDetachMs: -1 };
+    cellEvents.seen.set(id, s);
+  }
+  return s;
+}
+
+function trackCellEvents(): void {
+  if (!cellEvents) return;
+  const now = Date.now();
+  if (now - cellEvents.lastSample < WATCH_TRACK_MS) return;
+  cellEvents.lastSample = now;
+  const ms = now - cellEvents.startedAt;
+  if (cellEvents.parent.length >= CELL_EVENTS_SAMPLES_MAX) return;
+  const me = Game.getPlayer();
+  const parent = me ? me.getParentCell() : null;
+  cellEvents.parent.push([ms, parent ? parent.getFormID() : 0]);
+  cellEvents.seen.forEach((s, id) => {
+    const cell = Cell.from(Game.getFormEx(id));
+    const attached = cell !== null && cell.isAttached();
+    const last = s.attached.length ? s.attached[s.attached.length - 1][1] : null;
+    // a change, or the first reading: the rows stay short over a long walk
+    if (last === null || last !== attached) s.attached.push([ms, attached]);
+  });
+}
+
+on("cellFullyLoaded", (e) => {
+  if (!cellEvents) return;
+  const ms = Date.now() - cellEvents.startedAt;
+  const id = e.cell.getFormID();
+  cellSeen(id, e.cell.isInterior());
+  cellEvents.loaded.push([ms, id]);
+});
+
+on("cellAttach", (e) => {
+  if (!cellEvents) return;
+  const ms = Date.now() - cellEvents.startedAt;
+  const cell = e.refr.getParentCell();
+  if (!cell) return;
+  const s = cellSeen(cell.getFormID(), cell.isInterior());
+  s.attach += 1;
+  if (s.firstAttachMs < 0) s.firstAttachMs = ms;
+});
+
+on("cellDetach", (e) => {
+  if (!cellEvents) return;
+  const ms = Date.now() - cellEvents.startedAt;
+  const cell = e.refr.getParentCell();
+  if (!cell) return;
+  const s = cellSeen(cell.getFormID(), cell.isInterior());
+  s.detach += 1;
+  s.lastDetachMs = ms;
+});
+
 // The master behavior variables Skyrim Platform reads into
 // getAnimationVariablesFromActor's three buffers (uint8 booleans, float32
 // floats, uint32 integers), in its index order: the fork's
@@ -1833,6 +1901,22 @@ function run(step: Step, player: Actor): unknown {
       target.setActorValue(name, a.value);
       return { actor: target.getFormID(), [name]: target.getActorValue(name) };
     }
+    case "cell-events-start": {
+      const me = Game.getPlayer();
+      const parent = me ? me.getParentCell() : null;
+      cellEvents = { startedAt: Date.now(), lastSample: 0, loaded: [], seen: new Map(), parent: [] };
+      return { started: true, parent: parent ? parent.getFormID() : 0 };
+    }
+    case "cell-events-stop": {
+      if (!cellEvents) return { error: "no cell-events-start before cell-events-stop" };
+      const ce = cellEvents;
+      cellEvents = null;
+      const cells: Record<string, CellSeen> = {};
+      ce.seen.forEach((s, id) => {
+        cells[id.toString(16)] = s;
+      });
+      return { ms: Date.now() - ce.startedAt, loaded: ce.loaded, cells, parent: ce.parent };
+    }
     case "watch-start": {
       const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
       const actors = new Map<number, Watched>();
@@ -2394,6 +2478,7 @@ on("update", () => {
   if (me) finishRepeat(c, me);
   if (me) readAfterRest(me);
   trackWatch();
+  trackCellEvents();
   const step = pending;
   if (!step) return;
   pending = null;
