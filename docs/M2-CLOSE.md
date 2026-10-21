@@ -76,14 +76,15 @@ Report (Eli, 18:18 PDT, docs/private/playtest-m2-28.md; the log reads by
 numidium after it): items 1 to 3 and 5 to 7 ticked; item 4 not tested by
 hand (Eli: the four bow shots in the log were a check of the marksman bug,
 not at the player; b-headshot green on the stage stands as its proof);
-item 8 ticked but for the heals (test 2's Azure Reconstruction ran in his
-own game under ADR-029's default, no Self cast reached the server, the crop
-undid the rise, and Survival on both seats left no passive regen) and the
-spells' aim (landing in different places on the two screens). Eli's calls
-at the report: heals apply by the record (Healing Hands on another player
-heals them; Azure Reconstruction does not heal a player who is not the
-caster's summon), and Finger of Death's kill is the server's, in both
-games. Both are Train-31 rows (PLAN): M2's rows, by his word, built after
+item 8 ticked but for the heals (both seats held Azure Reconstruction,
+a minion heal by its record, so the caster's own engine refused it on a
+player and the server saw no claim, right by the record; Survival on both
+seats left no passive regen) and the spells' aim (landing in different
+places on the two screens; the arrows held, Eli: "marksman check was
+great. just copy that for the spells"). Eli's calls at the report: heals
+apply by the record (Healing Hands on another player heals them; Azure
+Reconstruction does not heal a player who is not the caster's summon), and
+Finger of Death's kill is the server's, in both games. Both are Train-31 rows (PLAN): M2's rows, by his word, built after
 the close's merges and before M3's first verb, as the snap-back fix is;
 the headshot row goes to the next checklist. The findings' detail is in
 docs/research/layer-reds-2026-10-20.md. M2 is called DONE at step 5's
@@ -177,12 +178,12 @@ Survival race (lifted by the 8df default's smoke).
    b-snapback staying pending for the train after twenty-eight) runs as
    the 03:30 nightly over the stage, each of the four leaving pending as
    its probe goes green on the stage (b-hailstone is approved and on main);
-   or by name, `just sweep m2-close`, about 4 h. Then the merge order (ADR-042a, PROPOSED
-   2026-10-20 for Eli's word at the report; numidium's read of the trap:
+   or by name, `just sweep m2-close`, about 4 h. Then the merge order (ADR-042a, ACCEPTED
+   2026-10-20 18:47 on Eli's word; numidium's read of the trap:
    both clones' snapshot is the stage, layer and all, and main has no layer
    yet): `just verb-merge m2-train-30` with GATE_SET on that sweep and
    PROMOTE=0, then the layer to main citing the same sweep under the same
-   five checks, then both promotes; T2 at the head cited beside. Fallback
-   without the word: the train's merge with PROMOTE=0, then layer-merge's
-   own full sweep on a re-laid stage. Green: M2 DONE in PLAN and LOG, the
-   carries moved to M3's chart.
+   five checks, then both promotes; T2 at the head cited beside. The
+   fallback (the train's merge with PROMOTE=0, then layer-merge's own full
+   sweep on a re-laid stage) is not needed. Green: M2 DONE in PLAN and
+   LOG, the carries moved to M3's chart.
