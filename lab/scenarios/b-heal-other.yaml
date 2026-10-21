@@ -32,10 +32,14 @@ steps:
   - wait: 2
   - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
   - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
-  - c2: set-percentages {health: 0.5}
   - wait: 4
   - c1: draw-weapon
   - wait: 3
+  # c2 to half right before the hold: its own regeneration (Survival off on
+  # the clean world) climbs about 0.004 a second, 0.5277 after the seven
+  # seconds the first run waited here (20261021-041155)
+  - c2: set-percentages {health: 0.5}
+  - wait: 1
   - assert:
       - server.actor(c2).healthPercentage < 0.52
       - c2.state.healthPercentage < 0.52
