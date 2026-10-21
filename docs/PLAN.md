@@ -587,19 +587,22 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the spells; the dent gone; Survival asks no box; Hailstone's numbers on
   both seats; vanilla capes; loads and frame rate; the MCM (11 entries, the
   fixed layer woke more menus); teleports, quiver, no freeze, globals, the
-  staggered cast. Found: test 2's heals undone and no natural regen (the
-  log, numidium's read at the report: no Self cast by test 2 reached the
-  server, so Azure Reconstruction ran in test 2's own game under ADR-029's
-  default and the server cropped a rise it was never told of; Survival on
-  for both seats, 828 = 1, so no passive regen); spells landing in
+  staggered cast. Found: test 2's heals doing nothing and no natural regen
+  (both seats held Azure Reconstruction, a minion heal by its record,
+  IsCommandedActor, so the caster's own engine refuses it on a player and
+  the server saw no claim: right by the record, as Eli ruled at the
+  report; Survival on for both seats, 828 = 1, so no passive regen; the
+  heal that must work on another player is Healing Hands, Train-31's
+  row); spells landing in
   different places on different screens (the arrow-path problem for spell
   projectiles; this train records their launch angles on both screens);
   Finger of Death's ash on test 1's screen only (the documented default,
   overruled by Eli at the report: "if it kills them by effect of the
   spell, yes kill them. why on earth would i want them dead in only one
-  game"); the headshot row unticked (the log: four bow shots by test 1
-  reached the server, 18:12:47 to 18:12:59, none followed by a hit claim,
-  a verdict or a refusal; Eli's word on what he saw pending);
+  game"); the headshot row not tested by hand (Eli: the four bow shots in
+  the log were a check of the marksman bug, not at the player, and the
+  arrows landed alike on both screens; b-headshot green on the stage
+  stands);
   Teleportation missing on test 1 (lost before tonight, in the slot-shift
   days; test 2's copy mis-based by the migration of a world saved without
   its order: slice two's first row); Survival's hunger, cold and fatigue
@@ -612,19 +615,27 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         reconstruction cast on another player should not heal them.
         they're not a summon. however i should be able to cast healing
         hands on them"): the server applies a restore effect to whoever
-        the record's delivery and conditions name, the caster for a Self
-        spell and another player for Healing Hands' aimed beam, as it
-        applies a hostile effect's damage already (magic-effects.md), the
-        effect's own conditions evaluated as ADR-039 does for Hailstone
-        (Azure Reconstruction's refuse a player who is not the caster's
-        summon); a scripted heal joins the allowlist instead (the record
-        read of the three spells decides which Azure Reconstruction is);
-        the snap-back fix beneath it (fork m2-snapback eef10842,
-        b-snapback) so an applied heal survives a stale report.
+        the record's delivery and conditions name, as it applies a hostile
+        effect's damage already (magic-effects.md), the effect's own
+        conditions evaluated as ADR-039 does for Hailstone. The reads
+        (docs/research/train-31-reads.md): Azure Reconstruction is a
+        minion heal (IsCommandedActor, GetActorValuePercent), refused on a
+        player by the caster's own engine, so nothing to build beyond the
+        two functions in the evaluator; Healing Hands on another player is
+        applied end to end already (measured 0.51 to 0.77), so its row
+        fixes the two defects (a held heal counts as hostility and starts
+        a fight; the Respite slot's HasPerk refuses as E_CONDITION_UNKNOWN
+        where the record's answer is false) with the snap-back fix beneath
+        (fork m2-snapback eef10842, b-snapback) so the server's raise
+        survives the next stale report; and RunSelfSpell's
+        FireAndForget-only gate widens to Concentration so vanilla Healing
+        on yourself is the server's too.
       - spell projectiles' aim parity: the caster's launch angles sent with
         the cast and the observer's figure launching from them, as arrows do
         (docs/verbs/marksman.md's shape; the flights record of this train
-        measures the gap first).
+        measures the gap first). Eli at the report: "marksman check was
+        great. just copy that for the spells": the arrows held on both
+        screens in twenty-eight, so the row copies the arrow-path shape.
       - Survival's need globals per player (hunger, cold, fatigue values
         and their states) in the playerGlobals list, R2 (docs/verbs/
         player-globals.md), after a read of which globals the Creation
@@ -636,10 +647,32 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         kills them by effect of the spell, yes kill them"): when the
         script's kill fires in the caster's game the victim dies on the
         server and so in both games, ADR-029's first allowlist entry; the
-        shape (the kill as a claim the server validates against the
-        effect's conditions, or the server running the kill itself from
-        the hit) decided by the record and code reads, then its verb doc.
-      - the headshot row's read, once Eli says what he saw.
+        shape from the reads (docs/research/train-31-reads.md): the
+        script's kill is arithmetic on the two Health values and one
+        global (SelfDamage = 1.25 x the target's Health; the kill branch
+        when the caster survives it, else the caster to 1 and the target
+        down 0.8 of that), computed by the server (R0) from the claimed
+        hit once the effect's seven conditions hold (IsActor, GetDead,
+        three HasKeyword, IsUndead, IsEssential), as a wire-rules function
+        with T0 for both branches; the C++ side joins the headshot list's
+        shape (scriptedEffects: spell, kill: true, consulted in OnSpellHit
+        after the claim and EffectConditionsHold) and calls Kill(aggressor)
+        as the headshot does; the caster's game keeps the script's visuals
+        (its player damage yields to the server's numbers already), the
+        victim's game gets the death from the server. HYPOTHESIS:
+        WB_IsResist's default, the figure's local kill racing a differing
+        server verdict.
+      - the headshot row: not tested in twenty-eight (Eli: the bow shots
+        were a check of the marksman bug); the next checklist carries it,
+        b-headshot its proof.
+      - a relaunched game's value reports not taken (numidium's grep of
+        twenty-eight's log: after test 2's 18:08 relaunch "report before
+        the login's record was applied, not taken" three times and no new
+        "recorded N bases" line, so his reports were dropped for the rest
+        of the session; docs/research/train-31-reads.md section 3b):
+        HYPOTHESIS until the code read and a probe (relaunch c2 with the
+        server up, then a drink or a hit) name the gate; the fix with its
+        T0 and a relaunch step in a scenario.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
