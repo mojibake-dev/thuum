@@ -1,0 +1,40 @@
+# Playtest thirty's seats (thuum ADR-040 item 6: `just playtest-setup 30`; the checklist is
+# docs/private/playtest-m3-30.md): M3's first look (Eli, 2026-10-21 11:07, "go with the first one"):
+# cell hosting live on SkyMP's existing NPC copies, the server with npcEnabled on for this server alone
+# (ADR-035 point 9; lab-api's run-own settings shape, numidium). DRAFT written 2026-10-21 11:1x before
+# cell-host's stage: the build line is filled at setup with the staged head and its green probes
+# (x-cell-attach, b-cell-host, the smoke) and the merge's state. Twenty-nine's world as saved after
+# its report (nothing to repair: it was saved under the layer's order and slice one re-bases at the
+# load). No spells and no items beyond twenty-nine's: this playtest is about who runs the NPCs, not
+# the players' magic; Survival stays as the records hold it. Today's loader admits the wildlife and
+# the non-unique, non-essential NPCs whose race is not a playable one (WorldState.h's
+# bannedEspmCharacterRaceIds), so wolves, deer, skeevers, spiders and the barrow's draugr appear and
+# Riverwood's residents, the guards and the bandits do not (npc-puppet lifts those bans). Everything
+# here is server-side (labCommand through playtest-console, set-percentages); the seats type nothing.
+id: 30
+build: "fork m3-cell-host 29a7b56e (CI 2481, 2483, 2487, 2488 green) on its stage over the merged Train-31 and layer: FILLED AT SETUP with the stage's head, T2's log and the probes' runs"
+world: playtest-m2-29-20261021T053403Z   # twenty-nine's world saved 2026-10-21 05:34Z after its report
+hold:
+  minutes: 180
+  reason: "playtest thirty: M3's first look, cell hosting on the NPC copies (fork m3-cell-host)"
+server:
+  # this server alone runs with NPCs on (ADR-035 point 9): playtest-setup lays the run-own
+  # settings overlay (server-settings-run.json beside the world) and starts the server on it
+  npcEnabled: true
+camp:
+  teleports: playtest-start
+seats:
+  - profile: 1
+    name: "test 1 (rotfern)"
+    perks: []   # none: hosting needs no perk; stated per Eli's rule (2026-10-20)
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
