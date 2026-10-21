@@ -6,8 +6,9 @@ runs the gate), printing one line per check:
 1. the set is done, green or watch (ADR-027), and every gate scenario's last run in it is green;
 2. its runs played one build: the same server image id and the same clone snapshot descriptions in every
    result.json's `build`;
-3. that build is the branch's stage: the server image is skymp-server:<branch>-<sha8>, the registry still serves
-   that tag as the same id, and every description names "<branch> client <sha8>";
+3. that build is the branch's stage: the server image is skymp-server:<branch>-<sha8>, or the branch's bare tag that
+   verb-stage pins (SERVER_TAG=<branch>) with every description naming the one <sha8>; the registry still serves
+   skymp-server:<branch>-<sha8> as the same id, and every description names "<branch> client <sha8>";
 4. the branch head is that sha, or differs from it in .md files only (a change to anything that builds runs the
    gate);
 5. nothing replaced the stage after the set began: no line in /srv/lab/turbo.log since its start, and the running
@@ -52,6 +53,18 @@ def builds(rs: dict, results: dict[str, dict]) -> set:
     return out
 
 
+def staged_sha(branch: str, image: str, descs) -> str:
+    """The commit a build stages: its image's own <branch>-<sha8> tag, or, under the branch's bare tag (verb-stage's
+    SERVER_TAG=<branch>, m2-train-30's stage on 2026-10-20), the one commit the clones' descriptions name."""
+    m = re.search(rf":{re.escape(branch)}-([0-9a-f]{{8}})$", image)
+    if m:
+        return m.group(1)
+    if not image.endswith(f":{branch}"):
+        return ""
+    named = {x.group(1) for _, d in descs for x in [re.search(rf"{re.escape(branch)} client ([0-9a-f]{{8}})", d)] if x}
+    return next(iter(named)) if len(named) == 1 else ""
+
+
 def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, head8: str, changed: list[str] | None,
            registry_id: str | None, live_server: str, live_descs: dict[str, str], turbo_since: list[str]) -> list[tuple[bool, str]]:
     out = []
@@ -69,8 +82,7 @@ def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, hea
     if not one:
         return out + [(False, "3-5. not checked: no single build")]
     image, sid, descs = next(iter(bs))
-    m = re.search(rf":{re.escape(branch)}-([0-9a-f]{{8}})$", image)
-    sha8 = m.group(1) if m else ""
+    sha8 = staged_sha(branch, image, descs)
     named = bool(descs) and all(f"{branch} client {sha8}" in d for _, d in descs)
     ok3 = bool(sha8) and named and registry_id == sid
     out.append((ok3, f"3. the branch's stage: server {image.rsplit('/', 1)[-1]} ({'the registry still serves it' if registry_id == sid else 'the registry serves another id'}), "
@@ -103,14 +115,16 @@ def main(argv: list[str]) -> int:
                     results[e["run"]] = {}
     head8 = subprocess.run(["git", "-C", fork, "rev-parse", "--short=8", f"origin/{branch}"], check=True, capture_output=True, text=True).stdout.strip()
     bs = builds(rs, results)
-    image = next(iter(bs))[0] if len(bs) == 1 else ""
-    m = re.search(rf":{re.escape(branch)}-([0-9a-f]{{8}})$", image)
+    image, _, descs = next(iter(bs)) if len(bs) == 1 else ("", "", ())
+    sha8 = staged_sha(branch, image, descs)
     changed = None
     registry_id = None
-    if m:
-        d = subprocess.run(["git", "-C", fork, "diff", "--name-only", m.group(1), f"origin/{branch}"], capture_output=True, text=True)
+    if sha8:
+        d = subprocess.run(["git", "-C", fork, "diff", "--name-only", sha8, f"origin/{branch}"], capture_output=True, text=True)
         changed = [p for p in d.stdout.splitlines() if p] if d.returncode == 0 else None
-        registry_id = ssh(f"docker pull -q {image} >/dev/null && docker image inspect --format '{{{{.Id}}}}' {image}").strip() or None
+        # the commit's own tag, whichever tag the stage ran: its id is what the set's runs must have played
+        tagged = image if image.endswith(f"-{sha8}") else f"{image}-{sha8}"
+        registry_id = ssh(f"docker pull -q {tagged} >/dev/null && docker image inspect --format '{{{{.Id}}}}' {tagged}").strip() or None
     live_server = ssh("docker inspect --format '{{.Image}}' lab-skymp-server-1").strip()
     live_descs = {}
     for c, vmid in CLONES.items():

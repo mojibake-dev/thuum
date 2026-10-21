@@ -234,20 +234,75 @@ each read:
   HDPT 0xEC1B2's PNAM). Decision: the train stays m2-train-30; the crash
   reruns once as the risk for twenty-eight (Eli's rotfern look on test 2's
   figure under this layer); the scenario stays pending on the head-parts
-  assert.
+  assert. The rerun, 20261021-004815: NO crash (no crash file, no relaunch,
+  every known and view assert held; the one failure the head-parts
+  derivation gap), so the skee64 crash was a one-off; the seats proceed.
 - b-figure-values 003901: no dent. The figure's health in c1's game fell 38
   times (the three hits as declines of 1.7 down to 0.6 over about 1.4 s
   each) and rose 30 times, every rise between 0.009 and 0.048 (the figure's
   own regeneration between the server's reports); the end values agreed.
   The assert counted the jitter: it becomes rises("health", 1) == 0 with
-  lab-api's threshold argument (branch scenario-b-figure-values-rises).
+  lab-api's threshold argument (lab-api main a69d91d; scenario on main
+  cb9e4e00); the probe reruns when the lab-api image swaps after
+  twenty-eight.
+- b-god 20261021-004426 GREEN with the shooter at 150 units.
 - b-hailstone 004204: row 1 (the Nord at the Orc) green at 0.85; row 2 (the
   Orc at the Nord) 0.7892 = 15 x 0.5 + 15 less the wait's regeneration: both
   effects applied, the base effect's gate fired on the Nord's 50 ResistFrost
   (the race's abilities read) and was halved, the Shatter went through
-  whole. Decider: the Shatter MGEF's DATA (flags, resist value): not Hostile
-  or not frost means the server is faithful to the record and the row's band
-  moves to 0.775; Hostile with resist 43 means a resist-branch fix.
+  whole. The record (numidium's esm.py): the base effect has NO
+  resist value and the Shatter is resisted by ResistFrost, so the engine
+  halves the Shatter and lets the base effect through, the server's own
+  total; the band follows the record (main 053dd276) and the rerun
+  20261021-005051 is GREEN.
+
+## Playtest twenty-eight's findings as they land (2026-10-20 evening)
+
+- 18:12, Eli: "rotfern is missing teleport" after the server restart and
+  the reconnect. numidium's read: twenty-seven's raw snapshot
+  (playtest-m2-27-20261020T183558Z) already held 15 learned spells for
+  profile 1 and no Teleportation, so test 1's loss predates tonight (the
+  slot-shift days, the very case ADR-043 ends); re-taught server-side at
+  18:13 (0x280A86DF). Profile 2's record holds 'a86df:Cloaks.esp', a
+  mis-based FormDesc: its raw 0x0B0A86DF was written under the no-layer
+  order (LostGrimoire at 0x0B there, Cloaks.esp at 0x0B under the layer),
+  and setup's migration of a world with NO saved order re-based from the
+  running order (RecordReader.h:12-16, the only choice without a saved
+  order), so it landed on Cloaks.esp and nothing was parked, since
+  Cloaks.esp exists. Slice one's weak case: a raw world whose records were
+  written across two orders cannot be re-based by one assumed order. ADR-043
+  slice two's first row: a repair for the lab's legacy worlds (the ids the
+  no-layer era wrote outside the slots the two orders share), while worlds
+  saved by the slice carry their order from now on, so the case cannot
+  recur. Re-taught to profile 2 too; the dangling entry to clean after.
+  The 28.yaml spell lists did not carry Teleportation (as 27's did not),
+  so it alone depended on the record; the setup's learn-spell adds and
+  never replaces, and the reconnect sync is cleared of this one.
+- Setup's gives stack on a restored world across playtests (4 iron swords,
+  3 capes on test 1; 3 cloaks on test 2): the setup's give becomes
+  idempotent, topping up to a count (numidium, main 485c4ee).
+- 18:18, Eli's report: "test 2's heals are getting rejected by the server.
+  nor is his health ticking up naturally". numidium's read of the server
+  log (00:58 to 01:30Z, kept as /srv/lab/handover/pt28-server.log): no Self
+  cast by ff000001 reached the server, no Azure Reconstruction (0x1A088694)
+  line anywhere, no refusal but the three ADR-039 E_CONDITION_UNKNOWN 448s,
+  no ChangeValues or crop line at info; test 2's only restore was a bed
+  ("Rest: ... slept 1 h, percentages now 1 1 1"). So Apocalypse's heal ran
+  in test 2's own game under ADR-029's default (the caster's game runs its
+  own spells' scripts) and the server, never told, cropped the reported rise
+  back to its regeneration model; and Survival Mode is ON for both seats
+  (playerGlobals 828 = 1 in both records, sent at the logins), which
+  disables passive health regeneration. Not a regression against
+  twenty-seven; visible now because test 2 tried to heal. The row: the
+  allowlisted self-heal (the server applies Azure Reconstruction as a Self
+  effect) with the snap-back fix beneath it (docs/PLAN.md, Train-31).
+- 18:18, the headshot row unticked without a note: the log read is pending
+  the right shooter (test 1 holds the bow in 28), and Eli's word on what he
+  saw.
+- Cosmetic, from the log: after the 18:02 restart the user numbers swapped
+  with connect order (user 1 is whoever connects first); after test 2's
+  relaunch "report before the login's record was applied, not taken" is the
+  login hold working.
 
 ## Consequence for M2's close
 

@@ -104,8 +104,11 @@ def camp_teleports(root: Path = ROOT) -> list[dict[str, Any]]:
     return out
 
 
-def seat_commands(seat: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
-    """A seat's server-side sets as labCommand payloads, in order: spells, values, items."""
+def seat_commands(seat: dict[str, Any], have: dict[int, int] | None = None) -> list[tuple[str, dict[str, Any]]]:
+    """A seat's server-side sets as labCommand payloads, in order: spells, values, items. An item's count is what
+    the seat should carry: given `have` (what it carries now, by base id), only the shortfall is added, since a
+    restored world keeps the last playtest's items and a plain add grew the piles (playtest 28's test 1 at four iron
+    swords and three capes, 2026-10-20)."""
     prof = seat["profile"]
     out = []
     for sp in seat.get("spells") or []:
@@ -113,7 +116,9 @@ def seat_commands(seat: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     for name, v in (seat.get("values") or {}).items():
         out.append((f"SetAV {name} {v}", {"kind": "console", "profileId": prof, "name": "SetAV", "args": [PLAYER, name, v]}))
     for it in seat.get("items") or []:
-        out.append((f"AddItem {it['id']:#x} {it.get('count', 1)}", {"kind": "console", "profileId": prof, "name": "AddItem", "args": [PLAYER, it["id"], it.get("count", 1)]}))
+        n = it.get("count", 1) - (have or {}).get(it["id"], 0)
+        if n > 0:
+            out.append((f"AddItem {it['id']:#x} {n}", {"kind": "console", "profileId": prof, "name": "AddItem", "args": [PLAYER, it["id"], n]}))
     return out
 
 
@@ -207,7 +212,7 @@ def setup(n: int) -> int:
         prof = seat["profile"]
         print(f"== profile {prof}: {seat.get('name', '')} {time.strftime('%H:%M:%S')}", flush=True)
         before = {it["id"]: _count(prof, it["id"]) for it in seat.get("items") or []}
-        for label, payload in seat_commands(seat):
+        for label, payload in seat_commands(seat, before):
             ans = command(payload)
             (rep.ok if ans.get("ok") else rep.fail)(f"{label}" + ("" if ans.get("ok") else f": {ans}"))
         time.sleep(2)
@@ -216,7 +221,7 @@ def setup(n: int) -> int:
             (rep.ok if isinstance(got, (int, float)) and abs(got - v) < 1e-3 else rep.fail)(f"{name} reads {got} on the server (wanted {v})")
         for it in seat.get("items") or []:
             got = _count(prof, it["id"])
-            want = before[it["id"]] + it.get("count", 1)
+            want = it.get("count", 1)
             (rep.ok if got >= want else rep.fail)(f"carries {got} of {it['id']:#x} (had {before[it['id']]}, wanted {want})")
         if seat.get("percentages"):
             _set_bars(rep, prof, {k: float(v) for k, v in seat["percentages"].items()})

@@ -9,7 +9,7 @@
 # playtest-console, set-percentages); the one thing a seat types itself is test 1's `player.addperk 7934b`
 # (Overdraw40, the headshot rule's perk, which lives in the shooter's game).
 id: 28
-build: "(filled at setup: fork m2-train-30 on its stage under the merged essentials layer)"
+build: "fork m2-train-30 44372078 (CI 2349, T2 32 identical) on stage-layer-train30 893170e: apocrypha's essentials layer c38a3b04 (the 0x7 drop, the head parts on their masters' bits, RaceMenu's menu loose)"
 world: playtest-m2-27-20261020T183558Z   # twenty-seven's world, saved 11:35 PDT after its checklist (Survival answered on both seats, the Apocalypse MCM global 40bef)
 hold:
   minutes: 180
