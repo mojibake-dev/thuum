@@ -201,9 +201,19 @@ the host's stream keeps its own budgets.
   { player, cell, now }, Unloaded { player, cell, now }, Gone { player, now }
   (PartOne.cpp:609-632's disconnect, which releases nothing today,
   skymp-hosting.md:111-114), Reach { player, cells } (the server's 3x3 for
-  that player), Rtt { player, ms } (renet's per-client round trip; no
-  accessor is read in wire-transport or wire-bridge today, to confirm against
-  the pinned renet, ADR-015), Tick { now }. Decisions: Grant { player, cell,
+  that player), Rtt { player, ms } (renet 2.0.0's RenetServer::rtt(client),
+  seconds as f64, the smoothed ack round trip (remote_connection.rs:444-465,
+  an EWMA 0.875/0.125), exposed as wire-transport Server::client_rtt_ms
+  (None unless connected; try_from_secs_f64, no `as`), mirrored in
+  wire-bridge beside client_ip, read in C++ as IServer::GetRttMs(userId)
+  through WireServer's clientsByUser table (WireServer.cpp:191-229); nothing
+  of it exists today. HYPOTHESIS from the static read, load-bearing beyond
+  this verb: wire-transport's poll calls transport.update(dt, renet) and
+  never renet.update(dt) (lib.rs:330, :582), so renet's connection clock
+  may stand at zero, which would read every rtt as 0 and, worse, never
+  resend a lost reliable packet (reliable.rs:112-113, :158-159) nor time a
+  connection out; settled by the read of renet's update and a T2 before
+  this verb leans on the round trip), Tick { now }. Decisions: Grant { player, cell,
   epoch }, Release { player, cell, epoch }, Unhosted { cell }. Rules: a cell
   with no host goes to the first Loaded whose Reach holds it, epoch plus one;
   the host's Unloaded or Gone arms GRACE_MS; a Loaded from the same host
@@ -216,10 +226,20 @@ the host's stream keeps its own budgets.
   cpp:58-106), GetActorToSendTo (MpActor.cpp:527-528: Teleport, ChangeValues,
   the death state, snippets; DelegateToHost PapyrusActor.cpp:189-195) and
   UpdateHoster (MpObjectReference.cpp:736-737) resolve through
-  host_of(cell_of(npc)). cell_of: the record's worldOrCell for an interior;
-  for an exterior the CELL at (worldspace, floor(x/4096), floor(y/4096))
-  from the masters' XCLC (lab/esm.py reads it, riverwood-ids.md:3-5; whether
-  libespm's browser indexes it is unread: HYPOTHESIS, code). The cell-change
+  host_of(cell_of(npc)). cell_of: the record's worldOrCell for an interior
+  (a CELL); for an exterior (a WRLD) the CELL at (worldspace,
+  floor(x/4096), floor(y/4096)) through libespm's index of every exterior
+  CELL's XCLC, built at load (Browser.cpp:297-313, the key
+  NavMeshKey(world, grid); FindExteriorCell Browser.cpp:106-115, by load
+  order CombineBrowser.cpp:110-125, the last file winning), exactly as
+  GetParentCell resolves it (PapyrusObjectReference.cpp:815-834, floor, the
+  2026-10-04 NATIVES decision); a null LookupResult means no CELL at that
+  square in any file: unhostable, not 0. The server's own 4096-unit chunks
+  truncate toward zero (MpObjectReference.cpp:152-155), a neighbourhood
+  heuristic that stays as it is; cell_of floors, as the engine's grid does
+  (cell -1 spans -4096 to 0). HYPOTHESIS, a cheap T0: a worldspace's
+  persistent CELL under WORLD_CHILDREN carrying an XCLC takes a map slot.
+  The cell-change
   rule: a hosted NPC's report naming another cell is accepted when the sender
   hosts the destination and the origin is unhosted or the sender's
   (MovementValidation.cpp:96-101 relaxed for that case alone, logged);
