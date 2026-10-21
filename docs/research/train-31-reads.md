@@ -499,3 +499,9 @@ lines from 05:02:10Z):
    ff000000 near either. "Dies on both" is the target's death on both
    screens; "ash only on player 1's screen" is the disintegration not
    played in the victim's own game: the visual relay row.
+5. Eli, 22:42, correcting his report: the Survival needs row should not
+   be ticked, "those reset when test 2 came back": the three need values
+   did not survive test 2's relaunch. The stage's settings carried 58
+   player globals (the three among them), so the read (asked of numidium)
+   decides between the seats never reporting the three, the login not
+   sending them, and the Creation's start overwriting a restored value.

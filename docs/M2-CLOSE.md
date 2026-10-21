@@ -130,7 +130,10 @@ stage's probes found the caster dying with its target and the bolt's origin
 offset, both fixed and probed green before he resumed): items 1 to 3 and 5
 to 8 ticked; item 4 marked unsure ("unsure what this is testing"), proven by
 the lab (b-relaunch-reports 20261021-041549) and the live log of test 2's
-22:12 relaunch (its reports taken at once). Notes that are rows, none a
+22:12 relaunch (its reports taken at once). Corrected at 22:42: section 2's
+Survival needs row is a NO ("those reset when test 2 came back"), so the
+need-globals row of Train-31 is not met and reopens for the next train (the
+log read says which side lost the values). Notes that are rows, none a
 fail by the checklist's own rule: the victim's game plays a plain death
 where the caster's shows the ash pile; Flames' stream lands in different
 places on the two screens while the bolts now match; Prepare for Adventure's
