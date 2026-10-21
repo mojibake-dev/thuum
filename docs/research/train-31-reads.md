@@ -433,3 +433,11 @@ echo (the hold's merge keeps a held value the report does not carry; the
 read says which side dropped it: the client applying the record's 120 over
 the set's 400 before echoing, or the hold not armed by the setup's path).
 Setup's workaround: set the values after the echo.
+
+Found during twenty-nine (Eli, 22:05): Become Ethereal on the other screen
+shows the wisps and not the translucency ("player two has whisps but never
+actually goes transparent"), so of the two visible effects of the shout only
+one reaches the figure. A row for the next train (PLAN); the record read of
+the word's spell 0x5F6EB and its effects decides whether a second MGEF or
+shader is missing from the relay or the Etherealize archetype's translucency
+is applied by a path the figure's cast misses.
