@@ -353,10 +353,10 @@ the host's stream keeps its own budgets.
 
 Doc drafted 2026-10-21, before any code.
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references, to be re-read on the merged base)
+- [x] engine surface cited or delegated (the cell events and getters through Skyrim Platform; cell_of through libespm's index; the AI switches npc-puppet's)
+- [ ] server logic + T0 (the cell host table: wire-rules cells with six T0, fork m3-cell-host afc792c1; the bridge, PartOne's integration and the grants' senders next)
+- [x] message + validator (same commit): CellLoaded 47, HostGrant 48, HostRelease 49 with their validators, JSON forms, fixtures and C++ structs, fork m3-cell-host ea0e24d3
 - [ ] native hook + T1 (none: events through Skyrim Platform)
 - [ ] TS handler
 - [ ] T2 green
