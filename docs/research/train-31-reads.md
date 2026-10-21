@@ -362,3 +362,20 @@ the recomposed id), AMBIGUOUS; a repaired copy under --out, never in place;
 --drop-unfixable --no-rebase reproduces the hand clean; raw records written
 as formVersion 2 with the target load-order.json. It runs on sky-srv beside
 the plugins, as load-order-check.py does.
+
+Run (numidium, 2026-10-20 20:17 PDT, sky-srv): on the raw
+playtest-m2-28-20261021T012414Z with its own 91-file order and main's
+17-file settings as the candidate, records from the 93 plugins under
+/srv/persist/esm/1.6.1170: "verdicts: OK 222, MISBASED 9", all nine in
+1.json's learnedSpells and all named: a86df:Cloaks.esp is LostGrimoire's
+GRIM_SPELL_ALT50_Teleportation; the eight Cloaks - Dawnguard.esp entries
+are Apocalypse's ShockNova (186d), Ghostwalk (aae8), Decompose (1f1fb),
+Scattershock_NPC (24e49), Hailstone_NPC (2e634), Battletide (5ecee),
+StaticDome (83a22) and AzureReconstruction (88694). The tool refuses an
+--out under /srv/lab/snapshots by its own rule, so the copy was written
+under /srv/lab/handover/world-repair/ and placed as
+/srv/lab/snapshots/playtest-m2-28-repaired-20261021T031739Z the way
+playtest-world.sh saves one (8 records, 1 changed; 1.json's learnedSpells
+14, the four re-taught copies merged, five spells back to test 2). It is
+twenty-nine's world (lab/playtests/29.yaml, main 38bef46); the hand-cleaned
+copy stays unused.
