@@ -1009,6 +1009,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the non-host games, the cleaner and the copies retired, the loader's
   bans lifted; its code waits on the re-analyst's prototypes (41370,
   41453, 37356) and cell-host's probes.
+  cell-host DONE 2026-10-21 13:47: fork parity 535544db, b-cell-host green
+  twice on its stage and in the gate, T2 33 identical, the verb doc closed
+  (docs/verbs/cell-host.md; three lab fixes on the way: the CellLoaded
+  budget 128 then 32, the client's 30 s refresh of its loaded set, a copy
+  disabled before its delete and the cleaner's double-pick guard; the
+  tags carried by name: H5 a third seat's, H6 and H7 npc-stream's, H8
+  npc-handoff's). The transport clock fix landed with it.
   NEXT PLAYTEST (Eli, 2026-10-21 11:07, "go with the first one"): M3's
   first look, playtest thirty: cell hosting live on SkyMP's existing NPC
   copies, the server with npcEnabled on (today's loader admits the
