@@ -52,6 +52,9 @@
   "bonds": [
     {"spell": "31C4D:Apocalypse - Magic of Skyrim.esp", "proc": "55B32:Apocalypse - Magic of Skyrim.esp"}
   ],
+  "scriptedEffects": [
+    {"spell": "35452:Apocalypse - Magic of Skyrim.esp", "kill": "fingerOfDeath"}
+  ],
   "headshot": {
       "spells": [
           "801:Headshot Kills.esp"
@@ -125,6 +128,9 @@
     "01751f:Apocalypse - Magic of Skyrim.esp",
     "017520:Apocalypse - Magic of Skyrim.esp",
     "01a60e:Apocalypse - Magic of Skyrim.esp",
+    "81a:ccQDRSSE001-SurvivalMode.esl",
+    "81b:ccQDRSSE001-SurvivalMode.esl",
+    "816:ccQDRSSE001-SurvivalMode.esl",
     "828:ccQDRSSE001-SurvivalMode.esl",
     {"global": "8df:ccQDRSSE001-SurvivalMode.esl", "default": 1}
   ],
