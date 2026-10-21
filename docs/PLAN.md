@@ -960,11 +960,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   8f17d7a4), the bridge's Cells, the core's integration (9aadeaea:
   CellOf and HostOf, the facts, HostGrant and HostRelease sent, the
   hosted flag frozen by default, the cell-change rule, Host 14 ignored,
-  the hosters map retired, CellHostTest). Next: the client's HostService
-  (CellLoaded from cellFullyLoaded plus the attach poll, the grants with
-  the monotonic epoch, isHostedHere; tryHost and HostStart/HostStop
-  handling retired), the round trip through the bridge after
-  wire-renet-clock merges, then x-cell-attach.
+  the hosters map retired, CellHostTest), then the client's HostService
+  (5f10768c, 07:22: CellLoaded from cellFullyLoaded plus the attach poll,
+  the grants with the monotonic epoch, isHostedHere and isMine at the four
+  sites; tryHost and the HostStart/HostStop handling retired; tsc clean).
+  Next: CI green on 8145082b, the round trip through the bridge after
+  wire-renet-clock merges, the lab's cell-events driver step and
+  server.host fact, then x-cell-attach and b-cell-host.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any

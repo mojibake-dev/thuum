@@ -9,6 +9,8 @@
 //   labState   {kind: "actor" | "inventory" | "online", profileId}
 //              {kind: "time"}: the server's game clock now
 //              {kind: "spell", formId}: a spell's effects and their MGEFs as the server resolves them
+//              {kind: "cellHost", cell}: who hosts the cell on the server (docs/verbs/cell-host.md)
+//              {kind: "ref", actorId}: an actor's record by form id (a hosted NPC's position and health)
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -129,6 +131,51 @@ const state = {
   online() {
     const ids = mp.get(0, "onlinePlayers") || [];
     return { players: ids.map((actorId) => ({ actorId, profileId: mp.get(actorId, "profileId") })) };
+  },
+
+  // Who hosts a cell on the server (docs/verbs/cell-host.md): the host
+  // table's row for the cell, {found, cell, hosted, actorId, epoch}; a cell
+  // the table never granted is {found: true, hosted: false, actorId: 0,
+  // epoch: 0}; a server without the property answers found: false
+  cellHost(payload) {
+    const cell = Number(payload.cell);
+    let rows;
+    try {
+      rows = mp.get(0, "cellHosts") || [];
+    } catch (e) {
+      return { found: false, cell, error: String((e && e.message) || e) };
+    }
+    const row = rows.find((r) => Number(r.cell) === cell);
+    return {
+      found: true,
+      cell,
+      hosted: row ? Boolean(row.hosted) : false,
+      actorId: row ? Number(row.player) : 0,
+      epoch: row ? Number(row.epoch) : 0,
+    };
+  },
+
+  // An actor's record by form id (a hosted NPC's position and health, the
+  // freeze's evidence while its cell is unhosted): the same fields as
+  // `actor` reads for a player, without the appearance verdicts
+  ref(payload) {
+    const actorId = Number(payload.actorId);
+    const loc = mp.get(actorId, "locationalData");
+    if (!loc || !Array.isArray(loc.pos)) return { found: false, actorId };
+    const pct = mp.get(actorId, "percentages") || {};
+    return {
+      found: true,
+      actorId,
+      x: loc.pos[0],
+      y: loc.pos[1],
+      z: loc.pos[2],
+      rot: loc.rot,
+      cell: loc.cellOrWorldDesc,
+      isDead: Boolean(mp.get(actorId, "isDead")),
+      healthPercentage: pct.health,
+      magickaPercentage: pct.magicka,
+      staminaPercentage: pct.stamina,
+    };
   },
 
   // The server's game clock (docs/verbs/time.md): year, month (from 0), day,

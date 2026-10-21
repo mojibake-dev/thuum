@@ -154,6 +154,9 @@ class ActorView:
     cell: str
     isDead: bool | None = None
     healthPercentage: float | None = None
+    # the other two bars as the server holds them (b-snapback reads stamina's hold)
+    magickaPercentage: float | None = None
+    staminaPercentage: float | None = None
     hasAppearance: bool | None = None
     raceId: int | None = None
     sex: int | None = None
@@ -792,6 +795,8 @@ class _ServerRef:
                 float(d["x"]), float(d["y"]), float(d["z"]), str(d["cell"]),
                 isDead=_opt_bool(d.get("isDead")),
                 healthPercentage=_opt_float(d.get("healthPercentage")),
+                magickaPercentage=_opt_float(d.get("magickaPercentage")),
+                staminaPercentage=_opt_float(d.get("staminaPercentage")),
                 hasAppearance=_opt_bool(d.get("hasAppearance")),
                 raceId=_opt_int(d.get("raceId")),
                 sex=_opt_int(d.get("sex")),
@@ -1434,7 +1439,8 @@ class _ClientRef:
 
 _ATTRS = {
     _ParityRef: {"findings", "ok", "report"},
-    ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "hasAppearance", "raceId", "sex",
+    ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage",
+                "hasAppearance", "raceId", "sex",
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
                 "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
