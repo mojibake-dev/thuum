@@ -505,3 +505,13 @@ lines from 05:02:10Z):
    player globals (the three among them), so the read (asked of numidium)
    decides between the seats never reporting the three, the login not
    sending them, and the Creation's start overwriting a restored value.
+   numidium's read (22:50): at test 2's relaunch login the server sent
+   "58 to watch, 5 values" (the three needs among them), and ff000001's
+   reports resumed at 05:16:02 and ran to 40 by 05:25:31; the log prints
+   counts, not values; the saved record at 05:34 has test 2 at 81a 433.75,
+   81b 0.0, 816 187.0. So the server sent and the seat reported; what is
+   left is the Creation's start on the fresh generated save resetting the
+   needs after the restored values landed, and the seat reporting its own
+   reset values over them. Probe x-survival-needs-relaunch tomorrow (known
+   values, a relaunch, the three read at +5, +30 and +90 s) decides which
+   tick; the fix shape is a client re-apply after the need quests start.

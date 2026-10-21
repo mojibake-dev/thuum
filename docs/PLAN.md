@@ -669,7 +669,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         test 2's relaunch; NOT met. The log read (asked) says whether the
         seats ever reported the three, what the login sent back, or
         whether the Creation's start overwrote a restored value; the row
-        stays open for the next train.
+        stays open for the next train. The read (numidium, 22:50): the
+        server sent the three at test 2's relaunch login ("sent 58 to
+        watch, 5 values", 05:13:19) and the seat reported about every 40 s
+        after, so neither side dropped them; the log carries counts, not
+        values, and what is left is the Creation's start on the fresh save
+        writing the defaults over the restored values before the first
+        report. Probe x-survival-needs-relaunch tomorrow on the train-31
+        stage (c2 with known need values, relaunched, the three read in its
+        game at +5, +30 and +90 s against the record); the likely fix on
+        the client side of player-globals: re-apply the three once the
+        toggle has started the need quests.
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
