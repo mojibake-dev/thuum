@@ -52,7 +52,8 @@ build). Both were DONE for 1d88a6b7 on 2026-10-20 (pipeline 2309 green in
 every job; T2 at 16:05 PDT identical across 32 sessions); the head then
 moved once, to 44372078 at 16:51, for clang-format alone (the fork's
 Formatting check, three files, no code change), so its pipeline and a T2
-at 44372078 are the ones the merge cites (ADR-042 check 4).
+at 44372078 are the ones the merge cites (ADR-042 check 4); pipeline 2349
+green in every job at 17:13, the Windows client included.
 
 ## 3. Playtest twenty-eight (T4, Eli, both seats, on the train's stage)
 
