@@ -515,3 +515,10 @@ lines from 05:02:10Z):
    reset values over them. Probe x-survival-needs-relaunch tomorrow (known
    values, a relaunch, the three read at +5, +30 and +90 s) decides which
    tick; the fix shape is a client re-apply after the need quests start.
+6. Eli, 22:58, on the grants read: "not necessarily, because the player one
+   equipped those spells and that was visible to player 2. that's allowed
+   to be non server authoritative. something like that is perfectly fine
+   riding on the existing functionality." So the granted spell's equip
+   rode the equipment relay to test 2's screen (the server never taught or
+   saw the spell, and need not); the grants class is not a row, by his
+   call, and the census tag reads so.

@@ -802,14 +802,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         run on the server, no refusal; the perk is the caster's game's);
         his death to Hailstone during the 15 s hid it.
       - the grants class (Thoughtsteal, Inferno, Knowledge is Power,
-        Meridia's Wrath): the log read: the granted spell never reached the
-        server (no cast of it, no equip refusal), so "it worked just fine"
-        was test 1's own screen; the census tag ("the server refuses its
-        equip") is wrong on the mechanism. Row: a script-granted spell
-        reaches the server when granted (the client reports the spell-list
-        change the way the login sync does), so its casts relay. Also
-        Thoughtsteal's effect on the target refused on function 570,
-        unknown to the evaluator (ADR-039), read with the row.
+        Meridia's Wrath): NOT a row. The log read found no cast of the
+        granted spell at the server, and Eli corrected my reading (22:58):
+        "the player one equipped those spells and that was visible to
+        player 2. that's allowed to be non server authoritative. something
+        like that is perfectly fine riding on the existing functionality":
+        the granted spell's equip rides the equipment relay to the other
+        screen, and that is the class's design. The census tag ("the
+        server refuses its equip") is corrected to that. Thoughtsteal's
+        effect on the target refused on function 570, unknown to the
+        evaluator (ADR-039): a note, nothing applied for a script effect
+        anyway.
       - the login echo over a server set (section above) and Become
         Ethereal's translucency (section above).
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
