@@ -515,7 +515,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         per-figure rune cap in the observer's game.
       - Finger of Death's kill: the allowlisted server-side kill (ADR-029's
         ground; MpActor::Kill is the primitive) with the client's script
-        blanked, or the ash pile stays as the documented default.
+        blanked. Not built in Train-30; the default stood into playtest
+        twenty-eight, where Eli ruled the kill ("if it kills them by effect
+        of the spell, yes kill them"): Train-31's row.
       - Hailstone and kin: GetActorValue (14) and HasMagicEffect (214) as
         server condition functions, since Hailstone's own effects gate on
         them and apply nothing today (spell-cast.md). BUILT 2026-10-20 on
@@ -585,13 +587,19 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the spells; the dent gone; Survival asks no box; Hailstone's numbers on
   both seats; vanilla capes; loads and frame rate; the MCM (11 entries, the
   fixed layer woke more menus); teleports, quiver, no freeze, globals, the
-  staggered cast. Found: test 2's heals rejected by the server and no
-  natural regen (read, HYPOTHESIS until the log: Survival's no passive
-  regen plus Azure Reconstruction refused by ADR-029's default, the crop
-  undoing the local heal); spells landing in different places on different
-  screens (the arrow-path problem for spell projectiles; this train records
-  their launch angles on both screens); Finger of Death's ash on test 1's
-  screen only (the documented default); the headshot row unticked (asked);
+  staggered cast. Found: test 2's heals undone and no natural regen (the
+  log, numidium's read at the report: no Self cast by test 2 reached the
+  server, so Azure Reconstruction ran in test 2's own game under ADR-029's
+  default and the server cropped a rise it was never told of; Survival on
+  for both seats, 828 = 1, so no passive regen); spells landing in
+  different places on different screens (the arrow-path problem for spell
+  projectiles; this train records their launch angles on both screens);
+  Finger of Death's ash on test 1's screen only (the documented default,
+  overruled by Eli at the report: "if it kills them by effect of the
+  spell, yes kill them. why on earth would i want them dead in only one
+  game"); the headshot row unticked (the log: four bow shots by test 1
+  reached the server, 18:12:47 to 18:12:59, none followed by a hit claim,
+  a verdict or a refusal; Eli's word on what he saw pending);
   Teleportation missing on test 1 (lost before tonight, in the slot-shift
   days; test 2's copy mis-based by the migration of a world saved without
   its order: slice two's first row); Survival's hunger, cold and fatigue
@@ -600,11 +608,19 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   m2-close nightly over this stage and the merges per ADR-042a follow.
     - Train-31 (the rows of twenty-eight's report, for the train after the
       close; each to its verb doc as it is built), in build order:
-      - the allowlisted self-heal: Azure Reconstruction (and vanilla
-        Healing's shape checked) applied by the server as a Self effect
-        under ADR-029's allowlist, with the snap-back fix (fork m2-snapback
-        eef10842, b-snapback) so an applied heal is not undone by a stale
-        report; the first allowlist entry, pulled from M3 by the report.
+      - heals by the record (Eli at the report, 2026-10-20: "azure
+        reconstruction cast on another player should not heal them.
+        they're not a summon. however i should be able to cast healing
+        hands on them"): the server applies a restore effect to whoever
+        the record's delivery and conditions name, the caster for a Self
+        spell and another player for Healing Hands' aimed beam, as it
+        applies a hostile effect's damage already (magic-effects.md), the
+        effect's own conditions evaluated as ADR-039 does for Hailstone
+        (Azure Reconstruction's refuse a player who is not the caster's
+        summon); a scripted heal joins the allowlist instead (the record
+        read of the three spells decides which Azure Reconstruction is);
+        the snap-back fix beneath it (fork m2-snapback eef10842,
+        b-snapback) so an applied heal survives a stale report.
       - spell projectiles' aim parity: the caster's launch angles sent with
         the cast and the observer's figure launching from them, as arrows do
         (docs/verbs/marksman.md's shape; the flights record of this train
@@ -616,8 +632,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
-      - Finger of Death's allowlisted kill, if Eli wants it in M2 (else the
-        documented default stands).
+      - Finger of Death's kill as the server's (Eli at the report: "if it
+        kills them by effect of the spell, yes kill them"): when the
+        script's kill fires in the caster's game the victim dies on the
+        server and so in both games, ADR-029's first allowlist entry; the
+        shape (the kill as a claim the server validates against the
+        effect's conditions, or the server running the kill itself from
+        the hit) decided by the record and code reads, then its verb doc.
       - the headshot row's read, once Eli says what he saw.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
