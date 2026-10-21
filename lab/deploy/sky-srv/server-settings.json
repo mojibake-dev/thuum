@@ -132,7 +132,10 @@
     }
   ],
   "scriptedEffects": [
-    {"spell": "35452:Apocalypse - Magic of Skyrim.esp", "kill": "fingerOfDeath"}
+    {
+      "spell": "35452:Apocalypse - Magic of Skyrim.esp",
+      "kill": "fingerOfDeath"
+    }
   ],
   "headshot": {
     "spells": [
