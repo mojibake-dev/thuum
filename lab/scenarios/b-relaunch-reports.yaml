@@ -1,0 +1,59 @@
+# M2, train-31 (docs/verbs/actor-values.md, "The login hold and a relaunch";
+# playtest twenty-eight's test 2, numidium's probe x-relaunch-reports-b
+# 20261021-015600): a game relaunched with the server up, holding user 1 as
+# the seat did after the 18:02 restart, had its actor-value reports refused
+# for the rest of its session ("report before the login's record was applied,
+# not taken"). The server sets c2's One-Handed to 45 (a-actor-values' shape),
+# the server restarts and c2 reconnects first, then c2's game relaunches: the
+# login's record brings the 45 back. Then the server sets One-Handed to 50:
+# the relaunched game applies it and its report must carry it into the record
+# (the client's echo of the applied record, which also ends the login hold);
+# a second restart and relaunch shows what the record holds. Red before the
+# train: the relaunched game's reports refused, the 50 held but never
+# recorded, lost with the restart, and the second relaunch reads 45.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-relaunch-reports
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 1200
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c2: papyrus-av {how: set, name: OneHanded, value: 45}
+  - wait: 3
+  - c2: skills {names: [OneHanded]}
+  - assert:
+      - c2.skill("OneHanded").base == 45
+  - server: restart
+  - wait: 20
+  # c2 first: it holds user 1, as test 2 did
+  - c2: reconnect
+  - wait: 3
+  - c1: reconnect
+  - wait: 15
+  # the game relaunched with the server up; the login's record applies
+  - c2: relaunch
+  - wait: 25
+  - c2: skills {names: [OneHanded]}
+  - assert:
+      - c2.skill("OneHanded").base == 45
+  # a value set after the relaunch: the relaunched game's report carries it
+  - c2: papyrus-av {how: set, name: OneHanded, value: 50}
+  - wait: 5
+  - c2: skills {names: [OneHanded]}
+  - assert:
+      - c2.skill("OneHanded").base == 50
+  # what the record holds: a fresh save shows only what the server sends
+  - server: restart
+  - wait: 20
+  - c2: relaunch
+  - wait: 25
+  - c2: skills {names: [OneHanded]}
+  - assert:
+      - c2.skill("OneHanded").base == 50
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
