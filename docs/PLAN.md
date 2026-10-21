@@ -612,7 +612,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
     - Train-31 (the rows of twenty-eight's report; the closing train since
       Eli's "lets aim to close this out on test 29": fork m2-train-31,
       head 3b579f41 on 2026-10-20 20:10, every row below BUILT with its T0,
-      pipeline green, T2 from the lab side; it stages on the morning's
+      pipeline 2423 green, T2 32 of 32 identical at 20:45: stage-ready; it
+      stages on the morning's
       merged base and playtest twenty-nine runs on it; each row to its
       verb doc as built), in build order:
       - heals by the record (Eli at the report, 2026-10-20: "azure
