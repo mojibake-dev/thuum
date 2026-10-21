@@ -228,6 +228,7 @@ class Runner:
     def release(self) -> dict[str, Any]:
         self.hold_until = None
         self.hold_reason = ""
+        self.board.forget_perks()  # a playtest's seats are its own
         self.touch()
         return self.hold_status()
 
@@ -265,6 +266,8 @@ class Runner:
         rec = RunRecord(run_id=run_id, scenario=scenario, dir=run_dir, started_at=_iso(self._wall()), game=version)
         self.runs[run_id] = rec
         self.active = rec
+        # a run's clients get only its own steps, never a playtest's kept perks
+        self.board.forget_perks()
         return rec
 
     async def execute(self, rec: RunRecord) -> RunRecord:
@@ -396,6 +399,7 @@ class Runner:
             "netem": self.netem_active,
             "memory": self.system.meminfo(),
             "hold": self.hold_status(),
+            "perks": self.board.seat_perks(),
             "version": self.s.version,
             "last_run": self.last_run.run_id if self.last_run else None,
         }
@@ -1470,7 +1474,7 @@ class Runner:
                 out["race"] = self.tables.base_id(out["race"])
             if action in ("global", "weather") and isinstance(out.get("form"), str):
                 out["form"] = self.tables.base_id(out["form"])
-            if action in ("known", "held") and isinstance(out.get("ids"), list):
+            if action in ("known", "held", "add-perks") and isinstance(out.get("ids"), list):
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
         except KeyError as e:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None

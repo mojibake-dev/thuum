@@ -14,6 +14,11 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
+# A seat's kept perks go again to the first poll after this long without one: a
+# game started since (a relaunch, a rollback) keeps none of them
+PERK_GAP_S = 20.0
+
+
 @dataclass
 class QueuedStep:
     id: str
@@ -35,6 +40,9 @@ class StepBoard:
         self._inflight: dict[str, QueuedStep] = {}
         self._all: dict[str, QueuedStep] = {}
         self._last_poll: dict[str, float] = {}
+        # a playtest seat's perks (POST /clients/<c>/perks), sent again as add-perks
+        # {ids, keep} after a heartbeat gap; the driver adds them back after a load
+        self._seat_perks: dict[str, list[int]] = {}
         self._views: dict[str, dict[str, Any]] = {}
         self._watches: dict[str, dict[str, Any]] = {}
         # a markers step's answer: marker id (decimal) -> visible, canTravel
@@ -75,7 +83,12 @@ class StepBoard:
 
     def poll(self, client: str) -> dict[str, Any]:
         """Heartbeat plus the next step for `client`, or {} when idle."""
-        self._last_poll[client] = self._clock()
+        now = self._clock()
+        last = self._last_poll.get(client)
+        self._last_poll[client] = now
+        perks = self._seat_perks.get(client)
+        if perks and (last is None or now - last > PERK_GAP_S):
+            self.enqueue(client, "add-perks", {"ids": list(perks), "keep": True})
         queue = self._pending.get(client)
         if not queue:
             return {}
@@ -170,6 +183,19 @@ class StepBoard:
                 return True
             await asyncio.sleep(0.05)
         return self._last_poll.get(client, -1.0) > since
+
+    def keep_perks(self, client: str, ids: list[int]) -> None:
+        """A playtest seat's perks from now on; an empty list forgets them."""
+        if ids:
+            self._seat_perks[client] = list(ids)
+        else:
+            self._seat_perks.pop(client, None)
+
+    def seat_perks(self) -> dict[str, list[int]]:
+        return {c: list(v) for c, v in self._seat_perks.items()}
+
+    def forget_perks(self) -> None:
+        self._seat_perks.clear()
 
     def heartbeats(self) -> dict[str, float]:
         now = self._clock()

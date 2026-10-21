@@ -108,6 +108,9 @@ class Doubles:
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
+            elif step["action"] == "add-perks":
+                ids = list(step["args"].get("ids") or [])
+                data = {"added": ids, "had": [], "missing": [], "refused": [], "kept": ids if step["args"].get("keep") else []}
             r = self.client.post(f"{self.prefix}/step/{step['id']}/result", json={"ok": True, "data": data})
             assert r.status_code == 200, r.text
 
@@ -1627,6 +1630,42 @@ class ProbeSteps(RunTests):
             self.assertEqual(out["r"].status_code, 200, out["r"].text)
             self.assertTrue(out["r"].json()["ok"])
             self.assertIn(want, self.doubles.seen)
+
+    def _post_turning(self, path, body):
+        import threading
+
+        out = {}
+        t = threading.Thread(target=lambda: out.update(r=self.client.post(path, json=body)))
+        t.start()
+        deadline = time.time() + 10
+        while t.is_alive() and time.time() < deadline:
+            self.doubles.turn()
+            time.sleep(0.02)
+        t.join(5)
+        return out["r"]
+
+    def test_a_seats_perks_go_to_its_game_and_stay_until_the_release(self):
+        # Eli, 2026-10-20: "you need to be writing what perks i need to give characters in playtests or giving
+        # them yourselves"
+        self._hold()
+        r = self._post_turning("/lab/clients/c1/perks", {"ids": [0x7934B]})
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["result"]["added"], [0x7934B])
+        self.assertIn(("c1", "add-perks", {"ids": [0x7934B], "keep": True}), self.doubles.seen)
+        self.assertEqual(self.client.get("/lab/status").json()["perks"], {"c1": [0x7934B]})
+        self.assertEqual(self.client.post("/lab/release").status_code, 200)
+        self.assertEqual(self.client.get("/lab/status").json()["perks"], {}, "the playtest's seats end with its hold")
+
+    def test_a_seats_perks_need_a_playtest_hold_and_perk_ids(self):
+        body = {"ids": [0x7934B]}
+        self.assertEqual(self.client.post("/lab/clients/c1/perks", json=body).status_code, 409)
+        self._hold(reason="numidium: a staging")
+        self.assertEqual(self.client.post("/lab/clients/c1/perks", json=body).status_code, 409)
+        self._hold()
+        for bad in ({}, {"ids": "7934b"}, {"ids": [True]}, {"ids": ["7934b:Skyrim.esm"]}, {"ids": [0]}, [0x7934B]):
+            self.assertEqual(self.client.post("/lab/clients/c1/perks", json=bad).status_code, 400, bad)
+        self.assertEqual(self.client.post("/lab/clients/c9/perks", json=body).status_code, 404)
+        self.assertEqual(self.client.get("/lab/status").json()["perks"], {})
 
     def test_a_playtest_step_needs_a_playtest_hold_and_sends_input_only(self):
         step = {"step": "equip {formId: 0x12fd0}"}
