@@ -71,3 +71,21 @@ exposes it (the cell-host verb's `IServer::GetRttMs`).
   resend, not the probe. The after-reading runs on cell-host's stage
   (fork m3-cell-host carries wire-renet-clock); a red there stages
   wire-renet-clock alone.
+
+## The after-reading (2026-10-21, cell-host's stage, the clock fix in)
+
+x-renet-loss 20261021-184702 on fork m3-cell-host c0e4a029 (wire-renet-clock
+merged): rounds one to three green under 25 percent egress loss, round four
+red: c2's figure of c1 started its cast (drainMs 2699) and ended it 6349 ms
+in, 2.7 s late against the probe's 5500 bound; rounds five and six not
+reached. So with the fix the end arrives (the before-reading's start never
+did), late once in four. HYPOTHESIS: head-of-line blocking. SpellCast rides
+the ReliableOrdered channel with the limits' 300 ms resend
+(wire-transport channels.rs:59, limits.rs:51); under 25 percent loss every
+earlier reliable-ordered message lost ahead of the end holds it until its
+own resend lands, and the chain of waits adds up to seconds. The probe's
+bound stands as the measure (a finding, not a bound to loosen). The
+transport row for npc-stream or the friend deploys: casts (and the other
+per-actor streams) on a channel of their own or on ReliableUnordered with
+their own order, so a lost movement sample or a slow report never holds a
+cast's end; measured again under the same probe after the change.
