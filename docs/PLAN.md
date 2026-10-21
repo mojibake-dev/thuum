@@ -150,8 +150,21 @@ scenario.
 - M1.1, TCL (Eli, 2026-10-09): DONE 2026-10-09 (90294654); a-console's TCL
   check (4382f56) awaits Eli's review. TGM and TIM went to M2.
 
-### M2: Combat and magic authority (8 to 12 weeks, Class B). IN PROGRESS since 2026-10-09
+### M2: Combat and magic authority (8 to 12 weeks, Class B). DONE 2026-10-21 (started 2026-10-09)
 
+Closed 2026-10-21 11:13 PDT (docs/M2-CLOSE.md; LOG): playtest twenty-nine
+the T4 half (2026-10-20, Eli: "lets aim to close this out on test 29"),
+the scenario half the sweep 20261021-144529-m2-close (70 scenarios on
+Train-31 9ad635cd over the re-laid layer, 69 green, b-push pending at the
+merge under ADR-042b by Eli's word), Train-31 merged to fork parity
+9ad635cd and the layer to main b0252470 as one stage under one sweep, both
+clones promoted. Carried to M3 by name: docs/M2-CLOSE.md section 4 plus
+b-push (the refused second Ragdoll under the layer, deterministic, its
+sender the next probe's hook; push.md), the rows after twenty-nine listed
+below (a stream's origin on the other screen, the victim's disintegration,
+Prepare for Adventure's items, the login echo over a server set, Become
+Ethereal's translucency, Survival's needs across a relaunch, the four side
+rows of the 03:30 read) and the transport clock (with cell-host's merge).
 The chart and Eli's decisions are docs/private/decisions-m2.md (this order;
 ADR-027 and ADR-028 accepted; lag compensation only if a playtest shows hits
 refused that should land; Apocalypse after spell-cast and magic-effects;

@@ -398,3 +398,33 @@ SendEvent hook since (lab/frida/README.md). Eli's word, 11:03: carried to
 M3 under ADR-042b (numidium): pending at the merge, so the sweep stands
 and Train-31 merges with the layer; the probe runs with the lighter trace
 on the first free slot, the fix goes in M3's first train.
+
+### The probe's read (2026-10-21, numidium's agent over x-push-knock-frida 175459 against the reds 165252 and 175115)
+
+- The probe was a red that read green: its asserts leave out b-push's y
+  bound. c2's own track ended at (-437, -180, -174), the server's record at
+  y -180 against the bound under -650; maxDisplacement 476 against 1235 to
+  1239 in the layer-free greens. c1's figure of c2 flew to about y -1345,
+  then jumped to c2's spot.
+- Two knockExplosion on 0x14 at 14.938 and 14.940 s, both the shout's own
+  push (the PushActorAway native, then its queued copy through
+  skse64+0x1893c), both sourced at c1's figure; none after, so the refused
+  Ragdoll at about 3106 ms had no knock behind it.
+- The server's stagger line follows the cast by 145 to 151 ms in all three
+  runs, OnSpellHit in the same ms; the layer-free greens have the same order
+  and no second Ragdoll. Frida stretched StaggerPlayer-to-Ragdoll to 136 ms
+  (40 to 46 elsewhere) without changing the outcome, so it is not a
+  heisenbug, and the stagger re-knock HYPOTHESIS above is REFUTED.
+- The load order separates red from green: all eight runs under the layer
+  saw two or three Ragdolls and ended at y -149 to -206; all six on the
+  17-plugin order saw one Ragdoll and reached -1252 to -1434. b-push fails
+  every time under the layer, not intermittently: one of the layer's six
+  files changes what the victim's game does after the vanilla knock
+  (HYPOTHESIS: an edit of the shout's effects, or a script on the knocked
+  player; the plugin-by-plugin bisect is lab/tools/plugin-patch.py's job).
+- Untested: what sends the refused Ragdoll. push-trace.js hooks neither the
+  animation event's sender nor a knockless stagger; the next probe hooks
+  the graph's event send for "Ragdoll" on the victim's player with a
+  backtrace (Skyrim Platform hooks SendAnimation too; sendevent-rate.js's
+  precedent for hooking beside its points) and names the sender. M3's
+  first train carries the fix.

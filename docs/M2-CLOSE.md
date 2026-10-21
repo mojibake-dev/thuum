@@ -280,3 +280,15 @@ Survival race (lifted by the 8df default's smoke).
    b-push: the known refused second Ragdoll, Eli's word; its probe
    x-push-knock-frida has never run. So step 3 stages m2-train-31 at
    9ad635cd as it stands.
+   2026-10-21 11:13: M2 DONE. The sweep 20261021-144529-m2-close read 69
+   of 70 green, b-push red twice (the known refused second Ragdoll in the
+   victim's own game under the layer); Eli at 11:03 and again in
+   numidium's session at 11:07: "carry b-push to m3", so ADR-042b
+   (ACCEPTED, main ffd5347) moved it from watch to pending at the merge and
+   the set stands. verb-merge m2-train-31 at 11:10 (fork parity 9ad635cd,
+   T2's log cited), layer-merge stage-layer-train31 at 11:12 (thuum main
+   b0252470, all eight checks), both clones promoted clean-m1-next to
+   clean-m1, deploy-srv from main, lab-api 2294723b (cell-host's lab
+   pieces, the perks mechanism, the netem step). The carries are section
+   4's plus b-push and the rows after twenty-nine (PLAN's M2 section).
+   M3's first look is playtest thirty (PLAN's M3 section).
