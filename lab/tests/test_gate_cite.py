@@ -1,6 +1,7 @@
 """lab/tools/gate-cite.py (ADR-042): when a finished run set may stand for a merge's gate. The five checks over a set
 record and its runs' result.json `build`, with the live lab's answers passed in."""
 import copy
+import datetime
 import importlib.util
 import unittest
 from pathlib import Path
@@ -73,6 +74,43 @@ class GateCite(unittest.TestCase):
         self.assertFalse(run(turbo=["2026-10-20T00:30:00Z client 20261020T003000Z 711 e3a5b367"])[4][0])
         self.assertFalse(run(live="sha256:other")[4][0])
         self.assertFalse(run(live_descs={"c1": "x", "c2": "y"})[4][0])
+
+
+UTC = datetime.timezone.utc
+LAYER_DESC = "stage-layer-train28 layer 58a62461, 2026-10-19"
+LAYER_RUN = {"verdict": "green", "started": "2026-10-19T23:00:00Z",
+             "build": {"server": {"image": "10.10.70.12:5000/skymp-server:m2-train-27", "id": "sha256:0ld"},
+                       "clients": {c: {"snapshot": "clean-m1-next", "description": LAYER_DESC} for c in ("c1", "c2")}}}
+LAID = datetime.datetime(2026, 10, 19, 22, 54, tzinfo=UTC)  # persist-mods wrote SHA256SUMS before the layer's smoke
+
+
+def layer(run=LAYER_RUN, rs=SET, foreign=(), sums=LAID):
+    return gc.layer_checks("stage-layer-train28", "r0", run, rs, None if foreign is None else list(foreign), sums)
+
+
+class LayerCite(unittest.TestCase):
+    """ADR-042a: a layer staged under the train, cited by the same sweep."""
+
+    def test_the_layer_as_laid_under_the_trains_sweep(self):
+        rows = layer()
+        self.assertTrue(all(ok for ok, _ in rows), rows)
+        self.assertEqual([m[:2] for _, m in rows], ["6.", "7.", "8."])
+
+    def test_the_layer_stage_run_must_be_green_before_the_set_and_name_one_layer(self):
+        self.assertFalse(layer(run={**LAYER_RUN, "verdict": "red"})[0][0])
+        self.assertFalse(layer(run={**LAYER_RUN, "started": "2026-10-20T01:00:00Z"})[0][0])
+        two = copy.deepcopy(LAYER_RUN); two["build"]["clients"]["c2"]["description"] = "stage-layer-train28 layer 0badc0de"
+        self.assertFalse(layer(run=two)[0][0])
+        train = copy.deepcopy(LAYER_RUN)
+        for c in train["build"]["clients"].values():
+            c["description"] = "m2-train-28 client e3a5b367, 2026-10-19"
+        self.assertFalse(layer(run=train)[0][0])
+
+    def test_a_layer_change_since_the_stage_or_new_mods_on_persist(self):
+        self.assertFalse(layer(foreign=["lab/layer/essentials.tsv"])[1][0])
+        self.assertFalse(layer(foreign=None)[1][0])
+        self.assertFalse(layer(sums=datetime.datetime(2026, 10, 19, 23, 30, tzinfo=UTC))[2][0])
+        self.assertFalse(layer(sums=None)[2][0])
 
 
 if __name__ == "__main__":
