@@ -306,7 +306,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   monotonic rule is the grant's); the loaded set is re-sent when the
   player's own CreateActor arrives (the moment the server has the actor,
   after Welcome), and cells the engine detaches leave it by a once-a-second
-  Cell.isAttached read.
+  Cell.isAttached read. Since 6ac33367 the loaded set is reported again
+  every 30 s: a report is a bit the server sets, so the repeat costs nothing
+  there, and it heals a report the server never took (b-cell-host
+  20261021-184501's refused landing cell); the budget is the first line,
+  the refresh the second.
 - Kill switch config key: `cellHost` under skymp5-client's settings (off: no
   reports, so the server grants nothing; the per-actor path is gone either
   way).
