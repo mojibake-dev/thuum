@@ -378,3 +378,23 @@ would land. So the south saddle is the only landing the lab has for this
 throw; the start question (decisions-lab.md, Eli) is between keeping the
 coin flip under ADR-027 and a shorter, different measurement, until the
 driver can pitch the view and a start can be chosen by eye.
+
+## b-push carried to M3 (2026-10-21, Eli: "carry b-push to m3")
+
+The M2 close sweep (run set 20261021-144529-m2-close, 69 of 70 green)
+left b-push red twice (20261021-165252 and its rerun), the same shape as
+the 03:30 nightly's rerun 132802 and the night before: c2's own game
+accepts the vanilla knock and refuses a second one about 60 ms later, its
+body barely flies (y -206 against the scenario's under -650, two Ragdolls
+and a GetUpBegin), while c1's figure of c2 flies normally. HYPOTHESIS
+(lab/.cache/probes/x-push-knock-frida.yaml, never read): the server's
+imposed stagger for the word's Stagger effects (PlayStagger, the
+TESModPlatform.Stagger snippet on the victim's own player) lands after the
+victim's own Ragdoll and re-knocks it in place; the fix would skip the
+imposed stagger for a spell whose hit the victim's own game already knocks
+down. The probe's first run (20261021-142913) crashed c2's game 30 s after
+the trace attached, before a line was logged; the trace lost its hot
+SendEvent hook since (lab/frida/README.md). Eli's word, 11:03: carried to
+M3 under ADR-042b (numidium): pending at the merge, so the sweep stands
+and Train-31 merges with the layer; the probe runs with the lighter trace
+on the first free slot, the fix goes in M3's first train.
