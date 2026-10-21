@@ -123,10 +123,21 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   high process list, ProcessLists::GetSingleton and highActorHandles
   (ProcessLists.h:36, :69; te-npcs.md:277-281). Not used here: the host's
   stream covers the server's NPCs by their views.
-- HYPOTHESIS (code reading; x-cell-attach decides): cellFullyLoaded fires
-  once per cell for each loaded grid cell at an exterior load and for each
-  new row or column at a grid shift, once for an interior at its door; a
-  cell leaves the loaded set when isAttached() turns false.
+- MEASURED (x-cell-attach 20261021-185728, solo, fork c0e4a029, the
+  driver's cell-events steps): cellFullyLoaded fires once per cell, 25
+  exterior cells within 2 ms at the coc into Riverwood (plus one
+  runtime-created exterior cell with an 0xff id, which carries no map
+  square and should be skipped by the client), the five cells of the new
+  column at each one-cell shift east (44.5, 58.4, 72.2 s), the interior
+  0x133c6 once at the inn's door, and at the coc back out five cells then
+  twenty-four more half a second later; no cell fired twice while loaded.
+  isAttached() read every 250 ms turned false for the far column within
+  one sample of its cellDetach events (cellDetach fires per reference, 1
+  to 430 a cell); the spawn's cells detached at the coc and were reported
+  unloaded. The player's parent cell read 0x9732 at (17225, -47204) and
+  0x9731, 0x9730, 0x972f, 0x972e along y about -48000: floor on both axes,
+  as cell_of has it (truncation would have read row -11). The bursts size
+  the CellLoaded budget (Authority).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
@@ -136,8 +147,8 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
 - SP filter: none needed (one event per cell load).
 - Data captured: the cell's form id, interior or exterior, the attach state;
   sent as CellLoaded { cell, loaded }.
-- Side effects of hooking here: none expected (an event and a getter);
-  HYPOTHESIS until x-cell-attach.
+- Side effects of hooking here: none seen in x-cell-attach 20261021-185728
+  (131 s of events and 250 ms reads over 66 cells, the game unchanged).
 
 ## Impose (observers render the server's decision)
 
@@ -372,8 +383,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   cellFullyLoaded, cellAttach and cellDetach with ids, the player's parent
   cell per 250 ms and isAttached() of every cell seen (written 2026-10-21:
   the driver's cell-events-start and cell-events-stop, main 4b69e9c, and
-  lab/.cache/probes/x-cell-attach.yaml; its run waits for a stage-client
-  with the new driver after the M2 merges). Decides H1 (which
+  lab/.cache/probes/x-cell-attach.yaml; RAN GREEN 20261021-185728 on
+  cell-host's first stage: H1 and H2 measured in Engine surface, the grid
+  math floor; two lab notes: the probe's move steps ran east for the whole
+  run instead of to their targets, a driver fault to read, and a runtime
+  0xff exterior cell is reported, to skip). Decides H1 (which
   cells fire, once each, at a load and a shift), H2 (isAttached tracks the
   detach), the grid math at negative coordinates (floor, not truncation: y
   -44000 is row -11; Riverwood 0x9732 at (4,-12) is the check) and the
