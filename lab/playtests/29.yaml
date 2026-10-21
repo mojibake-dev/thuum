@@ -40,6 +40,20 @@ seats:
       - 0x1A02E634   # Hailstone (02e634:Apocalypse - Magic of Skyrim.esp), b-hailstone's rows: the Nord at the Orc, then the reverse
       - 0x0004D3F2   # Healing Hands (Skyrim.esm), Train-31's heal by the record on another player (Eli, 2026-10-20)
       - 0x00012FD0   # Firebolt
+      # one spell per Apocalypse class that acts on players (docs/private/playtest-m2-29.md), each read from the
+      # esp on sky-srv, 2026-10-20: the _NPC ones are what Apocalypse's own tomes teach (WB_D025_Thundercrack_Book)
+      - 0x1A07C83B   # Thundercrack (WB_Des_Shock2_Spell_Thundercrack_NPC)
+      - 0x1A00541E   # Longstride (WB_Alt_Active1_Spell_Longstride)
+      - 0x1A0064A2   # Alarm (WB_Alt_Detection1_Spell_Alarm)
+      - 0x1A01FCD9   # Welling Blood (WB_Res_Blood2_Spell_WellingBlood)
+      - 0x1A00C0AC   # Shared Trauma (WB_Ill_PassthroughDmg2_Spell_SharedTrauma)
+      - 0x1A085594   # Blaze (WB_Des_Fire1_Spell_Blaze_NPC)
+      - 0x1A0253C2   # Rift Bolt (WB_Des_Shock2_Spell_RiftBolt_NPC)
+      - 0x1A006FA6   # Ocato's Recital (WB_Alt_Metamagic2_Spell_OcatosRecital)
+      - 0x1A007FFD   # Prepare for Adventure (WB_Alt_Buff1_Spell_PrepareForAdventure)
+      - 0x1A00BB22   # Thoughtsteal (WB_Ill_Antimage2_Spell_Thoughtsteal)
+      - 0x1A022DAB   # Inferno (WB_Des_Fire2_Spell_Inferno)
+      - 0x1A01FCCA   # Sealed Resolve (WB_Res_Buff3_Spell_SealedResolve)
     items:
       - {id: 0x00012EB7, count: 1}   # Iron Sword (Skyrim.esm IronSword), for the figure hit and dent checks
       - {id: 0x0B0147C6, count: 1}   # Cloaks of Skyrim's Cape - Whiterun (Cloaks.esp, local 0x0147C6 at the layer's 0x0B), the vanilla cape now
