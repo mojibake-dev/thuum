@@ -649,6 +649,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         it for every projectile and the figure's cast takes it; the
         measured gap was 65 units of origin at equal angles,
         docs/research/train-31-reads.md section 6); b-spell-aim for review.
+        Its first probe (20261021-042101, tonight's stage): the figure now
+        launches from the recorded origin exactly, 0.00 units and 0.0
+        degrees off; the 2.5 to 34.5 units left are the caster's own bolt
+        moving from the Launch call's origin before its first update, so
+        the cast now carries the flight's position as the origin (the
+        commit after 3b579f41 on m2-train-31, for the morning's stage).
       - Survival's need globals per player (hunger, cold, fatigue values
         and their states) in the playerGlobals list, R2 (docs/verbs/
         player-globals.md), after a read of which globals the Creation

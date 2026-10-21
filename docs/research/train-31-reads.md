@@ -313,6 +313,25 @@ paired at 0.00 units and 0.00 degrees. Steps/artifacts under
 and 022-c2-watch-stop.json (cast 1), 032 and 033 (cast 2). The row's build
 is in docs/verbs/spell-cast.md ("A spell projectile flies the arrow's way").
 
+The row's first probe (b-spell-aim 20261021-042101 on the tonight stage of
+3b579f41, red at "position" 34.49, "angle" 0.0; both watch-stops read): the
+figure's ten Firebolts launched from the caster's recorded origin exactly
+(launch gap 0.00 in every pair) with the same angles, so the fix moved the
+origin as meant. What remains is the caster's own game: its bolt sits 2.46
+to 3.66 units from the Launch call's origin at its first update in first
+person (mostly up: the direction (-0.19, 0.17, 0.97)), 30.5 to 34.5 units
+in third person after the view toggle (right and forward, (0.65, -0.76,
+0.0)), 10.8 on the last cast, while the figure's bolt sits on its origin
+(travel 0.00), and an arrow sits on its origin in both games (b-arrow-path's
+0.00). So the cast should carry the bolt's first-update position as the
+origin when the flight was seen (the bow rule took the launch's origin and
+the flight's angles; for arrows the two origins never differ): one client
+line on m2-train-31 (the commit after 3b579f41, magicSyncService.ts), for
+the morning's stage; b-spell-aim stays pending on it. HYPOTHESIS: why the
+caster's bolt moves between Launch and its first update (the hand's sweep
+during the release in third person reads right for 30 units; the 2.5 units
+up in first person may be the camera's bob), unmeasured.
+
 ## 7. Survival Mode's need globals (2026-10-20 19:45 PDT)
 
 A read agent over /srv/persist/esm/1.6.1170/ccQDRSSE001-SurvivalMode.esl
