@@ -313,6 +313,25 @@ paired at 0.00 units and 0.00 degrees. Steps/artifacts under
 and 022-c2-watch-stop.json (cast 1), 032 and 033 (cast 2). The row's build
 is in docs/verbs/spell-cast.md ("A spell projectile flies the arrow's way").
 
+The row's first probe (b-spell-aim 20261021-042101 on the tonight stage of
+3b579f41, red at "position" 34.49, "angle" 0.0; both watch-stops read): the
+figure's ten Firebolts launched from the caster's recorded origin exactly
+(launch gap 0.00 in every pair) with the same angles, so the fix moved the
+origin as meant. What remains is the caster's own game: its bolt sits 2.46
+to 3.66 units from the Launch call's origin at its first update in first
+person (mostly up: the direction (-0.19, 0.17, 0.97)), 30.5 to 34.5 units
+in third person after the view toggle (right and forward, (0.65, -0.76,
+0.0)), 10.8 on the last cast, while the figure's bolt sits on its origin
+(travel 0.00), and an arrow sits on its origin in both games (b-arrow-path's
+0.00). So the cast should carry the bolt's first-update position as the
+origin when the flight was seen (the bow rule took the launch's origin and
+the flight's angles; for arrows the two origins never differ): one client
+line on m2-train-31 (the commit after 3b579f41, magicSyncService.ts), for
+the morning's stage; b-spell-aim stays pending on it. HYPOTHESIS: why the
+caster's bolt moves between Launch and its first update (the hand's sweep
+during the release in third person reads right for 30 units; the 2.5 units
+up in first person may be the camera's bob), unmeasured.
+
 ## 7. Survival Mode's need globals (2026-10-20 19:45 PDT)
 
 A read agent over /srv/persist/esm/1.6.1170/ccQDRSSE001-SurvivalMode.esl
@@ -379,3 +398,46 @@ playtest-world.sh saves one (8 records, 1 changed; 1.json's learnedSpells
 14, the four re-taught copies merged, five spells back to test 2). It is
 twenty-nine's world (lab/playtests/29.yaml, main 38bef46); the hand-cleaned
 copy stays unused.
+
+## 9. Tonight's stage probes (2026-10-20, 21:10 to 21:35 PDT)
+
+The stage of 3b579f41 over the staged layer (stage-layer-train31-tonight
+0e69f61, numidium): smoke 20261021-040923 green; b-relaunch-reports 041549
+green (the early report refused with its base named, the echo taken 0.1 s
+later, the One-Handed set after the first relaunch surviving the second);
+b-heal-other 041155 red on its own precondition (c2's regeneration over
+seven seconds, 0.5277; fixed main d16f7e7), then 042404 GREEN; b-fod-kill
+041407 red on my decimal id (fixed d1f25e0), then 042635 red on one
+assertion of six: the kill branch killed c2 by c1's hand and the fail branch
+read right (c1 0.0162, c2 0.215, alive), but c1's Health read 0.0 after the
+kill: server.log 04:28:33.303 "EvaluateDeathItem ff000000", the caster died
+114 ms after its target. The server took the caster's 64.4 and the caster's
+own game ran the mod's script, which took 64.4 again and reported 0; a
+report of 0 kills (MpActor::SetPercentage). The fail branch hid the same
+stacking at the one-point floor. Fix, fork m2-train-31 9ad635cd: the
+caster's share is its own game's (the script runs there and reports the
+fall, as every self-inflicted script damage is taken, ADR-029's default),
+the server keeps the target's death and pays the caster only for an actor
+no game plays; the scenario is unchanged (c1's 0.36 comes from its report);
+the unit test's caster stays whole. b-spell-aim 042101 red, read in section
+6 (the figure launched from the recorded origin exactly; the caster's own
+bolt moves before its first update; fix b5075e04 for the morning).
+
+Found at the setup (numidium, 21:31): test 1's Magicka read 120 after the
+setup's SetAV 400; a second set held. The log: the set landed between the
+server's login send and the client's echo of the applied record, and the
+echo, carrying the record's old 120, was taken ("recorded 164 bases" at
+04:30:05.171 and .565), so a server raise made in that window is lost to
+the echo. HYPOTHESIS for a Train-31 row: a held server set must outrank the
+echo (the hold's merge keeps a held value the report does not carry; the
+read says which side dropped it: the client applying the record's 120 over
+the set's 400 before echoing, or the hold not armed by the setup's path).
+Setup's workaround: set the values after the echo.
+
+Found during twenty-nine (Eli, 22:05): Become Ethereal on the other screen
+shows the wisps and not the translucency ("player two has whisps but never
+actually goes transparent"), so of the two visible effects of the shout only
+one reaches the figure. A row for the next train (PLAN); the record read of
+the word's spell 0x5F6EB and its effects decides whether a second MGEF or
+shader is missing from the relay or the Etherealize archetype's translucency
+is applied by a path the figure's cast misses.
