@@ -83,10 +83,14 @@ game's "I have this cell loaded"; R2 for which cell an NPC is in.
 Why not R1 for the host: a game cannot see who else has the cell, nor
 anyone's round trip; TES3MP and Skyrim Together both keep the stamp on the
 server (tes3mp.md:45-47; te-npcs.md:56-58).
-Rate limit / bounds: CellLoaded 32 at once, 8 a second after (a 5x5 load is
-25 cells; uGridsToLoad 5, te-npcs.md:31; the constant is measured in
-x-cell-attach and carries its conditions, ADR-033 point 5); GRACE_MS 5000;
-the host's stream keeps its own budgets.
+Rate limit / bounds: CellLoaded 128 at once, 32 a second after (MEASURED
+on b-cell-host 20261021-184501, fork c0e4a029: the save's load fired 30
+loaded reports within 14 ms, a teleport five cells away 25 unloaded and 25
+loaded within 60 ms, loads and unloads sharing the bucket; the first bucket
+of 32 then 8 refused the landing cell's own report, E_VAL_RATE, which no
+client retries, so the server never learned the host had it; the bucket is
+sized to the engine's bursts and carried with those numbers, ADR-033 point
+5, fork a591bdeb); GRACE_MS 5000; the host's stream keeps its own budgets.
 
 ## Engine surface
 
@@ -195,7 +199,8 @@ the host's stream keeps its own budgets.
 - CellLoaded, new, id 55, MsgType 47, client to server, ReliableOrdered (a
   load then an unload keep their order), cap 16 bytes, fields { cell: u32,
   loaded: bool } (built 2026-10-21). Validator: the budget above as
-  wire-validate's cell_loaded_budget (32 at once, 8 a second; E_VAL_RATE), a
+  wire-validate's cell_loaded_budget (128 at once, 32 a second since
+  a591bdeb; E_VAL_RATE), a
   cell of 0 refused (E_VAL_RANGE), nothing more about the cell, since the
   election checks the server's own grid; idempotent (it sets a bit). The C++
   side: CellLoadedMessage, HostGrantMessage, HostReleaseMessage
