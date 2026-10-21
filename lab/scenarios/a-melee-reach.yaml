@@ -4,9 +4,13 @@
 # radians on the client, docs/LAB.md) with the IronSword drawn and swings
 # with the engine's own attack (lab-driver anim-event attackStart), from the
 # south end of the level strip south of lab-spawn (x 0, y -546 to -66; north
-# of it the summit drops away, run 20261003-091513). First c2 stands 180
+# of it the summit drops away, run 20261003-091513). First c2 stands 170
 # units north, inside the sword's measured edge (a hit at 185, a miss at
-# 190): the hit lands. Then c1 raises its own fCombatDistance to 1000, as a
+# 190; 180 fell short three times, 20261011-042255 and twice on the
+# train-30 plus layer stage 20261021-110412 and -132032, no OnHit on the
+# server, the swing sent: the edge's five units of margin against the
+# teleports' landing spread, docs/verbs/melee-reach.md's watch item):
+# the hit lands. Then c1 raises its own fCombatDistance to 1000, as a
 # player's console can (setgs), and c2 stands 520 units north: c1's engine
 # lands the swing, skymp5-client reports it, and the server must refuse it
 # (its bound for a Nord with a sword is 447). On a server without the check
@@ -26,7 +30,7 @@ steps:
   - c1: equip {item: "Skyrim.esm:IronSword"}
   - c1: draw-weapon
   - wait: 2
-  - c2: teleport {cell: lab-spawn, x: 0, y: -366, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -376, z: 0, rot: [0, 0, 0]}
   - c1: teleport {cell: lab-spawn, x: 0, y: -546, z: 0, rot: [0, 0, 0]}
   - c2: set-percentages {health: 1}
   - wait: 2

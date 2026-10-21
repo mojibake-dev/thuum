@@ -268,3 +268,15 @@ Survival race (lifted by the 8df default's smoke).
    m2-train-31 head staged on it, one full sweep, then `just verb-merge
    m2-train-31` (which carries train-30) and the layer's merge citing that
    sweep under 42a, both promotes. One stage, one sweep, as the rule says.
+   06:58: the four reds read (a read agent over the runs and the code):
+   none is a fork fix. a-melee-reach's swing was sent and the full server
+   log has no OnHit line at all, the dent gate leaves TESHitEvent alone and
+   seven sword scenarios landed on the same image; the one variable is c2
+   at 179.4 units against the sword's edge measured at 185, the red the
+   verb doc's watch item foresaw: c2 at 170 (main 8550593, scenario alone).
+   b-cloak-fight's 0.97 came from a 3-tick run against a 2-to-4 tick
+   measurement (a claimed Blood Boil tick is 12.5 of 1000; both reds
+   claimed two): 0.98 (main 673db44, scenario alone). b-spell: aa2dd21.
+   b-push: the known refused second Ragdoll, Eli's word; its probe
+   x-push-knock-frida has never run. So step 3 stages m2-train-31 at
+   9ad635cd as it stands.

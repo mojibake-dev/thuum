@@ -151,3 +151,13 @@ against the teleports' landing spread of a few units and c1's facing after
 its teleport). If it shows again: read the full server log for an OnHit or
 an E_HIT_REACH line, and move c2 to 170 units (the scenario's change in its
 own commit, for Eli's review).
+It showed again, twice, on the train-30 plus layer stage (20261021-110412
+and the rerun -132032, identical positions, 179.4 units): the full server
+log, complete to the run's end, has no OnHit line of any kind, so c1's
+engine landed nothing; the hit path is whole on the same image
+(a-melee-cone, a-sneak-damage, a-damage-flags, b-block, b-duel, a-fight-end
+and b-figure-values all landed their swords that night, and the dent gate
+replaces DamageActor after 38586 has raised TESHitEvent). c2 stands at
+170 units since main 8550593 (2026-10-21). Whether the layer's bodies moved
+the edge (a hit at 180 on the train-29 stage, a miss on this one) is
+PLAN's x-melee-edge row, a measurement, not this verb's bound.
