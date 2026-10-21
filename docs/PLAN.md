@@ -631,7 +631,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         FireAndForget-only gate widens to Concentration so vanilla Healing
         on yourself is the server's too. The hostility part BUILT
         2026-10-20 19:05 on fork m2-train-31 b0e4ba38 (T0
-        unit/HealOtherTest.cpp; CI pending); the self stream next.
+        unit/HealOtherTest.cpp); the self stream BUILT 19:36, 6f7b7a06
+        (docs/verbs/self-cast.md, T0 unit/SelfCastTest.cpp); CI pending.
       - spell projectiles' aim parity: the caster's launch angles sent with
         the cast and the observer's figure launching from them, as arrows do
         (docs/verbs/marksman.md's shape; the flights record of this train
@@ -675,9 +676,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         the login's record was applied, not taken" three times and no new
         "recorded N bases" line, so his reports were dropped for the rest
         of the session; docs/research/train-31-reads.md section 3b):
-        HYPOTHESIS until the code read and a probe (relaunch c2 with the
-        server up, then a drink or a hit) name the gate; the fix with its
-        T0 and a relaunch step in a scenario.
+        the gate named by the code read and numidium's two probes
+        (x-relaunch-reports 20261021-015132 and -b 015600): the hold armed
+        only at the record's send and cleared only by a report dominating
+        all 164 bases, never echoed by the client. BUILT 2026-10-20 19:36
+        on fork m2-train-31 6f7b7a06 (docs/verbs/actor-values.md: the hold
+        armed at the login, the comparison over skills, attributes and
+        level, the refusal naming the bases, the client's echo; T0 both
+        sides; CI pending); b-relaunch-reports from the probe, for review.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand

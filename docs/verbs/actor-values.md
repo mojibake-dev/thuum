@@ -288,3 +288,41 @@ build: 29 of 29 green (runs 20261008-132148 to -150004).
       moved to M5 with leveling (Eli, 2026-10-08); the base Health check
       green (x-av-health-probe 20261008-234952). DONE: no tag left
 - [x] ledger and suppression registry updated (four NATIVES rows)
+
+## The login hold and a relaunch (train-31, 2026-10-20)
+
+Playtest twenty-eight's test 2 relaunched its game with the server up at
+18:08 and the server refused that seat's actor-value reports for the rest
+of the session ("report before the login's record was applied, not taken",
+three times, no new "recorded" line); numidium's probes x-relaunch-reports
+20261021-015132 (c2 holding user 2: the first report taken) and -b 015600
+(c2 holding user 1 as in the playtest: refused) reproduced it, and the code
+read (docs/research/train-31-reads.md section 3b) named the mechanism. The
+hold was a per-actor flag armed only when the record was sent at the first
+movement after a login, cleared only by a report that dominated every one
+of the 164 recorded bases; the client applied the record without echoing
+it, and nothing cleared the flag at a disconnect. So a relaunched game's
+first report (its fresh save's values) was taken when it landed before the
+send and refused after it, and every later organic report could sit under
+the record on a base the engine computes by itself (InventoryWeight and
+kin; HYPOTHESIS, the new log line names the base next time).
+
+Fork m2-train-31 6f7b7a06, four parts, one shape:
+
+- the hold is armed at the login itself (PartOne::SetUserActor, when a
+  record exists), as the player's globals are sent there, so a fresh
+  session's report is refused whichever side of the send it lands on, and
+  the player's skills are never recorded over by a fresh save;
+- the comparison covers what the record imposes and play only raises: the
+  eighteen skills (6 to 23), the three attribute bases (24 to 26) and the
+  level (wire-rules actor_values::login_compares, login_shortfall;
+  login_applied over them); any other base is the engine's to move;
+- the refusal's line names the level pair and the bases the report fell
+  under, so a lab run measures instead of guessing;
+- the client echoes the applied record once (actorValuesService.ts, the
+  former "counts as sent" suppression gone), which is what ends the hold.
+
+T0: wire-rules tests (the shortfall, an uncompared base), unit/
+ActorValuesTest.cpp "A relaunch's login holds the record from the fresh
+session's first report until the echo". T3: b-relaunch-reports (from the
+probe, Eli's review). T4: playtest twenty-nine item 4.
