@@ -14,13 +14,17 @@
 #    (nothing of the base running): 15 Health off c2's 100, 0.85. The engine
 #    on c2's game agrees, no resistance to halve it.
 # 2. c2 casts at c1. Expected on the server: both effects applied (ResistFrost
-#    50 > 0; the base has no running entry), 30 before resistance, then the
-#    resistance rule (fork m2-train30-resist, docs/verbs/magic-effects.md)
-#    halves it on the Nord's 50 ResistFrost: 15, 0.85, as the engine's own
-#    30 x 0.5. So both seats read 0.85 by different paths: the Orc by the
-#    Shatter alone, the Nord by both effects halved. 0.70 on the Nord means
-#    the resistance rule did not run; 0.85 on the Orc with 1.00 on the Nord
-#    means the base effect's gate refused the Nord (no race ability seen).
+#    50 > 0; the base has no running entry), 30 before resistance; the record
+#    (esm.py on sky-srv, 2026-10-20): the base effect carries NO resist value
+#    (DATA 0x10 = -1) and the Shatter is resisted by ResistFrost (43), so the
+#    rule (fork m2-train30-resist, docs/verbs/magic-effects.md) halves the
+#    Shatter alone on the Nord's 50: 15 + 7.5 = 22.5, 0.775, as the engine
+#    gives. The first run on the train stage read 0.7892 with the wait's
+#    regeneration (20261021-004204). So the Orc reads 0.85 (the Shatter
+#    alone, whole) and the Nord about 0.78 (both, the Shatter halved). 0.70
+#    on the Nord means the resistance rule did not run; 1.00 on the Nord
+#    means the base effect's gate refused it (no race ability seen); 0.85
+#    on the Nord means the base effect was refused or the Shatter whole.
 # Spell ids as FormDescs so the lab composes the run's id (the layer's slot).
 id: b-hailstone
 milestone: M2
@@ -61,7 +65,7 @@ steps:
       - server.actor(c2).healthPercentage < 0.99
       - server.actor(c2).healthPercentage > 0.80
       - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.03
-  # 2. the Orc casts at the Nord: both effects, halved by its resistance: 0.85 on the server and in c1's own game
+  # 2. the Orc casts at the Nord: both effects, the Shatter halved by its resistance: about 0.78 on the server and in c1's own game
   - c1: set-percentages {health: 1, stamina: 1}
   - c2: set-percentages {health: 1, stamina: 1}
   - wait: 3
@@ -73,7 +77,7 @@ steps:
   - c2: watch-stop
   - c1: av-read {names: [health, stamina]}
   - assert:
-      - server.actor(c1).healthPercentage < 0.99
-      - server.actor(c1).healthPercentage > 0.80
+      - server.actor(c1).healthPercentage < 0.82
+      - server.actor(c1).healthPercentage > 0.75
       - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.03
 artifacts: [server.log, c1.log, c2.log, screenshots]
