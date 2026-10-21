@@ -8,8 +8,13 @@
 # four and Flame Cloak's eleven ticks claimed after one Firebolt). So c1
 # first lands a Firebolt (0x12FD0) on c2, 150 units south, and the fight
 # begins; then holds Blood Boil (Apocalypse's 044d44, a concentration Self
-# cloak) 4 s beside c2 at 1000 Health (measured there: 0.9557 on the server,
-# c2's own game within 0.25 %); then casts vanilla Flame Cloak (0x3AE9F, the
+# cloak) 4 s beside c2 at 1000 Health: each claimed tick is 0.5 s of the
+# stream at 25 a second, 12.5 of 1000, and the ticks stop about a second
+# into the hold (the fight window in c1's engine), so a run claims two to
+# four of them (4 in x-second-hand-cloak2 140554, 3 in 20261020-232113 at
+# 0.9625, 2 in 20261021-115106 and -132220 at 0.9745 and 0.9751, c2's own
+# game within 0.6 %); the bound takes two (0.98; one tick, 0.9875, still
+# fails); then casts vanilla Flame Cloak (0x3AE9F, the
 # tome's spell) and stands 8 s (the 6 s stand gave 0.9655). Each block
 # starts c2 at full and reads the server's number against c2's own game
 # right after. Order: look, equip, draw-weapon, wait, cast. Runs in
@@ -56,7 +61,7 @@ steps:
   - wait: 4.5
   - c2: dump-state
   - assert:
-      - server.actor(c2).healthPercentage < 0.97
+      - server.actor(c2).healthPercentage < 0.98
       - server.actor(c2).healthPercentage > 0.3
       - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
   - c1: console {text: "player.dispelallspells"}
