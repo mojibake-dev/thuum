@@ -1,0 +1,62 @@
+# M2, train-31 (docs/verbs/magic-effects.md, "Hostility from an effect";
+# playtest twenty-eight, Eli: "i should be able to cast healing hands on
+# them"): Healing Hands (Skyrim.esm 0x4D3F2, RestoreHealthConcActor 0x1CEA5,
+# 10 Health a second on the actor it is aimed at) heals the other player
+# through the server, as a hostile effect's damage is dealt, and begins no
+# fight. c1 learns it through the server's own AddSpell (decimal 316402),
+# equips it and holds it on c2, 150 units away at half Health, for 3 s with
+# its hands drawn first (b-spell's shape): the stream's hits reach the server
+# every 200 ms or so and each counts the time since the last, so c2 gains
+# about 10 a second of the time it was held, 20 to 30 of its base 100. The
+# server's number holds over the next reports (the snap-back hold,
+# docs/verbs/attributes.md) and c2's game agrees within 0.03 (the figure's
+# copy lands nothing there, ADR-028). Then the fight proxy of a-fight-end:
+# c2 waits an hour (T 20, Enter 28), which both the game and the server's
+# rest rule refuse inside a fight, and the server restores c2 to full; red
+# before the train, when a held heal began a fight and the wait was refused.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-heal-other
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 316402}
+  - wait: 2
+  - c1: console {text: "player.equipspell 4d3f2 right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - c2: set-percentages {health: 0.5}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - assert:
+      - server.actor(c2).healthPercentage < 0.52
+      - c2.state.healthPercentage < 0.52
+  - c1: hold-key {code: 199, ms: 3000}
+  - wait: 4.5
+  - assert:
+      # 10 a second for 2 to 3 s of the hold, on c2's base 100
+      - server.actor(c2).healthPercentage > 0.65
+      - server.actor(c2).healthPercentage < 0.85
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.03
+  - wait: 6
+  - assert:
+      # the raise stays over the next reports: no snap-back
+      - server.actor(c2).healthPercentage > 0.65
+  # no fight began: c2 may wait, and the server restores it to full
+  - c2: tap-key {code: 20}
+  - wait: 2
+  - c2: tap-key {code: 28}
+  - wait: 8
+  - assert:
+      - server.actor(c2).healthPercentage == 1
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
