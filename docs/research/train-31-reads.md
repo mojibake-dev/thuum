@@ -441,3 +441,24 @@ one reaches the figure. A row for the next train (PLAN); the record read of
 the word's spell 0x5F6EB and its effects decides whether a second MGEF or
 shader is missing from the relay or the Etherealize archetype's translucency
 is applied by a path the figure's cast misses.
+
+## 10. Playtest twenty-nine's report (2026-10-20 22:33 PDT)
+
+Eli's ticks: every item but three marked "[?]". Section 1: Healing Hands
+heals and starts no fight; the self heal holds; Finger of Death's two
+branches (the note "dies on both, only ash on player 1's screen" under the
+fail branch describes the kill branch: test 2 dead in both games, the
+disintegration only on the caster's screen); the relaunch row "unsure what
+this is testing" (proven by b-relaunch-reports 041549 and the live 22:12
+relaunch: numidium read the reports taken at once); the bolts land alike
+("projectiles work great") but "the fire stream doesnt hit the same spot
+for flames". Section 2 all ticked, the MCM's eleven entries listed. Section
+3 all ticked. Section 4: Prepare for Adventure "[?]" ("the first cast i had
+things in my inventory, then they vanished, then they wouldn't come back
+2nd time i cast"), Thoughtsteal or Inferno ticked ("you said it should
+refuse, but it worked just fine"), Sealed Resolve "[?]" ("hard to tell
+visually as the perk only lasts 15 seconds, take a look at the logs").
+Section 5 empty. Log reads asked of numidium: Sealed Resolve's lines, the
+granted spell's equip and the spell-list sync, Prepare for Adventure's
+inventory lines, the kill branch's deaths. Rows: PLAN, "the rows after
+twenty-nine".

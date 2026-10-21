@@ -735,6 +735,56 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         sides; CI 2423 green); b-relaunch-reports GREEN 20261021-041549 on
         the tonight stage (the early report refused and the echo taken
         0.1 s later), for Eli's review.
+- Playtest twenty-nine (2026-10-20, seats 21:33 on fork m2-train-31
+  3b579f41, re-staged at Eli's word 22:02 on 9ad635cd with the two fixes
+  the stage's probes called for; the staged essentials layer plus main's
+  settings; the repaired 28 world; report 22:33): the closing playtest
+  (docs/M2-CLOSE.md section 3b). Every item ticked but three marked
+  unsure: the relaunch row ("unsure what this is testing": the lab's
+  b-relaunch-reports and numidium's live read of test 2's 22:12 relaunch
+  are its proof), Prepare for Adventure ("i had things in my inventory,
+  then they vanished, then they wouldn't come back 2nd time i cast": a
+  finding, the inventory the server owns against a script that stores and
+  returns items, HYPOTHESIS until the log read) and Sealed Resolve ("hard
+  to tell visually as the perk only lasts 15 seconds", the log read asked).
+  Ticked with notes: Finger of Death's kill branch kills test 2 in both
+  games with the ash pile on test 1's screen only (the victim's own game
+  plays a plain death: a cosmetic row); projectiles land alike on both
+  screens but "the fire stream doesnt hit the same spot for flames" (a
+  stream's origin, the next row of the aim family); Thoughtsteal's granted
+  spell "worked just fine" where the checklist said the server refuses it
+  (the spell-list sync of train-30 teaches it; the census tag is stale);
+  the MCM shows eleven entries (apocalypse, goggles, idrc, jewelry limiter,
+  reading list, skyui, stealth detection fixes, true directional movement,
+  true HUD, undead fx, unread books glow). Section 5 empty: none of
+  twenty-eight's backsliding named. By the checklist's own rule a class
+  spell that misbehaves is a finding, not a fail of the close, so the T4
+  half of the close is met with the findings carried by name; the
+  scenario half is the morning's sweep over the train staged on main's
+  merged layer, then `just verb-merge m2-train-31`, then M2 DONE.
+    - The rows after twenty-nine (the next train, M2's tail, or M3 by
+      name in docs/M2-CLOSE.md section 4), in build order:
+      - a stream's origin on the other screen (Flames): the figure's
+        concentration cast starts at its own hand along the relayed aim;
+        the caster's stream starts at its own node, as the bolts did
+        before b5075e04; the same launch-position carry for a stream's
+        first projectile, or the aim's origin per update (spell-cast.md).
+      - the victim's own game plays the disintegration the caster's does
+        (SetCriticalStage and the ash pile) when the server's kill came
+        from a scripted effect: a relayed look in the scripted-effects
+        entry, as cast-teleport's `look` names one (scripted-effects.md).
+      - Prepare for Adventure and its class (World or player state): the
+        script's items against the server's inventory; the log read names
+        where they went; M3's if it needs the server to hold a script's
+        container, a train row if a sync bug.
+      - Sealed Resolve's read (perk-driven: the server applies nothing by
+        design; the log says whether it refused anything).
+      - the stale "refuses the granted spell" tag on the grants class
+        (docs/private/apocalypse-census-spells.tsv, the checklist text):
+        train-30's spell-list sync teaches a script-granted spell, the
+        read confirms.
+      - the login echo over a server set (section above) and Become
+        Ethereal's translucency (section above).
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
