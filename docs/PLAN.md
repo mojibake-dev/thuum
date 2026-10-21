@@ -820,9 +820,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         polls never called renet's own update, so no lost reliable packet
         was ever resent and every round trip read 0; fixed on fork branch
         wire-renet-clock (off 9ad635cd) with a T0 that fails without it;
-        no wire change. Ships with the first merge after Train-31 (its own
-        gate, ADR-030), before any friend plays over the internet; the lab
-        measures it under netem loss on b-spell's shape before and after.
+        no wire change. Merged into fork m3-cell-host (1c21308a), so it
+        lands with cell-host's merge, unless cell-host stalls past the
+        friend-deploy date, when it gets its own gate (agreed with
+        numidium 2026-10-21 08:4x); the lab measures it under netem loss
+        (the new `server: netem` step, main 2294723) with the probe
+        x-renet-loss, before on parity at 9ad635cd after Train-31's merge
+        and after on m3-cell-host's stage; a red after-reading stages
+        wire-renet-clock alone to separate the two branches.
       - from the 03:30 sweep's read (2026-10-21 morning, the four reds,
         docs/research/layer-reds-2026-10-20.md's sequel): b-push's known
         refused second Ragdoll has its decisive probe written and never
