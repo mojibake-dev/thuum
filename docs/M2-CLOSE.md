@@ -6,9 +6,13 @@ M2 close). The rule, as moved by Eli after twenty-eight's report
 (2026-10-20, before 18:55: "lets aim to close this out on test 29"): M2 is
 DONE when every row below is green on ONE stage, fork m2-train-31 (Train-31,
 twenty-eight's findings, on the base the morning's merges make: m2-train-30
-and the essentials layer under ADR-042a) under the merged essentials layer,
-and playtest twenty-nine on that stage is reported with every T4 item
-ticked. Anything red is fixed on the train or carried to M3 by name, in this
+and the essentials layer under ADR-042a) under the essentials layer as
+merged, or as staged with the same content (Eli, 2026-10-20 20:55: "tonight.
+same content counts": twenty-nine runs the night of the 20th on a temporary
+stage of m2-train-31 over the staged layer plus main's two settings lines,
+the morning's merges making the same content on main; the train-30 stage is
+re-laid before the 03:30 sweep so the merges keep their citation), and
+playtest twenty-nine on that stage is reported with every T4 item ticked. Anything red is fixed on the train or carried to M3 by name, in this
 file, before the word "done" is used. Nothing here is graded by feel; a T4
 item is a yes or a no. (As first written the stage was m2-train-30 and the
 playtest twenty-eight; section 3's Report says why it moved.)
