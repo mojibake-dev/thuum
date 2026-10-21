@@ -209,6 +209,10 @@ class FakeState:
         self.actors: dict[int, FakeActor] = {}
         self.rpc_log: list[tuple[str, dict[str, Any]]] = []
         self.cells: dict[str, str] = {}
+        # cell id -> {hosted, actorId, epoch}: the server's host table (labState kind cellHost)
+        self.hosts: dict[int, dict[str, Any]] = {}
+        # form id -> a non-player actor's record (labState kind ref): a hosted NPC
+        self.refs: dict[int, FakeActor] = {}
 
     def spawn(self, profile_id: int, x: float = 0.0, y: float = 0.0, z: float = 0.0, cell: str = "lab-spawn") -> FakeActor:
         a = FakeActor(x, y, z, cell)
@@ -220,13 +224,27 @@ class FakeState:
         if name == "labState":
             if payload.get("kind") == "online":
                 return {"players": [{"actorId": 0xFF000000 + pid, "profileId": pid} for pid in sorted(self.actors) if self.actors[pid].online]}
+            if payload.get("kind") == "cellHost":
+                cell = int(payload.get("cell", -1))
+                row = self.hosts.get(cell)
+                return {"found": True, "cell": cell, "hosted": bool(row and row.get("hosted")),
+                        "actorId": int(row.get("actorId", 0)) if row else 0, "epoch": int(row.get("epoch", 0)) if row else 0}
+            if payload.get("kind") == "ref":
+                ref_id = int(payload.get("actorId", -1))
+                ref = self.refs.get(ref_id)
+                if ref is None:
+                    return {"found": False, "actorId": ref_id}
+                return {"found": True, "actorId": ref_id, "x": ref.x, "y": ref.y, "z": ref.z, "rot": [0, 0, 0], "cell": ref.cell,
+                        "isDead": ref.isDead, "healthPercentage": ref.healthPercentage,
+                        "magickaPercentage": ref.magickaPercentage, "staminaPercentage": ref.staminaPercentage}
             actor = self.actors.get(int(payload.get("profileId", -1)))
             if actor is None:
                 return {"found": False}
             if payload.get("kind") == "actor":
                 app = actor.appearance
                 return {
-                    "found": True, "x": actor.x, "y": actor.y, "z": actor.z, "cell": actor.cell,
+                    "found": True, "actorId": 0xFF000000 + int(payload["profileId"]),
+                    "x": actor.x, "y": actor.y, "z": actor.z, "cell": actor.cell,
                     "isDead": actor.isDead, "healthPercentage": actor.healthPercentage,
                     "hasAppearance": app is not None,
                     "raceId": app.get("raceId") if app else None,

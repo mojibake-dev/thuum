@@ -50,6 +50,17 @@ class GateCite(unittest.TestCase):
         rows = run(results={**RESULTS, "r4": result(sid="sha256:other")})
         self.assertFalse(rows[1][0])
         self.assertIn("not checked", rows[2][1])
+        # a client on two clones is two builds too
+        other = {"c1": DESC["c1"], "c2": DESC["c2"].replace("58a62461", "0badc0de")}
+        self.assertFalse(run(results={**RESULTS, "r4": result(desc=other)})[1][0])
+
+    def test_a_solo_run_beside_two_seat_runs_is_one_build(self):
+        # the m2-close sweep (2026-10-21): eight solo scenarios played c1 alone on the same stage
+        rs = copy.deepcopy(SET); rs["scenarios"].append("a-solo")
+        rs["runs"]["a-solo"] = [{"run": "r5", "verdict": "green"}]
+        rows = run(rs=rs, results={**RESULTS, "r5": result(desc={"c1": DESC["c1"]})})
+        self.assertTrue(all(ok for ok, _ in rows), rows)
+        self.assertEqual(len(gc.builds(rs, {**RESULTS, "r5": result(desc={"c1": DESC["c1"]})})), 1)
 
     def test_the_stage_is_another_branchs_or_the_tag_moved(self):
         other = {c: d.replace("m2-train-28 client", "m2-other client") for c, d in DESC.items()}

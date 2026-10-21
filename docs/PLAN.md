@@ -820,16 +820,27 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         polls never called renet's own update, so no lost reliable packet
         was ever resent and every round trip read 0; fixed on fork branch
         wire-renet-clock (off 9ad635cd) with a T0 that fails without it;
-        no wire change. Ships with the first merge after Train-31 (its own
-        gate, ADR-030), before any friend plays over the internet; the lab
-        measures it under netem loss on b-spell's shape before and after.
+        no wire change. Merged into fork m3-cell-host (1c21308a), so it
+        lands with cell-host's merge, unless cell-host stalls past the
+        friend-deploy date, when it gets its own gate (agreed with
+        numidium 2026-10-21 08:4x); the lab measures it under netem loss
+        (the new `server: netem` step, main 2294723) with the probe
+        x-renet-loss, before on parity at 9ad635cd after Train-31's merge
+        and after on m3-cell-host's stage; a red after-reading stages
+        wire-renet-clock alone to separate the two branches.
       - from the 03:30 sweep's read (2026-10-21 morning, the four reds,
         docs/research/layer-reds-2026-10-20.md's sequel): b-push's known
         refused second Ragdoll has its decisive probe written and never
-        run, lab/.cache/probes/x-push-knock-frida.yaml (HYPOTHESIS: the
+        read, lab/.cache/probes/x-push-knock-frida.yaml (HYPOTHESIS: the
         server's imposed stagger snippet lands after the victim's own
         Ragdoll and re-knocks it in place; the fix, skip PlayStagger for a
-        hit whose spell carries the push effect, waits on that run);
+        hit whose spell carries the push effect, waits on that run; the
+        probe's first run crashed c2 before a line, the trace is lighter
+        since). CARRIED TO M3 by Eli, 2026-10-21 11:03 ("carry b-push to
+        m3"): pending at the merge under ADR-042b, red twice in the M2
+        close sweep (20261021-144529-m2-close, 69 of 70 green otherwise);
+        the probe on the first free slot, the fix in M3's first train
+        (push.md's last section);
         x-melee-edge, the sword's edge re-measured under the layer (180
         units hit on the train-29 stage and missed twice on train-30 plus
         the layer at identical positions; the layer's bodies are the
@@ -964,9 +975,35 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   (5f10768c, 07:22: CellLoaded from cellFullyLoaded plus the attach poll,
   the grants with the monotonic epoch, isHostedHere and isMine at the four
   sites; tryHost and the HostStart/HostStop handling retired; tsc clean).
-  Next: CI green on 8145082b, the round trip through the bridge after
-  wire-renet-clock merges, the lab's cell-events driver step and
-  server.host fact, then x-cell-attach and b-cell-host.
+  Then (07:25 to 07:50): the round trip (wire-renet-clock merged into
+  the branch, client_rtt_ms through IServer::GetRttMs to the table every
+  tick, f2b59a33), the T2 session cell-host.yaml at the spawn's cell
+  0xbbb1 (5fef550a), the host table listed for the lab (38f29158 and the
+  gamemode's labState cellHost and ref, main 6c1adbe), libespm's exterior
+  index guarded against a worldspace's persistent cell (29a7b56e, the
+  doc's HYPOTHESIS measured), the driver's cell-events steps (4b69e9c),
+  the probe x-cell-attach and the scenario b-cell-host (9a5272e, Eli's
+  review). CI 2481 green at 8145082b; the later heads building. Waits:
+  lab-api's server.host, server.ref, a snapshot compare and the run's
+  npcEnabled (numidium, after the M2 merges), a stage-client with the new
+  driver, then x-cell-attach, b-cell-host and the verb's T2 run on sky-srv.
+  The second verb's doc, docs/verbs/npc-puppet.md, drafted the same
+  morning (08:10): puppets as the engine's own references with AI off on
+  the non-host games, the cleaner and the copies retired, the loader's
+  bans lifted; its code waits on the re-analyst's prototypes (41370,
+  41453, 37356) and cell-host's probes.
+  NEXT PLAYTEST (Eli, 2026-10-21 11:07, "go with the first one"): M3's
+  first look, playtest thirty: cell hosting live on SkyMP's existing NPC
+  copies, the server with npcEnabled on (today's loader admits the
+  wildlife and the non-unique, non-essential, non-humanoid NPCs; the
+  humanoid lift is npc-puppet's), one game running a cell's NPCs, the
+  handoff when it leaves, the freeze when nobody is there. Seats aimed at
+  2026-10-22 evening if cell-host's stage goes green today: after the M2
+  merges, lab-api's deploy and a stage-client with the new driver,
+  verb-stage m3-cell-host (T2, x-cell-attach, b-cell-host, the smoke),
+  the gate sweep and its merge, then the playtest's own server setting
+  (npcEnabled for that server, off the shared file, ADR-035 point 9) and
+  the checklist docs/private/playtest-m3-30.md with each seat's perks.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any

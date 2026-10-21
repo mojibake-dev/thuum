@@ -17,8 +17,9 @@ seats:
   - profile: 1
     spells: [0x0C00186D, 0x0006796F]
     values: {Marksman: 60}
+    perks: [0x7934B]
     percentages: {health: 1, magicka: 1, stamina: 1}
-    by_hand: "player.addperk 7934b"
+    by_hand: "the console's player.showracemenu"
   - profile: 2
     spells: [0x00012FD0]
     items:
@@ -74,10 +75,20 @@ class PlaytestProfile(unittest.TestCase):
             PROFILE.replace("{health: 1, magicka: 1, stamina: 1}\n    by_hand", "{health: 2, magicka: 1, stamina: 1}\n    by_hand"),
             PROFILE.replace("readback: percentages", "readback: everything"),
             PROFILE.replace("  - profile: 2", "  - profile: 1"),
+            PROFILE.replace("perks: [0x7934B]", "perks: [Overdraw40]"),
+            PROFILE.replace("perks: [0x7934B]", "perks: [0]"),
         ]
         for text in bad:
             with self.assertRaises(ProfileError, msg=text[:80]):
                 self.load(text)
+
+    def test_a_seats_perks_go_to_the_client_that_plays_its_profile(self):
+        from playtest_setup import ProfileError, seat_client
+
+        self.assertEqual(self.load(PROFILE)["seats"][0]["perks"], [0x7934B])
+        self.assertEqual((seat_client(1), seat_client(2)), ("c1", "c2"))
+        with self.assertRaises(ProfileError):
+            seat_client(9)
 
     def test_the_camp_is_playtest_start_s_own_two_teleports(self):
         from playtest_setup import camp_teleports

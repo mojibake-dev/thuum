@@ -108,6 +108,9 @@ class Doubles:
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
+            elif step["action"] == "add-perks":
+                ids = list(step["args"].get("ids") or [])
+                data = {"added": ids, "had": [], "missing": [], "refused": [], "kept": ids if step["args"].get("keep") else []}
             r = self.client.post(f"{self.prefix}/step/{step['id']}/result", json={"ok": True, "data": data})
             assert r.status_code == 200, r.text
 
@@ -1322,6 +1325,37 @@ artifacts: [server.log]
 
 
 @needs_deps
+class NetemSteps(RunTests):
+    def _tc(self):
+        return [c for c in self.services.system.commands if c[:1] == ["tc"]]
+
+    def test_a_netem_step_impairs_from_that_step_and_zero_clears_it(self):
+        run_id, body = self._run("id: t-netem\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: netem {loss_pct: 25}\n"
+                                 "  - c1: dump-state\n  - server: netem {loss_pct: 0}\n  - c1: dump-state\n")
+        self.assertEqual(body["verdict"], "green", body)
+        dev = self.settings.netem_dev
+        self.assertEqual(self._tc(), [["tc", "qdisc", "replace", "dev", dev, "root", "netem", "delay", "0ms", "0ms", "loss", "25%"],
+                                      ["tc", "qdisc", "del", "dev", dev, "root"]])
+        self.assertTrue(any("netem delay 0ms 0ms loss 25%" in n for n in body["notes"]), body["notes"])
+        self.assertFalse(self.client.get("/lab/status").json()["netem"])
+
+    def test_a_netem_step_left_on_is_cleared_at_the_run_s_end(self):
+        run_id, body = self._run("id: t-netem-on\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: netem {delay_ms: 100, loss_pct: 10}\n")
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual([c[2] for c in self._tc()], ["replace", "del"])
+        self.assertFalse(self.client.get("/lab/status").json()["netem"])
+
+    def test_a_netem_step_tc_refuses_is_a_lab_error(self):
+        from labapi.fakes import Completed
+
+        real = self.services.system.run
+        self.services.system.run = lambda cmd, *a, **k: Completed(2, "", "RTNETLINK answers: Operation not permitted") if cmd[:3] == ["tc", "qdisc", "replace"] else real(cmd, *a, **k)
+        run_id, body = self._run("id: t-netem-no\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: netem {loss_pct: 25}\n")
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertIn("E_RUN_NETEM", body["failures"][0]["error"])
+
+
+@needs_deps
 class FakeclientSteps(RunTests):
     def test_t2_only_scenario_runs_the_fakeclient_inside_the_server_image(self):
         run_id, body = self._run(T2_ONLY)
@@ -1357,6 +1391,80 @@ class FakeclientSteps(RunTests):
         run_id, body = self._run(text)
         self.assertEqual(body["verdict"], "red")
         self.assertIn("c9", body["failures"][0]["error"])
+
+
+SNAPSHOT = """
+id: t-snapshot
+clients: [c1]
+steps:
+  - c1: connect
+  - server: snapshot {name: before, of: "server.actor(c1)"}
+  - c1: teleport {cell: lab-spawn, x: 300, y: 0, z: 0}
+  - assert:
+      - snapshot("before").x == 0
+      - server.actor(c1).x != snapshot("before").x
+      - server.ref(0x85547).healthPercentage == 0.5
+      - server.host(0x9810).client == "c1"
+      - server.host(0x9810).epoch == 1
+      - server.host(0x9811).hosted == false
+"""
+
+
+@needs_deps
+class CellHostSteps(RunTests):
+    """docs/verbs/cell-host.md's lab pieces: the host table and a ref through
+    labState, a server fact kept by a snapshot step for a later assert, and the
+    run's own npcEnabled laid over the version's settings."""
+
+    def test_a_snapshot_keeps_the_read_it_took_for_a_later_assert(self):
+        from labapi.fakes import FakeActor
+
+        self.state.refs[0x85547] = FakeActor(10.0, 20.0, 30.0, "tamriel", healthPercentage=0.5)
+        self.state.hosts[0x9810] = {"hosted": True, "actorId": 0xFF000001, "epoch": 1}
+        run_id, body = self._run(SNAPSHOT)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        self.assertTrue(any("snapshot before = server.actor(c1)" in n for n in body["notes"]), body["notes"])
+
+    def test_a_snapshot_of_a_record_the_server_lacks_is_red_not_a_lab_fault(self):
+        text = 'id: t-snap\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: snapshot {name: p, of: "server.ref(0x12345)"}\n'
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "red", body)
+        fail = body["failures"][0]
+        self.assertEqual(fail["kind"], "assertion-data", fail)
+        self.assertIn("E_RUN_SNAPSHOT: p", fail["error"])
+        self.assertEqual(len(body["steps"]), 2, "the run stops at the snapshot")
+
+    def _settings_files(self):
+        import dataclasses
+
+        files = {}
+        for version, name in (("1.6.1170", "server-settings.json"), ("1.7.104", "server-settings-1.7.104.json")):
+            f = self.tmp / name
+            f.write_text(json.dumps({"name": "thuum lab", "npcEnabled": False, "loadOrder": [version]}, indent=2) + "\n")
+            files[version] = f
+        spec = ";".join(f"{v}={f}" for v, f in files.items())
+        self.services.runner.s = dataclasses.replace(self.services.runner.s, game_server_settings=spec)
+        return files
+
+    def _up_env(self):
+        system = self.services.system
+        ups = [env for cmd, env in zip(system.commands, system.envs) if cmd[:2] == ["docker", "compose"] and "up" in cmd]
+        self.assertTrue(ups, system.commands)
+        return ups[-1]
+
+    def test_npc_enabled_is_laid_over_the_versions_settings_for_that_run(self):
+        files = self._settings_files()
+        run_id, body = self._run("id: t-npc\nclients: [c1]\nserver: {npcEnabled: true}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        overlay = self.tmp / "server-settings-run.json"
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(overlay))
+        laid = json.loads(overlay.read_text())
+        self.assertIs(laid["npcEnabled"], True)
+        self.assertEqual(laid["loadOrder"], ["1.6.1170"], "the run's version's file, the rest unchanged")
+        self.assertIs(json.loads(files["1.6.1170"].read_text())["npcEnabled"], False, "the version's own file is untouched")
+        # a run that names no npcEnabled mounts the version's file itself
+        run_id, body = self._run("id: t-plain\nclients: [c1]\nsteps:\n  - c1: connect\n")
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(files["1.6.1170"]))
 
 
 NAMED_ARGS = """
@@ -1627,6 +1735,42 @@ class ProbeSteps(RunTests):
             self.assertEqual(out["r"].status_code, 200, out["r"].text)
             self.assertTrue(out["r"].json()["ok"])
             self.assertIn(want, self.doubles.seen)
+
+    def _post_turning(self, path, body):
+        import threading
+
+        out = {}
+        t = threading.Thread(target=lambda: out.update(r=self.client.post(path, json=body)))
+        t.start()
+        deadline = time.time() + 10
+        while t.is_alive() and time.time() < deadline:
+            self.doubles.turn()
+            time.sleep(0.02)
+        t.join(5)
+        return out["r"]
+
+    def test_a_seats_perks_go_to_its_game_and_stay_until_the_release(self):
+        # Eli, 2026-10-20: "you need to be writing what perks i need to give characters in playtests or giving
+        # them yourselves"
+        self._hold()
+        r = self._post_turning("/lab/clients/c1/perks", {"ids": [0x7934B]})
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["result"]["added"], [0x7934B])
+        self.assertIn(("c1", "add-perks", {"ids": [0x7934B], "keep": True}), self.doubles.seen)
+        self.assertEqual(self.client.get("/lab/status").json()["perks"], {"c1": [0x7934B]})
+        self.assertEqual(self.client.post("/lab/release").status_code, 200)
+        self.assertEqual(self.client.get("/lab/status").json()["perks"], {}, "the playtest's seats end with its hold")
+
+    def test_a_seats_perks_need_a_playtest_hold_and_perk_ids(self):
+        body = {"ids": [0x7934B]}
+        self.assertEqual(self.client.post("/lab/clients/c1/perks", json=body).status_code, 409)
+        self._hold(reason="numidium: a staging")
+        self.assertEqual(self.client.post("/lab/clients/c1/perks", json=body).status_code, 409)
+        self._hold()
+        for bad in ({}, {"ids": "7934b"}, {"ids": [True]}, {"ids": ["7934b:Skyrim.esm"]}, {"ids": [0]}, [0x7934B]):
+            self.assertEqual(self.client.post("/lab/clients/c1/perks", json=bad).status_code, 400, bad)
+        self.assertEqual(self.client.post("/lab/clients/c9/perks", json=body).status_code, 404)
+        self.assertEqual(self.client.get("/lab/status").json()["perks"], {})
 
     def test_a_playtest_step_needs_a_playtest_hold_and_sends_input_only(self):
         step = {"step": "equip {formId: 0x12fd0}"}

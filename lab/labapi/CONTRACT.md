@@ -36,7 +36,7 @@ Request: `POST {SERVER_STATE_URL}/rpc/labState`
 Response when the profile has an actor:
 
 ```json
-{"found": true, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "lab-spawn",
+{"found": true, "actorId": 4278190081, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "lab-spawn",
  "isDead": false, "healthPercentage": 1.0,
  "hasAppearance": true, "raceId": 79683, "sex": 0,
  "appearanceAttempts": 1, "lastAppearanceRaceId": 79683,
@@ -125,6 +125,27 @@ does not load. Scenarios read `server.spell(0x12FD0).magnitude` (or a FormDesc,
 `server.spell("12fd0:Skyrim.esm")`): the Health damage that lands at once by the
 server's rule (assertions.py SpellView), with `overTime` and `conditional` beside
 it, so a bound holds under any layer's override of the record.
+
+### cellHost
+
+Request: `{"payload": {"kind": "cellHost", "cell": <int>}}`. Answer: `{"found":
+true, "cell", "hosted": <bool>, "actorId": <int, the holder's actor, 0 when
+none>, "epoch": <int>}`, the server's host table row for the cell
+(docs/verbs/cell-host.md; `mp.get(0, "cellHosts")`); a cell the table never
+granted answers `hosted: false, actorId: 0, epoch: 0`, and a server without the
+property `{"found": false, "cell", "error"}`. Scenarios read
+`server.host(0x9810).hosted | .client | .epoch`, where `.client` is the run's
+client whose player's actorId (the `actor` kind's) is the holder, "" when none.
+
+### ref
+
+Request: `{"payload": {"kind": "ref", "actorId": <int>}}`. Answer: `{"found":
+true, "actorId", "x", "y", "z", "rot", "cell", "isDead", "healthPercentage",
+"magickaPercentage", "staminaPercentage"}`, an actor's record by form id (a
+hosted NPC), the `actor` kind's fields without the appearance verdicts, or
+`{"found": false, "actorId"}` for a form the server holds no position for.
+Scenarios read `server.ref(0x85547).x` and keep one with a `server: snapshot`
+step to compare against later.
 
 ## labCommand
 

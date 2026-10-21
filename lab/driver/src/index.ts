@@ -38,6 +38,7 @@ import {
   loadGame,
   NetImmerse,
   ObjectReference,
+  Perk,
   Race,
   Shout,
   Spell,
@@ -161,6 +162,15 @@ const CRAFTING_MENU = "Crafting Menu";
 // the 133 asked; the server's record then reached the target 3 s after the
 // scenario's wait had ended).
 let moving: { x: number; y: number; cx: number; cy: number; speed: number; last: number; until: number } | null = null;
+// A playtest seat's perks (add-perks with keep): perks are the player's game's
+// alone (no server path until M5's perk transactions), and every login loads a
+// generated save without them (skymp5-client's loadGameService on the
+// server's createActor), so the driver adds back any the player lacks every
+// PERKS_CHECK_MS for as long as this game runs; a relaunched game starts with
+// none kept, and lab-api sends the list again (its poll after a heartbeat gap)
+let keptPerks: number[] = [];
+let perksCheckedAt = 0;
+const PERKS_CHECK_MS = 2000;
 // watch-start to watch-stop: the recorder (thuum ADR-031, docs/VERB.md's
 // Inventory). Everything this game's engine does to the player and to each
 // actor near it at the start, one record shape for both (the player's is
@@ -259,6 +269,74 @@ const VAR_EPSILON = 0.01;
 // larger step is the coordinate frame changing
 const WATCH_FRAME_JUMP_UNITS = 5000;
 let watching: { startedAt: number; actors: Map<number, Watched>; self: Watched; trackMax: number } | null = null;
+
+// thuum docs/verbs/cell-host.md (the Dynamic plan's x-cell-attach): the
+// engine's cell events as this game sees them between cell-events-start and
+// cell-events-stop: every cellFullyLoaded with its cell; cellAttach and
+// cellDetach counted per cell (they fire per reference, hundreds a cell);
+// the player's parent cell sampled every WATCH_TRACK_MS; and isAttached() of
+// every cell seen, read at each sample. Decides which cells fire, once each,
+// at a load and a shift, and whether isAttached tracks the detach.
+type CellSeen = { interior: boolean; attached: Array<[number, boolean]>; attach: number; detach: number; firstAttachMs: number; lastDetachMs: number };
+let cellEvents: { startedAt: number; lastSample: number; loaded: Array<[number, number]>; seen: Map<number, CellSeen>; parent: Array<[number, number]> } | null = null;
+const CELL_EVENTS_SAMPLES_MAX = 2400; // ten minutes at WATCH_TRACK_MS
+
+function cellSeen(id: number, interior: boolean): CellSeen {
+  if (!cellEvents) throw new Error("no cell-events");
+  let s = cellEvents.seen.get(id);
+  if (!s) {
+    s = { interior, attached: [], attach: 0, detach: 0, firstAttachMs: -1, lastDetachMs: -1 };
+    cellEvents.seen.set(id, s);
+  }
+  return s;
+}
+
+function trackCellEvents(): void {
+  if (!cellEvents) return;
+  const now = Date.now();
+  if (now - cellEvents.lastSample < WATCH_TRACK_MS) return;
+  cellEvents.lastSample = now;
+  const ms = now - cellEvents.startedAt;
+  if (cellEvents.parent.length >= CELL_EVENTS_SAMPLES_MAX) return;
+  const me = Game.getPlayer();
+  const parent = me ? me.getParentCell() : null;
+  cellEvents.parent.push([ms, parent ? parent.getFormID() : 0]);
+  cellEvents.seen.forEach((s, id) => {
+    const cell = Cell.from(Game.getFormEx(id));
+    const attached = cell !== null && cell.isAttached();
+    const last = s.attached.length ? s.attached[s.attached.length - 1][1] : null;
+    // a change, or the first reading: the rows stay short over a long walk
+    if (last === null || last !== attached) s.attached.push([ms, attached]);
+  });
+}
+
+on("cellFullyLoaded", (e) => {
+  if (!cellEvents) return;
+  const ms = Date.now() - cellEvents.startedAt;
+  const id = e.cell.getFormID();
+  cellSeen(id, e.cell.isInterior());
+  cellEvents.loaded.push([ms, id]);
+});
+
+on("cellAttach", (e) => {
+  if (!cellEvents) return;
+  const ms = Date.now() - cellEvents.startedAt;
+  const cell = e.refr.getParentCell();
+  if (!cell) return;
+  const s = cellSeen(cell.getFormID(), cell.isInterior());
+  s.attach += 1;
+  if (s.firstAttachMs < 0) s.firstAttachMs = ms;
+});
+
+on("cellDetach", (e) => {
+  if (!cellEvents) return;
+  const ms = Date.now() - cellEvents.startedAt;
+  const cell = e.refr.getParentCell();
+  if (!cell) return;
+  const s = cellSeen(cell.getFormID(), cell.isInterior());
+  s.detach += 1;
+  s.lastDetachMs = ms;
+});
 
 // The master behavior variables Skyrim Platform reads into
 // getAnimationVariablesFromActor's three buffers (uint8 booleans, float32
@@ -871,6 +949,33 @@ function hasSpell(player: Actor, id: number): boolean {
   return !!spell && player.hasSpell(spell);
 }
 
+// Actor.AddPerk on each perk the player lacks, read back with HasPerk:
+// `refused` is one the engine did not take, `missing` a form that is no perk
+function addPerks(player: Actor, ids: number[]) {
+  const out = { added: [] as number[], had: [] as number[], missing: [] as number[], refused: [] as number[] };
+  for (const id of ids) {
+    const perk = Perk.from(Game.getFormEx(id));
+    if (!perk) {
+      out.missing.push(id);
+    } else if (player.hasPerk(perk)) {
+      out.had.push(id);
+    } else {
+      player.addPerk(perk);
+      (player.hasPerk(perk) ? out.added : out.refused).push(id);
+    }
+  }
+  return out;
+}
+
+function keepPerks(player: Actor): void {
+  if (!keptPerks.length) return;
+  const now = Date.now();
+  if (now - perksCheckedAt < PERKS_CHECK_MS) return;
+  perksCheckedAt = now;
+  const r = addPerks(player, keptPerks);
+  if (r.added.length || r.refused.length) log("kept perks added again", JSON.stringify(r));
+}
+
 function dumpState(player: Actor) {
   const cell = player.getParentCell();
   const world = player.getWorldSpace();
@@ -1168,6 +1273,17 @@ function run(step: Step, player: Actor): unknown {
   switch (step.action) {
     case "dump-state":
       return dumpState(player);
+    case "add-perks": {
+      // a seat's perks (docs/LAB.md): added now, and with keep: true kept for
+      // this game, added again whenever a load drops them (keepPerks); keep
+      // with no ids clears the kept list
+      const ids = (Array.isArray(step.args?.ids) ? (step.args?.ids as unknown[]) : []).map((x) => Number(x));
+      if (step.args?.keep === true) {
+        keptPerks = ids;
+        perksCheckedAt = Date.now();
+      }
+      return { ...addPerks(player, ids), kept: keptPerks };
+    }
     case "known": {
       // thuum docs/verbs/learned-effects.md: the effects this player's engine
       // knows of each ingredient, bit i for effect i, keyed by its decimal
@@ -1833,6 +1949,22 @@ function run(step: Step, player: Actor): unknown {
       target.setActorValue(name, a.value);
       return { actor: target.getFormID(), [name]: target.getActorValue(name) };
     }
+    case "cell-events-start": {
+      const me = Game.getPlayer();
+      const parent = me ? me.getParentCell() : null;
+      cellEvents = { startedAt: Date.now(), lastSample: 0, loaded: [], seen: new Map(), parent: [] };
+      return { started: true, parent: parent ? parent.getFormID() : 0 };
+    }
+    case "cell-events-stop": {
+      if (!cellEvents) return { error: "no cell-events-start before cell-events-stop" };
+      const ce = cellEvents;
+      cellEvents = null;
+      const cells: Record<string, CellSeen> = {};
+      ce.seen.forEach((s, id) => {
+        cells[id.toString(16)] = s;
+      });
+      return { ms: Date.now() - ce.startedAt, loaded: ce.loaded, cells, parent: ce.parent };
+    }
     case "watch-start": {
       const bools = Array.isArray(a.bools) ? (a.bools as unknown[]).filter((x): x is string => typeof x === "string") : [];
       const actors = new Map<number, Watched>();
@@ -2393,7 +2525,9 @@ on("update", () => {
   finishConsole(c);
   if (me) finishRepeat(c, me);
   if (me) readAfterRest(me);
+  if (me) keepPerks(me);
   trackWatch();
+  trackCellEvents();
   const step = pending;
   if (!step) return;
   pending = null;
