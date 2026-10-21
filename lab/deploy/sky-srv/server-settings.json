@@ -54,6 +54,9 @@
   "bonds": [
     {"spell": "31C4D:Apocalypse - Magic of Skyrim.esp", "proc": "55B32:Apocalypse - Magic of Skyrim.esp"}
   ],
+  "scriptedEffects": [
+    {"spell": "35452:Apocalypse - Magic of Skyrim.esp", "kill": "fingerOfDeath"}
+  ],
   "headshot": {
       "spells": [
           "801:Headshot Kills.esp"
