@@ -313,6 +313,9 @@ each read:
   the arrows missed or a hit never became a claim; Eli's word on what he
   saw decides which, and the row stays open until then (b-headshot and
   b-arrow-path are green on the stage, so the lab's shots do claim).
+  Resolved by Eli after the report: "i wasn't shooting at the player. i
+  was checking the marksman bug"; not a lost claim, the row untested by
+  hand, the next checklist's.
 - By 18:31, Eli's two calls on the findings, his words: "azure
   reconstruction cast on another player should not heal them. they're not
   a summon. however i should be able to cast healing hands on them" and,
