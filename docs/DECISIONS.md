@@ -1963,9 +1963,10 @@ brings the `build` field (main 7bf200a). The tooling: verb-merge's
 
 ## ADR-042a: A layer merge may cite the nightly that swept its stage beside a train
 
-Status: PROPOSED 2026-10-20 17:56 PDT (thuum-magnus, from numidium's merge-order
+Status: ACCEPTED 2026-10-20 18:47 PDT (Eli, after the report: "sure whatever go
+with 42a"); proposed 17:56 PDT (thuum-magnus, from numidium's merge-order
 read); amends ADR-042 (the cited sweep served verb-merge only) for the case
-below. Eli's word at playtest twenty-eight's report.
+below.
 
 **Context.** Playtest twenty-eight runs on one stage: fork m2-train-30 over
 the fixed essentials layer (stage-layer-train30), and the 03:30 nightly over
@@ -1991,9 +1992,9 @@ keeps every other rule of layer-merge (ADR-030's non-verb promotion, the
 load-order checks).
 
 **Consequences.** M2-CLOSE's step 5 reads that order. gate-cite.py learns
-the layer's citation (numidium). Without Eli's word, the fallback is
-layer-merge's own sweep on a re-laid stage after the train's merge with
-PROMOTE=0 (about four hours of lab).
+the layer's citation (numidium, before the merges). The fallback written at
+proposal (layer-merge's own sweep on a re-laid stage after the train's
+merge with PROMOTE=0, about four hours of lab) is not needed.
 
 ## ADR-043: The world stores every form plugin-relative; a load order change migrates a world, never undresses it
 
