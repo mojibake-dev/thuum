@@ -904,6 +904,19 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 
+- STARTED 2026-10-21 00:05 PDT (Eli, after twenty-nine's report: "i
+  suppose kick it off when you're ready"), with M2's close finishing in
+  parallel (the morning's merges, Train-31's stage and merge). The first
+  verb is cell-host (docs/verbs/cell-host.md, drafted from ADR-035 and
+  docs/research/m3 the same night): the cell's own NPCs under one game's
+  AI, puppets elsewhere, the server's election, grace and freeze, the
+  reserved wire family given its senders. The engine-alone references
+  (r-npc-packages, r-npc-fight, r-cell-leave) and the puppet probe
+  (x-npc-puppet) ran on the new driver on 2026-10-18 (docs/research/m3/
+  readings-2026-10-18.md); their reruns on the merged base and the first
+  verb's probes take the lab after the morning order. Apocalypse's NPC
+  classes, the placers, the shouts' bystander and ADR-043 slice two ride
+  this milestone (docs/M2-CLOSE.md section 4).
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
