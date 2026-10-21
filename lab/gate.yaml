@@ -20,4 +20,3 @@ watch:
   - b-invis-recast     # docs/verbs/self-cast.md:104, a 120 s guest-agent stall spaced the casts past the spell's 30 s (2026-10-18)
 pending:
   - b-formdesc-world     # ADR-043 (docs/DECISIONS.md), a world saved in the raw shape loaded under the layer's order: slice one's re-base holds on m2-train-30 44372078's stage (20261021-004815: server.log's version-2 write, world-after), red on its headParts row alone, an ADR-026 derivation gap (a preset's Skyrim.esm hair beside the race's), carried, so it stays pending (thuum-magnus, 2026-10-20)
-  - b-snapback           # docs/verbs/attributes.md:100, a percentage the server raises holds against the seat's stale reports until one reaches it: red until fork m2-snapback 1fb5f2f9 stages, the train after twenty-eight, not m2-train-30, so it stays here through M2's close (2026-10-20)
