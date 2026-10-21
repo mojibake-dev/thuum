@@ -702,6 +702,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - the headshot row: not tested in twenty-eight (Eli: the bow shots
         were a check of the marksman bug); the next checklist carries it,
         b-headshot its proof.
+      - a server set lost to the login echo (found at twenty-nine's setup,
+        numidium 21:31: test 1's Magicka set to 400 between the login send
+        and the client's echo of the applied record read 120 after the echo
+        was taken; a second set held): HYPOTHESIS until the log read says
+        which side dropped it; the held set must outrank the echo
+        (docs/research/train-31-reads.md section 9); setup sets after the
+        echo meanwhile.
       - a relaunched game's value reports not taken (numidium's grep of
         twenty-eight's log: after test 2's 18:08 relaunch "report before
         the login's record was applied, not taken" three times and no new
