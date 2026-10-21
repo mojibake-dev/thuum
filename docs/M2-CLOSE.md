@@ -2,11 +2,20 @@
 
 Asked by Eli, 2026-10-20 ("wanna cook on a closeout set of tests? that if it
 passes we call m2 done?"), beside the scope calls of the same day (PLAN, the
-M2 close). The rule: M2 is DONE when every row below is green on ONE stage,
-fork m2-train-30 under the merged essentials layer, and playtest twenty-eight
-on that stage is reported with every T4 item ticked. Anything red is fixed
-on the train or carried to M3 by name, in this file, before the word "done"
-is used. Nothing here is graded by feel; a T4 item is a yes or a no.
+M2 close). The rule, as moved by Eli after twenty-eight's report
+(2026-10-20, before 18:55: "lets aim to close this out on test 29"): M2 is
+DONE when every row below is green on ONE stage, fork m2-train-31 (Train-31,
+twenty-eight's findings, on the base the morning's merges make: m2-train-30
+and the essentials layer under ADR-042a) under the essentials layer as
+merged, or as staged with the same content (Eli, 2026-10-20 20:55: "tonight.
+same content counts": twenty-nine runs the night of the 20th on a temporary
+stage of m2-train-31 over the staged layer plus main's two settings lines,
+the morning's merges making the same content on main; the train-30 stage is
+re-laid before the 03:30 sweep so the merges keep their citation), and
+playtest twenty-nine on that stage is reported with every T4 item ticked. Anything red is fixed on the train or carried to M3 by name, in this
+file, before the word "done" is used. Nothing here is graded by feel; a T4
+item is a yes or a no. (As first written the stage was m2-train-30 and the
+playtest twenty-eight; section 3's Report says why it moved.)
 "Under the merged layer" became "under the staged layer" on 2026-10-20
 16:13, when the layer's own gate (20261020-220005) ended red at 25 of 62
 (a-rotfern: c1's game died at the mid-game race pick in the VANILLA race
@@ -89,6 +98,31 @@ the close's merges and before M3's first verb, as the snap-back fix is;
 the headshot row goes to the next checklist. The findings' detail is in
 docs/research/layer-reds-2026-10-20.md. M2 is called DONE at step 5's
 green with Train-31 named here as its trailing train.
+
+## 3b. Playtest twenty-nine (T4, Eli, both seats, on Train-31's stage)
+
+Twenty-eight's unticked or re-tested items, each a yes or a no; the
+checklist (docs/private/playtest-m2-29.md) carries them with the Apocalypse
+class list Eli asked for:
+
+1. Healing Hands from test 1 heals test 2 on both screens and starts no
+   fight; the heal stays (no snap-back in the seconds after).
+2. Finger of Death from test 1 kills test 2 in BOTH games (the ash pile on
+   test 1's screen, test 2 dead and respawning on his own); the fail branch
+   (test 2 at full Health, test 1 low) leaves test 2 alive and test 1 at 1
+   Health on both screens.
+3. A spell projectile (Firebolt, Electrosphere) lands in the same place on
+   both screens, as the arrows did in twenty-eight.
+4. "restart test 2" (the game relaunched with the server up), then a drink
+   or a hit: test 2's bar moves on both screens afterwards (the relaunched
+   game's reports taken).
+5. Headshots, including the helmet case, by hand this time.
+6. Teleportation on both seats after a server restart (the cleaned world).
+7. Survival's hunger, cold and fatigue where the server keeps them (the
+   row's shape decides what is visible).
+8. Everything twenty-eight ticked, spot-checked: rotfern, the reconnect's
+   spells, no dent, Survival's box, Hailstone, capes, the MCM list (write
+   the entries), teleports, quiver, no freeze, globals, the staggered cast.
 
 ## 4. Carried to M3, by name
 
@@ -185,5 +219,14 @@ Survival race (lifted by the 8df default's smoke).
    PROMOTE=0, then the layer to main citing the same sweep under the same
    five checks, then both promotes; T2 at the head cited beside. The
    fallback (the train's merge with PROMOTE=0, then layer-merge's own full
-   sweep on a re-laid stage) is not needed. Green: M2 DONE in PLAN and
-   LOG, the carries moved to M3's chart.
+   sweep on a re-laid stage) is not needed. Green: the base for Train-31.
+6. Train-31 (PLAN's rows: Healing Hands' two defects with the snap-back
+   fix, Finger of Death's server kill, the spells' aim parity in the
+   arrow-path shape, the relaunched game's reports, Survival's need
+   globals, slice two's legacy-world repair) built on that base as fork
+   m2-train-31, CI and T2 green at its head, staged under the merged
+   layer, its probes green; then playtest twenty-nine on that stage with
+   section 3b's checklist; its report, then the gate (ADR-042: the nightly
+   over the stage or `just sweep m2-close`), `just verb-merge
+   m2-train-31`, and M2 DONE in PLAN and LOG, the carries moved to M3's
+   chart.

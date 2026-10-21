@@ -1,0 +1,71 @@
+# M2, train-31 (docs/verbs/scripted-effects.md; playtest twenty-eight, Eli:
+# "if it kills them by effect of the spell, yes kill them"): Finger of Death
+# (Apocalypse, 0x1A035452 under the lab's order, decimal 436295762; a Script
+# effect whose work the server does from the claimed hit, server-settings'
+# scriptedEffects) in both of the script's branches. c1 learns it through the
+# server's own AddSpell, has its Magicka base set to 400 by the server's
+# SetActorValue (the spell costs 160) and equips it; c2 stands 150 units away.
+# Fail branch first: both at full Health (base 100), so the caster's share,
+# 125 percent of c2's 100, would kill c1: the server leaves c1 at one point
+# (0.01), takes 0.8 of c1's 99 off c2 (79.2, to 0.208), and nobody dies. Then
+# both reset and c2 at half: the share of 50 is 62.5, under c1's 99, so c2
+# dies by c1's hand and c1 keeps 37.5 (0.375). c2's game agrees with the
+# server's number in the fail branch (ADR-028); in the kill branch c2 is dead
+# on the server and respawns as any death. Red by design until fork
+# m2-train-31 stages (the server before it applies nothing of a Script
+# effect). Assertions are evaluated by lab-api only (ADR-009).
+id: b-fod-kill
+milestone: M2
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: learn-spell {spellId: 436295762}
+  - c1: papyrus-av {how: set, name: Magicka, value: 400}
+  - wait: 2
+  - c1: set-percentages {magicka: 1}
+  - c1: console {text: "player.equipspell 1a035452 right"}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - c1: set-percentages {health: 1}
+  - c2: set-percentages {health: 1}
+  - wait: 4
+  - c1: draw-weapon
+  - wait: 3
+  - assert:
+      - server.actor(c1).healthPercentage > 0.99
+      - server.actor(c2).healthPercentage > 0.99
+  # the fail branch: the blast would kill its caster
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.actor(c2).isDead == False
+      - server.actor(c1).healthPercentage < 0.03
+      - server.actor(c2).healthPercentage > 0.17
+      - server.actor(c2).healthPercentage < 0.25
+      - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.03
+  # the kill branch: c2 at half, the caster survives its share
+  - c1: set-percentages {health: 1, magicka: 1}
+  - c2: set-percentages {health: 0.5}
+  - wait: 2
+  - c1: set-percentages {health: 1, magicka: 1}
+  - c2: set-percentages {health: 0.5}
+  - wait: 3
+  - assert:
+      - server.actor(c1).healthPercentage > 0.99
+      - server.actor(c2).healthPercentage < 0.52
+  - c1: hold-key {code: 199, ms: 1500}
+  - wait: 4
+  - assert:
+      - server.actor(c2).isDead == True
+      - server.actor(c1).healthPercentage > 0.33
+      - server.actor(c1).healthPercentage < 0.42
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]

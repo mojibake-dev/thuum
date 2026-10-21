@@ -609,8 +609,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   asked for on the server (the Creation's globals, a per-player globals
   row); the setup's gives stacking (fixed, idempotent, main 485c4ee). The
   m2-close nightly over this stage and the merges per ADR-042a follow.
-    - Train-31 (the rows of twenty-eight's report, for the train after the
-      close; each to its verb doc as it is built), in build order:
+    - Train-31 (the rows of twenty-eight's report; the closing train since
+      Eli's "lets aim to close this out on test 29": fork m2-train-31,
+      head 3b579f41 on 2026-10-20 20:10, every row below BUILT with its T0,
+      pipeline 2423 green, T2 32 of 32 identical at 20:45: stage-ready; it
+      stages on the morning's
+      merged base and playtest twenty-nine runs on it; each row to its
+      verb doc as built), in build order:
       - heals by the record (Eli at the report, 2026-10-20: "azure
         reconstruction cast on another player should not heal them.
         they're not a summon. however i should be able to cast healing
@@ -629,20 +634,43 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         (fork m2-snapback eef10842, b-snapback) so the server's raise
         survives the next stale report; and RunSelfSpell's
         FireAndForget-only gate widens to Concentration so vanilla Healing
-        on yourself is the server's too.
+        on yourself is the server's too. The hostility part BUILT
+        2026-10-20 19:05 on fork m2-train-31 b0e4ba38 (T0
+        unit/HealOtherTest.cpp); the self stream BUILT 19:36, 6f7b7a06
+        (docs/verbs/self-cast.md, T0 unit/SelfCastTest.cpp); CI pending.
       - spell projectiles' aim parity: the caster's launch angles sent with
         the cast and the observer's figure launching from them, as arrows do
         (docs/verbs/marksman.md's shape; the flights record of this train
         measures the gap first). Eli at the report: "marksman check was
         great. just copy that for the spells": the arrows held on both
         screens in twenty-eight, so the row copies the arrow-path shape.
+        BUILT 2026-10-20 19:50 on fork m2-train-31 c3dae632, no wire change
+        (the cast carried the launch already; the caster's game now fills
+        it for every projectile and the figure's cast takes it; the
+        measured gap was 65 units of origin at equal angles,
+        docs/research/train-31-reads.md section 6); b-spell-aim for review.
       - Survival's need globals per player (hunger, cold, fatigue values
         and their states) in the playerGlobals list, R2 (docs/verbs/
         player-globals.md), after a read of which globals the Creation
-        keeps them in.
+        keeps them in. READ and BUILT 2026-10-20 19:50: the three values
+        are plain globals the need scripts write each tick (0x81A, 0x81B,
+        0x816 of the .esl), the stage a script variable recomputed from
+        them; three entries in lab/deploy/sky-srv/server-settings.json's
+        playerGlobals, deployed with the train's stage; HYPOTHESIS: the
+        restore lands before the need quests start (twenty-nine's item 7).
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
+        BUILT 2026-10-20 20:15 as lab/tools/world-repair.py (verdicts OK,
+        DANGLING-PLUGIN, DANGLING-FORM, MISBASED, AMBIGUOUS over every form a
+        record names, own records by MAST count, the server's numbering; a
+        repaired copy under --out, never in place; 35 self-checks, the
+        fixture clean); the read found the hand-cleaned entry was test 2's
+        Teleportation mis-based and eight Apocalypse spells named as Cloaks
+        - Dawnguard's beside it (docs/research/train-31-reads.md section 8);
+        numidium runs it on sky-srv against the raw 28 snapshot with main's
+        17-file order as the candidate, and the repaired copy may become
+        twenty-nine's world.
       - Finger of Death's kill as the server's (Eli at the report: "if it
         kills them by effect of the spell, yes kill them"): when the
         script's kill fires in the caster's game the victim dies on the
@@ -661,7 +689,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         (its player damage yields to the server's numbers already), the
         victim's game gets the death from the server. HYPOTHESIS:
         WB_IsResist's default, the figure's local kill racing a differing
-        server verdict.
+        server verdict. BUILT 2026-10-20 19:05 on fork m2-train-31 b0e4ba38
+        (docs/verbs/scripted-effects.md; wire-rules scripted_effects with
+        T0, PartOne::ClaimScriptedKill, unit/ScriptedKillTest.cpp; CI
+        pending; b-fod-kill to write).
       - the headshot row: not tested in twenty-eight (Eli: the bow shots
         were a check of the marksman bug); the next checklist carries it,
         b-headshot its proof.
@@ -670,9 +701,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         the login's record was applied, not taken" three times and no new
         "recorded N bases" line, so his reports were dropped for the rest
         of the session; docs/research/train-31-reads.md section 3b):
-        HYPOTHESIS until the code read and a probe (relaunch c2 with the
-        server up, then a drink or a hit) name the gate; the fix with its
-        T0 and a relaunch step in a scenario.
+        the gate named by the code read and numidium's two probes
+        (x-relaunch-reports 20261021-015132 and -b 015600): the hold armed
+        only at the record's send and cleared only by a report dominating
+        all 164 bases, never echoed by the client. BUILT 2026-10-20 19:36
+        on fork m2-train-31 6f7b7a06 (docs/verbs/actor-values.md: the hold
+        armed at the login, the comparison over skills, attributes and
+        level, the refusal naming the bases, the client's echo; T0 both
+        sides; CI pending); b-relaunch-reports from the probe, for review.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
@@ -749,8 +785,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   closes M2, the list above plus train-30's rows, on a stage carrying them
   (the essentials layer merged, the reconnect spell fix, ADR-043 slice one,
   the dent gate, the Hailstone conditions and the resistance rule as they
-  land); after it the HYPOTHESIS probes and the snap-back fix. Nothing else
-  in M2 waits on him. The closeout set, the scenarios and T4 items whose
+  land); after it the HYPOTHESIS probes and the snap-back fix. Moved by Eli
+  after twenty-eight's report (2026-10-20, before 18:55: "lets aim to close
+  this out on test 29"): twenty-eight's findings make Train-31 the closing
+  train, built on the morning's merged base (the train and the layer under
+  ADR-042a), staged, probed, and playtest twenty-nine on that stage closes
+  M2 with every T4 item ticked. Nothing else in M2 waits on him. The
+  closeout set, the scenarios and T4 items whose
   green closes M2 and the carries to M3 by name: docs/M2-CLOSE.md (Eli,
   2026-10-20: "cook on a closeout set of tests, that if it passes we call
   m2 done").
