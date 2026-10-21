@@ -1059,6 +1059,27 @@ class DropTests(unittest.TestCase):
             with self.subTest(expr=expr), self.assertRaises(AssertionData):
                 ev.evaluate(expr)  # not an actor value the watch samples; a series the driver did not send
 
+    def test_rises_with_a_threshold_counts_only_rises_of_that_size(self):
+        from labapi.assertions import AssertionSyntax, Evaluator
+        v = WatchViews()
+        # b-figure-values 20261021-003901's shape: three hits as declines, the figure's own regeneration between
+        # the server's reports as rises of hundredths of a point; then one climb-back of a hit's size (the dent)
+        v.watches["c2"]["actors"][0]["health"] = [[0, 100.0], [100, 98.3], [150, 98.32], [200, 97.7], [250, 97.748],
+                                                   [300, 92.0], [350, 97.5]]
+        v.watches["c2"]["self"] = {"events": [], "bools": {}, "health": [[0, 100.0], [500, 75.0], [600, 75.04]]}
+        ev = Evaluator(RichServer(), v, ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c2.watched(c1).rises("health") == 3'))
+        self.assertTrue(ev.evaluate('c2.watched(c1).rises("health", 1) == 1'))
+        self.assertTrue(ev.evaluate('c2.watched(c1).rises("health", 0.5) == 1'))
+        self.assertTrue(ev.evaluate('c2.watched(c1).rises("health", 0) == 3'))
+        self.assertTrue(ev.evaluate("c2.watched_self().rises('health', 1) == 0"))
+        self.assertTrue(ev.evaluate("c2.watched_self().rises('health') == 1"))
+        for expr in ('c2.watched(c1).rises("health", True) == 0', 'c2.watched(c1).rises("health", "1") == 0',
+                     'c2.watched(c1).rises("health", 1, 2) == 0', 'c2.watched(c1).rises(1) == 0',
+                     'c2.watched(c1).rises() == 0'):
+            with self.subTest(expr=expr), self.assertRaises(AssertionSyntax):
+                ev.evaluate(expr)
+
     def test_drops_of_an_unsampled_bool_is_a_data_error(self):
         from labapi.assertions import AssertionData, Evaluator
         ev = Evaluator(RichServer(), self.views([[0, True]]), ["c1", "c2"])
