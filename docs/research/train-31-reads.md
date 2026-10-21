@@ -441,3 +441,84 @@ one reaches the figure. A row for the next train (PLAN); the record read of
 the word's spell 0x5F6EB and its effects decides whether a second MGEF or
 shader is missing from the relay or the Etherealize archetype's translucency
 is applied by a path the figure's cast misses.
+
+## 10. Playtest twenty-nine's report (2026-10-20 22:33 PDT)
+
+Eli's ticks: every item but three marked "[?]". Section 1: Healing Hands
+heals and starts no fight; the self heal holds; Finger of Death's two
+branches (the note "dies on both, only ash on player 1's screen" under the
+fail branch describes the kill branch: test 2 dead in both games, the
+disintegration only on the caster's screen); the relaunch row "unsure what
+this is testing" (proven by b-relaunch-reports 041549 and the live 22:12
+relaunch: numidium read the reports taken at once); the bolts land alike
+("projectiles work great") but "the fire stream doesnt hit the same spot
+for flames". Section 2 all ticked, the MCM's eleven entries listed. Section
+3 all ticked. Section 4: Prepare for Adventure "[?]" ("the first cast i had
+things in my inventory, then they vanished, then they wouldn't come back
+2nd time i cast"), Thoughtsteal or Inferno ticked ("you said it should
+refuse, but it worked just fine"), Sealed Resolve "[?]" ("hard to tell
+visually as the perk only lasts 15 seconds, take a look at the logs").
+Section 5 empty. Log reads asked of numidium: Sealed Resolve's lines, the
+granted spell's equip and the spell-list sync, Prepare for Adventure's
+inventory lines, the kill branch's deaths. Rows: PLAN, "the rows after
+twenty-nine".
+
+The four reads (numidium, 22:50, /srv/lab/handover/pt29-server.log, 854
+lines from 05:02:10Z):
+1. Sealed Resolve 0x1A01FCCA: one self cast ("casts 1a01fcca on itself: its
+   effects run on the server", 05:31:24.717), no hit, no refusal, no
+   condition line: as designed for the perk-driven class (the server
+   applies the self cast's value effects, none here, and the perk is the
+   caster's game's). Test 1 then died at 05:31:40 to seven Hailstone hits
+   from test 2 in god mode (each "effect 1a0b2c7f ... conditions fail",
+   the other effect's damage landing), which is what hid the perk's 15 s.
+2. Thoughtsteal 0x1A00BB22 hit ff000001 twice (05:29:50, 05:30:28); the
+   first hit "E_CONDITION_UNKNOWN: function ? (570) on effect 1a00bb1e ...
+   refused (ADR-039)", the second at debug. Inferno was never cast. NO
+   granted spell reached the server: every spell ff000000 cast in the log
+   is on 29's list, "not found in equipment" appears nowhere, no
+   learned-spell line in play. So the granted spell ran in test 1's own
+   game only; "it worked just fine" is that screen. Row: the grants class
+   needs the granted spell to reach the server when granted (the spell-list
+   sync teaches it only at a login); the census tag "the server refuses its
+   equip" is wrong on the mechanism: the cast is never sent.
+3. Prepare for Adventure 0x1A007FFD: two self casts (05:25:24, 05:25:56).
+   Ten seconds after the first, "OnUpdateEquipment ff000000 - rejected
+   equipment update: inventory does not contain item 1a0dd9db" and
+   "unequipping item 1a0dd9db (not in current equipment, unauthorized
+   change)", then the same for 1a0dd9d9; no AddItem line for ff000000
+   anywhere; nothing after the second cast. Eli's "vanished, then wouldn't
+   come back": the script's AddItem runs in his game, the server's R0
+   inventory never holds the items, so equipping them is refused and
+   undone. Row: the server gives the spell's items, in scriptedEffects'
+   shape (an entry naming the items the spell grants).
+4. Finger of Death: the caster fix holds live. Cast 1 (05:08:26): "the
+   target loses 79.2, the caster 99.0 in its own game, reported; nobody
+   dies". Cast 2 (05:10:47): "the target dies by the caster's hand",
+   "EvaluateDeathItem ff000001", a respawn 25 s later; no death line for
+   ff000000 near either. "Dies on both" is the target's death on both
+   screens; "ash only on player 1's screen" is the disintegration not
+   played in the victim's own game: the visual relay row.
+5. Eli, 22:42, correcting his report: the Survival needs row should not
+   be ticked, "those reset when test 2 came back": the three need values
+   did not survive test 2's relaunch. The stage's settings carried 58
+   player globals (the three among them), so the read (asked of numidium)
+   decides between the seats never reporting the three, the login not
+   sending them, and the Creation's start overwriting a restored value.
+   numidium's read (22:50): at test 2's relaunch login the server sent
+   "58 to watch, 5 values" (the three needs among them), and ff000001's
+   reports resumed at 05:16:02 and ran to 40 by 05:25:31; the log prints
+   counts, not values; the saved record at 05:34 has test 2 at 81a 433.75,
+   81b 0.0, 816 187.0. So the server sent and the seat reported; what is
+   left is the Creation's start on the fresh generated save resetting the
+   needs after the restored values landed, and the seat reporting its own
+   reset values over them. Probe x-survival-needs-relaunch tomorrow (known
+   values, a relaunch, the three read at +5, +30 and +90 s) decides which
+   tick; the fix shape is a client re-apply after the need quests start.
+6. Eli, 22:58, on the grants read: "not necessarily, because the player one
+   equipped those spells and that was visible to player 2. that's allowed
+   to be non server authoritative. something like that is perfectly fine
+   riding on the existing functionality." So the granted spell's equip
+   rode the equipment relay to test 2's screen (the server never taught or
+   saw the spell, and need not); the grants class is not a row, by his
+   call, and the census tag reads so.

@@ -121,6 +121,13 @@ renet channels, configured in `wire-transport::channels`:
 | 1 `ReliableUnordered` | ReliableUnordered | the default of the reserved M0 families only (Hit, HostedActor, InventoryApply), which no sender uses today |
 | 2 `Unreliable` | Unreliable | every send marked unreliable (movement, animation, a client's ChangeValues) |
 
+A reliable send is resent by renet until acked only while renet's
+connection clock advances; until fork branch wire-renet-clock (2026-10-21,
+docs/research/transport-clock.md) the transport's polls never called
+`RenetServer::update` or `RenetClient::update`, so the clock stood at zero
+and a lost reliable packet was never resent; the fix calls both before the
+transport's update, renet's own order.
+
 SkyMP's senders choose per send (`reliable` true or false), and
 `wire-transport::channels::for_send` maps that choice: reliable to channel 0,
 unreliable to channel 2 (SkyMP's server sent reliable as RELIABLE_ORDERED and
@@ -169,7 +176,12 @@ larger than the messages need.
 Families, mirroring the authority rungs:
 
 - Session: hello, version, mod list hash, disconnect reason.
-- Ownership: cell host grant, host handoff, host release (R0 decisions).
+- Ownership: cell host grant, host handoff, host release (R0 decisions):
+  HostGrant (id 56, MsgType 48) and HostRelease (id 57, MsgType 49) with the
+  cell and its epoch, fed by the client's CellLoaded (id 55, MsgType 47, an
+  Intent: a cell fully loaded or gone from the loaded set), docs/verbs/
+  cell-host.md; the M0 rows 7 and 8 stay reserved and dead
+  (ReservedHostGrant, ReservedHostRelease); the handoff is npc-handoff's.
 - Intent: movement sample, animation event, cast intent, hit intent,
   activate intent, aim pitch (R1 inputs; the validator's main customers).
 - Record: NPC state under host, physics owner updates (R2 inputs).
