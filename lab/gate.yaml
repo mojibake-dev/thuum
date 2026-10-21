@@ -16,7 +16,7 @@ watch:
   - a-melee-reach      # docs/verbs/melee-reach.md:141, red once in the m2-god sweep (2026-10-10)
   - a-racemenu         # docs/verbs/racemenu-sync.md:746, a figure's head scale after a reconnect (2026-10-09)
   - b-spell            # docs/verbs/spell-cast.md:394, red once in the m2-stagger sweep (2026-10-11)
-  - b-push             # docs/verbs/push.md:328, c2's landing on the spawn's saddle, red twice in train-25's gates (2026-10-18)
   - b-invis-recast     # docs/verbs/self-cast.md:104, a 120 s guest-agent stall spaced the casts past the spell's 30 s (2026-10-18)
 pending:
+  - b-push               # docs/verbs/push.md: under the essentials layer c2 ragdolls where it stands and is never thrown (y -206 against under -650 in 20261021-165252-b-push, the m2-close sweep; -157 in 20261021-123016 on train-30's stage), the layer's refused second Ragdoll, cause unread (x-push-knock-frida); carried to M3 by name (ADR-042b)
   - b-formdesc-world     # ADR-043 (docs/DECISIONS.md), a world saved in the raw shape loaded under the layer's order: slice one's re-base holds on m2-train-30 44372078's stage (20261021-004815: server.log's version-2 write, world-after), red on its headParts row alone, an ADR-026 derivation gap (a preset's Skyrim.esm hair beside the race's), carried, so it stays pending (thuum-magnus, 2026-10-20)

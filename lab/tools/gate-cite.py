@@ -4,7 +4,10 @@ run set may stand for a merge's gate (ADR-042, `GATE_SET=<id> just verb-merge`; 
 train, `GATE_SET=<id> LAYER_RUN=<run id> TRAIN=<fork branch> just layer-merge <thuum branch>`). Exits 0 when every
 check holds, 1 when one fails (the merge then runs its own gate), printing one line per check:
 
-1. the set is done, green or watch (ADR-027), and every gate scenario's last run in it is green;
+1. the set is done, green or watch (ADR-027), and every gate scenario's last run in it is green; or red only on
+   scenarios lab/gate.yaml holds `pending` at the merge, with nothing else unfinished (ADR-042b: a pending line
+   leaves its scenario out of a full sweep started after it, and the same line written while the set ran leaves it
+   out of the citation);
 2. its runs played one build: the same server image id and the same clone snapshot descriptions in every
    result.json's `build`;
 3. that build is the branch's stage: the server image is skymp-server:<branch>-<sha8>, or the branch's bare tag that
@@ -33,12 +36,35 @@ import re
 import subprocess
 import sys
 import urllib.request
+from pathlib import Path
 
 API = os.environ.get("LAB_API", "https://thuum.gaussing.tv/lab")
 RESULTS = os.environ.get("RESULTS", "https://thuum.gaussing.tv/results")
 JUMP = os.environ.get("JUMP_HOST", "root@core.gaussing.tv")
 SRV = os.environ.get("SRV_HOST", "eli@10.10.70.10")
 CLONES = {"c1": 711, "c2": 712}
+GATE_YAML = Path(__file__).resolve().parents[2] / "lab" / "gate.yaml"
+
+
+def gate_lists(path: Path = GATE_YAML) -> dict[str, list[str]]:
+    """lab/gate.yaml's lists (`always: [a, b]`, or one `- name` a line), read as verb-merge.sh reads them: the
+    standard library alone, since the Mac's python3 has no PyYAML."""
+    lists: dict[str, list[str]] = {}
+    cur = None
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        m = re.match(r"^(\w+):\s*(.*)$", line)
+        if m:
+            cur = m.group(1)
+            inline = m.group(2).strip()
+            lists[cur] = [x.strip().strip("'\"") for x in inline.strip("[]").split(",") if x.strip()] if inline.startswith("[") else []
+            continue
+        m = re.match(r"^\s*-\s*(\S+)", line)
+        if m and cur:
+            lists[cur].append(m.group(1).strip("'\""))
+    return lists
 
 
 def fetch(url: str) -> dict:
@@ -75,13 +101,20 @@ def staged_sha(branch: str, image: str, descs) -> str:
 
 
 def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, head8: str, changed: list[str] | None,
-           registry_id: str | None, live_server: str, live_descs: dict[str, str], turbo_since: list[str]) -> list[tuple[bool, str]]:
+           registry_id: str | None, live_server: str, live_descs: dict[str, str], turbo_since: list[str],
+           pending: list[str] | tuple = ()) -> list[tuple[bool, str]]:
     out = []
     last = {s: (runs[-1].get("verdict") if runs else None) for s, runs in rs.get("runs", {}).items()}
     missing = [s for s in gate if s not in rs.get("scenarios", [])]
     unproven = [s for s in gate if s not in missing and last.get(s) != "green"]
-    ok1 = rs.get("state") == "done" and rs.get("verdict") in ("green", "watch") and not missing and not unproven
+    # ADR-042b: a red set whose every red is pending at the merge, and nothing left unfinished, stands as green
+    reds = [s for s in rs.get("scenarios", []) if last.get(s) == "red"]
+    unfinished = [s for s in rs.get("scenarios", []) if last.get(s) not in ("green", "red")]
+    left_out = bool(reds) and not unfinished and all(s in pending for s in reds)
+    verdict_ok = rs.get("verdict") in ("green", "watch") or (rs.get("verdict") == "red" and left_out)
+    ok1 = rs.get("state") == "done" and verdict_ok and not missing and not unproven
     out.append((ok1, f"1. set {rs.get('id')}: {rs.get('state')}, {rs.get('verdict')}"
+                + (f"; red only on {', '.join(reds)}, pending at the merge (ADR-042b)" if left_out and rs.get("verdict") == "red" else "")
                 + (f"; lacks {', '.join(missing)}" if missing else "") + (f"; not green last: {', '.join(unproven)}" if unproven else "")))
     bs = builds(rs, results)
     bare = sum(1 for runs in rs.get("runs", {}).values() for e in runs if not (results.get(e.get("run")) or {}).get("build"))
@@ -192,9 +225,11 @@ def main(argv: list[str]) -> int:
             continue
         if t >= started:
             turbo_since.append(ln)
+    pending = gate_lists().get("pending", [])
     if layer and not gate:
-        gate = list(rs.get("scenarios", []))  # a layer's gate is the whole set (ADR-042a)
-    rows = checks(rs, results, gate, branch, head8, changed, registry_id, live_server, live_descs, turbo_since)
+        # a layer's gate is the whole set (ADR-042a), less what is pending at the merge (ADR-042b)
+        gate = [s for s in rs.get("scenarios", []) if s not in pending]
+    rows = checks(rs, results, gate, branch, head8, changed, registry_id, live_server, live_descs, turbo_since, pending)
     if layer:
         lbranch, lrun = layer
         try:
