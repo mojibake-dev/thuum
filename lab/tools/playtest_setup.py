@@ -9,6 +9,11 @@
                               players online, the heartbeats, the values and items read back, the bars full, the
                               two stream windows running
 
+A profile's `server: {npcEnabled: true}` is that playtest's server alone (ADR-035 point 9): setup lays the deployed
+settings with it over them as /srv/lab/server/server-settings-run.json (the file a run's own npcEnabled uses) and the
+restore recreates the server on that file; both setup and ready read the container's mount back. A lab run after the
+playtest mounts its own settings again.
+
 What pt23-setup.sh and pt23-after-streams.sh did for playtest twenty-three (2026-10-18), from a profile instead of
 a script per playtest. Every set is read back: an upward set-percentages can revert within 2 s (docs/LAB.md), and a
 console set the server took as a no-op shows only in its read (x-headshot-probe's "Archery", 20261018-164202).
@@ -17,6 +22,7 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import re
 import subprocess
 import sys
@@ -30,6 +36,12 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 API = "https://thuum.gaussing.tv/lab"
 JUMP = "root@core.gaussing.tv"
+SRV = "eli@10.10.70.10"
+# the server's settings as deploy-srv lays them, and the overlay a run or a playtest with its own server setting
+# mounts instead (lab-api's runner writes the same file for a run's npcEnabled, ADR-035 point 9)
+SETTINGS = "/srv/lab/server/server-settings.json"
+OVERLAY = "/srv/lab/server/server-settings-run.json"
+SERVER_KEYS = {"npcEnabled"}
 PLAYER = 20  # the console's word for the player itself (0x14)
 BARS = ("health", "magicka", "stamina")
 
@@ -66,6 +78,11 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
         raise ProfileError("hold.minutes is 1 to 600")
     if not isinstance(hold.get("reason", ""), str):
         raise ProfileError("hold.reason is text")
+    server = p.get("server") or {}
+    if not isinstance(server, dict) or set(server) - SERVER_KEYS:
+        raise ProfileError(f"server takes {sorted(SERVER_KEYS)}, got {server!r}")
+    if "npcEnabled" in server and not isinstance(server["npcEnabled"], bool):
+        raise ProfileError(f"server.npcEnabled is true or false, got {server['npcEnabled']!r}")
     camp = (p.get("camp") or {}).get("teleports")
     if camp not in (None, "playtest-start"):
         raise ProfileError(f"camp.teleports is playtest-start or absent, got {camp!r}")
@@ -98,6 +115,13 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     if ((p.get("after") or {}).get("readback")) not in (None, "percentages"):
         raise ProfileError("after.readback is percentages or absent")
     return p
+
+
+def overlay_text(settings_text: str, server: dict[str, Any]) -> str:
+    """The deployed settings with the profile's server keys over them, written as the runner writes its overlay."""
+    d = json.loads(settings_text)
+    d.update({k: v for k, v in server.items() if k in SERVER_KEYS})
+    return json.dumps(d, indent=2) + "\n"
 
 
 def camp_teleports(root: Path = ROOT) -> list[dict[str, Any]]:
@@ -217,6 +241,25 @@ def _guest_exec(vmid: int, ps: str, timeout: int = 60) -> dict[str, Any]:
     return json.loads(r.stdout) if r.stdout.strip() else {"exitcode": -1, "err-data": r.stderr}
 
 
+def _srv(cmd: str, stdin: str | None = None, timeout: int = 60) -> str:
+    r = subprocess.run(["ssh", "-o", "BatchMode=yes", "-J", JUMP, SRV, cmd], input=stdin, capture_output=True, text=True, timeout=timeout)
+    if r.returncode != 0:
+        raise RuntimeError(f"sky-srv: {cmd[:60]}: {r.stderr.strip()[:200]}")
+    return r.stdout
+
+
+def _lay_overlay(server: dict[str, Any]) -> str:
+    """The profile's own server setting laid beside the world (the deployed settings with it over them); the
+    restore then recreates the server on it, so the shared file never carries it."""
+    _srv(f"cat > {OVERLAY}", stdin=overlay_text(_srv(f"cat {SETTINGS}"), server))
+    return OVERLAY
+
+
+def _mounted_settings() -> str:
+    fmt = '{{range .Mounts}}{{if eq .Destination "/srv/skymp/server-settings.json"}}{{.Source}}{{end}}{{end}}'
+    return _srv(f"docker inspect --format '{fmt}' lab-skymp-server-1").strip()
+
+
 def _clients(root: Path = ROOT) -> dict[str, int]:
     """client name -> vmid of the managed clones, from lab-api's own table."""
     g = yaml.safe_load((root / "lab" / "labapi" / "labapi" / "guests.yaml").read_text())
@@ -227,11 +270,20 @@ def setup(n: int) -> int:
     p = load_profile(n)
     rep = Report()
     print(f"== playtest {n}: {p.get('build', '')}", flush=True)
+    env = dict(os.environ)
+    server = p.get("server") or {}
+    if server:
+        overlay = _lay_overlay(server)
+        env["PLAYTEST_SERVER_SETTINGS"] = overlay
+        rep.ok(f"server {server} laid over the deployed settings: {overlay}")
     print(f"== restore {p['world']} (both seats relaunched on it) {time.strftime('%H:%M:%S')}", flush=True)
-    r = subprocess.run([str(ROOT / "lab/tools/playtest-world.sh"), "restore", p["world"]], text=True)
+    r = subprocess.run([str(ROOT / "lab/tools/playtest-world.sh"), "restore", p["world"]], text=True, env=env)
     if r.returncode != 0:
         print("== the restore failed: no setup", flush=True)
         return 2
+    if server:
+        got = _mounted_settings()
+        (rep.ok if got == OVERLAY else rep.fail)(f"the server runs on {got or 'no settings mount'} (wanted {OVERLAY})")
     hold = p.get("hold") or {}
     _http("POST", "/hold", {"minutes": int(hold.get("minutes", 180)), "reason": hold.get("reason") or f"playtest {n}"})
     rep.ok(f"hold {hold.get('minutes', 180)} min: {hold.get('reason') or f'playtest {n}'}")
@@ -282,6 +334,9 @@ def ready(n: int) -> int:
     online = sorted(x.get("profileId") for x in state({"kind": "online"}).get("players", []))
     want = sorted(s["profile"] for s in p["seats"])
     (rep.ok if online == want else rep.fail)(f"online {online} (wanted {want})")
+    if p.get("server"):
+        got = _mounted_settings()
+        (rep.ok if got == OVERLAY else rep.fail)(f"the server runs on {got or 'no settings mount'} (wanted {OVERLAY}, the profile's server {p['server']})")
     st = _http("GET", "/status")
     hb = st.get("heartbeats_s_ago") or {}
     (rep.ok if hb and all(v < 5 for v in hb.values()) else rep.fail)(f"heartbeats {hb}")

@@ -82,6 +82,18 @@ class PlaytestProfile(unittest.TestCase):
             with self.assertRaises(ProfileError, msg=text[:80]):
                 self.load(text)
 
+    def test_a_profiles_own_server_setting_is_laid_over_the_deployed_file(self):
+        import json
+
+        from playtest_setup import ProfileError, overlay_text
+
+        p = self.load(PROFILE + "server: {npcEnabled: true}\n")
+        laid = json.loads(overlay_text('{"name": "thuum lab", "loadOrder": ["a.esm"], "npcEnabled": false}', p["server"]))
+        self.assertEqual(laid, {"name": "thuum lab", "loadOrder": ["a.esm"], "npcEnabled": True})
+        for bad in ("server: {npcEnabled: yes please}\n", "server: {port: 7778}\n", "server: [npcEnabled]\n"):
+            with self.assertRaises(ProfileError, msg=bad):
+                self.load(PROFILE + bad)
+
     def test_a_seats_perks_go_to_the_client_that_plays_its_profile(self):
         from playtest_setup import ProfileError, seat_client
 
