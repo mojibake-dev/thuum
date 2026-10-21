@@ -149,6 +149,20 @@ Finger of Death's own threshold condition rides ADR-039's evaluator if its
 functions are implemented, else refuses and logs as designed; section 5
 names them.
 
+## 3b. A relaunched game's reports not taken (found in the grep, HYPOTHESIS)
+
+numidium, 18:50, from the same window: test 2's first login after the
+18:02 restart was recorded ("ActorValues: user 1 actor ff000001 recorded
+164 bases, level 1", 01:02:56Z); after his 18:08 game relaunch the server
+logged "ActorValues: user 1 actor ff000001 report before the login's record
+was applied, not taken" at 01:08:16, 01:10:05 and 01:16:01Z and no new
+"recorded" line: the relaunched game's login record never counted as
+applied and its value reports were dropped for the rest of the session. A
+code read of the gate and the client's record sender is in flight; the row
+goes to Train-31 with a probe (relaunch c2's game with the server up, then a
+drink or a hit; the log's "recorded" and "not taken" lines are the
+measurement). Possibly the backsliding Eli felt on test 2's seat.
+
 ## 4. The headshot row of twenty-eight
 
 Eli, after the report: "for the question i wasn't shooting at the player. i
@@ -209,8 +223,16 @@ per TESCondition.h's FunctionID. Nothing edited, no lab run.
   the snap-back hold beneath the server's raise (a 2 s report carrying the
   old value undoes a server raise in the current build), and 560 and 715
   confirmed in the evaluator (were 560 unknown, every tick would refuse).
-  The grep of twenty-eight's log for 4d3f2 and its effects (asked of
-  numidium) decides what test 2 saw.
+  numidium's grep of twenty-eight's log (18:50): not one line for 4d3f2,
+  1cea5, 4e93e, 12fcc or 12fcd, so no Healing Hands and no Healing was
+  cast; the three E_CONDITION_UNKNOWN 448s are perk-gated extras of
+  1a02e634 (effects 153d3, f3932, 01:07:20Z) and 1a002878 (effect
+  1a100ba6, 01:16:39Z), cast by ff000000 at ff000001, refused by design;
+  every OnSpellHit on ff000001 in the window is test 1's (1a02e634 four
+  times, 1a031c4d, 1a002878, and Finger of Death 1a035452 at 01:17:08Z),
+  none a heal. So what test 2 saw was Azure Reconstruction doing nothing,
+  the record's own answer, and no regeneration under Survival. The heal
+  row stands on the measured defects alone, not on twenty-eight.
 
 ### Finger of Death, SPEL 03035452 (local 035452) WB_Res_Necro3_Spell_FingerOfDeath
 

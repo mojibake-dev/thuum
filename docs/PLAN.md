@@ -665,6 +665,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - the headshot row: not tested in twenty-eight (Eli: the bow shots
         were a check of the marksman bug); the next checklist carries it,
         b-headshot its proof.
+      - a relaunched game's value reports not taken (numidium's grep of
+        twenty-eight's log: after test 2's 18:08 relaunch "report before
+        the login's record was applied, not taken" three times and no new
+        "recorded N bases" line, so his reports were dropped for the rest
+        of the session; docs/research/train-31-reads.md section 3b):
+        HYPOTHESIS until the code read and a probe (relaunch c2 with the
+        server up, then a drink or a hit) name the gate; the fix with its
+        T0 and a relaunch step in a scenario.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
