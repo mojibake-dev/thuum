@@ -1,6 +1,7 @@
 # M2, train-31 (docs/verbs/scripted-effects.md; playtest twenty-eight, Eli:
 # "if it kills them by effect of the spell, yes kill them"): Finger of Death
-# (Apocalypse, 0x1A035452 under the lab's order, decimal 436295762; a Script
+# (Apocalypse, 0x1A035452 under the lab's order, written as the hex literal
+# PyYAML reads as an int, 29.yaml's way; a Script
 # effect whose work the server does from the claimed hit, server-settings'
 # scriptedEffects) in both of the script's branches. c1 learns it through the
 # server's own AddSpell, has its Magicka base set to 400 by the server's
@@ -25,7 +26,7 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: learn-spell {spellId: 436295762}
+  - c1: learn-spell {spellId: 0x1A035452}
   - c1: papyrus-av {how: set, name: Magicka, value: 400}
   - wait: 2
   - c1: set-percentages {magicka: 1}
