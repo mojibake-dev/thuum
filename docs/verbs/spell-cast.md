@@ -1497,9 +1497,19 @@ gate and the merges after).
   engine halves frost damage on a Nord (the engine's resistance never runs
   on a player's imposed damage), is the resistance rule, BUILT the same
   day on fork m2-train30-resist 8219604e, stacked on this branch
-  (docs/verbs/magic-effects.md, Resistance). The probe x-hailstone, on that
-  branch's stage: both seats land at 0.85, the Orc by the Shatter alone and
-  the Nord by both effects halved.
+  (docs/verbs/magic-effects.md, Resistance). The record read on sky-srv
+  (2026-10-20, esm.py, Apocalypse's esp, DATA 152 B each): the base effect
+  030B2C7F has flags 0x200805 (Hostile, Detrimental) and NO resist value
+  (0x10 = -1); the Shatter 030B374E has flags 0x208005 (Hostile,
+  Detrimental, HideInUI) and resist 43, ResistFrost. So on a Nord the engine
+  halves the Shatter and lets the base effect through whole, 15 + 7.5. The
+  scenario b-hailstone, first run on the train stage (20261021-004204 on
+  fork m2-train-30 44372078 over the fixed layer): the Orc row 0.85 (the
+  Shatter alone, whole), the Nord row 0.7892 with the wait's regeneration,
+  the record's number; its band had said 0.85 and was corrected to the
+  record (main 053dd276). CONFIRMED there: the conditions (the base effect
+  refused on the Orc, applied on the Nord by the race's ResistFrost) and
+  the resistance rule on the Shatter.
 - Scattershock (row 6), measured, no code: x-scattershock-6s
   20261020-080751 (train-28's stage, camp flat, 6 s hold): thirteen missiles
   launched on both seats (the PROJ 083a24 of Apocalypse) and the server
