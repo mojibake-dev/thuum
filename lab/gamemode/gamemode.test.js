@@ -281,3 +281,35 @@ test("labState spell reads the winning SPEL's effects and their MGEFs as the ser
   assert.strictEqual(spell.mgefs[String(0x010103b4)].conditions, 1);
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "spell", formId: 0x99 }), { found: false, formId: 0x99 });
 });
+
+test("labState cellHost reads the server's host table and ref an actor by id", () => {
+  global.mp = fakeMp();
+  mp.set(0, "cellHosts", [
+    { cell: 0xbbb1, hosted: true, player: 0xff000001, epoch: 2 },
+    { cell: 0xbbb0, hosted: false, player: 0, epoch: 1 },
+  ]);
+  mp.set(0xff000a03, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9050, 550, 0], rot: [0, 0, 0] });
+  mp.set(0xff000a03, "percentages", { health: 0.5, magicka: 1, stamina: 1 });
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "cellHost", cell: 0xbbb1 }),
+    { found: true, cell: 0xbbb1, hosted: true, actorId: 0xff000001, epoch: 2 });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "cellHost", cell: 0xbbb0 }),
+    { found: true, cell: 0xbbb0, hosted: false, actorId: 0, epoch: 1 });
+  // a cell never granted
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "cellHost", cell: 0x9732 }),
+    { found: true, cell: 0x9732, hosted: false, actorId: 0, epoch: 0 });
+  const wolf = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 });
+  assert.deepStrictEqual([wolf.found, wolf.x, wolf.y, wolf.z, wolf.cell, wolf.healthPercentage, wolf.isDead],
+    [true, 9050, 550, 0, "3c:Skyrim.esm", 0.5, false]);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a09 }), { found: false, actorId: 0xff000a09 });
+  // a server without the property
+  const bare = fakeMp();
+  const get = bare.get;
+  bare.get = (id, k) => { if (k === "cellHosts") throw new Error("no such property"); return get(id, k); };
+  global.mp = bare;
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const none = mp.onHttpRpcRunAttempt("labState", { kind: "cellHost", cell: 0xbbb1 });
+  assert.strictEqual(none.found, false);
+});

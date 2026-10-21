@@ -76,13 +76,19 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   CommonLibSSE-NG's, cited per field; 1.6.1170 only.
 
 - push-trace.js: where Unrelenting Force's throw stops in the target's game
-  (docs/verbs/push.md). Logs every OnEffect* and OnMagicEffectApply event the
-  VM is asked to send (SendEvent, Skyrim Platform's own hook point, 104800),
-  its handle split in halves; each Papyrus PushActorAway (56213, HYPOTHESIS)
-  with the pusher and the pushed; and each AIProcess::KnockExplosion (39895),
-  every ragdoll's entry, with its actor, source and backtrace. Hooked beside
-  Skyrim Platform's SendEvent hook, it runs first, so the names are the
-  engine's before the block. 1.6.1170 only.
+  (docs/verbs/push.md). Logs each Papyrus PushActorAway (56213, HYPOTHESIS)
+  with the pusher and the pushed, and each AIProcess::KnockExplosion (39895),
+  every ragdoll's entry, with its actor, source and backtrace. 1.6.1170 only.
+  Its first run on a seat (x-push-knock-frida 20261021-142913, c2) ended in
+  the game's own crash about 30 s after the attach (EXCEPTION_ACCESS_VIOLATION
+  at 68782+0xF2 in an input device path, RBX a BSWin32KeyboardDevice, the
+  jsonl empty), while the three offsets match the Address Library. The
+  SendEvent hook (104800, every VM event through JS) it had then is gone
+  since; whether it was the cause is HYPOTHESIS (sendevent-rate.js ran the
+  same hook on c1 for ADR-044 on 2026-10-20; figure-cast-trace and
+  launch-trace hook Skyrim Platform's own points too and run for minutes),
+  so the retry without it is the isolating read. Never kill frida-inject
+  under a running game (below).
 
 - hud-trace.js: what the game shows on its HUD and who asked
   (docs/verbs/shouts.md, the re-teach at login). Hooks
