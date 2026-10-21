@@ -93,6 +93,14 @@ class ScenarioTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: t\nclients: [c1]\n{bad}\n")
 
+    def test_the_drivers_cell_events_steps_parse(self):
+        # lab-driver's cell-events-start and cell-events-stop (main 4b69e9c, docs/verbs/cell-host.md's Dynamic plan):
+        # x-cell-attach was refused at its POST on cell-host's stage (2026-10-21 11:44) for want of these two names
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: cell-events-start\n  - wait: 1\n  - c1: cell-events-stop\n")
+        self.assertEqual([s.action for s in sc.steps if s.kind == "client"], ["cell-events-start", "cell-events-stop"])
+
     def test_netem_spec(self):
         from labapi.scenario import load_scenario
 
