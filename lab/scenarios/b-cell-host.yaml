@@ -15,9 +15,12 @@
 # away 6.3 s, 19:25:16.6 to 19:25:22.9, and c2 rightly took the cell at
 # epoch 2). c1 away for 8 s:
 # the grace runs out, c2 hosts at epoch 2 and c1's game logs the release.
-# c2's game relaunches with c1 still away: the cell goes unhosted and the
-# predator's record (server.ref) does not move over 10 s, the freeze. c1
-# back: epoch 3. A server restart and both reconnecting: a grant within 10 s,
+# c2's game relaunches with c1 still away: the cell goes unhosted at the
+# kept epoch (the disconnect's path); the relaunched game logs in where it
+# stood and takes the cell at epoch 3; c2 out of reach too: nobody has it
+# and the predator's record (server.ref), snapshotted after the last host
+# left, does not move over 10 s, the freeze. c1 back: epoch 4. A server
+# restart and both reconnecting: a grant within 10 s,
 # at epoch 1 again (the table is in memory). Both teleport in from outside
 # in one step: one grant. The npcEnabled setting is the run's own (ADR-035
 # point 9: lab-api's server.npcEnabled overlay on the version's settings).
@@ -65,13 +68,30 @@ steps:
   - c1: console {text: "getglobalvalue gamehour", match: "released cell 9810"}
   - assert:
       - c1.printed("released cell 9810")
-  # the host's game gone, nobody in reach: unhosted, the record frozen
-  - server: snapshot {name: predator, of: "server.ref(0x85547)"}
-  - c2: relaunch
-  - wait: 8
+  # the host's game gone (the relaunch step returns once c2 is off the
+  # online list; its game is back about 14 s later): the grace runs out with
+  # nobody in reach, unhosted at the kept epoch (run 194846 showed it in
+  # server.log at 19:51:35.8 and the returning game took epoch 3 before the
+  # old step could look)
+  - c2: relaunch {until: gone}
+  - wait: 6
   - assert:
       - server.host(0x9810).hosted == false
       - server.host(0x9810).epoch == 2
+  # the relaunched game logs in where it stood and takes the cell again
+  - c2: connect
+  - wait: 8
+  - assert:
+      - server.host(0x9810).client == "c2"
+      - server.host(0x9810).epoch == 3
+  # c2 out of reach too: nobody has the cell, and its record, snapshotted
+  # after the last host left it, stands still
+  - c2: teleport {cell: lab-spawn, x: 0, y: -450, z: 0, rot: [0, 0, 0]}
+  - wait: 7
+  - server: snapshot {name: predator, of: "server.ref(0x85547)"}
+  - assert:
+      - server.host(0x9810).hosted == false
+      - server.host(0x9810).epoch == 3
   - wait: 10
   - assert:
       - server.host(0x9810).hosted == false
@@ -82,7 +102,7 @@ steps:
   - wait: 15
   - assert:
       - server.host(0x9810).client == "c1"
-      - server.host(0x9810).epoch == 3
+      - server.host(0x9810).epoch == 4
   # a restart: the table starts over, a grant within 10 s of the reconnects
   - server: restart
   - wait: 20
