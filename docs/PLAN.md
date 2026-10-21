@@ -992,6 +992,18 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the non-host games, the cleaner and the copies retired, the loader's
   bans lifted; its code waits on the re-analyst's prototypes (41370,
   41453, 37356) and cell-host's probes.
+  NEXT PLAYTEST (Eli, 2026-10-21 11:07, "go with the first one"): M3's
+  first look, playtest thirty: cell hosting live on SkyMP's existing NPC
+  copies, the server with npcEnabled on (today's loader admits the
+  wildlife and the non-unique, non-essential, non-humanoid NPCs; the
+  humanoid lift is npc-puppet's), one game running a cell's NPCs, the
+  handoff when it leaves, the freeze when nobody is there. Seats aimed at
+  2026-10-22 evening if cell-host's stage goes green today: after the M2
+  merges, lab-api's deploy and a stage-client with the new driver,
+  verb-stage m3-cell-host (T2, x-cell-attach, b-cell-host, the smoke),
+  the gate sweep and its merge, then the playtest's own server setting
+  (npcEnabled for that server, off the shared file, ADR-035 point 9) and
+  the checklist docs/private/playtest-m3-30.md with each seat's perks.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
