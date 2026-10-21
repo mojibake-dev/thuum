@@ -760,6 +760,17 @@ class ConsoleTests(unittest.TestCase):
         self.assertFalse(ev.evaluate('c1.printed("Not enough permissions")'))
         self.assertTrue(ev.evaluate('not c1.printed("refused")'))
 
+    def test_printed_reads_the_history_a_match_brought_back(self):
+        # b-cell-host 20261021-193557: the release trace sat in the matched history and printed() read false
+        from labapi.assertions import Evaluator
+        views = ConsoleViews()
+        views.read["c1"] = {"typed": "getglobalvalue gamehour", "keys": 23, "lines": ["GetGlobalValue >> 16.79"],
+                            "history": ["[Script] Trace in HostService: released cell 9810 (epoch 1) "]}
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c1.printed("released cell 9810")'))
+        self.assertTrue(ev.evaluate('c1.printed("GetGlobalValue")'))
+        self.assertFalse(ev.evaluate('c1.printed("released cell 9811")'))
+
     def test_a_client_without_a_console_step_is_a_data_error(self):
         from labapi.assertions import AssertionData, Evaluator
         ev = Evaluator(RichServer(), ConsoleViews(), ["c1", "c2"])
