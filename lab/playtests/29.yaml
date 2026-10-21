@@ -11,7 +11,7 @@
 # playtest-console, set-percentages); the one thing a seat types itself is test 1's `player.addperk 7934b`
 # (Overdraw40, the headshot rule's perk, which lives in the shooter's game).
 id: 29
-build: "fork m2-train-31 3b579f41 (CI 2423, T2 32 identical) on stage-layer-train31-tonight 0e69f61: the essentials layer as staged (stage-layer-train30 7455e2c, apocrypha's c38a3b04) plus main f57d2c0 (scriptedEffects, Survival's need globals); the same content as the merge will make it (Eli, 2026-10-20)"
+build: "fork m2-train-31 9ad635cd (CI 2440; the Finger of Death caster fix and the spell origin over 3b579f41, T2 32 identical at 3b579f41) on stage-layer-train31-tonight: the essentials layer as staged (stage-layer-train30 7455e2c) plus main; probes on 9ad635cd b-fod-kill 045336 and b-spell-aim 045557 green; the same content as the merge will make it (Eli, 2026-10-20)"
 world: playtest-m2-28-repaired-20261021T031739Z   # twenty-eight's world saved 18:24 PDT after its report, repaired by lab/tools/world-repair.py (profile 2's nine mis-based learned spells re-based from main's 17-file order)
 hold:
   minutes: 180
