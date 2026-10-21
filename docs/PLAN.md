@@ -823,6 +823,21 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         no wire change. Ships with the first merge after Train-31 (its own
         gate, ADR-030), before any friend plays over the internet; the lab
         measures it under netem loss on b-spell's shape before and after.
+      - from the 03:30 sweep's read (2026-10-21 morning, the four reds,
+        docs/research/layer-reds-2026-10-20.md's sequel): b-push's known
+        refused second Ragdoll has its decisive probe written and never
+        run, lab/.cache/probes/x-push-knock-frida.yaml (HYPOTHESIS: the
+        server's imposed stagger snippet lands after the victim's own
+        Ragdoll and re-knocks it in place; the fix, skip PlayStagger for a
+        hit whose spell carries the push effect, waits on that run);
+        x-melee-edge, the sword's edge re-measured under the layer (180
+        units hit on the train-29 stage and missed twice on train-30 plus
+        the layer at identical positions; the layer's bodies are the
+        suspect; a-melee-reach stands at 170 meanwhile); GetGlobalValue
+        reading the Dragonborn gate's global 2020e99 in the plugin's own
+        index space rather than the load order's (HYPOTHESIS, a mapping
+        gap in the form-parameter rule; harmless today, the reward is 0
+        either way).
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
@@ -940,8 +955,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   49 with validators, fixtures and the C++ message layer, ea0e24d3); the
   verb doc's cell_of resolved to libespm's existing exterior-cell index;
   the round trip's exposure designed (Server::client_rtt_ms, on
-  wire-renet-clock). Next: the bridge's Cells, PartOne's election and
-  grants, the client's HostService, then x-cell-attach.
+  wire-renet-clock). The morning of 2026-10-21 (07:00 to 07:15): reach
+  made a fact with decisions (the 5x5 load against the 3x3 grid,
+  8f17d7a4), the bridge's Cells, the core's integration (9aadeaea:
+  CellOf and HostOf, the facts, HostGrant and HostRelease sent, the
+  hosted flag frozen by default, the cell-change rule, Host 14 ignored,
+  the hosters map retired, CellHostTest). Next: the client's HostService
+  (CellLoaded from cellFullyLoaded plus the attach poll, the grants with
+  the monotonic epoch, isHostedHere; tryHost and HostStart/HostStop
+  handling retired), the round trip through the bridge after
+  wire-renet-clock merges, then x-cell-attach.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
