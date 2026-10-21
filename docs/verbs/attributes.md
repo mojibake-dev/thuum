@@ -72,7 +72,7 @@ value was then cropped to the regeneration model and sent back; a
 server-applied heal snapped back the same way. Nothing recorded when the
 server last set a value and the report carries no stamp.
 
-The fix, fork m2-snapback 1fb5f2f9 (the train after playtest twenty-eight;
+The fix, fork m2-snapback eef10842 (the train after playtest twenty-eight;
 Eli 2026-10-20: the snap-back fix STAYS in M2): the bases' rule applied to
 the percentages. A value the server RAISED holds against the client's
 reports until one reaches it, the same shape as actor_values.rs's hold on a
@@ -97,7 +97,11 @@ what was imposed"):
   restoration potions work") goes: its case is this rule's, per value.
 - T0: unit/ChangeValuesTest.cpp, a raise holds against two stale reports,
   the report that carries it ends the hold, a later fall is taken, a lowered
-  value is cropped and not held. T3: b-snapback (approved by Eli 2026-10-20,
+  value is cropped and not held; green in ctest at eef10842 (pipeline 2352),
+  after the first build caught the hold being asked after the report's
+  equality with the server's value, which left the hold standing through
+  the report that carried the raise (fixed: the hold is asked first). T3:
+  b-snapback (approved by Eli 2026-10-20,
   main b10fc5bf; pending until the fix stages): a seat at
   half Health set to full by the server reads full on the server and in its
   own game 4 s later, two client reports past the set.

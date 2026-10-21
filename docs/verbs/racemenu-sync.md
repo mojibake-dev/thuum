@@ -665,7 +665,9 @@ above keep a hostile preset from carrying anything but a look.
   must, so its copy beat RaceMenu's in every layer seat; the render lays
   RaceMenu's copy loose (a loose file beats every archive), the rule being
   "when two archives share a path and the plugins' order cannot be the
-  installer's, lay the winner's copy loose". Deciders unchanged.
+  installer's, lay the winner's copy loose". CONFIRMED on the fixed layer's
+  stage (b53d922): both seats' skee64.log carry the chargen init again,
+  a-rotfern 20261021-000439 and a-racemenu 20261021-000831 green.
 
 ## Message contract
 
