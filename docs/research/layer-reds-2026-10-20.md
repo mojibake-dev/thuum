@@ -280,7 +280,29 @@ each read:
   never replaces, and the reconnect sync is cleared of this one.
 - Setup's gives stack on a restored world across playtests (4 iron swords,
   3 capes on test 1; 3 cloaks on test 2): the setup's give becomes
-  idempotent, topping up to a count (numidium, after 28).
+  idempotent, topping up to a count (numidium, main 485c4ee).
+- 18:18, Eli's report: "test 2's heals are getting rejected by the server.
+  nor is his health ticking up naturally". numidium's read of the server
+  log (00:58 to 01:30Z, kept as /srv/lab/handover/pt28-server.log): no Self
+  cast by ff000001 reached the server, no Azure Reconstruction (0x1A088694)
+  line anywhere, no refusal but the three ADR-039 E_CONDITION_UNKNOWN 448s,
+  no ChangeValues or crop line at info; test 2's only restore was a bed
+  ("Rest: ... slept 1 h, percentages now 1 1 1"). So Apocalypse's heal ran
+  in test 2's own game under ADR-029's default (the caster's game runs its
+  own spells' scripts) and the server, never told, cropped the reported rise
+  back to its regeneration model; and Survival Mode is ON for both seats
+  (playerGlobals 828 = 1 in both records, sent at the logins), which
+  disables passive health regeneration. Not a regression against
+  twenty-seven; visible now because test 2 tried to heal. The row: the
+  allowlisted self-heal (the server applies Azure Reconstruction as a Self
+  effect) with the snap-back fix beneath it (docs/PLAN.md, Train-31).
+- 18:18, the headshot row unticked without a note: the log read is pending
+  the right shooter (test 1 holds the bow in 28), and Eli's word on what he
+  saw.
+- Cosmetic, from the log: after the 18:02 restart the user numbers swapped
+  with connect order (user 1 is whoever connects first); after test 2's
+  relaunch "report before the login's record was applied, not taken" is the
+  login hold working.
 
 ## Consequence for M2's close
 
