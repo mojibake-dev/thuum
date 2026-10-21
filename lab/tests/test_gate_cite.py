@@ -70,10 +70,43 @@ class GateCite(unittest.TestCase):
         self.assertFalse(run(head8="1234abcd", changed=["skymp5-client/src/x.ts", "docs/a.md"])[3][0])
         self.assertTrue(run(head8="1234abcd", changed=["docs/verbs/shadowbond.md"])[3][0])
 
+    def test_a_red_only_on_what_is_pending_at_the_merge_stands(self):
+        # ADR-042b: b-push went red under the layer in the m2-close sweep and its carry was written while the set ran
+        rs = copy.deepcopy(SET); rs["verdict"] = "red"
+        rs["scenarios"].append("b-push")
+        rs["runs"]["b-push"] = [{"run": "r5", "verdict": "red"}, {"run": "r6", "verdict": "red"}]
+        results = {**RESULTS, "r5": result(), "r6": result()}
+        rows = gc.checks(rs, results, GATE, "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [], ["b-push"])
+        self.assertTrue(all(ok for ok, _ in rows), rows)
+        self.assertIn("red only on b-push, pending at the merge", rows[0][1])
+        # not pending: the red stands
+        self.assertFalse(gc.checks(rs, results, GATE, "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [], [])[0][0])
+        # a second red that is not pending
+        two = copy.deepcopy(rs); two["runs"]["b-shadowbond"].append({"run": "r7", "verdict": "red"})
+        self.assertFalse(gc.checks(two, {**results, "r7": result()}, ["smoke-two-players"], "m2-train-28", "e3a5b367", [], SID, SID,
+                                   dict(DESC), [], ["b-push"])[0][0])
+        # a lab fault that stayed beside it
+        err = copy.deepcopy(rs); err["runs"]["b-shadowbond"].append({"run": "r7", "verdict": "error"})
+        self.assertFalse(gc.checks(err, {**results, "r7": result()}, ["smoke-two-players"], "m2-train-28", "e3a5b367", [], SID, SID,
+                                   dict(DESC), [], ["b-push"])[0][0])
+        # a pending scenario the merge names itself must still be green
+        self.assertFalse(gc.checks(rs, results, GATE + ["b-push"], "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [], ["b-push"])[0][0])
+
+    def test_the_gate_lists_read_as_verb_merge_reads_them(self):
+        lists = gc.gate_lists()
+        self.assertIn("smoke-two-players", lists["always"])
+        self.assertTrue(lists["watch"] and lists["pending"], lists)
+        self.assertTrue(all(re_ok(s) for v in lists.values() for s in v), lists)
+
     def test_a_turbo_push_or_a_new_stage_after_the_set_began(self):
         self.assertFalse(run(turbo=["2026-10-20T00:30:00Z client 20261020T003000Z 711 e3a5b367"])[4][0])
         self.assertFalse(run(live="sha256:other")[4][0])
         self.assertFalse(run(live_descs={"c1": "x", "c2": "y"})[4][0])
+
+
+def re_ok(name):
+    import re
+    return re.fullmatch(r"[a-z0-9-]+", name) is not None
 
 
 UTC = datetime.timezone.utc
