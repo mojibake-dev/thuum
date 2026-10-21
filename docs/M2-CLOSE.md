@@ -124,6 +124,25 @@ class list Eli asked for:
    spells, no dent, Survival's box, Hailstone, capes, the MCM list (write
    the entries), teleports, quiver, no freeze, globals, the staggered cast.
 
+Report (Eli, 2026-10-20 22:33 PDT, docs/private/playtest-m2-29.md; the
+night's stage of m2-train-31, 3b579f41 then 9ad635cd at his word after the
+stage's probes found the caster dying with its target and the bolt's origin
+offset, both fixed and probed green before he resumed): items 1 to 3 and 5
+to 8 ticked; item 4 marked unsure ("unsure what this is testing"), proven by
+the lab (b-relaunch-reports 20261021-041549) and the live log of test 2's
+22:12 relaunch (its reports taken at once). Corrected at 22:42: section 2's
+Survival needs row is a NO ("those reset when test 2 came back"), so the
+need-globals row of Train-31 is not met and reopens for the next train (the
+log read says which side lost the values). Notes that are rows, none a
+fail by the checklist's own rule: the victim's game plays a plain death
+where the caster's shows the ash pile; Flames' stream lands in different
+places on the two screens while the bolts now match; Prepare for Adventure's
+items vanished and did not return (the one class spell marked unsure as a
+real misbehaviour); Sealed Resolve asks for a log read; Thoughtsteal's
+granted spell worked where the text said the server refuses it. The T4 half
+of the rule is met with those carried by name (PLAN, the rows after
+twenty-nine); the scenario half is step 6's sweep and merge.
+
 ## 4. Carried to M3, by name
 
 - Spells that instantiate world objects: runes (the glyph's decal on the
@@ -229,4 +248,10 @@ Survival race (lifted by the 8df default's smoke).
    section 3b's checklist; its report, then the gate (ADR-042: the nightly
    over the stage or `just sweep m2-close`), `just verb-merge
    m2-train-31`, and M2 DONE in PLAN and LOG, the carries moved to M3's
-   chart.
+   chart. Where it stands at 2026-10-20 22:40: twenty-nine REPORTED (section
+   3b, the T4 half met); the train's head 9ad635cd is CI-green and T2-green
+   (at 3b579f41; 9ad635cd left skymp-wire alone), its five probes green on
+   the night's stage; the morning's order (the train-30 and layer merges
+   under ADR-042a after the 03:30 sweep of the re-laid train-30 stage, then
+   m2-train-31 staged on main's merged layer and swept, then its merge) is
+   what remains before the word.

@@ -89,8 +89,14 @@ steps:
   - c1: hold-key {code: 199, ms: 1500}
   - wait: 4
   - assert:
-      - server.actor(c2).healthPercentage < 0.78
-      - server.actor(c2).healthPercentage > 0.74
+      # the band around the SERVED Firebolt's damage, as the first assertion
+      # above (the layer's Mysticism and Odin rewrite the record to 20 where
+      # Skyrim.esm says 25): 1 - 0.20 read 0.807 twice under the layer
+      # (20261021-103029-nightly, 20261021-133043) against the vanilla
+      # constants 0.78 and 0.74; the width is theirs, 0.03 over and 0.01
+      # under 1 - magnitude / 100
+      - server.actor(c2).healthPercentage < 1 - server.spell(0x12FD0).magnitude / 100 + 0.03
+      - server.actor(c2).healthPercentage > 1 - server.spell(0x12FD0).magnitude / 100 - 0.01
       - abs(c2.state.healthPercentage - server.actor(c2).healthPercentage) < 0.02
   - c2: watch-stop
   - assert:

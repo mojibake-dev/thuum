@@ -664,6 +664,22 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         them; three entries in lab/deploy/sky-srv/server-settings.json's
         playerGlobals, deployed with the train's stage; HYPOTHESIS: the
         restore lands before the need quests start (twenty-nine's item 7).
+        Twenty-nine's answer (Eli, 22:42, correcting his tick): "those
+        reset when test 2 came back", so the three values did NOT survive
+        test 2's relaunch; NOT met. The log read (asked) says whether the
+        seats ever reported the three, what the login sent back, or
+        whether the Creation's start overwrote a restored value; the row
+        stays open for the next train. The read (numidium, 22:50): the
+        server sent the three at test 2's relaunch login ("sent 58 to
+        watch, 5 values", 05:13:19) and the seat reported about every 40 s
+        after, so neither side dropped them; the log carries counts, not
+        values, and what is left is the Creation's start on the fresh save
+        writing the defaults over the restored values before the first
+        report. Probe x-survival-needs-relaunch tomorrow on the train-31
+        stage (c2 with known need values, relaunched, the three read in its
+        game at +5, +30 and +90 s against the record); the likely fix on
+        the client side of player-globals: re-apply the three once the
+        toggle has started the need quests.
       - ADR-043 slice two's first row: a repair for the lab's legacy worlds
         saved without their order (ids written across two orders), and the
         dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
@@ -735,6 +751,78 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         sides; CI 2423 green); b-relaunch-reports GREEN 20261021-041549 on
         the tonight stage (the early report refused and the echo taken
         0.1 s later), for Eli's review.
+- Playtest twenty-nine (2026-10-20, seats 21:33 on fork m2-train-31
+  3b579f41, re-staged at Eli's word 22:02 on 9ad635cd with the two fixes
+  the stage's probes called for; the staged essentials layer plus main's
+  settings; the repaired 28 world; report 22:33): the closing playtest
+  (docs/M2-CLOSE.md section 3b). Every item ticked but three marked
+  unsure: the relaunch row ("unsure what this is testing": the lab's
+  b-relaunch-reports and numidium's live read of test 2's 22:12 relaunch
+  are its proof), Prepare for Adventure ("i had things in my inventory,
+  then they vanished, then they wouldn't come back 2nd time i cast": a
+  finding, the inventory the server owns against a script that stores and
+  returns items, HYPOTHESIS until the log read) and Sealed Resolve ("hard
+  to tell visually as the perk only lasts 15 seconds", the log read asked).
+  Ticked with notes: Finger of Death's kill branch kills test 2 in both
+  games with the ash pile on test 1's screen only (the victim's own game
+  plays a plain death: a cosmetic row); projectiles land alike on both
+  screens but "the fire stream doesnt hit the same spot for flames" (a
+  stream's origin, the next row of the aim family); Thoughtsteal's granted
+  spell "worked just fine" where the checklist said the server refuses it
+  (the spell-list sync of train-30 teaches it; the census tag is stale);
+  the MCM shows eleven entries (apocalypse, goggles, idrc, jewelry limiter,
+  reading list, skyui, stealth detection fixes, true directional movement,
+  true HUD, undead fx, unread books glow). Section 5 empty: none of
+  twenty-eight's backsliding named. Corrected after the report (Eli,
+  22:42): the Survival needs row is a NO, "those reset when test 2 came
+  back"; the need-globals row reopens. By the checklist's own rule a class
+  spell that misbehaves is a finding, not a fail of the close, so the T4
+  half of the close is met with the findings carried by name; the
+  scenario half is the morning's sweep over the train staged on main's
+  merged layer, then `just verb-merge m2-train-31`, then M2 DONE.
+    - The rows after twenty-nine (the next train, M2's tail, or M3 by
+      name in docs/M2-CLOSE.md section 4), in build order:
+      - a stream's origin on the other screen (Flames): the figure's
+        concentration cast starts at its own hand along the relayed aim;
+        the caster's stream starts at its own node, as the bolts did
+        before b5075e04; the same launch-position carry for a stream's
+        first projectile, or the aim's origin per update (spell-cast.md).
+      - the victim's own game plays the disintegration the caster's does
+        (SetCriticalStage and the ash pile) when the server's kill came
+        from a scripted effect: a relayed look in the scripted-effects
+        entry, as cast-teleport's `look` names one (scripted-effects.md).
+      - Prepare for Adventure and its class (World or player state): the
+        log read (numidium, 22:50): the script's AddItem ran in test 1's
+        game, the server's R0 inventory never held the two items, and ten
+        seconds later the equipment update naming them was refused and
+        undone ("inventory does not contain item 1a0dd9db"); so the server
+        gives the spell's items, in scriptedEffects' shape (an entry naming
+        what the spell grants), a train row.
+      - Sealed Resolve: read, nothing to build (one self cast, its effects
+        run on the server, no refusal; the perk is the caster's game's);
+        his death to Hailstone during the 15 s hid it.
+      - the grants class (Thoughtsteal, Inferno, Knowledge is Power,
+        Meridia's Wrath): NOT a row. The log read found no cast of the
+        granted spell at the server, and Eli corrected my reading (22:58):
+        "the player one equipped those spells and that was visible to
+        player 2. that's allowed to be non server authoritative. something
+        like that is perfectly fine riding on the existing functionality":
+        the granted spell's equip rides the equipment relay to the other
+        screen, and that is the class's design. The census tag ("the
+        server refuses its equip") is corrected to that. Thoughtsteal's
+        effect on the target refused on function 570, unknown to the
+        evaluator (ADR-039): a note, nothing applied for a script effect
+        anyway.
+      - the login echo over a server set (section above) and Become
+        Ethereal's translucency (section above).
+      - the transport's frozen clock (found 2026-10-21 00:20 on the way to
+        cell-host's round trip, docs/research/transport-clock.md): the
+        polls never called renet's own update, so no lost reliable packet
+        was ever resent and every round trip read 0; fixed on fork branch
+        wire-renet-clock (off 9ad635cd) with a T0 that fails without it;
+        no wire change. Ships with the first merge after Train-31 (its own
+        gate, ADR-030), before any friend plays over the internet; the lab
+        measures it under netem loss on b-spell's shape before and after.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
@@ -824,6 +912,36 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 
 ### M3: Hosting (8 to 16 weeks, the TES3MP move)
 
+- STARTED 2026-10-21 00:05 PDT (Eli, after twenty-nine's report: "i
+  suppose kick it off when you're ready"), with M2's close finishing in
+  parallel (the morning's merges, Train-31's stage and merge). The first
+  verb is cell-host (docs/verbs/cell-host.md, drafted from ADR-035 and
+  docs/research/m3 the same night): the cell's own NPCs under one game's
+  AI, puppets elsewhere, the server's election, grace and freeze, the
+  reserved wire family given its senders. The engine-alone references
+  (r-npc-packages, r-npc-fight, r-cell-leave) and the puppet probe
+  (x-npc-puppet) ran on the new driver on 2026-10-18 (docs/research/m3/
+  readings-2026-10-18.md); their reruns on the merged base and the first
+  verb's probes take the lab after the morning order. Apocalypse's NPC
+  classes, the placers, the shouts' bystander and ADR-043 slice two ride
+  this milestone (docs/M2-CLOSE.md section 4). The verb order, from
+  ADR-035's consequences and the first doc's cut: cell-host (the election,
+  grace, epoch and freeze; the reserved wire family given senders; the
+  host's NPCs on SkyMP's existing relay), npc-puppet (AI off on the other
+  games, the engine's own references kept, the cleaner and the copies
+  retired), npc-stream (the host's state stream, HostedActorState as
+  Unreliable), npc-handoff (the saved state replayed before the grant),
+  npc-fate (one leveled roll per cell, deaths that persist). The first
+  doc's probes: x-cell-attach (solo, the cell events and the grid math),
+  then b-cell-host on a creature cell; the exits c-riverwood and
+  c-dungeon-enemies after npc-handoff and npc-fate. Built the first night
+  on fork m3-cell-host: the cell host table (wire-rules cells, afc792c1,
+  six T0) and the wire contract (CellLoaded 47, HostGrant 48, HostRelease
+  49 with validators, fixtures and the C++ message layer, ea0e24d3); the
+  verb doc's cell_of resolved to libespm's existing exterior-cell index;
+  the round trip's exposure designed (Server::client_rtt_ms, on
+  wire-renet-clock). Next: the bridge's Cells, PartOne's election and
+  grants, the client's HostService, then x-cell-attach.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
