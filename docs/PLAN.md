@@ -708,7 +708,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         on fork m2-train-31 6f7b7a06 (docs/verbs/actor-values.md: the hold
         armed at the login, the comparison over skills, attributes and
         level, the refusal naming the bases, the client's echo; T0 both
-        sides; CI pending); b-relaunch-reports from the probe, for review.
+        sides; CI 2423 green); b-relaunch-reports GREEN 20261021-041549 on
+        the tonight stage (the early report refused and the echo taken
+        0.1 s later), for Eli's review.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
