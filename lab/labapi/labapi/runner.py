@@ -778,7 +778,7 @@ class Runner:
         try:
             args = self._client_args(step.action, step.args)
             if step.action == "move":
-                args = await asyncio.to_thread(self._move_args, step.client, args)
+                args = await asyncio.to_thread(self._move_args, step.client, args, rec.scenario.solo)
         except (RunnerError, StateError) as e:
             rec.failures.append({"step": index, "kind": "lab", "error": str(e)})
             rec.verdict = "red"
@@ -1537,11 +1537,40 @@ class Runner:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None
         return out
 
-    def _move_args(self, client: str, args: dict[str, Any]) -> dict[str, Any]:
+    def _move_args(self, client: str, args: dict[str, Any], solo: bool = False) -> dict[str, Any]:
         """`move {dx, dy, dz?, duration_s}` is an offset from where the server
         says the client is; the driver translates the player to an absolute
-        target (x, y, z in world units) at a speed in units per second."""
-        actor = self.state.actor(client)
+        target (x, y, z in world units) at a speed in units per second.
+        `move {x, y, speed?}` names that target itself, in world units, and is
+        sent as written (x-cell-attach 20261021-185728: the offset path wrote
+        the server's record over a written target, and the player walked to
+        the spawn the whole run). In a solo run the server holds no record of
+        the player, so an offset starts from the client's last dump-state."""
+        offset = any(k in args for k in ("dx", "dy", "dz"))
+        if "x" in args or "y" in args:
+            if offset:
+                raise RunnerError("E_RUN_MOVE: a move takes an offset (dx, dy, dz) or a target (x, y), not both")
+            try:
+                tx, ty = float(args["x"]), float(args["y"])
+            except (KeyError, TypeError, ValueError) as e:
+                raise RunnerError(f"E_RUN_MOVE: a target move names both x and y in world units: {e}") from None
+            if "z" in args:
+                tz = float(args["z"])
+            else:
+                # the driver steps x and y and keeps the player's own z; the contract still names one
+                pos = (self.board.view(client) or {}).get("pos")
+                a = None if solo else self.state.actor(client)
+                tz = float(pos[2]) if isinstance(pos, list) and len(pos) == 3 else float(((a or {}).get("absolute") or a or {}).get("z", 0) or 0)
+            out = dict(args)
+            out.update({"x": tx, "y": ty, "z": tz, "speed": float(args.get("speed", 0) or 0) or 300.0})
+            return out
+        if solo:
+            pos = (self.board.view(client) or {}).get("pos")
+            if not (isinstance(pos, list) and len(pos) == 3):
+                raise RunnerError(f"E_RUN_MOVE: a solo run's offset move starts from {client}'s dump-state, and it has none yet")
+            actor = {"x": pos[0], "y": pos[1], "z": pos[2]}
+        else:
+            actor = self.state.actor(client)
         if actor is None:
             raise RunnerError(f"E_RUN_MOVE: the server has no actor for {client}")
         base = actor.get("absolute") or actor
