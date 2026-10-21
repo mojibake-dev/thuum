@@ -1998,8 +1998,9 @@ merge with PROMOTE=0, about four hours of lab) is not needed.
 
 ## ADR-042b: A cited sweep may stand red only on what is pending at the merge
 
-Status: PROPOSED 2026-10-21 10:00 PDT (numidium, after the m2-close sweep's
-b-push red); amends ADR-042's check 1 and ADR-042a's whole-set gate.
+Status: ACCEPTED 2026-10-21 11:07 PDT (Eli: "carry b-push to m3"); proposed
+10:00 PDT (numidium, after the m2-close sweep's b-push red); amends ADR-042's
+check 1 and ADR-042a's whole-set gate.
 
 **Context.** lab/gate.yaml's `pending` leaves a scenario red by design out of
 a full sweep, but only out of a sweep started after its line. The m2-close
