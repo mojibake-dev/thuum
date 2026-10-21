@@ -1996,6 +1996,39 @@ the layer's citation (numidium, before the merges). The fallback written at
 proposal (layer-merge's own sweep on a re-laid stage after the train's
 merge with PROMOTE=0, about four hours of lab) is not needed.
 
+## ADR-042b: A cited sweep may stand red only on what is pending at the merge
+
+Status: PROPOSED 2026-10-21 10:00 PDT (numidium, after the m2-close sweep's
+b-push red); amends ADR-042's check 1 and ADR-042a's whole-set gate.
+
+**Context.** lab/gate.yaml's `pending` leaves a scenario red by design out of
+a full sweep, but only out of a sweep started after its line. The m2-close
+sweep (20261021-144529, 70 scenarios on m2-train-31 9ad635cd over
+stage-layer-train31) read 69 green and b-push red under the essentials
+layer: c2 ragdolls where it stands and is never thrown (y -206 against under
+-650 in 20261021-165252-b-push, -150 in its rerun 175115), the layer's
+refused second Ragdoll, its cause unread. gate-cite.py's check 1 took only a
+green or a watch set, so the sweep could stand for neither merge although
+its other seven checks held, and the way round was a new stage and a
+four-hour sweep for a red that M2-CLOSE's own rule ("fixed on the train or
+carried to M3 by name") already covers. ADR-042a's decision already reads
+"every scenario of the set green or pending by its named fix".
+
+**Decision.** A cited set passes check 1 when it is done, its only reds are
+scenarios lab/gate.yaml holds `pending` at the merge (each line naming the
+verb doc that holds the fix and the run that read it red), and nothing else
+in it is unfinished (no lab fault left, no scenario missing). A scenario the
+merge names itself must still be green. A layer's whole-set gate (ADR-042a)
+leaves the pending ones out. Moving a scenario into `pending` to carry it is
+Eli's call, as every carry is.
+
+**Consequences.** The pending line adds no power the list did not have: a
+sweep started after it would have left the scenario out in the same way.
+b-push moves from `watch` to `pending` (docs/verbs/push.md, carried to M3 by
+name; the probe x-push-knock-frida first, on a free slot); gate-cite.py's
+check 1 and the layer's gate read gate.yaml's `pending` (thuum branch
+gate-pending-at-merge).
+
 ## ADR-043: The world stores every form plugin-relative; a load order change migrates a world, never undresses it
 
 Status: ACCEPTED 2026-10-19 19:32 PDT (Eli: "accept those ADRs"); proposed 2026-10-19 17:50 PDT (Eli, playtest twenty-six, the essentials layer:
