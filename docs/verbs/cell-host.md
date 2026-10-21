@@ -168,14 +168,20 @@ the host's stream keeps its own budgets.
 
 ## Message contract
 
-- HostGrant, id 7, server to one client, ReliableOrdered by default
-  (wire-transport channels.rs:35-41), reserved at wire-schema lib.rs:
-  296-300 as { cell: FormId }; this verb adds `epoch: u32`. HostRelease, id
-  8 (:301-305), the same. Idempotent per (cell, epoch). validate_server: the
-  client refuses a grant or release whose epoch is not above the last it saw
-  for that cell in this connection (TES3MP's late-grant desync, tes3mp.md:
-  194-196; Skyrim Together ignores a stale epoch, te-npcs.md:70-71); the
-  epochs clear at Welcome, since a restarted server counts from 1 again.
+- HostGrant and HostRelease, server to one client, reliable: thuum messages
+  in the SkyMP family's shape, MsgType 48 and 49 and so ids 56 and 57 (the
+  family's rule id = MsgType + 8, wire-schema lib.rs's test
+  skymp_wire_ids_are_msg_type_plus_offset), fields { cell: u32, epoch: u32 }
+  (wire-schema skymp.rs, built 2026-10-21 on fork m3-cell-host). The M0
+  rows 7 and 8, { cell: FormId } with no sender, stay reserved and dead as
+  ReservedHostGrant and ReservedHostRelease (ADR-012: ids are append-only).
+  Idempotent per (cell, epoch). validate_server (the shape, both sides): a
+  cell and an epoch above 0. The monotonic rule, a grant or release whose
+  epoch is not above the last seen for that cell in this connection is
+  ignored (TES3MP's late-grant desync, tes3mp.md:194-196; Skyrim Together
+  ignores a stale epoch, te-npcs.md:70-71), is the client's HostService's,
+  since the stateless validator keeps no per-cell state; the epochs clear at
+  Welcome, a restarted server counting from 1 again.
 - HostedActorState, id 5, host to server, ReliableUnordered today
   (channels.rs:38), fields { actor, transform, health, inventory_delta }
   (lib.rs:227-242), validated at wire-validate lib.rs:557-566 (transform,
@@ -183,11 +189,15 @@ the host's stream keeps its own budgets.
   "the sender hosts the actor's cell at this epoch" (E_VAL_RANGE for an
   older one). Its sender arrives with npc-stream, which also moves it to
   Unreliable (ADR-035 point 5).
-- CellLoaded, new, id 55 (TABLE is [Row; 55], lib.rs:426), client to
-  server, ReliableOrdered (a load then an unload keep their order), cap 16
-  bytes, fields { cell: FormId, loaded: bool }. Validator: the budget above
-  (E_VAL_RATE) and nothing about the cell, since the election checks the
-  server's own grid; idempotent (it sets a bit).
+- CellLoaded, new, id 55, MsgType 47, client to server, ReliableOrdered (a
+  load then an unload keep their order), cap 16 bytes, fields { cell: u32,
+  loaded: bool } (built 2026-10-21). Validator: the budget above as
+  wire-validate's cell_loaded_budget (32 at once, 8 a second; E_VAL_RATE), a
+  cell of 0 refused (E_VAL_RANGE), nothing more about the cell, since the
+  election checks the server's own grid; idempotent (it sets a bit). The C++
+  side: CellLoadedMessage, HostGrantMessage, HostReleaseMessage
+  (skymp5-server/cpp/messages), MsgType 47 to 49, PacketParser's case to
+  ActionListener::OnCellLoaded; two fixtures each in wire-json.
 - The legacy stream for hosted NPCs (UpdateMovement 2, UpdateAnimation 3,
   OnHit 17, SpellCast 23) keeps its bytes and budgets; the gate changes.
 - Byte caps re-derived, `just wire-header-check`, docs/WIRE.md:121 and

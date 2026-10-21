@@ -176,7 +176,12 @@ larger than the messages need.
 Families, mirroring the authority rungs:
 
 - Session: hello, version, mod list hash, disconnect reason.
-- Ownership: cell host grant, host handoff, host release (R0 decisions).
+- Ownership: cell host grant, host handoff, host release (R0 decisions):
+  HostGrant (id 56, MsgType 48) and HostRelease (id 57, MsgType 49) with the
+  cell and its epoch, fed by the client's CellLoaded (id 55, MsgType 47, an
+  Intent: a cell fully loaded or gone from the loaded set), docs/verbs/
+  cell-host.md; the M0 rows 7 and 8 stay reserved and dead
+  (ReservedHostGrant, ReservedHostRelease); the handoff is npc-handoff's.
 - Intent: movement sample, animation event, cast intent, hit intent,
   activate intent, aim pitch (R1 inputs; the validator's main customers).
 - Record: NPC state under host, physics owner updates (R2 inputs).
