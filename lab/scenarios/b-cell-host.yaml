@@ -8,7 +8,12 @@
 # the cell at epoch 1 (server.host(cell), lab-api's fact from the gamemode's
 # labState cellHost). c2 arrives beside it: still c1. c1 teleports two cells
 # east (out of its 3x3 reach while its game still has the cell loaded) and
-# back within 4 s: still c1, epoch 1 (the grace disarmed). c1 away for 7 s:
+# back inside the grace: still c1, epoch 1 (the grace disarmed; a teleport
+# step returns about 3.2 s after it starts, when the record has landed, so
+# the away time is that landing plus the half-second wait between, about
+# 3.7 s against the 5 s grace: run 20261021-192314 waited 3 s there, was
+# away 6.3 s, 19:25:16.6 to 19:25:22.9, and c2 rightly took the cell at
+# epoch 2). c1 away for 8 s:
 # the grace runs out, c2 hosts at epoch 2 and c1's game logs the release.
 # c2's game relaunches with c1 still away: the cell goes unhosted and the
 # predator's record (server.ref) does not move over 10 s, the freeze. c1
@@ -42,9 +47,10 @@ steps:
   - assert:
       - server.host(0x9810).client == "c1"
       - server.host(0x9810).epoch == 1
-  # two cells east and back inside the grace: still c1
+  # two cells east and back inside the grace: still c1 (the away time is the
+  # second teleport's own 3.2 s landing plus this wait)
   - c1: teleport {cell: lab-spawn, x: -2265, y: -19170, z: -3957, rot: [0, 0, 0]}
-  - wait: 3
+  - wait: 0.5
   - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
   - wait: 4
   - assert:
