@@ -25,8 +25,8 @@ with lab/pex.py; docs/research/train-31-reads.md section 5):
 | 1 | the effect applies only where its seven conditions hold: IsActor, GetDead == 0, no ActorTypeDwarven, no ActorTypeUndead, IsUndead == 0, no MagicNoDisintegrate, IsEssential == 0 | the caster's game decides whether the script runs at all | R0: the server evaluates the same conditions (ADR-039, every function known since train-29) before any arithmetic |
 | 2 | TargetHealth = the target's current Health (times 100 / (100 - MagicResist) if the script's WB_IsResist is true) | the blast's size | R0 from the server's Health; HYPOTHESIS: WB_IsResist's compiled default (not in the VMAD; the pex's variable table or a resistant target measures it) |
 | 3 | SelfDamage = TargetHealth x Percentage / 100, the Percentage global 125 | the caster's cost | R0: wire-rules scripted_effects::finger_of_death, the percentage from the entry (125 unless it says otherwise) |
-| 4 | kill branch (SelfDamage < caster's Health - 1): the target damaged by TargetHealth, the caster by SelfDamage, akTarget.Kill(akCaster) | both bars, the victim's death | R0: the target's Health to nothing by the caster's hand (MpActor::SetPercentages kills with the aggressor), the caster's DamageActorValue |
-| 5 | fail branch: the caster damaged to 1 point, the target by (caster's Health - 1) x 100 / Percentage, no kill | both bars | R0, the same function's other branch |
+| 4 | kill branch (SelfDamage < caster's Health - 1): the target damaged by TargetHealth, the caster by SelfDamage, akTarget.Kill(akCaster) | both bars, the victim's death | R0 for the target: its Health to nothing by the caster's hand (MpActor::SetPercentages kills with the aggressor). The caster's share is its own game's: the script runs there and reports the fall, taken as every self-inflicted script damage is (ADR-029's default); the server pays it only for an actor no game plays. The first build paid it on the server too and the caster died with its target (b-fod-kill 20261021-042635) |
+| 5 | fail branch: the caster damaged to 1 point, the target by (caster's Health - 1) x 100 / Percentage, no kill | both bars | R0 for the target, the same function's other branch; the caster's point as in row 4 |
 | 6 | the imagespace modifier, the explosion marker's sound, the message, the screen blood | the caster's screen | R3: the caster's own script keeps them (it still runs in the caster's game; its player damage yields to the server's numbers under ADR-028) |
 | 7 | the disintegration: SetCriticalStage, the shader, AttachAshPile after 1.25 s, SetAlpha 0 after 1.65 s, unless the race is in the immunity list (11 races) | the victim's body on the caster's screen; the victim's own screen shows the server's death | R3 on the caster's screen (the script's Kill on the figure, what playtest twenty-eight saw); the victim's death reaches its own game from the server (MpActor::Kill, DeathStateContainerMessage) and the other games through the figure's values as every death does |
 | 8 | Restoration advanced by SelfDamage x 0.75 x 0.75 for a player caster | the caster's skill | R2 as every skill is (the actor-values record) |
@@ -159,7 +159,7 @@ visuals), the victim's game takes the death as every death.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-20)
 - [x] engine surface cited or delegated (the record and the script, read on sky-srv 2026-10-20)
-- [x] server logic + T0 (fork m2-train-31 b0e4ba38, 2026-10-20 19:05 PDT; CI pending)
+- [x] server logic + T0 (fork m2-train-31 b0e4ba38, 2026-10-20 19:05 PDT; the caster's share left to its own game at 9ad635cd after b-fod-kill 20261021-042635 killed the caster too: the server's share and the script's stacked; docs/research/train-31-reads.md section 9)
 - [x] message + validator (same commit): no message; the settings list validated in Rust
 - [ ] native hook + T1: none needed
 - [ ] TS handler: none needed
