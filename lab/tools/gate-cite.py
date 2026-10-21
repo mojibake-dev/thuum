@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""gate-cite.py <run set id> <fork branch> <gate scenario...>: whether a finished run set may stand for a merge's
-gate (ADR-042, `GATE_SET=<id> just verb-merge`). Exits 0 when all five checks hold, 1 when one fails (verb-merge then
-runs the gate), printing one line per check:
+"""gate-cite.py [--layer <thuum branch> <run id>] <run set id> <fork branch> <gate scenario...>: whether a finished
+run set may stand for a merge's gate (ADR-042, `GATE_SET=<id> just verb-merge`; ADR-042a, a layer staged under that
+train, `GATE_SET=<id> LAYER_RUN=<run id> TRAIN=<fork branch> just layer-merge <thuum branch>`). Exits 0 when every
+check holds, 1 when one fails (the merge then runs its own gate), printing one line per check:
 
 1. the set is done, green or watch (ADR-027), and every gate scenario's last run in it is green;
 2. its runs played one build: the same server image id and the same clone snapshot descriptions in every
@@ -13,6 +14,14 @@ runs the gate), printing one line per check:
    gate);
 5. nothing replaced the stage after the set began: no line in /srv/lab/turbo.log since its start, and the running
    server and both clones' clean-m1-next still carry the set's build.
+
+With --layer, the train's five, then the layer's three (ADR-042a: the train staged over the layer as laid, the gate
+every scenario of the set):
+6. the layer's own stage run (its smoke or a decider, named) is green, every clone it played was described
+   "<thuum branch> layer <sha8>" with one <sha8>, and it began before the set did;
+7. the thuum branch's head carries that staged layer: every path it changed since <sha8> is a .md file or matches
+   origin/main's blob (a merge of main brought it);
+8. persist's mods are the ones laid: /srv/persist/mods/SHA256SUMS was last written before that run began.
 
 FORK_DIR (default skymp) is the fork checkout; LAB_API and RESULTS name lab-api and the results site."""
 from __future__ import annotations
@@ -98,7 +107,50 @@ def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, hea
     return out
 
 
+def _time(s: str) -> datetime.datetime:
+    return datetime.datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+
+def layer_sha(layer_branch: str, run: dict) -> str:
+    """The one <sha8> the layer stage run's clones were described with ("<thuum branch> layer <sha8>"), else ""."""
+    descs = [(d or {}).get("description", "") for d in ((run.get("build") or {}).get("clients") or {}).values()]
+    named = {x.group(1) for d in descs for x in [re.search(rf"{re.escape(layer_branch)} layer ([0-9a-f]{{8}})", d)] if x}
+    return next(iter(named)) if len(named) == 1 and descs and all(f"{layer_branch} layer " in d for d in descs) else ""
+
+
+def layer_checks(layer_branch: str, run_id: str, run: dict, rs: dict, foreign: list[str] | None,
+                 sums_written: datetime.datetime | None) -> list[tuple[bool, str]]:
+    out = []
+    lsha8 = layer_sha(layer_branch, run)
+    began = _time(run["started"]) if run.get("started") else None
+    before = began is not None and bool(rs.get("started")) and began < _time(rs["started"])
+    ok6 = run.get("verdict") == "green" and bool(lsha8) and before
+    out.append((ok6, f"6. the layer's own stage: run {run_id} {run.get('verdict')}, clones "
+                     + (f"'{layer_branch} layer {lsha8}'" if lsha8 else f"not one '{layer_branch} layer <sha8>'")
+                     + (", before the set" if before else ", not before the set")))
+    ok7 = foreign is not None and not foreign
+    out.append((ok7, "7. the head carries that layer: " + ("every change since is main's or a .md file" if ok7 else
+                (f"changed since {lsha8 or '?'}: {', '.join(foreign[:4])}" + ("..." if len(foreign) > 4 else "")) if foreign
+                else "the diff since the staged commit could not be read")))
+    ok8 = sums_written is not None and began is not None and sums_written < began
+    out.append((ok8, "8. persist's mods are the ones laid: SHA256SUMS " + (
+        f"written {sums_written:%Y-%m-%dT%H:%MZ}, before the run" if ok8 else
+        f"written {sums_written:%Y-%m-%dT%H:%MZ}, after the run began" if sums_written else "unreadable")))
+    return out
+
+
+def _blob(ref: str, path: str) -> str | None:
+    r = subprocess.run(["git", "rev-parse", "-q", "--verify", f"{ref}:{path}"], capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
 def main(argv: list[str]) -> int:
+    layer = None
+    if argv[:1] == ["--layer"]:
+        if len(argv) < 5:
+            print(__doc__.split("\n\n")[0], file=sys.stderr)
+            return 2
+        layer, argv = (argv[1], argv[2]), argv[3:]
     if len(argv) < 2:
         print(__doc__.split("\n\n")[0], file=sys.stderr)
         return 2
@@ -140,7 +192,29 @@ def main(argv: list[str]) -> int:
             continue
         if t >= started:
             turbo_since.append(ln)
+    if layer and not gate:
+        gate = list(rs.get("scenarios", []))  # a layer's gate is the whole set (ADR-042a)
     rows = checks(rs, results, gate, branch, head8, changed, registry_id, live_server, live_descs, turbo_since)
+    if layer:
+        lbranch, lrun = layer
+        try:
+            run = fetch(f"{RESULTS}/{lrun}/result.json")
+        except Exception:
+            run = {}
+        lsha8 = layer_sha(lbranch, run)
+        foreign = None
+        if lsha8:
+            subprocess.run(["git", "fetch", "-q", "origin", lbranch, "main"], capture_output=True)
+            d = subprocess.run(["git", "diff", "--name-only", lsha8, f"origin/{lbranch}"], capture_output=True, text=True)
+            if d.returncode == 0:
+                foreign = [p for p in d.stdout.splitlines() if p and not p.endswith(".md")
+                           and _blob(f"origin/{lbranch}", p) != _blob("origin/main", p)]
+        try:
+            sums_written = datetime.datetime.fromtimestamp(
+                int(ssh("stat -c %Y /srv/persist/mods/SHA256SUMS").strip()), datetime.timezone.utc)
+        except (subprocess.CalledProcessError, ValueError):
+            sums_written = None
+        rows += layer_checks(lbranch, lrun, run, rs, foreign, sums_written)
     for ok, msg in rows:
         print(("   ok  " if ok else "   NO  ") + msg)
     return 0 if all(ok for ok, _ in rows) else 1
