@@ -774,15 +774,24 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         from a scripted effect: a relayed look in the scripted-effects
         entry, as cast-teleport's `look` names one (scripted-effects.md).
       - Prepare for Adventure and its class (World or player state): the
-        script's items against the server's inventory; the log read names
-        where they went; M3's if it needs the server to hold a script's
-        container, a train row if a sync bug.
-      - Sealed Resolve's read (perk-driven: the server applies nothing by
-        design; the log says whether it refused anything).
-      - the stale "refuses the granted spell" tag on the grants class
-        (docs/private/apocalypse-census-spells.tsv, the checklist text):
-        train-30's spell-list sync teaches a script-granted spell, the
-        read confirms.
+        log read (numidium, 22:50): the script's AddItem ran in test 1's
+        game, the server's R0 inventory never held the two items, and ten
+        seconds later the equipment update naming them was refused and
+        undone ("inventory does not contain item 1a0dd9db"); so the server
+        gives the spell's items, in scriptedEffects' shape (an entry naming
+        what the spell grants), a train row.
+      - Sealed Resolve: read, nothing to build (one self cast, its effects
+        run on the server, no refusal; the perk is the caster's game's);
+        his death to Hailstone during the 15 s hid it.
+      - the grants class (Thoughtsteal, Inferno, Knowledge is Power,
+        Meridia's Wrath): the log read: the granted spell never reached the
+        server (no cast of it, no equip refusal), so "it worked just fine"
+        was test 1's own screen; the census tag ("the server refuses its
+        equip") is wrong on the mechanism. Row: a script-granted spell
+        reaches the server when granted (the client reports the spell-list
+        change the way the login sync does), so its casts relay. Also
+        Thoughtsteal's effect on the target refused on function 570,
+        unknown to the evaluator (ADR-039), read with the row.
       - the login echo over a server set (section above) and Become
         Ethereal's translucency (section above).
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
