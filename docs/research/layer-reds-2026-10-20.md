@@ -303,6 +303,43 @@ each read:
   with connect order (user 1 is whoever connects first); after test 2's
   relaunch "report before the login's record was applied, not taken" is the
   login hold working.
+- By 18:31, the headshot read with the right shooter (numidium): four
+  OnPlayerBowShot lines by ff000000 at 01:12:47 to 01:12:59Z (power 1.00,
+  aim 0.496 then 0.120 to 0.137, heading 3.153 then 3.686 to 3.688), and
+  after them no "OnWeaponHit - ff000000 hits ff000001" with the arrow, no
+  headshot verdict, no helmet line, no E_SHOT_* refusal: no hit claim for
+  any of the four. The window's eight hits on test 2 are all "with 13989"
+  at 01:03:53 to 01:04:02 (six of 7.568, two of 15.136), the sword. Either
+  the arrows missed or a hit never became a claim; Eli's word on what he
+  saw decides which, and the row stays open until then (b-headshot and
+  b-arrow-path are green on the stage, so the lab's shots do claim).
+- By 18:31, Eli's two calls on the findings, his words: "azure
+  reconstruction cast on another player should not heal them. they're not
+  a summon. however i should be able to cast healing hands on them" and,
+  on Finger of Death, "if it kills them by effect of the spell, yes kill
+  them. why on earth would i want them dead in only one game???". So: a
+  heal applies by the record, server-side, to whoever its delivery and
+  conditions name; a scripted kill is the server's, in both games. Both
+  Train-31 rows (PLAN); the mechanism follows the record read of the three
+  spells and the code read of the server's non-hostile path (in flight).
+  Eli's framing of my first read, which filed both as the documented
+  default: "less than human about some of these considerations as they
+  pertain to gameplay". The read of a finding starts from what a player
+  expects, then the ADR.
+- 18:24 to 18:33, numidium's after-28 order: the world saved as
+  playtest-m2-28-20261021T012414Z (8 records, untouched); the dangling
+  'a86df:Cloaks.esp' removed in a COPY, playtest-m2-28-cleaned-
+  20261021T012503Z (profile 2 from 18 to 17 learned spells; the server's
+  console has no RemoveSpell and the gamemode no forget), the next
+  playtest's start; the console probe x-syncspells-reconnect
+  20261021-012700 green on the saved world: syncSpells at login "17
+  listed, 15 removed, 17 added, 0 missing" then "17 listed, 2 removed, 0
+  added, 0 missing", and after `server: restart` plus a reconnect with the
+  game up "17 listed, 22 removed, 0 added, 0 missing" then "17 listed, 0
+  removed, 0 added, 0 missing", Teleportation 0x280A86DF and Flames known
+  = 1 throughout. The reconnect keeps a listed spell, as b-spells-reconnect
+  said; test 1's loss predates tonight. lab-api a69d91d6 deployed 18:33
+  (rises(av, at_least) live; server image and clones untouched).
 
 ## Consequence for M2's close
 
