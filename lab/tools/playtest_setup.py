@@ -251,7 +251,9 @@ def _srv(cmd: str, stdin: str | None = None, timeout: int = 60) -> str:
 def _lay_overlay(server: dict[str, Any]) -> str:
     """The profile's own server setting laid beside the world (the deployed settings with it over them); the
     restore then recreates the server on it, so the shared file never carries it."""
-    _srv(f"cat > {OVERLAY}", stdin=overlay_text(_srv(f"cat {SETTINGS}"), server))
+    # lab-api's runner writes the same file as root from its container (a run's npcEnabled), so the playtest's
+    # write goes through sudo too, into the same file and mode (playtest thirty's setup, 2026-10-21 13:5x: denied)
+    _srv(f"sudo tee {OVERLAY} > /dev/null", stdin=overlay_text(_srv(f"cat {SETTINGS}"), server))
     return OVERLAY
 
 
