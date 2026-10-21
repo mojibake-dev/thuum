@@ -157,7 +157,106 @@ claim are that check, not a lost claim; the row was not tested by hand in
 twenty-eight and stands on b-headshot (green on the stage). The next
 checklist carries it again.
 
-## 5. The records (pending the read)
+## 5. The records (read on sky-srv, 2026-10-20 18:40 to 18:50 PDT)
 
-Azure Reconstruction (Apocalypse local 088694), Healing Hands and Finger of
-Death: SPIT, effects, conditions, scripts.
+A read agent's reader over lab/esm.py's parser against the lab's own files,
+/srv/persist/esm/1.6.1170/ (Apocalypse 10.2.3, sha256 3534568f... as the
+dataset's SHA256SUMS line; Skyrim.esm 2bbc77fd...); layouts per libespm's
+SPEL.h, Effects.cpp and CTDA.h and CommonLibSSE-NG's EffectSetting.h, names
+per TESCondition.h's FunctionID. Nothing edited, no lab run.
+
+### Azure Reconstruction, SPEL 03088694 (local 088694; 0x1A088694 under the lab's order)
+
+- SPIT: cost 3, Concentration, delivery TargetActor, range 200, charge
+  0.5 s, flags IgnoreResistance + NoAbsorb/Reflect, half-cost perk
+  ConjurationNovice00.
+- One effect, MGEF 03126DA1 "Azure Reconstruction", DNAM "Heal a conjured
+  minion <mag> points per second.": ValueModifier Health, magnitude 10,
+  FXPersist + PowerAffectsMagnitude (not Hostile, not Detrimental);
+  keywords MagicRestoreHealth, WB_Conjuration; VMAD the vanilla
+  SayOnHitByMagicEffectScript.
+- MGEF conditions: IsCommandedActor (700) == 1 AND GetActorValuePercent
+  (640) Health < 1, both on the Subject.
+- Reading: a minion heal. Cast at a player, the caster's own engine refuses
+  the effect (IsCommandedActor is false for a player), so no
+  magicEffectApply, no OnHit, nothing at the server; by the record no
+  player is healed by it, as Eli said. Nothing to build. The evaluator
+  learns 700 (false for a player) and 640 (current over maximum from the
+  server's values) so a stray claim refuses by evaluation rather than
+  E_CONDITION_UNKNOWN. The first read's "allowlisted self-heal" was my
+  misreading of this record; docs/research/apocalypse/train-27-spells.md
+  section 4 had the conditions right (one correction there: SPIT carries
+  IgnoreResistance too).
+
+### Healing Hands, SPEL 0004D3F2 HealingHands (Skyrim.esm; FULL is an lstring, no STRINGS file under persist)
+
+- SPIT: cost 25, Concentration, delivery TargetActor, half-cost perk
+  RestorationApprentice25.
+- Effect 1, MGEF 0001CEA5 RestoreHealthConcActor: ValueModifier Health,
+  magnitude 10, duration 1, FXPersist + PowerAffectsMagnitude; conditions
+  HasKeyword (560) ActorTypeDwarven != 1, HasKeyword ActorTypeDaedra != 1,
+  HasKeyword ActorTypeUndead != 1, IsUndead (715) == 0, all AND on the
+  Subject.
+- Effect 2, MGEF 0004E93E PerkRestoreStaminaConcActor: ValueModifier
+  Stamina 10, HideInUI; an EFIT condition HasPerk (448) Respite (000581F9)
+  == 1 run on the player reference; MGEF conditions Daedra, Undead and
+  IsUndead as above.
+- Reading: the server applies effect 1 to another player already
+  (measured on the lab, docs/verbs/magic-effects.md:563, 0.51 to 0.77)
+  once 560 and 715 evaluate; effect 2 refuses E_CONDITION_UNKNOWN today
+  (448), the same outcome as the record's for a player without Respite.
+  The row's three parts: hostility (a held heal must not start a fight),
+  the snap-back hold beneath the server's raise (a 2 s report carrying the
+  old value undoes a server raise in the current build), and 560 and 715
+  confirmed in the evaluator (were 560 unknown, every tick would refuse).
+  The grep of twenty-eight's log for 4d3f2 and its effects (asked of
+  numidium) decides what test 2 saw.
+
+### Finger of Death, SPEL 03035452 (local 035452) WB_Res_Necro3_Spell_FingerOfDeath
+
+- SPIT: cost 160, FireAndForget, delivery TargetActor, range 1500, flags
+  IgnoreResistance + NoDualCastMods, half-cost perk RestorationAdept50.
+- One effect, MGEF 03035450: archetype Script, no actor value, Hostile +
+  Detrimental + NoDuration + NoMagnitude + NoArea + NoRecast; keywords
+  WISpellDangerous, WB_Restoration_Keyword_IsInstakillSpell,
+  WB_Restoration; DNAM "Blast of death magic that damages a living target
+  equal to its Health but the caster takes <Global=...Percentage>% damage.
+  If this would kill the caster, damage to the target is reduced."
+- MGEF conditions, seven, all AND on the Subject: IsActor (353) == 1,
+  GetDead (46) == 0, HasKeyword (560) ActorTypeDwarven == 0, HasKeyword
+  ActorTypeUndead == 0, IsUndead (715) == 0, HasKeyword MagicNoDisintegrate
+  == 0, IsEssential (354) == 0 (354 is the evaluator's since train-29).
+- The script, WB_FingerOfDeath_Script.OnEffectStart(akTarget, akCaster),
+  disassembled from the mod's BSA with lab/pex.py (no source shipped);
+  properties from the VMAD: Percentage GLOB 0301E196 = 125, the XP globals
+  0.75 and 1.0, AshPileObject DefaultAshPile1, the immunity list FLST
+  000F6534 (11 races: witchlights, wisps, magic anomalies, ice wraiths,
+  dragon priests, the three atronachs, Alduin, dragons):
+  1. TargetHealth = the target's Health; if WB_IsResist (a script default
+     absent from the VMAD, HYPOTHESIS until read from the pex's variable
+     table or measured against a resistant target): TargetHealth *= 100 /
+     (100 - the target's MagicResist).
+  2. SelfDamage = TargetHealth * 125 / 100.
+  3. If SelfDamage < the caster's Health - 1, the kill branch: the target's
+     Health damaged by TargetHealth, the caster's by SelfDamage,
+     akTarget.Kill(akCaster), the message, screen blood, then the
+     disintegration (SetCriticalStage, the shader, AttachAshPile after
+     1.25 s, SetAlpha 0 after 1.65 s) unless the target's race is in the
+     immunity list.
+  4. Else, the fail branch: the caster damaged by its Health - 1 (to 1),
+     the target by (caster's Health - 1) * 0.8; no kill, no pile.
+  5. Both branches: Restoration advanced for a player caster.
+- Reading: the kill is arithmetic on two Health values and one global,
+  then Kill. The server computes it (R0) from the claimed hit once the
+  seven conditions hold: a wire-rules function (target health, caster
+  health, percentage) -> (target delta, caster delta, kill), T0-tested
+  against both branches; the C++ side joins the headshot table's shape
+  (scriptedEffects: spell, kill: true, consulted in OnSpellHit after the
+  claim and EffectConditionsHold) and calls Kill(aggressor) as the headshot
+  does. The caster's game keeps the script's visuals: its DamageActorValue
+  on players yields to the server's numbers already (ADR-028, the dent
+  gate), and its Kill on the figure is what put the ash pile on test 1's
+  screen; the victim's game gets the death from the server, so both games
+  agree. HYPOTHESIS tags for the row: WB_IsResist's default, and the
+  figure's local kill racing the server's verdict when the server's
+  branch differs (an essential or resistant target).

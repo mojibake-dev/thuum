@@ -513,6 +513,7 @@ hit shader 0x20, light 0x18, cast type 0x50, delivery 0x54):
 | Paralyze | 0x5AD5F | 0x1EA6E ParalysisFFAimed, 0xA44C0 StaggerPushFFAimed | 21 Paralysis (AV 53), 33 Stagger | the target drops and stays down in its own game |
 | Lesser Ward | 0x13018 | 0x14C WardConcSelf0, 0xFCC62 ShieldConcSelf | 32 Accumulate Magnitude (AV 63 WardPower), 34 | a ward absorbs a spell's damage on the server |
 | Healing Hands | 0x4D3F2 | 0x1CEA5 RestoreHealthConcActor | 0 Value Mod (Health), delivery 3 target actor | the target's health rises on the server |
+| Healing Hands, slot 2 | 0x4D3F2 | 0x4E93E PerkRestoreStaminaConcActor | 0 Value Mod (Stamina), delivery 3 target actor, HideInUI; an EFIT condition HasPerk (448) Respite on the player (record read 2026-10-20, docs/research/train-31-reads.md) | refused E_CONDITION_UNKNOWN today, the record's own outcome for a player without Respite |
 | Become Ethereal (1 word) | 0x5F6EB (SHOU 0x32920) | 0x64D68 VoiceMakeEthereal | 41 Etherealize, hit shader 0x64D67 | the ghost look on the figure; no damage taken |
 | Unrelenting Force (3 words) | 0x13F3A (SHOU 0x13E07; Dragonborn.esm's override wins) | 0x7F82F, 0x7F82E VoiceUnrelentingForceEffect03/02; 0xEA075 (10 at once); Dragonborn's 0x0201FF2B (40 over 1 s) | 33 Stagger; 0 Value Mod (Health) | the push lands in the target's own game |
 | Frostbite | 0x2B96B | 0x13CAA FrostDamageConcAimed, 0xB729D FrostSlowConcAimed | 5 Dual Value Mod (Health), 34 (AV 30 SpeedMult) | the slow in the target's game, within the movement budget |
