@@ -53,7 +53,10 @@ every job; T2 at 16:05 PDT identical across 32 sessions); the head then
 moved once, to 44372078 at 16:51, for clang-format alone (the fork's
 Formatting check, three files, no code change), so its pipeline and a T2
 at 44372078 are the ones the merge cites (ADR-042 check 4); pipeline 2349
-green in every job at 17:13, the Windows client included.
+green in every job at 17:13, the Windows client included, and T2 at
+44372078 identical across 32 sessions at 17:19 (the same difftest binary
+and sessions as 1d88a6b7's, since the format commit left skymp-wire alone).
+Both DONE.
 
 ## 3. Playtest twenty-eight (T4, Eli, both seats, on the train's stage)
 
@@ -119,13 +122,25 @@ Survival race (lifted by the 8df default's smoke).
    c38a3b04 (the 0x7 drop-record, the head parts on their masters' gender
    bits, RaceMenu's menu laid loose; no slot moves), re-stages with
    a-rotfern, a-racemenu and b-duel as its deciders on the parity image
-   alone; it merges by its own gate after twenty-eight.
+   alone; it merges by its own gate after twenty-eight. Done 17:15: the
+   three deciders green (a-rotfern 20261021-000439, a-racemenu 000831,
+   b-duel 001214), RaceMenu's chargen initialising on both seats.
 2. m2-train-30 44372078 (assembled as 1d88a6b7, then formatted; CI and T2
    at the head) staged
    once on the staged layer (numidium, verb-stage from the layer's
    worktree); the probes in order, b-formdesc-world first, green on the
    stage before the playtest world is restored onto it. If the layer's fix
-   moves plugin slots, the train re-stages on the fixed layer.
+   moves plugin slots, the train re-stages on the fixed layer. Staged
+   17:16 to 17:25; the eight probes (docs/research/layer-reds-2026-10-20.md,
+   the train stage's probes): four green, three read red and disposed of
+   without a server change: b-formdesc-world's migration proved correct on
+   disk and on the wire (its red was c2's game crashing in RaceMenu's
+   overlay code at c1's login and a head-parts assert the ADR-026
+   derivation owes, carried), b-figure-values' gate holds (the assert
+   counted the figure's regeneration jitter; a threshold argument lands),
+   b-hailstone's row 2 waits on the Shatter effect's record. The migration
+   condition is met by the read, not the scenario's green; the crash
+   reruns once before the playtest world is restored.
 3. Playtest twenty-eight's setup (lab/playtests/28.yaml: twenty-seven's
    world restored under the layer's order through slice one; seats and
    spells server-side), the checklist as docs/private/playtest-m2-28.md.

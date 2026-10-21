@@ -192,6 +192,63 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   load and the menu's rebuild. Deciders: a-racemenu on the re-render; a
   head-parts read with the menu still open for the mechanism.
 
+## The deciders (2026-10-20, 17:04 to 17:15 PDT)
+
+All three green on the fixed layer's stage (stage-layer-train30 b53d922,
+render c38a3b04): a-rotfern 20261021-000439 (no CTD), a-racemenu
+20261021-000831 (the preset's eight parts through the menu, the relaunch
+and the reconnect), b-duel 20261021-001214 (18 Flames hits, 0.7351); both
+seats' skee64.log carry RaceMenu's chargen init again. apocrypha lifted
+docs/MODS.md's and plugin-patches.tsv's HYPOTHESIS tags on them (layer head
+64b2f067). b-god's range fix runs as the train stage's last probe.
+
+## The train stage's probes (2026-10-20, 17:25 to 17:50 PDT)
+
+On fork m2-train-30 44372078 over the fixed layer: smoke-two-players 002801,
+a-restart-persistence 003024, b-duel 003256, b-spells-reconnect 003639 green;
+b-formdesc-world 002549, b-figure-values 003901 and b-hailstone 004204 red,
+each read:
+
+- b-formdesc-world (slice one's first run anywhere): the migration is
+  CORRECT on disk and on the wire. server.log: "ADR-043: 8 records read
+  under the running order of 91 files; 8 in the raw shape re-based and
+  written back as version 2; 0 stored forms name a plugin the order lacks
+  and are kept"; world-after: both actor records at formVersion 2, every
+  mod form a FormDesc, the appearance re-based (0x0800AA00 to 0x2F00AA00,
+  the sibling appearanceForms), c2's record fully migrated too; c1's own
+  game read rotfern (0x2F00AA00) and c2's first game process built a figure
+  named "rotfern" with Ghostwalk at 0x1A in its left hand. The red: c2's
+  game CRASHED at 00:27:06Z, 27 s after start, in skee64.dll+00D47E2
+  (EXCEPTION_ACCESS_VIOLATION, rcx null; R14 the Character "rotfern"
+  ff00081a, RDI a BSTriShape "CBBE", RSI the OverlayInterface, the armor
+  "Shrouded Robes", SKSETaskRevertOverlays on the stack), as c1's look
+  applied to its figure; lab-api relaunched it (E_RUN_GAME_REPLACED) and
+  the step-8 reads came from the relaunched client still fading in (no
+  figure of c1 in reach; the view matched the NPC "stalleo" at 572 units,
+  so the deployed lab-api's matcher differs from assertions.py's 512).
+  The one assert of its own: server.actor(c1).headParts has eight, c1's
+  base seven: the preset carries the Skyrim.esm hair 0xEC1B2 beside
+  rotfern's hair and the engine keeps one part per type (TESNPC::
+  ChangeHeadPart), an ADR-026 derivation gap (the server's derived list
+  should keep one per type as the engine does); carried, HYPOTHESIS (read
+  HDPT 0xEC1B2's PNAM). Decision: the train stays m2-train-30; the crash
+  reruns once as the risk for twenty-eight (Eli's rotfern look on test 2's
+  figure under this layer); the scenario stays pending on the head-parts
+  assert.
+- b-figure-values 003901: no dent. The figure's health in c1's game fell 38
+  times (the three hits as declines of 1.7 down to 0.6 over about 1.4 s
+  each) and rose 30 times, every rise between 0.009 and 0.048 (the figure's
+  own regeneration between the server's reports); the end values agreed.
+  The assert counted the jitter: it becomes rises("health", 1) == 0 with
+  lab-api's threshold argument (branch scenario-b-figure-values-rises).
+- b-hailstone 004204: row 1 (the Nord at the Orc) green at 0.85; row 2 (the
+  Orc at the Nord) 0.7892 = 15 x 0.5 + 15 less the wait's regeneration: both
+  effects applied, the base effect's gate fired on the Nord's 50 ResistFrost
+  (the race's abilities read) and was halved, the Shatter went through
+  whole. Decider: the Shatter MGEF's DATA (flags, resist value): not Hostile
+  or not frost means the server is faithful to the record and the row's band
+  moves to 0.775; Hostile with resist 43 means a resist-branch fix.
+
 ## Consequence for M2's close
 
 docs/M2-CLOSE.md: the train stages on the staged layer (the probes do not

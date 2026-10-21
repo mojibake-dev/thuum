@@ -291,12 +291,15 @@ class WatchView:
         recast bug (docs/verbs/self-cast.md)."""
         return _drops(self.bools, name)
 
-    def rises(self, av: str) -> int:
+    def rises(self, av: str, at_least: float = 0.0) -> int:
         """How many times the actor's `av` (health, magicka or stamina) rose
-        between two samples in the watcher's game: a figure hit three times shows
-        a dent (its bar below the server's step, then climbing back) as a rise,
-        where a clean bar only falls (train-30's figure dent)."""
-        return _rises(self.avs, av)
+        between two samples in the watcher's game, by at least `at_least` points
+        when given: a figure hit three times shows a dent (its bar below the
+        server's step, then climbing back about a hit's size) as a rise, where a
+        clean bar only falls but for its own regeneration between the server's
+        reports (30 rises of 0.009 to 0.048 points in b-figure-values
+        20261021-003901, train-30's figure dent)."""
+        return _rises(self.avs, av, at_least)
 
 
 def _ever(bools: tuple, name: str) -> bool:
@@ -317,13 +320,13 @@ def _drops(bools: tuple, name: str) -> int:
 WATCH_AVS = ("health", "magicka", "stamina")
 
 
-def _rises(avs: tuple, av: str) -> int:
+def _rises(avs: tuple, av: str, at_least: float = 0.0) -> int:
     if av.lower() not in WATCH_AVS:
         raise AssertionData(f"rises reads one of {', '.join(WATCH_AVS)}, got {av!r}")
     for n, series in avs:
         if n == av.lower():
             values = [float(v) for _, v in series]
-            return sum(1 for was, now in zip(values, values[1:]) if now > was)
+            return sum(1 for was, now in zip(values, values[1:]) if now > was and now - was >= at_least)
     raise AssertionData(f"the watch carried no {av.lower()} series (a driver before the watch's actor values)")
 
 
@@ -415,11 +418,11 @@ class SelfWatchView:
         """How many times the player's sampled bool `name` went from true to false."""
         return _drops(self.bools, name)
 
-    def rises(self, av: str) -> int:
+    def rises(self, av: str, at_least: float = 0.0) -> int:
         """How many times the player's own `av` (health, magicka or stamina) rose
-        between two of the watch's samples: hit three times and never healed, its
-        health only falls."""
-        return _rises(self.avs, av)
+        between two of the watch's samples, by at least `at_least` points when
+        given: hit three times and never healed, its health only falls."""
+        return _rises(self.avs, av, at_least)
 
 
 @dataclass(frozen=True)
@@ -1470,6 +1473,11 @@ _FORM_SPEC_METHODS = {
 _PAIR_METHODS = {
     WatchView: {"flights_match"},
 }
+# Methods that take a string and, optionally, a number: c1.watched(c2).rises("health", 1)
+_STRING_NUMBER_METHODS = {
+    WatchView: {"rises"},
+    SelfWatchView: {"rises"},
+}
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
@@ -1606,6 +1614,11 @@ class Evaluator:
                     if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], (int, str)):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one form id, 0x3f9eb or \"0x3f9eb\"")
                     return self._read(node, getattr(obj, node.func.attr)(args[0]))
+                if node.func.attr in _STRING_NUMBER_METHODS.get(type(obj), set()):
+                    if not 1 <= len(args) <= 2 or not isinstance(args[0], str) or any(
+                            isinstance(a, bool) or not isinstance(a, (int, float)) or a < 0 for a in args[1:]):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a string and, optionally, a number of points, zero or more")
+                    return self._read(node, getattr(obj, node.func.attr)(*args))
                 # methods that take a form id: c.marker(0x00016223)
                 takes_id = node.func.attr in _ID_METHODS.get(type(obj), set())
                 takes_number = node.func.attr in _NUMBER_METHODS.get(type(obj), set())

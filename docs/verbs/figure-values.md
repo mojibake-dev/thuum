@@ -256,7 +256,23 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
   rises in the watched health series the driver records, main b7b0429),
   `server.actor(c2).healthPercentage < 0.99` and the bar at the server's
   percentage (scenario 52f06e1e, main 5f64b26; in gate.yaml's pending
-  until the dent branch stages, after the spells branch). The alternative,
+  until the dent branch stages, after the spells branch). First run on the
+  train stage (fork m2-train-30 44372078 over the fixed layer, b-figure-values
+  20261021-003901): the gate holds and the assert's shape was wrong. The
+  figure's health in c1's game (steps/032-c1-watch-stop.json, 69 samples,
+  100 to 83.65) fell 38 times and rose 30, every rise between 0.009 and
+  0.048 health: the figure's own regeneration between the server's reports,
+  which the engine runs on a figure as on any actor; the three hits arrived
+  as declines of 1.7 down to 0.6 over about 1.4 s each, with no dip of a
+  hit's size and no climb-back, and the end values agreed (server 0.8337,
+  c1's figure 0.8377). So the dent is gone (CONFIRMED as far as that run
+  reads) and the assert becomes `rises("health", 1) == 0`, a rise of a
+  point or more (lab-api's rises with a threshold; branch
+  scenario-b-figure-values-rises). Two things the run also shows, for the
+  record: the figure's bar eases toward the server's value over about
+  1.4 s per hit rather than stepping (the observer's apply, worth its own
+  read), and the figure regenerates locally between reports (hundredths; a
+  figure's healRate at 0 would still it, if ever wanted). The alternative,
   MagicTarget::
   IsInvulnerable's vfunc on Character (37335's first gate), is rejected
   for its reach: invulnerability is read by the magic system too and would
