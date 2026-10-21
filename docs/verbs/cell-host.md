@@ -386,8 +386,10 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   lab/.cache/probes/x-cell-attach.yaml; RAN GREEN 20261021-185728 on
   cell-host's first stage: H1 and H2 measured in Engine surface, the grid
   math floor; two lab notes: the probe's move steps ran east for the whole
-  run instead of to their targets, a driver fault to read, and a runtime
-  0xff exterior cell is reported, to skip). Decides H1 (which
+  run instead of to their targets, which was lab-api's move step treating
+  a written target as an offset from the server's record, the stale spawn
+  in a solo run, fixed by numidium on main b5e41ad, not the driver; and a
+  runtime 0xff exterior cell is reported, to skip). Decides H1 (which
   cells fire, once each, at a load and a shift), H2 (isAttached tracks the
   detach), the grid math at negative coordinates (floor, not truncation: y
   -44000 is row -11; Riverwood 0x9732 at (4,-12) is the check) and the
