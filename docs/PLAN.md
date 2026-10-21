@@ -823,6 +823,21 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         no wire change. Ships with the first merge after Train-31 (its own
         gate, ADR-030), before any friend plays over the internet; the lab
         measures it under netem loss on b-spell's shape before and after.
+      - from the 03:30 sweep's read (2026-10-21 morning, the four reds,
+        docs/research/layer-reds-2026-10-20.md's sequel): b-push's known
+        refused second Ragdoll has its decisive probe written and never
+        run, lab/.cache/probes/x-push-knock-frida.yaml (HYPOTHESIS: the
+        server's imposed stagger snippet lands after the victim's own
+        Ragdoll and re-knocks it in place; the fix, skip PlayStagger for a
+        hit whose spell carries the push effect, waits on that run);
+        x-melee-edge, the sword's edge re-measured under the layer (180
+        units hit on the train-29 stage and missed twice on train-30 plus
+        the layer at identical positions; the layer's bodies are the
+        suspect; a-melee-reach stands at 170 meanwhile); GetGlobalValue
+        reading the Dragonborn gate's global 2020e99 in the plugin's own
+        index space rather than the load order's (HYPOTHESIS, a mapping
+        gap in the form-parameter rule; harmless today, the reward is 0
+        either way).
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
