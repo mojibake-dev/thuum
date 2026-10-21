@@ -393,6 +393,7 @@ pinned:
 | POST /lab/runset/<id>/stop, /resume | stop after the current run; go on from the scenario after the last one run |
 | POST /lab/clients/<c>/rollback `{to}` | a live session's client-only rollback (ADR-041 item 5): the clone back to `to`, its newest lab snapshot, by a stop, a disk rollback and a start, then the guest agent; allowed under a hold, refused beside a run or a snapshot (`just client-rollback c1`) |
 | POST /lab/hold `{minutes, reason}`, POST /lab/release | the lab is somebody's (a playtest, a staging writing the clones): /run, /runset, /up and /down answer 409 E_RUN_HOLD with the reason and the nightly does not start, until the minutes pass or the release; the playtest tools hold three hours by themselves, verb-stage while it writes the clones |
+| POST /lab/clients/<c>/perks `{ids}` | a playtest seat's perks, only under a playtest's hold: perks are the player's game's alone (no server path until M5) and every login's generated save drops them, so lab-driver's `add-perks {ids, keep: true}` adds them and adds back any a load dropped (every 2 s), and lab-api sends the list again on the first poll after a 20 s heartbeat gap (a relaunched game); the release forgets them, as does a run's start; GET /lab/status shows them as `perks`; the answer is the driver's `{added, had, missing, refused, kept}`. A profile's `perks: [0x7934B]` per seat (lab/playtests/<n>.yaml) goes through it at playtest-setup and again at playtest-ready |
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/; a run set's
 record is results/runsets/<id>.json, written after every run. The nightly sweep
@@ -813,7 +814,12 @@ Inside sky-srv, per scenario:
 tc qdisc add dev eth0 root netem delay 60ms 15ms loss 0.5%
 ```
 
-Cleared on teardown. Every M2+ scenario runs at least once with faults on,
+Cleared on teardown. A `- server: netem {delay_ms, jitter_ms, loss_pct}` step
+sets the impairment from that step on instead (`tc qdisc replace`), so a run
+measured under loss connects and sets up clean first, and the same step with
+every key zero clears it; the run's end clears it either way (the transport's
+frozen clock, docs/research/transport-clock.md, is measured this way: a lost
+reliable message was never sent again). Every M2+ scenario runs at least once with faults on,
 because lag compensation and host handoff are the things that only break
 under them. tcpdump on sky-srv's own interface gives the pcap; it sees only
 sky-srv's flows, which is all the game traffic, and T2 fake clients use the

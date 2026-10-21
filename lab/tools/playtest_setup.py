@@ -2,7 +2,9 @@
 
     just playtest-setup <n>   before the Moonlight streams: the world restored (both seats relaunched on it),
                               the hold, the camp, each seat's spells, values, items and bars (server-side, through
-                              the gamemode's labCommand: never keystrokes in a seat), Sunshine restarted
+                              the gamemode's labCommand: never keystrokes in a seat) and perks (the seat's game's
+                              own, kept for it by lab-api and lab-driver through every load and relaunch),
+                              Sunshine restarted
     just playtest-ready <n>   once the streams are up: both games relaunched under them, then the checks: both
                               players online, the heartbeats, the values and items read back, the bars full, the
                               two stream windows running
@@ -78,6 +80,9 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
         seen.add(prof)
         for sp in s.get("spells") or []:
             _int(sp, f"profile {prof}'s spell")
+        for pk in s.get("perks") or []:
+            if _int(pk, f"profile {prof}'s perk") <= 0:
+                raise ProfileError(f"profile {prof}'s perk is a form id, got {pk!r}")
         for name, v in (s.get("values") or {}).items():
             if not re.fullmatch(r"[A-Za-z]+", str(name)) or isinstance(v, bool) or not isinstance(v, (int, float)):
                 raise ProfileError(f"profile {prof}'s value {name!r}: {v!r}")
@@ -178,6 +183,33 @@ def _count(prof: int, base: int) -> int:
     return sum(int(e.get("count", 0)) for e in state({"kind": "inventory", "profileId": prof}).get("entries", []) if e.get("baseId") == base)
 
 
+def seat_client(prof: int, root: Path = ROOT) -> str:
+    """The client whose player is profile `prof`, from lab-api's own clients table."""
+    g = yaml.safe_load((root / "lab" / "labapi" / "labapi" / "guests.yaml").read_text())
+    for name, c in (g.get("clients") or {}).items():
+        if (c or {}).get("profile_id") == prof:
+            return name
+    raise ProfileError(f"no client plays profile {prof}")
+
+
+def _perks(rep: Report, prof: int, ids: list[int]) -> None:
+    """A seat's perks: the player's game's own (no server path until M5), so they go to its lab-driver, which keeps
+    them through every load, and lab-api sends them again to a relaunched game (POST /clients/<c>/perks)."""
+    client = seat_client(prof)
+    want = ", ".join(f"{i:#x}" for i in ids)
+    try:
+        ans = _http("POST", f"/clients/{client}/perks", {"ids": ids})
+    except Exception as e:  # an HTTP refusal or a game that did not answer: the line says which
+        rep.fail(f"profile {prof} perks {want}: {e}")
+        return
+    r = ans.get("result") or {}
+    have = set(r.get("added") or []) | set(r.get("had") or [])
+    line = f"profile {prof} perks {want}: added {r.get('added')}, had {r.get('had')}"
+    if r.get("missing") or r.get("refused"):
+        line += f", missing {r.get('missing')}, refused {r.get('refused')}"
+    (rep.ok if have == set(ids) else rep.fail)(line)
+
+
 def _guest_exec(vmid: int, ps: str, timeout: int = 60) -> dict[str, Any]:
     enc = base64.b64encode(ps.encode("utf-16-le")).decode()
     r = subprocess.run(["ssh", "-o", "BatchMode=yes", JUMP, f"qm guest exec {vmid} --timeout {timeout} -- powershell -NoProfile -NonInteractive -EncodedCommand {enc}"],
@@ -223,6 +255,8 @@ def setup(n: int) -> int:
             got = _count(prof, it["id"])
             want = it.get("count", 1)
             (rep.ok if got >= want else rep.fail)(f"carries {got} of {it['id']:#x} (had {before[it['id']]}, wanted {want})")
+        if seat.get("perks"):
+            _perks(rep, prof, seat["perks"])
         if seat.get("percentages"):
             _set_bars(rep, prof, {k: float(v) for k, v in seat["percentages"].items()})
         if seat.get("by_hand"):
@@ -266,6 +300,8 @@ def ready(n: int) -> int:
         for it in seat.get("items") or []:
             got = _count(prof, it["id"])
             (rep.ok if got >= it.get("count", 1) else rep.fail)(f"profile {prof} carries {got} of {it['id']:#x}")
+        if seat.get("perks"):
+            _perks(rep, prof, seat["perks"])  # the relaunched game's, read back from its driver
         if seat.get("percentages") and (p.get("after") or {}).get("readback") == "percentages":
             want_bars = {k: float(v) for k, v in seat["percentages"].items()}
             a = state({"kind": "actor", "profileId": prof})
