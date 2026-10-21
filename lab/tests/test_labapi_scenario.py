@@ -101,6 +101,18 @@ class ScenarioTests(unittest.TestCase):
         sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: cell-events-start\n  - wait: 1\n  - c1: cell-events-stop\n")
         self.assertEqual([s.action for s in sc.steps if s.kind == "client"], ["cell-events-start", "cell-events-stop"])
 
+    def test_a_relaunch_may_return_once_the_player_is_gone(self):
+        # b-cell-host 20261021-194846: the host's game came back and took the cell before the check could read the gap
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {until: gone}\n  - c1: connect\n")
+        self.assertEqual((sc.steps[0].action, sc.steps[0].args), ("relaunch", {"until": "gone"}))
+        both = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {until: gone, files: [{rename: a.dll, to: a.off}]}\n")
+        self.assertEqual(both.steps[0].args, {"until": "gone", "files": [{"rename": "a.dll", "to": "a.off"}]})
+        for bad in ("relaunch {until: back}", "relaunch {until: true}", "relaunch {when: gone}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclients: [c1]\nsteps:\n  - c1: {bad}\n")
+
     def test_netem_spec(self):
         from labapi.scenario import load_scenario
 
