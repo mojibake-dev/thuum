@@ -332,3 +332,33 @@ three help-shown flags (0x8E0 to 0x8E2) are ordinary non-constant globals
 the server could keep but need not. Consequence: three playerGlobals
 entries (docs/verbs/player-globals.md, "Survival's needs"); HYPOTHESIS: the
 restore must land before the toggle starts the need quests.
+
+## 8. The saved world's format, for the repair tool (2026-10-20 19:55 PDT)
+
+A read agent over the fork (file driver: `<world>/changeForms/<desc>.json`
+plus `load-order.json`, FileDatabase.cpp:16-48, 107-170; FormDesc.cpp:6-46,
+141-172: the server numbers plugins in list order, full and light apart;
+RecordReader.cpp:25-65: a record below formVersion 2 is re-based from the
+saved order, or the running one when none is saved; MpChangeForms.cpp: on
+write a form no plugin of the order holds is DROPPED with an error, a learned
+spell at :301-304, an inventory entry at :94-97, a head part at :235-238),
+the lab's world tooling (lab-api runner.py:456-495 restore, slots.py,
+load-order-check.py's own-record idiom, the fixture
+lab/fixtures/worlds/adr043-preslice-25) and sky-srv's snapshots (33; only the
+two playtest-m2-28 copies carry a load-order.json; every earlier one is raw).
+The 28 copies' exact difference: one learnedSpells entry, "a86df:Cloaks.esp",
+gone from profile 1.json. The own-record check over all 226 FormDescs of the
+28 world: nine real misses, all in 1.json's learnedSpells, and all of one
+kind: forms written under main's 17-plugin order (slot 0B LostGrimoire, 0C
+Apocalypse) and re-based by the migration under the layer's 91-plugin order
+(0B Cloaks.esp, 0C Cloaks - Dawnguard.esp): the removed entry was test 2's
+Teleportation (LostGrimoire 0xA86DF), the other eight ("Cloaks -
+Dawnguard.esp" 186d, aae8, 1f1fb, 24e49, 2e634, 5ecee, 83a22, 88694) are
+Apocalypse's spells, dropped by the server at the record's next write.
+Twenty-seven's raw 1.json indeed mixes the orders (learnedSpells top bytes
+00, 0C, 0B and 1A). The tool, lab/tools/world-repair.py: verdicts OK,
+DANGLING-PLUGIN, DANGLING-FORM, MISBASED (one candidate order's plugin holds
+the recomposed id), AMBIGUOUS; a repaired copy under --out, never in place;
+--drop-unfixable --no-rebase reproduces the hand clean; raw records written
+as formVersion 2 with the target load-order.json. It runs on sky-srv beside
+the plugins, as load-order-check.py does.
