@@ -1961,6 +1961,40 @@ The first citable nightly is the one after the next lab-api pull, which
 brings the `build` field (main 7bf200a). The tooling: verb-merge's
 `GATE_SET` and its checks, numidium's.
 
+## ADR-042a: A layer merge may cite the nightly that swept its stage beside a train
+
+Status: PROPOSED 2026-10-20 17:56 PDT (thuum-magnus, from numidium's merge-order
+read); amends ADR-042 (the cited sweep served verb-merge only) for the case
+below. Eli's word at playtest twenty-eight's report.
+
+**Context.** Playtest twenty-eight runs on one stage: fork m2-train-30 over
+the fixed essentials layer (stage-layer-train30), and the 03:30 nightly over
+that stage is the m2-close sweep (docs/M2-CLOSE.md). Both clones'
+clean-m1-next is that stage, layer and all. Under ADR-042 as accepted,
+`just verb-merge m2-train-30` may cite the nightly, fast-forward parity and
+promote that snapshot to clean-m1, while main still has no layer
+(stage-layer-train30 unmerged; GATE_SET is off for layer-merge): clean-m1
+would then carry the layer's mods and plugins.txt under main's no-layer
+server settings, the half-state layer-merge exists to prevent. The
+alternative is layer-merge's own full sweep, about four hours, over a stage
+already proven by the deciders and by the same nightly.
+
+**Decision.** When a stage carries a layer as laid (layer-stage's checks
+passed, its deciders green) and a train together, one full sweep over that
+stage proves the pair: the train's verb-merge cites it under ADR-042 with
+PROMOTE=0, the layer's merge to main cites the same sweep under the same
+five checks (the stage branch named "stage-layer-<train> layer <sha8>", the
+sweep over that stage, its runs after the stage stood, no non-doc change to
+either head since, every scenario of the set green or pending by its named
+fix), and both promotes follow the second merge. A layer merged this way
+keeps every other rule of layer-merge (ADR-030's non-verb promotion, the
+load-order checks).
+
+**Consequences.** M2-CLOSE's step 5 reads that order. gate-cite.py learns
+the layer's citation (numidium). Without Eli's word, the fallback is
+layer-merge's own sweep on a re-laid stage after the train's merge with
+PROMOTE=0 (about four hours of lab).
+
 ## ADR-043: The world stores every form plugin-relative; a load order change migrates a world, never undresses it
 
 Status: ACCEPTED 2026-10-19 19:32 PDT (Eli: "accept those ADRs"); proposed 2026-10-19 17:50 PDT (Eli, playtest twenty-six, the essentials layer:

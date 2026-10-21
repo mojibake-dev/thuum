@@ -577,6 +577,48 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   mod), CONFIRMED 14:07 by x-layer-headparts 20261020-210719 on the layer
   stage (racemenu-sync.md); the stage's smoke green with no FSMP log.
 
+- Playtest twenty-eight (2026-10-20 evening, fork m2-train-30 44372078 on
+  the fixed essentials layer c38a3b04; world playtest-m2-27-20261020T183558Z
+  migrated by slice one): Eli's report 18:18, "im not super happy with this
+  test ngl. deffo some backsliding in what i expected". Ticked: rotfern
+  herself under the layer's order and after a restart; the reconnect keeps
+  the spells; the dent gone; Survival asks no box; Hailstone's numbers on
+  both seats; vanilla capes; loads and frame rate; the MCM (11 entries, the
+  fixed layer woke more menus); teleports, quiver, no freeze, globals, the
+  staggered cast. Found: test 2's heals rejected by the server and no
+  natural regen (read, HYPOTHESIS until the log: Survival's no passive
+  regen plus Azure Reconstruction refused by ADR-029's default, the crop
+  undoing the local heal); spells landing in different places on different
+  screens (the arrow-path problem for spell projectiles; this train records
+  their launch angles on both screens); Finger of Death's ash on test 1's
+  screen only (the documented default); the headshot row unticked (asked);
+  Teleportation missing on test 1 (lost before tonight, in the slot-shift
+  days; test 2's copy mis-based by the migration of a world saved without
+  its order: slice two's first row); Survival's hunger, cold and fatigue
+  asked for on the server (the Creation's globals, a per-player globals
+  row); the setup's gives stacking (fixed, idempotent, main 485c4ee). The
+  m2-close nightly over this stage and the merges per ADR-042a follow.
+    - Train-31 (the rows of twenty-eight's report, for the train after the
+      close; each to its verb doc as it is built), in build order:
+      - the allowlisted self-heal: Azure Reconstruction (and vanilla
+        Healing's shape checked) applied by the server as a Self effect
+        under ADR-029's allowlist, with the snap-back fix (fork m2-snapback
+        eef10842, b-snapback) so an applied heal is not undone by a stale
+        report; the first allowlist entry, pulled from M3 by the report.
+      - spell projectiles' aim parity: the caster's launch angles sent with
+        the cast and the observer's figure launching from them, as arrows do
+        (docs/verbs/marksman.md's shape; the flights record of this train
+        measures the gap first).
+      - Survival's need globals per player (hunger, cold, fatigue values
+        and their states) in the playerGlobals list, R2 (docs/verbs/
+        player-globals.md), after a read of which globals the Creation
+        keeps them in.
+      - ADR-043 slice two's first row: a repair for the lab's legacy worlds
+        saved without their order (ids written across two orders), and the
+        dangling 'a86df:Cloaks.esp' in twenty-seven's profile 2 cleaned.
+      - Finger of Death's allowlisted kill, if Eli wants it in M2 (else the
+        documented default stands).
+      - the headshot row's read, once Eli says what he saw.
 - Fix trains merged on the way: m2-fixes 2026-10-12 (c918a7a1: a plugin
   spell's reach, the crouch's hands, difftest on serde-saphyr); m2-visuals
   2026-10-13 (11c126b9: the shout relay, the silent re-teach, per-hand
