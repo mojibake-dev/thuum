@@ -916,7 +916,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   readings-2026-10-18.md); their reruns on the merged base and the first
   verb's probes take the lab after the morning order. Apocalypse's NPC
   classes, the placers, the shouts' bystander and ADR-043 slice two ride
-  this milestone (docs/M2-CLOSE.md section 4).
+  this milestone (docs/M2-CLOSE.md section 4). The verb order, from
+  ADR-035's consequences and the first doc's cut: cell-host (the election,
+  grace, epoch and freeze; the reserved wire family given senders; the
+  host's NPCs on SkyMP's existing relay), npc-puppet (AI off on the other
+  games, the engine's own references kept, the cleaner and the copies
+  retired), npc-stream (the host's state stream, HostedActorState as
+  Unreliable), npc-handoff (the saved state replayed before the grant),
+  npc-fate (one leveled roll per cell, deaths that persist). The first
+  doc's probes: x-cell-attach (solo, the cell events and the grid math),
+  then b-cell-host on a creature cell; the exits c-riverwood and
+  c-dungeon-enemies after npc-handoff and npc-fate.
 - How it starts (Eli, 2026-10-16): the way cast-action did, with the
   engine alone first. ADR-031's references of a host's simulation (NPCs
   under packages, a fight, a cell entered and left) are recorded before any
