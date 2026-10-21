@@ -192,6 +192,16 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   load and the menu's rebuild. Deciders: a-racemenu on the re-render; a
   head-parts read with the menu still open for the mechanism.
 
+## The deciders (2026-10-20, 17:04 to 17:15 PDT)
+
+All three green on the fixed layer's stage (stage-layer-train30 b53d922,
+render c38a3b04): a-rotfern 20261021-000439 (no CTD), a-racemenu
+20261021-000831 (the preset's eight parts through the menu, the relaunch
+and the reconnect), b-duel 20261021-001214 (18 Flames hits, 0.7351); both
+seats' skee64.log carry RaceMenu's chargen init again. apocrypha lifted
+docs/MODS.md's and plugin-patches.tsv's HYPOTHESIS tags on them (layer head
+64b2f067). b-god's range fix runs as the train stage's last probe.
+
 ## Consequence for M2's close
 
 docs/M2-CLOSE.md: the train stages on the staged layer (the probes do not
