@@ -256,10 +256,17 @@ reads):
   weakness at 0.5), and a Fortify Health potion untouched under Resist
   Magic. T3: x-hailstone (both seats, the Nord's 15 and the Orc's 15 by
   different paths) on the branch's stage, then b-hailstone as its scenario.
-- HYPOTHESIS until x-hailstone: the engine's order and cap for a dual value
-  modifier's second value (the Stamina half of Hailstone), and whether the
-  engine resists a Self spell's own hostile effect on its caster the same
-  way (the server does).
+- First lab read, b-hailstone 20261021-004204 on the train stage (fork
+  m2-train-30 44372078 over the fixed layer): on the Nord, Hailstone's base
+  effect (no resist value in the record) went through whole and its Shatter
+  (ResistFrost 43) was halved on the race's 50, 15 + 7.5, the engine's own
+  number (the scenario's first band had said 0.85 and follows the record
+  now, main 053dd276); on the Orc the Shatter alone, whole, 0.85. The rule
+  CONFIRMED on the Health half.
+- HYPOTHESIS until a read of the Stamina half: the engine's order and cap
+  for a dual value modifier's second value, and whether the engine resists
+  a Self spell's own hostile effect on its caster the same way (the server
+  does).
 
 ## Message contract
 
