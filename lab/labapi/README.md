@@ -89,7 +89,12 @@ does too).
 save at the next login) and holds until the new game is in and logged in;
 `relaunch {until: gone}` returns as soon as the player is off the server's
 online list, so a scenario can read the server while that game is down, and a
-later `- c2: connect` waits for the new game's login.
+later `- c2: connect` waits for the new game's login. `relaunch {files: [...]}`
+changes the run's game folder while the game is stopped, for what loads only
+at a launch: `{rename: <path>, to: <name>}`, `{ini: <path>, section, key,
+value}` for a key the ini has, or `{json: <path>, key, value}` to set or add a
+top-level key (skymp5-client-settings.txt's `cellHost` and `npcPuppet`
+switches). Paths are relative to the game folder; the next rollback undoes it.
 
 The scenario step notation `- c1: teleport {cell: lab-spawn, x: 0}` is not
 plain YAML (the colon inside the braces ends the scalar); the loader quotes

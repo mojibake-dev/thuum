@@ -8,6 +8,7 @@ before parsing; a quoted form in the file is accepted as well."""
 
 from __future__ import annotations
 
+import math
 import re
 from typing import Any, Literal
 
@@ -222,14 +223,17 @@ def _mouse_args(args: dict[str, Any]) -> dict[str, Any]:
 
 _GAME_PATH = re.compile(r"^[A-Za-z0-9 _.\-]+(?:[/\\][A-Za-z0-9 _.\-]+)*$")
 _BARE = re.compile(r"^[A-Za-z0-9 _.\-]+$")
+_JSON_KEY = re.compile(r"^[A-Za-z0-9_\-]+$")
 
 
 def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
     """relaunch {files?}: the seat's game quit and started again, with `files` changed in the run's game folder
     while it is stopped, since a DLL and an ini load at a launch (the essentials layer's FSMP off and vsync off
-    readings, 2026-10-19). Each entry is {rename: <path in the game folder>, to: <new file name beside it>} or
-    {ini: <path of an .ini>, section, key, value}, which sets a key the file already has. Paths are relative,
-    without '..'; the next run's rollback restores the clone."""
+    readings, 2026-10-19). Each entry is {rename: <path in the game folder>, to: <new file name beside it>},
+    {ini: <path of an .ini>, section, key, value}, which sets a key the file already has, or {json: <path of a
+    JSON file>, key, value}, which sets or adds a top-level key (skymp5-client-settings.txt's cellHost and
+    npcPuppet switches, read once at the client's start: npc-puppet's landing hang, 2026-10-21). Paths are
+    relative, without '..'; the next run's rollback restores the clone."""
     unknown = sorted(set(args) - {"files", "until"})
     if unknown:
         raise ValueError(f"relaunch takes files and until, not {unknown}")
@@ -248,7 +252,7 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
     for f in files:
         if not isinstance(f, dict):
             raise ValueError("a relaunch file change is a mapping")
-        path = f.get("rename", f.get("ini"))
+        path = f.get("rename", f.get("ini", f.get("json")))
         if not isinstance(path, str) or not _GAME_PATH.match(path) or ".." in path.replace("\\", "/").split("/"):
             raise ValueError(f"a relaunch file change names a relative path in the game folder, not {path!r}")
         if set(f) == {"rename", "to"}:
@@ -266,8 +270,18 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
             if any(c in v for c in "'\"`$\r\n"):
                 raise ValueError(f"ini's value carries no quotes, backticks, dollar signs or line breaks: {v!r}")
             out.append({"ini": path, "section": f["section"], "key": f["key"], "value": v})
+        elif set(f) == {"json", "key", "value"}:
+            if not isinstance(f["key"], str) or not _JSON_KEY.match(f["key"]):
+                raise ValueError(f"json's key is a top-level name of letters, digits, dash or underscore, not {f['key']!r}")
+            v = f["value"]
+            if not isinstance(v, (bool, int, float, str)) or (isinstance(v, float) and not math.isfinite(v)):
+                raise ValueError(f"json's value is a boolean, a number or a string, not {v!r}")
+            if isinstance(v, str) and any(c in v for c in "'\"`$\r\n"):
+                raise ValueError(f"json's value carries no quotes, backticks, dollar signs or line breaks: {v!r}")
+            out.append({"json": path, "key": f["key"], "value": v})
         else:
-            raise ValueError(f"a relaunch file change is {{rename, to}} or {{ini, section, key, value}}, not {sorted(f)}")
+            raise ValueError("a relaunch file change is {rename, to}, {ini, section, key, value} or {json, key, value}, "
+                             f"not {sorted(f)}")
     return {**head, "files": out}
 
 
