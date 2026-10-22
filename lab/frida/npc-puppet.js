@@ -34,13 +34,16 @@
 // data.angle at TESObjectREFR +0x48 (include/RE/T/TESObjectREFR.h:495, the
 // OBJ_REFR's angle after its three-float location at +0x54? no: location
 // +0x54, angle +0x48; the REA read: data.angle.z = actor+0x50).
-// Run: `just frida npc-puppet.js c1` with params through lab-api's frida step
-// ({MODE: 'p1', ACTOR: 0x1bcd8}), or a scenario's `frida {script:
-// npc-puppet.js, params: {...}}` step.
+// Run: a scenario's `frida {script: npc-puppet.js, params: {MODE: p1, ACTOR:
+// 0x1bcd8}}` step (lab-api prepends the params as globalThis.LAB_PARAMS), or
+// `just frida npc-puppet.js c1` for mode p0 by hand.
 'use strict';
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
-const PARAMS = (typeof params === 'object' && params) ? params : {};
+// lab-api prepends `globalThis.LAB_PARAMS = {...}` for a step's params
+// (labapi/runner.py _frida_start); `params` is kept for a hand-run copy
+const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS
+  : ((typeof params === 'object' && params) ? params : {});
 const MODE = PARAMS.MODE || 'p0';
 const ACTOR = PARAMS.ACTOR ? (PARAMS.ACTOR >>> 0) : 0;
 
