@@ -488,12 +488,14 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   nothing.
 - Side effects: H1 (the re-admitted job plays relayed events and idles on an
   AI-off puppet; the branch CONFIRMED-STATIC, the visible result HYPOTHESIS,
-  :154-155); H2 CONFIRMED 2026-10-22 by x-npc-legs 121157 (the walk cycle
-  under the relay is the graph's own locomotion: the puppet's graph events
-  NPC_TurnToWalkRight90 and NPC_TurnToWalkLeft90 sit at the starts of two
-  of its six short walks, 41 to 124 units/s, and the five-second frames
-  show a different working pose each time with the track moving, no glide;
-  the Dynamic plan's reading); H3 (translateTo's mover moves an actor whose movement step is
+  :154-155); H2 OPEN AGAIN 2026-10-22 (playtest 31's live read: the puppet
+  slides; x-npc-legs 121157 was over-read, its TurnToWalk events are not the
+  walk; the host's relay dropped moveStart, moveStop and the turns for every
+  actor, sync/animation.ts ignoredAnims, so the puppet's graph never entered
+  the walking state while translateTo carried it; fix on fork m3-train-32,
+  the locomotion events relayed for an NPC source, to be read by x-npc-legs
+  on that build: c2's watch events hold moveStart and a frame shows a
+  stride); H3 (translateTo's mover moves an actor whose movement step is
   skipped; the mover was not traced, :318-322); H4 (KeepOffsetFromActor does
   nothing useful on a puppet: answered 2026-10-21 by REA, the "Why now"
   section: its planner agent 42182 runs in the per-frame pass whatever the
@@ -831,6 +833,26 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     IdlePickup_Ground and IdleStop play between them. Not a glide: the
     relayed Speed and Direction drive the cycle. A stride on film wants
     shots every 0.5 s across one walk window, a later probe, not a tag.
+  - H2 RE-OPENED by playtest 31 ({now} PDT): the reading above was an
+    over-read. Eli, on the late-joining seat: "sliding npcs on test 2's
+    screen". numidium's paired 30 s watch: Sigrid on the host c1 played
+    [IdleStop, NPC_TurnToWalkRight90, moveStart, TurnRight, turnStop,
+    TurnLeft, turnStop, CyclicFreeze, moveStop, IdlePickup_Ground]; her
+    puppet on c2 played [NPC_TurnToWalkRight90, IdlePickup_Ground,
+    NPC_TurnToWalkRight90, NPC_TurnLeft90, IdlePickup_Ground], the same
+    track (maxDisp 237 against 240), never moveStart or moveStop or a plain
+    turn. 0x1066df the same: c1 [TurnRight, moveStart, ... moveStop,
+    IdleSleepStart], c2 [IdleSleepStart, IdleStop]. x-npc-legs's events had
+    no moveStart either; the TurnToWalk events are the turn-in-place
+    idles, not the walk. Cause, in the code: the host's AnimationSource
+    drops ignoredAnims (moveStart, moveStop, turnStop, TurnLeft, TurnRight,
+    the two Cyclic blends) at the source for every actor it reports, right
+    for a figure whose keep-offset AI makes them, wrong for a puppet whose
+    movement controller never runs. Fix on fork m3-train-32 b6dd852b: an
+    NPC source keeps the five locomotion events (the Cyclic blends stay the
+    local graph's); the receiver's applyAnimation already replays any event.
+    The reading that closes it: x-npc-legs on that build, c2's watch events
+    for Sigrid with moveStart and moveStop, and a frame with a stride.
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
@@ -1096,7 +1118,7 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
 - [x] native hook + T1 (built d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; no host-less T1 exists in the fork, so the proof is the seat's: "[verb:npc-puppet] detours installed: animation queue true, movement step true" in c1.log, the demote and promote lines, and P1's trace 20261022-044255: zero Move translations through the puppet phase, the original's output from the promote on, every controller's step stamped; 21:50 PDT)
 - [x] TS handler (eaa3b6d0 and d9a003fd: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
 - [x] T2 green (2026-10-21 21:39 PDT, numidium: test-proto at m3-npc-puppet eab366b2's image, all 33 difftest sessions identical between the legacy and the wire stacks; no ESM actor in a session by design, the Tests section)
-- [x] T3 scenario green, no HYPOTHESIS tags (2026-10-22 05:54 PDT: b-npc-puppet 123325 green on 19e7ca9b's stage, the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the tags that stay carry a name: H2 CONFIRMED by x-npc-legs 121157, the puppet's graph runs its own locomotion under the relay; H6 and H7 npc-stream's; H8 npc-handoff's)
+- [x] T3 scenario green, no HYPOTHESIS tags (2026-10-22 05:54 PDT: b-npc-puppet 123325 green on 19e7ca9b's stage, the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the tags that stay carry a name: H2 re-opened by playtest 31 the same morning (the puppet slid; the relay dropped its locomotion events), fixed on fork m3-train-32 and read there; H6 and H7 npc-stream's; H8 npc-handoff's)
 - [x] parity scenario green, or its later list reviewed with it (ADR-031) (b-cell-host green in the gate; the engine-alone references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 are the diff's base, their reruns on the merged base listed in the Dynamic plan)
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033) (the handoff and the restart inside b-npc-puppet; the figure beside a puppet in b-cell-host; playtest 31's checklist carries the rest by item)
 - [x] ledger and suppression registry updated (no Papyrus native added: setPuppet and isPuppet are Skyrim Platform exports, listed in the Suppress section's registry; docs/NATIVES.md unchanged)
