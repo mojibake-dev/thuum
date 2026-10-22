@@ -1163,13 +1163,36 @@ health message. A second red within two sweeps makes it a bug.
   stalled tick puts two real stream ticks, 183 ms apart, inside that window,
   where they read as the engine's double. Fix on fork m3-train-33 ab1740bf:
   both rules in time (the engine's double within 8 ms; a hit and its apply
-  within 34 ms), which a slow tick cannot fold. HYPOTHESIS until c1's watch
-  sample gaps in 225540 are read against 225208: that c1's JS tick stalled
-  through the holes (the driver samples from the same tick, so a stall is a
-  gap of 300 ms or more lined up with the server's holes); if so, the
-  stall's own cause on the host's tick is the next row (the roster's
-  per-actor lookups every 2 s are the first suspect). A row from the same
-  read: c1's figure of c2 took a refused combat idle every 15 ms
+  within 34 ms), which a slow tick cannot fold: a latent bug fixed, not
+  this cause. The stall hypothesis is FALSIFIED ({now} PDT, numidium): c1's
+  tick ran at 60 updates a second through 225540 with no gap over 267 ms,
+  and c1's own "hits dealt" on c2's figure count 20 pairs in the full run
+  against 10 pairs in the short one at exactly the server's ten ticks and
+  holes: the caster's game registered fewer hits, the client dropped
+  nothing. THE CAUSE: where c2's figure stood on c1's screen. From b-duel's
+  phase-2 watches (steps 038 and 039, after the power attack's 0.24
+  stagger, before the stream), the figure's error against c2's own position
+  at the end of the phase: 0.4 and 0.3 on the two greens (192438, 223749),
+  7.6, 6.1, 6.7 and 6.9 on the four reds, the figure at nearly the same
+  wrong spot each time, about 6.5 units farther from c1 at a bearing of
+  minus 2.2 degrees against c1's aim; on the greens the push peaked past
+  eight (11.7, 7.1) and came back, on the reds it stayed under. The stream's
+  projectiles then missed it half the time. The defect: translateTo keeps a
+  standing figure's 8-unit deadband against a fresh sample's jitter, and the
+  2 s re-apply of an unchanged record ran the same gate, so with c2 standing
+  still nothing ever brought the figure back. Fix on fork m3-train-33
+  8a581ede: the periodic re-apply of an unchanged record settles a standing
+  figure or puppet from one unit (movementApply.ts, formView.ts); a fresh
+  sample keeps its deadband. Read: b-duel three times on the stage, 19 or 20
+  ticks each and the phase-2 error back under one unit within 2 s of the
+  stagger. Whether train-33 shifted the push's size is not asked (HYPOTHESIS
+  either way; the deadband is the defect). Row for the figures, from the
+  same watches: on every run, green and red, 16b8854a's included, c2's
+  figure on c1's screen stands about 8 units below c2's own z on the lab
+  spawn's flat ground (14665 to 14666 against 14673.7), playtest 31's
+  "clipping through the floor" by the look of it; the figure's spawn height
+  and ground snap, its own train. A row from the same read: c1's figure of
+  c2 took a refused combat idle every 15 ms
   (IdleCombatSpecialStart, IdleCombatLookingAroundStart,
   IdleCombatStretchingStart) through the phase, the relay's idle blank
   answered by the engine's per-frame retry; a figure's graph thrashed every
