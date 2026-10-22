@@ -919,6 +919,30 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     no fault in itself. Train-33's read is therefore Speed, SpeedSampled and
     Direction on c2 against these values: about 80 walking, about 220
     running, Direction changing with the track.
+  - TRAIN-33 WORKS ON TWO OF THREE (x-npc-legs 20261022-202106 on a9c43bf0's
+    stage, {now} PDT, numidium's read): the fed inputs reach the graph.
+    Sigrid's puppet on c2: Speed changing 17 times to a peak of 106.2,
+    SpeedSampled 168.0, Direction 15 changes, the speed following each walk
+    (72 at 46.2 s, 106 at 46.6, 80 at 46.7, 79 at 48.0, 0 at 48.2) and the
+    engine's OWN moveStart and moveStop paired with it and taken (46.2 and
+    48.2; 60.8 and 66.1; 68.3), where 19e7ca9b refused every moveStop.
+    Faendal the same, 4,700 units out: Speed to 126.2, 58 changes, moveStart
+    and moveStop taken, moving in 234 of 270 samples. Alvor glided: a steady
+    walk from 38.9 to 44.7 s at 51 to 84 units/s with Speed 0 and no
+    moveStart; his events show IdleChairExitStart at 35.6 REFUSED, the turn
+    taken, then IdleStop refused and IdleHammerTableEnter taken: his puppet's
+    graph took the chair enter, refused the exit, and a furniture state that
+    consumes no Speed was carried across the yard (distance is not it,
+    Faendal is farther). Two things from it, on train-33 786a029d: (a) the
+    host reports a game-file actor's Speed (the graph's own input, 80 at a
+    walk) instead of SpeedSampled, which ran 1.3 to 1.5 times higher and
+    blended the puppets toward a jog; (b) a refused furniture exit on a
+    puppet ("*ExitStart" for game-file ids, filtered in native) is answered
+    with IdleForceDefaultState on the next update; HYPOTHESIS until a probe
+    catches a refused exit again. The reading that closes H2 on 786a029d:
+    c2's Speed near the host's through the walks, the engine's own
+    moveStart and moveStop, a stride in the burst's frames; the furniture
+    state on a puppet is otherwise npc-stream's (the sit and sleep state).
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
