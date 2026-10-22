@@ -1191,6 +1191,8 @@ class FridaSteps(RunTests):
             self.assertIn("new File(", v.read_text(), "the script's lines go to its own flushed .log")
             self.assertIn(f"{v.name}.log", v.read_text())
         self.assertTrue(all("'-e'" in e for e in started), "frida-inject eternalizes the script and exits")
+        # a step waits for the previous watcher, since the task drops a start while one runs (x-frida-flush)
+        self.assertTrue(all(e.index("Get-ScheduledTask -TaskName sky-lab-run") < e.index("Start-ScheduledTask") for e in started))
 
     def test_a_frida_step_needs_its_script(self):
         run_id, body = self._run(FRIDA_MISSING)
