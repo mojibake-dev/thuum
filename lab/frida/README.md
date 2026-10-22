@@ -234,3 +234,13 @@ hook rarer functions, or sample.
   job 41453's distinct handles. Offsets by `just addr` for 1.6.1170 only;
   xmm arguments are not readable in Frida's context, so angles are read
   back from the actor on leave.
+
+- exception-trace.js: every exception raised in the game, by thread, with
+  its stack: KERNELBASE RaiseException (a C++ throw's code 0xE06D7363 with
+  the thrown class names read from its ThrowInfo; any other code as SEH)
+  and Frida's first-chance fault handler (access violations and kin,
+  passed on). Repeats within a second are counted. For the landing hang of
+  2026-10-21 (docs/verbs/npc-puppet.md): the dump showed Skyrim Platform's
+  JS worker spinning in V8's stack-handler unwind after a JS entry exited
+  without unwinding, so this names the throw if it recurs. Place its step
+  before `connect` so it attaches during the load screen.
