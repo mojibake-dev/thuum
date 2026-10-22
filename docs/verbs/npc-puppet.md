@@ -588,6 +588,12 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   the events). Contract doc updated: no (nothing to update; `just
   wire-header-check` unchanged).
 
+- UpdateProperty for an actor from the game files (a game-file id) carries
+  baseRecordType "NPC_" as it carries "DOOR", so the client's form model
+  takes the word; without it the id is filed as a plain engine reference and
+  the property dropped (104032's handoff). A 0xff id needs no type. No wire
+  shape change: the field was optional.
+
 ## Server
 
 - Where the logic lives: the core (C++, legacy), three edits. PartOne's
@@ -666,6 +672,13 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   (hostService.ts:31's idiom): off, the set is never fed, so the detours are
   inert and AI stays on: a bisect switch, not a play mode. The binding and
   the cleaner follow `cellHost`.
+
+- A game-file actor whose form the server takes back while it is live here
+  (DestroyActor at leaving reach, a disconnect) goes puppet at the form's
+  loss: formView.destroy(lost) from formViewArray's two server-driven
+  destroys calls PuppetService.demoteOnLoss (the native clears the AI bit
+  alone when the actor has no 3D). The server's word cannot reach a game
+  that no longer listens to the actor; TES3MP's leaving host does the same.
 
 ## Tests
 
@@ -1012,6 +1025,28 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   finding from c2's live wire log: every one of its 1,835 send lines is a type 5
   UpdateEquipment refused for an inventory entry of count -1 (baseId 0x13790);
   that seat's equipment has never gone out on the wire. Its own branch (LOG).
+- THE HANDOFF'S TWO HALVES (2026-10-22 03:37 to 04:00 PDT). On 757066f3 the
+  roster works: b-npc-puppet 104032 held steps 14 (c1's Sigrid AI on, c2's
+  off, no copies) and 24 (both tracks 285 to 294 units over the minute,
+  0.004 units apart at the end, turns 0.52 and 0.16, no spin), the server
+  accepted ten sightings and placed eight residents from their interiors
+  (10:42:06 UTC), and went red at step 29, the handoff: nine cells moved to
+  c2 at epoch 2 and FlipHostedFlags ran for each, yet no promote on c2 and
+  c1's read AI on. (1) UpdatePropertyMessage names baseRecordType only for
+  DOOR (PreparePropertyMessage_, #1186), and the client's
+  skipFormViewCreation files an id under 0xff000000 without NPC_ under the
+  engine-reference branch (inventory, isOpen, isHarvested, disabled only):
+  the word at placement rode CreateActor, which names the type; the flip
+  never arrived. Fix: NPC_ named for a game-file id as DOOR is (a 0xff id
+  binds to its model without it; RespawnTest's player shape kept);
+  CellHostTest asserts the type on the flip. (2) The leaving host is no
+  listener of the residents when the release comes (its forms destroyed at
+  leaving reach), so no word reaches it and the unloaded persistent actor
+  keeps the AI bit. Fix: a game-file actor whose form the server takes back
+  while live here goes puppet at the loss (formView.destroy(lost) from
+  formViewArray, PuppetService.demoteOnLoss; the native clears the bit
+  alone with no 3D, Is3DLoaded TESObjectREFR.h:435). eedc2f58 then
+  19e7ca9b, pipeline 2614; the chain and the gate after it.
 
 ## Status
 
