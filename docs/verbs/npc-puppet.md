@@ -979,6 +979,16 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     929e3bc2 (pipeline 2647): the host's Speed is fed as reported, whatever
     the run mode; the host's channel is 0 when an actor truly stands. The
     read: Alvor walking between the markers at Speed near 80 on c2.
+  - ALVOR FED ({now} PDT): x-npc-legs 20261022-214026 on the train's fourth
+    head 2ce4fd36 (929e3bc2's speed feed plus cell-host's own-cell guard):
+    Alvor walked and was fed, Speed changing 15 times to 77.8, SpeedSampled
+    81.9, moveStart and moveStop taken, moving in 22 of 240 samples; Sigrid
+    77.8 with four starts and four stops, Faendal 83.3; Dorthe sat. The
+    furniture run-mode cause is confirmed. The gate runs on 2ce4fd36; its
+    merge is playtest 32's build. HYPOTHESIS by name after it: the refused
+    furniture exit's reset (786a029d, no refused exit since), cell-host's
+    own-cell guard (2ce4fd36, the event came on time in 214026), the turn
+    rate (0 fed), the gait from Speed alone (F6, the host's Speed now fed).
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
