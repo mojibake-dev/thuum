@@ -49,7 +49,7 @@ function throwTypes(params, paramCount) {
     for (let i = 0; i < n; i++) {
       const ct = imageBase.add(cta.add(4 + 4 * i).readU32());
       const td = imageBase.add(ct.add(4).readU32());
-      names.push(td.add(16).readUtf8String(96));
+      names.push(td.add(16).readCString(96));
     }
     return names;
   } catch (e) {
