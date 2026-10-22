@@ -831,7 +831,7 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   SkyrimPlatformImpl.pdb in the client artifact (the hooks-API frame
   stayed an offset); the Papyrus hook's Enter still scans the handler map
   from the hooked thread.
-- THE LANDING HANG, SECOND READING (2026-10-22, 23:38 to 01:0x PDT): the
+- THE LANDING HANG, SECOND READING (2026-10-21 23:38 to 2026-10-22 00:4x PDT): the
   hook fix did not hold (b-npc-puppet 063157, b-cell-host 063508 on
   931de577 hung c1 the same way), so the 23:06 entry above names a real
   defect that was not the cause. The lab closed in from the outside
