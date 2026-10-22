@@ -84,10 +84,13 @@ function fileVersion(path) {
   return [ms >>> 16, ms & 0xffff, ls >>> 16, ls & 0xffff].join('.');
 }
 
+// helper names avoid Frida's globals (ptr, hexdump, int64, uint64, NULL):
+// a top-level `ptr` failed the load ("cannot define variable 'ptr'",
+// run 20261022-040233)
 function hex(n) { return '0x' + (n >>> 0).toString(16); }
 function u32(p) { try { return p.isNull() ? 0 : p.readU32(); } catch (e) { return -1; } }
 function f32(p) { try { return p.isNull() ? NaN : p.readFloat(); } catch (e) { return NaN; } }
-function ptr(p) { try { return p.isNull() ? NULL : p.readPointer(); } catch (e) { return NULL; } }
+function readPtr(p) { try { return p.isNull() ? NULL : p.readPointer(); } catch (e) { return NULL; } }
 function formId(form) { return form.isNull() ? 0 : u32(form.add(0x14)); }
 function angleZ(actor) { return f32(actor.add(0x50)); }
 function wrap(d) { return ((((d + 180) % 360) + 360) % 360) - 180; }
@@ -128,8 +131,8 @@ if (at === undefined) {
     Interceptor.attach(exe.base.add(at.keepOffsetGoal), {
       onEnter(args) {
         const agent = args[0].sub(0x18);
-        const controller = ptr(agent.add(0x28));
-        const actor = controller.isNull() ? NULL : ptr(controller.add(0x1b8));
+        const controller = readPtr(agent.add(0x28));
+        const actor = controller.isNull() ? NULL : readPtr(controller.add(0x1b8));
         this.actor = actor;
         this.out = args[2];
         this.controller = controller;
@@ -158,7 +161,7 @@ if (at === undefined) {
         this.before = u32(this.controller.add(0x1c0));
       },
       onLeave() {
-        const actor = ptr(this.controller.add(0x1b8));
+        const actor = readPtr(this.controller.add(0x1b8));
         const id = formId(actor);
         if (!watched(id)) return;
         emit({ keepOffsetFlip: true, actor: hex(id), flag: this.flag, stateBefore: this.before,
@@ -205,7 +208,7 @@ if (at === undefined) {
     });
     // the controller hooks carry no actor: the controller's class and its step are logged for every controller
     function controllerClass(controller) {
-      const vt = ptr(controller);
+      const vt = readPtr(controller);
       if (vt.equals(exe.base.add(at.vtableRigid))) return 'rigid';
       if (vt.equals(exe.base.add(at.vtableProxy))) return 'proxy';
       return vt.toString();
