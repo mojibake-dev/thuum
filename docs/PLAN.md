@@ -1057,7 +1057,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 - Exit: `c-riverwood` (two players, NPC schedules run under host one; host
   one leaves; host two takes over; NPCs continue; restart restores) and
   `c-dungeon-enemies` (bandits fight both players under one host).
-- npc-puppet IN PROGRESS (2026-10-21 17:41 PDT, Eli's approval of the
+- npc-puppet DONE 2026-10-22 05:54 PDT (fork parity 19e7ca9b, main fbee62d; the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the record below). Begun 2026-10-21 17:41 PDT, Eli's approval of the
   one-shot plan after playtest thirty's spinning wolves): the measured
   cause (docs/verbs/npc-puppet.md "Why now": the hosted flag never reached
   a game-file actor's client copy, so the host never reported it and every

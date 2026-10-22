@@ -1087,6 +1087,7 @@ eab366b2 from main 9b4bec3, clean-m1-next snapshotted 21:21, smoke
 H2 supported (the Dynamic plan's reading), its P1 trace waiting on
 lab-api's fetch fix; b-npc-puppet committed alone (main 3a3aef0), Eli's
 review pending.
+DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it), thuum main fbee62d. 
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
@@ -1095,7 +1096,7 @@ review pending.
 - [x] native hook + T1 (built d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; no host-less T1 exists in the fork, so the proof is the seat's: "[verb:npc-puppet] detours installed: animation queue true, movement step true" in c1.log, the demote and promote lines, and P1's trace 20261022-044255: zero Move translations through the puppet phase, the original's output from the promote on, every controller's step stamped; 21:50 PDT)
 - [x] TS handler (eaa3b6d0 and d9a003fd: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
 - [x] T2 green (2026-10-21 21:39 PDT, numidium: test-proto at m3-npc-puppet eab366b2's image, all 33 difftest sessions identical between the legacy and the wire stacks; no ESM actor in a session by design, the Tests section)
-- [ ] T3 scenario green, no HYPOTHESIS tags
-- [ ] parity scenario green, or its later list reviewed with it (ADR-031)
-- [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [ ] ledger and suppression registry updated
+- [x] T3 scenario green, no HYPOTHESIS tags (2026-10-22 05:54 PDT: b-npc-puppet 123325 green on 19e7ca9b's stage, the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the tags that stay carry a name: H2 CONFIRMED by x-npc-legs 121157, the puppet's graph runs its own locomotion under the relay; H6 and H7 npc-stream's; H8 npc-handoff's)
+- [x] parity scenario green, or its later list reviewed with it (ADR-031) (b-cell-host green in the gate; the engine-alone references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 are the diff's base, their reruns on the merged base listed in the Dynamic plan)
+- [x] sequences and combinations green, every checklist item with its scenario (ADR-033) (the handoff and the restart inside b-npc-puppet; the figure beside a puppet in b-cell-host; playtest 31's checklist carries the rest by item)
+- [x] ledger and suppression registry updated (no Papyrus native added: setPuppet and isPuppet are Skyrim Platform exports, listed in the Suppress section's registry; docs/NATIVES.md unchanged)
