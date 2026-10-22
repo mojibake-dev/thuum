@@ -25,6 +25,63 @@ Roadmap reference: skymp/ROADMAP.md "NPC" (packages; NPCs travelling out of
 sight), skymp-hosting.md:440-444.
 Milestone: M3   Class: B
 
+## Why now: playtest thirty's wolves (measured 2026-10-21)
+
+The first live run with the server's NPCs on (fork parity 535544db,
+cell-host merged) showed the forest cell's wolves spinning in place on both
+screens within a minute; the relay echo's fix (m3-relay-echo 41f554ad) and a
+swap of the host changed nothing. Two defects of the copies model, measured
+(numidium's reads on the host seat, results playtest-30-wolves/01 to 08; the
+code trace, the prior-art read and the REA read of the same afternoon,
+docs/LOG.md):
+
+1. The host never learns it hosts an actor from the game files. CreateActor
+   sent such an actor under id + 0x100000000 (PartOne.cpp:979-983 on
+   535544db); the grant's flip went out as UpdateProperty isHostedByOther
+   under the raw u32 id (UpdateHoster, MpObjectReference.cpp:737-747;
+   skymp.rs:426); the client routed any id under 0xff000000 to its
+   engine-reference branch, which applies inventory, isOpen, isHarvested and
+   disabled alone (remoteServer.ts:785-804, :975-980). So the form's flag
+   stayed true (created before the grant) or undefined (after it), isMine
+   (hostService.ts:56) and the report list (:76) never admitted the actor,
+   and the server's record of 0x85547 stood at one position and heading
+   across five reads 2 s apart (results 07). cell-host.md had recorded the
+   defect as kept "until npc-puppet" without seeing that it left every
+   game-file actor unhosted in effect; CellHostTest covered a 0xff actor
+   alone.
+2. Every copy, on every screen, was re-applied every 2 s against that frozen
+   record (formView.ts:478-490), and the apply's hold,
+   keepOffsetFromActor(self, 0,0,0, 0,0, offsetAngle, 1, 1) with the angle
+   unwrapped (movementApply.ts:72-79), is a turn that renews itself every
+   frame: the planner agent MovementPlannerAgentKeepOffset (42182) sets the
+   facing goal to the actor's OWN data.angle plus the offset each frame, in
+   the per-frame pass that runs with or without kProcessMe, and
+   ClearKeepOffsetFromActor (37895, then 41734) only flips a mode byte,
+   taking effect in a motion-driven controller state alone (REA on sky-re,
+   2026-10-21, CONFIRMED-STATIC for the mechanism, the Engine surface
+   below). The measured cadence (a moveBackward/moveForward pair every 2 s
+   on a wolf near nobody, results 03) is the re-apply's; a re-apply landing
+   within 5 degrees froze a wolf for good (Eli: "on test 1 one wolf has
+   stopped spinning"). Beside it the copies' own AI fought the host player
+   (Aggression 2 on wolf copies, formView.ts:267-268, their attacks blanked;
+   inCombat true, target 0x14, results 02). Whether the heading kept turning
+   through the 15 s AI-off window is unmeasured (the watch recorded no
+   heading, and with AI off the animation stage is gated, so a still model
+   proves nothing): probe P0 in the Dynamic plan.
+
+Three rules the working projects make structural (docs/research/m3/
+tes3mp.md and te-npcs.md, the prior-art read of 2026-10-21) are this
+verb's. A: nothing multiplayer writes to an actor this game hosts (no first
+apply, no replayed animation, no clear, no 0xff blank, no echo; TES3MP's
+server skips the sender, apps/openmw-mp/Cell.cpp:202, Skyrim Together's
+too). B: a puppet's heading and position are written absolutely from the
+host's sample, never as a goal relative to the actor itself (TES3MP
+DedicatedActor.cpp:106; TE InterpolationSystem.cpp:95-121). C: one brain
+switched at one gate, the animation system live and fed the host's inputs
+(TES3MP's shape; TE's AI-on-outputs-blocked shape pays at every handoff,
+TE#810 and #898, and its #901, a zero controller timestep when the movement
+step is skipped, is hook 3's R1 below). ADR-045 records the decisions.
+
 ## Inventory (ADR-031: the action's consequences, before its rung)
 
 The action is "a second game shows a cell another game hosts, while the
@@ -389,8 +446,14 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   AIProcess fields the movement step writes, is open, :325-327, :421-422;
   probe P4); H3 (translateTo's mover moves an actor whose movement step is
   skipped; the mover was not traced, :318-322); H4 (KeepOffsetFromActor does
-  nothing useful on a puppet: its agent's slot, 7 ungated or 8 gated, is
-  unresolved, :304-308).
+  nothing useful on a puppet: answered 2026-10-21 by REA, the "Why now"
+  section: its planner agent 42182 runs in the per-frame pass whatever the
+  AI bit, with a goal relative to the actor itself, so it never goes on a
+  puppet, Rule B); H11 (setAngle imposes the heading on a puppet whose
+  animation job is re-admitted: Actor::SetRotationZ 37230 writes
+  data.angle.z and marks the loaded data's 3D update flag, REA 2026-10-21,
+  CONFIRMED-STATIC for the writes, the visible turn HYPOTHESIS; probe P4;
+  the fallback is SetPosition with the heading each sample).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -440,10 +503,12 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   (ActorUpdatableBy through HostOf, ActionListener.cpp:56-122 on m3host).
   UpdateAction stays the player's (cast-action.md:229): npc-stream's row.
 - CreateActor, MsgType 33: refr_id (Option<u64>, skymp.rs:1159) for an ESM
-  actor carries its own form id instead of id + 0x100000000 (PartOne.cpp:
-  979-983 on m3host): a value within the type, no shape change, no validator
-  rule on it. The client's two tests of that value (remoteServer.ts:372,
-  formView.ts:131-136) are the switch to the engine reference.
+  actor carries its own form id instead of id + 0x100000000, and
+  base_record_type (Option<String>, :1149; DOOR alone until now) carries
+  NPC_ for it (Stage 1, fork a29bfb08, PartOne.cpp's CreateActor): values
+  within the types, no shape change, no validator rule on them. The
+  client's tests of those values (remoteServer.ts skipFormViewCreation and
+  :372, formView.ts:131-136) are the switch to the engine reference.
 - UpdateProperty, MsgType 7: isHostedByOther (refr_id u32, skymp.rs:426)
   goes unused for engine actors, whose puppet or live state is the grant's
   (Client); the field stays (ADR-012: append-only) and the ESM defect
@@ -490,7 +555,14 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   worldCleanerService: return for actorId below 0xff000000 (the dead-body
   and chicken branches, :72-76, :81-99, fold in). movementApply: the puppet
   branch above. remoteServer's "it is an npc" test (:372) asks the base
-  record type, not the id.
+  record type, not the id. Every NPC this game does not host is a puppet,
+  an engine reference or a server-made 0xff copy alike (ADR-045's third
+  decision: AI off, the relay's transform and events, no keep-offset); the
+  self keep-offset stays on players' figures alone, whose own 130 ms
+  reports hold it. The view of an actor this game hosts applies nothing
+  (Rule A: no first apply, no replayed animation, no clear),
+  setDefaultAnimsDisabled(false), and setWeaponDrawnMode(-1) once at the
+  promotion.
 - Kill switch config key: `npcPuppet` under skymp5-client's settings
   (hostService.ts:31's idiom): off, the set is never fed, so the detours are
   inert and AI stays on: a bisect switch, not a play mode. The binding and
@@ -498,21 +570,29 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 
 ## Tests
 
-- T0: C++: PartOne's CreateActor for an ESM actor carries the form id
-  (unit/NpcExists.cpp's shape, skymp-hosting.md:182-184); the loader admits
-  an essential NPC, a guard and a Nord bandit under npcEnabled and still
-  skips a dead or disabled one (lab/esm.py counts the Riverwood ACHRs that
-  pass, skymp-hosting.md:558-559); UpdateHoster sends no property for an ESM
-  actor. Rust: none (no wire change); wire-validate's tests stand.
+- T0: C++ (fork a29bfb08): CellHostTest's game-file case, Whiterun's cow
+  0x10ebaf (unit/NpcExists.cpp's actor) travels under its own id with
+  baseRecordType NPC_ and no flag, the grant sends it no property, the
+  host's report moves it and reaches the other game once and not the host,
+  the other game's report is dropped; the 0xff wolf's flip still carries
+  (UpdateProperty isHostedByOther false to its host); NpcExists reads the
+  flag under props (the old top-level read was vacuous) and loads
+  Riverwood's Alvor 0x13482, unique and a Nord in an interior, under
+  npcEnabled (the three bans lifted; a crime-faction guard and a leveled
+  bandit have no placed id in the tests' hands, so b-npc-puppet's Riverwood
+  run is their proof). Rust: none (no wire change); wire-validate's tests
+  stand.
 - T1: the detour targets and the push resolve by id against SkyrimSE.exe
   1.6.1170 outside the game (41370, 41453, 37356, 69349: all 147 of the
   research's ids present, re-ai-puppet.md:10) and the stage table's name
   strings "Actor animation" and "Actor movement" read beside them (:59-61):
   the ids proven before any hook runs.
-- T2: difftest's cell-host.yaml extended with an ESM NPC in reach of the
-  spawn's cell 0xbbb1 under npcEnabled: its CreateActor carries its own id
-  on both servers; the host's UpdateMovement for it accepted, the non-host's
-  dropped (cell-host's gate).
+- T2: no ESM actor in a difftest session: T2's servers run
+  server-settings-t2.json without npcEnabled (lab/tools/test-proto.sh), and
+  the legacy image is frozen on upstream's id scheme, so every NPC's
+  CreateActor would diverge by design. The 33 sessions stand as the
+  regression (identical at the merge); the game-file case is CellHostTest's
+  (T0) and b-npc-puppet's (T3).
 - T3 scenario id: lab/scenarios/b-npc-puppet.yaml. Two seats, Riverwood
   (Tamriel 0x3C, (4,-12) 0x9732 and its neighbours, riverwood-ids.md:37-41),
   npcEnabled on the run's own setting, the clock to 7.9 (r-npc-packages'
@@ -549,6 +629,19 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   for a flagged actor: 41453 once per frame (hook 2a), 37356 at zero (hook
   3), 37347 and 37348 at zero, 33217 entered only before the stop. Falsified
   by a 37356 call for a flagged actor, or 41453 at zero.
+- P0, the spin's autopsy on today's build (solo c1 at 0x9810 under
+  npcEnabled: the flag never flips there either, so every copy is
+  re-applied every 2 s and the spin reproduces without a second seat):
+  lab/frida/npc-puppet.js hooks 42182 (the keep-offset planner; rcx minus
+  0x18 the agent, the target handle at +0x38, angleOffset.z at +0x50, at
+  return out[8] through r8 minus the actor's data.angle.z), 41734 (the
+  mode flip: dl, and ctrl+0x1C0 before and after) and 37230 (SetRotationZ
+  with its return address). Decides: 42182 every frame with the state 13
+  and out[8] minus angle.z about angleOffset.z confirms the keep-offset as
+  the spinner, and the 41734 log says why Clear never lands; a SetRotationZ
+  return address outside 37356 names another writer; 42182 silent during
+  the spin falsifies the cause. Beside it: labState ref 0x85547 read twice
+  (the frozen record) and c1's console "block anim" lines.
 - x-npc-puppet-2 (solo, c1, the fork's SP dist with the hooks, a driver step
   npc-puppet {formId, puppet} to add beside npc-ai; the Survival prompt step
   as every solo run): x-npc-puppet's bandit (0x1BCD8 at 150 units). P2 with
@@ -574,7 +667,9 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 
 ## Status
 
-Doc drafted 2026-10-21, before any code.
+Doc drafted 2026-10-21, before any code. Build begun 2026-10-21 17:41 PDT
+on the plan Eli approved (one shot, six stages, docs/LOG.md's entry):
+Stage 1 on fork m3-npc-puppet a29bfb08 (pipeline 2555).
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)

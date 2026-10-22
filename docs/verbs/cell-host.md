@@ -293,9 +293,13 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   rule: a hosted NPC's report naming another cell is accepted when the sender
   hosts the destination and the origin is unhosted or the sender's
   (MovementValidation.cpp:96-101 relaxed for that case alone, logged);
-  otherwise dropped, npc-handoff's row. isHostedByOther keeps its ESM defects
-  (u32 refr_id, skymp.rs:426, against CreateActor's u64, :1159;
-  skymp-hosting.md:149-166) until npc-puppet replaces the property.
+  otherwise dropped, npc-handoff's row. isHostedByOther never reached the
+  client's copy of an ESM actor (u32 refr_id, skymp.rs:426, against
+  CreateActor's u64, :1159; skymp-hosting.md:149-166): the client's
+  engine-reference branch dropped the flip, so as merged the host never
+  reported a game-file actor and playtest thirty's wolves spun on every
+  screen (docs/verbs/npc-puppet.md, "Why now"); npc-puppet retires the
+  property for them and derives the host's role from the grant alone.
 - DB fields / migration: none; cell hosts live in memory.
 - Restart behavior: every cell unhosted at start; each client re-sends its
   loaded set after Welcome and the election runs again. NPC records stand as
@@ -318,7 +322,9 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   As built (5f10768c): isMine(form, refr) is what the four sites ask, the
   grant and the server's own word on the actor (isHostedByOther, false
   only on the host's screen for the cell's actors no user plays, flipped
-  at the grant) agreeing, so a player standing in a hosted cell is never
+  at the grant for a 0xff actor; for an ESM actor the flip never landed,
+  the defect above, so isMine stayed false for every game-file actor until
+  npc-puppet) agreeing, so a player standing in a hosted cell is never
   reported for; a release is applied when it names the grant held (the
   monotonic rule is the grant's); the loaded set is re-sent when the
   player's own CreateActor arrives (the moment the server has the actor,

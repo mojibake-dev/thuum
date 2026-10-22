@@ -211,6 +211,20 @@ sees the actor. The owner's own CreateActor carries the race's bases and the
 percentages as before. No field is new, so the validator is unchanged: the
 props were optional finite floats already.
 
+### CreateActor's refr_id and base_record_type for an actor from the game files (npc-puppet, M3)
+
+An actor the server loads from the game files (a Skyrim.esm ACHR such as
+the forest predator 0x85547) travels in CreateActor (t 33) under its own
+form id, and its `baseRecordType` carries `NPC_` (DOOR was the only value
+before). Upstream sent id + 0x100000000 so the client would place a copy of
+the base; the client now binds the engine's own reference and runs it or
+puppets it by the cell's grant (thuum docs/verbs/npc-puppet.md). The
+property `isHostedByOther` is sent for players' figures and for server-made
+0xff actors alone; a game-file actor never carries it (UpdateProperty's
+refr_id is a u32, so its flip under the raw id never reached the client's
+copy: playtest thirty's wolves). Values within the existing types, no shape
+change, no validator change.
+
 ## Bridge and client FFI
 
 Server: `wire-bridge` links into the existing C++ server through cxx and

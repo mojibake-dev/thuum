@@ -2293,3 +2293,70 @@ loop, the one thing the block is for.
 - [x] accept (Eli, 2026-10-19 19:32 PDT: "accept those ADRs")
 - [ ] accept with changes (say what)
 - [ ] not yet
+
+## ADR-045: An NPC is run or puppeted by the cell's grant alone; puppets are the engine's own references with their AI off
+
+Status: PROPOSED 2026-10-21 17:52 PDT (thuum-magnus, from playtest
+thirty's spinning wolves and the deep dive Eli asked for that evening; the
+plan was approved at 17:41). Refines ADR-035 (the cell as the hosting unit,
+its first and ninth points) and retires the per-actor hosted property for
+actors from the game files.
+
+**Context.** Playtest thirty, the first with the server's NPCs on, showed
+every wolf at the forest cell spinning in place on both screens within a
+minute. Measured (docs/verbs/npc-puppet.md, "Why now"): the grant's flip of
+`isHostedByOther` went out under an actor's raw u32 id while its CreateActor
+had used id + 0x100000000, the client dropped the flip in its
+engine-reference branch, so the host never reported a game-file actor and
+every screen re-applied a frozen record every 2 s; the apply's hold, a
+keep-offset on the actor itself with a nonzero angle, is a turn that renews
+itself every frame (REA: the planner agent's goal is the actor's own angle
+plus the offset, in the per-frame pass, whatever the AI bit). TES3MP and
+Skyrim Together, the two projects whose NPC sync works, never let
+multiplayer code write to an actor on the game that hosts it, write a
+puppet's transform absolutely, and (TES3MP) switch the AI at one gate with
+the animation system left live; Skyrim Together's AI-on shape with every
+output blocked breaks at each handoff (its #810, #898).
+
+**Decision.**
+1. Puppets are the engine's own placed references on every game. PlaceAtMe
+   copies remain only for actors with no engine reference: players' figures
+   and server-made 0xff actors (ADR-035's first point, restated because the
+   client's id boundary moves: a game-file actor travels under its own id
+   with `baseRecordType` NPC_).
+2. On the client, whether an NPC is this game's to simulate derives from the
+   grant and the actor's cell alone. `isHostedByOther` is sent for players'
+   figures and for 0xff actors, where the id reaches the form model; for a
+   game-file actor it is never sent and never read. The field stays on the
+   wire (ADR-012, append-only); no shape change.
+3. Every NPC this game does not host is a puppet, engine reference or 0xff
+   copy alike: AI off (kProcessMe), moved and animated from the host's
+   relay with heading and position written absolutely, no keep-offset. The
+   self keep-offset stays on players' figures alone, held by the player's
+   own 130 ms reports.
+4. Nothing multiplayer writes to an actor this game hosts, at creation
+   included: no first apply of the record, no replayed animation, no clear,
+   no 0xff idle or stagger blank, no echo.
+
+**Consequences.** One fork branch (m3-npc-puppet) carries the server's id
+and flag change (Stage 1, a29bfb08), the Skyrim Platform puppet switch with
+its two detours (the engine's own animation job re-admitted for puppets;
+the movement step skipped with the character controller's step time kept,
+TE#901's lesson), the client's PuppetService and the view's engine path,
+the cleaner's floor at 0xff000000 and the loader's bans lifted. Probes P0
+to P5 and b-npc-puppet prove it; the hypotheses H1 to H11 are the verb
+doc's. The copies' Aggression 2 and blanked attacks go with the copies.
+Players' figures are untouched beyond the offset angle's wrap to (-180,
+180], a defect visible on figures too.
+
+**Alternatives.** Carry the flip under the client's long id (a u64
+refr_id on UpdateProperty, a wire widening) and keep the copies: fixes the
+authority and keeps the spin generator and the two-brain copy. Skyrim
+Together's shape (AI on, every output refused): leaks wherever a block is
+missing and piles up state for the handoff. A hotfix for playtest thirty:
+a client dist cannot be built and relaunched inside the hold, and Eli
+asked for one shot.
+
+- [ ] accept
+- [ ] accept with changes (say what)
+- [ ] not yet
