@@ -817,7 +817,7 @@ review pending.
 - [x] message + validator (same commit) (no wire change: CreateActor's refr_id and base_record_type carry values within their types; the contract line in docs/WIRE.md; wire-validate's tests stand, 2562)
 - [ ] native hook + T1 (built, d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; the install log "[verb:npc-puppet] detours installed" and P1's counts are the proof, no host-less T1 exists in the fork)
 - [x] TS handler (eaa3b6d0 and d9a003fd: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
-- [ ] T2 green
+- [x] T2 green (2026-10-21 21:39 PDT, numidium: test-proto at m3-npc-puppet eab366b2's image, all 33 difftest sessions identical between the legacy and the wire stacks; no ESM actor in a session by design, the Tests section)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
