@@ -265,3 +265,11 @@ hook rarer functions, or sample.
   script calls on the thread that called OnUpdate (main.cpp:118-131), so a
   thread id other than those two in the counts is a finding by itself. Place
   the step after a `relaunch` and before `connect`.
+
+  Attach timing (2026-10-22): the injector attaches by process name after
+  a 5 s wait, so a `frida` step placed after a `relaunch` lands on a game
+  already past kDataLoaded (x-npc-napi-trace 071646 hooked 1 s after the
+  hang it was meant to watch; x-npc-landing-trace 054932's exception trace
+  the same). A game to be read from its start takes `relaunch {until: gone,
+  frida: {script, params?}}`, which arms the watcher while the game is
+  stopped and lets the launch start it (lab-api 51d7764).
