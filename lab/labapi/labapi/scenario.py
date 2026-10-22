@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "npc-ai", "npc-state", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "papyrus-events"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "npc-ai", "npc-state", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "papyrus-events"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
 SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse"}
@@ -64,6 +64,10 @@ class ServerSpec(BaseModel):
     # the run's own npcEnabled (ADR-035 point 9): an overlay on the version's
     # settings file for this run alone, so a creature cell loads; None keeps the file's
     npcEnabled: bool | None = None
+    # the run's own game hour (docs/verbs/npc-puppet.md's b-npc-puppet): the
+    # overlay's time block starts the server's clock at it when the run's
+    # server starts (wire-rules clock.rs: epoch and start.hour); None keeps the file's
+    gameHour: float | None = None
 
 
 class Step(BaseModel):
@@ -385,14 +389,18 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
     npc = server.get("npcEnabled")
     if npc is not None and not isinstance(npc, bool):
         raise ValueError(f"server.npcEnabled is true or false, got {npc!r}")
+    hour = server.get("gameHour")
+    if hour is not None and (isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24):
+        raise ValueError(f"server.gameHour is an hour from 0 to under 24, got {hour!r}")
+    hour = float(hour) if hour is not None else None
     world = server.get("world")
     if world is None:
-        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc)
+        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc, gameHour=hour)
     if "snapshot" in server:
         raise ValueError("server takes a snapshot or a world, not both")
     if not isinstance(world, str) or not _WORLD_NAME.fullmatch(world):
         raise ValueError(f"server.world names a directory under lab/fixtures/worlds, got {world!r}")
-    return ServerSpec(world=world, netem=netem, npcEnabled=npc)
+    return ServerSpec(world=world, netem=netem, npcEnabled=npc, gameHour=hour)
 
 
 def load_scenario(text: str) -> Scenario:

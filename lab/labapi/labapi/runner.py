@@ -394,14 +394,23 @@ class Runner:
         env = {"ESM_DIR": self.s.game_versions()[version]}
         settings = self.s.game_settings_files().get(version)
         npc = rec.scenario.server.npcEnabled
-        if settings and npc is not None:
-            # ADR-035 point 9: the run's own npcEnabled over the version's file, laid
-            # beside the world for this run alone, so no second file is kept in step
+        hour = rec.scenario.server.gameHour
+        if settings and (npc is not None or hour is not None):
+            # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
+            # file, laid beside the world for this run alone, so no second file is kept in step
             try:
                 d = json.loads(Path(settings).read_text())
             except (OSError, ValueError) as e:
-                raise RunnerError(f"E_RUN_SETTINGS: cannot read {settings} for the npcEnabled overlay: {e}") from e
-            d["npcEnabled"] = npc
+                raise RunnerError(f"E_RUN_SETTINGS: cannot read {settings} for the run's overlay: {e}") from e
+            if npc is not None:
+                d["npcEnabled"] = npc
+            if hour is not None:
+                # the clock is a pure function of the wall clock and the time block (wire-rules
+                # clock.rs): it reads start.hour at the epoch, so the run's start is the epoch
+                time_block = dict(d.get("time") or {})
+                time_block["epoch"] = _iso(self._wall())
+                time_block["start"] = {**(time_block.get("start") or {}), "hour": hour}
+                d["time"] = time_block
             overlay = Path(self.s.server_world_dir).parent / "server-settings-run.json"
             overlay.write_text(json.dumps(d, indent=2) + "\n")
             settings = str(overlay)

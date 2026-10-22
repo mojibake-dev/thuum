@@ -69,7 +69,18 @@ step, as in an assert. `server: {npcEnabled: true}` beside `snapshot:` gives
 the run its own server setting: lab-api lays the run's version's settings
 file, with only npcEnabled changed, beside the world as
 server-settings-run.json and mounts that for the run (ADR-035 point 9); a run
-that names none mounts the version's file as it is. `- server: netem {loss_pct:
+that names none mounts the version's file as it is. `server: {gameHour: 7.9}`
+rides the same overlay: its `time` block starts the server's clock at that hour
+when the run's server starts (the epoch is the run's start; wire-rules
+clock.rs). NPC steps for docs/verbs/npc-puppet.md: `npc-state {formId}` is kept
+per seat and read as `c.npc_state(<id>).aiEnabled` (and .inCombat, .package,
+.combatTarget, .staggering, .x, .y, .z); `refs-near {formTypes: [43]}` then
+`c.refs_near().runtime_of(<base id>)` counts that base's runtime copies (ids
+from 0xff000000); a watch records each actor's heading, read as
+`c.watched_id(<id>).turns` (net turns) and `.headingAtStop`; the driver's
+`npc-puppet {formId?, puppet}` calls the fork's setPuppet export and
+`npc-pose {formId?, x, y, z, angleZ, speed, direction}` is the puppet apply in
+one step, from lab-spawn as place-npc. `- server: netem {loss_pct:
 25}` impairs the server's interface from that step on (delay_ms, jitter_ms and
 loss_pct as `server: {netem}` takes them; all zero clears it, and the run's end
 does too).

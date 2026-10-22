@@ -572,6 +572,63 @@ class RefsNearViews(NearViews):
         return self.read.get(observer)
 
 
+class PuppetViews(RefsNearViews):
+    """docs/verbs/npc-puppet.md's facts: c2 (the non-host) read Hod (0x13483) with its AI off and two
+    references of the wolf base 0x1e7a0, the engine's own (0x85547) and a runtime copy (0xff00090d);
+    c2's watch saw Hod net a quarter turn and a copy spin seven turns, c1's watch carries no heading
+    (a driver before it)."""
+
+    def __init__(self):
+        super().__init__()
+        self.read["c2"]["types"]["43"] = {"inCell": 4, "near": 2, "refs": [
+            {"formId": 0x85547, "baseId": 0x1E7A0, "baseType": 43, "disabled": True, "deleted": False, "pos": [0.0, 243.0, 0.0], "distance": 243.0},
+            {"formId": 0xFF00090D, "baseId": 0x1E7A0, "baseType": 43, "disabled": False, "deleted": False, "pos": [0.0, 242.0, 0.0], "distance": 242.0},
+        ]}
+        self.states = {"c1": {0x13483: {"formId": 0x13483, "aiEnabled": True, "package": 0x6C989, "inCombat": False, "combatTarget": 0,
+                                        "staggering": False, "pos": [17300.0, -47100.0, -120.0], "head": [0, 0, 0]}},
+                       "c2": {0x13483: {"formId": 0x13483, "aiEnabled": False, "package": 0, "inCombat": False, "combatTarget": 0,
+                                        "staggering": False, "pos": [17301.0, -47099.0, -120.0], "head": [0, 0, 0]}}}
+        self.watches = {
+            "c2": {"actors": [
+                {"formId": 0x13483, "first": [17300.0, -47100.0, -120.0], "last": [17400.0, -47100.0, -120.0], "maxDisplacement": 130.0, "samples": 240,
+                 "turned": -90.0, "headingAtStop": 270.0},
+                {"formId": 0xFF00090D, "first": [0.0, 242.0, 0.0], "last": [0.0, 242.0, 0.0], "maxDisplacement": 3.0, "samples": 240,
+                 "turned": 2520.0, "headingAtStop": 12.5},
+            ]},
+            "c1": {"actors": [{"formId": 0x13483, "first": [17300.0, -47100.0, -120.0], "last": [17300.0, -47100.0, -120.0],
+                               "maxDisplacement": 0.0, "samples": 240}]},
+        }
+
+    def npc_state(self, observer, form_id):
+        return (self.states.get(observer) or {}).get(form_id)
+
+    def watch(self, observer):
+        return self.watches.get(observer)
+
+
+@needs_deps
+class PuppetFactsTests(unittest.TestCase):
+    def test_a_seats_npc_state_a_copy_count_and_a_watched_actors_turns(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), PuppetViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.npc_state(0x13483).aiEnabled == true"))
+        self.assertTrue(ev.evaluate("c2.npc_state(0x13483).aiEnabled == false"))
+        self.assertTrue(ev.evaluate("c1.npc_state(0x13483).package == 0x6C989 and c2.npc_state(0x13483).inCombat == false"))
+        self.assertTrue(ev.evaluate("abs(c1.npc_state(0x13483).x - c2.npc_state(0x13483).x) < 256"))
+        # the engine's own reference of a base never counts as a copy
+        self.assertTrue(ev.evaluate("c2.refs_near().runtime_of(0x1e7a0) == 1"))
+        self.assertTrue(ev.evaluate("c2.refs_near().runtime_of(0x13476) == 0"))
+        # a walk nets a quarter turn, a spin seven
+        self.assertTrue(ev.evaluate("c2.watched_id(0x13483).turns < 2"))
+        self.assertTrue(ev.evaluate("c2.watched_id(0xff00090d).turns > 6"))
+        self.assertTrue(ev.evaluate("c2.watched_id(0x13483).headingAtStop == 270"))
+        for bad in ("c1.watched_id(0x13483).turns < 2",       # a driver before the heading: no pass
+                    "c1.npc_state(0x13484).aiEnabled == true",   # never read
+                    "c1.refs_near().runtime_of(0x1e7a0) == 0"):  # c1's step listed no actors: a zero would measure nothing
+            with self.subTest(bad=bad), self.assertRaises(AssertionData):
+                ev.evaluate(bad)
+
+
 @needs_deps
 class RefsNearTests(unittest.TestCase):
     def test_count_has_and_distance_read_the_last_step(self):

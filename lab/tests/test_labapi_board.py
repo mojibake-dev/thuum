@@ -6,6 +6,26 @@ from _labapi import needs_deps
 
 @needs_deps
 class BoardTests(unittest.TestCase):
+    def test_npc_state_answers_are_kept_by_the_form_id_they_named(self):
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+        named = board.enqueue("c2", "npc-state", {"formId": 0x13483})
+        board.poll("c2")
+        board.complete(named.id, {"ok": True, "data": {"formId": 0x13483, "aiEnabled": False}})
+        placed = board.enqueue("c2", "npc-state", {})
+        board.poll("c2")
+        board.complete(placed.id, {"ok": True, "data": {"formId": 0xFF000ABC, "aiEnabled": True}})
+        missing = board.enqueue("c2", "npc-state", {"formId": 0x13484})
+        board.poll("c2")
+        board.complete(missing.id, {"ok": True, "data": {"error": "no placed npc and no {formId}"}})
+        self.assertFalse(board.npc_state("c2", 0x13483)["aiEnabled"])
+        self.assertTrue(board.npc_state("c2", 0xFF000ABC)["aiEnabled"])
+        self.assertIsNone(board.npc_state("c2", 0x13484), "an error answer is no state")
+        self.assertIsNone(board.npc_state("c1", 0x13483))
+        board.clear_views()
+        self.assertIsNone(board.npc_state("c2", 0x13483))
+
     def test_a_seats_kept_perks_go_again_after_a_heartbeat_gap(self):
         from labapi.board import PERK_GAP_S, StepBoard
 

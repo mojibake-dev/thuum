@@ -15,6 +15,7 @@
 // AI-driven pathing. Each is tagged below. CONFIRMED: update fires while the
 // race menu is open (tap-key steps ran in it, runs 20261003-074730 on).
 
+import * as skyrimPlatform from "skyrimPlatform";
 import {
   Actor,
   ActorBase,
@@ -254,6 +255,15 @@ type Watched = {
   // (Papyrus ObjectReference.Is3DLoaded): an actor in an unloaded cell
   // reads motionless; this tells it from one sitting still
   loaded: [boolean, boolean];
+  // its heading (GetAngleZ, degrees) every WATCH_TRACK_MS as the track is,
+  // [ms, angleZ]; `turned` the net rotation in degrees summed over every
+  // frame's change, each wrapped into a half turn (so a spin at any rate
+  // under half a turn a frame counts whole), and `headingAtStop` the last
+  // heading read: thuum docs/verbs/npc-puppet.md, a copy's spin (playtest
+  // thirty's wolves) is many turns where a walk nets under one
+  heading: number[][];
+  turned: number;
+  headingAtStop: number;
 };
 const WATCH_HEALTH_MAX = 512;
 const WATCH_SELF_MAX = 256;
@@ -358,6 +368,7 @@ function newWatched(actor: Actor, bools: string[]): Watched {
     health: [[0, actor.getActorValue("health")]], magicka: [[0, actor.getActorValue("magicka")]], stamina: [[0, actor.getActorValue("stamina")]],
     events: [], vars: {}, bools: named, casts: [], hits: [], taken: [], effects: [], launches: [], flights: [], actions: [],
     frameChanges: [], loaded: [actor.is3DLoaded(), false],
+    heading: [[0, actor.getAngleZ()]], turned: 0, headingAtStop: actor.getAngleZ(),
   };
 }
 
@@ -709,6 +720,13 @@ function trackWatch(): void {
 // magicka keep their WATCH_SELF_MS pace (as before the recorder); another
 // actor's health is taken on every change (its one-frame engine damage).
 function trackWatched(actor: Actor, id: number, w: Watched, ms: number, own: boolean): void {
+  const angle = actor.getAngleZ();
+  w.turned += ((angle - w.headingAtStop + 540) % 360) - 180;
+  w.headingAtStop = angle;
+  const lastHeading = w.heading[w.heading.length - 1];
+  if (ms - lastHeading[0] >= WATCH_TRACK_MS && w.heading.length < (watching ? watching.trackMax : WATCH_TRACK_MAX)) {
+    w.heading.push([ms, angle]);
+  }
   const pos = positionOf(actor);
   const sx = pos[0] - w.last[0];
   const sy = pos[1] - w.last[1];
@@ -2062,6 +2080,35 @@ function run(step: Step, player: Actor): unknown {
       placedId = npc.getFormID();
       placedIds.push(placedId);
       return { formId: placedId };
+    }
+    case "npc-puppet": {
+      // thuum docs/verbs/npc-puppet.md: the placed or named NPC made a puppet
+      // ({puppet: true}) or live again through the fork's Skyrim Platform
+      // export setPuppet (m3-npc-puppet's dist, the client's own switch); a
+      // platform without the export fails the step rather than guess
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
+      const setPuppet = (skyrimPlatform as unknown as { setPuppet?: (id: number, puppet: boolean) => boolean }).setPuppet;
+      if (typeof setPuppet !== "function") throw new Error("npc-puppet: this Skyrim Platform has no setPuppet (the fork's m3-npc-puppet dist lays it)");
+      const done = setPuppet(npc.getFormID(), a.puppet === true);
+      return { formId: npc.getFormID(), puppet: a.puppet === true, done, aiEnabled: npc.isAIEnabled() };
+    }
+    case "npc-pose": {
+      // the client's puppet apply in one step (thuum docs/verbs/npc-puppet.md,
+      // x-npc-puppet-2's P4): the placed or named NPC moved to {x, y, z} from
+      // lab-spawn (place-npc's frame) at {speed} units a second with
+      // TranslateTo, turned to {angleZ} with SetAngle, and its graph's Speed
+      // and Direction set as the stream's pose sets them
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
+      const to = [LAB_SPAWN.pos[0] + num(a.x), LAB_SPAWN.pos[1] + num(a.y), LAB_SPAWN.pos[2] + num(a.z)];
+      const angleZ = a.angleZ === undefined ? npc.getAngleZ() : num(a.angleZ);
+      const speed = Math.max(1, num(a.speed, 200));
+      npc.translateTo(to[0], to[1], to[2], 0, 0, angleZ, speed, 0);
+      npc.setAngle(0, 0, angleZ);
+      npc.setAnimationVariableFloat("Speed", num(a.speed, 0));
+      npc.setAnimationVariableFloat("Direction", num(a.direction, 0));
+      return { formId: npc.getFormID(), to, angleZ, speed, direction: num(a.direction, 0) };
     }
     case "npc-ai": {
       // thuum docs/DECISIONS.md ADR-035 (proposed), point 4, the puppet

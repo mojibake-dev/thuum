@@ -1501,6 +1501,17 @@ class CellHostSteps(RunTests):
         self.assertTrue(ups, system.commands)
         return ups[-1]
 
+    def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
+        files = self._settings_files()
+        run_id, body = self._run("id: t-hour\nclients: [c1]\nserver: {gameHour: 7.9}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        overlay = self.tmp / "server-settings-run.json"
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(overlay))
+        laid = json.loads(overlay.read_text())
+        self.assertEqual(laid["time"]["start"], {"hour": 7.9})
+        self.assertRegex(laid["time"]["epoch"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+        self.assertIs(laid["npcEnabled"], False, "the version's own npcEnabled, untouched by a game hour alone")
+
     def test_npc_enabled_is_laid_over_the_versions_settings_for_that_run(self):
         files = self._settings_files()
         run_id, body = self._run("id: t-npc\nclients: [c1]\nserver: {npcEnabled: true}\nsteps:\n  - c1: connect\n")
