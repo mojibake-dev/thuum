@@ -61,6 +61,9 @@ class StepBoard:
         # (decimal) -> {inCell, near, refs: [...]}, ids: base id (decimal) ->
         # the nearest reference's formId and distance, or null} (docs/LAB.md)
         self._refs_near: dict[str, dict[str, Any]] = {}
+        # an npc-state step's answers by the form id it named (or answered): the
+        # seat's own engine state of that NPC (c.npc_state(id), docs/verbs/npc-puppet.md)
+        self._npc_states: dict[str, dict[int, dict[str, Any]]] = {}
         # a poisons step's answer: {poisons: [{baseId, poisonId, count, worn,
         # wornLeft}]}
         self._poisons: dict[str, dict[str, Any]] = {}
@@ -122,6 +125,13 @@ class StepBoard:
             self._projectiles[step.client] = body["data"]
         if step.action == "refs-near" and isinstance(body.get("data"), dict):
             self._refs_near[step.client] = body["data"]
+        if step.action == "npc-state" and isinstance(body.get("data"), dict) and "error" not in body["data"]:
+            try:
+                key = int((step.args or {}).get("formId") or body["data"].get("formId"))
+            except (TypeError, ValueError):
+                key = 0
+            if key:
+                self._npc_states.setdefault(step.client, {})[key] = body["data"]
         if step.action == "poisons" and isinstance(body.get("data"), dict):
             self._poisons[step.client] = body["data"]
         if step.action == "skills" and isinstance(body.get("data"), dict):
@@ -228,6 +238,9 @@ class StepBoard:
     def refs_near(self, observer: str) -> dict[str, Any] | None:
         return self._refs_near.get(observer)
 
+    def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None:
+        return (self._npc_states.get(observer) or {}).get(int(form_id))
+
     def poisons(self, observer: str) -> dict[str, Any] | None:
         return self._poisons.get(observer)
 
@@ -259,6 +272,7 @@ class StepBoard:
         self._globals.clear()
         self._projectiles.clear()
         self._refs_near.clear()
+        self._npc_states.clear()
         self._poisons.clear()
         self._skills.clear()
         self._node_scales.clear()

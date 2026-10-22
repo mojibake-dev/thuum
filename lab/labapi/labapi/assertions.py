@@ -7,6 +7,10 @@ the lab can grep (E_ASSERT_*).
   server.inventory(<client>).count("<file>:<id>")   from the state endpoint
   server.time().hour | .day | .month | .year | .daysPassed | .timeScale
                                                      the server's game clock, read when the assert runs
+  <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
+                                                     that seat's engine state of an NPC, from its last npc-state {formId}
+  <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
+  <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
   server.host(<cell>).hosted | .client | .epoch      the server's host table row for a cell id
                                                      (docs/verbs/cell-host.md): .client is the run's client
                                                      whose player holds it, "" when none
@@ -113,6 +117,7 @@ class ViewsFacade(Protocol):
     def globals(self, observer: str) -> dict[str, Any] | None: ...
     def projectiles(self, observer: str) -> dict[str, Any] | None: ...
     def refs_near(self, observer: str) -> dict[str, Any] | None: ...
+    def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
@@ -230,6 +235,12 @@ class WatchView:
     # its position every 250 ms, ((ms, x, y, z), ...) (lab-driver's track;
     # empty from a driver before it)
     track: tuple = ()
+    # the net rotation of its heading over the watch in whole turns (lab-driver's
+    # `turned`, every frame's change wrapped into a half turn, over 360) and the
+    # heading at the stop, degrees; None from a driver before them (an assert
+    # reading one is then a data error, never a pass)
+    turns: float | None = None
+    headingAtStop: float | None = None
     # its stagger and recoil events in the watcher's game, (ms, name, 1 if
     # its graph took the event after every hook), and the graph bools the
     # watch sampled, (name, ((ms, value), ...)) (lab-driver bc5d76a; thuum
@@ -507,6 +518,24 @@ class RefsNearView:
             raise AssertionData(f"{self._client}'s refs-near step has no count for form type {int(form_type)}")
         return n
 
+    def runtime_of(self, base_id: int) -> int:
+        """How many listed references of that base carry a runtime id (0xff000000
+        and above): a copy one game made, where the engine's own placed
+        reference of the same base never counts (docs/verbs/npc-puppet.md)."""
+        n, seen = 0, False
+        for rows in self._types.values():
+            refs = rows.get("refs") if isinstance(rows, dict) else None
+            for ref in refs if isinstance(refs, list) else []:
+                if isinstance(ref, dict) and ref.get("baseId") == int(base_id):
+                    seen = True
+                    if int(ref.get("formId") or 0) >= 0xFF000000:
+                        n += 1
+        # a zero means something only from a step that listed actors (43 NPC_) or the base itself
+        if not seen and not isinstance(self._types.get("43"), dict):
+            raise AssertionData(f"{self._client}'s refs-near step listed no reference of {int(base_id):#x} and no actors "
+                                f"(formTypes [43]): a zero would measure nothing")
+        return n
+
     def has(self, base_id: int) -> bool:
         if self._listed(base_id):
             return True
@@ -609,6 +638,23 @@ class RefView:
     healthPercentage: float | None = None
     magickaPercentage: float | None = None
     staminaPercentage: float | None = None
+
+
+@dataclass(frozen=True)
+class NpcStateView:
+    """c.npc_state(id): that seat's own engine state of an NPC at its last
+    `npc-state {formId}` step (docs/verbs/npc-puppet.md): whether its AI runs,
+    in combat and against whom (form ids, 0 for none), staggering, its
+    current package (0 for none), its position in that game."""
+
+    aiEnabled: bool
+    inCombat: bool
+    package: int
+    combatTarget: int
+    staggering: bool
+    x: float
+    y: float
+    z: float
 
 
 @dataclass(frozen=True)
@@ -1184,6 +1230,8 @@ class _ClientRef:
                 launches=_rows(best.get("launches"), 10),
                 flights=_rows(best.get("flights"), 8),
                 avs=_av_series(best),
+                turns=abs(float(best["turned"])) / 360.0 if best.get("turned") is not None else None,
+                headingAtStop=float(best["headingAtStop"]) if best.get("headingAtStop") is not None else None,
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{label} lacks {e}") from e
@@ -1288,6 +1336,20 @@ class _ClientRef:
             return ProjectileView(distance=float(ref["distance"]))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s projectile {int(ref_id):#x} lacks {e}") from e
+
+    def npc_state(self, form_id: int) -> NpcStateView:
+        """The seat's last npc-state step for that NPC (`npc-state {formId}`)."""
+        fn = getattr(self._views, "npc_state", None)
+        data = fn(self.name, int(form_id)) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported an npc-state step for {int(form_id):#x}")
+        try:
+            pos = data.get("pos") or [None, None, None]
+            return NpcStateView(bool(data["aiEnabled"]), bool(data["inCombat"]), int(data.get("package") or 0),
+                                int(data.get("combatTarget") or 0), bool(data.get("staggering")),
+                                float(pos[0]), float(pos[1]), float(pos[2]))
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
     def refs_near(self) -> RefsNearView:
         """c.refs_near(): what stood near that client's player (or its figure
@@ -1518,7 +1580,8 @@ _ATTRS = {
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
                 "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
-    WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs"},
+    WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop"},
+    NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},
@@ -1542,8 +1605,8 @@ _NUMBER_METHODS = {
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id"},
-    RefsNearView: {"has", "distance"},
+    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state"},
+    RefsNearView: {"has", "distance", "runtime_of"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
 _FORM_SPEC_METHODS = {
@@ -1567,9 +1630,9 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
-    RefsNearView: {"count", "has", "distance"},
+    RefsNearView: {"count", "has", "distance", "runtime_of"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "rises", "movedBy", "launched", "flights_match"},
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},

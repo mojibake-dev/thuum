@@ -123,6 +123,19 @@ class ScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             playtest_step('console {text: "tai"}')
 
+    def test_a_runs_own_game_hour_and_the_puppet_steps(self):
+        # docs/verbs/npc-puppet.md's b-npc-puppet and x-npc-puppet-2
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: t\nclients: [c1]\nserver: {snapshot: clean, npcEnabled: true, gameHour: 7.9}\n"
+                           "steps:\n  - c1: npc-puppet {puppet: true}\n  - c1: npc-pose {x: 0, y: -950, z: 0, angleZ: 90, speed: 200, direction: 0}\n")
+        self.assertEqual((sc.server.gameHour, sc.server.npcEnabled), (7.9, True))
+        self.assertEqual([st.action for st in sc.steps], ["npc-puppet", "npc-pose"])
+        self.assertIsNone(load_scenario("id: t\nclients: []\n").server.gameHour)
+        for bad in ("server: {gameHour: 24}", "server: {gameHour: -1}", "server: {gameHour: dawn}", "server: {gameHour: true}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclients: [c1]\n{bad}\n")
+
     def test_netem_spec(self):
         from labapi.scenario import load_scenario
 
