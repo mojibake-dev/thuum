@@ -229,6 +229,30 @@ the copy, playtest thirty's wolves; with the engine's reference bound to a
 view it does). Values within the existing types, no shape change, no
 validator change.
 
+### ActorSightings (t 50): a host's roster of game-file actors the server does not hold (npc-puppet, M3)
+
+Client to server, reliable, R1. Every 2 s while any remain, a game that hosts
+at least one cell sends the game-file actors its engine has attached that it
+holds no form model for: `sightings`, at most 64 of `{ refrId: u32 (under
+0xff000000), worldOrCell: u32 (the worldspace, or the interior cell), pos:
+[f32; 3], rot: [f32; 3] }` (skymp5-client HostService.reportSightings). The
+reason (thuum docs/verbs/npc-puppet.md, ADR-045's revision of 2026-10-22): the
+server loads a placed actor by its placement square, and a village's named
+residents are placed in their houses and walked outside by their schedules,
+so their host's engine has them where the server has nothing (b-npc-puppet
+20261022-081631 and 090227; x-npc-sigrid-ref 091354 read Sigrid 0x13483 in
+RiverwoodAlvorsHouse 0x133c8). The server (PartOne::OnActorSighting) takes an
+entry only when the sender hosts the cell of the sighted position
+(WorldState::CellOf of worldOrCell and pos; an interior id is its own cell),
+the record is a game-file actor with no user, it does not already stand in
+that cell, and no other game hosts the cell where the record stands; then it
+loads the record on demand and places it there (the grid, the position, the
+heading), after which the normal path runs: its CreateActor with the hosted
+word, the host's movement reports, puppets on the other screens. Validator
+(wire-validate): 1 to 64 entries, each refrId under 0xff000000 and nonzero,
+worldOrCell nonzero, every float finite. Appended to the contract (ADR-012);
+the MsgType after HostRelease (49).
+
 ## Bridge and client FFI
 
 Server: `wire-bridge` links into the existing C++ server through cxx and
