@@ -488,10 +488,12 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   nothing.
 - Side effects: H1 (the re-admitted job plays relayed events and idles on an
   AI-off puppet; the branch CONFIRMED-STATIC, the visible result HYPOTHESIS,
-  :154-155); H2 (the walk cycle comes from relayed graph variables: whether
-  the graph reads Speed and Direction set from a script, or only the
-  AIProcess fields the movement step writes, is open, :325-327, :421-422;
-  probe P4); H3 (translateTo's mover moves an actor whose movement step is
+  :154-155); H2 CONFIRMED 2026-10-22 by x-npc-legs 121157 (the walk cycle
+  under the relay is the graph's own locomotion: the puppet's graph events
+  NPC_TurnToWalkRight90 and NPC_TurnToWalkLeft90 sit at the starts of two
+  of its six short walks, 41 to 124 units/s, and the five-second frames
+  show a different working pose each time with the track moving, no glide;
+  the Dynamic plan's reading); H3 (translateTo's mover moves an actor whose movement step is
   skipped; the mover was not traced, :318-322); H4 (KeepOffsetFromActor does
   nothing useful on a puppet: answered 2026-10-21 by REA, the "Why now"
   section: its planner agent 42182 runs in the per-frame pass whatever the
@@ -815,6 +817,20 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     b-npc-puppet's frames at the minute decide whether the cycle holds
     under the relay; if they show a glide, hook 3's Move site writes the
     variables per frame natively (TE's shape) before R2 is asked.
+  - H2 CONFIRMED by x-npc-legs 20261022-121157 (numidium's read, {now} PDT):
+    c2 400 units south of Sigrid's track facing north, c1 hosting; before
+    and after the 40 s watch c1's Sigrid aiEnabled true and c2's false, her
+    package 863288 then 863324. The frames five seconds apart (screenshots
+    013 to 030) show her bent over the hoe, turning, back to the camera
+    with the blade in the soil, one foot forward, then upright: a different
+    pose each frame with the position moving. The watch (263 samples at
+    250 ms) holds six walks of 1 to 3 s at 41 to 124 units/s between the
+    shots; the puppet's graph events [45322 NPC_TurnToWalkRight90] and
+    [65327 NPC_TurnToWalkLeft90] sit at the starts of the 46.3 s and 66.5 s
+    walks, the locomotion graph's own walk starts, and IdleHoe,
+    IdlePickup_Ground and IdleStop play between them. Not a glide: the
+    relayed Speed and Direction drive the cycle. A stride on film wants
+    shots every 0.5 s across one walk window, a later probe, not a tag.
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
