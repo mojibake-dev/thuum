@@ -273,3 +273,14 @@ hook rarer functions, or sample.
   the same). A game to be read from its start takes `relaunch {until: gone,
   frida: {script, params?}}`, which arms the watcher while the game is
   stopped and lets the launch start it (lab-api 51d7764).
+
+## npc-locomotion.js
+
+docs/research/m3/re-puppet-locomotion.md's probes F1 and F2 for one actor (`frida {script:
+npc-locomotion.js, params: {ACTOR: 0x13483}}`): at the actor's graph tick (20123) the four
+MiddleHighProcessData fields the Speed, Direction, TurnDelta and TargetSpeed channels poll, and
+at the Speed channel's poll (38330) the value the graph is about to get, per second per actor,
+plus the animation job's distinct handles. On a puppet under train-33's detour the fields hold
+the relayed sample every tick; zeros there say the write did not reach the tick (F5, the stage
+order, or another writer). Attach to the running game after the seat stands where the actor
+is; no relaunch needed (the hooks are the per-frame path, not a login).
