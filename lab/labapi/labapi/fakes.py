@@ -65,6 +65,10 @@ class FakeProxmox:
         copied = re.search(r"\[IO\.File\]::Open\('([^']+)'.*\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
         if copied and copied.group(1) in self.files:
             self.files[copied.group(2)] = self.files[copied.group(1)]
+        # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line)
+        empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))
+        if empty and not (copied and copied.group(1) in self.files):
+            self.files[empty.group(1)] = ""
         if any("Get-Process SkyrimSE" in c for c in command):
             # a guest agent too busy to answer, this many times first
             if self.game_misses > 0:
