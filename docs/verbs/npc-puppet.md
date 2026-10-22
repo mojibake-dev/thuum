@@ -733,17 +733,22 @@ on the plan Eli approved (one shot, six stages, docs/LOG.md's entry).
 Fork m3-npc-puppet (off parity 535544db with m3-relay-echo 41f554ad):
 Stage 1 server a29bfb08; Stage 3 client eaa3b6d0; Stage 2 Skyrim Platform
 d9a003fd (the exports, the set, the two detours with R1's Move shape); the
-test's subscription fix 22240db7. CI: 2555 and 2557 red on the 0xff flip
-assertion alone (the new actor had no listeners at the grant in the test's
-sequence; fixed by the players' reports), 2558's Windows build and 2560's
-server build pending at 18:2x.
+fixes 6f08c050 (the test: a created actor subscribes at its own first
+SetPos) and eab366b2 (the hooks: Actor's runtime fields through
+GetActorRuntimeData()). CI GREEN at 18:3x: pipeline 2562, server-build
+(every T0 case, the two new CellHostTest cases and NpcExists' Alvor among
+them) and client-build (the Windows dist with the detours) both success.
+Before it: 2555, 2557 and 2560 red on the 0xff flip assertion alone (the
+new actor had no listeners at the grant in the test's sequence), 2558 red
+on the Windows compile of the hooks. The lab (T2 on the stage, P0 to P5,
+b-npc-puppet) waits on Eli's playtest-30 report, then numidium.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] server logic + T0 (a29bfb08 and 6f08c050; pipeline 2562 green: CellHostTest's game-file case and the 0xff flip, NpcExists' nested flag and Alvor)
+- [x] message + validator (same commit) (no wire change: CreateActor's refr_id and base_record_type carry values within their types; the contract line in docs/WIRE.md; wire-validate's tests stand, 2562)
+- [ ] native hook + T1 (built, d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; the install log "[verb:npc-puppet] detours installed" and P1's counts are the proof, no host-less T1 exists in the fork)
+- [x] TS handler (eaa3b6d0 and d9a003fd: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
