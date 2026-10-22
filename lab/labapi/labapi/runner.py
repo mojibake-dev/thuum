@@ -1179,12 +1179,11 @@ class Runner:
         params = args.get("params") or {}
         if not isinstance(params, dict):
             return fail("E_RUN_FRIDA: params is a map")
-        name = script
-        if params:
-            name = f"{src.stem}-{rec.run_id}-{index}.js"
-            up = Path(self.s.frida_scripts_dir) / "uploads"
-            up.mkdir(parents=True, exist_ok=True)
-            (up / name).write_text(f"globalThis.LAB_PARAMS = {json.dumps(params)};\n" + src.read_text())
+        # every run's script is served with the preamble (frida_script_text): its own copy per step
+        name = f"{src.stem}-{rec.run_id}-{index}.js"
+        up = Path(self.s.frida_scripts_dir) / "uploads"
+        up.mkdir(parents=True, exist_ok=True)
+        (up / name).write_text(frida_script_text(src.read_text(), self.s.client_lab_dir, name, params))
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return fail(f"E_RUN_FRIDA: {client} is not a managed guest")
@@ -1526,20 +1525,27 @@ class Runner:
         # the agent's file-read cannot open it then (run 20261006-183431,
         # E_PVE_FILE "being used by another process"), a read that shares
         # write access can, so it is copied that way first
-        out = f"{self.s.client_lab_dir}\\frida\\{script}.out"
-        copy = f"{out}.copy"
-        try:
-            cmd = ["powershell", "-NoProfile", "-Command",
-                   f"$s = [IO.File]::Open('{out}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $d.Close(); $s.Close()"]
-            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            if res.exitcode != 0:
-                rec.notes.append(f"frida {script}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
-                return
-            text = await asyncio.to_thread(self.control.file_read, g, copy)
-            (rec.dir / "frida" / name).write_text(text)
+        # the injector's .out (a load error; the injector exits once the script is eternalized) and then
+        # the script's own .log (frida_script_text's preamble, flushed every 250 ms), each copied with a
+        # read that shares write access, since the script still holds its .log open
+        texts = []
+        for ext in ("out", "log"):
+            src = f"{self.s.client_lab_dir}\\frida\\{script}.{ext}"
+            copy = f"{src}.copy"
+            try:
+                cmd = ["powershell", "-NoProfile", "-Command",
+                       f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
+                       f"$s.CopyTo($d); $d.Close(); $s.Close() }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"]
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                if res.exitcode != 0:
+                    rec.notes.append(f"frida {script}.{ext}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
+                    continue
+                texts.append(await asyncio.to_thread(self.control.file_read, g, copy))
+            except ProxmoxError as e:
+                rec.notes.append(f"frida {script}.{ext}: {e}")
+        if texts:
+            (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts))
             rec.artifacts.append(f"frida/{name}")
-        except ProxmoxError as e:
-            rec.notes.append(f"frida {script}: {e}")
 
     @staticmethod
     def _client_names(scenario) -> list[str]:
@@ -1691,6 +1697,33 @@ def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, str]]) -> 
             out.append(f"if (-not $hit) {{ throw ('no {key} in [{sec}] of ' + $p) }}")
             out.append(f"[System.IO.File]::WriteAllLines($p, $l); 'set {key}={val} in [{sec}] of ' + $p")
     return "\n".join(out)
+
+
+def frida_script_text(script: str, lab_dir: str, name: str, params: dict[str, Any] | None = None) -> str:
+    """A lab/frida script as the lab serves it: `params` as globalThis.LAB_PARAMS, then a preamble that
+    sends console.log's lines to <name>.log beside it through Frida's File API, flushed every 250 ms.
+    frida-inject eternalizes the script and exits (config.frida_exec_template's -e), so its stdout keeps
+    only what came before the exit, a load error; stdout redirected to a file sat in the injector's
+    buffer until it exited, and a short trace came back empty (P0, 20261022-040233, 2026-10-21). The
+    preamble declares nothing at the top level (a script's own names stay free: P0's `ptr`), and send()
+    becomes a no-op, the injector being gone; every lab script writes its lines through console.log."""
+    log = f"{lab_dir}\\frida\\{name}.log"
+    lines = [] if not params else [f"globalThis.LAB_PARAMS = {json.dumps(params)};"]
+    lines += [
+        "(function () {",
+        f"  var out = new File({json.dumps(log)}, 'a');",
+        "  var dirty = false;",
+        "  console.log = function () {",
+        "    var parts = [];",
+        "    for (var i = 0; i < arguments.length; i++) parts.push(typeof arguments[i] === 'string' ? arguments[i] : JSON.stringify(arguments[i]));",
+        "    out.write(parts.join(' ') + '\\n');",
+        "    dirty = true;",
+        "  };",
+        "  try { globalThis.send = function () {}; } catch (e) {}",
+        "  setInterval(function () { if (dirty) { out.flush(); dirty = false; } }, 250);",
+        "})();",
+    ]
+    return "\n".join(lines) + "\n" + script
 
 
 def _iso(ts: float) -> str:
