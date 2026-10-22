@@ -786,6 +786,51 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     and not the bandit's: a controller the engine never simulates (an
     actor out of the Havok world), HYPOTHESIS, harmless to us; the script
     now names its actor for the next trace.
+- THE LANDING HANG (2026-10-21 22:0x to 23:06 PDT), the gate's two reds
+  b-npc-puppet 045602 and b-cell-host 045917 and the probe's third
+  (x-npc-landing-trace 054932): c1's game alive and silent from the first
+  seconds after its load, every time its server had NPCs on. Read from the
+  dumps (two parsed on the Mac, 115 and 122 threads, every frame by module
+  offset and Address Library id; dump/threads.txt and threads-2.txt): no
+  exe thread runs, no lock is held, the load freeze is excluded (the image
+  base's slot outside the NaN ranges, TMS's fix armed and silent, 70172
+  and 90711 on no stack); the one running thread is Skyrim Platform's JS
+  worker, spinning in V8's StackFrameIterator::Advance on a StackHandler
+  linked to itself, which a JavaScript entry leaves behind when it exits
+  without V8 unwinding it; the frame right under the spinning entry still
+  holds the text of the login's benign filename error (the plugin-name
+  check refusing DigitigradeKhajiit+ArgonianRaptor.esp, present in every
+  run on every build), so the spin began inside that exception's unwind,
+  the first after the chain was broken. The breaking, in Skyrim Platform's
+  Hook.cpp: AddHandler threw a C++ std::runtime_error whenever
+  addRemoveBlocker was non-zero, an atomic any game or job thread raises
+  before it hands an animation event's Enter to the JavaScript thread, and
+  the hooks API's add callback was not wrapped, so the C++ exception
+  crossed V8's frames unwound by nothing. The npc-puppet build is the
+  first to host game-file actors: at the grant sendInputs creates one
+  AnimationSource per hosted actor (one add each) while those actors fire
+  animation events from the job threads, so the collision was certain;
+  the earlier builds met it only when a lone copy became hosted at the
+  wrong instant (a candidate for the lab's rare freezes). Confirmations:
+  x-npc-cow-solo 051307 GREEN (the detours' presence and the engine's
+  wolves do not hang a landing); the second seat, a non-host showing
+  puppets, never hung in any run; in 054932 the exception trace attached
+  after the grant and saw no throw. Fixes, fork 931de577: the add and
+  remove guard is the JavaScript thread's re-entrancy depth inside
+  HandleEnter and HandleLeave, and both callbacks are wrapped. A SECOND
+  BUG from the same run's server log: c1 streamed "107d07" at 7.5 Hz from
+  the instant of login, 28 s before any grant (the server's "may not move"
+  warnings), and after the grant the server moved that deer's record to
+  the player: the player's own movement went out under the deer's index,
+  the player's slot in the world model having been taken by a game-file
+  actor's model after a free (the id manager reuses freed slots). Fix,
+  the same head: a message about the player goes out only under a slot
+  whose form is the player's own, and nothing for the player until that
+  form is here. The three earlier fixes (9faa4be0) stand. Memory:
+  frida-lab-script-pitfalls, feedback-trace-reading-axes. Rows: ship
+  SkyrimPlatformImpl.pdb in the client artifact (the hooks-API frame
+  stayed an offset); the Papyrus hook's Enter still scans the handler map
+  from the hooked thread.
 - x-npc-puppet-2 (solo, c1, the fork's SP dist with the hooks, a driver step
   npc-puppet {formId, puppet} to add beside npc-ai; the Survival prompt step
   as every solo run): x-npc-puppet's bandit (0x1BCD8 at 150 units). P2 with
