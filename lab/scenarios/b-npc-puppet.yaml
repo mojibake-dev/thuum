@@ -89,7 +89,13 @@ steps:
       - server.host(0x9732).client == "c2"
       - c2.npc_state(0x13483).aiEnabled == true
       - c1.npc_state(0x13483).aiEnabled == false
-  # a restart: every resident a puppet on both seats until the grant, then one seat's live
+  # a restart: the games reconnect on their own within the wait (skymp5-client's
+  # reconnect, not the scenario's), the server grants the cell again to its only
+  # loader within about 12 s, and on that seat the demote at the reconnect precedes
+  # the grant's promote (20261022-112222: c2 "puppet 13483" 04:26:25.3, "live 13483"
+  # 04:26:26.9, the grant 11:26:27.989 UTC), so a read placed after the wait cannot
+  # catch both seats puppet. The read is the invariant: never two games live on one
+  # resident at any point, and exactly one live once the server hosts the cell again
   - server: restart
   - wait: 20
   - c1: reconnect
@@ -98,8 +104,7 @@ steps:
   - c1: npc-state {formId: 0x13483}
   - c2: npc-state {formId: 0x13483}
   - assert:
-      - c1.npc_state(0x13483).aiEnabled == false
-      - c2.npc_state(0x13483).aiEnabled == false
+      - not (c1.npc_state(0x13483).aiEnabled == true and c2.npc_state(0x13483).aiEnabled == true)
   - wait: 12
   - c1: npc-state {formId: 0x13483}
   - c2: npc-state {formId: 0x13483}
