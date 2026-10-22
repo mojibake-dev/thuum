@@ -1,0 +1,42 @@
+# Playtest thirty-one's seats (thuum ADR-040 item 6: `just playtest-setup 31`; the checklist is
+# docs/private/playtest-m3-31.md): M3's NPCs walk. npc-puppet merged 2026-10-22 05:54 PDT: a game-file NPC runs
+# under its cell host's engine and is a puppet on the other seat; the host's roster brings Riverwood's residents
+# (placed in their houses, walked out by their schedules) to the server where the engines have them. The server
+# alone with npcEnabled on and its clock at the morning (hour 7.9, b-npc-puppet's, so the residents are at work;
+# lab-api's run-own settings shape, ADR-035 point 9). A fresh world: playtest-m3-31-fresh-20261022T1320Z is the
+# lab's clean world as it stood (the two players' records and nothing else), copied under a playtest name since
+# a restore never takes the lab's own snapshots; playtest thirty's world instead if Eli says so. Both seats at
+# place 1, Riverwood's landing by the bridge end (Tamriel (4,-12), 0x9732), test 1 first so it hosts, test 2 150
+# units east facing it (b-npc-puppet's opening). No perks: nothing here depends on one (Eli's rule, 2026-10-20).
+# Everything here is server-side (labCommand); the seats type nothing.
+id: 31
+build: "fork parity 19e7ca9b, npc-puppet merged 2026-10-22 05:54 PDT (the gate 20261022-122513-merge-m3-npc-puppet 9 of 9 green on lab-driver ebb6969, T2 33 identical); the lab's server image m3-npc-puppet is the same build; this server alone with npcEnabled on and the clock at 7.9"
+world: playtest-m3-31-fresh-20261022T1320Z   # the clean world, copied 2026-10-22 13:20Z
+hold:
+  minutes: 180
+  reason: "playtest thirty-one: M3's NPCs walk (fork parity 19e7ca9b, npc-puppet)"
+server:
+  # this server alone runs with NPCs on and the morning clock (ADR-035 point 9): playtest-setup lays the run-own
+  # settings overlay (server-settings-run.json beside the world) and starts the server on it
+  npcEnabled: true
+  gameHour: 7.9
+camp:
+  # place 1, in order: test 1 first (the cell's first loader hosts it), then test 2 beside it
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [17225, -47204, -128], rot: [0, 0, 0]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [17375, -47204, -128], rot: [0, 0, 180]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: []   # none: nothing in thirty-one depends on a perk; stated per Eli's rule (2026-10-20)
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
