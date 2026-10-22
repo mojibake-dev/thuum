@@ -569,6 +569,21 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   upstream's long id the flip never reached the copy: the ESM defect of
   skymp-hosting.md:149-159 and cell-host.md:274-276; it reaches the view
   bound to the engine's reference). The field's shape is unchanged.
+- ActorSightings, MsgType 50 (new, 2026-10-22; docs/WIRE.md's section): the
+  host's roster, TES3MP's actor list. Every 2 s while any remain, a game
+  hosting a cell sends the game-file actors its engine has attached that the
+  server holds no form model for (refrId, worldOrCell, pos, rot; at most 64).
+  The server (PartOne::OnActorSighting) takes an entry only from the host of
+  the cell of the sighted position, for a game-file actor with no user that
+  does not already stand there and that no other game hosts where its record
+  stands; it loads the record on demand and places it there, and the normal
+  path follows. Why: the server loads actors by their placement square, and
+  Riverwood's named residents are placed in their houses (Sigrid 0x13483 in
+  0x133c8, read by x-npc-sigrid-ref 091354 and unit NpcExists) and walked
+  outside by their schedules, so no host could ever receive a word for them
+  (b-npc-puppet 081631, 090227). Validator: wire-validate's bounds (1 to 64
+  entries, ids under 0xff000000, finite floats). R1: the host computes, the
+  server validates by its own host table and cell index.
 - Idempotency / ordering: as today (a later sample wins; numChanges orders
   the events). Contract doc updated: no (nothing to update; `just
   wire-header-check` unchanged).
@@ -592,8 +607,15 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   offline actor's messages to its cell's host, and a userless neighbour's
   word ("true", it is never the hoster) would otherwise land in the host's
   own stream after its "false" (CellHostTest's stray word, jobs 10667,
-  10688, 10690; fork 1b0a7d0d). No Rust rule changes: wire-rules cells is
-  cell-host's and nothing new is decided.
+  10688, 10690; fork 1b0a7d0d). PartOne::OnActorSighting (the roster,
+  ActorSightings 50): an entry is taken only from the host of the cell of
+  the sighted position (WorldState::CellOf), for a game-file actor with no
+  user that does not already stand there and that no other game hosts
+  where its record stands; the record is loaded on demand (LookupFormById)
+  and placed there (SetCellOrWorldObsolete, SetPos, SetAngle: MpActor::
+  Teleport's three sets without its message), after which its first SetPos
+  subscribes it and CreateActor carries the word. No Rust rule changes:
+  wire-rules cells is cell-host's and nothing new is decided.
 - DB fields / migration: none.
 - Restart behavior: as cell-host: every cell unhosted at start, so every
   game's NPCs are puppets until the first grant; the records stand.
@@ -633,6 +655,13 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   (Rule A: no first apply, no replayed animation, no clear),
   setDefaultAnimsDisabled(false), and setWeaponDrawnMode(-1) once at the
   promotion.
+- The roster (HostService.reportSightings, 2026-10-22): the game-file
+  actors the engine attaches (cellAttach, by form id) that the world model
+  holds no form for are sent as ActorSightings every 2 s while this game
+  hosts any cell and any remain, with the worldspace (or interior cell),
+  position and heading the engine has them at; the server decides whose
+  cell that is. A resident placed in her house and standing in the street
+  reaches the server this way and nowhere else.
 - Kill switch config key: `npcPuppet` under skymp5-client's settings
   (hostService.ts:31's idiom): off, the set is never fed, so the detours are
   inert and AI stays on: a bisect switch, not a play mode. The binding and
@@ -653,8 +682,22 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   Riverwood's Alvor 0x13482, unique and a Nord in an interior, under
   npcEnabled (the three bans lifted; a crime-faction guard and a leveled
   bandit have no placed id in the tests' hands, so b-npc-puppet's Riverwood
-  run is their proof). Rust: none (no wire change); wire-validate's tests
-  stand.
+  run is their proof). The roster (fork, 2026-10-22): CellHostTest's "A
+  host's sighting places an interior-placed resident where its engine has
+  her": c1 at Riverwood's landing hosts the cell of Sigrid's street
+  position (CellOf), c2 far away; c2's sighting is dropped (no record), c1's
+  sighting of a position in a cell it does not host is dropped, c1's sighting
+  of Sigrid loads her record and places it in Tamriel at the sighted point
+  (CellOf, HostOf c1), c1 receives her CreateActor with the word false and
+  baseRecordType NPC_, and the same sighting again moves and sends nothing;
+  NpcExists's "Sigrid is placed in her house, not at Riverwood's squares":
+  her record's cell is 0x133c8 and libespm files her at no square around
+  Riverwood, so a landing there loads no resident. Rust: wire-schema's
+  ActorSightings (MsgType 50, wire id 58, C2S, cap 64, 4 KiB) with its
+  full-capacity sample, wire-json's fixtures, wire-validate's
+  check_sightings (ids 1 to 0xfeffffff, a world or cell, finite, in the
+  world) with a unit test and a proptest; the T2 session cell-host.yaml
+  sends a non-host's sighting that both servers drop.
 - T1: the detour targets and the push resolve by id against SkyrimSE.exe
   1.6.1170 outside the game (41370, 41453, 37356, 69349: all 147 of the
   research's ids present, re-ai-puppet.md:10) and the stage table's name
