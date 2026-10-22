@@ -244,3 +244,24 @@ hook rarer functions, or sample.
   JS worker spinning in V8's stack-handler unwind after a JS entry exited
   without unwinding, so this names the throw if it recurs. Place its step
   before `connect` so it attaches during the load screen.
+
+- napi-trace.js: what Skyrim Platform's JavaScript bridge was doing when a
+  game stopped (docs/verbs/npc-puppet.md, the landing hang of 2026-10-21
+  and 2026-10-22). Three layers in one step: libnode.dll's exported
+  Node-API entry points (every C++ callback by name and thread, learned at
+  registration from napi_create_function, napi_set_named_property,
+  napi_define_properties and napi_define_class; every C++ to JS call with
+  its status; every JS exception raised from C++ with the callback in
+  progress and the frames; the reference and handle-scope calls per thread,
+  which show a second thread touching the engine), the engine's Papyrus
+  native dispatch NativeFunctionBase::Call (Address Library 104651, the
+  name and class at this+0x10 and +0x18 per CommonLibSSE-NG's
+  NativeFunctionBase.h:62-63) by thread, and exception-trace.js's
+  RaiseException and first-chance faults. One line per second with the
+  counts; every throw and escape as it happens; and when the bridge has run
+  and then stays silent for QUIET_S seconds (3), one line with the last RING
+  (300) bridge events and the last NATIVE_RING (200) natives. Skyrim
+  Platform runs the game's JavaScript on one pool thread and the natives a
+  script calls on the thread that called OnUpdate (main.cpp:118-131), so a
+  thread id other than those two in the counts is a finding by itself. Place
+  the step after a `relaunch` and before `connect`.
