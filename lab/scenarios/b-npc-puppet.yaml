@@ -1,0 +1,111 @@
+# b-npc-puppet (M3, docs/verbs/npc-puppet.md, ADR-045; 2026-10-21): one
+# game runs Riverwood's townsfolk under the engine while the other shows
+# them as puppets of the engine's own references, AI off, moved by the relay.
+# Two seats under npcEnabled. c1 arrives first and hosts 0x9732 (Tamriel
+# (4,-12), b-cell-host's election); the hour is set to 7.9 so the schedules
+# send the residents to work (r-npc-packages' reading); c2 arrives beside c1.
+# Over 60 s both seats watch the fourteen residents by placed id
+# (docs/research/m3/riverwood-ids.md). Asserts: on c2 every named id
+# resolves and no 0xff actor carries a resident's base (a copy would);
+# Sigrid 0x13483 reads aiEnabled false on c2 and true on c1; her track moves
+# on both seats (the host walks her, the puppet follows) and the two end
+# within the relay's lag of each other, with no spin (the heading series
+# turns less than twice over the minute); then c1 leaves past the grace, c2
+# hosts within 5 s and Sigrid's AI flips on both seats; a server restart
+# makes every resident a puppet on both seats until the grant, then one
+# seat's live. The shout at Sven and the sneak are x-npc-puppet-2's (solo).
+# Its own commit (rule 13), after the grammar it reads landed on main.
+#
+# Facts and steps (lab-api and the driver, main 9b4bec3 from numidium's
+# lab-npc-puppet-grammar 4cd1a31): c.npc_state(<id>) from the seat's last
+# npc-state {formId} (.aiEnabled, .inCombat, .package, .combatTarget,
+# .staggering, .x .y .z); c.refs_near().runtime_of(<base>), references of
+# that base with an id at 0xff000000 or above (a copy would be one; a zero
+# counts only from a step that listed actors); the watch's heading per
+# sample and c.watched_id(<id>).turns, the net rotation over the watch in
+# full turns (a walk's back-and-forth nets near zero, a spin counts whole);
+# the server's clock for the run as server: {gameHour}. Riverwood's landing
+# after coc riverwood (x-cell-attach): (17224.8, -47204.4, -128.2) in
+# Tamriel, written with the worldspace's descriptor (cell: lab-spawn reads
+# x and y as offsets from the spawn).
+id: b-npc-puppet
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 1200
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  # absolute Tamriel coordinates take the worldspace's own descriptor (cell:
+  # lab-spawn reads x and y as offsets from the spawn); x-cell-attach's
+  # landing after coc riverwood is (17224.8, -47204.4, -128.2)
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 15
+  - assert:
+      - server.host(0x9732).client == "c1"
+  - c1: refs-near {radius: 4000, formTypes: [43]}
+  - c2: refs-near {radius: 4000, formTypes: [43]}
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - c1.npc_state(0x13483).aiEnabled == true
+      - c2.npc_state(0x13483).aiEnabled == false
+      - c2.refs_near().runtime_of(0x13476) == 0
+      - c2.refs_near().runtime_of(0x1347c) == 0
+  - c1: watch-start {formIds: [0x13482, 0x13483, 0x13484, 0x13489, 0x1348a, 0x1348b, 0x1348c, 0x13491, 0x35534, 0x13488, 0x13487, 0x13486, 0x13485, 0x3550c], trackMax: 480}
+  - c2: watch-start {formIds: [0x13482, 0x13483, 0x13484, 0x13489, 0x1348a, 0x1348b, 0x1348c, 0x13491, 0x35534, 0x13488, 0x13487, 0x13486, 0x13485, 0x3550c], trackMax: 480}
+  - c1: screenshot
+  - c2: screenshot
+  - wait: 60
+  - c1: watch-stop
+  - c2: watch-stop
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - c1.watched_id(0x13483).maxDisplacement > 100
+      - c2.watched_id(0x13483).maxDisplacement > 100
+      - abs(c1.watched_id(0x13483).x - c2.watched_id(0x13483).x) < 256
+      - abs(c1.watched_id(0x13483).y - c2.watched_id(0x13483).y) < 256
+      - c2.watched_id(0x13483).turns < 2
+      - c2.watched_id(0x13489).turns < 2
+  # the handoff: c1 back to the lab spawn (far out of 0x9732's reach, a known
+  # height) past the grace, c2 hosts, the AI flips
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - server.host(0x9732).client == "c2"
+      - c2.npc_state(0x13483).aiEnabled == true
+      - c1.npc_state(0x13483).aiEnabled == false
+  # a restart: every resident a puppet on both seats until the grant, then one seat's live
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 3
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - c1.npc_state(0x13483).aiEnabled == false
+      - c2.npc_state(0x13483).aiEnabled == false
+  - wait: 12
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - server.host(0x9732).hosted == true
+      - (c1.npc_state(0x13483).aiEnabled == true) != (c2.npc_state(0x13483).aiEnabled == true)
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
