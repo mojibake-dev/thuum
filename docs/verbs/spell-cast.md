@@ -1130,14 +1130,33 @@ health message. A second red within two sweeps makes it a bug.
   3.53 s starting 17.4 s after; the tick cadence itself was intact (about
   0.2 s), so this is not the dropped-report class above. The same assert
   went red once before with the same shape, 20261020-232356 at 0.822, on a
-  build before train-32; green in the twelve runs between. HYPOTHESIS: the
-  driver's hold-key (Home, 4000 ms) reached the game about 1.2 s later than
-  usual, so less of the hold fell before the fixed 5.5 s read: the lab's
-  input timing, not the server's number, and not train-33 (its relay change
-  touches game-file sources only, and the caster is a player). Per ADR-027
-  the set reruns it twice; if the shape recurs, the read moves from health
-  at a fixed wait to the stream's own tick count over the hold (the watch's
-  events), which the lab's timing cannot shorten.
+  build before train-32; green in the twelve runs between. The first
+  hypothesis, the driver's hold-key landing late, is FALSIFIED: the three
+  runs' step durations match to a tenth of a second through the assert
+  (numidium, {now} PDT), and by the anchor of the third sword hit the first
+  OnSpellHit came 17.37 s after it on 192438, 17.88 s on 215524 and 18.34 s
+  on the rerun 222125, with the stream's refused tail hit at the same 20.8 s
+  on all three: the end is the key's release, the start moved. The rerun
+  went red too (12 ticks, 0.8153), so under ADR-027 the gate is red and
+  parity did not move. x-duel-stream 20261022-223232 on the same stage (the
+  duel's opening, the Flames phase watched on both seats, no assert): the
+  caster's own MRh_SpellAimedConcentrationStart and Release 0.10 s after the
+  hold began, launches from +0.42 s every 183 to 185 ms, IsCastingRight true
+  for 4.2 s; the figure's cast 0.13 s behind it on c2, c2's first hit taken
+  at +0.71 s; 20 ticks and 3.6 s of stream registered (192438 had 19 and
+  3.53 s). So train-33 delivers the stream whole and on time, and the two
+  reds are variance under the same schedule: the stream finding c2's figure
+  late, or early hits lost on the caster's side; the reds kept no watch of
+  the phase (the run stops at the failed assert before the watch-stop).
+  HYPOTHESIS now: a figure-side cause, measured next by b-duel three times
+  on the stage (the rate against the one in thirteen before) and, on a red,
+  by the probe with the assert and the watch kept to the end. A row from the
+  same read: c1's figure of c2 took a refused combat idle every 15 ms
+  (IdleCombatSpecialStart, IdleCombatLookingAroundStart,
+  IdleCombatStretchingStart) through the phase, the relay's idle blank
+  answered by the engine's per-frame retry; a figure's graph thrashed every
+  frame is a suspect for playtest 31's odd-walking figures (the figures'
+  idle rule, its own train).
 
 - x-class-target2 20261018-191615 on train-26 d5b05e89 (fork m2-cast-target:
   the sender names the actor under the crosshair for a touch or
