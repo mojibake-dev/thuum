@@ -831,6 +831,53 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   SkyrimPlatformImpl.pdb in the client artifact (the hooks-API frame
   stayed an offset); the Papyrus hook's Enter still scans the handler map
   from the hooked thread.
+- THE LANDING HANG, SECOND READING (2026-10-22, 23:38 to 01:0x PDT): the
+  hook fix did not hold (b-npc-puppet 063157, b-cell-host 063508 on
+  931de577 hung c1 the same way), so the 23:06 entry above names a real
+  defect that was not the cause. The lab closed in from the outside
+  (numidium): the client's two switches off, one at a time and both
+  (x-npc-switch-a 064935, -b 065308, -c 065645) all HUNG; a lone c2
+  (x-npc-lone-c2 070852) GREEN and a lone c1 (x-npc-lone-seat 071125)
+  HUNG; c1 logged in as profile 2 (x-npc-c1-as-p2 073443) GREEN; profile 1
+  moved 200 units south into profile 2's cells (x-npc-p1-south 073851,
+  snapshot clean-p1south-20261022T0740Z) GREEN. So the trigger is the actor
+  set the server streams to profile 1's parking spot (14 units north of a
+  cell edge, so the streaming grid gives it the cell one north of profile
+  2's; fe010803, an ESL-slot form, draws the server's Negative Magicka
+  warning only in those logins), not the seat and not the record. From the
+  dumps: 045602 and 054932 ran job 10565's DLL (every return address on
+  the spinning thread is preceded by a call in that build alone); the
+  Skyrim Platform frames are the update dispatch (the "update" lambda,
+  napi_call_function's caller); and the spin, read in libnode 23.2.0 (V8
+  12.9.202.28-node.11) from the same dist, is Isolate::UnwindAndFindHandler
+  advancing a StackFrameIterator (libnode+0xf86cc0 pops the C_WASM_ENTRY
+  handler and walks the handler chain to the frame's fp; +0xf86c70 skips
+  to the next JavaScript frame) over a StackHandler chain linked to itself.
+  The "frame under it" of the first reading was the dispatch lambda's local
+  holding the filename error's text: that exception had been caught and
+  logged, and a LATER exception in the same dispatch spun. Both exception
+  traces had armed after their hangs (054932's ready at 05:50:48.7 UTC, the
+  hang at 05:50:47.3; 071646's a second late: the injector attaches by name
+  after a relaunched game has passed kDataLoaded), so "no C++ exception"
+  was never measured. The one unwrapped callback that can throw:
+  CallNativeApi.cpp's latent path built its promise with an executor lambda
+  (platform_lib/CreatePromise.h is new Promise(executor)) that ran
+  CallNativeSafe and a null-pointer test from inside V8's Promise
+  constructor; a C++ throw there (CallNative.cpp's "Expected self to be
+  non-null" and kin) unwound through V8's frames to the outer callback's
+  wrapper and left the nested entry's handler registered. Fix, fork
+  7dd03c88: the latent native is called in the wrapped callback and
+  resolved through a Napi::Promise::Deferred (no executor, no thread-local
+  pointer), so a failing latent call is a JavaScript error; and baseId 0 is
+  a player (CreateActorMessage.h's optional defaults to 0 and the wire
+  carries it, so every player's CreateActor says baseId 0; isNpcModel and
+  isFigure read it as an NPC, which made every player's figure demotable
+  and the player's own view a puppet at login; the clean world's two
+  records store no baseId, baseDesc 7:Skyrim.esm). Owed: the trace in the
+  relaunch shape (x-npc-napi-relaunch) naming the failing latent native,
+  then the client path for that actor; the lone profile-1 login on clean
+  with 7dd03c88 as the proof; b-npc-puppet and b-cell-host; the gate.
+  Memory: skyrim-platform-thread-shape, frida-lab-script-pitfalls.
 - x-npc-puppet-2 (solo, c1, the fork's SP dist with the hooks, a driver step
   npc-puppet {formId, puppet} to add beside npc-ai; the Survival prompt step
   as every solo run): x-npc-puppet's bandit (0x1BCD8 at 150 units). P2 with
