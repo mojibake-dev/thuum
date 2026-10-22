@@ -987,6 +987,32 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 - Breakpoint plan for a human session: none unless P4 falsifies.
 - Owner: agent (Frida); Eli (x64dbg) only on a falsified P4.
 
+- THE ROSTER'S FIRST LAB RESULT AND THE SILENT WIRE LOG (2026-10-22 02:36 to
+  03:19 PDT). ad1f2356 staged at 02:57: x-npc-lone-seat 095809 green, b-cell-host
+  100312 green, T2 green (33 identical), b-npc-puppet 100041 RED and numidium's
+  x-npc-sigrid-ref 100845 the same from one seat: zero "sights" lines on the
+  server, zero live lines on c1, Sigrid's record still in Alvor's house 20 s after
+  the landing, 0x13483 and 0x1066df both aiEnabled false on c1. The roster never
+  reached PartOne's accept path and nothing on either end said why: the client
+  wrote no line per roster, PartOne logged only successes, and c1's wire log
+  (Data/Platform/Logs/MpClientPlugin-logs.txt) had been full since 2026-10-18
+  02:36 (4,194,407 bytes): the plugin dropped every line past its 4 MiB cap, the
+  file persists across launches and sits inside clean-m1-next, so every run since
+  started with c1's refusals invisible. MpClientPlugin.dll is current on every
+  game folder (2607's dist). Fixes, all readings: 23d8abfa (the client looks each
+  sighted reference up afresh at report time and traces every roster sent:
+  "roster: N sighting(s) sent, U unknown of A attached, H cell(s) hosted"),
+  757066f3 (the server logs each roster's arrival once in ten seconds per
+  reporter and each drop reason once a minute per actor; the wire log rotates
+  to MpClientPlugin-logs.1.txt past 4 MiB), pipeline 2609. numidium empties the
+  wire log when client-dist lays a dist. The next b-npc-puppet reads three ways:
+  a "roster:" line in c1.log (the client sent), a "refused" line with t 50 in
+  c1's wire log (the plugin dropped it, and why), "roster from" and "dropped:"
+  lines in server.log (the server took it, and why nothing changed). Side
+  finding from c2's live wire log: every one of its 1,835 send lines is a type 5
+  UpdateEquipment refused for an inventory entry of count -1 (baseId 0x13790);
+  that seat's equipment has never gone out on the wire. Its own branch (LOG).
+
 ## Status
 
 Doc drafted 2026-10-21, before any code. Build begun 2026-10-21 17:41 PDT
