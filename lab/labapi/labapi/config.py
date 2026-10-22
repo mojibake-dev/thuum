@@ -140,11 +140,14 @@ class Settings:
     # the sky-lab-run task (register-runner.ps1, as `lab` on the desktop)
     # attached. So the watcher becomes C:\sky-lab\run.ps1 and that task runs it.
     # Braces are doubled for str.format.
+    # frida-inject eternalizes the script and exits (-e, frida 17.19.0's own option): a load error is
+    # flushed to its .out at once, and the script's lines reach its .log through runner.frida_script_text's
+    # preamble (stdout redirected to a file sat in the injector's buffer until it exited: P0, 2026-10-21)
     frida_exec_template: str = (
         "Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile '{lab_dir}\\frida\\{name}'; "
         "$w = @'\n"
         "$d = '{lab_dir}\\frida'; for ($i = 0; $i -lt 1500; $i++) {{ $p = Get-Process SkyrimSE -ErrorAction SilentlyContinue; if ($p) {{ break }}; Start-Sleep -Milliseconds 200 }}; "
-        "if ($p) {{ Start-Sleep -Seconds 5; Start-Process -FilePath \"$d\\frida-inject.exe\" -ArgumentList '-p', $p.Id, '-s', \"$d\\{name}\" -RedirectStandardOutput \"$d\\{name}.out\" -RedirectStandardError \"$d\\{name}.err\" -WindowStyle Hidden }}\n"
+        "if ($p) {{ Start-Sleep -Seconds 5; Start-Process -FilePath \"$d\\frida-inject.exe\" -ArgumentList '-p', $p.Id, '-s', \"$d\\{name}\", '-e' -RedirectStandardOutput \"$d\\{name}.out\" -RedirectStandardError \"$d\\{name}.err\" -WindowStyle Hidden }}\n"
         "'@; Set-Content -Path '{lab_dir}\\run.ps1' -Value $w; "
         "Start-ScheduledTask -TaskName sky-lab-run"
     )
