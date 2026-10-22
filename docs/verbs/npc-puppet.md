@@ -717,6 +717,53 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   the fix removes the keep-offset from every puppet, so the claim is also
   moot for the verb. Both script defects are fixed on main (LAB_PARAMS,
   readPtr); the buffering is lab-api's (numidium) before P1's trace.
+- x-npc-puppet-2's FIRST RUN (2026-10-21 21:25 to 21:35 PDT, run
+  20261022-042521 on the npc-puppet stage eab366b2, numidium; the Frida
+  trace empty for the reasons above, every other reading real):
+  - the switch: npc-puppet {puppet: true} answered done and the state read
+    aiEnabled false 10 s later; npc-puppet {puppet: false} read aiEnabled
+    true 0.5 s later (the export and the game-thread demote and promote
+    work; the kill switch untested).
+  - H3 CONFIRMED: npc-pose's translateTo took the AI-off puppet 500 units
+    to within 3 units of its target (pos 133854.4, -62081.2 against
+    133857, -62080), in under 1.2 s.
+  - H11 CONFIRMED: setAngle(0, 0, 90) left the heading at exactly 90
+    (the watch's headingAtStop 90, turned 0 through the shout) and the
+    frames at 1.2 s and 4 s show him in profile, facing east.
+  - H2 SUPPORTED, the sustained cycle open: the frame 0.2 s after one
+    write of Speed 200 and Direction 0 shows a stride mid-crossing (one
+    leg forward, the torso turned); at 1.2 s, arrived and with nothing
+    re-written, he stands with his legs together. The client re-writes
+    both at every 130 ms sample while the host reports motion, so
+    b-npc-puppet's frames at the minute decide whether the cycle holds
+    under the relay; if they show a glide, hook 3's Move site writes the
+    variables per frame natively (TE's shape) before R2 is asked.
+  - the slide CONFIRMED gone: the shout's first word staggered the puppet
+    (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
+    its track moved 12.7 units at most, the body back at its point (the
+    2026-10-18 reading with plain AI off slid 120 units at 40 u/s): hook
+    3's Move-at-rest holds the body.
+  - H1 CONFIRMED by the stagger: an AI-off puppet's graph took and played
+    the stagger (the bool rising and falling, the head node 28 units lower
+    mid-stagger) where the 2026-10-18 reading left the graph frozen; the
+    play-idle step itself returned false (Papyrus PlayIdle refuses an
+    AI-off actor), so the idle check needs an animation-event step, not
+    needed now.
+  - H6: the draft into combat measured again (inCombat true, combatTarget
+    the player, 1 s after the hit) and, solo, never undone: the sink is
+    skymp5-client's, absent from a solo game; the undo stays HYPOTHESIS
+    for the two-seat run.
+  - H5 CONFIRMED: at the promote the drafted bandit was moving within 0.5 s
+    (89 units) and at 2.5 s 180 units on, and after the second shout the
+    watch took three attackStart events with moves and turns: the AI and
+    its combat resumed at once (combatTarget kept from the puppet time:
+    npc-handoff's restore question answered for a hit-drafted target).
+  - H7 inconclusive: the sneak frame shows no stealth eye, but whether the
+    tap toggled sneaking is unread (no camera cue); a bark: none in the
+    log window.
+  - P1 (the detours' counts) reruns once lab-api's trace fetch is fixed
+    (numidium's labapi-frida-flush: frida-inject -e, console.log through a
+    flushed file, the preamble declaring no top-level name).
 - x-npc-puppet-2 (solo, c1, the fork's SP dist with the hooks, a driver step
   npc-puppet {formId, puppet} to add beside npc-ai; the Survival prompt step
   as every solo run): x-npc-puppet's bandit (0x1BCD8 at 150 units). P2 with
@@ -756,9 +803,13 @@ Before it: 2555, 2557 and 2560 red on the 0xff flip assertion alone (the
 new actor had no listeners at the grant in the test's sequence), 2558 red
 on the Windows compile of the hooks. Playtest thirty closed at Eli's word
 21:00; P0 ran and measured nothing (the Dynamic plan's outcome); the
-grammar merged (main 9b4bec3); `just verb-stage m3-npc-puppet` running
-(numidium, 21:1x); b-npc-puppet committed alone (main 3a3aef0), Eli's
-review pending; x-npc-puppet-2 waits on lab-api's trace fetch fix.
+grammar merged (main 9b4bec3); the stage up (verb-stage m3-npc-puppet
+eab366b2 from main 9b4bec3, clean-m1-next snapshotted 21:21, smoke
+20261022-042248 GREEN, T2 running identical); x-npc-puppet-2's first run
+20261022-042521 GREEN with H1, H3, H5 and H11 confirmed, the slide gone,
+H2 supported (the Dynamic plan's reading), its P1 trace waiting on
+lab-api's fetch fix; b-npc-puppet committed alone (main 3a3aef0), Eli's
+review pending.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
