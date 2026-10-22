@@ -276,6 +276,30 @@ class MouseStep(unittest.TestCase):
                 self.load(bad)
 
 
+
+@needs_deps
+class ScreenshotStep(unittest.TestCase):
+    """One shot, or a burst of frames an animation's rate apart (lab-api's screenshot {count, intervalMs}, burst.py)."""
+
+    def load(self, step):
+        from labapi.scenario import load_scenario
+
+        return load_scenario("id: x-shot\nclients: [c1]\nsteps:\n  - c1: " + step + "\n")
+
+    def test_a_plain_shot_takes_nothing_and_a_burst_is_normalized(self):
+        self.assertEqual(self.load("screenshot").steps[0].args, {})
+        step = self.load("screenshot {count: 40}").steps[0]
+        self.assertEqual((step.kind, step.action, step.args), ("client", "screenshot", {"count": 40, "intervalMs": 500}))
+        self.assertEqual(self.load("screenshot {count: 3, intervalMs: 100}").steps[0].args, {"count": 3, "intervalMs": 100})
+        self.assertEqual(self.load("screenshot {count: 61, intervalMs: 1000}").steps[0].args, {"count": 61, "intervalMs": 1000})
+
+    def test_what_a_burst_refuses(self):
+        for bad in ("screenshot {intervalMs: 500}", "screenshot {count: 1}", "screenshot {count: 121}", "screenshot {count: 2.5}",
+                    "screenshot {count: true}", "screenshot {count: 10, intervalMs: 99}", "screenshot {count: 10, intervalMs: 5001}",
+                    "screenshot {count: 62, intervalMs: 1000}", "screenshot {count: 10, fps: 30}"):
+            with self.assertRaises(ValueError, msg=bad):
+                self.load(bad)
+
 @needs_deps
 class PlaytestStepTests(unittest.TestCase):
     def test_a_playtest_step_is_input_normalized_as_a_scenario_s(self):

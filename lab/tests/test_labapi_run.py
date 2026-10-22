@@ -1020,6 +1020,118 @@ class ScreenshotSteps(RunTests):
         self.assertEqual(pngs, [])
 
 
+
+BURST = """
+id: burst
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: screenshot {count: 3, intervalMs: 200}
+"""
+
+
+@needs_deps
+class BurstSteps(RunTests):
+    def _managed_c1(self, answer, sidecars=3, raise_with=None):
+        """c1 managed; the burst's exec writes `sidecars` frames' .b64 under the request's out, then answers
+        `answer` (an ExecResult) or raises `raise_with`; the other execs pass through."""
+        from labapi import burst
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        real = pve.exec
+        self.scripts, self.timeouts = [], []
+
+        def exec_(guest, command, timeout):
+            if "-EncodedCommand" not in command or burst.TASK not in burst.decode(command):
+                return real(guest, command, timeout)
+            script = burst.decode(command)
+            self.scripts.append(script)
+            self.timeouts.append(timeout)
+            out = re.search(r"\$out = '([^']+)'", script).group(1)
+            for k in range(sidecars):
+                pve.files[f"{out}\\{k:03d}.png.b64"] = base64.b64encode(f"PNG frame {k}".encode()).decode()
+            if raise_with is not None:
+                pve.files[r"C:\sky-lab\burst\done.json"] = answer.out
+                raise raise_with
+            return answer
+
+        pve.exec = exec_
+
+    @staticmethod
+    def _done(n=3):
+        frames = [{"k": k, "ms": 200 * k + 3, "file": f"{k:03d}.png"} for k in range(n)]
+        return json.dumps({"count": n, "intervalMs": 200, "frames": frames, "width": 1920, "height": 1080, "at": "2026-10-22T19:40:00Z"})
+
+    def _burst(self, run_id, body):
+        step = next(s for s in body["steps"] if s["action"] == "screenshot")
+        shots = self.tmp / "results" / run_id / "screenshots"
+        return step, sorted(shots.glob(f"{step['index']:03d}-c1-*.png")), shots
+
+    def test_a_burst_films_in_the_seat_s_session_and_reads_every_frame_back(self):
+        from labapi import burst
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, shots = self._burst(run_id, body)
+        self.assertEqual([p.read_bytes() for p in pngs], [b"PNG frame 0", b"PNG frame 1", b"PNG frame 2"])
+        i = step["index"]
+        self.assertEqual([p.name for p in pngs], [f"{i:03d}-c1-{k}.png" for k in range(3)])
+        self.assertEqual([f["ms"] for f in json.loads((shots / f"{i:03d}-c1-burst.json").read_text())["frames"]], [3, 203, 403])
+        self.assertIn("3 of 3 frames over 403 ms", step["note"], step)
+        script = self.scripts[0]
+        # the task is the lab user's, headless, registered with -Force at this use; the request carries the args
+        self.assertIn("Register-ScheduledTask -TaskName 'sky-lab-burst'", script)
+        self.assertIn("-Force", script)
+        self.assertIn("conhost.exe", script)
+        self.assertIn("-UserId 'lab' -LogonType Interactive", script)
+        self.assertIn('"count": 3, "intervalMs": 200', script)
+        self.assertIn(f"$out = 'C:\\sky-lab\\shots\\{i:03d}-burst'", script)
+        self.assertGreaterEqual(self.timeouts[0], burst.wait_s({"count": 3, "intervalMs": 200}))
+
+    def test_a_frame_not_read_is_the_note_and_the_rest_are_kept(self):
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done(), ""), sidecars=2)
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 2)
+        self.assertIn("2 of 3 frames", step["note"], step)
+        self.assertIn("not read: frame 2", step["note"], step)
+
+    def test_a_burst_whose_exec_answer_was_lost_is_read_from_its_files(self):
+        from labapi.proxmox import ExecResult, ProxmoxError
+
+        self._managed_c1(ExecResult(0, self._done(), ""), raise_with=ProxmoxError("E_PVE_EXEC_LOST: pid 7 on fake-c1: the guest agent no longer knows it"))
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 3)
+        self.assertIn("read from its files", step["note"], step)
+
+    def test_a_burst_that_never_finished_is_a_note_not_a_failure(self):
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(3, "", "no done.json in 31 s; the task's last result 267011"), sidecars=0)
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(pngs, [])
+        self.assertIn("screenshot burst helper exited 3", step["note"], step)
+
+    def test_an_unmanaged_seat_s_burst_is_skipped(self):
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(pngs, [])
+        self.assertIn("screenshot burst skipped: c1 is unmanaged", step["note"], step)
+
 RELAUNCH = """
 id: relaunch
 clients: [c1]
