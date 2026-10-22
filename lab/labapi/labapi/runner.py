@@ -1062,7 +1062,7 @@ class Runner:
                 return False, f"{len(failed)} of {len(step.assertions)} did not hold within {step.seconds:g}s" + (f" ({read})" if read else "")
             await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
-    async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, str]] | None = None,
+    async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, Any]] | None = None,
                         until: str | None = None) -> tuple[bool, str]:
         """relaunch: the player quits the game and starts it again, so its
         client loads a fresh generated save at the next login, as a player
@@ -1671,23 +1671,31 @@ class Runner:
             return {"snapshot": g.snapshot, "error": str(e)[:200]}
 
 
-def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, str]]) -> str:
+def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, Any]]) -> str:
     """A relaunch's file changes as one PowerShell script: the game stopped, then each change in the run's game
     folder (<lab_dir>\\games\\<version>.txt names it), one line printed per change. The paths, names, sections, keys
-    and values are scenario._relaunch_args's, so none carries a quote."""
+    and values are scenario._relaunch_args's, so none carries a quote. A JSON change is read back and printed whole,
+    so the run's note shows the file the game starts with."""
     out = [
         "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'",
         "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3",
         f"$g = (Get-Content '{lab_dir}\\games\\{game}.txt' -Raw).Trim()",
     ]
     for f in files:
-        rel = (f.get("rename") or f["ini"]).replace("/", "\\")
+        rel = (f.get("rename") or f.get("ini") or f["json"]).replace("/", "\\")
         out.append(f"$p = Join-Path $g '{rel}'")
         if "rename" in f:
             to = f["to"]
             out.append(f"$t = Join-Path (Split-Path $p) '{to}'")
             out.append(f"if (Test-Path $p) {{ Rename-Item $p '{to}'; 'renamed ' + $p + ' to {to}' }} "
                        f"elseif (Test-Path $t) {{ 'already ' + $t }} else {{ throw ('no ' + $p) }}")
+        elif "json" in f:
+            key, val = f["key"], f["value"]
+            lit = ("$true" if val else "$false") if isinstance(val, bool) else f"'{val}'" if isinstance(val, str) else repr(val)
+            out.append("if (-not (Test-Path $p)) { throw ('no ' + $p) }")
+            out.append(f"$j = [System.IO.File]::ReadAllText($p) | ConvertFrom-Json; $j | Add-Member -NotePropertyName '{key}' -NotePropertyValue {lit} -Force")
+            out.append("[System.IO.File]::WriteAllText($p, ($j | ConvertTo-Json -Depth 20))")
+            out.append(f"'set {key} in ' + $p + ': ' + ([System.IO.File]::ReadAllText($p) | ConvertFrom-Json | ConvertTo-Json -Compress -Depth 20)")
         else:
             sec, key, val = f["section"], f["key"], f["value"]
             out.append("if (-not (Test-Path $p)) { throw ('no ' + $p) }")

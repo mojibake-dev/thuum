@@ -113,6 +113,23 @@ class ScenarioTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: t\nclients: [c1]\nsteps:\n  - c1: {bad}\n")
 
+    def test_a_relaunch_sets_a_key_in_a_json_settings_file(self):
+        # npc-puppet's landing hang (2026-10-21): skymp5-client reads its cellHost and npcPuppet switches once at its
+        # start, from a JSON file the lab's copy does not carry them in, so the change adds a top-level key
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {files: [{json: Data/Platform/Plugins/skymp5-client-settings.txt, "
+                           "key: cellHost, value: false}, {json: a.txt, key: server-port, value: 7777}, {json: a.txt, key: x_1, value: 10.10.70.10}]}\n")
+        self.assertEqual(sc.steps[0].args, {"files": [
+            {"json": "Data/Platform/Plugins/skymp5-client-settings.txt", "key": "cellHost", "value": False},
+            {"json": "a.txt", "key": "server-port", "value": 7777}, {"json": "a.txt", "key": "x_1", "value": "10.10.70.10"}]})
+        for bad in ("{json: ../a.txt, key: k, value: 1}", "{json: a.txt, key: gameData.profileId, value: 1}", "{json: a.txt, key: a b, value: 1}",
+                    "{json: a.txt, key: k, value: [1]}", "{json: a.txt, key: k, value: {a: 1}}", "{json: a.txt, key: k, value: .nan}",
+                    "{json: a.txt, key: k, value: \"it's\"}", "{json: a.txt, key: k, value: $x}", "{json: a.txt, key: k}",
+                    "{json: a.txt, section: s, key: k, value: 1}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {{files: [{bad}]}}\n")
+
     def test_a_playtest_reads_a_world_actor_and_switches_its_ai(self):
         # playtest thirty's spinning wolves (2026-10-21): the copies near a seat, one's engine state, its AI off and on
         from labapi.scenario import playtest_step
