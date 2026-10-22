@@ -30,6 +30,12 @@ after: {readback: percentages}
 """
 
 
+def overlay_text_at(settings_text, server, now):
+    from playtest_setup import overlay_text
+
+    return overlay_text(settings_text, server, now=now)
+
+
 @needs_deps
 class PlaytestProfile(unittest.TestCase):
     """ADR-040 item 6: a playtest's seats from lab/playtests/<n>.yaml."""
@@ -90,9 +96,37 @@ class PlaytestProfile(unittest.TestCase):
         p = self.load(PROFILE + "server: {npcEnabled: true}\n")
         laid = json.loads(overlay_text('{"name": "thuum lab", "loadOrder": ["a.esm"], "npcEnabled": false}', p["server"]))
         self.assertEqual(laid, {"name": "thuum lab", "loadOrder": ["a.esm"], "npcEnabled": True})
-        for bad in ("server: {npcEnabled: yes please}\n", "server: {port: 7778}\n", "server: [npcEnabled]\n"):
+        for bad in ("server: {npcEnabled: yes please}\n", "server: {port: 7778}\n", "server: [npcEnabled]\n",
+                    "server: {gameHour: 24}\n", "server: {gameHour: true}\n", "server: {gameHour: morning}\n"):
             with self.assertRaises(ProfileError, msg=bad):
                 self.load(PROFILE + bad)
+
+    def test_a_profiles_hour_is_the_clocks_time_block(self):
+        # playtest thirty-one's morning (thuum-magnus, 2026-10-22): the runner's own shape for a run's gameHour, the
+        # epoch at setup and start.hour at the hour, the deployed block's other keys kept
+        import json
+
+        p = self.load(PROFILE + "server: {npcEnabled: true, gameHour: 7.9}\n")
+        deployed = '{"npcEnabled": false, "time": {"mode": "real", "timeScale": 20, "start": {"year": 201, "hour": 12}}}'
+        laid = json.loads(overlay_text_at(deployed, p["server"], 1792674000.0))
+        self.assertTrue(laid["npcEnabled"])
+        self.assertEqual(laid["time"], {"mode": "real", "timeScale": 20, "epoch": "2026-10-22T13:00:00Z",
+                                        "start": {"year": 201, "hour": 7.9}})
+        self.assertNotIn("gameHour", laid)
+
+    def test_a_camp_may_name_its_own_teleports(self):
+        from playtest_setup import ProfileError
+
+        listed = PROFILE.replace("camp: {teleports: playtest-start}", "camp:\n  teleports:\n"
+                                 "    - {kind: teleport, profileId: 1, cell: \"3c:Skyrim.esm\", pos: [17225, -47204, -128], rot: [0, 0, 0]}\n"
+                                 "    - {kind: teleport, profileId: 2, cell: \"3c:Skyrim.esm\", pos: [17375, -47204, -128], rot: [0, 0, 180]}")
+        self.assertEqual([t["profileId"] for t in self.load(listed)["camp"]["teleports"]], [1, 2])
+        for bad in ("profileId: 1, cell", "kind: teleport, profileId: one, cell"):
+            with self.subTest(bad=bad), self.assertRaises(ProfileError):
+                self.load(listed.replace("kind: teleport, profileId: 1, cell", bad, 1))
+        for bad in ("pos: [17225, -47204, -128]", "rot: [0, 0, 0]"):
+            with self.subTest(bad=bad), self.assertRaises(ProfileError):
+                self.load(listed.replace(bad, bad.split(":")[0] + ": [1, 2]", 1))
 
     def test_a_seats_perks_go_to_the_client_that_plays_its_profile(self):
         from playtest_setup import ProfileError, seat_client

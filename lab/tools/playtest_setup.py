@@ -12,7 +12,9 @@
 A profile's `server: {npcEnabled: true}` is that playtest's server alone (ADR-035 point 9): setup lays the deployed
 settings with it over them as /srv/lab/server/server-settings-run.json (the file a run's own npcEnabled uses) and the
 restore recreates the server on that file; both setup and ready read the container's mount back. A lab run after the
-playtest mounts its own settings again.
+playtest mounts its own settings again. `server: {gameHour: 7.9}` sets the clock the same way, as the runner's time
+block does for a run (the epoch is setup's own time, the hour holds at it). `camp: {teleports: [...]}` names the camp's
+teleports as labCommand takes them, in order, where `playtest-start` reads playtest-start.sh's two.
 
 What pt23-setup.sh and pt23-after-streams.sh did for playtest twenty-three (2026-10-18), from a profile instead of
 a script per playtest. Every set is read back: an upward set-percentages can revert within 2 s (docs/LAB.md), and a
@@ -41,7 +43,7 @@ SRV = "eli@10.10.70.10"
 # mounts instead (lab-api's runner writes the same file for a run's npcEnabled, ADR-035 point 9)
 SETTINGS = "/srv/lab/server/server-settings.json"
 OVERLAY = "/srv/lab/server/server-settings-run.json"
-SERVER_KEYS = {"npcEnabled"}
+SERVER_KEYS = {"npcEnabled", "gameHour"}
 PLAYER = 20  # the console's word for the player itself (0x14)
 BARS = ("health", "magicka", "stamina")
 
@@ -83,9 +85,15 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
         raise ProfileError(f"server takes {sorted(SERVER_KEYS)}, got {server!r}")
     if "npcEnabled" in server and not isinstance(server["npcEnabled"], bool):
         raise ProfileError(f"server.npcEnabled is true or false, got {server['npcEnabled']!r}")
+    hour = server.get("gameHour", 0)
+    if isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
+        raise ProfileError(f"server.gameHour is an hour from 0 up to 24, got {server['gameHour']!r}")
     camp = (p.get("camp") or {}).get("teleports")
-    if camp not in (None, "playtest-start"):
-        raise ProfileError(f"camp.teleports is playtest-start or absent, got {camp!r}")
+    if isinstance(camp, list) and camp:
+        for t in camp:
+            _check_teleport(t)
+    elif camp not in (None, "playtest-start"):
+        raise ProfileError(f"camp.teleports is playtest-start, a list of teleports, or absent, got {camp!r}")
     seats = p.get("seats")
     if not isinstance(seats, list) or not seats:
         raise ProfileError("seats is a list")
@@ -117,10 +125,31 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     return p
 
 
-def overlay_text(settings_text: str, server: dict[str, Any]) -> str:
-    """The deployed settings with the profile's server keys over them, written as the runner writes its overlay."""
+def _check_teleport(t: Any) -> None:
+    """A camp teleport as labCommand takes it: {kind: teleport, profileId, cell, pos: [x, y, z], rot: [x, y, z]}."""
+    if not isinstance(t, dict) or set(t) != {"kind", "profileId", "cell", "pos", "rot"} or t["kind"] != "teleport":
+        raise ProfileError(f"a camp teleport is {{kind: teleport, profileId, cell, pos, rot}}, got {t!r}")
+    _int(t["profileId"], "a camp teleport's profileId")
+    if not isinstance(t["cell"], str) or not re.fullmatch(r"[0-9a-fA-F]+:[A-Za-z0-9 _.+-]+", t["cell"]):
+        raise ProfileError(f"a camp teleport's cell is <form id hex>:<plugin>, got {t['cell']!r}")
+    for k in ("pos", "rot"):
+        v = t[k]
+        if not isinstance(v, list) or len(v) != 3 or any(isinstance(x, bool) or not isinstance(x, (int, float)) for x in v):
+            raise ProfileError(f"a camp teleport's {k} is three numbers, got {v!r}")
+
+
+def overlay_text(settings_text: str, server: dict[str, Any], now: float | None = None) -> str:
+    """The deployed settings with the profile's server keys over them, written as the runner writes its overlay: the
+    clock's hour as its time block (wire-rules clock.rs: a pure function of the wall clock that reads start.hour at the
+    epoch, so the epoch is setup's own time)."""
     d = json.loads(settings_text)
-    d.update({k: v for k, v in server.items() if k in SERVER_KEYS})
+    if "npcEnabled" in server:
+        d["npcEnabled"] = server["npcEnabled"]
+    if "gameHour" in server:
+        block = dict(d.get("time") or {})
+        block["epoch"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() if now is None else now))
+        block["start"] = {**(block.get("start") or {}), "hour": server["gameHour"]}
+        d["time"] = block
     return json.dumps(d, indent=2) + "\n"
 
 
@@ -289,9 +318,10 @@ def setup(n: int) -> int:
     hold = p.get("hold") or {}
     _http("POST", "/hold", {"minutes": int(hold.get("minutes", 180)), "reason": hold.get("reason") or f"playtest {n}"})
     rep.ok(f"hold {hold.get('minutes', 180)} min: {hold.get('reason') or f'playtest {n}'}")
-    if (p.get("camp") or {}).get("teleports") == "playtest-start":
+    camp = (p.get("camp") or {}).get("teleports")
+    if camp:
         print(f"== the camp {time.strftime('%H:%M:%S')}", flush=True)
-        for t in camp_teleports():
+        for t in camp_teleports() if camp == "playtest-start" else camp:
             ans = command(t)
             (rep.ok if ans.get("ok") else rep.fail)(f"teleport profile {t['profileId']} to {t['pos']}: {ans}")
     for seat in p["seats"]:
