@@ -1148,10 +1148,28 @@ health message. A second red within two sweeps makes it a bug.
   reds are variance under the same schedule: the stream finding c2's figure
   late, or early hits lost on the caster's side; the reds kept no watch of
   the phase (the run stops at the failed assert before the watch-stop).
-  HYPOTHESIS now: a figure-side cause, measured next by b-duel three times
-  on the stage (the rate against the one in thirteen before) and, on a red,
-  by the probe with the assert and the watch kept to the end. A row from the
-  same read: c1's figure of c2 took a refused combat idle every 15 ms
+  Measured ({now} PDT): b-duel three more times on the stage went green,
+  red (12 ticks), red (13 ticks): 4 red of 5 on train-33 against 1 of 13
+  before, the build. x-duel-stream three times: 21, 20 and 10 ticks; the
+  short one (225540) with its watches: both games saw the whole stream (c1's
+  21 launches from +0.35 s every 183 ms; c2 took 20 hits from +0.66 s every
+  180 to 190 ms, its health down at +0.81), the server registered 10, in
+  clusters (holes of 0.365 and 0.726 s, every tick after a hole at the
+  0.25 cap), no refusal on either wire, no rejection or splash line on the
+  server. The reports were lost before any send, in the caster's own hit
+  path: hitService dropped a spell hit on the same target and spell within
+  dedupFrames = 2 of the last one sent, and every second same-key hit inside
+  one frame, both measured in JS frames (this.frame, one per update); a
+  stalled tick puts two real stream ticks, 183 ms apart, inside that window,
+  where they read as the engine's double. Fix on fork m3-train-33 ab1740bf:
+  both rules in time (the engine's double within 8 ms; a hit and its apply
+  within 34 ms), which a slow tick cannot fold. HYPOTHESIS until c1's watch
+  sample gaps in 225540 are read against 225208: that c1's JS tick stalled
+  through the holes (the driver samples from the same tick, so a stall is a
+  gap of 300 ms or more lined up with the server's holes); if so, the
+  stall's own cause on the host's tick is the next row (the roster's
+  per-actor lookups every 2 s are the first suspect). A row from the same
+  read: c1's figure of c2 took a refused combat idle every 15 ms
   (IdleCombatSpecialStart, IdleCombatLookingAroundStart,
   IdleCombatStretchingStart) through the phase, the relay's idle blank
   answered by the engine's per-frame retry; a figure's graph thrashed every
