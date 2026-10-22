@@ -22,4 +22,17 @@ got=$(run "Get-ChildItem 'C:\\sky-lab\\games' -Filter '*.txt' | ForEach-Object {
 echo "$got" | grep -q . || { echo "no game folder recorded on VM $vmid" >&2; exit 3; }
 bad=$(echo "$got" | grep -v "=$want\$" || true)
 [ -z "$bad" ] || { echo "SkyrimPlatformImpl.dll is not the dist's ($want) in: $bad" >&2; exit 3; }
+# the wire plugin too: a stale MpClientPlugin.dll refuses a new message type without a word in the game's log
+# (thuum-magnus's question on the roster head, 2026-10-22), and the check above names Skyrim Platform's DLL only
+mpdll="$here/skymp/build/dist-client/client/Data/SKSE/Plugins/MpClientPlugin.dll"
+if [ -f "$mpdll" ]; then
+  mpwant=$(shasum -a 256 "$mpdll" | cut -c1-16)
+  mpgot=$(run "Get-ChildItem 'C:\\sky-lab\\games' -Filter '*.txt' | ForEach-Object { \$g = (Get-Content \$_.FullName -Raw).Trim(); \$_.BaseName + '=' + (Get-FileHash -Algorithm SHA256 (Join-Path \$g 'Data\\SKSE\\Plugins\\MpClientPlugin.dll')).Hash.ToLower().Substring(0,16) }" | tr -d '\r')
+  mpbad=$(echo "$mpgot" | grep -v "=$mpwant\$" || true)
+  [ -z "$mpbad" ] || { echo "MpClientPlugin.dll is not the dist's ($mpwant) in: $mpbad" >&2; exit 3; }
+fi
+# the wire plugin's log persists across launches and so into the clone's snapshot: sky-c1's sat full and silent at
+# 4 MiB from 2026-10-18 into every run after, its refusals unreadable (2026-10-22); a stage starts every one empty
+wl=$(run "Get-ChildItem 'C:\\sky-lab\\games' -Filter '*.txt' | ForEach-Object { \$g = (Get-Content \$_.FullName -Raw).Trim(); Get-ChildItem (Join-Path \$g 'Data\\Platform\\Logs') -Filter 'MpClientPlugin-logs*.txt' -ErrorAction SilentlyContinue | ForEach-Object { \$f = \$_; try { Clear-Content \$f.FullName -ErrorAction Stop; \$f.Name } catch { \$f.Name + ' busy' } } }" | tr -d '\r')
+echo "wire logs emptied on VM $vmid: $(echo $wl | tr '\n' ' ')${mpwant:+(MpClientPlugin.dll $mpwant everywhere)}"
 echo "dist laid into every game folder on VM $vmid: $(echo $got | tr '\n' ' ')(SkyrimPlatformImpl.dll $want)"
