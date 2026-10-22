@@ -963,6 +963,22 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     until a probe catches one); the turn rate (0 fed; TurnDelta from the
     channel is the heading's own, probe later); the stage order (F5, moot
     while the read holds).
+  - THE SPEED AT THE HOST'S, AND ALVOR'S CAUSE (x-npc-legs 20261022-204726 on
+    786a029d, {now} PDT): the puppets' Speed now sits at the host's (Sigrid
+    77.8 against the host's 80.1, Dorthe 223.1 running against 221.4,
+    Faendal 83.3 against 81.6; SpeedSampled 96.6, 268.6 and 120.7), every
+    moveStart and moveStop taken, the enable count 2. Alvor glided again
+    with Speed 0 through two walks at 51 to 86 units/s, and this time not by
+    his chair: IdleChairExitStart was TAKEN, isInFurniture 0, every event
+    taken. The cause is in movementGet.ts, not the graph: getRunMode answers
+    "Standing" for any actor holding a furniture reference
+    (ac.getFurnitureReference() !== null, the TODO's branch), which Alvor
+    keeps as his AI's current furniture between the forge's and the tanning
+    rack's markers, and applyPuppetPose fed 0 whenever the run mode was
+    Standing, the gate kept from the variable-write version. Fix on
+    929e3bc2 (pipeline 2647): the host's Speed is fed as reported, whatever
+    the run mode; the host's channel is 0 when an actor truly stands. The
+    read: Alvor walking between the markers at Speed near 80 on c2.
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
