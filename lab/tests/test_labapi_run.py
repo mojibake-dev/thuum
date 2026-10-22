@@ -1077,6 +1077,32 @@ class RelaunchSteps(RunTests):
         self.assertLess(at, relaunch, "the files change before the game starts again")
         self.assertTrue([n for n in body.get("notes", []) if "files before the relaunch" in n], body.get("notes"))
 
+    def test_a_relaunch_sets_a_json_key_in_the_stopped_game(self):
+        """npc-puppet's landing hang: skymp5-client's cellHost switch off in its settings file, read once at the
+        client's start, so it is written while the game is stopped; the note carries the file as read back."""
+        import base64
+
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        files = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {files: [{json: Data/Platform/Plugins/skymp5-client-settings.txt, "
+                                 "key: cellHost, value: false}, {json: a.txt, key: n, value: 2.5}, {json: a.txt, key: s, value: lab}]}\n")
+        run_id, body = self._run(files)
+        self.assertEqual(body["verdict"], "green", body)
+        execs = [c[2] for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        at = next(i for i, c in enumerate(execs) if "-EncodedCommand" in c and "ConvertFrom-Json" in base64.b64decode(c[-1]).decode("utf-16-le"))
+        script = base64.b64decode(execs[at][-1]).decode("utf-16-le")
+        self.assertIn("Stop-Process", script)
+        self.assertIn("Data\\Platform\\Plugins\\skymp5-client-settings.txt", script)
+        self.assertIn("-NotePropertyName 'cellHost' -NotePropertyValue $false -Force", script)
+        self.assertIn("-NotePropertyName 'n' -NotePropertyValue 2.5 -Force", script)
+        self.assertIn("-NotePropertyName 's' -NotePropertyValue 'lab' -Force", script)
+        self.assertIn("ConvertTo-Json -Depth 20", script)
+        relaunch = next(i for i, c in enumerate(execs) if "sky-lab-launch" in " ".join(c))
+        self.assertLess(at, relaunch, "the file changes before the game starts again")
+
     def test_a_solo_relaunch_ends_in_game_without_a_login(self):
         """A solo run's game has no skymp5-client (ADR-031): the relaunch holds for the new process's poll and an
         in-game dump-state, never for the server's online list, which a solo seat never joins."""
