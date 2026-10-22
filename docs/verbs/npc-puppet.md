@@ -582,9 +582,18 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   m3host), apply only while npcEnabled is false, so the probe-only setting
   (ADR-035 point 9; cell-host's lab setting) admits Riverwood's residents,
   the guards and the humanoid bandits the exits need; dead-at-start and
-  initially disabled references stay skipped (:477-501). UpdateHoster
-  (MpObjectReference.cpp:737-740) sends nothing for an ESM actor. No Rust
-  rule changes: wire-rules cells is cell-host's and nothing new is decided.
+  initially disabled references stay skipped (:477-501). The hosted word
+  (revised 2026-10-22, ADR-045 point 2): CreateActor's props carry
+  isHostedByOther explicitly for every actor (a player's figure true; any
+  other actor true unless the listener hosts its cell), and UpdateHoster
+  (MpObjectReference.cpp) flips it at every grant and release for every
+  actor, game-file ids included, sending the word only to listeners that
+  have a user and to that user directly: GetActorToSendTo forwards an
+  offline actor's messages to its cell's host, and a userless neighbour's
+  word ("true", it is never the hoster) would otherwise land in the host's
+  own stream after its "false" (CellHostTest's stray word, jobs 10667,
+  10688, 10690; fork 1b0a7d0d). No Rust rule changes: wire-rules cells is
+  cell-host's and nothing new is decided.
 - DB fields / migration: none.
 - Restart behavior: as cell-host: every cell unhosted at start, so every
   game's NPCs are puppets until the first grant; the records stand.
