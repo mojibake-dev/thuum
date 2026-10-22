@@ -1120,6 +1120,25 @@ health message. A second red within two sweeps makes it a bug.
   are the two shapes; neither tonight (the T2 declarations name today's
   factors).
 
+- A stream's start against the fixed hold, ADR-027's watch item (15:10 PDT,
+  b-duel 20261022-215524 on train-33's gate, numidium's read): step 65's
+  server.actor(c2).healthPercentage read 0.8316 against the asserted < 0.78.
+  The three sword hits were identical to the green 192438 of the same
+  morning (6.496; 12.992 with the 0.24 stagger; 3.151 at blocked share
+  0.502). The Flames stream differed only in when it began: 11 ticks over
+  2.218 s starting 18.6 s after the last sword hit, against 19 ticks over
+  3.53 s starting 17.4 s after; the tick cadence itself was intact (about
+  0.2 s), so this is not the dropped-report class above. The same assert
+  went red once before with the same shape, 20261020-232356 at 0.822, on a
+  build before train-32; green in the twelve runs between. HYPOTHESIS: the
+  driver's hold-key (Home, 4000 ms) reached the game about 1.2 s later than
+  usual, so less of the hold fell before the fixed 5.5 s read: the lab's
+  input timing, not the server's number, and not train-33 (its relay change
+  touches game-file sources only, and the caster is a player). Per ADR-027
+  the set reruns it twice; if the shape recurs, the read moves from health
+  at a fixed wait to the stream's own tick count over the hold (the watch's
+  events), which the lab's timing cannot shorten.
+
 - x-class-target2 20261018-191615 on train-26 d5b05e89 (fork m2-cast-target:
   the sender names the actor under the crosshair for a touch or
   target-actor cast): the old symptom is gone (no cast applied to the
