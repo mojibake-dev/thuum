@@ -890,7 +890,7 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   then the client path for that actor; the lone profile-1 login on clean
   with 7dd03c88 as the proof; b-npc-puppet and b-cell-host; the gate.
   Memory: skyrim-platform-thread-shape, frida-lab-script-pitfalls.
-- THE FIXED LANDING'S TWO REDS (2026-10-22 01:1x to 01:5x PDT; numidium's
+- THE FIXED LANDING'S TWO REDS (2026-10-22 01:1x to 01:30 PDT; numidium's
   runs on 54df2a42): b-npc-puppet 081631 landed both seats in under 5 s
   and held the grant asserts, then failed c1.npc_state(0x13483).aiEnabled:
   the host demoted 23 actors at the Riverwood attach and promoted 5
