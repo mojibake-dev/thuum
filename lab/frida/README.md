@@ -219,3 +219,18 @@ stayed loaded. Read the first lines of the .out right after attaching: a
 script that throws at load still prints its error there. A script that walks
 the stack on every memory commit (NtAllocateVirtualMemory) never reported;
 hook rarer functions, or sample.
+
+- npc-puppet.js: the spinning wolves' autopsy (probe P0, docs/verbs/
+  npc-puppet.md) and the puppet shape's counts (probe P1). Params {MODE:
+  'p0'|'p1', ACTOR: formId}. P0 hooks the keep-offset planner agent's
+  per-frame facing goal (42182: the actor's own angle plus the offset,
+  REA 2026-10-21), the keep-offset mode flip (41734) and every
+  SetRotationZ (37230) with its caller, summarized per second per actor.
+  P1 counts, for one actor, the movement step 37356 (zero once puppet),
+  Actor::Move 37507 (one per frame with a zero translation under hook 3),
+  the controller's simulate 78275 with its step time (never zero), the
+  rigid-body controller's two step-time readers (a zero is Skyrim
+  Together's #901 hazard), the relay's SetPosition 37309 and the animation
+  job 41453's distinct handles. Offsets by `just addr` for 1.6.1170 only;
+  xmm arguments are not readable in Frida's context, so angles are read
+  back from the actor on leave.
