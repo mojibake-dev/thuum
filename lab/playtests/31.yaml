@@ -11,7 +11,7 @@
 # Everything here is server-side (labCommand); the seats type nothing.
 id: 31
 build: "fork parity 19e7ca9b, npc-puppet merged 2026-10-22 05:54 PDT (the gate 20261022-122513-merge-m3-npc-puppet 9 of 9 green on lab-driver ebb6969, T2 33 identical); the lab's server image m3-npc-puppet is the same build; this server alone with npcEnabled on and the clock at 7.9"
-world: playtest-m3-31-fresh-20261022T1320Z   # the clean world, copied 2026-10-22 13:20Z
+world: playtest-m3-31-rotfern-20261022T1800Z   # the fresh world with thirty's rotfern as profile 1 (Eli, 2026-10-22: "log our rotfern in on test1s machine ... make test 2 the character test 2"); profile 2 the clean test 2
 hold:
   minutes: 180
   reason: "playtest thirty-one: M3's NPCs walk (fork parity 19e7ca9b, npc-puppet)"
