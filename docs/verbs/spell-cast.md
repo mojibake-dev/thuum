@@ -1183,10 +1183,26 @@ health message. A second red within two sweeps makes it a bug.
   still nothing ever brought the figure back. Fix on fork m3-train-33
   8a581ede: the periodic re-apply of an unchanged record settles a standing
   figure or puppet from one unit (movementApply.ts, formView.ts); a fresh
-  sample keeps its deadband. Read: b-duel three times on the stage, 19 or 20
-  ticks each and the phase-2 error back under one unit within 2 s of the
-  stagger. Whether train-33 shifted the push's size is not asked (HYPOTHESIS
-  either way; the deadband is the defect). Row for the figures, from the
+  sample keeps its deadband. 8a581ede did NOT settle ({now} PDT): b-duel
+  three times on it went red (11 ticks, the figure 6.8 off at the end of
+  phase 2, peak 8.9), red (10, 5.8 off, peak 10.6) and green (16 ticks, 0.3
+  off), and x-duel-stream 233951 read the figure a constant 6.9 units off
+  through the whole stream window, 20 to 30 s after the stagger. The hole:
+  the settle rode the view's 2 s re-apply, taken only when no new sample
+  arrived, and a player's game reports movement at every tick while it
+  stands, so every apply was a fresh sample with the 8-unit deadband. Two of
+  those reds peaked past eight and still ended off, so "under the deadband"
+  is not the whole story either: the translation that fires on a fresh
+  sample past eight units did not leave the figure on the record (the
+  stagger's push outlasting a 0.2 s translation, HYPOTHESIS). Fix on fork
+  m3-train-33 3bd8d8ae: the record's own stillness decides, the deadband is
+  one unit whenever the target equals the last target this code sent
+  (within half a unit), whatever the sample count, and a settle prints
+  `settle <id>: <units> units from (x, y) to (x, y)` to the console (c1.log)
+  for the lab's read. Read: b-duel three times on the stage, 19 or 20 ticks
+  each, the phase-2 error back under one unit, the settle line in c1.log
+  after the stagger. Whether train-33 shifted the push's size is not asked
+  (HYPOTHESIS either way; the deadband is the defect). Row for the figures, from the
   same watches: on every run, green and red, 16b8854a's included, c2's
   figure on c1's screen stands about 8 units below c2's own z on the lab
   spawn's flat ground (14665 to 14666 against 14673.7), playtest 31's
