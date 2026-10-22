@@ -780,7 +780,8 @@ class Runner:
         if step.action == "screenshot":
             return await self._screenshot(rec, index, step.client)
         if step.action == "relaunch":
-            return await self._relaunch(rec, index, step.client, step.args.get("files"), until=step.args.get("until"))
+            return await self._relaunch(rec, index, step.client, step.args.get("files"), until=step.args.get("until"),
+                                        frida=step.args.get("frida"))
         if step.action == "frida":
             return await self._frida_start(rec, index, step.client, step.args)
         if step.action == "mouse":
@@ -1063,7 +1064,7 @@ class Runner:
             await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
     async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, Any]] | None = None,
-                        until: str | None = None) -> tuple[bool, str]:
+                        until: str | None = None, frida: dict[str, Any] | None = None) -> tuple[bool, str]:
         """relaunch: the player quits the game and starts it again, so its
         client loads a fresh generated save at the next login, as a player
         coming back another day does. A reconnect is not that: an in-game
@@ -1084,10 +1085,11 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return fail(f"E_RUN_RELAUNCH: {client} is not a managed client")
-        if files:
+        if files or frida:
             # the step's file changes, made in the run's game folder while the game is stopped: a DLL and an
-            # ini load at a launch (scenario._relaunch_args); the next run's rollback undoes them
-            script = _relaunch_files_ps(self.s.client_lab_dir, rec.game or self.s.game_default, files)
+            # ini load at a launch (scenario._relaunch_args); the next run's rollback undoes them. A frida
+            # relaunch with no files stops the game the same way, so its watcher is armed with no game running
+            script = _relaunch_files_ps(self.s.client_lab_dir, rec.game or self.s.game_default, files or [])
             encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
             try:
                 res = await asyncio.to_thread(self.control.exec, g, ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded],
@@ -1097,8 +1099,18 @@ class Runner:
             if res.exitcode != 0:
                 return fail(f"E_RUN_RELAUNCH: {g.name}: the file changes: exit {res.exitcode}: {(res.err or res.out).strip()[:200]}")
             done = " / ".join(ln.strip() for ln in res.out.splitlines() if ln.strip())
-            rec.notes.append(f"step {index}: {client} files before the relaunch: {done[:400]}")
+            if files:
+                rec.notes.append(f"step {index}: {client} files before the relaunch: {done[:400]}")
         cmd = ["powershell", "-NoProfile", "-Command", self.s.relaunch_cmd]
+        if frida:
+            # the watcher waits for a SkyrimSE process, so armed now it takes the new game at its start; the
+            # launch then starts without a second stop, which could kill a game launch.ps1's early-exit retry
+            # started and leave the watcher's injection on a dead process
+            ok, msg = await self._frida_start(rec, index, client, frida)
+            if not ok:
+                return False, msg
+            rec.notes.append(f"step {index}: {client} {msg}, armed before the game starts")
+            cmd = ["powershell", "-NoProfile", "-Command", self.s.relaunch_start_cmd]
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
         except ProxmoxError as e:
@@ -1693,7 +1705,13 @@ def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, Any]]) -> 
             key, val = f["key"], f["value"]
             lit = ("$true" if val else "$false") if isinstance(val, bool) else f"'{val}'" if isinstance(val, str) else repr(val)
             out.append("if (-not (Test-Path $p)) { throw ('no ' + $p) }")
-            out.append(f"$j = [System.IO.File]::ReadAllText($p) | ConvertFrom-Json; $j | Add-Member -NotePropertyName '{key}' -NotePropertyValue {lit} -Force")
+            *outer, leaf = key.split(".")
+            out.append("$j = [System.IO.File]::ReadAllText($p) | ConvertFrom-Json; $o = $j")
+            for k in outer:
+                # a nested key's objects on the way down, made when absent; anything else there is an error
+                out.append(f"if ($null -eq $o.'{k}') {{ $o | Add-Member -NotePropertyName '{k}' -NotePropertyValue ([pscustomobject]@{{}}) -Force }}; "
+                           f"if ($o.'{k}' -isnot [System.Management.Automation.PSCustomObject]) {{ throw ('{k} in ' + $p + ' is not an object') }}; $o = $o.'{k}'")
+            out.append(f"$o | Add-Member -NotePropertyName '{leaf}' -NotePropertyValue {lit} -Force")
             out.append("[System.IO.File]::WriteAllText($p, ($j | ConvertTo-Json -Depth 20))")
             out.append(f"'set {key} in ' + $p + ': ' + ([System.IO.File]::ReadAllText($p) | ConvertFrom-Json | ConvertTo-Json -Compress -Depth 20)")
         else:

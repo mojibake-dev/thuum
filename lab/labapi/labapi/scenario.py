@@ -223,7 +223,7 @@ def _mouse_args(args: dict[str, Any]) -> dict[str, Any]:
 
 _GAME_PATH = re.compile(r"^[A-Za-z0-9 _.\-]+(?:[/\\][A-Za-z0-9 _.\-]+)*$")
 _BARE = re.compile(r"^[A-Za-z0-9 _.\-]+$")
-_JSON_KEY = re.compile(r"^[A-Za-z0-9_\-]+$")
+_JSON_KEY = re.compile(r"^[A-Za-z0-9_\-]+(?:\.[A-Za-z0-9_\-]+){0,3}$")
 
 
 def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
@@ -231,18 +231,31 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
     while it is stopped, since a DLL and an ini load at a launch (the essentials layer's FSMP off and vsync off
     readings, 2026-10-19). Each entry is {rename: <path in the game folder>, to: <new file name beside it>},
     {ini: <path of an .ini>, section, key, value}, which sets a key the file already has, or {json: <path of a
-    JSON file>, key, value}, which sets or adds a top-level key (skymp5-client-settings.txt's cellHost and
-    npcPuppet switches, read once at the client's start: npc-puppet's landing hang, 2026-10-21). Paths are
-    relative, without '..'; the next run's rollback restores the clone."""
-    unknown = sorted(set(args) - {"files", "until"})
+    JSON file>, key, value}, which sets or adds a key, a dotted path naming one inside nested objects
+    (skymp5-client-settings.txt's cellHost and npcPuppet switches, read once at the client's start, and
+    gameData.profileId: npc-puppet's landing hang, 2026-10-21). Paths are relative, without '..'; the next
+    run's rollback restores the clone."""
+    unknown = sorted(set(args) - {"files", "until", "frida"})
     if unknown:
-        raise ValueError(f"relaunch takes files and until, not {unknown}")
+        raise ValueError(f"relaunch takes files, until and frida, not {unknown}")
     # until: gone returns once the player is off the server's online list, so a scenario can read the server
     # while that game is down (b-cell-host's unhosted window); a later connect waits for the new game's login
     until = args.get("until")
     if until is not None and until != "gone":
         raise ValueError(f"relaunch's until is gone, not {until!r}")
-    head = {"until": "gone"} if until else {}
+    head: dict[str, Any] = {"until": "gone"} if until else {}
+    # frida: {script, params?}, the frida step's arguments: its watcher armed while the game is stopped, so it
+    # takes the new game at its start and injects ahead of Skyrim Platform's engine (kDataLoaded, about 10 s in),
+    # which a frida step after the relaunch misses (x-npc-napi-trace 20261022-071646 attached 1 s after the hang)
+    frida = args.get("frida")
+    if frida is not None:
+        if not isinstance(frida, dict) or not set(frida) <= {"script", "params"} or "script" not in frida:
+            raise ValueError("relaunch's frida is {script, params?}, as the frida step takes them")
+        if not isinstance(frida["script"], str) or not _BARE.match(frida["script"]) or not frida["script"].endswith(".js"):
+            raise ValueError(f"relaunch's frida script is a lab/frida file name ending .js, not {frida['script']!r}")
+        if not isinstance(frida.get("params", {}), dict):
+            raise ValueError("relaunch's frida params is a map")
+        head["frida"] = dict(frida)
     files = args.get("files")
     if files is None:
         return head
@@ -272,7 +285,8 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
             out.append({"ini": path, "section": f["section"], "key": f["key"], "value": v})
         elif set(f) == {"json", "key", "value"}:
             if not isinstance(f["key"], str) or not _JSON_KEY.match(f["key"]):
-                raise ValueError(f"json's key is a top-level name of letters, digits, dash or underscore, not {f['key']!r}")
+                raise ValueError("json's key is a name of letters, digits, dash or underscore, or up to four such names "
+                                 f"joined by dots for a nested one, not {f['key']!r}")
             v = f["value"]
             if not isinstance(v, (bool, int, float, str)) or (isinstance(v, float) and not math.isfinite(v)):
                 raise ValueError(f"json's value is a boolean, a number or a string, not {v!r}")

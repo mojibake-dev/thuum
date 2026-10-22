@@ -260,6 +260,8 @@ class Settings:
         "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; "
         "Start-Sleep -Seconds 3; Start-ScheduledTask -TaskName sky-lab-launch"
     )
+    # a relaunch {frida} starts the game alone: its files step stopped it and the watcher is armed
+    relaunch_start_cmd: str = "Start-ScheduledTask -TaskName sky-lab-launch"
     relaunch_timeout_s: float = 300.0
     # Before a self-service snapshot (proxmox.GuestControl.snapshot_clone):
     # stop the game, its loader and Windows Error Reporting, and any running

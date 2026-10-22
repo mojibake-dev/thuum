@@ -1088,7 +1088,8 @@ class RelaunchSteps(RunTests):
         tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
         files = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {files: [{json: Data/Platform/Plugins/skymp5-client-settings.txt, "
-                                 "key: cellHost, value: false}, {json: a.txt, key: n, value: 2.5}, {json: a.txt, key: s, value: lab}]}\n")
+                                 "key: cellHost, value: false}, {json: a.txt, key: n, value: 2.5}, {json: a.txt, key: s, value: lab}, "
+                                 "{json: a.txt, key: gameData.profileId, value: 2}]}\n")
         run_id, body = self._run(files)
         self.assertEqual(body["verdict"], "green", body)
         execs = [c[2] for c in pve.calls if c[0] == "exec" and c[1] == 901]
@@ -1100,6 +1101,10 @@ class RelaunchSteps(RunTests):
         self.assertIn("-NotePropertyName 'n' -NotePropertyValue 2.5 -Force", script)
         self.assertIn("-NotePropertyName 's' -NotePropertyValue 'lab' -Force", script)
         self.assertIn("ConvertTo-Json -Depth 20", script)
+        # a dotted key walks down nested objects, making any that is absent, and sets the last name there
+        self.assertIn("if ($null -eq $o.'gameData') { $o | Add-Member -NotePropertyName 'gameData' -NotePropertyValue ([pscustomobject]@{}) -Force }", script)
+        self.assertIn("$o = $o.'gameData'", script)
+        self.assertIn("$o | Add-Member -NotePropertyName 'profileId' -NotePropertyValue 2 -Force", script)
         relaunch = next(i for i, c in enumerate(execs) if "sky-lab-launch" in " ".join(c))
         self.assertLess(at, relaunch, "the file changes before the game starts again")
 
@@ -1172,6 +1177,18 @@ steps:
   - c1: frida {script: missing.js}
 """
 
+FRIDA_RELAUNCH = """
+id: frida-relaunch
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: relaunch {frida: {script: x-trace.js}}
+  - c1: dump-state
+"""
+
+
 
 @needs_deps
 class FridaSteps(RunTests):
@@ -1219,6 +1236,28 @@ class FridaSteps(RunTests):
         self.assertTrue(all("'-e'" in e for e in started), "frida-inject eternalizes the script and exits")
         # a step waits for the previous watcher, since the task drops a start while one runs (x-frida-flush)
         self.assertTrue(all(e.index("Get-ScheduledTask -TaskName sky-lab-run") < e.index("Start-ScheduledTask") for e in started))
+
+    def test_a_relaunch_arms_its_frida_watcher_while_the_game_is_stopped(self):
+        """x-npc-napi-trace 20261022-071646: a frida step after a relaunch attached 1 s after the hang, past
+        Skyrim Platform's engine; relaunch {frida} arms the watcher once the game is stopped, then starts the
+        launch task with no second stop, so the watcher takes the new game at its start."""
+        import base64
+
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        run_id, body = self._run(FRIDA_RELAUNCH)
+        self.assertEqual(body["verdict"], "green", body)
+        execs = [c[2] for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        flat = [" ".join(c) for c in execs]
+        stop = next(i for i, c in enumerate(execs) if "-EncodedCommand" in c and "Stop-Process" in base64.b64decode(c[-1]).decode("utf-16-le"))
+        arm = next(i for i, e in enumerate(flat) if "/frida/scripts/" in e)
+        start = next(i for i, e in enumerate(flat) if "Start-ScheduledTask -TaskName sky-lab-launch" in e)
+        self.assertLess(stop, arm, "the game is stopped before the watcher is armed")
+        self.assertLess(arm, start, "the watcher is armed before the game starts")
+        self.assertNotIn("Stop-Process", flat[start], "the launch after an armed watcher stops nothing")
+        self.assertTrue(any("armed before the game starts" in n for n in body["notes"]), body["notes"])
 
     def test_a_frida_step_needs_its_script(self):
         run_id, body = self._run(FRIDA_MISSING)
