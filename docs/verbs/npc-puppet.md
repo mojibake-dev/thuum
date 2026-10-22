@@ -876,6 +876,35 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     Move detour writing it. Baselines first on the merged build:
     x-npc-legs-host (the host's Speed and bInMoveState through the same
     walks) and x-npc-legs-burst (shots every half second).
+  - R2 ANSWERED ({now} PDT, the re-analyst on sky-re, docs/research/m3/
+    re-puppet-locomotion.md, CONFIRMED-STATIC for the chain): the graph's
+    Speed, Direction and TurnDelta are not variables the engine sets by name
+    but Actor animation graph data channels, registered once
+    (Actor::CreateAnimationChannels, 37984) and polled at every graph tick
+    before the step: Speed reads MiddleHighProcessData::currentMovementSpeed
+    (MiddleHighProcessData.h:197), Direction reads rotation.z (:138, the move
+    direction in radians clockwise from the facing, through
+    Actor::GetMoveDirectionRelativeToFacing, Actor.h:555), TurnDelta reads
+    rotationSpeed.z (:139); the three fields are written by the movement step
+    37356 and its feedback tail only, so a skipped step leaves them 0, and a
+    Papyrus SetAnimationVariableFloat lives less than a frame because the
+    channel push (63590) rewrites the same variable slot before the step
+    (63587). The Speed channel's own threshold at 5.0 raises moveStart and
+    moveStop, the Direction channel the move direction actions (HYPOTHESIS
+    for the behavior, probes F2 and F3). Fix on fork m3-train-33 a9c43bf0:
+    setPuppetLocomotion(actorFormId, speed, directionDeg, turnRateDeg), an
+    SP export the client calls at each relayed sample in place of the two
+    variable writes, stored per puppet under the registry's lock; the Move
+    detour writes the sample every frame into currentMovementSpeed, unk2AC
+    (TargetSpeed's source, :198), rotation.z (wrapped to [0, 2 pi)) and
+    rotationSpeed.z after its Move(delta, zero) stamp; the relay's locomotion
+    events return to the figures' rule. HYPOTHESIS until x-npc-legs on that
+    build: the stage order (movement before animation, F5), no other writer
+    of the two fields (F1), the gait from Speed alone (F6), the client's
+    speed and direction in the engine's units and sign. The reading that
+    closes H2: c2's Speed and bInMoveState above zero through a walk, the
+    engine's own moveStart and moveStop in c2's events, a stride in
+    x-npc-legs-burst's frames.
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
