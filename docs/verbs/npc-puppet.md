@@ -703,6 +703,20 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   return address outside 37356 names another writer; 42182 silent during
   the spin falsifies the cause. Beside it: labState ref 0x85547 read twice
   (the frozen record) and c1's console "block anim" lines.
+  OUTCOME (2026-10-21 21:0x, run 20261022-040233-x-npc-spin-autopsy on the
+  last seat with 535544db's client): the record held (x 123592.1172, y
+  -80300.7188 twice) and the console history was all "block anim
+  attackStart_ForwardPowerShort" lines, but the Frida script never loaded:
+  a top-level helper named ptr shadowed Frida's global ptr() ("TypeError:
+  cannot define variable 'ptr'", the .out numidium read on c1), and the
+  error sat in frida-inject's block-buffered stdout past lab-api's fetch
+  (a 0-byte artifact). The client was retired by the next stage's retake,
+  so P0 cannot rerun. The spin's dynamic record is therefore playtest
+  thirty's live reads (the frozen record, the 2 s cadence, the lunges, the
+  one wolf that stopped) and the mechanism stays CONFIRMED-STATIC by REA;
+  the fix removes the keep-offset from every puppet, so the claim is also
+  moot for the verb. Both script defects are fixed on main (LAB_PARAMS,
+  readPtr); the buffering is lab-api's (numidium) before P1's trace.
 - x-npc-puppet-2 (solo, c1, the fork's SP dist with the hooks, a driver step
   npc-puppet {formId, puppet} to add beside npc-ai; the Survival prompt step
   as every solo run): x-npc-puppet's bandit (0x1BCD8 at 150 units). P2 with
@@ -740,8 +754,11 @@ GetActorRuntimeData()). CI GREEN at 18:3x: pipeline 2562, server-build
 them) and client-build (the Windows dist with the detours) both success.
 Before it: 2555, 2557 and 2560 red on the 0xff flip assertion alone (the
 new actor had no listeners at the grant in the test's sequence), 2558 red
-on the Windows compile of the hooks. The lab (T2 on the stage, P0 to P5,
-b-npc-puppet) waits on Eli's playtest-30 report, then numidium.
+on the Windows compile of the hooks. Playtest thirty closed at Eli's word
+21:00; P0 ran and measured nothing (the Dynamic plan's outcome); the
+grammar merged (main 9b4bec3); `just verb-stage m3-npc-puppet` running
+(numidium, 21:1x); b-npc-puppet committed alone (main 3a3aef0), Eli's
+review pending; x-npc-puppet-2 waits on lab-api's trace fetch fix.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
