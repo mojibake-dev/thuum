@@ -590,22 +590,30 @@ function describe(actor: Actor) {
   };
 }
 
-// Other actors within 4096 units. The Papyrus API has no enumeration;
-// findClosestActor at our own position returns ourselves, so sample
-// findRandomActor a few times and keep the distinct others.
+// Other actors within 4096 units, the nearest eight. The Papyrus API has no
+// enumeration; findClosestActor at our own position returns ourselves, so
+// sample findRandomActor until 32 draws in a row add nobody new (at most 160).
+// Twelve draws over a spawn's four or five actors missed one of them about one
+// run in twenty: a-restart-persistence 20261022-113744 read "c2 does not see
+// c1" with c1's figure 300 units away (thuum-magnus's read of the dumps).
 function nearbyActors(player: Actor): Actor[] {
   const found: Actor[] = [];
+  const seen = new Set<number>([player.getFormID()]);
   const px = player.getPositionX();
   const py = player.getPositionY();
   const pz = player.getPositionZ();
-  for (let i = 0; i < 12 && found.length < 8; i++) {
+  for (let i = 0, idle = 0; i < 160 && idle < 32; i++) {
     const other = Game.findRandomActor(px, py, pz, 4096);
-    if (!other) continue;
-    const id = other.getFormID();
-    if (id === player.getFormID() || found.some((f) => f.getFormID() === id)) continue;
+    const id = other ? other.getFormID() : 0;
+    if (!other || seen.has(id)) {
+      idle++;
+      continue;
+    }
+    seen.add(id);
     found.push(other);
+    idle = 0;
   }
-  return found;
+  return found.sort((x, y) => distanceTo(player, x) - distanceTo(player, y)).slice(0, 8);
 }
 
 // the actor nearest the player other than itself (in the lab, the other
