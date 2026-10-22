@@ -2299,7 +2299,7 @@ loop, the one thing the block is for.
 Status: PROPOSED 2026-10-21 17:52 PDT (thuum-magnus, from playtest
 thirty's spinning wolves and the deep dive Eli asked for that evening; the
 plan was approved at 17:41). Refines ADR-035 (the cell as the hosting unit,
-its first and ninth points). REVISED 2026-10-22 01:5x PDT (thuum-magnus,
+its first and ninth points). REVISED 2026-10-22 01:30 PDT (thuum-magnus,
 before acceptance): the second decision first retired the per-actor hosted
 property for actors from the game files and derived "mine" on the client
 from the grant and the actor's cell; b-npc-puppet 20261022-081631 on the
