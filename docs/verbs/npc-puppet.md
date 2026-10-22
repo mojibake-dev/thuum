@@ -853,6 +853,29 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     local graph's); the receiver's applyAnimation already replays any event.
     The reading that closes it: x-npc-legs on that build, c2's watch events
     for Sigrid with moveStart and moveStop, and a frame with a stride.
+  - x-npc-legs 20261022-190831 on train-32 16b8854a ({now} PDT, numidium's
+    read): the relayed events reach the puppets and the turn-to-walks are
+    taken (NPC_TurnToWalkRight90 at 16.3 and 41.2, Left180 at 27.4 and
+    53.9, bAnimationDriven 1 for the turn), Dorthe's moveStart is taken,
+    every moveStop, turnStop and IdleStop is refused (the graph was never in
+    the move state), and on all four residents Speed, SpeedDamped,
+    SpeedSampled, Direction, bInMoveState, iState, iSyncForwardState and
+    iSyncIdleLocomotion read 0 for the whole minute, Faendal's included at
+    50 units/s over 191 of 234 samples, although applyPuppetPose writes
+    Speed and Direction at every sample. So the engine refreshes the graph's
+    locomotion inputs every frame from movement data that the skipped step
+    leaves at zero, and a walk on a puppet is a turn-to-walk followed by the
+    idle blend while the relay carries the body: the glide, with the events
+    now present. The enable storm is gone on the same run (2 enable results
+    a seat against thousands), no figure is named by a puppet word, both
+    npc-state reads hold. H2 stays OPEN; the fix is train-33's: the inputs
+    written natively each frame where the engine reads them (the plan's R2,
+    the re-analyst's question of {now} PDT: the data channels or the
+    AIProcess fields behind Speed and Direction, docs/research/m3/
+    re-puppet-locomotion.md), an SP export per puppet fed by the relay, the
+    Move detour writing it. Baselines first on the merged build:
+    x-npc-legs-host (the host's Speed and bInMoveState through the same
+    walks) and x-npc-legs-burst (shots every half second).
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
