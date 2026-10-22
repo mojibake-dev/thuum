@@ -1057,6 +1057,17 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 - Exit: `c-riverwood` (two players, NPC schedules run under host one; host
   one leaves; host two takes over; NPCs continue; restart restores) and
   `c-dungeon-enemies` (bandits fight both players under one host).
+- npc-puppet IN PROGRESS (2026-10-21 17:41 PDT, Eli's approval of the
+  one-shot plan after playtest thirty's spinning wolves): the measured
+  cause (docs/verbs/npc-puppet.md "Why now": the hosted flag never reached
+  a game-file actor's client copy, so the host never reported it and every
+  screen re-applied a frozen record every 2 s through a self keep-offset
+  whose turn renews itself each frame), ADR-045 proposed, Stage 1 on fork
+  m3-npc-puppet a29bfb08 (the server's id and flag change, the bans lifted,
+  T0). Stages 2 (Skyrim Platform's puppet switch and two detours), 3 (the
+  client), 4 (numidium's grammar), 5 (P0 to P5, b-npc-puppet, the gate) and
+  6 (docs) follow with no playtest between; playtest 31 after the merge.
+
 
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
