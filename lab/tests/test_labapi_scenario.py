@@ -113,6 +113,16 @@ class ScenarioTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: t\nclients: [c1]\nsteps:\n  - c1: {bad}\n")
 
+    def test_a_playtest_reads_a_world_actor_and_switches_its_ai(self):
+        # playtest thirty's spinning wolves (2026-10-21): the copies near a seat, one's engine state, its AI off and on
+        from labapi.scenario import playtest_step
+
+        self.assertEqual(playtest_step("refs-near {radius: 2000, formTypes: [0x2B]}"), ("refs-near", {"radius": 2000, "formTypes": [43]}))
+        self.assertEqual(playtest_step("npc-state {formId: 0xff000a12}")[0], "npc-state")
+        self.assertEqual(playtest_step("npc-ai {formId: 0xff000a12, enabled: false}"), ("npc-ai", {"formId": 0xFF000A12, "enabled": False}))
+        with self.assertRaises(ValueError):
+            playtest_step('console {text: "tai"}')
+
     def test_netem_spec(self):
         from labapi.scenario import load_scenario
 
