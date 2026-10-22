@@ -105,7 +105,7 @@ function throwTypes(params, paramCount) {
     for (let i = 0; i < n; i++) {
       const ct = imageBase.add(cta.add(4 + 4 * i).readU32());
       const td = imageBase.add(ct.add(4).readU32());
-      names.push(td.add(16).readUtf8String(96));
+      names.push(td.add(16).readCString(96));
     }
     return names;
   } catch (e) {
@@ -411,6 +411,22 @@ if (at === undefined) {
 }
 
 // layer 3: RaiseException and first-chance faults
+// a thrown std::exception's what(): MSVC's std::exception keeps
+// __std_exception_data { const char* what; bool doFree; } right after the
+// vtable pointer, so the text sits at *(object + 8); the object is the
+// second ULONG_PTR of a C++ throw's RaiseException arguments
+function whatOf(params, paramCount) {
+  try {
+    if (paramCount < 2) return null;
+    const obj = params.add(8).readPointer();
+    if (obj.isNull()) return null;
+    const what = obj.add(8).readPointer();
+    return what.isNull() ? null : what.readCString(300);
+  } catch (e) {
+    return null;
+  }
+}
+
 const seen = {};
 function record(key, line) {
   const c = seen[key];
@@ -445,6 +461,7 @@ if (raise === null) {
           tid: this.threadId,
           code: hex(code),
           types: types,
+          what: code === 0xe06d7363 ? whatOf(args[3], paramCount) : null,
           in: currentCb[this.threadId] || null,
           frames: frames,
         },
