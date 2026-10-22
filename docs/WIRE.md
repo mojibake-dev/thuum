@@ -218,12 +218,16 @@ the forest predator 0x85547) travels in CreateActor (t 33) under its own
 form id, and its `baseRecordType` carries `NPC_` (DOOR was the only value
 before). Upstream sent id + 0x100000000 so the client would place a copy of
 the base; the client now binds the engine's own reference and runs it or
-puppets it by the cell's grant (thuum docs/verbs/npc-puppet.md). The
-property `isHostedByOther` is sent for players' figures and for server-made
-0xff actors alone; a game-file actor never carries it (UpdateProperty's
-refr_id is a u32, so its flip under the raw id never reached the client's
-copy: playtest thirty's wolves). Values within the existing types, no shape
-change, no validator change.
+puppets it by the server's word (thuum docs/verbs/npc-puppet.md, ADR-045
+point 2 as revised 2026-10-22). The property `isHostedByOther` is carried
+explicitly, true or false, in every actor's CreateActor (a player's figure
+always true; any other actor true unless the listener hosts its cell), and
+UpdateProperty (t 7) flips it under the actor's own id at every grant and
+release, game-file actors included (the first cut withheld it from them:
+under upstream's id + 0x100000000 the flip under the raw id never reached
+the copy, playtest thirty's wolves; with the engine's reference bound to a
+view it does). Values within the existing types, no shape change, no
+validator change.
 
 ## Bridge and client FFI
 

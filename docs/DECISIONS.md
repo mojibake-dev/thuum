@@ -2294,13 +2294,21 @@ loop, the one thing the block is for.
 - [ ] accept with changes (say what)
 - [ ] not yet
 
-## ADR-045: An NPC is run or puppeted by the cell's grant alone; puppets are the engine's own references with their AI off
+## ADR-045: An NPC is run or puppeted by the server's word per actor, derived from the cell's grant; puppets are the engine's own references with their AI off
 
 Status: PROPOSED 2026-10-21 17:52 PDT (thuum-magnus, from playtest
 thirty's spinning wolves and the deep dive Eli asked for that evening; the
 plan was approved at 17:41). Refines ADR-035 (the cell as the hosting unit,
-its first and ninth points) and retires the per-actor hosted property for
-actors from the game files.
+its first and ninth points). REVISED 2026-10-22 01:5x PDT (thuum-magnus,
+before acceptance): the second decision first retired the per-actor hosted
+property for actors from the game files and derived "mine" on the client
+from the grant and the actor's cell; b-npc-puppet 20261022-081631 on the
+fixed landing showed the host promoting 5 of 23 actors at Riverwood and
+none of the named residents, because they are persistent references and
+Papyrus GetParentCell answers the worldspace's persistent cell for them,
+so the client's cell test can never count them as the host's. The property
+is back for every actor, explicit either way, and the client reads it
+alone; the server derives it from the grant (fork 7fef1bec).
 
 **Context.** Playtest thirty, the first with the server's NPCs on, showed
 every wolf at the forest cell spinning in place on both screens within a
@@ -2324,11 +2332,18 @@ output blocked breaks at each handoff (its #810, #898).
    and server-made 0xff actors (ADR-035's first point, restated because the
    client's id boundary moves: a game-file actor travels under its own id
    with `baseRecordType` NPC_).
-2. On the client, whether an NPC is this game's to simulate derives from the
-   grant and the actor's cell alone. `isHostedByOther` is sent for players'
-   figures and for 0xff actors, where the id reaches the form model; for a
-   game-file actor it is never sent and never read. The field stays on the
-   wire (ADR-012, append-only); no shape change.
+2. (Revised 2026-10-22.) Whether an NPC is a game's to simulate is the
+   server's word per actor: `isHostedByOther`, sent explicitly true or false
+   in CreateActor for every actor (a player's figure always true; any other
+   actor true unless the listener hosts its cell) and flipped by
+   UpdateHoster at every grant and release, a server-made 0xff copy and a
+   game-file actor under its own id alike. The client reads that word alone
+   (HostService.isMine) and asks no cell of its own: the server derives the
+   word from the cell's grant, so the rule is still the cell's, stated once
+   where the cell is known. The field's shape is unchanged (ADR-012); the
+   first version withheld it from game-file actors because the flip under
+   the raw id never reached the client's copy; the client binds a view to
+   the engine's reference now, so it does.
 3. Every NPC this game does not host is a puppet, engine reference or 0xff
    copy alike: AI off (kProcessMe), moved and animated from the host's
    relay with heading and position written absolutely, no keep-offset. The

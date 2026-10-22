@@ -562,10 +562,13 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   client's tests of those values (remoteServer.ts skipFormViewCreation and
   :372, formView.ts:131-136) are the switch to the engine reference.
 - UpdateProperty, MsgType 7: isHostedByOther (refr_id u32, skymp.rs:426)
-  goes unused for engine actors, whose puppet or live state is the grant's
-  (Client); the field stays (ADR-012: append-only) and the ESM defect
-  (skymp-hosting.md:149-159; cell-host.md:274-276) closes by disuse. The
-  property still reaches server-made 0xff actors, where it works.
+  carries the server's word per actor, explicit true or false, for every
+  actor: in CreateActor's props and at every grant and release through
+  UpdateHoster, game-file actors under their own id included (fork
+  7fef1bec, 2026-10-22; the first cut withheld it from them, since under
+  upstream's long id the flip never reached the copy: the ESM defect of
+  skymp-hosting.md:149-159 and cell-host.md:274-276; it reaches the view
+  bound to the engine's reference). The field's shape is unchanged.
 - Idempotency / ordering: as today (a later sample wins; numChanges orders
   the events). Contract doc updated: no (nothing to update; `just
   wire-header-check` unchanged).
@@ -598,12 +601,18 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   native (rule 9).
 - TS handler: PuppetService (skymp5-client services): the puppet set per
   local form id; an engine actor puppeted at cellAttach and at its
-  CreateActor unless HostService.isHostedHere(refr); the grant and release
-  handlers flipping the cell's actors (promote with the view's last relayed
-  point); the combatState sink. formView: the engine-reference path for
-  actors (refrId below 0xff000000), no placeAtMe, no modWcProtection for
-  them (:273, :339). HostService.isMine for an engine reference reads the
-  grant alone (hostService.ts:55-57 keeps the flag for 0xff actors).
+  CreateActor unless the server's word already names this game
+  (HostService.isMineLocal); the views promote and demote on their next
+  update as the word flips at a grant or release (promote with the view's
+  last relayed point; the cell walk of the first cut, Cell.getNthRef over
+  the cell's own references, missed every persistent resident and ran at
+  the message's tick: b-npc-puppet 20261022-081631); the combatState sink.
+  formView: the engine-reference path for actors (refrId below
+  0xff000000), no placeAtMe, no modWcProtection for them (:273, :339).
+  HostService.isMine reads the server's word alone, isHostedByOther false,
+  for every actor but the player's own (ADR-045 point 2 as revised
+  2026-10-22; a persistent reference's getParentCell is the worldspace's
+  persistent cell, so no client cell test can stand in for the word).
   worldCleanerService: return for actorId below 0xff000000 (the dead-body
   and chicken branches, :72-76, :81-99, fold in). movementApply: the puppet
   branch above. remoteServer's "it is an npc" test (:372) asks the base
@@ -622,13 +631,16 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 
 ## Tests
 
-- T0: C++ (fork a29bfb08): CellHostTest's game-file case, Whiterun's cow
-  0x10ebaf (unit/NpcExists.cpp's actor) travels under its own id with
-  baseRecordType NPC_ and no flag, the grant sends it no property, the
-  host's report moves it and reaches the other game once and not the host,
-  the other game's report is dropped; the 0xff wolf's flip still carries
-  (UpdateProperty isHostedByOther false to its host); NpcExists reads the
-  flag under props (the old top-level read was vacuous) and loads
+- T0: C++ (fork a29bfb08, revised 7fef1bec): CellHostTest's game-file
+  case, Whiterun's cow 0x10ebaf (unit/NpcExists.cpp's actor) travels under
+  its own id with baseRecordType NPC_ and the explicit word (hosted by
+  other on both screens while nobody hosts), the grant flips it to false
+  for the host and true for the other game (the LAST word each hears is
+  read: pipeline 2594's job 10667 found an earlier "true" once in four
+  runs, task #21), the host's report moves it and reaches the other game
+  once and not the host, the other game's report is dropped; the 0xff
+  wolf's flip the same way; NpcExists reads the flag under props (the old
+  top-level read was vacuous; explicit true now) and loads
   Riverwood's Alvor 0x13482, unique and a Nord in an interior, under
   npcEnabled (the three bans lifted; a crime-faction guard and a leveled
   bandit have no placed id in the tests' hands, so b-npc-puppet's Riverwood
@@ -878,6 +890,28 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   then the client path for that actor; the lone profile-1 login on clean
   with 7dd03c88 as the proof; b-npc-puppet and b-cell-host; the gate.
   Memory: skyrim-platform-thread-shape, frida-lab-script-pitfalls.
+- THE FIXED LANDING'S TWO REDS (2026-10-22 01:1x to 01:5x PDT; numidium's
+  runs on 54df2a42): b-npc-puppet 081631 landed both seats in under 5 s
+  and held the grant asserts, then failed c1.npc_state(0x13483).aiEnabled:
+  the host demoted 23 actors at the Riverwood attach and promoted 5
+  (1066df, 10962a, 1e62b, 60b22, 1066de), none of the named residents;
+  Sigrid stands in (5,-12), inside the grant's 3x3. The residents are
+  persistent references: Papyrus GetParentCell answers the worldspace's
+  persistent cell for them, so isHostedHere never counted them as the
+  host's, and the grant's cell walk (Cell.getNthRef) listed only the
+  cell's own references; the walk also ran at the message's tick ("Game.
+  getFormEx can't be called in this context", 27 lines). Fix 7fef1bec:
+  the server's word per actor (ADR-045 point 2 revised, above). b-cell-host
+  081903 failed the handoff because the cell's second predator killed c2
+  1.6 s after it arrived (129.92 unarmed damage, a power attack at the
+  race's number through TES5DamageFormula: a real fight, as npc-puppet
+  means it) and the respawn unloaded c2's set, so c1's leave found no
+  second loader; fix, thuum main b46e3ed7 (its own commit, rule 13): god
+  mode on both seats at the scenario's start, the hosting assertions
+  unchanged. Next on 7fef1bec (pipeline 2598): T2 on sky-srv, the stage,
+  the lone profile-1 login, b-npc-puppet with every named resident's live
+  line, b-cell-host, the gate; the lab held to 05:05 PDT so the nightly
+  waits.
 - x-npc-puppet-2 (solo, c1, the fork's SP dist with the hooks, a driver step
   npc-puppet {formId, puppet} to add beside npc-ai; the Survival prompt step
   as every solo run): x-npc-puppet's bandit (0x1BCD8 at 150 units). P2 with
