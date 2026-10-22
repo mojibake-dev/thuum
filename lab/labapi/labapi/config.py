@@ -148,7 +148,13 @@ class Settings:
         "$w = @'\n"
         "$d = '{lab_dir}\\frida'; for ($i = 0; $i -lt 1500; $i++) {{ $p = Get-Process SkyrimSE -ErrorAction SilentlyContinue; if ($p) {{ break }}; Start-Sleep -Milliseconds 200 }}; "
         "if ($p) {{ Start-Sleep -Seconds 5; Start-Process -FilePath \"$d\\frida-inject.exe\" -ArgumentList '-p', $p.Id, '-s', \"$d\\{name}\", '-e' -RedirectStandardOutput \"$d\\{name}.out\" -RedirectStandardError \"$d\\{name}.err\" -WindowStyle Hidden }}\n"
-        "'@; Set-Content -Path '{lab_dir}\\run.ps1' -Value $w; "
+        "'@; "
+        # one watcher at a time: the task's IgnoreNew policy drops a start while a previous watcher still
+        # sleeps before its inject (x-frida-flush 20261022-043924: a second frida step a second after the
+        # first never started), so a step waits up to 20 s for the task to be idle and fails if it is not
+        "for ($i = 0; $i -lt 100 -and (Get-ScheduledTask -TaskName sky-lab-run).State -eq 'Running'; $i++) {{ Start-Sleep -Milliseconds 200 }}; "
+        "if ((Get-ScheduledTask -TaskName sky-lab-run).State -eq 'Running') {{ Write-Error 'sky-lab-run still runs a previous frida watcher (it waits for the game)'; exit 3 }}; "
+        "Set-Content -Path '{lab_dir}\\run.ps1' -Value $w; "
         "Start-ScheduledTask -TaskName sky-lab-run"
     )
     # Writes a base64 text file next to the PNG so the guest-agent file API (text only) can carry it.
