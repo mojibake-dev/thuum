@@ -761,9 +761,31 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   - H7 inconclusive: the sneak frame shows no stealth eye, but whether the
     tap toggled sneaking is unread (no camera cue); a bark: none in the
     log window.
-  - P1 (the detours' counts) reruns once lab-api's trace fetch is fixed
-    (numidium's labapi-frida-flush: frida-inject -e, console.log through a
-    flushed file, the preamble declaring no top-level name).
+  - P1 READ (the rerun 20261022-044255 on lab-api a9aa9d6's fetch, 281
+    lines, 21:50 PDT). c1.log: "[verb:npc-puppet] detours installed:
+    animation queue true, movement step true" at the platform's start, the
+    demote "puppet ff00081a: AI off, combat stopped, keep-offset cleared"
+    at 21:44:33 and the promote "live ff00081a: AI on, package evaluated"
+    at 21:45:18. On the trace's own clock (ready 21:44:29.6) the puppet
+    phase is 3 s to 48 s. The bandit's movement-step ENTRY fired about 47
+    times a second throughout: expected, since the Gum replacement sits at
+    the entry and the trace counts calls into it, not the original's body.
+    The discriminator is Move's translation: every Move in the puppet
+    phase carried exactly zero, the shout's stagger at 40 to 44 s
+    included, and non-zero translations (the controller's output, the
+    stagger's root motion and the charge) begin in the second of the
+    promote. Hook 3 CONFIRMED: the step's body is skipped for the puppet
+    and the controller ticks at rest. The controllers' simulate stamped
+    the step every frame (18 rigid-body controllers at about 846 calls a
+    second, the player's proxy at 47; zero steps: none), so R1's shape
+    holds and the slide's absence has its mechanism. The animation job's
+    distinct handles sat at 19 or 20 with other actors flickering, so hook
+    2a's count is inconclusive here; H1 stands on the stagger playing with
+    the AI off (the first run). A zero-step hazard fired twice a second on
+    ONE rigid-body controller from the first second, before any puppeting
+    and not the bandit's: a controller the engine never simulates (an
+    actor out of the Havok world), HYPOTHESIS, harmless to us; the script
+    now names its actor for the next trace.
 - x-npc-puppet-2 (solo, c1, the fork's SP dist with the hooks, a driver step
   npc-puppet {formId, puppet} to add beside npc-ai; the Survival prompt step
   as every solo run): x-npc-puppet's bandit (0x1BCD8 at 150 units). P2 with
@@ -815,7 +837,7 @@ review pending.
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
 - [x] server logic + T0 (a29bfb08 and 6f08c050; pipeline 2562 green: CellHostTest's game-file case and the 0xff flip, NpcExists' nested flag and Alvor)
 - [x] message + validator (same commit) (no wire change: CreateActor's refr_id and base_record_type carry values within their types; the contract line in docs/WIRE.md; wire-validate's tests stand, 2562)
-- [ ] native hook + T1 (built, d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; the install log "[verb:npc-puppet] detours installed" and P1's counts are the proof, no host-less T1 exists in the fork)
+- [x] native hook + T1 (built d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; no host-less T1 exists in the fork, so the proof is the seat's: "[verb:npc-puppet] detours installed: animation queue true, movement step true" in c1.log, the demote and promote lines, and P1's trace 20261022-044255: zero Move translations through the puppet phase, the original's output from the promote on, every controller's step stamped; 21:50 PDT)
 - [x] TS handler (eaa3b6d0 and d9a003fd: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
 - [x] T2 green (2026-10-21 21:39 PDT, numidium: test-proto at m3-npc-puppet eab366b2's image, all 33 difftest sessions identical between the legacy and the wire stacks; no ESM actor in a session by design, the Tests section)
 - [ ] T3 scenario green, no HYPOTHESIS tags
