@@ -189,6 +189,45 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 - Address Library IDs: every id above is the research's, resolved there by
   `just addr` (re-ai-puppet.md:9-14: RVAs are supporting data and
   HYPOTHESIS; the id is the answer). None is written here from memory.
+- R1, the character controller's step time (the re-analyst, REA on sky-re,
+  2026-10-21 18:0x; Skyrim Together's #901 is the hazard: skipping the
+  movement step left a new controller's hkStepInfo at zero and the
+  rigid-body controller's SetLinearVelocity and SetPosition divided by it).
+  CONFIRMED-STATIC: 37356 (RVA 0x6698d0) reads the controller through 39856,
+  which IS AIProcess::GetCharController (AIProcess.cpp:32), and touches
+  three controller fields only (flags kFollowRagdoll +0x218, the kAnimAngleMod
+  test with pitch and roll +0x24C/+0x250); no instruction in it, in 37350,
+  41444 or 41306 addresses stepInfo (+0x80..+0x8C, bhkCharacterController.h:
+  97; hkStepInfo.h: deltaTime +8, invDeltaTime +0xC). The stamp is two
+  stores inside 78275 (HYPOTHESIS name bhkCharacterController_Simulate, RVA
+  0xe9f170; `movss [rsi+0x88], xmm1` at 0xe9f905 and the reciprocal at
+  0xe9f915), reached from 37356 only through vtable 0xC8 Actor::Move (37507,
+  RVA 0x6768a0), which builds the 0x24-byte block {delta, angles,
+  translation rotated into world, speed, nearCamera} and calls 78275 for an
+  actor that may move; seated and don't-move actors take 78276 and
+  SetPositionImpl with no stamp (the engine itself leaves them unstamped).
+  The value: the Havok time simulated this frame, global 389089 (RVA
+  0x202c688; 77850 computes it per frame from fMaxTime:HAVOK times the time
+  multiplier, capped at uMaxNumPhysicsStepsPerUpdate steps, zero on a
+  sub-millisecond frame), else the block's delta split by the substep
+  count. The hazard is the rigid-body controller's alone: 79198 (slot 7
+  SetLinearVelocityImpl) and 79193 (slot 3 SetPositionImpl) pass +0x88 to
+  62456, `accel = dv / timestep`; the proxy controller's slots read no step.
+  37356's early paths: a cell not attached writes the position through 19790
+  and returns (no Move); ragdoll, reanimating and get-up reduce the step to
+  a zero input plus the flag and still Move; a sitting rider Moves into the
+  unstamped seated branch. No smaller "stamp the time" function exists.
+  Shape chosen (hook 3 as built): a flagged actor gets Move(delta, zero)
+  when it has a controller and an attached cell, kFollowRagdoll set first in
+  ragdoll; the controller ticks and stamps at rest where the relay last
+  warped it, gravity settles it, the divisions stay finite, the step's own
+  output, rotation and feedback are skipped. HYPOTHESIS until P1's trace;
+  fallback (shape 4): a plain early return plus one Move(delta, zero) while
+  stepInfo.deltaTime reads 0. Falsifiers: a +0x88 store outside 78275; a
+  puppet's controller vtable being the proxy's (240560, then the plain
+  return is safe here); a fresh controller reading a non-zero +0x88 before
+  any 78275 call; Move's tail moving the data position by more than
+  physics settling between relay ticks (then shape 4).
 - The prototypes of 41370, 41453 and 37356 for the two detours, and the push
   69349's arguments (the research gave rcx as the Actor* for Frida, :358-359,
   which holds for 37356 and not for 41370 or 41453, and the push's four
@@ -420,13 +459,21 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 ## Impose (observers render the server's decision)
 
 - Mechanism: PuppetService calls the Skyrim Platform export
-  setPuppet(actorId, true), which runs Q4's demote natively (re-ai-puppet.md:
-  351-354): StopCombatAndAlarmOnActor(actor, false), StopMoving, the
-  keep-offset cleared, EnableAI(false), the flag set, the actor left in high
-  process. Hook 2a: a detour on 41370 that calls the original, then for each
-  flagged actor in highActorHandles queues the engine's own job 41453 on the
-  same job list through the engine's push 69349, so the graph updates in the
-  engine's stage and thread model (:268-273). applyMovement's puppet branch
+  setPuppet(actorId, true) (as built, fork d9a003fd: PuppetApi.cpp, the flag
+  set at once in the mutex-guarded set Puppets, the engine calls queued to
+  the game thread, performAction's shape), which runs Q4's demote natively
+  (re-ai-puppet.md:351-354): StopCombatAndAlarmOnActor(actor, false), the
+  keep-offset cleared through the engine's own function (37895, not in
+  CommonLib), EnableAI(false), the actor left in high process (StopMoving
+  dropped: EnableAI(false) zeroes the controller's velocity itself). Hook
+  2a (PuppetHooks.cpp, a Frida Gum replacement of 41370, the DamageActor
+  hook's idiom): the original, then for each flagged actor in
+  highActorHandles that passes 41466's admission without its kProcessMe
+  term (AI off, a process, not in a temp change list, not deleted or
+  disabled, an attached cell, 3D with a parent) the engine's own job 41453
+  queued on the same job list through the engine's push 69349, so the graph
+  updates in the engine's stage and thread model (:268-273); an AI-on actor
+  is never queued twice. applyMovement's puppet branch
   on the engine reference: translateTo toward the relayed point with the
   speed lead and setPosition for a jump of 1024 or more (movementApply.ts:
   196, :239-301 on m3host); the relayed run mode, Speed and Direction written
@@ -459,20 +506,25 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 
 - What is suppressed: on a game that does not host the cell, for each of its
   engine actors: the AI (packages, combat decisions, detection requests,
-  chatter: the kProcessMe bit); the movement step (hook 3: 37356 returns
-  early for a flagged actor; the rest of 37350 runs, so the char controller
-  stays at the relayed position, :279-285); combat membership (the stop at
+  chatter: the kProcessMe bit); the movement step (hook 3: for a flagged
+  actor 37356's body is not run; instead Actor::Move(delta, zero) (vtable
+  0xC8, Actor.h:398, body 37507) ticks the character controller at rest,
+  which is what 37356 itself does for ragdolled actors and sitting riders:
+  R1 below; the rest of 37350 runs, :279-285); combat membership (the stop at
   demotion and at every combatState on a puppet: hits 38586 and Papyrus
   StartCombat 54768 are not gated and 38565 keeps selecting targets,
   :286-290); the keep-offset; local attack events unless relayed (as today).
   On every game: the cleaner's deletion of engine references and the copy
   for an ESM actor.
-- How: EnableAI through the export; two native detours in the fork's Skyrim
-  Platform (Hooks.cpp's idiom, REL::Relocation with write_vfunc or a
-  trampoline call, skyrim_platform/Hooks.cpp:165-169, :188-199 on m3host):
-  the research's "one bit plus two hooks" (:295-299) against Skyrim
-  Together's AI-on shape with a block per output, which leaks wherever a
-  block is missing (te-npcs.md:133-150); the puppet set in native;
+- How: EnableAI through the export; two function-entry detours in the
+  fork's Skyrim Platform (as built: Frida Gum replacements through
+  FridaHookHandler::Replace, the DamageActor hook's idiom, FridaHooks.cpp,
+  since the trampoline helper patches call sites and not function entries;
+  PuppetHooks.cpp, AE only, logged [verb:npc-puppet], the ids in
+  game/Offsets.h): the research's "one bit plus two hooks" (:295-299)
+  against Skyrim Together's AI-on shape with a block per output, which leaks
+  wherever a block is missing (te-npcs.md:133-150); the puppet set in native
+  (Puppets.h, a recursive mutex, the weapDrawnMode share's idiom);
   setDefaultAnimsDisabled(refrId, true); the cleaner's floor at 0xff000000;
   formView's engine-reference path (:131-136) taken for actors too.
 - Release condition: HostGrant for the cell: setPuppet(actorId, false) runs
@@ -621,14 +673,23 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- Frida script: lab/frida/npc-puppet.js, the research's P1 set (41369,
-  37347, 37348, 37349, 41453, 37350, 37356, 38565, 33236, 33217, 41408 with
-  its owner argument, 37774; re-ai-puppet.md:356-366): module base plus
-  `just addr` offset, rcx the Actor*, filtered on its form id (:358-359),
-  calls per second per step. On the fork's Skyrim Platform with the hooks,
-  for a flagged actor: 41453 once per frame (hook 2a), 37356 at zero (hook
-  3), 37347 and 37348 at zero, 33217 entered only before the stop. Falsified
-  by a 37356 call for a flagged actor, or 41453 at zero.
+- Frida script: lab/frida/npc-puppet.js (thuum 6ce514e), two modes. P0 as
+  above. P1 (params {MODE: 'p1', ACTOR}), per-second counts for one actor:
+  37356 (rcx the actor; zero once puppet), Actor::Move 37507 (rcx the actor,
+  r8 the translation; one per frame with a zero translation under hook 3's
+  shape), the controller's simulate 78275 (rcx the controller; +0x88 and
+  +0x8C read on leave, never zero while the body has a world; the Havok step
+  global 389089 beside them; the controller's class by its vtable, 240580
+  rigid or 240560 proxy), the rigid-body readers 79198 and 79193 (+0x88 on
+  entry: a zero is the #901 hazard, logged at once), the relay's
+  Actor::SetPosition 37309 with its updateCharController flag, and the
+  animation job 41453's distinct handles per second (one more than before
+  the puppeting). xmm arguments are not readable in Frida's context, so
+  angles and steps are read back from memory on leave. 37347 and 37348 are
+  not hooked (their rcx convention was never re-read, re-ai-puppet.md's
+  Corrections). Falsified by a 37356 call for the flagged actor, 41453's
+  distinct handles not rising by one, a zero step on a rigid controller, or
+  Move's translation non-zero for the puppet.
 - P0, the spin's autopsy on today's build (solo c1 at 0x9810 under
   npcEnabled: the flag never flips there either, so every copy is
   re-applied every 2 s and the spin reproduces without a second seat):
@@ -668,8 +729,14 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 ## Status
 
 Doc drafted 2026-10-21, before any code. Build begun 2026-10-21 17:41 PDT
-on the plan Eli approved (one shot, six stages, docs/LOG.md's entry):
-Stage 1 on fork m3-npc-puppet a29bfb08 (pipeline 2555).
+on the plan Eli approved (one shot, six stages, docs/LOG.md's entry).
+Fork m3-npc-puppet (off parity 535544db with m3-relay-echo 41f554ad):
+Stage 1 server a29bfb08; Stage 3 client eaa3b6d0; Stage 2 Skyrim Platform
+d9a003fd (the exports, the set, the two detours with R1's Move shape); the
+test's subscription fix 22240db7. CI: 2555 and 2557 red on the 0xff flip
+assertion alone (the new actor had no listeners at the grant in the test's
+sequence; fixed by the players' reports), 2558's Windows build and 2560's
+server build pending at 18:2x.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
