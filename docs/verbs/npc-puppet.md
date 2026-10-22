@@ -488,14 +488,15 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   nothing.
 - Side effects: H1 (the re-admitted job plays relayed events and idles on an
   AI-off puppet; the branch CONFIRMED-STATIC, the visible result HYPOTHESIS,
-  :154-155); H2 OPEN AGAIN 2026-10-22 (playtest 31's live read: the puppet
-  slides; x-npc-legs 121157 was over-read, its TurnToWalk events are not the
-  walk; the host's relay dropped moveStart, moveStop and the turns for every
-  actor, sync/animation.ts ignoredAnims, so the puppet's graph never entered
-  the walking state while translateTo carried it; fix on fork m3-train-32,
-  the locomotion events relayed for an NPC source, to be read by x-npc-legs
-  on that build: c2's watch events hold moveStart and a frame shows a
-  stride); H3 (translateTo's mover moves an actor whose movement step is
+  :154-155); H2 CONFIRMED 2026-10-22 on fork m3-train-33 (the walk cycle
+  under the relay: the graph's Speed and Direction are Actor data channels
+  fed from MiddleHighProcessData by the movement step alone, so the detour
+  writes the host's relayed sample there every frame, docs/research/m3/
+  re-puppet-locomotion.md; x-npc-legs 202106 and x-npc-legs-burst 202522 on
+  a9c43bf0: the puppets' Speed follows each walk, the engine's own moveStart
+  and moveStop pair with it and are taken, and the half-second frames show
+  the stride, results/train-33-stride; the Dynamic plan's entries); H3
+  (translateTo's mover moves an actor whose movement step is
   skipped; the mover was not traced, :318-322); H4 (KeepOffsetFromActor does
   nothing useful on a puppet: answered 2026-10-21 by REA, the "Why now"
   section: its planner agent 42182 runs in the per-frame pass whatever the
@@ -943,6 +944,25 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     c2's Speed near the host's through the walks, the engine's own
     moveStart and moveStop, a stride in the burst's frames; the furniture
     state on a puppet is otherwise npc-stream's (the sit and sleep state).
+  - H2 CONFIRMED ({now} PDT): x-npc-legs-burst 20261022-202522 on a9c43bf0,
+    forty frames at 500 ms (40 of 40 over 19,507 ms, frame 0 at 20:27:32.97Z,
+    the watch 79 s around them). Sigrid's puppet on c2: Speed 76 to 106 from
+    9.3 to 16.1 s with moveStart 9.3 and moveStop 16.1 taken, 72 to 80 from
+    22.1 to 29.6 s with moveStart 22.1 and moveStop 29.6, moveStart 35.5;
+    Dorthe's ran at Speed up to 307 (21.5 to 25.6 s) and walked at 91 to 93
+    (41.4 to 42.0), each with moveStart and moveStop taken; Faendal's 75 to
+    114 through the first 25 s; Alvor sat, no events. The frames (f13 to
+    f20, results/train-33-stride/zoom.png, read by numidium and by me): back
+    to the camera, then in profile mid-step with a foot ahead and the arms
+    off her sides, then walking into the camera with the arm swing and the
+    skirt's hang changing frame to frame while she grows in frame. A walk,
+    beside the decisive read (the graph's Speed and the engine's paired
+    events). What stays HYPOTHESIS under its own name: the gait from Speed
+    alone (F6; 786a029d reports the host's Speed, 80 at a walk, so the blend
+    sits at the host's gait); the refused furniture exit's reset (786a029d,
+    until a probe catches one); the turn rate (0 fed; TurnDelta from the
+    channel is the heading's own, probe later); the stage order (F5, moot
+    while the read holds).
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
