@@ -236,7 +236,11 @@ if (at === undefined) {
           const c = counts[key] || (counts[key] = { what: key, n: 0 });
           c.n += 1;
           c.lastDt = dt;
-          if (dt === 0) emit({ hazard: name, controller: args[0].toString(), stepZero: true });
+          if (dt === 0) {
+            // the controller's actor (the controller ctor stores it at +0x1B8, REA 2026-10-21)
+            const actor = readPtr(args[0].add(0x1b8));
+            emit({ hazard: name, controller: args[0].toString(), actor: hex(formId(actor)), stepZero: true });
+          }
         },
       });
     }
