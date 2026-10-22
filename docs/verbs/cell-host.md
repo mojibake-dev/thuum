@@ -338,6 +338,18 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   reports, so the server grants nothing; the per-actor path is gone either
   way).
 
+- The player's own parent cell joins the loaded set at every poll without
+  waiting for its load event (fork m3-train-33 2ce4fd36, 14:23 PDT): at a
+  teleport the engine's cellFullyLoaded for the destination cell itself can
+  go missing while its four neighbours' arrive (x-npc-legs 20261022-211702:
+  c1 at the Riverwood landing reported 9752, 9733, 9712 and 9731, never 9732,
+  its own, which stayed unhosted for the run; six earlier runs that day
+  reported it), and the 30 s refresh re-reports only what the set holds. The
+  player's parent cell is the engine's answer for the player, interior or
+  exterior; c1.log traces "own cell <id> reported without its load event"
+  when the guard fires. HYPOTHESIS on the miss's cause (the event's timing at
+  a load screen); the guard holds either way.
+
 ## Tests
 
 - T0: wire-rules cells (first loader; a second gets nothing; the grace
