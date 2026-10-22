@@ -1181,11 +1181,16 @@ class FridaSteps(RunTests):
         execs = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and c[1] == 901]
         started = [e for e in execs if "/frida/scripts/" in e]
         self.assertEqual(len(started), 2, execs)
-        variants = list((self.tmp / "frida" / "uploads").glob("x-trace-*.js"))
-        self.assertEqual(len(variants), 1, variants)
+        # every step serves its own copy with the preamble (runner.frida_script_text); params ride the first line
+        variants = sorted((self.tmp / "frida" / "uploads").glob("x-trace-*.js"), key=lambda v: int(v.stem.rsplit("-", 1)[1]))
+        self.assertEqual(len(variants), 2, variants)
         self.assertTrue(variants[0].read_text().startswith('globalThis.LAB_PARAMS = {"ANSWER_YES": true};'))
-        self.assertIn(f"/frida/scripts/{variants[0].name}", started[0])
-        self.assertIn("/frida/scripts/x-trace.js", started[1])
+        self.assertFalse(variants[1].read_text().startswith("globalThis.LAB_PARAMS"))
+        for v, start in zip(variants, started):
+            self.assertIn(f"/frida/scripts/{v.name}", start)
+            self.assertIn("new File(", v.read_text(), "the script's lines go to its own flushed .log")
+            self.assertIn(f"{v.name}.log", v.read_text())
+        self.assertTrue(all("'-e'" in e for e in started), "frida-inject eternalizes the script and exits")
 
     def test_a_frida_step_needs_its_script(self):
         run_id, body = self._run(FRIDA_MISSING)

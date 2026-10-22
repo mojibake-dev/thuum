@@ -22,7 +22,7 @@ from .board import StepBoard
 from .config import Settings
 from .guests import Tables, load_tables
 from .proxmox import GuestControl, ProxmoxError
-from .runner import Runner, RunnerError
+from .runner import Runner, RunnerError, frida_script_text
 from .runset import Policy, RunSetError, RunSets
 from . import scenario as scenario_mod
 from .scenario import load_scenario
@@ -483,17 +483,21 @@ def create_app(services: Services) -> FastAPI:
 
     @router.post("/frida")
     async def frida(client: str = Form(...), script: str | None = Form(None), file: UploadFile | None = File(None)):
+        # served with the run's preamble (runner.frida_script_text), as its own copy under uploads/
+        up_dir = Path(s.frida_scripts_dir) / "uploads"
+        up_dir.mkdir(parents=True, exist_ok=True)
         if file is not None:
-            name = Path(file.filename or "upload.js").name
-            up_dir = Path(s.frida_scripts_dir) / "uploads"
-            up_dir.mkdir(parents=True, exist_ok=True)
-            (up_dir / name).write_bytes(await file.read())
+            text = (await file.read()).decode("utf-8", "replace")
+            stem = Path(file.filename or "upload.js").stem
         elif script:
-            name = Path(script).name
-            if not (Path(s.frida_scripts_dir) / name).is_file():
-                raise HTTPException(404, f"no script {name} under {s.frida_scripts_dir}")
+            src = Path(s.frida_scripts_dir) / Path(script).name
+            if not src.is_file():
+                raise HTTPException(404, f"no script {src.name} under {s.frida_scripts_dir}")
+            text, stem = src.read_text(), src.stem
         else:
             raise HTTPException(400, "give a script name or upload a file")
+        name = f"{stem}-hand-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.js"
+        (up_dir / name).write_text(frida_script_text(text, s.client_lab_dir, name))
         g = services.tables.guest_for_client(client)
         if g is None:
             raise HTTPException(404, f"no guest plays client {client}")
