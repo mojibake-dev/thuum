@@ -20,6 +20,7 @@ from typing import Any
 from .assertions import AssertionData, AssertionSyntax, Evaluator, clients_needing_views
 from .board import StepBoard
 from .config import Settings
+from . import burst
 from . import mouse
 from .guests import Guest, Tables
 from . import slots as plugin_slots
@@ -778,6 +779,8 @@ class Runner:
                 rec.verdict = "red"
                 return False, str(e)
         if step.action == "screenshot":
+            if step.args.get("count"):
+                return await self._burst(rec, index, step.client, step.args)
             return await self._screenshot(rec, index, step.client)
         if step.action == "relaunch":
             return await self._relaunch(rec, index, step.client, step.args.get("files"), until=step.args.get("until"),
@@ -1241,6 +1244,49 @@ class Runner:
             return True, target.name + lost
         except (ProxmoxError, ValueError) as e:
             return True, f"screenshot skipped: {e}"
+
+    async def _burst(self, rec: RunRecord, index: int, client: str, args: dict[str, Any]) -> tuple[bool, str]:
+        """screenshot {count, intervalMs} (scenario.py; burst.py): frames at an animation's rate, filmed in the
+        seat's desktop session by one exec and read back after it as NNN-<client>-<k>.png beside
+        NNN-<client>-burst.json (each frame's offset in ms). As a plain shot does, a burst never fails a run: a
+        frame not filmed or not read is the step's note."""
+        shots = rec.dir / "screenshots"
+        shots.mkdir(exist_ok=True)
+        g = self.tables.guest_for_client(client)
+        if g is None or not g.managed:
+            return True, f"screenshot burst skipped: {client} is unmanaged or unmapped; a burst films a managed seat"
+        remote = f"{self.s.client_lab_dir}\\shots\\{index:03d}-burst"
+        cmd = burst.command(args, self.s.client_lab_dir, self.s.client_lab_user, remote)
+        lost = ""
+        try:
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, cmd, burst.exec_timeout_s(args, self.s.guest_task_timeout_s))
+                if res.exitcode != 0:
+                    return True, f"screenshot burst helper exited {res.exitcode}: {res.err.strip()[:200]}"
+                data = burst.done(res.out)
+            except ProxmoxError as e:
+                # a helper whose pid the agent lost has ended, as a plain shot's: its done.json says what it filmed
+                if "E_PVE_EXEC_LOST" not in str(e):
+                    raise
+                data = burst.done(await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\burst\\done.json"))
+                lost = " (the helper's exec answer was lost; read from its files)"
+        except (ProxmoxError, ValueError) as e:
+            return True, f"screenshot burst skipped: {e}"
+        got, missing = 0, []
+        for f in data["frames"]:
+            try:
+                b64 = await asyncio.to_thread(self.control.file_read, g, f"{remote}\\{f['file']}.b64")
+                (shots / f"{index:03d}-{client}-{int(f['k'])}.png").write_bytes(base64.b64decode(b64))
+                got += 1
+            except (ProxmoxError, ValueError) as e:
+                missing.append(f"frame {f['k']}: {e}"[:120])
+        (shots / f"{index:03d}-{client}-burst.json").write_text(json.dumps(data, indent=1))
+        ms = [int(f["ms"]) for f in data["frames"]]
+        note = (f"{got} of {len(ms)} frames over {ms[-1]} ms, {index:03d}-{client}-0.png to {index:03d}-{client}-{len(ms) - 1}.png "
+                f"(offsets in {index:03d}-{client}-burst.json){lost}")
+        if missing:
+            note += "; not read: " + "; ".join(missing[:3])
+        return True, note
 
     async def _mouse(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """A relative mouse move in the seat's own desktop session (scenario.py's mouse; mouse.py): what the

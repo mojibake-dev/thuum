@@ -579,6 +579,20 @@ fizzled. The guest agent runs in session 0, which has no desktop, so:
   lab error (E_RUN_MOUSE).
 - Until a move after draw-weapon is shown not to sheathe the weapon, a probe
   pitches before the draw: look, mouse, equip, draw-weapon, wait, hold.
+`screenshot {count, intervalMs}` films a managed seat at an animation's
+rate: `count` frames (2 to 120) `intervalMs` apart (100 to 5000, default
+500), at most 60 s in all. A plain `screenshot` costs 2 to 3 s a shot (a
+guest exec, the sky-lab-screenshot task, a 3.8 MB read back through the
+agent), and x-npc-legs 20261022-190831's walks lasted 1 to 3 s, so its
+five-second frames could not show a stride.
+- lab-api stages burst.ps1 and runs it as the lab user through the
+  on-demand task sky-lab-burst, registered with -Force at each use as
+  sky-lab-input is, headless. One stopwatch times every frame (CopyFromScreen,
+  then a PNG write); each frame's offset is in done.json, since a write can
+  push a frame late.
+- After the burst the frames come back as NNN-<client>-<k>.png beside
+  NNN-<client>-burst.json, the offsets. As with a plain shot, a burst never
+  fails a run: a frame not filmed or not read is the step's note.
 Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
 server's verdicts on the client's race menu results; `shouts`,

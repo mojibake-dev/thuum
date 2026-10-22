@@ -221,6 +221,30 @@ def _mouse_args(args: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+
+def _screenshot_args(args: dict[str, Any]) -> dict[str, Any]:
+    """screenshot {count?, intervalMs?}: without arguments one shot of the seat's screen, as always; with `count`
+    (2 to 120) a burst of that many frames `intervalMs` apart (100 to 5000, default 500), filmed in the seat's
+    desktop session by one exec and read back after it as NNN-<client>-<k>.png beside NNN-<client>-burst.json,
+    each frame's offset (burst.py): an animation's frames at its own rate, where one plain shot takes 2 to 3 s
+    (x-npc-legs 20261022-190831's walks lasted 1 to 3 s). A burst spans at most 60 s."""
+    if not args:
+        return {}
+    if "count" not in args:
+        raise ValueError("a screenshot burst names its count (2 to 120)")
+    out: dict[str, Any] = {}
+    for k, lo, hi, default in (("count", 2, 120, None), ("intervalMs", 100, 5000, 500)):
+        v = args.get(k, default)
+        if isinstance(v, bool) or not isinstance(v, int) or not lo <= v <= hi:
+            raise ValueError(f"screenshot's {k} is a whole number from {lo} to {hi}")
+        out[k] = v
+    unknown = sorted(set(args) - set(out))
+    if unknown:
+        raise ValueError(f"screenshot takes count and intervalMs, not {unknown}")
+    if (out["count"] - 1) * out["intervalMs"] > 60000:
+        raise ValueError("a screenshot burst spans at most 60 s: (count - 1) x intervalMs")
+    return out
+
 _GAME_PATH = re.compile(r"^[A-Za-z0-9 _.\-]+(?:[/\\][A-Za-z0-9 _.\-]+)*$")
 _BARE = re.compile(r"^[A-Za-z0-9 _.\-]+$")
 _JSON_KEY = re.compile(r"^[A-Za-z0-9_\-]+(?:\.[A-Za-z0-9_\-]+){0,3}$")
@@ -402,6 +426,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _repeat_args(args)
     if action == "mouse":
         args = _mouse_args(args)
+    if action == "screenshot":
+        args = _screenshot_args(args)
     if action == "relaunch":
         args = _relaunch_args(args)
     return Step(kind="client", client=key, action=action, args=args)
