@@ -36,6 +36,15 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
+  # god mode on both seats (the server's, as x-npc-cleaner-hold has it):
+  # under npc-puppet the host runs the predators' AI live and their hits
+  # land, and the cell's second predator killed c2 1.6 s after it arrived
+  # (b-npc-puppet's sibling run 20261022-081903: 129.92 unarmed damage, a
+  # power attack at the race's number); a dead player's loaded set unloads
+  # at the respawn, so step 17's handoff found no second loader. The
+  # measurement here is the hosting, not survival
+  - c1: console {text: "tgm"}
+  - c2: console {text: "tgm"}
   # c2 far away first, so c1 is the first loader
   - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
   - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
