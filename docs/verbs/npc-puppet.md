@@ -905,6 +905,20 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     closes H2: c2's Speed and bInMoveState above zero through a walk, the
     engine's own moveStart and moveStop in c2's events, a stride in
     x-npc-legs-burst's frames.
+  - THE HOST'S BASELINE (x-npc-legs-host 20261022-195031 on parity 16b8854a,
+    {now} PDT, numidium's read): through the same minute the host's graphs
+    read Speed about 80 at a walk (Sigrid max 80.1, Alvor 80.1, Faendal 81.6)
+    and about 220 at a run (Dorthe 221.4), SpeedSampled 103 to 123 walking
+    and 276 running, Direction changing 116 to 256 times; the puppets on c2
+    read 0 for all three while their tracks moved over 50 units/s in 95 to
+    212 of 250 samples. bInMoveState is no indicator: one sample, False, on
+    both seats, the host's walking Sigrid included (a by-name bool read gets
+    nothing from an NPC graph, or the name is not its walking state). The
+    host's own graph refuses many of its moveStarts and turns too (moveStart
+    2 taken, 4 refused; turnStop 3 and 11), so a refused event on a puppet is
+    no fault in itself. Train-33's read is therefore Speed, SpeedSampled and
+    Direction on c2 against these values: about 80 walking, about 220
+    running, Direction changing with the track.
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
