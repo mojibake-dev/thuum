@@ -2423,7 +2423,9 @@ Decision 2 is a client train of its own, merged as fork parity a25caf02 on
 ten-second sweep of each figure's view; the gate 20261023-173049 with b-duel,
 b-spell and p-spell-bolt green on its stage), with x-figure-spells (the lab's
 figure-spells read, main b70546b9) as the probe reading a figure's added
-spells against its hands after load. p-spell-bolt's later
+spells against its hands after load: GREEN 20261023-183306 on parity
+a25caf02, both figures added [] and extra [] at 3 s and 20 s, the equipped
+Firebolt in the hand slot and untouched. p-spell-bolt's later
 list keeps the probe effects declared (main 626108f6): the dummies land on a
 figure from the wildlife's cloaks, which the strip does not touch.
 
