@@ -154,6 +154,23 @@ class EvaluatorTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate("c2.state.crosshairRef == 0")  # a driver before crosshairRef: no pass
 
+    def test_a_clients_log_count_by_its_pattern(self):
+        """npc-handoff: a client's own log line ("[verb:npc-handoff] moved <id> into <cell>") counted mid-run."""
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+
+        class LogViews(Views):
+            def log_count(self, observer, pattern):
+                return {"c2": {"moved .* into": 2}}.get(observer, {}).get(pattern)
+
+        ev = Evaluator(Server(), LogViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c2.log_count("moved .* into") == 2'))
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.log_count("stale") == 0')      # never counted with that pattern
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c1.log_count("moved .* into") > 0')
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c2.log_count(3) == 0")
+
     def test_a_figures_spells_against_what_it_holds(self):
         """ADR-046: a figure carries only what the server gives it; a distributor's ability shows as an extra."""
         from labapi.assertions import AssertionData, Evaluator
@@ -288,6 +305,23 @@ class M0VocabularyTests(unittest.TestCase):
         bare = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
         with self.assertRaises(AssertionData):
             bare.evaluate("server.host(0x9810).hosted == true")  # a server without the host table
+
+    def test_the_follow_table(self):
+        """npc-handoff's D6: a game follows an actor through a door into a cell it does not host."""
+        from labapi.assertions import AssertionData, Evaluator
+        srv = RichServer()
+        srv.actors["c1"]["actorId"] = 0xFF000000
+        srv.actors["c2"]["actorId"] = 0xFF000001
+        rows = {0x3550C: {"found": True, "actorId": 0x3550C, "following": True, "player": 0xFF000000, "cell": 0x133C6}}
+        srv.follow = lambda actor_id: rows.get(actor_id, {"found": True, "actorId": actor_id, "following": False, "player": 0, "cell": 0})
+        ev = Evaluator(srv, NearViews(), ["c1", "c2"])
+        for expr in ("server.follow(0x3550c).following == true", 'server.follow(0x3550c).client == "c1"',
+                     "server.follow(0x3550c).cell == 0x133c6", "server.follow(0x13482).following == false",
+                     'server.follow(0x13482).client == ""'):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        with self.assertRaises(AssertionData):
+            Evaluator(RichServer(), NearViews(), ["c1", "c2"]).evaluate("server.follow(0x3550c).following")  # no follow table
 
     def test_the_server_actor_holds_all_three_bars(self):
         from labapi.assertions import AssertionData, Evaluator
@@ -623,7 +657,7 @@ class PuppetViews(RefsNearViews):
         self.states = {"c1": {0x13483: {"formId": 0x13483, "aiEnabled": True, "package": 0x6C989, "inCombat": False, "combatTarget": 0,
                                         "staggering": False, "pos": [17300.0, -47100.0, -120.0], "head": [0, 0, 0],
                                         "isDead": False, "healthPercentage": 1.0, "isEssential": False, "isProtected": True,
-                                        "activationBlocked": False},
+                                        "activationBlocked": False, "cell": 0x9732},
                               # a read from a driver before isDead and healthPercentage
                               0x13482: {"formId": 0x13482, "aiEnabled": True, "package": 0, "inCombat": False, "combatTarget": 0,
                                         "staggering": False, "pos": [17000.0, -47000.0, -120.0], "head": [0, 0, 0]}},
@@ -668,6 +702,10 @@ class PuppetFactsTests(unittest.TestCase):
             ev.evaluate("c1.npc_state(0x13482).isProtected")
         # the Talk prompt's mechanism: the puppet blocked, the live resident not (8eafa85d's clear)
         self.assertTrue(ev.evaluate("c2.npc_state(0x13483).activationBlocked == true and c1.npc_state(0x13483).activationBlocked == false"))
+        # the cell the reference stands in, a door's interior after a crossing (npc-handoff)
+        self.assertTrue(ev.evaluate("c1.npc_state(0x13483).cell == 0x9732"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.npc_state(0x13483).cell == 0")  # a driver before the cell read
         with self.assertRaises(AssertionData):
             ev.evaluate("c1.npc_state(0x13482).activationBlocked")
         # the engine's own reference of a base never counts as a copy

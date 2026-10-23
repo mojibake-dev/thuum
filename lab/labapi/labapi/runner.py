@@ -387,7 +387,7 @@ class Runner:
         self.tables.slots.update(new or {})
         return len(new) if new else None
 
-    def _compose_env(self, rec: RunRecord) -> dict[str, str]:
+    def _compose_env(self, rec: RunRecord, hour_override: float | None = None) -> dict[str, str]:
         """The run's master files and settings file for the server container
         (the compose file's ESM_DIR and SERVER_SETTINGS): docker compose takes
         them from the environment ahead of .env. The settings differ by
@@ -396,7 +396,7 @@ class Runner:
         env = {"ESM_DIR": self.s.game_versions()[version]}
         settings = self.s.game_settings_files().get(version)
         npc = rec.scenario.server.npcEnabled
-        hour = rec.scenario.server.gameHour
+        hour = hour_override if hour_override is not None else rec.scenario.server.gameHour
         if settings and (npc is not None or hour is not None):
             # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
             # file, laid beside the world for this run alone, so no second file is kept in step
@@ -572,8 +572,10 @@ class Runner:
                 continue
             await self._fetch_client_file(rec, g, f"{client}-before.log", f"'{self.s.client_driver_log}'")
 
-    async def _restart_server(self, rec: RunRecord) -> None:
-        await asyncio.to_thread(self.system.run, self._compose("restart", self.s.compose_service), env=self._compose_env(rec))
+    async def _restart_server(self, rec: RunRecord, hour: float | None = None) -> None:
+        """A restart inside the run; `server: restart {gameHour}` lays the overlay's clock anew first, the hour
+        starting at the restart (x-handoff-night's evening, then its morning)."""
+        await asyncio.to_thread(self.system.run, self._compose("restart", self.s.compose_service), env=self._compose_env(rec, hour))
         ready = await asyncio.to_thread(self.system.tcp_ready, "127.0.0.1", self.s.server_ui_port, self.s.server_ready_timeout_s)
         if not ready:
             raise RunnerError("E_RUN_SERVER_NOT_READY: after restart")
@@ -755,7 +757,7 @@ class Runner:
                 elif step.action == "netem":
                     rec.notes.append(f"step {index}: {await self._netem_step(Netem(**step.args))}")
                 else:
-                    await self._restart_server(rec)
+                    await self._restart_server(rec, step.args.get("gameHour"))
                 return True, ""
             except RunnerError as e:
                 rec.failures.append({"step": index, "kind": "lab", "error": str(e)})
@@ -781,6 +783,8 @@ class Runner:
                 return False, str(e)
         if step.action == "approach":
             return await self._approach(rec, index, step)
+        if step.action == "log-count":
+            return await self._log_count(rec, index, step.client, str(step.args["pattern"]))
         if step.action == "screenshot":
             if step.args.get("count"):
                 return await self._burst(rec, index, step.client, step.args)
@@ -861,6 +865,27 @@ class Runner:
                 rec.failures.append({"step": index, "kind": "timeout", "client": step.client, "error": error})
                 rec.verdict = "red"
                 return False, error
+
+    async def _log_count(self, rec: RunRecord, index: int, client: str, pattern: str) -> tuple[bool, str]:
+        """log-count {pattern} (scenario.py): the seat's Skyrim Platform log copied now, as the run's artifacts copy
+        it (the game holds it open without read sharing), and the lines matching the regex counted for
+        c.log_count("<pattern>"); an unmanaged seat or a failed copy keeps no count, so the assert raises."""
+        g = self.tables.guest_for_client(client)
+        if g is None or not g.managed:
+            return True, f"log-count skipped: {client} is unmanaged or unmapped"
+        copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}.log"
+        try:
+            cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath '{self.s.client_driver_log}' -Destination '{copy}' -Force"]
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            if res.exitcode != 0:
+                return True, f"log-count: the copy exited {res.exitcode}: {res.err.strip()[:200]}"
+            text = await asyncio.to_thread(self.control.file_read, g, copy)
+        except ProxmoxError as e:
+            return True, f"log-count: {e}"
+        rx = re.compile(pattern)
+        n = sum(1 for line in text.splitlines() if rx.search(line))
+        self.board.set_log_count(client, pattern, n)
+        return True, f"{n} line(s) of {client}'s log match {pattern!r}"
 
     async def _approach(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """approach {formId, distance, cell} (scenario.py): the seat placed `distance` units from a named NPC, on her

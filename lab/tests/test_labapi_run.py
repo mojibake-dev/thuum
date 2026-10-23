@@ -1721,6 +1721,21 @@ class CellHostSteps(RunTests):
         self.assertTrue(ups, system.commands)
         return ups[-1]
 
+    def test_a_restart_with_a_game_hour_lays_the_clock_anew(self):
+        """x-handoff-night: the evening at the run's start, the morning after a restart inside it."""
+        files = self._settings_files()
+        run_id, body = self._run("id: t-night\nclients: [c1]\nserver: {gameHour: 23.0}\nsteps:\n  - c1: connect\n"
+                                 "  - server: restart {gameHour: 7.9}\n")
+        self.assertEqual(body["verdict"], "green", body)
+        laid = json.loads((self.tmp / "server-settings-run.json").read_text())
+        self.assertEqual(laid["time"]["start"], {"hour": 7.9})
+
+    def test_a_log_count_on_an_unmanaged_seat_keeps_no_count(self):
+        run_id, body = self._run('id: t-log\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: log-count {pattern: "moved"}\n')
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s["action"] == "log-count")
+        self.assertIn("skipped", step["note"], step)
+
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()
         run_id, body = self._run("id: t-hour\nclients: [c1]\nserver: {gameHour: 7.9}\nsteps:\n  - c1: connect\n")
