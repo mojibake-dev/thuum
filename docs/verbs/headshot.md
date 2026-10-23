@@ -400,5 +400,6 @@ like different bandits spawned in for each"). The one accepted claim hit a
 body already at zero from the body arrows, so nothing visible. "bandits need
 to be uniform across games to ahve headshots register i guess": the helmet
 verdict is right against the record and wrong against the screens until
-npc-fate's one roll (the server's imposed on every engine, or the host's taken
-as the record); this section waits for it.
+npc-fate's one roll. Decided 2026-10-23 (ADR-046, decision 1, Eli: "i want the
+servers roll pushed to both"): the server's roll is imposed on every engine,
+the host's included, and this section passes with npc-fate's build.
