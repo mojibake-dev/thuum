@@ -1,0 +1,44 @@
+# Playtest thirty-two's seats (thuum ADR-040 item 6: `just playtest-setup 32`; the checklist is
+# docs/private/playtest-m3-32.md): M3's NPCs walk, the second session. Thirty-one's live findings went into
+# train-32 (merged 2026-10-22 12:48 PDT, fork parity 16b8854a: the relay's locomotion events, no force-enable of
+# disabled residents, the roster and the loader skip disabled references, the equipment counts, the engine-first
+# figure test) and train-33 (merged 18:13 PDT, fork parity fb6f3f09; the walk cycle: the host's Speed fed into the puppet's movement data each frame,
+# x-npc-legs-burst 20261022-202522's frames showing Sigrid's stride; a held furniture marker no longer zeroes a
+# walker's speed; the host's own cell reported without its load event). The world is thirty-one's as it ended
+# (playtest-m3-31-20261022T185547Z: rotfern as profile 1, test 2 as profile 2) with rotfern's Survival needs reset
+# on the record, the server alone with npcEnabled
+# and the morning clock (7.9), both seats at place 1, Riverwood's landing by the bridge end (Tamriel (4,-12),
+# 0x9732), test 1 first so it hosts, test 2 150 units east facing it. No perks (Eli's rule, 2026-10-20).
+# Everything here is server-side (labCommand); the seats type nothing.
+id: 32
+build: "fork parity fb6f3f09, train-33 merged 2026-10-22 18:13 PDT (the gate 20261023-004438-merge-m3-train-33 9 of 9 green, T2 33 identical, clones promoted); the lab's server image m3-train-33 is the same build; this server alone with npcEnabled on and the clock at 7.9"
+world: playtest-m3-32-rotfern-20261022T2206Z   # thirty-one's world as it ended (playtest-m3-31-20261022T185547Z: rotfern profile 1, test 2 profile 2) with rotfern's
+                                                # Survival needs at zero on the record (81a hunger 570 and 816 exhaustion 342 to 0, 81b cold 0), Eli 2026-10-22: "reset rotfern's survival needs at setup"
+hold:
+  minutes: 180
+  reason: "playtest thirty-two: M3's NPCs walk, second session (fork parity fb6f3f09, train-33)"
+server:
+  # this server alone runs with NPCs on and the morning clock (ADR-035 point 9): playtest-setup lays the run-own
+  # settings overlay (server-settings-run.json beside the world) and starts the server on it
+  npcEnabled: true
+  gameHour: 7.9
+camp:
+  # place 1, in order: test 1 first (the cell's first loader hosts it), then test 2 beside it
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [17225, -47204, -128], rot: [0, 0, 0]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [17375, -47204, -128], rot: [0, 0, 180]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: []   # none: nothing in thirty-two depends on a perk; stated per Eli's rule (2026-10-20)
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
