@@ -322,8 +322,8 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   game activated the bench with her own player and she sat ("rotfern sat
   down on a bench all on her own"; her own activation then followed each of
   the resident's at 01:21:23Z and 01:24:44Z, answered "occupant is another
-  object and is nearby"). Since fork m3-train-34 1db977ed the reply goes
-  only to an actor with a user; CellHostTest's case covers a hosted sitter
+  object and is nearby"). Since train-34 1db977ed (fork parity 7e59c32c, 2026-10-22 21:40 PDT) the
+  reply goes only to an actor with a user; CellHostTest's case covers a hosted sitter
   at a bed. Teleport and ChangeValues keep the host route (the host's game
   must apply them to its actor).
 - A host that quits (playtest 32, 2026-10-22, numidium's section 6): test 2's
