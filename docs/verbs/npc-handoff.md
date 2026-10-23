@@ -517,8 +517,8 @@ the lab. H5 stays HYPOTHESIS until x-handoff-door.
 - [ ] message + validator (same commit): none this slice (no wire change; ActorHandoff is D8's, the second slice)
 - [ ] native hook + T1 (none: no new Address Library id)
 - [x] TS handler, first slice (formView's door move behind npcHandoff, fork m3-train-40 b1aa119e; HandoffService with keyframes is D8's)
-- [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T2 green, first slice (train-40's stage 92529f31: 33 sessions identical, 16:03 PDT; the follow and the cold start send nothing under T2's NPC-less servers, the message layer unchanged)
+- [ ] T3 scenario green, no HYPOTHESIS tags (the probes: x-handoff-restart GREEN 222408, x-handoff-night's claim held, x-handoff-door v2 running; b-npc-handoff itself after the grammar; the gate set 20261023-223340-gate-m3-train-40 GREEN 9/9 stands for the merge by GATE_SET, which waits for Eli's D6 and D12)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
