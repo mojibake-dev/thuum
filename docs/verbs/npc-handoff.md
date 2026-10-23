@@ -464,12 +464,35 @@ engine" is the client's own record today (puppetService.ts:101-117);
 MovementValidation.cpp:115-120 bounds a hosted cell change at no distance
 against 4096 for a same-cell report (:22, :122-128).
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+Built, first slice (train-40, fork m3-train-40 f64d556f, 2026-10-23 14:00
+PDT, stacked on m3-train-39; the decisions as ADR-047, PROPOSED, D6 to D11
+at option A, Eli's D6 answer open: "for D6, i dont love A", numidium's
+answer that A moves no player pending its reply): D6 the follow (cells.rs's
+follow table and may_move verdict; PartOne::MayMoveActor's facts from libespm;
+WorldState::simulatorOf behind HostOf; the listener pin in
+ForceSubscriptionsUpdate; the client's moveRefrToPosition at the record's
+cell change), behind the cellFollow server setting and the npcHandoff client
+key, both default on; D10 the cold start (provisional first grants for
+COLD_START_MS 5 s, UNMEASURED, the nearer player by grid ring taking a cell
+at once, ties with arrival, no churn after; RefreshReach's rings through
+reach_ranked); (e) the refusal logged once a minute per actor with the count,
+the server half alone (the client keeps reporting an actor its engine runs
+indoors, since the follow needs that report; the planned drop from the
+report list would end every interior follow); D11 needs no server change
+(OnActorSighting admits the case) and waits for the night read. Not built:
+D7 (the two election knobs), D8 (ActorHandoff, no wire change this slice),
+D9 (the pass between live hosts, a crossing into another live host's cell
+still refused). The door's exit is a follow too (an interior at either end
+with a persistent actor), so a resident coming out into an exterior its
+follower does not host stays the follower's. mp.get(0, "cellFollows") for
+the lab. H5 stays HYPOTHESIS until x-handoff-door.
+
+- [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-22 draft; the decisions as ADR-047 PROPOSED 2026-10-23, D6 to D11)
+- [x] engine surface cited or delegated (the cell getters through Skyrim Platform and libespm's CELL and record flags; moveRefrToPosition the player's own cross-cell call; no new native)
+- [x] server logic + T0, first slice (D6, D10, e: fork m3-train-40 89c35590 the table with three tests, e4474bcf the core with CellHostTest's follow case; D7 to D9 open)
+- [ ] message + validator (same commit): none this slice (no wire change; ActorHandoff is D8's, the second slice)
+- [ ] native hook + T1 (none: no new Address Library id)
+- [x] TS handler, first slice (formView's door move behind npcHandoff, fork m3-train-40 b1aa119e; HandoffService with keyframes is D8's)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)

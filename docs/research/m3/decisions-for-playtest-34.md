@@ -135,6 +135,12 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
    record out of an interior), with the restart split rule; D7, D8 and D9 as a
    second slice after the playtest unless time allows. Two days with the door
    scenario (a resident through a door seen from both seats).
+   BUILT 2026-10-23 14:00 PDT, fork m3-train-40 f64d556f stacked on
+   m3-train-39: D6 behind the cellFollow server setting and the npcHandoff
+   client key (both default on, since Eli's D6 answer is open), D10 (the
+   first grants provisional for 5 s, the nearer player by grid ring), (e)
+   and the client's door move; D11 needs no server change; D7 to D9 the
+   second slice. The door, restart and night reads wait for the lab grammar.
 3. Train-41, the roll pushed to both (ADR-046 and D2 to D5): the ActorFate message
    and its validator, the server's roll at the first loader's level, the pin at
    the engine's roll site (an RE task for the re-analyst first; the swap after the
