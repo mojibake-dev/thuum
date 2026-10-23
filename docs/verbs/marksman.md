@@ -471,3 +471,29 @@ figure's own arrow dropped" and reports nothing (nothing flew).
   bowstring is empty (039): the nocked arrow leaves the bow at the release
   though the launch built none.
 
+
+## Playtest thirty-two's tenth arrow (2026-10-22)
+
+rotfern (test 1; the Long Bow 0x3B562 and iron arrows 0x1397D, both picked
+up in the world) shot Embershard's bandits on parity fb6f3f09: shots
+accepted from 01:51:56.180 to 01:52:16.080 UTC (eight stamps in the log
+read, "OnPlayerBowShot - ff000000 shot 1397d from 3b562"), the headshot
+kill of 39fe4 among them at 01:52:11.449. The next, at 01:52:19.646, was
+refused E_SHOT_EQUIPMENT ("shot 1397d from 3b562, which its equipment does
+not hold") and its hit 0.36 s later E_HIT_NO_SHOT at 907 units: an arrow
+that flew and struck in her game and did nothing (a player-visible wrong
+outcome, open). No equipment or inventory line for ff000000 lies between
+the last accepted shot and the refusal, and an accepted UpdateEquipment is
+not logged (ActionListener::OnUpdateEquipment warns on refusals alone), so
+the record of her equipment can have been replaced silently in those 3.5 s
+by a snapshot with the bow or the arrows not worn. Candidates, unmeasured:
+(a) a snapshot taken while the engine moved the ammo's worn mark between
+stacks as the count fell (getInventory reads worn from isEquipped and the
+entry's ExtraWorn); (b) the record's arrows running out ahead of the game's
+(RemoveItem per accepted shot, SendInventoryUpdate after each) and the
+engine's unequip of an empty quiver reaching the server as the next release
+was already in flight. The read: a probe (x-quiver-dry) shooting a
+twelve-arrow quiver dry at 2 s intervals with the server's equipment record
+dumped after each shot and the client's UpdateEquipment sends logged, on a
+train that logs accepted equipment updates at debug. A row of marksman's
+until then.
