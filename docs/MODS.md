@@ -662,6 +662,19 @@ outside the layer (Light Placer for Stealth Detection Fixes, Media Keys Fix for 
 Stuck Key Fix, Paired Animation Improvements for Open Animation Replacer, BodySlide for
 Racemenu Misc Slider) are optional on their pages.
 
+One more for Eli's call, from the lab (2026-10-22, train-34's first gate): Intuitive
+Dragon Ride Control's Papyrus start-up check showed its "SKSE is not loaded. Dragon riding
+will not work. [OK]" message box on a seat whose SKSE and whose IDRC DLL had loaded
+normally (c2-skse64.log and the DLL's own log identical to a green run's), twice in a row
+on b-invis-recast (20261023-033739 and 034010) and never in the forty-odd runs around
+them; its log shows the mod's InitializeData_SKSE running twice interleaved on the game
+thread in the reds against twice in sequence in the greens, so the check's timing is the
+mod's own race. The box pauses the game until OK, so a player can meet it too, and the lab
+reads the paused run as measuring nothing. Options: patch the check (its scripts are
+Papyrus, the box is one line), drop the mod from the set, or let the lab dismiss the box
+(a stopgap that hides a real load problem if one ever comes). The server loads its esp
+(lab/deploy/sky-srv/server-settings.json).
+
 **Not placed (rows with source `out`, not dropped silently):**
 - sse-engine-fixes-skse64-plugin-7: part 2 only (the game-root preloader d3dx9_42.dll); add-mods.ps1 installs under Data, and part 1, the SKSE plugin, was never on Fenestrate; Nexus 17230 file 725261
 - Fenestrate's Core Impact Framework 1.2.8 is not copied: the layer keeps CIF 2.0.7, which
