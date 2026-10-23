@@ -1263,3 +1263,34 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
 - [x] parity scenario green, or its later list reviewed with it (ADR-031) (b-cell-host green in the gate; the engine-alone references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 are the diff's base, their reruns on the merged base listed in the Dynamic plan)
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033) (the handoff and the restart inside b-npc-puppet; the figure beside a puppet in b-cell-host; playtest 31's checklist carries the rest by item)
 - [x] ledger and suppression registry updated (no Papyrus native added: setPuppet and isPuppet are Skyrim Platform exports, listed in the Suppress section's registry; docs/NATIVES.md unchanged)
+
+## Playtest thirty-three (2026-10-23, fork parity ac557132; fixes on m3-train-36)
+
+- A late-joining seat found eight residents frozen at its own engine's
+  placement, unblocked and unsampled, until a lookup loaded their records.
+  WorldState::LoadChangeForm defers a game-file id's ChangeForm until the form
+  loads (changeFormsForDeferredLoad, WorldState.cpp:279); the chunk loader
+  loads the game files' exterior placements alone (GetNeighborsByPosition),
+  and Riverwood's residents are placed indoors, so the server held no form for
+  them from the restore until OnActivate's LookupFormById loaded one at the
+  host's own E (refused for reach against the stale record; the host's first
+  report, a cell move, 31 to 48 ms later). No CreateActor reached any seat
+  meanwhile and both engines ran them by their own schedules. The host's roster
+  never named them (its rosters carried the animals, 4 to 12 entries), which
+  OnActorSighting would have answered with a load; why the host's attached set
+  lacked the named residents is the open question, readable now that the
+  server logs each roster's ids. Train-36: WorldState::LoadDeferredActors as
+  the save attaches, every saved game-file actor on the grid at its saved
+  position (NpcExists' case, Hod 0x1348a).
+- E on such an unblocked puppet opened the engine's dialogue with an AI-off
+  actor, which never answers, and the Dialogue Menu stayed open (test 2 stuck
+  until a relaunch). The block was the apply's per relayed sample, and
+  7e59c32c had dropped the demote-time call. Train-36: PuppetApi's Demote sets
+  TESObjectREFR::SetActivationBlocked(true) (CommonLibSSE-NG TESObjectREFR.h:464)
+  and the Promote clears it; the TS blockActivation calls are gone for puppets
+  (the figures keep the per-sample one), so no Papyrus-backed call runs at the
+  attach or per sample for the village.
+- Held: the bench (1db977ed), the handoff both ways in about 4 s, talk on the
+  promoted seat after a handoff (8eafa85d's claim, which x-npc-talk-prompt
+  055858 had read in the state), the walk ("a Tiny bit jumpy, otherwise doing
+  ok").
