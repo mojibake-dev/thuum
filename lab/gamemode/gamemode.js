@@ -12,6 +12,7 @@
 //              {kind: "cellHost", cell}: who hosts the cell on the server (docs/verbs/cell-host.md)
 //              {kind: "ref", actorId}: an actor's record by form id (a hosted NPC's position and health)
 //              {kind: "follow", actorId}: whether a game follows that actor out of its hosted cells (npc-handoff)
+//              {kind: "fate", actorId}: the server's roll for a game-file actor (npc-fate, ADR-046)
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -176,6 +177,29 @@ const state = {
       following: Boolean(row),
       player: row ? Number(row.player) : 0,
       cell: row ? Number(row.cell) : 0,
+    };
+  },
+
+  // The server's roll for a game-file actor (npc-fate, ADR-046): its actorFate,
+  // {baseId, level, raceId, worn}, as {found, actorId, fated, baseId, level,
+  // raceId, worn}; an actor the server rolled nothing for is fated: false; a
+  // server without the property answers found: false
+  fate(payload) {
+    const actorId = Number(payload.actorId);
+    let f;
+    try {
+      f = mp.get(actorId, "actorFate");
+    } catch (e) {
+      return { found: false, actorId, error: String((e && e.message) || e) };
+    }
+    return {
+      found: true,
+      actorId,
+      fated: Boolean(f),
+      baseId: f ? Number(f.baseId) : 0,
+      level: f ? Number(f.level) : 0,
+      raceId: f ? Number(f.raceId) : 0,
+      worn: f && Array.isArray(f.worn) ? f.worn.map(Number).sort((x, y) => x - y) : [],
     };
   },
 
