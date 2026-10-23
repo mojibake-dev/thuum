@@ -1769,9 +1769,23 @@ effects line changed between the 10-21 driver (ceded7d6) and the night's
 predates the essentials layer that brought the mod (10-19), but the probe was
 green on 10-21 on trains 30 and 31 with the mod in the load order, so the
 mod's presence alone is not it: the cloak runs at the hit now where it did
-not. Lead: the Attack perks' entry point applies the cloak when the player's
-hit lands, in each game for its own player, and something in trains 32 to 37
-changed what a hit on a figure means to it. Reads: p-spell-bolt on parity
+not. Mechanism (numidium's agent decoded the plugin fully on sky-srv,
+2026-10-23 07:3x: no script casts the cloak, no perk names it): SPID 7.3.0's
+StealthKillDetectionFix_Attack_DISTR.ini hands ability 0x817 madDetectionCloak
+to every non-player actor at load, never the player; the cloak's three
+constant effects fire while the holder detects the player and is not
+sneaking, has the player as combat target, or sees the player and is hostile;
+its item 0x818 carries 0x811, whose own condition is GetIsID(0x7 Player), so
+the dummy lands on Player-based actors alone. In c1's game the only holder is
+c2's figure (an NPC to SPID, base 0x7 to GetIsID), and the bolt's hit makes
+c1 its combat target or detected attacker, so it pulses the dummies onto c1's
+own actor and itself at the landing. The figure is therefore an NPC to every
+distributor in the layer and a Player to every GetIsID(0x7) condition: a
+design row for the figure model (an exclusion SPID understands, a keyword or
+the figures' own base, or a base that is neither; Eli's call with the layer).
+What changed since 10-21 is the figure's base or its combat answer to a hit
+(my guess: train-32's equipment reaching the other seat, an armed figure
+fighting back where a naked one did not). Reads: p-spell-bolt on parity
 7b3a17c6 (20261023-142552, the stage m3-train-36) is RED with the same diff
 (both dummies at 3416 ms), so train-37 is cleared and the change sits in
 trains 32 to 36 (or the lab since 10-21); the _Attack quest's script
