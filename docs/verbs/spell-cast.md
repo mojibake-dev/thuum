@@ -1776,21 +1776,25 @@ to every non-player actor at load, never the player; the cloak's three
 constant effects fire while the holder detects the player and is not
 sneaking, has the player as combat target, or sees the player and is hostile;
 its item 0x818 carries 0x811, whose own condition is GetIsID(0x7 Player), so
-the dummy lands on Player-based actors alone. In c1's game the only holder is
-c2's figure (an NPC to SPID, base 0x7 to GetIsID), and the bolt's hit makes
-c1 its combat target or detected attacker, so it pulses the dummies onto c1's
-own actor and itself at the landing. The figure is therefore an NPC to every
+the dummy lands on Player-based actors alone. The holders, by the recorder of the
+parity run 142552 (trace-c1.json): the lab spawn's fox 0x107cf9 and rabbit
+0x107d07 (a wolf 0x86112 beside them), every 0xfe014811 application cast by
+one of them, onto c1's own actor and the figure from 3416 ms every 500 ms;
+the 10-21 green's watch listed the figure alone, the cleaner having removed
+the wildlife then, and since npc-puppet (the cleaner's floor at 0xff000000,
+19e7ca9b) the engine's own references stand in every game. So the bolt's
+landing made the animals detect or target c1 and their cloaks pulsed. Not a
+spell-path regression; the declaration is on the probe's later list (main
+626108f6, its own commit, docs/private/reviews-pending.md), the reference
+stays. The figure is therefore an NPC to every
 distributor in the layer and a Player to every GetIsID(0x7) condition: a
 design row for the figure model (an exclusion SPID understands, a keyword or
 the figures' own base, or a base that is neither; Eli's call with the layer).
-What changed since 10-21 is the figure's base or its combat answer to a hit
-(my guess: train-32's equipment reaching the other seat, an armed figure
-fighting back where a naked one did not). Reads: p-spell-bolt on parity
-7b3a17c6 (20261023-142552, the stage m3-train-36) is RED with the same diff
-(both dummies at 3416 ms), so train-37 is cleared and the change sits in
-trains 32 to 36 (or the lab since 10-21); the _Attack quest's script
-conditions from the PEX (lab/pex.py) are the next read, then the bisect by
-mechanism among those five trains (what a hit on a figure means to the perk:
-the figure's base, its deferred kill, the hit path). The reference stays
+What changed since 10-21 is the wildlife standing in the lab's games, npc-puppet's
+doing by design; the figure's double nature stands as the row (the dummy landed
+on the figure, so GetIsID(0x7) passed for it). Reads: p-spell-bolt on parity
+7b3a17c6 (20261023-142552, the stage m3-train-36) was RED with the same diff
+(both dummies at 3416 ms), clearing train-37; the recorder then named the
+casters (above), which ends the bisect. The reference stays
 until the cause is named (no retake under ADR-042b without it); the row
 blocks nothing, the probes are invisible to a player.
