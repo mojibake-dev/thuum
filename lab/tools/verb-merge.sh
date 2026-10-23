@@ -13,7 +13,10 @@
 #      cites a finished set instead (ADR-042: a nightly or a layer's sweep of this
 #      exact stage), when lab/tools/gate-cite.py's five checks hold; else the gate
 #      runs;
-#   4. fork parity fast-forwarded to the branch (a plain push; a branch that is
+#   4. fork parity fast-forwarded to the commit the gate played: the branch's
+#      head as read at the start, held to the gate's own builds by gate-cite.py
+#      (--head, and --fresh for a gate this merge ran); a commit pushed to the
+#      branch meanwhile waits for its next stage (a plain push; a branch that is
 #      not ahead of parity stops here);
 #   5. both clones' clean-m1-next promoted to clean-m1 when the branch changed
 #      the client (PROMOTE=1 forces it, PROMOTE=0 skips it);
@@ -25,12 +28,12 @@ cd "$(dirname "$0")/../.."
 branch=${1:?fork branch}; shift
 fork=${FORK_DIR:-skymp}   # the fork checkout to fetch, read and push from; a worktree without the submodule names the shared one
 git -C "$fork" fetch -q origin "$branch" parity
-head=$(git -C "$fork" rev-parse --short=8 "origin/$branch")
+sha=$(git -C "$fork" rev-parse "origin/$branch"); head=${sha:0:8}   # what parity takes, whatever the branch does meanwhile
 echo "== verb-merge $branch ($head) $(date +%H:%M:%S)"
-if ! git -C "$fork" merge-base --is-ancestor origin/parity "origin/$branch"; then
+if ! git -C "$fork" merge-base --is-ancestor origin/parity "$sha"; then
   echo "== origin/$branch does not contain origin/parity: merge parity into the branch first (never rebase)" >&2; exit 2
 fi
-if [ "$(git -C "$fork" rev-parse origin/parity)" = "$(git -C "$fork" rev-parse "origin/$branch")" ]; then
+if [ "$(git -C "$fork" rev-parse origin/parity)" = "$sha" ]; then
   echo "== origin/$branch is parity already; nothing to merge" >&2; exit 2
 fi
 
@@ -77,7 +80,7 @@ echo "   $gate"
 setfile=""; cited=""
 if [ -n "${GATE_SET:-}" ]; then
   echo "   citing run set $GATE_SET (ADR-042)"
-  if FORK_DIR="$fork" python3 lab/tools/gate-cite.py "$GATE_SET" "$branch" $gate; then
+  if FORK_DIR="$fork" python3 lab/tools/gate-cite.py --head "$sha" "$GATE_SET" "$branch" $gate; then
     mkdir -p lab/results/runsets
     curl -fsS -m 30 "${LAB_API:-https://thuum.gaussing.tv/lab}/runset/$GATE_SET" > "lab/results/runsets/$GATE_SET.json"
     setfile=lab/results/runsets/$GATE_SET.json; cited=" (cited, ADR-042)"
@@ -91,6 +94,11 @@ if [ -z "$setfile" ]; then
     echo "== the gate is not green: parity not moved" >&2; exit 1
   fi
   setfile=$(ls -t lab/results/runsets/*-merge-"$branch"*.json | head -1)
+  # the gate played $head's stage, as one build that nothing replaced: a cited set's checks 2 to 5
+  echo "   the gate's builds against $head"
+  if ! FORK_DIR="$fork" python3 lab/tools/gate-cite.py --fresh --head "$sha" "$(basename "${setfile%.json}")" "$branch" $gate; then
+    echo "== the gate did not play $head's stage (above): parity not moved" >&2; exit 1
+  fi
 fi
 runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"] for s in rs["scenarios"] for e in rs["runs"].get(s,[]) if e.get("run")]; print(f"{r[0]} to {r[-1]} ({len(r)} runs)" if r else "")' "$setfile")
 watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1]))["watch"]))' "$setfile")
@@ -104,14 +112,17 @@ if [ -n "${T2_LOG:-}" ]; then
 fi
 
 echo "== 4. parity -> $branch $head $(date +%H:%M:%S)"
+git -C "$fork" fetch -q origin "$branch" parity
+now=$(git -C "$fork" rev-parse "origin/$branch")
+[ "$now" = "$sha" ] || echo "   origin/$branch moved to ${now:0:8} during the merge: parity takes the gated $head, the rest waits for its stage"
 old_parity=$(git -C "$fork" rev-parse origin/parity)
-git -C "$fork" push -q origin "origin/$branch:parity"
+git -C "$fork" push -q origin "$sha:refs/heads/parity"
 git -C "$fork" fetch -q origin parity
-[ "$(git -C "$fork" rev-parse --short=8 origin/parity)" = "$head" ] || { echo "== parity did not land on $head" >&2; exit 1; }
+[ "$(git -C "$fork" rev-parse origin/parity)" = "$sha" ] || { echo "== parity did not land on $head" >&2; exit 1; }
 echo "   fork parity = $head (was ${old_parity:0:8})"
 
 # what the branch changed on the client side since the parity it grew from
-client_changed=$(git -C "$fork" diff --name-only "$old_parity" "origin/$branch" -- skymp5-client skyrim-platform skymp-wire/crates/wire-client-ffi 2>/dev/null | head -1 || true)
+client_changed=$(git -C "$fork" diff --name-only "$old_parity" "$sha" -- skymp5-client skyrim-platform skymp-wire/crates/wire-client-ffi 2>/dev/null | head -1 || true)
 promote=${PROMOTE:-}
 [ -n "$promote" ] || { [ -n "$client_changed" ] && promote=1 || promote=0; }
 if [ "$promote" = 1 ]; then

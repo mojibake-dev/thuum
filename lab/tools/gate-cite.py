@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""gate-cite.py [--layer <thuum branch> <run id>] <run set id> <fork branch> <gate scenario...>: whether a finished
+"""gate-cite.py [--layer <thuum branch> <run id>] [--head <sha>] [--fresh] <run set id> <fork branch> <gate scenario...>: whether a finished
 run set may stand for a merge's gate (ADR-042, `GATE_SET=<id> just verb-merge`; ADR-042a, a layer staged under that
 train, `GATE_SET=<id> LAYER_RUN=<run id> TRAIN=<fork branch> just layer-merge <thuum branch>`). Exits 0 when every
 check holds, 1 when one fails (the merge then runs its own gate), printing one line per check:
@@ -25,6 +25,12 @@ every scenario of the set):
 7. the thuum branch's head carries that staged layer: every path it changed since <sha8> is a .md file or matches
    main's blob at the branch's last merge of main (that merge brought it; main may have moved since);
 8. persist's mods are the ones laid: /srv/persist/mods/SHA256SUMS was last written before that run began.
+
+With --head <sha>, check 4 holds the stage to that commit (verb-merge's head as read at its start) instead of the
+branch's head now. With --fresh, the set is the merge's own gate, just run: runset.sh judged its verdict (an ADR-027
+watch item may end red there), so check 1 is not repeated, and checks 2 to 5 hold its builds to the head, the one
+commit verb-merge pushes to parity (m3-train-34, 2026-10-22: a commit pushed to the branch a minute into the gate would
+have reached parity ungated).
 
 FORK_DIR (default skymp) is the fork checkout; LAB_API and RESULTS name lab-api and the results site."""
 from __future__ import annotations
@@ -151,6 +157,11 @@ def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, hea
     return out
 
 
+def own_gate(rows: list[tuple[bool, str]]) -> list[tuple[bool, str]]:
+    """--fresh: the merge's own gate, whose verdict runset.sh judged, keeps checks 2 to 5 and not check 1."""
+    return [(True, "1. the merge's own gate: its verdict is runset.sh's")] + rows[1:]
+
+
 def _time(s: str) -> datetime.datetime:
     return datetime.datetime.fromisoformat(s.replace("Z", "+00:00"))
 
@@ -189,12 +200,18 @@ def _blob(ref: str, path: str) -> str | None:
 
 
 def main(argv: list[str]) -> int:
-    layer = None
-    if argv[:1] == ["--layer"]:
-        if len(argv) < 5:
+    layer, head, fresh = None, None, False
+    while argv[:1] in (["--layer"], ["--head"], ["--fresh"]):
+        if argv[0] == "--fresh":
+            fresh, argv = True, argv[1:]
+            continue
+        if len(argv) < (5 if argv[0] == "--layer" else 4):
             print(__doc__.split("\n\n")[0], file=sys.stderr)
             return 2
-        layer, argv = (argv[1], argv[2]), argv[3:]
+        if argv[0] == "--layer":
+            layer, argv = (argv[1], argv[2]), argv[3:]
+        else:
+            head, argv = argv[1], argv[2:]
     if len(argv) < 2:
         print(__doc__.split("\n\n")[0], file=sys.stderr)
         return 2
@@ -209,14 +226,14 @@ def main(argv: list[str]) -> int:
                     results[e["run"]] = fetch(f"{RESULTS}/{e['run']}/result.json")
                 except Exception:
                     results[e["run"]] = {}
-    head8 = subprocess.run(["git", "-C", fork, "rev-parse", "--short=8", f"origin/{branch}"], check=True, capture_output=True, text=True).stdout.strip()
+    head8 = subprocess.run(["git", "-C", fork, "rev-parse", "--short=8", head or f"origin/{branch}"], check=True, capture_output=True, text=True).stdout.strip()
     bs = builds(rs, results)
     image, _, descs = next(iter(bs)) if len(bs) == 1 else ("", "", ())
     sha8 = staged_sha(branch, image, descs)
     changed = None
     registry_id = None
     if sha8:
-        d = subprocess.run(["git", "-C", fork, "diff", "--name-only", sha8, f"origin/{branch}"], capture_output=True, text=True)
+        d = subprocess.run(["git", "-C", fork, "diff", "--name-only", sha8, head or f"origin/{branch}"], capture_output=True, text=True)
         changed = [p for p in d.stdout.splitlines() if p] if d.returncode == 0 else None
         # the commit's own tag, whichever tag the stage ran: its id is what the set's runs must have played
         tagged = image if image.endswith(f"-{sha8}") else f"{image}-{sha8}"
@@ -241,6 +258,8 @@ def main(argv: list[str]) -> int:
         # a layer's gate is the whole set (ADR-042a), less what is pending at the merge (ADR-042b)
         gate = [s for s in rs.get("scenarios", []) if s not in pending]
     rows = checks(rs, results, gate, branch, head8, changed, registry_id, live_server, live_descs, turbo_since, pending)
+    if fresh:
+        rows = own_gate(rows)
     if layer:
         lbranch, lrun = layer
         try:
