@@ -287,6 +287,16 @@ class NpcKillStep(unittest.TestCase):
 
         step = load_scenario("id: x-kill\nclients: [c1]\nsteps:\n  - c1: npc-kill {formId: 0x13483}\n").steps[0]
         self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "npc-kill", {"formId": 0x13483}))
+        # the seat's player as the killer (a protected actor's death, x-npc-death)
+        step = load_scenario("id: x-kill\nclients: [c1]\nsteps:\n  - c1: npc-kill {formId: 0x13483, killer: player}\n").steps[0]
+        self.assertEqual(step.args, {"formId": 0x13483, "killer": "player"})
+
+    def test_look_at_is_a_client_step(self):
+        # the player's view onto a named actor, for a key press on it (x-npc-talk-prompt v3)
+        from labapi.scenario import load_scenario
+
+        step = load_scenario("id: x-look\nclients: [c1]\nsteps:\n  - c1: look-at {formId: 0x13483}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "look-at", {"formId": 0x13483}))
 
 @needs_deps
 class ScreenshotStep(unittest.TestCase):
