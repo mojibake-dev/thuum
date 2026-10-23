@@ -164,6 +164,14 @@ Rung: R0 for the fate (the roll, the death, the body's point, the respawn, the l
   the sample's height change; a trap: an activation the server saw; an NPC
   against an NPC: a hit the host reported through OnHit with both ids, which
   the server numbers); the rest refused and logged, ADR-039's shape.
+  2026-10-23: Eli asked for a mixed trust model instead ("npc's health hits
+  0, by any damage, that death propagates?"), drafted as ADR-048 (PROPOSED,
+  docs/DECISIONS.md): option A is (a), B is (b), C adds the rung R1h, a
+  host's death from a cause the server has no number for accepted under
+  plausibility checks and logged, a player's hit staying the server's
+  number, with a trustLevel setting (friends, strict) and C-ii on NPC-only
+  fights. D1 of the playtest-34 memo waits on it; train-42 builds the
+  answer.
 - Why the respawn is the server's and not the engine's: the engine's reset
   runs per game on each game's clock and detach times, so two games would
   reset one cell at two moments, each re-rolling (observation 1 again, every
