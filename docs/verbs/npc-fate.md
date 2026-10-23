@@ -748,7 +748,7 @@ rolls returned into 16155's item loop, and each fresh clone got
 RemoveOutfitItems(none) from InitInventoryIfRequired, which the read said
 touches no outfit: the outfit detour's site is in doubt (HYPOTHESIS raised:
 16155 may be reached from a caller other than 16072, or 16072's entries were
-hidden by the refs filter; the hook counts decide). The leg's frida step
+hidden by the refs filter; the hook counts decide). The counts (16:49 PDT): initOutfitItems and addWornOutfit n 0 in both legs, their hooks attached, while outfitEquip ran 65 times (47 on other actors) and the outfit-shaped rolls returned to SkyrimSE.exe+0x236d7c and +0x23a37a; so the outfit detour's site (16072) is FALSIFIED for 1.6.1170 and the real site is an RE read (re-npc-roll.md section 8, commissioned). The species half of the pin stands on observations 1 and 2; the worn asserts of x-npc-fate-pin stay red until the outfit detour moves. The leg's frida step
 returns before the hooks are live (the resolver ran 3 s before leg 1's
 ready), so a trace of a cell's load needs the game armed from launch or a
 15 s wait before the teleport. Also read: 0x85547 died to 0x85549 in a
