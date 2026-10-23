@@ -1771,8 +1771,12 @@ green on 10-21 on trains 30 and 31 with the mod in the load order, so the
 mod's presence alone is not it: the cloak runs at the hit now where it did
 not. Lead: the Attack perks' entry point applies the cloak when the player's
 hit lands, in each game for its own player, and something in trains 32 to 37
-changed what a hit on a figure means to it. Reads under way: p-spell-bolt
-once on parity 7b3a17c6 (trains 32 to 36 or train-37), then the _Attack
-quest's script conditions from the PEX (lab/pex.py). The reference stays
+changed what a hit on a figure means to it. Reads: p-spell-bolt on parity
+7b3a17c6 (20261023-142552, the stage m3-train-36) is RED with the same diff
+(both dummies at 3416 ms), so train-37 is cleared and the change sits in
+trains 32 to 36 (or the lab since 10-21); the _Attack quest's script
+conditions from the PEX (lab/pex.py) are the next read, then the bisect by
+mechanism among those five trains (what a hit on a figure means to the perk:
+the figure's base, its deferred kill, the hit path). The reference stays
 until the cause is named (no retake under ADR-042b without it); the row
 blocks nothing, the probes are invisible to a player.
