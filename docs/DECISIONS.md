@@ -2549,6 +2549,15 @@ deaths and every actor fact (ProcessorActorDeath) and leaves vetoes to
 server scripts; Skyrim Together is client-authoritative throughout; ours sits
 between and says where.
 
+Code facts (15:17 PDT, docs/research/m3/death-path.md): no host death report
+exists today, so H5's "counted" is a plan; the record holds only the server's
+health numbers (the host's sample is relayed, never stored); the cause the
+server holds at a death is exactly the killer pointer, a player, a hosted NPC
+or none, and SetLastHitTakenTime is the one durable "a numbered hit landed
+recently" fact; and every receiving puppet applies the relayed sample's isDead
+with no record behind it, a dormant hole under the deferred kill that train-42
+closes under any option (a puppet dies by the server's word alone).
+
 Options.
 - A. Every NPC death stays R0 (D1's A): the server's number alone kills; a
   death without a number leaves the actor at the floor, counted. Nothing a
