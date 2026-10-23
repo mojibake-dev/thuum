@@ -247,8 +247,16 @@ and 8 a second only ever stops a flood.
   figure's view (equipment.ts keepOnlyServerSpells, formView.ts); a puppet
   or a hosted resident is never touched (isFigureBase: the Player base or a
   base this game made). The Player base stays; perks and keywords take a
-  native enumeration when a case shows them. Oracle owed: a figure's spell
-  list fact in the lab (x-figure-spells).
+  native enumeration when a case shows them. Oracle: x-figure-spells
+  20261023-183306 GREEN on parity a25caf02 (lab-api ee94dffa, lab-driver
+  8947851d): each seat's figure of the other player read added [] and extra
+  [] at 3 s and at 20 s, c2's figure of test 1 with Firebolt 0x12FD0 in its
+  right hand (the equipped spell sits in the hand slot, not among the added
+  spells, so the strip never meets it). Two facts for the figure model: the
+  figures are the Player base 0x7 (so GetIsID(0x7) passes on them, as the
+  mod's probes showed), and whether SPID's 0x817 was stripped before 3 s or
+  never came is unread (the old parity's run would tell; not worth a
+  re-stage, the rule holds either way).
 
 - Mechanism: a Skyrim Platform export beside castSpellImmediate,
   performAction(actor, action, idle, eventName, type) (MagicApi.cpp on fork
