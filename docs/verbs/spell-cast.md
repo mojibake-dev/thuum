@@ -1199,9 +1199,22 @@ health message. A second red within two sweeps makes it a bug.
   one unit whenever the target equals the last target this code sent
   (within half a unit), whatever the sample count, and a settle prints
   `settle <id>: <units> units from (x, y) to (x, y)` to the console (c1.log)
-  for the lab's read. Read: b-duel three times on the stage, 19 or 20 ticks
-  each, the phase-2 error back under one unit, the settle line in c1.log
-  after the stagger. Whether train-33 shifted the push's size is not asked
+  for the lab's read. 3bd8d8ae on the stage ({now} PDT): b-duel green three
+  times on its assert (19, 17 and 15 ticks) but the figure still 4.4 and 4.9
+  off after phase 2 in two of three, and no settle anywhere: the stillness
+  test compared the target with the last translation this code had sent,
+  and a figure placed by a teleport that never walked has none behind it,
+  so the test never armed; and the console line never reaches c1.log at all
+  (printConsole is the in-game console; the [verb:npc-puppet] lines are the
+  native logger's), so the watch's phase-2 end error is the read. Fix on
+  fork m3-train-33 fb6f3f09: the stillness is read from consecutive records
+  (the target within half a unit of the previous apply's), which a standing
+  player's reports satisfy every tick. Read: b-duel three times on the
+  stage, 19 or 20 ticks each, the phase-2 error back under one unit by the
+  end of the watch; if a run still ends off with the record still, the
+  settle moves from translateTo to setPosition for the standing case
+  (HYPOTHESIS that a 0.2 s translation under the self keep-offset does not
+  finish). Whether train-33 shifted the push's size is not asked
   (HYPOTHESIS either way; the deadband is the defect). Row for the figures, from the
   same watches: on every run, green and red, 16b8854a's included, c2's
   figure on c1's screen stands about 8 units below c2's own z on the lab
