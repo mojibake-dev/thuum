@@ -432,6 +432,14 @@ each imposition's target is explicit.
   for Alvor's record to come out by the roster and go back into his house
   under the host's report, D6's Follow, with Hod as the fallback resident.
   D6 is unproven until v2 runs; D10 is proven; D11's night step held.
+  Reruns (16:14 PDT): x-handoff-night 230913 GREEN (the record in his house
+  at 23.0, outdoors after the restart at 7.9, c1 live, c2's puppet blocked:
+  D11 proven). x-handoff-door v2 230339 RED on the file's fact again:
+  outdoors the server's record cell is the worldOrCell descriptor, the
+  worldspace "3c:Skyrim.esm", and the interior only indoors (the client's
+  .cell is the parent CELL); Alvor was out the whole time. v3 waits for the
+  worldspace, then for leaving it (wherever his evening takes him), and
+  compares the two engines' cells to each other.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
