@@ -59,6 +59,20 @@ parity:
     # the figures' AI probes idles every frame; refused, not sync
     - "*/refused/Idle*"
     - "*/refused/move*"
+    # the essentials layer's Stealth Detection Fixes (StealthKillDetectionFix.esp,
+    # 2026-10-19): SPID gives its ability madDetectionCloak 0x817 to every
+    # non-player actor, and when such an actor detects or targets the player
+    # the cloak pulses the dummies 0x811 and 0x81d (magnitude 1, duration 1)
+    # onto every Player-based actor in range every 500 ms. Since npc-puppet
+    # the engine's own references stand in the lab (the cleaner's floor at
+    # 0xff000000), so the spawn's fox, rabbit and wolf hold the cloak and
+    # pulse the caster's own actor and the figure at the bolt's landing
+    # (nightly 20261023-140019, 140742; parity 142552: caster 0x107cf9 and
+    # 0x107d07). The engine-alone reference of 10-15 predates the mod. The
+    # mod's probe, not the spell's; the figure's double nature (an NPC to
+    # SPID, a Player to GetIsID) is the figure model's row (spell-cast.md)
+    - "*/effects/fe014811"
+    - "*/effects/fe01481d"
 steps:
   - c1: connect
   - c2: connect
