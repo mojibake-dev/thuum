@@ -326,6 +326,15 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   only to an actor with a user; CellHostTest's case covers a hosted sitter
   at a bed. Teleport and ChangeValues keep the host route (the host's game
   must apply them to its actor).
+- A host that quits (playtest 32, 2026-10-22, numidium's section 6): test 2's
+  game stopped at 02:31:36Z while it held Riverwood; the server dropped the
+  user at about 02:31:54Z (the connection timeout) and the cell passed at
+  the grace, 02:32:00Z. For about 24 s the cell belonged to a game that was
+  gone: its residents froze on the other screen, nobody's to move. Row: the
+  client's transport sends netcode's disconnect at process exit (renet's
+  disconnect packets, wire-client-ffi, ADR-011) so the drop is immediate, or
+  a host's timeout is shorter than a visitor's; the server decides either
+  way (R0).
 
 ## Client
 
