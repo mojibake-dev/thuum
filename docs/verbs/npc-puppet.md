@@ -1291,12 +1291,19 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
   Train-36: WorldState::LoadDeferredActors as the save attaches, every saved
   game-file actor on the grid at its saved position (NpcExists' case, Hod
   0x1348a), which puppeted seven of the eight residents on the late seat.
-  The roster's source is the next train's: a Skyrim Platform export listing
-  the engine's high-process actors (RE::ProcessLists::highActorHandles,
-  CommonLibSSE-NG include/RE/P/ProcessLists.h:69) in place of the attach
-  events, for the roster and for the demote at an actor's appearance; the
-  roster's ids line is its oracle. HYPOTHESIS until that run: the attach
-  event's silence for persistent references is the whole of the gap.
+  The roster's source is train-37's (fork m3-train-37 69958274, stacked on
+  train-36): the export getHighProcessActors lists the engine's high-process
+  actors (RE::ProcessLists::highActorHandles, CommonLibSSE-NG
+  include/RE/P/ProcessLists.h:69; the game thread snapshots them by form id
+  at every Actor animation stage in PuppetHooks' queue detour, the JS thread
+  reads the snapshot with no game call); HostService's roster iterates it in
+  place of the attach set, and PuppetService polls it every two seconds and
+  demotes any game-file actor the server's word does not name as this game's
+  (a resident the server does not hold yet is a puppet on its own host for
+  one roster round, until its CreateActor's word promotes it). The roster's
+  ids line and x-npc-late-join (all eight, Hilde included) are its oracle.
+  HYPOTHESIS until that run: the attach event's silence for persistent
+  references is the whole of the gap.
 - E on such an unblocked puppet opened the engine's dialogue with an AI-off
   actor, which never answers, and the Dialogue Menu stayed open (test 2 stuck
   until a relaunch). The block was the apply's per relayed sample, and
