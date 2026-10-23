@@ -1278,10 +1278,25 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
   meanwhile and both engines ran them by their own schedules. The host's roster
   never named them (its rosters carried the animals, 4 to 12 entries), which
   OnActorSighting would have answered with a load; why the host's attached set
-  lacked the named residents is the open question, readable now that the
-  server logs each roster's ids. Train-36: WorldState::LoadDeferredActors as
-  the save attaches, every saved game-file actor on the grid at its saved
-  position (NpcExists' case, Hod 0x1348a).
+  lacked the named residents was the open question, and train-36's stage
+  answered it (the server now logs each roster's ids; x-npc-late-join
+  20261023-092309): the host's rosters carry the animals, the creatures and
+  the placements (9b0dd 9b0dc 9b0db 6e296 8480b 6e297 105a25 105a35 8cacd)
+  and never a named resident, so the cellAttach events HostService's attached
+  set is built from do not fire for the persistent residents (the engine
+  attaches them to the worldspace's persistent cell at the world's load, not
+  at a cell's), and PuppetService's cellAttach demote never saw them either.
+  A resident with no saved record is therefore loaded by nobody and runs
+  live in both games (Hilde 0x35534 in that run, playtest 32's six before).
+  Train-36: WorldState::LoadDeferredActors as the save attaches, every saved
+  game-file actor on the grid at its saved position (NpcExists' case, Hod
+  0x1348a), which puppeted seven of the eight residents on the late seat.
+  The roster's source is the next train's: a Skyrim Platform export listing
+  the engine's high-process actors (RE::ProcessLists::highActorHandles,
+  CommonLibSSE-NG include/RE/P/ProcessLists.h:69) in place of the attach
+  events, for the roster and for the demote at an actor's appearance; the
+  roster's ids line is its oracle. HYPOTHESIS until that run: the attach
+  event's silence for persistent references is the whole of the gap.
 - E on such an unblocked puppet opened the engine's dialogue with an AI-off
   actor, which never answers, and the Dialogue Menu stayed open (test 2 stuck
   until a relaunch). The block was the apply's per relayed sample, and
