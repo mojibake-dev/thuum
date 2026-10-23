@@ -459,7 +459,13 @@ each imposition's target is explicit.
   leaves the actor at the door. HYPOTHESIS until v3 runs on the new stage:
   Activate with default processing moves an NPC through a blocked door as it
   moves the player. The gate set of 92529f31 no longer cites 40; a fresh
-  stage, T2 and gate follow on 1e4a5cd6.
+  stage, T2 and gate follow on the new head. Pipeline 2786 on 1e4a5cd6 red
+  on upstream's BrokenOarGrotto case (a runtime actor with no user activates
+  an auto-load door through Papyrus and the server moves it), so the host
+  path narrowed (16:58 PDT, 91690a6d): only a game-file actor whose
+  activation came as its host's report (Activate's reportedByHost, set by
+  OnActivate for a hosted caster); a script's, a runtime actor's or a
+  player's door keeps the server's transit.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
