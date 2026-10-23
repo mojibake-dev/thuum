@@ -420,6 +420,18 @@ each imposition's target is explicit.
   x-handoff-night (23.0, Alvor home to 0x133C8, restart at 7.9, his record
   outdoors within 180 s of the reconnects, c1 alone runs him). Their reds
   are findings; their greens tick D6, D10 and D11's rows and H5.
+  First runs on train-40's stage 92529f31 (15:34 PDT, numidium's reads):
+  x-handoff-restart 20261023-222408 GREEN, D10's split by nearness holds
+  (each square's cell to the player standing in it, Alvor live on c1 alone,
+  no churn a minute on). x-handoff-night 222831 RED on the probe's own fact
+  (npc_state .cell is the parent CELL, 0x9732 outdoors, not the worldspace):
+  the claim held, Alvor's record outdoors after the restart, c1 live, c2's
+  puppet blocked; the probe compares 0x9732 now. x-handoff-door 222127 RED
+  on its premise: at 19.9 Embry's record already stood in the inn and both
+  engines had him there, so nothing crossed; v2 starts at 19.7 and waits
+  for Alvor's record to come out by the roster and go back into his house
+  under the host's report, D6's Follow, with Hod as the fallback resident.
+  D6 is unproven until v2 runs; D10 is proven; D11's night step held.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
