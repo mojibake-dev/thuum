@@ -389,3 +389,16 @@ HeadshotTest's new case loads Alvor 0x13482 under npcEnabled, reads race
 0x13746 and asserts the claim is not refused for the race. The rule names
 stay the mod's (the ten playable races and ElderRace), so a bandit of a
 playable race takes a headshot and a wolf does not, as the mod has it.
+
+Playtest thirty-three (2026-10-23, parity ac557132, Bleak Falls Temple): the
+race fix did its part, eight claims reached the check. Seven were refused
+E_HEADSHOT_HELMET for a helmet the server's own outfit roll had put on the
+bandit (GetOutfitObjects through the template chain, the worn list in its
+equipment record): each engine rolls a placed NPC's gear for itself, so a
+bandit bareheaded on both screens wore a hood on the record ("also it looked
+like different bandits spawned in for each"). The one accepted claim hit a
+body already at zero from the body arrows, so nothing visible. "bandits need
+to be uniform across games to ahve headshots register i guess": the helmet
+verdict is right against the record and wrong against the screens until
+npc-fate's one roll (the server's imposed on every engine, or the host's taken
+as the record); this section waits for it.
