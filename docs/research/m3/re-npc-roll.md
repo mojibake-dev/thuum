@@ -250,7 +250,7 @@ the first return address as a module offset; leave: data.objectReference at +0x4
 37323, 37322 (actor id, the caller's offset).
 
 Scenario: x-npc-fate-roll's solo leg (npc-fate.md Tests :135 and its Dynamic plan): frida on c1,
-teleport into the forest cell with the LVLN placements (0x1e7a0 per the plan), wait 10, refs-near
+teleport into the forest cell with the leveled placements (their placed NPC_ 0x1e7a0, its TPLT the LVLN 0x42297: the lab read x-npc-fate-roll 232048 corrected the plan's direction), wait 10, refs-near
 with bases, then the engine's own reset baseline (save, out, GameDaysPassed past the GMST hours, back
 in). Expected: per fated placement one 14374 at the cell's load with the caller inside 19507, before
 any 418622 for that actor; 14752 reporting one pick and 14374's leave a fresh runtime id (0xFF
