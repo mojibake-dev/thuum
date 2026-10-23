@@ -437,7 +437,15 @@ rolled before any engine rolls them, one message per 64 actors); the pin
 (MpActor::GetFateBaseId, the chain's first leveled pick, else the placed
 base); the respawn's re-roll at the record's level with the fate sent to
 every user. unit/NpcFateTest covers the pass, the level, the pin and the
-record. Not built: the client half (the fate table, the two detours and the
+record. The ordering (16:07 PDT, after pipeline 2781's 0 == 25): the fate
+pass runs at a player's square change ahead of the grid's own 3x3 loader
+(WorldState::onSquareChange from MpObjectReference::SetPos, before
+ForceSubscriptionsUpdate), so the ring is rolled at the player's level
+before any of it is loaded or subscribed; an actor this process rolled
+without a fate (loaded by the grid before any pass, a login's own square)
+rolls anew at the pass's level (MpActor::RollFateIfUnrolled: chain and
+outfit, not from a save, not dead), while a record from a save keeps its
+roll (ADR-049 decision 1). Not built: the client half (the fate table, the two detours and the
 re-roll as Skyrim Platform natives, the host's own actor dressing from the
 record), which waits for x-npc-fate-roll's read of the engine's roll
 moments (docs/research/m3/re-npc-roll.md section 7). A placement whose
