@@ -2245,6 +2245,8 @@ function run(step: Step, player: Actor): unknown {
         // E does nothing on a blocked reference: every relayed puppet sample sets it, the promote
         // clears it (8eafa85d), the Talk prompt's mechanism (x-npc-talk-prompt v3)
         activationBlocked: npc.isActivationBlocked(),
+        // the cell the reference stands in in this game (a door's interior after a crossing, npc-handoff)
+        cell: npc.getParentCell()?.getFormID() ?? 0,
         pos: [npc.getPositionX(), npc.getPositionY(), npc.getPositionZ()],
         head: [
           NetImmerse.getNodeWorldPositionX(npc, head, false),

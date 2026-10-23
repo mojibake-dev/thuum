@@ -104,6 +104,10 @@ class BoardTests(unittest.TestCase):
             board.complete(spells.id, {"ok": True, "data": {"formId": 4278192173, "base": 7, "added": [77776], "equipped": [0, 77776, 0], "extra": []}})
             self.assertEqual(board.figure_spells("c1")["added"], [77776])
             self.assertIsNone(board.figure_spells("c2"))
+            # log counts by their pattern, set by lab-api's own log-count step
+            board.set_log_count("c2", "moved .* into", 2)
+            self.assertEqual(board.log_count("c2", "moved .* into"), 2)
+            self.assertIsNone(board.log_count("c2", "stale"))
             # a client's own node-scale and its {other: true} one are kept side by side
             own = board.enqueue("c1", "node-scale", {})
             board.poll("c1")
@@ -123,6 +127,7 @@ class BoardTests(unittest.TestCase):
             self.assertIsNone(board.projectiles("c2"))
             self.assertIsNone(board.refs_near("c2"))
             self.assertIsNone(board.figure_spells("c1"))
+            self.assertIsNone(board.log_count("c2", "moved .* into"))
             self.assertIsNone(board.node_scales("c1"))
             self.assertIsNone(board.presets("c1"))
             # a timed-out step is cancelled and a late result is ignored

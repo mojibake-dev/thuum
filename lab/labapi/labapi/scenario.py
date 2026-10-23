@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field, field_validator
 CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "npc-ai", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "papyrus-events"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
-SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse", "approach"}
+SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse", "approach", "log-count"}
 # fakeclient: the fork's headless legacy client logs in as a scenario client's
 # profile from inside the server image (T2 without a Windows client).
 # snapshot {name, of}: a server fact read now and kept under its name for a
@@ -246,6 +246,18 @@ def _screenshot_args(args: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _log_count_args(args: dict[str, Any]) -> dict[str, Any]:
+    """log-count {pattern}: how many lines of the seat's Skyrim Platform log match the regex, read mid-run (the
+    log copied through the guest agent as the run's artifacts copy it), for c.log_count("<pattern>")."""
+    if set(args) != {"pattern"} or not isinstance(args.get("pattern"), str) or not args["pattern"]:
+        raise ValueError("log-count takes one pattern, a regular expression")
+    try:
+        re.compile(args["pattern"])
+    except re.error as e:
+        raise ValueError(f"log-count's pattern is not a regular expression: {e}") from e
+    return dict(args)
+
+
 def _approach_args(args: dict[str, Any]) -> dict[str, Any]:
     """approach {formId, distance, cell, tolerance?}: the seat placed `distance` units (20 to 1000) from a named NPC
     and facing her, through the judged teleport (runner.py's _approach), so a key press acts on her by the player's
@@ -427,6 +439,11 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
                 raise ValueError(f"snapshot takes a name (letters, digits, _ and -), got {name!r}")
             if not isinstance(of, str) or not of.strip().startswith("server."):
                 raise ValueError(f"snapshot reads a server fact (of: \"server....\"), got {of!r}")
+        if action == "restart" and args:
+            # the clock set anew at the restart (x-handoff-night: 23.0 before, 7.9 after)
+            hour = args.get("gameHour")
+            if set(args) != {"gameHour"} or isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
+                raise ValueError(f"restart takes an optional gameHour from 0 to 24, got {args}")
         if action == "netem":
             # a typo must not read as zero, which clears the impairment
             if not args or set(args) - _NETEM_KEYS:
@@ -448,6 +465,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _screenshot_args(args)
     if action == "approach":
         args = _approach_args(args)
+    if action == "log-count":
+        args = _log_count_args(args)
     if action == "relaunch":
         args = _relaunch_args(args)
     return Step(kind="client", client=key, action=action, args=args)

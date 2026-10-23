@@ -11,6 +11,7 @@
 //              {kind: "spell", formId}: a spell's effects and their MGEFs as the server resolves them
 //              {kind: "cellHost", cell}: who hosts the cell on the server (docs/verbs/cell-host.md)
 //              {kind: "ref", actorId}: an actor's record by form id (a hosted NPC's position and health)
+//              {kind: "follow", actorId}: whether a game follows that actor out of its hosted cells (npc-handoff)
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -152,6 +153,29 @@ const state = {
       hosted: row ? Boolean(row.hosted) : false,
       actorId: row ? Number(row.player) : 0,
       epoch: row ? Number(row.epoch) : 0,
+    };
+  },
+
+  // Whether a game follows an actor into a cell it does not host (npc-handoff's
+  // follow, D6): the server's cellFollows row for the actor, {found, actorId,
+  // following, player, cell}; an actor nobody follows is {found: true,
+  // following: false, player: 0, cell: 0}; a server without the property
+  // answers found: false
+  follow(payload) {
+    const actorId = Number(payload.actorId);
+    let rows;
+    try {
+      rows = mp.get(0, "cellFollows") || [];
+    } catch (e) {
+      return { found: false, actorId, error: String((e && e.message) || e) };
+    }
+    const row = rows.find((r) => Number(r.actor) === actorId);
+    return {
+      found: true,
+      actorId,
+      following: Boolean(row),
+      player: row ? Number(row.player) : 0,
+      cell: row ? Number(row.cell) : 0,
     };
   },
 

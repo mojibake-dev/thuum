@@ -8,7 +8,7 @@ the lab can grep (E_ASSERT_*).
   server.time().hour | .day | .month | .year | .daysPassed | .timeScale
                                                      the server's game clock, read when the assert runs
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
-    | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked
+    | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked | .cell
                                                      that seat's engine state of an NPC, from its last npc-state {formId}
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
@@ -29,6 +29,11 @@ the lab can grep (E_ASSERT_*).
   <client>.state.menuOpen("<menu>")                that client's game has that menu open (dump-state's menus),
                                                      "Dialogue Menu" when a talk opened
   <client>.state.crosshairRef                        the form id under that client's crosshair, what E acts on (0 for none)
+  <client>.log_count("<regex>")                      lines of that client's Skyrim Platform log matching the regex,
+                                                     at its last log-count {pattern} step of that same pattern
+  server.follow(<id>).following | .client | .cell | .actorId
+                                                     whether a game follows that actor out of its hosted cells, which
+                                                     of the run's clients, into which cell (npc-handoff's D6)
   <client>.figure_spells().count | .extra | .base    that client's figure of the other player at its last figure-spells
                                                      step: its added spells, those it holds in no hand or power slot,
                                                      and its base's form id (ADR-046)
@@ -112,6 +117,7 @@ class ServerFacade(Protocol):
     def spell(self, form_id: int) -> dict[str, Any] | None: ...
     def cell_host(self, cell: int) -> dict[str, Any] | None: ...
     def ref(self, actor_id: int) -> dict[str, Any] | None: ...
+    def follow(self, actor_id: int) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -127,6 +133,7 @@ class ViewsFacade(Protocol):
     def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def figure_spells(self, observer: str) -> dict[str, Any] | None: ...
+    def log_count(self, observer: str, pattern: str) -> int | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
     def av_reads(self, observer: str) -> dict[str, Any] | None: ...
@@ -481,6 +488,17 @@ _UNSEARCHED = object()
 
 
 @dataclass(frozen=True)
+class FollowView:
+    """server.follow(id): the server's follow table row for an actor (labState kind follow, npc-handoff's D6):
+    whether a game follows it out of its hosted cells, which of the run's clients that game is ("" when none),
+    the cell it followed the actor into, and the follower's actor id (0 when none)."""
+    following: bool
+    client: str
+    cell: int
+    actorId: int
+
+
+@dataclass(frozen=True)
 class FigureSpellsView:
     """c.figure_spells(): that client's figure of another player at its last `figure-spells` step (ADR-046: a
     figure carries only what the server gives it): count, its added spells; extra, the added spells it holds in no
@@ -681,6 +699,8 @@ class NpcStateView:
     isProtected: bool | None = None
     # E does nothing on it in that game: a puppet's relayed samples set it, the promote clears it
     activationBlocked: bool | None = None
+    # the cell the reference stands in in that game (a door's interior after a crossing, npc-handoff)
+    cell: int | None = None
 
 
 @dataclass(frozen=True)
@@ -957,6 +977,22 @@ class _ServerRef:
                     client = c
                     break
         return HostView(bool(d.get("hosted")), client, int(d.get("epoch") or 0), holder)
+
+    def follow(self, spec) -> FollowView:
+        actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
+        fn = getattr(self._f, "follow", None)
+        d = fn(actor_id) if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData(f"server has no follow table to read {actor_id:#x} from (no npc-handoff follow)")
+        holder = int(d.get("player") or 0)
+        client = ""
+        if holder:
+            for c in self._clients:
+                a = self._f.actor(c)
+                if a and int(a.get("actorId") or 0) == holder:
+                    client = c
+                    break
+        return FollowView(bool(d.get("following")), client, int(d.get("cell") or 0), holder)
 
     def ref(self, spec) -> RefView:
         actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
@@ -1385,9 +1421,18 @@ class _ClientRef:
                                 float(pos[0]), float(pos[1]), float(pos[2]),
                                 isDead=_opt_bool(data.get("isDead")), healthPercentage=_opt_float(data.get("healthPercentage")),
                                 isEssential=_opt_bool(data.get("isEssential")), isProtected=_opt_bool(data.get("isProtected")),
-                                activationBlocked=_opt_bool(data.get("activationBlocked")))
+                                activationBlocked=_opt_bool(data.get("activationBlocked")), cell=_opt_int(data.get("cell")))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
+
+    def log_count(self, pattern: str) -> int:
+        """c.log_count("<regex>"): the lines of that client's Skyrim Platform log matching the regex at its last
+        log-count step of that same pattern."""
+        fn = getattr(self._views, "log_count", None)
+        n = fn(self.name, pattern) if fn else None
+        if n is None:
+            raise AssertionData(f"{self.name} has no log-count of {pattern!r} (a log-count {{pattern}} step first)")
+        return int(n)
 
     def figure_spells(self) -> FigureSpellsView:
         """c.figure_spells(): that client's figure of the other player at its last `figure-spells` step."""
@@ -1633,7 +1678,7 @@ _ATTRS = {
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop"},
     NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
-                   "isEssential", "isProtected", "activationBlocked"},
+                   "isEssential", "isProtected", "activationBlocked", "cell"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},
@@ -1644,6 +1689,7 @@ _ATTRS = {
     HostView: {"hosted", "client", "epoch", "actorId"},
     RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     FigureSpellsView: {"count", "extra", "base"},
+    FollowView: {"following", "client", "cell", "actorId"},
     AvView: {"health", "magicka", "stamina", "healthCurrent", "magickaCurrent", "staminaCurrent",
              "healthMax", "magickaMax", "staminaMax", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
@@ -1665,7 +1711,7 @@ _ID_METHODS = {
 _FORM_SPEC_METHODS = {
     WatchView: {"launched"},
     SelfWatchView: {"launched"},
-    _ServerRef: {"spell", "host", "ref"},
+    _ServerRef: {"spell", "host", "ref", "follow"},
 }
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {
@@ -1682,8 +1728,8 @@ _NULLARY = {
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "figure_spells", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
+    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of"},
     EffectsView: {"left", "magnitude"},

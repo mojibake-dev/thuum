@@ -310,6 +310,20 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {bad}\n")
 
+    def test_log_count_and_a_restart_that_sets_the_clock(self):
+        # a client's log lines counted mid-run, and a restart that lays the clock anew (npc-handoff's reads)
+        from labapi.scenario import load_scenario
+
+        sc = load_scenario('id: x-h\nclients: [c2]\nsteps:\n  - c2: log-count {pattern: "moved .* into"}\n  - server: restart {gameHour: 7.9}\n'
+                           '  - server: restart\n')
+        self.assertEqual((sc.steps[0].kind, sc.steps[0].action, sc.steps[0].args), ("client", "log-count", {"pattern": "moved .* into"}))
+        self.assertEqual((sc.steps[1].kind, sc.steps[1].action, sc.steps[1].args), ("server", "restart", {"gameHour": 7.9}))
+        self.assertEqual(sc.steps[2].args, {})
+        for bad in ("  - c2: log-count {}\n", '  - c2: log-count {pattern: "("}\n', '  - c2: log-count {pattern: x, n: 2}\n',
+                    "  - server: restart {gameHour: 25}\n", "  - server: restart {hour: 7}\n"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-h\nclients: [c2]\nsteps:\n{bad}")
+
     def test_figure_spells_is_a_client_step(self):
         # a figure's added spells against its equipped ones (ADR-046, x-figure-spells)
         from labapi.scenario import load_scenario
