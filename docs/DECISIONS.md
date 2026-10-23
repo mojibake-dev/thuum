@@ -2418,9 +2418,12 @@ Decisions.
 Consequences. Decision 1 rides npc-fate's build (the record's worn list
 reaches the engine's actor on every seat, the host's included, with the
 hosted word; the headshot section of playtest thirty-three passes with it).
-Decision 2 is a client train of its own: the strip at the figure's spawn
-callback (formView), a T0 for nothing (no server change) and a probe reading
-a figure's spell count after load against a resident's. p-spell-bolt's later
+Decision 2 is a client train of its own, merged as fork parity a25caf02 on
+2026-10-23 11:04 PDT (m3-train-38: the strip at every equipment apply and a
+ten-second sweep of each figure's view; the gate 20261023-173049 with b-duel,
+b-spell and p-spell-bolt green on its stage), with x-figure-spells (the lab's
+figure-spells read, main b70546b9) as the probe reading a figure's added
+spells against its hands after load. p-spell-bolt's later
 list keeps the probe effects declared (main 626108f6): the dummies land on a
 figure from the wildlife's cloaks, which the strip does not touch.
 

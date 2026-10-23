@@ -235,7 +235,9 @@ and 8 a second only ever stops a flood.
 ## Impose (observers render the server's decision)
 
 - The figure's spell set is the server's (ADR-046, decision 2, 2026-10-23;
-  fork m3-train-38 d2003056): a distributor such as SPID hands every
+  fork m3-train-38, parity a25caf02 since 11:04 PDT, the gate
+  20261023-173049 green with a lone teleport fault rerun twice green; its
+  CI image bakes the stable toolchain by name since the same train): a distributor such as SPID hands every
   non-player actor the layer's abilities at its load, and a figure is such
   an actor to it (Stealth Detection Fixes' madDetectionCloak on every NPC;
   its probes landed on a figure in p-spell-bolt's nightly red). The figure's
