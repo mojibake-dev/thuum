@@ -445,10 +445,7 @@ before any of it is loaded or subscribed; an actor this process rolled
 without a fate (loaded by the grid before any pass, a login's own square)
 rolls anew at the pass's level (MpActor::RollFateIfUnrolled: chain and
 outfit, not from a save, not dead), while a record from a save keeps its
-roll (ADR-049 decision 1). Not built: the client half (the fate table, the two detours and the
-re-roll as Skyrim Platform natives, the host's own actor dressing from the
-record), which waits for x-npc-fate-roll's read of the engine's roll
-moments (docs/research/m3/re-npc-roll.md section 7). A placement whose
+roll (ADR-049 decision 1). The client half followed the same day (below). CI: pipeline 2783 GREEN on 510f190c (16:47 PDT), the server with its unit tests (NpcFateTest included) and the Windows client with the detours. A placement whose
 chain ends at an LVLN with no pick (the server's chance-none) keeps the
 head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
 
