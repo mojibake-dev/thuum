@@ -353,6 +353,18 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   at the grace with no disconnect, the revived host is a candidate again, a
   host heard again inside its grace keeps its cell at the same epoch;
   wire-rules and wire-transport carry their own tests.
+  MEASURED by x-host-kill 20261023-205837 on train-39's stage (numidium's
+  read): c1's last report about 21:01:08.4Z, "silent 3701 ms, stale" at
+  21:01:12.1, the release and c2's grant at epoch 2 at 21:01:17.1 (8.7 s
+  after the last report, 5 s before netcode's disconnect at 21:01:22.2),
+  c2's Alvor and Hilde AI on, the relaunched c1 taking nothing back; and the
+  number's false positives: three live silences of 3.1, 3.5 and 3.1 s, all
+  at a game's first loads after a login (the first teleport after connect,
+  a relaunched game's login), none at the four mid-session loading screens
+  (Bleak Falls Temple and back on each seat), no grant changed hands on
+  them. kStaleHostMs is 4 s from train-39's next commit (2b14f213, local
+  until the stage is free), which clears all three; a login-time blip costs
+  a second of candidacy at most, since revived disarms the grace.
 
 ## Client
 
