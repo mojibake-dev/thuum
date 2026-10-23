@@ -1214,7 +1214,14 @@ health message. A second red within two sweeps makes it a bug.
   end of the watch; if a run still ends off with the record still, the
   settle moves from translateTo to setPosition for the standing case
   (HYPOTHESIS that a 0.2 s translation under the self keep-offset does not
-  finish). Whether train-33 shifted the push's size is not asked
+  finish). SETTLED ({now} PDT): fb6f3f09 on the stage, b-duel three times
+  green with the figure back on the record (19 ticks, the phase-2 error 0.0
+  at the end from a peak of 4.7; 19 ticks, 0.4 from 5.6; 18 ticks and
+  3.22 s of stream, 0.2 from 1.7), against the short streams' 2.0 to 2.6 s;
+  x-duel-stream 001417 on the head before it still read 5.3 for ten seconds.
+  The watch item closes with the gate on fb6f3f09; the figure's height
+  (dz minus 7.4 to minus 7.7 throughout) stays the figures' row. Whether
+  train-33 shifted the push's size is not asked
   (HYPOTHESIS either way; the deadband is the defect). Row for the figures, from the
   same watches: on every run, green and red, 16b8854a's included, c2's
   figure on c1's screen stands about 8 units below c2's own z on the lab
