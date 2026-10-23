@@ -384,6 +384,18 @@ plan its section 5 (lab/frida/npc-roll.js).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
+Registry, train-41 (15:26 PDT): the engine's two rolls are suppressed on a
+fated reference and replaced by the server's, through Skyrim Platform's
+detours (FateHooks.cpp, fork m3-train-41): the per-reference leveled roll
+wrapper (Address Library 14752 by `just addr`, the re-analyst's read,
+HYPOTHESIS) answers the server's NPC_ as the one pick; InventoryChanges::
+InitOutfitItems (16072, CommonLibSSE-NG's binding) adds the server's worn
+list tagged as the outfit's items and rolls nothing. Both pass every call
+through while the npcFate switch is off (the default until x-npc-fate-roll)
+or the reference is unfated. No Papyrus native is added (the exports are
+Skyrim Platform's, as setPuppet is); docs/NATIVES.md unchanged. The lab
+reads the server's side through mp.get(refrId, "actorFate").
+
 - What is suppressed, on every game (host and puppet alike, since the fate
   is nobody's game's): the engine's cell reset of a server-owned placement
   (the body deleted, the placement re-rolled, inventories reset); the
