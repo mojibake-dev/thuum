@@ -1264,7 +1264,7 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033) (the handoff and the restart inside b-npc-puppet; the figure beside a puppet in b-cell-host; playtest 31's checklist carries the rest by item)
 - [x] ledger and suppression registry updated (no Papyrus native added: setPuppet and isPuppet are Skyrim Platform exports, listed in the Suppress section's registry; docs/NATIVES.md unchanged)
 
-## Playtest thirty-three (2026-10-23, fork parity ac557132; fixes on m3-train-36)
+## Playtest thirty-three (2026-10-23, fork parity ac557132; fixes on m3-train-36, parity 7b3a17c6 since 03:01 PDT, and m3-train-37)
 
 - A late-joining seat found eight residents frozen at its own engine's
   placement, unblocked and unsampled, until a lookup loaded their records.
@@ -1288,9 +1288,11 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
   at a cell's), and PuppetService's cellAttach demote never saw them either.
   A resident with no saved record is therefore loaded by nobody and runs
   live in both games (Hilde 0x35534 in that run, playtest 32's six before).
-  Train-36: WorldState::LoadDeferredActors as the save attaches, every saved
-  game-file actor on the grid at its saved position (NpcExists' case, Hod
-  0x1348a), which puppeted seven of the eight residents on the late seat.
+  Train-36 (fork parity 7b3a17c6, 2026-10-23 03:01 PDT; the gate
+  20261023-092824 nine of nine, T2 33 identical): WorldState::LoadDeferredActors
+  as the save attaches, every saved game-file actor on the grid at its saved
+  position (NpcExists' case, Hod 0x1348a), which puppeted seven of the eight
+  residents on the late seat (x-npc-late-join 092309).
   The roster's source is train-37's (fork m3-train-37 69958274, stacked on
   train-36): the export getHighProcessActors lists the engine's high-process
   actors (RE::ProcessLists::highActorHandles, CommonLibSSE-NG
@@ -1307,7 +1309,8 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
 - E on such an unblocked puppet opened the engine's dialogue with an AI-off
   actor, which never answers, and the Dialogue Menu stayed open (test 2 stuck
   until a relaunch). The block was the apply's per relayed sample, and
-  7e59c32c had dropped the demote-time call. Train-36: PuppetApi's Demote sets
+  7e59c32c had dropped the demote-time call. Train-36 (parity 7b3a17c6):
+  PuppetApi's Demote sets
   TESObjectREFR::SetActivationBlocked(true) (CommonLibSSE-NG TESObjectREFR.h:464)
   and the Promote clears it; the TS blockActivation calls are gone for puppets
   (the figures keep the per-sample one), so no Papyrus-backed call runs at the
