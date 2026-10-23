@@ -74,18 +74,25 @@ g. The roster moves a record out of a cell nobody hosts to the sighter's cell
 
 The village belonged to a gone game for about 24 s: the connection timeout
 (about 18 s) plus the grace. Options: (i) the client's transport sends
-netcode's disconnect at process exit (renet's disconnect packets from
-wire-client-ffi, at the plugin's unload or an atexit), so the server drops
-the user at once and the grace alone remains; (ii) a shorter timeout for a
-host; (iii) a host whose reports stop for two seconds is treated as stale and
-the grace starts early. Recommendation: (i), correct by design and small, the
-timeout and grace unchanged; (ii) drops a laggy player's village for nothing.
+netcode's disconnect at process exit; (ii) a shorter timeout for a host;
+(iii) a host whose reports stop for two seconds is treated as stale by the
+server and the grace starts at once. Recommendation: (iii) first, then (i) if
+the exit path allows. The transport already leaves cleanly when the client is
+dropped (DestroyClient flushes the disconnect packet), but nothing runs it at
+the game's exit: the process terminates its threads before any DLL detach or
+atexit handler, so a disconnect from an exit hook needs the socket moved out
+of the poll thread and is blind to a crash or a kill. (iii) is server-side
+alone (R0), a per-host stamp of the last report in TickCellHostsEverySecond,
+covers the crash and the kill as well as the quit, and a host silent for two
+seconds at a 130 ms cadence has lost fifteen reports already. (ii) drops a
+laggy player's village for nothing.
 
 ## The trains, in order, with sizes
 
-1. Train-39, the quitting host: the disconnect at exit (Rust, wire-client-ffi)
-   and a lab read (a quit, the drop within a second, the grace alone). Half a
-   day with its gate.
+1. Train-39, the quitting host: the server's stale-host rule (iii), a T0 in
+   CellHostTest with the clock margins, and a lab read (the game stopped, the
+   cell passed within the grace plus two seconds). Half a day with its gate
+   and T2 (a server change).
 2. Train-40, doors: npc-handoff's (a), (g) and the client's MoveTo of an engine
    reference across cells (MayMoveActor's return, the follow table, the roster
    moving a record out of an interior), with (f) the split rule; (b), (c) and
