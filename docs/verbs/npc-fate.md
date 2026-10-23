@@ -191,6 +191,27 @@ Rung: R0 for the fate (the roll, the death, the body's point, the respawn, the l
 
 ## Engine surface
 
+RE read 2026-10-23 (the re-analyst, docs/research/m3/re-npc-roll.md, every
+id by `just addr`, pseudocode tagged HYPOTHESIS, vtable slots and bytes
+CONFIRMED-STATIC): a placed NPC_ whose template is an LVLN is rolled once in
+TESObjectREFR::InitItemImpl at the reference's load, by a resolver that
+rolls the list (the per-reference wrapper 14752 over CalculateCurrentFormList
+with GetCalcLevel's per-game rotating level offset), clones a TESNPC from the
+placed base, copies the pick into it, writes ExtraLeveledCreature and swaps
+the base with SetObjectReference; a save's change form skips the roll, a
+cell reset re-rolls through 37323. The outfit is rolled separately by one
+equipper (418622) at the actor's first biped init or middle-high entry and
+at every ResetInventory, its picks tagged ExtraOutfitItem{outfit}, the tag
+suppressing the roll (HasOutfitItems) and keying AddWornOutfit and
+RemoveOutfitItems; Papyrus SetOutfit never rolls. Train-41's path (the
+report's recommendation): a detour on 14752 answering the server's pick for
+a fated reference, a detour on 16072 adding the server's worn list tagged
+and skipping the roll, the engine's own re-roll for a late fate, no base
+swap of our own; today's applyEquipment leaves HasOutfitItems false, so the
+next dressing redresses the engine's picks over the server's (the flap). The
+five lab observations before it ships are the report's section 7; the Frida
+plan its section 5 (lab/frida/npc-roll.js).
+
 - CommonLibSSE-NG symbol(s), the leveled record and its roll:
   include/RE/T/TESLevCharacter.h:10-18 (TESBoundAnimObject, TESLeveledList,
   TESModelTextureSwap; FORMTYPE LeveledNPC), :49 (GetLevDifferenceMax,
