@@ -4,114 +4,146 @@ Eli asked that the four limits still expected on parity a25caf02 be built before
 playtest 34: headshots on bandits (the server's gear roll not yet pushed),
 doors (npc-handoff), deaths (a host-made zero-health NPC alive at the floor and
 the 25 s respawn; npc-fate), and a quitting host's village frozen about 24 s
-(cell-host). The parked decisions those builds need, each with its options and
-a recommendation, then the trains' order and size. Sources: docs/verbs/npc-fate.md
-(the draft's Authority and Status), docs/verbs/npc-handoff.md (decisions a to g),
-docs/verbs/cell-host.md (the quitting host row), ADR-046.
+(cell-host). Below are the twelve decisions those builds need, D1 to D12, each
+with its options (A, B, C) and the recommendation last; then the trains' order
+and size. Sources: docs/verbs/npc-fate.md (the draft's Authority and Status),
+docs/verbs/npc-handoff.md (its decisions a to g, kept in brackets below),
+docs/verbs/cell-host.md (the quitting host row), ADR-046 (the roll pushed to
+both, already decided).
 
-## npc-fate (one ADR; decision 1, the roll pushed to both, is ADR-046's)
+How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
 
-1. Death authority. (a) The server's number alone kills; a death the server
-   has no number for (a fall, a trap, a script) leaves the actor alive at the
-   floor and is counted. (b) A host's death report accepted as R1 when the
-   server can check its cause (a fall by the sample's height change, a trap
-   by an activation it saw, an NPC against an NPC by a hit the host reported
-   with both ids, which the server numbers), the rest refused and logged.
-   Recommendation: (a) now, (b) as the next slice. The hosted NPC's hits on
-   other NPCs already reach the server through the host's report and get the
-   server's number, so a fight's deaths are the server's today; what (a)
-   leaves at the floor is the fall and the trap, rare in a village and a
-   dungeon's first chamber, and (b)'s checks each need a lab read.
-2. The roll's level. (a) The level of the player whose arrival loads the
-   placement, clamped by the cell's encounter zone. (b) Today's level 0, every
-   entry allowed. Recommendation: (a). Level 0 is what rolled a cave bear
-   under the games' wolf; (a) is the engine's own input and keeps the
-   species the screens expect.
-3. The respawn's pick. (a) Re-roll at the respawn, as the engine re-rolls a
-   leveled placement at a cell reset. (b) Keep the first roll. Recommendation:
-   (a), the engine's behavior.
-4. The message. (a) A dedicated ActorFate message (the base the server rolled,
-   sent ahead of the actor's attach so the engine never rolls its own; the
-   death, the respawn and the loot through the existing DeathStateContainer,
-   Teleport and OpenContainer). (b) The existing deltas alone, the roll riding
-   CreateActor's base and equipment. Recommendation: (a). The pin has to reach
-   the client before the engine's roll at attach, which CreateActor cannot
-   promise; one appended type with its validator in the same commit.
-5. formVersion. (a) 2, the fate as an added optional field (ADR-043's decision
-   2). (b) 3 with a migration. Recommendation: (a).
+## npc-fate: deaths, the roll, the message (one ADR)
 
-## npc-handoff (one ADR)
+### D1. Who decides an NPC's death
+- A. The server's number alone kills. A death the server has no number for (a
+  fall, a trap, a script) leaves the actor alive at the floor, and is counted.
+- B. A host's death report is accepted (R1) when the server can check its cause:
+  a fall by the sample's height change, a trap by an activation the server saw,
+  an NPC against an NPC by a hit the host reported with both ids, which the
+  server numbers. The rest is refused and logged.
+- Recommended: A now, B as the next slice. A hosted NPC's hits on other NPCs
+  already reach the server through the host's report and get the server's
+  number, so a fight's deaths are the server's today. What A leaves at the floor
+  is the fall and the trap, rare in a village and a dungeon's first chamber, and
+  each of B's checks needs a lab read.
 
-a. The follow. A host follows its actor into a cell nobody has LOADED while
-   its own game has it loaded and the destination is adjacent or a door's
-   interior; a per-actor follow table answers who simulates it; ADR-035's
-   "nobody hosts" refined to "no game has loaded". Alternative: hosting on a
-   5x5 grid. Recommendation: the follow table; the 5x5 grid doubles every
-   host's load for the same door.
-b. Flicker damping at the reach ring: a reach-only lapse keeps the cell for
-   GRACE_REACH_MS (15 s placeholder) and a candidate waits CANDIDATE_DWELL_MS
-   (5 s placeholder) before taking it. Recommendation: accept the shape, the
-   two numbers from x-cell-attach's reads on two seats.
-c. The keyframe. An ActorHandoff message (the record plus npc-stream's
-   furniture, target and package) before HostGrant on the same ordered
-   channel. Alternative: a widened HostGrant. Recommendation: the dedicated
-   message, appended, the grant left as it is.
-d. The pass between two live hosts: per actor through the existing
-   UpdateHoster flip, with ACTOR_TENURE_MS (10 s placeholder) for the
-   boundary wanderer. Recommendation: accept.
-f. The split after a restart. Today the loaded cells go by arrival order
-   (nine to one game, three to the other, in 20 ms; Eli: "weird").
-   Alternatives: each cell to the nearest player at the restart's first
-   grants, arrival the tiebreak; or one host for the whole loaded set.
-   Recommendation: nearest player per cell. Fewer handoffs, and the village
-   is one game's when both stand in it.
-g. The roster moves a record out of a cell nobody hosts to the sighter's cell
-   (the record indoors while the engines bring the resident out; measured
-   with Sigrid's record in her house). Recommendation: accept; it is the
-   other direction of the door case and needs no new message.
+### D2. The level a leveled NPC is rolled at
+- A. The level of the player whose arrival loads the placement, clamped by the
+  cell's encounter zone.
+- B. Level 0 with every entry allowed (today).
+- Recommended: A. Level 0 is what rolled a cave bear under the games' wolf; A is
+  the engine's own input and keeps the species the screens expect.
+
+### D3. A respawned NPC's pick
+- A. Re-roll at the respawn, as the engine re-rolls a leveled placement at a cell
+  reset.
+- B. Keep the first roll.
+- Recommended: A, the engine's behavior.
+
+### D4. How the server's roll reaches the games
+- A. A dedicated ActorFate message: the base the server rolled, sent ahead of the
+  actor's attach so the engine never rolls its own; the death, the respawn and
+  the loot through the existing DeathStateContainer, Teleport and OpenContainer.
+- B. The existing deltas alone, the roll riding CreateActor's base and equipment.
+- Recommended: A. The pin has to reach the client before the engine's roll at
+  attach, which CreateActor cannot promise; one appended type with its validator
+  in the same commit.
+
+### D5. The save format
+- A. formVersion 2, the fate as an added optional field (ADR-043's decision 2).
+- B. formVersion 3 with a migration.
+- Recommended: A.
+
+## npc-handoff: doors and passing NPCs between hosts (one ADR)
+
+### D6. An NPC walking into a cell nobody has loaded [handoff a]
+- A. The host follows its actor into a cell no game has LOADED, while its own game
+  has it loaded and the destination is adjacent or a door's interior; a
+  per-actor follow table answers who simulates it. ADR-035's "nobody hosts" is
+  refined to "no game has loaded".
+- B. Hosting on a 5x5 grid instead of 3x3.
+- Recommended: A. B doubles every host's load for the same door.
+
+### D7. Flicker damping at the reach ring [handoff b]
+- A. A reach-only lapse keeps the cell for GRACE_REACH_MS (15 s placeholder), and
+  a candidate waits CANDIDATE_DWELL_MS (5 s placeholder) before taking it; the
+  two numbers come from x-cell-attach's reads on two seats.
+- B. No damping (today).
+- Recommended: A, the shape accepted and the numbers measured.
+
+### D8. The NPC's state sent to a new host [handoff c]
+- A. A dedicated ActorHandoff message (the record plus npc-stream's furniture,
+  target and package) before HostGrant, on the same ordered channel.
+- B. A widened HostGrant carrying it.
+- Recommended: A, appended, the grant left as it is.
+
+### D9. Passing an NPC between two live hosts [handoff d]
+- A. Per actor, through the existing UpdateHoster flip, with ACTOR_TENURE_MS
+  (10 s placeholder) for the NPC that wanders along a boundary.
+- B. Not now (today: an NPC stays with its cell's host).
+- Recommended: A.
+
+### D10. Who hosts each cell after a server restart [handoff f]
+- A. Each cell to the nearest player at the restart's first grants, arrival order
+  as the tiebreak.
+- B. Arrival order (today: nine cells to one game and three to the other in 20 ms;
+  Eli: "weird").
+- C. One host for the whole loaded set.
+- Recommended: A. Fewer handoffs, and the village is one game's when both stand
+  in it.
+
+### D11. A resident's record left in an unhosted interior [handoff g]
+- A. The roster moves the record out of a cell nobody hosts to the sighter's cell
+  (the record indoors while the engines bring the resident out; measured with
+  Sigrid's record in her house).
+- B. Leave it (today).
+- Recommended: A. It is the other direction of the door case and needs no new
+  message.
 
 ## cell-host: the quitting host
 
-The village belonged to a gone game for about 24 s: the connection timeout
-(about 18 s) plus the grace. Options: (i) the client's transport sends
-netcode's disconnect at process exit; (ii) a shorter timeout for a host;
-(iii) a host whose reports stop for two seconds is treated as stale by the
-server and the grace starts at once. Recommendation: (iii) first, then (i) if
-the exit path allows. The transport already leaves cleanly when the client is
-dropped (DestroyClient flushes the disconnect packet), but nothing runs it at
-the game's exit: the process terminates its threads before any DLL detach or
-atexit handler, so a disconnect from an exit hook needs the socket moved out
-of the poll thread and is blind to a crash or a kill. (iii) is server-side
-alone (R0), a per-host stamp of the last report in TickCellHostsEverySecond,
-covers the crash and the kill as well as the quit, and a host silent for two
-seconds at a 130 ms cadence has lost fifteen reports already. (ii) drops a
-laggy player's village for nothing.
+### D12. How a quitting host's village hands over
+Today the village belongs to a gone game for about 24 s: the connection timeout
+(about 18 s) plus the 5 s grace.
+- A. The server treats a host whose reports stop for a few seconds as stale and
+  starts the grace at once (server-side alone, R0: a per-host stamp of the last
+  report in TickCellHostsEverySecond).
+- B. The client's transport sends netcode's disconnect at process exit.
+- C. A shorter connection timeout for a host.
+- Recommended: A first, then B if the exit path allows. A covers the crash and the
+  kill as well as the quit, and a host silent for two seconds at a 130 ms cadence
+  has already lost fifteen reports. B: the transport already leaves cleanly when
+  the client is dropped (DestroyClient flushes the disconnect packet), but nothing
+  runs it at the game's exit; the process terminates its threads before any DLL
+  detach or atexit handler, so a disconnect from an exit hook needs the socket
+  moved out of the poll thread, and it is blind to a crash or a kill. C drops a
+  laggy player's village for nothing.
+- Built ahead of the answer, not merged: train-39 implements A with a three-second
+  threshold (a save's or a loading screen's stall must not pass a village); the
+  lab calibrates the number, and the merge waits for Eli's answer.
 
 ## The trains, in order, with sizes
 
-1. Train-39, the quitting host: the server's stale-host rule (iii), a T0 in
-   CellHostTest with the clock margins, and a lab read (the game stopped, the
-   cell passed within the grace plus two seconds). Half a day with its gate
-   and T2 (a server change). BUILT 2026-10-23 13:26 PDT, fork m3-train-39
-   206190dc (the threshold three seconds, not two: a save's or a loading
-   screen's stall must not pass a village; the lab calibrates it); the stage
-   with T2 and the kill-the-host read are numidium's next.
-2. Train-40, doors: npc-handoff's (a), (g) and the client's MoveTo of an engine
-   reference across cells (MayMoveActor's return, the follow table, the roster
-   moving a record out of an interior), with (f) the split rule; (b), (c) and
-   (d) as a second slice after the playtest unless time allows. Two days with
-   the door scenario (a resident through a door seen from both seats).
-3. Train-41, the roll pushed to both (ADR-046 decision 1 and npc-fate's 2 to
-   5): the ActorFate message and its validator, the server's roll at the
-   first loader's level, the pin at the engine's roll site (an RE task for
-   the re-analyst first; the swap after the roll as the fallback), the
-   record's equipment applied to the engine's actor on every seat. Two days
-   plus the RE read, and the NPC headshot section passes with it.
-4. Train-42, deaths: npc-fate's decision 1 (a), the respawn at the placement
-   after the server's reset time with a re-roll, the body persisting across a
-   restart (the schema row and its restart scenario), the corpse's loot
-   through the CONT branch. Two days.
+1. Train-39, the quitting host (D12): the server's stale-host rule, a T0 in
+   CellHostTest with the clock margins, and a lab read (the game stopped, the cell
+   passed within the grace plus the threshold). Half a day with its gate and T2 (a
+   server change). BUILT 2026-10-23 13:26 PDT, fork m3-train-39 206190dc; the
+   stage with T2 and the kill-the-host read are numidium's next.
+2. Train-40, doors (D6, D11, D10): the client's MoveTo of an engine reference
+   across cells (MayMoveActor's return, the follow table, the roster moving a
+   record out of an interior), with the restart split rule; D7, D8 and D9 as a
+   second slice after the playtest unless time allows. Two days with the door
+   scenario (a resident through a door seen from both seats).
+3. Train-41, the roll pushed to both (ADR-046 and D2 to D5): the ActorFate message
+   and its validator, the server's roll at the first loader's level, the pin at
+   the engine's roll site (an RE task for the re-analyst first; the swap after the
+   roll as the fallback), the record's equipment applied to the engine's actor on
+   every seat. Two days plus the RE read, and the NPC headshot section passes with
+   it.
+4. Train-42, deaths (D1 and D3): the respawn at the placement after the server's
+   reset time with a re-roll, the body persisting across a restart (the schema row
+   and its restart scenario), the corpse's loot through the CONT branch. Two days.
 
-Playtest 34 with all four: about a week of agent work with the lab,
-2026-10-29 or 10-30. With the first three and deaths left as a known limit:
-2026-10-27.
+Playtest 34 with all four: about a week of agent work with the lab, 2026-10-29 or
+10-30. With the first three and deaths left as a known limit: 2026-10-27.
