@@ -310,6 +310,23 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   out of the way (skymp-hosting.md:341-350).
 - Papyrus natives touched: none (ledger unchanged).
 
+- A hosted actor's activation (playtest 32, 2026-10-22). The host's client
+  reports an activation by an actor it hosts as that actor's (the caster's
+  host must be the sender, ActionListener::OnActivate), and the server
+  records it (a door's state, a furniture's occupant). The reply that
+  performs a player's own activation in its game (OpenContainer, which the
+  client answers with refr.activate(player) because it blocked the player's
+  activation and waited for the word) went out through GetActorToSendTo,
+  which hands an offline actor's messages to its cell's host: when a
+  resident sat on Riverwood's bench 2ad10 by package in rotfern's game, her
+  game activated the bench with her own player and she sat ("rotfern sat
+  down on a bench all on her own"; her own activation then followed each of
+  the resident's at 01:21:23Z and 01:24:44Z, answered "occupant is another
+  object and is nearby"). Since fork m3-train-34 1db977ed the reply goes
+  only to an actor with a user; CellHostTest's case covers a hosted sitter
+  at a bed. Teleport and ChangeValues keep the host route (the host's game
+  must apply them to its actor).
+
 ## Client
 
 - SP binding: none new (cellFullyLoaded, Cell.isAttached, getParentCell,
