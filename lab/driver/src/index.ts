@@ -2247,6 +2247,12 @@ function run(step: Step, player: Actor): unknown {
         activationBlocked: npc.isActivationBlocked(),
         // the cell the reference stands in in this game (a door's interior after a crossing, npc-handoff)
         cell: npc.getParentCell()?.getFormID() ?? 0,
+        // what this game rolled for it (npc-fate, ADR-046): its race (a leveled pick's clone carries the pick's)
+        // and the form ids it wears, one per form across the 32 slots, sorted
+        raceId: npc.getRace()?.getFormID() ?? 0,
+        worn: Array.from(new Set(Array.from({ length: 32 }, (_, i) => npc.getWornForm(2 ** i)?.getFormID() ?? 0)))
+          .filter((id) => id !== 0)
+          .sort((x, y) => x - y),
         pos: [npc.getPositionX(), npc.getPositionY(), npc.getPositionZ()],
         head: [
           NetImmerse.getNodeWorldPositionX(npc, head, false),

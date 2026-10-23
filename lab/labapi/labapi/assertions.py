@@ -8,7 +8,7 @@ the lab can grep (E_ASSERT_*).
   server.time().hour | .day | .month | .year | .daysPassed | .timeScale
                                                      the server's game clock, read when the assert runs
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
-    | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked | .cell
+    | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked | .cell | .raceId | .worn
                                                      that seat's engine state of an NPC, from its last npc-state {formId}
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
@@ -31,6 +31,10 @@ the lab can grep (E_ASSERT_*).
   <client>.state.crosshairRef                        the form id under that client's crosshair, what E acts on (0 for none)
   <client>.log_count("<regex>")                      lines of that client's Skyrim Platform log matching the regex,
                                                      at its last log-count {pattern} step of that same pattern
+  server.fate(<id>).fated | .baseId | .level | .raceId | .worn
+                                                     the server's roll for a game-file actor (npc-fate, ADR-046); worn
+                                                     a sorted tuple of form ids, compared with == to a seat's
+                                                     c.npc_state(<id>).worn
   server.follow(<id>).following | .client | .cell | .actorId
                                                      whether a game follows that actor out of its hosted cells, which
                                                      of the run's clients, into which cell (npc-handoff's D6)
@@ -118,6 +122,7 @@ class ServerFacade(Protocol):
     def cell_host(self, cell: int) -> dict[str, Any] | None: ...
     def ref(self, actor_id: int) -> dict[str, Any] | None: ...
     def follow(self, actor_id: int) -> dict[str, Any] | None: ...
+    def fate(self, actor_id: int) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -488,6 +493,18 @@ _UNSEARCHED = object()
 
 
 @dataclass(frozen=True)
+class FateView:
+    """server.fate(id): the server's roll for a game-file actor (labState kind fate, npc-fate, ADR-046): whether
+    it rolled one, the NPC_ the roll is pinned to, the roll's level, that NPC_'s race, and the outfit roll's worn
+    form ids as a sorted tuple (equal to a seat's c.npc_state(id).worn when the seat wears the server's roll)."""
+    fated: bool
+    baseId: int
+    level: int
+    raceId: int
+    worn: tuple[int, ...]
+
+
+@dataclass(frozen=True)
 class FollowView:
     """server.follow(id): the server's follow table row for an actor (labState kind follow, npc-handoff's D6):
     whether a game follows it out of its hosted cells, which of the run's clients that game is ("" when none),
@@ -701,6 +718,9 @@ class NpcStateView:
     activationBlocked: bool | None = None
     # the cell the reference stands in in that game (a door's interior after a crossing, npc-handoff)
     cell: int | None = None
+    # what that game rolled for it (npc-fate): its race and the form ids it wears, sorted
+    raceId: int | None = None
+    worn: tuple[int, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -977,6 +997,15 @@ class _ServerRef:
                     client = c
                     break
         return HostView(bool(d.get("hosted")), client, int(d.get("epoch") or 0), holder)
+
+    def fate(self, spec) -> FateView:
+        actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
+        fn = getattr(self._f, "fate", None)
+        d = fn(actor_id) if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData(f"server has no fate to read {actor_id:#x} from (no npc-fate)")
+        return FateView(bool(d.get("fated")), int(d.get("baseId") or 0), int(d.get("level") or 0), int(d.get("raceId") or 0),
+                        tuple(sorted(int(w) for w in d.get("worn") or [])))
 
     def follow(self, spec) -> FollowView:
         actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
@@ -1421,7 +1450,9 @@ class _ClientRef:
                                 float(pos[0]), float(pos[1]), float(pos[2]),
                                 isDead=_opt_bool(data.get("isDead")), healthPercentage=_opt_float(data.get("healthPercentage")),
                                 isEssential=_opt_bool(data.get("isEssential")), isProtected=_opt_bool(data.get("isProtected")),
-                                activationBlocked=_opt_bool(data.get("activationBlocked")), cell=_opt_int(data.get("cell")))
+                                activationBlocked=_opt_bool(data.get("activationBlocked")), cell=_opt_int(data.get("cell")),
+                                raceId=_opt_int(data.get("raceId")),
+                                worn=tuple(sorted(int(w) for w in data["worn"])) if isinstance(data.get("worn"), list) else None)
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
@@ -1678,7 +1709,7 @@ _ATTRS = {
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop"},
     NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
-                   "isEssential", "isProtected", "activationBlocked", "cell"},
+                   "isEssential", "isProtected", "activationBlocked", "cell", "raceId", "worn"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},
@@ -1690,6 +1721,7 @@ _ATTRS = {
     RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     FigureSpellsView: {"count", "extra", "base"},
     FollowView: {"following", "client", "cell", "actorId"},
+    FateView: {"fated", "baseId", "level", "raceId", "worn"},
     AvView: {"health", "magicka", "stamina", "healthCurrent", "magickaCurrent", "staminaCurrent",
              "healthMax", "magickaMax", "staminaMax", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
@@ -1711,7 +1743,7 @@ _ID_METHODS = {
 _FORM_SPEC_METHODS = {
     WatchView: {"launched"},
     SelfWatchView: {"launched"},
-    _ServerRef: {"spell", "host", "ref", "follow"},
+    _ServerRef: {"spell", "host", "ref", "follow", "fate"},
 }
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {
@@ -1728,7 +1760,7 @@ _NULLARY = {
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow"},
+    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of"},

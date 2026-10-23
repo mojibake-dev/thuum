@@ -282,6 +282,17 @@ test("labState spell reads the winning SPEL's effects and their MGEFs as the ser
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "spell", formId: 0x99 }), { found: false, formId: 0x99 });
 });
 
+test("labState fate reads the server's roll for a game-file actor", () => {
+  global.mp = fakeMp();
+  mp.set(0x85547, "actorFate", { baseId: 0x23ab5, level: 9, raceId: 0x13746, worn: [0x13913, 0x1391d] });
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "fate", actorId: 0x85547 }),
+    { found: true, actorId: 0x85547, fated: true, baseId: 0x23ab5, level: 9, raceId: 0x13746, worn: [0x13913, 0x1391d] });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "fate", actorId: 0x13482 }),
+    { found: true, actorId: 0x13482, fated: false, baseId: 0, level: 0, raceId: 0, worn: [] });
+});
+
 test("labState follow reads the server's follow table by actor", () => {
   global.mp = fakeMp();
   mp.set(0, "cellFollows", [{ actor: 0x3550c, player: 0xff000000, cell: 0x133c6 }]);

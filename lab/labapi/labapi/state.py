@@ -113,6 +113,12 @@ class ServerState:
         body = self._backend.rpc("labState", {"kind": "cellHost", "cell": int(cell)})
         return body if body.get("found") else None
 
+    def fate(self, actor_id: int) -> dict[str, Any] | None:
+        """The server's roll for a game-file actor (labState kind fate, npc-fate, ADR-046): {found, actorId, fated,
+        baseId, level, raceId, worn}, or None from a server without the fate property."""
+        body = self._backend.rpc("labState", {"kind": "fate", "actorId": int(actor_id)})
+        return body if body.get("found") else None
+
     def follow(self, actor_id: int) -> dict[str, Any] | None:
         """Whether a game follows an actor out of its hosted cells (labState kind follow, npc-handoff's D6):
         {found, actorId, following, player, cell}, or None from a server without the follow table."""

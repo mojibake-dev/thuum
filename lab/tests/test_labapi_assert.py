@@ -306,6 +306,31 @@ class M0VocabularyTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             bare.evaluate("server.host(0x9810).hosted == true")  # a server without the host table
 
+    def test_the_servers_fate_against_a_seats_roll(self):
+        """npc-fate (ADR-046): the server's roll pushed to both; a seat's engine race and worn items read against it."""
+        from labapi.assertions import AssertionData, Evaluator
+        srv = RichServer()
+        fates = {0x85547: {"found": True, "actorId": 0x85547, "fated": True, "baseId": 0x23AB5, "level": 9, "raceId": 0x13746,
+                           "worn": [0x1391D, 0x13913]}}
+        srv.fate = lambda actor_id: fates.get(actor_id, {"found": True, "actorId": actor_id, "fated": False, "baseId": 0,
+                                                         "level": 0, "raceId": 0, "worn": []})
+
+        class FateViews(NearViews):
+            def npc_state(self, observer, form_id):
+                return {"c1": {0x85547: {"formId": 0x85547, "aiEnabled": True, "inCombat": False, "package": 0, "combatTarget": 0,
+                                         "staggering": False, "pos": [0, 0, 0], "raceId": 0x13746, "worn": [0x13913, 0x1391D]}},
+                        "c2": {0x85547: {"formId": 0x85547, "aiEnabled": False, "inCombat": False, "package": 0, "combatTarget": 0,
+                                         "staggering": False, "pos": [0, 0, 0], "raceId": 0x13746, "worn": [0x13913]}}}.get(observer, {}).get(form_id)
+
+        ev = Evaluator(srv, FateViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("server.fate(0x85547).fated == true and server.fate(0x85547).level == 9"))
+        self.assertTrue(ev.evaluate("c1.npc_state(0x85547).raceId == server.fate(0x85547).raceId"))
+        self.assertTrue(ev.evaluate("c1.npc_state(0x85547).worn == server.fate(0x85547).worn"))   # sorted on both sides
+        self.assertFalse(ev.evaluate("c2.npc_state(0x85547).worn == server.fate(0x85547).worn"))  # a seat that rolled its own
+        self.assertTrue(ev.evaluate("server.fate(0x13482).fated == false"))
+        with self.assertRaises(AssertionData):
+            Evaluator(RichServer(), FateViews(), ["c1", "c2"]).evaluate("server.fate(0x85547).fated")  # no fate property
+
     def test_the_follow_table(self):
         """npc-handoff's D6: a game follows an actor through a door into a cell it does not host."""
         from labapi.assertions import AssertionData, Evaluator
