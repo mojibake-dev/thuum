@@ -21,7 +21,7 @@ declare module "skyrimPlatform" {
   // graph event it sends, the input type bits, the actor's graph variables
   // at that moment)
   export interface ActionPerformedEvent {
-    actor: Actor | null;
+    actor: Actor;
     action: number;
     idle: number;
     eventName: string;
