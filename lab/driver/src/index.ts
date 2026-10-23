@@ -2129,6 +2129,16 @@ function run(step: Step, player: Actor): unknown {
       npc.enableAI(a.enabled === true);
       return { formId: npc.getFormID(), aiEnabled: npc.isAIEnabled() };
     }
+    case "npc-kill": {
+      // the named NPC killed by this seat's own engine (Papyrus Actor.Kill with no killer): no hit
+      // report and no number of the server's, the host-made death npc-fate's H5 asks about (the
+      // console's kill is the server's own, ConsoleCommands' ExecuteKill). Returns the state after;
+      // the death can take a frame, so isDead may read false here and true at the next npc-state
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
+      npc.kill(null);
+      return { formId: npc.getFormID(), isDead: npc.isDead() };
+    }
     case "npc-state": {
       // the placed NPC as its engine has it, for the puppet probe: whether
       // its AI runs, its package and combat target (form ids, 0 for none),
@@ -2146,6 +2156,10 @@ function run(step: Step, player: Actor): unknown {
         inCombat: npc.isInCombat(),
         combatTarget: npc.getCombatTarget()?.getFormID() ?? 0,
         staggering: npc.getAnimationVariableBool("IsStaggering"),
+        // dead in this game, and its health share (playtest 32's "deaths that dont propagate": a
+        // puppet's death on the seat that did not make it)
+        isDead: npc.isDead(),
+        healthPercentage: npc.getActorValuePercentage("health"),
         pos: [npc.getPositionX(), npc.getPositionY(), npc.getPositionZ()],
         head: [
           NetImmerse.getNodeWorldPositionX(npc, head, false),

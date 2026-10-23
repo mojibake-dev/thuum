@@ -133,6 +133,21 @@ class EvaluatorTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate("c2.state.movementControls")  # c2's dump has no controls
 
+    def test_a_client_s_open_menus(self):
+        """Playtest 32: the Talk prompt showed and E did nothing; a probe that activates a resident reads the
+        seat's menus (dump-state's) for the Dialogue Menu."""
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+
+        views = Views()
+        views.data["c1"] = {"pos": [0, 0, 0], "menus": ["HUD Menu", "Dialogue Menu"]}
+        ev = Evaluator(Server(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c1.state.menuOpen("Dialogue Menu")'))
+        self.assertFalse(ev.evaluate('c1.state.menuOpen("Inventory Menu")'))
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.state.menuOpen("Dialogue Menu")')  # c2's dump carries no menus
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c1.state.menuOpen(3)")
+
     def test_a_client_s_own_knock_down(self):
         """skymp5-client ragdolls its local player on the server's death state
         and never sets the engine's isDead; lab-driver reports down (m0-death)."""
@@ -585,9 +600,14 @@ class PuppetViews(RefsNearViews):
             {"formId": 0xFF00090D, "baseId": 0x1E7A0, "baseType": 43, "disabled": False, "deleted": False, "pos": [0.0, 242.0, 0.0], "distance": 242.0},
         ]}
         self.states = {"c1": {0x13483: {"formId": 0x13483, "aiEnabled": True, "package": 0x6C989, "inCombat": False, "combatTarget": 0,
-                                        "staggering": False, "pos": [17300.0, -47100.0, -120.0], "head": [0, 0, 0]}},
+                                        "staggering": False, "pos": [17300.0, -47100.0, -120.0], "head": [0, 0, 0],
+                                        "isDead": False, "healthPercentage": 1.0},
+                              # a read from a driver before isDead and healthPercentage
+                              0x13482: {"formId": 0x13482, "aiEnabled": True, "package": 0, "inCombat": False, "combatTarget": 0,
+                                        "staggering": False, "pos": [17000.0, -47000.0, -120.0], "head": [0, 0, 0]}},
                        "c2": {0x13483: {"formId": 0x13483, "aiEnabled": False, "package": 0, "inCombat": False, "combatTarget": 0,
-                                        "staggering": False, "pos": [17301.0, -47099.0, -120.0], "head": [0, 0, 0]}}}
+                                        "staggering": False, "pos": [17301.0, -47099.0, -120.0], "head": [0, 0, 0],
+                                        "isDead": True, "healthPercentage": 0.0}}}
         self.watches = {
             "c2": {"actors": [
                 {"formId": 0x13483, "first": [17300.0, -47100.0, -120.0], "last": [17400.0, -47100.0, -120.0], "maxDisplacement": 130.0, "samples": 240,
@@ -615,6 +635,11 @@ class PuppetFactsTests(unittest.TestCase):
         self.assertTrue(ev.evaluate("c2.npc_state(0x13483).aiEnabled == false"))
         self.assertTrue(ev.evaluate("c1.npc_state(0x13483).package == 0x6C989 and c2.npc_state(0x13483).inCombat == false"))
         self.assertTrue(ev.evaluate("abs(c1.npc_state(0x13483).x - c2.npc_state(0x13483).x) < 256"))
+        # a puppet's death on the seat that did not make it (playtest 32), and an older read without the fields
+        self.assertTrue(ev.evaluate("c2.npc_state(0x13483).isDead == true and c2.npc_state(0x13483).healthPercentage == 0"))
+        self.assertTrue(ev.evaluate("c1.npc_state(0x13483).isDead == false and c1.npc_state(0x13483).healthPercentage > 0.9"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.npc_state(0x13482).isDead")
         # the engine's own reference of a base never counts as a copy
         self.assertTrue(ev.evaluate("c2.refs_near().runtime_of(0x1e7a0) == 1"))
         self.assertTrue(ev.evaluate("c2.refs_near().runtime_of(0x13476) == 0"))
