@@ -254,8 +254,8 @@ worldOrCell nonzero, every float finite. Appended to the contract (ADR-012);
 the MsgType after HostRelease (49).
 
 UpdateMovement (2), a validator change without a shape change (fork
-m3-train-35, 2026-10-22; docs/verbs/npc-puppet.md, x-npc-death
-20261023-054215): healthPercentage must lie in [0, 1], else Range. The
+m3-train-35, parity ac557132 since 2026-10-22 23:48 PDT; docs/verbs/npc-puppet.md,
+x-npc-death 20261023-054215): healthPercentage must lie in [0, 1], else Range. The
 engine's deferred kill lets a host's actor sit below zero health (a script,
 a fall) and the percentage read negative; the client clamps it at the source
 (movementGet), the puppet apply never steps a figure or a puppet under one
