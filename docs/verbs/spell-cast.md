@@ -1747,3 +1747,32 @@ cast takes the launch for any projectile. HYPOTHESIS: whether a player's
 spell bolt re-aims on its first update as an arrow does (the flight's angles
 cover it either way). T3: b-spell-aim (for review; b-arrow-path's claim,
 within 2 units and half a degree). T4: playtest twenty-nine item 7.
+
+## p-spell-bolt's extra effects (the nightly 20261023-104716 on train-37's stage, 2026-10-23)
+
+The nightly's one red, twice (20261023-140019 and 140742, step 21, parity.ok):
+"actor-own/effects/fe014811 extra (reference: absent; run: at 3249 ms)" and
+"target-figure/effects/fe014811 extra", the second run adding
+"actor-figure/effects/fe01481d extra (at 448 ms)". By the server's load
+order fe014811 and fe01481d are StealthKillDetectionFix.esp's 0x811
+madDetectionDummyEffect and 0x81d madDetectionDummyEffectLOS (lab/esm.py),
+the probes its detection cloaks (SPEL 0x817 madDetectionCloak, 0x818
+madDetectionCloakConc) pulse onto actors in range; the plugin has no NPC_ or
+RACE record, so no base carries them: its quests (madStealthKillQuest,
+_Attack, _Sleep) and perks (StealthKillDetectionFixAttackPerk and its Bow and
+LOS variants) cast them from script or an entry point. The probe's target is
+c2's player at full health 150 units off; 3249 ms is the bolt's landing. The
+lab is ruled out: the recorder's effects are Skyrim Platform's
+magicEffectApply events, unfiltered (lab/driver/src/index.ts:913-919), and no
+effects line changed between the 10-21 driver (ceded7d6) and the night's
+(8d3b3139). The reference (lab/references/spell-bolt-a.json, retaken 10-15)
+predates the essentials layer that brought the mod (10-19), but the probe was
+green on 10-21 on trains 30 and 31 with the mod in the load order, so the
+mod's presence alone is not it: the cloak runs at the hit now where it did
+not. Lead: the Attack perks' entry point applies the cloak when the player's
+hit lands, in each game for its own player, and something in trains 32 to 37
+changed what a hit on a figure means to it. Reads under way: p-spell-bolt
+once on parity 7b3a17c6 (trains 32 to 36 or train-37), then the _Attack
+quest's script conditions from the PEX (lab/pex.py). The reference stays
+until the cause is named (no retake under ADR-042b without it); the row
+blocks nothing, the probes are invisible to a player.
