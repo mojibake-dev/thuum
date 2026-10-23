@@ -1302,10 +1302,16 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
   place of the attach set, and PuppetService polls it every two seconds and
   demotes any game-file actor the server's word does not name as this game's
   (a resident the server does not hold yet is a puppet on its own host for
-  one roster round, until its CreateActor's word promotes it). The roster's
-  ids line and x-npc-late-join (all eight, Hilde included) are its oracle.
-  HYPOTHESIS until that run: the attach event's silence for persistent
-  references is the whole of the gap.
+  one roster round, until its CreateActor's word promotes it). CONFIRMED on
+  train-37's stage, x-npc-late-join 20261023-101310 GREEN (18 of 18): the
+  new source sighted Hilde two seconds after the grant ("ff000000 sights
+  35534 at (20347, -46423, -122) in 3c, cell 9732; the record stood in
+  1cb84", her house), she worked furniture live on her host and stood as a
+  blocked puppet on the late seat with the other seven; the attach event's
+  silence for persistent references was the whole of the gap. For the
+  oracle: the server's ten-second "ids [...]" line samples one roster per
+  ten seconds, so a resident sighted once between two lines never shows in
+  them; the "sights" line is the read.
 - E on such an unblocked puppet opened the engine's dialogue with an AI-off
   actor, which never answers, and the Dialogue Menu stayed open (test 2 stuck
   until a relaunch). The block was the apply's per relayed sample, and
