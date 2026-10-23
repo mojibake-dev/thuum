@@ -277,6 +277,17 @@ class MouseStep(unittest.TestCase):
 
 
 
+
+@needs_deps
+class NpcKillStep(unittest.TestCase):
+    """A seat's own engine kills a named NPC (lab-driver's npc-kill, npc-ai's shape): no hit, no number of the server's."""
+
+    def test_npc_kill_is_a_client_step(self):
+        from labapi.scenario import load_scenario
+
+        step = load_scenario("id: x-kill\nclients: [c1]\nsteps:\n  - c1: npc-kill {formId: 0x13483}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "npc-kill", {"formId": 0x13483}))
+
 @needs_deps
 class ScreenshotStep(unittest.TestCase):
     """One shot, or a burst of frames an animation's rate apart (lab-api's screenshot {count, intervalMs}, burst.py)."""

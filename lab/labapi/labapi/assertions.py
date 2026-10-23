@@ -8,6 +8,7 @@ the lab can grep (E_ASSERT_*).
   server.time().hour | .day | .month | .year | .daysPassed | .timeScale
                                                      the server's game clock, read when the assert runs
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
+    | .isDead | .healthPercentage
                                                      that seat's engine state of an NPC, from its last npc-state {formId}
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
@@ -25,6 +26,8 @@ the lab can grep (E_ASSERT_*).
   <client>.state.movementControls | .menuControls | .lookingControls | .activateControls
                                                      the engine's player controls, true when enabled
   <client>.state.rested                              the player has the Rested bonus (a sleep's)
+  <client>.state.menuOpen("<menu>")                that client's game has that menu open (dump-state's menus),
+                                                     "Dialogue Menu" when a talk opened
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
   <client>.morph() | .morph_of(<client>)             a body morph its node-scale {morph} step read, the
@@ -655,6 +658,9 @@ class NpcStateView:
     x: float
     y: float
     z: float
+    # dead in that game, and its health share (a driver from lab-npc-facts on; older reads lack them)
+    isDead: bool | None = None
+    healthPercentage: float | None = None
 
 
 @dataclass(frozen=True)
@@ -815,6 +821,13 @@ class StateView:
     activateControls: bool | None = None
     # the player has the Rested bonus (lab-driver's rested, docs/verbs/sleep.md)
     rested: bool | None = None
+    # the menus open in that game (lab-driver's dump-state menus: "HUD Menu", "Dialogue Menu", ...)
+    menus: tuple[str, ...] | None = None
+
+    def menuOpen(self, name: str) -> bool:
+        if self.menus is None:
+            raise AssertionData("the dump-state carried no menus")
+        return name in self.menus
 
 
 @dataclass(frozen=True)
@@ -1347,7 +1360,8 @@ class _ClientRef:
             pos = data.get("pos") or [None, None, None]
             return NpcStateView(bool(data["aiEnabled"]), bool(data["inCombat"]), int(data.get("package") or 0),
                                 int(data.get("combatTarget") or 0), bool(data.get("staggering")),
-                                float(pos[0]), float(pos[1]), float(pos[2]))
+                                float(pos[0]), float(pos[1]), float(pos[2]),
+                                isDead=_opt_bool(data.get("isDead")), healthPercentage=_opt_float(data.get("healthPercentage")))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
@@ -1568,6 +1582,7 @@ class _ClientRef:
                 lookingControls=_opt_bool(controls.get("looking")),
                 activateControls=_opt_bool(controls.get("activate")),
                 rested=_opt_bool(dump.get("rested")),
+                menus=tuple(str(m) for m in dump["menus"]) if isinstance(dump.get("menus"), list) else None,
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s state lacks {e}") from e
@@ -1581,7 +1596,7 @@ _ATTRS = {
                 "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop"},
-    NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z"},
+    NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},
@@ -1636,6 +1651,7 @@ _METHODS = {
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "rises", "movedBy", "launched", "flights_match"},
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},
+    StateView: {"menuOpen"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
