@@ -11,6 +11,7 @@ import calendar
 import difflib
 import hashlib
 import json
+import math
 import re
 import time
 from dataclasses import dataclass, field
@@ -778,6 +779,8 @@ class Runner:
                 rec.failures.append({"step": index, "kind": "server-command", "error": str(e)})
                 rec.verdict = "red"
                 return False, str(e)
+        if step.action == "approach":
+            return await self._approach(rec, index, step)
         if step.action == "screenshot":
             if step.args.get("count"):
                 return await self._burst(rec, index, step.client, step.args)
@@ -858,6 +861,43 @@ class Runner:
                 rec.failures.append({"step": index, "kind": "timeout", "client": step.client, "error": error})
                 rec.verdict = "red"
                 return False, error
+
+    async def _approach(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
+        """approach {formId, distance, cell} (scenario.py): the seat placed `distance` units from a named NPC, on her
+        line to the seat and facing her, through the judged teleport, so a key press acts on her by the player's own
+        path (look's SetAngle never turned the first-person view, x-npc-talk-prompt 20261023-051308; a teleport's
+        heading is the one the view takes, its angle X is not, so the view stays level). Her position is the seat's
+        own npc-state read and the seat's its own dump-state; the target is in `cell`'s frame (offsets from its origin
+        when the table knows the cell, absolute otherwise)."""
+        assert step.client
+        a = step.args
+        fid, distance = int(a["formId"]), float(a["distance"])
+        qn = await self.board.run_step(step.client, "npc-state", {"formId": fid}, self.s.step_timeout_s)
+        qd = await self.board.run_step(step.client, "dump-state", {}, self.s.step_timeout_s)
+        npc = qn.result.get("data") if qn.ok else None
+        dump = qd.result.get("data") if qd.ok else None
+        try:
+            nx, ny, nz = (float(v) for v in npc["pos"][:3])  # type: ignore[index]
+            sx, sy = (float(v) for v in dump["pos"][:2])  # type: ignore[index]
+        except (KeyError, IndexError, TypeError, ValueError):
+            error = (f"E_RUN_APPROACH: no position for {fid:#x} or for {step.client} (npc-state "
+                     f"{_brief(npc if npc is not None else qn.result, 200)}, dump-state {'ok' if dump else _brief(qd.result, 200)})")
+            rec.failures.append({"step": index, "kind": "lab", "client": step.client, "error": error})
+            rec.verdict = "red"
+            return False, error
+        dx, dy = sx - nx, sy - ny
+        span = math.hypot(dx, dy)
+        ux, uy = (dx / span, dy / span) if span > 1 else (0.0, -1.0)  # a seat standing on her comes in from the south
+        tx, ty = nx + ux * distance, ny + uy * distance
+        heading = (math.degrees(math.atan2(nx - tx, ny - ty)) + 360) % 360  # the engine's angle Z: 0 north, clockwise
+        cell = self.tables.cell(str(a["cell"]))
+        ox, oy, oz = cell.origin if cell is not None else (0.0, 0.0, 0.0)
+        args: dict[str, Any] = {"cell": a["cell"], "x": round(tx - ox, 1), "y": round(ty - oy, 1), "z": round(nz - oz, 1),
+                                "rot": [0, 0, round(heading, 1)]}
+        if "tolerance" in a:
+            args["tolerance"] = a["tolerance"]
+        ok, note = await self._teleport(rec, index, step.model_copy(update={"action": "teleport", "args": args}))
+        return ok, (f"{note}; {distance:g} units from {fid:#x} at ({nx:.0f}, {ny:.0f}, {nz:.0f}), facing {heading:.1f}" if ok else note)
 
     def _dump_at_target(self, dump: dict[str, Any], args: dict[str, Any], tolerance: float | None = None) -> bool:
         """The client's own position (dump-state pos, absolute world units)

@@ -28,6 +28,7 @@ the lab can grep (E_ASSERT_*).
   <client>.state.rested                              the player has the Rested bonus (a sleep's)
   <client>.state.menuOpen("<menu>")                that client's game has that menu open (dump-state's menus),
                                                      "Dialogue Menu" when a talk opened
+  <client>.state.crosshairRef                        the form id under that client's crosshair, what E acts on (0 for none)
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
   <client>.morph() | .morph_of(<client>)             a body morph its node-scale {morph} step read, the
@@ -828,6 +829,8 @@ class StateView:
     rested: bool | None = None
     # the menus open in that game (lab-driver's dump-state menus: "HUD Menu", "Dialogue Menu", ...)
     menus: tuple[str, ...] | None = None
+    # the form id under the crosshair (lab-driver's dump-state crosshairRef, what E acts on; 0 for none)
+    crosshairRef: int | None = None
 
     def menuOpen(self, name: str) -> bool:
         if self.menus is None:
@@ -1590,6 +1593,7 @@ class _ClientRef:
                 activateControls=_opt_bool(controls.get("activate")),
                 rested=_opt_bool(dump.get("rested")),
                 menus=tuple(str(m) for m in dump["menus"]) if isinstance(dump.get("menus"), list) else None,
+                crosshairRef=_opt_int(dump.get("crosshairRef")),
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s state lacks {e}") from e
@@ -1618,7 +1622,7 @@ _ATTRS = {
              "healthMax", "magickaMax", "staminaMax", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
                 "gameYear", "gameMonth", "gameDay", "gameHour", "gameDaysPassed", "timeScale", "down",
-                "movementControls", "menuControls", "lookingControls", "activateControls", "rested"},
+                "movementControls", "menuControls", "lookingControls", "activateControls", "rested", "crosshairRef"},
     _ClientRef: {"state"},
 }
 # Methods that take a number: c2.watched(c1).movedBy(5000)

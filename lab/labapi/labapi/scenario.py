@@ -20,10 +20,10 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "npc-ai", "npc-kill", "npc-state", "look-at", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "papyrus-events"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "npc-ai", "npc-kill", "npc-state", "look-at", "npc-damage", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "papyrus-events"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell"}
-SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse"}
+SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse", "approach"}
 # fakeclient: the fork's headless legacy client logs in as a scenario client's
 # profile from inside the server image (T2 without a Windows client).
 # snapshot {name, of}: a server fact read now and kept under its name for a
@@ -245,6 +245,24 @@ def _screenshot_args(args: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("a screenshot burst spans at most 60 s: (count - 1) x intervalMs")
     return out
 
+
+def _approach_args(args: dict[str, Any]) -> dict[str, Any]:
+    """approach {formId, distance, cell, tolerance?}: the seat placed `distance` units (20 to 1000) from a named NPC
+    and facing her, through the judged teleport (runner.py's _approach), so a key press acts on her by the player's
+    own path; `cell` names the frame the target is written in ("3c:Skyrim.esm" for Tamriel's absolute units)."""
+    unknown = sorted(set(args) - {"formId", "distance", "cell", "tolerance"})
+    if unknown:
+        raise ValueError(f"approach takes formId, distance, cell and tolerance, not {unknown}")
+    fid = args.get("formId")
+    if isinstance(fid, bool) or not isinstance(fid, int) or fid <= 0:
+        raise ValueError(f"approach's formId is a form id, got {fid!r}")
+    d = args.get("distance")
+    if isinstance(d, bool) or not isinstance(d, (int, float)) or not 20 <= d <= 1000:
+        raise ValueError(f"approach's distance is a number of units from 20 to 1000, got {d!r}")
+    if not isinstance(args.get("cell"), str) or not args["cell"]:
+        raise ValueError('approach names the cell its target is written in ("3c:Skyrim.esm" for Tamriel)')
+    return dict(args)
+
 _GAME_PATH = re.compile(r"^[A-Za-z0-9 _.\-]+(?:[/\\][A-Za-z0-9 _.\-]+)*$")
 _BARE = re.compile(r"^[A-Za-z0-9 _.\-]+$")
 _JSON_KEY = re.compile(r"^[A-Za-z0-9_\-]+(?:\.[A-Za-z0-9_\-]+){0,3}$")
@@ -428,6 +446,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _mouse_args(args)
     if action == "screenshot":
         args = _screenshot_args(args)
+    if action == "approach":
+        args = _approach_args(args)
     if action == "relaunch":
         args = _relaunch_args(args)
     return Step(kind="client", client=key, action=action, args=args)

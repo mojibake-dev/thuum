@@ -1051,6 +1051,9 @@ function dumpState(player: Actor) {
     // and the rest of what can hold a player still with the controls on: an
     // open menu, menu mode, a furniture, the sit and sleep states
     menus: MENUS.filter((m) => Ui.isMenuOpen(m)),
+    // the reference under the crosshair, what E acts on (SKSE's GetCurrentCrosshairRef; 0 for none):
+    // a probe asserts its aim before a key press (x-npc-talk-prompt v4)
+    crosshairRef: Game.getCurrentCrosshairRef()?.getFormID() ?? 0,
     inMenuMode: Utility.isInMenuMode(),
     furniture: player.getFurnitureReference()?.getFormID() ?? 0,
     sitState: player.getSitState(),
@@ -2173,6 +2176,18 @@ function run(step: Step, player: Actor): unknown {
       const killer = a.killer === "player" ? Game.getPlayer() : null;
       npc.kill(killer);
       return { formId: npc.getFormID(), killer: killer ? killer.getFormID() : 0, isDead: npc.isDead() };
+    }
+    case "npc-damage": {
+      // the named NPC's health damaged in this seat's own engine (Actor.DamageActorValue), as a fall, a
+      // trap or another NPC's blow lands on the host with no hit report for the server: skymp5-client's
+      // deferred kill on every viewed actor (formView.ts's startDeferredKill) leaves her alive at the
+      // floor, npc-fate's H5 (x-npc-death v4). Answers her health share and isDead after
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
+      const amount = num(a.amount);
+      if (!(amount > 0)) return { error: `npc-damage's amount is a positive number, got ${JSON.stringify(a.amount)}` };
+      npc.damageActorValue("health", amount);
+      return { formId: npc.getFormID(), healthPercentage: npc.getActorValuePercentage("health"), isDead: npc.isDead() };
     }
     case "npc-state": {
       // the placed NPC as its engine has it, for the puppet probe: whether

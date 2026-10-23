@@ -291,6 +291,25 @@ class NpcKillStep(unittest.TestCase):
         step = load_scenario("id: x-kill\nclients: [c1]\nsteps:\n  - c1: npc-kill {formId: 0x13483, killer: player}\n").steps[0]
         self.assertEqual(step.args, {"formId": 0x13483, "killer": "player"})
 
+    def test_npc_damage_is_a_client_step(self):
+        # the host's engine hurts a named NPC with no hit report (npc-fate's H5, x-npc-death v4)
+        from labapi.scenario import load_scenario
+
+        step = load_scenario("id: x-hurt\nclients: [c1]\nsteps:\n  - c1: npc-damage {formId: 0x13483, amount: 1000}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "npc-damage", {"formId": 0x13483, "amount": 1000}))
+
+    def test_approach_names_its_npc_distance_and_cell(self):
+        # the seat placed a distance from a named NPC, facing her (lab-api's, through the judged teleport)
+        from labapi.scenario import load_scenario
+
+        step = load_scenario('id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {formId: 0x13483, distance: 80, cell: "3c:Skyrim.esm"}\n').steps[0]
+        self.assertEqual((step.kind, step.client, step.action), ("client", "c1", "approach"))
+        self.assertEqual(step.args, {"formId": 0x13483, "distance": 80, "cell": "3c:Skyrim.esm"})
+        for bad in ("{formId: 0x13483, distance: 80}", "{distance: 80, cell: lab-spawn}", "{formId: 0x13483, distance: 5, cell: lab-spawn}",
+                    "{formId: 0x13483, distance: 80, cell: lab-spawn, speed: 2}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {bad}\n")
+
     def test_look_at_is_a_client_step(self):
         # the player's view onto a named actor, for a key press on it (x-npc-talk-prompt v3)
         from labapi.scenario import load_scenario
