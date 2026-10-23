@@ -234,6 +234,20 @@ and 8 a second only ever stops a flood.
 
 ## Impose (observers render the server's decision)
 
+- The figure's spell set is the server's (ADR-046, decision 2, 2026-10-23;
+  fork m3-train-38 d2003056): a distributor such as SPID hands every
+  non-player actor the layer's abilities at its load, and a figure is such
+  an actor to it (Stealth Detection Fixes' madDetectionCloak on every NPC;
+  its probes landed on a figure in p-spell-bolt's nightly red). The figure's
+  added spells (Actor.getNthSpell, not the base's or the race's) are kept to
+  the four the server equips (left, right, voice, instant) and the rest
+  removed, at every equipment apply and in a ten-second sweep of each
+  figure's view (equipment.ts keepOnlyServerSpells, formView.ts); a puppet
+  or a hosted resident is never touched (isFigureBase: the Player base or a
+  base this game made). The Player base stays; perks and keywords take a
+  native enumeration when a case shows them. Oracle owed: a figure's spell
+  list fact in the lab (x-figure-spells).
+
 - Mechanism: a Skyrim Platform export beside castSpellImmediate,
   performAction(actor, action, idle, eventName, type) (MagicApi.cpp on fork
   m2-cast-action), building the TESActionData on the stack with the event
