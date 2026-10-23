@@ -501,7 +501,7 @@ the lab. H5 stays HYPOTHESIS until x-handoff-door.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-22 draft; the decisions as ADR-047 PROPOSED 2026-10-23, D6 to D11)
 - [x] engine surface cited or delegated (the cell getters through Skyrim Platform and libespm's CELL and record flags; moveRefrToPosition the player's own cross-cell call; no new native)
-- [x] server logic + T0, first slice (D6, D10, e: fork m3-train-40 89c35590 the table with three tests, e4474bcf the core with CellHostTest's follow case; D7 to D9 open)
+- [x] server logic + T0, first slice (D6, D10, e: fork m3-train-40 89c35590 the table with three tests, e4474bcf the core with CellHostTest's follow case, the include fix 97d08da7 compiled and ctest green in pipeline 2756, 2026-10-23 14:14 PDT, 424 cases; the head 1c3c0699 merges train-39's 4 s; D7 to D9 open)
 - [ ] message + validator (same commit): none this slice (no wire change; ActorHandoff is D8's, the second slice)
 - [ ] native hook + T1 (none: no new Address Library id)
 - [x] TS handler, first slice (formView's door move behind npcHandoff, fork m3-train-40 b1aa119e; HandoffService with keyframes is D8's)
