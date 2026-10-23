@@ -408,6 +408,18 @@ each imposition's target is explicit.
     :99-113); server.simulator(0x13483).kind == "host". dump-state on both;
     artifacts server.log, c1.log, c2.log, screenshots. c-riverwood
     (cell-host.md:382-389) runs on the merge, Embry's door included.
+- Probes by path, drafted 2026-10-23 for train-40's stage (lab/.cache/probes,
+  numidium runs them once the grammar lands: npc_state(id).cell, c.log_count,
+  server.follow(id), `server: restart {gameHour}`): x-handoff-door (the clock
+  at 19.9, Embry 0x3550C into the inn 0x133C6: the record follows within the
+  until's window, the follow names c1, c2's log has "moved 3550c into 133c6",
+  both engines have him in the inn; then c2 walks in: the inn granted to c2,
+  the follow ended, c2 runs him); x-handoff-restart (c1 in 0x9732, c2 one
+  square west in 0x9733, restart, both reconnect: each cell to the player
+  standing in it, Alvor live on c1 alone, no churn a minute on);
+  x-handoff-night (23.0, Alvor home to 0x133C8, restart at 7.9, his record
+  outdoors within 180 s of the reconnects, c1 alone runs him). Their reds
+  are findings; their greens tick D6, D10 and D11's rows and H5.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
