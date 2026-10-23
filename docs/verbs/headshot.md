@@ -372,7 +372,7 @@ not know.
   ragdoll; Eli judges the feel at twenty-four).
 
 
-## Playtest thirty-two's NPC targets (2026-10-22, fork parity fb6f3f09; fixed on m3-train-34 dc6e3adb)
+## Playtest thirty-two's NPC targets (2026-10-22, fork parity fb6f3f09; fixed on m3-train-34 dc6e3adb, parity 7e59c32c since 21:40 PDT)
 
 With the server's NPCs on (npc-puppet), every headshot on a game-file actor
 was refused E_HEADSHOT_RACE: PartOne::ClaimHeadshot read the target's race

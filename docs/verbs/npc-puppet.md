@@ -107,7 +107,7 @@ code read (skymp-hosting.md, on parity ef44a1d8 unless a tree is named):
 | essential, protected, unique, crime-faction and playable-race NPCs never loaded (WorldState.cpp:519-585; on m3host :506 npcEnabled, :541 CrimeFactionsList 0x26953, :585-587 the race list) | code | imposed: the three bans lifted behind npcEnabled on the probe-only setting (ADR-035 point 9); dead-at-start and initially disabled references stay skipped (:477-501 on m3host) |
 | the puppet's health, equipment and inventory (the copy's deferred kill and 1,000,000 health, formView.ts:313-319; the 25% step toward the relayed percentage, movementApply.ts:63-67) | code | imposed as today on the kept reference (startDeferredKill, skyrimPlatform.ts:2202; the step); the live values: later, npc-stream (HostedActorState) |
 | a persistent NPC through a door (Embry into the inn, readings-18:36-43) | trace | native on the host; on a puppet: later, npc-handoff (a relayed report in another cell moves the reference with MoveTo, TESObjectREFR.h:456, where today's copy respawns, movementApply RespawnNeededError, skymp-hosting.md:278-279) |
-| the observer's shape kept: head tracking on the look-at point, blockActivation, the local attack events blanked unless relayed (movementApply.ts:37-59; animation.ts:383-394 for a view with default animations disabled) | code | imposed as today on the puppet (setDefaultAnimsDisabled(refrId, true), formView.ts:454 on m3host); undone at the promote since train-34 8eafa85d (PuppetService.ensureLive: blockActivation(false), clearLookAt, setHeadTracking(true) before setPuppet(false); ensurePuppet blocks from the demote): playtest 32's handoffs (2026-10-22, 19:02 to 19:09 PDT) left every resident that had been a puppet with a Talk prompt and E dead on both screens once live (Eli: "there's a prompt it does nothing"); the view's hosted branch had lifted the weapon-drawn mode and the default-anims block alone |
+| the observer's shape kept: head tracking on the look-at point, blockActivation, the local attack events blanked unless relayed (movementApply.ts:37-59; animation.ts:383-394 for a view with default animations disabled) | code | imposed as today on the puppet (setDefaultAnimsDisabled(refrId, true), formView.ts:454 on m3host); undone at the promote since train-34 (fork parity 7e59c32c, 2026-10-22 21:40 PDT; 8eafa85d: PuppetService.ensureLive runs blockActivation(false), clearLookAt and setHeadTracking(true) before setPuppet(false); the demote-time block 8eafa85d also added was dropped again by 7e59c32c, the apply's per-sample block standing, after the IDRC box read in the first gate): playtest 32's handoffs (2026-10-22, 19:02 to 19:09 PDT) left every resident that had been a puppet with a Talk prompt and E dead on both screens once live (Eli: "there's a prompt it does nothing"); the view's hosted branch had lifted the weapon-drawn mode and the default-anims block alone |
 
 ### Sequences and combinations (ADR-033)
 
@@ -537,7 +537,8 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   heading, the flag cleared, EnableAI(true), EvaluatePackage(true, false);
   before it the TS promote undoes what the puppet apply imposed beyond the AI
   bit (the activation block, the look-at, head tracking; 8eafa85d, after
-  playtest 32's dead Talk prompts);
+  playtest 32's dead Talk prompts; on parity 7e59c32c since 2026-10-22
+  21:40 PDT, the demote itself making no Papyrus-backed call);
   the recorded combat target is npc-handoff's to restore. HostRelease or the
   connection's end: demote. A reference the engine detaches drops its flag;
   its reload is puppet by default (cellAttach).
