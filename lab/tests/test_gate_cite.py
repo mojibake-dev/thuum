@@ -109,6 +109,21 @@ class GateCite(unittest.TestCase):
         self.assertTrue(lists["watch"] and lists["pending"], lists)
         self.assertTrue(all(re_ok(s) for v in lists.values() for s in v), lists)
 
+    def test_the_merges_own_gate_is_held_to_the_head_it_began_with(self):
+        # m3-train-34, 2026-10-22: the branch moved a minute into the gate; verb-merge pushes the head it began with
+        # (--head) and runset.sh's verdict stands for check 1 (--fresh), where a red watch item may end a green merge
+        rs = copy.deepcopy(SET); rs["verdict"] = "watch"
+        rs["runs"]["b-shadowbond"].append({"run": "r5", "verdict": "red"})
+        results = {**RESULTS, "r5": result()}
+        self.assertFalse(run(rs=rs, results=results)[0][0])
+        rows = gc.own_gate(run(rs=rs, results=results))
+        self.assertTrue(all(ok for ok, _ in rows), rows)
+        self.assertEqual([m[:2] for _, m in rows], ["1.", "2.", "3.", "4.", "5."])
+        # a gate that played another commit than the one the merge takes stops it
+        moved = gc.own_gate(run(head8="7e59c32c", changed=["skymp5-client/src/services/services/puppetService.ts"]))
+        self.assertFalse(moved[3][0])
+        self.assertIn("differs from e3a5b367 in more than docs", moved[3][1])
+
     def test_a_turbo_push_or_a_new_stage_after_the_set_began(self):
         self.assertFalse(run(turbo=["2026-10-20T00:30:00Z client 20261020T003000Z 711 e3a5b367"])[4][0])
         self.assertFalse(run(live="sha256:other")[4][0])
