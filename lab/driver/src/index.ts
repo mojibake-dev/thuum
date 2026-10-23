@@ -1387,6 +1387,35 @@ function run(step: Step, player: Actor): unknown {
       player.setAngle(pitch, 0, heading);
       return { pitch: player.getAngleX(), heading: player.getAngleZ() };
     }
+    case "look-at": {
+      // the player's view turned onto a named actor ({formId}, npc-state's), so a key press acts on it
+      // as the player's own would (hold-key 18, E: the player's activation path, which a Papyrus
+      // Activate is not, x-npc-talk-prompt 20261023-045446): the heading from this player's head node
+      // to the actor's (degrees, 0 north and clockwise, getAngleZ's) and the pitch toward it (degrees,
+      // down positive, look's), both set through look's SetAngle. Answers the angles read back and the
+      // distance. look's caveat stands: the first-person view may not take the pitch, and at 100 units
+      // or less a level view meets a standing actor's head, HYPOTHESIS
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
+      const node = "NPC Head [Head]";
+      const at = (r: Actor) => [
+        NetImmerse.getNodeWorldPositionX(r, node, false),
+        NetImmerse.getNodeWorldPositionY(r, node, false),
+        NetImmerse.getNodeWorldPositionZ(r, node, false),
+      ];
+      const [ex, ey, ez] = at(player);
+      const [tx, ty, tz] = at(npc);
+      if ((ex === 0 && ey === 0 && ez === 0) || (tx === 0 && ty === 0 && tz === 0)) {
+        return { error: "no head node to aim from or at" };
+      }
+      const dx = tx - ex;
+      const dy = ty - ey;
+      const dz = tz - ez;
+      const heading = ((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360;
+      const pitch = (-Math.atan2(dz, Math.hypot(dx, dy)) * 180) / Math.PI;
+      player.setAngle(pitch, 0, heading);
+      return { formId: npc.getFormID(), distance: Math.hypot(dx, dy, dz), heading: player.getAngleZ(), pitch: player.getAngleX() };
+    }
     case "arrows": {
       // thuum docs/verbs/marksman.md (playtest thirteen: the target's screen
       // shows two arrows per shot): how many projectiles stand in the
@@ -2130,14 +2159,20 @@ function run(step: Step, player: Actor): unknown {
       return { formId: npc.getFormID(), aiEnabled: npc.isAIEnabled() };
     }
     case "npc-kill": {
-      // the named NPC killed by this seat's own engine (Papyrus Actor.Kill with no killer): no hit
-      // report and no number of the server's, the host-made death npc-fate's H5 asks about (the
-      // console's kill is the server's own, ConsoleCommands' ExecuteKill). Returns the state after;
-      // the death can take a frame, so isDead may read false here and true at the next npc-state
+      // the named NPC killed by this seat's own engine (Papyrus Actor.Kill, with no killer or, with
+      // {killer: "player"}, this seat's player): no hit report and no number of the server's, the
+      // host-made death npc-fate's H5 asks about (the console's kill is the server's own,
+      // ConsoleCommands' ExecuteKill). A kill with no killer left Sigrid alive (x-npc-death
+      // 20261023-044628); a protected actor dies to the player alone, HYPOTHESIS. Returns the state
+      // after; the death can take a frame, so isDead may read false here and true at the next npc-state
       const npc = namedNpc(a);
       if (!npc) return { error: "no placed npc and no {formId}" };
-      npc.kill(null);
-      return { formId: npc.getFormID(), isDead: npc.isDead() };
+      if (a.killer !== undefined && a.killer !== "player") {
+        return { error: `npc-kill's killer is "player" or absent, got ${JSON.stringify(a.killer)}` };
+      }
+      const killer = a.killer === "player" ? Game.getPlayer() : null;
+      npc.kill(killer);
+      return { formId: npc.getFormID(), killer: killer ? killer.getFormID() : 0, isDead: npc.isDead() };
     }
     case "npc-state": {
       // the placed NPC as its engine has it, for the puppet probe: whether
@@ -2160,6 +2195,13 @@ function run(step: Step, player: Actor): unknown {
         // puppet's death on the seat that did not make it)
         isDead: npc.isDead(),
         healthPercentage: npc.getActorValuePercentage("health"),
+        // what the engine refuses a death for: essential (the actor's own read) and protected (its
+        // leveled base's; an alias's protection is not read), x-npc-death's
+        isEssential: npc.isEssential(),
+        isProtected: npc.getLeveledActorBase()?.isProtected() ?? null,
+        // E does nothing on a blocked reference: every relayed puppet sample sets it, the promote
+        // clears it (8eafa85d), the Talk prompt's mechanism (x-npc-talk-prompt v3)
+        activationBlocked: npc.isActivationBlocked(),
         pos: [npc.getPositionX(), npc.getPositionY(), npc.getPositionZ()],
         head: [
           NetImmerse.getNodeWorldPositionX(npc, head, false),

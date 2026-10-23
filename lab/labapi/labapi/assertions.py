@@ -8,7 +8,7 @@ the lab can grep (E_ASSERT_*).
   server.time().hour | .day | .month | .year | .daysPassed | .timeScale
                                                      the server's game clock, read when the assert runs
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
-    | .isDead | .healthPercentage
+    | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked
                                                      that seat's engine state of an NPC, from its last npc-state {formId}
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
@@ -661,6 +661,11 @@ class NpcStateView:
     # dead in that game, and its health share (a driver from lab-npc-facts on; older reads lack them)
     isDead: bool | None = None
     healthPercentage: float | None = None
+    # what the engine refuses a death for: the actor's essential and its leveled base's protected (x-npc-death)
+    isEssential: bool | None = None
+    isProtected: bool | None = None
+    # E does nothing on it in that game: a puppet's relayed samples set it, the promote clears it
+    activationBlocked: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -1361,7 +1366,9 @@ class _ClientRef:
             return NpcStateView(bool(data["aiEnabled"]), bool(data["inCombat"]), int(data.get("package") or 0),
                                 int(data.get("combatTarget") or 0), bool(data.get("staggering")),
                                 float(pos[0]), float(pos[1]), float(pos[2]),
-                                isDead=_opt_bool(data.get("isDead")), healthPercentage=_opt_float(data.get("healthPercentage")))
+                                isDead=_opt_bool(data.get("isDead")), healthPercentage=_opt_float(data.get("healthPercentage")),
+                                isEssential=_opt_bool(data.get("isEssential")), isProtected=_opt_bool(data.get("isProtected")),
+                                activationBlocked=_opt_bool(data.get("activationBlocked")))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
@@ -1596,7 +1603,8 @@ _ATTRS = {
                 "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop"},
-    NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage"},
+    NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
+                   "isEssential", "isProtected", "activationBlocked"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},
