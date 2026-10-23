@@ -378,6 +378,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   message; and only a host is marked stale, since a login's first loads come
   before any grant and a silent visitor hosts nothing to pass on. The
   threshold stays 4 s.
+  Third read, x-host-kill 20261023-221644 on train-40's stage 92529f31 (the
+  two changes carried): no stale line at either login; the kill's alone,
+  "silent 4032 ms, stale" and the pass at epoch 2 about 9.0 s after c1's
+  last report, the disconnect 4.6 s later. The row's number is MEASURED and
+  its login blips closed.
 
 ## Client
 
