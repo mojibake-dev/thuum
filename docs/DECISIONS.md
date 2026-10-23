@@ -2441,7 +2441,8 @@ playtest 34 ("I think i'd like this to be built for this playtest ... id
 rather that", relayed by numidium); the recommendations of
 docs/research/m3/decisions-for-playtest-34.md stand until Eli says otherwise.
 Refines ADR-035 point 8 ("nobody hosts") and ADR-045's word per actor; sets
-docs/verbs/npc-handoff.md's decisions a to g.
+the memo's D6 to D11 (docs/verbs/npc-handoff.md's decisions a to g; the
+draft's e, the refusal log, has no D-number), each at the memo's option A.
 
 Context. The cell-change rule of cell-host (PartOne::MayMoveActor) accepts a
 hosted actor's move into another cell only when the sender hosts the
@@ -2458,7 +2459,7 @@ Ours keeps the server's word per actor and widens only what a host vouches
 for.
 
 Decisions.
-1. (a) The follow. A move by an actor's simulator into a cell nobody hosts
+1. D6 (a) The follow. A move by an actor's simulator into a cell nobody hosts
    is accepted when the sender's game has the destination loaded (its
    CellLoaded set) and the destination is adjacent to the origin's grid
    square (Chebyshev distance 1 in one worldspace) or an interior entered
@@ -2470,39 +2471,41 @@ Decisions.
    has LOADED freezes; a loaded, unhosted cell keeps its actors under the
    follower. A followed actor stays in its follower's listener set across
    the grid's two-square drop. R0 for the follow, R1 for the report.
-2. (b) The edge flicker is damped by two election knobs, GRACE_REACH_MS for
+2. D7 (b) The edge flicker is damped by two election knobs, GRACE_REACH_MS for
    a lapse of reach alone while the host's game still loads the cell and
    CANDIDATE_DWELL_MS before a visitor counts as a candidate; the shape is
    accepted, the numbers UNMEASURED until x-cell-attach's reads on two
    seats size them. Second slice.
-3. (c) The keyframe before a grant is a dedicated ActorHandoff message (the
+3. D8 (c) The keyframe before a grant is a dedicated ActorHandoff message (the
    record plus npc-stream's furniture, target and package) on HostGrant's
    ordered channel, appended to the wire with its validator; HostGrant is
    not widened. Second slice.
-4. (d) An actor crossing into another live host's adjacent cell passes:
+4. D9 (d) An actor crossing into another live host's adjacent cell passes:
    the server writes the record, sends the new host its keyframe and flips
    the word both ways through UpdateHoster; an actor passed inside
    ACTOR_TENURE_MS (UNMEASURED) is not passed again. Second slice.
-5. (e) A refusal is logged once a minute per actor and counted; the client's
+5. (e, no D-number) A refusal is logged once a minute per actor and counted; the client's
    report list drops an actor in a cell it neither hosts nor loads.
-6. (f) The cold start. In a table with no host anywhere, a grant waits one
+6. D10 (f) The cold start. In a table with no host anywhere, a grant waits one
    dwell from the table's first loaded report and goes to the eligible
    player whose grid square is nearest the cell's, arrival the tiebreak;
    with any host standing, the first eligible player takes an unhosted cell
    as today. The dwell is CANDIDATE_DWELL_MS's number, one knob (5 s
    placeholder, UNMEASURED).
-7. (g) A sighting of an actor whose record stands in a cell nobody hosts
+7. D11 (g) A sighting of an actor whose record stands in a cell nobody hosts
    moves the record to the sighter's cell (OnActorSighting admits the case
    today); the grid then carries it to every game and the word follows.
 
-Consequences. Train-40 builds decisions 1, 5, 6 and 7 with the client's
+Consequences. Train-40 builds D6, D10 and D11 (decisions 1, 6 and 7) with
+(e)'s refusal log and the client's
 move of an engine reference into the record's new cell (an interior the
 local game has loaded, or the exterior the puppet already stands in): the
 Rust table gains the follow table, a move verdict and the cold-start rule
 with their T0; MayMoveActor becomes the thin call; the report list's drop
 and the once-a-minute log on both ends; the door and restart scenarios
 (b-npc-handoff's ring, door, night and restart steps) after the lab grammar
-they need. Decisions 2, 3 and 4 are the second slice after playtest 34
+they need. D7, D8 and D9 (decisions 2, 3 and 4) are the second slice after
+playtest 34
 unless time allows; until then a crossing into another live host's cell is
 refused as today and a grant carries no keyframe (the new host promotes from
 the record's last sample, as cell-host does now). The HYPOTHESIS tags left
