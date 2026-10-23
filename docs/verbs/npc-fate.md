@@ -589,6 +589,26 @@ head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
 
 ## Client
 
+Built, the client half (train-41, fork m3-train-41 8535e336, 2026-10-23 15:23 PDT),
+behind the npcFate switch, off by default: Skyrim Platform's fate table and
+two Frida Gum detours (the leveled roll wrapper 14752 answering the server's
+NPC_ as the one CALCED_OBJECT; InventoryChanges::InitOutfitItems 16072
+adding the server's worn list tagged ExtraOutfitItem and skipping the roll),
+the exports setActorFate, clearActorFate, setActorFateEnabled, rerollActor
+(the engine's re-roll 37323 on the game thread) and actorFateCount, every
+id from re-npc-roll.md's table by `just addr`, every structure offset a
+CommonLibSSE-NG header line; ActorFateService keeps every fate and re-rolls
+a reference the engine already holds when its fate is new (a login's
+neighbours, a cell attached ahead, a respawn): one pop; formView skips the
+equipment apply for engine references under the switch (the engine dresses
+them; figures and 0xff copies keep the apply). HYPOTHESIS, the detours and
+the re-roll, until x-npc-fate-roll's five observations; then the switch
+turns on in the lab's settings and the parity read (both seats' species and
+worn items equal to the server's record) ticks ADR-046 decision 1. Known
+cost of the first slice: at a login every fated neighbour the engine already
+rolled is re-rolled once (no base compare through the clone's template yet).
+
+
 - SP binding: Impose A's pin, a native table `setActorFate(refrId, baseId)`
   and `clearActorFate(refrId)` consulted by the roll-site hook (RE-1); Impose
   B's `setBaseObject(refr, base)` on the CommonLib virtual (TESObjectREFR.h:
