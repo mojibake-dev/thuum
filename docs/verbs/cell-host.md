@@ -330,11 +330,29 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   game stopped at 02:31:36Z while it held Riverwood; the server dropped the
   user at about 02:31:54Z (the connection timeout) and the cell passed at
   the grace, 02:32:00Z. For about 24 s the cell belonged to a game that was
-  gone: its residents froze on the other screen, nobody's to move. Row: the
-  client's transport sends netcode's disconnect at process exit (renet's
-  disconnect packets, wire-client-ffi, ADR-011) so the drop is immediate, or
-  a host's timeout is shorter than a visitor's; the server decides either
-  way (R0).
+  gone: its residents froze on the other screen, nobody's to move. Since
+  train-39 (fork m3-train-39 206190dc, 2026-10-23 13:26 PDT) the server reads
+  each connection's silence itself (R0): the wire transport stamps every
+  received message per client (Server::client_silence_ms, IServer::GetSilenceMs
+  through the combined server), and TickCellHosts marks a user silent for
+  kStaleHostMs stale (cells.rs stale: every cell it hosts starts its grace at
+  that tick, it is no candidate anywhere, its loaded set and reach kept) and a
+  user heard again revived (cells.rs revived: each loaded cell considered anew,
+  a running grace of its own disarmed, a free cell granted). A killed, crashed
+  or quit game therefore passes its cells in kStaleHostMs plus a tick plus the
+  grace, about eight to nine seconds, with no disconnect needed; netcode's
+  timeout still ends the connection later. The client's disconnect at exit
+  (option i of docs/research/m3/decisions-for-playtest-34.md) stays a later
+  row: the process ends its threads before any exit hook could flush one, and
+  it is blind to a crash or a kill. HYPOTHESIS on the number alone:
+  kStaleHostMs 3'000 is twenty-three missed reports at the client's 130 ms
+  cadence and past a save's or a loading screen's stall of a second or two;
+  the lab read (the host's game killed with both seats in Riverwood, the
+  cell's host read every second) measures the pass and a loading screen's
+  silence calibrates it. CellHostTest's case: the silent host's cell passes
+  at the grace with no disconnect, the revived host is a candidate again, a
+  host heard again inside its grace keeps its cell at the same epoch;
+  wire-rules and wire-transport carry their own tests.
 
 ## Client
 

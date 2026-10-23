@@ -92,7 +92,10 @@ laggy player's village for nothing.
 1. Train-39, the quitting host: the server's stale-host rule (iii), a T0 in
    CellHostTest with the clock margins, and a lab read (the game stopped, the
    cell passed within the grace plus two seconds). Half a day with its gate
-   and T2 (a server change).
+   and T2 (a server change). BUILT 2026-10-23 13:26 PDT, fork m3-train-39
+   206190dc (the threshold three seconds, not two: a save's or a loading
+   screen's stall must not pass a village; the lab calibrates it); the stage
+   with T2 and the kill-the-host read are numidium's next.
 2. Train-40, doors: npc-handoff's (a), (g) and the client's MoveTo of an engine
    reference across cells (MayMoveActor's return, the follow table, the roster
    moving a record out of an interior), with (f) the split rule; (b), (c) and
