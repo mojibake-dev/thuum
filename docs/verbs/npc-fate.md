@@ -42,7 +42,7 @@ Milestone: M3   Class: B
    conflict"). The one plain NPC_ bandit pair (0x39fe2 to 0x39fe5) had
    records and hosted as cell-host says. The forest's wolves showed the
    same split one level up: 0x85547 and 0x85549 are LvlAnimalForestPredator
-   0x1e7a0 picks through an NPC_ template chain, which the server rolls
+   0x1e7a0's template chain (its TPLT the LVLN 0x42297) picks through, which the server rolls
    once at player level 0 (MpActor.cpp:1661-1764, kPcLevel :1664;
    LeveledListUtils.cpp:189-199) and the client ignores (formView.ts:163,
    "getLeveledBase crashes too often ATM"): the server's record of 0x85549
@@ -105,7 +105,7 @@ reviewed like a scenario.
 | --- | --- | --- |
 | the placement resolved to one actor at the cell's attach: the engine picks from the LVLN's entries by level (TESLeveledList::CalculateCurrentFormList, TESLeveledList.h:65; iLevCharLevelDifferenceMax, TESLevCharacter.h:49) and writes ExtraLeveledCreature (originalBase, templateBase; ExtraLeveledCreature.h:23-24) with Actor's kLeveledActor change flag (Actor.h:238) | record, code | imposed: the server rolls once per placement (R0, LeveledListUtils.cpp:71-123) and the game pins the server's base on the engine reference before its own roll (Impose A, H1) or swaps it after (Impose B, H2); both HYPOTHESIS |
 | the roll's inputs: the player's level and the zone's bounds (ENCOUNTER_ZONE_DATA minLevel, maxLevel, BGSEncounterZone.h:22-25; the locked zoneLevel, :37), the list's chanceNone or its global (TESLeveledList.h:60, :70, :76) | record, code | imposed: the server's rule (Authority: the first loader's recorded level clamped by the zone; today's level 0 as the alternative); the engine's lock of the zone level at the first attach is H3; the server reading a chance-none global as 100 (LeveledListUtils.cpp:35) against the engine's global value (TESLeveledList.h:60) is a defect to fix with a T0 oracle (H12) |
-| an NPC_ whose template chain reaches a LVLN (the wolves' 0x1e7a0), rolled per game by the engine and once on the server (templateChain, MpChangeForms.h:119; LeveledListUtils.cpp:189-199) | code, record | imposed: the same pin, with the chain's leaf as the base; the client's dead getLeveledBase path (formView.ts:154-175) retired |
+| an NPC_ whose template chain reaches a LVLN (the forest predators' placed NPC_ 0x1e7a0, its template the LVLN 0x42297; x-npc-fate-roll 232048), rolled per game by the engine and once on the server (templateChain, MpChangeForms.h:119; LeveledListUtils.cpp:189-199) | code, record | imposed: the same pin, with the chain's leaf as the base; the client's dead getLeveledBase path (formView.ts:154-175) retired |
 | the actor's inventory and outfit, their LVLI entries rolled by each engine at the reference's load (kLeveledInventory, TESObjectREFR.h:156) and by the server at level 1 (MpObjectReference.cpp:1982-1999, :44) | record, code | imposed: the server's inventory is the body's container (R0, the CONT shape, Server); the engine's own roll on the body never reaches a player: the menu lists the server's list (H4); and the WORN roll matters alive too (playtest 33, 2026-10-23): the headshot's helmet check reads the server's worn list, which each engine's own roll contradicts on screen (seven refusals for a hood nobody saw, docs/verbs/headshot.md), so the roll decision below covers outfits and server-placed 0xff actors, not placements alone |
 | the death item (INAM, TESActorBaseData.h:126) rolled at death | record, code | native on the server already (EvaluateDeathItem, MpActor.cpp:1796-1857; AddDeathItem from Kill :1932); nothing new |
 | the death on the server's own number: a hit the server computed takes health to zero (SetPercentages, MpActor.cpp:889-897, Kill(aggressor) :896; SetPercentage :855-866), a headshot (PartOne.cpp:2060-2063), a scripted kill (ClaimScriptedKill :1905-1912), the console (ConsoleCommands.cpp:255-268) | code | native: R0 as today; Kill (MpActor.cpp:1911-1933) records isDead, tells the listeners (DeathStateContainer 18) and fires onDeath; this verb changes what onDeath arms (Server) |
@@ -732,6 +732,32 @@ rolled is re-rolled once (no base compare through the clone's template yet).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+x-npc-fate-roll 20261023-232048 (16:46 PDT, numidium's agent reading both
+traces of lab/frida/npc-roll.js against re-npc-roll.md section 7): observation
+1 HELD (the resolver once per placement at the teleport's cell load, inside
+InitItemImpl, never at the biped init 76 ms later or after); observation 2
+HELD (the wrapper's out array exactly one NPC_ on all twenty logged rolls:
+0x85549 rolled 0x23abe into clone 0xff000840, 0x85547 rolled 0x23ab7);
+observation 3 not measurable (the engine's re-roll never ran on either; it
+runs through our rerollActor, so x-npc-fate-pin with npcFate on and the
+script armed measures it); observation 4 not measurable on predators (no
+outfit, defaultOutfit 0); observation 5 not tested (the save restored nothing
+for them: the resolver's entry read the placed base again). Corrections:
+the placed NPC_ is 0x1e7a0 and its TPLT the LVLN 0x42297 (not the other way);
+the wrapper path's fifth argument read 1, 2 or minus one, never the 0 the
+read predicted; InitOutfitItems (16072) and AddWornOutfit (19692) were never
+entered across 65 outfit-equipper calls while outfit-shaped leveled-item
+rolls returned into 16155's item loop, and each fresh clone got
+RemoveOutfitItems(none) from InitInventoryIfRequired, which the read said
+touches no outfit: the outfit detour's site is in doubt (HYPOTHESIS raised:
+16155 may be reached from a caller other than 16072, or 16072's entries were
+hidden by the refs filter; the hook counts decide). The leg's frida step
+returns before the hooks are live (the resolver ran 3 s before leg 1's
+ready), so a trace of a cell's load needs the game armed from launch or a
+15 s wait before the teleport. Also read: 0x85547 died to 0x85549 in a
+predators' fight on both legs (the server's number, respawn after 25 s),
+and the solo player died to them too; the probes take tgm after connect.
+
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
     resolves to a TESNPC, writes ExtraLeveledCreature (originalBase,
@@ -771,7 +797,7 @@ rolled is re-rolled once (no base compare through the clone's template yet).
   actor, the body's point on both seats, the take and server.log's take
   lines: H7's read), x-npc-fate-respawn (above).
 - Breakpoint plan for a human session (x64dbg): TESLeveledList::
-  CalculateCurrentFormList with this the LVLN's form (0x1e7a0 for the
+  CalculateCurrentFormList with this the LVLN's form (0x42297, the template of the placed NPC_ 0x1e7a0, for the
   forest), condition: once per attach; watch a_level and a_usePlayerLevel
   and the out array; expected if H1 holds: one call per placement at the
   cell's attach with the player's level, none at a later 3D load; falsified

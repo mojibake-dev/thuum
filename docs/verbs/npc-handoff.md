@@ -440,6 +440,26 @@ each imposition's target is explicit.
   .cell is the parent CELL); Alvor was out the whole time. v3 waits for the
   worldspace, then for leaving it (wherever his evening takes him), and
   compares the two engines' cells to each other.
+  x-handoff-door v3 231505 RED, a finding (16:46 PDT, numidium's read):
+  Alvor's record went into his house through the server's DOOR activation
+  branch, not a follow. The client blocks every door's activation and
+  reports it with the NPC as caster; the branch teleported the record
+  indoors and sent a Teleport the host's game does not apply to an NPC, so
+  the host's engine stood at the door, the record left the host's grid, both
+  seats demoted him (the host too), the host's roster sighted him outdoors
+  and brought the record back, and the loop ran every 4 s: residents stand
+  at their doors with their AI blinking and never go home, on parity too by
+  construction (the activation path and the roster predate train-40;
+  HYPOTHESIS, not run on parity). Fix on train-40 (1e4a5cd6): for an
+  activator no user plays the branch asks the follow verdict
+  (WorldState::npcDoorVerdict, MayMoveActor for the actor's simulator), then
+  an SpSnippet to the host's game, ObjectReference.Activate on the door with
+  the actor and default processing, the engine's own transit; the record is
+  not moved by the server and follows the host's next report; a refusal
+  leaves the actor at the door. HYPOTHESIS until v3 runs on the new stage:
+  Activate with default processing moves an NPC through a blocked door as it
+  moves the player. The gate set of 92529f31 no longer cites 40; a fresh
+  stage, T2 and gate follow on 1e4a5cd6.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
