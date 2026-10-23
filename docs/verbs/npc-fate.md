@@ -410,6 +410,29 @@ plan its section 5 (lab/frida/npc-roll.js).
 
 ## Message contract
 
+Built, the server half (train-41, fork m3-train-41 818287c3, 2026-10-23 15:05
+PDT, stacked on m3-train-40; ADR-049 PROPOSED, D2 to D5 at option A): the
+ActorFate message (MsgType 51, wire id 59, server to client, reliable:
+fates of {refrId, baseId, level, worn}, at most 64 entries and 32 worn each,
+wire-validate's check_fates with a test and a proptest, the JSON family's
+51 and its fixtures, the C++ struct and the client type); the server's roll
+at the first loader's level (WorldState::fateLoaderLevel around the fate
+pass's chunk loads, the chain and the outfit alike, fateLevel on the change
+form as an optional field, formVersion kept); the fate pass
+(PartOne::SendFates at every square change: the squares three out that the
+player has not been sent, their chunks loaded first so the actors there are
+rolled before any engine rolls them, one message per 64 actors); the pin
+(MpActor::GetFateBaseId, the chain's first leveled pick, else the placed
+base); the respawn's re-roll at the record's level with the fate sent to
+every user. unit/NpcFateTest covers the pass, the level, the pin and the
+record. Not built: the client half (the fate table, the two detours and the
+re-roll as Skyrim Platform natives, the host's own actor dressing from the
+record), which waits for x-npc-fate-roll's read of the engine's roll
+moments (docs/research/m3/re-npc-roll.md section 7). A placement whose
+chain ends at an LVLN with no pick (the server's chance-none) keeps the
+head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
+
+
 - Message name / numeric type: ActorFate, new, S2C: the next MsgType and
   wire id at the commit, in table order (ADR-012; wire-schema lib.rs:
   440-507, TABLE and WIRE_IDS 59; id = MsgType + 8, :509-510): MsgType 53
