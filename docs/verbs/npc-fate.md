@@ -754,6 +754,28 @@ ready), so a trace of a cell's load needs the game armed from launch or a
 15 s wait before the teleport. Also read: 0x85547 died to 0x85549 in a
 predators' fight on both legs (the server's number, respawn after 25 s),
 and the solo player died to them too; the probes take tgm after connect.
+x-npc-fate-roll v2 20261023-234133 (16:54 PDT, numidium's read): observations
+1 and 2 held again (one resolver call per placement inside InitItemImpl at
+the cell's load; 52 wrapper rolls, one NPC_ each, all at level 1); the 15 s
+wait lets the attached leg catch the roll. Observation 5 NOT HELD in
+practice: the save carried no clone ("current 0x1e7a0" at every entry) and
+the relaunch rolled 0x85547 as a different NPC_ (0x23ab7, then 0x23abe), so
+every load is a fresh roll that can change the species: playtest 33's
+"different bandits for each", traced in the engine. The pin therefore
+applies at every load, and a login's neighbours (loaded by the save before
+the connect: PreLoadGame and the roll 0.19 s later, both before the server
+saw the connection) take the late path, one re-roll each. Observations 3
+and 4 still unmeasurable on predators (no re-roll ran; defaultOutfit 0).
+The outfit hooks, narrowed: InitOutfitItems fired twice later on other
+actors (the hook works, 16072 is reachable), but the load-time outfit-shaped
+rolls bypass it (into +0x23a37a) and AddWornOutfit never fired; the
+re-analyst's section 8 reads the load-time path. Leg 2 was void (the
+relaunched game logged in inside the forest, died before its tgm, and
+respawned at the spawn; the "no placed 0x85547" was the seat's respawn, not
+a chance-none deletion); the rerun teleports to the spawn before the
+relaunch. One more face of the split: the server read 0x85547's base health
+as 12 for its own pick and 150 in the earlier run, the record following the
+server's leaf while a seat showed another species.
 
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
