@@ -75,6 +75,7 @@ class Doubles:
         self.seen: list[tuple[str, str, dict]] = []
         self.stale_dumps = 0  # dump-states that report the client far from where the server's record says
         self.menus: dict[str, list[str]] = {}  # the menus a client's dump-state reports open
+        self.npcs: dict[str, dict[int, dict]] = {}  # the NPCs a client's npc-state reports, by form id
 
     def turn(self):
         for name in self.names:
@@ -106,6 +107,8 @@ class Doubles:
                     data["menus"] = list(self.menus[name])
             elif step["action"] == "request-screenshot":
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
+            elif step["action"] == "npc-state":
+                data = (self.npcs.get(name) or {}).get(int(step["args"].get("formId", 0))) or {}
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
             elif step["action"] == "add-perks":
@@ -1414,6 +1417,39 @@ steps:
   - assert:
       - abs(server.actor(c1).x - 300) < 1
 """
+
+
+APPROACH = """
+id: approach
+clients: [c1]
+steps:
+  - c1: connect
+  - c1: approach {formId: 0x13483, distance: 80, cell: "3c:Skyrim.esm"}
+"""
+
+
+@needs_deps
+class ApproachSteps(RunTests):
+    def test_approach_lands_the_seat_at_the_distance_facing_the_npc(self):
+        """Her position is the seat's own npc-state; the seat comes in on her line to it and faces her, through the
+        judged teleport (x-npc-talk-prompt v4: look's SetAngle never turned the view)."""
+        me = self.state.actors[1]
+        me.x, me.y, me.z = 1000.0, 0.0, 0.0  # the seat due east of her
+        self.doubles.npcs["c1"] = {0x13483: {"formId": 0x13483, "pos": [0.0, 0.0, -50.0]}}
+        run_id, body = self._run(APPROACH)
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"]
+        self.assertEqual(len(sent), 1, sent)
+        self.assertEqual((sent[0]["cell"], sent[0]["x"], sent[0]["y"], sent[0]["z"]), ("3c:Skyrim.esm", 80.0, 0.0, -50.0))
+        self.assertEqual(sent[0]["rot"], [0, 0, 270.0])  # east of her, facing west
+        step = next(s for s in body["steps"] if s["action"] == "approach")
+        self.assertIn("80 units from 0x13483", step["note"], step)
+
+    def test_approach_without_the_npc_is_red_and_sends_nothing(self):
+        run_id, body = self._run(APPROACH)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertTrue(any("E_RUN_APPROACH" in f["error"] for f in body["failures"]), body["failures"])
+        self.assertFalse([p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"])
 
 
 @needs_deps

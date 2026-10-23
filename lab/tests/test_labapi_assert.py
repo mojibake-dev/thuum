@@ -147,6 +147,12 @@ class EvaluatorTests(unittest.TestCase):
             ev.evaluate('c2.state.menuOpen("Dialogue Menu")')  # c2's dump carries no menus
         with self.assertRaises(AssertionSyntax):
             ev.evaluate("c1.state.menuOpen(3)")
+        # what E acts on: the reference under the crosshair (x-npc-talk-prompt v4 asserts its aim first)
+        views.data["c1"]["crosshairRef"] = 0x13483
+        self.assertTrue(ev.evaluate("c1.state.crosshairRef == 0x13483"))
+        views.data["c2"] = {"pos": [0, 0, 0]}
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.state.crosshairRef == 0")  # a driver before crosshairRef: no pass
 
     def test_a_client_s_own_knock_down(self):
         """skymp5-client ragdolls its local player on the server's death state
