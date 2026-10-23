@@ -2514,3 +2514,111 @@ are the three numbers and (g)'s night step.
 - [ ] accept (Eli)
 - [ ] accept with changes (say what)
 - [ ] not yet
+
+## ADR-048: Trust is mixed by what is at stake: players' contested state stays the server's number, a host's own NPC outcomes are accepted under plausibility checks and logged, and a server setting picks the strictness
+
+Status: PROPOSED 2026-10-23 13:43 PDT (thuum-magnus, at Eli's request relayed
+by numidium: on D1 of the playtest-34 memo, "what's stopping it from being as
+simple as 'npc's health hits 0, by any damage. that death propagats?'", then
+"personally i think we might need a more mixed model for client vs server
+trust", and to drafting it as its own ADR, "yes please"). D1 waits on it.
+Refines the design law's rungs (CLAUDE.md, docs/VERB.md), ADR-028 (the
+server computes the damage one actor deals another) and ADR-035 point 6;
+sets npc-fate's death authority.
+
+Context. The law has four rungs: R0 the server computes, R1 the host
+computes and the server validates, R2 the host computes and the server
+records, R3 client-local. Every number that reaches an NPC from a player is
+the server's (ADR-028), so the server knows when a hit kills. Today's NPC
+death path (docs/verbs/npc-fate.md, trains 34 and 35): the server's number
+alone kills; the console kill is a server command; every viewed actor on
+every seat carries the engine's deferred kill (startDeferredKill), so an
+engine death waits for the server's word; the host's health in its movement
+samples is relayed to the other seats for display, clamped to [0,1] on the
+wire and floored at 0.01 at the puppet apply, so a relayed zero kills
+nothing. A death the server has no number for (a fall, a trap, an NPC
+against an NPC with no hit report, a script, a hazard) leaves the actor
+alive at the floor and is counted (npc-fate H5). Eli's simple rule, "health
+hits 0 by any damage, the death propagates", takes the host's word for the
+zero. Its two costs, named by numidium: a buggy or modded host can kill what
+it hosts (rule 5: client-reported anything is untrusted); and two health
+numbers exist where the host's engine applies its own damage to a hit the
+server also numbers (the engine's on the host's screen, the server's in the
+record), so they can disagree. TES3MP takes the authority player's word for
+deaths and every actor fact (ProcessorActorDeath) and leaves vetoes to
+server scripts; Skyrim Together is client-authoritative throughout; ours sits
+between and says where.
+
+Options.
+- A. Every NPC death stays R0 (D1's A): the server's number alone kills; a
+  death without a number leaves the actor at the floor, counted. Nothing a
+  host says can kill. The floor cases stay wrong on every screen.
+- B. A host's death report is R1 (D1's B): accepted only when the server
+  can check the cause (a fall by the sample's height change, a trap by an
+  activation the server saw, an NPC against an NPC by a hit report with both
+  ids that the server numbers), the rest refused and logged (ADR-039's
+  shape). Every check is a lab read before it ships.
+- C. The mixed model, recommended:
+  1. A new rung between R1 and R2, R1h, "host-attested, server-checked": an
+     outcome a host simulates for an NPC it hosts is accepted from the host
+     when cheap plausibility checks pass, applied as the server's state and
+     logged for audit, one line per acceptance and per refusal with the check
+     that failed. It differs from R1 (the server recomputes or proves) and
+     from R2 (recorded, never applied to shared state).
+  2. What stays R0, because players contest it or could cheat with it:
+     damage between players, inventory, trades and the economy, leveling,
+     and a death caused by a player's hit (the server's number already; the
+     engine's own damage on the host's screen is overwritten by the server's
+     value as today). A host claiming such a death is refused.
+  3. What moves to R1h: an NPC's death at zero health from damage the server
+     has no number for (a fall, a trap, a hazard, a script, an NPC against an
+     NPC with no hit report), reported by the host with a cause code on the
+     death report npc-fate already counts (its deathStart or TESDeathEvent
+     report, H5); the death then travels as D4 decides (DeathStateContainer
+     through the fate path), the body's point as the host's last sample
+     under cell-host's bounds.
+  4. The checks: the reporter simulates the actor's cell at the current
+     epoch (the host, or ADR-047's follower); the actor is nobody's player;
+     the record is not essential, and not protected unless the cause is a
+     player's hit (which is R0 anyway); the cause is one the server has no
+     number for; at most N host-attested deaths per host per minute
+     (placeholder 6, UNMEASURED; the lab's wolf fights size it), the rest
+     refused and logged. A refused report leaves the actor at the floor as
+     today.
+  5. A server setting, trustLevel: "friends" (the default for our
+     deployments) applies R1h as above; "strict" (a public server later)
+     demands option B's proofs and refuses the rest. Read once at start, the
+     npcEnabled idiom; one code path with the checks' list chosen by the
+     level.
+  6. The fight between two NPCs on one host (C-ii, Eli's call inside C):
+     (a) the server keeps numbering every reported NPC-against-NPC hit as
+     today, and only the death is R1h; (b) a fight with no player in it is
+     the host's throughout: its health numbers are accepted (R1h, the same
+     checks) and the server stops numbering those hits, keeping its number
+     for any hit a player deals or takes. Recommended: (b); it removes the
+     two-numbers disagreement where it has no cheating surface (both actors
+     are the host's) and the server's work with it.
+
+Consequences. D1 resolves as C: train-42 (deaths) builds the cause code on
+the death report, the checks, the setting, the logs and the two tests (a
+fall kills on both screens; a claimed kill of an essential or a player-hit
+death is refused and logged); the floor cases close. Rule 5 holds: the word
+is validated by the checks and logged, never trusted silently. The two costs
+under C: a buggy or modded host can still kill what it hosts, within the cap
+and in the log, and "strict" removes it; the two numbers remain only for a
+player's hit, where the server's value wins as today, and vanish for
+NPC-only fights under C-ii (b). Verbs that move rungs: npc-fate (the death
+from host-only causes, R0 to R1h; the roll, the body's point, the respawn
+and the loot stay R0); under C-ii (b) the hit verbs' numbering of a hit
+between two NPCs (hit-cone, melee-reach, marksman, damage-flags) moves from
+R0 to R1h while every hit a player deals or takes stays as declared. Verbs
+that do not move: npc-puppet and npc-stream (R2 for what a puppet shows and
+the host's actor state, already), actor-values (R2 for progress, R0 for set
+values), player-globals (R2), headshot (R1 head hit, R0 kill: a player's
+hit), scripted-effects (R0), activation-reach (R1), hostility-sync (R0 fact).
+On acceptance the law gains the rung in CLAUDE.md and docs/VERB.md, and
+every verb doc names R1h where it applies.
+
+- [ ] accept (Eli), with C-ii (a) or (b)
+- [ ] accept with changes (say what)
+- [ ] not yet
