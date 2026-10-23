@@ -365,6 +365,19 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   them. kStaleHostMs is 4 s from train-39's next commit (2b14f213, local
   until the stage is free), which clears all three; a login-time blip costs
   a second of candidacy at most, since revived disarms the grace.
+  Second read, x-host-kill 20261023-214420 on 2b14f213 (4 s): the pass 9.4 s
+  after the last report (stale at 4.4 s, the grace), the disconnect 4.4 s
+  later; and 4 s still tripped at each seat's first load after its login
+  (4.5 and 4.8 s, n=5 across the two runs: 3.1 to 4.8), never mid-session,
+  never moving a grant. Two changes (fork m3-train-39 f88cd50d, carried by
+  m3-train-40 92529f31): the silence is the smaller of netcode's time since
+  any packet (renet_netcode's time_since_last_received_packet: a keepalive
+  counts, so a game whose network tick runs while its world loads is heard;
+  the client's tick rides Skyrim Platform's tick event, so during a load it
+  likely stalls too, HYPOTHESIS the next read settles) and the time since a
+  message; and only a host is marked stale, since a login's first loads come
+  before any grant and a silent visitor hosts nothing to pass on. The
+  threshold stays 4 s.
 
 ## Client
 
