@@ -1245,6 +1245,7 @@ eab366b2 from main 9b4bec3, clean-m1-next snapshotted 21:21, smoke
 H2 supported (the Dynamic plan's reading), its P1 trace waiting on
 lab-api's fetch fix; b-npc-puppet committed alone (main 3a3aef0), Eli's
 review pending.
+THE WALK CYCLE CLOSED 2026-10-22 18:13 PDT: train-33 merged to fork parity fb6f3f09 (gate 20261023-004438 nine of nine, T2 33 identical), the puppet's graph fed natively each frame (H2 CONFIRMED above), the figure settled onto a still record, the host's own cell reported; the tags that stay by name: the refused furniture exit's reset, the own-cell guard (both unexercised), the turn rate, the gait from Speed alone (F6).
 DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it), thuum main fbee62d. 
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
