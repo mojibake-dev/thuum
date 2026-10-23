@@ -23,10 +23,13 @@ server:
   npcEnabled: true
   gameHour: 7.9
 camp:
-  # place 1, in order: test 1 first (the cell's first loader hosts it), then test 2 beside it
+  # test 1 alone at place 1 (the checklist's "test 1 arrives alone"; it hosts the cell), test 2 parked at the lab
+  # spawn until Eli's word, then brought beside test 1 by hand: labCommand teleport profile 2 to
+  # [17375, -47204, -128] rot [0, 0, 180] (Eli, playtest 32: "you keep spawning them both together at riverwood
+  # but it says 'test 1 arrives alone'"; thirty-one's shape)
   teleports:
     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [17225, -47204, -128], rot: [0, 0, 0]}
-    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [17375, -47204, -128], rot: [0, 0, 180]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [133857, -61580, 14677], rot: [0, 0, 0]}
 seats:
   - profile: 1
     name: "test 1"
