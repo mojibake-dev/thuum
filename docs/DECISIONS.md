@@ -1308,7 +1308,7 @@ sender: HostGrant {cell}, HostRelease {cell} and HostedActorState
    the server (TES3MP's ProcessorObjectSpawn.hpp:21-26).
 7. A handoff runs in TES3MP's order: the server sends the cell's recorded
    state, then the grant with a new epoch; the new host turns its puppets
-   live from its own copies and sends a full HostedActorState for each;
+   live from its own copies (since ADR-045, 2026-10-22, from the engine's own references: a puppet is no copy) and sends a full HostedActorState for each;
    the old host gets HostRelease and turns its actors to puppets. In the
    engine (the same read, its order a HYPOTHESIS): going live is
    SetPosition to the recorded point, AI on, the package evaluated at once
