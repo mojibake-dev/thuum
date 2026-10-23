@@ -98,6 +98,12 @@ class BoardTests(unittest.TestCase):
             board.complete(near.id, {"ok": True, "data": {"from": 20, "types": {"50": {"inCell": 1}, "24": {"inCell": 3, "near": 0, "refs": []}}, "ids": {"392127": None}}})
             self.assertEqual(board.refs_near("c2")["types"]["50"]["inCell"], 1)
             self.assertIsNone(board.refs_near("c1"))
+            # figure-spells answers too, the last per observer, a driver error kept out
+            spells = board.enqueue("c1", "figure-spells", {})
+            board.poll("c1")
+            board.complete(spells.id, {"ok": True, "data": {"formId": 4278192173, "base": 7, "added": [77776], "equipped": [0, 77776, 0], "extra": []}})
+            self.assertEqual(board.figure_spells("c1")["added"], [77776])
+            self.assertIsNone(board.figure_spells("c2"))
             # a client's own node-scale and its {other: true} one are kept side by side
             own = board.enqueue("c1", "node-scale", {})
             board.poll("c1")
@@ -116,6 +122,7 @@ class BoardTests(unittest.TestCase):
             self.assertIsNone(board.held("c1"))
             self.assertIsNone(board.projectiles("c2"))
             self.assertIsNone(board.refs_near("c2"))
+            self.assertIsNone(board.figure_spells("c1"))
             self.assertIsNone(board.node_scales("c1"))
             self.assertIsNone(board.presets("c1"))
             # a timed-out step is cancelled and a late result is ignored

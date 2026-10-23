@@ -29,6 +29,9 @@ the lab can grep (E_ASSERT_*).
   <client>.state.menuOpen("<menu>")                that client's game has that menu open (dump-state's menus),
                                                      "Dialogue Menu" when a talk opened
   <client>.state.crosshairRef                        the form id under that client's crosshair, what E acts on (0 for none)
+  <client>.figure_spells().count | .extra | .base    that client's figure of the other player at its last figure-spells
+                                                     step: its added spells, those it holds in no hand or power slot,
+                                                     and its base's form id (ADR-046)
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
   <client>.morph() | .morph_of(<client>)             a body morph its node-scale {morph} step read, the
@@ -123,6 +126,7 @@ class ViewsFacade(Protocol):
     def refs_near(self, observer: str) -> dict[str, Any] | None: ...
     def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
+    def figure_spells(self, observer: str) -> dict[str, Any] | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
     def av_reads(self, observer: str) -> dict[str, Any] | None: ...
@@ -474,6 +478,16 @@ class ProjectileView:
 
 
 _UNSEARCHED = object()
+
+
+@dataclass(frozen=True)
+class FigureSpellsView:
+    """c.figure_spells(): that client's figure of another player at its last `figure-spells` step (ADR-046: a
+    figure carries only what the server gives it): count, its added spells; extra, the added spells it holds in no
+    hand and no power slot (a distributor's, SPID's 0x817 and the like); base, its base's form id."""
+    count: int
+    extra: int
+    base: int
 
 
 class RefsNearView:
@@ -1375,6 +1389,17 @@ class _ClientRef:
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
+    def figure_spells(self) -> FigureSpellsView:
+        """c.figure_spells(): that client's figure of the other player at its last `figure-spells` step."""
+        fn = getattr(self._views, "figure_spells", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("added"), list):
+            raise AssertionData(f"{self.name} has not reported a figure-spells step yet")
+        try:
+            return FigureSpellsView(len(data["added"]), len(data.get("extra") or []), int(data.get("base") or 0))
+        except (TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s figure-spells answer is malformed: {e}") from e
+
     def refs_near(self) -> RefsNearView:
         """c.refs_near(): what stood near that client's player (or its figure
         of the other player, with the step's {from: other}) at its last
@@ -1618,6 +1643,7 @@ _ATTRS = {
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
     HostView: {"hosted", "client", "epoch", "actorId"},
     RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage"},
+    FigureSpellsView: {"count", "extra", "base"},
     AvView: {"health", "magicka", "stamina", "healthCurrent", "magickaCurrent", "staminaCurrent",
              "healthMax", "magickaMax", "staminaMax", "healthPercentage", "magickaPercentage", "staminaPercentage"},
     StateView: {"x", "y", "z", "worldOrCell", "cellName", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "equippedRight", "equippedLeft", "raceId", "sex",
@@ -1653,11 +1679,11 @@ _STRING_NUMBER_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near"},
+    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "figure_spells", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of"},
     EffectsView: {"left", "magnitude"},

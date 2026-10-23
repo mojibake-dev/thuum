@@ -154,6 +154,21 @@ class EvaluatorTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate("c2.state.crosshairRef == 0")  # a driver before crosshairRef: no pass
 
+    def test_a_figures_spells_against_what_it_holds(self):
+        """ADR-046: a figure carries only what the server gives it; a distributor's ability shows as an extra."""
+        from labapi.assertions import AssertionData, Evaluator
+
+        class SpellViews(Views):
+            def figure_spells(self, observer):
+                return {"c1": {"formId": 4278192173, "base": 7, "added": [77776, 0x01000817], "equipped": [0, 77776, 0],
+                               "extra": [0x01000817]}}.get(observer)
+
+        ev = Evaluator(Server(), SpellViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.figure_spells().count == 2 and c1.figure_spells().extra == 1"))
+        self.assertTrue(ev.evaluate("c1.figure_spells().base == 7"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.figure_spells().extra == 0")  # no figure-spells step on c2: no pass
+
     def test_a_client_s_own_knock_down(self):
         """skymp5-client ragdolls its local player on the server's death state
         and never sets the engine's isDead; lab-driver reports down (m0-death)."""

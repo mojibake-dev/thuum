@@ -64,6 +64,8 @@ class StepBoard:
         # an npc-state step's answers by the form id it named (or answered): the
         # seat's own engine state of that NPC (c.npc_state(id), docs/verbs/npc-puppet.md)
         self._npc_states: dict[str, dict[int, dict[str, Any]]] = {}
+        # a figure-spells step's answer: {formId, name, base, added, equipped, extra} (ADR-046)
+        self._figure_spells: dict[str, dict[str, Any]] = {}
         # a poisons step's answer: {poisons: [{baseId, poisonId, count, worn,
         # wornLeft}]}
         self._poisons: dict[str, dict[str, Any]] = {}
@@ -134,6 +136,8 @@ class StepBoard:
                 self._npc_states.setdefault(step.client, {})[key] = body["data"]
         if step.action == "poisons" and isinstance(body.get("data"), dict):
             self._poisons[step.client] = body["data"]
+        if step.action == "figure-spells" and isinstance(body.get("data"), dict) and "error" not in body["data"]:
+            self._figure_spells[step.client] = body["data"]
         if step.action == "skills" and isinstance(body.get("data"), dict):
             self._skills[step.client] = body["data"]
         if step.action == "node-scale" and isinstance(body.get("data"), dict):
@@ -244,6 +248,9 @@ class StepBoard:
     def poisons(self, observer: str) -> dict[str, Any] | None:
         return self._poisons.get(observer)
 
+    def figure_spells(self, observer: str) -> dict[str, Any] | None:
+        return self._figure_spells.get(observer)
+
     def skills(self, observer: str) -> dict[str, Any] | None:
         return self._skills.get(observer)
 
@@ -273,6 +280,7 @@ class StepBoard:
         self._projectiles.clear()
         self._refs_near.clear()
         self._npc_states.clear()
+        self._figure_spells.clear()
         self._poisons.clear()
         self._skills.clear()
         self._node_scales.clear()

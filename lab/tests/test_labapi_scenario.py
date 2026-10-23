@@ -310,6 +310,13 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {bad}\n")
 
+    def test_figure_spells_is_a_client_step(self):
+        # a figure's added spells against its equipped ones (ADR-046, x-figure-spells)
+        from labapi.scenario import load_scenario
+
+        step = load_scenario("id: x-fig\nclients: [c1]\nsteps:\n  - c1: figure-spells {name: test 2}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "figure-spells", {"name": "test 2"}))
+
     def test_look_at_is_a_client_step(self):
         # the player's view onto a named actor, for a key press on it (x-npc-talk-prompt v3)
         from labapi.scenario import load_scenario
