@@ -253,6 +253,15 @@ word, the host's movement reports, puppets on the other screens. Validator
 worldOrCell nonzero, every float finite. Appended to the contract (ADR-012);
 the MsgType after HostRelease (49).
 
+UpdateMovement (2), a validator change without a shape change (fork
+m3-train-35, 2026-10-22; docs/verbs/npc-puppet.md, x-npc-death
+20261023-054215): healthPercentage must lie in [0, 1], else Range. The
+engine's deferred kill lets a host's actor sit below zero health (a script,
+a fall) and the percentage read negative; the client clamps it at the source
+(movementGet), the puppet apply never steps a figure or a puppet under one
+percent (the server's death state is the only death), and the validator
+refuses the rest as the untrusted input it is (rule 5). No field is new.
+
 ## Bridge and client FFI
 
 Server: `wire-bridge` links into the existing C++ server through cxx and
