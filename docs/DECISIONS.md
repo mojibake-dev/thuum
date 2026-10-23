@@ -2375,3 +2375,55 @@ asked for one shot.
 - [ ] accept
 - [ ] accept with changes (say what)
 - [ ] not yet
+
+## ADR-046: The server's state is every engine's for figures and NPCs: a figure carries only what the server gives it, and a leveled or placed NPC wears the server's roll
+
+Status: ACCEPTED 2026-10-23 about 08:15 PDT (Eli, relayed by numidium: "for
+1, i want the servers roll pushed to both"; "for 2 go with your
+recommendation", numidium's recommendation being decision 2 below). Opened
+by thuum-magnus from playtest thirty-three's section 4 and the nightly's
+p-spell-bolt read of the same morning. Refines ADR-045 (Rule A's state
+exception) and sets npc-fate's roll decision.
+
+Context. (1) The server rolls a leveled or server-placed NPC's outfit itself
+(GetOutfitObjects through the template chain, the worn list in its equipment
+record) while each engine rolls its own at the reference's load, so the
+headshot's helmet verdict followed a hood no screen showed: seven refusals
+of eight claims in Bleak Falls Temple, "bandits need to be uniform across
+games to ahve headshots register i guess" (docs/verbs/headshot.md,
+docs/verbs/npc-fate.md). (2) SPID hands abilities to every non-player actor
+at load, and a figure (a copy of a player on the Player base 0x7) is an NPC
+to the distributor and a Player to every GetIsID(0x7) condition, so mods act
+on it both ways: Stealth Detection Fixes' cloak would run on a figure as on a
+resident, and its probes landed on one (docs/verbs/spell-cast.md).
+
+Decisions.
+1. The server's roll of a leveled or server-placed NPC's outfit and look is
+   imposed on every engine, the host's included: the record's equipment is
+   applied to the engine's actor, the one state exception ADR-045's Rule A
+   already makes for deaths. npc-fate's roll covers outfits and 0xff
+   placements, not placements alone, and the headshot verdict then matches
+   the screens.
+2. A figure carries only what the server gives it. Once a figure loads, the
+   client strips every spell and ability a distributor added to the actor
+   (Actor.getSpellCount and getNthSpell over the actor's added spells,
+   removeSpell for each; skyrimPlatform.ts declares both), one rule for every
+   SPID mod in the layer and no INI patched per mod. The figure keeps the
+   Player base, since its appearance and RaceMenu sync rest on it; Player-only
+   effects landing on a figure are harmless dummies so far, and a dedicated
+   figure base becomes the next step only if a player-only mod effect on a
+   figure matters in play. Spells and abilities first; distributed perks and
+   keywords take a native enumeration when a case shows them.
+
+Consequences. Decision 1 rides npc-fate's build (the record's worn list
+reaches the engine's actor on every seat, the host's included, with the
+hosted word; the headshot section of playtest thirty-three passes with it).
+Decision 2 is a client train of its own: the strip at the figure's spawn
+callback (formView), a T0 for nothing (no server change) and a probe reading
+a figure's spell count after load against a resident's. p-spell-bolt's later
+list keeps the probe effects declared (main 626108f6): the dummies land on a
+figure from the wildlife's cloaks, which the strip does not touch.
+
+- [x] accept (Eli, 2026-10-23, in the words above)
+- [ ] accept with changes (say what)
+- [ ] not yet

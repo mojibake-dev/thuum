@@ -719,11 +719,14 @@ Rung: R0 for the fate (the roll, the death, the body's point, the respawn, the l
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
-reference trace; nothing built, nothing run. Decisions for Eli, one ADR (its
-number to be assigned): the death's authority shape (a or b, Authority); the
-roll's level (the first loader's or 0); the respawn's pick (re-roll or
-keep); the ActorFate message against the existing deltas alone; formVersion
-2 or 3.
+reference trace; nothing built, nothing run. Decided 2026-10-23 (ADR-046,
+decision 1, Eli: "i want the servers roll pushed to both"): the server's roll
+of a leveled or placed NPC's outfit and look is imposed on every engine, the
+host's included, so the roll covers outfits and 0xff placements and the
+headshot verdict matches the screens. Still for Eli, one ADR (its number to
+be assigned): the death's authority shape (a or b, Authority); the roll's
+level (the first loader's or 0); the respawn's pick (re-roll or keep); the
+ActorFate message against the existing deltas alone; formVersion 2 or 3.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [ ] engine surface cited or delegated

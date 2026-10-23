@@ -1788,8 +1788,11 @@ spell-path regression; the declaration is on the probe's later list (main
 626108f6, its own commit, docs/private/reviews-pending.md), the reference
 stays. The figure is therefore an NPC to every
 distributor in the layer and a Player to every GetIsID(0x7) condition: a
-design row for the figure model (an exclusion SPID understands, a keyword or
-the figures' own base, or a base that is neither; Eli's call with the layer).
+design row for the figure model, decided 2026-10-23 (ADR-046, decision 2,
+Eli: "go with your recommendation"): a figure carries only what the server
+gives it, the client stripping every distributor-added spell and ability at
+the figure's load (getSpellCount, getNthSpell, removeSpell), the Player base
+kept; a client train of its own.
 What changed since 10-21 is the wildlife standing in the lab's games, npc-puppet's
 doing by design; the figure's double nature stands as the row (the dummy landed
 on the figure, so GetIsID(0x7) passed for it). Reads: p-spell-bolt on parity
