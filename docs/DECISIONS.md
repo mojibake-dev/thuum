@@ -2622,3 +2622,64 @@ every verb doc names R1h where it applies.
 - [ ] accept (Eli), with C-ii (a) or (b)
 - [ ] accept with changes (say what)
 - [ ] not yet
+
+## ADR-049: An NPC's fate is the server's one roll: at the first loader's level, kept on the record, re-rolled at the respawn, and sent ahead of the engine's own roll as its own message
+
+Status: PROPOSED 2026-10-23 14:49 PDT (thuum-magnus), built ahead of Eli's
+word under its build-first call for playtest 34; the playtest-34 memo's D2
+to D5 (docs/research/m3/decisions-for-playtest-34.md), each at the
+recommended option A. D1 (the death's authority) is ADR-048's. Carries out
+ADR-046 decision 1 (the server's roll pushed to every engine) for
+docs/verbs/npc-fate.md.
+
+Context. The server rolls a leveled placement's template chain once at
+level 0 (every entry allowed: a cave bear under the games' wolf) and its
+outfit at level 1 (MpActor::EnsureTemplateChainEvaluated,
+MpObjectReference::EnsureBaseContainerAdded); each engine rolls its own at
+the reference's load (InitItemImpl) and at its first dressing, with its own
+randomness (docs/research/m3/re-npc-roll.md). The server's pick already
+travels as the last element of CreateActor's templateChain and its worn list
+as the equipment, but CreateActor goes out at the 3x3 subscription while the
+engine attaches a 5x5, so it cannot reach a client before that engine rolls.
+
+Decisions.
+1. D2 (A). The roll's level is the level of the player whose arrival loads
+   the placement (its actor-value record's level, the client's report,
+   clamped at 1), the engine's own input; the encounter zone's clamp follows
+   when libespm reads CELL and REFR XEZN and the ECZN record (it has none
+   today). A record rolled before this rule keeps its roll, its level
+   recorded as 0.
+2. D3 (A). The respawn re-rolls the chain and the outfit at the record's
+   level, as the engine re-rolls a leveled placement at a cell reset; the
+   fate is sent again.
+3. D4 (A). A dedicated ActorFate message (MsgType 51, server to client,
+   reliable, R0): the placement, the NPC_ the roll chose (the chain's leaf;
+   the placed base when nothing is leveled; 0 when the roll chose none), the
+   level and the worn list; appended to the wire with its validator in the
+   same commit. It is sent per player for every game-file actor in the
+   squares the engine is about to attach (the 5x5 ring around the player's
+   square, the server loading those chunks early, once per square per
+   player) and again at a respawn; CreateActor's chain and equipment stay as
+   the late copy. The client pins the engine's roll from it (two native
+   detours, re-npc-roll.md section 3) and, for a fate that arrives after the
+   engine rolled, goes through the engine's own re-roll: one pop, accepted.
+4. D5 (A). The fate rides the change form as an optional field (fateLevel),
+   present once rolled under this rule; formVersion stays 2 (ADR-043
+   decision 2's rule for optional fields).
+
+Consequences. Train-41 builds the server half (the loader's level into both
+rolls, fateLevel on the record, the fate pass at the player's square change
+and at the respawn, the message with its validator, JSON form, C++ struct
+and client type) and, after the lab read x-npc-fate-roll confirms the roll's
+moment, the client half (the two detours and the re-roll as Skyrim Platform
+natives, the fate table, the guard that lets a host's own engine actor dress
+from the record, ADR-046's one state exception). Interiors get their fate
+late by construction (the engine loads them at the door before the server
+hears of it), so a resident indoors may pop once on a seat's first visit; the
+exterior ring is ahead of the engine. HYPOTHESIS tags: the detours' sites
+until the Frida read, the re-roll's safety on a live actor, the number of
+squares ahead (two, the engine's uGridsToLoad 5).
+
+- [ ] accept (Eli)
+- [ ] accept with changes (say what)
+- [ ] not yet
