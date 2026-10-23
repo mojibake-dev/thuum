@@ -2177,6 +2177,34 @@ function run(step: Step, player: Actor): unknown {
       npc.kill(killer);
       return { formId: npc.getFormID(), killer: killer ? killer.getFormID() : 0, isDead: npc.isDead() };
     }
+    case "figure-spells": {
+      // a figure's spell set in this game (ADR-046: a figure carries only what the server gives it, and
+      // SPID adds its abilities at the actor's load): the nearest actor with a runtime id that is not this
+      // player ({name} picks one by its display name), its added spells (SKSE's Actor.GetSpellCount and
+      // GetNthSpell, the actor's own, not its base's), what it holds in each hand and its power slot
+      // (GetEquippedSpell 0 left, 1 right, 2 other), and the added spells that are none of those
+      // (x-figure-spells)
+      const want = typeof a.name === "string" ? a.name : null;
+      const me = player.getFormID();
+      const fig = nearbyActors(player)
+        .filter((x) => x.getFormID() >= 0xff000000 && x.getFormID() !== me && (!want || x.getDisplayName() === want))
+        .sort((x, y) => distanceTo(player, x) - distanceTo(player, y))[0];
+      if (!fig) return { error: want ? `no figure named ${want} nearby` : "no figure nearby" };
+      const added: number[] = [];
+      for (let i = 0; i < fig.getSpellCount(); i++) {
+        const sp = fig.getNthSpell(i);
+        if (sp) added.push(sp.getFormID());
+      }
+      const equipped = [0, 1, 2].map((src) => fig.getEquippedSpell(src)?.getFormID() ?? 0);
+      return {
+        formId: fig.getFormID(),
+        name: fig.getDisplayName(),
+        base: fig.getLeveledActorBase()?.getFormID() ?? 0,
+        added,
+        equipped,
+        extra: added.filter((id) => !equipped.includes(id)),
+      };
+    }
     case "npc-damage": {
       // the named NPC's health damaged in this seat's own engine (Actor.DamageActorValue), as a fall, a
       // trap or another NPC's blow lands on the host with no hit report for the server: skymp5-client's
