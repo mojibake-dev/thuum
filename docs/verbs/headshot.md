@@ -371,3 +371,21 @@ not know.
   mod's own kill (the engine's death animation differs from a push's
   ragdoll; Eli judges the feel at twenty-four).
 
+
+## Playtest thirty-two's NPC targets (2026-10-22, fork parity fb6f3f09; fixed on m3-train-34 dc6e3adb)
+
+With the server's NPCs on (npc-puppet), every headshot on a game-file actor
+was refused E_HEADSHOT_RACE: PartOne::ClaimHeadshot read the target's race
+from its appearance alone, and a game-file actor carries none, so the race
+was 0 and no list held it (39fe2 bare-headed at the barrow's door, 01:4x
+UTC). Tonight's overlay put "0:Skyrim.esm" into headshot.races in the run's
+own settings (numidium, restored at the close-out) and one passed end to end,
+01:52:11Z "headshot: ff000000 kills 39fe4 with fe01e801 on a claimed bow
+hit", the kill, the death item and the 25 s respawn following (the respawn
+point is npc-fate's). Train-34 dc6e3adb reads the race through
+MpActor::GetRaceId (the appearance when there is one, else the NPC_ base's
+RNAM through its template chain, EvaluateTemplate with UseTraits), and
+HeadshotTest's new case loads Alvor 0x13482 under npcEnabled, reads race
+0x13746 and asserts the claim is not refused for the race. The rule names
+stay the mod's (the ten playable races and ElderRace), so a bandit of a
+playable race takes a headshot and a wolf does not, as the mod has it.
