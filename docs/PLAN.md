@@ -1068,7 +1068,23 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   client), 4 (numidium's grammar), 5 (P0 to P5, b-npc-puppet, the gate) and
   6 (docs) follow with no playtest between; playtest 31 after the merge.
 
-
+- STATE 2026-10-23 15:28 PDT (the day's chart line): cell-host DONE (parity
+  535544db), npc-puppet DONE (19e7ca9b), trains 34 to 38 merged (parity
+  a25caf02: playtests 32 and 33's fixes, ADR-046's figure half). Eli asked
+  that the four limits be built before playtest 34: train-39 the quitting
+  host (fork m3-train-39 f88cd50d: the server's stale-host rule, the pass
+  9.4 s after a kill against 24, measured twice; merge waits for D12),
+  train-40 doors (m3-train-40 92529f31: D6 the follow behind cellFollow and
+  npcHandoff, D10 the cold start by ring, the refusal log; staged by
+  numidium with the three handoff probes; merge waits for D6 and D12),
+  train-41 the roll pushed to both (m3-train-41 b98cf340: ActorFate 51, the
+  server's one roll at the first loader's level, the fate pass ahead of the
+  engine's ring, the respawn re-roll, Skyrim Platform's two detours and the
+  re-roll behind npcFate, off until x-npc-fate-roll's read; ADR-049
+  PROPOSED), train-42 deaths (waits for ADR-048, the mixed trust model Eli
+  asked for; the death path mapped in docs/research/m3/death-path.md).
+  Decisions with Eli: D6, D12, ADR-048 with C-ii, ADR-049. Playtest 34 after
+  the four and their reads; its checklist at Eli's word.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
