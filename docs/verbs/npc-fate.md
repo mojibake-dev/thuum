@@ -1055,6 +1055,27 @@ equal. Worn lists read, not asserted (the predators wear no outfit; the
 outfit claim is x-npc-fate-outfit's). The switch flips to true on 41 when
 both legs hold.
 
+x-npc-fate-pin v2 on 41's stage (0a10f977; run 20261024-052150, 22:33 PDT):
+the species pin HELD on leg 1: server.fate's raceId 78346 for both predators
+(level 1, worn empty: creatures), c1's engine races 78346 for both, "pinned
+85547 to" once in the plugin's log. The run went red on its own premise:
+no late line, because the fate reached c1's table AHEAD of the attach even
+on a five-square teleport (the position report leaves before the engine
+finishes loading, and the handler's table write, kept out of the update
+tick for this reason, lands during the loading screen), so the run stopped
+before leg 2. v3 claims the pin line and reads the late count; rerun
+pending. The late path showed at the spawn instead, on the login's
+neighbours: "redressed d1faa from the server's roll: 5 of 5 tagged for
+outfit 1e608", d1fa9 (4 of 4, outfit c0197), d1f56 (5 of 5, c0197), and
+"the base has no default outfit, nothing to redress" for 107d05, 85540 and
+107d06: the outfit imposition's late path works on bases with a default
+outfit. x-npc-fate-outfit green on the same stage (052632, npcFate off, the
+detours inert; its trace on the results site). A finding outside the fate:
+c2's console logged 108 "settle 86111" lines over 19 s (npc-puppet's
+periodic re-apply of an unchanged record, formView.ts:622 and
+movementApply.ts:322) with the puppet 2,077 units from its record and the
+gap never closing; an agent reads the run for the host and grant timeline.
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
