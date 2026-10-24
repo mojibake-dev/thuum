@@ -845,6 +845,26 @@ second roll, which the 16155 detour covers since it sits under every
 inventory init; an interior's actors take the late path (the door loads the
 cell before the fate arrives). The trace gains the re-roll caller's label
 and ResetInventory's returns.
+x-npc-fate-outfit v2 20261024-002544 (17:34 PDT, numidium's read with
+npc-roll.js v2): section 8's chain HELD step by step for both bandits: the
+attach re-roll 37323 from 19231 (arg minus one), the resolver with skipInit
+0 and one pick through the wrapper, InitInventoryIfRequired from the
+resolver (RemoveOutfitItems with none, fromInit), InitLeveledItems, the
+outfit resolver 16155 for 0xC0197 at level 1 returning into InitLeveledItems'
+default slot with its six rolls all at the outfit site, then ResetInventory
+from 19231 with a second init and a second outfit roll, then the equipper
+with the outfit and no InitOutfitItems; both sleep outfits 0, one 16155 per
+init; the equipped set is exactly the second roll (the first stripped, as
+8.3 predicts). Observation 4 therefore HELD for the site: the 16155 detour
+answers inside every init. The one difference from the read: HasOutfitItems
+is called from po3_SpellPerkItemDistributor.dll inside the equipper's frame
+and SPID issues the armor EquipObject calls (the weapon's is the equipper's
+own), so AddWornOutfit counts zero on this load order: SPID dresses the
+actor from the inventory the init built (HYPOTHESIS: how it hooks in).
+Consequence: the pin decides what SPID equips as long as SPID dresses from
+the inventory; whether SPID's own item distribution adds items on top, and
+whether its chance rules differ per game (another split the layer's INIs
+would own), is the open row for the parity read.
 
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter

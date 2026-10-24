@@ -446,3 +446,16 @@ before the first dressing" plan, since InitInventoryIfRequired strips them befor
 7's 14752 detour for the species; and run the 8.4 trace once before the build to confirm the chain
 (16038, 19690 at +0xb4, 16129, 16155, 14751 at +0xca) per fresh actor and to settle the AddWornOutfit
 zero by the outfit id logged at 418622.
+
+### 8.6 Lab confirmation (17:34 PDT, x-npc-fate-outfit 20261024-002544)
+
+The chain of 8.4 held per bandit on a seat (numidium's read of npc-roll.js v2): 37323 from 19231 at
+the attach, 14374 with a_skipInit false and one wrapper pick, 16038 from 14374 with 19690(null) at
++0xb4, 16129 from 16038, 16155 for defaultOutfit 0xC0197 at level 1 returning into 16129's default
+slot with every 14751 inside it at the outfit site, then 37322 from 19231 with a second 16038 (from
+19802, a_ignoreContainerExtraData true), 16129 and 16155; then 418622 with the outfit and no 16072. The
+equipped set is the second roll, the first stripped. The open AddWornOutfit zero is answered: on the
+lab's load order po3_SpellPerkItemDistributor.dll reads HasOutfitItems inside 418622's frame and issues
+the armor EquipObject calls itself (the weapon's comes from 418622); AddWornOutfit never runs. So the
+detour on 16155 decides the inventory both inits build, and SPID dresses from it; whether SPID's own
+item distribution adds to it is the next read (HYPOTHESIS, the parity probe's worn comparison).
