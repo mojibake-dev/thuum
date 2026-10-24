@@ -495,7 +495,19 @@ each imposition's target is explicit.
   applyEquipment and formView skip a deleted reference; a property for a
   form not held is skipped with a trace; the "moved" line through logTrace.
   numidium keeps a crashed game's Skyrim Platform log across the retry (main
-  2492956) from this stage on.
+  2492956) from this stage on. v4 on 10375935 (013234, 18:44 PDT): no crash;
+  the host path worked twice (the snippet walked Alvor into the inn, the
+  follow named c1, "told to 1 viewing game" went out), but the record
+  bounced out 133 ms after the first follow on the host's next report (a
+  sample before the engine's transit, or reordered on the unreliable
+  channel), and c2's engine still kept him at the door with no "Teleporting"
+  line in its log at all (the handler never ran: a dispatch question the
+  door agent reads); the viewer Teleport also fired on every exterior
+  border crossing inside both grids, about thirty in four minutes. Fixes on
+  f205f4d5: FOLLOW_SETTLE_MS (1 s, UNMEASURED) refuses a report back into
+  the cell left under a follow younger than the window; the Teleport goes
+  only to games outside the destination's 3x3, the ones the move
+  unsubscribes.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
