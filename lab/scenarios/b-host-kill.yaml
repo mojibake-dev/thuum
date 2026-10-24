@@ -1,0 +1,69 @@
+# b-host-kill (M3, docs/verbs/cell-host.md, the quitting-host row, ADR-047
+# D12; 2026-10-23): a host whose game stops without a word loses its village
+# inside the grace plus the stale threshold, not the connection timeout. The
+# server marks a hosting client stale when it has heard nothing for 4 s
+# (wire-transport's silence, train-39) and starts every cell's grace at
+# once, so the pass lands about 9 s after the host's last report, where the
+# timeout alone took about 24 s. Two seats under npcEnabled at Riverwood's
+# landing, c1 hosting 0x9732 and c2 beside it; c1's game is stopped hard
+# (relaunch {until: stopped}, lab-api 0d3dd4d3: the guest agent's kill, no
+# quit menu, the step back as soon as the stop-and-start command returns,
+# nothing having told the server), then the claim: 0x9732 is c2's within 12
+# s of the kill (the pass's 9 s plus the command's own second or two; the
+# timeout's 24 s would miss it), Alvor 0x13482 and 0x35534 live on c2. The
+# relaunched c1 logs in where it stood and must not take the village back
+# from a live host. Last, each live seat through two loading screens (Bleak
+# Falls Temple 0x371de and back): a seat that never stopped must never read
+# stale (the server log's line, read at the run). Measured as x-host-kill:
+# 205837 (3 s threshold, 8.7 s), 214420 (4 s, 9.4 s), 221644 on train-40
+# 92529f31 (9.0 s, no stale at either login). Its own commit (rule 13).
+id: b-host-kill
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 25
+  - assert:
+      - server.host(0x9732).client == "c1"
+  # the second seat arrives and stays: the candidate for the pass
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).client == "c1"
+  - c2: npc-state {formId: 0x13482}
+  # the kill: the host's game gone with no goodbye; the step returns at the kill
+  - c1: relaunch {until: stopped}
+  - until: {within: 12, expect: [server.host(0x9732).client == "c2"]}
+  - c2: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x35534}
+  - assert:
+      - server.host(0x9732).client == "c2"
+      - c2.npc_state(0x13482).aiEnabled == true
+      - c2.npc_state(0x35534).aiEnabled == true
+  # the killed seat comes back where it stood and must not take the village back from a live host
+  - c1: connect
+  - wait: 15
+  - assert:
+      - server.host(0x9732).client == "c2"
+  # the false-positive read: each live seat through two loading screens (the server log's "stale")
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -7329, y: 979, z: 573, rot: [0, 0, 90]}
+  - wait: 10
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 15
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -7329, y: 979, z: 573, rot: [0, 0, 90]}
+  - wait: 10
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 15
+  - assert:
+      - server.host(0x9732).client == "c2"
+artifacts: [server.log, c1.log, c2.log]
