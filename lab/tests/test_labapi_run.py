@@ -1432,6 +1432,14 @@ steps:
   - c1: approach {formId: 0x13483, distance: 80, cell: "3c:Skyrim.esm"}
 """
 
+APPROACH_RECORD = """
+id: approach-record
+clients: [c1]
+steps:
+  - c1: connect
+  - c1: approach {formId: 0x13482, distance: 150, cell: record}
+"""
+
 
 @needs_deps
 class ApproachSteps(RunTests):
@@ -1454,6 +1462,33 @@ class ApproachSteps(RunTests):
         run_id, body = self._run(APPROACH)
         self.assertEqual(body["verdict"], "red", body)
         self.assertTrue(any("E_RUN_APPROACH" in f["error"] for f in body["failures"]), body["failures"])
+        self.assertFalse([p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"])
+
+    def test_approach_by_record_lands_in_the_cell_her_record_stands_in(self):
+        """x-handoff-door: one evening takes Alvor home and another to the inn, so the probe names neither; the cell
+        is the server's record's at the step, and the seat lands on her line in it."""
+        import math
+
+        from labapi.fakes import FakeActor
+
+        me = self.state.actors[1]
+        me.x, me.y, me.z = 1000.0, 0.0, 0.0
+        self.state.refs[0x13482] = FakeActor(-512.8, -205.8, 240.0, "133c8:Skyrim.esm")
+        self.doubles.npcs["c1"] = {0x13482: {"formId": 0x13482, "pos": [-512.8, -205.8, 240.0]}}
+        run_id, body = self._run(APPROACH_RECORD)
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"]
+        self.assertEqual(len(sent), 1, sent)
+        self.assertEqual(sent[0]["cell"], "133c8:Skyrim.esm")
+        self.assertAlmostEqual(math.hypot(sent[0]["x"] + 512.8, sent[0]["y"] + 205.8), 150.0, delta=0.2)
+        step = next(s for s in body["steps"] if s["action"] == "approach")
+        self.assertIn("in her record's cell 133c8:Skyrim.esm", step["note"], step)
+
+    def test_approach_by_record_without_a_record_is_red_and_sends_nothing(self):
+        self.doubles.npcs["c1"] = {0x13482: {"formId": 0x13482, "pos": [-512.8, -205.8, 240.0]}}
+        run_id, body = self._run(APPROACH_RECORD)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertTrue(any("no record of 0x13482" in f["error"] for f in body["failures"]), body["failures"])
         self.assertFalse([p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "teleport"])
 
 

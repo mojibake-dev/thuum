@@ -310,6 +310,13 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {bad}\n")
 
+    def test_approach_may_take_its_cell_from_the_record(self):
+        # `cell: record`: the cell the server's record of her stands in, read at the step (x-handoff-door's leg 3)
+        from labapi.scenario import load_scenario
+
+        step = load_scenario('id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {formId: 0x13482, distance: 150, cell: record}\n').steps[0]
+        self.assertEqual(step.args["cell"], "record")
+
     def test_log_count_and_a_restart_that_sets_the_clock(self):
         # a client's log lines counted mid-run, and a restart that lays the clock anew (npc-handoff's reads)
         from labapi.scenario import load_scenario

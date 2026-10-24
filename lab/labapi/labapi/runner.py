@@ -931,14 +931,29 @@ class Runner:
         ux, uy = (dx / span, dy / span) if span > 1 else (0.0, -1.0)  # a seat standing on her comes in from the south
         tx, ty = nx + ux * distance, ny + uy * distance
         heading = (math.degrees(math.atan2(nx - tx, ny - ty)) + 360) % 360  # the engine's angle Z: 0 north, clockwise
-        cell = self.tables.cell(str(a["cell"]))
+        frame = str(a["cell"])
+        if frame == "record":
+            # the cell her record stands in, read now: one evening takes Alvor home and another to the inn
+            # (x-handoff-door 20261024-025527 against 013234), so a probe names neither
+            try:
+                ref = await asyncio.to_thread(self.state.ref, fid)
+            except StateError:
+                ref = None
+            frame = str((ref or {}).get("cell") or "")
+            if not frame:
+                error = f"E_RUN_APPROACH: no record of {fid:#x} to take its cell from (cell: record)"
+                rec.failures.append({"step": index, "kind": "lab", "client": step.client, "error": error})
+                rec.verdict = "red"
+                return False, error
+        cell = self.tables.cell(frame)
         ox, oy, oz = cell.origin if cell is not None else (0.0, 0.0, 0.0)
-        args: dict[str, Any] = {"cell": a["cell"], "x": round(tx - ox, 1), "y": round(ty - oy, 1), "z": round(nz - oz, 1),
+        args: dict[str, Any] = {"cell": frame, "x": round(tx - ox, 1), "y": round(ty - oy, 1), "z": round(nz - oz, 1),
                                 "rot": [0, 0, round(heading, 1)]}
         if "tolerance" in a:
             args["tolerance"] = a["tolerance"]
         ok, note = await self._teleport(rec, index, step.model_copy(update={"action": "teleport", "args": args}))
-        return ok, (f"{note}; {distance:g} units from {fid:#x} at ({nx:.0f}, {ny:.0f}, {nz:.0f}), facing {heading:.1f}" if ok else note)
+        where = f" in her record's cell {frame}" if a["cell"] == "record" else ""
+        return ok, (f"{note}; {distance:g} units from {fid:#x} at ({nx:.0f}, {ny:.0f}, {nz:.0f}){where}, facing {heading:.1f}" if ok else note)
 
     def _dump_at_target(self, dump: dict[str, Any], args: dict[str, Any], tolerance: float | None = None) -> bool:
         """The client's own position (dump-state pos, absolute world units)
