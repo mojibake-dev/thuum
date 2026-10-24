@@ -377,3 +377,18 @@ a player is fixed to the depth of the cdylib and no further.
 - Google, "Rust in Android: move fast and fix things" (2025): https://blog.google/security/rust-in-android-move-fast-fix-things/
 - Wireshark RakNet dissector fields: https://wireshark.org/docs/dfref/r/raknet.html
 - RakNet-compatible Rust crates evaluated and rejected: https://github.com/b23r0/rust-raknet, https://docs.rs/rak-rs
+
+### The form index in difftest (01:56 PDT, 2026-10-24)
+
+A form index (`idx`) names a form only within one server's run: each stack
+allocates indices by its own form count, and a server that loads records
+ahead of the engine (the fate pass, train-41) shifts every index against the
+legacy image while the messages stay the same (43's T2 at d2210492: 33
+sessions differing in idx alone, 293 against 64 for the first player).
+difftest therefore renames every idx in a client's stream to the form id its
+CreateActor (MsgType 33) paired it with (`refr:<id>`, at any depth) before
+the diff: the comparison reads identity, not allocation order. An index no
+CreateActor named stays a number and differs as before; a session
+declaration that names an index literally misses on both stacks and should
+name the form instead. Fork skymp-wire/difftest, m3-train-41 e7a5e211.
+
