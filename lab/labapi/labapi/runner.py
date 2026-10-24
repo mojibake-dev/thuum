@@ -926,11 +926,6 @@ class Runner:
             rec.failures.append({"step": index, "kind": "lab", "client": step.client, "error": error})
             rec.verdict = "red"
             return False, error
-        dx, dy = sx - nx, sy - ny
-        span = math.hypot(dx, dy)
-        ux, uy = (dx / span, dy / span) if span > 1 else (0.0, -1.0)  # a seat standing on her comes in from the south
-        tx, ty = nx + ux * distance, ny + uy * distance
-        heading = (math.degrees(math.atan2(nx - tx, ny - ty)) + 360) % 360  # the engine's angle Z: 0 north, clockwise
         frame = str(a["cell"])
         if frame == "record":
             # the cell her record stands in, read now: one evening takes Alvor home and another to the inn
@@ -945,14 +940,29 @@ class Runner:
                 rec.failures.append({"step": index, "kind": "lab", "client": step.client, "error": error})
                 rec.verdict = "red"
                 return False, error
+        # a seat in another frame (outdoors, for her house) has no line to her: its numbers are the worldspace's and
+        # hers the interior's, so it comes in from the south, and the engine's own placement in her cell counts as the
+        # landing (x-handoff-door 20261024-032354: twenty landings on one spot 23 units from her, the mixed line's
+        # target 200 off); the probe's next approach, from inside, aims (a Skyrim.esm frame is "<hex>:Skyrim.esm")
+        seat_frame = dump.get("worldOrCell")
+        across = (isinstance(seat_frame, int) and 0 < seat_frame < 0x01000000 and frame.endswith(":Skyrim.esm")
+                  and frame.split(":", 1)[0].lower().lstrip("0") != f"{seat_frame:x}")
+        dx, dy = (0.0, 0.0) if across else (sx - nx, sy - ny)
+        span = math.hypot(dx, dy)
+        ux, uy = (dx / span, dy / span) if span > 1 else (0.0, -1.0)  # a seat standing on her comes in from the south
+        tx, ty = nx + ux * distance, ny + uy * distance
+        heading = (math.degrees(math.atan2(nx - tx, ny - ty)) + 360) % 360  # the engine's angle Z: 0 north, clockwise
         cell = self.tables.cell(frame)
         ox, oy, oz = cell.origin if cell is not None else (0.0, 0.0, 0.0)
         args: dict[str, Any] = {"cell": frame, "x": round(tx - ox, 1), "y": round(ty - oy, 1), "z": round(nz - oz, 1),
                                 "rot": [0, 0, round(heading, 1)]}
         if "tolerance" in a:
             args["tolerance"] = a["tolerance"]
+        if across:
+            args["tolerance"] = max(float(a.get("tolerance", 0) or 0), distance + self.s.teleport_tolerance)
         ok, note = await self._teleport(rec, index, step.model_copy(update={"action": "teleport", "args": args}))
         where = f" in her record's cell {frame}" if a["cell"] == "record" else ""
+        where += " (from another frame: from the south, the engine's placement)" if across else ""
         return ok, (f"{note}; {distance:g} units from {fid:#x} at ({nx:.0f}, {ny:.0f}, {nz:.0f}){where}, facing {heading:.1f}" if ok else note)
 
     def _dump_at_target(self, dump: dict[str, Any], args: dict[str, Any], tolerance: float | None = None) -> bool:

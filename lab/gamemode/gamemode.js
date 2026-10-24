@@ -482,6 +482,40 @@ command.respawn = (payload) => {
   return { ok: true, actorId, spawn: spawn || null };
 };
 
+// A game-file actor killed by the server by form id (npc-fate's death reads): the console verb's Kill
+// (ConsoleCommands.cpp ExecuteKill: MpActor::Kill with its killer, the death event and the death item), run
+// as the seat's console as `console` runs it (the verb checks the seat's rank). killerProfileId names the
+// seat whose actor is the killer; none is a death with no killer.
+command["kill-ref"] = (payload) => {
+  const actorId = actorFor(payload.profileId);
+  if (!actorId) return notFound(payload.profileId);
+  if (typeof mp.executeConsoleCommand !== "function") return { ok: false, error: "this server has no executeConsoleCommand" };
+  const formId = payload.formId;
+  if (!Number.isInteger(formId) || formId <= 0) return { ok: false, error: "kill-ref needs formId, a form id" };
+  const args = [formId];
+  let killer = null;
+  if (payload.killerProfileId !== undefined && payload.killerProfileId !== null) {
+    killer = actorFor(payload.killerProfileId);
+    if (!killer) return notFound(payload.killerProfileId);
+    args.push(killer);
+  }
+  mp.executeConsoleCommand(actorId, "Kill", args);
+  return { ok: true, formId, killer, isDead: Boolean(mp.get(formId, "isDead")) };
+};
+
+// A dead game-file actor up again at once by form id (npc-fate's respawn reads, without the reset's hours): at
+// its spawn point as respawn puts a player there (locationalData, then isDead false: MpActor::SetIsDead's
+// Respawn), or where it fell with inPlace (the console verb's Resurrect does the same).
+command["respawn-ref"] = (payload) => {
+  const formId = payload.formId;
+  if (!Number.isInteger(formId) || formId <= 0) return { ok: false, error: "respawn-ref needs formId, a form id" };
+  if (!mp.get(formId, "isDead")) return { ok: false, formId, error: "not dead" };
+  const spawn = payload.inPlace ? null : mp.get(formId, "spawnPoint");
+  if (spawn) mp.set(formId, "locationalData", spawn);
+  mp.set(formId, "isDead", false);
+  return { ok: true, formId, spawn: spawn || null, isDead: Boolean(mp.get(formId, "isDead")) };
+};
+
 function dispatch(table, payload) {
   const kind = payload && payload.kind;
   const fn = table[kind];
@@ -504,7 +538,7 @@ mp.onHttpRpcRunAttempt = (name, payload) => {
   }
 };
 
-console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn, papyrus-av, staff-rank, learn-spell, console)");
+console.log("thuum lab gamemode loaded: rpc labState, labCommand (teleport, give, set-appearance, open-race-menu, set-percentages, kill, respawn, kill-ref, respawn-ref, papyrus-av, staff-rank, learn-spell, console)");
 
 // For the unit test only; the server never reads this.
 if (typeof module !== "undefined") {

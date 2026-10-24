@@ -1432,6 +1432,20 @@ steps:
   - c1: approach {formId: 0x13483, distance: 80, cell: "3c:Skyrim.esm"}
 """
 
+KILL_REF = """
+id: kill-ref
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: kill-ref {formId: 0x85547, killer: c2}
+  - assert:
+      - server.ref(0x85547).isDead == true
+  - c1: respawn-ref {formId: 0x85547}
+  - assert:
+      - server.ref(0x85547).isDead == false
+"""
+
 APPROACH_RECORD = """
 id: approach-record
 clients: [c1]
@@ -1481,8 +1495,27 @@ class ApproachSteps(RunTests):
         self.assertEqual(len(sent), 1, sent)
         self.assertEqual(sent[0]["cell"], "133c8:Skyrim.esm")
         self.assertAlmostEqual(math.hypot(sent[0]["x"] + 512.8, sent[0]["y"] + 205.8), 150.0, delta=0.2)
+        # the seat stands outdoors (its dump's worldOrCell 0x3c) and she indoors: no line between two frames
+        # (x-handoff-door 20261024-032354), so it comes in from the south and the engine's placement counts
+        self.assertEqual((sent[0]["x"], sent[0]["y"]), (-512.8, -355.8))
+        self.assertNotIn("tolerance", sent[0], "the landing's bound is lab-api's")
         step = next(s for s in body["steps"] if s["action"] == "approach")
-        self.assertIn("in her record's cell 133c8:Skyrim.esm", step["note"], step)
+        self.assertIn("in her record's cell 133c8:Skyrim.esm (from another frame", step["note"], step)
+
+    def test_kill_ref_names_its_killer_by_client_and_respawn_ref_puts_it_up(self):
+        """npc-fate's death reads: a game-file actor killed by the server by form id, the killer a scenario client
+        sent as its profile, then up again at once."""
+        from labapi.fakes import FakeActor
+
+        self.state.refs[0x85547] = FakeActor(123400.0, -80300.0, 10705.0, "3c:Skyrim.esm")
+        run_id, body = self._run(KILL_REF)
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] in ("kill-ref", "respawn-ref")]
+        self.assertEqual([p["kind"] for p in sent], ["kill-ref", "respawn-ref"], sent)
+        self.assertEqual(sent[0]["killerProfileId"], 2, sent[0])
+        self.assertNotIn("killer", sent[0])
+        self.assertEqual(sent[0]["formId"], 0x85547)
+        self.assertFalse(self.state.refs[0x85547].isDead)
 
     def test_approach_by_record_without_a_record_is_red_and_sends_nothing(self):
         self.doubles.npcs["c1"] = {0x13482: {"formId": 0x13482, "pos": [-512.8, -205.8, 240.0]}}

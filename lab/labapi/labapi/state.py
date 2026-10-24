@@ -148,6 +148,10 @@ class ServerState:
 
     def command(self, client: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
         payload = {"kind": action, "profileId": self._profile(client), **args}
+        if action == "kill-ref" and "killer" in args:
+            # the killer a client of the scenario, sent as the profile its actor plays
+            del payload["killer"]
+            payload["killerProfileId"] = self._profile(str(args["killer"]))
         if action == "teleport" and self._cells is not None and "cell" in args:
             cell = self._cells.cell(str(args["cell"]))
             if cell is not None:
