@@ -465,7 +465,20 @@ each imposition's target is explicit.
   path narrowed (16:58 PDT, 91690a6d): only a game-file actor whose
   activation came as its host's report (Activate's reportedByHost, set by
   OnActivate for a hosted caster); a script's, a runtime actor's or a
-  player's door keeps the server's transit.
+  player's door keeps the server's transit. x-handoff-door v3 on 91690a6d
+  (run 20261024-001915, 17:29 PDT): the host path WORKS (the snippet walked
+  Alvor into the inn under his evening package, the record followed at
+  "133c6", the follow names c1), the viewer's did not (c2's engine kept him
+  at the door, AI off, no "moved" line; c2's game had also been replaced
+  30 s into the run, a separate fault numidium's agent reads). Two
+  mechanisms for the viewer's half (8dc3b974): formView moves an engine
+  reference whenever the engine's own cell differs from the record's, once
+  per record cell (a late viewer catches up), and the server, on an
+  accepted or followed cell change, sends every listening game but the
+  host's a Teleport for the actor before the record moves, so the grid's
+  DestroyActor follows it in order and the viewer's engine has already
+  moved its reference (remoteServer's onTeleportMessage). HYPOTHESIS until
+  the probe runs again.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
