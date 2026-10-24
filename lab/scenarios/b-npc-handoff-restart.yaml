@@ -20,6 +20,11 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
+  # god mode on both seats, and again after the restart (the server's tgm does not survive it):
+  # run 145430 lost 0x9733 to the grace handoff after a wolf killed c2's level-1 player, whose
+  # respawn at the spawn released the cell; D10 itself had held
+  - c1: console {text: tgm}
+  - c2: console {text: tgm}
   - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
   - c2: teleport {cell: "3c:Skyrim.esm", x: 16000, y: -47204, z: -128, rot: [0, 0, 90]}
   - wait: 25
@@ -30,6 +35,8 @@ steps:
   - server: restart
   - c1: connect
   - c2: connect
+  - c1: console {text: tgm}
+  - c2: console {text: tgm}
   - wait: 20
   - c1: npc-state {formId: 0x13482}
   - c2: npc-state {formId: 0x13482}
