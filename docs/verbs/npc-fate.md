@@ -791,6 +791,18 @@ the server's worn roll must read the override; the DOFT following the
 inventory template bit is a HYPOTHESIS. The probe x-npc-fate-outfit (lone
 seat, tgm, the trace live 15 s before the load) runs on them; esm.py wants
 an achrs-in command (its near lists REFRs alone).
+x-npc-fate-roll v3 20261023-235610 (17:04 PDT, numidium's read): clean,
+observations 1 and 2 held a third time (one resolver per placement at the
+load, skipInit 1, inside InitItemImpl; 47 wrapper rolls, one NPC_ each);
+every roll entered fresh ("current 0x1e7a0", level 1), so a matching species
+across the two legs was chance, not persistence (over three runs 0x85549
+picked 0x23abe five of five, 0x85547 0x23ab7 twice and 0x23abe three times):
+the engine rolls at every load, MEASURED. The resolver leads the server's
+hosting line by about 4.3 s on both legs (the fate must be on the client
+before the attach; the fate pass runs at the square change, ahead). 16072
+and 19692 n 0 again; the engine's re-roll ran only on other actors. A lab
+fault of numidium's to chase: a trace armed by relaunch {frida} loses its
+tail at about 30 s after its load (read such traces to there).
 
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
