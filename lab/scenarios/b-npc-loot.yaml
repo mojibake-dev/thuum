@@ -1,0 +1,47 @@
+# b-npc-loot (M3, docs/verbs/npc-fate.md, the deaths; 2026-10-24): a corpse
+# is the server's container. A lone seat (c2 parked on port 1): c1 in god
+# mode kills the predator 0x85547 by kill-ref, the console gives the body
+# three gold on the server (additem by reference id), c1 approaches in the
+# record's cell (the heading aims the crosshair, so the record's inventory
+# applies to the body it looks at), activates it (the hook reports; the
+# engine's own menu is blocked at death), the server's OpenContainer opens
+# the ContainerMenu on the record's items, Take All (R, scancode 19) and
+# the menu's close send the take and the releasing second activation.
+# Asserts: the body stays dead and server.inventory(c1) holds at least the
+# three gold. Proved as x-npc-loot GREEN 064648 on train-42 61ffa74e. Its own
+# commit (rule 13).
+id: b-npc-loot
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 12.0
+timeout_s: 900
+steps:
+  - c2: relaunch {until: gone, files: [{json: Data/Platform/Plugins/skymp5-client-settings.txt, key: server-port, value: 1}]}
+  - c1: connect
+  - wait: 10
+  - c1: console {text: tgm}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - wait: 20
+  - c1: kill-ref {formId: 0x85547, killer: c1}
+  - wait: 5
+  - c1: console {text: "85547.additem f 3"}
+  - wait: 2
+  - c1: approach {formId: 0x85547, distance: 120, cell: record}
+  - wait: 3
+  - c1: screenshot
+  - c1: activate {refId: 0x85547}
+  - wait: 4
+  - c1: screenshot
+  - c1: tap-key {code: 19}
+  - wait: 2
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 4
+  - assert:
+      - server.ref(0x85547).isDead == true
+      - server.inventory(c1).count("0xf") >= 3
+artifacts: [server.log, c1.log, screenshots]
