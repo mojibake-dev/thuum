@@ -567,12 +567,14 @@ class ClientLogs(RunTests):
         pve.skse_logs = ["skse64.log", "TMS_AIPathingFreezeFix.log"]
         pve.files[r"C:\sky-lab\c1.log"] = "platform log\n"
         pve.files[r"C:\sky-lab\c1-driver.log"] = "2026-10-01T00:00:00Z loaded\n"
+        pve.files[r"C:\sky-lab\c1-console.log"] = "2026-10-01T00:00:01Z [Script] Trace in HostService: roster\n"
         pve.files[r"C:\sky-lab\c1-skse64.log"] = "imagebase = 00007FF7AB420000\n"
         pve.files[r"C:\sky-lab\c1-TMS_AIPathingFreezeFix.log"] = "patched 1 call\n"
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn("c1.log", body["artifacts"])
         self.assertIn("c1-driver.log", body["artifacts"])
+        self.assertIn("c1-console.log", body["artifacts"], "every console line, lab-driver's tee (printConsole reaches no other file)")
         self.assertIn("c1-skse64.log", body["artifacts"])
         self.assertIn("c1-TMS_AIPathingFreezeFix.log", body["artifacts"])
         run_dir = self.tmp / "results" / run_id
@@ -580,12 +582,14 @@ class ClientLogs(RunTests):
         self.assertEqual((run_dir / "c1-skse64.log").read_text(), "imagebase = 00007FF7AB420000\n")
         self.assertEqual((run_dir / "c1-TMS_AIPathingFreezeFix.log").read_text(), "patched 1 call\n")
         copies = [c for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
-        self.assertEqual(len(copies), 3, pve.calls)
+        self.assertEqual(len(copies), 4, pve.calls)
         self.assertIn("game-dir.txt", " ".join(copies[1][2]))
         self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
+        self.assertIn("game-dir.txt", " ".join(copies[2][2]))
+        self.assertIn("lab-console-logs.txt", " ".join(copies[2][2]))
         # one listing: the folder skyrim-platform.log is in, itself left out (it is c1.log), then every other
         # My Games\<folder>\SKSE (the freeze fix logs under Skyrim.INI\SKSE), a name kept from its first folder
-        listing = " ".join(copies[2][2])
+        listing = " ".join(copies[3][2])
         self.assertIn(r"$main = 'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE'", listing)
         self.assertIn("Join-Path $_.FullName 'SKSE'", listing)
         self.assertIn("-Filter '*.log'", listing)
@@ -1736,6 +1740,41 @@ class CellHostSteps(RunTests):
         self.assertEqual(body["verdict"], "green", body)
         step = next(s for s in body["steps"] if s["action"] == "log-count")
         self.assertIn("skipped", step["note"], step)
+
+    def _log_count_on_a_managed_seat(self, files: dict[str, str]):
+        import asyncio
+
+        from labapi.guests import Guest
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        lab = self.services.runner.s.client_lab_dir
+        for name, text in files.items():
+            pve.files[f"{lab}\\{name}"] = text
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "moved"))
+        self.assertTrue(ok, note)
+        return pve, note
+
+    def test_a_log_count_reads_the_console_log_beside_the_platform_log(self):
+        """x-handoff-door 20261024-013234: skymp5-client's logTrace lines reach the game's console alone, so log-count
+        reads lab-driver's tee of it (Data\\Platform\\Logs\\lab-console-logs.txt) beside skyrim-platform.log."""
+        pve, note = self._log_count_on_a_managed_seat({
+            "logcount-003.log": "a moved line\nanother\n",
+            "logcount-003-console.log": "[npc-handoff] moved 13482 into 133c6\n[x] moved again\nquiet\n",
+        })
+        self.assertEqual(self.services.board.log_count("c1", "moved"), 3, note)
+        self.assertIn("1 in its Skyrim Platform log, 2 in its console log", note)
+        copies = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        self.assertTrue(any("lab-console-logs.txt" in c and "logcount-003-console.log" in c for c in copies), copies)
+
+    def test_a_log_count_without_a_console_log_counts_the_platform_log(self):
+        """a driver from before the tee writes no console log: that copy reads nothing, and the count is the first log's"""
+        pve, note = self._log_count_on_a_managed_seat({"logcount-003.log": "a moved line\nanother\n"})
+        self.assertEqual(self.services.board.log_count("c1", "moved"), 1, note)
+        self.assertIn("0 in its console log", note)
 
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()

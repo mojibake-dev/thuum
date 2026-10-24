@@ -130,6 +130,10 @@ class Settings:
     # directory the client recorded in {client_lab_dir}\game-dir.txt at install;
     # collected as <client>-driver.log beside <client>.log.
     client_plugin_log: str = r"Data\Platform\Logs\lab-driver-logs.txt"
+    # every line the game's console printed (lab-driver's consoleMessage tee, its own writeLogs file, relative to
+    # the game directory as above): skymp5-client's printConsole, logTrace and logError lines reach no other
+    # file; collected as <client>-console.log, and log-count reads it beside <client>.log
+    client_console_log: str = r"Data\Platform\Logs\lab-console-logs.txt"
     # PowerShell run through the guest agent. {url} {name} {lab_dir} {out} are filled in.
     # frida-inject (the standalone injector, staged by `just client-frida`) attaches
     # to the game by name once it exists plus five seconds (attaching at process
@@ -334,6 +338,7 @@ class Settings:
             client_lab_user=_env("CLIENT_LAB_USER", d.client_lab_user),
             client_driver_log=_env("CLIENT_DRIVER_LOG", d.client_driver_log),
             client_plugin_log=_env("CLIENT_PLUGIN_LOG", d.client_plugin_log),
+            client_console_log=_env("CLIENT_CONSOLE_LOG", d.client_console_log),
             frida_exec_template=_env("FRIDA_EXEC_TEMPLATE", d.frida_exec_template),
             screenshot_cmd_template=_env("SCREENSHOT_CMD_TEMPLATE", d.screenshot_cmd_template),
             step_timeout_s=float(_env("STEP_TIMEOUT_S", str(d.step_timeout_s))),
