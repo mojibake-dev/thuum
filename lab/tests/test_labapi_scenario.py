@@ -317,6 +317,16 @@ class NpcKillStep(unittest.TestCase):
         step = load_scenario('id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {formId: 0x13482, distance: 150, cell: record}\n').steps[0]
         self.assertEqual(step.args["cell"], "record")
 
+    def test_a_server_block_may_set_the_runs_respawn_hours(self):
+        from labapi.scenario import load_scenario
+
+        s = load_scenario("id: x-r\nclients: [c1]\nserver: {npcEnabled: true, npcRespawnHours: 1}\nsteps:\n  - wait: 1\n")
+        self.assertEqual(s.server.npcRespawnHours, 1.0)
+        self.assertIsNone(load_scenario("id: x-r\nclients: [c1]\nsteps:\n  - wait: 1\n").server.npcRespawnHours)
+        for bad in ("0", "-1", "true", "721", "'one'"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-r\nclients: [c1]\nserver: {{npcRespawnHours: {bad}}}\nsteps:\n  - wait: 1\n")
+
     def test_kill_ref_and_respawn_ref_take_a_form_id(self):
         # a game-file actor killed by the server (its killer a client of the scenario) or put up again at once
         from labapi.scenario import load_scenario
