@@ -718,6 +718,9 @@ class NpcStateView:
     activationBlocked: bool | None = None
     # the cell the reference stands in in that game (a door's interior after a crossing, npc-handoff)
     cell: int | None = None
+    # whether that game holds its 3D: an unloaded copy keeps its AI bit on while nothing simulates it, so a far
+    # seat's "no live copy" reads loaded-ness (b-npc-handoff-night 092208, b-npc-puppet's far-seat asserts)
+    is3DLoaded: bool | None = None
     # what that game rolled for it (npc-fate): its race and the form ids it wears, sorted
     raceId: int | None = None
     worn: tuple[int, ...] | None = None
@@ -1451,7 +1454,7 @@ class _ClientRef:
                                 isDead=_opt_bool(data.get("isDead")), healthPercentage=_opt_float(data.get("healthPercentage")),
                                 isEssential=_opt_bool(data.get("isEssential")), isProtected=_opt_bool(data.get("isProtected")),
                                 activationBlocked=_opt_bool(data.get("activationBlocked")), cell=_opt_int(data.get("cell")),
-                                raceId=_opt_int(data.get("raceId")),
+                                is3DLoaded=_opt_bool(data.get("is3DLoaded")), raceId=_opt_int(data.get("raceId")),
                                 worn=tuple(sorted(int(w) for w in data["worn"])) if isinstance(data.get("worn"), list) else None)
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
@@ -1709,7 +1712,7 @@ _ATTRS = {
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop"},
     NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
-                   "isEssential", "isProtected", "activationBlocked", "cell", "raceId", "worn"},
+                   "isEssential", "isProtected", "activationBlocked", "cell", "is3DLoaded", "raceId", "worn"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},
