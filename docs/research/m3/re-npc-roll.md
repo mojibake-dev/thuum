@@ -533,3 +533,40 @@ is matched.
   14752 (return address); the solo leg's first teleport into the predator
   cell, a 15 s wait, then out and back in after GameDaysPassed is pushed
   past the threshold.
+
+## 10. Where a bandit's weapon comes from (Skyrim.esm 1.6.1170, numidium's record read over ssh on sky-srv, 2026-10-24 23:39 PDT; layouts from CommonLibSSE-NG TESActorBaseData.h:57 and :74, TESLeveledList.h, TESContainer.h)
+
+- The six Embershard picks (0x39CF6, 0x39CFF, 0x39D07; 0x39CF9, 0x39D05,
+  0x39D0D) all carry COCT 3 with the same three CNTO entries at count 1 and
+  no COED: 0x37C1B LVLI LItemBanditWeapon1H, 0x4F78D LVLI LootGoldChange25,
+  0x10E0DD LVLI LootBanditRandom. Their templateUseFlags 0x0FBE set the
+  inventory bit (0x100), so the inventory is the template's (0x39CFD
+  EncBandit01TemplateMelee, 0x1BCD9 EncBandit02TemplateMelee, 0x1BCDA
+  EncBandit03TemplateMelee); the templates' inventory bit is clear and their
+  CNTO is the same three lists, so the answer is the same either way. The
+  DOFT on all nine is 0xC0197, boots, cuirass, gauntlets and shield lists
+  alone: no weapon comes from the outfit.
+- LItemBanditWeapon1H 0x37C1B: LVLD 0, LVLF 0x03 (every level at or under
+  the player's, each item in count, use-all clear), three LVLO at level 1:
+  0x37C18 LItemBanditMace, 0x37C19 LItemBanditSword, 0x37C1A
+  LItemBanditWarAxe, each LVLD 0, LVLF 0x03 with eleven WEAP entries at
+  count 1 (level 1: IronMace 0x13982 and SteelMace 0x13988; IronSword
+  0x12EB7 and SteelSword 0x13989; IronWarAxe 0x13790 and SteelWarAxe
+  0x13983; level 9 the Orcish, 15 the Dwarven, 22 the Elven). The three
+  weapons seen in 061219 and 062856 (IronMace, SteelMace, SteelSword) are
+  all level-1 picks: two independent rolls, the sub-list then the weapon,
+  which is why the server's and the engine's hands agree only by chance.
+- A second hand-held source: LootBanditRandom 0x10E0DD (LVLD 25, LVLF 0x04
+  use-all, nine level-1 entries) holds 0x10E0E2 LootToolRandom05 (LVLD 95),
+  which can add WEAP weapPickaxe 0xE3C16 or Axe01 0x2F2F4: rare (chance
+  none 95), but a weapon the outfit pin never sees, so the inventory pin
+  covers it too. LootGoldChange25 0x4F78D (LVLD 75): nine level-1 Gold001
+  entries at counts 1 to 9, the corpse's gold (x-npc-loot reads the server's
+  inventory, so per-engine loot rolls do not reach the menu).
+- Consequence for the pin: the server's base inventory roll
+  (AddContainerObject at the fate's level, LeveledListUtils) already picks
+  from these lists and equips the weapon the fate's worn list carries; the
+  engine's pick at the inventory init (the per-entry LVLI roll the trace
+  classifies as 14751, under InitLeveledItems 16129) is what the next slice
+  answers with the server's weapon, the shape of the 16155 outfit detour;
+  the engine's equip choice after the init is the re-analyst's question 4.
