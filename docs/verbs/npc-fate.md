@@ -418,9 +418,14 @@ weapon list, section 10) and writes the fate's worn weapons in their place
 once per init pass, then lets the original tag them as the engine would;
 the dresser 418622 equips the server's weapon as its own best pick, so no
 forced equip and nothing to re-evaluate. Gold and loot rows stay the
-engine's (the corpse's menu is the server's inventory). HYPOTHESIS until
-x-npc-fate-outfit v3 holds the worn equality with the hands counted.
-Declared gaps: the sleep outfit (above); a protected base under a player's over-time damage (a poison, a
+engine's (the corpse's menu is the server's inventory). CONFIRMED at T3
+(00:31 PDT): x-npc-fate-outfit v3 GREEN on 43's stage 962fc913 (run
+20261024-072041), the worn equality whole on both Embershard bandits at 20 s
+and again at 60 s (0xB6FE4: IronWarAxe 0x13790, hide boots 0x13910, studded
+cuirass 0x1B3A2, bandit gauntlets 0x6F39B, the WIC cloak 0xE00DB79; 0xB6FDB:
+hide boots, SteelSword 0x13989, ArmorBanditCuirass2 0x10594D), the races
+79684 and 79688 equal to the fates; x-npc-fate-pin v3 GREEN on the same
+stage (072444). Declared gaps: the sleep outfit (above); a protected base under a player's over-time damage (a poison, a
 cloak: ModifyActorValuePercentage carries no aggressor) keeps its point,
 the hit's own number kills it (HYPOTHESIS whether any over-time effect
 reaches an NPC's health that way at all); the cleared hours and the
@@ -1182,6 +1187,12 @@ the read. x-npc-death v2 (070022) held the death on both seats through the
 viewer's return and the restart (the body bound widened to 32 units each
 way for the ragdoll's settle, v3).
 
+43's stage on 962fc913 (00:31 PDT): x-npc-fate-outfit v3 GREEN (072041): the
+worn equality whole, the weapons included (above, Suppress); x-npc-fate-pin
+v3 GREEN (072444), both legs. ADR-046 decision 1 holds at T3 for everything
+the outfit and the inventory roll govern: species, armor, cloak and weapon,
+on both seats and both paths.
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
@@ -1216,7 +1227,7 @@ D16.
 - [ ] native hook + T1
 - [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-npc-fate-pin v3 GREEN 20261024-053914 on 41's stage 0a10f977: the species half of ADR-046 decision 1 at T3 on both seats and both paths; the worn half is x-npc-fate-outfit v3's on 41's restage; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; the committed b-npc-fate waits on x-npc-death's hold; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
