@@ -118,6 +118,19 @@ for ($attempt = 1; $attempt -le 3; $attempt++) {
     while ((Get-Date) -lt $watch -and -not $p.HasExited) { Start-Sleep -Seconds 3; $p.Refresh() }
     if (-not $p.HasExited) { Log ('running pid ' + $p.Id); break }
     Log ('pid ' + $p.Id + ' exited within a minute of its window')
+    # The exited game's Skyrim Platform log, kept under its pid before the next
+    # launch overwrites it: a crash's JS side lives only there (sky-c2 crashed in
+    # Actor.UnequipAll on a deleted figure 25 s into run 20261024-001915, and the
+    # relaunch erased what deleted it). lab-api's run-end read takes every *.log
+    # in that folder (runner.py _skse_logs), so the copy needs no lab-api change.
+    try {
+      $spLog = 'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform.log'
+      if (Test-Path -LiteralPath $spLog) {
+        $kept = Join-Path (Split-Path -Parent $spLog) ('skyrim-platform-pid' + $p.Id + '.log')
+        Copy-Item -LiteralPath $spLog -Destination $kept -Force
+        Log ('kept its Skyrim Platform log as ' + (Split-Path -Leaf $kept))
+      }
+    } catch { Log ('keeping its Skyrim Platform log failed: ' + $_.Exception.Message) }
     Start-Sleep -Seconds 5
     continue
   }
