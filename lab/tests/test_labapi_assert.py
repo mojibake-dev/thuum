@@ -682,13 +682,13 @@ class PuppetViews(RefsNearViews):
         self.states = {"c1": {0x13483: {"formId": 0x13483, "aiEnabled": True, "package": 0x6C989, "inCombat": False, "combatTarget": 0,
                                         "staggering": False, "pos": [17300.0, -47100.0, -120.0], "head": [0, 0, 0],
                                         "isDead": False, "healthPercentage": 1.0, "isEssential": False, "isProtected": True,
-                                        "activationBlocked": False, "cell": 0x9732},
+                                        "activationBlocked": False, "cell": 0x9732, "is3DLoaded": True},
                               # a read from a driver before isDead and healthPercentage
                               0x13482: {"formId": 0x13482, "aiEnabled": True, "package": 0, "inCombat": False, "combatTarget": 0,
                                         "staggering": False, "pos": [17000.0, -47000.0, -120.0], "head": [0, 0, 0]}},
                        "c2": {0x13483: {"formId": 0x13483, "aiEnabled": False, "package": 0, "inCombat": False, "combatTarget": 0,
                                         "staggering": False, "pos": [17301.0, -47099.0, -120.0], "head": [0, 0, 0],
-                                        "isDead": True, "healthPercentage": 0.0, "activationBlocked": True}}}
+                                        "isDead": True, "healthPercentage": 0.0, "activationBlocked": True, "is3DLoaded": False}}}
         self.watches = {
             "c2": {"actors": [
                 {"formId": 0x13483, "first": [17300.0, -47100.0, -120.0], "last": [17400.0, -47100.0, -120.0], "maxDisplacement": 130.0, "samples": 240,
@@ -733,6 +733,11 @@ class PuppetFactsTests(unittest.TestCase):
             ev.evaluate("c2.npc_state(0x13483).cell == 0")  # a driver before the cell read
         with self.assertRaises(AssertionData):
             ev.evaluate("c1.npc_state(0x13482).activationBlocked")
+        # loaded-ness, a far seat's "no loaded live copy" (an unloaded copy keeps its AI bit on), and no read from an older driver
+        self.assertTrue(ev.evaluate("c1.npc_state(0x13483).is3DLoaded == true and c2.npc_state(0x13483).is3DLoaded == false"))
+        self.assertTrue(ev.evaluate("not (c2.npc_state(0x13483).is3DLoaded and c2.npc_state(0x13483).aiEnabled)"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.npc_state(0x13482).is3DLoaded")
         # the engine's own reference of a base never counts as a copy
         self.assertTrue(ev.evaluate("c2.refs_near().runtime_of(0x1e7a0) == 1"))
         self.assertTrue(ev.evaluate("c2.refs_near().runtime_of(0x13476) == 0"))

@@ -2247,6 +2247,9 @@ function run(step: Step, player: Actor): unknown {
         activationBlocked: npc.isActivationBlocked(),
         // the cell the reference stands in in this game (a door's interior after a crossing, npc-handoff)
         cell: npc.getParentCell()?.getFormID() ?? 0,
+        // whether this game holds its 3D: a lost actor with no 3D keeps its AI on, nobody's engine running it, so a
+        // far seat's copy reads aiEnabled true unloaded (b-npc-handoff-night 092208); "no loaded live copy" is the claim
+        is3DLoaded: npc.is3DLoaded(),
         // what this game rolled for it (npc-fate, ADR-046): its race (a leveled pick's clone carries the pick's)
         // and the form ids it wears, one per form across the 32 slots and the two hands' weapon or armor (the
         // server's fate counts the weapon, x-npc-fate-outfit 20261024-061219; a shield is in a slot and the left
