@@ -1368,8 +1368,7 @@ to 44 held until 44 is staged and gated ("Hold until built").
 ## Reviewer checklist
 
 1. Is the rung right, and is the reason for not going one rung higher real?
-   (The roll, the death, the body's point, the respawn and the loot R0; the
-   host's death report counted R2 until Eli's shape; the fall R2 declared.)
+   (2026-10-24: the host's death report is ActorDeath, R1, built on train-44 and checked by the server's own evidence; a hazard death's evidence stays the one HYPOTHESIS, refused and counted until the lab's trap run.)
 2. Does every address come from CommonLib, addrlib, or a Ghidra reference?
    (Headers by file:line; the roll site, the reset and the dead-at-load
    shape UNKNOWN and delegated; TE-MAP's two ids leads only.)
