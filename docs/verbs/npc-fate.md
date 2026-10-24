@@ -623,7 +623,11 @@ actorFateCount, every
 id from re-npc-roll.md's table by `just addr`, every structure offset a
 CommonLibSSE-NG header line; ActorFateService keeps every fate and re-rolls
 a reference the engine already holds when its fate is new (a login's
-neighbours, a cell attached ahead, a respawn): one pop; formView skips the
+neighbours, a cell attached ahead, a respawn): one pop, its engine lookups
+inside the update tick (0a10f977, 20:18 PDT: the handler itself writes only
+the table, which has to hold the fate before a loading screen's attach, and
+a Papyrus native in a message handler is the fault that broke every teleport
+on train-40; the two exports queue game-thread tasks of their own); formView skips the
 equipment apply for engine references under the switch (the engine dresses
 them; figures and 0xff copies keep the apply). HYPOTHESIS, the detours and
 the re-roll, until x-npc-fate-roll's five observations; then the switch
@@ -953,6 +957,21 @@ powerof3's Spell-Perk-Item-Distributor if the re-analyst needs the sites).
   puppet apply floors the relayed health (train-35), so the question changes
   nothing a player sees.
 
+x-npc-fate-pin v2 (20:18 PDT, for train-41's stage on 0a10f977): two legs,
+one path each. Late (c1): the teleport from the lab spawn (square 32,-15,
+five squares out, beyond the fate ring of 3 and the engine's grid of 2)
+straight into the forest; the engine rolls at the load and the fate arrives
+after it, so the late path re-rolls the clone: "late fate for 85547: reroll
+queued" counted at least once in c1's console log, the species equal to the
+server's. Ahead (c2): a teleport into the air over square 31,-17 (three
+squares from the forest cell: inside the ring, outside the grid; z 25000,
+god mode takes the fall), ten seconds for the fates to land in the table,
+then the teleport in: the detour pins at the attach's roll, "late fate for
+85547" counts zero on c2 and "pinned 85547 to" at least once, the species
+equal. Worn lists read, not asserted (the predators wear no outfit; the
+outfit claim is x-npc-fate-outfit's). The switch flips to true on 41 when
+both legs hold.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
@@ -970,7 +989,7 @@ ActorFate message against the existing deltas alone; formVersion 2 or 3.
 - [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT; the death half is train-42's)
 - [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6)
 - [ ] native hook + T1
-- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin)
+- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
