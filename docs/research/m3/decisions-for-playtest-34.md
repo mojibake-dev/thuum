@@ -27,6 +27,9 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
   number, so a fight's deaths are the server's today. What A leaves at the floor
   is the fall and the trap, rare in a village and a dungeon's first chamber, and
   each of B's checks needs a lab read.
+  
+  - Decision: jump right to B
+
 
 ### D2. The level a leveled NPC is rolled at
 - A. The level of the player whose arrival loads the placement, clamped by the
@@ -35,11 +38,20 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
 - Recommended: A. Level 0 is what rolled a cave bear under the games' wolf; A is
   the engine's own input and keeps the species the screens expect.
 
+- Decision: some way to calculate a middle ground? 
+- Options for the middle ground (thuum-magnus, 15:52 PDT; one rule for every placement, the zone's min and max clamp all three as the engine's own clamp does; the respawn's re-roll keeps the stored level, D3, so a dungeon stays as first rolled):
+  - A2. The party's mean: the mean level of the players within the fate ring (three squares) at the roll, the players online when none is near, rounded down. A level-30 and a level-1 together roll a dungeon at 15: tuned for the pair, not for whoever stepped in first. Stable while the party is.
+  - A3. The party's low end: the lowest level among the same players. The level-1 never meets a cave bear because a level-30 walked in ahead; the level-30 meets wolves. The safe pick for a mixed pair, dull for the strong one.
+  - A4. The world's level: a server setting (npcRollLevel, say 10), the same for everyone until the operator raises it. A designed difficulty, as a dedicated TES3MP server often runs; nobody's arrival changes it; a lone level-1 meets level-10 lists.
+  - Recommended: A2, with A3 as the switch for a friends' night with a newcomer. All three are one line where PartOne sets the roll's level around the fate pass (fateLoaderLevel), behind one setting (npcRollLevel: loader | party-mean | party-min | a number), a T0 each; the pin probe reads server.fate(id).level. A slice of an afternoon, after the merge.
+
 ### D3. A respawned NPC's pick
 - A. Re-roll at the respawn, as the engine re-rolls a leveled placement at a cell
   reset.
 - B. Keep the first roll.
 - Recommended: A, the engine's behavior.
+
+- Decision: A 
 
 ### D4. How the server's roll reaches the games
 - A. A dedicated ActorFate message: the base the server rolled, sent ahead of the
@@ -50,10 +62,14 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
   attach, which CreateActor cannot promise; one appended type with its validator
   in the same commit.
 
+- Decision: A 
+
 ### D5. The save format
 - A. formVersion 2, the fate as an added optional field (ADR-043's decision 2).
 - B. formVersion 3 with a migration.
 - Recommended: A.
+
+- Decision: A
 
 ## npc-handoff: doors and passing NPCs between hosts (one ADR)
 
@@ -65,6 +81,8 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
 - B. Hosting on a 5x5 grid instead of 3x3.
 - Recommended: A. B doubles every host's load for the same door.
 
+- Decision: A
+
 ### D7. Flicker damping at the reach ring [handoff b]
 - A. A reach-only lapse keeps the cell for GRACE_REACH_MS (15 s placeholder), and
   a candidate waits CANDIDATE_DWELL_MS (5 s placeholder) before taking it; the
@@ -72,17 +90,23 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
 - B. No damping (today).
 - Recommended: A, the shape accepted and the numbers measured.
 
+- Decision: A
+
 ### D8. The NPC's state sent to a new host [handoff c]
 - A. A dedicated ActorHandoff message (the record plus npc-stream's furniture,
   target and package) before HostGrant, on the same ordered channel.
 - B. A widened HostGrant carrying it.
 - Recommended: A, appended, the grant left as it is.
 
+- Decision: A
+
 ### D9. Passing an NPC between two live hosts [handoff d]
 - A. Per actor, through the existing UpdateHoster flip, with ACTOR_TENURE_MS
   (10 s placeholder) for the NPC that wanders along a boundary.
 - B. Not now (today: an NPC stays with its cell's host).
 - Recommended: A.
+
+- Decision: A
 
 ### D10. Who hosts each cell after a server restart [handoff f]
 - A. Each cell to the nearest player at the restart's first grants, arrival order
@@ -93,6 +117,8 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
 - Recommended: A. Fewer handoffs, and the village is one game's when both stand
   in it.
 
+- Decision: A
+
 ### D11. A resident's record left in an unhosted interior [handoff g]
 - A. The roster moves the record out of a cell nobody hosts to the sighter's cell
   (the record indoors while the engines bring the resident out; measured with
@@ -100,6 +126,8 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
 - B. Leave it (today).
 - Recommended: A. It is the other direction of the door case and needs no new
   message.
+
+- Decision: x
 
 ## cell-host: the quitting host
 
@@ -123,6 +151,8 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
   threshold (a save's or a loading screen's stall must not pass a village); the
   lab calibrates the number, and the merge waits for Eli's answer.
 
+- Decision: leaning towards B, that's the best practice way right? but also A as a background. 
+
 ## The deaths' four calls, made under the design law while building (2026-10-23 20:39 PDT); say the letter to change one
 
 ### D13. The reset clock's source
@@ -132,11 +162,15 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
 - Recommended and built: A, the engine's number. Until the GMST's record id is
   read (numidium's esm.py) the executable's compiled 72 hours stand in.
 
+- Decision: A 
+
 ### D14. The pick at the respawn when the death item resolves to nothing
 - A. Rolled anew regardless (the engine's cell reset re-rolls every leveled
   actor and resets its inventory).
 - B. Today's player-path gate: keep the pick and the inventory.
 - Recommended and built: A.
+
+- Decision: A
 
 ### D15. Unique, essential and protected bases
 - A. The engine's rule: a unique base stays dead; an essential base never
@@ -144,11 +178,15 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
 - B. Every game-file actor dies and respawns alike.
 - Recommended and built: A.
 
+- Decision: A 
+
 ### D16. Looting a corpse on a seat that does not host it
 - A. Any player loots under the CONT occupancy rule: the body's activation is
   blocked on every seat and the server's OpenContainer opens the menu.
 - B. The host alone.
 - Recommended and built: A.
+
+- Decision: A 
 
 ### D17. The bandits' weapons (23:34 PDT): the outfit pin holds for the armor and the race on both Embershard bandits (x-npc-fate-outfit 062856), but a bandit's WEAPON is the base's own inventory list, rolled by each engine at the inventory init and never by the outfit detour, so it may differ per screen (a mace here, a sword there); the damage is the server's either way
 - A. Pin the inventory's leveled roll too before playtest 34: a detour at the per-entry LVLI roll (the trace's 14751 site, under the re-analyst's read tonight) answering the server's weapon for a fated actor, the same shape as the outfit's; a few hours of agent work plus one lab read (outfit v3 is the probe).
@@ -156,6 +194,8 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
 - Recommended: A if 34 is a day or more away, else B; your word on the day decides it.
 - GREEN at T3 (00:32 PDT): x-npc-fate-outfit v3 on 43's stage (072041), the weapons the server's on both bandits at 20 and 60 s; the pin probe green on the same stage. The only question left is the merge's place: A rides 43 with 41 and 42 into 34, B leaves it for the next train.
 - Built ahead of the answer, not merged (23:56 PDT): fork m3-train-43 962fc913, stacked on 42, the 16128 detour (re-npc-roll.md section 11); its read is x-npc-fate-outfit v3 on 43's stage after 42's.
+
+- Decision: A 
 
 ## Merge-ready (09:55 PDT, 2026-10-24)
 
