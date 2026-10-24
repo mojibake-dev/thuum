@@ -1089,6 +1089,26 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the mixed trust model, the path mapped in docs/research/m3/death-path.md).
   Decisions with Eli: D6, D12, ADR-048 with C-ii, ADR-049. Playtest 34 after
   the four and their reads; its checklist at Eli's word.
+
+- STATE 2026-10-24 16:45 PDT (the day's chart line, replacing the 17:45
+  one): trains 39 to 43 merge-ready by citation at fork m3-train-43 de9d048e
+  (gate set 155001 all sixteen, T2 green, gate-cite's five checks; 43 the
+  hands pin, D17); Eli's answers (15:49 PDT, the memo): D1 B, D2 a middle
+  ground, D3 to D11 A, D12 B with A as the background, D13 to D17 A; and
+  "Hold until built": the merge waits for train-44 (fork m3-train-44
+  53b9fd65, stacked on 43, built 16:05 to 16:39 PDT, CI running): D1-B the
+  host's checked death report (ActorDeath 52; the server takes a death it
+  has no number for when it can check the cause against its own evidence:
+  the killer's numbered hit, the host's samples' drop, an activation beside
+  the body; ADR-048 ACCEPTED as B); D12-B the client's disconnect at the
+  game's own quit (Skyrim Platform's thunk on WinMain's call to the engine's
+  shutdown, the re-analyst's read; the stale rule stays the backstop); D2 the
+  roll's level by one rule behind npcRollLevel (party-mean by default; the
+  pick a settings line). Two HYPOTHESIS reads owed on 44's stage
+  (x-npc-fall-report, x-host-quit with lab/frida/quit-path.js). Then
+  numidium's stage, T2 and gate of sixteen plus the two, Eli's look, the
+  merge of 39 to 44, the clones' promotion, playtest 34 (its checklist
+  drafted in docs/private/playtest-m3-34.md, the build named).
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
