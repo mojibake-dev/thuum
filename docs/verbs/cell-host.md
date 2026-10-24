@@ -395,7 +395,8 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   (20261024-065333 on 42's stage, lab-api 0d3dd4d3, 00:00 PDT): the pass 7.0 s
   after the kill (8 polls), c2 hosting and running 0x13482 and 0x35534, still
   the host after c1's return and both seats' loading screens. D12's number
-  stands at T3.
+  stands at T3; green again in the citable set (162052, gate-m3-train-43 155001
+  on de9d048e, 09:55 PDT).
 
 ## Client
 
