@@ -1193,6 +1193,21 @@ v3 GREEN (072444), both legs. ADR-046 decision 1 holds at T3 for everything
 the outfit and the inventory roll govern: species, armor, cloak and weapon,
 on both seats and both paths.
 
+43's restage on d2210492 (01:15 PDT): x-npc-death v3 GREEN (080218): the
+kill is the server's word on both seats, the body stays through the viewer's
+leaving and return, the server's restart keeps it dead at its point (within
+32 units, the ragdoll's settle) and the host's relaunch passes the cell with
+the body in place; the death travel holds at T3. x-npc-fate-pin v3 GREEN
+again (080801). x-npc-respawn v2 (075756): the resurrect held on both
+seats, "resurrected 85547 (puppet false, dead before true, dead after
+false)" on the host-grant winner and "(puppet true, ...)" on the other,
+with "live 85547" after the grant: resurrectActor CONFIRMED at T3, the
+hypothesis of the AI-off refusal with it (rule 2: the engine's own reason
+stays unread, the outcome is the claim). The run's red was the probe's:
+god mode does not survive the server restart any more than a relaunch, so
+the revived predators killed c2's player, whose respawn at the spawn lost
+the cell before the read; v3 re-arms tgm after the reconnects (numidium).
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
