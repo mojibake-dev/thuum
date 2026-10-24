@@ -1344,3 +1344,17 @@ asserts (the leaving host's Sigrid "aiEnabled false" from the lab spawn, and
 the restart's "exactly one seat AI on") read the old mechanism and move to
 "no loaded live copy" once npc-state carries is3DLoaded (numidium's grammar).
 
+The rule generalized (05:40 PDT, fork m3-train-40 856fed7d): the loss path was
+one road to an AI-off copy in a cell this engine does not load; the server's
+Teleport of a viewer's reference into an unattached house was another
+(b-npc-handoff-night 114904: c2's copy, demoted loaded, moved indoors, then
+c2 won the post-restart grant and its unloaded AI-off Alvor never ran his
+morning). So: a puppet this engine no longer loads is released
+(releasePuppet, a Skyrim Platform export: the flag off at once, the AI and
+activation back on on the game thread, no package evaluation on an actor
+with no process), by the puppet service's two-second poll over its tracked
+set; the same poll makes it a puppet again within two seconds when it loads
+on a seat that does not host it, and the host's roster sights it. The cost
+accepted: an unloaded copy wanders by its schedule until it is rebound, and
+a reloaded one may take a step or two before the re-demote.
+
