@@ -522,6 +522,16 @@ each imposition's target is explicit.
   (HostService.isMine); logging.logLab writes through writeLogs to the
   Skyrim Platform log, and the "moved", "Teleport received" and "late fate"
   lines use it. The settle window stays as a guard against reordering.
+  acaf4b34's stage (023055, 19:37 PDT) refused every teleport, the player's
+  own included: the handler's lookup called natives at message time and
+  Skyrim Platform threw "can't be called in this context" (the lab's new
+  console log showed it on its first run). a5e431e2: the lookup at message
+  time is pure JavaScript (the idx's model index and the view's stored local
+  form id, worldViewMisc.getLocalRefrIdOfIndex), every native waits for the
+  update; the ordering fix stands. Lab fact: writeLogs writes
+  Data/Platform/Logs/<plugin>-logs.txt; since lab main 70731404 the driver
+  tees every console line into <client>-console.log and log-count counts it
+  beside the Skyrim Platform log, so printConsole lines are countable.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
