@@ -721,7 +721,14 @@ line if Eli wants it. Setting npcDeathReports, default true; false restores
 A. T0 unit/ActorDeathTest, five cases (Tests 8). HYPOTHESIS, two: that a
 trap's trigger reaches the server as an activation at all (the hazard
 evidence; the lab's trap run decides, and until then a hazard death is
-refused E_DEATH_UNCHECKED and counted, A's floor for that cause); and the
+refused E_DEATH_UNCHECKED and counted, A's floor for that cause; the static
+reading, 16:55 PDT: the client reports an activation whose caster is the
+player or a synced actor (activationService: caster 0x14 or isSyncedActorId,
+localIdToRemoteId), so a pressure plate activated by the stepping actor's
+own reference, TrapTriggerBase's shape, reaches OnActivate and the recent
+activations when that actor is the player or a hosted NPC, while a trap
+whose script activates with the trigger itself as the action reference
+never does; which shape Skyrim's traps use is the read); and the
 fall bound (200 units within 4 s is a plausibility floor, not the engine's
 damage rule, which ran on the host; x-npc-fall-report reads a drop the
 engine kills at).
