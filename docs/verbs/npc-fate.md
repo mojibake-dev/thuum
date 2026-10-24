@@ -1052,19 +1052,21 @@ reference trace; nothing built, nothing run. Decided 2026-10-23 (ADR-046,
 decision 1, Eli: "i want the servers roll pushed to both"): the server's roll
 of a leveled or placed NPC's outfit and look is imposed on every engine, the
 host's included, so the roll covers outfits and 0xff placements and the
-headshot verdict matches the screens. Still for Eli, one ADR (its number to
-be assigned): the death's authority shape (a or b, Authority); the roll's
-level (the first loader's or 0); the respawn's pick (re-roll or keep); the
-ActorFate message against the existing deltas alone; formVersion 2 or 3.
+headshot verdict matches the screens. Built as recommended (the memo's D2 to
+D5: the first loader's level, the re-roll at the respawn, the ActorFate
+message, formVersion 2) and, for the deaths, D13 to D16 under the design law
+(20:51 PDT). Still for Eli: ADR-048, the death's authority (D1: A, B or
+C-ii), which holds train-42's merge; ADR-049's acceptance; any veto of D13 to
+D16.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [ ] engine surface cited or delegated
-- [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT; the death half is train-42's)
+- [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT); the death half on fork m3-train-42 1d09fa04 (the body's stamp, the sweep on the game clock, the master's 240 h, the respawn funnel, the engine's essential and protected rule, the corpse as a container; five T0 cases, CI pending)
 - [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6)
 - [ ] native hook + T1
-- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler)
+- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (by path, awaiting the stages: x-npc-fate-pin v2 and x-npc-fate-outfit on 41; x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated

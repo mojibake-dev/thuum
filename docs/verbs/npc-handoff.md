@@ -628,7 +628,7 @@ the lab. H5 stays HYPOTHESIS until x-handoff-door.
 - [ ] native hook + T1 (none: no new Address Library id)
 - [x] TS handler, first slice (formView's door move behind npcHandoff, fork m3-train-40 b1aa119e; HandoffService with keyframes is D8's)
 - [x] T2 green, first slice (train-40's stage 92529f31: 33 sessions identical, 16:03 PDT; the follow and the cold start send nothing under T2's NPC-less servers, the message layer unchanged)
-- [ ] T3 scenario green, no HYPOTHESIS tags (the probes: x-handoff-restart GREEN 222408, x-handoff-night GREEN 230913, x-handoff-door's D6 claim HELD 025527 on a5e431e2 (its third leg red on the destination, v5 fixes the probe); H5 held; b-npc-handoff itself after the grammar; the gate set 20261023-223340-gate-m3-train-40 GREEN 9/9 stands for the merge by GATE_SET, which waits for Eli's D6 and D12)
+- [ ] T3 scenario green, no HYPOTHESIS tags (the probes: x-handoff-restart GREEN 222408, x-handoff-night GREEN 230913, x-handoff-door's D6 claim HELD 025527 on a5e431e2 and again 032354 on 2841's restage (the server's Teleport moved the viewer's reference that time, formView's rule the first: both mechanisms seen; the third leg red on approach's frame, fixed in lab main eb4592aa, v5 rerun pending); H5 held; b-npc-handoff itself after the grammar; the gate set 20261023-223340-gate-m3-train-40 GREEN 9/9 stands for the merge by GATE_SET, which waits for Eli's D6 and D12)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
