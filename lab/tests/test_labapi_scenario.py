@@ -315,6 +315,13 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {bad}\n")
 
+    def test_quit_is_a_seat_step_without_args(self):
+        # the game's own quit (the console's qqq, D12-B's clean disconnect), answered by the driver before its keys
+        from labapi.scenario import load_scenario
+
+        step = load_scenario("id: x-q\nclients: [c1]\nsteps:\n  - c1: quit\n  - c1: relaunch {until: gone}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "quit", {}))
+
     def test_approach_may_take_its_cell_from_the_record(self):
         # `cell: record`: the cell the server's record of her stands in, read at the step (x-handoff-door's leg 3)
         from labapi.scenario import load_scenario

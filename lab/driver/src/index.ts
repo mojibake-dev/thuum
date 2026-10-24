@@ -145,6 +145,8 @@ const CONSOLE_READ_MS = 2500;
 let consoleTyping: {
   step: Step; text: string; keys: number[]; next: number; phase: "open" | "type" | "read" | "close";
   tapped: boolean; at: number; lines: string[]; wasOpen: boolean; match: string;
+  // a quit's typing: its step answered before the keys, so nothing is posted after them
+  detached?: boolean;
 } | null = null;
 // The result goes in this long after the ingredients come out, so
 // skymp5-client's craft service has every removal before the result: made in
@@ -1206,7 +1208,8 @@ function finishConsole(c: Config): void {
       }
       if (now - k.at > CONSOLE_OPEN_MS) {
         consoleTyping = null;
-        postResult(c, k.step, { ok: false, error: `the console did not open ${CONSOLE_OPEN_MS} ms after the grave key` });
+        if (k.detached) log(`quit: the console did not open ${CONSOLE_OPEN_MS} ms after the grave key`);
+        else postResult(c, k.step, { ok: false, error: `the console did not open ${CONSOLE_OPEN_MS} ms after the grave key` });
       }
       return;
     }
@@ -1218,6 +1221,11 @@ function finishConsole(c: Config): void {
         return;
       }
       Input.tapKey(DIK_RETURN);
+      if (k.detached) {
+        // the game quits at this Enter; its step answered already
+        consoleTyping = null;
+        return;
+      }
       k.phase = "read";
       return;
     }
@@ -1241,7 +1249,8 @@ function finishConsole(c: Config): void {
     postResult(c, k.step, { ok: true, data: { typed: k.text, lines: k.lines, keys: k.keys.length, history } });
   } catch (e) {
     consoleTyping = null;
-    postResult(c, k.step, { ok: false, error: String(e) });
+    if (k.detached) log(`quit: ${String(e)}`);
+    else postResult(c, k.step, { ok: false, error: String(e) });
   }
 }
 
@@ -2518,6 +2527,18 @@ function run(step: Step, player: Actor): unknown {
       const match = typeof a.match === "string" ? a.match : "";
       consoleTyping = { step, text, keys, next: 0, phase: wasOpen ? "type" : "open", tapped: false, at: Date.now(), lines: [], wasOpen, match };
       return DEFERRED;
+    }
+    case "quit": {
+      // The game's own quit, the console's qqq: the engine's shutdown call out of WinMain, where train-44's thunk
+      // tears skymp5-client down first and sends netcode's disconnect (D12-B, x-host-quit). The game exits at the
+      // Enter and could answer nothing after it, so the step answers now and its typing goes on detached
+      if (consoleTyping) return { error: "a console step is still typing" };
+      const wasOpen = Ui.isMenuOpen("Console");
+      consoleTyping = {
+        step, text: "qqq", keys: [DIK["q"], DIK["q"], DIK["q"]], next: 0, phase: wasOpen ? "type" : "open",
+        tapped: false, at: Date.now(), lines: [], wasOpen, match: "", detached: true,
+      };
+      return { quitting: true };
     }
     case "tap-key": {
       // One key press through the engine's input system (SKSE Input.TapKey,
