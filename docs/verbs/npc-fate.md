@@ -1105,7 +1105,7 @@ C-ii), which holds train-42's merge; ADR-049's acceptance; any veto of D13 to
 D16.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
+- [x] engine surface cited or delegated (the roll sites 14374, 14752, 16129 and 16155 by `just addr` with the lab's Frida counts, re-npc-roll.md sections 1 to 8; the attach re-roll's caller 19231 and its gate, section 9, REA; the death path, death-path.md; the CommonLib lines named per field; 22:47 PDT)
 - [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT); the death half on fork m3-train-42 1d09fa04 (the body's stamp, the sweep on the game clock, the master's 240 h, the respawn funnel, the engine's essential and protected rule, the corpse as a container; five T0 cases; CI GREEN on 5352af64, 21:44 PDT: the unit binary, upstream's integration tests under the reset clock, the Windows client)
 - [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6)
 - [ ] native hook + T1
