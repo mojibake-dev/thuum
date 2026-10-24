@@ -581,7 +581,13 @@ compiled 72 last (D13, T0 pins 240); MpActor::Respawn is the one funnel that
 clears the body's stamp and its due entry (the console's Resurrect and the
 lab's respawn-ref pass there), so the next death counts from its own day.
 008c8883 fixes the Catch2 chained comparison both builds of 645f9344
-refused. Owed: the JSON round-trip T0 and MayDie against a master flag, the
+refused. A contract change (21:35 PDT): the gamemode's per-actor spawnDelay
+times players alone now; a game-file actor's body keeps to the reset clock
+whatever spawnDelay says, so upstream's two integration tests that killed
+the mudcrab 0xDC558 with spawnDelay 0 and waited a millisecond
+(test_isdead, test_partial_location_save) moved to npcRespawnHours 0.0001
+in their settings and a wait spanning one sweep; a gamemode wanting an
+instant respawn calls the console's Resurrect or the lab's respawn-ref. Owed: the JSON round-trip T0 and MayDie against a master flag, the
 restart scenario as b-npc-fate (rule 13, after x-npc-death holds), the
 cleared hours (the quests verb), kNeverResets zones (libespm reads no ECZN:
 every cell resets). The lab's grammar (numidium, lab main eb4592aa):
