@@ -10,8 +10,8 @@
 # the viewer by the isDead property); the viewer leaves five squares out and
 # returns, the body still a body on its screen (the dead bind, the
 # two-second read); the server restarts and both reconnect, the record dead
-# at its point within 32 units each way (the ragdoll's settle; a death never
-# teleports the record) and dead on both seats; the host's game is relaunched,
+# at its point where it fell, within 256 units each way (a ragdoll's settle on a
+# slope, 65 measured; a death never teleports the record) and dead on both seats; the host's game is relaunched,
 # the cell passes to the viewer (the stale rule) with the body in place, and
 # the returning host finds it dead. No respawn inside the run (the master's
 # 240 hours). Proved as x-npc-death v3 GREEN 080218 on train-43 d2210492
