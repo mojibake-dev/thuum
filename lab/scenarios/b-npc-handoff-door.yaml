@@ -1,0 +1,93 @@
+# b-npc-handoff-door (M3, docs/verbs/npc-handoff.md, ADR-047 D6; 2026-10-23):
+# an NPC through a door into a cell no game has loaded keeps walking: its
+# record follows the host's engine (a Follow in the server's judgement,
+# wire-rules cells.rs), the viewing game's reference is moved into the house
+# (the server's Teleport ahead of the unsubscribe, or formView's cell rule),
+# and when the viewer walks in the house is granted to it and the follow
+# ends. Two seats under npcEnabled at Riverwood's landing, the clock at 19.7
+# so Alvor 0x13482 leaves his forge for home (0x133C8) or the inn (0x133C6)
+# inside the window: the first until waits for the host's roster to bring
+# his record out, the second for the record to go back in under the host's
+# report. Asserts: the follow names c1 while nobody hosts the house and both
+# engines have him in the same interior (npc_state .cell, the parent CELL);
+# c2 approaches in the record's cell (approach {cell: record}, lab-api
+# b1a009ce): the follow ends, c2 runs him (aiEnabled true), c1's puppet
+# stands; then c1 walks in: its puppet, unsubscribed outside, binds at the
+# attach and stands within 150 units of c2's live Alvor. Proved as
+# x-handoff-door: v5 GREEN 041126 (train-40 a5e431e2), v6 GREEN 054447 (all
+# four legs); D6 held in 025527 and 032354 too. Its own commit (rule 13).
+id: b-npc-handoff-door
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 19.7
+timeout_s: 1800
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 25
+  - assert:
+      - server.host(0x9732).client == "c1"
+  # the record outdoors (server.ref .cell is the worldOrCell descriptor: the WORLDSPACE outdoors,
+  # the interior indoors; the client's npc_state .cell is the engine's parent CELL): held at once
+  # in run 230339, the roster having brought him out
+  - until: {within: 180, expect: [server.ref(0x13482).cell == "3c:Skyrim.esm"]}
+  - c1: npc-state {formId: 0x13482}
+  - assert:
+      - c1.npc_state(0x13482).aiEnabled == true
+  # the evening's end: his host's engine walks him indoors; the record follows him in (D6). The
+  # wait is for leaving the worldspace, wherever his schedule takes him (his house 0x133c8 is
+  # expected; the inn 0x133c6 is the other door in his evening): numidium, if `!=` is not in the
+  # until grammar, use two runs with == on each
+  - until: {within: 1200, expect: [server.ref(0x13482).cell != "3c:Skyrim.esm"]}
+  - wait: 5
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c2: log-count {pattern: "moved 13482 into"}
+  - c2: screenshot
+  - assert:
+      - server.follow(0x13482).following == true
+      - server.follow(0x13482).client == "c1"
+      - c1.npc_state(0x13482).cell == c2.npc_state(0x13482).cell
+  # informational (v4): the client's own "moved 13482 into" line appears only when formView moved
+  # the reference itself; when the server's Teleport to the viewer (train-40 8dc3b974) moved it
+  # first, the line is the server's "told to 1 viewing game(s)" in server.log instead
+  #   c2.log_count("moved 13482 into") >= 1
+  # the visitor walks in, wherever he went (the inn in 001915 and 013234, home in 025527): approach
+  # with `cell: record` lands in the record's cell; that cell becomes c2's loaded cell, granted
+  # (the follow ending is the grant's mark, so no cell is named), and c2 runs him
+  - c2: approach {formId: 0x13482, distance: 200, cell: record}
+  - wait: 8
+  - c2: approach {formId: 0x13482, distance: 150, cell: record}
+  - wait: 15
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c2: screenshot
+  - assert:
+      - server.follow(0x13482).following == false
+      - c2.npc_state(0x13482).aiEnabled == true
+      - c1.npc_state(0x13482).aiEnabled == false
+  # leg 4 (v6, after 041126's read): while c1 stood outside, in another cell than the record's,
+  # it was no listener of Alvor (an interior has no exterior neighbours), so its engine's
+  # reference sat in an unloaded cell where the Teleport put it, about 500 units from c2's live
+  # Alvor seconds after the grant. The claim: once c1 is inside, the attach and the subscription's
+  # CreateActor bind the puppet and the relay brings it to the record within a beat
+  - c1: approach {formId: 0x13482, distance: 200, cell: record}
+  - wait: 8
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c1: screenshot
+  - assert:
+      - c1.npc_state(0x13482).aiEnabled == false
+      - c2.npc_state(0x13482).aiEnabled == true
+      - c1.npc_state(0x13482).x - c2.npc_state(0x13482).x < 150
+      - c2.npc_state(0x13482).x - c1.npc_state(0x13482).x < 150
+      - c1.npc_state(0x13482).y - c2.npc_state(0x13482).y < 150
+      - c2.npc_state(0x13482).y - c1.npc_state(0x13482).y < 150
+artifacts: [server.log, c1.log, c2.log, screenshots]
