@@ -386,7 +386,13 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   GREEN 9 of 9 (run set 20261024-044200-gate-m3-train-40, 22:13 PDT) and
   x-host-kill green on 92529f31 with the rule unchanged since; the merge
   waits on Eli's D12 alone (a restage first if 41's stage has replaced the
-  gate's, as agreed with numidium).
+  gate's, as agreed with numidium). The row's committed T3 (23:04 PDT, main
+  1cb745d1, its own commit): lab/scenarios/b-host-kill.yaml, x-host-kill's
+  shape with the timing claimed: the kill through `relaunch {until:
+  stopped}` (lab-api 0d3dd4d3, the step back at the kill with nothing told
+  to the server) and `until: {within: 12, expect: [server.host(0x9732).client
+  == "c2"]}`, which the timeout's 24 s would miss; the first run waits for
+  the lab to carry that step (42's stage or a pull).
 
 ## Client
 
