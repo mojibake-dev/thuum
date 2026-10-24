@@ -393,8 +393,9 @@ outfit-array resolver (16155, re-npc-roll.md section 8; first 16072, which
 the lab showed to be the late path alone) adds the server's worn list
 tagged as the outfit's items under every inventory init and rolls nothing;
 the sleep outfit stays the engine's (a declared gap). Both pass every call
-through while the npcFate switch is off (the default until x-npc-fate-roll)
-or the reference is unfated. No Papyrus native is added (the exports are
+through while the npcFate switch is off (since 3aabd51e, 22:46 PDT, only
+when the settings file says false: the pin held at T3, x-npc-fate-pin v3
+GREEN 053914) or the reference is unfated. No Papyrus native is added (the exports are
 Skyrim Platform's, as setPuppet is); docs/NATIVES.md unchanged. The lab
 reads the server's side through mp.get(refrId, "actorFate").
 
@@ -1070,7 +1071,7 @@ outfit 1e608", d1fa9 (4 of 4, outfit c0197), d1f56 (5 of 5, c0197), and
 "the base has no default outfit, nothing to redress" for 107d05, 85540 and
 107d06: the outfit imposition's late path works on bases with a default
 outfit. x-npc-fate-outfit green on the same stage (052632, npcFate off, the
-detours inert; its trace on the results site). A finding outside the fate:
+detours inert; its trace on the results site). Then v3 GREEN (22:46 PDT, run 20261024-053914, 10 of 10): leg 1 as before (three runs now); leg 2, c2 parked over square 31,-17 at z 25000 landed in one attempt and stood at about 12,946 absolute after the wait (above the forest's 10,700: no fall-through), no late line while parked or after stepping in, both species 78346 on c2's engine, "pinned 85547 to" once. The species half of ADR-046 decision 1 holds at T3 on both seats and both paths; npcFate flipped on by default (3aabd51e); the worn half is x-npc-fate-outfit v3's read on the Embershard bandits. A finding outside the fate:
 c2's console logged 108 "settle 86111" lines over 19 s (npc-puppet's
 periodic re-apply of an unchanged record, formView.ts:622 and
 movementApply.ts:322) with the puppet 2,077 units from its record and the
@@ -1108,9 +1109,9 @@ D16.
 - [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT); the death half on fork m3-train-42 1d09fa04 (the body's stamp, the sweep on the game clock, the master's 240 h, the respawn funnel, the engine's essential and protected rule, the corpse as a container; five T0 cases; CI GREEN on 5352af64, 21:44 PDT: the unit binary, upstream's integration tests under the reset clock, the Windows client)
 - [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6)
 - [ ] native hook + T1
-- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow)
+- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (by path, awaiting the stages: x-npc-fate-pin v2 and x-npc-fate-outfit on 41; x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-npc-fate-pin v3 GREEN 20261024-053914 on 41's stage 0a10f977: the species half of ADR-046 decision 1 at T3 on both seats and both paths; the worn half is x-npc-fate-outfit v3's on 41's restage; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
