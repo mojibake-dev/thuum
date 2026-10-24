@@ -776,6 +776,21 @@ a chance-none deletion); the rerun teleports to the spawn before the
 relaunch. One more face of the split: the server read 0x85547's base health
 as 12 for its own pick and 150 in the earlier run, the record following the
 server's leaf while a seat showed another species.
+Outfitted leveled placements for observation 4 (17:03 PDT, numidium's
+agent over Skyrim.esm with lab/esm.py on sky-srv): in Embershard Mine's
+interior 0xB6BE6, ACHR 0xB6FE4 (placed NPC_ 0x1AF77 LvlBanditMeleeCommonerM,
+TPLT LVLN 0x1A319 whose entries are NPC_s 0x39CF6, 0x39CFF, 0x39D07 at
+levels 1, 5, 9, each with DOFT 0xC0197 BanditArmorMeleeShield20Outfit, four
+LVLI items; boots and cuirass always roll, gauntlets chance-none 50, the
+shield 80) and ACHR 0xB6FDB (0x1B060, LVLN 0x1A323, the Redguard picks),
+194 units apart, the stand point the bedroll 0xB6D55's spot (753.8, 5268.7,
+8221.1); outside, ACHR 0xB6CE1 in cell 0x9791 (nested LVLN 0x39CFC, zone
+0xD9545). Every bandit placement carries XLCM 0 (kEasy). 1nivWICCloaks.esp
+overrides 0xC0197 in the served order (a helmet list and a cloak list), so
+the server's worn roll must read the override; the DOFT following the
+inventory template bit is a HYPOTHESIS. The probe x-npc-fate-outfit (lone
+seat, tgm, the trace live 15 s before the load) runs on them; esm.py wants
+an achrs-in command (its near lists REFRs alone).
 
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
