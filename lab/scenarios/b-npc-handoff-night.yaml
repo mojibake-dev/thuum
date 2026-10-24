@@ -40,6 +40,9 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 30
+  # evidence before the claim (gate 114904 ran out with no dump): where each engine has him
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
   - until: {within: 180, expect: [server.ref(0x13482).cell == "3c:Skyrim.esm"]}
   - wait: 10
   - c1: npc-state {formId: 0x13482}
