@@ -1161,6 +1161,27 @@ and culls 0x85548 and 0x85549 by kill-ref before the landing (the same
 prelude in the respawn's v2); rerun asked. b-host-kill GREEN on this stage
 too (cell-host.md).
 
+x-npc-respawn v2 (070508, 42's stage) and its read (00:28 PDT, an agent over
+both runs' logs): the sweep respawned the record before anyone had
+reconnected, so both seats learned the respawn only from their reconnect's
+CreateActor (props.isDead false). c2 won the host grant by 15 ms and
+promoted its actor (AI on) 40 ms before its Papyrus Resurrect: alive. c1,
+the host at the death (an AI-on death), reconnected as a viewer: its view
+demoted the corpse (AI off, activation blocked) and the two-second read's
+Resurrect ran on that corpse and did not stand it up; in 064950 c1 won the
+grant and both seats came back alive. No message was missed and no error
+logged. Fix (m3-train-42 5ee047df, merged forward into 43 d2210492):
+resurrectActor, a Skyrim Platform export running the engine's own Resurrect
+(A/Actor.h:369) with the AI on in one game-thread task (a puppet demoted
+again after it, a live actor unblocked), in place of the Papyrus call whose
+order against the puppet's demote the two queues never fixed; the client's
+engine branch calls it and logs "resurrect <id> (puppet <bool>) queued" to
+the console tee. HYPOTHESIS (rule 2) that Resurrect under AI off after an
+AI-on death is the engine's refusal; the rerun decides, with c1's state at
+the read. x-npc-death v2 (070022) held the death on both seats through the
+viewer's return and the restart (the body bound widened to 32 units each
+way for the ragdoll's settle, v3).
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
