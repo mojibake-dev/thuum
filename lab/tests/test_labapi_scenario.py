@@ -107,6 +107,11 @@ class ScenarioTests(unittest.TestCase):
 
         sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {until: gone}\n  - c1: connect\n")
         self.assertEqual((sc.steps[0].action, sc.steps[0].args), ("relaunch", {"until": "gone"}))
+        # stopped: the kill alone, the server not yet told (b-host-kill times the pass from it)
+        sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {until: stopped}\n  - c1: connect\n")
+        self.assertEqual(sc.steps[0].args, {"until": "stopped"})
+        with self.assertRaises(ValueError):
+            load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {until: dead}\n")
         both = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: relaunch {until: gone, files: [{rename: a.dll, to: a.off}]}\n")
         self.assertEqual(both.steps[0].args, {"until": "gone", "files": [{"rename": "a.dll", "to": "a.off"}]})
         for bad in ("relaunch {until: back}", "relaunch {until: true}", "relaunch {when: gone}"):

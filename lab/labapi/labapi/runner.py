@@ -1230,6 +1230,17 @@ class Runner:
         if res.exitcode != 0:
             return fail(f"E_RUN_RELAUNCH: {g.name}: exit {res.exitcode}: {res.err.strip()[:200]}")
         started = self._clock()
+        if until == "stopped":
+            # the kill alone: the guest agent stopped the game and started the launch task, and nothing has told the
+            # server, so the scenario times what follows from here (b-host-kill); the new game logs in by itself
+            # and the next connect takes its identity, as after gone
+            if rec.scenario.solo:
+                return fail("E_RUN_RELAUNCH: until: stopped leaves a new game to log in by itself, which a solo seat never does")
+            rec.games.pop(client, None)
+            rec.pending_identity.add(client)
+            stopped = f"{client}'s game stopped, the server not told; its new game logs in by itself"
+            rec.notes.append(f"step {index}: {stopped}")
+            return True, stopped
         if until == "gone":
             if rec.scenario.solo:
                 return fail("E_RUN_RELAUNCH: until: gone reads the server's online list, which a solo seat never joins")
