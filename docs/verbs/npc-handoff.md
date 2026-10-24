@@ -507,7 +507,21 @@ each imposition's target is explicit.
   f205f4d5: FOLLOW_SETTLE_MS (1 s, UNMEASURED) refuses a report back into
   the cell left under a follow younger than the window; the Teleport goes
   only to games outside the destination's 3x3, the ones the move
-  unsubscribes.
+  unsubscribes. The door agent's read of 013234 (18:54 PDT) corrected two
+  assumptions: the viewer's Teleports DID reach the handler (the ragdoll
+  calls it makes were logged 0.1 s after each "told to 1"), but the handler
+  deferred everything to the next update and the same tick's DestroyActor
+  freed the idx and the view first, so the deferred lookup found nothing;
+  and the 133 ms flip-back was the host's own formView moving its own Alvor
+  back out (the host never hears its own reports, so its model lagged its
+  engine), not a stale sample. Also: logTrace is printConsole with a prefix,
+  the in-game console alone, which lab-api's log-count never reads; the
+  [verb:npc-puppet] lines that do appear are the native side's. Fixes on
+  acaf4b34: the Teleport resolves its reference at message time and defers
+  the move alone; the engine-cell rule skips an actor this game simulates
+  (HostService.isMine); logging.logLab writes through writeLogs to the
+  Skyrim Platform log, and the "moved", "Teleport received" and "late fate"
+  lines use it. The settle window stays as a guard against reordering.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
