@@ -398,6 +398,23 @@ or the reference is unfated. No Papyrus native is added (the exports are
 Skyrim Platform's, as setPuppet is); docs/NATIVES.md unchanged. The lab
 reads the server's side through mp.get(refrId, "actorFate").
 
+Registry, train-42 (20:54 PDT), the deaths: on the server, the player path's
+25 s wall respawn never touches a game-file actor (RespawnWithDelay's branch
+schedules the fated respawn instead), and the server's number floors at one
+point for an essential base, or a protected one not under a player's hand
+(MayDie). On every seat, a game-file body's activation is blocked at the
+death (deathService; a dead puppet promoted at a handoff keeps it,
+puppetService 32dffbda), so the engine's own loot menu never opens: the
+server's OpenContainer with default processing is the one that does; the
+engine's own cell-reset resurrection of a corpse on a re-entry
+(re-npc-roll.md section 9, the 19286 path) is undone by the view's
+two-second re-apply of the record's death. Declared gaps: the sleep outfit
+(above); a protected base under a player's over-time damage (a poison, a
+cloak: ModifyActorValuePercentage carries no aggressor) keeps its point,
+the hit's own number kills it (HYPOTHESIS whether any over-time effect
+reaches an NPC's health that way at all); the cleared hours and the
+never-resets zones (Server).
+
 - What is suppressed, on every game (host and puppet alike, since the fate
   is nobody's game's): the engine's cell reset of a server-owned placement
   (the body deleted, the placement re-rolled, inventories reset); the
