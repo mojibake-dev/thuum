@@ -1269,6 +1269,21 @@ class RelaunchSteps(RunTests):
         self.assertEqual(reads["off"], 3, "the connect after it waited through the gap")
         self.assertTrue(any("c1 online after" in n for n in body.get("notes", [])), body.get("notes"))
 
+    def test_a_relaunch_until_stopped_returns_at_the_kill(self):
+        """b-host-kill: the step returns once the guest agent has stopped the game, with the player still on the
+        server's online list, so a scenario times what follows from the kill; the connect after it takes the new
+        game's identity."""
+        from labapi.guests import Guest
+
+        tables = self.services.tables
+        tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        text = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: stopped}\n  - c1: connect\n")
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s.get("action") == "relaunch")
+        self.assertIn("game stopped, the server not told", str(step.get("note")), step)
+        self.assertTrue(any("c1 online after" in n for n in body.get("notes", [])), body.get("notes"))
+
     def test_relaunch_needs_a_managed_client(self):
         run_id, body = self._run(RELAUNCH)
         self.assertEqual(body["verdict"], "red", body)

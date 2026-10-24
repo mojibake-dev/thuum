@@ -319,11 +319,14 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
     if unknown:
         raise ValueError(f"relaunch takes files, until and frida, not {unknown}")
     # until: gone returns once the player is off the server's online list, so a scenario can read the server
-    # while that game is down (b-cell-host's unhosted window); a later connect waits for the new game's login
+    # while that game is down (b-cell-host's unhosted window); a later connect waits for the new game's login.
+    # until: stopped returns as soon as the guest agent has stopped the game, the server not yet told, so what
+    # follows is timed from the kill itself (b-host-kill: the stale rule's pass inside the grace plus the
+    # threshold, which gone's netcode timeout of about 18 s would hide)
     until = args.get("until")
-    if until is not None and until != "gone":
-        raise ValueError(f"relaunch's until is gone, not {until!r}")
-    head: dict[str, Any] = {"until": "gone"} if until else {}
+    if until is not None and until not in ("gone", "stopped"):
+        raise ValueError(f"relaunch's until is gone or stopped, not {until!r}")
+    head: dict[str, Any] = {"until": until} if until else {}
     # frida: {script, params?}, the frida step's arguments: its watcher armed while the game is stopped, so it
     # takes the new game at its start and injects ahead of Skyrim Platform's engine (kDataLoaded, about 10 s in),
     # which a frida step after the relaunch misses (x-npc-napi-trace 20261022-071646 attached 1 s after the hang)
