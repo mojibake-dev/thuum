@@ -570,3 +570,80 @@ is matched.
   classifies as 14751, under InitLeveledItems 16129) is what the next slice
   answers with the server's weapon, the shape of the 16155 outfit detour;
   the engine's equip choice after the init is the re-analyst's question 4.
+
+## 11. The inventory's leveled roll at init and the engine's equip choice (REA on sky-re, 2026-10-24 23:53 PDT; the re-analyst's read for the weapon pin)
+
+- The path (CONFIRMED-STATIC by call references and pseudocode): 16038
+  InitInventoryIfRequired -> 16129 InventoryChanges::InitLeveledItems
+  (src/RE/I/InventoryChanges.cpp:143) -> for each ContainerObject of the
+  base's TESContainer (T/TESActorBase.h:22 at +0x88; count, obj, itemExtra:
+  T/TESContainer.h:25-28) whose obj is an LVLI (formType 0x35) and whose
+  ordinal no existing entry already carries (11727 reads ExtraLeveledItem
+  +0x10 as a signed short): `TESLeveledList::CalculateCurrentFormList(obj+
+  0x30, level, |count|, &picks, 0, true)` (14751, 0x1e3a30; the CALL at
+  16129+0x217, return 16129+0x21c), then `16128(this, &picks, ordinal,
+  nullptr)`. The level is TESActorBaseData::GetLevel (14384) for an actor
+  owner. 14751's signature is T/TESLeveledList.h:65 exactly: no owner, no
+  InventoryChanges, no reference in its arguments; it recurses into nested
+  lists and appends through 14755. 14752 (0x1e3e70) is `void
+  (TESLeveledList*, TESObjectREFR*, BSScrapArray<CALCED_OBJECT>*)`, called
+  by 14374, 20232 and 23540 alone: the placed-reference paths, never the
+  CNTO roll (16129's callees hold neither 14752 nor 14374).
+- The owner (CONFIRMED-STATIC): unreachable from 14751's arguments; from
+  16129's frame (R14 holds `this`, a Frida read only); and at hand in 16128
+  (RVA 0x236890, unnamed): `void (InventoryChanges* changes,
+  BSScrapArray<CALCED_OBJECT>* picks, uint32 lvliOrdinal, BGSOutfit* outfit)`,
+  the owner at changes+0x08 (I/InventoryChanges.h:64), whose complete caller
+  set is 16129 (outfit null) and 16155 (outfit = the init's outfit, section
+  8.2): `outfit == nullptr` selects the container path exactly. 16128 per
+  row: a new ExtraDataList, 11637 stores the ordinal as a u16 at
+  ExtraLeveledItem+0x10 (CommonLib's `levItem`: the ordinal, CONFIRMED on
+  width and value, HYPOTHESIS on the engine's intent), SetCount, the COED
+  when not default, 16053 (the entry adder), then AddChange 0x8000000. The
+  ordinal counts the base's LVLI entries in CNTO order.
+- The picks (CONFIRMED-STATIC): a BSScrapArray<CALCED_OBJECT> {allocator +0,
+  data +8, capacity +0x10, size +0x18} of 0x28-byte rows: form +0, count as
+  an int32 at +8 (CommonLib's u16 count plus pad0A), pad0C, ContainerItemExtra
+  +0x10 (C/ContainerItemExtra.h:30-32); 14755 merges a pick into a row of the
+  same form and COED by adding counts, else appends; an empty array returns
+  at the size check, so a detour that answers must grow it (the 14752
+  detour's emplace_back idiom) and write count, pad0A and pad0C itself.
+- The dresser (Q4), 418622 (0x3bd380, unnamed): `(TESNPC*, Actor*, ?, bool
+  equipWeapons, ?, bool)`; CONFIRMED-STATIC calls in order: MakeInventory
+  Changes, DispelWornItemEnchantments, RemoveWeapon (vfunc 0x82), InitOutfit
+  Items when nothing is worn, AddWornOutfit, then per biped slot the best
+  armor (16089) through ActorEquipManager::EquipObject (38894), then, if
+  equipWeapons and alive, the best weapon per animation type through 16088,
+  sorted by 26416's score (the actor's weapon damage times the combat
+  style's melee, ranged or unarmed multiplier, T/TESCombatStyle.h:97 and
+  :11-16; class 3 at a tenth, class 4 nil, kNotUsedInNormalCombat nil, a
+  bonus for kBoundWeapon; ties by value). 16088 scans BOTH the base's CNTO
+  weapons still in the inventory and the InventoryChanges' added entries
+  (two loops), so a server-added weapon competes with the engine's rolled
+  one by score: HYPOTHESIS, the lab's "the engine equips its own weapon over
+  the server's added one" (a steel sword outscoring an iron mace). 418622's
+  callers: 37322 (the attach step of section 8.6: ResetInventory 19802 then
+  418622 with equipWeapons from the current package), the console's
+  SetLevel, 24725 (when nothing is worn), 39800 (the AI update, low process
+  through 24725), eight more unread. A forced EquipObject after the init
+  holds only until the next 418622 moment, the combat tree's equip nodes
+  (48124, 48126), the AI equipment pass (39650) or an added weapon's
+  re-pick (37797 -> 19689), so the robust shape is to make the inventory the
+  server's at 16128: the engine's own best pick IS the server's weapon.
+- The pin's shape (the next slice, m3-train-43): a detour on 16128 that, for
+  a fated owner on the container path (outfit null), drops the WEAP rows
+  from `picks` and writes the fate's worn WEAP rows in their place (count 1,
+  the pad fields written), then calls the original: the engine's own tagging
+  (the ordinal, the count, the entry, the change flag) comes free and the
+  detour is re-asked at every re-init (InitItemImpl, the attach's
+  ResetInventory, SetOutfit), idempotent like 16155's; the gold and loot
+  rolls stay the engine's (the corpse's menu is the server's inventory).
+  The server side needs nothing: its base roll already picks from the same
+  lists and the fate's worn carries the weapon it equipped. Frida plan: 16128
+  enter (changes, the owner's id at +0x08 then +0x14, the rows' forms and
+  counts, r8d ordinal, r9); 14751 with its return address; 418622 enter
+  (npc, actor, equipWeapons, return address); 16088 leave (the chosen
+  entry's form and score); 38894 enter (actor, object, return address).
+  Falsifiers: a 16128 call with r9 null returning outside 16129; a weapon
+  EquipObject at load from outside 418622 and the listed callers; 418622
+  equipping a weapon 16088 did not return; the ordinal stored as a form id.
