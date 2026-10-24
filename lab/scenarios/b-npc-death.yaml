@@ -82,12 +82,14 @@ steps:
   - c1: screenshot
   - assert:
       - server.ref(0x85547).isDead == true
-      # the body's point within 32 units each way: run 070022 drifted 1.1 and 5.8 units as the
-      # host reported the corpse's ragdoll settling; a teleport would be thousands
-      - server.ref(0x85547).x - snapshot("body").x < 32
-      - snapshot("body").x - server.ref(0x85547).x < 32
-      - server.ref(0x85547).y - snapshot("body").y < 32
-      - snapshot("body").y - server.ref(0x85547).y < 32
+      # the body where it fell, within a ragdoll's settle each way: the host reports the corpse's
+      # physics after the kill, 5.8 units in 070022 and 64.9 in 093324 (a slope); the claim is
+      # that a death never teleports the record (a teleport is a cell's 4096 or more), so the
+      # bound is 256, the exit's bound (cell-host.md), measured up by the runs, not guessed down
+      - server.ref(0x85547).x - snapshot("body").x < 256
+      - snapshot("body").x - server.ref(0x85547).x < 256
+      - server.ref(0x85547).y - snapshot("body").y < 256
+      - snapshot("body").y - server.ref(0x85547).y < 256
       - c1.npc_state(0x85547).isDead == true
       - c2.npc_state(0x85547).isDead == true
   # leg 4: the host relaunches; the cell passes to c2 and the body stays; the host's return finds it
