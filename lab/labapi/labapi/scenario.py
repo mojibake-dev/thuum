@@ -262,7 +262,9 @@ def _log_count_args(args: dict[str, Any]) -> dict[str, Any]:
 def _approach_args(args: dict[str, Any]) -> dict[str, Any]:
     """approach {formId, distance, cell, tolerance?}: the seat placed `distance` units (20 to 1000) from a named NPC
     and facing her, through the judged teleport (runner.py's _approach), so a key press acts on her by the player's
-    own path; `cell` names the frame the target is written in ("3c:Skyrim.esm" for Tamriel's absolute units)."""
+    own path; `cell` names the frame the target is written in ("3c:Skyrim.esm" for Tamriel's absolute units), or is
+    `record`: the cell the server's record of her stands in (server.ref(formId).cell), read at the step, for a resident
+    whose evening may take her through either of two doors (x-handoff-door: Alvor home once, to the inn twice)."""
     unknown = sorted(set(args) - {"formId", "distance", "cell", "tolerance"})
     if unknown:
         raise ValueError(f"approach takes formId, distance, cell and tolerance, not {unknown}")
