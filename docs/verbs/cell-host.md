@@ -391,8 +391,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   shape with the timing claimed: the kill through `relaunch {until:
   stopped}` (lab-api 0d3dd4d3, the step back at the kill with nothing told
   to the server) and `until: {within: 12, expect: [server.host(0x9732).client
-  == "c2"]}`, which the timeout's 24 s would miss; the first run waits for
-  the lab to carry that step (42's stage or a pull).
+  == "c2"]}`, which the timeout's 24 s would miss; first run GREEN
+  (20261024-065333 on 42's stage, lab-api 0d3dd4d3, 00:00 PDT): the pass 7.0 s
+  after the kill (8 polls), c2 hosting and running 0x13482 and 0x35534, still
+  the host after c1's return and both seats' loading screens. D12's number
+  stands at T3.
 
 ## Client
 

@@ -1141,6 +1141,26 @@ weapon may differ per screen, the damage the server's either way. The pin
 of the inventory's leveled roll is train-43 (962fc913, 23:56 PDT: the 16128
 detour, Suppress); D17 asks Eli whether it comes before playtest 34.
 
+42's stage on 61ffa74e (00:00 PDT): x-npc-loot GREEN (064648): kill-ref,
+the corpse's three gold by the console, approach, activate (the hook
+reported, the engine's menu blocked), the ContainerMenu on the server's
+list, Take All, close: server.inventory(c1) rose by the gold and the body
+stayed dead; H4 held (the menu lists the server's items and the take is
+the server's). x-npc-respawn (064950): the kill dead on the record and
+both seats; the restart at 14.0 with npcRespawnHours 1; both seats alive
+again at the placement, hp 1, race 78346 equal to the fate: the respawn
+travel held on both seats (the sweep, RespawnFated, Resurrect on the
+engine references, the species pinned; H9 held in its shape); red on one
+premise alone, the late line, which a re-roll picking the same base never
+writes (the fate's key is base and worn) and a changed one may beat the
+attach: v2 reads it. x-npc-death (064426) red on its premise: 0x85549
+killed 0x85547 within seconds of the cell loading (the server's number
+through the host's reports), before any kill-ref; v2 parks c1 three
+squares out first, where the fate pass has already loaded the records,
+and culls 0x85548 and 0x85549 by kill-ref before the landing (the same
+prelude in the respawn's v2); rerun asked. b-host-kill GREEN on this stage
+too (cell-host.md).
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
