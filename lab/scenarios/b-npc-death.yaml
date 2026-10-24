@@ -1,0 +1,106 @@
+# b-npc-death (M3, docs/verbs/npc-fate.md, the deaths; 2026-10-24): a
+# game-file actor's death is the server's word on every seat and its body
+# stays. Two seats under npcEnabled in god mode. The prelude parks c1 three
+# squares from the forest cell, where the fate pass has loaded the ring's
+# records before any engine attaches the cell, and kills the subject's rival
+# predators there by kill-ref (the forest's predators fight each other
+# within seconds of the cell loading); then both seats land and the subject
+# 0x85547 stands alone, alive, c1 hosting. Legs: kill-ref the subject, dead
+# on the record and both seats within 10 s (the host by the death container,
+# the viewer by the isDead property); the viewer leaves five squares out and
+# returns, the body still a body on its screen (the dead bind, the
+# two-second read); the server restarts and both reconnect, the record dead
+# at its point within 32 units each way (the ragdoll's settle; a death never
+# teleports the record) and dead on both seats; the host's game is relaunched,
+# the cell passes to the viewer (the stale rule) with the body in place, and
+# the returning host finds it dead. No respawn inside the run (the master's
+# 240 hours). Proved as x-npc-death v3 GREEN 080218 on train-43 d2210492
+# (v2 070022 held every death leg, red on a one-unit body bound). Its own
+# commit (rule 13).
+id: b-npc-death
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 12.0
+timeout_s: 1200
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: tgm}
+  - c2: console {text: tgm}
+  - wait: 2
+  # the prelude (v2, after 064426): the forest's predators fight each other within seconds of the
+  # cell loading and 0x85549 killed the subject before any kill-ref. The fate pass loads the ring's
+  # records three squares out, before any engine attaches the cell, so c1 parks there (the pin
+  # probe's park, z 25000 in god mode) and the rivals 0x85548 and 0x85549 die by kill-ref while
+  # nobody's engine has them; then both seats land and the subject stands alone
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 130336, y: -67584, z: 25000, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: kill-ref {formId: 0x85548, killer: c1}
+  - c1: kill-ref {formId: 0x85549, killer: c1}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: -10300, y: -19170, z: -3957, rot: [0, 0, 180]}
+  - wait: 25
+  - assert:
+      - server.host(0x9810).client == "c1"
+      - server.ref(0x85547).isDead == false
+      - server.ref(0x85549).isDead == true
+  # leg 1: the kill is the server's word on both seats
+  - c1: kill-ref {formId: 0x85547, killer: c1}
+  - wait: 10
+  - server: snapshot {name: body, of: "server.ref(0x85547)"}
+  - c1: npc-state {formId: 0x85547}
+  - c2: npc-state {formId: 0x85547}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.ref(0x85547).isDead == true
+      - c1.npc_state(0x85547).isDead == true
+      - c2.npc_state(0x85547).isDead == true
+  # leg 2: the viewer leaves (the lab spawn, five squares out) and returns: the body is still a
+  # body on its screen (the dead bind, the two-second re-check)
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - wait: 12
+  - c2: teleport {cell: lab-spawn, x: -10300, y: -19170, z: -3957, rot: [0, 0, 180]}
+  - wait: 15
+  - c2: npc-state {formId: 0x85547}
+  - assert:
+      - c2.npc_state(0x85547).isDead == true
+      - server.ref(0x85547).isDead == true
+  # leg 3: the server restarts; the record loads dead at its point and arms no 25 s timer (rule 6)
+  - server: restart {gameHour: 12.0}
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 30
+  - c1: npc-state {formId: 0x85547}
+  - c2: npc-state {formId: 0x85547}
+  - c1: screenshot
+  - assert:
+      - server.ref(0x85547).isDead == true
+      # the body's point within 32 units each way: run 070022 drifted 1.1 and 5.8 units as the
+      # host reported the corpse's ragdoll settling; a teleport would be thousands
+      - server.ref(0x85547).x - snapshot("body").x < 32
+      - snapshot("body").x - server.ref(0x85547).x < 32
+      - server.ref(0x85547).y - snapshot("body").y < 32
+      - snapshot("body").y - server.ref(0x85547).y < 32
+      - c1.npc_state(0x85547).isDead == true
+      - c2.npc_state(0x85547).isDead == true
+  # leg 4: the host relaunches; the cell passes to c2 and the body stays; the host's return finds it
+  - c1: relaunch {until: gone}
+  - wait: 20
+  - c2: npc-state {formId: 0x85547}
+  - assert:
+      - server.host(0x9810).client == "c2"
+      - c2.npc_state(0x85547).isDead == true
+      - server.ref(0x85547).isDead == true
+  - c1: connect
+  - wait: 25
+  - c1: npc-state {formId: 0x85547}
+  - assert:
+      - c1.npc_state(0x85547).isDead == true
+artifacts: [server.log, c1.log, c2.log, screenshots]
