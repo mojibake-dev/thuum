@@ -123,6 +123,33 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
   threshold (a save's or a loading screen's stall must not pass a village); the
   lab calibrates the number, and the merge waits for Eli's answer.
 
+## The deaths' four calls, made under the design law while building (2026-10-23 20:39 PDT); say the letter to change one
+
+### D13. The reset clock's source
+- A. The master's GMST iHoursToRespawnCell, read from Skyrim.esm at load, with
+  a server setting npcRespawnHours overriding it for the lab.
+- B. A server setting alone.
+- Recommended and built: A, the engine's number. Until the GMST's record id is
+  read (numidium's esm.py) the executable's compiled 72 hours stand in.
+
+### D14. The pick at the respawn when the death item resolves to nothing
+- A. Rolled anew regardless (the engine's cell reset re-rolls every leveled
+  actor and resets its inventory).
+- B. Today's player-path gate: keep the pick and the inventory.
+- Recommended and built: A.
+
+### D15. Unique, essential and protected bases
+- A. The engine's rule: a unique base stays dead; an essential base never
+  dies; a protected one dies to a player's own hand alone.
+- B. Every game-file actor dies and respawns alike.
+- Recommended and built: A.
+
+### D16. Looting a corpse on a seat that does not host it
+- A. Any player loots under the CONT occupancy rule: the body's activation is
+  blocked on every seat and the server's OpenContainer opens the menu.
+- B. The host alone.
+- Recommended and built: A.
+
 ## The trains, in order, with sizes
 
 1. Train-39, the quitting host (D12): the server's stale-host rule, a T0 in
