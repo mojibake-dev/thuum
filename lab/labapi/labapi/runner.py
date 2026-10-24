@@ -867,25 +867,41 @@ class Runner:
                 return False, error
 
     async def _log_count(self, rec: RunRecord, index: int, client: str, pattern: str) -> tuple[bool, str]:
-        """log-count {pattern} (scenario.py): the seat's Skyrim Platform log copied now, as the run's artifacts copy
-        it (the game holds it open without read sharing), and the lines matching the regex counted for
-        c.log_count("<pattern>"); an unmanaged seat or a failed copy keeps no count, so the assert raises."""
+        """log-count {pattern} (scenario.py): the seat's Skyrim Platform log and its console log copied now, as the
+        run's artifacts copy them (the game holds them open without read sharing), and the lines matching the regex
+        counted in both for c.log_count("<pattern>"). The console log is lab-driver's tee of every console line:
+        printConsole, which skymp5-client's logTrace and logError use, reaches no other file, so a count of the
+        first alone never saw them (x-handoff-door 20261024-013234). An unmanaged seat or a failed copy of the
+        Skyrim Platform log keeps no count, so the assert raises; a console log not there yet (a driver from
+        before the tee) counts as empty."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return True, f"log-count skipped: {client} is unmanaged or unmapped"
-        copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}.log"
-        try:
-            cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath '{self.s.client_driver_log}' -Destination '{copy}' -Force"]
-            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            if res.exitcode != 0:
-                return True, f"log-count: the copy exited {res.exitcode}: {res.err.strip()[:200]}"
-            text = await asyncio.to_thread(self.control.file_read, g, copy)
-        except ProxmoxError as e:
-            return True, f"log-count: {e}"
+        game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
+        texts: list[str] = []
+        for source, suffix in ((f"'{self.s.client_driver_log}'", ""),
+                               (f"(Join-Path {game_dir} '{self.s.client_console_log}')", "-console")):
+            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log"
+            try:
+                cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath {source} -Destination '{copy}' -Force"]
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                if res.exitcode != 0:
+                    if suffix:
+                        texts.append("")
+                        continue
+                    return True, f"log-count: the copy exited {res.exitcode}: {res.err.strip()[:200]}"
+                texts.append(await asyncio.to_thread(self.control.file_read, g, copy))
+            except ProxmoxError as e:
+                if suffix:
+                    texts.append("")
+                    continue
+                return True, f"log-count: {e}"
         rx = re.compile(pattern)
-        n = sum(1 for line in text.splitlines() if rx.search(line))
+        counts = [sum(1 for line in text.splitlines() if rx.search(line)) for text in texts]
+        n = sum(counts)
         self.board.set_log_count(client, pattern, n)
-        return True, f"{n} line(s) of {client}'s log match {pattern!r}"
+        return True, (f"{n} line(s) of {client}'s logs match {pattern!r} "
+                      f"({counts[0]} in its Skyrim Platform log, {counts[1]} in its console log)")
 
     async def _approach(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """approach {formId, distance, cell} (scenario.py): the seat placed `distance` units from a named NPC, on her
@@ -1594,7 +1610,7 @@ class Runner:
             if not re.fullmatch(r"[A-Za-z0-9_.-][A-Za-z0-9 _.-]*\.log", log):
                 continue
             name = f"{client}-{log.replace(' ', '_')}"
-            if name in rec.artifacts or name in (f"{client}-driver.log", f"{client}-launch.log", f"{client}-before.log"):
+            if name in rec.artifacts or name in (f"{client}-driver.log", f"{client}-console.log", f"{client}-launch.log", f"{client}-before.log"):
                 continue
             try:
                 text = await asyncio.to_thread(self.control.file_read, g, f"{self.s.client_lab_dir}\\{client}-{log}")
@@ -1606,8 +1622,9 @@ class Runner:
 
     async def _client_log(self, rec: RunRecord, client: str, name: str) -> None:
         """<client>.log is Skyrim Platform's log; <client>-driver.log is
-        lab-driver's own (writeLogs), found under the game directory the client
-        recorded at install. Both are copied first: the game holds its logs
+        lab-driver's own (writeLogs), and <client>-console.log every line the
+        game's console printed (lab-driver's tee), both found under the game
+        directory the client recorded at install. Both are copied first: the game holds its logs
         open without read sharing, which the agent's file-read cannot get past,
         and PowerShell's Copy-Item can."""
         g = self.tables.guest_for_client(client)
@@ -1617,6 +1634,7 @@ class Runner:
         await self._fetch_client_file(rec, g, name, f"'{self.s.client_driver_log}'")
         game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
         await self._fetch_client_file(rec, g, f"{client}-driver.log", f"(Join-Path {game_dir} '{self.s.client_plugin_log}')")
+        await self._fetch_client_file(rec, g, f"{client}-console.log", f"(Join-Path {game_dir} '{self.s.client_console_log}')")
         # the SKSE folder's logs beside it in every run (skse64.log's image base, each plugin's own)
         await self._skse_logs(rec, g, client)
 

@@ -2709,11 +2709,21 @@ on("update", () => {
 // there, so a console step can return the ones that match its {match}
 const CONSOLE_HISTORY_MAX = 400;
 const consoleHistory: string[] = [];
+// and every one of them to its own log file (Data\Platform\Logs\lab-console-logs.txt), which lab-api collects
+// as <client>-console.log and log-count reads: printConsole reaches no other file, so skymp5-client's
+// logTrace lines were missing from every run's logs (x-handoff-door 20261024-013234). writeLogs only writes
+// its file, so this handler never sees its own lines
+const CONSOLE_LOG_NAME = "lab-console";
 on("consoleMessage", (e) => {
   const line = String(e.message);
   if (consoleTyping) consoleTyping.lines.push(line);
   consoleHistory.push(line);
   if (consoleHistory.length > CONSOLE_HISTORY_MAX) consoleHistory.splice(0, consoleHistory.length - CONSOLE_HISTORY_MAX);
+  try {
+    writeLogs(CONSOLE_LOG_NAME, new Date().toISOString(), line);
+  } catch (_) {
+    // logging must never throw into an event handler
+  }
 });
 
 log("loaded");

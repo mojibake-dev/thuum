@@ -247,8 +247,9 @@ def _screenshot_args(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def _log_count_args(args: dict[str, Any]) -> dict[str, Any]:
-    """log-count {pattern}: how many lines of the seat's Skyrim Platform log match the regex, read mid-run (the
-    log copied through the guest agent as the run's artifacts copy it), for c.log_count("<pattern>")."""
+    """log-count {pattern}: how many lines of the seat's Skyrim Platform log and its console log (lab-driver's tee:
+    every printConsole, logTrace and logError line) match the regex, read mid-run (the logs copied through the guest
+    agent as the run's artifacts copy them), for c.log_count("<pattern>")."""
     if set(args) != {"pattern"} or not isinstance(args.get("pattern"), str) or not args["pattern"]:
         raise ValueError("log-count takes one pattern, a regular expression")
     try:
