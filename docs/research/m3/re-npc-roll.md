@@ -459,3 +459,77 @@ lab's load order po3_SpellPerkItemDistributor.dll reads HasOutfitItems inside 41
 the armor EquipObject calls itself (the weapon's comes from 418622); AddWornOutfit never runs. So the
 detour on 16155 decides the inventory both inits build, and SPID dresses from it; whether SPID's own
 item distribution adds to it is the next read (HYPOTHESIS, the parity probe's worn comparison).
+
+## 9. The attach re-roll's caller and gate (REA on sky-re, 2026-10-23 20:33 PDT; HYPOTHESIS unless marked)
+
+The re-analyst read 19231 (RVA 0x2c9990, unnamed by CommonLib) and its
+neighbourhood on the unpacked 1.6.1170 exe. Every number below is the
+decompiler's (`just addr` for the ids); CommonLib lines cited where a field
+is matched.
+
+- What 19231 is (CONFIRMED-STATIC by call references): the inlined
+  per-reference visitor of a walk over TESObjectCELL::references (AE +0x88,
+  T/TESObjectCELL.h:229, a BSTScatterTable read from its kernel), called once
+  by 19084 (0x2be050) with the cell's table and the current Calendar hour
+  (36304: floor(GameDaysPassed * 24)). 19084 runs 19231 only when the cell's
+  ExtraDetachTime (11813) is absent or 0: the cell's FIRST load since the
+  save began. Its callers: 19111 (an interior's load: the cell's records read
+  from each file, the cell's InitItemImpl, then 19084), 20460 (an exterior
+  grid cell's: find or allocate, the same, among its callers
+  PlayerCharacter::CenterOnCell_Impl 40437) and 40656 (a PlayerCharacter step
+  on an attached interior). So the moment is the cell's load, after its
+  references' InitItemImpl, not the 3D attach.
+- The gate on 37323 (the compares CONFIRMED-STATIC; the names HYPOTHESIS):
+  (1) the base's formType 0x2B NPC (a 0x1C container gets ResetInventory
+  alone; anything else goes to 20232, the leveled-item re-roll through
+  ExtraLeveledItemBase and a direct 14752 call); (2) the reference is
+  kPersistent (formFlags bit 10) or an ActorCharacter with kStartsDead (bit
+  9); (3) Actor::lastSeenTime (AE +0x264, A/Actor.h:694 with the AE shift)
+  is 0, or 37730 says the actor is due: not kRefPermanentlyDeleted, its
+  encounter zone (ExtraEncounterZone, else the cell's, else the
+  worldspace's) absent or without kNeverResets, and 19086: hoursNow minus
+  lastSeenTime above the threshold, iHoursToRespawnCellCleared when the
+  editor location is cleared else iHoursToRespawnCell; (4) 19629 returns 0:
+  no alias of a quest that is not start-game-enabled holds the actor; then
+  `37323(actor, -1)` and `ResetInventory(!(npc->actorBaseFlags & kRespawn))`.
+  Inside 37323 one more: ExtraLeveledCreature::originalBase present and
+  different from the current base.
+- The route to the pin (CONFIRMED-STATIC as call references): 37323 ->
+  14374 (guarded by 14372 on the LVLN's TESLeveledList, a_skipInit false)
+  -> 14752. No other roll site inside 37323. With a_skipInit false the
+  re-roll also re-runs InitInventoryIfRequired, so 16155 sees it. Its order:
+  Set3D(nullptr) under the actor's lock, SetObjectReference(originalBase),
+  the ExtraLeveledCreature cleared, the old clone deleted (36460), then
+  14374: the clone's form id dies at every attach re-roll, so the pin must
+  key on the placed reference, never the clone (ours does: refr_id).
+- The thresholds (CONFIRMED-STATIC by bytes): the Setting objects for
+  iHoursToRespawnCell and iHoursToRespawnCellCleared carry the compiled
+  defaults 72 and 144 (hours); iHoursToClearCorpses 24. The master's GMST
+  records override them in game: the values are a lab/esm.py read (asked of
+  numidium); until then the server's FateRespawnHours takes 72, HYPOTHESIS.
+- The other path, a cell WITH a detach time (HYPOTHESIS as flow): 19084 ->
+  19286 per reference with hours-since-detach against the same thresholds
+  (the cell's encounter zone may say never); its actor branch calls 37730
+  and, when due, 37292 (37323's sibling: Set3D null, SetObjectReference(
+  originalBase), 14374), then Resurrect (vfunc 0xAB, A/Actor.h:369) for a
+  dead actor or SetDelete/ResetInventory for a starts-dead one, then a reset
+  event. This is the engine's own cell-reset respawn: a seat re-entering a
+  cell after the threshold stands its corpses up on its own, so the client's
+  bind of a dead engine reference must re-apply the record's death (the
+  deaths' client half) and the pin re-rolls the fresh clone to the fate.
+- The engine's own "already rolled" mark (HYPOTHESIS): lastSeenTime, in
+  Calendar hours, written by 37731 (callers 37622, 37623, 37624, 41468,
+  unread); a stamp within the threshold skips both the re-roll and the
+  inventory reset in 19231. Whether a client's save carries it in the ACHR
+  change form is unread. The clock verb moves GameDaysPassed, so a stamp
+  older than the threshold is due again.
+- Falsifiers: a 19231 hit with ExtraDetachTime non-zero; a 37323 call from
+  19231 on a reference with bits 9 and 10 both clear; a 37323 call with a
+  recent lastSeenTime and no kNeverResets zone; the re-roll's 14752 return
+  address outside 14374's body; a lab read of actor+0x264 that is not
+  Calendar hours. Frida plan: hook 19084 (cell, detach time, hours), 19231
+  (count), 37730 and 19086 (hoursNow, +0x264, cleared; return), 19629,
+  37323 (base before and after), 37731 (the stored hours), 37292, 14374 and
+  14752 (return address); the solo leg's first teleport into the predator
+  cell, a 15 s wait, then out and back in after GameDaysPassed is pushed
+  past the threshold.
