@@ -496,11 +496,19 @@ head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
   since a fate must not overtake the ActorFate before it for the same id;
   the client handles either order against CreateActor (the table is read at
   bind and at the pin).
-- Direction: server to client only. No client message is new: the roll, the
-  death and the respawn are the server's; the host's death report (Observe
-  1) rides npc-stream's HostedActorState when it lands, as a flag the server
-  counts (a field no event fills is dropped before merge, npc-stream.md's
-  rule), and the roster's engine base rides ActorSightings (below).
+- Direction: ActorFate server to client only: the roll, the death and the
+  respawn are the server's. One client message since train-44 (2026-10-24,
+  ADR-048's B, Eli's D1 "jump right to B"): ActorDeath (MsgType 52, wire id
+  60, C2S, reliable, once per death, R1), the host's report that a game-file
+  actor it simulates died of something the server has no number for: refrId
+  u32, cause u8 (0 unknown, 1 fall, 2 hazard, 3 script, 4 an actor's hit),
+  killer u32 (cause 4's actor, else 0), pos Vec3; validator
+  check_actor_death (the id in range, the cause at most 4, a finite point in
+  the world) and a per-host budget of six at once, one a second
+  (E_VAL_RATE); two fixtures; the C++ struct and the client type in the same
+  train (597bb9dc the wire, dd285ad9 the server, 6e827918 the client). The
+  server's checks are the Server section's (OnActorDeath); WIRE.md carries
+  the contract. The roster's engine base rides ActorSightings (below).
 - Fields (name: type, units, bounds), in the family's JSON form (`"t": 53`):
   refrId u32 (the placement's own id, under 0xff000000, nonzero); base u32
   (the rolled NPC_'s form id, nonzero); dead bool; worldOrCell u32
@@ -686,6 +694,51 @@ in the scenario's server block, for the sweep's own read.
   (ADR-035 point 9, the run's own setting); off is today's behaviour, every
   path above untouched.
 
+Built, the death report's judge (train-44, fork m3-train-44 dd285ad9,
+2026-10-24 16:10 PDT; ADR-048's B, Eli's D1 "jump right to B", 15:49 PDT):
+ActionListener::OnActorDeath takes a host's ActorDeath for a game-file actor
+when the reporter simulates it (PartOne::SimulatorOf: the cell's host or
+ADR-047's follower), the actor is alive and may die (MpActor::MayDie: an
+essential never, a protected one to a player's hand alone, so never by a
+report), the body lies within 2048 units of the record, and the cause named
+checks against what the server saw: cause 4 by a hit from the named killer
+the server numbered within 3 s (MpActor::NoteHitBy, stamped at every weapon
+and spell hit the server numbers, a self cast excepted), 1 by a drop of 200
+units in the host's own movement samples within 4 s (MpActor::RecordHeight
+at every hosted sample, DropTo the highest minus the body's), 2 by an
+activation within 512 units of the body within 5 s (the listener's recent
+activations, NoteActivation at every first activation), 0 by any of the
+three; 3 (a script's kill is the server's to run, scripted-effects.md) and
+any other code refused. Then MpActor::Kill with the killer, the death's
+travel as every death's. A refusal is one warn a minute per actor with its
+code (E_DEATH_OFF, NO_ACTOR, PLAYER, NOT_HOST, IMMORTAL, FAR, NO_KILLER,
+UNCHECKED, SCRIPT, CAUSE), a report for an actor already dead an info line
+(the server's own kill got there first, the expected race). A report naming
+a player's hit is checked as any actor's (the server numbered that hit): the
+engine's number outran the server's and the death stands on both screens
+(the gameplay-first rule); a strict mode refusing a player's hand is one
+line if Eli wants it. Setting npcDeathReports, default true; false restores
+A. T0 unit/ActorDeathTest, five cases (Tests 8). HYPOTHESIS, two: that a
+trap's trigger reaches the server as an activation at all (the hazard
+evidence; the lab's trap run decides, and until then a hazard death is
+refused E_DEATH_UNCHECKED and counted, A's floor for that cause); and the
+fall bound (200 units within 4 s is a plausibility floor, not the engine's
+damage rule, which ran on the host; x-npc-fall-report reads a drop the
+engine kills at).
+
+Built, the roll's level rule (train-44 e3b39ac8, 16:30 PDT; the memo's D2,
+Eli: "some way to calculate a middle ground?"): PartOne::FateRollLevel gives
+the fate pass its level by the npcRollLevel setting: "loader" (the first
+loader's own level, ADR-049's A), "party-mean" (the default: the mean,
+rounded down, of the levels of the players within the fate ring's three
+squares in the loader's world or cell, the loader among them, or of every
+player online when no near one has a record), "party-min" (the lowest of the
+same), or a number for everyone (a designed difficulty, the dedicated
+server's shape); clamped at 1; the respawn's re-roll keeps the record's
+level (D3); the encounter zone's clamp stays ADR-049's owed read. The pick
+among the three is a settings line, not a build. T0 unit/NpcRollLevelTest
+(Tests 9).
+
 ## Client
 
 Built, the deaths' client half (95abf0dc, 20:39 PDT): formView binds a dead
@@ -758,6 +811,17 @@ rolled is re-rolled once (no base compare through the clone's template yet).
 - Kill switch config key: the server's `npcFate`; the client follows the
   server (no fate arrives, nothing pins, the view behaves as on fb6f3f09).
 
+Built, the death report's sender (train-44 6e827918, 16:18 PDT):
+DeathReportService sends ActorDeath at deathStart (the kill itself; deathEnd
+waits for the ragdoll to settle and the server's windows run from the kill)
+for a game-file actor this game simulates (HostService.isMineLocal) whose
+death is not the server's own word (DeathService.takeServerKill marks the
+kills it plays, consumed by the report that asks): cause 4 with the killer's
+remote id when the engine names an actor, else 0 (the server picks any
+evidence it has); the body's position; one logLab line per report. Not
+reported: the player's own death, a figure's or a copy's (0xff ids), a
+puppet's (another game simulates it).
+
 ## Tests
 
 - T0 (skymp5-server unit, the esm-backed shape CellHostTest and NpcExists
@@ -790,6 +854,14 @@ rolled is re-rolled once (no base compare through the clone's template yet).
      fixtures; validate_server accepts them and refuses refr_id 0,
      0xff000000, base 0 and a negative deadline (Rust, wire-validate's
      tests).
+  8. ActorDeathTest (train-44, the death report): the fall by the host's
+     samples, a report from a game that does not simulate the actor refused,
+     the killer's hit checked against the hits the server numbered, the
+     hazard's activation, the refusals (a script, an unnamed cause, a body
+     far from the record, the setting off) and a dead actor's report as
+     nothing.
+  9. NpcRollLevelTest (train-44, the memo's D2): the four npcRollLevel rules
+     on three players, a lone loader, a loader without a record.
 - T1: the natives resolve on the seat (`just addr` for RE-1's id once named;
   the virtuals through RTTI, no literal) and the pin or swap logs its line
   per fated reference; no host-less T1 exists in the fork, so the proof is
@@ -810,6 +882,13 @@ rolled is re-rolled once (no base compare through the clone's template yet).
   01:21 PDT). The sketch below (b-npc-fate.yaml,
   the Barrow's bandits with a bow and the restart) stays the fuller scenario
   for the verb's close.
+  By path for 44's stage (16:45 PDT): lab/.cache/probes/x-npc-fall-report.yaml
+  (the host's engine drops a hosted predator 4000 units through its console;
+  the report accepted by the samples' drop; the record dead on the server
+  and on both engines; the server log's "death report" line names the
+  judgment) and the NPC fight's reports inside b-npc-death's and
+  b-cell-host's runs (the predators' fight: the log's "accepted" or "already
+  dead" lines). b-npc-death-report follows a green probe (rule 13).
 - T3 scenario id, the sketch: lab/scenarios/b-npc-fate.yaml (written by hand after the
   grammar lands, rule 13; the sketch): two seats under npcEnabled and
   npcFate, the clock at 7.9; c1 connects and teleports to Bleak Falls
@@ -1268,14 +1347,18 @@ D5: the first loader's level, the re-roll at the respawn, the ActorFate
 message, formVersion 2) and, for the deaths, D13 to D16 under the design law
 (20:51 PDT). Still for Eli: ADR-048, the death's authority (D1: A, B or
 C-ii), which holds train-42's merge; ADR-049's acceptance; any veto of D13 to
-D16.
+D16. 2026-10-24 (Eli's answers, 15:49 PDT, through
+numidium): D1 B (built, train-44, this doc's Server and Client), D2 a middle
+ground (built as npcRollLevel, party-mean by default), D3 to D10 A, D11 A,
+D12 B (built, cell-host's quitting-host row), D13 to D17 A; the merge of 39
+to 44 held until 44 is staged and gated ("Hold until built").
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated (the roll sites 14374, 14752, 16129 and 16155 by `just addr` with the lab's Frida counts, re-npc-roll.md sections 1 to 8; the attach re-roll's caller 19231 and its gate, section 9, REA; the death path, death-path.md; the CommonLib lines named per field; 22:47 PDT)
 - [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT); the death half on fork m3-train-42 1d09fa04 (the body's stamp, the sweep on the game clock, the master's 240 h, the respawn funnel, the engine's essential and protected rule, the corpse as a container; five T0 cases; CI GREEN on 5352af64 and again on 61ffa74e (23:11 PDT, the mirror rule and the explicit life flag), 21:44 PDT: the unit binary, upstream's integration tests under the reset clock, the Windows client)
-- [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6)
+- [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6; ActorDeath 52, wire id 60, its validator and per-host budget, two fixtures, fork m3-train-44 597bb9dc, the C++ struct dd285ad9 and the client type 6e827918, 2026-10-24)
 - [ ] native hook + T1
-- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow)
+- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow; DeathReportService 6e827918, train-44: the host's death report at deathStart)
 - [x] T2 green (33 sessions identical with the declared divergences at de9d048e, the index compared as identity, the declarations naming forms; 09:55 PDT)
 - [x] T3 scenario green (09:55 PDT: the gate set 20261024-155001-gate-m3-train-43 on de9d048e, all sixteen green on their last runs, b-npc-death 162453, b-npc-loot 163014, b-npc-respawn 163304 with the re-roll; T2 green at de9d048e; gate-cite's five checks pass; HYPOTHESIS tags remaining: the over-time damage path's aggressor, the engine's reason for refusing Resurrect under AI off, named in Suppress) (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; committed: b-npc-death, b-npc-loot and b-npc-respawn (main 26db4afd); every fate and death probe green on 43 d2210492; 43's T2 and a gate set with the nine plus the seven committed scenarios run tonight for the merge's citation; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
