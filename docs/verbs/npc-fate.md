@@ -804,8 +804,10 @@ rolled is re-rolled once (no base compare through the clone's template yet).
   rule 13): lab/scenarios/b-npc-death.yaml (the death's travel on both
   seats through the viewer's return, the restart and the host's relaunch:
   x-npc-death v3 GREEN 080218) and lab/scenarios/b-npc-loot.yaml (the corpse
-  as the server's container: x-npc-loot GREEN 064648); b-npc-respawn follows
-  x-npc-respawn's hold (its v3 rerunning). The sketch below (b-npc-fate.yaml,
+  as the server's container: x-npc-loot GREEN 064648); lab/scenarios/b-npc-respawn.yaml (the body
+  standing again at its placement after the reset hours across a restart,
+  rolled anew, on both seats: x-npc-respawn v3 GREEN 081548; main 26db4afd,
+  01:21 PDT). The sketch below (b-npc-fate.yaml,
   the Barrow's bandits with a bow and the restart) stays the fuller scenario
   for the verb's close.
 - T3 scenario id, the sketch: lab/scenarios/b-npc-fate.yaml (written by hand after the
@@ -1216,6 +1218,13 @@ god mode does not survive the server restart any more than a relaunch, so
 the revived predators killed c2's player, whose respawn at the spawn lost
 the cell before the read; v3 re-arms tgm after the reconnects (numidium).
 
+x-npc-respawn v3 GREEN (01:21 PDT, run 20261024-081548 on 43 d2210492, god
+mode re-armed after the reconnects): alive on the record and both seats
+after the restart, the species equal to the fate on both, c2 running the
+revived predator with c1's puppet 50 units behind. On d2210492 every fate
+and death probe is green: pin v3, outfit v3 (weapons too), death v3,
+respawn v3, loot, with b-host-kill and door v6 beside them.
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
@@ -1250,7 +1259,7 @@ D16.
 - [ ] native hook + T1
 - [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; committed: b-npc-death and b-npc-loot on main 7135b4be, b-npc-respawn after its probe's hold; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; committed: b-npc-death, b-npc-loot and b-npc-respawn (main 26db4afd); every fate and death probe green on 43 d2210492; 43's T2 and a gate set with the nine plus the seven committed scenarios run tonight for the merge's citation; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
