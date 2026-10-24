@@ -1502,6 +1502,7 @@ class ApproachSteps(RunTests):
 
         me = self.state.actors[1]
         me.x, me.y, me.z = 1000.0, 0.0, 0.0
+        me.slides = 300.0  # the engine's own arrival point, 300 off the line's target (b-npc-handoff-door 144756)
         self.state.refs[0x13482] = FakeActor(-512.8, -205.8, 240.0, "133c8:Skyrim.esm")
         self.doubles.npcs["c1"] = {0x13482: {"formId": 0x13482, "pos": [-512.8, -205.8, 240.0]}}
         run_id, body = self._run(APPROACH_RECORD)

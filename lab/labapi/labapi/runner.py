@@ -962,7 +962,10 @@ class Runner:
         if "tolerance" in a:
             args["tolerance"] = a["tolerance"]
         if across:
-            args["tolerance"] = max(float(a.get("tolerance", 0) or 0), distance + self.s.teleport_tolerance)
+            # any landing in her cell: the engine places an arrival at its own point (the inn's at (-264.7, -340.4)
+            # every time, about 300 units off the line's target, b-npc-handoff-door 20261024-144756), and the
+            # judge's cell check still holds the frame; the next approach, from inside, aims
+            args["tolerance"] = 1.0e6
         ok, note = await self._teleport(rec, index, step.model_copy(update={"action": "teleport", "args": args}))
         where = f" in her record's cell {frame}" if a["cell"] == "record" else ""
         where += " (from another frame: from the south, the engine's placement)" if across else ""
