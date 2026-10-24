@@ -1095,6 +1095,22 @@ explicitly in CreateActor (props.isDead false, within the contract); a
 record never dead says nothing, so ADR-038's predicted deaths stand. The
 confirming read is x-npc-respawn's (both seats alive after the restart).
 
+41's restage on 3aabd51e, npcFate on by default (23:17 PDT): x-npc-fate-pin v3
+GREEN again (060646). x-npc-fate-outfit v3 (061219): the race held for both
+Embershard bandits (0xB6FE4 79684, 0xB6FDB 79688, the engine equal to the
+fate) and the armor matched the server's roll exactly (0xB6FE4: hide boots
+0x13910, studded cuirass 0x1B3A2, 0x6F39E; 0xB6FDB: the four hide pieces
+0x13910 to 0x13913), both the ahead path ("pinned b6fe4 to 39cf6", "dressed
+b6fe4 from the server's roll inside the outfit roll: 4 of 4 tagged, the
+engine's outfit roll skipped") and the late path ("redressed", "late fate
+for b6fe4: redress queued"). The one red was the grammar's: the server's
+worn list carries the roll's weapon (SteelMace 0x13988, SteelSword 0x13989)
+and the driver's worn read the 32 biped slots alone, so the engine's list
+lacked the weapon. Decision: npc-state's worn adds the hands' objects
+(getEquippedObject 0 and 1, deduplicated against the shield's slot), the
+stronger claim; rerun before 42's stage. The outfit half of ADR-046
+decision 1 stands on the armor already; the weapon's equality is the rerun's.
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
