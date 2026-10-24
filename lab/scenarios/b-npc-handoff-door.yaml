@@ -72,7 +72,10 @@ steps:
   - assert:
       - server.follow(0x13482).following == false
       - c2.npc_state(0x13482).aiEnabled == true
-      - c1.npc_state(0x13482).aiEnabled == false
+      # c1 stands outside while Alvor is in the house: its copy has no 3D and, since train-40
+      # a146ee0c (an unloaded actor keeps its AI, npc-handoff D11), the claim is no LOADED live
+      # copy on c1, loaded-ness and AI together (b-npc-puppet's form; gate 114157 read the bit)
+      - not (c1.npc_state(0x13482).is3DLoaded and c1.npc_state(0x13482).aiEnabled)
   # leg 4 (v6, after 041126's read): while c1 stood outside, in another cell than the record's,
   # it was no listener of Alvor (an interior has no exterior neighbours), so its engine's
   # reference sat in an unloaded cell where the Teleport put it, about 500 units from c2's live
