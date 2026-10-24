@@ -150,6 +150,11 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
 - B. The host alone.
 - Recommended and built: A.
 
+### D17. The bandits' weapons (23:34 PDT): the outfit pin holds for the armor and the race on both Embershard bandits (x-npc-fate-outfit 062856), but a bandit's WEAPON is the base's own inventory list, rolled by each engine at the inventory init and never by the outfit detour, so it may differ per screen (a mace here, a sword there); the damage is the server's either way
+- A. Pin the inventory's leveled roll too before playtest 34: a detour at the per-entry LVLI roll (the trace's 14751 site, under the re-analyst's read tonight) answering the server's weapon for a fated actor, the same shape as the outfit's; a few hours of agent work plus one lab read (outfit v3 is the probe).
+- B. Accept per-screen weapons for 34 as a known limit (armor, helmet and race the server's on every screen) and pin the weapons in M3's next train.
+- Recommended: A if 34 is a day or more away, else B; your word on the day decides it.
+
 ## The trains, in order, with sizes
 
 1. Train-39, the quitting host (D12): the server's stale-host rule, a T0 in

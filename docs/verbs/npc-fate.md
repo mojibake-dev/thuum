@@ -410,7 +410,10 @@ server's OpenContainer with default processing is the one that does; the
 engine's own cell-reset resurrection of a corpse on a re-entry
 (re-npc-roll.md section 9, the 19286 path) is undone by the view's
 two-second re-apply of the record's death. Declared gaps: the sleep outfit
-(above); a protected base under a player's over-time damage (a poison, a
+(above); the hands: a base's own inventory lists (CNTO, leveled) roll in
+each engine at the inventory init (the per-entry LVLI roll, 14751), unpinned,
+so a bandit's weapon may differ per screen while its armor is the server's
+(run 062856; the next slice pins it); a protected base under a player's over-time damage (a poison, a
 cloak: ModifyActorValuePercentage carries no aggressor) keeps its point,
 the hit's own number kills it (HYPOTHESIS whether any over-time effect
 reaches an NPC's health that way at all); the cleared hours and the
@@ -1110,6 +1113,26 @@ lacked the weapon. Decision: npc-state's worn adds the hands' objects
 (getEquippedObject 0 and 1, deduplicated against the shield's slot), the
 stronger claim; rerun before 42's stage. The outfit half of ADR-046
 decision 1 stands on the armor already; the weapon's equality is the rerun's.
+
+x-npc-fate-outfit v3 with the hands in the engine's worn read (41 restaged
+with lab driver 9aecd2aa; run 20261024-062856, 23:34 PDT): the ARMOR is
+pinned on both bandits, exactly, and the race with it; 0xB6FDB matched the
+server whole (SteelSword 0x13989, ArmorBanditCuirass2 0x10594D, the WIC
+cloak 0xE00233D); 0xB6FE4's armor matched (hide shield 0x13914, studded
+cuirass 0x1B3A2, bandit boots 0x6F398 and gauntlets 0x6F39B) while its
+weapon did not: the server's IronMace 0x13982 against the engine's
+SteelSword 0x13989, and in 061219 the server's SteelMace against the same
+engine sword. The weapon is not the outfit's: the NPC_ base 0x39CF6 carries
+three CNTO entries (leveled item lists) beside its DOFT, the engine rolls
+them at the inventory init through the per-entry LVLI roll (the trace's
+14751, "container"), which the 16155 outfit detour never sees, and the
+engine equips its own pick over the server's added one (0xB6FDB matched by
+chance). So the outfit half of ADR-046 decision 1 holds for what the outfit
+governs, the armor and the race (the headshot claim: the helmet you see is
+the server's), and the WEAPON is a declared gap of this slice: a bandit's
+weapon may differ per screen, the damage the server's either way. The pin
+of the inventory's leveled roll is the next slice (the re-analyst reads the
+site tonight); D17 asks Eli whether it comes before playtest 34.
 
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
