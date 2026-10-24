@@ -1843,7 +1843,10 @@ def frida_script_text(script: str, lab_dir: str, name: str, params: dict[str, An
     only what came before the exit, a load error; stdout redirected to a file sat in the injector's
     buffer until it exited, and a short trace came back empty (P0, 20261022-040233, 2026-10-21). The
     preamble declares nothing at the top level (a script's own names stay free: P0's `ptr`), and send()
-    becomes a no-op, the injector being gone; every lab script writes its lines through console.log."""
+    becomes a no-op, the injector being gone; every lab script writes its lines through console.log.
+    A heartbeat line, {"heartbeat": true, "t": <ms>}, every 10 s tells a quiet trace from a lost one: a
+    script that logs only when its hooks run went silent 30 s after its load and read as a lost tail
+    (x-npc-fate-roll 20261023-235610's leg 2, 2026-10-23)."""
     log = f"{lab_dir}\\frida\\{name}.log"
     lines = [] if not params else [f"globalThis.LAB_PARAMS = {json.dumps(params)};"]
     lines += [
@@ -1858,6 +1861,7 @@ def frida_script_text(script: str, lab_dir: str, name: str, params: dict[str, An
         "  };",
         "  try { globalThis.send = function () {}; } catch (e) {}",
         "  setInterval(function () { if (dirty) { out.flush(); dirty = false; } }, 250);",
+        "  setInterval(function () { out.write(JSON.stringify({ heartbeat: true, t: Date.now() }) + '\\n'); dirty = true; }, 10000);",
         "})();",
     ]
     return "\n".join(lines) + "\n" + script

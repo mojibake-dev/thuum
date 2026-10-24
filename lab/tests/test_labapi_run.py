@@ -1347,6 +1347,7 @@ class FridaSteps(RunTests):
         for v, start in zip(variants, started):
             self.assertIn(f"/frida/scripts/{v.name}", start)
             self.assertIn("new File(", v.read_text(), "the script's lines go to its own flushed .log")
+            self.assertIn("heartbeat: true", v.read_text(), "a 10 s heartbeat tells a quiet trace from a lost one")
             self.assertIn(f"{v.name}.log", v.read_text())
         self.assertTrue(all("'-e'" in e for e in started), "frida-inject eternalizes the script and exits")
         # a step waits for the previous watcher, since the task drops a start while one runs (x-frida-flush)
