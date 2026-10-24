@@ -157,6 +157,19 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
 - GREEN at T3 (00:32 PDT): x-npc-fate-outfit v3 on 43's stage (072041), the weapons the server's on both bandits at 20 and 60 s; the pin probe green on the same stage. The only question left is the merge's place: A rides 43 with 41 and 42 into 34, B leaves it for the next train.
 - Built ahead of the answer, not merged (23:56 PDT): fork m3-train-43 962fc913, stacked on 42, the 16128 detour (re-npc-roll.md section 11); its read is x-npc-fate-outfit v3 on 43's stage after 42's.
 
+## Merge-ready (09:55 PDT, 2026-10-24)
+
+Train-43 at de9d048e carries 39 to 42 inside it and is merge-ready by citation:
+the gate set 20261024-155001-gate-m3-train-43 (the nine plus the seven
+committed scenarios) all green on their last runs, T2 green at that head
+(33 sessions), gate-cite's five checks passing, the stage held on the lab.
+One command at your word on D12, D6, D2 to D5, ADR-049, ADR-048 and D17
+(numidium's): `GATE_SET=20261024-155001-gate-m3-train-43 T2=skip just
+verb-merge m3-train-43 b-npc-puppet b-cell-host b-npc-handoff-door
+b-npc-handoff-restart b-npc-handoff-night b-host-kill b-npc-death b-npc-loot
+b-npc-respawn`. A narrower grouping (say D12 and D6 alone) needs its own
+branch's stage and gate, about two hours of lab.
+
 ## The trains, in order, with sizes
 
 1. Train-39, the quitting host (D12): the server's stale-host rule, a T0 in
