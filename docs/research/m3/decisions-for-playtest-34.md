@@ -154,6 +154,7 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
 - A. Pin the inventory's leveled roll too before playtest 34: a detour at the per-entry LVLI roll (the trace's 14751 site, under the re-analyst's read tonight) answering the server's weapon for a fated actor, the same shape as the outfit's; a few hours of agent work plus one lab read (outfit v3 is the probe).
 - B. Accept per-screen weapons for 34 as a known limit (armor, helmet and race the server's on every screen) and pin the weapons in M3's next train.
 - Recommended: A if 34 is a day or more away, else B; your word on the day decides it.
+- Built ahead of the answer, not merged (23:56 PDT): fork m3-train-43 962fc913, stacked on 42, the 16128 detour (re-npc-roll.md section 11); its read is x-npc-fate-outfit v3 on 43's stage after 42's.
 
 ## The trains, in order, with sizes
 
