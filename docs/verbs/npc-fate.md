@@ -1225,6 +1225,24 @@ revived predator with c1's puppet 50 units behind. On d2210492 every fate
 and death probe is green: pin v3, outfit v3 (weapons too), death v3,
 respawn v3, loot, with b-host-kill and door v6 beside them.
 
+The gate on 43 (112259, 13 of 16) and the respawn's finding (05:45 PDT):
+b-npc-respawn red with the record alive and both seats alive, the fate's
+new pick (raceId 78337) against both engines' old species (78346): the
+re-roll was never imposed. The read (an agent over 120743): the late path
+ran on both seats but took the redress branch every time, because the
+client decided "a clone" by the Papyrus getBaseObject, which for a leveled
+clone answers ExtraLeveledCreature's originalBase (the placed NPC_, an esm
+id), never the clone (Ghidra: the native's callback reads the extra's
++0x10, else data.objectReference); the "rerolled" line had never appeared
+in any run, and the two greens had re-rolled the same base. Fixed on
+m3-train-41 7ec13787 (forward 42 28c4861c, 43 de9d048e): rerollActor
+decides on the game thread by the engine's own mark (ExtraDataList::HasType
+kLeveledCreature): a clone takes the engine's 37323 re-roll through the
+detours, any other actor the redress (the body shared on the game thread);
+the client calls it for every new fate. The reread is b-npc-respawn on
+43's restage: "rerolled 85547 ... toward the fate's <base>" then "pinned
+85547 to <base>" on both seats, the species equal.
+
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
 load_scenario): x-npc-death, two seats in the forest,
