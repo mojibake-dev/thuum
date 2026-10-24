@@ -818,6 +818,26 @@ before the attach; the fate pass runs at the square change, ahead). 16072
 and 19692 n 0 again; the engine's re-roll ran only on other actors. A lab
 fault of numidium's to chase: a trace armed by relaunch {frida} loses its
 tail at about 30 s after its load (read such traces to there).
+x-npc-fate-outfit 20261024-000244 (17:18 PDT, numidium's read of Embershard
+Mine's two bandits on the old hooks): they were not first-rolled at the mine's
+load; the engine RE-ROLLED them at the attach through its re-roll 37323 (arg
+minus one, from a caller at SkyrimSE.exe+0x2c9ac2 the script did not name),
+each from a runtime base it already held (a persistent reference loads with
+the game, before the connection), the resolver then picking anew (skipInit 0)
+and ResetInventory (37322) following; so each outfit rolled TWICE per bandit
+(the resolver's inventory init and ResetInventory's), with different picks,
+all through 16155's path (24 rolls returning to its item loop, six lists each,
+the WIC cloak list among them), InitOutfitItems and AddWornOutfit never
+entered; GetCalcLevel read 6 while the wrapper rolled at 1 (the easy
+modifier scales it). Consequences for the pin: a persistent leveled actor's
+first roll precedes any fate table, and what the player sees is the
+attach-time re-roll, which passes through the leveled wrapper (the 14752
+detour answers it) as long as the fate is on the client before the ATTACH,
+not the game's load; the outfit answer must hold through ResetInventory's
+second roll, which the 16155 detour covers since it sits under every
+inventory init; an interior's actors take the late path (the door loads the
+cell before the fate arrives). The trace gains the re-roll caller's label
+and ResetInventory's returns.
 
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
