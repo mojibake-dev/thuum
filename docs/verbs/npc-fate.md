@@ -556,10 +556,21 @@ occupancy within 512, the record's inventory, OpenContainer, TakeItem and
 PutItem on the server). T0 (NpcFateTest): the body lies inside the window
 and stands at its placement past it, rolled anew, its fate sent; the corpse
 opens as a container and the take is the server's; the broadcast case
-leaves the shared world alive. Owed: the GMST read, the JSON round-trip T0,
-the restart scenario (rule 6), kill-ref and respawn-ref labCommands (asked
-of numidium), the cleared hours (the quests verb), kNeverResets zones
-(libespm reads no ECZN: every cell resets).
+leaves the shared world alive. Then (d908abca, 20:46 PDT): the hours are
+the master's GMST iHoursToRespawnCell, 240 (record 0xD3646; the cleared
+0xD3647 is 720, for the quests verb; numidium's esm.py read on sky-srv),
+through libespm when the world has the master, the setting first, the
+compiled 72 last (D13, T0 pins 240); MpActor::Respawn is the one funnel that
+clears the body's stamp and its due entry (the console's Resurrect and the
+lab's respawn-ref pass there), so the next death counts from its own day.
+008c8883 fixes the Catch2 chained comparison both builds of 645f9344
+refused. Owed: the JSON round-trip T0 and MayDie against a master flag, the
+restart scenario as b-npc-fate (rule 13, after x-npc-death holds), the
+cleared hours (the quests verb), kNeverResets zones (libespm reads no ECZN:
+every cell resets). The lab's grammar (numidium, lab main eb4592aa):
+`c1: kill-ref {formId, killer?}` (the console verb's Kill as the seat's
+console) and `c1: respawn-ref {formId, inPlace?}`; asked: npcRespawnHours
+in the scenario's server block, for the sweep's own read.
 
 - Where the logic lives:
   - The loader. WorldState::AttachEspmRecord (WorldState.cpp:427-690) admits
@@ -1021,8 +1032,9 @@ equal. Worn lists read, not asserted (the predators wear no outfit; the
 outfit claim is x-npc-fate-outfit's). The switch flips to true on 41 when
 both legs hold.
 
-The deaths' reads (owed the grammar: kill-ref and respawn-ref labCommands, a
-key step for the loot menu's Take All): x-npc-death, two seats in the forest,
+The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
+40 steps, and x-npc-loot.yaml, 22 steps, both loading through
+load_scenario): x-npc-death, two seats in the forest,
 kill-ref the predator, both seats' npc_state dead within 10 s and
 server.ref isDead; c2 two cells off and back, the body still dead on c2;
 server: restart, both reconnect, dead on both and server.ref isDead with the
