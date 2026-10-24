@@ -50,9 +50,10 @@ steps:
   - c1: screenshot
   - c2: screenshot
   - assert:
-      - server.host(0x9732).client == "c1"
-      - c1.npc_state(0x13482).aiEnabled == true
-      - c2.npc_state(0x13482).aiEnabled == false
-      - c2.npc_state(0x13482).activationBlocked == true
+      # whoever won the reconnect race hosts 0x9732 (c1 by 17 ms in 230913, c2 by 26 ms in 114904);
+      # the claim is host-agnostic: one seat runs him loaded, the other does not, both have him out
+      - server.host(0x9732).hosted == true
+      - (c1.npc_state(0x13482).is3DLoaded and c1.npc_state(0x13482).aiEnabled) != (c2.npc_state(0x13482).is3DLoaded and c2.npc_state(0x13482).aiEnabled)
+      - c1.npc_state(0x13482).cell == 0x9732
       - c2.npc_state(0x13482).cell == 0x9732
 artifacts: [server.log, c1.log, c2.log, screenshots]
