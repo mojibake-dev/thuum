@@ -1,0 +1,55 @@
+# b-npc-handoff-night (M3, docs/verbs/npc-handoff.md, ADR-047 D11;
+# 2026-10-23): a resident's record left in an unhosted interior while the
+# engines bring him out is moved by the roster to the sighter's cell, so one
+# seat runs him and nobody has two of him. The clock at 23.0: Alvor 0x13482
+# goes home to 0x133C8 under c1's follow (the record indoors); then a
+# restart with the clock at 7.9 forgets every follow, the record indoors
+# subscribes nobody, both engines walk him out by schedule, c1 (the host of
+# 0x9732) sights him and the roster moves the record out. Asserts: his
+# record is in 0x133C8 before the restart and outdoors ("3c:Skyrim.esm")
+# within 180 s of the reconnects; c1 runs him (aiEnabled true), c2's puppet
+# is blocked and in 0x9732 (npc_state .cell, the parent CELL). Proved as
+# x-handoff-night GREEN 230913 on train-40 (run 222831 red on the probe's
+# own fact alone). Its own commit (rule 13).
+id: b-npc-handoff-night
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 23.0
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 25
+  - assert:
+      - server.host(0x9732).client == "c1"
+  # home for the night: the record follows him in (D6) or is moved in by his host's roster
+  - until: {within: 420, expect: [server.ref(0x13482).cell == "133c8:Skyrim.esm"]}
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - assert:
+      - c1.npc_state(0x13482).cell == 0x133c8
+  # morning after a restart: the record indoors, nobody's; the engines bring him out
+  - server: restart {gameHour: 7.9}
+  - c1: connect
+  - c2: connect
+  - wait: 30
+  - until: {within: 180, expect: [server.ref(0x13482).cell == "3c:Skyrim.esm"]}
+  - wait: 10
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13482).aiEnabled == true
+      - c2.npc_state(0x13482).aiEnabled == false
+      - c2.npc_state(0x13482).activationBlocked == true
+      - c2.npc_state(0x13482).cell == 0x9732
+artifacts: [server.log, c1.log, c2.log, screenshots]
