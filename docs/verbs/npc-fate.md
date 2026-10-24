@@ -929,10 +929,10 @@ ActorFate message against the existing deltas alone; formVersion 2 or 3.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT; the death half is train-42's)
+- [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6)
 - [ ] native hook + T1
-- [ ] TS handler
+- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)

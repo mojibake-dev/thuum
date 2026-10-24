@@ -2687,7 +2687,20 @@ late by construction (the engine loads them at the door before the server
 hears of it), so a resident indoors may pop once on a seat's first visit; the
 exterior ring is ahead of the engine. HYPOTHESIS tags: the detours' sites
 until the Frida read, the re-roll's safety on a live actor, the number of
-squares ahead (two, the engine's uGridsToLoad 5).
+squares ahead (two, the engine's uGridsToLoad 5). Measured the same day
+(17:19 PDT, x-npc-fate-roll's three runs and x-npc-fate-outfit, numidium's
+reads of lab/frida/npc-roll.js): the engine rolls a leveled placement afresh
+at every load (the same placement two species across two loads), so the pin
+applies at every load; a persistent leveled actor is first rolled at the
+game's load, before any fate can exist, and re-rolled at the cell's attach
+through the engine's own re-roll, with its outfit rolled twice (the
+resolver's inventory init and ResetInventory's); the leveled roll's one site
+is the wrapper under the resolver (held three times), the outfit's one site
+the resolver 16155 under every inventory init, and InitOutfitItems is the
+late path only (re-npc-roll.md section 8). The rule the build follows: the
+fate must be on the client before the ATTACH, which the fate pass gives an
+exterior three squares ahead; an interior's actors and a login's neighbours
+take the late path, one engine re-roll each.
 
 - [ ] accept (Eli)
 - [ ] accept with changes (say what)
