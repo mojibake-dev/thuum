@@ -297,3 +297,152 @@ missing body (else B falls back to disable, native, enable); tagged entries supp
 InitOutfitItems across process transitions and a ResetInventory (else the outfit detour must also
 guard 418622); a reloaded seat keeping the imposed base without a new 14374 (persistence). Section
 5's plan is those five observations.
+
+## 8. Erratum: the outfit roll's real site (2026-10-23 lab read)
+
+x-npc-fate-roll 232048 and 234133 (lab/frida/npc-roll.js): InitOutfitItems (16072) and AddWornOutfit
+(19692) at zero through the cell's load while 418622 ran 65 times and outfit-shaped rolls (14751, arg5
+0, a_usePlayerLevel 1, armor picks) returned to SkyrimSE.exe+0x236d7c, +0x236bd9 and +0x23a37a; 16072
+fired twice in 234133's leg 2, 15 to 20 s after ready, on other actors. Re-read with REA (same seeds;
+every answer confidence "observed", authority "shipped-artifact"); ids by `just addr`. Section 2's
+"never in InitInventoryIfRequired" and "tagged entries suppress the roll" are wrong for 1.6.1170; the
+script's "16072+0x864c" and "+0x84a9" were nearest-start labels, not containment.
+
+### 8.1 The containing functions (CONFIRMED-STATIC, REA body ranges and complete call coverage)
+
+0x236d7c and 0x236bd9 lie in InventoryChanges::InitLeveledItems, 16129 (0x236b60, body
+0x236b60..0x236e33; CommonLib's name, src/RE/I/InventoryChanges.cpp:143): +0x79 is the join after
+GetCalcLevel(owner, true) for a container owner or TESActorBaseData::GetLevel(npc->actorData) for an
+actor (`CMP byte [RCX+0x1a],0x3e; MOV RAX,[RCX+0x40]; LEA RCX,[RAX+0x30]; CALL 14384`), so the 20205
+hits there were the cell's chests; +0x21c is the container loop's `CalculateCurrentFormList(lvli+0x30,
+level, |count|, &out, 0, 1)` over the base container's own LVLI entries, whose picks 16128 tags
+ExtraLeveledItem (r9 = 0): inventory, not outfit. 0x23a37a lies in 16155 (0x23a2b0, body ..0x23a4b8,
+unnamed), at +0xca, the return of its `CalculateCurrentFormList(lvli+0x30, ctx->level, 1, &out, 0, 1)`
+(0x23a357..0x23a375: dx = word [R14+0x10], r8d = 1, r9 = &out, [rsp+0x20] = 0, [rsp+0x28] = 1).
+
+The chain, CONFIRMED-STATIC by call references: InitLeveledItems, before its container loop, with an
+actor owner whose base is a TESNPC, calls 16155 twice: `MOV RCX,[RBX+0x218]` (TESNPC::defaultOutfit,
+T/TESNPC.h:281), ctx on the stack {[RBP-0x31] = outfit, [RBP-0x29] = R14 (this, the InventoryChanges),
+[RBP-0x21] = DX (the level, u16)}, `ADD RCX,0x20` (BGSOutfit::outfitItems, B/BGSOutfit.h:43), `LEA
+RDX,[RBP-0x31]`, `CALL 16155` (returns +0xcc), then the same for [RBX+0x220] (sleepOutfit, :282; returns
++0xe9). 16155 has exactly two callers: 16129 and 16072. 16072 InitOutfitItems(this, a_outfit,
+a_npcLevel) is a 0x40-byte wrapper: `ctx = {a_outfit, this, a_npcLevel}; 16155(&a_outfit->outfitItems,
+&ctx)`; its callers are 418622 (gated by HasOutfitItems, section 2) and 40746 (a player-side init by
+shape: PlayerCharacter singleton, a +0x720 record's outfit; HYPOTHESIS). CommonLib's binding of 16072 is
+right; it is the late path, not the load path. 16068 (GenerateLeveledListChanges or InitScripts) reaches
+neither 14751 nor 16155 nor 16128 to a depth of two (16054 and 16147 read; 16054 has one unresolved
+call). 14751's complete caller set: itself, 14752, 14864, 16056, 16057, 16129, 16155, 22000, 22511,
+25063, 37198, 54655, 56203, 56489. InitLeveledItems' callers: 16038 InitInventoryIfRequired (from 19507
+InitItemImpl, 14374 the resolver with a_skipInit false, 13723 CreateReferenceAtLocation, 19802
+TESObjectREFR::ResetInventory, 54755 Papyrus SetOutfit, 12095 the change-form reader by shape); 19654
+(no static caller; indirect or dead); 22405 (a console command by shape: Script::ParseParameters, the
+actorbase's level fields, InitLeveledItems, then 418622(npc, actor, 1, 1, 0, 1): SetLevel, HYPOTHESIS).
+So the outfit is rolled at the inventory's init, the same InitItemImpl moment as the LVLN roll, before
+any 3D and before 418622; 418622 then finds HasOutfitItems true and skips 16072. The two late 16072
+fires are 418622 on an actor with no tagged entries: an applyEquipment's removeAllItems on a puppet
+(section 3(c)'s flap) or an outfit whose every roll failed (HYPOTHESIS; the owner id decides). Section
+2's "SetOutfit never rolls" is wrong too: its InitInventoryIfRequired rolls the new outfit through
+InitLeveledItems before AddWornOutfit.
+
+### 8.2 Where the picks are tagged, and what HasOutfitItems gates
+
+16155 `(BSTArray<TESForm*>* a_items, OutfitInitCtx* a_ctx)`, rcx data at +0, size at +0x10, rdx the ctx
+{BGSOutfit* outfit; InventoryChanges* changes; uint16 level}; returns `MOV EAX,1`. Per item: an LVLI
+(formType 0x35) rolls as above, then 16128(rcx = ctx->changes, rdx = &out, r8d = 0, r9 = ctx->outfit) at
++0xd9; any other form: 16133(changes, item, 0) finds the entry; unless it exists, has an extra list,
+15988(entry, 0x8E) and 15989(entry) == outfit->formID, a fresh ExtraDataList (Allocate 0x20, ctor 11583
+by shape), 11647(list, outfit), 16053(rcx = changes, rdx = item, r8 = list, r9d = 1, [rsp+0x20] = 0).
+16128 (0x236890) `(InventoryChanges*, BSScrapArray<CALCED_OBJECT>*, uint32 a_lvliIndex, BGSOutfit*
+a_outfit)`: a_outfit null tags each pick through 11637 (the ExtraLeveledItem setter by shape), SetCount,
+the COED copy, 16053(changes, form, list, count, 0); a_outfit set skips a pick whose own entry already
+carries this outfit's tag (16133, 15988, 15989), else tags it through 11647 and 16053(changes, form,
+list, 1, 0); then, game running, 14608(owner, 0x8000000) (AddChange kLeveledInventory,
+T/TESObjectREFR.h:156; HYPOTHESIS). 11647 (0x15d210) `(ExtraDataList*, BGSOutfit*)`: under the lock at
++0x18, GetByType(0x8E) by shape; found: id = outfit->formID; else Allocate(0x18), `*p =
+&VTABLE_ExtraOutfitItem; p[0x10] = outfit->formID`, ExtraDataList::Add (CONFIRMED-STATIC).
+HasOutfitItems (19691) is read only in 418622 (its callee list), never in 16129, 16155 or 16128: at the
+load it gates nothing. The dedupe is per pick form, so a tagged server list does not stop a differing
+engine pick from being added.
+
+### 8.3 Why InitInventoryIfRequired calls RemoveOutfitItems(nullptr)
+
+16038 (0x225770) `(TESObjectREFR* a_ref, bool a_ignoreContainerExtraData)`, pseudocode (HYPOTHESIS as
+flow; the call targets, the vfunc slot and the return offset CONFIRMED-STATIC):
+```
+required = base container has an LVLI entry;
+if (a_ref->formType == 0x3E) {                      // 0x1402257ea
+  kw = 11436(0xa3);        // default object by index, lazily cached: kKeywordSkipOutfitItems = 163, B/BGSDefaultObjectManager.h:176
+  if (!kw || !a_ref->HasKeywordHelper(kw))          // CALL [RAX+0x240] = vfunc 0x48, T/TESObjectREFR.h:268, rdx = kw
+    Actor::RemoveOutfitItems(a_ref, nullptr);       // XOR EDX,EDX; CALL 19690 at 0x14022581f, returns +0xb4
+  if (parentCell && cellState in {2,3,4,6,7}) required = true;   // +0x60 then +0x44, T/TESObjectCELL.h:259
+}
+if (!required) return false;
+changes = GetInventoryChanges(extraList) or a new one (owner = a_ref, totalWeight -1);
+InitLeveledItems(changes); if (!a_ignoreContainerExtraData) InitFromContainerExtra(changes); 16068(changes);
+```
+So every inventory init of an actor without the SkipOutfitItems keyword strips every outfit-tagged entry
+(null outfit = any tag, section 2), then rolls the default and sleep outfits again. Entries added tagged
+before the first InitInventoryIfRequired are removed at the init; ones added after it live until the
+next init (the resolver's a_skipInit false path, ResetInventory, SetOutfit, PlaceAtMe), which strips and
+re-rolls. On a fresh clone the strip removes nothing (the lab's 19690 at +0xb4 on every clone). A detour
+that adds early is wrong on this build; it must answer inside the roll.
+
+### 8.4 The detour (replaces section 3(c)'s 16072 site and section 7's second detour)
+
+Detour 16155 in Skyrim Platform's native layer, `bool (*)(RE::BSTArray<RE::TESForm*>* a_items,
+OutfitInitCtx* a_ctx)` with `struct OutfitInitCtx { RE::BGSOutfit* outfit; RE::InventoryChanges*
+changes; std::uint16_t level; }` (layout CONFIRMED-STATIC by both callers' stores and 16155's reads).
+When ctx->changes->owner (I/InventoryChanges.h:64) is a fated actor and ctx->outfit its base's
+defaultOutfit: for each (form, count) of the server's worn list, a fresh ExtraDataList (the engine's
+Allocate 0x20 plus 11583, or CommonLib's `ExtraDataList()` at E/ExtraDataList.h:136 if the pin defines
+it; read the idiom first), 11647(list, ctx->outfit), 16053(ctx->changes, form, list, count, nullptr);
+return true without touching a_items. Any other owner or outfit (the sleepOutfit's call included, a
+declared gap) falls through to the original. The one site covers the load (16129), the engine's re-inits
+(every InitInventoryIfRequired caller) and the late re-dress (16072 from 418622): idempotent by
+construction, since each re-init strips and asks again. A fate arriving after the roll goes through one
+new native: RemoveOutfitItems(actor, defaultOutfit) (not nullptr, to spare the sleep outfit's entries),
+the same three calls, AddWornOutfit(actor, outfit, true): one pop. AddObjectToContainer (vfunc 0x5A,
+T/TESObjectREFR.h:286) is the CommonLib-named fallback for the add but may raise events mid-init
+(HYPOTHESIS); 16053 is the engine's own call here. Open: AddWornOutfit counted zero across 65 418622
+calls. 418622's only skip around it is 37897(actor) = HasKeywordHelper(DefaultObjects[155] =
+kKeywordHorse, B/BGSDefaultObjectManager.h:168; objects at +0x20, 366 entries, so +0x4f8 and +0xc2b)
+plus a biped-slot clash through 419334 (the worn entry by slot); the whole block is skipped only when
+npc->defaultOutfit is null (the lab spawn's figures and puppets, by shape). The script below logs the
+outfit id per 418622 call to settle it.
+
+Frida (npc-roll.js, ids by `just addr` on the day): 16129 (enter: rcx changes, owner at +0x08, id at
++0x14; ret), 16155 (enter: count at rcx+0x10; ctx: outfit at rdx and its id, changes at rdx+0x08, owner,
+level u16 at rdx+0x10; ret: 16129+0xcc default, +0xe9 sleep, or inside 16072), 16038 (enter: ref id, dl;
+ret: 19507, 37791, 14374, 13723, 19802, 54755, 12095), 19690 (keep; ret 16038+0xb4), 14751 (keep; ret
+16155+0xca outfit, 16129+0x21c container, inside 14752 LVLN), 418622 (add the outfit id at rcx+0x218),
+19691 (leave: result), 16072 and 19692 (counts), ActorEquipManager::EquipObject (Offset 38894; ret: what
+wears the outfit if 19692 stays zero). Scenario: the solo leg with a 15 s wait before the teleport.
+Expected per fresh actor: 16038 from 19507, 19690(nullptr) at +0xb4, 16129, 16155 once per non-null
+outfit with its 14751 calls returning to +0xca, then 418622 at the biped init with HasOutfitItems true
+and no 16072; 16072 only on an actor with no tagged entries (a puppet after applyEquipment, by owner
+id). Falsifiers: a 16155 return outside 16129 and 16072; a 14751 return to 0x23a37a with no 16155 entry
+on the thread; tagged entries surviving a 19690 from 16038; 418622 with a non-null outfit, no 19692 and
+no horse keyword (the 418622 read wrong).
+
+### 8.5 Address table additions (1.6.1170 AE ids, by `just addr`)
+
+| id | offset | name | status |
+| --- | --- | --- | --- |
+| 16129 | 0x236b60 | InventoryChanges::InitLeveledItems: rolls defaultOutfit and sleepOutfit through 16155, then the container's LVLIs | CommonLib name; flow HYPOTHESIS |
+| 16155 | 0x23a2b0 | the outfit-array resolver `(BSTArray<TESForm*>*, OutfitInitCtx*)`, the detour site | callers and registers CONFIRMED-STATIC |
+| 16128, 16053 | 0x236890, 0x226a20 | add calced picks (tag by r9: outfit or leveled index); add an entry with an extra list `(changes, form, list, count, 0)` | HYPOTHESIS |
+| 11647, 11637, 11583 | 0x15d210, 0x15c840, 0x151e90 | ExtraOutfitItem setter; ExtraLeveledItem setter and ExtraDataList ctor by shape | 11647 CONFIRMED-STATIC |
+| 16133, 15988, 15989 | 0x237310, 0x222dd0, 0x222e70 | an item's entry; entry has extra type; its outfit id | HYPOTHESIS |
+| 11436 | 0x14eeb0 | default object by index, lazily cached (0xa3 = kKeywordSkipOutfitItems) | index CONFIRMED by header |
+| 37897, 419334, 14608 | 0x698d60, 0x678000, 0x1dffc0 | HasKeyword(kKeywordHorse); worn entry by biped slot; AddChange by shape | HYPOTHESIS |
+| 19654, 22405, 40746 | 0x2e0460, 0x3581d0, 0x74cc90 | InitLeveledItems' indirect caller; console SetLevel by shape; 16072's player-side caller | HYPOTHESIS |
+| 16054, 16147, 38894 | 0x227430, 0x239b70, 0x6c9820 | 16068's two unnamed callees (no roll to depth two); ActorEquipManager::EquipObject | CONFIRMED-STATIC; CommonLib Offset |
+
+Recommendation: move the outfit pin off 16072 and onto 16155, the one function every outfit resolution
+on 1.6.1170 passes through (the load's InitLeveledItems, every later InitInventoryIfRequired, 418622's
+late InitOutfitItems), answering the server's worn list tagged with the outfit's id through the engine's
+own 11647 and 16053 for a fated owner and falling through otherwise; drop every "add tagged entries
+before the first dressing" plan, since InitInventoryIfRequired strips them before it rolls; keep section
+7's 14752 detour for the species; and run the 8.4 trace once before the build to confirm the chain
+(16038, 19690 at +0xb4, 16129, 16155, 14751 at +0xca) per fresh actor and to settle the AddWornOutfit
+zero by the outfit id logged at 418622.
