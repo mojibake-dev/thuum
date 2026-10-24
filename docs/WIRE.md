@@ -183,9 +183,13 @@ Families, mirroring the authority rungs:
   cell-host.md; the M0 rows 7 and 8 stay reserved and dead
   (ReservedHostGrant, ReservedHostRelease); the handoff is npc-handoff's.
 - Intent: movement sample, animation event, cast intent, hit intent,
-  activate intent, aim pitch (R1 inputs; the validator's main customers).
+  activate intent, aim pitch (R1 inputs; the validator's main customers);
+  a host's checked death report for a game-file actor (ActorDeath 52,
+  npc-fate, M3).
 - Record: NPC state under host, physics owner updates (R2 inputs).
-- World: server-decided deltas broadcast to renderers (R0 outputs).
+- World: server-decided deltas broadcast to renderers (R0 outputs); the
+  server's roll of a placement ahead of the engine's own (ActorFate 51,
+  npc-fate, M3).
 - Snippet: delegated Papyrus execution request and result (R2, ledgered).
 
 Every message documents: direction, rung, idempotency, and the reason codes
@@ -261,6 +265,47 @@ a fall) and the percentage read negative; the client clamps it at the source
 (movementGet), the puppet apply never steps a figure or a puppet under one
 percent (the server's death state is the only death), and the validator
 refuses the rest as the untrusted input it is (rule 5). No field is new.
+
+### ActorFate (t 51) and ActorDeath (t 52): the server's roll ahead of the engine's, and a host's checked death report (npc-fate, M3)
+
+ActorFate (id 59, MsgType 51), server to client, reliable, R0 output (fork
+m3-train-41, 2026-10-23; docs/verbs/npc-fate.md, ADR-046 decision 1,
+ADR-049): `fates`, at most 64 of `{ refrId: u32 (under 0xff000000, nonzero),
+baseId: u32 (the NPC_ the roll chose, 0 for none), level: u16, worn: [u32]
+(at most 32) }`, sent at a player's square change for the three squares of
+game-file actors around it before any of them is subscribed, so every engine
+dresses the placement from the server's roll (Skyrim Platform's detours on
+the roll sites) instead of rolling its own. Validator (wire-validate
+check_fates): 1 to 64 entries, each refrId in range and nonzero, at most 32
+worn, every id nonzero.
+
+ActorDeath (id 60, MsgType 52), client to server, reliable, once per death,
+R1 (fork m3-train-44 597bb9dc, 2026-10-24; ADR-048's B, Eli's D1 "jump right
+to B"): `{ refrId: u32 (the dead game-file actor, under 0xff000000,
+nonzero), cause: u8 (0 unknown, 1 fall, 2 hazard, 3 script, 4 an actor's
+hit), killer: u32 (the killer's id for cause 4, else 0), pos: [f32; 3]
+(where the body fell) }`, sent by skymp5-client's DeathReportService at
+deathStart for an actor the game simulates whose death is not the server's
+own word. The server (ActionListener::OnActorDeath) takes it only when the
+reporter simulates the actor (the cell's host, or ADR-047's follower), the
+actor is a game-file actor and alive, its base may die (MpActor::MayDie: an
+essential never, a protected one never by a report), the body lies within
+2048 units of the record, and the cause checks against what the server saw:
+cause 4 by a hit from the named killer the server numbered within 3 s, 1 by
+a drop of 200 units in the host's own movement samples within 4 s, 2 by an
+activation within 512 units of the body within 5 s, 0 by any of the three;
+cause 3 and any other code refused. Then it kills the record (MpActor::Kill,
+the death's travel as every death's: isDead to every viewer, the body as the
+server's container, the fated respawn). A refusal logs one warn a minute per
+actor with its code (E_DEATH_OFF, NO_ACTOR, PLAYER, NOT_HOST, IMMORTAL, FAR,
+NO_KILLER, UNCHECKED, SCRIPT, CAUSE); a report for an actor already dead is
+an info line (the server's own kill got there first). Validator
+(wire-validate check_actor_death): refrId in range and the cause at most 4
+(E_VAL_RANGE), pos finite (E_VAL_NONFINITE) and in the world
+(E_VAL_OUT_OF_WORLD), a per-host budget of six at once refilling one a
+second (E_VAL_RATE). The server setting npcDeathReports (default true) off
+restores ADR-048's A, the server's number alone. Appended to the contract
+(ADR-012); the two MsgTypes after ActorSightings (50).
 
 ## Bridge and client FFI
 

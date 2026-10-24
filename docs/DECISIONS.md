@@ -2517,7 +2517,10 @@ are the three numbers and (g)'s night step.
 
 ## ADR-048: Trust is mixed by what is at stake: players' contested state stays the server's number, a host's own NPC outcomes are accepted under plausibility checks and logged, and a server setting picks the strictness
 
-Status: PROPOSED 2026-10-23 13:43 PDT (thuum-magnus, at Eli's request relayed
+Status: ACCEPTED 2026-10-24 as option B (Eli, through numidium, on the
+memo's D1: "jump right to B"), built the same day on fork m3-train-44
+(docs/verbs/npc-fate.md, Server and Client; WIRE.md's ActorDeath). PROPOSED
+2026-10-23 13:43 PDT (thuum-magnus, at Eli's request relayed
 by numidium: on D1 of the playtest-34 memo, "what's stopping it from being as
 simple as 'npc's health hits 0, by any damage. that death propagats?'", then
 "personally i think we might need a more mixed model for client vs server
@@ -2628,7 +2631,27 @@ hit), scripted-effects (R0), activation-reach (R1), hostility-sync (R0 fact).
 On acceptance the law gains the rung in CLAUDE.md and docs/VERB.md, and
 every verb doc names R1h where it applies.
 
-- [ ] accept (Eli), with C-ii (a) or (b)
+Decision (2026-10-24). Option B, not C. Built on fork m3-train-44: the
+ActorDeath message (MsgType 52, C2S, R1), the server's checks against its
+own evidence (the reporter simulates the actor; a hit from the named killer
+the server numbered within 3 s; a drop of 200 units in the host's samples
+within 4 s; an activation within 512 units within 5 s; the body within 2048
+units of the record; MayDie's essential and protected rule; a script's kill
+refused), one warn a minute per actor with the code of the refusal, and the
+kill through the one funnel. The law's rungs are unchanged: no R1h; the
+report is R1, host computes and the server validates by what it saw.
+C's trustLevel collapses to the setting npcDeathReports (true, B; false,
+A); C-ii stays (a) by omission (the server numbers every reported
+NPC-against-NPC hit as today; the death alone is the host's report,
+checked). One detail for Eli's veto: a report naming a player's hit is
+checked as any actor's, since the server numbered that hit, so a death the
+engine dealt ahead of the server's number stands on both screens
+(gameplay first); C's point 2 (refuse a player-caused death) is not built,
+and is one line if wanted. The hazard evidence is a HYPOTHESIS (that a
+trap's trigger reaches the server as an activation); until the lab's trap
+run, a hazard death is refused and counted, A's floor for that cause.
+
+- [x] accept (Eli, 2026-10-24): option B
 - [ ] accept with changes (say what)
 - [ ] not yet
 
@@ -2658,6 +2681,13 @@ Decisions.
    when libespm reads CELL and REFR XEZN and the ECZN record (it has none
    today). A record rolled before this rule keeps its roll, its level
    recorded as 0.
+   2026-10-24: Eli asked for a middle ground between the loader's level and
+   level 0 ("some way to calculate a middle ground?"); built on fork
+   m3-train-44 as one rule behind the npcRollLevel setting
+   (PartOne::FateRollLevel): loader (A as written), party-mean (the default:
+   the mean, rounded down, of the players within the fate ring's three
+   squares, the players online when no near one has a record), party-min,
+   or a number for everyone; the pick is a settings line, not a build.
 2. D3 (A). The respawn re-rolls the chain and the outfit at the record's
    level, as the engine re-rolls a leveled placement at a cell reset; the
    fate is sent again.

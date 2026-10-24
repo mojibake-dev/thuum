@@ -397,6 +397,40 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   the host after c1's return and both seats' loading screens. D12's number
   stands at T3; green again in the citable set (162052, gate-m3-train-43 155001
   on de9d048e, 09:55 PDT).
+  D12's B built (train-44, fork m3-train-44 cf8b6007, 2026-10-24 16:25 PDT;
+  Eli, 15:49 PDT: "leaning towards B, that's the best practice way right? but
+  also A as a background"): the client disconnects at the game's own quit.
+  The re-analyst's read of the quit path (REA on sky-re, 16:00 PDT,
+  CONFIRMED-STATIC for the instructions): every quit is one byte store,
+  Main::quitGame (CommonLibSSE-NG include/RE/M/Main.h:77; Main::Singleton
+  403449, the byte at +0x10), by the console's QuitGame (22896), the main and
+  system menus' QuitToDesktop callbacks (52119, 53265, nine bytes each), the
+  window procedure's WM_DESTROY case (36649; Alt-F4 and the title bar's X
+  reach it through DefWindowProc) and Skyrim Platform's own exitProcess;
+  WinMain (36544) tests the byte after each Main::Update (36564) and makes
+  one call to the shutdown routine (36551) at WinMain+0x1ae, on the main
+  thread, with our network thread (wire-client-ffi's std::thread, no
+  engine's) alive through the whole teardown; the engine never calls
+  ExitProcess (the CRT's exit does after WinMain returns), and no SKSE
+  message marks the quit. Skyrim Platform's thunk on that call (Hooks.cpp
+  OnQuitShutdown, write_call<5> at Offsets::Hooks::QuitShutdownCall, AE only)
+  tears the client down first (MpClientPluginApi::DestroyClientAtQuit, only
+  when a client was created) and logs the cost, then runs the engine's
+  shutdown; the teardown's wait for the network thread is bounded at 200 ms
+  (wire-client-ffi shutdown: Close, the disconnect datagram, one last poll,
+  normally 5 to 10 ms; the handle dropped past the bound), so a wedged socket
+  never hangs the quit. Expected: the server's ClientDisconnected and the
+  cell's pass inside the same second as the quit, ahead of the 4 s stale
+  line. HYPOTHESIS until the lab's read (rule 2): lab/frida/quit-path.js
+  stamps Main::Update's first frame with the byte set, the shutdown call's
+  thread, time and caller, DestroyClient's entry, return and cost, and
+  ExitProcess; lab/.cache/probes/x-host-quit.yaml (by path, for 44's stage)
+  quits c1 through the console (qqq) while it hosts Riverwood and claims
+  c2's grant within 4 s. What would falsify it: a quit reaching ExitProcess
+  with no shutdown entry (a GetProcAddress'd ExitProcess), the callbacks on
+  another thread, the datagram sent and no ClientDisconnected, or the
+  teardown past 200 ms. The stale rule stays the backstop for a crash or a
+  kill (A as the background, Eli's words).
 
 ## Client
 

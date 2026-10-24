@@ -29,6 +29,15 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
   each of B's checks needs a lab read.
   
   - Decision: jump right to B
+  - Built (thuum-magnus, 2026-10-24 16:20 PDT, fork m3-train-44 597bb9dc,
+    dd285ad9, 6e827918): the ActorDeath message (MsgType 52), the server's
+    checks (the reporter simulates the actor; a hit by the named killer the
+    server numbered within 3 s; a drop of 200 units in the host's samples
+    within 4 s; an activation within 512 units within 5 s; essential and
+    protected by the engine's rule; a script refused), the client's report at
+    deathStart, npcDeathReports (false restores A), five T0 cases. ADR-048
+    accepted as B. The lab read owed: x-npc-fall-report (by path) on 44's
+    stage; the trap's evidence is a HYPOTHESIS (docs/verbs/npc-fate.md).
 
 
 ### D2. The level a leveled NPC is rolled at
@@ -44,6 +53,12 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
   - A3. The party's low end: the lowest level among the same players. The level-1 never meets a cave bear because a level-30 walked in ahead; the level-30 meets wolves. The safe pick for a mixed pair, dull for the strong one.
   - A4. The world's level: a server setting (npcRollLevel, say 10), the same for everyone until the operator raises it. A designed difficulty, as a dedicated TES3MP server often runs; nobody's arrival changes it; a lone level-1 meets level-10 lists.
   - Recommended: A2, with A3 as the switch for a friends' night with a newcomer. All three are one line where PartOne sets the roll's level around the fate pass (fateLoaderLevel), behind one setting (npcRollLevel: loader | party-mean | party-min | a number), a T0 each; the pin probe reads server.fate(id).level. A slice of an afternoon, after the merge.
+  - Built (16:30 PDT, fork m3-train-44 e3b39ac8): all three behind
+    npcRollLevel (PartOne::FateRollLevel), party-mean the default, A3 as
+    "party-min", A4 as a number, the old rule as "loader"; T0
+    NpcRollLevelTest. The pick is a line in lab/deploy/sky-srv/
+    server-settings.json, not a build: say A2, A3 or A4 (or a number) and
+    numidium sets it.
 
 ### D3. A respawned NPC's pick
 - A. Re-roll at the respawn, as the engine re-rolls a leveled placement at a cell
@@ -152,6 +167,16 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
   lab calibrates the number, and the merge waits for Eli's answer.
 
 - Decision: leaning towards B, that's the best practice way right? but also A as a background. 
+- Built (16:25 PDT, fork m3-train-44 cf8b6007): B on top of A. The
+  re-analyst read the quit path (every quit is one byte store, Main::quitGame;
+  WinMain's one call to the engine's shutdown routine runs on the main thread
+  with the network thread alive; the engine never calls ExitProcess), so the
+  exit hook's premise in the recommendation above was wrong: Skyrim Platform
+  thunks that call, tears the client down first (the disconnect datagram
+  goes out, the wait bounded at 200 ms) and then runs the shutdown. A (the
+  stale rule) stays the backstop for a crash or a kill. HYPOTHESIS until
+  the lab's read: lab/frida/quit-path.js and x-host-quit (by path) on 44's
+  stage (docs/verbs/cell-host.md, the quitting-host row).
 
 ## The deaths' four calls, made under the design law while building (2026-10-23 20:39 PDT); say the letter to change one
 
