@@ -416,7 +416,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   OnQuitShutdown, write_call<5> at Offsets::Hooks::QuitShutdownCall, AE only)
   tears the client down first (MpClientPluginApi::DestroyClientAtQuit, only
   when a client was created) and logs the cost, then runs the engine's
-  shutdown; the teardown's wait for the network thread is bounded at 200 ms
+  shutdown; the call site read again through REA on 2026-10-24 16:57 PDT
+  (thuum-magnus): 0x14063eb1e inside WinMain 0x14063e970 decodes as `CALL
+  0x140641c60`, bytes e8 3d 31 00 00, five bytes, reached by the conditional
+  jump from 0x14063eb08 (the quitGame test), so write_call<5> fits the
+  instruction exactly (CONFIRMED-STATIC); the teardown's wait for the network thread is bounded at 200 ms
   (wire-client-ffi shutdown: Close, the disconnect datagram, one last poll,
   normally 5 to 10 ms; the handle dropped past the bound), so a wedged socket
   never hangs the quit. Expected: the server's ClientDisconnected and the
