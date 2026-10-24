@@ -800,7 +800,15 @@ rolled is re-rolled once (no base compare through the clone's template yet).
   fixtures and a new session npc-fate.yaml later (a fated placement's
   CreateActor then ActorFate, both stacks byte-equal). The legacy server
   without npcFate must produce today's output for every existing session.
-- T3 scenario id: lab/scenarios/b-npc-fate.yaml (written by hand after the
+- T3 scenario ids, committed (01:16 PDT, main 7135b4be, one commit each,
+  rule 13): lab/scenarios/b-npc-death.yaml (the death's travel on both
+  seats through the viewer's return, the restart and the host's relaunch:
+  x-npc-death v3 GREEN 080218) and lab/scenarios/b-npc-loot.yaml (the corpse
+  as the server's container: x-npc-loot GREEN 064648); b-npc-respawn follows
+  x-npc-respawn's hold (its v3 rerunning). The sketch below (b-npc-fate.yaml,
+  the Barrow's bandits with a bow and the restart) stays the fuller scenario
+  for the verb's close.
+- T3 scenario id, the sketch: lab/scenarios/b-npc-fate.yaml (written by hand after the
   grammar lands, rule 13; the sketch): two seats under npcEnabled and
   npcFate, the clock at 7.9; c1 connects and teleports to Bleak Falls
   Barrow's first chamber (an interior; the landing read by x-npc-fate-roll),
@@ -1242,7 +1250,7 @@ D16.
 - [ ] native hook + T1
 - [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; the committed b-npc-fate waits on x-npc-death's hold; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; committed: b-npc-death and b-npc-loot on main 7135b4be, b-npc-respawn after its probe's hold; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
