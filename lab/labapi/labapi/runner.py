@@ -397,7 +397,8 @@ class Runner:
         settings = self.s.game_settings_files().get(version)
         npc = rec.scenario.server.npcEnabled
         hour = hour_override if hour_override is not None else rec.scenario.server.gameHour
-        if settings and (npc is not None or hour is not None):
+        respawn = rec.scenario.server.npcRespawnHours
+        if settings and (npc is not None or hour is not None or respawn is not None):
             # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
             # file, laid beside the world for this run alone, so no second file is kept in step
             try:
@@ -406,6 +407,8 @@ class Runner:
                 raise RunnerError(f"E_RUN_SETTINGS: cannot read {settings} for the run's overlay: {e}") from e
             if npc is not None:
                 d["npcEnabled"] = npc
+            if respawn is not None:
+                d["npcRespawnHours"] = respawn
             if hour is not None:
                 # the clock is a pure function of the wall clock and the time block (wire-rules
                 # clock.rs): it reads start.hour at the epoch, so the run's start is the epoch

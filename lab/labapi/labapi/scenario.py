@@ -70,6 +70,10 @@ class ServerSpec(BaseModel):
     # overlay's time block starts the server's clock at it when the run's
     # server starts (wire-rules clock.rs: epoch and start.hour); None keeps the file's
     gameHour: float | None = None
+    # the run's own respawn hours (train-42's npcRespawnHours server setting, ScampServer.cpp: the lab's knob over the
+    # master's GMST iHoursToRespawnCell, 240 in Skyrim.esm 1.6.1170), so a death's respawn falls inside a run after
+    # a restart to a later hour; None keeps the file's
+    npcRespawnHours: float | None = None
 
 
 class Step(BaseModel):
@@ -510,14 +514,19 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
     if hour is not None and (isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24):
         raise ValueError(f"server.gameHour is an hour from 0 to under 24, got {hour!r}")
     hour = float(hour) if hour is not None else None
+    respawn = server.get("npcRespawnHours")
+    if respawn is not None and (isinstance(respawn, bool) or not isinstance(respawn, (int, float)) or not 0 < respawn <= 720):
+        raise ValueError(f"server.npcRespawnHours is a number of game hours above 0 and up to 720, got {respawn!r}")
+    respawn = float(respawn) if respawn is not None else None
     world = server.get("world")
     if world is None:
-        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc, gameHour=hour)
+        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc, gameHour=hour,
+                          npcRespawnHours=respawn)
     if "snapshot" in server:
         raise ValueError("server takes a snapshot or a world, not both")
     if not isinstance(world, str) or not _WORLD_NAME.fullmatch(world):
         raise ValueError(f"server.world names a directory under lab/fixtures/worlds, got {world!r}")
-    return ServerSpec(world=world, netem=netem, npcEnabled=npc, gameHour=hour)
+    return ServerSpec(world=world, netem=netem, npcEnabled=npc, gameHour=hour, npcRespawnHours=respawn)
 
 
 def load_scenario(text: str) -> Scenario:
