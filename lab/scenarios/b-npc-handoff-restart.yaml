@@ -1,0 +1,49 @@
+# b-npc-handoff-restart (M3, docs/verbs/npc-handoff.md, ADR-047 D10;
+# 2026-10-23): after a server restart each cell goes to the nearest player
+# at the first grants (provisional for 5 s, a nearer player by grid ring
+# takes a cell at once), not to whoever reported first. Two seats under
+# npcEnabled, c1 at Riverwood's landing (0x9732) and c2 one cell west
+# (0x9733), both cells hosted; then `server: restart` and both reconnect
+# together: 0x9732 is c1's and 0x9733 c2's, Alvor live on c1 and a blocked
+# puppet on c2, and a minute later the same two hosts (no churn). Proved as
+# x-handoff-restart GREEN 222408 on train-40. Its own commit (rule 13).
+id: b-npc-handoff-restart
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 9.0
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 16000, y: -47204, z: -128, rot: [0, 0, 90]}
+  - wait: 25
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9733).hosted == true
+  # the cold start: every cell unhosted, both games report their loaded sets together
+  - server: restart
+  - c1: connect
+  - c2: connect
+  - wait: 20
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - server.host(0x9733).client == "c2"
+      - c1.npc_state(0x13482).aiEnabled == true
+      - c2.npc_state(0x13482).aiEnabled == false
+      - c2.npc_state(0x13482).activationBlocked == true
+  # after the window hosts do not churn: a minute on, the same two
+  - wait: 60
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - server.host(0x9733).client == "c2"
+artifacts: [server.log, c1.log, c2.log, screenshots]
