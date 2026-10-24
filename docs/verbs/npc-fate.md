@@ -864,7 +864,18 @@ actor from the inventory the init built (HYPOTHESIS: how it hooks in).
 Consequence: the pin decides what SPID equips as long as SPID dresses from
 the inventory; whether SPID's own item distribution adds items on top, and
 whether its chance rules differ per game (another split the layer's INIs
-would own), is the open row for the parity read.
+would own), is the open row for the parity read. Read (17:44 PDT, numidium
+over the seats' five _DISTR.ini files and 1115 SPID logs): no Item, Outfit,
+SleepOutfit, Skin or DeathItem line anywhere, every line a Spell or a Perk
+at chance 100 (Stealth Detection Fixes' three, Sun Affects' one,
+Thaumaturgy's three perks), so SPID's configs cannot dress a bandit
+differently on two engines and the pin's worn list is the whole picture as
+far as SPID goes; the DLL in the equipper's frame is SPID 7.3.0's Outfit
+Manager, installed at startup even with no Outfit lines (hooks on
+InitItemImpl, Load3D, ResetInventory, SetOutfit, the inventory filters and
+AddWornOutfit, a HasOutfitItems stub), dressing from the inventory the init
+built unless one of those hooks re-filters (HYPOTHESIS; the source is
+powerof3's Spell-Perk-Item-Distributor if the re-analyst needs the sites).
 
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter

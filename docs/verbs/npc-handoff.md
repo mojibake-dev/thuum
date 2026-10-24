@@ -478,7 +478,24 @@ each imposition's target is explicit.
   host's a Teleport for the actor before the record moves, so the grid's
   DestroyActor follows it in order and the viewer's engine has already
   moved its reference (remoteServer's onTeleportMessage). HYPOTHESIS until
-  the probe runs again.
+  the probe runs again. The door agent's read of 001915 (17:44 PDT): the
+  server's lines show the snippet walking Alvor into his house at 00:21:17
+  (before the probe's first wait), a false "no host to walk it" at the exit
+  door at 00:23:10 (the door's pre-check called MayMoveActor, which REMOVED
+  his standing follow before the host lookup; c1's engine walked him out
+  anyway), then the inn at 00:23:44; c2's game had crashed at 00:20:30 in
+  Actor.UnequipAll on its deleted copy of c1's character (kDeleted) and
+  launch.ps1 relaunched it; c2 then got only the grid's DestroyActor at the
+  crossing (the unreliable relay and nothing after), so a view update never
+  came; c1 threw on 'tick' five times setting an interior door's isOpen on a
+  form it held no model for; and the lab's log-count reads the Skyrim
+  Platform log, so a printConsole line is invisible to it. Four fixes
+  (10375935): cells.rs judge and PartOne::WouldMoveActor, the door's
+  pre-check with nothing recorded (the follow is the host's report's);
+  applyEquipment and formView skip a deleted reference; a property for a
+  form not held is skipped with a trace; the "moved" line through logTrace.
+  numidium keeps a crashed game's Skyrim Platform log across the retry (main
+  2492956) from this stage on.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
