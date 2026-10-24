@@ -357,7 +357,16 @@ each imposition's target is explicit.
   hosted NPC into an unhosted cell (both servers drop it); the legacy server
   knows no ActorHandoff. The hosted cases need an NPC, which T2's servers do
   not load (npc-puppet.md:706-711).
-- T3 scenario id: lab/scenarios/b-npc-handoff.yaml. Two seats, Riverwood as
+- T3 scenario ids, this slice (D6, D10, D11; committed 22:54 PDT on main
+  839ed5bc, each in its own commit, rule 13): lab/scenarios/
+  b-npc-handoff-door.yaml (the follow through a door, the viewer's reference
+  moved, the grant at the viewer's entry, the unsubscribed puppet's bind: x-
+  handoff-door v6 GREEN 054447), b-npc-handoff-restart.yaml (the nearest
+  player's grants after a restart: x-handoff-restart GREEN 222408),
+  b-npc-handoff-night.yaml (the record brought out of an unhosted interior:
+  x-handoff-night GREEN 230913). The second slice's scenario (D7 to D9),
+  sketched below as b-npc-handoff.yaml, waits for its grammar.
+- T3 scenario id, the second slice: lab/scenarios/b-npc-handoff.yaml. Two seats, Riverwood as
   b-npc-puppet lays it (Tamriel 0x3C, 0x9732 at (4,-12), the clock to 7.9,
   npcEnabled, tgm on both as b-cell-host has it), c1 first. Grammar first
   (a scenario needing new facts lands after them): server.simulator(id)
@@ -628,7 +637,7 @@ the lab. H5 stays HYPOTHESIS until x-handoff-door.
 - [ ] native hook + T1 (none: no new Address Library id)
 - [x] TS handler, first slice (formView's door move behind npcHandoff, fork m3-train-40 b1aa119e; HandoffService with keyframes is D8's)
 - [x] T2 green, first slice (train-40's stage 92529f31: 33 sessions identical, 16:03 PDT; the follow and the cold start send nothing under T2's NPC-less servers, the message layer unchanged)
-- [ ] T3 scenario green, no HYPOTHESIS tags (the probes: x-handoff-restart GREEN 222408, x-handoff-night GREEN 230913, x-handoff-door v5 GREEN 041126 on a5e431e2 (lab-api 1002b909; D6 held in three runs, 025527 by formView's rule, 032354 and 041126 by the server's Teleport; the third leg lands in the record's cell); H5 held; GATE 9 of 9 on a5e431e2 (run set 20261024-044200-gate-m3-train-40, 22:12 PDT) and T2 green: the merge of 39 and 40 waits on Eli's D12 and D6 alone; v6 GREEN 054447 on 41's stage (all four legs: the viewer's entry after the grant finds its puppet a unit from the host's live Alvor, and this run had no gap at all; 041126's 500 units were the unloaded-house case, closed once the viewer loads the cell; 22:51 PDT); v6 was written as the viewer's entry after the grant (its puppet, unsubscribed outside, sits where the Teleport put it until the attach binds it: 21:16 PDT); b-npc-handoff itself after the grammar; the gate set 20261023-223340-gate-m3-train-40 GREEN 9/9 stands for the merge by GATE_SET, which waits for Eli's D6 and D12)
+- [ ] T3 scenario green, no HYPOTHESIS tags (committed: b-npc-handoff-door, b-npc-handoff-restart, b-npc-handoff-night on main 839ed5bc, the green probes promoted unchanged; they run at 40's merge gate; the probes: x-handoff-restart GREEN 222408, x-handoff-night GREEN 230913, x-handoff-door v5 GREEN 041126 on a5e431e2 (lab-api 1002b909; D6 held in three runs, 025527 by formView's rule, 032354 and 041126 by the server's Teleport; the third leg lands in the record's cell); H5 held; GATE 9 of 9 on a5e431e2 (run set 20261024-044200-gate-m3-train-40, 22:12 PDT) and T2 green: the merge of 39 and 40 waits on Eli's D12 and D6 alone; v6 GREEN 054447 on 41's stage (all four legs: the viewer's entry after the grant finds its puppet a unit from the host's live Alvor, and this run had no gap at all; 041126's 500 units were the unloaded-house case, closed once the viewer loads the cell; 22:51 PDT); v6 was written as the viewer's entry after the grant (its puppet, unsubscribed outside, sits where the Teleport put it until the attach binds it: 21:16 PDT); b-npc-handoff itself after the grammar; the gate set 20261023-223340-gate-m3-train-40 GREEN 9/9 stands for the merge by GATE_SET, which waits for Eli's D6 and D12)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
