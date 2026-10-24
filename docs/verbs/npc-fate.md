@@ -388,9 +388,11 @@ Registry, train-41 (15:26 PDT): the engine's two rolls are suppressed on a
 fated reference and replaced by the server's, through Skyrim Platform's
 detours (FateHooks.cpp, fork m3-train-41): the per-reference leveled roll
 wrapper (Address Library 14752 by `just addr`, the re-analyst's read,
-HYPOTHESIS) answers the server's NPC_ as the one pick; InventoryChanges::
-InitOutfitItems (16072, CommonLibSSE-NG's binding) adds the server's worn
-list tagged as the outfit's items and rolls nothing. Both pass every call
+held three times in the lab) answers the server's NPC_ as the one pick; the
+outfit-array resolver (16155, re-npc-roll.md section 8; first 16072, which
+the lab showed to be the late path alone) adds the server's worn list
+tagged as the outfit's items under every inventory init and rolls nothing;
+the sleep outfit stays the engine's (a declared gap). Both pass every call
 through while the npcFate switch is off (the default until x-npc-fate-roll)
 or the reference is unfated. No Papyrus native is added (the exports are
 Skyrim Platform's, as setPuppet is); docs/NATIVES.md unchanged. The lab
@@ -609,10 +611,15 @@ head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
 Built, the client half (train-41, fork m3-train-41 8535e336, 2026-10-23 15:23 PDT),
 behind the npcFate switch, off by default: Skyrim Platform's fate table and
 two Frida Gum detours (the leveled roll wrapper 14752 answering the server's
-NPC_ as the one CALCED_OBJECT; InventoryChanges::InitOutfitItems 16072
-adding the server's worn list tagged ExtraOutfitItem and skipping the roll),
-the exports setActorFate, clearActorFate, setActorFateEnabled, rerollActor
-(the engine's re-roll 37323 on the game thread) and actorFateCount, every
+NPC_ as the one CALCED_OBJECT; since 17:24 PDT, 1a3a91c4, the outfit-array
+resolver 16155 under every inventory init, adding the server's worn list
+tagged through the engine's own ExtraOutfitItem setter and entry adder and
+skipping the roll, in place of InventoryChanges::InitOutfitItems 16072,
+which the lab showed to be the late path alone), the exports setActorFate,
+clearActorFate, setActorFateEnabled, rerollActor (the engine's re-roll 37323
+on the game thread, for a leveled pick), redressActor (the outfit stripped,
+the server's list added tagged, worn again, for a plain base) and
+actorFateCount, every
 id from re-npc-roll.md's table by `just addr`, every structure offset a
 CommonLibSSE-NG header line; ActorFateService keeps every fate and re-rolls
 a reference the engine already holds when its fate is new (a login's
