@@ -88,7 +88,10 @@ steps:
   - assert:
       - server.host(0x9732).client == "c2"
       - c2.npc_state(0x13483).aiEnabled == true
-      - c1.npc_state(0x13483).aiEnabled == false
+      # no loaded live copy on the seat that left: an unloaded copy keeps its AI bit since
+      # train-40 a146ee0c (the engine's own low-process schedule moves it, nobody simulates it
+      # with 3D; npc-handoff D11), so the claim is loaded-ness and AI together, not the bit alone
+      - not (c1.npc_state(0x13483).is3DLoaded and c1.npc_state(0x13483).aiEnabled)
   # a restart: the games reconnect on their own within the wait (skymp5-client's
   # reconnect, not the scenario's), the server grants the cell again to its only
   # loader within about 12 s, and on that seat the demote at the reconnect precedes
@@ -104,13 +107,13 @@ steps:
   - c1: npc-state {formId: 0x13483}
   - c2: npc-state {formId: 0x13483}
   - assert:
-      - not (c1.npc_state(0x13483).aiEnabled == true and c2.npc_state(0x13483).aiEnabled == true)
+      - not ((c1.npc_state(0x13483).is3DLoaded and c1.npc_state(0x13483).aiEnabled) and (c2.npc_state(0x13483).is3DLoaded and c2.npc_state(0x13483).aiEnabled))
   - wait: 12
   - c1: npc-state {formId: 0x13483}
   - c2: npc-state {formId: 0x13483}
   - assert:
       - server.host(0x9732).hosted == true
-      - (c1.npc_state(0x13483).aiEnabled == true) != (c2.npc_state(0x13483).aiEnabled == true)
+      - (c1.npc_state(0x13483).is3DLoaded and c1.npc_state(0x13483).aiEnabled) != (c2.npc_state(0x13483).is3DLoaded and c2.npc_state(0x13483).aiEnabled)
   - c1: dump-state
   - c2: dump-state
 artifacts: [server.log, c1.log, c2.log, screenshots]
