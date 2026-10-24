@@ -769,7 +769,22 @@ and 4 still unmeasurable on predators (no re-roll ran; defaultOutfit 0).
 The outfit hooks, narrowed: InitOutfitItems fired twice later on other
 actors (the hook works, 16072 is reachable), but the load-time outfit-shaped
 rolls bypass it (into +0x23a37a) and AddWornOutfit never fired; the
-re-analyst's section 8 reads the load-time path. Leg 2 was void (the
+re-analyst's section 8 reads the load-time path. Section 8 (17:09 PDT,
+REA on sky-re): the load-time outfit roll is InventoryChanges::InitLeveledItems
+(16129) calling the outfit-array resolver 16155 for defaultOutfit and
+sleepOutfit straight out of InitInventoryIfRequired, at the same InitItemImpl
+moment as the LVLN roll and before any 3D; 16072 is the late path (418622's,
+gated by HasOutfitItems, which gates nothing at the load); 16155 has exactly
+those two callers; InitInventoryIfRequired strips every outfit-tagged entry
+(RemoveOutfitItems with none) before it rolls, so a pre-tagged list is
+removed at the init. The outfit pin therefore moves to a detour on 16155:
+for a fated owner, the server's worn list tagged through the engine's own
+ExtraOutfitItem setter (11647) and entry adder (16053), returning without
+rolling; every other owner falls through; one site covers the load, every
+re-init and the late re-dress; a late fate on an unleveled actor goes
+through a redress native (RemoveOutfitItems with the outfit, the same adds,
+AddWornOutfit). The trace gains 16129, 16155, 16038 and 418622's outfit id
+to confirm the chain before the detour ships. Leg 2 was void (the
 relaunched game logged in inside the forest, died before its tgm, and
 respawned at the spawn; the "no placed 0x85547" was the seat's respawn, not
 a chance-none deletion); the rerun teleports to the spawn before the
