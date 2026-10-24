@@ -1326,3 +1326,21 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
   promoted seat after a handoff (8eafa85d's claim, which x-npc-talk-prompt
   055858 had read in the state), the walk ("a Tiny bit jumpy, otherwise doing
   ok").
+
+## Amendment, 2026-10-24 (03:14 PDT): the loss-time demote and an unloaded actor
+
+The demote at a lost form (formView.destroy(lost), puppetService.demoteOnLoss,
+PuppetApi Demote) cleared the AI bit of an actor with no 3D as well ("the bit
+alone"). An unloaded actor is simulated by nobody's engine, and no word
+reaches a record nobody subscribes, so an actor whose record sat in an
+unhosted interior at a reconnect stayed AI-off for good: npc-handoff's D11
+(b-npc-handoff-night 092208) found it. Since fork m3-train-40 a146ee0c the
+no-3D branch leaves the actor alone (AI and activation untouched, a log
+line); the engine's low-process schedule moves it, the roster of the host it
+walks in on sights it, and the server's word rebinds and places the copy when
+its cell loads again (a snap at re-entry, the engine's own behaviour for an
+unloaded actor). A loaded actor is demoted as before. b-npc-puppet's far-seat
+asserts (the leaving host's Sigrid "aiEnabled false" from the lab spawn, and
+the restart's "exactly one seat AI on") read the old mechanism and move to
+"no loaded live copy" once npc-state carries is3DLoaded (numidium's grammar).
+
