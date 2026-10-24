@@ -1072,10 +1072,28 @@ outfit 1e608", d1fa9 (4 of 4, outfit c0197), d1f56 (5 of 5, c0197), and
 107d06: the outfit imposition's late path works on bases with a default
 outfit. x-npc-fate-outfit green on the same stage (052632, npcFate off, the
 detours inert; its trace on the results site). Then v3 GREEN (22:46 PDT, run 20261024-053914, 10 of 10): leg 1 as before (three runs now); leg 2, c2 parked over square 31,-17 at z 25000 landed in one attempt and stood at about 12,946 absolute after the wait (above the forest's 10,700: no fall-through), no late line while parked or after stepping in, both species 78346 on c2's engine, "pinned 85547 to" once. The species half of ADR-046 decision 1 holds at T3 on both seats and both paths; npcFate flipped on by default (3aabd51e); the worn half is x-npc-fate-outfit v3's read on the Embershard bandits. A finding outside the fate:
-c2's console logged 108 "settle 86111" lines over 19 s (npc-puppet's
-periodic re-apply of an unchanged record, formView.ts:622 and
-movementApply.ts:322) with the puppet 2,077 units from its record and the
-gap never closing; an agent reads the run for the host and grant timeline.
+c2's console logged 108 "settle 86111" lines over 19 s with the puppet
+2,077 units from its record and the gap never closing. Read (22:50 PDT, an
+agent over the run's logs): 86111 died at 05:24:42 UTC to another NPC's hit
+under c1's hosting (the server's number), respawned 25 s later on 41's code
+(the old wall timer; 42's clock was not on that stage) with the record set
+to its placement 2,077 units away; the respawn's container with the
+teleport went to the host alone (MpActor::SendAndSetDeathState), and c2, a
+viewer that had joined with the record dead and killed its copy in place,
+got only RespawnEvent's isDead=false property, which 41's client ignores
+for an engine actor. So c2's copy stayed a corpse, movementApply's
+`!actor.isDead()` guard skipped every apply (the snap over 1,024 units
+included) while the settle print fired on each of c1's samples, until the
+cell grant to c2 promoted the corpse live without placing it. The cause is
+the deaths' respawn travel, not npc-puppet's settle. 42's client half
+applies the property (the seam, 55e64a94; Resurrect on an engine
+reference, 95abf0dc), and 61ffa74e adds the mirror of the dead bind: a
+dead engine reference whose record the server explicitly says is alive is
+resurrected on the two-second read (a seat that reconnects after the
+sweep binds a corpse), the server saying a game-file actor's life
+explicitly in CreateActor (props.isDead false, within the contract); a
+record never dead says nothing, so ADR-038's predicted deaths stand. The
+confirming read is x-npc-respawn's (both seats alive after the restart).
 
 The deaths' reads, written by path (20:46 PDT; lab/.cache/probes/x-npc-death.yaml,
 40 steps, and x-npc-loot.yaml, 22 steps, both loading through
