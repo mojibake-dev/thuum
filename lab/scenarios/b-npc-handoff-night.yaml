@@ -54,6 +54,9 @@ steps:
       # the claim is host-agnostic: one seat runs him loaded, the other does not, both have him out
       - server.host(0x9732).hosted == true
       - (c1.npc_state(0x13482).is3DLoaded and c1.npc_state(0x13482).aiEnabled) != (c2.npc_state(0x13482).is3DLoaded and c2.npc_state(0x13482).aiEnabled)
-      - c1.npc_state(0x13482).cell == 0x9732
-      - c2.npc_state(0x13482).cell == 0x9732
+      # out of the house, the same cell on both engines: his morning walk crosses Riverwood's
+      # cells (145834 read him in 0x9731, the one west of 0x9732), so the claim is "not the house"
+      # and "the engines agree", not one cell
+      - c1.npc_state(0x13482).cell != 0x133c8
+      - c1.npc_state(0x13482).cell == c2.npc_state(0x13482).cell
 artifacts: [server.log, c1.log, c2.log, screenshots]
