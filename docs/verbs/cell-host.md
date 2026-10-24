@@ -382,7 +382,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   two changes carried): no stale line at either login; the kill's alone,
   "silent 4032 ms, stale" and the pass at epoch 2 about 9.0 s after c1's
   last report, the disconnect 4.6 s later. The row's number is MEASURED and
-  its login blips closed.
+  its login blips closed. Carried in train-40 a5e431e2: T2 green (33 sessions), the gate set
+  GREEN 9 of 9 (run set 20261024-044200-gate-m3-train-40, 22:13 PDT) and
+  x-host-kill green on 92529f31 with the rule unchanged since; the merge
+  waits on Eli's D12 alone (a restage first if 41's stage has replaced the
+  gate's, as agreed with numidium).
 
 ## Client
 
