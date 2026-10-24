@@ -531,6 +531,36 @@ head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
 
 ## Server
 
+Built, the deaths (train-42, fork m3-train-42 645f9344 the server, 95abf0dc
+the client, 2026-10-23 20:39 PDT), independent of ADR-048's D1 and held from
+the merge until Eli's answer: the death stamps the record with the server's
+game day (MpChangeFormREFR::fateDiedAt, optional, formVersion kept; the
+five-field Fate struct below reduced to the one stamp the deadline needs,
+the rest derivable or bookkeeping); RespawnWithDelay's game-file branch
+schedules the fated respawn for every caller (the death event, the load,
+the stray hit), so no 25 s timer touches a game-file actor;
+PartOne::TickFateRespawns sweeps the due set once a second against the
+installed game clock (a sweep, not the one wall timer below: the rest and
+sleep verbs jump GameDaysPassed and a timer set at the death would miss the
+jump); the hours are WorldState::FateRespawnHours, the npcRespawnHours
+setting when set, else the executable's compiled iHoursToRespawnCell 72
+(re-npc-roll.md section 9; the master's GMST value is a read owed, T0 5);
+the respawn stands the record at its placement (GetEditorLocationalData
+through SendAndSetDeathState's teleport), attributes full, the roll fresh
+regardless of the death item (D3 A, the engine's reset), the fate sent
+again and isDead false broadcast; a unique base stays dead (the engine's
+rule), essential and protected per MpActor::MayDie in both percentage paths
+(essential never dies, protected dies to a player's hand alone); a dead
+game-file actor is a container (IsCorpse shares the CONT branch's body:
+occupancy within 512, the record's inventory, OpenContainer, TakeItem and
+PutItem on the server). T0 (NpcFateTest): the body lies inside the window
+and stands at its placement past it, rolled anew, its fate sent; the corpse
+opens as a container and the take is the server's; the broadcast case
+leaves the shared world alive. Owed: the GMST read, the JSON round-trip T0,
+the restart scenario (rule 6), kill-ref and respawn-ref labCommands (asked
+of numidium), the cleared hours (the quests verb), kNeverResets zones
+(libespm reads no ECZN: every cell resets).
+
 - Where the logic lives:
   - The loader. WorldState::AttachEspmRecord (WorldState.cpp:427-690) admits
     a LVLN base: `isLeveledNpc = t == "LVLN"` beside isNpc (:452), rolled to
@@ -607,6 +637,25 @@ head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
   path above untouched.
 
 ## Client
+
+Built, the deaths' client half (95abf0dc, 20:39 PDT): formView binds a dead
+record's engine reference (the copies' "never spawn dead" kept for copies)
+and emits applyDeathStateEvent at the bind and every two seconds while the
+record is dead and the engine's actor is not (the engine's own cell reset
+stands corpses up on a re-entry, re-npc-roll.md section 9); the record's
+inventory applies to a dead engine reference (the server's container);
+deathService blocks a game-file body's activation at death, as dealWithRef
+blocks a CONT's, so the loot menu is the server's OpenContainer with default
+processing, the activate hook still reporting; a game-file actor's respawn
+is the engine's own Resurrect (inventory and AI reset), the fresh roll
+through ActorFate's late path, the placement through the death container's
+teleport (onTeleportMessage moves the host's engine reference), the host's
+actor unblocked and a puppet kept blocked, in place of RespawnNeededError's
+disable-and-delete of the placement; onOpenContainerMessage takes a dead
+NPC_ as a container (ContainerMenu). HYPOTHESIS until the lab: H4 (the menu
+lists the server's items), H6 (the body at the record's point on a reload),
+H9 (Resurrect, then the late re-roll), H10 and H11 (the kill on a puppet
+and on the host's actor).
 
 Built, the client half (train-41, fork m3-train-41 8535e336, 2026-10-23 15:23 PDT),
 behind the npcFate switch, off by default: Skyrim Platform's fate table and
@@ -971,6 +1020,18 @@ then the teleport in: the detour pins at the attach's roll, "late fate for
 equal. Worn lists read, not asserted (the predators wear no outfit; the
 outfit claim is x-npc-fate-outfit's). The switch flips to true on 41 when
 both legs hold.
+
+The deaths' reads (owed the grammar: kill-ref and respawn-ref labCommands, a
+key step for the loot menu's Take All): x-npc-death, two seats in the forest,
+kill-ref the predator, both seats' npc_state dead within 10 s and
+server.ref isDead; c2 two cells off and back, the body still dead on c2;
+server: restart, both reconnect, dead on both and server.ref isDead with the
+point kept (rule 6); c1 relaunch, c2 hosts, the body stays. x-npc-loot: the
+corpse given three gold by labCommand, c1 activates it, the ContainerMenu
+opens, Take All, server.inventory(c1) holds the gold and server.ref's does
+not. x-npc-respawn: npcRespawnHours 1 in the server block, the kill, restart
+with gameHour two hours on, the predator alive at its placement on both
+seats and server.ref alive, a new ActorFate in c1's log.
 
 ## Status
 
