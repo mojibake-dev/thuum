@@ -317,6 +317,20 @@ class NpcKillStep(unittest.TestCase):
         step = load_scenario('id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {formId: 0x13482, distance: 150, cell: record}\n').steps[0]
         self.assertEqual(step.args["cell"], "record")
 
+    def test_kill_ref_and_respawn_ref_take_a_form_id(self):
+        # a game-file actor killed by the server (its killer a client of the scenario) or put up again at once
+        from labapi.scenario import load_scenario
+
+        head = "id: x-k\nclients: [c1, c2]\nsteps:\n  - c1: "
+        kill = load_scenario(head + "kill-ref {formId: 0x85547, killer: c2}\n").steps[0]
+        self.assertEqual((kill.kind, kill.action, kill.args), ("client", "kill-ref", {"formId": 0x85547, "killer": "c2"}))
+        up = load_scenario(head + "respawn-ref {formId: 0x85547, inPlace: true}\n").steps[0]
+        self.assertEqual(up.args, {"formId": 0x85547, "inPlace": True})
+        for bad in ("kill-ref {formId: 0x85547, killer: c3}", "kill-ref {killer: c2}", "kill-ref {formId: 0x85547, inPlace: true}",
+                    "respawn-ref {formId: 0x85547, killer: c2}", "respawn-ref {formId: 0x85547, inPlace: 1}", "respawn-ref {formId: true}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+
     def test_log_count_and_a_restart_that_sets_the_clock(self):
         # a client's log lines counted mid-run, and a restart that lays the clock anew (npc-handoff's reads)
         from labapi.scenario import load_scenario

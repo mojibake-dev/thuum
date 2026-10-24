@@ -335,3 +335,44 @@ test("labState cellHost reads the server's host table and ref an actor by id", (
   const none = mp.onHttpRpcRunAttempt("labState", { kind: "cellHost", cell: 0xbbb1 });
   assert.strictEqual(none.found, false);
 });
+
+test("kill-ref kills a game-file actor through the console verb's Kill, its killer a seat", () => {
+  global.mp = fakeMp();
+  const calls = [];
+  mp.executeConsoleCommand = (actorId, name, args) => {
+    calls.push([actorId, name, args]);
+    mp.set(args[0], "isDead", true);
+  };
+  mp.set(0x85547, "isDead", false);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const r = mp.onHttpRpcRunAttempt("labCommand", { kind: "kill-ref", profileId: 1, formId: 0x85547, killerProfileId: 1 });
+  assert.deepStrictEqual(r, { ok: true, formId: 0x85547, killer: 0xff000001, isDead: true });
+  assert.deepStrictEqual(calls, [[0xff000001, "Kill", [0x85547, 0xff000001]]]);
+  const none = mp.onHttpRpcRunAttempt("labCommand", { kind: "kill-ref", profileId: 1, formId: 0x85549 });
+  assert.strictEqual(none.killer, null);
+  assert.deepStrictEqual(calls[1], [0xff000001, "Kill", [0x85549]]);
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "kill-ref", profileId: 1 }).ok, false);
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "kill-ref", profileId: 1, formId: 0x85547, killerProfileId: 9 }).found, false);
+});
+
+test("respawn-ref puts a dead game-file actor up at its spawn point, or in place", () => {
+  global.mp = fakeMp();
+  mp.set(0x85547, "isDead", true);
+  mp.set(0x85547, "spawnPoint", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [123400, -80300, 10705], rot: [0, 0, 0] });
+  mp.set(0x85547, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [1, 1, 1], rot: [0, 0, 0] });
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const r = mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0x85547 });
+  assert.strictEqual(r.ok, true);
+  assert.strictEqual(mp.get(0x85547, "isDead"), false);
+  assert.deepStrictEqual(mp.get(0x85547, "locationalData").pos, [123400, -80300, 10705]);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0x85547 }), { ok: false, formId: 0x85547, error: "not dead" });
+  mp.set(0x85549, "isDead", true);
+  mp.set(0x85549, "spawnPoint", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9, 9, 9], rot: [0, 0, 0] });
+  mp.set(0x85549, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [5, 5, 5], rot: [0, 0, 0] });
+  const inPlace = mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0x85549, inPlace: true });
+  assert.strictEqual(inPlace.spawn, null);
+  assert.deepStrictEqual(mp.get(0x85549, "locationalData").pos, [5, 5, 5]);
+  assert.strictEqual(mp.get(0x85549, "isDead"), false);
+});

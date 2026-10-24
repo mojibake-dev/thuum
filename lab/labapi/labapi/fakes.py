@@ -302,6 +302,20 @@ class FakeState:
                 actor.healthPercentage = 1.0
                 actor.x, actor.y, actor.z, actor.cell = actor.spawn
                 return {"ok": True}
+            if kind in ("kill-ref", "respawn-ref"):
+                # a game-file actor's record (self.refs), killed or put up again by form id, as the gamemode does
+                fid = int(payload.get("formId", -1))
+                ref = self.refs.get(fid)
+                if ref is None:
+                    return {"ok": False, "error": f"no record of {fid:#x}"}
+                if kind == "kill-ref":
+                    ref.isDead, ref.healthPercentage = True, 0.0
+                    killer = payload.get("killerProfileId")
+                    return {"ok": True, "formId": fid, "killer": 0xFF000000 + int(killer) if killer is not None else None, "isDead": True}
+                if not ref.isDead:
+                    return {"ok": False, "formId": fid, "error": "not dead"}
+                ref.isDead, ref.healthPercentage = False, 1.0
+                return {"ok": True, "formId": fid, "spawn": None, "isDead": False}
             return {"ok": False, "error": f"unknown command {kind!r}"}
         return {"ok": False, "error": f"unknown rpc {name!r}"}
 
