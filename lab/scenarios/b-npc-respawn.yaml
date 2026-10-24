@@ -1,0 +1,87 @@
+# b-npc-respawn (M3, docs/verbs/npc-fate.md, the deaths, D3 A and D13;
+# 2026-10-24): a game-file actor's body lies for the server's reset hours
+# and then stands at its placement, rolled anew, on both seats and in the
+# record. Two seats under npcEnabled in god mode, npcRespawnHours 1 in the
+# server block (the master's 240 in play); the prelude parks c1 three
+# squares out and kills the subject's rivals by kill-ref where the fate pass
+# has loaded them; both land, the subject 0x85547 alive with its fate's
+# race; kill-ref: dead on the record and both seats; `server: restart
+# {gameHour: 14.0}` moves the clock past the hour on the same day, the record
+# loads dead with its stamp and the first sweep stands it up (RespawnFated:
+# the re-roll, the fate sent again, the respawn event's teleport); both
+# reconnect and re-arm god mode (the server's tgm does not survive a
+# restart; 075756's revived predators killed a seat); after 40 s the record
+# and both engines are alive with the species equal to the fate (the
+# respawn is the engine's own Resurrect run with the AI on in one
+# game-thread task, a puppet demoted again after it). The late-fate line is
+# a read (a re-roll picking the same base changes no fate). Proved as
+# x-npc-respawn v3 GREEN 081548 on train-43 d2210492 (v2 070508 found the
+# resurrect under AI off, fixed; 075756 found the god mode). Its own commit
+# (rule 13).
+id: b-npc-respawn
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  npcRespawnHours: 1
+  gameHour: 12.0
+timeout_s: 1200
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: tgm}
+  - c2: console {text: tgm}
+  - wait: 2
+  # the prelude (v2, after 064426): the forest's predators fight each other within seconds of the
+  # cell loading and 0x85549 killed the subject before any kill-ref. The fate pass loads the ring's
+  # records three squares out, before any engine attaches the cell, so c1 parks there (the pin
+  # probe's park, z 25000 in god mode) and the rivals 0x85548 and 0x85549 die by kill-ref while
+  # nobody's engine has them; then both seats land and the subject stands alone
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 130336, y: -67584, z: 25000, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: kill-ref {formId: 0x85548, killer: c1}
+  - c1: kill-ref {formId: 0x85549, killer: c1}
+  - wait: 2
+  - c1: teleport {cell: lab-spawn, x: -10457, y: -19170, z: -3957, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: -10300, y: -19170, z: -3957, rot: [0, 0, 180]}
+  - wait: 25
+  - assert:
+      - server.ref(0x85547).isDead == false
+      - server.fate(0x85547).raceId != 0
+  # the kill, the server's word on both seats; the body lies
+  - c1: kill-ref {formId: 0x85547, killer: c1}
+  - wait: 10
+  - c1: npc-state {formId: 0x85547}
+  - c2: npc-state {formId: 0x85547}
+  - c1: screenshot
+  - assert:
+      - server.ref(0x85547).isDead == true
+      - c1.npc_state(0x85547).isDead == true
+      - c2.npc_state(0x85547).isDead == true
+  # the clock moves past the hour across a restart; the record loads dead and the sweep ends it
+  - server: restart {gameHour: 14.0}
+  - c1: reconnect
+  - c2: reconnect
+  # v3: god mode again, the server's restart having dropped it (075756: c2's player died to the revived 85547)
+  - c1: console {text: "tgm"}
+  - c2: console {text: "tgm"}
+  - wait: 2
+  - wait: 40
+  - c1: npc-state {formId: 0x85547}
+  - c2: npc-state {formId: 0x85547}
+  - c1: log-count {pattern: "late fate for 85547"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.ref(0x85547).isDead == false
+      - c1.npc_state(0x85547).isDead == false
+      - c2.npc_state(0x85547).isDead == false
+      - c1.npc_state(0x85547).raceId == server.fate(0x85547).raceId
+      - c2.npc_state(0x85547).raceId == server.fate(0x85547).raceId
+  # run 064950: the respawn, both seats' life and the species held; the late line counted 0,
+  # because a re-roll that picks the same base changes no fate (the key is base and worn) and
+  # a changed one may land ahead of any attach; the count stays a read
+artifacts: [server.log, c1.log, c2.log, screenshots]
