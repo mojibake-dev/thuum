@@ -125,7 +125,30 @@ grant's own ReliableOrdered channel, TES3MP's order (tes3mp.md:164-168,
 carries the record alone. Row: imposed.
 
 (d) An actor crossing into another live host's cell. R0 for the pass, R1
-for the report. The server accepts the origin host's sample when the
+for the report. BUILT 2026-10-25 (train-46, fork m3-train-46 53432d22, off
+parity fa8809a1) after playtest 34 exposed it: a server restart's cold start
+gave Sigrid's two cells, 9712 and 9731, to different players (D10 by ring,
+within 10 ms) and every crossing between them was refused, seven a second,
+test 2's engine walking her live where test 1 held her record (numidium's
+read of the server log, 21:40 to 21:44Z). The build: wire-rules'
+MoveVerdict::Pass for the simulator's adjacent crossing into a cell another
+live player hosts (a teleport across squares or a stranger's report stays
+refused; the pass ends any follow); the server applies the move as a hosted
+cell change and flips the word per actor through UpdateHoster (the new
+host's game hears "not hosted by other" and goes live from the relayed
+point, the sender's hears "hosted by other" and demotes; the sender's
+further reports are dropped by the verdict), one info line "npc-handoff D9:
+X now simulates Y in cell Z"; no ActorHandoff message (the clients already
+act on the per-actor word and the new host's puppet stands at the relayed
+border point), and no tenure in this slice (ACTOR_TENURE_MS stays
+UNMEASURED: a border shuttle passes at every crossing, each pass a demote
+and a promote; the lab read says whether that thrashes). T0: wire-rules'
+tests (a crossing both ways, the refusals), CellHostTest's case (the record
+moves, the simulator flips, both words sent, the old host's report dropped,
+the new host's accepted, the crossing back). T3: x-handoff-cross by path
+(the restart scenario's shape, the premise that the two cells' hosts
+differ, three minutes of her shuttle, no refusal, at least one pass, one
+seat's AI on at the end), on 46's stage after the playtest. The server accepts the origin host's sample when the
 destination is adjacent and hosted by another player, writes the record,
 sends that player an ActorHandoff, then flips the word both ways through
 UpdateHoster (MpObjectReference.cpp:746-770); the new host's game promotes
@@ -623,9 +646,9 @@ the server half alone (the client keeps reporting an actor its engine runs
 indoors, since the follow needs that report; the planned drop from the
 report list would end every interior follow); D11 needs no server change
 (OnActorSighting admits the case) and waits for the night read. Not built:
-D7 (the two election knobs), D8 (ActorHandoff, no wire change this slice),
-D9 (the pass between live hosts, a crossing into another live host's cell
-still refused). The door's exit is a follow too (an interior at either end
+D7 (the two election knobs), D8 (ActorHandoff, no wire change this slice).
+D9 (the pass between live hosts) BUILT on train-46 (2026-10-25, decision (d)
+above), without ActorHandoff and without the tenure. The door's exit is a follow too (an interior at either end
 with a persistent actor), so a resident coming out into an exterior its
 follower does not host stays the follower's. mp.get(0, "cellFollows") for
 the lab. H5 stays HYPOTHESIS until x-handoff-door.

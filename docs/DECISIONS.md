@@ -2515,6 +2515,14 @@ are the three numbers and (g)'s night step.
 - [ ] accept with changes (say what)
 - [ ] not yet
 
+2026-10-25: the row "a crossing into another host's cell passes it" (D9,
+the memo's second slice) built on fork m3-train-46 after playtest 34 showed
+its absence (a restart's cold start split Sigrid's two cells between the
+players and every crossing was refused, one engine walking her live where
+the other held her record): MoveVerdict::Pass, the record moving with the
+simulation and the per-actor word flipped both ways, no ActorHandoff and
+no tenure in this slice; docs/verbs/npc-handoff.md decision (d).
+
 ## ADR-048: Trust is mixed by what is at stake: players' contested state stays the server's number, a host's own NPC outcomes are accepted under plausibility checks and logged, and a server setting picks the strictness
 
 Status: ACCEPTED 2026-10-24 as option B (Eli, through numidium, on the
