@@ -502,6 +502,14 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   is no candidate and its cells start their grace at the death (an R0 fact
   the server already holds), since its respawn teleports it away and passes
   them by distance anyway.
+  Filed as D18 in docs/research/m3/decisions-after-playtest-34.md (B
+  recommended) and BUILT AHEAD on fork m3-train-48 (16:28 PDT, not merged):
+  wire-rules' PlayerState.dead with died and respawned, the bridge's two
+  calls, and the server's WorldState::onDeathState (MpActor::
+  SendAndSetDeathState, the death true and the respawn false) into
+  PartOne::OnDeathState for a player's actor alone; the rules' test and
+  CellHostTest's case (the grace from the death, the dead player's loaded
+  report granting nothing, the respawn's grant).
   The Papyrus quit too (x-host-quit-papyrus 20261025-190351 on the merged
   build, Debug.QuitGame from the driver's next tick with no menu open,
   numidium's read, 12:07 PDT): GREEN on D12-B's claims (the leave 1.2 s

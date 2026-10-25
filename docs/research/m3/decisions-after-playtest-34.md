@@ -33,6 +33,11 @@ where the candidates are the players loaded in the cell whatever their state.
   place (the candidate filter), and the grace keeps a respawn-in-place from
   bouncing the cell. C saves five seconds a death at the cost of a flip when
   the player stands up where it fell.
+- Built ahead, not merged (16:28 PDT, fork m3-train-48, after D21-B): the
+  rules' dead flag (died, respawned; eligible and candidate read it), the
+  bridge's two calls, WorldState::onDeathState from SendAndSetDeathState
+  into PartOne::OnDeathState for a player's actor; the rules' test and
+  CellHostTest's case. Awaits the letter.
 
 ## npc-fate
 
@@ -153,5 +158,5 @@ is which brake.
    and the copy's hit (the console PlaceAtMe server action, numidium's), T2
    cited, gate, merge; D19-B is its design; D23-B's first half (redress when
    the bases agree) and, if the reload reads clean, its second.
-3. train-48 (server), fork m3-train-48 off 46: D21-B built ahead; D18-B and
-   D22's brake join it if the letters say so.
+3. train-48 (server), fork m3-train-48 off 46: D21-B and D18-B built ahead;
+   D22's brake joins it if the read asks one.
