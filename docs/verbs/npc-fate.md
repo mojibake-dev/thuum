@@ -903,6 +903,24 @@ the TGM branch zeroing the number before the same log line; no formula
 question (a creature's unarmed damage is its race's, times the target's
 armor penalty, never zero).
 
+Section 3's leads from the code (HYPOTHESIS each, the client logs or a
+probe decide): (1) "NPC bow animations on one screen only": the host's
+AnimationSource relays every event the actor's graph took (sync/
+animation.ts, movement-controller events aside) and the puppet replays an
+attack event through allowedAnims, so the relay is not the gap; a bow draw
+needs ammo in the actor's inventory, and the fate's worn list pins armor
+and weapons but not the arrow stack (x-npc-fate-outfit's own note: "a
+difference made only of a weapon or an arrow stack"), so a puppet archer
+with no arrows refuses bowAttackStart. The read: both seats' npc-state worn
+and inventory for an archer, the AMMO rows compared. (2) "arrows need
+re-equip after load": the player's own ammo across a relaunch, the
+equipment restore's worn flag for AMMO; a client read of applyEquipment's
+filterWorn against an arrow stack. (3) sitting NPCs jerky indoors: the
+furniture row (npc-puppet.md). (4) face animations and voice lines not
+propagating: dialogue on a puppet, known. (5) Hilde stuck at her door and
+the smith's daughter leaving in place after the handoff: the session's
+logs at the end (numidium's agent).
+
 BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
 resetBaseFirst, and the view's dead-body apply passes false, so a game-file
