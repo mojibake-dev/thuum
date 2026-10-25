@@ -832,6 +832,11 @@ flagged nightly run (the signature above names the session). To confirm the
 mechanism: log the discarded bool at CallNative.cpp:482; count the
 functor's vtable slots 1 and 3 with Frida in a flagged session. For
 playtest 34 the flagged seat is relaunched rather than chased.
+The fix is on fork parity fa8809a1 (train-45 merged 2026-10-25 14:20 PDT,
+the gate of eighteen green); none of the nineteen runs on it carried a
+flagged session, so the deadline path's landing is unread: the first
+"[ragdoll] ... unanswered after 1000 ms" line in any run's console log,
+with whether the move landed, is the read to watch for.
 
 ## Turbo mode (ADR-041)
 
