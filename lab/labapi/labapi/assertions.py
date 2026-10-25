@@ -944,9 +944,19 @@ def _bool_series(raw: Any) -> tuple:
 
 
 class _ServerRef:
-    def __init__(self, facade: ServerFacade, clients: list[str] | None = None):
+    def __init__(self, facade: ServerFacade, clients: list[str] | None = None, views: Any = None):
         self._f = facade
         self._clients = list(clients or [])
+        self._views = views
+
+    def log_count(self, pattern: str) -> int:
+        """server.log_count("<regex>"): the lines of the run's server log matching the regex at its last
+        `server: log-count {pattern}` step of that same pattern (x-host-quit: the leave's own line)."""
+        fn = getattr(self._views, "log_count", None) if self._views is not None else None
+        n = fn("server", pattern) if fn else None
+        if n is None:
+            raise AssertionData(f"the server has no log-count of {pattern!r} (a server: log-count {{pattern}} step first)")
+        return int(n)
 
     def actor(self, client: str) -> ActorView:
         d = self._f.actor(client)
@@ -1763,7 +1773,7 @@ _NULLARY = {
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate"},
+    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of"},
@@ -1782,7 +1792,7 @@ _BIN = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, as
 class Evaluator:
     def __init__(self, server: ServerFacade, views: ViewsFacade, clients: list[str], parity: Any = None, references_dir: str | Path | None = None,
                  snapshots: dict[str, Any] | None = None):
-        self._names: dict[str, Any] = {"server": _ServerRef(server, clients), "true": True, "false": False, "True": True, "False": False}
+        self._names: dict[str, Any] = {"server": _ServerRef(server, clients, views), "true": True, "false": False, "True": True, "False": False}
         self._server_facade = server
         # the run's `server: snapshot {name, of}` values, by name (runner.RunRecord.snapshots)
         self._snapshots = snapshots if snapshots is not None else {}

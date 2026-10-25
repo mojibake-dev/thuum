@@ -315,6 +315,15 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-a\nclients: [c1]\nsteps:\n  - c1: approach {bad}\n")
 
+    def test_a_server_log_count_step_takes_a_pattern(self):
+        # the run's server log counted by a regex, for server.log_count("<pattern>") (x-host-quit's leave)
+        from labapi.scenario import load_scenario
+
+        step = load_scenario('id: x-s\nclients: [c1]\nsteps:\n  - server: log-count {pattern: "user [0-9]+ left"}\n').steps[0]
+        self.assertEqual((step.kind, step.action, step.args), ("server", "log-count", {"pattern": "user [0-9]+ left"}))
+        with self.assertRaises(ValueError):
+            load_scenario('id: x-s\nclients: [c1]\nsteps:\n  - server: log-count {pattern: "user (["}\n')
+
     def test_quit_is_a_seat_step_without_args(self):
         # the game's own quit (the console's qqq, D12-B's clean disconnect), answered by the driver before its keys
         from labapi.scenario import load_scenario
