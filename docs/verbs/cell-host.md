@@ -435,6 +435,41 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   another thread, the datagram sent and no ClientDisconnected, or the
   teardown past 200 ms. The stale rule stays the backstop for a crash or a
   kill (A as the background, Eli's words).
+  MEASURED by x-host-quit 20261025-004815 on 44's stage 154ca7d4 (numidium's
+  read, 17:50 to 18:00 PDT): the trace holds the premise, the quit flag's
+  frame and the shutdown's entry on one thread (3928, the main thread),
+  DestroyClient entered at the flag and left 5 ms later from the thunk
+  (caller SkyrimPlatformImpl.dll), the shutdown entered at +5 ms from
+  WinMain+0x1b3; c1.log's production line "[verb:cell-host] quit: the
+  client disconnected in 4 ms; the engine's shutdown follows". The server's
+  "WireServer: user 1 left (connection terminated by the transport layer)"
+  read 3.4 s after the flag until the clocks were paired: the seat's clock
+  runs 3.26 s behind sky-srv's (the grant of 9732 at epoch 1: the server's
+  00:49:45.753 against c1's 00:49:42.493), so the leave came about 0.17 s
+  after the quit flag, one datagram as the code says (renet_netcode 2.0
+  sends exactly one netcode Disconnect packet synchronously, client.rs:49-62;
+  renetcode's server drops the client on it at once, server.rs:411; a lost
+  one would mean the 15 s timeout). No "silent ... stale" line: the
+  transport's leave, not train-39's rule. The probe's own claim was wrong:
+  the pass waits the 5 s grace after a leave, and the quit step returns
+  before the driver types qqq and Enter (about 3 s), so the grant lands
+  about 8.5 to 9.5 s after the step; v4 claims the leave line within 6 s
+  (lab-api's server log-count fact, numidium) and the grant within 12.
+  A FINDING with it: the quit CRASHES inside the engine's shutdown after the
+  teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
+  SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
+  pointer; the stack through the thunk, WinMain+0x1b3, 36551+0x3f4, 82324,
+  84561, 84559 (RE::GSysAllocPaged::ShutdownHeapEngine, Scaleform's paged
+  heap teardown, GSysAllocPaged.h:39), 84554 twice, 87837+0x50). The leave
+  landed before it, so the village passes; a player gets the WER box and a
+  CrashLogger log at every quit until it is understood. HYPOTHESIS: a
+  pre-existing crash on exit of this load order inside Scaleform's memory
+  teardown, unseen because every lab relaunch so far was a kill and never a
+  quit; the re-analyst names the frames, and two lab discriminators are
+  numidium's (older CrashLogger logs on the seats with the same stack; a
+  quit from the main menu with no client ever created, where the thunk does
+  nothing). If the no-client quit does not crash, the teardown is in the
+  frame.
 
 ## Client
 
