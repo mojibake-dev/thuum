@@ -1269,6 +1269,27 @@ class RelaunchSteps(RunTests):
         self.assertEqual(reads["off"], 3, "the connect after it waited through the gap")
         self.assertTrue(any("c1 online after" in n for n in body.get("notes", [])), body.get("notes"))
 
+    def test_a_relaunch_keeps_the_outgoing_games_logs(self):
+        """x-host-quit: the quit game's Skyrim Platform log held D12-B's production line, and the relaunch's new game
+        truncates it; every relaunch copies the outgoing game's two logs into the run first."""
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.files[r"C:\sky-lab\c1-relaunch-001.log"] = "[verb:cell-host] quit: the client disconnected in 12 ms\n"
+        pve.files[r"C:\sky-lab\c1-relaunch-001-console.log"] = "2026-10-24T00:00:00Z [Script] tgm done\n"
+        run_id, body = self._run(RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: stopped}\n  - c1: connect\n"))
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn("c1-relaunch-001.log", body["artifacts"])
+        self.assertIn("c1-relaunch-001-console.log", body["artifacts"])
+        run_dir = self.tmp / "results" / run_id
+        self.assertIn("quit: the client disconnected", (run_dir / "c1-relaunch-001.log").read_text())
+        copies = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
+        kill = next(i for i, c in enumerate(pve.calls) if c[0] == "exec" and "sky-lab-launch" in " ".join(c[2]))
+        first_copy = next(i for i, c in enumerate(pve.calls) if c[0] == "exec" and "c1-relaunch-001.log" in " ".join(c[2]))
+        self.assertLess(first_copy, kill, "the copy comes before the relaunch's stop and start")
+        self.assertTrue(any("lab-console-logs.txt" in c and "c1-relaunch-001-console.log" in c for c in copies), copies)
+
     def test_a_relaunch_until_stopped_returns_at_the_kill(self):
         """b-host-kill: the step returns once the guest agent has stopped the game, with the player still on the
         server's online list, so a scenario times what follows from the kill; the connect after it takes the new

@@ -1200,6 +1200,13 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return fail(f"E_RUN_RELAUNCH: {client} is not a managed client")
+        # the outgoing game's own logs, kept before the new game truncates them: its Skyrim Platform log and its
+        # console log (a quit's one production line for D12-B lived there, x-host-quit; every relaunch scenario
+        # lost the game before's client lines the same way). A failure is a note, never the step's
+        game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
+        await self._fetch_client_file(rec, g, f"{client}-relaunch-{index:03d}.log", f"'{self.s.client_driver_log}'")
+        await self._fetch_client_file(rec, g, f"{client}-relaunch-{index:03d}-console.log",
+                                      f"(Join-Path {game_dir} '{self.s.client_console_log}')")
         if files or frida:
             # the step's file changes, made in the run's game folder while the game is stopped: a DLL and an
             # ini load at a launch (scenario._relaunch_args); the next run's rollback undoes them. A frida
