@@ -1394,6 +1394,12 @@ numidium): D1 B (built, train-44, this doc's Server and Client), D2 a middle
 ground (built as npcRollLevel, party-mean by default), D3 to D10 A, D11 A,
 D12 B (built, cell-host's quitting-host row), D13 to D17 A; the merge of 39
 to 44 held until 44 is staged and gated ("Hold until built").
+MERGED 2026-10-24 22:23 PDT on Eli's "Merge now": trains 39 to 44 on fork
+parity 6cdc2b35 (gate set 20261025-015916-gate-m3-train-44, eighteen green;
+T2 green), the clones promoted; D2 settled as A2 party-mean, the default.
+Open after the merge: the hazard evidence's lab read (a trap death), the
+encounter zone clamp (docs/research/m3/encounter-zones.md), the fuller
+b-npc-fate scenario; the quit crash is cell-host's row.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated (the roll sites 14374, 14752, 16129 and 16155 by `just addr` with the lab's Frida counts, re-npc-roll.md sections 1 to 8; the attach re-roll's caller 19231 and its gate, section 9, REA; the death path, death-path.md; the CommonLib lines named per field; 22:47 PDT)
