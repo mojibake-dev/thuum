@@ -1125,6 +1125,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   MERGE-READY by citation (gate set 20261025-015916-gate-m3-train-44,
   eighteen green on their last runs, T2 green at 6cdc2b35, gate-cite's five
   checks); the command in the memo's "Merge-ready (44)"; Eli's word next.
+  22:23 PDT: MERGED on Eli's "Merge now" (numidium's verb-merge citing the
+  set): trains 39 to 44 on fork parity 6cdc2b35 (from a25caf02), both clones
+  promoted to clean-m1 at 6cdc2b35 (22:24), thuum main cd39f801 with the
+  pin; D2 settled as A2 party-mean (the default). The lab stands on the
+  merged build. Next: playtest 34 at Eli's word from the checklist; the quit
+  crash's three discriminators on the stage after it; then the playtest's
+  findings, and M3's remaining rows (npc-stream's smooth motion, dialogue on
+  a puppet, the encounter zone clamp drafted in docs/research/m3/
+  encounter-zones.md, the trap evidence's lab read).
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,

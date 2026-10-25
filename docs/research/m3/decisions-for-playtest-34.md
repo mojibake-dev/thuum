@@ -287,6 +287,10 @@ b-npc-respawn b-npc-death-report b-host-quit`. verb-merge adds the always
 scenarios and gate.yaml's watch; parity goes to 6cdc2b35 and both clones are
 promoted; then playtest 34 from docs/private/playtest-m3-34.md.
 
+MERGED 22:23 PDT, 2026-10-24, on your "Merge now": fork parity 6cdc2b35,
+both clones promoted at 22:24, thuum main cd39f801 with the pin; D2 as A2.
+Playtest 34 at your word.
+
 ## The trains, in order, with sizes
 
 1. Train-39, the quitting host (D12): the server's stale-host rule, a T0 in

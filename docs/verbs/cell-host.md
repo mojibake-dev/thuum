@@ -480,6 +480,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   b-host-quit green on its last runs (030427, 030801 after the 025053
   settle red at c2's first teleport, the set's watch item), b-host-kill
   green with it; train-44 merge-ready by citation, Eli's word next.
+  MERGED 22:23 PDT on Eli's "Merge now": fork parity 6cdc2b35, the clones
+  promoted; the quitting host's two halves (the stale rule and the quit's
+  disconnect) are parity's. Open: the quit crash's three discriminators on
+  the next stage (the Papyrus quit, the no-client quit, the console quit on
+  parity), then the heaps mode if they point at a movie.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
