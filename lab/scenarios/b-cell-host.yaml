@@ -89,6 +89,9 @@ steps:
       - server.host(0x9810).epoch == 2
   # the relaunched game logs in where it stood and takes the cell again
   - c2: connect
+  # god mode again: a relaunch drops the server's tgm (nightly 20261025-115250's lesson at the
+  # restart below; lab-relaunch-loses-god-mode)
+  - c2: console {text: "tgm"}
   - wait: 8
   - assert:
       - server.host(0x9810).client == "c2"
@@ -117,6 +120,11 @@ steps:
   - wait: 20
   - c1: reconnect
   - c2: reconnect
+  # god mode again on both: the server's tgm does not survive the restart (nightly
+  # 20261025-115250: a predator killed c1 after the restart, its respawn unloaded the cell and
+  # the grace passed it, one grant more than the claim; b-npc-handoff-restart's shape)
+  - c1: console {text: "tgm"}
+  - c2: console {text: "tgm"}
   - wait: 10
   - assert:
       - server.host(0x9810).hosted == true
