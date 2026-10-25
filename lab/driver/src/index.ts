@@ -142,6 +142,9 @@ const DIK: Record<string, number> = {
 const CONSOLE_OPEN_MS = 3000;
 const CONSOLE_KEY_MS = 40;
 const CONSOLE_READ_MS = 2500;
+// A quit {via: papyrus} goes this long after its step answered, so the answer is posted before the game exits
+const QUIT_DELAY_MS = 300;
+let quitAt = 0;
 let consoleTyping: {
   step: Step; text: string; keys: number[]; next: number; phase: "open" | "type" | "read" | "close";
   tapped: boolean; at: number; lines: string[]; wasOpen: boolean; match: string;
@@ -2531,7 +2534,16 @@ function run(step: Step, player: Actor): unknown {
     case "quit": {
       // The game's own quit, the console's qqq: the engine's shutdown call out of WinMain, where train-44's thunk
       // tears skymp5-client down first and sends netcode's disconnect (D12-B, x-host-quit). The game exits at the
-      // Enter and could answer nothing after it, so the step answers now and its typing goes on detached
+      // Enter and could answer nothing after it, so the step answers now and its typing goes on detached.
+      // {via: "papyrus"}: Debug.QuitGame from the next tick instead, with no menu open: the console's own movie
+      // stays alive through the shutdown under qqq, and a GFx movie alive at quit is the re-analyst's reading of
+      // 004815's crash in the heap teardown, which a player's quit never has
+      if (a.via === "papyrus") {
+        if (quitAt) return { error: "a quit is already under way" };
+        quitAt = Date.now() + QUIT_DELAY_MS;
+        return { quitting: true, via: "papyrus" };
+      }
+      if (a.via !== undefined && a.via !== "console") return { error: `quit's via is console or papyrus, not ${JSON.stringify(a.via)}` };
       if (consoleTyping) return { error: "a console step is still typing" };
       const wasOpen = Ui.isMenuOpen("Console");
       consoleTyping = {
@@ -2721,6 +2733,10 @@ on("update", () => {
   if (me) finishCraft(c, me);
   if (me) finishRacePick(c, me);
   finishConsole(c);
+  if (quitAt && Date.now() >= quitAt) {
+    quitAt = 0;
+    Debug.quitGame();
+  }
   if (me) finishRepeat(c, me);
   if (me) readAfterRest(me);
   if (me) keepPerks(me);
