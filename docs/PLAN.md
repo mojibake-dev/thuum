@@ -1109,7 +1109,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   numidium's stage, T2 and gate of sixteen plus the two, Eli's look, the
   merge of 39 to 44, the clones' promotion, playtest 34 (its checklist
   drafted in docs/private/playtest-m3-34.md, the build named).
-  18:45 PDT, the same line's end of day: 44's head is 6cdc2b35 (the trap
+  18:42 PDT, the same line's end of day: 44's head is 6cdc2b35 (the trap
   trigger's own activation forwarded as the hazard evidence after the
   scripts' read; the death report read from the health floor after the
   first fall run fired nothing under the engine's deferred kill); both
