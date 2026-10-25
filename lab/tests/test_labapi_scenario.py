@@ -380,6 +380,16 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(head + bad + "\n")
 
+    def test_close_menu_names_its_menu(self):
+        # a bare close-menu reached the driver as "no menu name" and left the menu open (x-body-release 20261025-234352)
+        from labapi.scenario import load_scenario
+
+        head = "id: x-m\nclients: [c1]\nsteps:\n  - c1: "
+        self.assertEqual(load_scenario(head + "close-menu {name: ContainerMenu}\n").steps[0].args, {"name": "ContainerMenu"})
+        for bad in ("close-menu", "close-menu {}", "close-menu {name: 7}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+
     def test_log_count_and_a_restart_that_sets_the_clock(self):
         # a client's log lines counted mid-run, and a restart that lays the clock anew (npc-handoff's reads)
         from labapi.scenario import load_scenario

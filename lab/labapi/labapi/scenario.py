@@ -522,6 +522,10 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _ref_command_args(action, args, clients)
     if action == "server-console":
         args = _server_console_args(args)
+    if action == "close-menu" and not (isinstance(args.get("name"), str) and args["name"].strip()):
+        # the driver closes a menu by its engine name ({name: ContainerMenu}); without one it answers an error the
+        # run would take as a pass and the menu stays open (x-body-release 20261025-234352: no closing activation)
+        raise ValueError(f"close-menu takes the engine's menu name, {{name: ContainerMenu}}, got {args!r}")
     if action == "log-count":
         args = _log_count_args(args)
     if action == "relaunch":
