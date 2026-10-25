@@ -879,6 +879,22 @@ server's own lines name every corpse activation that reached it
 ...)"). Whether a body keeps the single-occupant rule, tells the second
 player, or admits both is a design item for the post-playtest memo (the
 rule is upstream's for every container), not a train-47 fix.
+CONFIRMED by the lines (numidium, 16:06 PDT): 28 ProcessActivate lines on
+39fe2 from 22:37Z; rotfern took the body at 22:38:32 ("no occupant"),
+its closing activation 3.4 s later read "occupant is already this object"
+(the first-activation path), test 2 was refused five times in 22:38:41 to
+:43 ("occupant is another object and is nearby") and got the body only at
+22:42:40, once rotfern stood out of range ("occupant is too far away"),
+after which rotfern was refused in turn; no "doesn't occupy ref", no
+TakeItem, PutItem or DropItem line in 22:37 to 22:59Z. The cause is a
+server defect, not the rule: ProcessActivateSecond releases the occupant
+for a CONT and a FURN base and falls through for a corpse (an NPC_ base
+that IsCorpse shares with the CONT branch's OPEN but not its CLOSE), so a
+body's occupancy is never released by its looter's closing activation and
+clears only by distance, disable or destroy. The fix is one condition
+(the corpse joins the CONT release) with a T0 case; its train is numidium's
+call (46's fourth commit before the stage, or the next server train). The
+strip and the cape left no server line: client-side, as read above.
 
 BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
