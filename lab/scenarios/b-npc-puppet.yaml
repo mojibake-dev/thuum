@@ -9,8 +9,11 @@
 # resolves and no 0xff actor carries a resident's base (a copy would);
 # Sigrid 0x13483 reads aiEnabled false on c2 and true on c1; her track moves
 # on both seats (the host walks her, the puppet follows) and the two end
-# within the relay's lag of each other, with no spin (the heading series
-# turns less than twice over the minute); then c1 leaves past the grace, c2
+# within the relay's lag of each other, with no spin (the puppet's net
+# rotation over the minute equals the host's within a quarter turn: a
+# resident's shuttle between chores can net three turns on both seats, a
+# spin adds turns on the puppet alone; nightly 20261025-130521 against 31
+# runs, 2026-10-25); then c1 leaves past the grace, c2
 # hosts within 5 s and Sigrid's AI flips on both seats; a server restart
 # makes every resident a puppet on both seats until the grant, then one
 # seat's live. The shout at Sven and the sneak are x-npc-puppet-2's (solo).
@@ -23,7 +26,8 @@
 # that base with an id at 0xff000000 or above (a copy would be one; a zero
 # counts only from a step that listed actors); the watch's heading per
 # sample and c.watched_id(<id>).turns, the net rotation over the watch in
-# full turns (a walk's back-and-forth nets near zero, a spin counts whole);
+# full turns, absolute (the two seats agree within 0.065 turns for every
+# watched actor across 31 runs; a spin on the puppet alone would not);
 # the server's clock for the run as server: {gameHour}. Riverwood's landing
 # after coc riverwood (x-cell-attach): (17224.8, -47204.4, -128.2) in
 # Tamriel, written with the worldspace's descriptor (cell: lab-spawn reads
@@ -77,8 +81,8 @@ steps:
       - c2.watched_id(0x13483).maxDisplacement > 100
       - abs(c1.watched_id(0x13483).x - c2.watched_id(0x13483).x) < 256
       - abs(c1.watched_id(0x13483).y - c2.watched_id(0x13483).y) < 256
-      - c2.watched_id(0x13483).turns < 2
-      - c2.watched_id(0x13489).turns < 2
+      - abs(c2.watched_id(0x13483).turns - c1.watched_id(0x13483).turns) < 0.25
+      - abs(c2.watched_id(0x13489).turns - c1.watched_id(0x13489).turns) < 0.25
   # the handoff: c1 back to the lab spawn (far out of 0x9732's reach, a known
   # height) past the grace, c2 hosts, the AI flips
   - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
