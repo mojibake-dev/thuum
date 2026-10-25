@@ -766,6 +766,13 @@ passes the parent). The scenario now asserts the species as a premise
 (main e6a62fb), so the roll's red reads at the prelude; the fix owed is a
 wolf-only subject (a direct EncWolf or deer placement near the forest,
 esm.py), since a one-in-five premise red is no gate scenario.
+Done (13:03 PDT): the subject is the fixed EncWolf 0x82717 (base EncWolf
+itself, numidium's esm.py read; its pair 0x82716 and the leveled predator
+0x82718 culled from a park at square (22, -20)), x-npc-fall-report v4 GREEN
+20261025-195607 on parity 6cdc2b35 promoted unchanged into
+b-npc-death-report (main c5eb498); the premises are the engine's (c1 runs
+the wolf, c2 puppets it, raceId 78346). The nightly's four reds all read
+and their scenarios green again (fix-m3-nightly 193214, 4 of 4).
 
 Built, the roll's level rule (train-44 e3b39ac8, 16:30 PDT; the memo's D2,
 Eli: "some way to calculate a middle ground?"): PartOne::FateRollLevel gives
