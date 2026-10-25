@@ -577,7 +577,7 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   names the movie; falsified if the heap's name is not a MovieView's, the
   handler is not a context's +0x30, or the root's refcount reads zero.
   NAMED (x-host-quit-names 20261025-201238, train-45's stage probe, green
-  on D12-B, the crash inside the run; numidium's read, 13:2x PDT): the
+  on D12-B, the crash inside the run; numidium's read, 13:18 PDT): the
   leaked movie is the engine's own LOADING MENU. The ninth and faulting
   heap is `MovieView "LoadingMenu.swf"` (name and inline copy agree), its
   handler the context's +0x30 and the context's +0x10 that heap; the UI
