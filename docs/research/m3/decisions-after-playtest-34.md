@@ -148,6 +148,8 @@ is which brake.
 - Recommended: decide on the read. A if the probe passes once per crossing;
   C before B if it thrashes, since a margin needs no clock and reads the same
   on both servers in T2.
+- The read (16:58 PDT): x-handoff-cross v2 20261025-235039 GREEN, one pass in
+  three minutes, no refusal, no thrash. A stands; nothing to build.
 
 ## The trains, in order
 1. train-46 (server), fork m3-train-46 aaafffe5: after Eli's report, numidium's

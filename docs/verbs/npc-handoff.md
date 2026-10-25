@@ -687,3 +687,11 @@ the lab. H5 stays HYPOTHESIS until x-handoff-door.
     head's GitHub Formatting check green? Parity was red there from 10-15 to
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
+
+GREEN AT T3 (16:58 PDT, 2026-10-25): x-handoff-cross v2 20261025-235039 on train-46's stage
+aaafffe5: the cold start's split held (0x9712 to c1, 0x9731 to c2, each seat standing inside
+its own cell), Sigrid crossed once with no refusal ("passes 13483 into cell" once, "may not
+move 13483" never), and at the end c1 ran her AI with c2 a puppet. Committed as
+b-npc-handoff-cross (main 81211790). v1 (233736) had read its premise false on positions
+alone (c1 at the landing was ring 1 for both cells). One pass in three minutes means no
+shuttle thrash to read: D22's tenure stays unbuilt and A stands on this read.
