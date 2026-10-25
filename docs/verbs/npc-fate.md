@@ -866,6 +866,19 @@ the loot rows. The non-host's failed interaction and rotfern's refused
 takes wait on the server's lines (E_ACTIVATE_REACH; "doesn't occupy ref",
 PutItem's and TakeItem's throw when the taker is not the body's occupant).
 
+BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
+train-46; built ahead does not merge): (1) applyInventory takes
+resetBaseFirst, and the view's dead-body apply passes false, so a game-file
+body's inventory lands as a diff alone, its worn set in place; (2) a
+server-made copy this game hosts takes the server's equipment ONCE at its
+first apply (FormView.hostDressed), its hands the record's, Rule A after.
+Probes to write for its stage: x-body-loot (c1 alone in 371de, 39fe4 killed
+by the server, c1 activates the body, the engine's worn set still equal to
+the fate's worn list after the loot; the ContainerMenu's opening is the
+driver's activate step's return) and a server-made copy's hit landing on
+the server with no E_HIT_WEAPON (needs a server-made NPC the lab can place;
+how playtest 34's two were made is numidium's to say).
+
 ## Client
 
 Built, the deaths' client half (95abf0dc, 20:39 PDT): formView binds a dead
