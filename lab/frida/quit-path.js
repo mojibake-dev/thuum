@@ -37,6 +37,26 @@
 // unmapped is the leaked movie; the list of 84554 entries at quit is the leak
 // list. Diagnosis only: Frida in the process is itself a confound for the
 // crash (004815 had it; the production read is x-host-quit-plain).
+// Mode 'names' (params {MODE: names}; the re-analyst's read of 2026-10-25,
+// REA on sky-re): names the leaked movie. Joins on the heap address: the
+// root's CreateHeap (84512: rdx the name, a char* the heap copies to
+// heap+0x828 and points to from heap+0x80, rax the new heap),
+// GFxMovieDefImpl::CreateMemoryContext (85302: rdx the heap name
+// `MovieView "<file>"`, rax the context whose +0x10 is its heap and whose
+// +0x30 is the limit handler the crash reads), CreateInstance (85301: rdx
+// the context, rax the GFxMovieRoot with the heap at +0x38 and the refcount
+// at +0x08), the context's deleting destructor (85286, the normal end, from
+// GFxMovieRoot::Release 83930 under the UI destructor 82073), the UI
+// destructor's walk of UI::menuMap (each registered menu's name, IMenu, its
+// uiMovie, that movie's refcount and heap; the layout a HYPOTHESIS from the
+// read: entries at UI+0x150, capacity at UI+0x134, stride 0x20, entry+0x18
+// nonzero when occupied, entry+8 the IMenu, IMenu+0x10 the movie), and
+// DestroyItself (84554) at quit with the heap's name read as pointer then
+// C string (the heaps mode read a sized UTF-8 string and got nothing), its
+// handler, and for a handler-carrying heap the context (handler-0x30, its
+// +0x10 must equal the heap), the root(s) created on it and the root's
+// refcount: a nonzero refcount is the holder that kept the movie alive, a
+// heap missing from the menu walk is a movie never registered as a menu.
 // Run: a scenario's `frida {script: quit-path.js}` step before the quit, or
 // `just frida quit-path.js c1` by hand, then quit the game (console qqq).
 'use strict';
@@ -56,6 +76,10 @@ const OFFSETS = {
     setLimitHandler: 0x102f4d0, // 84545
     contextDtor: 0x1057b40, // 85286 GFxMovieDef::MemoryContextImpl's deleting destructor (HYPOTHESIS name)
     engineDtor: 0x10ea500, // 87837, the crash's function (+0x50 the faulting load)
+    createHeap: 0x102e1d0, // 84512 the root's CreateHeap (rdx the name, r8 the parent, rax the heap)
+    createContext: 0x1058fd0, // 85302 GFxMovieDefImpl::CreateMemoryContext (rdx the heap name, rax the context; its heap at ctx+0x10)
+    createRoot: 0x1058e70, // 85301 GFxMovieDefImpl::CreateInstance(MemoryContext*, bool) (rdx the context, rax the GFxMovieRoot; its heap at root+0x38)
+    uiDtor: 0xfa3640, // 82073 UI's destructor, which releases every registered menu's movie
   },
 };
 
@@ -128,8 +152,19 @@ if (at === undefined) {
     },
   });
 
-  if (MODE === 'heaps') {
-    function str(p) { try { return p.isNull() ? '' : p.readUtf8String(64); } catch (e) { return '?'; } }
+  // a heap's name: heap+0x80 points at the copy the heap made at heap+0x828
+  // (84512); read as a C string, never with a byte count (a sized UTF-8 read
+  // over the bytes past the NUL threw every time in the heaps run 192408)
+  function cstr(p) { try { return p.isNull() ? '' : p.readCString(); } catch (e) { return '?'; } }
+  function heapName(h) {
+    const viaPointer = cstr(readPtr(h.add(0x80)));
+    const inline = cstr(h.add(0x828));
+    return { name: viaPointer, name2: inline };
+  }
+  function mod(a) { const m = Process.findModuleByAddress(a); return m ? m.name + '+0x' + a.sub(m.base).toString(16) : a.toString(); }
+
+  if (MODE === 'heaps' || MODE === 'names') {
+    function str(p) { return cstr(p); }
     function mapped(p) { try { return !p.isNull() && Process.findRangeByAddress(p) !== null; } catch (e) { return false; } }
     let destroyed = 0;
     Interceptor.attach(exe.base.add(at.heapDestroy), {
@@ -138,11 +173,23 @@ if (at === undefined) {
         destroyed += 1;
         const engine = readPtr(heap.add(0xc8));
         const handler = engine.isNull() ? NULL : readPtr(engine.add(0x748));
-        emit({
-          heapDestroy: destroyed, heap: heap.toString(), name: str(readPtr(heap.add(0x80))),
+        const names = heapName(heap);
+        const row = {
+          heapDestroy: destroyed, heap: heap.toString(), name: names.name, name2: names.name2,
           refCount: heap.add(0x20).readU32(), engine: engine.toString(), handler: handler.toString(),
           handlerMapped: mapped(handler), threadId: this.threadId, msAfterFlag: since(),
-        });
+        };
+        if (MODE === 'names' && !handler.isNull()) {
+          // the handler is MemoryContextImpl+0x30; the context's +0x10 is its heap
+          const ctx = handler.sub(0x30);
+          row.ctx = ctx.toString();
+          row.ctxHeapMatches = mapped(ctx) && readPtr(ctx.add(0x10)).equals(heap);
+          const roots = rootsByCtx[ctx.toString()] || [];
+          row.roots = roots.map(function (r) { return { root: r, refCount: mapped(ptr(r)) ? ptr(r).add(0x08).readU32() : -1 }; });
+          row.created = heapsByAddr[heap.toString()] || null;
+          row.menu = menusByHeap[heap.toString()] || null;
+        }
+        emit(row);
       },
     });
     Interceptor.attach(exe.base.add(at.setLimitHandler), {
@@ -150,16 +197,81 @@ if (at === undefined) {
         emit({ setLimitHandler: true, heap: args[0].toString(), name: str(readPtr(args[0].add(0x80))), handler: args[1].toString(), caller: caller(this.context), msAfterFlag: since() });
       },
     });
-    Interceptor.attach(exe.base.add(at.contextDtor), {
-      onEnter: function (args) {
-        emit({ contextDtor: true, context: args[0].toString(), heap: readPtr(args[0].add(0x10)).toString(), msAfterFlag: since() });
-      },
-    });
+    if (MODE === 'heaps') {
+      Interceptor.attach(exe.base.add(at.contextDtor), {
+        onEnter: function (args) {
+          emit({ contextDtor: true, context: args[0].toString(), heap: readPtr(args[0].add(0x10)).toString(), msAfterFlag: since() });
+        },
+      });
+    }
     Interceptor.attach(exe.base.add(at.engineDtor), {
       onEnter: function (args) {
         const engine = args[0];
         const handler = readPtr(engine.add(0x748));
         emit({ engineDtor: true, engine: engine.toString(), handler: handler.toString(), handlerMapped: mapped(handler), msAfterFlag: since() });
+      },
+    });
+  }
+
+  // mode names: the creation side, joined on the heap address
+  const heapsByAddr = {};
+  const rootsByCtx = {};
+  const menusByHeap = {};
+  if (MODE === 'names') {
+    Interceptor.attach(exe.base.add(at.createHeap), {
+      onEnter: function (args) { this.name = cstr(args[1]); this.parent = args[2].toString(); },
+      onLeave: function (retval) {
+        heapsByAddr[retval.toString()] = { name: this.name, parent: this.parent, t: Date.now() };
+        emit({ createHeap: true, heap: retval.toString(), parent: this.parent, name: this.name });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.createContext), {
+      onEnter: function (args) { this.heapName = cstr(args[1]); },
+      onLeave: function (retval) {
+        const heap = mapped(retval) ? readPtr(retval.add(0x10)) : NULL;
+        emit({ createContext: true, ctx: retval.toString(), heap: heap.toString(), heapName: this.heapName });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.createRoot), {
+      onEnter: function (args) { this.ctx = args[1].toString(); },
+      onLeave: function (retval) {
+        const heap = mapped(retval) ? readPtr(retval.add(0x38)) : NULL;
+        (rootsByCtx[this.ctx] = rootsByCtx[this.ctx] || []).push(retval.toString());
+        emit({ createRoot: true, root: retval.toString(), ctx: this.ctx, heap: heap.toString() });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.uiDtor), {
+      onEnter: function (args) {
+        // UI::menuMap, the layout a HYPOTHESIS: read everything under try
+        const ui = args[0];
+        let walked = 0;
+        try {
+          const entries = readPtr(ui.add(0x150));
+          const capacity = ui.add(0x134).readU32();
+          for (let i = 0; i < capacity && i < 4096; i++) {
+            const e = entries.add(i * 0x20);
+            if (readPtr(e.add(0x18)).isNull()) continue;
+            const menu = readPtr(e.add(0x08));
+            const movie = menu.isNull() ? NULL : readPtr(menu.add(0x10));
+            const heap = movie.isNull() ? NULL : readPtr(movie.add(0x38));
+            const row = { menu: menu.toString(), menuName: cstr(readPtr(e)), uiMovie: movie.toString(),
+                          refCount: movie.isNull() ? -1 : movie.add(0x08).readU32(), heap: heap.toString() };
+            if (!heap.isNull()) menusByHeap[heap.toString()] = row;
+            walked += 1;
+            emit(Object.assign({ uiMenu: true }, row));
+          }
+        } catch (e) { emit({ error: 'menuMap walk failed: ' + e, walked: walked }); }
+        emit({ uiDtor: 'enter', menusWalked: walked, msAfterFlag: since() });
+      },
+    });
+    // the normal end of a movie's memory context, with its caller chain
+    Interceptor.attach(exe.base.add(at.contextDtor), {
+      onEnter: function (args) {
+        const ctx = args[0];
+        const heap = mapped(ctx) ? readPtr(ctx.add(0x10)) : NULL;
+        const names = heap.isNull() ? { name: '', name2: '' } : heapName(heap);
+        const bt = Thread.backtrace(this.context, Backtracer.ACCURATE).slice(0, 8).map(mod);
+        emit({ contextDtorNamed: true, ctx: ctx.toString(), heap: heap.toString(), name: names.name, backtrace: bt, msAfterFlag: since() });
       },
     });
   }
