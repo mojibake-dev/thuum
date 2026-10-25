@@ -43,6 +43,10 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
     reference); fixed in 44's restage: the host forwards a trigger's own
     activation and the server notes it as the evidence. Bear traps and oil
     pools stay the floor.
+    17:51 PDT: the first lab run (20261025-004503) fell 4000 units and
+    fired nothing: the engine's deferred kill on every viewed actor holds
+    the death, so the report now comes from the host's health-floor poll,
+    not deathStart (fork m3-train-44 6cdc2b35; its rerun decides).
 
 
 ### D2. The level a leveled NPC is rolled at
