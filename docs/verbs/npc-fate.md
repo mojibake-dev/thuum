@@ -931,6 +931,27 @@ the deferred kill did not hold.
   host's samples; the server records the death"). The NPC fight's reports
   read inside b-npc-death's and b-cell-host's runs (the log's "accepted" or
   "already dead" lines); a trap's death is the open HYPOTHESIS and no claim.
+  The trap read's probe, by path for the stage after playtest 34 (22:51
+  PDT, a research agent's draft): lab/.cache/probes/x-npc-trap-report.yaml,
+  Arvel the Swift's pressure plate and swinging spike wall in Bleak Falls
+  Temple (0x371de; UESP's walkthrough lists no other plate in the zone; the
+  lever puzzle's darts are a lever puller's activation, the blades and the
+  oil fire with no activation at all), a hosted entrance bandit walked onto
+  the plate first (prid, moveto to c1 standing 150 units before it, c1
+  teleporting past the gate's sweep so the hostile bandit crosses it) and
+  set onto the plate's centre as the fallback, the catacomb draugr culled
+  first; the reads: c1's "Sent a trigger's own activation", the server's
+  "trigger X fired itself in cell Y" and "an activation beside the body",
+  the record dead on both seats. Placeholders for every ref id and point
+  (UESP publishes Arvel's base 00039646 and ref 00039655 and nothing else):
+  numidium's esm.py fills them from the interior's cell-children group.
+  Risks named: TrapTriggerBase's acceptableTrigger never fires for an actor
+  of the plate's owning faction (read the plate REFR's XOWN first; a skeever
+  or a draugr victim if it names the bandits); whether a MoveTo into a
+  loaded trigger raises OnTriggerEnter is undocumented (hence the walk
+  first); the spike wall's leveled 75 damage against a level-1 bandit's 35
+  health is a HYPOTHESIS on the roll; a body flung past 512 units reads
+  E_DEATH_UNCHECKED.
 - T3 scenario id, the sketch: lab/scenarios/b-npc-fate.yaml (written by hand after the
   grammar lands, rule 13; the sketch): two seats under npcEnabled and
   npcFate, the clock at 7.9; c1 connects and teleports to Bleak Falls
