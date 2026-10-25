@@ -604,6 +604,40 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   po3_Tweaks' loading-screen options); then a solo quit per suspect plugin
   disabled (a layer change each). Not a thuum verb's bug; a fix row of its
   own.
+  The re-analyst's read of the holders (REA on sky-re, 13:47 PDT): the
+  Loading Menu is an ALWAYS-OPEN menu by engine design (flags
+  kPausesGame|kAlwaysOpen|kAllowSaving|kApplicationMenu, LoadingMenu.h:13;
+  the hide path keeps a kAlwaysOpen menu's instance, movie and delegate
+  until shutdown, which is why five engine menus were alive at the UI
+  destructor's entry), and the UI destructor 82073 is the one place it
+  dies: per live entry AddRef, UnregisterHandler (releasing the two
+  callback references its FxDelegate holds, "RequestPlayerInfo" and
+  "RequestLoadingText"), Release; then the map destructor 82118 and the
+  stack destructor 82107 release their pointers; an untouched Loading Menu
+  counts 3 at the entry, 1 after the loop, 0 after the map destructor, and
+  36551 calls 82073 at +0x33a before the Scaleform teardown at +0x3df, so
+  no ordering bug (CONFIRMED-STATIC). For the movie to survive, the
+  IMenu's count must stay at or above 1 after the map destructor: an extra
+  reference taken after the creator returned (an outside holder, HYPOTHESIS
+  who) or an unregister that released fewer than two (HYPOTHESIS). No
+  global pointer to the Loading Menu exists in the engine (the creator
+  51943, both destructors and ProcessMessage write only the instance and a
+  byte flag). Skyrim Platform keeps no IMenu or GFxMovieView (the fork's
+  sources read: EventHandler, FridaHooksUtils, main, BrowserApi,
+  PapyrusTESModPlatform, LoadGame; the overlay is the CEF one, NirnLab
+  headers only). Of the lab layer's 33 DLLs the one with a documented
+  loading-screen feature is SSEDisplayTweaks (its LoadingScreen frame-rate
+  settings); po3_Tweaks has none (the earlier lead corrected); TrueHUD,
+  TrueDirectionalMovement, MCMHelper, SKSEMenuFramework, ImprovedCameraSE,
+  ConsoleUtilSSE and skee64 touch the UI otherwise. quit-path.js's holders
+  mode (thuum main) reads the Loading Menu's IMenu count at the destructor's
+  entry, after its callbacks' release and after the map and stack
+  destructors, with its stack membership and delegate count: 4 or more at
+  the entry names an outside holder, 3 with a count above zero after the
+  map destructor a short delegate release. Bisect order if the count says a
+  holder: SKSE with no DLL plugins and SP off (engine against load order),
+  then SSEDisplayTweaks, then TrueHUD with TrueDirectionalMovement, then the
+  menu frameworks, then skee64 with Skyrim Platform, the rest by halves.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
