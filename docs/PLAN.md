@@ -1109,6 +1109,19 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   numidium's stage, T2 and gate of sixteen plus the two, Eli's look, the
   merge of 39 to 44, the clones' promotion, playtest 34 (its checklist
   drafted in docs/private/playtest-m3-34.md, the build named).
+  18:45 PDT, the same line's end of day: 44's head is 6cdc2b35 (the trap
+  trigger's own activation forwarded as the hazard evidence after the
+  scripts' read; the death report read from the health floor after the
+  first fall run fired nothing under the engine's deferred kill); both
+  reads GREEN on its stage (the fall's drop of 3813 units taken, the quit's
+  leave line 1.2 s after the quit and the grant at the grace) and committed
+  as b-npc-death-report (3c6c54e) and b-host-quit (8dcc000); T2 and the
+  gate of seventeen run. One finding open: on 44 the game crashes inside
+  its own Scaleform teardown after the disconnect at every console quit
+  tested (3 of 3), the server side whole, HYPOTHESIS a GFx movie alive at
+  quit (the console's, the lab's quit path); its discriminators need a stage
+  change and wait for Eli's look. Research drafted during the waits:
+  docs/research/m3/encounter-zones.md (ADR-049's owed clamp).
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
