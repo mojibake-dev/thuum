@@ -826,7 +826,26 @@ once at its creation on every game, the host's included (its identity, as
 the fate pin is for a game-file actor), and Rule A holds from then on; a
 client change, its own train. A probe of a hosted game-file actor hitting
 its own host's player (the server's OnWeaponHit line on the host's own
-actor) belongs to the next stage.
+actor) belongs to the next stage. The playtest itself then showed the path
+live (numidium's read): after its host handover (ff000000 took 371de at
+epoch 2 at 22:36:48Z) the campfire bandit 0x39fe2, hosted on rotfern's own
+game, hit rotfern's player at 22:38:08Z, "39fe2 hits ff000000 with 13985
+for 13.70 damage, health 1 -> 0.86", applied; the probe x-host-own-hit (by
+path) confirms it under the lab's eyes and is the scenario candidate.
+Rotfern then killed 39fe4 by three plain hits and 39fe2 by a headshot
+(ClaimHeadshot, head bare), both "died at day 1.8113; the body lies until
+day 11.8113"; across the server restart of 22:46:59Z both bodies stayed
+dead on their 240 h clocks (ApplyChangeForm's respawn of a dead actor
+yielding to the fate), their records moved by a few units (the host
+re-settling them). Eli's section 5 notes on the bodies, to read from the
+client logs at the session's end and build on the next train: the non-host
+cannot interact with a body (a dead puppet keeps the native demote's
+activation block, which the promote lifts for the host alone; the engine's
+container menu never opens); when the host loots, the body loses all its
+clothes (the equipment update on a dead actor, or the engine's strip; a
+read); after a cell reload both seats can; rotfern could not take armor
+where test 2 could; test 2 does not see the cape rotfern placed (a dropped
+or placed item's sync).
 
 ## Client
 
