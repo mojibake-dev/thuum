@@ -60,6 +60,7 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
   the engine's own input and keeps the species the screens expect.
 
 - Decision: some way to calculate a middle ground? 
+- Decision (2026-10-24 evening, through numidium): "A2 party mean", the built default; npcRollLevel stays unset, no settings line.
 - Options for the middle ground (thuum-magnus, 15:52 PDT; one rule for every placement, the zone's min and max clamp all three as the engine's own clamp does; the respawn's re-roll keeps the stored level, D3, so a dungeon stays as first rolled):
   - A2. The party's mean: the mean level of the players within the fate ring (three squares) at the roll, the players online when none is near, rounded down. A level-30 and a level-1 together roll a dungeon at 15: tuned for the pair, not for whoever stepped in first. Stable while the party is.
   - A3. The party's low end: the lowest level among the same players. The level-1 never meets a cave bear because a level-30 walked in ahead; the level-30 meets wolves. The safe pick for a mixed pair, dull for the strong one.

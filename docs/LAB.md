@@ -773,6 +773,37 @@ a scenario green (ADR-009). Scenario YAML is review-gated (ADR-016): a
 change travels in its own commit, Eli approves it, and CI refuses a commit
 that mixes scenario YAML with other files.
 
+### Known intermittent fault: a teleport that never settles (E_RUN_TELEPORT)
+
+Filed 2026-10-24 22:25 PDT (thuum-magnus, from numidium's agent's read of
+b-host-quit 20261025-025053, the one red of gate-m3-train-44, green twice on
+ADR-027's reruns). A fresh seat, in the world and unpaused (no crash, no
+death, no message box, a Utility.wait running mid-window), stood at its
+login spot through twenty teleports in 60 s. Every Teleport reached the
+client ("Teleport received for idx 0 into 3c", then "Teleporting id 0 refrId
+14 ..."), the server record moved with each and snapped back to the seat's
+own reports. The move (remoteServer.ts, the Teleport handler's
+moveRefrToPosition) runs only after ObjectReference.
+forceRemoveRagdollFromWorld returns (ragdollService.ts's
+safeRemoveRagdollFromWorld), and its "onResult called:
+ObjectReference.forceRemoveRagdollFromWorld" line never appeared in that
+run; the green run beside it (013410) shows it 19 ms after the teleport.
+Not train-44's: b-npc-puppet 20261023-173905 on train-38, before any of the
+day's handler edits, shows the same spot and the same missing line, so it is
+an old intermittent fault in the client or the engine. HYPOTHESIS on the
+why, two candidates: the engine requeues the ragdoll task (CommonLibSSE-NG
+include/RE/D/DelayFunctor.h:37) or the call is refused and the refusal
+dropped (skyrim-platform CallNative.cpp:482 ignores the result). To confirm:
+log the send and the resolve of safeRemoveRagdollFromWorld; keep the last
+dump-state's menus, inMenuMode and down in lab-api's E_RUN_TELEPORT note
+(numidium's); or trace the ForceAddRemoveRagdollFunctor vtable with Frida
+(the agent read Offsets_VTABLE.h:4604; verify per rule 1 before any hook).
+lab-api classes E_RUN_TELEPORT as a red, not a lab fault, so a set carrying
+one waits for ADR-027's lone-red reruns; a scenario whose first teleport is
+the only thing that failed is this fault until the read says otherwise. The
+seat's clock ran about 4.20 s behind sky-srv in that run (its connect against
+its first pcap packet): see the clock lesson above the trace reads.
+
 ## Turbo mode (ADR-041)
 
 A live session's pushes, while Eli is at the seats under a playtest hold. A

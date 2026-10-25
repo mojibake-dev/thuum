@@ -2688,6 +2688,8 @@ Decisions.
    the mean, rounded down, of the players within the fate ring's three
    squares, the players online when no near one has a record), party-min,
    or a number for everyone; the pick is a settings line, not a build.
+   Eli picked A2, party-mean, the built default (2026-10-24, with "Merge
+   now" for 39 to 44); npcRollLevel stays unset.
 2. D3 (A). The respawn re-rolls the chain and the outfit at the record's
    level, as the engine re-rolls a leveled placement at a cell reset; the
    fate is sent again.
