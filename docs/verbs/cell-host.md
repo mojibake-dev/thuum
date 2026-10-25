@@ -500,6 +500,18 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   with its handler and whether that handler is mapped: the leaked movie's
   name. One lab fact worth the read: the lab's quit is the console's qqq with
   the Console menu open, a movie a player's menu quit never has open.
+  GREEN at T3: x-host-quit v4 20261025-012653 on 44 6cdc2b35 (numidium's
+  read, 18:30 PDT): the server's "user N left" line held 1.2 s after the
+  quit step returned (two polls of lab-api's server.log_count, the console
+  typing inside it), the grant of 0x9732 to c2 held 5.0 s after that (the
+  grace), Alvor's AI on for c2, and c1 back after its relaunch without
+  taking the village (online 27.1 s after the relaunch). D12-B measured on
+  its own claim. The crash recurred at that quit with the same stack
+  (c1-crash-2026-10-24-18-29-27.log, reading 0x1D4C91AF030), Frida armed
+  again, so no discriminator yet; the plain quit after the gate is the
+  first. The committed scenario b-host-quit follows the plain run's green,
+  since the committed shape carries no Frida step (rule 13: a green probe
+  promoted unchanged).
 
 ## Client
 
