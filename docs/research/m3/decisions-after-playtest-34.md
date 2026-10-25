@@ -86,6 +86,11 @@ respawn re-enables; under train-46's rule the fate respawn would, hours later).
 - Recommended: B. Disable is how the gamemode and the lab take an actor out;
   an out actor that comes back by its own clock is a surprise on every seat.
   A server fix with a T0 case, the next server train.
+- Built ahead, not merged (16:23 PDT, fork m3-train-48 off train-46):
+  RespawnWithDelay returns for a disabled non-player (the 25 s timer's
+  callback too), the sweep drops a disabled body and keeps its stamp, and
+  MpActor::Enable schedules the fated return (stamped at the enable when the
+  death left none); NpcFateTest's case. Awaits the letter.
 
 ### D23. The late re-roll's lost 3D on a login inside a dungeon
 Section 4: the campfire pair and eleven more leveled NPCs were invisible on
@@ -148,4 +153,5 @@ is which brake.
    and the copy's hit (the console PlaceAtMe server action, numidium's), T2
    cited, gate, merge; D19-B is its design; D23-B's first half (redress when
    the bases agree) and, if the reload reads clean, its second.
-3. The next server train: D18-B, D21-B, and D22's brake if the read asks one.
+3. train-48 (server), fork m3-train-48 off 46: D21-B built ahead; D18-B and
+   D22's brake join it if the letters say so.
