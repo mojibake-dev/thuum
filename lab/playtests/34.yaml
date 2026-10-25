@@ -1,0 +1,46 @@
+# Playtest thirty-four's seats (thuum ADR-040 item 6: `just playtest-setup 34`; the checklist is
+# docs/private/playtest-m3-34.md): M3's NPCs, the fourth session, on fork parity fa8809a1 (trains 39 to 45:
+# the quitting host and D12-B's disconnect at the quit, doors and handoffs, the server's roll pushed to both
+# engines with D2's party mean, deaths, respawn and loot, the bandits' weapons, D1-B's death report, and
+# train-45's bounded ragdoll wait). The world is thirty-three's as it ended (playtest-m3-33-20261023T084433Z:
+# rotfern as profile 1, test 2 as profile 2) with rotfern's Survival needs at zero on the record again, as for
+# thirty-two and thirty-three (Eli 2026-10-22: "reset rotfern's survival needs at setup"; 2026-10-25: "33's end
+# world, needs reset"), the server alone with npcEnabled and the morning clock (7.9), test 1 alone at place 1,
+# Riverwood's landing by the bridge end (Tamriel (4,-12), 0x9732), so it hosts, test 2 parked at the lab spawn
+# until Eli's word (thirty-three's shape; the checklist's section 2, "test 1 first, then test 2"). One perk,
+# given by the setup and kept by lab-driver through every load: rotfern's Overdraw (the Headshot Kills mod's
+# condition, the checklist's section 4).
+# Everything here is server-side (labCommand); the seats type nothing.
+id: 34
+build: "fork parity fa8809a1, train-45 merged 2026-10-25 14:20 PDT over train-44 (the gate 20261025-201636-merge-m3-train-45 18 of 18 green, T2 6cdc2b35's, clones promoted); the lab's server image skymp-server:m3-train-45"
+world: playtest-m3-34-rotfern-20261025T2127Z   # thirty-three's world as it ended (playtest-m3-33-20261023T084433Z) with rotfern's
+                                                # Survival needs at zero on the record (81b cold 107.36, 81a hunger 390 and 816 exhaustion 261 to 0)
+hold:
+  minutes: 180
+  reason: "playtest thirty-four: M3's NPCs, fourth session (fork parity fa8809a1, trains 39 to 45)"
+server:
+  # this server alone runs with NPCs on and the morning clock (ADR-035 point 9): playtest-setup lays the run-own
+  # settings overlay (server-settings-run.json beside the world) and starts the server on it
+  npcEnabled: true
+  gameHour: 7.9
+camp:
+  # test 1 alone at place 1 (it hosts the cell), test 2 parked at the lab spawn until Eli's word, then brought beside
+  # test 1 by hand: labCommand teleport profile 2 to [17375, -47204, -128] rot [0, 0, 180] (thirty-three's shape)
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [17225, -47204, -128], rot: [0, 0, 0]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [133857, -61580, 14677], rot: [0, 0, 0]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # rotfern's Overdraw, the Headshot Kills mod's condition (section 4); given by the setup, nothing to type
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
