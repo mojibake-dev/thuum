@@ -865,6 +865,20 @@ left in place; the pin already makes the worn sets equal, so the diff is
 the loot rows. The non-host's failed interaction and rotfern's refused
 takes wait on the server's lines (E_ACTIVATE_REACH; "doesn't occupy ref",
 PutItem's and TakeItem's throw when the taker is not the body's occupant).
+The likelier reading of both (HYPOTHESIS until the lines): a body is a
+container, and a container has ONE occupant at a time within 512 units
+(CheckIfObjectCanStartOccupyThis: "occupant is another object and is
+nearby" refuses, every other case opens), held until that player's closing
+activation clears it or the player is destroyed or disabled; the refused
+player gets no OpenContainer and so no menu and no message, and a take by
+anyone but the occupant throws "doesn't occupy ref". The non-host's
+"can't interact" while the host held or had left the body, and rotfern's
+refused takes while test 2 held it, are that rule seen twice. The
+server's own lines name every corpse activation that reached it
+("MpObjectReference::ProcessActivate 39fe4 - <reason> (activationSource =
+...)"). Whether a body keeps the single-occupant rule, tells the second
+player, or admits both is a design item for the post-playtest memo (the
+rule is upstream's for every container), not a train-47 fix.
 
 BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
