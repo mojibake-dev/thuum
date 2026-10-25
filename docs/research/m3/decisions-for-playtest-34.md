@@ -247,6 +247,45 @@ b-npc-handoff-restart b-npc-handoff-night b-host-kill b-npc-death b-npc-loot
 b-npc-respawn`. A narrower grouping (say D12 and D6 alone) needs its own
 branch's stage and gate, about two hours of lab.
 
+## Merge-ready (44) (20:13 PDT, 2026-10-24)
+
+Train-44 at fork m3-train-44 6cdc2b35 (stacked on 43 de9d048e, so 39 to 43
+ride inside it) is merge-ready by citation: the gate set
+20261025-015916-gate-m3-train-44 (eighteen scenarios: the three always, the
+ten M3 b- scenarios, the four watch, and the two committed today) all green
+on their last runs, verdict watch; T2 green at 6cdc2b35 (18:58 PDT, every
+session identical); gate-cite's five checks passing (one build; the registry
+serving skymp-server:m3-train-44; the clones naming "m3-train-44 client
+6cdc2b35"; 6cdc2b35 the staged commit; nothing replaced it). The one red of
+the set, b-host-quit 20261025-025053 at c2's first teleport (a settle, before
+any claim), went green twice on ADR-027's lone-red reruns (030427, 030801)
+and is the watch item; numidium's agent reads its cause.
+
+What 44 carries, built on your answers of 15:49: D1 B (the host's checked
+death report: the floor under the deferred kill, the fall by the server's
+own samples, the trap trigger's own activation as the hazard evidence, an
+actor's hit by the server's numbered hits; T3: b-npc-death-report), D12 B on
+A (the client's disconnect at the game's own quit, the leave about 5 ms
+after the quit flag; T3: b-host-quit), D2 as one rule behind npcRollLevel
+(party-mean by default; party-min for A3, a number for A4: a settings line,
+say which).
+
+Open and player-visible: on 44 the game crashes inside its own Scaleform
+teardown AFTER the disconnect at every console quit tested (3 of 3, with and
+without Frida); the village passes all the same; a player sees the Windows
+box at quit. HYPOTHESIS a GFx movie alive at quit, the console's the first
+candidate (the lab quits through the console with the Console menu open; a
+player's menu quit does not). Its three discriminators (the Papyrus quit, the
+no-client quit, the console quit on parity) each need a stage change and run
+on the next stage; the checklist tells you to expect the box and carry on.
+
+One command at your word (numidium's): `GATE_SET=20261025-015916-gate-m3-train-44
+T2=skip just verb-merge m3-train-44 b-npc-puppet b-cell-host b-npc-handoff-door
+b-npc-handoff-restart b-npc-handoff-night b-host-kill b-npc-death b-npc-loot
+b-npc-respawn b-npc-death-report b-host-quit`. verb-merge adds the always
+scenarios and gate.yaml's watch; parity goes to 6cdc2b35 and both clones are
+promoted; then playtest 34 from docs/private/playtest-m3-34.md.
+
 ## The trains, in order, with sizes
 
 1. Train-39, the quitting host (D12): the server's stale-host rule, a T0 in
