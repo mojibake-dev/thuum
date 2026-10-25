@@ -576,6 +576,34 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   owns it or none. One run on any build (the crash is the same everywhere)
   names the movie; falsified if the heap's name is not a MovieView's, the
   handler is not a context's +0x30, or the root's refcount reads zero.
+  NAMED (x-host-quit-names 20261025-201238, train-45's stage probe, green
+  on D12-B, the crash inside the run; numidium's read, 13:2x PDT): the
+  leaked movie is the engine's own LOADING MENU. The ninth and faulting
+  heap is `MovieView "LoadingMenu.swf"` (name and inline copy agree), its
+  handler the context's +0x30 and the context's +0x10 that heap; the UI
+  destructor's walk listed 38 menus, six with a live movie at its entry
+  (TrueHUD at refcount 4, LoadWaitSpinner, Console, Loading Menu, HUD Menu
+  at 11, Fader Menu), and five of those heaps never reached DestroyItself
+  (released properly: the five context destructors of the heaps run);
+  only the Loading Menu's movie, refcount 1 (its IMenu's GPtr the one
+  holder, so no plugin holds the movie view itself), survives to the
+  teardown with its handler set. No creation join: it was made before the
+  attach, at startup. The other eight heaps are the engine's (Global,
+  _ResourceLib_Images, _Font_Cache, the MovieData heaps of fonts_console,
+  fonts_en, fonts_cclub and LoadingMenu.swf), _Mesh_Cache with its own
+  handler and no fault. Reading: the movie is held only by its IMenu, so
+  the IMenu itself is what never dies before the heap teardown: an extra
+  holder of the Loading Menu's IMenu (a plugin's or Skyrim Platform's
+  smart pointer kept from a menu event or a loading hook) or the UI
+  destructor's own order (HYPOTHESIS which). Next, after the playtest: the
+  names mode prints the IMenu's refcount in the walk (IMenu+0x08, the
+  GRefCountBase count) so a count above one names a holder; the re-analyst
+  reads the Loading Menu's release path under the UI destructor and who
+  references the Loading Menu's IMenu (Skyrim Platform's loading hooks,
+  LoadGame.cpp, are the first suspect, then SSEDisplayTweaks' and
+  po3_Tweaks' loading-screen options); then a solo quit per suspect plugin
+  disabled (a layer change each). Not a thuum verb's bug; a fix row of its
+  own.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
