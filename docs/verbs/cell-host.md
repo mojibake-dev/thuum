@@ -521,6 +521,31 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   lab stands on the merged build with the current driver, ready for the
   playtest; Eli chooses between playing now and the remaining
   discriminators.
+  Eli chose the discriminators first ("id rather have everything sured up
+  before I actually sit to test"). All three GREEN on D12-B's claims and all
+  three CRASHED alike (numidium, 12:33 PDT): x-host-quit-c2 192025 (c2 hosts
+  and quits; c2-crash-2026-10-25-12-22-43.log inside the run: the SEAT is
+  cleared); x-quit-solo 192810 (solo, no skymp5-client, Debug.QuitGame from
+  Riverwood; c1-crash-2026-10-25-12-29-54.log: the crash NEEDS NO SKYMP
+  CLIENT, so Skyrim Platform and the SKSE plugins are what is left, vanilla
+  unread); x-host-quit-heaps 192408 (the heaps mode on a Papyrus quit): the
+  crash read 0x01E74A0EF030 and the trace's ninth and LAST heapDestroy, heap
+  0x1e74a0f60c0, carried exactly that handler, mapped at DestroyItself's
+  entry and freed before 87837 read it; six setLimitHandler(nullptr) calls
+  and five contextDtor records came first (five movie memory contexts
+  destroyed and cleared, five of the six nulls from SkyrimSE.exe+0x1057b65
+  inside 85286), and the ninth heap's context never was: a leaked movie
+  memory context, the F030 low bits of every crash its heapLimit. Every
+  heap name read "?": HeapInfo.name at heap+0x80 (the _info at +0x38, its
+  name at +0x48) is unconfirmed (rule 1). To NAME the leaked movie the
+  trace must record heap and movie creation from early in the session (the
+  heap's creation with its name, or the movie's load with its file), so the
+  ninth heap's address maps to a name at quit: the re-analyst's next read;
+  or the SKSE plugins bisected in solo runs (a layer change). With no
+  skymp5-client in the solo crash the fix is not in our client: a plugin's
+  movie, or Skyrim Platform's own UI (NirnLabUIPlatform at startup is
+  numidium's candidate, unverified). Playtest 34 goes ahead with the box
+  known; the fix is its own row.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
