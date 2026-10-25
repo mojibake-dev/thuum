@@ -24,7 +24,9 @@ field's size is the uint32 that XXXX carried.
 
 `near` lists the references placed in a worldspace within a radius (in the
 x-y plane) whose base record is one of the types, e.g. FLOR,CONT,ACTI,DOOR:
-the objects a scenario can activate around a spot. `races` lists the plugin's
+the objects a scenario can activate around a spot. Actors are placed as ACHR
+records with the same NAME and DATA, so NPC_ lists the fixed creatures and
+people and LVLN the leveled placements, whose species the server's roll picks. `races` lists the plugin's
 RACE records with their Playable and Child flags: the races the race menu
 offers are the playable ones (docs/verbs/character-creation.md). `attacks`
 lists a race's attack data, one ATKD and its ATKE event name per attack
@@ -150,7 +152,7 @@ def near(buf: bytes, world: int, x: float, y: float, radius: float, types: set[s
     bases = {fid: (t, off) for t, fid, off, _ in headers(buf, 0, len(buf), types) if t in types}
     out: list[Placed] = []
     for t, fid, off, w in headers(buf, 0, len(buf), {"WRLD"}):
-        if t != "REFR" or w != world:
+        if t not in ("REFR", "ACHR") or w != world:
             continue
         rec, _ = record_at(buf, off)
         name, data = rec.get("NAME"), rec.get("DATA")
