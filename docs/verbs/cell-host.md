@@ -485,6 +485,23 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   disconnect) are parity's. Open: the quit crash's three discriminators on
   the next stage (the Papyrus quit, the no-client quit, the console quit on
   parity), then the heaps mode if they point at a movie.
+  THE CRASH PREDATES 44 (x-quit-console-43 20261025-185002 on m3-train-43
+  de9d048e, the build without the thunk, numidium's read, 11:5x PDT): c1
+  wrote c1-crash-2026-10-25-11-52-22.log at that quit, the same exception
+  at SkyrimSE.exe+0x10EA550 and the same stack frame by frame through
+  36551+0x3f4 and WinMain+0x1b3 (the Skyrim Platform frame at a different
+  offset, +0x54f640, a different SP build, which fits the HookedWinMain
+  reading), with the client ALIVE at the teardown. So the console quit
+  crashes the same way without OnQuitShutdown: the class is the engine's or
+  the load order's, and 44's thunk is cleared. Left: whether a quit with no
+  menu open crashes (x-host-quit-papyrus on the merged build, next), and
+  the seat (c1 against c2). A design question filed for Eli from the same
+  night's reads (b-cell-host 20261025-115250): a DEAD player can still host
+  a cell (c1 took epoch 2 while dead, before its 25 s respawn). Not a bug
+  under today's rules; the recommendation when it is decided: a dead player
+  is no candidate and its cells start their grace at the death (an R0 fact
+  the server already holds), since its respawn teleports it away and passes
+  them by distance anyway.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
