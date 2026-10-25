@@ -254,8 +254,13 @@ if (at === undefined) {
             const menu = readPtr(e.add(0x08));
             const movie = menu.isNull() ? NULL : readPtr(menu.add(0x10));
             const heap = movie.isNull() ? NULL : readPtr(movie.add(0x38));
+            // menuRefCount: the IMenu's own count (GRefCountBase at +0x08, HYPOTHESIS on
+            // the offset); the Loading Menu's movie read refcount 1 at the quit (its IMenu
+            // the one holder) yet outlived the teardown, so the IMenu's holders are the
+            // next read (names run 20261025-201238)
             const row = { menu: menu.toString(), menuName: cstr(readPtr(e)), uiMovie: movie.toString(),
-                          refCount: movie.isNull() ? -1 : movie.add(0x08).readU32(), heap: heap.toString() };
+                          refCount: movie.isNull() ? -1 : movie.add(0x08).readU32(),
+                          menuRefCount: menu.isNull() ? -1 : menu.add(0x08).readU32(), heap: heap.toString() };
             if (!heap.isNull()) menusByHeap[heap.toString()] = row;
             walked += 1;
             emit(Object.assign({ uiMenu: true }, row));
