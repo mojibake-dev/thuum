@@ -847,6 +847,25 @@ read); after a cell reload both seats can; rotfern could not take armor
 where test 2 could; test 2 does not see the cape rotfern placed (a dropped
 or placed item's sync).
 
+The strip has a mechanism in code (HYPOTHESIS until the session's lines
+or a lab run): the body's inventory is laid in by applyInventory
+(modelApplyUtils.ts, ignoreWorn true) at the host's loot, and applyInventory
+begins with resetBase, which, the first time this game session meets the
+reference's BASE id, calls TESModPlatform.resetContainer on the base and
+removeAllItems on the reference before diffing the server's list in: the
+engine's worn set goes out and comes back unworn, so the corpse stands in
+its underwear from the first loot (sync/inventory.ts resetBase; basesReset
+keyed by base id, so each of the campfire pair's bases strips once). The
+same resetContainer on an NPC_ base shared by many placements (the Enc
+bandits') clears that base's own inventory list for every actor of it
+spawned later in the session, a latent hazard the CONT path never had. The
+row for the next client train: a dead engine reference takes the server's
+list as a diff alone (no base reset, no removeAllItems), its worn items
+left in place; the pin already makes the worn sets equal, so the diff is
+the loot rows. The non-host's failed interaction and rotfern's refused
+takes wait on the server's lines (E_ACTIVATE_REACH; "doesn't occupy ref",
+PutItem's and TakeItem's throw when the taker is not the body's occupant).
+
 ## Client
 
 Built, the deaths' client half (95abf0dc, 20:39 PDT): formView binds a dead
