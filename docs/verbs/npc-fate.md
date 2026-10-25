@@ -841,7 +841,20 @@ kills it plays, consumed by the report that asks): cause 4 with the killer's
 remote id when the engine names an actor, else 0 (the server picks any
 evidence it has); the body's position; one logLab line per report. Not
 reported: the player's own death, a figure's or a copy's (0xff ids), a
-puppet's (another game simulates it).
+puppet's (another game simulates it). The floor (17:51 PDT, fork
+m3-train-44 6cdc2b35, after x-npc-fall-report 20261025-004503 fell 4000
+units and fired nothing): every viewed actor carries the engine's deferred
+kill (formView startDeferredKill, "the server's death is the only death"),
+so the deaths B exists for, a fall, a trap, a blow whose engine damage
+outran the server's, leave the actor at or under zero health and alive,
+with no death event at all; deathStart was the wrong ear. The service now
+polls every hosted game-file actor's health twice a second
+(HostService.hostedActorRemoteIds, getActorValuePercentage) and reports the
+first time it reaches the floor, once per visit there, cause 0; the
+server's acceptance kills the record, its isDead comes back, killActor
+ends the deferred kill and plays the death, and the deathStart that follows
+is the server's own word (takeServerKill). deathStart stays for an actor
+the deferred kill did not hold.
 
 ## Tests
 
@@ -1379,7 +1392,7 @@ to 44 held until 44 is staged and gated ("Hold until built").
 - [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT); the death half on fork m3-train-42 1d09fa04 (the body's stamp, the sweep on the game clock, the master's 240 h, the respawn funnel, the engine's essential and protected rule, the corpse as a container; five T0 cases; CI GREEN on 5352af64 and again on 61ffa74e (23:11 PDT, the mirror rule and the explicit life flag), 21:44 PDT: the unit binary, upstream's integration tests under the reset clock, the Windows client)
 - [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6; ActorDeath 52, wire id 60, its validator and per-host budget, two fixtures, fork m3-train-44 597bb9dc, the C++ struct dd285ad9 and the client type 6e827918, 2026-10-24)
 - [ ] native hook + T1
-- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow; DeathReportService 6e827918, train-44: the host's death report at deathStart)
+- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow; DeathReportService 6e827918, train-44: the host's death report at deathStart; 6cdc2b35: read from the health floor under the deferred kill, the ear that hears a fall)
 - [x] T2 green (33 sessions identical with the declared divergences at de9d048e, the index compared as identity, the declarations naming forms; 09:55 PDT)
 - [x] T3 scenario green (09:55 PDT: the gate set 20261024-155001-gate-m3-train-43 on de9d048e, all sixteen green on their last runs, b-npc-death 162453, b-npc-loot 163014, b-npc-respawn 163304 with the re-roll; T2 green at de9d048e; gate-cite's five checks pass; HYPOTHESIS tags remaining: the over-time damage path's aggressor, the engine's reason for refusing Resurrect under AI off, named in Suppress) (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; committed: b-npc-death, b-npc-loot and b-npc-respawn (main 26db4afd); every fate and death probe green on 43 d2210492; 43's T2 and a gate set with the nine plus the seven committed scenarios run tonight for the merge's citation; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
