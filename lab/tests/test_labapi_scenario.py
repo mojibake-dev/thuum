@@ -365,6 +365,21 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(head + bad + "\n")
 
+    def test_server_console_takes_a_console_name_and_args(self):
+        # a console command run on the server as the seat's player would type it (a hostile placed at a resident)
+        from labapi.scenario import load_scenario
+
+        head = "id: x-c\nclients: [c1, c2]\nsteps:\n  - c1: "
+        step = load_scenario(head + "server-console {name: PlaceAtMe, args: [0x14, 0x23abf]}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args),
+                         ("client", "c1", "server-console", {"name": "PlaceAtMe", "args": [0x14, 0x23abf]}))
+        self.assertEqual(load_scenario(head + "server-console {name: tgm}\n").steps[0].args, {"name": "tgm", "args": []})
+        for bad in ("server-console {args: [0x14]}", "server-console {name: Place-At-Me}", "server-console {name: PlaceAtMe, args: 20}",
+                    "server-console {name: PlaceAtMe, args: [true]}", "server-console {name: PlaceAtMe, args: [[1]]}",
+                    "server-console {name: PlaceAtMe, base: 0x23abf}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+
     def test_log_count_and_a_restart_that_sets_the_clock(self):
         # a client's log lines counted mid-run, and a restart that lays the clock anew (npc-handoff's reads)
         from labapi.scenario import load_scenario

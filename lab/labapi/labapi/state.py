@@ -148,6 +148,9 @@ class ServerState:
 
     def command(self, client: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
         payload = {"kind": action, "profileId": self._profile(client), **args}
+        if action == "server-console":
+            # the gamemode's labCommand console as the seat's player would type it (playtest-console's payload)
+            payload = {"kind": "console", "profileId": self._profile(client), "name": args["name"], "args": list(args.get("args") or [])}
         if action == "kill-ref" and "killer" in args:
             # the killer a client of the scenario, sent as the profile its actor plays
             del payload["killer"]

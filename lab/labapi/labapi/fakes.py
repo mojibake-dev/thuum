@@ -302,6 +302,10 @@ class FakeState:
                 actor.healthPercentage = 1.0
                 actor.x, actor.y, actor.z, actor.cell = actor.spawn
                 return {"ok": True}
+            if kind == "console":
+                # the gamemode's console: mp.executeConsoleCommand as the profile's player; it answers the call it made
+                return {"ok": True, "actorId": 0xFF000000 + int(payload.get("profileId", 0)) - 1, "name": payload.get("name"),
+                        "args": list(payload.get("args") or [])}
             if kind in ("kill-ref", "respawn-ref"):
                 # a game-file actor's record (self.refs), killed or put up again by form id, as the gamemode does
                 fid = int(payload.get("formId", -1))
