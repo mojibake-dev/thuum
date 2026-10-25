@@ -330,6 +330,9 @@ class NpcKillStep(unittest.TestCase):
 
         step = load_scenario("id: x-q\nclients: [c1]\nsteps:\n  - c1: quit\n  - c1: relaunch {until: gone}\n").steps[0]
         self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "quit", {}))
+        # via papyrus: Debug.QuitGame with no menu open (the console's movie alive at quit, 004815's crash)
+        step = load_scenario("id: x-q\nclients: [c1]\nsteps:\n  - c1: quit {via: papyrus}\n").steps[0]
+        self.assertEqual(step.args, {"via": "papyrus"})
 
     def test_approach_may_take_its_cell_from_the_record(self):
         # `cell: record`: the cell the server's record of her stands in, read at the step (x-handoff-door's leg 3)
