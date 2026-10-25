@@ -753,6 +753,19 @@ drop of 3813 units in the host's samples", killed the record and scheduled
 the 240 h reset; dead on the record and both seats; the bound of 200 held
 with room. Committed as lab/scenarios/b-npc-death-report.yaml (main
 3c6c54e). The hazard's evidence stays the one HYPOTHESIS.
+Nightly 20261025-124620 red on the roll, not the report (numidium's
+agent, 11:5x PDT): the subject 0x85547 came up a SKEEVER (EncSkeever
+0x23ab7, race 78337; the gate's green had EncWolf 0x23abe, 78346), one
+entry in five of its level-1 list, and the lifted skeever never fell: two
+seconds after the lift it stood on the ground 441 units off at health 1,
+where the wolf had been mid-fall, so nothing reached the floor and nothing
+was reported (no report line, no E_DEATH_*). Why a small creature stays
+down is a HYPOTHESIS (the engine re-grounding a size-0 race, or skymp's
+teleport moving the actor with a null cell where CommonLib's SetPosition
+passes the parent). The scenario now asserts the species as a premise
+(main e6a62fb), so the roll's red reads at the prelude; the fix owed is a
+wolf-only subject (a direct EncWolf or deer placement near the forest,
+esm.py), since a one-in-five premise red is no gate scenario.
 
 Built, the roll's level rule (train-44 e3b39ac8, 16:30 PDT; the memo's D2,
 Eli: "some way to calculate a middle ground?"): PartOne::FateRollLevel gives
