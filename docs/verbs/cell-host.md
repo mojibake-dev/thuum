@@ -502,6 +502,25 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   is no candidate and its cells start their grace at the death (an R0 fact
   the server already holds), since its respawn teleports it away and passes
   them by distance anyway.
+  The Papyrus quit too (x-host-quit-papyrus 20261025-190351 on the merged
+  build, Debug.QuitGame from the driver's next tick with no menu open,
+  numidium's read, 12:07 PDT): GREEN on D12-B's claims (the leave 1.2 s
+  after the step, the grant 5.0 s later, c1 back without retaking), and
+  c1 crashed at the quit with the same stack frame for frame. The tally:
+  the console quit on 44 three of three (with and without Frida), the
+  console quit on 43 without the thunk one of one, the Papyrus quit on 44
+  with no menu open one of one. The thunk, Frida and the Console menu's
+  movie are cleared; whatever is alive at the teardown is alive at every
+  quit (a persistent movie, the HUD's or a plugin's own, or no movie at all).
+  Left: the seat (every quit so far was c1's; x-host-quit-c2 by path swaps
+  the seats), the mod stack (the no-client solo quit: Skyrim Platform
+  loaded, nothing connected), and quit-path.js's heaps mode to name what
+  is alive at the teardown (under Frida the crash is the same, so the trace
+  does not confound the read). Two leftover crash logs ride clean-m1-next
+  (17-50-50 and 43's 11-52-22): only one stamped inside a run counts. The
+  lab stands on the merged build with the current driver, ready for the
+  playtest; Eli chooses between playing now and the remaining
+  discriminators.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
