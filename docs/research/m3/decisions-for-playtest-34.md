@@ -38,6 +38,11 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
     deathStart, npcDeathReports (false restores A), five T0 cases. ADR-048
     accepted as B. The lab read owed: x-npc-fall-report (by path) on 44's
     stage; the trap's evidence is a HYPOTHESIS (docs/verbs/npc-fate.md).
+    17:10 PDT: the trap half as first built could never fire (every vanilla
+    trigger activates itself, the stepping actor is never the action
+    reference); fixed in 44's restage: the host forwards a trigger's own
+    activation and the server notes it as the evidence. Bear traps and oil
+    pools stay the floor.
 
 
 ### D2. The level a leveled NPC is rolled at

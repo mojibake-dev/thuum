@@ -718,17 +718,31 @@ a player's hit is checked as any actor's (the server numbered that hit): the
 engine's number outran the server's and the death stands on both screens
 (the gameplay-first rule); a strict mode refusing a player's hand is one
 line if Eli wants it. Setting npcDeathReports, default true; false restores
-A. T0 unit/ActorDeathTest, five cases (Tests 8). HYPOTHESIS, two: that a
-trap's trigger reaches the server as an activation at all (the hazard
-evidence; the lab's trap run decides, and until then a hazard death is
-refused E_DEATH_UNCHECKED and counted, A's floor for that cause; the static
-reading, 16:55 PDT: the client reports an activation whose caster is the
-player or a synced actor (activationService: caster 0x14 or isSyncedActorId,
-localIdToRemoteId), so a pressure plate activated by the stepping actor's
-own reference, TrapTriggerBase's shape, reaches OnActivate and the recent
-activations when that actor is the player or a hosted NPC, while a trap
-whose script activates with the trigger itself as the action reference
-never does; which shape Skyrim's traps use is the read); and the
+A. T0 unit/ActorDeathTest, five cases (Tests 8). The hazard evidence as
+first built was unreachable (17:05 PDT, an agent's read of the vanilla
+scripts, digital-apple/TESVScripts, and the CK wiki): every trigger script
+activates itself (TrapTriggerBase L239, PressurePlate L21, Tripwire L18
+`activate(self as objectReference)`), the engine forwards that activation to
+the trap with the plate as the activator (CK wiki, Reference, Activate
+Parents: "this reference will be activated by the reference which acted as
+the activate parent, not the originally activating NPC"), and the client
+reported only activations whose action reference was the player or a hosted
+actor, so no trap ever reached OnActivate. Since the restage's head (the
+commit after 53b9fd65): the game hosting the trigger's cell forwards a
+reference's activation of itself as an Activate with caster and target the
+same (activationService), and the server notes it where and when
+(OnActivate's first branch: the reporter must host the cell, nothing is
+activated), so a death within 512 units and 5 s of it checks as a hazard;
+ActorDeathTest's hazard case drives that path. Still the floor: bear traps,
+break-away floors, oil pools and falling lamps fire with no activation at
+all (TrapBear, TrapBreakAwayBase, TrapExplosiveGas: OnTriggerEnter or OnHit
+straight to the hit, the explosion or the hazard). HYPOTHESIS, two: that the
+engine's death event for a trap kill carries no killer (ProcessTrapHit,
+darts, flames and hazards set no blame actor; Papyrus's akKiller is typed
+Actor; but a non-actor killer in the native event would make Skyrim
+Platform drop deathStart altogether, EventHandler.cpp L413-447, and the
+report would never leave the host: the lab's plate run decides, Arvel's
+plate in Bleak Falls Temple the natural read); and the
 fall bound (200 units within 4 s is a plausibility floor, not the engine's
 damage rule, which ran on the host; x-npc-fall-report reads a drop the
 engine kills at).

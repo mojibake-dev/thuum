@@ -294,7 +294,14 @@ essential never, a protected one never by a report), the body lies within
 cause 4 by a hit from the named killer the server numbered within 3 s, 1 by
 a drop of 200 units in the host's own movement samples within 4 s, 2 by an
 activation within 512 units of the body within 5 s, 0 by any of the three;
-cause 3 and any other code refused. Then it kills the record (MpActor::Kill,
+cause 3 and any other code refused. The hazard evidence rides Activate (6)
+unchanged in shape: a reference's activation of itself (caster and target
+the same, not the player) is a trap trigger's firing, forwarded by the game
+hosting the trigger's cell (every vanilla trigger script activates itself
+and the engine never names the stepping actor); the server notes it as
+evidence and activates nothing (ActionListener::OnActivate's first branch),
+and drops it from a game that does not host the cell. Then it kills the
+record (MpActor::Kill,
 the death's travel as every death's: isDead to every viewer, the body as the
 server's container, the fated respawn). A refusal logs one warn a minute per
 actor with its code (E_DEATH_OFF, NO_ACTOR, PLAYER, NOT_HOST, IMMORTAL, FAR,
