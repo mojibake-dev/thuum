@@ -57,6 +57,24 @@
 // +0x10 must equal the heap), the root(s) created on it and the root's
 // refcount: a nonzero refcount is the holder that kept the movie alive, a
 // heap missing from the menu walk is a movie never registered as a menu.
+// Mode 'holders' (params {MODE: holders}; the re-analyst's read of the
+// Loading Menu, 2026-10-25): the leaked movie is the Loading Menu's, an
+// always-open menu (kAlwaysOpen) that the UI destructor 82073 alone destroys:
+// per live entry AddRef, UnregisterHandler (which releases the two callback
+// references its FxDelegate holds), Release; then the map destructor 82118
+// and the stack destructor 82107 release their GPtrs. An untouched Loading
+// Menu reads refcount 3 at the destructor's entry (the map entry plus two
+// callbacks), 1 after the loop and 0 after the map destructor, and dies with
+// its movie. This mode reads the Loading Menu's IMenu count (IMenu+0x08,
+// GRefCountImplCore's count) at those three points, its membership in
+// UI::menuStack (the GPtr array at UI+0x110, the size at +0x120, HYPOTHESIS
+// layout) and its delegate's callback count (the GHash at delegate+0x18, its
+// table's first qword the entry count per 82660, HYPOTHESIS). The IMenu's
+// address comes from the creator 51943's return when the trace is armed from
+// the launch (relaunch {frida}), else from the destructor's menu walk. Four
+// or more at the entry means a holder outside the UI (a plugin's reference;
+// the bisect names it); three at the entry and a count above zero after the
+// map destructor means the delegate released fewer than two.
 // Run: a scenario's `frida {script: quit-path.js}` step before the quit, or
 // `just frida quit-path.js c1` by hand, then quit the game (console qqq).
 'use strict';
@@ -80,6 +98,10 @@ const OFFSETS = {
     createContext: 0x1058fd0, // 85302 GFxMovieDefImpl::CreateMemoryContext (rdx the heap name, rax the context; its heap at ctx+0x10)
     createRoot: 0x1058e70, // 85301 GFxMovieDefImpl::CreateInstance(MemoryContext*, bool) (rdx the context, rax the GFxMovieRoot; its heap at root+0x38)
     uiDtor: 0xfa3640, // 82073 UI's destructor, which releases every registered menu's movie
+    loadingMenuCreator: 0x9365b0, // 51943 the Loading Menu's creator (rax the IMenu), registered by UI::Register("Loading Menu")
+    unregisterHandler: 0xfbe8c0, // 82639 FxDelegate::UnregisterHandler (rcx the delegate, rdx the handler): the dtor loop's release of a menu's callbacks
+    menuMapDtor: 0xfa6b00, // 82118 UI::menuMap's destructor: the last Release of every registered IMenu
+    menuStackDtor: 0xfa6680, // 82107 UI::menuStack's destructor
   },
 };
 
@@ -278,6 +300,76 @@ if (at === undefined) {
         const bt = Thread.backtrace(this.context, Backtracer.ACCURATE).slice(0, 8).map(mod);
         emit({ contextDtorNamed: true, ctx: ctx.toString(), heap: heap.toString(), name: names.name, backtrace: bt, msAfterFlag: since() });
       },
+    });
+  }
+
+  // mode holders: the Loading Menu's IMenu refcount through the UI teardown
+  if (MODE === 'holders') {
+    let loadingMenu = NULL;
+    function count(p) { try { return p.isNull() ? -1 : p.add(0x08).readU32(); } catch (e) { return -2; } }
+    function delegateCallbacks(menu) {
+      try {
+        const delegate = readPtr(menu.add(0x28));
+        if (delegate.isNull()) return -1;
+        const table = readPtr(delegate.add(0x18));
+        return table.isNull() ? 0 : table.readU64().toNumber();
+      } catch (e) { return -2; }
+    }
+    function onStack(ui, menu) {
+      try {
+        const data = readPtr(ui.add(0x110));
+        const size = ui.add(0x120).readU32();
+        for (let i = 0; i < size && i < 64; i++) {
+          if (readPtr(data.add(i * 8)).equals(menu)) return true;
+        }
+        return false;
+      } catch (e) { return null; }
+    }
+    Interceptor.attach(exe.base.add(at.loadingMenuCreator), {
+      onLeave: function (retval) {
+        loadingMenu = retval;
+        emit({ loadingMenuCreated: true, menu: retval.toString(), refCount: count(retval), threadId: this.threadId });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.uiDtor), {
+      onEnter: function (args) {
+        const ui = args[0];
+        if (loadingMenu.isNull()) {
+          // the trace was armed after the creation: find the entry by name in the map
+          try {
+            const entries = readPtr(ui.add(0x150));
+            const capacity = ui.add(0x134).readU32();
+            for (let i = 0; i < capacity && i < 4096; i++) {
+              const e = entries.add(i * 0x20);
+              if (readPtr(e.add(0x18)).isNull()) continue;
+              if (cstr(readPtr(e)) === 'Loading Menu') { loadingMenu = readPtr(e.add(0x08)); break; }
+            }
+          } catch (e) { emit({ error: 'menuMap search failed: ' + e }); }
+        }
+        this.ui = ui;
+        emit({ holders: 'uiDtor enter', menu: loadingMenu.toString(), refCount: count(loadingMenu),
+               onStack: loadingMenu.isNull() ? null : onStack(ui, loadingMenu),
+               delegateCallbacks: loadingMenu.isNull() ? -1 : delegateCallbacks(loadingMenu), msAfterFlag: since() });
+      },
+      onLeave: function () {
+        emit({ holders: 'uiDtor leave', menu: loadingMenu.toString(), refCount: mapped(loadingMenu) ? count(loadingMenu) : 'freed', msAfterFlag: since() });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.unregisterHandler), {
+      onEnter: function (args) {
+        this.ours = !loadingMenu.isNull() && mapped(loadingMenu) && readPtr(loadingMenu.add(0x28)).equals(args[0]);
+        if (this.ours) this.before = count(loadingMenu);
+      },
+      onLeave: function () {
+        if (this.ours) emit({ holders: 'unregisterHandler', menu: loadingMenu.toString(), refCountBefore: this.before, refCountAfter: count(loadingMenu), delegateCallbacks: delegateCallbacks(loadingMenu) });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.menuMapDtor), {
+      onEnter: function () { emit({ holders: 'menuMap dtor enter', menu: loadingMenu.toString(), refCount: mapped(loadingMenu) ? count(loadingMenu) : 'freed' }); },
+      onLeave: function () { emit({ holders: 'menuMap dtor leave', menu: loadingMenu.toString(), refCount: mapped(loadingMenu) ? count(loadingMenu) : 'freed', msAfterFlag: since() }); },
+    });
+    Interceptor.attach(exe.base.add(at.menuStackDtor), {
+      onLeave: function () { emit({ holders: 'menuStack dtor leave', menu: loadingMenu.toString(), refCount: mapped(loadingMenu) ? count(loadingMenu) : 'freed' }); },
     });
   }
 
