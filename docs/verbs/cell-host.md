@@ -470,6 +470,36 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   quit from the main menu with no client ever created, where the thunk does
   nothing). If the no-client quit does not crash, the teardown is in the
   frame.
+  The re-analyst's read of the stack (REA on sky-re, 18:30 PDT,
+  CONFIRMED-STATIC for the chain, HYPOTHESIS for the cause): 36551 at +0x3df
+  loads the BSScaleformManager singleton and calls its teardown 82324
+  (BSScaleformManager.h:50-56's fields released in order), which calls
+  84561, GMemory's ShutdownHeapEngine shape, which calls 84559
+  (RE::GSysAllocPaged::ShutdownHeapEngine: the global heap's leak dump, then
+  its DestroyItself 84554, GMemoryHeap.h:190), which walks the global heap's
+  child heaps (+0x88) destroying each, then frees its own engine through
+  87837, the allocation engine's destructor: per segment it loads the heap's
+  limit handler from engine+0x748 and calls OnFreeSegment on it
+  (GMemoryHeap.h:120). The crash is that load, MOV RAX,[RCX] with RCX the
+  handler, a canonical user-mode address ending in 0x30, the offset of
+  heapLimit inside GFxMovieDef's MemoryContextImpl (GFxMovieDef.h:93): a
+  movie's memory context whose destructor (85286, which begins with
+  SetLimitHandler(nullptr)) never ran, so a movie-scale child heap of the
+  global heap was alive at quit with a handler into memory already
+  unmapped. Networking on 36551's path before the Scaleform teardown: none
+  to depth two (its 47 direct calls named, BSAudioManager's GetSingleton
+  the only CommonLib-named one; the exe's WinHttpCloseHandle sites all lie
+  in bnet code none of the 47 reaches). The thunk touches no Scaleform
+  object, and GFx heaps are VirtualAlloc segments, not the CRT heap a Rust
+  free reaches. Verdict, HYPOTHESIS until a run: the engine's known at-exit
+  class, a GFx movie leaked past the UI teardown; the only way the thunk
+  could matter is ordering (a JS callback leaving a menu or GFxValue alive).
+  Decides it: the plain quit (no Frida) and the no-client quit as above, and
+  lab/frida/quit-path.js's heaps mode, which lists every heap 84554 destroys
+  at quit by name (HeapInfo.name at +0x80 through +0x38, GMemoryHeap.h:97-99)
+  with its handler and whether that handler is mapped: the leaked movie's
+  name. One lab fact worth the read: the lab's quit is the console's qqq with
+  the Console menu open, a movie a player's menu quit never has open.
 
 ## Client
 
