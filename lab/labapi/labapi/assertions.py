@@ -12,6 +12,8 @@ the lab can grep (E_ASSERT_*).
                                                      that seat's engine state of an NPC, from its last npc-state {formId}
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
+    | .turned | .endX | .endY | .endZ                 the same rotation signed, in degrees, and where it stood at the
+                                                     watch's stop (watched(<client>) carries them too)
   server.host(<cell>).hosted | .client | .epoch      the server's host table row for a cell id
                                                      (docs/verbs/cell-host.md): .client is the run's client
                                                      whose player holds it, "" when none
@@ -261,6 +263,17 @@ class WatchView:
     # reading one is then a data error, never a pass)
     turns: float | None = None
     headingAtStop: float | None = None
+    # the same rotation signed (lab-driver's `turned`, degrees; `turns` is its
+    # absolute value over 360), so a copy turning the other way from its host
+    # shows, and where the actor stood at the watch's stop (lab-driver's `last`,
+    # re-based with `first` across a frame change, less the same origin as x, y
+    # and z): b-npc-puppet's "the two end within the relay's lag of each
+    # other", which x and y (the start) never tested. None from a driver
+    # before them, a data error when read
+    turned: float | None = None
+    endX: float | None = None
+    endY: float | None = None
+    endZ: float | None = None
     # its stagger and recoil events in the watcher's game, (ms, name, 1 if
     # its graph took the event after every hook), and the graph bools the
     # watch sampled, (name, ((ms, value), ...)) (lab-driver bc5d76a; thuum
@@ -1327,6 +1340,9 @@ class _ClientRef:
     def _watch_view(self, best: dict[str, Any], origin: tuple[float, float, float], label: str) -> WatchView:
         try:
             first = best["first"]
+            last = best.get("last")
+            end = (tuple(float(last[i]) - origin[i] for i in range(3))
+                   if isinstance(last, (list, tuple)) and len(last) >= 3 else (None, None, None))
             series = best.get("magicka") or []
             falls = [float(t) for (t, v), (_, prev) in zip(series[1:], series) if float(v) < float(prev)]
             return WatchView(
@@ -1345,6 +1361,8 @@ class _ClientRef:
                 avs=_av_series(best),
                 turns=abs(float(best["turned"])) / 360.0 if best.get("turned") is not None else None,
                 headingAtStop=float(best["headingAtStop"]) if best.get("headingAtStop") is not None else None,
+                turned=float(best["turned"]) if best.get("turned") is not None else None,
+                endX=end[0], endY=end[1], endZ=end[2],
             )
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{label} lacks {e}") from e
@@ -1720,7 +1738,8 @@ _ATTRS = {
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
                 "shouts", "wordsKnown", "wordsUnlocked", "shoutRecovery"},
     Pos: {"x", "y", "z", "name", "isDead", "healthPercentage", "equippedRight", "equippedLeft", "raceId", "sex"},
-    WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop"},
+    WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop",
+                "turned", "endX", "endY", "endZ"},
     NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
                    "isEssential", "isProtected", "activationBlocked", "cell", "is3DLoaded", "raceId", "worn"},
     MarkerView: {"visible", "canTravel"},
