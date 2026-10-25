@@ -470,7 +470,7 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   quit from the main menu with no client ever created, where the thunk does
   nothing). If the no-client quit does not crash, the teardown is in the
   frame.
-  The re-analyst's read of the stack (REA on sky-re, 18:30 PDT,
+  The re-analyst's read of the stack (REA on sky-re, 18:19 PDT,
   CONFIRMED-STATIC for the chain, HYPOTHESIS for the cause): 36551 at +0x3df
   loads the BSScaleformManager singleton and calls its teardown 82324
   (BSScaleformManager.h:50-56's fields released in order), which calls
