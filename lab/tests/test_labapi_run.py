@@ -1840,6 +1840,50 @@ class CellHostSteps(RunTests):
         laid = json.loads((self.tmp / "server-settings-run.json").read_text())
         self.assertEqual(laid["time"]["start"], {"hour": 7.9})
 
+    def test_a_server_log_count_reads_the_runs_server_log(self):
+        """x-host-quit: the leave a quit sends is the server's own line ("user N left"), counted from the run's
+        server log so far (compose logs since the run began) for server.log_count("<pattern>")."""
+        self.services.system.log_text = ("[info] WireServer: user 1 left (connection terminated by the transport layer)\n"
+                                         "[info] disconnect 2\n[info] something else\n")
+        text = ('id: t-slog\nclients: [c1]\nsteps:\n  - c1: connect\n  - server: log-count {pattern: "user [0-9]+ left"}\n'
+                "  - assert:\n      - 'server.log_count(\"user [0-9]+ left\") >= 1'\n")
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s.get("action") == "log-count")
+        self.assertIn("1 line(s) of the server's log match", step["note"], step)
+        logs = [c for c in self.services.system.commands if c[:2] == ["docker", "compose"] and "logs" in c and "--since" in c]
+        self.assertTrue(logs, self.services.system.commands)
+
+    def test_a_server_log_count_is_live_in_an_until_and_an_assert(self):
+        """x-host-quit v4: the leave's line read inside an until right after the quit, no step first; each poll counts
+        the run's server log anew, so a line that lands mid-until holds it."""
+        system = self.services.system
+        system.log_text = "[info] nothing yet\n"
+        real_run = system.run
+        polls = {"n": 0}
+
+        def run(cmd, timeout=120.0, env=None):
+            if cmd[:2] == ["docker", "compose"] and "logs" in cmd:
+                polls["n"] += 1
+                if polls["n"] >= 3:  # the leave lands on the third read
+                    system.log_text = "[info] WireServer: user 1 left (connection terminated by the transport layer)\n"
+            return real_run(cmd, timeout, env)
+
+        system.run = run
+        text = ("id: t-slog2\nclients: [c1]\nsteps:\n  - c1: connect\n"
+                "  - until: {within: 30, expect: ['server.log_count(\"user [0-9]+ left\") >= 1']}\n"
+                "  - assert:\n      - 'server.log_count(\"user [0-9]+ left\") == 1'\n")
+        run_id, body = self._run(text)
+        self.assertEqual(body["verdict"], "green", body)
+        until = next(s for s in body["steps"] if s.get("kind") == "until")
+        self.assertIn("held after", until["note"], until)
+        self.assertGreaterEqual(polls["n"], 3)
+
+    def test_a_server_log_count_with_no_match_reads_zero(self):
+        run_id, body = self._run("id: t-slog3\nclients: [c1]\nsteps:\n  - c1: connect\n"
+                                 "  - assert:\n      - 'server.log_count(\"user [0-9]+ left\") >= 1'\n")
+        self.assertEqual(body["verdict"], "red", body)
+
     def test_a_log_count_on_an_unmanaged_seat_keeps_no_count(self):
         run_id, body = self._run('id: t-log\nclients: [c1]\nsteps:\n  - c1: connect\n  - c1: log-count {pattern: "moved"}\n')
         self.assertEqual(body["verdict"], "green", body)

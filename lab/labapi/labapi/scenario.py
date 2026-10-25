@@ -30,7 +30,7 @@ SPECIAL_ACTIONS = {"screenshot", "relaunch", "frida", "mouse", "approach", "log-
 # snapshot {name, of}: a server fact read now and kept under its name for a
 # later assert's snapshot("name") (docs/verbs/cell-host.md: the freeze, a
 # hosted NPC's record that must not move once its cell is unhosted).
-SERVER_STEP_ACTIONS = {"restart", "fakeclient", "snapshot", "netem"}
+SERVER_STEP_ACTIONS = {"restart", "fakeclient", "snapshot", "netem", "log-count"}
 _NETEM_KEYS = {"delay_ms", "jitter_ms", "loss_pct"}
 _SNAPSHOT_NAME = re.compile(r"[A-Za-z][A-Za-z0-9_-]*")
 KNOWN_ARTIFACTS = {"server.log", "screenshots", "world-diff", "pcap", "trace"}
@@ -468,6 +468,9 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
                 raise ValueError(f"snapshot takes a name (letters, digits, _ and -), got {name!r}")
             if not isinstance(of, str) or not of.strip().startswith("server."):
                 raise ValueError(f"snapshot reads a server fact (of: \"server....\"), got {of!r}")
+        if action == "log-count":
+            # the run's server log, its lines matching the regex, for server.log_count("<pattern>")
+            args = _log_count_args(args)
         if action == "restart" and args:
             # the clock set anew at the restart (x-handoff-night: 23.0 before, 7.9 after)
             hour = args.get("gameHour")

@@ -5,6 +5,7 @@ assertion failed or a step timed out, error when the lab itself failed."""
 
 from __future__ import annotations
 
+import ast
 import asyncio
 import base64
 import calendar
@@ -759,6 +760,8 @@ class Runner:
                     return await self._snapshot(rec, index, step)
                 elif step.action == "netem":
                     rec.notes.append(f"step {index}: {await self._netem_step(Netem(**step.args))}")
+                elif step.action == "log-count":
+                    return await self._server_log_count(rec, index, str(step.args["pattern"]))
                 else:
                     await self._restart_server(rec, step.args.get("gameHour"))
                 return True, ""
@@ -905,6 +908,17 @@ class Runner:
         self.board.set_log_count(client, pattern, n)
         return True, (f"{n} line(s) of {client}'s logs match {pattern!r} "
                       f"({counts[0]} in its Skyrim Platform log, {counts[1]} in its console log)")
+
+    async def _server_log_count(self, rec: RunRecord, index: int, pattern: str) -> tuple[bool, str]:
+        """server: log-count {pattern} (scenario.py): the run's server log so far (compose logs since the run
+        began, as the server.log artifact reads it), its lines matching the regex counted for
+        server.log_count("<pattern>"): a server fact read by its own line, such as the leave a quit sends
+        (x-host-quit: "user N left" within seconds of the quit, against netcode's timeout)."""
+        r = await asyncio.to_thread(self.system.run, self._compose("logs", "--no-color", "--since", rec.started_at, self.s.compose_service))
+        rx = re.compile(pattern)
+        n = sum(1 for line in (r.stdout or "").splitlines() if rx.search(line))
+        self.board.set_log_count("server", pattern, n)
+        return True, f"{n} line(s) of the server's log match {pattern!r}"
 
     async def _approach(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """approach {formId, distance, cell} (scenario.py): the seat placed `distance` units from a named NPC, on her
@@ -1060,6 +1074,13 @@ class Runner:
         client an expression reads): the failures, as an assert records them,
         the readings as text, and the client whose dump-state timed out, if
         one did (nothing is evaluated then)."""
+        # server.log_count("<regex>") is live: the run's server log counted anew before each evaluation, an
+        # until's every poll included (x-host-quit: the leave's line inside the until right after the quit)
+        for pattern in _server_log_patterns(exprs):
+            try:
+                await self._server_log_count(rec, index, pattern)
+            except re.error:
+                pass  # no count stored, so the expression's own read reports it
         needed: set[str] = set()
         for expr in exprs:
             needed |= clients_needing_views(expr, rec.scenario.clients)  # fakeclients have no view
@@ -1901,6 +1922,23 @@ def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, Any]]) -> 
             out.append(f"if (-not $hit) {{ throw ('no {key} in [{sec}] of ' + $p) }}")
             out.append(f"[System.IO.File]::WriteAllLines($p, $l); 'set {key}={val} in [{sec}] of ' + $p")
     return "\n".join(out)
+
+
+def _server_log_patterns(exprs: list[str]) -> list[str]:
+    """The regexes `server.log_count("<regex>")` names in `exprs`, each once, in order: the live server-log reads
+    an evaluation makes first (an unparsable expression names none; its syntax error is the evaluator's)."""
+    out: list[str] = []
+    for text in exprs:
+        try:
+            tree = ast.parse(text, mode="eval")
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "log_count"
+                    and isinstance(node.func.value, ast.Name) and node.func.value.id == "server"
+                    and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
+                out.append(node.args[0].value)
+    return list(dict.fromkeys(out))
 
 
 def frida_script_text(script: str, lab_dir: str, name: str, params: dict[str, Any] | None = None) -> str:
