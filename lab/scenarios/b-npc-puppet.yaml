@@ -25,9 +25,12 @@
 # .staggering, .x .y .z); c.refs_near().runtime_of(<base>), references of
 # that base with an id at 0xff000000 or above (a copy would be one; a zero
 # counts only from a step that listed actors); the watch's heading per
-# sample and c.watched_id(<id>).turns, the net rotation over the watch in
-# full turns, absolute (the two seats agree within 0.065 turns for every
-# watched actor across 31 runs; a spin on the puppet alone would not);
+# sample and c.watched_id(<id>).turned, the net rotation over the watch in
+# signed degrees (the two seats agree within 0.065 turns for every watched
+# actor across 31 runs; a spin on the puppet alone, either way round, would
+# not), and .endX .endY, where the track ended (lab-api 4e088ad; the earlier
+# .x .y were the watch's first sample, so the header's end claim was never
+# tested until 2026-10-25);
 # the server's clock for the run as server: {gameHour}. Riverwood's landing
 # after coc riverwood (x-cell-attach): (17224.8, -47204.4, -128.2) in
 # Tamriel, written with the worldspace's descriptor (cell: lab-spawn reads
@@ -79,10 +82,10 @@ steps:
   - assert:
       - c1.watched_id(0x13483).maxDisplacement > 100
       - c2.watched_id(0x13483).maxDisplacement > 100
-      - abs(c1.watched_id(0x13483).x - c2.watched_id(0x13483).x) < 256
-      - abs(c1.watched_id(0x13483).y - c2.watched_id(0x13483).y) < 256
-      - abs(c2.watched_id(0x13483).turns - c1.watched_id(0x13483).turns) < 0.25
-      - abs(c2.watched_id(0x13489).turns - c1.watched_id(0x13489).turns) < 0.25
+      - abs(c1.watched_id(0x13483).endX - c2.watched_id(0x13483).endX) < 256
+      - abs(c1.watched_id(0x13483).endY - c2.watched_id(0x13483).endY) < 256
+      - abs(c2.watched_id(0x13483).turned - c1.watched_id(0x13483).turned) / 360 < 0.25
+      - abs(c2.watched_id(0x13489).turned - c1.watched_id(0x13489).turned) / 360 < 0.25
   # the handoff: c1 back to the lab spawn (far out of 0x9732's reach, a known
   # height) past the grace, c2 hosts, the AI flips
   - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
