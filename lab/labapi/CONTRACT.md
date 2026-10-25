@@ -164,6 +164,9 @@ them by name.
 {"payload": {"kind": "papyrus-av", "profileId": 1, "how": "set", "name": "Marksman", "value": 45}}
 {"payload": {"kind": "staff-rank", "profileId": 2, "rank": 0}}
 {"payload": {"kind": "learn-spell", "profileId": 1, "spellId": 77776}}
+{"payload": {"kind": "kill-ref", "profileId": 1, "formId": 546119, "killerProfileId": 2}}
+{"payload": {"kind": "respawn-ref", "profileId": 1, "formId": 546119, "inPlace": true}}
+{"payload": {"kind": "console", "profileId": 1, "name": "PlaceAtMe", "args": [20, 146111]}}
 ```
 
 `teleport` carries the descriptor and absolute coordinates; lab-api resolves
@@ -199,6 +202,13 @@ the player learn a spell through the server's own Papyrus `Actor.AddSpell`
 `spellId` the record's form id; `learned` is AddSpell's answer, true when
 the player learns it now, false when it knew it already or the record is no
 spell.
+
+`kill-ref` kills a game-file actor by form id through the server's console Kill (the killer the scenario client
+named, sent as its profile), and `respawn-ref` puts it up again at once, at its spawn point or where it fell with
+`inPlace`. `console` runs a console command on the server as the profile's player would type it
+(`mp.executeConsoleCommand`; skymp5-server's ConsoleCommands.cpp is the table), never typed into a game: a scenario
+writes it `c1: server-console {name: PlaceAtMe, args: [0x14, 0x23abf]}` (an EncWolfIce placed at c1's player), and
+`just playtest-console` sends the same payload in a playtest.
 
 Response: `{"ok": true}` or `{"ok": false, "error": "<reason>"}`. For `give`,
 lab-api adds `baseId` next to the scenario's `item` string so the gamemode

@@ -1482,6 +1482,14 @@ steps:
       - server.ref(0x85547).isDead == false
 """
 
+SERVER_CONSOLE = """
+id: server-console
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c1: server-console {name: PlaceAtMe, args: [0x14, 0x23abf]}
+"""
+
 APPROACH_RECORD = """
 id: approach-record
 clients: [c1]
@@ -1538,6 +1546,14 @@ class ApproachSteps(RunTests):
         self.assertNotIn("tolerance", sent[0], "the landing's bound is lab-api's")
         step = next(s for s in body["steps"] if s["action"] == "approach")
         self.assertIn("in her record's cell 133c8:Skyrim.esm (from another frame", step["note"], step)
+
+    def test_server_console_sends_the_gamemodes_console_kind_as_the_seats_player(self):
+        """playtest 34's lab probe: a hostile placed by the server's console at the seat's player (PlaceAtMe), sent
+        as labCommand's console kind under the client's profile, the server's answer the step's note."""
+        run_id, body = self._run(SERVER_CONSOLE)
+        self.assertEqual(body["verdict"], "green", body)
+        sent = [p for n, p in self.state.rpc_log if n == "labCommand" and p["kind"] == "console"]
+        self.assertEqual(sent, [{"kind": "console", "profileId": 1, "name": "PlaceAtMe", "args": [0x14, 0x23abf]}], sent)
 
     def test_kill_ref_names_its_killer_by_client_and_respawn_ref_puts_it_up(self):
         """npc-fate's death reads: a game-file actor killed by the server by form id, the killer a scenario client
