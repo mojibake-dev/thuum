@@ -444,17 +444,38 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   client disconnected in 4 ms; the engine's shutdown follows". The server's
   "WireServer: user 1 left (connection terminated by the transport layer)"
   read 3.4 s after the flag until the clocks were paired: the seat's clock
-  runs 3.26 s behind sky-srv's (the grant of 9732 at epoch 1: the server's
-  00:49:45.753 against c1's 00:49:42.493), so the leave came about 0.17 s
-  after the quit flag, one datagram as the code says (renet_netcode 2.0
-  sends exactly one netcode Disconnect packet synchronously, client.rs:49-62;
-  renetcode's server drops the client on it at once, server.rs:411; a lost
-  one would mean the 15 s timeout). No "silent ... stale" line: the
-  transport's leave, not train-39's rule. The probe's own claim was wrong:
-  the pass waits the 5 s grace after a leave, and the quit step returns
-  before the driver types qqq and Enter (about 3 s), so the grant lands
-  about 8.5 to 9.5 s after the step; v4 claims the leave line within 6 s
-  (lab-api's server log-count fact, numidium) and the grant within 12.
+  runs about 3.42 s behind sky-srv's (numidium's agent, 18:50 PDT: the pcap
+  on sky-srv holds c1's netcode Disconnect datagram, prefix 0x26, sequence
+  0x4ee7 after the last payload's 0x4ee6, at 01:29:30.7328 in run 012653,
+  sent inside DestroyClient, which ran 18:29:27.308 to .313 on c1, so 3.416
+  to 3.425 s; nine roster pairs in that run 3.412 to 3.422, seven of eight
+  in 004815 3.417 to 3.422; a first read of 3.26 s came from one host-grant
+  pair taken during a cell-load hitch), so the leave came about 5 ms after
+  the quit flag: the "left" line 0.2 ms after the datagram, one datagram as
+  the code says (renet_netcode 2.0 sends exactly one netcode Disconnect
+  packet synchronously, client.rs:49-62; renetcode's server drops the
+  client on it at once, server.rs:411; a lost one would mean the 15 s
+  timeout). The reason text, renet's DisconnectReason::Transport, is the
+  same for a Disconnect packet and a netcode timeout, so the pcap is what
+  proves the packet; no "silent ... stale" line either way. The grant to
+  c2 ("ff000001 hosts cell 9732 at epoch 2") 5.383 s after the leave,
+  GRACE_MS 5000 plus the once-a-second tick's phase. The probe's own claim
+  was wrong: the pass waits the grace, and the quit step returns before the
+  driver types qqq and Enter (0.2 to 1 s), so the grant lands about 6 to 7 s
+  after the step; v4 claims the leave line within 6 s (lab-api's server
+  log-count fact, numidium) and the grant within 12. The trace's shutdown
+  leave and exitProcess lines are missing because the crash happens inside
+  the shutdown, not because the tail was lost; the crash logs of 012653 and
+  013410 are identical apart from ASLR (the same 187 modules and registers,
+  RCX = RBX+0x127490 in both, the process's initial thread). Their probable
+  stack's frame [8], SkyrimPlatformImpl.dll+0x54fab0, reads by position as
+  Skyrim Platform's own HookedWinMain return site (tilted/reverse/
+  Entry.cpp:23-42), not the thunk; the thunk's own frame is absent, which
+  is what a tail call leaves (`return func(...)` compiled as a jump,
+  HYPOTHESIS; harmless, and the trace shows the thunk ran). A variable the
+  next stage can hold fixed: both seats fail "Trying to get server mods"
+  (status 0, no connection) about every 42 s all run long, and a fetch was
+  in flight at both crashing quits.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
