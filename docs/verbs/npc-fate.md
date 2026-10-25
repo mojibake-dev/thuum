@@ -892,9 +892,16 @@ for a CONT and a FURN base and falls through for a corpse (an NPC_ base
 that IsCorpse shares with the CONT branch's OPEN but not its CLOSE), so a
 body's occupancy is never released by its looter's closing activation and
 clears only by distance, disable or destroy. The fix is one condition
-(the corpse joins the CONT release) with a T0 case; its train is numidium's
-call (46's fourth commit before the stage, or the next server train). The
-strip and the cape left no server line: client-side, as read above.
+(the corpse joins the CONT release) with a T0 case: BUILT as train-46's
+fourth commit (aaafffe5, 16:09 PDT, numidium's call: one CI cycle against a
+second server train's T2 and gate), ActorDeathTest's case opening, closing
+and admitting the next player with its OpenContainer. The strip and the
+cape left no server line: client-side, as read above. The ice wolf's 0
+damage on rotfern against 10 a bite on Alvor (numidium's section 5 read)
+is god mode: "ConsoleCommands: ff000000 god mode on" at 22:59:59.798Z,
+the TGM branch zeroing the number before the same log line; no formula
+question (a creature's unarmed damage is its race's, times the target's
+armor penalty, never zero).
 
 BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
