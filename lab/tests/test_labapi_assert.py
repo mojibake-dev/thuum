@@ -695,6 +695,8 @@ class PuppetViews(RefsNearViews):
                  "turned": -90.0, "headingAtStop": 270.0},
                 {"formId": 0xFF00090D, "first": [0.0, 242.0, 0.0], "last": [0.0, 242.0, 0.0], "maxDisplacement": 3.0, "samples": 240,
                  "turned": 2520.0, "headingAtStop": 12.5},
+                # a record without the stop position or the signed rotation (an older driver)
+                {"formId": 0x13489, "first": [17100.0, -47000.0, -120.0], "maxDisplacement": 0.0, "samples": 240},
             ]},
             "c1": {"actors": [{"formId": 0x13483, "first": [17300.0, -47100.0, -120.0], "last": [17300.0, -47100.0, -120.0],
                                "maxDisplacement": 0.0, "samples": 240}]},
@@ -751,6 +753,23 @@ class PuppetFactsTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(AssertionData):
                 ev.evaluate(bad)
 
+
+    def test_a_watched_actors_signed_rotation_and_where_it_stood_at_the_stop(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), PuppetViews(), ["c1", "c2"])
+        # where it ended beside where it began: Hod walked 100 units on c2 and stood on c1 (b-npc-puppet's end claim)
+        self.assertTrue(ev.evaluate("c2.watched_id(0x13483).endX - c2.watched_id(0x13483).x == 100"))
+        self.assertTrue(ev.evaluate("abs(c1.watched_id(0x13483).endX - c2.watched_id(0x13483).endX) == 100"))
+        self.assertTrue(ev.evaluate("c2.watched_id(0x13483).endY == -47100 and c2.watched_id(0x13483).endZ == -120"))
+        # the rotation signed: a quarter turn one way, seven the other; turns is its absolute value over 360
+        self.assertTrue(ev.evaluate("c2.watched_id(0x13483).turned == -90 and c2.watched_id(0x13483).turns == 0.25"))
+        self.assertTrue(ev.evaluate("c2.watched_id(0xff00090d).turned == 2520"))
+        self.assertTrue(ev.evaluate("abs(c2.watched_id(0xff00090d).turned - c2.watched_id(0x13483).turned) / 360 > 7"))
+        # c1's record carries no signed rotation and 0x13489's no stop position (a driver before them): no pass
+        for bad in ("abs(c2.watched_id(0x13483).turned - c1.watched_id(0x13483).turned) / 360 < 0.25",
+                    "c2.watched_id(0x13489).endX > 0"):
+            with self.subTest(bad=bad), self.assertRaises(AssertionData):
+                ev.evaluate(bad)
 
 @needs_deps
 class RefsNearTests(unittest.TestCase):
