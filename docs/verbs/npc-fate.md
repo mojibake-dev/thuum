@@ -804,6 +804,30 @@ killed, found on the reset clock with its day stamped). For the playtest
 numidium restored a copy of the world without the two records
 (playtest-m3-34b-rotfern-20261025T2217Z).
 
+The same two bandits explain the playtest's second finding, test 2 taking
+no damage inside the temple it hosted: in 15 minutes of log no OnHit line
+names ff000004 or ff000005 as an aggressor, and no refusal either, while
+the game-file bandit 0x39fe4 beside them, hosted by the same seat, hit
+test 1 four times (applied). The path: OnHit's weapon branch needs the
+weapon in the aggressor's record's hands (equipment.inv.HasItem), and a
+miss ended at a spdlog::debug line, silent in the lab's log. A server-made
+copy is dressed by the host's engine from the base's own roll (npc-puppet's
+Rule A: the server's equipment is never applied to a hosted actor), while
+the record holds the server's roll (EnsureBaseContainerAdded at the fate
+level or 1), and nothing pins the two the way a game-file actor's fate pins
+its hands (ADR-049, train-43), so every swing of theirs carried a weapon
+the record's hands lacked and was dropped. Nothing in the path refuses a
+hosted NPC's hit on its own host's player (target 0x14 resolves to the
+sender's actor); test 2 was shot at by nobody else. Train-46 makes the
+drop visible: E_HIT_WEAPON at info level once a minute per actor, the hit
+still dropped (the server's number needs the server's weapon). The dress
+is OWED as a design line: a server-made copy takes the server's equipment
+once at its creation on every game, the host's included (its identity, as
+the fate pin is for a game-file actor), and Rule A holds from then on; a
+client change, its own train. A probe of a hosted game-file actor hitting
+its own host's player (the server's OnWeaponHit line on the host's own
+actor) belongs to the next stage.
+
 ## Client
 
 Built, the deaths' client half (95abf0dc, 20:39 PDT): formView binds a dead
