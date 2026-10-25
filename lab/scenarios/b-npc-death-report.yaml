@@ -1,24 +1,28 @@
-# b-npc-death-report (M3, docs/verbs/npc-fate.md, ADR-048 B; 2026-10-24): a death the
-# server has no number for travels from the host's report when the server can check it.
-# Every viewed actor carries the engine's deferred kill, so a fall leaves a hosted actor at
-# or under zero health with no death event; the host's game reads the floor
-# (DeathReportService's poll) and sends ActorDeath (cause 0), and the server accepts it by
-# the drop in its own movement samples (200 units within 4 s) and kills the record: dead on
-# the server and on both engines, the body the server's container, the respawn on the
-# master's reset clock. c1 hosts the forest cell 0x9810 (b-cell-host's leveled predators)
-# under god mode; the prelude kills the two rivals from the park (b-npc-death's lesson),
-# then c1 lifts 0x85547 4000 units through its console (skymp's console intercept: the
-# server sets the record and teleports the host's engine actor, which then falls), two
-# npc-state reads show the fall, and the claims follow. Refusals are the server log's
-# "[verb:npc-fate] death report E_DEATH_*" lines. Measured as x-npc-fall-report v3 on
-# train-44 6cdc2b35 (20261025-012351: the wolf mid-fall at z 12741, dead at hp -675 on the
-# host; the server's line "a drop of 3813 units in the host's samples; the server records
-# the death"; dead on the record and both seats; the 240 h reset scheduled). The trap's
-# evidence (a trigger's own activation) is the verb's open HYPOTHESIS and no claim here.
-# Nightly 20261025-124620 red on the roll: the subject came up a skeever (one entry in
-# five at level 1) and a lifted skeever never fell, so a species premise now reds the run at
-# the prelude rather than at the claim; a wolf-only subject is owed (esm.py). Its own
-# commit (rule 13).
+# b-npc-death-report (M3, docs/verbs/npc-fate.md, ADR-048 B; 2026-10-24, the subject fixed
+# 2026-10-25): a death the server has no number for travels from the host's report when the
+# server can check it. Every viewed actor carries the engine's deferred kill, so a fall
+# leaves a hosted actor at or under zero health with no death event; the host's game reads
+# the floor (DeathReportService's poll) and sends ActorDeath (cause 0), and the server
+# accepts it by the drop in its own movement samples (200 units within 4 s) and kills the
+# record: dead on the server and on both engines, the body the server's container, the
+# respawn on the master's reset clock. The subject is a FIXED EncWolf, 0x82717 (ACHR, base
+# 0x23abe EncWolf itself, Tamriel at 102871.5, -83986.3, 12369.7; numidium's esm.py read),
+# so the server rolls nothing: the earlier subject 0x85547 was placed from the leveled
+# template 0x1e7a0 and came up a skeever one run in five, and a lifted skeever never fell
+# (nightly 20261025-124620). Grid by truncation toward zero: the subject's square is
+# (25, -20); c1 parks at (22, -20), three squares west, where the fate pass's ring loads
+# the subject's square and the rival predator 0x82718's (24, -21) while the engine attaches
+# neither, and kill-refs the pair 0x82716 and 0x82718 so the subject stands alone; both
+# seats land 470 units east of the wolf under god mode. The premises are read from the
+# engine (c1 runs the wolf, c2 puppets it, raceId 78346). Then the lift (prid 82717, setpos
+# z 16370: 4000 up, through skymp's console intercept: the server sets the record and
+# teleports the host's engine actor, which then falls), two reads of the fall, the until on
+# the record's death, dead on both seats, the host's report line counted. Refusals are the
+# server log's "[verb:npc-fate] death report E_DEATH_*" lines. Measured as x-npc-fall-report
+# v4 GREEN 20261025-195607 on parity 6cdc2b35 (the until at its first poll, dead on the
+# server and both seats, the client's line counted); the leveled subject's run before it
+# was v3 GREEN 20261025-012351 on train-44. The trap's evidence (a trigger's own
+# activation) is the verb's open HYPOTHESIS and no claim here. Its own commit (rule 13).
 id: b-npc-death-report
 milestone: M3
 clients: [c1, c2]
@@ -35,50 +39,44 @@ steps:
   - c1: console {text: "tgm"}
   - c2: console {text: "tgm"}
   - wait: 2
-  # the prelude (b-npc-death's, after 20261025-000418: 0x85549 killed the subject before the
-  # lift, the predators' fight again): the fate pass loads the ring's records three squares out
-  # before any engine attaches the cell, so c1 parks there (z 25000 in god mode) and the rivals
-  # 0x85548 and 0x85549 die by kill-ref while nobody's engine has them; then both seats land and
-  # the subject stands alone
-  - c1: teleport {cell: "3c:Skyrim.esm", x: 130336, y: -67584, z: 25000, rot: [0, 0, 0]}
+  # the prelude: from the park three squares out the rivals die while nobody's engine has them
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 92160, y: -83968, z: 25000, rot: [0, 0, 0]}
   - wait: 8
-  - c1: kill-ref {formId: 0x85548, killer: c1}
-  - c1: kill-ref {formId: 0x85549, killer: c1}
+  - c1: kill-ref {formId: 0x82716, killer: c1}
+  - c1: kill-ref {formId: 0x82718, killer: c1}
   - wait: 2
-  - c1: teleport {cell: "3c:Skyrim.esm", x: 123000, y: -80000, z: 10705, rot: [0, 0, 0]}
-  - c2: teleport {cell: "3c:Skyrim.esm", x: 123200, y: -80000, z: 10705, rot: [0, 0, 180]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 103340, y: -83986, z: 12400, rot: [0, 0, 90]}
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 103540, y: -83986, z: 12400, rot: [0, 0, 90]}
   - wait: 25
+  - c1: npc-state {formId: 0x82717}
+  - c2: npc-state {formId: 0x82717}
   - assert:
-      - server.host(0x9810).client == "c1"
-      - server.ref(0x85547).isDead == false
-      - server.ref(0x85549).isDead == true
-      # the premise, not the claim: the subject rolled a wolf (EncWolf's race 78346). 0x85547's
-      # level-1 list holds one EncSkeever to four EncWolf and the server picks uniformly, and a
-      # lifted skeever never fell (nightly 20261025-124620: on the ground 441 units off at
-      # health 1 while the gate's wolf was mid-fall), so one run in five has nothing to report;
-      # a red here is the roll's, read as such, until the subject is a wolf-only placement
-      - server.fate(0x85547).raceId == 78346
-  - c1: npc-state {formId: 0x85547}
-  - c2: npc-state {formId: 0x85547}
+      - server.ref(0x82717).isDead == false
+      - server.ref(0x82716).isDead == true
+      - c1.npc_state(0x82717).aiEnabled == true
+      - c2.npc_state(0x82717).aiEnabled == false
+      - c1.npc_state(0x82717).raceId == 78346
+  - c1: npc-state {formId: 0x82717}
+  - c2: npc-state {formId: 0x82717}
   # the lift: the host's engine takes the wolf 4000 units up and lets it fall
-  - c1: console {text: "prid 85547"}
+  - c1: console {text: "prid 82717"}
   - wait: 1
-  - c1: console {text: "setpos z 14705"}
+  - c1: console {text: "setpos z 16370"}
   # the read either way (numidium, after 20261025-004503): the wolf two and ten seconds after the
   # lift on the host, so the run says whether it fell, landed at the floor or never fell
   - wait: 2
-  - c1: npc-state {formId: 0x85547}
+  - c1: npc-state {formId: 0x82717}
   - wait: 8
-  - c1: npc-state {formId: 0x85547}
-  - until: {within: 10, expect: [server.ref(0x85547).isDead == true]}
+  - c1: npc-state {formId: 0x82717}
+  - until: {within: 10, expect: [server.ref(0x82717).isDead == true]}
   - wait: 5
-  - c1: npc-state {formId: 0x85547}
-  - c2: npc-state {formId: 0x85547}
-  - c1: log-count {pattern: "death report: 85547 died"}
+  - c1: npc-state {formId: 0x82717}
+  - c2: npc-state {formId: 0x82717}
+  - c1: log-count {pattern: "death report: 82717 died"}
   - c1: screenshot
   - assert:
-      - server.ref(0x85547).isDead == true
-      - c1.npc_state(0x85547).isDead == true
-      - c2.npc_state(0x85547).isDead == true
-      - 'c1.log_count("death report: 85547 died") >= 1'
+      - server.ref(0x82717).isDead == true
+      - c1.npc_state(0x82717).isDead == true
+      - c2.npc_state(0x82717).isDead == true
+      - 'c1.log_count("death report: 82717 died") >= 1'
 artifacts: [server.log, c1.log, c2.log, screenshots]
