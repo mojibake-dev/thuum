@@ -7,7 +7,7 @@ built, on train-46 (server, fork m3-train-46 aaafffe5: the pass between live
 hosts, the server-made actor's death rule, E_HIT_WEAPON at info, the corpse's
 occupancy released) and train-47 (client, fork m3-train-47 3a8a50a8, built
 ahead: the body's inventory as a diff alone, the hosted server-made copy
-dressed once). Five findings are calls rather than defects, D18 to D22 below,
+dressed once). Six findings are calls rather than defects, D18 to D23 below,
 each with its options and the recommendation last, numbered after the memo
 before this one (docs/research/m3/decisions-for-playtest-34.md, D1 to D17).
 Sources: docs/verbs/npc-fate.md (the playtest 34 paragraphs), cell-host.md
@@ -87,6 +87,41 @@ respawn re-enables; under train-46's rule the fate respawn would, hours later).
   an out actor that comes back by its own clock is a surprise on every seat.
   A server fix with a T0 case, the next server train.
 
+### D23. The late re-roll's lost 3D on a login inside a dungeon
+Section 4: the campfire pair and eleven more leveled NPCs were invisible on
+test 2, on its compass and detecting it, after every restore; visible on test
+1. Numidium's agent's read of the 15:27 capture: test 2 logged in inside
+371de from its saved position, so its engine loaded the temple BEFORE the
+fates arrived (the server's 22 fates at 22:18:34.985Z), and the late path
+(actorFateService.ts:74, rerollActor) sent every leveled clone through the
+engine's own re-roll (FateApi.cpp:142-146, 37323), which drops the 3D
+(re-npc-roll.md:53: Set3D(nullptr, true)) and nothing reloads it; the
+promote then turned the AI on with no 3D check ("rerolled 39fe4 through the
+engine (3D loaded false)", then "live 39fe4"). Ten of the thirteen were then
+released by the D11 rule, which read the missing model as out of reach. The
+six fixed-base NPCs, redressed only, kept their 3D; test 1, whose fates came
+before its attach, pinned at load with no re-roll. This is re-npc-roll.md's
+(b) falsifier, "leaves a live actor without 3D", met.
+- A. Leave as today: a login inside a dungeon shows its leveled NPCs invisible
+  on that seat until the cell is left and re-entered.
+- B. The late path re-rolls only when the loaded clone's base differs from the
+  fate's pick (the common case after a save or a login is equality: the save
+  kept the roll the server pinned), redressing otherwise; after a re-roll it
+  reloads the 3D (Load3D, CommonLibSSE-NG include/RE/T/TESObjectREFR.h:302
+  and A/Actor.h:315; or Disable then Enable(false), :337 and :374, the
+  resurrect path's shape), and the promote waits for Is3DLoaded (:435).
+  Which reload the engine accepts on an attached actor is a lab read.
+- C. The late path never re-rolls a loaded clone: redress always, and a
+  species that differs from the fate's pick stands until the cell's next
+  load (the pick re-applied at the engine's own next init).
+- Recommended: B. C leaves two screens with two species until a reload (the
+  leveled identity D10 was meant to end); A leaves a seat blind in every
+  dungeon it logs into. B's first half costs nothing and covers the common
+  case; its second half is a Skyrim Platform native change with one probe
+  (a seat relaunched inside the temple, its leveled NPCs read 3D-loaded and
+  visible after the late fate). Train-47 can carry it (a client dist), or
+  the train after.
+
 ## npc-handoff
 
 ### D22. Tenure at the crossing (conditional)
@@ -111,5 +146,6 @@ is which brake.
    greens (rule 13).
 2. train-47 (client), fork m3-train-47 3a8a50a8 on 46: stage with x-body-loot
    and the copy's hit (the console PlaceAtMe server action, numidium's), T2
-   cited, gate, merge; D19-B is its design.
+   cited, gate, merge; D19-B is its design; D23-B's first half (redress when
+   the bases agree) and, if the reload reads clean, its second.
 3. The next server train: D18-B, D21-B, and D22's brake if the read asks one.
