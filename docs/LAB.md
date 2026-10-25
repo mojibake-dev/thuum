@@ -803,6 +803,35 @@ one waits for ADR-027's lone-red reruns; a scenario whose first teleport is
 the only thing that failed is this fault until the read says otherwise. The
 seat's clock ran about 4.20 s behind sky-srv in that run (its connect against
 its first pcap packet): see the clock lesson above the trace reads.
+Root cause (numidium's agent, 2026-10-25 12:46 PDT; the code lines and the
+external pointer not re-verified by numidium): the client waits forever.
+remoteServer.ts runs the Teleport in once('update') with the player as the
+reference and calls RagdollService.safeRemoveRagdollFromWorld, whose
+callback holds the move; ragdollService.ts had no deadline, no rejection
+handler and no single-flight guard, so twenty lab teleports made twenty
+calls and none answered; deathService's respawn get-up and the predicted
+death's take-back wait the same way, which reaches players. The trigger is
+a per-session player state set at load: bad sessions log "syncSpells: 0
+listed, 14 removed" then "0 removed", good ones "15 removed" then 2 or 3 (3
+of 3 bad against 52 of 52 good c2 sessions and 54 of 54 c1 sessions); 4 of
+125 c2 first-teleport sessions since 10-23, never c1, so likely c2's image
+or profile state. Other natives keep answering mid-hang (Utility.wait, a
+figure's disable and resurrect 40 s later): only this call goes unanswered.
+HYPOTHESIS, even odds: the call refused with the refusal discarded
+(CallNative.cpp:482-484 drops VmCall::Run's bool) or held by
+ForceAddRemoveRagdollFunctor's WantsRequeue (DelayFunctor.h:35-37; the
+requeue condition unread, Ghidra answered 502 and REA was not loaded). The
+fix (fork m3-train-45, the client): RagdollService bounds the wait, the
+callbacks running once on the engine's answer or at a 1 s deadline (greens
+answer in 11 to 71 ms), one call in flight per actor, a logLab line when
+the deadline fires. Caveat: moveRefrToPosition does nothing while
+moveRefrBlocked is set (PapyrusTESModPlatform.cpp:148; LoadGame.cpp:115,
+:45), so the bounded wait alone may not land the move in a loading game;
+the proof is a flagged session's teleport landing, read from the next
+flagged nightly run (the signature above names the session). To confirm the
+mechanism: log the discarded bool at CallNative.cpp:482; count the
+functor's vtable slots 1 and 3 with Frida in a flagged session. For
+playtest 34 the flagged seat is relaunched rather than chased.
 
 ## Turbo mode (ADR-041)
 
