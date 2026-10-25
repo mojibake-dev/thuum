@@ -1121,7 +1121,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   tested (3 of 3), the server side whole, HYPOTHESIS a GFx movie alive at
   quit (the console's, the lab's quit path); its discriminators need a stage
   change and wait for Eli's look. Research drafted during the waits:
-  docs/research/m3/encounter-zones.md (ADR-049's owed clamp).
+  docs/research/m3/encounter-zones.md (ADR-049's owed clamp). 20:13 PDT:
+  MERGE-READY by citation (gate set 20261025-015916-gate-m3-train-44,
+  eighteen green on their last runs, T2 green at 6cdc2b35, gate-cite's five
+  checks); the command in the memo's "Merge-ready (44)"; Eli's word next.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,

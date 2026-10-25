@@ -476,6 +476,10 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   next stage can hold fixed: both seats fail "Trying to get server mods"
   (status 0, no connection) about every 42 s all run long, and a fetch was
   in flight at both crashing quits.
+  Cited: gate set 20261025-015916-gate-m3-train-44 on 6cdc2b35 (20:13 PDT),
+  b-host-quit green on its last runs (030427, 030801 after the 025053
+  settle red at c2's first teleport, the set's watch item), b-host-kill
+  green with it; train-44 merge-ready by citation, Eli's word next.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
