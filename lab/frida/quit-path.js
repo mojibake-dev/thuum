@@ -24,10 +24,27 @@
 // through a block-buffered stdout may lose them (lab lesson 2026-10-21):
 // every line is sent and printed at once; read the run's frida output and
 // the server log's ClientDisconnected together.
+// Mode 'heaps' (params {MODE: heaps}; the quit crash of x-host-quit 004815,
+// the re-analyst's read of 2026-10-24): the Scaleform heap teardown at quit
+// lists what it destroys. Hooks GMemoryHeapPT::DestroyItself (84554, rcx the
+// heap: HeapInfo.name at heap+0x80, the embedded _info at +0x38 and its name
+// at +0x48, GMemoryHeap.h:97-99; the refcount at +0x20; the allocation engine
+// at +0xC8; the heap's limit handler at engine+0x748, which 87837 reads and
+// faults on when it points into unmapped memory), SetLimitHandler (84545,
+// rcx the heap, rdx the handler, with the caller) and the movie memory
+// context's deleting destructor (85286, rcx the context, which begins with
+// SetLimitHandler(nullptr)). A heap at 84554 whose handler is non-null and
+// unmapped is the leaked movie; the list of 84554 entries at quit is the leak
+// list. Diagnosis only: Frida in the process is itself a confound for the
+// crash (004815 had it; the production read is x-host-quit-plain).
 // Run: a scenario's `frida {script: quit-path.js}` step before the quit, or
 // `just frida quit-path.js c1` by hand, then quit the game (console qqq).
 'use strict';
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
+
+// lab-api prepends `globalThis.LAB_PARAMS = {...}` for a step's params
+const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
+const MODE = PARAMS.MODE || 'quit';
 
 const OFFSETS = {
   '1.6.1170.0': {
@@ -35,6 +52,10 @@ const OFFSETS = {
     mainUpdate: 0x645ea0, // 36564
     shutdown: 0x641c60, // 36551
     mainSingleton: 0x31872c0, // 403449
+    heapDestroy: 0x102f7a0, // 84554 GMemoryHeapPT::DestroyItself (the re-analyst's name)
+    setLimitHandler: 0x102f4d0, // 84545
+    contextDtor: 0x1057b40, // 85286 GFxMovieDef::MemoryContextImpl's deleting destructor (HYPOTHESIS name)
+    engineDtor: 0x10ea500, // 87837, the crash's function (+0x50 the faulting load)
   },
 };
 
@@ -72,7 +93,7 @@ const at = OFFSETS[version];
 if (at === undefined) {
   emit({ error: 'no offsets for this runtime', version: version });
 } else {
-  emit({ ready: true, version: version, winMainShutdownCall: 'SkyrimSE.exe+0x' + (at.winMain + 0x1ae).toString(16) });
+  emit({ ready: true, version: version, mode: MODE, winMainShutdownCall: 'SkyrimSE.exe+0x' + (at.winMain + 0x1ae).toString(16) });
   let frames = 0;
   let lastFlag = 0;
   let flagAt = 0;
@@ -106,6 +127,42 @@ if (at === undefined) {
       emit({ exitProcess: true, code: args[0].toInt32(), threadId: this.threadId, msAfterFlag: since() });
     },
   });
+
+  if (MODE === 'heaps') {
+    function str(p) { try { return p.isNull() ? '' : p.readUtf8String(64); } catch (e) { return '?'; } }
+    function mapped(p) { try { return !p.isNull() && Process.findRangeByAddress(p) !== null; } catch (e) { return false; } }
+    let destroyed = 0;
+    Interceptor.attach(exe.base.add(at.heapDestroy), {
+      onEnter: function (args) {
+        const heap = args[0];
+        destroyed += 1;
+        const engine = readPtr(heap.add(0xc8));
+        const handler = engine.isNull() ? NULL : readPtr(engine.add(0x748));
+        emit({
+          heapDestroy: destroyed, heap: heap.toString(), name: str(readPtr(heap.add(0x80))),
+          refCount: heap.add(0x20).readU32(), engine: engine.toString(), handler: handler.toString(),
+          handlerMapped: mapped(handler), threadId: this.threadId, msAfterFlag: since(),
+        });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.setLimitHandler), {
+      onEnter: function (args) {
+        emit({ setLimitHandler: true, heap: args[0].toString(), name: str(readPtr(args[0].add(0x80))), handler: args[1].toString(), caller: caller(this.context), msAfterFlag: since() });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.contextDtor), {
+      onEnter: function (args) {
+        emit({ contextDtor: true, context: args[0].toString(), heap: readPtr(args[0].add(0x10)).toString(), msAfterFlag: since() });
+      },
+    });
+    Interceptor.attach(exe.base.add(at.engineDtor), {
+      onEnter: function (args) {
+        const engine = args[0];
+        const handler = readPtr(engine.add(0x748));
+        emit({ engineDtor: true, engine: engine.toString(), handler: handler.toString(), handlerMapped: mapped(handler), msAfterFlag: since() });
+      },
+    });
+  }
 
   // the client plugin loads at the first createClient, so look until it is there
   let destroyHooked = false;
