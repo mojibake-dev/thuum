@@ -512,6 +512,29 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   first. The committed scenario b-host-quit follows the plain run's green,
   since the committed shape carries no Frida step (rule 13: a green probe
   promoted unchanged).
+  The plain run (x-host-quit-plain 20261025-013410, 18:36 PDT, no Frida in
+  the process): GREEN on the same numbers (the leave line 1.2 s after the
+  quit step, the grant 5.0 s after that, c1 online 27.1 s after its
+  relaunch), and the crash AGAIN, c1-crash-2026-10-24-18-36-26.log, no frida
+  module, the same exception and a stack identical frame by frame, the read
+  address 0x0273C9A4F030 against 0x01D4C91AF030 and 0x012049B7F030 before:
+  three times the F030 ending, MemoryContextImpl's heapLimit offset. Frida
+  is cleared; the finding reads: on 44 the game crashes inside the engine's
+  own teardown after the disconnect at every console quit tested (3 of 3),
+  the server side whole. Committed as lab/scenarios/b-host-quit.yaml (main
+  8dcc000) from the plain run. Across all of /srv/lab/results only these
+  three quits carry the 84559 stack, and no earlier run ever quit through
+  the engine (a relaunch kills). On numidium's question whether the pre-44
+  build reached the shutdown routine at a quit at all: it did, statically
+  (CONFIRMED-STATIC by the WinMain read: every quit's byte store leads to
+  the same call, and the thunk only runs code ahead of it, so 44 did not
+  change whether the engine tears down, only that the client is gone when
+  it does). What differs between the three crashing quits and playtest 32's
+  clean one: the console path with the Console menu open against a menu
+  quit, the seat (c1 against c2), and the build (44 against parity); the
+  Papyrus quit on the next stage separates the first, the no-client quit the
+  second and third. All three need a stage change, so they wait for Eli's
+  look at 39 to 44.
 
 ## Client
 
