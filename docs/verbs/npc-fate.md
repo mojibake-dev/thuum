@@ -745,7 +745,14 @@ report would never leave the host: the lab's plate run decides, Arvel's
 plate in Bleak Falls Temple the natural read); and the
 fall bound (200 units within 4 s is a plausibility floor, not the engine's
 damage rule, which ran on the host; x-npc-fall-report reads a drop the
-engine kills at).
+engine kills at). MEASURED (x-npc-fall-report v3 20261025-012351 on 44
+6cdc2b35, 18:26 PDT, numidium's read): the host's engine killed the lifted
+wolf by a 4000-unit fall (mid-fall at z 12741, dead at hp -675 under the
+deferred kill), the floor report went out, and the server took it by "a
+drop of 3813 units in the host's samples", killed the record and scheduled
+the 240 h reset; dead on the record and both seats; the bound of 200 held
+with room. Committed as lab/scenarios/b-npc-death-report.yaml (main
+3c6c54e). The hazard's evidence stays the one HYPOTHESIS.
 
 Built, the roll's level rule (train-44 e3b39ac8, 16:30 PDT; the memo's D2,
 Eli: "some way to calculate a middle ground?"): PartOne::FateRollLevel gives
@@ -916,13 +923,14 @@ the deferred kill did not hold.
   01:21 PDT). The sketch below (b-npc-fate.yaml,
   the Barrow's bandits with a bow and the restart) stays the fuller scenario
   for the verb's close.
-  By path for 44's stage (16:45 PDT): lab/.cache/probes/x-npc-fall-report.yaml
-  (the host's engine drops a hosted predator 4000 units through its console;
-  the report accepted by the samples' drop; the record dead on the server
-  and on both engines; the server log's "death report" line names the
-  judgment) and the NPC fight's reports inside b-npc-death's and
-  b-cell-host's runs (the predators' fight: the log's "accepted" or "already
-  dead" lines). b-npc-death-report follows a green probe (rule 13).
+  lab/scenarios/b-npc-death-report.yaml (main 3c6c54e, 2026-10-24 18:28 PDT,
+  its own commit): the host's floor report of a fall taken by the server's
+  own samples' drop and the death on both seats, from x-npc-fall-report v3
+  GREEN 20261025-012351 on 44 6cdc2b35 (the host's engine drops a hosted
+  predator 4000 units through its console; "a drop of 3813 units in the
+  host's samples; the server records the death"). The NPC fight's reports
+  read inside b-npc-death's and b-cell-host's runs (the log's "accepted" or
+  "already dead" lines); a trap's death is the open HYPOTHESIS and no claim.
 - T3 scenario id, the sketch: lab/scenarios/b-npc-fate.yaml (written by hand after the
   grammar lands, rule 13; the sketch): two seats under npcEnabled and
   npcFate, the clock at 7.9; c1 connects and teleports to Bleak Falls

@@ -47,6 +47,9 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
     fired nothing: the engine's deferred kill on every viewed actor holds
     the death, so the report now comes from the host's health-floor poll,
     not deathStart (fork m3-train-44 6cdc2b35; its rerun decides).
+    18:26 PDT: GREEN at T3 (20261025-012351: the fall's drop of 3813 units
+    in the host's samples, the death on both seats); committed as
+    b-npc-death-report. The trap's half stays open.
 
 
 ### D2. The level a leveled NPC is rolled at
