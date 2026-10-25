@@ -907,12 +907,16 @@ Section 3's leads from the code (HYPOTHESIS each, the client logs or a
 probe decide): (1) "NPC bow animations on one screen only": the host's
 AnimationSource relays every event the actor's graph took (sync/
 animation.ts, movement-controller events aside) and the puppet replays an
-attack event through allowedAnims, so the relay is not the gap; a bow draw
-needs ammo in the actor's inventory, and the fate's worn list pins armor
-and weapons but not the arrow stack (x-npc-fate-outfit's own note: "a
-difference made only of a weapon or an arrow stack"), so a puppet archer
-with no arrows refuses bowAttackStart. The read: both seats' npc-state worn
-and inventory for an archer, the AMMO rows compared. (2) "arrows need
+attack event through allowedAnims, so the relay is not the gap. Two
+candidates: the puppet's graph refusing a bow draw on an AI-off actor whose
+movement step the detour skips (melee attacks replay; a draw holds a state
+the combat controller owns), or ammo: the fate's worn list is the server's
+equipment with a Worn flag (FateOf, PartOne.cpp), the outfit's rows, never
+the base inventory's arrow stack, which each engine rolls itself, so a
+puppet should hold arrows of its own roll unless that roll came empty. The
+read: an archer's npc-state on both seats (worn and inventory, the AMMO
+rows) and the puppet seat's "block anim" console lines at the host's
+bowAttackStart. (2) "arrows need
 re-equip after load": the player's own ammo across a relaunch, the
 equipment restore's worn flag for AMMO; a client read of applyEquipment's
 filterWorn against an arrow stack. (3) sitting NPCs jerky indoors: the
