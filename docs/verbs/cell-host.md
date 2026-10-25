@@ -546,6 +546,36 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   movie, or Skyrim Platform's own UI (NirnLabUIPlatform at startup is
   numidium's candidate, unverified). Playtest 34 goes ahead with the box
   known; the fix is its own row.
+  The naming hooks (the re-analyst, REA on sky-re, 12:51 PDT, CONFIRMED-
+  STATIC for the layouts and ids): a heap's name is a char* at heap+0x80
+  pointing at the heap's own copy at heap+0x828 (GMemoryHeap.h:97-99, :231;
+  the root's CreateHeap 84512 makes the copy: rdx the name, r8 the parent,
+  rax the heap; the child list at +0x88/+0x90, DestroyItself walking it head
+  to tail, so the ninth heap destroyed is the youngest surviving child);
+  the heaps run read nothing because it read a sized UTF-8 string over the
+  bytes past the NUL. A movie's memory context is made by
+  GFxMovieDefImpl::CreateMemoryContext 85302 (rdx the heap name `MovieView
+  "<file>"`, built by CreateInstance 85300 from GetFileURL's basename; rax
+  the 0x60-byte context inside the new heap, its heap at +0x10, the limit
+  handler at +0x30 installed through SetLimitHandler, the heap's auto-
+  release at heap+0x30), its root by CreateInstance 85301 (rdx the context,
+  rax the GFxMovieRoot: context at +0x28, heap at +0x38, refcount at +0x08);
+  the context dies normally in 85286 from GFxMovieRoot::Release 83930 when
+  the root's refcount reaches zero, which the UI destructor 82073 drives
+  for every menu in UI::menuMap (IMenu+0x10 the movie); BSScaleformManager
+  ::LoadMovie 82325 formats "Interface/%s.swf" into GFxLoader::CreateMovie
+  84640. So the leaked heap is a movie whose root's refcount never reached
+  zero (an extra holder: a plugin's GPtr, an IMenu made but never
+  registered, a load task; HYPOTHESIS which); the sixth
+  SetLimitHandler(nullptr) came from the `_Mesh_Cache` heap's owner, not a
+  movie. The leak dump at quit is a stub (84555 `xor al,al; ret`), so the
+  engine prints no heap names: the trace must. quit-path.js's names mode
+  (thuum main, this commit) joins 84512, 85302, 85301, 82073's menu walk
+  and 84554 on the heap address and prints, for the handler-carrying heap,
+  its name, its context, its roots with their refcounts and the menu that
+  owns it or none. One run on any build (the crash is the same everywhere)
+  names the movie; falsified if the heap's name is not a MovieView's, the
+  handler is not a context's +0x30, or the root's refcount reads zero.
   A FINDING with it: the quit CRASHES inside the engine's shutdown after the
   teardown (c1-crash-2026-10-24-17-50-50.log: EXCEPTION_ACCESS_VIOLATION at
   SkyrimSE.exe+0x10EA550, mov rax, [rcx], the main thread, reading a garbage
