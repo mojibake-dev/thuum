@@ -1,0 +1,54 @@
+# b-host-own-hit (thuum-magnus, 2026-10-25): a game-file actor a seat hosts hits that seat's OWN
+# player, and the server takes the hit (target 0x14 resolved to the sender's actor; cell-host's
+# hosted-aggressor permission). Playtest 34 (section 2) could not show it: test 2's only attackers
+# inside the temple were two server-made bandits whose every swing OnHit's weapon check dropped
+# (E_HIT_WEAPON since train-46); the path itself was then seen live (39fe2 hits ff000000 at
+# 22:38:08Z, applied) and under the lab's eyes as x-host-own-hit 20261025-234109 on train-46's
+# stage (aaafffe5): 12 hits of the campfire pair on c1 in the window, no E_HIT_WEAPON, no
+# permission refusal, the pair alive with its AI on. Promoted unchanged (rule 13): the id and
+# this header differ from the probe, the steps and asserts are byte for byte.
+# Shape: c1 alone in Bleak Falls Temple 0x371de (c2 connected and parked at the spawn, so c1
+# hosts), 400 units west of the campfire pair MS13BanditCampfire01 0x39fe4 (-3825, 745, 583) and
+# 02 0x39fe2 (-3644, 677, 582) (numidium's esm.py read), fixed NPC_ bases whose hands the fate pins
+# (train-43), hostile on sight. Under god mode the server still logs the hit ("OnWeaponHit - X
+# hits Y with W for 0 damage"), the fight goes on. Claims: c1 hosts, runs the pair's AI, and within
+# 90 s the server logs one of the pair hitting ff000000 (c1's actor); no E_HIT_WEAPON line (the
+# pin holds); the pair alive. The teleport drops c1 from z 650 onto the hall's floor (god mode).
+id: b-host-own-hit
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 360
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "tgm"}
+  - c2: console {text: "tgm"}
+  - wait: 2
+  # c1 into the temple's first hall, facing the campfire; c2 stays at the spawn
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 25
+  - c1: npc-state {formId: 0x39fe4}
+  - c1: npc-state {formId: 0x39fe2}
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - c1.npc_state(0x39fe4).aiEnabled == true
+      - server.ref(0x39fe4).isDead == false
+  # the pair detects the player and attacks; the host's game reports its own actors' hits
+  # on its own player, the server resolves target 0x14 to ff000000 and logs the hit
+  - until: {within: 90, expect: ['server.log_count("OnWeaponHit - 39fe[24] hits ff000000") >= 1']}
+  - wait: 5
+  - c1: npc-state {formId: 0x39fe4}
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("OnWeaponHit - 39fe[24] hits ff000000") >= 1'
+      - 'server.log_count("E_HIT_WEAPON") == 0'
+      - 'server.log_count("No permission to send OnHit") == 0'
+      - server.ref(0x39fe4).isDead == false
+      - c1.npc_state(0x39fe4).aiEnabled == true
+artifacts: [server.log, c1.log, c2.log, screenshots]
