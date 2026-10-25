@@ -1134,6 +1134,21 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   findings, and M3's remaining rows (npc-stream's smooth motion, dialogue on
   a puppet, the encounter zone clamp drafted in docs/research/m3/
   encounter-zones.md, the trap evidence's lab read).
+- STATE 2026-10-25 14:22 PDT: the night's nightly on the merged build read
+  four M3 reds, none the code's (a spin bound too tight, god mode lost at
+  a restart, a one-in-five roll, and the client's unbounded wait on the
+  engine's ragdoll call); the three scenarios are amended and green again,
+  and the fourth is train-45 (fork m3-train-45 fa8809a1, the ragdoll wait
+  bounded, client only), MERGED at 14:20 on Eli's word with a gate of
+  eighteen green (parity fa8809a1, the clones promoted, thuum main
+  9c1652dd). Eli chose the quit-crash checks before the playtest: six of
+  six quits crash alike on every seat, path and build, with or without our
+  client, so the crash is the Skyrim Platform and SKSE stack's, not ours;
+  the leak is NAMED (the engine's always-open Loading Menu's movie held past
+  the heap teardown), the holders mode and the bisect order wait for after
+  the playtest. The fall scenario's subject is a fixed wolf (no roll). The
+  lab stands on skymp-server:m3-train-45 and clean-m1 at fa8809a1; playtest
+  34 at Eli's word from docs/private/playtest-m3-34.md.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
