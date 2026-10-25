@@ -787,6 +787,23 @@ level (D3); the encounter zone's clamp stays ADR-049's owed read. The pick
 among the three is a settings line, not a build. T0 unit/NpcRollLevelTest
 (Tests 9).
 
+Playtest 34's finding (2026-10-25, numidium's read): two SERVER-MADE
+bandits in Bleak Falls Temple, carried in the world since a lab placement
+(0xff000004 and 0xff000005, base EncBandit01Melee2HBerserkNordM 0x3de6f,
+profileId -1), died to rotfern's headshots and stood again 25 s later by
+the players' RespawnWithDelay, while the game-file bandit 0x39fe4 beside
+them lay for the reset hours as designed: IsFateRespawned required an id
+under 0xff000000. Train-46 (fork m3-train-46 fe1ee08f) keys it on the base
+instead (every actor that is not a player's; IsCreatedAsPlayer is a 0xff id
+with base 0x7 or below), so a server-made NPC's death schedules the reset
+clock and its respawn stands it at its spawn point (SendAndSetDeathState's
+GetSpawnPoint; GetEditorLocationalData has nothing for a 0xff id), and a
+host's death report for it is judged like a game-file actor's. T0:
+NpcFateTest's case (a change form with an NPC base loaded under a 0xff id,
+killed, found on the reset clock with its day stamped). For the playtest
+numidium restored a copy of the world without the two records
+(playtest-m3-34b-rotfern-20261025T2217Z).
+
 ## Client
 
 Built, the deaths' client half (95abf0dc, 20:39 PDT): formView binds a dead
