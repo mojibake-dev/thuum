@@ -604,7 +604,7 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   po3_Tweaks' loading-screen options); then a solo quit per suspect plugin
   disabled (a layer change each). Not a thuum verb's bug; a fix row of its
   own.
-  The re-analyst's read of the holders (REA on sky-re, 13:47 PDT): the
+  The re-analyst's read of the holders (REA on sky-re, 13:41 PDT): the
   Loading Menu is an ALWAYS-OPEN menu by engine design (flags
   kPausesGame|kAlwaysOpen|kAllowSaving|kApplicationMenu, LoadingMenu.h:13;
   the hide path keeps a kAlwaysOpen menu's instance, movie and delegate
