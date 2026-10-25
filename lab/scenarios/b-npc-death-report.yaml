@@ -15,7 +15,10 @@
 # host; the server's line "a drop of 3813 units in the host's samples; the server records
 # the death"; dead on the record and both seats; the 240 h reset scheduled). The trap's
 # evidence (a trigger's own activation) is the verb's open HYPOTHESIS and no claim here.
-# Its own commit (rule 13).
+# Nightly 20261025-124620 red on the roll: the subject came up a skeever (one entry in
+# five at level 1) and a lifted skeever never fell, so a species premise now reds the run at
+# the prelude rather than at the claim; a wolf-only subject is owed (esm.py). Its own
+# commit (rule 13).
 id: b-npc-death-report
 milestone: M3
 clients: [c1, c2]
@@ -49,6 +52,12 @@ steps:
       - server.host(0x9810).client == "c1"
       - server.ref(0x85547).isDead == false
       - server.ref(0x85549).isDead == true
+      # the premise, not the claim: the subject rolled a wolf (EncWolf's race 78346). 0x85547's
+      # level-1 list holds one EncSkeever to four EncWolf and the server picks uniformly, and a
+      # lifted skeever never fell (nightly 20261025-124620: on the ground 441 units off at
+      # health 1 while the gate's wolf was mid-fall), so one run in five has nothing to report;
+      # a red here is the roll's, read as such, until the subject is a wolf-only placement
+      - server.fate(0x85547).raceId == 78346
   - c1: npc-state {formId: 0x85547}
   - c2: npc-state {formId: 0x85547}
   # the lift: the host's engine takes the wolf 4000 units up and lets it fall
