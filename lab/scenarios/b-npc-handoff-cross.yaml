@@ -1,0 +1,66 @@
+# b-npc-handoff-cross (thuum-magnus, 2026-10-25): ADR-047 D9, npc-handoff decision (d), the pass
+# between live hosts (fork m3-train-46). Playtest 34's finding: a server restart's cold start gave
+# Sigrid's two cells, 0x9712 and 0x9731, to different players (D10 by ring, within 10 ms), and her
+# shuttle between them was refused at every crossing (seven a second, "may not move 13483 to cell
+# 9731"), test 2's engine walking her live where test 1 held her record. The build passes the actor
+# at an adjacent crossing: the record moves into the destination, the destination's host hears "not
+# hosted by other" and goes live, the sender's game hears "hosted by other" and demotes, and the
+# sender's further reports are dropped. GREEN as x-handoff-cross v2 20261025-235039 on train-46's
+# stage (aaafffe5): the split held (9712 to c1, 9731 to c2), no refusal of her moves, one pass, c1
+# live and c2 a puppet at the end. Promoted unchanged (rule 13): the id and this header differ from
+# the probe, the steps and asserts are byte for byte.
+# Shape: both seats under god mode in Riverwood, each standing inside its own cell before a server
+# restart so the cold start grants each its own (the PREMISE, asserted: Sigrid's cells are the
+# exterior squares (5, -11) above y -45056 (0x9712) and (5, -12) below it (0x9731); c1 at (21995,
+# -44935) in 9712 and c2 at (21869, -45151) in 9731, the playtest's own split; a seat at the landing
+# (17225, -47204), square (4, -12), is ring 1 for both and gets neither), then three minutes of her
+# shuttle. Claims: no refusal of her moves, at least one pass, and exactly one seat running her AI
+# at the end (the other a puppet). Reads: the server log's "passes 13483" and "npc-handoff D9"
+# lines, both seats' npc-state.
+id: b-npc-handoff-cross
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: tgm}
+  - c2: console {text: tgm}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 21869, y: -45151, z: -128, rot: [0, 0, 0]}
+  - wait: 25
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  # the split: the cold start after a restart grants each cell to its nearer player
+  - server: restart
+  - c1: connect
+  - c2: connect
+  - c1: console {text: tgm}
+  - c2: console {text: tgm}
+  - wait: 20
+  - assert:
+      - server.host(0x9712).client == "c1"
+      - server.host(0x9731).client == "c2"
+  # her shuttle crosses the border a few times in three minutes
+  - wait: 60
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - wait: 60
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - wait: 60
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("may not move 13483") == 0'
+      - 'server.log_count("passes 13483 into cell") >= 1'
+      - c1.npc_state(0x13483).aiEnabled != c2.npc_state(0x13483).aiEnabled
+artifacts: [server.log, c1.log, c2.log, screenshots]
