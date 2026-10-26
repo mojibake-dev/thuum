@@ -665,6 +665,20 @@ the lab. H5 stays HYPOTHESIS until x-handoff-door.
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Watch item (2026-10-26, the stream's merge gate 20261026-202431-merge-m3-npc-stream, ADR-027):
+b-npc-handoff-cross red once (210042) at a login re-split: as c2 took 9731 the
+server refused four of c1's reports in 11 ms, a transient of the grant's order,
+not the stream's; green on its rerun 220011 and in the nightly 20261026-132333
+before it. Beside it, the pass THRASHES at the border: that green nightly moved
+Alvor between 9731 and 9732 836 times in a run, and the committed claims count
+no passes, so D22's premise that a crossing is one pass is false. The margin
+brake (fork m3-pass-margin 5b99ad03: PASS_MARGIN_UNITS 256, UNMEASURED; the
+crossing host keeps the actor as a follow into the hosted cell until the step
+the margin deep) is built ahead and merges on D36's letter
+(docs/research/m3/decisions-after-npc-stream.md); x-handoff-cross v3 counts the
+passes (at most six each of Sigrid and Alvor in three minutes). Closes when v3
+is green on the brake and the scenario carries the count (its own commit).
+
 ## Reviewer checklist
 
 1. Is the rung right, and is the reason for not going one rung higher real?
