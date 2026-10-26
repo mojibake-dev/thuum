@@ -1529,6 +1529,22 @@ Falsifiers in P7 v3: a resident's say still refused with the entry null
 loaded and still refused. The lab's one asset fact left: whether Sven's
 line 6aea9 carries a LIP and the chickens' bark 10aa5d does not.
 
+### P7 v2's read and voice v3's stage (12:00 PDT)
+
+P7 v2 (20261026-185231, the v2 stage of ad1d103d) GREEN, all 33 steps:
+V1 (the sink and the relay) held again, a started say and an ENDED line on
+the puppets held ("line on 1066df ended (timer 0.00 -> -1.00)", the hare's
+the same: the detour's pair ends a puppet's line, V3 CONFIRMED on the
+creatures), no E_SPEECH_OWN. The recorded resident says confirm the
+deferral read before v3 ran: Sven's neighbour 13489 (info 6aea8) and 1348b
+(info 6aea9) answered "refused (returned true, state idle, handle none,
+dialogue state set after)": the say ACCEPTED the line, played nothing, and
+left the lip entry set, the replay queued for an AI frame a puppet never
+gets. Voice v3 (6efe3271, pushed 12:00 PDT on numidium's word; its stage
+chained after the v2 T2) passes the flag that selects the synchronous lip
+load, and P7 v3 reads whether the residents' lines play with their lip
+sync (V2 for humanoids) and end (V3 for humanoids).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
