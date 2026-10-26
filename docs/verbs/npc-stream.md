@@ -979,7 +979,59 @@ host's regeneration), the puppet's health follows the record within 0.05,
 the first state line in the server log at the grant, no E_STATE_OWN, the
 non-host's puppets report nothing (no "state ... by c2's id" line).
 
-Slices 3 and 4 unchanged (EQUIPMENT; the voice line and the budgets).
+### Slice 3 as built (2026-10-26 04:13 PDT, fork m3-npc-stream 2673d1ab on 42af75b7)
+
+The record's hands are what the hit path judges a hosted actor's swing
+against (E_HIT_WEAPON: playtest 34's two bandits, every swing dropped, the
+host's player unhurt), so the host streams what its actor wears. No wire
+change: UpdateEquipment 5 under the actor's idx, as cast-action's actions
+and the state go. The core (ActionListener::OnUpdateEquipment) resolves an
+idx that is not the sender's own through ActorUpdatableBy (the host gate)
+and writes the actor's record, where before it resolved every idx to the
+sender's own actor (cell-host's latent corruption, now closed); for a hosted
+actor it checks the WORN entries alone against the actor's own inventory
+(its engine's whole inventory is npc-fate's record, not this message's), the
+spells by IsSpellLearned (the base's included; templates a known gap), the
+armor slot rule as it stands; a refusal drops the report with one warn a
+minute per actor (E_EQUIP_REFUSED) and sends the host nothing (Rule A;
+SetInventory has no idx and would replace the host player's own inventory,
+a snippet on an NPC runs nowhere); an accepted report logs an info line
+(the hands, the spells, numChanges). The player's path is byte for byte as
+it was. CellHostTest's case: the host's worn sword into the actor's record
+and to the other game alone with the host player's record untouched, the
+non-host's dropped, an item the record lacks refused with no SetInventory
+and no snippet to the host. wire-json pins the shape: an entry's count is
+u32, the -1 of 2026-10-22's log is refused at recognize.
+
+The client reads the hands in HostedStateService's poll (getEquippedObject
+1 and 0, two calls per hosted actor per half second) and, on a change or at
+the first poll for the actor, sends what the actor wears: the 32 biped
+slots through getWornForm and the hands, worn flags set (wornLeft the left
+hand), the hands' spells, numChanges counting up from the record's own. A
+poll, not the equip events: whether the engine raises them for an AI's
+equip is unread (H4) and a cell's attach would raise one per resident's
+outfit at once. On the puppet seat an engine-dressed puppet (a game-file
+actor under the fate switch) keeps its outfit and follows the record's
+HANDS alone (sync/equipment.ts applyHands: the worn WEAP into the right
+hand, the wornLeft entry into the left, each changed only when it differs
+from what the puppet holds, the item added when the engine's roll lacks it,
+the hands' spells as a figure's); the copies' apply stands.
+
+HYPOTHESIS: H6, the puppet's hands follow a hosted actor's draw (P6); H7,
+a game-file actor's worn items are present in the server's record under
+the fate pin (a refusal line on the stage says otherwise); the template
+spells gap (an NPC mage whose spell list is a template's is refused and
+logged, follow-up in a later train).
+
+Probe by path x-npc-stream-p6 (two seats, P4's layout and bandit): the
+equipment line for the residents and the bandit on the server, no
+E_EQUIP_REFUSED, no E_HIT_WEAPON, and the bandit's swings landing on the
+server (OnWeaponHit lines naming the god-mode host player). A lab-api row
+for the record's worn list (server.ref(id).worn from mp.get(id,
+"equipment")) is asked of numidium for the next probe.
+
+Slice 4 unchanged (the voice line, the budgets from P3, b-npc-stream, the
+parity scenario and the reference trace).
 
 ## Status
 
@@ -992,7 +1044,10 @@ by path; P1 read the same morning (H1 confirmed in the lab's sense). Slice
 2 (STATE) built 2026-10-26 03:49 PDT, fork 42af75b7 (the wire message,
 its validator and fixtures, the Rust rule and its bridge, the core's
 handler, the client's sender; wire tests and clippy clean, tsc, codegen and
-fork-lint clean; CI next); slices 3 and 4 next. Open questions for Eli before the build as
+fork-lint clean; CI green, pipeline 3133). Slice 3 (EQUIPMENT) built the
+same morning (the hosted idx resolved in OnUpdateEquipment, the hands
+streamed from the host's poll, the puppet's hands following; tsc, lint and
+the JSON crate's tests clean; fork 2673d1ab, CI next); slice 4 next. Open questions for Eli before the build as
 they stood, each stated once in its section: (1) the epoch on
 HostedActorState alone, not on the players' hot messages (Authority); (2)
 a death the host alone witnessed is floored and left to npc-fate, with a
