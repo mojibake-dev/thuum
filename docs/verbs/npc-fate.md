@@ -925,6 +925,18 @@ propagating: dialogue on a puppet, known. (5) Hilde stuck at her door and
 the smith's daughter leaving in place after the handoff: the session's
 logs at the end (numidium's agent).
 
+GREEN AT T3, both (18:42 PDT): the corpse's release (x-body-release v3
+20261026-012319 on 46's stage: c1's loot and close, then c2 admitted at
+once, two "no occupant" lines and never "another object"; committed as
+b-npc-body-release, main f87ca564) and the protected floor (x-npc-protected
+v3 20261026-012622: six bear hits on Jenassa logged "health 0.01 -> 0",
+the number before MayDie's floor, her record and c1's engine alive, no
+death line of hers; committed as b-npc-protected, main a7a25d13). The
+earlier runs' reds were the probes' (a bare close-menu, a mod's start-up
+box, a claim too broad by the bear's own death, a hostile taking the
+god-mode player). Train-46 MERGE-READY by citation and MERGING on Eli's
+"Merge now" (gate 20261026-001639 eighteen of eighteen, T2 green).
+
 BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
 resetBaseFirst, and the view's dead-body apply passes false, so a game-file
