@@ -1190,6 +1190,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   of 47b, 48, 49), Step R reads (x-npc-bow, x-npc-spell, p3, p6 v3), trains 51 one NPC path with the
   reconciler, 52 deaths by the engine, 53 bows and spells, 54 gaze and face plus the safeguards, 55 the
   dialogue claim (ADR-051, npc-talk), one gate, playtest 35 at the end; about seven working days.
+- STATE 2026-10-26 14:53 PDT: the ladder's code is BUILT but train 53 (bows and spells, after Step R's
+  reads): 47b d049eddc; 51 m3-npc-path 4be36aed (ADR-051 PROPOSED); 52 m3-npc-death 55a95002 (DamageCause
+  55/63); 54 m3-npc-face 867c4210 (the gaze and the face, the stream counters); 55 m3-npc-talk 0d453dc1
+  (ADR-052 PROPOSED, ActorClaim 56/64); voice v4 m3-npc-voice 8da16ef6; D22's brake m3-pass-margin 11bf32f3
+  (memo D36). The lab: the stream's gate running (one login-transient red, reruns at its end), then Step R,
+  the voice stage, 50b, 51, 52, 54, 55 in numidium's queue; each merges on a green gate (D32 B).
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
