@@ -2745,3 +2745,96 @@ take the late path, one engine re-roll each.
 - [ ] accept (Eli)
 - [ ] accept with changes (say what)
 - [ ] not yet
+
+## ADR-050: NPCs through the engine's own entries: the host streams its actors' actions, values and equipment; the simulating engine keeps its own death; one NPC path
+
+Status: ACCEPTED 2026-10-26 02:22 PDT (Eli: "proceed with the pivot. open ADR-050 and
+start npc-stream", on docs/research/m3/structure-review-2026-10-26.md).
+Refines ADR-035 point 5 (built now, not later), ADR-045 Rule A (its
+standing exceptions named and retired one by one), ADR-048 (the mechanism,
+its trust choice untouched), ADR-046 decision 1 and ADR-049 (server-made
+NPCs through the same roll and pin). Supersedes nothing: the cell host, the
+puppet, the roll's authority and the checked death report stand.
+
+Context. After playtest 34 Eli asked whether the NPC work was repeating the
+casting detour of 2026-10-12 to 10-15 (a figure's hands driven by replaying
+the caster's graph events, patched for 45 hours across three branches until
+ADR-032 replayed the caster's own BGSActions through the engine's
+PerformAction entry, five hours). Three independent readers (the review)
+converged: the core is sound and TES3MP's (one engine simulates an NPC,
+every other engine shows the engine's own reference AI-off and fed from the
+host, cells to the first loader with a grace and an epoch, a body as the
+server's container, respawn on the server's clock), and three commitments
+are the casting shape, a mirror at the wrong layer that then takes one
+patch per symptom: (1) a puppet's presentation rides a replay of the host's
+graph events (sync/animation.ts:212) while the action replay ADR-035 point 5
+ordered for NPCs, npc-stream, was never built and the PerformAction hook
+reads the player alone (FridaHooks.cpp:461); (2) the engine that simulates an
+NPC has its own death blocked on every seat, the host's included
+(formView.ts:397-401), and the server rebuilds deaths one cause at a time
+(the floor, the 500 ms poll, the kill mark, the trap evidence), against
+ADR-031's "cut at the number"; (3) the roll is pinned into the engine one
+category at a time with server-made NPCs outside it (the once-dress,
+E_HIT_WEAPON, the late reload). (1) and (2) share a root: npc-stream unbuilt;
+handoff and fate were built around its absence. Two seams at the
+implementation layer compound it: the client's puppet state spread over
+about eight entry points, and SkyMP's shapes for players and their copies
+reaching NPCs by default. The casting era's safeguards (ADR-031's reference
+trace, ADR-033's sequence tables) were skipped for the NPC verbs.
+
+Decisions.
+1. npc-stream is built first, as docs/verbs/npc-stream.md drafts it and in
+   this order: the host's engine's actions for the actors it simulates
+   captured at the PerformAction entry (the hook admits an actor in the
+   hosted set beside the player) and sent as UpdateAction under the actor's
+   idx, which every other game performs on its puppet through cast-action's
+   replay (ADR-032's entry, extended from figures to NPCs); then the host's
+   reading of its actors' values, combat target and running package as
+   HostedActorState, recorded under the hold rule (R2 bounded by the
+   players' attributes rule); then the actors' equipment as UpdateEquipment
+   under the actor's idx. The graph-event relay retires for NPCs as the
+   action replay covers each kind (attacks, blocks, draws, casts, shouts,
+   idles through ActionIdle); locomotion stays on the engine's own Speed
+   and Direction feed (train-33). A kill switch, npcStream, restores
+   today's stream for a bisect.
+2. Deaths by the engine (ADR-031 point 3 for NPCs), the train after: the
+   server keeps every number a player deals or takes (ADR-028) and
+   delivers that number to the simulating host as a cause through the
+   engine's own hit path (the RE read owed since ADR-031); the host's engine
+   reacts and dies by itself; the deferred kill stays on puppets alone; the
+   host's death report keeps ADR-048 B's checks and a refusal is corrected
+   through the respawn path; the 500 ms floor poll retires. The host's
+   health reaches the server through HostedActorState (decision 1).
+3. One NPC path, the train after that: a server-made NPC is fated through
+   the same roll and pin as a game-file actor (a fate keyed before PlaceAtMe
+   returns), which retires the once-dress (D19) and E_HIT_WEAPON; the
+   client's puppet state is one reconciler computing each actor's state
+   from (the server's word, loaded here, dead, kind) and applying it
+   idempotently from every event and one poll, "loaded here" read from the
+   cell's attach rather than the 3D; the NPC rules are keyed once on "not a
+   player" on the server; an engine reference's binding is kept for the
+   session; the NPC activation rung is declared (R2 for a door or furniture
+   the host's engine uses, R0 where shared state moves); D11's release
+   (856fed7d, every engine runs an unloaded actor's schedule) is written as
+   its own decision.
+4. The per-actor owner table (actor to player, epoch, since; claim, pass,
+   relinquish, reassign; the cell as the policy) is written as an ADR when
+   the first case needs it (followers, mounts, dragons, summons), not
+   before; the one gap it closes now, a pass fenced by an epoch where a 1 s
+   settle window stands in, is named here.
+5. The safeguards come back before the next playtest: an NPC reference trace
+   committed under lab/references (ADR-031's diff against the engine
+   alone), every NPC verb's ADR-033 sequence table with its result column
+   filled from runs, and no verb merged with its Status boxes open.
+
+Consequences. Trains 47, 48, 49 and their stack 50 stay built and unmerged
+until Eli's word on each survivor: from 47 the body's inventory as a diff
+alone, the late fate's 3D reload and a puppet's own activation not
+forwarded survive any model; the hosted copy's once-dress (D19-B) is held,
+retired by decision 3; from 48 the dead host (D18-B) and the disabled death
+(D21-B) survive; 49 (D24-B's fast exit) stands on D24's four reads (neither
+quit crash is ours). npc-stream's first train is fork m3-npc-stream off
+parity aaafffe5; its probes are the draft's P1 to P5 and b-npc-stream. The
+cost accepted: about four to five days before the next playtest, against
+continuing to patch; the casting precedent's numbers are the argument.
+
