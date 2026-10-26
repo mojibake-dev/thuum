@@ -89,7 +89,12 @@
 // Thread.setHardwareWatchpoint and Process.setExceptionHandler (a
 // 'single-step' on Windows), HYPOTHESIS until the first run's 'armed' row
 // reads threadsArmed above zero; a thread made after the arming carries no
-// watchpoint (the main thread does the menus' reference work).
+// watchpoint (the main thread does the menus' reference work). The menu is
+// found through the UI singleton's live map walk at the script's start
+// (polled every 500 ms until it exists), since the script goes live seconds
+// after the process start and the creator has returned by then (run
+// 20261026-015302 armed nothing); the 'armed' row's count says whether the
+// outside references were already taken (five) or come at the loads (three).
 // Run: a scenario's `frida {script: quit-path.js}` step before the quit, or
 // `just frida quit-path.js c1` by hand, then quit the game (console qqq).
 'use strict';
@@ -117,6 +122,7 @@ const OFFSETS = {
     unregisterHandler: 0xfbe8c0, // 82639 FxDelegate::UnregisterHandler (rcx the delegate, rdx the handler): the dtor loop's release of a menu's callbacks
     menuMapDtor: 0xfa6b00, // 82118 UI::menuMap's destructor: the last Release of every registered IMenu
     menuStackDtor: 0xfa6680, // 82107 UI::menuStack's destructor
+    uiSingleton: 0x20f6a00, // 400327 the UI singleton's pointer (CommonLibSSE-NG include/RE/Offsets.h:557 RELOCATION_ID(514178, 400327); just addr 400327)
   },
 };
 
@@ -372,6 +378,25 @@ if (at === undefined) {
         return false;
       } catch (e) { return null; }
     }
+    // the live map walk (x-quit-watch 20261026-015302: the script went live
+    // 7.4 s after the process start and the creator had returned already, so
+    // its onLeave never fired and nothing armed): the UI singleton's map
+    // read now, the same layout as the destructor's search below
+    function findLoadingMenuLive() {
+      try {
+        const ui = readPtr(exe.base.add(at.uiSingleton));
+        if (ui.isNull()) return NULL;
+        const entries = readPtr(ui.add(0x150));
+        const capacity = ui.add(0x134).readU32();
+        if (entries.isNull() || capacity === 0 || capacity > 4096) return NULL;
+        for (let i = 0; i < capacity; i++) {
+          const e = entries.add(i * 0x20);
+          if (readPtr(e.add(0x18)).isNull()) continue;
+          if (cstr(readPtr(e)) === 'Loading Menu') return readPtr(e.add(0x08));
+        }
+      } catch (e) { emit({ error: 'live menuMap walk failed: ' + e }); }
+      return NULL;
+    }
     Interceptor.attach(exe.base.add(at.loadingMenuCreator), {
       onLeave: function (retval) {
         loadingMenu = retval;
@@ -379,6 +404,27 @@ if (at === undefined) {
         if (MODE === 'watch') armWatch(retval);
       },
     });
+    if (MODE === 'watch') {
+      const tryArm = function () {
+        if (watchArmed) return true;
+        const live = findLoadingMenuLive();
+        if (live.isNull()) return false;
+        loadingMenu = live;
+        emit({ loadingMenuFound: true, menu: live.toString(), refCount: count(live), via: 'live menuMap walk' });
+        armWatch(live);
+        return true;
+      };
+      if (!tryArm()) {
+        let polls = 0;
+        const timer = setInterval(function () {
+          polls++;
+          if (tryArm() || polls > 240) {
+            clearInterval(timer);
+            if (!watchArmed) emit({ watch: 'not armed', polls: polls });
+          }
+        }, 500);
+      }
+    }
     Interceptor.attach(exe.base.add(at.uiDtor), {
       onEnter: function (args) {
         const ui = args[0];
