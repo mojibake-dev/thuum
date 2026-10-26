@@ -1,0 +1,77 @@
+# b-npc-protected (thuum-magnus, 2026-10-25): a protected game-file NPC never dies on the record to a
+# hostile NPC's hits (D15-A, MpActor::MayDie: a protected base dies to a player's own hand alone); the
+# server floors her at one point and both the record and the host's engine keep her alive. Playtest
+# 34's section 5 item, moved to the lab at Eli's word: no Riverwood resident reads protected in this
+# load order (numidium's npc-state read of twelve), so the subject is HirelingJenassa, ACHR 0xe1ba9,
+# base 0xb9982, in WhiterunDrunkenHuntsman 0x165b7 at (230, -1040, 70) (numidium's esm.py read of
+# Skyrim.esm 1.6.1170: ACBS kProtected set, kEssential clear, CommonLibSSE-NG
+# include/RE/T/TESActorBaseData.h:32). PREMISE: the engine on c1 reads her protected (held in every
+# run: the plugin's bit survives the load order). GREEN as x-npc-protected v3 20261026-012622 on
+# train-46's stage (aaafffe5); v2 000257 had held the floor (six bear hits, each logged "health 0.01 ->
+# 0", the computed number before MayDie's floor puts her back at 0.01, her record alive) and read red
+# on a death claim too broad by the bear's own death; v1 234704's ice wolf bit the god-mode player
+# instead (god mode is not invisibility). Promoted unchanged (rule 13): the id and this header differ
+# from the probe, the steps and asserts are byte for byte.
+# Shape: c2 at the spawn (one target fewer), c1 450 units from Jenassa under Invisibility
+# (b-invis-recast's spell 0x27eb6, cast before the placement and recast twice inside the window since
+# it holds 30 s), a start-up message box dismissed on both seats, the server console's PlaceAtMe of
+# EncBear 0x23a8a at her (numidium's server-console step, run as c1). Claims: the bear's hits on
+# e1ba9 land on the server (OnWeaponHit lines by pattern, at least 3), her record never dies, c1 reads
+# her alive with her AI on, no "e1ba9 died at day" line. No player-kill half: kill-ref bypasses
+# MayDie, and T0 covers the player's hand.
+id: b-npc-protected
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 13.0
+timeout_s: 480
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "tgm"}
+  - c2: console {text: "tgm"}
+  # a mod's box at a seat's start (Intuitive Dragon Ride Control: "SKSE is not loaded", c2 in
+  # x-body-release v2) pauses the game for the whole run; dismissed, a no-op when no box is up
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: console {text: "player.setav magicka 3000"}
+  - c1: learn-spell {spellId: 163510}
+  - c1: console {text: "player.equipspell 27eb6 right"}
+  - wait: 2
+  - c1: teleport {cell: "165b7:Skyrim.esm", x: -200, y: -900, z: 80, rot: [0, 0, 110]}
+  - wait: 25
+  - c1: npc-state {formId: 0xe1ba9}
+  - assert:
+      - server.host(0x165b7).client == "c1"
+      - c1.npc_state(0xe1ba9).isProtected == true
+      - c1.npc_state(0xe1ba9).aiEnabled == true
+      - server.ref(0xe1ba9).isDead == false
+  # the seat goes unseen: Invisibility cast from the drawn right hand (b-invis-recast's steps)
+  - c1: draw-weapon
+  - wait: 3
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 4
+  # the hostile at her side, the server's own actor, hosted by c1's game
+  - c1: server-console {name: PlaceAtMe, args: [0xe1ba9, 0x23a8a]}
+  - wait: 5
+  - c1: npc-state {formId: 0xe1ba9}
+  # the hits land on the server and floor at one point: no death on the record
+  - until: {within: 60, expect: ['server.log_count("OnWeaponHit - ff0000[0-9a-f]{2} hits e1ba9") >= 1']}
+  - wait: 20
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 25
+  - c1: hold-key {code: 199, ms: 2000}
+  - wait: 15
+  - c1: npc-state {formId: 0xe1ba9}
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("OnWeaponHit - ff0000[0-9a-f]{2} hits e1ba9") >= 3'
+      - server.ref(0xe1ba9).isDead == false
+      - c1.npc_state(0xe1ba9).isDead == false
+      - c1.npc_state(0xe1ba9).aiEnabled == true
+      - 'server.log_count("e1ba9 died at day") == 0'
+artifacts: [server.log, c1.log, c2.log, screenshots]
