@@ -1411,6 +1411,42 @@ committed scenarios (promoted from these green runs: b-npc-stream-actions,
 b-npc-stream-state, b-npc-stream-equipment, each its own commit, rule 13),
 the parity scenario and the reference trace (ADR-050 decision 5).
 
+### The voice stage's read (a7cba312, 11:01 to 11:15 PDT; P7 v1 20261026-181119, 11:26 PDT)
+
+No crash on either seat; T2 on the voice branch running at the read. The
+pipeline works end to end for the message: the host's sink raised 26 lines
+in the window (the lab spawn's creatures' bark, info 10aa5d on topic
+10aa5a, many times from the chicken 1066de, 1066df and the hare 10962a
+while c1 still hosted the spawn's cells; one resident's line, 13484 info
+6aea9 topic 6aea3, near the end), the server relayed each to the listener
+in range (seven "speech ... by ff000000" lines, "to 1 listener" once c2
+stood in reach, no E_SPEECH_OWN), and the puppet seat asked its native for
+each. V1 (the sink sees a hosted actor's lines) reads CONFIRMED for the
+creatures and for one resident; few resident lines fired because c1
+teleported between four points instead of walking (greetings need an
+approach). V2 split: the engine's say STARTED on every creature puppet
+(twenty-five asks, state byte 3 after each, identical pre-state: bits
+382021a1, timer -1, state idle) and was REFUSED on the humanoid resident
+puppet 13484 with the same pre-state (state idle after): the engine's reason
+is unread (the candidates from the static read: the process's dialogue
+state at +0x3B8, or the response taking the sound-descriptor path 39771
+that never sets the state byte, so the line may have PLAYED unseen by the
+native's test). V3 (the pair ends the line) was unread by a logging fault
+of mine: the state byte passes 1 and back to idle inside one pair call
+(37752 sets 1, UpdateSoundCallBack handles it), so the "line ended" line
+printed never; the creatures' twenty-five lines may well have ended. V4
+unread.
+
+Voice build v2 (the commit after a7cba312 on m3-npc-voice): the native
+logs the say's return value, the process's presence, the sound handle's
+validity and the timer after the call, and answers "played" when the
+handle is live without the state byte (the sound-descriptor path); the
+pair logs "line ended" on the timer's run-out as well as the state's.
+P7 v2 claims V1, the relay, a started say and an ended line on ANY puppet
+(the creatures are puppets too), and records the resident's say with its
+diagnostics for v3's claim. The playtest's D27-B stands: the voice stays
+off the playtest's build until P7 is green.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
