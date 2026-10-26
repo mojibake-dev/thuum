@@ -1097,13 +1097,95 @@ The Dynamic plan (rule 8; the re-analyst's static read first, launched
   prototypes; no lip sync and no speaker idle this way (the puppet's mouth
   stays shut: a player-visible gap, said in the checklist if this is the
   shape).
-The message, when the read allows it: a Record row (R2) under the actor's
-idx with the info's form id, its topic's and its quest's, the response
-index and the subtitle's text cap, unreliable (a lost line is a lost line;
-TES3MP's shape), its budget from the measured rate; the validator bounds
-the ids and the text; the puppet plays it by the path R2 or R4 chooses.
-Until the read, the voice line stays "known" in the playtest checklist
-(npc-fate.md:923-924's row), as it has been.
+The re-analyst's static read (REA on sky-re, 2026-10-26 04:27 to 05:02
+PDT; every id and offset below is a tool read of 1.6.1170, none from
+memory; the names beyond CommonLib's are HYPOTHESIS, the prototypes
+CONFIRMED-STATIC):
+- R1 CONFIRMED-STATIC: TESTopicInfoEvent is 0x18 bytes: +0x00 a refcounted
+  callback pointer (null for barks), +0x08 NiPointer<TESObjectREFR> the
+  speaker, +0x10 the topic info's form id, +0x14 a u32 type (0 begin, 1
+  end); dispatched by 25616 (the only writer of the holder's +0xEC8 source
+  that also takes the holder's singleton 14298), consumed by SkyrimVM's
+  ProcessEvent 53997 (slot 1 of AE 217135) which reads exactly those four
+  fields. Nine callers: 19518 (a reference's say-topic), 35225 (the
+  DialogueItem-level sender), 35282, 35283, 35284, 35294 (the player's menu
+  begin and end), 37543 (an actor's say-topic), 37544 (the sound-done
+  callback, the END), 37741 (PauseCurrentDialogue). Barks reach it: 39333
+  (say by subtype) to 32493 (the item chooser) to 39642 to 39643, which
+  starts the sound and sends BEGIN through 35225; scene lines too (44673).
+  Combat grunts, pain and shout audio are not topic infos and never pass
+  here. So a sink in the fork's Skyrim Platform sees every spoken LINE
+  (hellos, idle chatter, scenes, scripted infos) with its speaker and
+  info; the grunts stay the graph's.
+- R2 CONFIRMED-STATIC on the prototype, HYPOTHESIS on the puppet: Actor::
+  SpeakSoundFunction 37542 is `float (Actor*, const char* voicePath,
+  BSSoundHandle* out, EmotionType, u32 percent, int textLength,
+  TESIdleForm* speakerIdle, TESIdleForm* listenIdle, TESObjectREFR* target,
+  bool, BGSSoundOutput*, bool lipFromSound, bool, bool)`, returning the
+  speech's seconds (-1 when the menu's +0xB1 is set); it reads no
+  kProcessMe: it loads the lip data, plays the talking and listening idles
+  through the special-idle setup, builds the sound from "sound\" plus the
+  path (67664, flags 0x10 | 0x80 for an NPC), follows the head node
+  (67636), starts it (67617) and stores the handle. What ENDS a line is
+  outside it: the AI update 37347 returns at its top when kProcessMe is
+  clear, before the voice timer (37752) and UpdateSoundCallBack (vtable
+  slot 0x40, 37544), and 37544 is what shows the subtitle (state 3 through
+  52626), sets the timer from the sound's duration, and at expiry sends
+  END and SetSpeakingDone. HYPOTHESIS: on a puppet (AI off, high process
+  kept) a line started through the engine plays its audio, lip sync and
+  idle, shows no subtitle, never ends, never sets kSpeakingDone and leaves
+  the process's +0x278 at 3 until the AI returns; the cure is the engine's
+  own callback run for the puppet (37752 then slot 0x40 once a frame while
+  +0x278 is 3), the shape of npc-puppet's detours (the engine's job, run
+  for the actor the AI update skips). Falsified by 37544 entries on a
+  puppet with kProcessMe clear.
+- R3 CONFIRMED-STATIC: Papyrus Say is 56220 ("cannot speak a None topic
+  info"), registered at 56246 with three parameters; a living actor's
+  normal case goes 39162 to 39642 to 39643 to 39772 to 37542, the bark
+  chain itself; the info is picked by 25541 to 25544 (the condition walk,
+  random and say-once) only when the caller gives none: 39642 forwards its
+  own info argument into 25541, and 39333 passes the info 32493 chose. So
+  "say the host's line" on the puppet is 39162 or 39642 with the host's
+  topic and info ids (a new native, the engine's own bookkeeping and the
+  BEGIN event), or a DialogueItem (35220) handed to 20206 or 20207 then
+  19518; Say itself re-picks and may differ.
+- R4 CONFIRMED-STATIC: BuildSoundDataFromFile is `(BSSoundHandle&, const
+  BSResource::ID&, u32 flags, u32 priority)` as BSAudioManager.h:27 has it;
+  SubtitleManager::ShowSubtitle 52626 is `(SubtitleManager*, TESObjectREFR*
+  speaker, const char* text, bool force)`, dropped unless the speaker is
+  not the player and bGeneralSubtitles or bDialogueSubtitles (383199,
+  383202) is on; 52627 removes a speaker's line. A pure playback without
+  the dialogue system (67664, 67624, 67636, 67616, 52626, later 52627) has
+  no lip sync and no talking idle: the puppet's mouth stays shut (R2's path
+  is the one to build).
+- Unanswered statically (the lab's): whether anything but the AI update
+  drives slot 0x40 (a backtrace on 37544 over a minute of play answers
+  it); what HighProcessData+0x3B8 holds (39369 gates a bark's BEGIN on
+  it); what the TopicResultCallBack does at completion.
+
+The design this read allows (the voice slice, its own fork branch off
+m3-npc-stream after the stage's reads, HYPOTHESIS until P7): on the host a
+Skyrim Platform sink on TESTopicInfoEvent (the struct declared in
+game/Events.h as TESSceneActionEvent is, AppendSinkScriptEvent's idiom),
+filtered in native to type 0 and a speaker in the hosted set (rule 9),
+raised as `topicInfo {speakerId, topicInfo}`; the client sends a Record
+row (R2) under the actor's idx with the info's and its topic's form ids,
+unreliable (a lost line is a lost line, TES3MP's shape), its budget from
+the measured rate; the server gates the host, relays to the actor's other
+listeners (UpdateAction's loop) and records nothing; on the puppet seat a
+native sayTopicInfo(actorId, topicId, infoId) calls 39642 with the given
+info (the engine's own say, lip sync and idle, the BEGIN event), and the
+puppet detour runs 37752 and slot 0x40 once a frame for a puppet whose
++0x278 is 3, so the subtitle shows and the line ends (R2's HYPOTHESIS, the
+slice's first probe). Until then the voice line stays "known" in the
+playtest checklist (npc-fate.md:923-924's row), as it has been.
+
+P7 by path, when the slice is built: solo first (a Frida hook on 25616,
+53997 and 35225 beside the sink's log line over Riverwood at 8:00: every
+spoken line matched to an event row, the grunts absent), then two seats
+(the host's resident greets the host's player; the puppet seat's line
+through the native: 37542 and 67617 entries, then 37544 entries and the
+subtitle with the detour, none without it).
 
 The rest of slice 4 waits on the stage's reads: P3's numbers (the stream's
 cost, the hosted_state_budget and action_budget replacing their UNMEASURED
