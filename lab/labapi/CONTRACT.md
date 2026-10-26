@@ -141,11 +141,16 @@ client whose player's actorId (the `actor` kind's) is the holder, "" when none.
 
 Request: `{"payload": {"kind": "ref", "actorId": <int>}}`. Answer: `{"found":
 true, "actorId", "x", "y", "z", "rot", "cell", "isDead", "healthPercentage",
-"magickaPercentage", "staminaPercentage"}`, an actor's record by form id (a
-hosted NPC), the `actor` kind's fields without the appearance verdicts, or
+"magickaPercentage", "staminaPercentage", "worn"}`, an actor's record by form id
+(a hosted NPC), the `actor` kind's fields without the appearance verdicts, or
 `{"found": false, "actorId"}` for a form the server holds no position for.
-Scenarios read `server.ref(0x85547).x` and keep one with a `server: snapshot`
-step to compare against later.
+`worn` is the record's equipment (`mp.get(id, "equipment")`, read inside a try)
+as a seat's npc-state counts it: the ARMO and WEAP form ids marked worn in a
+slot or either hand, one per form, sorted, typed through the server's espm, so
+ammo and a torch drop; `null` when the server holds no equipment for the id.
+Scenarios read `server.ref(0x85547).x`, compare `server.ref(<id>).worn` with
+`c1.npc_state(<id>).worn` (npc-stream's hands), and keep one with a `server:
+snapshot` step to compare against later.
 
 ## labCommand
 

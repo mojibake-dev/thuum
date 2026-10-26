@@ -376,3 +376,37 @@ test("respawn-ref puts a dead game-file actor up at its spawn point, or in place
   assert.deepStrictEqual(mp.get(0x85549, "locationalData").pos, [5, 5, 5]);
   assert.strictEqual(mp.get(0x85549, "isDead"), false);
 });
+
+test("labState ref reads the record's worn armor and weapons, as a seat's npc-state counts them", () => {
+  // npc-stream slice 3: a hosted actor's equipment follows its host's engine, and a claim compares the record's
+  // hands with both seats' npc-state worn lists; the record marks ammo and a torch worn too, which those lists omit
+  const records = {
+    [0x12e49]: { record: { type: "ARMO" } },
+    [0x13790]: { record: { type: "WEAP" } },
+    [0x1397d]: { record: { type: "AMMO" } },
+    [0x1d4ec]: { record: { type: "LIGH" } },
+    [0x12eb7]: { record: { type: "ARMO" } },
+  };
+  global.mp = { ...fakeMp(), lookupEspmRecordById: (id) => records[id] || {} };
+  mp.set(0xff000a03, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9050, 550, 0], rot: [0, 0, 0] });
+  mp.set(0xff000a03, "equipment", {
+    inv: { entries: [
+      { baseId: 0x13790, count: 2, worn: true, wornLeft: true },
+      { baseId: 0x12e49, count: 1, worn: true },
+      { baseId: 0x1397d, count: 12, worn: true },
+      { baseId: 0x1d4ec, count: 1, wornLeft: true },
+      { baseId: 0x12eb7, count: 1 },
+    ] },
+    leftSpell: 0, rightSpell: 0, voiceSpell: 0, instantSpell: 0, numChanges: 3,
+  });
+  mp.set(0xff000a04, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [0, 0, 0], rot: [0, 0, 0] });
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 }).worn, [0x12e49, 0x13790]);
+  // no equipment property reads null, not [], so a claim never takes an unread list for an empty one
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a04 }).worn, null);
+  // EquipmentBinding throws for a form that is no actor
+  const get = mp.get;
+  mp.get = (id, k) => { if (k === "equipment") throw new Error("not an actor"); return get(id, k); };
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 }).worn, null);
+});

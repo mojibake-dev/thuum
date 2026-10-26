@@ -190,6 +190,7 @@ class FakeActor:
     healthPercentage: float = 1.0
     magickaPercentage: float = 1.0
     staminaPercentage: float = 1.0
+    worn: list[int] | None = None  # a record's worn armor and weapons (labState ref's worn); None reads unreported
     appearance: dict[str, Any] | None = None
     race_menu_open: bool = False
     # (raceId, allowed) per UpdateAppearance the server judged
@@ -240,7 +241,7 @@ class FakeState:
                     return {"found": False, "actorId": ref_id}
                 return {"found": True, "actorId": ref_id, "x": ref.x, "y": ref.y, "z": ref.z, "rot": [0, 0, 0], "cell": ref.cell,
                         "isDead": ref.isDead, "healthPercentage": ref.healthPercentage,
-                        "magickaPercentage": ref.magickaPercentage, "staminaPercentage": ref.staminaPercentage}
+                        "magickaPercentage": ref.magickaPercentage, "staminaPercentage": ref.staminaPercentage, "worn": ref.worn}
             actor = self.actors.get(int(payload.get("profileId", -1)))
             if actor is None:
                 return {"found": False}

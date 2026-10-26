@@ -17,8 +17,10 @@ the lab can grep (E_ASSERT_*).
   server.host(<cell>).hosted | .client | .epoch      the server's host table row for a cell id
                                                      (docs/verbs/cell-host.md): .client is the run's client
                                                      whose player holds it, "" when none
-  server.ref(<id>).x | .y | .z | .cell | .healthPercentage | .isDead
-                                                     an actor's record by form id (a hosted NPC)
+  server.ref(<id>).x | .y | .z | .cell | .healthPercentage | .isDead | .worn
+                                                     an actor's record by form id (a hosted NPC); worn
+                                                     is its equipment's armor and weapon form ids, sorted,
+                                                     as c.npc_state(<id>).worn counts them (npc-stream)
   snapshot("<name>").<field>                         a server fact a `server: snapshot {name, of}` step
                                                      kept earlier in the run (the freeze's evidence)
   <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
@@ -694,7 +696,11 @@ class HostView:
 @dataclass(frozen=True)
 class RefView:
     """server.ref(id): an actor's record by form id (labState kind ref): a hosted
-    NPC's position and health; a snapshot keeps one to compare against."""
+    NPC's position and health; a snapshot keeps one to compare against. worn is
+    the record's equipment as a seat's npc-state counts it (the armor and weapon
+    form ids worn in a slot or either hand, one per form, sorted; ammo and a torch
+    left out), so a claim compares the server's hands with both seats' (npc-stream
+    slice 3); None when the server reported no equipment for the id."""
 
     x: float
     y: float
@@ -704,6 +710,7 @@ class RefView:
     healthPercentage: float | None = None
     magickaPercentage: float | None = None
     staminaPercentage: float | None = None
+    worn: tuple[int, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -1060,7 +1067,8 @@ class _ServerRef:
                            isDead=_opt_bool(d.get("isDead")),
                            healthPercentage=_opt_float(d.get("healthPercentage")),
                            magickaPercentage=_opt_float(d.get("magickaPercentage")),
-                           staminaPercentage=_opt_float(d.get("staminaPercentage")))
+                           staminaPercentage=_opt_float(d.get("staminaPercentage")),
+                           worn=tuple(sorted(int(w) for w in d["worn"])) if isinstance(d.get("worn"), list) else None)
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{actor_id:#x}'s record lacks {e}") from e
 
@@ -1750,7 +1758,7 @@ _ATTRS = {
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
     HostView: {"hosted", "client", "epoch", "actorId"},
-    RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage"},
+    RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "worn"},
     FigureSpellsView: {"count", "extra", "base"},
     FollowView: {"following", "client", "cell", "actorId"},
     FateView: {"fated", "baseId", "level", "raceId", "worn"},

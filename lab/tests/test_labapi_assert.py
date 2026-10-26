@@ -331,6 +331,29 @@ class M0VocabularyTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             Evaluator(RichServer(), FateViews(), ["c1", "c2"]).evaluate("server.fate(0x85547).fated")  # no fate property
 
+    def test_the_records_worn_against_both_seats(self):
+        """npc-stream slice 3: a hosted actor's equipment follows its host's engine; server.ref(id).worn reads the
+        record's armor and weapons as a seat's npc-state counts them, so a claim compares the three."""
+        from labapi.assertions import AssertionData, Evaluator
+        srv = RichServer()
+        refs = {0xFF000A03: {"found": True, "actorId": 0xFF000A03, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "3c:Skyrim.esm",
+                             "isDead": False, "healthPercentage": 1.0, "worn": [0x13790, 0x12E49]},
+                0xFF000A04: {"found": True, "actorId": 0xFF000A04, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "3c:Skyrim.esm",
+                             "isDead": False, "healthPercentage": 1.0, "worn": None}}
+        srv.ref = lambda actor_id: refs.get(actor_id, {"found": False})
+
+        class WornViews(NearViews):
+            def npc_state(self, observer, form_id):
+                worn = {"c1": [0x12E49, 0x13790], "c2": [0x12E49]}.get(observer)
+                return {"formId": form_id, "aiEnabled": observer == "c1", "inCombat": False, "package": 0, "combatTarget": 0,
+                        "staggering": False, "pos": [0, 0, 0], "raceId": 0x13746, "worn": worn} if worn else None
+
+        ev = Evaluator(srv, WornViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("server.ref(0xff000a03).worn == c1.npc_state(0xff000a03).worn"))   # sorted on both sides
+        self.assertFalse(ev.evaluate("server.ref(0xff000a03).worn == c2.npc_state(0xff000a03).worn"))  # a seat a hand behind
+        with self.assertRaises(AssertionData):
+            ev.evaluate("server.ref(0xff000a04).worn == c1.npc_state(0xff000a04).worn")  # the record reported no equipment
+
     def test_the_follow_table(self):
         """npc-handoff's D6: a game follows an actor through a door into a cell it does not host."""
         from labapi.assertions import AssertionData, Evaluator
