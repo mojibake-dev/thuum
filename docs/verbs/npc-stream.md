@@ -1268,7 +1268,7 @@ which the next graph update died on. (The paragraph as first written
 blamed the third crash on a furniture idle performed through the entry;
 the re-analyst's read below corrects it: one cause, three victims.)
 
-The re-analyst's read of the three frames (REA on sky-re, 09:0x to 09:3x
+The re-analyst's read of the three frames (REA on sky-re, 09:0x to 09:2x
 PDT; CONFIRMED-STATIC unless marked): P4 and P5 fault in
 hkbClipGenerator's animation-duration read (59263, OpenAnimationReplacer's
 own name for it) on a clip control whose binding pointer is not null but
