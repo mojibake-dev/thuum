@@ -889,3 +889,30 @@ teleport's), so a holder that takes a reference at every Loading Menu open
 and never gives it back is the first thing the watchpoint would show
 (HYPOTHESIS).
 
+THE HOLDERS NAMED (19:27 PDT, 2026-10-25; x-quit-scan v3 20261026-021707,
+numidium's run of quit-path.js's scan mode on parity aaafffe5): the
+Loading Menu's IMenu (0x1bac400dd10) read refCount 3 at the script's
+start and 6 at the scan 110 s later, after three loading screens (the
+login's, the landing's, the temple's): one reference per load, kept; 6
+again at the UI destructor's entry at the quit, then the usual crash
+(c1-crash-2026-10-25-19-21-20.log, 87837+0x50 reading inside the menu's
+own heap region). The scan of 6.26 GB in 5395 ranges found the pointer six
+times: (1) a STATIC in NextGenDecapitations.dll's image at +0x204d80; (2) a
+STATIC in DeathDropOverhaul.dll's image at +0x1e9620; (3) a stack slot with
+a CoreImpactFramework.dll return address (+0x989e0) sixteen bytes before
+it; (4) a heap word whose neighbours fit the menu map's entry (the menu,
+then its creator 51943); (5) and (6) two heap words in the menu's own
+region that fit the delegate's two callbacks. So two SKSE plugins each hold
+the Loading Menu's IMenu in a static that nothing clears, and the UI
+destructor's three releases cannot bring the count to zero: the IMenu and
+its movie outlive the UI and the movie's memory context survives to the
+heap teardown, which reads a freed limit handler (the crash). The per-load
+growth is one taker (or the CIF slot's transient), HYPOTHESIS; the
+earlier HYPOTHESIS "an outside holder or a short delegate release" is
+decided for the outside holder. Not ours: Skyrim Platform and skymp5-client
+hold no menu pointer (sources). The decision is Eli's (docs/research/m3/
+decisions-after-playtest-34.md D24): leave the crash, fast-exit the process
+in our quit thunk after the disconnect (the way the "fast exit" plugins
+do), or drop or replace the two plugins; x-quit-bisect-ngd-ddo (by path)
+reads the count and the quit with the two DLLs renamed aside.
+

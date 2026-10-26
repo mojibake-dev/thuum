@@ -7,7 +7,7 @@ built, on train-46 (server, fork m3-train-46 aaafffe5: the pass between live
 hosts, the server-made actor's death rule, E_HIT_WEAPON at info, the corpse's
 occupancy released) and train-47 (client, fork m3-train-47 3a8a50a8, built
 ahead: the body's inventory as a diff alone, the hosted server-made copy
-dressed once). Six findings are calls rather than defects, D18 to D23 below,
+dressed once). Seven findings are calls rather than defects, D18 to D24 below,
 each with its options and the recommendation last, numbered after the memo
 before this one (docs/research/m3/decisions-for-playtest-34.md, D1 to D17).
 Sources: docs/verbs/npc-fate.md (the playtest 34 paragraphs), cell-host.md
@@ -133,6 +133,38 @@ before its attach, pinned at load with no re-roll. This is re-npc-roll.md's
   (a seat relaunched inside the temple, its leveled NPCs read 3D-loaded and
   visible after the late fate). Train-47 can carry it (a client dist), or
   the train after.
+
+## cell-host, the quitting host: the crash at every quit
+
+### D24. The quit crash's remedy (19:27 PDT)
+Every quit crashes in the engine's Scaleform heap teardown (six of six on
+every seat, path and build, with or without our client). The leak is NAMED
+(cell-host.md, the quitting host row): the engine's always-open Loading
+Menu's IMenu is held by two SKSE plugins in statics that nothing clears,
+NextGenDecapitations.dll (+0x204d80) and DeathDropOverhaul.dll (+0x1e9620),
+found by a pointer scan of the process (x-quit-scan v3 20261026-021707);
+its count also grows by one at every loading screen (a taker, HYPOTHESIS:
+one of the two, or the Core Impact Framework slot the scan found on a
+stack). The UI destructor's own three releases cannot reach zero, the menu
+and its movie outlive the UI, and the heap teardown reads a freed handler.
+Skyrim Platform and skymp5-client hold no menu pointer. The crash lands
+after our disconnect (D12-B's leave is 5 ms after the quit flag), so a
+player sees a crash dialog at every quit and the lab's end checks read a
+crash log per quit; nothing else is lost.
+- A. Leave as today: a crash log per quit, the dialog for the player.
+- B. Fast exit: our quit thunk (OnQuitShutdown, which already disconnects the
+  client first) flushes the logs and ends the process (TerminateProcess)
+  instead of running the engine's shutdown, the shape the "fast exit" SKSE
+  plugins use; the teardown that crashes never runs, and nothing of ours
+  needs it. The plugins' leak stays, harmless.
+- C. Drop or replace the two plugins (the decapitation and death-drop
+  features), if x-quit-bisect-ngd-ddo reads a clean quit without them; the
+  per-load taker may be a third (CIF), which the same run tells.
+- D. Report to the mods' author with the scan's offsets and wait.
+- Recommended: B now, D alongside; C only on the bisect's word and your
+  taste for the two features. B is a dozen lines in the thunk we already
+  own and holds whatever plugin leaks next; A keeps a dialog at every quit
+  of every playtest.
 
 ## npc-handoff
 
