@@ -287,6 +287,19 @@ roll (Skyrim Platform's detours on the roll sites) instead of rolling its own.
 Validator (wire-validate check_fates): 1 to 64 entries, each refrId nonzero,
 at most 32 worn, every id nonzero.
 
+ActorClaim (id 64, MsgType 56), client to server, reliable, R0 (fork m3-npc-talk
+0d453dc1, 2026-10-26; docs/verbs/npc-talk.md, ADR-052): `{ idx: u32 (the actor as
+the server indexes it), claim: bool (true asks, false releases) }`, a player's
+claim on an NPC another game simulates, for a dialogue. The server grants it
+when the claimant stands in the actor's cell within activation reach, the actor
+is an NPC, alive, not in combat by its host's last state and unclaimed, and the
+claimant has the cell loaded (wire-rules cells.rs, the follows table's claim
+row); the word (isHostedByOther) then names the claimant for the lease (120 s,
+UNMEASURED) or until the release, the claimant's unload or departure, or a grant
+into the cell. Validator: idx in range; budget 8 then 2 a second (UNMEASURED).
+Refusals: E_CLAIM_NO_ACTOR, E_CLAIM_NONE, E_CLAIM_NPC, E_CLAIM_DEAD,
+E_CLAIM_COMBAT, E_CLAIM_REACH, E_CLAIM_HELD, E_CLAIM_UNLOADED.
+
 DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
 m3-npc-death b82a82e5, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
 deaths by the engine): `{ idx: u32 (the victim as the server indexes it),

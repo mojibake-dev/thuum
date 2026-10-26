@@ -136,12 +136,14 @@ second (UNMEASURED).
 
 ## Status
 
+Built 14:53 PDT on fork m3-npc-talk 0d453dc1 (off m3-npc-face 867c4210 with m3-pass-margin 11bf32f3 merged in, so the claim and the margin share the follows table's kinds); probe x-npc-talk-claim by path (38 steps); the T2 session npc-talk.yaml; CI pending.
+
 - [x] doc complete, inventory listed with a disposition per row, rung declared (14:43 PDT)
 - [x] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] server logic + T0 (14:53 PDT, fork m3-npc-talk 0d453dc1: OnActorClaim, PartOne::ClaimActor and ReleaseClaim, cells.rs claim rows; CellHostTest's talk case, cells.rs's claim test)
+- [x] message + validator (same commit): ActorClaim 56/64, the budget, the fixtures
+- [x] native hook + T1: activatePickRef (a CommonLib call, no id; no T1 needed)
+- [x] TS handler: TalkService (npcTalk, talkKey)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
