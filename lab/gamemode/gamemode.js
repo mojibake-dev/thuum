@@ -223,6 +223,7 @@ const state = {
       healthPercentage: pct.health,
       magickaPercentage: pct.magicka,
       staminaPercentage: pct.stamina,
+      worn: wornOf(actorId),
     };
   },
 
@@ -282,6 +283,39 @@ const state = {
     return { found: true, formId, editorId: spel.record.editorId, effects, mgefs };
   },
 };
+
+// The armor and weapon form ids an actor's equipment record marks worn, in a
+// slot or either hand, one per form and sorted (npc-stream slice 3: a hosted
+// actor's hands follow its host's engine): a seat's npc-state worn list counts
+// the same (lab-driver: the 32 slots and the two hands' weapon or armor). The
+// record marks ammo and a torch worn too, so each form's type comes from the
+// server's espm (lookupEspmRecordById's record.type) and only ARMO and WEAP
+// stay. null when the server holds no equipment for the id (EquipmentBinding
+// throws for a form that is no actor), [] when it wears nothing.
+function wornOf(actorId) {
+  let eq;
+  try {
+    eq = mp.get(actorId, "equipment");
+  } catch (e) {
+    return null;
+  }
+  const entries = eq && eq.inv && Array.isArray(eq.inv.entries) ? eq.inv.entries : null;
+  if (!entries) return null;
+  const ids = new Set();
+  for (const entry of entries) {
+    if (!entry || !(entry.worn || entry.wornLeft)) continue;
+    const id = Number(entry.baseId);
+    let type = "";
+    try {
+      const found = mp.lookupEspmRecordById(id);
+      type = found && found.record ? String(found.record.type) : "";
+    } catch (e) {
+      type = "";
+    }
+    if (type === "ARMO" || type === "WEAP") ids.add(id);
+  }
+  return Array.from(ids).sort((x, y) => x - y);
+}
 
 // Little-endian reads from an espm field's bytes (a Uint8Array from lookupEspmRecordById).
 function view(bytes) {
