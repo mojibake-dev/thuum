@@ -1264,10 +1264,44 @@ project or of the variable set's size; every figure's graph was the
 master's, and cast-action never met another. A hosted chicken's or cow's
 graph is another project, so the host captured garbage for it and the
 puppet seat wrote the master's indexes into the creature's variable set,
-which the next graph update died on. The third crash is the other shape:
-a resident's furniture idle (the grindstone's) performed through the
-engine's action entry on a puppet not at the furniture, whose sync the
-entry's handler assumes.
+which the next graph update died on. (The paragraph as first written
+blamed the third crash on a furniture idle performed through the entry;
+the re-analyst's read below corrects it: one cause, three victims.)
+
+The re-analyst's read of the three frames (REA on sky-re, 09:0x to 09:3x
+PDT; CONFIRMED-STATIC unless marked): P4 and P5 fault in
+hkbClipGenerator's animation-duration read (59263, OpenAnimationReplacer's
+own name for it) on a clip control whose binding pointer is not null but
+garbage (P4 0x1C5_3FA4E600, P5 0x257_BFA11955), P6 in hkbStateMachine's
+transition collector (59380) on a transition whose toStateId no longer
+maps (states[-1], rcx 0x1_00000000). Split into dwords, every corrupted
+pointer is two adjacent 4-byte words holding a small int and a plausible
+float (453 and 1.288; 599 and -1.259; 1 and 0): the footprint of a
+4-byte-strided out-of-bounds write of variable values (HYPOTHESIS on the
+interpretation, the values CONFIRMED). The descriptor wrote 301 fixed
+master indices (14 ints, 19 floats, 268 booleans, the highest 300) into
+`variableValueSet->varSet[index]` with no check of the set's size, where
+the engine's own by-name getter and setter (63614, 63608, through 63851)
+refuse an index at or past the size. Into a creature's much smaller set
+the write lands up to 1200 bytes past the array, into whatever Havok
+allocated next: the cow's own transition data (P6, the cow's canned turn
+cannedTurnLeft180, ActionIdle 0x13002, on Cow 0x60B22), a neighbour's clip
+controls (P5 the chicken's; P4 the grindstone's: the grindstone is a
+furniture graph updated on a job thread, a VICTIM of a puppet's write, not
+an idle's subject). The chains by id: P5 the puppet detour's animation job
+41453 to the actor's animation update 20123 to the graph manager's update
+63358 to the graph's update 63587 to its far-LOD trigger walk 63864 to the
+duration read; P4 the same manager update into hkbBehaviorGraph::Update
+58329 with OpenAnimationReplacer's looping-clip pre-update one call ahead
+of the engine's; P6 the replay's second entry 38953 to ActionIdle's handler
+43567 to NotifyAnimationGraph 32901 to the manager's send 63362 to the
+graph's send 63591 to the behaviour graph's handleEvent 58330 and 58377 to
+the state machine's 59336, 59385, 59386, 59381 and the fault. Nothing in
+the chains dereferences a furniture or a target; EquipItemEx owns no Havok
+memory; ChangeValues touches none. One cause, then: the variable write
+into a graph that is not the master behaviour's. Unread statically: the
+creature projects' word counts (below 301 by the signature), the humanoid
+project names (data, not strings in the image: v2's log line reads them).
 
 v2 (a0ff0e72): the descriptor admits a graph only when its project is
 DefaultMale or DefaultFemale (HYPOTHESIS on the two names until the lab's
@@ -1279,7 +1313,9 @@ on the puppet side the engine's entry performs the hands' casts and the
 attack family alone (the figures' proven path on humanoid graphs; the
 attacks H2a's test), and every other action (a package idle, a canned
 turn, a draw, an activate) is sent to the puppet's graph as its event, the
-relay's proven path, with no variables and no retries. Two bisect switches
+relay's proven path, with no variables and no retries: a scoping by the
+proven paths, not the crash's fix (the fix is the descriptor's gate; the
+read above found no entry-side cause). Two bisect switches
 for the next stage, read from c2's settings file, on by default:
 npcStreamActions (false drops an NPC puppet's queue unplayed) and
 npcStreamHands (false skips the hands' apply). The voice branch takes v2 by
