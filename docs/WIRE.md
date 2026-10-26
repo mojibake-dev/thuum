@@ -287,6 +287,21 @@ roll (Skyrim Platform's detours on the roll sites) instead of rolling its own.
 Validator (wire-validate check_fates): 1 to 64 entries, each refrId nonzero,
 at most 32 worn, every id nonzero.
 
+DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
+m3-npc-death b82a82e5, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
+deaths by the engine): `{ idx: u32 (the victim as the server indexes it),
+attacker: u32 (the aggressor's form id, 0 for none), health: f32 (the
+RESULTING percentage, 0 to 1, absolute: never a delta, since the hold rule
+keeps the record below the engine for 10 s after a hit and a delta would
+double on a hit the host also reports), killMove: bool (the number killed
+through a headshot or a scripted kill) }`, sent to the host of an NPC when
+the server numbers a hit on it (MpActor::NetSetPercentages) instead of the
+absolute health in ChangeValues; the host's engine applies it through its own
+damage entry (Skyrim Platform damageActor), reacts, records the killer and
+dies by itself at zero, which it reports (ActorDeath); the other listeners
+hear the resulting values as ChangeValues at the hit. Validator (wire-validate
+check_damage_cause): idx in range, health finite and 0 to 1.
+
 ActorDeath (id 60, MsgType 52), client to server, reliable, once per death,
 R1 (fork m3-train-44 597bb9dc, 2026-10-24; ADR-048's B, Eli's D1 "jump right
 to B"): `{ refrId: u32 (the dead game-file actor, under 0xff000000,
