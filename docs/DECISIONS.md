@@ -2838,3 +2838,49 @@ parity aaafffe5; its probes are the draft's P1 to P5 and b-npc-stream. The
 cost accepted: about four to five days before the next playtest, against
 continuing to patch; the casting precedent's numbers are the argument.
 
+## ADR-051: An engine that no longer loads a puppet releases it to its schedule, and the first engine to sight it moves the record
+
+Status: PROPOSED 2026-10-26 13:22 PDT (thuum-magnus, train 51; ADR-050 decision 3 asked for
+D11's release "written as its own decision"). Eli accepts.
+
+Context. A puppet is the engine's own reference with its AI off (ADR-045). An NPC whose record
+stands in a cell nobody hosts (a house at night, an interior no game has loaded) subscribes
+nobody: no CreateActor, no word, no host (ADR-047 D11, npc-handoff.md decision (g)). An engine
+that holds such an actor AI-off and UNLOADED runs no schedule for it, never sights it and never
+brings it out: the seat that won a post-restart grant kept Riverwood's residents in their houses
+(b-npc-handoff-night 114904, 092208). The fork's fix (856fed7d, train-43) is the release:
+releasePuppet puts the flag off at once and the AI and the activation back on on the game
+thread with no package evaluation; the puppet service's two-second poll releases every tracked
+puppet whose 3D is gone and re-demotes it when it loads on a seat that does not host it; the
+host's roster sights it, OnActorSighting moves the record to the sighter's cell, the grid
+carries it to every game and the word follows. The release was built as a fix under ADR-047
+and is a rule of its own: it is the one place where an engine other than the host runs an NPC's
+brain, and ADR-050 decision 3's reconciler needs it stated to compute "unloaded here" as a
+state rather than an event.
+
+Decision.
+1. Every engine runs the schedule of an NPC it does not load: an actor this engine neither
+   loads (no 3D, its cell unattached) nor hosts is released (AI on, activation unblocked, the
+   puppet flag off), whoever hosts the cell its record stands in. Nothing of a released actor is
+   reported (its movement is no record's: R2 by omission, declared), so two engines running one
+   unloaded actor's schedule in parallel disagree about nothing the server holds.
+2. The first engine to load the actor sights it (the roster's sighting, R1); the server moves the
+   record to the sighter's cell when nobody hosts the record's cell (ADR-047 D11), the grid
+   subscribes the players around it, and the word (isHostedByOther) names the host of that cell.
+   Every other engine that loads it demotes it on the word, as at any attach.
+3. On the client the release is a state, not a step: the reconciler (ADR-050 decision 3) computes
+   each actor's state from (the server's word, loaded here, dead, kind) and applies: hosted here
+   and loaded, live; not hosted here and loaded, puppet; not loaded here, released; dead, the
+   death's rules; the same function from every event and the two-second poll, idempotently.
+4. The host of a cell whose actor stands released elsewhere keeps the record's authority: its
+   reports are the only ones accepted (ActorUpdatableBy); a released actor's engine never
+   reports, so the gate meets no second sender.
+
+Consequences. The puppet verb's Rule C (one brain) holds for every actor some engine loads; for
+an actor no engine loads, every engine's brain runs and none is believed, until a sighting. The
+reconciler's state table is the one place the release lives (train 51 folds releasePuppet's poll
+into it). A released actor that comes out of a house walks on every engine from its own
+schedule, so two seats may see it emerge at slightly different moments until the first sighting
+moves the record and the word demotes the others: a visible seam measured by
+b-npc-handoff-night's claims, accepted. Retired by a later owner table (ADR-050 decision 4) only
+if an unloaded actor ever needs a simulator (a follower in a cell its player left).
