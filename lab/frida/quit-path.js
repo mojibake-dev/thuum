@@ -75,6 +75,21 @@
 // or more at the entry means a holder outside the UI (a plugin's reference;
 // the bisect names it); three at the entry and a count above zero after the
 // map destructor means the delegate released fewer than two.
+// Mode 'watch' (params {MODE: watch}; the holders read 20261026-014250: five
+// at the entry, two outside the UI, as many as the run's loading screens):
+// holders plus a hardware WRITE watchpoint on the Loading Menu IMenu's
+// refcount word (IMenu+0x08) on every thread, set the moment the creator
+// 51943 returns the menu (so the trace must be armed from the launch,
+// relaunch {frida}), and an exception handler that logs each write's module
+// and offset (the instruction after the write: an x86 data breakpoint traps
+// after it) with the count it left. Scaleform's AddRef and Release are
+// inlined at every caller, so no function names the holder; the writes do:
+// a module other than SkyrimSE.exe with more increments than decrements
+// across the loading screens is the outside holder. Frida 17's
+// Thread.setHardwareWatchpoint and Process.setExceptionHandler (a
+// 'single-step' on Windows), HYPOTHESIS until the first run's 'armed' row
+// reads threadsArmed above zero; a thread made after the arming carries no
+// watchpoint (the main thread does the menus' reference work).
 // Run: a scenario's `frida {script: quit-path.js}` step before the quit, or
 // `just frida quit-path.js c1` by hand, then quit the game (console qqq).
 'use strict';
@@ -303,10 +318,42 @@ if (at === undefined) {
     });
   }
 
-  // mode holders: the Loading Menu's IMenu refcount through the UI teardown
-  if (MODE === 'holders') {
+  // mode holders: the Loading Menu's IMenu refcount through the UI teardown;
+  // mode watch: holders plus the refcount's writers
+  if (MODE === 'holders' || MODE === 'watch') {
     let loadingMenu = NULL;
     function count(p) { try { return p.isNull() ? -1 : p.add(0x08).readU32(); } catch (e) { return -2; } }
+    // the write watchpoint on the count, every thread alive now, and the
+    // handler that names each writer (watch mode alone)
+    let watchArmed = false;
+    function armWatch(menu) {
+      if (watchArmed || menu.isNull()) return;
+      watchArmed = true;
+      const target = menu.add(0x08);
+      let threadsArmed = 0, threadsFailed = 0, firstError = null;
+      try {
+        Process.enumerateThreads().forEach(function (th) {
+          try { Thread.setHardwareWatchpoint(th.id, target, 4, 'w'); threadsArmed++; }
+          catch (e) { threadsFailed++; if (firstError === null) firstError = '' + e; }
+        });
+      } catch (e) { firstError = 'enumerateThreads: ' + e; }
+      let writes = 0;
+      try {
+        Process.setExceptionHandler(function (details) {
+          if (details.type !== 'single-step' && details.type !== 'breakpoint') return false;
+          writes++;
+          const pc = details.context.pc;
+          const m = Process.findModuleByAddress(pc);
+          let value = -2;
+          try { value = target.readU32(); } catch (e) { value = -3; }
+          emit({ watch: 'refcount write', n: writes, menu: menu.toString(), count: value, pc: pc.toString(),
+                 module: m ? m.name : null, offset: m ? pc.sub(m.base).toString() : null, msAfterFlag: since() });
+          return true;
+        });
+      } catch (e) { firstError = (firstError === null ? '' : firstError + '; ') + 'setExceptionHandler: ' + e; }
+      emit({ watch: 'armed', menu: menu.toString(), count: count(menu), threadsArmed: threadsArmed,
+             threadsFailed: threadsFailed, error: firstError });
+    }
     function delegateCallbacks(menu) {
       try {
         const delegate = readPtr(menu.add(0x28));
@@ -329,6 +376,7 @@ if (at === undefined) {
       onLeave: function (retval) {
         loadingMenu = retval;
         emit({ loadingMenuCreated: true, menu: retval.toString(), refCount: count(retval), threadId: this.threadId });
+        if (MODE === 'watch') armWatch(retval);
       },
     });
     Interceptor.attach(exe.base.add(at.uiDtor), {
