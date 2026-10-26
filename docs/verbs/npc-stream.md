@@ -1447,6 +1447,50 @@ P7 v2 claims V1, the relay, a started say and an ended line on ANY puppet
 diagnostics for v3's claim. The playtest's D27-B stands: the voice stays
 off the playtest's build until P7 is green.
 
+### Slice 5, planned: the gaze and the face (Eli's question of 11:43 PDT: "the puppets end up fairly stiff on a cell guest's screen")
+
+What a guest's screen still lacks, after slices 1 to 3 and the voice, in
+the order a player sees it: (1) the movement cadence (130 ms samples and a
+smoothing move: a beat late, a slide between reports; TES3MP's is 25 ms;
+the "smooth motion" row, a measured number first, P3); (2) the gaze: the
+host sends a look POINT per sample and the puppet aims at the nearest
+actor within 128 units of it (movementApply.ts:37-56), while the engine
+tracks a TARGET in six typed slots (HighProcessData.h:217
+headTrackTarget[kTotal], the setter SetHeadtrackTarget(type, target)
+:178 and ClearHeadtrackTarget :171, the types at :80-94); (3) the face
+outside speech: the emotion type and value the engine exposes as Actor
+vfuncs (GetEmotionType 0x10A, SetEmotionType 0x10B, GetEmotionValue 0x10C,
+SetEmotionValue 0x10D, Actor.h:464-467), which the dialogue system and
+the AI set and a puppet never does, so a puppet in a fight wears a
+neutral face until it speaks; (4) furniture exits and paired kill moves,
+the known puppet-graph gaps. The voice slice brings the lip sync, the
+line's emotion and the talking and listening idles with it (37542 sets
+all three). Blinks, breathing and eye saccades are the puppet engine's
+own FaceGen and graph work and should run with the AI off; a probe should
+read a puppet's blink rather than assume it.
+
+The slice, in the stream's one shape: HostedActorState gains gazeTarget
+(u32, the head-track target's form id as the server knows it, 0 for
+none), gazeSlot (u8, the engine's HEAD_TRACK_TYPE of the highest set
+slot), emotionType (u8) and emotionValue (u8, 0 to 100), read on the host
+by one native getHostedGaze(actorId) from the high process's slots and
+the two vfuncs (CONFIRMED surfaces by header, no new id); the validator
+bounds them in the same commit (gazeSlot below kTotal, emotionType within
+the engine's enum, emotionValue at most 100); the message's direction
+becomes Both: the server validates and records as today, then relays the
+bytes unreliable to the actor's other listeners (UpdateAction's loop), so
+a puppet seat applies the gaze (setLookAt on the target when it resolves,
+the point heuristic only when it does not) and the face
+(setExpressionOverride(type, value), the SKSE override the engine's
+FaceGen blends; skyrimPlatform.ts:2203) itself; the percentages stay
+ChangeValues (the server's judged numbers). Rule 9: the getter is a few
+field reads per hosted actor per poll. Probe: two seats, a resident in a
+scene (Sven and Hilde talk at 7.9): the puppet's head turns to the same
+speaker as the host's within a sample, and its expression override reads
+the host's emotion during and outside the line (npc-state gains the two
+reads). This slice waits for D25's letter (the memo's D30): built on the
+merged train, not on the branch up for merge.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,

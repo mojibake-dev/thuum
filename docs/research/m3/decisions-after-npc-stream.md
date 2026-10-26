@@ -108,5 +108,22 @@ affected (the fate pins their roll).
 - Recommended: C, with B only if playtest 35 needs placed bandits to hit
   the players (the temple's bandits are game-file actors and hit already).
 
+### D30. The gaze and the face (Eli, 11:43 PDT: "the puppets end up fairly stiff on a cell guest's screen")
+After slices 1 to 3 and the voice, a guest's puppet still aims its head at
+a heuristic point and wears a neutral face outside speech; the engine
+exposes both as plain fields (the six head-track slots, the emotion type
+and value). The verb doc's slice 5 plans four small fields on
+HostedActorState, the message relayed to the other listeners, the puppet
+applying them through the engine's own setters; no new engine id.
+- A. Leave as today: the gaze heuristic and the neutral face stay; the
+  movement cadence (the larger stiffness) is measured first (P3).
+- B. Build slice 5 now on m3-npc-stream, before D25's merge (one more
+  stage and read, a day).
+- C. Build slice 5 as the next train after D25's merge, with the cadence
+  row's measurement beside it.
+- Recommended: C. The branch up for merge has three green scenarios; a
+  fourth slice on it restarts its stage, and the cadence number decides
+  how much the gaze and the face buy against the lag a player sees first.
+
 ## Recommendation, in one line
-D25 C, D26 A, D27 B, D28 B, D29 C.
+D25 C, D26 A, D27 B, D28 B, D29 C, D30 C.
