@@ -1545,6 +1545,51 @@ chained after the v2 T2) passes the flag that selects the synchronous lip
 load, and P7 v3 reads whether the residents' lines play with their lip
 sync (V2 for humanoids) and end (V3 for humanoids).
 
+### P7 v3's read and voice v4 (13:49 PDT)
+
+P7 v3 (6efe3271): the first run 193428 measured nothing (c1 paused under a
+MessageBoxMenu, E_RUN_PAUSED); numidium's rerun x-npc-stream-p7-shot 200538
+GREEN on its letter, no box, no crash, T2 green: the creatures start and end
+their lines, and the resident 13482 (info 6aeaa) read "deferred (bits
+382021a1, timer -1.00, state -1, lip -1 before; returned true, state -1,
+timer -1.00, handle none, in flight true, lip -1 after)": the synchronous
+lip load changed nothing for the humanoid, and the lip entry was null before
+AND after. The re-analyst's read (REA on sky-re, scratchpad
+npc-stream/re-voice-defer.md; HYPOTHESIS by rule 2, dossiers per function):
+"lip -1 after" means the lip load 16256 never ran, because SpeakSoundFunction
+37542 leaves at its audibility gate BEFORE the lip branch: `if (Get3D() == 0
+|| noSound) return 0`, noSound when the voice path is null, a limb is gone,
+or (no current scene) the actor is not talking to the player and lies
+farther than kDialogueOutputModel3D's max distance from the audio listener
+(67710) on ANY axis (a cube). 39772 sets the in-progress mark (+0x454,
+CommonLib greetingPlayer) unconditionally at every start, so "in flight"
+proves only that the start ran. Corrections to the read above: flag7 is the
+background-lip-load flag as read (the engine passes bBackgroundLoadLipFiles,
+Papyrus Say a literal 1, the AI replay IsLipPending), the async request is
+16254 (not 16255), and 39642 returns 1 for a refused and a started say
+alike. The mark's readers: nothing in the say chain or 37266 reads it (a
+stuck mark blocks no later puppet say), but once AI resumes 39637 holds the
+greeting timer and 39632 replays while it is set: a promoted NPC greets
+nobody until a line ends through 37544 or 37741. So D27-B's letter: the voice
+stays off the build until a resident speaks on a puppet; the STREAM merges
+alone under D25-C.
+
+Voice v4 (m3-npc-voice 8da16ef6): the say logs the 3D and the per-axis
+distance to the player before the call, passes keepExtra false (44673's and
+37541's shape; only Papyrus Say passes true), and a start that left the item
+in progress with nothing playing and no lip entry is reported as INAUDIBLE
+(result 5) and cleared through the engine's own ClearGreetTopic (39334,
+`void(RE::AIProcess*)`, the body reading ->high; CONFIRMED-STATIC by the
+dossier 0x1406e1b70; called by 37544's three END paths and 37741's stop).
+Owed to v5 if the lab asks: the multi-response continuation after an END
+(39632's SayTopic with a null topic and IsLipPending) and the handoff's stop
+(Actor::PauseCurrentDialogue, slot 0x4F). P7 v4 (x-npc-stream-p7.yaml, 41
+steps): c2 follows c1's tour at a 100-unit offset so its listener is within
+the output model's range of the residents c1 greets; claims v2's plus a
+RESIDENT's line started on the puppet and no "deferred" verdict; the
+inaudible count recorded. HYPOTHESIS V5: the resident's line plays with its
+lip on a puppet whose seat stands within range.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
