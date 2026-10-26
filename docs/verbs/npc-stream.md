@@ -735,6 +735,18 @@ npc-stream") builds this verb first and "as the draft states"; the eight
 open questions below are answered here so the build can start, each as a
 call under the law, Eli's letter changing any:
 - Q1, the epoch: on HostedActorState alone (the Authority's reasons). Call A.
+  REVISED at slice 2's build (2026-10-26 04:0x PDT): no epoch on the wire.
+  The client cannot name a persistent reference's cell (getParentCell is the
+  worldspace's persistent cell, b-npc-puppet 20261022-081631's lesson, the
+  reason isMine stopped asking the cell), so the epoch it would send for a
+  resident is a guess, and a guessed field is a dead field (rule 4's test).
+  The server's host table already refuses a sender that is not the actor's
+  host (ActorUpdatableBy), and a stale state from a released grant cannot
+  outlive the grace between a release and a regrant to the same host;
+  npc-handoff's keyframe is the first state after a grant, which the server
+  can mark by its own table. ADR-035 point 5's "with the epoch" is met by
+  the server's number, not the client's word. Eli's letter restores the
+  field (it would need a per-actor epoch sent with the word).
 - Q2, a death the host alone witnessed: this verb floors it and leaves it to
   npc-fate as drafted, UNTIL ADR-050's decision 2 (deaths by the engine) lands
   on the train after this one; the stream's health channel is what that
@@ -830,11 +842,12 @@ blanked (sync/animation.ts's attack blank, the figures' guard) is admitted
 once ahead of the performAction (allowAnimationOnce), as a relayed attack
 event is.
 
-Budgets: no rate budget exists on UpdateAction today (the movement budget is
-the only one, wire-rules movement); a host's action stream is UNMEASURED,
-every action carrying the graph's variable arrays (hundreds of bytes,
-reliable). P3's numbers size it in slice 4; the lab's x-npc-stream-p4 reads
-the volume (the host's action lines over its window).
+Budgets: the validator's action_budget was 12 then 6 a second, sized for one
+player (wire-validate lib.rs); slice 2 re-derives it for a host (48 then
+16, UNMEASURED from P1's rate). A host's action stream carries the graph's
+variable arrays with every action (hundreds of bytes, reliable); P3's
+numbers size both in slice 4, and x-npc-stream-p4 reads the volume (the
+host's action lines over its window).
 
 HYPOTHESIS, tagged for the lab:
 - H1 (each event once): the mark covers every graph event an action sends;
@@ -890,7 +903,83 @@ attack-family row exists; P4's fight is a placed bandit (0x1bcd8 at Sven
 through the server), the host's own server-made actor, whose attacks go
 through its host's entry.
 
-Slices 2 to 4 unchanged (STATE, EQUIPMENT, the voice line and the budgets).
+### Slice 2 as built (2026-10-26 04:0x PDT, fork m3-npc-stream, the commit after c2129b4a)
+
+HostedActorState, MsgType 53, wire id 61, C2S, 64 bytes, in the same commit
+as its validator and its two fixtures (wire-schema skymp.rs; wire-validate
+check_hosted_state: each percentage a number within 0 and 1, idx below
+u32::MAX; the budget hosted_state_budget 128 then 32 a second, UNMEASURED;
+the proptest hosted_state_never_panics; wire-json's family list and
+53-HostedActorState-0/1.json; the C++ HostedActorStateMessage, its
+PacketParser case and REGISTER_MESSAGE). Fields: idx, health, magicka,
+stamina, combatTarget, package; no epoch (Q1 revised above). The M0 row 5
+renamed ReservedHostedActor and ReservedHostedActorState, dead, the id kept
+(Q6; the transport's channel default and the validator's old arm follow the
+rename). SCHEMA_VERSION stays 17: the family's messages 46 to 52 bumped
+nothing, an appended message needs no lockout (ADR-012).
+
+The rule is Rust's (ADR-010, cell-host's shape): wire-rules hosted_state,
+facts per value {reported, recorded, held (the attributes hold table's
+answer), lowered_ago_ms (the server's last lowering of the value by its own
+number)}, alive, one_point; verdict per value {record, changed, dropped},
+floored, dead. A report that would undo a value the server lowered within
+10 s (LOWERED_HOLD_MS, attributes.rs's own window) or raised and not yet
+reported is dropped; an equal one (within 1/1024, the core's IsNearlyEqual)
+changes nothing; a health under one point on a living record is floored
+(god-mode's TIM number) until ADR-050's deaths-by-the-engine train; a dead or
+respawning record drops the report whole. Six T0 cases in the module, one
+in the bridge. The core (ActionListener::OnHostedActorState) gathers:
+GetActorValues, TakeReportedPercentage per value (the hold's answer; the
+call that reaches a held value ends the hold, the players' path),
+GetLastHitTakenTime as the health's last lowering (magicka and stamina have
+no server lowering path for an NPC today), IsDead and IsRespawning,
+GetMaximumValues for the point; refuses the sender's own idx (E_STATE_OWN,
+one warn a minute per player; a player's values go as ChangeValues with the
+regeneration crop) and the gate's refusals as ActorUpdatableBy logs them;
+writes the changed values as judged (MpActor::SetJudgedPercentages: the
+change form and the attributes stamp, no Kill, no respawn check); records
+the target and the package (SetHostedState, memory); sends ChangeValues
+{idx, the changed values} reliable to every listener with a user but the
+host (UpdateHoster's loop); logs one info line a minute per actor with the
+counts, the first state at once. OnUpdateAnimation keeps a hosted actor's
+last event (a later subscriber's CreateActor carries it). CellHostTest's new
+case walks the whole: the host's state to the record and the other game
+alone, the non-host's dropped, the own idx refused, an equal report sends
+nothing, a 0 floored, the JSON path once, the hit hold, the last animation
+kept for the host's report and not the other game's.
+
+The client (skymp5-client): HostedStateService (the doc's sendHostedState
+and PackageService in one), DeathReportService's poll shape: every 500 ms
+per hosted actor (hostedActorRemoteIds), the three percentages clamped to 0
+to 1 (0 for a dead actor), the combat target through localIdToRemoteId, the
+package from the last packageStart or packageChange event for the actor (no
+native reads it; the events have no native filter, rule 9's cost accepted at
+their rate; HYPOTHESIS H3 until a probe reads the 8:00 switch through them),
+sent on a change (half a point, or the target or the package) as
+HostedActorState under the actor's remote id, the first for an actor
+reliable; under the npcStream switch. sendActorValuePercentage is the
+player's alone now (it read the player's values for every hosted target and
+sent them under the target's id; the server wrote them to the sender's own
+actor, so nothing showed). The receiving side stands: onChangeValuesMessage
+applies the record's values to a puppet (the host never hears them).
+
+Counters by MsgType (the doc's labState kind `stream`) are owed to slice 4
+with the property binding they need; the probe reads the server's info line
+and server.ref(id).healthPercentage meanwhile. The action budget is
+re-derived for a host: 48 then 16 a second, UNMEASURED from P1's rate (490
+taken actions in 122 s for seventeen NPCs before the movement filter; a
+fight's burst on top); P3 replaces it. (The "no rate budget exists on
+UpdateAction" sentence under slice 1 was wrong: the validator's action_budget
+was 12 then 6, sized for one player.)
+
+Probe by path x-npc-stream-p5 (two seats, b-npc-puppet's layout, after P4):
+the record follows the host's engine (abs(server.ref(id).healthPercentage -
+c1.npc_state(id).healthPercentage) < 0.02 after a numbered hit and after the
+host's regeneration), the puppet's health follows the record within 0.05,
+the first state line in the server log at the grant, no E_STATE_OWN, the
+non-host's puppets report nothing (no "state ... by c2's id" line).
+
+Slices 3 and 4 unchanged (EQUIPMENT; the voice line and the budgets).
 
 ## Status
 
@@ -899,7 +988,11 @@ Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
 2026-10-26 02:24 PDT on fork m3-npc-stream (ADR-050), the eight questions answered
 above as the build's calls. Slice 1 (ACTIONS) built 2026-10-26 03:08 PDT,
 fork c2129b4a (tsc, codegen and fork-lint clean; CI building), its probes
-by path; slices 2 to 4 next. Open questions for Eli before the build as
+by path; P1 read the same morning (H1 confirmed in the lab's sense). Slice
+2 (STATE) built 2026-10-26 04:0x PDT on the same branch (the wire message,
+its validator and fixtures, the Rust rule and its bridge, the core's
+handler, the client's sender; wire tests and clippy clean, tsc, codegen and
+fork-lint clean; CI next); slices 3 and 4 next. Open questions for Eli before the build as
 they stood, each stated once in its section: (1) the epoch on
 HostedActorState alone, not on the players' hot messages (Authority); (2)
 a death the host alone witnessed is floored and left to npc-fate, with a

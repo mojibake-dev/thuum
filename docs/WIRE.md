@@ -118,7 +118,7 @@ renet channels, configured in `wire-transport::channels`:
 | Channel | renet SendType | Carries |
 | --- | --- | --- |
 | 0 `ReliableOrdered` | ReliableOrdered | every send its sender marks reliable |
-| 1 `ReliableUnordered` | ReliableUnordered | the default of the reserved M0 families only (Hit, HostedActor, InventoryApply), which no sender uses today |
+| 1 `ReliableUnordered` | ReliableUnordered | the default of the reserved M0 families only (Hit, ReservedHostedActor, InventoryApply), which no sender uses today |
 | 2 `Unreliable` | Unreliable | every send marked unreliable (movement, animation, a client's ChangeValues) |
 
 A reliable send is resent by renet until acked only while renet's
@@ -186,7 +186,11 @@ Families, mirroring the authority rungs:
   activate intent, aim pitch (R1 inputs; the validator's main customers);
   a host's checked death report for a game-file actor (ActorDeath 52,
   npc-fate, M3).
-- Record: NPC state under host, physics owner updates (R2 inputs).
+- Record: NPC state under host, physics owner updates (R2 inputs): a host's
+  state for an actor it simulates (HostedActorState, id 61, MsgType 53,
+  npc-stream, M3: the three percentages bounded by the server's numbers, the
+  combat target and the package recorded); the M0 row 5 stays reserved and
+  dead (ReservedHostedActor, renamed 2026-10-26).
 - World: server-decided deltas broadcast to renderers (R0 outputs); the
   server's roll of a placement ahead of the engine's own (ActorFate 51,
   npc-fate, M3).
@@ -313,6 +317,37 @@ an info line (the server's own kill got there first). Validator
 second (E_VAL_RATE). The server setting npcDeathReports (default true) off
 restores ADR-048's A, the server's number alone. Appended to the contract
 (ADR-012); the two MsgTypes after ActorSightings (50).
+
+HostedActorState (id 61, MsgType 53), client to server, unreliable (the first
+for an actor after a grant marked reliable, the keyframe), at most once per
+500 ms per hosted actor and only on a change, R2 bounded (fork m3-npc-stream,
+2026-10-26; ADR-050 decision 1, docs/verbs/npc-stream.md slice 2): `{ idx:
+u32 (the actor as the server indexes it; the sender's own refused), health:
+f32, magicka: f32, stamina: f32 (0 to 1, as the host's engine has them, 0 for
+a dead actor), combatTarget: u32 (the target's form id as the server knows
+it, 0 for none), package: u32 (the running package's form id, the last
+package event's, 0 for none) }`, sent by skymp5-client's HostedStateService
+for every actor the game simulates (HostService.hostedActorRemoteIds). No
+epoch: the server's host table refuses a sender that is not the actor's host
+(ActorUpdatableBy), and a client cannot name a persistent reference's cell
+(the verb doc's Q1, revised at the build). The server
+(ActionListener::OnHostedActorState) judges each value through wire-rules
+hosted_state against its own numbers: a report that would undo a value it
+lowered within 10 s (a hit it numbered, MpActor's last hit taken) or raised
+and not yet reported (the attributes hold) is dropped, an equal one changes
+nothing, a health that would leave a living record under one point is
+floored at that point (god-mode's TIM number) until ADR-050's
+deaths-by-the-engine train, a dead or respawning record drops the report
+whole; the changed values are written as judged (no kill, no respawn check)
+and go as ChangeValues (16) to every listener with a user but the host, the
+target and the package are kept in memory (forgotten at a restart, by
+design). One info line a minute per actor with the counts. Validator
+(wire-validate check_hosted_state): each percentage a number within 0 and 1
+and idx below u32::MAX (E_VAL_RANGE, E_VAL_NONFINITE), a per-host budget of
+128 at once refilling 32 a second (E_VAL_RATE; UNMEASURED, P3 replaces it).
+The action budget (UpdateAction 44) is re-derived for a host that streams its
+actors' actions: 48 at once, 16 a second (UNMEASURED, from x-npc-stream-p1's
+rate). Appended to the contract (ADR-012); the MsgType after ActorDeath (52).
 
 ## Bridge and client FFI
 
