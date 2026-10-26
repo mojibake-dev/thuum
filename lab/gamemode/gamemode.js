@@ -13,6 +13,7 @@
 //              {kind: "ref", actorId}: an actor's record by form id (a hosted NPC's position and health)
 //              {kind: "follow", actorId}: whether a game follows that actor out of its hosted cells (npc-handoff)
 //              {kind: "fate", actorId}: the server's roll for a game-file actor (npc-fate, ADR-046)
+//              {kind: "stream", profileId}: a player's stream counters by message type (npc-stream slice 4)
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -177,6 +178,29 @@ const state = {
       following: Boolean(row),
       player: row ? Number(row.player) : 0,
       cell: row ? Number(row.cell) : 0,
+    };
+  },
+
+  // A player's stream counters (npc-stream slice 4, ADR-050): the server's
+  // streamCounters rows {user, player, t, accepted, dropped, foreign}, one per
+  // connection and SkyMP message type, kept for the player's actor as {found,
+  // actorId, rows: [{t, accepted, dropped, foreign}]}; a server without the
+  // property answers found: false
+  stream(payload) {
+    const actorId = actorFor(payload.profileId);
+    if (!actorId) return notFound(payload.profileId);
+    let rows;
+    try {
+      rows = mp.get(0, "streamCounters") || [];
+    } catch (e) {
+      return { found: false, actorId, error: String((e && e.message) || e) };
+    }
+    return {
+      found: true,
+      actorId,
+      rows: rows
+        .filter((r) => Number(r.player) === actorId)
+        .map((r) => ({ t: Number(r.t), accepted: Number(r.accepted) || 0, dropped: Number(r.dropped) || 0, foreign: Number(r.foreign) || 0 })),
     };
   },
 

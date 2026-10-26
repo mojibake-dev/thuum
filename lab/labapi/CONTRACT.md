@@ -152,6 +152,16 @@ Scenarios read `server.ref(0x85547).x`, compare `server.ref(<id>).worn` with
 `c1.npc_state(<id>).worn` (npc-stream's hands), and keep one with a `server:
 snapshot` step to compare against later.
 
+### stream
+
+Request: `{"payload": {"kind": "stream", "profileId": <int>}}`. Answer:
+`{"found": true, "actorId", "rows": [{"t", "accepted", "dropped", "foreign"}]}`,
+the server's `streamCounters` rows (npc-stream slice 4: one row per connection
+and SkyMP message type) kept for that player's actor, or `{"found": false}`
+from a server without the property. Scenarios read
+`server.stream(c1).dropped(53) == 0` (HostedActorState is 53): each method sums
+that type's rows, 0 for a type the player never sent.
+
 ## labCommand
 
 The server-side scenario verbs (rung R0) go here rather than to the client;

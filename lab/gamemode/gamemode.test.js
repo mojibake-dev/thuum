@@ -410,3 +410,24 @@ test("labState ref reads the record's worn armor and weapons, as a seat's npc-st
   mp.get = (id, k) => { if (k === "equipment") throw new Error("not an actor"); return get(id, k); };
   assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 }).worn, null);
 });
+
+test("labState stream reads a player's counters by message type, or found: false without them", () => {
+  // npc-stream slice 4: the server's per-connection counters, one row per connection and message type; a claim reads
+  // a seat's accepted and dropped state (53) and its foreign rows against the budgets
+  global.mp = fakeMp();
+  mp.set(0, "streamCounters", [
+    { user: 0, player: 0xff000001, t: 53, accepted: 60, dropped: 2, foreign: 0 },
+    { user: 0, player: 0xff000001, t: 5, accepted: 12, dropped: 0, foreign: 1 },
+    { user: 1, player: 0xff000002, t: 53, accepted: 7, dropped: 0, foreign: 0 },
+  ]);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "stream", profileId: 1 }), {
+    found: true, actorId: 0xff000001,
+    rows: [{ t: 53, accepted: 60, dropped: 2, foreign: 0 }, { t: 5, accepted: 12, dropped: 0, foreign: 1 }],
+  });
+  // a server without the property
+  const get = mp.get;
+  mp.get = (id, k) => { if (k === "streamCounters") throw new Error("no such property"); return get(id, k); };
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "stream", profileId: 1 }).found, false);
+});

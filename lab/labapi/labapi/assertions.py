@@ -42,6 +42,9 @@ the lab can grep (E_ASSERT_*).
   server.follow(<id>).following | .client | .cell | .actorId
                                                      whether a game follows that actor out of its hosted cells, which
                                                      of the run's clients, into which cell (npc-handoff's D6)
+  server.stream(<client>).accepted(<type>) | .dropped(<type>) | .foreign(<type>)
+                                                     that player's stream counters for one SkyMP message type
+                                                     (HostedActorState 53), 0 for a type never sent (npc-stream)
   <client>.figure_spells().count | .extra | .base    that client's figure of the other player at its last figure-spells
                                                      step: its added spells, those it holds in no hand or power slot,
                                                      and its base's form id (ADR-046)
@@ -127,6 +130,7 @@ class ServerFacade(Protocol):
     def ref(self, actor_id: int) -> dict[str, Any] | None: ...
     def follow(self, actor_id: int) -> dict[str, Any] | None: ...
     def fate(self, actor_id: int) -> dict[str, Any] | None: ...
+    def stream(self, client: str) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -694,6 +698,28 @@ class HostView:
 
 
 @dataclass(frozen=True)
+class StreamView:
+    """server.stream(c): a player's stream counters (labState kind stream, npc-stream slice 4), one row per SkyMP
+    message type: accepted(t), dropped(t) and foreign(t) are that type's counts for the player's connection
+    (HostedActorState is 53), 0 for a type it never sent, so a claim reads a budget row as
+    `server.stream(c1).dropped(53) == 0`."""
+
+    rows: tuple[tuple[int, int, int, int], ...]   # (t, accepted, dropped, foreign)
+
+    def _sum(self, t: Any, i: int) -> int:
+        return sum(r[i] for r in self.rows if r[0] == int(t))
+
+    def accepted(self, t: Any) -> int:
+        return self._sum(t, 1)
+
+    def dropped(self, t: Any) -> int:
+        return self._sum(t, 2)
+
+    def foreign(self, t: Any) -> int:
+        return self._sum(t, 3)
+
+
+@dataclass(frozen=True)
 class RefView:
     """server.ref(id): an actor's record by form id (labState kind ref): a hosted
     NPC's position and health; a snapshot keeps one to compare against. worn is
@@ -1039,6 +1065,17 @@ class _ServerRef:
             raise AssertionData(f"server has no fate to read {actor_id:#x} from (no npc-fate)")
         return FateView(bool(d.get("fated")), int(d.get("baseId") or 0), int(d.get("level") or 0), int(d.get("raceId") or 0),
                         tuple(sorted(int(w) for w in d.get("worn") or [])))
+
+    def stream(self, client: str) -> StreamView:
+        fn = getattr(self._f, "stream", None)
+        d = fn(client) if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData(f"server has no stream counters for {client} (no npc-stream slice 4)")
+        try:
+            return StreamView(tuple((int(r["t"]), int(r.get("accepted") or 0), int(r.get("dropped") or 0), int(r.get("foreign") or 0))
+                                    for r in d.get("rows") or []))
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"stream counters for {client} lack {e}") from e
 
     def follow(self, spec) -> FollowView:
         actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
@@ -1773,6 +1810,7 @@ _ATTRS = {
 _NUMBER_METHODS = {
     WatchView: {"movedBy"},
     RefsNearView: {"count"},
+    StreamView: {"accepted", "dropped", "foreign"},
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
@@ -1800,7 +1838,7 @@ _NULLARY = {
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count"},
+    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of"},
@@ -1808,6 +1846,7 @@ _METHODS = {
     WatchView: {"took", "sent", "ever", "drops", "rises", "movedBy", "launched", "flights_match"},
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},
     StateView: {"menuOpen"},
+    StreamView: {"accepted", "dropped", "foreign"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
