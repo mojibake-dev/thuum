@@ -1030,8 +1030,87 @@ server (OnWeaponHit lines naming the god-mode host player). A lab-api row
 for the record's worn list (server.ref(id).worn from mp.get(id,
 "equipment")) is asked of numidium for the next probe.
 
-Slice 4 unchanged (the voice line, the budgets from P3, b-npc-stream, the
-parity scenario and the reference trace).
+### Slice 4: the voice line is BLOCKED on an engine read (rule 8); the rest waits on the stage
+
+Read on 2026-10-26 04:2x PDT (a read-only agent over the fork, CommonLibSSE-NG
+at the pin and the docs; FACT unless tagged): Skyrim Platform raises no event
+for a spoken line (Definitions.txt has menuOpen, sceneAction and the package
+events; none names a speaker and a topic info), and no native plays a given
+TopicInfo (ObjectReference.say takes a Topic, whose info the engine picks
+again by conditions, random and say-once among them; Topic has add alone,
+TopicInfo getOwningQuest alone). CommonLibSSE-NG at this pin forward-declares
+TESTopicInfoEvent (ScriptEventSourceHolder.h:54, the source at +0x0EC8,
+:108; SkyrimVM's sink at +0x0140, SkyrimVM.h:126) and has no header for its
+fields, so the layout other forks carry (speaker, topic info, a stage) is
+HYPOTHESIS here until a read. The engine's pieces are named: TESTopicInfo's
+ResponseData (sound, text, speakerIdle, TESTopicInfo.h:73-115) and
+GetDialogueData(Actor*) building a DialogueItem {quest, topic, info,
+speaker} (src/RE/T/TESTopicInfo.cpp:24-27), the DialogueResponse's voice
+path and soundLip (DialogueItem.h:25-34; the constructor's AE id 35220,
+Offsets.h:62-70's trap: CommonLib's SE 34413 is PlaceAreaEffect on AE),
+ExtraSayToTopicInfo (type 0x71: the topic, the sound handle, the item),
+SubtitleManager (speaker, subtitle), the actor's kSpeakingDone and
+kVoiceFileDone bits and QSpeakingDone/SetSpeakingDone (Actor.h:164, :167,
+:461-462). The puppet's side: re-ai-puppet.md:226-240 reads the dialogue
+voice timer (37752) as running inside the AI update alone, so a line started
+on an AI-off puppet may never end (HYPOTHESIS; "expect the line it was
+speaking to hang", :376), and the say path's gating by the AI bit is the
+reason a puppet is silent at all (npc-puppet.md:102, the voice row carried
+here). TES3MP streams speech as part of the actor's state and the receiver
+plays the voice (tes3mp.md:53, :81; with AI off the remote actor speaks from
+the packet alone, :104-107); Skyrim Together's owner sends "speech"
+(te-npcs.md:101-102) and hooks Actor::SpeakSoundFunction 37542 (TE-MAP.md:33,
+a lead, rule 1). The lab reads nothing of speech today: dump-state lists the
+Dialogue Menu among the open menus, npc-state has no speech field, no Frida
+script traces 37752, 39333, 37542 or 52626; a probe could claim a puppet
+spoke only through a log line the replay prints and a subtitle in a
+screenshot.
+
+The Dynamic plan (rule 8; the re-analyst's static read first, launched
+04:27 PDT on sky-re through REA):
+- R1: TESTopicInfoEvent's layout on 1.6.1170 and the paths that dispatch it
+  (the xrefs of the source at the holder's +0x0EC8): a package bark, idle
+  chatter and a combat grunt dispatch it, or scripted infos alone. Decides
+  whether a sink in the fork's Skyrim Platform (the AppendSinkScriptEvent
+  idiom, Events.h's own struct as TESSceneActionEvent has) observes every
+  line a hosted NPC speaks. Lab confirmation: a Frida hook on the dispatch
+  helper (or the new sink's log line) on a solo seat in Riverwood at 8:00
+  for 120 s beside action-trace.js's rows: the lines spoken by the residents
+  (subtitles on in the seat's settings, screenshots at 10 s), each matched
+  to an event row with its speaker and info, none missing.
+- R2: Actor::SpeakSoundFunction 37542: its prototype (a TopicInfo, a
+  DialogueItem, a response index, a sound path), what it writes (the sound
+  handle, the subtitle, ExtraSayToTopicInfo) and whether it needs the AI
+  update (kProcessMe, 37347) to run or to end. Decides whether the puppet
+  says the host's line through it (the info id, not the topic: Say re-picks)
+  or through the cheapest playback (R4). Lab confirmation: a Frida hook on
+  37542 on the host seat logging its arguments at every call during the
+  same 120 s; then the puppet seat's call of the same function with the
+  same arguments through a lab-only export, the subtitle and the voice on
+  the puppet seat, and kSpeakingDone read 10 s later (hung or done).
+- R3: Papyrus Say's path: where the info is picked from the topic, so the
+  message carries what the engine needs (the info's form id, its quest).
+- R4: the fallback playback without the dialogue system: BSAudioManager::
+  BuildSoundDataFromFile (BSAudioManager.h:27) with the response's voice
+  path, BSSoundHandle::SetObjectToFollow and Play (BSSoundHandle.h:43, :47),
+  SubtitleManager::ShowSubtitle (52626, TE-MAP.md:34) for the text: their
+  prototypes; no lip sync and no speaker idle this way (the puppet's mouth
+  stays shut: a player-visible gap, said in the checklist if this is the
+  shape).
+The message, when the read allows it: a Record row (R2) under the actor's
+idx with the info's form id, its topic's and its quest's, the response
+index and the subtitle's text cap, unreliable (a lost line is a lost line;
+TES3MP's shape), its budget from the measured rate; the validator bounds
+the ids and the text; the puppet plays it by the path R2 or R4 chooses.
+Until the read, the voice line stays "known" in the playtest checklist
+(npc-fate.md:923-924's row), as it has been.
+
+The rest of slice 4 waits on the stage's reads: P3's numbers (the stream's
+cost, the hosted_state_budget and action_budget replacing their UNMEASURED
+placeholders), b-npc-stream promoted from the green probes in its own
+commit (rule 13), the parity scenario p-npc-stream and the reference trace
+(ADR-050 decision 5), the labState `stream` counters with their lab-api
+row, the sequence table's result column (ADR-033).
 
 ## Status
 
@@ -1047,7 +1126,10 @@ handler, the client's sender; wire tests and clippy clean, tsc, codegen and
 fork-lint clean; CI green, pipeline 3133). Slice 3 (EQUIPMENT) built the
 same morning (the hosted idx resolved in OnUpdateEquipment, the hands
 streamed from the host's poll, the puppet's hands following; tsc, lint and
-the JSON crate's tests clean; fork 2673d1ab, CI next); slice 4 next. Open questions for Eli before the build as
+the JSON crate's tests clean; fork 2673d1ab, CI green, pipeline 3136). Slice
+4's voice line BLOCKED on the engine read above (rule 8, the re-analyst's
+static read running); the rest of slice 4 waits on the stage's reads (P4 to
+P6 queued behind the nightly, numidium's chain). Open questions for Eli before the build as
 they stood, each stated once in its section: (1) the epoch on
 HostedActorState alone, not on the players' hot messages (Authority); (2)
 a death the host alone witnessed is floored and left to npc-fate, with a
