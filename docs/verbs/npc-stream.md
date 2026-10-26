@@ -865,6 +865,31 @@ through the watch's IsAttacking, no blocked attack event on the puppet, no
 refused report, the tracks' ends within 256 units). Probes are numidium's
 to run; the two-seat one needs verb-stage of m3-npc-stream.
 
+P1's read (x-npc-stream-p1 20261026-101422, solo c1 on today's client,
+Riverwood at 8:00, 122 s of trace; numidium's run): the entry is called
+for seventeen NPCs, 3547 times; 1533 of those are the engine's dry runs
+(flags bit 0 set, the hook skips them), 3057 return false, 490 are taken.
+Every taken action for an NPC is one of: the movement controller's (index
+14 turnStop, 15 TurnLeft, 16 TurnRight, 17 moveStop, 18 moveStart: 290 of
+the 490, which the stream drops by name), the idle action (index 68) with
+CyclicFreeze or CyclicCrossBlend (81, dropped by name too), or the idle
+action with a package idle or a canned turn (IdlePickup_Ground 26, the
+NPC_TurnToWalk and cannedTurn family about 60, IdleStop 7,
+IdleWoodPickUpEnter 4, IdleChairExitStart 4, IdleWoodChopStart,
+IdleMillLoadStart, IdleActivateDoor, WeapEquip, Unequip, and so on: about
+120, the stream's whole volume, under one action a second for the village).
+Of 1236 graph events sent to the seventeen NPCs' graphs, 1234 came inside a
+PerformAction and 2 outside (StartIdleAnimationDriven once, MillLogChuteCut
+once); no event name appeared both inside and outside. H1 reads CONFIRMED
+in the lab's sense: the mark covers every event an action sends, and for an
+NPC the relay's remaining share is two events in two minutes. Nothing
+called the second entry in two minutes of vanilla (the replay's entry is the
+replay's alone). H2a stayed unread: start-combat on Sven 0x13491 (the bard)
+drew his weapon and sheathed it within the window and he never swung, so no
+attack-family row exists; P4's fight is a placed bandit (0x1bcd8 at Sven
+through the server), the host's own server-made actor, whose attacks go
+through its host's entry.
+
 Slices 2 to 4 unchanged (STATE, EQUIPMENT, the voice line and the budgets).
 
 ## Status
