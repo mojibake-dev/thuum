@@ -1581,6 +1581,105 @@ not. x-npc-respawn: npcRespawnHours 1 in the server block, the kill, restart
 with gameHour two hours on, the predator alive at its placement on both
 seats and server.ref alive, a new ActorFate in c1's log.
 
+## ADR-050 decision 2, deaths by the engine: the build as mapped (2026-10-26 05:2x PDT, the train after npc-stream)
+
+The decision (docs/DECISIONS.md ADR-050): the server keeps every number a
+player deals or takes and delivers it to the simulating host as a CAUSE
+through the engine's own hit path; the host's engine reacts and dies by
+itself; the deferred kill stays on puppets alone; the host's death report
+keeps ADR-048 B's checks and a refusal is corrected through the respawn
+path; the 500 ms floor poll retires; the host's health reaches the server
+through HostedActorState. A read-only code map (2026-10-26, fork
+m3-npc-stream 2673d1ab) found the pieces; nothing is built yet, and the
+build waits for npc-stream's stage reads and Eli's word on the train.
+
+What stands today (FACT, the map's reads):
+- The deferred kill is the engine's own Papyrus native (StartDeferredKill,
+  no arguments; no Skyrim Platform detour behind it) armed once per view
+  for EVERY actor (formView.ts:396-403, upstream's code with thuum's
+  comment; no isMine gate), undone only by DeathService.killActor's
+  endDeferredKill then kill (deathService.ts:160-186), never re-armed after
+  a resurrect, untouched by the promote and the demote.
+- A player's hit on a hosted NPC is numbered by the server (OnWeaponHit,
+  ActionListener.cpp:4178-4354: CalculateDamage, NetSetPercentages with
+  the aggressor, SetLastHitTakenTime, NoteHitBy) and reaches the host as
+  ChangeValues (NetSendChangeValues to GetActorToSendTo, the host), which
+  the host applies as a VALUE change (sync/actorvalues.ts damageActorValue:
+  no hit event, no attacker, no reaction, and under the deferred kill never
+  a death); the server's own SetPercentages kills the record at 0 (MayDie)
+  and the host plays that death from the DeathStateContainer. The host's
+  engine also applies its own damage for the player's swing (nothing cuts a
+  player's engine hit on a game-file NPC; DamageActorReplacement cuts 0xff
+  victims with attackDamageMult 0 alone), held alive by the deferred kill
+  until the server's number lands.
+- The engine's hit path to deliver a number as a cause: Actor::DamageActor
+  37335 (game/Offsets.h:41-48, AE only, `(Actor*, float damage, Actor*
+  attacker, bool killMove) -> bool isDead`), already Gum-replaced with the
+  original kept (FridaHooks.cpp:1108-1116, g_damageActorOriginal), not
+  exposed to JS; inside it the write (38468) then HandleHealthDamage
+  (vfunc 0x104, 38606), which at health 0 runs 37316: records myKiller and
+  queues KillImpl (docs/research/re-37335-and-rune-landing.md:24-68). The
+  hit EVENT, blood, impact and the reactions live in its callers (38586
+  ProcessHitVictim, 38627), which need a HitData: unread (the RE read owed
+  since ADR-031). Skyrim Together applies a remote health as a value delta
+  and calls Kill at 0 (te-npcs.md:127-129): the value shape, not the cause;
+  TE-MAP.md:62 names 37335 as TE's damage gate.
+- The server's death handling: Kill, SendAndSetDeathState (the container
+  to the host, isDead to every listener), the fated respawn; OnActorDeath's
+  seven refusals and the three evidences (a hit within 3 s, a drop of 200
+  units in the host's samples, an activation within 512 units in 5 s);
+  a refusal only logs, nothing goes back to the host (no correction path).
+- The client's life mirror (formView.ts:547-566, every 2 s, no isMine
+  gate) would resurrect an engine death on the host within 2 s if the
+  record lagged; the deferred kill is what hides that today.
+
+The build (file by file, in this order; HYPOTHESIS tags where the engine
+decides):
+1. Skyrim Platform: an export damageActor(actorId, damage, attackerId,
+   killMove) through g_damageActorOriginal (the engine's own DamageActor,
+   the prototype Offsets.h already carries; no new id), filtered to the
+   hosted set (rule 9); the engine writes the health, handles bleedout and
+   at 0 records the killer and queues the kill (HYPOTHESIS H1: the death
+   that follows raises deathStart with the attacker as the killer, cause 4
+   with its killer in the host's report). DamageActorReplacement extended
+   to cut the host's OWN engine damage to a hosted victim when the attacker
+   is a player (the value-change chokepoint, ADR-031 point 3: the number is
+   the server's; the engine's event, blood and reactions stay).
+2. The server: OnWeaponHit and OnSpellHit deliver the number to
+   HostOf(target) as a snippet or a message with the attacker (the host's
+   id for a player's hit, the aggressor's otherwise) instead of the
+   absolute ChangeValues to the host; the record's health still moves by
+   the server's number (the floor under the hold rule, hosted_state.rs,
+   loses its "until"); SetPercentages' Kill at 0 for a hosted actor defers
+   to the host's report (the server stops killing a record whose engine is
+   about to) with a timeout that kills it anyway when no report comes
+   (HYPOTHESIS H2 on the window: the report's round trip plus the ragdoll,
+   ADR-048's 3 s hit evidence as the first number); the effects path,
+   ClaimScriptedKill and ClaimHeadshot follow the same rule; OnActorDeath's
+   refusal is corrected through the respawn path (the host told to stand
+   the actor up: resurrectActor's message, the one the life mirror sends).
+3. The client: the deferred kill armed in ensurePuppet and ended in
+   ensureLive (puppetService.ts), never on a hosted live actor; re-armed
+   after a resurrect; the life mirror gated to actors this game does not
+   host; the floor poll (deathReportService.onUpdate) retired, deathStart
+   the one ear; killActor's end-then-kill the puppet's path alone;
+   onChangeValuesMessage's health write kept for puppets and figures.
+4. Tests: ActorDeathTest and CellHostTest cases for a player's hit reaching
+   the host as a cause (the snippet or message with the number and the
+   attacker), the record's Kill deferred then taken from the report, a
+   refusal corrected by the respawn, no floor poll; NpcFateTest's isDead
+   case stands. Lab: x-npc-death v5 (the host's bandit killed by the
+   player's hits: one death, the killer named, no floor line, the body on
+   both seats), b-npc-fate's claims re-read.
+5. Docs: this doc's rows 112 and 121 and the death-report section,
+   npc-stream.md's floor sentence, WIRE.md's HostedActorState paragraph,
+   research/m3/death-path.md.
+
+The RE read owed before step 1 can be skipped: 37335 is enough for the
+number and the engine's death; 38586 (the event and the reactions for a
+remote cause) is the richer path and stays a later read, since the host's
+engine already plays blood and reactions for the swing it saw.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
