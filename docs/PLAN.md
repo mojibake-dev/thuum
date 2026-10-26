@@ -1184,6 +1184,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   (solo inventory, today's client) and P4 (two seats, the stage) by path for
   numidium. The quit crash is not ours (both halves read: two plugins' leak,
   the engine's world teardown); D24 stands at B with D.
+- STATE 2026-10-26 13:20 PDT: the NPC ladder APPROVED by Eli (plan file humble-crunching-iverson.md;
+  "if something is drafted just do the thing, 35 can wait till that's done"): Step 0 merges (D25-C the
+  stream alone, P7 v3 green on its letter with the resident still deferred; D28-B as one stack m3-train-50b
+  of 47b, 48, 49), Step R reads (x-npc-bow, x-npc-spell, p3, p6 v3), trains 51 one NPC path with the
+  reconciler, 52 deaths by the engine, 53 bows and spells, 54 gaze and face plus the safeguards, 55 the
+  dialogue claim (ADR-051, npc-talk), one gate, playtest 35 at the end; about seven working days.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
