@@ -153,6 +153,8 @@ is which brake.
 - The read (16:58 PDT): x-handoff-cross v2 20261025-235039 GREEN, one pass in
   three minutes, no refusal, no thrash. A stands; nothing to build.
 
+## MERGED (46) (18:44 PDT, 2026-10-25): Eli "Merge now"; fork parity aaafffe5 (from fa8809a1), thuum main bfc41e0b; the clones keep parity's client fa8809a1 (no client change on the train). Trains 47 (f70cf19f) and 48 (9b412a10) both contain aaafffe5 already and wait on the letters.
+
 ## Merge-ready (46) (18:24 PDT, 2026-10-25; numidium's citation)
 
 Train-46 at fork m3-train-46 aaafffe5 (five commits over parity fa8809a1:

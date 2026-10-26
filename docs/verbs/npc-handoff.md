@@ -695,3 +695,7 @@ move 13483" never), and at the end c1 ran her AI with c2 a puppet. Committed as
 b-npc-handoff-cross (main 81211790). v1 (233736) had read its premise false on positions
 alone (c1 at the landing was ring 1 for both cells). One pass in three minutes means no
 shuttle thrash to read: D22's tenure stays unbuilt and A stands on this read.
+
+MERGED (18:44 PDT, 2026-10-25): decision (d), the pass between live hosts, on
+fork parity aaafffe5 with train-46 (Eli: "Merge now"; gate 20261026-001639
+eighteen of eighteen; b-npc-handoff-cross committed from the stage's green).

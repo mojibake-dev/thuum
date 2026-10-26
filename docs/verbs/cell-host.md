@@ -863,3 +863,7 @@ Doc drafted 2026-10-21, before any code.
 - [x] parity scenario green, or its later list reviewed with it (ADR-031): no parity scenario of this verb's own (the election adds no engine action; the host's NPCs run as the engine alone runs them, the references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 standing); the parity diff of a hosted cell against the engine alone is npc-stream's row, listed there
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033): the table above, each row with its run; the two rows that name later verbs carry by name
 - [x] ledger and suppression registry updated: no native touched (docs/NATIVES.md unchanged); the Suppress section above is the registry entry (the per-actor ask and grant retired from the senders, the ids kept)
+
+MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity aaafffe5 carries the
+pass between live hosts (npc-handoff D9) and the corpse's release; the dead
+host (D18-B) rides train-48, built ahead on Eli's letter.

@@ -1656,3 +1656,9 @@ b-npc-fate scenario; the quit crash is cell-host's row.
     head's GitHub Formatting check green? Parity was red there from 10-15 to
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
+
+MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity aaafffe5 (Eli: "Merge
+now"; gate 20261026-001639 eighteen of eighteen, T2 green; thuum main
+bfc41e0b): the server-made actor's death by the NPC rule, E_HIT_WEAPON at
+info, the corpse's occupancy released. The body's diff-only inventory and
+the hosted copy's dress ride train-47, built ahead on the memo's letters.
