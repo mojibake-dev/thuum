@@ -149,3 +149,20 @@ Eli, on the one-shot plan: "i would argue not to defer actually. if something is
 - D34. ADR-050 decision 2 (the engine's own death) in this ladder: A, built (train 52).
 - D35. ADR-050 decision 3's client reconciler in this ladder: A, built (train 51).
 - D27-B's read of P7 v3 (200538): green on its letter, the resident still deferred; the voice stays off the build until a resident speaks on a puppet (its own train after the Dynamic read); the stream merges alone under D25-C.
+
+### D36. The pass thrash at a cell border (D22 revisited, 14:27 PDT)
+D22's letter ("recommended" = A, no brake) stood on x-handoff-cross v2's read of one pass in three
+minutes. Numidium's read of b-npc-handoff-cross's GREEN nightly run on aaafffe5 (20261026-132333)
+found 836 "passes 13482 into cell" lines: Alvor working the border between 9731 and 9732 changed
+hosts tens of times a second, every flip a demote on one seat and a promote on the other, which the
+scenario's claims never counted. Pre-existing on main, not the stream's. The brake is built ahead on
+fork m3-pass-margin 11bf32f3 (two rules tests green; x-handoff-cross v3 counts the passes).
+- A. Leave as today: the pass fires at every crossing sample; an actor on a border flaps hosts.
+- B. A tenure of 10 s after a pass, during which the sender keeps the actor (a clock, read differently
+  on two servers in T2).
+- C. A hysteresis by a cell margin: the pass waits until the actor stands 256 units (UNMEASURED) inside
+  the other host's square; nearer the edge the crossing host keeps it as a follow into the hosted cell,
+  and a step the margin deep passes it. No clock; the same read on both servers. Built.
+- Recommended: C. It merges only on your letter, after x-handoff-cross v3's read on its stage.
+
+- Decision:
