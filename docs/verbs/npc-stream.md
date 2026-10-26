@@ -1629,7 +1629,25 @@ streamed and played nine of nine. The projectile reads came 25 to 30 s after
 the volley, and the spell run asked for arrows (form type 64; bolts are 63,
 flames 67), so whether the puppet's engine launches an arrow or a bolt of
 its own on the replayed release is UNREAD; v2 of both probes by path polls
-the references ten times through the fight's first dozen seconds. Train
+the references ten times through the fight's first dozen seconds. The logs'
+read (thuum-magnus's agent, 15:55 PDT) found the cause of "bows were
+missing" (playtest 34): the HOST's own engine launched the hosted archer's
+two arrows and the native launch rule dropped them as a figure's ("a
+figure's own arrow dropped: shooter ff000bb4", 3 ms after each
+attackRelease on c1), because a server-made NPC's copy carries a 0xff id on
+the host too and the rule keys on the id; no arrow existed on any seat, the
+server saw no bow shot, and the archer's only landed hits were a dagger's
+after its weapon swap. The mage's three casts DID reach the server
+(OnSpellCast, refused "spell c96a1 not found in equipment": SparksRightHand,
+the NPC-only hand variant, outside the known set, and its equipment report
+refused twice over, "not learned" and "inventory does not contain item
+c96a1", the host's hands poll having listed the hand's spell as a worn
+entry); its one spell hit was dropped E_HIT_WEAPON; the puppet replayed
+nine of nine hand actions and cast nothing (no relay reached it). Both are
+train 53's: the launch rule by what the actor is (the player's or a
+simulated actor's arrow flies and is reported, a figure's or a puppet's is
+dropped), the hands poll keeping a hand's spell out of the worn list
+(m3-npc-cast cd3f6121), the server half above. Train
 53's call: the bow relay is built whatever v2 reads, one shape for arrows
 (every arrow on the wire is a relayed shot, a puppet's like a figure's; the
 puppet's own launch, if its engine makes one, dropped by the launch rule
