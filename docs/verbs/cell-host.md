@@ -950,3 +950,18 @@ train-49) skips 36551 whole and both crashes with it. Which of the two
 plugins takes the per-load reference is unread (they went out together); a
 one-at-a-time pair tells, for the report upstream (D24-D).
 
+THE PAIR (01:26 PDT, 2026-10-26; x-quit-bisect-ngd 20261026-081617 and
+x-quit-bisect-ddo 20261026-082111, numidium's runs): each plugin alone holds
+ONE reference to the Loading Menu's IMenu (refCount 3 at the start, 4 at the
+scan after three loads and 4 at the UI destructor's entry, the one image
+hit the other plugin's static), and either alone keeps the menu past the
+UI destructor and gives the Scaleform crash (87837+0x50 under
+36551+0x3f4). The growth of one per load shows only with both loaded (5
+after two loads, 6 after three; the sum of the singles is 5, so a third
+holder appears with both: v3's CoreImpactFramework stack slot, HYPOTHESIS).
+So a direct fix for the first crash must cover both plugins, or release
+the menu's outside references in our quit thunk before 36551 runs; the
+second crash, in the world teardown, stands behind it (its owner is the
+next read: x-quit-second-nopuppet, our detours off; x-quit-second-solo, no
+connected client).
+
