@@ -189,8 +189,9 @@ Families, mirroring the authority rungs:
 - Record: NPC state under host, physics owner updates (R2 inputs): a host's
   state for an actor it simulates (HostedActorState, id 61, MsgType 53,
   npc-stream, M3: the three percentages bounded by the server's numbers, the
-  combat target and the package recorded); the M0 row 5 stays reserved and
-  dead (ReservedHostedActor, renamed 2026-10-26).
+  combat target and the package recorded) and a spoken line beginning on
+  such an actor (ActorSpeech, id 62, MsgType 54, the voice slice); the M0
+  row 5 stays reserved and dead (ReservedHostedActor, renamed 2026-10-26).
 - World: server-decided deltas broadcast to renderers (R0 outputs); the
   server's roll of a placement ahead of the engine's own (ActorFate 51,
   npc-fate, M3).
@@ -364,6 +365,25 @@ and idx below u32::MAX (E_VAL_RANGE, E_VAL_NONFINITE), a per-host budget of
 The action budget (UpdateAction 44) is re-derived for a host that streams its
 actors' actions: 48 at once, 16 a second (UNMEASURED, from x-npc-stream-p1's
 rate). Appended to the contract (ADR-012); the MsgType after ActorDeath (52).
+
+ActorSpeech (id 62, MsgType 54), client to server, unreliable, R2 (fork
+branch m3-npc-voice, 2026-10-26; docs/verbs/npc-stream.md, the voice slice,
+ADR-050): `{ idx: u32 (the speaking actor as the server indexes it; the
+sender's own refused), topic: u32 (the topic's form id, the info's parent),
+info: u32 (the topic info's form id, the line) }`, sent by skymp5-client's
+VoiceService when the fork's Skyrim Platform raises topicInfo for a line
+beginning on an actor the game hosts (the sink filtered in native to the
+hosted set and the begin). The server (ActionListener::OnActorSpeech) takes
+the host gate (ActorUpdatableBy), refuses the sender's own idx
+(E_SPEECH_OWN, one warn a minute per player) and relays the bytes unreliable
+to every listener with a user but the host; it records nothing (a lost line
+is a lost line, TES3MP's ActorSpeech shape); one info line a minute per
+actor with the counts. The receiving game's puppet says the same info
+through the engine's own say (sayTopicInfo) and the puppet detour ends the
+line. Validator (wire-validate check_actor_speech): idx below u32::MAX, a
+topic and an info that are forms (E_VAL_RANGE), a per-host budget of 32 at
+once refilling 8 a second (E_VAL_RATE; UNMEASURED, P7 replaces it).
+Appended to the contract (ADR-012); the MsgType after HostedActorState (53).
 
 ## Bridge and client FFI
 
