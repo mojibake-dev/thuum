@@ -497,3 +497,19 @@ twelve-arrow quiver dry at 2 s intervals with the server's equipment record
 dumped after each shot and the client's UpdateEquipment sends logged, on a
 train that logs accepted equipment updates at debug. A row of marksman's
 until then.
+
+## Train 53 (2026-10-26, fork m3-npc-cast 78cec009; docs/verbs/npc-stream.md slice 6)
+
+The shot names its shooter (PlayerBowShot's idx, SCHEMA_VERSION 18) so a
+hosted NPC's shot travels the same path as a player's: the host's game
+reports the actor's launch under the actor's idx, OnPlayerBowShot's hosted
+branch checks the bow against the record's hands and records the shot under
+the actor's id (its quiver is the engine's, E_SHOT_QUIVER recorded when the
+record holds no arrow), OnHit's shot claim runs for every shooter, and the
+native launch rule lets the player's and a simulated actor's arrow fly while
+a figure's or a puppet's own arrow is dropped outside a RelayedArrowScope.
+Found and fixed in the same hunk: the relay loop through GetActorToSendTo
+sent a host near a player's shot one ArrowShot per NPC it hosted among the
+shooter's listeners; the loop is now every listener with a user but the
+sender. The scenario b-marksman stays as it is; b-npc-archer (train 53's)
+reads the hosted shot.
