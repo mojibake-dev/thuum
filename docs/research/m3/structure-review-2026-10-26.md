@@ -559,12 +559,15 @@ next playtest, against continuing to patch. The casting precedent's numbers
 are the argument: 45 hours of patches and three playtests on the wrong layer,
 then five hours to the right one.
 
-**D24, the quit crash, as of 01:43 PDT.** The two plugins' statics are the whole
-Loading Menu leak (each alone crashes the quit); behind it a second crash in
-the world teardown stays with our puppet and fate detours off and carries a
-dynamic actor (0xff000d26) on its stack; x-quit-second-solo (no client at
-all) is running. If the second crash is gone without the client, our copies
-are in the teardown and a direct fix exists (our dynamic actors deleted before
-the engine's shutdown, in the thunk we already own); if it stays, the direct
-fix is the plugins' (D24-D) and the fast exit (train-49) is the honest remedy
-for both crashes. I will add the read when it lands.
+**D24, the quit crash, closed by the four reads (01:44 PDT).** Each of the two
+plugins (NextGenDecapitations, DeathDropOverhaul) alone holds one static
+reference to the Loading Menu and alone crashes the quit in the Scaleform
+teardown (081617, 082111); with both out that crash is gone and a second
+crash in the world teardown remains, connected (022931), connected with our
+puppet and fate detours off (082607), and with no skymp5-client in the game
+at all (083649, the solo boot), carrying the same dynamic actor 0xff000d26 on
+its stack each time, which no client of ours made. Neither crash is ours. A
+direct fix would patch other plugins' or the engine's teardown; the fast exit
+built on train-49 (D24-B) skips both, with the plugins' leak reported upstream
+(D24-D) beside it. That is the recommendation for D24, with the facts Eli
+asked for.

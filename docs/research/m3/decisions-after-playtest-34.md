@@ -188,6 +188,21 @@ crash log per quit; nothing else is lost.
   two plugins' leak.
 
 - Decision: Reevaluate solutions. I feel like there's a more direct fix unless im biffing on your wording. 
+- Reevaluated (01:44 PDT, four lab reads): each plugin alone holds one static
+  reference and alone crashes the quit in the Scaleform teardown
+  (x-quit-bisect-ngd 081617, x-quit-bisect-ddo 082111); with both out that
+  crash is gone and a SECOND crash in the world teardown remains, connected
+  (022931), with our puppet and fate detours off (x-quit-second-nopuppet
+  082607), and with no skymp5-client in the game at all (x-quit-second-solo
+  083649, the solo boot), the same dynamic actor 0xff000d26 on its stack
+  every time, which no client of ours made. So neither crash is ours, and the
+  only direct fixes are theirs: the two plugins' statics (D) and whichever
+  plugin or engine path owns the second crash (a load-order bisect in solo
+  would name it; not needed for the quit). The direct fix I could write, our
+  thunk releasing the Loading Menu's surplus references before the engine's
+  shutdown, cures the first crash and lands on the second. B stands: the fast
+  exit skips both, D reports the leak. If you still read a more direct fix,
+  say which; the facts are docs/verbs/cell-host.md's quitting-host row.
 
 ## npc-handoff
 
