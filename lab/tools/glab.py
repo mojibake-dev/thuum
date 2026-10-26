@@ -48,4 +48,5 @@ def main():
             for j in jobs:
                 print(f"    {j['name']:22} {j['status']:9} {(j.get('failure_reason') or ''):24} id={j['id']}")
 
-main()
+if __name__ == "__main__":
+    main()
