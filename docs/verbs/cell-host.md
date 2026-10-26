@@ -928,3 +928,25 @@ b-host-quit's claims with quit-path.js's quit mode armed, the read being
 the trace's quit flag and disconnect rows with no "shutdown enter" and the
 seat back from a clean end with no crash log.
 
+THE BISECT (19:36 PDT, 2026-10-25; x-quit-bisect-ngd-ddo 20261026-022931,
+numidium's run): with NextGenDecapitations.dll and DeathDropOverhaul.dll
+renamed aside at the relaunch, the Loading Menu's IMenu read refCount 3 at
+the script's start, 3 at the scan after the same three loading screens and
+3 at the UI destructor's entry (onStack false, delegateCallbacks 2): nothing
+is taken per load any more, and the scan's four hits were the UI's own (the
+map entry, the two callbacks, one heap word). The two plugins are the whole
+Loading Menu leak. The quit still crashed, later and elsewhere:
+c1-crash-2026-10-25-19-33-44.log, EXCEPTION_ACCESS_VIOLATION at
+SkyrimSE.exe+0x1949d3 (13129+0x23, cmp [rdi], eax with rdi 0x1f8 and rax the
+quit thread's id: a lock owner's check on a null object's member,
+HYPOTHESIS), r14 a BSFadeNode "skeleton.nif" (an actor's 3D going down),
+the stack through 106339, 19729, 37178, 12358, 19504, 19502, 37176, 37175,
+40288, 15973 to 36551+0xd9d (the shutdown routine, past the +0x3f4 of the
+Scaleform crash) and WinMain's shutdown call. So the engine's shutdown under
+this load order dies in its world teardown once the UI's part gets through:
+a second crash that every quit so far hid behind the first. Dropping the
+two plugins (D24-C) does not give a clean quit; the fast exit (D24-B,
+train-49) skips 36551 whole and both crashes with it. Which of the two
+plugins takes the per-load reference is unread (they went out together); a
+one-at-a-time pair tells, for the report upstream (D24-D).
+
