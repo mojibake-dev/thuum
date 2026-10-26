@@ -318,6 +318,22 @@ second (E_VAL_RATE). The server setting npcDeathReports (default true) off
 restores ADR-048's A, the server's number alone. Appended to the contract
 (ADR-012); the two MsgTypes after ActorSightings (50).
 
+UpdateEquipment (id 13, MsgType 5) gains a sender for a hosted actor (fork
+m3-npc-stream 2673d1ab, 2026-10-26; docs/verbs/npc-stream.md slice 3): the
+host's HostedStateService sends it under the actor's idx when the actor's
+hands change and once at the first poll, with what the actor wears alone
+(the worn slots and the hands, worn flags set, the hands' spells; never its
+whole inventory, npc-fate's record). No shape change. The server
+(ActionListener::OnUpdateEquipment) resolves an idx that is not the sender's
+own through the host gate (ActorUpdatableBy) and writes the actor's record,
+where it resolved every idx to the sender's own actor before; for a hosted
+actor it checks the worn entries against the actor's own inventory, the
+spells by IsSpellLearned and the armor slot rule, refuses with one warn a
+minute per actor (E_EQUIP_REFUSED) and sends the host nothing on a refusal
+(no SetInventory, which has no idx; no snippet). The player's path is
+unchanged. An entry's count is u32: a count below one is refused at the
+shape (wire-json's test).
+
 HostedActorState (id 61, MsgType 53), client to server, unreliable (the first
 for an actor after a grant marked reliable, the keyframe), at most once per
 500 ms per hosted actor and only on a change, R2 bounded (fork m3-npc-stream,
