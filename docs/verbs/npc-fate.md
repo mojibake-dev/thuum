@@ -1680,6 +1680,57 @@ number and the engine's death; 38586 (the event and the reactions for a
 remote cause) is the richer path and stays a later read, since the host's
 engine already plays blood and reactions for the swing it saw.
 
+## ADR-050 decision 3, one NPC path: train 51 as built (13:49 PDT, fork m3-npc-path 4be36aed)
+
+Server (c387979c): MpActor::RollFateIfUnrolled refuses only a player's base
+(baseId <= 0x7), so a server-made NPC rolls as a game-file actor does;
+PapyrusObjectReference::PlaceAtMe rolls the placed actor before its create
+word, at the level WorldState::fateRollLevelAt gives (PartOne::FateRollLevel
+with the placer as the loader, else the first player online, else 1), and
+logs "PlaceAtMe - <id> (base <base>) fated at level <n>"; PartOne::onSubscribe
+sends a fated 0xff NPC's ActorFate to the listener just ahead of its
+CreateActor (a game-file actor's rides the ring pass); wire-validate's
+check_fates admits a 0xff placement (WIRE.md's ActorFate line). The NPC rules
+keyed once on IsCreatedAsPlayer: the death word (isDead true, and the explicit
+false at the subscribe) reaches a server-made NPC's copies; a dead NPC's late
+swing or cast schedules no player respawn (the fate's clock stands). T0:
+NpcFateTest "A server-made NPC is fated at its placement, its fate goes ahead
+of its create word, and its death is the server's word to every listener".
+
+Client and Skyrim Platform (4be36aed): PuppetService is the reconciler, one
+function reconcile(localId, mine?, last?) computing the state from (the
+server's word, loaded here, dead, kind) and applying it idempotently: live
+(the word names this game: markHosted true, the promote once with the
+record's last point), puppet (not the word's, with a 3D: the demote once),
+released (not loaded here, by the attach set or the 3D, for two polls:
+releasePuppet, ADR-051), a figure never. Called from the view's update (the
+word as the view read it), the cell attach and detach, a lost form, a
+resurrect (the deferred kill re-armed), the combat sink (the demote again
+for a drafted puppet) and the two-second poll over the high-process list and
+every actor touched; the native flag (Puppets::Is) is the one truth, so a
+detach no longer desynchronizes the TS set. The deferred kill is armed here
+for every NPC (figures keep the view's), ready for train 52's keying. A
+server-made NPC's copy rolls the server's roll inside its placement:
+actorFateService keeps a 0xff fate by its remote id, the view arms it by base
+right before placeAtMe (the new export armActorFate), and Fates::BindArmed in
+the three detours binds it to the copy's own id at the first roll site it
+meets ("copy <remote> of <base>: fate armed true", then the outfit detour's
+"dressed <id> from the server's roll"). The death word reaches NPC copies
+(remoteServer's isDead branch for an NPC copy, movementApply's emit kept).
+Activation rung declared: a puppet's own activation of a door or furniture is
+R2 (the host's engine uses it; a puppet never reports one, train-47's
+survivor); an activation that moves shared state (a container, a door's open
+state) is R0 through the existing activate path.
+
+HYPOTHESIS (x-npc-copy-fate, 38 steps by path): H-51a the armed fate binds
+inside placeAtMe on both seats (the outfit detour meets the new copy before
+the engine's own outfit roll); H-51b the host's worn report then matches the
+record (no E_EQUIP_REFUSED naming a 0xff actor) and the bandit's swings land
+(OnWeaponHit on ff000000, no E_HIT_WEAPON); H-51c the reconciler's regression
+set (b-npc-puppet, b-cell-host, b-npc-handoff-door, -cross, -night, -restart)
+stays green; H-51d the release grace of 4 s leaves no live window on a
+non-host after the late fate's 3D drop (b-npc-handoff-night's claims).
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
