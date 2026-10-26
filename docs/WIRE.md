@@ -287,6 +287,17 @@ roll (Skyrim Platform's detours on the roll sites) instead of rolling its own.
 Validator (wire-validate check_fates): 1 to 64 entries, each refrId nonzero,
 at most 32 worn, every id nonzero.
 
+PlayerBowShot (id 30, MsgType 22) names its shooter since train 53 (fork
+m3-npc-cast 78cec009, 2026-10-26; SCHEMA_VERSION 18): `idx`, the sender's own
+idx for its own shot, a hosted actor's for one its game simulates (0 is a real
+actor, so the sender's own idx is the sentinel, slice 3's idiom); u32::MAX is
+refused (E_VAL_RANGE), and whether the sender may shoot for that idx is the
+server's host rule (ActorUpdatableBy). The relay ArrowShot (id 50, MsgType 42)
+is unchanged in shape; since the same commit it goes to every listener with a
+user but the sender (the loop through GetActorToSendTo handed an offline
+listener's copy to its host, one per hosted neighbour). docs/verbs/npc-stream.md,
+slice 6.
+
 ActorClaim (id 64, MsgType 56), client to server, reliable, R0 (fork m3-npc-talk
 0d453dc1, 2026-10-26; docs/verbs/npc-talk.md, ADR-052): `{ idx: u32 (the actor as
 the server indexes it), claim: bool (true asks, false releases) }`, a player's

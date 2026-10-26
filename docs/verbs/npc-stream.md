@@ -124,6 +124,27 @@ combat music.
   carried with it (ADR-033 point 5; cell-host's CellLoaded budget is the
   precedent); the first stage runs UNMEASURED placeholders at four times
   the rate the references suggest, named so in the code.
+- MEASURED (P3, x-npc-stream-p3 20261026-222300 on parity 66f04f2a, the
+  pcap's read by an agent, 16:05 PDT): with c1 hosting 18 to 19 actors and
+  c2 puppeting them, the relay to the puppet seat is about 9.6 KB/s of
+  message-bearing payload in the quiet square (55 packets a second) and
+  11.6 KB/s in the fight (+22%), about 500 to 580 B/s per hosted actor;
+  the host's own stream up is symmetric (9.1 KB/s, 480 B/s per actor). The
+  effective sample period is 140 ms (the 130 ms timer quantized to frames;
+  autocorrelation at lag 140, r 0.46), 7.1 samples a second per actor,
+  not one burst per period (36.8 message packets a second, inter-arrival
+  median 17 ms). The dominant wire cost is NOT the stream: the transport
+  sends 720 to 790 packets a second of 26 to 31 B payload to each client
+  in every window (23 KB/s on the wire to a client hosting nothing) and
+  each client returns 180 to 190 such packets a second, independent of the
+  hosted count; read as renet's ack and keep-alive traffic at the update
+  rates (HYPOTHESIS, from ciphertext sizes alone): its own row before the
+  per-actor budgets are tightened. Two server-wide stalls (164 ms at the
+  Riverwood keyframe, 60 ms at c2's teleport), no gap over 0.3 s while
+  hosting, no retransmission-looking repeats. The per-message counts and
+  the per-type budgets come from slice 4's counters on train 54's stage
+  (server.stream rows). Message types are invisible in the pcap (netcode
+  encrypts payloads), so the budget rows below stay in bytes per actor.
 
 ## Engine surface
 
@@ -1619,7 +1640,7 @@ on this train.
 
 Step R (2026-10-26, on the merged parity 66f04f2a; numidium's chain, 22:15
 to 22:32Z): P3 (x-npc-stream-p3 20261026-222300) GREEN, all 32 steps, its
-pcap the rates' read (the numbers follow in the measured table); P6 v3
+pcap the rates' read (the MEASURED bullet under Rate limit above); P6 v3
 (222815) GREEN, H6 CONFIRMED; x-npc-bow (221512) and x-npc-spell (221906)
 red on a probe slip alone (a log_count claim reads an earlier log-count step
 with the identical pattern), their records in hand: the archer's three draw
@@ -1652,7 +1673,15 @@ dropped), the hands poll keeping a hand's spell out of the worn list
 (every arrow on the wire is a relayed shot, a puppet's like a figure's; the
 puppet's own launch, if its engine makes one, dropped by the launch rule
 extended to puppet shooters); v2's read decides only whether that drop has
-work to do (H-53c).
+work to do (H-53c). The voice's P7 v4 (20261026-224627, on 8da16ef6's
+stage) read RED on its own premise: every resident's say on c2 was
+"inaudible" with the diagnostics putting the speaker 3.7k to 6.6k units
+from c2's listener (the residents who spoke during the tour were not the
+ones beside it; the creatures near the spawn started as before; the server
+relayed 14 lines, no E_SPEECH_OWN), so the engine's rule held and the voice
+stays off the build (D27-B); v5 by path places both seats at one named
+resident through the judged approach (c1 at 150 units, c2 at 300) for
+three visits of 45 s (numidium runs it in a gap).
 
 Slice 6 (SPELLS AND BOWS on hosted NPCs, train 53; ADR-050's "attacking the
 same"), the server half built 2026-10-26 on fork m3-npc-cast 30e72b86 (off
@@ -1686,10 +1715,33 @@ list; read as the count of E_CAST_UNKNOWN lines on x-npc-spell v2), H-53b
 (the puppet's cast through castSpellImmediate ends when the host's does: the
 end is player-only on the client, magicSyncService), H-53c (the puppet's own
 arrow or bolt on the replayed release, the drop's work), H-53d (NPC headshots
-are not counted). The bow relay (PlayerBowShot gains the shooter's idx, the
-hosted branch of OnPlayerBowShot, ArrowShot under the NPC's idx, the shot
-claim for hosted shooters, the launch drop for puppet shooters) and the
-spell client follow on the branch.
+are not counted). Built the same afternoon on the branch (78cec009): the
+hands poll keeps a hand's spell out of the worn list (cd3f6121); a hosted
+caster's cast END goes out from its action stream's hand-equipped event
+(463a029a; H-53b's mechanism: the player's end hook was its own graph's);
+and the BOW RELAY, one shape for arrows (every arrow on the wire is a
+relayed shot, a puppet's like a figure's): PlayerBowShot names its shooter
+(idx; SCHEMA_VERSION 18; the validator refuses u32::MAX; fixtures, the size
+test and the difftest session carry it), OnPlayerBowShot's hosted branch
+under the host rule (the bow against the record's hands; the quiver the
+engine's, R2: an arrow spent when the record holds one, E_SHOT_QUIVER
+recorded otherwise; the shot recorded under the actor's id; ArrowShot under
+its idx to every listener with a user but the sender), OnHit's shot claim
+for every shooter (a hosted arrow at its draw power, a hit with no shot
+refused), the native launch rule by what the actor is (the player's and a
+simulated actor's arrow flies and reaches JS; a figure's or a puppet's own
+arrow is dropped outside a RelayedArrowScope), and the host's client
+sending a hosted actor's launch as its shot with the engine's launch. A
+bug found on the way and fixed in the same hunk: the old relay loop sent
+through GetActorToSendTo, which hands an offline listener's message to its
+host, so a host near a player's shot received one ArrowShot per NPC it
+hosted among the shooter's listeners (one arrow drawn per hosted
+neighbour; never seen in a lab run, which shot with no hosted cell near).
+T0: NpcCastTest's hosted shot case; MarksmanTest, GodModeTest, SelfCastTest
+and HeadshotTest name their shooters. HYPOTHESIS H-53e (the puppet's
+relayed arrow leaves from its bow node along the host's launch, as a
+figure's does; x-npc-bow v3 reads one arrow per shot on c2 within a second
+of c1's).
 
 ## Status
 
