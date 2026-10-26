@@ -1,0 +1,91 @@
+# b-npc-stream-actions (thuum-magnus, 2026-10-26): the host's actions travel as actions (ADR-050 decision 1,
+# docs/verbs/npc-stream.md slice 1). The host's engine performs its residents' actions through the engine's
+# one action entry (ActorMediator::PerformAction); the fork's hook reports them for the actors in the hosted
+# set (setHosted at the grant; graphs of the humanoid master behaviour alone, a creature's refused by name
+# and logged once), they go as UpdateAction under each actor's own id, and the puppet seat plays a resident's
+# idle or turn as its graph event and performs the hands' casts and the attacks through the same entry.
+# b-npc-puppet's Riverwood layout (c1 hosts 0x9732 at 7.9, c2 beside it); a bandit (EncBandit01Melee1HNordM
+# 0x1bcd8) placed at Sven through the server, the host's own server-made actor. Claims: the hosted set fed at
+# the grant (c1's "setHosted(<id>, true): hosted set n"), a resident's action streamed (c1's console "action
+# <id> idle <id> <event> type 2 on 1348x"), a puppet's first action played as its event (c2's console
+# "npc-stream: first action <event> on 1348x played as its event"), the bandit's attacks streamed from the
+# host ("action ... attack... on ff...") and performed on c2's puppet copy ("performAction on ff...: ...
+# event 'attack...' -> taken 1"), no "block anim attack" on c2, no "No permission" refusal for the residents
+# or the bandit, Sigrid's track ending within 256 units on both seats. GREEN as x-npc-stream-p4 v2
+# 20261026-172720 on the v3 stage of fork m3-npc-stream 66f04f2a (42 steps; the bandit's six attacks all
+# taken on the puppet, none refused; ten puppets' first events); v1 on the same build's first stage read red
+# on a claim stale since slice 1 v2 (a resident's idle performs no longer through the entry), and the stage
+# before that (2673d1ab) crashed the puppet seat three times on the cause v2 removed (the master behaviour's
+# fixed variable indexes written into creature graphs). Promoted unchanged (rule 13): the id and this header
+# differ from the probe, the steps and asserts are byte for byte.
+id: b-npc-stream-actions
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  # x-cell-attach's landing after coc riverwood, in Tamriel's own descriptor (b-npc-puppet)
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 15
+  - c1: log-count {pattern: "setHosted.[0-9a-f]+, true.: hosted set"}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - 'c1.log_count("setHosted.[0-9a-f]+, true.: hosted set") >= 1'
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - c1.npc_state(0x13483).aiEnabled == true
+      - c2.npc_state(0x13483).aiEnabled == false
+  # the residents at their chores: their idles and draws stream as actions
+  - c1: watch-start {formIds: [0x13482, 0x13483, 0x13484, 0x13489, 0x1348a, 0x1348b, 0x1348c, 0x13491, 0x35534, 0x13488, 0x13487, 0x13486, 0x13485, 0x3550c], bools: [IsAttacking], trackMax: 480}
+  - c2: watch-start {formIds: [0x13482, 0x13483, 0x13484, 0x13489, 0x1348a, 0x1348b, 0x1348c, 0x13491, 0x35534, 0x13488, 0x13487, 0x13486, 0x13485, 0x3550c], bools: [IsAttacking], trackMax: 480}
+  - wait: 45
+  - c1: log-count {pattern: "action [0-9a-f]+ idle [0-9a-f]+ .* on (1348[0-9a-f]|35534|3550c)"}
+  - c2: log-count {pattern: "npc-stream: first action [A-Za-z_0-9]+ on (1348[0-9a-f]|35534|3550c) played as its event"}
+  - c2: log-count {pattern: "is not the master behaviour"}
+  - assert:
+      - c1.log_count("action [0-9a-f]+ idle [0-9a-f]+ .* on (1348[0-9a-f]|35534|3550c)") >= 1
+      - 'c2.log_count("npc-stream: first action [A-Za-z_0-9]+ on (1348[0-9a-f]|35534|3550c) played as its event") >= 1'
+  # a bandit at Sven, the server's own actor, hosted by c1's game: the attack family through the
+  # entry on the host, the same actions performed on c2's puppet copy
+  - c1: server-console {name: PlaceAtMe, args: [0x13491, 0x1bcd8]}
+  - wait: 30
+  - c1: watch-stop
+  - c2: watch-stop
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c1: refs-near {radius: 4000, formTypes: [43]}
+  - c2: refs-near {radius: 4000, formTypes: [43]}
+  - c1: log-count {pattern: "action [0-9a-f]+ idle [0-9a-f]+ [A-Za-z_]*[Aa]ttack[A-Za-z_]* type [0-9]+ on ff[0-9a-f]+"}
+  - c2: log-count {pattern: "performAction on ff[0-9a-f]+: .* event '[A-Za-z_]*[Aa]ttack[A-Za-z_]*' .* taken 1"}
+  - c2: log-count {pattern: "performAction on ff[0-9a-f]+: .* event '[A-Za-z_]*[Aa]ttack[A-Za-z_]*' .* taken 0"}
+  - c2: log-count {pattern: "block anim attack"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - c1.log_count("action [0-9a-f]+ idle [0-9a-f]+ [A-Za-z_]*[Aa]ttack[A-Za-z_]* type [0-9]+ on ff[0-9a-f]+") >= 1
+      - 'c2.log_count("performAction on ff[0-9a-f]+: .* event ''[A-Za-z_]*[Aa]ttack[A-Za-z_]*'' .* taken 1") >= 1'
+      - c2.log_count("block anim attack") == 0
+      - 'server.log_count("No permission to update actor (1348[0-9a-f]|35534|3550c|ff[0-9a-f]+)") == 0'
+      - abs(c1.watched_id(0x13483).endX - c2.watched_id(0x13483).endX) < 256
+      - abs(c1.watched_id(0x13483).endY - c2.watched_id(0x13483).endY) < 256
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
