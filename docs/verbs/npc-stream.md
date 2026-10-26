@@ -735,7 +735,7 @@ npc-stream") builds this verb first and "as the draft states"; the eight
 open questions below are answered here so the build can start, each as a
 call under the law, Eli's letter changing any:
 - Q1, the epoch: on HostedActorState alone (the Authority's reasons). Call A.
-  REVISED at slice 2's build (2026-10-26 04:0x PDT): no epoch on the wire.
+  REVISED at slice 2's build (2026-10-26 03:49 PDT): no epoch on the wire.
   The client cannot name a persistent reference's cell (getParentCell is the
   worldspace's persistent cell, b-npc-puppet 20261022-081631's lesson, the
   reason isMine stopped asking the cell), so the epoch it would send for a
@@ -903,7 +903,7 @@ attack-family row exists; P4's fight is a placed bandit (0x1bcd8 at Sven
 through the server), the host's own server-made actor, whose attacks go
 through its host's entry.
 
-### Slice 2 as built (2026-10-26 04:0x PDT, fork m3-npc-stream, the commit after c2129b4a)
+### Slice 2 as built (2026-10-26 03:49 PDT, fork m3-npc-stream 42af75b7 on c2129b4a)
 
 HostedActorState, MsgType 53, wire id 61, C2S, 64 bytes, in the same commit
 as its validator and its two fixtures (wire-schema skymp.rs; wire-validate
@@ -989,7 +989,7 @@ Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
 above as the build's calls. Slice 1 (ACTIONS) built 2026-10-26 03:08 PDT,
 fork c2129b4a (tsc, codegen and fork-lint clean; CI building), its probes
 by path; P1 read the same morning (H1 confirmed in the lab's sense). Slice
-2 (STATE) built 2026-10-26 04:0x PDT on the same branch (the wire message,
+2 (STATE) built 2026-10-26 03:49 PDT, fork 42af75b7 (the wire message,
 its validator and fixtures, the Rust rule and its bridge, the core's
 handler, the client's sender; wire tests and clippy clean, tsc, codegen and
 fork-lint clean; CI next); slices 3 and 4 next. Open questions for Eli before the build as
