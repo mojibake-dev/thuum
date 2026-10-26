@@ -1,0 +1,84 @@
+# b-npc-body-release (thuum-magnus, 2026-10-25): a body's occupancy is released by its looter's closing
+# activation, and the next player at the body is admitted at once. Playtest 34, section 5 (Eli): "the
+# non-host can't interact with the body" and "rotfern couldn't take armor, test 2 could". The server's
+# lines: a body is a container with ONE occupant within 512 units (D16-A), and ProcessActivateSecond
+# released a CONT and a FURN alone, so the looter's closing activation fell through, the body stayed
+# the looter's, and the other seat was refused five times ("occupant is another object and is nearby")
+# until the looter stood out of range. Train-46's aaafffe5 lets the corpse join the release. GREEN as
+# x-body-release v3 20261026-012319 on train-46's stage (aaafffe5); v2 235731 had held every claim and
+# read red on lab-api's end check alone (a mod's start-up box on c2), v1 234352 on its own bare
+# close-menu. Promoted unchanged (rule 13): the id and this header differ from the probe, the steps
+# and asserts are byte for byte.
+# Shape: two seats in Bleak Falls Temple 0x371de, c1 arriving first and hosting, c2 ten seconds later
+# (a puppet seat), god mode on both, a start-up message box dismissed on both (a no-op when none is up);
+# the server kills 0x39fe4 (kill-ref); c1 activates the body (the driver's Papyrus Activate, default
+# processing off: the hook reports it, the server's OpenContainer follows), the menu closes
+# (close-menu ContainerMenu, the client's closing activation), then c2, beside the body, activates it.
+# Claims: two "ProcessActivate 39fe4 - no occupant" lines (c1's, then c2's), never "occupant is
+# another object", no E_ACTIVATE_REACH, the body dead on the record. On parity fa8809a1 (no release)
+# the second "no occupant" never comes and "another object" does.
+id: b-npc-body-release
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 420
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "tgm"}
+  - c2: console {text: "tgm"}
+  # a mod's box at a seat's start (Intuitive Dragon Ride Control: "SKSE is not loaded", on c2 in
+  # v2 235731) pauses the game for the whole run and lab-api's end check reads it as measuring
+  # nothing; dismissed here, a no-op when no box is up
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - wait: 2
+  # c1 first, 400 units west of the campfire pair; c2 ten seconds later at the hall's entrance side
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 10
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4700, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - c1: npc-state {formId: 0x39fe4}
+  - c2: npc-state {formId: 0x39fe4}
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - c1.npc_state(0x39fe4).aiEnabled == true
+      - c2.npc_state(0x39fe4).aiEnabled == false
+      - server.ref(0x39fe4).isDead == false
+  # the server's kill; both views kill the body within their two-second re-apply
+  - c1: kill-ref {formId: 0x39fe4, killer: c1}
+  - until: {within: 10, expect: [server.ref(0x39fe4).isDead == true]}
+  - wait: 5
+  - c1: npc-state {formId: 0x39fe4}
+  - c2: npc-state {formId: 0x39fe4}
+  - assert:
+      - c1.npc_state(0x39fe4).isDead == true
+      - c2.npc_state(0x39fe4).isDead == true
+  # the host loots and closes: the body's occupancy taken, then released by the closing activation
+  - c1: activate {refId: 0x39fe4}
+  - wait: 4
+  - c1: screenshot
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 4
+  - assert:
+      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 1'
+  # the non-host, beside the body now, is admitted at once
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4250, y: 800, z: 650, rot: [0, 0, 90]}
+  - wait: 6
+  - c2: close-menu {name: MessageBoxMenu}
+  - c2: activate {refId: 0x39fe4}
+  - wait: 4
+  - c2: screenshot
+  - c2: close-menu {name: ContainerMenu}
+  - wait: 3
+  - assert:
+      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 2'
+      - 'server.log_count("ProcessActivate 39fe4 - occupant is another object") == 0'
+      - 'server.log_count("E_ACTIVATE_REACH") == 0'
+      - server.ref(0x39fe4).isDead == true
+artifacts: [server.log, c1.log, c2.log, screenshots]
