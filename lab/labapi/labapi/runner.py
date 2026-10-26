@@ -805,7 +805,10 @@ class Runner:
         if step.action in ("connect", "reconnect") and rec.scenario.solo:
             raise RunnerError(f"E_RUN_SOLO: {step.action} has no meaning in a solo run (the game runs without skymp5-client); the clients' heartbeats are the gate")
         if step.action in ("connect", "reconnect"):
-            return await self._wait_online(rec, index, step.client, step.action)
+            ok, note = await self._wait_online(rec, index, step.client, step.action)
+            if ok and self.s.clear_start_box:
+                await self._clear_start_box(rec, index, step.client)
+            return ok, note
         try:
             args = self._client_args(step.action, step.args)
             if step.action == "move":
@@ -1126,6 +1129,24 @@ class Runner:
         rec.snapshots[name] = value
         rec.notes.append(f"step {index}: snapshot {name} = {of}: {str(value)[:300]}")
         return True, ""
+
+    async def _clear_start_box(self, rec: RunRecord, index: int, client: str) -> None:
+        """A mod's start-up message box over a seat's game from its first load (x-body-release 20261025-235731: Intuitive
+        Dragon Ride Control's own "SKSE is not loaded" check racing c2's load) pauses it for the whole run. Once, a few
+        seconds after the seat's connect, lab-api reads its menus and closes a MessageBoxMenu it finds, then reads them
+        again and says in the run's notes whether the box went; a box raised later in the run stays a finding (_paused)."""
+        if self.s.start_box_wait_s > 0:
+            await asyncio.sleep(self.s.start_box_wait_s)
+        qs = await self.board.run_step(client, "dump-state", {}, self.s.step_timeout_s)
+        menus = (self.board.view(client) or {}).get("menus") if qs.ok else None
+        if not (isinstance(menus, list) and "MessageBoxMenu" in menus):
+            return
+        await self.board.run_step(client, "close-menu", {"name": "MessageBoxMenu"}, self.s.step_timeout_s)
+        await self.board.run_step(client, "dump-state", {}, self.s.step_timeout_s)
+        after = (self.board.view(client) or {}).get("menus")
+        stayed = isinstance(after, list) and "MessageBoxMenu" in after
+        rec.notes.append(f"step {index}: {client} had a message box over its game after its connect (menus: {', '.join(map(str, menus))}): "
+                         + ("it stayed after a close" if stayed else "closed it (a mod's start-up box)"))
 
     def _paused(self, clients: list[str], index: int | str) -> list[dict[str, Any]]:
         """The seats among `clients` whose last dump-state shows a message box: the game sits

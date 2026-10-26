@@ -75,6 +75,7 @@ class Doubles:
         self.seen: list[tuple[str, str, dict]] = []
         self.stale_dumps = 0  # dump-states that report the client far from where the server's record says
         self.menus: dict[str, list[str]] = {}  # the menus a client's dump-state reports open
+        self.closable: set[str] = set()  # the clients whose close-menu removes the named menu from self.menus
         self.npcs: dict[str, dict[int, dict]] = {}  # the NPCs a client's npc-state reports, by form id
 
     def turn(self):
@@ -105,6 +106,10 @@ class Doubles:
                         "sees": {o: {"x": a.x, "y": a.y, "z": a.z} for pid, a in self.state.actors.items() for o, p in self.profile.items() if p == pid and o != name}}
                 if name in self.menus:
                     data["menus"] = list(self.menus[name])
+            elif step["action"] == "close-menu":
+                if name in self.closable and name in self.menus:
+                    self.menus[name] = [m for m in self.menus[name] if m != step["args"].get("name")]
+                data = "closing"
             elif step["action"] == "request-screenshot":
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
             elif step["action"] == "npc-state":
@@ -137,6 +142,7 @@ class RunTests(unittest.TestCase):
             step_timeout_s=5, heartbeat_timeout_s=5, server_ready_timeout_s=1, connect_timeout_s=1, time_scale=0.0,
             before_logs_quiet_s=0.0,  # the clients' before-run logs are fetched only where a test turns it on
             hang_evidence=False,  # a hung seat's dump is taken only where a test turns it on
+            clear_start_box=False,  # a seat's start-up box is cleared only where a test turns it on
         )
         self.state = FakeState()
         self.state.spawn(1, 0, 0, 0)
@@ -859,6 +865,25 @@ class PausedGames(RunTests):
         run_id, body = self._run(self.TWO + "  - c1: dump-state\n  - assert:\n      - server.actor(c1).x == 0\n")
         self.assertEqual(body["verdict"], "red", body)
         self.assertEqual([(f["kind"], f["client"], f["step"]) for f in body["failures"]], [("paused", "c1", "end")])
+
+    def test_a_box_over_a_seat_at_its_connect_is_closed_and_noted(self):
+        # a mod's start-up box (x-body-release 20261025-235731's "SKSE is not loaded"): closed after the connect, so
+        # the run measures; one that will not close stays, said in the notes, and the assert's guard still fails it
+        import dataclasses
+
+        self.services.runner.s = dataclasses.replace(self.settings, clear_start_box=True, start_box_wait_s=0.0)
+        self.doubles.menus["c1"] = ["Cursor Menu", "HUD Menu", "MessageBoxMenu"]
+        self.doubles.closable.add("c1")
+        run_id, body = self._run(self.TWO + "  - assert:\n      - c1.sees(c2) == true\n")
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn(("c1", "close-menu", {"name": "MessageBoxMenu"}), self.doubles.seen)
+        self.assertTrue(any("c1 had a message box over its game after its connect" in n and "closed it" in n for n in body["notes"]), body["notes"])
+        self.doubles.menus["c1"] = ["HUD Menu", "MessageBoxMenu"]
+        self.doubles.closable.clear()
+        run_id, body = self._run(self.TWO + "  - assert:\n      - c1.sees(c2) == true\n")
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual([(f["kind"], f["client"]) for f in body["failures"]], [("paused", "c1")])
+        self.assertTrue(any("it stayed after a close" in n for n in body["notes"]), body["notes"])
 
     def test_the_hud_and_a_fade_are_no_pause(self):
         self.doubles.menus["c1"] = ["Fader Menu", "HUD Menu"]

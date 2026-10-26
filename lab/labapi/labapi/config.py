@@ -247,6 +247,13 @@ class Settings:
     # PUT {client_lab_api_url}/clients/<client>/hang-dump/<run>: <client>-SkyrimSE.dmp, a few GB.
     hang_evidence: bool = True
     hang_dump_timeout_s: float = 900.0
+    # A mod's start-up message box over a seat's game from its first load pauses it for the whole run (x-body-release
+    # 20261025-235731: Intuitive Dragon Ride Control's own "SKSE is not loaded" check racing c2's load, so c2 measured
+    # nothing and the run ended E_RUN_PAUSED). With clear_start_box on, start_box_wait_s after each connect lab-api reads
+    # the seat's menus once and closes a MessageBoxMenu it finds, saying so in the run's notes; a box raised later in
+    # the run stays a finding (E_RUN_PAUSED at the assert or the end).
+    clear_start_box: bool = True
+    start_box_wait_s: float = 3.0
     # lab-api as the clones reach it (lab-driver-settings.txt: labApiBase + labApiPath)
     client_lab_api_url: str = "http://10.10.70.10/lab"
     # where Windows Error Reporting writes SkyrimSE.exe's crash dumps on a clone (LocalDumps'
@@ -353,6 +360,8 @@ class Settings:
             before_logs_quiet_s=float(_env("BEFORE_LOGS_QUIET_S", str(d.before_logs_quiet_s))),
             hang_evidence=_env_bool("HANG_EVIDENCE", d.hang_evidence),
             hang_dump_timeout_s=float(_env("HANG_DUMP_TIMEOUT_S", str(d.hang_dump_timeout_s))),
+            clear_start_box=_env_bool("CLEAR_START_BOX", d.clear_start_box),
+            start_box_wait_s=float(_env("START_BOX_WAIT_S", str(d.start_box_wait_s))),
             client_lab_api_url=_env("CLIENT_LAB_API_URL", d.client_lab_api_url),
             client_dump_dir=_env("CLIENT_DUMP_DIR", d.client_dump_dir),
             crash_check_timeout_s=float(_env("CRASH_CHECK_TIMEOUT_S", str(d.crash_check_timeout_s))),
