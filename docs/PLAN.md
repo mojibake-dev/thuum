@@ -1149,6 +1149,25 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   the playtest. The fall scenario's subject is a fixed wolf (no roll). The
   lab stands on skymp-server:m3-train-45 and clean-m1 at fa8809a1; playtest
   34 at Eli's word from docs/private/playtest-m3-34.md.
+- STATE 2026-10-25 18:24 PDT: playtest 34 ran on fa8809a1 (14:33 to 16:11,
+  called by Eli) and every defect it showed is built: train-46 (fork
+  m3-train-46 aaafffe5, server: the pass between live hosts at a crossing,
+  the server-made actor's death by the NPC rule, the hosted hit's weapon
+  mismatch said at info, the corpse's occupancy released by its looter's
+  closing activation) is MERGE-READY by citation (gate 20261026-001639
+  eighteen of eighteen, T2 green, the four fixes read true at T3; two new
+  scenarios committed from the greens, b-host-own-hit and
+  b-npc-handoff-cross), waiting on Eli's look; train-47 (client,
+  f70cf19f: the looted body's inventory as a diff alone, the hosted
+  server-made copy dressed once, the late fate's redress-or-reload of the
+  3D, a puppet's own activation not forwarded) and train-48 (server,
+  9b412a10: a disabled actor's death schedules no respawn, a dead player
+  hosts nothing) are built ahead, CI green, waiting on Eli's letters to the
+  memo docs/research/m3/decisions-after-playtest-34.md (D18 to D23). The
+  playtest's reads: the invisible dungeon pair was the late fate's 3D, the
+  body's "can't interact" the container's one occupant plus a release
+  defect, the zero damage god mode. The quit crash's holders read and the
+  bisect wait for the lab's next window.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
