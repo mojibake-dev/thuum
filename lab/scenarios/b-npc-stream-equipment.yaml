@@ -1,0 +1,63 @@
+# b-npc-stream-equipment (thuum-magnus, 2026-10-26): the host's equipment stream (ADR-050 decision 1,
+# docs/verbs/npc-stream.md slice 3). The host sends UpdateEquipment under a hosted actor's idx when its hands
+# change and once at the first poll (what the actor wears: the worn slots and the hands, the hands' spells),
+# the server checks the worn items against the actor's own record and writes them, and the record's hands
+# are what the hit path judges a hosted actor's swing against. b-npc-puppet's Riverwood layout and P4's
+# placed bandit. Claims: the server's equipment lines for the residents ("[verb:npc-stream] equipment 1348x
+# by ff000000"), no E_EQUIP_REFUSED and no E_HIT_WEAPON naming a resident (the fate's roll and the engine's
+# worn items agree for a game-file actor). The placed server-made bandit's lines are RECORDED, not claimed:
+# its engine-rolled weapon is refused against a record that never held it and its swings are dropped, which
+# is playtest 34's D19 gap (the hosted server-made copy's dress: train-47's once-dress, or ADR-050 decision
+# 3's one NPC path), not this verb's. GREEN as x-npc-stream-p6 v2 20261026-173133 on the v3 stage of fork
+# m3-npc-stream 66f04f2a (27 steps); v1 on the stage before read red on the bandit's refusal alone, the
+# residents' claims held. Promoted unchanged (rule 13): the id and this header differ from the probe, the
+# steps and asserts are byte for byte.
+id: b-npc-stream-equipment
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - 'server.log_count("\\[verb:npc-stream\\] equipment 1348[0-9a-f]+ by ff000000") >= 1'
+      - 'server.log_count("E_EQUIP_REFUSED") == 0'
+  # the bandit at Sven, the server's own actor, hosted by c1's game: its hands reach the record before
+  # its swings, so the server's hit path has the weapon
+  - c1: server-console {name: PlaceAtMe, args: [0x13491, 0x1bcd8]}
+  - wait: 30
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c1: refs-near {radius: 4000, formTypes: [43]}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("\\[verb:npc-stream\\] equipment 1348[0-9a-f]+ by ff000000") >= 1'
+      - 'server.log_count("E_EQUIP_REFUSED: 1348[0-9a-f]+") == 0'
+      - 'server.log_count("E_HIT_WEAPON: hosted 1348[0-9a-f]+") == 0'
+  # recorded, not claimed (D19's gap): the bandit's refusal and its dropped swings
+  - c1: log-count {pattern: "equipment ff0000[0-9a-f]+:"}
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
