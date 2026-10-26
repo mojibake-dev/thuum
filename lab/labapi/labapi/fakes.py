@@ -218,6 +218,7 @@ class FakeState:
         self.hosts: dict[int, dict[str, Any]] = {}
         # form id -> a non-player actor's record (labState kind ref): a hosted NPC
         self.refs: dict[int, FakeActor] = {}
+        self.stream_rows: dict[int, list[dict[str, int]]] | None = None  # by profile id; None answers found: false
 
     def spawn(self, profile_id: int, x: float = 0.0, y: float = 0.0, z: float = 0.0, cell: str = "lab-spawn") -> FakeActor:
         a = FakeActor(x, y, z, cell)
@@ -234,6 +235,11 @@ class FakeState:
                 row = self.hosts.get(cell)
                 return {"found": True, "cell": cell, "hosted": bool(row and row.get("hosted")),
                         "actorId": int(row.get("actorId", 0)) if row else 0, "epoch": int(row.get("epoch", 0)) if row else 0}
+            if payload.get("kind") == "stream":
+                pid = int(payload.get("profileId", -1))
+                if self.stream_rows is None:
+                    return {"found": False, "error": "no such property"}
+                return {"found": True, "actorId": 0xFF000000 + pid, "rows": list(self.stream_rows.get(pid, []))}
             if payload.get("kind") == "ref":
                 ref_id = int(payload.get("actorId", -1))
                 ref = self.refs.get(ref_id)

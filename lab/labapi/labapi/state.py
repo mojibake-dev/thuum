@@ -91,6 +91,12 @@ class ServerState:
         body = self._backend.rpc("labState", {"kind": "actor", "profileId": self._profile(client)})
         return self._normalize_actor(body) if body.get("found") else None
 
+    def stream(self, client: str) -> dict[str, Any] | None:
+        """A player's stream counters (labState kind stream, npc-stream slice 4): {found, actorId, rows: [{t,
+        accepted, dropped, foreign}]}, one row per SkyMP message type, or None from a server without them."""
+        body = self._backend.rpc("labState", {"kind": "stream", "profileId": self._profile(client)})
+        return body if body.get("found") else None
+
     def online(self, client: str) -> bool:
         """The server reports the client's profile among its logged-in players
         (labState kind online: {"players": [{"actorId", "profileId"}, ...]})."""

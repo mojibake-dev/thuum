@@ -354,6 +354,24 @@ class M0VocabularyTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate("server.ref(0xff000a04).worn == c1.npc_state(0xff000a04).worn")  # the record reported no equipment
 
+    def test_a_players_stream_counters_by_message_type(self):
+        """npc-stream slice 4: the server's per-connection counters read as budget rows; a type never sent reads 0,
+        and a server without the counters is missing data, not a pass."""
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        srv = RichServer()
+        rows = {"c1": [{"t": 53, "accepted": 60, "dropped": 2, "foreign": 0}, {"t": 53, "accepted": 4, "dropped": 0, "foreign": 0},
+                       {"t": 5, "accepted": 12, "dropped": 0, "foreign": 1}]}
+        srv.stream = lambda client: {"found": True, "actorId": 0xFF000000, "rows": rows[client]} if client in rows else {"found": False}
+        ev = Evaluator(srv, NearViews(), ["c1", "c2"])
+        for expr in ("server.stream(c1).accepted(53) == 64", "server.stream(c1).dropped(53) == 2", "server.stream(c1).foreign(5) == 1",
+                     "server.stream(c1).accepted(54) == 0"):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("server.stream(c2).accepted(53) == 0")   # no counters for that seat
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate('server.stream(c1).accepted("53") == 0')  # a type is a number
+
     def test_the_follow_table(self):
         """npc-handoff's D6: a game follows an actor through a door into a cell it does not host."""
         from labapi.assertions import AssertionData, Evaluator
