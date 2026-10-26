@@ -1366,6 +1366,51 @@ The next stage (66f04f2a, the first-event line alone over v2) reruns P4
 and P6 with the v2 claims; then the voice branch's stage, the voice branch
 having taken the stream's commits by merge.
 
+### The third stage's read: the three slices GREEN at T3 on probes (11:03 PDT)
+
+The v3 stage of 66f04f2a (10:09 to 10:34 PDT, lab-api d0fef6d3): P4 v2
+20261026-172720 GREEN (42 steps), P6 v2 20261026-173133 GREEN (27 steps),
+T2 GREEN at 18:01Z, no crash log on either seat; with P5 20261026-163259
+GREEN on the stage before, every slice has its green run. The numbers from
+the runs' logs:
+- The hosted actors' actions: 142 action lines from the host in P4's
+  window, 6 of them the placed bandit's attacks (five attackStart, one
+  attackPowerStartRight); on the puppet seat the same six performed
+  through the engine's entry, every one "taken 1", none refused, no
+  "block anim attack": H2 (a puppet's graph, AI off, takes an action
+  through the entry) and H2a (the attack family comes through the entry
+  for an NPC) read CONFIRMED, and H3 (the engine sends on the puppet the
+  event the host reported, so the allow's key matches) with them. Ten
+  puppets played their first streamed action as its event (the event
+  path, the residents' idles and turns). The tracks' ends within 256 units
+  held, so the variables' write before an attack did not fight the fed
+  locomotion in the window (H4 consistent, not measured in depth).
+- The gate's log lines name five refused projects in one run: Chicken (47
+  words, two actors), Dog (93), Hare (46), HighlandCow (93); the residents
+  streamed, so DefaultMale and DefaultFemale are the master's names
+  (CONFIRMED). Every creature rides the relay, as designed.
+- The state: 38 state lines by the host in P4's window, none refused, no
+  E_STATE_OWN, no "No permission" anywhere (the gates held for every
+  message type); P5's claims as recorded above.
+- The equipment: 29 equipment lines by the host for the residents and the
+  spawn's creatures, no refusal naming a resident (H7, the fate pin and the
+  engine's worn items agree, CONFIRMED for the residents); the placed
+  bandit's one refusal and one dropped swing (E_EQUIP_REFUSED, E_HIT_WEAPON)
+  are D19's gap, recorded. H6 (the puppet's hands follow the record on the
+  other seat) is not yet claimed by a probe (P6 reads the server's side);
+  the lab-api row server.ref(id).worn (numidium's, live) lets the next
+  probe compare the record with both seats' npc-state worn lists.
+- The budgets' first numbers (UNMEASURED placeholders) were never hit:
+  no E_VAL_RATE in the server logs across the stage.
+
+Open after the stage: H6 (a worn-list comparison across the seats), the
+voice slice's V1 to V4 (P7 on the voice stage, running), the counters
+(slice 4), the budgets from a measured rate (P3's read of these logs is a
+start: 142 actions and 38 states in about 110 s for seventeen actors), the
+committed scenarios (promoted from these green runs: b-npc-stream-actions,
+b-npc-stream-state, b-npc-stream-equipment, each its own commit, rule 13),
+the parity scenario and the reference trace (ADR-050 decision 5).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
@@ -1382,7 +1427,9 @@ same morning (the hosted idx resolved in OnUpdateEquipment, the hands
 streamed from the host's poll, the puppet's hands following; tsc, lint and
 the JSON crate's tests clean; fork 2673d1ab, CI green, pipeline 3136; the
 first stage RED on the puppet seat's crash, slice 1 v2 a0ff0e72 pushed
-09:09 PDT, its stage running). Slice
+09:09 PDT; the v2 and v3 stages GREEN, no crashes, T2 green twice; the
+three slices at T3 on probes 11:03 PDT, H1, H2, H2a, H3 and H7 confirmed,
+H6 open). Slice
 4's voice line read twice by the re-analyst and BUILT 2026-10-26 05:33 PDT
 on fork branch m3-npc-voice 82ffd53a (the sink, the native, the detour's pair, the
 message with its validator and fixtures, the server relay, the client
@@ -1405,11 +1452,11 @@ Inventory's voice row).
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [ ] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
-- [ ] T2 green
+- [x] server logic + T0 (slices 1 to 3; CellHostTest's four cases)
+- [x] message + validator (same commit: HostedActorState 53/61 42af75b7; ActorSpeech 54/62 82ffd53a on the voice branch)
+- [x] native hook + T1 (no new Address Library id in slices 1 to 3; the voice slice's ids are the re-analyst's reads, their T1 the stage's log lines)
+- [x] TS handler
+- [x] T2 green (the v2 and v3 stages, 17:05Z and 18:01Z)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
