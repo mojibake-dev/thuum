@@ -1163,29 +1163,76 @@ CONFIRMED-STATIC):
   it); what HighProcessData+0x3B8 holds (39369 gates a bark's BEGIN on
   it); what the TopicResultCallBack does at completion.
 
-The design this read allows (the voice slice, its own fork branch off
-m3-npc-stream after the stage's reads, HYPOTHESIS until P7): on the host a
-Skyrim Platform sink on TESTopicInfoEvent (the struct declared in
-game/Events.h as TESSceneActionEvent is, AppendSinkScriptEvent's idiom),
-filtered in native to type 0 and a speaker in the hosted set (rule 9),
-raised as `topicInfo {speakerId, topicInfo}`; the client sends a Record
-row (R2) under the actor's idx with the info's and its topic's form ids,
-unreliable (a lost line is a lost line, TES3MP's shape), its budget from
-the measured rate; the server gates the host, relays to the actor's other
-listeners (UpdateAction's loop) and records nothing; on the puppet seat a
-native sayTopicInfo(actorId, topicId, infoId) calls 39642 with the given
-info (the engine's own say, lip sync and idle, the BEGIN event), and the
-puppet detour runs 37752 and slot 0x40 once a frame for a puppet whose
-+0x278 is 3, so the subtitle shows and the line ends (R2's HYPOTHESIS, the
-slice's first probe). Until then the voice line stays "known" in the
-playtest checklist (npc-fate.md:923-924's row), as it has been.
+The second static read (REA, 05:0x to 05:4x PDT; asm read for 39162,
+37752 and 37544, CONFIRMED-STATIC): SayTopic 39162 is `bool (AIProcess*,
+Actor* speaker, TESTopic*, TESTopicInfo* info, bool unused, bool flag6,
+bool flag7, bool keepExtra)`, Papyrus Say's call being (process, actor,
+topic, 0, 0, 0, 1, 1); the info argument reaches the item picker 25541,
+which skips the condition walk when it is given, and the topic must be the
+info's parent (a null topic replays the greet topic); 39642 refuses (returns
+1, says nothing) while the previous line has not ended (37266: the done
+bits 0x180 and the voice timer) or the process's dialogue state (+0x3B8)
+forbids, and touches no package, no AI evaluation, only the head track
+toward a target. The voice timer 37752 is `void (Actor*, bool force)`,
+needing nothing from the AI frame (it reads the main loop's seconds since
+the last frame); UpdateSoundCallBack (slot 0x40, CommonLib Actor.h:287)
+takes a dead bool and runs a state machine on the actor's soundCallBackSet
+(+0x278 on this build; CommonLib's runtime data relocated +8): 3 arms the
+timer from the sound's duration and shows the subtitle, 1 or 2 at the
+timer's expiry send the END, drop the subtitle and set the done bits
+(kSpeakingDone is set only for a line to the player: not a puppet
+discriminator; the state byte and the timer are). The pair `37752(actor,
+false); actor->UpdateSoundCallBack(false)` once a frame reproduces the AI
+update's exactly. 25616 marks the info said-once on both BEGIN and END
+(HYPOTHESIS: harmless on the puppet seat, both seats converge). Unread: the
+done bits' initial value on a fresh actor (if clear, the first say refuses
+and the native must set 0x180 first), the dialogue state's type field.
 
-P7 by path, when the slice is built: solo first (a Frida hook on 25616,
-53997 and 35225 beside the sink's log line over Riverwood at 8:00: every
-spoken line matched to an event row, the grunts absent), then two seats
-(the host's resident greets the host's player; the puppet seat's line
-through the native: 37542 and 67617 entries, then 37544 entries and the
-subtitle with the detour, none without it).
+### The voice slice as built (2026-10-26 05:33 PDT, fork branch m3-npc-voice 82ffd53a off 2673d1ab, its own worktree; CI next)
+
+On the host, a Skyrim Platform sink on TESTopicInfoEvent (the struct in
+game/Events.h with the read's layout and a static_assert on its 0x18
+bytes; AppendSinkScriptEvent's idiom), filtered in native to the begin
+(type 0) and a speaker in the hosted set (rule 9), reads the info's parent
+topic on the dispatching thread and raises `topicInfo {speakerId,
+topicInfo, topic}` as a tick task (no game call in its handler). The client
+(VoiceService) sends ActorSpeech, MsgType 54, wire id 62, `{idx, topic,
+info}`, unreliable, under the actor's remote id, in the same commit as its
+validator (idx below u32::MAX, a topic and an info that are forms; the
+budget speech_budget 32 then 8 a second, UNMEASURED; the proptest), its two
+fixtures and the C++ message, parser case and registration. The server
+(OnActorSpeech) refuses the sender's own idx (E_SPEECH_OWN), takes
+ActorUpdatableBy's gate and relays the bytes unreliable to every listener
+with a user but the host; records nothing; one info line a minute per actor
+with the counts (CellHostTest's case: the host's line to the other game
+once and never back, the non-host's and the own idx dropped). On the puppet
+seat VoiceService maps the idx to the form, refuses an actor this game
+hosts (Rule A), a figure or a dead actor, and asks the native
+sayTopicInfo(actorId, infoId): on the game thread it calls SayTopic
+(Offsets::Voice::SayTopic) with the info and its parent topic in Say's
+shape, logs the done bits, the timer and the state byte before and the
+state after, and answers 1 when the state read 3 (the line started) or 2
+(refused); the puppet detour (PuppetHooks.cpp DriveVoice, in the animation
+queue's per-frame loop on the game thread) runs the engine's own pair for a
+puppet whose state byte is 3, 1 or 2 or whose timer counts, and logs "line
+on <id> ended" at the 1-or-2 transition. The lines' audio, lip sync,
+talking idle and subtitle are the engine's; nothing else of the dialogue
+system is touched.
+
+HYPOTHESIS, P7's: V1 the sink sees every line a hosted resident begins
+(barks and greetings; the read says the bark chain dispatches); V2 the
+puppet's say starts (the native answers 1; if 2 on every try, the done
+bits' initial value is the first suspect and v2 sets 0x180 when the timer is
+at or under 0 and no handle is live); V3 the pair ends the line (the "line
+ended" line and the subtitle's removal); V4 the said-once mark on the puppet
+seat changes nothing visible. P7 by path, two seats, b-npc-puppet's layout:
+over 90 s at 8:00 with c1 among the residents, c1's console log has "speech
+1348x" lines (V1), c2's "say 1348x info ... -> started" (V2) and c2's Skyrim
+Platform log "line on 1348x ended" (V3), the server's "speech ... by
+ff000000" lines and no E_SPEECH_OWN; screenshots on c2 for a subtitle (the
+seats' subtitle switches are the INI's, unread). Then the engine-side solo
+read (a Frida hook on 25616, 53997 and 35225 beside the sink's log) if V1
+misses lines.
 
 The rest of slice 4 waits on the stage's reads: P3's numbers (the stream's
 cost, the hosted_state_budget and action_budget replacing their UNMEASURED
@@ -1209,9 +1256,11 @@ fork-lint clean; CI green, pipeline 3133). Slice 3 (EQUIPMENT) built the
 same morning (the hosted idx resolved in OnUpdateEquipment, the hands
 streamed from the host's poll, the puppet's hands following; tsc, lint and
 the JSON crate's tests clean; fork 2673d1ab, CI green, pipeline 3136). Slice
-4's voice line BLOCKED on the engine read above (rule 8, the re-analyst's
-static read running); the rest of slice 4 waits on the stage's reads (P4 to
-P6 queued behind the nightly, numidium's chain). Open questions for Eli before the build as
+4's voice line read twice by the re-analyst and BUILT 2026-10-26 05:33 PDT
+on fork branch m3-npc-voice 82ffd53a (the sink, the native, the detour's pair, the
+message with its validator and fixtures, the server relay, the client
+service; HYPOTHESIS V1 to V4 for P7); the rest of slice 4 waits on the
+stage's reads (P4 to P6 queued behind the nightly, numidium's chain). Open questions for Eli before the build as
 they stood, each stated once in its section: (1) the epoch on
 HostedActorState alone, not on the players' hot messages (Authority); (2)
 a death the host alone witnessed is floored and left to npc-fate, with a
