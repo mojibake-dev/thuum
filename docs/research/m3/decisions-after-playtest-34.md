@@ -165,6 +165,11 @@ crash log per quit; nothing else is lost.
   taste for the two features. B is a dozen lines in the thunk we already
   own and holds whatever plugin leaks next; A keeps a dialog at every quit
   of every playtest.
+- Built ahead, not merged (19:33 PDT, fork m3-train-49 1c25b0e6, a client
+  dist off parity aaafffe5): OnQuitShutdown's fast exit behind
+  skymp5-client's quitFastExit setting (default on) and the plugin export
+  setQuitFastExit; probe x-quit-fast by path. Awaits the letter and the
+  bisect's read (x-quit-bisect-ngd-ddo, running).
 
 ## npc-handoff
 
@@ -219,3 +224,5 @@ f70cf19f) and train-48 (server, 9b412a10).
    the bases agree) and, if the reload reads clean, its second.
 3. train-48 (server), fork m3-train-48 off 46: D21-B and D18-B built ahead;
    D22's brake joins it if the read asks one.
+4. train-49 (client dist), fork m3-train-49 off 46: D24-B built ahead (the
+   fast exit); its stage runs x-quit-fast and b-host-quit.
