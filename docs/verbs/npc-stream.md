@@ -1630,7 +1630,7 @@ the volley, and the spell run asked for arrows (form type 64; bolts are 63,
 flames 67), so whether the puppet's engine launches an arrow or a bolt of
 its own on the replayed release is UNREAD; v2 of both probes by path polls
 the references ten times through the fight's first dozen seconds. The logs'
-read (thuum-magnus's agent, 15:55 PDT) found the cause of "bows were
+read (thuum-magnus's agent, 15:40 PDT) found the cause of "bows were
 missing" (playtest 34): the HOST's own engine launched the hosted archer's
 two arrows and the native launch rule dropped them as a figure's ("a
 figure's own arrow dropped: shooter ff000bb4", 3 ms after each
