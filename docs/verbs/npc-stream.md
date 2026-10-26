@@ -1324,6 +1324,48 @@ merge (fba05393). The re-analyst's read of the three crashes' frames
 the Dynamic plan when it comes; the lab's next read is P4 to P6 on v2's
 stage (started 09:1x PDT).
 
+### The second stage's read (v2 a0ff0e72, 09:10 to 09:39 PDT; the verdicts and the next claims, 10:09 PDT)
+
+NO CRASHES: c2 survived P4, P5 and P6 with no crash log, and T2 is GREEN
+at 17:05Z. The descriptor's gate did its work and said so: c2's log has
+"graph project 'ChickenProject' (variable set of 47) is not the master
+behaviour: no variables read or written for 1066df or any actor on it",
+one line for the whole run (a chicken's set is 47 words against the
+master's 301 indices: the out-of-bounds write the first stage died of), and
+the residents' actions streamed (c1's 40 action lines for 1348x, 29
+setHosted lines at the grant), so the humanoid projects passed the name
+check: the HYPOTHESIS on DefaultMale and DefaultFemale reads CONFIRMED by
+the residents' stream.
+- P5 (20261026-163259) GREEN: the state stream end to end. The record
+  follows the host's engine within 0.02 for Sigrid, takes an engine-side
+  fall of 40 points on Sven within a poll, the puppet follows the record
+  within 0.05, the host's regeneration moves the record up again, no
+  E_STATE_OWN, no state from the observer's seat.
+- P4 (162926) RED on one claim of v1's shape: "performAction on 1348x
+  taken 1" read 0, because since v2 a resident's idles, turns and draws
+  play as their events on the puppet and the entry performs the hands' casts
+  and the attacks alone (no resident fought); the host's side held (40
+  action lines), the earlier claims held. The puppet's event path now says
+  its first action per actor once ("npc-stream: first action <event> on
+  <id> played as its event", 66f04f2a), and P4 v2 claims that line; the
+  entry's proof stays the bandit's attack (its claims stand, unreached in
+  v1 since the run stopped at the stale claim).
+- P6 (163621) RED on the bandit, not on slice 3: the residents' equipment
+  lines held and no refusal named one; the server-made bandit's
+  engine-rolled weapon 13911 was refused against a record that never held
+  it (E_EQUIP_REFUSED, then E_HIT_WEAPON on its swings), which is playtest
+  34's D19 gap (the hosted server-made copy's dress: train-47's once-dress,
+  held by Eli's letter; ADR-050 decision 3's one NPC path retires it), and
+  the bandit fought the village (target 13489), not the god-mode player, so
+  no OnWeaponHit on ff000000 came. P6 v2 claims the residents alone and
+  records the bandit's lines for the memo; the hit path's proof moves to
+  the probe after D19 or decision 3 lands. The "0 worn, right 0 left 0"
+  equipment lines numidium read were the lab spawn's creatures (107cf8 to
+  107d07, 1066df the chicken, 1b747), not clothed residents.
+The next stage (66f04f2a, the first-event line alone over v2) reruns P4
+and P6 with the v2 claims; then the voice branch's stage, the voice branch
+having taken the stream's commits by merge.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
