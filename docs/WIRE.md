@@ -384,6 +384,17 @@ The action budget (UpdateAction 44) is re-derived for a host that streams its
 actors' actions: 48 at once, 16 a second (UNMEASURED, from x-npc-stream-p1's
 rate). Appended to the contract (ADR-012); the MsgType after ActorDeath (52).
 
+Slice 5 (train 54, fork m3-npc-face ac435de8, 2026-10-26; D30-C): HostedActorState
+gains `gazeTarget: u32` (the head-track target as the server knows it, 0 none),
+`gazeSlot: u8` (the engine's HEAD_TRACK_TYPE of the highest set slot, below
+6), `emotionType: u8` (the engine's EmotionType, at most 7) and `emotionValue:
+u8` (0 to 100), and its direction becomes Both: the server records the four on
+the actor and relays the message unreliable to the actor's other listeners
+(never the host), whose puppets aim at the target and wear the emotion; the
+percentages stay the judged ChangeValues and a puppet seat ignores the
+message's values. Validator (check_hosted_state): the slot below 6, the type
+at most 7, the value at most 100, beside the percentages' bounds.
+
 ActorSpeech (id 62, MsgType 54), client to server, unreliable, R2 (fork
 branch m3-npc-voice, 2026-10-26; docs/verbs/npc-stream.md, the voice slice,
 ADR-050): `{ idx: u32 (the speaking actor as the server indexes it; the

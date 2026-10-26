@@ -1590,6 +1590,30 @@ RESIDENT's line started on the puppet and no "deferred" verdict; the
 inaudible count recorded. HYPOTHESIS V5: the resident's line plays with its
 lip on a puppet whose seat stands within range.
 
+### Slice 5 as built (14:36 PDT, fork m3-npc-face ac435de8 off m3-npc-death 55a95002)
+
+The plan above, in code: the four fields on HostedActorState (validator bounds
+and fixtures in the commit, the row Both); the server records them
+(MpActor::SetHostedGaze) and relays the message unreliable to the actor's
+other listeners, never the host (OnHostedActorState; CellHostTest's state
+case extended); Skyrim Platform pollHostedGaze reads, on the game thread per
+poll, each hosted actor's highest set head-track slot (HighProcessData
+headTrackTarget and headTracked, HighProcessData.h:217-218; the types at
+:80-94) and its emotion (Actor::GetEmotionType and GetEmotionValue,
+Actor.h:464-466), hostedGaze answers the last read; HostedStateService sends
+them on a change (a target or slot change, an emotion type change, a value
+moved ten points); PuppetFaceService on the other seats aims the puppet
+(setLookAt on the resolved target; movementApply's point heuristic stands
+aside while a target is named, sync/puppetGaze.ts) and wears the emotion
+(setExpressionOverride with the Mood index of the engine's EmotionType: 7
+neutral, 8 anger, 14 disgust, 9 fear, 11 sad, 10 happy, 12 surprise, 13
+puzzled, the CK wiki's SetExpressionOverride table; clearExpressionOverride
+at neutral 0). HYPOTHESIS H-54a (the head turns within a sample), H-54b (the
+Mood mapping reads right on the puppet's face), H-54c (no per-sample jitter
+against the heuristic). Probe x-npc-stream-face by path (30 steps). The
+cadence row (P3) and slice 4's counters, budgets and parity scenario follow
+on this train.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
