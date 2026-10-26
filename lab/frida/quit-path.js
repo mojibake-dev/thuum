@@ -95,6 +95,22 @@
 // after the process start and the creator has returned by then (run
 // 20261026-015302 armed nothing); the 'armed' row's count says whether the
 // outside references were already taken (five) or come at the loads (three).
+// Mode 'scan' (params {MODE: scan, SCAN_AFTER_MS}; x-quit-watch v2
+// 20261026-015903: the lab's Frida has no Thread.setHardwareWatchpoint, and
+// the Loading Menu's count went 3 to 5 across two loading screens, one
+// reference taken per load and kept): the holders are FOUND rather than
+// caught. CommonLibSSE's UI::GetMenu is the library's own inline map lookup
+// and the GPtr copy's AddRef is inlined too, so no engine function sees a
+// plugin take its reference; but every holder keeps the IMenu's address in
+// a GPtr field, so SCAN_AFTER_MS after the script's start (default 90 s,
+// after the probe's loading screens and before its quit) every readable
+// range of the process is scanned for the pointer's eight bytes. A hit
+// inside a module's image is that module's static holder; a hit in the heap
+// is read back up to 0x80 bytes for the nearest qword that points into a
+// module (the holder object's vtable, HYPOTHESIS for the layout), which
+// names the module. The UI's own holders show too (the menu map's entry,
+// the delegate's callbacks, SkyrimSE.exe's objects); the two over them are
+// the read. The scan runs on Frida's own thread while the game plays.
 // Run: a scenario's `frida {script: quit-path.js}` step before the quit, or
 // `just frida quit-path.js c1` by hand, then quit the game (console qqq).
 'use strict';
@@ -326,7 +342,7 @@ if (at === undefined) {
 
   // mode holders: the Loading Menu's IMenu refcount through the UI teardown;
   // mode watch: holders plus the refcount's writers
-  if (MODE === 'holders' || MODE === 'watch') {
+  if (MODE === 'holders' || MODE === 'watch' || MODE === 'scan') {
     let loadingMenu = NULL;
     function count(p) { try { return p.isNull() ? -1 : p.add(0x08).readU32(); } catch (e) { return -2; } }
     // the write watchpoint on the count, every thread alive now, and the
@@ -404,6 +420,52 @@ if (at === undefined) {
         if (MODE === 'watch') armWatch(retval);
       },
     });
+    if (MODE === 'scan') {
+      const scanAfterMs = Number(PARAMS.SCAN_AFTER_MS) || 90000;
+      let scanMenu = NULL;
+      const findTimer = setInterval(function () {
+        const live = findLoadingMenuLive();
+        if (!live.isNull()) {
+          scanMenu = live;
+          loadingMenu = live;
+          clearInterval(findTimer);
+          emit({ loadingMenuFound: true, menu: live.toString(), refCount: count(live), via: 'live menuMap walk' });
+        }
+      }, 500);
+      setTimeout(function () {
+        if (scanMenu.isNull()) { emit({ scan: 'no menu found before the scan' }); return; }
+        const hex = scanMenu.toString(16).replace('0x', '').padStart(16, '0');
+        const needle = hex.match(/../g).reverse().join(' ');
+        emit({ scan: 'start', menu: scanMenu.toString(), refCount: count(scanMenu), needle: needle });
+        const ranges = Process.enumerateRanges({ protection: 'r--', coalesce: true });
+        let scanned = 0, skipped = 0, failed = 0;
+        const hits = [];
+        ranges.forEach(function (r) {
+          if (r.size > 0x40000000) { skipped++; return; }
+          try {
+            Memory.scanSync(r.base, r.size, needle).forEach(function (f) { hits.push(f.address); });
+            scanned += r.size;
+          } catch (e) { failed++; }
+        });
+        emit({ scan: 'done', menu: scanMenu.toString(), refCount: count(scanMenu), ranges: ranges.length, bytesScanned: scanned,
+               rangesSkipped: skipped, rangesFailed: failed, hits: hits.length });
+        hits.forEach(function (a) {
+          const m = Process.findModuleByAddress(a);
+          const row = { scan: 'hit', at: a.toString(), module: m ? m.name : null, offset: m ? a.sub(m.base).toString() : null };
+          if (!m) {
+            for (let back = 8; back <= 0x80; back += 8) {
+              try {
+                const q = a.sub(back).readPointer();
+                const qm = Process.findModuleByAddress(q);
+                if (qm) { row.vtableLike = { back: back, ptr: q.toString(), module: qm.name, offset: q.sub(qm.base).toString() }; break; }
+              } catch (e) { break; }
+            }
+            try { row.words = [a.sub(0x10).readPointer().toString(), a.sub(0x08).readPointer().toString(), a.add(0x08).readPointer().toString()]; } catch (e) { }
+          }
+          emit(row);
+        });
+      }, scanAfterMs);
+    }
     if (MODE === 'watch') {
       const tryArm = function () {
         if (watchArmed) return true;
