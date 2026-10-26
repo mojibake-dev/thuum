@@ -39,6 +39,8 @@ where the candidates are the players loaded in the cell whatever their state.
   into PartOne::OnDeathState for a player's actor; the rules' test and
   CellHostTest's case. Awaits the letter.
 
+- Decision: recommended
+
 ## npc-fate
 
 ### D19. The hands of a server-made copy
@@ -61,6 +63,8 @@ built on B.
   dies (the fate's body). C costs a property on the wire for every NPC and a
   reset of the copy's base container on every seat.
 
+- Decision: recommended
+
 ### D20. A body's one occupant
 Section 5's "the non-host can't interact with the body" and "rotfern couldn't
 take armor, test 2 could" read, in the lines, as the container rule (D16-A:
@@ -78,6 +82,8 @@ body is refused with no menu and no message until the first closes.
   its own and a race the engine's menu was not built for.
 - The release itself is proven at T3 (18:42 PDT): b-npc-body-release (x-body-release
   v3 20261026-012319), so A reads as upstream's rule with the defect gone.
+
+- Decision: B
 
 ### D21. A disabled server-made actor's respawn
 Numidium's section 5 read: the ice wolf ff000003, disabled by the console at
@@ -98,6 +104,8 @@ respawn re-enables; under train-46's rule the fate respawn would, hours later).
   callback too), the sweep drops a disabled body and keeps its stamp, and
   MpActor::Enable schedules the fated return (stamped at the enable when the
   death left none); NpcFateTest's case. Awaits the letter.
+
+- Decision: B
 
 ### D23. The late re-roll's lost 3D on a login inside a dungeon
 Section 4: the campfire pair and eleven more leveled NPCs were invisible on
@@ -133,6 +141,8 @@ before its attach, pinned at load with no re-roll. This is re-npc-roll.md's
   (a seat relaunched inside the temple, its leveled NPCs read 3D-loaded and
   visible after the late fate). Train-47 can carry it (a client dist), or
   the train after.
+
+- Decision: B
 
 ## cell-host, the quitting host: the crash at every quit
 
@@ -177,6 +187,8 @@ crash log per quit; nothing else is lost.
   alone gives no clean quit; B skips both. Recommended: B, with D for the
   two plugins' leak.
 
+- Decision: Reevaluate solutions. I feel like there's a more direct fix unless im biffing on your wording. 
+
 ## npc-handoff
 
 ### D22. Tenure at the crossing (conditional)
@@ -195,6 +207,8 @@ is which brake.
   on both servers in T2.
 - The read (16:58 PDT): x-handoff-cross v2 20261025-235039 GREEN, one pass in
   three minutes, no refusal, no thrash. A stands; nothing to build.
+
+- Decision: recommended.
 
 ## MERGED (46) (18:44 PDT, 2026-10-25): Eli "Merge now"; fork parity aaafffe5 (from fa8809a1), thuum main bfc41e0b; the clones keep parity's client fa8809a1 (no client change on the train). Trains 47 (f70cf19f) and 48 (9b412a10) both contain aaafffe5 already and wait on the letters.
 
