@@ -275,14 +275,17 @@ refuses the rest as the untrusted input it is (rule 5). No field is new.
 
 ActorFate (id 59, MsgType 51), server to client, reliable, R0 output (fork
 m3-train-41, 2026-10-23; docs/verbs/npc-fate.md, ADR-046 decision 1,
-ADR-049): `fates`, at most 64 of `{ refrId: u32 (under 0xff000000, nonzero),
-baseId: u32 (the NPC_ the roll chose, 0 for none), level: u16, worn: [u32]
-(at most 32) }`, sent at a player's square change for the three squares of
-game-file actors around it before any of them is subscribed, so every engine
-dresses the placement from the server's roll (Skyrim Platform's detours on
-the roll sites) instead of rolling its own. Validator (wire-validate
-check_fates): 1 to 64 entries, each refrId in range and nonzero, at most 32
-worn, every id nonzero.
+ADR-049): `fates`, at most 64 of `{ refrId: u32 (nonzero: a game-file
+placement under 0xff000000, or since ADR-050 decision 3 (train 51, fork
+m3-npc-path) a server-made NPC's id from 0xff000000 up), baseId: u32 (the
+NPC_ the roll chose, 0 for none), level: u16, worn: [u32] (at most 32) }`,
+sent at a player's square change for the three squares of game-file actors
+around it before any of them is subscribed, and for a server-made NPC to each
+subscriber just ahead of its CreateActor (the placement rolls the fate before
+its create word), so every engine dresses the placement from the server's
+roll (Skyrim Platform's detours on the roll sites) instead of rolling its own.
+Validator (wire-validate check_fates): 1 to 64 entries, each refrId nonzero,
+at most 32 worn, every id nonzero.
 
 ActorDeath (id 60, MsgType 52), client to server, reliable, once per death,
 R1 (fork m3-train-44 597bb9dc, 2026-10-24; ADR-048's B, Eli's D1 "jump right
