@@ -2884,3 +2884,51 @@ schedule, so two seats may see it emerge at slightly different moments until the
 moves the record and the word demotes the others: a visible seam measured by
 b-npc-handoff-night's claims, accepted. Retired by a later owner table (ADR-050 decision 4) only
 if an unloaded actor ever needs a simulator (a follower in a cell its player left).
+
+## ADR-052: A per-actor claim beside the cell's host: the server may give one NPC to one player for a while, and a dialogue is the first case
+
+Status: PROPOSED 2026-10-26 14:43 PDT (thuum-magnus, train 55; ADR-050 decision 4 asked for the
+owner table "when the first case needs it"; Eli's D31 letter C: "if something is drafted just do
+the thing"). Eli accepts.
+
+Context. The hosting unit is the cell (ADR-035): every NPC in a cell is simulated by the cell's
+host, and a seat that does not host the cell sees puppets whose activation is blocked natively
+(train-36), because the engine's dialogue with an AI-off actor never answers (playtest 33: the
+Dialogue Menu stuck). So a guest cannot talk to a resident in a cell another player hosts;
+playtest 33 showed the cure in kind ("test 2 was able to talk just fine once test 1 left").
+ADR-047 already holds one per-actor exception to the cell rule, the follow (an actor in a cell
+nobody hosts stays its host's), and ADR-047 D22's brake makes a second (a follow into another
+host's cell within the pass margin). Both live in the rules' follows table, and
+WorldState::HostOf answers through simulator_of, so every server gate (ActorUpdatableBy, OnHit,
+OnSpellCast, GetActorToSendTo, OnActorDeath) follows a per-actor row for free, and the word to
+the clients is already per actor (MpObjectReference::UpdateHoster). The missing piece is a row a
+PLAYER may ask for.
+
+Decision.
+1. The claim: a player loaded in an NPC's cell and within activation reach may claim the actor
+   (ActorClaim, MsgType 56, {idx, claim: true}); the server grants it when the actor is an NPC,
+   alive, not in combat (the host's last state) and unclaimed, by writing a follow row for the
+   claimant (the actor, the cell, a lease), so simulator_of names the claimant: the old host's
+   seat demotes the actor on the word, the claimant's promotes it (AI on, activation unblocked),
+   and the claimant's engine runs the actor; its reports pass the gates as a host's do.
+2. The release: the claimant's ActorClaim {claim: false} (sent at the Dialogue Menu's close), the
+   lease's end (CLAIM_LEASE_MS, 120 s, UNMEASURED), the claimant leaving the cell or the server, a
+   grant into the cell, or the actor's death end the row; the cell's rule names the simulator
+   again and the word follows. The claimant's engine is believed about the actor for the claim's
+   span only.
+3. The cell stays the policy: no claim outlives its cell's next grant, a claim grants no cell, and
+   a claimant simulates nothing else. The owner table ADR-050 decision 4 named is this table: the
+   follows map with a kind per row (follow, margin, claim), its first cases a dialogue (now),
+   followers, mounts and summons (later rows, each its own ADR note).
+4. What a dialogue does (quest stages, gold, items given, a follower recruited) stays M6's: the
+   claimant's engine runs the menu natively and its lines reach every seat through the voice
+   slice; the engine's Papyrus fragments stay blocked on clients (ADR-044's rule), so the
+   conversation has no shared effect yet, which the playtest's Known limits say.
+
+Consequences. The client's trigger is the Activate key on a puppet under the crosshair (the
+engine's activate event never fires for a blocked activation), and the activation itself runs
+through PlayerCharacter::ActivatePickRef once the word has promoted the actor and its AI has
+ticked (no second key press). A claim's demote on the host's seat ends that engine's packages for
+the actor mid-step (as a handoff does); the host's seat sees the puppet walk to the talker and
+face it from the claimant's stream. A failed promote (the engine refusing the dialogue on a
+just-promoted actor, HYPOTHESIS) reads as an open menu that never comes; the lease ends it.
