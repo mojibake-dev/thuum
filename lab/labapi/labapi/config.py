@@ -264,8 +264,13 @@ class Settings:
     # 20261025-235731: Intuitive Dragon Ride Control's own "SKSE is not loaded" check racing c2's load, so c2 measured
     # nothing and the run ended E_RUN_PAUSED). With clear_start_box on, start_box_wait_s after each connect lab-api reads
     # the seat's menus once and closes a MessageBoxMenu it finds, saying so in the run's notes; a box raised later in
-    # the run stays a finding (E_RUN_PAUSED at the assert or the end).
-    clear_start_box: bool = True
+    # the run stays a finding (E_RUN_PAUSED at the assert or the end). OFF by default since 2026-10-26: its wait made
+    # every connect and reconnect 3 s slower (the nightly 20261026-104926: 197 steps at 3.04 s or more, 0.009 s
+    # before), which pushed m0-death's check past the server's 25 s respawn (145408); and its close posts a kHide
+    # that IDRC's box ignores ("it stayed after a close", x-quit-scan 021707), while the box has not come since the
+    # Frida watcher went headless (20f10f31). The end check still reads a box (E_RUN_PAUSED). CLEAR_START_BOX=1 turns
+    # it back on for a seat that needs it.
+    clear_start_box: bool = False
     start_box_wait_s: float = 3.0
     # lab-api as the clones reach it (lab-driver-settings.txt: labApiBase + labApiPath)
     client_lab_api_url: str = "http://10.10.70.10/lab"
