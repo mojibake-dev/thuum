@@ -76,6 +76,8 @@ body is refused with no menu and no message until the first closes.
 - Recommended: A for M3; B when a notice channel to the player exists (the
   HUD line the fate's deaths will want too). C is a client and server slice of
   its own and a race the engine's menu was not built for.
+- The release itself is proven at T3 (18:42 PDT): b-npc-body-release (x-body-release
+  v3 20261026-012319), so A reads as upstream's rule with the defect gone.
 
 ### D21. A disabled server-made actor's respawn
 Numidium's section 5 read: the ice wolf ff000003, disabled by the console at
