@@ -867,3 +867,25 @@ Doc drafted 2026-10-21, before any code.
 MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity aaafffe5 carries the
 pass between live hosts (npc-handoff D9) and the corpse's release; the dead
 host (D18-B) rides train-48, built ahead on Eli's letter.
+
+THE HOLDERS READ (18:49 PDT, 2026-10-25; x-quit-holders 20261026-014250 on
+parity aaafffe5, numidium's run of quit-path.js's holders mode; the quit
+crashed as every quit does, c1-crash-2026-10-25-18-45-37.log): at the UI
+destructor's entry the Loading Menu's IMenu read refCount 5, onStack false,
+delegateCallbacks 2, 207 ms after the quit flag. The UI's own references
+are the menu map's entry and the two delegate callbacks, three; the two
+over them are held OUTSIDE the UI, so the survival is an outside holder,
+not the destructor's order (the second branch of the earlier HYPOTHESIS
+falls). The records after the unregister and the map and stack destructors
+never reached disk (the crash came before the next flush, or the hooks
+never fired); the entry count decides it alone. Two reads are open: the
+plugin bisect in the order above (SSEDisplayTweaks first), or one run that
+names the holder: a write watchpoint on the IMenu's refcount word (IMenu +
+0x08, the count the names mode reads) logging each writer's return address
+and module across two loading screens and the quit, if the lab's Frida
+offers hardware watchpoints (Thread.setHardwareWatchpoint, per thread). The
+count of two matches the run's two loading screens (the login's and the
+teleport's), so a holder that takes a reference at every Loading Menu open
+and never gives it back is the first thing the watchpoint would show
+(HYPOTHESIS).
+
