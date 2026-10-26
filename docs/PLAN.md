@@ -1154,10 +1154,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   m3-train-46 aaafffe5, server: the pass between live hosts at a crossing,
   the server-made actor's death by the NPC rule, the hosted hit's weapon
   mismatch said at info, the corpse's occupancy released by its looter's
-  closing activation) is MERGE-READY by citation (gate 20261026-001639
-  eighteen of eighteen, T2 green, the four fixes read true at T3; two new
-  scenarios committed from the greens, b-host-own-hit and
-  b-npc-handoff-cross), waiting on Eli's look; train-47 (client,
+  closing activation) is MERGED (18:44 PDT, Eli: "Merge now"; fork parity
+  aaafffe5, thuum main bfc41e0b; gate 20261026-001639 eighteen of eighteen,
+  T2 green, the four fixes read true at T3; four scenarios committed from
+  the greens, b-host-own-hit, b-npc-handoff-cross, b-npc-body-release and
+  b-npc-protected); train-47 (client,
   f70cf19f: the looted body's inventory as a diff alone, the hosted
   server-made copy dressed once, the late fate's redress-or-reload of the
   3D, a puppet's own activation not forwarded) and train-48 (server,
