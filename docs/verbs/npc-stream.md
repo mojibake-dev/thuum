@@ -1491,6 +1491,44 @@ the host's emotion during and outside the line (npc-state gains the two
 reads). This slice waits for D25's letter (the memo's D30): built on the
 merged train, not on the branch up for merge.
 
+### The refusal's static read and voice v3 (11:57 PDT)
+
+The re-analyst's follow-up (REA on sky-re, 11:3x to 12:0x PDT) names the
+humanoid puppet's refusal with high confidence, HYPOTHESIS until P7 v3:
+our native passes the say's seventh flag as true (Say's own shape), and
+that flag selects the ASYNCHRONOUS lip-file load inside SpeakSoundFunction
+(37542: the lip entry queued to the background loader, its state word at
++0xC in bits 28 to 30 reading 1 or 2 while pending; the engine's callers
+pass the INI bBackgroundLoadLipFiles here, default 1). With the lip
+pending, 37542 returns before BuildSoundDataFromFile, before the head
+follow and before the state byte's 3, and 39772 marks the say "in flight"
+(+0x454) for the engine to REPLAY on its next AI frame (39632, reached only
+through UpdateAI 37347): a puppet, AI off, never replays it, so the first
+humanoid line plays nothing. A creature's bark has no LIP file: the lookup
+fails synchronously, 37542 clears the entry and plays at once, state byte
+3, which is exactly P7 v1's split (twenty-five creature starts, one
+resident refusal, identical pre-state). Corrected on the way: 37266's test
+is `(bits & 0x180) != 0x180 || timer > 0` means busy, and the logged bits
+0x382021a1 have both done bits set, so 37266 refused nobody. The detour's
+pair holds no replay (37752 returns on the done bit; 37544 only ends
+lines), so the engine's deferral path is closed to a puppet by design.
+Second candidates, lower: 37542's distance gate against the audio
+listener outside a scene (Sven's distance on c2 unread), an empty
+DialogueItem when the topic has no owner quest or the response list fails
+to load. HighProcessData's +0x3B8 is the current line's lip-sync resource
+entry (set by 37542 and the sound-descriptor path, cleared at the line's
+end, at a pause and at Say), not a dialogue state: the first-read name was
+wrong and the doc above is corrected by this paragraph.
+
+Voice v3 (the commit after ad1d103d on m3-npc-voice): the native passes
+the seventh flag false, the SYNCHRONOUS lip load (16256), so the line
+plays in the same call with its lip sync and no replay is needed; the
+diagnostics add the lip entry's state bits before and after the call.
+Falsifiers in P7 v3: a resident's say still refused with the entry null
+(the distance gate or an empty item), or entered with the entry already
+loaded and still refused. The lab's one asset fact left: whether Sven's
+line 6aea9 carries a LIP and the chickens' bark 10aa5d does not.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
