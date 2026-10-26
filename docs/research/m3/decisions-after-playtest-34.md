@@ -151,6 +151,27 @@ is which brake.
 - The read (16:58 PDT): x-handoff-cross v2 20261025-235039 GREEN, one pass in
   three minutes, no refusal, no thrash. A stands; nothing to build.
 
+## Merge-ready (46) (18:24 PDT, 2026-10-25; numidium's citation)
+
+Train-46 at fork m3-train-46 aaafffe5 (five commits over parity fa8809a1:
+53432d22 the pass between live hosts, fe1ee08f the server-made actor's
+death by the NPC rule, 5d391c4b its unit case, c7c389af E_HIT_WEAPON at
+info, aaafffe5 the corpse's occupancy released) is merge-ready by citation:
+gate-m3-train-46 (20261026-001639) GREEN 18 of 18 with no reruns
+(smoke-two-players to b-invis-recast 011953); T2 green at aaafffe5
+(17:16:36 PDT); gate-cite's five checks passing (one build; the registry
+serving skymp-server:m3-train-46; the clones naming "m3-train-46 client
+aaafffe5"; aaafffe5 the staged commit; nothing replaced it). The stage's
+probes: x-host-own-hit GREEN (234109, committed b-host-own-hit b09d7b25),
+x-handoff-cross v2 GREEN (235039, committed b-npc-handoff-cross 81211790),
+x-body-release v2 with every claim held (235731; red on a mod's start-up
+box alone) and x-npc-protected v2 with the floor held (000257; red on the
+bear's own death line alone), both v3s running as this is written. The
+command at Eli's word: `GATE_SET=20261026-001639-gate-m3-train-46 T2=skip
+just verb-merge m3-train-46`, the eleven M3 b- scenarios named as for 45.
+Built ahead of its letters and not merging with it: train-47 (client,
+f70cf19f) and train-48 (server, 9b412a10).
+
 ## The trains, in order
 1. train-46 (server), fork m3-train-46 aaafffe5: after Eli's report, numidium's
    stage with x-handoff-cross, x-host-own-hit and x-body-release by path, T2,
