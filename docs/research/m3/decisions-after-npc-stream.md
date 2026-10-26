@@ -139,3 +139,13 @@ applying them through the engine's own setters; no new engine id.
 
 ## Recommendation, in one line
 D25 C, D26 A, D27 B, D28 B, D29 C, D30 C.
+
+## Added 13:13 PDT, after Eli's letters (all recommended): the ladder's calls, settled by Eli's words on the plan
+
+Eli, on the one-shot plan: "i would argue not to defer actually. if something is drafted just do the thing, 35 can wait till that's done."
+- D31. Talking to an NPC from a seat that does not host its cell: C, the dialogue claim (ADR-050 decision 4's first case; ADR-051 and docs/verbs/npc-talk.md first), train 55.
+- D32. Merge authority for the ladder: recommended B (one word now; each train merges when its gate is green and its probes' claims hold, reported as it lands; any red, weakened assertion or scope question stops the chain). Read as B unless Eli says A.
+- D33. When playtest 35 runs: A, at the ladder's end.
+- D34. ADR-050 decision 2 (the engine's own death) in this ladder: A, built (train 52).
+- D35. ADR-050 decision 3's client reconciler in this ladder: A, built (train 51).
+- D27-B's read of P7 v3 (200538): green on its letter, the resident still deferred; the voice stays off the build until a resident speaks on a puppet (its own train after the Dynamic read); the stream merges alone under D25-C.
