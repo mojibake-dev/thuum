@@ -504,7 +504,7 @@ def create_app(services: Services) -> FastAPI:
         if not g.managed:
             raise HTTPException(400, f"{g.name} is unmanaged; Frida cannot be started there through the guest agent")
         url = f"{s.lab_api_internal_url.rstrip('/')}/frida/scripts/{name}"
-        cmd = ["powershell", "-NoProfile", "-Command", s.frida_exec_template.format(url=url, name=name, lab_dir=s.client_lab_dir, out="")]
+        cmd = ["powershell", "-NoProfile", "-Command", s.frida_exec_template.format(url=url, name=name, lab_dir=s.client_lab_dir, out="", user=s.client_lab_user)]
         try:
             res = await asyncio.to_thread(services.control.exec, g, cmd, s.guest_task_timeout_s)
         except ProxmoxError as e:

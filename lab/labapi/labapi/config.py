@@ -134,16 +134,24 @@ class Settings:
     # the game directory as above): skymp5-client's printConsole, logTrace and logError lines reach no other
     # file; collected as <client>-console.log, and log-count reads it beside <client>.log
     client_console_log: str = r"Data\Platform\Logs\lab-console-logs.txt"
-    # PowerShell run through the guest agent. {url} {name} {lab_dir} {out} are filled in.
+    # PowerShell run through the guest agent. {url} {name} {lab_dir} {out} {user} are filled in.
     # frida-inject (the standalone injector, staged by `just client-frida`) attaches
     # to the game by name once it exists plus five seconds (attaching at process
     # start never loaded the agent, 2026-10-01) and keeps running until the game
     # ends; its stdout is the trace. It must run in the lab user's session, the
     # game's: as SYSTEM through the guest agent it failed on both clones on
     # 2026-10-05 ("refused to load frida-agent"), while the same command through
-    # the sky-lab-run task (register-runner.ps1, as `lab` on the desktop)
-    # attached. So the watcher becomes C:\sky-lab\run.ps1 and that task runs it.
-    # Braces are doubled for str.format.
+    # a task running as `lab` on the desktop attached. So the watcher becomes
+    # C:\sky-lab\frida-watch.ps1 and the on-demand task sky-lab-frida runs it,
+    # registered with -Force at each use (nothing for a snapshot to carry) and
+    # headless, as mouse.py's sky-lab-input is: through Windows 11's default
+    # console host a -WindowStyle Hidden PowerShell still opens a window over the
+    # game (install-lab.ps1's screenshot note), and a seat relaunched under Frida
+    # came up with the taskbar over its game and its keys going nowhere
+    # (x-start-box 20261026-022654: the console did not open, as in x-quit-watch
+    # 015302 and x-quit-scan 020652 and 021213). conhost --headless opens no
+    # window, and frida-inject shares its console (-NoNewWindow), so the game
+    # keeps the foreground its launch gave it. Braces are doubled for str.format.
     # frida-inject eternalizes the script and exits (-e, frida 17.19.0's own option): a load error is
     # flushed to its .out at once, and the script's lines reach its .log through runner.frida_script_text's
     # preamble (stdout redirected to a file sat in the injector's buffer until it exited: P0, 2026-10-21)
@@ -151,15 +159,20 @@ class Settings:
         "Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile '{lab_dir}\\frida\\{name}'; "
         "$w = @'\n"
         "$d = '{lab_dir}\\frida'; for ($i = 0; $i -lt 1500; $i++) {{ $p = Get-Process SkyrimSE -ErrorAction SilentlyContinue; if ($p) {{ break }}; Start-Sleep -Milliseconds 200 }}; "
-        "if ($p) {{ Start-Sleep -Seconds 5; Start-Process -FilePath \"$d\\frida-inject.exe\" -ArgumentList '-p', $p.Id, '-s', \"$d\\{name}\", '-e' -RedirectStandardOutput \"$d\\{name}.out\" -RedirectStandardError \"$d\\{name}.err\" -WindowStyle Hidden }}\n"
+        "if ($p) {{ Start-Sleep -Seconds 5; Start-Process -FilePath \"$d\\frida-inject.exe\" -ArgumentList '-p', $p.Id, '-s', \"$d\\{name}\", '-e' -RedirectStandardOutput \"$d\\{name}.out\" -RedirectStandardError \"$d\\{name}.err\" -NoNewWindow }}\n"
         "'@; "
         # one watcher at a time: the task's IgnoreNew policy drops a start while a previous watcher still
         # sleeps before its inject (x-frida-flush 20261022-043924: a second frida step a second after the
         # first never started), so a step waits up to 20 s for the task to be idle and fails if it is not
-        "for ($i = 0; $i -lt 100 -and (Get-ScheduledTask -TaskName sky-lab-run).State -eq 'Running'; $i++) {{ Start-Sleep -Milliseconds 200 }}; "
-        "if ((Get-ScheduledTask -TaskName sky-lab-run).State -eq 'Running') {{ Write-Error 'sky-lab-run still runs a previous frida watcher (it waits for the game)'; exit 3 }}; "
-        "Set-Content -Path '{lab_dir}\\run.ps1' -Value $w; "
-        "Start-ScheduledTask -TaskName sky-lab-run"
+        "for ($i = 0; $i -lt 100 -and (Get-ScheduledTask -TaskName sky-lab-frida -ErrorAction SilentlyContinue).State -eq 'Running'; $i++) {{ Start-Sleep -Milliseconds 200 }}; "
+        "if ((Get-ScheduledTask -TaskName sky-lab-frida -ErrorAction SilentlyContinue).State -eq 'Running') {{ Write-Error 'sky-lab-frida still runs a previous frida watcher (it waits for the game)'; exit 3 }}; "
+        "Set-Content -Path '{lab_dir}\\frida-watch.ps1' -Value $w; "
+        "$ps = Join-Path $env:SystemRoot 'System32\\WindowsPowerShell\\v1.0\\powershell.exe'; "
+        "$a = New-ScheduledTaskAction -Execute 'conhost.exe' -Argument ('--headless ' + $ps + ' -NoProfile -ExecutionPolicy Bypass -File {lab_dir}\\frida-watch.ps1'); "
+        "$s = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Hours 2) -MultipleInstances IgnoreNew; "
+        "$t = New-ScheduledTaskPrincipal -UserId '{user}' -LogonType Interactive -RunLevel Highest; "
+        "Register-ScheduledTask -TaskName sky-lab-frida -Action $a -Principal $t -Settings $s -Force | Out-Null; "
+        "Start-ScheduledTask -TaskName sky-lab-frida"
     )
     # Writes a base64 text file next to the PNG so the guest-agent file API (text only) can carry it.
     # The capture must happen in the lab user's session: the guest agent runs

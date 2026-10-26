@@ -1416,7 +1416,17 @@ class FridaSteps(RunTests):
             self.assertIn(f"{v.name}.log", v.read_text())
         self.assertTrue(all("'-e'" in e for e in started), "frida-inject eternalizes the script and exits")
         # a step waits for the previous watcher, since the task drops a start while one runs (x-frida-flush)
-        self.assertTrue(all(e.index("Get-ScheduledTask -TaskName sky-lab-run") < e.index("Start-ScheduledTask") for e in started))
+        self.assertTrue(all(e.index("Get-ScheduledTask -TaskName sky-lab-frida") < e.index("Start-ScheduledTask") for e in started))
+        # the watcher's task is registered at each use and headless, and frida-inject shares its console: no
+        # window comes over the game, which keeps the foreground and its keys (x-start-box 20261026-022654)
+        for e in started:
+            self.assertLess(e.index("Register-ScheduledTask -TaskName sky-lab-frida"), e.index("Start-ScheduledTask"))
+            self.assertIn("-Force", e)
+            self.assertIn("'conhost.exe' -Argument ('--headless '", e)
+            self.assertIn(f"-UserId '{self.settings.client_lab_user}'", e)
+            self.assertIn("-NoNewWindow", e)
+            self.assertNotIn("-WindowStyle Hidden", e)
+            self.assertNotIn("sky-lab-run", e)
 
     def test_a_relaunch_arms_its_frida_watcher_while_the_game_is_stopped(self):
         """x-npc-napi-trace 20261022-071646: a frida step after a relaunch attached 1 s after the hang, past
