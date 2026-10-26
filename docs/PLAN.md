@@ -1196,6 +1196,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   (ADR-052 PROPOSED, ActorClaim 56/64); voice v4 m3-npc-voice 8da16ef6; D22's brake m3-pass-margin 11bf32f3
   (memo D36). The lab: the stream's gate running (one login-transient red, reruns at its end), then Step R,
   the voice stage, 50b, 51, 52, 54, 55 in numidium's queue; each merges on a green gate (D32 B).
+- STATE 2026-10-26 15:40 PDT: the STREAM MERGED (fork parity 66f04f2a, 22:14Z, 25 green; b-npc-handoff-cross
+  an ADR-027 watch item); Step R DONE (P3 and P6 v3 green, H6 confirmed; the bow and spell reads' records in
+  hand, their projectile reads re-timed in v2); 50b cut as m3-train-50b 951ea43d; the brake current
+  045f5ca0; train 53's server half built, m3-npc-cast 30e72b86 (a hosted NPC's spell list recorded R2, its
+  hits validated R1), the bow relay and the spell client next on it. The lab: the voice v4 stage (merge only
+  on a green P7 v4), then 50b, 51, 52, 54, 55, 53.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
