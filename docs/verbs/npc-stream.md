@@ -1241,6 +1241,53 @@ commit (rule 13), the parity scenario p-npc-stream and the reference trace
 (ADR-050 decision 5), the labState `stream` counters with their lab-api
 row, the sequence table's result column (ADR-033).
 
+### The first stage's read and slice 1 v2 (2026-10-26 09:09 PDT, fork a0ff0e72)
+
+The stage of 2673d1ab (verb-stage 08:09 to 08:31 PDT, T2 GREEN at 15:58Z)
+ran P4, P5 and P6 and all three ended E_RUN_GAME_LOST for c2, the puppet
+seat, within seconds of the host's stream reaching its puppets
+(20261026-151921, -152304, -152837): access violations in the graph update
+under the animation job the puppet detour queues (41453 in P5's stack), a
+ChickenProject graph on P5's stack, a HighlandCowProject on P6's, a
+grindstone's BlacksmithSharpeningWheelAnimatingProject on P4's,
+OpenAnimationReplacer in the frames. The bisect x-npc-stream-p4-off
+(160318: P4's layout with the host's npcStream false) ran clean, and in
+it c2 itself hosted the lab spawn's NPCs and streamed their state and
+equipment without harm: the host side of slices 2 and 3 holds, the fault
+was the puppet-side apply.
+
+The cause in our code (read, not inferred): AnimationGraphMasterBehaviour-
+Descriptor reads and writes a graph's variables at the humanoid master
+behaviour's FIXED indexes (AnimationVariablesForMasterBehavior.h,
+AnimVariableMasterGraphIndexes::CreateDefault) with no check of the graph's
+project or of the variable set's size; every figure's graph was the
+master's, and cast-action never met another. A hosted chicken's or cow's
+graph is another project, so the host captured garbage for it and the
+puppet seat wrote the master's indexes into the creature's variable set,
+which the next graph update died on. The third crash is the other shape:
+a resident's furniture idle (the grindstone's) performed through the
+engine's action entry on a puppet not at the furniture, whose sync the
+entry's handler assumes.
+
+v2 (a0ff0e72): the descriptor admits a graph only when its project is
+DefaultMale or DefaultFemale (HYPOTHESIS on the two names until the lab's
+once-per-project log line reads them; a wrong pair would stream nothing
+and say so) and every index lies inside the variable set; the hook
+reports and marks a hosted actor only when its variables were captured, so
+a creature is not in the stream and its events ride the relay as before;
+on the puppet side the engine's entry performs the hands' casts and the
+attack family alone (the figures' proven path on humanoid graphs; the
+attacks H2a's test), and every other action (a package idle, a canned
+turn, a draw, an activate) is sent to the puppet's graph as its event, the
+relay's proven path, with no variables and no retries. Two bisect switches
+for the next stage, read from c2's settings file, on by default:
+npcStreamActions (false drops an NPC puppet's queue unplayed) and
+npcStreamHands (false skips the hands' apply). The voice branch takes v2 by
+merge (fba05393). The re-analyst's read of the three crashes' frames
+(59263+0x10, 59380+0xFB, the graph update chain) is running and lands in
+the Dynamic plan when it comes; the lab's next read is P4 to P6 on v2's
+stage (started 09:1x PDT).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
@@ -1255,7 +1302,9 @@ handler, the client's sender; wire tests and clippy clean, tsc, codegen and
 fork-lint clean; CI green, pipeline 3133). Slice 3 (EQUIPMENT) built the
 same morning (the hosted idx resolved in OnUpdateEquipment, the hands
 streamed from the host's poll, the puppet's hands following; tsc, lint and
-the JSON crate's tests clean; fork 2673d1ab, CI green, pipeline 3136). Slice
+the JSON crate's tests clean; fork 2673d1ab, CI green, pipeline 3136; the
+first stage RED on the puppet seat's crash, slice 1 v2 a0ff0e72 pushed
+09:09 PDT, its stage running). Slice
 4's voice line read twice by the re-analyst and BUILT 2026-10-26 05:33 PDT
 on fork branch m3-npc-voice 82ffd53a (the sink, the native, the detour's pair, the
 message with its validator and fixtures, the server relay, the client
