@@ -1397,13 +1397,16 @@ the runs' logs:
   engine's worn items agree, CONFIRMED for the residents); the placed
   bandit's one refusal and one dropped swing (E_EQUIP_REFUSED, E_HIT_WEAPON)
   are D19's gap, recorded. H6 (the puppet's hands follow the record on the
-  other seat) is not yet claimed by a probe (P6 reads the server's side);
-  the lab-api row server.ref(id).worn (numidium's, live) lets the next
-  probe compare the record with both seats' npc-state worn lists.
+  other seat) was not claimed by these runs (P6 reads the server's side);
+  the lab-api row server.ref(id).worn (numidium's, live) let P6 v3 compare
+  the record with both seats' npc-state worn lists: CONFIRMED on Step R
+  (x-npc-stream-p6 20261026-222815, GREEN, all 34 steps, on the merged
+  parity 66f04f2a: c1's and c2's worn lists equal server.ref(0x13491).worn).
 - The budgets' first numbers (UNMEASURED placeholders) were never hit:
   no E_VAL_RATE in the server logs across the stage.
 
-Open after the stage: H6 (a worn-list comparison across the seats), the
+Open after the stage: H6 (a worn-list comparison across the seats; CONFIRMED
+on Step R, 222815), the
 voice slice's V1 to V4 (P7 on the voice stage, running), the counters
 (slice 4), the budgets from a measured rate (P3's read of these logs is a
 start: 142 actions and 38 states in about 110 s for seventeen actors), the
@@ -1614,6 +1617,62 @@ against the heuristic). Probe x-npc-stream-face by path (30 steps). The
 cadence row (P3) and slice 4's counters, budgets and parity scenario follow
 on this train.
 
+Step R (2026-10-26, on the merged parity 66f04f2a; numidium's chain, 22:15
+to 22:32Z): P3 (x-npc-stream-p3 20261026-222300) GREEN, all 32 steps, its
+pcap the rates' read (the numbers follow in the measured table); P6 v3
+(222815) GREEN, H6 CONFIRMED; x-npc-bow (221512) and x-npc-spell (221906)
+red on a probe slip alone (a log_count claim reads an earlier log-count step
+with the identical pattern), their records in hand: the archer's three draw
+and two release actions streamed on c1 and played on c2 (taken 1; the
+ring's other 24 taken 0; no block anim), the mage's nine hand-cast actions
+streamed and played nine of nine. The projectile reads came 25 to 30 s after
+the volley, and the spell run asked for arrows (form type 64; bolts are 63,
+flames 67), so whether the puppet's engine launches an arrow or a bolt of
+its own on the replayed release is UNREAD; v2 of both probes by path polls
+the references ten times through the fight's first dozen seconds. Train
+53's call: the bow relay is built whatever v2 reads, one shape for arrows
+(every arrow on the wire is a relayed shot, a puppet's like a figure's; the
+puppet's own launch, if its engine makes one, dropped by the launch rule
+extended to puppet shooters); v2's read decides only whether that drop has
+work to do (H-53c).
+
+Slice 6 (SPELLS AND BOWS on hosted NPCs, train 53; ADR-050's "attacking the
+same"), the server half built 2026-10-26 on fork m3-npc-cast 30e72b86 (off
+the talk head 87557458): a hosted actor's hands, casts and hits under its
+own id, with these dispositions (rule 5). The NPC's spell LIST is the host's
+engine's (templates and leveled spell lists the server does not walk):
+recorded, R2. A spell or a shout in a hosted equipment report outside the
+known set is recorded with one line (E_EQUIP_UNKNOWN_SPELL) when the form is
+a SPEL or a SHOU, and a form that is neither refuses the report as before; a
+hosted cast of a spell the record's hands lack is recorded and relayed
+(E_CAST_UNKNOWN; a form that is no spell E_CAST_FORM, refused). The known
+set itself widens through the template the chain names for spells (NPC_'s
+UseSpelllist, EvaluateTemplateNoThrow over the evaluated chain). The HITS
+are validated, R1, as a player's: the claim against the recorded cast, the
+bond, the first-hit release of a touch or target-actor cast and the
+second-hand reach claim run for every recorded cast, a hosted one included,
+and a hosted spell hit with no cast behind it is refused (E_SPELL_NO_CAST,
+the hole the plan's review named). The player's own gates stand (the shout
+rule and its recovery are a player's; an NPC's shout falls to the generic
+path as a recorded cast; headshot spells stay a player's, H-53d). Why
+recorded and not refused slot by slot, the plan's words: OnSpellCast's
+equipment gate keys on the record's hands, so a refused slot would drop the
+NPC's cast; recording keeps the host's engine the authority on what its NPC
+knows and the server the authority on what its hits do. T0:
+unit/NpcCastTest.cpp, five cases on the forest's predator hosted by one
+player (the hands recorded and relayed, a sword refused; the cast recorded
+and relayed, its hit claimed once; a hit with no cast refused; an unlisted
+spell's cast recorded and its hit landing by reach; a touch cast relayed at
+its first hit). HYPOTHESIS H-53a (the template chain gives a leveled mage's
+list; read as the count of E_CAST_UNKNOWN lines on x-npc-spell v2), H-53b
+(the puppet's cast through castSpellImmediate ends when the host's does: the
+end is player-only on the client, magicSyncService), H-53c (the puppet's own
+arrow or bolt on the replayed release, the drop's work), H-53d (NPC headshots
+are not counted). The bow relay (PlayerBowShot gains the shooter's idx, the
+hosted branch of OnPlayerBowShot, ArrowShot under the NPC's idx, the shot
+claim for hosted shooters, the launch drop for puppet shooters) and the
+spell client follow on the branch.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
@@ -1632,7 +1691,7 @@ the JSON crate's tests clean; fork 2673d1ab, CI green, pipeline 3136; the
 first stage RED on the puppet seat's crash, slice 1 v2 a0ff0e72 pushed
 09:09 PDT; the v2 and v3 stages GREEN, no crashes, T2 green twice; the
 three slices at T3 on probes 11:03 PDT, H1, H2, H2a, H3 and H7 confirmed,
-H6 open). Slice
+H6 confirmed on Step R, P6 v3 222815). Slice
 4's voice line read twice by the re-analyst and BUILT 2026-10-26 05:33 PDT
 on fork branch m3-npc-voice 82ffd53a (the sink, the native, the detour's pair, the
 message with its validator and fixtures, the server relay, the client
