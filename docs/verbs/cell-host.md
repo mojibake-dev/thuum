@@ -916,3 +916,15 @@ in our quit thunk after the disconnect (the way the "fast exit" plugins
 do), or drop or replace the two plugins; x-quit-bisect-ngd-ddo (by path)
 reads the count and the quit with the two DLLs renamed aside.
 
+BUILT AHEAD, D24-B (19:33 PDT, 2026-10-25; fork m3-train-49 1c25b0e6 off
+parity aaafffe5, a client dist; built ahead does not merge): the quit
+thunk OnQuitShutdown, after the client's teardown and a log flush, ends the
+process (TerminateProcess) instead of running the engine's shutdown, when
+skymp5-client's quitFastExit setting (default on) has said so through the
+plugin export setQuitFastExit (MpClientPluginApi; Definitions.txt and the
+regenerated skyrimPlatform.ts carry the declaration); false keeps the
+engine's own shutdown for a read of it. The probe x-quit-fast (by path):
+b-host-quit's claims with quit-path.js's quit mode armed, the read being
+the trace's quit flag and disconnect rows with no "shutdown enter" and the
+seat back from a clean end with no crash log.
+
