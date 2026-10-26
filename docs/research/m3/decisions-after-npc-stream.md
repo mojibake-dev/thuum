@@ -39,6 +39,8 @@ and the reference trace (ADR-050 decision 5).
   and decides whether one merge or two. Slice 4's rows are measurement and
   bookkeeping that read the merged build better than a stage.
 
+- Decision: recommended
+
 ### D26. The epoch on HostedActorState (the verb doc's Q1, revised at the build)
 The draft carried the cell's epoch on every state; the build dropped it:
 a client cannot name a persistent reference's cell (getParentCell is the
@@ -52,6 +54,8 @@ host. ADR-035 point 5's "with the epoch" is met by the server's number.
   more per actor per flip), and the server checks it against the cell's.
 - Recommended: A. B adds a message per actor per grant to carry a number
   the server already holds, for a race the grace already closes.
+
+- Decision: recommended
 
 ### D27. The voice slice in playtest 35
 Built on m3-npc-voice (the spoken-line sink filtered to hosted speakers,
@@ -70,6 +74,8 @@ harmless); P7 reads them this hour.
 - Recommended: B. A green P7 is the verb's own bar; a red one means the
   engine disagreed with the static read and the Dynamic plan's Frida read
   comes first (rule 8).
+
+- Decision: recommended
 
 ## npc-fate
 
@@ -90,6 +96,8 @@ with D). 50: the stack of the three.
   and D29 decides its gap's path; the rest are decided fixes with green
   gates waiting.
 
+- Decision: recommended
+
 ### D29. The server-made copy's dress (playtest 34's D19, read again by b-npc-stream-equipment)
 A bandit the server places (PlaceAtMe) is dressed by its host's engine from
 the base's own roll while the record holds the server's roll; slice 3 now
@@ -108,6 +116,8 @@ affected (the fate pins their roll).
 - Recommended: C, with B only if playtest 35 needs placed bandits to hit
   the players (the temple's bandits are game-file actors and hit already).
 
+- Decision: recommended
+
 ### D30. The gaze and the face (Eli, 11:43 PDT: "the puppets end up fairly stiff on a cell guest's screen")
 After slices 1 to 3 and the voice, a guest's puppet still aims its head at
 a heuristic point and wears a neutral face outside speech; the engine
@@ -124,6 +134,8 @@ applying them through the engine's own setters; no new engine id.
 - Recommended: C. The branch up for merge has three green scenarios; a
   fourth slice on it restarts its stage, and the cadence number decides
   how much the gaze and the face buy against the lag a player sees first.
+
+- Decision: recommended
 
 ## Recommendation, in one line
 D25 C, D26 A, D27 B, D28 B, D29 C, D30 C.
