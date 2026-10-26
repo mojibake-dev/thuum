@@ -168,8 +168,14 @@ crash log per quit; nothing else is lost.
 - Built ahead, not merged (19:33 PDT, fork m3-train-49 1c25b0e6, a client
   dist off parity aaafffe5): OnQuitShutdown's fast exit behind
   skymp5-client's quitFastExit setting (default on) and the plugin export
-  setQuitFastExit; probe x-quit-fast by path. Awaits the letter and the
-  bisect's read (x-quit-bisect-ngd-ddo, running).
+  setQuitFastExit; probe x-quit-fast by path. Awaits the letter.
+- The bisect's read (19:36 PDT, x-quit-bisect-ngd-ddo 20261026-022931):
+  without the two plugins the count stays 3 through three loads and the UI
+  destructor, so they are the whole Loading Menu leak; but the quit still
+  crashes, later, in the world teardown (SkyrimSE.exe+0x1949d3 under
+  36551+0xd9d, an actor's 3D going down: a second crash the first hid). C
+  alone gives no clean quit; B skips both. Recommended: B, with D for the
+  two plugins' leak.
 
 ## npc-handoff
 
