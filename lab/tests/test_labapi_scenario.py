@@ -160,6 +160,16 @@ class ScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             playtest_step('console {text: "tai"}')
 
+    def test_a_playtest_draws_and_calms_a_named_npc(self):
+        # playtest 35's "draw <name>" and "calm" on the host's seat: one named NPC's combat opened and ended with its AI
+        # left running (an npc-ai off and on would flip the simulation under test)
+        from labapi.scenario import load_scenario, playtest_step
+
+        self.assertEqual(playtest_step("start-combat {formId: 0x13491}"), ("start-combat", {"formId": 0x13491}))
+        self.assertEqual(playtest_step("stop-combat {formId: 0x13491}"), ("stop-combat", {"formId": 0x13491}))
+        sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: start-combat {formId: 0x13491}\n  - c1: stop-combat {formId: 0x13491}\n")
+        self.assertEqual([st.action for st in sc.steps], ["start-combat", "stop-combat"])
+
     def test_a_runs_own_game_hour_and_the_puppet_steps(self):
         # docs/verbs/npc-puppet.md's b-npc-puppet and x-npc-puppet-2
         from labapi.scenario import load_scenario
