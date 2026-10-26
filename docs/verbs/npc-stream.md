@@ -777,12 +777,104 @@ Slices, inside-out, one fork branch m3-npc-stream off parity aaafffe5:
 4. The voice line, the budgets from P3, b-npc-stream whole, the parity
    scenario and the reference trace (ADR-050 decision 5).
 
+### Slice 1 as built (2026-10-26 03:08 PDT, fork m3-npc-stream c2129b4a off parity aaafffe5)
+
+The hook on the engine's one action entry (FridaHooks.cpp,
+ActorMediator::PerformAction 38949) admits, beside the player, every actor
+in a hosted set (Hosted.h beside Puppets.h: a mutex-guarded set written on
+the JS thread by the export setHosted, read on the game thread; isHosted
+beside it) and reports the action under the source's own id: actionPerformed
+gains actorId, its actor null for an NPC (no form lookup on the event's
+thread, PuppetApi.cpp's reason), its variables from the source's own master
+behaviour graph. The replay's entry is the mediator's second one (38953,
+MagicApi.cpp PerformActionOnActor), which the hook does not watch, so a
+puppet's replay reports nothing back.
+
+The "each event once" rule is not a name list. The hook marks the actor in
+flight from the entry to the leave (Hosted::BeginPerforming, a depth per id
+for the mediator's paired re-entry; the export isPerformingAction), and the
+relay's source (sync/animation.ts AnimationSource) reads the mark inside the
+sendAnimationEvent hook, where the game thread waits (Hook.cpp's
+PushAndWait), and drops the event: inside a hosted actor's own PerformAction,
+every event the engine sends its graph is the action's and travels as the
+action. The player keeps the hand-cast name rule of cast-action (its melee
+and voice events feed the server's AnimationSystem; not this verb's). Rule
+9: the source's hook is pre-matched in native to its one id, and a source
+whose actor left the hosted list goes with its hook (sendInputsService).
+
+ActionSyncService sends a hosted actor's every action as UpdateAction under
+its remote id (the message built in the event's context, the id mapped on
+the update), the movement controller's actions aside (moveStart, the turns:
+a puppet's legs are the fed Speed and Direction channels, npc-puppet.md, and
+a replayed moveStop would idle its graph against the fed speed).
+HostService.markHosted mirrors the word per actor into the set at every flip
+(PuppetService: ensureLive true; ensurePuppet, demoteOnLoss and a cell
+detach false), off under the `npcStream` setting (the hosted set stays
+empty, the hook reports the player alone: today's stream). The server's gate
+is ActorUpdatableBy's as it stood (the host of the actor's cell); the relay
+the bytes as they came, reliable, to every listener but the sender.
+CellHostTest's new case: the host's UpdateAction for its actor reaches the
+other game once and never the host, the other game's is dropped, the
+player's own as before. No wire change (no widening): UpdateAction 44 as
+cast-action defined it, check_update_action unchanged.
+
+On the puppet side formView.replayActions already ran for every view this
+game does not host; the cast handshake inside it (the want variable's edge,
+the graph's BeginCast answer, the sheathed caster's drop of the later cast
+actions, the Equipped exit's want reset) is now gated to the hands' events
+(isHandCastEvent), so an idle or an attack goes variables then action with
+no wait (castHandsOf answered "right hand" for any name, so attackStart
+would have waited four updates on an answer the graph never gives). The
+attack event an action sends on a puppet whose default animations are
+blanked (sync/animation.ts's attack blank, the figures' guard) is admitted
+once ahead of the performAction (allowAnimationOnce), as a relayed attack
+event is.
+
+Budgets: no rate budget exists on UpdateAction today (the movement budget is
+the only one, wire-rules movement); a host's action stream is UNMEASURED,
+every action carrying the graph's variable arrays (hundreds of bytes,
+reliable). P3's numbers size it in slice 4; the lab's x-npc-stream-p4 reads
+the volume (the host's action lines over its window).
+
+HYPOTHESIS, tagged for the lab:
+- H1 (each event once): the mark covers every graph event an action sends;
+  an event of the same name sent outside a PerformAction (the engine's own
+  stagger, a furniture exit) stays on the relay by design. P1 reads the
+  coverage (the notify rows tagged inPerform for NPC sources).
+- H2 (the puppet performs): a puppet's graph (AI off, the detours feeding
+  it) takes an action through the second entry: "performAction on <id>:
+  ... taken 1" on the puppet seat. P4.
+- H2a: the attack family (attackStart, the power attacks, bowAttackStart,
+  attackRelease) comes through the entry for an NPC at all; P1's start-combat
+  rows decide. If the AI's attacks bypass the mediator, the attack family is
+  the re-analyst's read (Q3's clause), not a guess.
+- H3 (the allow's key): the engine sends on the puppet the event the host's
+  hook reported (performAction passes the event as given); a mismatch shows
+  as "block anim attack..." on the puppet seat. P4.
+- H4 (the variables): a hosted NPC's master behaviour variables applied to
+  the puppet one update before each action (cast-action's shape) do not
+  fight the fed locomotion channels past one frame. P4's tracks.
+
+Probes by path (lab/.cache/probes): x-npc-stream-p1 (solo, today's client:
+action-trace.js with SOURCES all and EVENTS all over Riverwood at 8:00 and
+Sven's start-combat; the inventory of what NPCs perform through the entry,
+no claim) and x-npc-stream-p4 (two seats on this slice's build:
+b-npc-puppet's layout; the hosted set fed at the grant, a resident's action
+streamed, the puppet's replay taken, Sven's attack on both seats' graphs
+through the watch's IsAttacking, no blocked attack event on the puppet, no
+refused report, the tracks' ends within 256 units). Probes are numidium's
+to run; the two-seat one needs verb-stage of m3-npc-stream.
+
+Slices 2 to 4 unchanged (STATE, EQUIPMENT, the voice line and the budgets).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
 2 and 11 checked, the fork lines re-read at 19e7ca9b). BUILDING since
 2026-10-26 02:24 PDT on fork m3-npc-stream (ADR-050), the eight questions answered
-above as the build's calls. Open questions for Eli before the build as
+above as the build's calls. Slice 1 (ACTIONS) built 2026-10-26 03:08 PDT,
+fork c2129b4a (tsc, codegen and fork-lint clean; CI building), its probes
+by path; slices 2 to 4 next. Open questions for Eli before the build as
 they stood, each stated once in its section: (1) the epoch on
 HostedActorState alone, not on the players' hot messages (Authority); (2)
 a death the host alone witnessed is floored and left to npc-fate, with a

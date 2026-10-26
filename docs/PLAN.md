@@ -1169,6 +1169,21 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   body's "can't interact" the container's one occupant plus a release
   defect, the zero damage god mode. The quit crash's holders read and the
   bisect wait for the lab's next window.
+- STATE 2026-10-26 03:10 PDT: the structural review
+  (docs/research/m3/structure-review-2026-10-26.md) found the core sound and
+  three commitments in the casting shape, two with one root (npc-stream
+  never built); ADR-050 ACCEPTED (Eli: "proceed with the pivot. open
+  ADR-050 and start npc-stream"): NPCs through the engine's own entries,
+  npc-stream first, deaths by the engine next, one NPC path, the owner table
+  as a later ADR, the safeguards back on. Trains 47 to 50 HELD unmerged
+  pending Eli's word per survivor. npc-stream slice 1 (ACTIONS) BUILT on
+  fork m3-npc-stream c2129b4a (the hosted set and the in-flight mark in
+  Skyrim Platform, the hook widened, a hosted actor's actions as UpdateAction
+  under its own id, the puppet's replay admitted for every action, the
+  relay's source dropping what the action covers; CI building), probes P1
+  (solo inventory, today's client) and P4 (two seats, the stage) by path for
+  numidium. The quit crash is not ours (both halves read: two plugins' leak,
+  the engine's world teardown); D24 stands at B with D.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
