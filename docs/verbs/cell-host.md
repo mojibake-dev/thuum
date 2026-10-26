@@ -965,3 +965,16 @@ second crash, in the world teardown, stands behind it (its owner is the
 next read: x-quit-second-nopuppet, our detours off; x-quit-second-solo, no
 connected client).
 
+THE SECOND CRASH IS THE LOAD ORDER'S (01:44 PDT, 2026-10-26; numidium's runs):
+x-quit-second-nopuppet 20261026-082607 (both plugins out, skymp5-client's
+npcPuppet and npcFate false so our detours pass everything through) and
+x-quit-second-solo 20261026-083649 (both plugins out, the solo boot with no
+skymp5-client at all) both end in the second crash exactly
+(SkyrimSE.exe+0x1949d3, 13129+0x23, reading 0x1f8, eleven frames to
+36551+0xd9d), each with the dynamic actor 0xff000d26 on the stack beside the
+skeleton going down, an actor no client of ours made (the solo game has
+none). Neither quit crash is ours: the first is the two plugins' statics, the
+second another plugin's or the engine's under this load order (a load-order
+bisect in solo would name it). The fast exit (train-49, D24-B) skips both;
+the plugins' leak goes upstream (D24-D).
+
