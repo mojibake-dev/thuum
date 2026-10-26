@@ -133,6 +133,10 @@ Scripts use Frida 17's API: a module's exports come from its Module object
   uses, which performs a data as given); and every cast-shaped graph event
   (MRh_, MLh_, DualMagic, shout, Voice, Cast) sent to the player's or a
   figure's holder (IAnimationGraphManagerHolder::NotifyAnimationGraph, 32901),
+  by default. Params (docs/verbs/npc-stream.md): SOURCES 'all' or a list of
+  form ids admits the world's NPCs (what they perform through the entry, and
+  whether their graph events come inside a PerformAction: the stream's
+  in-flight mark), EVENTS 'all' admits every event name for them,
   tagged with whether a PerformAction is open on that thread. The test of the
   re-analyst's read of 2026-10-14 (the event empty on entry and chosen on
   exit, the type 2, the indices 45..52 and 60..63, no cast event without an

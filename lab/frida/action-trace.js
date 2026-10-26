@@ -25,8 +25,25 @@
 // IAnimationGraphManagerHolder base at TESObjectREFR+0x38
 // (T/TESObjectREFR.h:112), so the holder's actor is holder-0x38 when the
 // holder is an actor's (the base function serves other holders too; the
-// read is kept to the player and the figures, ids 0x14 and 0xFF......).
+// read is kept to the player and the figures, ids 0x14 and 0xFF......, unless
+// the params widen it).
+//
+// Params (lab-api prepends globalThis.LAB_PARAMS for a step's params; thuum
+// docs/verbs/npc-stream.md, ADR-050): SOURCES 'figures' (default, the read
+// above), 'all' (every actor the entry is called for: the inventory of what
+// the world's NPCs perform through it, their event names and whether their
+// graph events come inside a PerformAction, the in-flight mark's coverage),
+// or a list of form ids; EVENTS 'cast' (the cast-shaped names, the default
+// for 'figures') or 'all' (every name, the default otherwise).
 'use strict';
+const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
+const SOURCES = PARAMS.SOURCES === undefined ? 'figures' : PARAMS.SOURCES;
+const EVENTS = PARAMS.EVENTS === undefined ? (SOURCES === 'figures' ? 'cast' : 'all') : PARAMS.EVENTS;
+function sourceAdmitted(id) {
+  if (SOURCES === 'all') return id > 0;
+  if (Array.isArray(SOURCES)) return SOURCES.indexOf(id) >= 0;
+  return id === 0x14 || (id >>> 24) === 0xff;
+}
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
 const OFFSETS = {
@@ -60,8 +77,10 @@ const hex = function (n) { return n < 0 ? String(n) : '0x' + n.toString(16); };
 function dataFields(d) {
   try {
     const action = d.add(0x18).readPointer();
+    const sourceId = formId(d.add(0x08).readPointer());
     return {
-      source: hex(formId(d.add(0x08).readPointer())),
+      source: hex(sourceId),
+      sourceId: sourceId,
       action: hex(formId(action)),
       index: action.isNull() ? -1 : action.add(0x28).readU32(),
       type: d.add(0x20).readU32(),
@@ -91,9 +110,10 @@ if (off === undefined) {
     onLeave(retval) {
       open[this.threadId] = (open[this.threadId] || 1) - 1;
       const exit = dataFields(this.data);
-      // the player's and the figures' only; the rest is the world's NPCs
+      // the player's and the figures' by default; the rest is the world's
+      // NPCs, admitted by SOURCES
       const src = this.entry.source || '';
-      if (src !== '0x14' && src.indexOf('0xff') !== 0) return;
+      if (!sourceAdmitted(this.entry.sourceId === undefined ? -1 : this.entry.sourceId)) return;
       emit({ perform: true, tid: this.threadId, source: src, actionIn: this.entry.action, index: this.entry.index, typeIn: this.entry.type, eventIn: this.entry.event, flagsIn: this.entry.flags, eventOut: exit.event, idleOut: exit.idle, resultOut: exit.result, flagsOut: exit.flags, ret: retval.toInt32() & 0xff });
     },
   });
@@ -111,11 +131,11 @@ if (off === undefined) {
       this.skip = true;
       try {
         const name = fixedString(args[1].readPointer());
-        if (!CAST_EVENT.test(name)) return;
+        if (EVENTS === 'cast' && !CAST_EVENT.test(name)) return;
         // the base function serves holders that are not actors (a weapon's,
         // a furniture's); their id read is garbage and filtered by value
         const id = formId(args[0].sub(0x38));
-        if (id !== 0x14 && (id >>> 24) !== 0xff) return;
+        if (!sourceAdmitted(id)) return;
         this.skip = false;
         this.name = name;
         this.actor = hex(id);
@@ -128,5 +148,5 @@ if (off === undefined) {
     },
   });
 
-  emit({ ready: true, version: version, perform: '0x' + off.perform.toString(16), chosen: '0x' + off.chosen.toString(16), notify: '0x' + off.notify.toString(16) });
+  emit({ ready: true, version: version, sources: SOURCES, events: EVENTS, perform: '0x' + off.perform.toString(16), chosen: '0x' + off.chosen.toString(16), notify: '0x' + off.notify.toString(16) });
 }
