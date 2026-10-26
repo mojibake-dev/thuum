@@ -2423,6 +2423,16 @@ function run(step: Step, player: Actor): unknown {
       npc.startCombat(player);
       return { actor: npc.getFormID(), inCombat: npc.isInCombat(), combatTarget: npc.getCombatTarget()?.getFormID() ?? 0 };
     }
+    case "stop-combat": {
+      // start-combat's stop (Papyrus Actor.StopCombat, CK wiki "StopCombat -
+      // Actor"): the actor {formId} names, else the placed NPC, else the
+      // nearest other, leaves combat while its AI keeps running (playtest
+      // 35's "calm": an npc-ai off and on would flip the simulation under
+      // test). The answer reads its combat state just after the call
+      const npc = namedNpc(a) ?? nearestOther(player);
+      npc.stopCombat();
+      return { actor: npc.getFormID(), inCombat: npc.isInCombat(), combatTarget: npc.getCombatTarget()?.getFormID() ?? 0 };
+    }
     case "play-idle": {
       // One IDLE record played on the player, or with {other: true} on the
       // nearest other actor (Papyrus Actor.PlayIdle, CK wiki "PlayIdle -
