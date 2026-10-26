@@ -12,7 +12,11 @@ process start failed once (the agent never loaded before the game died); from a
 few seconds in it works, so lab-api waits for the process and five seconds more.
 The injector must run in the lab user's session, the game's own: as SYSTEM
 through the guest agent it reported "refused to load frida-agent" on both
-clones (2026-10-05), so lab-api hands its watcher to the sky-lab-run task.
+clones (2026-10-05), so lab-api hands its watcher to the on-demand task
+sky-lab-frida, registered at each use and headless (conhost --headless, with
+frida-inject on the same console). A watcher with a window took the game's
+foreground: the taskbar over the game and its keys lost (x-start-box
+20261026-022654).
 
 Scripts use Frida 17's API: a module's exports come from its Module object
 (`Process.getModuleByName(m).findExportByName(n)`); the static

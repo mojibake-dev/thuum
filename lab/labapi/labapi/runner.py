@@ -1376,7 +1376,7 @@ class Runner:
             return fail(f"E_RUN_FRIDA: {client} is not a managed guest")
         url = f"{self.s.lab_api_internal_url.rstrip('/')}/frida/scripts/{name}"
         cmd = ["powershell", "-NoProfile", "-Command",
-               self.s.frida_exec_template.format(url=url, name=name, lab_dir=self.s.client_lab_dir, out="")]
+               self.s.frida_exec_template.format(url=url, name=name, lab_dir=self.s.client_lab_dir, out="", user=self.s.client_lab_user)]
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
         except ProxmoxError as e:
