@@ -1,0 +1,69 @@
+# b-npc-stream-state (thuum-magnus, 2026-10-26): the host's state stream (ADR-050 decision 1, docs/verbs/
+# npc-stream.md slice 2). The host sends HostedActorState (MsgType 53) for every actor it simulates, twice a
+# second on a change: the server judges the three percentages against its own numbers (wire-rules
+# hosted_state: a report that would undo a value the server lowered or raised lately is dropped, a health
+# under one point on a living record floored) and fans the changed values to the other listeners as
+# ChangeValues. b-npc-puppet's Riverwood layout. Claims: the server's first state line for a resident at
+# the grant ("[verb:npc-stream] state 1348x by ff000000"), the record following the host's engine for Sigrid
+# within 0.02, no E_STATE_OWN; after the host's own engine damages Sven 0x13491 by 40 points (npc-damage: a
+# fall's or a trap's shape, no server number) the record takes the fall within a poll and c2's puppet
+# follows the record within 0.05; the observer's puppets report nothing (no state line names c2's id); after
+# 30 s the host's regeneration has moved the record up with its engine. GREEN as x-npc-stream-p5
+# 20261026-163259 on the v2 stage of fork m3-npc-stream a0ff0e72 (28 steps, every claim held at the first
+# run of the slice). Promoted unchanged (rule 13): the id and this header differ from the probe, the steps
+# and asserts are byte for byte.
+id: b-npc-stream-state
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13483).aiEnabled == true
+      - c2.npc_state(0x13483).aiEnabled == false
+      - 'server.log_count("\\[verb:npc-stream\\] state 1348[0-9a-f]+ by ff000000") >= 1'
+      - 'server.log_count("E_STATE_OWN") == 0'
+      - abs(server.ref(0x13483).healthPercentage - c1.npc_state(0x13483).healthPercentage) < 0.02
+  # the host's own engine damages Sven (no server number: a fall's or a trap's shape); the stream
+  # carries the fall to the record within a poll and the record to the puppet
+  - c1: npc-damage {formId: 0x13491, amount: 40}
+  - wait: 5
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - c1.npc_state(0x13491).healthPercentage < 0.9
+      - abs(server.ref(0x13491).healthPercentage - c1.npc_state(0x13491).healthPercentage) < 0.02
+      - abs(c2.npc_state(0x13491).healthPercentage - server.ref(0x13491).healthPercentage) < 0.05
+      - 'server.log_count("state 1348[0-9a-f]+ by ff000001") == 0'
+  # the host's regeneration moves the record up again
+  - wait: 30
+  - c1: npc-state {formId: 0x13491}
+  - assert:
+      - abs(server.ref(0x13491).healthPercentage - c1.npc_state(0x13491).healthPercentage) < 0.02
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
