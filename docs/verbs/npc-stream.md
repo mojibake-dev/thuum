@@ -353,9 +353,10 @@ Skyrim Platform already sinks or from a hook cast-action already owns
 
 ## Message contract
 
-- HostedActorState, new: MsgType 51, wire id 59 (the family's rule id =
+- HostedActorState, new: MsgType 53, wire id 61 (the family's rule id =
   MsgType + 8, wire-schema lib.rs:509-510; the table's next row after
-  ActorSightings 50, :499), client to server, Unreliable (ADR-035 point 5:
+  ActorDeath 52, :510; 51 and 52 went to ActorFate and ActorDeath while this
+  doc waited), client to server, Unreliable (ADR-035 point 5:
   per-tick state unreliable with the epoch; the sender marks it so and
   channels::for_send maps it, wire-transport channels.rs:46-52), cap 64
   bytes, SCHEMA_VERSION 17 to 18 (lib.rs:35). Fields, in the family's JSON form
@@ -391,7 +392,7 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   cell-host's own precedent for rows 7 and 8 (ReservedHostGrant,
   ReservedHostRelease, cell-host.md:197-198) point the other way. The two
   are not reconciled. This doc is written for the family message above
-  (MsgType 51, wire id 59), with row 5 renamed ReservedHostedActor and
+  (MsgType 53, wire id 61), with row 5 renamed ReservedHostedActor and
   kept dead (ADR-012: ids append-only), the equipment on UpdateEquipment 5
   and the inventory npc-fate's; it also departs from the ADR's "full
   updates go reliable" by sending the keyframe after a grant on the same
@@ -488,7 +489,7 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   - OnChangeValues: unchanged (the sender's own actor; :2292-2309).
   - OnUpdateAction: unchanged gate (:373-400); the budget's numbers.
   - Counters: PartOne keeps, per connection, accepted and dropped counts by
-    MsgType for the hosted paths (2, 3, 5, 44, 51) and a count of reports
+    MsgType for the hosted paths (2, 3, 5, 44, 53) and a count of reports
     about actors the sender does not own; the lab gamemode reads them as
     labState kind `stream` (Tests: the grammar).
 - DB fields / migration: none. The values and the equipment live in
@@ -552,7 +553,7 @@ Skyrim Platform already sinks or from a hook cast-action already owns
 
 ## Tests
 
-- T0: Rust: wire-schema's HostedActorState (MsgType 51, wire id 59, C2S,
+- T0: Rust: wire-schema's HostedActorState (MsgType 53, wire id 61, C2S,
   cap 64) with its sample, the two wire-json fixtures (and the equipment
   pair for the -1 count: a refused and an accepted one); wire-validate's
   check_hosted_state (an epoch of 0, a percentage of 1.01 or -0.01, a NaN,
@@ -575,7 +576,7 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   n" in c1.log at the grant) and by P4.
 - T2: difftest session npc-stream.yaml: c1 sends a HostedActorState for an
   actor nobody hosts (both servers drop it: the wire one by the host table,
-  the legacy one knows no 51, as it knows no 47 to 50) and an
+  the legacy one knows no 53, as it knows no 47 to 52) and an
   UpdateEquipment under the other player's idx (both drop it: "already
   owned by user"); declared divergences none beyond the session's usual.
   The hosted case needs an NPC, which T2's servers do not load
@@ -612,9 +613,9 @@ Skyrim Platform already sinks or from a hook cast-action already owns
     server.ref(0x13483).package != 0 (H3's event fired at least once in the
     minute; a 0 here reads H3 false) and == c1.npc_state(0x13483).package
     when the getter agrees (recorded, not asserted, until H3 is read);
-    server.stream("c2").accepted[51] == 0 and server.stream("c2")
+    server.stream("c2").accepted[53] == 0 and server.stream("c2")
     .about_others == 0 (the observer's puppets never report);
-    server.stream("c1").accepted[51] > 0.
+    server.stream("c1").accepted[53] > 0.
   - the fight: c1 looks at Sven 0x13491 and casts the shout's first word
     0x13E09 at him (x-npc-puppet-2's step, the shout given to c1 through
     the server first, docs/verbs/shouts.md's record, numidium's grammar);
@@ -633,9 +634,9 @@ Skyrim Platform already sinks or from a hook cast-action already owns
     moves once more and c2 ends within one report of c1.
   - the handoff: c1 to the lab spawn past the grace; wait 8: server.host
     (0x9732).client == "c2"; server.ref(0x13483).epoch == 2 (the last state
-    taken was the new host's); server.stream("c2").accepted[51] > 0 and
+    taken was the new host's); server.stream("c2").accepted[53] > 0 and
     c1's count unchanged over the next 5 s (the old host streams nothing;
-    its late states, if any, in dropped[51]).
+    its late states, if any, in dropped[53]).
   - the late joiner: c1 back beside c2; wait 10: abs(c1.npc_state(0x13483)
     .health - server.ref(0x13483).healthPercentage) < 0.05; c1's Sven
     rightHand == server's.
@@ -727,11 +728,62 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   the condition "source is the puppet", watching the return of 38953).
 - Owner: agent (Frida); Eli (x64dbg) only on a falsified H2.
 
+## The build's calls under the design law (2026-10-26 02:24 PDT; say the letter to change one)
+
+ADR-050 (Eli, 2026-10-26: "proceed with the pivot. open ADR-050 and start
+npc-stream") builds this verb first and "as the draft states"; the eight
+open questions below are answered here so the build can start, each as a
+call under the law, Eli's letter changing any:
+- Q1, the epoch: on HostedActorState alone (the Authority's reasons). Call A.
+- Q2, a death the host alone witnessed: this verb floors it and leaves it to
+  npc-fate as drafted, UNTIL ADR-050's decision 2 (deaths by the engine) lands
+  on the train after this one; the stream's health channel is what that
+  train stands on. Call: as drafted, the next train changes it.
+- Q3, the actions row: here, as ADR-035 point 5 places it; P4 decides H2 (a
+  puppet performs an action); if H2 falsifies, the replay entry's gates are
+  the re-analyst's read, not a guess. Call A.
+- Q4, the package field: kept as an observation (R2 record) for npc-handoff
+  and the lab; dropped before merge if P3 reads no event across the 8:00
+  switch (rule 4's dead-field test). Call: keep, conditional.
+- Q5, the budgets: UNMEASURED placeholders at four times the references'
+  rates, named so in the code, replaced by P3's numbers. Call A.
+- Q6, the M0 row 5: the family message, MsgType 53 and wire id 61 (51 and 52
+  went to ActorFate and ActorDeath since the draft); row 5's Rust variant and
+  struct renamed ReservedHostedActor and ReservedHostedActorState, dead,
+  the id kept (ADR-012); the keyframe after a grant on the same unreliable
+  channel, that one send marked reliable. Call: the family message.
+- Q7, the inventory's rung: npc-fate's R0 stands; this verb carries
+  equipment (R1 against the record), never inventory. Call: R0 elsewhere.
+- Q8, the voice line: the fourth slice of this verb, after the actions, the
+  state and the equipment. Call: later slice.
+
+Slices, inside-out, one fork branch m3-npc-stream off parity aaafffe5:
+1. ACTIONS (the root the review named): the hosted set in Skyrim Platform
+   (setHosted and isHosted beside setPuppet) read at the PerformAction
+   entry, the actionPerformed event for a hosted actor, UpdateAction under
+   the actor's idx from ActionSyncService, the server's gate re-read for a
+   hosted idx and its budget sized for a host, the puppet's replayActions
+   admitted for an engine reference; the graph-event relay's source drops,
+   for a hosted actor, the events the action replay covers (the attack
+   family first), so a puppet plays each once (P4's H1). Probes P4 and a
+   solo P1 beside it.
+2. STATE: HostedActorState 53/61 with its validator and fixtures in one
+   commit, the hold rule in wire-rules, OnHostedActorState with ChangeValues
+   to the other listeners, the counters, the client's sendHostedState and
+   PackageService. Probes x-npc-stream-values, P3's cost read.
+3. EQUIPMENT: UpdateEquipment under a hosted actor's idx on the server's
+   resolution, the -1 count prerequisite, the client's sendEquipment for a
+   hosted actor. Probe P5.
+4. The voice line, the budgets from P3, b-npc-stream whole, the parity
+   scenario and the reference trace (ADR-050 decision 5).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
-2 and 11 checked, the fork lines re-read at 19e7ca9b). Open questions for
-Eli before the build, each stated once in its section: (1) the epoch on
+2 and 11 checked, the fork lines re-read at 19e7ca9b). BUILDING since
+2026-10-26 02:24 PDT on fork m3-npc-stream (ADR-050), the eight questions answered
+above as the build's calls. Open questions for Eli before the build as
+they stood, each stated once in its section: (1) the epoch on
 HostedActorState alone, not on the players' hot messages (Authority); (2)
 a death the host alone witnessed is floored and left to npc-fate, with a
 visible corpse the record calls alive (the Inventory's death row), against
