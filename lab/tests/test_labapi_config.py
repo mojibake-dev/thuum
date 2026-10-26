@@ -46,3 +46,18 @@ class Version(unittest.TestCase):
             del os.environ["LABAPI_VERSION"]
         self.assertEqual(Settings().version, "dev")
 
+
+@needs_deps
+class StartBox(unittest.TestCase):
+    def test_the_start_box_guard_is_off_unless_asked(self):
+        """Its 3 s wait after every connect pushed m0-death past the server's 25 s respawn (nightly 20261026-104926,
+        145408) and its kHide never closed the box it was written for; CLEAR_START_BOX=1 turns it back on."""
+        import os
+        from labapi.config import Settings
+
+        self.assertIs(Settings().clear_start_box, False)
+        os.environ["CLEAR_START_BOX"] = "1"
+        try:
+            self.assertIs(Settings.from_env().clear_start_box, True)
+        finally:
+            del os.environ["CLEAR_START_BOX"]
