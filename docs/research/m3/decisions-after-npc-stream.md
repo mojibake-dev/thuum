@@ -415,3 +415,10 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   the cell-host routine), so neither is the claim's. A sessions-only commit on m3-npc-talk (1b866786) declares
   them. Call with numidium: gate-cite accepts skymp-wire/difftest/sessions/** differences (they build nothing),
   T2 reruns with SESSIONS=tree at the new head, and 55's stage keeps c1be67d1's images; no restage.
+- 16:09 PDT 2026-10-27: x-npc-talk-claim v3 230022 (55's stage) red at its own stillness assert, before any claim:
+  with the host's npc-ai off Sven still walked a loop over the 9731/9732 border at 9.0 (195 x and 122 y in five
+  seconds, package 0), the second time the lever failed to stop a walker. Call (numidium's a, b, c): a, a driver
+  step `npc-hold {formId, held}` on Actor.setDontMove (the engine's own scene hold; his AI and dialogue keep
+  running), numidium's to add with a live timing run; v4 of the probe holds him, keeps the stillness assert,
+  approaches to 70 and presses E at once, releases at the end; claims unchanged. Not b (the re-approach grammar
+  is not there) and not c (a guess about another resident's schedule).
