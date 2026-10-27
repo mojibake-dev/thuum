@@ -371,3 +371,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   client line), the record following under R2. Main 0977292 measures the restart against a pre-restart snapshot
   and records the travel; H-54e opened in npc-fate.md with a drift probe for 55's stage and the candidate rule
   (a dead record holds after a settle window, R0) for 55 or later. The 256 bound and every other claim stand.
+- 12:15 PDT 2026-10-27: 0977292 WITHDRAWN as a re-measurement (numidium: rule 13, the fall-point bounds are what
+  caught the corpse's 1300-unit drift and a snapshot before the restart would hide it); main c6899e0 restores
+  them and adds the restart's own bounds beside them. No mid-gate deploy; ADR-027's reruns play the strict file.
+  A green rerun: the watch item carries H-54e open and 54 merges. A red rerun: D40's stop, reported, and
+  H-54e read first (x-npc-corpse-drift on the stage); ours → the fix carries the strict claim; the engine's → a
+  restatement in this memo naming what it no longer covers.
