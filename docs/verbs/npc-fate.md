@@ -1878,6 +1878,30 @@ ff000001 kills 1348c with fe01e801 on a claimed bow hit", 103638); v8
 holds Sven still with the host's npc-ai lever instead of combat (a shot
 needs a still target, a swing an engaged one).
 
+52's gate (gate-m3-npc-death on cc1d9025, 10:51Z; 04:46 PDT): b-npc-death
+20261027-112539 red on the restart leg, read as a premise, not 52's code.
+The record after the restart lay 360 units (y) from the body snapshot. What
+moved it: after a restart both games log in again within the same tenth of
+a second and the cell's grant is a race (c2 won it in 004553 and 112539, c1
+in 061658); in 112539 c2's own game had re-settled the corpse on its cell
+reload in leg 2 (from 28 units off the host's body to 63 x, 333 y and 104
+lower, down the forest slope; no line of ours on c2 between the kill and
+the return, so the engine's physics on the reloaded ragdoll), and as the
+new host its samples of its own body became the record under R2
+(OnUpdateMovement takes a dead hosted actor's samples; the 65-unit settle
+was measured through the same path). 52's server diff writes no position
+and its client change for a dead puppet (restBody in place of
+applyPuppetPose) moves no dead ragdoll either way. Fixed on main 86d340b
+in the scenario's own commit: c2 waits five squares out through the
+restart, c1 alone reloads the cell and the step holds for its grant, c2
+returns once c1 has it; the claims unchanged (D39 B, D40). A known limit
+this run names: a seat that reloads the cell can find the corpse
+re-settled by its engine (360 units on a slope here); the pre-kill
+placement covers the kill moment only, since a dead ragdoll takes no
+setPosition, and a host change after such a reload moves the record to
+the new host's body. Playtest 35's known limits carry it; a fix in kind
+has no hook, the engine re-settles the body without killing it again.
+
 ## Watch item (2026-10-27, 51's merge gate, ADR-027)
 
 b-npc-body-release red once (20261027-061048) at its second activation:
