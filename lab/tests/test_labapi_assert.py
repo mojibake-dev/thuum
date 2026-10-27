@@ -306,6 +306,28 @@ class M0VocabularyTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             bare.evaluate("server.host(0x9810).hosted == true")  # a server without the host table
 
+    def test_a_puppets_gaze_and_face_against_its_hosts(self):
+        """npc-stream slice 5 (train 54): both seats' npc-state carry the head-track target and the face's expression;
+        a build without the getters answers null, which is missing data, never a pass."""
+        from labapi.assertions import AssertionData, Evaluator
+        srv = RichServer()
+
+        class GazeViews(NearViews):
+            def npc_state(self, observer, form_id):
+                base = {"formId": form_id, "aiEnabled": observer == "c1", "inCombat": False, "package": 0, "combatTarget": 0,
+                        "staggering": False, "pos": [0, 0, 0]}
+                if observer == "c1":
+                    return dict(base, gazeTarget=0x14, gazeSlot=2, emotionType=3, emotionValue=50.0, exprOverride=False, exprIndex=10, exprValue=50.0)
+                if observer == "c2":
+                    return dict(base, gazeTarget=0x14, gazeSlot=2, emotionType=3, emotionValue=50.0, exprOverride=True, exprIndex=10, exprValue=50.0)
+                return dict(base, gazeTarget=None)
+
+        ev = Evaluator(srv, GazeViews(), ["c1", "c2", "c3"])
+        self.assertTrue(ev.evaluate("c2.npc_state(0x13483).gazeTarget == c1.npc_state(0x13483).gazeTarget"))
+        self.assertTrue(ev.evaluate("c2.npc_state(0x13483).exprIndex == c1.npc_state(0x13483).exprIndex and c2.npc_state(0x13483).exprOverride == true"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c3.npc_state(0x13483).gazeTarget == 0x14")   # no getters on that build
+
     def test_the_servers_fate_against_a_seats_roll(self):
         """npc-fate (ADR-046): the server's roll pushed to both; a seat's engine race and worn items read against it."""
         from labapi.assertions import AssertionData, Evaluator

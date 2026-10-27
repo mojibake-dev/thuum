@@ -9,7 +9,9 @@ the lab can grep (E_ASSERT_*).
                                                      the server's game clock, read when the assert runs
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
     | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked | .cell | .raceId | .worn
-                                                     that seat's engine state of an NPC, from its last npc-state {formId}
+    | .gazeTarget | .gazeSlot | .emotionType | .emotionValue | .exprOverride | .exprIndex | .exprValue
+                                                     that seat's engine state of an NPC, from its last npc-state {formId};
+                                                     the gaze and face fields carry the poll before it (train 54)
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
     | .turned | .endX | .endY | .endZ                 the same rotation signed, in degrees, and where it stood at the
@@ -770,6 +772,17 @@ class NpcStateView:
     # what that game rolled for it (npc-fate): its race and the form ids it wears, sorted
     raceId: int | None = None
     worn: tuple[int, ...] | None = None
+    # the gaze and the face as that game holds them (npc-stream slice 5, train 54's getters): the head-track target's
+    # form id and slot, the streamed emotion, and the face's strongest expression keyframe (index, value, whether an
+    # override holds it); lab-driver answers the PREVIOUS poll's values, so a claim reads them on a second npc-state;
+    # None on a build without the getters or before a first poll
+    gazeTarget: int | None = None
+    gazeSlot: int | None = None
+    emotionType: int | None = None
+    emotionValue: float | None = None
+    exprOverride: bool | None = None
+    exprIndex: int | None = None
+    exprValue: float | None = None
 
 
 @dataclass(frozen=True)
@@ -1528,7 +1541,11 @@ class _ClientRef:
                                 isEssential=_opt_bool(data.get("isEssential")), isProtected=_opt_bool(data.get("isProtected")),
                                 activationBlocked=_opt_bool(data.get("activationBlocked")), cell=_opt_int(data.get("cell")),
                                 is3DLoaded=_opt_bool(data.get("is3DLoaded")), raceId=_opt_int(data.get("raceId")),
-                                worn=tuple(sorted(int(w) for w in data["worn"])) if isinstance(data.get("worn"), list) else None)
+                                worn=tuple(sorted(int(w) for w in data["worn"])) if isinstance(data.get("worn"), list) else None,
+                                gazeTarget=_opt_int(data.get("gazeTarget")), gazeSlot=_opt_int(data.get("gazeSlot")),
+                                emotionType=_opt_int(data.get("emotionType")), emotionValue=_opt_float(data.get("emotionValue")),
+                                exprOverride=_opt_bool(data.get("exprOverride")), exprIndex=_opt_int(data.get("exprIndex")),
+                                exprValue=_opt_float(data.get("exprValue")))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
@@ -1786,7 +1803,8 @@ _ATTRS = {
     WatchView: {"x", "y", "z", "maxDisplacement", "samples", "drainMs", "drainEndMs", "maxStep", "maxStepMs", "turns", "headingAtStop",
                 "turned", "endX", "endY", "endZ"},
     NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
-                   "isEssential", "isProtected", "activationBlocked", "cell", "is3DLoaded", "raceId", "worn"},
+                   "isEssential", "isProtected", "activationBlocked", "cell", "is3DLoaded", "raceId", "worn",
+                   "gazeTarget", "gazeSlot", "emotionType", "emotionValue", "exprOverride", "exprIndex", "exprValue"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PoisonView: {"poisonId", "count"},
