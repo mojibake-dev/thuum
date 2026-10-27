@@ -72,6 +72,9 @@ steps:
       # swung back at 13489 for 8, dying to them), so the victim is not named; the aggressor is the
       # server-made copy (ff000002 onward: the players are ff000000 and ff000001)
       - 'server.log_count("OnWeaponHit - ff00000[2-9a-f] hits") >= 1'
+      # recorded, not claimed (>= 0 always holds and the count prints in the result): the copy's hit on a
+      # PLAYER, the R0 path, which no other scenario claims for a copy; playtest 35's bandit line reads it
+      - 'server.log_count("OnWeaponHit - ff00000[2-9a-f] hits ff00000[01]") >= 0'
       - 'server.log_count("E_HIT_WEAPON: hosted ff[0-9a-f]+") == 0'
       - 'server.log_count("E_EQUIP_REFUSED: ff[0-9a-f]+") == 0'
       - 'server.log_count("No permission to update actor ff[0-9a-f]+") == 0'
