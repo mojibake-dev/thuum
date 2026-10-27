@@ -1939,3 +1939,21 @@ scenario ran GREEN on 52's restage (125012, 7cd47e24). The old claim's red
 stays the watch item until the restated scenario is green once more in a
 gate or the nightly; then this section and gate.yaml's entry come out
 together.
+
+## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
+
+b-npc-death red twice on its restart leg's premise, never on a claim. (1)
+20261027-112539 (52's gate on cc1d9025): the record after the restart lay
+360 units from the body snapshot because the restart's cell grant is a race
+between the games' own logins; c2 won it with a corpse its cell reload had
+re-settled down the forest slope, and the record followed its host's body
+under R2. Fixed on main 86d340b: c2 waits five squares out through the
+restart, c1 alone reloads the cell and the step holds for its grant. (2)
+20261027-125354 (52's restage on 7cd47e24): the pinned host held and c2's
+teleport back, issued within a second of its login, never settled (the
+record written, the game unmoved for 60 s under the server's corrections).
+Fixed on main c1f44fb: fifteen seconds between c2's reconnect and the move.
+GREEN at 20261027-132954 on 7cd47e24 with every claim as written. The two
+premise reds stay the watch item until the scenario is green once more in a
+gate or the nightly; then this section and gate.yaml's entry come out
+together.
