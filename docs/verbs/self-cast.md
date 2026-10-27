@@ -115,7 +115,8 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
   nothing, as in every green run. The lab's pacing, not the build; the
   scenario's claim holds only while its casts stay inside the spell's
   duration, which its steps keep when no step stalls. A gate.yaml watch
-  item when its ADR-027 reruns pass.
+  item when its ADR-027 reruns pass; CLOSED 2026-10-27: green at every gate
+  since, 54's gate 20261027-202121 the last, gate.yaml's entry out.
 - A Papyrus `Spell.Cast` of a spell the actor has not equipped raises no
   spellCast event in Skyrim Platform: its TESSpellCastEvent handler raises
   the event only when the spell sits in one of the actor's selected slots
