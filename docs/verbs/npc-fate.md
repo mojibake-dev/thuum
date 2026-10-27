@@ -1988,6 +1988,33 @@ Promoted as b-npc-death-blow (main, its own commit). H1 stands refuted for
 the killer: the engine names one only when its own kill move kills; the
 server's credit covers the rest.
 
+54's gate (12:13 PDT): b-npc-death 20261027-190413 red on the restart leg's
+body bounds with the host pinned and holding (c1 hosted 9810 before and
+after; c2 five squares out through the restart). The record after the
+restart lay 1316 x and 687 y from the body snapshot because c1's own engine
+had moved the corpse that far between the kill and the restart, from
+(123718, -80883) to (124847, -81527) at the same height (10619.5 to
+10618.5), and the record followed its host under R2 (to (125023, -81568) by
+the read, so the body was still moving). No ragdoll slides 1300 units on
+flat ground; no line of ours on c1 touches 85547 in that window (no settle,
+no apply, no placement; "puppet 85547" then "live 85547" 258 ms apart at
+the reconnect, the reconciler's flip while the grant arrived). HYPOTHESIS
+H-54e: a dead hosted actor's body moves on its host's engine after the kill
+word, at the same height, at a walker's pace (10 to 40 units a second by the
+reads), and the record follows. Candidates: the reconciler's puppet flip at
+the reconnect feeding the locomotion detour a speed the dead actor's graph
+keeps; the engine's own movement controller running on a corpse killed by
+the word with its AI on. Dynamic plan: x-npc-corpse-drift (by path, 55's
+stage) polls the host's npc-state of the corpse every ten seconds for two
+minutes after a kill-ref, then across a restart and the reconnect, both
+seats; a drift before the reconnect blames the engine, one after it the
+flip. If the drift is real, the rule in kind is R0 after the settle: a dead
+record takes its host's samples for a settle window (ten seconds) and then
+holds, so the body's place is the server's word wherever a host's engine
+takes its copy (55 or later, with its T0 case). The scenario measures the
+restart against the record right before it (main 0977292) and records the
+travel as two >= 0 rows.
+
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
 b-npc-death red twice on its restart leg's premise, never on a claim. (1)
