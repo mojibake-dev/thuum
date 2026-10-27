@@ -331,3 +331,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   Sven (the approach faces the record, the hit cone wants the body). Main f9767f2: look-at before every draw and
   the iron sword for up to three measured swings (none lethal under the still hold), the warhammer for the kill
   legs; claims unchanged. numidium runs rest2 (death-engine alone) and the merge cites gate, rest and rest2.
+- 09:10 PDT 2026-10-27: rest2's b-npc-death-engine 160214 red again at the one-number read: the still hold does
+  not hold a walking actor on its host (AI off, 260 units walked) and look-at never turns the player. Main
+  bb3da60: the measured leg under the combat hold with six iron-sword swings (repeat), the warhammer after,
+  AI on throughout; claims unchanged. numidium runs rest3 (death-engine alone); the merge cites the chain.
+  Two lab facts for the lab notes: the npc-ai lever freezes a standing actor only; look-at's heading is a read.
