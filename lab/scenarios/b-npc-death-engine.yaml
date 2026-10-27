@@ -8,9 +8,7 @@
 # weak swings land at least one and at most 42 of his 50), then the sword's small blows end him (v5's kill
 # legs: a warhammer's lethal single blow had the engine's deathStart name no killer and the server record
 # "died of unknown", rest 153601 and rest2 160510; the credit from the server's own pending aggressor is train
-# 54's, npc-fate.md H-52b; the sword's small blows lost it as well in rest3's 161323, since the engine
-# names a killer only when its own kill move ends him, so until 54 the killer claim reads the server's own
-# pending aggressor or the report's killer), his AI on throughout: the one-number read after the measured swings
+# 54's, npc-fate.md H-52b), his AI on throughout: the one-number read after the measured swings
 # (the engine's health on the host within 0.03 of the record), the death by either order (the server's number
 # first with the kill waiting on the report, or the engine's kill move first with the report taken on the
 # server's evidence), dead on the record and both seats, the bodies within 200 units on both axes.
@@ -161,13 +159,7 @@ steps:
       # before the damage) and the server takes the report on its own evidence; both are the design's
       # (ADR-050 decision 2, ADR-048 B; x-npc-death-host v3 091759 took the second path)
       - 'server.log_count("death pending on 13491") >= 1 or server.log_count("death report: 13491 died") >= 1'
-      # the killer's name: the server's own evidence (the pending line's aggressor, its number's) or the
-      # report's. The engine's deathStart names a killer only when its own kill move ended him (the stage's
-      # 123746, the report 2.3 s after the pending line, cause 4); when the server's cause took the engine's
-      # health to zero the report came 75 ms after it with no killer (153601, 160510, 161323; H1 refuted for
-      # the killer, npc-fate.md). Train 54 credits the server's own numbered hit (H-52b, m3-npc-face
-      # 240a31de), and this line returns to the report's killer when 54 merges
-      - 'server.log_count("death pending on 13491: .*aggressor ff000000") >= 1 or server.log_count("death report: 13491 died .* killer ff000000") >= 1'
+      - 'server.log_count("death report: 13491 died .* killer ff000000") >= 1'
       - 'server.log_count("death by the server.s word on 13491") == 0'
       - server.ref(0x13491).isDead == true
       - c1.npc_state(0x13491).isDead == true
