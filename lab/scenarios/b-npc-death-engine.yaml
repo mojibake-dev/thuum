@@ -1,8 +1,10 @@
 # b-npc-death-engine (thuum-magnus, 2026-10-27; train 52, ADR-050 decision 2, docs/verbs/npc-fate.md): the host
 # kills its own hosted NPC and the death is the engine's, from the server's number. Promoted unchanged from
 # x-npc-death-host v5 (GREEN 20261027-095847 on 52's stage of fork m3-npc-death cc1d9025; the id and this header
-# changed, steps and claims byte for byte). The host approaches Sven in his record's frame and starts his combat
-# there (the hold read by an inCombat assert), swings an iron sword: the one-number read after the first swing
+# changed, steps and claims byte for byte). The host approaches Sven in his record's frame and holds him still
+# there (the host's npc-ai lever, read by an aiEnabled assert; 52's gate 20261027-140805: under the combat hold
+# he fought c1 and moved, and the one swing before the one-number read missed where the stage's 123746 had
+# landed, so a swing on a combatant is luck), swings a Daedric warhammer: the one-number read after the first swing
 # (the engine's health on the host within 0.03 of the record), the death by either order (the server's number
 # first with the kill waiting on the report, or the engine's kill move first with the report taken on the
 # server's evidence), dead on the record and both seats, the bodies within 200 units on both axes.
@@ -54,11 +56,15 @@ steps:
   # his combat there and reads the hold before anything else; every approach draws the weapon again before
   # the swings; the claims as they were
   - c1: approach {formId: 0x13491, distance: 150, cell: record}
-  - c1: start-combat {formId: 0x13491}
-  - wait: 3
+  # 52's gate 20261027-140805: the combat hold kept him in reach but moving (he fought c1), and the one swing
+  # before the one-number read missed where the stage's 123746 had landed; a swing on a combatant is luck, so
+  # the still hold stands him for the swings (x-npc-headshot-host v9's lever, the host's npc-ai off); the
+  # engine's death needs no AI of his (b-npc-headshot-host dies the same way) and the claims are as they were
+  - c1: npc-ai {formId: 0x13491, enabled: false}
+  - wait: 1
   - c1: npc-state {formId: 0x13491}
   - assert:
-      - c1.npc_state(0x13491).inCombat == true
+      - c1.npc_state(0x13491).aiEnabled == false
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
   - c1: draw-weapon
   - wait: 1
