@@ -176,9 +176,11 @@ client. The server has no record of that reference: the shield is lootable from 
 server AND lies on the floor in each game, a client-local item outside the one-state rule (the
 other seat's floor copy comes from its own engine's drop, or not at all for a puppet whose death is
 the server's word). Train 47b's own claim holds: the record keeps the roll through the death and
-the loot. x-body-loot v3 reads the drop honestly (the record equals the roll; the body wears the
-roll or has an ARMO reference lying beside it) so 50b can merge; the committed scenario b-body-loot
-inherits your letter here.
+the loot. x-body-loot v4 claims 47b's own point (the record equals the roll through the death and
+the loot, the loot menu opens) and READS the body's worn list and the shield's whereabouts (v3's
+look for an ARMO within 200 units of the body found none: where the mod puts the shield is itself
+unread) so 50b can merge; the committed scenario b-body-loot inherits your letter here, and on B
+the strict claim (the body wears the roll after the loot) returns to it.
 - A. Leave as today: the mod stays; the body's shield doubles on the floor client-side; the
   probe and the scenario carry the "or" clause as a known limit.
 - B. Drop DeathDropOverhaul from the lab and playtest load order (a persist-mods render, a layer
