@@ -1927,6 +1927,24 @@ copy when the cell passes, and the reset case waits for a probe before a
 rule (a timed bind after the kill move's window, or the server's word on
 the host's report of a live actor against a dead record).
 
+52's gate's rest (09:13 PDT): the killer after a lethal single blow. In the
+rest's b-npc-death-engine (153601) and its rerun (160510) a Daedric
+warhammer's 27-a-hit blow ended Sven, and the host's report said "13491 died
+of unknown ..., host ff000000, killer 0: a hit the server numbered 82 ms
+before; the server records the death", with his AI on and his combat started
+in 160510; the stage's 123746 killed him with the iron sword's small blows
+and the report named ff000000. deathReportService on 7cd47e24 sends
+deathStart's killer when the engine names an actor and 0 otherwise, so
+HYPOTHESIS H-52b: after a lethal single blow (a kill move, or the one cause
+that takes the engine's health to zero) the engine's deathStart names no
+killer, H1's edge. The server has the better evidence, its own number's
+aggressor on the pending line (R0), so the credit from the pending aggressor
+on a report with killer 0 is train 54's code, on m3-npc-face with an
+ActorDeathTest case and a scenario for the big blow in 54's gate; until then
+a strong player's kill records "died of unknown" on the server (the game
+shows no kill feed; nothing of the fate reads the killer yet). The scenario
+proves the engine-named path with the sword (main 70da78b), as promoted.
+
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
 b-npc-death red twice on its restart leg's premise, never on a claim. (1)
