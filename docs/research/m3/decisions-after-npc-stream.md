@@ -285,3 +285,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   WITH a fix in hand is a restage, not a stop; numidium cuts or finishes the gate, I push on its word,
   52 restages on 7cd47e24 and runs its probes with b-npc-respawn and the two premise fixes, then its gate.
   The reset case of a live copy on a dead record on the simulating seat is named in npc-fate.md, unprobed.
+- 05:13 PDT 2026-10-27: b-npc-stream-actions 120242 (the cut gate's fourth red, 1 of 6) read as a premise red:
+  the "block anim" print names no actor, and a creature's own blocked attack at c2's connect point, far from
+  Riverwood, counted once against a claim of zero. Scoped on main f98c657 to the bandit's window (a baseline
+  count before the bandit, the claim the difference), the five other claims unchanged; numidium adds it to
+  52's stage probes. A later client line naming the actor (ctx.selfId) would let the pattern name the bandit;
+  not a restage's worth now.
