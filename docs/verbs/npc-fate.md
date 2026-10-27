@@ -2050,23 +2050,14 @@ predators for 40 s; 86117 killed it in ten hits and D18's grace passed its
 cells to c2 before leg 4 (every death and body claim before it held). Fixed
 on main b8c494f: server-console TGM after c1's reconnect, after c2's and
 after c1's relaunch. GREEN in the gate's rest at 154008, which played b8c494f
-from main at ec7107d. The three premise reds stay the watch item until the
-scenario is green once more in a gate or the nightly; then this section and
-gate.yaml's entry come out together.
-
-## Watch item (2026-10-27, 52's gate, ADR-027): b-npc-respawn
-
-b-npc-respawn red once at 20261027-150150 (52's gate on 7cd47e24): the
-respawn sweep under test stood up every dead actor whose hour had passed, the
-prelude's kill-ref victims 0x85548 and 0x85549 included, and the revived
-85549 attacked the subject sixteen seconds after the logins ("death pending
-on 85547 ... aggressor 85549", c2's report accepted with the engine's number
-ahead of the server's), so the 40 s read found it dead again where the
-stage's 124550 had slower rivals. The stand-up, the fate, the death by the
-engine and the host's report all ran as designed; the premise (the subject
-alone) is what the sweep undid. Fixed on main 717eeab in the scenario's own
-commit: the rivals die again by kill-ref the moment the seats are back, the
-claims unchanged. GREEN in the gate's rest at 154953, which played 717eeab
-from main at ec7107d. The old premise's red stays the watch item until the
-scenario is green once more in a gate or the nightly; then this section and
-gate.yaml's entry come out together.
+from main at ec7107d. (4) 20261027-190413 (54's gate on 240a31de): with
+the host pinned and holding, the record after the restart lay 1316 x and
+687 y from the body snapshot because c1's own engine had moved the corpse
+between the kill and the restart at the same height and the record followed
+under R2: H-54e, a finding of the build's or the engine's, read by
+x-npc-corpse-drift on the next stage; the scenario kept its fall-point
+bounds (they caught it) and gained the restart's own (main c6899e0). GREEN
+in the gate's rest at 202429 with every claim as written, the corpse still
+this time. The four reds stay the watch item, H-54e open, until the
+scenario is green once more in a gate or the nightly and H-54e has its
+read; then this section and gate.yaml's entry come out together.

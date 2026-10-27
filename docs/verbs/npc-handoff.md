@@ -713,19 +713,3 @@ shuttle thrash to read: D22's tenure stays unbuilt and A stands on this read.
 MERGED (18:44 PDT, 2026-10-25): decision (d), the pass between live hosts, on
 fork parity aaafffe5 with train-46 (Eli: "Merge now"; gate 20261026-001639
 eighteen of eighteen; b-npc-handoff-cross committed from the stage's green).
-
-## Watch item (2026-10-27, 52's gate, ADR-027): b-npc-handoff-night
-
-b-npc-handoff-night red once at 20261027-143604 (52's gate on 7cd47e24):
-the restart's cell grant is a race between the games' own logins, c2 won
-0x9732 by 18 ms, its engine never brought Alvor out (its copy a puppet
-indoors) and the record sat in 133c8 for the full 180 s; the premise is c1
-hosting 0x9732. Fixed on main ab00c67 in the scenario's own commit
-(b-npc-death's shape): c2 waits five squares out through the restart, c1 alone
-reloads Riverwood and the step holds for its grant, c2 returns fifteen
-seconds after its own login; the claims unchanged. GREEN in the gate's rest
-at 154552, which played ab00c67 from main at ec7107d. numidium takes the
-restart race into lab-api after the ladder (an ordered reconnect), so the
-restart scenarios stop carrying their own guard. The old premise's red stays
-the watch item until the scenario is green once more in a gate or the
-nightly; then this section and gate.yaml's entry come out together.

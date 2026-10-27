@@ -977,37 +977,3 @@ none). Neither quit crash is ours: the first is the two plugins' statics, the
 second another plugin's or the engine's under this load order (a load-order
 bisect in solo would name it). The fast exit (train-49, D24-B) skips both;
 the plugins' leak goes upstream (D24-D).
-
-
-## Watch item (2026-10-26, the 50b merge gate 20261027-001423, ADR-027)
-
-b-cell-host red once (002301) at the restart's assert, `server.host(0x9810).hosted
-== true` false at epoch 1, green on both reruns (014824, 015416). The read (an
-agent over the three server logs, 19:5x PDT): the cause is train 48's D18-B
-meeting the scenario's old premise. After the restart both games reconnected on
-their own 11 s after the server listened, inside the step's fixed 20 s wait; c1's
-grant followed its login within 0.1 s; four predators (85547, 86117, 85549,
-85548) hit the unprotected c1 for 102 in 3.3 s and it died at 00:27:49.256,
-where the server wrote "ff000000 died: its cells start their grace, no candidate
-until it stands (D18)"; the console tgm landed 1.8 s after the death; 5.35 s
-after the death the cell went unhosted with c2 at the spawn and nobody in
-reach, and the assert 12 s later found it so. The greens were the same race won
-by seconds (014824's tgm landed with 7.8 health left). Fixed in the scenario's
-premise, its own commit on main the same evening: the step waits for the grant
-itself (until) and sets god mode through the server's lever straight after it;
-the claims are unchanged. Closes when the fixed scenario is green in a gate or
-the nightly.
-
-## Watch item (2026-10-27, 52's gate, ADR-027): b-host-own-hit
-
-b-host-own-hit red once at 20261027-135408 (52's gate on 7cd47e24): the
-campfire pair's detection of c1 is the camp's own timing, and neither bandit
-found a target in 90 s (their camp package streamed throughout) where the cut
-gate's 110935 had engaged inside the window; 7cd47e24 touches nothing on that
-path. Fixed on main 9a2441d in the scenario's own commit: once c1 hosts the
-cell its game starts the fight (approach to 200 units, start-combat on both
-bandits, inCombat asserted before the window), the claims unchanged. Deployed
-mid-gate at 14:01Z (the only lab file changed since the gate's deploy), and
-GREEN in the gate's rest at 153329, which played 9a2441d. The old premise's
-red stays the watch item until the scenario is green once more in a gate or
-the nightly; then this section and gate.yaml's entry come out together.
