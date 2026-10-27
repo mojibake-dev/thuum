@@ -318,3 +318,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   this gate, all on main for finish-gate's rest. Noted for after the ladder (numidium): a lab-api `server:
   restart` that reconnects the seats in their listed order, each waiting for its grants, so restart scenarios
   stop carrying their own guard; a-restart-persistence and b-npc-handoff-restart are exposed the same way.
+- 08:08 PDT 2026-10-27: b-npc-respawn 150150 (52's gate's fifth red) read as a premise red: the respawn sweep under
+  test stood the prelude's dead rivals up with the subject and the revived 85549 killed it inside the 40 s window,
+  a death by the engine as designed (c2's report accepted). Main 717eeab kills the rivals again by kill-ref right
+  after the reconnects, the claims unchanged. Five premise reds in this gate, all on main for finish-gate's rest.
