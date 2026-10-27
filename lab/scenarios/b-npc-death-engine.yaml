@@ -4,7 +4,9 @@
 # changed, steps and claims byte for byte). The host approaches Sven in his record's frame and holds him still
 # there (the host's npc-ai lever, read by an aiEnabled assert; 52's gate 20261027-140805: under the combat hold
 # he fought c1 and moved, and the one swing before the one-number read missed where the stage's 123746 had
-# landed, so a swing on a combatant is luck), swings a Daedric warhammer: the one-number read after the first swing
+# landed, so a swing on a combatant is luck; then his AI back and his combat with c1 started for the swings that
+# end him, since with his AI off the engine's death names no killer, the rest's 153601: "died of unknown ...,
+# killer 0"), swings a Daedric warhammer: the one-number read after the first swing
 # (the engine's health on the host within 0.03 of the record), the death by either order (the server's number
 # first with the kill waiting on the report, or the engine's kill move first with the report taken on the
 # server's evidence), dead on the record and both seats, the bodies within 200 units on both axes.
@@ -58,8 +60,8 @@ steps:
   - c1: approach {formId: 0x13491, distance: 150, cell: record}
   # 52's gate 20261027-140805: the combat hold kept him in reach but moving (he fought c1), and the one swing
   # before the one-number read missed where the stage's 123746 had landed; a swing on a combatant is luck, so
-  # the still hold stands him for the swings (x-npc-headshot-host v9's lever, the host's npc-ai off); the
-  # engine's death needs no AI of his (b-npc-headshot-host dies the same way) and the claims are as they were
+  # the still hold stands him for the first swing (x-npc-headshot-host v9's lever, the host's npc-ai off);
+  # his AI comes back before the swings that end him (below) and the claims are as they were
   - c1: npc-ai {formId: 0x13491, enabled: false}
   - wait: 1
   - c1: npc-state {formId: 0x13491}
@@ -77,6 +79,20 @@ steps:
   - assert:
       - server.ref(0x13491).healthPercentage < 1
       - abs(c1.npc_state(0x13491).healthPercentage - server.ref(0x13491).healthPercentage) < 0.03
+  # the kill legs under the combat hold: with his AI off the engine's death names no killer (52's gate's
+  # rest, 20261027-153601: "13491 died of unknown ..., killer 0", the report claim read 0), so his AI
+  # comes back and his combat with c1 starts before the swings that end him, as the stage's 123746 killed
+  # him; the swings re-approach him, a moving target is theirs to find
+  - c1: npc-ai {formId: 0x13491, enabled: true}
+  - wait: 1
+  - c1: start-combat {formId: 0x13491}
+  - wait: 3
+  - c1: npc-state {formId: 0x13491}
+  - assert:
+      - c1.npc_state(0x13491).inCombat == true
+  - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: draw-weapon
+  - wait: 1
   - c1: hold-key {code: 199, ms: 120}
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
