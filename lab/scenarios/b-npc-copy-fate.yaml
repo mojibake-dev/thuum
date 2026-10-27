@@ -1,0 +1,78 @@
+# b-npc-copy-fate (thuum-magnus, 2026-10-26; train 51, ADR-050 decision 3, D29-C; docs/verbs/npc-fate.md): a
+# server-made NPC goes through the same roll and pin as a game-file actor. Promoted unchanged from
+# x-npc-copy-fate v2 20261027-051619 (GREEN on 51's stage of fork m3-npc-path 39cf3f4d; the id and this
+# header changed, steps and claims byte for byte). The server rolls the placed bandit's fate before its create
+# word and sends it ahead of CreateActor; each seat's view arms the fate by the base before its placeAtMe and
+# the detours bind it to the copy's own id, so the host's copy wears the record's roll from its first frame;
+# the outfit rolls once on the server, so what the record wears its inventory holds (the double roll that
+# refused the host's faithful hands report in 041406). The bandit: EncBandit01Melee1HNordM 0x1bcd8 placed at
+# c1's own actor and set on c1's god-mode player with start-combat, c2 watching from 150 units. Claims: the
+# server's fate line at the placement; the fate armed and the copy dressed from the server's roll on BOTH
+# seats; the host's worn report accepted (no E_EQUIP_REFUSED naming a 0xff actor); the bandit's swings land
+# (OnWeaponHit on ff000000, no E_HIT_WEAPON); no refusal of the hosted stream.
+id: b-npc-copy-fate
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13483).aiEnabled == true
+      - c2.npc_state(0x13483).aiEnabled == false
+  # the bandit at c1's player: fated by the server before its word, dressed from the roll on both seats
+  - c1: server-console {name: PlaceAtMe, args: [0x14, 0x1bcd8]}
+  - wait: 10
+  - c1: refs-near {radius: 2000, formTypes: [43]}
+  - c2: refs-near {radius: 2000, formTypes: [43]}
+  - c1: log-count {pattern: "copy ff[0-9a-f]+ of 1bcd8: fate armed true"}
+  - c2: log-count {pattern: "copy ff[0-9a-f]+ of 1bcd8: fate armed true"}
+  - c1: log-count {pattern: "dressed ff[0-9a-f]+ from the server.s roll inside the outfit roll"}
+  - c2: log-count {pattern: "dressed ff[0-9a-f]+ from the server.s roll inside the outfit roll"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("PlaceAtMe - ff[0-9a-f]+ .base 1bcd8. fated at level") >= 1'
+      - 'c1.log_count("copy ff[0-9a-f]+ of 1bcd8: fate armed true") >= 1'
+      - 'c2.log_count("copy ff[0-9a-f]+ of 1bcd8: fate armed true") >= 1'
+      - 'c1.log_count("dressed ff[0-9a-f]+ from the server.s roll inside the outfit roll") >= 1'
+      - 'c2.log_count("dressed ff[0-9a-f]+ from the server.s roll inside the outfit roll") >= 1'
+      - 'server.log_count("E_EQUIP_REFUSED: ff[0-9a-f]+") == 0'
+  # the fight: the host's hands are the record's, so the swings count
+  - c1: start-combat {}
+  - wait: 30
+  - c1: log-count {pattern: "action [0-9a-f]+ idle [0-9a-f]+ [A-Za-z_]*[Aa]ttack[A-Za-z_]* type [0-9]+ on ff[0-9a-f]+"}
+  - c2: log-count {pattern: "performAction on ff[0-9a-f]+: .* event '[A-Za-z_]*[Aa]ttack[A-Za-z_]*' .* taken 1"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("OnWeaponHit - ff0000[0-9a-f]+ hits ff000000") >= 1'
+      - 'server.log_count("E_HIT_WEAPON: hosted ff[0-9a-f]+") == 0'
+      - 'server.log_count("E_EQUIP_REFUSED: ff[0-9a-f]+") == 0'
+      - 'server.log_count("No permission to update actor ff[0-9a-f]+") == 0'
+  - c1: stop-combat {}
+  - wait: 3
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
