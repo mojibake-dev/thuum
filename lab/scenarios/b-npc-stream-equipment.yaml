@@ -5,7 +5,8 @@
 # are what the hit path judges a hosted actor's swing against. b-npc-puppet's Riverwood layout and P4's
 # placed bandit. Claims: the server's equipment lines for the residents ("[verb:npc-stream] equipment 1348x
 # by ff000000"), no E_EQUIP_REFUSED and no E_HIT_WEAPON naming a resident (the fate's roll and the engine's
-# worn items agree for a game-file actor). The placed server-made bandit's lines are RECORDED, not claimed:
+# worn items agree for a game-file actor). The placed server-made bandit's lines, RECORDED at first, are
+# CLAIMED since train 51 (the one roll on the server; the next lines are the history):
 # its engine-rolled weapon is refused against a record that never held it and its swings are dropped, which
 # is playtest 34's D19 gap (the hosted server-made copy's dress: train-47's once-dress, or ADR-050 decision
 # 3's one NPC path), not this verb's. GREEN as x-npc-stream-p6 v2 20261026-173133 on the v3 stage of fork
@@ -56,7 +57,10 @@ steps:
       - 'server.log_count("\\[verb:npc-stream\\] equipment 1348[0-9a-f]+ by ff000000") >= 1'
       - 'server.log_count("E_EQUIP_REFUSED: 1348[0-9a-f]+") == 0'
       - 'server.log_count("E_HIT_WEAPON: hosted 1348[0-9a-f]+") == 0'
-  # recorded, not claimed (D19's gap): the bandit's refusal and its dropped swings
+      # claimed since train 51 (ADR-050 decision 3, the one roll on the server: x-npc-copy-fate v2
+      # 20261027-051619): the server-made bandit's hands pass and its swings land as a resident's do
+      - 'server.log_count("E_EQUIP_REFUSED: ff[0-9a-f]+") == 0'
+      - 'server.log_count("E_HIT_WEAPON: hosted ff[0-9a-f]+") == 0'
   - c1: log-count {pattern: "equipment ff0000[0-9a-f]+:"}
   - c1: dump-state
   - c2: dump-state
