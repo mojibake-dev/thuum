@@ -67,8 +67,12 @@ steps:
   - wait: 4
   - assert:
       - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 1'
-  # the non-host, beside the body now, is admitted at once
-  - c2: teleport {cell: "371de:Skyrim.esm", x: -4250, y: 800, z: 650, rot: [0, 0, 90]}
+  # the non-host, beside the body now, is admitted at once: placed by the judged approach at 150 units
+  # from the body as the server's record has it (a fixed point stood 459 units from the record in 51's
+  # gate, 20261027-061048, seven past the 452 reach the server allows a target of unknown size, where the
+  # same point had been inside it in two gates before: the body lies where its death left it, a few
+  # units apart run to run; the premise is the fix, the claims as they were)
+  - c2: approach {formId: 0x39fe4, distance: 150, cell: "371de:Skyrim.esm"}
   - wait: 6
   - c2: close-menu {name: MessageBoxMenu}
   - c2: activate {refId: 0x39fe4}
