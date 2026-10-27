@@ -1901,17 +1901,3 @@ placement covers the kill moment only, since a dead ragdoll takes no
 setPosition, and a host change after such a reload moves the record to
 the new host's body. Playtest 35's known limits carry it; a fix in kind
 has no hook, the engine re-settles the body without killing it again.
-
-## Watch item (2026-10-27, 51's merge gate, ADR-027)
-
-b-npc-body-release red once (20261027-061048) at its second activation:
-E_ACTIVATE_REACH, c2 at 459 units from the body's record against the 452
-reach for a target of unknown size, where the scenario's fixed teleport
-point had stood inside it in the stream's and 50b's gates. The body lies
-where its death left it, a few units apart run to run, so the premise was
-position-dependent, not the train's. Fixed on main d85701d in its own
-commit (c2 by the judged approach at 150 units from the record, the claims
-unchanged), deployed under D38 B before the gate's rest, where the fixed
-scenario ran GREEN (074932, nine of nine). The old point's red stays the
-watch item until the fixed scenario is green once more in a gate or the
-nightly; then this line and gate.yaml's entry come out together.
