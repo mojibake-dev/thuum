@@ -1,15 +1,12 @@
 # b-npc-death-engine (thuum-magnus, 2026-10-27; train 52, ADR-050 decision 2, docs/verbs/npc-fate.md): the host
 # kills its own hosted NPC and the death is the engine's, from the server's number. Promoted unchanged from
 # x-npc-death-host v5 (GREEN 20261027-095847 on 52's stage of fork m3-npc-death cc1d9025; the id and this header
-# changed, steps and claims byte for byte). The host approaches Sven in his record's frame and holds him still
-# there (the host's npc-ai lever, read by an aiEnabled assert; 52's gate 20261027-140805: under the combat hold
-# he fought c1 and moved, and the one swing before the one-number read missed where the stage's 123746 had
-# landed, so a swing on a combatant is luck; then his AI back and his combat with c1 started for the swings that
-# end him, since with his AI off the engine's death names no killer, the rest's 153601: "died of unknown ...,
-# killer 0"), swings an iron sword up to three times for the one-number read (none of them lethal; the rest's
-# rerun 155405 missed its single swing: an approach faces the RECORD, and the engine's 35-degree hit cone wants
-# the body, so every approach is followed by look-at, head to head in c1's own game, b-npc-headshot-host's aim)
-# and then the Daedric warhammer for the swings that end him: the one-number read after the measured swings
+# changed, steps and claims byte for byte). The host approaches Sven in his record's frame, starts his combat
+# there (the hold read by an inCombat assert) and swings an iron sword six times at 1.5 s for the one-number
+# read (52's gate 20261027-140805 missed its one swing on a moving combatant; a still hold by npc-ai off did not
+# hold him, he walked 260 units in the rest's rerun 160214, and look-at's setAngle never turns the player; six
+# weak swings land at least one and at most 42 of his 50), then the Daedric warhammer for the swings that end
+# him, his AI on throughout so the death names its killer: the one-number read after the measured swings
 # (the engine's health on the host within 0.03 of the record), the death by either order (the server's number
 # first with the kill waiting on the report, or the engine's kill move first with the report taken on the
 # server's evidence), dead on the record and both seats, the bodies within 200 units on both axes.
@@ -50,9 +47,8 @@ steps:
   # house at 0.16, two hits short): a Daedric warhammer (WEAP 0x139ba, esm.py; 27 a hit), given and equipped
   # through the console as b-marksman arms its bow, so two landed hits end him before he turns
   - c1: console {text: "player.additem 139ba 1"}
-  # the measured swings use the iron sword (WEAP 0x12eb7, esm.py; 7 a hit on his 50), so up to three can land
-  # before the one-number read with none of them lethal, since a death under the still hold names no killer
-  # (the rest's 153601); the warhammer is equipped for the kill legs below
+  # the measured swings use the iron sword (WEAP 0x12eb7, esm.py; 7 a hit on his 50), so six swings leave
+  # him alive and hurt for the one-number read; the warhammer is equipped for the kill legs below
   - c1: console {text: "player.equipitem 12eb7"}
   - wait: 2
   - c1: draw-weapon
@@ -64,51 +60,32 @@ steps:
   # his combat there and reads the hold before anything else; every approach draws the weapon again before
   # the swings; the claims as they were
   - c1: approach {formId: 0x13491, distance: 150, cell: record}
-  # 52's gate 20261027-140805: the combat hold kept him in reach but moving (he fought c1), and the one swing
-  # before the one-number read missed where the stage's 123746 had landed; a swing on a combatant is luck, so
-  # the still hold stands him for the first swing (x-npc-headshot-host v9's lever, the host's npc-ai off);
-  # his AI comes back before the swings that end him (below) and the claims are as they were
-  - c1: npc-ai {formId: 0x13491, enabled: false}
-  - wait: 1
+  # the measured swings under the combat hold, six of them (52's gate 20261027-140805 missed its one swing
+  # on a moving combatant; the still hold did not hold him: with his AI off on the host he walked 260 units
+  # in the rest's rerun 160214, 20430 to 20657, and look-at's setAngle never turns the player, its heading
+  # reading the approach's every time). Six iron-sword swings at 1.5 s against an engaged Sven closing in
+  # land at least one and at most 42 of his 50, so the one-number read finds him hurt and alive; his AI
+  # stays on throughout, so the death below names its killer (a death under AI off names none, 153601)
+  - c1: start-combat {formId: 0x13491}
+  - wait: 3
   - c1: npc-state {formId: 0x13491}
   - assert:
-      - c1.npc_state(0x13491).aiEnabled == false
+      - c1.npc_state(0x13491).inCombat == true
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
-  # the rest's rerun 155405: the single swing missed him standing still, since the approach faces his record
-  # and the engine's hit cone (fCombatHitConeAngle, 35 degrees) wants the body; look-at aims head to head in
-  # c1's own game (b-npc-headshot-host's aim), before the draw because the angle set sheathes
-  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - wait: 1
+  - c1: repeat {times: 6, gapMs: 1500, step: {hold-key: {code: 199, ms: 120}}}
+  - wait: 2
   # the measured swings, then the one-number read: the engine's health on the host against the record
   - c1: npc-state {formId: 0x13491}
   - c2: npc-state {formId: 0x13491}
   - assert:
       - server.ref(0x13491).healthPercentage < 1
       - abs(c1.npc_state(0x13491).healthPercentage - server.ref(0x13491).healthPercentage) < 0.03
-  # the kill legs under the combat hold: with his AI off the engine's death names no killer (52's gate's
-  # rest, 20261027-153601: "13491 died of unknown ..., killer 0", the report claim read 0), so his AI
-  # comes back and his combat with c1 starts before the swings that end him, as the stage's 123746 killed
-  # him; the swings re-approach him, a moving target is theirs to find
-  - c1: npc-ai {formId: 0x13491, enabled: true}
-  - wait: 1
-  - c1: start-combat {formId: 0x13491}
-  - wait: 3
-  - c1: npc-state {formId: 0x13491}
-  - assert:
-      - c1.npc_state(0x13491).inCombat == true
-  # the warhammer (WEAP 0x139ba, 27 a hit) for the swings that end him, two landed hits
+  # the warhammer (WEAP 0x139ba, 27 a hit) for the swings that end him, two landed hits, the combat hold on
   - c1: console {text: "player.equipitem 139ba"}
   - wait: 1
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
-  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
@@ -122,23 +99,6 @@ steps:
   - c1: hold-key {code: 199, ms: 120}
   - wait: 1
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
-  - c1: look-at {formId: 0x13491}
-  - c1: draw-weapon
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: hold-key {code: 199, ms: 120}
-  - wait: 1
-  - c1: approach {formId: 0x13491, distance: 110, cell: record}
-  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
@@ -154,7 +114,21 @@ steps:
   - c1: hold-key {code: 199, ms: 120}
   - wait: 1
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
-  - c1: look-at {formId: 0x13491}
+  - c1: draw-weapon
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: approach {formId: 0x13491, distance: 110, cell: record}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
