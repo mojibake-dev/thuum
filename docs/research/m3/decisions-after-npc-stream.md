@@ -301,3 +301,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   changed only the life check). Main 9a2441d has the host's game start the fight (approach to 200 units,
   start-combat on both, inCombat asserted), the claims unchanged. A lone red reruns at the gate's end under
   ADR-027; numidium decides whether the rerun plays the deployed file or this one.
+- 07:13 PDT 2026-10-27: b-npc-death-engine 140805 (52's gate's second red) read as a premise red: the combat hold
+  keeps Sven in reach but moving, and the one swing before the one-number read missed (the stage's first swing
+  had landed by luck). Main f1829c2 holds him still for the swings (npc-ai off, as b-npc-headshot-host does;
+  the engine's death needs no AI of his), the claims unchanged. With two reds the gate ends red and
+  finish-gate's rest plays the deployed tree, so this lands on main before the gate's end.
