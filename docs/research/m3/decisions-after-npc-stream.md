@@ -409,3 +409,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   stayed at one point through 24 reads over four minutes on both seats, a restart and the host's reconnect
   included. H-54e's fix holds at T3; its mechanism (the promote switching AI on a dead actor at the reconciler's
   flip) stays the code's one candidate. b-npc-death's fall-point bounds stay strict with that.
+- 15:00 PDT 2026-10-27: 55's T2 (job 12909 at c1be67d1) red on the npc-talk session alone: two wire-only notices
+  undeclared (c2's HostGrant at epoch 2 and the DestroyActor of c1's actor), both the session's end as
+  cell-host.yaml declares them; the claim handler grants no cell (OnActorClaim; PartOne's one HostGrant sender is
+  the cell-host routine), so neither is the claim's. A sessions-only commit on m3-npc-talk (1b866786) declares
+  them. Call with numidium: gate-cite accepts skymp-wire/difftest/sessions/** differences (they build nothing),
+  T2 reruns with SESSIONS=tree at the new head, and 55's stage keeps c1be67d1's images; no restage.
