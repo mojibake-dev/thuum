@@ -17,11 +17,7 @@ watch:
   - a-racemenu         # docs/verbs/racemenu-sync.md:746, a figure's head scale after a reconnect (2026-10-09)
   - b-spell            # docs/verbs/spell-cast.md:394, red once in the m2-stagger sweep (2026-10-11)
   - b-invis-recast     # docs/verbs/self-cast.md:104, a 120 s guest-agent stall spaced the casts past the spell's 30 s (2026-10-18)
-  - b-npc-death        # docs/verbs/npc-fate.md:1930, red three times on its restart leg's premise in 52's cut gate, restage and gate (the grant race pinned 86d340b, the login-to-move wait c1f44fb, god mode re-armed b8c494f; green at 132954 and in the rest at 154008) (2026-10-27)
-  - b-host-own-hit     # docs/verbs/cell-host.md:1001, red once in 52's gate (the pair's own detection; the host starts the fight 9a2441d, deployed mid-gate 14:01Z, green in the rest 153329) (2026-10-27)
-  - b-npc-handoff-night # docs/verbs/npc-handoff.md:717, red once in 52's gate (the restart's grant race; c1 pinned ab00c67, green in the rest 154552) (2026-10-27)
-  - b-npc-respawn      # docs/verbs/npc-fate.md:1954, red once in 52's gate (the sweep revived the prelude's rivals; re-killed 717eeab, green in the rest 154953) (2026-10-27)
-  - b-cell-host        # docs/verbs/cell-host.md:982, red once at the restart's assert in the 50b merge gate (D18-B meeting the old fixed wait; the premise fixed the same evening) (2026-10-26)
+  - b-npc-death        # docs/verbs/npc-fate.md:2033, red four times on its restart leg in 52's cut gate, restage and gate and 54's gate (three premises fixed 86d340b, c1f44fb, b8c494f; the fourth H-54e, a corpse moved on its host's engine, 190413, green in 54's rest 202429) (2026-10-27)
   - b-npc-handoff-cross # docs/verbs/npc-handoff.md:668, red once at a login re-split in the stream's merge gate, and the pass thrash D36's brake answers (2026-10-26)
 pending:
   - b-npc-headshot-host  # lab-driver cannot aim: look and look-at leave the heading at the approach's, so a shot flies at the RECORD's point and misses a body 26 units off (54's gate 20261027-192858, every look-at heading equal to its approach's; v9's green 104716 was luck); the headshot path's claims held whenever a shot landed; un-pend with numidium's driver aim fix after the ladder, proved by a probe (2026-10-27, thuum-magnus)
