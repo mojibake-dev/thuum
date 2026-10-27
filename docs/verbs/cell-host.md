@@ -997,3 +997,17 @@ premise, its own commit on main the same evening: the step waits for the grant
 itself (until) and sets god mode through the server's lever straight after it;
 the claims are unchanged. Closes when the fixed scenario is green in a gate or
 the nightly.
+
+## Watch item (2026-10-27, 52's gate, ADR-027): b-host-own-hit
+
+b-host-own-hit red once at 20261027-135408 (52's gate on 7cd47e24): the
+campfire pair's detection of c1 is the camp's own timing, and neither bandit
+found a target in 90 s (their camp package streamed throughout) where the cut
+gate's 110935 had engaged inside the window; 7cd47e24 touches nothing on that
+path. Fixed on main 9a2441d in the scenario's own commit: once c1 hosts the
+cell its game starts the fight (approach to 200 units, start-combat on both
+bandits, inCombat asserted before the window), the claims unchanged. Deployed
+mid-gate at 14:01Z (the only lab file changed since the gate's deploy), and
+GREEN in the gate's rest at 153329, which played 9a2441d. The old premise's
+red stays the watch item until the scenario is green once more in a gate or
+the nightly; then this section and gate.yaml's entry come out together.
