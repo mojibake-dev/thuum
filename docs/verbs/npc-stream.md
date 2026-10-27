@@ -1688,6 +1688,19 @@ host to 300 units of Sven and the puppet seat to 400 before the window
 residents. The run's second red was the lab's (a c2 log-count step met
 "QEMU guest agent is not running" and left its claim without a count).
 
+54's stage, second read (11:16 PDT, x-npc-stream-face v2 20261027-181024,
+GREEN, six of six): H-54d CONFIRMED (both seats beside Sven: 52 resident
+state lines with a gaze target where v1 had none, one at the dialogue slot
+4; the targets residents, the players and creatures, slots 0 to 2 besides).
+H-54a read at T3: c2's puppets took 25 gaze targets within the relay's
+sample ("face: 3550c gaze -> 13483 (slot 1)", "35534 gaze -> 13491 (slot
+2)", clears when the host's slot emptied); the head's turn itself is T4's
+eye (playtest 35). H-54b read: 18 non-neutral expressions on c2 ("face:
+1348c expression 1 50 (mood 8)", anger at 50 as Mood 8; neutral 0 at mood
+7), the mapping as the table says. H-54c (no jitter against the heuristic)
+stays HYPOTHESIS for T4. Promoted as b-npc-stream-face (main, its own
+commit) for 54's gate set.
+
 Step R (2026-10-26, on the merged parity 66f04f2a; numidium's chain, 22:15
 to 22:32Z): P3 (x-npc-stream-p3 20261026-222300) GREEN, all 32 steps, its
 pcap the rates' read (the MEASURED bullet under Rate limit above); P6 v3
