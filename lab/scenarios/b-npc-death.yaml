@@ -89,8 +89,14 @@ steps:
   - wait: 8
   - server: restart {gameHour: 12.0}
   - c1: reconnect
+  # god mode again, the server's lever straight after each login: the server's tgm is a session flag a
+  # restart forgets (52's gate 20261027-141823: predator 86117 hit c1 for real damage after the restart,
+  # ten hits, c1 died at 14:22:30 and the grace passed its cells to c2 at 14:22:35, long before leg 4; the
+  # prelude's console tgm had set it before the restart; b-cell-host's lever)
+  - c1: server-console {name: TGM}
   - until: {within: 45, expect: [server.host(0x9810).client == "c1"]}
   - c2: reconnect
+  - c2: server-console {name: TGM}
   # a move within a second of a seat's login never settled (52's restage 20261027-125354: the record
   # written at the landing, c2's game unmoved at the away point for 60 s while the server corrected it
   # every 3.5 s); the lab's own shape gives a login ten seconds before its first move (the prelude's
@@ -122,6 +128,8 @@ steps:
       - c2.npc_state(0x85547).isDead == true
       - server.ref(0x85547).isDead == true
   - c1: connect
+  # a relaunch loses the server's tgm as well (lab-relaunch-loses-god-mode): on again before the wait
+  - c1: server-console {name: TGM}
   - wait: 25
   - c1: npc-state {formId: 0x85547}
   - assert:
