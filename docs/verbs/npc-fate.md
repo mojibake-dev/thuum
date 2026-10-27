@@ -2017,7 +2017,14 @@ adds the restart's own bounds against the record right before it (main
 c6899e0, after 0977292 had re-measured the fall-point bounds against that
 snapshot and numidium read it against rule 13: a re-measurement that hides
 the anomaly weakens the claim). Until H-54e's read the scenario reds on a
-drifting corpse, by design. The code read (12:18 PDT): the native promote
+drifting corpse, by design. H-54e's read at T3 (14:26 PDT, x-npc-corpse-drift
+20261027-211727 GREEN on 55's stage, m3-npc-talk c1be67d1 with the promote
+fix): the corpse stayed at one point through 24 reads over four minutes on
+both seats, c1's at (125306, -81256) and c2's 22 units from it, across the
+kill word, a server restart and the host's reconnect (the flip that walked
+190413's wolf). With the fix no corpse moves; the flip's mechanism (the
+promote's EnableAI and EvaluatePackage on a dead actor) stays the one
+candidate the code shows, and the fix closes the path either way. The code read (12:18 PDT): the native promote
 (PuppetApi.cpp Promote) lifts the block, calls EnableAI(true) and
 EvaluatePackage(false, false) on any actor, dead or alive; at c1's reconnect
 the reconciler flipped the dead wolf to puppet and back to live within 258
