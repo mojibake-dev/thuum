@@ -1869,7 +1869,14 @@ the restaged cc1d9025 GREEN, nine of nine claims, the one-number read after
 the first swing, the death by either order, the bodies within 200 units on
 both axes. The guest's probe reached 0.16 with six landed hits before Sven
 fled into his house (v5 095425); v6 arms the guest with a Daedric warhammer
-(two landed hits) for the rerun.
+(two landed hits): GREEN 20261027-103226, the guest kills the host's NPC
+through the cause path. The headshot probe read the headshot path end to
+end on a hosted resident before its own premise held: a level shot from
+150 units at Sven, circling the host he fought, took the bystander 1348c
+instead and the server killed it on the claimed bow hit ("headshot:
+ff000001 kills 1348c with fe01e801 on a claimed bow hit", 103638); v8
+holds Sven still with the host's npc-ai lever instead of combat (a shot
+needs a still target, a swing an engaged one).
 
 ## Watch item (2026-10-27, 51's merge gate, ADR-027)
 
