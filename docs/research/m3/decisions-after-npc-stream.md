@@ -173,7 +173,8 @@ fork m3-pass-margin 11bf32f3 (two rules tests green; x-handoff-cross v3 counts t
   and a step the margin deep passes it. No clock; the same read on both servers. Built.
 - Recommended: C. It merges only on your letter, after x-handoff-cross v3's read on its stage.
 
-- Decision:
+- Decision: C (Eli, 00:00 PDT: "recommended on both", D36 and D37 together). The brake rides inside
+  trains 55 and 53; x-handoff-cross v3 reads it on 55's stage, and 55 merges on its gate under D32 B.
 
 ### D37. A client mod drops a dead NPC's shield into the world (17:00 PDT)
 x-body-loot 20261026-231653 on 50b's stage read RED at the dead bandit's worn list: alive it wore
@@ -198,4 +199,7 @@ the strict claim (the body wears the roll after the loot) returns to it.
 - Recommended: B. A client mod that creates world items the server never records breaks the one
   authority per state rule (CLAUDE.md), and D24 already names the same plugin for the quit leak.
 
-- Decision:
+- Decision: B (Eli, 00:00 PDT: "recommended on both"). DeathDropOverhaul leaves the lab and playtest
+  load order until M4's dropped-items row (a persist-mods render laid on clean-m1, numidium and core,
+  in a gap or before playtest 35's setup); the strict body-worn claim returns to x-body-loot and its
+  promotion b-body-loot once the layer is on the seats.
