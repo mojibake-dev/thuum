@@ -327,3 +327,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   Main 249da50 keeps the still hold for the first swing only and restores his AI and combat for the kill
   swings; the claims unchanged. The engine fact (an AI-off actor's death carries no killer; the server records
   the death on its own evidence) goes into npc-fate.md with the watch item.
+- 09:01 PDT 2026-10-27: b-npc-death-engine's lone-red rerun 155405 missed its single measured swing on a still
+  Sven (the approach faces the record, the hit cone wants the body). Main f9767f2: look-at before every draw and
+  the iron sword for up to three measured swings (none lethal under the still hold), the warhammer for the kill
+  legs; claims unchanged. numidium runs rest2 (death-engine alone) and the merge cites gate, rest and rest2.
