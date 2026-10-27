@@ -262,3 +262,10 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   design rather than weakening it (x-npc-death-host v3 20261027-091759 took the second path).
 - 02:32 PDT: the bodies' distance is 52's code (a dead ragdoll takes no setPosition), fixed on
   m3-npc-death cc1d9025 and restaged; a code fix restages, a premise fix reruns.
+- 04:25 PDT 2026-10-27: b-npc-copy-fate's victim claim restated from the player to any target
+  ("OnWeaponHit - ff00000[2-9a-f] hits"): in 52's gate (111854) four residents reached the placed bandit
+  first and it fought them, its swings counted as train 51 means (E_HIT_WEAPON judged the aggressor's
+  hands, whoever was struck), so the claim still asserts 51's change with the three refusal claims; what it
+  no longer asserts is a server-made copy's hit landing on a PLAYER (the R0 path), which no other scenario
+  claims for a copy: that count is recorded in the scenario (a >= 0 row prints it) and playtest 35's bandit
+  line in Bleak Falls Temple reads it on both screens. A loosening, named here so Eli sees it unasked.
