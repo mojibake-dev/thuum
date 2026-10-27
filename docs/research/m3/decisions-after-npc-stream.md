@@ -223,3 +223,8 @@ item, as a rerun's green is inside one set).
 - C. A fresh full gate on main's scenarios, b-npc-copy-fate included: about 1 h 50 min of lab against 50 min.
 - Recommended: B. The rest then asserts what main asserts, and the one premise that changed moved where a seat
   stands, not what it claims.
+
+- Decision: B (Eli, 00:44 PDT: "D38 B i suppose"). After the card's recovery, `just deploy-srv` runs before the rest:
+  since the stage's deploy (main 84330e1d) only three scenario files changed, b-npc-body-release (d85701d's
+  approach), b-npc-stream-equipment (e42dbca's two claims on the server-made bandit) and the new b-npc-copy-fate,
+  which is not in the rest; the rest plays the first two as main has them.
