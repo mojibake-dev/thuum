@@ -241,3 +241,14 @@ says any red stops the chain for your read.
   reds and the fix are reported as it lands.
 - Recommended: B.
 - Decision: B (Eli, 01:56 PDT: "go with B.").
+
+### D40. Eli's standing word for the rest of the ladder (01:57 PDT 2026-10-27, verbatim)
+Eli: "i keep getting pinged for questions and shit, just plough ahead to a fully functional playtest 35."
+Read as: no more questions to Eli until playtest 35 is set up; every open or new decision on the way
+takes the memo's recommendation by default, the scenario owner (thuum-magnus) and the process owner
+(numidium) deciding between them and recording the call here; reds are read and fixed, and a premise
+red fixed with the claims unchanged counts as the claims holding under D32 B (the chain merges on the
+green gate and reports); only a red of a train's own code with no fix in hand stops the chain, and then
+the stop is reported, not asked. This answers numidium's pending question on 52's premise reds: B.
+
+- Decision: as above (Eli, "just plough ahead to a fully functional playtest 35")
