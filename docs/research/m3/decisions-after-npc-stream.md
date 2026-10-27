@@ -400,3 +400,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   per crossing" was the unbraked rule's claim; restated to "a follow within the margin, passes at most six and
   recorded" (main, its own commit; v4 by path), a restatement matching the train's change, named for Eli as
   copy-fate's was. Not asserted at T3: a crossing deep enough to pass (CellHostTest proves it at T0).
+- 14:22 PDT 2026-10-27 (D36 C's follow-up, named for Eli): what b-npc-handoff-cross no longer asserts at T3 is a
+  crossing deep enough to pass; CellHostTest proves it at T0 and Riverwood's traffic never walks 256 deep in
+  three minutes. One probe after the ladder reads it at T3: an actor walked or moved 300 units into the other
+  host's square (npc-pose or a placed NPC's travel package), the pass line once, the follow lines before it, and
+  the seats' AI swapping once. numidium holds it on the after-ladder list with the lab-api items.
