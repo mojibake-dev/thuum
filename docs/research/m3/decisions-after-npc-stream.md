@@ -385,3 +385,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   stays out of the citation while the claim stands as written; numidium fixes the driver's aim right after the
   ladder (a same-spot teleport with the computed heading, since the teleport applies its heading) and un-pends
   it once a probe proves the aim. Named here for Eli: a committed scenario sits out gates until the lab can aim.
+- 13:18 PDT 2026-10-27: b-npc-stream-voice 200545 (54's gate's third red) read as a premise red: the listener's
+  computed landing point fell in an obstacle and the engine's placement sat 74 units off it, past the judge's
+  tolerance. Main c70e828 gives the listener's approaches tolerance 150 (earshot, not a mark), claims unchanged;
+  the judge's acceptance of a repeated placement is a lab-api row for numidium after the ladder.
