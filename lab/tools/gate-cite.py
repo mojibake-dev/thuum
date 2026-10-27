@@ -150,10 +150,13 @@ def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, hea
     ok3 = bool(sha8) and named and registry_id == sid
     out.append((ok3, f"3. the branch's stage: server {image.rsplit('/', 1)[-1]} ({'the registry still serves it' if registry_id == sid else 'the registry serves another id'}), "
                      f"clones {'name' if named else 'do not all name'} '{branch} client {sha8 or '?'}'"))
-    docs_only = changed is not None and all(p.endswith(".md") for p in changed)
+    # paper only: docs, or the T2 sessions' declarations (skymp-wire/difftest/sessions/, difftest's inputs, which the
+    # server and client images do not run); T2 itself must be green on the head with them (m3-npc-talk c1be67d1,
+    # 2026-10-27: a declaration-only commit after the stage would otherwise restage a train whose build is unchanged)
+    docs_only = changed is not None and all(p.endswith(".md") or p.startswith("skymp-wire/difftest/sessions/") for p in changed)
     ok4 = head8 == sha8 or (bool(sha8) and docs_only)
     out.append((ok4, f"4. head {head8} " + ("is the staged commit" if head8 == sha8 else
-                ("differs in .md files only" if docs_only else f"differs from {sha8 or '?'} in more than docs"))))
+                ("differs in docs or T2 session declarations only" if docs_only else f"differs from {sha8 or '?'} in more than docs"))))
     same = live_server == sid and dict(descs) == live_descs
     ok5 = same and not turbo_since
     out.append((ok5, "5. nothing replaced it since the set began" if ok5 else
