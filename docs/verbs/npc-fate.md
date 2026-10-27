@@ -1746,9 +1746,12 @@ refusal (npc-stream.md) reads as this, not D19. Fixed on m3-npc-path
 39cf3f4d (one roll, its picks added to the inventory; NpcFateTest's placed
 case asserts every worn entry is in the inventory). The rerun, v2
 20261027-051619 on 39cf3f4d, GREEN: no E_EQUIP_REFUSED for the copy, the
-dress claims matched: H-51b CONFIRMED for the hands (the swing's landing
-reads on 51's gate and the stage's T2). H-51c and H-51d read on the gate
-(gate-m3-npc-path, 25 runs).
+dress claims matched, and the bandit's swings landed on the host's player
+(OnWeaponHit on ff000000, no E_HIT_WEAPON): H-51b CONFIRMED whole. Promoted
+unchanged as b-npc-copy-fate (thuum main 916af5a, its own commit), and
+b-npc-stream-equipment's placed-bandit lines turned from recorded to
+claimed (e42dbca). H-51c and H-51d read on the gate (gate-m3-npc-path, 25
+runs).
 
 ## Status
 
