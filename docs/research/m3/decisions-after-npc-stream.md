@@ -389,3 +389,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   computed landing point fell in an obstacle and the engine's placement sat 74 units off it, past the judge's
   tolerance. Main c70e828 gives the listener's approaches tolerance 150 (earshot, not a mark), claims unchanged;
   the judge's acceptance of a repeated placement is a lab-api row for numidium after the ladder.
+- 14:13 PDT 2026-10-27: x-npc-talk-claim 210601 (55's stage) read as a premise red: E hit nothing, Sven walked his
+  7.9 package out of the crosshair's line between the approach's judge and the press (look and look-at aim
+  nothing). v3 by path: the clock at 9.0 (Sven at the mill's saw, standing), the host's npc-ai lever through the
+  claim, the record asserted still, approach to 70 and E at once; the claim line's cell widened to 973[12] for
+  the hour. The claim code (talkService, ActionListener's gates) is untested by this run; the rerun reads it.
