@@ -67,7 +67,11 @@ steps:
   - c1: screenshot
   - c2: screenshot
   - assert:
-      - 'server.log_count("OnWeaponHit - ff0000[0-9a-f]+ hits ff000000") >= 1'
+      # the copy's swings count on whomever it fights: Riverwood's residents reach a bandit placed in the
+      # square before the player does (52's gate, 20261027-111854: four residents hit it within 5 s and it
+      # swung back at 13489 for 8, dying to them), so the victim is not named; the aggressor is the
+      # server-made copy (ff000002 onward: the players are ff000000 and ff000001)
+      - 'server.log_count("OnWeaponHit - ff00000[2-9a-f] hits") >= 1'
       - 'server.log_count("E_HIT_WEAPON: hosted ff[0-9a-f]+") == 0'
       - 'server.log_count("E_EQUIP_REFUSED: ff[0-9a-f]+") == 0'
       - 'server.log_count("No permission to update actor ff[0-9a-f]+") == 0'
