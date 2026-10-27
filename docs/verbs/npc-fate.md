@@ -1841,6 +1841,31 @@ bfc41e0b): the server-made actor's death by the NPC rule, E_HIT_WEAPON at
 info, the corpse's occupancy released. The body's diff-only inventory and
 the hosted copy's dress ride train-47, built ahead on the memo's letters.
 
+## ADR-050 decision 2, deaths by the engine: 52's first stage reads (02:29 PDT 2026-10-27)
+
+x-npc-death-host v3 (20261027-091759, the host kills Sven with seven landed
+iron-sword hits, the server's number 1 to 0.02): Sven died on every seat
+and the record, but two claims read wrong. (1) "death pending on 13491"
+never printed: at one hit point the host's engine's KILL MOVE ended him
+(the engine decides a kill move before the damage), 842 ms after the
+seventh hit, and the server took the report on its own evidence ("ff000000
+hit it 842 ms before (the engine's number outran the server's)"). Both
+orders are the design's: the server's number first and the kill waiting on
+the report (ADR-050 decision 2's pending death), or the engine first and
+the report checked (ADR-048 B); the probes' claim assumed the first and now
+accepts either. (2) The bodies lay 326 units apart: c2's rest fired
+("rested at the host's spot, 329 units away") and a dead ragdoll takes no
+setPosition. Fixed on fork m3-npc-death cc1d9025: the puppet is placed at
+the host's last sample BEFORE the kill word is applied, while it still
+moves (deathService); the rest after death stays as a read. Also read: the
+guest-hit path works (x-npc-death-guest v3 091346: ff000001's hits on
+13491 reached the server and the record moved 1 to 0.44, four landed hits
+of twelve at 7 on a base of 50; eight needed, so the probes swing thirty
+and twenty-four times now), and the combat hold (start-combat on the host)
+keeps a walking resident in place for the swings, where a judged approach
+alone lands three seconds behind him. HYPOTHESIS H-52a: the pre-kill
+placement puts the bodies within 200 units (52's restage reads it).
+
 ## Watch item (2026-10-27, 51's merge gate, ADR-027)
 
 b-npc-body-release red once (20261027-061048) at its second activation:
