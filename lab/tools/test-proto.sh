@@ -101,10 +101,27 @@ G = f"https://gitlab.gaussing.tv/api/v4/projects/{project}"
 def get(path):
     req = urllib.request.Request(G + path, headers={"PRIVATE-TOKEN": os.environ["TOK"]})
     return json.load(urllib.request.urlopen(req, timeout=60))
-jobs = [x for x in get("/jobs?scope[]=success&per_page=100") if x["name"] == "difftest-build" and x["ref"] == ref]
 head = sha or get("/repository/branches/" + urllib.parse.quote(ref, safe=""))["commit"]["id"]
+# Every successful difftest-build in the newest thousand jobs, any branch's: one project-wide page of a hundred ran out
+# on a busy day (m3-npc-talk c1be67d1, 2026-10-27: a parity merge left skymp-wire alone, so it built none of its own,
+# and the branch's last build was older than the newest hundred jobs of five branches, so T2 read no artifact at all).
+jobs = []
+for page in range(1, 11):
+    batch = get(f"/jobs?scope[]=success&per_page=100&page={page}")
+    jobs += [x for x in batch if x["name"] == "difftest-build"]
+    if len(batch) < 100 or any(x["commit"]["id"].startswith(head) for x in jobs):
+        break
+def ancestor(commit):
+    # the build's commit is in the head's history: GitLab's merge base of the two is that commit
+    try:
+        mb = get("/repository/merge_base?" + urllib.parse.urlencode([("refs[]", commit), ("refs[]", head)]))
+    except Exception:
+        return False
+    return mb.get("id") == commit
 own = [x for x in jobs if x["commit"]["id"].startswith(head)]
-pick = own or jobs
+# else the newest build of an ancestor, whichever branch built it (a merged branch's build is the head's history
+# too); the compare below still stops T2 when skymp-wire changed between that build and the head
+pick = own or next(([x] for x in jobs if ancestor(x["commit"]["id"])), [])
 if not pick:
     print("")
     sys.exit(0)
