@@ -1980,6 +1980,13 @@ attacker (the lab's npc-damage, Actor.DamageActorValue, as the cause does
 when it brings the engine to zero), so deathStart names no killer and the
 report says cause 0; the credit then names the hit's aggressor. Its rerun on
 54's stage reads H-52b at T3.
+H-52b CONFIRMED at T3 (11:19 PDT): x-npc-death-blow v2 20261027-181507 GREEN,
+ten of ten, on m3-npc-face 240a31de: "[2026-10-27 18:17:52.188] [info] [verb:npc-fate] death report: 13491 died of unknown at (20025, -46299, -147), host ff000000, killer ff000000: a hit the server numbered 54 ms before, the killer ff0000". The report named no
+killer (cause 0) and the server credited the sword hit it had numbered
+within its window; every other claim of b-npc-death-engine held with it.
+Promoted as b-npc-death-blow (main, its own commit). H1 stands refuted for
+the killer: the engine names one only when its own kill move kills; the
+server's credit covers the rest.
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
