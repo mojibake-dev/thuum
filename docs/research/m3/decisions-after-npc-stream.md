@@ -296,3 +296,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   the server correcting it every 3.5 s; the DB had carried c2's away position through the restart, and c1
   held the cell as pinned). A lab premise, not 52's: main c1f44fb gives c2 fifteen seconds after its
   reconnect before the move, the claims unchanged; finish-train's rerun plays it.
+- 07:00 PDT 2026-10-27: b-host-own-hit 135408 (52's gate's first red) read as a premise red: the campfire pair's
+  detection of c1 is the camp's own timing (no target in 90 s; green at 110935 on the cut gate; 7cd47e24
+  changed only the life check). Main 9a2441d has the host's game start the fight (approach to 200 units,
+  start-combat on both, inCombat asserted), the claims unchanged. A lone red reruns at the gate's end under
+  ADR-027; numidium decides whether the rerun plays the deployed file or this one.
