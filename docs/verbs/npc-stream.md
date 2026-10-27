@@ -1471,7 +1471,7 @@ P7 v2 claims V1, the relay, a started say and an ended line on ANY puppet
 diagnostics for v3's claim. The playtest's D27-B stands: the voice stays
 off the playtest's build until P7 is green.
 
-Voice v4 and P7 v5, READ (2026-10-27 01:5x PDT, an agent over run
+Voice v4 and P7 v5, READ (2026-10-27 01:53 PDT, an agent over run
 20261027-083204-x-npc-stream-p7, GREEN on 52's stage, build m3-npc-death
 f9859083, voice code 8da16ef6): v3's "deferred" was the audibility gate
 (SpeakSoundFunction, before the lip load: a speaker outside the dialogue
