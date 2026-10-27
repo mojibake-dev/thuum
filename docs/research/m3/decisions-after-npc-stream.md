@@ -428,3 +428,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   as a slowdown and presses E when lab-api's until reads him under c2's crosshair (c2.state.crosshairRef, the
   until refreshing the client's dump each poll, every quarter second for 90 s); claims unchanged, no new
   grammar, no driver step. The driver aim step stays on numidium's after-ladder list unless v5 reds.
+- 16:44 PDT 2026-10-27: x-npc-talk-claim v6 233908 GREEN on 55's stage: the dialogue claim works end to end (the
+  grant 157 ms after the E, the menu open on the guest, the release at its close, the host live again). Promoted
+  as b-npc-talk (main, its own commit) for 53's gate. 55's three probes green (talk-claim, handoff-cross v4, the
+  corpse-drift read); the gate runs on c1be67d1 and merges 1b866786 under the paper rule.
