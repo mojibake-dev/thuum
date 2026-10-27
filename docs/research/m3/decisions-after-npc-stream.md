@@ -355,3 +355,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   reverts it whole; the killer line is strict. 52 ships inside 54 as one merge train (ADR-030): m3-npc-face
   carries 7cd47e24 and the credit 240a31de, 54's gate plays the strict line on the build with the credit, and
   parity goes 51 to 54 with 52's commits inside; no further rest for 52. 52's premise-fix watch items stand.
+- 10:43 PDT 2026-10-27: x-npc-stream-face 173514 (54's stage) read as a premise red: the gaze path ran for the
+  creatures near the host (targets streamed, relayed, taken by c2's puppets at slot 3) while the residents
+  3600 units away set no head-track slot in 90 s (H-54d: the engine tracks heads near the player only). v2 by
+  path brings both seats to the mill (300 and 400 units of Sven), claims unchanged; a rerun on this stage, no
+  restage. The second red was a QEMU guest agent hiccup on sky-c2 during a log-count step.

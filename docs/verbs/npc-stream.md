@@ -1670,6 +1670,24 @@ against the heuristic). Probe x-npc-stream-face by path (30 steps). The
 cadence row (P3) and slice 4's counters, budgets and parity scenario follow
 on this train.
 
+54's stage, first read (10:43 PDT, x-npc-stream-face 20261027-173514 on
+m3-npc-face 240a31de): the gaze path is alive end to end for actors near the
+player. The host's state lines carried head-track targets for the creatures
+at the landing ("state 107cf9 ... gaze 107d07 slot 1", another at slot 5),
+the server accepted and relayed them (15 resident state lines, E_STATE_OWN
+0, no permission line), and c2's puppets took them ("face: 86111 gaze ->
+107cf9 (slot 3)", 86112 the same), with 22 expression lines for residents
+on c2. The residents themselves never set a slot: eight state lines each
+with gaze 0 over the 90 s window, their chatter included (topic 6aea3 by
+1348a, 13482, 13484 and 3550c), and Sven stood 3600 units from the host at
+the landing. HYPOTHESIS H-54d: the engine tracks heads for actors near the
+player only, so a hosted actor far from its host streams no gaze; the
+puppet seat then falls to the point heuristic. v2 of the probe brings the
+host to 300 units of Sven and the puppet seat to 400 before the window
+(claims unchanged); its rerun decides H-54d and reads H-54a to H-54c on the
+residents. The run's second red was the lab's (a c2 log-count step met
+"QEMU guest agent is not running" and left its claim without a count).
+
 Step R (2026-10-26, on the merged parity 66f04f2a; numidium's chain, 22:15
 to 22:32Z): P3 (x-npc-stream-p3 20261026-222300) GREEN, all 32 steps, its
 pcap the rates' read (the MEASURED bullet under Rate limit above); P6 v3
