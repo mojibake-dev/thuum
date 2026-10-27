@@ -278,3 +278,10 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   counts as holding; with b-npc-copy-fate's (84805f1, d7692a2) the gate's two reds are both premise reds
   with fixes on main, so 52 merges on the two reruns' green. The known limit (a cell reload can
   re-settle a seat's corpse; the record follows the host) is recorded in npc-fate.md for playtest 35.
+- 05:07 PDT 2026-10-27: b-npc-respawn 115833 (52's gate's third red) read as 52's own code: the life check's
+  guard skipped the stand-up on the host, which binds a corpse when it logs in after the sweep (the
+  respawn's container reaches the host of the moment only). Fixed on m3-npc-death 7cd47e24 (the check
+  resurrects any copy whose record says alive; it still never kills a simulated one). D40: a code red
+  WITH a fix in hand is a restage, not a stop; numidium cuts or finishes the gate, I push on its word,
+  52 restages on 7cd47e24 and runs its probes with b-npc-respawn and the two premise fixes, then its gate.
+  The reset case of a live copy on a dead record on the simulating seat is named in npc-fate.md, unprobed.

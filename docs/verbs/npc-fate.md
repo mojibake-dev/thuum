@@ -1901,3 +1901,28 @@ placement covers the kill moment only, since a dead ragdoll takes no
 setPosition, and a host change after such a reload moves the record to
 the new host's body. Playtest 35's known limits carry it; a fix in kind
 has no hook, the engine re-settles the body without killing it again.
+
+52's gate's third red (05:07 PDT): b-npc-respawn 20261027-115833, 52's own
+code. After the restart the record stood again on schedule ("stands again
+at its placement, rolled anew", 12:01:20) while the server loaded, before
+any host held the cell; c1 logged in as host at 12:01:26 and bound a
+corpse; c2's two-second check resurrected its puppet ("resurrect 85547
+(puppet true) queued"), c1's never ran: 52 had put the check's
+`!simulatedHere` guard on both directions ("the life check is a puppet's",
+b82a82e5). The kill direction is the design's (ADR-050 decision 2: the
+simulating seat's engine dies from the cause and its report, the check
+never kills it); the stand-up is the server's word on every seat, since the
+respawn's container reaches the host of the moment and a host that logs in
+after the sweep binds a corpse, as the check's own comment already said.
+Fixed on m3-npc-death 7cd47e24 (the check resurrects any copy whose record
+says alive and still never kills a simulated one; one condition, tsc clean,
+no server, wire or scenario change), pushed when the gate's branch is
+clear, then CI, the restage, the probes with b-npc-respawn, and the gate
+again (D40: a code red with a fix in hand restages). Named, not fixed: a
+LIVE copy on the simulating seat bound to a DEAD record (the engine's own
+cell reset standing a corpse up on the host's re-entry, re-npc-roll.md
+section 9) is no longer killed by the check while that seat hosts; the
+cause path covers deaths happening now, another seat's check covers the
+copy when the cell passes, and the reset case waits for a probe before a
+rule (a timed bind after the kill move's window, or the server's word on
+the host's report of a live actor against a dead record).
