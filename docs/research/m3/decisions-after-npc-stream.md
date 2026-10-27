@@ -366,3 +366,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   (two more sword swings for a numbered hit, then npc-damage on the host's engine, no attacker); v2 by path,
   claims unchanged, rerun from disk after T2. Not 2 (a pair of claims proves the credit only when the dice
   fall its way) and not 3 (luck).
+- 12:13 PDT 2026-10-27: b-npc-death 190413 (54's gate) read as a premise red for the restart claim: the host held
+  and the corpse moved 1300 units on the host's own engine between the kill and the restart (same height, no
+  client line), the record following under R2. Main 0977292 measures the restart against a pre-restart snapshot
+  and records the travel; H-54e opened in npc-fate.md with a drift probe for 55's stage and the candidate rule
+  (a dead record holds after a settle window, R0) for 55 or later. The 256 bound and every other claim stand.
