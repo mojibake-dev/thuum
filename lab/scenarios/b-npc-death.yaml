@@ -9,9 +9,13 @@
 # on the record and both seats within 10 s (the host by the death container,
 # the viewer by the isDead property); the viewer leaves five squares out and
 # returns, the body still a body on its screen (the dead bind, the
-# two-second read); the server restarts and both reconnect, the record dead
-# at its point where it fell, within 256 units each way (a ragdoll's settle on a
-# slope, 65 measured; a death never teleports the record) and dead on both seats; the host's game is relaunched,
+# two-second read); the server restarts with the viewer held five squares out
+# and the host alone reloading the cell (the restart's grant is a race between
+# the games' own logins, and the record is its host's body: 52's gate
+# 20261027-112539, where the viewer won it with a corpse its reload had
+# re-settled 360 units down the slope), the record dead at its point where it
+# fell, within 256 units each way (a ragdoll's settle on a slope, 65 measured;
+# a death never teleports the record) and dead on both seats; the host's game is relaunched,
 # the cell passes to the viewer (the stale rule) with the body in place, and
 # the returning host finds it dead. No respawn inside the run (the master's
 # 240 hours). Proved as x-npc-death v3 GREEN 080218 on train-43 d2210492
@@ -72,11 +76,23 @@ steps:
   - assert:
       - c2.npc_state(0x85547).isDead == true
       - server.ref(0x85547).isDead == true
-  # leg 3: the server restarts; the record loads dead at its point and arms no 25 s timer (rule 6)
+  # leg 3: the server restarts; the record loads dead at its point and arms no 25 s timer (rule 6).
+  # The premise (52's gate 20261027-112539): the record after the restart is its HOST's body (R2), and
+  # both games log in again within the same tenth of a second, so the grant is a race (c2 won it in
+  # 004553 and 112539, c1 in 061658). In 112539 c2's own game had re-settled the corpse on the cell's
+  # reload in leg 2 (360 units down the slope and 104 lower, the engine's physics; no line of ours,
+  # and a dead ragdoll takes no setPosition) and the record followed c2's body, 360 from the snapshot.
+  # So c2 waits five squares out through the restart, c1 alone reloads the cell and holds it (the grant
+  # within a tenth of a second of its login, as b-cell-host reads it) and c2 comes back once c1 has it;
+  # the claims below are unchanged
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - wait: 8
   - server: restart {gameHour: 12.0}
   - c1: reconnect
+  - until: {within: 45, expect: [server.host(0x9810).client == "c1"]}
   - c2: reconnect
-  - wait: 30
+  - c2: teleport {cell: lab-spawn, x: -10300, y: -19170, z: -3957, rot: [0, 0, 180]}
+  - wait: 20
   - c1: npc-state {formId: 0x85547}
   - c2: npc-state {formId: 0x85547}
   - c1: screenshot
