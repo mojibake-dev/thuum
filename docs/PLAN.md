@@ -1208,6 +1208,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   double roll found and fixed; train 53 built (m3-npc-cast 78b877b1, the bow relay, the spell path); every
   ladder branch green on its current head; 51 (m3-npc-path 39cf3f4d) in T2 then its gate, merge-ready
   after it; D32 (merge authority), D36 (the brake) and D37 (DeathDropOverhaul's drop) wait on Eli.
+- STATE 2026-10-27 01:0x PDT: Eli's letters: D32 B ("plough ahead to test 35"), D36 C and D37 B ("recommended on
+  both"), D38 B. 51 MERGED (parity 39cf3f4d, 08:19Z; the gate cut by c2's RTX wedge, core's recovery, finished
+  by its rest, 29 runs; watch item b-npc-body-release's old point). 52 staging (P7 v5 first); 54, 55, 53 follow
+  on green; the D37 layer (layer-d37-ddo-out) stages at the end with the full sweep, then playtest 35.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
