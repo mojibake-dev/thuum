@@ -322,3 +322,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   test stood the prelude's dead rivals up with the subject and the revived 85549 killed it inside the 40 s window,
   a death by the engine as designed (c2's report accepted). Main 717eeab kills the rivals again by kill-ref right
   after the reconnects, the claims unchanged. Five premise reds in this gate, all on main for finish-gate's rest.
+- 08:42 PDT 2026-10-27: b-npc-death-engine 153601 (the rest's lone red) read as a premise red of my own making:
+  with Sven's AI off the engine's death names no killer, so f1829c2's still hold broke the report's killer claim.
+  Main 249da50 keeps the still hold for the first swing only and restores his AI and combat for the kill
+  swings; the claims unchanged. The engine fact (an AI-off actor's death carries no killer; the server records
+  the death on its own evidence) goes into npc-fate.md with the watch item.
