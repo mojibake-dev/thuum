@@ -360,3 +360,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   3600 units away set no head-track slot in 90 s (H-54d: the engine tracks heads near the player only). v2 by
   path brings both seats to the mill (300 and 400 units of Sven), claims unchanged; a rerun on this stage, no
   restage. The second red was a QEMU guest agent hiccup on sky-c2 during a log-count step.
+- 10:48 PDT 2026-10-27: x-npc-death-blow 174006 (54's stage) red on the credit line alone: the engine's own kill
+  move ended him first with the killer named, so the credit was not reached (the lethal blow's path is the
+  engine's dice). Call (numidium's 1, 2, 3): 1, the server path's report shape forced without a lethal blow
+  (two more sword swings for a numbered hit, then npc-damage on the host's engine, no attacker); v2 by path,
+  claims unchanged, rerun from disk after T2. Not 2 (a pair of claims proves the credit only when the dice
+  fall its way) and not 3 (luck).

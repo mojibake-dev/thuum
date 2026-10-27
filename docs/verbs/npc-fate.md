@@ -1967,6 +1967,19 @@ train (ADR-030): m3-npc-face carries m3-npc-death 7cd47e24 and the credit
 b-npc-death-engine's strict line on the build that names the killer from
 the server's own number, and parity goes from 51 to 54 with 52's commits
 inside. The intermediate parity at 52 is the only thing that goes.
+54's stage (10:48 PDT): x-npc-death-blow v1 (20261027-174006, the warhammer)
+held every claim but the credit line: the engine's own kill move ended him
+first (the hit left the server's number at 0.04, the report came 537 ms
+later as cause 4 with the killer, "the engine's number outran the
+server's"), so the credit had nothing to do. Which path a lethal blow takes
+is the engine's dice (153601, 160510 and 161323 took the server's, the
+credit's case; 174006 the engine's). v2 forces the server path's report
+shape without a lethal blow: two more sword swings for a numbered hit within
+the 3 s window, then the host's own engine takes his health with no
+attacker (the lab's npc-damage, Actor.DamageActorValue, as the cause does
+when it brings the engine to zero), so deathStart names no killer and the
+report says cause 0; the credit then names the hit's aggressor. Its rerun on
+54's stage reads H-52b at T3.
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
