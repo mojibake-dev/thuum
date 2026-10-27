@@ -349,3 +349,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   895f135 to the pending line's aggressor or the report's killer until 54 merges, a loosening named here as
   copy-fate's was; the strict line returns in 54's scenario commit with x-npc-death-blow proving the credit.
   Not a restage of 52: the fix is in the next train and 52's death path otherwise holds on every claim.
+- 09:21 PDT 2026-10-27: the loosening above is WITHDRAWN. numidium read 895f135 against rule 13 ("Never turn a
+  scenario green by weakening its assertions"): a claim relaxed only to wait for its fix is exactly that, where
+  copy-fate's was restated to what 51 changed; D40 settles open calls and lifts no hard rule. Main 3055859
+  reverts it whole; the killer line is strict. 52 ships inside 54 as one merge train (ADR-030): m3-npc-face
+  carries 7cd47e24 and the credit 240a31de, 54's gate plays the strict line on the build with the credit, and
+  parity goes 51 to 54 with 52's commits inside; no further rest for 52. 52's premise-fix watch items stand.

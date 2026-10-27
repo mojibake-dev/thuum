@@ -1957,10 +1957,16 @@ line as cause 4 with the killer: the engine's own kill move had ended him.
 So H1 is REFUTED for the killer: the cause applied through damageActor kills
 the engine's actor without recording an attacker, and deathStart names a
 killer only when the engine's own kill move kills. The credit from the
-server's own number (54, 240a31de) is the fix, not an edge. Until 54 merges
-b-npc-death-engine's killer line reads the pending line's aggressor or the
-report's killer (main 895f135, a loosening named under D40); 54's scenario
-commit returns it to the report's killer, which the credit then names.
+server's own number (54, 240a31de) is the fix, not an edge. A loosening of
+b-npc-death-engine's killer line to the pending line's aggressor (main
+895f135) was reverted the same hour (3055859): numidium read it against
+rule 13, never turn a scenario green by weakening its assertions, and was
+right; the line stays strict. So train 52 ships inside train 54 as one merge
+train (ADR-030): m3-npc-face carries m3-npc-death 7cd47e24 and the credit
+240a31de on parity 39cf3f4d, 54's gate plays every M3 scenario including
+b-npc-death-engine's strict line on the build that names the killer from
+the server's own number, and parity goes from 51 to 54 with 52's commits
+inside. The intermediate parity at 52 is the only thing that goes.
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
