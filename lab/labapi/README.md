@@ -80,7 +80,8 @@ from 0xff000000); a watch records each actor's heading, read as
 `c.watched_id(<id>).turns` (net turns) and `.headingAtStop`; the driver's
 `npc-puppet {formId?, puppet}` calls the fork's setPuppet export and
 `npc-pose {formId?, x, y, z, angleZ, speed, direction}` is the puppet apply in
-one step, from lab-spawn as place-npc. `- server: netem {loss_pct:
+one step, from lab-spawn as place-npc; `npc-hold {formId, held}` stands a named NPC
+still in that seat's game while its AI and dialogue run (Actor.SetDontMove). `- server: netem {loss_pct:
 25}` impairs the server's interface from that step on (delay_ms, jitter_ms and
 loss_pct as `server: {netem}` takes them; all zero clears it, and the run's end
 does too).
