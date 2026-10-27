@@ -959,6 +959,43 @@ function hookNamedActor(id: number): void {
   namedEventHooks.add(id);
 }
 // the actor a step names: {formId}, else the placed NPC (place-npc), else none
+// npc-state's gaze and face (npc-stream slice 5, train 54): the fork's Skyrim Platform reads an actor's head-track
+// target (HighProcessData's highest set slot) and its face (BSFaceGenAnimationData's strongest expression keyframe and
+// whether an override holds it) on the game thread when pollHostedGaze([ids]) asks, and hostedGaze(id) answers the
+// last read as [targetFormId, slot, emotionType, emotionValue, exprOverride, exprIndex, exprValue] (PuppetApi.h). The
+// getters exist only on builds with train 54 and not in the submodule's typings, so they are reached through the
+// module object: on a build without them every field is null and nothing is called; npc-state's own timing is kept,
+// so its answer carries the previous poll (null before a first poll) and polls anew
+function gazeOf(formId: number): Record<string, number | boolean | null> {
+  const none = { gazeTarget: null, gazeSlot: null, emotionType: null, emotionValue: null, exprOverride: null, exprIndex: null, exprValue: null };
+  const api = skyrimPlatform as unknown as Record<string, unknown>;
+  const read = api["hostedGaze"];
+  const poll = api["pollHostedGaze"];
+  if (typeof read !== "function" || typeof poll !== "function") return none;
+  let last: unknown = null;
+  try {
+    last = (read as (id: number) => unknown)(formId);
+  } catch (e) {
+    last = null;
+  }
+  try {
+    (poll as (ids: number[]) => void)([formId]);
+  } catch (e) {
+    // the next read answers null
+  }
+  if (!Array.isArray(last) || last.length < 7) return none;
+  const num = (v: unknown): number | null => (typeof v === "number" ? v : null);
+  return {
+    gazeTarget: num(last[0]),
+    gazeSlot: num(last[1]),
+    emotionType: num(last[2]),
+    emotionValue: num(last[3]),
+    exprOverride: last[4] === null || last[4] === undefined ? null : Boolean(last[4]),
+    exprIndex: num(last[5]),
+    exprValue: num(last[6]),
+  };
+}
+
 function namedNpc(a: Record<string, unknown>): Actor | null {
   const id = num(a.formId) || placedId;
   return id ? Actor.from(Game.getFormEx(id)) : null;
@@ -2286,6 +2323,9 @@ function run(step: Step, player: Actor): unknown {
           NetImmerse.getNodeWorldPositionY(npc, head, false),
           NetImmerse.getNodeWorldPositionZ(npc, head, false),
         ],
+        // the gaze and the face as this game holds them (npc-stream slice 5, train 54): the previous poll's values,
+        // then a new poll, so a claim reads them on a second npc-state (gazeOf)
+        ...gazeOf(npc.getFormID()),
       };
     }
     case "papyrus-events": {
