@@ -9,6 +9,11 @@
 # stage (aaafffe5): the split held (9712 to c1, 9731 to c2), no refusal of her moves, one pass, c1
 # live and c2 a puppet at the end. Promoted unchanged (rule 13): the id and this header differ from
 # the probe, the steps and asserts are byte for byte.
+# Restated under D22's brake (D36 C, train 55, 2026-10-27; x-handoff-cross v3 211054 on 55's stage): a
+# crossing within PASS_MARGIN_UNITS (256) is a follow, the crossing host keeping the actor, so the claim
+# "one pass" of the unbraked rule becomes "a follow within the margin" with the passes bounded at six each
+# (the per-sample thrash D22 removes: 836 passes in the nightly 132333) and recorded; the pass a step
+# beyond the margin is CellHostTest's. The other claims as they were.
 # Shape: both seats under god mode in Riverwood, each standing inside its own cell before a server
 # restart so the cold start grants each its own (the PREMISE, asserted: Sigrid's cells are the
 # exterior squares (5, -11) above y -45056 (0x9712) and (5, -12) below it (0x9731); c1 at (21995,
@@ -61,6 +66,16 @@ steps:
   - c2: screenshot
   - assert:
       - 'server.log_count("may not move 13483") == 0'
-      - 'server.log_count("passes 13483 into cell") >= 1'
+      # under the brake a crossing within the margin is a FOLLOW (the crossing host keeps the actor, the
+      # other seat sees a puppet, no host flip): v3's 211054 on 55's stage read Sigrid 160 units into c1's
+      # cell as a follow and zero passes in three minutes, Sven's 26 border hovers followed every time; the
+      # unbraked rule's "one pass per crossing" (836 passes in the nightly 132333) is what D22 removes, and
+      # the pass a step beyond the margin is CellHostTest's (a hold at 256 inside, a pass a step deeper)
+      - 'server.log_count("follows 1348[23] into cell .* within the pass margin") >= 1'
+      - 'server.log_count("passes 13483 into cell") <= 6'
+      - 'server.log_count("passes 13482 into cell") <= 6'
+      # recorded: the passes, zero while nobody walks 256 deep
+      - 'server.log_count("passes 13483 into cell") >= 0'
+      - 'server.log_count("passes 13482 into cell") >= 0'
       - c1.npc_state(0x13483).aiEnabled != c2.npc_state(0x13483).aiEnabled
 artifacts: [server.log, c1.log, c2.log, screenshots]
