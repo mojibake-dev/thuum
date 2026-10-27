@@ -1,0 +1,70 @@
+# b-npc-stream-voice (thuum-magnus, 2026-10-27; docs/verbs/npc-stream.md, the voice slice, ADR-050 decision 1): a
+# hosted resident's spoken line reaches the other seat and its puppet says it through the engine's own entry.
+# Promoted unchanged from x-npc-stream-p7 v5 (GREEN 20261027-083204 and 094833 on 52's stages of fork m3-npc-death;
+# the id and this header changed, steps and claims byte for byte). Both seats are placed at one resident at a
+# time through the judged approach (c1 at 150 units so the host's engine greets, c2 at 300 inside earshot),
+# three visits of 45 s. Claims: the sink on c1, the server's relay with no E_SPEECH_OWN, a puppet's start and end,
+# a RESIDENT's line started on the puppet, no deferred verdict; the inaudible count recorded (a far speaker's).
+id: b-npc-stream-voice
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 15
+  # both seats at one resident (the server's record names her cell: outside in the morning), c1 close enough
+  # for the host's engine to greet, c2 within earshot of its puppet of her; a resident's greeting or chatter
+  # within the wait
+  - c1: approach {formId: 0x13483, distance: 150, cell: record}
+  - c2: approach {formId: 0x13483, distance: 300, cell: record}
+  - c1: look-at {formId: 0x13483}
+  - wait: 45
+  - c2: screenshot
+  - c1: approach {formId: 0x1348b, distance: 150, cell: record}
+  - c2: approach {formId: 0x1348b, distance: 300, cell: record}
+  - c1: look-at {formId: 0x1348b}
+  - wait: 45
+  - c2: screenshot
+  - c1: approach {formId: 0x13484, distance: 150, cell: record}
+  - c2: approach {formId: 0x13484, distance: 300, cell: record}
+  - c1: look-at {formId: 0x13484}
+  - wait: 45
+  - c2: screenshot
+  - c1: log-count {pattern: "VoiceService: speech [0-9a-f]+: info"}
+  - c2: log-count {pattern: "say [0-9a-f]+ info [0-9a-f]+ -> started"}
+  - c2: log-count {pattern: "say (1348[0-9a-f]|35534|3550c) info [0-9a-f]+ -> (started|refused|played)"}
+  - c2: log-count {pattern: "sayTopicInfo on (1348[0-9a-f]|35534|3550c)"}
+  - c2: log-count {pattern: "line on [0-9a-f]+ ended"}
+  - c2: log-count {pattern: "sayTopicInfo on (1348[0-9a-f]|35534|3550c): .* -> started"}
+  - c2: log-count {pattern: "sayTopicInfo on [0-9a-f]+: .* -> inaudible"}
+  - c2: log-count {pattern: "sayTopicInfo on [0-9a-f]+: .* -> deferred"}
+  - c1: screenshot
+  - assert:
+      - 'c1.log_count("VoiceService: speech [0-9a-f]+: info") >= 1'
+      - 'server.log_count("\\[verb:npc-stream\\] speech [0-9a-f]+ by ff000000") >= 1'
+      - 'server.log_count("E_SPEECH_OWN") == 0'
+      - 'c2.log_count("say [0-9a-f]+ info [0-9a-f]+ -> started") >= 1'
+      - 'c2.log_count("line on [0-9a-f]+ ended") >= 1'
+      - 'c2.log_count("sayTopicInfo on (1348[0-9a-f]|35534|3550c): .* -> started") >= 1'
+      - 'c2.log_count("sayTopicInfo on [0-9a-f]+: .* -> deferred") == 0'
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
