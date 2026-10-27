@@ -2030,6 +2030,17 @@ resurrect turns the AI on when the record stands again), a local commit on
 m3-npc-face behind 54's gate, pushed to whichever branch the gate's verdict
 sends it to (a restage of 54 on a red rerun, 55's branch on a green).
 
+Train 52 merged inside train 54 (13:43 PDT): fork parity 240a31de, the chain
+20261027-181833-gate-m3-npc-face plus its rest 202429 (verdict watch), 52's
+commits in it: the engine's own deaths from the server's cause (H-52a
+confirmed), the life check's stand-up (7cd47e24), the killer credited from
+the server's own number (H-52b confirmed at T3, b-npc-death-blow), the
+voice slice, the body placement before the kill. Open on this build: H-54e
+(a corpse moving on its host's engine; the promote fix is on 55's branch,
+c1be67d1, with x-npc-corpse-drift as its read) and the engine's refusal of
+Resurrect under AI off (Suppress). b-npc-headshot-host sits pending until
+the lab can aim.
+
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
 b-npc-death red twice on its restart leg's premise, never on a claim. (1)

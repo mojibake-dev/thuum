@@ -1890,3 +1890,32 @@ Inventory's voice row).
     head's GitHub Formatting check green? Parity was red there from 10-15 to
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
+
+Trains 52 and 54 merged (13:43 PDT): fork parity 240a31de (m3-npc-face, with
+m3-npc-death 7cd47e24 inside), cited by the chain 20261027-181833-gate-m3-
+npc-face plus its rest 202429, verdict watch: 28 green and 3 red in the gate
+(b-npc-death's corpse drift, H-54e; b-npc-headshot-host, the lab's aim,
+pending; b-npc-stream-voice's listener placed off an obstacle), the rest
+three of three green. On this build: the voice slice (V1 to V4 read), the
+gaze and the face (H-54a and H-54b read at T3, H-54d confirmed, H-54c for
+T4), slice 4's counters (867c4210); slice 4's parity scenario
+(p-npc-stream against lab/references/npc-packages-a.json) is not built,
+since its per-id grammar row in lab-api is numidium's and later, so the
+parity Status box stays open. The killer credit (H-52b) and the life
+check's stand-up are in the same build (npc-fate.md).
+
+## Watch item (2026-10-27, 54's gate, ADR-027): b-npc-stream-voice
+
+b-npc-stream-voice red once at 20261027-200545 (54's gate on 240a31de): the
+listener's third approach (300 units from 0x13484) was judged unsettled for
+60 s because the computed landing point fell in a Riverwood obstacle and the
+engine placed c2 74 units off it, the same spot to the decimal nineteen
+times, past the judge's 64-unit tolerance; with c2 judged away, the 25
+relayed lines went to no listener. The two earlier approaches of the run had
+settled in 3.3 s. Fixed on main c70e828 in the scenario's own commit:
+tolerance 150 on the listener's three approaches (earshot, not a mark), the
+claims unchanged; GREEN in the gate's rest at 203422. numidium makes
+lab-api's approach accept a repeated engine placement after the ladder. The
+old premise's red stays the watch item until the scenario is green once more
+in a gate or the nightly; then this section and gate.yaml's entry come out
+together.
