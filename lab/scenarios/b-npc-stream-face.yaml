@@ -1,0 +1,84 @@
+# b-npc-stream-face (thuum-magnus, 2026-10-27; train 54, slice 5 of docs/verbs/npc-stream.md, D30-C): the gaze
+# and the face reach a puppet. Promoted unchanged from x-npc-stream-face v2 (GREEN 20261027-181024 on 54's stage
+# of fork m3-npc-face 240a31de; the id and this header changed, steps and claims byte for byte). The host's state
+# poll reads each hosted actor's highest set head-track slot and its emotion (pollHostedGaze, hostedGaze) and sends
+# them in HostedActorState on a change; the server records them and relays the state to the actor's other
+# listeners; the puppet seat aims its puppet at the same target (setLookAt) and wears the emotion
+# (setExpressionOverride, the Mood index of the engine's EmotionType). Layout: P4's, then both seats brought
+# beside Sven (c1 300 units, c2 400, in his record's frame): the engine tracks heads near the player only (H-54d,
+# confirmed by v1 173514 against v2: the landing's creatures streamed gaze while the residents 3600 units away
+# set no slot). Claims: the host's state lines carry a gaze target for a resident (52 in 181024, one at the
+# dialogue slot 4); the server accepts the state ("state <id> by ff000000", no E_STATE_OWN); c2's face lines
+# name a resident's gaze target (25) and an expression (53, 18 of them non-neutral, anger 50 on 1348c as
+# mood 8); no refusal. Its own commit (rule 13).
+id: b-npc-stream-face
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13491).aiEnabled == true
+      - c2.npc_state(0x13491).aiEnabled == false
+  # the gaze needs the host's player near (54's stage 20261027-173514: the creatures at the landing streamed
+  # head-track targets through 90 s, "state 107cf9 ... gaze 107d07 slot 1" and slot 5, and c2's puppets took
+  # them, "face: 86111 gaze -> 107cf9 (slot 3)", while the residents 3600 units away at the mill never set a
+  # slot in eight state lines each, their greetings included: the engine tracks heads near the player only,
+  # HYPOTHESIS H-54d until this rerun). So the host stands 300 units from Sven in his record's frame and the
+  # puppet seat 400, before the window; the claims are unchanged
+  - c1: approach {formId: 0x13491, distance: 300, cell: record}
+  - c2: approach {formId: 0x13491, distance: 400, cell: record}
+  - wait: 5
+  # the residents at their morning: the talk's head-tracking and faces stream for 90 s
+  - wait: 45
+  - c1: screenshot
+  - c2: screenshot
+  - wait: 45
+  # the gaze and the face by npc-state (lab-api's seven fields since 2026-10-26: gazeTarget, gazeSlot,
+  # emotionType, emotionValue, exprOverride, exprIndex, exprValue; the answer carries the PREVIOUS poll's
+  # values, so one read primes and the next reads): RECORDED on both seats during the talk, for the
+  # committed scenario's claim once the read shows them stable across the seats
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - wait: 2
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c1: log-count {pattern: "state (1348[0-9a-f]|35534|3550c|13491): .* gaze [1-9a-f][0-9a-f]* slot"}
+  - c1: log-count {pattern: "state (1348[0-9a-f]|35534|3550c|13491): .* slot 4 "}
+  - c2: log-count {pattern: "face: (1348[0-9a-f]|35534|3550c|13491) gaze -> [0-9a-f]+"}
+  - c2: log-count {pattern: "face: (1348[0-9a-f]|35534|3550c|13491) expression [1-7] "}
+  - c2: log-count {pattern: "face: (1348[0-9a-f]|35534|3550c|13491) expression"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("\\[verb:npc-stream\\] state 1348[0-9a-f]+ by ff000000") >= 1'
+      - 'server.log_count("E_STATE_OWN") == 0'
+      - 'c1.log_count("state (1348[0-9a-f]|35534|3550c|13491): .* gaze [1-9a-f][0-9a-f]* slot") >= 1'
+      - 'c2.log_count("face: (1348[0-9a-f]|35534|3550c|13491) gaze -> [0-9a-f]+") >= 1'
+      - 'c2.log_count("face: (1348[0-9a-f]|35534|3550c|13491) expression") >= 1'
+      - 'server.log_count("No permission to update actor (1348[0-9a-f]|35534|3550c)") == 0'
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
