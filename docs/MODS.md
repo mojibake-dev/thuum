@@ -477,9 +477,19 @@ client-only at the tail), 45 of them light; 28 mod folders scoped `@1.6.1170` (e
 mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on 1.7.104).
 111 mod folders and the Papyrus map's, 5,754 files once the install-order rule (below) has
 dropped the six replaced copies, 4.1 GB on disk (the DLL mods' .pdb files kept: Crash Logger
-with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, never
-removes one: a render that drops a file (FSMP's DLL and configs on 2026-10-20) relies on the
-clone being laid from a base without it, which the stage's snapshot discipline gives.
+with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, and since
+2026-10-27 removes, by hash, what an earlier render laid and this one drops: against the clone's
+own record of its last lay (C:\sky-lab\mods.sums) and the render's PREVIOUS.sums (persist-mods:
+the manifest it replaced, for a clone laid before the record existed), the way a mod manager
+purges what it deployed. A file at that path with another hash stays and is counted. Before
+that, a dropped file stayed on any clone whose base carried it (FSMP's DLL came off on
+2026-10-20 only because its base lacked it), so a promoted mod could never leave.
+
+**Out by Eli's letters.** Death Drop Overhaul 1.2.4 (D37 B, 2026-10-27 00:00 PDT, "recommended on
+both"): it drops a dead actor's held shield as a world reference on each client that the server
+never records (x-body-loot 20261026-231653 on 50b's stage), outside the one-authority rule, and it
+is one of the two Loading Menu holders at quit (D24). Its row stays in essentials.tsv as `out`
+until M4's dropped-items row makes a dropped item the server's.
 
 **Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
 lab/tools/persist-mods.sh after its hand-written blocks:
