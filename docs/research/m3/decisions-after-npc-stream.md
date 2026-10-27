@@ -422,3 +422,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   running), numidium's to add with a live timing run; v4 of the probe holds him, keeps the stillness assert,
   approaches to 70 and presses E at once, releases at the end; claims unchanged. Not b (the re-approach grammar
   is not there) and not c (a guess about another resident's schedule).
+- 16:32 PDT 2026-10-27: x-npc-hold v1 232338 (numidium's timing probe) red at its stillness pair: SetDontMove slowed
+  Sven to about 33 units a second but did not stop him within five seconds (npc-ai's EnableAI(false) had left
+  him at 77). Call: the press waits for him instead of holding him. x-npc-talk-claim v5 by path keeps the hold
+  as a slowdown and presses E when lab-api's until reads him under c2's crosshair (c2.state.crosshairRef, the
+  until refreshing the client's dump each poll, every quarter second for 90 s); claims unchanged, no new
+  grammar, no driver step. The driver aim step stays on numidium's after-ladder list unless v5 reds.
