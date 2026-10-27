@@ -394,3 +394,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   nothing). v3 by path: the clock at 9.0 (Sven at the mill's saw, standing), the host's npc-ai lever through the
   claim, the record asserted still, approach to 70 and E at once; the claim line's cell widened to 973[12] for
   the hour. The claim code (talkService, ActionListener's gates) is untested by this run; the rerun reads it.
+- 14:21 PDT 2026-10-27: x-handoff-cross v3 211054 (55's stage) read: the brake (D36 C) works as designed, zero
+  passes and 42 follows in Riverwood's three minutes (Sigrid 160 units into the other host's cell, a follow;
+  Sven's 26 hovers followed), PASS_MARGIN_UNITS 256 MEASURED for that traffic. b-npc-handoff-cross's "one pass
+  per crossing" was the unbraked rule's claim; restated to "a follow within the margin, passes at most six and
+  recorded" (main, its own commit; v4 by path), a restatement matching the train's change, named for Eli as
+  copy-fate's was. Not asserted at T3: a crossing deep enough to pass (CellHostTest proves it at T0).
