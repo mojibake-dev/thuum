@@ -269,3 +269,12 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   no longer asserts is a server-made copy's hit landing on a PLAYER (the R0 path), which no other scenario
   claims for a copy: that count is recorded in the scenario (a >= 0 row prints it) and playtest 35's bandit
   line in Bleak Falls Temple reads it on both screens. A loosening, named here so Eli sees it unasked.
+- 04:46 PDT 2026-10-27: b-npc-death 112539 (52's gate) read as a premise red: the restart's cell grant is a
+  race between the games' own logins, and the record after it is its host's body (R2); c2 won the race
+  with a corpse its cell reload had re-settled 360 units down the slope (the engine's physics on a
+  reloaded ragdoll, no line of ours), so the record followed c2's body. 52 writes no position on the
+  server and moves no dead ragdoll on the client. Fixed on main 86d340b with the claims unchanged (c2
+  held out of the cell through the restart, an until on c1's grant). Under D39 B the rerun's green
+  counts as holding; with b-npc-copy-fate's (84805f1, d7692a2) the gate's two reds are both premise reds
+  with fixes on main, so 52 merges on the two reruns' green. The known limit (a cell reload can
+  re-settle a seat's corpse; the record follows the host) is recorded in npc-fate.md for playtest 35.
