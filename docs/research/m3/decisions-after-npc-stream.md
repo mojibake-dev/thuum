@@ -343,3 +343,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   from the server's own pending aggressor, R0, an ActorDeathTest case, a big-blow scenario in 54's gate), H-52b
   in npc-fate.md until then; not (b), a loosening with a real gap behind it; not a restage of 52, since the fix
   lands in the next train before playtest 35.
+- 09:20 PDT 2026-10-27: rest3's b-npc-death-engine 161323 lost the killer with the sword as well (the report 77 ms
+  after the pending line, no killer; the green 123746's came 2.3 s later from the engine's own kill move): H1
+  refuted for the killer, the server's credit (54's 240a31de) the fix. Call: the killer line loosened on main
+  895f135 to the pending line's aggressor or the report's killer until 54 merges, a loosening named here as
+  copy-fate's was; the strict line returns in 54's scenario commit with x-npc-death-blow proving the credit.
+  Not a restage of 52: the fix is in the next train and 52's death path otherwise holds on every claim.

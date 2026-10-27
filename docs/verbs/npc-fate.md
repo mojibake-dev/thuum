@@ -1950,6 +1950,17 @@ b-npc-death-blow on green. Until 54 merges a strong player's kill records
 "died of unknown" on the server (the game shows no kill feed; nothing of the
 fate reads the killer yet). b-npc-death-engine proves the engine-named path
 with the sword (main 70da78b), as promoted.
+Then rest3's 161323 lost the killer with the sword too (the pending line at
+16:16:13.677 naming ff000000, the report 77 ms later "died of unknown ...,
+killer 0"), where the stage's 123746 had its report 2.3 s after the pending
+line as cause 4 with the killer: the engine's own kill move had ended him.
+So H1 is REFUTED for the killer: the cause applied through damageActor kills
+the engine's actor without recording an attacker, and deathStart names a
+killer only when the engine's own kill move kills. The credit from the
+server's own number (54, 240a31de) is the fix, not an edge. Until 54 merges
+b-npc-death-engine's killer line reads the pending line's aggressor or the
+report's killer (main 895f135, a loosening named under D40); 54's scenario
+commit returns it to the report's killer, which the credit then names.
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
