@@ -1938,12 +1938,18 @@ deathStart's killer when the engine names an actor and 0 otherwise, so
 HYPOTHESIS H-52b: after a lethal single blow (a kill move, or the one cause
 that takes the engine's health to zero) the engine's deathStart names no
 killer, H1's edge. The server has the better evidence, its own number's
-aggressor on the pending line (R0), so the credit from the pending aggressor
-on a report with killer 0 is train 54's code, on m3-npc-face with an
-ActorDeathTest case and a scenario for the big blow in 54's gate; until then
-a strong player's kill records "died of unknown" on the server (the game
-shows no kill feed; nothing of the fate reads the killer yet). The scenario
-proves the engine-named path with the sword (main 70da78b), as promoted.
+aggressor on the pending line (R0), so the credit is train 54's code: on
+m3-npc-face 240a31de a report naming no killer after a hit the server
+numbered within the window takes that hit's aggressor as the killer
+(ActionListener::OnActorDeath case 0, "the killer {:x} credited from the
+server's own number"; MpActor::LastHitBy picks the latest hitter in the
+window, MpActor::LastKillerId reads the credit; ActorDeathTest's new case),
+read at T3 by x-npc-death-blow on 54's stage (b-npc-death-engine's shape
+with the warhammer's kill and the credit line claimed), promoted as
+b-npc-death-blow on green. Until 54 merges a strong player's kill records
+"died of unknown" on the server (the game shows no kill feed; nothing of the
+fate reads the killer yet). b-npc-death-engine proves the engine-named path
+with the sword (main 70da78b), as promoted.
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
