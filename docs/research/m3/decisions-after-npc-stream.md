@@ -405,3 +405,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   three minutes. One probe after the ladder reads it at T3: an actor walked or moved 300 units into the other
   host's square (npc-pose or a placed NPC's travel package), the pass line once, the follow lines before it, and
   the seats' AI swapping once. numidium holds it on the after-ladder list with the lab-api items.
+- 14:26 PDT 2026-10-27: x-npc-corpse-drift 211727 GREEN on 55's stage: with the promote fix (c1be67d1) the corpse
+  stayed at one point through 24 reads over four minutes on both seats, a restart and the host's reconnect
+  included. H-54e's fix holds at T3; its mechanism (the promote switching AI on a dead actor at the reconciler's
+  flip) stays the code's one candidate. b-npc-death's fall-point bounds stay strict with that.
