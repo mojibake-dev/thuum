@@ -203,3 +203,23 @@ the strict claim (the body wears the roll after the loot) returns to it.
   load order until M4's dropped-items row (a persist-mods render laid on clean-m1, numidium and core,
   in a gap or before playtest 35's setup); the strict body-worn claim returns to x-body-loot and its
   promotion b-body-loot once the layer is on the seats.
+
+### D38. How train 51's cut gate finishes (00:15 PDT, numidium)
+51's gate set 20261027-054632 ended at 18 of 25 when sky-c2's RTX failed a link retrain at a lab-api slot reset
+(23:53 PDT: root port 00:03.4 "retraining failed", QEMU exit 1, then no heartbeat; DevCtl 0x2df0 and 0x79ff, the
+wedge of 10-16 and 10-17): 16 green; b-npc-body-release red on its old fixed point (459 units against the 452 reach;
+the premise is fixed on main d85701d, only where c2 stands, the claims unchanged); b-npc-respawn and
+b-npc-stream-actions lab faults; seven unrun. ADR-027's reruns of the red never ran. After the card is recovered (a
+remove and rescan under 00:03.4, or a host power cycle if that does not stick; no core session is running), one
+controlled start proves it, RUNSET_AFTER plays the set's rest (the nine not green) on the same stage, and verb-merge
+cites the two sets as one gate (gate-cite.py's chain: a red in the first set cleared by a green in the rest is a watch
+item, as a rerun's green is inside one set).
+- A. Leave as agreed: the rest on the scenarios the stage deployed. b-npc-body-release's old point plays the retry the
+  reruns would have, b-npc-stream-equipment its claims from before e42dbca. A green or watch rest merges under D32 B,
+  a red one stops for your read. This is what happens without a letter.
+- B. Deploy main's scenarios before the rest: b-npc-body-release plays d85701d's approach and b-npc-stream-equipment
+  e42dbca's stricter claims (the server-made bandit's hands and swings). A green or watch rest merges, the old point's
+  red kept in the record as a watch item.
+- C. A fresh full gate on main's scenarios, b-npc-copy-fate included: about 1 h 50 min of lab against 50 min.
+- Recommended: B. The rest then asserts what main asserts, and the one premise that changed moved where a seat
+  stands, not what it claims.
