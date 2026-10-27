@@ -6,7 +6,10 @@
 # he fought c1 and moved, and the one swing before the one-number read missed where the stage's 123746 had
 # landed, so a swing on a combatant is luck; then his AI back and his combat with c1 started for the swings that
 # end him, since with his AI off the engine's death names no killer, the rest's 153601: "died of unknown ...,
-# killer 0"), swings a Daedric warhammer: the one-number read after the first swing
+# killer 0"), swings an iron sword up to three times for the one-number read (none of them lethal; the rest's
+# rerun 155405 missed its single swing: an approach faces the RECORD, and the engine's 35-degree hit cone wants
+# the body, so every approach is followed by look-at, head to head in c1's own game, b-npc-headshot-host's aim)
+# and then the Daedric warhammer for the swings that end him: the one-number read after the measured swings
 # (the engine's health on the host within 0.03 of the record), the death by either order (the server's number
 # first with the kill waiting on the report, or the engine's kill move first with the report taken on the
 # server's evidence), dead on the record and both seats, the bodies within 200 units on both axes.
@@ -47,7 +50,10 @@ steps:
   # house at 0.16, two hits short): a Daedric warhammer (WEAP 0x139ba, esm.py; 27 a hit), given and equipped
   # through the console as b-marksman arms its bow, so two landed hits end him before he turns
   - c1: console {text: "player.additem 139ba 1"}
-  - c1: console {text: "player.equipitem 139ba"}
+  # the measured swings use the iron sword (WEAP 0x12eb7, esm.py; 7 a hit on his 50), so up to three can land
+  # before the one-number read with none of them lethal, since a death under the still hold names no killer
+  # (the rest's 153601); the warhammer is equipped for the kill legs below
+  - c1: console {text: "player.equipitem 12eb7"}
   - wait: 2
   - c1: draw-weapon
   # v5 (2026-10-27, after 092536: the hold before the approach did not take with c1 at the landing, 3700 units
@@ -68,12 +74,20 @@ steps:
   - assert:
       - c1.npc_state(0x13491).aiEnabled == false
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  # the rest's rerun 155405: the single swing missed him standing still, since the approach faces his record
+  # and the engine's hit cone (fCombatHitConeAngle, 35 degrees) wants the body; look-at aims head to head in
+  # c1's own game (b-npc-headshot-host's aim), before the draw because the angle set sheathes
+  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
   - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
   - wait: 1
-  # one swing, then the one-number read: the engine's health on the host against the record
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - wait: 1
+  # the measured swings, then the one-number read: the engine's health on the host against the record
   - c1: npc-state {formId: 0x13491}
   - c2: npc-state {formId: 0x13491}
   - assert:
@@ -90,7 +104,11 @@ steps:
   - c1: npc-state {formId: 0x13491}
   - assert:
       - c1.npc_state(0x13491).inCombat == true
+  # the warhammer (WEAP 0x139ba, 27 a hit) for the swings that end him, two landed hits
+  - c1: console {text: "player.equipitem 139ba"}
+  - wait: 1
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
@@ -104,6 +122,7 @@ steps:
   - c1: hold-key {code: 199, ms: 120}
   - wait: 1
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
@@ -119,6 +138,7 @@ steps:
   - c1: hold-key {code: 199, ms: 120}
   - wait: 1
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
@@ -134,6 +154,7 @@ steps:
   - c1: hold-key {code: 199, ms: 120}
   - wait: 1
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: look-at {formId: 0x13491}
   - c1: draw-weapon
   - wait: 1
   - c1: hold-key {code: 199, ms: 120}
