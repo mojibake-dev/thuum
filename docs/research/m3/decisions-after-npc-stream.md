@@ -252,3 +252,13 @@ green gate and reports); only a red of a train's own code with no fix in hand st
 the stop is reported, not asked. This answers numidium's pending question on 52's premise reds: B.
 
 - Decision: as above (Eli, "just plough ahead to a fully functional playtest 35")
+
+Calls recorded under D40 (thuum-magnus and numidium between them):
+- 02:32 PDT: the death probes claim EITHER order of an NPC's death, the server's number reaching zero
+  first with the kill waiting on the host's report (death pending) or the host's engine ending the
+  actor first (a kill move at low health decides before the damage) with the report taken on the
+  server's evidence; both are ADR-050 decision 2 with ADR-048 B ("the engine's number outran the
+  server's and the death stands on both screens", npc-fate.md), so the change aligns the claim with the
+  design rather than weakening it (x-npc-death-host v3 20261027-091759 took the second path).
+- 02:32 PDT: the bodies' distance is 52's code (a dead ragdoll takes no setPosition), fixed on
+  m3-npc-death cc1d9025 and restaged; a code fix restages, a premise fix reruns.
