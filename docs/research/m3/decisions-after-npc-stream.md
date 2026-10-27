@@ -336,3 +336,10 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   bb3da60: the measured leg under the combat hold with six iron-sword swings (repeat), the warhammer after,
   AI on throughout; claims unchanged. numidium runs rest3 (death-engine alone); the merge cites the chain.
   Two lab facts for the lab notes: the npc-ai lever freezes a standing actor only; look-at's heading is a read.
+- 09:13 PDT 2026-10-27: rest2's b-npc-death-engine 160510 landed its measured swings and lost the killer on the
+  warhammer's lethal blow ("died of unknown ..., killer 0", the engine's deathStart naming none after a single
+  lethal blow; the server's pending line names ff000000). Call (numidium's a, b, c): (c) now, main 70da78b, the
+  sword for the kill legs as the stage's 123746 proved, claims unchanged; and (a) as train 54's code (the credit
+  from the server's own pending aggressor, R0, an ActorDeathTest case, a big-blow scenario in 54's gate), H-52b
+  in npc-fate.md until then; not (b), a loosening with a real gap behind it; not a restage of 52, since the fix
+  lands in the next train before playtest 35.
