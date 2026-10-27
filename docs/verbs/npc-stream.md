@@ -1471,6 +1471,38 @@ P7 v2 claims V1, the relay, a started say and an ended line on ANY puppet
 diagnostics for v3's claim. The playtest's D27-B stands: the voice stays
 off the playtest's build until P7 is green.
 
+Voice v4 and P7 v5, READ (2026-10-27 01:5x PDT, an agent over run
+20261027-083204-x-npc-stream-p7, GREEN on 52's stage, build m3-npc-death
+f9859083, voice code 8da16ef6): v3's "deferred" was the audibility gate
+(SpeakSoundFunction, before the lip load: a speaker outside the dialogue
+output model's range of the seat's listener on an axis), named "inaudible"
+since v4 and cleared (result 5, the item cleared, ClearGreetTopic); v5
+placed both seats at one resident at a time (c1 at 150 units so the host's
+engine greets, c2 at 300, three visits of 45 s). The numbers: c1's sink
+captured 51 lines (1066df 11, 10962a 10, 1066de 10, 13484 9, 1e62b 7,
+13483 2, 3550c 1, 1348b 1; every line with a topic; 453e9 a scene of
+13483 and 13484 in sequence, 6aea3 the greeting); the server's 20
+per-speaker summaries covered 41 received and 38 relayed (the first three
+"to 0 listener(s)" before c2 stood in Riverwood), no E_SPEECH_* at all;
+c2's native took 47 asks, 45 STARTED and 2 inaudible (1348b at 5722 units
+and 3550c, both far speakers), 0 deferred, 0 refused, and 45 "line ended",
+one per started line, none still open at the log's end; the resident
+starts: 13483's 453f3 (delay 2.67, lip 3) and 6aea8, 13484's 6aea9 twice
+and 45473 to 45478, so V1 (the sink sees every line), V2 (the engine's say
+takes an info on an AI-off humanoid puppet: a resident's, not only a
+creature's), V3 (the pair ends the line) and V4 (the said-once mark is
+harmless: nothing refused twice) are CONFIRMED. Timing: the sink-to-say
+delay is a few tens of milliseconds once the clocks are paired (c2 reads
+0.59 s less than c1), with a 45 ms band over 47 lines; the one outlier was
+the first relay as c2 landed (about 1.8 s, the arrival's burst). Two "no
+actor or info" answers (1e62b 5b1b1, 13484 5b1b5) fell within a second of
+c2's teleport settling; the native's "delay" is the engine's estimate, not
+the observed length (6aea9 13.40 against 6.8 ended). Odd, not the voice's:
+c1's Skyrim Platform log stopped two minutes before its console log (an
+unflushed buffer at collection); the master-API manifest fetch fails every
+43 s on both seats. The voice rides 52's merge with npcVoice on; the
+checklist's voice items are live.
+
 ### Slice 5, planned: the gaze and the face (Eli's question of 11:43 PDT: "the puppets end up fairly stiff on a cell guest's screen")
 
 What a guest's screen still lacks, after slices 1 to 3 and the voice, in
