@@ -115,16 +115,24 @@ steps:
   - assert:
       - server.host(0x9810).client == "c1"
       - server.host(0x9810).epoch == 4
-  # a restart: the table starts over, a grant within 10 s of the reconnects
+  # a restart: the table starts over, a grant within 10 s of the reconnects. The games reconnect
+  # on their own once the server listens (about 15 s after the step returns) and c1's grant follows
+  # its login within a tenth of a second, so the step waits for the grant itself rather than a
+  # fixed 20 s
   - server: restart
-  - wait: 20
+  - until: {within: 45, expect: [server.host(0x9810).hosted == true]}
+  # god mode again on both, the server's lever straight after the grant: the server's tgm does
+  # not survive the restart (nightly 20261025-115250: a predator killed c1 after the restart, its
+  # respawn unloaded the cell and the grace passed it, one grant more than the claim), and the
+  # console path landed it 6 s after the grant, through a fixed wait, while the predators needed
+  # 3.3 s to kill the unprotected c1 (gate 20261027-001423's lone red 002301: under D18-B, train
+  # 48, a dead host's cells start their grace at the death with no candidate, so the cell went
+  # unhosted 5.35 s later and the claim found it so; the two green reruns won the same race by
+  # seconds, one with 7.8 health left). The premise is the fix, not the claim.
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
   - c1: reconnect
   - c2: reconnect
-  # god mode again on both: the server's tgm does not survive the restart (nightly
-  # 20261025-115250: a predator killed c1 after the restart, its respawn unloaded the cell and
-  # the grace passed it, one grant more than the claim; b-npc-handoff-restart's shape)
-  - c1: console {text: "tgm"}
-  - c2: console {text: "tgm"}
   - wait: 10
   - assert:
       - server.host(0x9810).hosted == true
