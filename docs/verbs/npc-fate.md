@@ -1863,8 +1863,13 @@ guest-hit path works (x-npc-death-guest v3 091346: ff000001's hits on
 of twelve at 7 on a base of 50; eight needed, so the probes swing thirty
 and twenty-four times now), and the combat hold (start-combat on the host)
 keeps a walking resident in place for the swings, where a judged approach
-alone lands three seconds behind him. HYPOTHESIS H-52a: the pre-kill
-placement puts the bodies within 200 units (52's restage reads it).
+alone lands three seconds behind him. H-52a (the pre-kill placement puts the
+bodies within 200 units) CONFIRMED: x-npc-death-host v5 20261027-095847 on
+the restaged cc1d9025 GREEN, nine of nine claims, the one-number read after
+the first swing, the death by either order, the bodies within 200 units on
+both axes. The guest's probe reached 0.16 with six landed hits before Sven
+fled into his house (v5 095425); v6 arms the guest with a Daedric warhammer
+(two landed hits) for the rerun.
 
 ## Watch item (2026-10-27, 51's merge gate, ADR-027)
 
