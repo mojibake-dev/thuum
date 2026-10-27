@@ -1731,6 +1731,25 @@ set (b-npc-puppet, b-cell-host, b-npc-handoff-door, -cross, -night, -restart)
 stays green; H-51d the release grace of 4 s leaves no live window on a
 non-host after the late fate's 3D drop (b-npc-handoff-night's claims).
 
+Lab read (2026-10-26 night, 51's stage at numidium's): the first run,
+x-npc-copy-fate 20261027-041406 on m3-npc-path 28aa2e43, read H-51a
+CONFIRMED (both seats "copy ... of 1bcd8: fate armed true", three dress lines
+each "from the server's roll inside the outfit roll: 6 of 6 tagged for outfit
+c0197", the PlaceAtMe fated line on the server) and H-51b FALSE for a reason
+older than the train: the host's faithful hands report was refused,
+"inventory does not contain item 13913" (ArmorHideHelmet), because
+EnsureBaseContainerAdded rolled each leveled outfit entry TWICE, once into
+the worn set (the fate's worn list the clients dress from) and once into
+the inventory, so a leveled helmet could be worn by the record and absent
+from its inventory. Every leveled outfit could do it: P6 v2's placed-bandit
+refusal (npc-stream.md) reads as this, not D19. Fixed on m3-npc-path
+39cf3f4d (one roll, its picks added to the inventory; NpcFateTest's placed
+case asserts every worn entry is in the inventory). The rerun, v2
+20261027-051619 on 39cf3f4d, GREEN: no E_EQUIP_REFUSED for the copy, the
+dress claims matched: H-51b CONFIRMED for the hands (the swing's landing
+reads on 51's gate and the stage's T2). H-51c and H-51d read on the gate
+(gate-m3-npc-path, 25 runs).
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
