@@ -2017,7 +2017,18 @@ adds the restart's own bounds against the record right before it (main
 c6899e0, after 0977292 had re-measured the fall-point bounds against that
 snapshot and numidium read it against rule 13: a re-measurement that hides
 the anomaly weakens the claim). Until H-54e's read the scenario reds on a
-drifting corpse, by design.
+drifting corpse, by design. The code read (12:18 PDT): the native promote
+(PuppetApi.cpp Promote) lifts the block, calls EnableAI(true) and
+EvaluatePackage(false, false) on any actor, dead or alive; at c1's reconnect
+the reconciler flipped the dead wolf to puppet and back to live within 258
+ms as the grant arrived ("puppet 85547", "live 85547"), so a corpse had its
+AI switched on and its package evaluated, and the engine's package walked
+the body. That is the candidate the probe's phase b tests (a drift that
+starts at the reconnect). The fix is written and held: the promote leaves a
+dead actor's AI off (the block still comes off for the loot; the fate's
+resurrect turns the AI on when the record stands again), a local commit on
+m3-npc-face behind 54's gate, pushed to whichever branch the gate's verdict
+sends it to (a restage of 54 on a red rerun, 55's branch on a green).
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
