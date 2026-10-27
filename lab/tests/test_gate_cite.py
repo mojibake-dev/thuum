@@ -174,3 +174,62 @@ class LayerCite(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# a gate a lab fault cut short (sky-c2's card at 06:53Z, 2026-10-27) and RUNSET_AFTER finished on the same stage
+CUT = {"id": "20261027-054632-gate-m3-npc-path", "state": "done", "verdict": "error",
+       "scenarios": ["smoke-two-players", "b-shadowbond", "a-melee-reach", "b-spell"],
+       "runs": {"smoke-two-players": [{"run": "r1", "verdict": "green"}],
+                "b-shadowbond": [{"run": "r2", "verdict": "red"}],
+                "a-melee-reach": [{"run": "r3", "verdict": "error"}, {"run": "r4", "verdict": "error", "rerun": "lab-fault"}]},
+       "watch": [], "started": "2026-10-27T05:46:32Z", "finished": "2026-10-27T07:05:40Z",
+       "notes": ["RunnerError: E_RUN_HOLD: the lab is held"]}
+REST = {"id": "20261027-093000-gate-m3-npc-path-rest", "state": "done", "verdict": "green",
+        "scenarios": ["b-shadowbond", "a-melee-reach", "b-spell"],
+        "runs": {"b-shadowbond": [{"run": "r5", "verdict": "green"}], "a-melee-reach": [{"run": "r6", "verdict": "green"}],
+                 "b-spell": [{"run": "r7", "verdict": "green"}]},
+        "watch": [], "started": "2026-10-27T09:30:00Z", "finished": "2026-10-27T10:10:00Z"}
+
+
+class ChainCite(unittest.TestCase):
+    def test_a_cut_gate_and_its_rest_stand_as_one_with_the_cleared_red_a_watch_item(self):
+        rs, why = gc.chain([CUT, REST])
+        self.assertEqual(why, "")
+        self.assertEqual(rs["id"], CUT["id"] + "+" + REST["id"])
+        self.assertEqual((rs["state"], rs["verdict"], rs["started"]), ("done", "watch", CUT["started"]))
+        # the red then green is ADR-027's watch item; the lab faults then green are not
+        self.assertEqual(rs["watch"], ["b-shadowbond"])
+        self.assertEqual([e["run"] for e in rs["runs"]["a-melee-reach"]], ["r3", "r4", "r6"])
+        self.assertEqual(rs["summary"]["counts"], {"green": 4})
+        results = {f"r{i}": result() for i in range(1, 8)}
+        rows = gc.checks(rs, results, ["smoke-two-players", "b-spell"], "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [])
+        self.assertTrue(all(ok for ok, _ in rows), rows)
+        # one build across both sets: a rest played on another stage is two
+        self.assertFalse(gc.checks(rs, {**results, "r7": result(sid="sha256:other")}, ["b-spell"], "m2-train-28",
+                                   "e3a5b367", [], SID, SID, dict(DESC), [])[1][0])
+
+    def test_a_set_that_ended_with_its_own_verdict_took_no_rest(self):
+        green = {**CUT, "verdict": "green"}
+        self.assertIsNone(gc.chain([green, REST])[0])
+        running = {**CUT, "state": "running", "verdict": None}
+        self.assertIsNone(gc.chain([running, REST])[0])
+        self.assertIsNotNone(gc.chain([{**CUT, "state": "stopped", "verdict": None}, REST])[0])
+
+    def test_a_rest_that_is_not_the_rest(self):
+        short = {**REST, "scenarios": ["b-shadowbond", "a-melee-reach"]}
+        self.assertIn("is not the rest", gc.chain([CUT, short])[1])
+        extra = {**REST, "scenarios": REST["scenarios"] + ["smoke-two-players"]}
+        self.assertIsNone(gc.chain([CUT, extra])[0])
+        early = {**REST, "started": "2026-10-27T07:00:00Z"}
+        self.assertIn("did not begin after", gc.chain([CUT, early])[1])
+
+    def test_a_rest_that_ends_red_leaves_the_gate_red(self):
+        red = {**REST, "verdict": "red", "runs": {**REST["runs"], "b-spell": [{"run": "r7", "verdict": "red"}] * 3}}
+        rs, _ = gc.chain([CUT, red])
+        self.assertEqual(rs["verdict"], "red")
+        results = {f"r{i}": result() for i in range(1, 8)}
+        self.assertFalse(gc.checks(rs, results, ["b-spell"], "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [])[0][0])
+
+    def test_one_set_reads_as_itself(self):
+        rs, why = gc.chain([SET])
+        self.assertEqual((rs["id"], rs["verdict"], why), (SET["id"], "watch", ""))

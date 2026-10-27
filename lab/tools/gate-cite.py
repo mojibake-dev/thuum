@@ -26,6 +26,10 @@ every scenario of the set):
    main's blob at the branch's last merge of main (that merge brought it; main may have moved since);
 8. persist's mods are the ones laid: /srv/persist/mods/SHA256SUMS was last written before that run began.
 
+The set may be a chain, "<first>+<rest>": a gate a lab fault cut short and RUNSET_AFTER finished on the same stage,
+read as one set (chain()), its checks over every run of both and nothing replaced since the first began.
+`gate-cite.py --combine <set or chain>` prints that one set's record, which verb-merge keeps for the merge's lines.
+
 With --head <sha>, check 4 holds the stage to that commit (verb-merge's head as read at its start) instead of the
 branch's head now. With --fresh, the set is the merge's own gate, just run: runset.sh judged its verdict (an ADR-027
 watch item may end red there), so check 1 is not repeated, and checks 2 to 5 hold its builds to the head, the one
@@ -157,6 +161,64 @@ def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, hea
     return out
 
 
+def _ended_early(rs: dict) -> bool:
+    """runset.sh's rule for taking a rest (RUNSET_AFTER): stopped, or done without a verdict of its own."""
+    return rs.get("state") == "stopped" or (rs.get("state") == "done" and rs.get("verdict") not in ("green", "watch"))
+
+
+def _not_green_last(rs: dict) -> list[str]:
+    return [s for s in rs.get("scenarios", []) if ((rs.get("runs") or {}).get(s) or [{}])[-1].get("verdict") != "green"]
+
+
+def chain(sets: list[dict]) -> tuple[dict | None, str]:
+    """A gate a lab fault cut short and RUNSET_AFTER finished ("the two sets together are the sweep", runset.sh), read
+    as one set: (the combined set, "") or (None, why they are not one gate). Every set but the last ended early; each
+    later set holds exactly the scenarios whose last run in the set before it was not green, and began after that one
+    ended. The combined set keeps the first's id chain, scenarios and start, each scenario's runs in order across the
+    sets, and the last's state and end; its verdict is the last's, or watch when a scenario went red before a later
+    set's green (the ADR-027 watch item a rerun's green makes inside one set). A lab fault cleared later is no watch
+    item, as inside one set."""
+    if not sets:
+        return None, "no set"
+    for prev, rest in zip(sets, sets[1:]):
+        if not _ended_early(prev):
+            return None, f"{prev.get('id')} is {prev.get('state')} ({prev.get('verdict')}): it took no rest"
+        want = _not_green_last(prev)
+        if sorted(rest.get("scenarios", [])) != sorted(want):
+            return None, f"{rest.get('id')} is not the rest of {prev.get('id')}: it holds {len(rest.get('scenarios', []))} scenarios, the rest is {len(want)}"
+        ended = prev.get("finished") or prev.get("started")
+        if not (ended and rest.get("started") and _time(rest["started"]) >= _time(ended)):
+            return None, f"{rest.get('id')} did not begin after {prev.get('id')} ended"
+    first, last = sets[0], sets[-1]
+    runs = {s: [e for rs in sets for e in (rs.get("runs") or {}).get(s, [])] for s in first.get("scenarios", [])}
+    cleared = [s for s, rr in runs.items() if rr and rr[-1].get("verdict") == "green"
+               and any(e.get("verdict") == "red" for e in rr[:-1])]
+    watch = list(dict.fromkeys([w for rs in sets for w in rs.get("watch", [])] + cleared))
+    verdict = last.get("verdict")
+    if verdict == "green" and watch:
+        verdict = "watch"
+    counts: dict[str, int] = {}
+    for rr in runs.values():
+        v = (rr[-1].get("verdict") if rr else None) or "unrun"
+        counts[v] = counts.get(v, 0) + 1
+    combined = {**first, "id": "+".join(str(rs.get("id")) for rs in sets), "runs": runs, "state": last.get("state"),
+                "verdict": verdict, "watch": watch, "finished": last.get("finished"), "summary": {"counts": counts},
+                "notes": [n for rs in sets for n in rs.get("notes", [])]}
+    return combined, ""
+
+
+def fetch_gate(rid: str) -> dict:
+    """The set a GATE_SET names: one run set id, or a chain "<first>+<rest>[+...]" (chain()); raises ValueError when a
+    chain is not one gate."""
+    sets = [fetch(f"{API}/runset/{x}") for x in rid.split("+")]
+    if len(sets) == 1:
+        return sets[0]
+    rs, why = chain(sets)
+    if rs is None:
+        raise ValueError(why)
+    return rs
+
+
 def own_gate(rows: list[tuple[bool, str]]) -> list[tuple[bool, str]]:
     """--fresh: the merge's own gate, whose verdict runset.sh judged, keeps checks 2 to 5 and not check 1."""
     return [(True, "1. the merge's own gate: its verdict is runset.sh's")] + rows[1:]
@@ -200,6 +262,14 @@ def _blob(ref: str, path: str) -> str | None:
 
 
 def main(argv: list[str]) -> int:
+    if argv[:1] == ["--combine"] and len(argv) == 2:
+        # verb-merge's record of the cited gate (lab/results/runsets/<GATE_SET>.json): the set, or the chain as one
+        try:
+            print(json.dumps(fetch_gate(argv[1]), indent=2))
+        except ValueError as e:
+            print(f"{argv[1]} is not one gate: {e}", file=sys.stderr)
+            return 1
+        return 0
     layer, head, fresh = None, None, False
     while argv[:1] in (["--layer"], ["--head"], ["--fresh"]):
         if argv[0] == "--fresh":
@@ -217,7 +287,11 @@ def main(argv: list[str]) -> int:
         return 2
     rid, branch, gate = argv[0], argv[1], argv[2:]
     fork = os.environ.get("FORK_DIR", "skymp")
-    rs = fetch(f"{API}/runset/{rid}")
+    try:
+        rs = fetch_gate(rid)
+    except ValueError as e:
+        print(f"   NO  1. {rid} is not one gate: {e}")
+        return 1
     results = {}
     for runs in rs.get("runs", {}).values():
         for e in runs:

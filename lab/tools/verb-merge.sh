@@ -11,8 +11,9 @@
 #      own and the touched verbs'), and `watch` (the open ADR-027 items), as one
 #      run set; a red stops everything before parity moves. GATE_SET=<run set id>
 #      cites a finished set instead (ADR-042: a nightly or a layer's sweep of this
-#      exact stage), when lab/tools/gate-cite.py's five checks hold; else the gate
-#      runs;
+#      exact stage), or a chain <first>+<rest> (a gate a lab fault cut short and
+#      RUNSET_AFTER finished), when lab/tools/gate-cite.py's five checks hold; else
+#      the gate runs;
 #   4. fork parity fast-forwarded to the commit the gate played: the branch's
 #      head as read at the start, held to the gate's own builds by gate-cite.py
 #      (--head, and --fresh for a gate this merge ran); a commit pushed to the
@@ -82,7 +83,8 @@ if [ -n "${GATE_SET:-}" ]; then
   echo "   citing run set $GATE_SET (ADR-042)"
   if FORK_DIR="$fork" python3 lab/tools/gate-cite.py --head "$sha" "$GATE_SET" "$branch" $gate; then
     mkdir -p lab/results/runsets
-    curl -fsS -m 30 "${LAB_API:-https://thuum.gaussing.tv/lab}/runset/$GATE_SET" > "lab/results/runsets/$GATE_SET.json"
+    # one set, or a chain "<first>+<rest>" that RUNSET_AFTER finished, read as one (gate-cite.py --combine)
+    python3 lab/tools/gate-cite.py --combine "$GATE_SET" > "lab/results/runsets/$GATE_SET.json"
     setfile=lab/results/runsets/$GATE_SET.json; cited=" (cited, ADR-042)"
     echo "   the cited set stands for the gate: no gate run"
   else
