@@ -1859,18 +1859,3 @@ Inventory's voice row).
     head's GitHub Formatting check green? Parity was red there from 10-15 to
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
-
-## Watch item (2026-10-27, 52's cut gate, ADR-027): b-npc-stream-actions
-
-b-npc-stream-actions red once at 20261027-120242 (52's gate on cc1d9025),
-1 of 6: `c2.log_count("block anim attack") == 0` read 1 from "block anim
-attackStart_Attack1" at c2's connect point (127k, -61k), far from Riverwood
-and before the layout; the client's print named no actor, so a creature's
-own blocked attack counted against the bandit's claim. Scoped on main
-f98c657 to the bandit's window (a baseline log-count before the bandit, a
-suffixed pattern after it, the claim their difference; the five other
-claims unchanged) and GREEN on 52's restage (125917, 7cd47e24). On
-m3-npc-face 7f373326 (train 54) the print names its actor, so a later
-pattern can name the bandit. The old claim's red stays the watch item until
-the scoped scenario is green once more in a gate or the nightly; then this
-section and gate.yaml's entry come out together.

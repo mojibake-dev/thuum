@@ -1927,19 +1927,6 @@ copy when the cell passes, and the reset case waits for a probe before a
 rule (a timed bind after the kill move's window, or the server's word on
 the host's report of a live actor against a dead record).
 
-## Watch item (2026-10-27, 52's cut gate, ADR-027): b-npc-copy-fate
-
-b-npc-copy-fate red once at 20261027-111854 (52's gate on cc1d9025): four
-residents reached the placed bandit within 5 s and it fought them, swinging
-back at 13489 for 8 damage, counted as train 51 means, while the old claim
-named the player as its victim, which the premise never guaranteed. The
-claim was restated on main 84805f1 (any target) with the player-hit count
-recorded as a >= 0 row (d7692a2), the other claims unchanged, and the
-scenario ran GREEN on 52's restage (125012, 7cd47e24). The old claim's red
-stays the watch item until the restated scenario is green once more in a
-gate or the nightly; then this section and gate.yaml's entry come out
-together.
-
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
 b-npc-death red twice on its restart leg's premise, never on a claim. (1)
