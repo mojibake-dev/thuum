@@ -312,3 +312,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   through the server's lever after each login (b-cell-host's shape), the claims unchanged. Three premise reds in
   this gate (b-host-own-hit 9a2441d, b-npc-death-engine f1829c2, b-npc-death b8c494f), all on main before the
   gate's end for finish-gate's rest.
+- 07:45 PDT 2026-10-27: b-npc-handoff-night 143604 (52's gate's fourth red) read as a premise red: the restart's
+  grant race again (c2 won 0x9732 by 18 ms; its engine never brought Alvor out, the record sat indoors 180 s).
+  Main ab00c67 pins c1 through the restart (b-npc-death's shape), the claims unchanged. Four premise reds in
+  this gate, all on main for finish-gate's rest. Noted for after the ladder (numidium): a lab-api `server:
+  restart` that reconnects the seats in their listed order, each waiting for its grants, so restart scenarios
+  stop carrying their own guard; a-restart-persistence and b-npc-handoff-restart are exposed the same way.
