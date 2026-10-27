@@ -313,6 +313,15 @@ class NpcKillStep(unittest.TestCase):
         step = load_scenario("id: x-hurt\nclients: [c1]\nsteps:\n  - c1: npc-damage {formId: 0x13483, amount: 1000}\n").steps[0]
         self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "npc-damage", {"formId": 0x13483, "amount": 1000}))
 
+    def test_npc_hold_is_a_client_step(self):
+        # the host's engine stands a named NPC still while its AI and dialogue run (Actor.SetDontMove, x-npc-talk-claim v4)
+        from labapi.scenario import load_scenario
+
+        step = load_scenario("id: x-hold\nclients: [c1]\nsteps:\n  - c1: npc-hold {formId: 0x13491, held: true}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "npc-hold", {"formId": 0x13491, "held": True}))
+        step = load_scenario("id: x-hold\nclients: [c1]\nsteps:\n  - c1: npc-hold {formId: 0x13491, held: false}\n").steps[0]
+        self.assertEqual(step.args, {"formId": 0x13491, "held": False})
+
     def test_approach_names_its_npc_distance_and_cell(self):
         # the seat placed a distance from a named NPC, facing her (lab-api's, through the judged teleport)
         from labapi.scenario import load_scenario
