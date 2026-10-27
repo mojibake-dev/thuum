@@ -228,3 +228,16 @@ item, as a rerun's green is inside one set).
   since the stage's deploy (main 84330e1d) only three scenario files changed, b-npc-body-release (d85701d's
   approach), b-npc-stream-equipment (e42dbca's two claims on the server-made bandit) and the new b-npc-copy-fate,
   which is not in the rest; the rest plays the first two as main has them.
+
+### D39. Train 52's probes red on their premise (01:45 PDT, numidium)
+On 52's stage (m3-npc-death f9859083) P7 v5 was green, and all three death probes were red the same way: Sven
+(0x13491) walked his package away from the one approach, so no swing or shot from either seat reached the server
+(x-npc-death-guest 083747, x-npc-death-host 084109, x-npc-headshot-host 084400; zero OnWeaponHit on 13491).
+thuum-06's v3 of all three holds him first (start-combat on the host, so he stands and fights its god-mode player;
+the engine's own death path untouched) and keeps a re-approach before every swing; the claims are unchanged. D32 B
+says any red stops the chain for your read.
+- A. Stop the chain until you have read the fixed probes' results yourself.
+- B. If the fixed probes pass on the same stage with their claims unchanged, 52 gates and merges as usual, and the
+  reds and the fix are reported as it lands.
+- Recommended: B.
+- Decision: B (Eli, 01:56 PDT: "go with B.").
