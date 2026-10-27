@@ -2011,9 +2011,13 @@ seats; a drift before the reconnect blames the engine, one after it the
 flip. If the drift is real, the rule in kind is R0 after the settle: a dead
 record takes its host's samples for a settle window (ten seconds) and then
 holds, so the body's place is the server's word wherever a host's engine
-takes its copy (55 or later, with its T0 case). The scenario measures the
-restart against the record right before it (main 0977292) and records the
-travel as two >= 0 rows.
+takes its copy (55 or later, with its T0 case). The scenario keeps its
+fall-point bounds as asserted, since they are what caught the drift, and
+adds the restart's own bounds against the record right before it (main
+c6899e0, after 0977292 had re-measured the fall-point bounds against that
+snapshot and numidium read it against rule 13: a re-measurement that hides
+the anomaly weakens the claim). Until H-54e's read the scenario reds on a
+drifting corpse, by design.
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
