@@ -1,0 +1,171 @@
+# b-npc-death-engine (thuum-magnus, 2026-10-27; train 52, ADR-050 decision 2, docs/verbs/npc-fate.md): the host
+# kills its own hosted NPC and the death is the engine's, from the server's number. Promoted unchanged from
+# x-npc-death-host v5 (GREEN 20261027-095847 on 52's stage of fork m3-npc-death cc1d9025; the id and this header
+# changed, steps and claims byte for byte). The host approaches Sven in his record's frame, starts his combat
+# there (the hold read by an inCombat assert) and swings an iron sword six times at 1.5 s for the one-number
+# read (52's gate 20261027-140805 missed its one swing on a moving combatant; a still hold by npc-ai off did not
+# hold him, he walked 260 units in the rest's rerun 160214, and look-at's setAngle never turns the player; six
+# weak swings land at least one and at most 42 of his 50), then the sword's small blows end him (v5's kill
+# legs: a warhammer's lethal single blow had the engine's deathStart name no killer and the server record
+# "died of unknown", rest 153601 and rest2 160510; the credit from the server's own pending aggressor is train
+# 54's, npc-fate.md H-52b), his AI on throughout: the one-number read after the measured swings
+# (the engine's health on the host within 0.03 of the record), the death by either order (the server's number
+# first with the kill waiting on the report, or the engine's kill move first with the report taken on the
+# server's evidence), dead on the record and both seats, the bodies within 200 units on both axes.
+id: b-npc-death-engine
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13491).aiEnabled == true
+      - c2.npc_state(0x13491).aiEnabled == false
+      - server.ref(0x13491).isDead == false
+  - c1: give {item: "Skyrim.esm:IronSword", count: 1}
+  # the iron sword (WEAP 0x12eb7, esm.py; 7 a hit on his 50) for every swing, equipped through the console as
+  # b-marksman arms its bow: six measured swings leave him alive and hurt for the one-number read, and the
+  # kill legs' small blows end him through the engine's own death event, which names the killer. A Daedric
+  # warhammer's 27-a-hit blow (rest2 160510, rest 153601) ended him with "died of unknown ..., killer 0":
+  # after a lethal single blow the engine's deathStart names no killer and the server records the death on
+  # its own evidence without crediting its pending aggressor; that credit is train 54's (npc-fate.md H-52b)
+  - c1: console {text: "player.equipitem 12eb7"}
+  - wait: 2
+  - c1: draw-weapon
+  # v5 (2026-10-27, after 092536: the hold before the approach did not take with c1 at the landing, 3700 units
+  # from Sven (start-combat answered inCombat false, no target), c2's swings after each judged teleport drew
+  # the sheathed blade instead of striking (a teleport sheathes; zero hits of thirty), and Sven's package took
+  # him into the inn, where a Tamriel-framed approach read his interior coordinates as world ones). So: the
+  # host approaches him first, in the frame of his record (cell: record, wherever his package has him), starts
+  # his combat there and reads the hold before anything else; every approach draws the weapon again before
+  # the swings; the claims as they were
+  - c1: approach {formId: 0x13491, distance: 150, cell: record}
+  # the measured swings under the combat hold, six of them (52's gate 20261027-140805 missed its one swing
+  # on a moving combatant; the still hold did not hold him: with his AI off on the host he walked 260 units
+  # in the rest's rerun 160214, 20430 to 20657, and look-at's setAngle never turns the player, its heading
+  # reading the approach's every time). Six iron-sword swings at 1.5 s against an engaged Sven closing in
+  # land at least one and at most 42 of his 50, so the one-number read finds him hurt and alive; his AI
+  # stays on throughout, so the death below names its killer (a death under AI off names none, 153601)
+  - c1: start-combat {formId: 0x13491}
+  - wait: 3
+  - c1: npc-state {formId: 0x13491}
+  - assert:
+      - c1.npc_state(0x13491).inCombat == true
+  - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: draw-weapon
+  - wait: 1
+  - c1: repeat {times: 6, gapMs: 1500, step: {hold-key: {code: 199, ms: 120}}}
+  - wait: 2
+  # the measured swings, then the one-number read: the engine's health on the host against the record
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - assert:
+      - server.ref(0x13491).healthPercentage < 1
+      - abs(c1.npc_state(0x13491).healthPercentage - server.ref(0x13491).healthPercentage) < 0.03
+  # the kill legs: the sword's small blows under the combat hold, re-approaching between the bursts (v5's
+  # shape, the stage's 123746: the engine's death event named ff000000)
+  - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: draw-weapon
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: draw-weapon
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: draw-weapon
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: approach {formId: 0x13491, distance: 110, cell: record}
+  - c1: draw-weapon
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c1: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - until: {within: 40, expect: [server.ref(0x13491).isDead == true]}
+  - wait: 6
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c1: log-count {pattern: "cause on 13491: health"}
+  - c1: log-count {pattern: "death report: 13491 died"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'c1.log_count("cause on 13491: health") >= 2'
+      # the death is the engine's: either the server's number reaches zero first and the kill waits on the
+      # host's report (death pending), or the host's engine ends him first (a kill move at low health decides
+      # before the damage) and the server takes the report on its own evidence; both are the design's
+      # (ADR-050 decision 2, ADR-048 B; x-npc-death-host v3 091759 took the second path)
+      - 'server.log_count("death pending on 13491") >= 1 or server.log_count("death report: 13491 died") >= 1'
+      - 'server.log_count("death report: 13491 died .* killer ff000000") >= 1'
+      - 'server.log_count("death by the server.s word on 13491") == 0'
+      - server.ref(0x13491).isDead == true
+      - c1.npc_state(0x13491).isDead == true
+      - c2.npc_state(0x13491).isDead == true
+      - abs(c1.npc_state(0x13491).x - c2.npc_state(0x13491).x) < 200
+      - abs(c1.npc_state(0x13491).y - c2.npc_state(0x13491).y) < 200
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]

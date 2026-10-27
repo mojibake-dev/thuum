@@ -138,7 +138,9 @@ rotation 0.
   cone), which the 256 of slack covers
 - [x] on fork parity (15eb653d, 2026-10-03)
 
-Watch item (2026-10-10, the merge sweep on fork m2-god 35acc275, ADR-027):
+Watch item (2026-10-10, the merge sweep on fork m2-god 35acc275, ADR-027;
+CLOSED 2026-10-27: green at every gate since c2 moved to 170 units on
+2026-10-21, 54's gate 20261027-201308 the last, gate.yaml's entry out):
 a-melee-reach red once (20261011-042255) at its first assert: c2's health
 read 1.0 three seconds after c1's swing (anim-event attackStart, sent), with
 c1 at y -545.3 and c2 at -365.7 (179.6 units, inside the sword's measured

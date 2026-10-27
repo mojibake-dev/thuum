@@ -153,3 +153,31 @@ Built 14:53 PDT on fork m3-npc-talk 0d453dc1 (off m3-npc-face 867c4210 with m3-p
 ## Reviewer checklist
 
 As docs/VERB.md's.
+
+## 55's stage read (16:44 PDT, x-npc-talk-claim v6 20261027-233908, GREEN)
+
+The claim end to end on m3-npc-talk c1be67d1: c2's E on Sven's puppet sent
+ActorClaim ("claim 13491 (local 13491) sent on E", 23:41:55.264 on c2's
+clock), the server granted it ("ff000001 claims 13491 in cell 9731 for a
+dialogue; it simulates the actor for the lease"), c2's game ran
+activatePickRef on the word 157 ms after the send ("granted:
+activatePickRef queued (crosshair 13491)") and the Dialogue Menu opened
+(menuOpen true at the read), c1's seat demoted its copy ("puppet 13491" at
+the grant); c2 closed the menu, the release went out ("claim 13491 released
+at the Dialogue Menu's close"), the server put him back under the cell's
+rule ("releases 13491; the cell's rule names ff000000") and c1 was live
+again 300 ms later ("live 13491"); c1 hosted 9732 throughout; no E_CLAIM
+refusal. H-55a read: the engine opened the dialogue with the just-promoted
+actor within the second (the grant to the menu inside the 4 s wait, the
+until's first poll already on him). H-55b not exercised (the crosshair
+stayed on him, "crosshair 13491"). H-55c read: the old host's demote and
+promote drew no refusal and no second word. The premise took six versions
+of the probe: a walking resident leaves the crosshair's line between a
+judged approach and the press; neither the host's AI switch (77 units a
+second after it) nor SetDontMove within five seconds (33) stops him at
+once; SetDontMove lets him finish his leg and then holds exactly (x-npc-hold
+v2 232956, three to six seconds), so the shape is the hold, eight seconds,
+a stillness read, the approach to 70, a crosshair check and E. Promoted as
+b-npc-talk (main, its own commit) for 53's gate, 55's deploy having
+preceded it. What a dialogue does (quest stages, gold, items, followers)
+stays M6 (PLAN.md).

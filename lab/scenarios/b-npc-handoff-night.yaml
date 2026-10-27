@@ -5,7 +5,9 @@
 # goes home to 0x133C8 under c1's follow (the record indoors); then a
 # restart with the clock at 7.9 forgets every follow, the record indoors
 # subscribes nobody, both engines walk him out by schedule, c1 (the host of
-# 0x9732) sights him and the roster moves the record out. Asserts: his
+# 0x9732, pinned through the restart since 52's gate 20261027-143604: the
+# grant is a race between the games' own logins, c2 won it by 18 ms and its
+# engine never brought him out) sights him and the roster moves the record out. Asserts: his
 # record is in 0x133C8 before the restart and outdoors ("3c:Skyrim.esm")
 # within 180 s of the reconnects; c1 runs him (aiEnabled true), c2's puppet
 # is blocked and in 0x9732 (npc_state .cell, the parent CELL). Proved as
@@ -35,10 +37,21 @@ steps:
   - c2: npc-state {formId: 0x13482}
   - assert:
       - c1.npc_state(0x13482).cell == 0x133c8
-  # morning after a restart: the record indoors, nobody's; the engines bring him out
+  # morning after a restart: the record indoors, nobody's; the engines bring him out. The premise is
+  # c1 hosting 0x9732 (its engine has him outdoors by schedule and its roster moves the record out),
+  # and the restart's grant is a race between the games' own logins (52's gate 20261027-143604: c2 won
+  # it by 18 ms, its engine never brought him out and the record sat indoors for the full 180 s). So
+  # c2 waits five squares out through the restart, c1 alone reloads Riverwood and the step holds for
+  # its grant, and c2 comes back once c1 has it, fifteen seconds after its own login (b-npc-death's
+  # shape, 86d340b and c1f44fb); the claims below are unchanged
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - wait: 8
   - server: restart {gameHour: 7.9}
   - c1: connect
+  - until: {within: 45, expect: [server.host(0x9732).client == "c1"]}
   - c2: connect
+  - wait: 15
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
   - wait: 30
   # evidence before the claim (gate 114904 ran out with no dump): where each engine has him
   - c1: npc-state {formId: 0x13482}

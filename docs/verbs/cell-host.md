@@ -977,23 +977,3 @@ none). Neither quit crash is ours: the first is the two plugins' statics, the
 second another plugin's or the engine's under this load order (a load-order
 bisect in solo would name it). The fast exit (train-49, D24-B) skips both;
 the plugins' leak goes upstream (D24-D).
-
-
-## Watch item (2026-10-26, the 50b merge gate 20261027-001423, ADR-027)
-
-b-cell-host red once (002301) at the restart's assert, `server.host(0x9810).hosted
-== true` false at epoch 1, green on both reruns (014824, 015416). The read (an
-agent over the three server logs, 19:5x PDT): the cause is train 48's D18-B
-meeting the scenario's old premise. After the restart both games reconnected on
-their own 11 s after the server listened, inside the step's fixed 20 s wait; c1's
-grant followed its login within 0.1 s; four predators (85547, 86117, 85549,
-85548) hit the unprotected c1 for 102 in 3.3 s and it died at 00:27:49.256,
-where the server wrote "ff000000 died: its cells start their grace, no candidate
-until it stands (D18)"; the console tgm landed 1.8 s after the death; 5.35 s
-after the death the cell went unhosted with c2 at the spawn and nobody in
-reach, and the assert 12 s later found it so. The greens were the same race won
-by seconds (014824's tgm landed with 7.8 health left). Fixed in the scenario's
-premise, its own commit on main the same evening: the step waits for the grant
-itself (until) and sets god mode through the server's lever straight after it;
-the claims are unchanged. Closes when the fixed scenario is green in a gate or
-the nightly.

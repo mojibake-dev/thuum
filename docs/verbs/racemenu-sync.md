@@ -802,7 +802,9 @@ above keep a hostile preset from carrying anything but a look.
       20261009-005736 and -010108, then in the merge sweep on 137f3fb5 (30
       of 30); fork parity fast-forwarded to it, 2026-10-08.
 
-Watch item (2026-10-09, the merge sweep on fork m1-console 89db8732):
+Watch item (2026-10-09, the merge sweep on fork m1-console 89db8732;
+CLOSED 2026-10-27: never shown again, green at every gate since, 54's
+gate 20261027-201511 the last, gate.yaml's entry out):
 a-racemenu red once (20261009-080458) at its check after the restart. c2's
 figure of c1 had RaceMenu's head scale recorded (NiOverride 1.6) and the
 body morph applied (0.7), but the engine's head node read 1.0; c1's own

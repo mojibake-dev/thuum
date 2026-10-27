@@ -1471,6 +1471,38 @@ P7 v2 claims V1, the relay, a started say and an ended line on ANY puppet
 diagnostics for v3's claim. The playtest's D27-B stands: the voice stays
 off the playtest's build until P7 is green.
 
+Voice v4 and P7 v5, READ (2026-10-27 01:53 PDT, an agent over run
+20261027-083204-x-npc-stream-p7, GREEN on 52's stage, build m3-npc-death
+f9859083, voice code 8da16ef6): v3's "deferred" was the audibility gate
+(SpeakSoundFunction, before the lip load: a speaker outside the dialogue
+output model's range of the seat's listener on an axis), named "inaudible"
+since v4 and cleared (result 5, the item cleared, ClearGreetTopic); v5
+placed both seats at one resident at a time (c1 at 150 units so the host's
+engine greets, c2 at 300, three visits of 45 s). The numbers: c1's sink
+captured 51 lines (1066df 11, 10962a 10, 1066de 10, 13484 9, 1e62b 7,
+13483 2, 3550c 1, 1348b 1; every line with a topic; 453e9 a scene of
+13483 and 13484 in sequence, 6aea3 the greeting); the server's 20
+per-speaker summaries covered 41 received and 38 relayed (the first three
+"to 0 listener(s)" before c2 stood in Riverwood), no E_SPEECH_* at all;
+c2's native took 47 asks, 45 STARTED and 2 inaudible (1348b at 5722 units
+and 3550c, both far speakers), 0 deferred, 0 refused, and 45 "line ended",
+one per started line, none still open at the log's end; the resident
+starts: 13483's 453f3 (delay 2.67, lip 3) and 6aea8, 13484's 6aea9 twice
+and 45473 to 45478, so V1 (the sink sees every line), V2 (the engine's say
+takes an info on an AI-off humanoid puppet: a resident's, not only a
+creature's), V3 (the pair ends the line) and V4 (the said-once mark is
+harmless: nothing refused twice) are CONFIRMED. Timing: the sink-to-say
+delay is a few tens of milliseconds once the clocks are paired (c2 reads
+0.59 s less than c1), with a 45 ms band over 47 lines; the one outlier was
+the first relay as c2 landed (about 1.8 s, the arrival's burst). Two "no
+actor or info" answers (1e62b 5b1b1, 13484 5b1b5) fell within a second of
+c2's teleport settling; the native's "delay" is the engine's estimate, not
+the observed length (6aea9 13.40 against 6.8 ended). Odd, not the voice's:
+c1's Skyrim Platform log stopped two minutes before its console log (an
+unflushed buffer at collection); the master-API manifest fetch fails every
+43 s on both seats. The voice rides 52's merge with npcVoice on; the
+checklist's voice items are live.
+
 ### Slice 5, planned: the gaze and the face (Eli's question of 11:43 PDT: "the puppets end up fairly stiff on a cell guest's screen")
 
 What a guest's screen still lacks, after slices 1 to 3 and the voice, in
@@ -1637,6 +1669,37 @@ Mood mapping reads right on the puppet's face), H-54c (no per-sample jitter
 against the heuristic). Probe x-npc-stream-face by path (30 steps). The
 cadence row (P3) and slice 4's counters, budgets and parity scenario follow
 on this train.
+
+54's stage, first read (10:43 PDT, x-npc-stream-face 20261027-173514 on
+m3-npc-face 240a31de): the gaze path is alive end to end for actors near the
+player. The host's state lines carried head-track targets for the creatures
+at the landing ("state 107cf9 ... gaze 107d07 slot 1", another at slot 5),
+the server accepted and relayed them (15 resident state lines, E_STATE_OWN
+0, no permission line), and c2's puppets took them ("face: 86111 gaze ->
+107cf9 (slot 3)", 86112 the same), with 22 expression lines for residents
+on c2. The residents themselves never set a slot: eight state lines each
+with gaze 0 over the 90 s window, their chatter included (topic 6aea3 by
+1348a, 13482, 13484 and 3550c), and Sven stood 3600 units from the host at
+the landing. HYPOTHESIS H-54d: the engine tracks heads for actors near the
+player only, so a hosted actor far from its host streams no gaze; the
+puppet seat then falls to the point heuristic. v2 of the probe brings the
+host to 300 units of Sven and the puppet seat to 400 before the window
+(claims unchanged); its rerun decides H-54d and reads H-54a to H-54c on the
+residents. The run's second red was the lab's (a c2 log-count step met
+"QEMU guest agent is not running" and left its claim without a count).
+
+54's stage, second read (11:16 PDT, x-npc-stream-face v2 20261027-181024,
+GREEN, six of six): H-54d CONFIRMED (both seats beside Sven: 52 resident
+state lines with a gaze target where v1 had none, one at the dialogue slot
+4; the targets residents, the players and creatures, slots 0 to 2 besides).
+H-54a read at T3: c2's puppets took 25 gaze targets within the relay's
+sample ("face: 3550c gaze -> 13483 (slot 1)", "35534 gaze -> 13491 (slot
+2)", clears when the host's slot emptied); the head's turn itself is T4's
+eye (playtest 35). H-54b read: 18 non-neutral expressions on c2 ("face:
+1348c expression 1 50 (mood 8)", anger at 50 as Mood 8; neutral 0 at mood
+7), the mapping as the table says. H-54c (no jitter against the heuristic)
+stays HYPOTHESIS for T4. Promoted as b-npc-stream-face (main, its own
+commit) for 54's gate set.
 
 Step R (2026-10-26, on the merged parity 66f04f2a; numidium's chain, 22:15
 to 22:32Z): P3 (x-npc-stream-p3 20261026-222300) GREEN, all 32 steps, its
@@ -1827,3 +1890,32 @@ Inventory's voice row).
     head's GitHub Formatting check green? Parity was red there from 10-15 to
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
+
+Trains 52 and 54 merged (13:43 PDT): fork parity 240a31de (m3-npc-face, with
+m3-npc-death 7cd47e24 inside), cited by the chain 20261027-181833-gate-m3-
+npc-face plus its rest 202429, verdict watch: 28 green and 3 red in the gate
+(b-npc-death's corpse drift, H-54e; b-npc-headshot-host, the lab's aim,
+pending; b-npc-stream-voice's listener placed off an obstacle), the rest
+three of three green. On this build: the voice slice (V1 to V4 read), the
+gaze and the face (H-54a and H-54b read at T3, H-54d confirmed, H-54c for
+T4), slice 4's counters (867c4210); slice 4's parity scenario
+(p-npc-stream against lab/references/npc-packages-a.json) is not built,
+since its per-id grammar row in lab-api is numidium's and later, so the
+parity Status box stays open. The killer credit (H-52b) and the life
+check's stand-up are in the same build (npc-fate.md).
+
+## Watch item (2026-10-27, 54's gate, ADR-027): b-npc-stream-voice
+
+b-npc-stream-voice red once at 20261027-200545 (54's gate on 240a31de): the
+listener's third approach (300 units from 0x13484) was judged unsettled for
+60 s because the computed landing point fell in a Riverwood obstacle and the
+engine placed c2 74 units off it, the same spot to the decimal nineteen
+times, past the judge's 64-unit tolerance; with c2 judged away, the 25
+relayed lines went to no listener. The two earlier approaches of the run had
+settled in 3.3 s. Fixed on main c70e828 in the scenario's own commit:
+tolerance 150 on the listener's three approaches (earshot, not a mark), the
+claims unchanged; GREEN in the gate's rest at 203422. numidium makes
+lab-api's approach accept a repeated engine placement after the ladder. The
+old premise's red stays the watch item until the scenario is green once more
+in a gate or the nightly; then this section and gate.yaml's entry come out
+together.

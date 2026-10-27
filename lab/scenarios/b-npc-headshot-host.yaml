@@ -1,0 +1,129 @@
+# b-npc-headshot-host (thuum-magnus, 2026-10-27; train 52, ADR-050 decision 2 with ADR-038, docs/verbs/npc-fate.md):
+# a guest's headshot on a hosted NPC kills it on both screens without the deferral's wait. Promoted unchanged from
+# x-npc-headshot-host v9 (GREEN 20261027-104716 on 52's stage of fork m3-npc-death cc1d9025; the id and this header
+# changed, steps and claims byte for byte). The host holds Sven still (npc-ai off), the guest aims head to head
+# (look-at before the draw) from 150 units and looses: the lethal cause with the kill move on the host, the death
+# by either order, dead on both seats.
+id: b-npc-headshot-host
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13491).aiEnabled == true
+      - c2.npc_state(0x13491).aiEnabled == false
+      - server.ref(0x13491).isDead == false
+  - c2: papyrus-av {how: set, name: Marksman, value: 60}
+  - c2: console {text: "player.addperk 7934b"}
+  - c2: give {item: "0x3b562", count: 1}
+  - c2: give {item: "0x1397d", count: 40}
+  - c2: console {text: "player.equipitem 3b562"}
+  - c2: console {text: "player.equipitem 1397d"}
+  - wait: 2
+  # v5 (2026-10-27, after 092536: the hold before the approach did not take with c1 at the landing, 3700 units
+  # from Sven (start-combat answered inCombat false, no target), c2's swings after each judged teleport drew
+  # the sheathed blade instead of striking (a teleport sheathes; zero hits of thirty), and Sven's package took
+  # him into the inn, where a Tamriel-framed approach read his interior coordinates as world ones). So: the
+  # host approaches him first, in the frame of his record (cell: record, wherever his package has him), starts
+  # his combat there and reads the hold before anything else; every approach draws the weapon again before
+  # the swings; the claims as they were
+  # v8 (2026-10-27, after 103638: the bow fires and the headshot path works end to end, on the wrong actor;
+  # Sven circled c1 while they fought and six looks read headings 71 to 286, so a shot needs him STILL, not
+  # engaged): the host's npc-ai lever off on him after its approach, so he stands where his record says;
+  # the engine's death on a headshot needs no AI; the claims as they were
+  - c1: approach {formId: 0x13491, distance: 150, cell: record}
+  - c1: npc-ai {formId: 0x13491, enabled: false}
+  - wait: 2
+  - c1: npc-state {formId: 0x13491}
+  - assert:
+      - c1.npc_state(0x13491).aiEnabled == false
+  # v6 (2026-10-27, after 100249: the hold took and both arrows from 300 units missed him while he fought c1,
+  # the approach setting the heading and nothing the pitch): b-headshot's level shot (look pitch 0 from the
+  # crosshair's head height meets a same-height head) from 150 units, so his sidestep during the arrow's
+  # flight is a third of what it was, six shots or until he falls; the claims as they were. v7: the lab's
+  # first-cast order per try (look, then draw-weapon, wait 3, hold: a look after the draw sheathes the hands
+  # again, measured on train-24's stage 2026-10-18). v9 (after 104144: the still hold took, two arrows loosed,
+  # nothing hit; the approach aims at the record and a level pitch is a guess): look-at {formId} aims heading
+  # and pitch from c2's head to Sven's head in c2's own game, before the draw
+  - c2: approach {formId: 0x13491, distance: 150, cell: record}
+  - c2: look-at {formId: 0x13491}
+  - c2: draw-weapon
+  - wait: 3
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 2
+  - c2: approach {formId: 0x13491, distance: 150, cell: record}
+  - c2: look-at {formId: 0x13491}
+  - c2: draw-weapon
+  - wait: 3
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 2
+  - c2: approach {formId: 0x13491, distance: 150, cell: record}
+  - c2: look-at {formId: 0x13491}
+  - c2: draw-weapon
+  - wait: 3
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 2
+  - c2: approach {formId: 0x13491, distance: 150, cell: record}
+  - c2: look-at {formId: 0x13491}
+  - c2: draw-weapon
+  - wait: 3
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 2
+  - c2: approach {formId: 0x13491, distance: 150, cell: record}
+  - c2: look-at {formId: 0x13491}
+  - c2: draw-weapon
+  - wait: 3
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 2
+  - c2: approach {formId: 0x13491, distance: 150, cell: record}
+  - c2: look-at {formId: 0x13491}
+  - c2: draw-weapon
+  - wait: 3
+  - c2: hold-key {code: 199, ms: 1500}
+  - wait: 2
+  - until: {within: 20, expect: [server.ref(0x13491).isDead == true]}
+  - wait: 5
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c1: log-count {pattern: "cause on 13491: health 0.000 .* kill move true"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("PartOne::ClaimHeadshot - ff000001 on 13491") >= 1'
+      # the death is the engine's: either the server's number reaches zero first and the kill waits on the
+      # host's report (death pending), or the host's engine ends him first (a kill move at low health decides
+      # before the damage) and the server takes the report on its own evidence; both are the design's
+      # (ADR-050 decision 2, ADR-048 B; x-npc-death-host v3 091759 took the second path)
+      - 'server.log_count("death pending on 13491") >= 1 or server.log_count("death report: 13491 died") >= 1'
+      - 'c1.log_count("cause on 13491: health 0.000 .* kill move true") >= 1'
+      - 'server.log_count("death report: 13491 died .* killer ff000001") >= 1'
+      - 'server.log_count("death by the server.s word on 13491") == 0'
+      - server.ref(0x13491).isDead == true
+      - c1.npc_state(0x13491).isDead == true
+      - c2.npc_state(0x13491).isDead == true
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
