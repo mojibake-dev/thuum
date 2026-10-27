@@ -9,9 +9,16 @@
 # on the record and both seats within 10 s (the host by the death container,
 # the viewer by the isDead property); the viewer leaves five squares out and
 # returns, the body still a body on its screen (the dead bind, the
-# two-second read); the server restarts and both reconnect, the record dead
-# at its point where it fell, within 256 units each way (a ragdoll's settle on a
-# slope, 65 measured; a death never teleports the record) and dead on both seats; the host's game is relaunched,
+# two-second read); the server restarts with the viewer held five squares out
+# and the host alone reloading the cell (the restart's grant is a race between
+# the games' own logins, and the record is its host's body: 52's gate
+# 20261027-112539, where the viewer won it with a corpse its reload had
+# re-settled 360 units down the slope), the record dead at its point where it
+# fell, within 256 units each way (a ragdoll's settle on a slope, 65 measured;
+# a death never teleports the record; these bounds caught a corpse moving 1300
+# units on its host's own engine in 54's gate 190413, npc-fate.md H-54e), and
+# within 256 of where the record stood right before the restart (a claim added
+# after 190413), dead on both seats; the host's game is relaunched,
 # the cell passes to the viewer (the stale rule) with the body in place, and
 # the returning host finds it dead. No respawn inside the run (the master's
 # 240 hours). Proved as x-npc-death v3 GREEN 080218 on train-43 d2210492
@@ -72,11 +79,40 @@ steps:
   - assert:
       - c2.npc_state(0x85547).isDead == true
       - server.ref(0x85547).isDead == true
-  # leg 3: the server restarts; the record loads dead at its point and arms no 25 s timer (rule 6)
+  # leg 3: the server restarts; the record loads dead at its point and arms no 25 s timer (rule 6).
+  # The premise (52's gate 20261027-112539): the record after the restart is its HOST's body (R2), and
+  # both games log in again within the same tenth of a second, so the grant is a race (c2 won it in
+  # 004553 and 112539, c1 in 061658). In 112539 c2's own game had re-settled the corpse on the cell's
+  # reload in leg 2 (360 units down the slope and 104 lower, the engine's physics; no line of ours,
+  # and a dead ragdoll takes no setPosition) and the record followed c2's body, 360 from the snapshot.
+  # So c2 waits five squares out through the restart, c1 alone reloads the cell and holds it (the grant
+  # within a tenth of a second of its login, as b-cell-host reads it) and c2 comes back once c1 has it;
+  # the claims below are unchanged
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - wait: 8
+  # the record right before the restart, for a claim ADDED to the fall-point bounds below: the restart
+  # keeps the record where its host last said (54's gate 20261027-190413 found the record 1316 x and 687
+  # y from the body snapshot after the restart with c1 hosting throughout: c1's own engine had moved the
+  # corpse between the kill and the restart, npc-fate.md H-54e, which the fall-point bounds caught and
+  # keep catching until its read)
+  - server: snapshot {name: rest, of: "server.ref(0x85547)"}
   - server: restart {gameHour: 12.0}
   - c1: reconnect
+  # god mode again, the server's lever straight after each login: the server's tgm is a session flag a
+  # restart forgets (52's gate 20261027-141823: predator 86117 hit c1 for real damage after the restart,
+  # ten hits, c1 died at 14:22:30 and the grace passed its cells to c2 at 14:22:35, long before leg 4; the
+  # prelude's console tgm had set it before the restart; b-cell-host's lever)
+  - c1: server-console {name: TGM}
+  - until: {within: 45, expect: [server.host(0x9810).client == "c1"]}
   - c2: reconnect
-  - wait: 30
+  - c2: server-console {name: TGM}
+  # a move within a second of a seat's login never settled (52's restage 20261027-125354: the record
+  # written at the landing, c2's game unmoved at the away point for 60 s while the server corrected it
+  # every 3.5 s); the lab's own shape gives a login ten seconds before its first move (the prelude's
+  # connects), so c2 gets fifteen here before its way back
+  - wait: 15
+  - c2: teleport {cell: lab-spawn, x: -10300, y: -19170, z: -3957, rot: [0, 0, 180]}
+  - wait: 20
   - c1: npc-state {formId: 0x85547}
   - c2: npc-state {formId: 0x85547}
   - c1: screenshot
@@ -85,11 +121,20 @@ steps:
       # the body where it fell, within a ragdoll's settle each way: the host reports the corpse's
       # physics after the kill, 5.8 units in 070022 and 64.9 in 093324 (a slope); the claim is
       # that a death never teleports the record (a teleport is a cell's 4096 or more), so the
-      # bound is 256, the exit's bound (cell-host.md), measured up by the runs, not guessed down
+      # bound is 256, the exit's bound (cell-host.md), measured up by the runs, not guessed down.
+      # These four caught H-54e (54's gate 190413: the corpse moved 1300 units on its host's own
+      # engine between the kill and the restart, the record following) and stay as they are until
+      # that read says whose the drift is (x-npc-corpse-drift, npc-fate.md)
       - server.ref(0x85547).x - snapshot("body").x < 256
       - snapshot("body").x - server.ref(0x85547).x < 256
       - server.ref(0x85547).y - snapshot("body").y < 256
       - snapshot("body").y - server.ref(0x85547).y < 256
+      # and the restart itself keeps the record where its host last said (the second snapshot, right
+      # before the restart): a claim added beside the fall-point bounds, not in their place
+      - server.ref(0x85547).x - snapshot("rest").x < 256
+      - snapshot("rest").x - server.ref(0x85547).x < 256
+      - server.ref(0x85547).y - snapshot("rest").y < 256
+      - snapshot("rest").y - server.ref(0x85547).y < 256
       - c1.npc_state(0x85547).isDead == true
       - c2.npc_state(0x85547).isDead == true
   # leg 4: the host relaunches; the cell passes to c2 and the body stays; the host's return finds it
@@ -101,6 +146,8 @@ steps:
       - c2.npc_state(0x85547).isDead == true
       - server.ref(0x85547).isDead == true
   - c1: connect
+  # a relaunch loses the server's tgm as well (lab-relaunch-loses-god-mode): on again before the wait
+  - c1: server-console {name: TGM}
   - wait: 25
   - c1: npc-state {formId: 0x85547}
   - assert:

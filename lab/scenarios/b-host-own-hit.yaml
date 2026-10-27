@@ -14,6 +14,11 @@
 # hits Y with W for 0 damage"), the fight goes on. Claims: c1 hosts, runs the pair's AI, and within
 # 90 s the server logs one of the pair hitting ff000000 (c1's actor); no E_HIT_WEAPON line (the
 # pin holds); the pair alive. The teleport drops c1 from z 650 onto the hall's floor (god mode).
+# The pair's detection of the player is the camp's own business (52's gate 20261027-135408: no
+# target in 90 s, the camp package 3eab9 streamed throughout, where 110935 engaged inside the
+# window), so once c1 hosts the cell its game starts the fight itself (approach to 200 units, then
+# start-combat on both, inCombat asserted): the claim is the hit on the host's own player, never
+# the detection.
 id: b-host-own-hit
 milestone: M3
 clients: [c1, c2]
@@ -39,8 +44,19 @@ steps:
       - server.host(0x371de).client == "c1"
       - c1.npc_state(0x39fe4).aiEnabled == true
       - server.ref(0x39fe4).isDead == false
-  # the pair detects the player and attacks; the host's game reports its own actors' hits
-  # on its own player, the server resolves target 0x14 to ff000000 and logs the hit
+  # the fight is the host's game's to start (the pair's own detection of the player took 90 s and
+  # more in 135408): c1 closes to 200 units of 0x39fe4 and its game puts both bandits in combat;
+  # start-combat takes only with the host's player near (lab-probe-premises), hence the approach
+  - c1: approach {formId: 0x39fe4, distance: 200, cell: record}
+  - wait: 2
+  - c1: start-combat {formId: 0x39fe4}
+  - c1: start-combat {formId: 0x39fe2}
+  - wait: 3
+  - c1: npc-state {formId: 0x39fe4}
+  - assert:
+      - c1.npc_state(0x39fe4).inCombat == true
+  # the pair attacks; the host's game reports its own actors' hits on its own player, the server
+  # resolves target 0x14 to ff000000 and logs the hit
   - until: {within: 90, expect: ['server.log_count("OnWeaponHit - 39fe[24] hits ff000000") >= 1']}
   - wait: 5
   - c1: npc-state {formId: 0x39fe4}

@@ -679,6 +679,27 @@ the margin deep) is built ahead and merges on D36's letter
 passes (at most six each of Sigrid and Alvor in three minutes). Closes when v3
 is green on the brake and the scenario carries the count (its own commit).
 
+## D22's brake read on 55's stage (14:21 PDT, x-handoff-cross v3 20261027-211054)
+
+The brake held Riverwood's border traffic as follows and passed nobody in
+three minutes: Sigrid's shuttle took her 160 units into c1's cell 9712 and
+the server logged "ff000001 follows 13483 into cell 9712 ... within the pass
+margin", c2 live and c1's copy a puppet; Sven hovered within 150 units of
+the 9731/9732 line 26 times and was followed every time; Alvor once into
+9731. No "may not move", no host flip, 42 follow lines in all (one per
+crossing, where the unbraked nightly 20261026-132333 had 836 passes). So
+PASS_MARGIN_UNITS 256 reads MEASURED for Riverwood: it holds every hover and
+shuttle there as a follow, and the per-sample thrash is gone. The pass a
+step beyond the margin is proved at T0 (CellHostTest's crossing case: a
+hold at 256 inside, a pass a step deeper, back at the margin) and not yet at
+T3, since no exterior actor walks that deep in the window; the door, night
+and restart scenarios move actors between cells by their own paths. The
+committed b-npc-handoff-cross asserted the unbraked rule's one pass per
+crossing; it is restated to the follow within the margin with the passes
+bounded at six each and recorded (its own commit, named in the memo under
+D40), and x-handoff-cross v4 carries the same claims for the rerun. The
+watch item above closes with 55's merge, as its line says.
+
 ## Reviewer checklist
 
 1. Is the rung right, and is the reason for not going one rung higher real?

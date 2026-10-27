@@ -13,12 +13,10 @@
 # that stage, cited by GATE_SET at the train's merge (ADR-042).
 always: [smoke-two-players, a-restart-persistence, b-duel]   # M0's floor, M1's exit, M2's exit (server-authoritative damage between two players, 2026-10-14)
 watch:
-  - a-melee-reach      # docs/verbs/melee-reach.md:141, red once in the m2-god sweep (2026-10-10)
-  - a-racemenu         # docs/verbs/racemenu-sync.md:746, a figure's head scale after a reconnect (2026-10-09)
-  - b-spell            # docs/verbs/spell-cast.md:394, red once in the m2-stagger sweep (2026-10-11)
-  - b-invis-recast     # docs/verbs/self-cast.md:104, a 120 s guest-agent stall spaced the casts past the spell's 30 s (2026-10-18)
-  - b-cell-host        # docs/verbs/cell-host.md:982, red once at the restart's assert in the 50b merge gate (D18-B meeting the old fixed wait; the premise fixed the same evening) (2026-10-26)
+  - b-npc-death        # docs/verbs/npc-fate.md:2033, red four times on its restart leg in 52's cut gate, restage and gate and 54's gate (three premises fixed 86d340b, c1f44fb, b8c494f; the fourth H-54e, a corpse moved on its host's engine, 190413, green in 54's rest 202429) (2026-10-27)
+  - b-npc-stream-voice # docs/verbs/npc-stream.md:1907, red once in 54's gate (the listener placed 74 units off a point in an obstacle, past the judge's 64; tolerance 150 c70e828, green in the rest 203422) (2026-10-27)
   - b-npc-handoff-cross # docs/verbs/npc-handoff.md:668, red once at a login re-split in the stream's merge gate, and the pass thrash D36's brake answers (2026-10-26)
 pending:
+  - b-npc-headshot-host  # lab-driver cannot aim: look and look-at leave the heading at the approach's, so a shot flies at the RECORD's point and misses a body 26 units off (54's gate 20261027-192858, every look-at heading equal to its approach's; v9's green 104716 was luck); the headshot path's claims held whenever a shot landed; un-pend with numidium's driver aim fix after the ladder, proved by a probe (2026-10-27, thuum-magnus)
   - b-push               # docs/verbs/push.md: under the essentials layer c2 ragdolls where it stands and is never thrown (y -206 against under -650 in 20261021-165252-b-push, the m2-close sweep; -157 in 20261021-123016 on train-30's stage), the layer's refused second Ragdoll, cause unread (x-push-knock-frida); carried to M3 by name (ADR-042b)
   - b-formdesc-world     # ADR-043 (docs/DECISIONS.md), a world saved in the raw shape loaded under the layer's order: slice one's re-base holds on m2-train-30 44372078's stage (20261021-004815: server.log's version-2 write, world-after), red on its headParts row alone, an ADR-026 derivation gap (a preset's Skyrim.esm hair beside the race's), carried, so it stays pending (thuum-magnus, 2026-10-20)

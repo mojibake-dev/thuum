@@ -10,7 +10,9 @@
 # <id> idle <id> <event> type 2 on 1348x"), a puppet's first action played as its event (c2's console
 # "npc-stream: first action <event> on 1348x played as its event"), the bandit's attacks streamed from the
 # host ("action ... attack... on ff...") and performed on c2's puppet copy ("performAction on ff...: ...
-# event 'attack...' -> taken 1"), no "block anim attack" on c2, no "No permission" refusal for the residents
+# event 'attack...' -> taken 1"), no "block anim attack" on c2 in the bandit's window (a baseline count
+# before it: the client's print names no actor, and a creature's own attack near c2's connect point
+# counted once in 52's gate, 20261027-120242), no "No permission" refusal for the residents
 # or the bandit, Sigrid's track ending within 256 units on both seats. GREEN as x-npc-stream-p4 v2
 # 20261026-172720 on the v3 stage of fork m3-npc-stream 66f04f2a (42 steps; the bandit's six attacks all
 # taken on the puppet, none refused; ten puppets' first events); v1 on the same build's first stage read red
@@ -63,6 +65,13 @@ steps:
   - assert:
       - c1.log_count("action [0-9a-f]+ idle [0-9a-f]+ .* on (1348[0-9a-f]|35534|3550c)") >= 1
       - 'c2.log_count("npc-stream: first action [A-Za-z_0-9]+ on (1348[0-9a-f]|35534|3550c) played as its event") >= 1'
+  # the blocked-attack baseline: "block anim <event>" (skymp5-client animation.ts) names no actor, and a
+  # creature's own attack near c2's connect point, far from Riverwood, counted once ("block anim
+  # attackStart_Attack1" at 12:05:56 right after c2's connect, 52's gate 20261027-120242). A seat's
+  # log_count reads the last log-count step of ITS pattern (a snapshot takes server facts alone), so the
+  # bandit's window is the difference of two patterns matching the same lines: this one before the
+  # bandit, the suffixed one after it
+  - c2: log-count {pattern: "block anim attack"}
   # a bandit at Sven, the server's own actor, hosted by c1's game: the attack family through the
   # entry on the host, the same actions performed on c2's puppet copy
   - c1: server-console {name: PlaceAtMe, args: [0x13491, 0x1bcd8]}
@@ -76,13 +85,13 @@ steps:
   - c1: log-count {pattern: "action [0-9a-f]+ idle [0-9a-f]+ [A-Za-z_]*[Aa]ttack[A-Za-z_]* type [0-9]+ on ff[0-9a-f]+"}
   - c2: log-count {pattern: "performAction on ff[0-9a-f]+: .* event '[A-Za-z_]*[Aa]ttack[A-Za-z_]*' .* taken 1"}
   - c2: log-count {pattern: "performAction on ff[0-9a-f]+: .* event '[A-Za-z_]*[Aa]ttack[A-Za-z_]*' .* taken 0"}
-  - c2: log-count {pattern: "block anim attack"}
+  - c2: log-count {pattern: "block anim attack[A-Za-z_0-9]*"}
   - c1: screenshot
   - c2: screenshot
   - assert:
       - c1.log_count("action [0-9a-f]+ idle [0-9a-f]+ [A-Za-z_]*[Aa]ttack[A-Za-z_]* type [0-9]+ on ff[0-9a-f]+") >= 1
       - 'c2.log_count("performAction on ff[0-9a-f]+: .* event ''[A-Za-z_]*[Aa]ttack[A-Za-z_]*'' .* taken 1") >= 1'
-      - c2.log_count("block anim attack") == 0
+      - c2.log_count("block anim attack[A-Za-z_0-9]*") - c2.log_count("block anim attack") == 0
       - 'server.log_count("No permission to update actor (1348[0-9a-f]|35534|3550c|ff[0-9a-f]+)") == 0'
       - abs(c1.watched_id(0x13483).endX - c2.watched_id(0x13483).endX) < 256
       - abs(c1.watched_id(0x13483).endY - c2.watched_id(0x13483).endY) < 256

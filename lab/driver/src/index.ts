@@ -2210,6 +2210,18 @@ function run(step: Step, player: Actor): unknown {
       npc.enableAI(a.enabled === true);
       return { formId: npc.getFormID(), aiEnabled: npc.isAIEnabled() };
     }
+    case "npc-hold": {
+      // the named NPC stood still in this seat's game while its AI and dialogue run (Papyrus
+      // Actor.SetDontMove; Skyrim Platform's setDontMove, skymp/skyrim-platform's skyrimPlatform.ts:2083),
+      // the lever the engine's own scenes stand an actor with: x-npc-talk-claim v4 holds Sven on the host
+      // so the guest's crosshair stays on him (npc-ai's EnableAI(false) never stopped his walk,
+      // 20261027-230022). Papyrus has no getter for the flag, so held is the value set and two server
+      // snapshots apart are the read. Returns the state after
+      const npc = namedNpc(a);
+      if (!npc) return { error: "no placed npc and no {formId}" };
+      npc.setDontMove(a.held === true);
+      return { formId: npc.getFormID(), held: a.held === true, aiEnabled: npc.isAIEnabled() };
+    }
     case "npc-kill": {
       // the named NPC killed by this seat's own engine (Papyrus Actor.Kill, with no killer or, with
       // {killer: "player"}, this seat's player): no hit report and no number of the server's, the

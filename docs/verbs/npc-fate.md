@@ -1750,8 +1750,14 @@ dress claims matched, and the bandit's swings landed on the host's player
 (OnWeaponHit on ff000000, no E_HIT_WEAPON): H-51b CONFIRMED whole. Promoted
 unchanged as b-npc-copy-fate (thuum main 916af5a, its own commit), and
 b-npc-stream-equipment's placed-bandit lines turned from recorded to
-claimed (e42dbca). H-51c and H-51d read on the gate (gate-m3-npc-path, 25
-runs).
+claimed (e42dbca). H-51c and H-51d read on the gate: MERGED to fork parity
+39cf3f4d at 08:19Z 2026-10-27, the gate cut at 18 of 25 by sky-c2's RTX
+wedge and finished by its rest under D38 B, cited as one
+(20261027-054632-gate-m3-npc-path+20261027-074932-gate-m3-npc-path-rest, 29
+runs, verdict watch: b-npc-body-release's old point, below); T2 green on
+39cf3f4d; both clones promoted; the regression set (b-npc-puppet,
+b-cell-host, the four b-npc-handoff) green in the gate, so H-51c and H-51d
+hold at T3.
 
 ## Status
 
@@ -1834,3 +1840,242 @@ now"; gate 20261026-001639 eighteen of eighteen, T2 green; thuum main
 bfc41e0b): the server-made actor's death by the NPC rule, E_HIT_WEAPON at
 info, the corpse's occupancy released. The body's diff-only inventory and
 the hosted copy's dress ride train-47, built ahead on the memo's letters.
+
+## ADR-050 decision 2, deaths by the engine: 52's first stage reads (02:29 PDT 2026-10-27)
+
+x-npc-death-host v3 (20261027-091759, the host kills Sven with seven landed
+iron-sword hits, the server's number 1 to 0.02): Sven died on every seat
+and the record, but two claims read wrong. (1) "death pending on 13491"
+never printed: at one hit point the host's engine's KILL MOVE ended him
+(the engine decides a kill move before the damage), 842 ms after the
+seventh hit, and the server took the report on its own evidence ("ff000000
+hit it 842 ms before (the engine's number outran the server's)"). Both
+orders are the design's: the server's number first and the kill waiting on
+the report (ADR-050 decision 2's pending death), or the engine first and
+the report checked (ADR-048 B); the probes' claim assumed the first and now
+accepts either. (2) The bodies lay 326 units apart: c2's rest fired
+("rested at the host's spot, 329 units away") and a dead ragdoll takes no
+setPosition. Fixed on fork m3-npc-death cc1d9025: the puppet is placed at
+the host's last sample BEFORE the kill word is applied, while it still
+moves (deathService); the rest after death stays as a read. Also read: the
+guest-hit path works (x-npc-death-guest v3 091346: ff000001's hits on
+13491 reached the server and the record moved 1 to 0.44, four landed hits
+of twelve at 7 on a base of 50; eight needed, so the probes swing thirty
+and twenty-four times now), and the combat hold (start-combat on the host)
+keeps a walking resident in place for the swings, where a judged approach
+alone lands three seconds behind him. H-52a (the pre-kill placement puts the
+bodies within 200 units) CONFIRMED: x-npc-death-host v5 20261027-095847 on
+the restaged cc1d9025 GREEN, nine of nine claims, the one-number read after
+the first swing, the death by either order, the bodies within 200 units on
+both axes. The guest's probe reached 0.16 with six landed hits before Sven
+fled into his house (v5 095425); v6 arms the guest with a Daedric warhammer
+(two landed hits): GREEN 20261027-103226, the guest kills the host's NPC
+through the cause path. The headshot probe read the headshot path end to
+end on a hosted resident before its own premise held: a level shot from
+150 units at Sven, circling the host he fought, took the bystander 1348c
+instead and the server killed it on the claimed bow hit ("headshot:
+ff000001 kills 1348c with fe01e801 on a claimed bow hit", 103638); v8
+holds Sven still with the host's npc-ai lever instead of combat (a shot
+needs a still target, a swing an engaged one).
+
+52's gate (gate-m3-npc-death on cc1d9025, 10:51Z; 04:46 PDT): b-npc-death
+20261027-112539 red on the restart leg, read as a premise, not 52's code.
+The record after the restart lay 360 units (y) from the body snapshot. What
+moved it: after a restart both games log in again within the same tenth of
+a second and the cell's grant is a race (c2 won it in 004553 and 112539, c1
+in 061658); in 112539 c2's own game had re-settled the corpse on its cell
+reload in leg 2 (from 28 units off the host's body to 63 x, 333 y and 104
+lower, down the forest slope; no line of ours on c2 between the kill and
+the return, so the engine's physics on the reloaded ragdoll), and as the
+new host its samples of its own body became the record under R2
+(OnUpdateMovement takes a dead hosted actor's samples; the 65-unit settle
+was measured through the same path). 52's server diff writes no position
+and its client change for a dead puppet (restBody in place of
+applyPuppetPose) moves no dead ragdoll either way. Fixed on main 86d340b
+in the scenario's own commit: c2 waits five squares out through the
+restart, c1 alone reloads the cell and the step holds for its grant, c2
+returns once c1 has it; the claims unchanged (D39 B, D40). A known limit
+this run names: a seat that reloads the cell can find the corpse
+re-settled by its engine (360 units on a slope here); the pre-kill
+placement covers the kill moment only, since a dead ragdoll takes no
+setPosition, and a host change after such a reload moves the record to
+the new host's body. Playtest 35's known limits carry it; a fix in kind
+has no hook, the engine re-settles the body without killing it again.
+
+52's gate's third red (05:07 PDT): b-npc-respawn 20261027-115833, 52's own
+code. After the restart the record stood again on schedule ("stands again
+at its placement, rolled anew", 12:01:20) while the server loaded, before
+any host held the cell; c1 logged in as host at 12:01:26 and bound a
+corpse; c2's two-second check resurrected its puppet ("resurrect 85547
+(puppet true) queued"), c1's never ran: 52 had put the check's
+`!simulatedHere` guard on both directions ("the life check is a puppet's",
+b82a82e5). The kill direction is the design's (ADR-050 decision 2: the
+simulating seat's engine dies from the cause and its report, the check
+never kills it); the stand-up is the server's word on every seat, since the
+respawn's container reaches the host of the moment and a host that logs in
+after the sweep binds a corpse, as the check's own comment already said.
+Fixed on m3-npc-death 7cd47e24 (the check resurrects any copy whose record
+says alive and still never kills a simulated one; one condition, tsc clean,
+no server, wire or scenario change), pushed when the gate's branch is
+clear, then CI, the restage, the probes with b-npc-respawn, and the gate
+again (D40: a code red with a fix in hand restages). Named, not fixed: a
+LIVE copy on the simulating seat bound to a DEAD record (the engine's own
+cell reset standing a corpse up on the host's re-entry, re-npc-roll.md
+section 9) is no longer killed by the check while that seat hosts; the
+cause path covers deaths happening now, another seat's check covers the
+copy when the cell passes, and the reset case waits for a probe before a
+rule (a timed bind after the kill move's window, or the server's word on
+the host's report of a live actor against a dead record).
+
+52's gate's rest (09:13 PDT): the killer after a lethal single blow. In the
+rest's b-npc-death-engine (153601) and its rerun (160510) a Daedric
+warhammer's 27-a-hit blow ended Sven, and the host's report said "13491 died
+of unknown ..., host ff000000, killer 0: a hit the server numbered 82 ms
+before; the server records the death", with his AI on and his combat started
+in 160510; the stage's 123746 killed him with the iron sword's small blows
+and the report named ff000000. deathReportService on 7cd47e24 sends
+deathStart's killer when the engine names an actor and 0 otherwise, so
+HYPOTHESIS H-52b: after a lethal single blow (a kill move, or the one cause
+that takes the engine's health to zero) the engine's deathStart names no
+killer, H1's edge. The server has the better evidence, its own number's
+aggressor on the pending line (R0), so the credit is train 54's code: on
+m3-npc-face 240a31de a report naming no killer after a hit the server
+numbered within the window takes that hit's aggressor as the killer
+(ActionListener::OnActorDeath case 0, "the killer {:x} credited from the
+server's own number"; MpActor::LastHitBy picks the latest hitter in the
+window, MpActor::LastKillerId reads the credit; ActorDeathTest's new case),
+read at T3 by x-npc-death-blow on 54's stage (b-npc-death-engine's shape
+with the warhammer's kill and the credit line claimed), promoted as
+b-npc-death-blow on green. Until 54 merges a strong player's kill records
+"died of unknown" on the server (the game shows no kill feed; nothing of the
+fate reads the killer yet). b-npc-death-engine proves the engine-named path
+with the sword (main 70da78b), as promoted.
+Then rest3's 161323 lost the killer with the sword too (the pending line at
+16:16:13.677 naming ff000000, the report 77 ms later "died of unknown ...,
+killer 0"), where the stage's 123746 had its report 2.3 s after the pending
+line as cause 4 with the killer: the engine's own kill move had ended him.
+So H1 is REFUTED for the killer: the cause applied through damageActor kills
+the engine's actor without recording an attacker, and deathStart names a
+killer only when the engine's own kill move kills. The credit from the
+server's own number (54, 240a31de) is the fix, not an edge. A loosening of
+b-npc-death-engine's killer line to the pending line's aggressor (main
+895f135) was reverted the same hour (3055859): numidium read it against
+rule 13, never turn a scenario green by weakening its assertions, and was
+right; the line stays strict. So train 52 ships inside train 54 as one merge
+train (ADR-030): m3-npc-face carries m3-npc-death 7cd47e24 and the credit
+240a31de on parity 39cf3f4d, 54's gate plays every M3 scenario including
+b-npc-death-engine's strict line on the build that names the killer from
+the server's own number, and parity goes from 51 to 54 with 52's commits
+inside. The intermediate parity at 52 is the only thing that goes.
+54's stage (10:48 PDT): x-npc-death-blow v1 (20261027-174006, the warhammer)
+held every claim but the credit line: the engine's own kill move ended him
+first (the hit left the server's number at 0.04, the report came 537 ms
+later as cause 4 with the killer, "the engine's number outran the
+server's"), so the credit had nothing to do. Which path a lethal blow takes
+is the engine's dice (153601, 160510 and 161323 took the server's, the
+credit's case; 174006 the engine's). v2 forces the server path's report
+shape without a lethal blow: two more sword swings for a numbered hit within
+the 3 s window, then the host's own engine takes his health with no
+attacker (the lab's npc-damage, Actor.DamageActorValue, as the cause does
+when it brings the engine to zero), so deathStart names no killer and the
+report says cause 0; the credit then names the hit's aggressor. Its rerun on
+54's stage reads H-52b at T3.
+H-52b CONFIRMED at T3 (11:19 PDT): x-npc-death-blow v2 20261027-181507 GREEN,
+ten of ten, on m3-npc-face 240a31de: "[2026-10-27 18:17:52.188] [info] [verb:npc-fate] death report: 13491 died of unknown at (20025, -46299, -147), host ff000000, killer ff000000: a hit the server numbered 54 ms before, the killer ff0000". The report named no
+killer (cause 0) and the server credited the sword hit it had numbered
+within its window; every other claim of b-npc-death-engine held with it.
+Promoted as b-npc-death-blow (main, its own commit). H1 stands refuted for
+the killer: the engine names one only when its own kill move kills; the
+server's credit covers the rest.
+
+54's gate (12:13 PDT): b-npc-death 20261027-190413 red on the restart leg's
+body bounds with the host pinned and holding (c1 hosted 9810 before and
+after; c2 five squares out through the restart). The record after the
+restart lay 1316 x and 687 y from the body snapshot because c1's own engine
+had moved the corpse that far between the kill and the restart, from
+(123718, -80883) to (124847, -81527) at the same height (10619.5 to
+10618.5), and the record followed its host under R2 (to (125023, -81568) by
+the read, so the body was still moving). No ragdoll slides 1300 units on
+flat ground; no line of ours on c1 touches 85547 in that window (no settle,
+no apply, no placement; "puppet 85547" then "live 85547" 258 ms apart at
+the reconnect, the reconciler's flip while the grant arrived). HYPOTHESIS
+H-54e: a dead hosted actor's body moves on its host's engine after the kill
+word, at the same height, at a walker's pace (10 to 40 units a second by the
+reads), and the record follows. Candidates: the reconciler's puppet flip at
+the reconnect feeding the locomotion detour a speed the dead actor's graph
+keeps; the engine's own movement controller running on a corpse killed by
+the word with its AI on. Dynamic plan: x-npc-corpse-drift (by path, 55's
+stage) polls the host's npc-state of the corpse every ten seconds for two
+minutes after a kill-ref, then across a restart and the reconnect, both
+seats; a drift before the reconnect blames the engine, one after it the
+flip. If the drift is real, the rule in kind is R0 after the settle: a dead
+record takes its host's samples for a settle window (ten seconds) and then
+holds, so the body's place is the server's word wherever a host's engine
+takes its copy (55 or later, with its T0 case). The scenario keeps its
+fall-point bounds as asserted, since they are what caught the drift, and
+adds the restart's own bounds against the record right before it (main
+c6899e0, after 0977292 had re-measured the fall-point bounds against that
+snapshot and numidium read it against rule 13: a re-measurement that hides
+the anomaly weakens the claim). Until H-54e's read the scenario reds on a
+drifting corpse, by design. H-54e's read at T3 (14:26 PDT, x-npc-corpse-drift
+20261027-211727 GREEN on 55's stage, m3-npc-talk c1be67d1 with the promote
+fix): the corpse stayed at one point through 24 reads over four minutes on
+both seats, c1's at (125306, -81256) and c2's 22 units from it, across the
+kill word, a server restart and the host's reconnect (the flip that walked
+190413's wolf). With the fix no corpse moves; the flip's mechanism (the
+promote's EnableAI and EvaluatePackage on a dead actor) stays the one
+candidate the code shows, and the fix closes the path either way. The code read (12:18 PDT): the native promote
+(PuppetApi.cpp Promote) lifts the block, calls EnableAI(true) and
+EvaluatePackage(false, false) on any actor, dead or alive; at c1's reconnect
+the reconciler flipped the dead wolf to puppet and back to live within 258
+ms as the grant arrived ("puppet 85547", "live 85547"), so a corpse had its
+AI switched on and its package evaluated, and the engine's package walked
+the body. That is the candidate the probe's phase b tests (a drift that
+starts at the reconnect). The fix is written and held: the promote leaves a
+dead actor's AI off (the block still comes off for the loot; the fate's
+resurrect turns the AI on when the record stands again), a local commit on
+m3-npc-face behind 54's gate, pushed to whichever branch the gate's verdict
+sends it to (a restage of 54 on a red rerun, 55's branch on a green).
+
+Train 52 merged inside train 54 (13:43 PDT): fork parity 240a31de, the chain
+20261027-181833-gate-m3-npc-face plus its rest 202429 (verdict watch), 52's
+commits in it: the engine's own deaths from the server's cause (H-52a
+confirmed), the life check's stand-up (7cd47e24), the killer credited from
+the server's own number (H-52b confirmed at T3, b-npc-death-blow), the
+voice slice, the body placement before the kill. Open on this build: H-54e
+(a corpse moving on its host's engine; the promote fix is on 55's branch,
+c1be67d1, with x-npc-corpse-drift as its read) and the engine's refusal of
+Resurrect under AI off (Suppress). b-npc-headshot-host sits pending until
+the lab can aim.
+
+## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
+
+b-npc-death red twice on its restart leg's premise, never on a claim. (1)
+20261027-112539 (52's gate on cc1d9025): the record after the restart lay
+360 units from the body snapshot because the restart's cell grant is a race
+between the games' own logins; c2 won it with a corpse its cell reload had
+re-settled down the forest slope, and the record followed its host's body
+under R2. Fixed on main 86d340b: c2 waits five squares out through the
+restart, c1 alone reloads the cell and the step holds for its grant. (2)
+20261027-125354 (52's restage on 7cd47e24): the pinned host held and c2's
+teleport back, issued within a second of its login, never settled (the
+record written, the game unmoved for 60 s under the server's corrections).
+Fixed on main c1f44fb: fifteen seconds between c2's reconnect and the move.
+GREEN at 20261027-132954 on 7cd47e24 with every claim as written. (3)
+20261027-141823 (52's gate): the server's god mode is a session flag the
+restart forgot, and the pinned-host shape left c1 alone with the forest's
+predators for 40 s; 86117 killed it in ten hits and D18's grace passed its
+cells to c2 before leg 4 (every death and body claim before it held). Fixed
+on main b8c494f: server-console TGM after c1's reconnect, after c2's and
+after c1's relaunch. GREEN in the gate's rest at 154008, which played b8c494f
+from main at ec7107d. (4) 20261027-190413 (54's gate on 240a31de): with
+the host pinned and holding, the record after the restart lay 1316 x and
+687 y from the body snapshot because c1's own engine had moved the corpse
+between the kill and the restart at the same height and the record followed
+under R2: H-54e, a finding of the build's or the engine's, read by
+x-npc-corpse-drift on the next stage; the scenario kept its fall-point
+bounds (they caught it) and gained the restart's own (main c6899e0). GREEN
+in the gate's rest at 202429 with every claim as written, the corpse still
+this time. The four reds stay the watch item, H-54e open, until the
+scenario is green once more in a gate or the nightly and H-54e has its
+read; then this section and gate.yaml's entry come out together.

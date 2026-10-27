@@ -1,0 +1,103 @@
+# b-npc-talk (thuum-magnus, 2026-10-27; train 55, ADR-052, docs/verbs/npc-talk.md): a guest opens dialogue with
+# an NPC the host's game simulates. Promoted unchanged from x-npc-talk-claim v6 (GREEN 20261027-233908 on 55's
+# stage of fork m3-npc-talk c1be67d1; the id and this header changed, steps and claims byte for byte). c1 hosts
+# Riverwood from P4's landing; the host's game holds Sven (0x13491) with npc-hold (Actor.SetDontMove, eight
+# seconds for his leg to end, the record read still), c2 approaches to 70 units in his record's frame, a short
+# crosshair check, and E: talkService sends ActorClaim, the server grants it (the same world, the record's reach,
+# alive, not in combat), c2's game runs activatePickRef on the grant and the Dialogue Menu opens, c1's seat
+# demotes Sven; c2 closes the menu, the release puts him back under c1's rule, the hold comes off. In 233908 the
+# grant came 157 ms after the E ("granted: activatePickRef queued (crosshair 13491)"), the menu opened, the release
+# at the close, c1 live again 300 ms later. Claims: the server's claim and release lines (the cell 973[12], his
+# record's at 9.0), no E_CLAIM refusal, c2's grant line, the menu open, the AI swap both ways. Its own commit
+# (rule 13).
+id: b-npc-talk
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 9.0
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13491).aiEnabled == true
+      - c2.npc_state(0x13491).aiEnabled == false
+  # the walk up to Sven and the E on his puppet. The approach is judged in his record's frame (his package
+  # walks him about the mill at 7.9, and a Tamriel-framed approach misreads an interior), lands facing the
+  # record, and the E follows within a second, before his walk takes him out from under the crosshair; look-at
+  # is gone, since lab-driver's setAngle never turns the player (54's stage reads, 2026-10-27), and the
+  # approach's own heading is what aims the crosshair (x-npc-talk-prompt 045446)
+  # v4 (55's stage: v2 210601's E hit nothing, Sven walking his package out of the crosshair's line between
+  # the approach's judge and the press; v3 230022 failed its own stillness assert, the host's npc-ai lever
+  # off and Sven still walking a loop over the border at 9.0, package 0, 77 units a second). So the host's
+  # game holds him with the engine's own scene hold (npc-hold, Actor.SetDontMove, thuum main 9a657c65), his
+  # AI and dialogue running as the claim's design wants; the record is read still, two snapshots three seconds
+  # apart within five units, before c2 approaches to 70 units in his record's frame and presses E at once (the
+  # approach's heading is the crosshair's aim; look and look-at aim nothing); the hold comes off at the end
+  # v6 (x-npc-hold v2 232956 measured the hold: SetDontMove lets him finish his current leg, 100 units in the
+  # first three to six seconds, then holds him exactly, and the holder's own E opened his dialogue; v5 233323
+  # waited for a walker who had been frozen off the line). So: the hold, eight seconds for his leg to end, the
+  # record read still (two snapshots three seconds apart within five units), c2's approach to 70 units in his
+  # record's frame, now accurate, a short aim check on c2's crosshair (dump-state's crosshairRef, what E acts
+  # on; lab-api's until re-dumps the client each poll), then E at once; the claim's gates read the record's
+  # reach and the same world
+  - c1: npc-hold {formId: 0x13491, held: true}
+  - wait: 8
+  - server: snapshot {name: s1, of: "server.ref(0x13491)"}
+  - wait: 3
+  - assert:
+      - abs(server.ref(0x13491).x - snapshot("s1").x) < 5
+      - abs(server.ref(0x13491).y - snapshot("s1").y) < 5
+  - c2: approach {formId: 0x13491, distance: 70, cell: record}
+  - until: {within: 10, every: 0.25, expect: ['c2.state.crosshairRef == 0x13491']}
+  - c2: hold-key {code: 18, ms: 100}
+  - wait: 4
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c2: dump-state
+  - c2: log-count {pattern: "claim 13491 .* sent on E"}
+  - c2: log-count {pattern: "claim 13491 granted: activatePickRef queued"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("\\[verb:npc-talk\\] ff000001 claims 13491 in cell 973[12] for a dialogue") >= 1'
+      - 'server.log_count("E_CLAIM_") == 0'
+      - 'c2.log_count("claim 13491 granted: activatePickRef queued") >= 1'
+      - c2.npc_state(0x13491).aiEnabled == true
+      - c1.npc_state(0x13491).aiEnabled == false
+      - c2.state.menuOpen("Dialogue Menu") == True
+  # the menu closed: the release, the host's rule again
+  - c2: close-menu {name: "Dialogue Menu"}
+  - wait: 6
+  - c1: npc-state {formId: 0x13491}
+  - c2: npc-state {formId: 0x13491}
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("\\[verb:npc-talk\\] ff000001 releases 13491") >= 1'
+      - c1.npc_state(0x13491).aiEnabled == true
+      - c2.npc_state(0x13491).aiEnabled == false
+      - server.host(0x9732).client == "c1"
+  # the hold off: the host's copy walks again
+  - c1: npc-hold {formId: 0x13491, held: false}
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]

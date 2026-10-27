@@ -453,7 +453,9 @@ m2-shouts c4641e26 (which merges m2-pt13), x-left-flames 20261012-031332:
 the figure drained from 0.7 s to 4.9 s, the 4 s stream and its relay's
 delay, then stopped.
 
-Watch item (ADR-027, the stagger merge sweep 2026-10-11): b-spell red once
+Watch item (ADR-027, the stagger merge sweep 2026-10-11; CLOSED 2026-10-27:
+no second red in any sweep or gate since, 54's gate 20261027-201844 the
+last, gate.yaml's entry out): b-spell red once
 (20261012-004816): after the four-second Flames stream, c2's own game read
 0.6477 and the server 0.692, outside the scenario's 0.02; green on both
 reruns (20261012-010948, -011230). HYPOTHESIS: c2's own game took a little

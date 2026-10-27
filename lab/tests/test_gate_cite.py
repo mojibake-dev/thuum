@@ -80,6 +80,10 @@ class GateCite(unittest.TestCase):
     def test_a_head_past_the_stage(self):
         self.assertFalse(run(head8="1234abcd", changed=["skymp5-client/src/x.ts", "docs/a.md"])[3][0])
         self.assertTrue(run(head8="1234abcd", changed=["docs/verbs/shadowbond.md"])[3][0])
+        # a T2 declaration after the stage builds nothing (m3-npc-talk c1be67d1, 2026-10-27); the wire's code does
+        self.assertTrue(run(head8="1234abcd", changed=["skymp-wire/difftest/sessions/npc-talk.yaml", "docs/a.md"])[3][0])
+        self.assertFalse(run(head8="1234abcd", changed=["skymp-wire/difftest/sessions/npc-talk.yaml",
+                                                         "skymp-wire/crates/wire-bridge/src/rules.rs"])[3][0])
 
     def test_a_red_only_on_what_is_pending_at_the_merge_stands(self):
         # ADR-042b: b-push went red under the layer in the m2-close sweep and its carry was written while the set ran

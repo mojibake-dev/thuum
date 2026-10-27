@@ -223,3 +223,212 @@ item, as a rerun's green is inside one set).
 - C. A fresh full gate on main's scenarios, b-npc-copy-fate included: about 1 h 50 min of lab against 50 min.
 - Recommended: B. The rest then asserts what main asserts, and the one premise that changed moved where a seat
   stands, not what it claims.
+
+- Decision: B (Eli, 00:44 PDT: "D38 B i suppose"). After the card's recovery, `just deploy-srv` runs before the rest:
+  since the stage's deploy (main 84330e1d) only three scenario files changed, b-npc-body-release (d85701d's
+  approach), b-npc-stream-equipment (e42dbca's two claims on the server-made bandit) and the new b-npc-copy-fate,
+  which is not in the rest; the rest plays the first two as main has them.
+
+### D39. Train 52's probes red on their premise (01:45 PDT, numidium)
+On 52's stage (m3-npc-death f9859083) P7 v5 was green, and all three death probes were red the same way: Sven
+(0x13491) walked his package away from the one approach, so no swing or shot from either seat reached the server
+(x-npc-death-guest 083747, x-npc-death-host 084109, x-npc-headshot-host 084400; zero OnWeaponHit on 13491).
+thuum-06's v3 of all three holds him first (start-combat on the host, so he stands and fights its god-mode player;
+the engine's own death path untouched) and keeps a re-approach before every swing; the claims are unchanged. D32 B
+says any red stops the chain for your read.
+- A. Stop the chain until you have read the fixed probes' results yourself.
+- B. If the fixed probes pass on the same stage with their claims unchanged, 52 gates and merges as usual, and the
+  reds and the fix are reported as it lands.
+- Recommended: B.
+- Decision: B (Eli, 01:56 PDT: "go with B.").
+
+### D40. Eli's standing word for the rest of the ladder (01:57 PDT 2026-10-27, verbatim)
+Eli: "i keep getting pinged for questions and shit, just plough ahead to a fully functional playtest 35."
+Read as: no more questions to Eli until playtest 35 is set up; every open or new decision on the way
+takes the memo's recommendation by default, the scenario owner (thuum-magnus) and the process owner
+(numidium) deciding between them and recording the call here; reds are read and fixed, and a premise
+red fixed with the claims unchanged counts as the claims holding under D32 B (the chain merges on the
+green gate and reports); only a red of a train's own code with no fix in hand stops the chain, and then
+the stop is reported, not asked. This answers numidium's pending question on 52's premise reds: B.
+
+- Decision: as above (Eli, "just plough ahead to a fully functional playtest 35")
+
+Calls recorded under D40 (thuum-magnus and numidium between them):
+- 02:32 PDT: the death probes claim EITHER order of an NPC's death, the server's number reaching zero
+  first with the kill waiting on the host's report (death pending) or the host's engine ending the
+  actor first (a kill move at low health decides before the damage) with the report taken on the
+  server's evidence; both are ADR-050 decision 2 with ADR-048 B ("the engine's number outran the
+  server's and the death stands on both screens", npc-fate.md), so the change aligns the claim with the
+  design rather than weakening it (x-npc-death-host v3 20261027-091759 took the second path).
+- 02:32 PDT: the bodies' distance is 52's code (a dead ragdoll takes no setPosition), fixed on
+  m3-npc-death cc1d9025 and restaged; a code fix restages, a premise fix reruns.
+- 04:25 PDT 2026-10-27: b-npc-copy-fate's victim claim restated from the player to any target
+  ("OnWeaponHit - ff00000[2-9a-f] hits"): in 52's gate (111854) four residents reached the placed bandit
+  first and it fought them, its swings counted as train 51 means (E_HIT_WEAPON judged the aggressor's
+  hands, whoever was struck), so the claim still asserts 51's change with the three refusal claims; what it
+  no longer asserts is a server-made copy's hit landing on a PLAYER (the R0 path), which no other scenario
+  claims for a copy: that count is recorded in the scenario (a >= 0 row prints it) and playtest 35's bandit
+  line in Bleak Falls Temple reads it on both screens. A loosening, named here so Eli sees it unasked.
+- 04:46 PDT 2026-10-27: b-npc-death 112539 (52's gate) read as a premise red: the restart's cell grant is a
+  race between the games' own logins, and the record after it is its host's body (R2); c2 won the race
+  with a corpse its cell reload had re-settled 360 units down the slope (the engine's physics on a
+  reloaded ragdoll, no line of ours), so the record followed c2's body. 52 writes no position on the
+  server and moves no dead ragdoll on the client. Fixed on main 86d340b with the claims unchanged (c2
+  held out of the cell through the restart, an until on c1's grant). Under D39 B the rerun's green
+  counts as holding; with b-npc-copy-fate's (84805f1, d7692a2) the gate's two reds are both premise reds
+  with fixes on main, so 52 merges on the two reruns' green. The known limit (a cell reload can
+  re-settle a seat's corpse; the record follows the host) is recorded in npc-fate.md for playtest 35.
+- 05:07 PDT 2026-10-27: b-npc-respawn 115833 (52's gate's third red) read as 52's own code: the life check's
+  guard skipped the stand-up on the host, which binds a corpse when it logs in after the sweep (the
+  respawn's container reaches the host of the moment only). Fixed on m3-npc-death 7cd47e24 (the check
+  resurrects any copy whose record says alive; it still never kills a simulated one). D40: a code red
+  WITH a fix in hand is a restage, not a stop; numidium cuts or finishes the gate, I push on its word,
+  52 restages on 7cd47e24 and runs its probes with b-npc-respawn and the two premise fixes, then its gate.
+  The reset case of a live copy on a dead record on the simulating seat is named in npc-fate.md, unprobed.
+- 05:13 PDT 2026-10-27: b-npc-stream-actions 120242 (the cut gate's fourth red, 1 of 6) read as a premise red:
+  the "block anim" print names no actor, and a creature's own blocked attack at c2's connect point, far from
+  Riverwood, counted once against a claim of zero. Scoped on main f98c657 to the bandit's window (a baseline
+  count before the bandit, the claim the difference), the five other claims unchanged; numidium adds it to
+  52's stage probes. A later client line naming the actor (ctx.selfId) would let the pattern name the bandit;
+  not a restage's worth now.
+- 06:05 PDT 2026-10-27: b-npc-death 125354 (52's restage) red on the new premise step, not the claims: c2's
+  teleport back within a second of its login never settled (the record written, the game unmoved for 60 s,
+  the server correcting it every 3.5 s; the DB had carried c2's away position through the restart, and c1
+  held the cell as pinned). A lab premise, not 52's: main c1f44fb gives c2 fifteen seconds after its
+  reconnect before the move, the claims unchanged; finish-train's rerun plays it.
+- 07:00 PDT 2026-10-27: b-host-own-hit 135408 (52's gate's first red) read as a premise red: the campfire pair's
+  detection of c1 is the camp's own timing (no target in 90 s; green at 110935 on the cut gate; 7cd47e24
+  changed only the life check). Main 9a2441d has the host's game start the fight (approach to 200 units,
+  start-combat on both, inCombat asserted), the claims unchanged. A lone red reruns at the gate's end under
+  ADR-027; numidium decides whether the rerun plays the deployed file or this one.
+- 07:13 PDT 2026-10-27: b-npc-death-engine 140805 (52's gate's second red) read as a premise red: the combat hold
+  keeps Sven in reach but moving, and the one swing before the one-number read missed (the stage's first swing
+  had landed by luck). Main f1829c2 holds him still for the swings (npc-ai off, as b-npc-headshot-host does;
+  the engine's death needs no AI of his), the claims unchanged. With two reds the gate ends red and
+  finish-gate's rest plays the deployed tree, so this lands on main before the gate's end.
+- 07:27 PDT 2026-10-27: b-npc-death 141823 (52's gate's third red) read as a premise red: the server's tgm is a
+  session flag the restart forgot, and the pinned-host shape leaves c1 alone with the forest's predators for
+  40 s, so 86117 killed it and the grace passed its cells to c2 before leg 4. Main b8c494f re-arms god mode
+  through the server's lever after each login (b-cell-host's shape), the claims unchanged. Three premise reds in
+  this gate (b-host-own-hit 9a2441d, b-npc-death-engine f1829c2, b-npc-death b8c494f), all on main before the
+  gate's end for finish-gate's rest.
+- 07:45 PDT 2026-10-27: b-npc-handoff-night 143604 (52's gate's fourth red) read as a premise red: the restart's
+  grant race again (c2 won 0x9732 by 18 ms; its engine never brought Alvor out, the record sat indoors 180 s).
+  Main ab00c67 pins c1 through the restart (b-npc-death's shape), the claims unchanged. Four premise reds in
+  this gate, all on main for finish-gate's rest. Noted for after the ladder (numidium): a lab-api `server:
+  restart` that reconnects the seats in their listed order, each waiting for its grants, so restart scenarios
+  stop carrying their own guard; a-restart-persistence and b-npc-handoff-restart are exposed the same way.
+- 08:08 PDT 2026-10-27: b-npc-respawn 150150 (52's gate's fifth red) read as a premise red: the respawn sweep under
+  test stood the prelude's dead rivals up with the subject and the revived 85549 killed it inside the 40 s window,
+  a death by the engine as designed (c2's report accepted). Main 717eeab kills the rivals again by kill-ref right
+  after the reconnects, the claims unchanged. Five premise reds in this gate, all on main for finish-gate's rest.
+- 08:42 PDT 2026-10-27: b-npc-death-engine 153601 (the rest's lone red) read as a premise red of my own making:
+  with Sven's AI off the engine's death names no killer, so f1829c2's still hold broke the report's killer claim.
+  Main 249da50 keeps the still hold for the first swing only and restores his AI and combat for the kill
+  swings; the claims unchanged. The engine fact (an AI-off actor's death carries no killer; the server records
+  the death on its own evidence) goes into npc-fate.md with the watch item.
+- 09:01 PDT 2026-10-27: b-npc-death-engine's lone-red rerun 155405 missed its single measured swing on a still
+  Sven (the approach faces the record, the hit cone wants the body). Main f9767f2: look-at before every draw and
+  the iron sword for up to three measured swings (none lethal under the still hold), the warhammer for the kill
+  legs; claims unchanged. numidium runs rest2 (death-engine alone) and the merge cites gate, rest and rest2.
+- 09:10 PDT 2026-10-27: rest2's b-npc-death-engine 160214 red again at the one-number read: the still hold does
+  not hold a walking actor on its host (AI off, 260 units walked) and look-at never turns the player. Main
+  bb3da60: the measured leg under the combat hold with six iron-sword swings (repeat), the warhammer after,
+  AI on throughout; claims unchanged. numidium runs rest3 (death-engine alone); the merge cites the chain.
+  Two lab facts for the lab notes: the npc-ai lever freezes a standing actor only; look-at's heading is a read.
+- 09:13 PDT 2026-10-27: rest2's b-npc-death-engine 160510 landed its measured swings and lost the killer on the
+  warhammer's lethal blow ("died of unknown ..., killer 0", the engine's deathStart naming none after a single
+  lethal blow; the server's pending line names ff000000). Call (numidium's a, b, c): (c) now, main 70da78b, the
+  sword for the kill legs as the stage's 123746 proved, claims unchanged; and (a) as train 54's code (the credit
+  from the server's own pending aggressor, R0, an ActorDeathTest case, a big-blow scenario in 54's gate), H-52b
+  in npc-fate.md until then; not (b), a loosening with a real gap behind it; not a restage of 52, since the fix
+  lands in the next train before playtest 35.
+- 09:20 PDT 2026-10-27: rest3's b-npc-death-engine 161323 lost the killer with the sword as well (the report 77 ms
+  after the pending line, no killer; the green 123746's came 2.3 s later from the engine's own kill move): H1
+  refuted for the killer, the server's credit (54's 240a31de) the fix. Call: the killer line loosened on main
+  895f135 to the pending line's aggressor or the report's killer until 54 merges, a loosening named here as
+  copy-fate's was; the strict line returns in 54's scenario commit with x-npc-death-blow proving the credit.
+  Not a restage of 52: the fix is in the next train and 52's death path otherwise holds on every claim.
+- 09:21 PDT 2026-10-27: the loosening above is WITHDRAWN. numidium read 895f135 against rule 13 ("Never turn a
+  scenario green by weakening its assertions"): a claim relaxed only to wait for its fix is exactly that, where
+  copy-fate's was restated to what 51 changed; D40 settles open calls and lifts no hard rule. Main 3055859
+  reverts it whole; the killer line is strict. 52 ships inside 54 as one merge train (ADR-030): m3-npc-face
+  carries 7cd47e24 and the credit 240a31de, 54's gate plays the strict line on the build with the credit, and
+  parity goes 51 to 54 with 52's commits inside; no further rest for 52. 52's premise-fix watch items stand.
+- 10:43 PDT 2026-10-27: x-npc-stream-face 173514 (54's stage) read as a premise red: the gaze path ran for the
+  creatures near the host (targets streamed, relayed, taken by c2's puppets at slot 3) while the residents
+  3600 units away set no head-track slot in 90 s (H-54d: the engine tracks heads near the player only). v2 by
+  path brings both seats to the mill (300 and 400 units of Sven), claims unchanged; a rerun on this stage, no
+  restage. The second red was a QEMU guest agent hiccup on sky-c2 during a log-count step.
+- 10:48 PDT 2026-10-27: x-npc-death-blow 174006 (54's stage) red on the credit line alone: the engine's own kill
+  move ended him first with the killer named, so the credit was not reached (the lethal blow's path is the
+  engine's dice). Call (numidium's 1, 2, 3): 1, the server path's report shape forced without a lethal blow
+  (two more sword swings for a numbered hit, then npc-damage on the host's engine, no attacker); v2 by path,
+  claims unchanged, rerun from disk after T2. Not 2 (a pair of claims proves the credit only when the dice
+  fall its way) and not 3 (luck).
+- 12:13 PDT 2026-10-27: b-npc-death 190413 (54's gate) read as a premise red for the restart claim: the host held
+  and the corpse moved 1300 units on the host's own engine between the kill and the restart (same height, no
+  client line), the record following under R2. Main 0977292 measures the restart against a pre-restart snapshot
+  and records the travel; H-54e opened in npc-fate.md with a drift probe for 55's stage and the candidate rule
+  (a dead record holds after a settle window, R0) for 55 or later. The 256 bound and every other claim stand.
+- 12:15 PDT 2026-10-27: 0977292 WITHDRAWN as a re-measurement (numidium: rule 13, the fall-point bounds are what
+  caught the corpse's 1300-unit drift and a snapshot before the restart would hide it); main c6899e0 restores
+  them and adds the restart's own bounds beside them. No mid-gate deploy; ADR-027's reruns play the strict file.
+  A green rerun: the watch item carries H-54e open and 54 merges. A red rerun: D40's stop, reported, and
+  H-54e read first (x-npc-corpse-drift on the stage); ours → the fix carries the strict claim; the engine's → a
+  restatement in this memo naming what it no longer covers.
+- 12:35 PDT 2026-10-27: b-npc-headshot-host 192858 (54's gate's second red) read as the lab's: lab-driver cannot
+  aim (look and look-at leave the player's heading at the approach's; every look-at in the run read its
+  approach's facing, and the shots flew at the record's point 26 units off the body); the headshot path's own
+  claims held whenever a shot landed (104716 on 52's stage, by luck of the body's place). Call (numidium's
+  proposal, nothing weakened): the scenario goes `pending` in gate.yaml (ADR-042b) with that reason, so its red
+  stays out of the citation while the claim stands as written; numidium fixes the driver's aim right after the
+  ladder (a same-spot teleport with the computed heading, since the teleport applies its heading) and un-pends
+  it once a probe proves the aim. Named here for Eli: a committed scenario sits out gates until the lab can aim.
+- 13:18 PDT 2026-10-27: b-npc-stream-voice 200545 (54's gate's third red) read as a premise red: the listener's
+  computed landing point fell in an obstacle and the engine's placement sat 74 units off it, past the judge's
+  tolerance. Main c70e828 gives the listener's approaches tolerance 150 (earshot, not a mark), claims unchanged;
+  the judge's acceptance of a repeated placement is a lab-api row for numidium after the ladder.
+- 14:13 PDT 2026-10-27: x-npc-talk-claim 210601 (55's stage) read as a premise red: E hit nothing, Sven walked his
+  7.9 package out of the crosshair's line between the approach's judge and the press (look and look-at aim
+  nothing). v3 by path: the clock at 9.0 (Sven at the mill's saw, standing), the host's npc-ai lever through the
+  claim, the record asserted still, approach to 70 and E at once; the claim line's cell widened to 973[12] for
+  the hour. The claim code (talkService, ActionListener's gates) is untested by this run; the rerun reads it.
+- 14:21 PDT 2026-10-27: x-handoff-cross v3 211054 (55's stage) read: the brake (D36 C) works as designed, zero
+  passes and 42 follows in Riverwood's three minutes (Sigrid 160 units into the other host's cell, a follow;
+  Sven's 26 hovers followed), PASS_MARGIN_UNITS 256 MEASURED for that traffic. b-npc-handoff-cross's "one pass
+  per crossing" was the unbraked rule's claim; restated to "a follow within the margin, passes at most six and
+  recorded" (main, its own commit; v4 by path), a restatement matching the train's change, named for Eli as
+  copy-fate's was. Not asserted at T3: a crossing deep enough to pass (CellHostTest proves it at T0).
+- 14:22 PDT 2026-10-27 (D36 C's follow-up, named for Eli): what b-npc-handoff-cross no longer asserts at T3 is a
+  crossing deep enough to pass; CellHostTest proves it at T0 and Riverwood's traffic never walks 256 deep in
+  three minutes. One probe after the ladder reads it at T3: an actor walked or moved 300 units into the other
+  host's square (npc-pose or a placed NPC's travel package), the pass line once, the follow lines before it, and
+  the seats' AI swapping once. numidium holds it on the after-ladder list with the lab-api items.
+- 14:26 PDT 2026-10-27: x-npc-corpse-drift 211727 GREEN on 55's stage: with the promote fix (c1be67d1) the corpse
+  stayed at one point through 24 reads over four minutes on both seats, a restart and the host's reconnect
+  included. H-54e's fix holds at T3; its mechanism (the promote switching AI on a dead actor at the reconciler's
+  flip) stays the code's one candidate. b-npc-death's fall-point bounds stay strict with that.
+- 15:00 PDT 2026-10-27: 55's T2 (job 12909 at c1be67d1) red on the npc-talk session alone: two wire-only notices
+  undeclared (c2's HostGrant at epoch 2 and the DestroyActor of c1's actor), both the session's end as
+  cell-host.yaml declares them; the claim handler grants no cell (OnActorClaim; PartOne's one HostGrant sender is
+  the cell-host routine), so neither is the claim's. A sessions-only commit on m3-npc-talk (1b866786) declares
+  them. Call with numidium: gate-cite accepts skymp-wire/difftest/sessions/** differences (they build nothing),
+  T2 reruns with SESSIONS=tree at the new head, and 55's stage keeps c1be67d1's images; no restage.
+- 16:09 PDT 2026-10-27: x-npc-talk-claim v3 230022 (55's stage) red at its own stillness assert, before any claim:
+  with the host's npc-ai off Sven still walked a loop over the 9731/9732 border at 9.0 (195 x and 122 y in five
+  seconds, package 0), the second time the lever failed to stop a walker. Call (numidium's a, b, c): a, a driver
+  step `npc-hold {formId, held}` on Actor.setDontMove (the engine's own scene hold; his AI and dialogue keep
+  running), numidium's to add with a live timing run; v4 of the probe holds him, keeps the stillness assert,
+  approaches to 70 and presses E at once, releases at the end; claims unchanged. Not b (the re-approach grammar
+  is not there) and not c (a guess about another resident's schedule).
+- 16:32 PDT 2026-10-27: x-npc-hold v1 232338 (numidium's timing probe) red at its stillness pair: SetDontMove slowed
+  Sven to about 33 units a second but did not stop him within five seconds (npc-ai's EnableAI(false) had left
+  him at 77). Call: the press waits for him instead of holding him. x-npc-talk-claim v5 by path keeps the hold
+  as a slowdown and presses E when lab-api's until reads him under c2's crosshair (c2.state.crosshairRef, the
+  until refreshing the client's dump each poll, every quarter second for 90 s); claims unchanged, no new
+  grammar, no driver step. The driver aim step stays on numidium's after-ladder list unless v5 reds.
+- 16:44 PDT 2026-10-27: x-npc-talk-claim v6 233908 GREEN on 55's stage: the dialogue claim works end to end (the
+  grant 157 ms after the E, the menu open on the guest, the release at its close, the host live again). Promoted
+  as b-npc-talk (main, its own commit) for 53's gate. 55's three probes green (talk-claim, handoff-cross v4, the
+  corpse-drift read); the gate runs on c1be67d1 and merges 1b866786 under the paper rule.
