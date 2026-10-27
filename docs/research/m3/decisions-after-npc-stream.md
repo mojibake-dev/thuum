@@ -291,3 +291,8 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   count before the bandit, the claim the difference), the five other claims unchanged; numidium adds it to
   52's stage probes. A later client line naming the actor (ctx.selfId) would let the pattern name the bandit;
   not a restage's worth now.
+- 06:05 PDT 2026-10-27: b-npc-death 125354 (52's restage) red on the new premise step, not the claims: c2's
+  teleport back within a second of its login never settled (the record written, the game unmoved for 60 s,
+  the server correcting it every 3.5 s; the DB had carried c2's away position through the restart, and c1
+  held the cell as pinned). A lab premise, not 52's: main c1f44fb gives c2 fifteen seconds after its
+  reconnect before the move, the claims unchanged; finish-train's rerun plays it.
