@@ -150,6 +150,14 @@ Eli, on the one-shot plan: "i would argue not to defer actually. if something is
 - D35. ADR-050 decision 3's client reconciler in this ladder: A, built (train 51).
 - D27-B's read of P7 v3 (200538): green on its letter, the resident still deferred; the voice stays off the build until a resident speaks on a puppet (its own train after the Dynamic read); the stream merges alone under D25-C.
 
+### D32 answered (23:36 PDT, Eli's words)
+Eli: "plough ahead to test 35." Read as D32 B: one word for the ladder. Each train merges when its gate
+is green and its probes' claims hold, reported as it lands; any red, weakened assertion or scope
+question stops the chain for Eli's read. D36 (the brake) and D37 (the shield drop) are not covered by
+it: the brake merges only on D36's letter, the mod stays until D37's.
+
+- Decision: B (Eli, "plough ahead to test 35")
+
 ### D36. The pass thrash at a cell border (D22 revisited, 14:27 PDT)
 D22's letter ("recommended" = A, no brake) stood on x-handoff-cross v2's read of one pass in three
 minutes. Numidium's read of b-npc-handoff-cross's GREEN nightly run on aaafffe5 (20261026-132333)
