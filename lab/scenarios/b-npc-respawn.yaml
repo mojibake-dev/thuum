@@ -9,8 +9,10 @@
 # {gameHour: 14.0}` moves the clock past the hour on the same day, the record
 # loads dead with its stamp and the first sweep stands it up (RespawnFated:
 # the re-roll, the fate sent again, the respawn event's teleport); both
-# reconnect and re-arm god mode (the server's tgm does not survive a
-# restart; 075756's revived predators killed a seat); after 40 s the record
+# reconnect, the rivals die again by kill-ref (the sweep under test stands
+# them up too, and in 52's gate 20261027-150150 the revived 85549 killed the
+# subject inside the window) and god mode is re-armed (the server's tgm does
+# not survive a restart; 075756's revived predators killed a seat); after 40 s the record
 # and both engines are alive with the species equal to the fate (the
 # respawn is the engine's own Resurrect run with the AI on in one
 # game-thread task, a puppet demoted again after it). The late-fate line is
@@ -65,6 +67,13 @@ steps:
   - server: restart {gameHour: 14.0}
   - c1: reconnect
   - c2: reconnect
+  # the sweep under test stands the rivals up as well (52's gate 20261027-150150: 85549 and 85548 stood with
+  # the subject at the server's load, and the revived 85549 killed it inside the window, "death pending on
+  # 85547 ... aggressor 85549", a death by the engine as designed, where the stage's 124550 had slower
+  # rivals), so the rivals die again by kill-ref the moment the seats are back, as the prelude killed
+  # them; the subject's stand-up is what the claims read
+  - c1: kill-ref {formId: 0x85548, killer: c1}
+  - c1: kill-ref {formId: 0x85549, killer: c1}
   # v3: god mode again, the server's restart having dropped it (075756: c2's player died to the revived 85547)
   - c1: console {text: "tgm"}
   - c2: console {text: "tgm"}
