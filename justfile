@@ -482,6 +482,12 @@ playtest-relaunch client:
 playtest-assist client action args="{}":
     @curl -fsS -m 60 -X POST "{{lab_api}}/clients/{{client}}/assist" -H 'content-type: application/json' -d '{"action":"{{action}}","args":{{args}}}'; echo
 
+# A probe or scenario checked before a run spends lab time: it loads as the runner loads it, every claim's syntax
+# dry-runs through lab-api's Evaluator, and every seat's log_count claim names a pattern a log-count step counted
+# first (lab/tools/probe-check.py; three runs lost to these on 2026-10-26).
+probe-check +files:
+    @lab/labapi/.venv/bin/python lab/tools/probe-check.py {{files}}
+
 # In a playtest, one driver step on a seat as a scenario writes it (lab-api's playtest-step, refused without a playtest
 # hold): input and its rhythm, `just playtest-step 2 'repeat {times: 12, gapMs: 3000, step: {hold-key: {code: 199, ms: 3000}}}'`
 # (the lab casts on test 2 while the person staggers it from test 1), or a read, `just playtest-step 1 'node-scale {node: "NPC Root [Root]"}'`.
