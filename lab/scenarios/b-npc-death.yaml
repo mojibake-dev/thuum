@@ -91,6 +91,11 @@ steps:
   - c1: reconnect
   - until: {within: 45, expect: [server.host(0x9810).client == "c1"]}
   - c2: reconnect
+  # a move within a second of a seat's login never settled (52's restage 20261027-125354: the record
+  # written at the landing, c2's game unmoved at the away point for 60 s while the server corrected it
+  # every 3.5 s); the lab's own shape gives a login ten seconds before its first move (the prelude's
+  # connects), so c2 gets fifteen here before its way back
+  - wait: 15
   - c2: teleport {cell: lab-spawn, x: -10300, y: -19170, z: -3957, rot: [0, 0, 180]}
   - wait: 20
   - c1: npc-state {formId: 0x85547}
