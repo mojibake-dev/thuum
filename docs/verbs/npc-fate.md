@@ -1750,8 +1750,14 @@ dress claims matched, and the bandit's swings landed on the host's player
 (OnWeaponHit on ff000000, no E_HIT_WEAPON): H-51b CONFIRMED whole. Promoted
 unchanged as b-npc-copy-fate (thuum main 916af5a, its own commit), and
 b-npc-stream-equipment's placed-bandit lines turned from recorded to
-claimed (e42dbca). H-51c and H-51d read on the gate (gate-m3-npc-path, 25
-runs).
+claimed (e42dbca). H-51c and H-51d read on the gate: MERGED to fork parity
+39cf3f4d at 08:19Z 2026-10-27, the gate cut at 18 of 25 by sky-c2's RTX
+wedge and finished by its rest under D38 B, cited as one
+(20261027-054632-gate-m3-npc-path+20261027-074932-gate-m3-npc-path-rest, 29
+runs, verdict watch: b-npc-body-release's old point, below); T2 green on
+39cf3f4d; both clones promoted; the regression set (b-npc-puppet,
+b-cell-host, the four b-npc-handoff) green in the gate, so H-51c and H-51d
+hold at T3.
 
 ## Status
 
@@ -1834,3 +1840,17 @@ now"; gate 20261026-001639 eighteen of eighteen, T2 green; thuum main
 bfc41e0b): the server-made actor's death by the NPC rule, E_HIT_WEAPON at
 info, the corpse's occupancy released. The body's diff-only inventory and
 the hosted copy's dress ride train-47, built ahead on the memo's letters.
+
+## Watch item (2026-10-27, 51's merge gate, ADR-027)
+
+b-npc-body-release red once (20261027-061048) at its second activation:
+E_ACTIVATE_REACH, c2 at 459 units from the body's record against the 452
+reach for a target of unknown size, where the scenario's fixed teleport
+point had stood inside it in the stream's and 50b's gates. The body lies
+where its death left it, a few units apart run to run, so the premise was
+position-dependent, not the train's. Fixed on main d85701d in its own
+commit (c2 by the judged approach at 150 units from the record, the claims
+unchanged), deployed under D38 B before the gate's rest, where the fixed
+scenario ran GREEN (074932, nine of nine). The old point's red stays the
+watch item until the fixed scenario is green once more in a gate or the
+nightly; then this line and gate.yaml's entry come out together.

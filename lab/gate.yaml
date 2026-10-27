@@ -17,6 +17,7 @@ watch:
   - a-racemenu         # docs/verbs/racemenu-sync.md:746, a figure's head scale after a reconnect (2026-10-09)
   - b-spell            # docs/verbs/spell-cast.md:394, red once in the m2-stagger sweep (2026-10-11)
   - b-invis-recast     # docs/verbs/self-cast.md:104, a 120 s guest-agent stall spaced the casts past the spell's 30 s (2026-10-18)
+  - b-npc-body-release # docs/verbs/npc-fate.md:1844, red once at its second activation in 51's merge gate (a fixed point 7 units past reach; the premise fixed d85701d, green in the gate's rest) (2026-10-27)
   - b-cell-host        # docs/verbs/cell-host.md:982, red once at the restart's assert in the 50b merge gate (D18-B meeting the old fixed wait; the premise fixed the same evening) (2026-10-26)
   - b-npc-handoff-cross # docs/verbs/npc-handoff.md:668, red once at a login re-split in the stream's merge gate, and the pass thrash D36's brake answers (2026-10-26)
 pending:
