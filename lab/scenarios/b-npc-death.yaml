@@ -13,9 +13,11 @@
 # and the host alone reloading the cell (the restart's grant is a race between
 # the games' own logins, and the record is its host's body: 52's gate
 # 20261027-112539, where the viewer won it with a corpse its reload had
-# re-settled 360 units down the slope), the record dead at its point where it
-# fell, within 256 units each way (a ragdoll's settle on a slope, 65 measured;
-# a death never teleports the record) and dead on both seats; the host's game is relaunched,
+# re-settled 360 units down the slope), the record dead where it lay right
+# before the restart, within 256 units each way (a ragdoll's settle on a slope,
+# 65 measured; a restart never teleports the record; the body's travel between
+# the kill and the restart is the host's engine's and is recorded, 1316 units in
+# 54's gate 190413, npc-fate.md H-54e) and dead on both seats; the host's game is relaunched,
 # the cell passes to the viewer (the stale rule) with the body in place, and
 # the returning host finds it dead. No respawn inside the run (the master's
 # 240 hours). Proved as x-npc-death v3 GREEN 080218 on train-43 d2210492
@@ -87,6 +89,12 @@ steps:
   # the claims below are unchanged
   - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
   - wait: 8
+  # the record right before the restart: the restart's claim is measured against it (54's gate
+  # 20261027-190413: with c1 hosting throughout, the record stood 1316 x and 687 y from the body snapshot
+  # after the restart because c1's own engine had moved the corpse that far between the kill and the
+  # restart, at the same height, and the record followed its host under R2; what the restart does to the
+  # record is one question, what a host's engine does to a corpse another, npc-fate.md H-54e)
+  - server: snapshot {name: rest, of: "server.ref(0x85547)"}
   - server: restart {gameHour: 12.0}
   - c1: reconnect
   # god mode again, the server's lever straight after each login: the server's tgm is a session flag a
@@ -109,14 +117,18 @@ steps:
   - c1: screenshot
   - assert:
       - server.ref(0x85547).isDead == true
-      # the body where it fell, within a ragdoll's settle each way: the host reports the corpse's
-      # physics after the kill, 5.8 units in 070022 and 64.9 in 093324 (a slope); the claim is
-      # that a death never teleports the record (a teleport is a cell's 4096 or more), so the
-      # bound is 256, the exit's bound (cell-host.md), measured up by the runs, not guessed down
-      - server.ref(0x85547).x - snapshot("body").x < 256
-      - snapshot("body").x - server.ref(0x85547).x < 256
-      - server.ref(0x85547).y - snapshot("body").y < 256
-      - snapshot("body").y - server.ref(0x85547).y < 256
+      # the record where it lay before the restart, within a ragdoll's settle each way: the host
+      # reports the corpse's physics, 5.8 units in 070022 and 64.9 in 093324 (a slope); the claim is
+      # that a restart never teleports the record (a teleport is a cell's 4096 or more), so the bound
+      # is 256, the exit's bound (cell-host.md), measured up by the runs, not guessed down. The
+      # body's travel between the kill and the restart is the host's engine's (R2) and is RECORDED
+      # below, not bounded (190413: 1316 and 687 with no height change, H-54e)
+      - server.ref(0x85547).x - snapshot("rest").x < 256
+      - snapshot("rest").x - server.ref(0x85547).x < 256
+      - server.ref(0x85547).y - snapshot("rest").y < 256
+      - snapshot("rest").y - server.ref(0x85547).y < 256
+      - abs(snapshot("rest").x - snapshot("body").x) >= 0
+      - abs(snapshot("rest").y - snapshot("body").y) >= 0
       - c1.npc_state(0x85547).isDead == true
       - c2.npc_state(0x85547).isDead == true
   # leg 4: the host relaunches; the cell passes to c2 and the body stays; the host's return finds it
