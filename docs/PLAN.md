@@ -1202,6 +1202,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   045f5ca0; train 53's server half built, m3-npc-cast 30e72b86 (a hosted NPC's spell list recorded R2, its
   hits validated R1), the bow relay and the spell client next on it. The lab: the voice v4 stage (merge only
   on a green P7 v4), then 50b, 51, 52, 54, 55, 53.
+- STATE 2026-10-26 22:50 PDT: 50b MERGED (parity 951ea43d; b-cell-host's lone red was D18-B meeting the
+  scenario's old fixed wait, its premise fixed on main); the voice stays off (P7 v4 red on its premise, v5
+  by path for 52's stage); Step R's bow and spell reads green; the host's dropped arrows and the outfit's
+  double roll found and fixed; train 53 built (m3-npc-cast 78b877b1, the bow relay, the spell path); every
+  ladder branch green on its current head; 51 (m3-npc-path 39cf3f4d) in T2 then its gate, merge-ready
+  after it; D32 (merge authority), D36 (the brake) and D37 (DeathDropOverhaul's drop) wait on Eli.
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
