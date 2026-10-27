@@ -377,3 +377,11 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   A green rerun: the watch item carries H-54e open and 54 merges. A red rerun: D40's stop, reported, and
   H-54e read first (x-npc-corpse-drift on the stage); ours → the fix carries the strict claim; the engine's → a
   restatement in this memo naming what it no longer covers.
+- 12:35 PDT 2026-10-27: b-npc-headshot-host 192858 (54's gate's second red) read as the lab's: lab-driver cannot
+  aim (look and look-at leave the player's heading at the approach's; every look-at in the run read its
+  approach's facing, and the shots flew at the record's point 26 units off the body); the headshot path's own
+  claims held whenever a shot landed (104716 on 52's stage, by luck of the body's place). Call (numidium's
+  proposal, nothing weakened): the scenario goes `pending` in gate.yaml (ADR-042b) with that reason, so its red
+  stays out of the citation while the claim stands as written; numidium fixes the driver's aim right after the
+  ladder (a same-spot teleport with the computed heading, since the teleport applies its heading) and un-pends
+  it once a probe proves the aim. Named here for Eli: a committed scenario sits out gates until the lab can aim.
