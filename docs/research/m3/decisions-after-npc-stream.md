@@ -166,3 +166,26 @@ fork m3-pass-margin 11bf32f3 (two rules tests green; x-handoff-cross v3 counts t
 - Recommended: C. It merges only on your letter, after x-handoff-cross v3's read on its stage.
 
 - Decision:
+
+### D37. A client mod drops a dead NPC's shield into the world (17:00 PDT)
+x-body-loot 20261026-231653 on 50b's stage read RED at the dead bandit's worn list: alive it wore
+hide boots, a hide shield, a steel war axe and a studded cuirass (the fate's roll, the server's);
+dead, the shield was gone from the body. DeathDropOverhaul.dll (the seats' load order, also one of
+the two Loading Menu holders of D24) drops a dead actor's held shield as a world reference on each
+client. The server has no record of that reference: the shield is lootable from the body on the
+server AND lies on the floor in each game, a client-local item outside the one-state rule (the
+other seat's floor copy comes from its own engine's drop, or not at all for a puppet whose death is
+the server's word). Train 47b's own claim holds: the record keeps the roll through the death and
+the loot. x-body-loot v3 reads the drop honestly (the record equals the roll; the body wears the
+roll or has an ARMO reference lying beside it) so 50b can merge; the committed scenario b-body-loot
+inherits your letter here.
+- A. Leave as today: the mod stays; the body's shield doubles on the floor client-side; the
+  probe and the scenario carry the "or" clause as a known limit.
+- B. Drop DeathDropOverhaul from the lab and playtest load order (a persist-mods render, a layer
+  stage) until M4's dropped-items row makes a dropped item the server's; the strict claim returns.
+- C. Sync the drop now: the host's engine's drop reported as the server's item (M4's physics and
+  dropped-items row pulled forward; a verb of its own, a week).
+- Recommended: B. A client mod that creates world items the server never records breaks the one
+  authority per state rule (CLAUDE.md), and D24 already names the same plugin for the quit leak.
+
+- Decision:
