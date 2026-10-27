@@ -306,3 +306,9 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   had landed by luck). Main f1829c2 holds him still for the swings (npc-ai off, as b-npc-headshot-host does;
   the engine's death needs no AI of his), the claims unchanged. With two reds the gate ends red and
   finish-gate's rest plays the deployed tree, so this lands on main before the gate's end.
+- 07:27 PDT 2026-10-27: b-npc-death 141823 (52's gate's third red) read as a premise red: the server's tgm is a
+  session flag the restart forgot, and the pinned-host shape leaves c1 alone with the forest's predators for
+  40 s, so 86117 killed it and the grace passed its cells to c2 before leg 4. Main b8c494f re-arms god mode
+  through the server's lever after each login (b-cell-host's shape), the claims unchanged. Three premise reds in
+  this gate (b-host-own-hit 9a2441d, b-npc-death-engine f1829c2, b-npc-death b8c494f), all on main before the
+  gate's end for finish-gate's rest.
