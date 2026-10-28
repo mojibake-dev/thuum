@@ -60,3 +60,10 @@ gameData.profileId, headshot-spells); the knobs are a top-level block beside the
 
 Written onto the seat (identity.ps1 lays the file in Data\Platform\Plugins of each game folder), then a
 plugin reload or a relaunch; a turbo-log line names the values.
+
+## Measured before the day (00:29 PDT)
+The plain plugin reload keeps a seat whole (c2, 07:26 to 07:27Z: a rewrite of skymp5-client.js, the reload
+proved by the settings-file line, look and a walk landing at the server after it), so a client fix lands by
+`just client-hot <client> <file>` in seconds and the seat stays in play; the seat is marked hot and a relaunch
+or rollback clears the mark before any set-up. `just lab-tail server|c1|c2` streams the server's log and a
+seat's console for the live read.
