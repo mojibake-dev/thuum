@@ -67,3 +67,13 @@ proved by the settings-file line, look and a walk landing at the server after it
 `just client-hot <client> <file>` in seconds and the seat stays in play; the seat is marked hot and a relaunch
 or rollback clears the mark before any set-up. `just lab-tail server|c1|c2` streams the server's log and a
 seat's console for the live read.
+
+## The morning's order (00:32 PDT)
+1. The layer-merge sweep (97 scenarios) ends about 07:00 PDT; green merges the D37 layer and promotes the
+   clones (a red stops for a read).
+2. 56's stage (m3-turbo-knobs a29f237a if green, else 7b61b533), the composed world, both seats relaunched and
+   streamed.
+3. x-voice-lines with `just frida lab/frida/voice-lines.js c1` (57's read), about five minutes.
+4. client-hot's first use: a same-bytes push of a seat's current client (the tool's live proof), then `just
+   lab-tail server` and `just lab-tail c1` open for the day.
+5. "Seats ready" to Eli; the day runs as the runbook says.
