@@ -488,3 +488,16 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   jump's length in one frame where the glide spread it over 0.2 s, the
   claim playtest twenty-three left open.
 
+## Train 56: the running lead runs out before the settle (22:11 PDT 2026-10-27; fork m3-pt35-fixes d0828a79)
+
+Playtest 35 (Eli: "a player running is snapped back a tiny bit after
+jogging"; pt35-read-1 D): the server corrected nobody; c1 wrote 108 "settle"
+lines on Prisoner's figure (mean 6.7 units, max 36.8). A running figure is led
+speed x 0.2 s ahead of its record; at the first Standing sample the lead
+vanished and train-33's one-unit settle pulled the figure back onto the
+record. Built: the lead halves at each standing sample until under one unit,
+and the deadband stays at eight until it is gone. Read first: x-figure-settle
+(five jogs, the settle count on the watching seat, at most one per jog as the
+first hypothesis). Item g (memo D45): the figure and puppet paths measured
+with ADR-031's recorder against the references before any further tuning.
+

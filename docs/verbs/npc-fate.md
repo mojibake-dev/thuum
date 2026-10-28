@@ -2083,3 +2083,26 @@ in the gate's rest at 202429 with every claim as written, the corpse still
 this time. The four reds stay the watch item, H-54e open, until the
 scenario is green once more in a gate or the nightly and H-54e has its
 read; then this section and gate.yaml's entry come out together.
+
+## Train 56: the cause tops the engine up to the server's number (22:11 PDT 2026-10-27; fork m3-pt35-fixes 627bc45f)
+
+Playtest 35, Bleak Falls: rotfern's three arrow hits took 39fe2's record 1 to
+0.564 to 0.1285 to 0, "death pending ... its host reports within 3000 ms",
+no report, and "death by the server's word" at 04:36:37.8 while the engine's
+bar stood at a quarter (Eli: "they died early"). The host's console: every
+cause arrived and was queued with "attacker ff000000 (local 0)"; the
+native's lines: "health 0.564 of 35.0 (engine 35.0 -> 19.7, damaged),
+attacker 0", then "engine 31.2 -> 4.5", "24.5 -> 0.0", "18.4 -> 0.0": the
+engine moved a quarter of each delta (15.3 asked, 3.8 taken: the
+difficulty's multiplier on a player's hit, the attacker unmapped). The
+archer probe's causes with an NPC attacker had landed whole. Built: the
+client maps the local player's remote id to 0x14 (remoteIdToLocalId has no
+form for it); the native reads the value back after DamageActorOriginal and
+takes the remainder through the value owner (RestoreActorValue with the
+damage modifier, Papyrus DamageActorValue's route, no multiplier), logging
+"topped up"; the killer stays the first call's. Probe: x-npc-arrow-death
+(the host's bow on a held Sven: the engine's death with the killer or the
+credit, no server's word). H-56a (HYPOTHESIS): the value-owner route to zero
+kills by the engine's own health check as the console's damageav does; the
+probe reads the death report.
+

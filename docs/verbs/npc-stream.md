@@ -1859,6 +1859,38 @@ ADR-040 (memo D41 and D44); 53's gate after Eli's report, the merge after
 the gate; the Status boxes tick at that merge. b-npc-archer and b-npc-caster
 are promoted from the two probes then (rule 13, their own commits).
 
+### Train 56: a hosted NPC's last action for a late joiner; the voice's later lines to 57 (22:11 PDT 2026-10-27)
+
+Playtest 35 (pt35-read-1 E): Hilde's IdleTanningEnter was captured on the
+host two minutes before the second seat reached Riverwood, and her
+CreateActor carried the last animation EVENT, not the action, so the puppet
+stood idle until the host's engine restarted the chore. Built (6bc6657c):
+MpActor keeps a hosted actor's last UpdateAction (memory, R2; set in
+OnUpdateAction for an actor the sender hosts) and VisitProperties writes it to
+the CreateActor as the custom property "lastAction" (UpdateAction's fields as
+JSON, the record's own property channel, as isHostedByOther travels); the
+client seeds the puppet's action queue with it and the view's first replay
+performs it; a player's actions are never carried. No wire row: a typed field
+added to CreateActorProps broke wire-legacy's positional decode of the lab's
+capture (every_captured_packet_reads_into_the_schema), so the capture's
+messages take no new fields. T0: CellHostTest, a late joiner's CreateActor
+carries the hosted actor's last action, a player's never. Probe:
+x-npc-late-join. Furniture itself (the rack's marker) is not carried; the
+action's idle plays in place, a later row if the lab shows the offset.
+
+The voice (pt35-read-1 C): the relay is lossless and the puppet played every
+relayed line, but the host captured one speech event per topic INFO
+(TESTopicInfoEvent fires at an info's begin alone), so the later response
+lines of a multi-line info never left the host; Eli heard the first line of
+each topic on the puppet and the rest on the host. Train 57, after the
+re-analyst's read: how the engine advances an info's responses on the host
+(the AI's dialogue update an AI-off puppet never runs) and whether
+SpeakSoundFunction is called per line; then either the puppet's voice drive
+(PuppetHooks DriveVoice) advancing the response at a line's end, or a
+per-line capture on the host with the puppet saying by response index.
+HYPOTHESIS until the trace. The different greeting was two greeting infos
+147 ms apart, the puppet starting the first.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
