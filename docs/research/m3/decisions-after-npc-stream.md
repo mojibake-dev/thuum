@@ -510,3 +510,6 @@ set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, 
   (four hosted shots reported, the placed archer's taken under its id, one relayed arrow in flight on c2, no arrow of
   the puppet's own) and x-npc-caster 032625 GREEN (H-53b confirmed); the first stage's T2 was green on ecec018e and
   the fix is client-only. T2 on bf133744 runs, then numidium's 35 set-up; well inside the 22:30 cutoff.
+- 21:06 PDT 2026-10-27 (D41 and D44 closed): playtest 35 is set up on 53's stage bf133744 (T2 green at 20:58 after
+  numidium's build-picker fix, main bd4b7e8), seats ready 21:03:09 PDT, the hold to 00:02 PDT; the build frozen until
+  Eli's report; 53's gate and merge after it, then the D37 layer (D41).
