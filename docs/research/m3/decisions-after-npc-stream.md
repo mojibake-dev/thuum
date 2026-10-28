@@ -673,3 +673,26 @@ layer-stage with a smoke, the sweep at night) or the evening.
 - 04:25 PDT 2026-10-28 (correction): b-npc-talk 111955's cause is the claim row overwritten by the movement judge's
   follow when Sven crossed into 9731 mid-dialogue (the release was sent; E_CLAIM_NONE answered), 56's cells.rs fix;
   the (b) call stands.
+
+### D51. Survival's cold death on a seat (11:14 PDT 2026-10-28, thuum-cf, from apocrypha's read and numidium's lead)
+Survival Mode's one lethal need is cold: Survival_NeedCold's CheckIfMaxCold calls PlayerRef.Kill() when
+Survival_ColdNeedValue reaches 1000 (apocrypha, from ccQDRSSE001-SurvivalMode.esl; UESP agrees). On a seat that Kill meets the
+engine's deferred kill the client holds its player in for the whole session (deathService.ts 28, appearance.ts 183; CommonLib
+MiddleHighProcessData inDeferredKill +0x332, deferredKillTimer +0x2D4), and the server has no path to hear of it: a player dies
+by the server's own number alone (MpActor.cpp 1041 to 1051: health 0 in its damage path, then Kill and SendAndSetDeathState) and no
+C2S message reports a player's own death (the death report is a host's, for NPCs). Two unread engine behaviours, HYPOTHESIS both:
+the scripted Kill (Papyrus Actor.Kill, Actor::KillImpl, Actor.h 468) kills regardless and the seat shows a dead body the server
+holds alive, its health restored by the next ChangeValues and no respawn ever; or the deferred kill swallows it and cold never
+kills. A player reads both as wrong: the frozen player stands up again, or never falls. The server already records the needs
+(playerGlobals 81a Survival_HungerNeedValue, 81b Survival_ColdNeedValue, 816 Survival_ExhaustionNeedValue and 828; the esl's GLOBs
+by esm.py on sky-srv).
+- A: leave it as today. Cold does whatever the engine does; read it when a player freezes. The lab never freezes anyone.
+- B: the server's word from its own record (R0, the law): a listed global may carry a lethal threshold (data in the playerGlobals
+  entry, {global, killAt}); when the recorded value reaches it the server kills the player through MpActor::Kill with that cause
+  and the existing respawn follows; the client suppresses Survival's own Kill (or the deferred kill does, per the probe). One rule
+  in the PlayerGlobals handler, a T0 case, a probe that sets the global through a lab `global` step (the lever library's).
+- C: the client reports the scripted Kill as a cause (a C2S DeathIntent {reason}) the server validates against its recorded cold
+  need (R1): more wire for the same outcome.
+Recommended B: the needs are recorded state and a death from state is the server's word; the client's Kill is untrusted input
+either way (rule 5). Before any build the probe reads the hypotheses: x-player-cold-kill (c1 `console player.kill` on a seat, then
+c1.state and server.ref(0xff000000).isDead, screenshot) after the hold. Not today's unless Eli freezes in play.
