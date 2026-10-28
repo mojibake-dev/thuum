@@ -667,3 +667,6 @@ layer-stage with a smoke, the sweep at night) or the evening.
   pauses it). In the morning's stage by layer-stage with a smoke, Eli's play the measurement, the sweep at night.
   A lab rule changes under it: a MessageBoxMenu open no longer means the seat is paused (numidium's paused read).
   HYPOTHESIS until the smoke and the play; menu crashes would reopen the Engine Fixes question.
+- 04:24 PDT 2026-10-28 (the D37 sweep's red, numidium's a or b): b-npc-talk 111955 is 55's release bug (fixed in 56).
+  Call: a green rerun proceeds as armed; two red reruns take (b), D37 staged unmerged, Souls and 56 over it, one
+  sweep tonight for the three, no gate surgery (a pending entry under ADR-042b and a hand merge was (a)).
