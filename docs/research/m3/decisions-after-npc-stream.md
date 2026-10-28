@@ -203,6 +203,10 @@ the strict claim (the body wears the roll after the loot) returns to it.
   load order until M4's dropped-items row (a persist-mods render laid on clean-m1, numidium and core,
   in a gap or before playtest 35's setup); the strict body-worn claim returns to x-body-loot and its
   promotion b-body-loot once the layer is on the seats.
+- Amended 17:47 PDT 2026-10-27 (Eli: "let's do the expidition and drop 35 tonight", on the estimate that
+  the layer's full sweep pushed 35 to the morning): the layer lands AFTER playtest 35, riding the nightly or
+  its own sweep tomorrow; 35 is set up tonight on 53's merged parity with DeathDropOverhaul still in the load
+  order, its shield drop a named known limit in the checklist. layer-d37-ddo-out already carries main (8905804).
 
 ### D38. How train 51's cut gate finishes (00:15 PDT, numidium)
 51's gate set 20261027-054632 ended at 18 of 25 when sky-c2's RTX failed a link retrain at a lab-api slot reset
@@ -436,3 +440,12 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   landed and the two for the numbered hit made the eighth lethal, which rolled the engine's kill move; my
   arithmetic (eight sevens are 56, not under 50). Main dca3b06: four measured swings, 42 at most before
   npc-damage; claims unchanged; numidium deploys mid-gate for the reruns. A premise red of the probe's own.
+### D41. Expedite: playtest 35 tonight, the D37 layer after it (17:47 PDT 2026-10-27, Eli)
+Eli: "let's do the expidition and drop 35 tonight" (on the estimate: 55's gate to about 19:15 PDT, 53 to
+about 23:15, then the layer's full sweep of about six hours would have put 35 at 06:00). Decision: after 53
+merges and is recorded, playtest 35 is set up at once on that parity (trains 51 to 55 and 53; the D37 layer
+not in it, DeathDropOverhaul's client-local shield drop a known limit on the checklist); the layer stage, its
+probe x-body-loot v5, b-body-loot and layer-merge's full sweep follow after the playtest (the nightly at
+03:30 PDT or a sweep tomorrow). Target: 35's seats ready around midnight PDT, each red on the way adding its
+rerun. No other change to the ladder.
+
