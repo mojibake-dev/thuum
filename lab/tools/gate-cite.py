@@ -87,6 +87,13 @@ def ssh(*argv: str, srv: bool = True) -> str:
     return subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120).stdout
 
 
+def same_content(a: str, b: str) -> bool:
+    """Two `docker image inspect` fingerprints of an image (its config's creation time and its layer list): one build
+    when both were read and are equal, whatever manifest digest each tag carries."""
+    a, b = a.strip(), b.strip()
+    return bool(a) and a == b
+
+
 def builds(rs: dict, results: dict[str, dict]) -> set:
     """The builds a set's runs played, as (server image, image id, ((client, clone description), ...)): one when
     every run played one server and each client one clone. A run that played fewer clients names only those (a solo
@@ -305,7 +312,7 @@ def main(argv: list[str]) -> int:
                     results[e["run"]] = {}
     head8 = subprocess.run(["git", "-C", fork, "rev-parse", "--short=8", head or f"origin/{branch}"], check=True, capture_output=True, text=True).stdout.strip()
     bs = builds(rs, results)
-    image, _, descs = next(iter(bs)) if len(bs) == 1 else ("", "", ())
+    image, played, descs = next(iter(bs)) if len(bs) == 1 else ("", "", ())
     sha8 = staged_sha(branch, image, descs)
     changed = None
     registry_id = None
@@ -315,6 +322,18 @@ def main(argv: list[str]) -> int:
         # the commit's own tag, whichever tag the stage ran: its id is what the set's runs must have played
         tagged = image if image.endswith(f"-{sha8}") else f"{image}-{sha8}"
         registry_id = ssh(f"docker pull -q {tagged} >/dev/null && docker image inspect --format '{{{{.Id}}}}' {tagged}").strip() or None
+        if registry_id and played and registry_id != played:
+            # one build under two manifest digests (m3-npc-talk c1be67d1, 2026-10-27: the bare tag the stage ran and the
+            # commit's own tag held one config, created 13:53:14.007239683, and the same seven layers, as sha256:8685aafe
+            # and sha256:bd96e385): the content is the config's creation time and the layer list, and the same content is
+            # the registry still serving the set's build
+            fmt = "{{.Created}} {{json .RootFS.Layers}}"
+            try:
+                same = same_content(ssh(f"docker image inspect --format '{fmt}' {tagged}"), ssh(f"docker image inspect --format '{fmt}' {played}"))
+            except subprocess.SubprocessError:
+                same = False
+            if same:
+                registry_id = played
     live_server = ssh("docker inspect --format '{{.Image}}' lab-skymp-server-1").strip()
     live_descs = {}
     for c, vmid in CLONES.items():

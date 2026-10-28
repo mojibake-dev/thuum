@@ -195,6 +195,19 @@ REST = {"id": "20261027-093000-gate-m3-npc-path-rest", "state": "done", "verdict
         "watch": [], "started": "2026-10-27T09:30:00Z", "finished": "2026-10-27T10:10:00Z"}
 
 
+class SameContent(unittest.TestCase):
+    """Check 3 reads one build under two manifest digests by its content (m3-npc-talk c1be67d1, 2026-10-27)."""
+
+    def test_equal_fingerprints_are_one_build(self):
+        fp = '2026-10-27T13:53:14.007239683-07:00 ["sha256:aa","sha256:bb"]\n'
+        self.assertTrue(gc.same_content(fp, fp.strip()))
+
+    def test_unread_or_different_fingerprints_are_not(self):
+        self.assertFalse(gc.same_content("", ""))
+        self.assertFalse(gc.same_content('t1 ["sha256:aa"]', 't1 ["sha256:ab"]'))
+        self.assertFalse(gc.same_content('t1 ["sha256:aa"]', 't2 ["sha256:aa"]'))
+
+
 class ChainCite(unittest.TestCase):
     def test_a_cut_gate_and_its_rest_stand_as_one_with_the_cleared_red_a_watch_item(self):
         rs, why = gc.chain([CUT, REST])
