@@ -11,10 +11,16 @@
 # value, given by the setup and kept by lab-driver through every load: test 1's Overdraw40 (0x7934b) and Marksman 60, the
 # headshot rule's two conditions (CIF's headshot.json, docs/verbs/headshot.md:35 and :144; the checklist's headshot
 # item); test 2 none.
+# Eli 2026-10-27 21:05 PDT: "i need test 1 to be rotfern and test 2 to be prisoner". The world is composed on sky-srv
+# (playtest-m3-35-rotfern-prisoner-20261028T040633Z): playtest-m3-34b-rotfern-20261025T2217Z (rotfern as profile 1,
+# her newest) with profile 2's record (changeForms/1.json, formDesc 1, formVersion 2) from playtest-m3-30-20261022T040151Z
+# (Prisoner's newest: from 31 on profile 2 was a fresh test 2), both characters' Survival needs (81b, 81a, 816) zeroed
+# (rotfern's already were; Prisoner's read 299, 1000 and 960). Rotfern's base archery reads 60.0 (av 8, kArchery,
+# CommonLibSSE-NG ActorValues.h:16), so the Marksman 60 below changes nothing on her.
 # Everything here is server-side (labCommand); the seats type nothing.
 id: 35
 build: "fork m3-npc-cast bf133744 on its stage (train 53, unmerged: x-npc-archer, x-npc-caster and T2 green; its gate after Eli's report), over fork parity 1b866786 (train 55 merged 2026-10-28 02:25Z); the lab's server image skymp-server:m3-npc-cast, the clones' clean-m1-next 'm3-npc-cast client bf133744'"
-world: playtest-m3-35-clean-20261028T040030Z
+world: playtest-m3-35-rotfern-prisoner-20261028T040633Z   # rotfern (profile 1) from 34b, Prisoner (profile 2) from 30's end world, needs zeroed
 hold:
   minutes: 150
   reason: "playtest thirty-five: M3's NPCs across the board (fork parity m3-npc-cast bf133744 (53's stage), the NPC ladder)"
