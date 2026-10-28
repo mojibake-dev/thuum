@@ -41,3 +41,22 @@ and the host's samples of its NPCs). Any of them is a line in the settings file 
 or a relaunch), no build; the defaults are the shipped values, so an absent block changes nothing. Eli's "jerky
 NPCs" and "snap after a jog" are read against these first: a lower sendRateMs smooths puppets at the cost of
 bandwidth, a longer leadSeconds leads figures further, a slower leadDecay glides longer.
+
+The seat's settings file is lab/deploy/sky-client/skymp5-client-settings.txt's JSON (server-ip, server-port,
+gameData.profileId, headshot-spells); the knobs are a top-level block beside them, every key optional:
+
+```json
+"movement": {
+  "sendRateMs": 130,
+  "leadSeconds": 0.2,
+  "leadDecay": 0.5,
+  "deadbandMoving": 8,
+  "deadbandStill": 1,
+  "popDistance": 256,
+  "popWindowMs": 600,
+  "jumpDistance": 1024
+}
+```
+
+Written onto the seat (identity.ps1 lays the file in Data\Platform\Plugins of each game folder), then a
+plugin reload or a relaunch; a turbo-log line names the values.
