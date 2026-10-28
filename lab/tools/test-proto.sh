@@ -267,9 +267,14 @@ PY
 # of its own). A good Hello is welcomed and the login proceeds; a Hello with one
 # hash broken (--break-mod 0, the first full plugin) is refused with 502
 # E_MOD_LOCK_MISMATCH and the fakeclient exits 3 without logging in.
+# An image whose fakeclient has no --manifest predates the lock (fork m3-mod-lock 1992edc2 brought it): the cases
+# are skipped there, by name, since test-proto plays every branch's image (2026-10-28: train 56's merge T2 on
+# 26e3d0cf would have gone red on cases its image cannot run). The test is the image's own binary, not the branch.
 echo "== mod-lock: a good Hello welcomed, a broken one refused (502)"
 modlock_rc=0
-if ssh_srv "$dc exec -T skymp-server-test cat /srv/skymp/data/manifest.json > /srv/lab/difftest/manifest-test.json"; then
+if ! ssh_srv "$dc exec -T skymp-server-test grep -q -a -e --manifest /srv/skymp/fakeclient"; then
+  echo "   skipped: this image's fakeclient has no --manifest (the branch predates the mod lock)"
+elif ssh_srv "$dc exec -T skymp-server-test cat /srv/skymp/data/manifest.json > /srv/lab/difftest/manifest-test.json"; then
   ssh_srv "$dc run --rm --no-deps -T -v /srv/lab/difftest:/opt/difftest:ro skymp-server-test /srv/skymp/fakeclient --host skymp-server-test --port 7777 --profile-id 9 --moves 1 --manifest /opt/difftest/manifest-test.json --timeout-ms 20000 --settle-ms 1000 2>/dev/null" > "$tmp/modlock-good.jsonl" || true
   ssh_srv "$dc run --rm --no-deps -T -v /srv/lab/difftest:/opt/difftest:ro skymp-server-test /srv/skymp/fakeclient --host skymp-server-test --port 7777 --profile-id 9 --moves 1 --manifest /opt/difftest/manifest-test.json --break-mod 0 --timeout-ms 20000 --settle-ms 1000 2>/dev/null" > "$tmp/modlock-bad.jsonl" || true
   python3 - "$tmp/modlock-good.jsonl" "$tmp/modlock-bad.jsonl" <<'PYML' || modlock_rc=1
