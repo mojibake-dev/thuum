@@ -1719,6 +1719,28 @@ floats; phenomeKeyFrame (+0x80) is the script layer and stays zero under
 engine lip sync, which is why the first face read saw nothing. faceKeyframes
 answers all twelve sets since ceb54180 (sets 8 and 9 are the mouth).
 
+23:25Z, the lip draw (the re-analyst's read C): numidium's twelve-set
+samples showed sets 8 and 9 moving on the watcher's PUPPET as on the live
+NPC, so the lip file is evaluated and copied and the phonemes are not drawn.
+The face morph pass (26988, from the face node's UpdateDownwardPass 26998)
+runs only for actors the face morph budget (41318) finds in a near-actor
+list that the per-frame AI job (41369) fills on its kProcessMe branch
+(41450), rebuilt every 3 s from highActorHandles (41317); an AI-off puppet
+is on it one frame in three seconds, so its whole face, phonemes,
+expressions and eyes, stays static on the watcher; the host's live NPC
+passes because its AI runs there; a puppet in dialogue with the local
+player passes through IsTalkingToPC. Settings read from the image:
+fTalkingDistance:LOD 2000 and fLodDistance:LOD 500 (plus ten, from the
+world root camera), uiNumActorsAllowedToMorph:FaceGen 10, none the gate at
+one to three meters. Fix (fork m3-face-twelve 0ab36af3): while a puppet
+speaks, DriveVoice sets the face node's runtime flag bit 8 each frame
+(BSFaceGenNiNode.h:27; the engine's own one-shot force, set by
+AIProcess::Update3DModel), so the pass queues the node past the budget and
+the distances, applies every layer and clears the bit. HYPOTHESIS H-54d
+(the mouth moves on the watcher during a relayed line) until
+x-npc-stream-face reads it; the idle face between lines stays static (the
+engine-shaped insert 41450 is one new id, later).
+
 54's stage, first read (10:43 PDT, x-npc-stream-face 20261027-173514 on
 m3-npc-face 240a31de): the gaze path is alive end to end for actors near the
 player. The host's state lines carried head-track targets for the creatures
