@@ -591,3 +591,8 @@ inventory, the container menu's live updates while another player moves items a 
   archer probe's causes (an NPC attacker) applied. The fix maps the local player to 0x14 and lets a cause with no
   attacker apply the server's number anyway (no killer credited). f moves into train 56 (small, pinned); b (the
   voice's later lines) stays 57's behind the re-analyst's read.
+- 22:11 PDT 2026-10-27 (D45 built): train 56 on fork m3-pt35-fixes 6bc6657c, items a, c, d, e and f (f moved in once
+  the logs pinned it); five probes by path, probe-check ok. One shape lesson: CreateActor takes no new typed field
+  (wire-legacy decodes the lab's capture positionally; the late-join action is a custom property). 57: the voice's
+  later response lines (the re-analyst's read runs now) and item g's measurement. Lab order unchanged: 53's gate
+  and merge, the D37 layer overnight, 56's stage and probes in the morning, playtest 36 on its stage.

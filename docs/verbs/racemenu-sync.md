@@ -818,3 +818,20 @@ recorded transform to the new 3D. If it shows again: read the figure's 3D
 load time against the apply's trace, and harden the apply by comparing the
 engine's node scale with NiOverride's record and calling its
 UpdateNodeTransform when they differ.
+
+## Train 56: node overrides re-applied at every 3D load (22:11 PDT 2026-10-27; fork m3-pt35-fixes 9aec660b)
+
+Playtest 35: rotfern's head node read 0.94 at the engine against RaceMenu's
+1 after every teleport and after a relaunch that loaded into Bleak Falls,
+1.0 after Riverwood's relaunch; Prisoner's read 1 throughout. The client
+applied the server's node scales and texture sets once (formView's
+once-flags per view; remoteServer's apply at the player's CreateActor)
+through NetImmerse.setNodeScale, which skee does not persist, so a 3D rebuilt
+after the apply (a teleport's cell change, an interior's late 3D) came up
+with the race's own transforms. Built: formView applies them at each 3D load
+transition; the new NodeOverridesService does the same for the player's own
+actor from the overrides its CreateActor carried, reading the scale back and
+retrying over the next updates until it lands. Probe: x-head-scale (1.6 on
+the head, a teleport into Bleak Falls and back, a relaunch into it, c2's
+figure read at the end).
+
