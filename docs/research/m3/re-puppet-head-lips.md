@@ -261,3 +261,190 @@ The probe stays first (x-puppet-head-face), with the face read widened to unk120
 on both seats; then, if Q4 holds, the 35225 gate in PuppetHooks with the puppet-and-not-talkingToPC predicate is the one
 fragment build, and Q7's clear-on-promote and no-override-during-a-line is the one face build. The head build of Q3 is
 unchanged.
+
+# RE: the lip draw's budget, the puppet's static face (2026-10-28, 16:25 PDT, 23:25Z)
+
+The re-analyst's third read for playtest 37 (pyghidra on SkyrimSE 1.6.1170, the unpacked program; REA failed to connect
+again). Conventions as in B: every Address Library ID is a reverse lookup of the RVA in addrlib/versionlib-1-6-1170-0.bin
+through lab/addr.py's loader, written as ID (RVA); CommonLib names are cited to their header; every engine name beyond
+those is HYPOTHESIS until a Frida trace confirms it. Actor runtime offsets are AE's (eight past Actor.h's comments), so
+currentProcess is +0xF8 and Actor+0x27C is Actor.h:702's unk274. The question: on the watcher the puppet's unk120 and
+unk140 move during a line and its mouth does not, so the fault sits between BSFaceGenAnimationData and the face geometry.
+
+## C. The two distances and the apply (26988)
+
+26988 (0x432550), `(BSFaceGenNiNode*, bool forceReset)`, runs per face node from the job 26999 (0x4334e0), which passes
+the node's flags bit 0 as forceReset. Per child geometry it wants the child's AsTriShape (NiObject.h:52, slot 9), the
+shape's head morph data (27020 (0x433ec0): 27019 (0x433e40) takes the extra data named by the fixed string 401734
+(0x313f9b0) and resolves its +0x18 through 26879 (0x42de10); 27020 keeps the result only when its NiRTTI is 401739
+(0x313f9e8), the ID between CommonLib's NiRTTI_BSFaceGenMorphData 401738 and NiRTTI_BSFaceGenMorphDataHair 401740,
+Offsets_NiRTTI.h:39-40; HYPOTHESIS: BSFaceGenMorphDataHead, so hair shapes take no phonemes) and the FaceGen extra data
+named by 401741 (0x313fa08) through 70510 (0xd26490, GetExtraData by name). Then the distance: 26834 (0x42b7e0) returns
+BSFaceGenManager->unk10 (BSFaceGenManager.h:54; the singleton is 400331 (0x20f6a20)) plus 0xA0, a NiAVObject's world
+translate (NiAVObject.h:158, world at 0x7C, translate at +0x24), or the zero vector 410468 (0x3272c98) when unk10 is null.
+unk10 is written once by the init 36632 (0x64adb0) from Scenegraph+0x128 (the Scenegraph pointer is 403513 (0x31874c0),
+Main.cpp:29), which is exactly what CommonLib's Main::WorldRootCamera 36609 (0x649a90, Main.cpp:23) returns. So the
+distance is the world root camera's position to the face node's world translate, camera to face, not player to actor.
+The two Settings (Setting.h:51-52: data at +8, name at +0x10) sit side by side in .data:
+
+- `fLodDistance:LOD`, object 378622 (0x200d2e8), data 378623 (0x200d2f0), 500.0 in the image: the near gate. dist <= 500
+  plus ten admits the expression layer (unk0C0, seventeen values), the modifiers (26990 (0x432a80), with the eye and brow
+  pairs) and the custom layer (unk180). Beyond 500 minus ten, with no phoneme applied that frame and the face not paused
+  (unk21A, section D), the face is Reset (26586 with 0, 1, 1, 0, 0).
+- `fTalkingDistance:LOD`, object 378625 (0x200d300), data 378626 (0x200d308), 2000.0: the far gate. dist <= 2000 plus ten
+  admits the phoneme layer, unk140's sixteen values in (0, 1] through 26926 (0x430fe0) with kind 0.
+
+Both gates are bypassed by the node's flags bit 6 and by UI->numPausesGame (UI.h:129; the UI singleton is 400327
+(0x20f6a00), Offsets.h:557) being non-zero, that is, by any pausing menu: B's "chargen flag" was this counter. A watcher
+one to three meters from the puppet puts the third-person camera 150 to 400 units from the face and a first-person one
+70 to 210; both layers pass with margin, and the INI cannot be the puppet's problem. Per node the application also wants
+bit 7 clear (or bit 8 set); bit 8 forces both layers regardless of distance and resets the geometry first, and 26988
+clears it on exit.
+
+The flags word (BSFaceGenNiNode.h:26, +0x160; the runtime block starts at 0x128 with animationData at +0x150 and the
+ActorHandle unk15C at +0x15C): bit 0 = changed this frame (written by 26998 before queueing; 26988 restores the base
+geometry through 26829 (0x42b4b0) when it or forceReset is set); bit 2 = animated, set where the head model receives its
+BSFaceGenAnimationData, 24727 (0x3bbe00) and the re-attach 24732 (0x3bcbf0), both `|= 4`, while the no-model head build
+25366 (0x3e0c40) clears it and bit 4; bit 4 = the "BSFaceGenNiNodeSkinned" node (same writers, `|= 0x10`); bit 5 = the
+player's face (25366, when the TESNPC's formID is 7); bit 6 = the distance bypass, with no writer anywhere in the
+program's decompiled text (every `0x160) |` is one of the five functions here or the console), a dead or whole-word
+flag; bit 7 = the console's `FaceGen coord 1` debug mode (23017 (0x371c70) sets 0x81 and stores the actor's handle in
+unk15C; `FaceGen coord` clears 0xff7e); bit 8 = the one-shot force, set by AIProcess::Update3DModel 39395 (0x6e3b70,
+Offsets.h:38) after a kModel refresh on actor->GetFaceNodeSkinned() (TESObjectREFR.h:293, vtable slot 0x61), consumed by
+26988.
+
+## D. Who gets queued (26998), and where the AI enters
+
+26985 (0x432230) is BSFaceGenNiNode::UpdateDownwardPass (BSFaceGenNiNode.h:35): unless the node is kHidden
+(NiAVObject.h:58) it calls 26998 (0x4330c0), then NiNode's pass. 26998, read from its disassembly because the decompiler
+dropped the actor (it printed the handle lookup without arguments and the budget call with a null actor):
+
+1. Return when hidden, when animationData is null, or when NiUpdateData.flags lacks kDirty (NiAVObject.h:30) and unk218
+   (BSFaceGenAnimationData.h:75) is clear. lastTime (+0x158) takes the update time.
+2. With bit 2: unk218 = 0 and changed = Update 26598 (0x41d750)(anim, the frame delta 410199, true); without it changed =
+   unk217 (BSFaceGenAnimationData.h:74).
+3. actor = LookupReferenceByHandle 12922 (0x18a9b0) on unk15C; isPlayer = actor == the raw player pointer 401069
+   (0x3137698; set by 40411 (0x72cb40), zeroed by 40412 (0x72db30), HYPOTHESIS the PlayerCharacter ctor and dtor). Eyes:
+   when unk215 is set, `bDisableHeadTracking:HeadTracking` (object 381267 (0x20136a8), data 381268 (0x20136b0), false)
+   is false, and AIProcess::GetHeadtrackTarget 39484 (0x6ec490, AIProcess.cpp:60) finds a target (or isPlayer), with bits
+   2 and 4 and kSelectiveUpdate (NiAVObject.h:59) on the node, 26601 (0x41e350) moves the eye angles (+0x1BC, +0x1C0
+   toward +0x1D4, +0x1D8) and its result also counts as changed.
+4. force = bit 8. Not changed and not forced: done (unk215 = 1).
+5. With children: the first child's AsGeometry (NiObject.h:50, slot 7), its properties[1] (BSGeometry.h:141, +0x128) and
+   that property's fadeNode (BSShaderProperty.h:227, +0x60). No fade node, or a fade node without kIgnoreFade (1 << 15)
+   whose currentFade (BSFadeNode.h:25, +0x130) is <= 0 while the fade gate 390865 (0x2032dfc) is true, or a face node
+   without kSelectiveUpdate: queue only when forced.
+6. Otherwise queue when forced, or when unk21A is set, or when **41318 (0x76b600)(ProcessLists 400315 (0x20f69b0),
+   actor, BSFaceGenManager->numActorsToMorph, FLT_MAX, callback 27000 (0x433530)) returns true**, or isPlayer, or 37199
+   (0x6603e0), AIProcess::IsTalkingToPC 39347 on the actor's process, is true. Queueing takes the spin lock 401746
+   (0x313fa30), writes bit 0 from changed, and appends the node (refcounted, deduplicated) to the list 401743
+   (0x313fa18), count 401745 (0x313fa28).
+
+The budget 41318: a null actor or the player (403521) passes outright; otherwise the actor's handle (12325 (0x178ec0),
+GetHandle) is looked for among the first numActorsToMorph entries of a list sorted by squared distance to the player,
+counting only entries the callback admits; past that count, or past FLT_MAX, false. numActorsToMorph
+(BSFaceGenManager.h:52) is set by the manager's ctor 26823 (0x42b1f0) from `uiNumActorsAllowedToMorph:FaceGen`, object
+378641 (0x200d390), data 378642 (0x200d398), 10 in the image. The callback 27000 admits an entry when the actor's
+Actor+0x27C low nibble equals 7 and its GetFaceNodeSkinned (slot 0x61) exists and is not kHidden; the nibble is written by
+HighActorCuller's vtable slot 1, 40335 (0x729a90; VTABLE_HighActorCuller 207915, Offsets_VTABLE.h:2219): 2 when the
+actor's 3D (19735 (0x2e5770)) has a fade node, plus 4 when its currentFade >= 1e-5, plus 1 after the culling test, which
+also sets the fade node's flag 1 << 20 when it fails, so 7 = in the scene, faded in, culled in (HYPOTHESIS on the bit
+meanings; the arithmetic is the decompile's).
+
+The list is 404457 (0x31a52f0): two buffers of 64 {handle, distSq} pairs, the live index 404426 (0x319c254), the counts
+404427 (0x319c258). Two builders:
+
+- Per frame, the Actor update stage: ProcessLists_QueueHighActorAI 41367 (0x770410) zeroes the back buffer's count when
+  runSchedules (ProcessLists.h:94) is set and a job list is given, then queues 41448 (0x7767b0), which is 41369
+  (0x7706b0) per highActorHandles entry (ProcessLists.h:69). **41369 inserts the actor through 41450 (0x776840), the
+  sorted insert (by 19824 (0x2edc50)'s squared distance to the player, skipping the player, 64 cap), only on its AI
+  branch: boolBits bit 9 clear, formFlags bit 21 clear, kProcessMe set (Actor.h:160), currentProcess set, processLevel
+  (AIProcess.h:225, read by 37269 (0x662b00)) == kHigh, after Actor_UpdateAI 37347 and before Actor::Update 37348. The
+  failing branch, EnableAI(false)'s, calls only UpdateNoAI and inserts nothing.** 41368 (0x770670) flips the buffers at
+  the stage's end.
+- Every 3.0 s (371107 (0x1ffd350), the timer at PlayerCharacter+0x924 in 40747 (0x74cdc0), from PlayerCharacter::Update
+  40447 (0x732660)), after a cell change (40438 (0x7304f0) from Main::Update 36564 (0x645ea0)) and after a load (35780
+  (0x614dd0)): 41317 (0x76b530) rebuilds the back buffer from every highActorHandles entry through 41450 and flips. An
+  AI-off actor is therefore in the live list only between that flip and the next AI stage's, about one frame in three
+  seconds.
+
+That is Q2's AI dependency: not Actor::Update, not the process level as such, not the AI process reading the face; the
+face budget consults a list the AI job fills, and a kProcessMe-off actor is never in it. Everything downstream of the
+queue is unconditional: 26996 (0x432f90) runs from 39096 (0x6d36b0) in the "Main post render" stage (its table 380586
+(0x2011d60), registered with the other stages and the dynamic lists, "UpdateMorphing" among them, by the JobListManager
+setup 35402 (0x5fadd0)), pushes one 26999 job per queued node through 69349 (0xcf66b0) onto the dynamic list 35404(0xc)
+returns, waits for them, and clears the list every frame. Two paths skip the queue: Main::Update 36564 calls
+26988(player->GetFaceNodeSkinned(), 1) every frame while the "RaceSex Menu" (InterfaceStrings.h:60; the singleton is
+400446 (0x20f8958), Offsets.h:328) is open, the chargen redraw; the console FaceGen 23017 only re-creates the head
+("coord 0": 24731 (0x3bcab0) then 24732) or resets the morphs ("swap 2": 26995 (0x432ef0) through 26941 (0x4318c0),
+HYPOTHESIS), it has no redraw.
+
+unk21A (BSFaceGenAnimationData.h:77) is the face pause: 26591 (0x41d080), `(this, bool pause, bool immediate)`, Resets on
+pause and clears every layer on unpause, the lip entry included. Its only engine writer is Actor::Update 37348, which
+pauses at sitSleepState kIsSleeping (ActorState.h:78, bits 14-17 == 7) or lifeState kUnconcious (ActorState.h, bits 21-24
+== 3) and unpauses living actors otherwise. 26998 queues a paused face without the budget; 26988 then skips the
+out-of-range Reset and still applies the modifiers when the expressions are out of range. With AI off the puppet keeps
+whatever pause state its last Actor::Update left, so a puppet demoted asleep or unconscious stays paused; unk21A is worth
+one log line.
+
+## Hypotheses
+
+9. Q9, why the puppet's lips never draw: 26998 never queues its face node because 41318 cannot find the puppet in the
+   near-actor list, which 41369 refills every frame on its kProcessMe branch only (high on the chain, medium on the
+   one-frame-in-three-seconds exception). Evidence: 26998's disassembly at 0x140433309 to 0x140433358 (the budget call
+   with the looked-up actor in RDX, then the player and IsTalkingToPC checks, then the queue); 41318's body; 41369's gate
+   and the position of its 41450 call; 41367's zeroing of the back count; the live read (unk120 and unk140 move, so D's
+   steps 1 and 2 run whether or not the node is queued). Side effects (HYPOTHESIS): the puppet loses the per-line
+   expression and the eye tracking through the same queue, so its whole face is static on the watcher, not only the lips;
+   the host's live NPC passes because its AI runs there; a puppet in dialogue with the local player passes through
+   IsTalkingToPC. Frida (watcher seat, one relayed line): hook 26998 (rcx node, rdx NiUpdateData) filtered to the puppet's
+   face node (actor->GetFaceNodeSkinned() read once by the native), logging [rcx+0x160], [[rcx+0x150]+0x217], +0x218,
+   +0x21A, +0x215 and [rdx+4] & 1; hook 41318 (rdx actor, r8d count) with its return in AL and the actor's formID at
+   +0x14; hook 41450 (rcx actor) with a backtrace (0x7706b0 the AI job, 0x76b530 the 3 s rebuild); hook 26999 and 26988
+   at entry (rcx node). Expect per frame: 26998 entered for the puppet, 41318 returning 0, no 26999 or 26988 for its
+   node, 41450 for the puppet only from 0x76b530 about every three seconds with at most one 26988 right after; on the
+   talker's seat the live NPC's 41318 returning 1 and 26988 per frame. Falsified by 41318 returning 1 for the puppet
+   every frame (then the list is not the gate: read 27000's result, the +0x27C nibble and the face node's kHidden), or by
+   26988 entering per frame for the puppet with the mouth still shut (then the apply or the geometry is at fault, and C's
+   per-geometry tests and Q10's distance line decide).
+10. Q10, the two INI floats: `fTalkingDistance:LOD` (2000) admits the phonemes, `fLodDistance:LOD` (500) admits
+    expressions, modifiers and custom, both plus ten, both measured from Main::WorldRootCamera's world translate to the
+    face node's, both bypassed by a pausing menu or by node bit 6 or 8; a watcher at one to three meters passes both
+    (high). Evidence: 26988's reads at 0x1404326f5, 0x140432701 and 0x140432908; the Setting objects' bytes (vtable
+    0x141775178, 0x43fa0000, 0x44fa0000) and their names at 0x141845070 and 0x141845088; 26834; 36632's write of unk10;
+    36609's body. Side effects (HYPOTHESIS): nothing to set; the budget runs before the distance, so no INI reaches the
+    puppet. Frida: inside the 26988 hook compute the distance from [[403513]+0x128]+0xA0 to rcx+0xA0 and log
+    [0x14200d308], [0x14200d2f0] and [[0x1420f6a00]+0x160]. Falsified by a distance above 510 at one to three meters
+    (then unk10 is not the camera we think) or by the floats reading other than 2000 and 500 (an INI override on the
+    seat).
+11. Q11, the smallest change, both HYPOTHESIS until Frida. (A) Set bit 8 on the puppet's face node each frame while a
+    line is on it: actor->GetFaceNodeSkinned()->GetRuntimeData().flags |= 0x100 (BSFaceGenNiNode.h:26 and :47) in the
+    DriveVoice pair while voiceTimer > 0 or unk228 (BSFaceGenAnimationData.h:84) is non-null. 26998 then queues the node
+    without the budget and without the changed test, 26988 restores the geometry and applies every layer regardless of
+    distance, and clears the bit; it is the engine's own post-refresh path (39395) and the RaceSex redraw's semantics,
+    pure CommonLib, no new ID, no thread question, bounded to speaking puppets. Cost: the chargen per-frame cost per
+    speaking puppet; add our own fTalkingDistance check if far puppets speak. (B) The engine-shaped alternative: call
+    41450 (0x776840, `void(Actor*)`, HYPOTHESIS signature from its decompile) on the puppet from hook 2a, the UpdateNoAI
+    replacement that runs inside 41369's AI-off branch, so the puppet enters the back buffer exactly where an AI actor
+    would; the budget (ten culled-in faces nearest the player), the distance gates and the changed-only apply then stay
+    the engine's, and the idle face (expression, eyes) comes back with the lips. Risks: 41450 takes no lock, the engine
+    calls it from the same job, so the context must match (inside the job, never from the SP thread); the puppet loses
+    when ten nearer faces exist, as a live NPC would. Recommendation: A first for the playtest (one bit, one place), B
+    when the face stream wants expressions and eyes on idle puppets. Frida after either: Q9's hooks; expect 26988 per
+    frame for the puppet during the line and the mouth moving. Falsified by 26988 running per frame with non-zero values
+    at [[node+0x150]+0x150] and a still mouth (then 26926 or the head's morph data on the watcher's copy: log 27020's
+    result per geometry), or, for B, by 41318 still returning 0 (the insert landed in the wrong buffer, or the culler
+    nibble is not 7 for the puppet).
+12. Q12, a cheaper per-actor path: the engine has one direct redraw, 26988(node, true), as Main::Update calls it for the
+    chargen player every frame; it serves as a one-shot after a relayed line ends (a restore-and-apply with the lip entry
+    released leaves the mouth closed) but per frame it is the heaviest option and runs on the main thread rather than the
+    post-render job (medium). Evidence: 36564's call at 0x140646a8a under the RaceSex Menu check; 23017's subcommands.
+    Side effects (HYPOTHESIS): calling 26988 outside the post-render stage touches geometry the renderer may be reading;
+    the chargen does it from the main update, so that spot is safe and the SP thread is not. Falsified by the chargen
+    call sitting inside a render fence we have not seen (then A is the only safe per-frame lever).
+
+## What follows (Eli's order)
+
+The probe stays first; its Frida script grows Q9's five hooks on the watcher (26998, 41318, 41450, 26999, 26988) and
+Q10's distance line, one relayed line, both seats. Then the lip build is Q11 A in the DriveVoice pair (bit 8 while the
+line plays), with B kept for the idle face; Q4's fragment gate and Q7's override clear are unchanged.
