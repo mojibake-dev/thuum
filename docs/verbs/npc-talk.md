@@ -115,6 +115,14 @@ second (UNMEASURED).
   close, and a release sent at the close reached the server first, so the line's report was dropped
   as a non-simulator's; playtest 37, Eli: "some tiny greetings are lost too. like the 'alright'
   when i end a convo"; fork m3-pass-promote c7c76870, 2026-10-28; the lease stays the safety net).
+- The claimed partner is held still for the claim's life (Actor.setDontMove at the grant, released
+  with the claim; fork m3-face-twelve 56300846): playtest 37's wiggle (Eli: "sven and gerdur ... dont
+  fully stop for the convo"), the promoted actor's package steering under the claimed dialogue
+  (NPC_TurnToWalkLeft180 a second after the promote, 80 units of drift in 20 s, the watcher's puppet
+  settling 4 to 6 units behind). HYPOTHESIS on why the engine does not stop a just-promoted partner;
+  the client logs the engine's own in-dialogue word at the menu's open. The release also waits for
+  the actor's last line to settle (2.5 s, within 10 s of the close; 310c0d77): Orgnar's post-dialogue
+  line began 19 ms after the 3 s graced release and was dropped as a non-simulator's (22:04:00Z).
 - Kill switch config key: npcTalk (default on).
 
 ## Tests
