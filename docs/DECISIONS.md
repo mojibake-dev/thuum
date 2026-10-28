@@ -3040,5 +3040,15 @@ file changes (the fork's DirectoryMonitor, SkyrimPlatform.cpp:115 to 127).
 server change's first failure shows before CI; an engine-facing change starts from a hypothesis
 with a trace instead of a guess with a gate. The cost: a hot-reloaded seat drifts from the
 staged build until its relaunch, and sky-srv carries a build tree beside the deployed server.
-UNMEASURED: the hot path's round trip and whether every client service survives a reload
-(ADR-041 read storage alone); read on its first use.
+UNMEASURED, and the premise of item 1 is not yet met: on 2026-10-19 (docs/LAB.md's Turbo mode)
+Skyrim Platform reloaded a running game's plugins 8 ms after the write, but the reloaded
+skymp5-client logged nothing on the server and sent no movement (HYPOTHESIS there: the reload
+starts with an empty storage, so no world model, and establishConnectionConditional finds the
+native client still connected and skips the login). Two shapes (00:02 PDT 2026-10-28, numidium):
+(a) skymp5-client survives its own reload, a check in establishConnectionConditional that closes
+and logs in again on an empty-storage start with the native client connected (the real fix, and
+it holds for players too); (b) client-hot follows the reload with a forced reconnect from
+lab-driver, a lab-side workaround. numidium measures (b) on one seat after tonight's rest (a
+createActor at the server, then a turn's rotation read back); if red, client-hot waits on (a),
+which rides the next client train. Until that run the hot path's round trip and a reload's
+survivors are unmeasured.
