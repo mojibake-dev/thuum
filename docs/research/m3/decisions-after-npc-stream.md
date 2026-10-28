@@ -602,3 +602,16 @@ inventory, the container menu's live updates while another player moves items a 
   (the one-capture-per-info of 35). Train 57's shape: A, the puppet's own continuation from DriveVoice (no wire
   change), after the Frida trace confirms the chain (lab/frida/voice-lines.js, a host seat, 120 s). Rule 8: no code
   before the trace.
+
+### D47. The pace: how to run what remains (23:40 PDT 2026-10-27, Eli)
+Eli: "if i wanted to throw all caution to the wind, all testing and whatever, and just 'code the rest of it' how would
+that look? this is taking forever". The three ways given: A as today (one proved train a day); B code the rest with
+T0 and T2 alone and a playtest per milestone (fast for a week, then an undigestible playtest: all six of 56's fixes
+came from the lab or the playtest, none from code; defects found late cost most, Boehm and Basili 2001, DORA); C
+split by rung and batch the lab (R0 merges on T0 and T2; engine-facing changes keep one probe at a daily slot; the
+gate cut to the touched verbs; the milestone lists nightly). Eli: "im leaning C, but Id like a playtest or two a day
+was the cadence we had a while ago". Decision: C with the cadence, ADR-053 PROPOSED (two stage slots a day, a short
+playtest on each, eight items at most). First day, 2026-10-28: the morning slot stages 56 (x-voice-lines with the
+trace, 56's five probes, T2) and carries playtest 36 trimmed to eight items; the evening slot carries 57 (if the
+trace confirms the chain) and the D37 layer's result, playtest 37. The GPU question (D47's companion, 20:3x PDT):
+no sharing on the lab's cards; more seats by passthrough.

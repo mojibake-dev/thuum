@@ -2932,3 +2932,51 @@ ticked (no second key press). A claim's demote on the host's seat ends that engi
 the actor mid-step (as a handoff does); the host's seat sees the puppet walk to the talker and
 face it from the claimant's stream. A failed promote (the engine refusing the dialogue on a
 just-promoted actor, HYPOTHESIS) reads as an open menu that never comes; the lease ends it.
+
+## ADR-053: Two stage slots a day, a short playtest on each; the gate is the touched verbs' own; R0 changes merge on T0 and T2
+
+Status: PROPOSED 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all
+caution to the wind and just code the rest of it": "im leaning C, but Id like a playtest or two a
+day was the cadence we had a while ago"). Eli accepts by letter. Amends ADR-030 (the gate's
+selection at a merge) and ADR-040 (the playtest's cadence and loop); leaves ADR-024, ADR-027 and
+ADR-033 as they are.
+
+**Context.** Train 53 was written in about an hour on 2026-10-27 and reached playtest 35 eleven
+hours later: a Windows build (10 to 40 min), a stage (20 min), probes (5 to 10 min each), T2
+(25 min), a thirty-scenario gate (over two hours), and every red a read, a fix, a redeploy and a
+rerun. Of the day's four reds three were probe premises or tooling (the mage's timing, Sven
+walking, the build picker) and one a bug (the archer's natives); of the six fixes in train 56
+all six came from the lab or the playtest, none from reading code. The lab is slow and it is
+also the only thing finding the engine's behavior. The memo's three ways (decisions-after-
+npc-stream.md D47): A as today, one proved train a day; B code the rest with T0 and T2 alone
+and one playtest per milestone, whose unknowns would surface twenty features at once in a
+playtest Eli could not digest (35 was called at six); C split by rung and batch the lab.
+
+**Decision.**
+1. Two stage slots a day, morning and evening. A slot stages every train stacked since the
+   last slot (ADR-030's stacked trains), runs the day's rule-8 probes and T2, and carries a
+   playtest of at most eight items and about forty minutes on Eli's characters; the build is
+   frozen for the playtest alone. One or two playtests a day, as ADR-040 asked and as the days
+   of 2026-10-19 ran.
+2. The gate at a merge is the always set, the touched VERBS' own scenarios (each scenario names
+   its verb) and the watch items; a milestone's whole list and the full sweep run nightly. A
+   nightly red reopens its verb (ADR-030). A gate of thirty scenarios becomes one of eight to
+   twelve.
+3. The rung fast path: a change whose state is R0 (the server computes: formulas, transactions,
+   records, validators, the wire) and that changes no engine behavior on any seat merges on T0
+   and T2 alone, the nightly its T3; a change to R1 or R2 behavior (anything the engine does on a
+   seat) keeps one probe at the day's slot before its gate. Rule 3 stands: a verb ships whole,
+   the probe seeding its scenario.
+4. Probes are for rule-8 unknowns and the verb's own scenario, not for every change. The
+   premise levers are the library's defaults (a held NPC, a server-live until, a parked seat,
+   lab-probe-premises), not per-probe inventions; a premise red is fixed once in the lever.
+5. Ceremony: one dated paragraph a day per verb (the day's trains together), the memo for
+   decisions alone, the LOG one block a day; a merge keeps its one line (the sha, the gate id).
+6. Eli's structural levers when taken: ADR-036 (a relaunch instead of a rollback) and more
+   seats by passthrough (two GPUs for two seats; no sharing, memo D47's GPU answer).
+
+**Consequences.** About two trains a day with a playtest each half-day instead of one proved
+train a day; the lab's cost moves from every train to every slot. The risk accepted: an R0
+change that touches the engine after all surfaces in the nightly or the next playtest, a day
+later than today, and a short playtest misses what a long one found. UNMEASURED: the slot's
+length and the eight-item playtest's; read on the first two days (2026-10-28 and 29).
