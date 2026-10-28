@@ -463,4 +463,11 @@ go is written now (docs/research/m4/physics-sync-scout.md, a research agent, no 
 three things that must work for 35 are proved at T3 on this build: live NPC behaviour (the stream
 scenarios), death sync (b-npc-death-engine, -guest, -report, -blow, b-npc-death) and the corpse's container
 (b-npc-loot, b-npc-body-release).
+- 19:24 PDT 2026-10-27 (D41's shape): Eli asked whether bows and spells can be in tonight's 35 (they are train 53's,
+  the last train). Call, recommended to Eli and taken unless it objects: ADR-040's shape, as playtest 24 took on
+  train 27's stage: 35 is set up on 53's STAGE once x-npc-archer, x-npc-caster and T2 are green (about 21:00
+  PDT), 53's gate runs after Eli's report and the merge after the gate; the build under test is frozen from
+  "seats ready" to the report. Fallback on a 53 red: 35 on 55's parity without bows and spells, Eli's call.
+  55's rest was green (death-blow 014918 on four swings, respawn 015254 at 16.0); a gate-cite image-id false
+  refusal (fixed, 03ba40f) cost one aborted set.
 
