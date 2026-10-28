@@ -506,3 +506,7 @@ set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, 
   D43 PROPOSED there: A leave as today, B rest-only (TES3MP's shape, corpse-rest and item-rest as two whole verbs
   in M4, 7 to 11 days), C the whole arc with motion streams (20 to 30 days plus RE), D ragdoll pose; recommended
   B. Eli decides later; nothing before playtest 35 depends on it.
+- 20:31 PDT 2026-10-27 (D44's outcome): A held. The restage at bf133744 (20:12 PDT) read x-npc-archer 032303 GREEN
+  (four hosted shots reported, the placed archer's taken under its id, one relayed arrow in flight on c2, no arrow of
+  the puppet's own) and x-npc-caster 032625 GREEN (H-53b confirmed); the first stage's T2 was green on ecec018e and
+  the fix is client-only. T2 on bf133744 runs, then numidium's 35 set-up; well inside the 22:30 cutoff.

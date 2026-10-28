@@ -1806,6 +1806,59 @@ relayed arrow leaves from its bow node along the host's launch, as a
 figure's does; x-npc-bow v3 reads one arrow per shot on c2 within a second
 of c1's).
 
+### 53's stage read (20:31 PDT 2026-10-27; fork m3-npc-cast ecec018e, then bf133744)
+
+The first stage (ecec018e, probes 20261028-023756 and 024159) read the
+caster GREEN and the archer RED, a code red: the archer EncBandit01Missile-
+KhajiitM 0x9a549 fired seven arrows on its host (PROJ 50 in flight on c1's
+polls; the puppet's attackRelease taken 1 on c2) and every launch threw in
+the client's projectileLaunched handler, c1.log "on('projectileLaunched'):
+'Game.getFormEx' can't be called in this context" (seven lines, 19:40:36 to
+19:40:55 PDT), so no hosted shot formed and no OnPlayerBowShot reached the
+server. The cause: playerBowShotService's onHostedLaunch read the engine
+(Game.getFormEx for the shooter, its equipped weapon, its aim) inside the
+handler, and Skyrim Platform refuses a native there (CallNativeApi.cpp:
+requirements.vm is unset in the launch event's context); the player's own
+shot keeps its launch and does its natives on the update tick, the crossbow
+hook defers with controller.once("update"). The fix (bf133744, one hunk):
+the hosted branch keeps the launch's fields and reports on the next update,
+the file's own idiom; tsc clean; no wire change. Memo D44.
+
+The restage (bf133744, 20:12 PDT) read both GREEN:
+
+- x-npc-archer 20261028-032303: the host's client reported four hosted
+  shots (ff000002 the placed archer, 1397d from 3b562 at power 1.00, and
+  1348c, a Riverwood archer its game also hosts; c1-console.log "hosted shot
+  by"), the server took the placed archer's shot under its id
+  ("OnPlayerBowShot - ff000002 shot 1397d from 3b562, power 1.00, aim -0.021
+  heading 2.522, by its host ff000000"), zero E_SHOT_EQUIPMENT, E_SHOT_ORIGIN
+  and E_SHOT_QUIVER, and its eight bow hits landed through the record
+  (OnWeaponHit by ff000002). On c2 zero "no figure, bow or arrow here", zero
+  "puppet's own arrow dropped", zero PROJ in flight through the volley and
+  ONE in flight on the last two polls, after the relay. So: H-53c read, the
+  puppet with its AI off launched no arrow of its own on the replayed
+  release (the drop rule stood unexercised, nothing to drop); H-53e PARTIAL,
+  one relayed arrow flew on the other seat and its path against the host's
+  launch is a screenshot read, not a number (T4 row in playtest 35's
+  checklist: one arrow per shot leaving the puppet's bow).
+- x-npc-caster 20261028-032625: the mage EncBandit01MagicNordM 0x39d37
+  cast on both screens, c2-console.log five "cast ... on puppet" and three
+  "cast end ... on puppet" lines, so H-53b CONFIRMED (a hosted caster's end
+  reaches the puppet from the action stream's hand-equipped event). The
+  server recorded zero E_CAST_UNKNOWN (every cast's spell was in the
+  record's hands through the template chain: H-53a read for this mage, the
+  leveled list's case stays open until a leveled mage is placed) and two
+  E_EQUIP_UNKNOWN_SPELL lines (two entries of the hands report outside the
+  known set recorded alone, the report kept, as designed); zero
+  E_SPELL_NO_CAST and zero E_EQUIP_REFUSED naming the mage; 68 OnSpellHit
+  lines by caster ff000002 on c1's player through the record.
+
+T2 on ecec018e GREEN (numidium, 20:12 PDT); the fix is client-only, so it
+predicts bf133744's, which runs now. Playtest 35 runs on this stage under
+ADR-040 (memo D41 and D44); 53's gate after Eli's report, the merge after
+the gate; the Status boxes tick at that merge. b-npc-archer and b-npc-caster
+are promoted from the two probes then (rule 13, their own commits).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
