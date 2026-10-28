@@ -2933,6 +2933,26 @@ the actor mid-step (as a handoff does); the host's seat sees the puppet walk to 
 face it from the claimant's stream. A failed promote (the engine refusing the dialogue on a
 just-promoted actor, HYPOTHESIS) reads as an open menu that never comes; the lease ends it.
 
+Amendment proposed 11:25 PDT 2026-10-28 (thuum-cf, playtest 36's tails; Eli decides, the patch waits):
+decision 3's "no claim outlives its cell's next grant" drops a dialogue claim at every grant into the
+cell, including a grant to the claimant itself. Seen 17:56:18Z: cell 9732 regranted to ff000001 while
+it held Sven (13491) for a dialogue; the row went with the grant (cells.rs grant() retains no follow
+in the cell), the claimant kept simulating him by the cell's rule, and its release at 17:58:04Z met
+E_CLAIM_NONE. With a third player the same grant flips the actor away mid-conversation: the word
+names the new host, the claimant's seat demotes its dialogue partner (TalkService "ended by the
+word"), the menu stays up over a puppet. Two seats cannot show it; the expedition's three can.
+- A: keep decision 3 as it stands. The warning stays; the third-player break is a known limit.
+- B: a claim outranks a grant for its lease: grant() keeps rows of kind Claim (one line in cells.rs:
+  `retain(f.cell != cell || f.kind == Claim)`), the lease, the release, the claimant's leaving and
+  the actor's death still end it, and simulator_of already reads the claim first. The unit test's
+  regrant case asserts the kept claim and a third-player grant case is added; the patch is saved
+  (thuum-cf's scratchpad claim-outlives-grant.patch, 65 lines, applies to m3-turbo-knobs 8b088be1).
+- C: keep decision 3 and tell the claimant: the grant's word carries a reason so the client closes
+  the Dialogue Menu itself. More wire for a worse outcome.
+Recommended B. Not in the turbo day's build: it reverses an accepted decision, so it rides the next
+train after Eli's letter. The client's renewal (8b088be1, every 60 s while the menu is open) is
+inside decision 2 as written and is in the build.
+
 ## ADR-053: Two stage slots a day, a short playtest on each; the gate is the touched verbs' own; R0 changes merge on T0 and T2
 
 Status: ACCEPTED 23:47 PDT 2026-10-27 (Eli: "oh then yes accept"); proposed 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all

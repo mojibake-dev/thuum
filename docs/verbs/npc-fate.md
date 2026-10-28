@@ -1759,6 +1759,15 @@ runs, verdict watch: b-npc-body-release's old point, below); T2 green on
 b-cell-host, the four b-npc-handoff) green in the gate, so H-51c and H-51d
 hold at T3.
 
+### Playtest 36, the turbo day (11:36 PDT 2026-10-28): the engine's deaths under play
+Eli's item 5 ticked (its note unfinished: "this "). The server log: four hosted NPCs died by the engine from the server's
+number with the killer credited (b6ce1 17:56:49Z and 9b0dc 18:13:27Z "died of an actor's hit ... killer ff000000: ff000000
+hit it 88 ms (54 ms) before"; b6fdb 18:17:37Z the same), each "death pending ... its host reports within 3000 ms" answered
+within 100 ms. One variant to watch: b6fe4 18:17:18Z "died of unknown at ..., host ff000000, killer ff000000: a hit the
+server numbered 54 ms before, the killer ..." (the engine's deathStart named no killer and the server credited its own
+pending aggressor, H-52b's path): the credit held, the cause word did not. Bodies: lootable from the killer's seat; the other
+seat's E on the same body met "occupant is another object and is nearby" (one looter at a time, the engine's rule).
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the

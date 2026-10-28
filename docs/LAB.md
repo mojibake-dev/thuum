@@ -752,9 +752,11 @@ Every run's end also reads each managed seat's game:
 Any of the three keeps the seat's launch.log as <client>-launch.log and turns
 a run that would have been green into error, which a run set reruns once as
 a lab fault. A red run stays red and gains the failure.
-A seat whose dump-state shows MessageBoxMenu open is paused. Either the
-dump-state an assert or until takes, or the run's last one from that seat,
-counts. That is E_RUN_PAUSED, and the run is red: an assert about a paused
+A seat whose dump-state shows MessageBoxMenu open is paused unless its
+GameDaysPassed moved in a fresh dump-state one second later: under Skyrim
+Souls RE (apocrypha/layer-souls) a message box leaves the world running, so
+the clock decides (lab-api 7abbdae). Either the dump-state an assert or until
+takes, or the run's last one from that seat, counts. That is E_RUN_PAUSED, and the run is red: an assert about a paused
 game can hold while it measures nothing, as r-melee-power-a did twice under
 Survival Mode's first-load prompt on 2026-10-14. A snapshot's quiesce empties
 the dump folders and WER's report queues, so no image carries an old crash.
@@ -864,24 +866,47 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
   - Measured on 2026-10-19 (fork 88c43e77): both seats back online 65 s after
     the push, one seat 32 s. The bundle syncs like the Windows build's: a
     600 px turn moved c1's server rot 27 degrees on either.
-  - A push relaunches, not hot-reloads (ADR-041's condition). Skyrim
-    Platform does reload a running game's plugins 8 ms after a last-write
-    change under Data/Platform/Plugins (DirectoryMonitor.cpp). But on
-    2026-10-19 the reloaded skymp5-client logged nothing on the server and
-    sent no movement: two turns left c1's rot at 0, while c2's control
-    turned 26.9 degrees.
-  - HYPOTHESIS: the reload starts with an empty storage
-    (assets/storageProxy.js makes a new Proxy over {}), so there is no world
-    model. skympClient.ts's establishConnectionConditional then finds the
-    native client still connected and skips the login, so no createActor
-    ever arrives.
+  - A push relaunches; `just client-hot` below reloads without one. On
+    2026-10-19 a reloaded skymp5-client sent no movement (two turns left
+    c1's rot at 0), because the reload started with an empty storage and
+    skipped the login. ADR-041's storageProxy fix keeps the storage across a
+    reload, and on 2026-10-28 07:27Z c2's server record followed a turn (rot
+    180 to 0) and a 531-unit walk after one.
+- `just client-hot <c1|c2> <file|fork ref>` (ADR-054 item 1): a bundle
+  reloaded in ONE running seat, no relaunch.
+  - Skyrim Platform reloads a plugin 8 ms after a last-write change under
+    Data/Platform/Plugins (DirectoryMonitor.cpp). client-hot writes the bytes
+    in place (WriteAllBytes); turbo-client's ReplaceFile never triggers it.
+  - The replaced file is kept under C:\sky-lab\turbo\<stamp>\, the seat is
+    marked in C:\sky-lab\hot.txt, and turbo.log gets "hot <stamp> <vmid>
+    <sha8>". A lab run refuses it (its rollback would undo the file).
+  - The reload is proven by a new "Found settings file ... for plugin
+    skymp5-client" line in skyrim-platform.log within 20 s.
+  - A hot reload keeps the connection and never logs in again, so a service
+    armed once from the login's messages does not come back. Until fork
+    m3-turbo-knobs 7fbb5e74 and e9953d0c, PlayerGlobalsService's watch list
+    and HostService's maps were class fields: on 2026-10-28 the needs record
+    froze two seconds after a hot push, and a reloaded host's roster stopped.
+    Both now keep their state in sp.storage. Not kept, accepted: TimeService's
+    clock (the 60 s resync heals it), TalkService's held claim (its lease ends
+    it), DeathService's playerDead.
+  - The first lay of a bundle that carries those fixes is `client-hot` and
+    then `just playtest-relaunch <c>` at once, one seat at a time: the old
+    services saved nothing. After that a hot push keeps the globals and the
+    hosting.
+  - A seat's record never reads as "slow" after a hot push until the server
+    log shows the reporter's cadence ("PlayerGlobals: user N actor ...
+    recorded").
 - `just client-rollback <c1|c2> [snapshot]`: a seat's whole clone back to
   its newest snapshot (clean-m1-next, what the stage laid), for anything a
   kept file cannot undo; the server and the other seat stay as they are.
-- `just turbo-back [--world]`: the reverse of the last push in turbo.log.
+- `just turbo-back [--world] [<stamp>]`: the reverse of the last push in
+  turbo.log, or of the push its stamp names.
   - A server push goes back to its previous tag (31 s measured).
   - A client push stops each pushed seat's game, puts the kept file back and
     relaunches only those seats (44 s for both, 37 to 74 s for one).
+  - A hot push goes back like a client push: its one seat's kept file
+    restored and that seat relaunched.
   - `--world` also restores the newest saved turbo world, which relaunches
     both seats.
 

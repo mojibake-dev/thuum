@@ -160,6 +160,13 @@ class ScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             playtest_step('console {text: "tai"}')
 
+    def test_a_playtest_reads_a_seat_s_globals(self):
+        # playtest 36's needs (2026-10-28): the game's own Survival values on a seat, beside the server's record of them
+        from labapi.scenario import playtest_step
+
+        self.assertEqual(playtest_step('globals {forms: ["81a:ccQDRSSE001-SurvivalMode.esl"]}'),
+                         ("globals", {"forms": ["81a:ccQDRSSE001-SurvivalMode.esl"]}))
+
     def test_a_playtest_draws_and_calms_a_named_npc(self):
         # playtest 35's "draw <name>" and "calm" on the host's seat: one named NPC's combat opened and ended with its AI
         # left running (an npc-ai off and on would flip the simulation under test)
