@@ -30,6 +30,7 @@ for pair in c1:711 c2:712; do
   for f in $crashes; do extra+=("$c-$f|'$skse\\$f'"); done
   for spec in "$c.log|'$skse\\skyrim-platform.log'" "$c-skse64.log|'$skse\\skse64.log'" ${extra[@]+"${extra[@]}"} \
               "$c-driver.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')" \
+              "$c-console.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')" \
               "$c-sunshine.log|'C:\\Program Files\\Sunshine\\config\\sunshine.log'"; do
     name=${spec%%|*}; src=${spec#*|}
     copy="C:\\sky-lab\\playtest-$n-$name"
