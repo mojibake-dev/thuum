@@ -79,3 +79,11 @@ seat's console for the live read.
 4. client-hot's first use: a same-bytes push of a seat's current client (the tool's live proof), then `just
    lab-tail server` and `just lab-tail c1` open for the day.
 5. "Seats ready" to Eli; the day runs as the runbook says.
+
+## The pausing (00:58 PDT, apocrypha)
+Skyrim Souls RE 3.2.0 rides the morning's stage as a layer (apocrypha/layer-souls 34aa1e76): every menu the mod
+covers stays unpaused (the console excepted), no slow motion, movement in menus on, Engine Fixes not brought (the
+mod runs without it, its warning turned off). What Eli looks at: the inventory and a container open while the
+other player keeps moving; a container's list while the other player moves items (the D46 probe's question); any
+menu crash or oddity, which would reopen the Engine Fixes question. The lab's own rule changes under it: a
+MessageBoxMenu open no longer means a paused seat.

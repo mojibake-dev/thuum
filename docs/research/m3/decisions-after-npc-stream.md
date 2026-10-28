@@ -655,3 +655,15 @@ staged after the trace). The pausing: Skyrim Souls RE - Updated as a mod layer (
 lab's facts (Address Library present, Engine Fixes absent: its preloader lives in the game root, which add-mods.ps1
 cannot lay); apocrypha decides the menus, the Engine Fixes question and whether it goes in for the morning (a
 layer-stage with a smoke, the sweep at night) or the evening.
+- 00:58 PDT 2026-10-28 (D46 decided, apocrypha): Skyrim Souls RE - Unpaused Menus 3.2.0 (Vermunds and Fudgyduff,
+  2026-09-25; Nexus 27859, file 810395 the 1.6.1170 and 1.6.1179 build, 810396 the 1.7.104 build) as the row
+  skyrim-souls-re-3.2.0@1.6.1170 in lab/layer/essentials.tsv on branch apocrypha/layer-souls 34aa1e76 (off main
+  b901eb0e), the menu choices as deltas in a new lab/layer/ini-patches.tsv applied by lab/tools/ini-patch.py: every
+  Souls menu unpaused as shipped (Inventory, Container, Barter, Gift, Favorites, Magic, Tween, Stats, LevelUp,
+  Training, Journal, Map, Book, Lockpicking, SleepWait, Tutorial, MessageBox, Custom), movement in menus on, no slow
+  motion, bConsole false (the lab's console steps type against a paused world), bHideEngineFixesWarning true.
+  Engine Fixes is "technically not needed" per the mod's page and does not come along (the 1.6.1170 preloader
+  needs the game root, which add-mods cannot lay; no 1.7.104 build exists). Dialogue needs no setting (vanilla never
+  pauses it). In the morning's stage by layer-stage with a smoke, Eli's play the measurement, the sweep at night.
+  A lab rule changes under it: a MessageBoxMenu open no longer means the seat is paused (numidium's paused read).
+  HYPOTHESIS until the smoke and the play; menu crashes would reopen the Engine Fixes question.
