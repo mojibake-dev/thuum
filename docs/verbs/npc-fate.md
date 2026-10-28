@@ -2048,6 +2048,10 @@ c1be67d1, with x-npc-corpse-drift as its read) and the engine's refusal of
 Resurrect under AI off (Suppress). b-npc-headshot-host sits pending until
 the lab can aim.
 
+H-54e's fix merged (19:26 PDT): the promote that leaves a dead actor's AI
+off rode train 55 to parity 1b866786 (c1be67d1), read green at T3 by
+x-npc-corpse-drift 211727; b-npc-death played green in 55's gate (003911).
+
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
 b-npc-death red twice on its restart leg's premise, never on a claim. (1)

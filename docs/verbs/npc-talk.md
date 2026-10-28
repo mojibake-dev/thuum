@@ -181,3 +181,10 @@ a stillness read, the approach to 70, a crosshair check and E. Promoted as
 b-npc-talk (main, its own commit) for 53's gate, 55's deploy having
 preceded it. What a dialogue does (quest stages, gold, items, followers)
 stays M6 (PLAN.md).
+
+## Train 55 merged (19:26 PDT 2026-10-27)
+
+Fork parity 1b866786, cited by the gate 20261027-234255 (28 runs, two
+premise reds answered in its rest) and the chain; the claim's scenario
+b-npc-talk (main 4854286, from x-npc-talk-claim v6 233908) plays from 53's
+gate on. The Status boxes tick at that gate's green.
