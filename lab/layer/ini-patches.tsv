@@ -1,0 +1,6 @@
+# Settings persist-mods writes into a laid mod's ini (lab/tools/ini-patch.py; docs/MODS.md, the essentials layer). The mod's file stays
+# the mod's; these rows are the lab's deltas. Key matched without regard to case; a missing key is appended to its section; a missing
+# section is an error.
+folder	file	section	key	value	why
+skyrim-souls-re-3.2.0@1.6.1170	SKSE/Plugins/SkyrimSoulsRE.ini	MESSAGES	bHideEngineFixesWarning	true	the lab runs Skyrim Souls RE without SSE Engine Fixes (its preloader is a game-root file add-mods cannot lay, and 1.7.104 has no Engine Fixes build; the mod's page: "technically not needed"), and the mod's start-up warning is a message box every seat would have to click away, which the lab's smoke reads as a paused game (E_RUN_PAUSED)
+skyrim-souls-re-3.2.0@1.6.1170	SKSE/Plugins/SkyrimSoulsRE.ini	UNPAUSED_MENUS	bConsole	false	the console pauses as in vanilla: the lab's scenario steps type console commands and were written against a paused world; Eli's ask is inventory, containers and dialogue, not the console (numidium or magnus can flip it when a scenario wants the world running under the console)

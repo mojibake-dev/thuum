@@ -426,6 +426,10 @@ while IFS= read -r m; do
     || { echo "could not pull $m off $dst:$persist/esm (lab/.cache/game)" >&2; exit 2; }
 done < <(python3 "$root/lab/tools/plugin-patch.py" --needs "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv")
 python3 "$root/lab/tools/plugin-patch.py" "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv" "$game_cache"
+# The lab's settings in laid mods' ini files (lab/layer/ini-patches.tsv, lab/tools/ini-patch.py):
+# the mod's file stays the mod's, the manifest holds the deltas (Skyrim Souls RE: its Engine Fixes
+# warning box off, the console left paused). Idempotent, before SHA256SUMS like the plugin patches.
+python3 "$root/lab/tools/ini-patch.py" "$root/lab/layer/ini-patches.tsv" "$stage/tree"
 # Rows install in order, as a mod manager does: a later row's file replaces an
 # earlier row's (or a folder laid above the rows) at the same Data path. The
 # clients apply SHA256SUMS in its sorted order and keep the last copy they
