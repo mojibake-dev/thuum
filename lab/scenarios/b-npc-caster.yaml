@@ -15,6 +15,8 @@
 # PROJ 50, never under its reference class 64, 63 or 67, which read 0 by construction in 235808 and 000211)
 # 53's gate 051558: the observer's read waits for the mage's first cast (an until on the server's live cast line),
 # claims unchanged (its own commit).
+# 53's rest 064325: the mage's record hardened (SetAV Health 2000) after its first cast so a resident's arrows cannot
+# end it before a cast ends; claims unchanged (its own commit, 00:04 PDT 2026-10-28).
 id: b-npc-caster
 milestone: M3
 clients: [c1, c2]
@@ -53,6 +55,12 @@ steps:
   # showed four casts and two ends. The read waits for the mage's first cast at the server (live) before the polls;
   # the claims are as they were
   - until: {within: 120, every: 2, expect: ['server.log_count("ActionListener - ff000002 casts") >= 1']}
+  # 53's rest 20261028-064325: Sven's arrows killed the mage within fifteen seconds of its first cast ("death
+  # pending on ff000002, aggressor 13491"), so no cast could END and the end claim read 0. The mage's record is
+  # hardened through the server console (SetAV takes [target, name, value], ConsoleCommands.cpp: the server's own
+  # number is the authority, the host's engine follows it by the cause), so a resident cannot end it before a
+  # cast ends; the claims are as they were
+  - c1: server-console {name: SetAV, args: [0xff000002, "Health", 2000]}
   - c1: refs-near {radius: 4096, formTypes: [50]}
   - c2: refs-near {radius: 4096, formTypes: [50]}
   - wait: 1
