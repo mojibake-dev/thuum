@@ -226,6 +226,17 @@ lethal need calls PlayerRef.Kill() at Survival_ColdNeedValue (81b) 1000; the ser
 death report exists for players, MpActor::Kill comes from its own number alone) and the seat holds its player in the
 engine's deferred kill: memo D51, B recommended (the server's word from its recorded cold need), probe x-player-cold-kill.
 
+Closed at 12:25 PDT (apocrypha's read of Survival_MainScript's bytecode): the silence after the relaunches was the Creation's rule, not
+the record's. The main script's 5 s poll starts the mode (StartSurvivalMode: perks, items, the three needs' StartNeed) when
+Survival_ModeToggle 828 == 1, Survival_ModeEnabled 826 != 1 and ModeCanBeEnabled(): MQ101 completed OR (fighting controls enabled AND
+not in an interior). A generated save never has MQ101 done, so a login indoors (today's Embershard Mine) leaves Survival off until the
+first step outside; the camp starts it within 5 s. Two rules for this verb fall out. (1) A listed global is a switch the player sets (828)
+or the player's data (the needs 81A, 81B, 816; 8DF the prompt shown; 8E0 to 8E2 the help boxes shown), never a script's own running
+state: 826 and Update.esm's Survival_ModeEnabledShared (00314A) are never listed, since a restored 1 would read as "already running" in a
+fresh game whose quests are not running, and A0F (ModeCanBeEnabled's output) is derived. (2) A restored need value needs no care: StartNeed
+applies its stage at once and each tick adds elapsed game hours from the script's own stamp. Known limit (the checklist's): Survival waits
+for the outdoors after an indoor login. If a train ever wants it on from login indoors, the Creation's own StartSurvivalMode() is the path.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
