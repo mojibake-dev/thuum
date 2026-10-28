@@ -432,3 +432,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   grant 157 ms after the E, the menu open on the guest, the release at its close, the host live again). Promoted
   as b-npc-talk (main, its own commit) for 53's gate. 55's three probes green (talk-claim, handoff-cross v4, the
   corpse-drift read); the gate runs on c1be67d1 and merges 1b866786 under the paper rule.
+- 17:29 PDT 2026-10-27: b-npc-death-blow 002258 (55's gate) red on the credit line alone: all six measured swings
+  landed and the two for the numbered hit made the eighth lethal, which rolled the engine's kill move; my
+  arithmetic (eight sevens are 56, not under 50). Main dca3b06: four measured swings, 42 at most before
+  npc-damage; claims unchanged; numidium deploys mid-gate for the reruns. A premise red of the probe's own.
