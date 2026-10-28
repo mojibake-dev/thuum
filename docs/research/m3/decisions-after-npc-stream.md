@@ -752,3 +752,35 @@ C as the next step if B's heuristic misses.
   RE/B/BSFaceGenAnimationData.h:39-43, while a line plays; head and neck rotations by a native hook), measured against the
   skeleton's own update first. Playtest 37 also found the stale in-flight item (a sound-path line's) behind the snap-closing
   dialogues and the no-lip lines; the fix rides the same branch.
+
+### D54. A non-persistent resident at a door (15:5x PDT 2026-10-28, thuum-magnus, from the tail after the door pass went live)
+
+Since skymp-server:m3-door-pass-802b74f2 (21:59Z) every placed resident's door in Riverwood walked through under its host
+(Sven, Dorthe, Frodnar, Hod, Gerdur, Alvor, 1348c into their houses and the inn, the records following), except one:
+"door 1cbb0: 35534 may not cross into 1cb84 (refused); the actor stays" at 22:18:43Z and 22:24:40Z. 0x35534 is HildeRef
+and 0x1cb84 RiverwoodSvensHouse (the master file). ADR-047 D6's door fact admits "an interior entered by a persistent
+actor" (the ACHR's persistent flag; PartOne.cpp CellMoveFacts), because the engine keeps simulating persistent actors off
+screen; Hilde's reference is not flagged, so her door is neither adjacent nor a door to the rule, the verdict is Refuse,
+and her host's engine walks her back to her own door every few minutes, the Embry symptom for the few non-persistent
+residents (one of eight in Riverwood). Player-visible on both screens: a woman pacing at her door at bedtime.
+
+Options.
+- A. Leave as today: a non-persistent resident never enters an interior under the server; she paces at the door; the
+  one who hosts the interior from inside sees her never arrive.
+- B. The record moves with the engine's walk for every actor at a door, persistence or not: the door branch moves the
+  record to the door's destination itself (the player's Teleport idiom in ProcessActivateNormal: SetCellOrWorldObsolete,
+  SetPos, SetAngle) when the destination is hosted by nobody, and the pass rule applies as for a persistent actor when
+  it is hosted; an unhosted interior then holds a frozen record (ADR-035 point 8, TES3MP's shape), re-animated when a
+  player enters and hosts it. The host's engine keeps her where the engine put her (inside, unloaded, no AI), the other
+  seat's view drops the record with the grid, so no engine walks her back. Server-only; CellHostTest gains the
+  non-persistent door case; T3 a door leg with Hilde.
+- C. The persistence fact widened to "any actor with a schedule package into its own home" by the ESM (the AI package's
+  location): more reading of the game files for a distinction the engine does not make at the door.
+
+Recommended B. Nothing in TES3MP or the engine treats a non-persistent actor's door differently from a persistent one's;
+the persistence fact was a guard for the host's off-screen simulation, which an unhosted frozen record does not need.
+Eli's call; the build is a slot's, not the turbo loop's.
+
+- [ ] A (leave as today)
+- [ ] B (the record moves with the walk, frozen when unhosted)
+- [ ] C (the ESM's schedule fact)
