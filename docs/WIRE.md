@@ -175,7 +175,19 @@ larger than the messages need.
 
 Families, mirroring the authority rungs:
 
-- Session: hello, version, mod list hash, disconnect reason.
+- Session: hello, version, mod list hash, disconnect reason. Live since
+  mod-lock (docs/verbs/mod-lock.md, fork m3-mod-lock): Hello (id 0, C2S)
+  carries one hash per plugin, the full plugins in the engine's load order
+  then the light ones, each FNV-1a 64 over lowercase(name) + 0x00 + size as
+  u32 LE + crc32 as u32 LE (wire-rules mods.rs, the one definition; the
+  client's src/lib/modHash.ts pinned to the same vectors); the bridge judges
+  it against the server's manifest.json and answers Welcome (id 1) or Refuse
+  (id 2) with a reason code: 501 E_MOD_LOCK_COUNT, 502 E_MOD_LOCK_MISMATCH,
+  503 E_MOD_LOCK_NO_HELLO (a login before any Hello, when the server
+  requires one); the refused connection is dropped on the next poll. The
+  session family has no SkyMP MsgType: between a plugin and its wire DLL it
+  travels as JSON keyed by "w" (0, 1, 2), hashes as 16 lowercase hex digits,
+  the DLL filling schema_version when the plugin omits it.
 - Ownership: cell host grant, host handoff, host release (R0 decisions):
   HostGrant (id 56, MsgType 48) and HostRelease (id 57, MsgType 49) with the
   cell and its epoch, fed by the client's CellLoaded (id 55, MsgType 47, an

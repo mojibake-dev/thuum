@@ -1,6 +1,6 @@
 # Verb: mod-lock
 
-Status: DRAFT (12:32 PDT 2026-10-28, thuum-cf; the friend deployment's item 3, docs/research/deploy/friend-playtest.md
+Status: BUILT, server and client, unproven at T2 and T3 (fork m3-mod-lock, three commits, pushed 12:53 PDT 2026-10-28); drafted (12:32 PDT 2026-10-28, thuum-cf; the friend deployment's item 3, docs/research/deploy/friend-playtest.md
 section 3 on thuum branch friend-deploy, "the enforcement (G3a)"; ADR-055 records the deployment's decisions).
 
 ## Intent
@@ -154,12 +154,12 @@ without a Hello), a setting, not a hypothesis.
 
 ## Status
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
+- [x] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated (none in the engine; the SP calls and the TES4 flag cited)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [x] server logic + T0 (wire-rules mods.rs: the hash vectors, the order, the judgement, the manifest's parse; the bridge's handling; cargo test and clippy clean)
+- [x] message + validator (same commit: wire-json's "w" forms with the DLL's version fill, wire-transport's 501 to 503, the bridge's judgement; the contract in docs/WIRE.md)
 - [ ] native hook + T1 (not applicable)
-- [ ] TS handler
+- [x] TS handler (HelloService, AuthService's wait for the Welcome, the session route in NetworkingService; tsc clean, the hash's node check against the vectors)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031) (not applicable: no engine play)
