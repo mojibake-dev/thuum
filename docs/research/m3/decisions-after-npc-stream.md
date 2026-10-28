@@ -448,4 +448,6 @@ not in it, DeathDropOverhaul's client-local shield drop a known limit on the che
 probe x-body-loot v5, b-body-loot and layer-merge's full sweep follow after the playtest (the nightly at
 03:30 PDT or a sweep tomorrow). Target: 35's seats ready around midnight PDT, each red on the way adding its
 rerun. No other change to the ladder.
-
+- 18:27 PDT 2026-10-27: b-npc-respawn 011906 (55's gate) read as a premise red: the restart's gameHour 14.0 lay
+  before the body's hour (the kill at 13.53 h by a clock running twenty to one, the body until 14.53). Main
+  59836b8 restarts at 16.0, claims unchanged; deployed mid-gate for the ADR-027 rerun.
