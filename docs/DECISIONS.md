@@ -2979,4 +2979,13 @@ playtest Eli could not digest (35 was called at six); C split by rung and batch 
 train a day; the lab's cost moves from every train to every slot. The risk accepted: an R0
 change that touches the engine after all surfaces in the nightly or the next playtest, a day
 later than today, and a short playtest misses what a long one found. UNMEASURED: the slot's
-length and the eight-item playtest's; read on the first two days (2026-10-28 and 29).
+length and the eight-item playtest's; read on the first two days (2026-10-28 and 29). The
+tooling (numidium, on branches until Eli's letter): the gate's verb-to-scenario map in
+lab/gate.yaml with gate-cite and the chains selecting from it (half a day to a day; UNMEASURED
+how often a cross-verb regression then shows only at night); the slot wrapper over verb-stage,
+the probes, T2 and playtest-setup (one to two hours); the R0 merge path (verb-merge R0=1, citing
+T2 and the pipeline's T0, refused mechanically when the fork diff touches skymp5-client,
+skyrim-platform or the gamemode; half a day); the nightly's list checked for every b- and c-
+scenario (minutes); the premise lever library (npc-still, an approach that re-aims, an ordered
+restart, a judged look; about a day, each timed live first). The first day runs the slots by
+hand with today's tools.
