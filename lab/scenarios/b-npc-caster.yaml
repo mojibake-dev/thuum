@@ -13,6 +13,8 @@
 # taken, the E_CAST_UNKNOWN and E_EQUIP_UNKNOWN_SPELL counts, screenshots. Its own commit (rule 13).
 # (refs-near filters a cell's references by their BASE form's type, lab-driver: a projectile in flight is found under
 # PROJ 50, never under its reference class 64, 63 or 67, which read 0 by construction in 235808 and 000211)
+# 53's gate 051558: the observer's read waits for the mage's first cast (an until on the server's live cast line),
+# claims unchanged (its own commit).
 id: b-npc-caster
 milestone: M3
 clients: [c1, c2]
@@ -46,6 +48,11 @@ steps:
       - c2.npc_state(0x13483).aiEnabled == false
   - c1: server-console {name: PlaceAtMe, args: [0x14, 0x39d37]}
   - wait: 3
+  # 53's gate 20261028-051558: the mage opened its fight 75 s after the placement (the probe's green run had it
+  # casting within ten), so the observer's log-count step ran before any cast and read 0 while c2's console then
+  # showed four casts and two ends. The read waits for the mage's first cast at the server (live) before the polls;
+  # the claims are as they were
+  - until: {within: 120, every: 2, expect: ['server.log_count("ActionListener - ff000002 casts") >= 1']}
   - c1: refs-near {radius: 4096, formTypes: [50]}
   - c2: refs-near {radius: 4096, formTypes: [50]}
   - wait: 1
