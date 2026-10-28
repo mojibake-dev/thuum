@@ -167,6 +167,16 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual(playtest_step('globals {forms: ["81a:ccQDRSSE001-SurvivalMode.esl"]}'),
                          ("globals", {"forms": ["81a:ccQDRSSE001-SurvivalMode.esl"]}))
 
+    def test_a_playtest_reads_a_node_s_rotation(self):
+        # playtest 37's face probe (2026-10-28): a puppet's head and neck against the live NPC's on its host
+        from labapi.scenario import load_scenario, playtest_step
+
+        self.assertEqual(playtest_step('node-rotation {formId: 0x13491, nodes: ["NPC Head [Head]"]}'),
+                         ("node-rotation", {"formId": 0x13491, "nodes": ["NPC Head [Head]"]}))
+        sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: node-rotation {formId: 0x13491}\n  - c1: face-keyframes {formId: 0x13491}\n")
+        self.assertEqual([st.action for st in sc.steps], ["node-rotation", "face-keyframes"])
+        self.assertEqual(playtest_step("face-keyframes {formId: 0x13491}")[0], "face-keyframes")
+
     def test_a_playtest_draws_and_calms_a_named_npc(self):
         # playtest 35's "draw <name>" and "calm" on the host's seat: one named NPC's combat opened and ended with its AI
         # left running (an npc-ai off and on would flip the simulation under test)
