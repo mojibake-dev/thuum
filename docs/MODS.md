@@ -468,15 +468,16 @@ of 210 on 2026-10-18, and their decisions on the dependency gaps; the plan is
 docs/research/mod-layer-plan.md). Built by apocrypha on branch
 `apocrypha/layer-essentials`; `just layer-stage apocrypha/layer-essentials` stages it.
 
-**What it is.** 97 mods copied from Fenestrate, 5 fetched from Nexus (Cloaks of Skyrim and
+**What it is.** 97 mods copied from Fenestrate, 6 fetched from Nexus (Cloaks of Skyrim and
 Winter Is Coming from decision 4, Realistic Aspen Trees after playtest 26, the Survival
-collection's two non-HDT warmth patches after playtest 27, all below), on top of the layer's
+collection's two non-HDT warmth patches after playtest 27, Skyrim Souls RE for the pausing on
+2026-10-28, all below), on top of the layer's
 existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot
 Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
-client-only at the tail), 45 of them light; 28 mod folders scoped `@1.6.1170` (every SKSE DLL
-mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on 1.7.104).
-111 mod folders and the Papyrus map's, 5,754 files once the install-order rule (below) has
-dropped the six replaced copies, 4.1 GB on disk (the DLL mods' .pdb files kept: Crash Logger
+client-only at the tail), 45 of them light; 29 mod folders scoped `@1.6.1170` (every SKSE DLL
+mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6 or, Skyrim Souls RE, carry a
+build for it; none has run on 1.7.104). 112 mod folders and the Papyrus map's, 5,773 files once
+the install-order rule (below) has dropped the six replaced copies, 4.2 GB on disk (the DLL mods' .pdb files kept: Crash Logger
 with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, never
 removes one: a render that drops a file (FSMP's DLL and configs on 2026-10-20) relies on the
 clone being laid from a base without it, which the stage's snapshot discipline gives.
@@ -637,6 +638,45 @@ RaceMenu.bsa by lab/tools/bsa-extract.py (a stdlib BSA reader with its own LZ4 f
 order. Rule learned: when two archives carry the same path and the plugins' order cannot be the
 installer's, lay the winner's copy loose. HYPOTHESIS until `RaceMap::CreateDefaultMap` appears in
 a layer seat's skee64.log and a-rotfern and a-racemenu are green.
+
+**Skyrim Souls RE, the pausing (Eli, 2026-10-27, memo D46: "pausing, inventory, and containers
+shouldn't pause the game. it should be transparent. rn it feels unnatural in multiplayer. the player
+who opens their inventory, everything freezes for"; D50 puts it in the turbo build):** the row
+`skyrim-souls-re-3.2.0@1.6.1170` lays Skyrim Souls RE - Unpaused Menus 3.2.0 (Nexus 27859 file
+810395, by Vermunds and Fudgyduff; source github.com/Vermunds/SkyrimSoulsRE, GPL-3.0), an SKSE DLL
+with no plugin and no slot, so the load order and both settings files are untouched. The current
+release ships one build per runtime and the DLL's own SKSE version data says which: file 810395
+names 1.6.1170 and 1.6.1179, file 810396 names 1.7.104. The layer lays the 1.6.1170 build, the
+players' version, like every DLL mod; the 1.7.104 build is fetched and recorded in the archive table
+and goes on when the 1.7.104 set takes its first DLL (its Address Library coverage to be checked
+first). What the archive holds, plain Data layout taken whole: the DLL, its ini and pdb, the
+combat-alert overlay swf, its English strings, and seven vanilla script patches based on USSEP
+(loose .pex, so they shadow USSEP's archive copies; the Papyrus block leaves them inert connected,
+as it does USSEP's). Needs: SKSE64 and Address Library, both in place; SSE Engine Fixes is
+recommended by the page "with the Memory Manager Patch and Global Time Fix features enabled. This is
+technically not needed for the mod to run, but is highly recommended if you want to avoid certain
+issues", and the layer does not carry it: Engine Fixes 7.0.20 needs its game-root preloader on
+1.6.1170 (the row sse-engine-fixes is `out` for that reason) and has no build for 1.7.104 at all
+(7.0.21 beta is for 1.7.99 only). So the first stage measures Souls on its own; if menu crashes
+appear, Engine Fixes part 1 becomes a layer row and the preloader a lab tooling question for
+numidium. Its in-game config menu needs SKSE Menu Framework (in the layer) and ImGui Icons (not);
+the ini is the configuration, which is what the layer uses.
+
+The menu choices, `lab/layer/ini-patches.tsv` over the mod's own ini (lab/tools/ini-patch.py; the
+file stays the mod's, the manifest holds the deltas): every menu the mod covers stays unpaused as
+shipped (Inventory, Container, Barter, Gift, Favorites, Magic, Tween, Stats, LevelUp, Training,
+Journal, Map, Book, Lockpicking, SleepWait, Tutorial, MessageBox, Custom), with movement in menus on,
+no slow motion, the combat-alert overlay on, auto-close at 400 units; two deltas: `bConsole = false`,
+the console pauses as in vanilla because the lab's scenario steps type console commands against a
+paused world (numidium or magnus can flip it), and `bHideEngineFixesWarning = true`, the start-up
+message box the mod shows without Engine Fixes, which every seat would have to click away and the
+smoke would read as E_RUN_PAUSED. Two facts for the lab's rules: DialogueMenu is not a Souls menu
+because vanilla Skyrim never pauses dialogue, so "dialogue unpaused" needs no setting (if a lab
+dialogue path pauses, that is SkyMP's own menu, a MessageBoxMenu or CustomMenu, both unpaused here);
+and with MessageBoxMenu unpaused, docs/LAB.md's rule "a seat whose dump-state shows MessageBoxMenu
+open is paused" no longer holds under the layer, the box is open and the world runs. Also for mod
+authors' scripts: the mod makes `Utility.IsInMenuMode()` true while an unpaused menu is open and
+`Utility.Wait()` no longer waits for menus. HYPOTHESIS until the layer's smoke and Eli's play.
 
 **Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
 textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
