@@ -519,3 +519,59 @@ set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, 
   joiner's missing in-progress action, the guest's claim never sent for Sven, dialogue voice relaying the first
   line only, rotfern's head node 0.94 after every teleport. The log read runs (pt35-read-1); D45 (the fix train's
   shape and order against the D37 layer) follows it. 53's gate and merge stay as armed, after the informal report.
+
+### D45. Playtest 35's fixes: what rides before playtest 36 (21:41 PDT 2026-10-27, thuum-magnus under D40)
+Eli called 35 early ("fix this at least. anims still dont fully work. NPC's cannot be claimed sufficiently, in
+conversation only one voice file will play and not the next one"). The log read (docs/private/pt35-read-1.md)
+and the code reads give six items, each a fix to a shipped verb:
+- a. npc-talk, the stuck claim: a guest's granted claim was never released in play (no "released at the
+  Dialogue Menu's close" on either seat, no "releases" at the server), the client's E handler returns silently
+  behind `pending || claimed` (talkService.ts:43), and the 120 s lease lapsed with no word to the seats. Fix:
+  the server's UpdateHoster word to both seats at the lapse (the release path), the client releasing a held
+  claim when E lands on another puppet and at its own timeout equal to the lease, a trace on every decline, and
+  a probe closing the menu as a player does (Tab) to read why onMenuClose missed. Server and client; T0 for the
+  lapse's word.
+- b. npc-stream voice, the later lines: the host captures one speech event per topic info (TESTopicInfoEvent at
+  the begin alone), so a multi-line response plays its first line on the puppet and the rest on the host. RE
+  first (the re-analyst): how the engine advances an info's responses on the host (the AI's dialogue update an
+  AI-off puppet never runs) and whether SpeakSoundFunction is called per line; then the puppet's voice drive
+  advancing the response at a line's end, or a per-line capture on the host with the puppet saying by index.
+  HYPOTHESIS until the trace; probe on Sven's multi-line topics.
+- c. npc-stream actions, the late joiner: CreateActor carries the last animation event, not the last action or
+  the furniture, so Hilde's tanning was missing on a seat that joined two minutes after it began. Fix: the
+  record keeps a hosted actor's last action (slice 1's BGSAction and idle, R2) and furniture reference; a late
+  joiner's CreateActor and the promote path carry it; the puppet replays it once at creation. Server, client,
+  the wire row if CreateActor's props need one (validator in the same commit).
+- d. movement (figures), the snap after jogging: movementApply.ts:427's one-unit settle for a still record
+  (train-33) pulls the other player's figure back by the running lead at the first Standing sample (108 settles
+  on c1, mean 6.7 units, max 36.8). Fix: let the lead run out (an ease over the lead's length) before the
+  deadband drops from 8 to 1. Client only; the probe reads the settle lines' mean and max against these.
+- e. racemenu-sync, rotfern's head at 0.94: the client applies the server's node scales once (formView's
+  isSetNodeScaleApplied, remoteServer's apply at CreateActor) through NetImmerse.setNodeScale, which skee does
+  not persist; a 3D rebuilt after the apply (a teleport, a load into an interior) shows the race's own scale.
+  Fix: re-apply node scales and texture sets whenever the actor's 3D loads, player and figures. Client only;
+  probe: the node read after a teleport and after a relaunch into Bleak Falls.
+- f. npc-fate, the arrow-borne zero: rotfern's three arrow hits took 39fe2's record to 0, no host report came in
+  3 s, the server killed it by its word while the host's engine bar stood at a quarter. Read first (c1's cause
+  lines in the Bleak Falls window, the refreshed log copy): the cause's apply for the host's own player's arrow
+  hits, or the DamageActor cut's coverage of projectile damage. Server or Skyrim Platform; T0 and a probe (the
+  host kills its hosted bandit with arrows; the engine dies with the killer, no "death by the server's word").
+Options: A, train 56 now with a, c, d, e (code-ready), train 57 with b and f after their reads; the D37 layer
+(layer-d37-ddo-out 8905804, D41) staged and swept overnight right after 53's merge while 56 is written (code
+needs no lab); 56's stage and probes in the morning, playtest 36 on its stage under ADR-040; 57 after. B, one
+train with all six after both reads (36 a day later). C, 36 on 56 alone, b and f deferred to M3's end (Eli
+asked for the voice by name, so no). Recommended: A. Decision: A under D40 (21:41 PDT); 53's gate and merge first,
+as armed.
+
+### D46. Eli's idea for apocrypha: menus that do not pause (21:41 PDT 2026-10-27, relayed by numidium)
+Eli, verbatim: "a thought to work with apocrypha on-- pausing, inventory, and containers shouldn't pause the
+game. it should be transparent. rn it feels unnatural in multiplayer. the player who opens their inventory,
+everything freezes for. im sure there's a mod for this." The standard tool (lazy): Skyrim Souls RE - Updated
+(Nexus skyrimspecialedition/mods/27859; source github.com/Vermunds/SkyrimSoulsRE), an SKSE DLL that unpauses
+chosen menus (inventory, containers, books, map, dialogue), per menu in Data/SKSE/Plugins/SkyrimSoulsRE.ini,
+optional slow motion; requires SKSE64, VC++ 14, Address Library, and SSE Engine Fixes with the Memory Manager
+Patch and Global Time Fix on. No plugin slot, no load-order change: a mod layer (persist-mods, layer-stage, the
+full sweep) after D37's. apocrypha confirms: 1.6.1170 support in the current release, whether the lab carries
+Engine Fixes, which menus to unpause (dialogue unpaused meets npc-talk's lease; containers meet the server's R0
+inventory, the container menu's live updates while another player moves items a probe). Decision: pending
+(apocrypha's layer; Eli's call on the menu list).
