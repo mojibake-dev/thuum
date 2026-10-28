@@ -56,6 +56,7 @@ Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process
     ok=0; for p in "${pids[@]}"; do wait "$p" || ok=1; done
     [ "$ok" = 0 ] || { echo "== a seat did not come back after its relaunch" >&2; exit 4; }
     ;;
+  dist) echo "== a dist push ($a on VM $b) keeps no file to put back: just client-rollback <c> returns that seat to its clean-m1-next (the stage's dist)" >&2; exit 2;;
   *) echo "== unknown turbo push kind $kind" >&2; exit 2;;
 esac
 if [ "${1:-}" = --world ]; then

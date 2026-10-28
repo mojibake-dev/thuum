@@ -459,6 +459,12 @@ turbo-client ref:
 client-hot client what:
     @lab/tools/client-hot.sh {{client}} {{what}}
 
+# A client DIST (Skyrim Platform and the SKSE plugins with the client) to running seats, one at a time, from the fork's
+# client-build of the branch's head or SHA=<commit>: client-dist, then playtest-relaunch, a "dist" line in turbo.log.
+# A change inside Skyrim Platform loads only at a game's start; undo with `just client-rollback <c>`.
+turbo-dist branch seats="both":
+    @lab/tools/turbo-dist.sh {{branch}} {{seats}}
+
 # The bundle alone, built from a fork ref (its path is the last line).
 turbo-client-build ref:
     @lab/tools/turbo-client-build.sh {{ref}}
