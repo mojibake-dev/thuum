@@ -2523,6 +2523,21 @@ the other held her record): MoveVerdict::Pass, the record moving with the
 simulation and the per-actor word flipped both ways, no ActorHandoff and
 no tenure in this slice; docs/verbs/npc-handoff.md decision (d).
 
+2026-10-28 (playtest 37, 14:3x PDT): the door's pass. Prisoner hosted the
+Sleeping Giant from inside it while rotfern hosted Riverwood; Embry's package
+took him to the inn's door and the server refused the crossing ("door 13424:
+3550c may not cross into 133c6 (refused); the actor stays", 21:23:41Z and
+21:24:34Z), so his host's engine walked him back to the door every few
+seconds. Eli, through numidium: "let embry cross and hand him to the inn's
+host. that's a good rule to have." The rule: a persistent actor's door into a
+cell another live host holds is a crossing like D9's adjacent one; the move
+judge passes it to that host at once (an interior is deep by definition), an
+exit passes it back under D22's margin brake, a stranger's door report stays
+refused. Built on fork m3-door-pass 2a18f926 (stacked on m3-shared-containers
+dbfc8e82), T0 at the crate and CellHostTest; the refusal line at the door is
+a stranger's or an unhosted actor's alone now. T3: a door leg into a hosted
+interior, its own commit.
+
 ## ADR-048: Trust is mixed by what is at stake: players' contested state stays the server's number, a host's own NPC outcomes are accepted under plausibility checks and logged, and a server setting picks the strictness
 
 Status: ACCEPTED 2026-10-24 as option B (Eli, through numidium, on the

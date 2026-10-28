@@ -650,7 +650,14 @@ D7 (the two election knobs), D8 (ActorHandoff, no wire change this slice).
 D9 (the pass between live hosts) BUILT on train-46 (2026-10-25, decision (d)
 above), without ActorHandoff and without the tenure. The door's exit is a follow too (an interior at either end
 with a persistent actor), so a resident coming out into an exterior its
-follower does not host stays the follower's. mp.get(0, "cellFollows") for
+follower does not host stays the follower's. A door into a cell ANOTHER seat
+hosts passes the actor to that host since 2026-10-28 (Eli, playtest 37: "let
+embry cross and hand him to the inn's host. that's a good rule to have"; fork
+m3-door-pass 2a18f926; ADR-047's note of the day): the door's pre-check
+admits it, the host's engine walks it through, its report from indoors passes
+the record and flips the word (D9's path), the exit passes it back under D22's
+margin brake; the refusal at the door is a stranger's or an unhosted actor's
+alone. T3: a hosted-interior leg of the door scenario, its own commit. mp.get(0, "cellFollows") for
 the lab. H5 stays HYPOTHESIS until x-handoff-door.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-22 draft; the decisions as ADR-047 PROPOSED 2026-10-23, D6 to D11)
