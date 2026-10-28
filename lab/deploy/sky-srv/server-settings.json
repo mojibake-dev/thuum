@@ -231,6 +231,10 @@
       "default": 1
     }
   ],
+  "modLock": {
+    "enabled": true,
+    "requireHello": false
+  },
   "startPoints": [
     {
       "pos": [
