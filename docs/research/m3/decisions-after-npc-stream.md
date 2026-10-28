@@ -497,3 +497,12 @@ clock); B, 35 now on 53's stage as it stands, NPC bows a known limit, spells in;
 bows or spells. Decision: A (the goal names bows), fork m3-npc-cast bf133744; numidium relaunches ladder 53 on it
 with the no-gate switch (the Windows build, the stage, x-npc-archer, x-npc-caster, T2, TRAIN END 21, the 35
 set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, numidium saying so first.
+
+- 19:59 PDT 2026-10-27 (D42's follow-up): the physics-sync scouting report is written, docs/research/m4/
+  physics-sync-scout.md (one agent, no code touched): the fork accepts movement for actors only and places a
+  dropped item once at the dropper, frozen everywhere; nobody has shipped prop or ragdoll sync in Skyrim
+  (TES3MP streams no object motion, Skyrim Together's per-frame body writes corrupted Havok; its unmerged #913
+  is the keyframed-follower shape); the CommonLib surface is cited by file:line, the rest is nine "RE this" items.
+  D43 PROPOSED there: A leave as today, B rest-only (TES3MP's shape, corpse-rest and item-rest as two whole verbs
+  in M4, 7 to 11 days), C the whole arc with motion streams (20 to 30 days plus RE), D ragdoll pose; recommended
+  B. Eli decides later; nothing before playtest 35 depends on it.
