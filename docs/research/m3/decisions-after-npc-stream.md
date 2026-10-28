@@ -575,3 +575,19 @@ full sweep) after D37's. apocrypha confirms: 1.6.1170 support in the current rel
 Engine Fixes, which menus to unpause (dialogue unpaused meets npc-talk's lease; containers meet the server's R0
 inventory, the container menu's live updates while another player moves items a probe). Decision: pending
 (apocrypha's layer; Eli's call on the menu list).
+- 21:45 PDT 2026-10-27 (D45 addendum, playtest 35 ended): Eli's close adds NPC jerkiness on the non-host screen and
+  player figures feeling off against the pre-stream movement ("what we had before for movement felt a TINY bit
+  more natural"). Item g: before any tuning, the puppet and figure paths MEASURED with ADR-031's recorder on 56's
+  stage against the reference traces (p-npc-stream's row, numidium's per-id grammar) and the pre-stream build's
+  figure numbers (x-duel-stream 20261022-233951); numidium's note stands: by number, not by eye. Item d's ease
+  ships in 56 with its own before and after numbers. Two causes pinned by the fresh logs: (a) the movement judge's
+  Follow record overwrites a Claim row when the claimed actor crosses a cell (cells.rs's insert at the Follow
+  verdict), so the claim ends silently, no ClaimEnded word, and the client's claimed flag never clears (Hilde's
+  crossing 9732 to 9731; zero "ended with its lease" lines; E_CLAIM_NONE on rotfern's release at 04:26:48): the fix
+  keeps the Claim row across the claimant's own crossings and ends it only by release, lease, departure, unload or
+  death, plus the client's resets. (f) the host's death causes for its own player's arrow kill were queued with
+  the attacker ff000000 mapped to local 0 (the local player's remote id has no local form in the map), and the
+  engine's health followed only its own arrow damage, so the native apply did nothing without an attacker; the
+  archer probe's causes (an NPC attacker) applied. The fix maps the local player to 0x14 and lets a cause with no
+  attacker apply the server's number anyway (no killer credited). f moves into train 56 (small, pinned); b (the
+  voice's later lines) stays 57's behind the re-analyst's read.
