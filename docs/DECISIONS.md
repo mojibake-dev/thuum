@@ -3062,3 +3062,11 @@ reload is measured first, and if it still sends nothing the suspects are service
 lives in class fields rather than storage (the hosted set, the puppet maps, a held claim), read
 from the seat's console. Until that run the hot path's round trip and a reload's survivors are
 unmeasured.
+MEASURED green (00:29 PDT 2026-10-28, numidium, c2 outside any run, 07:26 to 07:27Z): a last-write
+rewrite of skymp5-client.js (WriteAllBytes; a ReplaceFile does NOT trigger the monitor) reloaded
+the plugin (skyrim-platform.log's "Found settings file ... for plugin skymp5-client" count rose
+by one, SkyrimPlatform.cpp:191), and after it a `look` moved the server's record rotation and a
+1.5 s walk moved it 531 units, both players online: ADR-041's storage fix holds, the reloaded
+client keeps its world and skips a new login correctly, and client-hot needs no reconnect. A
+side fact of the run: look's setAngle does move the server's rotation; the earlier "unchanged"
+readback was a stale latent read, so the lab's aim lever may be simpler than a judged teleport.
