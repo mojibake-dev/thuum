@@ -631,3 +631,14 @@ streaming to the Mac over Moonlight and reaching sky-srv over the tailnet; to si
 cost per seat-hour, the Skyrim and Steam install per instance, the latency to the on-prem server, Sunshine on a
 headless Windows display, and the lab's clone and snapshot shape against instances that come and go). Eli on
 Docker: not wanted on the Mac; T0 and T2 run on sky-srv's toolchain instead (ADR-054 item 2).
+
+### D49. A turbo day (00:21 PDT 2026-10-28, Eli)
+Eli asked again what "throw ceremony and ci/cd to the wind and iterate as fast as possible" looks like; the
+answer was ADR-041's turbo mode all day: Eli plays from the morning, fixes land live (a client change in under a
+minute, a server or Skyrim Platform change in about ten, the compile being physics), the oracle is Eli plus the
+server log and the seats' consoles, one turbo-log line per push, merges at the end of the day, the nightly the
+only net; the costs named (Eli's time the limit, regressions a day late, a thin scenario library, authority bugs
+that corrupt a world quietly). Eli: "yea cook on shit and we'll do a turbo day tomorrow". Decision: 2026-10-28 is
+a turbo day on 56's stage (7b61b533 over parity bf133744), no gate before play; the voice trace runs first thing
+for 57; authority changes (a claim, a death, an inventory or persistence rule) still take CI's T0 and T2 before a
+push; the gate and the merge at night; the runbook is docs/research/process/turbo-day.md.
