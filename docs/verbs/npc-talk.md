@@ -123,6 +123,19 @@ second (UNMEASURED).
   the client logs the engine's own in-dialogue word at the menu's open. The release also waits for
   the actor's last line to settle (2.5 s, within 10 s of the close; 310c0d77): Orgnar's post-dialogue
   line began 19 ms after the 3 s graced release and was dropped as a non-simulator's (22:04:00Z).
+- One activation per claim (fork m3-face-twelve 4fa48629; the re-analyst's read,
+  docs/research/m3/re-claimed-dialogue-state.md): playtest 37's finding 19 read the engine's own
+  Actor.IsInDialogueWithPlayer() FALSE for a claimant's promoted partner with the menu open and TRUE
+  for the host's own. The talking-to-player byte (HighProcessData::talkingToPC, +0x458) is set by
+  the first TESNPC::Activate through Actor::SetDialogueWithPlayer and cleared by a SECOND activation
+  of an actor whose dialogue already runs (the activation's set-then-clear pair before its speaker
+  test); the byte gates the AI's package step (the wiggle), the look at the player (the missing head
+  turn) and the voice timing. On the claimant's seat the engine's own E release after the promote and
+  our activatePickRef were two. Now activatePickRef runs nothing while the Dialogue Menu is open,
+  while the MenuTopicManager's speaker is the pick or while the pick already talks to the player, and
+  consumeActivatePress marks the claim's E press done on the ActivateHandler so its release activates
+  nothing (HYPOTHESIS H-55e: the native reads TRUE on the claimant; H-55f: the consumed press
+  activates nothing; x-npc-talk-claim reads both; the Frida plan is in the read).
 - Kill switch config key: npcTalk (default on).
 
 ## Tests
