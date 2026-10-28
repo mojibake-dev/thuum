@@ -437,6 +437,12 @@ playtest-record-stop:
 
 # In a playtest, quit a player's game and start it again ("quit test 1": client c1 or c2), and wait for its login.
 # Turbo mode (ADR-041): a live session's pushes, every one logged in /srv/lab/turbo.log.
+# A live read of the lab's logs to leave open in a terminal (a turbo day's, memo D49): `just lab-tail server [pattern]`
+# follows the lab server's docker log over the jump, `just lab-tail c1|c2 [pattern]` polls that seat's console tee every
+# two seconds through the guest agent with a shared read, from its end onward. Read-only; Ctrl-C ends it.
+lab-tail what pattern=".":
+    @lab/tools/lab-tail.sh {{what}} {{quote(pattern)}}
+
 # A server push: skymp-server alone switched to a fixed <ref-slug>-<sha8> tag the fork's server-build pushed, the world
 # saved first, then the wait for both seats back online (they reconnect by themselves).
 turbo-srv tag:
