@@ -596,3 +596,9 @@ inventory, the container menu's live updates while another player moves items a 
   (wire-legacy decodes the lab's capture positionally; the late-join action is a custom property). 57: the voice's
   later response lines (the re-analyst's read runs now) and item g's measurement. Lab order unchanged: 53's gate
   and merge, the D37 layer overnight, 56's stage and probes in the morning, playtest 36 on its stage.
+- 22:36 PDT 2026-10-27 (D45 b, the voice's later lines): the re-analyst's read is in (docs/private/re-voice-responses.md,
+  the Dynamic section in npc-stream.md). The later lines of an info start from the AI update's null-topic SayTopic,
+  which an AI-off puppet never runs; the player's dialogue partner speaks through UpdateInDialogue with no event
+  (the one-capture-per-info of 35). Train 57's shape: A, the puppet's own continuation from DriveVoice (no wire
+  change), after the Frida trace confirms the chain (lab/frida/voice-lines.js, a host seat, 120 s). Rule 8: no code
+  before the trace.
