@@ -74,7 +74,11 @@ steps:
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
   - c1: draw-weapon
   - wait: 1
-  - c1: repeat {times: 6, gapMs: 1500, step: {hold-key: {code: 199, ms: 120}}}
+  # four measured swings, not six (55's gate 20261028-002258: all six landed, 42 of his 50, and the two swings
+  # for the numbered hit then took him to zero, 56 in all; the eighth, lethal, rolled the engine's own kill
+  # move, which named the killer itself and left the credit nothing to do). Four land at most 28, the two
+  # after at most 14: 42 at most, never lethal, so the death is npc-damage's alone
+  - c1: repeat {times: 4, gapMs: 1500, step: {hold-key: {code: 199, ms: 120}}}
   - wait: 2
   # the measured swings, then the one-number read: the engine's health on the host against the record
   - c1: npc-state {formId: 0x13491}
@@ -86,7 +90,7 @@ steps:
   # 537 ms before (the engine's number outran the server's)", the server's number still at 0.04, and the
   # credit had nothing to do; which path a lethal blow takes is the engine's dice, 160510 and 161323 took
   # the server's): the server path's report shape forced. Two more sword swings land at least one numbered
-  # hit, never lethal (at most eight hits of seven on his fifty), then the host's own engine takes his
+  # hit, never lethal (at most six hits of seven on his fifty: four measured, two after), then the host's own engine takes his
   # health with no attacker (npc-damage, Actor.DamageActorValue, as the cause does when it brings the engine
   # to zero): deathStart names no killer, the report says cause 0, and the server credits the hit it
   # numbered within its 3 s window (H-52b, m3-npc-face 240a31de)
