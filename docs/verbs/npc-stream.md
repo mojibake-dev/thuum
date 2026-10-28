@@ -1891,6 +1891,55 @@ per-line capture on the host with the puppet saying by response index.
 HYPOTHESIS until the trace. The different greeting was two greeting infos
 147 ms apart, the puppet starting the first.
 
+### Train 57, Dynamic: the later response lines (the re-analyst's read, 22:36 PDT 2026-10-27; HYPOTHESIS until the trace)
+
+The read (docs/private/re-voice-responses.md, REA on sky-re against the
+unpacked 1.6.1170; ids by `just addr`, structures by CommonLibSSE-NG
+DialogueItem.h:55, HighProcessData.h:298, :337, :338, :345,
+MenuTopicManager.h:40-44, :71-78, TESObjectREFR.h:272): a topic info's
+responses are a list on the actor's DialogueItem; each line's START runs
+39643 (play the item's current response, raise the BEGIN event 25616, advance
+the current response, 35223); the FIRST line starts from SayTopic 39162 with
+the topic, every LATER line starts from the AI update's 39632 calling
+SayTopic with a NULL topic while HighProcessData's greetingPlayer (+0x454)
+marks an item in progress; the voice timer path (37752, UpdateSoundCallBack
+37544) only ENDS lines. An AI-off puppet never runs 39632, so it plays the
+first line and stops: the lab's voice slice as measured. Inside the player's
+Dialogue Menu the partner's lines run through Actor::UpdateInDialogue (37541,
+the vtable slot CommonLib names), which calls SpeakSoundFunction (37542) per
+line and raises no event, so the host captures one BEGIN per info there:
+playtest 35's "one voice file" is the menu case, Sven being the host player's
+partner. SpeakSoundFunction is per line on every path; its arguments carry
+the voice path alone, no response index, so a per-line capture would read
+the response one frame up (39772 for barks, 37541 for the menu).
+
+Fix shape A (recommended; no wire change): the puppet's own continuation.
+From PuppetHooks DriveVoice, after the pair has ended a line, while
+greetingPlayer is set and the busy test 37266 says free, call
+Offsets::Voice::SayTopic(process, actor, nullptr, nullptr, false,
+high->unk45C, lipPending(39369), false), the AI update's own call: 39642
+refuses while a lip load is pending, otherwise plays the item's current
+response, raises a BEGIN this seat ignores, and advances; the last line's END
+clears the mark and the loop stops. The host's relay stays one message per
+info; the relayed repeat of greetTopic's info while the mark is set is
+dropped (barks raise a BEGIN per line). Shape B (per-line capture on the
+host with a per-index say) needs two more hooks and a response index no
+engine entry takes (SayTopic resets to the first response). A is the lazy
+one: the responses are the same plugin data on both seats.
+
+The trace (lab/frida/voice-lines.js; a host seat, 120 s: the player talks to
+Sven through a multi-line topic, then stands in Riverwood for barks and
+scenes): hooks on 37542 (the actor's id, the voice path), 39772 (the item's
+info and the response's index and path), 37541 (the menu's response path and
+info, non-null rdx only), 25616 (the info id and the event type), 39632 and
+39643 (entries per actor). Expected: the menu, one type 0, N 37541 and 37542
+entries, one type 1; a bark, N 39772 and 37542, N type 0, one type 1. With A
+built, a puppet seat shows N 39643 entries per info and zero 39632 entries
+for the puppet's handle. Falsifiers: a multi-line bark with one type 0; 39632
+entered for an AI-off puppet; 37541 with a response for a non-partner
+speaker; the continuation returning 1 with nothing started while the mark is
+set and 37266 says free (39372 on a stale lip entry is the unread gate).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
