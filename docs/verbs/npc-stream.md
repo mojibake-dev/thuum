@@ -1940,6 +1940,28 @@ entered for an AI-off puppet; 37541 with a response for a non-partner
 speaker; the continuation returning 1 with nothing started while the mark is
 set and 37266 says free (39372 on a stale lip entry is the unread gate).
 
+### Train 53 merged (00:08 PDT 2026-10-28): fork parity bf133744
+
+The chain 20261028-044241 (the gate, 30 scenarios, four not-greens, every one
+a premise or a tooling read: the mage's timing, Sven's walk, a lab-api
+log-count fault, the lab's aim) plus the rest 20261028-064325 (death-engine,
+stream-voice and talk green; b-npc-caster red on the mage's death before a
+cast end, green on its rerun 065950), verdict watch; both clones promoted to
+clean-m1 at 07:07Z. Slice 6 (bows and spells on hosted NPCs) is on parity
+with the whole NPC ladder: trains 51, 52, 54, 55 and 53. b-npc-archer and
+b-npc-caster are the slice's scenarios; the Status boxes below stay as they
+are until the hypotheses close (H-53a's leveled list, H-53c's drop rule,
+H-53e's path, H-54c's jitter) and the parity scenario p-npc-stream is built.
+
+## Watch item (00:08 PDT 2026-10-28, 53's chain, ADR-027): b-npc-caster
+
+Red once at 20261028-051558 (the observer's read before the mage's first
+cast; the until on the server's live cast line fixed it, bf15433) and once at
+064325 (Sven's arrows killed the mage within fifteen seconds of its first
+cast, so no cast could end; the mage's record is hardened after its first
+cast, main 34cbc19), green on the rerun 065950 with neither lever yet
+deployed. Closes when the scenario plays green with both levers in a gate.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
