@@ -440,6 +440,17 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   landed and the two for the numbered hit made the eighth lethal, which rolled the engine's kill move; my
   arithmetic (eight sevens are 56, not under 50). Main dca3b06: four measured swings, 42 at most before
   npc-damage; claims unchanged; numidium deploys mid-gate for the reruns. A premise red of the probe's own.
+- 19:40 PDT 2026-10-27 (D36 C's follow-up, drafted in 53's stage wait): x-handoff-deep v1 by path (lab/.cache/
+  probes, probe-check ok), the pass a step beyond the margin at T3: Sigrid standing 300 or more inside c1's cell
+  0x9712 (Riverwood02, grid 5,-11) is moved by c1's own engine to 300 inside c2's 0x9731 (Riverwood04, grid 5,-12;
+  grids by esm.py's XCLC, the border at y -45056) with npc-pose's TranslateTo at 150 u/s, her AI off and
+  SetDontMove on the host first (HYPOTHESIS: a TranslateTo under a running AI is fought; the reads tell). Read at the
+  fork (parity 1b866786): the deep pass writes no "passes" line (ActionListener's cell-host line sits under
+  hostedCellChange, false once the follow moved the record); its line is D9's "now simulates 13483 in cell 9731; the
+  sender's game is told to demote", written at every Pass verdict. Claims: the margin follow line, D9's line once,
+  no refusal, the follow row gone (server.follow), c2 hosting 9731 still, the seats' AI swapped, the record and c2's
+  copy within 100 of the target. npc-pose takes lab-spawn's frame, so the target is written as offsets; a
+  world-frame row for npc-pose is a lab-api wish on numidium's after-ladder list, where this probe runs.
 ### D41. Expedite: playtest 35 tonight, the D37 layer after it (17:47 PDT 2026-10-27, Eli)
 Eli: "let's do the expidition and drop 35 tonight" (on the estimate: 55's gate to about 19:15 PDT, 53 to
 about 23:15, then the layer's full sweep of about six hours would have put 35 at 06:00). Decision: after 53
