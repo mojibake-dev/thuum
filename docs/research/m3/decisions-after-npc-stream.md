@@ -741,3 +741,14 @@ NextClip on c2) and play "for one (pointing) sometimes neither": the replay's ve
   tracking update's distance gate, RE first per ADR-054): the relayed target then exists for every conversation.
 Recommended B now (a day's client work, probe x-npc-pair-gaze: Sven and Hilde's DRAGON scene at 7.9 read on the observer),
 C as the next step if B's heuristic misses.
+- 14:06 PDT 2026-10-28 (playtest 37, Eli: "those 2 animation complications are .... a challenge. dont those actions still
+  produce SOMETHING we can transmit?"; numidium's answer and the design call): yes, and both identities already travel (the
+  line, the gaze target); the puppet's engine is what does not act on them. The order, laziest first: (1) make the engine
+  consume what we send: the in-flight fix keeps every puppet line on the lip path (m3-voice-inflight), and the head-track
+  target we set works once the update that turns the neck runs; the re-analyst reads whether the face animation and the
+  head-tracking update run on an AI-off actor (RE/H/HighProcessData.h:171-182 SetHeadtrackTarget and :217 headTrackTarget
+  sit in the AI process's data), and if gated, the smallest change runs that one update for puppets (a per-frame call or a
+  detour of the gate); (2) only if neither can be made to run do we stream raw values (the phoneme keyframe,
+  RE/B/BSFaceGenAnimationData.h:39-43, while a line plays; head and neck rotations by a native hook), measured against the
+  skeleton's own update first. Playtest 37 also found the stale in-flight item (a sound-path line's) behind the snap-closing
+  dialogues and the no-lip lines; the fix rides the same branch.
