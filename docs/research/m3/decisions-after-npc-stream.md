@@ -515,3 +515,7 @@ set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, 
   Eli's report; 53's gate and merge after it, then the D37 layer (D41).
 - 21:12 PDT 2026-10-27: 35 re-set on rotfern and Prisoner's composed world (Eli's ask to numidium at 21:05); seats
   ready 21:10:06 PDT, the hold to 00:09 PDT; the build unchanged (53's stage bf133744), frozen until the report.
+- 21:31 PDT 2026-10-27: playtest 35 called early by Eli with three asks and a fourth read (checklist's Result): a late
+  joiner's missing in-progress action, the guest's claim never sent for Sven, dialogue voice relaying the first
+  line only, rotfern's head node 0.94 after every teleport. The log read runs (pt35-read-1); D45 (the fix train's
+  shape and order against the D37 layer) follows it. 53's gate and merge stay as armed, after the informal report.
