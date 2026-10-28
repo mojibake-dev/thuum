@@ -31,3 +31,13 @@ measures alive. The cadence ADR-053 set stays for the days after; this is the da
 The claim as a player lives it, the chore a late joiner sees, the voice's later lines (57, if the trace
 confirms and the build lands), bows that kill by the engine, the head after teleports, the figure's stop, NPC
 motion against 35, the feel.
+
+## Knobs for the day (00:24 PDT)
+The motion feel numbers are settings (fork m3-turbo-knobs a29f237a, in the morning's stage if its pipeline is
+green): `skymp5-client.movement` in the seat's skymp5-client-settings.txt with `leadSeconds` (0.2, the running
+lead), `leadDecay` (0.5, its run-out per standing sample), `deadbandMoving` (8), `deadbandStill` (1),
+`popDistance` (256), `popWindowMs` (600), `jumpDistance` (1024) and `sendRateMs` (130, the player's own samples
+and the host's samples of its NPCs). Any of them is a line in the settings file and a plugin reload (client-hot
+or a relaunch), no build; the defaults are the shipped values, so an absent block changes nothing. Eli's "jerky
+NPCs" and "snap after a jog" are read against these first: a lower sendRateMs smooths puppets at the cost of
+bandwidth, a longer leadSeconds leads figures further, a slower leadDecay glides longer.
