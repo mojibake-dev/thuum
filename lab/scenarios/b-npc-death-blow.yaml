@@ -10,6 +10,8 @@
 # move takes the other path (cause 4, the killer named, x-npc-death-blow v1 174006); which path a lethal blow
 # takes is the engine's dice (52's rest 153601, 160510, 161323 took the server's). Claims: b-npc-death-engine's
 # nine plus the credit line. Its own commit (rule 13).
+# 53's gate 052618: Sven held in place (npc-hold) before the measured swings, the walking-target premise; claims
+# unchanged (its own commit, 22:31 PDT 2026-10-27).
 id: b-npc-death-blow
 milestone: M3
 clients: [c1, c2]
@@ -71,6 +73,12 @@ steps:
   - c1: npc-state {formId: 0x13491}
   - assert:
       - c1.npc_state(0x13491).inCombat == true
+  # 53's gate 20261028-052618 (death-engine): none of the measured swings landed, Sven working his distance in
+  # combat (he hit c1 four times, c1 him never): the walking-target premise. He is held in place (npc-hold,
+  # SetDontMove: his current leg ends within a few seconds, then he stands exactly, still in combat) before the
+  # approach, so the swings find him; the claims are as they were
+  - c1: npc-hold {formId: 0x13491, held: true}
+  - wait: 5
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
   - c1: draw-weapon
   - wait: 1
@@ -121,6 +129,7 @@ steps:
       - c2.npc_state(0x13491).isDead == true
       - abs(c1.npc_state(0x13491).x - c2.npc_state(0x13491).x) < 200
       - abs(c1.npc_state(0x13491).y - c2.npc_state(0x13491).y) < 200
+  - c1: npc-hold {formId: 0x13491, held: false}
   - c1: dump-state
   - c2: dump-state
 artifacts: [server.log, c1.log, c2.log, screenshots]
