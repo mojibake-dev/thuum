@@ -713,6 +713,17 @@ second player stands at a chest that will not open while the first browses it.
   two seats in one chest (x-container-shared), b-container-shared after it.
 - C: B without the refresh: the stale view corrects itself at the next open. Cheaper, visibly wrong once.
 Recommended B. A train of its own after the turbo trains merge; the refresh is the part that makes it feel right.
+- 13:04 PDT 2026-10-28 (the code read for B): the one-looter rule is MpObjectReference::ProcessActivate's CONT branch
+  (MpObjectReference.cpp 1627 to 1655): CheckIfObjectCanStartOccupyThis (1773 to 1810) lets a second player in only when
+  the occupant is gone, disabled, over 512 units away or in another cell; otherwise the activation does nothing on the
+  server and the seat's E is silent (playtest 36: test 2's E on a body test 1 was looting, "occupant is another object and
+  is nearby"). The occupant is one MpActor* with two event sinks (destroy, disable) that clear it. B's shape: a set of
+  occupants (each with its sinks), the inventory property and OpenContainer sent to each on its activation as today, and
+  on every change to the container's inventory (TakeItem, PutItem, the server's own moves) the "inventory" property sent
+  again to every occupant within reach, so an open menu shows the move (HYPOTHESIS: the engine's ContainerMenu refreshes
+  when the reference's inventory changes under it; skymp5-client applies the property through ModelApplyUtils). No wire
+  change; T0 on the occupant set; a probe with two seats in one chest reads the refresh. Bodies share the branch, so two
+  looters on one corpse follow.
 
 ### D53. NPCs facing each other, and their talking animations, on the observer's screen (11:36 PDT 2026-10-28, Eli's item 6 and item 4's scene)
 The local gaze (D50, 8acf15f9) makes a puppet with no relayed target look at the LOCAL player; the host's engine relays a
