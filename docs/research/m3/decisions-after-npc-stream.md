@@ -670,3 +670,6 @@ layer-stage with a smoke, the sweep at night) or the evening.
 - 04:24 PDT 2026-10-28 (the D37 sweep's red, numidium's a or b): b-npc-talk 111955 is 55's release bug (fixed in 56).
   Call: a green rerun proceeds as armed; two red reruns take (b), D37 staged unmerged, Souls and 56 over it, one
   sweep tonight for the three, no gate surgery (a pending entry under ADR-042b and a hand merge was (a)).
+- 04:25 PDT 2026-10-28 (correction): b-npc-talk 111955's cause is the claim row overwritten by the movement judge's
+  follow when Sven crossed into 9731 mid-dialogue (the release was sent; E_CLAIM_NONE answered), 56's cells.rs fix;
+  the (b) call stands.
