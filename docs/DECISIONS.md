@@ -3055,5 +3055,10 @@ and logs in again on an empty-storage start with the native client connected (th
 it holds for players too); (b) client-hot follows the reload with a forced reconnect from
 lab-driver, a lab-side workaround. numidium measures (b) on one seat after tonight's rest (a
 createActor at the server, then a turn's rotation read back); if red, client-hot waits on (a),
-which rides the next client train. Until that run the hot path's round trip and a reload's
-survivors are unmeasured.
+which rides the next client train. The 2026-10-19 red is the case ADR-041's storageProxy fix
+cites, and that fix is on parity (the storage target on globalThis, which ClearState never
+touches), so a reloaded client keeps its world model and skips a new login correctly; the plain
+reload is measured first, and if it still sends nothing the suspects are services whose state
+lives in class fields rather than storage (the hosted set, the puppet maps, a held claim), read
+from the seat's console. Until that run the hot path's round trip and a reload's survivors are
+unmeasured.
