@@ -1021,6 +1021,10 @@ function faceOf(formId: number): Record<string, unknown> {
   if (!Array.isArray(last) || last.length < 4) return { available: true, read: false };
   const nums = (v: unknown): number[] => (Array.isArray(v) ? v.map((x) => (typeof x === "number" ? x : 0)) : []);
   const phoneme = nums(last[2]);
+  // fork m3-face-twelve (2026-10-28, after the control read zero phonemes on a live NPC whose mouth moved): index 4
+  // carries every keyframe set of BSFaceGenAnimationData, 0x20 to 0x180 in header order; setsMax names the one that
+  // moves while a lip-synced line plays, so the probe finds the lip set without a second build
+  const sets = Array.isArray(last[4]) ? (last[4] as unknown[]).map(nums) : undefined;
   return {
     available: true,
     read: true,
@@ -1029,6 +1033,7 @@ function faceOf(formId: number): Record<string, unknown> {
     phoneme,
     phonemeMax: phoneme.reduce((m, x) => Math.max(m, x), 0),
     override: Boolean(last[3]),
+    ...(sets ? { sets, setsMax: sets.map((v) => v.reduce((m, x) => Math.max(m, Math.abs(x)), 0)) } : {}),
   };
 }
 
