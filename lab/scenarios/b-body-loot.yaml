@@ -1,0 +1,67 @@
+# b-body-loot (thuum-magnus, 2026-10-28; the D37 layer, DeathDropOverhaul out of the load order, memo D37 B and
+# D41; docs/verbs/npc-fate.md): a looted body keeps its clothes and the roll's shield stays on it, on the engine
+# and on the record. Promoted unchanged from x-body-loot v5 (GREEN 20261028-072219 on the layer's stage; the id and this
+# header changed, steps and claims byte for byte). c1 alone in Bleak Falls Temple 0x371de (c2 parked at the
+# spawn, so c1 hosts), 400 units west of the campfire pair; the fate's pin holds first (the engine's worn set
+# equals the fate's worn list); the server kills 0x39fe4 with c1 as the killer; c1 activates the body and the
+# loot menu opens from the activation (the server's OpenContainer); after the menu the body's worn set still
+# equals the fate's worn list on the dead record and on the engine, no E_ACTIVATE_REACH. With the mod in the
+# load order the engine's worn set lost ArmorHideShield 0x13914 at death (x-body-loot v3 and v4, 2026-10-26);
+# the refs-near reads for 0x13914 stay as reads. Its own commit (rule 13).
+id: b-body-loot
+# v2 (2026-10-25 16:5x PDT): close-menu names the ContainerMenu (x-body-release v1's lesson)
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 360
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: console {text: "tgm"}
+  - c2: console {text: "tgm"}
+  - wait: 2
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 25
+  - c1: npc-state {formId: 0x39fe4}
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - c1.npc_state(0x39fe4).aiEnabled == true
+      - server.ref(0x39fe4).isDead == false
+      - c1.npc_state(0x39fe4).worn == server.fate(0x39fe4).worn
+  # the server's kill; the host's view kills the body within its two-second re-apply
+  - c1: kill-ref {formId: 0x39fe4, killer: c1}
+  - until: {within: 10, expect: [server.ref(0x39fe4).isDead == true]}
+  - wait: 5
+  # beside the body: what lies around it (the mod's drop, if any) and what it wears
+  - c1: approach {formId: 0x39fe4, distance: 60, cell: "371de:Skyrim.esm"}
+  - wait: 2
+  - c1: refs-near {radius: 4096, formTypes: [26, 41], ids: [0x13914]}
+  - c1: npc-state {formId: 0x39fe4}
+  - c1: screenshot
+  - assert:
+      - c1.npc_state(0x39fe4).isDead == true
+      - server.ref(0x39fe4).worn == server.fate(0x39fe4).worn
+      - c1.npc_state(0x39fe4).worn == server.fate(0x39fe4).worn
+  # the loot: the activation reported, the server's inventory laid in, its OpenContainer opens the menu
+  - c1: activate {refId: 0x39fe4}
+  - wait: 4
+  - c1: screenshot
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 3
+  - c1: refs-near {radius: 4096, formTypes: [26, 41], ids: [0x13914]}
+  - c1: npc-state {formId: 0x39fe4}
+  - c1: screenshot
+  - assert:
+      - server.ref(0x39fe4).isDead == true
+      - c1.npc_state(0x39fe4).isDead == true
+      - server.ref(0x39fe4).worn == server.fate(0x39fe4).worn
+      - c1.npc_state(0x39fe4).worn == server.fate(0x39fe4).worn
+      - 'server.log_count("E_ACTIVATE_REACH") == 0'
+artifacts: [server.log, c1.log, c2.log, screenshots]
