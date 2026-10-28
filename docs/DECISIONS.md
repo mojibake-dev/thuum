@@ -2989,3 +2989,56 @@ skyrim-platform or the gamemode; half a day); the nightly's list checked for eve
 scenario (minutes); the premise lever library (npc-still, an approach that re-aims, an ordered
 restart, a judged look; about a day, each timed live first). The first day runs the slots by
 hand with today's tools.
+
+## ADR-036: A seat relaunches the game between runs instead of rolling its VM back
+
+Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", the fifth of
+memo D48's faster ways). Proposed 2026-10-16 on thuum branch (see docs/private/decisions-lab.md) (its text there; the lab's
+facts in docs/private/decisions-lab.md and docs/research/process/turbo-mode.md:95: a relaunch is a
+median 31.5 s a step over 156 of 239 measured, in game 27.6 s after the command, bounded at five
+minutes; a rollback costs the VM's restore plus Steam's startup checks, docs/LOG.md 2026-10-16).
+numidium implements it in lab-api behind ADR-053's knobs and ADR-054's hot path: a run's seats
+relaunch onto a named save instead of restoring the clone (the launch task's IgnoreNew setting
+fixed, the cleaning list applied between runs, the ASLR base reuse noted), the rollback kept for
+a seat whose relaunch fails twice and for the snapshot promotions. UNMEASURED until the first
+day: the minutes saved per run against the rollback's, and any state a relaunch carries that a
+rollback cleared.
+
+## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
+
+Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
+faster ways of memo D48; the fourth, more seats, is Eli's to brainstorm). Companion to ADR-053
+(the cadence) and ADR-041 (turbo mode); adds to the workflow in CLAUDE.md.
+
+**Context.** On 2026-10-27 five of train 56's six fixes were TypeScript alone, and each client
+iteration cost a Windows build in CI (10 to 40 min), a stage (20 min) and relaunches. Two CI
+rounds died on a unit test file (40 min) that a local build would have caught in two. The one
+engine-facing unknown read statically first (the voice's later lines) produced an exact fix
+shape and a trace in twenty-five minutes, where a built guess would have learned at T3 in hours.
+ADR-041's turbo-client already builds skymp5-client.js on the Mac from a fork ref in seconds and
+lays it into every game folder through the guest agent; Skyrim Platform reloads a plugin whose
+file changes (the fork's DirectoryMonitor, SkyrimPlatform.cpp:115 to 127).
+
+**Decision.**
+1. The client hot path: `just client-hot <client> [file]`, turbo-client's lay for ONE seat with
+   no relaunch, taking a bundle built here (webpack in a worktree with SKYRIMPATH at a scratch
+   folder, or turbo-client-build's from a ref), its proof the reload line in skyrim-platform.log.
+   The seat is marked hot-reloaded under C:\sky-lab, so playtest-setup refuses it until a
+   relaunch or rollback clears the mark: a hot seat is never a playtest's. A change proved this
+   way still runs its train's pipeline before a stage or a merge; the hot path is for the loop,
+   not the record.
+2. T0 and T2 before any push: the server built on sky-srv's own toolchain (a scratch checkout
+   with ccache over ssh, where the server already builds and runs; no Docker emulation on the
+   Mac), `ctest` for T0 and the fake clients against that server for T2's sessions; a push to the
+   fork follows a green local run, so CI confirms rather than discovers.
+3. Reverse engineering before engine-facing code: for any change to what the engine does on a
+   seat, the Dynamic section (the static read with REA or Ghidra, the Frida plan, the expected
+   observations) is written and, where a trace is cheap, run before the code; rule 8 as the
+   habit, not the exception.
+
+**Consequences.** A TypeScript iteration drops from about an hour to about two minutes; a
+server change's first failure shows before CI; an engine-facing change starts from a hypothesis
+with a trace instead of a guess with a gate. The cost: a hot-reloaded seat drifts from the
+staged build until its relaunch, and sky-srv carries a build tree beside the deployed server.
+UNMEASURED: the hot path's round trip and whether every client service survives a reload
+(ADR-041 read storage alone); read on its first use.

@@ -616,3 +616,18 @@ trace, 56's five probes, T2) and carries playtest 36 trimmed to eight items; the
 trace confirms the chain) and the D37 layer's result, playtest 37. The GPU question (D47's companion, 20:3x PDT):
 no sharing on the lab's cards; more seats by passthrough.
 - 23:47 PDT 2026-10-27: D47 closed, ADR-053 ACCEPTED (Eli: "oh then yes accept"). numidium's tooling moves off its branches: the gate's verb map, the slot wrapper, the R0 merge path, the nightly's list check, the lever library (two days between them); the slots run by hand meanwhile.
+
+### D48. Faster still: the six levers beyond ADR-053 (00:01 PDT 2026-10-28, from Eli's words of 2026-10-27 late)
+Eli: "yeah. full transparency, im impatient and think there has to be a faster way to be doing this." The six
+levers given, by payoff per effort: (1) a client hot path onto a running seat (Skyrim Platform's reload, no CI,
+no relaunch; five of 56's six fixes were TypeScript alone); (2) T0 and T2 before any push (two CI rounds died on a
+test file); (3) reverse engineering before engine-facing code (the voice item: twenty-five minutes of static read
+gave the fix shape); (4) a second seat pair and a second server; (5) ADR-036, a relaunch instead of a rollback; (6)
+a scope cut of M4 to M6 to what an evening with friends needs. Eli: "do all of those sans 4. ill brainstorm on 4.
+we might be able to do windows vms in AWS with a gpu each that are spun up as needed but we'll see." Decision:
+ADR-054 ACCEPTED (1 to 3), ADR-036 ACCEPTED (5), the scope list written for Eli to strike (6,
+docs/research/m4/scope-cut.md); 4 pending Eli (the AWS idea: Windows GPU instances on demand, each a seat
+streaming to the Mac over Moonlight and reaching sky-srv over the tailnet; to size when Eli returns to it: the
+cost per seat-hour, the Skyrim and Steam install per instance, the latency to the on-prem server, Sunshine on a
+headless Windows display, and the lab's clone and snapshot shape against instances that come and go). Eli on
+Docker: not wanted on the Mac; T0 and T2 run on sky-srv's toolchain instead (ADR-054 item 2).
