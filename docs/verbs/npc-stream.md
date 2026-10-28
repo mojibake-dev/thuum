@@ -687,6 +687,36 @@ Skyrim Platform already sinks or from a hook cast-action already owns
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+2026-10-28, the fragment gate (playtest 37, Eli: "if i ask 'what do you have
+for sale' the trading menue is opened for both people"; the re-analyst's
+read A in docs/research/m3/re-puppet-head-lips.md): a relayed line a puppet
+says on a watcher seat runs its info's script fragments there too, since the
+engine's one sender of the TESTopicInfoEvent, DialogueItem::SendTopicInfoEvent
+(Address Library 35225), tests nothing per seat: the BEGIN leaves 39643
+inside our sayTopicInfo, the END leaves UpdateSoundCallBack inside our voice
+pair, both to 25616 and SkyrimVM's sink 53997, which calls the info's begin
+or end fragment. Built on fork m3-face-twelve 4e643c1c as a Gum replacement
+of 35225: a puppet speaker (Puppets::Is) whose high process is not
+talkingToPC (HighProcessData.h:341) sends no event, logged once a minute per
+speaker ("fragment gate: info X type Y on puppet Z not sent to the VM"); the
+host's own NPCs are not puppets there and keep every fragment; a claimant's
+partner is promoted first, so it is not a puppet either. Rung: the
+fragment's effect is the host's seat's (R2 recorded through its own
+consequences: a barter, a stage); the watcher suppresses. HYPOTHESIS H-57a
+(the gate stops the menu on the watcher) and H-57b (the host's own menu and
+fragments are untouched). Frida plan (lab/frida, the npc-puppet.js shape):
+hook 35225 (rcx the item: [[rcx+0x20]+0x14] the info's formID, [[rcx+0x38]+0x14]
+the speaker's; edx the type; a backtrace), 25616 (rcx info, edx type, r8 the
+handle pointer, r9b force) and 53997 (rdx the event: [+8] speaker, [+0x10]
+formID, [+0x14] type) on the watcher; c1 hosts a merchant and asks its wares,
+c2 watches. Expected on c2 with the gate: 35225 entered twice per line (type
+0 from 39643 inside the say task, type 1 from 37544 inside DriveVoice), no
+25616 and no 53997 after either, the BarterMenu shut. Falsified by a 53997 on
+c2 with no 35225 before it (another sender; gate at 25616) or by the menu
+opening with no 53997 at all. Probe x-npc-vendor by path: the same two
+seats, claims c2.state.menuOpen("BarterMenu") false after the host's ask,
+c1's true, c2's log-count of the gate line >= 1.
+
 - Frida script: lab/frida/npc-stream.js (lab/frida/npc-puppet.js's shape;
   LAB_PARAMS, no top-level name a Frida global owns, the stdout flushed:
   the 2026-10-21 pitfalls). Hooks, by `just addr`: the engine's send that
@@ -1669,6 +1699,25 @@ Mood mapping reads right on the puppet's face), H-54c (no per-sample jitter
 against the heuristic). Probe x-npc-stream-face by path (30 steps). The
 cadence row (P3) and slice 4's counters, budgets and parity scenario follow
 on this train.
+
+2026-10-28 (playtest 37, the re-analyst's read B in
+docs/research/m3/re-puppet-head-lips.md): the expression override leaves
+the puppet path. The engine's exprOverride (BSFaceGenAnimationData +0x21E)
+is written only by the Papyrus native SetExpressionOverride (54748) and the
+console's FaceGen command, never by the engine's own dialogue; while set it
+gates the expression setters, among them the line's own emotion that
+UpdateSoundCallBack (37544, state 3) applies inside our voice pair on the
+puppet, and it is not cleared by a promote, so the talker's live Orgnar read
+exprOverride true (numidium's 522 samples). So H-54b is withdrawn: the
+puppet wears what its say gives it, PuppetFaceService records the host's
+emotion and clears any override once per puppet, PuppetService clears it at
+every promote (fork m3-face-twelve 4e643c1c). The lip sync itself is not
+gated by the override: it writes the unnamed set at +0x120 from the lip
+file (16266, sixteen phonemes at 30 fps) and copies it to +0x140, which the
+face node's morph pass (26988) applies under two camera-distance INI
+floats; phenomeKeyFrame (+0x80) is the script layer and stays zero under
+engine lip sync, which is why the first face read saw nothing. faceKeyframes
+answers all twelve sets since ceb54180 (sets 8 and 9 are the mouth).
 
 54's stage, first read (10:43 PDT, x-npc-stream-face 20261027-173514 on
 m3-npc-face 240a31de): the gaze path is alive end to end for actors near the
