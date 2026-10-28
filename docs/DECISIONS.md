@@ -3090,3 +3090,38 @@ by one, SkyrimPlatform.cpp:191), and after it a `look` moved the server's record
 client keeps its world and skips a new login correctly, and client-hot needs no reconnect. A
 side fact of the run: look's setAngle does move the server's rotation; the earlier "unchanged"
 readback was a stale latent read, so the lab's aim lever may be simpler than a judged teleport.
+
+## ADR-055: Deployment, a friend's seat: the eight decisions of 2026-10-19, recorded as one
+
+Status: ACCEPTED 2026-10-19 13:00 PDT by Eli's ticks on docs/private/decisions-2026-10-19.md section 2; written here
+12:32 PDT 2026-10-28 (thuum-cf) as the friend deployment's item 1 (docs/research/deploy/friend-playtest.md section 3, on
+thuum branch friend-deploy), "before any script".
+
+Context. The friend deployment's research (2026-10-19) left eight blocking questions. Eli answered them on the
+decisions page; this ADR is the record the scripts and verbs build to, so none is asked again.
+
+Decision.
+1. Identity (D1): a shared password plus per-friend profile ids now (distinct, above 0; the installer writes both from
+   an invite); a token issuer later (ADR-011's token.rs, the issuer front in the gamemode). The server keys actors by
+   profile id either way, so a character record never moves between the two.
+2. Mod delivery (D2): the friend's own Nexus API key in our one download script (Premium accounts), the manifest's
+   hashes verifying the result; a token path or a Vortex collection were not taken.
+3. Server placement (D3): a DMZ sibling on VM 520's stub, promoted from the lab's gate (core's recommendation); the
+   lab stays dark and stays the gate.
+4. Game version (D4): 1.6.1170 by the scripted downgrade (ADR-025's version).
+5. Discord (D5): the existing bot and channel; kalpa's discord module shape (a pinned setup post, a release post per
+   roll).
+6. Operator tooling (D6): the lab gamemode's console over a non-public RPC.
+7. The starting kit (D7): no helmet and a visible face, by a server setting (the plan's source hypothesis: the vanilla
+   Player base record's outfit; a gamemode rule and a layer plugin were not taken).
+8. Alternate Start (D8): in. The sub-choice (the server offers the choice and the mod supplies the places, or the mod
+   runs as written and the lab measures what breaks) is open; the default when the work starts is the mod as written
+   first, measured.
+Also recorded: sky-build always on with malcolm stopped (core, live since 2026-10-19).
+
+Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
+the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
+installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs
+(the fresh-profile login, the mismatch, the start) and the friend-as-host scenarios after M3's host verbs. A change
+to any of the eight is a new ADR, not a rewrite of this one.
+
