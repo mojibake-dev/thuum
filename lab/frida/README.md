@@ -292,3 +292,13 @@ plus the animation job's distinct handles. On a puppet under train-33's detour t
 the relayed sample every tick; zeros there say the write did not reach the tick (F5, the stage
 order, or another writer). Attach to the running game after the seat stands where the actor
 is; no relaunch needed (the hooks are the per-frame path, not a login).
+
+- voice-lines.js: how a topic info's response lines start and end on a
+  talking actor (train 57, docs/verbs/npc-stream.md's Dynamic section; the
+  re-analyst's read in docs/private/re-voice-responses.md). Hooks
+  SpeakSoundFunction per line, the bark path's line start, the dialogue
+  menu's Actor::UpdateInDialogue, the topic info event sender, the AI
+  update's continuation (counted per actor) and the start of an item's
+  current response; a summary every ten seconds. Run on a host seat talking
+  to Sven through a multi-line topic, then standing for barks, 120 s
+  (x-voice-lines by path). Address Library ids by `just addr`, 1.6.1170 only.

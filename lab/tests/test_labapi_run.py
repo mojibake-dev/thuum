@@ -1950,9 +1950,11 @@ class CellHostSteps(RunTests):
 
         self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
-        lab = self.services.runner.s.client_lab_dir
+        # the sources log-count copies by a shared read: the platform log at its path, the tee under the game folder
+        sources = {"platform": self.services.runner.s.client_driver_log,
+                   "console": pve.game_dir + "\\" + self.services.runner.s.client_console_log}
         for name, text in files.items():
-            pve.files[f"{lab}\\{name}"] = text
+            pve.files[sources[name]] = text
         rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
         ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "moved"))
         self.assertTrue(ok, note)
@@ -1962,8 +1964,8 @@ class CellHostSteps(RunTests):
         """x-handoff-door 20261024-013234: skymp5-client's logTrace lines reach the game's console alone, so log-count
         reads lab-driver's tee of it (Data\\Platform\\Logs\\lab-console-logs.txt) beside skyrim-platform.log."""
         pve, note = self._log_count_on_a_managed_seat({
-            "logcount-003.log": "a moved line\nanother\n",
-            "logcount-003-console.log": "[npc-handoff] moved 13482 into 133c6\n[x] moved again\nquiet\n",
+            "platform": "a moved line\nanother\n",
+            "console": "[npc-handoff] moved 13482 into 133c6\n[x] moved again\nquiet\n",
         })
         self.assertEqual(self.services.board.log_count("c1", "moved"), 3, note)
         self.assertIn("1 in its Skyrim Platform log, 2 in its console log", note)
@@ -1972,7 +1974,7 @@ class CellHostSteps(RunTests):
 
     def test_a_log_count_without_a_console_log_counts_the_platform_log(self):
         """a driver from before the tee writes no console log: that copy reads nothing, and the count is the first log's"""
-        pve, note = self._log_count_on_a_managed_seat({"logcount-003.log": "a moved line\nanother\n"})
+        pve, note = self._log_count_on_a_managed_seat({"platform": "a moved line\nanother\n"})
         self.assertEqual(self.services.board.log_count("c1", "moved"), 1, note)
         self.assertIn("0 in its console log", note)
 
@@ -2360,3 +2362,55 @@ class GameCheckRetries(GameVersions):
         with self.assertRaises(RunnerError) as cm:
             self._check_with_misses(3)
         self.assertIn("E_RUN_GAME", str(cm.exception))
+
+
+LOGCOUNT = """
+id: x-logcount
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: log-count {pattern: "claim 13491"}
+  - assert:
+      - c1.log_count("claim 13491") == 2
+"""
+
+
+class LogCount(RunTests):
+    """log-count copies the seat's Skyrim Platform log and lab-driver's console tee with a read that shares write
+    access (the tee is open while the game prints: b-npc-stream-voice 20261028-063409 read 0 from a failed copy)."""
+
+    def _seat(self):
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        return self.services.control._b
+
+    def _console(self, pve):
+        return pve.game_dir + "\\" + self.settings.client_console_log
+
+    def test_both_logs_are_counted_through_shared_read_copies(self):
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\nother\n"
+        pve.files[self._console(pve)] = "x\nclaim 13491 granted\n"
+        run_id, body = self._run(LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)
+        copies = [c for c in pve.calls if c[:2] == ("exec", 901) and any("logcount-" in a and "ReadWrite" in a for a in c[2])]
+        self.assertEqual(len(copies), 2, pve.calls)
+
+    def test_a_console_tee_not_there_counts_as_empty(self):
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\nclaim 13491 granted\n"
+        run_id, body = self._run(LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)
+
+    def test_an_unreadable_log_keeps_no_count(self):
+        # the Skyrim Platform log never copies: three tries, then no count, so the assert cannot read it as 0
+        pve = self._seat()
+        pve.files[self._console(pve)] = "claim 13491 sent on E\nclaim 13491 granted\n"
+        run_id, body = self._run(LOGCOUNT)
+        self.assertNotEqual(body["verdict"], "green", body)
+        tries = [c for c in pve.calls if c[:2] == ("exec", 901) and any("logcount-" in a and ".log.copy" in a and "-console" not in a for a in c[2])]
+        self.assertEqual(len(tries), 3, pve.calls)
+

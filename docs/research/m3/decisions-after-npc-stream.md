@@ -203,6 +203,10 @@ the strict claim (the body wears the roll after the loot) returns to it.
   load order until M4's dropped-items row (a persist-mods render laid on clean-m1, numidium and core,
   in a gap or before playtest 35's setup); the strict body-worn claim returns to x-body-loot and its
   promotion b-body-loot once the layer is on the seats.
+- Amended 17:47 PDT 2026-10-27 (Eli: "let's do the expidition and drop 35 tonight", on the estimate that
+  the layer's full sweep pushed 35 to the morning): the layer lands AFTER playtest 35, riding the nightly or
+  its own sweep tomorrow; 35 is set up tonight on 53's merged parity with DeathDropOverhaul still in the load
+  order, its shield drop a named known limit in the checklist. layer-d37-ddo-out already carries main (8905804).
 
 ### D38. How train 51's cut gate finishes (00:15 PDT, numidium)
 51's gate set 20261027-054632 ended at 18 of 25 when sky-c2's RTX failed a link retrain at a lab-api slot reset
@@ -432,3 +436,198 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   grant 157 ms after the E, the menu open on the guest, the release at its close, the host live again). Promoted
   as b-npc-talk (main, its own commit) for 53's gate. 55's three probes green (talk-claim, handoff-cross v4, the
   corpse-drift read); the gate runs on c1be67d1 and merges 1b866786 under the paper rule.
+- 17:29 PDT 2026-10-27: b-npc-death-blow 002258 (55's gate) red on the credit line alone: all six measured swings
+  landed and the two for the numbered hit made the eighth lethal, which rolled the engine's kill move; my
+  arithmetic (eight sevens are 56, not under 50). Main dca3b06: four measured swings, 42 at most before
+  npc-damage; claims unchanged; numidium deploys mid-gate for the reruns. A premise red of the probe's own.
+- 19:40 PDT 2026-10-27 (D36 C's follow-up, drafted in 53's stage wait): x-handoff-deep v1 by path (lab/.cache/
+  probes, probe-check ok), the pass a step beyond the margin at T3: Sigrid standing 300 or more inside c1's cell
+  0x9712 (Riverwood02, grid 5,-11) is moved by c1's own engine to 300 inside c2's 0x9731 (Riverwood04, grid 5,-12;
+  grids by esm.py's XCLC, the border at y -45056) with npc-pose's TranslateTo at 150 u/s, her AI off and
+  SetDontMove on the host first (HYPOTHESIS: a TranslateTo under a running AI is fought; the reads tell). Read at the
+  fork (parity 1b866786): the deep pass writes no "passes" line (ActionListener's cell-host line sits under
+  hostedCellChange, false once the follow moved the record); its line is D9's "now simulates 13483 in cell 9731; the
+  sender's game is told to demote", written at every Pass verdict. Claims: the margin follow line, D9's line once,
+  no refusal, the follow row gone (server.follow), c2 hosting 9731 still, the seats' AI swapped, the record and c2's
+  copy within 100 of the target. npc-pose takes lab-spawn's frame, so the target is written as offsets; a
+  world-frame row for npc-pose is a lab-api wish on numidium's after-ladder list, where this probe runs.
+### D41. Expedite: playtest 35 tonight, the D37 layer after it (17:47 PDT 2026-10-27, Eli)
+Eli: "let's do the expidition and drop 35 tonight" (on the estimate: 55's gate to about 19:15 PDT, 53 to
+about 23:15, then the layer's full sweep of about six hours would have put 35 at 06:00). Decision: after 53
+merges and is recorded, playtest 35 is set up at once on that parity (trains 51 to 55 and 53; the D37 layer
+not in it, DeathDropOverhaul's client-local shield drop a known limit on the checklist); the layer stage, its
+probe x-body-loot v5, b-body-loot and layer-merge's full sweep follow after the playtest (the nightly at
+03:30 PDT or a sweep tomorrow). Target: 35's seats ready around midnight PDT, each red on the way adding its
+rerun. No other change to the ladder.
+- 18:27 PDT 2026-10-27: b-npc-respawn 011906 (55's gate) read as a premise red: the restart's gameHour 14.0 lay
+  before the body's hour (the kill at 13.53 h by a clock running twenty to one, the body until 14.53). Main
+  59836b8 restarts at 16.0, claims unchanged; deployed mid-gate for the ADR-027 rerun.
+
+### D42. Corpses after a cell reload: leave them to each engine (19:22 PDT 2026-10-27, Eli)
+Eli: "for corpses lets go A, and defer it to a later arc where we seek to sync most/all physics objects.
+(maybe throw out an agent to scout out how that would go while we wait but it doesn't need to be a thing for
+now. so long as live npc behavior, death syncs, and corpse container shit all works appropriately)". Decision:
+A. A seat that reloads a cell finds the corpse where its own engine re-settles it; the record stays the
+host's body; the checklist names it. The ragdoll's rest and every other physics object (dropped items, the
+M4 rows) belong to a later arc, "sync most or all physics objects"; a scouting report on how that arc would
+go is written now (docs/research/m4/physics-sync-scout.md, a research agent, no code) and binds nothing. The
+three things that must work for 35 are proved at T3 on this build: live NPC behaviour (the stream
+scenarios), death sync (b-npc-death-engine, -guest, -report, -blow, b-npc-death) and the corpse's container
+(b-npc-loot, b-npc-body-release).
+- 19:24 PDT 2026-10-27 (D41's shape): Eli asked whether bows and spells can be in tonight's 35 (they are train 53's,
+  the last train). Call, recommended to Eli and taken unless it objects: ADR-040's shape, as playtest 24 took on
+  train 27's stage: 35 is set up on 53's STAGE once x-npc-archer, x-npc-caster and T2 are green (about 21:00
+  PDT), 53's gate runs after Eli's report and the merge after the gate; the build under test is frozen from
+  "seats ready" to the report. Fallback on a 53 red: 35 on 55's parity without bows and spells, Eli's call.
+  55's rest was green (death-blow 014918 on four swings, respawn 015254 at 16.0); a gate-cite image-id false
+  refusal (fixed, 03ba40f) cost one aborted set.
+
+### D44. 53's archer red: fix and restage before 35, with a cutoff (19:52 PDT 2026-10-27, thuum-magnus under D40)
+53's stage (m3-npc-cast ecec018e) read: x-npc-caster 024159 GREEN; x-npc-archer 023756 RED on its two shot
+claims, a CODE red with the fix in hand. The archer fired seven arrows on the host (PROJ 50 in flight on c1's
+polls; the puppet's attackRelease taken 1 on c2) and every launch threw in the client's projectileLaunched
+handler ("'Game.getFormEx' can't be called in this context", c1.log, seven lines 19:40:36 to 19:40:55), so no
+"hosted shot by" line formed and no OnPlayerBowShot reached the server. Cause: playerBowShotService's
+onHostedLaunch (53's code) calls natives (Game.getFormEx, getEquippedWeapon, the aim reads) inside the handler,
+where Skyrim Platform refuses them (CallNativeApi.cpp: requirements.vm is unset in the launch event's context);
+the player's own shot keeps its launch and does its natives on the update tick, and the crossbow hook defers
+with controller.once("update"). Options: A, fix (the hosted branch keeps the launch and reports on the next
+update, the file's own idiom) and restage 53, 35 after the probes and T2 (about 21:45 PDT by numidium's
+clock); B, 35 now on 53's stage as it stands, NPC bows a known limit, spells in; C, 35 on 55's parity without
+bows or spells. Decision: A (the goal names bows), fork m3-npc-cast bf133744; numidium relaunches ladder 53 on it
+with the no-gate switch (the Windows build, the stage, x-npc-archer, x-npc-caster, T2, TRAIN END 21, the 35
+set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, numidium saying so first.
+
+- 19:59 PDT 2026-10-27 (D42's follow-up): the physics-sync scouting report is written, docs/research/m4/
+  physics-sync-scout.md (one agent, no code touched): the fork accepts movement for actors only and places a
+  dropped item once at the dropper, frozen everywhere; nobody has shipped prop or ragdoll sync in Skyrim
+  (TES3MP streams no object motion, Skyrim Together's per-frame body writes corrupted Havok; its unmerged #913
+  is the keyframed-follower shape); the CommonLib surface is cited by file:line, the rest is nine "RE this" items.
+  D43 PROPOSED there: A leave as today, B rest-only (TES3MP's shape, corpse-rest and item-rest as two whole verbs
+  in M4, 7 to 11 days), C the whole arc with motion streams (20 to 30 days plus RE), D ragdoll pose; recommended
+  B. Eli decides later; nothing before playtest 35 depends on it.
+- 20:31 PDT 2026-10-27 (D44's outcome): A held. The restage at bf133744 (20:12 PDT) read x-npc-archer 032303 GREEN
+  (four hosted shots reported, the placed archer's taken under its id, one relayed arrow in flight on c2, no arrow of
+  the puppet's own) and x-npc-caster 032625 GREEN (H-53b confirmed); the first stage's T2 was green on ecec018e and
+  the fix is client-only. T2 on bf133744 runs, then numidium's 35 set-up; well inside the 22:30 cutoff.
+- 21:06 PDT 2026-10-27 (D41 and D44 closed): playtest 35 is set up on 53's stage bf133744 (T2 green at 20:58 after
+  numidium's build-picker fix, main bd4b7e8), seats ready 21:03:09 PDT, the hold to 00:02 PDT; the build frozen until
+  Eli's report; 53's gate and merge after it, then the D37 layer (D41).
+- 21:12 PDT 2026-10-27: 35 re-set on rotfern and Prisoner's composed world (Eli's ask to numidium at 21:05); seats
+  ready 21:10:06 PDT, the hold to 00:09 PDT; the build unchanged (53's stage bf133744), frozen until the report.
+- 21:31 PDT 2026-10-27: playtest 35 called early by Eli with three asks and a fourth read (checklist's Result): a late
+  joiner's missing in-progress action, the guest's claim never sent for Sven, dialogue voice relaying the first
+  line only, rotfern's head node 0.94 after every teleport. The log read runs (pt35-read-1); D45 (the fix train's
+  shape and order against the D37 layer) follows it. 53's gate and merge stay as armed, after the informal report.
+
+### D45. Playtest 35's fixes: what rides before playtest 36 (21:41 PDT 2026-10-27, thuum-magnus under D40)
+Eli called 35 early ("fix this at least. anims still dont fully work. NPC's cannot be claimed sufficiently, in
+conversation only one voice file will play and not the next one"). The log read (docs/private/pt35-read-1.md)
+and the code reads give six items, each a fix to a shipped verb:
+- a. npc-talk, the stuck claim: a guest's granted claim was never released in play (no "released at the
+  Dialogue Menu's close" on either seat, no "releases" at the server), the client's E handler returns silently
+  behind `pending || claimed` (talkService.ts:43), and the 120 s lease lapsed with no word to the seats. Fix:
+  the server's UpdateHoster word to both seats at the lapse (the release path), the client releasing a held
+  claim when E lands on another puppet and at its own timeout equal to the lease, a trace on every decline, and
+  a probe closing the menu as a player does (Tab) to read why onMenuClose missed. Server and client; T0 for the
+  lapse's word.
+- b. npc-stream voice, the later lines: the host captures one speech event per topic info (TESTopicInfoEvent at
+  the begin alone), so a multi-line response plays its first line on the puppet and the rest on the host. RE
+  first (the re-analyst): how the engine advances an info's responses on the host (the AI's dialogue update an
+  AI-off puppet never runs) and whether SpeakSoundFunction is called per line; then the puppet's voice drive
+  advancing the response at a line's end, or a per-line capture on the host with the puppet saying by index.
+  HYPOTHESIS until the trace; probe on Sven's multi-line topics.
+- c. npc-stream actions, the late joiner: CreateActor carries the last animation event, not the last action or
+  the furniture, so Hilde's tanning was missing on a seat that joined two minutes after it began. Fix: the
+  record keeps a hosted actor's last action (slice 1's BGSAction and idle, R2) and furniture reference; a late
+  joiner's CreateActor and the promote path carry it; the puppet replays it once at creation. Server, client,
+  the wire row if CreateActor's props need one (validator in the same commit).
+- d. movement (figures), the snap after jogging: movementApply.ts:427's one-unit settle for a still record
+  (train-33) pulls the other player's figure back by the running lead at the first Standing sample (108 settles
+  on c1, mean 6.7 units, max 36.8). Fix: let the lead run out (an ease over the lead's length) before the
+  deadband drops from 8 to 1. Client only; the probe reads the settle lines' mean and max against these.
+- e. racemenu-sync, rotfern's head at 0.94: the client applies the server's node scales once (formView's
+  isSetNodeScaleApplied, remoteServer's apply at CreateActor) through NetImmerse.setNodeScale, which skee does
+  not persist; a 3D rebuilt after the apply (a teleport, a load into an interior) shows the race's own scale.
+  Fix: re-apply node scales and texture sets whenever the actor's 3D loads, player and figures. Client only;
+  probe: the node read after a teleport and after a relaunch into Bleak Falls.
+- f. npc-fate, the arrow-borne zero: rotfern's three arrow hits took 39fe2's record to 0, no host report came in
+  3 s, the server killed it by its word while the host's engine bar stood at a quarter. Read first (c1's cause
+  lines in the Bleak Falls window, the refreshed log copy): the cause's apply for the host's own player's arrow
+  hits, or the DamageActor cut's coverage of projectile damage. Server or Skyrim Platform; T0 and a probe (the
+  host kills its hosted bandit with arrows; the engine dies with the killer, no "death by the server's word").
+Options: A, train 56 now with a, c, d, e (code-ready), train 57 with b and f after their reads; the D37 layer
+(layer-d37-ddo-out 8905804, D41) staged and swept overnight right after 53's merge while 56 is written (code
+needs no lab); 56's stage and probes in the morning, playtest 36 on its stage under ADR-040; 57 after. B, one
+train with all six after both reads (36 a day later). C, 36 on 56 alone, b and f deferred to M3's end (Eli
+asked for the voice by name, so no). Recommended: A. Decision: A under D40 (21:41 PDT); 53's gate and merge first,
+as armed.
+
+### D46. Eli's idea for apocrypha: menus that do not pause (21:41 PDT 2026-10-27, relayed by numidium)
+Eli, verbatim: "a thought to work with apocrypha on-- pausing, inventory, and containers shouldn't pause the
+game. it should be transparent. rn it feels unnatural in multiplayer. the player who opens their inventory,
+everything freezes for. im sure there's a mod for this." The standard tool (lazy): Skyrim Souls RE - Updated
+(Nexus skyrimspecialedition/mods/27859; source github.com/Vermunds/SkyrimSoulsRE), an SKSE DLL that unpauses
+chosen menus (inventory, containers, books, map, dialogue), per menu in Data/SKSE/Plugins/SkyrimSoulsRE.ini,
+optional slow motion; requires SKSE64, VC++ 14, Address Library, and SSE Engine Fixes with the Memory Manager
+Patch and Global Time Fix on. No plugin slot, no load-order change: a mod layer (persist-mods, layer-stage, the
+full sweep) after D37's. apocrypha confirms: 1.6.1170 support in the current release, whether the lab carries
+Engine Fixes, which menus to unpause (dialogue unpaused meets npc-talk's lease; containers meet the server's R0
+inventory, the container menu's live updates while another player moves items a probe). Decision: pending
+(apocrypha's layer; Eli's call on the menu list).
+- 21:45 PDT 2026-10-27 (D45 addendum, playtest 35 ended): Eli's close adds NPC jerkiness on the non-host screen and
+  player figures feeling off against the pre-stream movement ("what we had before for movement felt a TINY bit
+  more natural"). Item g: before any tuning, the puppet and figure paths MEASURED with ADR-031's recorder on 56's
+  stage against the reference traces (p-npc-stream's row, numidium's per-id grammar) and the pre-stream build's
+  figure numbers (x-duel-stream 20261022-233951); numidium's note stands: by number, not by eye. Item d's ease
+  ships in 56 with its own before and after numbers. Two causes pinned by the fresh logs: (a) the movement judge's
+  Follow record overwrites a Claim row when the claimed actor crosses a cell (cells.rs's insert at the Follow
+  verdict), so the claim ends silently, no ClaimEnded word, and the client's claimed flag never clears (Hilde's
+  crossing 9732 to 9731; zero "ended with its lease" lines; E_CLAIM_NONE on rotfern's release at 04:26:48): the fix
+  keeps the Claim row across the claimant's own crossings and ends it only by release, lease, departure, unload or
+  death, plus the client's resets. (f) the host's death causes for its own player's arrow kill were queued with
+  the attacker ff000000 mapped to local 0 (the local player's remote id has no local form in the map), and the
+  engine's health followed only its own arrow damage, so the native apply did nothing without an attacker; the
+  archer probe's causes (an NPC attacker) applied. The fix maps the local player to 0x14 and lets a cause with no
+  attacker apply the server's number anyway (no killer credited). f moves into train 56 (small, pinned); b (the
+  voice's later lines) stays 57's behind the re-analyst's read.
+- 22:11 PDT 2026-10-27 (D45 built): train 56 on fork m3-pt35-fixes 6bc6657c, items a, c, d, e and f (f moved in once
+  the logs pinned it); five probes by path, probe-check ok. One shape lesson: CreateActor takes no new typed field
+  (wire-legacy decodes the lab's capture positionally; the late-join action is a custom property). 57: the voice's
+  later response lines (the re-analyst's read runs now) and item g's measurement. Lab order unchanged: 53's gate
+  and merge, the D37 layer overnight, 56's stage and probes in the morning, playtest 36 on its stage.
+- 22:36 PDT 2026-10-27 (D45 b, the voice's later lines): the re-analyst's read is in (docs/private/re-voice-responses.md,
+  the Dynamic section in npc-stream.md). The later lines of an info start from the AI update's null-topic SayTopic,
+  which an AI-off puppet never runs; the player's dialogue partner speaks through UpdateInDialogue with no event
+  (the one-capture-per-info of 35). Train 57's shape: A, the puppet's own continuation from DriveVoice (no wire
+  change), after the Frida trace confirms the chain (lab/frida/voice-lines.js, a host seat, 120 s). Rule 8: no code
+  before the trace.
+
+### D47. The pace: how to run what remains (23:40 PDT 2026-10-27, Eli)
+Eli: "if i wanted to throw all caution to the wind, all testing and whatever, and just 'code the rest of it' how would
+that look? this is taking forever". The three ways given: A as today (one proved train a day); B code the rest with
+T0 and T2 alone and a playtest per milestone (fast for a week, then an undigestible playtest: all six of 56's fixes
+came from the lab or the playtest, none from code; defects found late cost most, Boehm and Basili 2001, DORA); C
+split by rung and batch the lab (R0 merges on T0 and T2; engine-facing changes keep one probe at a daily slot; the
+gate cut to the touched verbs; the milestone lists nightly). Eli: "im leaning C, but Id like a playtest or two a day
+was the cadence we had a while ago". Decision: C with the cadence, ADR-053 PROPOSED (two stage slots a day, a short
+playtest on each, eight items at most). First day, 2026-10-28: the morning slot stages 56 (x-voice-lines with the
+trace, 56's five probes, T2) and carries playtest 36 trimmed to eight items; the evening slot carries 57 (if the
+trace confirms the chain) and the D37 layer's result, playtest 37. The GPU question (D47's companion, 20:3x PDT):
+no sharing on the lab's cards; more seats by passthrough.
+- 23:47 PDT 2026-10-27: D47 closed, ADR-053 ACCEPTED (Eli: "oh then yes accept"). numidium's tooling moves off its branches: the gate's verb map, the slot wrapper, the R0 merge path, the nightly's list check, the lever library (two days between them); the slots run by hand meanwhile.
+
+### D48. Faster still: the six levers beyond ADR-053 (00:01 PDT 2026-10-28, from Eli's words of 2026-10-27 late)
+Eli: "yeah. full transparency, im impatient and think there has to be a faster way to be doing this." The six
+levers given, by payoff per effort: (1) a client hot path onto a running seat (Skyrim Platform's reload, no CI,
+no relaunch; five of 56's six fixes were TypeScript alone); (2) T0 and T2 before any push (two CI rounds died on a
+test file); (3) reverse engineering before engine-facing code (the voice item: twenty-five minutes of static read
+gave the fix shape); (4) a second seat pair and a second server; (5) ADR-036, a relaunch instead of a rollback; (6)
+a scope cut of M4 to M6 to what an evening with friends needs. Eli: "do all of those sans 4. ill brainstorm on 4.
+we might be able to do windows vms in AWS with a gpu each that are spun up as needed but we'll see." Decision:
+ADR-054 ACCEPTED (1 to 3), ADR-036 ACCEPTED (5), the scope list written for Eli to strike (6,
+docs/research/m4/scope-cut.md); 4 pending Eli (the AWS idea: Windows GPU instances on demand, each a seat
+streaming to the Mac over Moonlight and reaching sky-srv over the tailnet; to size when Eli returns to it: the
+cost per seat-hour, the Skyrim and Steam install per instance, the latency to the on-prem server, Sunshine on a
+headless Windows display, and the lab's clone and snapshot shape against instances that come and go). Eli on
+Docker: not wanted on the Mac; T0 and T2 run on sky-srv's toolchain instead (ADR-054 item 2).

@@ -25,6 +25,8 @@ class FakeProxmox:
         self.statuses: dict[int, str] = {}
         self.files: dict[str, str] = {}
         self.exec_result = ExecResult(0, "", "")
+        # C:\\sky-lab\\game-dir.txt on a clone: the game folder log-count names its console tee under
+        self.game_dir = "C:\\Games\\Skyrim Special Edition 1.6.1170"
         # what the game check (Settings.game_check_cmd) reads on a clone: the
         # default version's exe (ADR-025: 1.6.1170, the clones' second game
         # folder) unless a test says otherwise
@@ -61,6 +63,8 @@ class FakeProxmox:
 
     def exec(self, guest: Guest, command: list[str], timeout: float) -> ExecResult:
         self.calls.append(("exec", guest.vmid, tuple(command)))
+        if any("game-dir.txt" in c and "Get-Content" in c and "Join-Path" not in c and "Copy" not in c for c in command):
+            return ExecResult(0, self.game_dir + "\r\n", "")
         # the runner's shared-read copy of a file another process still writes
         copied = re.search(r"\[IO\.File\]::Open\('([^']+)'.*\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
         if copied and copied.group(1) in self.files:

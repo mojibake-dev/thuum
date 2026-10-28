@@ -91,6 +91,20 @@ toolchain per layer, every feature the same shape.
     (ADR-009, ADR-016). Never turn a scenario green by weakening its
     assertions; CI refuses a commit that mixes a scenario with other files.
 
+## The developer loop (ADR-053, ADR-054; 2026-10-27)
+
+- Two stage slots a day, morning and evening, each with a playtest of at most eight items;
+  a merge's gate is the always set plus the touched verbs' own scenarios plus watch; the
+  milestone lists run nightly. An R0 change (server-only, no engine behavior on a seat)
+  merges on T0 and T2; anything the engine does on a seat keeps one probe at the slot.
+- A TypeScript client change goes to a running seat with `just client-hot <client> [file]`
+  (webpack here, Skyrim Platform reloads the plugin; the seat is then no playtest's until
+  its relaunch); the train's pipeline still runs before a stage.
+- T0 and T2 run before any push, on sky-srv's toolchain over ssh (no Docker on the Mac);
+  CI confirms.
+- Engine-facing code starts from its Dynamic section (the static read, the Frida plan) and,
+  where a trace is cheap, from the trace; rule 8 is the habit.
+
 ## Workflow per verb
 
 1. Pick the next verb from the current milestone in docs/PLAN.md.
