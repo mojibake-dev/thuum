@@ -451,3 +451,16 @@ rerun. No other change to the ladder.
 - 18:27 PDT 2026-10-27: b-npc-respawn 011906 (55's gate) read as a premise red: the restart's gameHour 14.0 lay
   before the body's hour (the kill at 13.53 h by a clock running twenty to one, the body until 14.53). Main
   59836b8 restarts at 16.0, claims unchanged; deployed mid-gate for the ADR-027 rerun.
+
+### D42. Corpses after a cell reload: leave them to each engine (19:22 PDT 2026-10-27, Eli)
+Eli: "for corpses lets go A, and defer it to a later arc where we seek to sync most/all physics objects.
+(maybe throw out an agent to scout out how that would go while we wait but it doesn't need to be a thing for
+now. so long as live npc behavior, death syncs, and corpse container shit all works appropriately)". Decision:
+A. A seat that reloads a cell finds the corpse where its own engine re-settles it; the record stays the
+host's body; the checklist names it. The ragdoll's rest and every other physics object (dropped items, the
+M4 rows) belong to a later arc, "sync most or all physics objects"; a scouting report on how that arc would
+go is written now (docs/research/m4/physics-sync-scout.md, a research agent, no code) and binds nothing. The
+three things that must work for 35 are proved at T3 on this build: live NPC behaviour (the stream
+scenarios), death sync (b-npc-death-engine, -guest, -report, -blow, b-npc-death) and the corpse's container
+(b-npc-loot, b-npc-body-release).
+
