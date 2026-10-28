@@ -213,6 +213,19 @@ files, 13 of 13, test_unit's 359 cases with this verb's two.
   expected three are declared from its first T2 run) and stages with the
   draft T3 b-player-globals by path.
 
+### Playtest 36, the turbo day (11:36 PDT 2026-10-28): the record froze at a hot push; the cold Kill
+rotfern's Survival needs read hunger 30 and exhaustion 18 after four idle real hours (Eli: "it doesnt seem to kill them like
+it should to starve them"). Not the clock (20x by the run overlay and by the live cadence: a report every 42.9 s, Survival's
+quarter-game-hour tick) and not Survival (hunger and exhaustion never kill, apocrypha's read): the reports STOPPED at the
+seat's hot push (numidium's log read: the last line 13:25:21Z, two seconds after client-hot) because this service kept the
+list to watch in a class field filled once by the login's message, and a reloaded client never logs in again. Fixed
+7fbb5e74: the list in sp.storage, a resumed service reports every watched value once. After the 18:23Z and 18:24Z relaunches
+on the fixed bundle no "recorded" line had come by 18:33Z; whether the seats run (Eli stopped at 11:21 PDT; a console or a
+save menu pauses Survival's ticks) is numidium's dump read, a regression the fallback reading. The cold Kill: Survival's one
+lethal need calls PlayerRef.Kill() at Survival_ColdNeedValue (81b) 1000; the server cannot honour a client-side kill (no C2S
+death report exists for players, MpActor::Kill comes from its own number alone) and the seat holds its player in the
+engine's deferred kill: memo D51, B recommended (the server's word from its recorded cold need), probe x-player-cold-kill.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
