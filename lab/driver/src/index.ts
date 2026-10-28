@@ -996,6 +996,42 @@ function gazeOf(formId: number): Record<string, number | boolean | null> {
   };
 }
 
+// face-keyframes's read (playtest 37's face probe, 2026-10-28): the fork's Skyrim Platform reads an actor's three
+// FaceGen keyframe sets (BSFaceGenAnimationData's expression, modifier and phoneme, CommonLib
+// RE/B/BSFaceGenAnimationData.h:39-42) on the game thread when pollFaceKeyframes(id) asks, and faceKeyframes(id)
+// answers the last read as [expression[], modifier[], phoneme[], override] or null (fork m3-voice-inflight). Reached
+// through the module object as gazeOf's getters are, and in their timing: the answer is the previous poll's, and the
+// step polls anew, so a sampling probe reads one step behind and a single read is two steps.
+function faceOf(formId: number): Record<string, unknown> {
+  const api = skyrimPlatform as unknown as Record<string, unknown>;
+  const read = api["faceKeyframes"];
+  const poll = api["pollFaceKeyframes"];
+  if (typeof read !== "function" || typeof poll !== "function") return { available: false };
+  let last: unknown = null;
+  try {
+    last = (read as (id: number) => unknown)(formId);
+  } catch (e) {
+    last = null;
+  }
+  try {
+    (poll as (id: number) => void)(formId);
+  } catch (e) {
+    // the next read answers null
+  }
+  if (!Array.isArray(last) || last.length < 4) return { available: true, read: false };
+  const nums = (v: unknown): number[] => (Array.isArray(v) ? v.map((x) => (typeof x === "number" ? x : 0)) : []);
+  const phoneme = nums(last[2]);
+  return {
+    available: true,
+    read: true,
+    expression: nums(last[0]),
+    modifier: nums(last[1]),
+    phoneme,
+    phonemeMax: phoneme.reduce((m, x) => Math.max(m, x), 0),
+    override: Boolean(last[3]),
+  };
+}
+
 function namedNpc(a: Record<string, unknown>): Actor | null {
   const id = num(a.formId) || placedId;
   return id ? Actor.from(Game.getFormEx(id)) : null;
@@ -1819,6 +1855,55 @@ function run(step: Step, player: Actor): unknown {
         };
       });
       return { node, ...scales(near[0]), all };
+    }
+    case "face-keyframes": {
+      // an actor's FaceGen keyframes as the engine animates its face (faceOf above): {formId}, else the placed npc;
+      // {player: true} for the player. The phoneme set is the mouth: its values move while a lip-synced line plays.
+      const target = a.player === true ? player : namedNpc(a);
+      if (!target) return { error: "no placed npc and no {formId}" };
+      return { formId: target.getFormID(), aiEnabled: target.isAIEnabled(), ...faceOf(target.getFormID()) };
+    }
+    case "node-rotation": {
+      // a node's rotation on a named actor ({formId}, else the npc the probe
+      // placed; {player: true} for the player), as the engine holds it after
+      // the animation (NetImmerse.GetNodeWorldRotationEuler and
+      // GetNodeLocalRotationEuler, skyrimPlatform.ts; third person), for the
+      // face probe of playtest 37 (2026-10-28, Eli: the probe before any more
+      // head builds): a puppet's head against the live NPC's on its host.
+      // Each Euler read reports `filled` false when its out-array came back
+      // untouched; beside it, the world vector from the node to {toward} (the
+      // head's magic node by default) by the scalar GetRelativeNodePosition,
+      // which turns with the head whatever the arrays do. {nodes}: the head
+      // and the neck by default. The actor's heading and AI bit ride along.
+      const target = a.player === true ? player : namedNpc(a);
+      if (!target) return { error: "no placed npc and no {formId}" };
+      const nodes = Array.isArray(a.nodes) ? (a.nodes as unknown[]).map(String) : ["NPC Head [Head]", "NPC Neck [Neck]"];
+      const toward = String(a.toward || "NPC Head MagicNode [Hmag]");
+      const read = nodes.map((node) => {
+        const world = [0, 0, 0];
+        const local = [0, 0, 0];
+        const worldOk = NetImmerse.getNodeWorldRotationEuler(target, node, world, false);
+        const localOk = NetImmerse.getNodeLocalRotationEuler(target, node, local, false);
+        return {
+          node,
+          has: NetImmerse.hasNode(target, node, false),
+          world: { ok: worldOk, value: world, filled: world.some((v) => v !== 0) },
+          local: { ok: localOk, value: local, filled: local.some((v) => v !== 0) },
+          toward: [
+            NetImmerse.getRelativeNodePositionX(target, node, toward, false),
+            NetImmerse.getRelativeNodePositionY(target, node, toward, false),
+            NetImmerse.getRelativeNodePositionZ(target, node, toward, false),
+          ],
+        };
+      });
+      return {
+        formId: target.getFormID(),
+        angleZ: target.getAngleZ(),
+        aiEnabled: target.isAIEnabled(),
+        toward,
+        towardHas: NetImmerse.hasNode(target, toward, false),
+        nodes: read,
+      };
     }
     case "head-parts": {
       // the head parts on the player's base or, with {other: true}, on the
