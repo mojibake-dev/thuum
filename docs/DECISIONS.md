@@ -2953,6 +2953,14 @@ Recommended B. Not in the turbo day's build: it reverses an accepted decision, s
 train after Eli's letter. The client's renewal (8b088be1, every 60 s while the menu is open) is
 inside decision 2 as written and is in the build.
 
+Note 14:18 PDT 2026-10-28 (playtest 37, Eli: "it seems like rotfern can steal an interaction from prisoner but not the
+other way around is that by design? id like no one to be able to steal from anyone"): decision 1's claim was the guest's
+mechanism and a host's own dialogue with an NPC it simulates was the engine's alone, unmarked on the server, so a guest's E
+took the actor out from under the host's open menu while a host's E on a guest's claimed actor met E_CLAIM_HELD. The first
+case now covers both: the host's own dialogue sends the same claim at its E (the rules grant a claim to the actor's own
+simulator with no pass and refuse others while it is held) and releases it at the menu's close (fork m3-voice-inflight, the
+client's TalkService). No change to decisions 1 to 4; the amendment above stays proposed.
+
 ## ADR-053: Two stage slots a day, a short playtest on each; the gate is the touched verbs' own; R0 changes merge on T0 and T2
 
 Status: ACCEPTED 23:47 PDT 2026-10-27 (Eli: "oh then yes accept"); proposed 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all
