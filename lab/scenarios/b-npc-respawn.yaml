@@ -6,7 +6,9 @@
 # squares out and kills the subject's rivals by kill-ref where the fate pass
 # has loaded them; both land, the subject 0x85547 alive with its fate's
 # race; kill-ref: dead on the record and both seats; `server: restart
-# {gameHour: 14.0}` moves the clock past the hour on the same day, the record
+# {gameHour: 16.0}` (14.0 until 55's gate 011906, where a late kill at 13.53 h
+# left the body's hour, 14.53, still ahead of the restart's clock) moves the
+# clock past the hour on the same day, the record
 # loads dead with its stamp and the first sweep stands it up (RespawnFated:
 # the re-roll, the fate sent again, the respawn event's teleport); both
 # reconnect, the rivals die again by kill-ref (the sweep under test stands
@@ -64,7 +66,11 @@ steps:
       - c1.npc_state(0x85547).isDead == true
       - c2.npc_state(0x85547).isDead == true
   # the clock moves past the hour across a restart; the record loads dead and the sweep ends it
-  - server: restart {gameHour: 14.0}
+  # the hour must lie past the body's own (death plus npcRespawnHours 1): the clock runs about twenty to one
+  # while the prelude plays, so the kill lands anywhere from 12.4 to 13.6 by game time (55's gate
+  # 20261028-011906: died at day 1.5637, 13.53 h, the body until 1.6053, 14.53 h, and a restart at 14.0 found
+  # the hour not yet passed, the record loading dead and staying so); 16.0 is past any death before 15.0
+  - server: restart {gameHour: 16.0}
   - c1: reconnect
   - c2: reconnect
   # the sweep under test stands the rivals up as well (52's gate 20261027-150150: 85549 and 85548 stood with
