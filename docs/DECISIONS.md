@@ -3027,10 +3027,15 @@ file changes (the fork's DirectoryMonitor, SkyrimPlatform.cpp:115 to 127).
    relaunch or rollback clears the mark: a hot seat is never a playtest's. A change proved this
    way still runs its train's pipeline before a stage or a merge; the hot path is for the loop,
    not the record.
-2. T0 and T2 before any push: the server built on sky-srv's own toolchain (a scratch checkout
-   with ccache over ssh, where the server already builds and runs; no Docker emulation on the
-   Mac), `ctest` for T0 and the fake clients against that server for T2's sessions; a push to the
-   fork follows a green local run, so CI confirms rather than discovers.
+2. T0 and T2 before a real push: a throwaway fork branch `wip/<name>` whose CI rule runs
+   server-build's ctest in a clean build directory with ccache (content-keyed, so the shared
+   tree's stale-time trap does not apply) and pushes the image as skymp-server:wip-<name>-<sha8>
+   with difftest-build, no Windows client, no fuzz, no promotion; `just wip-check <worktree>`
+   pushes, waits for T0 and runs T2 against that image (`SERVER_TAG=wip-<name> just
+   test-proto`), then deletes the branch. About eight minutes to a verdict, nothing built on the
+   Mac (Eli: no Docker there) and nothing on sky-srv (about 1 GB free, the lab's own server and
+   T2's containers). A push to a train's branch follows a green wip check, so CI confirms rather
+   than discovers.
 3. Reverse engineering before engine-facing code: for any change to what the engine does on a
    seat, the Dynamic section (the static read with REA or Ghidra, the Frida plan, the expected
    observations) is written and, where a trace is cheap, run before the code; rule 8 as the
