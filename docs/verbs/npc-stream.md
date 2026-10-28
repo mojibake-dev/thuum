@@ -1962,6 +1962,24 @@ cast, so no cast could end; the mage's record is hardened after its first
 cast, main 34cbc19), green on the rerun 065950 with neither lever yet
 deployed. Closes when the scenario plays green with both levers in a gate.
 
+### Train 57's candidate (00:16 PDT 2026-10-28; fork m3-voice-lines 3eef89d3 off 56's head; HYPOTHESIS until the trace)
+
+Built ahead of the trace so its build is ready, staged only after
+lab/frida/voice-lines.js has read the chain on a host seat (rule 8, ADR-054
+item 3): PuppetHooks DriveVoice, once the pair has ended a line and the high
+process still marks the item in progress with a response left
+(greetingPlayer, DialogueItem's currentResponse), makes the AI update's own
+call, SayTopic with a null topic (the lip load synchronous, voice v3's flag;
+the engine's busy test inlined from the two voice bits and the timer), which
+plays the item's current response, raises a BEGIN this seat ignores and
+advances; the last line's END clears the mark and the loop stops. PuppetApi
+SayTopicInfo leaves a relayed repeat of the item in progress alone (a bark
+raises a BEGIN per line on the host; result 3, "left to its continuation").
+Probe: x-npc-voice-lines (c1 talks to a held Sven through the first topic,
+c2's puppet: the first line started, at least one continuation, at least two
+ends). Falsified by the trace (a multi-line bark with one BEGIN, or the
+AI update entered for an AI-off puppet) the candidate is dropped unmerged.
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
