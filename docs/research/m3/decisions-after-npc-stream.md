@@ -482,3 +482,18 @@ scenarios), death sync (b-npc-death-engine, -guest, -report, -blow, b-npc-death)
   55's rest was green (death-blow 014918 on four swings, respawn 015254 at 16.0); a gate-cite image-id false
   refusal (fixed, 03ba40f) cost one aborted set.
 
+### D44. 53's archer red: fix and restage before 35, with a cutoff (19:52 PDT 2026-10-27, thuum-magnus under D40)
+53's stage (m3-npc-cast ecec018e) read: x-npc-caster 024159 GREEN; x-npc-archer 023756 RED on its two shot
+claims, a CODE red with the fix in hand. The archer fired seven arrows on the host (PROJ 50 in flight on c1's
+polls; the puppet's attackRelease taken 1 on c2) and every launch threw in the client's projectileLaunched
+handler ("'Game.getFormEx' can't be called in this context", c1.log, seven lines 19:40:36 to 19:40:55), so no
+"hosted shot by" line formed and no OnPlayerBowShot reached the server. Cause: playerBowShotService's
+onHostedLaunch (53's code) calls natives (Game.getFormEx, getEquippedWeapon, the aim reads) inside the handler,
+where Skyrim Platform refuses them (CallNativeApi.cpp: requirements.vm is unset in the launch event's context);
+the player's own shot keeps its launch and does its natives on the update tick, and the crossbow hook defers
+with controller.once("update"). Options: A, fix (the hosted branch keeps the launch and reports on the next
+update, the file's own idiom) and restage 53, 35 after the probes and T2 (about 21:45 PDT by numidium's
+clock); B, 35 now on 53's stage as it stands, NPC bows a known limit, spells in; C, 35 on 55's parity without
+bows or spells. Decision: A (the goal names bows), fork m3-npc-cast bf133744; numidium relaunches ladder 53 on it
+with the no-gate switch (the Windows build, the stage, x-npc-archer, x-npc-caster, T2, TRAIN END 21, the 35
+set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, numidium saying so first.
