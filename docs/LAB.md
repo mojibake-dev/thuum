@@ -893,7 +893,11 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
   - The first lay of a bundle that carries those fixes is `client-hot` and
     then `just playtest-relaunch <c>` at once, one seat at a time: the old
     services saved nothing. After that a hot push keeps the globals and the
-    hosting.
+    hosting, so from m3-turbo-knobs 26e3d0cf on no relaunch follows a push.
+    Measured on 2026-10-28 on 26e3d0cf's own bundle: c2's needs record took
+    a full 61-value report 8 s after the push and ticked on, and c1, the
+    Riverwood host, kept relaying its cells' NPCs through the reload with no
+    release.
   - A seat's record never reads as "slow" after a hot push until the server
     log shows the reporter's cadence ("PlayerGlobals: user N actor ...
     recorded").
