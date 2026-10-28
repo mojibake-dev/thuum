@@ -847,6 +847,15 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   away): npc-handoff's row. None of the four stands against this verb.
 - Breakpoint plan for a human session: none needed.
 
+### Playtest 36, the turbo day (11:36 PDT 2026-10-28): what a plugin reload keeps
+A hot-reloaded skymp5-client (lab client-hot, ADR-054) keeps its connection and never logs in again, so HostService's
+grants and epochs, loaded set, native hosted mirror and attached actors, all class fields, died with the reload: a reloaded
+host's roster stopped (hosted.size 0 gates reportSightings), isHostedHere said no, a release for a held cell was ignored
+and the setHosted mirror could not be cleared; the per-actor word in the world model survived, so the streams went on,
+which hid it. Fixed e9953d0c: the five persisted in sp.storage at every grant, release and reset and once a second from the
+poll, restored at construction ("resumed after a reload: N hosted cell(s), ..."). The fix takes hold from a fresh launch;
+numidium laid the bundle with a relaunch per seat at 11:22 and 11:23 PDT.
+
 ## Status
 
 Doc drafted 2026-10-21, before any code.
