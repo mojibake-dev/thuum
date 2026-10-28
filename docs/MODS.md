@@ -474,13 +474,23 @@ collection's two non-HDT warmth patches after playtest 27, Skyrim Souls RE for t
 2026-10-28, all below), on top of the layer's
 existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot
 Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
-client-only at the tail), 45 of them light; 29 mod folders scoped `@1.6.1170` (every SKSE DLL
-mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6 or, Skyrim Souls RE, carry a
-build for it; none has run on 1.7.104). 112 mod folders and the Papyrus map's, 5,773 files once
-the install-order rule (below) has dropped the six replaced copies, 4.2 GB on disk (the DLL mods' .pdb files kept: Crash Logger
-with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, never
-removes one: a render that drops a file (FSMP's DLL and configs on 2026-10-20) relies on the
-clone being laid from a base without it, which the stage's snapshot discipline gives.
+client-only at the tail), 45 of them light; the SKSE DLL mods scoped `@1.6.1170` (all of them loaded on Fenestrate's
+1.6.1170 under SKSE 2.2.6 or, Skyrim Souls RE, carry a build for it; none has run on 1.7.104), with Death Drop Overhaul
+out and Skyrim Souls RE in. The folder, file and size counts are the render's own (persist-mods prints them; the two
+layers' branches counted from different bases, 111 and 112 mod folders and the Papyrus map's, 5,754 and 5,773 files, so
+the next render's line is the one to quote). The DLL mods' .pdb files are kept: Crash Logger with PDB support is in the
+set and reads them. add-mods.ps1 adds and replaces files, and since 2026-10-27 removes, by hash, what an earlier render
+laid and this one drops: against the clone's own record of its last lay (C:\sky-lab\mods.sums) and the render's
+PREVIOUS.sums (persist-mods: the manifest it replaced, for a clone laid before the record existed), the way a mod manager
+purges what it deployed. A file at that path with another hash stays and is counted. Before that, a dropped file stayed
+on any clone whose base carried it (FSMP's DLL came off on 2026-10-20 only because its base lacked it), so a promoted mod
+could never leave.
+
+**Out by Eli's letters.** Death Drop Overhaul 1.2.4 (D37 B, 2026-10-27 00:00 PDT, "recommended on
+both"): it drops a dead actor's held shield as a world reference on each client that the server
+never records (x-body-loot 20261026-231653 on 50b's stage), outside the one-authority rule, and it
+is one of the two Loading Menu holders at quit (D24). Its row stays in essentials.tsv as `out`
+until M4's dropped-items row makes a dropped item the server's.
 
 **Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
 lab/tools/persist-mods.sh after its hand-written blocks:
