@@ -631,6 +631,27 @@ appeared in a connected game (numidium, x-survival-unblock3 20261020-024406), so
 from the first tick is enough. The file is regenerated at every build and listed in SHA256SUMS like every layer file.
 `lab/tests/test_papyrus_map.py` checks the rows and the VMAD reader's layouts.
 
+**Survival Mode's needs do not kill, except cold (Eli, 2026-10-28: "it doesnt seem to kill them
+like it should to starve them"; read from the Creation's plugin and script, not from memory).**
+ccQDRSSE001-SurvivalMode.esl's need stages are spells of penalties and nothing else: Hunger stages 2
+to 5 lower Block, Sneak and weapon speed (stage 0 raises stamina regen), Exhaustion stages 2 to 5
+lower magicka and stamina regeneration and disease resistance; no hunger or exhaustion effect
+touches Health, and the plugin's only Health damage is Survival_FreezingWaterDamage (5 per second
+while swimming in freezing water) beside the cold need's max-health penalty
+(Survival_AttributePenaltyHealth). Starving to death is another needs mod's rule (iNeed, SunHelm,
+Frostfall), not this Creation's. Cold is the one need that kills: the cold quest's script
+Survival_NeedCold calls `PlayerRef.Kill()` in `CheckIfMaxCold` when the cold value reaches
+Survival_ColdNeedMaxValue (1000); the layer's copy of that script is Supernatural Survival Tweaks',
+which adds only an undead exemption. So the kill is a Papyrus path on the player: its script is on
+ADR-044's admitted list and its ticks run (the needs rising to their caps in playtest 35 is that
+chain working), and whether SkyMP's server honours a client-side `Kill()` of the player is the
+server's question, not the layer's. The numbers for a checklist row, from the plugin's globals:
+hunger rises Survival_HungerNeedRate 7.5 every 0.25 game hours (30 a game hour, stages at 80, 160,
+340, 520, 770, cap 1000: fed to the cap in about 33 game hours), exhaustion 9 every 0.5 game hours
+(18 a game hour, cap 960), cold by real-time and game-time ticks toward 1000 in cold weather only.
+Playtest 36's seats at hunger 30 and exhaustion 18 after four idle real hours are exactly one game
+hour of ticks: the needs follow the game clock, and the lab's game clock barely moved.
+
 **RaceMenu's menu under the layer (2026-10-20, the a-rotfern CTD and a-racemenu's hair swap):**
 SkyUI_SE.bsa carries `interface/racesex_menu.swf` too, the one file the two archives share, and in
 the layer SkyUI_SE.esp is client-only at the tail (slot 82) after RaceMenu.esp (23), so among
