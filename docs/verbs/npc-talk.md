@@ -181,3 +181,32 @@ a stillness read, the approach to 70, a crosshair check and E. Promoted as
 b-npc-talk (main, its own commit) for 53's gate, 55's deploy having
 preceded it. What a dialogue does (quest stages, gold, items, followers)
 stays M6 (PLAN.md).
+
+## Train 55 merged (19:26 PDT 2026-10-27)
+
+Fork parity 1b866786, cited by the gate 20261027-234255 (28 runs, two
+premise reds answered in its rest) and the chain; the claim's scenario
+b-npc-talk (main 4854286, from x-npc-talk-claim v6 233908) plays from 53's
+gate on. The Status boxes tick at that gate's green.
+
+## Train 56: the claim as a player lives it (22:11 PDT 2026-10-27; fork m3-pt35-fixes, memo D45 a)
+
+Playtest 35 (docs/private/pt35-read-1.md): Prisoner's granted claim on Hilde
+was never released. Two causes. At the server, the movement judge's Follow
+verdict replaced the Claim row with a margin follow when Hilde walked from
+9732 into 9731 under the claim, a step deeper passed her, and the claim ended
+with no ClaimEnded word (zero "ended with its lease" lines; rotfern's later
+release met E_CLAIM_NONE). At the client, the Dialogue Menu's close event
+never reached onMenuClose, and the E handler returned silently behind
+`pending || claimed` for Prisoner's nine presses on Sven. The fixes
+(0f007157, ada2ba1f): wire-rules cells.rs accepts the claimant's report into
+any cell and the Claim row keeps its kind and lease, naming the new cell
+(test a_claim_travels_with_its_actor_across_cells: no pass, no follow, the
+host's own report refused, the release and the lease still find it); the
+client watches a held claim every update (the word ending it forgets it; the
+menu seen open and then closed releases it, event or not; a menu that never
+opens releases it after ten seconds; E on another puppet releases the held
+one first) and traces every decline of an E. Probe: x-npc-talk-cross (the
+claim, Tab out of the dialogue, the release, a second claim on Sven sent and
+granted). Still 57's: the voice's later response lines (npc-stream.md).
+

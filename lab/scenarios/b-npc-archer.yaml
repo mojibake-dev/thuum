@@ -1,0 +1,101 @@
+# b-npc-archer (thuum-magnus, 2026-10-27; train 53, docs/verbs/npc-stream.md slice 6, the bow relay): a hosted
+# archer's shot on the other screen is the host's shot. Promoted unchanged from x-npc-archer (GREEN
+# 20261028-032303 on 53's stage of fork m3-npc-cast bf133744; the id and this header changed, steps and claims byte
+# for byte). c1 hosts Riverwood from the landing, c2 stands beside it; the server console places
+# EncBandit01MissileKhajiitM 0x9a549 at c1's own actor (a server-made ff actor c1 hosts) and it opens combat on its
+# own. In 032303 the host's client reported four hosted shots (the placed archer's 1397d from 3b562 at power 1.00,
+# and a Riverwood archer's it also hosts), the server took the placed archer's shot under its id ("OnPlayerBowShot -
+# ff000002 shot ... by its host ff000000"), zero E_SHOT_EQUIPMENT and E_SHOT_ORIGIN, its eight bow hits landed
+# through the record, and on c2 no "no figure, bow or arrow here", no arrow of the puppet's own and one relayed
+# arrow in flight after the volley. The first stage's 023756 was the code red this scenario guards against: natives
+# inside the launch handler threw on every launch and no shot reached the server (fixed in bf133744). Claims: c1
+# hosts 0x9732, no "a figure's own arrow dropped" on c1, the hosted shot line on c1, the server's OnPlayerBowShot by
+# its host, no E_SHOT_EQUIPMENT or E_SHOT_ORIGIN, no "no figure, bow or arrow here" on c2. Recorded: the projectiles
+# in flight on both seats, the puppet's release taken, E_SHOT_QUIVER, screenshots. Its own commit (rule 13).
+# (refs-near filters a cell's references by their BASE form's type, lab-driver: a projectile in flight is found under
+# PROJ 50, never under its reference class 64, 63 or 67, which read 0 by construction in 235808 and 000211)
+id: b-npc-archer
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13483}
+  - c2: npc-state {formId: 0x13483}
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.npc_state(0x13483).aiEnabled == true
+      - c2.npc_state(0x13483).aiEnabled == false
+  - c1: server-console {name: PlaceAtMe, args: [0x14, 0x9a549]}
+  - wait: 3
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: refs-near {radius: 4096, formTypes: [50]}
+  - c2: refs-near {radius: 4096, formTypes: [50]}
+  - wait: 1
+  - c1: projectiles {ids: [0x3be11], radius: 4096}
+  - c2: projectiles {ids: [0x3be11], radius: 4096}
+  - wait: 10
+  - c1: log-count {pattern: "a figure's own arrow dropped: shooter ff[0-9a-f]+"}
+  - c2: log-count {pattern: "a puppet's own arrow dropped: shooter [0-9a-f]+"}
+  - c1: log-count {pattern: "hosted shot by ff[0-9a-f]+: [0-9a-f]+ from [0-9a-f]+, power"}
+  - c2: log-count {pattern: "no figure, bow or arrow here for a shot of"}
+  - c2: log-count {pattern: "performAction on ff[0-9a-f]+: .* event '[A-Za-z_]*[Rr]elease[A-Za-z_]*' .* taken 1"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - 'c1.log_count("a figure''s own arrow dropped: shooter ff[0-9a-f]+") == 0'
+      - 'c1.log_count("hosted shot by ff[0-9a-f]+: [0-9a-f]+ from [0-9a-f]+, power") >= 1'
+      - 'server.log_count("OnPlayerBowShot - ff[0-9a-f]+ shot [0-9a-f]+ from [0-9a-f]+, .* by its host ff000000") >= 1'
+      - 'server.log_count("E_SHOT_EQUIPMENT") == 0'
+      - 'server.log_count("E_SHOT_ORIGIN") == 0'
+      - 'c2.log_count("no figure, bow or arrow here for a shot of") == 0'
+  - c1: refs-near {radius: 2000, formTypes: [43]}
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]

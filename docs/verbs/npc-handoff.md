@@ -665,20 +665,6 @@ the lab. H5 stays HYPOTHESIS until x-handoff-door.
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
-Watch item (2026-10-26, the stream's merge gate 20261026-202431-merge-m3-npc-stream, ADR-027):
-b-npc-handoff-cross red once (210042) at a login re-split: as c2 took 9731 the
-server refused four of c1's reports in 11 ms, a transient of the grant's order,
-not the stream's; green on its rerun 220011 and in the nightly 20261026-132333
-before it. Beside it, the pass THRASHES at the border: that green nightly moved
-Alvor between 9731 and 9732 836 times in a run, and the committed claims count
-no passes, so D22's premise that a crossing is one pass is false. The margin
-brake (fork m3-pass-margin 5b99ad03: PASS_MARGIN_UNITS 256, UNMEASURED; the
-crossing host keeps the actor as a follow into the hosted cell until the step
-the margin deep) is built ahead and merges on D36's letter
-(docs/research/m3/decisions-after-npc-stream.md); x-handoff-cross v3 counts the
-passes (at most six each of Sigrid and Alvor in three minutes). Closes when v3
-is green on the brake and the scenario carries the count (its own commit).
-
 ## D22's brake read on 55's stage (14:21 PDT, x-handoff-cross v3 20261027-211054)
 
 The brake held Riverwood's border traffic as follows and passed nobody in
@@ -699,6 +685,17 @@ crossing; it is restated to the follow within the margin with the passes
 bounded at six each and recorded (its own commit, named in the memo under
 D40), and x-handoff-cross v4 carries the same claims for the rerun. The
 watch item above closes with 55's merge, as its line says.
+
+## Train 55 merged (19:26 PDT 2026-10-27): the brake (D36 C) on parity 1b866786
+
+Fork parity 1b866786 (m3-npc-talk: the dialogue claim, ADR-052; D22's brake,
+PASS_MARGIN_UNITS 256, MEASURED for Riverwood's traffic; the H-54e promote
+fix), cited by 55's gate 20261027-234255 plus its rest (b-npc-death-blow and
+b-npc-respawn, both premise fixes). b-npc-handoff-cross's watch item closes
+here: v3 211054 read the brake holding, the scenario carries the follow and
+the bounded pass count (39cab38), v4 230629 and the gate's 004521 ran it
+green. The deep crossing's pass stays T0's (CellHostTest) until the probe
+named in the memo under D36.
 
 ## Reviewer checklist
 

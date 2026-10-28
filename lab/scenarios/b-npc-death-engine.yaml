@@ -12,6 +12,8 @@
 # (the engine's health on the host within 0.03 of the record), the death by either order (the server's number
 # first with the kill waiting on the report, or the engine's kill move first with the report taken on the
 # server's evidence), dead on the record and both seats, the bodies within 200 units on both axes.
+# 53's gate 052618: Sven held in place (npc-hold) before the measured swings, the walking-target premise; claims
+# unchanged (its own commit, 22:31 PDT 2026-10-27).
 id: b-npc-death-engine
 milestone: M3
 clients: [c1, c2]
@@ -73,6 +75,13 @@ steps:
   - c1: npc-state {formId: 0x13491}
   - assert:
       - c1.npc_state(0x13491).inCombat == true
+  # 53's gate 20261028-052618 (death-engine): none of the measured swings landed, Sven working his distance in
+  # combat (he hit c1 four times, c1 him never): the walking-target premise. He is held in place (npc-hold,
+  # SetDontMove: his current leg ends within a few seconds, then he stands exactly, still in combat) before the
+  # approach, so the swings find him; the claims are as they were. The wait is the measured settle: x-npc-hold v2
+  # read the hold's leg ending between 3 and 6 s (100.6 units moved, then 0.0 from 6 to 21 s), so eight
+  - c1: npc-hold {formId: 0x13491, held: true}
+  - wait: 8
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
   - c1: draw-weapon
   - wait: 1
@@ -166,6 +175,7 @@ steps:
       - c2.npc_state(0x13491).isDead == true
       - abs(c1.npc_state(0x13491).x - c2.npc_state(0x13491).x) < 200
       - abs(c1.npc_state(0x13491).y - c2.npc_state(0x13491).y) < 200
+  - c1: npc-hold {formId: 0x13491, held: false}
   - c1: dump-state
   - c2: dump-state
 artifacts: [server.log, c1.log, c2.log, screenshots]

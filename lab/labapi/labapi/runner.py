@@ -204,6 +204,7 @@ class Runner:
         self.active: RunRecord | None = None
         self.netem_active = False
         self.frida_started: list[tuple[str, str]] = []  # (client, script name)
+        self._game_dirs: dict[tuple[str, str], str] = {}  # (run id, client): the seat's game folder, read once a run
         # a snapshot or promote in progress (app.py); no run starts meanwhile
         self.maintenance: str | None = None
         # when the last run (or lab-up, lab-down) ended, as the next run's
@@ -886,31 +887,56 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return True, f"log-count skipped: {client} is unmanaged or unmapped"
-        game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
+        # both logs are copied by a read that shares write access, the frida traces' way: Copy-Item's read refuses a
+        # file another process holds open for writing, and lab-driver's console tee is open whenever the game prints
+        # (b-npc-stream-voice 20261028-063409: step 29's copy failed and read as an empty log, 0 lines, while step 30's
+        # copy of the same file a second later counted 9). A failed copy is tried three times; a console tee that is
+        # not there (a driver from before it) counts as empty; an unreadable log keeps no count, so the assert raises
+        try:
+            game_dir = await self._game_dir(rec, g, client)
+        except ProxmoxError as e:
+            return True, f"log-count: {client}'s game folder unread: {e}"
         texts: list[str] = []
-        for source, suffix in ((f"'{self.s.client_driver_log}'", ""),
-                               (f"(Join-Path {game_dir} '{self.s.client_console_log}')", "-console")):
-            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log"
-            try:
-                cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath {source} -Destination '{copy}' -Force"]
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                if res.exitcode != 0:
-                    if suffix:
-                        texts.append("")
-                        continue
-                    return True, f"log-count: the copy exited {res.exitcode}: {res.err.strip()[:200]}"
-                texts.append(await asyncio.to_thread(self.control.file_read, g, copy))
-            except ProxmoxError as e:
-                if suffix:
-                    texts.append("")
-                    continue
-                return True, f"log-count: {e}"
+        for src, suffix in ((self.s.client_driver_log, ""), (f"{game_dir}\\{self.s.client_console_log}", "-console")):
+            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log.copy"
+            read = (f"$s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
+                    f"$s.CopyTo($d); $d.Close(); $s.Close()")
+            if suffix:
+                read = f"if (Test-Path '{src}') {{ {read} }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"
+            cmd = ["powershell", "-NoProfile", "-Command", read]
+            text, why = None, ""
+            for attempt in range(3):
+                try:
+                    res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                    if res.exitcode == 0:
+                        text = await asyncio.to_thread(self.control.file_read, g, copy)
+                        break
+                    why = f"the copy exited {res.exitcode}: {res.err.strip()[:200]}"
+                except ProxmoxError as e:
+                    why = str(e)
+                await asyncio.sleep(1.0 * self.s.time_scale if self.s.time_scale else 0.01)
+            if text is None:
+                which = "console log" if suffix else "Skyrim Platform log"
+                return True, f"log-count: {client}'s {which} unread after three tries ({why}); no count kept"
+            texts.append(text)
         rx = re.compile(pattern)
         counts = [sum(1 for line in text.splitlines() if rx.search(line)) for text in texts]
         n = sum(counts)
         self.board.set_log_count(client, pattern, n)
         return True, (f"{n} line(s) of {client}'s logs match {pattern!r} "
                       f"({counts[0]} in its Skyrim Platform log, {counts[1]} in its console log)")
+
+    async def _game_dir(self, rec: RunRecord, g, client: str) -> str:
+        """The seat's game folder (C:\\sky-lab\\game-dir.txt), read once a run: log-count's copies name literal paths."""
+        key = (rec.run_id, client)
+        if key not in self._game_dirs:
+            cmd = ["powershell", "-NoProfile", "-Command", f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"]
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            got = (res.out or "").strip() if res.exitcode == 0 else ""
+            if not got:
+                raise ProxmoxError(f"game-dir.txt read exited {res.exitcode}: {(res.err or '').strip()[:200]}")
+            self._game_dirs[key] = got
+        return self._game_dirs[key]
 
     async def _server_log_count(self, rec: RunRecord, index: int, pattern: str) -> tuple[bool, str]:
         """server: log-count {pattern} (scenario.py): the run's server log so far (compose logs since the run

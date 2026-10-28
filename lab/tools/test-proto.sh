@@ -121,7 +121,29 @@ def ancestor(commit):
 own = [x for x in jobs if x["commit"]["id"].startswith(head)]
 # else the newest build of an ancestor, whichever branch built it (a merged branch's build is the head's history
 # too); the compare below still stops T2 when skymp-wire changed between that build and the head
-pick = own or next(([x] for x in jobs if ancestor(x["commit"]["id"])), [])
+def stale_paths(at):
+    # the skymp-wire paths the head changed since the build, less the session declarations a SESSIONS dir supplies
+    cmp = get("/repository/compare?" + urllib.parse.urlencode({"from": at, "to": head}))
+    wire = {d["new_path"] for d in cmp.get("diffs", []) if d["new_path"].startswith("skymp-wire/")}
+    tree = os.environ.get("SESSIONS", "") != ""
+    return [p for p in wire if not (tree and p.startswith("skymp-wire/difftest/sessions/"))]
+# of the ancestors' builds, newest first, the first whose skymp-wire is the head's: across a merge the newest by time
+# can sit on the other side (m3-npc-cast bf133744, 2026-10-28: parity's 1b866786 build, after the branch merged
+# m3-npc-talk in, lacks the branch's own wire changes, and the branch's ecec018e build holds the head's skymp-wire);
+# the newest ancestor at all when none of the first six does, which the compare below refuses as stale
+pick = own
+if not pick:
+    first, seen = None, 0
+    for x in jobs:
+        if not ancestor(x["commit"]["id"]):
+            continue
+        first, seen = first or x, seen + 1
+        if not stale_paths(x["commit"]["id"]):
+            pick = [x]
+            break
+        if seen >= 6:
+            break
+    pick = pick or ([first] if first else [])
 if not pick:
     print("")
     sys.exit(0)

@@ -15,7 +15,6 @@ always: [smoke-two-players, a-restart-persistence, b-duel]   # M0's floor, M1's 
 watch:
   - b-npc-death        # docs/verbs/npc-fate.md:2033, red four times on its restart leg in 52's cut gate, restage and gate and 54's gate (three premises fixed 86d340b, c1f44fb, b8c494f; the fourth H-54e, a corpse moved on its host's engine, 190413, green in 54's rest 202429) (2026-10-27)
   - b-npc-stream-voice # docs/verbs/npc-stream.md:1907, red once in 54's gate (the listener placed 74 units off a point in an obstacle, past the judge's 64; tolerance 150 c70e828, green in the rest 203422) (2026-10-27)
-  - b-npc-handoff-cross # docs/verbs/npc-handoff.md:668, red once at a login re-split in the stream's merge gate, and the pass thrash D36's brake answers (2026-10-26)
 pending:
   - b-npc-headshot-host  # lab-driver cannot aim: look and look-at leave the heading at the approach's, so a shot flies at the RECORD's point and misses a body 26 units off (54's gate 20261027-192858, every look-at heading equal to its approach's; v9's green 104716 was luck); the headshot path's claims held whenever a shot landed; un-pend with numidium's driver aim fix after the ladder, proved by a probe (2026-10-27, thuum-magnus)
   - b-push               # docs/verbs/push.md: under the essentials layer c2 ragdolls where it stands and is never thrown (y -206 against under -650 in 20261021-165252-b-push, the m2-close sweep; -157 in 20261021-123016 on train-30's stage), the layer's refused second Ragdoll, cause unread (x-push-knock-frida); carried to M3 by name (ADR-042b)

@@ -10,6 +10,8 @@
 # move takes the other path (cause 4, the killer named, x-npc-death-blow v1 174006); which path a lethal blow
 # takes is the engine's dice (52's rest 153601, 160510, 161323 took the server's). Claims: b-npc-death-engine's
 # nine plus the credit line. Its own commit (rule 13).
+# 53's gate 052618: Sven held in place (npc-hold) before the measured swings, the walking-target premise; claims
+# unchanged (its own commit, 22:31 PDT 2026-10-27).
 id: b-npc-death-blow
 milestone: M3
 clients: [c1, c2]
@@ -71,10 +73,21 @@ steps:
   - c1: npc-state {formId: 0x13491}
   - assert:
       - c1.npc_state(0x13491).inCombat == true
+  # 53's gate 20261028-052618 (death-engine): none of the measured swings landed, Sven working his distance in
+  # combat (he hit c1 four times, c1 him never): the walking-target premise. He is held in place (npc-hold,
+  # SetDontMove: his current leg ends within a few seconds, then he stands exactly, still in combat) before the
+  # approach, so the swings find him; the claims are as they were. The wait is the measured settle: x-npc-hold v2
+  # read the hold's leg ending between 3 and 6 s (100.6 units moved, then 0.0 from 6 to 21 s), so eight
+  - c1: npc-hold {formId: 0x13491, held: true}
+  - wait: 8
   - c1: approach {formId: 0x13491, distance: 110, cell: record}
   - c1: draw-weapon
   - wait: 1
-  - c1: repeat {times: 6, gapMs: 1500, step: {hold-key: {code: 199, ms: 120}}}
+  # four measured swings, not six (55's gate 20261028-002258: all six landed, 42 of his 50, and the two swings
+  # for the numbered hit then took him to zero, 56 in all; the eighth, lethal, rolled the engine's own kill
+  # move, which named the killer itself and left the credit nothing to do). Four land at most 28, the two
+  # after at most 14: 42 at most, never lethal, so the death is npc-damage's alone
+  - c1: repeat {times: 4, gapMs: 1500, step: {hold-key: {code: 199, ms: 120}}}
   - wait: 2
   # the measured swings, then the one-number read: the engine's health on the host against the record
   - c1: npc-state {formId: 0x13491}
@@ -86,7 +99,7 @@ steps:
   # 537 ms before (the engine's number outran the server's)", the server's number still at 0.04, and the
   # credit had nothing to do; which path a lethal blow takes is the engine's dice, 160510 and 161323 took
   # the server's): the server path's report shape forced. Two more sword swings land at least one numbered
-  # hit, never lethal (at most eight hits of seven on his fifty), then the host's own engine takes his
+  # hit, never lethal (at most six hits of seven on his fifty: four measured, two after), then the host's own engine takes his
   # health with no attacker (npc-damage, Actor.DamageActorValue, as the cause does when it brings the engine
   # to zero): deathStart names no killer, the report says cause 0, and the server credits the hit it
   # numbered within its 3 s window (H-52b, m3-npc-face 240a31de)
@@ -117,6 +130,7 @@ steps:
       - c2.npc_state(0x13491).isDead == true
       - abs(c1.npc_state(0x13491).x - c2.npc_state(0x13491).x) < 200
       - abs(c1.npc_state(0x13491).y - c2.npc_state(0x13491).y) < 200
+  - c1: npc-hold {formId: 0x13491, held: false}
   - c1: dump-state
   - c2: dump-state
 artifacts: [server.log, c1.log, c2.log, screenshots]

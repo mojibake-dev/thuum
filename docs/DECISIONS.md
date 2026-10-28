@@ -2932,3 +2932,128 @@ ticked (no second key press). A claim's demote on the host's seat ends that engi
 the actor mid-step (as a handoff does); the host's seat sees the puppet walk to the talker and
 face it from the claimant's stream. A failed promote (the engine refusing the dialogue on a
 just-promoted actor, HYPOTHESIS) reads as an open menu that never comes; the lease ends it.
+
+## ADR-053: Two stage slots a day, a short playtest on each; the gate is the touched verbs' own; R0 changes merge on T0 and T2
+
+Status: ACCEPTED 23:47 PDT 2026-10-27 (Eli: "oh then yes accept"); proposed 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all
+caution to the wind and just code the rest of it": "im leaning C, but Id like a playtest or two a
+day was the cadence we had a while ago"). Amends ADR-030 (the gate's
+selection at a merge) and ADR-040 (the playtest's cadence and loop); leaves ADR-024, ADR-027 and
+ADR-033 as they are.
+
+**Context.** Train 53 was written in about an hour on 2026-10-27 and reached playtest 35 eleven
+hours later: a Windows build (10 to 40 min), a stage (20 min), probes (5 to 10 min each), T2
+(25 min), a thirty-scenario gate (over two hours), and every red a read, a fix, a redeploy and a
+rerun. Of the day's four reds three were probe premises or tooling (the mage's timing, Sven
+walking, the build picker) and one a bug (the archer's natives); of the six fixes in train 56
+all six came from the lab or the playtest, none from reading code. The lab is slow and it is
+also the only thing finding the engine's behavior. The memo's three ways (decisions-after-
+npc-stream.md D47): A as today, one proved train a day; B code the rest with T0 and T2 alone
+and one playtest per milestone, whose unknowns would surface twenty features at once in a
+playtest Eli could not digest (35 was called at six); C split by rung and batch the lab.
+
+**Decision.**
+1. Two stage slots a day, morning and evening. A slot stages every train stacked since the
+   last slot (ADR-030's stacked trains), runs the day's rule-8 probes and T2, and carries a
+   playtest of at most eight items and about forty minutes on Eli's characters; the build is
+   frozen for the playtest alone. One or two playtests a day, as ADR-040 asked and as the days
+   of 2026-10-19 ran.
+2. The gate at a merge is the always set, the touched VERBS' own scenarios (each scenario names
+   its verb) and the watch items; a milestone's whole list and the full sweep run nightly. A
+   nightly red reopens its verb (ADR-030). A gate of thirty scenarios becomes one of eight to
+   twelve.
+3. The rung fast path: a change whose state is R0 (the server computes: formulas, transactions,
+   records, validators, the wire) and that changes no engine behavior on any seat merges on T0
+   and T2 alone, the nightly its T3; a change to R1 or R2 behavior (anything the engine does on a
+   seat) keeps one probe at the day's slot before its gate. Rule 3 stands: a verb ships whole,
+   the probe seeding its scenario.
+4. Probes are for rule-8 unknowns and the verb's own scenario, not for every change. The
+   premise levers are the library's defaults (a held NPC, a server-live until, a parked seat,
+   lab-probe-premises), not per-probe inventions; a premise red is fixed once in the lever.
+5. Ceremony: one dated paragraph a day per verb (the day's trains together), the memo for
+   decisions alone, the LOG one block a day; a merge keeps its one line (the sha, the gate id).
+6. Eli's structural levers when taken: ADR-036 (a relaunch instead of a rollback) and more
+   seats by passthrough (two GPUs for two seats; no sharing, memo D47's GPU answer).
+
+**Consequences.** About two trains a day with a playtest each half-day instead of one proved
+train a day; the lab's cost moves from every train to every slot. The risk accepted: an R0
+change that touches the engine after all surfaces in the nightly or the next playtest, a day
+later than today, and a short playtest misses what a long one found. UNMEASURED: the slot's
+length and the eight-item playtest's; read on the first two days (2026-10-28 and 29). The
+tooling (numidium, on branches until Eli's letter): the gate's verb-to-scenario map in
+lab/gate.yaml with gate-cite and the chains selecting from it (half a day to a day; UNMEASURED
+how often a cross-verb regression then shows only at night); the slot wrapper over verb-stage,
+the probes, T2 and playtest-setup (one to two hours); the R0 merge path (verb-merge R0=1, citing
+T2 and the pipeline's T0, refused mechanically when the fork diff touches skymp5-client,
+skyrim-platform or the gamemode; half a day); the nightly's list checked for every b- and c-
+scenario (minutes); the premise lever library (npc-still, an approach that re-aims, an ordered
+restart, a judged look; about a day, each timed live first). The first day runs the slots by
+hand with today's tools.
+
+## ADR-036: A seat relaunches the game between runs instead of rolling its VM back
+
+Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", the fifth of
+memo D48's faster ways). Proposed 2026-10-16 on thuum branch (see docs/private/decisions-lab.md) (its text there; the lab's
+facts in docs/private/decisions-lab.md and docs/research/process/turbo-mode.md:95: a relaunch is a
+median 31.5 s a step over 156 of 239 measured, in game 27.6 s after the command, bounded at five
+minutes; a rollback costs the VM's restore plus Steam's startup checks, docs/LOG.md 2026-10-16).
+numidium implements it in lab-api behind ADR-053's knobs and ADR-054's hot path: a run's seats
+relaunch onto a named save instead of restoring the clone (the launch task's IgnoreNew setting
+fixed, the cleaning list applied between runs, the ASLR base reuse noted), the rollback kept for
+a seat whose relaunch fails twice and for the snapshot promotions. UNMEASURED until the first
+day: the minutes saved per run against the rollback's, and any state a relaunch carries that a
+rollback cleared.
+
+## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
+
+Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
+faster ways of memo D48; the fourth, more seats, is Eli's to brainstorm). Companion to ADR-053
+(the cadence) and ADR-041 (turbo mode); adds to the workflow in CLAUDE.md.
+
+**Context.** On 2026-10-27 five of train 56's six fixes were TypeScript alone, and each client
+iteration cost a Windows build in CI (10 to 40 min), a stage (20 min) and relaunches. Two CI
+rounds died on a unit test file (40 min) that a local build would have caught in two. The one
+engine-facing unknown read statically first (the voice's later lines) produced an exact fix
+shape and a trace in twenty-five minutes, where a built guess would have learned at T3 in hours.
+ADR-041's turbo-client already builds skymp5-client.js on the Mac from a fork ref in seconds and
+lays it into every game folder through the guest agent; Skyrim Platform reloads a plugin whose
+file changes (the fork's DirectoryMonitor, SkyrimPlatform.cpp:115 to 127).
+
+**Decision.**
+1. The client hot path: `just client-hot <client> [file]`, turbo-client's lay for ONE seat with
+   no relaunch, taking a bundle built here (webpack in a worktree with SKYRIMPATH at a scratch
+   folder, or turbo-client-build's from a ref), its proof the reload line in skyrim-platform.log.
+   The seat is marked hot-reloaded under C:\sky-lab, so playtest-setup refuses it until a
+   relaunch or rollback clears the mark: a hot seat is never a playtest's. A change proved this
+   way still runs its train's pipeline before a stage or a merge; the hot path is for the loop,
+   not the record.
+2. T0 and T2 before a real push: a throwaway fork branch `wip/<name>` whose CI rule runs
+   server-build's ctest in a clean build directory with ccache (content-keyed, so the shared
+   tree's stale-time trap does not apply) and pushes the image as skymp-server:wip-<name>-<sha8>
+   with difftest-build, no Windows client, no fuzz, no promotion; `just wip-check <worktree>`
+   pushes, waits for T0 and runs T2 against that image (`SERVER_TAG=wip-<name> just
+   test-proto`), then deletes the branch. About eight minutes to a verdict, nothing built on the
+   Mac (Eli: no Docker there) and nothing on sky-srv (about 1 GB free, the lab's own server and
+   T2's containers). A push to a train's branch follows a green wip check, so CI confirms rather
+   than discovers.
+3. Reverse engineering before engine-facing code: for any change to what the engine does on a
+   seat, the Dynamic section (the static read with REA or Ghidra, the Frida plan, the expected
+   observations) is written and, where a trace is cheap, run before the code; rule 8 as the
+   habit, not the exception.
+
+**Consequences.** A TypeScript iteration drops from about an hour to about two minutes; a
+server change's first failure shows before CI; an engine-facing change starts from a hypothesis
+with a trace instead of a guess with a gate. The cost: a hot-reloaded seat drifts from the
+staged build until its relaunch, and sky-srv carries a build tree beside the deployed server.
+UNMEASURED, and the premise of item 1 is not yet met: on 2026-10-19 (docs/LAB.md's Turbo mode)
+Skyrim Platform reloaded a running game's plugins 8 ms after the write, but the reloaded
+skymp5-client logged nothing on the server and sent no movement (HYPOTHESIS there: the reload
+starts with an empty storage, so no world model, and establishConnectionConditional finds the
+native client still connected and skips the login). Two shapes (00:02 PDT 2026-10-28, numidium):
+(a) skymp5-client survives its own reload, a check in establishConnectionConditional that closes
+and logs in again on an empty-storage start with the native client connected (the real fix, and
+it holds for players too); (b) client-hot follows the reload with a forced reconnect from
+lab-driver, a lab-side workaround. numidium measures (b) on one seat after tonight's rest (a
+createActor at the server, then a turn's rotation read back); if red, client-hot waits on (a),
+which rides the next client train. Until that run the hot path's round trip and a reload's
+survivors are unmeasured.
