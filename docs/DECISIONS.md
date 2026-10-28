@@ -2935,9 +2935,9 @@ just-promoted actor, HYPOTHESIS) reads as an open menu that never comes; the lea
 
 ## ADR-053: Two stage slots a day, a short playtest on each; the gate is the touched verbs' own; R0 changes merge on T0 and T2
 
-Status: PROPOSED 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all
+Status: ACCEPTED 23:47 PDT 2026-10-27 (Eli: "oh then yes accept"); proposed 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all
 caution to the wind and just code the rest of it": "im leaning C, but Id like a playtest or two a
-day was the cadence we had a while ago"). Eli accepts by letter. Amends ADR-030 (the gate's
+day was the cadence we had a while ago"). Amends ADR-030 (the gate's
 selection at a merge) and ADR-040 (the playtest's cadence and loop); leaves ADR-024, ADR-027 and
 ADR-033 as they are.
 

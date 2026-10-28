@@ -615,3 +615,4 @@ playtest on each, eight items at most). First day, 2026-10-28: the morning slot 
 trace, 56's five probes, T2) and carries playtest 36 trimmed to eight items; the evening slot carries 57 (if the
 trace confirms the chain) and the D37 layer's result, playtest 37. The GPU question (D47's companion, 20:3x PDT):
 no sharing on the lab's cards; more seats by passthrough.
+- 23:47 PDT 2026-10-27: D47 closed, ADR-053 ACCEPTED (Eli: "oh then yes accept"). numidium's tooling moves off its branches: the gate's verb map, the slot wrapper, the R0 merge path, the nightly's list check, the lever library (two days between them); the slots run by hand meanwhile.
