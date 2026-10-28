@@ -1118,7 +1118,7 @@ class Runner:
             for qs in results:
                 if not qs.ok:
                     return [], "", qs.client
-            paused = self._paused(sorted(needed), index)
+            paused = await self._paused(sorted(needed), index)
             if paused:
                 return paused, "", None
         evaluator = Evaluator(self.state, self.board, self._client_names(rec.scenario), parity=rec.scenario.parity, references_dir=self.s.references_dir,
@@ -1174,16 +1174,27 @@ class Runner:
         rec.notes.append(f"step {index}: {client} had a message box over its game after its connect (menus: {', '.join(map(str, menus))}): "
                          + ("it stayed after a close" if stayed else "closed it (a mod's start-up box)"))
 
-    def _paused(self, clients: list[str], index: int | str) -> list[dict[str, Any]]:
+    async def _paused(self, clients: list[str], index: int | str) -> list[dict[str, Any]]:
         """The seats among `clients` whose last dump-state shows a message box: the game sits
         paused under MessageBoxMenu, nothing it would measure moves, and an assert about it can
         hold while measuring nothing (2026-10-14: r-melee-power-a went green twice under Survival
         Mode's first-load prompt; solo runs now answer it, thuum-solo-survival-prompt). Of the 454
-        dump-states the lab kept from 10-14 to 10-17, only those two showed the box."""
+        dump-states the lab kept from 10-14 to 10-17, only those two showed the box. Under a layer that unpauses menus
+        (Skyrim Souls RE, the essentials layer of 2026-10-28) a box no longer stops the world, so a seat showing one is
+        read again a second later: its game days passed (dump-state's GameDaysPassed global) moving means the world
+        runs under the box and the seat is not paused; standing still, or unread, keeps the verdict."""
         out: list[dict[str, Any]] = []
         for c in clients:
-            menus = (self.board.view(c) or {}).get("menus")
+            view = self.board.view(c) or {}
+            menus = view.get("menus")
             if isinstance(menus, list) and "MessageBoxMenu" in menus:
+                t0 = view.get("gameDaysPassed")
+                if isinstance(t0, (int, float)) and not isinstance(t0, bool):
+                    await asyncio.sleep(1.0 * self.s.time_scale if self.s.time_scale else 0.01)
+                    qs = await self.board.run_step(c, "dump-state", {}, self.s.step_timeout_s)
+                    t1 = (self.board.view(c) or {}).get("gameDaysPassed") if qs.ok else None
+                    if isinstance(t1, (int, float)) and not isinstance(t1, bool) and t1 > t0:
+                        continue  # the world runs under the box
                 out.append({"step": index, "kind": "paused", "client": c,
                             "error": f"E_RUN_PAUSED: {c}'s game is paused under a message box (menus: {', '.join(map(str, menus))}), so it measured nothing"})
         return out
@@ -1578,7 +1589,7 @@ class Runner:
             rec.verdict = "error"
         # a seat whose last dump-state shows a message box sat paused: the run measured nothing there
         flagged = {f.get("client") for f in rec.failures if f.get("kind") == "paused"}
-        rec.failures.extend(self._paused([c for c in rec.scenario.clients if c not in flagged], "end"))
+        rec.failures.extend(await self._paused([c for c in rec.scenario.clients if c not in flagged], "end"))
         unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap", "trace") and not n.endswith(".log")]
         for n in unknown:
             rec.notes.append(f"unknown artifact {n!r} ignored")

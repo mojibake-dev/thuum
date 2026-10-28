@@ -75,6 +75,8 @@ class Doubles:
         self.seen: list[tuple[str, str, dict]] = []
         self.stale_dumps = 0  # dump-states that report the client far from where the server's record says
         self.menus: dict[str, list[str]] = {}  # the menus a client's dump-state reports open
+        self.days: dict[str, float] = {}  # a client's game days passed in its dump-state, advanced by day_step per dump
+        self.day_step: dict[str, float] = {}
         self.closable: set[str] = set()  # the clients whose close-menu removes the named menu from self.menus
         self.npcs: dict[str, dict[int, dict]] = {}  # the NPCs a client's npc-state reports, by form id
 
@@ -106,6 +108,9 @@ class Doubles:
                         "sees": {o: {"x": a.x, "y": a.y, "z": a.z} for pid, a in self.state.actors.items() for o, p in self.profile.items() if p == pid and o != name}}
                 if name in self.menus:
                     data["menus"] = list(self.menus[name])
+                if name in self.days:
+                    data["gameDaysPassed"] = self.days[name]
+                    self.days[name] += self.day_step.get(name, 0.0)
             elif step["action"] == "close-menu":
                 if name in self.closable and name in self.menus:
                     self.menus[name] = [m for m in self.menus[name] if m != step["args"].get("name")]
@@ -852,6 +857,20 @@ class PausedGames(RunTests):
         self.assertEqual((f["kind"], f["client"], f["step"]), ("paused", "c1", 2))
         self.assertEqual(f["error"], "E_RUN_PAUSED: c1's game is paused under a message box (menus: Cursor Menu, HUD Menu, MessageBoxMenu), so it measured nothing")
         self.assertEqual(body["steps"][2]["note"], f["error"])
+
+    def test_a_box_over_a_running_world_is_no_pause(self):
+        # Skyrim Souls RE unpauses the box: the seat's game days move between two reads, so the assert measures
+        self.doubles.menus["c1"] = ["HUD Menu", "MessageBoxMenu"]
+        self.doubles.days["c1"], self.doubles.day_step["c1"] = 1.5, 0.0002
+        run_id, body = self._run(self.TWO + "  - assert:\n      - c1.sees(c2) == true\n")
+        self.assertFalse([f for f in body["failures"] if f["kind"] == "paused"], body["failures"])
+
+    def test_a_box_over_a_standing_world_is_a_pause(self):
+        self.doubles.menus["c1"] = ["HUD Menu", "MessageBoxMenu"]
+        self.doubles.days["c1"], self.doubles.day_step["c1"] = 1.5, 0.0
+        run_id, body = self._run(self.TWO + "  - assert:\n      - c1.sees(c2) == true\n")
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual(body["failures"][0]["kind"], "paused", body["failures"])
 
     def test_an_until_over_a_paused_seat_fails_at_its_first_poll(self):
         self.doubles.menus["c2"] = ["HUD Menu", "MessageBoxMenu"]

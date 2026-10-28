@@ -1,0 +1,56 @@
+# Playtest thirty-six's seats, the turbo day (memo D49; docs/private/playtest-m3-36.md): copied from 35's profile with
+# 36's world and build; the hold is renewed or released for the probes in Eli's gaps.
+# Playtest thirty-five's seats (thuum ADR-040 item 6: `just playtest-setup 35`; the checklist is
+# docs/private/playtest-m3-35.md): M3's NPCs across the board, the NPC ladder's playtest, on fork parity m3-npc-cast bf133744 (53's stage)
+# (trains 51 to 55 and 53: the server's roll on every screen, the host's engine dying by itself and reporting it, the
+# puppet's head and face, the guest's dialogue claim, the hosted archer's and mage's shots). The world is the lab's
+# clean world saved as a playtest world (playtest-m3-35-clean-20261028T040030Z: `just lab-up` then `just playtest-save m3-35-clean`), so every
+# resident stands as the gates found him (no earlier session's deaths or record formats), the server alone with
+# npcEnabled and the morning clock (7.9), test 1 alone at place 1, Riverwood's landing by the bridge end (Tamriel
+# (4,-12), 0x9732), so it hosts, test 2 parked at the lab spawn until Eli's word (thirty-four's shape; the checklist's
+# section 2, "test 1 first, then test 2"). No god mode on either seat (the checklist reads hit numbers, bars and a
+# death under the bandits' fire; Eli toggles tgm himself if he wants it). One perk and one
+# value, given by the setup and kept by lab-driver through every load: test 1's Overdraw40 (0x7934b) and Marksman 60, the
+# headshot rule's two conditions (CIF's headshot.json, docs/verbs/headshot.md:35 and :144; the checklist's headshot
+# item); test 2 none.
+# Eli 2026-10-27 21:05 PDT: "i need test 1 to be rotfern and test 2 to be prisoner". The world is composed on sky-srv
+# (playtest-m3-35-rotfern-prisoner-20261028T040633Z): playtest-m3-34b-rotfern-20261025T2217Z (rotfern as profile 1,
+# her newest) with profile 2's record (changeForms/1.json, formDesc 1, formVersion 2) from playtest-m3-30-20261022T040151Z
+# (Prisoner's newest: from 31 on profile 2 was a fresh test 2), both characters' Survival needs (81b, 81a, 816) zeroed
+# (rotfern's already were; Prisoner's read 299, 1000 and 960). Rotfern's base archery reads 60.0 (av 8, kArchery,
+# CommonLibSSE-NG ActorValues.h:16), so the Marksman 60 below changes nothing on her.
+# Everything here is server-side (labCommand); the seats type nothing.
+id: 36
+build: "fork m3-turbo-knobs defaa7e2 on its stage (train 56, the turbo day D49: no gate before play; its probes in the gaps, the gate at night) over parity bf133744 with the NPC ladder and the D37 layer merged"
+world: playtest-m3-36-rotfern-prisoner-20261028T131908Z   # 35's end world (rotfern and Prisoner at their newest), both characters' Survival needs zeroed
+hold:
+  minutes: 300
+  reason: "playtest thirty-six: M3's NPCs across the board (fork parity m3-npc-cast bf133744 (53's stage), the NPC ladder)"
+server:
+  # this server alone runs with NPCs on and the morning clock (ADR-035 point 9): playtest-setup lays the run-own
+  # settings overlay (server-settings-run.json beside the world) and starts the server on it
+  npcEnabled: true
+  gameHour: 7.9
+camp:
+  # test 1 alone at place 1 (it hosts the cell), test 2 parked at the lab spawn until Eli's word, then brought beside
+  # test 1 by hand: labCommand teleport profile 2 to [17375, -47204, -128] rot [0, 0, 180] (thirty-four's shape)
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [17225, -47204, -128], rot: [0, 0, 0]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [133857, -61580, 14677], rot: [0, 0, 0]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40, the headshot rule's perk condition; given by the setup, nothing to type
+    values:
+      Marksman: 60   # the headshot rule's floor; "Archery" does nothing on the server (25.yaml)
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  # Moonlight: confirm each stream window runs before "seats ready"
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
