@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# turbo-back.sh [--world] (ADR-041 item 5): the reverse of the last turbo push, from /srv/lab/turbo.log.
+# turbo-back.sh [--world] [<stamp>] (ADR-041 item 5): the reverse of the last turbo push, from /srv/lab/turbo.log, or
+# of the push with that stamp (a hot push's, say, when another came after it).
 # - A server push ("srv <prev> <new>") goes back to <prev>: turbo-srv.sh with TURBO_BACK=1, the image still local.
 # - A client push ("client <stamp> <vmids>") stops each pushed seat's game (Skyrim Platform's folder watcher would
 #   otherwise reload the old file into the running game), puts back the skymp5-client.js turbo-client.sh kept under
+#   (a hot push, "hot <stamp> <vmid> <sha8>" from client-hot.sh, is the same for its one seat, its kept file alike)
 #   C:\sky-lab\turbo\<stamp>\ into every game folder of the clone, and relaunches those seats only.
 # --world also restores the newest saved turbo world (playtest-turbo-*), for a world a server push damaged
 # (playtest-world.sh restore relaunches both seats).
@@ -21,7 +23,13 @@ run() {  # run <vmid> <powershell>: turbo-client.sh's helper; the stop and the c
   done
   printf '%s' "$out" | python3 -c 'import sys,json; d=json.load(sys.stdin, strict=False); print((d.get("out-data") or d.get("err-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'
 }
-last=$(ssh_srv "grep -v ' back\$' /srv/lab/turbo.log 2>/dev/null | tail -1" || true)
+want=""; for arg in "$@"; do case "$arg" in --world) ;; *) want=$arg;; esac; done
+case "$want" in *[!0-9TZ]*) echo "== a stamp is like 20261028T182237Z" >&2; exit 2;; esac
+if [ -n "$want" ]; then
+  last=$(ssh_srv "grep -v ' back\$' /srv/lab/turbo.log 2>/dev/null | grep ' $want ' | tail -1" || true)
+else
+  last=$(ssh_srv "grep -v ' back\$' /srv/lab/turbo.log 2>/dev/null | tail -1" || true)
+fi
 [ -n "$last" ] || { echo "== no turbo push in /srv/lab/turbo.log: nothing to take back" >&2; exit 2; }
 read -r when kind a b _ <<<"$last"
 echo "== turbo-back: the last push was $kind at $when ($a $b)"
@@ -29,7 +37,7 @@ case "$kind" in
   srv)
     TURBO_BACK=1 "$here/lab/tools/turbo-srv.sh" "$a"
     ;;
-  client)
+  client|hot)
     stamp=$a
     for vmid in ${b//,/ }; do
       ps="\$k = 'C:\\sky-lab\\turbo\\$stamp'; if (-not (Test-Path \$k)) { throw 'no kept files at ' + \$k }
@@ -39,7 +47,7 @@ Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process
       out=$(run "$vmid" "$ps") || { echo "== VM $vmid: $out" >&2; exit 3; }
       echo "   VM $vmid: $out"
     done
-    ssh_srv "echo \"\$(date -u +%Y-%m-%dT%H:%M:%SZ) client $stamp $b back\" >> /srv/lab/turbo.log"
+    ssh_srv "echo \"\$(date -u +%Y-%m-%dT%H:%M:%SZ) $kind $stamp $b back\" >> /srv/lab/turbo.log"
     pids=()
     for vmid in ${b//,/ }; do
       case $vmid in 711) c=c1;; 712) c=c2;; *) echo "== VM $vmid is no seat" >&2; exit 2;; esac

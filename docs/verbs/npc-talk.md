@@ -134,6 +134,20 @@ second (UNMEASURED).
   (TESObjectREFR::ActivateRef's entry and the dialogue's start, 37347's first pass on the actor
   after the promote); owner: agent.
 
+### Playtest 36, the turbo day (11:36 PDT 2026-10-28; fork m3-turbo-knobs f5a8f7d1 over 56's stage)
+Eli ticked items 1 and 2: "the claiming SEEMS to work but check logs"; "rotfern walked to embershard mine, prisoner was
+still talking to sven". The logs: eight claims granted on Sven, Hilde and Sigrid's household, every one released at the
+Dialogue Menu's close; one E_CLAIM_HELD pair when test 1 pressed E on Sven under test 2's claim (by design, one claim per
+actor). Two findings from the tails. (a) A dialogue of 175 s outlived CLAIM_LEASE_MS 120 s; today the cell's regrant to the
+claimant itself (17:56:18Z) had already dropped the claim row (ADR-052 decision 3, cells.rs grant() retains no follow in
+the cell), so the only trace was E_CLAIM_NONE at the release; with the lease, or a grant to a third player, the partner
+turns into a puppet under the open menu. Fix 8b088be1: the held claim is sent again every 60 s while the menu is open (the
+server renews its holder's claim, ClaimVerdict Reclaimed, by design). The grant's drop is an ADR-052 amendment PROPOSED
+(B: a claim outranks a grant for its lease; the patch saved in thuum-cf's scratchpad). (b) E on a corpse sent a claim
+(E_CLAIM_DEAD, 3 s waited): f5a8f7d1 skips dead actors, a body is the engine's own activation. Unread: two dialogues on
+Sven that opened and closed within 400 to 600 ms of the grant (17:55:01Z and 17:55:07Z) before the third stuck; the menu's
+early close wants a Frida read with x-npc-talk-cross's cause (HYPOTHESIS H-55a still: a greeting in flight).
+
 ## Status
 
 Built 14:53 PDT on fork m3-npc-talk 0d453dc1 (off m3-npc-face 867c4210 with m3-pass-margin 11bf32f3 merged in, so the claim and the margin share the follows table's kinds); probe x-npc-talk-claim by path (38 steps); the T2 session npc-talk.yaml; CI pending.

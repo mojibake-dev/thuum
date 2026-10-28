@@ -1980,6 +1980,23 @@ c2's puppet: the first line started, at least one continuation, at least two
 ends). Falsified by the trace (a multi-line bark with one BEGIN, or the
 AI update entered for an AI-off puppet) the candidate is dropped unmerged.
 
+### Playtest 36, the turbo day (11:36 PDT 2026-10-28; 56's stage defaa7e2 with the hot bundle, then 40e3ab41 relaunched)
+Eli's item 3 ticked ("when prisoner showed up hilde WAS tanning": the late joiner's lastAction, 56). Item 4 unticked: "didn't
+work. only first plays. LOTS of voice lines are synced. their barks (things said as you pass them) are synced. however, the
+'DRAGON! I SAW A DRAGON' exchange that hilde and sven have is weird. sometimes anims play for one (pointing) sometimes
+neither. voicelines only play for one at a time. i think something about it being a scripted event makes it weird." Three
+threads in that: the continuation (train 57, built and green on m3-voice-lines 5de4ced5, was NOT in the build; merged into
+the turbo train at 26e3d0cf for tonight's gate, HYPOTHESIS until x-npc-voice-lines); one speaker of a two-NPC scene refused
+on the observer (c2's VoiceService: five "-> refused", PuppetApi result 2, all b6fdb's while b6fe4's lines started; the
+sayTopicInfo pre-state in c2's skyrim-platform.log is numidium's read); and the dialogue idles (IdleDialogueStart,
+MotionDrivenDialogueGeneric, NextClip) stream to the observer (c2's ActionSync traces carry them) but Eli sees them play for
+one or neither: the replay's result per idle on a puppet is the platform log's too (both reads before any code). Item 6
+unticked: "so ferns head looks right, NPC heads dont track. im wondering if that's ok for tracking players so each player
+is addressed on their screen, but it needs to work for NPCS talking to eachother on both. additionally no talking
+animations propagate still." The local gaze (8acf15f9) looks at the local player alone; a conversation's partner is the
+missing target (memo D53). Item 7 unticked: "still a little glide back about a foot" (the movement knobs, a measured tune
+in tomorrow's slot, not a blind one). Item 5 ticked: arrow deaths by the engine (npc-fate).
+
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,

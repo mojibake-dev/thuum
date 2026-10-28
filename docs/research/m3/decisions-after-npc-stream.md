@@ -673,3 +673,60 @@ layer-stage with a smoke, the sweep at night) or the evening.
 - 04:25 PDT 2026-10-28 (correction): b-npc-talk 111955's cause is the claim row overwritten by the movement judge's
   follow when Sven crossed into 9731 mid-dialogue (the release was sent; E_CLAIM_NONE answered), 56's cells.rs fix;
   the (b) call stands.
+
+- 11:36 PDT 2026-10-28 (Eli's verdict in playtest 36, item 6): "so ferns head looks right, NPC heads dont track. im wondering
+  if that's ok for tracking players so each player is addressed on their screen, but it needs to work for NPCS talking
+  to eachother on both. additionally no talking animations propagate still." The local gaze stands for players; the
+  NPC-to-NPC case and the dialogue idles are D53.
+### D51. Survival's cold death on a seat (11:14 PDT 2026-10-28, thuum-cf, from apocrypha's read and numidium's lead)
+Survival Mode's one lethal need is cold: Survival_NeedCold's CheckIfMaxCold calls PlayerRef.Kill() when
+Survival_ColdNeedValue reaches 1000 (apocrypha, from ccQDRSSE001-SurvivalMode.esl; UESP agrees). On a seat that Kill meets the
+engine's deferred kill the client holds its player in for the whole session (deathService.ts 28, appearance.ts 183; CommonLib
+MiddleHighProcessData inDeferredKill +0x332, deferredKillTimer +0x2D4), and the server has no path to hear of it: a player dies
+by the server's own number alone (MpActor.cpp 1041 to 1051: health 0 in its damage path, then Kill and SendAndSetDeathState) and no
+C2S message reports a player's own death (the death report is a host's, for NPCs). Two unread engine behaviours, HYPOTHESIS both:
+the scripted Kill (Papyrus Actor.Kill, Actor::KillImpl, Actor.h 468) kills regardless and the seat shows a dead body the server
+holds alive, its health restored by the next ChangeValues and no respawn ever; or the deferred kill swallows it and cold never
+kills. A player reads both as wrong: the frozen player stands up again, or never falls. The server already records the needs
+(playerGlobals 81a Survival_HungerNeedValue, 81b Survival_ColdNeedValue, 816 Survival_ExhaustionNeedValue and 828; the esl's GLOBs
+by esm.py on sky-srv).
+- A: leave it as today. Cold does whatever the engine does; read it when a player freezes. The lab never freezes anyone.
+- B: the server's word from its own record (R0, the law): a listed global may carry a lethal threshold (data in the playerGlobals
+  entry, {global, killAt}); when the recorded value reaches it the server kills the player through MpActor::Kill with that cause
+  and the existing respawn follows; the client suppresses Survival's own Kill (or the deferred kill does, per the probe). One rule
+  in the PlayerGlobals handler, a T0 case, a probe that sets the global through a lab `global` step (the lever library's).
+- C: the client reports the scripted Kill as a cause (a C2S DeathIntent {reason}) the server validates against its recorded cold
+  need (R1): more wire for the same outcome.
+Recommended B: the needs are recorded state and a death from state is the server's word; the client's Kill is untrusted input
+either way (rule 5). Before any build the probe reads the hypotheses: x-player-cold-kill (c1 `console player.kill` on a seat, then
+c1.state and server.ref(0xff000000).isDead, screenshot) after the hold. Not today's unless Eli freezes in play.
+
+### D52. Shared containers (11:36 PDT 2026-10-28, Eli's item 8: "this works fine, left unmarked because only one person can activate a container at once. id kind of like that to be more dynamic.")
+Today the server lets one player into a container at a time (MpObjectReference::ProcessActivate: "occupant is another
+object and is nearby"), the engine's own rule for furniture and containers; Skyrim Souls RE unpauses the menu, so the
+second player stands at a chest that will not open while the first browses it.
+- A: leave it: one looter at a time, a known limit in the checklist.
+- B: concurrent access (TES3MP's shape): the occupant check skips containers for players; the server already owns the
+  container's inventory (R0: every take and put is a validated transfer), so two open menus are two views of one record;
+  the second player's view goes stale when the first moves an item unless the server re-sends SetInventory for the
+  container to every player with it open (the OpenContainer path knows them). One server rule, one T0 case, a probe with
+  two seats in one chest (x-container-shared), b-container-shared after it.
+- C: B without the refresh: the stale view corrects itself at the next open. Cheaper, visibly wrong once.
+Recommended B. A train of its own after the turbo trains merge; the refresh is the part that makes it feel right.
+
+### D53. NPCs facing each other, and their talking animations, on the observer's screen (11:36 PDT 2026-10-28, Eli's item 6 and item 4's scene)
+The local gaze (D50, 8acf15f9) makes a puppet with no relayed target look at the LOCAL player; the host's engine relays a
+target only when it tracks one, and it tracks heads near its own player alone (H-54d), so two residents talking far from
+their host face nobody on the observer, and Eli reads it as wrong ("it needs to work for NPCS talking to eachother on
+both"). The dialogue idles do reach the observer (ActionSync traces for IdleDialogueStart, MotionDrivenDialogueGeneric,
+NextClip on c2) and play "for one (pointing) sometimes neither": the replay's verdict per idle on a puppet is unread.
+- A: leave both: heads for players only, idles as they land.
+- B: the conversation names the target: a relayed line (ActorSpeech, speaker and the server's listener) sets the puppet's
+  gaze to its partner for the line's span on every seat (the speaker looks at the listener, the listener at the speaker),
+  the relayed engine target still winning, the local player next; no wire change (the speech relay carries the speaker;
+  the listener is the dialogue's other party where the host's state names a target, else the nearest speaking partner).
+  The idles: read the platform log's replay verdicts first (numidium), then fix the refused ones in the entry replay.
+- C: B plus the host's engine made to track heads for its hosted actors away from its player (an engine hook on the head
+  tracking update's distance gate, RE first per ADR-054): the relayed target then exists for every conversation.
+Recommended B now (a day's client work, probe x-npc-pair-gaze: Sven and Hilde's DRAGON scene at 7.9 read on the observer),
+C as the next step if B's heuristic misses.
