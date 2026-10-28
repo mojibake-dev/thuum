@@ -652,6 +652,28 @@ hunger rises Survival_HungerNeedRate 7.5 every 0.25 game hours (30 a game hour, 
 Playtest 36's seats at hunger 30 and exhaustion 18 after four idle real hours are exactly one game
 hour of ticks: the needs follow the game clock, and the lab's game clock barely moved.
 
+**How Survival Mode starts, from its compiled scripts (thuum-cf's relaunch question, 2026-10-28;
+the Creation's archive pulled off sky-c1 into lab/.cache/game, its scripts disassembled):** only
+SurvivalModeMainQuest is start-game-enabled. Its Survival_MainScript arms a 5 s RegisterForSingleUpdate
+at OnInit and, every tick of OnUpdate, (1) shows Survival_StartPrompt once if Survival_PlayerHasBeenPrompted
+(05:8DF) is 0 and the mode can be enabled ("yes" sets Survival_ModeToggle 05:828 to 1), (2) computes
+ModeCanBeEnabled() = MQ101.IsCompleted() OR (Game.IsFightingControlsEnabled() AND NOT
+PlayerRef.IsInInterior()) and writes it to Survival_ModeCanBeEnabled (05:A0F), (3) calls
+StartSurvivalMode() when 828 == 1 AND that holds AND Survival_ModeEnabled (05:826) != 1, or
+StopSurvivalMode() when 828 != 1 AND 826 == 1. Both operands are globals read cold each tick; 826 is
+the mod's own running-state global, written 1 by StartSurvivalMode and 0 by StopSurvivalMode and
+mirrored into Update.esm's Survival_ModeEnabledShared (01:00314A) for the engine's settings menu.
+StartSurvivalMode starts the three need quests (Survival_NeedBase.StartNeed: Start(), the stage
+values, one OnUpdateGameTime() at once, then RegisterForSingleUpdateGameTime at the need's
+interval), adds the perks and sets 826. The player alias's OnPlayerLoadGame re-arms the timer and
+runs version updates; it starts nothing. Two consequences for a connected game, where every launch
+is a fresh game: a restored 826 = 1 tells the poll the mode already runs and the needs never start
+(the bare relaunches of 2026-10-28, needs flat for thirty minutes while GameDaysPassed ran), and the
+mode cannot start indoors unless MQ101 is completed (those seats stood in Embershard Mine). Rule for
+the player-globals verb: a global a script writes as its own running state (05:826, 01:00314A, and
+the derived 05:A0F) is never restored; the switch a player sets (828) and the player's data (the
+needs, 8DF, 8E0 to 8E2) are, and the mod's own poll then enables within 5 s wherever it may.
+
 **RaceMenu's menu under the layer (2026-10-20, the a-rotfern CTD and a-racemenu's hair swap):**
 SkyUI_SE.bsa carries `interface/racesex_menu.swf` too, the one file the two archives share, and in
 the layer SkyUI_SE.esp is client-only at the tail (slot 82) after RaceMenu.esp (23), so among
