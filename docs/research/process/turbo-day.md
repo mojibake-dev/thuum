@@ -36,8 +36,9 @@ motion against 35, the feel.
 The motion feel numbers are settings (fork m3-turbo-knobs a29f237a, in the morning's stage if its pipeline is
 green): `skymp5-client.movement` in the seat's skymp5-client-settings.txt with `leadSeconds` (0.2, the running
 lead), `leadDecay` (0.5, its run-out per standing sample), `deadbandMoving` (8), `deadbandStill` (1),
-`popDistance` (256), `popWindowMs` (600), `jumpDistance` (1024) and `sendRateMs` (130, the player's own samples
-and the host's samples of its NPCs). Any of them is a line in the settings file and a plugin reload (client-hot
+`popDistance` (256), `popWindowMs` (600), `jumpDistance` (1024), `sendRateMs` (130, the player's own samples
+and the host's samples of its NPCs) and `localGazeRadius` (450, a puppet with no relayed gaze looks at the local
+player within it; 0 off). Any of them is a line in the settings file and a plugin reload (client-hot
 or a relaunch), no build; the defaults are the shipped values, so an absent block changes nothing. Eli's "jerky
 NPCs" and "snap after a jog" are read against these first: a lower sendRateMs smooths puppets at the cost of
 bandwidth, a longer leadSeconds leads figures further, a slower leadDecay glides longer.
@@ -54,7 +55,8 @@ gameData.profileId, headshot-spells); the knobs are a top-level block beside the
   "deadbandStill": 1,
   "popDistance": 256,
   "popWindowMs": 600,
-  "jumpDistance": 1024
+  "jumpDistance": 1024,
+  "localGazeRadius": 450
 }
 ```
 

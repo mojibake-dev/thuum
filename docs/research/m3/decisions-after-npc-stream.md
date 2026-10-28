@@ -642,3 +642,16 @@ that corrupt a world quietly). Eli: "yea cook on shit and we'll do a turbo day t
 a turbo day on 56's stage (7b61b533 over parity bf133744), no gate before play; the voice trace runs first thing
 for 57; authority changes (a claim, a death, an inventory or persistence rule) still take CI's T0 and T2 before a
 push; the gate and the merge at night; the runbook is docs/research/process/turbo-day.md.
+
+### D50. Two more for the turbo build: head tracking and mouth movement, and the pausing (00:45 PDT 2026-10-28, Eli)
+Eli: "given you're cooking all night on this, id LIKE to add head tracking/mouth movement and the pausing to this
+build as well. i feel like those are reasonable asks". Head tracking: the host's engine tracks heads near ITS player
+only (H-54d), so on the guest's screen a resident far from its host stood stiff (35: "HIS face and head doesn't move
+the way hilde's does", Hilde being live under Prisoner's claim). Built on fork m3-turbo-knobs 8acf15f9: a puppet
+with no relayed gaze looks at the LOCAL player within 450 units (knob movement.localGazeRadius, hysteresis 100), a
+relayed target still winning; in the morning's stage if its pipeline is green. Mouth movement: the puppet's lips
+move with every line it says; the lines it never said are 57's (the continuation on m3-voice-lines 3eef89d3, built,
+staged after the trace). The pausing: Skyrim Souls RE - Updated as a mod layer (D46), handed to apocrypha with the
+lab's facts (Address Library present, Engine Fixes absent: its preloader lives in the game root, which add-mods.ps1
+cannot lay); apocrypha decides the menus, the Engine Fixes question and whether it goes in for the morning (a
+layer-stage with a smoke, the sweep at night) or the evening.
