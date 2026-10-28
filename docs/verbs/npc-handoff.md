@@ -348,8 +348,12 @@ each imposition's target is explicit.
   `[verb:npc-handoff] keyframe <id>` and `promoted <id>`; a furnitureEvent
   sink keeping the last target per hosted actor; formView's
   RespawnNeededError branch for an engine reference (formView.ts:549-556)
-  calling moveRefrToPosition to the record, logged `moved <id> into <cell>`;
-  nothing applied to an actor this game hosts (Rule A, ADR-045 point 4); the
+  calling moveRefrToPosition to the record, logged `moved <id> into <cell>`,
+  never for the actor's own simulator except at the moment of its promotion
+  by a pass (the record is the previous simulator's truth then; the door's
+  pass of 2026-10-28, fork m3-pass-promote c7c76870, logged `at its
+  promotion`); nothing else applied to an actor this game hosts (Rule A,
+  ADR-045 point 4); the
   report list skips an actor whose cell this game neither hosts nor loads
   (e); the roster re-reads its attached set at a reconnect (g).
 - Kill switch config key: `npcHandoff` under skymp5-client's settings: off,

@@ -110,8 +110,11 @@ second (UNMEASURED).
 ## Client
 
 - SP binding: activatePickRef() (PlayerCharacter::ActivatePickRef on the game thread).
-- TS handler: TalkService (the key, the claim, the activation after the promote, the release at
-  the Dialogue Menu's close).
+- TS handler: TalkService (the key, the claim, the activation after the promote, the release 3 s
+  after the Dialogue Menu's close: the exit line is spoken on the claimant's engine right after the
+  close, and a release sent at the close reached the server first, so the line's report was dropped
+  as a non-simulator's; playtest 37, Eli: "some tiny greetings are lost too. like the 'alright'
+  when i end a convo"; fork m3-pass-promote c7c76870, 2026-10-28; the lease stays the safety net).
 - Kill switch config key: npcTalk (default on).
 
 ## Tests
