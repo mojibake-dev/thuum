@@ -453,6 +453,12 @@ turbo-srv tag:
 turbo-client ref:
     @lab/tools/turbo-client.sh {{ref}}
 
+# A client push to ONE running seat with no relaunch (ADR-054 item 1): a skymp5-client.js file (a fork worktree's webpack
+# build) or a fork ref laid into the running game's folder by a last-write rewrite, which Skyrim Platform hot-reloads; the
+# replaced file kept for turbo-back, the reload proven by skyrim-platform.log's load line, the seat marked hot.
+client-hot client what:
+    @lab/tools/client-hot.sh {{client}} {{what}}
+
 # The bundle alone, built from a fork ref (its path is the last line).
 turbo-client-build ref:
     @lab/tools/turbo-client-build.sh {{ref}}
