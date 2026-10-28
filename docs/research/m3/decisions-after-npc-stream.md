@@ -513,3 +513,5 @@ set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, 
 - 21:06 PDT 2026-10-27 (D41 and D44 closed): playtest 35 is set up on 53's stage bf133744 (T2 green at 20:58 after
   numidium's build-picker fix, main bd4b7e8), seats ready 21:03:09 PDT, the hold to 00:02 PDT; the build frozen until
   Eli's report; 53's gate and merge after it, then the D37 layer (D41).
+- 21:12 PDT 2026-10-27: 35 re-set on rotfern and Prisoner's composed world (Eli's ask to numidium at 21:05); seats
+  ready 21:10:06 PDT, the hold to 00:09 PDT; the build unchanged (53's stage bf133744), frozen until the report.
