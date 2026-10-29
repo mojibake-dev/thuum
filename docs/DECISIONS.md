@@ -3318,9 +3318,10 @@ the stage is shared.
 
 ## ADR-057: Spell-placed world objects are the server's, from a table keyed by spell and anchor (Raise Wall)
 
-Status: PROPOSED 22:01 PDT 2026-10-28 (thuum-magnus, under the no-questions rule; Eli, playtest 37: "im impatient, can we
-try getting raise wall working?"). Eli's veto reverses it to ADR-029's allowlist entry (B below) at the cost of the
-natives.
+Status: ACCEPTED under the overnight rule of 2026-10-28 ("take the recommended option, record the call"), 07:2x PDT
+2026-10-29 (thuum-magnus; written PROPOSED 22:01 PDT 2026-10-28; Eli, playtest 37: "im impatient, can we try getting
+raise wall working?"). Built and T0 green on m3-turbo-train-3o-win ee44f7d1. Eli's veto reverses it to ADR-029's
+allowlist entry (B below) at the cost of the natives.
 
 Context. Apocalypse's Raise Wall (SPEL 0xcc14, a self-delivery concentration spell) places a wall MSTT 0x98529 (a
 Havok body, no navcut) and a glow ACTI 0x735e8 by its effect script in the caster's game alone, 192 units ahead along
