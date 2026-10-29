@@ -1212,7 +1212,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   both"), D38 B. 51 MERGED (parity 39cf3f4d, 08:19Z; the gate cut by c2's RTX wedge, core's recovery, finished
   by its rest, 29 runs; watch item b-npc-body-release's old point). 52 staging (P7 v5 first); 54, 55, 53 follow
   on green; the D37 layer (layer-d37-ddo-out) stages at the end with the full sweep, then playtest 35.
-- STATE 2026-10-28 21:0x PDT (playtest 37's turbo night; Eli: "stop queueing things for tonight, we're blasting
+- STATE 2026-10-28 19:3x PDT (playtest 37's turbo night; Eli: "stop queueing things for tonight, we're blasting
   today as hard as possible"): the shared chest's two faults read and fixed (the pause guard, then the item-menu
   gates by name and the take's baseline), the face survivor and the vendor gate (m3-face-twelve b181518b); the
   parallel builds landed on their own fork branches and merged into m3-turbo-train-3 0e4942bb (schema 19, its dist
