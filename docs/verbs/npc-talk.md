@@ -168,8 +168,10 @@ is FALSIFIED by the read: no package field is on the condition's path, and the p
 its first AI frame. The fix on fork m3-face-twelve (after ed606faf): ActivatePickRef resets the cache with the
 engine's own sentinel (the stamp at -FLT_MAX, Actor.h:671) and asks GetVendorFaction again before the activation,
 waiting a frame at most 30 times for a vendor whose faction does not resolve, then opening anyway with the cell and
-hour logged. HYPOTHESIS H-58b until the claimant sees the shop topic (the probe x-npc-vendor-claim: c2 claims Orgnar
-while c1 hosts the inn, the Dialogue Menu's topics read for the services row; the Frida plan in the read's section 6).
+hour logged. H-58b CONFIRMED at T4, 20:41 PDT 2026-10-28 (Eli: "shop worked!", Prisoner claiming Orgnar in the Sleeping Giant
+hosted by rotfern on the 0e4942bb dist; the "activatePickRef waits ... vendor faction resolved" lines of c2's platform
+log are the evidence, pulled by numidium); the probe x-npc-vendor-claim stays the formal read (c2 claims Orgnar while
+c1 hosts the inn, the Dialogue Menu's topics read for the services row).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
