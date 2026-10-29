@@ -2838,3 +2838,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ("its conditions fail; not applied", ADR-039) so no reanimation ran server-side at all, 75 the accepted death report of the
   hosted atronach reached c2 alone and c1's puppet froze with no death word. Reads of cab63's conditions and the death report's
   send path next; the client bits (68's hands after the first apply, 71's settle once) follow.
+- 13:43 PDT: Eli's new standing goal, verbatim: "so leaving turbo mode, i wont be able to touch this this weekend very much so i want you to be
+  working on ONE big pass that will close out m3 ideally, and additionally where it touches quest states propagation. additionally with some
+  heavy progress made into physics items. i feel like the canon perfection of multiplayer phys objects is gmod if that mental model helps at
+  all." So: turbo mode ends with playtest 38 (3o staging, 3n the fallback); from here one pass on stacked fork branches through the weekend
+  (2026-10-30 to 11-01): M3's open items and playtest 38's findings first, the quest-stage propagation where M3 touches it (76's list, the
+  Story Manager read), then the physics items under the Garry's Mod model (the toucher simulates the prop, the server records it, every
+  other seat interpolates). The pass's plan is written next (docs/private/pass-m3-close.md and PLAN.md's chart lines), then built.
