@@ -192,7 +192,18 @@ location does in single player, is the open HYPOTHESIS (H-56a). Consequences: a 
 not started is parked by the client and applied when the engine's questStart for that quest fires (fork m3-quest-stage,
 no wire change); the probe x-quest-stage keys on MS13Intro 0xb6031 (no event, unique-actor aliases Lucan and Camilla,
 stage 10), already in lab/deploy's sharedQuests; Sven's Faendal line on both seats waits for the Story Manager to start
-A Lovely Letter on each. Dynamic plan (runnable since 2026-10-29: the lab-driver logs the player's locationChanged with the old and new
+A Lovely Letter on each. RESULT (14:03 PDT 2026-10-29, x-story-manager-walk 20261029-205447 at 3o's stage; the probe's own claim was framed wrong, the
+read is the console's): H-56a ANSWERED. c1's placement from lab-spawn into Riverwood's landing logged "locationChanged actor 14
+old none new 13163" at 20:56:22.186Z and, in the same millisecond, "questStart quest 74a83": a placement INTO the location raises
+the Change Location event and the Story Manager starts A Lovely Letter at once, on a lab seat, with no help. The second placement,
+to x 16000 in RiverwoodEdge01 0x9733, logged no change (that square is inside RiverwoodLocation too), so the walk half read
+nothing new. Why the playtests never saw it: every playtest seat LOGS IN inside the location (the camp is the landing), and a
+login sets the player's location without a change, so the Story Manager hears nothing until the player leaves the location and
+returns. Fix shape (HYPOTHESIS, the owed RE): at login, when the player's location has no change to report, the client raises
+the engine's own Change Location event once (BGSStoryEventManager::AddEvent, the Dynamic plan's lead, Address Library 32359 to
+resolve by `just addr`, the CLOC event's struct to read) from none to the current location, so each seat's Story Manager starts
+what an arrival starts; the stage relay then keeps the seats together. Until then the lab's probes place a seat outside and
+back in. The original Dynamic plan (runnable since 2026-10-29: the lab-driver logs the player's locationChanged with the old and new
 location ids and every questStart and questStop through the console tee, so log-count reads them, no step added;
 the probe x-story-manager-walk by path places c1 at Riverwood's landing, then at x 16000 in RiverwoodEdge01 0x9733 and
 runs it east across the cell line into 0x9732 under hold-key W, reading the lines and 0x74a83's running state after
