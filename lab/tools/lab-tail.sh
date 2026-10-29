@@ -17,14 +17,21 @@ case "$what" in
 esac
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 off=-1
+# a graceful stop: `just lab-tail-stop <seat>` leaves this flag, and the loop ends between polls, never inside one. A tail
+# killed mid-poll leaves its exec's answer in the clone's agent, and a later caller is handed it (2026-10-29: three
+# relaunches of playtest 37's lays lost to a console line stamped before the tail stopped)
+stopflag="$(cd "$(dirname "$0")/../.." && pwd)/lab/.cache/lab-tail-$what.stop"   # one path every session shares (gitignored)
+mkdir -p "$(dirname "$stopflag")"
+rm -f "$stopflag"
 while true; do
+  [ -e "$stopflag" ] && { rm -f "$stopflag"; echo "== lab-tail $what stopped between polls"; exit 0; }
   read_ps="\$p = Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt'
 if (-not (Test-Path -LiteralPath \$p)) { 'OFF -1'; exit }
 \$s = [IO.File]::Open(\$p, 'Open', 'Read', 'ReadWrite'); \$o = $off
 if (\$o -lt 0 -or \$o -gt \$s.Length) { \$o = \$s.Length }
 \$s.Seek(\$o, 'Begin') | Out-Null; \$r = New-Object IO.StreamReader(\$s); \$t = \$r.ReadToEnd(); \$e = \$s.Position; \$s.Close()
 'OFF ' + \$e; \$t"
-  out=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 30 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$read_ps")" 2>/dev/null \
+  out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 30 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$read_ps")" 2>/dev/null \
     | python3 -c 'import sys,json; d=json.load(sys.stdin, strict=False); sys.stdout.write(d.get("out-data") or "")' 2>/dev/null) || { sleep 2; continue; }
   # the first line by expansion, not `head -1`: under pipefail a printf cut short by head is a SIGPIPE, and set -e
   # then ends the loop at its first poll that carries text

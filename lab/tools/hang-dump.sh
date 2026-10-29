@@ -29,14 +29,14 @@ New-Item -ItemType Directory -Force -Path 'C:\\sky-lab\\dumps' | Out-Null
 foreach (\$n in 'skse64.log', 'skyrim-platform.log') { Copy-Item -LiteralPath (Join-Path \$d \$n) -Destination ('C:\\sky-lab\\dumps\\$client-hang-$stamp-' + \$n) -Force }
 Get-ChildItem 'C:\\sky-lab\\dumps' -Filter '$client-hang-$stamp*' | ForEach-Object { \$_.Name + ' ' + \$_.Length }"
   echo "== $client: no finished run to upload into; ProcDump dump kept on the seat $(date +%H:%M:%S)"
-  ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 600 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" \
+  ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 600 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" \
     | python3 -c 'import json,sys; d=json.load(sys.stdin); print((d.get("out-data") or "").strip())'
   echo "== $client evidence in C:\\sky-lab\\dumps on VM $vmid (pull before a rollback)"
   exit 0
 fi
 url="$seat_api/clients/$client/hang-dump/$run"
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-guest() { ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout ${2:-120} -- powershell -NoProfile -NonInteractive -EncodedCommand $1" \
+guest() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout ${2:-120} -- powershell -NoProfile -NonInteractive -EncodedCommand $1" \
   | python3 -c 'import json,sys; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode") == 0 else 1)'; }
 dump=$(cd "$here" && uv run --project lab/labapi python -c '
 import base64, sys

@@ -872,6 +872,12 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
     skipped the login. ADR-041's storageProxy fix keeps the storage across a
     reload, and on 2026-10-28 07:27Z c2's server record followed a turn (rot
     180 to 0) and a 531-unit walk after one.
+- One guest agent per clone: every lab tool's `qm guest exec` takes that clone's lock on core first
+  (`flock -w 90 /run/lock/qga-<vmid>`, 2026-10-29), so two callers never share the channel. A seat tail
+  stops with `just lab-tail-stop <c1|c2>`, which ends it between polls. A tail killed mid-poll leaves its
+  exec's answer in the agent, and a later caller is handed it: playtest 37's lays lost three relaunches to a
+  console line stamped before the tail stopped. Before a dist, relaunch or rollback, stop the seat tails that
+  way, or wait 35 s after a kill.
 - `just client-hot <c1|c2> <file|fork ref>` (ADR-054 item 1): a bundle
   reloaded in ONE running seat, no relaunch.
   - Skyrim Platform reloads a plugin 8 ms after a last-write change under

@@ -443,6 +443,15 @@ playtest-record-stop:
 lab-tail what pattern=".":
     @lab/tools/lab-tail.sh {{what}} {{quote(pattern)}}
 
+# Stop a seat's lab-tail between its polls (never mid-poll, which leaves a stale answer in the clone's agent): the flag
+# lab-tail checks before each poll, then a wait of at most 45 s for the process to end.
+lab-tail-stop what:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p lab/.cache && touch "lab/.cache/lab-tail-{{what}}.stop"
+    for i in $(seq 1 45); do pgrep -f "lab-tail.sh {{what}}" >/dev/null || { echo "lab-tail {{what}} stopped"; exit 0; }; sleep 1; done
+    echo "lab-tail {{what}} still running after 45 s" >&2; exit 1
+
 # A server push: skymp-server alone switched to a fixed <ref-slug>-<sha8> tag the fork's server-build pushed, the world
 # saved first, then the wait for both seats back online (they reconnect by themselves).
 turbo-srv tag:
