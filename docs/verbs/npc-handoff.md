@@ -93,8 +93,10 @@ distance.
 by the actor's simulator into a cell nobody hosts is accepted when the
 sender's game has the destination loaded (its CellLoaded set, cells.rs:
 84-85) and the destination is adjacent to the origin square (Chebyshev
-distance 1 in one worldspace) or a door's interior (an interior CELL and a
-persistent ACHR, kPersistent 1 << 10, TESObjectREFR.h:181). The server
+distance 1 in one worldspace) or a door's interior (an interior CELL; until
+memo D54 B, 2026-10-28, also a persistent ACHR, kPersistent 1 << 10,
+TESObjectREFR.h:181, since dropped: every actor's door counts, fork
+m3-door-walk 2dca472a, CellMoveFacts' door fact). The server
 records a follow, actor to (player, origin cell, its epoch), which
 simulator_of(actor) answers while the cell is unhosted and which a grant of
 the cell (FlipHostedFlags, PartOne.cpp:1389-1403), the follower's Gone or
@@ -319,8 +321,9 @@ each imposition's target is explicit.
     and logs; Pass writes the record, sends ActorHandoff to the
     destination's host and calls UpdateHoster(new host); Refuse drops,
     logged once a minute per actor and counted (e). Adjacency: Chebyshev 1
-    between two squares of one worldspace, or an interior with a persistent
-    ACHR (libespm's record flags); MovementValidation.cpp:115-120 stands
+    between two squares of one worldspace, or an interior through a door
+    (the persistence fact retired by memo D54 B, m3-door-walk 2dca472a);
+    MovementValidation.cpp:115-120 stands
     aside only for an accepted verdict. HostOf (:1272-1290) asks simulator_of.
   - ApplyHostDecisions (:1405-1451): Grant sends one ActorHandoffMessage
     per actor of the cell among the host's emitters (FlipHostedFlags'
@@ -364,7 +367,10 @@ each imposition's target is explicit.
 
 - T0: Rust, wire-rules cells: Follow into an unhosted cell the sender
   loads; Refuse into one it does not load or two squares away; Follow into
-  an interior with a persistent actor; simulator_of answers the follower
+  an interior through a door (any actor since D54 B: CellHostTest's two
+  non-persistent cases, Hilde 0x35534 into RiverwoodSvensHouse 0x1cb84,
+  unhosted and frozen, then into a live host's cell, passed); simulator_of
+  answers the follower
   while unhosted and the host once granted; a grant, the follower's unload
   and Gone each end the follow; Pass { to } into another host's adjacent
   cell, Accept for the new simulator inside ACTOR_TENURE_MS, Pass back
