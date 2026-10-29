@@ -3207,8 +3207,12 @@ update mid-world), the kit through learnedSpells, the hour performed or dropped,
 or a server timer. Two open calls for Eli: (a) the disease path RUNS TODAY on a seat (VampireDiseaseEffectScript's
 events are ActiveEffect events on the player, admitted), so a player bitten by a lab vampire turns client-side three
 game days later with no server record: A) a server-side cure of DiseaseSanguinareVampiris 0xB8780 on the record until
-the slice, B) R3 for now; (b) rotfern's pairing is not in the list (rotfern at the race list's end with no vampire
-entry: a turn sets no race, a cure gives ImperialRaceChild), the page's fix options. The served RaceCompatibility
+the slice, B) R3 for now; (b) rotfern's pairing is an INDEX gap, not a missing entry (apocrypha's precision): rotfern
+is PlayableRaceList[14] of 15 (four non-playable child races at [10..13] before it) and rotfernRaceVampire is
+PlayableVampireList[11] of 12 (BretonRaceChildVampire at [10] before it), so VampireChange looks up VampireList[14],
+which does not exist, and sets no race, while VampireCure finds the vampire at [11] and sets RaceList[11],
+ImperialRaceChild; the fix keeps both races at the same index, [10] in both lists, with the child entries dropped
+(apocrypha's layer, Eli's word). The served RaceCompatibility
 scripts are the plain variant, not the USKP set the readme prescribes with USSEP (numidium's layer item).
 
 2026-10-28 19:4x PDT (Eli through numidium, verbatim): "go with B but also in going with B one needs to scout out how
