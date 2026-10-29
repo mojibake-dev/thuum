@@ -2830,3 +2830,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (clang-format 21.1.8 rewrote the grant-roster files once). Verb docs: npc-fate's loader row BUILT, npc-puppet's roster-race section.
   Both stack on 3o for the evening's train 3p with the client bits (67's log-once, 68's ammo after the wipes, 64's one post per change,
   71's ragdoll after the silent kill) once the pulled logs are read.
+- 13:39 PDT: the pulled logs read (results/playtest-38; the seats' logs start at the 20:06Z relaunch): 66 confirmed (two shots, no hit
+  sent, no server actor), 67 one 9.6 s window of 418 lines after the respawn (fixed on m3-client-bits), 68 confirmed: the 5 s loop's
+  first apply re-added the whole inventory 5 s after the login's hands pass and un-equipped the ammo with no hands pass after it, 70
+  applied at login as designed, 71 the watcher moved the bodies 975 and 1227 units to the records' spots and replayed the death
+  animation in place, then settled 39fe4 4,583 times in ten minutes, 72 the server refused Reanimate Corpse's effect cab63 at the body
+  ("its conditions fail; not applied", ADR-039) so no reanimation ran server-side at all, 75 the accepted death report of the
+  hosted atronach reached c2 alone and c1's puppet froze with no death word. Reads of cab63's conditions and the death report's
+  send path next; the client bits (68's hands after the first apply, 71's settle once) follow.
