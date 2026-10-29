@@ -3014,3 +3014,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   record moved east, the watcher's copy farther than its 100 units, and the rest kept across a server restart. The walker is the host by
   the slice's named hole (a Keyframed body gives a non-host's bump no signal; the contact native's read is in flight). P3 pre-assembled
   locally as m3-pass-train-3 (P2 plus m3-prop-physics).
+- 15:24 PDT: m3-npc-reach's fourth T0 (pipeline 3849) read 493 of 494: the reach rule refused the hosted resident's hit at 2000 units
+  (E_HIT_REACH logged) and the near hit fell to E_HIT_WEAPON because the victim's move sent new fate squares and the roll re-dressed her
+  record, wiping the test's sword; fixed as 6fd5b343 (armed after the move, inside the hit). The three trains are on CI server-only for
+  their first C++ compiles and T0: 3858 m3-npc-reach 6fd5b343, 3859 m3-pass-train-2 0b49a28e, 3860 m3-pass-train-3 a51762d4 (the
+  runner rebuilds thuum/rust-ci first).
