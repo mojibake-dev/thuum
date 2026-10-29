@@ -605,8 +605,63 @@ rotfern at [14] of 15 (four child races before it) against rotfernRaceVampire at
 turn set no race and a cure gave ImperialRaceChild (the 2026-10-06 diff below; the read in
 docs/research/vampirism-under-the-server.md). The served copy now holds the ten vanilla pairs and
 rotfern's at [10] in both lists; Eli's plugin is untouched, and the slot's CRC32 moves with the
-render. `drop-record <formid>` removes one record, the groups around
-it shrinking and the header's count following (with flst-set the two patches that change a file's size); it
+render. `perk-drop-ability <formid>` removes a perk's ability entry and `spell-magnitude <formid> <value>` sets a
+spell's magnitudes (the multiplayer defaults, below); every record patch must hit the last plugin
+overriding its record, which the tool checks against the load order. `drop-record <formid>` removes one record, the groups around
+it shrinking and the header's count following (with flst-set and perk-drop-ability the patches that change a file's size); it
+
+**Multiplayer defaults (Eli, 2026-10-28, verbatim: "some settings i want on for everyone by default
+(some settings some changes) - subtitles need to be on across the board - killcams have to be
+disabled for multiplayer - the bow's slow time perks need to not slow time", then "yeah include the
+slow time shout too"; apocrypha/layer-defaults, for the slot after playtest 37 with D57 A).** All
+four are data, read from the files, and take the layer's two existing shapes: an ini key written on
+every seat and in the friend installer, or a build-time patch on a served plugin, the server's copy
+included. Nothing happens at runtime.
+
+- **Game ini keys, `lab/layer/game-ini.tsv`.** persist-mods copies the table to the tree's root beside
+  plugins.txt (not a Data file, not in SHA256SUMS); add-mods.ps1 fetches it after plugins.txt and
+  writes each key into the lab user's Documents\My Games\Skyrim Special Edition\<file> under its
+  section, rewriting a present key in place, appending a missing section, every other line kept
+  (display.ps1's shape for iSize); the friend installer reads the same file. Rows: SkyrimPrefs.ini
+  [Interface] `bGeneralSubtitles=1` and `bDialogueSubtitles=1` (the seat's file carries both at 0; the
+  1.6.1170 executable names both, and no `bShowSubtitles`), rung R3, a seat's own HUD; Skyrim.ini
+  [VATS] `bVATSDisable=1`, the kill camera's switch, rung R3, the seat's own camera. The read behind
+  the camera key: the melee cinematic and the bow's arrow cam are the engine's VATS camera; Skyrim.esm
+  holds no game setting for it beyond `fKillCamBaseOdds` (unread semantics; every other VATS GMST is
+  camera geometry), and the executable knows `bVATSDisable`. The fork's client already blanks `KillMove*`
+  animation events for runtime figures (deathService.hookDisableKillMoves, self ids ff000000 to
+  ffffffff: other players' figures), so the ini key closes what remained, the camera on the player's
+  own kills and deaths; a paired kill move on an NPC still plays in the normal camera and is the npc-fate
+  verb's killMove. HYPOTHESIS until a seat kills with a bow and a sword and sees neither cinematic.
+- **Two record patches on the plugins that win the records (`lab/layer/plugin-patches.tsv`).** The
+  records in question are already overridden in the layer: USSEP carries Steady Hand's two perks and
+  the shout's first spell, the Spell Absorb and Twin Souls Fix (slot 20) carries all three shout spells
+  with its no-absorb flag, so a separate tail plugin copying Skyrim.esm's records would have reverted
+  their fixes; the patch lands in the copy that wins, and plugin-patch.py now refuses a record patch
+  that a later plugin overrides (the guard scans the load order after the patched plugin, by master
+  name and local id). `perk-drop-ability 00103ADA` and `00103ADB` on USSEP's copy of Archery's Steady
+  Hand ranks (SteadyHand40, SteadyHand60): each perk's one entry is an ability,
+  `PerkSteadyHandTimeSlowdown01/02` (SPEL `00103AD8/9`, a 0.5 and 0.25 modifier of actor value 78,
+  the engine's bow-zoom time scale, through MGEF `00103AD7`); the entry goes (PRKE type 1 with its
+  DATA and PRKF), the perk keeps USSEP's name, description, conditions and NNAM link, so the tree
+  still shows and sells it and it does nothing: time is the server's (R0), so the slow goes.
+  `spell-magnitude 00048AD0/1/2 1.0` on the Twin Souls fix's copies of the Slow Time shout's three
+  spells (VoiceSlowTime1/2/3, effect MGEF `00048ACD` VoiceSlowTimeEffect, archetype 37 SlowTime, which
+  scales the game's time by the magnitude: 0.3 for 8 s, 0.2 for 12 s, 0.1 for 16 s); at 1.0 time
+  keeps its pace and the shout keeps its words, walls, sound, recovery and the no-absorb flag (R0 for
+  the time, the rest the seat's own). USSEP's size and CRC32 move with the perk patch (slot 1's mod-lock
+  entry), the Twin Souls fix's CRC32 with the spell patch (its light slot). HYPOTHESIS until a seat
+  zooms a bow with Steady Hand and shouts Slow Time with the clock unchanged on both seats. Block's
+  Quick Reflexes (PERK `000D8C33`, its spell `000D8C31` at 0.05 for 1 s, the same archetype) is the
+  one perk slow-time left in Skyrim.esm, for Eli's word.
+
+The alternatives read and not taken: a GMST override for the camera (none governs it), the client's
+runtime set-gmst (not data, not in the installer), a tail plugin of vanilla copies (it would have undone
+USSEP's and the Twin Souls fix's own changes to the same records), the shout kept out of reach (its
+three word walls' scripts and words are learnable content; a magnitude of 1.0 keeps them honest), and
+the shout turned into a per-actor slow on hostiles (new spell records with a cone projectile and an
+area effect the server's magic-effects verb would carry; content work for M2 if a real replacement is
+wanted).
 carries the layer's rule that **no served plugin may override the player's base record NPC_
 0x00000007 (nor PlayerRef 0x14)**: in SkyMP every player shares 0x7 and the server builds each
 player's values and appearance from it, so a layer override changes every player's base under
