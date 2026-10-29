@@ -228,9 +228,9 @@ re-positioning (out of scope).
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1 (none)
+- [x] server logic + T0 (fork m3-spell-placed 5b951a9c: wire-rules placements.rs, PartOne's placement, removal and sweep, unit/SpellPlacedTest.cpp)
+- [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h)
+- [x] native hook + T1 (none needed)
 - [ ] TS handler
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags

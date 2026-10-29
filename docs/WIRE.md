@@ -598,3 +598,12 @@ CreateActor named stays a number and differs as before; a session
 declaration that names an index literally misses on both stacks and should
 name the form instead. Fork skymp-wire/difftest, m3-train-41 e7a5e211.
 
+### CreateActor's placedBy for a spell-placed world object (spell-placed-object, M3; ADR-057)
+
+CreateActor (t 33) gains the optional prop `placedBy: u32` (SCHEMA_VERSION 20; fork m3-spell-placed 5b951a9c): the
+server id of the caster whose accepted cast of a listed spell placed the form from the server's `spellPlacedObjects`
+table (Raise Wall's wall MSTT and glow ACTI first). It is nonzero and travels only with `baseRecordType` MSTT or ACTI;
+any other pairing is E_VAL_RANGE in validate_server, and the transport refuses the message from a client by direction.
+The caster's own game skips a form naming itself while the script's own copy stands at the pose; every other game
+places it as any server form. The removal is the usual DestroyActor 5 s after the cast's end. Fixtures
+33-CreateActor-0 and -1 carry the field; WireJsonContractTest reads them through CreateActorMessage.h.
