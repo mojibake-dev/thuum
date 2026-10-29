@@ -356,8 +356,10 @@ check_damage_cause): idx in range, health finite and 0 to 1.
 
 ActorDeath (id 60, MsgType 52), client to server, reliable, once per death,
 R1 (fork m3-train-44 597bb9dc, 2026-10-24; ADR-048's B, Eli's D1 "jump right
-to B"): `{ refrId: u32 (the dead game-file actor, under 0xff000000,
-nonzero), cause: u8 (0 unknown, 1 fall, 2 hazard, 3 script, 4 an actor's
+to B"): `{ refrId: u32 (the dead actor, nonzero: a game-file actor, or since
+fork m3-death-range, playtest 37's finding 47, a server-made one from
+0xff000000 up, whose death otherwise ran the server's 3 s word), cause: u8 (0
+unknown, 1 fall, 2 hazard, 3 script, 4 an actor's
 hit), killer: u32 (the killer's id for cause 4, else 0), pos: [f32; 3]
 (where the body fell) }`, sent by skymp5-client's DeathReportService at
 deathStart for an actor the game simulates whose death is not the server's
