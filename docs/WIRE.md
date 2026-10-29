@@ -332,8 +332,9 @@ SCHEMA_VERSION 21): `mode: u8` (0 list, 1 all; a client's message carries 0 or i
 refused), and in mode 1 the login message's `shared` is the DENIED list (may be
 empty; the validator refuses an empty list with quest 0 in mode 0 only); the
 client budget is 32 then 8 a second (UNMEASURED; a load fires a dozen quest
-starts). The server setting `sharedQuests` is the array (mode list) or
-`{mode: "all", denied: [FormDesc...]}`; E_QUEST_DENIED beside E_QUEST_UNLISTED. Client to server, R1: one stage the player's own game
+starts). The server setting `sharedQuests` stays the array (mode list); the mode is
+its own key `sharedQuestsMode` `{mode: "all", denied: [FormDesc...]}`, which an
+older image ignores; E_QUEST_DENIED beside E_QUEST_UNLISTED. Client to server, R1: one stage the player's own game
 set on a shared quest; the server checks the quest is a QUST in its load order
 and on its `sharedQuests` list, keeps the stage once on the world's record (the
 set of stages done per quest, on the world's journal reference), relays it to

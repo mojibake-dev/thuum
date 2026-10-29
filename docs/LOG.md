@@ -2942,3 +2942,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   at 500 and 2000 units on the player target). P2's pre-assembly m3-pass-train-2 (local) merged npc-reach, story-arrival, quest-fragment
   and quest-mode with the two platform branches' additive conflicts resolved by hand (both natives after Stagger; the login handler
   mode-aware with the arrival flag); tsc, fork-lint and the wire crates' tests green on the merge.
+- 14:49 PDT: the quest-sharing mode made backward-compatible on numidium's read (a typed key change would have broken every older
+  image's start from main's deploy file: a fallback restage, turbo-back, the nightly's clean image, the layer's stage): the mode lives
+  under its own key `sharedQuestsMode` (fork m3-quest-mode fc17612d: the addon reads it first, else the `sharedQuests` array; the Rust
+  parser unchanged), and the block (mode all; MQ101 to MQ104's chain and the DLC starts denied) is in both lab/deploy/sky-srv settings
+  files on main since 47c8103, before `sharedQuests`, which stays; an image without the branch ignores the key. No timed commit.
+  P2's pre-assembly aa618c1a carries the change. (47c8103's message names docs this commit carries.)
