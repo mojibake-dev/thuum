@@ -278,3 +278,14 @@ and DLC quests the alternate start's fragments stage, plus four served-layer con
 controllers 1219b6, 126ab9, 12bbbc, 284074, FactionAssaultEvent 284076, FactionKillEvent 284079, WhiterunGuardConfrontationQuest
 29847f) join the list the day that plugin is served; today it is client-only, so its quests are E_QUEST_UNKNOWN on the server. The
 `allowed` list is where a start-game-enabled world system that should cross gets named.
+
+**D62 built (15:10 PDT 2026-10-29, fork m3-quest-mode 4a759c5b):** in mode all a quest whose DNAM carries Start Game Enabled (libespm
+QUST.h, mainFlags 0x1) is each seat's own: its reports are refused E_QUEST_OWN_START and a recorded stage of it is not replayed at a
+login, unless the quest is on `sharedQuestsMode.allowed` (a quest both denied and allowed is a parse error); the client has no filter
+(Skyrim Platform's Quest exposes no start-enabled getter), so a seat still reports such stages and the server refuses them. The
+premise corrected on the masters: MQ101 0x3372b is NOT start-game-enabled (0x00), MS13 The Golden Claw 0x39645 IS (0x11), as are
+MS01, MS05, MS12, MQ103, MQKillDragon, C00, CW00A/B and 87 Dialogue* hubs (330 of Skyrim.esm's 1,811). So the rule also holds back
+real side quests that start at the game's start and wait for their trigger; `allowed` is the lever, and the deploy's list today is
+the former curated four (A Lovely Letter, MS13, MS13Intro, MS13FIN), so the Golden Claw crosses as playtest 38 saw it. A call for
+Eli, D63: which start-game-enabled world quests join `allowed` (the MS side quests, the faction openers C00 and CW00, the dialogue
+hubs stay a seat's own by the recommended reading, since their stages track one player's conversations).

@@ -2983,3 +2983,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   pushed images kept); a blanket prune also took the unused base images, restored from the lab registry and the internet, except
   thuum/rust-ci, which the next pipeline rebuilds once (slower first run). core lands a scheduled prune and a disk check in sky-lab verify
   as IaC. m3-npc-reach rerun by an empty commit pushed server-only.
+- 15:10 PDT: D62 built on fork m3-quest-mode 4a759c5b (allowed list in the Rust parser with its clash check, the bridge query, the
+  C++ check reading the QUST's DNAM through libespm after E_QUEST_UNKNOWN and before the shared check, E_QUEST_OWN_START, the login
+  replay filtered the same way, QuestStageTest's case, libespm's questData pointer initialised; cargo green, fork-lint green; the C++
+  on CI). The agent's census corrected the premise: MQ101 is not start-game-enabled, MS13 The Golden Claw is, with MS01, MS05, MS12,
+  MQ103, C00, CW00A/B and the Dialogue* hubs; so the deploy files gained `allowed` = the former curated four (the Golden Claw keeps
+  crossing as playtest 38 saw), and D63 (which start-game-enabled world quests join allowed) goes to Eli. P2's pre-assembly re-merged
+  (wire tests green). WIRE.md and quest-stage.md carry the shape.

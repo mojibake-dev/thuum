@@ -314,6 +314,12 @@
       "809:Thaumaturgy.esp",
       "2725d0:LostGrimoire.esp",
       "1e2c7:UndeadFX.esp"
+    ],
+    "allowed": [
+      "74a83:Skyrim.esm",
+      "39645:Skyrim.esm",
+      "b6031:Skyrim.esm",
+      "3dd29:Skyrim.esm"
     ]
   },
   "sharedQuests": [
