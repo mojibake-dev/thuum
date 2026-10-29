@@ -269,6 +269,9 @@
       }
     ]
   },
+  "cureSpells": [
+    "b8780:Skyrim.esm"
+  ],
   "sharedQuests": [
     "74a83:Skyrim.esm",
     "39645:Skyrim.esm",
