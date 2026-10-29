@@ -240,7 +240,7 @@ re-positioning (out of scope).
 - [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h)
 - [x] native hook + T1 (none needed)
 - [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands)
-- [ ] T2 green (T0 green on m3-turbo-train-3k d7548ccf, pipeline 3779, after the destroy path's use-after-free fix d67dd7af; the lay waits on a train after 3n)
+- [ ] T2 green (T0 green on 3k d7548ccf and on 3o-win ee44f7d1, both halves built; the lay is 3o at the morning's break after 3n's merge, image and dist together)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
