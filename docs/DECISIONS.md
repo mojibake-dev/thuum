@@ -3192,6 +3192,17 @@ the clock is the server's, so the first cut REFUSES those two choices (no kit en
 other starts stand); performing them server-side is a later slice. The friendly factions the bandit, Forsworn and
 vampire starts add client-side are a known limit, not synced.
 
+2026-10-28 19:4x PDT (Eli through numidium, verbatim): "go with B but also in going with B one needs to scout out how
+vamirism changes happen. (and if race compatibility is in our modlst)". D8's sub-choice is B: Live Another Life
+supplies the content (the prison, the statue's menu, the landing table) and the server performs the outcome (the
+permit keyed on the landing, each start's kit from a server table), as the 17:4x and 18:1x reads above describe.
+With it, a read of how a vampire change happens, before the two race-changing starts are built (apocrypha's): LAL's
+chargen MakePlayerVampire, the vanilla turn and the Vampire Lord, and what each changes (race, spells, actor values,
+factions). RaceCompatibility 2.16 (the USSEP variant) is in the served load order (lab/layer/load-order.tsv slot 6,
+every client and the server): its PlayerVampireQuestScript pairs PlayableRaceList[i] with PlayableVampireList[i],
+and its Actor.SetRace and SendVampirismStateChanged calls have no native in the ledger (docs/MODS.md). Until that
+read lands, the first cut's refusal of the two vampire starts stands.
+
 Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
 the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
 installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs
