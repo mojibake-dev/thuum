@@ -147,14 +147,18 @@ spell, effect or book carries either name, nor do the Nexus changelogs from
   0309852E, Script archetype) applies only when the caster's game finds
   room ahead (condition GetVATSFrontAreaFree >= 300, an engine geometry
   query); script WB_FabricateWall_Script places the wall (MSTT 03098529,
-  1470 x 102 x 262 units, a real collision body on the AnimStatic layer: a
-  MOPP over a compressed mesh, BSXFlags Havok and Articulated, no navmesh-cut
-  data in the mesh or the record, so actors are stopped by collision, not
-  re-pathed; corrected 2026-10-28 from the mesh's blocks) 192 units ahead,
+  1470 x 102 x 262 units by its record bounds, the end caps visual only: the
+  collision body spans x -526..562, y -52..52, z 0..262, 1088 units wide, a
+  MOPP over a compressed mesh on the AnimStatic layer, BSXFlags Havok and
+  Articulated, no navmesh-cut data in the mesh or the record, so actors are
+  stopped by collision, not re-pathed; corrected 2026-10-28 from the mesh's
+  blocks) 192 units ahead,
   starting 288 below the ground,
   raises it with TranslateToRef at speed 512, sets off EXPL 0300C145 there
   (no damage, knock-down), and on the stream's end fades it out and deletes
-  it after 5 s. Nothing persists between casts. Missing natives:
+  it after 5 s. Nothing persists between casts, nothing moves or scales the
+  wall after the rise, and the spell's No Dual Cast Modification flag (SPIT
+  0x800000) leaves a dual cast as one wall. Missing natives:
   GetAngleZ, Math.Sin, Math.Cos, TranslateTo (TranslateToRef reaches
   GetAngleX and GetAngleY too).
 - **Milestones**, SPEL 030A59D5, the nearest thing to Mark/Recall: five
