@@ -2979,3 +2979,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   layer's 228 are start-game-enabled, so D62's rule keeps most mod quests a seat's own and leaves stage-started world content shared.
   Fork CI is blocked: sky-ci's runner is out of disk (pipeline 3837's job 14167, "No space left on device" compiling wire-bridge); core
   asked to free it; pushes held (numidium: no push needed before the base merges; the base waits on the duel's read and D61).
+- 15:07 PDT: core freed sky-ci (2.1 GB to 41 GB free: 1,900 never-pruned skymp-server image tags and a 17 GB build cache; the registry's
+  pushed images kept); a blanket prune also took the unused base images, restored from the lab registry and the internet, except
+  thuum/rust-ci, which the next pipeline rebuilds once (slower first run). core lands a scheduled prune and a disk check in sky-lab verify
+  as IaC. m3-npc-reach rerun by an empty commit pushed server-only.
