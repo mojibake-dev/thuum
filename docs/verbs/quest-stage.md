@@ -267,3 +267,14 @@ each half; it plays at the first stage after the driver's lay): a seat walks fro
 Riverwood (the Guardian Stones leg and the Riverwood Trader exit are a later version); expected newLoc 0x13163 then questStart 0x74a83; a location
 event without the start points at the SM nodes (a Frida read of BGSStoryEventManager::AddEvent, Address Library
 32359, and BGSStoryTeller 32485 by just addr), no location event at the player's location tracking after a placement.
+
+**The denylist's shape (14:59 PDT 2026-10-29, apocrypha's census, docs/research/layer-quests.md on apocrypha/alternate-start):** under
+D62's rule a Start Game Enabled quest is each seat's own, which covers 38 of the layer's 42 controller, MCM, version-tracker and
+player-alias quests and 330 of Skyrim.esm's 1,811; the denylist carries what the rule misses: the main quest's chain and the 40 vanilla
+and DLC quests the alternate start's fragments stage, plus four served-layer controllers that are not start-game-enabled
+(MAG_GeneralControllerQuest f4f8c0:MysticismMagic.esp, MAG_ThaumaturgyControllerQuest 809:Thaumaturgy.esp, GRIM_QST_TeleportManager
+2725d0:LostGrimoire.esp, US_ApplyCorpseMonitorQuest 1e2c7:UndeadFX.esp). The alternate start's own twelve script- or SM-started quests
+(ChargenQuest 000daf, RumorsOfWarQuest 07a334, FarmhouseProfits 01189b, CheskoPolygonQuest 03fda5, HelgenNPCKillerQuest 068ec0, the
+controllers 1219b6, 126ab9, 12bbbc, 284074, FactionAssaultEvent 284076, FactionKillEvent 284079, WhiterunGuardConfrontationQuest
+29847f) join the list the day that plugin is served; today it is client-only, so its quests are E_QUEST_UNKNOWN on the server. The
+`allowed` list is where a start-game-enabled world system that should cross gets named.

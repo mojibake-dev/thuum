@@ -314,7 +314,11 @@
       "16e02:Dragonborn.esm",
       "18b13:Dragonborn.esm",
       "18b15:Dragonborn.esm",
-      "305d:HearthFires.esm"
+      "305d:HearthFires.esm",
+      "f4f8c0:MysticismMagic.esp",
+      "809:Thaumaturgy.esp",
+      "2725d0:LostGrimoire.esp",
+      "1e2c7:UndeadFX.esp"
     ]
   },
   "sharedQuests": [
