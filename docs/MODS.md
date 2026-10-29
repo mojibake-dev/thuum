@@ -606,8 +606,9 @@ turn set no race and a cure gave ImperialRaceChild (the 2026-10-06 diff below; t
 docs/research/vampirism-under-the-server.md). The served copy now holds the ten vanilla pairs and
 rotfern's at [10] in both lists; Eli's plugin is untouched, and the slot's CRC32 moves with the
 render. `perk-drop-ability <formid>` removes a perk's ability entry and `spell-magnitude <formid> <value>` sets a
-spell's magnitudes (the multiplayer defaults, below); every record patch must hit the last plugin
-overriding its record, which the tool checks against the load order. `drop-record <formid>` removes one record, the groups around
+spell's magnitudes, injecting the record from its master first when the plugin lacks it (the multiplayer
+defaults, below); every record patch must hit the last plugin overriding its record, which the tool
+checks against the load order. `drop-record <formid>` removes one record, the groups around
 it shrinking and the header's count following (with flst-set and perk-drop-ability the patches that change a file's size); it
 
 **Multiplayer defaults (Eli, 2026-10-28, verbatim: "some settings i want on for everyone by default
@@ -649,13 +650,20 @@ included. Nothing happens at runtime.
   spells (VoiceSlowTime1/2/3, effect MGEF `00048ACD` VoiceSlowTimeEffect, archetype 37 SlowTime, which
   scales the game's time by the magnitude: 0.3 for 8 s, 0.2 for 12 s, 0.1 for 16 s); at 1.0 time
   keeps its pace and the shout keeps its words, walls, sound, recovery and the no-absorb flag (R0 for
-  the time, the rest the seat's own). USSEP's size and CRC32 move with the perk patch (slot 1's mod-lock
-  entry: 21,106,651 B CRC32 86A15BD3 before, 21,106,601 B CRC32 642C6867 after, the two 25-byte ability
-  blocks gone), the Twin Souls fix's CRC32 with the spell patch (its light slot: 42,409 B either way,
-  CRC32 F765F49C before, C5F71B81 after); dry run of 2026-10-28, SHA-256s 9770bb37... and e2756021... HYPOTHESIS until a seat
-  zooms a bow with Steady Hand and shouts Slow Time with the clock unchanged on both seats. Block's
-  Quick Reflexes (PERK `000D8C33`, its spell `000D8C31` at 0.05 for 1 s, the same archetype) is the
-  one perk slow-time left in Skyrim.esm, for Eli's word.
+  the time, the rest the seat's own). `spell-magnitude 000D8C31 1.0` on USSEP for Block's Quick
+  Reflexes (Eli, 21:1x PDT: "yes to apocryphas ask"): the perk (PERK `000D8C33`) applies
+  PerkQuickReflexes while the player blocks a power attack, the game's time at 0.05 for 1 s through the
+  same SlowTime archetype (MGEF `000D8C32`, which USSEP overrides). No plugin of the layer overrides
+  the spell itself, so the patch's second ability applies: a plugin without the record gets Skyrim.esm's
+  copy injected into its SPEL group (read from lab/.cache/game, the host's master copy, decompressed;
+  the header's count up by one) and then the magnitude; the guard confirms nothing later carries it.
+  USSEP's size and CRC32 move with its three patches (slot 1's mod-lock entry: 21,106,651 B CRC32
+  86A15BD3 before; 21,106,777 B CRC32 7CA7F25F after, SHA-256 01064760..., the two 25-byte ability
+  blocks gone and the 176-byte spell record added), the Twin Souls fix's CRC32 with the shout rows (its
+  light slot: 42,409 B either way, CRC32 F765F49C before, C5F71B81 after, SHA-256 e2756021...); dry runs
+  of 2026-10-28. HYPOTHESIS until a seat zooms a bow with Steady Hand, blocks a power attack with Quick
+  Reflexes and shouts Slow Time with the clock unchanged on both seats. These were the only slow-time
+  records in Skyrim.esm (two perks, one shout; Dawnguard's and Dragonborn's were not read for more).
 
 The alternatives read and not taken: a GMST override for the camera (none governs it), the client's
 runtime set-gmst (not data, not in the installer), a tail plugin of vanilla copies (it would have undone

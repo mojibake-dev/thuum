@@ -38,7 +38,10 @@ lab/layer/load-order.tsv. Every patch is idempotent, keeps the file's size, and 
                     Steady Hand's slow time, where time is the server's.
   spell-magnitude <formid> <value>
                     set every EFIT magnitude of a SPEL to <value>; areas, durations and effects stay, the
-                    size too. The Slow Time shout's three spells at 1.0, time at its pace.
+                    size too. A plugin without the record gets it first, copied from the master that owns
+                    it (read from <game plugin dir>, decompressed) into its SPEL group, the header's count
+                    following: the one way to patch a record no plugin of the layer overrides. The Slow
+                    Time shout's three spells and Block's Quick Reflexes at 1.0, time at its pace.
 
 A patch that targets a record (drop-record, flst-set, perk-drop-ability, spell-magnitude) must hit the
 copy that wins: after patching, every plugin later in the load order is scanned for an override of the
@@ -346,11 +349,70 @@ def patch_perk_drop_ability(buf, ctx, fid_hex):
     return new, f'PERK {fid:08X}: {dropped} ability entr{"y" if dropped == 1 else "ies"} removed, {len(buf)} -> {len(new)} B'
 
 
+def master_record(game_dir, master, local_fid, typ):
+    """(header, decompressed body) of a master's record by local form id, or None."""
+    path = next((p for p in Path(game_dir).iterdir() if p.name.lower() == master.lower()), None)
+    if path is None:
+        raise SystemExit(f'{master} is not in {game_dir} (persist-mods pulls it off the host\'s persist esm directory)')
+    buf = path.read_bytes()
+    for o, t, flags, rfid, size in walk(buf):
+        if t == typ and (rfid & 0xFFFFFF) == local_fid and t != b'TES4':
+            body = buf[o + 24:o + 24 + size]
+            if flags & COMPRESSED:
+                import zlib
+                body = zlib.decompress(body[4:])
+            return buf[o:o + 24], body
+    return None
+
+
+def inject_record(buf, typ, fid, hdr, body, flags_mask=~COMPRESSED):
+    """the file with a record appended to its top group of that type (made after the last group if absent),
+    the header's record count up by one (and by two for a new group)."""
+    flags = struct.unpack_from('<I', hdr, 8)[0] & flags_mask
+    rec = typ + struct.pack('<III', len(body), flags, fid) + hdr[16:24] + body
+    size0 = struct.unpack_from('<I', buf, 4)[0]
+    o, groups = 24 + size0, []
+    while o + 24 <= len(buf):
+        gsize = struct.unpack_from('<I', buf, o + 4)[0]
+        groups.append((o, gsize, buf[o + 8:o + 12], struct.unpack_from('<I', buf, o + 12)[0]))
+        o += gsize
+    new = bytearray(buf)
+    added = 1
+    hit = next(((go, gs) for go, gs, label, gtype in groups if label == typ and gtype == 0), None)
+    if hit:
+        go, gs = hit
+        new[go + gs:go + gs] = rec
+        struct.pack_into('<I', new, go + 4, gs + len(rec))
+    else:
+        new += b'GRUP' + struct.pack('<I', 24 + len(rec)) + typ + struct.pack('<IHHHH', 0, 0, 0, 44, 0) + rec
+        added = 2
+    p, end = 24, 24 + size0
+    while p + 6 <= end:
+        sig = new[p:p + 4]
+        n = struct.unpack_from('<H', new, p + 4)[0]
+        if sig == b'HEDR':
+            count = struct.unpack_from('<I', new, p + 6 + 4)[0]
+            struct.pack_into('<I', new, p + 6 + 4, count + added)
+            break
+        p += 6 + n
+    return bytes(new)
+
+
 def patch_spell_magnitude(buf, ctx, fid_hex, value):
     fid, value = int(fid_hex, 16), float(value)
     hit = record_at(buf, fid, b'SPEL')
+    injected = ''
     if hit is None:
-        raise SystemExit(f'spell-magnitude: no SPEL {fid:08X} in the plugin')
+        masters, _ = masters_of(buf)
+        if (fid >> 24) >= len(masters):
+            raise SystemExit(f'spell-magnitude: no SPEL {fid:08X} in the plugin and it is the plugin\'s own index, nothing to copy')
+        master = masters[fid >> 24]
+        src = master_record(ctx['game_dir'], master, fid & 0xFFFFFF, b'SPEL')
+        if src is None:
+            raise SystemExit(f'spell-magnitude: no SPEL {fid:08X} in the plugin nor in {master}')
+        buf = inject_record(buf, b'SPEL', fid, *src)
+        injected = f', the record injected from {master}'
+        hit = record_at(buf, fid, b'SPEL')
     o, flags, size = hit
     if flags & COMPRESSED:
         raise SystemExit(f'spell-magnitude: SPEL {fid:08X} is compressed; this patch rewrites uncompressed records only')
@@ -365,15 +427,15 @@ def patch_spell_magnitude(buf, ctx, fid_hex, value):
         p += 6 + sz
     if not before:
         raise SystemExit(f'spell-magnitude: SPEL {fid:08X} has no EFIT')
-    if all(b == value for b in before):
+    if all(b == value for b in before) and not injected:
         return bytes(buf), f'SPEL {fid:08X} already at {value:g}'
-    return bytes(buf), f'SPEL {fid:08X}: {len(before)} magnitude(s) {", ".join(f"{b:g}" for b in before)} -> {value:g}'
+    return bytes(buf), f'SPEL {fid:08X}: {len(before)} magnitude(s) {", ".join(f"{b:g}" for b in before)} -> {value:g}{injected}'
 
 
 PATCHES = {'esl': patch_esl, 'hdpt-gender-from-master': patch_hdpt_gender_from_master, 'drop-record': patch_drop_record,
            'flst-set': patch_flst_set, 'perk-drop-ability': patch_perk_drop_ability, 'spell-magnitude': patch_spell_magnitude}
-NEEDS_MASTERS = {'hdpt-gender-from-master'}
-RESIZES = {'drop-record', 'flst-set', 'perk-drop-ability'}
+NEEDS_MASTERS = {'hdpt-gender-from-master', 'spell-magnitude'}
+RESIZES = {'drop-record', 'flst-set', 'perk-drop-ability', 'spell-magnitude'}
 RECORD_KINDS = {'drop-record', 'flst-set', 'perk-drop-ability', 'spell-magnitude'}
 
 
@@ -429,8 +491,14 @@ def main():
     if len(sys.argv) == 5 and sys.argv[1] == '--needs':
         need = set()
         for r, kind, args, path in locate(*sys.argv[2:]):
-            if kind in NEEDS_MASTERS:
+            if kind == 'hdpt-gender-from-master':
                 need.update(hdpt_masters_needed(path.read_bytes()))
+            elif kind == 'spell-magnitude':
+                buf = path.read_bytes()
+                fid = int(args[0], 16)
+                masters, _ = masters_of(buf)
+                if record_at(buf, fid, b'SPEL') is None and (fid >> 24) < len(masters):
+                    need.add(masters[fid >> 24])
         print('\n'.join(sorted(need)))
         return
     if len(sys.argv) != 5:

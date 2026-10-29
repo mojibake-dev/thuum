@@ -231,12 +231,45 @@ class SpellMagnitude(unittest.TestCase):
         self.assertEqual(again, new)
         self.assertIn("already", what2)
 
-    def test_refuses_a_missing_spell_and_one_without_an_effect(self):
+    def test_refuses_a_spell_without_an_effect_and_one_nobody_has(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        (d / "Skyrim.esm").write_bytes(plugin([record(b"SPEL", 0x00048AD0, sub(b"EDID", b"X\0"))], masters=()))
         p = plugin([record(b"SPEL", 0x00048AD0, sub(b"EDID", b"X\0"))])
         with self.assertRaises(SystemExit):
-            plugin_patch.patch_spell_magnitude(p, {}, "00048AD1", "1.0")
+            plugin_patch.patch_spell_magnitude(p, {"game_dir": str(d)}, "00048AD0", "1.0")  # no EFIT
         with self.assertRaises(SystemExit):
-            plugin_patch.patch_spell_magnitude(p, {}, "00048AD0", "1.0")
+            plugin_patch.patch_spell_magnitude(p, {"game_dir": str(d)}, "00048AD1", "1.0")  # not in the plugin nor the master
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_spell_magnitude(p, {"game_dir": str(d)}, "01000001", "1.0")  # the plugin's own index
+
+    def test_injects_the_record_from_its_master_when_the_plugin_lacks_it(self):
+        import tempfile, zlib
+        d = Path(tempfile.mkdtemp())
+        zipped = struct.pack("<I", len(self.SPEL)) + zlib.compress(self.SPEL)
+        (d / "Skyrim.esm").write_bytes(plugin([record(b"SPEL", 0x000D8C31, zipped, flags=plugin_patch.COMPRESSED)], masters=()))
+        armo = record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))
+        p = plugin([armo])  # one ARMO group, no SPEL group
+        new, what = plugin_patch.patch_spell_magnitude(p, {"game_dir": str(d)}, "000D8C31", "1.0")
+        recs = [(t, f, fl) for _, t, fl, f, _ in plugin_patch.walk(new) if t != b"TES4"]
+        self.assertEqual(recs, [(b"ARMO", 0x00000D62, 0), (b"SPEL", 0x000D8C31, 0)])  # appended in a new SPEL group, uncompressed
+        o, _, _, _, size = next(r for r in plugin_patch.walk(new) if r[3] == 0x000D8C31)
+        subs = dict(plugin_patch.subrecords(new[o + 24:o + 24 + size]))
+        self.assertEqual(struct.unpack_from("<fII", subs[b"EFIT"], 0), (1.0, 0, 8))
+        hedr = new.index(b"HEDR")
+        self.assertEqual(struct.unpack_from("<I", new, hedr + 6 + 4)[0], 1 + 2)  # the record and its new group
+        grp2 = new.rindex(b"GRUP")
+        self.assertEqual(struct.unpack_from("<I", new, grp2 + 4)[0], len(new) - grp2)
+        self.assertIn("injected from Skyrim.esm", what)
+        again, what2 = plugin_patch.patch_spell_magnitude(new, {"game_dir": str(d)}, "000D8C31", "1.0")
+        self.assertEqual(again, new)
+        self.assertIn("already", what2)
+        # into an existing SPEL group: appended at its end, the group grows by the record
+        q = plugin([record(b"SPEL", 0x00048AD0, self.SPEL)])
+        q = q.replace(b"HDPT", b"SPEL", 1)  # the helper labels its one group HDPT; make it the SPEL group
+        new2, _ = plugin_patch.patch_spell_magnitude(q, {"game_dir": str(d)}, "000D8C31", "1.0")
+        self.assertEqual([f for _, t, _, f, _ in plugin_patch.walk(new2) if t == b"SPEL"], [0x00048AD0, 0x000D8C31])
+        self.assertEqual(new2.count(b"GRUP"), 1)
 
 
 class LaterOverrides(unittest.TestCase):
