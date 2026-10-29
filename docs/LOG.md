@@ -3008,3 +3008,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   props. The named hole: a Keyframed body never moves from a bump, so a non-host's touch has no signal until the Havok contact native
   (the re-analyst reads the player's character controller's contact callback now); x-prop-push uses the host as the walker. The
   HYPOTHESIS inventory is saved for P4.
+- 15:20 PDT: x-prop-push v1 by path (probe-check ok, backed up): the guard camp's two tankards BasicTankard01 0x3975b and 0x3975c (MISC with
+  Havok, no enable parent, open ground in Riverwood's cell 0x9732; the lookup found nothing pushable within 2000 units of the landing);
+  c1, the host, runs east through them, c2 watches 100 north; claims the owner's stream and sleep lines, the follower's apply line, the
+  record moved east, the watcher's copy farther than its 100 units, and the rest kept across a server restart. The walker is the host by
+  the slice's named hole (a Keyframed body gives a non-host's bump no signal; the contact native's read is in flight). P3 pre-assembled
+  locally as m3-pass-train-3 (P2 plus m3-prop-physics).
