@@ -3019,3 +3019,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   record, wiping the test's sword; fixed as 6fd5b343 (armed after the move, inside the hit). The three trains are on CI server-only for
   their first C++ compiles and T0: 3858 m3-npc-reach 6fd5b343, 3859 m3-pass-train-2 0b49a28e, 3860 m3-pass-train-3 a51762d4 (the
   runner rebuilds thuum/rust-ci first).
+- 15:38 PDT: the touch's read (docs/research/m3/re-havok-contact.md): the player's bhkCharProxyController's ContactPointAddedCallback
+  (Address Library 79131) hears every added contact point with no motion-type filter, so a Keyframed clutter body's touch is delivered,
+  while the surface-interaction pass (ObjectInteractionCallback via 62648, the impulse body 78304) skips motion types 4 and 5 and applies
+  the push only to dynamic bodies under the 95 mass cap: a non-simulating seat swallows the bump by construction and the claim must come
+  from the manifold contact; polling bumpedBody cannot replace the detour. lab/frida/prop-contact.js carries the Dynamic plan (hooks 79131
+  and 78304, offsets by just addr; the hkpRootCdPoint and hkpCollidable field offsets from the headers at write time). An agent builds the
+  hook (a Gum on-enter detour, one propContact event per prop per 250 ms) and the client's claim on contact, with the proximity stand-in
+  behind a fallback setting.
