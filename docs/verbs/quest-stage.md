@@ -94,31 +94,46 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 
 ## Message contract
 
-- Message name / numeric type: QuestStage, the next free MsgType (filled at the implementation commit).
+- Message name / numeric type: QuestStage, MsgType 57, wire id 65 (wire-schema skymp.rs, SCHEMA_VERSION 19).
 - Direction: both. C2S: the seat's report. S2C: the relay to the other seats and the login replay.
 - Fields: quest (u32, the QUST form id in the shared load order; a long form id where the server's convention needs
   one, as PlayerGlobals carries its ids), stage (u16, the engine's stage index).
-- Validator rules (wire-rules): quest nonzero; stage within u16; on the server's side the quest is a QUST and on the
-  list, the rate per quest per player 50 ms; refusals E_QUEST_UNKNOWN (not a QUST), E_QUEST_UNLISTED, E_QUEST_RATE.
+- Validator rules: structural (wire-validate check_quest_stage): a quest of 0 only with a list, the list naming each
+  quest once and never 0; from a client no list and a quest named, under a budget of 16 then 4 a second
+  (quest_stage_budget, UNMEASURED). Semantic (wire-rules quest_stages, through the bridge): the quest on the server's
+  `sharedQuests` list (E_QUEST_UNLISTED); the handler's own: a QUST in the load order (E_QUEST_UNKNOWN). A stage
+  already recorded is a no-op at debug, never a relay.
 - Idempotency / ordering: a stage already recorded is a no-op; the replay is ascending per quest; the relay is
   reliable and ordered.
-- Contract doc updated: in the implementation commit (docs/WIRE.md's row and the fixture pair).
+- Contract doc updated: docs/WIRE.md's QuestStage paragraph; fixtures 57-QuestStage-0 and -1 (wire-json); the C++
+  struct QuestStageMessage.h round-trips them (WireJsonContractTest).
 
 ## Server
 
-- Where the logic lives: the handler beside OnPlayerGlobals (ActionListener), the record on the world (the shape the
-  code map names: the world's change form or the server's own record), the relay to every other user, the replay in
-  the login path after PlayerGlobals.
-- DB fields / migration: a new field on the world record (the migration note in the commit; rule 6).
-- Restart behavior: the record is loaded with the world; a login after a restart replays it (b-quest-stage-restart).
+- Where the logic lives: ActionListener::OnQuestStage (the refusals, the record, the relay to every connected user
+  with an actor but the sender) and ActionListener::SendQuestStages (the list message, then one message per recorded
+  stage, ascending per quest), called from PartOne::SetUserActor right after SendPlayerGlobals. The rule: wire-rules
+  quest_stages.rs (the list from `sharedQuests`, check, at_login, done, merge) through wire-bridge's SharedQuests.
+- DB fields / migration: the world's journal reference, a server-made XMarker (STAT 0x3b) at a far corner of Tamriel
+  (WRLD 0x3c) with the fixed form id 0xffffff00 (PartOne::WorldJournal, above GenerateFormId's walk), whose change form
+  carries the new optional field `questStages` ({"entries": [{"quest": "<hex>:<plugin>", "stage": N}]}, absent in
+  older records, read as none; MpChangeForms.h, QuestStageDone.h). No script: the optional field is the migration
+  (rule 6's shape, ADR-043's form version unchanged).
+- Restart behavior: WorldState::LoadChangeForm recreates any 0xff... reference from its change form, the journal
+  included; a login after a restart replays the record (QuestStageTest's restart case; b-quest-stage-restart at T3).
+- Settings: `sharedQuests` in server-settings.json (lab/deploy/sky-srv, both load orders): FreeformRiverwood01
+  (A Lovely Letter, 0x74a83), MS13, MS13Intro, MS13FIN (The Golden Claw, 0x39645, 0xb6031, 0x3dd29), read from
+  Skyrim.esm with lab/esm.py on 2026-10-28.
 - Papyrus natives touched (ledger lines added): none in the first slice (the server VM's Quest class, if any, is
   untouched).
 
 ## Client
 
 - SP binding: none new (the platform's `questStage` event and `Quest` natives).
-- TS handler: questStageService (the report on `questStage` for listed quests, the apply on the message with the
-  guard, the list from the server at login).
+- TS handler: services/services/questStageService.ts (the report on the platform's `questStage` event for listed
+  quests, one applied stage per update through Quest.setCurrentStageID with the engine's echo consumed, the list from
+  the server's login message kept in the platform's storage across a reload); the message plumbing in messages.ts,
+  questStageMessage.ts, anyMessage.ts, events.ts, networkingService.ts.
 - Kill switch config key: `questStage` (default on) in the client settings; the server's `sharedQuests` list empty
   means nothing is shared.
 
@@ -128,7 +143,8 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
   stage; the refusals: unknown, unlisted, rate; the replay at login after PlayerGlobals; the restart: a second
   PartOne over the same save sees the stages).
 - T1: none (no native hook).
-- T2: a difftest session with one accepted report, one refused, and the replay at a second login.
+- T2: difftest/sessions/quest-stage.yaml (c1's stage 10 of FreeformRiverwood01 recorded and relayed to c2, the same
+  again a no-op, MQ102's refused as unlisted) and the login list in divergences.yaml.
 - T3 scenario id: lab/scenarios/b-quest-stage.yaml (after lab-api's quest-stage read: `c.quest(id).stage()` and
   `.stageDone(n)`), b-quest-stage-restart.yaml.
 - Assertions that would fail if the verb silently regressed: c2's GetStage of the listed quest equals c1's within the
@@ -146,10 +162,10 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated (the platform's event and natives; no engine hook)
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [x] server logic + T0 (QuestStageTest: record, relay, no-op, refusals, replay, restart; CI's T0 pending)
+- [x] message + validator (same commit)
 - [x] native hook + T1 (none needed)
-- [ ] TS handler
+- [x] TS handler
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
