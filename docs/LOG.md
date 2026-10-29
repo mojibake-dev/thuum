@@ -2822,3 +2822,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the shared list does, D55 B; Eli's call). Logs at results/playtest-38 (numidium's pull since 18:06Z); the end world saved. Fix
   branches cut from 3o: m3-dead-placed (the loader loads starts-dead ACHRs as dead records) and m3-grant-roster (a roster dropped for a
   missing host replays at the grant).
+- 13:33 PDT: the two server fixes for playtest 38's confirmed mechanisms built and pushed server-only off 3o ee44f7d1, T0 on CI: fork
+  m3-dead-placed 2f886731 (finding 65: a starts-dead placement loads as the server's corpse: WorldState's loader no longer returns false
+  on the ACHR flag, MpActor::MarkPlacedDead sets isDead and zero bars with no save request, RespawnWithDelay yields to the mark; T0
+  NpcExists's floor body 0x3b9ea) and fork m3-grant-roster 5b6ef482 (finding 66: a sighting dropped for a missing host is held per cell
+  for 30 s and replayed for the grant's host by ApplyHostDecisions; T0 CellHostTest's held-and-replayed case). fork-lint green on both
+  (clang-format 21.1.8 rewrote the grant-roster files once). Verb docs: npc-fate's loader row BUILT, npc-puppet's roster-race section.
+  Both stack on 3o for the evening's train 3p with the client bits (67's log-once, 68's ammo after the wipes, 64's one post per change,
+  71's ragdoll after the silent kill) once the pulled logs are read.
