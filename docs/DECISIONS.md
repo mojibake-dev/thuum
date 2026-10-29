@@ -3166,6 +3166,19 @@ record in cell 0x21594 whose one movement lands within slack of a table entry (a
 is permitted and that entry names the server's kit; the vanilla-start line (MQ101's cart) is not honoured; the escape
 line is harmless.
 
+2026-10-28 18:1x PDT, apocrypha's landing table completed (the alternate-start page): the three master-marker
+landings read from the server's own Dawnguard.esm and Dragonborn.esm: the Dawnguard start (stage 8) at
+DLC1VQ03HunterStart, Dawnguard.esm 0x6E62 (0x02006E62 in our order), cell DLC1DawnguardHQ01; Harkon's court (stage 9),
+where LAL moves nobody itself and the vanilla bite wakes the player at DLC1VQ02PlayerWakeupMarker, Dawnguard.esm
+0x175CC (0x020175CC), cell DLC1VampireCastleGuildhall, the marker's role inferred from its name, so that entry takes a
+cell-wide slack; the Retching Netch (stage 3, InnMenuChoice 9) at an unnamed XMarker, Dragonborn.esm 0x3BD38
+(0x0403BD38), cell DLC2RRTheRetchingNetch. The table is FormDescs the server resolves through espm at load; the ship
+ride and the vanilla cart are out. Two starts change the player's race (stage 15's vampire lair through the chargen
+script's MakePlayerVampire, Harkon's bite through the vanilla turn plus Vampire Lord): race and appearance are R0 and
+the clock is the server's, so the first cut REFUSES those two choices (no kit entry in the permit's table, the menu's
+other starts stand); performing them server-side is a later slice. The friendly factions the bandit, Forsworn and
+vampire starts add client-side are a known limit, not synced.
+
 Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
 the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
 installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs

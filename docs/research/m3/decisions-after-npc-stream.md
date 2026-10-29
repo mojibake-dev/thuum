@@ -764,6 +764,17 @@ C as the next step if B's heuristic misses.
   skeleton's own update first. Playtest 37 also found the stale in-flight item (a sound-path line's) behind the snap-closing
   dialogues and the no-lip lines; the fix rides the same branch.
 
+- 18:14 PDT 2026-10-28 (the flicker; Eli: "il reitterate, the flicker is that the entire container closes and reopens.
+  that needs a fix."): the re-analyst's read (re-container-menu-refresh.md) found the cause outside the menu:
+  TESModPlatform::AddItemEx returns without doing anything while the game is paused, and the ContainerMenu pauses it
+  (CommonLib ContainerMenu.h:14, kPausesGame), so under the open menu nothing of the other seat's take or put ever landed;
+  the redraws read an unchanged inventory, the item list's re-read blanked the selection (finding 30's "cannot place"),
+  and only the close-and-reopen fallback showed the change. Fixed on fork m3-face-twelve ed606faf (client build on): a
+  pause by an item menu no longer drops the change, and the engine's own inventory-update message (Papyrus AddItem's
+  shape, to "Top Menu") is posted from the game thread after each change lands; refreshContainerMenu is the batch's end
+  (the message twice, Skyrim Souls' shape); ItemList::Update and the mode knob are gone; chestRedraw unset means the
+  in-place redraw, "reopen" stays the fallback. HYPOTHESIS until Eli's chest redraws in place.
+
 ### D54. A non-persistent resident at a door (15:5x PDT 2026-10-28, thuum-magnus, from the tail after the door pass went live)
 
 Since skymp-server:m3-door-pass-802b74f2 (21:59Z) every placed resident's door in Riverwood walked through under its host
@@ -793,7 +804,9 @@ the persistence fact was a guard for the host's off-screen simulation, which an 
 Eli's call; the build is a slot's, not the turbo loop's.
 
 - [ ] A (leave as today)
-- [ ] B (the record moves with the walk, frozen when unhosted)
+- [x] B (the record moves with the walk, frozen when unhosted): Eli, 18:0x PDT 2026-10-28 via numidium, "B for D54".
+  Server-only, the next slot's build: the judge's door arm without the persistence fact, CellHostTest's non-persistent
+  door case, a T3 door leg with Hilde.
 - [ ] C (the ESM's schedule fact)
 
 ### D55. Shared quest state under the dialogue work (17:5x PDT 2026-10-28, Eli, from playtest 37's Sven line)
@@ -845,5 +858,6 @@ Sven's Faendal line then offered on both. Known limits in the doc: QF world effe
 objectives, aliases and quest globals are not synced; one world journal. Not today's loop: tonight's branch.
 
 - [ ] A (leave as is)
-- [ ] B (world-shared stages, the journal stubbed; the first slice tonight)
+- [x] B (world-shared stages, the journal stubbed; the first slice tonight): Eli, 18:0x PDT 2026-10-28 via numidium,
+  "i recommended as B for 55". ADR-056 and docs/verbs/quest-stage.md first, then the slice on its fork branch.
 - [ ] C (per-player quests, shared world effects)
