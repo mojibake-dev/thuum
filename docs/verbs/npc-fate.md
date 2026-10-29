@@ -2163,3 +2163,31 @@ credit, no server's word). H-56a (HYPOTHESIS): the value-owner route to zero
 kills by the engine's own health check as the console's damageav does; the
 probe reads the death report.
 
+## Finding 54 (2026-10-28, playtest 37): the reanimated thrall stood on the host alone
+
+Eli: "i think the necromancer resurrected a skeever, only visible on prisoner..." and later "the body stands up only on
+rotferns screen and fights neither". The read (21:41 PDT, a code read on the 3f tree with the live logs): the server's
+resurrection branch existed (OnHostedActorState: a dead record whose host samples health above one point is respawned
+alive, "isDead false" to every listener; the host's ordinary sample is the report), but on the host a dead-promoted
+body keeps its AI off (H-54e, PuppetApi.cpp Promote) and under AI off the engine's own Actor::Resurrect from the
+Reanimate effect's Start does not take: isDead stays true (x-npc-respawn 070508's finding, the reason
+FateApi::ResurrectActor wraps the call in EnableAI(true)), the sampler keeps reading 0, hosted_state_judge drops the
+sample as dead, the record stays dead, the watchers' puppets stay bodies and the thrall has no AI anywhere ("fights
+neither"). Two more holes: DiedAgo is nullopt for a death before the server's start (nothing stamps a body loaded dead),
+so such a body could never be stood up; and a 0xff NPC copy's live word took the players' figures' delete-and-replace
+path on the watcher. The logs put the reanimation on c2's engine at 03:54:15Z two seconds after a handoff while c1 was
+stale then disconnected, so the screen Eli saw it on is undetermined; the mechanism is the same on either host.
+
+Fix, fork m3-reanimate 9ef0d567 (train m3-turbo-train-3g d1f3e393): the platform hooks Character's Resurrect
+(CommonLibSSE-NG Actor.h:369, vfunc 0AB, written on VTABLE_Character[0] with PlayerHealthDamage's write_vfunc shape;
+the player's own vtable is untouched) and, for an actor this seat hosts and not a puppet, enables the AI before the
+engine's call and turns it off again only if the body stays dead; the host's sampler sends the dead-to-alive flip
+reliable and never swallows it as unchanged; the server counts a death with no stamp of this process as past the grace
+(T0 in ActorDeathTest); the watcher routes a server-made NPC copy's live word through resurrectActor. HYPOTHESIS H-54f:
+the kProcessMe bit (what EnableAI writes) is what blocks Resurrect on an AI-off actor; the platform line "resurrect
+<id>: hosted body, AI enabled for the engine's own resurrection (dead before true, dead after false)" confirms it, "dead
+after true" falsifies it. HYPOTHESIS H-54g: nothing else owns Character's slot 0AB (Hooks.cpp's SKSE lesson); the
+line's absence on a reanimate reveals it. Open: a reanimate inside the 3 s grace after the kill word is dropped as in
+flight and the stood-up sample goes once (a re-send while the record says dead is the follow-up); activation stays
+blocked on the host's reanimated actor; the engine's a_resetInventory on a reanimate against the record's kept
+inventory.
