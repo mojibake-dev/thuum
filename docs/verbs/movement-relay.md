@@ -132,3 +132,21 @@ unchecked (the next movement verb).
 
 - Passed: with magic readied, test 1's crouch and its stand showed on test
   2's screen within about a quarter second.
+
+## The figure's glide knobs (2026-10-28, fork m3-follow-mode c84da2c3)
+
+The other player's figure is moved once per sample (about every 130 ms plus a frame) by one engine translateTo
+(skymp5-client/src/sync/movementApply.ts, translateTo), the planner fed an offset so the AI plays the walk. The knobs
+live under "movement" in the client's settings file (the lab template lab/deploy/sky-client/skymp5-client-settings.txt
+overwrites a seat's at every dist): leadSeconds (default 0.2, upstream's lead: the target is the sample plus speed times
+the lead along the heading, the glide timed by the lead), mode "lead" or "follow" (default "lead", today's behaviour
+byte for byte), followMargin (1.15). Playtest 37 read the lead's two failures on Eli's screen: at 0.1 "the yoyo is
+decreased but it looks like,, frames are missing?" (a glide shorter than the sample spacing finishes early and the
+figure stands until the next sample, then runs at distance over the lead), at 0.2 the overshoot past the sender's stop
+and the walk back (the stop learned a sample late). Follow mode targets the sample itself and times the glide by the
+smoothed arrival spacing (an exponential average, alpha 0.3, clamped 0.08 to 0.4 s, from 0.14) times the margin, so
+the engine is still gliding when the next sample lands: the figure runs at the sender's speed about one spacing behind
+with no overshoot, Skyrim Together's delayed-playback trade with the engine's own glide instead of a per-frame set.
+HYPOTHESIS (H-MV1) until a probe measures both modes (x-figure-settle-lead's two-pass shape with a 16 ms watch: stall
+frames under 5% of moving frames, max step under twice the median, overshoot past the stop under 8 units); the stop's
+last glide in the idle pose is the trade to watch. Laid as hot-3g-1.js with the template on "follow" (21:37 PDT).
