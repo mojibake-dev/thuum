@@ -557,6 +557,18 @@ players a rest, however long ago the last hit. Other options weighed: 10 s
 or 30 s without a hit (an exploit window: step back and rest), and distance
 alone (standing together never ends it).
 
+**Amendment (2026-10-28 21:29 PDT, thuum-magnus under the no-questions rule; Eli may veto):** a fight is also
+recorded between a player and a hosted NPC. The read of H-53h (docs/verbs/npc-stream.md) found that the Flame
+Atronach's cloak damage effect carries condition function 719, IsHostileToActor (CommonLibSSE-NG TESCondition.h:865),
+which the server already implements as "a fight recorded between the two parties"; NotifyHostility only ever recorded
+fights between two user-played actors and TickFights forgot any pair with a non-user member, so every NPC-to-player
+effect gated on hostility was refused forever, the cloak included (a player standing in the fire took no server
+damage). The rule now admits a hosted NPC (an actor with a host) as a party: a hit by or on it with a player on the
+other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat
+snippet goes only to a user-played victim (the host's engine already fights). Between two hosted NPCs nothing is
+recorded (the engine's own business on the host). Fork m3-npc-fights; T0 in NpcCastTest's cloak case regains its
+damage claim (5 of 250 per cadence after the first Firebolt), the wire-rules tests cover the three pairs.
+
 ## ADR-024: The full sweep runs at the merge, not per verb
 
 Status: accepted (2026-10-05, Eli: "please yes that's great").
