@@ -318,6 +318,14 @@ mod's files stay local (lab/.cache/mods); only names, ids and positions are reco
 - `lab/layer/papyrus-admitted.tsv`: a `layer` row for `alternate start - live another life.esp`; the
   map then carries its 212 class names.
 - layer-stage's 2b passes (no 0x7, no 0x14; every master a base entry or served).
+- With the lay, the quest-stage verb's denylist (`sharedQuestsMode.denied` in both lab/deploy/sky-srv
+  settings files, then one layer-render run) gains the plugin's twelve script- and story-manager-started
+  quests, which D62's start-game-enabled rule does not cover: ChargenQuest 000daf, RumorsOfWarQuest 07a334,
+  FarmhouseProfits 01189b, CheskoPolygonQuest 03fda5, HelgenNPCKillerQuest 068ec0, the Bandit 1219b6,
+  Vampire 126ab9, L4D 12bbbc and Forsworn 284074 start controllers, FactionAssaultEvent 284076,
+  FactionKillEvent 284079, WhiterunGuardConfrontationQuest 29847f (docs/research/layer-quests.md; thuum-cf
+  wrote them into docs/verbs/quest-stage.md as the additions for that day). The forty vanilla and DLC quests
+  its fragments stage are in the denylist already (2026-10-29).
 - The spawn record and the outfit: thuum-cf; the permit keyed on the choice and the start table:
   thuum-magnus; the probe: a fresh seat spawns in the prison in rags, talks to the statue, picks an
   inn, sleeps, and arrives there on both screens with the server's gear, numidium.
