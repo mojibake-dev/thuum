@@ -192,7 +192,11 @@ location does in single player, is the open HYPOTHESIS (H-56a). Consequences: a 
 not started is parked by the client and applied when the engine's questStart for that quest fires (fork m3-quest-stage,
 no wire change); the probe x-quest-stage keys on MS13Intro 0xb6031 (no event, unique-actor aliases Lucan and Camilla,
 stage 10), already in lab/deploy's sharedQuests; Sven's Faendal line on both seats waits for the Story Manager to start
-A Lovely Letter on each. Dynamic plan: a seat subscribed to locationChanged and questStart walks from the Guardian
-Stones into Riverwood and out of the Riverwood Trader; expected newLoc 0x13163 then questStart 0x74a83; a location
+A Lovely Letter on each. Dynamic plan (runnable since 2026-10-29: the lab-driver logs the player's locationChanged with the old and new
+location ids and every questStart and questStop through the console tee, so log-count reads them, no step added;
+the probe x-story-manager-walk by path places c1 at Riverwood's landing, then at x 16000 in RiverwoodEdge01 0x9733 and
+runs it east across the cell line into 0x9732 under hold-key W, reading the lines and 0x74a83's running state after
+each half; it plays at the first stage after the driver's lay): a seat walks from outside the location into
+Riverwood (the Guardian Stones leg and the Riverwood Trader exit are a later version); expected newLoc 0x13163 then questStart 0x74a83; a location
 event without the start points at the SM nodes (a Frida read of BGSStoryEventManager::AddEvent, Address Library
 32359, and BGSStoryTeller 32485 by just addr), no location event at the player's location tracking after a placement.
