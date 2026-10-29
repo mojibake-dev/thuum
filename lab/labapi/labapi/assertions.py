@@ -12,6 +12,10 @@ the lab can grep (E_ASSERT_*).
     | .gazeTarget | .gazeSlot | .emotionType | .emotionValue | .exprOverride | .exprIndex | .exprValue
                                                      that seat's engine state of an NPC, from its last npc-state {formId};
                                                      the gaze and face fields carry the poll before it (train 54)
+  <client>.quest(<id>).stage() | .stageDone(<n>) | .running()
+                                                     that seat's game's quest: its current stage, whether stage n is
+                                                     done (n among the step's stages), whether it runs; from its last
+                                                     quest-stage {quests, stages} step naming it (ADR-056)
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
     | .turned | .endX | .endY | .endZ                 the same rotation signed, in degrees, and where it stood at the
@@ -146,6 +150,7 @@ class ViewsFacade(Protocol):
     def projectiles(self, observer: str) -> dict[str, Any] | None: ...
     def refs_near(self, observer: str) -> dict[str, Any] | None: ...
     def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
+    def quests(self, observer: str) -> dict[int, dict[str, Any] | None] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def figure_spells(self, observer: str) -> dict[str, Any] | None: ...
     def log_count(self, observer: str, pattern: str) -> int | None: ...
@@ -783,6 +788,38 @@ class NpcStateView:
     exprOverride: bool | None = None
     exprIndex: int | None = None
     exprValue: float | None = None
+
+
+class QuestView:
+    """c.quest(id): a quest as that client's game holds it at its last
+    `quest-stage {quests, stages}` step naming it (Papyrus Quest.GetCurrentStageID,
+    IsStageDone and IsRunning; docs/verbs/quest-stage.md): stage() its current
+    stage, stageDone(n) whether stage n is done, for an n among the step's
+    stages, running() whether it runs."""
+
+    def __init__(self, client: str, form_id: int, data: dict[str, Any]):
+        self._client = client
+        self._id = int(form_id)
+        self._data = data
+
+    def stage(self) -> int:
+        v = self._data.get("stage")
+        if not isinstance(v, int) or isinstance(v, bool):
+            raise AssertionData(f"{self._client}'s quest-stage step read no stage of {self._id:#x}")
+        return v
+
+    def stageDone(self, n: int) -> bool:
+        done = self._data.get("done")
+        v = done.get(str(int(n))) if isinstance(done, dict) else None
+        if not isinstance(v, bool):
+            raise AssertionData(f"{self._client}'s quest-stage step did not read stage {int(n)} of {self._id:#x}")
+        return v
+
+    def running(self) -> bool:
+        v = self._data.get("running")
+        if not isinstance(v, bool):
+            raise AssertionData(f"{self._client}'s quest-stage step read no running state of {self._id:#x}")
+        return v
 
 
 @dataclass(frozen=True)
@@ -1569,6 +1606,18 @@ class _ClientRef:
         except (TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s figure-spells answer is malformed: {e}") from e
 
+    def quest(self, form_id: int) -> QuestView:
+        """c.quest(id): that quest in that client's game at its last
+        `quest-stage` step naming it: stage(), stageDone(n), running()."""
+        fn = getattr(self._views, "quests", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict) or int(form_id) not in data:
+            raise AssertionData(f"{self.name} has not reported a quest-stage step for {int(form_id):#x}")
+        q = data[int(form_id)]
+        if not isinstance(q, dict):
+            raise AssertionData(f"{self.name}'s game holds no quest {int(form_id):#x}")
+        return QuestView(self.name, int(form_id), q)
+
     def refs_near(self) -> RefsNearView:
         """c.refs_near(): what stood near that client's player (or its figure
         of the other player, with the step's {from: other}) at its last
@@ -1829,10 +1878,11 @@ _NUMBER_METHODS = {
     WatchView: {"movedBy"},
     RefsNearView: {"count"},
     StreamView: {"accepted", "dropped", "foreign"},
+    QuestView: {"stageDone"},
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state"},
+    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state", "quest"},
     RefsNearView: {"has", "distance", "runtime_of"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
@@ -1854,10 +1904,11 @@ _STRING_NUMBER_METHODS = {
 _NULLARY = {
     _ServerRef: {"time"},
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells"},
+    QuestView: {"stage", "running"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of"},
     EffectsView: {"left", "magnitude"},
@@ -1865,6 +1916,7 @@ _METHODS = {
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},
     StateView: {"menuOpen"},
     StreamView: {"accepted", "dropped", "foreign"},
+    QuestView: {"stage", "stageDone", "running"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
@@ -1991,7 +2043,7 @@ class Evaluator:
                 if node.func.attr in _NULLARY.get(type(obj), set()):
                     if node.args:
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes no argument")
-                    return getattr(obj, node.func.attr)()
+                    return self._read(node, getattr(obj, node.func.attr)())
                 args = []
                 for a in node.args:
                     if isinstance(a, ast.Name) and isinstance(self._names.get(a.id), _ClientRef):

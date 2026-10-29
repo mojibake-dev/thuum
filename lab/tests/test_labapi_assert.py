@@ -328,6 +328,33 @@ class M0VocabularyTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate("c3.npc_state(0x13483).gazeTarget == 0x14")   # no getters on that build
 
+    def test_a_shared_quests_stage_on_both_seats(self):
+        """x-quest-stage (ADR-056, memo D55 B): c1 sets stage 10 of FreeformRiverwood01 (0x74a83), c2 reads it; a stage
+        the step did not name, a quest never read and a form that is no quest are missing data, never a pass."""
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        srv = RichServer()
+
+        class QuestViews(NearViews):
+            def quests(self, observer):
+                return {"c1": {0x74A83: {"stage": 10, "running": True, "done": {"10": True}}},
+                        "c2": {0x74A83: {"stage": 10, "running": True, "done": {"10": True, "20": False}}, 0x39645: None}}.get(observer)
+
+        ev = Evaluator(srv, QuestViews(), ["c1", "c2", "c3"])
+        self.assertTrue(ev.evaluate("c2.quest(0x74a83).stage() == c1.quest(0x74a83).stage()"))
+        self.assertTrue(ev.evaluate("c2.quest(0x74a83).stageDone(10) and not c2.quest(0x74a83).stageDone(20)"))
+        self.assertTrue(ev.evaluate("c2.quest(0x74a83).running()"))
+        self.assertEqual(ev.readings[f"c2.quest({0x74A83}).stage()"], 10)   # a reading names the id as the ast holds it
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.quest(0x74a83).stageDone(20)")     # the step did not read stage 20
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.quest(0x39645).stage() == 0")       # no quest of that id in c2's game
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c3.quest(0x74a83).stage() == 10")      # c3 never read it
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c2.quest(0x74a83).stage(10) == 10")
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate('c2.quest("0x74a83").stage() == 10')
+
     def test_the_servers_fate_against_a_seats_roll(self):
         """npc-fate (ADR-046): the server's roll pushed to both; a seat's engine race and worn items read against it."""
         from labapi.assertions import AssertionData, Evaluator
