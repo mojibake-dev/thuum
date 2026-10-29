@@ -2973,3 +2973,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   libespm QUST.h) is each seat's own in mode all unless listed `allowed`, being built on m3-quest-mode; client-only plugins' quests are
   E_QUEST_UNKNOWN on the server already. Finding 77 is Reading List's own book radar (RL_DetectionQuest started and stopped every 0.5 s
   by RL_ManagerScript), per seat, the server never sees it; Eli's call whether to slow it (a VMAD property patch) or drop the mod.
+- 14:59 PDT: the denylist took apocrypha's four non-start-game-enabled layer controllers (MysticismMagic, Thaumaturgy, LostGrimoire,
+  UndeadFX; all served), 44 entries now in both deploy files (the renderer's layout); the alternate start's twelve script-started quests
+  wait for the day that plugin is served (client-only today). apocrypha's numbers: 330 of Skyrim.esm's 1,811 quests and 162 of the
+  layer's 228 are start-game-enabled, so D62's rule keeps most mod quests a seat's own and leaves stage-started world content shared.
+  Fork CI is blocked: sky-ci's runner is out of disk (pipeline 3837's job 14167, "No space left on device" compiling wire-bridge); core
+  asked to free it; pushes held (numidium: no push needed before the base merges; the base waits on the duel's read and D61).
