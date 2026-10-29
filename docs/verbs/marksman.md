@@ -498,6 +498,26 @@ dumped after each shot and the client's UpdateEquipment sends logged, on a
 train that logs accepted equipment updates at debug. A row of marksman's
 until then.
 
+## Playtest 37's refused volleys (finding 45, 2026-10-28; fork m3-hands d902d919)
+
+Eli: "i just had a moment where headshots didnt work." The server: 32 E_SHOT_EQUIPMENT refusals in one evening,
+ten in a row at 01:14:55Z to 01:15:32Z while rotfern swapped Flames and the bow, two more after a relaunch. The
+cause, read in the handlers: OnUpdateEquipment refused a WHOLE report for one bad entry (an item the server
+inventory lacked, 64b3f five times in two seconds; a spell slot not learned) and sent UnequipItem for every newly
+worn item of that report, the bow included, so the record's hands froze at the pre-swap state; and after a relaunch
+the client's onLoadGame sends the engine's hands 3 s after the load ("Currently only armor is equipped after
+relogging", sendInputsService.ts), which writes the record's hands without the bow until the next equip event. The
+fix on m3-hands d902d919, server-only: OnPlayerBowShot judges a bow or arrow the hands lack by the INVENTORY (a count
+of at least one accepts, logged "hands stale: shot from <bow> accepted on the inventory" once per shooter per 10 s;
+a bow or arrow the inventory lacks is E_SHOT_NO_BOW or E_SHOT_NO_ARROW; E_SHOT_EQUIPMENT retired, b-npc-archer's
+claim renamed in its own commit); OnHit's shot gate reads the inventory the same way; OnUpdateEquipment drops each
+bad entry of a PLAYER's report, logs it, corrects that entry alone (UnequipItem, RemoveSpell or RemoveShout,
+SendInventoryUpdate) and keeps the rest (a hosted actor's report keeps npc-stream slice 3's whole refusal, its own
+decision with scenarios on it). T0: MarksmanTest's stale-hands, no-bow and no-arrow cases;
+PartOne_UpdateEquipmentTest's unknown-spell and missing-item cases. Open (Eli: "this also needs fixing"): the
+client re-equips only armor after a relaunch, so the weapons in the hands wait for the player's first draw; a seat's
+engine behaviour, a probe before its fix (the record's hands applied as worn at the login's first update).
+
 ## Train 53 (2026-10-26, fork m3-npc-cast 78cec009; docs/verbs/npc-stream.md slice 6)
 
 The shot names its shooter (PlayerBowShot's idx, SCHEMA_VERSION 18) so a

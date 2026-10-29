@@ -2536,7 +2536,20 @@ exit passes it back under D22's margin brake, a stranger's door report stays
 refused. Built on fork m3-door-pass 2a18f926 (stacked on m3-shared-containers
 dbfc8e82), T0 at the crate and CellHostTest; the refusal line at the door is
 a stranger's or an unhosted actor's alone now. T3: a door leg into a hosted
-interior, its own commit.
+interior, its own commit. The pass's first live run: Hod into rotfern's hosted
+inn at 00:47:23Z (playtest 37, finding 39).
+
+2026-10-28 19:4x PDT, memo D54 B (Eli: "B for D54"): the persistence fact
+leaves the door. Hilde 0x35534 (ACHR flags 0x0) was refused at her own door
+and turned back; now every actor's door counts, persistent or not: into a live
+host's cell the move passes (D9's shape), into an unhosted interior the record
+follows the host's report and freezes there when the report stops (D6's
+follow, the host's client reporting the actor by its form from indoors, the
+HYPOTHESIS the T3 door leg reads). Server-only, fork m3-door-walk 2dca472a:
+CellMoveFacts' door fact without IsPersistentReference, the judge's door arm
+unchanged, CellHostTest's two non-persistent cases (RiverwoodSvensHouse
+0x1cb84). Decision 1's "entered by a persistent actor" reads "entered through
+a door" from here.
 
 ## ADR-048: Trust is mixed by what is at stake: players' contested state stays the server's number, a host's own NPC outcomes are accepted under plausibility checks and logged, and a server setting picks the strictness
 
