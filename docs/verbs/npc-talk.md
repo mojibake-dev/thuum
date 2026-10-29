@@ -168,7 +168,12 @@ is FALSIFIED by the read: no package field is on the condition's path, and the p
 its first AI frame. The fix on fork m3-face-twelve (after ed606faf): ActivatePickRef resets the cache with the
 engine's own sentinel (the stamp at -FLT_MAX, Actor.h:671) and asks GetVendorFaction again before the activation,
 waiting a frame at most 30 times for a vendor whose faction does not resolve, then opening anyway with the cell and
-hour logged. H-58b CONFIRMED at T4, 20:41 PDT 2026-10-28 (Eli: "shop worked!", Prisoner claiming Orgnar in the Sleeping Giant
+hour logged. The first live run (c2's platform log, 03:40Z): the wait ran all 30 frames "no vendor faction yet (cell
+133c6, hour 5.26)" and the dialogue opened anyway, with the shop topic there: the pin's GetVendorFaction returns the
+value it read before recomputing (Actor.cpp:610), and the loop nulled the cache each frame before asking, so it read
+null forever while the recompute it forced filled the cache each frame and the menu found it; fixed on m3-face-twelve
+after becfd02e (the cache read after the recompute; the wait ends at its first frame). So the mechanism stands by the
+outcome and by the forced recompute, not yet by a "resolved" line. H-58b CONFIRMED at T4 by the outcome, 20:41 PDT 2026-10-28 (Eli: "shop worked!", Prisoner claiming Orgnar in the Sleeping Giant
 hosted by rotfern on the 0e4942bb dist; the "activatePickRef waits ... vendor faction resolved" lines of c2's platform
 log are the evidence, pulled by numidium); the probe x-npc-vendor-claim stays the formal read (c2 claims Orgnar while
 c1 hosts the inn, the Dialogue Menu's topics read for the services row).
