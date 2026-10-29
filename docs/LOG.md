@@ -3074,3 +3074,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   variables and started fork pipeline 3875 on m3-pass-train-3 as an API pipeline with CLIENT_BUILD_WINDOWS=0 (every changes: rule
   counts as matched there, the client build stays off the seats' host); P3's T2 follows P2's on that artifact. ADR-036's note for
   probes: a probe changing seat files outside the relaunch step's lever says `client: rollback` at the top level; none of today's do.
+- 16:54 PDT: ADR-058's slice two read against the master file (esm.py on sky-srv): the MSTT references around Riverwood and lab-spawn
+  are effects and animated statics (motes, chimney smoke, mist, rapids, a burning campfire, a spit pot), none a player kicks, and no
+  CONT editor id names the Blue Palace's physical container; slice two deferred to M4 with the dungeon work (a note under ADR-058),
+  head 3 continues on slice one's proof, persistence (x-prop-push's restart half suffices; the asleep sample saves at once) and a
+  rules review of m3-prop-physics by an agent. Windows trees assembled clean and lint-green, unpushed until numidium's T2 verdicts:
+  m3-pass-train-2-win (P2 + P1-win) and m3-pass-train-3-win 1d5b2321 (P3 + P2-win). Two agents draft P4's next batches (cell-host,
+  npc-handoff, npc-talk; npc-puppet, spell-placed-object).

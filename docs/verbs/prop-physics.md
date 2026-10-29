@@ -151,3 +151,19 @@ throttle), logging "[verb:prop-physics] contact <hex> layer N motion N: claimed"
 behind propContactFallback (default off). HYPOTHESIS until lab/frida/prop-contact.js: the callback's thread, that slot 2 fires for a
 Keyframed body under the player's proxy controller, and that FindCollidableRef is safe there. The Windows build compiles it at the -win
 push; MSVC's /WX is the first reader.
+
+## Slice two's read and the persistence path (16:54 PDT 2026-10-29)
+
+ADR-058 decision 4 gave slice two the movable statics (MSTT) and the Blue Palace's physical container. The master file says otherwise
+for the lab's cells (esm.py on sky-srv, Skyrim.esm 1.6.1170, `near 0x3c` within 3000 units): eight MSTT references around Riverwood's
+spot, none around lab-spawn, every one an effect or an animated static (FXMotesForest01, FXSmokeChimney02, FXMistStreet01,
+FXrapidsBig01, Campfire01LandBurning, SpitPotOpen01), and no CONT editor id containing "Palace" or "Phys". The props a player moves
+are items, slice one's set; the traps' bodies are M4's. Slice two is deferred to M4 with the dungeon work (ADR-058's note of this
+hour); head 3 continues on slice one's proof, its persistence and the review.
+
+Persistence (rule 6): the asleep sample's SetPos runs in SetPosMode::Other, which saves the record at once (MpObjectReference.h:55-62),
+the awake samples in CalledByUpdateMovement, which saves from time to time; no schema changes, so no migration. x-prop-push carries the
+restart half (the record's x within 8 of its rest after `server: restart`, the watcher's fresh copy at the record), so a separate
+x-prop-restart is not needed; b-prop-push inherits the step. PropTest's third case reads the record after a sample (the same
+ChangeForm the save writes). HYPOTHESIS until the run: that the client's arrival forcing (formView's item movement, skipped for a
+tracked prop) leaves the restarted record's place standing on a fresh seat.

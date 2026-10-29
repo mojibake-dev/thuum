@@ -3403,3 +3403,14 @@ to: B/bhkCharProxyController.h, H/hkpContactListener.h) and is the verb's RE tas
 player's grab and drop plus proximity to an awake prop (the nearest player within 128 units of a body that woke claims it).
 Known limits: no prediction (a prop a seat does not simulate moves a sample behind), stacked props flip owners by contact, a
 prop in an unhosted cell freezes, bodies and props stream on the same budget (prop_budget UNMEASURED).
+
+Note, 16:53 PDT 2026-10-29 (the pass, thuum-magnus): slice two's premise read against the master file. esm.py on sky-srv (Skyrim.esm
+1.6.1170, `near 0x3c` within 3000 units) lists eight MSTT references around Riverwood's spot and none around lab-spawn, every one
+of them an effect or an animated static (FXMotesForest01 three times, FXSmokeChimney02, FXMistStreet01, FXrapidsBig01, a burning
+Campfire01LandBurning, a SpitPotOpen01), nothing a player kicks; no CONT editor id in Skyrim.esm contains "Palace" or "Phys", so the
+roadmap's "physical container" of the Blue Palace stays unidentified. The props a player moves are items (slice one's set) and, in
+dungeons, the traps' bodies (M4's d-bleak-falls). Decision 4's slice two is therefore deferred to M4 with the dungeon work (the
+loader's MSTT admission costs records and arrival messages for effect objects and buys nothing in the lab's cells), and head 3 of
+the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
+position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
+budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first.
