@@ -2852,3 +2852,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the frozen atronach (HYPOTHESIS; x-npc-creature-death to read; the explosion is the host's ability). 71: the settle logged before its
   dead check once per host sample; the bind kill had no fall. m3-client-bits now carries 67, 66's belt, 68's hands pass after the first
   apply, 71's dead-body silence and the push-with-no-force after a silent kill (17d13443 and the commit after it; tsc green; local).
+- 13:58 PDT: the pass's first train: m3-pass-train-1 7a223e0d = 3o ee44f7d1 plus m3-dead-placed 2f886731 (T0 GREEN, pipeline 3811) plus
+  m3-grant-roster 5b6ef482 (T0 GREEN, 3812), fork-lint green, pushed server-only (T0 on the merge running); numidium stages and gates it
+  after 3o's (or 3n's) merge. Probes by path for its stage (probe-check ok, backed up): x-reanimate-host (c1 hosts Riverwood and kills
+  Hilde 0x35534 through its engine; c2 learns Reanimate Corpse by the server console and casts it at her by the driver's Spell.Cast;
+  claims the host-cast server line, the record alive, her engine state alive on both seats), x-dead-placed-loot (the Bleak Falls hall's
+  skeleton 0xc3b1d and skeever 0x3b9ea have dead records; both seats open the skeleton's menu; no "doesn't exist", no roster drop for
+  a missing record; the worn set equal on both seats and the record), x-grant-roster (c1 hosts 0x9733 and runs east into 0x9732; the
+  grant within 30 s, accepted sightings after it; the race and its replay recorded). The driver's cast step takes a target by form
+  id (Papyrus Spell.Cast), so a game-file body is the target (a server-made one has a different local id per seat). The pass plan is
+  docs/private/pass-m3-close.md v1; the summary for Eli docs/private/weekend-summary.md.
