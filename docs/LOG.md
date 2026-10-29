@@ -3051,3 +3051,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   never asserted the package claim the doc describes (H3 is a READ), and npc-stream's Status tick uses the build's numbering, not the
   Inventory table's (H4 is moot: slice 3 shipped a poll). Three new reads proposed: x-npc-overtime, x-wire-idle-rate, cloak-hostile.js.
   The edits are applied next by an agent from the drafts, my review on the diff.
+- 16:31 PDT: core's read of sky-c2: the GPU is wedged (the PCIe link fine at 8 GT/s x16, the device in the all-ones config state, the
+  guest's Win32_VideoController "NVIDIA GeForce GTX 1050 [Error]"), so the seat has software-rendered since 21:03Z, the minute the
+  teleport timings slid and the agent died; host pressure was not a factor (5 to 41 percent CPU, no swap). Remove-and-rescan failed
+  twice on this card; the fix is a host reboot, Eli's call by its standing word, asked before 22:30Z and unanswered; the sixth wedge in
+  sixteen days, the second on this card, the cause vfio resets at two per rollback (c2 took 37 rollbacks today); numidium builds ADR-036
+  (relaunch, not rollback) to cut them to a handful, its first trial after this reboot. A software-rendered seat is worse than absent for
+  the gate (its timings read as regressions), so the lab waits on the reboot; the pass continues on CI and the docs, and T2 (fakeclients on
+  sky-srv, no seats) can run on the trains meanwhile.
