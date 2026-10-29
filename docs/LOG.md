@@ -3065,3 +3065,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   cloak-hostile.js, b-npc-stream-state's claim, x-handoff-cross's count, x-puppet-head-face, x-reanimate-host), DELETE 7 (history).
   Tags 50 to 34 and 39 to 26; the remaining 60 are the reads above plus the tags no draft covered (npc-handoff, npc-talk, cell-host,
   spell-placed-object next). Zero em dashes, 132 insertions, 68 deletions.
+- 16:41 PDT: H-53h's read written: lab/frida/cloak-hostile.js hooks Actor::IsHostileToActor (CommonLibSSE-NG Actor.h:593, Address
+  Library 37537 by `just addr`) and logs first sight and each flip of the answer per (self, other, caller) for calls involving the
+  player, a summary every ten seconds; x-cloak-hostile by path is the creature caster's frame plus the trace on c1 before the
+  placement, recorded not claimed. The Frida README gains entries for today's four scripts (quest-stage-chain, story-location,
+  prop-contact, cloak-hostile). numidium's T2 of P2 runs on sky-srv; P3 (db5c9611) had no difftest-build (the job's changes: rule
+  saw none of the crate's 13 changed files across the train's pushes), so lab/tools/glab.py run now takes KEY=VALUE pipeline
+  variables and started fork pipeline 3875 on m3-pass-train-3 as an API pipeline with CLIENT_BUILD_WINDOWS=0 (every changes: rule
+  counts as matched there, the client build stays off the seats' host); P3's T2 follows P2's on that artifact. ADR-036's note for
+  probes: a probe changing seat files outside the relaunch step's lever says `client: rollback` at the top level; none of today's do.
