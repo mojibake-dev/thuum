@@ -7,5 +7,8 @@
   "server-info-ignore": true,
   "headshot-spells": [
     "801:Headshot Kills.esp"
-  ]
+  ],
+  "movement": {
+    "leadSeconds": 0.15
+  }
 }
