@@ -208,7 +208,12 @@ and BretonRaceChildVampire dropped (they are not playable and serve nothing here
 Eli edits the plugin at the byte level (chim; the stagger revert's precedent, and a new CRC32 for the
 slot's mod-lock), or a build-time patch kind for lab/tools/plugin-patch.py that rewrites a form list's
 entries (size-changing, like `drop-record`, which already rewrites group sizes), so the served copy
-carries the fix and Eli's source stays his. The patch is the lab's shape; the call is Eli's.
+carries the fix and Eli's source stays his. The patch is the lab's shape; the call is Eli's. Eli's call, 20:1x PDT 2026-10-28 (D57 A, via numidium): fixed in
+the layer. Built on apocrypha/layer-vampire-pairing as the `flst-set` patch kind (two rows for rotfern.esp:
+both lists to the ten vanilla pairs plus rotfern's at [10]; the served copy 99,359 B, CRC32 7B65C699), with
+the RaceCompatibility row switched to the USKP script set in the same branch; it stages at the next layer
+slot after playtest 37. D56 A (the server cures Sanguinare Vampiris on the record until the vampirism
+slice) is thuum-cf's.
 
 ## A layer finding on the way: the served RaceCompatibility scripts are the plain variant
 
