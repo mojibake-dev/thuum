@@ -327,7 +327,13 @@ QuestStage (id 65, MsgType 57), both directions, reliable (fork m3-quest-stage,
 2026-10-28; docs/verbs/quest-stage.md, ADR-056): `{ quest: u32 (the QUST's form
 id in the load order both ends share, 0 with a list), stage: u16 (the engine's
 stage index), shared: [u32] (server to client only: the shared quests, sent at
-a login with quest 0) }`. Client to server, R1: one stage the player's own game
+a login with quest 0) }`. Since fork m3-quest-mode 11cbf4cb (14:41 PDT 2026-10-29, D58 B;
+SCHEMA_VERSION 21): `mode: u8` (0 list, 1 all; a client's message carries 0 or is
+refused), and in mode 1 the login message's `shared` is the DENIED list (may be
+empty; the validator refuses an empty list with quest 0 in mode 0 only); the
+client budget is 32 then 8 a second (UNMEASURED; a load fires a dozen quest
+starts). The server setting `sharedQuests` is the array (mode list) or
+`{mode: "all", denied: [FormDesc...]}`; E_QUEST_DENIED beside E_QUEST_UNLISTED. Client to server, R1: one stage the player's own game
 set on a shared quest; the server checks the quest is a QUST in its load order
 and on its `sharedQuests` list, keeps the stage once on the world's record (the
 set of stages done per quest, on the world's journal reference), relays it to
