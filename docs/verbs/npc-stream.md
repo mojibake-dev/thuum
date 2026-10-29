@@ -702,9 +702,14 @@ speaker ("fragment gate: info X type Y on puppet Z not sent to the VM"); the
 host's own NPCs are not puppets there and keep every fragment; a claimant's
 partner is promoted first, so it is not a puppet either. Rung: the
 fragment's effect is the host's seat's (R2 recorded through its own
-consequences: a barter, a stage); the watcher suppresses. HYPOTHESIS H-57a
-(the gate stops the menu on the watcher) and H-57b (the host's own menu and
-fragments are untouched). Frida plan (lab/frida, the npc-puppet.js shape):
+consequences: a barter, a stage); the watcher suppresses. H-57a (the gate
+stops the menu on the watcher) and H-57b (the host's own menu and fragments
+are untouched) CONFIRMED at T4, 2026-10-28 18:02 PDT, Eli's shop test on
+ed606faf's predecessor dist (2ce8b523): the inn's host opened Orgnar's shop,
+the watcher's screen got no barter menu (playtest 37, finding 40; the formal
+read stays the Frida plan). The same test found the claimant's promoted
+vendor offering no vendor topic at all (finding 40 b; the read in
+docs/research/m3/re-claimed-vendor-topic.md, npc-talk's item). Frida plan (lab/frida, the npc-puppet.js shape):
 hook 35225 (rcx the item: [[rcx+0x20]+0x14] the info's formID, [[rcx+0x38]+0x14]
 the speaker's; edx the type; a backtrace), 25616 (rcx info, edx type, r8 the
 handle pointer, r9b force) and 53997 (rdx the event: [+8] speaker, [+0x10]
