@@ -564,8 +564,9 @@ which the server already implements as "a fight recorded between the two parties
 fights between two user-played actors and TickFights forgot any pair with a non-user member, so every NPC-to-player
 effect gated on hostility was refused forever, the cloak included (a player standing in the fire took no server
 damage). The rule now admits a hosted NPC (an actor with a host) as a party: a hit by or on it with a player on the
-other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat
-snippet goes only to a user-played victim (the host's engine already fights). Between two hosted NPCs nothing is
+other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat snippet stays between two players (a hosted NPC's victim is its host engine's to fight, a
+player's copy of a hosted creature is AI-off, so a creature's hit on a player sends no notice; the server's rest
+refusal is what that player keeps). Between two hosted NPCs nothing is
 recorded (the engine's own business on the host). Fork m3-npc-fights; T0 in NpcCastTest's cloak case regains its
 damage claim (5 of 250 per cadence after the first Firebolt), the wire-rules tests cover the three pairs.
 
