@@ -3150,6 +3150,16 @@ esm.py), worn, in place of the Player base's sixteen default items the server la
 worn flag) replaces the base's kit for a player actor, with its T0 and a probe. The alternate start is apocrypha's
 layer (D8). Not the turbo loop's; the friend deployment's next server item.
 
+2026-10-28 17:4x PDT, apocrypha's vetting of the alternate start (docs/research/alternate-start.md on thuum branch
+apocrypha/alternate-start, c16e62a): Live Another Life is the pick (Realm of Lorkhan overrides Player 0x7, Alternate
+Perspective rebuilds Helgen, Unbound Reborn is an MCM). The facts for the server side: the opening cell is vanilla
+AbandonedPrison01 (Skyrim.esm 0x21594), LAL's marker at (6481, 1334, 191), so a startPoints entry may name it with or
+without the layer; in LAL's own flow the player wears rags there and the bed's script equips the chosen kit by
+EquipItem and RemoveItem, none of which reaches an R0 record, so the rags are the server's startingKit (D7) and each
+start's kit a server table, not the mod's AddItems. D8's first sub-choice recommended: the mod supplies the room, the
+statue's menu and its 54-marker table; the server performs the teleport and the kit through a permit keyed on the
+choice (castTeleports' shape). Fork work, this session's after the turbo day, with its T0 and a probe.
+
 Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
 the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
 installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs
