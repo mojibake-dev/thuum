@@ -294,6 +294,13 @@ not honored; a client-side race swap that the server never records is the a-rotf
 The bandit, Forsworn and vampire-lair starts also add the player to a friendly faction
 (`ARTHLALBanditVampireFaction` and the controllers' factions), client-local and harmless.
 
+First cut (thuum-cf, 2026-10-28 evening, ADR-055 D8's note on thuum main): the permit's landing table
+carries the landings above as FormDescs the server resolves through espm at load, with cell-wide
+slack on Harkon's inferred marker; the two race-changing starts have no kit entry, so the server
+answers them with a refusal and the menu's other starts stand; performing them server-side (the race
+change as the entry's R0 act, the hour set) is a later slice if Eli wants vampire starts at all; the
+client-side factions are a known, unsynced limit; the ship-ride scene and the vanilla cart are out.
+
 The source material for this section is in the plugin's records (QUST `000DAF` and `07A334` with
 their VMAD fragment maps and ALFR aliases, the 102 INFO fragments) and the 159 compiled scripts of
 the mod's archive, disassembled, not decompiled, plus Dawnguard.esm and Dragonborn.esm for the three master markers; the tables were generated from them and spot-checked
