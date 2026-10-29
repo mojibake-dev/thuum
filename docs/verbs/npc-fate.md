@@ -1796,6 +1796,22 @@ already naked in the playtest world heal only by a restore or a respawn. Probe: 
 server.ref(id).worn holding the weapon both seats' npc_state show, no E_EQUIP_REFUSED naming it, its swings logged as
 OnWeaponHit, the worn lists equal on both seats.
 
+## A resurrection by the host's engine (playtest 37, finding 48; fork m3-npc-caster 05a285f6, 2026-10-28)
+
+Eli: "the necromancer resurrected a skeever, only visible on prisoner ... yea deff add resurrections to thuum's
+stack." The host's sampler streams every hosted actor its engine has alive, so a reanimated actor's health went out
+and the server's OnHostedActorState set alive false for a dead record and dropped the sample; nothing reports a
+stand-up. Built without a wire change: a hosted NPC the record holds dead (IsFateRespawned) whose host samples health
+above one point more than kPendingDeathMs (3 s) after its death (RecordDeathAt, DiedAgo) is taken as the host's
+engine's resurrection, R2 recorded ("[verb:npc-fate] resurrection by its host's engine"): MpActor::Respawn(false)
+clears the death and keeps the inventory, RespawnEvent sends isDead false to every listener, the watcher's formView
+turns it into the puppet's Resurrect (game-file ids; a server-made copy's stand-up reaches the record and not its
+puppet, formView.ts's dead-word gate under 0xff000000, a known limit). T0: ActorDeathTest (within the grace nothing;
+from a non-host nothing; from the host the death cleared and the live word relayed). Reanimate's thrall, Dead Thrall
+and a scripted resurrect all ride it. The 0xff death report (a server-made creature's death "by the server's word"
+after 3 s because the client never reports a 0xff id and the wire refuses the range) is a contract change for its own
+commit, not this one.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the

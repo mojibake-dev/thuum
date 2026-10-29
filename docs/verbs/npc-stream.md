@@ -685,6 +685,23 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   NPC's equipment (the latent corruption back); the old host's states
   accepted after the handoff (epoch not advancing).
 
+### Slice 6's creature half (playtest 37, finding 47; fork m3-npc-caster 05a285f6, 2026-10-28)
+
+A flame atronach hosted by Prisoner cast Firebolts he alone saw: the host's client reports a cast from Skyrim
+Platform's spellCast event, which the platform raises only when the spell sits in one of the actor's four selected
+slots (EventHandler.cpp isCastValid), and a creature's AI cast fills none (which engine path it takes is unread, rule
+8; the Dynamic plan is in the branch's report: the hosted caster's spellCast events are now logged with their slots on
+the host, and a Frida plan on MagicCaster's CastSpellImmediate, ActorMagicCaster::SpellCast and FinishCast by
+CommonLib name). Built: the host reports a hosted actor's spell LAUNCH (the launch hook admits hosted shooters) as
+its SpellCast under the caster's id with the launch's hand, origin and angles when no cast event claimed it within
+400 ms, the two deduping each other (H-53f, HYPOTHESIS until x-npc-creature-caster); the watcher's creature puppet
+casts and ends without graph variables (MagicApi's HasMasterGraph: a non-master graph skips the apply instead of
+returning, H-53g); the server stands a known constant-effect ability as the cast behind a cloak's hit
+(PartOne::AbilityReaching over KnownBaseSpells' reached spells), so the atronach's cloak damage lands at the reach
+rule's cadence, and a spell no ability reaches stays refused (rule 5; T0 NpcCastTest). Known: a server-made
+creature's death still ends by the server's word (the client never reports a 0xff id and the wire refuses the range,
+a contract change for its own commit).
+
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
 2026-10-28, the fragment gate (playtest 37, Eli: "if i ask 'what do you have
