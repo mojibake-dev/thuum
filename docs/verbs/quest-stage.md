@@ -194,6 +194,8 @@ two names), 54240 and 25234 (formID, stage), 53763 (the counter). (a) c1's conso
 effect. (b) c2's relayed apply under the detour: 56684, 53716, 25004, 25260, 53987 returning with 25234 inside its frame and no
 53429 or 54240, 53763 to zero in the same call; lab-api stageDone(10) true on c2, no world effect, the promise resolved.
 
+**Suppress (slice two, 14:29 PDT 2026-10-29, fork m3-quest-fragment d02103fd):** the relayed stage's Papyrus fragment, by a Gum replacement of the VM's quest stage sink (53987) keyed by the pairs the client marks (TESModPlatform.SuppressQuestStageFragment / ReleaseQuestStageFragment); the callback's slot 1 fires so the journal, the done bit and the latent return keep; setting questFragmentSuppress; HYPOTHESIS until the trace.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

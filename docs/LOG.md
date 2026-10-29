@@ -2906,3 +2906,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   sharedQuests setting as an array or {mode: all, denied}, Refusal::Denied, QuestStage's mode byte with the denied list at login,
   SCHEMA_VERSION 21, the client's report filter, T0 cases, the QuestStage budget raised to 32 then 8 a second UNMEASURED). The pass plan
   is v2 (docs/private/pass-m3-close.md: the branch map and the trains P1-win to P4).
+- 14:29 PDT: fork m3-quest-fragment d02103fd built and reviewed (local, Windows-only compile: pushed with the client build when the lab
+  is free): Offsets::Hooks::QuestStageSink REL::ID(53987), a Gum replacement of SkyrimVM's quest stage sink keyed by (quest << 16 | stage)
+  under a mutex never held across the callback or the original, the finished callback's slot 1 fired through a documented vtable read (no
+  CommonLib header names the class's slots; HYPOTHESIS), natives TESModPlatform.SuppressQuestStageFragment and ReleaseQuestStageFragment
+  (.psc, callNative), the client's setStage wrapping its relayed and parked applies, the setting questFragmentSuppress; fork-lint and tsc
+  green. NATIVES.md rows added (rule 10), quest-stage.md's Suppress updated. The exit scenarios c-riverwood 20c01ef and c-dungeon-enemies
+  d70890b committed alone (an agent's drafts, my review: the cross-seat and handoff position bounds set to b-npc-puppet's measured 256,
+  dump-state before the menu reads), self-approved under the 10-13 word for P2's gate.
