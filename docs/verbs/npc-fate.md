@@ -403,10 +403,22 @@ Registry, train-42 (20:54 PDT), the deaths: on the server, the player path's
 25 s wall respawn never touches a game-file actor (RespawnWithDelay's branch
 schedules the fated respawn instead), and the server's number floors at one
 point for an essential base, or a protected one not under a player's hand
-(MayDie). On every seat, a game-file body's activation is blocked at the
-death (deathService; a dead puppet promoted at a handoff keeps it,
-puppetService 32dffbda), so the engine's own loot menu never opens: the
-server's OpenContainer with default processing is the one that does; the
+(MayDie). On every seat, a dead body is never activation-blocked (the rule
+since 2026-10-28, playtest 37's findings 58 and 62; train-42 blocked a
+game-file body at the death and puppetService 32dffbda kept the block
+through a dead promote, on the assumption that the server's OpenContainer
+activation with default processing opens a blocked body: it never did, every
+corpse that opened was the engine's own activation of an unblocked one, and
+a body demoted again after a host flip opened to no E press): the engine's
+own loot menu opens on E, the activate hook reports it, the server answers
+the record's inventory and OpenContainer, and the view lays the server's
+list under the open menu (memo D52 B); a server-made NPC copy (a 0xff id
+with an NPC base) is a corpse to the server too (IsCorpse keyed on
+IsCreatedAsPlayer, not the id's range: the dead necromancer ff00000a's E was
+dropped with no line); a dead body is released from the puppet state on
+every seat (the native promote's dead branch: block lifted, AI left off,
+flag cleared) and the fate's resurrect turns the AI on for the call whatever
+the flag; the
 engine's own cell-reset resurrection of a corpse on a re-entry
 (re-npc-roll.md section 9, the 19286 path) is undone by the view's
 two-second re-apply of the record's death. Registry, train-43 (23:56 PDT, fork m3-train-43 962fc913, stacked on 42,
