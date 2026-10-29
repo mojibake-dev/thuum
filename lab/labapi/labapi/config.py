@@ -306,15 +306,21 @@ class Settings:
     relaunch_cmd: str = relaunch_stop_cmd + "; " + relaunch_start_cmd
     relaunch_timeout_s: float = 300.0
     # ADR-036: how a seat starts a run. "rollback" stops its VM, rolls the disk back to its snapshot and boots it,
-    # two vfio resets of its GPU (sky-c2's GTX 1050 wedged at one on 2026-10-29, the fifth link-retrain wedge in
-    # sixteen days, docs/LOG.md 02:49 PDT). "relaunch" stops the game, cleans what a run leaves and starts the
-    # launch task with the VM left running, and rolls back only when something asks (Runner._rollback_reason).
+    # two vfio resets of its GPU (sky-c2's GTX 1050 wedged at one twice on 2026-10-29, at 02:44 PDT and at 14:03 PDT on
+    # its 37th rollback of the day, the sixth wedge in sixteen days; docs/LOG.md). "relaunch" stops the game, cleans
+    # what a run leaves and starts the launch task with the VM left running, and rolls back only when something
+    # asks (Runner._rollback_reason).
     # Rollback until the first live day has measured the other; anything else is refused at load.
     client_reset: str = "rollback"
     # in relaunch mode a seat rolls back once it has played this many runs since its last rollback, as a floor
     relaunch_rollback_every: int = 20
     # relaunch tries before the seat rolls back in that same run (a try is the guest exec and the new game's poll)
     reset_relaunch_tries: int = 2
+    # how long one relaunch try waits for the new game's poll: launch.ps1's 15 s settle (launch.ps1:78), a window in
+    # about 30 s and the login put a good try's poll near a minute (ADR-036's measured relaunch, a median 31.5 s in
+    # game), so 180 s is a slow try's bound, well short of heartbeat_timeout_s: two tries at 300 s and the rollback
+    # after them would outlast a scenario's own timeout
+    relaunch_heartbeat_timeout_s: float = 180.0
     # Before a self-service snapshot (proxmox.GuestControl.snapshot_clone):
     # stop the game, its loader and Windows Error Reporting, and any running
     # sky-lab task, so the clone shuts down quiet (thuum-mundus's recipe). Then
@@ -413,6 +419,7 @@ class Settings:
             crash_check_timeout_s=float(_env("CRASH_CHECK_TIMEOUT_S", str(d.crash_check_timeout_s))),
             client_reset=_env("LAB_CLIENT_RESET", d.client_reset).strip() or d.client_reset,  # unset or empty: rollback
             relaunch_rollback_every=int(_env("LAB_RELAUNCH_ROLLBACK_EVERY", str(d.relaunch_rollback_every))),
+            relaunch_heartbeat_timeout_s=float(_env("LAB_RELAUNCH_HEARTBEAT_TIMEOUT_S", str(d.relaunch_heartbeat_timeout_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),

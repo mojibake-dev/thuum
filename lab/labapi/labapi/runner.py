@@ -843,7 +843,7 @@ class Runner:
 
     async def _relaunch_seat(self, client: str, g: Guest) -> tuple[str, str]:
         """One relaunch try between runs (ADR-036): _client_relaunch_ps through the guest agent, then a poll from the
-        new game within heartbeat_timeout_s, the rollback's own wait. ("ok", what the cleaning did), ("hot", why) for a
+        new game within relaunch_heartbeat_timeout_s. ("ok", what the cleaning did), ("hot", why) for a
         seat a hot push marked, which only a rollback undoes, or ("failed", why)."""
         seat = self.seats.get(client)
         script = _client_relaunch_ps(self.s.client_lab_dir, self.s.client_driver_log, list(seat.presets) if seat else [],
@@ -869,8 +869,8 @@ class Runner:
         if res.exitcode != 0:
             left = [str(x) for x in said.get("left") or []]
             return "failed", f"the cleaning left {', '.join(left[:4])}" if left else f"exit {res.exitcode}: {res.err.strip()[:200]}"
-        if not await self.board.wait_heartbeat(client, since, self.s.heartbeat_timeout_s):
-            return "failed", f"no poll from its new game within {self.s.heartbeat_timeout_s:g}s"
+        if not await self.board.wait_heartbeat(client, since, self.s.relaunch_heartbeat_timeout_s):
+            return "failed", f"no poll from its new game within {self.s.relaunch_heartbeat_timeout_s:g}s"
         return "ok", f"{int(said.get('removed') or 0)} files cleaned"
 
     def _remember_seats(self, rec: RunRecord, clients: list[str]) -> None:
