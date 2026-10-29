@@ -175,3 +175,24 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 ## Reviewer checklist
 
 See docs/VERB.md.
+
+## The Story Manager's quests (read 23:22 PDT 2026-10-28, playtest 37's 3i lay)
+
+The live set-stage with start: true on A Lovely Letter 0x74a83 answered started false and left both seats at stage 0
+(finding 57). The record says why (lab/esm.py; CTDA layout per CommonLibSSE-NG TESCondition.h:897-947): the quest's
+Story Manager condition set reads function 576 GetEventData (TESCondition.h:708) against LCTN RiverwoodLocation
+0x13163 on the Change Location event, its Location alias fills from that event (ALFE CLOC) under function 359
+GetInCurrentLoc, and the quest's event is CLOC (ENAM), so the Creation Kit's rule applies: a quest that specifies an
+event can only be started by the Story Manager, never by Start or SetStage (the chain in the game files: SMEN 0x1320e
+CLOC, SMBN 0x9002a FreeformQuestsNode conditioned on the new location having LocTypeHabitation, SMQN 0xb555d
+FreeformRiverwoodNode, the quest first in its branch; no lab plugin overrides them). Nothing in the client blocks the
+Story Manager (the Papyrus event block is the VM's alone; the platform emits locationChanged and questStart and nobody
+subscribes); whether a login or a teleport INTO Riverwood ever raises the Change Location event, as a walk into the
+location does in single player, is the open HYPOTHESIS (H-56a). Consequences: a world stage of a quest the engine has
+not started is parked by the client and applied when the engine's questStart for that quest fires (fork m3-quest-stage,
+no wire change); the probe x-quest-stage keys on MS13Intro 0xb6031 (no event, unique-actor aliases Lucan and Camilla,
+stage 10), already in lab/deploy's sharedQuests; Sven's Faendal line on both seats waits for the Story Manager to start
+A Lovely Letter on each. Dynamic plan: a seat subscribed to locationChanged and questStart walks from the Guardian
+Stones into Riverwood and out of the Riverwood Trader; expected newLoc 0x13163 then questStart 0x74a83; a location
+event without the start points at the SM nodes (a Frida read of BGSStoryEventManager::AddEvent, Address Library
+32359, and BGSStoryTeller 32485 by just addr), no location event at the player's location tracking after a placement.
