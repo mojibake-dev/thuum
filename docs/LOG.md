@@ -2990,3 +2990,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   MQ103, C00, CW00A/B and the Dialogue* hubs; so the deploy files gained `allowed` = the former curated four (the Golden Claw keeps
   crossing as playtest 38 saw), and D63 (which start-game-enabled world quests join allowed) goes to Eli. P2's pre-assembly re-merged
   (wire tests green). WIRE.md and quest-stage.md carry the shape.
+- 15:10 PDT: numidium stopped 3o's gate at 22:09Z after a third red (b-npc-talk 215828: Sven drifted about 100 units from his snapshot
+  during the talk; c2's teleport took 13 attempts and 56 s). The common factor is c2's seat: its teleports went from 1 attempt in 3 to 4 s
+  at 20:51Z to 10 in 43 s and 13 in 56 s by 21:58Z while c1 stayed at 1 in 3 to 4 s, slowness that survives every rollback (the host side:
+  c2's GPU link after the day's resets, or contention; core reads it). A slow c2 sends stale positions and animations and c1's engine
+  strikes the stale figure, which also reads as the duel's single blocked hit, so D61 is on hold: the whole gate reruns on the same stage
+  once c2 is healthy, and follow mode is judged on a healthy seat. P1-win and P2 stay held; the base's merge waits on that rerun.
