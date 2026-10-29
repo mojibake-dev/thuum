@@ -704,7 +704,11 @@ a contract change for its own commit, fork m3-death-range 2069d4d2). READ ITEM (
 the cloak's hit is claimed but its damage effect, MGEF crFireDamageConcAimed 0x10fdd1, carries one CTDA (function 719
 by the record, lab/esm.py) that ADR-039's evaluation holds false ("its conditions fail; not applied"), so the
 atronach's cloak may deal no server-side damage to a player even when claimed; which function 719 is and what it
-needs on the server is HYPOTHESIS H-53h until read (the Firebolt is unaffected; NpcCastTest asserts the claim).
+needs on the server is HYPOTHESIS H-53h until read (the Firebolt is unaffected). OPEN ITEM before the train merges
+to parity: NpcCastTest's cloak case asserts the claim alone since fork m3-turbo-train-3b df445168 (the lay's T0), a
+relaxed T0 claim in rule 13's sense; the damage assertion (one cadence, 5 of 250, health 0.98) goes back the moment the
+condition is read and the server's evaluation holds it, or the case states why the engine's cloak never hurts a
+player server-side. Tracked here and in the LOG; numidium tells Eli the cloak caveat with the lay.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
