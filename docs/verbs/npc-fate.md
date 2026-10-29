@@ -103,7 +103,7 @@ reviewed like a scenario.
 
 | consequence | seen in | disposition |
 | --- | --- | --- |
-| the placement resolved to one actor at the cell's attach: the engine picks from the LVLN's entries by level (TESLeveledList::CalculateCurrentFormList, TESLeveledList.h:65; iLevCharLevelDifferenceMax, TESLevCharacter.h:49) and writes ExtraLeveledCreature (originalBase, templateBase; ExtraLeveledCreature.h:23-24) with Actor's kLeveledActor change flag (Actor.h:238) | record, code | imposed: the server rolls once per placement (R0, LeveledListUtils.cpp:71-123) and the game pins the server's base on the engine reference before its own roll (Impose A, H1) or swaps it after (Impose B, H2); both HYPOTHESIS |
+| the placement resolved to one actor at the cell's attach: the engine picks from the LVLN's entries by level (TESLeveledList::CalculateCurrentFormList, TESLeveledList.h:65; iLevCharLevelDifferenceMax, TESLevCharacter.h:49) and writes ExtraLeveledCreature (originalBase, templateBase; ExtraLeveledCreature.h:23-24) with Actor's kLeveledActor change flag (Actor.h:238) | record, code | imposed: the server rolls once per placement (R0, LeveledListUtils.cpp:71-123) and the game pins the server's base on the engine reference before its own roll (Impose A, H1) or swaps it after (Impose B, H2); H1 CONFIRMED: the 16128 detour answers before the engine's roll (npc-roll.js v2 on x-npc-fate-outfit v2 20261024-002544; x-npc-fate-pin v3 072444); H2 retired as the unused fallback |
 | the roll's inputs: the player's level and the zone's bounds (ENCOUNTER_ZONE_DATA minLevel, maxLevel, BGSEncounterZone.h:22-25; the locked zoneLevel, :37), the list's chanceNone or its global (TESLeveledList.h:60, :70, :76) | record, code | imposed: the server's rule (Authority: the first loader's recorded level clamped by the zone; today's level 0 as the alternative); the engine's lock of the zone level at the first attach is H3; the server reading a chance-none global as 100 (LeveledListUtils.cpp:35) against the engine's global value (TESLeveledList.h:60) is a defect to fix with a T0 oracle (H12) |
 | an NPC_ whose template chain reaches a LVLN (the forest predators' placed NPC_ 0x1e7a0, its template the LVLN 0x42297; x-npc-fate-roll 232048), rolled per game by the engine and once on the server (templateChain, MpChangeForms.h:119; LeveledListUtils.cpp:189-199) | code, record | imposed: the same pin, with the chain's leaf as the base; the client's dead getLeveledBase path (formView.ts:154-175) retired |
 | the actor's inventory and outfit, their LVLI entries rolled by each engine at the reference's load (kLeveledInventory, TESObjectREFR.h:156) and by the server at level 1 (MpObjectReference.cpp:1982-1999, :44) | record, code | imposed: the server's inventory is the body's container (R0, the CONT shape, Server); the engine's own roll on the body never reaches a player: the menu lists the server's list (H4); and the WORN roll matters alive too (playtest 33, 2026-10-23): the headshot's helmet check reads the server's worn list, which each engine's own roll contradicts on screen (seven refusals for a hood nobody saw, docs/verbs/headshot.md), so the roll decision below covers outfits and server-placed 0xff actors, not placements alone |
@@ -117,7 +117,7 @@ reviewed like a scenario.
 | the engine's cell reset: after the detach time plus iHoursToRespawnCell (or iHoursToRespawnCellCleared; the zone's kNeverResets, BGSEncounterZone.h:14; gameData detachTime, attachTime, resetTime :34-36; ExtraDetachTime.h; TESObjectCELL's kDetachTime change, TESObjectCELL.h:151) the engine deletes the body, re-rolls the placement and resets inventories (ResetInventory(a_leveledOnly), TESObjectREFR.h:338) | record (the GMSTs), code | suppressed on every game (Suppress, H8): the server resets, the engine never does |
 | the respawn: the actor back at its placement after the reset time, a fresh pick from the list (the engine's reset re-rolls a leveled placement: H9a), full attributes, the base inventory | record, code | imposed: the server's schedule on the shared clock (R0, Server), applied in the game as disable, base, enable (Impose, H9) |
 | SkyMP's respawn after spawnDelay 25 s at GetSpawnPoint with the base inventory re-added (MpActor.cpp:1935-2007; DeathEvent.cpp:65-70; MpChangeForms.h:117) and the respawn of a dead record at load (MpActor.cpp:820-824; PartOne.cpp:375-378 for players) | code | suppressed for game-file actors: the fate's schedule replaces the timer and the load-time respawn; players keep theirs (m0-death) |
-| the loader's skips: dead-at-start placements (kStartsDead, TESObjectREFR.h:177; WorldState.cpp:471-480, "TODO: Load dead references") and initially disabled ones (:492-507) | code | BUILT 2026-10-29 (fork m3-dead-placed 2f886731, playtest 38's finding 65: a Bleak Falls floor body with different loot per screen): a dead-at-start placement loads as the server's corpse, dead on the record with no death event, no death item and no respawn (MpActor::MarkPlacedDead; RespawnWithDelay yields), its loot the corpse path's one roll, lootable by every seat; T0 NpcExists's floor-body case (0x3b9ea). HYPOTHESIS until a lab run: the watcher's bind leaves the engine's own corpse pose, and the engine adds no death item to a starts-dead actor. Initially disabled placements stay skipped. |
+| the loader's skips: dead-at-start placements (kStartsDead, TESObjectREFR.h:177; WorldState.cpp:471-480, "TODO: Load dead references") and initially disabled ones (:492-507) | code | BUILT 2026-10-29 (fork m3-dead-placed 2f886731, playtest 38's finding 65: a Bleak Falls floor body with different loot per screen): a dead-at-start placement loads as the server's corpse, dead on the record with no death event, no death item and no respawn (MpActor::MarkPlacedDead; RespawnWithDelay yields), its loot the corpse path's one roll, lootable by every seat; T0 NpcExists's floor-body case (0x3b9ea). HYPOTHESIS until x-dead-placed-loot (unrun) reads the two open points: c2's screenshot shows whether the watcher's bind leaves the engine's own corpse pose, and a c1 log-count of the death report for 0xc3b1d with the claim `== 0` shows no death event and no death item on a starts-dead actor; v2 picks a dressed body. Initially disabled placements stay skipped. |
 | the puppet's deferred kill and million health (formView.ts:313-319) and a puppet's death shown from the relay (movementApply.ts:75) | code | imposed as today: a puppet's isDead is the server's word; the view's "don't spawn dead actors" (formView.ts:75-79) changes for an engine reference, which binds and takes the death (Client) |
 | the killer: the engine's myKiller (Actor.h:654, GetKiller :550) set by KillImpl's attacker; the server's kill names none (GetDeathStateMsg :1608-1636 carries isDead alone; deathService.killActor(actor, null)) | code | later: the crime verb (a townsperson's death with a killer is a bounty); this slice's kills stay killer-less in the engine, named |
 | headshot's predicted death on a figure (deathService.ts:107-118, ADR-038) | code | native as is; an NPC target's kill is the server's through ClaimHeadshot (PartOne.cpp:2060-2063), no prediction |
@@ -313,8 +313,10 @@ plan its section 5 (lab/frida/npc-roll.js).
 - Data captured: (1) the dying actor's id, the killer's id if the event
   names one, the server's record state at that moment (alive at the floor
   or dead); (2) refr id, the engine's resolved base, the fate's base.
-- Side effects of hooking here: HYPOTHESIS (the death event's timing against
-  the host's last sample; the sighting read's cost at 64 entries).
+- Side effects of hooking here: the death report's race with the host's last
+  sample is the 3 s grace's (b-npc-death-report 195607); the roster's base
+  read per sighted reference every 2 s (64 at most) is rule 9's accepted,
+  unmeasured cost.
 
 ## Impose (observers render the server's decision)
 
@@ -380,7 +382,10 @@ plan its section 5 (lab/frida/npc-roll.js).
   lists the server's items (H4).
 - Visual without simulation achieved by: nothing simulated on any client
   for the fate; the engine plays the death and the loot menu it already has.
-- Side effects: HYPOTHESIS (H1, H2, H4, H6, H9, H10, H11).
+- Side effects: CONFIRMED: H1 (072444), H4 (x-npc-loot 064648), H6
+  (x-npc-corpse-drift 211727), H9 (x-npc-respawn 064950; b-npc-respawn
+  154953), H10 and H11 (x-npc-death-guest 103226, x-npc-death-host 095847);
+  H2 retired.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -440,7 +445,11 @@ hide boots, SteelSword 0x13989, ArmorBanditCuirass2 0x10594D), the races
 stage (072444). Declared gaps: the sleep outfit (above); a protected base under a player's over-time damage (a poison, a
 cloak: ModifyActorValuePercentage carries no aggressor) keeps its point,
 the hit's own number kills it (HYPOTHESIS whether any over-time effect
-reaches an NPC's health that way at all); the cleared hours and the
+reaches an NPC's health that way at all, read by x-npc-overtime: c1 hosts
+Riverwood under TGM, learns Flame Cloak 0x3AE9F by the server console and
+stands by a held Sven 0x13491 for 15 s with no swing; the claim:
+server.ref(0x13491).healthPercentage falls with zero OnHit lines, or stays
+1.0 and no tick reaches an NPC, the gap moot); the cleared hours and the
 never-resets zones (Server).
 
 - What is suppressed, on every game (host and puppet alike, since the fate
@@ -464,8 +473,22 @@ never-resets zones (Server).
 - Release condition (host handoff, cell unload): none; the fate is the
   server's, so a handoff changes nothing and an unload drops nothing (the
   record keeps the body). The switches stay for the session.
-- Side effects: HYPOTHESIS (H8; a mod's own cell-reset scripts, if any,
-  reading the GMST).
+- Side effects: the engine's reset is held off by kNeverResets and the two
+  GMSTs at maximum; no run has waited the vanilla 240 h, the re-impose
+  fallback is unbuilt, and a mod's own reset script is unsynced by design
+  (the layer ships none).
+
+Known limits: The death report's race with the host's last sample is the
+3 s grace's (b-npc-death-report 195607); the roster's base read per sighted
+reference every 2 s (64 at most) is rule 9's accepted, unmeasured cost. The
+engine's reset is held off by kNeverResets and the two GMSTs at maximum; no
+run has waited the vanilla 240 h, the re-impose fallback is unbuilt, and a
+mod's own reset script is unsynced by design (the layer ships none). A chain
+rolling chance-none pins its head where vanilla would show nothing that
+visit; the resident is always present, the engine's own answer unread. SPID
+7.3.0's Outfit Manager sits in the equipper's frame on every seat; with no
+Outfit or Item line in the layer it dresses from the pin's inventory, and a
+layer adding such lines reopens the read (layer-stage's check).
 
 ## Message contract
 
@@ -492,9 +515,9 @@ before any of it is loaded or subscribed; an actor this process rolled
 without a fate (loaded by the grid before any pass, a login's own square)
 rolls anew at the pass's level (MpActor::RollFateIfUnrolled: chain and
 outfit, not from a save, not dead), while a record from a save keeps its
-roll (ADR-049 decision 1). The client half followed the same day (below). CI: pipeline 2783 GREEN on 510f190c (16:47 PDT), the server with its unit tests (NpcFateTest included) and the Windows client with the detours. A placement whose
-chain ends at an LVLN with no pick (the server's chance-none) keeps the
-head as its pin today, HYPOTHESIS until the engine's behavior for it is read.
+roll (ADR-049 decision 1). The client half followed the same day (below). CI: pipeline 2783 GREEN on 510f190c (16:47 PDT), the server with its unit tests (NpcFateTest included) and the Windows client with the detours. A chain rolling
+chance-none pins its head where vanilla would show nothing that visit; the
+resident is always present, the engine's own answer unread.
 
 
 - Message name / numeric type: ActorFate, new, S2C: the next MsgType and
@@ -771,10 +794,8 @@ agent, 11:5x PDT): the subject 0x85547 came up a SKEEVER (EncSkeever
 entry in five of its level-1 list, and the lifted skeever never fell: two
 seconds after the lift it stood on the ground 441 units off at health 1,
 where the wolf had been mid-fall, so nothing reached the floor and nothing
-was reported (no report line, no E_DEATH_*). Why a small creature stays
-down is a HYPOTHESIS (the engine re-grounding a size-0 race, or skymp's
-teleport moving the actor with a null cell where CommonLib's SetPosition
-passes the parent). The scenario now asserts the species as a premise
+was reported (no report line, no E_DEATH_*). The scenario now asserts the
+species as a premise
 (main e6a62fb), so the roll's red reads at the prelude; the fix owed is a
 wolf-only subject (a direct EncWolf or deer placement near the forest,
 esm.py), since a one-in-five premise red is no gate scenario.
@@ -859,8 +880,10 @@ read); after a cell reload both seats can; rotfern could not take armor
 where test 2 could; test 2 does not see the cape rotfern placed (a dropped
 or placed item's sync).
 
-The strip has a mechanism in code (HYPOTHESIS until the session's lines
-or a lab run): the body's inventory is laid in by applyInventory
+The strip has a mechanism in code (CONFIRMED by its fix: train-47's
+resetBaseFirst false; x-body-loot v5 20261028-072219 as b-body-loot, the
+worn set kept after the host's loot; no strip in playtests 35 to 38): the
+body's inventory is laid in by applyInventory
 (modelApplyUtils.ts, ignoreWorn true) at the host's loot, and applyInventory
 begins with resetBase, which, the first time this game session meets the
 reference's BASE id, calls TESModPlatform.resetContainer on the base and
@@ -877,7 +900,9 @@ left in place; the pin already makes the worn sets equal, so the diff is
 the loot rows. The non-host's failed interaction and rotfern's refused
 takes wait on the server's lines (E_ACTIVATE_REACH; "doesn't occupy ref",
 PutItem's and TakeItem's throw when the taker is not the body's occupant).
-The likelier reading of both (HYPOTHESIS until the lines): a body is a
+The likelier reading of both (CONFIRMED: one occupant plus the server's
+missing release, LOG 2026-10-25 16:06 PDT; x-body-release v2 235731 every
+claim held; superseded by D52 B's shared containers): a body is a
 container, and a container has ONE occupant at a time within 512 units
 (CheckIfObjectCanStartOccupyThis: "occupant is another object and is
 nearby" refuses, every other case opens), held until that player's closing
@@ -915,8 +940,11 @@ the TGM branch zeroing the number before the same log line; no formula
 question (a creature's unarmed damage is its race's, times the target's
 armor penalty, never zero).
 
-Section 3's leads from the code (HYPOTHESIS each, the client logs or a
-probe decide): (1) "NPC bow animations on one screen only": the host's
+Section 3's leads from the code (the verdicts: (1) the host dropped its own
+archer's arrows (LOG 2026-10-26 15:43 PDT), fixed in 53, x-npc-archer 032303
+GREEN as b-npc-archer; (2) finding 68 (LOG 2026-10-29 13:39 PDT); (3) to (5)
+moved to npc-puppet, the voice and face slices, npc-handoff): (1) "NPC bow
+animations on one screen only": the host's
 AnimationSource relays every event the actor's graph took (sync/
 animation.ts, movement-controller events aside) and the puppet replays an
 attack event through allowedAnims, so the relay is not the gap. Two
@@ -978,7 +1006,8 @@ through ActorFate's late path, the placement through the death container's
 teleport (onTeleportMessage moves the host's engine reference), the host's
 actor unblocked and a puppet kept blocked, in place of RespawnNeededError's
 disable-and-delete of the placement; onOpenContainerMessage takes a dead
-NPC_ as a container (ContainerMenu). HYPOTHESIS until the lab: H4 (the menu
+NPC_ as a container (ContainerMenu). CONFIRMED at the lab, the runs named
+under Impose's side effects: H4 (the menu
 lists the server's items), H6 (the body at the record's point on a reload),
 H9 (Resurrect, then the late re-roll), H10 and H11 (the kill on a puppet
 and on the host's actor).
@@ -1310,7 +1339,7 @@ answers inside every init. The one difference from the read: HasOutfitItems
 is called from po3_SpellPerkItemDistributor.dll inside the equipper's frame
 and SPID issues the armor EquipObject calls (the weapon's is the equipper's
 own), so AddWornOutfit counts zero on this load order: SPID dresses the
-actor from the inventory the init built (HYPOTHESIS: how it hooks in).
+actor from the inventory the init built.
 Consequence: the pin decides what SPID equips as long as SPID dresses from
 the inventory; whether SPID's own item distribution adds items on top, and
 whether its chance rules differ per game (another split the layer's INIs
@@ -1324,8 +1353,11 @@ far as SPID goes; the DLL in the equipper's frame is SPID 7.3.0's Outfit
 Manager, installed at startup even with no Outfit lines (hooks on
 InitItemImpl, Load3D, ResetInventory, SetOutfit, the inventory filters and
 AddWornOutfit, a HasOutfitItems stub), dressing from the inventory the init
-built unless one of those hooks re-filters (HYPOTHESIS; the source is
-powerof3's Spell-Perk-Item-Distributor if the re-analyst needs the sites).
+built. SPID 7.3.0's Outfit Manager sits in the equipper's frame on every
+seat; with no Outfit or Item line in the layer it dresses from the pin's
+inventory, and a layer adding such lines reopens the read (layer-stage's
+check; the source is powerof3's Spell-Perk-Item-Distributor if the
+re-analyst needs the sites).
 
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
@@ -1801,7 +1833,9 @@ engine pass): a worn WEAP the record lacks in a HOSTED report is recorded R2 (E_
 the item added to the record's inventory so the body holds what it swung) and the hit gate stands unchanged; any other
 missing item still drops; the record's worn non-weapon entries a report lacks are kept ("outfit kept for ..."), so a
 report never shrinks the fate's worn list; the host's hands poll skips an actor whose 3D is not loaded (HYPOTHESIS that
-the dressing precedes the flag). T0: NpcFateTest [NpcFate][HostedEquipment]. Rung note: the wielded weapon's identity
+the dressing precedes the flag, read by b-npc-stream-equipment: a host log-count of the poll's skip line, text on
+5b89bf35, with the claim that every skipped resident reports worn within one poll, 0.5 s, of its first sample and no
+E_EQUIP_UNKNOWN_WEAPON). T0: NpcFateTest [NpcFate][HostedEquipment]. Rung note: the wielded weapon's identity
 on a hosted game-file actor is R2 where the fate arrived late; the damage number stays the server's. The one-roll
 purity returns when RedressOnGameThread strips the engine's non-fate WEAP rows (a platform change, later). The records
 already naked in the playtest world heal only by a restore or a respawn. Probe: a placed bandit on c1 after a relaunch,
@@ -2195,11 +2229,13 @@ Fix, fork m3-reanimate 9ef0d567 (train m3-turbo-train-3g d1f3e393): the platform
 the player's own vtable is untouched) and, for an actor this seat hosts and not a puppet, enables the AI before the
 engine's call and turns it off again only if the body stays dead; the host's sampler sends the dead-to-alive flip
 reliable and never swallows it as unchanged; the server counts a death with no stamp of this process as past the grace
-(T0 in ActorDeathTest); the watcher routes a server-made NPC copy's live word through resurrectActor. HYPOTHESIS H-54f:
-the kProcessMe bit (what EnableAI writes) is what blocks Resurrect on an AI-off actor; the platform line "resurrect
-<id>: hosted body, AI enabled for the engine's own resurrection (dead before true, dead after false)" confirms it, "dead
-after true" falsifies it. HYPOTHESIS H-54g: nothing else owns Character's slot 0AB (Hooks.cpp's SKSE lesson); the
-line's absence on a reanimate reveals it. Open: a reanimate inside the 3 s grace after the kill word is dropped as in
+(T0 in ActorDeathTest); the watcher routes a server-made NPC copy's live word through resurrectActor.
+HYPOTHESIS H-54f, x-reanimate-host's read (unrun): the kProcessMe bit (what EnableAI writes) is what blocks Resurrect
+on an AI-off actor; a c1 log-count of the platform line "resurrect 35534: hosted body, AI enabled for the engine's own
+resurrection (dead before true, dead after false)" with the claim `>= 1` confirms it, "dead after true" falsifies it.
+HYPOTHESIS H-54g, the same run's read: nothing else owns Character's slot 0AB (Hooks.cpp's SKSE lesson); the line's
+presence shows the slot 0AB hook fired, its absence with the record flipped names another owner for the re-analyst.
+Open: a reanimate inside the 3 s grace after the kill word is dropped as in
 flight and the stood-up sample goes once (a re-send while the record says dead is the follow-up); activation stays
 blocked on the host's reanimated actor; the engine's a_resetInventory on a reanimate against the record's kept
 inventory.
@@ -2214,8 +2250,8 @@ the HOST's seat makes the caster's figure launch the same spell at the body on t
 with the launch geometry since fork m3-npc-launch-geometry 435b4c64), the Reanimate effect runs there, the Resurrect
 hook of 9ef0d567 stands the hosted body, the host's sampler reports it alive, the server flips the record and every
 puppet stands. Tonight's zero platform lines on c2 say one of three links failed: the relayed projectile never hit the
-body on c2, the effect did not apply on the host's engine (the magic model keeps effects the server's; HYPOTHESIS that
-a relayed cast's projectile applies its archetype on the host's engine), or the hook never fired (H-54g); Prisoner's
+body on c2, the effect did not apply on the host's engine (the magic model keeps effects the server's),
+or the hook never fired (H-54g); Prisoner's
 own cast on a body he hosts separates the hook from the rest. If the relayed projectile proves unreliable, the server
 tells the host's seat outright to cast the accepted reanimate from the caster's figure at the body (an SpSnippet,
 Spell.Cast on the host's engine), deterministic and still the engine's reanimation, with the level cap and the thrall's

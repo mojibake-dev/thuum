@@ -3059,3 +3059,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (relaunch, not rollback) to cut them to a handful, its first trial after this reboot. A software-rendered seat is worse than absent for
   the gate (its timings read as regressions), so the lab waits on the reboot; the pass continues on CI and the docs, and T2 (fakeclients on
   sky-srv, no seats) can run on the trains meanwhile.
+- 16:36 PDT: P4's forty endings applied to npc-stream.md and npc-fate.md by an agent from the drafts (python by sentence text,
+  my review on the diff): CLOSE 15 (runs or LOG lines named inline), LIMIT 7 (in place and in a Known limits paragraph before
+  each doc's Message contract), READ 11 (each keeps the word HYPOTHESIS beside its named read: x-npc-overtime, x-wire-idle-rate,
+  cloak-hostile.js, b-npc-stream-state's claim, x-handoff-cross's count, x-puppet-head-face, x-reanimate-host), DELETE 7 (history).
+  Tags 50 to 34 and 39 to 26; the remaining 60 are the reads above plus the tags no draft covered (npc-handoff, npc-talk, cell-host,
+  spell-placed-object next). Zero em dashes, 132 insertions, 68 deletions.

@@ -44,12 +44,12 @@ Dynamic plan), the records (riverwood-ids.md) and the code read:
 | --- | --- | --- |
 | the walk: the transform sampled every 130 ms (sendInputsService.ts:139-161; the sample movementGet.ts:34-95: world or cell, position, heading, run mode, direction from the graph's Direction, speed from SpeedSampled, jump, sneak, block, drawn, dead, health percentage, the look point) | code, trace | native on the host; R1 under the bounds cell-host left (same cell or under 4096 units a report, the cell-change rule; no speed budget for NPCs, docs/verbs/movement-speed.md:29-30), the actor's cell itself R2 as cell-host records it; the message, cadence and channel unchanged here (UpdateMovement 2, Unreliable); a standing actor's unchanged sample still goes 7.7 times a second (no change test at sendInputsService.ts:149), which the cost row carries |
 | the state flags in the sample (ActorState.h:97-134 behind Papyrus and the graph: sneaking, sprinting, blocking, the weapon state, dead) | code | native on the host; imposed on a puppet as today (movementApply.ts:67-73); the server records four of them unvalidated, R2 (ActionListener.cpp:322-330: bInJumpState, _skymp_isWeapDrawn, IsBlocking, IsSneaking) |
-| the graph events (IdleHoe, IdleBlacksmithForgeEnter, attackStart, staggerStart; 32 to 134 events per walking resident over 90 s, readings-18:21-28) | trace, code | native on the host, imposed on a puppet (R2): reported by the host's AnimationSource per hosted actor (animation.ts:242-347) as UpdateAnimation 3, Unreliable, its hook filtered in native to the actor's own id and removed at the release (Observe; today unfiltered and never removed, :245-261, skymp-hosting.md:316-320); the server relays and now keeps the last event per hosted actor too (today the player's own alone, ActionListener.cpp:364-370), so a late joiner's CreateActor carries it (PartOne.cpp:976); a puppet replays each once (H7, HYPOTHESIS) |
-| the engine's BGSActions (the attack, the power attack, the draw and sheathe: r-npc-fight's three IsAttacking windows and 22 moveStarts on one bandit, readings-18:67-71) | trace | native on the host, imposed on a puppet (R2): UpdateAction 44 extended from the player to the actors this game hosts (ADR-035 point 5: "actions ride cast-action's action replay (ADR-032), extended from players' figures to NPCs"; cast-action.md:229 left them "a later slice"): the native PerformAction hook's filter widened from the player to a hosted set (FridaHooks.cpp:455-470 reads `data->source.get() == player` at :460); a puppet performs them through performAction with the variables first, as a figure does (formView.ts:613, the method :824; H2, HYPOTHESIS: an AI-off puppet's graph takes the action entry); the event an action carries is not re-sent as an animation event (H1, HYPOTHESIS) |
+| the graph events (IdleHoe, IdleBlacksmithForgeEnter, attackStart, staggerStart; 32 to 134 events per walking resident over 90 s, readings-18:21-28) | trace, code | native on the host, imposed on a puppet (R2): reported by the host's AnimationSource per hosted actor (animation.ts:242-347) as UpdateAnimation 3, Unreliable, its hook filtered in native to the actor's own id and removed at the release (Observe; today unfiltered and never removed, :245-261, skymp-hosting.md:316-320); the server relays and now keeps the last event per hosted actor too (today the player's own alone, ActionListener.cpp:364-370), so a late joiner's CreateActor carries it (PartOne.cpp:976); a puppet replays each once; H7 CONFIRMED: P4 v2 20261026-172720 (six host attack actions, six puppet 'taken 1', no 'block anim attack'); P1 101422 (1234 of 1236 events inside a PerformAction) |
+| the engine's BGSActions (the attack, the power attack, the draw and sheathe: r-npc-fight's three IsAttacking windows and 22 moveStarts on one bandit, readings-18:67-71) | trace | native on the host, imposed on a puppet (R2): UpdateAction 44 extended from the player to the actors this game hosts (ADR-035 point 5: "actions ride cast-action's action replay (ADR-032), extended from players' figures to NPCs"; cast-action.md:229 left them "a later slice"): the native PerformAction hook's filter widened from the player to a hosted set (FridaHooks.cpp:455-470 reads `data->source.get() == player` at :460); a puppet performs them through performAction with the variables first, as a figure does (formView.ts:613, the method :824); H2 CONFIRMED (172720: every streamed attack performed through the entry on the AI-off puppet); the event an action carries is not re-sent as an animation event; H1 CONFIRMED (101422: an action's events ride the mark) |
 | health, magicka and stamina as the host's engine moves them (regeneration; a bandit's hit on a bandit; a fall; a script) | trace (r-npc-fight's bandit took none; the engine alone's NPC values are not in a trace yet), code | native on the host, imposed on a puppet from the server's record: R2 for the numbers, recorded from HostedActorState (new, MsgType 51) under R1 bounds (finite, 0 to 1 inclusive, and the attributes hold, wire-rules attributes.rs, the players' rule: a host's report cannot undo a value the server lowered itself); at most twice a second per actor; the server tells the other games as ChangeValues 16, the path a figure's values take (remoteServer.ts:882-904); a report of 0 does not kill: a death is the server's (R0, npc-fate), the record floors at one point and the floor logs (Server) |
-| the combat target and the combat state (a hit drafts the actor, combatTarget the player, inCombat true: readings-18:100-102; TESCombatEvent) | trace | native on the host; recorded in memory (R2) from HostedActorState (the target's identity; the look point stays in the movement sample, movementGet.ts:46-56, where the puppet's head tracking reads it, movementApply.ts:37-56); never imposed on a puppet (npc-puppet's H6, HYPOTHESIS there: a puppet is never in combat); restored at a promote: later, npc-handoff |
-| the running package and its changes (the schedule switch at 8:00, Hod back to the mill, readings-17:39-43; packageStart, packageChange, packageEnd) | trace (the Papyrus getter read 0x3EAB9 at every read, AI on or off and mid-recoil, readings-17:67, readings-18:77-82 and :116-118), code | native on the host; recorded in memory (R2) from HostedActorState, an observation only: nothing imposes a package on a puppet (Skyrim Together's package sync, written, crashed and compiled out, te-npcs.md section 3); the proposed source is Skyrim Platform's package events, not the getter (ADR-034; H3, HYPOTHESIS); what the getter's one id means is the open question stated under Engine surface, the package |
-| what the actor wears and holds (the server's EquipBestWeapon on a hosted caster, MpActor.cpp:193, skymp-hosting.md:130; the engine's own equips under its packages; ActorEquipManager) | code | native on the host, imposed on a puppet (R1): UpdateEquipment 5 under the actor's own idx on the host's equip and unequip events for a hosted actor (today the player's alone, sendInputsService.ts:55-103, :287-290; H4, HYPOTHESIS: that TESEquipEvent fires for an NPC's AI-driven equip as it does for the player's menu equip), validated against that actor's own inventory and base spells, recorded on that actor (today the handler writes the sender's record whatever the idx, ActionListener.cpp:873-876 and :1024-1025: the latent corruption skymp-hosting.md:131 names), relayed reliably; a puppet applies it as every view does (formView.ts:655-675); the client's -1 inventory count that the wire's u32 refuses (docs/LOG.md:2245, 2026-10-22 03:19, c2's 1,835 refused UpdateEquipment sends) is this row's prerequisite |
+| the combat target and the combat state (a hit drafts the actor, combatTarget the player, inCombat true: readings-18:100-102; TESCombatEvent) | trace | native on the host; recorded in memory (R2) from HostedActorState (the target's identity; the look point stays in the movement sample, movementGet.ts:46-56, where the puppet's head tracking reads it, movementApply.ts:37-56); never imposed on a puppet (npc-puppet's H6: a puppet is never in combat); restored at a promote: later, npc-handoff |
+| the running package and its changes (the schedule switch at 8:00, Hod back to the mill, readings-17:39-43; packageStart, packageChange, packageEnd) | trace (the Papyrus getter read 0x3EAB9 at every read, AI on or off and mid-recoil, readings-17:67, readings-18:77-82 and :116-118), code | native on the host; recorded in memory (R2) from HostedActorState, an observation only: nothing imposes a package on a puppet (Skyrim Together's package sync, written, crashed and compiled out, te-npcs.md section 3); the proposed source is Skyrim Platform's package events, not the getter (ADR-034; H3, HYPOTHESIS until b-npc-stream-state's claim: a c1 log-count of the sender's package-event line for 0x13483 across 8:00, gameHour 7.9 for 60 s, `>= 1`, with c1.npc_state(0x13483).package recorded before and after; the line's text is the fork's, 42af75b7); what the getter's one id means is the open question stated under Engine surface, the package |
+| what the actor wears and holds (the server's EquipBestWeapon on a hosted caster, MpActor.cpp:193, skymp-hosting.md:130; the engine's own equips under its packages; ActorEquipManager) | code | native on the host, imposed on a puppet (R1): UpdateEquipment 5 under the actor's own idx from the host's half-second poll (slice 3: a poll, not the equip events, which were the player's alone, sendInputsService.ts:55-103, :287-290), validated against that actor's own inventory and base spells, recorded on that actor (today the handler writes the sender's record whatever the idx, ActionListener.cpp:873-876 and :1024-1025: the latent corruption skymp-hosting.md:131 names), relayed reliably; a puppet applies it as every view does (formView.ts:655-675); the client's -1 inventory count that the wire's u32 refuses (docs/LOG.md:2245, 2026-10-22 03:19, c2's 1,835 refused UpdateEquipment sends) is this row's prerequisite |
 | the actor's inventory changing on the host (a pickup, loot taken, an arrow spent) | ADR-035 point 6; PLAN.md:1045-1047 | later: npc-fate, on ADR-035 point 6 (docs/DECISIONS.md:1302-1305: inventories are R0, the server's); open question for Eli: docs/PLAN.md:1045-1047 has inventory changes streaming from the host as R2 with cheap bounds, the ADR has them R0, and the two have not been reconciled; this doc follows the ADR and carries no inventory_delta either way (the M0 row's field, Message contract) until he says which |
 | the actor's death on the host (NPC against NPC, a fall, a trap) | ADR-035 point 6 | later: npc-fate (deaths that persist, R0); until then a puppet shows the relayed isDead as today (movementApply.ts:73, deathService), a corpse the server's record calls alive: carried by name, with H9's count |
 | hits by the hosted actor on anyone and the players' hits on it (hitService.ts:17-41; melee-reach.md:27-28) | code | later: npc-fate; the hit gates stand (ActionListener.cpp:2898) |
@@ -138,8 +138,11 @@ combat music.
   in every window (23 KB/s on the wire to a client hosting nothing) and
   each client returns 180 to 190 such packets a second, independent of the
   hosted count; read as renet's ack and keep-alive traffic at the update
-  rates (HYPOTHESIS, from ciphertext sizes alone): its own row before the
-  per-actor budgets are tightened. Two server-wide stalls (164 ms at the
+  rates (HYPOTHESIS, from ciphertext sizes alone; the read is
+  x-wire-idle-rate, a T2 on sky-srv: one idle fakeclient under 60 s of
+  tcpdump, the claim that the 26 to 31 B packet rate equals the server's
+  tick rate within 10 % and ends with the connection): its own row before
+  the per-actor budgets are tightened. Two server-wide stalls (164 ms at the
   Riverwood keyframe, 60 ms at c2's teleport), no gap over 0.3 s while
   hosting, no retransmission-looking repeats. The per-message counts and
   the per-type budgets come from slice 4's counters on train 54's stage
@@ -166,9 +169,9 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   (skyrim_platform/EventHandler.h:34) as combatState with target, actor,
   isCombat, isSearching (skyrimPlatform.ts:651, :197-202). The reading:
   Actor.getCombatTarget (:2058) and getCombatState (:2057), Papyrus
-  natives; HYPOTHESIS that getCombatTarget answers currentCombatTarget and
-  not the controller's targetHandle (the two can differ while a target is
-  being chosen).
+  natives. The streamed combat target is the Papyrus getter's answer, R2 and
+  never imposed; while the controller chooses, its targetHandle may differ
+  for a tick, unsynced.
 - The values: RE::ActorValueOwner (include/RE/A/ActorValueOwner.h:12-22:
   GetActorValue :15, GetPermanentActorValue :16, GetBaseActorValue :17,
   SetBaseActorValue :18, ModActorValue :19, RestoreActorValue :20,
@@ -217,9 +220,6 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   behind getEquippedObject (:2065), getEquippedWeapon (:2069),
   getEquippedSpell (:2068), getEquippedShout (:2067), getWornForm (:2093),
   which the client's getEquipment already walks (sync/equipment.ts:97-106).
-  HYPOTHESIS (H4) that TESEquipEvent fires for an NPC's AI-driven equip on
-  the host (EquipBestWeapon at a fight's start) as it does for the player's
-  menu equip.
 - The package: Actor::GetCurrentPackage (Actor.h:536-537);
   RE::AIProcess::GetRunningPackage (include/RE/A/AIProcess.h:172),
   currentPackage (:198, an RE::ActorPackage: package :22, target :24,
@@ -278,7 +278,10 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   hooks.sendAnimationEvent.remove (skyrimPlatform.ts:1596-1597) when the
   word flips away (H10, HYPOTHESIS: a handler removed mid-game stops its
   callbacks at once; no source has ever been removed in this client,
-  skymp-hosting.md:316-320); the PerformAction hook's native filter widened to a
+  skymp-hosting.md:316-320; the read is a count of "No permission to update
+  actor 1348[23]" in x-handoff-cross 211054 and 230629, whose passes flip
+  the word: zero confirms H10, nonzero becomes b-npc-handoff-cross's claim);
+  the PerformAction hook's native filter widened to a
   hosted set (Hosted.h beside Puppets.h, the same mutex-guarded set, written
   by a setHosted(actorId, bool) export from HostService at the word's flip,
   read at FridaHooks.cpp:455-470 beside the player test); Skyrim Platform's
@@ -371,6 +374,14 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   set assertion), H7 (cell-host's: each relayed animation played once,
   measured by the event counts on both seats). Reversibility on handoff is
   the Release condition and b-npc-stream's handoff step.
+
+Known limits: The streamed combat target is the Papyrus getter's answer, R2
+and never imposed; while the controller chooses, its targetHandle may differ
+for a tick, unsynced. A hosted NPC's attack costs the stamina its host's
+engine charges; the server charges none and records the host's percentage R2
+through HostedActorState. The combat target and the package are memory: a
+restart or a handoff drops both, the record carries neither (as TES3MP), and
+the host's engine re-acquires a target by its own senses.
 
 ## Message contract
 
@@ -495,8 +506,10 @@ Skyrim Platform already sinks or from a hook cast-action already owns
     sender is its host too (ActionListener.cpp:364-370 returns before it
     for any actor but the player's own); animationSystem.Process stays the
     player's (it spends the player's stamina for attacks; whether a hosted
-    NPC's attack should spend its own on the server is npc-fate's,
-    HYPOTHESIS that the engine's own cost on the host suffices meanwhile).
+    NPC's attack should spend its own on the server is npc-fate's;
+    a hosted NPC's attack costs the stamina its host's engine charges; the
+    server charges none and records the host's percentage R2 through
+    HostedActorState).
   - OnUpdateEquipment: the actor is ActorUpdatableBy(msg.idx) (the
     sender's own when idx is its own, else the hosted actor), not
     ActorByUser (:873-876); the spell checks ask IsSpellLearned for a player
@@ -515,10 +528,11 @@ Skyrim Platform already sinks or from a hook cast-action already owns
     labState kind `stream` (Tests: the grammar).
 - DB fields / migration: none. The values and the equipment live in
   MpChangeForm already (actorValues :106, equipment :102); the combat target
-  and the package are memory by design (HYPOTHESIS that the host's engine
-  takes a target again by sight after a restart; b-npc-stream's restart
-  step reads the record alone; TES3MP keeps neither, tes3mp.md:186-191, and
-  the handoff's restore is npc-handoff's, in memory too). Rule 6 needs no
+  and the package are memory: a restart or a handoff drops both, the record
+  carries neither (as TES3MP), and the host's engine re-acquires a target by
+  its own senses (b-npc-stream's restart step reads the record alone; TES3MP
+  keeps neither, tes3mp.md:186-191, and the handoff's restore is
+  npc-handoff's, in memory too). Rule 6 needs no
   migration; the restart step in b-npc-stream proves what persists.
 - Restart behavior: every cell unhosted at start (cell-host); the first
   grant after the reconnects restarts the stream, the host's first
@@ -562,7 +576,7 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   word (isMine true or false per actor, the same places PuppetService
   promotes and demotes). On the puppet side: formView.replayActions for a
   puppet view (formView.ts:613 runs for every view this game does not host
-  already, the method :824; HYPOTHESIS H2 that the puppet's graph takes it),
+  already, the method :824; H2 CONFIRMED, 172720),
   applyEquipment (:655-675) and the ChangeValues path (remoteServer.ts:
   882-904) as they are; Rule A's gates stand (:498-500, :525, :574, :655:
   nothing applied to an actor this game hosts).
@@ -722,11 +736,13 @@ atronach's own host standing in the cloak (playtest 37's seat), is refused "its 
 health unchanged, the engine's rule between strangers; a claimed Firebolt of the atronach's begins the fight with the
 other player (health 0.9, GetFights().between, no StartCombat notice, the pair kept through a TickFights); then
 the cloak's first report on that player lands one cadence, 0.5 s (wire-rules casts REACHED_TICK_MS) of magnitude 10, 5
-of the recorded 250: 0.9 to 0.88, with no E_CONDITION_UNKNOWN. HYPOTHESIS (H-53h, what remains): the engine's own 719
-with a null parameter on an aggressive creature, whether a creature whose AI means to attack the player counts as
-hostile to it before any blow (then the single-player cloak burns a player it has not yet hit, where the server's
-table waits for a counted hit; a Frida read of the condition's answer on the host's seat at the atronach's first cloak
-proc decides); no new notice reaches a seat, the StartCombat stays between players.
+of the recorded 250: 0.9 to 0.88, with no E_CONDITION_UNKNOWN. HYPOTHESIS (H-53h, what remains; the read is
+cloak-hostile.js under x-npc-creature-caster's frame, v3 red at 205125): the engine's own 719 with a null parameter
+on an aggressive creature, whether a creature whose AI means to attack the player counts as hostile to it before any
+blow (then the single-player cloak burns a player it has not yet hit, where the server's table waits for a counted
+hit); the script hooks IsHostileToActor (Actor.h:593, its id by `just addr`) on the host's seat and logs self, other
+and the result at the first cloak proc before any counted hit: 1 means vanilla burns strangers, a limit to declare, 0
+means the rule matches; no new notice reaches a seat, the StartCombat stays between players.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -1053,7 +1069,8 @@ per hosted actor (hostedActorRemoteIds), the three percentages clamped to 0
 to 1 (0 for a dead actor), the combat target through localIdToRemoteId, the
 package from the last packageStart or packageChange event for the actor (no
 native reads it; the events have no native filter, rule 9's cost accepted at
-their rate; HYPOTHESIS H3 until a probe reads the 8:00 switch through them),
+their rate; HYPOTHESIS H3 until b-npc-stream-state's claim under Inventory
+reads the 8:00 switch through them),
 sent on a change (half a point, or the target or the package) as
 HostedActorState under the actor's remote id, the first for an actor
 reliable; under the npcStream switch. sendActorValuePercentage is the
@@ -1141,7 +1158,9 @@ TopicInfo getOwningQuest alone). CommonLibSSE-NG at this pin forward-declares
 TESTopicInfoEvent (ScriptEventSourceHolder.h:54, the source at +0x0EC8,
 :108; SkyrimVM's sink at +0x0140, SkyrimVM.h:126) and has no header for its
 fields, so the layout other forks carry (speaker, topic info, a stage) is
-HYPOTHESIS here until a read. The engine's pieces are named: TESTopicInfo's
+CONFIRMED: the sink built on the layout (static_assert 0x18) delivered 51
+lines with speaker, info and topic, P7 v5 20261027-083204. The engine's
+pieces are named: TESTopicInfo's
 ResponseData (sound, text, speakerIdle, TESTopicInfo.h:73-115) and
 GetDialogueData(Actor*) building a DialogueItem {quest, topic, info,
 speaker} (src/RE/T/TESTopicInfo.cpp:24-27), the DialogueResponse's voice
@@ -1152,7 +1171,7 @@ SubtitleManager (speaker, subtitle), the actor's kSpeakingDone and
 kVoiceFileDone bits and QSpeakingDone/SetSpeakingDone (Actor.h:164, :167,
 :461-462). The puppet's side: re-ai-puppet.md:226-240 reads the dialogue
 voice timer (37752) as running inside the AI update alone, so a line started
-on an AI-off puppet may never end (HYPOTHESIS; "expect the line it was
+on an AI-off puppet may never end ("expect the line it was
 speaking to hang", :376), and the say path's gating by the AI bit is the
 reason a puppet is silent at all (npc-puppet.md:102, the voice row carried
 here). TES3MP streams speech as part of the actor's state and the receiver
@@ -1216,7 +1235,8 @@ CONFIRMED-STATIC):
   here. So a sink in the fork's Skyrim Platform sees every spoken LINE
   (hellos, idle chatter, scenes, scripted infos) with its speaker and
   info; the grunts stay the graph's.
-- R2 CONFIRMED-STATIC on the prototype, HYPOTHESIS on the puppet: Actor::
+- R2 CONFIRMED-STATIC on the prototype, CONFIRMED on the puppet (45 of 47
+  asks started on c2's puppets, residents included, 083204): Actor::
   SpeakSoundFunction 37542 is `float (Actor*, const char* voicePath,
   BSSoundHandle* out, EmotionType, u32 percent, int textLength,
   TESIdleForm* speakerIdle, TESIdleForm* listenIdle, TESObjectREFR* target,
@@ -1230,7 +1250,9 @@ CONFIRMED-STATIC):
   clear, before the voice timer (37752) and UpdateSoundCallBack (vtable
   slot 0x40, 37544), and 37544 is what shows the subtitle (state 3 through
   52626), sets the timer from the sound's duration, and at expiry sends
-  END and SetSpeakingDone. HYPOTHESIS: on a puppet (AI off, high process
+  END and SetSpeakingDone. CONFIRMED in its cure: the pair ended all 45
+  started lines (V3, 083204); the untreated hang is the static read's and
+  never ships: on a puppet (AI off, high process
   kept) a line started through the engine plays its audio, lip sync and
   idle, shows no subtitle, never ends, never sets kSpeakingDone and leaves
   the process's +0x278 at 3 until the AI returns; the cure is the engine's
@@ -1283,7 +1305,7 @@ timer's expiry send the END, drop the subtitle and set the done bits
 discriminator; the state byte and the timer are). The pair `37752(actor,
 false); actor->UpdateSoundCallBack(false)` once a frame reproduces the AI
 update's exactly. 25616 marks the info said-once on both BEGIN and END
-(HYPOTHESIS: harmless on the puppet seat, both seats converge). Unread: the
+(V4 CONFIRMED: nothing refused twice, 083204). Unread: the
 done bits' initial value on a fresh actor (if clear, the first say refuses
 and the native must set 0x180 first), the dialogue state's type field.
 
@@ -1376,8 +1398,9 @@ transition collector (59380) on a transition whose toStateId no longer
 maps (states[-1], rcx 0x1_00000000). Split into dwords, every corrupted
 pointer is two adjacent 4-byte words holding a small int and a plausible
 float (453 and 1.288; 599 and -1.259; 1 and 0): the footprint of a
-4-byte-strided out-of-bounds write of variable values (HYPOTHESIS on the
-interpretation, the values CONFIRMED). The descriptor wrote 301 fixed
+4-byte-strided out-of-bounds write of variable values (CONFIRMED by its
+fix: v2 a0ff0e72 bounded the write; the v2 and v3 stages ran with no crash
+log, 172720, 163259, 173133). The descriptor wrote 301 fixed
 master indices (14 ints, 19 floats, 268 booleans, the highest 300) into
 `variableValueSet->varSet[index]` with no check of the set's size, where
 the engine's own by-name getter and setter (63614, 63608, through 63851)
@@ -1689,7 +1712,9 @@ their lines, and the resident 13482 (info 6aeaa) read "deferred (bits
 timer -1.00, handle none, in flight true, lip -1 after)": the synchronous
 lip load changed nothing for the humanoid, and the lip entry was null before
 AND after. The re-analyst's read (REA on sky-re, scratchpad
-npc-stream/re-voice-defer.md; HYPOTHESIS by rule 2, dossiers per function):
+npc-stream/re-voice-defer.md; CONFIRMED: v4 built on the audibility gate;
+083204 read 2 inaudible far speakers, 0 deferred, 45 started; the dossier's
+names stay rule 2's):
 "lip -1 after" means the lip load 16256 never ran, because SpeakSoundFunction
 37542 leaves at its audibility gate BEFORE the lip branch: `if (Get3D() == 0
 || noSound) return 0`, noSound when the voice path is null, a limb is gone,
@@ -1817,7 +1842,10 @@ sample ("face: 3550c gaze -> 13483 (slot 1)", "35534 gaze -> 13491 (slot
 eye (playtest 35). H-54b read: 18 non-neutral expressions on c2 ("face:
 1348c expression 1 50 (mood 8)", anger at 50 as Mood 8; neutral 0 at mood
 7), the mapping as the table says. H-54c (no jitter against the heuristic)
-stays HYPOTHESIS for T4. Promoted as b-npc-stream-face (main, its own
+stays HYPOTHESIS until x-puppet-head-face (unrun): six paired
+face-keyframes samples, the claim once lab-api has the fact that c2's
+expression equals c1's at every pair and changes no more often; meanwhile a
+playtest 39 checklist line. Promoted as b-npc-stream-face (main, its own
 commit) for 54's gate set.
 
 Step R (2026-10-26, on the merged parity 66f04f2a; numidium's chain, 22:15
