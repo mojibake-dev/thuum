@@ -131,6 +131,159 @@ scene Eli described, and its table of starts is data the server can own. Realm o
 player-record patch before anything else; Alternate Perspective rebuilds Helgen and is the most
 invasive; Unbound Reborn is an MCM. Eli's call between the recommendation and the mod-free alternative.
 
+## How the pick is recorded, and what the server can read (thuum-cf's question, 2026-10-28)
+
+The menu is not a message box: it is dialogue with the Statue of Mara, a talking activator, 94 topics
+under the quest's dialogue. One quest carries the whole start, `ARTHLALChargenQuest`, FormID `000DAF`
+in the plugin (`0B000DAF` where the lab's load order puts the mod at index 0B; the lab's slot may
+differ), with two scripts: `ARTH_LAL_StartQuest` (the state) and `ARTH_QF_LALStartQuest_02000DAF`
+(the stage fragments). The second quest, `ARTHLALRumorsOfWarQuest` (`07A334`), holds the starts
+themselves: one stage per start, a fragment per stage, and the aliases whose forced references are
+the markers. Read from the disassembled bytecode:
+
+- Statue activation: `ARTH_LAL_MaraStatueScript.OnActivate` calls `ResetMenuChoices()`, which sets the
+  chargen script's `MainMenuChoice`, `ImmigrationMenuChoice`, `PropertyMenuChoice`, `GuildMenuChoice`,
+  `InnMenuChoice`, `ArmyMenuChoice` and `DeadRandom` to -1 and `StartChosen`, `EscapeOptionUsed`,
+  `SolstheimStart` to false. Nothing readable happens here.
+- A sub-menu line ("I'm a patron at a local inn.", "I own property...", "I arrived on board a ship.",
+  "I'm a new member of a guild.", "I'm a soldier in the army.") only writes `MainMenuChoice` (4, 2, 1,
+  3, 6). A leaf line's fragment (`ARTH_TIF_LALNewStart_<id>`) does two things: it calls
+  `SetAddonQuestStage(N, ARTHLALRumorsOfWarQuest)` and, for a sub-menu leaf, writes the sub-choice
+  (`InnMenuChoice=6` for Windpeak Inn, `PropertyMenuChoice=2` for Breezehome, and so on).
+  `SetAddonQuestStage` stores the pair in two script variables, `StartupQuest` and `QuestStage`, sets
+  `StartChosen`, and sets the chargen quest to **stage 15** (16 if "I want to escape this cell" was
+  used). So the pick is recorded in Papyrus script variables, not in a global (the mod defines no
+  globals) and not in an alias; the only form-level trace at pick time is chargen stage 15.
+- The bed (`ARTH_LAL_CellBedScript.OnActivate`): with `MainMenuChoice == 0` (the vanilla start) it
+  equips the cuffs and sets chargen **stage 20**, whose fragment stops the chargen quest, sets the
+  MQQuickstart global to 0 and starts MQ101 at stage 10, Helgen's cart. Otherwise it removes the
+  prisoner tunic and shoes and sets chargen **stage 30**: Fragment_13 drives MQ101 to 900 and cleans
+  Helgen, Fragment_148 calls `ExecuteAddonQuest()`, which is `SetStage(StartupQuest, QuestStage)`, so
+  **RumorsOfWar's current stage becomes N, the start**, and N's fragment runs: EquipItem/AddItem for
+  the kit, the branch on the sub-choice, `Player.MoveTo(marker)`, then a 0.25 s update. Stage 35
+  disables the bed and stops the chargen quest.
+
+What a client report can read, in Skyrim Platform terms (Papyrus natives on forms; a script's own
+properties are not reachable from SP): `Quest.getCurrentStageID()` and `Quest.isStageDone(n)` on the
+two quests. Chargen stage 15 says "a start was chosen"; RumorsOfWar's stage says which start (N),
+and it is set a few Papyrus instructions before the MoveTo in the same fragment. The sub-choice
+(which inn, which house, which city) is not readable from any form: the only thing that
+distinguishes Windpeak Inn from Vilemyr Inn after the bed is the landing itself. That decides the
+permit's key.
+
+Two shapes for the permit, in order of preference:
+
+1. **A landing-table permit.** The server already validates the landing of a cast jump against a
+   destination plus slack. Here the destinations are a fixed table (below): while a player's record
+   is in the prison cell `00021594` (optionally also gated on the client reporting chargen stage 15),
+   one movement whose landing is within slack of a table entry is permitted, and that entry names the
+   kit the server lays in. No Papyrus read, no race, and the sub-choice ambiguity is gone because the
+   landing is the choice. The random starts (bandit, left for dead) are sets of positions, all in
+   the table; starts whose marker lives in Dawnguard.esm or Dragonborn.esm, or needs a mod the lab
+   does not ship, are simply not permitted (the move snaps back; the statue still offers the line,
+   see the note after the table).
+2. **A stage-keyed permit.** The client polls `ARTHLALRumorsOfWarQuest.getCurrentStageID()` and
+   reports N; the server permits N's marker set (one marker, or the branch set for 1, 2 and 3). The
+   report and the movement both travel client to server on one ordered connection, so if the client
+   detects the stage before the MoveTo lands (the fragment runs equips and AddItems between the two,
+   each a Papyrus frame) the server sees the report first. That ordering is a measurement, not a
+   given, which is why shape 1 comes first.
+
+Either way the kit is the server's table, keyed by landing or by N: the fragment's own AddItems are
+leveled lists (`LootCitizenPocketsCommon`, `LItemWeaponAny1HTown`) and a random gold roll, and under
+R0 they never reach the record, while the bed's RemoveItem of the rags does not either, so without
+the server's kit the other seat keeps seeing the player in rags.
+
+Two lines need a decision rather than a table entry. "I got caught crossing the border illegally.
+[Vanilla Start]" runs Helgen's cart (MQ101 from stage 10, the player AI-driven); the lab's world never
+runs MQ101 and the cart is unpermitted movement, so this line should not be honored, or be removed
+(a drop-record of INFO `00C70F`, if the patch tool's GRUP rewrite is checked for nested dialogue
+groups). "I want to escape this cell." sets RumorsOfWar stage 100 and enables the prison-break
+marker: no MoveTo, the player walks out of the Abandoned Prison into Eastmarch; harmless, no permit
+needed, the kit is whatever the server gives at the cell.
+
+### The landing table (RumorsOfWar stage, marker, cell or worldspace, position)
+
+Positions are the markers' DATA in the plugin; the FormIDs are the mod's own records at load index 0B
+(replace the first byte with the lab's slot). Lines marked "not in the lab's set" are offered by the
+statue only when the mod they belong to is installed (the dialogue is conditioned on
+`ARTHLALVersionTracking`'s DLC-support flags), so they do not appear for the lab's players.
+
+| statue line | RumorsOfWar stage | landing | cell or worldspace | x, y, z |
+| --- | --- | --- | --- | --- |
+| Solitude | 1 | ARTHLALSolitudeDockStart (0b057c06) | Tamriel (exterior) | -64593, 95460, -13888 |
+| Dawnstar | 1 | ARTHLALDawnstarDockStart (0b031fdf) | Tamriel (exterior) | 29048, 106238, -13874 |
+| Windhelm | 1 | ARTHLALWindhelmDockStart (0b057c07) | Tamriel (exterior) | 140444, 33952, -13933 |
+| Proudspire Manor [Solitude] | 2 | ARTHLALSolitudeHouseStart (0b032579) | SolitudeProudspireManor | 313, -809, 288 |
+| Vlindrel Hall [Markarth] | 2 | ARTHLALMarkarthHouseStart (0b057c08) | MarkarthVlindrelHall | -2465, 1819, 192 |
+| Honeyside [Riften] | 2 | ARTHLALRiftenHouseStart (0b057c0a) | RiftenHoneyside | 124, 226, 63 |
+| Breezehome [Whiterun] | 2 | ARTHLALWhiterunHouseStart (0b057c09) | WhiterunBreezehome | -424, -148, 319 |
+| Shoal's Rest Farm [Near Rorikstead] | 2 | alias FarmhouseStart (0b031fcc) | ARTHLALFarmhouse | 1848, 2231, 8052 |
+| The Companions | 4 | ARTHLALCompanionsStart (0b057c0b) | WhiterunJorrvaskr | -486, -774, 65 |
+| College of Winterhold | 5 | ARTHLALCollegeStart (0b057c0c) | Tamriel (exterior) | 116158, 111850, -7744 |
+| Dark Brotherhood | 6 | ARTHLALDBStart (0b057c0d) | DarkBrotherhoodSanctuary | 3205, -217, -342 |
+| Thieves Guild | 7 | ARTHLALThievesStart (0b057c0e) | RiftenRaggedFlagon | -2219, 1575, -124 |
+| Windpeak Inn [Dawnstar] | 3 | alias InnDawnstar (0b031fe4) | DawnstarWindpeakInn | 1244, 582, 0 |
+| Four Shields Tavern [Dragon Bridge] | 3 | alias InnDragonBridge (0b031fe5) | DragonBridgeFourShieldsTavern | 1709, -732, 0 |
+| Dead Man's Drink [Falkreath] | 3 | ARTHLALFalkreathInnStartMarker (0b031fe6) | FalkreathDeadMansDrink | 140, -720, 1 |
+| Vilemyr Inn [Ivarstead] | 3 | alias InnIvarstead (0b031fe7) | IvarsteadVilemyrInn | 1334, -574, 0 |
+| Braidwood Inn [Kynesgrove] | 3 | alias InnKynesgrove (0b031fe8) | KynesgroveBraidwoodInn | 1519, -700, 0 |
+| Moorside Inn [Morthal] | 3 | alias InnMorthal (0b031fe9) | MorthalMoorsideInn | 1090, -747, 1 |
+| Nightgate Inn | 3 | alias InnNightgate (0b031fea) | NightgateInn | 1089, -758, 1 |
+| Sleeping Giant Inn [Riverwood] | 3 | alias InnRiverwood (0b031feb) | RiverwoodSleepingGiantInn | -788, -615, 1 |
+| Frostfruit Inn [Rorikstead] | 3 | alias InnRorikstead (0b031fec) | RoriksteadFrostfruitInn | 1081, -738, 1 |
+| The Frozen Hearth [Winterhold] | 3 | alias InnWinterhold (0b031fed) | WinterholdTheFrozenHearth | 1763, -556, 1 |
+| I'm an outlaw in the wilds. | 12 | random lair/spot: ARTHLALBandit1Start (Tamriel (exterior) 73912, 1189, -3776), ARTHLALBandit2Start (Tamriel (exterior) -133085, 22969, -4405), ARTHLALBanditStartMarker3 (Tamriel (exterior) 53755, 70870, -2129) |  |  |
+| Imperial Legion | 10 | ARTHLALLegionStart (0b057c0f) | SolitudeCastleDour | -482, 912, 0 |
+| Stormcloak Rebellion | 11 | ARTHLALStormcloakStart (0b057c10) | WindhelmPalaceoftheKings | -3892, -1656, 56 |
+| I am camping in the woods. | 13 | ARTHLALCampsiteStart (0b031fde) | Tamriel (exterior) | 6567, -70661, 4745 |
+| I was shipwrecked off the coast! | 14 | ARTLALShipwreckStart (0b009b71) | Tamriel (exterior) | 52052, 157092, -14066 |
+| I live in an Orcish stronghold. | 101 | ARTHLALOrcStart (0b057c14) | Tamriel (exterior) | -145125, -22831, -1048 |
+| I am a vampire in a secluded lair. | 15 | a random vanilla vampire lair: ARTHLALVampireStartController fills a location alias (LocTypeVampireLair) and the player is moved to its marker; the set is Skyrim.esm's lairs, not in this plugin |  |  |
+| I am a Khajiit caravan guard. | 102 | ARTHLALCaravanStart (0b057c15) | Tamriel (exterior) | -160858, 5437, -5200 |
+| I was attacked and left for dead. | 19 | random lair/spot: ARTHLALL4D2Start (Tamriel (exterior) 145719, -11213, -10353), ARTHLALL4D4Start (Tamriel (exterior) -167564, 56747, -5096), ARTHLALL4D5Start (Tamriel (exterior) 79228, 78724, -4688), ARTHLALL4DStart3Marker (Tamriel (exterior) -58907, -31773, -3214) |  |  |
+| I am a necromancer in a secret location. | 16 | ARTHLALNecroStart (0b057c19) | BlackreachZCell10 | 511, 547, 2867 |
+| I am a Forsworn native. | 103 | ARTHLALForswornStartMarker (0b031fe3) | DruadachRedoubt01 | 823, 2679, 7725 |
+| I am a Vigilant of Stendarr. | 17 | ARTHLALVigilantStart (0b032567) | HallOfTheVigilant01 | -964, -710, 1 |
+| I am an Argonian dock worker in Windhelm. | 104 | ARTHLALArgonianStart (0b057c1a) | WindhelmArgonianAssemblage | 2043, -960, 56 |
+| I am a member of the Alik'r. | 105 | ARTHLALRedguardStart (0b031ff3) | Tamriel (exterior) | -113836, 4853, -4902 |
+| Surprise me. | random | one of the sub-menu's starts, picked by PickRandom*/Randomize() |  |  |
+| I am a refugee from Morrowind. [Windhelm] | 106 | ARTHLALDunmerStart (0b03ed79) | WindhelmNewGnisisCornerclub | 3114, -1933, -512 |
+| I am a refugee from Morrowind. [Raven Rock] | 107 | ARTHLALDunmerRRStart (0b09df54) | DLC2RRAbandonedBuilding | 1454, 2452, 427 |
+| The Dawnguard | 8 | DLC1VQ03HunterStart, a Dawnguard.esm reference (Fort Dawnguard); its position is in Dawnguard.esm, not this plugin |  |  |
+| Lord Harkon's Court | 9 | no MoveTo of its own: it drives DLC1VQ02 to stage 20 and lets Dawnguard.esm's own fragments carry the player to Castle Volkihar |  |  |
+| I am an agent with the Thalmor Embassy. | 108 | ARTHLALThalmorStartMarker (0b052b3e) | ThalmorEmbassy01 | -1042, -202, 288 |
+| The Retching Netch [Raven Rock] | 3 | alias InnRavenRock (0403bd38) | (placed by master 04, not in this plugin) |  |
+| I am Erik the Slayer's childhood friend. | 109 | alias InnRorikstead (0b031fec) | RoriksteadFrostfruitInn | 1081, -738, 1 |
+| I want to escape this cell. | 100 | no MoveTo: the player walks out |  |  |
+| I am a warlock's thrall. | 18 | ARTHLALThrallStartMarker (0b075d0d) | BoulderfallCave01 | 2007, 522, -163 |
+| The Horny Horker [Keld-Nar] | 3 | marker from DLCSupport.ARTHKeldNarInnStartMarker: an add-on mod's, not in the lab's set |  |  |
+| Bee & Barb [Riften] | 3 | alias InnRiften (0b08e13a) | RiftenBeeandBarb | 536, -136, 322 |
+| Silver-Blood Inn [Markarth] | 3 | alias InnMarkarth (0b08e13d) | MarkarthSilverBloodInn | -6458, -2000, -12 |
+| Winking Skeever [Solitude] | 3 | alias InnSolitude (0b08e13e) | SolitudeWinkingSkeever | 796, -1667, 289 |
+| Bannered Mare [Whiterun] | 3 | alias InnWhiterun (0b08e13f) | WhiterunBanneredMare | 49, 260, 321 |
+| Candlehearth Hall [Windhelm] | 3 | alias InnWindhelm (0b08e140) | WindhelmCandlehearthHall | 28, -4082, 64 |
+| Heljarchen Hall [The Pale] | 2 | ARTHLALHFPaleHouseMarker (0b0b2362) | BYOHHouse3Pale | 126, 416, 270 |
+| Lakeview Manor [Falkreath] | 2 | ARTHLALHFFalkreathHouseMarker (0b0b2364) | BYOHHouse1Falkreath | 126, 416, 270 |
+| Windstad Manor [Hjaalmarch] | 2 | ARTHLALHFHjaalmarchHouseMarker (0b0b2363) | BYOHHouse2Hjaalmarch | 126, 416, 270 |
+| Raven Rock | 1 | DLC2 ship ride to Raven Rock (RRShipRide.SetSail) |  |  |
+| Old Hroldan Inn | 3 | ARTHLALOldHroldanShezrieStart (0b0d5a77) | OldHroldanInn, only with Shezrie's Old Hroldan installed (not in the lab's set) | 806, 564, -256 |
+| Old Hroldan Inn | 3 | ARTHLALOldHroldanStart (0b0d5a76) | OldHroldanInn | 1095, -666, 1 |
+| I am a member of the Penitus Oculatus. | 110 | ARTHLALOculatusStartMarker (0b24c557) | DragonBridgePenitusOculatusOutpost | 661, -83, 272 |
+| Tundra Homestead [Whiterun Hold] | 2 | ARTHTHStartMarker (0b31beb0) | Tamriel (exterior); needs the Tundra Homestead Creation (THQuest via DLCSupport), not in the lab's set | 39071, -36, -4288 |
+| Worthy Meade Inn [Telengard] | 3 | marker from DLCSupport.TGStartMarker: an add-on mod's, not in the lab's set |  |  |
+| Shadowfoot Sanctum [Riften Ratway] | 2 | marker from DLCSupport.SSStartMarker: an add-on mod's, not in the lab's set |  |  |
+| Dead Trees Inn [Granite Hill] | 3 | marker from DLCSupport.GHStartMarker: an add-on mod's, not in the lab's set |  |  |
+| Screaming Goblin Inn [Oakwood] | 3 | marker from DLCSupport.OWStartMarker: an add-on mod's, not in the lab's set |  |  |
+| Outdoor Inn [Black Moor] | 3 | marker from DLCSupport.BMStartMarker: an add-on mod's, not in the lab's set |  |  |
+| The Tapped Vein [Shor's Stone] | 3 | marker from DLCSupport.ShorsStoneStartMarker: an add-on mod's, not in the lab's set |  |  |
+
+The source material for this section is in the plugin's records (QUST `000DAF` and `07A334` with
+their VMAD fragment maps and ALFR aliases, the 102 INFO fragments) and the 159 compiled scripts of
+the mod's archive, disassembled, not decompiled; the tables were generated from them and spot-checked
+against the fragment bytecode (Fragment_2, _3, _4 branches; Fragment_10, _11, _18, _21, _102). The
+mod's files stay local (lab/.cache/mods); only names, ids and positions are recorded here.
+
 ## If Live Another Life is chosen: the layer plan
 
 - Row `alternate-start-live-another-life-4.2.6a`, source nexus 272/729409, md5 80f2bd23…, take `./->.`
