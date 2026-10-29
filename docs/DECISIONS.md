@@ -3314,3 +3314,38 @@ relay, the probe x-quest-stage (c1's console setstage on a listed quest reaches 
 an unlisted quest refused in the log; a restart keeps the stage) once lab-api has a quest-stage read, then scenario
 b-quest-stage. The dialogue work (npc-talk) stands on it: a line conditioned on a stage is offered on both seats once
 the stage is shared.
+
+
+## ADR-057: Spell-placed world objects are the server's, from a table keyed by spell and anchor (Raise Wall)
+
+Status: PROPOSED 22:01 PDT 2026-10-28 (thuum-magnus, under the no-questions rule; Eli, playtest 37: "im impatient, can we
+try getting raise wall working?"). Eli's veto reverses it to ADR-029's allowlist entry (B below) at the cost of the
+natives.
+
+Context. Apocalypse's Raise Wall (SPEL 0xcc14, a self-delivery concentration spell) places a wall MSTT 0x98529 (a
+Havok body, no navcut) and a glow ACTI 0x735e8 by its effect script in the caster's game alone, 192 units ahead along
+the caster's yaw, Z -48, for the concentration plus a 5 s fade (apocrypha's disassembly of WB_FabricateWall_Script,
+2026-10-28). ADR-029's default (scripts run in the caster's game) is why the other seat saw nothing (numidium's
+refs-near diff at 04:25Z: the two references on c1, none on c2), and ADR-029 left the first allowlist entry open.
+apocrypha's corpus read (docs/research/apocalypse/placed-objects.md on apocrypha/alternate-start): three families by
+anchor, caster (Raise Wall, Fabricate Object, Wind Running), hit target (Tharn's Prison, Enter the Dungeon, Banish
+Living), projectile impact (Summoning Rune, Wellocs Instant Forest).
+
+Decision. Shape C of docs/verbs/spell-placed-object.md: the server places the objects itself from a settings table
+(spell, anchor, bases with offsets, lifetime rule, caps) when it accepts the cast start it already records
+(PartOne::StartCast, wire-rules casts), deletes them 5 s after the cast's end, a disconnect or a cap, and every seat
+receives them through the server-object path (collision comes with the mesh on every seat); the caster's game keeps
+the script's own copies and skips the server's whose placed_by names itself; the rise and the shaders are the client's
+cosmetics (R3, a later slice); the knockdown explosion and a wall placed where the caster's engine chose the
+no-room message are listed limits. Not chosen: A, the caster's game reporting the script's placements (Skyrim
+Platform intercepts no PlaceAtMe, and a client's pose would be trusted); B, the server running the script through
+ADR-029's allowlist (GetAngleZ, Sin, Cos, TranslateToRef missing and PlaceAtMe delegated, so no server object would be
+born).
+
+Consequences. A wire change (CreateActorProps gains placed_by, the schema bump, validator and fixtures in one commit,
+rule 4), a DB field placedBySpell with a sweep at load (rule 6), the table in both deploy settings files, T0 for the
+pose, the gate, the caps and the lifetime, T2 for the relay, the probe x-raise-wall and scenario b-spell-placed-wall
+(the wall on both seats within 2 s and 16 units, neither walks through it, gone on both within the lifetime, a late
+joiner sees it). v1 ships Raise Wall alone on the caster anchor; Fabricate Object's menu choice (a client-reported
+base id validated against the spell's list) and Wind Running's per-update placement are later deltas; the hit-target
+and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
