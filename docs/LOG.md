@@ -3043,3 +3043,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   no HYPOTHESIS tags") and unticked, cell-host's unticked, each with the inventory's counts and the earlier tick's text kept inside the
   line; the boxes tick again when the reads land (quit-path.js, x-npc-trap-report, the handoff probes). Fork m3-pass-train-3's head is
   db5c9611 (the contact hook merged, FridaHooks.cpp's includes from both hooks), pushed server-only.
+- 15:58 PDT: T0 GREEN on m3-pass-train-3 at both heads (3866 b383e2e9, 3869 db5c9611): the props server half compiles and PropTest passes
+  on top of P2. Every pass train is green on the server side; the Windows halves (the arrival native, the fragment hook, the contact hook,
+  the client services) compile at the -win pushes, which wait on numidium's base.
