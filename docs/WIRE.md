@@ -327,7 +327,14 @@ QuestStage (id 65, MsgType 57), both directions, reliable (fork m3-quest-stage,
 2026-10-28; docs/verbs/quest-stage.md, ADR-056): `{ quest: u32 (the QUST's form
 id in the load order both ends share, 0 with a list), stage: u16 (the engine's
 stage index), shared: [u32] (server to client only: the shared quests, sent at
-a login with quest 0) }`. Client to server, R1: one stage the player's own game
+a login with quest 0) }`. Since fork m3-quest-mode 11cbf4cb (14:41 PDT 2026-10-29, D58 B;
+SCHEMA_VERSION 21): `mode: u8` (0 list, 1 all; a client's message carries 0 or is
+refused), and in mode 1 the login message's `shared` is the DENIED list (may be
+empty; the validator refuses an empty list with quest 0 in mode 0 only); the
+client budget is 32 then 8 a second (UNMEASURED; a load fires a dozen quest
+starts). The server setting `sharedQuests` stays the array (mode list); the mode is
+its own key `sharedQuestsMode` `{mode: "all", denied: [FormDesc...]}`, which an
+older image ignores; E_QUEST_DENIED beside E_QUEST_UNLISTED. Client to server, R1: one stage the player's own game
 set on a shared quest; the server checks the quest is a QUST in its load order
 and on its `sharedQuests` list, keeps the stage once on the world's record (the
 set of stages done per quest, on the world's journal reference), relays it to
@@ -598,3 +605,12 @@ CreateActor named stays a number and differs as before; a session
 declaration that names an index literally misses on both stacks and should
 name the form instead. Fork skymp-wire/difftest, m3-train-41 e7a5e211.
 
+### CreateActor's placedBy for a spell-placed world object (spell-placed-object, M3; ADR-057)
+
+CreateActor (t 33) gains the optional prop `placedBy: u32` (SCHEMA_VERSION 20; fork m3-spell-placed 5b951a9c): the
+server id of the caster whose accepted cast of a listed spell placed the form from the server's `spellPlacedObjects`
+table (Raise Wall's wall MSTT and glow ACTI first). It is nonzero and travels only with `baseRecordType` MSTT or ACTI;
+any other pairing is E_VAL_RANGE in validate_server, and the transport refuses the message from a client by direction.
+The caster's own game skips a form naming itself while the script's own copy stands at the pose; every other game
+places it as any server form. The removal is the usual DestroyActor 5 s after the cast's end. Fixtures
+33-CreateActor-0 and -1 carry the field; WireJsonContractTest reads them through CreateActorMessage.h.

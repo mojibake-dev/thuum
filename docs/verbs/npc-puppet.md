@@ -611,8 +611,9 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   race list (WorldState.cpp:519-585 on ef44a1d8; :541 and :585-587 on
   m3host), apply only while npcEnabled is false, so the probe-only setting
   (ADR-035 point 9; cell-host's lab setting) admits Riverwood's residents,
-  the guards and the humanoid bandits the exits need; dead-at-start and
-  initially disabled references stay skipped (:477-501). The hosted word
+  the guards and the humanoid bandits the exits need; initially disabled
+  references stay skipped (:477-501), dead-at-start ones load as corpses
+  since fork m3-dead-placed 2f886731 (2026-10-29, finding 65). The hosted word
   (revised 2026-10-22, ADR-045 point 2): CreateActor's props carry
   isHostedByOther explicitly for every actor (a player's figure true; any
   other actor true unless the listener hosts its cell), and UpdateHoster
@@ -1225,6 +1226,21 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   formViewArray, PuppetService.demoteOnLoss; the native clears the bit
   alone with no 3D, Is3DLoaded TESObjectREFR.h:435). eedc2f58 then
   19e7ca9b, pipeline 2614; the chain and the gate after it.
+
+## The roster that races the grant (built 13:33 PDT 2026-10-29, fork m3-grant-roster 5b6ef482)
+
+Playtest 38's finding 66 ("attempted to kill a bandit outside bleakfalls. all damage was ignored"): rotfern stepped out
+of the barrow at 20:00:49Z, the server granted it the exterior block at 20:00:51.189Z, and its roster of the same
+millisecond (the bandit 105a22, ddf87) was dropped "the cell is nobody's yet"; the next roster came ten seconds later
+(the client reports every 2 s while it hosts a cell, and it hosted none yet), after the player had died to the bandit it
+could not hurt (a live NPC without a server id is no hit target on the client while the engine's own damage is cut).
+The fix is the server's alone, no wire change: a sighting dropped for a missing host is held per cell (PartOne::Impl
+heldSightings, kHeldSightingsPerCell 64, kHeldSightingMs 30 s, one entry per reference) and ApplyHostDecisions replays the
+held ones for the grant's host right after the flags flip (PartOne::ReplayHeldSightings, one info line "held before the
+grant replayed"); a sighting of another game's cell is never held. T0: CellHostTest "A sighting that arrives before its
+cell's grant is held and replayed". HYPOTHESIS until a lab run: the replayed record's CreateActor reaches the host within
+a round trip of the grant. A client belt for later: hostService.onHostGrant resetting lastSightings so the next poll
+reports at once.
 
 ## Status
 

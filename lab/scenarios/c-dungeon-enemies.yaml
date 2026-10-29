@@ -1,0 +1,256 @@
+# c-dungeon-enemies (M3's exit, docs/PLAN.md's M3 section "Exit"; drafted 2026-10-29 from the grammar and
+# the proven scenarios' idioms, no run yet): bandits fight both players under one host, a hit from either
+# seat moves the one record, the guest's kill is a death on every screen and the body is one container for
+# both. The frame is x-dead-placed-loot's: Bleak Falls Temple's first hall, cell 0x371de, c1 at
+# (-7329, 979, 573) facing 90 so it arrives first and hosts, c2 100 units east; the bandits are the hall's
+# own campfire pair MS13BanditCampfire01 0x39fe4 and 02 0x39fe2 (b-host-own-hit's read: fixed NPC_ bases
+# whose hands the fate pins, hostile on sight, at (-3825, 745, 583) and (-3644, 677, 582), about 3500 units
+# east of the frame). Both seats under god mode through the server console (the pair's hits log at 0
+# damage and the fight goes on, b-host-own-hit) and every start-up box dismissed.
+# Why the hall's own bandits and not a placed one: the driver's place-npc is Papyrus PlaceAtMe in ONE seat's
+# engine (lab/driver/src/index.ts "place-npc": a solo reference's NPC, kept as the default target of
+# npc-state, npc-damage, npc-kill and start-combat), with no server record and no copy on the other seat,
+# and skymp5-client's cleaner removes a reference the server never made (x-fsmp-solo-base runs solo for
+# that reason); a bandit the SERVER places (server-console PlaceAtMe, b-npc-copy-fate's 0x1bcd8) is
+# ff000002 on the server but a runtime id of its own on each seat, which npc-state {formId} can name on
+# neither (the driver's namedNpc is Game.getFormEx of the id given, else this seat's own placement), so
+# its per-seat health and death would be unreadable. The campfire pair carries one id on the server and on
+# both seats, so every claim below names it; the exit's "placed bandit" is narrowed to that.
+# Claims, in order:
+#  1. both seats in the hall, c1 hosts 0x371de; the pair runs on c1 (aiEnabled true) and reads as puppets
+#     on c2 (aiEnabled false); both alive on the record;
+#  2. the fight: c1 closes to 200 units of 0x39fe4 (approach, the record's frame) and its game starts both
+#     bandits' combat (start-combat takes only with the host's player near, b-host-own-hit); within 90 s
+#     the server logs one of the pair hitting ff000000 (c1's actor), with no E_HIT_WEAPON and no permission
+#     refusal (b-host-own-hit's claims); their hits on ff000001 (c2) are recorded, not claimed (no scenario
+#     has claimed a hosted actor's hit on the other player; b-npc-copy-fate records it the same way);
+#  3. a hit from the host moves the one record: c1's engine takes 25 of 0x39fe4's health (npc-damage,
+#     b-npc-stream-state's lever) and 5 s later the record is below 0.95 and within 0.03 of the host's
+#     engine (b-npc-death-blow's bound), c2's puppet within 0.05 of the record (b-npc-stream-state's
+#     bound) and of c1's read; the guest's blows are sword swings (b-npc-death-guest's lever: a Daedric
+#     warhammer 0x139ba, 27 a hit, given and equipped through the console, hold-key 199 after an approach
+#     in the record's frame), since a guest's npc-damage would act on its own puppet alone (the observer's
+#     puppets report nothing, b-npc-stream-state);
+#  4. killed by c2, the guest: the host holds 0x39fe4 in place (npc-hold, b-npc-death-blow's walking-target
+#     lesson) and c2 swings five rounds of six; the record dies within 60 s of the last swing, the death
+#     comes by the host's report (a "death report" line, no "death by the server's word"), dead on both
+#     seats' engines; the killer credit to ff000001 is recorded, not claimed;
+#  5. the body is one container for both: c2 then c1 activate it (approach to 150 in the hall's frame),
+#     each opens the ContainerMenu and closes it (the closing activation releases the occupancy,
+#     b-npc-body-release), two "no occupant" lines, no "occupant is another object", no E_ACTIVATE_REACH,
+#     the record dead throughout.
+# Known limits: 0x39fe2 fights unheld and may take some of c2's swings (thirty at 27 a hit leave margin,
+# the until bounds the wait); the pair's level is the fate's roll, so the damage claim is a share below
+# 0.95 after 25 points, not a number (a vanilla humanoid has more than 25 health, so the blow is never
+# lethal); the guest's hits are counted by the server as any player's melee (reach and cone,
+# docs/verbs/melee-reach.md) and are read here through the death alone. Its own commit (rule 13).
+id: c-dungeon-enemies
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # c1 first into the hall, so it hosts; c2 100 units east of it (x-dead-placed-loot's frame)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -7329, y: 979, z: 573, rot: [0, 0, 90]}
+  - wait: 20
+  - assert:
+      - server.host(0x371de).hosted == true
+      - server.host(0x371de).client == "c1"
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -7229, y: 979, z: 573, rot: [0, 0, 90]}
+  - wait: 20
+  # claim 1: the pair live on the host, puppets on the guest, alive on the record
+  - c1: npc-state {formId: 0x39fe4}
+  - c2: npc-state {formId: 0x39fe4}
+  - c1: npc-state {formId: 0x39fe2}
+  - c2: npc-state {formId: 0x39fe2}
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - c1.npc_state(0x39fe4).aiEnabled == true
+      - c1.npc_state(0x39fe2).aiEnabled == true
+      - c2.npc_state(0x39fe4).aiEnabled == false
+      - c2.npc_state(0x39fe2).aiEnabled == false
+      - server.ref(0x39fe4).isDead == false
+      - server.ref(0x39fe2).isDead == false
+  # claim 2: the fight is the host's game's to start (the pair's own detection took 90 s and more in
+  # b-host-own-hit's 135408): c1 closes to 200 units of 0x39fe4 in the record's frame and starts both
+  # bandits' combat; the pair attacks, the host's game reports its own actors' hits on its own player and
+  # the server resolves target 0x14 to ff000000
+  - c1: approach {formId: 0x39fe4, distance: 200, cell: record}
+  - wait: 2
+  - c1: start-combat {formId: 0x39fe4}
+  - c1: start-combat {formId: 0x39fe2}
+  - wait: 3
+  - c1: npc-state {formId: 0x39fe4}
+  - assert:
+      - c1.npc_state(0x39fe4).inCombat == true
+  - until: {within: 90, expect: ['server.log_count("OnWeaponHit - 39fe[24] hits ff000000") >= 1']}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("OnWeaponHit - 39fe[24] hits ff000000") >= 1'
+      - 'server.log_count("E_HIT_WEAPON") == 0'
+      - 'server.log_count("No permission to send OnHit") == 0'
+      # recorded, not claimed (>= 0 always holds and the count prints in the result): the pair's hits on
+      # the guest's player, the R0 path no scenario has claimed for a hosted actor
+      - 'server.log_count("OnWeaponHit - 39fe[24] hits ff000001") >= 0'
+  # claim 3: the host's engine damages 0x39fe4 (no server number: a fall's or a trap's shape); the stream
+  # carries the fall to the record within a poll and the record to c2's puppet
+  - c1: npc-damage {formId: 0x39fe4, amount: 25}
+  - wait: 5
+  - c1: npc-state {formId: 0x39fe4}
+  - c2: npc-state {formId: 0x39fe4}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.ref(0x39fe4).isDead == false
+      - server.ref(0x39fe4).healthPercentage < 0.95
+      - abs(server.ref(0x39fe4).healthPercentage - c1.npc_state(0x39fe4).healthPercentage) < 0.03
+      - abs(c2.npc_state(0x39fe4).healthPercentage - server.ref(0x39fe4).healthPercentage) < 0.05
+      - abs(c1.npc_state(0x39fe4).healthPercentage - c2.npc_state(0x39fe4).healthPercentage) < 0.05
+  # claim 4: the guest's kill. The warhammer given and equipped through the console as b-npc-death-guest
+  # arms it; the host holds 0x39fe4 still (SetDontMove: its current leg ends within a few seconds, x-npc-hold
+  # v2 read the settle between 3 and 6 s, so eight); every approach draws the weapon again before the
+  # swings (a teleport sheathes), five rounds of six as b-npc-death-guest swings them
+  - c2: console {text: "player.additem 139ba 1"}
+  - c2: console {text: "player.equipitem 139ba"}
+  - wait: 2
+  - c2: draw-weapon
+  - c1: npc-hold {formId: 0x39fe4, held: true}
+  - wait: 8
+  - c2: approach {formId: 0x39fe4, distance: 110, cell: record}
+  - c2: draw-weapon
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: approach {formId: 0x39fe4, distance: 110, cell: record}
+  - c2: draw-weapon
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: approach {formId: 0x39fe4, distance: 110, cell: record}
+  - c2: draw-weapon
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: approach {formId: 0x39fe4, distance: 110, cell: record}
+  - c2: draw-weapon
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: approach {formId: 0x39fe4, distance: 110, cell: record}
+  - c2: draw-weapon
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - c2: hold-key {code: 199, ms: 120}
+  - wait: 1
+  - until: {within: 60, expect: [server.ref(0x39fe4).isDead == true]}
+  - wait: 5
+  - c1: npc-state {formId: 0x39fe4}
+  - c2: npc-state {formId: 0x39fe4}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.ref(0x39fe4).isDead == true
+      - c1.npc_state(0x39fe4).isDead == true
+      - c2.npc_state(0x39fe4).isDead == true
+      # the death is the engine's, by the host's report (ADR-050 decision 2; b-npc-death-guest's claims)
+      - 'server.log_count("death report: 39fe4 died") >= 1'
+      - 'server.log_count("death by the server.s word on 39fe4") == 0'
+      # recorded, not claimed: the kill credited to the guest's actor
+      - 'server.log_count("death report: 39fe4 died .* killer ff000001") >= 0'
+  - c1: npc-hold {formId: 0x39fe4, held: false}
+  # claim 5: one body, two looters. The judged approach puts each seat 150 units from the body as the
+  # record has it (a fixed point stood past the reach in b-npc-body-release's 061048); the opener's
+  # closing activation releases the occupancy and the next is admitted at once
+  - c2: approach {formId: 0x39fe4, distance: 150, cell: "371de:Skyrim.esm"}
+  - wait: 6
+  - c2: close-menu {name: MessageBoxMenu}
+  - c2: activate {refId: 0x39fe4}
+  - wait: 4
+  - c2: dump-state
+  - c2: screenshot
+  - assert:
+      - 'c2.state.menuOpen("ContainerMenu") == true'
+  - c2: close-menu {name: ContainerMenu}
+  - wait: 4
+  - assert:
+      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 1'
+  - c1: approach {formId: 0x39fe4, distance: 150, cell: "371de:Skyrim.esm"}
+  - wait: 6
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: activate {refId: 0x39fe4}
+  - wait: 4
+  - c1: dump-state
+  - c1: screenshot
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 3
+  - assert:
+      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 2'
+      - 'server.log_count("ProcessActivate 39fe4 - occupant is another object") == 0'
+      - 'server.log_count("E_ACTIVATE_REACH") == 0'
+      - server.ref(0x39fe4).isDead == true
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]

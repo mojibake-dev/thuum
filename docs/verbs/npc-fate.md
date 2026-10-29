@@ -117,7 +117,7 @@ reviewed like a scenario.
 | the engine's cell reset: after the detach time plus iHoursToRespawnCell (or iHoursToRespawnCellCleared; the zone's kNeverResets, BGSEncounterZone.h:14; gameData detachTime, attachTime, resetTime :34-36; ExtraDetachTime.h; TESObjectCELL's kDetachTime change, TESObjectCELL.h:151) the engine deletes the body, re-rolls the placement and resets inventories (ResetInventory(a_leveledOnly), TESObjectREFR.h:338) | record (the GMSTs), code | suppressed on every game (Suppress, H8): the server resets, the engine never does |
 | the respawn: the actor back at its placement after the reset time, a fresh pick from the list (the engine's reset re-rolls a leveled placement: H9a), full attributes, the base inventory | record, code | imposed: the server's schedule on the shared clock (R0, Server), applied in the game as disable, base, enable (Impose, H9) |
 | SkyMP's respawn after spawnDelay 25 s at GetSpawnPoint with the base inventory re-added (MpActor.cpp:1935-2007; DeathEvent.cpp:65-70; MpChangeForms.h:117) and the respawn of a dead record at load (MpActor.cpp:820-824; PartOne.cpp:375-378 for players) | code | suppressed for game-file actors: the fate's schedule replaces the timer and the load-time respawn; players keep theirs (m0-death) |
-| the loader's skips: dead-at-start placements (kStartsDead, TESObjectREFR.h:177; WorldState.cpp:471-480, "TODO: Load dead references") and initially disabled ones (:492-507) | code | later: a second slice makes a dead-at-start placement a server corpse (Bleak Falls' floor bodies are lootable content); this slice keeps them skipped, their loot each game's own, named as a gap |
+| the loader's skips: dead-at-start placements (kStartsDead, TESObjectREFR.h:177; WorldState.cpp:471-480, "TODO: Load dead references") and initially disabled ones (:492-507) | code | BUILT 2026-10-29 (fork m3-dead-placed 2f886731, playtest 38's finding 65: a Bleak Falls floor body with different loot per screen): a dead-at-start placement loads as the server's corpse, dead on the record with no death event, no death item and no respawn (MpActor::MarkPlacedDead; RespawnWithDelay yields), its loot the corpse path's one roll, lootable by every seat; T0 NpcExists's floor-body case (0x3b9ea). HYPOTHESIS until a lab run: the watcher's bind leaves the engine's own corpse pose, and the engine adds no death item to a starts-dead actor. Initially disabled placements stay skipped. |
 | the puppet's deferred kill and million health (formView.ts:313-319) and a puppet's death shown from the relay (movementApply.ts:75) | code | imposed as today: a puppet's isDead is the server's word; the view's "don't spawn dead actors" (formView.ts:75-79) changes for an engine reference, which binds and takes the death (Client) |
 | the killer: the engine's myKiller (Actor.h:654, GetKiller :550) set by KillImpl's attacker; the server's kill names none (GetDeathStateMsg :1608-1636 carries isDead alone; deathService.killActor(actor, null)) | code | later: the crime verb (a townsperson's death with a killer is a bounty); this slice's kills stay killer-less in the engine, named |
 | headshot's predicted death on a figure (deathService.ts:107-118, ADR-038) | code | native as is; an NPC target's kill is the server's through ClaimHeadshot (PartOne.cpp:2060-2063), no prediction |
@@ -403,10 +403,22 @@ Registry, train-42 (20:54 PDT), the deaths: on the server, the player path's
 25 s wall respawn never touches a game-file actor (RespawnWithDelay's branch
 schedules the fated respawn instead), and the server's number floors at one
 point for an essential base, or a protected one not under a player's hand
-(MayDie). On every seat, a game-file body's activation is blocked at the
-death (deathService; a dead puppet promoted at a handoff keeps it,
-puppetService 32dffbda), so the engine's own loot menu never opens: the
-server's OpenContainer with default processing is the one that does; the
+(MayDie). On every seat, a dead body is never activation-blocked (the rule
+since 2026-10-28, playtest 37's findings 58 and 62; train-42 blocked a
+game-file body at the death and puppetService 32dffbda kept the block
+through a dead promote, on the assumption that the server's OpenContainer
+activation with default processing opens a blocked body: it never did, every
+corpse that opened was the engine's own activation of an unblocked one, and
+a body demoted again after a host flip opened to no E press): the engine's
+own loot menu opens on E, the activate hook reports it, the server answers
+the record's inventory and OpenContainer, and the view lays the server's
+list under the open menu (memo D52 B); a server-made NPC copy (a 0xff id
+with an NPC base) is a corpse to the server too (IsCorpse keyed on
+IsCreatedAsPlayer, not the id's range: the dead necromancer ff00000a's E was
+dropped with no line); a dead body is released from the puppet state on
+every seat (the native promote's dead branch: block lifted, AI left off,
+flag cleared) and the fate's resurrect turns the AI on for the call whatever
+the flag; the
 engine's own cell-reset resurrection of a corpse on a re-entry
 (re-npc-roll.md section 9, the 19286 path) is undone by the view's
 two-second re-apply of the record's death. Registry, train-43 (23:56 PDT, fork m3-train-43 962fc913, stacked on 42,
@@ -2163,3 +2175,49 @@ credit, no server's word). H-56a (HYPOTHESIS): the value-owner route to zero
 kills by the engine's own health check as the console's damageav does; the
 probe reads the death report.
 
+## Finding 54 (2026-10-28, playtest 37): the reanimated thrall stood on the host alone
+
+Eli: "i think the necromancer resurrected a skeever, only visible on prisoner..." and later "the body stands up only on
+rotferns screen and fights neither". The read (21:41 PDT, a code read on the 3f tree with the live logs): the server's
+resurrection branch existed (OnHostedActorState: a dead record whose host samples health above one point is respawned
+alive, "isDead false" to every listener; the host's ordinary sample is the report), but on the host a dead-promoted
+body keeps its AI off (H-54e, PuppetApi.cpp Promote) and under AI off the engine's own Actor::Resurrect from the
+Reanimate effect's Start does not take: isDead stays true (x-npc-respawn 070508's finding, the reason
+FateApi::ResurrectActor wraps the call in EnableAI(true)), the sampler keeps reading 0, hosted_state_judge drops the
+sample as dead, the record stays dead, the watchers' puppets stay bodies and the thrall has no AI anywhere ("fights
+neither"). Two more holes: DiedAgo is nullopt for a death before the server's start (nothing stamps a body loaded dead),
+so such a body could never be stood up; and a 0xff NPC copy's live word took the players' figures' delete-and-replace
+path on the watcher. The logs put the reanimation on c2's engine at 03:54:15Z two seconds after a handoff while c1 was
+stale then disconnected, so the screen Eli saw it on is undetermined; the mechanism is the same on either host.
+
+Fix, fork m3-reanimate 9ef0d567 (train m3-turbo-train-3g d1f3e393): the platform hooks Character's Resurrect
+(CommonLibSSE-NG Actor.h:369, vfunc 0AB, written on VTABLE_Character[0] with PlayerHealthDamage's write_vfunc shape;
+the player's own vtable is untouched) and, for an actor this seat hosts and not a puppet, enables the AI before the
+engine's call and turns it off again only if the body stays dead; the host's sampler sends the dead-to-alive flip
+reliable and never swallows it as unchanged; the server counts a death with no stamp of this process as past the grace
+(T0 in ActorDeathTest); the watcher routes a server-made NPC copy's live word through resurrectActor. HYPOTHESIS H-54f:
+the kProcessMe bit (what EnableAI writes) is what blocks Resurrect on an AI-off actor; the platform line "resurrect
+<id>: hosted body, AI enabled for the engine's own resurrection (dead before true, dead after false)" confirms it, "dead
+after true" falsifies it. HYPOTHESIS H-54g: nothing else owns Character's slot 0AB (Hooks.cpp's SKSE lesson); the
+line's absence on a reanimate reveals it. Open: a reanimate inside the 3 s grace after the kill word is dropped as in
+flight and the stood-up sample goes once (a re-send while the record says dead is the follow-up); activation stays
+blocked on the host's reanimated actor; the engine's a_resetInventory on a reanimate against the record's kept
+inventory.
+
+### Reanimation is any player's, on any body (Eli, 23:25 PDT 2026-10-28)
+
+Eli, verbatim through numidium: "anyone should be able to reanimate any corpse, that's Just Gameplay". So a reanimate
+cast by any player on any body stands it on every screen whichever seat hosts the body's cell; rotfern's casts on the
+bodies in Prisoner's hosted cell (finding 63) are the required case, not the design's gap. The mechanism is the
+engine's own path, which the pieces already outline: the server accepts the caster's hit (it did), the relayed cast on
+the HOST's seat makes the caster's figure launch the same spell at the body on the host's engine (castSpellImmediate,
+with the launch geometry since fork m3-npc-launch-geometry 435b4c64), the Reanimate effect runs there, the Resurrect
+hook of 9ef0d567 stands the hosted body, the host's sampler reports it alive, the server flips the record and every
+puppet stands. Tonight's zero platform lines on c2 say one of three links failed: the relayed projectile never hit the
+body on c2, the effect did not apply on the host's engine (the magic model keeps effects the server's; HYPOTHESIS that
+a relayed cast's projectile applies its archetype on the host's engine), or the hook never fired (H-54g); Prisoner's
+own cast on a body he hosts separates the hook from the rest. If the relayed projectile proves unreliable, the server
+tells the host's seat outright to cast the accepted reanimate from the caster's figure at the body (an SpSnippet,
+Spell.Cast on the host's engine), deterministic and still the engine's reanimation, with the level cap and the thrall's
+duration the engine's on the host; the thrall follows the caster's figure there. The server side stays R0 for the
+record's life and R2 for the thrall's behaviour.

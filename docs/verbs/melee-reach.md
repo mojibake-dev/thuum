@@ -24,9 +24,18 @@ the attacker's engine; the server cannot simulate the swing, only bound it.
 What the server validates: on OnHit (MsgType 17) from a player against
 another player's actor, with a weapon or bare hands and not a bow or
 crossbow shot, the distance between the two actors' recorded positions
-against the bound below. Out of scope: hits on NPCs and creatures and hits
-by hosted NPCs (their scales and body extents are their own records'; they
-keep the 4096 bound), the hit's angle (the cone), spells and arrows.
+against the bound below. Since fork m3-npc-reach 7a80172c (the weekend pass,
+14:17 PDT 2026-10-29, M3's "NPC melee reach and hit cone"): a humanoid NPC, its
+race playable (RACE DATA flag 0x1), is gated as a player is, as a target of a
+player's swing and as an aggressor whose host reports the hit (R1: the host
+computes, the server validates; its weapon from its record's hands, its
+heading from the host's sample; the rule's 256 units of slack cover the
+sample's age). Out of scope still: creatures and the non-playable humanoid
+races (Elder, Dremora, the vampire races; their extents unread, they keep the
+4096 bound), spells and arrows. HYPOTHESIS until a lab read of a hosted
+bandit's refused swing (c-dungeon-enemies carries the read); T0 HitTest's
+created actor at 2000 units refused, CellHostTest's hosted Sigrid beyond
+reach refused and at 60 units landing.
 Rate limit / bounds: unchanged (the weapon-speed cooldown and the splash
 window stand).
 

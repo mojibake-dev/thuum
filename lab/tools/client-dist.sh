@@ -9,7 +9,7 @@ here=$(cd "$(dirname "$0")/../.." && pwd)
 dll="$here/skymp/build/dist-client/client/Data/Platform/Distribution/RuntimeDependencies/SkyrimPlatformImpl.dll"
 test -f "$dll" || { echo "no client dist: just build-client" >&2; exit 2; }
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-run() { ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 300 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
+run() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 300 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
 run "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; 'game stopped'"
 "$here/lab/tools/stage-client.sh" "$vmid" | tail -3
 # install-lab.ps1 lays a fresh dist into every game folder, longer than the
