@@ -94,10 +94,13 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 
 ## Message contract
 
-- Message name / numeric type: QuestStage, MsgType 57, wire id 65 (wire-schema skymp.rs, SCHEMA_VERSION 19).
+- Message name / numeric type: QuestStage, MsgType 57, wire id 65 (wire-schema skymp.rs, SCHEMA_VERSION 19 at first; 21 with
+  the mode byte, fork m3-quest-mode 11cbf4cb, 2026-10-29).
 - Direction: both. C2S: the seat's report. S2C: the relay to the other seats and the login replay.
 - Fields: quest (u32, the QUST form id in the shared load order; a long form id where the server's convention needs
   one, as PlayerGlobals carries its ids), stage (u16, the engine's stage index).
+- mode (u8, D58 B, m3-quest-mode): 0 list, 1 all; set by the server on the login message, whose `shared` carries the
+  shared quests in mode 0 and the DENIED quests in mode 1; a client's message with mode != 0 is refused (Range).
 - Validator rules: structural (wire-validate check_quest_stage): a quest of 0 only with a list, the list naming each
   quest once and never 0; from a client no list and a quest named, under a budget of 16 then 4 a second
   (quest_stage_budget, UNMEASURED). Semantic (wire-rules quest_stages, through the bridge): the quest on the server's
@@ -124,6 +127,16 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - Settings: `sharedQuests` in server-settings.json (lab/deploy/sky-srv, both load orders): FreeformRiverwood01
   (A Lovely Letter, 0x74a83), MS13, MS13Intro, MS13FIN (The Golden Claw, 0x39645, 0xb6031, 0x3dd29), read from
   Skyrim.esm with lab/esm.py on 2026-10-28.
+- Settings since D58 B (14:49 PDT 2026-10-29, fork m3-quest-mode fc17612d): `sharedQuests` stays the curated array above (mode
+  list); the mode lives under its OWN key `sharedQuestsMode`: `{"mode": "all", "denied": [...]}` (every quest a seat starts is the
+  world's unless denied; the Rust parser is strict: unknown fields, a duplicate, a non-list `denied` are named errors; the mode key
+  wins when both are present). The key is its own so an older image, which reads only `sharedQuests`, ignores it and starts from the
+  same deploy file (numidium's shape: a fallback restage, turbo-back, the nightly's clean image and the layer's stage all deploy
+  from main). The lab's block is in both deploy files on thuum main since 47c8103: mode all, denied the main quest's intro chain and
+  the DLC starts, read from the masters with lab/esm.py on 2026-10-29: MQ101 3372b, MQ101DragonAttack d0593, MQ102 4e50d, MQ102A
+  2bf9c, MQ102B 2610a, MQ103 d0800, MQ104 2610c (Skyrim.esm), DLC1VQ01 352a (Dawnguard.esm), DLC2MQ01 17f8e (Dragonborn.esm); the
+  alternate-start plugin's quest is apocrypha's to name. MQ104 is in as the chain's next link; drop it if Dragon Rising's stages are
+  wanted shared.
 - Papyrus natives touched (ledger lines added): none in the first slice (the server VM's Quest class, if any, is
   untouched).
 
@@ -158,6 +171,44 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - Breakpoint plan: none.
 - Owner: agent (the probe).
 
+
+## Slice two: the relayed stage without its fragment (static read 14:07 PDT 2026-10-29, the re-analyst; HYPOTHESIS until the trace)
+
+ADR-056's known limit: a relayed stage's QF fragment runs on the applying seat too, so rewards duplicate. The engine's chain, read
+on the unpacked 1.6.1170 program through Ghidra and reverse-mapped to Address Library ids with lab/addr.py, forward-checked by
+`just addr` (CommonLibSSE-NG declares the sink and the event but no body: SkyrimVM.h:116 the sink sub-object, :228 the
+FragmentSystem member; ScriptEventSourceHolder.h:95 the source; TESQuestStageEvent.h:9-12 the event; BSTEvent.h:89-108 SendEvent
+synchronous): the Papyrus native Quest.SetCurrentStageID (id 56684; refuses an event-scoped quest outside the Story Manager,
+TESQuest.h:263-264) calls EnsureQuestStarted (25003, Offsets.h:551), registers a latent wait (53703; 53716 counts the stage's log
+entries through the stage finder 25028), then the setter 25004 (walks the stage list, raises currentStage upward, calls 25252,
+AddChange kQuestStages). 25252 sets the stage's done bit, registers startup and shutdown stages with BGSStoryTeller's
+questStageWaitMap (32495), and runs 25260 per log entry: conditions, the complete and fail bits, the journal entry and the "quest
+updated" message, then sends a TESQuestStageEvent (25271) carrying a StageItemFinishedCallback. The sink SkyrimVM::ProcessEvent
+(53987, VTABLE_SkyrimVM[30] = 217115) asks the FragmentSystem (53429) for the quest's script and fragment names by (formID, stage,
+entry): found, it dispatches the VM method call (DispatchMethodCall2, IVirtualMachine.h:93) with a functor (54240) that fires
+the callback's slot 1 (25234, the TESQuestStageItemDoneEvent) when the stack ends; not found, it fires slot 1 inline. Slot 1's
+sinks clear the StoryTeller's wait and return the latent SetStage (53763). The console SetStage is 22151 over the same 25004;
+a stage set on an unstarted quest is queued by the VM itself (53711) and set at the quest's start (53706, 53713).
+
+The narrowest suppression: a Gum replacement of 53987 (the shape of the dialogue fragment gate at 35225): when the event's
+(formID, stage) is in the client's set of stages being applied from the server's relay, fire the callback's slot 1 if non-null
+and return kContinue, the engine's own no-fragment branch; else the original. Kept: the done bit, currentStage, the journal entry
+and message, the complete and fail bits, the StoryTeller bookkeeping, the latent return. Skipped with the fragment: the stage's
+world effects and its SetObjectiveDisplayed (objectives stay the later ADR's). Keyed by pairs, never a flag window: the VM may
+queue a stage on an unstarted quest and set it later. The alternative, writing currentStage and the stage bit without SetStage,
+reimplements 25004 and 25252 and loses the journal; not taken. Falsifiers: a 54240 for a suppressed pair (another dispatcher), or
+a 56684 with no 53763 (the Skyrim Platform promise would hang). Every id above is UNKNOWN to CommonLib and tagged HYPOTHESIS
+until the trace. Notes: the re-analyst's scratch (rev.py and notes.md), to be copied under docs/research/m3/re-quest-fragment.md.
+
+Dynamic plan (lab/frida/quest-stage-chain.js, both seats): hook 56684 (vm, stackId, the quest's formID, the stage), 22151, 25004
+(quest, stage, the return), 25260 (entry, hasLogEntry), 53987 (the callback, formID, stage, entry), 53429 (the return and the
+two names), 54240 and 25234 (formID, stage), 53763 (the counter). (a) c1's console setstage MS13Intro 0xb6031 10: 22151, 25004,
+25260 per entry, 53987 with 53429 true and two names, later 54240 then 25234, no 53763; the journal entry and the stage's world
+effect. (b) c2's relayed apply under the detour: 56684, 53716, 25004, 25260, 53987 returning with 25234 inside its frame and no
+53429 or 54240, 53763 to zero in the same call; lab-api stageDone(10) true on c2, no world effect, the promise resolved.
+
+**Suppress (slice two, 14:29 PDT 2026-10-29, fork m3-quest-fragment d02103fd):** the relayed stage's Papyrus fragment, by a Gum replacement of the VM's quest stage sink (53987) keyed by the pairs the client marks (TESModPlatform.SuppressQuestStageFragment / ReleaseQuestStageFragment); the callback's slot 1 fires so the journal, the done bit and the latent return keep; setting questFragmentSuppress; HYPOTHESIS until the trace.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
@@ -175,3 +226,44 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 ## Reviewer checklist
 
 See docs/VERB.md.
+
+## The Story Manager's quests (read 23:22 PDT 2026-10-28, playtest 37's 3i lay)
+
+The live set-stage with start: true on A Lovely Letter 0x74a83 answered started false and left both seats at stage 0
+(finding 57). The record says why (lab/esm.py; CTDA layout per CommonLibSSE-NG TESCondition.h:897-947): the quest's
+Story Manager condition set reads function 576 GetEventData (TESCondition.h:708) against LCTN RiverwoodLocation
+0x13163 on the Change Location event, its Location alias fills from that event (ALFE CLOC) under function 359
+GetInCurrentLoc, and the quest's event is CLOC (ENAM), so the Creation Kit's rule applies: a quest that specifies an
+event can only be started by the Story Manager, never by Start or SetStage (the chain in the game files: SMEN 0x1320e
+CLOC, SMBN 0x9002a FreeformQuestsNode conditioned on the new location having LocTypeHabitation, SMQN 0xb555d
+FreeformRiverwoodNode, the quest first in its branch; no lab plugin overrides them). Nothing in the client blocks the
+Story Manager (the Papyrus event block is the VM's alone; the platform emits locationChanged and questStart and nobody
+subscribes); whether a login or a teleport INTO Riverwood ever raises the Change Location event, as a walk into the
+location does in single player, is the open HYPOTHESIS (H-56a). Consequences: a world stage of a quest the engine has
+not started is parked by the client and applied when the engine's questStart for that quest fires (fork m3-quest-stage,
+no wire change); the probe x-quest-stage keys on MS13Intro 0xb6031 (no event, unique-actor aliases Lucan and Camilla,
+stage 10), already in lab/deploy's sharedQuests; Sven's Faendal line on both seats waits for the Story Manager to start
+A Lovely Letter on each. RESULT (14:03 PDT 2026-10-29, x-story-manager-walk 20261029-205447 at 3o's stage; the probe's own claim was framed wrong, the
+read is the console's): H-56a ANSWERED. c1's placement from lab-spawn into Riverwood's landing logged "locationChanged actor 14
+old none new 13163" at 20:56:22.186Z and, in the same millisecond, "questStart quest 74a83": a placement INTO the location raises
+the Change Location event and the Story Manager starts A Lovely Letter at once, on a lab seat, with no help. The second placement,
+to x 16000 in RiverwoodEdge01 0x9733, logged no change (that square is inside RiverwoodLocation too), so the walk half read
+nothing new. Why the playtests never saw it: every playtest seat LOGS IN inside the location (the camp is the landing), and a
+login sets the player's location without a change, so the Story Manager hears nothing until the player leaves the location and
+returns. Fix shape (the RE read 14:16 PDT, docs/research/m3/re-story-location.md; HYPOTHESIS until the Frida plan): the engine's own
+sender, PlayerCharacter::SetParentCell (40466), raises the Change Location event only when the player's currentLocation differs from the
+cell's, which a login inside the location never does; a Skyrim Platform native builds the same 0x18-byte event {{actor handle, old, new}}
+and queues it through BGSStoryEventManager::AddEvent (CommonLibSSE-NG BGSStoryEventManager.h:24-42, the CLOC index static 380069), old
+none, new the player's current location, once per login; every Change Location branch node evaluates as at a fast travel's arrival (the
+list in the research note). The earlier wording: at login, when the player's location has no change to report, the client raises
+the engine's own Change Location event once (BGSStoryEventManager::AddEvent, the Dynamic plan's lead, Address Library 32359 to
+resolve by `just addr`, the CLOC event's struct to read) from none to the current location, so each seat's Story Manager starts
+what an arrival starts; the stage relay then keeps the seats together. Until then the lab's probes place a seat outside and
+back in. The original Dynamic plan (runnable since 2026-10-29: the lab-driver logs the player's locationChanged with the old and new
+location ids and every questStart and questStop through the console tee, so log-count reads them, no step added;
+the probe x-story-manager-walk by path places c1 at Riverwood's landing, then at x 16000 in RiverwoodEdge01 0x9733 and
+runs it east across the cell line into 0x9732 under hold-key W, reading the lines and 0x74a83's running state after
+each half; it plays at the first stage after the driver's lay): a seat walks from outside the location into
+Riverwood (the Guardian Stones leg and the Riverwood Trader exit are a later version); expected newLoc 0x13163 then questStart 0x74a83; a location
+event without the start points at the SM nodes (a Frida read of BGSStoryEventManager::AddEvent, Address Library
+32359, and BGSStoryTeller 32485 by just addr), no location event at the player's location tracking after a placement.

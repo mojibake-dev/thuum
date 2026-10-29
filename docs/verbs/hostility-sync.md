@@ -164,8 +164,16 @@ up only when it loses its target, so without an end the aggro never expired
 ## Tests
 
 - **T0, cargo:** the rule: the first hit notifies, hits under 10 s apart do
-  not, a hit after the quiet window does again, and a hit on a non-player
-  never does.
+  not, a hit after the quiet window does again; a hit counts with a player
+  on one side and a player or a hosted NPC (an actor the server knows a
+  host for) on the other, and a hit between two NPCs, or on an actor nobody
+  plays or hosts, never does. Since 2026-10-28 (docs/verbs/npc-stream.md,
+  H-53h) this amends ADR-023's reading of a fight as one between players: a
+  hosted NPC is a party too, so the fights table answers IsHostileToActor
+  for the effects between a creature and the player it fights, the StartCombat notice stays between two players (a hosted NPC's victim is its host engine's to fight, a
+  player's copy of a hosted creature is AI-off), TickFights keeps a pair whose member has a host, and the rest
+  rule's `in_fight` refuses a player a rest mid-fight with a hosted NPC as
+  with a player.
 - **T0, ctest:** player A hits player B. B's user gets one SpSnippet
   "Actor" "StartCombat", self A, argument 0x14. A second hit 3 s later
   sends none. A hit after 10 s sends one again.

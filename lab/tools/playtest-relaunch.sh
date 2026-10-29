@@ -23,7 +23,7 @@ ps='Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Pro
 # (2026-10-09 11:55, sky-c2: the game stopped, the task never started); the
 # same command again is safe, stopping nothing new and starting the task
 for attempt in 1 2; do
-  out=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" 2>&1 || true)
+  out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" 2>&1 || true)
   line=$(printf '%s' "$out" | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip().splitlines()[-1])' 2>/dev/null || true)
   [ -n "$line" ] && { echo "$line"; break; }
   echo "the guest agent answered no relaunch line (attempt $attempt): ${out:0:200}" >&2

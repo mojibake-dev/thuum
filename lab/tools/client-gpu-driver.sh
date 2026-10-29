@@ -12,7 +12,7 @@ jump=${JUMP_HOST:-root@core.gaussing.tv}
 here=$(cd "$(dirname "$0")/../.." && pwd)
 srv=${SRV_HOST:-eli@10.10.70.10}; srv_ip=${SRV_IP:-10.10.70.10}; port=${DIST_PORT:-8765}
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-run() { ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout ${2:-120} -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
+run() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout ${2:-120} -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
 echo "== adapters before"; run "Get-CimInstance Win32_VideoController | ForEach-Object { '  ' + \$_.Name + ' [' + \$_.DriverVersion + '] ' + \$_.Status }"
 if [ -z "$exe" ]; then
   # the package by the card: NVIDIA's branches split by family, and a Pascal package refuses a Blackwell

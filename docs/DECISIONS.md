@@ -564,8 +564,9 @@ which the server already implements as "a fight recorded between the two parties
 fights between two user-played actors and TickFights forgot any pair with a non-user member, so every NPC-to-player
 effect gated on hostility was refused forever, the cloak included (a player standing in the fire took no server
 damage). The rule now admits a hosted NPC (an actor with a host) as a party: a hit by or on it with a player on the
-other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat
-snippet goes only to a user-played victim (the host's engine already fights). Between two hosted NPCs nothing is
+other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat snippet stays between two players (a hosted NPC's victim is its host engine's to fight, a
+player's copy of a hosted creature is AI-off, so a creature's hit on a player sends no notice; the server's rest
+refusal is what that player keeps). Between two hosted NPCs nothing is
 recorded (the engine's own business on the host). Fork m3-npc-fights; T0 in NpcCastTest's cloak case regains its
 damage claim (5 of 250 per cadence after the first Firebolt), the wire-rules tests cover the three pairs.
 
@@ -3313,3 +3314,92 @@ relay, the probe x-quest-stage (c1's console setstage on a listed quest reaches 
 an unlisted quest refused in the log; a restart keeps the stage) once lab-api has a quest-stage read, then scenario
 b-quest-stage. The dialogue work (npc-talk) stands on it: a line conditioned on a stage is offered on both seats once
 the stage is shared.
+
+
+## ADR-057: Spell-placed world objects are the server's, from a table keyed by spell and anchor (Raise Wall)
+
+Status: ACCEPTED under the overnight rule of 2026-10-28 ("take the recommended option, record the call"), 07:2x PDT
+2026-10-29 (thuum-magnus; written PROPOSED 22:01 PDT 2026-10-28; Eli, playtest 37: "im impatient, can we try getting
+raise wall working?"). Built and T0 green on m3-turbo-train-3o-win ee44f7d1. Eli's veto reverses it to ADR-029's
+allowlist entry (B below) at the cost of the natives.
+
+Context. Apocalypse's Raise Wall (SPEL 0xcc14, a self-delivery concentration spell) places a wall MSTT 0x98529 (a
+Havok body, no navcut) and a glow ACTI 0x735e8 by its effect script in the caster's game alone, 192 units ahead along
+the caster's yaw, Z -48, for the concentration plus a 5 s fade (apocrypha's disassembly of WB_FabricateWall_Script,
+2026-10-28). ADR-029's default (scripts run in the caster's game) is why the other seat saw nothing (numidium's
+refs-near diff at 04:25Z: the two references on c1, none on c2), and ADR-029 left the first allowlist entry open.
+apocrypha's corpus read (docs/research/apocalypse/placed-objects.md on apocrypha/alternate-start): three families by
+anchor, caster (Raise Wall, Fabricate Object, Wind Running), hit target (Tharn's Prison, Enter the Dungeon, Banish
+Living), projectile impact (Summoning Rune, Wellocs Instant Forest).
+
+Decision. Shape C of docs/verbs/spell-placed-object.md: the server places the objects itself from a settings table
+(spell, anchor, bases with offsets, lifetime rule, caps) when it accepts the cast start it already records
+(PartOne::StartCast, wire-rules casts), deletes them 5 s after the cast's end, a disconnect or a cap, and every seat
+receives them through the server-object path (collision comes with the mesh on every seat); the caster's game keeps
+the script's own copies and skips the server's whose placed_by names itself; the rise and the shaders are the client's
+cosmetics (R3, a later slice); the knockdown explosion and a wall placed where the caster's engine chose the
+no-room message are listed limits. Not chosen: A, the caster's game reporting the script's placements (Skyrim
+Platform intercepts no PlaceAtMe, and a client's pose would be trusted); B, the server running the script through
+ADR-029's allowlist (GetAngleZ, Sin, Cos, TranslateToRef missing and PlaceAtMe delegated, so no server object would be
+born).
+
+Consequences. A wire change (CreateActorProps gains placed_by, the schema bump, validator and fixtures in one commit,
+rule 4), a DB field placedBySpell with a sweep at load (rule 6), the table in both deploy settings files, T0 for the
+pose, the gate, the caps and the lifetime, T2 for the relay, the probe x-raise-wall and scenario b-spell-placed-wall
+(the wall on both seats within 2 s and 16 units, neither walks through it, gone on both within the lifetime, a late
+joiner sees it). v1 ships Raise Wall alone on the caster anchor; Fabricate Object's menu choice (a client-reported
+base id validated against the spell's list) and Wind Running's per-update placement are later deltas; the hit-target
+and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
+
+## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
+
+Status: PROPOSED 14:06 PDT 2026-10-29 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes.
+Eli's words: "heavy progress made into physics items. i feel like the canon perfection of multiplayer phys objects is gmod if
+that mental model helps at all", and "i had a friend add air strafing from the source engine to openmw i would imagine the
+networked portion physics object functionlity can be borrowed in a similar way" (2026-10-29).
+
+Context. The law gives physics to the host client (R2: the host computes, the server records; ADR-002 forbids server Havok), and
+nothing in the fork moves a prop between seats today: every item reference and spawned object is forced Keyframed on arrival
+(skymp5-client objectReferenceEx.ts, spawnProcess.ts), the loader skips movable statics (MSTT), and a kicked basket or a dropped
+sword moves on one screen alone. PLAN.md's M3 line "physics host switching for movables" has had no code (the pass's audit).
+Garry's Mod is Source: the server runs VPhysics and is the one truth, clients interpolate the networked origin and angles and
+predict only their own player, and a held or pushed prop's motion controller is the server's (Valve, "Source Multiplayer
+Networking", developer.valvesoftware.com/wiki/Source_Multiplayer_Networking; Bernier, "Latency Compensating Methods in
+Client/Server In-game Protocol Design and Optimization", GDC 2001). We cannot run the physics on the server, so what we borrow is
+the networked portion, as Eli's friend borrowed Source's air strafing into OpenMW without its physics: ONE simulator per prop,
+positions and angles networked only while the body is awake, interpolation on every other seat, and the simulator chosen by
+the interaction (Fiedler, "State Synchronization", gafferongames.com, 2015; "Networked Physics in Virtual Reality", GDC 2018).
+
+Decision 1, one simulator per prop. A prop is simulated by exactly one seat at a time: the cell's host by default, and the seat
+whose player last touched it (a Havok contact of its character controller, a grab, a drop, a shout's or spell's impulse) for as
+long as its lease holds (PROP_LEASE_MS, 3000 after the body sleeps; UNMEASURED). The owner table ADR-050 decision 4 and ADR-052
+named gets its second row kind: "prop" beside "follow", "margin" and "claim"; the cell is still the policy (a prop in an
+unhosted cell freezes at the record). Rung: the claim R0 (the server decides who simulates, on the toucher's report, newest touch
+wins by epoch), the transform R2 (the simulator's engine computes, the server records).
+
+Decision 2, the wire. Three rows in wire-schema, each with its validator in the same commit (rule 4): PropTransform {refr,
+pos, rot, asleep} from the simulator at most every 100 ms while the body is awake and once at sleep (C2S), relayed to the
+cell's other listeners (S2C) as a delta; PropClaim {refr, touch} (C2S) from the seat whose player touched a prop it does not
+simulate; PropOwner {refr, player, epoch} (S2C) to every listener at each change. The record keeps the last transform and the
+asleep flag (the reference's locationalData; no schema change for items, MSTT records are slice two's).
+
+Decision 3, the seats. The simulating seat's body is Dynamic and streams; every other seat's body is Keyframed and takes the
+stream's transform (SetPosition and the rotation through the rigid body's setters; interpolated over the sample interval as a
+figure is), so it neither falls nor fights the stream; at an owner change the new simulator's body goes Dynamic with the last
+streamed velocity (HYPOTHESIS: the hand-over is seamless at 100 ms samples) and the old one goes Keyframed. Nothing predicts.
+
+Decision 4, the slices. One: items the server already loads (MISC, WEAP, ARMO, ALCH, INGR, BOOK references with Havok, a drop's
+reference from its first frame), the probe x-prop-push (c1 walks into a basket; c2 sees it move within 32 units of c1's and rest
+where c1's rests) and x-prop-pass (c2 kicks it back: the owner flips, c1 interpolates). Two: movable statics (MSTT) admitted by
+the loader as references (the dead-placed fix's shape) and the Blue Palace's physical container. Three (later, M4): dragging and
+telekinesis as touches, ragdoll bodies under the same rows (finding 71's settle becomes a PropTransform of the body).
+
+Consequences. The observe/impose/suppress split: observe the Havok awake state and transform on the simulator (bhkRigidBody,
+hkpMotion: CommonLibSSE-NG H/hkpMotion.h, B/bhkRigidBody.h; the sleep signal is the simulation island's active mark,
+H/hkpSimulationIsland.h, the headers hold no isActive); impose the transform on the others (TESObjectREFR::SetPosition, the
+body's SetRotation, SetMotionType Keyframed: N/NiAVObject.h's SetMotionType); suppress the others' dynamics (Keyframed). The
+touch detection has no header entry point (the character controller's contact callbacks exist as listener lists nobody adds
+to: B/bhkCharProxyController.h, H/hkpContactListener.h) and is the verb's RE task; until it lands, slice one's touch is the
+player's grab and drop plus proximity to an awake prop (the nearest player within 128 units of a body that woke claims it).
+Known limits: no prediction (a prop a seat does not simulate moves a sample behind), stacked props flip owners by contact, a
+prop in an unhosted cell freezes, bodies and props stream on the same budget (prop_budget UNMEASURED).

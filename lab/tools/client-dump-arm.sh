@@ -25,5 +25,5 @@ Register-ScheduledTask -TaskName 'sky-lab-procdump' -Action \$a -Principal \$p -
 Start-ScheduledTask -TaskName 'sky-lab-procdump'
 Start-Sleep 2
 (Get-ScheduledTask -TaskName 'sky-lab-procdump').State.ToString() + ', waiting for SkyrimSE.exe; dumps so far: ' + @(Get-ChildItem 'C:\\sky-lab\\dumps' -Filter *.dmp -ErrorAction SilentlyContinue).Count"
-ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" \
+ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" \
   | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); print((d.get("err-data") or "").strip()[-400:], file=sys.stderr) if d.get("exitcode") else None; sys.exit(0 if d.get("exitcode")==0 else 1)'

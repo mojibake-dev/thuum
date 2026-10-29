@@ -700,15 +700,33 @@ returning, H-53g); the server stands a known constant-effect ability as the cast
 (PartOne::AbilityReaching over KnownBaseSpells' reached spells), so the atronach's cloak damage lands at the reach
 rule's cadence, and a spell no ability reaches stays refused (rule 5; T0 NpcCastTest). Known: a server-made
 creature's death still ends by the server's word (the client never reports a 0xff id and the wire refuses the range,
-a contract change for its own commit, fork m3-death-range 2069d4d2). READ ITEM (the train's first T0, pipeline 3650):
-the cloak's hit is claimed but its damage effect, MGEF crFireDamageConcAimed 0x10fdd1, carries one CTDA (function 719
-by the record, lab/esm.py) that ADR-039's evaluation holds false ("its conditions fail; not applied"), so the
-atronach's cloak may deal no server-side damage to a player even when claimed; which function 719 is and what it
-needs on the server is HYPOTHESIS H-53h until read (the Firebolt is unaffected). OPEN ITEM before the train merges
-to parity: NpcCastTest's cloak case asserts the claim alone since fork m3-turbo-train-3b df445168 (the lay's T0), a
-relaxed T0 claim in rule 13's sense; the damage assertion (one cadence, 5 of 250, health 0.98) goes back the moment the
-condition is read and the server's evaluation holds it, or the case states why the engine's cloak never hurts a
-player server-side. Tracked here and in the LOG; numidium tells Eli the cloak caveat with the lay.
+a contract change for its own commit, fork m3-death-range 2069d4d2). READ (2026-10-28; the train's first T0, pipeline
+3650, showed it): the cloak's hit is claimed, and its damage effect, MGEF crFireDamageConcAimed 0x10fdd1 (SPEL
+crAtronachCloakFlameDmg 0x6445b: concentration, aimed, magnitude 10, duration 1), carries one CTDA, function 719,
+EqualTo 1.0, params 0, run on Subject (lab/esm.py). H-53h CONFIRMED-by-read for the identity: 719 is IsHostileToActor
+(CommonLibSSE-NG include/RE/T/TESCondition.h:865; the engine method include/RE/A/Actor.h:593), which the fork already
+implements: condition_functions/IsHostileToActor.cpp ignores the null parameter, takes the effect's other end as the
+other actor and answers worldState->fightBetween(self, other), installed in PartOne::Init over wire-rules hostility.rs
+Fights::between, ADR-023's table. It failed because that table never held a hosted NPC:
+ActionListener::NotifyHostility built its facts from serverState.UserByActor alone and the rule wanted a user on both
+sides, so a hit by or on a hosted creature never entered it, and PartOne::TickFights forgot any pair whose member had
+no user; every NPC-to-player effect gated on 719 was refused forever, mid-fight included (the Firebolt, with no
+condition, was unaffected). Fixed on fork m3-npc-fights (R0; no wire change, no new condition function): HitFacts
+carry aggressor_is_hosted and target_is_hosted (worldState.HostOf non-null for an actor no user plays), the rule
+(hostility.rs `counted`, formerly `between_players`) counts a hit with a player on one side and a player or a hosted
+NPC on the other, the StartCombat notice stays between two players (a hosted NPC's victim is its host engine's to fight, a player's
+copy of a hosted creature is AI-off), TickFights keeps a pair whose member has a host, and the rest rule's in_fight refuses a player a rest
+mid-fight with a hosted NPC as with a player (hostility-sync.md's T0 line amends ADR-023's "between players"). The T0
+claim restored (NpcCastTest's cloak case, relaxed at df445168): the cloak's first hit on a never-fought pair, the
+atronach's own host standing in the cloak (playtest 37's seat), is refused "its conditions fail; not applied" with its
+health unchanged, the engine's rule between strangers; a claimed Firebolt of the atronach's begins the fight with the
+other player (health 0.9, GetFights().between, no StartCombat notice, the pair kept through a TickFights); then
+the cloak's first report on that player lands one cadence, 0.5 s (wire-rules casts REACHED_TICK_MS) of magnitude 10, 5
+of the recorded 250: 0.9 to 0.88, with no E_CONDITION_UNKNOWN. HYPOTHESIS (H-53h, what remains): the engine's own 719
+with a null parameter on an aggressive creature, whether a creature whose AI means to attack the player counts as
+hostile to it before any blow (then the single-player cloak burns a player it has not yet hit, where the server's
+table waits for a counted hit; a Frida read of the condition's answer on the host's seat at the atronach's first cloak
+proc decides); no new notice reaches a seat, the StartCombat stays between players.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 

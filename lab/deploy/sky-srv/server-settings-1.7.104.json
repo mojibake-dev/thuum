@@ -267,11 +267,51 @@
   "cureSpells": [
     "b8780:Skyrim.esm"
   ],
+  "sharedQuestsMode": {
+    "mode": "all",
+    "denied": [
+      "3372b:Skyrim.esm",
+      "d0593:Skyrim.esm",
+      "4e50d:Skyrim.esm",
+      "2bf9c:Skyrim.esm",
+      "2610a:Skyrim.esm",
+      "d0800:Skyrim.esm",
+      "2610c:Skyrim.esm",
+      "352a:Dawnguard.esm",
+      "17f8e:Dragonborn.esm"
+    ]
+  },
   "sharedQuests": [
     "74a83:Skyrim.esm",
     "39645:Skyrim.esm",
     "b6031:Skyrim.esm",
     "3dd29:Skyrim.esm"
+  ],
+  "spellPlacedObjects": [
+    {
+      "spell": "00cc14:Apocalypse - Magic of Skyrim.esp",
+      "anchor": "caster",
+      "objects": [
+        {
+          "base": "098529:Apocalypse - Magic of Skyrim.esp",
+          "type": "MSTT",
+          "forward": 192,
+          "dz": -48
+        },
+        {
+          "base": "0735e8:Apocalypse - Magic of Skyrim.esp",
+          "type": "ACTI",
+          "forward": 192,
+          "dz": 0
+        }
+      ],
+      "lifetime": {
+        "whileHeld": true,
+        "lingerS": 5,
+        "maxS": 120
+      },
+      "perCaster": 2
+    }
   ],
   "modLock": {
     "enabled": true,
