@@ -9,6 +9,6 @@
     "801:Headshot Kills.esp"
   ],
   "movement": {
-    "leadSeconds": 0.1
+    "leadSeconds": 0.15
   }
 }
