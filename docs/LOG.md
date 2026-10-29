@@ -2813,3 +2813,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   busy" lines on a seat (read pending); 68 rotfern's bow drew no arrows after its relaunch (x-hands-relaunch's second shot never
   fired; read pending). Mid-sitting at Eli's ask numidium reset the hall (world saved playtest-m3-38-before-bleakfalls-reset-
   20261029T200344Z, 33 records moved aside), rotfern alone in it hosting (epoch 2) for item 3's protocol.
+- 13:27 PDT: playtest 38 closed (Eli: "ok. filled out. basically everything failed in one way or another."): item 1 ticked with 64's
+  note, 2 to 8 unticked; item 5's bolts and item 7's cloak passed on Eli's words; findings 64 to 76 in docs/private/playtest-m3-38-
+  findings.md (kept beside the checklist while Eli has it open; folded in when it is closed). The sitting's new ones: 69 killcams on,
+  70 the Golden Claw stage 12 relayed at the barrow's entry trigger (works as designed), 71 a killed bandit T-posing half in the ground on
+  the watcher (the silent bind kill plays no ragdoll), 72 a killed body could not be reanimated (unread), 73 and 74 a pre-dead body
+  reanimated as two local copies (no record: 65's root), 75 the atronach freezes at death, 76 a rumor's misc quest did not cross (only
+  the shared list does, D55 B; Eli's call). Logs at results/playtest-38 (numidium's pull since 18:06Z); the end world saved. Fix
+  branches cut from 3o: m3-dead-placed (the loader loads starts-dead ACHRs as dead records) and m3-grant-roster (a roster dropped for a
+  missing host replays at the grant).
