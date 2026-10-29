@@ -700,7 +700,11 @@ returning, H-53g); the server stands a known constant-effect ability as the cast
 (PartOne::AbilityReaching over KnownBaseSpells' reached spells), so the atronach's cloak damage lands at the reach
 rule's cadence, and a spell no ability reaches stays refused (rule 5; T0 NpcCastTest). Known: a server-made
 creature's death still ends by the server's word (the client never reports a 0xff id and the wire refuses the range,
-a contract change for its own commit).
+a contract change for its own commit, fork m3-death-range 2069d4d2). READ ITEM (the train's first T0, pipeline 3650):
+the cloak's hit is claimed but its damage effect, MGEF crFireDamageConcAimed 0x10fdd1, carries one CTDA (function 719
+by the record, lab/esm.py) that ADR-039's evaluation holds false ("its conditions fail; not applied"), so the
+atronach's cloak may deal no server-side damage to a player even when claimed; which function 719 is and what it
+needs on the server is HYPOTHESIS H-53h until read (the Firebolt is unaffected; NpcCastTest asserts the claim).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
