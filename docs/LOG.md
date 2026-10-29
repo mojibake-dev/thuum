@@ -2948,3 +2948,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   parser unchanged), and the block (mode all; MQ101 to MQ104's chain and the DLC starts denied) is in both lab/deploy/sky-srv settings
   files on main since 47c8103, before `sharedQuests`, which stays; an image without the branch ignores the key. No timed commit.
   P2's pre-assembly aa618c1a carries the change. (47c8103's message names docs this commit carries.)
+- 14:53 PDT: 3o's gate has two reds from the always set (numidium): a-restart-persistence 210336 ("c2 does not see c1" after the
+  restart; c2's guest agent dead at the pull, its logs lost; the server log clean at the restart: a lab fault to rerun) and b-duel
+  211244 (the step-65 held attack left c2 at 0.968 against < 0.78). My read of the duel's server log: three hits recorded, each from
+  health 1.0 (the victim regenerated between hits 13 and 48 s apart), and the held attack landed ONCE, weak and half-blocked (blocked
+  share 0.502 from the attacker's engine's hit data), where the green runs took 22 to 36 percent; the server's melee path is the parity
+  code in 3n and 3o, so the suspect is the figure on the attacker's screen: movement.mode follow as the client default since ee6bb01
+  (the figure a sample behind; m3-turbo-knobs' lead and still knobs). numidium's reader compares 090354's hit lines; if confirmed, the
+  gate's cure is the client settings' mode back to lead (a settings commit, not a scenario change) and D61 for Eli: A follow for the
+  look, B lead as before, C the hybrid (lead within melee reach when a weapon is drawn, follow otherwise), recommended C as a build.
+  With two reds the run set ends red (ADR-027 reruns a lone red only), so 3o's merge waits; 3n shares the default and would sink alike.
