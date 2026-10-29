@@ -127,14 +127,16 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - Settings: `sharedQuests` in server-settings.json (lab/deploy/sky-srv, both load orders): FreeformRiverwood01
   (A Lovely Letter, 0x74a83), MS13, MS13Intro, MS13FIN (The Golden Claw, 0x39645, 0xb6031, 0x3dd29), read from
   Skyrim.esm with lab/esm.py on 2026-10-28.
-- Settings since D58 B (14:41 PDT 2026-10-29, fork m3-quest-mode 11cbf4cb): `sharedQuests` as the array above (mode list)
-  or `{{"mode": "all", "denied": [...]}}` (every quest a seat starts is the world's unless denied; the Rust parser is strict:
-  unknown fields, a duplicate, a non-list `denied` are named errors). The lab's block, to land in both deploy files AT THE SAME
-  DEPLOY as the code (a server without 11cbf4cb refuses the object and does not start; so P2's stage, never before): mode all,
-  denied the main quest's intro chain and the DLC starts, read from the masters with lab/esm.py on 2026-10-29: MQ101 3372b,
-  MQ101DragonAttack d0593, MQ102 4e50d, MQ102A 2bf9c, MQ102B 2610a, MQ103 d0800, MQ104 2610c (Skyrim.esm), DLC1VQ01 352a
-  (Dawnguard.esm), DLC2MQ01 17f8e (Dragonborn.esm); the alternate-start plugin's quest is apocrypha's to name. MQ104 is in as
-  the chain's next link; drop it if Dragon Rising's stages are wanted shared.
+- Settings since D58 B (14:49 PDT 2026-10-29, fork m3-quest-mode fc17612d): `sharedQuests` stays the curated array above (mode
+  list); the mode lives under its OWN key `sharedQuestsMode`: `{"mode": "all", "denied": [...]}` (every quest a seat starts is the
+  world's unless denied; the Rust parser is strict: unknown fields, a duplicate, a non-list `denied` are named errors; the mode key
+  wins when both are present). The key is its own so an older image, which reads only `sharedQuests`, ignores it and starts from the
+  same deploy file (numidium's shape: a fallback restage, turbo-back, the nightly's clean image and the layer's stage all deploy
+  from main). The lab's block is in both deploy files on thuum main since 47c8103: mode all, denied the main quest's intro chain and
+  the DLC starts, read from the masters with lab/esm.py on 2026-10-29: MQ101 3372b, MQ101DragonAttack d0593, MQ102 4e50d, MQ102A
+  2bf9c, MQ102B 2610a, MQ103 d0800, MQ104 2610c (Skyrim.esm), DLC1VQ01 352a (Dawnguard.esm), DLC2MQ01 17f8e (Dragonborn.esm); the
+  alternate-start plugin's quest is apocrypha's to name. MQ104 is in as the chain's next link; drop it if Dragon Rising's stages are
+  wanted shared.
 - Papyrus natives touched (ledger lines added): none in the first slice (the server VM's Quest class, if any, is
   untouched).
 
