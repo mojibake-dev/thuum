@@ -2927,3 +2927,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   SetParentCell with the player's currentLocation and the cell's location, BeginStartUpQuest, the locationChanged SendEvent; offsets by
   just addr for 1.6.1170, cited per line), the Dynamic plan of H-56a's fix; to run at P2's stage on c1 around a placement into Riverwood
   and a relaunch in place under m3-story-arrival.
+- 14:41 PDT: fork m3-quest-mode 11cbf4cb built and reviewed (local): sharedQuests as the array or {mode: all, denied} in wire-rules
+  quest_stages.rs (strict parser, Refusal::Denied, at_login replays every recorded quest but the denied), QuestStage's mode byte with the
+  denied list at login (SCHEMA_VERSION 21; a client's mode refused; the empty-list refusal in mode 0 only; budget 32 then 8 a second
+  UNMEASURED), the C++ mirror and E_QUEST_DENIED, the client's report filter and v2 storage, T0 QuestStageTest's mode-all case (Enter
+  clears the shared world record); cargo test green across the workspace, tsc and fork-lint green. The deploy block (mode all; the main
+  quest's intro chain MQ101 to MQ104 and the DLC starts denied, ids by esm.py) is written into quest-stage.md and lands in both deploy
+  files at P2's deploy, never before: a server without the branch refuses the object at startup. WIRE.md's QuestStage paragraph says
+  the same. The quest-fragment hook and this mode ride the same train so sharing every quest does not double its rewards.
