@@ -87,7 +87,7 @@ walker's seat and Keyframed on the other, and the stream's first sample within 1
 - [x] message contract in wire-schema with validators and fixtures (same commit; b752b262)
 - [x] server rule in Rust with T0 (8575e59b; the C++ T0 PropTest runs on CI)
 - [ ] native hook + T1 (the transform read, the Keyframed set, the contact)
-- [ ] SP binding and TS service
+- [x] SP binding and TS service (the TS PropService, 8f887477; no new SP binding in slice one: setMotionType, translateTo, setPosition from the platform's own surface)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
@@ -107,3 +107,29 @@ walker's seat and Keyframed on the other, and the stream's first sample within 1
 - PropClaim has no client event (C2S only); PropTransform and PropOwner have both. touch is u32 in C++, range-checked in the handler too.
 - Unverified: the C++ on CI (listener population after ForceSubscriptionsUpdate, the LocationalData init, the first CellLoaded's grant);
   the lease's end tested in Rust alone; the difftest session drops an iron dagger and assumes the drop lands at 0xff000004.
+
+## The client half (15:18 PDT 2026-10-29, fork m3-prop-physics 8f887477, slice one)
+
+PropService (skymp5-client/src/services/services/propService.ts, 880 lines; registered in index.ts; HostService gained hostsCell): every
+500 ms the view's bound item references within 1024 units (the nearest 64; FormTypeEx.isItem's ten types) are tracked; the owner is
+the last PropOwner's player while its lease lives (the client mirrors PROP_LEASE_MS 3000 and the asleep rule so a toucher's seat does
+not keep a Dynamic body the server no longer accepts samples from), else the cell's host. The simulator's body is Dynamic and streams
+a sample at more than 2 units or 2 degrees since the last sent, at least 100 ms apart, unreliable, and one reliable asleep sample after
+500 ms still; the follower's body stays Keyframed and takes each sample by translateTo over the clamped interval (50 to 300 ms) under
+256 units, setPosition and setAngle beyond and at sleep; echoes of owned props are ignored and logged once. Touches: a grab (touch 1), a
+drop (touch 2: containerChanged out of the inventory matched to the server's copy by base within 3 s and 512 units; the release sends
+touch 2 too, since props.rs holds a grabbed prop against every other claim until the holder's drop), and the proximity stand-in (touch 0:
+a prop that moved more than 2 units between two reads with the player within 128 units and no sample for 300 ms, once per 2 s).
+formView.ts skips the movement block for a tracked prop (the item's CreateActor movement, re-applied every 2 s, would yank a Dynamic
+body back to its login place); PropService writes each sample into the model's movement so untracked props still land where the stream
+left them. Wake policy: setMotionType(Dynamic, true) only when a PropOwner names this seat; host-default clutter gets false (no settle
+storm of 64 bodies). A 1 s grace after tracking before any motion-type change (SpawnProcess's own Keyframed set comes last). Kill switch
+propPhysics. Logs under [verb:prop-physics]: "claim <hex> touch N", "stream <hex> started|asleep", "applied <hex> from the stream"
+(per 10 s), "prop <hex> owner <hex> epoch N (mine|theirs)" and "(host)" at a fallback.
+
+**The structural hole, named:** a Keyframed body never moves from a bump, so the proximity touch fires only on bodies the arrival
+forcing missed or an ex-owner's after its lease; a non-host walking into a basket gets nothing. The sure touches are the grab and the
+drop, and the host's own push covers x-prop-push when the walker hosts the cell. The contact native (the Havok callback on the player's
+character controller, the re-analyst's read in flight) is slice one's missing piece for x-prop-pass; until it lands, the claim on
+contact is HYPOTHESIS and the probe uses the host as the walker. Everything engine-facing (motion-type flips at runtime, translateTo on
+keyframed clutter, the 500 ms sleep stand-in, the drop match against DropItemService's delete) is untested until x-prop-push.

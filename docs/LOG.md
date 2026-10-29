@@ -3002,3 +3002,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lines written after the tick (six resolved nowhere), and npc-fate's and npc-handoff's box 8 is reworded without that clause. P4's
   shape: restore the wording and untick honestly, one stage's batch of reads by covered lines, every remaining tag a limit, a Dynamic
   line or a deletion; the engine-map function-name tags stay under rule 2.
+- 15:18 PDT: fork m3-prop-physics's client half built and reviewed (8f887477, tsc green): PropService (tracking, the owner with the
+  mirrored lease, the Dynamic simulator's 100 ms stream and sleep, the Keyframed follower's translateTo, the grab, drop and proximity
+  touches, PropOwner's motion-type flip, the kill switch propPhysics), HostService.hostsCell, formView's movement skip for tracked
+  props. The named hole: a Keyframed body never moves from a bump, so a non-host's touch has no signal until the Havok contact native
+  (the re-analyst reads the player's character controller's contact callback now); x-prop-push uses the host as the walker. The
+  HYPOTHESIS inventory is saved for P4.
