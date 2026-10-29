@@ -262,6 +262,20 @@ class SoloFlag(unittest.TestCase):
         self.assertEqual(sc.steps[0].args["rz"], 180)
 
 
+@needs_deps
+class ClientRollbackKey(unittest.TestCase):
+    def test_client_rollback_is_the_one_value_and_absent_leaves_the_choice_to_the_runner(self):
+        """ADR-036: `client: rollback` rolls the run's seats back cold whatever the reset mode; a scenario never asks
+        for a relaunch, which is the runner's to choose."""
+        from labapi.scenario import load_scenario
+
+        self.assertIsNone(load_scenario("id: plain\nclients: [c1]\nsteps: []\n").client)
+        self.assertEqual(load_scenario("id: cold\nclient: rollback\nclients: [c1]\nsteps: []\n").client, "rollback")
+        for bad in ("relaunch", "true", "[c1]", "Rollback"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclient: {bad}\nclients: [c1]\nsteps: []\n")
+
+
 
 @needs_deps
 class RepeatStep(unittest.TestCase):

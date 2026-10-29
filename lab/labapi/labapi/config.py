@@ -10,6 +10,8 @@ from pathlib import Path
 
 PKG_DIR = Path(__file__).resolve().parent
 LAB_DIR = PKG_DIR.parent.parent  # lab/
+# Settings.client_reset's values (ADR-036)
+CLIENT_RESETS = ("rollback", "relaunch")
 
 
 def _version_map(spec: str) -> dict[str, str]:
@@ -210,9 +212,13 @@ class Settings:
     # SkyrimSE.exe that is running, one per line. The logon launcher picks the
     # folder; this checks what it started, and the run's end reads the identity
     # again (a game replaced or lost mid-run is a lab fault, Runner._crash_check).
+    # First, "base <hex>": the image's base address as skse64.log prints it, for ADR-036's note that a relaunch
+    # within one boot tends to keep the base a cold boot randomizes (Mandiant, "Six facts about address space layout
+    # randomization on Windows", 2020); the lines after it are read from the end, so a check without it still parses.
     game_check_cmd: str = (
         "$p = Get-Process SkyrimSE -ErrorAction SilentlyContinue | Select-Object -First 1; "
         "if (-not $p) { Write-Error 'no SkyrimSE process'; exit 3 }; "
+        "'base ' + $p.MainModule.BaseAddress.ToInt64().ToString('X16'); "
         "'' + $p.Id + '@' + $p.StartTime.ToUniversalTime().ToString('o'); "
         "$p.Path; (Get-Item -LiteralPath $p.Path).VersionInfo.FileVersion"
     )
@@ -285,13 +291,30 @@ class Settings:
     # launch task (sky-lab-launch, as `lab` on the desktop); the launcher
     # asks lab-api which version to start. A fresh launch to in-game took 90
     # to 120 s on the clones (launch.log).
-    relaunch_cmd: str = (
-        "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; "
-        "Start-Sleep -Seconds 3; Start-ScheduledTask -TaskName sky-lab-launch"
+    # The launch task is stopped before the game (ADR-036): install-lab.ps1:104 registers it IgnoreNew, and
+    # launch.ps1 watches its game for a minute after the window and starts it again itself when it exits inside
+    # that minute (launch.ps1:117-135), so a kill in that minute was followed by the old launcher's own launch,
+    # with that boot's game folder and solo switch, while the Start-ScheduledTask was dropped (the ADR's review,
+    # 2026-10-17). Stopped first, the old launcher neither relaunches nor keeps a pid log, and the start is a
+    # fresh launch.ps1. The relaunch step, its files lever and the relaunch between runs all stop this way.
+    relaunch_stop_cmd: str = (
+        "Stop-ScheduledTask -TaskName sky-lab-launch -ErrorAction SilentlyContinue; "
+        "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3"
     )
     # a relaunch {frida} starts the game alone: its files step stopped it and the watcher is armed
     relaunch_start_cmd: str = "Start-ScheduledTask -TaskName sky-lab-launch"
+    relaunch_cmd: str = relaunch_stop_cmd + "; " + relaunch_start_cmd
     relaunch_timeout_s: float = 300.0
+    # ADR-036: how a seat starts a run. "rollback" stops its VM, rolls the disk back to its snapshot and boots it,
+    # two vfio resets of its GPU (sky-c2's GTX 1050 wedged at one on 2026-10-29, the fifth link-retrain wedge in
+    # sixteen days, docs/LOG.md 02:49 PDT). "relaunch" stops the game, cleans what a run leaves and starts the
+    # launch task with the VM left running, and rolls back only when something asks (Runner._rollback_reason).
+    # Rollback until the first live day has measured the other; anything else is refused at load.
+    client_reset: str = "rollback"
+    # in relaunch mode a seat rolls back once it has played this many runs since its last rollback, as a floor
+    relaunch_rollback_every: int = 20
+    # relaunch tries before the seat rolls back in that same run (a try is the guest exec and the new game's poll)
+    reset_relaunch_tries: int = 2
     # Before a self-service snapshot (proxmox.GuestControl.snapshot_clone):
     # stop the game, its loader and Windows Error Reporting, and any running
     # sky-lab task, so the clone shuts down quiet (thuum-mundus's recipe). Then
@@ -310,6 +333,11 @@ class Settings:
     )
     time_scale: float = 1.0
     extra: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        # a mistyped mode must stop lab-api at its start, not leave the lab in a reset nobody chose
+        if self.client_reset not in CLIENT_RESETS:
+            raise ValueError(f"LAB_CLIENT_RESET is one of {', '.join(CLIENT_RESETS)}, not {self.client_reset!r}")
 
     def game_versions(self) -> dict[str, str]:
         """game_esm_dirs as {version: host directory of its master files}."""
@@ -383,6 +411,8 @@ class Settings:
             client_lab_api_url=_env("CLIENT_LAB_API_URL", d.client_lab_api_url),
             client_dump_dir=_env("CLIENT_DUMP_DIR", d.client_dump_dir),
             crash_check_timeout_s=float(_env("CRASH_CHECK_TIMEOUT_S", str(d.crash_check_timeout_s))),
+            client_reset=_env("LAB_CLIENT_RESET", d.client_reset).strip() or d.client_reset,  # unset or empty: rollback
+            relaunch_rollback_every=int(_env("LAB_RELAUNCH_ROLLBACK_EVERY", str(d.relaunch_rollback_every))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),

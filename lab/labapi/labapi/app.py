@@ -382,7 +382,7 @@ def create_app(services: Services) -> FastAPI:
     # POST /clients/<c>/rollback {to} returns the clone to its newest snapshot,
     # a live session's client-only rollback (thuum ADR-041 item 5).
     # Minutes long; no run starts meanwhile.
-    async def _maintain(what: str, fn, *args):
+    async def _maintain(what: str, fn, *args, seat: str):
         # a snapshot or a promote is the holder's own work: a hold keeps runs,
         # run sets, up and down out, not this (verb-stage's first live run held
         # the lab and then could not snapshot the clones it had just written,
@@ -396,6 +396,9 @@ def create_app(services: Services) -> FastAPI:
             return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
         finally:
             runner.maintenance = None
+            # ADR-036: the clone was stopped, snapshotted or rolled back outside a run, maybe onto another snapshot
+            # than the table's, so only a rollback of its next run tells its build truly
+            runner.forget_seats(f"{what} since its last run", [seat])
 
     def _client_guest(client: str):
         g = runner.tables.guest_for_client(client)
@@ -411,7 +414,7 @@ def create_app(services: Services) -> FastAPI:
         g = _client_guest(client)
         description = str(body.get("description") or f"{body['name']} by lab-api")
         return await _maintain(f"snapshot {body['name']} of {g.name}", services.control.snapshot_clone, g, body["name"],
-                               description, s.quiesce_cmd, s.guest_task_timeout_s, s.heartbeat_timeout_s)
+                               description, s.quiesce_cmd, s.guest_task_timeout_s, s.heartbeat_timeout_s, seat=client)
 
     @router.post("/clients/{client}/promote")
     async def client_promote(client: str, request: Request):
@@ -420,7 +423,7 @@ def create_app(services: Services) -> FastAPI:
             raise HTTPException(400, "body must be {from, to}")
         g = _client_guest(client)
         return await _maintain(f"promote {body['from']} to {body['to']} on {g.name}", services.control.promote_clone, g,
-                               body["from"], body["to"], s.heartbeat_timeout_s)
+                               body["from"], body["to"], s.heartbeat_timeout_s, seat=client)
 
     @router.post("/clients/{client}/rollback")
     async def client_rollback(client: str, request: Request):
@@ -429,7 +432,7 @@ def create_app(services: Services) -> FastAPI:
             raise HTTPException(400, "body must be {to}")
         g = _client_guest(client)
         return await _maintain(f"rollback of {g.name} to {body['to']}", services.control.rollback_clone, g, body["to"],
-                               s.heartbeat_timeout_s)
+                               s.heartbeat_timeout_s, seat=client)
 
     @router.get("/game")
     async def game_version(client: str):
