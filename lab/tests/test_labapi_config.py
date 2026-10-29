@@ -61,3 +61,44 @@ class StartBox(unittest.TestCase):
             self.assertIs(Settings.from_env().clear_start_box, True)
         finally:
             del os.environ["CLEAR_START_BOX"]
+
+
+@needs_deps
+class ClientReset(unittest.TestCase):
+    def test_the_reset_mode_is_rollback_unless_the_env_says_relaunch_and_nothing_else_loads(self):
+        """ADR-036: deploying the relaunch changes nothing until LAB_CLIENT_RESET flips, and a mistyped mode stops
+        lab-api at its start."""
+        import os
+        from labapi.config import Settings
+
+        d = Settings()
+        self.assertEqual((d.client_reset, d.relaunch_rollback_every, d.reset_relaunch_tries), ("rollback", 20, 2))
+        old = {k: os.environ.get(k) for k in ("LAB_CLIENT_RESET", "LAB_RELAUNCH_ROLLBACK_EVERY")}
+        try:
+            os.environ["LAB_CLIENT_RESET"] = "relaunch"
+            os.environ["LAB_RELAUNCH_ROLLBACK_EVERY"] = "5"
+            s = Settings.from_env()
+            self.assertEqual((s.client_reset, s.relaunch_rollback_every), ("relaunch", 5))
+            os.environ["LAB_CLIENT_RESET"] = ""  # a compose file's empty value is the default
+            self.assertEqual(Settings.from_env().client_reset, "rollback")
+            for bad in ("relunch", "Relaunch", "none"):
+                os.environ["LAB_CLIENT_RESET"] = bad
+                with self.subTest(bad=bad), self.assertRaises(ValueError):
+                    Settings.from_env()
+        finally:
+            for k, v in old.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+    def test_every_relaunch_stops_the_launch_task_before_the_game(self):
+        """install-lab.ps1 registers sky-lab-launch IgnoreNew and launch.ps1 relaunches a game that exits in its first
+        minute, so the task stops first and the start is always a fresh launch.ps1."""
+        from labapi.config import Settings
+
+        s = Settings()
+        self.assertTrue(s.relaunch_cmd.startswith("Stop-ScheduledTask -TaskName sky-lab-launch"), s.relaunch_cmd)
+        self.assertLess(s.relaunch_cmd.index("Stop-ScheduledTask"), s.relaunch_cmd.index("Stop-Process"))
+        self.assertTrue(s.relaunch_cmd.endswith("; Start-ScheduledTask -TaskName sky-lab-launch"), s.relaunch_cmd)
+        self.assertEqual(s.relaunch_cmd, s.relaunch_stop_cmd + "; " + s.relaunch_start_cmd)

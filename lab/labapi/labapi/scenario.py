@@ -142,6 +142,9 @@ class Scenario(BaseModel):
     # aside), so the engine alone plays the action on a committed save; nobody
     # logs in to the server, and a `connect` step is refused as meaningless.
     solo: bool = False
+    # `client: rollback` (ADR-036): every seat of the run rolled back to its snapshot first, whatever the reset mode,
+    # for a scenario that writes where a relaunch's cleaning never reaches or needs a fresh boot's image base
+    client: Literal["rollback"] | None = None
     clients: list[str] = Field(default_factory=list)
     server: ServerSpec = Field(default_factory=ServerSpec)
     timeout_s: float = 600
@@ -589,11 +592,15 @@ def load_scenario(text: str) -> Scenario:
                 raise ValueError(f"parity names {who!r}, which is not one of the scenario's clients")
         if parity.actor == parity.target:
             raise ValueError("parity's actor and target must be two clients")
+    reset = data.get("client")
+    if reset is not None and reset != "rollback":
+        raise ValueError(f"client is rollback (its seats rolled back to their snapshots before the run, ADR-036), not {reset!r}")
     return Scenario(
         id=str(data["id"]),
         milestone=(str(data["milestone"]) if data.get("milestone") is not None else None),
         game=(str(data["game"]) if data.get("game") is not None else None),
         solo=bool(data.get("solo", False)),
+        client=reset,
         clients=clients,
         server=_server_spec(server),
         timeout_s=float(data.get("timeout_s", 600)),
