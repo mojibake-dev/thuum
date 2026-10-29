@@ -323,6 +323,22 @@ into the cell. Validator: idx in range; budget 8 then 2 a second (UNMEASURED).
 Refusals: E_CLAIM_NO_ACTOR, E_CLAIM_NONE, E_CLAIM_NPC, E_CLAIM_DEAD,
 E_CLAIM_COMBAT, E_CLAIM_REACH, E_CLAIM_HELD, E_CLAIM_UNLOADED.
 
+QuestStage (id 65, MsgType 57), both directions, reliable (fork m3-quest-stage,
+2026-10-28; docs/verbs/quest-stage.md, ADR-056): `{ quest: u32 (the QUST's form
+id in the load order both ends share, 0 with a list), stage: u16 (the engine's
+stage index), shared: [u32] (server to client only: the shared quests, sent at
+a login with quest 0) }`. Client to server, R1: one stage the player's own game
+set on a shared quest; the server checks the quest is a QUST in its load order
+and on its `sharedQuests` list, keeps the stage once on the world's record (the
+set of stages done per quest, on the world's journal reference), relays it to
+every other player and replays the record after a login in order after
+PlayerGlobals, behind the list. Server to client, R0: the list, the relay, the
+replay; the seat applies each stage through the engine's own SetStage and
+consumes the engine's event for it. Validator: a client names no list and a
+quest other than 0; the list names each quest once and never 0; budget 16 then
+4 a second (UNMEASURED). Refusals (the server's log): E_QUEST_UNKNOWN (not a
+QUST in the load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
+
 DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
 m3-npc-death b82a82e5, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
 deaths by the engine): `{ idx: u32 (the victim as the server indexes it),
@@ -340,8 +356,10 @@ check_damage_cause): idx in range, health finite and 0 to 1.
 
 ActorDeath (id 60, MsgType 52), client to server, reliable, once per death,
 R1 (fork m3-train-44 597bb9dc, 2026-10-24; ADR-048's B, Eli's D1 "jump right
-to B"): `{ refrId: u32 (the dead game-file actor, under 0xff000000,
-nonzero), cause: u8 (0 unknown, 1 fall, 2 hazard, 3 script, 4 an actor's
+to B"): `{ refrId: u32 (the dead actor, nonzero: a game-file actor, or since
+fork m3-death-range, playtest 37's finding 47, a server-made one from
+0xff000000 up, whose death otherwise ran the server's 3 s word), cause: u8 (0
+unknown, 1 fall, 2 hazard, 3 script, 4 an actor's
 hit), killer: u32 (the killer's id for cause 4, else 0), pos: [f32; 3]
 (where the body fell) }`, sent by skymp5-client's DeathReportService at
 deathStart for an actor the game simulates whose death is not the server's

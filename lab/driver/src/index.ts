@@ -40,6 +40,7 @@ import {
   NetImmerse,
   ObjectReference,
   Perk,
+  Quest,
   Race,
   Shout,
   Spell,
@@ -1208,6 +1209,48 @@ function postResult(c: Config, step: Step, body: Record<string, unknown>): void 
   });
 }
 
+// a set-stage step waiting for the engine's answer to its latent calls (the step's case in run)
+type StageSet = {
+  step: Step;
+  quest: number;
+  before: number;
+  wasRunning: boolean;
+  asked: number;
+  startedAt: number;
+  started?: boolean;
+  ok?: boolean;
+  error?: string;
+};
+let stageSet: StageSet | null = null;
+const STAGE_SET_WAIT_MS = 10000;
+
+function finishStageSet(c: Config): void {
+  if (!stageSet) return;
+  const k = stageSet;
+  const answered = k.ok !== undefined || k.error !== undefined;
+  if (!answered && Date.now() - k.startedAt < STAGE_SET_WAIT_MS) return;
+  stageSet = null;
+  try {
+    const q = Quest.from(Game.getFormEx(k.quest));
+    const data = {
+      quest: k.quest,
+      before: k.before,
+      wasRunning: k.wasRunning,
+      asked: k.asked,
+      started: k.started,
+      ok: k.ok,
+      error: k.error,
+      stage: q ? q.getCurrentStageID() : null,
+      running: q ? q.isRunning() : null,
+      done: q ? q.isStageDone(k.asked) : null,
+    };
+    if (answered) postResult(c, k.step, { ok: true, data });
+    else postResult(c, k.step, { ok: false, error: `no answer from the engine after ${STAGE_SET_WAIT_MS} ms`, data });
+  } catch (e) {
+    postResult(c, k.step, { ok: false, error: String(e) });
+  }
+}
+
 function finishDeferred(c: Config): void {
   if (!deferred) return;
   const d = deferred;
@@ -1860,6 +1903,56 @@ function run(step: Step, player: Actor): unknown {
         };
       });
       return { node, ...scales(near[0]), all };
+    }
+    case "quest-stage": {
+      // quests' stages as this seat's game holds them (Papyrus Quest.GetCurrentStageID, IsStageDone, IsRunning;
+      // skyrimPlatform.ts's Quest): {quests: [formId, ...], stages?: [n, ...]} answers per quest its current stage,
+      // whether it runs, and which of the named stages are done, keyed by the quest's form id as decimal text
+      // (docs/verbs/quest-stage.md, memo D55 B: one seat sets a shared quest's stage, the other reads it)
+      const ids = Array.isArray(a.quests) ? (a.quests as unknown[]).map((x) => num(x)) : [];
+      const stages = Array.isArray(a.stages) ? (a.stages as unknown[]).map((x) => num(x)) : [];
+      const out: Record<string, unknown> = {};
+      for (const id of ids) {
+        const q = Quest.from(Game.getFormEx(id));
+        if (!q) {
+          out[String(id)] = null;
+          continue;
+        }
+        const done: Record<string, boolean> = {};
+        for (const n of stages) done[String(n)] = q.isStageDone(n);
+        out[String(id)] = { stage: q.getCurrentStageID(), running: q.isRunning(), done };
+      }
+      return out;
+    }
+    case "set-stage": {
+      // a quest's stage set in this seat's game, as a quest's own script would (Papyrus Quest.SetCurrentStageID,
+      // skyrimPlatform.ts's Quest): {quest, stage, start?}; the seat reports it to the server like any stage its game
+      // sets. Both calls are latent: the step answers when the engine does (finishStageSet), with the engine's own
+      // true or false and the quest as it then stands, since a stopped quest whose start fails takes no stage
+      // (playtest 37, 2026-10-28: A Lovely Letter stayed at 0 and not running after a bare set). {start: true} asks
+      // Quest.Start first when the quest is not running
+      if (stageSet) return { error: "a set-stage step is still waiting for the engine" };
+      const q = Quest.from(Game.getFormEx(num(a.quest)));
+      if (!q) return { error: `no quest ${num(a.quest)}` };
+      const quest = q.getFormID();
+      const asked = num(a.stage);
+      const set: StageSet = { step, quest, before: q.getCurrentStageID(), wasRunning: q.isRunning(), asked, startedAt: Date.now() };
+      stageSet = set;
+      const first: Promise<boolean | undefined> = a.start === true && !set.wasRunning ? q.start() : Promise.resolve(undefined);
+      first
+        .then((started) => {
+          set.started = started;
+          return q.setCurrentStageID(asked);
+        })
+        .then(
+          (ok) => {
+            set.ok = ok;
+          },
+          (e) => {
+            set.error = String(e);
+          },
+        );
+      return DEFERRED;
     }
     case "face-keyframes": {
       // an actor's FaceGen keyframes as the engine animates its face (faceOf above): {formId}, else the placed npc;
@@ -2877,6 +2970,7 @@ on("update", () => {
   const c = config();
   if (!c) return;
   finishDeferred(c);
+  finishStageSet(c);
   releaseHeldKeys();
   sendDelayedEvents();
   runScheduledReplays();

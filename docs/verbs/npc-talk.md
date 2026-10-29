@@ -153,6 +153,31 @@ second (UNMEASURED).
   puppet AI off during the dialogue and on again within the grace after the close; the line
   relayed to the host's puppet.
 
+### The claimed partner's vendor topics (playtest 37, finding 40; 2026-10-28 18:5x PDT)
+
+Eli: "start convo from prisoner no option to shop / doesnt restore even after leaving the cell as prisoner / restored
+after rotfern left cell." The re-analyst's read (docs/research/m3/re-claimed-vendor-topic.md): every INFO of the
+generic services topic (DIAL OfferServicesTopic, quest DialogueGeneric) is conditioned on the two job factions and on
+GetOffersServicesNow, whose engine body reads the actor's cached vendor faction (CommonLib Actor::CanOfferServices
+over GetVendorFaction, Actor.cpp:136); the cache is recomputed lazily and at most every 20 s of AI time, from the
+actor's factions with vendor hours, conditions and a location test (Orgnar's ServicesRiverwoodSleepingGiantInn: hours
+0 to 23, In Cell the inn). HYPOTHESIS H-58a: the claimed dialogue's topic list is built while that cache is empty (a
+recompute within the previous 20 s kept nothing for the AI-off puppet, or the recompute at the start fails its cell
+test and re-arms the throttle), while the handoff's promote minutes before a talk lets it refill. The package reading
+is FALSIFIED by the read: no package field is on the condition's path, and the promoted actor runs a package within
+its first AI frame. The fix on fork m3-face-twelve (after ed606faf): ActivatePickRef resets the cache with the
+engine's own sentinel (the stamp at -FLT_MAX, Actor.h:671) and asks GetVendorFaction again before the activation,
+waiting a frame at most 30 times for a vendor whose faction does not resolve, then opening anyway with the cell and
+hour logged. The first live run (c2's platform log, 03:40Z): the wait ran all 30 frames "no vendor faction yet (cell
+133c6, hour 5.26)" and the dialogue opened anyway, with the shop topic there: the pin's GetVendorFaction returns the
+value it read before recomputing (Actor.cpp:610), and the loop nulled the cache each frame before asking, so it read
+null forever while the recompute it forced filled the cache each frame and the menu found it; fixed on m3-face-twelve
+after becfd02e (the cache read after the recompute; the wait ends at its first frame). So the mechanism stands by the
+outcome and by the forced recompute, not yet by a "resolved" line. H-58b CONFIRMED at T4 by the outcome, 20:41 PDT 2026-10-28 (Eli: "shop worked!", Prisoner claiming Orgnar in the Sleeping Giant
+hosted by rotfern on the 0e4942bb dist; the "activatePickRef waits ... vendor faction resolved" lines of c2's platform
+log are the evidence, pulled by numidium); the probe x-npc-vendor-claim stays the formal read (c2 claims Orgnar while
+c1 hosts the inn, the Dialogue Menu's topics read for the services row).
+
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
 - H-55a: if the menu never opens, a Frida read of the activation on the claimant's seat

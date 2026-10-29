@@ -1768,6 +1768,54 @@ server numbered 54 ms before, the killer ..." (the engine's deathStart named no 
 pending aggressor, H-52b's path): the credit held, the cause word did not. Bodies: lootable from the killer's seat; the other
 seat's E on the same body met "occupant is another object and is nearby" (one looter at a time, the engine's rule).
 
+## Playtest 37's hands and outfit (findings 43 and 46, 2026-10-28; fork m3-fate-dress 5b89bf35)
+
+The host's engine copy of a game-file bandit wielded a weapon its record lacked ("E_HIT_WEAPON: hosted 39fe4 hits
+ff000001 with 13983, which its record's hands lack; dropped", 39fe2 with 13985) and a bandit outside stood naked.
+The read (the agent's, against the fork and the esm): the server rolls the outfit and the CNTO lists once and puts the
+inventory's best weapon in the record's hands (EquipBestWeapon); the AHEAD path pins the engine's roll through the
+three detours, but on the LATE path (an interior's actors by construction, a relaunch's or a teleport's neighbours
+after fatedSquares is erased at disconnect) RedressOnGameThread strips and re-adds the outfit from the fate and never
+re-rolls the CNTO weapon rows, so the engine's own rolled weapon stays beside the server's and the dresser picks by
+score (re-npc-roll.md section 11); 39fe2 and 39fe4 are plain NPC_ placements in an interior, 29600 LvlBanditMissile
+re-fated after c1's 01:37Z relaunch. Then the host's hands poll reported the engine's weapon, OnUpdateEquipment
+refused the whole report (the record's inventory lacked it) and the hit gate dropped every swing. Finding 46 is the
+same handler's other side: an accepted report REPLACED the record's worn set, which FateOf reads, so one partial report
+(a copy polled before its dressing) shrank the roll to a dagger and every later redress dressed the copy naked, on
+every seat, persisted (29600's "1 worn, right 1397e left 0").
+
+Built, server-only (the shape B: the client holds no record inventory for a live NPC and a forced equip lasts one
+engine pass): a worn WEAP the record lacks in a HOSTED report is recorded R2 (E_EQUIP_UNKNOWN_WEAPON, one info line,
+the item added to the record's inventory so the body holds what it swung) and the hit gate stands unchanged; any other
+missing item still drops; the record's worn non-weapon entries a report lacks are kept ("outfit kept for ..."), so a
+report never shrinks the fate's worn list; the host's hands poll skips an actor whose 3D is not loaded (HYPOTHESIS that
+the dressing precedes the flag). T0: NpcFateTest [NpcFate][HostedEquipment]. Rung note: the wielded weapon's identity
+on a hosted game-file actor is R2 where the fate arrived late; the damage number stays the server's. The one-roll
+purity returns when RedressOnGameThread strips the engine's non-fate WEAP rows (a platform change, later). The records
+already naked in the playtest world heal only by a restore or a respawn. Probe: a placed bandit on c1 after a relaunch,
+server.ref(id).worn holding the weapon both seats' npc_state show, no E_EQUIP_REFUSED naming it, its swings logged as
+OnWeaponHit, the worn lists equal on both seats.
+
+## A resurrection by the host's engine (playtest 37, finding 48; fork m3-npc-caster 05a285f6, 2026-10-28)
+
+Eli: "the necromancer resurrected a skeever, only visible on prisoner ... yea deff add resurrections to thuum's
+stack." The host's sampler streams every hosted actor its engine has alive, so a reanimated actor's health went out
+and the server's OnHostedActorState set alive false for a dead record and dropped the sample; nothing reports a
+stand-up. Built without a wire change: a hosted NPC the record holds dead (IsFateRespawned) whose host samples health
+above one point more than kPendingDeathMs (3 s) after its death (RecordDeathAt, DiedAgo) is taken as the host's
+engine's resurrection, R2 recorded ("[verb:npc-fate] resurrection by its host's engine"): MpActor::Respawn(false)
+clears the death and keeps the inventory, RespawnEvent sends isDead false to every listener, the watcher's formView
+turns it into the puppet's Resurrect (game-file ids; a server-made copy's stand-up reaches the record and not its
+puppet, formView.ts's dead-word gate under 0xff000000, a known limit). T0: ActorDeathTest (within the grace nothing;
+from a non-host nothing; from the host the death cleared and the live word relayed). Reanimate's thrall, Dead Thrall
+and a scripted resurrect all ride it. The 0xff death report (a server-made creature's death "by the server's word"
+after 3 s because the client never reported a 0xff id and the wire refused the range) is its own commit, fork
+m3-death-range 2069d4d2 (19:3x PDT): ActorDeath's refr_id bound leaves the validator (the id nonzero, the cause 0 to
+4; who may report whom stays OnActorDeath's rule: the simulator, a fated actor, alive), the client's gate keeps only the
+player's own actor out (the host gate isMineLocal keeps other players' figures out), no schema change; docs/WIRE.md's
+row says so. HYPOTHESIS until a placed creature's death on its host is recorded as its report (x-npc-creature-caster's
+leg: no "death by the server's word" for the placed atronach).
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
