@@ -8,8 +8,12 @@
 # (Impose), and deletes both 5 s after the cast's end (Inventory's OnEffectFinish row); the client half's skip
 # (Suppress) keeps the caster's own engine copy alone. Drafted from x-raise-wall (by path). The frame: lab-spawn,
 # both seats under the server's TGM (the caster's own god mode too, so the 8 magicka a second stream holds as long
-# as the key does; docs/verbs/god-mode.md), c1 at (0, -200) facing north so the wall's centre line lands at (0, -8),
-# c2 at (0, 300) facing south, 500 from c1 and 308 from the wall's spot, clear of the 300 units the spell's
+# as the key does; docs/verbs/god-mode.md), c1 at (0, -500) facing north so the wall's centre line lands at (0, -308),
+# c2 at (0, 0) facing south, 500 from c1 and 308 from the wall's spot, clear of the 300 units the spell's
+# (the frame moved 300 south on 2026-10-29 14:04 PDT: lab-spawn's (0, 300) is off the standable ground, c2 never
+# settled there in two runs at 3o's stage, 204833 and 205817, and fell 1,246 units; (0, 0) and (0, -500) are
+# spots other scenarios stand on; every claim is relative to the two records but the blocked read, moved with
+# the line: north of the centre line was y > 0 at -8, is y > -300 at -308, the same 8 units)
 # GetVATSFrontAreaFree condition wants ahead of the caster; one exterior cell holds all three spots (refs-near
 # lists one cell, docs/LAB.md). The spell and the bases are named as FormDescs (learn-spell's spellId, form() in
 # the claims), so the layer's slot for Apocalypse stays out of this file (docs/LAB.md: a slot written into a
@@ -32,7 +36,7 @@
 #    (per set or per form: the client half's spelling, matched without its apostrophes). Red until the client half
 #    lands (runtime_of reads 2 and the line is absent), which is this scenario's job.
 # 4. c2 walking at the wall (W 17 held 3 s, about 900 units unblocked: past the centre line and into c1's figure)
-#    stays north of the centre line (server.actor(c2).y > 0 in lab-spawn's frame; the north face is at y 44), and
+#    stays north of the centre line (server.actor(c2).y > -300 in lab-spawn's frame; the north face is at y -264), and
 #    c1 walking into its own copy stays within 256 of its start (the Havok body 1088 wide, 104 thick, 262 tall:
 #    the collision row's HYPOTHESIS, this read clears it).
 # 5. After the release, the removal line (the cast's end plus the 5 s linger plus the 50 ms tick) and then neither
@@ -69,8 +73,8 @@ steps:
   - c1: learn-spell {spellId: "00cc14:Apocalypse - Magic of Skyrim.esp"}
   - c2: learn-spell {spellId: "00cc14:Apocalypse - Magic of Skyrim.esp"}
   - wait: 2
-  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 0]}
-  - c2: teleport {cell: lab-spawn, x: 0, y: 300, z: 0, rot: [0, 0, 180]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
   - wait: 4
   # the first-cast order: look, equip, draw, wait, hold
   - c1: look {pitch: 0, heading: 0}
@@ -109,7 +113,8 @@ steps:
   - wait: 4
   - c2: screenshot
   - assert:
-      - server.actor(c2).y > 0
+      # the wall's centre line is at y -308 in this frame (the caster at -500 plus 192); north of it means blocked
+      - server.actor(c2).y > -300
       - abs(server.actor(c1).y - snapshot("c1start").y) < 256
   # 5. the release (the hold's 30 s), the linger, the removal line, then neither base on the watcher
   - until: {within: 40, every: 1, expect: ['server.log_count("set [0-9]+ removed: 2 of 2 forms deleted, its linger ran out") >= 1']}
@@ -123,8 +128,8 @@ steps:
       - 'c1.log_count("spell-placed [0-9a-fx]+: this game.s own copy of base [0-9a-fx]+ stands at the pose. the server.s copy not placed") >= 1'
       - 'c1.log_count("spell-placed [0-9a-fx]+: this game.s own copy of base [0-9a-fx]+ stands at the pose. the server.s copy not placed") <= 2'
   # 6. the late joiner: both seats back on their marks (the walks moved them), the caster redrawn after its look
-  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 0]}
-  - c2: teleport {cell: lab-spawn, x: 0, y: 300, z: 0, rot: [0, 0, 180]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
   - wait: 4
   - c1: look {pitch: 0, heading: 0}
   - wait: 1
