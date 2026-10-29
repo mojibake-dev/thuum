@@ -154,11 +154,19 @@ re-positioning (out of scope).
 ## Suppress (engine's own behavior blocked on non-hosts)
 
 - What is suppressed: nothing. The caster's view skips a CreateActor whose
-  placed_by is itself while its cast of that spell is open or ended under 6 s
-  ago; after a relaunch it places the server's.
-- How: a check in formView's spawn path.
-- Release condition: the window above.
-- Side effects: the failure-effect divergence (Inventory).
+  placedBy is itself when this game's own reference of that base stands
+  within 96 units of the pose (the mod's script's copy; Game.findClosest
+  ReferenceOfType, the cleaner's protection 0 telling the game's own
+  placement from the view's copies), retrying for 2 s to cover the script's
+  half-second rise; when none stands there (a relaunch mid-set, the copy
+  gone) it places the server's as any seat does (fork m3-spell-placed-client
+  bb7cc946, built as this rule rather than the earlier draft's "cast open or
+  ended under 6 s", which a relaunched caster would have failed).
+- How: a check in formView's spawn path (ownPlacedCopyStands).
+- Release condition: no own copy at the pose for 2 s.
+- Side effects: the failure-effect divergence (Inventory). HYPOTHESIS: the
+  script's fresh reference is found before its 3D loads (H-SP3); observers
+  see a cut at the removal, not the mod's fade (H-SP4).
 
 ## Message contract
 
@@ -231,7 +239,7 @@ re-positioning (out of scope).
 - [x] server logic + T0 (fork m3-spell-placed 5b951a9c: wire-rules placements.rs, PartOne's placement, removal and sweep, unit/SpellPlacedTest.cpp)
 - [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h)
 - [x] native hook + T1 (none needed)
-- [ ] TS handler
+- [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
