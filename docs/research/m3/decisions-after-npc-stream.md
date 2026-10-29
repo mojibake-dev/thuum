@@ -701,6 +701,10 @@ Recommended B: the needs are recorded state and a death from state is the server
 either way (rule 5). Before any build the probe reads the hypotheses: x-player-cold-kill (c1 `console player.kill` on a seat, then
 c1.state and server.ref(0xff000000).isDead, screenshot) after the hold. Not today's unless Eli freezes in play.
 
+2026-10-28 23:5xZ, Eli (through numidium, on "the recommendation there is for the server to decide the death from its
+recorded cold value"): "that sounds good." B ACCEPTED; built into the night's train as a playerGlobals entry's `killAt`
+(wire-rules player_globals.rs, the C++ handler's Kill with the cause) with its T0; x-player-cold-kill reads it.
+
 ### D52. Shared containers (11:36 PDT 2026-10-28, Eli's item 8: "this works fine, left unmarked because only one person can activate a container at once. id kind of like that to be more dynamic.")
 Today the server lets one player into a container at a time (MpObjectReference::ProcessActivate: "occupant is another
 object and is nearby"), the engine's own rule for furniture and containers; Skyrim Souls RE unpauses the menu, so the
