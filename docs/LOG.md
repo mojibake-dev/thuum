@@ -3027,3 +3027,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and 78304, offsets by just addr; the hkpRootCdPoint and hkpCollidable field offsets from the headers at write time). An agent builds the
   hook (a Gum on-enter detour, one propContact event per prop per 250 ms) and the client's claim on contact, with the proximity stand-in
   behind a fallback setting.
+- 15:40 PDT: T0 GREEN on m3-npc-reach 6fd5b343 (pipeline 3858: the reach and cone gate for humanoid NPCs, the hosted resident's hit
+  refused at 2000 units and landing at 60) and on m3-pass-train-2 0b49a28e (3859: npc-reach, story-arrival, quest-fragment, quest-mode
+  with D62 and the own-key setting; the server C++ compiles and the suite passes with the mode-all and allowed cases); m3-pass-train-3
+  a51762d4 (3860, the props server half) running. The platform halves (the arrival native, the fragment hook) compile on the Windows
+  client build alone, at the -win pushes.
