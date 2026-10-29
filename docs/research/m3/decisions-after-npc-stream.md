@@ -729,6 +729,13 @@ Recommended B. A train of its own after the turbo trains merge; the refresh is t
   change; T0 on the occupant set; a probe with two seats in one chest reads the refresh. Bodies share the branch, so two
   looters on one corpse follow.
 
+2026-10-28 17:3x PDT, D52 B's state after playtest 37: two players in one chest works on the server (dbfc8e82, the
+refused move's re-sync 9fb04fec); the HYPOTHESIS that the open ContainerMenu redraws from an inventory change was
+answered no, and the two engine refreshes we tried (the inventory-update message with a null item, the item list's
+re-read for the container) both took the store side. The working fallback is chestRedraw "reopen" (the menu closed
+and the chest activated again at each change), two-way and whole, which Eli calls "a UI nightmare"; the in-place
+refresh the engine itself uses under an open menu is the re-analyst's read (docs/research/m3/re-container-menu-refresh.md).
+
 ### D53. NPCs facing each other, and their talking animations, on the observer's screen (11:36 PDT 2026-10-28, Eli's item 6 and item 4's scene)
 The local gaze (D50, 8acf15f9) makes a puppet with no relayed target look at the LOCAL player; the host's engine relays a
 target only when it tracks one, and it tracks heads near its own player alone (H-54d), so two residents talking far from
