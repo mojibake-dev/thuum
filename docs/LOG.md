@@ -3032,3 +3032,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   with D62 and the own-key setting; the server C++ compiles and the suite passes with the mode-all and allowed cases); m3-pass-train-3
   a51762d4 (3860, the props server half) running. The platform halves (the arrival native, the fragment hook) compile on the Windows
   client build alone, at the -win pushes.
+- 15:46 PDT: m3-pass-train-3's first pipeline (3860) red at compile: unit/PropTest.cpp used GetCellHost's return type without the bridge's
+  rules header (the file the neighbours include); fixed on the train as b383e2e9 (to land on m3-prop-physics after the contact hook's
+  commit), rerunning server-only. The lab shows no hold and no run set; both seats' heartbeats fresh; c2's read is core's.
