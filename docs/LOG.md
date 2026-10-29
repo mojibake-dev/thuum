@@ -2958,3 +2958,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   gate's cure is the client settings' mode back to lead (a settings commit, not a scenario change) and D61 for Eli: A follow for the
   look, B lead as before, C the hybrid (lead within melee reach when a weapon is drawn, follow otherwise), recommended C as a build.
   With two reds the run set ends red (ADR-027 reruns a lone red only), so 3o's merge waits; 3n shares the default and would sink alike.
+- 14:54 PDT: fork m3-prop-physics's server half built and reviewed (local): b752b262 the three wire rows (PropTransform 58, PropClaim 59,
+  PropOwner 60; wire ids 66 to 68; validators with a prop budget 20 then 10 a second UNMEASURED; six fixtures; C++ structs; the client
+  interfaces; SCHEMA_VERSION 21) and 8575e59b the owner rule (wire-rules props.rs: owner_of, claim with epochs, transform with the lease
+  at sleep, host_changed, gone; the bridge; the handlers OnPropClaim and OnPropTransform; PartOne's plumbing; unit/PropTest.cpp; a difftest
+  session); cargo tests and clippy green, fork-lint green, the C++ on CI only. The client's PropService (slice one) is being built in the
+  same worktree. numidium: no movement.mode change by me; follow is Eli's own pick and goes to Eli as D61 with the duel's evidence.
