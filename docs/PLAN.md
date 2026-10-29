@@ -1224,6 +1224,31 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   docs/private/playtest-m3-37.md; the lay by numidium at the train's green, then Eli's reads in the order of pain
   (the chest, the shop topic, the face, the atronach, a reanimation, x-quest-stage at the train's stage).
 
+
+**STATE 14:05 PDT 2026-10-29 (the weekend pass's audit of parity bf133744 against this chart; one line per item):**
+- cell-host DONE (parity 535544db, 10-21). npc-puppet DONE (19e7ca9b, a25caf02, 10-22/23). Trains 39 to 44 MERGED (6cdc2b35), 45
+  (fa8809a1), 46 (aaafffe5), 47b/48/49 as 50b (951ea43d). The stream's slices 1 to 3 MERGED (66f04f2a). The NPC ladder is ON PARITY
+  whole: 51 (39cf3f4d), 52 deaths by the engine and 54 gaze, face, counters (240a31de, 10-27 20:41Z), 55 the dialogue claim with
+  D22's brake (1b866786, 10-28 02:25Z), 53 bows and spells (bf133744, 10-28 07:07Z); the voice is ON by default since P7 v5 green
+  (the earlier "stays off" line is stale).
+- NOT merged, riding the turbo trains cut after the ladder (3 to 3o; 3o ee44f7d1 staging 2026-10-29 with its gate, 3n e14dc298 the
+  fallback): shared containers, the door pass, the face and vendor gate, quest-stage (ADR-056), hands, the 0xff death report
+  (m3-death-range, on 3c to 3o), empty-label, door-walk, fate-dress, hunger, npc-caster, cast-relay, follow-mode, reanimate,
+  cloak-look, corpse-loot, bind-silent, launch-geometry, has-perk, spell-placed (ADR-057, Raise Wall) and the reanimate fallback
+  (ac620176), trains 56 (pt35 fixes) and 57 (voice lines). Playtest 38 ran on 3n's stage (findings 64 to 76, docs/private/playtest-
+  m3-38-findings.md).
+- The pass's trains (docs/private/pass-m3-close.md): m3-pass-train-1 7a223e0d (3o plus the dead-placed loader, finding 65, and the
+  held roster's replay at the grant, finding 66; T0 green) with m3-client-bits (66's belt, 67, 68, 71) as its -win; P2 to P4 follow.
+- NO code anywhere, the pass's own list: the two exit scenarios c-riverwood and c-dungeon-enemies (P2); NPC melee reach and hit cone
+  (the rules exist in melee.rs, the gate at ActionListener's "Player against player only" keeps NPCs out; P2); the encounter zone
+  clamp (ADR-049's owed read; P2); the trap evidence's lab read (x-npc-trap-report by path, never run; P2's stage); the smooth
+  motion number (P3 measured; P2's stage); npc-handoff's D8 ActorHandoff (the state replayed before a grant; decided by
+  c-riverwood's read: built only if the handoff shows a visible reset); physics host switching for movables (ADR-058, the pass's
+  head 3, slices one and two); horses, host follows rider (an owner-table row, kind mount; the pass writes the row, the build is
+  M7's with mounted combat).
+- Verb docs with Status boxes open: npc-stream six, npc-fate five, quest-stage five, npc-talk five, npc-handoff five, cell-host one
+  (the T1 box, "none: events through Skyrim Platform"); the pass closes them by probes or the ledger (P3, P4).
+
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
