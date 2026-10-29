@@ -2900,3 +2900,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   engine's story event queue; m3-quest-fragment: the VM quest stage sink's replacement keyed by the relayed pairs), both to be reviewed
   and lint-checked before any push; the exit scenarios c-riverwood and c-dungeon-enemies drafted by an agent from the lab's grammar for my
   review (own commits after).
+- 14:22 PDT: two more builds handed to implementation agents on fork worktrees for review: m3-prop-physics (ADR-058 slice one's server
+  half: the three wire rows with validators, fixtures and C++ structs in one commit, the props rule in wire-rules with its bridge, the
+  handlers, T0 PropTest, a difftest session; the wire idiom map of 0d453dc1 and 169b5a97 as the template) and m3-quest-mode (D58 B: the
+  sharedQuests setting as an array or {mode: all, denied}, Refusal::Denied, QuestStage's mode byte with the denied list at login,
+  SCHEMA_VERSION 21, the client's report filter, T0 cases, the QuestStage budget raised to 32 then 8 a second UNMEASURED). The pass plan
+  is v2 (docs/private/pass-m3-close.md: the branch map and the trains P1-win to P4).
