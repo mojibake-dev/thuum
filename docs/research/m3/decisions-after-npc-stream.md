@@ -795,3 +795,55 @@ Eli's call; the build is a slot's, not the turbo loop's.
 - [ ] A (leave as today)
 - [ ] B (the record moves with the walk, frozen when unhosted)
 - [ ] C (the ESM's schedule fact)
+
+### D55. Shared quest state under the dialogue work (17:5x PDT 2026-10-28, Eli, from playtest 37's Sven line)
+
+Eli, verbatim (through numidium, about 00:56Z): "sven convo the line about faendal, the quest one, doesnt appear on
+prisoners thing. part of me wants to touch on this one out of order. appropriately communicating the worlds shared
+quest state (with stub functionality to later separate journals but thats a LONG time coming) makes sense to start now
+as part of the dialogue work. some of the quests propogate and duplicate but not all. i think it's like, if you're
+there in the room to hear one dialog line you get it, but like sven if you have to get to a certain point in the convo
+it doesnt get telegraphed. sometimes the rumor dialog propagates, but svens did not."
+
+The mechanism (numidium's read, checked against the day's tails): a quest stage set by a dialogue fragment or a script
+runs on the talker's game alone, and since 2ce8b523 the fragment gate keeps a relayed line's fragments off the
+watcher on purpose; so each game's quest state drifts from the other's, and every line or topic whose conditions read
+that state (Sven's Faendal line in A Lovely Letter; the bounty rumor's INFO that would not even resolve on the watcher,
+finding 34) is offered on one seat and not the other. The lines that cross are the ones both games' states allow.
+Shared quest state is the layer the dialogue work stands on; today it is nobody's.
+
+Options.
+- A. Leave as is. Each game keeps its own quests; the gate stops the fragment duplicates; conditioned lines differ per
+  seat and a player's quest progress is invisible to the other. The journal is each player's own by accident.
+- B. World-shared quest state, the journal stubbed (Eli's lean). The server owns the world's quest stages (R0),
+  fed by the talker's report: a client's own stage change (its dialogue fragment, a script, the console's setstage in
+  the lab) is reported, R1 validated (the quest is a QUST in the loaded files, the stage is a known stage of it, the
+  reporter is a player, one report per quest per 50 ms), recorded per world (the world record, `mp.get(0,
+  "questStages")`, persisted), relayed to every other seat and replayed at login in order after PlayerGlobals. The
+  other seats apply it through the engine's own Quest.SetStage, so their topics, conditions and journals follow; the
+  apply is idempotent (a stage at or below the current one does nothing) and marks the quest so the SetStage's own
+  event is not reported back. The journal on every seat is the engine's, filled from the shared stages: one world
+  journal, the stub Eli names, until a per-player split. What the gate's fragments become: on the talker a TIF
+  fragment sets the stage and the report carries it to the world; on the watcher the gate keeps dropping the say's
+  fragments (right: the world's work is done once); the QF stage fragments that run under the watcher's SetStage are
+  the duplicated world effects, items and gold (self-correcting: R0 inventory overrides a local add at the next
+  SetInventory), enabled references and moved actors (wrong until the server performs world effects itself from a
+  table of fragment kinds, the second slice). Rungs: a stage R1 reported, R0 recorded and applied; objectives and
+  quest globals R2 recorded, later; the journal R3 per seat (the engine's own).
+- C. Per-player quests with shared world effects. Each player's quest state stays private (the engine today), and the
+  server performs only the world effects a stage brings (an enabled reference, a moved actor, a given item) when a
+  report names them. The right end state for separate journals; it needs the fragment-kind table first, and until a
+  player does a quest himself its conditioned lines stay off his seat, which is the very thing Eli saw.
+
+Recommended B, as a verb (docs/verbs/quest-stage.md) under a new ADR (ADR-056, shared quest state), the first slice
+small enough to start tonight: (1) the wire message QuestStage {quest: u32, stage: u16}, both directions, with its
+validator and fixtures; (2) the server's world record of stages, the relay, the login replay, a T0 for the record,
+the relay, the replay and each refusal; (3) the client's report (Skyrim Platform's questStage event) and apply
+(Quest.setStage when the local stage is lower, the loop guard); (4) the probe x-quest-stage after lab-api gains a
+quest-stage read: the host's console sets A Lovely Letter's stage, the other seat's Quest.getCurrentStageID equals it,
+Sven's Faendal line then offered on both. Known limits in the doc: QF world effects duplicate until the second slice;
+objectives, aliases and quest globals are not synced; one world journal. Not today's loop: tonight's branch.
+
+- [ ] A (leave as is)
+- [ ] B (world-shared stages, the journal stubbed; the first slice tonight)
+- [ ] C (per-player quests, shared world effects)

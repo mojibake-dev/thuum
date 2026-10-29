@@ -3158,7 +3158,13 @@ without the layer; in LAL's own flow the player wears rags there and the bed's s
 EquipItem and RemoveItem, none of which reaches an R0 record, so the rags are the server's startingKit (D7) and each
 start's kit a server table, not the mod's AddItems. D8's first sub-choice recommended: the mod supplies the room, the
 statue's menu and its 54-marker table; the server performs the teleport and the kit through a permit keyed on the
-choice (castTeleports' shape). Fork work, this session's after the turbo day, with its T0 and a probe.
+choice (castTeleports' shape). Fork work, this session's after the turbo day, with its T0 and a probe. Second
+read (apocrypha, 6e7ac18, the page's "How the pick is recorded"): the statue's menu is dialogue (a talking activator,
+94 topics), the pick is held in script ints no form exposes (chargen stage 15 the only form-level trace; the start's
+stage N on ARTHLALRumorsOfWarQuest is set in the same fragment as the MoveTo), so the permit is keyed on the LANDING: a
+record in cell 0x21594 whose one movement lands within slack of a table entry (about fifty markers, the page's table)
+is permitted and that entry names the server's kit; the vanilla-start line (MQ101's cart) is not honoured; the escape
+line is harmless.
 
 Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
 the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
