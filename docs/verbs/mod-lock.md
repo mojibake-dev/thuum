@@ -113,6 +113,14 @@ cap::NAME; the Refuse carries one u16 reason code (lib.rs:283 to 287).
   through a bridge call (`wire_server_set_mods(json)` with the loadOrder's files, sizes, CRC32s and light flags, the
   same facts manifestGen writes), the verdict sends Welcome or Refuse and, on a refusal, disconnects after the Refuse
   is sent; the core sees only welcomed connections' later messages (no C++ handler: "new handlers are Rust").
+  A layer render that rewrites a plugin's bytes moves the lock with it: nothing is hand-kept, the server's list
+  follows its files, and the server's copy and every client's must come from the same render (layer-stage's load
+  order check). apocrypha's defaults layer (thuum apocrypha/layer-defaults 539496c, the slot after playtest 37, D57 A
+  inside) moves three entries: USSEP at slot 1 from 21,106,651 B CRC32 86A15BD3 to 21,106,601 B 642C6867 (two perk
+  ability blocks dropped by a build-time patch), then to 21,106,777 B 7CA7F25F at f8259a2 (Eli's Quick Reflexes
+  row, a spell record injected from Skyrim.esm), SpellAbsorptionAndTwinSoulsFix_SE.esp (light, 42,409 B either way)
+  from F765F49C to C5F71B81 (three magnitudes set), rotfern.esp to 7B65C699; its patch tool refuses a record patch a
+  later plugin overrides, so these stay the winning copies (21:11 PDT).
   The login CustomPacket of a connection without a Hello is refused with E_MOD_LOCK_NO_HELLO after a grace of one
   server setting (`modLock.graceMs`, default 0 once every client sends a Hello; the lab's old-client run measures the
   switch-over).

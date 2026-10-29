@@ -557,6 +557,18 @@ players a rest, however long ago the last hit. Other options weighed: 10 s
 or 30 s without a hit (an exploit window: step back and rest), and distance
 alone (standing together never ends it).
 
+**Amendment (2026-10-28 21:29 PDT, thuum-magnus under the no-questions rule; Eli may veto):** a fight is also
+recorded between a player and a hosted NPC. The read of H-53h (docs/verbs/npc-stream.md) found that the Flame
+Atronach's cloak damage effect carries condition function 719, IsHostileToActor (CommonLibSSE-NG TESCondition.h:865),
+which the server already implements as "a fight recorded between the two parties"; NotifyHostility only ever recorded
+fights between two user-played actors and TickFights forgot any pair with a non-user member, so every NPC-to-player
+effect gated on hostility was refused forever, the cloak included (a player standing in the fire took no server
+damage). The rule now admits a hosted NPC (an actor with a host) as a party: a hit by or on it with a player on the
+other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat
+snippet goes only to a user-played victim (the host's engine already fights). Between two hosted NPCs nothing is
+recorded (the engine's own business on the host). Fork m3-npc-fights; T0 in NpcCastTest's cloak case regains its
+damage claim (5 of 250 per cadence after the first Firebolt), the wire-rules tests cover the three pairs.
+
 ## ADR-024: The full sweep runs at the merge, not per verb
 
 Status: accepted (2026-10-05, Eli: "please yes that's great").
@@ -2536,7 +2548,20 @@ exit passes it back under D22's margin brake, a stranger's door report stays
 refused. Built on fork m3-door-pass 2a18f926 (stacked on m3-shared-containers
 dbfc8e82), T0 at the crate and CellHostTest; the refusal line at the door is
 a stranger's or an unhosted actor's alone now. T3: a door leg into a hosted
-interior, its own commit.
+interior, its own commit. The pass's first live run: Hod into rotfern's hosted
+inn at 00:47:23Z (playtest 37, finding 39).
+
+2026-10-28 19:1x PDT, memo D54 B (Eli: "B for D54"): the persistence fact
+leaves the door. Hilde 0x35534 (ACHR flags 0x0) was refused at her own door
+and turned back; now every actor's door counts, persistent or not: into a live
+host's cell the move passes (D9's shape), into an unhosted interior the record
+follows the host's report and freezes there when the report stops (D6's
+follow, the host's client reporting the actor by its form from indoors, the
+HYPOTHESIS the T3 door leg reads). Server-only, fork m3-door-walk 2dca472a:
+CellMoveFacts' door fact without IsPersistentReference, the judge's door arm
+unchanged, CellHostTest's two non-persistent cases (RiverwoodSvensHouse
+0x1cb84). Decision 1's "entered by a persistent actor" reads "entered through
+a door" from here.
 
 ## ADR-048: Trust is mixed by what is at stake: players' contested state stays the server's number, a host's own NPC outcomes are accepted under plausibility checks and logged, and a server setting picks the strictness
 
@@ -3150,9 +3175,141 @@ esm.py), worn, in place of the Player base's sixteen default items the server la
 worn flag) replaces the base's kit for a player actor, with its T0 and a probe. The alternate start is apocrypha's
 layer (D8). Not the turbo loop's; the friend deployment's next server item.
 
+2026-10-28 17:4x PDT, apocrypha's vetting of the alternate start (docs/research/alternate-start.md on thuum branch
+apocrypha/alternate-start, c16e62a): Live Another Life is the pick (Realm of Lorkhan overrides Player 0x7, Alternate
+Perspective rebuilds Helgen, Unbound Reborn is an MCM). The facts for the server side: the opening cell is vanilla
+AbandonedPrison01 (Skyrim.esm 0x21594), LAL's marker at (6481, 1334, 191), so a startPoints entry may name it with or
+without the layer; in LAL's own flow the player wears rags there and the bed's script equips the chosen kit by
+EquipItem and RemoveItem, none of which reaches an R0 record, so the rags are the server's startingKit (D7) and each
+start's kit a server table, not the mod's AddItems. D8's first sub-choice recommended: the mod supplies the room, the
+statue's menu and its 54-marker table; the server performs the teleport and the kit through a permit keyed on the
+choice (castTeleports' shape). Fork work, this session's after the turbo day, with its T0 and a probe. Second
+read (apocrypha, 6e7ac18, the page's "How the pick is recorded"): the statue's menu is dialogue (a talking activator,
+94 topics), the pick is held in script ints no form exposes (chargen stage 15 the only form-level trace; the start's
+stage N on ARTHLALRumorsOfWarQuest is set in the same fragment as the MoveTo), so the permit is keyed on the LANDING: a
+record in cell 0x21594 whose one movement lands within slack of a table entry (about fifty markers, the page's table)
+is permitted and that entry names the server's kit; the vanilla-start line (MQ101's cart) is not honoured; the escape
+line is harmless.
+
+2026-10-28 18:1x PDT, apocrypha's landing table completed (the alternate-start page): the three master-marker
+landings read from the server's own Dawnguard.esm and Dragonborn.esm: the Dawnguard start (stage 8) at
+DLC1VQ03HunterStart, Dawnguard.esm 0x6E62 (0x02006E62 in our order), cell DLC1DawnguardHQ01; Harkon's court (stage 9),
+where LAL moves nobody itself and the vanilla bite wakes the player at DLC1VQ02PlayerWakeupMarker, Dawnguard.esm
+0x175CC (0x020175CC), cell DLC1VampireCastleGuildhall, the marker's role inferred from its name, so that entry takes a
+cell-wide slack; the Retching Netch (stage 3, InnMenuChoice 9) at an unnamed XMarker, Dragonborn.esm 0x3BD38
+(0x0403BD38), cell DLC2RRTheRetchingNetch. The table is FormDescs the server resolves through espm at load; the ship
+ride and the vanilla cart are out. Two starts change the player's race (stage 15's vampire lair through the chargen
+script's MakePlayerVampire, Harkon's bite through the vanilla turn plus Vampire Lord): race and appearance are R0 and
+the clock is the server's, so the first cut REFUSES those two choices (no kit entry in the permit's table, the menu's
+other starts stand); performing them server-side is a later slice. The friendly factions the bandit, Forsworn and
+ vampire starts add client-side are a known limit, not synced.
+
+2026-10-28 20:03 PDT, apocrypha's vampirism scout (docs/research/vampirism-under-the-server.md on thuum branch
+apocrypha/alternate-start, 3cbde0f), the input for D8 B's permit slice: one function turns every path,
+PlayerVampireQuestScript.VampireChange (quest 0xEAFD5; RaceCompatibility's list copy served loose), one
+Actor.SetRace by the player's race index in PlayableRaceList (RaceCompatibility.esm 0xD62/0xD63 at slot 6, rotfern.esp
+overriding at 81), fourteen disease RemoveSpells, the stage-1 ability kit, a 12 game-hour timer, PlayerIsVampire 1;
+LAL's lair line calls it then stage 3 and GameHour 19, Harkon's bite adds DLC1VampireChange, the perk, the wake marker
+and DLC1VQ02 stage 40. Today the race is R0 appearance recorded only at a race-menu close, no server path changes a
+live actor's race, the kit's spells are client-local AddSpells the learnedSpells list never hears (a client-turned
+vampire's VampireDrain is refused by the equip rule), the globals and timer client-local. The slice, when built: the
+server sets Appearance.raceId to the pair's vampire race and broadcasts UpdateAppearance outside the race-menu path's
+Playable rule (the own seat follows through applyAppearanceToPlayer and raceMenuService.alignRace, HYPOTHESIS for an
+update mid-world), the kit through learnedSpells, the hour performed or dropped, progression by named script admission
+or a server timer. Two open calls for Eli: (a) the disease path RUNS TODAY on a seat (VampireDiseaseEffectScript's
+events are ActiveEffect events on the player, admitted), so a player bitten by a lab vampire turns client-side three
+game days later with no server record: A) a server-side cure of DiseaseSanguinareVampiris 0xB8780 on the record until
+the slice, B) R3 for now; (b) rotfern's pairing is an INDEX gap, not a missing entry (apocrypha's precision): rotfern
+is PlayableRaceList[14] of 15 (four non-playable child races at [10..13] before it) and rotfernRaceVampire is
+PlayableVampireList[11] of 12 (BretonRaceChildVampire at [10] before it), so VampireChange looks up VampireList[14],
+which does not exist, and sets no race, while VampireCure finds the vampire at [11] and sets RaceList[11],
+ImperialRaceChild; the fix keeps both races at the same index, [10] in both lists, with the child entries dropped
+(apocrypha's layer, Eli's word). The served RaceCompatibility
+scripts are the plain variant, not the USKP set the readme prescribes with USSEP (numidium's layer item).
+
+2026-10-28 19:4x PDT (Eli through numidium, verbatim): "go with B but also in going with B one needs to scout out how
+vamirism changes happen. (and if race compatibility is in our modlst)". D8's sub-choice is B: Live Another Life
+supplies the content (the prison, the statue's menu, the landing table) and the server performs the outcome (the
+permit keyed on the landing, each start's kit from a server table), as the 17:4x and 18:1x reads above describe.
+With it, a read of how a vampire change happens, before the two race-changing starts are built (apocrypha's): LAL's
+chargen MakePlayerVampire, the vanilla turn and the Vampire Lord, and what each changes (race, spells, actor values,
+factions). RaceCompatibility 2.16 (the USSEP variant) is in the served load order (lab/layer/load-order.tsv slot 6,
+every client and the server): its PlayerVampireQuestScript pairs PlayableRaceList[i] with PlayableVampireList[i],
+and its Actor.SetRace and SendVampirismStateChanged calls have no native in the ledger (docs/MODS.md). Until that
+read lands, the first cut's refusal of the two vampire starts stands.
+
+2026-10-28 20:10 PDT (Eli through numidium, verbatim): "A for both, but how big of a lift is properly implementing
+D56". The two calls above (memos D56 and D57): D56 A, the server cures DiseaseSanguinareVampiris on a player's
+record whenever it appears, until the vampirism slice is built (server-only, thuum-cf's); D57 A, rotfern's pairing
+fixed in the layer at [10] in both lists with the child entries dropped (apocrypha's, by a plugin-patch kind that
+rewrites a form list, since rotfern.esp is Eli's), with the RaceCompatibility row moved to the USKP script set, at
+the next layer slot after playtest 37. The slice's size as answered: the turn as an R0 race act, the kit through
+learnedSpells, progression and feeding (named admission or a server clock), infection and cure (VC01 on the shared
+quest stages), about three verbs; the Vampire Lord (beast form, perks with no server path yet) its own later verb.
+
 Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
 the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
 installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs
 (the fresh-profile login, the mismatch, the start) and the friend-as-host scenarios after M3's host verbs. A change
 to any of the eight is a new ADR, not a rewrite of this one.
 
+2026-10-28 21:11 PDT (apocrypha, the defaults layer 539496c): the layer tree carries game-ini.tsv at its root beside plugins.txt
+(lab/layer/game-ini.tsv, outside SHA256SUMS; rows file, section, key, value, why after a header, # comments). Today's
+rows: SkyrimPrefs.ini [Interface] bGeneralSubtitles=1 and bDialogueSubtitles=1, Skyrim.ini [VATS] bVATSDisable=1 (the
+kill camera's switch). add-mods.ps1 applies them to the lab user's Documents\My Games\Skyrim Special Edition\<file>
+(the key rewritten in place within its section, a missing section appended, every other line kept). The installer and
+the sync script (canon-sync.ps1's shape, item 5 above) apply the same file the same way under the friend's user, after
+the first launch or on every sync, since the game's launcher rewrites SkyrimPrefs.ini.
+
+
+## ADR-056: World-shared quest stages, the journal stubbed (memo D55, B)
+
+Status: ACCEPTED 18:0x PDT 2026-10-28 (Eli through numidium: "i recommended as B for 55"; the memo is D55 in
+docs/research/m3/decisions-after-npc-stream.md). Written 18:2x PDT 2026-10-28 (thuum-magnus), before the first slice.
+
+Context. A quest stage set by a dialogue fragment or a script runs on the talker's game alone, and since fork
+2ce8b523 the fragment gate keeps a relayed line's fragments off the watcher on purpose (npc-stream.md, H-57a and b
+CONFIRMED by playtest 37's shop test). So each game's quest state drifts from the other's, and every line or topic whose
+conditions read that state is offered on one seat and not the other: Sven's Faendal line in A Lovely Letter (playtest
+37, Eli: "sven convo the line about faendal, the quest one, doesnt appear on prisoners thing"), the bounty rumor whose
+INFO did not even resolve on the watcher (finding 34). Eli: "appropriately communicating the worlds shared quest state
+(with stub functionality to later separate journals but thats a LONG time coming) makes sense to start now as part of
+the dialogue work." TES3MP's shape is one shared journal for the world (its JournalChanges sync, every player's entry
+sent to all), with per-player journals a server option that came later; we take the same order.
+
+Decision.
+1. The server owns the world's quest stages. Rung R0 for the record and its relay; the feed is R1: a client reports
+   its own game's stage change (the engine's quest-stage event, Skyrim Platform's `questStage`) as one message,
+   QuestStage {quest, stage}, in both directions (the report up, the relay and the replay down). The validator: the
+   quest is a QUST record in the server's load order (espm), it is on the server's shared list (decision 5), the stage
+   fits the engine's u16 stage index, at most one report per quest per 50 ms per player; a stage already recorded is a
+   no-op, never an error.
+2. The record is the world's, not a player's: per quest, the set of stages done (the engine's GetStageDone semantics,
+   because conditions read GetStage and GetStageDone and a stage can be set out of order), persisted with the world
+   and surviving a restart (rule 6: a migration note and a restart scenario).
+3. The relay: at once, reliable, to every other connected player; the replay at login, in order, after PlayerGlobals
+   (the same place the clock and the globals are sent), ascending per quest so each SetStage sees the previous ones.
+4. The apply on a seat is the engine's own Quest.SetStage for each stage not done there (idempotent: a stage done is
+   skipped), so topics, conditions and the journal follow by the engine's rules; the engine's event from that apply is
+   consumed by a loop guard and never reported. A quest the engine has not started starts at its first stage, the
+   engine's rule.
+5. The shared list is a server setting (`sharedQuests`, FormDescs, the PlayerGlobals shape) and is the stub Eli names:
+   the first slice lists Riverwood's quests (A Lovely Letter, the Riverwood rumours' quests, the Bleak Falls errands)
+   and grows by the playtests; a quest off the list stays each seat's own as today. Replaying the whole world's quest
+   state onto a fresh player (the main quest's stages move the player and start scenes) is what the list prevents.
+6. The journal is each engine's own, filled from the shared stages: one world journal on every seat, the stub. A
+   per-player journal (C's end state: private quests, shared world effects) is a later ADR with the fragment-kind table
+   it needs.
+
+Known limits of the first slice, written into docs/verbs/quest-stage.md: the QF stage fragments run on every applying
+seat (items, gold, enabled references, moved actors duplicate until the server performs world effects itself from a
+table of fragment kinds, the second slice; the R0 inventory corrects the items and gold at the next SetInventory);
+objectives, aliases and quest globals are not synced; the list is hand-kept; a stage set on a seat before its login
+replay is reported and recorded like any other.
+
+Consequences. One new message with its validator, fixtures and contract line in one commit (rule 4); a world record and
+its migration; a client service with the report, the apply and the guard; T0 for the rules and the record, T2 for the
+relay, the probe x-quest-stage (c1's console setstage on a listed quest reaches c2's GetStage within the relay's lag;
+an unlisted quest refused in the log; a restart keeps the stage) once lab-api has a quest-stage read, then scenario
+b-quest-stage. The dialogue work (npc-talk) stands on it: a line conditioned on a stage is offered on both seats once
+the stage is shared.

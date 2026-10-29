@@ -1212,6 +1212,18 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   both"), D38 B. 51 MERGED (parity 39cf3f4d, 08:19Z; the gate cut by c2's RTX wedge, core's recovery, finished
   by its rest, 29 runs; watch item b-npc-body-release's old point). 52 staging (P7 v5 first); 54, 55, 53 follow
   on green; the D37 layer (layer-d37-ddo-out) stages at the end with the full sweep, then playtest 35.
+- STATE 2026-10-28 19:3x PDT (playtest 37's turbo night; Eli: "stop queueing things for tonight, we're blasting
+  today as hard as possible"): the shared chest's two faults read and fixed (the pause guard, then the item-menu
+  gates by name and the take's baseline), the face survivor and the vendor gate (m3-face-twelve b181518b); the
+  parallel builds landed on their own fork branches and merged into m3-turbo-train-3 0e4942bb (schema 19, its dist
+  and server image go together): quest-stage a54e5eca (ADR-056, memo D55 B, the world's quest stages behind a
+  shared list, a new verb under npc-talk), empty-label 06e38831, door-walk 2dca472a (D54 B), hands d902d919
+  (finding 45), fate-dress 5b89bf35 (findings 43 and 46), hunger 853dd4fc (the food's Survival amounts, SetGlobal),
+  npc-caster 05a285f6 (creature casts from the launch, the ability behind a cloak's hit, resurrections by the host's
+  engine, Eli's ask); m3-death-range 2069d4d2 (the 0xff death report) waits for the next train. Findings 40 to 49 in
+  docs/private/playtest-m3-37.md; the lay by numidium at the train's green, then Eli's reads in the order of pain
+  (the chest, the shop topic, the face, the atronach, a reanimation, x-quest-stage at the train's stage).
+
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,

@@ -685,6 +685,31 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   NPC's equipment (the latent corruption back); the old host's states
   accepted after the handoff (epoch not advancing).
 
+### Slice 6's creature half (playtest 37, finding 47; fork m3-npc-caster 05a285f6, 2026-10-28)
+
+A flame atronach hosted by Prisoner cast Firebolts he alone saw: the host's client reports a cast from Skyrim
+Platform's spellCast event, which the platform raises only when the spell sits in one of the actor's four selected
+slots (EventHandler.cpp isCastValid), and a creature's AI cast fills none (which engine path it takes is unread, rule
+8; the Dynamic plan is in the branch's report: the hosted caster's spellCast events are now logged with their slots on
+the host, and a Frida plan on MagicCaster's CastSpellImmediate, ActorMagicCaster::SpellCast and FinishCast by
+CommonLib name). Built: the host reports a hosted actor's spell LAUNCH (the launch hook admits hosted shooters) as
+its SpellCast under the caster's id with the launch's hand, origin and angles when no cast event claimed it within
+400 ms, the two deduping each other (H-53f, HYPOTHESIS until x-npc-creature-caster); the watcher's creature puppet
+casts and ends without graph variables (MagicApi's HasMasterGraph: a non-master graph skips the apply instead of
+returning, H-53g); the server stands a known constant-effect ability as the cast behind a cloak's hit
+(PartOne::AbilityReaching over KnownBaseSpells' reached spells), so the atronach's cloak damage lands at the reach
+rule's cadence, and a spell no ability reaches stays refused (rule 5; T0 NpcCastTest). Known: a server-made
+creature's death still ends by the server's word (the client never reports a 0xff id and the wire refuses the range,
+a contract change for its own commit, fork m3-death-range 2069d4d2). READ ITEM (the train's first T0, pipeline 3650):
+the cloak's hit is claimed but its damage effect, MGEF crFireDamageConcAimed 0x10fdd1, carries one CTDA (function 719
+by the record, lab/esm.py) that ADR-039's evaluation holds false ("its conditions fail; not applied"), so the
+atronach's cloak may deal no server-side damage to a player even when claimed; which function 719 is and what it
+needs on the server is HYPOTHESIS H-53h until read (the Firebolt is unaffected). OPEN ITEM before the train merges
+to parity: NpcCastTest's cloak case asserts the claim alone since fork m3-turbo-train-3b df445168 (the lay's T0), a
+relaxed T0 claim in rule 13's sense; the damage assertion (one cadence, 5 of 250, health 0.98) goes back the moment the
+condition is read and the server's evaluation holds it, or the case states why the engine's cloak never hurts a
+player server-side. Tracked here and in the LOG; numidium tells Eli the cloak caveat with the lay.
+
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
 2026-10-28, the fragment gate (playtest 37, Eli: "if i ask 'what do you have
@@ -702,9 +727,14 @@ speaker ("fragment gate: info X type Y on puppet Z not sent to the VM"); the
 host's own NPCs are not puppets there and keep every fragment; a claimant's
 partner is promoted first, so it is not a puppet either. Rung: the
 fragment's effect is the host's seat's (R2 recorded through its own
-consequences: a barter, a stage); the watcher suppresses. HYPOTHESIS H-57a
-(the gate stops the menu on the watcher) and H-57b (the host's own menu and
-fragments are untouched). Frida plan (lab/frida, the npc-puppet.js shape):
+consequences: a barter, a stage); the watcher suppresses. H-57a (the gate
+stops the menu on the watcher) and H-57b (the host's own menu and fragments
+are untouched) CONFIRMED at T4, 2026-10-28 18:02 PDT, Eli's shop test on
+ed606faf's predecessor dist (2ce8b523): the inn's host opened Orgnar's shop,
+the watcher's screen got no barter menu (playtest 37, finding 40; the formal
+read stays the Frida plan). The same test found the claimant's promoted
+vendor offering no vendor topic at all (finding 40 b; the read in
+docs/research/m3/re-claimed-vendor-topic.md, npc-talk's item). Frida plan (lab/frida, the npc-puppet.js shape):
 hook 35225 (rcx the item: [[rcx+0x20]+0x14] the info's formID, [[rcx+0x38]+0x14]
 the speaker's; edx the type; a backtrace), 25616 (rcx info, edx type, r8 the
 handle pointer, r9b force) and 53997 (rdx the event: [+8] speaker, [+0x10]

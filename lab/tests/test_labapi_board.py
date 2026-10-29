@@ -26,6 +26,26 @@ class BoardTests(unittest.TestCase):
         board.clear_views()
         self.assertIsNone(board.npc_state("c2", 0x13483))
 
+    def test_quest_stage_answers_merge_by_quest(self):
+        # x-quest-stage (ADR-056): a second read of one quest replaces the first; a quest the read did not name stays
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+        first = board.enqueue("c2", "quest-stage", {"quests": [0x74A83, 0x39645]})
+        board.poll("c2")
+        board.complete(first.id, {"ok": True, "data": {str(0x74A83): {"stage": 0, "running": True, "done": {}},
+                                                        str(0x39645): None}})
+        again = board.enqueue("c2", "quest-stage", {"quests": [0x74A83], "stages": [10]})
+        board.poll("c2")
+        board.complete(again.id, {"ok": True, "data": {str(0x74A83): {"stage": 10, "running": True, "done": {"10": True}}}})
+        quests = board.quests("c2")
+        self.assertEqual(quests[0x74A83]["stage"], 10)
+        self.assertIn(0x39645, quests)
+        self.assertIsNone(quests[0x39645], "a form that is no quest in that game is kept as None")
+        self.assertIsNone(board.quests("c1"))
+        board.clear_views()
+        self.assertIsNone(board.quests("c2"))
+
     def test_a_seats_kept_perks_go_again_after_a_heartbeat_gap(self):
         from labapi.board import PERK_GAP_S, StepBoard
 

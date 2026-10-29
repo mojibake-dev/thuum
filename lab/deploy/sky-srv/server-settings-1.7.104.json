@@ -229,6 +229,50 @@
       "default": 1
     }
   ],
+  "survivalFood": {
+    "switch": "828:ccQDRSSE001-SurvivalMode.esl",
+    "effects": [
+      {
+        "effect": "2ee1:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 2,
+        "floor": 0
+      },
+      {
+        "effect": "2ee2:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 18,
+        "floor": 0
+      },
+      {
+        "effect": "2ee3:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 220,
+        "floor": 0
+      },
+      {
+        "effect": "2ee4:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 380,
+        "floor": 0
+      },
+      {
+        "effect": "2ee5:Update.esm",
+        "need": "81b:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 200,
+        "floor": 50
+      }
+    ]
+  },
+  "cureSpells": [
+    "b8780:Skyrim.esm"
+  ],
+  "sharedQuests": [
+    "74a83:Skyrim.esm",
+    "39645:Skyrim.esm",
+    "b6031:Skyrim.esm",
+    "3dd29:Skyrim.esm"
+  ],
   "modLock": {
     "enabled": true,
     "requireHello": false

@@ -92,7 +92,7 @@ steps:
       - 'c1.log_count("a figure''s own arrow dropped: shooter ff[0-9a-f]+") == 0'
       - 'c1.log_count("hosted shot by ff[0-9a-f]+: [0-9a-f]+ from [0-9a-f]+, power") >= 1'
       - 'server.log_count("OnPlayerBowShot - ff[0-9a-f]+ shot [0-9a-f]+ from [0-9a-f]+, .* by its host ff000000") >= 1'
-      - 'server.log_count("E_SHOT_EQUIPMENT") == 0'
+      - 'server.log_count("E_SHOT_NO_BOW") == 0'
       - 'server.log_count("E_SHOT_ORIGIN") == 0'
       - 'c2.log_count("no figure, bow or arrow here for a shot of") == 0'
   - c1: refs-near {radius: 2000, formTypes: [43]}

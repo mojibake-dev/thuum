@@ -7,5 +7,10 @@
   "server-info-ignore": true,
   "headshot-spells": [
     "801:Headshot Kills.esp"
-  ]
+  ],
+  "movement": {
+    "mode": "follow",
+    "followMargin": 1.15,
+    "leadSeconds": 0.15
+  }
 }
