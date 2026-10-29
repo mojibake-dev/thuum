@@ -3046,3 +3046,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 15:58 PDT: T0 GREEN on m3-pass-train-3 at both heads (3866 b383e2e9, 3869 db5c9611): the props server half compiles and PropTest passes
   on top of P2. Every pass train is green on the server side; the Windows halves (the arrival native, the fragment hook, the contact hook,
   the client services) compile at the -win pushes, which wait on numidium's base.
+- 16:19 PDT: P4's drafts for the forty unread hypothesis tags of npc-stream and npc-fate (docs/private/p4-dynamic-lines-2026-10-29.md:
+  CLOSE 15 by runs or LOG lines, LIMIT 7, READ 11 naming the probe or a new one, DELETE 7 as history); two premise corrections: x-npc-stream-p5
+  never asserted the package claim the doc describes (H3 is a READ), and npc-stream's Status tick uses the build's numbering, not the
+  Inventory table's (H4 is moot: slice 3 shipped a poll). Three new reads proposed: x-npc-overtime, x-wire-idle-rate, cloak-hostile.js.
+  The edits are applied next by an agent from the drafts, my review on the diff.
