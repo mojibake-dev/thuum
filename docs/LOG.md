@@ -2895,3 +2895,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   every CLOC branch node evaluating, as a fast travel does. The shared quest list's widening (D58 B) needs a wire field (QuestStage's
   shared list cannot carry a mode; the validator refuses an empty list for quest 0; the client filters its reports by the list today;
   the budget is 16 then 4 a second), so it is a schema bump with fixtures and mirrors; the record's shape stays (keyed by FormDesc).
+- 14:17 PDT: melee-reach.md and hit-cone.md scope rows widened to humanoid NPCs (fork m3-npc-reach 7a80172c, T0 on CI); the two SP
+  builds of head 2 handed to implementation agents on fork worktrees (m3-story-arrival: the login's Change Location event through the
+  engine's story event queue; m3-quest-fragment: the VM quest stage sink's replacement keyed by the relayed pairs), both to be reviewed
+  and lint-checked before any push; the exit scenarios c-riverwood and c-dungeon-enemies drafted by an agent from the lab's grammar for my
+  review (own commits after).
