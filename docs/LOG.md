@@ -2887,3 +2887,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   `just addr` for 1.6.1170 only, cited per line), the Dynamic plan of quest-stage.md's slice two; to run at the pass's next stage on
   both seats (`just frida quest-stage-chain <client>`, params QUEST and RAW) around a console setstage on c1 and a relayed apply on c2,
   before the suppression hook is built on its evidence.
+- 14:16 PDT: fork m3-npc-reach 7a80172c pushed server-only (M3's NPC melee reach and hit cone: a humanoid NPC, its race playable, is gated
+  by reach and cone as a player is, as a target and as a host-reported aggressor; creatures and the non-playable humanoid races keep the old
+  bound, a named limit; HitTest's created actor at 2000 units now refused, CellHostTest's hosted Sigrid hit beyond reach refused). The
+  Story Manager's Change Location event read (docs/research/m3/re-story-location.md): the sender gates on currentLocation, which a login
+  inside the location never changes; the native is the engine's own AddEvent with the CLOC index (ids by just addr); the side effect is
+  every CLOC branch node evaluating, as a fast travel does. The shared quest list's widening (D58 B) needs a wire field (QuestStage's
+  shared list cannot carry a mode; the validator refuses an empty list for quest 0; the client filters its reports by the list today;
+  the budget is 16 then 4 a second), so it is a schema bump with fixtures and mirrors; the record's shape stays (keyed by FormDesc).
