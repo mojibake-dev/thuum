@@ -41,9 +41,9 @@ laid, since the same ids are the world's main quest and guild starts:
 - Dragonborn.esm: 016e02 DLC2Init (1), 018b13 DLC2RR01 (1), 018b15 DLC2RR03 (1), 02adda DLC2RRArrivalScene (1).
 - HearthFires.esm: 00305d BYOHHouseBuilding (3, the three homesteads' build quest).
 thuum-cf's denylist already holds MQ101, MQ101DragonAttack, MQ102, MQ102A, MQ102B, MQ103, MQ104,
-DLC1VQ01 (352a) and DLC2Init (17f8e is not what the read finds: Dragonborn's start chain here is 016e02
-DLC2Init, 018b13 DLC2RR01, 018b15 DLC2RR03 and the scene 02adda; 17f8e is worth a second look).
-The rest above is new to it. The eighteen ARTHLAL quests and the alias and controller quests among them
+DLC1VQ01 (352a) and DLC2MQ01 (17f8e, Dragonborn's own main quest, which the alternate start does not
+touch; the Raven Rock arrival it drives is 016e02 DLC2Init, 018b13 DLC2RR01, 018b15 DLC2RR03 and the
+scene 02adda). The rest above is new to it. The eighteen ARTHLAL quests and the alias and controller quests among them
 (the bandit, vampire, left-for-dead and Forsworn controllers pick a random lair per seat) are the
 sharpest case: a shared stage there would hand one player's random lair to everyone.
 
