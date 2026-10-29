@@ -19,7 +19,7 @@ enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 run() {
   local out try
   for try in 1 2 3; do
-    out=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" || true)
+    out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" || true)
     if printf '%s' "$out" | python3 -c 'import sys,json; json.load(sys.stdin, strict=False)' 2>/dev/null; then break; fi
     echo "guest agent answered no JSON (try $try of 3)" >&2
     sleep 10
@@ -28,7 +28,7 @@ run() {
 }
 script="New-Item -ItemType Directory -Force -Path 'C:\\sky-lab' | Out-Null
 \$in=[Console]::OpenStandardInput(); \$f=[IO.File]::Create('C:\\sky-lab\\lab-driver.js'); \$in.CopyTo(\$f); \$f.Close()"
-ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --pass-stdin 1 --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$script")" < "$f" | python3 -c 'import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get("exitcode")==0 else 1)'
+ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --pass-stdin 1 --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$script")" < "$f" | python3 -c 'import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get("exitcode")==0 else 1)'
 want=$(shasum -a 256 "$f" | awk '{print $1}')
 got=$(run "(Get-FileHash -Algorithm SHA256 'C:\\sky-lab\\lab-driver.js').Hash.ToLower()")
 [ "$want" = "$got" ] || { echo "hash mismatch: $want vs $got" >&2; exit 3; }

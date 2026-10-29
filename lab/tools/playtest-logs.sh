@@ -24,7 +24,7 @@ enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 for pair in c1:711 c2:712; do
   c=${pair%%:*}; vmid=${pair#*:}
   # CrashLogger's logs written since the session's start (the clone's clock is local time), each kept by its name
-  crashes=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "\$t = [datetime]::Parse('$since').ToLocalTime(); Get-ChildItem -LiteralPath '$skse' -Filter 'crash-*.log' | Where-Object { \$_.LastWriteTime -ge \$t } | ForEach-Object { \$_.Name }")" 2>/dev/null \
+  crashes=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "\$t = [datetime]::Parse('$since').ToLocalTime(); Get-ChildItem -LiteralPath '$skse' -Filter 'crash-*.log' | Where-Object { \$_.LastWriteTime -ge \$t } | ForEach-Object { \$_.Name }")" 2>/dev/null \
     | python3 -c 'import json,sys; print(" ".join((json.load(sys.stdin).get("out-data") or "").split()))' 2>/dev/null || true)
   extra=()
   for f in $crashes; do extra+=("$c-$f|'$skse\\$f'"); done
@@ -36,7 +36,7 @@ for pair in c1:711 c2:712; do
     copy="C:\\sky-lab\\playtest-$n-$name"
     # the guest agent's answer is now and then not JSON (client-frametime's captures, 2026-10-19): three tries
     for attempt in 1 2 3; do
-      ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Copy-Item -LiteralPath $src -Destination '$copy' -Force\"" > /dev/null 2>&1 || true
+      ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Copy-Item -LiteralPath $src -Destination '$copy' -Force\"" > /dev/null 2>&1 || true
       if ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
         | python3 -c 'import json,sys; d=json.load(sys.stdin); sys.stdout.write(d.get("content","")); sys.stderr.write(" (truncated by the agent)" if d.get("truncated") else "")' > "$local_dir/$name" 2>"$local_dir/$name.note"; then
         break

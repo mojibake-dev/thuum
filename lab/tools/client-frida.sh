@@ -19,7 +19,7 @@ want_tool() { [ -z "${TOOLS:-}" ] || case " $TOOLS " in *" $1 "*) true;; *) fals
 f="$here/lab/.cache/frida/frida-inject.exe"
 ! want_tool frida || test -f "$f" || { echo "no $f: download frida-inject-<ver>-windows-x86_64.exe.xz from the frida release and unxz it there" >&2; exit 2; }
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-run() { ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 300 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
+run() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 300 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
 ssh -o BatchMode=yes -J "$jump" "$srv" 'mkdir -p /srv/lab/handover'
 run "New-Item -ItemType Directory -Force -Path 'C:\\sky-lab\\frida' | Out-Null" >/dev/null
 if want_tool frida; then
