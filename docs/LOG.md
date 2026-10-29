@@ -2883,3 +2883,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   narrowest suppression a Gum replacement of 53987 keyed by (quest, stage) pairs the client is applying from the relay, HYPOTHESIS
   until the Frida plan runs. Eli's pointer (a friend ported Source's air strafing into OpenMW): borrow the networked portion, not
   the simulation; cited in ADR-058 (Valve's networking page, Bernier 2001, Fiedler's state synchronization).
+- 14:10 PDT: lab/frida/quest-stage-chain.js: the quest-stage chain's trace (the twelve functions of the re-analyst's read, offsets by
+  `just addr` for 1.6.1170 only, cited per line), the Dynamic plan of quest-stage.md's slice two; to run at the pass's next stage on
+  both seats (`just frida quest-stage-chain <client>`, params QUEST and RAW) around a console setstage on c1 and a relayed apply on c2,
+  before the suppression hook is built on its evidence.
