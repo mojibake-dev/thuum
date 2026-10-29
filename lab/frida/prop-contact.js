@@ -11,8 +11,10 @@
 // motion type 1 to 3, then 78304 every step with the basket as its body; (b) on the other seat: 79131 fires
 // with motion type 4 and 78304 stays silent. Every id is a HYPOTHESIS until this trace reads as expected
 // (rule 2). Params: RAW (true prints the raw args). The hkpRootCdPoint's rootCollidableB offset is read from
-// CommonLibSSE-NG hkpRootCdPoint.h at write time (0x30: contact 0x00, rootCollidableA 0x20, rootCollidableB
-// 0x30); if the struct differs on this runtime the layer reads nonsense and RAW shows it.
+// CommonLibSSE-NG hkpRootCdPoint.h (contact 0x00, rootCollidableA 0x20, rootCollidableB 0x30), hkpCollidable.h
+// (ownerOffset 0x20, the typed broad-phase handle 0x24: type +4, collisionFilterInfo +8), hkpEntity.h (motion
+// 0x150) and hkpMotion.h (type +0x10), hkpWorldObject.h (the embedded collidable 0x20); if a struct differs on
+// this runtime the layer reads nonsense and RAW shows it.
 // Offsets by `just addr` (lab/addr.py, Address Library 1.6.1170 only), 2026-10-29.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const RAW = PARAMS.RAW === undefined ? false : !!PARAMS.RAW;
@@ -50,9 +52,12 @@ const formId = function (p) { try { return p.isNull() ? 0 : p.add(0x14).readU32(
 const hex = function (n) { return n < 0 ? String(n) : '0x' + n.toString(16); };
 const u32 = function (p, o) { try { return p.add(o).readU32(); } catch (e) { return -1; } };
 const u8 = function (p, o) { try { return p.add(o).readU8(); } catch (e) { return -1; } };
+const s8 = function (p, o) { try { return p.add(o).readS8(); } catch (e) { return -128; } };
 const ptrAt = function (p, o) { try { return p.add(o).readPointer(); } catch (e) { return NULL; } };
 const raw = function (args) { return RAW ? [String(args[0]), String(args[1]), String(args[2]), String(args[3])] : undefined; };
 
+// hkpWorldObject.h: the embedded hkpLinkedCollidable's offset (the header's comment column; verified at write time)
+const COLLIDABLE_IN_WORLD_OBJECT = 0x20;
 const exe = Process.getModuleByName('SkyrimSE.exe');
 const version = fileVersion(exe.path);
 const off = OFFSETS[version];
@@ -62,14 +67,18 @@ if (off === undefined) {
   const at = function (name) { return exe.base.add(off[name]); };
   const findRef = new NativeFunction(at('findCollidableRef'), 'pointer', ['pointer']);
   const proxyVtable = at('proxyControllerVtable');
-  // the collidable's layer and owner: collisionFilterInfo at +0x18 (hkpCollidable.h), the owner at +0x8 and
-  // its type at +0x28 (type 1 = an entity: the rigid body); the body's motion type at +0x160
+  // the collidable (hkpCollidable.h: an hkpCdBody of 0x20 bytes, then ownerOffset int8 at +0x20, the typed
+  // broad-phase handle at +0x24 whose type is at +4 and collisionFilterInfo at +8, so +0x28 and +0x2c):
+  // the owner is this plus ownerOffset (type 1 = an entity, the rigid body), the layer the low seven
+  // bits of the filter info (hkpCollidable::GetCollisionLayer), the body's motion type at +0x160
+  // (hkpEntity.h: motion at 0x150; hkpMotion.h: type at +0x10)
   const collidableFacts = function (c) {
-    if (c.isNull()) return { layer: -1, motion: -1, ref: '0x0' };
-    const layer = u32(c, 0x18) & 0x7f;
-    const type = u8(c, 0x28);
-    const owner = ptrAt(c, 0x8);
-    const motion = type === 1 && !owner.isNull() ? u8(owner, 0x160) : -1;
+    if (c.isNull()) return { layer: -1, motion: -1, ref: '0x0', ownerType: -1 };
+    const layer = u32(c, 0x2c) & 0x7f;
+    const type = s8(c, 0x28);
+    const ownerOffset = s8(c, 0x20);
+    const owner = c.add(ownerOffset);
+    const motion = type === 1 ? u8(owner, 0x160) : -1;
     let ref = 0;
     try { ref = formId(findRef(c)); } catch (e) { ref = -1; }
     return { layer: layer, motion: motion, ref: hex(ref), ownerType: type };
@@ -91,7 +100,7 @@ if (off === undefined) {
     onEnter(args) { this.a = raw(args); this.body = args[1]; },
     onLeave(retval) {
       let ref = 0;
-      try { const c = ptrAt(this.body, 0x8); ref = c.isNull() ? 0 : formId(findRef(c)); } catch (e) { ref = -1; }
+      try { const c = this.body.isNull() ? NULL : this.body.add(COLLIDABLE_IN_WORLD_OBJECT); ref = c.isNull() ? 0 : formId(findRef(c)); } catch (e) { ref = -1; }
       emit({ fn: 'impulse body', id: 78304, tid: this.threadId, motion: u8(this.body, 0x160), ref: hex(ref), args: this.a });
     },
   });
