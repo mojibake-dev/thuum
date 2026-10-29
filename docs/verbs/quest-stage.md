@@ -235,7 +235,12 @@ the Change Location event and the Story Manager starts A Lovely Letter at once, 
 to x 16000 in RiverwoodEdge01 0x9733, logged no change (that square is inside RiverwoodLocation too), so the walk half read
 nothing new. Why the playtests never saw it: every playtest seat LOGS IN inside the location (the camp is the landing), and a
 login sets the player's location without a change, so the Story Manager hears nothing until the player leaves the location and
-returns. Fix shape (HYPOTHESIS, the owed RE): at login, when the player's location has no change to report, the client raises
+returns. Fix shape (the RE read 14:16 PDT, docs/research/m3/re-story-location.md; HYPOTHESIS until the Frida plan): the engine's own
+sender, PlayerCharacter::SetParentCell (40466), raises the Change Location event only when the player's currentLocation differs from the
+cell's, which a login inside the location never does; a Skyrim Platform native builds the same 0x18-byte event {{actor handle, old, new}}
+and queues it through BGSStoryEventManager::AddEvent (CommonLibSSE-NG BGSStoryEventManager.h:24-42, the CLOC index static 380069), old
+none, new the player's current location, once per login; every Change Location branch node evaluates as at a fast travel's arrival (the
+list in the research note). The earlier wording: at login, when the player's location has no change to report, the client raises
 the engine's own Change Location event once (BGSStoryEventManager::AddEvent, the Dynamic plan's lead, Address Library 32359 to
 resolve by `just addr`, the CLOC event's struct to read) from none to the current location, so each seat's Story Manager starts
 what an arrival starts; the stage relay then keeps the seats together. Until then the lab's probes place a seat outside and
