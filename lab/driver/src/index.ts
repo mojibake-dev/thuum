@@ -1942,7 +1942,11 @@ function run(step: Step, player: Actor): unknown {
       first
         .then((started) => {
           set.started = started;
-          return q.setCurrentStageID(asked);
+          // a wrapper from an earlier frame is out of Skyrim Platform's object pool by now ("Invalid
+          // _skyrimPlatform_indexInPool", playtest 37 at 05:59Z): the quest is looked up again for the second call
+          const again = Quest.from(Game.getFormEx(quest));
+          if (!again) throw new Error(`no quest ${quest} after its start`);
+          return again.setCurrentStageID(asked);
         })
         .then(
           (ok) => {
