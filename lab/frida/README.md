@@ -302,3 +302,41 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   current response; a summary every ten seconds. Run on a host seat talking
   to Sven through a multi-line topic, then standing for barks, 120 s
   (x-voice-lines by path). Address Library ids by `just addr`, 1.6.1170 only.
+- quest-stage-chain.js: the engine's chain from a quest stage's set to its
+  Papyrus fragment, on both seats (docs/verbs/quest-stage.md slice two;
+  docs/research/m3/re-quest-fragment.md). Hooks the Papyrus native
+  SetCurrentStageID, the console's setstage, EnsureQuestStarted, the setter,
+  the done bit, the per-entry log step, the VM's stage sink, the fragment
+  lookup (the script and fragment names), the dispatch functor, the item-done
+  event and the latent return; `QUEST` keeps one quest, `RAW` prints unknown
+  args. Expected orders for a local setstage and for a relayed apply are in
+  the header; a relayed pair under the planned detour shows the item-done
+  inside the sink's frame with no lookup. Run on either seat during
+  x-quest-mode or c-riverwood.
+- story-location.js: the Story Manager's Change Location event on a seat
+  (docs/verbs/quest-stage.md H-56a; docs/research/m3/re-story-location.md).
+  Hooks the event manager's AddEvent against the Change Location index
+  static, PlayerCharacter::SetParentCell (the player's currentLocation
+  against the cell's), BeginStartUpQuest and the location-change SendEvent.
+  Expected: a placement into Riverwood raises one event and starts 74a83; a
+  login inside raises none until m3-story-arrival's native queues one. Run
+  on the arriving seat through x-story-arrival-login.
+- prop-contact.js: the player's Havok contact with a prop
+  (docs/verbs/prop-physics.md, ADR-058; docs/research/m3/re-havok-contact.md).
+  Hooks the character proxy's ContactPointAddedCallback (the collidable's
+  layer, the owner body's motion type, the reference by FindCollidableRef)
+  and the surface pass's impulse body. Expected: the simulating seat sees a
+  contact with motion type 1 to 3 then the impulse every step; the other
+  seat sees motion type 4 and no impulse. Struct offsets are read from the
+  CommonLibSSE-NG headers named in the header. Run on both seats through
+  x-prop-push.
+- cloak-hostile.js: whether a hostile creature's engine counts the player as
+  hostile before any blow (docs/verbs/npc-stream.md slice 6, H-53h). Hooks
+  Actor::IsHostileToActor and logs self, other, the answer and the caller's
+  RVA for every call involving the player (or `ACTOR`), first sight and each
+  flip per (self, other, caller), with a summary every ten seconds; `ALL`
+  keeps every call (capped), `BT` adds in-module backtraces to the first
+  sixteen. Read the (atronach, player) answer against c1's first bolt hit: 1
+  before it is a vanilla limit to declare, 0 until it confirms the server's
+  rule. Run on the host seat through x-cloak-hostile (the creature caster's
+  frame). Address Library id by `just addr`, 1.6.1170 only.
