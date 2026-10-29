@@ -3241,6 +3241,14 @@ installer and sync script in canon-sync.ps1's shape, the announcements through t
 (the fresh-profile login, the mismatch, the start) and the friend-as-host scenarios after M3's host verbs. A change
 to any of the eight is a new ADR, not a rewrite of this one.
 
+2026-10-28 21:11 PDT (apocrypha, the defaults layer 539496c): the layer tree carries game-ini.tsv at its root beside plugins.txt
+(lab/layer/game-ini.tsv, outside SHA256SUMS; rows file, section, key, value, why after a header, # comments). Today's
+rows: SkyrimPrefs.ini [Interface] bGeneralSubtitles=1 and bDialogueSubtitles=1, Skyrim.ini [VATS] bVATSDisable=1 (the
+kill camera's switch). add-mods.ps1 applies them to the lab user's Documents\My Games\Skyrim Special Edition\<file>
+(the key rewritten in place within its section, a missing section appended, every other line kept). The installer and
+the sync script (canon-sync.ps1's shape, item 5 above) apply the same file the same way under the friend's user, after
+the first launch or on every sync, since the game's launcher rewrites SkyrimPrefs.ini.
+
 
 ## ADR-056: World-shared quest stages, the journal stubbed (memo D55, B)
 
