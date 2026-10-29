@@ -543,3 +543,34 @@ lab/deploy/sky-srv/server-settings.json and the 1.7.104 file (2026-10-21
 12:3x, numidium deploys); the probe to confirm is the relaunch read with
 them. A probe that sets high values with the flags at 0 cannot measure
 ticking (it pauses under the box).
+
+## Survival's food (2026-10-28, playtest 37; fork m3-hunger 853dd4fc)
+
+Eli: "food doesnt replenish hunger." numidium's live read CONFIRMED it (the hunger need 81a at 1000 through 115 reads
+while Eli ate): the food's Survival script never runs on a seat. The mechanism, read from the game files on sky-srv
+(nothing from memory): the Creation's esl carries no amount keywords; a food's size is an MGEF on the ALCH record,
+Update.esm's Survival_FoodRestoreHungerVerySmall 0x01002ee1 (51 records), Small 0x01002ee2 (24), Medium 0x01002ee3
+(20), Large 0x01002ee4 (31), and Survival_FoodRestoreCold 0x01002ee5 on the twelve hot soups; the esl's overrides of
+those MGEFs carry Survival_HungerRestoreEffectScript with amountToRestore bound to the GLOBs 0x8de VerySmall = 2,
+0x82d Small = 18, 0x82b Medium = 220, 0x82c Large = 380, and the cold one 0x818 = 200 (lab/tools/bsa-extract.py and
+lab/pex.py over the BSA; OnEffectStart to Hunger.DecreaseHungerBuffered to Survival_NeedBase.DecrementNeed, clamped
+at 0; cold's floor 50). The effect's conditions: Survival_ModeEnabled 0x826 at 1 and the player as target.
+
+Built, server-only: ActionListener::ApplySurvivalFood after a true OnEquip of an ALCH that is no poison: the item's
+effects (MpActor::EffectsOf) against the `survivalFood` table in server-settings.json ({effect, need, amount, floor}
+per MGEF FormDesc, the amount from the GLOB's record when the table gives none; both lab/deploy settings files carry
+the five rows), gated on the recorded switch 828 at 1, the floor applied, the record merged (RecordPlayerGlobals) and
+the value sent to the player with the full watch list (the client's apply replaces its watch from every message),
+one log line "[verb:player-globals] <actor> ate <item> <EditorId> (<effect EditorId>): 81a:... <before> -> <after>".
+The needs lever: the console command SetGlobal <0x14|0|"self"|actor id> <FormDesc|form id> <value> (rank admin, a
+wire-rules console row; ConsoleCommands.cpp in ExecuteAddSpell's shape), reachable in a playtest through lab-api's
+console labCommand: {"kind":"console","profileId":1,"name":"setglobal","args":[20,"81a:ccQDRSSE001-SurvivalMode.esl",600]}.
+T0: PlayerGlobalsTest's food and SetGlobal cases on the test order's vanilla records (the unit load order has no
+Survival plugin: FoodRestoreHealth as the effect, GameHour as the need).
+
+Known and HYPOTHESIS: the HUD's stage recomputes at its next hunger tick (0.25 game hours, up to about 45 s at 20x),
+where the Creation's own path recomputes at once; a hunger tick landing between the write and the client's apply
+reports the stale value, which wins (one round trip's window); gated on 828, not 826 (never listed by rule), so an
+indoor login with 828 at 1 gets a restore the game would hold; not covered: the vampire blood potion (a keyword
+condition), alchemy-made reduce-hunger potions (runtime records), werewolf feeding and cannibalism, the gutworm
+multiplier. Probe: x-survival-eat v2 reads 81a before and after an eat of a Large food on a seat with 828 at 1.
