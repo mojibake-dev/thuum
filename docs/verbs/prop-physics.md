@@ -1,6 +1,9 @@
 # prop-physics
 
-Status: DRAFT 14:06 PDT 2026-10-29 (the weekend pass, thuum-magnus; ADR-058). Slice one in build; nothing at T3 yet.
+Status: DRAFT (the weekend pass, thuum-magnus; ADR-058). Slice one's server half BUILT 14:54 PDT 2026-10-29 on fork m3-prop-physics
+(b752b262 the wire rows with validators, fixtures, C++ structs and client interfaces, SCHEMA_VERSION 21; 8575e59b the owner rule
+props.rs with its bridge, the handlers, PartOne's plumbing, unit/PropTest.cpp, the difftest session; cargo tests and clippy green,
+fork-lint green, the C++ compiles on CI only); the client service in build; nothing at T3 yet.
 
 ## Intent
 
@@ -81,8 +84,8 @@ walker's seat and Keyframed on the other, and the stream's first sample within 1
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [ ] engine surface cited or delegated (the touch: delegated to the re-analyst)
-- [ ] message contract in wire-schema with validators and fixtures (same commit)
-- [ ] server rule in Rust with T0
+- [x] message contract in wire-schema with validators and fixtures (same commit; b752b262)
+- [x] server rule in Rust with T0 (8575e59b; the C++ T0 PropTest runs on CI)
 - [ ] native hook + T1 (the transform read, the Keyframed set, the contact)
 - [ ] SP binding and TS service
 - [ ] T2 green
@@ -90,3 +93,17 @@ walker's seat and Keyframed on the other, and the stream's first sample within 1
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green (ADR-033)
 - [ ] ledger and suppression registry updated
+
+## The build's departures from the first draft (14:54 PDT 2026-10-29, the server half)
+
+- The rules are pure: owner_of, transform and host_changed take now_ms, and transform takes the cell's host (an unclaimed prop is the
+  host's by default). The bridge: prop_owner_of(refr, cell_host, now_ms), prop_transform(refr, player, cell, cell_host, asleep, now_ms),
+  props_host_changed(cell, host, now_ms); PartOne gained ClaimProp, PropTransform, PropOwnerOf, PropEpochOf, PropsHostChanged (in
+  ApplyHostDecisions' Grant case) and props_gone beside cells->gone at the disconnect.
+- PropRow has `grabbed`: a grab (touch 1) holds the prop against other players' claims until the owner's drop or impulse (HYPOTHESIS: the
+  engine's grab is exclusive on its seat). WrongCell: no cell at the sample's point, or an unhosted cell with no live lease (the record
+  freezes). A lapsed toucher's re-touch is Granted anew (a new epoch), so the host's seat hears the word and goes Keyframed. The
+  transform's cell is the sample's position in the record's worldOrCell (HYPOTHESIS: a prop never changes world or interior by physics).
+- PropClaim has no client event (C2S only); PropTransform and PropOwner have both. touch is u32 in C++, range-checked in the handler too.
+- Unverified: the C++ on CI (listener population after ForceSubscriptionsUpdate, the LocationalData init, the first CellLoaded's grant);
+  the lease's end tested in Rust alone; the difftest session drops an iron dagger and assumes the drop lands at 0xff000004.
