@@ -2914,3 +2914,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   green. NATIVES.md rows added (rule 10), quest-stage.md's Suppress updated. The exit scenarios c-riverwood 20c01ef and c-dungeon-enemies
   d70890b committed alone (an agent's drafts, my review: the cross-seat and handoff position bounds set to b-npc-puppet's measured 256,
   dump-state before the menu reads), self-approved under the 10-13 word for P2's gate.
+- 14:32 PDT: fork m3-story-arrival 9dc8b4a3 built and reviewed (local until the lab is free for a client build): the native
+  TESModPlatform.SendStoryChangeLocation(Actor, Location old, Location new) builds the engine's own 0x18-byte Change Location event (a
+  typed struct with GetIndex reading REL::ID(380069), the BGSAddToPlayerInventoryEvent idiom; static_asserts on the layout) and queues it
+  through BGSStoryEventManager::AddEvent; the .psc and .pex declarations (lab/pex.py add-native); the client raises it once per login
+  after the shared list and the game load, old none, new the player's current location, logging "[verb:quest-stage] arrival event raised
+  at login for location <hex>"; setting storyArrivalAtLogin; tsc and fork-lint green; no C++ compile here (Windows-only). Probes by path
+  for P2's stage: x-story-arrival-login (the placement's start, then a relaunch in place: the client's and the native's lines, the quest
+  running) and x-quest-mode (an undeclared quest's stage crosses in mode all, a denied one is E_QUEST_DENIED). m3-npc-reach's compile red
+  (a chrono literal in a test file without the using-declaration) fixed as 5d418327, T0 rerunning.
