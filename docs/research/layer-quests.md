@@ -16,7 +16,8 @@ performs the landing and the kit). Every quest and scene its scripts start, stop
 stay on the seat that casts it, or one player's choice at the statue advances the world's main quest.
 From the plugin's VMAD properties and all 159 scripts:
 
-Its own quests (eighteen; seven start-game-enabled, marked *):
+Its own quests (eighteen; six start-game-enabled, marked *; the other twelve, the chargen and start quests, the
+five controllers and the events, are started by its scripts or the story manager):
 000daf ARTHLALChargenQuest, 07a334 ARTHLALRumorsOfWarQuest, 01189b ARTHLALFarmhouseProfits,
 0194b5 ARTHLALAssaultFriendlies*, 03fda5 ARTHLALCheskoPolygonQuest, 049f33 ARTHLALVersionTracking*,
 068ec0 ARTHLALHelgenNPCKillerQuest, 07026c ARTHLALPatch417Special*, 1219b6 ARTHLALBanditStartController,
@@ -43,7 +44,11 @@ laid, since the same ids are the world's main quest and guild starts:
 thuum-cf's denylist already holds MQ101, MQ101DragonAttack, MQ102, MQ102A, MQ102B, MQ103, MQ104,
 DLC1VQ01 (352a) and DLC2MQ01 (17f8e, Dragonborn's own main quest, which the alternate start does not
 touch; the Raven Rock arrival it drives is 016e02 DLC2Init, 018b13 DLC2RR01, 018b15 DLC2RR03 and the
-scene 02adda). The rest above is new to it. The eighteen ARTHLAL quests and the alias and controller quests among them
+scene 02adda). The rest above is new to it. Under D62's rule (a start-game-enabled quest is each seat's own unless allowed), the twelve ARTHLAL quests
+that are not start-game-enabled need the denylist; so do the four controller quests of the census that are
+not (MAG_GeneralControllerQuest f4f8c0:MysticismMagic.esp, MAG_ThaumaturgyControllerQuest 000809:Thaumaturgy.esp,
+GRIM_QST_TeleportManager 2725d0:LostGrimoire.esp, US_ApplyCorpseMonitorQuest 01e2c7:UndeadFX.esp). The eighteen
+ARTHLAL quests and the alias and controller quests among them
 (the bandit, vampire, left-for-dead and Forsworn controllers pick a random lair per seat) are the
 sharpest case: a shared stage there would hand one player's random lair to everyone.
 
