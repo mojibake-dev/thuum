@@ -40,6 +40,7 @@ import {
   NetImmerse,
   ObjectReference,
   Perk,
+  Quest,
   Race,
   Shout,
   Spell,
@@ -1860,6 +1861,36 @@ function run(step: Step, player: Actor): unknown {
         };
       });
       return { node, ...scales(near[0]), all };
+    }
+    case "quest-stage": {
+      // quests' stages as this seat's game holds them (Papyrus Quest.GetCurrentStageID, IsStageDone, IsRunning;
+      // skyrimPlatform.ts's Quest): {quests: [formId, ...], stages?: [n, ...]} answers per quest its current stage,
+      // whether it runs, and which of the named stages are done, keyed by the quest's form id as decimal text
+      // (docs/verbs/quest-stage.md, memo D55 B: one seat sets a shared quest's stage, the other reads it)
+      const ids = Array.isArray(a.quests) ? (a.quests as unknown[]).map((x) => num(x)) : [];
+      const stages = Array.isArray(a.stages) ? (a.stages as unknown[]).map((x) => num(x)) : [];
+      const out: Record<string, unknown> = {};
+      for (const id of ids) {
+        const q = Quest.from(Game.getFormEx(id));
+        if (!q) {
+          out[String(id)] = null;
+          continue;
+        }
+        const done: Record<string, boolean> = {};
+        for (const n of stages) done[String(n)] = q.isStageDone(n);
+        out[String(id)] = { stage: q.getCurrentStageID(), running: q.isRunning(), done };
+      }
+      return out;
+    }
+    case "set-stage": {
+      // a quest's stage set in this seat's game, as a quest's own script would (Papyrus Quest.SetCurrentStageID,
+      // skyrimPlatform.ts's Quest): {quest, stage}; the seat reports it to the server like any stage its game sets.
+      // The latent call is asked and not awaited (run answers at once): a quest-stage read after it reads the result
+      const q = Quest.from(Game.getFormEx(num(a.quest)));
+      if (!q) return { error: `no quest ${num(a.quest)}` };
+      const before = q.getCurrentStageID();
+      q.setCurrentStageID(num(a.stage)).catch(() => undefined);
+      return { quest: q.getFormID(), before, asked: num(a.stage) };
     }
     case "face-keyframes": {
       // an actor's FaceGen keyframes as the engine animates its face (faceOf above): {formId}, else the placed npc;

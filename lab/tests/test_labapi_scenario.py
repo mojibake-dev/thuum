@@ -175,6 +175,17 @@ class ScenarioTests(unittest.TestCase):
                          ("node-rotation", {"formId": 0x13491, "nodes": ["NPC Head [Head]"]}))
         sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: node-rotation {formId: 0x13491}\n  - c1: face-keyframes {formId: 0x13491}\n")
         self.assertEqual([st.action for st in sc.steps], ["node-rotation", "face-keyframes"])
+
+    def test_a_quest_s_stage_is_set_on_one_seat_and_read_on_both(self):
+        # x-quest-stage (ADR-056): set-stage is a lever a playtest may pull, quest-stage a read
+        from labapi.scenario import load_scenario, playtest_step
+
+        self.assertEqual(playtest_step("quest-stage {quests: [0x74a83], stages: [10]}"),
+                         ("quest-stage", {"quests": [0x74A83], "stages": [10]}))
+        self.assertEqual(playtest_step("set-stage {quest: 0x74a83, stage: 10}"), ("set-stage", {"quest": 0x74A83, "stage": 10}))
+        sc = load_scenario("id: t\nclients: [c1, c2]\nsteps:\n  - c1: set-stage {quest: 0x74a83, stage: 10}\n"
+                           "  - c2: quest-stage {quests: [0x74a83], stages: [10]}\n")
+        self.assertEqual([st.action for st in sc.steps], ["set-stage", "quest-stage"])
         self.assertEqual(playtest_step("face-keyframes {formId: 0x13491}")[0], "face-keyframes")
 
     def test_a_playtest_draws_and_calms_a_named_npc(self):
