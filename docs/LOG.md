@@ -2923,3 +2923,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   for P2's stage: x-story-arrival-login (the placement's start, then a relaunch in place: the client's and the native's lines, the quest
   running) and x-quest-mode (an undeclared quest's stage crosses in mode all, a denied one is E_QUEST_DENIED). m3-npc-reach's compile red
   (a chrono literal in a test file without the using-declaration) fixed as 5d418327, T0 rerunning.
+- 14:32 PDT: lab/frida/story-location.js: the Story Manager's Change Location trace (AddEvent_Impl against the CLOC index static,
+  SetParentCell with the player's currentLocation and the cell's location, BeginStartUpQuest, the locationChanged SendEvent; offsets by
+  just addr for 1.6.1170, cited per line), the Dynamic plan of H-56a's fix; to run at P2's stage on c1 around a placement into Riverwood
+  and a relaunch in place under m3-story-arrival.
