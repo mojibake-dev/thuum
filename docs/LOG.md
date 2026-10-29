@@ -2935,3 +2935,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   quest's intro chain MQ101 to MQ104 and the DLC starts denied, ids by esm.py) is written into quest-stage.md and lands in both deploy
   files at P2's deploy, never before: a server without the branch refuses the object at startup. WIRE.md's QuestStage paragraph says
   the same. The quest-fragment hook and this mode ride the same train so sharing every quest does not double its rewards.
+- 14:46 PDT: m3-npc-reach's T0 rounds: 3826 red at compile (a chrono literal the test file never declared), 3832 red on two fixtures
+  (HitTest's "npc" is a created actor on the player's base, IsCreatedAsPlayer, so the gate leaves it alone by design and the hit at
+  2000 units lands as before; CellHostTest's hosted Sigrid hit with source 0 was dropped by E_HIT_WEAPON before reach judged it), fixed
+  as dc7689d1 and be6cf6af (the helper spelled out in the file) and pushed; the rule itself read right in the log (E_HIT_REACH refusals
+  at 500 and 2000 units on the player target). P2's pre-assembly m3-pass-train-2 (local) merged npc-reach, story-arrival, quest-fragment
+  and quest-mode with the two platform branches' additive conflicts resolved by hand (both natives after Stagger; the login handler
+  mode-aware with the arrival flag); tsc, fork-lint and the wire crates' tests green on the merge.
