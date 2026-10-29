@@ -2964,3 +2964,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   at sleep, host_changed, gone; the bridge; the handlers OnPropClaim and OnPropTransform; PartOne's plumbing; unit/PropTest.cpp; a difftest
   session); cargo tests and clippy green, fork-lint green, the C++ on CI only. The client's PropService (slice one) is being built in the
   same worktree. numidium: no movement.mode change by me; follow is Eli's own pick and goes to Eli as D61 with the duel's evidence.
+- 14:56 PDT: the sharing mode's denylist widened on apocrypha's read (docs/research/layer-quests.md on apocrypha/alternate-start: the
+  alternate start's fragments stage the main quest's chain, the guild openers, the dialogue scenes, the house purchase, the DLC openers
+  for the chosen start; a shared stage of the random-lair controllers would hand one seat's lair to everyone): 40 quests denied across
+  Skyrim.esm, Dawnguard.esm, Dragonborn.esm and HearthFires.esm, written by json.dumps(indent=2) so layer-render --check holds
+  (apocrypha: the renderer rewrites the whole file and keeps every key). The layer's MCM, version-tracker, player-alias and controller
+  quests (42 on the page) and the alternate start's own eighteen are the rule's: D62, a Start Game Enabled quest (QUST DNAM flag 0x1,
+  libespm QUST.h) is each seat's own in mode all unless listed `allowed`, being built on m3-quest-mode; client-only plugins' quests are
+  E_QUEST_UNKNOWN on the server already. Finding 77 is Reading List's own book radar (RL_DetectionQuest started and stopped every 0.5 s
+  by RL_ManagerScript), per seat, the server never sees it; Eli's call whether to slow it (a VMAD property patch) or drop the mod.
