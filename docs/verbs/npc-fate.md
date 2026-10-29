@@ -1810,7 +1810,7 @@ puppet, formView.ts's dead-word gate under 0xff000000, a known limit). T0: Actor
 from a non-host nothing; from the host the death cleared and the live word relayed). Reanimate's thrall, Dead Thrall
 and a scripted resurrect all ride it. The 0xff death report (a server-made creature's death "by the server's word"
 after 3 s because the client never reported a 0xff id and the wire refused the range) is its own commit, fork
-m3-death-range 2069d4d2 (20:5x PDT): ActorDeath's refr_id bound leaves the validator (the id nonzero, the cause 0 to
+m3-death-range 2069d4d2 (19:3x PDT): ActorDeath's refr_id bound leaves the validator (the id nonzero, the cause 0 to
 4; who may report whom stays OnActorDeath's rule: the simulator, a fated actor, alive), the client's gate keeps only the
 player's own actor out (the host gate isMineLocal keeps other players' figures out), no schema change; docs/WIRE.md's
 row says so. HYPOTHESIS until a placed creature's death on its host is recorded as its report (x-npc-creature-caster's

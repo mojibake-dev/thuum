@@ -2539,7 +2539,7 @@ a stranger's or an unhosted actor's alone now. T3: a door leg into a hosted
 interior, its own commit. The pass's first live run: Hod into rotfern's hosted
 inn at 00:47:23Z (playtest 37, finding 39).
 
-2026-10-28 19:4x PDT, memo D54 B (Eli: "B for D54"): the persistence fact
+2026-10-28 19:1x PDT, memo D54 B (Eli: "B for D54"): the persistence fact
 leaves the door. Hilde 0x35534 (ACHR flags 0x0) was refused at her own door
 and turned back; now every actor's door counts, persistent or not: into a live
 host's cell the move passes (D9's shape), into an unhosted interior the record
@@ -3213,7 +3213,7 @@ to any of the eight is a new ADR, not a rewrite of this one.
 ## ADR-056: World-shared quest stages, the journal stubbed (memo D55, B)
 
 Status: ACCEPTED 18:0x PDT 2026-10-28 (Eli through numidium: "i recommended as B for 55"; the memo is D55 in
-docs/research/m3/decisions-after-npc-stream.md). Written 18:3x PDT 2026-10-28 (thuum-magnus), before the first slice.
+docs/research/m3/decisions-after-npc-stream.md). Written 18:2x PDT 2026-10-28 (thuum-magnus), before the first slice.
 
 Context. A quest stage set by a dialogue fragment or a script runs on the talker's game alone, and since fork
 2ce8b523 the fragment gate keeps a relayed line's fragments off the watcher on purpose (npc-stream.md, H-57a and b
