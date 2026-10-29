@@ -2845,3 +2845,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (2026-10-30 to 11-01): M3's open items and playtest 38's findings first, the quest-stage propagation where M3 touches it (76's list, the
   Story Manager read), then the physics items under the Garry's Mod model (the toucher simulates the prop, the server records it, every
   other seat interpolates). The pass's plan is written next (docs/private/pass-m3-close.md and PLAN.md's chart lines), then built.
+- 13:51 PDT: second reads of 72, 75 and 71 from the code. 72: the refused effect was the Dark Souls perk rider's HasPerk (true to
+  ADR-039 and to rotfern's perks), the reanimation effect held; the server applies no effect to a dead target, so a 3n reanimation runs
+  only on the host's engine, and rotfern was the non-host at 20:16Z: expected, 3o's CastReanimateOnHost is the fix; the host half was
+  never tried. 75: the server sends isDead to every listener; the client logs none of it; the watcher's creature kill with AI off is
+  the frozen atronach (HYPOTHESIS; x-npc-creature-death to read; the explosion is the host's ability). 71: the settle logged before its
+  dead check once per host sample; the bind kill had no fall. m3-client-bits now carries 67, 66's belt, 68's hands pass after the first
+  apply, 71's dead-body silence and the push-with-no-force after a silent kill (17d13443 and the commit after it; tsc green; local).
