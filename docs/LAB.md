@@ -686,7 +686,9 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    virtio-fs shares, which are incompatible with RAM snapshots, so every
    rollback in the lab is disk-only; sky-re is rolled back with `pct`.
 2. Applies netem if asked.
-3. Rolls each named client back and starts it; waits for the lab-driver
+3. Rolls each named client back and starts it, or under
+   LAB_CLIENT_RESET=relaunch relaunches its game when nothing asks for the
+   rollback (ADR-036, "Between runs" below); waits for the lab-driver
    heartbeat.
 4. Feeds steps in order; each step names a client or the server; waits for
    the ack or the timeout.
@@ -774,6 +776,61 @@ Assertions live in the YAML, and the runner is the only thing that can mark
 a scenario green (ADR-009). Scenario YAML is review-gated (ADR-016): a
 change travels in its own commit, Eli approves it, and CI refuses a commit
 that mixes scenario YAML with other files.
+
+### Between runs: a relaunch or a rollback (ADR-036)
+
+A client rollback is two vfio resets of the seat's GPU, and the cards wedge
+after them (sky-c2's GTX 1050 at a rollback on 2026-10-29, the fifth
+link-retrain wedge in sixteen days). LAB_CLIENT_RESET picks how the phase
+rollback-clients (its name kept) starts each managed seat: `rollback`, the
+default until a live day has measured the other, or `relaunch`. A relaunch
+is one guest exec, the VM left running: every running sky-lab task stops (a
+Frida watcher or an armed ProcDump would take the next run's game), then
+sky-lab-launch and the game, the cleaning list goes, and sky-lab-launch
+starts; the rollback's heartbeat wait follows. Every relaunch, the relaunch
+step's and its files lever's too, stops sky-lab-launch before the game: the
+task is registered IgnoreNew (install-lab.ps1:104) and launch.ps1 starts
+again a game that exits in its first minute (launch.ps1:117-135), so a kill
+in that minute came back as the old launch's own, with that boot's folder
+and solo switch.
+
+A seat rolls back anyway when the run asks (a run set's first run on it, a
+cold-rollback rerun, lab-up); when the scenario says `client: rollback`; when
+lab-api has run nothing on it since it started (the memory is lab-api's
+alone); when its last run left a reason (a step that timed out on it, an
+E_RUN_* naming it, a crash or a replaced game at the end, its game check, an
+end left unread, an E_RUN_TIMEOUT or internal error anywhere, a relaunch
+step's files lever, a preset name the cleaning cannot spell) or something
+touched it outside a run (a hold, lab-down, a snapshot, promote or rollback
+of the clone); when it has played LAB_RELAUNCH_ROLLBACK_EVERY runs (20) since
+its last rollback; when its VM is not running; and when C:\sky-lab\hot.txt
+marks a hot push, which the relaunch reads first and then touches nothing. A
+relaunch that fails is tried once more, and a second failure rolls the seat
+back in the same run.
+
+The cleaning list names folders and patterns, never a wildcard over
+C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
+.copy; frida-inject.exe stays), shots\, screenshots\, burst\ and input\ (the
+screenshot, burst and mouse steps' files); each game folder's
+Data\SKSE\Plugins\CharGen\Presets (thuum-*.jslot and the presets the seat's
+last run saved by name); the Saves folder's TESMODPLATFORM-* (Skyrim
+Platform's generated saves, which a kill before its load settles leaves); the
+SKSE folder's skyrim-platform-pid*.log (launch.ps1's copies, which the next
+run's end would collect as its own). Crash dumps stay: a run's end counts
+only those written since a few minutes before its start, and a crash it finds
+rolls the seat back. A file that will not go fails the try. A scenario that
+writes anywhere else says `client: rollback`.
+
+result.json's `client_reset` holds each managed seat's `{kind, seconds,
+since_rollback, reason, image_base}`, and a note per seat reads "c1 relaunched
+in <s> s, <n> runs since its rollback, <k> files cleaned" or "c2 rolled back
+in <s> s: <reason>". `image_base` is the game check's read of the image's base
+address, also noted per seat: a relaunch within one boot tends to keep the
+base a cold boot randomizes (ADR-036). In a run set (ADR-030 as ADR-036
+amends it), each seat's first run rolls it back, and a red run in which a
+seat relaunched (its entry's `relaunched`) is rerun once with every seat
+rolled back, tagged `cold-rollback`; that rerun's verdict is the scenario's,
+both stay in the set's record, and ADR-027's lone-red reruns follow as before.
 
 ### Known intermittent fault: a teleport that never settles (E_RUN_TELEPORT)
 
