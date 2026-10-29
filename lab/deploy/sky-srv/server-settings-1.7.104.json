@@ -232,11 +232,36 @@
   "survivalFood": {
     "switch": "828:ccQDRSSE001-SurvivalMode.esl",
     "effects": [
-      { "effect": "2ee1:Update.esm", "need": "81a:ccQDRSSE001-SurvivalMode.esl", "amount": 2, "floor": 0 },
-      { "effect": "2ee2:Update.esm", "need": "81a:ccQDRSSE001-SurvivalMode.esl", "amount": 18, "floor": 0 },
-      { "effect": "2ee3:Update.esm", "need": "81a:ccQDRSSE001-SurvivalMode.esl", "amount": 220, "floor": 0 },
-      { "effect": "2ee4:Update.esm", "need": "81a:ccQDRSSE001-SurvivalMode.esl", "amount": 380, "floor": 0 },
-      { "effect": "2ee5:Update.esm", "need": "81b:ccQDRSSE001-SurvivalMode.esl", "amount": 200, "floor": 50 }
+      {
+        "effect": "2ee1:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 2,
+        "floor": 0
+      },
+      {
+        "effect": "2ee2:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 18,
+        "floor": 0
+      },
+      {
+        "effect": "2ee3:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 220,
+        "floor": 0
+      },
+      {
+        "effect": "2ee4:Update.esm",
+        "need": "81a:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 380,
+        "floor": 0
+      },
+      {
+        "effect": "2ee5:Update.esm",
+        "need": "81b:ccQDRSSE001-SurvivalMode.esl",
+        "amount": 200,
+        "floor": 50
+      }
     ]
   },
   "sharedQuests": [
