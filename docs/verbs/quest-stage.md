@@ -158,6 +158,42 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - Breakpoint plan: none.
 - Owner: agent (the probe).
 
+
+## Slice two: the relayed stage without its fragment (static read 14:07 PDT 2026-10-29, the re-analyst; HYPOTHESIS until the trace)
+
+ADR-056's known limit: a relayed stage's QF fragment runs on the applying seat too, so rewards duplicate. The engine's chain, read
+on the unpacked 1.6.1170 program through Ghidra and reverse-mapped to Address Library ids with lab/addr.py, forward-checked by
+`just addr` (CommonLibSSE-NG declares the sink and the event but no body: SkyrimVM.h:116 the sink sub-object, :228 the
+FragmentSystem member; ScriptEventSourceHolder.h:95 the source; TESQuestStageEvent.h:9-12 the event; BSTEvent.h:89-108 SendEvent
+synchronous): the Papyrus native Quest.SetCurrentStageID (id 56684; refuses an event-scoped quest outside the Story Manager,
+TESQuest.h:263-264) calls EnsureQuestStarted (25003, Offsets.h:551), registers a latent wait (53703; 53716 counts the stage's log
+entries through the stage finder 25028), then the setter 25004 (walks the stage list, raises currentStage upward, calls 25252,
+AddChange kQuestStages). 25252 sets the stage's done bit, registers startup and shutdown stages with BGSStoryTeller's
+questStageWaitMap (32495), and runs 25260 per log entry: conditions, the complete and fail bits, the journal entry and the "quest
+updated" message, then sends a TESQuestStageEvent (25271) carrying a StageItemFinishedCallback. The sink SkyrimVM::ProcessEvent
+(53987, VTABLE_SkyrimVM[30] = 217115) asks the FragmentSystem (53429) for the quest's script and fragment names by (formID, stage,
+entry): found, it dispatches the VM method call (DispatchMethodCall2, IVirtualMachine.h:93) with a functor (54240) that fires
+the callback's slot 1 (25234, the TESQuestStageItemDoneEvent) when the stack ends; not found, it fires slot 1 inline. Slot 1's
+sinks clear the StoryTeller's wait and return the latent SetStage (53763). The console SetStage is 22151 over the same 25004;
+a stage set on an unstarted quest is queued by the VM itself (53711) and set at the quest's start (53706, 53713).
+
+The narrowest suppression: a Gum replacement of 53987 (the shape of the dialogue fragment gate at 35225): when the event's
+(formID, stage) is in the client's set of stages being applied from the server's relay, fire the callback's slot 1 if non-null
+and return kContinue, the engine's own no-fragment branch; else the original. Kept: the done bit, currentStage, the journal entry
+and message, the complete and fail bits, the StoryTeller bookkeeping, the latent return. Skipped with the fragment: the stage's
+world effects and its SetObjectiveDisplayed (objectives stay the later ADR's). Keyed by pairs, never a flag window: the VM may
+queue a stage on an unstarted quest and set it later. The alternative, writing currentStage and the stage bit without SetStage,
+reimplements 25004 and 25252 and loses the journal; not taken. Falsifiers: a 54240 for a suppressed pair (another dispatcher), or
+a 56684 with no 53763 (the Skyrim Platform promise would hang). Every id above is UNKNOWN to CommonLib and tagged HYPOTHESIS
+until the trace. Notes: the re-analyst's scratch (rev.py and notes.md), to be copied under docs/research/m3/re-quest-fragment.md.
+
+Dynamic plan (lab/frida/quest-stage-chain.js, both seats): hook 56684 (vm, stackId, the quest's formID, the stage), 22151, 25004
+(quest, stage, the return), 25260 (entry, hasLogEntry), 53987 (the callback, formID, stage, entry), 53429 (the return and the
+two names), 54240 and 25234 (formID, stage), 53763 (the counter). (a) c1's console setstage MS13Intro 0xb6031 10: 22151, 25004,
+25260 per entry, 53987 with 53429 true and two names, later 54240 then 25234, no 53763; the journal entry and the stage's world
+effect. (b) c2's relayed apply under the detour: 56684, 53716, 25004, 25260, 53987 returning with 25234 inside its frame and no
+53429 or 54240, 53763 to zero in the same call; lab-api stageDone(10) true on c2, no world effect, the promise resolved.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

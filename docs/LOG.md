@@ -2870,3 +2870,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   wrong (server.actor x is lab-spawn relative; x 16000 is inside the location) and are v2 by path, with x-grant-roster's x claim
   likewise. Also read: quest 0x30002859 flaps start/stop every 0.7 s on c1 (finding 77, for apocrypha); x-npc-creature-caster 14 of 15
   with the fix's claims held (v3 records the host-side launch chain); x-raise-wall's first run a lab fault, rerun on.
+- 14:05 PDT: PLAN.md's M3 section gained the pass's STATE block (the audit of parity bf133744: the ladder's five trains are on parity
+  whole, the voice on by default; everything after rides the turbo trains, 3o staging; the no-code list: the exit scenarios, NPC reach
+  and cone, the zone clamp, the trap read, the smooth-motion number, D8 ActorHandoff, physics movables, horses; the open Status boxes).
+  b-spell-placed-wall's frame moved 300 south for 3o's gate chain (main 334514f, its own commit; the one absolute claim moved with the
+  wall's line, the same margin). m3-pass-train-1 7a223e0d T0 green (pipeline 3819).
+- 14:07 PDT: the pass's paper for heads 2 and 3: ADR-058 (physics props: the toucher simulates, the server records, every other seat
+  keyframed; the owner table's prop row; three wire rows; slices one to three) PROPOSED and taken under the pass's rule; docs/verbs/
+  prop-physics.md DRAFT with the engine surface from CommonLibSSE-NG's headers (the touch's entry point UNKNOWN, the re-analyst's);
+  quest-stage.md's slice two: the engine's SetStage-to-fragment chain read through Ghidra (56684, 25004, 25252, 25260, 53987 the VM's
+  stage sink, 53429 the fragment lookup, 54240, 25234, 53763; ids reverse-mapped with lab/addr.py and checked by just addr), the
+  narrowest suppression a Gum replacement of 53987 keyed by (quest, stage) pairs the client is applying from the relay, HYPOTHESIS
+  until the Frida plan runs. Eli's pointer (a friend ported Source's air strafing into OpenMW): borrow the networked portion, not
+  the simulation; cited in ADR-058 (Valve's networking page, Bernier 2001, Fiedler's state synchronization).

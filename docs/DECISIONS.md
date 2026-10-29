@@ -3350,3 +3350,56 @@ pose, the gate, the caps and the lifetime, T2 for the relay, the probe x-raise-w
 joiner sees it). v1 ships Raise Wall alone on the caster anchor; Fabricate Object's menu choice (a client-reported
 base id validated against the spell's list) and Wind Running's per-update placement are later deltas; the hit-target
 and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
+
+## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
+
+Status: PROPOSED 14:06 PDT 2026-10-29 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes.
+Eli's words: "heavy progress made into physics items. i feel like the canon perfection of multiplayer phys objects is gmod if
+that mental model helps at all", and "i had a friend add air strafing from the source engine to openmw i would imagine the
+networked portion physics object functionlity can be borrowed in a similar way" (2026-10-29).
+
+Context. The law gives physics to the host client (R2: the host computes, the server records; ADR-002 forbids server Havok), and
+nothing in the fork moves a prop between seats today: every item reference and spawned object is forced Keyframed on arrival
+(skymp5-client objectReferenceEx.ts, spawnProcess.ts), the loader skips movable statics (MSTT), and a kicked basket or a dropped
+sword moves on one screen alone. PLAN.md's M3 line "physics host switching for movables" has had no code (the pass's audit).
+Garry's Mod is Source: the server runs VPhysics and is the one truth, clients interpolate the networked origin and angles and
+predict only their own player, and a held or pushed prop's motion controller is the server's (Valve, "Source Multiplayer
+Networking", developer.valvesoftware.com/wiki/Source_Multiplayer_Networking; Bernier, "Latency Compensating Methods in
+Client/Server In-game Protocol Design and Optimization", GDC 2001). We cannot run the physics on the server, so what we borrow is
+the networked portion, as Eli's friend borrowed Source's air strafing into OpenMW without its physics: ONE simulator per prop,
+positions and angles networked only while the body is awake, interpolation on every other seat, and the simulator chosen by
+the interaction (Fiedler, "State Synchronization", gafferongames.com, 2015; "Networked Physics in Virtual Reality", GDC 2018).
+
+Decision 1, one simulator per prop. A prop is simulated by exactly one seat at a time: the cell's host by default, and the seat
+whose player last touched it (a Havok contact of its character controller, a grab, a drop, a shout's or spell's impulse) for as
+long as its lease holds (PROP_LEASE_MS, 3000 after the body sleeps; UNMEASURED). The owner table ADR-050 decision 4 and ADR-052
+named gets its second row kind: "prop" beside "follow", "margin" and "claim"; the cell is still the policy (a prop in an
+unhosted cell freezes at the record). Rung: the claim R0 (the server decides who simulates, on the toucher's report, newest touch
+wins by epoch), the transform R2 (the simulator's engine computes, the server records).
+
+Decision 2, the wire. Three rows in wire-schema, each with its validator in the same commit (rule 4): PropTransform {refr,
+pos, rot, asleep} from the simulator at most every 100 ms while the body is awake and once at sleep (C2S), relayed to the
+cell's other listeners (S2C) as a delta; PropClaim {refr, touch} (C2S) from the seat whose player touched a prop it does not
+simulate; PropOwner {refr, player, epoch} (S2C) to every listener at each change. The record keeps the last transform and the
+asleep flag (the reference's locationalData; no schema change for items, MSTT records are slice two's).
+
+Decision 3, the seats. The simulating seat's body is Dynamic and streams; every other seat's body is Keyframed and takes the
+stream's transform (SetPosition and the rotation through the rigid body's setters; interpolated over the sample interval as a
+figure is), so it neither falls nor fights the stream; at an owner change the new simulator's body goes Dynamic with the last
+streamed velocity (HYPOTHESIS: the hand-over is seamless at 100 ms samples) and the old one goes Keyframed. Nothing predicts.
+
+Decision 4, the slices. One: items the server already loads (MISC, WEAP, ARMO, ALCH, INGR, BOOK references with Havok, a drop's
+reference from its first frame), the probe x-prop-push (c1 walks into a basket; c2 sees it move within 32 units of c1's and rest
+where c1's rests) and x-prop-pass (c2 kicks it back: the owner flips, c1 interpolates). Two: movable statics (MSTT) admitted by
+the loader as references (the dead-placed fix's shape) and the Blue Palace's physical container. Three (later, M4): dragging and
+telekinesis as touches, ragdoll bodies under the same rows (finding 71's settle becomes a PropTransform of the body).
+
+Consequences. The observe/impose/suppress split: observe the Havok awake state and transform on the simulator (bhkRigidBody,
+hkpMotion: CommonLibSSE-NG H/hkpMotion.h, B/bhkRigidBody.h; the sleep signal is the simulation island's active mark,
+H/hkpSimulationIsland.h, the headers hold no isActive); impose the transform on the others (TESObjectREFR::SetPosition, the
+body's SetRotation, SetMotionType Keyframed: N/NiAVObject.h's SetMotionType); suppress the others' dynamics (Keyframed). The
+touch detection has no header entry point (the character controller's contact callbacks exist as listener lists nobody adds
+to: B/bhkCharProxyController.h, H/hkpContactListener.h) and is the verb's RE task; until it lands, slice one's touch is the
+player's grab and drop plus proximity to an awake prop (the nearest player within 128 units of a body that woke claims it).
+Known limits: no prediction (a prop a seat does not simulate moves a sample behind), stacked props flip owners by contact, a
+prop in an unhosted cell freezes, bodies and props stream on the same budget (prop_budget UNMEASURED).
