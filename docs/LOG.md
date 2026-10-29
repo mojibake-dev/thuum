@@ -2862,3 +2862,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   grant within 30 s, accepted sightings after it; the race and its replay recorded). The driver's cast step takes a target by form
   id (Papyrus Spell.Cast), so a game-file body is the target (a server-made one has a different local id per seat). The pass plan is
   docs/private/pass-m3-close.md v1; the summary for Eli docs/private/weekend-summary.md.
+- 14:03 PDT: H-56a ANSWERED by x-story-manager-walk's console at 3o's stage (run 205447): the placement from lab-spawn into Riverwood
+  logged "locationChanged actor 14 old none new 13163" and "questStart quest 74a83" in the same millisecond (20:56:22.186Z), so the
+  Story Manager starts A Lovely Letter the moment a seat ARRIVES; the playtests' seats log in inside the location (the camp is the
+  landing) and a login is no change, which is why it never started for them. Fix shape in quest-stage.md: a login-time Change
+  Location event through the engine's own BGSStoryEventManager::AddEvent (RE first, HYPOTHESIS). The probe's own claims were framed
+  wrong (server.actor x is lab-spawn relative; x 16000 is inside the location) and are v2 by path, with x-grant-roster's x claim
+  likewise. Also read: quest 0x30002859 flaps start/stop every 0.7 s on c1 (finding 77, for apocrypha); x-npc-creature-caster 14 of 15
+  with the fix's claims held (v3 records the host-side launch chain); x-raise-wall's first run a lab fault, rerun on.
