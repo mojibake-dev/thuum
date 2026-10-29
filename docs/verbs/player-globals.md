@@ -239,6 +239,20 @@ for the outdoors after an indoor login. If a train ever wants it on from login i
 
 ## Status
 
+### Memo D51 B built (17:1x PDT 2026-10-28, Eli: "that sounds good")
+
+A death from recorded state is the server's word (R0). A `playerGlobals` entry may carry `killAt` (a finite
+number) beside `default`; when a player's merged record puts that global at or past it, the server kills the
+player through its own death path (MpActor::Kill, the respawn following as for any death) and logs "dies by the
+server's word: global X at V reached its killAt". Survival's cold need, 81b:ccQDRSSE001-SurvivalMode.esl, carries
+killAt 1000 in both server settings files (the mod's own CheckIfMaxCold threshold; apocrypha's read). The client's
+own Kill stays untrusted (rule 5): the seat's deferred kill holds the player until the server's word. Built on fork
+m3-door-pass after 9fb04fec: wire-rules player_globals.rs `kill_at` and `lethal()` with the crate's test, the bridge's
+player_globals_lethal, PartOne::LethalPlayerGlobals, the handler's kill, PlayerGlobalsTest's case (GameHour standing
+in for the cold need). HYPOTHESIS H-D51a (the seat's deferred kill swallows Survival's own Kill, so the server's word
+is the one death) until x-player-cold-kill reads it; the probe gains the global's set through the lab `global` step
+and the server's `isDead`.
+
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated
 - [x] server logic + T0

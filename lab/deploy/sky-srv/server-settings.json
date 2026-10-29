@@ -211,7 +211,10 @@
     "017520:Apocalypse - Magic of Skyrim.esp",
     "01a60e:Apocalypse - Magic of Skyrim.esp",
     "81a:ccQDRSSE001-SurvivalMode.esl",
-    "81b:ccQDRSSE001-SurvivalMode.esl",
+    {
+      "global": "81b:ccQDRSSE001-SurvivalMode.esl",
+      "killAt": 1000
+    },
     "816:ccQDRSSE001-SurvivalMode.esl",
     "828:ccQDRSSE001-SurvivalMode.esl",
     {
