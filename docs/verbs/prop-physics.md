@@ -31,7 +31,7 @@ one screen alone (skymp5-client/src/extensions/objectReferenceEx.ts, view/spawnP
 | awake or asleep | H/hkpSimulationIsland.h:41-42; H/hkpWorld.h:99-100 | the island's active mark; no isActive in the headers (HYPOTHESIS: in the active list means awake) |
 | the motion type set | N/NiAVObject.h:126-135; T/TESObjectREFR.h:468 | SetMotionType Keyframed, Dynamic |
 | write a position | T/TESObjectREFR.h:469-470, :456, :259 | SetPosition and MoveTo through MoveTo_Impl; Update3DPosition |
-| the touch | B/bhkCharProxyController.h:22-25; H/hkpCharacterProxyListener.h:15-28; H/hkpContactListener.h:18-20 | callbacks exist, nobody registers: UNKNOWN entry point, the re-analyst's task |
+| the touch | B/bhkCharProxyController.h:22-25; H/hkpCharacterProxyListener.h:49 (slot 2); H/hkpRootCdPoint.h:16; H/hkpCollidable.h:54-69; T/TESHavokUtilities.h:15 | READ 15:37 PDT (docs/research/m3/re-havok-contact.md): the player's proxy controller's ContactPointAddedCallback, Address Library 79131 (just addr), fires for Keyframed bodies too; the reference by FindCollidableRef 26003; HYPOTHESIS until lab/frida/prop-contact.js |
 | a drop | A/Actor.h:401 | DropObject returns the handle; a dropped item is a prop from its first frame |
 | what is a prop | B/BSXFlags.h:17; C/CollisionLayers.h:8-36 | the model's Havok flag and the body's layer (kClutter 4, kProps 10) |
 | Skyrim Platform today | skyrimPlatform.ts: getPositionX/Y/Z, setPosition, setAngle, translateTo, applyHavokImpulse, setMotionType, getMass, dropObject, Cell.getNthRef | no velocity, no sleep state, no contact event |
@@ -76,9 +76,12 @@ claim on a grab (grabRelease event), a drop (the drop's handle), a contact (the 
 
 ## Dynamic plan
 
-Frida on a lab seat: trace the character controller's contact callback (the re-analyst names the id) with the colliding body's
-reference and the body's motion type each hit; expected: a contact per step into the basket, the basket's body Dynamic on the
-walker's seat and Keyframed on the other, and the stream's first sample within 100 ms of the first contact.
+lab/frida/prop-contact.js (`just frida prop-contact <client>`): hooks the proxy controller's ContactPointAddedCallback (79131) and the
+interaction's impulse body (78304) on both seats while the player walks into a basket twice; logs this, the collidable's layer, the
+owner body's motion type, the reference's id (FindCollidableRef 26003) and the thread. Expected: on the simulating seat 79131 once per
+touch and 78304 every step with bumpedBody the basket; on the other seat 79131 fires with motion type 4 and 78304 stays silent; then the
+stream's first sample within 100 ms of the first contact on the owner's seat. The thread the callback runs on decides whether the
+hook's event send hops to the JS thread.
 
 ## Status
 
