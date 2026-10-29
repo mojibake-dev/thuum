@@ -244,8 +244,16 @@ re-positioning (out of scope).
   shows a message (Message.Show), so a cast into a wall keeps the stream open
   with the fail effect and the server may place a wall the caster never saw
   (fn 518 GetVATSFrontAreaFree is the engine's); a listed v1 limit.
-- For apocrypha: does the perk's dual cast change the constants or apply
-  twice; the MSTT's bounds (width, height) for the scenario; whether anything
-  re-positions or scales the wall after the rise.
+- Answered by apocrypha (22:03 PDT): a dual cast changes nothing (SPIT flag No Dual
+  Cast Modification, one effect instance, one wall, the same constants); the
+  MSTT's visual is 1470 wide, 102 thick, 262 tall with the origin on the
+  base's centre line, its Havok body 1088 wide, 104 thick, 262 tall (the end
+  caps have no collision, so the scenario's walker meets the wall within
+  about 500 units of its centre line), 214 units stand above the caster's
+  floor after the rise; nothing re-positions or scales the wall after the
+  rise (no OnUpdate, no second TranslateToRef, no SetScale), so one pose
+  suffices: caster + 192 along the yaw (x += 192 sin, y += 192 cos, Papyrus
+  angles), Z - 48, rotation (0, 0, yaw); the glow at the same XY at the
+  caster's Z.
 - For Eli: ADR-029's open question, answered here as C, not an allowlist entry;
   whether the rise and shader earn a client slice; the caps.
