@@ -291,6 +291,8 @@ Court" (stage 9) calls the vanilla `HarkonBitesPlayer(True)`, the turn that also
 Lord. Race and appearance are R0 on the server and the clock is the server's, so these two lines are
 either performed by the server as part of the kit (a race change, a time the server already sets) or
 not honored; a client-side race swap that the server never records is the a-rotfern class of mismatch.
+How each turn happens, what it touches and what the server lacks for it: docs/research/vampirism-under-the-server.md
+(Eli's scout for B, 2026-10-28).
 The bandit, Forsworn and vampire-lair starts also add the player to a friendly faction
 (`ARTHLALBanditVampireFaction` and the controllers' factions), client-local and harmless.
 
