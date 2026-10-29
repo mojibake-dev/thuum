@@ -661,7 +661,9 @@ m3-door-pass 2a18f926; ADR-047's note of the day): the door's pre-check
 admits it, the host's engine walks it through, its report from indoors passes
 the record and flips the word (D9's path), the exit passes it back under D22's
 margin brake; the refusal at the door is a stranger's or an unhosted actor's
-alone. T3: a hosted-interior leg of the door scenario, its own commit. mp.get(0, "cellFollows") for
+alone. CONFIRMED live 2026-10-29 00:47:23Z (Hod 1348a through the Sleeping Giant's
+door into rotfern's hosted inn: the walk, the pass, the new host live, the old demoted; playtest 37's finding 39);
+T3: x-handoff-door-pass, then a hosted-interior leg of the door scenario, its own commit. mp.get(0, "cellFollows") for
 the lab. H5 stays HYPOTHESIS until x-handoff-door.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-22 draft; the decisions as ADR-047 PROPOSED 2026-10-23, D6 to D11)
