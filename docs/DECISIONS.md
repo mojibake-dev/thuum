@@ -3185,3 +3185,55 @@ installer and sync script in canon-sync.ps1's shape, the announcements through t
 (the fresh-profile login, the mismatch, the start) and the friend-as-host scenarios after M3's host verbs. A change
 to any of the eight is a new ADR, not a rewrite of this one.
 
+
+## ADR-056: World-shared quest stages, the journal stubbed (memo D55, B)
+
+Status: ACCEPTED 18:0x PDT 2026-10-28 (Eli through numidium: "i recommended as B for 55"; the memo is D55 in
+docs/research/m3/decisions-after-npc-stream.md). Written 18:3x PDT 2026-10-28 (thuum-magnus), before the first slice.
+
+Context. A quest stage set by a dialogue fragment or a script runs on the talker's game alone, and since fork
+2ce8b523 the fragment gate keeps a relayed line's fragments off the watcher on purpose (npc-stream.md, H-57a and b
+CONFIRMED by playtest 37's shop test). So each game's quest state drifts from the other's, and every line or topic whose
+conditions read that state is offered on one seat and not the other: Sven's Faendal line in A Lovely Letter (playtest
+37, Eli: "sven convo the line about faendal, the quest one, doesnt appear on prisoners thing"), the bounty rumor whose
+INFO did not even resolve on the watcher (finding 34). Eli: "appropriately communicating the worlds shared quest state
+(with stub functionality to later separate journals but thats a LONG time coming) makes sense to start now as part of
+the dialogue work." TES3MP's shape is one shared journal for the world (its JournalChanges sync, every player's entry
+sent to all), with per-player journals a server option that came later; we take the same order.
+
+Decision.
+1. The server owns the world's quest stages. Rung R0 for the record and its relay; the feed is R1: a client reports
+   its own game's stage change (the engine's quest-stage event, Skyrim Platform's `questStage`) as one message,
+   QuestStage {quest, stage}, in both directions (the report up, the relay and the replay down). The validator: the
+   quest is a QUST record in the server's load order (espm), it is on the server's shared list (decision 5), the stage
+   fits the engine's u16 stage index, at most one report per quest per 50 ms per player; a stage already recorded is a
+   no-op, never an error.
+2. The record is the world's, not a player's: per quest, the set of stages done (the engine's GetStageDone semantics,
+   because conditions read GetStage and GetStageDone and a stage can be set out of order), persisted with the world
+   and surviving a restart (rule 6: a migration note and a restart scenario).
+3. The relay: at once, reliable, to every other connected player; the replay at login, in order, after PlayerGlobals
+   (the same place the clock and the globals are sent), ascending per quest so each SetStage sees the previous ones.
+4. The apply on a seat is the engine's own Quest.SetStage for each stage not done there (idempotent: a stage done is
+   skipped), so topics, conditions and the journal follow by the engine's rules; the engine's event from that apply is
+   consumed by a loop guard and never reported. A quest the engine has not started starts at its first stage, the
+   engine's rule.
+5. The shared list is a server setting (`sharedQuests`, FormDescs, the PlayerGlobals shape) and is the stub Eli names:
+   the first slice lists Riverwood's quests (A Lovely Letter, the Riverwood rumours' quests, the Bleak Falls errands)
+   and grows by the playtests; a quest off the list stays each seat's own as today. Replaying the whole world's quest
+   state onto a fresh player (the main quest's stages move the player and start scenes) is what the list prevents.
+6. The journal is each engine's own, filled from the shared stages: one world journal on every seat, the stub. A
+   per-player journal (C's end state: private quests, shared world effects) is a later ADR with the fragment-kind table
+   it needs.
+
+Known limits of the first slice, written into docs/verbs/quest-stage.md: the QF stage fragments run on every applying
+seat (items, gold, enabled references, moved actors duplicate until the server performs world effects itself from a
+table of fragment kinds, the second slice; the R0 inventory corrects the items and gold at the next SetInventory);
+objectives, aliases and quest globals are not synced; the list is hand-kept; a stage set on a seat before its login
+replay is reported and recorded like any other.
+
+Consequences. One new message with its validator, fixtures and contract line in one commit (rule 4); a world record and
+its migration; a client service with the report, the apply and the guard; T0 for the rules and the record, T2 for the
+relay, the probe x-quest-stage (c1's console setstage on a listed quest reaches c2's GetStage within the relay's lag;
+an unlisted quest refused in the log; a restart keeps the stage) once lab-api has a quest-stage read, then scenario
+b-quest-stage. The dialogue work (npc-talk) stands on it: a line conditioned on a stage is offered on both seats once
+the stage is shared.
