@@ -650,7 +650,9 @@ included. Nothing happens at runtime.
   scales the game's time by the magnitude: 0.3 for 8 s, 0.2 for 12 s, 0.1 for 16 s); at 1.0 time
   keeps its pace and the shout keeps its words, walls, sound, recovery and the no-absorb flag (R0 for
   the time, the rest the seat's own). USSEP's size and CRC32 move with the perk patch (slot 1's mod-lock
-  entry), the Twin Souls fix's CRC32 with the spell patch (its light slot). HYPOTHESIS until a seat
+  entry: 21,106,651 B CRC32 86A15BD3 before, 21,106,601 B CRC32 642C6867 after, the two 25-byte ability
+  blocks gone), the Twin Souls fix's CRC32 with the spell patch (its light slot: 42,409 B either way,
+  CRC32 F765F49C before, C5F71B81 after); dry run of 2026-10-28, SHA-256s 9770bb37... and e2756021... HYPOTHESIS until a seat
   zooms a bow with Steady Hand and shouts Slow Time with the clock unchanged on both seats. Block's
   Quick Reflexes (PERK `000D8C33`, its spell `000D8C31` at 0.05 for 1 s, the same archetype) is the
   one perk slow-time left in Skyrim.esm, for Eli's word.
