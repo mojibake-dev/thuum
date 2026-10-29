@@ -24,6 +24,13 @@ lab/layer/load-order.tsv. Every patch is idempotent, keeps the file's size, and 
                     header's record count follows. The file gets shorter, the one patch that changes
                     the size. For the layer's rule that no served plugin overrides the player's base
                     record NPC_ 0x00000007 (SkyMP's server owns it for every player).
+  flst-set <formid> <id,id,...>
+                    replace a form list's entries (its LNAM subrecords) with the given form ids in that
+                    order (hex, as the plugin numbers them); every other subrecord of the record stays.
+                    The record and the groups around it resize, the header's count does not move. For
+                    rotfern's vampire pairing: RaceCompatibility's PlayerVampireQuestScript pairs
+                    PlayableRaceList[i] with PlayableVampireList[i], so both lists must put a race and
+                    its vampire at one index (docs/research/vampirism-under-the-server.md).
 """
 import csv
 import struct
@@ -205,9 +212,59 @@ def patch_drop_record(buf, ctx, fid_hex):
     return bytes(new), f"dropped {dropped['records']} record(s) {fid:08X}" + (f" and {dropped['groups']} emptied group(s)" if dropped['groups'] else '') + f', {len(buf)} -> {len(new)} B'
 
 
-PATCHES = {'esl': patch_esl, 'hdpt-gender-from-master': patch_hdpt_gender_from_master, 'drop-record': patch_drop_record}
+def patch_flst_set(buf, ctx, fid_hex, items_hex):
+    fid = int(fid_hex, 16)
+    items = [int(x, 16) for x in items_hex.split(',') if x]
+    if not items:
+        raise SystemExit('flst-set: no entries given')
+    hit = next(((o, flags, size) for o, typ, flags, rfid, size in walk(buf) if typ == b'FLST' and rfid == fid), None)
+    if hit is None:
+        raise SystemExit(f'flst-set: no FLST {fid:08X} in the plugin')
+    o, flags, size = hit
+    if flags & COMPRESSED:
+        raise SystemExit(f'flst-set: FLST {fid:08X} is compressed; this patch rewrites uncompressed records only')
+    body = buf[o + 24:o + 24 + size]
+    keep, current, p = [], [], 0
+    while p + 6 <= len(body):
+        sig = body[p:p + 4]
+        n = struct.unpack_from('<H', body, p + 4)[0]
+        if sig == b'LNAM' and n == 4:
+            current.append(struct.unpack_from('<I', body, p + 6)[0])
+        else:
+            keep.append(body[p:p + 6 + n])
+        p += 6 + n
+    if current == items:
+        return buf, f'FLST {fid:08X} already holds these {len(items)} entries'
+    new_body = b''.join(keep) + b''.join(b'LNAM' + struct.pack('<HI', 4, x) for x in items)
+    hdr = bytearray(buf[o:o + 24])
+    struct.pack_into('<I', hdr, 4, len(new_body))
+    new_rec = bytes(hdr) + new_body
+
+    def build(start, end):
+        chunks, q = [], start
+        while q + 24 <= end:
+            typ = buf[q:q + 4]
+            if typ == b'GRUP':
+                gsize = struct.unpack_from('<I', buf, q + 4)[0]
+                inner = build(q + 24, q + gsize)
+                ghdr = bytearray(buf[q:q + 24])
+                struct.pack_into('<I', ghdr, 4, 24 + len(inner))
+                chunks.append(bytes(ghdr) + inner)
+                q += gsize
+                continue
+            rsize = struct.unpack_from('<I', buf, q + 4)[0]
+            chunks.append(new_rec if q == o else buf[q:q + 24 + rsize])
+            q += 24 + rsize
+        return b''.join(chunks)
+
+    new = build(0, len(buf))
+    return new, f'FLST {fid:08X}: {len(current)} -> {len(items)} entries, {len(buf)} -> {len(new)} B'
+
+
+PATCHES = {'esl': patch_esl, 'hdpt-gender-from-master': patch_hdpt_gender_from_master, 'drop-record': patch_drop_record,
+           'flst-set': patch_flst_set}
 NEEDS_MASTERS = {'hdpt-gender-from-master'}
-RESIZES = {'drop-record'}
+RESIZES = {'drop-record', 'flst-set'}
 
 
 def locate(tsv, tree, order_tsv):

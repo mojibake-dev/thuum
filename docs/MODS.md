@@ -315,13 +315,14 @@ What it is:
   - The Misc Slider's body morphs are inert on rotfern's child body.
   - Whether Eli's own character carries RaceMenu co-save data is open. The
     evidence leans vanilla: hair and ears were picked as head parts.
-- **RaceCompatibility 2.16**: ESM plus override ESP. The served scripts are the
-  plain "20 Dawnguard" set, not the "21 Dawnguard USKP" set its readme
-  prescribes with USSEP (PlayerVampireQuestScript sha256 4b5979cc...; 537
-  disassembled lines apart in the progression, cure and feeding; apocrypha,
-  2026-10-28, docs/research/vampirism-under-the-server.md on
-  apocrypha/alternate-start 3cbde0f). Its
-  scripts use vanilla natives only, among them:
+- **RaceCompatibility 2.16**: ESM plus override ESP. Since 2026-10-28 the served
+  scripts are the "21 Dawnguard USKP" set its readme prescribes with USSEP
+  (apocrypha/layer-vampire-pairing, Eli's D57 A); until then the plain "20
+  Dawnguard" set was laid, 537 disassembled lines apart in the progression,
+  cure and feeding (PlayerVampireQuestScript sha256 4b5979cc... before,
+  08c0f8b8... now; apocrypha, docs/research/vampirism-under-the-server.md).
+  The override ESP stays out: the ESM loads after USSEP here and its two quest
+  overrides already win. Its scripts use vanilla natives only, among them:
   - Actor.SetRace, Game.GetFormFromFile and Actor.SendVampirismStateChanged,
     all missing;
   - Actor.AddSpell and RemoveSpell, delegated.
@@ -379,7 +380,8 @@ What it needs from thuum:
   derivation stripped RS Children's races unevenly, leaving rotfern at
   [14] and rotfernRaceVampire at [11], so turning sets no race and curing
   gives ImperialRaceChild; the fix is RaceCompatibility's 10 vanilla pairs
-  plus the rotfern pair at [10]; (4) every complexion (FTSM, FTSF, DFTM,
+  plus the rotfern pair at [10], applied at build since 2026-10-28 by the
+  flst-set rows of lab/layer/plugin-patches.tsv (Eli's D57 A); (4) every complexion (FTSM, FTSF, DFTM,
   DFTF) now names one face texture set where the composite had six. Dead
   weight: an orphan cm01.nif, FaceGen for Kharjo and Teldryn where the
   engine never looks, stray overrides of NPC_ Kharjo and Keening (WEAP,
@@ -595,8 +597,16 @@ both seats) and broke the vanilla race menu for males, whose rebuild at open rea
 female bit as female and takes the first valid alternative where one exists, so a male's hair
 swapped to ApachiiHairM01 at menu open (a-racemenu 20261020-224305, step 18; magnus's read). The
 master's own bits are right for both paths. HYPOTHESIS until a-racemenu is green on this render.
-`drop-record <formid>` removes one record, the groups around
-it shrinking and the header's count following (the one patch that changes a file's size); it
+`flst-set <formid> <id,...>` replaces a form list's entries in the given order and keeps its
+other subrecords, the record and the groups around it resizing; it carries rotfern's vampire
+pairing (Eli's D57 A, 2026-10-28): RaceCompatibility's PlayerVampireQuestScript pairs
+PlayableRaceList[i] with PlayableVampireList[i], and rotfern.esp's overrides of the two lists had
+rotfern at [14] of 15 (four child races before it) against rotfernRaceVampire at [11] of 12, so a
+turn set no race and a cure gave ImperialRaceChild (the 2026-10-06 diff below; the read in
+docs/research/vampirism-under-the-server.md). The served copy now holds the ten vanilla pairs and
+rotfern's at [10] in both lists; Eli's plugin is untouched, and the slot's CRC32 moves with the
+render. `drop-record <formid>` removes one record, the groups around
+it shrinking and the header's count following (with flst-set the two patches that change a file's size); it
 carries the layer's rule that **no served plugin may override the player's base record NPC_
 0x00000007 (nor PlayerRef 0x14)**: in SkyMP every player shares 0x7 and the server builds each
 player's values and appearance from it, so a layer override changes every player's base under

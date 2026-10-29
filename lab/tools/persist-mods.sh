@@ -7,10 +7,12 @@
 #   All-In-One installer, fetched with the Keychain's Nexus key (service
 #   nexus-api-key, account nexus; never printed) into lab/.cache/mods and
 #   checked against apocrypha's md5 in docs/MODS.md. Laid out by the
-#   installer's own manual path for a game without USSEP and without vampire
-#   or werewolf overhauls: "20 Dawnguard" (the ESM, its scripts and strings),
-#   "20 Dawnguard Script", "20 Dawnguard Werewolf Script". The USSEP override
-#   ESP stays out.
+#   installer's own manual path for a game with USSEP and without vampire or
+#   werewolf overhauls: "20 Dawnguard" (the ESM and its strings), the scripts
+#   of "21 Dawnguard USKP" and "21 Dawnguard USKP Script" (the plain "20"
+#   scripts until 2026-10-28, Eli's D57 A), "20 Dawnguard Werewolf Script".
+#   The USSEP override ESP stays out: RaceCompatibility.esm loads after USSEP
+#   here, so its two quest overrides already win.
 # - rotfern, Eli's race: the standalone fork in ~/Code/mods/rotfern-skyrim
 #   (ROTFERN_DIR), the whole folder (plugin, meshes, textures, its RaceMenu
 #   preset and config) without its backups. Personal use only (its README):
@@ -243,11 +245,16 @@ fen_cache="$cache/fenestrate"
 stage=$(mktemp -d "${TMPDIR:-/tmp}/persist-mods.XXXXXX")
 trap 'rm -rf "$stage"' EXIT
 x="$stage/x"; mkdir -p "$x"
-unzip -q "$rc_zip" "20 Dawnguard/*" "20 Dawnguard Script/*" "20 Dawnguard Werewolf Script/*" -d "$x"
+# The USKP script set, as the readme prescribes beside USKP/USSEP: "21 Dawnguard USKP" (GenericRaceController,
+# RaceDispatcherScript, companionshousekeepingscript) and "21 Dawnguard USKP Script" (PlayerVampireQuestScript),
+# the ESM and Strings from "20 Dawnguard", the werewolf script in its one variant. Until 2026-10-28 the plain
+# "20 Dawnguard" scripts were laid, which discarded USSEP's fixes in the vampire progression, cure and feeding
+# (docs/research/vampirism-under-the-server.md; Eli's call D57 A).
+unzip -q "$rc_zip" "20 Dawnguard/*" "21 Dawnguard USKP/*" "21 Dawnguard USKP Script/*" "20 Dawnguard Werewolf Script/*" -d "$x"
 rc="$stage/tree/racecompatibility-2.16"
 mkdir -p "$rc/Scripts" "$rc/Strings"
 cp "$x/20 Dawnguard/RaceCompatibility.esm" "$rc/"
-cp "$x/20 Dawnguard/Scripts/"*.pex "$x/20 Dawnguard Script/Scripts/"*.pex "$x/20 Dawnguard Werewolf Script/Scripts/"*.pex "$rc/Scripts/"
+cp "$x/21 Dawnguard USKP/Scripts/"*.pex "$x/21 Dawnguard USKP Script/Scripts/"*.pex "$x/20 Dawnguard Werewolf Script/Scripts/"*.pex "$rc/Scripts/"
 cp "$x/20 Dawnguard/Strings/"* "$rc/Strings/"
 # The whole mod folder but its backups and README: the plugin, meshes,
 # textures, its RaceMenu preset (SKSE\Plugins\CharGen\Presets\rotfern.jslot)
