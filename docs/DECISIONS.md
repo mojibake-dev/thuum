@@ -3190,7 +3190,26 @@ ride and the vanilla cart are out. Two starts change the player's race (stage 15
 script's MakePlayerVampire, Harkon's bite through the vanilla turn plus Vampire Lord): race and appearance are R0 and
 the clock is the server's, so the first cut REFUSES those two choices (no kit entry in the permit's table, the menu's
 other starts stand); performing them server-side is a later slice. The friendly factions the bandit, Forsworn and
-vampire starts add client-side are a known limit, not synced.
+ vampire starts add client-side are a known limit, not synced.
+
+2026-10-28 20:03 PDT, apocrypha's vampirism scout (docs/research/vampirism-under-the-server.md on thuum branch
+apocrypha/alternate-start, 3cbde0f), the input for D8 B's permit slice: one function turns every path,
+PlayerVampireQuestScript.VampireChange (quest 0xEAFD5; RaceCompatibility's list copy served loose), one
+Actor.SetRace by the player's race index in PlayableRaceList (RaceCompatibility.esm 0xD62/0xD63 at slot 6, rotfern.esp
+overriding at 81), fourteen disease RemoveSpells, the stage-1 ability kit, a 12 game-hour timer, PlayerIsVampire 1;
+LAL's lair line calls it then stage 3 and GameHour 19, Harkon's bite adds DLC1VampireChange, the perk, the wake marker
+and DLC1VQ02 stage 40. Today the race is R0 appearance recorded only at a race-menu close, no server path changes a
+live actor's race, the kit's spells are client-local AddSpells the learnedSpells list never hears (a client-turned
+vampire's VampireDrain is refused by the equip rule), the globals and timer client-local. The slice, when built: the
+server sets Appearance.raceId to the pair's vampire race and broadcasts UpdateAppearance outside the race-menu path's
+Playable rule (the own seat follows through applyAppearanceToPlayer and raceMenuService.alignRace, HYPOTHESIS for an
+update mid-world), the kit through learnedSpells, the hour performed or dropped, progression by named script admission
+or a server timer. Two open calls for Eli: (a) the disease path RUNS TODAY on a seat (VampireDiseaseEffectScript's
+events are ActiveEffect events on the player, admitted), so a player bitten by a lab vampire turns client-side three
+game days later with no server record: A) a server-side cure of DiseaseSanguinareVampiris 0xB8780 on the record until
+the slice, B) R3 for now; (b) rotfern's pairing is not in the list (rotfern at the race list's end with no vampire
+entry: a turn sets no race, a cure gives ImperialRaceChild), the page's fix options. The served RaceCompatibility
+scripts are the plain variant, not the USKP set the readme prescribes with USSEP (numidium's layer item).
 
 2026-10-28 19:4x PDT (Eli through numidium, verbatim): "go with B but also in going with B one needs to scout out how
 vamirism changes happen. (and if race compatibility is in our modlst)". D8's sub-choice is B: Live Another Life
