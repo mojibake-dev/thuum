@@ -2996,3 +2996,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   c2's GPU link after the day's resets, or contention; core reads it). A slow c2 sends stale positions and animations and c1's engine
   strikes the stale figure, which also reads as the duel's single blocked hit, so D61 is on hold: the whole gate reruns on the same stage
   once c2 is healthy, and follow mode is judged on a healthy seat. P1-win and P2 stay held; the base's merge waits on that rerun.
+- 15:17 PDT: the HYPOTHESIS inventory for P4 (docs/private/hypothesis-inventory-2026-10-29.md): 196 lines across eight M3 verb docs, 4
+  closed in place, 76 open with a named read, 92 open with none, 24 the template's; the reads that close the most are quit-path.js (7),
+  npc-puppet.js (6), x-npc-trap-report (5, never run), P7 (4); cell-host's ticked "no HYPOTHESIS tags" box is inconsistent with sixteen
+  lines written after the tick (six resolved nowhere), and npc-fate's and npc-handoff's box 8 is reworded without that clause. P4's
+  shape: restore the wording and untick honestly, one stage's batch of reads by covered lines, every remaining tag a limit, a Dynamic
+  line or a deletion; the engine-map function-name tags stay under rule 2.
