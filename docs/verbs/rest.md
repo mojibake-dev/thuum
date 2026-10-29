@@ -88,6 +88,44 @@ Milestone: M1   Class: B
   `just probe` shows what holds a player if one is ever stuck again.
   If a playtest hits it again, `just probe <client>` reads the client's
   controls with nothing reset.
+
+  **Dynamic plan, 2026-10-29 (thuum-magnus), after playtest 37's finding
+  31.** Both players froze about a minute after a server-decided sleep in a
+  rented inn bed (the Sleeping Giant, 2026-10-28 17:1x PDT): controls on,
+  menus closed, the clock running, the drivers answering; no screenshot, and
+  the window's logs were lost to the relaunches (the saved results end
+  21:25Z). The two hypotheses stated at the time, the sleep menu's fade left
+  running and the bed's handoff holding the player (its open flow gave up on
+  getFurnitureReference after 15 s while the Rest ran), are ruled out by what
+  the lab's dump-state would have shown and the finding's reads did show: no
+  Fader Menu or Sleep/Wait Menu open, the HUD alone, every control true.
+  Left: this bullet's HYPOTHESIS, the correction landing on the engine's
+  sleep bookkeeping (the sleeping bit, sleepSeconds, hoursToSleep) while the
+  player is still in its sleep state, a long sleep widening the window;
+  Survival's exhaustion branch on a clock TimeService has just snapped back
+  (a rented bed changes only the seat-local ownership, RentRoomScript's
+  SetActorOwner through the fragment, never synced and never read by the
+  server's IsSleepFurniture); and the stream itself. Fixes on fork
+  m3-rest-correction (skymp5-client, from 56d995de): F1, TimeService's
+  report and correction wait until Actor.GetSleepState reads 0, no Fader
+  Menu is open and the Sleep/Wait Menu has been closed for a tick, one
+  logTrace line per held tick ("rest: the correction waits, sleep state N,
+  fader open X") and one at the release ("rest: the correction released,
+  ..."), the fix this bullet named on 2026-10-05; F2, remoteServer's furniture
+  open flow takes an opened Sleep/Wait Menu as a bed's open fact and ends
+  there, no 15 s wait, no "gave up ... releasing the occupant" line and no
+  second activation (a bed seats nobody; the server's bed branch sets no
+  occupant, MpObjectReference::ProcessActivateNormal). The probe
+  x-rented-bed (lab/.cache/probes, by path, probe-check ok): c1 in the inn's
+  rented bed REFR 0x0005eda7 (the `Bed` of RentRoomScript on Delphine and
+  Orgnar in Skyrim.esm, owned by RiverwoodSleepingGiantInnFaction; the
+  rental's engine effect made by the console's prid and setownership), an
+  8-hour sleep, the Rest line within 30 s, dump-state at +2, +10 and +60 s
+  claiming the HUD open, no holding menu and every control on, a 2 s walk
+  moving the record more than 50 units, F1's lines counted (at least one
+  hold, one release); then c2 at the camp bedroll. Grammar gaps: dump-state's
+  sleepState, sitState, inMenuMode and furniture have no `c.state` fact, so
+  they stay readings in the dumps until lab-api names them.
 - **The server would undo a rest's healing.** It crops a client's health and
   magicka reports to what regeneration allows over at most 2 s
   (docs/verbs/attributes.md; ActionListener::OnChangeValues,
