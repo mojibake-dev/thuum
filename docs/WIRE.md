@@ -323,6 +323,22 @@ into the cell. Validator: idx in range; budget 8 then 2 a second (UNMEASURED).
 Refusals: E_CLAIM_NO_ACTOR, E_CLAIM_NONE, E_CLAIM_NPC, E_CLAIM_DEAD,
 E_CLAIM_COMBAT, E_CLAIM_REACH, E_CLAIM_HELD, E_CLAIM_UNLOADED.
 
+QuestStage (id 65, MsgType 57), both directions, reliable (fork m3-quest-stage,
+2026-10-28; docs/verbs/quest-stage.md, ADR-056): `{ quest: u32 (the QUST's form
+id in the load order both ends share, 0 with a list), stage: u16 (the engine's
+stage index), shared: [u32] (server to client only: the shared quests, sent at
+a login with quest 0) }`. Client to server, R1: one stage the player's own game
+set on a shared quest; the server checks the quest is a QUST in its load order
+and on its `sharedQuests` list, keeps the stage once on the world's record (the
+set of stages done per quest, on the world's journal reference), relays it to
+every other player and replays the record after a login in order after
+PlayerGlobals, behind the list. Server to client, R0: the list, the relay, the
+replay; the seat applies each stage through the engine's own SetStage and
+consumes the engine's event for it. Validator: a client names no list and a
+quest other than 0; the list names each quest once and never 0; budget 16 then
+4 a second (UNMEASURED). Refusals (the server's log): E_QUEST_UNKNOWN (not a
+QUST in the load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
+
 DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
 m3-npc-death b82a82e5, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
 deaths by the engine): `{ idx: u32 (the victim as the server indexes it),
