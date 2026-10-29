@@ -99,7 +99,9 @@ USSEP 4.3.9 added would be the one way this could bite; the override check finds
 ## The shape that fits: content from the mod, authority from the server
 
 1. The spawn record puts a new player in `AbandonedPrison01` at `ARTHLALNewStartMarker` (6481, 1334,
-   191) wearing rags: that is Live Another Life's own opening scene, and it is the server's startPoints
+   191) wearing rags. The cell is vanilla, Skyrim.esm `00021594` (Live Another Life overrides it and
+   places its marker, an XMarker, and its statue inside), so startPoints can name it with or without the
+   mod; only the statue and the bed are the mod's. In rags: that is Live Another Life's own opening scene, and it is the server's startPoints
    plus ADR-055 D7's `startingKit` (the prisoner's tunic and shoes, worn, in place of the Player base's
    sixteen default items; thuum-cf). No script moves anyone.
 2. The player talks to the statue and picks a life: the mod's dialogue, client-side, admitted.
