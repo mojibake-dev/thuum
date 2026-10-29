@@ -64,4 +64,33 @@ if (Test-Path $PluginsTxt) {
 $lines += $plugins | ForEach-Object { '*' + $_ }
 [IO.File]::WriteAllLines($PluginsTxt, [string[]]$lines)
 $r.plugins = $plugins
+# game-ini.tsv (lab/layer/game-ini.tsv): the game's own ini keys every seat sets, "file section key value why" rows,
+# written into the lab user's Documents inis under their sections; a missing section is appended, a present key is
+# rewritten in place, every other line stays (the file is the game's and the launcher's). An older tree without the
+# file changes nothing.
+$iniDir = 'C:\Users\lab\Documents\My Games\Skyrim Special Edition'
+$gameIni = (& curl.exe -sS -f "$From/game-ini.tsv") -join "`n"
+$r.gameIni = @()
+if ($LASTEXITCODE -eq 0 -and $gameIni) {
+  $rows = @($gameIni -split "`n" | Where-Object { $_.Trim() -and -not $_.StartsWith('#') } | Select-Object -Skip 1 | ForEach-Object {
+      $f = $_ -split "`t"; [pscustomobject]@{ File = $f[0]; Section = $f[1]; Key = $f[2]; Value = $f[3] } })
+  foreach ($file in ($rows | ForEach-Object { $_.File } | Sort-Object -Unique)) {
+    $path = Join-Path $iniDir $file
+    $lines = @(); if (Test-Path $path) { $lines = @(Get-Content $path) }
+    foreach ($row in ($rows | Where-Object { $_.File -eq $file })) {
+      $header = '[' + $row.Section + ']'
+      $start = [array]::IndexOf($lines, $header)
+      if ($start -lt 0) { $lines += @($header); $start = $lines.Count - 1 }
+      $end = $lines.Count
+      for ($i = $start + 1; $i -lt $lines.Count; $i++) { if ($lines[$i] -match '^\[') { $end = $i; break } }
+      $hit = -1
+      for ($i = $start + 1; $i -lt $end; $i++) { if ($lines[$i] -match ('^\s*' + [regex]::Escape($row.Key) + '\s*=')) { $hit = $i; break } }
+      $line = $row.Key + '=' + $row.Value
+      if ($hit -ge 0) { $lines[$hit] = $line } else { $lines = @($lines[0..$start]) + @($line) + @(if ($start + 1 -lt $lines.Count) { $lines[($start + 1)..($lines.Count - 1)] }) }
+      $r.gameIni += ($file + ' ' + $header + ' ' + $line)
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path $path) | Out-Null
+    Set-Content -Path $path -Value $lines -Encoding ASCII
+  }
+}
 $r | ConvertTo-Json -Compress
