@@ -134,8 +134,9 @@ second (UNMEASURED).
   our activatePickRef were two. Now activatePickRef runs nothing while the Dialogue Menu is open,
   while the MenuTopicManager's speaker is the pick or while the pick already talks to the player, and
   consumeActivatePress marks the claim's E press done on the ActivateHandler so its release activates
-  nothing (HYPOTHESIS H-55e: the native reads TRUE on the claimant; H-55f: the consumed press
-  activates nothing; x-npc-talk-claim reads both; the Frida plan is in the read).
+  nothing (H-55e CONFIRMED live on 2ce8b523's dist, 00:21:12Z: the claimant's seat read "is in dialogue with
+  the player by the engine" on the first claim; HYPOTHESIS H-55f: the consumed press activates nothing;
+  x-npc-talk-claim reads both formally; the Frida plan is in the read).
 - Kill switch config key: npcTalk (default on).
 
 ## Tests
