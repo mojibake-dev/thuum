@@ -3142,6 +3142,14 @@ Decision.
    first, measured.
 Also recorded: sky-build always on with malcolm stopped (core, live since 2026-10-19).
 
+2026-10-28 (playtest 37, Eli through numidium, verbatim): "side note, for new players joining we'll need the alternate
+start mod working, and dropped in wearing rags not full armor/helmet." D7 refined: a new player's starting kit is the
+prisoner's rags (ClothesPrisonerTunic 0x3c9fe and ClothesPrisonerShoes 0x3ca00, or ClothesPrisonerRags 0x8f19a, by
+esm.py), worn, in place of the Player base's sixteen default items the server lays in at the actor's first inventory
+(MpObjectReference::EnsureBaseContainerAdded on base 0x7); a server setting `startingKit` (items with counts and a
+worn flag) replaces the base's kit for a player actor, with its T0 and a probe. The alternate start is apocrypha's
+layer (D8). Not the turbo loop's; the friend deployment's next server item.
+
 Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
 the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
 installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs
