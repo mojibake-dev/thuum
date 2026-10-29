@@ -617,3 +617,18 @@ cannot read counts as hostile, as before. Fork m2-train-31 b0e4ba38,
 ActionListener::OnSpellHit; T0 unit/HealOtherTest.cpp (Healing Hands heals
 10 of 250 at the stream's first hit with no StartCombat snippet; Firebolt
 still begins the fight); T3 b-heal-other (to write).
+
+## Cure spells (memo D56 A, 20:13 PDT 2026-10-28; fork m3-cure-disease ce16dde5)
+
+Eli: "A for both." Sanguinare Vampiris (Skyrim.esm SPEL 0xb8780) runs on a seat today: a vampire's hit applies it in
+the player's own game and VampireDiseaseEffectScript turns the player three game days later, client-side, with no
+server record (apocrypha's vampirism scout, docs/research/vampirism-under-the-server.md, ADR-055 D8's note). Until the
+vampirism slice is built (the turn as an R0 race act, the kit through learnedSpells, progression by named admission or
+a server timer), the server removes the listed spells from every player's game at its login and every minute after,
+through the engine's own RemoveSpell (the shrine's cure in one line; a spell the game does not carry is a no-op
+there). The list: server-settings.json's `cureSpells` ("<hex id>:<plugin>" strings, both lab/deploy files carry
+b8780:Skyrim.esm; a bad entry stops the server, named). Rung R0, server-only: PartOne::SetCureSpellsSettings and
+CureSpells, ActionListener::SendCures (the minute chain per login, the newer login's the one that goes on), one info
+line per send "[verb:magic-effects] cure: actor <id> told to drop N listed spell(s) (memo D56 A)". T0: CureSpellsTest.
+Known: a player already turned (a vampire race) is not un-turned by it; the slice's cure does that. HYPOTHESIS until a
+seat with the disease (console `player.addspell b8780` on a seat, then a minute) shows it gone.
