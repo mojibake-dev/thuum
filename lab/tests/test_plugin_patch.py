@@ -1,7 +1,8 @@
 """The layer's build-time plugin patches (lab/layer/plugin-patches.tsv, lab/tools/plugin-patch.py): every row names a
 plugin of the load order and a known patch; the esl patch sets only the header's light flag and refuses a plugin with
 records of its own above 0xFFF; the HDPT patch gives every override its master record's gender bits, keeps every other
-bit and the file's size, refuses a compressed record or a missing master, and all are idempotent."""
+bit and the file's size, refuses a compressed record or a missing master; the form-list patch replaces a list's
+entries in order, keeps its other subrecords and resizes the groups around it; and all are idempotent."""
 import csv
 import importlib.util
 import struct
@@ -129,6 +130,59 @@ class HdptGenderFromMaster(unittest.TestCase):
         p = plugin([record(b"HDPT", 0x00010000, sub(b"DATA", b"\x01")), record(b"HDPT", 0x01000005, sub(b"DATA", b"\x01")),
                     record(b"HDPT", 0x02000001, sub(b"DATA", b"\x01"))], masters=("Skyrim.esm", "Dawnguard.esm"))
         self.assertEqual(plugin_patch.hdpt_masters_needed(p), ["Dawnguard.esm", "Skyrim.esm"])  # 02 = the plugin's own, not a master
+
+
+class FlstSet(unittest.TestCase):
+    RACES = "00013740,00013741,0200AA00"
+
+    def flst(self, fid, edid, items):
+        return record(b"FLST", fid, sub(b"EDID", edid) + b"".join(sub(b"LNAM", struct.pack("<I", x)) for x in items))
+
+    def test_replaces_the_entries_in_order_and_resizes_the_group(self):
+        other = record(b"FLST", 0x01000D63, sub(b"EDID", b"PlayableVampireList\0") + sub(b"LNAM", struct.pack("<I", 0x0008883A)))
+        p = plugin([self.flst(0x01000D62, b"PlayableRaceList\0", [0x00013740, 0x00013741, 0x0002C65C, 0x0002C659, 0x0200AA00]), other],
+                   masters=("Skyrim.esm", "RaceCompatibility.esm"))
+        new, what = plugin_patch.patch_flst_set(p, {}, "01000D62", self.RACES)
+        self.assertEqual(len(new), len(p) - 2 * 10)  # two LNAM subrecords of 6 + 4 bytes gone
+        recs = [(t, f, s) for _, t, _, f, s in plugin_patch.walk(new) if t != b"TES4"]
+        self.assertEqual([(t, f) for t, f, _ in recs], [(b"FLST", 0x01000D62), (b"FLST", 0x01000D63)])
+        o = next(o for o, t, _, f, _ in plugin_patch.walk(new) if f == 0x01000D62)
+        body = new[o + 24:o + 24 + recs[0][2]]
+        self.assertTrue(body.startswith(sub(b"EDID", b"PlayableRaceList\0")))
+        lnams = [struct.unpack_from("<I", body, i + 6)[0] for i in range(len(body)) if body[i:i + 4] == b"LNAM"]
+        self.assertEqual(lnams, [0x00013740, 0x00013741, 0x0200AA00])
+        grp = new.index(b"GRUP")
+        self.assertEqual(struct.unpack_from("<I", new, grp + 4)[0], len(new) - grp)
+        self.assertIn("5 -> 3 entries", what)
+        self.assertEqual(new[new.index(b"PlayableVampireList"):], p[p.index(b"PlayableVampireList"):])
+        again, what2 = plugin_patch.patch_flst_set(new, {}, "01000D62", self.RACES)
+        self.assertEqual(again, new)
+        self.assertIn("already", what2)
+
+    def test_keeps_the_header_count_and_can_grow_a_list(self):
+        p = plugin([self.flst(0x01000D62, b"PlayableRaceList\0", [0x00013740])], masters=("Skyrim.esm", "RaceCompatibility.esm"))
+        new, what = plugin_patch.patch_flst_set(p, {}, "01000D62", self.RACES)
+        self.assertEqual(len(new), len(p) + 2 * 10)
+        hedr = new.index(b"HEDR")
+        self.assertEqual(struct.unpack_from("<I", new, hedr + 6 + 4)[0], 1)
+
+    def test_refuses_a_missing_list_a_compressed_one_and_no_entries(self):
+        p = plugin([self.flst(0x01000D62, b"PlayableRaceList\0", [0x00013740])], masters=("Skyrim.esm", "RaceCompatibility.esm"))
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_flst_set(p, {}, "01000D63", self.RACES)
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_flst_set(p, {}, "01000D62", "")
+        zipped = plugin([record(b"FLST", 0x01000D62, b"\0" * 12, flags=plugin_patch.COMPRESSED)], masters=("Skyrim.esm", "RaceCompatibility.esm"))
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_flst_set(zipped, {}, "01000D62", self.RACES)
+
+    def test_the_rotfern_rows_pair_the_two_lists_index_for_index(self):
+        patches = [r for r in rows(ROOT / "lab" / "layer" / "plugin-patches.tsv") if r["plugin"] == "rotfern.esp"]
+        lists = {r["patch"].split()[1]: r["patch"].split()[2].split(",") for r in patches if r["patch"].startswith("flst-set")}
+        self.assertEqual(set(lists), {"01000D62", "01000D63"})
+        self.assertEqual(len(lists["01000D62"]), len(lists["01000D63"]))
+        self.assertEqual(lists["01000D62"][10], "0200AA00")
+        self.assertEqual(lists["01000D63"][10], "02019D08")
 
 
 if __name__ == "__main__":
