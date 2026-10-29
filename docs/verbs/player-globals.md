@@ -558,7 +558,10 @@ at 0; cold's floor 50). The effect's conditions: Survival_ModeEnabled 0x826 at 1
 
 Built, server-only: ActionListener::ApplySurvivalFood after a true OnEquip of an ALCH that is no poison: the item's
 effects (MpActor::EffectsOf) against the `survivalFood` table in server-settings.json ({effect, need, amount, floor}
-per MGEF FormDesc, the amount from the GLOB's record when the table gives none; both lab/deploy settings files carry
+per MGEF FormDesc, each row's amount a required positive finite number (a row without one refuses the settings at load,
+PartOne::SetSurvivalFoodSettings; the literals are the plugin's GLOBs 0x8de Very Small 2, 0x82d Small 18, 0x82b Medium 220,
+0x82c Large 380 and 0x818 cold Medium 200, read on sky-srv's 1.6.1170 masters 2026-10-29; the doc said "from the GLOB's
+record when the table gives none" until then, which the code never did); both lab/deploy settings files carry
 the five rows), gated on the recorded switch 828 at 1, the floor applied, the record merged (RecordPlayerGlobals) and
 the value sent to the player with the full watch list (the client's apply replaces its watch from every message),
 one log line "[verb:player-globals] <actor> ate <item> <EditorId> (<effect EditorId>): 81a:... <before> -> <after>".
