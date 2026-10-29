@@ -147,8 +147,11 @@ spell, effect or book carries either name, nor do the Nexus changelogs from
   0309852E, Script archetype) applies only when the caster's game finds
   room ahead (condition GetVATSFrontAreaFree >= 300, an engine geometry
   query); script WB_FabricateWall_Script places the wall (MSTT 03098529,
-  1470 x 102 x 262 units, a real collision body on the AnimStatic layer,
-  navmesh obstacle flag) 192 units ahead, starting 288 below the ground,
+  1470 x 102 x 262 units, a real collision body on the AnimStatic layer: a
+  MOPP over a compressed mesh, BSXFlags Havok and Articulated, no navmesh-cut
+  data in the mesh or the record, so actors are stopped by collision, not
+  re-pathed; corrected 2026-10-28 from the mesh's blocks) 192 units ahead,
+  starting 288 below the ground,
   raises it with TranslateToRef at speed 512, sets off EXPL 0300C145 there
   (no damage, knock-down), and on the stream's end fades it out and deletes
   it after 5 s. Nothing persists between casts. Missing natives:
