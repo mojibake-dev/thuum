@@ -250,10 +250,10 @@ statue only when the mod they belong to is installed (the dialogue is conditione
 | Surprise me. | random | one of the sub-menu's starts, picked by PickRandom*/Randomize() |  |  |
 | I am a refugee from Morrowind. [Windhelm] | 106 | ARTHLALDunmerStart (0b03ed79) | WindhelmNewGnisisCornerclub | 3114, -1933, -512 |
 | I am a refugee from Morrowind. [Raven Rock] | 107 | ARTHLALDunmerRRStart (0b09df54) | DLC2RRAbandonedBuilding | 1454, 2452, 427 |
-| The Dawnguard | 8 | DLC1VQ03HunterStart, a Dawnguard.esm reference (Fort Dawnguard); its position is in Dawnguard.esm, not this plugin |  |  |
-| Lord Harkon's Court | 9 | no MoveTo of its own: it drives DLC1VQ02 to stage 20 and lets Dawnguard.esm's own fragments carry the player to Castle Volkihar |  |  |
+| The Dawnguard | 8 | DLC1VQ03HunterStart (Dawnguard.esm 006E62; 02006E62 in the lab's order) | DLC1DawnguardHQ01 (Fort Dawnguard) | -1376, 2009, -128 |
+| Lord Harkon's Court | 9 | no MoveTo of its own: it calls `DLC1VampireTurn.HarkonBitesPlayer(True)`, the vanilla bite, which turns the player and wakes them at DLC1VQ02PlayerWakeupMarker (Dawnguard.esm 0175CC; 020175CC in the lab's order; the marker's role inferred from its name, the vanilla script is in Dawnguard's archive, not read here) | DLC1VampireCastleGuildhall (Castle Volkihar) | -87, -2436, 7417 |
 | I am an agent with the Thalmor Embassy. | 108 | ARTHLALThalmorStartMarker (0b052b3e) | ThalmorEmbassy01 | -1042, -202, 288 |
-| The Retching Netch [Raven Rock] | 3 | alias InnRavenRock (0403bd38) | (placed by master 04, not in this plugin) |  |
+| The Retching Netch [Raven Rock] | 3 | alias InnRavenRock: an unnamed XMarker, Dragonborn.esm 03BD38 (0403BD38 in the lab's order) | DLC2RRTheRetchingNetch (Dragonborn.esm cell 017EC0) | -842, -19, -382 |
 | I am Erik the Slayer's childhood friend. | 109 | alias InnRorikstead (0b031fec) | RoriksteadFrostfruitInn | 1081, -738, 1 |
 | I want to escape this cell. | 100 | no MoveTo: the player walks out |  |  |
 | I am a warlock's thrall. | 18 | ARTHLALThrallStartMarker (0b075d0d) | BoulderfallCave01 | 2007, 522, -163 |
@@ -278,9 +278,25 @@ statue only when the mod they belong to is installed (the dialogue is conditione
 | Outdoor Inn [Black Moor] | 3 | marker from DLCSupport.BMStartMarker: an add-on mod's, not in the lab's set |  |  |
 | The Tapped Vein [Shor's Stone] | 3 | marker from DLCSupport.ShorsStoneStartMarker: an add-on mod's, not in the lab's set |  |  |
 
+Three landings sit in masters the lab ships anyway (thuum-cf, 2026-10-28: keep them permitted; leave
+out the ship-ride scene and the vanilla cart), so their positions were read from Dawnguard.esm and
+Dragonborn.esm (the server's own copies, copied off CORE's esm directory into lab/.cache/game;
+licensed, local). The server loads the same masters through espm, so the table can name markers as
+FormDescs and let the server resolve positions at load; the coordinates here are for reading.
+
+Two starts touch state the server owns beyond position and kit. "I am a vampire in a secluded lair"
+(stage 15) calls the chargen script's `MakePlayerVampire()`: `PlayerVampireQuest.VampireChange(Player)`
+(the race swap to the vampire variant), progression stage 3, and `GameHour` set to 19. "Lord Harkon's
+Court" (stage 9) calls the vanilla `HarkonBitesPlayer(True)`, the turn that also grants the Vampire
+Lord. Race and appearance are R0 on the server and the clock is the server's, so these two lines are
+either performed by the server as part of the kit (a race change, a time the server already sets) or
+not honored; a client-side race swap that the server never records is the a-rotfern class of mismatch.
+The bandit, Forsworn and vampire-lair starts also add the player to a friendly faction
+(`ARTHLALBanditVampireFaction` and the controllers' factions), client-local and harmless.
+
 The source material for this section is in the plugin's records (QUST `000DAF` and `07A334` with
 their VMAD fragment maps and ALFR aliases, the 102 INFO fragments) and the 159 compiled scripts of
-the mod's archive, disassembled, not decompiled; the tables were generated from them and spot-checked
+the mod's archive, disassembled, not decompiled, plus Dawnguard.esm and Dragonborn.esm for the three master markers; the tables were generated from them and spot-checked
 against the fragment bytecode (Fragment_2, _3, _4 branches; Fragment_10, _11, _18, _21, _102). The
 mod's files stay local (lab/.cache/mods); only names, ids and positions are recorded here.
 
