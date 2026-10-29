@@ -3226,6 +3226,15 @@ every client and the server): its PlayerVampireQuestScript pairs PlayableRaceLis
 and its Actor.SetRace and SendVampirismStateChanged calls have no native in the ledger (docs/MODS.md). Until that
 read lands, the first cut's refusal of the two vampire starts stands.
 
+2026-10-28 20:10 PDT (Eli through numidium, verbatim): "A for both, but how big of a lift is properly implementing
+D56". The two calls above (memos D56 and D57): D56 A, the server cures DiseaseSanguinareVampiris on a player's
+record whenever it appears, until the vampirism slice is built (server-only, thuum-cf's); D57 A, rotfern's pairing
+fixed in the layer at [10] in both lists with the child entries dropped (apocrypha's, by a plugin-patch kind that
+rewrites a form list, since rotfern.esp is Eli's), with the RaceCompatibility row moved to the USKP script set, at
+the next layer slot after playtest 37. The slice's size as answered: the turn as an R0 race act, the kit through
+learnedSpells, progression and feeding (named admission or a server clock), infection and cure (VC01 on the shared
+quest stages), about three verbs; the Vampire Lord (beast form, perks with no server path yet) its own later verb.
+
 Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
 the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
 installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs
