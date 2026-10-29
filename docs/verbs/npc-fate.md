@@ -2191,3 +2191,21 @@ line's absence on a reanimate reveals it. Open: a reanimate inside the 3 s grace
 flight and the stood-up sample goes once (a re-send while the record says dead is the follow-up); activation stays
 blocked on the host's reanimated actor; the engine's a_resetInventory on a reanimate against the record's kept
 inventory.
+
+### Reanimation is any player's, on any body (Eli, 23:25 PDT 2026-10-28)
+
+Eli, verbatim through numidium: "anyone should be able to reanimate any corpse, that's Just Gameplay". So a reanimate
+cast by any player on any body stands it on every screen whichever seat hosts the body's cell; rotfern's casts on the
+bodies in Prisoner's hosted cell (finding 63) are the required case, not the design's gap. The mechanism is the
+engine's own path, which the pieces already outline: the server accepts the caster's hit (it did), the relayed cast on
+the HOST's seat makes the caster's figure launch the same spell at the body on the host's engine (castSpellImmediate,
+with the launch geometry since fork m3-npc-launch-geometry 435b4c64), the Reanimate effect runs there, the Resurrect
+hook of 9ef0d567 stands the hosted body, the host's sampler reports it alive, the server flips the record and every
+puppet stands. Tonight's zero platform lines on c2 say one of three links failed: the relayed projectile never hit the
+body on c2, the effect did not apply on the host's engine (the magic model keeps effects the server's; HYPOTHESIS that
+a relayed cast's projectile applies its archetype on the host's engine), or the hook never fired (H-54g); Prisoner's
+own cast on a body he hosts separates the hook from the rest. If the relayed projectile proves unreliable, the server
+tells the host's seat outright to cast the accepted reanimate from the caster's figure at the body (an SpSnippet,
+Spell.Cast on the host's engine), deterministic and still the engine's reanimation, with the level cap and the thrall's
+duration the engine's on the host; the thrall follows the caster's figure there. The server side stays R0 for the
+record's life and R2 for the thrall's behaviour.
