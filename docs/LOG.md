@@ -3039,3 +3039,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   claim on contact, the proximity stand-in behind propContactFallback; tsc and fork-lint green; the C++ compiles on the Windows build); the
   PropTest header fix cherry-picked onto the branch (2b2f23c0); the P3 train takes the merge (FridaHooks.cpp's additive conflict with the
   quest-fragment hook resolved by keeping both).
+- 15:52 PDT: P4's first honest move: the T3 Status box of npc-fate and npc-handoff restored to the template's wording ("T3 scenario green,
+  no HYPOTHESIS tags") and unticked, cell-host's unticked, each with the inventory's counts and the earlier tick's text kept inside the
+  line; the boxes tick again when the reads land (quit-path.js, x-npc-trap-report, the handoff probes). Fork m3-pass-train-3's head is
+  db5c9611 (the contact hook merged, FridaHooks.cpp's includes from both hooks), pushed server-only.
