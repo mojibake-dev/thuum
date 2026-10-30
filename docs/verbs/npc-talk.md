@@ -212,6 +212,74 @@ c1 hosts the inn, the Dialogue Menu's topics read for the services row).
   (TESObjectREFR::ActivateRef's entry and the dialogue's start, 37347's first pass on the actor
   after the promote); owner: agent.
 
+### The hold on 3o-win (2026-10-30): the engine's path, the fork's range, the trace
+
+The finding: b-npc-talk v7 red at 24 s twice on 3o-win (215828, 053717) after
+greens on earlier builds; the lab's hold is Skyrim Platform's
+Actor.setDontMove(true) on the host seat (lab-driver's npc-hold). Two reads
+before any guess (rule 8), then one Frida-armed probe.
+
+The engine (the re-analyst's Ghidra read, SkyrimSE 1.6.1170; every id checked
+back through `just addr`):
+- The Papyrus native is callback 54761 (rcx VM*, rdx stack id, r8 Actor*, r9b
+  bool; the IS_LONG shape, CommonLibSSE-NG include/RE/N/NativeFunction.h:95),
+  bound by registration 54784 to "Actor" and "SetDontMove"; it calls
+  Actor_SetDontMove 37489 (rcx Actor*, dl bool).
+- 37489(true) writes lifeState 9 through Actor::SetLifeState 37612
+  (src/RE/A/Actor.cpp:1031-1034) and calls StopMoving 37817 (Actor.cpp:1091-1094)
+  then 37818 (HYPOTHESIS: the mover's goal cleared); 37489(false) writes 0 if it
+  still reads 9. The field: ActorState::actorState1.lifeState, four bits at bit
+  21 (include/RE/A/ActorState.h:114, :203), the dword at Actor+0xC8 (ActorState
+  at Actor+0xC0 on 1.6.629 and later, Actor.h AsActorState). Value 9 has no
+  CommonLib name (ACTOR_LIFE_STATE ends at kBleedout 8). HYPOTHESIS: 37612 marks
+  the form changed (ChangeFlags::kLifeState), so a hold persists through a save.
+- The consumer: Actor::Move 37507 (vtable slot 0xC8, Actor.h:398), called at the
+  movement step 37356's tail once per step, computes dontMove = race kImmobile
+  || lifeState == 9 and then drives the character controller through 78276 (a
+  zero velocity into bhkCharacterController's SetLinearVelocityImpl) instead of
+  78275. HYPOTHESIS: the stop is immediate, every step, not at a leg's end,
+  which is not what x-npc-hold v2 measured (LOG 2617: 3 to 6 s of motion after
+  the hold); the trace settles where that motion comes from. 37356's other
+  tail, SetPosition slot 0xA9 when form flag bit 4 at Actor+0x10 is set, never
+  consults lifeState (HYPOTHESIS: an actor moved that way ignores the hold).
+  29198 withholds a movement message while lifeState is 9 (its callers unread).
+- Clearers (every caller of 37612 read): 37489(false); Resurrect 37321 (vtable
+  0xAD) writes 0 unconditionally, and 40491 (the AIProcess rebuilt, then
+  Resurrect) reaches it; KillImpl 37896, the dead sweeps, bleedout 38631,
+  SetUnconscious 37487 and SetRestrained 37488 write their own states and leave
+  9 alone. No package evaluation, scene, dialogue start, cell detach or AI
+  re-evaluation writes 0 over 9 (static). Actor_SetDialogueWithPlayer 37200
+  issues the same 37818 stop without touching lifeState.
+
+The fork (a code read of defaa7e2..ee44f7d1, 151 commits): nothing moves,
+re-drives or re-flags a live hosted NPC on its own host's seat, and the native
+call path the hold uses is untouched. Ranked unlikely: talkService's unhold
+(c0876327, talkService.ts:273-280, a setDontMove(false) behind a held flag the
+shipped code never sets true; the one in-range writer of the exact flag);
+HostService's storage restore (e9953d0c); formView's promotion move
+(c7c76870, both sides the worldspace in Tamriel); the three new engine hooks
+(HostedResurrect slot 0xAB, Reanimate 38820, SendTopicInfoEvent 35225), each a
+pass-through for a live AI-on actor; the door pass (cells.rs 491-506), which
+needs a door on Sven's 9.0 leg. The server never echoes a hosted NPC's movement
+to its host. Outside the range, as questions: the deployed settings since 10-27
+(sharedQuests holds 74a83, Sven's quest; cureSpells, survivalFood,
+spellPlacedObjects, modLock), the layer (Skyrim Souls RE), and whether the 9.0
+leg is a sandbox or a travel on this build.
+
+The trace: lab/frida/dontmove-trace.js (54761, 37489, 37612 with the caller's
+RVA, 37321, 40491, 37507 with the position and the 78276 or 78275 branch, 37817,
+37818, 37356's entries; a flip row at every lifeState change, a row a second),
+armed by x-npc-hold v4's relaunch on c1 (by path) at the union's stage.
+Expected if the hold works: one write of 9 within a frame of 54761, every Move
+after it on 78276 and a flat position from the next second, one write of 0 from
+37489 at the release. Falsifiers: Move not called per step for 13491 (another
+mover, or another seat, moves him); the position changing while 78276 is the
+branch; a write of 0 from a caller other than 37489 during the hold, which
+names the clearer (37321 or 40491 is a resurrect, and 3o's host-engine
+resurrection paths are then the lever); +0xC8 not reading 9 after 54761 (the
+field). The second read, from the run's server log: which user's reports moved
+13491 over the series and simulator_of his cell (the door pass). Owner: agent.
+
 ### Playtest 36, the turbo day (11:36 PDT 2026-10-28; fork m3-turbo-knobs f5a8f7d1 over 56's stage)
 Eli ticked items 1 and 2: "the claiming SEEMS to work but check logs"; "rotfern walked to embershard mine, prisoner was
 still talking to sven". The logs: eight claims granted on Sven, Hilde and Sigrid's household, every one released at the

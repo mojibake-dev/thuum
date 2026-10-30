@@ -340,3 +340,16 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   before it is a vanilla limit to declare, 0 until it confirms the server's
   rule. Run on the host seat through x-cloak-hostile (the creature caster's
   frame). Address Library id by `just addr`, 1.6.1170 only.
+- dontmove-trace.js: the hold finding (docs/verbs/npc-talk.md, Dynamic plan,
+  "The hold on 3o-win"): for one actor (ACTOR, default Sven 0x13491) it logs
+  the Papyrus SetDontMove call and the engine's Actor_SetDontMove, every
+  Actor::SetLifeState write with its caller's RVA (the hold is lifeState 9 at
+  Actor+0xC8), Resurrect (the one writer that clears it unconditionally),
+  Actor::Move per step with the position and which controller branch it took
+  (78276 zero velocity under the hold, 78275 normal), the two stop calls and the
+  movement step's entries; a flip row at every lifeState change and a row a
+  second. Armed by x-npc-hold v4's relaunch on the host seat. Read: a write of
+  9 at the call, every Move on the zero branch after it and a flat position say
+  the hold works; a write of 0 from a caller other than 37489 while held names
+  the clearer; no write at all says the call never reached the engine. Address
+  Library ids by `just addr`, 1.6.1170 only.

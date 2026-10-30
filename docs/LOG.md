@@ -3324,3 +3324,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (refs-near {from: other}: the nearest other actor's parent cell and distances); the blocked read moves with the line (y > -166 at
   -174, the same 8 units); no tolerance changed. x-raise-wall by path carries the same frame (sha1 992a9efb); reviews-pending has
   the entry, self-approved.
+- 00:24 PDT: the hold finding's two reads, no guess (rule 8). Engine (re-analyst, Ghidra): SetDontMove is lifeState 9 at Actor+0xC8
+  (54761 to 37489 to SetLifeState 37612 plus StopMoving 37817 and 37818); Actor::Move 37507 zeroes the controller's velocity every
+  step while it reads 9 (HYPOTHESIS: an immediate stop, against v2's measured 3 to 6 s); Resurrect 37321 (and 40491) writes 0 over
+  it unconditionally and nothing else clears 9. Fork range defaa7e2..ee44f7d1: nothing moves or re-flags a live hosted NPC on its own
+  host, five unlikely candidates ranked in npc-talk.md's Dynamic plan. lab/frida/dontmove-trace.js and x-npc-hold v4 (by path) arm
+  the read at the union's stage; the falsifier that names a clearer is a 37612 write of 0 from a caller other than 37489 (a resurrect
+  would point at 3o's host-engine resurrection paths).
