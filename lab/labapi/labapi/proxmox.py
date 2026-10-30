@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
 import time
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -63,8 +64,17 @@ class GuestControl:
     """The only thing the runner calls. Refuses every action on an unmanaged
     guest except status, and refuses files past the 16 MiB cap."""
 
-    def __init__(self, backend: ProxmoxGuests):
+    def __init__(self, backend: ProxmoxGuests, reset_stagger_s: float = 0.0):
         self._b = backend
+        # A seat's VM stop or start resets its passthrough GPU (vfio), and two seats' resets within seconds is the only
+        # pattern that has wedged a card: core's host journal on 2026-10-30, every vfio reset since August grouped into
+        # bursts, found 1,748 single-card bursts with no failed retrain and all twelve wedges in bursts where both lab
+        # cards reset together (14 percent of such bursts since 10-28, when the pair became two slot-powered GTX 1050s).
+        # So one seat's stop, rollback and start run as one, and another seat's reset waits until reset_stagger_s after
+        # this one's last (Settings.reset_stagger_s; 0 in the tests and fakes).
+        self._stagger = reset_stagger_s
+        self._cards = threading.RLock()
+        self._last_reset: tuple[str, float] | None = None
 
     def _managed(self, guest: Guest, what: str) -> None:
         if not guest.managed:
@@ -83,9 +93,26 @@ class GuestControl:
         except Exception as e:
             raise ProxmoxError(f"{code}: {guest.name}: {type(e).__name__}: {str(e)[:200]}") from e
 
+    def _card_reset(self, guest: Guest, code: str, fn) -> None:
+        """A client seat's stop or start (its GPU's reset), after the other seat's last by reset_stagger_s."""
+        if guest.role != "client" or self._stagger <= 0:
+            self._call(code, guest, fn, guest)
+            return
+        with self._cards:
+            last = self._last_reset
+            if last is not None and last[0] != guest.name:
+                wait = last[1] + self._stagger - time.monotonic()
+                if wait > 0:
+                    log.info("%s of %s waits %.1f s after %s's GPU reset (reset_stagger_s)", code, guest.name, wait, last[0])
+                    time.sleep(wait)
+            try:
+                self._call(code, guest, fn, guest)
+            finally:
+                self._last_reset = (guest.name, time.monotonic())
+
     def stop(self, guest: Guest) -> None:
         self._managed(guest, "stop")
-        self._call("E_PVE_STOP", guest, self._b.stop, guest)
+        self._card_reset(guest, "E_PVE_STOP", self._b.stop)
 
     def rollback(self, guest: Guest, snapshot: str) -> None:
         self._managed(guest, "roll back")
@@ -95,7 +122,7 @@ class GuestControl:
 
     def start(self, guest: Guest) -> None:
         self._managed(guest, "start")
-        self._call("E_PVE_START", guest, self._b.start, guest)
+        self._card_reset(guest, "E_PVE_START", self._b.start)
 
     def status(self, guest: Guest) -> str:
         try:
@@ -136,10 +163,12 @@ class GuestControl:
         return self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
 
     def rollback_sequence(self, guest: Guest, snapshot: str) -> None:
-        """Disk-only rollback (docs/LAB.md): stop, rollback, start."""
-        self.stop(guest)
-        self.rollback(guest, snapshot)
-        self.start(guest)
+        """Disk-only rollback (docs/LAB.md): stop, rollback, start, as one under the seats' reset lock, so two seats'
+        rollbacks in one run follow each other reset_stagger_s apart instead of resetting both cards at once."""
+        with self._cards:
+            self.stop(guest)
+            self.rollback(guest, snapshot)
+            self.start(guest)
 
     # ----- self-service snapshots (thuum-mundus's recipe) --------------------
 

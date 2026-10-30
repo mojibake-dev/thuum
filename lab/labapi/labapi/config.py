@@ -321,6 +321,9 @@ class Settings:
     # game), so 180 s is a slow try's bound, well short of heartbeat_timeout_s: two tries at 300 s and the rollback
     # after them would outlast a scenario's own timeout
     relaunch_heartbeat_timeout_s: float = 180.0
+    # seconds between one seat's GPU reset (a VM stop or start) and another's (proxmox.GuestControl, core's
+    # dual-reset finding of 2026-10-30: every wedge came with both lab cards reset within seconds)
+    reset_stagger_s: float = 20.0
     # Before a self-service snapshot (proxmox.GuestControl.snapshot_clone):
     # stop the game, its loader and Windows Error Reporting, and any running
     # sky-lab task, so the clone shuts down quiet (thuum-mundus's recipe). Then
@@ -420,6 +423,7 @@ class Settings:
             client_reset=_env("LAB_CLIENT_RESET", d.client_reset).strip() or d.client_reset,  # unset or empty: rollback
             relaunch_rollback_every=int(_env("LAB_RELAUNCH_ROLLBACK_EVERY", str(d.relaunch_rollback_every))),
             relaunch_heartbeat_timeout_s=float(_env("LAB_RELAUNCH_HEARTBEAT_TIMEOUT_S", str(d.relaunch_heartbeat_timeout_s))),
+            reset_stagger_s=float(_env("LAB_RESET_STAGGER_S", str(d.reset_stagger_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),
