@@ -3136,3 +3136,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   limit; H-56a's line points at its RESULT), 11 to 9. lab/tools/glab.py lists N pipelines (`glab.py skymp 8`) and a pipeline's jobs
   (`glab.py jobs skymp <id>`). CI: P1-win 8b7e2ade pipeline 3881 GREEN with its client build; P2-win e4770853 pipeline 3882 RED at
   client-build 14282 (the server, wire and difftest jobs green), read next; 3884 (P3), 3885 (P3-win) and 3888 (m3-send-rate) running.
+- 17:33 PDT: pipeline 3882's client-build (P2-win e4770853) read: the P2 merge of m3-story-arrival and m3-quest-fragment had dropped
+  SendStoryChangeLocation's `return true; }}` and the Suppress binding's `vm->BindNativeMethod(` in PapyrusTESModPlatform.cpp (C1075,
+  six C2601, C2187), a Windows-only file no server build reads; restored on the -win branches (P2-win a1272466, P3-win c8a6e8e8, both
+  lint-green, braces and parens balanced), pushed with the client build. The server branches P2 0b49a28e and P3 54e021e0 keep their
+  shas for numidium's T2s and take the same fix by a merge from P2-win after P3's verdict. P1-win 8b7e2ade's pipeline 3881 GREEN with
+  its client build: the first pass train whose Windows half compiles.
