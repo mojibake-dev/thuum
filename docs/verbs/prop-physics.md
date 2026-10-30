@@ -53,8 +53,8 @@ Rung: R2 for the transform (the simulating seat's Havok, the server records), R0
 
 ## Message contract (wire-schema, validators in the same commit)
 
-- PropTransform {refr: u32, pos: Vec3, rot: Vec3, asleep: bool}: C2S from the simulator (bounded: one per prop per 100 ms, pos
-  within the cell's bounds, finite), S2C to the cell's other listeners.
+- PropTransform {refr: u32, pos: Vec3, rot: Vec3, asleep: bool}: C2S from the simulator (bounded: one per prop per 100 ms by the
+  validator's budget, finite, and inside the rule's step budget against the record), S2C to the cell's other listeners.
 - PropClaim {refr: u32, touch: u8} (contact 0, grab 1, drop 2, impulse 3): C2S; refused when the claimant is not in the prop's
   cell or holds no listener of it.
 - PropOwner {refr: u32, player: u32, epoch: u32}: S2C to every listener at each change.
@@ -171,3 +171,41 @@ restart half (the record's x within 8 of its rest after `server: restart`, the w
 x-prop-restart is not needed; b-prop-push inherits the step. PropTest's third case reads the record after a sample (the same
 ChangeForm the save writes). HYPOTHESIS until the run: that the client's arrival forcing (formView's item movement, skipped for a
 tracked prop) leaves the restarted record's place standing on a fresh seat.
+
+## The review's fixes (17:19 PDT 2026-10-29, fork m3-prop-physics eb04cdd5; P3 54e021e0, P3-win 48e35c46)
+
+An agent's rules review of slice one (ee44f7d1..2b2f23c0) found six holes and two low notes; every one is fixed on the branch before
+the trace, so the lab proves the rule as it ships.
+
+1. The authority was the sample's cell: the position a seat sent named the cell whose host was asked, and no step bound existed, so
+   an owner or a host could relocate a prop across cells in one message (rule 5). Now the host of the cell the RECORD stands in is
+   the authority (PartOne::PropTransform takes the record's cell), and the rule judges every sample against a step budget from the
+   record: PROP_MAX_SPEED_UNITS_PER_S 6000 for the time since the last accepted sample, never under PROP_STEP_FLOOR_UNITS 128 (both
+   UNMEASURED; x-prop-push sizes them); a sample over it is TooFast (E_PROP_STEP), refused and relayed to nobody, the record standing.
+   The sample's facts cross the bridge as one shared struct (PropSampleFacts), the melee rule's shape.
+2. Every non-actor reference counted as a prop on the server where the client filters to items: a door, a container or an activator
+   could be claimed and streamed under the floor. Now IsPropKind gates both handlers on libespm's item types (E_PROP_KIND), the
+   client's FormTypeEx.isItem set, and a claim needs the claimant within reach of the prop's record: 256 units for a contact or a
+   grab, 512 for a drop, 2048 for an impulse (E_PROP_REACH; UNMEASURED budgets).
+3. A grab's exclusivity broke at the client's 500 ms stir test: an asleep sample started the lease, the host took the prop, and the
+   row kept its grab mark, wedging every later claim as Held. Now a grabbed row sleeps into no lease and lapses in no silence; it
+   ends by the holder's drop or impulse claim (which wakes the row for the dropper's fall samples), by the holder's departure, by the
+   host's takeover of a lapsed row (which clears the mark), or by PROP_GRAB_MAX_MS 120 s, the safety against a release a seat never
+   reported.
+4. An owner that stopped streaming awake (its prop left tracking range, its game hung) held the prop for the session. Now an awake
+   row lapses after PROP_SILENCE_MS 3 s without an accepted sample (the host simulates again; the toucher's next touch is a new
+   grant), and the client's untrack sends one final asleep sample before parking a body it simulated.
+5. A listener arriving while a seat simulated a prop never heard the owner and ran a second simulator until the lease lapsed. Now
+   onSubscribe follows a non-actor reference's create word with PropOwner when the row is live (PartOne::PropLiveOwner, the rule's
+   live_owner).
+6. The refusal log's map was keyed by the unvalidated reference id and never pruned; it is keyed by the seat now. Two low notes: the
+   C++ handler checks isfinite on every value (the legacy JSON path parses 1e999 as infinity; the Rust edge refused it already), and
+   the asleep flag lives in the rule's row alone, not in the record, so after a restart every prop is asleep by construction and
+   the host's default (ADR-058's "the record keeps the asleep flag" is corrected here).
+
+The client also reads a resting body it simulates ten times a second instead of every frame (REST_READ_MS 100: sixty-four host-default
+props at rest cost nine natives each per read), and the message module names PropService. T0: props.rs gains three cases (the silence
+lapse, the grab through stillness and silence to its drop or limit, the step budget with its floor and a NaN), the bridge test covers
+the new code and the live owner, PropTest a fourth case (a container refused, a claim from beyond reach, a sample across the cell
+leaving the record, the late listener's word). Cargo tests (250 and 22) and clippy green locally, fork-lint and tsc green; the C++
+compiles on CI (P3's push pipeline, whose difftest-build runs on the crate change).

@@ -3103,3 +3103,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   per server tick, about 815 a second (near 45 KB/s with UDP and IP headers), because the gamemode loops `server.tick()` then a 1 ms
   setTimeout (skymp5-server/ts/index.ts:222-227) and the wire sends at every update (wire-transport lib.rs:377): a cost for the pass to
   weigh, not a fault in the row.
+- 17:19 PDT: the prop-physics rules review (an agent on ee44f7d1..2b2f23c0) found six holes, all fixed on fork m3-prop-physics eb04cdd5
+  (the record's cell as the authority and a step budget per sample through a shared PropSampleFacts; items alone as props, within
+  reach; the silence lapse; the grab's no-lease, its limit and its clearing at a takeover; PropOwner at the subscription; isfinite
+  and a bounded refusal map; the client's final sample at untrack and a 100 ms rest read), with T0 in props.rs, the bridge and
+  PropTest; cargo, clippy, fork-lint and tsc green locally. Merged into P3 54e021e0 (pushed server-only; the crate changed, so its
+  difftest builds on the push) and P3-win 48e35c46 (pushed with the client build); P1-win 8b7e2ade and P2-win pushed earlier on P2's
+  T2 green (numidium, 00:05Z). numidium's x-wire-idle-rate MEASURED the idle rate (814.8 packets/s against 816.4 ticks/s, within 0.2
+  percent): npc-stream's row closes, and the cost it names (an idle client near 45 KB/s because the server loop ticks every 1 ms and
+  the wire sends at every update) is a budget row for the pass's end. The details in docs/verbs/prop-physics.md.
