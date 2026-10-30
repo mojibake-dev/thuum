@@ -323,6 +323,45 @@ class ResetStaggerTests(unittest.TestCase):
 
 
 @needs_deps
+class SeatStopTests(unittest.TestCase):
+    """GuestControl's seat_stop: a client seat stops by an ACPI shutdown PVE forces to a stop when it says shutdown,
+    by a hard stop otherwise, and a guest with no GPU (the server) always by a hard stop."""
+
+    def _control(self, **kw):
+        from labapi.proxmox import GuestControl
+
+        calls = []
+
+        class Backend:
+            def stop(self, g):
+                calls.append(("stop", g.name))
+
+            def stop_gently(self, g, timeout_s):
+                calls.append(("stop-gently", g.name, timeout_s))
+
+        return GuestControl(Backend(), **kw), calls
+
+    def _guests(self):
+        from labapi.guests import Guest
+
+        return (Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1"),
+                Guest("sky-srv", 700, "10.10.70.10", "qemu", "server", True, "", None))
+
+    def test_shutdown_mode_stops_a_seat_gently_and_the_server_at_once(self):
+        control, calls = self._control(seat_stop="shutdown", seat_shutdown_timeout_s=45)
+        seat, server = self._guests()
+        control.stop(seat)
+        control.stop(server)
+        self.assertEqual(calls, [("stop-gently", "sky-c1", 45), ("stop", "sky-srv")])
+
+    def test_the_default_is_the_hard_stop_it_always_was(self):
+        control, calls = self._control()
+        seat, server = self._guests()
+        control.stop(seat)
+        self.assertEqual(calls, [("stop", "sky-c1")])
+
+
+@needs_deps
 class TablesTests(unittest.TestCase):
     def test_shipped_tables(self):
         from labapi.config import PKG_DIR

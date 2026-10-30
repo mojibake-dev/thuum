@@ -92,6 +92,33 @@ class ClientReset(unittest.TestCase):
                 else:
                     os.environ[k] = v
 
+    def test_the_seat_stop_is_a_hard_stop_unless_the_env_says_shutdown_and_nothing_else_loads(self):
+        """core's question of 2026-10-30 (a hard stop pulls a running NVIDIA driver from under its GPU): the knob
+        changes nothing until LAB_SEAT_STOP says shutdown, and a mistyped value stops lab-api at its start."""
+        import os
+        from labapi.config import Settings
+
+        d = Settings()
+        self.assertEqual((d.seat_stop, d.seat_shutdown_timeout_s, d.reset_stagger_s), ("stop", 60, 20.0))
+        old = {k: os.environ.get(k) for k in ("LAB_SEAT_STOP", "LAB_SEAT_SHUTDOWN_TIMEOUT_S")}
+        try:
+            os.environ["LAB_SEAT_STOP"] = "shutdown"
+            os.environ["LAB_SEAT_SHUTDOWN_TIMEOUT_S"] = "45"
+            s = Settings.from_env()
+            self.assertEqual((s.seat_stop, s.seat_shutdown_timeout_s), ("shutdown", 45))
+            os.environ["LAB_SEAT_STOP"] = ""
+            self.assertEqual(Settings.from_env().seat_stop, "stop")
+            for bad in ("shut-down", "Shutdown", "acpi"):
+                os.environ["LAB_SEAT_STOP"] = bad
+                with self.subTest(bad=bad), self.assertRaises(ValueError):
+                    Settings.from_env()
+        finally:
+            for k, v in old.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
     def test_every_relaunch_stops_the_launch_task_before_the_game(self):
         """install-lab.ps1 registers sky-lab-launch IgnoreNew and launch.ps1 relaunches a game that exits in its first
         minute, so the task stops first and the start is always a fresh launch.ps1."""

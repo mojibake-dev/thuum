@@ -122,6 +122,10 @@ class FakeProxmox:
             return ExecResult(0, json.dumps({"games": games[-1:], "dumps": [], "curl": -1}) + "\r\n", "")
         return self.exec_result
 
+    def stop_gently(self, guest: Guest, timeout_s: int) -> None:
+        self.calls.append(("stop-gently", guest.vmid, timeout_s))
+        self.statuses[guest.vmid] = "stopped"
+
     def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]:
         self.calls.append(("shutdown", guest.vmid, timeout_s))
         if self.shutdown_error:
