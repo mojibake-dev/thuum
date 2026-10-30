@@ -273,10 +273,15 @@ not server.ref until the gamemode's ref kind serves any reference.
 
 Thirteen of fourteen claims held on the fixed client: the engine's own dropped reference deleted by DropItemService, the server's
 copy placed and "simulated here: Dynamic" on the dropper's seat, its stream started and asleep twice as the sword settled, the
-watcher applying it, one runtime SteelSword per seat, the two copies within 32 units in x and y (the pos fact). The one red was the
-probe's: the dropper was the cell's host, which simulates its cell's props by default (the host rule), so the server answered its
-own drop with "it simulates it already" (a debug line) and no touch-2 claim went out; the claim is the non-host dropper's path, which
-v4 exercises with c2 as the dropper. Noted as the rule's shape: a touch by the simulator itself is no claim.
+watcher applying it, one runtime SteelSword per seat, the two copies within 32 units in x and y (the pos fact). The one red was
+the missing touch-2 claim, read first as the host rule's silence and then, with v4 (150222, c2 the non-host dropper: the copy
+tracked on both seats, the sword at the dropper's feet on both screens, no claim, no stream, no apply), as the client never
+sending a drop claim at all: PropService.onContainerChanged required the event's reference, which Skyrim Platform leaves
+undefined when the engine's container event carries an empty handle, as a drop's does (EventHandler.cpp's conversion;
+DropItemService's gate accepts the same event), so the drops list stayed empty and claimDrop never matched the copy. Fixed on
+m3-prop-physics (2026-10-30; the union at 0e23c820): the guard without the reference, a trace per recorded drop and per new track (a
+follower's new prop had no line: placed within two units, Keyframed from the start). The engine reuses the deleted drop's form
+id for the copy's placeAtMe (HYPOTHESIS, harmless). x-prop-drop v4 reruns unchanged on the new client.
 
 ## Slice three on paper (18:45 PDT 2026-10-29; ADR-058 decision 4 names it M4's build)
 

@@ -3522,3 +3522,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the server can never refuse what it never hears (its refusal is T2's fakeclient's backstop). v6 by path claims the client-side
   truth (no server line about 4e50d's stage, c2 unchanged) and is promoted to b-quest-stage in its own commit (D68: the quest
   verb's scenario; mode all merges whole if the sweep plays it green); reviews-pending has the entry.
+- 08:24 PDT: x-prop-drop v4 read (agent): UNION, the client never sent a drop claim in v3 or v4. The server's copy was tracked on the
+  dropper's seat (CreateActor 47 ms after the delete, a view, the bound reference at the record), every rescan gate passes, and
+  claimDrop stayed silent because PropService.onContainerChanged returned early on `!e.reference`: Skyrim Platform leaves a container
+  event's reference undefined when the engine's handle is empty, which a drop's is (DropItemService's `!== null` gate accepts it). The
+  "host needs no claim" reading of v3 was wrong in mechanism (no claim left that seat either; the host simulated by default). Fix on
+  m3-prop-physics, the guard without the reference plus a trace per recorded drop and per new track; merged into the union at
+  0e23c820 and pushed with the client build; the verb doc corrected. The engine reuses the deleted drop's id for the copy (HYPOTHESIS,
+  harmless). numidium: the T2 and the restage move to 0e23c820's builds; the by-path x-prop-drop v4 reruns unchanged on it.
