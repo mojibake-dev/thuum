@@ -269,6 +269,15 @@ the lane), the drop through the InventoryMenu (DropItemService acts only while i
 reaches it), and lab-api's server.ref, which is actor-typed, so a tankard's record is read through the seats' listings (pos) and
 not server.ref until the gamemode's ref kind serves any reference.
 
+### The drop at T3 (07:45 PDT 2026-10-30; x-prop-drop v3 143937 on the restage, 8f9c11bd)
+
+Thirteen of fourteen claims held on the fixed client: the engine's own dropped reference deleted by DropItemService, the server's
+copy placed and "simulated here: Dynamic" on the dropper's seat, its stream started and asleep twice as the sword settled, the
+watcher applying it, one runtime SteelSword per seat, the two copies within 32 units in x and y (the pos fact). The one red was the
+probe's: the dropper was the cell's host, which simulates its cell's props by default (the host rule), so the server answered its
+own drop with "it simulates it already" (a debug line) and no touch-2 claim went out; the claim is the non-host dropper's path, which
+v4 exercises with c2 as the dropper. Noted as the rule's shape: a touch by the simulator itself is no claim.
+
 ## Slice three on paper (18:45 PDT 2026-10-29; ADR-058 decision 4 names it M4's build)
 
 Two props the engine owns differently from clutter, written so the row kind "prop" covers them when the build comes:
