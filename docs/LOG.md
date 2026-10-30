@@ -3126,3 +3126,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stall, a request honored) and clippy green locally. Asked of numidium: the idle read on its image (about 60 a second expected),
   the full T2, the touched verbs' gate when the lab is back. The note under ADR-011 in DECISIONS.md; WIRE.md's Transport section
   carries the schedule.
+- 17:30 PDT: docs/verbs/mount.md DRAFT: the owner table's fifth row kind, mount (the rider simulates the horse wherever the ride goes,
+  granted at the mount, released at the dismount, the rider's departure or the horse's death, no lease by time; the claim's shape,
+  the follow's cross-cell reach), the inventory from the records and CommonLibSSE-NG's mount surface (Actor.h:197-199, :370,
+  :473-474, :553-554), the build M7's with mounted combat. PLAN's "horses (host follows rider)" line is answered on paper, as the
+  pass's audit said. The physics probes x-prop-push and x-prop-pass (v2, by path) read the review's budgets (E_PROP_STEP and
+  E_PROP_REACH must read 0).
