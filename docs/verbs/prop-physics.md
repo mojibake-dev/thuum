@@ -5,6 +5,8 @@ Status: DRAFT (the weekend pass, thuum-magnus; ADR-058). Slice one's server half
 props.rs with its bridge, the handlers, PartOne's plumbing, unit/PropTest.cpp, the difftest session; cargo tests and clippy green,
 fork-lint green, the C++ compiles on CI only); the client service in build; nothing at T3 yet.
 
+Milestone: M3 (the pass's head 3; ADR-058)   Class: B
+
 ## Intent
 
 A prop (a kicked basket, a dropped sword, a boulder, a body) moves the same on every screen: the seat whose player touched it
@@ -13,6 +15,8 @@ Eli: "the canon perfection of multiplayer phys objects is gmod"). Today every su
 one screen alone (skymp5-client/src/extensions/objectReferenceEx.ts, view/spawnProcess.ts).
 
 ## Rung
+
+Rung: R2 for the transform (the simulating seat's Havok, the server records), R0 for the claim (the server decides who simulates).
 
 - The transform: R2. The simulating seat's Havok computes, the server records the last transform and the asleep flag. Not R1:
   the server has nothing to validate a position against but a speed bound (a budget row, UNMEASURED), which it applies as the

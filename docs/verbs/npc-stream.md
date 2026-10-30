@@ -2183,8 +2183,8 @@ rung, PLAN's R2 against ADR-035 point 6's R0 (the Inventory's inventory
 row); (8) which slice takes the voice line npc-puppet carried here (the
 Inventory's voice row).
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated
+- [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:02 PDT 2026-10-29 by the pass: the Inventory's 27 rows each carry a disposition and a rung; the Rung paragraph at the top declares R1 for the transform and R2 for the hosted state)
+- [x] engine surface cited or delegated (ticked 17:02 PDT 2026-10-29 by the pass: the combat and speech surfaces cited to CommonLibSSE-NG by file:line in the Engine surface section, the voice slice's ids by `just addr` from the re-analyst's reads)
 - [x] server logic + T0 (slices 1 to 3; CellHostTest's four cases)
 - [x] message + validator (same commit: HostedActorState 53/61 42af75b7; ActorSpeech 54/62 82ffd53a on the voice branch)
 - [x] native hook + T1 (no new Address Library id in slices 1 to 3; the voice slice's ids are the re-analyst's reads, their T1 the stage's log lines)

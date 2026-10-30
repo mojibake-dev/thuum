@@ -217,7 +217,7 @@ effect. (b) c2's relayed apply under the detour: 56684, 53716, 25004, 25260, 539
 - [x] message + validator (same commit)
 - [x] native hook + T1 (none needed)
 - [x] TS handler
-- [ ] T2 green
+- [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: T2 GREEN on m3-turbo-train-3n e14dc298, pipeline 3793, zero undeclared differences, the quest-stage session's declared relay matched once its ids were hex, LOG 2026-10-29 04:15 PDT; the sharing-mode slice's T2 is P2's, running)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
