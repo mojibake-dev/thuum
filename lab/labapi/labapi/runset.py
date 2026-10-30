@@ -215,6 +215,14 @@ class RunSets:
                     return rs
                 sid = rs.scenarios[rs.position]
                 verdict = await self._played(rs, sid, cold)
+                dead = _vm_start_failed(rs, sid)
+                if dead:
+                    # the position stays: the scenario never played a step, so a resume plays it again
+                    rs.state = "stopped"
+                    rs.notes.append(f"stopped at {sid}: a seat's VM could not start ({dead[:200]}), the host's to mend, "
+                                    f"with no rerun spent on it, at {_iso(self._wall())}; resume once the lab is back")
+                    self.save(rs)
+                    return rs
                 # and a red counts only after a cold-rollback rerun: a red run in which a seat relaunched is run again
                 # with every seat rolled back, and that verdict is the scenario's (ADR-027's reruns follow at the end)
                 last = (rs.runs.get(sid) or [{}])[-1]
@@ -278,7 +286,7 @@ class RunSets:
         asks each of them to roll every seat back."""
         verdict = await self._run(rs, sid, rerun=rerun, cold=cold, every=every)
         tries = 0
-        while verdict == "error" and tries < rs.policy.lab_fault_reruns:
+        while verdict == "error" and tries < rs.policy.lab_fault_reruns and not _vm_start_failed(rs, sid):
             tries += 1
             verdict = await self._run(rs, sid, rerun="lab-fault", cold=cold, every=every)
         return verdict
@@ -315,6 +323,12 @@ class RunSets:
             entry["relaunched"] = relaunched
         if cold is not None:
             cold.update(c for c, r in rec.client_reset.items() if r.get("kind") == "rollback")
+        # a seat's VM that cannot start is the host's to mend, not a run's to retry (2026-10-30 04:40Z: two cards whose
+        # BARs a rescan had left unassigned crashed QEMU at every start, and the lab-fault rerun and the next scenario
+        # spent two more starts on them before the two-faults stop): execute stops the set at it, with no rerun
+        dead = next((str(f.get("error") or "") for f in rec.failures if "QEMU exited" in str(f.get("error") or "")), "")
+        if dead:
+            entry["vm_start_failed"] = dead[:300]
         rs.runs.setdefault(sid, []).append(entry)
         rs.current = None
         return rec.verdict
@@ -371,3 +385,8 @@ class RunSets:
 
 def _iso(ts: float) -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts))
+
+
+def _vm_start_failed(rs: RunSet, sid: str) -> str:
+    """The failure of the scenario's last run in the set when a seat's VM could not start (RunSets._run's mark), else ""."""
+    return str(((rs.runs.get(sid) or [{}])[-1]).get("vm_start_failed") or "")
