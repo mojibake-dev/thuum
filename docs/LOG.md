@@ -3306,3 +3306,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the pass's rule on numidium's recommendation: 3o does not merge on its own gate; the union (P3-win, 3o inside trains 1 to 3) is the
   new base straight from parity bf133744, merged under one full sweep with the layer, with both findings fixed in it first; 3n stays
   the fallback. An agent reads 063053 against the server's subscription and the client's spawn path.
+
+### 2026-10-30
+
+- 00:05 PDT: the Raise Wall cause and its fix. An agent's read of 063053: the server placed both forms and every seat's view aborted
+  on its first Papyrus call on the MSTT base, every frame ("Bad call result 4", kFailedAbort): Skyrim Platform packs a form argument by
+  its formType (CallNative.cpp AnySafeToVariable) and the VM registers no Papyrus class for MovableStatic (36), so CommonLib's
+  PackHandle (RE/P/PackUnpack.h) left the variable None; the caster's own copy stood because the script's PlaceAtMe never crosses
+  the platform. Fix: fork m3-sp-pack-form 9fad9f08 packs a class-less form type as Form (the file's own static-VM idiom); merged
+  into m3-pass-train-3-win 997fedf1 (numidium told first), pipeline 3962 with the client build on (the seats are down anyway).
+  HYPOTHESIS until b-spell-placed-wall's claim 2 reads green on a seat with it (spell-placed-object.md, The cause at T3).
+- 00:19 PDT: b-spell-placed-wall v2 (12353ab, its own commit; numidium asked for it before the union's stage so the sweep plays a sound
+  frame): the 300-south move of 10-29 had stood c1 (0, -500) across lab-spawn's cell edge (the origin is 310 units north of its
+  cell's south edge, guests.yaml; the wall's line at -308 lay 2 units inside the origin cell), so c1's one-cell refs-near could
+  never list its own copies: claim 3 unreadable, a premise red behind the real one. The summit's flat strip (LAB.md's note) holds no
+  300-unit clearance inside one cell, so c1 stands at (0, -366), 56 units south of the edge, and reads through c2's figure's cell
+  (refs-near {from: other}: the nearest other actor's parent cell and distances); the blocked read moves with the line (y > -166 at
+  -174, the same 8 units); no tolerance changed. x-raise-wall by path carries the same frame (sha1 992a9efb); reviews-pending has
+  the entry, self-approved.

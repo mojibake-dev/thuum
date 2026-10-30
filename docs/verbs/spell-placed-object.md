@@ -24,6 +24,32 @@ away, had neither within 4000. ADR-029 runs the script in the caster's
 game only (docs/DECISIONS.md:742); on c2's figure the relayed stream's script
 is blanked (ADR-044; FridaHooks.cpp:134; remoteServer.ts:1158-1245).
 
+### The cause at T3 (2026-10-30; 3o's stage, runs 063053 and 063222)
+
+With the server half live the placement line held ("placed 2 forms") and c2's
+refs-near still had neither base: every seat's view aborted on its first
+Papyrus call on the MSTT base, every frame ("Bad call result 4", kFailedAbort,
+in both seats' console logs). Skyrim Platform packs a form argument by its
+formType (skyrim_platform/CallNative.cpp, AnySafeToVariable: the id is
+nativePtrRaw->formType) and the VM registers no Papyrus class for
+MovableStatic (36), so CommonLib's PackHandle (RE/P/PackUnpack.h: SetNone, then
+a return when GetScriptObjectType finds no class) handed every native a None
+and the call aborted; the caster's own copy stood because the script's
+PlaceAtMe never crosses the platform. Fix on the fork, m3-sp-pack-form 9fad9f08,
+merged into m3-pass-train-3-win 997fedf1 with the client build: a form whose
+type has no class is packed as Form, the class every native that takes a Form
+accepts (the file's own static-VM idiom). HYPOTHESIS until b-spell-placed-wall's
+claim 2, or x-raise-wall's watcher reads, go green on a seat with the fix and
+its console log shows no "Bad call result 4" during the cast.
+
+The frame hid a premise red behind it: the 2026-10-29 move 300 south stood c1
+at (0, -500), in the cell south of the wall's (lab-spawn's origin is 310 units
+north of its cell's south edge, lab-api's guests.yaml; the wall's line at -308
+lay 2 units inside the origin cell), so c1's one-cell refs-near could never
+list its own copies (claim 3). The scenario's v2 (thuum 12353ab) stands c1 at
+(0, -366) and reads its copies through c2's figure's cell (refs-near
+{from: other}); x-raise-wall by path carries the same frame.
+
 ## Inventory (ADR-031: the action's consequences, before its rung)
 
 From WB_FabricateWall_Script and the records (apocrypha's read, 2026-10-28;
@@ -242,7 +268,10 @@ are the caster's alone (ADR-057).
   (lab/references/raise-wall.json).
 - Lab reads that clear the tags: the collision (the walks), the fade (screenshots),
   the fail script's dispel (apocrypha's read, then a cast
-  with a wall under 300 units ahead).
+  with a wall under 300 units ahead); the pack-form fix (The cause at T3):
+  b-spell-placed-wall's claim 2 on a seat with m3-sp-pack-form, and the seat's
+  console log (lab's <client>-console.log) without "Bad call result 4" during
+  the cast.
 - Owner: agent.
 
 ## Status
@@ -253,7 +282,7 @@ are the caster's alone (ADR-057).
 - [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h)
 - [x] native hook + T1 (none needed)
 - [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands)
-- [ ] T2 green (T0 green on 3k d7548ccf and on 3o-win ee44f7d1, both halves built; the lay is 3o at the morning's break after 3n's merge, image and dist together)
+- [ ] T2 green (T0 green on 3k d7548ccf and on 3o-win ee44f7d1, both halves built; the lay is the union m3-pass-train-3-win 997fedf1, the pack-form fix inside, at its stage after the reboot, D67)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
