@@ -3425,3 +3425,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   client's cast hooks (the `cast` step reaches no server for an aimed spell); v4 casts the way a player does (approach to 80, the
   mouse-pitched aim, equipspell, draw, the key held). x-npc-hold v5: dontmove-trace.js v2 adds a MoveTo hook (56626) with the caller
   and a six-frame backtrace to name the warper; sky-srv's lab/frida needs main's script first.
+- 07:06 PDT: the prop read (agent, three runs): UNION, the client. RemoteServer's skip path gives every game-file item (below 0xff000000,
+  not DOOR, not NPC_) no FormModel and no FormView, and PropService.rescan built its candidates from the view's forms, so no clutter
+  was ever tracked (zero PropService lines on any seat across ten runs; the server half streams them correctly). Premises on top: the
+  walkers curved (45 and 158 degrees for 90 and 180 asked; c1 ran into c2), the console's player.drop never passes DropItemService's
+  InventoryMenu gate, lab-api's server.ref is actor-typed. Under "build what is drafted" the client is fixed now: m3-prop-physics
+  af65e4b4 (game-file items enter the candidate set from their CreateActor with the record's pose; isItem caches nothing for an
+  unloaded reference; propPhysics OFF unless the setting says true, rule 3 and D68), tsc clean, fork-lint clean, merged into the
+  union at 8f9c11bd and pushed with the client build (pipeline 3992); the union restages on it. Probes by path for the restage:
+  x-prop-push v4 27b712ce (the watcher 100 south, the heading set before the key, a walker claim), x-prop-pass v4 30da64b4,
+  x-prop-drop v3 05dc320c (the inventory open before the console drop; c1 50 west), x-prop-grab v3 1c0e0541 (the switch on),
+  all four with the switch on at a relaunch of both seats. x-quest-mode v4 on DB01Misc 0x1ea4f (finding 76's rumor quest; MS13Intro
+  refuses to start in this world, HYPOTHESIS Run Once and done). x-rented-bed v2 GREEN (135155): the rented-bed correction holds.

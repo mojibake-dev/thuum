@@ -247,6 +247,28 @@ T2 runs again on 50a44336.
 | TRACK_RADIUS, TRACK_MAX, RESCAN_MS | 1024, 64, 500 | PropService | which props a seat tracks; the rescan's native count |
 | GLIDE_MIN_MS, GLIDE_MAX_MS, JUMP_UNITS | 50, 300, 256 | PropService | the follower's interpolation window and its snap threshold |
 
+## The candidate set (07:06 PDT 2026-10-30; the stage's read of x-prop-push 133010, x-prop-pass 133232, x-prop-drop 132737)
+
+The union's first stage found the client half dead for every game-file item: zero PropService lines on any seat across ten prop
+runs, nothing at the server. The cause (an agent's read, high confidence): RemoteServer.onCreateActorMessage returns early for
+every reference below 0xff000000 that is no DOOR and no NPC_ (skipFormViewCreation: onceLoad, dealWithRef Keyframed, and no
+FormModel and no FormView), while PropService.rescan built its candidates from the view's forms alone, so the set was empty by
+construction; the model "the view's bound item references" (The client half) was wrong, and the server half streams them
+correctly (LoadChunkIfNeeded admits items, Subscribe sends the CreateActor with the record's transform). The fix (fork
+m3-prop-physics af65e4b4, in the union at 8f9c11bd): PropService remembers every game-file item's CreateActor (refr, base, the
+record's pose; a bounded map, no view, no model), the rescan adds those references when loaded and near, their record's pose is
+imposed from the message where the model's movement would have been, and isItem caches nothing for a reference not loaded yet.
+Two smaller holes stay noted: the record's pose for such a reference is the message's until a sample comes (recordSample keeps it
+there too), and the engine's settle moves a tankard under SAMPLE_UNITS, so "placed at its record" does not print on the host; the
+first visible line is "simulated here: Dynamic".
+
+The switch: propPhysics is OFF unless the client setting says true (rule 3 and D68: the verb has no green T3 scenario yet), the
+lab's probes turn it on through their relaunch files, and the default flips in the commit whose b-prop-push goes green. Premise
+defects found beside the fault, fixed in the probes: the walkers' headings (set and settled before the key; the watcher out of
+the lane), the drop through the InventoryMenu (DropItemService acts only while it is open; a console player.drop alone never
+reaches it), and lab-api's server.ref, which is actor-typed, so a tankard's record is read through the seats' listings (pos) and
+not server.ref until the gamemode's ref kind serves any reference.
+
 ## Slice three on paper (18:45 PDT 2026-10-29; ADR-058 decision 4 names it M4's build)
 
 Two props the engine owns differently from clutter, written so the row kind "prop" covers them when the build comes:
