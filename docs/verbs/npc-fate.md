@@ -984,6 +984,28 @@ box, a claim too broad by the bear's own death, a hostile taking the
 god-mode player). Train-46 MERGE-READY by citation and MERGING on Eli's
 "Merge now" (gate 20261026-001639 eighteen of eighteen, T2 green).
 
+AMENDED FOR D52 (12:06 PDT 2026-10-30, main 330124b, the scenario alone):
+b-npc-body-release's claims counted the single-occupant check's lines
+("ProcessActivate 39fe4 - no occupant", twice), and memo D52's shared
+containers (dbfc8e82, 10988419; the pass union 0e23c820) moved a corpse's
+open and close onto containerOccupants, which write nothing but "N players
+in the container now" at a second concurrent occupant; the check is
+furniture's alone now (MpObjectReference.cpp:1965). The scenario went red
+three times in the union's sweep (20261030-164127: 184852, 185123, 185329)
+with the activation working. The shape is unchanged (c1 loots and closes,
+then c2 is admitted at once); the claims read D52's path: each seat's
+admission as the server's OpenContainer at the client's handler line
+("waiting for 'ContainerMenu open' (a corpse)", a log-count step) with the
+ContainerMenu open in a dump-state; c1's release as its handler's "menu
+closed" and "sent ActivateMessage" lines (the closing activation
+ProcessActivateSecond's corpse branch takes); the release's effect as the
+server's silence at c2's join (no "[0-9]+ players in the container now":
+c1 stands inside the 512-unit occupation reach, so a c1 left in the set
+would make c2 the second occupant and log it); kept: no "occupant is
+another object", no E_ACTIVATE_REACH, the body dead on the record. Two
+seats in one body at once is x-shared-chest's read (D52's probe), not this
+scenario's.
+
 BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
 resetBaseFirst, and the view's dead-body apply passes false, so a game-file
