@@ -3363,6 +3363,21 @@ joiner sees it). v1 ships Raise Wall alone on the caster anchor; Fabricate Objec
 base id validated against the spell's list) and Wind Running's per-update placement are later deltas; the hit-target
 and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
 
+D70 (14:00 PDT 2026-10-30, the pass; numidium's memo on b-spell-placed-wall's three reds, taken under the pass's rule, Eli may veto):
+the pose model. Facts: on the union 0e23c820 the scenario's claim 3 (the caster's own wall against the server's copy, 192 along the
+yaw) failed three runs out of three, the cold rollback included (204953, 205125, 205303): the copy stood 75 to 88 units from the
+caster's engine wall, which stood 104 to 118 ahead of the caster and moved 14 units between runs at the same stand; the server
+placed once per cast, the observer holds one runtime copy of each form (the morning's CallNative fix), so the server half and the
+observer are right and the fixed step is wrong. HYPOTHESIS (the Dynamic read before the fix): the script places the wall at the
+caster's aim (TargetBox), not at a fixed step. Options: A) fix in the union, the caster reports the pose and the server validates
+and places there (shape A of the verb doc), a new message, client and server code, a rebuild and a restage, the merge hours later;
+B) the copies off for this merge through the kill switch (spellPlacedObjects emptied in both deploy settings), the scenario pending
+by name with the reason, the fix as the next train after the physics and rumor trains; C) merge the placement as it stands, pending
+the scenario: the other seat sees a wall about 80 units off, a player-visible wrong outcome by name. Taken: B. A wall in the wrong
+place blocks a gap the caster sees open, worse than no wall (playtest 38's state), and the fix is a train's worth. The verb's pose
+model becomes shape A: the caster's report, validated (reach from the caster, bounds, one report per accepted cast), the copies at
+the reported pose; the settings table keeps the forms and the lifetime, and loses the step.
+
 ## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
 
 Status: PROPOSED 14:06 PDT 2026-10-29 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes.
