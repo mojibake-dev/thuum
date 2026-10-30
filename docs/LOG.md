@@ -3207,3 +3207,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   base 80254. P3 is 50a44336 (the placeholder plus train 2's review fixes merged, 256 crate tests green, fork-lint), pushed
   server-only with its difftest on the push; P3-win follows (its merge took the train's platform source again). numidium asked to
   run the full T2 on 50a44336 in place of the queued rerun of 54e021e0.
+- 18:24 PDT: PLAN.md's M3 chart gains the pass's evening STATE block (the three trains with their shas and review state, the T2 verdicts,
+  D63 to D65, the slice-two deferral, the tag count, what M3 DONE still waits on). P3-win ffa51358 pushed with the client build.

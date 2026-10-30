@@ -1249,6 +1249,19 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 - Verb docs with Status boxes open: npc-stream six, npc-fate five, quest-stage five, npc-talk five, npc-handoff five, cell-host one
   (the T1 box, "none: events through Skyrim Platform"); the pass closes them by probes or the ledger (P3, P4).
 
+**STATE 18:24 PDT 2026-10-29 (the pass's evening, one line per item; the 14:05 block above stands for the morning):**
+- The pass's trains, each reviewed against the hard rules by a fresh agent and fixed before any stage: P1 m3-pass-train-1 b0cda83a
+  (the placed-dead corpse 65, the held roster 66 keyed by reporter and bounded) with the client bits f9c6b7ca (67, 68, 71 and the
+  rented-bed correction, finding 31) as P1-win 9721ff72; P2 58208e9f (NPC melee reach and cone, the login's Change Location event,
+  quest sharing mode all under D58 B and D62 with the INDX check and a bounded record, the fragment suppression made real in the
+  .pex) as P2-win dca7fe09; P3 50a44336 (ADR-058 slice one with the review's six fixes, P2 merged) as P3-win ffa51358. T2: P2 green
+  at 0b49a28e, P3 red once on its session's assumed id (fixed by the harness's created-form placeholder), the rest queued.
+- D63 A (the four allowed quests stand), D64 C (the transport's 60 Hz flush clock, m3-send-rate b6f4deb4, green on CI), D65 A
+  (Reading List's radar stays; the driver throttles its lines); ADR-058's slice two deferred to M4 on the esm read.
+- The exit scenarios c-riverwood and c-dungeon-enemies are committed and wait on the lab; the eight M3 verb docs stand at 196 to
+  about 65 hypothesis tags, every remaining one a named pending read or the template's own words; mount.md drafts the owner table's
+  fifth row (horses, M7's build). M3 DONE waits on the host reboot, the stages and the two exit scenarios green.
+
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
