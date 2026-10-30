@@ -3552,3 +3552,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   start-game-enabled). The playtest 39 checklist revised to the day's facts (v2).
 - 08:45 PDT: D69 B green on the CI's T0 (fork m3-quest-sge-stages dc3ec679, pipeline 4017, 508 cases): the train after the union's
   merge, with its own T3 to write (the rumor quest's later stage crossing); Eli's veto open in the summary.
+- 09:42 PDT: 0e23c820 staged (dist 14739, clean-m1-next retaken 16:19Z) and its T2 GREEN alone with the tolerance (15:41 to 16:10Z).
+  The restage's reads (numidium): x-prop-drop v4 162049 RED past the grant: "ff000001 claims prop ff000002 by touch 2: granted,
+  epoch 1" and c2's stream started, then 3.6 s later "E_PROP_NOT_OWNER: ff000001 moves prop ff000002; another seat simulates it",
+  the server refusing its own grantee (a union server finding, an agent reading props.rs's owner logic against the run); and a side
+  effect of the drop gate's removal: at each login eight "drop of base ... recorded" lines per seat (the outfit removals share the
+  event's shape), narrowed on m3-prop-physics to DropItemService's gate, the inventory menu open. x-prop-push v8, x-prop-pass v8 and
+  x-prop-grab v6 (162049's siblings) all red on one premise: Riverwood's street bucket 0x3975d is DISABLED in this world (listed
+  disabled on both seats; no collision, no crosshair); esm.py's ref shows no enable parent in Skyrim.esm, so the world or the layer
+  disables it; lab-api gains c.refs_near().disabled(baseId) for the premise. Props merge dark under D68; the physics train after
+  the merge carries the owner fix, the gate, a new enabled site and the premise claim. The pre-sweep deploy and the sweep run now.

@@ -801,6 +801,15 @@ class PuppetViews(RefsNearViews):
 
 @needs_deps
 class PuppetFactsTests(unittest.TestCase):
+    def test_disabled_reads_the_nearest_listed_references_flag(self):
+        # x-prop-push v8: a disabled bucket has no collision; the probe claims disabled == false first
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), RefsNearViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.refs_near().disabled(0x5FBC0) == true"))
+        self.assertTrue(ev.evaluate("c1.refs_near().disabled(0x3E8F0) == false"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.refs_near().disabled(0x3E8F0)")
+
     def test_pos_is_the_nearest_listed_references_position(self):
         # x-prop-drop: two seats' copies of one prop compared where they lie, from the listing's pos rows
         from labapi.assertions import AssertionData, Evaluator
