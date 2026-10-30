@@ -291,3 +291,37 @@ real side quests that start at the game's start and wait for their trigger; `all
 the former curated four (A Lovely Letter, MS13, MS13Intro, MS13FIN), so the Golden Claw crosses as playtest 38 saw it. A call for
 Eli, D63: which start-game-enabled world quests join `allowed` (the MS side quests, the faction openers C00 and CW00, the dialogue
 hubs stay a seat's own by the recommended reading, since their stages track one player's conversations).
+
+## The review's fixes (18:05 PDT 2026-10-29, fork m3-pass-train-2 58208e9f; P2-win dca7fe09)
+
+An agent's rules review of the train (ee44f7d1..0b49a28e) found eight things; six are fixed on the train, two are declared.
+
+1. Slice two was INERT: d02103fd changed TESModPlatform.psc but not the compiled TESModPlatform.pex, and Skyrim Platform's
+   callNative resolves a function through the loaded .pex (VmProvider.cpp), so Suppress and ReleaseQuestStageFragment threw
+   "Native function not found", the client logged it and every relayed stage ran its fragment. Both natives are declared in the
+   .pex now (lab/pex.py add-native, the arrival native's precedent, e0e3af03); no playtest had reached the path.
+2. Rule 12 and 5 in mode all: any u16 stage of any shareable quest was accepted with no check against the quest's own stages and
+   no bound on the world's record, and the login replay was quadratic. Now a stage the quest's INDX list does not define is
+   refused (E_QUEST_STAGE, libespm's QUST stages), the record is bounded (QUEST_RECORD_CAP 4096 pairs in wire-rules
+   quest_stages, E_QUEST_FULL once per 10 s past it, UNMEASURED as a bound), and at_login runs in one pass (c5749f0c; tests in
+   the crate and QuestStageTest, MS13's INDX list read from the browser: 10 in, 9999 out).
+3. The arrival event was armed by the login's quest mode message, which a server with an empty shared list never sends, so such
+   a server never raised the Change Location event at login. The arrival now waits on this connection's own CreateActor and
+   the game's load, the flags reset at every connectionAccepted, the 3 s window kept (6653465c).
+4. The fragment mark was released at the SetStage promise's answer, which can come before a queued stage's event (a quest not
+   yet running). The sink's replacement consumes one mark at the pair's first event, and the client's release is a 10 s safety
+   that logs a warn if it takes a mark back (58208e9f). HYPOTHESIS (the agent's caveat): the static read has the setter send one
+   TESQuestStageEvent per log entry (25260), so a stage with several passing entries would run its later entries' fragments
+   under a one-shot consume; lab/frida/quest-stage-chain.js counts the 53987 events per stage at P2's stage and decides whether
+   the consume moves to the last entry (53716's count).
+5. Start-game-enabled reports: in mode all a seat reports every stage event of every quest it does not know to be denied, so
+   Skyrim.esm's 330 such quests arrive at the client's rate and each cost a token of the validator's budget and an info line.
+   Skyrim Platform's Quest exposes no Start Game Enabled getter, so the client filter stands; the server logs E_QUEST_OWN_START
+   once per seat per 10 s with the held count, and tests E_QUEST_DENIED first (a quest both denied and start-game-enabled logs
+   the setting's word; 5ced4995). The token cost is a declared limit until the mode message carries the flag.
+6. Declared, not fixed: PlayerScale reads the sex from the appearance alone, so a female NPC's reach uses the male height column
+   (melee-reach.md's known limit; within the 256-unit slack for every playable race); libespm's NPC_ data reads no sex, and
+   UESP's ACBS bit 0x1 Female is the lead to confirm against the record before a one-line read.
+
+T0 green locally on the crate (246 cases) and the bridge; clippy, fork-lint and tsc green; the C++ compiles on CI (the push
+pipeline, whose difftest builds on the crate change); the Windows half on P2-win's pipeline.

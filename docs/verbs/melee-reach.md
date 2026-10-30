@@ -172,3 +172,8 @@ replaces DamageActor after 38586 has raised TESHitEvent). c2 stands at
 170 units since main 8550593 (2026-10-21). Whether the layer's bodies moved
 the edge (a hit at 180 on the train-29 stage, a miss on this one) is
 PLAN's x-melee-edge row, a measurement, not this verb's bound.
+
+Known limit (18:05 PDT 2026-10-29, the review of m3-pass-train-2, finding 7): the scale a hosted NPC's reach and target extent use is
+the race's male height column, because PlayerScale reads the sex from a player's appearance and an NPC has none; libespm's NPC_
+data exposes no sex today. The difference stays inside the 256-unit slack for every playable race. UESP's NPC_ record page names
+ACBS flag bit 0x1 as Female; a one-line read of it lands once confirmed against the record (rule 1).
