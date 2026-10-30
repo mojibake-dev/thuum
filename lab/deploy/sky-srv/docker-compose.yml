@@ -103,6 +103,9 @@ services:
       FIXTURE_WORLDS_DIR: /srv/lab/thuum/lab/fixtures/worlds   # a scenario's `server: {world:}` fixtures (ADR-043), deployed with the tree
       NIGHTLY_SWEEP_UTC: "10:30"
       NIGHTLY_QUIET_S: "1800"
+      # ADR-036's reset between runs (config.py's client_reset: rollback or relaunch), from sky-srv's .env so the
+      # mode flips with a lab-api restart and no image; unset is rollback, the code's own default
+      LAB_CLIENT_RESET: ${LAB_CLIENT_RESET:-rollback}
       # the lab's tables from the deployed tree, like the Frida scripts: a
       # snapshot switch (a stacked clean-m1-<branch> for a client on another
       # wire schema) is a `just deploy-srv` and a lab-api restart, not an image
