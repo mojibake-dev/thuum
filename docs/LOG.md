@@ -3240,3 +3240,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   INDX check), P1 b0cda83a at 02:39Z, P3 6901781c at 03:08Z (the prop-physics session identical with its 14 declared divergences,
   no E_PROP line in the kept log); each run stopped its services, the lab's server untouched. prop-physics's T2 box ticked; the
   chart's state line updated. Left before the union's stage: P3-win e65a345b's T2 once the lab is back, and the reboot before that.
+- 21:14 PDT: the union's T2 (P3-win e65a345b, numidium, beside 3o's gate on sky-srv) red on one LEGACY line: god-mode's declared
+  divergence {{t 16, health 0.96288}} x1 on legacy came x0 (the legacy stack never sent c1 its damaged health this run); every wire
+  line matched and prop-physics is identical. Read as the legacy stack's timing under load (the run shared sky-srv with the gate's
+  first runs); numidium reruns it in a quiet window before the union's stage, and a second miss sends the session's legacy timing to
+  a read, not the union. ADR-036 is live (main 80ccdfe, LAB_CLIENT_RESET=relaunch): a rollback of c2 again logged the slow retrain
+  (214 s, the agent missing, the rerun green), so numidium trials relaunch mode on three runs and then runs 3o's gate from scratch
+  under it, one rollback per seat at the set's start.
