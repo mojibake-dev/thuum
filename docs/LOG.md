@@ -3227,3 +3227,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   P2-win 0dc92d5a (one conflict, the disconnect handler's two departures, props_gone and ForgetHeldSightings, both kept); tsc and
   fork-lint green on both, pushed with the client build. P3-win's server content is now the full composition (trains 1, 2 and 3), the
   tree a stage of all three would run; its own T2 is the last before that stage.
+- 19:04 PDT: D64 folded into the physics train at numidium's ask (one stage and one gate cover it; npc-stream's cadence and cell-host's
+  grants are in the gate anyway): P3 6901781c (server-only, difftest on the push), P3-win e65a345b (the client build); every crate's
+  tests and fork-lint green. The lab plan once the host is back, numidium's: 3o's gate again with b-spell-placed-wall's fix deployed,
+  the merge and "base merged"; ADR-036 pushed with the default unchanged and a live trial; apocrypha's layer on the merged base and
+  P3-win on top of it (ADR-042a) with the nine probes by path and the three traces; one full sweep as the gate for both, then
+  layer-merge and verb-merge citing it. The three single-train T2s prove the parts, P3-win's T2 the sum.
