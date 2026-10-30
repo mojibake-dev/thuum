@@ -3209,3 +3209,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   run the full T2 on 50a44336 in place of the queued rerun of 54e021e0.
 - 18:24 PDT: PLAN.md's M3 chart gains the pass's evening STATE block (the three trains with their shas and review state, the T2 verdicts,
   D63 to D65, the slice-two deferral, the tag count, what M3 DONE still waits on). P3-win ffa51358 pushed with the client build.
+- 18:42 PDT: D64's reads on fork m3-send-rate b6f4deb4 (numidium, sky-srv, the same idle script as 17:13's): the server now sends an
+  idle fakeclient 59.98 packets a second (3,304 of 3,306 in the 55.1 s window, all 26 B, a median gap of 16.6 ms) against 814.8 before,
+  its loop still ticking 847.2 times a second (51,627 in 60.9 s), so the flush clock alone moved; the client's own 5 ms loop still sends
+  189.3 a second, and no server packet followed the close. The full T2 of m3-send-rate is GREEN (difftest 14302, every session identical
+  to legacy but its declared lines). Its gate (npc-stream's relay cadence, cell-host's grants) waits for the lab.
