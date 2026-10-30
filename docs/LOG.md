@@ -3148,3 +3148,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   not imposed a limit; H1 and H2 keep their reads), npc-talk.md 9 to 5 (H-55a and H-58a CONFIRMED, H-55b a limit). Three honesty
   lines added where the docs named reads that do not exist: npc-handoff's Dynamic plan (four probes never written), npc-talk's
   vendor read (x-npc-vendor-claim never written) and its Known limits (the M6 row the Inventory points at).
+- 17:36 PDT: Status boxes ticked on evidence: prop-physics's doc-complete and engine-surface boxes (the touch delegated and read), npc-fate's
+  native hook (FateHooks.cpp's detours, npc-roll.js's counts). CI at this minute: P3 3884's wire jobs green with difftest 14287, its
+  server-build running; P2-win a1272466 building (3892), P3-win c8a6e8e8 queued (3893), m3-send-rate 3888 running.
