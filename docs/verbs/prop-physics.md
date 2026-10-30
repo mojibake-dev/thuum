@@ -95,7 +95,9 @@ hook's event send hops to the JS thread.
 - [x] server rule in Rust with T0 (8575e59b; the C++ T0 PropTest runs on CI)
 - [ ] native hook + T1 (the contact hook BUILT, fork m3-prop-physics d4a75d02: a Gum on-enter detour on 79131 filtered to the player's proxy controller and the clutter and props layers, one propContact event per prop per 250 ms through the tick queue; T1 none, the trace at the stage; the transform read and the Keyframed set are the platform's own natives)
 - [x] SP binding and TS service (the TS PropService, 8f887477; no new SP binding in slice one: setMotionType, translateTo, setPosition from the platform's own surface)
-- [ ] T2 green
+- [x] T2 green (ticked 20:09 PDT 2026-10-29: P3 6901781c's T2 GREEN at 03:08Z, numidium, its own difftest job 14395; the prop-physics
+      session identical to legacy with its 14 declared divergences, the kept server log without an E_PROP line; the union P3-win
+      e65a345b's T2 is the last before the stage)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green (ADR-033)

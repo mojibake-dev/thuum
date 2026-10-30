@@ -3236,3 +3236,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 19:51 PDT: CI GREEN on the union: P3-win e65a345b (pipeline 3923, client and server), P3 6901781c (3922, server and difftest), P2-win
   0dc92d5a (3919, client and server); every head of the pass compiles on both platforms. The stage build waits on the lab alone;
   numidium's T2s run the parts (P2 since 01:42Z, then P1, then P3) and the union's last.
+- 20:09 PDT: every single-train T2 GREEN on its final head (numidium): P2 58208e9f at 02:11Z (the quest-stage session matched under the
+  INDX check), P1 b0cda83a at 02:39Z, P3 6901781c at 03:08Z (the prop-physics session identical with its 14 declared divergences,
+  no E_PROP line in the kept log); each run stopped its services, the lab's server untouched. prop-physics's T2 box ticked; the
+  chart's state line updated. Left before the union's stage: P3-win e65a345b's T2 once the lab is back, and the reboot before that.
