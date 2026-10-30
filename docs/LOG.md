@@ -3279,3 +3279,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   cold rerun erroring on c1's dead card; seven never ran and replay as RUNSET_AFTER on the same stage after the reboot, one chained
   gate. numidium's rerun rule taken: a red with a relaunched seat reruns relaunched first, a second red reruns cold, a green first
   rerun is green; red-red-green names a relaunch-state finding (the note under ADR-036 and ADR-030 is numidium's).
+- 22:59 PDT: b-npc-talk 053717's red READ (an agent on the run, the 10-28 runs and the greens): no talk ran; the red is the stillness pair
+  BEFORE any claim (step 20, the host's npc-hold then 8 s), and the lab's hold stops a walker at the end of his current sandbox leg,
+  three to eighteen seconds (the greens' legs ended inside 8 s; the reds 215828 and 053717 began a leg as the hold landed and walked
+  eleven seconds and more, 33 units a second, collinear); the record moved on c1's own reports as the cell's host, no non-simulator
+  accepted, no claim row touched, so the server and the claimant's client are clean. My 22:47 line's "during the claimed talk" is
+  wrong: the talk never started. Fix: b-npc-talk v7 (its own commit b8ebc705, self-approved under the 10-13 word): the settle waits
+  24 s before the snapshot pair, the five-unit bound unchanged; x-npc-hold v3 by path measures the leg's upper bound (snapshots every
+  3 s for 30 s) at the stage; npc-talk.md's Known limits carry the leg-end stop. The vain form, a `settle {{of, within, apart, timeout}}`
+  step every stillness read shares, goes to numidium's grammar list. deploy-srv must carry v7 before the gate's replay.
