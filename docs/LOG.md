@@ -3452,3 +3452,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   again before any v5. numidium's side note: quest 0x30002859 (a layer plugin at slot 0x30) ran EnsureQuestStarted every 0.7 s for a
   whole run on c1 (134416's trace), to apocrypha. The restage of 8f9c11bd started 14:14Z (builds green; LABAPI=3996, the clones rolled
   back to the morning's clean-m1-next; deploy-srv from main be6569f lays the gamemode ref fix).
+- 07:18 PDT: x-reanimate-host 135637's dump after the mouse pitch read crosshairRef 218420, Hilde's body: the mouse step works on a
+  relaunched seat (the earlier suspicion withdrawn); Sven, who stands by her, took the bolt in the five seconds between the aim and
+  the key. v5 by path holds Sven on the host first and takes the aim right before the key (approach, equip, draw, wait, pitch, dump,
+  key); the mouse-aimed grab keeps its dy for the restage's read.
