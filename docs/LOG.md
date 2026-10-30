@@ -3580,3 +3580,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its train's stage, x-quest-rumor v1 (the rumor's own stage 10 relayed, the denied quest kept at the client, FreeformHeartwoodMill's
   flagged start-up stage refused and its plain stage the world's); committed as a scenario it would red today's nightly under D62, so
   b-quest-rumor is promoted from it when green there. D68 and D69 recorded in DECISIONS.md under ADR-030 and ADR-056.
+- 10:53 PDT: b-body-loot red twice in the sweep (174118, 174322): its premise is the D37 layer's load order (Death Drop Overhaul out, Eli's
+  D37 B of 10-27), and dd2550c reached neither main nor the staged defaults layer (bd5bb64); main's essentials still carry
+  death-drop-overhaul-1.2.4 (verified in git before answering). The call (numidium's recommendation, apocrypha agreeing, taken under
+  the pass's rule): the scenario pending in lab/gate.yaml (main 4c2f1a8, numidium, the config line alone), out of both citations, its
+  steps and claims untouched; the other way was the D37 layer merged first (a layer stage and a full sweep, hours). It comes out in
+  layer-souls' merge (apocrypha's e94b63c carries D37 and Skyrim Souls RE; its gate plays b-body-loot after the clone's DDO.dll
+  deletion is read). The debt named for Eli: D37 B is three days unlanded, every stage since 10-28 has had DDO in. The sweep at 26
+  of 102 green at 10:52 PDT, b-cast-crossfire running.
