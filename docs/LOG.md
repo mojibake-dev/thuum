@@ -3261,3 +3261,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   `server.actor(c2).healthPercentage < 0.78` read 0.7851) and green on its cold rerun as ADR-030's amendment runs it; an agent reads
   that claim's margin (the hits, the regen between them, the timing), never its number. A stale C:\sky-lab\hot.txt inside 3o's
   clean-m1-next made c1 roll back at every run; install-lab clears it from main 7be6465, numidium deletes it by hand for this gate.
+- 22:37 PDT: D66 built (the recommended D of the b-duel margin read, taken under the pass's rule): fork m3-cast-held-time 51069b46 off 3o,
+  wire-rules casts.rs HOLE_MS 1000: a single stream's report after a hole counts the hole (a lost report is not a lost target, the
+  engine burned the gap), the first report and a re-contact one cadence as before, two hands of the same spell keep the cap per
+  report (the reports name no hand); the one T2 declaration that followed the cap moved in the same commit (spell-cast's second tick
+  0.96 to 0.948); casts.rs's new case covers the way, a hole, the cadence, a re-contact, a second and the two-hand cap; 241 rules
+  cases, the bridge and the harness green, clippy green; pushed server-only, its difftest on the push. R0 and server-only, so it
+  merges on T0 and T2 (ADR-053); numidium asked whether to fold it into P3 before the union's T2 rerun. b-duel's claim is unchanged.
