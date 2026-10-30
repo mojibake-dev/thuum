@@ -145,7 +145,8 @@ combat music.
   loop): an idle client costs about 815 packets a second, near 45 KB/s with
   headers, because the server loop ticks and sleeps 1 ms (skymp5-server
   index.ts:222-227) and the wire sends at every update, a budget row of its
-  own before the per-actor budgets are tightened. Two server-wide stalls (164 ms at the
+  own before the per-actor budgets are tightened. D64 (18:44 PDT 2026-10-29): the transport flushes on a 60 Hz clock (fork m3-send-rate b6f4deb4), 59.98 a second measured on
+  the idle client, T2 green; the gate when the lab is back. Two server-wide stalls (164 ms at the
   Riverwood keyframe, 60 ms at c2's teleport), no gap over 0.3 s while
   hosting, no retransmission-looking repeats. The per-message counts and
   the per-type budgets come from slice 4's counters on train 54's stage

@@ -3214,3 +3214,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its loop still ticking 847.2 times a second (51,627 in 60.9 s), so the flush clock alone moved; the client's own 5 ms loop still sends
   189.3 a second, and no server packet followed the close. The full T2 of m3-send-rate is GREEN (difftest 14302, every session identical
   to legacy but its declared lines). Its gate (npc-stream's relay cadence, cell-host's grants) waits for the lab.
+- 18:44 PDT: D64's proof recorded where the decision lives (the note under ADR-011 and WIRE.md's Transport section at 86af255d, npc-stream's
+  idle-rate row here): 59.98 a second against 814.8, the loop unchanged, T2 green; m3-send-rate's merge waits for the touched verbs' gate.
