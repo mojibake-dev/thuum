@@ -3671,3 +3671,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   The read x-body-open-guest v1 by path (e4031424): the server's kill and c2's open, the host's engine death and c2's open, then
   c2's npc-ai on the body and a third open; H5 (AI off refuses activation) against H1 (the death never completes on a puppet).
   Asked of numidium: the read in the first lab gap after the rest set; b-npc-body-release pended only if the rest set reds it.
+- 14:39 PDT: c-riverwood, M3's second exit scenario, GREEN on its relaunched rerun (212353; the first run 211911 red on the restart leg alone,
+  Alvor's restored record 72 units off in y against 64, the hand-off and the schedules whole): an ADR-027 watch item (gate.yaml,
+  cell-host.md): the write-behind save's lag at a restart (TickSaveStorage's one batch in flight, HYPOTHESIS), a graceful stop that
+  flushes as the fix in kind. numidium: D71 taken as written; gate-cite 8e1fd11 leaves pending scenarios out of a chain's rest set, so
+  the rest set is b-npc-body-release alone, then x-body-open-guest, then the merges near 22:15Z, 39's setup at 22:30Z. The first set
+  at 97 of 102 (14:38 PDT): 94 green, the three reds read and recorded.

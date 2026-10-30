@@ -1051,3 +1051,17 @@ none). Neither quit crash is ours: the first is the two plugins' statics, the
 second another plugin's or the engine's under this load order (a load-order
 bisect in solo would name it). The fast exit (train-49, D24-B) skips both;
 the plugins' leak goes upstream (D24-D).
+
+## Watch item: the restart leg's restore lag (c-riverwood, 14:39 PDT 2026-10-30; ADR-027)
+
+c-riverwood, M3's exit scenario, went red once in the union's sweep (211911) on its restart leg alone: Alvor's record, read right
+after the restart against its pre-restart snapshot, lay (27.8, 72.4) off, past the claim's 64 in y; Gerdur's two and Alvor's x held,
+and before it the hand-off held whole (c2 hosting, the residents' AI on c2). The relaunched rerun (212353) was green throughout, so
+the item is a watch (lab/gate.yaml). HYPOTHESIS, from the code (WorldState.cpp TickSaveStorage, union 0e23c820): the records reach
+the storage as a write-behind batch of every changed form, one batch in flight at a time (saveStorageBusy), the next taken when the
+storage answers, no interval of its own; a restart that stops the process takes whatever the last answered batch held, so a walking
+resident's record can sit a batch or two behind its host's last accepted sample, 77 units here (about a second of a resident's
+walk, plus the host's 500 ms sample). The claim's 64 is the relay's bound, not the save's. Fix in kind (R0, a small server item for a
+later train): a graceful stop that drains the in-flight batch and writes the pending changes before the process exits, which the
+restart step would then wait on; until then a scenario that restarts under walking residents reads a lag of this size once in a
+while. Not a loosening candidate: the bound stays, the watch closes on a green gate or on the flush.
