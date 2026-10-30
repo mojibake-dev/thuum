@@ -3080,7 +3080,8 @@ gate and a finding by name about relaunch-carried state, since the relaunched an
 first live gate in relaunch mode (run set 20261030-050437) spent an immediate cold rerun, two rollbacks a seat, on
 each of two reds (b-duel's marginal 0.7851 against 0.78, b-npc-talk's NPC drift), and the second preceded sky-c1's
 card wedging at 05:39:41Z. The same night lab-api learned that a stale hot mark (one older than a dist laid since)
-is removed, not obeyed; that the capture folders are cleaned as far as they go; and that a VM that cannot start
+is removed, not obeyed; that the capture folders (and, from 2026-10-30 14:09Z, the runner's frida trace copies) are
+cleaned as far as they go; and that a VM that cannot start
 stops the set with no rerun. Measured: c2 relaunched in 31 to 33 s against 55 to 64 s for a rollback, with zero
 device resets per relaunch by core's count of the host's vfio lines.
 

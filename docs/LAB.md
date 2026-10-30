@@ -823,12 +823,16 @@ SKSE folder's skyrim-platform-pid*.log (launch.ps1's copies, which the next
 run's end would collect as its own). Crash dumps stay: a run's end counts
 only those written since a few minutes before its start, and a crash it finds
 rolls the seat back. A file that will not go fails the try, except in the
-capture folders shots\ and screenshots\, which are cleaned as far as they go:
-a file a timed-out guest-file-close left open in the agent stays until the VM
-restarts, the note says "<n> held open left in place", and the next capture
-writes its own name (b-cloak-fight 20261030-053144 lost a rollback to two
-held .png.b64 sidecars). A scenario that writes anywhere else says
-`client: rollback`.
+capture folders shots\ and screenshots\ and for the runner's trace copies
+in frida\ (*.js.out.copy, *.js.log.copy, the files it reads back through the
+agent), which are cleaned as far as they go: a file a timed-out
+guest-file-close left open in the agent stays until the VM restarts, the note
+says "<n> held open left in place", and the next capture writes its own name,
+as the next copy carries its run's script name (b-cloak-fight
+20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode
+20261030-131512 one to a story-location .js.log.copy). A script, its .out,
+.err or .log still held means a Frida process outlived the stop, and fails
+the try. A scenario that writes anywhere else says `client: rollback`.
 
 result.json's `client_reset` holds each managed seat's `{kind, seconds,
 since_rollback, reason, image_base}`, and a note per seat reads "c1 relaunched

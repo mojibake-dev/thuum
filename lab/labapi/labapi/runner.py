@@ -2234,9 +2234,9 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     fails the try), then the cleaning list goes, and the launch task starts (`start`). The cleaning list is what a run
     leaves on a seat that its rollback undid, by folder and name pattern, never a wildcard over the lab folder
     (launch.ps1 needs game-dir.txt and games\\):
-    - frida\\: each run's script and its .out, .err and .log, and the runner's shared-read .copy of the last two
-      (config.frida_exec_template, frida_script_text, Runner._frida_trace); frida-inject.exe and the tools beside it
-      stay;
+    - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
+      of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace); frida-inject.exe and the
+      tools beside it stay;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
@@ -2275,10 +2275,13 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         "    if (Test-Path -LiteralPath $item.FullName) { if ($soft) { [void]$held.Add($item.FullName) } else { [void]$left.Add($item.FullName) } } else { [void]$gone.Add($item.FullName) }",
         "  }",
         "}",
-        "Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log', '*.js.out.copy', '*.js.log.copy') @()",
-        # the capture folders are cleaned as far as they will go: a file a timed-out guest-file-close left open in the
-        # agent (proxmox.py file_read, 2026-10-17) stays until the VM restarts, and failing the try on it cost sky-c2 a
-        # rollback (b-cloak-fight 20261030-053144: 025.png.b64 and 032.png.b64); the next capture writes its own name
+        "Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
+        # the capture folders and the trace copies the agent read back are cleaned as far as they will go: a file a
+        # timed-out guest-file-close left open in the agent (proxmox.py file_read, 2026-10-17) stays until the VM
+        # restarts, and failing the try on it cost a rollback (sky-c2, b-cloak-fight 20261030-053144: 025.png.b64 and
+        # 032.png.b64; sky-c1, x-quest-mode 20261030-131512: story-location-20261030-131130-x-story-arrival-login-13
+        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name
+        "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
         "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
         "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
         "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
