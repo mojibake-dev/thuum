@@ -3530,3 +3530,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m3-prop-physics, the guard without the reference plus a trace per recorded drop and per new track; merged into the union at
   0e23c820 and pushed with the client build; the verb doc corrected. The engine reuses the deleted drop's id for the copy (HYPOTHESIS,
   harmless). numidium: the T2 and the restage move to 0e23c820's builds; the by-path x-prop-drop v4 reruns unchanged on it.
+- 08:31 PDT: x-reanimate-host v6 GREEN (152542; numidium), seven of seven: the non-host's Reanimate Corpse crossed as a player's cast,
+  the server sent it to the body's host, the host's engine stood Hilde up 7 s later and the record's death cleared, alive on both
+  seats: 3o's reanimate verb at T3. The sweep found the aim at 700 to 800 counts for 80 units (about 13 counts a degree on c2; in
+  memory). Two notes in npc-fate.md: the server's EffectConditionsHold refused cab63 on the corpse in the same millisecond (harmless
+  here, the host's engine applies it; HYPOTHESIS that the evaluator misreads GetDead or the level cap on a dead target, a read owed
+  for any R0 effect gated so). D69 B built on fork m3-quest-sge-stages e7580346 off the union (pipeline 4014, server-only; the CI's
+  T0 pending): OWN_START refuses only stage 0 and the record's start-up stages of a start-game-enabled quest, its later stages the
+  world's; the login replay follows; the D62 test became D69's. A train after the union's merge, Eli's veto open.
