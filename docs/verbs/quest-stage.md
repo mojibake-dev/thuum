@@ -250,6 +250,10 @@ server loses nothing, since a repeated (quest, stage) is its no-op already (Ques
 ([3-9][0-9]|[1-9][0-9][0-9]) such report") == 0 (no window of thirty or more held); the mode-all relay unchanged (x-quest-mode v5's
 set and relay claims repeated in the same run). The premise's read first: whether the controller's bursts recur in the lab's
 frame without a vampire on either seat (they did in 151127's, both seats mortal).
+Built (12:58 PDT 2026-10-30): fork m3-quest-report-dedupe 7eb968bb off the union 0e23c820 (questStageService.ts: REPORT_REPEAT_MS 30000,
+REPORT_MEMORY_MAX 256, REPEAT_FLUSH_MS 5000; `repeated`, `closeRepeatWindow`, `flushRepeats`; tsc clean), kept local until the union and the
+physics train have merged (its client build would load the seats' host mid-sweep); the probe x-quest-report-dedupe v1 by path (0a281115:
+both seats mortal at the spawn for 150 s, the drop line on each seat, the server's held count under thirty, x-quest-mode v6's relay unchanged).
 
 ## Status
 
