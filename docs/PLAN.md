@@ -1264,6 +1264,22 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   about 65 hypothesis tags, every remaining one a named pending read or the template's own words; mount.md drafts the owner table's
   fifth row (horses, M7's build). M3 DONE waits on the host reboot, the stages and the two exit scenarios green.
 
+**STATE 00:29 PDT 2026-10-30 (the pass's night, one line per item; the 18:24 block stands for the evening):**
+- The union m3-pass-train-3-win is the new base (D67, taken under the pass's rule after 3o's gate stopped on its two findings and
+  the eighth wedge): trains 1 to 3 with D64 (the transport's 60 Hz flush clock), D66 (a single stream's holes counted, casts.rs
+  HOLE_MS) and the Raise Wall fix (m3-sp-pack-form 9fad9f08: Skyrim Platform packed a class-less form type, MSTT 36, as None, so
+  every native on the wall's base aborted and the observer's wall never came; HYPOTHESIS until the watcher claim) at 997fedf1,
+  green on client and server (pipeline 3962); its T2 is queued on sky-srv (numidium), then the layer, the stage with its probes
+  and traces, one full sweep as the gate, layer-merge and verb-merge, playtest 39. 3n e14dc298 stays the fallback.
+- Two findings from 3o's gate, both read without a guess: b-spell-placed-wall (the fix above, and the scenario's v2 frame
+  12353ab: c1 at (0, -366), inside its cell's reach of the wall, its copies read through c2's figure's cell); b-npc-talk's hold
+  (SetDontMove is lifeState 9 at Actor+0xC8, Actor::Move zeroes the velocity while it reads 9, only Resurrect clears it; nothing in
+  the fork range defaa7e2..ee44f7d1 moves a hosted NPC on its host; c1 alone moved Sven in the red run's log):
+  lab/frida/dontmove-trace.js under x-npc-hold v4 at the stage decides between the engine and the call.
+- The lab: the eighth wedge at 06:34Z; core reproduced the mechanism with bare QEMU (two GP107 bus resets in one second) and
+  lab-api's 20 s seat stagger (f0480e2) is the fix; the morning reboot is Eli's word; sky-srv is down since core's 07:17Z reboot.
+  M3 DONE still waits on the stage, the sweep and the two exit scenarios green.
+
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
