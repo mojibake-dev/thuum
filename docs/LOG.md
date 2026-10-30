@@ -3516,3 +3516,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   mid-sweep screenshot showing the rise's rock filling the view from the north stand; v5 by path (sha1 04c9b297) stands the grabber
   80 east on the flat facing west, as the walkers do, the sweep unchanged. Queue: quest-mode v5 (running), reanimate v6, push v6,
   pass v6, grab v5.
+- 08:17 PDT: x-quest-mode v5 (151127; numidium): mode all GREEN through the relay (c1's console set of MS10MiscObjPointer's stage 10
+  reported, the server's "recorded, relayed to 1" after 0.1 s, c2's stage done and its line once, no E_QUEST_UNLISTED); the one red
+  asked the server for E_QUEST_DENIED on MQ102 while the client keeps a denied quest's stages to itself and never reports them, so
+  the server can never refuse what it never hears (its refusal is T2's fakeclient's backstop). v6 by path claims the client-side
+  truth (no server line about 4e50d's stage, c2 unchanged) and is promoted to b-quest-stage in its own commit (D68: the quest
+  verb's scenario; mode all merges whole if the sweep plays it green); reviews-pending has the entry.
