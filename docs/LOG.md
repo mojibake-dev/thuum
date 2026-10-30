@@ -3343,3 +3343,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   since August) shows thirteen failures, all in dual bursts, and 0 of 1,787 solo. lab-api's 20 s reset stagger (f0480e2) is
   the fix, live since 06:5xZ; LAB_SEAT_STOP (50e961b) stays at stop. The lab waits for the morning reboot, then the union's
   stage (D67).
+- 00:27 PDT: P3-win 997fedf1 GREEN on pipeline 3962 (client-build 14566, server-build 14565); numidium queues the union's T2 on sky-srv
+  for the next quiet window and has x-npc-hold v4 (sha1 4c43515e) and x-raise-wall (992a9efb) on the union stage's probe list. The hold's
+  second read, 053717's server log: ff000000 (c1) is the only reporter moving 13491 (into cell 9731 at 05:37:22 and 9732 at 05:38:51,
+  both cells c1's), no grant, pass or follow touches him, so the door pass is out; the trace decides between the engine and the call.
+  core's mechanism for the wedges (LOG e3b342a on its side): two GP107 bus resets in the same second; lab-api's 20 s stagger is the fix
+  and is live; the lab waits for the morning reboot (c2's card failed in the experiment) and core's handover.
