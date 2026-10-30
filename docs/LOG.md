@@ -3697,3 +3697,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m3-guest-loot 05ac32a9 (client: the AI on around the server's open and off at the first sight of the menu or after 2 s; the host's
   menu-mode wait 39e5c2f5 before it), tsc clean, unpushed until the physics stage; its probe x-body-open-guest-fix v1 by path
   (cb798c4c). The train's gate: c-dungeon-enemies, b-npc-body-release, the probe. D71's record carries the read.
+- 15:11 PDT: PLAYTEST 39 SEATS READY (numidium, 15:10:30 PDT; playtest-ready all ok): the merged base (fork parity 0e23c820, the
+  m3-pass-train-3-win image; thuum main 69765ae with the world's stamp playtest-m3-39-rotfern-prisoner-20261030T220506Z, 38's end
+  with the needs zeroed), both seats outdoors at the guard camp, test 1 Marksman 60 and Overdraw40, bars full, no god mode, the three
+  spells held, streams 48989 and 49989, the hold to 01:09:52Z. Notes: Sunshine on sky-c2 reads Stopped 3 s after a restart and
+  Running at 12 s (numidium's tooling note); parity's pipeline 4047 red at wire-test on a CI DNS miss (cargo-deny's fetch), 4054
+  rebuilding server-only so no Windows build runs during 39. The build is frozen until Eli's report.
