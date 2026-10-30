@@ -3497,3 +3497,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   them, and ran down the rise over their heads (it ended at z -144 at x 19419); c1 tracked both tankards Dynamic throughout. v6 by
   path (sha1 73f39251): the walker 80 east on the flat running west, a ground-level start claimed (z within 20 of the tankards'),
   "moved" read by position against the files' place in any direction (server.ref and c2's pos). pass v6 waits for pass v5's read.
+- 08:03 PDT: x-prop-pass v5 (145809; numidium): the same flight from the north, c2 starting 34 units above the tankards and running
+  straight over them. The ground around the guard camp's tankards from today's runs (engine z): 40 west -95, 110 west -143, 40 north
+  -99, 100 south -88, 190 south -80, 182 east -144, the tankards at -133: they sit low against higher ground west, north and south,
+  and the flat is east. pass v6 by path (sha1 6a74f853) takes the east start as push v6 does, a ground-level start claimed, the moves
+  by position in any direction. Queue: drop v4 (running), grab v4, quest-mode v5, reanimate v6, push v6, pass v6.
