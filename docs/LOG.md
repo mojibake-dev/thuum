@@ -3542,3 +3542,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   like server.actor's (c1 on the flat at engine z -143.8 read -14805.8); the walk never ran. v7 of push (sha1 1043fc3b) and pass
   (ffb1a53c) put the premise in the dump's frame (the tankards' -133 is -14795 there); the memory's frame fact corrected: only
   server.ref and refs_near().pos are absolute.
+- 08:45 PDT: x-prop-grab v5 (153628; numidium): red downstream of no grab, a boulder filling the pitched view from the EAST stand too, so
+  the camp's tankards sit in a pocket of rock (the rise 40 west, the north rise, RockM03 south, the boulder east) and every walker
+  today flew over them; x-prop-pass v6 stopped at its z premise as expected. The restage runs drop v4 alone (the v7s pulled); the
+  prop site moves to Riverwood's street: Bucket01 0x3975d (base 0x12fdf) at (19378, -47182, -144), the flat's own height, nothing
+  placed within 160 units west or north (esm.py near). push v8 (sha1 783cfcb0), pass v8 (f52d4440) and grab v6 (ffd62016) by path
+  stand the walker or grabber 80 west of it and the watcher north; every bound unchanged. Under D68 props merge dark unless the
+  bucket reads green on the restage. D69 B's branch repushed at dc3ec679 (the test on FreeformHeartwoodMill; MQ101 was not
+  start-game-enabled). The playtest 39 checklist revised to the day's facts (v2).
