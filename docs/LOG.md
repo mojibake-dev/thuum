@@ -3382,3 +3382,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   half passed), x-npc-hold 124551 (the trace), x-reanimate-host 125920 (Hilde never died), x-dead-placed-loot 130152 (E_ACTIVATE_REACH
   twice, the menu opened), x-rented-bed 130908 (the walk after the sleep did not happen), x-quest-mode 131512 (no stage line within
   15 s). numidium holds the sweep for the reads; a union fix means a restage, a premise means the sweep goes.
+- 06:30 PDT: x-dead-placed-loot 130152 read (agent): PREMISE. Both E_ACTIVATE_REACH lines were the probe's own activations of the
+  skeleton 0xc3b1d from the v1 spot (-7329, 979, 573), b-host-kill's entrance landing, 10,423 units from the body (the esm's placement
+  (-271.3, -5035.0, -4181.4); the server's record, both engines and the esm agree within 4 units; the reach 603 for a 151-unit base);
+  each engine opened its own corpse menu locally and rolled its own gold (c1's 5 clawed back, "doesn't occupy"): finding 65's symptom
+  reproduced by the refusal, not by the loader, whose claims all held. v2 by path (sha1 8913bb2b) approaches each seat to the body
+  before its activation (c1 60, c2 80, x-shared-chest's grammar); claims unchanged; menuOpen alone proves nothing for a corpse.
+  x-prop-push's in-flight rerun (132025) confirmed the pre-touch record premise (numidium); the four prop v2/v3s are queued.
