@@ -3692,3 +3692,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 15:04 PDT: the guest-loot train begun as prework on fork m3-guest-loot 39e5c2f5 (off parity 0e23c820, tsc clean, unpushed until the
   physics stage): the host handler's first wait in menu mode (the 15 s late release); the guest's open follows v2's answer.
   lab/playtests/39.yaml handed to numidium (2bea6a6); the lab is 39's after the guest read.
+- 15:08 PDT: x-body-open-guest v2 (215922, numidium) GREEN: H5 holds, a released body takes an activation only with its AI on (both
+  kills refused with the AI off; with the AI on the menu opens and the body walks 45 units in 5 s, H-54e). The fix built on fork
+  m3-guest-loot 05ac32a9 (client: the AI on around the server's open and off at the first sight of the menu or after 2 s; the host's
+  menu-mode wait 39e5c2f5 before it), tsc clean, unpushed until the physics stage; its probe x-body-open-guest-fix v1 by path
+  (cb798c4c). The train's gate: c-dungeon-enemies, b-npc-body-release, the probe. D71's record carries the read.

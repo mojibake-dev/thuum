@@ -2899,6 +2899,11 @@ exit open until the fix's gate plays it green. The read: x-body-open-guest by pa
 death, then the body's AI switched on before a third try) in the first lab gap after the rest set; the fix the train after
 (client, Promote's dead branch or an AI-on at the server's OpenContainer, whichever the read names), gated with c-dungeon-enemies
 and b-npc-body-release.
+The read (15:08 PDT): x-body-open-guest v2 (20261030-215922) GREEN, H5 holds: the guest's copy refuses the activation with
+its AI off after both kills (the server's and the host's engine's), and takes it once the AI is on, the body shifting 45 units in
+5 s meanwhile (H-54e's walk). The fix, fork m3-guest-loot 05ac32a9 (client only): the AI on around the server's open and off again
+at the first sight of the menu or after 2 s; the promote's dead branch unchanged. With it the host handler's menu-mode wait
+(39e5c2f5). Gate: c-dungeon-enemies, b-npc-body-release, x-body-open-guest-fix (by path; b-body-open-guest on green).
 
 ## ADR-051: An engine that no longer loads a puppet releases it to its schedule, and the first engine to sight it moves the record
 

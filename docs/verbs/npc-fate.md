@@ -2402,3 +2402,17 @@ until the physics train has staged): remoteServer.ts's open-container handler ta
 on the host the checker sees the engine's open menu at once and the close sends the closing activation instead of the 15 s give-up;
 the two scenarios' host claims (the admission line within the step, the closing activation at the close) read this behavior as
 written. The guest's open (D71) joins the branch once x-body-open-guest v2 names H5 or H1.
+
+D71's read and fix (15:08 PDT 2026-10-30): x-body-open-guest v2 (215922) GREEN, H5 holds. Leg 1 (the server's kill) and leg 2 (the host's
+console kill, the engine's death and the host's report): the guest's Activate false, the body dead on c2 and the server, no menu. Leg 3
+(npc-ai on the body of leg 2): Activate true, the menu open, the body 45 units off within 5 s (H-54e's walk). Leg 4 (the AI on leg 1's
+body): the driver's Activate false yet the menu open, the server's path (the handler's activate with default processing) opening it.
+So a released body takes an activation only with its AI on, the player's E and the handler's alike. The fix (fork m3-guest-loot
+05ac32a9, tsc clean, unpushed until the physics stage): onOpenContainerMessage switches a dead NPC's AI on before its activate, polls
+the menu in menu mode (the open seen while the game pauses), and switches the AI off at the first open or after 2 s, one trace line
+each way ("body X: AI on for the server's open (D71)", "body X: AI off again, the menu is open (D71, H-54e)"); the game pauses in the
+menu, so nothing walks while it is open, and the bracket bounds the walk to the open's own frames. The promote's dead branch keeps
+the AI off (H-54e's no-drift rule). Its probe x-body-open-guest-fix v1 by path (cb798c4c, 73 steps): both kills, the guest's menu
+within 4 s with the two lines once per body and the AI off after, then the host's open after the guest's close with its handler line
+inside the step (39e5c2f5) and no second occupant counted. The train's gate: c-dungeon-enemies, b-npc-body-release and this probe
+(b-body-open-guest promoted on green); M3's exit closes with it.
