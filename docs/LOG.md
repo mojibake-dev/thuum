@@ -3469,3 +3469,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   already", debug). v4 by path (sha1 b233846f) makes the non-host drop, the claim path proper. x-prop-pass v4 red on the two known
   premises (the drift 22 degrees, the frame), v5 queued; the lab cost of the switch lever (a rollback per seat after a files probe)
   noted for after the sweep: the lab's client template should carry propPhysics on.
+- 07:51 PDT: x-prop-grab v3 on the restage (144359; numidium): red on the aim premise, the view pitched nearly straight down after dy 1131
+  (a rock at c2's feet filled the frame), so the mouse step's counts per degree on this seat are not the rune probes' 20.2 and no
+  dump field reads the view's pitch; the south stand also sat on RockM03. v4 by path (sha1 a72e7303): the grabber 80 north facing
+  south, the pitch swept in five steps of 100 counts from 600 with E held 1.5 s at each (a hit grabs and releases, a miss does
+  nothing), each step's crosshair recorded; the grant claim at least once. The earlier note that the mouse aim "works" stands only
+  as far as 135637's crosshair on the body goes; the body may have lain at c2's feet.
