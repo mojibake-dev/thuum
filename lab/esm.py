@@ -21,6 +21,7 @@ field's size is the uint32 that XXXX carried.
     esm.py id <plugin> <form id>
     esm.py races <plugin>
     esm.py attacks <plugin> <race editor id substring>
+    esm.py quests <plugin> [sge|all]
 
 `near` lists the references placed in a worldspace within a radius (in the
 x-y plane) whose base record is one of the types, e.g. FLOR,CONT,ACTI,DOOR:
@@ -34,7 +35,12 @@ lists a race's attack data, one ATKD and its ATKE event name per attack
 attack angle, strike angle, stagger, attack type, knockdown, recovery,
 stamina mult; the same order as CommonLibSSE-NG's BGSAttackData::AttackData).
 The strike angle is the half angle of the engine's hit cone for that attack
-(docs/verbs/melee-reach.md).
+(docs/verbs/melee-reach.md). `quests` lists the plugin's QUST records with their
+DNAM flags (UESP, "Skyrim Mod:Mod File Format/QUST": uint16 flags, 0x01 Start Game
+Enabled, 0x100 Run Once; then priority, two unknowns and the uint32 quest type), the
+facts behind docs/verbs/quest-stage.md's D62 (a Start Game Enabled quest is each
+seat's own under sharing mode all unless the settings allow it); `sge` keeps the
+enabled ones.
 """
 
 from __future__ import annotations
@@ -52,6 +58,9 @@ RECORD = struct.Struct("<4sIIIHHHH")
 RACE_FLAGS_AT = 32
 RACE_PLAYABLE = 1 << 0
 RACE_CHILD = 1 << 2
+# QUST DNAM flags (UESP, "Skyrim Mod:Mod File Format/QUST")
+QUST_START_GAME_ENABLED = 0x01
+QUST_RUN_ONCE = 0x100
 GROUP = struct.Struct("<4sI4siHHI")
 FIELD = struct.Struct("<4sH")
 COMPRESSED = 0x00040000
@@ -295,6 +304,26 @@ def main(argv: list[str]) -> int:
             for a in attacks:
                 print(f"  {a.event:32} strike {a.strike_angle:g} angle {a.attack_angle:g} flags {a.flags:#x}")
         return 0 if hits else 1
+    if len(argv) in (3, 4) and argv[1] == "quests":
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        only_sge = len(argv) == 4 and argv[3] == "sge"
+        quests = list(walk(buf, 0, len(buf), "QUST"))
+        shown = 0
+        for rec in quests:
+            dnam = rec.get("DNAM") or b""
+            flags = struct.unpack_from("<H", dnam)[0] if len(dnam) >= 2 else 0
+            qtype = struct.unpack_from("<I", dnam, 8)[0] if len(dnam) >= 12 else -1
+            sge = bool(flags & QUST_START_GAME_ENABLED)
+            if only_sge and not sge:
+                continue
+            shown += 1
+            full = rec.get("FULL") or b""
+            name = f"lstring {struct.unpack('<I', full[:4])[0]:#x}" if len(full) >= 4 else "unnamed"
+            print(f"{rec.form_id:#010x} {rec.editor_id:40} flags {flags:#06x}{' SGE' if sge else ''}"
+                  f"{' once' if flags & QUST_RUN_ONCE else ''} type {qtype} {name}")
+        print(f"# {shown} of {len(quests)} quests shown", file=sys.stderr)
+        return 0 if shown else 1
     if len(argv) == 4 and argv[1] == "ref":
         with open(argv[2], "rb") as f:
             buf = f.read()

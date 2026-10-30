@@ -3081,3 +3081,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   rules review of m3-prop-physics by an agent. Windows trees assembled clean and lint-green, unpushed until numidium's T2 verdicts:
   m3-pass-train-2-win (P2 + P1-win) and m3-pass-train-3-win 1d5b2321 (P3 + P2-win). Two agents draft P4's next batches (cell-host,
   npc-handoff, npc-talk; npc-puppet, spell-placed-object).
+- 17:00 PDT: lab/esm.py gains `quests <plugin> [sge]` (QUST DNAM flags, UESP's layout): Skyrim.esm 1.6.1170 holds 1811 quests, 330 Start Game
+  Enabled (179 system, 92 miscellaneous, 9 main, 6 mages, 2 thieves, 6 brotherhood, 4 companions, 8 daedric, 13 side, 11 civil war), the
+  fact base of D63 (which of them join `allowed` under mode all; the memo in the weekend summary recommends leaving the four as they
+  are). docs/private/playtest-m3-39.md drafted: eight items across the pass's trains, each naming its train (skipped, not red, when
+  the train is not in the build). Fork pipeline 3875 green with difftest-build 14255; P3's T2 follows P2's on it (numidium).
