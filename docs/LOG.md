@@ -3492,3 +3492,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   screenshot showed, and the seat's counts per degree are unknown. v6 by path (sha1 61be44e1) sweeps five pitches from 500 by 100
   with a cast at each and screenshots after the approach and mid-sweep. x-quest-mode v5 by path (sha1 83048df6): MS10MiscObjPointer
   0x10d3bb, not start-game-enabled, in no list. Both queued after grab v4.
+- 08:00 PDT: x-prop-push v5 (145427; numidium): the drift and frame fixes held (a dead-straight 223-unit run along the tankards' line, the
+  relative claim green) and still no contact: c1 started at z -95, 38 units above the tankards' surface (-133) only 40 units west of
+  them, and ran down the rise over their heads (it ended at z -144 at x 19419); c1 tracked both tankards Dynamic throughout. v6 by
+  path (sha1 73f39251): the walker 80 east on the flat running west, a ground-level start claimed (z within 20 of the tankards'),
+  "moved" read by position against the files' place in any direction (server.ref and c2's pos). pass v6 waits for pass v5's read.
