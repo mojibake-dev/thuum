@@ -35,21 +35,21 @@ message, one per cast; OnEffectStart and OnEffectFinish only.
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | the stream: art, loop, cost | record | native; relayed by spell-cast (R1) |
-| TargetBox, FXEmptyActivator 0xb79ff, the translate target | script | suppressed: no server copy (HYPOTHESIS: no collision) |
+| TargetBox, FXEmptyActivator 0xb79ff, the translate target | script | suppressed: no server copy (no collision lost, Known limits S1) |
 | the wall, MSTT 0x98529: placed disabled 192 forward and 288 down at the caster's yaw, enabled, translated up 240 to the TargetBox | script | imposed: the server's object at the final pose (R0); the rise R3, later |
-| the halo, ACTI 0x735e8, at the TargetBox's XY, the caster's height | script | imposed: the server's second object (R0); HYPOTHESIS: no collision |
+| the halo, ACTI 0x735e8, at the TargetBox's XY, the caster's height | script | imposed: the server's second object (R0); no collision added, Known limits S1 |
 | explosion 0xc145 at the TargetBox: knockdown 4, no damage, radius 50 | script | native in the caster's game alone |
 | effect shader 0x735e7 on the wall | script | R3, later |
-| OnEffectFinish: Disable(fade) both, Wait 5, Delete all three | script | imposed: deleted 5 s after the cast's end (R0); the fade HYPOTHESIS |
-| the failure effect: a message, no wall | record | native; the server waits 250 ms of open stream (HYPOTHESIS: its script dispels) |
-| the collision: the mesh's Havok body (SKYL_ANIMSTATIC, MOPP), no navcut | mesh read | native: blocked, not re-pathed (HYPOTHESIS) |
+| OnEffectFinish: Disable(fade) both, Wait 5, Delete all three | script | imposed: deleted 5 s after the cast's end (R0); the fade: H-SP4 |
+| the failure effect: a message, no wall | record | native; the server waits 250 ms of open stream (REFUTED: WB_OcatosRecitalFail_Script shows a message and dispels nothing, apocrypha's read, LOG 2026-10-28 22:01 PDT, so the 250 ms gate narrows no failed cast; a wall where the caster's engine chose the no-room message is the declared v1 limit: Open questions, ADR-057, Known limits S2) |
+| the collision: the mesh's Havok body (SKYL_ANIMSTATIC, MOPP), no navcut | mesh read | native: blocked, not re-pathed (HYPOTHESIS until b-spell-placed-wall's claim 4, c2's walk stays north of y -300 and c1's within 256 of its start, or x-raise-wall v2's cast-two walk holds; unrun, 204833 and 205817 died at c2's teleport before any cast and the frames since moved; the no-navcut re-pathing is the mod's own on every seat, not claimed) |
 
 ### Sequences and combinations (ADR-033)
 
 | sequence or combination | probe or scenario | result |
 | --- | --- | --- |
 | hold again within a second: two sets for up to 5 s | x-raise-wall-rhythm | open |
-| each hand; both; the perk's dual cast (one effect, HYPOTHESIS) | x-raise-wall | open |
+| each hand; both; the perk's dual cast (one effect by the record, SPIT No Dual Cast Modification, apocrypha 22:03 PDT; HYPOTHESIS until x-raise-wall gains a both-hands cast step with one placement line and two forms, none today) | x-raise-wall | open |
 | interrupted: a stagger or a sheathe ends the stream | x-raise-wall | open |
 | both seats at each other | x-raise-wall-both | open |
 | a late joiner; a relaunched caster (its skip off) | b-spell-placed-wall | open |
@@ -125,7 +125,7 @@ re-positioning (out of scope).
 - The client's object path: a 0xff model with no reference spawns one by
   `player.placeAtMe(base, 1, true, true)` (formView.ts:281-304, :352), poses
   and enables it (spawnProcess.ts:18, :31; formView.ts:360-363). An MSTT or
-  ACTI takes the same path; HYPOTHESIS: a placed MSTT keeps its collision
+  ACTI takes the same path; a placed MSTT's collision: :45's read
   (apocalypse-options.md:820).
 - The casts: SpellCast MsgType 23 (skymp.rs:942-1001); StartCast
   (PartOne.cpp:3472, from ActionListener.cpp:4834, :4882), EndCast (:3481, from
@@ -148,8 +148,8 @@ re-positioning (out of scope).
   y + 192 cos yaw, z - 48 (the wall) and z (the halo); at the end, disconnect
   or cap, Disable now and Delete 5 s later.
 - Visual without simulation achieved by: the wall at its final pose.
-- Side effects: HYPOTHESIS: the client's disable-then-delete (formView.ts:462-500)
-  fades; HYPOTHESIS: the collision.
+- Side effects: the client's disable-then-delete (formView.ts:462-500), a fade or
+  a cut on the watcher: H-SP4; the collision: :45's read.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -164,9 +164,22 @@ re-positioning (out of scope).
   ended under 6 s", which a relaunched caster would have failed).
 - How: a check in formView's spawn path (ownPlacedCopyStands).
 - Release condition: no own copy at the pose for 2 s.
-- Side effects: the failure-effect divergence (Inventory). HYPOTHESIS: the
-  script's fresh reference is found before its 3D loads (H-SP3); observers
-  see a cut at the removal, not the mod's fade (H-SP4).
+- Side effects: the failure-effect divergence (Inventory). HYPOTHESIS, two
+  reads: H-SP3, the script's fresh reference is found before its 3D loads,
+  until x-raise-wall v2's or b-spell-placed-wall's claim 3 holds (c1's
+  runtime_of 1 for both bases, the skip line 1 to 2 a cast); H-SP4, observers
+  see a cut at the removal, not the mod's fade, until two c2 screenshots
+  inside the linger (the hold's end + 0.5 s and + 3 s, added to x-raise-wall)
+  are read by eye for a fade or a cut; both unrun (204833 and 205817 died at
+  the teleport).
+
+Known limits: S1, the TargetBox (FXEmptyActivator 0xb79ff) has no server copy,
+and the halo's copy stands at the wall's XY inside the wall's own Havok body
+(1088 by 104 by 262), so neither adds a collision any seat lacks; unread, moot
+by geometry. S2, a cast the caster's engine refused with the no-room message
+keeps its stream open, so the server may place a wall the caster never saw
+(the fail script only shows a message); the knockdown explosion and the shader
+are the caster's alone (ADR-057).
 
 ## Message contract
 

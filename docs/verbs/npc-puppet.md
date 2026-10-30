@@ -150,15 +150,15 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   kProcessMe shared by 41369, 41466 and kin (:67-71, CONFIRMED-STATIC by
   disassembly). ProcessLists::GetSingleton, highActorHandles, runSchedules,
   runMovement, runAnimations (include/RE/P/ProcessLists.h:36, :69, :94-96).
-- Hook 2a's targets, from the research with its tags: 41370 (HYPOTHESIS name
-  ProcessLists_QueueActorAnimation, :136-138) partitions highActorHandles
+- Hook 2a's targets, from the research with its tags: 41370 (the re-analyst's
+  label ProcessLists_QueueActorAnimation, :247) partitions highActorHandles
   with 41466 (:139-143) and queues the job 41453 per actor (:144-150, the
-  unrolled vtable 0x7D UpdateAnimation, Actor.h:326); the engine's own push
-  is 69349, `FUN(jobList, job, handle, 0)` (:270-273). Rejected by the
-  research: a vtable 0xAE UpdateNoAI hook (Actor.h:372; it runs twice a
-  frame for an AI-off high actor, 41369 and 41447, :159-162) and a byte patch
-  of 41466 (:276-278).
-- Hook 3's target: 37356 (HYPOTHESIS name Actor_MovementStep, :122-132,
+  unrolled vtable 0x7D UpdateAnimation, Actor.h:326); the engine's own push is
+  69349, `FUN(jobList, job, handle, 0)` (:270-273). Rejected by the research:
+  a vtable 0xAE UpdateNoAI hook (Actor.h:372; it runs twice a frame for an
+  AI-off high actor, 41369 and 41447, :159-162) and a byte patch of 41466
+  (:276-278).
+- Hook 3's target: 37356 (the re-analyst's label Actor_MovementStep, :363;
   CONFIRMED-STATIC that no kProcessMe test exists in it or in 37350, 37355,
   41717); Skyrim Together skips it on remotes (te-npcs.md:139-140;
   docs/TE-MAP.md:57, a lead only, ADR-005).
@@ -199,35 +199,39 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   test with pitch and roll +0x24C/+0x250); no instruction in it, in 37350,
   41444 or 41306 addresses stepInfo (+0x80..+0x8C, bhkCharacterController.h:
   97; hkStepInfo.h: deltaTime +8, invDeltaTime +0xC). The stamp is two
-  stores inside 78275 (HYPOTHESIS name bhkCharacterController_Simulate, RVA
-  0xe9f170; `movss [rsi+0x88], xmm1` at 0xe9f905 and the reciprocal at
-  0xe9f915), reached from 37356 only through vtable 0xC8 Actor::Move (37507,
-  RVA 0x6768a0), which builds the 0x24-byte block {delta, angles,
-  translation rotated into world, speed, nearCamera} and calls 78275 for an
-  actor that may move; seated and don't-move actors take 78276 and
-  SetPositionImpl with no stamp (the engine itself leaves them unstamped).
-  The value: the Havok time simulated this frame, global 389089 (RVA
-  0x202c688; 77850 computes it per frame from fMaxTime:HAVOK times the time
-  multiplier, capped at uMaxNumPhysicsStepsPerUpdate steps, zero on a
-  sub-millisecond frame), else the block's delta split by the substep
-  count. The hazard is the rigid-body controller's alone: 79198 (slot 7
-  SetLinearVelocityImpl) and 79193 (slot 3 SetPositionImpl) pass +0x88 to
-  62456, `accel = dv / timestep`; the proxy controller's slots read no step.
-  37356's early paths: a cell not attached writes the position through 19790
-  and returns (no Move); ragdoll, reanimating and get-up reduce the step to
-  a zero input plus the flag and still Move; a sitting rider Moves into the
-  unstamped seated branch. No smaller "stamp the time" function exists.
-  Shape chosen (hook 3 as built): a flagged actor gets Move(delta, zero)
-  when it has a controller and an attached cell, kFollowRagdoll set first in
-  ragdoll; the controller ticks and stamps at rest where the relay last
-  warped it, gravity settles it, the divisions stay finite, the step's own
-  output, rotation and feedback are skipped. HYPOTHESIS until P1's trace;
-  fallback (shape 4): a plain early return plus one Move(delta, zero) while
-  stepInfo.deltaTime reads 0. Falsifiers: a +0x88 store outside 78275; a
-  puppet's controller vtable being the proxy's (240560, then the plain
-  return is safe here); a fresh controller reading a non-zero +0x88 before
-  any 78275 call; Move's tail moving the data position by more than
-  physics settling between relay ticks (then shape 4).
+  stores inside 78275 (the re-analyst's label bhkCharacterController_Simulate,
+  RVA 0xe9f170; `movss [rsi+0x88], xmm1` at 0xe9f905 and the reciprocal at
+  0xe9f915; the role CONFIRMED by P1 20261022-044255: the hooked simulate
+  stamped +0x88 every frame on 18 rigid-body controllers, about 846 calls a
+  second, zero steps none), reached from 37356 only through vtable 0xC8
+  Actor::Move (37507, RVA 0x6768a0), which builds the 0x24-byte block {delta,
+  angles, translation rotated into world, speed, nearCamera} and calls 78275
+  for an actor that may move; seated and don't-move actors take 78276 and
+  SetPositionImpl with no stamp (the engine itself leaves them unstamped). The
+  value: the Havok time simulated this frame, global 389089 (RVA 0x202c688;
+  77850 computes it per frame from fMaxTime:HAVOK times the time multiplier,
+  capped at uMaxNumPhysicsStepsPerUpdate steps, zero on a sub-millisecond
+  frame), else the block's delta split by the substep count. The hazard is the
+  rigid-body controller's alone: 79198 (slot 7 SetLinearVelocityImpl) and
+  79193 (slot 3 SetPositionImpl) pass +0x88 to 62456, `accel = dv / timestep`;
+  the proxy controller's slots read no step. 37356's early paths: a cell not
+  attached writes the position through 19790 and returns (no Move); ragdoll,
+  reanimating and get-up reduce the step to a zero input plus the flag and
+  still Move; a sitting rider Moves into the unstamped seated branch. No
+  smaller "stamp the time" function exists. Shape chosen (hook 3 as built): a
+  flagged actor gets Move(delta, zero) when it has a controller and an
+  attached cell, kFollowRagdoll set first in ragdoll; the controller ticks and
+  stamps at rest where the relay last warped it, gravity settles it, the
+  divisions stay finite, the step's own output, rotation and feedback are
+  skipped. CONFIRMED by P1 20261022-044255: every Move in the puppet phase
+  carried a zero translation, the stagger included, the controllers stamped
+  the step every frame, and the body held (12.7 units against the 120-unit
+  slide, 042521); shape 4 unneeded (the fallback: a plain early return plus
+  one Move(delta, zero) while stepInfo.deltaTime reads 0). Falsifiers: a +0x88
+  store outside 78275; a puppet's controller vtable being the proxy's (240560,
+  then the plain return is safe here); a fresh controller reading a non-zero
+  +0x88 before any 78275 call; Move's tail moving the data position by more
+  than physics settling between relay ticks (then shape 4).
 - The prototypes of 41370, 41453 and 37356 for the two detours, and the push
   69349's arguments (the research gave rcx as the Actor* for Frida, :358-359,
   which holds for 37356 and not for 41370 or 41453, and the push's four
@@ -240,119 +244,143 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   means the instruction or decompiled line is in the binary as read, not
   that the game behaves so; none of the four target functions has a
   CommonLib or seed name):
-  - 41370 (SkyrimSE.exe+0x7709c0, 729 bytes; HYPOTHESIS name
-    ProcessLists_QueueActorAnimation): `void (RE::ProcessLists* self /* rcx
-    */, JobList* jobs /* rdx */)`. self is the ProcessLists singleton (the
-    caller loads 400315, ProcessLists::GetSingleton::singleton,
+  - 41370 (SkyrimSE.exe+0x7709c0, 729 bytes; the re-analyst's label
+    ProcessLists_QueueActorAnimation; the role CONFIRMED by hook 2a's effect:
+    the detour on it queued the job and the AI-off puppet's graph ticked,
+    x-npc-puppet-2 20261022-042521 H1 and x-npc-legs-burst 20261022-202522 H2,
+    where plain AI off froze it, readings-18:83-85): `void (RE::ProcessLists*
+    self /* rcx */, JobList* jobs /* rdx */)`. self is the ProcessLists
+    singleton (the caller loads 400315, ProcessLists::GetSingleton::singleton,
     src/RE/P/ProcessLists.cpp:13); 41370 reads self+0x1E6 (runAnimations,
-    include/RE/P/ProcessLists.h:96) and self+0x40 (highActorHandles' size:
-    the array at +0x30, :69; a BSTArray's size at +0x10,
-    include/RE/B/BSTArray.h:374-376, :140-141). jobs is the stage's job
-    list, passed verbatim as the first argument of both pushes; the stage
-    takes it from the table 403091 at index 5 through 35404 and runs it
-    through 69352 into 69376 after 41370 returns; CommonLib only
-    forward-declares BSJobs::JobList (include/RE/I/IVirtualMachine.h:13-15,
-    :65), so the name is HYPOTHESIS and the layout CONFIRMED-STATIC. Gates in
-    41370 itself: runAnimations != 0 and the size != 0, nothing else; no
-    read of +0xE8 (kProcessMe) in its 213 instructions. CONFIRMED-STATIC.
-    Body: two BSScrapArray<Actor*> (68160, 68162), 41466(&highActorHandles,
-    &{&listA, &listB}); for every Actor* in list A an ActorHandle minted
-    inline (the +0x28 refcount test under 0x3ff, else 12325, the sentinel
-    400312 for a zero count) and 69349(jobs, 41453, handle, 0); for list B
-    the same with 41454; then the arrays' references released.
-    CONFIRMED-STATIC. Callers: exactly one, the stage function 39054
+    include/RE/P/ProcessLists.h:96) and self+0x40 (highActorHandles' size: the
+    array at +0x30, :69; a BSTArray's size at +0x10,
+    include/RE/B/BSTArray.h:374-376, :140-141). jobs is the stage's job list,
+    passed verbatim as the first argument of both pushes; the stage takes it
+    from the table 403091 at index 5 through 35404 and runs it through 69352
+    into 69376 after 41370 returns; CommonLib only forward-declares
+    BSJobs::JobList (include/RE/I/IVirtualMachine.h:13-15, :65), so the
+    stage's list is a BSJobs::JobList by CommonLib's forward declaration and
+    by effect: the detour's push onto it ran the job (042521 H1, 202522 H2);
+    layout CONFIRMED-STATIC. Gates in 41370 itself: runAnimations != 0 and the
+    size != 0, nothing else; no read of +0xE8 (kProcessMe) in its 213
+    instructions. CONFIRMED-STATIC. Body: two BSScrapArray<Actor*> (68160,
+    68162), 41466(&highActorHandles, &{&listA, &listB}); for every Actor* in
+    list A an ActorHandle minted inline (the +0x28 refcount test under 0x3ff,
+    else 12325, the sentinel 400312 for a zero count) and 69349(jobs, 41453,
+    handle, 0); for list B the same with 41454; then the arrays' references
+    released. CONFIRMED-STATIC. Callers: exactly one, the stage function 39054
     (+0x6d2670), the main loop's table entry 380490 named "Actor animation"
-    (206263); the other incoming reference is .pdata, so 41370 is not
-    virtual. CONFIRMED-STATIC.
-  - 41466 (+0x777480; HYPOTHESIS name ProcessLists_PartitionAnimatedActors):
+    (206263); the other incoming reference is .pdata, so 41370 is not virtual.
+    CONFIRMED-STATIC.
+  - 41466 (+0x777480; the re-analyst's label
+    ProcessLists_PartitionAnimatedActors; the role CONFIRMED by effect: an
+    AI-off actor it drops left the graph frozen, readings-18:83-85, and the
+    detour's re-test of its terms without kProcessMe ticked it, 042521 H1):
     `bool (RE::BSTArray<RE::ActorHandle>* highActors /* rcx */,
-    RE::BSScrapArray<RE::Actor*>* out[2] /* rdx */)`, returns true always.
-    Per handle it resolves the actor (17201) and admits it to list A when
-    all hold: boolBits bit 9 clear (+0xE8, kInTempChangeList, Actor.h:168),
-    formFlags bit 21 clear (+0x10, kStillLoading, TESForm.h:89), boolBits
-    bit 1 set (kProcessMe, Actor.h:160; the instructions at +0x7774e8 and
-    +0x777505), currentProcess non-null (+0xF8, Actor.h:651 with the
-    1.6.1170 shift :712), Get3D2() and its parent non-null (slot 0x70,
+    RE::BSScrapArray<RE::Actor*>* out[2] /* rdx */)`, returns true always. Per
+    handle it resolves the actor (17201) and admits it to list A when all
+    hold: boolBits bit 9 clear (+0xE8, kInTempChangeList, Actor.h:168),
+    formFlags bit 21 clear (+0x10, kStillLoading, TESForm.h:89), boolBits bit
+    1 set (kProcessMe, Actor.h:160; the instructions at +0x7774e8 and
+    +0x777505), currentProcess non-null (+0xF8, Actor.h:651 with the 1.6.1170
+    shift :712), Get3D2() and its parent non-null (slot 0x70,
     TESObjectREFR.h:308; NiAVObject::parent +0x30, NiAVObject.h:153),
     formFlags bits 5 and 11 clear (kDeleted TESForm.h:62, kDisabled :75),
     parentCell non-null (+0x60, TESObjectREFR.h:496) with cellState 7
     (kAttached, TESObjectCELL.h:139, :259); and to list B as well when the
     cell's formFlags bit 13 is set (the pin's generic names for bit 13,
-    TESForm.h:80-81; the CELL meaning not named there). CONFIRMED-STATIC.
-    This is the only kProcessMe test on the animation path.
-  - 41453 (+0x776a90, 199 bytes; HYPOTHESIS name
-    ProcessLists_ActorAnimationJob): `void (RE::RefHandle handle /* ecx: the
-    32-bit ActorHandle value */)`. Only ECX is read before the lookup; rcx is
-    NOT an Actor* (the research's :358-359 is wrong for it). The handle is
-    resolved by 12922, which checks the handle's age against
+    TESForm.h:80-81; the CELL meaning not named there). CONFIRMED-STATIC. This
+    is the only kProcessMe test on the animation path.
+  - 41453 (+0x776a90, 199 bytes; the re-analyst's label
+    ProcessLists_ActorAnimationJob; the role CONFIRMED: P1 044255 counted its
+    handles per second, 19 to 20 distinct, and the one queued for the puppet
+    ticked its graph, 042521 H1, 202522 H2): `void (RE::RefHandle handle /*
+    ecx: the 32-bit ActorHandle value */)`. Only ECX is read before the
+    lookup; rcx is NOT an Actor* (the research's :358-359 is wrong for it).
+    The handle is resolved by 12922, which checks the handle's age against
     BSPointerHandleManager's entries and fills a NiPointer<Actor>; null
     returns. CONFIRMED-STATIC. Body, with the actor: delta =
     GetSecondsSinceLastFrame (410199, src/RE/M/Misc.cpp:82-86) times
-    44302(VATS singleton 400883) (HYPOTHESIS: 1.0 outside VATS; 37361 and
-    37363 apply it only in VATS mode 4 for the VATS target); then
-    37364(actor) (HYPOTHESIS: the transform into the graph manager),
-    20121(actor) and 20122(actor) (HYPOTHESIS: attached-node bookkeeping and
-    loadedData's timed entries, +0x68, TESObjectREFR.h:497), 20123(actor,
-    delta): a BSAnimationUpdateData on the stack (deltaTime,
+    44302(VATS singleton 400883) (1.0 outside VATS; 37361 and 37363 apply it
+    only in VATS mode 4 for the VATS target; a static label no run reads, the
+    engine's own job runs whole here, Known limits K1); then 37364(actor) (the
+    transform into the graph manager; a static label, Known limits K1),
+    20121(actor) and 20122(actor) (attached-node bookkeeping and loadedData's
+    timed entries, +0x68, TESObjectREFR.h:497; a static label, Known limits
+    K1), 20123(actor, delta): a BSAnimationUpdateData on the stack (deltaTime,
     include/RE/B/BSAnimationUpdateData.h:9-27), slot 0x79
     ModifyAnimationUpdateData (Actor.h:322) and
     IAnimationGraphManagerHolder::UpdateAnimationGraphManager on actor+0x38
     (32899, src/RE/I/IAnimationGraphManagerHolder.cpp:65-70; the holder at
-    +0x38, TESObjectREFR.h:112): the graph tick; then
-    39896(currentProcess, actor) (HYPOTHESIS: the knock-state machine,
-    returning at once for a null middleHigh, AIProcess.h:196, or kNormal),
-    then 37363(actor, delta) (its only caller; when not sitting, knocked or
-    bleeding out, and the char controller's lodDistance, +0x29C,
-    bhkCharacterController.h:142, within settings 370871 or 370879, slots
-    0x122 and 0x123 with delta, then 37976); finally the handle's reference
-    released. CONFIRMED-STATIC for the sequence. Against vtable 0x7D
+    +0x38, TESObjectREFR.h:112): the graph tick; then 39896(currentProcess,
+    actor) (the knock-state machine, returning at once for a null middleHigh,
+    AIProcess.h:196, or kNormal; a static label, Known limits K1; its one
+    +0xE8 read tests kParalyzed alone, :329-330, so the puppet's bit is not
+    re-tested there), then 37363(actor, delta) (its only caller; when not
+    sitting, knocked or bleeding out, and the char controller's lodDistance,
+    +0x29C, bhkCharacterController.h:142, within settings 370871 or 370879,
+    slots 0x122 and 0x123 with delta, then 37976); finally the handle's
+    reference released. CONFIRMED-STATIC for the sequence. Against vtable 0x7D
     UpdateAnimation (37361, Actor.h:326): a sibling with the same core, not
     the vtable body unrolled (37361 gates on Get3D2, its parent and
-    currentProcess itself, uses 20119, inlines 37363's body, adds 37976 and
-    a cell-flag-13 branch, 37287). CONFIRMED-STATIC. Hidden gates for hook
-    2a: no instruction in 41453, 37364, 20121, 20122, 20123 or 37363 reads
-    +0xE8; 39896 reads it once and tests only bit 31 (kParalyzed,
-    Actor.h:190) inside the knockState path; so a 41453 queued for an AI-off
-    actor runs the graph tick. CONFIRMED-STATIC for those six bodies, their
-    callees not walked (HYPOTHESIS that none re-tests the bit; IsAIEnabled is
+    currentProcess itself, uses 20119, inlines 37363's body, adds 37976 and a
+    cell-flag-13 branch, 37287). CONFIRMED-STATIC. Hidden gates for hook 2a:
+    no instruction in 41453, 37364, 20121, 20122, 20123 or 37363 reads +0xE8;
+    39896 reads it once and tests only bit 31 (kParalyzed, Actor.h:190) inside
+    the knockState path; so a 41453 queued for an AI-off actor runs the graph
+    tick. CONFIRMED-STATIC for those six bodies, their callees not walked
+    (CONFIRMED by effect that none re-tests the bit: a queued 41453 ran the
+    graph tick for the AI-off puppet, 042521 H1 with the stagger played and
+    the head node 28 units lower, 202522 H2 with Speed and the engine's own
+    moveStart, so no unwalked callee re-tests kProcessMe; IsAIEnabled is
     inline in CommonLib, src/RE/A/Actor.cpp:741-744, so only a +0xE8 read
     could hide it). Callers: none by call; 41370 takes its address; the
-    consumer calling fn(arg) is 69376's thread code, not read (HYPOTHESIS:
-    the job argument arrives in rcx as stored).
+    consumer calling fn(arg) is 69376's thread code, not read (the job
+    argument arrives in rcx as stored, CONFIRMED by P1 044255: 41453's entry
+    read its handle in ecx as stored, 19 to 20 distinct handles a second, and
+    the queued job resolved the puppet, H1).
   - 41454 (+0x776b60), the list-B job: `void (RE::RefHandle handle /* ecx
     */)`: the same lookup, one call 37286(actor), the release; not an
-    animation update (HYPOTHESIS: the per-frame step for actors whose cell
-    has form flag 13). CONFIRMED-STATIC for the body.
-  - 69349 (+0xcf66b0; HYPOTHESIS name JobList_AddJob): `void (JobList* jobs
-    /* rcx */, void (*job)(std::uint64_t) /* rdx */, std::uint64_t arg /* r8
-    */)`. The list's first qword points at a BSTArray<Job> {data +0,
-    capacity +8, size +0x10}, grown by one 16-byte element through 68163
-    with the heap allocator functor (186376, include/RE/Offsets_VTABLE.h:30),
-    then [elem+0] = job and [elem+8] = arg; the TLS slot +0x768 is set to
-    0x59 around the growth and restored (HYPOTHESIS: a memory-manager context
-    tag). The fourth argument is dead: every caller zeroes r9d and 69349
-    never reads r9 (HYPOTHESIS: a source parameter this build ignores); a
-    detour may pass 0. The handle rides in the low 32 bits of arg. Thirty
-    callers, among them 41306 (the movement queue), 41367, 41374, 41380,
-    41301. CONFIRMED-STATIC.
-  - 37356 (+0x6698d0, 3986 bytes, 27 virtual calls; HYPOTHESIS name
-    Actor_MovementStep; Skyrim Together's lead docs/TE-MAP.md:57): `void
-    (RE::Actor* self /* rcx */, float delta /* xmm1 */)`. It reads +0xF8
-    currentProcess, +0x38 the graph holder, +0x150 movementController
-    (Actor.h:667 with the shift), +0xC8 and +0xCC actorState1 and 2
-    (ActorState at +0xC0, Actor.h:737-741; ActorState.h:203-204), +0x60
-    parentCell, +0x48 to +0x5C angle and location (OBJ_REFR at +0x40,
-    TESObjectREFR.h:73-80, :495), +0x10 formFlags; delta is the per-actor
-    delta from the movement table. CONFIRMED-STATIC. Gates, none on
-    kProcessMe (no read of +0xE8): the movement runs when currentProcess is
-    null, or when the actor is not Actor::IsInRagdollState (37491), not
-    actorState2.reanimating (bit 4 of +0xCC, ActorState.h:128) and knockState
-    != kGetUp (:115, :60), else it only flags the char controller (+0x218 |=
-    0x1000); skipped for a sitting rider (sitSleepState kIsSitting, :112,
-    :71, with 17965: not boolFlags kIsAMount, Actor.h:197, and
-    ExtraDataList's kInteraction 0xA9, ExtraDataTypes.h:343); with the graph
-    variable bIsSynced (FixedStrings +0x578, FixedStrings.h:193; holder slot
-    0x12, IAnimationGraphManagerHolder.h:42) set and processLevel kHigh
+    animation update (the per-frame step for actors whose cell has form flag
+    13; a static label, Known limits K1: a puppet is never queued for 41454,
+    the detour queues 41453 alone, and no gap has shown). CONFIRMED-STATIC for
+    the body.
+  - 69349 (+0xcf66b0; the re-analyst's label JobList_AddJob; the role
+    CONFIRMED by effect: the detour's 69349(jobs, 41453, handle, 0) ran the
+    job on the stage's list, 042521 H1, 202522 H2): `void (JobList* jobs /*
+    rcx */, void (*job)(std::uint64_t) /* rdx */, std::uint64_t arg /* r8
+    */)`. The list's first qword points at a BSTArray<Job> {data +0, capacity
+    +8, size +0x10}, grown by one 16-byte element through 68163 with the heap
+    allocator functor (186376, include/RE/Offsets_VTABLE.h:30), then [elem+0]
+    = job and [elem+8] = arg; the TLS slot +0x768 is set to 0x59 around the
+    growth and restored (a memory-manager context tag; a static label, the
+    engine's own push runs whole here, Known limits K1). The fourth argument
+    is dead: every caller zeroes r9d and 69349 never reads r9 (a source
+    parameter this build ignores; a static label, Known limits K1); a detour
+    may pass 0: the built detour passes 0 and the push took it (042521). The
+    handle rides in the low 32 bits of arg. Thirty callers, among them 41306
+    (the movement queue), 41367, 41374, 41380, 41301. CONFIRMED-STATIC.
+  - 37356 (+0x6698d0, 3986 bytes, 27 virtual calls; the re-analyst's label
+    Actor_MovementStep; the role CONFIRMED by P1 044255 (its entry at frame
+    rate, about 47 a second, for the bandit; its body skipped for the puppet
+    with every Move at zero translation; the controller's output back in the
+    second of the promote) and the slide gone in 042521 (12.7 units against
+    120); Skyrim Together's lead docs/TE-MAP.md:57): `void (RE::Actor* self /*
+    rcx */, float delta /* xmm1 */)`. It reads +0xF8 currentProcess, +0x38 the
+    graph holder, +0x150 movementController (Actor.h:667 with the shift),
+    +0xC8 and +0xCC actorState1 and 2 (ActorState at +0xC0, Actor.h:737-741;
+    ActorState.h:203-204), +0x60 parentCell, +0x48 to +0x5C angle and location
+    (OBJ_REFR at +0x40, TESObjectREFR.h:73-80, :495), +0x10 formFlags; delta
+    is the per-actor delta from the movement table. CONFIRMED-STATIC. Gates,
+    none on kProcessMe (no read of +0xE8): the movement runs when
+    currentProcess is null, or when the actor is not Actor::IsInRagdollState
+    (37491), not actorState2.reanimating (bit 4 of +0xCC, ActorState.h:128)
+    and knockState != kGetUp (:115, :60), else it only flags the char
+    controller (+0x218 |= 0x1000); skipped for a sitting rider (sitSleepState
+    kIsSitting, :112, :71, with 17965: not boolFlags kIsAMount, Actor.h:197,
+    and ExtraDataList's kInteraction 0xA9, ExtraDataTypes.h:343); with the
+    graph variable bIsSynced (FixedStrings +0x578, FixedStrings.h:193; holder
+    slot 0x12, IAnimationGraphManagerHolder.h:42) set and processLevel kHigh
     (process+0x137 == 0, AIProcess.h:225, :26) the translation and rotation
     come from 39589 and 39597, else from the movement controller (slot 7 on
     +0x150, with delta and an output block) after bSpeedSynced (+0x580, :194)
@@ -360,65 +388,72 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     TESObjectREFR::GetScale into 39873, with 39878 and the setters 39880,
     39882, 39884, 39886. CONFIRMED-STATIC. Then slot 0x11A
     ModifyMovementData(delta, &translation, &rotation) (Actor.h:480); the
-    rider variables HasTweenSpeed, TweenSpeed, bTweenUpdate (FixedStrings.h:
-    161-163); if parentCell is null or not kAttached, or 40413(player)
-    holds, the position is written through 19790 (the data-position writer
-    the research saw inside SetPosition) and it returns; else
-    Actor::SetRotationZ (37230) with the rotation, a pitch clamp (settings
-    371032, 380228, 371029, 371026, 382579), then the position: formFlags bit
-    4 clear means slot 0xC8 Move(delta, &translation) (Actor.h:398), set
-    means a rotation matrix (70233) and slot 0xA9 SetPosition(&pos, true)
-    (Actor.h:367); then, with flyState (bits 18 to 20, ActorState.h:113) 0
-    or 5 and the global byte 389168 clear, slot 0x11D
+    rider variables HasTweenSpeed, TweenSpeed, bTweenUpdate
+    (FixedStrings.h:161-163); if parentCell is null or not kAttached, or
+    40413(player) holds, the position is written through 19790 (the
+    data-position writer the research saw inside SetPosition) and it returns;
+    else Actor::SetRotationZ (37230) with the rotation, a pitch clamp
+    (settings 371032, 380228, 371029, 371026, 382579), then the position:
+    formFlags bit 4 clear means slot 0xC8 Move(delta, &translation)
+    (Actor.h:398), set means a rotation matrix (70233) and slot 0xA9
+    SetPosition(&pos, true) (Actor.h:367); then, with flyState (bits 18 to 20,
+    ActorState.h:113) 0 or 5 and the global byte 389168 clear, slot 0x11D
     ComputeMotionFeedbackSpeedAndDirection (Actor.h:483) and on true slot
     0x11E UpdateFeedbackGraphSpeedAndDirection (:484). CONFIRMED-STATIC for
-    the calls, HYPOTHESIS for the data block's field meanings. Callers:
-    exactly one, 37350 (+0x669010); the other reference is .pdata, so 37356
-    is not virtual. The chain: stage 39053 calls 41306(ProcessLists* /* rcx
-    */, float delta /* xmm1 */, JobList* /* r8 */), which, when runMovement
-    (+0x1E5, ProcessLists.h:95) is set, fills the static table 404437 of
-    16-byte entries {Actor* +0, float delta +8, bool +0xC} for the first
-    min(size, 128) high actors and pushes 69349(jobs, 41444, index, 0) per
-    actor and 41445 for the player; 41444 is `void (std::uint32_t index /*
-    ecx */)`: the entry's actor, its currentProcess and the flag required,
-    then 39447(process, -1) and 37350(actor, entry.delta); 37350 is `void
-    (RE::Actor* /* rcx */, float delta /* xmm1 */)`: 39447 again, a VATS
-    delta substitution (delta 0, processLevel kHigh, VATS mode 4, the VATS
-    target), 41717(movementController) (the message pump, controller fields
-    only), and for delta > 0: 37355(actor) (the controller mode from
-    bAnimationDriven +0x568 and bAllowRotation +0x570, FixedStrings.h:
-    191-192, through 32716, 32717, 32718 and 37997), 37356(actor, delta),
-    slot 0x11B (Actor.h:481), the kMountPointClear logic on +0x204 bit 2
-    (:198), slot 0x11C on the char controller (:482; the getter 39856,
-    HYPOTHESIS AIProcess::GetCharController, MiddleHighProcessData.h:183),
-    slots 0xAF and 0xB0 (:373, :374), 39548(process, actor); always
-    39448(process) == -1 then 39599(process). kProcessMe: no read of +0xE8 in
-    41306, 41444, 37350, 37355, 37356 or 41717 (every instruction of the six
-    bodies read): the research's :131 stands, and the two job wrappers above
-    it are ungated too. CONFIRMED-STATIC.
+    the calls; the data block's field meanings are static labels (the step is
+    skipped whole for a puppet, so the block's fields are moot here; Known
+    limits K1). Callers: exactly one, 37350 (+0x669010); the other reference
+    is .pdata, so 37356 is not virtual. The chain: stage 39053 calls
+    41306(ProcessLists* /* rcx */, float delta /* xmm1 */, JobList* /* r8 */),
+    which, when runMovement (+0x1E5, ProcessLists.h:95) is set, fills the
+    static table 404437 of 16-byte entries {Actor* +0, float delta +8, bool
+    +0xC} for the first min(size, 128) high actors and pushes 69349(jobs,
+    41444, index, 0) per actor and 41445 for the player; 41444 is `void
+    (std::uint32_t index /* ecx */)`: the entry's actor, its currentProcess
+    and the flag required, then 39447(process, -1) and 37350(actor,
+    entry.delta); 37350 is `void (RE::Actor* /* rcx */, float delta /* xmm1
+    */)`: 39447 again, a VATS delta substitution (delta 0, processLevel kHigh,
+    VATS mode 4, the VATS target), 41717(movementController) (the message
+    pump, controller fields only), and for delta > 0: 37355(actor) (the
+    controller mode from bAnimationDriven +0x568 and bAllowRotation +0x570,
+    FixedStrings.h:191-192, through 32716, 32717, 32718 and 37997),
+    37356(actor, delta), slot 0x11B (Actor.h:481), the kMountPointClear logic
+    on +0x204 bit 2 (:198), slot 0x11C on the char controller (:482; the
+    getter 39856, AIProcess::GetCharController, :197; the field
+    MiddleHighProcessData.h:183), slots 0xAF and 0xB0 (:373, :374),
+    39548(process, actor); always 39448(process) == -1 then 39599(process).
+    kProcessMe: no read of +0xE8 in 41306, 41444, 37350, 37355, 37356 or 41717
+    (every instruction of the six bodies read): the research's :131 stands,
+    and the two job wrappers above it are ungated too. CONFIRMED-STATIC.
   - Handles for the detour: CommonLib's actor->GetHandle() (Actor.h:546;
     src/RE/A/Actor.cpp:458-461; BSPointerHandle.h:106-108 to :180) is
     BSPointerHandleManagerInterface::GetHandle, 16212 (BSPointerHandle.h:
     210-215): the sentinel 400312 for a zero refcount under 0x3ff, else
     CreateRefHandle (seed-named), the same test 41370 inlines; 41453's
-    lookup 12922 checks the same manager entries and age bits. HYPOTHESIS
-    that the two paths yield the same handle value.
+    lookup 12922 checks the same manager entries and age bits. The two paths
+    yield the same handle value, CONFIRMED by effect: the handles CommonLib's
+    GetHandle minted resolved in 12922 (the queued job ticked the puppet's
+    graph, 042521 H1, 202522 H2); P1 044255's per-handle match against the
+    test actor went unread (hook 2a's count inconclusive).
     LookupReferenceByHandle (Misc.cpp:88-91, include/RE/Offsets.h:582) is
     12332, a third entry point.
-  - Side effects (HYPOTHESIS): a detour on 41370 that calls the original and
-    then pushes 69349(jobs, 41453, GetHandle(puppet), 0) per flagged puppet
-    gives the puppet the engine's graph tick (20123) in the engine's own
-    stage and thread model, plus 37364, 39896 (a knocked-down puppet goes
-    through get-up) and 37363; harmless on an actor without a graph manager,
-    but the detour should still require 41466's other terms (3D with a
-    parent, an attached cell, not deleted or disabled, currentProcess
-    non-null) before queuing. A detour on 37356 that returns early for
-    puppets removes the controller output, Move and SetPosition,
-    SetRotationZ, the pitch clamp, the tween variables and the feedback into
-    39873, 39878 and slot 0x11E, while 37350 still runs slots 0x11C, 0xAF and
-    0xB0 on the char controller; it also removes the 19790 fallback write
-    for a puppet whose cell is not attached. The relayed SetPosition stands
-    either way.
+  - Side effects (CONFIRMED: hook 2a's tick by 042521, H1, the stagger on the
+    AI-off graph, and by 202522, H2, Speed and the engine's own moveStart and
+    moveStop; hook 3's removals by P1 044255, every Move in the puppet phase
+    at zero, the controller ticking at rest; the relayed SetPosition stood,
+    H3, 042521): a detour on 41370 that calls the original and then pushes
+    69349(jobs, 41453, GetHandle(puppet), 0) per flagged puppet gives the
+    puppet the engine's graph tick (20123) in the engine's own stage and
+    thread model, plus 37364, 39896 (a knocked-down puppet goes through
+    get-up) and 37363; harmless on an actor without a graph manager, but the
+    detour should still require 41466's other terms (3D with a parent, an
+    attached cell, not deleted or disabled, currentProcess non-null) before
+    queuing. A detour on 37356 that returns early for puppets removes the
+    controller output, Move and SetPosition, SetRotationZ, the pitch clamp,
+    the tween variables and the feedback into 39873, 39878 and slot 0x11E,
+    while 37350 still runs slots 0x11C, 0xAF and 0xB0 on the char controller;
+    it also removes the 19790 fallback write for a puppet whose cell is not
+    attached. The relayed SetPosition stands either way.
   - The Frida trace that confirms it (module base plus `just addr`): 41370
     entry (rcx ProcessLists*, rdx jobs; one call a frame expected); 41466
     exit (the two lists' sizes at +0x10 of each BSScrapArray); 20123 entry
@@ -453,8 +488,13 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 - Data captured: the actor's form id and combat state, kept in this game; a
   puppet reports nothing to the server.
 - Side effects of hooking here: the stop arrives one event after the draft,
-  so a flicker of combat music or HUD on the puppet game is possible;
-  HYPOTHESIS until x-npc-puppet-2 (H6).
+  so a flicker of combat music or HUD on the puppet game is possible; H6 stays
+  HYPOTHESIS until b-npc-puppet carries the two-seat claim (c2's shout at its
+  puppet Sven, inCombat false on c2 3 s after; its own commit, rule 13):
+  x-npc-puppet-2 20261022-042521 landed and could not decide it, solo, the
+  sink never ran (:1073-1078), and the two-seat shout the Tests section
+  describes is in no scenario yet; the music or HUD flicker is a playtest
+  line.
 
 ## Impose (observers render the server's decision)
 
@@ -487,25 +527,29 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   animation job: the graph animates what the relay tells it and decides
   nothing.
 - Side effects: H1 (the re-admitted job plays relayed events and idles on an
-  AI-off puppet; the branch CONFIRMED-STATIC, the visible result HYPOTHESIS,
-  :154-155); H2 CONFIRMED 2026-10-22 on fork m3-train-33 (the walk cycle
-  under the relay: the graph's Speed and Direction are Actor data channels
-  fed from MiddleHighProcessData by the movement step alone, so the detour
-  writes the host's relayed sample there every frame, docs/research/m3/
-  re-puppet-locomotion.md; x-npc-legs 202106 and x-npc-legs-burst 202522 on
-  a9c43bf0: the puppets' Speed follows each walk, the engine's own moveStart
-  and moveStop pair with it and are taken, and the half-second frames show
-  the stride, results/train-33-stride; the Dynamic plan's entries); H3
-  (translateTo's mover moves an actor whose movement step is
-  skipped; the mover was not traced, :318-322); H4 (KeepOffsetFromActor does
-  nothing useful on a puppet: answered 2026-10-21 by REA, the "Why now"
-  section: its planner agent 42182 runs in the per-frame pass whatever the
-  AI bit, with a goal relative to the actor itself, so it never goes on a
-  puppet, Rule B); H11 (setAngle imposes the heading on a puppet whose
-  animation job is re-admitted: Actor::SetRotationZ 37230 writes
-  data.angle.z and marks the loaded data's 3D update flag, REA 2026-10-21,
-  CONFIRMED-STATIC for the writes, the visible turn HYPOTHESIS; probe P4;
-  the fallback is SetPosition with the heading each sample).
+  AI-off puppet; the branch CONFIRMED-STATIC, :154-155; the visible result
+  CONFIRMED by x-npc-puppet-2 20261022-042521: the AI-off puppet's graph took
+  and played the shout's stagger, IsStaggering 1495 to 4228 ms, the head node
+  28 units lower; relayed idles on puppets in x-npc-legs 20261022-121157,
+  IdleHoe and IdlePickup_Ground); H2 CONFIRMED 2026-10-22 on fork m3-train-33
+  (the walk cycle under the relay: the graph's Speed and Direction are Actor
+  data channels fed from MiddleHighProcessData by the movement step alone, so
+  the detour writes the host's relayed sample there every frame,
+  docs/research/m3/re-puppet-locomotion.md; x-npc-legs 202106 and
+  x-npc-legs-burst 202522 on a9c43bf0: the puppets' Speed follows each walk,
+  the engine's own moveStart and moveStop pair with it and are taken, and the
+  half-second frames show the stride, results/train-33-stride; the Dynamic
+  plan's entries); H3 (translateTo's mover moves an actor whose movement step
+  is skipped; the mover was not traced, :318-322); H4 (KeepOffsetFromActor
+  does nothing useful on a puppet: answered 2026-10-21 by REA, the "Why now"
+  section: its planner agent 42182 runs in the per-frame pass whatever the AI
+  bit, with a goal relative to the actor itself, so it never goes on a puppet,
+  Rule B); H11 (setAngle imposes the heading on a puppet whose animation job
+  is re-admitted: Actor::SetRotationZ 37230 writes data.angle.z and marks the
+  loaded data's 3D update flag, REA 2026-10-21, CONFIRMED-STATIC for the
+  writes, the visible turn CONFIRMED by 042521 P4: setAngle(0, 0, 90) left the
+  heading at exactly 90, turned 0 through the shout, the frames at 1.2 s and 4
+  s in profile facing east; the SetPosition fallback unneeded).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -542,14 +586,25 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   the recorded combat target is npc-handoff's to restore. HostRelease or the
   connection's end: demote. A reference the engine detaches drops its flag;
   its reload is puppet by default (cellAttach).
-- Side effects: H5 (the promote and demote order, Q4's, HYPOTHESIS, :47-48;
-  a buffered EvaluatePackage issued while puppet still fires on the first AI
-  tick, :347-348; an immediate evaluation outside sit states 0, 3 and 7 does
-  nothing, :345, so a seated puppet going live may wait for its next AI
-  tick); H6 (the stop undoes the draft before any visible target selection:
-  measured once that the draft happens, readings-18:100-102, the undo
-  unmeasured). Reversibility on handoff is the Release condition itself and
-  b-npc-puppet's three flips.
+- Side effects: H5 CONFIRMED (the promote and demote order, Q4's, :47-48;
+  042521 P5: the drafted bandit moved within 0.5 s of the promote, 180 units
+  by 2.5 s, three attackStart events after the second shout, combatTarget kept
+  from the puppet time; a buffered EvaluatePackage issued while puppet still
+  fires on the first AI tick, :347-348; an immediate evaluation outside sit
+  states 0, 3 and 7 does nothing, :345, so a seated puppet going live may wait
+  for its next AI tick, the engine's own wait, unread); H6 (the stop undoes
+  the draft before any visible target selection: measured once that the draft
+  happens, readings-18:100-102, the undo unmeasured). Reversibility on handoff
+  is the Release condition itself and b-npc-puppet's three flips.
+
+Known limits: K1, the engine's own animation job and push run whole for a
+puppet; the roles the re-analyst gave their callees (44302's VATS factor,
+37364, 20121, 20122, 39896, the list-B job 41454, 69349's TLS tag and dead r9)
+and the skipped step's data-block fields are static labels no run reads, and
+the verb depends on none of them. K2, a refused furniture exit on a puppet is
+answered with IdleForceDefaultState on the next update (786a029d); the path
+has not fired since x-npc-legs 202106 and is unread, and the furniture state
+itself rides the relay (npc-stream: exits stay on the relay by design).
 
 ## Message contract
 
@@ -896,21 +951,26 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     Papyrus SetAnimationVariableFloat lives less than a frame because the
     channel push (63590) rewrites the same variable slot before the step
     (63587). The Speed channel's own threshold at 5.0 raises moveStart and
-    moveStop, the Direction channel the move direction actions (HYPOTHESIS
-    for the behavior, probes F2 and F3). Fix on fork m3-train-33 a9c43bf0:
-    setPuppetLocomotion(actorFormId, speed, directionDeg, turnRateDeg), an
-    SP export the client calls at each relayed sample in place of the two
-    variable writes, stored per puppet under the registry's lock; the Move
-    detour writes the sample every frame into currentMovementSpeed, unk2AC
-    (TargetSpeed's source, :198), rotation.z (wrapped to [0, 2 pi)) and
-    rotationSpeed.z after its Move(delta, zero) stamp; the relay's locomotion
-    events return to the figures' rule. HYPOTHESIS until x-npc-legs on that
-    build: the stage order (movement before animation, F5), no other writer
-    of the two fields (F1), the gait from Speed alone (F6), the client's
-    speed and direction in the engine's units and sign. The reading that
-    closes H2: c2's Speed and bInMoveState above zero through a walk, the
-    engine's own moveStart and moveStop in c2's events, a stride in
-    x-npc-legs-burst's frames.
+    moveStop, the Direction channel the move direction actions (CONFIRMED by
+    effect: the fed Speed raised the engine's own moveStart and moveStop at
+    each walk's ends, x-npc-legs 20261022-202106 at 46.2 and 48.2, 60.8 and
+    66.1, and x-npc-legs-burst 20261022-202522, and the fed Direction faced
+    the stride along the track, 202522 f13 to f20; F2 and F3 not needed). Fix
+    on fork m3-train-33 a9c43bf0: setPuppetLocomotion(actorFormId, speed,
+    directionDeg, turnRateDeg), an SP export the client calls at each relayed
+    sample in place of the two variable writes, stored per puppet under the
+    registry's lock; the Move detour writes the sample every frame into
+    currentMovementSpeed, unk2AC (TargetSpeed's source, :198), rotation.z
+    (wrapped to [0, 2 pi)) and rotationSpeed.z after its Move(delta, zero)
+    stamp; the relay's locomotion events return to the figures' rule.
+    CONFIRMED on train-33 (202106, 202522, 204726, 214026): the client's speed
+    and direction land in the engine's units and sign (Sigrid 77.8 against the
+    host's 80.1, Dorthe 223.1 against 221.4), no other writer zeroes the
+    fields (F1, by the read), the stage order moot while Speed reads the
+    host's (F5, movement before animation); the gait from Speed alone (F6)
+    stays at :1027. The reading that closes H2: c2's Speed and bInMoveState
+    above zero through a walk, the engine's own moveStart and moveStop in c2's
+    events, a stride in x-npc-legs-burst's frames.
   - THE HOST'S BASELINE (x-npc-legs-host 20261022-195031 on parity 16b8854a,
     {now} PDT, numidium's read): through the same minute the host's graphs
     read Speed about 80 at a walk (Sigrid max 80.1, Alvor 80.1, Faendal 81.6)
@@ -944,11 +1004,13 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     walk) instead of SpeedSampled, which ran 1.3 to 1.5 times higher and
     blended the puppets toward a jog; (b) a refused furniture exit on a
     puppet ("*ExitStart" for game-file ids, filtered in native) is answered
-    with IdleForceDefaultState on the next update; HYPOTHESIS until a probe
-    catches a refused exit again. The reading that closes H2 on 786a029d:
-    c2's Speed near the host's through the walks, the engine's own
-    moveStart and moveStop, a stride in the burst's frames; the furniture
-    state on a puppet is otherwise npc-stream's (the sit and sleep state).
+    with IdleForceDefaultState on the next update; the path has not fired
+    since this run (202106) and is unread, and the furniture state itself
+    rides the relay (npc-stream: exits stay on the relay by design; Known
+    limits K2). The reading that closes H2 on 786a029d: c2's Speed near the
+    host's through the walks, the engine's own moveStart and moveStop, a
+    stride in the burst's frames; the furniture state on a puppet is otherwise
+    npc-stream's (the sit and sleep state).
   - H2 CONFIRMED ({now} PDT): x-npc-legs-burst 20261022-202522 on a9c43bf0,
     forty frames at 500 ms (40 of 40 over 19,507 ms, frame 0 at 20:27:32.97Z,
     the watch 79 s around them). Sigrid's puppet on c2: Speed 76 to 106 from
@@ -963,11 +1025,14 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     skirt's hang changing frame to frame while she grows in frame. A walk,
     beside the decisive read (the graph's Speed and the engine's paired
     events). What stays HYPOTHESIS under its own name: the gait from Speed
-    alone (F6; 786a029d reports the host's Speed, 80 at a walk, so the blend
-    sits at the host's gait); the refused furniture exit's reset (786a029d,
-    until a probe catches one); the turn rate (0 fed; TurnDelta from the
-    channel is the heading's own, probe later); the stage order (F5, moot
-    while the read holds).
+    alone (F6, the host-seat gait calibration,
+    re-puppet-locomotion.md:150-152, a Frida plan with no probe file and no
+    run; 786a029d reports the host's Speed, 80 at a walk, so the blend sits at
+    the host's gait); the turn rate (0 fed; TurnDelta from the channel is the
+    heading's own; it names no probe yet); the stage order (F5, moot while the
+    read holds). Not tags: the refused furniture exit's reset is Known limits
+    K2; cell-host's own-cell guard (2ce4fd36, the event on time in 214026) is
+    cell-host.md's.
   - THE SPEED AT THE HOST'S, AND ALVOR'S CAUSE (x-npc-legs 20261022-204726 on
     786a029d, {now} PDT): the puppets' Speed now sits at the host's (Sigrid
     77.8 against the host's 80.1, Dorthe 223.1 running against 221.4,
@@ -990,10 +1055,10 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     81.9, moveStart and moveStop taken, moving in 22 of 240 samples; Sigrid
     77.8 with four starts and four stops, Faendal 83.3; Dorthe sat. The
     furniture run-mode cause is confirmed. The gate runs on 2ce4fd36; its
-    merge is playtest 32's build. HYPOTHESIS by name after it: the refused
-    furniture exit's reset (786a029d, no refused exit since), cell-host's
-    own-cell guard (2ce4fd36, the event came on time in 214026), the turn
-    rate (0 fed), the gait from Speed alone (F6, the host's Speed now fed).
+    merge is playtest 32's build. HYPOTHESIS by name after it: the list at
+    :1027 (the gait from Speed alone, F6, the host's Speed now fed; the turn
+    rate, 0 fed; the refused exit's reset Known limits K2 and the own-cell
+    guard cell-host.md's, not tags).
   - the slide CONFIRMED gone: the shout's first word staggered the puppet
     (staggerStart taken at 1465 ms, IsStaggering true 1495 to 4228 ms) and
     its track moved 12.7 units at most, the body back at its point (the
@@ -1007,8 +1072,10 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     needed now.
   - H6: the draft into combat measured again (inCombat true, combatTarget
     the player, 1 s after the hit) and, solo, never undone: the sink is
-    skymp5-client's, absent from a solo game; the undo stays HYPOTHESIS
-    for the two-seat run.
+    skymp5-client's, absent from a solo game; the undo stays HYPOTHESIS until
+    b-npc-puppet carries the claim (c2's shout at its puppet Sven, inCombat
+    false on c2 3 s after): today's b-npc-puppet has no hit on a puppet and no
+    inCombat claim (its header :19), so no two-seat run has asserted it.
   - H5 CONFIRMED: at the promote the drafted bandit was moving within 0.5 s
     (89 units) and at 2.5 s 180 units on, and after the second shout the
     watch took three attackStart events with moves and turns: the AI and
@@ -1039,8 +1106,9 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
     2a's count is inconclusive here; H1 stands on the stagger playing with
     the AI off (the first run). A zero-step hazard fired twice a second on
     ONE rigid-body controller from the first second, before any puppeting
-    and not the bandit's: a controller the engine never simulates (an
-    actor out of the Havok world), HYPOTHESIS, harmless to us; the script
+    and not the bandit's: a controller the engine never simulates (an actor
+    out of the Havok world), HYPOTHESIS until the next npc-puppet.js P1 trace
+    names its actor (nothing since 044255), harmless to the verb; the script
     now names its actor for the next trace.
 - THE LANDING HANG (2026-10-21 22:0x to 23:06 PDT), the gate's two reds
   b-npc-puppet 045602 and b-cell-host 045917 and the probe's third
@@ -1238,9 +1306,11 @@ The fix is the server's alone, no wire change: a sighting dropped for a missing 
 heldSightings, kHeldSightingsPerCell 64, kHeldSightingMs 30 s, one entry per reference) and ApplyHostDecisions replays the
 held ones for the grant's host right after the flags flip (PartOne::ReplayHeldSightings, one info line "held before the
 grant replayed"); a sighting of another game's cell is never held. T0: CellHostTest "A sighting that arrives before its
-cell's grant is held and replayed". HYPOTHESIS until a lab run: the replayed record's CreateActor reaches the host within
-a round trip of the grant. A client belt for later: hostService.onHostGrant resetting lastSightings so the next poll
-reports at once.
+cell's grant is held and replayed". HYPOTHESIS (the replayed record's CreateActor reaches the host within a round trip of
+the grant) until x-grant-roster (v2 by path, unrun) with a claim added: when its recorded replay line is present, the held
+id's first "sights" line stands within 1 s of the grant line (a log-timestamp pairing the grammar lacks today; T0
+CellHostTest proves the mechanism, the lab the timing). A client belt for later: hostService.onHostGrant resetting
+lastSightings so the next poll reports at once.
 
 ## Status
 
@@ -1275,7 +1345,7 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
 - [x] native hook + T1 (built d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; no host-less T1 exists in the fork, so the proof is the seat's: "[verb:npc-puppet] detours installed: animation queue true, movement step true" in c1.log, the demote and promote lines, and P1's trace 20261022-044255: zero Move translations through the puppet phase, the original's output from the promote on, every controller's step stamped; 21:50 PDT)
 - [x] TS handler (eaa3b6d0 and d9a003fd: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
 - [x] T2 green (2026-10-21 21:39 PDT, numidium: test-proto at m3-npc-puppet eab366b2's image, all 33 difftest sessions identical between the legacy and the wire stacks; no ESM actor in a session by design, the Tests section)
-- [x] T3 scenario green, no HYPOTHESIS tags (2026-10-22 05:54 PDT: b-npc-puppet 123325 green on 19e7ca9b's stage, the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the tags that stay carry a name: H2 re-opened by playtest 31 the same morning (the puppet slid; the relay dropped its locomotion events), fixed on fork m3-train-32 and read there; H6 and H7 npc-stream's; H8 npc-handoff's)
+- [ ] T3 scenario green, no HYPOTHESIS tags (unticked 17:19 PDT 2026-10-29 by the pass's inventory: ticked at 123325 while tags stood; the earlier tick's text kept: (2026-10-22 05:54 PDT: b-npc-puppet 123325 green on 19e7ca9b's stage, the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the tags that stay carry a name: H2 re-opened by playtest 31 the same morning (the puppet slid; the relay dropped its locomotion events), fixed on fork m3-train-32 and read there; H6 and H7 npc-stream's; H8 npc-handoff's))
 - [x] parity scenario green, or its later list reviewed with it (ADR-031) (b-cell-host green in the gate; the engine-alone references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 are the diff's base, their reruns on the merged base listed in the Dynamic plan)
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033) (the handoff and the restart inside b-npc-puppet; the figure beside a puppet in b-cell-host; playtest 31's checklist carries the rest by item)
 - [x] ledger and suppression registry updated (no Papyrus native added: setPuppet and isPuppet are Skyrim Platform exports, listed in the Suppress section's registry; docs/NATIVES.md unchanged)

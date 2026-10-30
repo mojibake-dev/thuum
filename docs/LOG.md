@@ -3112,3 +3112,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   T2 green (numidium, 00:05Z). numidium's x-wire-idle-rate MEASURED the idle rate (814.8 packets/s against 816.4 ticks/s, within 0.2
   percent): npc-stream's row closes, and the cost it names (an idle client near 45 KB/s because the server loop ticks every 1 ms and
   the wire sends at every update) is a budget row for the pass's end. The details in docs/verbs/prop-physics.md.
+- 17:21 PDT: P4's third batch applied (an agent from docs/private/p4-dynamic-lines-3-2026-10-29.md, my review on the diff): npc-puppet.md
+  40 tags to 11 (CLOSE 17 by the P1 and x-npc-puppet-2 runs, the engine map's function names kept as the re-analyst's labels with
+  their ROLES confirmed; LIMIT 9 into a Known limits paragraph K1/K2; DELETE 3; KEEP 5 and READ 1 keep the word; the T3 Status box
+  unticked as npc-fate's and npc-handoff's were) and spell-placed-object.md 12 to 5 (the fail script's dispel REFUTED by apocrypha's
+  read; S1/S2 limits; the collision and the fade reads named). Premise corrections recorded: b-npc-puppet never asserted the two-seat
+  shout's inCombat claim the doc describes (a probe before any scenario claim), x-raise-wall has no dual-cast or interrupt step, and
+  no Raise Wall claim has been read in the lab yet (both x-raise-wall runs died at a teleport before any cast).
