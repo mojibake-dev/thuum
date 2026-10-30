@@ -3086,3 +3086,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   fact base of D63 (which of them join `allowed` under mode all; the memo in the weekend summary recommends leaving the four as they
   are). docs/private/playtest-m3-39.md drafted: eight items across the pass's trains, each naming its train (skipped, not red, when
   the train is not in the build). Fork pipeline 3875 green with difftest-build 14255; P3's T2 follows P2's on it (numidium).
+- 17:03 PDT: P4's Status pass, first cut: boxes the evidence already supports ticked with their reasons (npc-stream's doc-complete and
+  engine-surface boxes, npc-fate's and spell-placed-object's doc-complete, npc-talk's T2 by train 55's green, quest-stage's T2 by 3n's
+  e14dc298 green), and VERB.md gains the none rule: a box whose item the verb has none of is ticked "(none: why)", so cell-host's native
+  box and npc-handoff's message and native boxes tick (the table read 10/12, 5/11 and 5/11 for nothing to do). prop-physics.md gets the
+  Milestone, Class and Rung lines `just status` reads (M3, B, R2/R0). Both Windows trees type-check clean (tsc on pass2win-wt and
+  pass3win-wt against clientbits' node_modules; yarn is not on the Mac).

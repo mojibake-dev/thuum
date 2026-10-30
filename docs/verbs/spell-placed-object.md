@@ -234,7 +234,7 @@ re-positioning (out of scope).
 
 ## Status
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
+- [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:02 PDT 2026-10-29 by the pass: the Inventory's 23 rows each carry a disposition; Rung R0 for the objects, declared at the top)
 - [x] engine surface cited or delegated
 - [x] server logic + T0 (fork m3-spell-placed 5b951a9c: wire-rules placements.rs, PartOne's placement, removal and sweep, unit/SpellPlacedTest.cpp)
 - [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h)

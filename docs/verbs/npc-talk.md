@@ -208,7 +208,7 @@ Built 14:53 PDT on fork m3-npc-talk 0d453dc1 (off m3-npc-face 867c4210 with m3-p
 - [x] message + validator (same commit): ActorClaim 56/64, the budget, the fixtures
 - [x] native hook + T1: activatePickRef (a CommonLib call, no id; no T1 needed)
 - [x] TS handler: TalkService (npcTalk, talkKey)
-- [ ] T2 green
+- [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: train 55's T2 green on the head's own difftest build, LOG 2026-10-27 16:09 PDT, merged to parity 1b866786 2026-10-28T02:25Z)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
