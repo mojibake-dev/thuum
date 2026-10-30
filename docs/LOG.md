@@ -3247,3 +3247,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   a read, not the union. ADR-036 is live (main 80ccdfe, LAB_CLIENT_RESET=relaunch): a rollback of c2 again logged the slow retrain
   (214 s, the agent missing, the rerun green), so numidium trials relaunch mode on three runs and then runs 3o's gate from scratch
   under it, one rollback per seat at the set's start.
+- 21:25 PDT: the lab is held until 06:24Z for core's card read (numidium): sky-c1's VM start at 04:14Z failed with "QEMU exited with
+  code 1", the wedge's signature, on the one port the BIOS visit changed (its next rollback worked, the seat played slowly), and at
+  04:23Z lab-api lost TLS to the Proxmox API while starting c2; b-npc-loot ran green between. ADR-036's relaunch never ran (every
+  reset a forced rollback). 3o's gate has not restarted; the pass's stage waits behind it.
