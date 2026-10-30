@@ -3132,3 +3132,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   :473-474, :553-554), the build M7's with mounted combat. PLAN's "horses (host follows rider)" line is answered on paper, as the
   pass's audit said. The physics probes x-prop-push and x-prop-pass (v2, by path) read the review's budgets (E_PROP_STEP and
   E_PROP_REACH must read 0).
+- 17:32 PDT: quest-stage.md: two tags closed on evidence (INDX stages are not parsed, the stage check is the wire's u16, a declared
+  limit; H-56a's line points at its RESULT), 11 to 9. lab/tools/glab.py lists N pipelines (`glab.py skymp 8`) and a pipeline's jobs
+  (`glab.py jobs skymp <id>`). CI: P1-win 8b7e2ade pipeline 3881 GREEN with its client build; P2-win e4770853 pipeline 3882 RED at
+  client-build 14282 (the server, wire and difftest jobs green), read next; 3884 (P3), 3885 (P3-win) and 3888 (m3-send-rate) running.

@@ -63,8 +63,10 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
   `getStageDone(stage)`); the engine starts a stopped quest at SetStage (Papyrus reference).
 - The stage change event: Skyrim Platform's `questStage` event (SKSE's TESQuestStageEvent; fields `quest` and `stage`)
   fires on every seat for every quest's stage change, our own applies included: the loop guard consumes those.
-- The server: libespm reads QUST records (Records.h: the record type is listed; whether INDX stages are parsed is
-  read at the implementation, else the stage check is the u16 bound alone, HYPOTHESIS tagged there).
+- The server: libespm reads QUST records (Records.h: the record type is listed); INDX stages are not parsed
+  (read at the implementation 2026-10-29: wire-validate's check_quest_stage bounds the mode and the shared list,
+  and the stage is the wire type's u16), so a stage number the quest does not define is the engine's to refuse on
+  each seat, a known limit.
 - CommonLibSSE-NG symbols: none needed (no native hook; the event and the natives are the platform's).
 - Address Library ID(s): none.
 
@@ -239,7 +241,7 @@ CLOC, SMBN 0x9002a FreeformQuestsNode conditioned on the new location having Loc
 FreeformRiverwoodNode, the quest first in its branch; no lab plugin overrides them). Nothing in the client blocks the
 Story Manager (the Papyrus event block is the VM's alone; the platform emits locationChanged and questStart and nobody
 subscribes); whether a login or a teleport INTO Riverwood ever raises the Change Location event, as a walk into the
-location does in single player, is the open HYPOTHESIS (H-56a). Consequences: a world stage of a quest the engine has
+location does in single player, was the open question (H-56a, ANSWERED in the RESULT below). Consequences: a world stage of a quest the engine has
 not started is parked by the client and applied when the engine's questStart for that quest fires (fork m3-quest-stage,
 no wire change); the probe x-quest-stage keys on MS13Intro 0xb6031 (no event, unique-actor aliases Lucan and Camilla,
 stage 10), already in lab/deploy's sharedQuests; Sven's Faendal line on both seats waits for the Story Manager to start
