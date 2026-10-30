@@ -1913,6 +1913,20 @@ no death leg (its atronach is never killed) and no probe has read a 0xff death r
 leg to add is c1 killing the placed caster by swings, with the claims server.log_count("death report: ff000002 died") >=
 1 and "death by the server's word on ff000002" == 0.
 
+### The non-host's reanimate at T3 (2026-10-30; x-reanimate-host v6 152542 on the union 8f9c11bd)
+
+GREEN, seven of seven: c2's Reanimate Corpse on Hilde's body (killed by kill-ref, the record dead) reached the server as a player's
+cast ("OnSpellCast ff000001 cast 65bd7 ... relayed"), the server sent the cast to the body's host for the engine's own effect
+("reanimate 65bd7 by ff000001 on 35534: cast on its host ff000000"), and 7 s later the host's engine stood her up and reported it
+("resurrection by its host's engine: 35534 stands again with health 1.000 on ff000000's sample"), the record's death cleared and
+the live word to every listener; alive on both seats. Two reads around it: the server's own condition evaluator refused the
+effect on the corpse in the same millisecond ("EffectConditionsHold - effect cab63 of 65bd7 by ff000001 at 35534: its conditions
+fail; not applied (ADR-039)"), harmless here since the host's engine applies the effect (R2, recorded), but HYPOTHESIS: if
+Reanimate's conditions should hold on a dead target under its level cap, the evaluator misreads one of them (GetDead, or the
+level condition against the record), which would matter for any R0 effect gated the same way; a read of cab63's CTDAs against
+the evaluator is owed. And the aim: on c2 the mouse step's pitch found the body at 700 to 800 counts for a target 80 units off
+and about 120 below the eye (about 13 counts a degree on this seat; the rune probes' 20.2 was another seat's or another frame's).
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
