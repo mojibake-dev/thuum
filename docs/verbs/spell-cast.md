@@ -1122,6 +1122,37 @@ health message. A second red within two sweeps makes it a bug.
   are the two shapes; neither tonight (the T2 declarations name today's
   factors).
 
+- The stream's number counts its holes (D66, 22:35 PDT 2026-10-30, the pass; fork
+  m3-cast-held-time, R0, server-only, b-duel's claim unchanged). The read that
+  decided it (an agent on run set 20261030-050437, 3o's gate in relaunch
+  mode): b-duel's step 65 red at 0.7851 against the 0.78 bound and green on its
+  cold rerun at 0.7601 were the same hold with a different count. Red: 14
+  reports, a counted sum of 2.742 s, holes of 0.736 s (four cadences, 0.486 s
+  uncounted, 3.9 points) and 0.371 s (1.0 point) and a tail of about 0.36 s to
+  the stream's end; green: 16 reports, 3.063 s counted, one two-cadence hole.
+  Regen is a constant 0.005 of the read (c2's game at the in-combat 0.42 to
+  0.47 points a second, overwritten by every server tick, the record trailing
+  by half a point at the assert); the server's own crop never generates. The
+  margin is spent where the server undercounts the engine (the engine burns
+  every frame of contact, ADR-031, while the client drops a report now and
+  then under slow frames), so the count changes: a stream's first report on a
+  target still counts MAX_TICK_MS at most (its way to the target), a later
+  report counts its whole gap up to HOLE_MS 1000 (a lost report is not a lost
+  target), and a report after a longer hole counts MAX_TICK_MS again (a
+  re-contact); the hole rule is a single stream's, since with the same spell
+  streaming from both hands the reports name no hand, each takes the hand
+  that waited longest, and a hand off its target would be credited the
+  other's time, so two hands keep the cap per report (x-dual-stack's read).
+  Under it the red reads about 0.737 and the green about 0.75,
+  the ideal hold (20 to 21 reports) unchanged at 0.705 to 0.712, the bound's
+  margin four points and up. Still uncounted, a known limit: the tail between
+  the last report and the stream's end (one cadence at most) and the first
+  contact's way. The one T2 declaration that followed the old cap moved in the
+  same commit (spell-cast's second tick, 0.96 to 0.948); casts.rs's new case
+  covers the way, a hole, the cadence, a re-contact and exactly a second. This
+  claim had read red on 10-18 twice, 10-20, 10-22 twice and 10-30; each red cost
+  a cold rerun, and a real one or two point regression of the stream's number
+  would have hidden in that noise.
 - A stream's start against the fixed hold, ADR-027's watch item (15:10 PDT,
   b-duel 20261022-215524 on train-33's gate, numidium's read): step 65's
   server.actor(c2).healthPercentage read 0.8316 against the asserted < 0.78.
