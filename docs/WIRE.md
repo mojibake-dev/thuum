@@ -140,7 +140,9 @@ the old shape), keeps the remainder so the long-run rate is the interval's,
 never bursts after a stalled tick, and a disconnect flushes at the next poll.
 Ingest, validation and the game's tick keep their cadence; a message queued
 between flushes waits at most 16.7 ms. The clients flush at their own poll (a
-frame on a seat, 5 ms on the fakeclient); their rate is theirs.
+frame on a seat, 5 ms on the fakeclient); their rate is theirs. Measured 18:43 PDT 2026-10-29 on the
+branch's image: 59.98 packets a second to the idle client (all 26 B, a median gap of
+16.6 ms) with the loop still at 847 ticks a second, T2 green.
 
 SkyMP's senders choose per send (`reliable` true or false), and
 `wire-transport::channels::for_send` maps that choice: reliable to channel 0,

@@ -3432,3 +3432,7 @@ Compensating Methods in Client/Server In-game Protocol Design and Optimization",
 image (about 60 packets a second expected, nothing after the close), the full T2, and the touched verbs' gate, since npc-stream's
 relay cadence and cell-host's grant timing ride the send path; a T3 timing claim the extra 16.7 ms moves has its margin read, never
 weakened (rule 13).
+Proof, 18:43 PDT 2026-10-29 (numidium's reads on sky-srv, the same idle script): 59.98 small packets a second to an idle client
+against 814.8 before (3,304 in 55.1 s, all 26 B, a median gap of 16.6 ms), the loop still at 847 ticks a second (only the flush
+moved), nothing after the close; the full T2 GREEN (difftest 14302, every session identical to legacy but its declared lines).
+The branch's merge waits for the touched verbs' gate when the lab is back.
