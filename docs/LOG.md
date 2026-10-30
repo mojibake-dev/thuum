@@ -3221,3 +3221,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   glide) and slice three on paper (the held object through PlayerCharacter's grab surface, CommonLibSSE-NG PlayerCharacter.h:553-570
   and :696-712, Offsets.h:452; the body's resting root as one asleep sample applied by SetPosition; HYPOTHESIS tags for the reads
   that come before M4's build).
+- 19:02 PDT: CI GREEN on every pushed head but the newest: P1 b0cda83a (3903), m3-client-bits f9c6b7ca (3907), P1-win 9721ff72 (3908, client
+  and all), P2 58208e9f (3900), P2-win dca7fe09 (3901, client and all), P3 50a44336 (3911, server and difftest); P3-win ffa51358's
+  3912 building. The Windows trees composed in stage order: P2-win 0dc92d5a takes P1-win 9721ff72 (clean), P3-win 868240a8 takes
+  P2-win 0dc92d5a (one conflict, the disconnect handler's two departures, props_gone and ForgetHeldSightings, both kept); tsc and
+  fork-lint green on both, pushed with the client build. P3-win's server content is now the full composition (trains 1, 2 and 3), the
+  tree a stage of all three would run; its own T2 is the last before that stage.
