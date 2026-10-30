@@ -3349,3 +3349,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   both cells c1's), no grant, pass or follow touches him, so the door pass is out; the trace decides between the engine and the call.
   core's mechanism for the wedges (LOG e3b342a on its side): two GP107 bus resets in the same second; lab-api's 20 s stagger is the fix
   and is live; the lab waits for the morning reboot (c2's card failed in the experiment) and core's handover.
+- 00:43 PDT: x-prop-drop v1 by path (sha1 58313908): slice one's second sure touch, the drop (the server's AddItem gives c1 a
+  SteelSword 0x13989, the game's own console drops it, the touch-2 claim line, one runtime copy per seat, the two copies within 32
+  units); its "lands where c1's does" claim needed a fact the listing already carried, so lab-api gains c.refs_near().pos(baseId)
+  (the nearest listed reference's x, y, z; the ids search has none) with its test; x-prop-push v2 already holds the restart half.
+  The stage that plays it needs that lab-api image (LABAPI=<this push's thuum pipeline>).
