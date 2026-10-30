@@ -1148,7 +1148,7 @@ health message. A second red within two sweeps makes it a bug.
   margin four points and up. Still uncounted, a known limit: the tail between
   the last report and the stream's end (one cadence at most) and the first
   contact's way. The one T2 declaration that followed the old cap moved in the
-  same commit (spell-cast's second tick, 0.96 to 0.94784; declared as the computed f32 exactly since 820a565c); casts.rs's new case
+  same commit (spell-cast's second tick, 0.96 to about 0.948: the counted gap is the server's clock's, 400 ms nominal with a millisecond or two of replay jitter, so the T2 declaration carries a 0.001 tolerance since 92a3f276); casts.rs's new case
   covers the way, a hole, the cadence, a re-contact and exactly a second. This
   claim had read red on 10-18 twice, 10-20, 10-22 twice and 10-30; each red cost
   a cold rerun, and a real one or two point regression of the stream's number

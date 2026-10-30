@@ -3502,3 +3502,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   -99, 100 south -88, 190 south -80, 182 east -144, the tankards at -133: they sit low against higher ground west, north and south,
   and the flat is east. pass v6 by path (sha1 6a74f853) takes the east start as push v6 does, a ground-level start claimed, the moves
   by position in any direction. Queue: drop v4 (running), grab v4, quest-mode v5, reanimate v6, push v6, pass v6.
+- 08:12 PDT: the union's T2 on 8f9c11bd RED on one value (numidium): D66's declared 0.94784 occurred as 0.94792; 37 of 38 sessions identical,
+  the smoke, the mod-lock and the restart passes green. The counted gap is the server's clock's (400 ms nominal, a millisecond or two
+  of replay jitter on a loaded sky-srv), so no exact declaration can hold; quantizing the gap in the rule was rejected (rounding each
+  hit to 50 ms biases Flames' 183 ms cadence by about 9 percent). Fix in the harness: a declared divergence may name per-field
+  tolerances by dotted path (within: {"data.health": 0.001}), the matcher comparing those numeric leaves within the bound and the
+  rest to the digit; spell-cast declares the tick as 0.948 within 0.001; a test on both sides of the bound; 12 difftest tests and
+  clippy green. The union's head is 92a3f276 (skymp-wire/difftest only; the client dist 3992 and the server's behaviour unchanged),
+  pipeline 4007; numidium runs T2 alone on it. x-prop-drop v4 (150222): 9 of 13 held (one runtime sword per seat within a unit of each
+  other at the dropper's feet, the budgets clean) and the non-host dropper's seat never tracked the server's copy while the host
+  simulated it, so no claim, no stream, no apply: a likely client gap, under an agent's read.
