@@ -3689,3 +3689,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   guest read x-body-open-guest v2 (4ef23336) runs now, ten minutes before 39's setup. lab/playtests/39.yaml written for numidium
   (38's end world composed as 36 and 37 were, both seats outdoors at the guard camp, perks as before, no god mode; the world's stamp
   numidium's to fill); the physics push waits for Eli's report, then verb-stage with the five probes.
+- 15:04 PDT: the guest-loot train begun as prework on fork m3-guest-loot 39e5c2f5 (off parity 0e23c820, tsc clean, unpushed until the
+  physics stage): the host handler's first wait in menu mode (the 15 s late release); the guest's open follows v2's answer.
+  lab/playtests/39.yaml handed to numidium (2bea6a6); the lab is 39's after the guest read.

@@ -2396,3 +2396,9 @@ guest's open; the two scenarios' host claims (330124b, a8cd208) are re-timed wit
 the closing activation at the close), their reruns the train's gate. Before D52 this delay held the body against the other seat
 for 15 s after the looter closed it: playtest 34's "the non-host can't interact with the body" had this second cause beside the
 corpse's missing release.
+
+The guest-loot train begun (15:04 PDT 2026-10-30): fork m3-guest-loot off parity 0e23c820, first commit 39e5c2f5 (tsc clean, local
+until the physics train has staged): remoteServer.ts's open-container handler takes its first wait as `Utility.waitMenuMode(0.1)`, so
+on the host the checker sees the engine's open menu at once and the close sends the closing activation instead of the 15 s give-up;
+the two scenarios' host claims (the admission line within the step, the closing activation at the close) read this behavior as
+written. The guest's open (D71) joins the branch once x-body-open-guest v2 names H5 or H1.
