@@ -1745,7 +1745,11 @@ engine's two tags, H1 and H2, read below):
 3. The client: the deferred kill armed in ensurePuppet and ended in
    ensureLive (puppetService.ts), never on a hosted live actor; re-armed
    after a resurrect; the life mirror gated to actors this game does not
-   host; the floor poll (deathReportService.onUpdate) retired, deathStart
+   host (the host's own engine is still corrected after a REFUSED report:
+   x-reanimate-host 125920, a Papyrus kill refused E_DEATH_UNCHECKED, the
+   record's alive state stood the body up 1.3 s later through deathService's
+   resurrect, as the refused-report correction intends; the mirror's gate and
+   the correction are two paths); the floor poll (deathReportService.onUpdate) retired, deathStart
    the one ear; killActor's end-then-kill the puppet's path alone;
    onChangeValuesMessage's health write kept for puppets and figures.
 4. Tests: ActorDeathTest and CellHostTest cases for a player's hit reaching
