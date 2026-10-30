@@ -871,7 +871,14 @@ class Runner:
             return "failed", f"the cleaning left {', '.join(left[:4])}" if left else f"exit {res.exitcode}: {res.err.strip()[:200]}"
         if not await self.board.wait_heartbeat(client, since, self.s.relaunch_heartbeat_timeout_s):
             return "failed", f"no poll from its new game within {self.s.relaunch_heartbeat_timeout_s:g}s"
-        return "ok", f"{int(said.get('removed') or 0)} files cleaned"
+        note = f"{int(said.get('removed') or 0)} files cleaned"
+        held = [str(x) for x in said.get("held") or []]
+        if held:
+            note += f", {len(held)} held open left in place ({', '.join(held[:2])})"
+        stale = str(said.get("stale") or "").strip()
+        if stale:
+            note += f", a stale hot mark removed ({stale[:100]}; a dist was laid after it)"
+        return "ok", note
 
     def _remember_seats(self, rec: RunRecord, clients: list[str]) -> None:
         """ADR-036: at a run's end, what each managed seat's next reset needs (SeatState). A seat whose reset never
@@ -2245,23 +2252,35 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     return "\n".join([
         "$ErrorActionPreference = 'Continue'; $ProgressPreference = 'SilentlyContinue'",
         f"$lab = '{lab_dir}'; $hot = Join-Path $lab 'hot.txt'",
-        "if (Test-Path -LiteralPath $hot) { @{ hot = $true; mark = [string](Get-Content -LiteralPath $hot -Raw) } | ConvertTo-Json -Compress; exit 0 }",
+        # a mark older than a dist laid since (install-lab writes games\\<version>.txt at every lay) names a push the dist
+        # superseded: it goes, and the seat relaunches (sky-c1, 2026-10-30: a 10-29 03:35Z mark inside 3o's clean-m1-next
+        # rolled it back at every run and after every cold rollback that restored it)
+        "$stale = ''",
+        "if (Test-Path -LiteralPath $hot) {",
+        "  $mark = Get-Item -LiteralPath $hot",
+        "  $laid = @(Get-ChildItem -LiteralPath (Join-Path $lab 'games') -Filter '*.txt' -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTimeUtc -gt $mark.LastWriteTimeUtc })",
+        "  if ($laid.Count -eq 0) { @{ hot = $true; mark = [string](Get-Content -LiteralPath $hot -Raw) } | ConvertTo-Json -Compress; exit 0 }",
+        "  $stale = [string](Get-Content -LiteralPath $hot -Raw); Remove-Item -LiteralPath $hot -Force",
+        "}",
         "Get-ScheduledTask -TaskName 'sky-lab*' -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Running' } | Stop-ScheduledTask",
         stop,
         "if ((Get-ScheduledTask -TaskName sky-lab-launch -ErrorAction SilentlyContinue).State -eq 'Running') { Write-Error 'sky-lab-launch still runs after its stop'; exit 3 }",
-        "$gone = New-Object System.Collections.ArrayList; $left = New-Object System.Collections.ArrayList",
-        "function Clean([string]$dir, [string[]]$files, [string[]]$dirs) {",
+        "$gone = New-Object System.Collections.ArrayList; $left = New-Object System.Collections.ArrayList; $held = New-Object System.Collections.ArrayList",
+        "function Clean([string]$dir, [string[]]$files, [string[]]$dirs, [switch]$soft) {",
         "  if (-not (Test-Path -LiteralPath $dir)) { return }",
         "  foreach ($item in @(Get-ChildItem -LiteralPath $dir -Force -ErrorAction SilentlyContinue)) {",
         "    $like = if ($item.PSIsContainer) { $dirs } else { $files }",
         "    if (-not ($like | Where-Object { $item.Name -like $_ })) { continue }",
         "    Remove-Item -LiteralPath $item.FullName -Recurse -Force -ErrorAction SilentlyContinue",
-        "    if (Test-Path -LiteralPath $item.FullName) { [void]$left.Add($item.FullName) } else { [void]$gone.Add($item.FullName) }",
+        "    if (Test-Path -LiteralPath $item.FullName) { if ($soft) { [void]$held.Add($item.FullName) } else { [void]$left.Add($item.FullName) } } else { [void]$gone.Add($item.FullName) }",
         "  }",
         "}",
         "Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log', '*.js.out.copy', '*.js.log.copy') @()",
-        "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
-        "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
+        # the capture folders are cleaned as far as they will go: a file a timed-out guest-file-close left open in the
+        # agent (proxmox.py file_read, 2026-10-17) stays until the VM restarts, and failing the try on it cost sky-c2 a
+        # rollback (b-cloak-fight 20261030-053144: 025.png.b64 and 032.png.b64); the next capture writes its own name
+        "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
+        "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
         "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
         "Clean (Join-Path $lab 'input') @('request.json', 'done.json') @()",
         f"$presets = @({names})",
@@ -2271,10 +2290,10 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         "}",
         f"Clean '{skse.parent / 'Saves'}' @('TESMODPLATFORM-*') @()",
         f"Clean '{skse}' @('skyrim-platform-pid*.log') @()",
-        "if ($left.Count -gt 0) { @{ hot = $false; removed = $gone.Count; left = @($left) } | ConvertTo-Json -Compress; exit 4 }",
+        "if ($left.Count -gt 0) { @{ hot = $false; removed = $gone.Count; left = @($left); held = @($held); stale = $stale } | ConvertTo-Json -Compress; exit 4 }",
         "$ErrorActionPreference = 'Stop'",
         start,
-        "@{ hot = $false; removed = $gone.Count; left = @() } | ConvertTo-Json -Compress",
+        "@{ hot = $false; removed = $gone.Count; left = @(); held = @($held); stale = $stale } | ConvertTo-Json -Compress",
     ])
 
 

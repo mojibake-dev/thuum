@@ -805,8 +805,12 @@ touched it outside a run (a hold, lab-down, a snapshot, promote or rollback
 of the clone); when it has played LAB_RELAUNCH_ROLLBACK_EVERY runs (20) since
 its last rollback; when its VM is not running; and when C:\sky-lab\hot.txt
 marks a hot push, which the relaunch reads first and then touches nothing. A
-relaunch that fails is tried once more, and a second failure rolls the seat
-back in the same run.
+mark older than a dist laid since (install-lab writes games\<version>.txt at
+every lay, and from main 7be6465 removes the mark itself) is stale: the
+relaunch removes it and goes on, noted "a stale hot mark removed" (2026-10-30:
+a 10-29 03:35Z mark inside 3o's clean-m1-next rolled sky-c1 back at every run,
+and every cold rollback restored it). A relaunch that fails is tried once
+more, and a second failure rolls the seat back in the same run.
 
 The cleaning list names folders and patterns, never a wildcard over
 C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
@@ -818,8 +822,13 @@ Platform's generated saves, which a kill before its load settles leaves); the
 SKSE folder's skyrim-platform-pid*.log (launch.ps1's copies, which the next
 run's end would collect as its own). Crash dumps stay: a run's end counts
 only those written since a few minutes before its start, and a crash it finds
-rolls the seat back. A file that will not go fails the try. A scenario that
-writes anywhere else says `client: rollback`.
+rolls the seat back. A file that will not go fails the try, except in the
+capture folders shots\ and screenshots\, which are cleaned as far as they go:
+a file a timed-out guest-file-close left open in the agent stays until the VM
+restarts, the note says "<n> held open left in place", and the next capture
+writes its own name (b-cloak-fight 20261030-053144 lost a rollback to two
+held .png.b64 sidecars). A scenario that writes anywhere else says
+`client: rollback`.
 
 result.json's `client_reset` holds each managed seat's `{kind, seconds,
 since_rollback, reason, image_base}`, and a note per seat reads "c1 relaunched
@@ -827,10 +836,16 @@ in <s> s, <n> runs since its rollback, <k> files cleaned" or "c2 rolled back
 in <s> s: <reason>". `image_base` is the game check's read of the image's base
 address, also noted per seat: a relaunch within one boot tends to keep the
 base a cold boot randomizes (ADR-036). In a run set (ADR-030 as ADR-036
-amends it), each seat's first run rolls it back, and a red run in which a
-seat relaunched (its entry's `relaunched`) is rerun once with every seat
-rolled back, tagged `cold-rollback`; that rerun's verdict is the scenario's,
-both stay in the set's record, and ADR-027's lone-red reruns follow as before.
+amends it), each seat's first run rolls it back. A red run in which a seat
+relaunched (its entry's `relaunched`) is rerun relaunched first, tagged
+`relaunched`, which costs no card a reset; only a second red is rerun with
+every seat rolled back, tagged `cold-rollback`, and the last rerun's verdict is
+the scenario's (ADR-036's note of 2026-10-30). Red, red and a cold green is
+green for the gate and a finding by name in the set's notes: the relaunched
+seats and the cold ones disagreed. Every run stays in the set's record, and
+ADR-027's lone-red reruns follow as before. A run whose seat's VM could not
+start (a failure naming "QEMU exited") stops the set at once with no rerun,
+its position kept so a resume plays it again.
 
 ### Known intermittent fault: a teleport that never settles (E_RUN_TELEPORT)
 

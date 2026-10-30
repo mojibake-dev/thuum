@@ -3073,6 +3073,17 @@ a seat whose relaunch fails twice and for the snapshot promotions. UNMEASURED un
 day: the minutes saved per run against the rollback's, and any state a relaunch carries that a
 rollback cleared.
 
+Note 2026-10-30 (numidium, thuum-cf agreeing under the pass's rule; amends ADR-030's cold-rerun amendment): a red
+run in which a seat relaunched is rerun relaunched first, costing no card a reset; only a second red is rerun with
+every seat rolled back, and the last rerun's verdict is the scenario's. Red, red and a cold green is green for the
+gate and a finding by name about relaunch-carried state, since the relaunched and cold seats disagreed. Why: the
+first live gate in relaunch mode (run set 20261030-050437) spent an immediate cold rerun, two rollbacks a seat, on
+each of two reds (b-duel's marginal 0.7851 against 0.78, b-npc-talk's NPC drift), and the second preceded sky-c1's
+card wedging at 05:39:41Z. The same night lab-api learned that a stale hot mark (one older than a dist laid since)
+is removed, not obeyed; that the capture folders are cleaned as far as they go; and that a VM that cannot start
+stops the set with no rerun. Measured: c2 relaunched in 31 to 33 s against 55 to 64 s for a rollback, with zero
+device resets per relaunch by core's count of the host's vfio lines.
+
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 
 Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
