@@ -3580,3 +3580,102 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its train's stage, x-quest-rumor v1 (the rumor's own stage 10 relayed, the denied quest kept at the client, FreeformHeartwoodMill's
   flagged start-up stage refused and its plain stage the world's); committed as a scenario it would red today's nightly under D62, so
   b-quest-rumor is promoted from it when green there. D68 and D69 recorded in DECISIONS.md under ADR-030 and ADR-056.
+- 10:53 PDT: b-body-loot red twice in the sweep (174118, 174322): its premise is the D37 layer's load order (Death Drop Overhaul out, Eli's
+  D37 B of 10-27), and dd2550c reached neither main nor the staged defaults layer (bd5bb64); main's essentials still carry
+  death-drop-overhaul-1.2.4 (verified in git before answering). The call (numidium's recommendation, apocrypha agreeing, taken under
+  the pass's rule): the scenario pending in lab/gate.yaml (main 4c2f1a8, numidium, the config line alone), out of both citations, its
+  steps and claims untouched; the other way was the D37 layer merged first (a layer stage and a full sweep, hours). It comes out in
+  layer-souls' merge (apocrypha's e94b63c carries D37 and Skyrim Souls RE; its gate plays b-body-loot after the clone's DDO.dll
+  deletion is read). The debt named for Eli: D37 B is three days unlanded, every stage since 10-28 has had DDO in. The sweep at 26
+  of 102 green at 10:52 PDT, b-cast-crossfire running.
+- 10:58 PDT: correction to the 10:53 line (numidium's read after the cold rerun): b-body-loot is not red by design under Death Drop
+  Overhaul; its verdict follows the fate's roll. The three runs' worn lists before and after the kill: 174118 red, the rolled weapon
+  79760 gone at death; 174322 red (relaunched), the rolled weapon 77495 gone; 174522 GREEN (cold rollback), the rolled SteelSword
+  0x13989 kept. The mod drops some rolled gear at death and not other (x-body-loot v3 and v4 lost the shield 0x13914), so with it
+  loaded the scenario is a coin flip on the roll, and ADR-036's relaunch-carried-state finding would misattribute the pattern. The
+  sweep counts it green (the last verdict), so the union's citation never needed the pending line. The line stays, its reason
+  corrected (main af1968a, gate.yaml alone): the scenario's premise (DDO out) is unmet on main, and a coin flip in the nightly costs
+  two reruns per red and proves nothing until layer-souls takes DDO out; its claims stay as promoted. The debt is unchanged: D37 B
+  unlanded. The sweep at 29 of 102, b-cast-rhythm running.
+- 12:05 PDT: b-npc-body-release RED three times in the sweep, the cold rollback included (184852, 185123, 185329), on step 26's
+  `ProcessActivate 39fe4 - no occupant` count at 0 with the activation itself working (c1's "Sent activation" and the handler's
+  "waiting for 'ContainerMenu open' (a corpse)" lines; no server line at all). numidium's cause, confirmed in the union's code at
+  0e23c820: memo D52's shared containers (dbfc8e82, 10988419) moved a corpse's open and close onto containerOccupants (Add, Remove,
+  Prune, no lines but "N players in the container now" at a second concurrent occupant), and the single-occupant check with its "no
+  occupant" and "occupant is another object" lines is furniture's alone (MpObjectReference.cpp:1965). The scenario (10-25, train-46)
+  last ran 10-28, before D52 met a gate; the claims predate it. The amendment (main 330124b, the scenario alone, rule 13; not a
+  loosening, each claim at least as strong as the line it replaces): the same shape (c1 loots and closes, then c2 is admitted); each
+  seat's admission is the server's OpenContainer read at the client's handler line (`log-count` steps, c.log_count claims) with the
+  ContainerMenu open in a dump-state; c1's release is its handler's "menu closed" and "sent ActivateMessage" lines (the closing
+  activation that ProcessActivateSecond's corpse branch takes); the release's effect is the server's silence at c2's join (no
+  "[0-9]+ players in the container now": c1 stands inside the 512-unit occupation reach, having passed the 452-unit reach check, so a
+  c1 left in the set would make c2 the second occupant and log it); kept: no "occupant is another object", no E_ACTIVATE_REACH, the
+  body dead on the record. Two seats in one body at once stays x-shared-chest's (D52's probe). Loaded through lab-api's
+  load_scenario (47 steps, 20 assertions parse) before the commit. Next (numidium): deploy-srv with the layer, then
+  `RUNSET_AFTER=20261030-164127-pass-union-0e23c820 just sweep pass-union-rest` on the same stage.
+- 12:11 PDT: the stage-0 churn numidium noted in x-quest-mode v5 (151127) scoped for a train after D69's (docs/verbs/quest-stage.md, "Ahead"):
+  the quest is DLC1VCController 0x0201a428 (Dawnguard.esm, Start Game Enabled, Run Once, the vampire-conversion controller),
+  restarting in bursts of 32 a minute apart on each seat; the server's line is already one per seat per 10 s with the count, so the
+  cost is the wire; the client has no Start Game Enabled getter, so the fix is a per-quest repeat window in onQuestStage (30 s,
+  UNMEASURED), one trace line per window, a probe with the server's held count under thirty and the mode-all relay unchanged.
+  Client only, its own branch off the merged base; nothing of it rides the D69 train. The sweep continues (numidium's rest set after
+  its end, then the merges).
+- 12:24 PDT: Eli on the bodies and the props ("i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"): ADR-058's slice three (a dead body as a prop with one resting-place sample) is M4's,
+  the "unless playtest 39 ranks the bodies' drift first" clause retired; recorded under ADR-058 and in prop-physics.md's slice-three
+  row. Nothing in the pass changes: the bodies keep train 52's pre-kill placement and each game's own fall (npc-fate.md:114), and
+  playtest 39's item 2 (bodies lying, not standing, at a load: finding 71) is this pass's fix, not slice three's.
+- 12:58 PDT: Eli: "status? when's 39 if now, please get some prework done on some other stuff". The sweep at 65 of 102 at 12:54 PDT, 3.0 min a
+  scenario, ending about 14:45 PDT; then numidium's deploy-srv and the rest set (b-npc-body-release's rerun), the merges and the
+  layer, so playtest 39 about 15:30 PDT on the merged build (the stage's bytes). Prework meanwhile: (1) the physics train carries the
+  union head locally (m3-prop-physics dde874b5, a merge of 0e23c820, tsc clean; not pushed, the client build stays off the seats'
+  host until the sweep ends); the D69 branch already contains it. (2) The five by-path probes for the physics stage and D69's T3 load
+  through lab-api's load_scenario (x-prop-push 42 steps, x-prop-pass 37, x-prop-grab 58, x-prop-drop 37, x-quest-rumor 34). (3) The
+  stage-0 repeat window built on fork m3-quest-report-dedupe 7eb968bb with its probe by path (quest-stage.md "Ahead"). (4) The owed
+  read of the server's effect-condition evaluator refusing Reanimate on a corpse (npc-fate.md:1944-1949) is delegated to a reader
+  agent (the CTDA list of MGEF 0xcab63 from the master file, EffectConditionsHold's handling of each, the misread candidate, a T0).
+  rest.md's F1/F2 are already in the pass (m3-rest-correction 6a3427fa), nothing left there.
+- 13:02 PDT: the owed evaluator read is back (a reader agent, 26 tool uses; its citations spot-checked in the union's code): the refused
+  effect at 3o's reanimate ("EffectConditionsHold - effect cab63 of 65bd7 by ff000001 at 35534: its conditions fail") is Reanimate
+  Corpse's third effect, PerkDarkSoulsReanimateEffect 0xcab63, whose one CTDA is HasPerk(DarkSouls 0x581de) == 1 on the caster (the
+  record's bytes from Skyrim.esm on sky-srv; the spell's other two effects carry HasKeyword MagicNoReanimate == 0 and ActorTypeUndead ==
+  1 OR IsUndead == 0, no GetDead and no GetLevel anywhere; the level cap is the archetype's magnitude 13 and deadness the archetype's
+  own engine check). HasPerk answers 0 for the magic caller by design (condition_functions/HasPerk.cpp:35, ADR-039: the server holds no
+  perks before M5), so the rider is refused on every target and the base effects hold; EffectConditionsTest's case "Reanimate Corpse's
+  Dark Souls rider is refused by its HasPerk condition" (unit/EffectConditionsTest.cpp:408-446) already encodes it on a living target.
+  On a corpse the line is a log line alone: ApplyEffects returns for a dead target before any condition (MpActor.cpp:3776), the only
+  evaluation is OnSpellHit's hostility loop, and the raise went through CastReanimateOnHost's snippet (R2), which never consults the
+  evaluator. npc-fate.md:1944-1949's HYPOTHESIS (a GetDead or level misread) is falsified and closed; no code change. A one-line
+  follow-up for the next server train touching MpActor's effects: the refusal line names no row; appending the failing row
+  ("HasPerk(0x581de) == 1 on Target") with a dead-target case in that test would have saved this read.
+- 14:01 PDT: b-spell-placed-wall RED three times in the sweep, the cold rollback included (204953, 205125, 205303), on claim 3 alone: the
+  server's copy of Raise Wall's wall (192 along the yaw, ADR-057 shape C) stands 75 to 88 units from the caster's own engine wall,
+  which stood 104 to 118 ahead of c1 and moved 14 units between runs at the same stand; the server placed once per cast and the
+  observer holds one runtime copy of each form (the morning's CallNative fix), so the placement model is wrong, not the halves.
+  HYPOTHESIS: the script places the wall at the caster's aim (TargetBox), so no fixed step matches. D70 (numidium's memo, taken under
+  the pass's rule, recorded under ADR-057): B, the copies off for the merge through the verb's kill switch (spellPlacedObjects
+  emptied in both deploy settings, main 061288b with the scenario's pending line in lab/gate.yaml; layer-render --check green, no code
+  change, no head move), the merge on the rest set; A (the caster-reported pose, a new message, client and server, a rebuild and a
+  restage) would have cost the afternoon and 39; C (merge the wrong place by name) refused as a player-visible wrong outcome. For
+  playtest 39 the other seat sees no wall again, item 8 rewritten as the declared limit and the known-limits list extended. The fix is
+  shape A as the next train after the physics and rumor trains, its Dynamic read first (x-raise-wall v4: the caster's engine wall's
+  distance at three pitches, by path, at the physics stage). numidium: deploy-srv from main (the emptied table), then the rest set.
+- 14:02 PDT: D70's Dynamic read by path, x-raise-wall-pitch v1 (01176511; both probe folders): the caster's own wall at three pitches under
+  the emptied table, for the physics stage. numidium told (B, 061288b, deploy from main, the rest set, the pending line).
+- 14:29 PDT: c-dungeon-enemies, M3's exit, RED three times (210543, 210957 relaunched, 211413 cold) at claim 5's first menuOpen: the
+  server admits the non-host (c2, the killer) to the body and c2's engine never opens it (the handler's 15 s give-up, the driver's
+  Activate false); the body had been released from the puppet state at its death with the AI left off (Promote's dead branch,
+  H-54e). Everything before held. D71 (numidium's memo, taken under the pass's rule, recorded under ADR-050): C, merge as it stands
+  with the scenario pending by name (the admission is harmless, the guest's E does nothing: playtest 34's state, declared on 39's
+  checklist), M3's exit open until the fix's gate; A impossible without the read (rule 8) and a client rebuild plus the sweep again;
+  B a server head move for no visible change. The scenario's claim 5 also amended for D52 as b-npc-body-release's (its own commit).
+  The read x-body-open-guest v1 by path (e4031424): the server's kill and c2's open, the host's engine death and c2's open, then
+  c2's npc-ai on the body and a third open; H5 (AI off refuses activation) against H1 (the death never completes on a puppet).
+  Asked of numidium: the read in the first lab gap after the rest set; b-npc-body-release pended only if the rest set reds it.
+- 14:39 PDT: c-riverwood, M3's second exit scenario, GREEN on its relaunched rerun (212353; the first run 211911 red on the restart leg alone,
+  Alvor's restored record 72 units off in y against 64, the hand-off and the schedules whole): an ADR-027 watch item (gate.yaml,
+  cell-host.md): the write-behind save's lag at a restart (TickSaveStorage's one batch in flight, HYPOTHESIS), a graceful stop that
+  flushes as the fix in kind. numidium: D71 taken as written; gate-cite 8e1fd11 leaves pending scenarios out of a chain's rest set, so
+  the rest set is b-npc-body-release alone, then x-body-open-guest, then the merges near 22:15Z, 39's setup at 22:30Z. The first set
+  at 97 of 102 (14:38 PDT): 94 green, the three reds read and recorded.
+- m3-pass-train-3-win merged to fork parity 0e23c820 (2026-10-30T21:55Z): the gate 20261030-164127-pass-union-0e23c820 (cited, ADR-042), 20261030-164127-a-activation-reach to 20261030-214533-t2-fakeclient-restart (111 runs); T2 skip on skymp-server:m3-pass-train-3-win, citing 0e23c820's T2 green alone 15:41 to 16:10Z (92a3f276's per-field tolerance inside); clones not promoted here (layer-merge promotes the pair, ADR-042a). The union P3-win over parity bf133744: trains 1 to 3, D64's 60 Hz send flush, D66's held-cast hole time, the CallNative fix (Raise Wall seen by the other seat, its server copies then off for the merge under D70 B), the prop candidate set and the drop's reference gate (props dark, propPhysics off by default, D68), quest sharing in mode all (b-quest-stage green), the story arrival (b-story-arrival green) and the non-host reanimate (x-reanimate-host v6 green). The set: 99 of 102 green, red only on what gate.yaml holds pending at the merge (b-spell-placed-wall D70; c-dungeon-enemies D71, the guest cannot open a body, so M3's exit stays open; b-npc-body-release 428a2ee, its amended claim follows the OpenContainer and menu order, red twice in the rest set 20261030-214710-pass-union-rest, which is that line's evidence and not the citation); c-riverwood a watch item (the restart leg's write-behind lag, red 211911 then green 212353); b-body-loot green on its cold rerun, pending for the D37 layer. The GPU stagger held all day (core: 45 bursts, none closer than 20 s, no failure). The defaults layer bd5bb64 merges next under the same set.
+- apocrypha/layer-defaults (a mod layer) merged to main 31a2080a by merge commit (2026-10-30T21:57Z): the full sweep 20261030-164127-pass-union-0e23c820 (cited with m3-pass-train-3-win, ADR-042a; the layer's own run 20261030-122932-smoke-two-players), 20261030-164127-a-activation-reach to 20261030-214533-t2-fakeclient-restart (111 runs); both clones promoted. Plugins: the load order unchanged (no plugin added or dropped); the layer is patches and keys only: game-ini.tsv's subtitles on (bGeneralSubtitles, bDialogueSubtitles) and the kill camera off (bVATSDisable=1); plugin-patches.tsv's rotfern.esp FormList sets (RaceCompatibility's and the vampire half), USSEP's Steady Hand slowdown abilities dropped and Quick Reflexes' slowdown at 1.0, and SpellAbsorption's three Slow Time words at magnitude 1.0, so no shout or perk slows the other seat's clock; persist's tree 5,754 files (rotfern.esp CRC32 7B65C699). The fork's parity 0e23c820 was merged first (c8d8ec9), the pair's clean-m1-next promoted here. Next layer: apocrypha/layer-souls (D37 B's Death Drop Overhaul out and Skyrim Souls RE), b-body-loot its gate scenario after the clone's deletion of DeathDropOverhaul.dll is read.

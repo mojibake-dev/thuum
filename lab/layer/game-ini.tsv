@@ -1,0 +1,8 @@
+# The game's own ini keys every seat gets (docs/MODS.md, "Multiplayer defaults"): persist-mods puts this file at the
+# tree's root beside plugins.txt; add-mods.ps1 (and the friend installer, the same file) writes each key into the
+# named file under the user's Documents\My Games\Skyrim Special Edition, under its section, the other lines kept.
+# These are a seat's own settings (R3); nothing here reaches the server.
+file	section	key	value	why
+SkyrimPrefs.ini	Interface	bGeneralSubtitles	1	Eli, 2026-10-28: "subtitles need to be on across the board". The engine's two subtitle switches live in SkyrimPrefs.ini [Interface] (the seat's file has both at 0; the executable names both); this one is the ambient lines
+SkyrimPrefs.ini	Interface	bDialogueSubtitles	1	the same for dialogue lines
+Skyrim.ini	VATS	bVATSDisable	1	Eli, 2026-10-28: "killcams have to be disabled for multiplayer". The kill camera (melee cinematic and the bow's arrow cam) is the engine's VATS camera; bVATSDisable=1 under [VATS] is its switch (the executable names it; no game setting governs the camera, Skyrim.esm's only kill-cam GMST is fKillCamBaseOdds, unread). The fork's client already blanks KillMove* animation events for runtime figures (deathService.hookDisableKillMoves, ids ff000000..ffffffff), so this closes the camera on the player's own kills and deaths. HYPOTHESIS until a seat kills with a bow and sees no cinematic

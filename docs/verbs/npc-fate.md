@@ -984,6 +984,28 @@ box, a claim too broad by the bear's own death, a hostile taking the
 god-mode player). Train-46 MERGE-READY by citation and MERGING on Eli's
 "Merge now" (gate 20261026-001639 eighteen of eighteen, T2 green).
 
+AMENDED FOR D52 (12:06 PDT 2026-10-30, main 330124b, the scenario alone):
+b-npc-body-release's claims counted the single-occupant check's lines
+("ProcessActivate 39fe4 - no occupant", twice), and memo D52's shared
+containers (dbfc8e82, 10988419; the pass union 0e23c820) moved a corpse's
+open and close onto containerOccupants, which write nothing but "N players
+in the container now" at a second concurrent occupant; the check is
+furniture's alone now (MpObjectReference.cpp:1965). The scenario went red
+three times in the union's sweep (20261030-164127: 184852, 185123, 185329)
+with the activation working. The shape is unchanged (c1 loots and closes,
+then c2 is admitted at once); the claims read D52's path: each seat's
+admission as the server's OpenContainer at the client's handler line
+("waiting for 'ContainerMenu open' (a corpse)", a log-count step) with the
+ContainerMenu open in a dump-state; c1's release as its handler's "menu
+closed" and "sent ActivateMessage" lines (the closing activation
+ProcessActivateSecond's corpse branch takes); the release's effect as the
+server's silence at c2's join (no "[0-9]+ players in the container now":
+c1 stands inside the 512-unit occupation reach, so a c1 left in the set
+would make c2 the second occupant and log it); kept: no "occupant is
+another object", no E_ACTIVATE_REACH, the body dead on the record. Two
+seats in one body at once is x-shared-chest's read (D52's probe), not this
+scenario's.
+
 BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
 resetBaseFirst, and the view's dead-body apply passes false, so a game-file
@@ -1921,10 +1943,17 @@ cast ("OnSpellCast ff000001 cast 65bd7 ... relayed"), the server sent the cast t
 ("resurrection by its host's engine: 35534 stands again with health 1.000 on ff000000's sample"), the record's death cleared and
 the live word to every listener; alive on both seats. Two reads around it: the server's own condition evaluator refused the
 effect on the corpse in the same millisecond ("EffectConditionsHold - effect cab63 of 65bd7 by ff000001 at 35534: its conditions
-fail; not applied (ADR-039)"), harmless here since the host's engine applies the effect (R2, recorded), but HYPOTHESIS: if
-Reanimate's conditions should hold on a dead target under its level cap, the evaluator misreads one of them (GetDead, or the
-level condition against the record), which would matter for any R0 effect gated the same way; a read of cab63's CTDAs against
-the evaluator is owed. And the aim: on c2 the mouse step's pitch found the body at 700 to 800 counts for a target 80 units off
+fail; not applied (ADR-039)"), harmless here since the host's engine applies the effect (R2, recorded). CLOSED (13:02 PDT 2026-10-30, a reader agent's
+read, its citations checked): no misread. The refused effect is the spell's third, PerkDarkSoulsReanimateEffect 0xcab63, whose
+one CTDA is HasPerk(DarkSouls 0x581de) == 1 on the caster (the record's bytes from Skyrim.esm; the other two effects carry
+HasKeyword MagicNoReanimate == 0 and ActorTypeUndead == 1 OR IsUndead == 0; no GetDead and no GetLevel on the spell at all, the
+level cap being the archetype's magnitude 13 and deadness the archetype's own engine check). HasPerk answers 0 for the magic
+caller by design (condition_functions/HasPerk.cpp, ADR-039: no perks server-side before M5), so the rider is refused on every
+target and the base effects hold, as unit/EffectConditionsTest.cpp's "Dark Souls rider" case already encodes on a living target.
+On a corpse the line is a log line alone: ApplyEffects returns for a dead target before any condition (MpActor.cpp:3776), the
+only evaluation is OnSpellHit's hostility loop, and the raise went through CastReanimateOnHost's snippet, which never consults
+the evaluator. Follow-up for the next server train touching MpActor's effects (one line and a test case): the refusal line names
+no row; append the failing row ("HasPerk(0x581de) == 1 on Target") and add the dead-target case to that test. And the aim: on c2 the mouse step's pitch found the body at 700 to 800 counts for a target 80 units off
 and about 120 below the eye (about 13 counts a degree on this seat; the rune probes' 20.2 was another seat's or another frame's).
 
 ## Status
@@ -2336,3 +2365,20 @@ tells the host's seat outright to cast the accepted reanimate from the caster's 
 Spell.Cast on the host's engine), deterministic and still the engine's reanimation, with the level cap and the thrall's
 duration the engine's on the host; the thrall follows the caster's figure there. The server side stays R0 for the
 record's life and R2 for the thrall's behaviour.
+
+## The non-host's loot at M3's exit (D71, 14:29 PDT 2026-10-30; c-dungeon-enemies on the union 0e23c820)
+
+RED three times (210543, 210957 relaunched, 211413 cold) at claim 5's first menuOpen: c2, the puppet seat and the killer, activates
+the body and the server admits it (OpenContainer, "onOpenContainerMesage - waiting for 'ContainerMenu open' (a corpse) to be
+true" on c2), but the engine never opens the menu and the handler gives up at 15 s and sends the closing activation; the driver's
+Activate answered false. c2's body: "promote 39fe4: dead, the block lifted and the AI left off (npc-fate H-54e)" at the death
+(14:17:32), nothing of ours touches it after. The host's engine opens the same body (b-npc-body-release's cold run, 18:56). The
+scenario also counted the single-occupant lines D52 removed; its claim 5 is amended (its own commit) to read D52's path as
+b-npc-body-release's. HYPOTHESIS, the read x-body-open-guest v1 (by path, sha1 e4031424; the server's kill of 0x39fe4 and c2's open;
+the host's console kill of 0x39fe2, the engine's death by the host's report, and c2's open; then c2's npc-ai on the body and a third
+open) separates: H5, an actor with its AI off takes no activation even dead (then the fix is the AI on at the release once the body
+rests, or at the server's OpenContainer, with H-54e's stand-up re-read); H1, the death never completes on a puppet (then the fix is
+the kill path's completion on the puppet seat). The scenario is pending (lab/gate.yaml) and M3's exit stays open until the fix's
+gate plays it green; playtest 39 carries the guest's loot as a declared limit (playtest 34's state). Noted beside it: after the
+death the host kept receiving causes for the dead body from the guest's late swings (c1's "cause on 39fe4: health 0.000 ... attacker
+ff000ceb", one per hit for 50 s), the server's OnWeaponHit at 0 -> 0 each time; harmless, a bound for a later train.

@@ -331,4 +331,5 @@ Two props the engine owns differently from clutter, written so the row kind "pro
   takes none), once, within the snap threshold. HYPOTHESIS (the read before the build, x-body-pose's successor): that SetPosition on a
   settled ragdoll moves the whole body coherently on 1.6.1170, and that the second seat's own ragdoll, already at rest, re-settles
   within a stride rather than standing. Corpse dragging is the held object's case on a body (the engine's grab works on ragdolls).
+  M4 by Eli's word (12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"); no earlier slice, whatever playtest 39 shows of the bodies' drift (ADR-058).
 - Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).

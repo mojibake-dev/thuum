@@ -240,6 +240,21 @@ class ChainCite(unittest.TestCase):
         early = {**REST, "started": "2026-10-27T07:00:00Z"}
         self.assertIn("did not begin after", gc.chain([CUT, early])[1])
 
+    def test_a_rest_leaves_out_what_gate_yaml_holds_pending(self):
+        # the union's rest (2026-10-30): a scenario pended while the first set ran is no part of its rest, as an
+        # "all" sweep leaves it out, and check 1 reads its red in the first set as pending
+        cut = {**CUT, "scenarios": CUT["scenarios"] + ["b-spell-placed-wall"],
+               "runs": {**CUT["runs"], "b-spell-placed-wall": [{"run": "r8", "verdict": "red"}] * 3}}
+        rs, why = gc.chain([cut, REST], pending=["b-spell-placed-wall"])
+        self.assertEqual(why, "")
+        self.assertEqual([e["run"] for e in rs["runs"]["b-spell-placed-wall"]], ["r8"] * 3)
+        results = {f"r{i}": result() for i in range(1, 9)}
+        rows = gc.checks(rs, results, ["smoke-two-players", "b-spell"], "m2-train-28", "e3a5b367", [], SID, SID,
+                         dict(DESC), [], pending=["b-spell-placed-wall"])
+        self.assertTrue(rows[0][0], rows[0])
+        # unpended, the same rest is short of it
+        self.assertIn("is not the rest", gc.chain([cut, REST])[1])
+
     def test_a_rest_that_ends_red_leaves_the_gate_red(self):
         red = {**REST, "verdict": "red", "runs": {**REST["runs"], "b-spell": [{"run": "r7", "verdict": "red"}] * 3}}
         rs, _ = gc.chain([CUT, red])
