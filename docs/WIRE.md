@@ -578,7 +578,7 @@ resolves the same string in a declared divergence per stack, from that client's 
 table in its normalized events, before matching. The first T2 of the prop-physics session had
 assumed the generator's next id (0xff000004) and read the claim refused when earlier sessions
 had allocated forms on the same server; the session names its dropped dagger by its base
-(80254) now. The two stacks' generators differ by design, so `created` is never compared.
+(80254) now. The two stacks' generators differ by design, so `created` is never compared. A declared divergence may name per-field tolerances by dotted path (`within: {"data.health": 0.001}`) for the numbers the server takes from its own clock, which no replay reproduces to the digit (D66's counted gap: 8f9c11bd's T2 on a loaded host read 0.94792 where a quiet one read 0.94784, 2026-10-30); every other field matches exactly.
 
 ## Fuzzing
 
