@@ -562,7 +562,9 @@ class RefsNearView:
     or found by the step's ids search; distance(baseId) how far the nearest
     one lies, the listing's exact figure before the search's bisected one
     (docs/research/train-29-rows.md row 7c); pos(baseId) where the nearest
-    listed one stands (x, y, z), for comparing two seats' copies of one prop."""
+    listed one stands (x, y, z), for comparing two seats' copies of one prop;
+    disabled(baseId) whether the nearest listed one is disabled in that game
+    (no collision, no crosshair: a prop probe's premise)."""
 
     def __init__(self, client: str, data: dict[str, Any]):
         self._client = client
@@ -653,6 +655,25 @@ class RefsNearView:
             return PosView(float(p[0]), float(p[1]), float(p[2]))
         except (TypeError, ValueError) as e:
             raise AssertionData(f"{self._client}'s refs-near step listed {int(base_id):#x} with a malformed position: {e}")
+
+    def disabled(self, base_id: int) -> bool:
+        """Whether the nearest listed reference of that base is disabled in the
+        observer's game (the listing's disabled flag): a disabled reference has
+        no collision and no crosshair, so a prop probe claims disabled == false
+        as its premise (x-prop-push v8 162049: Riverwood's street bucket 0x3975d
+        listed disabled on both seats, every walker through its spot)."""
+        nearest: dict[str, Any] | None = None
+        for rows in self._types.values():
+            refs = rows.get("refs") if isinstance(rows, dict) else None
+            for ref in refs if isinstance(refs, list) else []:
+                if not (isinstance(ref, dict) and "distance" in ref and ref.get("baseId") == int(base_id)):
+                    continue
+                if nearest is None or float(ref["distance"]) < float(nearest["distance"]):
+                    nearest = ref
+        if nearest is None:
+            raise AssertionData(f"{self._client}'s refs-near step listed no reference of {int(base_id):#x} (the disabled flag "
+                                f"comes from the listing by type, never from the ids search)")
+        return bool(nearest.get("disabled"))
 
     def distance(self, base_id: int) -> float:
         listed = self._listed(base_id)
@@ -1921,7 +1942,7 @@ _NUMBER_METHODS = {
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
     _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state", "quest"},
-    RefsNearView: {"has", "distance", "runtime_of", "pos"},
+    RefsNearView: {"has", "distance", "runtime_of", "pos", "disabled"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
 _FORM_SPEC_METHODS = {
@@ -1948,7 +1969,7 @@ _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
-    RefsNearView: {"count", "has", "distance", "runtime_of", "pos"},
+    RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "rises", "movedBy", "launched", "flights_match"},
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},
