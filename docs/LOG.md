@@ -3538,3 +3538,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   for any R0 effect gated so). D69 B built on fork m3-quest-sge-stages e7580346 off the union (pipeline 4014, server-only; the CI's
   T0 pending): OWN_START refuses only stage 0 and the record's start-up stages of a start-game-enabled quest, its later stages the
   world's; the login replay follows; the D62 test became D69's. A train after the union's merge, Eli's veto open.
+- 08:33 PDT: x-prop-push v6 (152914; numidium): red at my own ground-level premise, the dump's z being an offset from lab-spawn's origin
+  like server.actor's (c1 on the flat at engine z -143.8 read -14805.8); the walk never ran. v7 of push (sha1 1043fc3b) and pass
+  (ffb1a53c) put the premise in the dump's frame (the tankards' -133 is -14795 there); the memory's frame fact corrected: only
+  server.ref and refs_near().pos are absolute.
