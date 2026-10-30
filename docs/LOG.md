@@ -3268,3 +3268,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   0.96 to 0.948); casts.rs's new case covers the way, a hole, the cadence, a re-contact, a second and the two-hand cap; 241 rules
   cases, the bridge and the harness green, clippy green; pushed server-only, its difftest on the push. R0 and server-only, so it
   merges on T0 and T2 (ADR-053); numidium asked whether to fold it into P3 before the union's T2 rerun. b-duel's claim is unchanged.
+- 22:38 PDT: D66 folded into the physics train at numidium's word (one stage, one gate; b-duel gated there anyway): P3 6796e787 (server-only,
+  the difftest on the push, 257 rules cases green), P3-win 7a6fd1e2 (the client build): the union is trains 1 to 3 plus D64 and D66.
+  Its T2 runs in a quiet window after 3o's gate (8 of 18 green so far in relaunch mode: c1 relaunches since the stale mark went, the
+  only rollbacks the forcing ones), then the merge, the layer and the stage.
