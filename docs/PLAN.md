@@ -1268,9 +1268,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 - The union m3-pass-train-3-win is the new base (D67, taken under the pass's rule after 3o's gate stopped on its two findings and
   the eighth wedge): trains 1 to 3 with D64 (the transport's 60 Hz flush clock), D66 (a single stream's holes counted, casts.rs
   HOLE_MS) and the Raise Wall fix (m3-sp-pack-form 9fad9f08: Skyrim Platform packed a class-less form type, MSTT 36, as None, so
-  every native on the wall's base aborted and the observer's wall never came; HYPOTHESIS until the watcher claim) at 997fedf1,
-  green on client and server (pipeline 3962); its T2 is queued on sky-srv (numidium), then the layer, the stage with its probes
-  and traces, one full sweep as the gate, layer-merge and verb-merge, playtest 39. 3n e14dc298 stays the fallback.
+  every native on the wall's base aborted and the observer's wall never came; HYPOTHESIS until the watcher claim) at 820a565c
+  (997fedf1 plus one difftest commit: D66's declaration as the exact f32), green on client and server (pipeline 3962's client,
+  3974's server and difftest) and T2 GREEN seat-free (numidium, 19 declared divergences held); then the layer, the stage with its
+  fourteen probes and three traces, one full sweep as the gate, layer-merge and verb-merge, playtest 39. 3n e14dc298 stays the fallback.
 - Two findings from 3o's gate, both read without a guess: b-spell-placed-wall (the fix above, and the scenario's v2 frame
   12353ab: c1 at (0, -366), inside its cell's reach of the wall, its copies read through c2's figure's cell); b-npc-talk's hold
   (SetDontMove is lifeState 9 at Actor+0xC8, Actor::Move zeroes the velocity while it reads 9, only Resurrect clears it; nothing in
