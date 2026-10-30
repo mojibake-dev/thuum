@@ -37,8 +37,15 @@
 #     seats' engines; the killer credit to ff000001 is recorded, not claimed;
 #  5. the body is one container for both: c2 then c1 activate it (approach to 150 in the hall's frame),
 #     each opens the ContainerMenu and closes it (the closing activation releases the occupancy,
-#     b-npc-body-release), two "no occupant" lines, no "occupant is another object", no E_ACTIVATE_REACH,
-#     the record dead throughout.
+#     b-npc-body-release). Amended for memo D52 (2026-10-30, as b-npc-body-release 330124b): a corpse's open and
+#     close ride the shared occupant set, which logs nothing but "N players in the container now" at a second
+#     concurrent occupant, so the two "no occupant" lines this claimed are furniture's alone now. Read instead:
+#     each seat's admission as the server's OpenContainer at its handler line ("waiting for 'ContainerMenu open'
+#     (a corpse)") with the menu open in the dump, c2's release as its closing activation's line, and the release's
+#     effect as no "players in the container now" at c1's join (c2 stands inside the occupation reach); no
+#     "occupant is another object", no E_ACTIVATE_REACH, the record dead throughout. On the union 0e23c820 the
+#     non-host's open itself is red (210543, 210957, 211413: the server admits, c2's engine never opens the body
+#     released from the puppet state with its AI left off); pending until its fix, x-body-open-guest reads the cause.
 # Known limits: 0x39fe2 fights unheld and may take some of c2's swings (thirty at 27 a hit leave margin,
 # the until bounds the wait); the pair's level is the fate's roll, so the damage claim is a share below
 # 0.95 after 25 points, not a number (a vanilla humanoid has more than 25 health, so the blow is never
@@ -229,12 +236,17 @@ steps:
   - wait: 4
   - c2: dump-state
   - c2: screenshot
+  - c2: log-count {pattern: "onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == true'
+      - 'c2.log_count("onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true") >= 1'
   - c2: close-menu {name: ContainerMenu}
   - wait: 4
+  - c2: dump-state
+  - c2: log-count {pattern: "onOpenContainerMesage - sent ActivateMessage"}
   - assert:
-      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 1'
+      - 'c2.state.menuOpen("ContainerMenu") == false'
+      - 'c2.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1'
   - c1: approach {formId: 0x39fe4, distance: 150, cell: "371de:Skyrim.esm"}
   - wait: 6
   - c1: close-menu {name: MessageBoxMenu}
@@ -242,12 +254,19 @@ steps:
   - wait: 4
   - c1: dump-state
   - c1: screenshot
+  - c1: log-count {pattern: "onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true"}
   - assert:
       - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'c1.log_count("onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true") >= 1'
+      # the release's effect: c2 is out of the set when c1 joins, so the server never counts two
+      - 'server.log_count("ProcessActivate 39fe4 - [0-9]+ players in the container now") == 0'
   - c1: close-menu {name: ContainerMenu}
   - wait: 3
+  - c1: dump-state
+  - c1: log-count {pattern: "onOpenContainerMesage - sent ActivateMessage"}
   - assert:
-      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 2'
+      - 'c1.state.menuOpen("ContainerMenu") == false'
+      - 'c1.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1'
       - 'server.log_count("ProcessActivate 39fe4 - occupant is another object") == 0'
       - 'server.log_count("E_ACTIVATE_REACH") == 0'
       - server.ref(0x39fe4).isDead == true
