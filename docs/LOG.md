@@ -3620,3 +3620,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   UNMEASURED), one trace line per window, a probe with the server's held count under thirty and the mode-all relay unchanged.
   Client only, its own branch off the merged base; nothing of it rides the D69 train. The sweep continues (numidium's rest set after
   its end, then the merges).
+- 12:24 PDT: Eli on the bodies and the props ("i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"): ADR-058's slice three (a dead body as a prop with one resting-place sample) is M4's,
+  the "unless playtest 39 ranks the bodies' drift first" clause retired; recorded under ADR-058 and in prop-physics.md's slice-three
+  row. Nothing in the pass changes: the bodies keep train 52's pre-kill placement and each game's own fall (npc-fate.md:114), and
+  playtest 39's item 2 (bodies lying, not standing, at a load: finding 71) is this pass's fix, not slice three's.

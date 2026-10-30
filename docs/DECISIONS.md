@@ -3425,7 +3425,7 @@ dungeons, the traps' bodies (M4's d-bleak-falls). Decision 4's slice two is ther
 loader's MSTT admission costs records and arrival messages for effect objects and buys nothing in the lab's cells), and head 3 of
 the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
 position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
-budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first.
+budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first. Eli, 12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"; the playtest 39 clause is retired, slice three is M4's, and the read before its build (npc-fate's measured "a dead ragdoll takes no SetPosition" against the row's SetPosition hypothesis) waits with it.
 
 Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet
 cost. Facts: the gamemode loops `server.tick()` then a 1 ms setTimeout (skymp5-server/ts/index.ts:222-227), about 816 ticks a
