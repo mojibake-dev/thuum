@@ -1212,6 +1212,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   both"), D38 B. 51 MERGED (parity 39cf3f4d, 08:19Z; the gate cut by c2's RTX wedge, core's recovery, finished
   by its rest, 29 runs; watch item b-npc-body-release's old point). 52 staging (P7 v5 first); 54, 55, 53 follow
   on green; the D37 layer (layer-d37-ddo-out) stages at the end with the full sweep, then playtest 35.
+
+- STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
+  sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
+  GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
+  admits, the non-host's engine never opens the body released from the puppet state with its AI left off; the read x-body-open-guest
+  running, the fix the train after), so M3 is NOT DONE today. Dark on the merged build: props (D68, the physics train stages after
+  playtest 39), Raise Wall's copies (D70, the caster-reported pose as a train). Pending by name: b-body-loot (the D37 layer unmerged),
+  b-spell-placed-wall (D70), c-dungeon-enemies and b-npc-body-release (D71; the host's handler stalls in the paused menu too). Built
+  and waiting: m3-prop-physics dde874b5 (the union head merged), m3-quest-sge-stages dc3ec679 (D69 B), m3-quest-report-dedupe 7eb968bb.
 - STATE 2026-10-28 19:3x PDT (playtest 37's turbo night; Eli: "stop queueing things for tonight, we're blasting
   today as hard as possible"): the shared chest's two faults read and fixed (the pause guard, then the item-menu
   gates by name and the take's baseline), the face survivor and the vendor gate (m3-face-twelve b181518b); the

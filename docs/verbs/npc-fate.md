@@ -2382,3 +2382,17 @@ the kill path's completion on the puppet seat). The scenario is pending (lab/gat
 gate plays it green; playtest 39 carries the guest's loot as a declared limit (playtest 34's state). Noted beside it: after the
 death the host kept receiving causes for the dead body from the guest's late swings (c1's "cause on 39fe4: health 0.000 ... attacker
 ff000ceb", one per hit for 50 s), the server's OnWeaponHit at 0 -> 0 each time; harmless, a bound for a later train.
+
+The host's own open, read from b-npc-body-release's rest-set reruns (15:03 PDT 2026-10-30; 214710 and 215006, red at step 26, the
+scenario pending 428a2ee): c1's engine opened the body's menu itself (menuOpen true at +4 s) and the handler's admission line never
+came within the step: on the host the engine's native activation opens the ContainerMenu at once and the game pauses in it, so
+onOpenContainerMessage's first `Utility.wait(0.1)` (game time) stalls until the menu closes; the "waiting for 'ContainerMenu open'
+(a corpse) to be true" line prints after the close (the first sweep's cold run: 18:56:01.6 the activation, 18:56:08.4 the line),
+the checker then finds the menu closed, waits its 15 s and gives up ("gave up waiting ... releasing the occupant"), and only then
+sends the closing activation. So on a host the occupant release runs 15 s late, the "menu closed" line never prints, and the
+admission line is not a fact of the open's moment. A client defect, not the scenarios' premise: the fix rides the guest-loot train
+(the first wait as `Utility.waitMenuMode`, or the checker's loop entered without the game-time wait), the same file as the
+guest's open; the two scenarios' host claims (330124b, a8cd208) are re-timed with that train (the admission line after the close,
+the closing activation at the close), their reruns the train's gate. Before D52 this delay held the body against the other seat
+for 15 s after the looter closed it: playtest 34's "the non-host can't interact with the body" had this second cause beside the
+corpse's missing release.
