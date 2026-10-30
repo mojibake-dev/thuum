@@ -128,6 +128,20 @@ docs/research/transport-clock.md) the transport's polls never called
 and a lost reliable packet was never resent; the fix calls both before the
 transport's update, renet's own order.
 
+Outbound packets leave on a flush clock, not at every poll (D64, 17:26 PDT 2026-10-29;
+fork m3-send-rate): the gamemode polls the server about 800 times a second (a
+tick, then a 1 ms sleep, skymp5-server/ts/index.ts), and renet sends a packet to
+every connection at each `send_packets`, so a flush per poll cost an idle
+client 814.8 packets a second of 26 to 31 B (x-wire-idle-rate on sky-srv,
+numidium: equal to the 816.4 ticks a second within 0.2 percent, near 45 KB/s a
+seat with headers). `wire-transport::FlushClock` accumulates the polled time and
+flushes at `Options::send_interval` (`SEND_INTERVAL_DEFAULT` 1/60 s; zero is
+the old shape), keeps the remainder so the long-run rate is the interval's,
+never bursts after a stalled tick, and a disconnect flushes at the next poll.
+Ingest, validation and the game's tick keep their cadence; a message queued
+between flushes waits at most 16.7 ms. The clients flush at their own poll (a
+frame on a seat, 5 ms on the fakeclient); their rate is theirs.
+
 SkyMP's senders choose per send (`reliable` true or false), and
 `wire-transport::channels::for_send` maps that choice: reliable to channel 0,
 unreliable to channel 2 (SkyMP's server sent reliable as RELIABLE_ORDERED and

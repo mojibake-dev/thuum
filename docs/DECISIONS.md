@@ -3414,3 +3414,21 @@ loader's MSTT admission costs records and arrival messages for effect objects an
 the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
 position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
 budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first.
+
+Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet
+cost. Facts: the gamemode loops `server.tick()` then a 1 ms setTimeout (skymp5-server/ts/index.ts:222-227), about 816 ticks a
+second on sky-srv; the transport flushed renet at every poll (wire-transport lib.rs's poll), so every connected client took about
+815 small packets a second, near 45 KB/s with UDP and IP headers, about 365 kbit/s per idle player; the client answers at its own
+rate (184 a second from the fakeclient's 5 ms loop); an unfiltered capture showed the lab's server sending the same 31 B stream to
+both seats, so this is every player's cost. Options: A) leave it, the cost scaling with players (eight idle players about 3 Mbit/s
+up from the server, plus a busy loop); B) a fixed server tick at 1/60 s, which cuts ticks about 13x but changes the cadence of
+every system the tick drives (PartOne::Tick's timers, the VM, ingest latency up to 16.7 ms) and reopens every T2 and T3 timing
+claim; C) a send schedule in wire-transport, the tick and the ingest untouched, the outbound flush on a fixed 60 Hz clock, a message
+waiting at most 16.7 ms, one crate and one timer, server side only, no wire row and no schema change. Prior art for C: a fixed
+network send rate decoupled from the simulation step (Fiedler, "Fix Your Timestep!", Gaffer On Games, 2004; Valve, "Source
+Multiplayer Networking", developer.valvesoftware.com, the tick rate and the update rate as separate settings; Bernier, "Latency
+Compensating Methods in Client/Server In-game Protocol Design and Optimization", GDC 2001). Decision: C at 60 Hz, fork m3-send-rate
+(wire-transport's FlushClock, SEND_INTERVAL_DEFAULT 1/60 s, the bridge binding with it). Proof: the idle read again on the branch's
+image (about 60 packets a second expected, nothing after the close), the full T2, and the touched verbs' gate, since npc-stream's
+relay cadence and cell-host's grant timing ride the send path; a T3 timing claim the extra 16.7 ms moves has its margin read, never
+weakened (rule 13).
