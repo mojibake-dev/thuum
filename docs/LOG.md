@@ -3659,3 +3659,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   playtest 39 the other seat sees no wall again, item 8 rewritten as the declared limit and the known-limits list extended. The fix is
   shape A as the next train after the physics and rumor trains, its Dynamic read first (x-raise-wall v4: the caster's engine wall's
   distance at three pitches, by path, at the physics stage). numidium: deploy-srv from main (the emptied table), then the rest set.
+- 14:02 PDT: D70's Dynamic read by path, x-raise-wall-pitch v1 (01176511; both probe folders): the caster's own wall at three pitches under
+  the emptied table, for the physics stage. numidium told (B, 061288b, deploy from main, the rest set, the pending line).

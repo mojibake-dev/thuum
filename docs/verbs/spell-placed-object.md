@@ -330,3 +330,11 @@ within 512 of the caster's record, one report per set, the bases those of the sp
 reported pose; the table keeps the forms and the lifetime and loses the step. The Dynamic read first: x-raise-wall v4 with the
 caster's pitch varied (level, 15 degrees down, 15 up) and the engine wall's distance read at each, which proves or falsifies the
 aim hypothesis before the message is designed.
+
+The Dynamic read is written (14:02 PDT 2026-10-30): x-raise-wall-pitch v1 by path (lab/.cache/probes, sha1 01176511; 47 steps, loads
+through lab-api's load_scenario): x-raise-wall v3's frame with the server's table empty, c1 casting three 10 s holds, level, about
+15 degrees down (mouse dy 200 with the wake) and about 15 up (dy -400), its own refs-near inside each hold reading the engine
+wall's distance (recorded in the step's readings, asserted only present), the server's placement line absent. The same distance
+within 16 at the three pitches falsifies the aim hypothesis and sends the fix to the script's own placement rule (lab/esm.py on
+the effect's VMAD, then the Papyrus source if Apocalypse ships it); a distance that follows the pitch confirms it and the message
+of shape A carries the pose. Runs at the physics train's stage, beside its probes.
