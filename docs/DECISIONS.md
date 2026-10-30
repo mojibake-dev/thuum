@@ -3448,3 +3448,28 @@ Proof, 18:43 PDT 2026-10-29 (numidium's reads on sky-srv, the same idle script):
 against 814.8 before (3,304 in 55.1 s, all 26 B, a median gap of 16.6 ms), the loop still at 847 ticks a second (only the flush
 moved), nothing after the close; the full T2 GREEN (difftest 14302, every session identical to legacy but its declared lines).
 The branch's merge waits for the touched verbs' gate when the lab is back.
+
+Note under ADR-030, D68 (09:56 PDT 2026-10-30, the pass; numidium's question, taken under the pass's rule): rule 3 at the union's merge.
+Facts: the union m3-pass-train-3-win carried verbs without a committed scenario (prop-physics slice one, quest mode all, the login's
+story arrival) beside fixes to shipped verbs; the full sweep plays only committed scenarios, so a green sweep proves the union breaks
+nothing it covers and says nothing about a verb without one. Options: A) each partial verb dark by default (a switch off at the
+merge) or made whole by a scenario promoted from its green probe before the sweep; B) cut the union to the whole verbs and restage;
+C) merge as is. Taken: A. Story arrival: b-story-arrival promoted from x-story-arrival-login (green with story-location.js). Quest
+mode all: b-quest-stage promoted from x-quest-mode (green through the relay on MS10MiscObjPointer; the denied claim is the client's
+silence), so mode all merges whole and the deploy's mode stays; quest-stage's missing scenario, a debt from before the pass, is
+closed by it. Prop-physics: dark, propPhysics off by default in the client until b-prop-push is green (the camp's tankards sit in a
+rock pocket, Riverwood's street bucket is disabled, the drop's stream has two faults; the physics train carries the fixes, the
+lab-spawn basket probes and the default back on). The fixes to shipped verbs (the placed-dead loader, the held roster, the NPC
+reach, the rented-bed correction, 3o's reanimate and Raise Wall, D64, D66, the CallNative fix) merge on the sweep as fixes always
+have. The merge record (the sweep's run set and the shas) is the LOG's.
+
+Note under ADR-056, D69 (09:56 PDT 2026-10-30, the pass; taken under the pass's rule, Eli's veto open): finding 76 is D62. The Aventus
+rumor quest (DB01Misc 0x1ea4f) is start-game-enabled, and D62 keeps every start-game-enabled quest's stages per seat unless the
+allowed list names it; the server refused the probe's set on purpose ("a start-game-enabled quest is each seat's own (D62)") while
+the mode-all relay, the report path and the login message all worked. Eli expected the rumor to propagate. Options: A) keep D62 and
+grow the allowed list with the misc and rumor quests players meet (a curated list, finding 76 its first entry); B) what is each
+seat's own is the engine's OWN START of such a quest, stage 0 and the record's start-up stages (QUST INDX, the StartUpStage flag),
+and its later stages are the world's like any other quest's, the denylist the brake and the fragment suppression keeping a relayed
+stage's script off the applying seat; C) leave rumors per seat. Taken: B, built on fork m3-quest-sge-stages (dc3ec679, T0 green: the
+D62 test became D69's on FreeformHeartwoodMill, whose stage 10 carries the flag and whose 20 does not), the train after the union's
+merge, with its own T3 (a rumor's later stage crossing) before it merges.
