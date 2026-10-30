@@ -220,7 +220,7 @@ effect. (b) c2's relayed apply under the detour: 56684, 53716, 25004, 25260, 539
 - [x] native hook + T1 (none needed)
 - [x] TS handler
 - [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: T2 GREEN on m3-turbo-train-3n e14dc298, pipeline 3793, zero undeclared differences, the quest-stage session's declared relay matched once its ids were hex, LOG 2026-10-29 04:15 PDT; the sharing-mode slice's T2 is P2's, running)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (DEBT, 2026-10-30, D68: no scenario of this verb is committed; the mode-all relay, the denylist, the INDX check, the fragment suppression and the login's arrival ride the union with x-quest-mode v3 and b-story-arrival as their reads; b-quest-stage is owed from x-quest-mode's green and lands in its own commit)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated

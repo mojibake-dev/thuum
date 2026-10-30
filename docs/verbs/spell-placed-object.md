@@ -38,9 +38,14 @@ and the call aborted; the caster's own copy stood because the script's
 PlaceAtMe never crosses the platform. Fix on the fork, m3-sp-pack-form 9fad9f08,
 merged into m3-pass-train-3-win 997fedf1 with the client build: a form whose
 type has no class is packed as Form, the class every native that takes a Form
-accepts (the file's own static-VM idiom). HYPOTHESIS until b-spell-placed-wall's
-claim 2, or x-raise-wall's watcher reads, go green on a seat with the fix and
-its console log shows no "Bad call result 4" during the cast.
+accepts (the file's own static-VM idiom). CONFIRMED at T3 by x-raise-wall
+20261030-124309 on the union 820a565c (the v2 frame): the watcher's six claims
+held (both bases listed at the pose; the glow 174.09 against 173.95 from the
+records, the wall 178.75 with its 48 units of depth; runtime_of 1 and 1), zero
+"Bad call result 4" on either seat, two skip lines on c1 and none on c2. The
+run's one red was the caster's own MSTT read 135.7 units below the pose, 104
+units into the mod's 240-unit rise at 512 u/s (x-raise-wall v3 waits 2 s);
+b-spell-placed-wall plays at the sweep.
 
 The frame hid a premise red behind it: the 2026-10-29 move 300 south stood c1
 at (0, -500), in the cell south of the wall's (lab-spawn's origin is 310 units
