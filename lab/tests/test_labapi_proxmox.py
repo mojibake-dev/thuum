@@ -265,6 +265,64 @@ class ProxmoxerTaskTests(unittest.TestCase):
 
 
 @needs_deps
+class ResetStaggerTests(unittest.TestCase):
+    """core's host journal, 2026-10-30: every GPU wedge since August came in a burst where both lab cards reset within
+    seconds, and 1,748 single-card bursts never failed; so two seats' stops and starts land reset_stagger_s apart."""
+
+    def _control(self, stagger):
+        import time
+
+        from labapi.proxmox import GuestControl
+
+        log = []
+
+        class Backend:
+            def stop(self, g):
+                log.append(("stop", g.name, time.monotonic()))
+
+            def rollback(self, g, snap):
+                log.append(("rollback", g.name, time.monotonic()))
+
+            def start(self, g):
+                log.append(("start", g.name, time.monotonic()))
+
+        return GuestControl(Backend(), reset_stagger_s=stagger), log
+
+    def test_two_seats_rollbacks_follow_each_other_a_stagger_apart(self):
+        import threading
+
+        from labapi.guests import Guest
+
+        control, log = self._control(0.3)
+        seats = [Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1"),
+                 Guest("sky-c2", 712, "10.10.70.22", "qemu", "client", True, "clean-m1", "c2")]
+        threads = [threading.Thread(target=control.rollback_sequence, args=(g, "clean-m1")) for g in seats]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(10)
+        names = [e[1] for e in log]
+        self.assertEqual(len(log), 6, log)
+        self.assertEqual(names, [names[0]] * 3 + [names[3]] * 3, "one seat's stop, rollback and start, then the other's")
+        self.assertNotEqual(names[0], names[3])
+        self.assertGreaterEqual(log[3][2] - log[2][2], 0.29, "the second seat's stop waits out the stagger after the first's start")
+
+    def test_one_seats_own_stop_and_start_and_a_server_never_wait(self):
+        import time
+
+        from labapi.guests import Guest
+
+        control, log = self._control(5.0)
+        seat = Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1")
+        server = Guest("sky-srv", 700, "10.10.70.10", "qemu", "server", True, "", None)
+        t0 = time.monotonic()
+        control.rollback_sequence(seat, "clean-m1")
+        control.stop(server)
+        control.start(server)
+        self.assertLess(time.monotonic() - t0, 1.0, "no stagger inside one seat's sequence or for a guest with no GPU")
+
+
+@needs_deps
 class TablesTests(unittest.TestCase):
     def test_shipped_tables(self):
         from labapi.config import PKG_DIR
