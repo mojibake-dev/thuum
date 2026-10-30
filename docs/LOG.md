@@ -3373,3 +3373,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   hold's shape, x-story-arrival-login v2 (story-location.js armed on c1 at a relaunch before the first login and again at the in-place
   one, since a relaunch ends the trace with the process; sha1 8358ce43) and x-quest-mode v2 (quest-stage-chain.js armed on both seats,
   c1 sets and c2 applies; sha1 f81b147d), to run after the stage's probes and before the sweep.
+- 06:24 PDT: the union's stage done (820a565c on the layer; the client laid on both seats, clean-m1-next retaken): 3 green (x-grant-roster,
+  x-cloak-hostile, x-story-arrival-login with story-location.js), 8 red, 2 errors. The errors and three reds are the lab's or mine:
+  x-prop-push and x-prop-pass errored on a missing items-table entry (numidium added BasicTankard01 0x319e3, 9dd7acd); x-prop-grab's
+  pre-grab snapshot and the pre-touch server.ref claims in push and pass asked for a record a game-file reference has only after its
+  first accepted sample (v2 grab, v3 push and pass by path); x-prop-drop's pre-drop runtime_of == 0 was a zero lab-api refuses by
+  design (v2, has == false). Six reds go to agents' reads before the sweep: x-raise-wall 124309 (claim 3's new formula; whether c2's
+  half passed), x-npc-hold 124551 (the trace), x-reanimate-host 125920 (Hilde never died), x-dead-placed-loot 130152 (E_ACTIVATE_REACH
+  twice, the menu opened), x-rented-bed 130908 (the walk after the sleep did not happen), x-quest-mode 131512 (no stage line within
+  15 s). numidium holds the sweep for the reads; a union fix means a restage, a premise means the sweep goes.
