@@ -292,6 +292,18 @@ Skyrim has no wilderness sleep, so TES3MP's allowWildernessRest has no
 counterpart, and an unknown key stops the server at start, named, as the
 clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
 
+### Findings at the union's stage (2026-10-30; x-rented-bed 130908, read by an agent)
+
+Two faults in the rented-bed correction (fork 6a3427fa, in the union as part of P1-win), neither the cause of that run's red (the
+stand point was) and neither a blocker, both owed a fix in a later train:
+- The correction's open loop in remoteServer.ts paces itself by Utility.wait(0.1), game time, which the pausing Sleep/Wait Menu
+  stops: its first pass ran before the menu opened and the next after it closed, so openedAsBed never saw the menu and the "gave
+  up" line and the second ActivateMessage went out as before the fix (harmless: ProcessActivateSecond returns false for a FURN
+  with no occupant). Fix: pace that loop with Utility.waitMenuMode, which the same function already uses for its 1 s delay.
+- The sleep-state gate (GetSleepState) is vacuous for a menu sleep: the state read 0 with the Sleep/Wait and Fader menus open, so
+  the gate held its "closed this tick" tick only and released 3.8 s after the engine's wake. The probe header's "the engine's
+  sleep state outlives the menu by seconds" is not what the lab read.
+
 ## Status
 
 - [x] design reviewed (conventions: Eli, 2026-10-04)

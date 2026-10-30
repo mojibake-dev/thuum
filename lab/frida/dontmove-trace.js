@@ -28,7 +28,12 @@
 // release. Falsified by: Move not called per step for the actor (another mover, or another seat, moves him); the
 // position changing while 78276 is the branch (the zero velocity does not stop the controller); a write of 0 from a
 // caller other than 37489 during the hold (the clearer); +0xC8 not reading 9 after 54761 returned (the field).
-// Params through LAB_PARAMS: ACTOR (a form id, default 0x13491). Offsets for 1.6.1170 only.
+// v2 (2026-10-30, after x-npc-hold v4's read 124551): the hold held every frame yet the actor's position jumped eight times by
+// 100.77 units along his path at 4 s intervals to his leg's end. So the trace also hooks TESObjectREFR::MoveTo_Impl (56626: rcx the
+// reference, r8/r9 the cell and worldspace, the stack's fifth argument the NiPoint3* position), the engine's one entry for SetPosition
+// and MoveTo, and for the watched actor logs the new position, the caller's RVA and a six-frame backtrace (RVAs inside SkyrimSE.exe,
+// module plus offset elsewhere): a row per warp names the warper; no row during a warp says the writer bypasses MoveTo (the next read
+// is then a watchpoint on +0x54). Params through LAB_PARAMS: ACTOR (a form id, default 0x13491). Offsets for 1.6.1170 only.
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS
@@ -49,6 +54,7 @@ const OFFSETS = {
     movementStep: 0x6698d0, // addrlib: 37356
     resurrect: 0x665ad0, // addrlib: 37321
     resurrectRebuild: 0x736eb0, // addrlib: 40491
+    moveTo: 0xa447f0, // addrlib: 56626 (CommonLibSSE-NG Offsets.h:545 TESObjectREFR::MoveTo, the AE id of RELOCATION_ID(56227, 56626); SetPosition and MoveTo land here, TESObjectREFR.cpp:920)
   },
 };
 
@@ -196,5 +202,24 @@ if (at === undefined) {
   });
   Interceptor.attach(exe.base.add(at.movementStep), {
     onEnter(args) { if (watched(args[0])) second().step += 1; },
+  });
+
+  // v2: every MoveTo of the actor, with the caller and a short backtrace (the warps' writer, if they pass through here)
+  function where(p) {
+    const m = Process.findModuleByAddress(p);
+    if (m === null) return p.toString();
+    if (m.name === 'SkyrimSE.exe') return rva(p);
+    return m.name + '+0x' + p.sub(m.base).toString(16);
+  }
+  Interceptor.attach(exe.base.add(at.moveTo), {
+    onEnter(args) {
+      const refr = args[0];
+      if (!watched(refr)) return;
+      const posPtr = args[4];
+      const to = posPtr.isNull() ? null : [f32(posPtr), f32(posPtr.add(4)), f32(posPtr.add(8))];
+      let bt = [];
+      try { bt = Thread.backtrace(this.context, Backtracer.ACCURATE).slice(0, 6).map(where); } catch (e) { bt = ['backtrace failed: ' + e]; }
+      emit({ moveTo: true, from: posOf(refr), to: to, held: held, lifeState: lifeStateOf(refr), caller: rva(this.returnAddress), bt: bt });
+    },
   });
 }
