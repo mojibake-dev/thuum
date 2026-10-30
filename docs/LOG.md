@@ -3295,3 +3295,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reporter of 13491's moves, the plugin set on c1, 3o's client code that could re-move a live hosted actor on its host). ADR-027's
   lone-red rerun decides the gate honestly; the scenario is not touched again before the cause is known. b-npc-handoff-door and
   b-player-globals green with both seats relaunched (33 and 31 s).
+- 23:33 PDT: CI GREEN on the final heads: m3-cast-held-time 51069b46 (3941, server and difftest), P3 6796e787 (3943, server and difftest),
+  the union P3-win 7a6fd1e2 (3944, client and server). The stage tree compiles on both platforms with every fold; its T2 waits for a
+  quiet window, the stage for 3o's gate and merge.
