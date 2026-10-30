@@ -373,10 +373,29 @@ on("locationChanged", (e) => {
   }
 });
 
+// A quest a mod's own script starts and stops twice a second (Reading List's
+// RL_DetectionQuest, playtest 38's finding 77; D65) would flood the console
+// the probes read: one line per quest and kind per ten seconds, carrying the
+// count of the lines it stands for. The first line of a quest is never held,
+// so a log-count on "questStart quest 74a83" still reads the start.
+const questLineAt = new Map<string, [number, number]>();
+function logQuestEvent(kind: string, quest: string): void {
+  const key = `${kind} ${quest}`;
+  const now = Date.now();
+  const seen = questLineAt.get(key);
+  if (seen && now - seen[0] < 10_000) {
+    seen[1] += 1;
+    return;
+  }
+  const held = seen ? seen[1] : 0;
+  questLineAt.set(key, [now, 0]);
+  log(held > 0 ? `${kind} quest ${quest} (and ${held} more in the last 10 s)` : `${kind} quest ${quest}`);
+}
+
 on("questStart", (e) => {
   try {
     const quest = e.quest ? e.quest.getFormID().toString(16) : "none";
-    log(`questStart quest ${quest}`);
+    logQuestEvent("questStart", quest);
   } catch (err) {
     log(`questStart: unreadable event (${String(err)})`);
   }
@@ -385,7 +404,7 @@ on("questStart", (e) => {
 on("questStop", (e) => {
   try {
     const quest = e.quest ? e.quest.getFormID().toString(16) : "none";
-    log(`questStop quest ${quest}`);
+    logQuestEvent("questStop", quest);
   } catch (err) {
     log(`questStop: unreadable event (${String(err)})`);
   }

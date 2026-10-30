@@ -3151,3 +3151,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 17:36 PDT: Status boxes ticked on evidence: prop-physics's doc-complete and engine-surface boxes (the touch delegated and read), npc-fate's
   native hook (FateHooks.cpp's detours, npc-roll.js's counts). CI at this minute: P3 3884's wire jobs green with difftest 14287, its
   server-build running; P2-win a1272466 building (3892), P3-win c8a6e8e8 queued (3893), m3-send-rate 3888 running.
+- 17:37 PDT: D65 (finding 77, Reading List's RL_DetectionQuest flapping twice a second per seat, the server never seeing it): A, leave the
+  mod as it is (B, a property patch in apocrypha's layer, when the layer next moves), and lab-driver throttles repeated questStart and
+  questStop lines per quest to one per ten seconds with the held count, the first line never held (a probe's log-count on a start
+  still reads it); tsc green, 21 lines. The memo in the weekend summary's calls list.
