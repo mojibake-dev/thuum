@@ -8,15 +8,28 @@
 # (Impose), and deletes both 5 s after the cast's end (Inventory's OnEffectFinish row); the client half's skip
 # (Suppress) keeps the caster's own engine copy alone. Drafted from x-raise-wall (by path). The frame: lab-spawn,
 # both seats under the server's TGM (the caster's own god mode too, so the 8 magicka a second stream holds as long
-# as the key does; docs/verbs/god-mode.md), c1 at (0, -500) facing north so the wall's centre line lands at (0, -308),
-# c2 at (0, 0) facing south, 500 from c1 and 308 from the wall's spot, clear of the 300 units the spell's
+# as the key does; docs/verbs/god-mode.md), c1 at (0, -366) facing north so the wall's centre line lands at (0, -174),
+# c2 at (0, 0) facing south, 366 from c1 and 174 from the wall's spot, clear of the 300 units the spell's
 # (the frame moved 300 south on 2026-10-29 14:04 PDT: lab-spawn's (0, 300) is off the standable ground, c2 never
 # settled there in two runs at 3o's stage, 204833 and 205817, and fell 1,246 units; (0, 0) and (0, -500) are
 # spots other scenarios stand on; every claim is relative to the two records but the blocked read, moved with
 # the line: north of the centre line was y > 0 at -8, is y > -300 at -308, the same 8 units)
-# GetVATSFrontAreaFree condition wants ahead of the caster; one exterior cell holds all three spots (refs-near
-# lists one cell, docs/LAB.md). The spell and the bases are named as FormDescs (learn-spell's spellId, form() in
-# the claims), so the layer's slot for Apocalypse stays out of this file (docs/LAB.md: a slot written into a
+# (v2, 00:16 PDT 2026-10-30, thuum-magnus, after 3o's stage 063053 and 063222: the 300-south move put c1 across a cell
+# edge. lab-spawn's origin stands 310 units north of its cell's south edge (origin y -61130, lab-api's guests.yaml;
+# the edge at -61440), so c1 at (0, -500) stood in the cell south of the wall's (-308 is 2 units inside the origin
+# cell) and its one-cell refs-near could never list its own copies: claim 3 unreadable, a premise red waiting
+# behind the real one. The summit's flat strip runs along x = 0 from the origin to about -450 (docs/LAB.md's
+# summit note), so no 300-unit clearance fits inside one cell on known ground; instead c1 stands at (0, -366), a
+# spot other scenarios stand on, 56 units south of the edge, the wall's faces land at -226 and -122, 84 units
+# inside the origin cell, c2 keeps (0, 0), 366 from c1 (332 to its capsule, past the 300 the condition wants) and
+# 174 from the glow, and c1's own-copies read goes through c2's figure's cell: refs-near {from: other} lists the
+# nearest other actor's parent cell with the distances from that actor (lab-driver's refs-near), so claim 3's
+# distances are claim 2's pose formula instead of the caster's own 198 and 192. The one absolute claim moved with
+# the line again, north of the centre line: y > -166 at -174, the same 8 units. No tolerance changed.)
+# GetVATSFrontAreaFree condition wants ahead of the caster; the wall and c2 share lab-spawn's origin cell and c1
+# stands in the cell south of it, reading through c2's figure's cell (refs-near lists one cell, docs/LAB.md). The
+# spell and the bases are named as FormDescs (learn-spell's spellId, form() in the claims), so the layer's slot for
+# Apocalypse stays out of this file (docs/LAB.md: a slot written into a
 # scenario breaks at the next layer). The casts are the first-cast order (look, equip by the console step's
 # equipspell, draw-weapon, wait 3, hold-key 199) and the server's lines are read after FormDesc::ToString's unpadded
 # hex ("cast cc14:Apocalypse - Magic of Skyrim.esp"), past the [verb:spell-placed] tag (a regex class) and before
@@ -28,15 +41,16 @@
 #    s: the doc's "within 2 s" is this read's latency) lists both bases within 1000 (has) and each one's distance
 #    from c2 is within 16 units of the records' c2.y - c1.y - 192: the pose on the watcher is the server's pose
 #    projected on the line the seats stand on (the facts give a listed reference's distance, not its position; the
-#    wall's 48 units of depth add under 4 units at this range). Each base is one runtime reference on c2
+#    wall's 48 units of depth add under 7 units at this range). Each base is one runtime reference on c2
 #    (runtime_of): the server's copy, once.
-# 3. c1's refs-near lists its own engine copies at 198 and 192 (sqrt(192^2 + 48^2), and the glow at its own
-#    height: the script's pose equals the table's), and ONE runtime reference of each base: the skip kept the
+# 3. c1's refs-near, read through c2's figure's cell and from its position (v2: c1 stands in the cell south of the
+#    wall's), lists its own engine copies at claim 2's distances (the script's pose equals the table's), and ONE
+#    runtime reference of each base: the skip kept the
 #    server's copy off the caster's seat (Suppress). c1's console shows the skip line, between 1 and 2 lines a cast
 #    (per set or per form: the client half's spelling, matched without its apostrophes). Red until the client half
 #    lands (runtime_of reads 2 and the line is absent), which is this scenario's job.
 # 4. c2 walking at the wall (W 17 held 3 s, about 900 units unblocked: past the centre line and into c1's figure)
-#    stays north of the centre line (server.actor(c2).y > -300 in lab-spawn's frame; the north face is at y -264), and
+#    stays north of the centre line (server.actor(c2).y > -166 in lab-spawn's frame; the north face is at y -122), and
 #    c1 walking into its own copy stays within 256 of its start (the Havok body 1088 wide, 104 thick, 262 tall:
 #    the collision row's HYPOTHESIS, this read clears it).
 # 5. After the release, the removal line (the cast's end plus the 5 s linger plus the 50 ms tick) and then neither
@@ -73,7 +87,7 @@ steps:
   - c1: learn-spell {spellId: "00cc14:Apocalypse - Magic of Skyrim.esp"}
   - c2: learn-spell {spellId: "00cc14:Apocalypse - Magic of Skyrim.esp"}
   - wait: 2
-  - c1: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -366, z: 0, rot: [0, 0, 0]}
   - c2: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
   - wait: 4
   # the first-cast order: look, equip, draw, wait, hold
@@ -87,7 +101,8 @@ steps:
   - c1: hold-key {code: 199, ms: 30000}
   - until: {within: 10, every: 0.5, expect: ['server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 2 form") >= 1']}
   - c2: refs-near {radius: 1000, formTypes: [36, 24]}
-  - c1: refs-near {radius: 1000, formTypes: [36, 24]}
+  # v2: c1 reads the wall's cell through c2's figure (the listing's cell and the distances are the nearest other actor's)
+  - c1: refs-near {radius: 1000, formTypes: [36, 24], from: other}
   - assert:
       # 1. the server took the cast and placed two forms
       - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 2 form") == 1'
@@ -99,9 +114,10 @@ steps:
       - 'abs(c2.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
       - 'c2.refs_near().runtime_of(form("098529:Apocalypse - Magic of Skyrim.esp")) == 1'
       - 'c2.refs_near().runtime_of(form("0735e8:Apocalypse - Magic of Skyrim.esp")) == 1'
-      # 3. the caster: its own engine copies 192 ahead (the wall 48 down), one runtime reference of each base
-      - 'abs(c1.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp")) - 198) < 16'
-      - 'abs(c1.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp")) - 192) < 16'
+      # 3. the caster: its own engine copies at the pose, read from c2's figure's cell and position (v2), one runtime
+      #    reference of each base
+      - 'abs(c1.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
+      - 'abs(c1.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
       - 'c1.refs_near().runtime_of(form("098529:Apocalypse - Magic of Skyrim.esp")) == 1'
       - 'c1.refs_near().runtime_of(form("0735e8:Apocalypse - Magic of Skyrim.esp")) == 1'
   - c2: screenshot
@@ -113,8 +129,8 @@ steps:
   - wait: 4
   - c2: screenshot
   - assert:
-      # the wall's centre line is at y -308 in this frame (the caster at -500 plus 192); north of it means blocked
-      - server.actor(c2).y > -300
+      # the wall's centre line is at y -174 in this frame (the caster at -366 plus 192); north of it means blocked
+      - server.actor(c2).y > -166
       - abs(server.actor(c1).y - snapshot("c1start").y) < 256
   # 5. the release (the hold's 30 s), the linger, the removal line, then neither base on the watcher
   - until: {within: 40, every: 1, expect: ['server.log_count("set [0-9]+ removed: 2 of 2 forms deleted, its linger ran out") >= 1']}
@@ -128,7 +144,7 @@ steps:
       - 'c1.log_count("spell-placed [0-9a-fx]+: this game.s own copy of base [0-9a-fx]+ stands at the pose. the server.s copy not placed") >= 1'
       - 'c1.log_count("spell-placed [0-9a-fx]+: this game.s own copy of base [0-9a-fx]+ stands at the pose. the server.s copy not placed") <= 2'
   # 6. the late joiner: both seats back on their marks (the walks moved them), the caster redrawn after its look
-  - c1: teleport {cell: lab-spawn, x: 0, y: -500, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -366, z: 0, rot: [0, 0, 0]}
   - c2: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
   - wait: 4
   - c1: look {pitch: 0, heading: 0}
