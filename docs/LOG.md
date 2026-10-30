@@ -3475,3 +3475,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   south, the pitch swept in five steps of 100 counts from 600 with E held 1.5 s at each (a hit grabs and releases, a miss does
   nothing), each step's crosshair recorded; the grant claim at least once. The earlier note that the mouse aim "works" stands only
   as far as 135637's crosshair on the body goes; the body may have lain at c2's feet.
+- 07:55 PDT: the restage done (STAGE EXIT 0 at 14:51Z; clean-m1-next = the layer plus 8f9c11bd on both clones; the client fix confirmed
+  in every prop probe). x-quest-mode v4 (144813): the console set DB01Misc's stage 10 and the report reached the server, which
+  refused it by design, "a start-game-enabled quest is each seat's own (D62)": finding 76's rumor quest is start-game-enabled, so
+  the rumor did not propagate because D62 says so, not because anything broke. D69, recommended B under the pass's rule and
+  recorded for Eli's veto: a start-game-enabled quest's stages beyond its start become the world's (stage 0 stays per seat, the
+  denylist the brake, the fragment suppression on the applying seat), a server rule change in a follow-up train after the union;
+  A would grow the allowed list by hand, C leaves the rumor per seat. x-quest-mode v5 by path (sha1 follows) sets stage 10 of
+  MS10MiscObjPointer 0x10d3bb, not start-game-enabled, one unique-actor alias, in no list. Side note from the run (numidium): a
+  Dawnguard start-game-enabled quest (1a428) restarts in a loop on both seats, 32 stage-0 reports per log window, each a QuestStage
+  message refused OWN_START; with Reading List's radar that is two quests churning forever; a client-side drop of repeated stage-0
+  reports is worth a train. The after-stage queue runs reanimate v5, push v5, pass v5, drop v4, grab v4; the union's T2 still runs.

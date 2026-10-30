@@ -211,6 +211,20 @@ effect. (b) c2's relayed apply under the detour: 56684, 53716, 25004, 25260, 539
 
 **Suppress (slice two, 14:29 PDT 2026-10-29, fork m3-quest-fragment d02103fd):** the relayed stage's Papyrus fragment, by a Gum replacement of the VM's quest stage sink (53987) keyed by the pairs the client marks (TESModPlatform.SuppressQuestStageFragment / ReleaseQuestStageFragment); the callback's slot 1 fires so the journal, the done bit and the latent return keep; setting questFragmentSuppress; HYPOTHESIS until the trace.
 
+### Finding 76 is D62 (2026-10-30; x-quest-mode v4 144813)
+
+The Aventus rumor quest of playtest 38's finding 76 ("prisoner picked up the aventus rumor misc quest and it didn't propagate")
+is DB01Misc 0x1ea4f, start-game-enabled in this load order; the probe's console setstage of its stage 10 reached the server as a
+report and the server refused it on purpose: "E_QUEST_OWN_START: ... a start-game-enabled quest is each seat's own (D62)". So the
+mode-all relay, the report path and the login message all work, and the rumor did not propagate because D62 keeps every
+start-game-enabled quest per seat unless the allowed list names it. Eli expected the rumor to propagate. D69 (recorded in the LOG
+and the weekend summary, recommended B under the pass's rule, Eli may veto): A) keep D62 and grow the allowed list with the misc
+and rumor quests players meet (a curated list, finding 76 its first entry); B) a start-game-enabled quest's stages beyond its
+start are the world's (stage 0, the engine's own start on every seat, stays per seat; the denylist stays the brake; the fragment
+suppression keeps a relayed stage's script off the applying seat), a server rule change with its T0 in a follow-up train after
+the union; C) leave as today. The union merges the quest work as it stands (D68: whole if x-quest-mode goes green on a quest that
+is neither start-game-enabled nor denied, else the deploy's mode back to the list).
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
