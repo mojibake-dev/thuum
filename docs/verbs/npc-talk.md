@@ -280,6 +280,27 @@ resurrection paths are then the lever); +0xC8 not reading 9 after 54761 (the
 field). The second read, from the run's server log: which user's reports moved
 13491 over the series and simulator_of his cell (the door pass). Owner: agent.
 
+The reads (2026-10-30). x-npc-hold v4 124551 (dontmove-trace.js): the hold reached the
+engine in one frame (lifeState 0 to 9 from inside 37489), every Actor::Move
+after it took the zero-velocity branch (2193 of 2193), lifeState read 9 for
+the whole series, no foreign write, no resurrect, and the controller stood
+still in 41 of the 50 held seconds; yet Sven's position jumped eight times by
+100.77 units along his walking heading at 4 s intervals until his path's end
+807 units away, then stayed. So the engine honours the hold and something
+else carries a held walker along his path in quantized warps (ENGINE,
+HYPOTHESIS 0.7: a path follower's warp; UNION 0.2: an unnamed writer of
++0x54). The server saw only c1's reports and no host change (the door pass
+is out). x-npc-hold v5 135929 (the trace's v2 with a MoveTo hook, 56626):
+GREEN, the record equal to s10's; 2 MoveTo rows before the hold (0.3-unit
+settles) and none while held, and no warp occurred in that run, so the
+writer is still unnamed; the hook stays armed for the next run that warps.
+The hold's premise is therefore run-dependent: it holds when Sven's leg is
+short at the hold (a sandbox at the mill), and fails when he is mid-travel
+(his 9.0 leg home to the mill, about 800 units, 32 s of warps), which the
+login's duration decides (relaunch mode logs in faster, so the hold lands
+earlier in his schedule). Known limit for b-npc-talk v7's 24 s pair until a
+driver-side settle or a stillness fact exists.
+
 ### Playtest 36, the turbo day (11:36 PDT 2026-10-28; fork m3-turbo-knobs f5a8f7d1 over 56's stage)
 Eli ticked items 1 and 2: "the claiming SEEMS to work but check logs"; "rotfern walked to embershard mine, prisoner was
 still talking to sven". The logs: eight claims granted on Sven, Hilde and Sigrid's household, every one released at the

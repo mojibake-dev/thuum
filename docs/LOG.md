@@ -3442,3 +3442,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   record is its position with the actor fields null (main c06f52f, 22 gamemode tests green), to be laid by deploy-srv before the
   restage's probes. x-quest-mode v4 by path (sha1 5897fa0a) sets DB01Misc 0x1ea4f's stage 10 (finding 76's rumor quest) in place
   of MS13Intro, which refuses to start in this world (v3 134416: the console typed, EnsureQuestStarted ret 0; HYPOTHESIS Run Once).
+- 07:16 PDT: x-npc-hold v5 GREEN (135929; numidium): the hold held, the record equal to s10's; the trace's MoveTo hook saw two 0.3-unit
+  settles before the hold and nothing while held, and no warp occurred, so v4's warper stays unnamed and the hook stays armed; the
+  premise is run-dependent (a short leg holds, a mid-travel leg warps to its end), written into npc-talk.md's Dynamic plan.
+  x-reanimate-host v4 RED on its aim (135637): the player-like cast now crosses the hooks ("OnSpellCast ff000001 cast 65bd7 ... relayed")
+  but the bolt hit 13491 (Sven), alive, so EffectConditionsHold refused the effect (finding 72's path, rightly) and the reanimate branch
+  never had its corpse; the mouse-pitched aim is the suspect (x-prop-grab v2's crosshair also read 0 after its pitch, both on relaunched
+  seats; the mouse step reports SendInput's accepted count, not the game's uptake). The restage's x-prop-grab v3 reads the same aim
+  again before any v5. numidium's side note: quest 0x30002859 (a layer plugin at slot 0x30) ran EnsureQuestStarted every 0.7 s for a
+  whole run on c1 (134416's trace), to apocrypha. The restage of 8f9c11bd started 14:14Z (builds green; LABAPI=3996, the clones rolled
+  back to the morning's clean-m1-next; deploy-srv from main be6569f lays the gamemode ref fix).
