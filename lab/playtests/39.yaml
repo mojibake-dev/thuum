@@ -1,0 +1,42 @@
+# Playtest thirty-nine's seats (docs/private/playtest-m3-39.md v2): the pass's merged base, fork parity 0e23c820 (the union
+# m3-pass-train-3-win, merged 22:0xZ on 2026-10-30 after its full sweep 20261030-164127, 99 of 102 green, red only on what
+# gate.yaml holds pending), thuum main d39fbd3 with apocrypha's defaults layer bd5bb64 merged, both clones promoted to clean-m1.
+# The server runs the parity image with spellPlacedObjects EMPTY (D70: Raise Wall's copies off, the wall on the caster's screen
+# only) and the guest's loot of a body is a declared limit (D71). Props are dark on this build (D68; the physics train stages
+# after this playtest). The world: 38's end world composed as 36's and 37's were (numidium on sky-srv: rotfern profile 1 and
+# Prisoner profile 2 at their newest from playtest-m3-38-end-*, both characters' Survival needs 81b, 81a, 816 zeroed, the FormDesc
+# braced), the clock at 7.9, npcEnabled, bars full, no god mode (Eli toggles tgm if he wants it), follow mode the client's default.
+# Both seats OUTDOORS at the Riverwood guard camp (x-prop-push's spot, cell 0x9732 of Tamriel 0x3c): test 1 at (19087, -47480)
+# facing east, test 2 at (19237, -47380) facing west, beside each other; items 1 to 5 move to Bleak Falls Temple 0x371de by the
+# checklist's own teleports. Spells: the records keep Raise Wall 1a00cc14, Dead Thrall 7e8df and Reanimate Corpse 65bd7 on both
+# seats (the grants of 2026-10-29); numidium confirms with the server's learned list and re-grants what a record lacks through
+# labCommand. Perks as 37 and 38 listed them. Everything here is server-side (labCommand); the seats type nothing.
+id: 39
+build: "fork parity 0e23c820 (the pass's union merged), thuum main d39fbd3 (the defaults layer), the parity image with spellPlacedObjects empty, clean-m1 promoted"
+world: playtest-m3-39-rotfern-prisoner-COMPOSE   # numidium composes it from playtest-m3-38-end-* (rotfern and Prisoner at their newest, Survival needs zeroed) and writes the stamp here
+hold:
+  minutes: 300
+  reason: "playtest thirty-nine: the pass's merged base"
+server:
+  npcEnabled: true
+  gameHour: 7.9
+camp:
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [19087, -47480, -128], rot: [0, 0, 90]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [19237, -47380, -128], rot: [0, 0, 270]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 (as 37 and 38); given by the setup, nothing to type
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
