@@ -225,11 +225,11 @@ suppression keeps a relayed stage's script off the applying seat), a server rule
 the union; C) leave as today. The union merges the quest work as it stands (D68: whole if x-quest-mode goes green on a quest that
 is neither start-game-enabled nor denied, else the deploy's mode back to the list).
 
-D69 B built (2026-10-30, fork m3-quest-sge-stages e7580346, off the union 0e23c820; a train after the union's merge): in mode all,
+D69 B built (2026-10-30, fork m3-quest-sge-stages dc3ec679, off the union 0e23c820, T0 green on pipeline 4017; a train after the union's merge): in mode all,
 OWN_START refuses only the engine's own start of a start-game-enabled quest, stage 0 and the record's start-up stages (QUST INDX,
 libespm's JournalIndex::StartUpStage; MQ101's 0 carries it), and its later stages are recorded, relayed and replayed like any
-other quest's; the login replay follows the same stage-aware test. The D62 unit test became D69's (MQ101's flagged 0 refused;
-MS13's 10 and 20 relayed, replayed at a login, kept when the allowed list no longer names the quest). T3 for it: the rumor
+other quest's; the login replay follows the same stage-aware test. The D62 unit test became D69's (FreeformHeartwoodMill's flagged start-up stage 10 refused, its 20 and MS13's 10 and 20
+relayed, replayed at a login, kept when the allowed list no longer names the quest; MQ101 is Run Once, not start-game-enabled). T3 for it: the rumor
 quest's own stage set (DB01Misc 10, x-quest-mode v4's frame) crossing to the other seat, a scenario of its own after the
 train's stage. Eli may still veto for A or C.
 

@@ -3550,3 +3550,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stand the walker or grabber 80 west of it and the watcher north; every bound unchanged. Under D68 props merge dark unless the
   bucket reads green on the restage. D69 B's branch repushed at dc3ec679 (the test on FreeformHeartwoodMill; MQ101 was not
   start-game-enabled). The playtest 39 checklist revised to the day's facts (v2).
+- 08:45 PDT: D69 B green on the CI's T0 (fork m3-quest-sge-stages dc3ec679, pipeline 4017, 508 cases): the train after the union's
+  merge, with its own T3 to write (the rumor quest's later stage crossing); Eli's veto open in the summary.
