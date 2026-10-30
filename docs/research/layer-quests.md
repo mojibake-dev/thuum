@@ -152,8 +152,13 @@ then run `python3 lab/tools/layer-render.py` once so the layout is the render's 
 
 Slot 0x30 on c1 is RLAiO.esp (Reading List All in One, client-only row 83). The clients' full slots
 run masters 00 to 04, Fish 05, AdvDSGS 06, then the layer's full plugins in the engine's order (ESM
-flags first); on a 1.6.1170 seat RLAiO sits at 0x32 because RaceMenu.esp and RaceMenuPlugin.esp (full,
-1.6.1170 only) precede it, on a 1.7.104 seat at 0x30. The quest is 002859 RL_DetectionQuest, start
+flags first), counted from the staged tree, where the two Survival warmth patches are light by their
+build-time esl patch: 45 full layer plugins on a 1.6.1170 seat, RLAiO at 0x30 (rotfern 0x2F, Unread
+Books Glow 0x31), 42 on a 1.7.104 seat (no RaceMenu.esp, RaceMenuPlugin.esp or RaceMenuMorphsCBBE.esp),
+RLAiO at 0x2E. (A first version of this page put RLAiO at 0x32 on 1.6.1170: it counted the two patches
+as full from their unpatched cache copies; thuum-cf's trace of run 20261030-134416, a 1.6.1170 seat with
+the quest at 0x30, caught it. Slot arithmetic has to read the staged tree's flags, as layer-stage's
+load-order check does.) The quest is 002859 RL_DetectionQuest, start
 game enabled, one alias DetectedBook (optional, find the closest matching reference in the loaded
 area, flags 0x6022) carrying RL_DetectedBookScript. The loop is the mod's design: the manager
 RL_ManagerQuest (000d62, RL_ManagerScript, which extends SKI_ConfigBase) has `TriggerReset()` =
