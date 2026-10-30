@@ -311,13 +311,28 @@ class ProxmoxerGuests:
             raise ProxmoxError(f"E_PVE_TASK: {upid} ended with {status}")
 
     def _task_end(self, upid: str, timeout: float) -> str:
-        """A task's exit status once it stopped."""
+        """A task's exit status once it stopped. A failed read of the task is not a failed task: the task runs on
+        the host while lab-api's poll of it fails (2026-10-30 04:23:38Z, a few-second host stall: an SSLError on
+        712's start-task poll failed run 20261030-042304 although the start ended TASK OK, and the forced rollback
+        after it was one more reset for a card that wedged that night), so a read error is asked again until the
+        deadline, as the exec loop asks exec-status again, and only then raised, naming the last error."""
         deadline = time.monotonic() + timeout
+        last: Exception | None = None
         while time.monotonic() < deadline:
-            st = self._api.nodes(self._node).tasks(upid).status.get()
+            try:
+                st = self._api.nodes(self._node).tasks(upid).status.get()
+            except Exception as e:  # proxmoxer's ResourceException and requests' connection, TLS and timeout errors
+                if last is None:
+                    log.warning("E_PVE_TASK_READ: %s: %s: %s", upid, type(e).__name__, str(e)[:200])
+                last = e
+                time.sleep(2.0)
+                continue
+            last = None
             if st.get("status") == "stopped":
                 return str(st.get("exitstatus"))
             time.sleep(0.5)
+        if last is not None:
+            raise ProxmoxError(f"E_PVE_TASK: {upid} unread until {timeout}s: {type(last).__name__}: {str(last)[:200]}")
         raise ProxmoxError(f"E_PVE_TASK: {upid} did not finish in {timeout}s")
 
     def stop(self, guest: Guest) -> None:

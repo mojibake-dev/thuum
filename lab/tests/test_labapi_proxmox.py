@@ -201,6 +201,70 @@ class ProxmoxerExecTests(unittest.TestCase):
 
 
 @needs_deps
+class ProxmoxerTaskTests(unittest.TestCase):
+    """The real backend's task wait against a scripted task-status endpoint (2026-10-30 04:23:38Z: an SSLError on
+    712's start-task poll failed a run whose start had ended TASK OK)."""
+
+    def _backend(self, statuses):
+        from labapi.proxmox import ProxmoxerGuests
+
+        class Status:
+            def __init__(self):
+                self.left = list(statuses)
+
+            def get(self):
+                st = self.left.pop(0) if len(self.left) > 1 else self.left[0]
+                if isinstance(st, Exception):
+                    raise st
+                return st
+
+        status = Status()
+
+        class Task:
+            def __init__(self):
+                self.status = status
+
+        class Node:
+            def tasks(self, upid):
+                return Task()
+
+        class Api:
+            def nodes(self, node):
+                return Node()
+
+        b = object.__new__(ProxmoxerGuests)
+        b._api = Api()
+        b._node = "core"
+        return b
+
+    def test_a_failed_task_read_is_asked_again(self):
+        from unittest import mock
+
+        b = self._backend([ConnectionError("SSLError: Max retries exceeded"), {"status": "running"},
+                           {"status": "stopped", "exitstatus": "OK"}])
+        with mock.patch("labapi.proxmox.time.sleep"):
+            self.assertEqual(b._task_end("UPID:core:0000D652:0004CDF5:6AE41BC1:qmstart:712:lab-api@pve!runner:", 5.0), "OK")
+
+    def test_a_task_read_that_never_answers_names_the_last_error(self):
+        from unittest import mock
+
+        from labapi.proxmox import ProxmoxError
+
+        b = self._backend([ConnectionError("SSLError: Max retries exceeded")])
+        with mock.patch("labapi.proxmox.time.sleep"), self.assertRaises(ProxmoxError) as cm:
+            b._task_end("UPID:core:1:qmstart:712", 0.05)
+        self.assertIn("unread until", str(cm.exception))
+        self.assertIn("SSLError", str(cm.exception))
+
+    def test_a_task_that_failed_still_fails(self):
+        from unittest import mock
+
+        b = self._backend([{"status": "stopped", "exitstatus": "start failed: QEMU exited with code 1"}])
+        with mock.patch("labapi.proxmox.time.sleep"):
+            self.assertEqual(b._task_end("UPID:core:1:qmstart:711", 5.0), "start failed: QEMU exited with code 1")
+
+
+@needs_deps
 class TablesTests(unittest.TestCase):
     def test_shipped_tables(self):
         from labapi.config import PKG_DIR
