@@ -3288,3 +3288,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   24 s before the snapshot pair, the five-unit bound unchanged; x-npc-hold v3 by path measures the leg's upper bound (snapshots every
   3 s for 30 s) at the stage; npc-talk.md's Known limits carry the leg-end stop. The vain form, a `settle {{of, within, apart, timeout}}`
   step every stillness read shares, goes to numidium's grammar list. deploy-srv must carry v7 before the gate's replay.
+- 23:31 PDT: b-npc-talk v7 RED again (20261030-062117 in the rest set, both seats cold-rolled-back: 87 units in the pair after the 24 s
+  settle), so the leg-end reading does not cover it: on 3o-win the hold does not stop Sven at all (three reds on this build, 215828,
+  053717, 062117; every green of the step on earlier builds), a build or load-order finding against the lab's hold, not the talk's
+  rule and not relaunch. A fast read runs on 062117 against the green 232956 (the hold step's result, the npc-state series, the
+  reporter of 13491's moves, the plugin set on c1, 3o's client code that could re-move a live hosted actor on its host). ADR-027's
+  lone-red rerun decides the gate honestly; the scenario is not touched again before the cause is known. b-npc-handoff-door and
+  b-player-globals green with both seats relaunched (33 and 31 s).
