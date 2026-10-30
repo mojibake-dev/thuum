@@ -3486,3 +3486,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Dawnguard start-game-enabled quest (1a428) restarts in a loop on both seats, 32 stage-0 reports per log window, each a QuestStage
   message refused OWN_START; with Reading List's radar that is two quests churning forever; a client-side drop of repeated stage-0
   reports is worth a train. The after-stage queue runs reanimate v5, push v5, pass v5, drop v4, grab v4; the union's T2 still runs.
+- 07:56 PDT: x-reanimate-host v5 (145135; numidium): Sven held, Hilde dead by kill-ref, the cast relayed ("OnSpellCast ff000001 cast 65bd7"),
+  and the bolt hit nothing: crosshairRef 0 after the pitch, the approach having placed c2 80 units from the body this run, while v4's
+  body lay at c2's feet and the same dy 1070 found it there; so the pitch overshoots to nearly straight down, as x-prop-grab v3's
+  screenshot showed, and the seat's counts per degree are unknown. v6 by path (sha1 61be44e1) sweeps five pitches from 500 by 100
+  with a cast at each and screenshots after the approach and mid-sweep. x-quest-mode v5 by path (sha1 83048df6): MS10MiscObjPointer
+  0x10d3bb, not start-game-enabled, in no list. Both queued after grab v4.
