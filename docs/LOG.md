@@ -3272,3 +3272,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the difftest on the push, 257 rules cases green), P3-win 7a6fd1e2 (the client build): the union is trains 1 to 3 plus D64 and D66.
   Its T2 runs in a quiet window after 3o's gate (8 of 18 green so far in relaunch mode: c1 relaunches since the stale mark went, the
   only rollbacks the forcing ones), then the merge, the layer and the stage.
+- 22:47 PDT: 3o's gate 20261030-050437 cut short at 05:39:41Z by sky-c1's card wedging again (the full signature; core asks Eli for the
+  reboot): ten green (smoke, a-restart-persistence, b-duel on its cold rerun, b-body-loot, b-npc-loot, b-npc-death-report,
+  b-npc-respawn, b-npc-copy-fate, b-cloak-fight, b-npc-archer), b-npc-talk 053717 RED at step 20 (Sven 0x13491 about 100 units from
+  snapshot s1 during the claimed talk: red three of four on 10-28, now on a healthy stage, a finding; an agent reads the run), its
+  cold rerun erroring on c1's dead card; seven never ran and replay as RUNSET_AFTER on the same stage after the reboot, one chained
+  gate. numidium's rerun rule taken: a red with a relaunched seat reruns relaunched first, a second red reruns cold, a green first
+  rerun is green; red-red-green names a relaunch-state finding (the note under ADR-036 and ADR-030 is numidium's).
