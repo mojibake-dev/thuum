@@ -3354,3 +3354,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   units); its "lands where c1's does" claim needed a fact the listing already carried, so lab-api gains c.refs_near().pos(baseId)
   (the nearest listed reference's x, y, z; the ids search has none) with its test; x-prop-push v2 already holds the restart half.
   The stage that plays it needs that lab-api image (LABAPI=<this push's thuum pipeline>).
+- 00:54 PDT: x-prop-grab v1 by path: slice one's grab read with the non-host as the grabber (the host's own grab is "simulates it
+  already"), the view pitched by lab-api's mouse step (20.2 px per degree, the rune probes' number; look's pitch may not reach the
+  first-person view), E held 3 s; claims: the touch-1 claim granted, the grabber's stream, the host's Keyframed follow, the record
+  moved; the aim is the premise. With x-prop-push v2, x-prop-pass v2 and x-prop-drop v1, slice one's four touches each have a probe.
