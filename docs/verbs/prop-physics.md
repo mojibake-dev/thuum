@@ -81,7 +81,11 @@ claim on a grab (grabRelease event), a drop (the drop's handle), a contact (the 
   x-prop-pass v2, x-prop-drop v1 (the server's AddItem gives c1 a SteelSword, the game's own console drops it, the touch-2 claim
   line, one runtime copy on each seat, the two copies within 32 units in x and y through lab-api's new refs-near pos fact: the
   listing's position rows, which no fact exposed before; the created reference's rest after a restart is not read, a created
-  reference having no stable id for server.ref). All three play at the union's stage.
+  reference having no stable id for server.ref). All three play at the union's stage. x-prop-grab v1 (2026-10-30) reads the
+  grab, slice one's first sure touch: the non-host pitches its view onto the host's tankard through lab-api's mouse step (look's
+  SetAngle pitch may not reach the first-person view; the rune probes' 20.2 px per degree) and holds E 3 s; the claims are the
+  touch-1 claim granted, the grabber's stream and the host's Keyframed follow, the record moved; the aim is the premise
+  (crosshairRef), the engine's hold threshold HYPOTHESIS, the exclusivity (E_PROP_HELD) left to x-prop-grab-held.
 
 ## Dynamic plan
 
