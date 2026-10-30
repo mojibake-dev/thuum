@@ -3182,3 +3182,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   source) pushed with the client build. The PlayerScale sex column is declared in melee-reach.md (libespm reads no sex). CI: P2-win
   a1272466's 3892 GREEN with its client build (the brace fix proven), m3-send-rate 3888 GREEN on every job, P3-win c8a6e8e8's
   client-build green with its server-build running. numidium asked for T2 on 58208e9f after P3's.
+- 18:08 PDT: train 1's review fixes built by an agent and pushed: fork m3-pass-train-1 b0cda83a (7b8ff8ea the held roster keyed by
+  (reporter, reference), bounded at 1024 across cells with the oldest dropped, swept once a second, forgotten at the reporter's
+  disconnect; b0cda83a a placed corpse ignores its host's live sample unless the server accepted a reanimate hit on it within 10 s,
+  the gate that keeps 'anyone reanimates any corpse' true while a sample alone stands nothing; three T0 cases including the corpse's
+  restart) server-only, m3-client-bits 9a0d4c34 (the silent kill's push re-fetches the body by id; the hands pass runs after any apply
+  that re-added a worn entry, by the apply's own report), P1-win 60f40cbc with the client build; fork-lint and tsc green, the C++ on
+  CI. npc-puppet.md carries the hold's new shape; npc-fate.md's placed-dead row follows when the fourth P4 batch's apply lands.
