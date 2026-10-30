@@ -99,7 +99,10 @@ and the Inventory's M6 row points here. The lab's hold (lab-driver npc-hold, Act
 sandbox leg, three to eighteen seconds after the call (x-npc-hold v2 232956 measured three to six on one sample; b-npc-talk's
 stillness reds 215828 and 053717 held Sven as a leg began and read him walking eleven seconds on, every rule intact, the
 record moved by his host's own reports): a stillness read waits out a whole leg (v7, 24 s; 22:59 PDT 2026-10-30), and the
-verb's own claim never depended on the hold (talkService withdrew it: a held actor cannot turn to face its partner).
+verb's own claim never depended on the hold (talkService withdrew it: a held actor cannot turn to face its partner). Then v7's
+24 s read red too (062117, both seats cold, 87 units in the pair; 23:31 PDT 2026-10-30): on 3o-win the hold does not stop him at
+all, every green of the step was an earlier build, so the lab's hold is a build or load-order finding under read (HYPOTHESIS which:
+the flag never set, cleared after, or the host re-moving him), and the stillness pair stays as the finding's claim, not weakened.
 
 ## Message contract
 
