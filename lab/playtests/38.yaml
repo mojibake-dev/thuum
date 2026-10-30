@@ -1,0 +1,37 @@
+# Playtest thirty-eight's seats (docs/private/playtest-m3-38.md): the overnight train's stage, fork m3-turbo-train-3n
+# e14dc298 (its dist is b588e0ff's, GitLab job 14000: the two difftest commits after it change no client; the image
+# m3-turbo-train-3n-b588e0ff, the same server code), before its gate (sky-c2's GPU wedge at 02:44 PDT stopped the
+# night's gate; core's host reboot at 11:01 PDT recovered it). Raise Wall and the non-host reanimate are 3o ee44f7d1
+# (schema 20), a second lay at a break Eli picks. The world is 37's end, saved at 23:30 PDT on the 28th
+# (playtest-m3-37-end-20261029T063051Z-20261029T063051Z, 883 records: rotfern and Prisoner at their newest).
+# Both seats at the camp OUTDOORS (Survival starts only outdoors in the lab, lab-survival-indoor-rule), test 2 beside
+# test 1 (thirty-four's shape). Perks as 37's. Everything here is server-side (labCommand); the seats type nothing.
+id: 38
+build: "fork m3-turbo-train-3n e14dc298 on its stage (dist b588e0ff GitLab 14000, image m3-turbo-train-3n-b588e0ff), before its gate"
+world: playtest-m3-37-end-20261029T063051Z-20261029T063051Z   # 37's end world, rotfern (profile 1) and Prisoner (profile 2) at their newest
+hold:
+  minutes: 300
+  reason: "playtest thirty-eight: the overnight train (3n's stage)"
+server:
+  npcEnabled: true
+  gameHour: 7.9
+camp:
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [17225, -47204, -128], rot: [0, 0, 0]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [17375, -47204, -128], rot: [0, 0, 180]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40, the headshot rule's perk condition; given by the setup, nothing to type
+    values:
+      Marksman: 60   # the headshot rule's floor
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages

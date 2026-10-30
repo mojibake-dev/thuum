@@ -64,6 +64,9 @@ class StepBoard:
         # an npc-state step's answers by the form id it named (or answered): the
         # seat's own engine state of that NPC (c.npc_state(id), docs/verbs/npc-puppet.md)
         self._npc_states: dict[str, dict[int, dict[str, Any]]] = {}
+        # a quest-stage step's answers by quest form id, merged across steps: {stage, running, done: stage (decimal)
+        # -> done}, or None for a form that is no quest in that game (c.quest(id), docs/verbs/quest-stage.md)
+        self._quests: dict[str, dict[int, dict[str, Any] | None]] = {}
         # a figure-spells step's answer: {formId, name, base, added, equipped, extra} (ADR-046)
         self._figure_spells: dict[str, dict[str, Any]] = {}
         # a log-count step's answers: the regex -> how many lines of the seat's Skyrim Platform log matched
@@ -136,6 +139,13 @@ class StepBoard:
                 key = 0
             if key:
                 self._npc_states.setdefault(step.client, {})[key] = body["data"]
+        if step.action == "quest-stage" and isinstance(body.get("data"), dict):
+            for k, v in body["data"].items():
+                try:
+                    key = int(k)
+                except (TypeError, ValueError):
+                    continue
+                self._quests.setdefault(step.client, {})[key] = v if isinstance(v, dict) else None
         if step.action == "poisons" and isinstance(body.get("data"), dict):
             self._poisons[step.client] = body["data"]
         if step.action == "figure-spells" and isinstance(body.get("data"), dict) and "error" not in body["data"]:
@@ -247,6 +257,9 @@ class StepBoard:
     def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None:
         return (self._npc_states.get(observer) or {}).get(int(form_id))
 
+    def quests(self, observer: str) -> dict[int, dict[str, Any] | None] | None:
+        return self._quests.get(observer)
+
     def poisons(self, observer: str) -> dict[str, Any] | None:
         return self._poisons.get(observer)
 
@@ -288,6 +301,7 @@ class StepBoard:
         self._projectiles.clear()
         self._refs_near.clear()
         self._npc_states.clear()
+        self._quests.clear()
         self._figure_spells.clear()
         self._log_counts.clear()
         self._poisons.clear()

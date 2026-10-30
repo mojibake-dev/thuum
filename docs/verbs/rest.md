@@ -88,6 +88,44 @@ Milestone: M1   Class: B
   `just probe` shows what holds a player if one is ever stuck again.
   If a playtest hits it again, `just probe <client>` reads the client's
   controls with nothing reset.
+
+  **Dynamic plan, 2026-10-29 (thuum-magnus), after playtest 37's finding
+  31.** Both players froze about a minute after a server-decided sleep in a
+  rented inn bed (the Sleeping Giant, 2026-10-28 17:1x PDT): controls on,
+  menus closed, the clock running, the drivers answering; no screenshot, and
+  the window's logs were lost to the relaunches (the saved results end
+  21:25Z). The two hypotheses stated at the time, the sleep menu's fade left
+  running and the bed's handoff holding the player (its open flow gave up on
+  getFurnitureReference after 15 s while the Rest ran), are ruled out by what
+  the lab's dump-state would have shown and the finding's reads did show: no
+  Fader Menu or Sleep/Wait Menu open, the HUD alone, every control true.
+  Left: this bullet's HYPOTHESIS, the correction landing on the engine's
+  sleep bookkeeping (the sleeping bit, sleepSeconds, hoursToSleep) while the
+  player is still in its sleep state, a long sleep widening the window;
+  Survival's exhaustion branch on a clock TimeService has just snapped back
+  (a rented bed changes only the seat-local ownership, RentRoomScript's
+  SetActorOwner through the fragment, never synced and never read by the
+  server's IsSleepFurniture); and the stream itself. Fixes on fork
+  m3-rest-correction (skymp5-client, from 56d995de): F1, TimeService's
+  report and correction wait until Actor.GetSleepState reads 0, no Fader
+  Menu is open and the Sleep/Wait Menu has been closed for a tick, one
+  logTrace line per held tick ("rest: the correction waits, sleep state N,
+  fader open X") and one at the release ("rest: the correction released,
+  ..."), the fix this bullet named on 2026-10-05; F2, remoteServer's furniture
+  open flow takes an opened Sleep/Wait Menu as a bed's open fact and ends
+  there, no 15 s wait, no "gave up ... releasing the occupant" line and no
+  second activation (a bed seats nobody; the server's bed branch sets no
+  occupant, MpObjectReference::ProcessActivateNormal). The probe
+  x-rented-bed (lab/.cache/probes, by path, probe-check ok): c1 in the inn's
+  rented bed REFR 0x0005eda7 (the `Bed` of RentRoomScript on Delphine and
+  Orgnar in Skyrim.esm, owned by RiverwoodSleepingGiantInnFaction; the
+  rental's engine effect made by the console's prid and setownership), an
+  8-hour sleep, the Rest line within 30 s, dump-state at +2, +10 and +60 s
+  claiming the HUD open, no holding menu and every control on, a 2 s walk
+  moving the record more than 50 units, F1's lines counted (at least one
+  hold, one release); then c2 at the camp bedroll. Grammar gaps: dump-state's
+  sleepState, sitState, inMenuMode and furniture have no `c.state` fact, so
+  they stay readings in the dumps until lab-api names them.
 - **The server would undo a rest's healing.** It crops a client's health and
   magicka reports to what regeneration allows over at most 2 s
   (docs/verbs/attributes.md; ActionListener::OnChangeValues,
@@ -254,6 +292,18 @@ Skyrim has no wilderness sleep, so TES3MP's allowWildernessRest has no
 counterpart, and an unknown key stops the server at start, named, as the
 clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
 
+### Findings at the union's stage (2026-10-30; x-rented-bed 130908, read by an agent)
+
+Two faults in the rented-bed correction (fork 6a3427fa, in the union as part of P1-win), neither the cause of that run's red (the
+stand point was) and neither a blocker, both owed a fix in a later train:
+- The correction's open loop in remoteServer.ts paces itself by Utility.wait(0.1), game time, which the pausing Sleep/Wait Menu
+  stops: its first pass ran before the menu opened and the next after it closed, so openedAsBed never saw the menu and the "gave
+  up" line and the second ActivateMessage went out as before the fix (harmless: ProcessActivateSecond returns false for a FURN
+  with no occupant). Fix: pace that loop with Utility.waitMenuMode, which the same function already uses for its 1 s delay.
+- The sleep-state gate (GetSleepState) is vacuous for a menu sleep: the state read 0 with the Sleep/Wait and Fader menus open, so
+  the gate held its "closed this tick" tick only and released 3.8 s after the engine's wake. The probe header's "the engine's
+  sleep state outlives the menu by seconds" is not what the lab read.
+
 ## Status
 
 - [x] design reviewed (conventions: Eli, 2026-10-04)
@@ -274,3 +324,10 @@ clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
       time scale 20); its dependence on other time scales is measured once
       (time scale 10) and written down as not followed
 - [x] scenario reviewed by Eli (a-rest, thuum 7b12fa7: approved)
+
+Finding 31's fix rides the pass (18:11 PDT 2026-10-29): fork m3-rest-correction 6a3427fa (F1, the clock correction and the RestIntent
+wait for the engine's wake: GetSleepState 0, no Fader Menu, the Sleep/Wait Menu closed a tick, one trace line per held tick and
+one at the release; F2, a bed's open fact is its Sleep/Wait Menu, so the furniture wait and its "gave up" line end for beds) is
+merged into m3-client-bits f9c6b7ca and m3-pass-train-1-win 9721ff72, the first pass train to stage; x-rented-bed (by path, v1 of
+2026-10-29 00:4x) reads it there: one "slept 8 h" on the server, at least one held tick and exactly one release on c1, both seats
+answering a minute after. HYPOTHESIS until that run, as the Dynamic plan says.

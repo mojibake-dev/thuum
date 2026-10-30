@@ -13,7 +13,7 @@ vmid=${1:?vmid}; version=${2:?game version, e.g. 1.6.1170}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 srv=${SRV_HOST:-eli@10.10.70.10}; srv_ip=${SRV_IP:-10.10.70.10}; port=${GAME_HTTP_PORT:-8766}
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-run() { ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 3600 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); print((d.get("err-data") or "").strip()[-600:], file=sys.stderr) if d.get("exitcode") else None; sys.exit(0 if d.get("exitcode")==0 else 1)'; }
+run() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 3600 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); print((d.get("err-data") or "").strip()[-600:], file=sys.stderr) if d.get("exitcode") else None; sys.exit(0 if d.get("exitcode")==0 else 1)'; }
 ssh -o BatchMode=yes -J "$jump" "$srv" "test -f /srv/persist/game/$version/SHA256SUMS && mkdir -p /srv/lab/handover" \
   || { echo "no /srv/persist/game/$version/SHA256SUMS on sky-srv" >&2; exit 2; }
 ssh -o BatchMode=yes -J "$jump" "$srv" "cd /srv/persist/game/$version && (nohup python3 -m http.server $port --bind $srv_ip >/dev/null 2>&1 & echo \$! > /srv/lab/handover/.game-http.pid)"

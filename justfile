@@ -443,6 +443,15 @@ playtest-record-stop:
 lab-tail what pattern=".":
     @lab/tools/lab-tail.sh {{what}} {{quote(pattern)}}
 
+# Stop a seat's lab-tail between its polls (never mid-poll, which leaves a stale answer in the clone's agent): the flag
+# lab-tail checks before each poll, then a wait of at most 45 s for the process to end.
+lab-tail-stop what:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p lab/.cache && touch "lab/.cache/lab-tail-{{what}}.stop"
+    for i in $(seq 1 45); do pgrep -f "lab-tail.sh {{what}}" >/dev/null || { echo "lab-tail {{what}} stopped"; exit 0; }; sleep 1; done
+    echo "lab-tail {{what}} still running after 45 s" >&2; exit 1
+
 # A server push: skymp-server alone switched to a fixed <ref-slug>-<sha8> tag the fork's server-build pushed, the world
 # saved first, then the wait for both seats back online (they reconnect by themselves).
 turbo-srv tag:
@@ -458,6 +467,12 @@ turbo-client ref:
 # replaced file kept for turbo-back, the reload proven by skyrim-platform.log's load line, the seat marked hot.
 client-hot client what:
     @lab/tools/client-hot.sh {{client}} {{what}}
+
+# A client DIST (Skyrim Platform and the SKSE plugins with the client) to running seats, one at a time, from the fork's
+# client-build of the branch's head or SHA=<commit>: client-dist, then playtest-relaunch, a "dist" line in turbo.log.
+# A change inside Skyrim Platform loads only at a game's start; undo with `just client-rollback <c>`.
+turbo-dist branch seats="both":
+    @lab/tools/turbo-dist.sh {{branch}} {{seats}}
 
 # The bundle alone, built from a fork ref (its path is the last line).
 turbo-client-build ref:

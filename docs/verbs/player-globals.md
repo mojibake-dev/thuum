@@ -226,7 +226,32 @@ lethal need calls PlayerRef.Kill() at Survival_ColdNeedValue (81b) 1000; the ser
 death report exists for players, MpActor::Kill comes from its own number alone) and the seat holds its player in the
 engine's deferred kill: memo D51, B recommended (the server's word from its recorded cold need), probe x-player-cold-kill.
 
+Closed at 12:25 PDT (apocrypha's read of Survival_MainScript's bytecode): the silence after the relaunches was the Creation's rule, not
+the record's. The main script's 5 s poll starts the mode (StartSurvivalMode: perks, items, the three needs' StartNeed) when
+Survival_ModeToggle 828 == 1, Survival_ModeEnabled 826 != 1 and ModeCanBeEnabled(): MQ101 completed OR (fighting controls enabled AND
+not in an interior). A generated save never has MQ101 done, so a login indoors (today's Embershard Mine) leaves Survival off until the
+first step outside; the camp starts it within 5 s. Two rules for this verb fall out. (1) A listed global is a switch the player sets (828)
+or the player's data (the needs 81A, 81B, 816; 8DF the prompt shown; 8E0 to 8E2 the help boxes shown), never a script's own running
+state: 826 and Update.esm's Survival_ModeEnabledShared (00314A) are never listed, since a restored 1 would read as "already running" in a
+fresh game whose quests are not running, and A0F (ModeCanBeEnabled's output) is derived. (2) A restored need value needs no care: StartNeed
+applies its stage at once and each tick adds elapsed game hours from the script's own stamp. Known limit (the checklist's): Survival waits
+for the outdoors after an indoor login. If a train ever wants it on from login indoors, the Creation's own StartSurvivalMode() is the path.
+
 ## Status
+
+### Memo D51 B built (17:1x PDT 2026-10-28, Eli: "that sounds good")
+
+A death from recorded state is the server's word (R0). A `playerGlobals` entry may carry `killAt` (a finite
+number) beside `default`; when a player's merged record puts that global at or past it, the server kills the
+player through its own death path (MpActor::Kill, the respawn following as for any death) and logs "dies by the
+server's word: global X at V reached its killAt". Survival's cold need, 81b:ccQDRSSE001-SurvivalMode.esl, carries
+killAt 1000 in both server settings files (the mod's own CheckIfMaxCold threshold; apocrypha's read). The client's
+own Kill stays untrusted (rule 5): the seat's deferred kill holds the player until the server's word. Built on fork
+m3-door-pass after 9fb04fec: wire-rules player_globals.rs `kill_at` and `lethal()` with the crate's test, the bridge's
+player_globals_lethal, PartOne::LethalPlayerGlobals, the handler's kill, PlayerGlobalsTest's case (GameHour standing
+in for the cold need). HYPOTHESIS H-D51a (the seat's deferred kill swallows Survival's own Kill, so the server's word
+is the one death) until x-player-cold-kill reads it; the probe gains the global's set through the lab `global` step
+and the server's `isDead`.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated
@@ -518,3 +543,37 @@ lab/deploy/sky-srv/server-settings.json and the 1.7.104 file (2026-10-21
 12:3x, numidium deploys); the probe to confirm is the relaunch read with
 them. A probe that sets high values with the flags at 0 cannot measure
 ticking (it pauses under the box).
+
+## Survival's food (2026-10-28, playtest 37; fork m3-hunger 853dd4fc)
+
+Eli: "food doesnt replenish hunger." numidium's live read CONFIRMED it (the hunger need 81a at 1000 through 115 reads
+while Eli ate): the food's Survival script never runs on a seat. The mechanism, read from the game files on sky-srv
+(nothing from memory): the Creation's esl carries no amount keywords; a food's size is an MGEF on the ALCH record,
+Update.esm's Survival_FoodRestoreHungerVerySmall 0x01002ee1 (51 records), Small 0x01002ee2 (24), Medium 0x01002ee3
+(20), Large 0x01002ee4 (31), and Survival_FoodRestoreCold 0x01002ee5 on the twelve hot soups; the esl's overrides of
+those MGEFs carry Survival_HungerRestoreEffectScript with amountToRestore bound to the GLOBs 0x8de VerySmall = 2,
+0x82d Small = 18, 0x82b Medium = 220, 0x82c Large = 380, and the cold one 0x818 = 200 (lab/tools/bsa-extract.py and
+lab/pex.py over the BSA; OnEffectStart to Hunger.DecreaseHungerBuffered to Survival_NeedBase.DecrementNeed, clamped
+at 0; cold's floor 50). The effect's conditions: Survival_ModeEnabled 0x826 at 1 and the player as target.
+
+Built, server-only: ActionListener::ApplySurvivalFood after a true OnEquip of an ALCH that is no poison: the item's
+effects (MpActor::EffectsOf) against the `survivalFood` table in server-settings.json ({effect, need, amount, floor}
+per MGEF FormDesc, each row's amount a required positive finite number (a row without one refuses the settings at load,
+PartOne::SetSurvivalFoodSettings; the literals are the plugin's GLOBs 0x8de Very Small 2, 0x82d Small 18, 0x82b Medium 220,
+0x82c Large 380 and 0x818 cold Medium 200, read on sky-srv's 1.6.1170 masters 2026-10-29; the doc said "from the GLOB's
+record when the table gives none" until then, which the code never did); both lab/deploy settings files carry
+the five rows), gated on the recorded switch 828 at 1, the floor applied, the record merged (RecordPlayerGlobals) and
+the value sent to the player with the full watch list (the client's apply replaces its watch from every message),
+one log line "[verb:player-globals] <actor> ate <item> <EditorId> (<effect EditorId>): 81a:... <before> -> <after>".
+The needs lever: the console command SetGlobal <0x14|0|"self"|actor id> <FormDesc|form id> <value> (rank admin, a
+wire-rules console row; ConsoleCommands.cpp in ExecuteAddSpell's shape), reachable in a playtest through lab-api's
+console labCommand: {"kind":"console","profileId":1,"name":"setglobal","args":[20,"81a:ccQDRSSE001-SurvivalMode.esl",600]}.
+T0: PlayerGlobalsTest's food and SetGlobal cases on the test order's vanilla records (the unit load order has no
+Survival plugin: FoodRestoreHealth as the effect, GameHour as the need).
+
+Known and HYPOTHESIS: the HUD's stage recomputes at its next hunger tick (0.25 game hours, up to about 45 s at 20x),
+where the Creation's own path recomputes at once; a hunger tick landing between the write and the client's apply
+reports the stale value, which wins (one round trip's window); gated on 828, not 826 (never listed by rule), so an
+indoor login with 828 at 1 gets a restore the game would hold; not covered: the vampire blood potion (a keyword
+condition), alchemy-made reduce-hunger potions (runtime records), werewolf feeding and cannibalism, the gutworm
+multiplier. Probe: x-survival-eat v2 reads 81a before and after an eat of a Large food on a seat with 828 at 1.

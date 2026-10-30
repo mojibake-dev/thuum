@@ -40,7 +40,11 @@ of sky-srv is the operator's `sky-lab` action between scenario sets, and
 `SERVER_ROLLBACK_MODE=vm` exists only for a lab-api that runs elsewhere.
 Client rollback is the disk-only sequence (stop, rollback, start, wait for
 the heartbeat) on managed guests; fenestrate and any `managed: false` guest
-is never touched, lab-api only waits for its heartbeat.
+is never touched, lab-api only waits for its heartbeat. Under
+`LAB_CLIENT_RESET=relaunch` a managed seat's game is relaunched and its run
+files cleaned instead, with the VM left running, unless something asks for
+the rollback (ADR-036; docs/LAB.md, "Between runs"); result.json's
+`client_reset` says which each seat got and why.
 
 Server-side verbs (`teleport`, `give`) go to the server's `labCommand` RPC;
 client verbs (`connect`, `reconnect`, `move`, `equip`, `cast`, `activate`,
@@ -148,7 +152,9 @@ game.
 | SERVER_PORT | 7777 | the game port fakeclient steps connect to (service name as host) |
 | FAKECLIENT_BIN | /srv/skymp/fakeclient | the headless client inside the server image |
 | FAKECLIENT_TIMEOUT_S | 90 | wall clock for one fakeclient step |
-| HEARTBEAT_TIMEOUT_S | 300 | client rollback to first poll |
+| HEARTBEAT_TIMEOUT_S | 300 | client rollback (or relaunch) to first poll |
+| LAB_CLIENT_RESET | rollback | how a run starts each managed seat: `rollback` or `relaunch` (ADR-036, docs/LAB.md "Between runs"); anything else stops lab-api at its start |
+| LAB_RELAUNCH_ROLLBACK_EVERY | 20 | under `relaunch`, a seat that has played this many runs since its last rollback rolls back |
 | SERVER_READY_TIMEOUT_S | 120 | server rollback to UI port |
 | GUEST_TASK_TIMEOUT_S | 120 | Proxmox tasks and guest execs |
 | BEFORE_LOGS_QUIET_S | 600 | a run this long after the last keeps the clients' logs as <client>-before.log before their rollback; 0 turns it off |

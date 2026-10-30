@@ -167,6 +167,27 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual(playtest_step('globals {forms: ["81a:ccQDRSSE001-SurvivalMode.esl"]}'),
                          ("globals", {"forms": ["81a:ccQDRSSE001-SurvivalMode.esl"]}))
 
+    def test_a_playtest_reads_a_node_s_rotation(self):
+        # playtest 37's face probe (2026-10-28): a puppet's head and neck against the live NPC's on its host
+        from labapi.scenario import load_scenario, playtest_step
+
+        self.assertEqual(playtest_step('node-rotation {formId: 0x13491, nodes: ["NPC Head [Head]"]}'),
+                         ("node-rotation", {"formId": 0x13491, "nodes": ["NPC Head [Head]"]}))
+        sc = load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: node-rotation {formId: 0x13491}\n  - c1: face-keyframes {formId: 0x13491}\n")
+        self.assertEqual([st.action for st in sc.steps], ["node-rotation", "face-keyframes"])
+
+    def test_a_quest_s_stage_is_set_on_one_seat_and_read_on_both(self):
+        # x-quest-stage (ADR-056): set-stage is a lever a playtest may pull, quest-stage a read
+        from labapi.scenario import load_scenario, playtest_step
+
+        self.assertEqual(playtest_step("quest-stage {quests: [0x74a83], stages: [10]}"),
+                         ("quest-stage", {"quests": [0x74A83], "stages": [10]}))
+        self.assertEqual(playtest_step("set-stage {quest: 0x74a83, stage: 10}"), ("set-stage", {"quest": 0x74A83, "stage": 10}))
+        sc = load_scenario("id: t\nclients: [c1, c2]\nsteps:\n  - c1: set-stage {quest: 0x74a83, stage: 10}\n"
+                           "  - c2: quest-stage {quests: [0x74a83], stages: [10]}\n")
+        self.assertEqual([st.action for st in sc.steps], ["set-stage", "quest-stage"])
+        self.assertEqual(playtest_step("face-keyframes {formId: 0x13491}")[0], "face-keyframes")
+
     def test_a_playtest_draws_and_calms_a_named_npc(self):
         # playtest 35's "draw <name>" and "calm" on the host's seat: one named NPC's combat opened and ended with its AI
         # left running (an npc-ai off and on would flip the simulation under test)
@@ -239,6 +260,20 @@ class SoloFlag(unittest.TestCase):
         sc = load_scenario("id: p-ref\nsolo: true\nclients: [c1]\nsteps:\n  - c1: solo-start {x: 0, y: -300, z: 0, rz: 180}\n")
         self.assertEqual(sc.steps[0].action, "solo-start")
         self.assertEqual(sc.steps[0].args["rz"], 180)
+
+
+@needs_deps
+class ClientRollbackKey(unittest.TestCase):
+    def test_client_rollback_is_the_one_value_and_absent_leaves_the_choice_to_the_runner(self):
+        """ADR-036: `client: rollback` rolls the run's seats back cold whatever the reset mode; a scenario never asks
+        for a relaunch, which is the runner's to choose."""
+        from labapi.scenario import load_scenario
+
+        self.assertIsNone(load_scenario("id: plain\nclients: [c1]\nsteps: []\n").client)
+        self.assertEqual(load_scenario("id: cold\nclient: rollback\nclients: [c1]\nsteps: []\n").client, "rollback")
+        for bad in ("relaunch", "true", "[c1]", "Rollback"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: t\nclient: {bad}\nclients: [c1]\nsteps: []\n")
 
 
 

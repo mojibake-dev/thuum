@@ -128,6 +128,22 @@ docs/research/transport-clock.md) the transport's polls never called
 and a lost reliable packet was never resent; the fix calls both before the
 transport's update, renet's own order.
 
+Outbound packets leave on a flush clock, not at every poll (D64, 17:26 PDT 2026-10-29;
+fork m3-send-rate): the gamemode polls the server about 800 times a second (a
+tick, then a 1 ms sleep, skymp5-server/ts/index.ts), and renet sends a packet to
+every connection at each `send_packets`, so a flush per poll cost an idle
+client 814.8 packets a second of 26 to 31 B (x-wire-idle-rate on sky-srv,
+numidium: equal to the 816.4 ticks a second within 0.2 percent, near 45 KB/s a
+seat with headers). `wire-transport::FlushClock` accumulates the polled time and
+flushes at `Options::send_interval` (`SEND_INTERVAL_DEFAULT` 1/60 s; zero is
+the old shape), keeps the remainder so the long-run rate is the interval's,
+never bursts after a stalled tick, and a disconnect flushes at the next poll.
+Ingest, validation and the game's tick keep their cadence; a message queued
+between flushes waits at most 16.7 ms. The clients flush at their own poll (a
+frame on a seat, 5 ms on the fakeclient); their rate is theirs. Measured 18:43 PDT 2026-10-29 on the
+branch's image: 59.98 packets a second to the idle client (all 26 B, a median gap of
+16.6 ms) with the loop still at 847 ticks a second, T2 green.
+
 SkyMP's senders choose per send (`reliable` true or false), and
 `wire-transport::channels::for_send` maps that choice: reliable to channel 0,
 unreliable to channel 2 (SkyMP's server sent reliable as RELIABLE_ORDERED and
@@ -175,7 +191,19 @@ larger than the messages need.
 
 Families, mirroring the authority rungs:
 
-- Session: hello, version, mod list hash, disconnect reason.
+- Session: hello, version, mod list hash, disconnect reason. Live since
+  mod-lock (docs/verbs/mod-lock.md, fork m3-mod-lock): Hello (id 0, C2S)
+  carries one hash per plugin, the full plugins in the engine's load order
+  then the light ones, each FNV-1a 64 over lowercase(name) + 0x00 + size as
+  u32 LE + crc32 as u32 LE (wire-rules mods.rs, the one definition; the
+  client's src/lib/modHash.ts pinned to the same vectors); the bridge judges
+  it against the server's manifest.json and answers Welcome (id 1) or Refuse
+  (id 2) with a reason code: 501 E_MOD_LOCK_COUNT, 502 E_MOD_LOCK_MISMATCH,
+  503 E_MOD_LOCK_NO_HELLO (a login before any Hello, when the server
+  requires one); the refused connection is dropped on the next poll. The
+  session family has no SkyMP MsgType: between a plugin and its wire DLL it
+  travels as JSON keyed by "w" (0, 1, 2), hashes as 16 lowercase hex digits,
+  the DLL filling schema_version when the plugin omits it.
 - Ownership: cell host grant, host handoff, host release (R0 decisions):
   HostGrant (id 56, MsgType 48) and HostRelease (id 57, MsgType 49) with the
   cell and its epoch, fed by the client's CellLoaded (id 55, MsgType 47, an
@@ -311,6 +339,31 @@ into the cell. Validator: idx in range; budget 8 then 2 a second (UNMEASURED).
 Refusals: E_CLAIM_NO_ACTOR, E_CLAIM_NONE, E_CLAIM_NPC, E_CLAIM_DEAD,
 E_CLAIM_COMBAT, E_CLAIM_REACH, E_CLAIM_HELD, E_CLAIM_UNLOADED.
 
+QuestStage (id 65, MsgType 57), both directions, reliable (fork m3-quest-stage,
+2026-10-28; docs/verbs/quest-stage.md, ADR-056): `{ quest: u32 (the QUST's form
+id in the load order both ends share, 0 with a list), stage: u16 (the engine's
+stage index), shared: [u32] (server to client only: the shared quests, sent at
+a login with quest 0) }`. Since fork m3-quest-mode 11cbf4cb (14:41 PDT 2026-10-29, D58 B;
+SCHEMA_VERSION 21): `mode: u8` (0 list, 1 all; a client's message carries 0 or is
+refused), and in mode 1 the login message's `shared` is the DENIED list (may be
+empty; the validator refuses an empty list with quest 0 in mode 0 only); the
+client budget is 32 then 8 a second (UNMEASURED; a load fires a dozen quest
+starts). The server setting `sharedQuests` stays the array (mode list); the mode is
+its own key `sharedQuestsMode` `{mode: "all", denied: [FormDesc...], allowed:
+[FormDesc...]}`, which an older image ignores; E_QUEST_DENIED beside
+E_QUEST_UNLISTED, and E_QUEST_OWN_START for a start-game-enabled quest not
+allowed (D62). Client to server, R1: one stage the player's own game
+set on a shared quest; the server checks the quest is a QUST in its load order
+and on its `sharedQuests` list, keeps the stage once on the world's record (the
+set of stages done per quest, on the world's journal reference), relays it to
+every other player and replays the record after a login in order after
+PlayerGlobals, behind the list. Server to client, R0: the list, the relay, the
+replay; the seat applies each stage through the engine's own SetStage and
+consumes the engine's event for it. Validator: a client names no list and a
+quest other than 0; the list names each quest once and never 0; budget 16 then
+4 a second (UNMEASURED). Refusals (the server's log): E_QUEST_UNKNOWN (not a
+QUST in the load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
+
 DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
 m3-npc-death b82a82e5, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
 deaths by the engine): `{ idx: u32 (the victim as the server indexes it),
@@ -328,8 +381,10 @@ check_damage_cause): idx in range, health finite and 0 to 1.
 
 ActorDeath (id 60, MsgType 52), client to server, reliable, once per death,
 R1 (fork m3-train-44 597bb9dc, 2026-10-24; ADR-048's B, Eli's D1 "jump right
-to B"): `{ refrId: u32 (the dead game-file actor, under 0xff000000,
-nonzero), cause: u8 (0 unknown, 1 fall, 2 hazard, 3 script, 4 an actor's
+to B"): `{ refrId: u32 (the dead actor, nonzero: a game-file actor, or since
+fork m3-death-range, playtest 37's finding 47, a server-made one from
+0xff000000 up, whose death otherwise ran the server's 3 s word), cause: u8 (0
+unknown, 1 fall, 2 hazard, 3 script, 4 an actor's
 hit), killer: u32 (the killer's id for cause 4, else 0), pos: [f32; 3]
 (where the body fell) }`, sent by skymp5-client's DeathReportService at
 deathStart for an actor the game simulates whose death is not the server's
@@ -515,6 +570,16 @@ and the packets are read into the schema by wire-legacy, which reads the
 old binary format through the same serde types. Hand-written sessions cover
 the paths the corpus never exercises.
 
+A session names a form the server creates during the run (a drop, a placement) as
+`"{{created:<baseId>}}"` instead of a fixed id (18:23 PDT 2026-10-29, fork m3-prop-physics
+f559b0d9): the fakeclient keeps the latest form id each CreateActor named per base and
+resolves the string when it sends (0 and an error event when none came), and the harness
+resolves the same string in a declared divergence per stack, from that client's `created`
+table in its normalized events, before matching. The first T2 of the prop-physics session had
+assumed the generator's next id (0xff000004) and read the claim refused when earlier sessions
+had allocated forms on the same server; the session names its dropped dagger by its base
+(80254) now. The two stacks' generators differ by design, so `created` is never compared. A declared divergence may name per-field tolerances by dotted path (`within: {"data.health": 0.001}`) for the numbers the server takes from its own clock, which no replay reproduces to the digit (D66's counted gap: 8f9c11bd's T2 on a loaded host read 0.94792 where a quiet one read 0.94784, 2026-10-30); every other field matches exactly.
+
 ## Fuzzing
 
 - `codec_decode`: arbitrary bytes into `wire_codec::decode`; must return
@@ -568,3 +633,12 @@ CreateActor named stays a number and differs as before; a session
 declaration that names an index literally misses on both stacks and should
 name the form instead. Fork skymp-wire/difftest, m3-train-41 e7a5e211.
 
+### CreateActor's placedBy for a spell-placed world object (spell-placed-object, M3; ADR-057)
+
+CreateActor (t 33) gains the optional prop `placedBy: u32` (SCHEMA_VERSION 20; fork m3-spell-placed 5b951a9c): the
+server id of the caster whose accepted cast of a listed spell placed the form from the server's `spellPlacedObjects`
+table (Raise Wall's wall MSTT and glow ACTI first). It is nonzero and travels only with `baseRecordType` MSTT or ACTI;
+any other pairing is E_VAL_RANGE in validate_server, and the transport refuses the message from a client by direction.
+The caster's own game skips a form naming itself while the script's own copy stands at the pose; every other game
+places it as any server form. The removal is the usual DestroyActor 5 s after the cast's end. Fixtures
+33-CreateActor-0 and -1 carry the field; WireJsonContractTest reads them through CreateActorMessage.h.

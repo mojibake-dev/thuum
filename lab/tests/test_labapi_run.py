@@ -2433,3 +2433,285 @@ class LogCount(RunTests):
         tries = [c for c in pve.calls if c[:2] == ("exec", 901) and any("logcount-" in a and ".log.copy" in a and "-console" not in a for a in c[2])]
         self.assertEqual(len(tries), 3, pve.calls)
 
+
+RESET = """
+id: t2-reset
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - c1: dump-state
+"""
+
+
+@needs_deps
+class ClientResets(RunTests):
+    """ADR-036: between runs a seat relaunches its game instead of rolling its VM back, two vfio resets of its GPU,
+    unless something asks for the rollback; LAB_CLIENT_RESET picks the mode, rollback until the first live day."""
+
+    def _seat(self, mode="relaunch", **extra):
+        import dataclasses
+
+        from labapi.guests import Guest
+
+        self.services.runner.s = dataclasses.replace(self.settings, client_reset=mode, **extra)
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.snaps[901] = [{"name": "clean-sp", "parent": None, "description": "m3-turbo client b588e0ff, 2026-10-29"},
+                          {"name": "current", "parent": "clean-sp"}]
+        return pve
+
+    def _warm(self, **extra):
+        """A seat whose first run since lab-api started rolled it back, so its next run may relaunch it."""
+        pve = self._seat(**extra)
+        run_id, body = self._run(RESET)
+        self.assertEqual(body["client_reset"]["c1"]["kind"], "rollback", body)
+        self.assertEqual(body["client_reset"]["c1"]["reason"], "no run on it since lab-api started")
+        return pve
+
+    def _reset(self, text=RESET):
+        run_id, body = self._run(text)
+        return body["client_reset"]["c1"], body
+
+    @staticmethod
+    def _vm_resets(pve, since=0):
+        return [c for c in pve.calls[since:] if c[0] in ("stop", "rollback", "start")]
+
+    def test_rollback_mode_rolls_back_every_run_and_says_so(self):
+        pve = self._seat(mode="rollback")
+        for _ in range(2):
+            reset, body = self._reset()
+            self.assertEqual(body["verdict"], "green", body)
+            self.assertEqual((reset["kind"], reset["reason"]), ("rollback", "LAB_CLIENT_RESET is rollback"))
+            self.assertTrue(any(n.startswith("c1 rolled back in ") and n.endswith(" s: LAB_CLIENT_RESET is rollback") for n in body["notes"]), body["notes"])
+        self.assertEqual(pve.relaunches, [])
+        self.assertEqual([c for c in pve.calls if c[0] == "rollback"], [("rollback", 901, "clean-sp")] * 2)
+        self.assertNotIn(("status", 901), pve.calls, "rollback mode asks nothing it does not need")
+
+    def test_a_clean_seat_relaunches_with_no_rollback_and_records_the_same_build(self):
+        pve = self._seat()
+        reset1, body1 = self._reset()
+        mark = len(pve.calls)
+        reset2, body2 = self._reset()
+        self.assertEqual(body2["verdict"], "green", body2)
+        self.assertEqual(self._vm_resets(pve, mark), [], "the VM was neither stopped, rolled back nor started")
+        self.assertEqual(len(pve.relaunches), 1)
+        self.assertEqual((reset2["kind"], reset2["since_rollback"], reset2["reason"]), ("relaunch", 1, ""))
+        self.assertIsInstance(reset2["seconds"], float)
+        rollback_clients = next(p for p in body2["phases"] if p["name"] == "rollback-clients")
+        self.assertEqual(rollback_clients["note"], "c1=fake-c1 (relaunched)")
+        self.assertTrue(any(n.startswith("c1 relaunched in ") and n.endswith(" s, 1 run since its rollback, 3 files cleaned") for n in body2["notes"]),
+                        body2["notes"])
+        # the snapshot the disk descends from, as a rolled-back seat records it (gate-cite.py's check 2)
+        self.assertEqual(body2["build"]["clients"], body1["build"]["clients"])
+        self.assertEqual(body2["build"]["clients"]["c1"]["description"], "m3-turbo client b588e0ff, 2026-10-29")
+        result = json.loads((self.tmp / "results" / body2["run"] / "result.json").read_text())
+        self.assertEqual(result["client_reset"]["c1"]["kind"], "relaunch")
+        # the count goes on: the next run is the second since the rollback
+        self.assertEqual(self._reset()[0]["since_rollback"], 2)
+
+    def test_the_relaunch_stops_the_tasks_and_the_game_cleans_named_paths_and_starts_a_fresh_launch(self):
+        pve = self._warm()
+        self._run(RESET.replace("  - c1: dump-state\n", "  - c1: racemenu-save {name: own-before}\n"))
+        self._run(RESET)
+        self.assertEqual(len(pve.relaunches), 2)
+        first, second = pve.relaunches
+        # the hot push's mark is read before anything stops; then every sky-lab task, the launch task and the game;
+        # the cleaning; the launch task's start last
+        steps = ["hot.txt", "Get-ScheduledTask -TaskName 'sky-lab*'", "Stop-ScheduledTask -TaskName sky-lab-launch", "Stop-Process -Force",
+                 "(Get-ScheduledTask -TaskName sky-lab-launch -ErrorAction SilentlyContinue).State -eq 'Running'",
+                 "Clean (Join-Path $lab 'frida')", "Start-ScheduledTask -TaskName sky-lab-launch"]
+        at = [first.index(s) for s in steps]
+        self.assertEqual(at, sorted(at), steps)
+        for named in ("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
+                      "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
+                      "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
+                      "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
+                      "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
+                      "Clean (Join-Path $lab 'input') @('request.json', 'done.json') @()",
+                      "Clean (Join-Path $g 'Data\\SKSE\\Plugins\\CharGen\\Presets') $presets @()",
+                      "Clean 'C:\\Users\\lab\\Documents\\My Games\\Skyrim Special Edition\\Saves' @('TESMODPLATFORM-*') @()",
+                      "Clean 'C:\\Users\\lab\\Documents\\My Games\\Skyrim Special Edition\\SKSE' @('skyrim-platform-pid*.log') @()"):
+            self.assertIn(named, first)
+        # skymp5-client's presets always, and by name the ones the seat's last run saved through lab-driver
+        self.assertIn("$presets = @('thuum-*.jslot')", first)
+        self.assertIn("$presets = @('thuum-*.jslot', 'own-before.jslot')", second)
+        # never a wildcard over the lab folder, and the crash dumps stay (the run's end tells them by time)
+        for script in (first, second):
+            self.assertNotIn("C:\\sky-lab\\*", script)
+            self.assertNotIn("dumps", script)
+
+    def test_the_scenario_can_ask_for_a_rollback(self):
+        pve = self._warm()
+        reset, body = self._reset("client: rollback\n" + RESET.lstrip())
+        self.assertEqual((reset["kind"], reset["reason"]), ("rollback", "the scenario says client: rollback"))
+        self.assertEqual(pve.relaunches, [])
+
+    def test_a_relaunch_steps_files_roll_the_next_run_back(self):
+        pve = self._warm()
+        files = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {files: [{rename: Data/SKSE/Plugins/hdtsmp64.dll, to: hdtsmp64.dll.off}]}\n")
+        reset, body = self._reset(files)
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        # the step's own stop takes the launch task down before the game, as relaunch_cmd does
+        lever = next(base64.b64decode(c[2][-1]).decode("utf-16-le") for c in pve.calls
+                     if c[0] == "exec" and "-EncodedCommand" in c[2] and "Rename-Item" in base64.b64decode(c[2][-1]).decode("utf-16-le"))
+        self.assertLess(lever.index("Stop-ScheduledTask -TaskName sky-lab-launch"), lever.index("Stop-Process"))
+        reset, body = self._reset()
+        self.assertEqual(reset["kind"], "rollback")
+        self.assertRegex(reset["reason"], r"^its last run \(\S+-relaunch\) changed files in its game folder")
+
+    def test_a_fault_naming_the_seat_rolls_the_next_run_back(self):
+        self._warm()
+        self.state.actors[1].online = False  # c1 never logs in: E_RUN_CONNECT, a timeout naming it
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("red", "relaunch"), body)
+        self.state.actors[1].online = True
+        reset, body = self._reset()
+        self.assertEqual(reset["kind"], "rollback")
+        self.assertIn("ended in a fault: step 0, timeout: E_RUN_CONNECT", reset["reason"])
+        # once rolled back the seat is clean again
+        self.assertEqual(self._reset()[0]["kind"], "relaunch")
+
+    def test_a_failed_game_check_rolls_the_next_run_back(self):
+        from labapi.proxmox import ExecResult
+
+        pve = self._warm()
+        good, pve.game = pve.game, ExecResult(3, "", "no SkyrimSE process")
+        reset, body = self._reset()
+        self.assertEqual(body["verdict"], "error", body)
+        pve.game = good
+        reset, body = self._reset()
+        self.assertEqual(reset["kind"], "rollback")
+        self.assertIn("E_RUN_GAME: c1 (fake-c1): no running SkyrimSE.exe", reset["reason"])
+
+    def test_an_unread_run_end_rolls_the_next_run_back(self):
+        # the crash check counts dumps by time: one a lost answer missed would read as the next run's crash
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._warm()
+        real = pve.exec
+
+        def lost(guest, command, timeout):
+            if "-EncodedCommand" in command and "SkyrimSE.exe.*.dmp" in base64.b64decode(command[-1]).decode("utf-16-le"):
+                raise ProxmoxError("E_PVE_EXEC: fake-c1: qga command 'guest-exec' failed - got timeout")
+            return real(guest, command, timeout)
+
+        pve.exec = lost
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        pve.exec = real
+        reset, body = self._reset()
+        self.assertEqual(reset["kind"], "rollback")
+        self.assertIn("the run's end could not read its game", reset["reason"])
+
+    def test_a_hot_mark_older_than_a_dist_is_removed_and_the_seat_relaunches(self):
+        """sky-c1, 2026-10-30: a 10-29 03:35Z mark inside 3o's clean-m1-next, a dist laid over it at the stage, rolled
+        the seat back at every run. The script removes a mark older than a games record (install-lab's lay) and goes on."""
+        pve = self._warm()
+        pve.relaunch_stale = "20261029T033547Z 4aa5b774 C:\\Games\\Skyrim Special Edition 1.6.1170\\Data\\Platform\\Plugins\\skymp5-client.js"
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        script = pve.relaunches[-1]
+        self.assertIn("$laid = @(Get-ChildItem -LiteralPath (Join-Path $lab 'games') -Filter '*.txt'", script)
+        self.assertIn("$_.LastWriteTimeUtc -gt $mark.LastWriteTimeUtc", script)
+        self.assertLess(script.index("$laid = "), script.index("Get-ScheduledTask -TaskName 'sky-lab*'"),
+                        "the mark is judged before anything stops")
+        self.assertTrue(any("a stale hot mark removed (20261029T033547Z 4aa5b774" in n for n in body["notes"]), body["notes"])
+
+    def test_a_capture_file_held_open_is_left_and_the_seat_relaunches(self):
+        """sky-c2, b-cloak-fight 20261030-053144: two .png.b64 sidecars a timed-out guest-file-close left open failed
+        both relaunch tries and cost a rollback. The capture folders are cleaned as far as they go."""
+        pve = self._warm()
+        pve.relaunch_held = ["C:\\sky-lab\\shots\\025.png.b64", "C:\\sky-lab\\shots\\032.png.b64"]
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        script = pve.relaunches[-1]
+        self.assertIn("Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft", script)
+        self.assertIn("Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft", script)
+        self.assertNotIn("CharGen\\Presets') $presets @() -soft", script, "presets and saves still fail the try")
+        self.assertTrue(any("2 held open left in place (C:\\sky-lab\\shots\\025.png.b64" in n for n in body["notes"]), body["notes"])
+
+    def test_a_trace_copy_held_open_is_left_and_the_seat_relaunches(self):
+        """sky-c1, x-quest-mode 20261030-131512: the runner's shared-read copy of the last run's story-location.js log,
+        read back through the agent, failed both relaunch tries and cost a rollback. The copies go as far as they
+        will; the scripts and their own outputs still fail the try (one held means a Frida process outlived the stop)."""
+        pve = self._warm()
+        pve.relaunch_held = ["C:\\sky-lab\\frida\\story-location-20261030-131130-x-story-arrival-login-13.js.log.copy"]
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        script = pve.relaunches[-1]
+        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft", script)
+        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()\n", script)
+        self.assertTrue(any("1 held open left in place (C:\\sky-lab\\frida\\story-location-20261030-131130" in n
+                            for n in body["notes"]), body["notes"])
+
+    def test_a_hot_push_mark_rolls_the_seat_back_in_the_same_run(self):
+        pve = self._warm()
+        pve.hot_mark = "20261028T182237Z 26e3d0cf C:\\Games\\Skyrim Special Edition 1.6.1170\\Data\\Platform\\Plugins\\skymp5-client.js"
+        mark = len(pve.calls)
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "rollback"), body)
+        self.assertEqual(len(pve.relaunches), 1, "the relaunch read the mark and stopped nothing")
+        self.assertEqual(self._vm_resets(pve, mark), [("stop", 901), ("rollback", 901, "clean-sp"), ("start", 901)])
+        self.assertIn("C:\\sky-lab\\hot.txt marks a hot push on it (20261028T182237Z 26e3d0cf", reset["reason"])
+
+    def test_a_vm_that_is_not_running_rolls_back(self):
+        pve = self._warm()
+        pve.statuses[901] = "stopped"
+        reset, body = self._reset()
+        self.assertEqual((reset["kind"], reset["reason"]), ("rollback", "its VM is stopped"))
+        self.assertEqual(pve.relaunches, [])
+
+    def test_a_seat_rolls_back_every_n_runs_as_a_floor(self):
+        self._warm(relaunch_rollback_every=3)
+        resets = [self._reset()[0] for _ in range(4)]
+        self.assertEqual([(r["kind"], r["since_rollback"]) for r in resets], [("relaunch", 1), ("relaunch", 2), ("rollback", 3), ("relaunch", 1)])
+        self.assertEqual(resets[2]["reason"], "3 runs since its last rollback (LAB_RELAUNCH_ROLLBACK_EVERY is 3)")
+
+    def test_a_hold_and_a_clones_maintenance_roll_the_next_run_back(self):
+        self._warm()
+        self.assertEqual(self.client.post("/lab/hold", json={"minutes": 5, "reason": "playtest 39"}).status_code, 200)
+        self.client.post("/lab/release")
+        reset, body = self._reset()
+        self.assertEqual((reset["kind"], reset["reason"]), ("rollback", "the lab was held since its last run (playtest 39)"))
+        # a clone rolled back by hand (ADR-041 item 5) may stand on another snapshot than the table's: only a
+        # rollback tells its build truly (this one is refused by the snapshot guard after it began, all the same)
+        self.client.post("/lab/clients/c1/rollback", json={"to": "clean-m1"})
+        reset, body = self._reset()
+        self.assertEqual((reset["kind"], reset["reason"]), ("rollback", "rollback of fake-c1 to clean-m1 since its last run"))
+        self.assertEqual(self._reset()[0]["kind"], "relaunch")
+
+    def test_two_failed_relaunches_fall_back_to_a_rollback_in_the_same_run(self):
+        pve = self._warm()
+        pve.relaunch_failures = 1
+        pve.relaunch_left = ["C:\\sky-lab\\shots\\004.png"]
+        mark = len(pve.calls)
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "rollback"), body)
+        self.assertEqual(len(pve.relaunches), 2)
+        self.assertEqual(reset["reason"], "2 relaunches failed, the last: the cleaning left C:\\sky-lab\\shots\\004.png")
+        self.assertEqual(self._vm_resets(pve, mark), [("stop", 901), ("rollback", 901, "clean-sp"), ("start", 901)])
+
+    def test_one_failed_relaunch_is_tried_again(self):
+        pve = self._warm()
+        pve.relaunch_failures = 1
+        mark = len(pve.calls)
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        self.assertEqual(len(pve.relaunches), 2)
+        self.assertTrue(reset["reason"].startswith("relaunched on try 2, after its guest exec: E_PVE_EXEC"), reset)
+        self.assertEqual(self._vm_resets(pve, mark), [])
+
+    def test_the_game_checks_image_base_is_noted_per_seat(self):
+        from labapi.proxmox import ExecResult
+
+        pve = self._seat()
+        pve.game = ExecResult(0, "base 00007FF7AB420000\r\nC:\\Games\\Skyrim Special Edition 1.6.1170\\SkyrimSE.exe\r\n1.6.1170.0\r\n", "")
+        reset, body = self._reset()
+        self.assertEqual(reset["image_base"], "00007FF7AB420000")
+        self.assertIn("c1's SkyrimSE.exe image base 00007FF7AB420000 after its rollback", body["notes"])
+        reset, body = self._reset()
+        self.assertIn("c1's SkyrimSE.exe image base 00007FF7AB420000 after its relaunch", body["notes"])
+        self.assertEqual(body["games"], {}, "the base line is no game identity")
+

@@ -1,0 +1,72 @@
+# b-quest-stage (thuum-magnus, 2026-10-30; docs/verbs/quest-stage.md, ADR-056, D58 B and D62; fork m3-quest-mode inside the union
+# m3-pass-train-3-win 92a3f276; promoted from x-quest-mode v6, whose v5 ran GREEN through the relay at the union's stage on 2026-10-30
+# with lab/frida/quest-stage-chain.js reading the engine's chain): sharedQuestsMode {mode: all, denied: [...]} makes every
+# quest's stage a seat reports the world's unless denied; the login message carries the mode and the denied list; the client
+# reports every stage event but the denied; a start-game-enabled quest stays each seat's own (D62) unless the allowed list names
+# it. Playtest 38's finding 76 (the Aventus rumor, DB01Misc) is that D62 rule at work, D69 in the LOG. The deploy's settings for
+# this scenario carry mode all with the main quest's intro chain and the DLC starts denied (lab/deploy/sky-srv/server-settings.json).
+# Shape: both seats connect (the login message's mode read in the console, "the server shares ... mode all"); c1 sets stage 10 of
+# MS10MiscObjPointer 0x10d3bb (Skyrim.esm, not start-game-enabled, in no list: the mode's point) through the game's own console
+# (setstage; the driver's Papyrus pair is refused by the engine for quests not yet running), the server records and relays it, and
+# c2's game applies it (its stage done, its line once); then c1 sets stage 10 of MQ102 0x4e50d, denied, and the client keeps it to
+# itself: no server line about it at all, c2 unchanged (the server's E_QUEST_DENIED is the backstop a filtering client never
+# reaches; T2's fakeclient exercises it). Recorded, not claimed: the fragment skip line on c2 (m3-quest-fragment's suppression),
+# the chain's counts. The trace that read the engine's chain is the probe's, not the scenario's. Assertions are evaluated by
+# lab-api only (ADR-009). Its own commit (rule 13).
+id: b-quest-stage
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 300
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: quest-stage {quests: [0x10d3bb, 0x4e50d], stages: [10]}
+  - c2: quest-stage {quests: [0x10d3bb, 0x4e50d], stages: [10]}
+  - c1: log-count {pattern: "the server shares .* mode all"}
+  - c2: log-count {pattern: "the server shares .* mode all"}
+  - assert:
+      - c1.quest(0x10d3bb).stageDone(10) == false
+      - c2.quest(0x10d3bb).stageDone(10) == false
+      - 'c1.log_count("the server shares .* mode all") >= 1'
+      - 'c2.log_count("the server shares .* mode all") >= 1'
+      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent .* mode all") >= 0'
+  # an undeclared quest's stage is the world's in mode all
+  # v3: the game's own console (setstage, 22151 over the setter): the driver's Papyrus Quest.Start then SetCurrentStageID answered
+  # false to both on MS13Intro in 131512 (started false, ok false; no setter, no stage event, nothing to report)
+  - c1: console {text: "setstage 10d3bb 10"}
+  - until: {within: 15, expect: ['server.log_count("\\[verb:quest-stage\\] ff[0-9a-f]+ set 10d3bb:Skyrim.esm stage 10: recorded, relayed to 1") >= 1']}
+  - wait: 5
+  - c1: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c2: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c2: log-count {pattern: "the world.s stage 10 of quest 10d3bb set"}
+  - c2: log-count {pattern: "fragment of 10d3bb stage 10 skipped"}
+  - assert:
+      - c1.quest(0x10d3bb).stageDone(10) == true
+      - c2.quest(0x10d3bb).stageDone(10) == true
+      - c2.quest(0x10d3bb).stage() == 10
+      - 'c2.log_count("the world.s stage 10 of quest 10d3bb set") >= 1'
+      - 'server.log_count("E_QUEST_UNLISTED") == 0'
+      # recorded: the fragment's skip on the applying seat (m3-quest-fragment, when it rides the build)
+      - 'c2.log_count("fragment of 10d3bb stage 10 skipped") >= 0'
+  # a denied quest stays each seat's own
+  - c1: console {text: "setstage 4e50d 10"}
+  - wait: 5
+  - c2: quest-stage {quests: [0x4e50d], stages: [10]}
+  - assert:
+      # v6: the denied quest stays per seat at the client (QuestStageService reports every stage event but the denied, so the
+      # server never hears of it: no line about 4e50d's stage, neither a set nor a refusal); the server's E_QUEST_DENIED is the
+      # backstop for a client that does not filter, which T2's fakeclient exercises
+      - 'server.log_count("set 4e50d:Skyrim.esm stage") == 0'
+      - 'server.log_count("reported stage 10 of 4e50d:Skyrim.esm") == 0'
+      - c2.quest(0x4e50d).stageDone(10) == false
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]

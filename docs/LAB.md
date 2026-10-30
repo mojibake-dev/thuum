@@ -686,7 +686,9 @@ Input is a YAML scenario (see lab/scenarios/). The runner:
    virtio-fs shares, which are incompatible with RAM snapshots, so every
    rollback in the lab is disk-only; sky-re is rolled back with `pct`.
 2. Applies netem if asked.
-3. Rolls each named client back and starts it; waits for the lab-driver
+3. Rolls each named client back and starts it, or under
+   LAB_CLIENT_RESET=relaunch relaunches its game when nothing asks for the
+   rollback (ADR-036, "Between runs" below); waits for the lab-driver
    heartbeat.
 4. Feeds steps in order; each step names a client or the server; waits for
    the ack or the timeout.
@@ -774,6 +776,80 @@ Assertions live in the YAML, and the runner is the only thing that can mark
 a scenario green (ADR-009). Scenario YAML is review-gated (ADR-016): a
 change travels in its own commit, Eli approves it, and CI refuses a commit
 that mixes scenario YAML with other files.
+
+### Between runs: a relaunch or a rollback (ADR-036)
+
+A client rollback is two vfio resets of the seat's GPU, and the cards wedge
+after them (sky-c2's GTX 1050 at a rollback on 2026-10-29, the fifth
+link-retrain wedge in sixteen days). LAB_CLIENT_RESET picks how the phase
+rollback-clients (its name kept) starts each managed seat: `rollback`, the
+default until a live day has measured the other, or `relaunch`. A relaunch
+is one guest exec, the VM left running: every running sky-lab task stops (a
+Frida watcher or an armed ProcDump would take the next run's game), then
+sky-lab-launch and the game, the cleaning list goes, and sky-lab-launch
+starts; the rollback's heartbeat wait follows. Every relaunch, the relaunch
+step's and its files lever's too, stops sky-lab-launch before the game: the
+task is registered IgnoreNew (install-lab.ps1:104) and launch.ps1 starts
+again a game that exits in its first minute (launch.ps1:117-135), so a kill
+in that minute came back as the old launch's own, with that boot's folder
+and solo switch.
+
+A seat rolls back anyway when the run asks (a run set's first run on it, a
+cold-rollback rerun, lab-up); when the scenario says `client: rollback`; when
+lab-api has run nothing on it since it started (the memory is lab-api's
+alone); when its last run left a reason (a step that timed out on it, an
+E_RUN_* naming it, a crash or a replaced game at the end, its game check, an
+end left unread, an E_RUN_TIMEOUT or internal error anywhere, a relaunch
+step's files lever, a preset name the cleaning cannot spell) or something
+touched it outside a run (a hold, lab-down, a snapshot, promote or rollback
+of the clone); when it has played LAB_RELAUNCH_ROLLBACK_EVERY runs (20) since
+its last rollback; when its VM is not running; and when C:\sky-lab\hot.txt
+marks a hot push, which the relaunch reads first and then touches nothing. A
+mark older than a dist laid since (install-lab writes games\<version>.txt at
+every lay, and from main 7be6465 removes the mark itself) is stale: the
+relaunch removes it and goes on, noted "a stale hot mark removed" (2026-10-30:
+a 10-29 03:35Z mark inside 3o's clean-m1-next rolled sky-c1 back at every run,
+and every cold rollback restored it). A relaunch that fails is tried once
+more, and a second failure rolls the seat back in the same run.
+
+The cleaning list names folders and patterns, never a wildcard over
+C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
+.copy; frida-inject.exe stays), shots\, screenshots\, burst\ and input\ (the
+screenshot, burst and mouse steps' files); each game folder's
+Data\SKSE\Plugins\CharGen\Presets (thuum-*.jslot and the presets the seat's
+last run saved by name); the Saves folder's TESMODPLATFORM-* (Skyrim
+Platform's generated saves, which a kill before its load settles leaves); the
+SKSE folder's skyrim-platform-pid*.log (launch.ps1's copies, which the next
+run's end would collect as its own). Crash dumps stay: a run's end counts
+only those written since a few minutes before its start, and a crash it finds
+rolls the seat back. A file that will not go fails the try, except in the
+capture folders shots\ and screenshots\ and for the runner's trace copies
+in frida\ (*.js.out.copy, *.js.log.copy, the files it reads back through the
+agent), which are cleaned as far as they go: a file a timed-out
+guest-file-close left open in the agent stays until the VM restarts, the note
+says "<n> held open left in place", and the next capture writes its own name,
+as the next copy carries its run's script name (b-cloak-fight
+20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode
+20261030-131512 one to a story-location .js.log.copy). A script, its .out,
+.err or .log still held means a Frida process outlived the stop, and fails
+the try. A scenario that writes anywhere else says `client: rollback`.
+
+result.json's `client_reset` holds each managed seat's `{kind, seconds,
+since_rollback, reason, image_base}`, and a note per seat reads "c1 relaunched
+in <s> s, <n> runs since its rollback, <k> files cleaned" or "c2 rolled back
+in <s> s: <reason>". `image_base` is the game check's read of the image's base
+address, also noted per seat: a relaunch within one boot tends to keep the
+base a cold boot randomizes (ADR-036). In a run set (ADR-030 as ADR-036
+amends it), each seat's first run rolls it back. A red run in which a seat
+relaunched (its entry's `relaunched`) is rerun relaunched first, tagged
+`relaunched`, which costs no card a reset; only a second red is rerun with
+every seat rolled back, tagged `cold-rollback`, and the last rerun's verdict is
+the scenario's (ADR-036's note of 2026-10-30). Red, red and a cold green is
+green for the gate and a finding by name in the set's notes: the relaunched
+seats and the cold ones disagreed. Every run stays in the set's record, and
+ADR-027's lone-red reruns follow as before. A run whose seat's VM could not
+start (a failure naming "QEMU exited") stops the set at once with no rerun,
+its position kept so a resume plays it again.
 
 ### Known intermittent fault: a teleport that never settles (E_RUN_TELEPORT)
 
@@ -872,6 +948,12 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
     skipped the login. ADR-041's storageProxy fix keeps the storage across a
     reload, and on 2026-10-28 07:27Z c2's server record followed a turn (rot
     180 to 0) and a 531-unit walk after one.
+- One guest agent per clone: every lab tool's `qm guest exec` takes that clone's lock on core first
+  (`flock -w 90 /run/lock/qga-<vmid>`, 2026-10-29), so two callers never share the channel. A seat tail
+  stops with `just lab-tail-stop <c1|c2>`, which ends it between polls. A tail killed mid-poll leaves its
+  exec's answer in the agent, and a later caller is handed it: playtest 37's lays lost three relaunches to a
+  console line stamped before the tail stopped. Before a dist, relaunch or rollback, stop the seat tails that
+  way, or wait 35 s after a kill.
 - `just client-hot <c1|c2> <file|fork ref>` (ADR-054 item 1): a bundle
   reloaded in ONE running seat, no relaunch.
   - Skyrim Platform reloads a plugin 8 ms after a last-write change under
@@ -893,7 +975,11 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
   - The first lay of a bundle that carries those fixes is `client-hot` and
     then `just playtest-relaunch <c>` at once, one seat at a time: the old
     services saved nothing. After that a hot push keeps the globals and the
-    hosting.
+    hosting, so from m3-turbo-knobs 26e3d0cf on no relaunch follows a push.
+    Measured on 2026-10-28 on 26e3d0cf's own bundle: c2's needs record took
+    a full 61-value report 8 s after the push and ticked on, and c1, the
+    Riverwood host, kept relaying its cells' NPCs through the reload with no
+    release.
   - A seat's record never reads as "slow" after a hot push until the server
     log shows the reporter's cadence ("PlayerGlobals: user N actor ...
     recorded").

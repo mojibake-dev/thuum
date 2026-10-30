@@ -17,7 +17,7 @@ enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 run() {  # run <vmid> <powershell>: turbo-client.sh's helper; the stop and the copy are safe to ask again
   local out try
   for try in 1 2 3; do
-    out=$(ssh -o BatchMode=yes "$jump" "qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" || true)
+    out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$1 qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" || true)
     printf '%s' "$out" | python3 -c 'import sys,json; json.load(sys.stdin, strict=False)' 2>/dev/null && break
     sleep 5
   done
@@ -56,6 +56,7 @@ Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process
     ok=0; for p in "${pids[@]}"; do wait "$p" || ok=1; done
     [ "$ok" = 0 ] || { echo "== a seat did not come back after its relaunch" >&2; exit 4; }
     ;;
+  dist) echo "== a dist push ($a on VM $b) keeps no file to put back: just client-rollback <c> returns that seat to its clean-m1-next (the stage's dist)" >&2; exit 2;;
   *) echo "== unknown turbo push kind $kind" >&2; exit 2;;
 esac
 if [ "${1:-}" = --world ]; then

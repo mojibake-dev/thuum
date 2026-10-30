@@ -1,7 +1,10 @@
 """A run set: a named list of scenarios the runner plays one after another,
 with ADR-030's rules encoded instead of scripted per merge. A run that ends
-without a verdict (a lab fault, E_RUN_*) is rerun once; when the set's only red
-scenario reruns green twice it is a watch item (ADR-027), any other red is red;
+without a verdict (a lab fault, E_RUN_*) is rerun once; a seat's first run in
+the set rolls it back, and a red run in which a seat relaunched is rerun once
+with every seat rolled back, that rerun's verdict the scenario's (ADR-036's
+amendment); when the set's only red scenario reruns green twice it is a watch
+item (ADR-027), any other red is red;
 a set can be stopped after its current run and resumed later; its state is
 written beside the runs as results/runsets/<id>.json after every run, so a
 lab-api restart loses nothing. The nightly sweep is a set named `nightly` over
@@ -49,7 +52,7 @@ class RunSet:
     state: str = "running"          # running, stopping, stopped, done
     position: int = 0               # the next scenario to run
     current: str | None = None      # the run id in progress
-    runs: dict[str, list[dict[str, Any]]] = field(default_factory=dict)  # scenario -> [{run, verdict, rerun?}]
+    runs: dict[str, list[dict[str, Any]]] = field(default_factory=dict)  # scenario -> [{run, verdict, rerun?, relaunched?}]
     watch: list[str] = field(default_factory=list)   # ADR-027 watch items this set made
     verdict: str | None = None      # green, watch, red, error
     notes: list[str] = field(default_factory=list)
@@ -202,17 +205,39 @@ class RunSets:
     async def execute(self, rs: RunSet) -> RunSet:
         try:
             faults_in_a_row = 0
+            # ADR-036's amendment of ADR-030: a set starts from a cold rollback, each seat's first run in it (a resumed
+            # set's too) asking for one whatever the runner remembers of the seat; these are the seats rolled back so far
+            cold: set[str] = set()
             while rs.position < len(rs.scenarios):
                 if rs.state == "stopping":
                     rs.state = "stopped"
                     rs.notes.append(f"stopped before {rs.scenarios[rs.position]} at {_iso(self._wall())}")
                     return rs
                 sid = rs.scenarios[rs.position]
-                verdict = await self._run(rs, sid)
-                tries = 0
-                while verdict == "error" and tries < rs.policy.lab_fault_reruns:
-                    tries += 1
-                    verdict = await self._run(rs, sid, rerun="lab-fault")
+                verdict = await self._played(rs, sid, cold)
+                # and a red counts only after its reruns (ADR-036's note of 2026-10-30): a red run in which a seat
+                # relaunched is run again relaunched first, costing no card a reset, and only a second red is run with
+                # every seat rolled back, its verdict the scenario's; red, red and a cold green is green for the gate and
+                # a finding by name, since the relaunched seats and the cold ones disagreed (that night two reds each
+                # bought an immediate cold rerun, two rollbacks a seat, and the second preceded sky-c1's wedge)
+                last = (rs.runs.get(sid) or [{}])[-1]
+                if verdict == "red" and last.get("relaunched") and not _vm_start_failed(rs, sid):
+                    verdict = await self._played(rs, sid, cold, rerun="relaunched")
+                    again = (rs.runs.get(sid) or [{}])[-1]
+                    if verdict == "red" and again.get("relaunched") and not _vm_start_failed(rs, sid):
+                        why = f"a cold-rollback rerun of {again.get('run')}, red twice with {', '.join(again['relaunched'])} relaunched"
+                        verdict = await self._played(rs, sid, cold, rerun="cold-rollback", every=why)
+                        if verdict == "green":
+                            rs.notes.append(f"{sid}: red twice with relaunched seats ({last.get('run')}, {again.get('run')}) and green "
+                                            "on a cold rollback: relaunch-carried state is the suspect (ADR-036), a finding by name")
+                dead = _vm_start_failed(rs, sid)
+                if dead:
+                    # the position stays: the scenario never played a step, so a resume plays it again
+                    rs.state = "stopped"
+                    rs.notes.append(f"stopped at {sid}: a seat's VM could not start ({dead[:200]}), the host's to mend, "
+                                    f"with no rerun spent on it, at {_iso(self._wall())}; resume once the lab is back")
+                    self.save(rs)
+                    return rs
                 faults_in_a_row = faults_in_a_row + 1 if verdict == "error" else 0
                 if verdict == "error" and rs.policy.lab_fault_stop and faults_in_a_row >= rs.policy.lab_fault_stop:
                     # the lab, not a scenario, is failing: stop here, resumable, with
@@ -265,7 +290,17 @@ class RunSets:
         else:
             rs.verdict = "green"
 
-    async def _run(self, rs: RunSet, sid: str, rerun: str | None = None) -> str:
+    async def _played(self, rs: RunSet, sid: str, cold: set[str], rerun: str | None = None, every: str = "") -> str:
+        """One run of the scenario, then its lab-fault reruns while it ends without a verdict; `every` (a reason)
+        asks each of them to roll every seat back."""
+        verdict = await self._run(rs, sid, rerun=rerun, cold=cold, every=every)
+        tries = 0
+        while verdict == "error" and tries < rs.policy.lab_fault_reruns and not _vm_start_failed(rs, sid):
+            tries += 1
+            verdict = await self._run(rs, sid, rerun="lab-fault", cold=cold, every=every)
+        return verdict
+
+    async def _run(self, rs: RunSet, sid: str, rerun: str | None = None, cold: set[str] | None = None, every: str = "") -> str:
         path = self.scenarios_dir / f"{sid}.yaml"
         if not path.is_file():
             rs.runs.setdefault(sid, []).append({"run": None, "verdict": "missing"})
@@ -280,13 +315,29 @@ class RunSets:
         # a run posted by hand, or a snapshot in progress, finishes first
         while self.runner.active is not None or self.runner.maintenance is not None:
             await asyncio.sleep(self.poll_s)
-        rec = self.runner.prepare(sc, rs.game)
+        # ADR-036: the seats this run must roll back, each with why (execute's cold start and cold-rollback rerun)
+        ask = {c: every for c in sc.clients} if every else {}
+        for c in sc.clients:
+            if cold is not None and c not in cold and c not in ask:
+                ask[c] = "the run set's first run on it (ADR-030: a set starts from a cold rollback)"
+        rec = self.runner.prepare(sc, rs.game, rollback=ask)
         rs.current = rec.run_id
         self.save(rs)
         await self.runner.execute(rec)
         entry: dict[str, Any] = {"run": rec.run_id, "verdict": rec.verdict}
         if rerun:
             entry["rerun"] = rerun
+        relaunched = sorted(c for c, r in rec.client_reset.items() if r.get("kind") == "relaunch")
+        if relaunched:
+            entry["relaunched"] = relaunched
+        if cold is not None:
+            cold.update(c for c, r in rec.client_reset.items() if r.get("kind") == "rollback")
+        # a seat's VM that cannot start is the host's to mend, not a run's to retry (2026-10-30 04:40Z: two cards whose
+        # BARs a rescan had left unassigned crashed QEMU at every start, and the lab-fault rerun and the next scenario
+        # spent two more starts on them before the two-faults stop): execute stops the set at it, with no rerun
+        dead = next((str(f.get("error") or "") for f in rec.failures if "QEMU exited" in str(f.get("error") or "")), "")
+        if dead:
+            entry["vm_start_failed"] = dead[:300]
         rs.runs.setdefault(sid, []).append(entry)
         rs.current = None
         return rec.verdict
@@ -343,3 +394,8 @@ class RunSets:
 
 def _iso(ts: float) -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts))
+
+
+def _vm_start_failed(rs: RunSet, sid: str) -> str:
+    """The failure of the scenario's last run in the set when a seat's VM could not start (RunSets._run's mark), else ""."""
+    return str(((rs.runs.get(sid) or [{}])[-1]).get("vm_start_failed") or "")

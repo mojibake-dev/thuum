@@ -1212,6 +1212,75 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   both"), D38 B. 51 MERGED (parity 39cf3f4d, 08:19Z; the gate cut by c2's RTX wedge, core's recovery, finished
   by its rest, 29 runs; watch item b-npc-body-release's old point). 52 staging (P7 v5 first); 54, 55, 53 follow
   on green; the D37 layer (layer-d37-ddo-out) stages at the end with the full sweep, then playtest 35.
+- STATE 2026-10-28 19:3x PDT (playtest 37's turbo night; Eli: "stop queueing things for tonight, we're blasting
+  today as hard as possible"): the shared chest's two faults read and fixed (the pause guard, then the item-menu
+  gates by name and the take's baseline), the face survivor and the vendor gate (m3-face-twelve b181518b); the
+  parallel builds landed on their own fork branches and merged into m3-turbo-train-3 0e4942bb (schema 19, its dist
+  and server image go together): quest-stage a54e5eca (ADR-056, memo D55 B, the world's quest stages behind a
+  shared list, a new verb under npc-talk), empty-label 06e38831, door-walk 2dca472a (D54 B), hands d902d919
+  (finding 45), fate-dress 5b89bf35 (findings 43 and 46), hunger 853dd4fc (the food's Survival amounts, SetGlobal),
+  npc-caster 05a285f6 (creature casts from the launch, the ability behind a cloak's hit, resurrections by the host's
+  engine, Eli's ask); m3-death-range 2069d4d2 (the 0xff death report) waits for the next train. Findings 40 to 49 in
+  docs/private/playtest-m3-37.md; the lay by numidium at the train's green, then Eli's reads in the order of pain
+  (the chest, the shop topic, the face, the atronach, a reanimation, x-quest-stage at the train's stage).
+
+
+**STATE 14:05 PDT 2026-10-29 (the weekend pass's audit of parity bf133744 against this chart; one line per item):**
+- cell-host DONE (parity 535544db, 10-21). npc-puppet DONE (19e7ca9b, a25caf02, 10-22/23). Trains 39 to 44 MERGED (6cdc2b35), 45
+  (fa8809a1), 46 (aaafffe5), 47b/48/49 as 50b (951ea43d). The stream's slices 1 to 3 MERGED (66f04f2a). The NPC ladder is ON PARITY
+  whole: 51 (39cf3f4d), 52 deaths by the engine and 54 gaze, face, counters (240a31de, 10-27 20:41Z), 55 the dialogue claim with
+  D22's brake (1b866786, 10-28 02:25Z), 53 bows and spells (bf133744, 10-28 07:07Z); the voice is ON by default since P7 v5 green
+  (the earlier "stays off" line is stale).
+- NOT merged, riding the turbo trains cut after the ladder (3 to 3o; 3o ee44f7d1 staging 2026-10-29 with its gate, 3n e14dc298 the
+  fallback): shared containers, the door pass, the face and vendor gate, quest-stage (ADR-056), hands, the 0xff death report
+  (m3-death-range, on 3c to 3o), empty-label, door-walk, fate-dress, hunger, npc-caster, cast-relay, follow-mode, reanimate,
+  cloak-look, corpse-loot, bind-silent, launch-geometry, has-perk, spell-placed (ADR-057, Raise Wall) and the reanimate fallback
+  (ac620176), trains 56 (pt35 fixes) and 57 (voice lines). Playtest 38 ran on 3n's stage (findings 64 to 76, docs/private/playtest-
+  m3-38-findings.md).
+- The pass's trains (docs/private/pass-m3-close.md): m3-pass-train-1 7a223e0d (3o plus the dead-placed loader, finding 65, and the
+  held roster's replay at the grant, finding 66; T0 green) with m3-client-bits (66's belt, 67, 68, 71) as its -win; P2 to P4 follow.
+- NO code anywhere, the pass's own list: the two exit scenarios c-riverwood and c-dungeon-enemies (P2); NPC melee reach and hit cone
+  (the rules exist in melee.rs, the gate at ActionListener's "Player against player only" keeps NPCs out; P2); the encounter zone
+  clamp (ADR-049's owed read; P2); the trap evidence's lab read (x-npc-trap-report by path, never run; P2's stage); the smooth
+  motion number (P3 measured; P2's stage); npc-handoff's D8 ActorHandoff (the state replayed before a grant; decided by
+  c-riverwood's read: built only if the handoff shows a visible reset); physics host switching for movables (ADR-058, the pass's
+  head 3, slices one and two); horses, host follows rider (an owner-table row, kind mount; the pass writes the row, the build is
+  M7's with mounted combat).
+- Verb docs with Status boxes open: npc-stream six, npc-fate five, quest-stage five, npc-talk five, npc-handoff five, cell-host one
+  (the T1 box, "none: events through Skyrim Platform"); the pass closes them by probes or the ledger (P3, P4).
+
+**STATE 18:24 PDT 2026-10-29 (the pass's evening, one line per item; the 14:05 block above stands for the morning):**
+- The pass's trains, each reviewed against the hard rules by a fresh agent and fixed before any stage: P1 m3-pass-train-1 b0cda83a
+  (the placed-dead corpse 65, the held roster 66 keyed by reporter and bounded) with the client bits f9c6b7ca (67, 68, 71 and the
+  rented-bed correction, finding 31) as P1-win 9721ff72; P2 58208e9f (NPC melee reach and cone, the login's Change Location event,
+  quest sharing mode all under D58 B and D62 with the INDX check and a bounded record, the fragment suppression made real in the
+  .pex) as P2-win dca7fe09; P3 50a44336 (ADR-058 slice one with the review's six fixes, P2 merged) as P3-win ffa51358. T2: P2 green
+  at 0b49a28e and again on 58208e9f (02:11Z), P1 green on b0cda83a (02:39Z), P3 red once on its session's assumed id (fixed by
+  the harness's created-form placeholder) then green on 6901781c with D64 folded in (03:08Z); the union P3-win e65a345b compiles on
+  both platforms and its T2 is the last before the stage (20:09 PDT).
+- D63 A (the four allowed quests stand), D64 C (the transport's 60 Hz flush clock, m3-send-rate b6f4deb4, green on CI), D65 A
+  (Reading List's radar stays; the driver throttles its lines); ADR-058's slice two deferred to M4 on the esm read.
+- The exit scenarios c-riverwood and c-dungeon-enemies are committed and wait on the lab; the eight M3 verb docs stand at 196 to
+  about 65 hypothesis tags, every remaining one a named pending read or the template's own words; mount.md drafts the owner table's
+  fifth row (horses, M7's build). M3 DONE waits on the host reboot, the stages and the two exit scenarios green.
+
+**STATE 00:29 PDT 2026-10-30 (the pass's night, one line per item; the 18:24 block stands for the evening):**
+- The union m3-pass-train-3-win is the new base (D67, taken under the pass's rule after 3o's gate stopped on its two findings and
+  the eighth wedge): trains 1 to 3 with D64 (the transport's 60 Hz flush clock), D66 (a single stream's holes counted, casts.rs
+  HOLE_MS) and the Raise Wall fix (m3-sp-pack-form 9fad9f08: Skyrim Platform packed a class-less form type, MSTT 36, as None, so
+  every native on the wall's base aborted and the observer's wall never came; HYPOTHESIS until the watcher claim) at 820a565c
+  (997fedf1 plus one difftest commit: D66's declaration as the exact f32), green on client and server (pipeline 3962's client,
+  3974's server and difftest) and T2 GREEN seat-free (numidium, 19 declared divergences held); then the layer, the stage with its
+  fourteen probes and three traces, one full sweep as the gate, layer-merge and verb-merge, playtest 39. 3n e14dc298 stays the fallback.
+- Two findings from 3o's gate, both read without a guess: b-spell-placed-wall (the fix above, and the scenario's v2 frame
+  12353ab: c1 at (0, -366), inside its cell's reach of the wall, its copies read through c2's figure's cell); b-npc-talk's hold
+  (SetDontMove is lifeState 9 at Actor+0xC8, Actor::Move zeroes the velocity while it reads 9, only Resurrect clears it; nothing in
+  the fork range defaa7e2..ee44f7d1 moves a hosted NPC on its host; c1 alone moved Sven in the red run's log):
+  lab/frida/dontmove-trace.js under x-npc-hold v4 at the stage decides between the engine and the call.
+- The lab: the eighth wedge at 06:34Z; core reproduced the mechanism with bare QEMU (two GP107 bus resets in one second) and
+  lab-api's 20 s seat stagger (f0480e2) is the fix; the morning reboot is Eli's word; sky-srv is down since core's 07:17Z reboot.
+  M3 DONE still waits on the stage, the sweep and the two exit scenarios green.
+
 ### M4: World and dungeons (6 to 10 weeks, Class B)
 
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
