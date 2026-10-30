@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
 import time
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -53,6 +54,8 @@ class ProxmoxGuests(Protocol):
     def file_read(self, guest: Guest, path: str) -> str: ...
     # an ACPI shutdown: the task's exit status and its log lines
     def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]: ...
+    # a seat's stop by an ACPI shutdown that PVE forces to a stop after timeout_s (GuestControl's seat_stop)
+    def stop_gently(self, guest: Guest, timeout_s: int) -> None: ...
     def snapshots(self, guest: Guest) -> list[dict[str, Any]]: ...
     def snapshot_create(self, guest: Guest, name: str, description: str) -> None: ...
     def snapshot_delete(self, guest: Guest, name: str) -> None: ...
@@ -63,8 +66,25 @@ class GuestControl:
     """The only thing the runner calls. Refuses every action on an unmanaged
     guest except status, and refuses files past the 16 MiB cap."""
 
-    def __init__(self, backend: ProxmoxGuests):
+    def __init__(self, backend: ProxmoxGuests, reset_stagger_s: float = 0.0, seat_stop: str = "stop",
+                 seat_shutdown_timeout_s: int = 60):
         self._b = backend
+        # how a client seat's VM stops (Settings.seat_stop): "stop" pulls it at once, as every rollback has since the
+        # first runner (c87d63a, 2026-09-24, when a rollback discarding the disk made a clean shutdown look worthless);
+        # "shutdown" lets Windows and the NVIDIA driver quiesce the GPU before vfio resets it, an ACPI shutdown PVE forces
+        # to a stop after seat_shutdown_timeout_s (core's question of 2026-10-30: lab-api hard-stopped a running driver
+        # in about 93 percent of the night's seat stops; whether that matters is that night's experiment)
+        self._seat_stop = seat_stop
+        self._shutdown_timeout = seat_shutdown_timeout_s
+        # A seat's VM stop or start resets its passthrough GPU (vfio), and two seats' resets within seconds is the only
+        # pattern that has wedged a card: core's host journal on 2026-10-30, every vfio reset since August grouped into
+        # bursts, found 1,748 single-card bursts with no failed retrain and all twelve wedges in bursts where both lab
+        # cards reset together (14 percent of such bursts since 10-28, when the pair became two slot-powered GTX 1050s).
+        # So one seat's stop, rollback and start run as one, and another seat's reset waits until reset_stagger_s after
+        # this one's last (Settings.reset_stagger_s; 0 in the tests and fakes).
+        self._stagger = reset_stagger_s
+        self._cards = threading.RLock()
+        self._last_reset: tuple[str, float] | None = None
 
     def _managed(self, guest: Guest, what: str) -> None:
         if not guest.managed:
@@ -83,9 +103,29 @@ class GuestControl:
         except Exception as e:
             raise ProxmoxError(f"{code}: {guest.name}: {type(e).__name__}: {str(e)[:200]}") from e
 
+    def _card_reset(self, guest: Guest, code: str, fn) -> None:
+        """A client seat's stop or start (its GPU's reset), after the other seat's last by reset_stagger_s."""
+        if guest.role != "client" or self._stagger <= 0:
+            self._call(code, guest, fn, guest)
+            return
+        with self._cards:
+            last = self._last_reset
+            if last is not None and last[0] != guest.name:
+                wait = last[1] + self._stagger - time.monotonic()
+                if wait > 0:
+                    log.info("%s of %s waits %.1f s after %s's GPU reset (reset_stagger_s)", code, guest.name, wait, last[0])
+                    time.sleep(wait)
+            try:
+                self._call(code, guest, fn, guest)
+            finally:
+                self._last_reset = (guest.name, time.monotonic())
+
     def stop(self, guest: Guest) -> None:
         self._managed(guest, "stop")
-        self._call("E_PVE_STOP", guest, self._b.stop, guest)
+        if self._seat_stop == "shutdown" and guest.role == "client":
+            self._card_reset(guest, "E_PVE_STOP", lambda g: self._b.stop_gently(g, self._shutdown_timeout))
+            return
+        self._card_reset(guest, "E_PVE_STOP", self._b.stop)
 
     def rollback(self, guest: Guest, snapshot: str) -> None:
         self._managed(guest, "roll back")
@@ -95,7 +135,7 @@ class GuestControl:
 
     def start(self, guest: Guest) -> None:
         self._managed(guest, "start")
-        self._call("E_PVE_START", guest, self._b.start, guest)
+        self._card_reset(guest, "E_PVE_START", self._b.start)
 
     def status(self, guest: Guest) -> str:
         try:
@@ -136,10 +176,12 @@ class GuestControl:
         return self._call("E_PVE_SNAPSHOT", guest, self._b.snapshots, guest)
 
     def rollback_sequence(self, guest: Guest, snapshot: str) -> None:
-        """Disk-only rollback (docs/LAB.md): stop, rollback, start."""
-        self.stop(guest)
-        self.rollback(guest, snapshot)
-        self.start(guest)
+        """Disk-only rollback (docs/LAB.md): stop, rollback, start, as one under the seats' reset lock, so two seats'
+        rollbacks in one run follow each other reset_stagger_s apart instead of resetting both cards at once."""
+        with self._cards:
+            self.stop(guest)
+            self.rollback(guest, snapshot)
+            self.start(guest)
 
     # ----- self-service snapshots (thuum-mundus's recipe) --------------------
 
@@ -311,13 +353,28 @@ class ProxmoxerGuests:
             raise ProxmoxError(f"E_PVE_TASK: {upid} ended with {status}")
 
     def _task_end(self, upid: str, timeout: float) -> str:
-        """A task's exit status once it stopped."""
+        """A task's exit status once it stopped. A failed read of the task is not a failed task: the task runs on
+        the host while lab-api's poll of it fails (2026-10-30 04:23:38Z, a few-second host stall: an SSLError on
+        712's start-task poll failed run 20261030-042304 although the start ended TASK OK, and the forced rollback
+        after it was one more reset for a card that wedged that night), so a read error is asked again until the
+        deadline, as the exec loop asks exec-status again, and only then raised, naming the last error."""
         deadline = time.monotonic() + timeout
+        last: Exception | None = None
         while time.monotonic() < deadline:
-            st = self._api.nodes(self._node).tasks(upid).status.get()
+            try:
+                st = self._api.nodes(self._node).tasks(upid).status.get()
+            except Exception as e:  # proxmoxer's ResourceException and requests' connection, TLS and timeout errors
+                if last is None:
+                    log.warning("E_PVE_TASK_READ: %s: %s: %s", upid, type(e).__name__, str(e)[:200])
+                last = e
+                time.sleep(2.0)
+                continue
+            last = None
             if st.get("status") == "stopped":
                 return str(st.get("exitstatus"))
             time.sleep(0.5)
+        if last is not None:
+            raise ProxmoxError(f"E_PVE_TASK: {upid} unread until {timeout}s: {type(last).__name__}: {str(last)[:200]}")
         raise ProxmoxError(f"E_PVE_TASK: {upid} did not finish in {timeout}s")
 
     def stop(self, guest: Guest) -> None:
@@ -366,6 +423,16 @@ class ProxmoxerGuests:
             time.sleep(0.5)
         why = f"; last exec-status error {type(last).__name__}: {str(last)[:200]}" if last else ""
         raise ProxmoxError(f"E_PVE_EXEC: pid {pid} on {guest.name} did not exit in {timeout}s{why}")
+
+    def stop_gently(self, guest: Guest, timeout_s: int) -> None:
+        # a stopped VM has nothing to shut down (PVE refuses a shutdown of one); a running one gets the guest's own
+        # shutdown and, past timeout_s, PVE's stop (forceStop)
+        if self.status(guest) != "running":
+            return
+        upid = self._res(guest).status.shutdown.post(timeout=timeout_s, forceStop=1)
+        status = self._task_end(upid, timeout_s + 60)
+        if status != "OK":
+            raise ProxmoxError(f"E_PVE_TASK: {upid} ended with {status}")
 
     def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]:
         upid = self._res(guest).status.shutdown.post(timeout=timeout_s)

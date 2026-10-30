@@ -561,7 +561,8 @@ class RefsNearView:
     has(baseId) whether one of that base stood there, listed under its type
     or found by the step's ids search; distance(baseId) how far the nearest
     one lies, the listing's exact figure before the search's bisected one
-    (docs/research/train-29-rows.md row 7c)."""
+    (docs/research/train-29-rows.md row 7c); pos(baseId) where the nearest
+    listed one stands (x, y, z), for comparing two seats' copies of one prop."""
 
     def __init__(self, client: str, data: dict[str, Any]):
         self._client = client
@@ -626,6 +627,32 @@ class RefsNearView:
         if isinstance(found, dict) and "error" in found:
             raise AssertionData(f"{self._client}'s refs-near step could not search for {int(base_id):#x}: {found['error']}")
         return isinstance(found, dict)
+
+    def pos(self, base_id: int) -> "PosView":
+        """Where the nearest listed reference of that base stands in the observer's
+        game (the listing's pos, in the engine's absolute coordinates), so two
+        seats' copies of one prop are compared where they lie, not by their
+        distances from two different observers (x-prop-drop: c2's sword within
+        32 units of c1's). The ids search carries no position, so a base found
+        by the search alone has none."""
+        nearest: dict[str, Any] | None = None
+        for rows in self._types.values():
+            refs = rows.get("refs") if isinstance(rows, dict) else None
+            for ref in refs if isinstance(refs, list) else []:
+                if not (isinstance(ref, dict) and "distance" in ref and ref.get("baseId") == int(base_id)):
+                    continue
+                if nearest is None or float(ref["distance"]) < float(nearest["distance"]):
+                    nearest = ref
+        if nearest is None:
+            raise AssertionData(f"{self._client}'s refs-near step listed no reference of {int(base_id):#x} (a position "
+                                f"comes from the listing by type, never from the ids search)")
+        p = nearest.get("pos")
+        if not (isinstance(p, list) and len(p) == 3):
+            raise AssertionData(f"{self._client}'s refs-near step listed {int(base_id):#x} without a position")
+        try:
+            return PosView(float(p[0]), float(p[1]), float(p[2]))
+        except (TypeError, ValueError) as e:
+            raise AssertionData(f"{self._client}'s refs-near step listed {int(base_id):#x} with a malformed position: {e}")
 
     def distance(self, base_id: int) -> float:
         listed = self._listed(base_id)
@@ -724,6 +751,16 @@ class StreamView:
 
     def foreign(self, t: Any) -> int:
         return self._sum(t, 3)
+
+
+@dataclass(frozen=True)
+class PosView:
+    """c.refs_near().pos(baseId): a listed reference's position in that seat's game
+    (the refs-near step's pos row, absolute coordinates)."""
+
+    x: float
+    y: float
+    z: float
 
 
 @dataclass(frozen=True)
@@ -1856,6 +1893,7 @@ _ATTRS = {
                    "gazeTarget", "gazeSlot", "emotionType", "emotionValue", "exprOverride", "exprIndex", "exprValue"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
+    PosView: {"x", "y", "z"},
     PoisonView: {"poisonId", "count"},
     SkillView: {"base", "xp", "legendary"},
     PresetView: {"bytes", "sha256", "look"},
@@ -1883,7 +1921,7 @@ _NUMBER_METHODS = {
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
     _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state", "quest"},
-    RefsNearView: {"has", "distance", "runtime_of"},
+    RefsNearView: {"has", "distance", "runtime_of", "pos"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
 _FORM_SPEC_METHODS = {
@@ -1910,7 +1948,7 @@ _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
-    RefsNearView: {"count", "has", "distance", "runtime_of"},
+    RefsNearView: {"count", "has", "distance", "runtime_of", "pos"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "rises", "movedBy", "launched", "flights_match"},
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},

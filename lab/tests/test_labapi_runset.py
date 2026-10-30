@@ -130,6 +130,36 @@ class RunSetTests(RunTests):
         self.assertEqual(body["runs"]["t2-green-two"][0]["verdict"], "green")
         self.assertEqual(body["verdict"], "error", "the two faults never got a verdict")
 
+    def test_a_vm_that_cannot_start_stops_the_set_with_no_rerun(self):
+        """2026-10-30 04:40Z: two cards whose BARs a rescan had left unassigned crashed QEMU at every start, and the
+        set's lab-fault rerun and its next scenario spent two more starts before the two-faults stop. A run whose
+        seat's VM could not start stops the set at once, with no rerun, and a resume plays that scenario again."""
+        calls = []
+        real = self.runsets._run
+
+        async def fake(rs, sid, rerun=None, cold=None, every=""):
+            calls.append((sid, rerun))
+            if sid == "t2-green-two" and sum(1 for c in calls if c[0] == sid) == 1:
+                rs.runs.setdefault(sid, []).append({"run": "r-dead", "verdict": "error", "vm_start_failed":
+                    "E_RUN_ROLLBACK: sky-c2: E_PVE_TASK: UPID:core:1:qmstart:712: ended with start failed: QEMU exited with code 1"})
+                return "error"
+            return await real(rs, sid, rerun=rerun, cold=cold, every=every)
+
+        self.runsets._run = fake
+        rid = self._start(["t2-green-one", "t2-green-two", "t2-green-three"])
+        body = self._wait(rid)
+        self.assertEqual(body["state"], "stopped", body["summary"])
+        self.assertEqual(body["position"], 1, "stopped at the scenario whose VM could not start, to be played again")
+        self.assertEqual([c for c in calls if c[0] == "t2-green-two"], [("t2-green-two", None)], "no lab-fault rerun")
+        self.assertNotIn("t2-green-three", body["runs"])
+        self.assertTrue(any("could not start" in n and "resume" in n for n in body["notes"]), body["notes"])
+        r = self.client.post(f"/lab/runset/{rid}/resume")
+        self.assertEqual(r.status_code, 200, r.text)
+        body = self._wait(rid)
+        self.assertEqual(body["state"], "done", body["summary"])
+        self.assertEqual(body["runs"]["t2-green-two"][-1]["verdict"], "green")
+        self.assertEqual(body["runs"]["t2-green-three"][-1]["verdict"], "green")
+
     def test_two_reds_are_red_with_no_rerun(self):
         rid = self._start(["t2-red", "t2-red-two"])
         body = self._wait(rid)
@@ -324,6 +354,114 @@ class RunSetTests(RunTests):
         later.active = None
         later.s = dataclasses.replace(self.settings, nightly_sweep_utc="")
         self.assertIsNone(later.maybe_nightly(at(10, 31, day=17)), "no nightly configured")
+
+
+@needs_deps
+class ColdRollbacks(RunSetTests):
+    """ADR-036's amendment of ADR-030 under the relaunch mode: a set starts from a cold rollback, each seat's first run
+    in it rolled back, and a red counts only after its reruns (the note of 2026-10-30): a red run in which a seat
+    relaunched is run again relaunched first, and only a second red is run with every seat rolled back, that rerun's
+    verdict the scenario's."""
+
+    def _warm(self):
+        """Relaunch mode with c1 managed, and one run by hand first, so the runner knows c1 clean and only the set's
+        own ask can roll it back."""
+        from labapi.guests import Guest
+
+        self.services.runner.s = dataclasses.replace(self.settings, client_reset="relaunch")
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        run = self.client.post("/lab/run", files={"scenario": ("s.yaml", GREEN.encode(), "text/yaml")}).json()["run"]
+        deadline = time.time() + 20
+        while time.time() < deadline and not self.client.get(f"/lab/run/{run}").json().get("finished"):
+            self.doubles.turn()
+            time.sleep(0.02)
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
+
+    def _reset(self, run_id):
+        return json.loads((self.tmp / "results" / run_id / "result.json").read_text())["client_reset"]["c1"]
+
+    def test_the_sets_first_run_rolls_each_seat_back_and_a_relaunched_red_reruns_relaunched_then_cold(self):
+        self._warm()
+        rid = self._start(["t2-green-one", "t2-red"])
+        body = self._wait(rid)
+        self.assertEqual(body["verdict"], "red", body["summary"])
+        first = body["runs"]["t2-green-one"][0]
+        self.assertEqual(self._reset(first["run"])["reason"], "the run set's first run on it (ADR-030: a set starts from a cold rollback)")
+        self.assertNotIn("relaunched", first)
+        entries = body["runs"]["t2-red"]
+        # the red on a relaunched seat, its relaunched rerun, then on a second red the cold-rollback rerun (the
+        # scenario's verdict), then ADR-027's lone-red rerun
+        self.assertEqual([(e.get("rerun"), e.get("relaunched"), e["verdict"]) for e in entries],
+                         [(None, ["c1"], "red"), ("relaunched", ["c1"], "red"), ("cold-rollback", None, "red"),
+                          ("lone-red", ["c1"], "red")])
+        self.assertEqual(self._reset(entries[1]["run"])["kind"], "relaunch", "the first rerun costs no reset")
+        cold = self._reset(entries[2]["run"])
+        self.assertEqual(cold["kind"], "rollback")
+        self.assertEqual(cold["reason"], f"a cold-rollback rerun of {entries[1]['run']}, red twice with c1 relaunched")
+
+    def test_a_relaunched_rerun_that_is_green_makes_the_scenario_green_with_no_reset(self):
+        # a red the relaunched seat carried once (a flake): its relaunched rerun's green is the scenario's verdict, and
+        # no seat was rolled back for it
+        self._warm()
+        flipped: list[str] = []
+        real = self.services.runner._reset_seat
+
+        async def carried(rec, client, g):
+            note = await real(rec, client, g)
+            # the relaunched seat carries a bad state into t2-green-two's first run only; the fake's world is no
+            # snapshot, so every other run's reset puts it back, as the lab's world restore would
+            bad = rec.scenario.id == "t2-green-two" and rec.client_reset[client]["kind"] == "relaunch" and not flipped
+            if bad:
+                flipped.append(rec.run_id)
+            self.state.actors[1].x = 12345.0 if bad else 0.0
+            return note
+
+        self.services.runner._reset_seat = carried
+        (self.scen / "t2-green-two.yaml").write_text(GREEN.replace("id: t2-green", "id: t2-green-two").replace(
+            "  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}\n",
+            "  - assert:\n      - server.actor(c1).x != 12345\n  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}\n"))
+        rid = self._start(["t2-green-one", "t2-green-two"])
+        body = self._wait(rid)
+        entries = body["runs"]["t2-green-two"]
+        self.assertEqual([(e.get("rerun"), e["verdict"]) for e in entries], [(None, "red"), ("relaunched", "green")])
+        self.assertEqual(self._reset(entries[1]["run"])["kind"], "relaunch")
+        self.assertEqual(body["verdict"], "green", body["summary"])
+        self.assertEqual(body["watch"], [])
+
+    def test_red_twice_relaunched_and_green_cold_is_green_and_a_finding_by_name(self):
+        # the red follows what every relaunched seat carries: two relaunched reds, then the cold rerun's green, which is
+        # the scenario's verdict and, named in the set's notes, a finding about relaunch-carried state (ADR-036)
+        self._warm()
+        real = self.services.runner._reset_seat
+
+        async def carried(rec, client, g):
+            note = await real(rec, client, g)
+            bad = rec.scenario.id == "t2-green-two" and rec.client_reset[client]["kind"] == "relaunch"
+            self.state.actors[1].x = 12345.0 if bad else 0.0
+            return note
+
+        self.services.runner._reset_seat = carried
+        (self.scen / "t2-green-two.yaml").write_text(GREEN.replace("id: t2-green", "id: t2-green-two").replace(
+            "  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}\n",
+            "  - assert:\n      - server.actor(c1).x != 12345\n  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}\n"))
+        rid = self._start(["t2-green-one", "t2-green-two"])
+        body = self._wait(rid)
+        entries = body["runs"]["t2-green-two"]
+        self.assertEqual([(e.get("rerun"), e["verdict"]) for e in entries],
+                         [(None, "red"), ("relaunched", "red"), ("cold-rollback", "green")])
+        self.assertEqual(body["verdict"], "green", body["summary"])
+        self.assertTrue(any("t2-green-two: red twice with relaunched seats" in n and "a finding by name" in n
+                            for n in body["notes"]), body["notes"])
+
+    def test_a_red_with_no_seat_relaunched_gets_no_cold_rerun(self):
+        self._warm()
+        rid = self._start(["t2-red"])
+        body = self._wait(rid)
+        entries = body["runs"]["t2-red"]
+        self.assertEqual([e.get("rerun") for e in entries], [None, "lone-red"])
+        self.assertNotIn("relaunched", entries[0], "the set's first run on c1 rolled it back")
+        self.assertEqual(self._reset(entries[0]["run"])["kind"], "rollback")
+
 
 if __name__ == "__main__":
     unittest.main()

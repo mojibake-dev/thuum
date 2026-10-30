@@ -163,6 +163,17 @@ class RunRecord:
     snapshots: dict[str, Any] = field(default_factory=dict)
     # clients a `relaunch {until: gone}` left starting a new game: their next connect takes its identity
     pending_identity: set[str] = field(default_factory=set)
+    # ADR-036: the seats this run must roll back whatever the reset mode or their state, each with why (a run set's
+    # first run on it, a cold-rollback rerun, lab-up)
+    rollback: dict[str, str] = field(default_factory=dict)
+    # how each managed seat was reset for this run, as result.json's client_reset: {kind: rollback | relaunch,
+    # seconds, since_rollback, reason}, and the image base the game check read (image_base)
+    client_reset: dict[str, dict[str, Any]] = field(default_factory=dict)
+    # the managed seats whose reset began, a fault naming one that the reset, the game check or the run's end raised,
+    # and those a relaunch step's files lever changed: what the seat's next run reads (Runner._remember_seats)
+    reset_started: set[str] = field(default_factory=set)
+    faulted: dict[str, str] = field(default_factory=dict)
+    levers: set[str] = field(default_factory=set)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -177,6 +188,7 @@ class RunRecord:
             "game": self.game,
             "games": self.games,
             "build": self.build,
+            "client_reset": self.client_reset,
             "verdict": self.verdict,
             "started": self.started_at,
             "finished": self.finished_at,
@@ -186,6 +198,19 @@ class RunRecord:
             "artifacts": self.artifacts,
             "notes": self.notes,
         }
+
+
+@dataclass
+class SeatState:
+    """What the runner remembers of a managed seat between its runs, to choose its next reset (ADR-036). Memory only:
+    a lab-api start forgets every seat, so each one's first run after it rolls back."""
+    since_rollback: int = 0         # the runs it played since its last rollback, that rollback's own run included
+    force: str = ""                 # why its next run must roll it back; empty lets it relaunch
+    presets: tuple[str, ...] = ()   # the RaceMenu presets its last run's racemenu-save steps wrote, by name
+
+
+# a preset name the relaunch's cleaning may write into its script (lab-driver saves <name>.jslot in the Presets folder)
+_PRESET_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9 _.-]*")
 
 
 class Runner:
@@ -221,6 +246,8 @@ class Runner:
         # clones) until this wall time or a release; runs and run sets wait
         self.hold_until: float | None = None
         self.hold_reason: str = ""
+        # each managed seat's state between runs, by client (ADR-036's reset choice, _rollback_reason)
+        self.seats: dict[str, SeatState] = {}
 
     # ----- public -------------------------------------------------------------
 
@@ -230,8 +257,20 @@ class Runner:
     def hold(self, minutes: float, reason: str) -> dict[str, Any]:
         self.hold_until = self._wall() + minutes * 60
         self.hold_reason = reason
+        # a held lab is somebody's: a playtest plays the seats and its turbo pushes lay files on them, a staging writes
+        # their game folders, and a relaunch would carry all of it into the next run under the snapshot's name
+        self.forget_seats(f"the lab was held since its last run ({reason})")
         self.touch()
         return self.hold_status()
+
+    def forget_seats(self, why: str, clients: list[str] | None = None) -> None:
+        """ADR-036: the named managed seats (every one by default) roll back at their next run, for `why`: something
+        outside the runner touched them or may have. A reason already standing is kept, the earlier one."""
+        for g in self.tables.guests.values():
+            if g.role == "client" and g.managed and g.client and (clients is None or g.client in clients):
+                seat = self.seats.get(g.client)
+                if seat is not None and not seat.force:
+                    seat.force = why
 
     def release(self) -> dict[str, Any]:
         self.hold_until = None
@@ -249,7 +288,9 @@ class Runner:
         """An operator did something: the quiet spell starts over."""
         self.last_activity_wall = self._wall()
 
-    def prepare(self, scenario: Scenario, game: str | None = None) -> RunRecord:
+    def prepare(self, scenario: Scenario, game: str | None = None, rollback: dict[str, str] | None = None) -> RunRecord:
+        """A run ready for execute(). `rollback` names seats this run rolls back to their snapshots whatever the reset
+        mode, each with why (ADR-036; a run set's first run on a seat, a cold-rollback rerun)."""
         if self.active is not None:
             raise RunnerError(f"E_RUN_BUSY: run {self.active.run_id} is active")
         if self.maintenance is not None:
@@ -271,7 +312,8 @@ class Runner:
             run_id = f"{stamp}-{scenario.id}-{n}"
             run_dir = Path(self.s.results_dir) / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
-        rec = RunRecord(run_id=run_id, scenario=scenario, dir=run_dir, started_at=_iso(self._wall()), game=version)
+        rec = RunRecord(run_id=run_id, scenario=scenario, dir=run_dir, started_at=_iso(self._wall()), game=version,
+                        rollback=dict(rollback or {}))
         self.runs[run_id] = rec
         self.active = rec
         # a run's clients get only its own steps, never a playtest's kept perks
@@ -308,6 +350,11 @@ class Runner:
                     rec.notes.append(f"netem: {type(e).__name__}: {e}")
             if rec.verdict == "running":
                 rec.verdict = "green" if not rec.failures else "red"
+            try:
+                self._remember_seats(rec, rec.scenario.clients)
+            except Exception as e:  # a seat the runner cannot account for rolls back at its next run
+                rec.notes.append(f"seat memory: {type(e).__name__}: {e}")
+                self.seats.clear()
             rec.finished_at = _iso(self._wall())
             rec.phase = "done"
             (rec.dir / "result.json").write_text(json.dumps(rec.to_result(), indent=2))
@@ -341,7 +388,11 @@ class Runner:
         rec = RunRecord(run_id="up", scenario=Scenario(id="lab-up"), dir=Path(self.s.results_dir), started_at=_iso(self._wall()))
         await self._rollback_server(rec, self.s.server_snapshot_default)
         clients = [g.client for g in self.tables.guests.values() if g.role == "client" and g.client]
-        await self._rollback_clients(rec, clients)
+        rec.rollback = {c: "lab-up rolls every seat back" for c in clients}
+        try:
+            await self._rollback_clients(rec, clients)
+        finally:
+            self._remember_seats(rec, clients)
         self._note_run_end()
         return {"ok": True, "phases": rec.phases}
 
@@ -350,6 +401,8 @@ class Runner:
             raise RunnerError(f"E_RUN_BUSY: run {self.active.run_id} is active")
         rec = RunRecord(run_id="down", scenario=Scenario(id="lab-down"), dir=Path(self.s.results_dir), started_at=_iso(self._wall()))
         notes = []
+        # rolled back with no heartbeat waited on, nor any run of the runner's own: each seat's next run rolls it back
+        self.forget_seats("lab-down rolled it back outside a run")
         for g in self.tables.guests.values():
             if g.role == "client" and g.managed:
                 try:
@@ -662,33 +715,32 @@ class Runner:
         self.netem_active = False
 
     async def _rollback_clients(self, rec: RunRecord, clients: list[str]) -> None:
+        """The phase rollback-clients (its name kept for the tools that read it): each managed seat reset by
+        _reset_seat, a rollback or, under ADR-036's relaunch mode, its game relaunched; an unmanaged one only
+        heartbeat-checked."""
         async def one(client: str) -> str:
             g = self.tables.guest_for_client(client)
             if g is None:
                 raise RunnerError(f"E_RUN_NO_GUEST: no guest plays client {client!r} (guests.yaml)")
-            since = self._clock()
             if g.managed:
-                try:
-                    await asyncio.to_thread(self.control.rollback_sequence, g, g.snapshot)
-                except ProxmoxError as e:
-                    # the estate refused (a newer ZFS snapshot on the clone's disk, a
-                    # task timeout): a lab failure with the cause, not an internal one
-                    raise RunnerError(f"E_RUN_ROLLBACK: {g.name}: {e}") from e
-                # Only a heartbeat from the fresh boot proves "boots to connected":
-                # the previous session kept polling until the stop landed, and a
-                # clock started before it let that poll pass the phase while the
-                # clone was still booting (run 20261001-233852: the phase passed
-                # at 74 s and c2 was not online 60 s later).
-                since = self._clock()
-                rec.build.setdefault("clients", {})[client] = await asyncio.to_thread(self._client_build, g)
-            if not await self.board.wait_heartbeat(client, since, self.s.heartbeat_timeout_s):
+                return await self._reset_seat(rec, client, g)
+            if not await self.board.wait_heartbeat(client, self._clock(), self.s.heartbeat_timeout_s):
                 raise RunnerError(f"E_RUN_NO_HEARTBEAT: {client} ({g.name}) did not poll within {self.s.heartbeat_timeout_s}s")
-            return f"{client}={g.name}{'' if g.managed else ' (unmanaged, heartbeat only)'}"
+            return f"{client}={g.name} (unmanaged, heartbeat only)"
 
         async def go():
             await self._traces_before_rollback(rec, clients)
             await self._client_logs_before_rollback(rec, clients)
-            notes = await asyncio.gather(*(one(c) for c in clients))
+            # a seat that fails ends the others' resets with the run: a relaunch's tries and its fallback rollback
+            # would otherwise go on past the run's end and meet the next run's rollback of that clone (ADR-036);
+            # its next run rolls it back, its reset never having finished (_remember_seats)
+            tasks = [asyncio.ensure_future(one(c)) for c in clients]
+            try:
+                notes = await asyncio.gather(*tasks)
+            except BaseException:
+                for t in tasks:
+                    t.cancel()
+                raise
             return ", ".join(notes)
 
         await self._phase(rec, "rollback-clients", go())
@@ -706,6 +758,176 @@ class Runner:
                 keep.append((client, script))
         self.frida_started = keep
 
+    async def _reset_seat(self, rec: RunRecord, client: str, g: Guest) -> str:
+        """One managed seat's reset for a run (ADR-036). Its game relaunches when nothing asks for more
+        (_rollback_reason); a failed relaunch is tried again, and after reset_relaunch_tries failures, or on a seat a
+        hot push marked, the seat rolls back in this same run: its VM stopped, its disk rolled back to its snapshot,
+        started. Either way the new game's first poll ends it, the build records the snapshot the disk descends from
+        (gate-cite.py's check 2 compares those descriptions across a set's runs, a relaunched seat's too), and
+        result.json's client_reset and a notes line say which, how long and why. The fetches that must come first
+        (the traces and logs a reset erases) are the phase's, before any seat starts."""
+        rec.reset_started.add(client)
+        t0 = self._clock()
+        seat = self.seats.get(client)
+        failed: list[str] = []
+        cleaned = ""
+        try:
+            reason = await self._rollback_reason(rec, client, g)
+            while not reason:
+                outcome, said = await self._relaunch_seat(client, g)
+                if outcome == "ok":
+                    cleaned = said
+                    break
+                if outcome == "hot":
+                    reason = said
+                    break
+                failed.append(said)
+                if len(failed) >= max(1, self.s.reset_relaunch_tries):
+                    reason = f"{len(failed)} relaunches failed, the last: {said}"
+            since = t0
+            if reason:
+                try:
+                    await asyncio.to_thread(self.control.rollback_sequence, g, g.snapshot)
+                except ProxmoxError as e:
+                    # the estate refused (a newer ZFS snapshot on the clone's disk, a
+                    # task timeout): a lab failure with the cause, not an internal one
+                    raise RunnerError(f"E_RUN_ROLLBACK: {g.name}: {e}") from e
+                # Only a heartbeat from the fresh boot proves "boots to connected":
+                # the previous session kept polling until the stop landed, and a
+                # clock started before it let that poll pass the phase while the
+                # clone was still booting (run 20261001-233852: the phase passed
+                # at 74 s and c2 was not online 60 s later).
+                since = self._clock()
+            rec.build.setdefault("clients", {})[client] = await asyncio.to_thread(self._client_build, g)
+            if reason and not await self.board.wait_heartbeat(client, since, self.s.heartbeat_timeout_s):
+                raise RunnerError(f"E_RUN_NO_HEARTBEAT: {client} ({g.name}) did not poll within {self.s.heartbeat_timeout_s}s")
+        except RunnerError as e:
+            rec.faulted[client] = str(e)
+            raise
+        seconds = round(self._clock() - t0, 1)
+        runs = seat.since_rollback if seat is not None else None
+        if reason:
+            rec.client_reset[client] = {"kind": "rollback", "seconds": seconds, "since_rollback": runs, "reason": reason}
+            rec.notes.append(f"{client} rolled back in {seconds:.1f} s: {reason}")
+            return f"{client}={g.name}"
+        retried = f"relaunched on try {len(failed) + 1}, after {'; '.join(failed)}" if failed else ""
+        rec.client_reset[client] = {"kind": "relaunch", "seconds": seconds, "since_rollback": runs, "reason": retried}
+        rec.notes.append(f"{client} relaunched in {seconds:.1f} s, {runs} run{'' if runs == 1 else 's'} since its rollback, {cleaned}"
+                         + (f" ({retried})" if retried else ""))
+        return f"{client}={g.name} (relaunched)"
+
+    async def _rollback_reason(self, rec: RunRecord, client: str, g: Guest) -> str:
+        """Why this run rolls the seat back, or "" when its game may relaunch instead (ADR-036), in this order: the
+        mode, the run's own ask (a run set's, lab-up's), the scenario's `client: rollback`, a seat lab-api has run
+        nothing on since it started, what its last run left that only a rollback undoes (SeatState.force, from
+        _remember_seats, a hold, lab-down, or a snapshot, promote or rollback of the clone), the floor of one rollback
+        every relaunch_rollback_every runs, and a VM that is not running. A hot push's mark is the relaunch's own read."""
+        if self.s.client_reset != "relaunch":
+            return f"LAB_CLIENT_RESET is {self.s.client_reset}"
+        if rec.rollback.get(client):
+            return rec.rollback[client]
+        if rec.scenario.client == "rollback":
+            return "the scenario says client: rollback"
+        seat = self.seats.get(client)
+        if seat is None:
+            return "no run on it since lab-api started"
+        if seat.force:
+            return seat.force
+        if seat.since_rollback >= self.s.relaunch_rollback_every:
+            return (f"{seat.since_rollback} run{'' if seat.since_rollback == 1 else 's'} since its last rollback "
+                    f"(LAB_RELAUNCH_ROLLBACK_EVERY is {self.s.relaunch_rollback_every})")
+        power = await asyncio.to_thread(self.control.status, g)
+        if power != "running":
+            return f"its VM is {power}"
+        return ""
+
+    async def _relaunch_seat(self, client: str, g: Guest) -> tuple[str, str]:
+        """One relaunch try between runs (ADR-036): _client_relaunch_ps through the guest agent, then a poll from the
+        new game within relaunch_heartbeat_timeout_s. ("ok", what the cleaning did), ("hot", why) for a
+        seat a hot push marked, which only a rollback undoes, or ("failed", why)."""
+        seat = self.seats.get(client)
+        script = _client_relaunch_ps(self.s.client_lab_dir, self.s.client_driver_log, list(seat.presets) if seat else [],
+                                     self.s.relaunch_stop_cmd, self.s.relaunch_start_cmd)
+        cmd = ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", base64.b64encode(script.encode("utf-16-le")).decode("ascii")]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return "failed", f"its guest exec: {e}"
+        # the old game stopped inside that exec, and launch.ps1 starts the new one 15 s after its task starts (its
+        # settle, launch.ps1:78), so a poll from here on is the new game's
+        since = self._clock()
+        lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
+        try:
+            said = json.loads(lines[-1]) if lines else None
+        except ValueError:
+            said = None
+        if not isinstance(said, dict):
+            return "failed", f"no answer (exit {res.exitcode}: {(res.err or res.out).strip()[:200]})"
+        if said.get("hot"):
+            return "hot", (f"{self.s.client_lab_dir}\\hot.txt marks a hot push on it ({str(said.get('mark') or '').strip()[:160]}), "
+                           "which only a rollback undoes")
+        if res.exitcode != 0:
+            left = [str(x) for x in said.get("left") or []]
+            return "failed", f"the cleaning left {', '.join(left[:4])}" if left else f"exit {res.exitcode}: {res.err.strip()[:200]}"
+        if not await self.board.wait_heartbeat(client, since, self.s.relaunch_heartbeat_timeout_s):
+            return "failed", f"no poll from its new game within {self.s.relaunch_heartbeat_timeout_s:g}s"
+        note = f"{int(said.get('removed') or 0)} files cleaned"
+        held = [str(x) for x in said.get("held") or []]
+        if held:
+            note += f", {len(held)} held open left in place ({', '.join(held[:2])})"
+        stale = str(said.get("stale") or "").strip()
+        if stale:
+            note += f", a stale hot mark removed ({stale[:100]}; a dist was laid after it)"
+        return "ok", note
+
+    def _remember_seats(self, rec: RunRecord, clients: list[str]) -> None:
+        """ADR-036: at a run's end, what each managed seat's next reset needs (SeatState). A seat whose reset never
+        began keeps what was known of it, and one whose reset began and never finished rolls back next. Otherwise:
+        its runs since its last rollback, the presets its racemenu-save steps wrote, and why its next run must roll
+        it back, if it must: a fault naming it (_seat_fault), a run that ended with no verdict at all (E_RUN_TIMEOUT,
+        an internal error, either of which may hide a seat's hang), a preset name the cleaning cannot spell, a
+        relaunch step's files lever (the step's own note: the next run's rollback undoes them), or a hold."""
+        whole = next((str(f.get("error") or "") for f in rec.failures if f.get("kind") in ("scenario-timeout", "internal")), "")
+        for client in clients:
+            g = self.tables.guest_for_client(client)
+            if g is None or not g.managed or client not in rec.reset_started:
+                continue
+            reset = rec.client_reset.get(client)
+            if reset is None:
+                why = rec.faulted.get(client, "")
+                self.seats[client] = SeatState(force=f"its reset in run {rec.run_id} did not finish" + (f" ({why[:200]})" if why else ""))
+                continue
+            before = self.seats.get(client)
+            runs = 1 if reset.get("kind") == "rollback" else (before.since_rollback if before is not None else 0) + 1
+            names = [str((s.args or {}).get("name", "")) for s in rec.scenario.steps
+                     if s.kind == "client" and s.client == client and s.action == "racemenu-save"]
+            fault = self._seat_fault(rec, client) or whole
+            if fault:
+                force = f"its last run ({rec.run_id}) ended in a fault: {fault[:200]}"
+            elif any(not _PRESET_NAME.fullmatch(n) for n in names):
+                force = f"its last run ({rec.run_id}) saved a RaceMenu preset whose name the cleaning cannot spell"
+            elif client in rec.levers:
+                force = f"its last run ({rec.run_id}) changed files in its game folder (a relaunch step's files)"
+            elif self.hold_active():
+                force = f"the lab is held ({self.hold_reason})"
+            else:
+                force = ""
+            self.seats[client] = SeatState(since_rollback=runs, force=force, presets=tuple(dict.fromkeys(names)))
+
+    @staticmethod
+    def _seat_fault(rec: RunRecord, client: str) -> str:
+        """The first fault this run recorded naming the seat, or "": its reset's, its game check's or its unread end's
+        own (RunRecord.faulted), a step that timed out on it (a hang, a dump-state unanswered, a connect never online,
+        a teleport never settled), or a lab failure or E_RUN_* naming it (a crash, a game lost or replaced at the end,
+        a relaunch, a mouse move, a paused game). A driver's own error answer is the step's red, not the seat's."""
+        if client in rec.faulted:
+            return rec.faulted[client]
+        for f in rec.failures:
+            error = str(f.get("error") or "")
+            if f.get("client") == client and (f.get("kind") in ("timeout", "lab", "paused") or error.startswith("E_RUN")):
+                return f"step {f.get('step')}, {f.get('kind')}: {error}"
+        return ""
+
     async def _check_game(self, rec: RunRecord, clients: list[str]) -> None:
         """Each managed client runs the run's game version: the logon launcher
         picks the folder from GET /game, and this reads back the SkyrimSE.exe
@@ -717,6 +939,11 @@ class Runner:
             g = self.tables.guest_for_client(client)
             if g is None or not g.managed:
                 return f"{client}=unchecked (unmanaged)"
+
+            def fault(error: str) -> RunnerError:
+                rec.faulted[client] = error  # its next run rolls it back (ADR-036)
+                return RunnerError(error)
+
             cmd = ["powershell", "-NoProfile", "-Command", self.s.game_check_cmd]
             # Both clones boot and launch their games at once after a rollback,
             # and a guest agent that busy can miss its answer (run
@@ -728,16 +955,24 @@ class Runner:
                     break
                 except ProxmoxError as e:
                     if attempt == 2:
-                        raise RunnerError(f"E_RUN_GAME: {client} ({g.name}): {e}") from e
+                        raise fault(f"E_RUN_GAME: {client} ({g.name}): {e}") from e
                     await asyncio.sleep(10 * self.s.time_scale)
             lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
             if res.exitcode != 0 or len(lines) < 2:
-                raise RunnerError(f"E_RUN_GAME: {client} ({g.name}): no running SkyrimSE.exe to read ({res.err.strip()[:200] or res.exitcode})")
+                raise fault(f"E_RUN_GAME: {client} ({g.name}): no running SkyrimSE.exe to read ({res.err.strip()[:200] or res.exitcode})")
             path, version = lines[-2], lines[-1]
             if version != rec.game and not version.startswith(rec.game + "."):
-                raise RunnerError(f"E_RUN_GAME: {client} ({g.name}) runs SkyrimSE.exe {version} from {path}; the run plays {rec.game}")
+                raise fault(f"E_RUN_GAME: {client} ({g.name}) runs SkyrimSE.exe {version} from {path}; the run plays {rec.game}")
             if len(lines) >= 3 and "@" in lines[-3]:
                 rec.games[client] = lines[-3]
+            # the image base (game_check_cmd's first line), which a relaunch within one boot tends to keep (ADR-036)
+            base = next((ln.split(None, 1)[1] for ln in lines if ln.startswith("base ") and len(ln.split()) == 2), "")
+            if base:
+                reset = rec.client_reset.get(client)
+                if reset is not None:
+                    reset["image_base"] = base
+                how = {"relaunch": " after its relaunch", "rollback": " after its rollback"}.get((reset or {}).get("kind", ""), "")
+                rec.notes.append(f"{client}'s SkyrimSE.exe image base {base}{how}")
             return f"{client}={version}"
 
         async def go():
@@ -1288,9 +1523,12 @@ class Runner:
                                       f"(Join-Path {game_dir} '{self.s.client_console_log}')")
         if files or frida:
             # the step's file changes, made in the run's game folder while the game is stopped: a DLL and an
-            # ini load at a launch (scenario._relaunch_args); the next run's rollback undoes them. A frida
-            # relaunch with no files stops the game the same way, so its watcher is armed with no game running
-            script = _relaunch_files_ps(self.s.client_lab_dir, rec.game or self.s.game_default, files or [])
+            # ini load at a launch (scenario._relaunch_args); the next run's rollback undoes them (a lever is a
+            # reason for that run to roll the seat back, ADR-036). A frida relaunch with no files stops the game
+            # the same way, so its watcher is armed with no game running
+            if files:
+                rec.levers.add(client)
+            script = _relaunch_files_ps(self.s.client_lab_dir, rec.game or self.s.game_default, files or [], self.s.relaunch_stop_cmd)
             encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
             try:
                 res = await asyncio.to_thread(self.control.exec, g, ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded],
@@ -1654,10 +1892,13 @@ class Runner:
                   .replace("@URL@", url).replace("@UPLOAD_S@", str(max(30, int(self.s.crash_check_timeout_s * 0.8)))))
         cmd = ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand",
                base64.b64encode(script.encode("utf-16-le")).decode()]
+        # an end left unread rolls the seat back at its next run (ADR-036): the dumps are told by their time, so one
+        # this read missed would be the next run's crash if the seat only relaunched
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.crash_check_timeout_s)
         except ProxmoxError as e:
             rec.notes.append(f"crash check {client}: {e}")
+            rec.faulted.setdefault(client, f"the run's end could not read its game: {e}")
             return False
         lines = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
         try:
@@ -1666,6 +1907,7 @@ class Runner:
             seen = None
         if not isinstance(seen, dict):
             rec.notes.append(f"crash check {client}: no answer ({(lines[-1] if lines else res.err.strip())[:200]})")
+            rec.faulted.setdefault(client, "the run's end read no answer from its game")
             return False
         errors: list[str] = []
         dumps = [d for d in seen.get("dumps") or [] if isinstance(d, dict)]
@@ -1940,14 +2182,15 @@ class Runner:
             return {"snapshot": g.snapshot, "error": str(e)[:200]}
 
 
-def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, Any]]) -> str:
-    """A relaunch's file changes as one PowerShell script: the game stopped, then each change in the run's game
+def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, Any]], stop: str) -> str:
+    """A relaunch's file changes as one PowerShell script: the launch task and the game stopped (`stop`,
+    Settings.relaunch_stop_cmd), then each change in the run's game
     folder (<lab_dir>\\games\\<version>.txt names it), one line printed per change. The paths, names, sections, keys
     and values are scenario._relaunch_args's, so none carries a quote. A JSON change is read back and printed whole,
     so the run's note shows the file the game starts with."""
     out = [
         "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'",
-        "Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3",
+        stop,
         f"$g = (Get-Content '{lab_dir}\\games\\{game}.txt' -Raw).Trim()",
     ]
     for f in files:
@@ -1980,6 +2223,78 @@ def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, Any]]) -> 
             out.append(f"if (-not $hit) {{ throw ('no {key} in [{sec}] of ' + $p) }}")
             out.append(f"[System.IO.File]::WriteAllLines($p, $l); 'set {key}={val} in [{sec}] of ' + $p")
     return "\n".join(out)
+
+
+def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop: str, start: str) -> str:
+    """ADR-036's relaunch between runs as one PowerShell script for the guest agent (SYSTEM), its last stdout line one
+    JSON object. A seat a hot push marked (<lab_dir>\\hot.txt, lab/tools/client-hot.sh:65) is left as it is and the mark
+    printed: only a rollback undoes the push. Otherwise every running sky-lab task stops, as a snapshot's quiesce stops
+    them (config.quiesce_cmd: a Frida watcher still waiting for a game, or an armed ProcDump, would take the next run's
+    game), then the launch task and the game (`stop`, Settings.relaunch_stop_cmd; a launch task still running after it
+    fails the try), then the cleaning list goes, and the launch task starts (`start`). The cleaning list is what a run
+    leaves on a seat that its rollback undid, by folder and name pattern, never a wildcard over the lab folder
+    (launch.ps1 needs game-dir.txt and games\\):
+    - frida\\: each run's script and its .out, .err and .log, and the runner's shared-read .copy of the last two
+      (config.frida_exec_template, frida_script_text, Runner._frida_trace); frida-inject.exe and the tools beside it
+      stay;
+    - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
+      (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
+    - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
+      `presets`, the names the seat's last run's racemenu-save steps wrote (lab-driver's racemenu-save);
+    - the Saves folder's TESMODPLATFORM-* files, Skyrim Platform's generated saves, which it deletes itself only once
+      a load has settled (LoadGame.cpp:47-60), so a kill before then leaves them;
+    - the SKSE folder's skyrim-platform-pid*.log, launch.ps1's copies of a game that exited in its first minute
+      (launch.ps1:126-133), which Runner._skse_logs would collect as the next run's.
+    Crash dumps stay: the run's end counts only those written since a few minutes before its start (_CRASH_PS's
+    @SINCE@), and a crash it found rolls the seat back. A file that will not go fails the try before the game starts."""
+    skse = PureWindowsPath(driver_log).parent
+    names = ", ".join(f"'{p}'" for p in ["thuum-*.jslot", *(f"{n}.jslot" for n in presets)])
+    return "\n".join([
+        "$ErrorActionPreference = 'Continue'; $ProgressPreference = 'SilentlyContinue'",
+        f"$lab = '{lab_dir}'; $hot = Join-Path $lab 'hot.txt'",
+        # a mark older than a dist laid since (install-lab writes games\\<version>.txt at every lay) names a push the dist
+        # superseded: it goes, and the seat relaunches (sky-c1, 2026-10-30: a 10-29 03:35Z mark inside 3o's clean-m1-next
+        # rolled it back at every run and after every cold rollback that restored it)
+        "$stale = ''",
+        "if (Test-Path -LiteralPath $hot) {",
+        "  $mark = Get-Item -LiteralPath $hot",
+        "  $laid = @(Get-ChildItem -LiteralPath (Join-Path $lab 'games') -Filter '*.txt' -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTimeUtc -gt $mark.LastWriteTimeUtc })",
+        "  if ($laid.Count -eq 0) { @{ hot = $true; mark = [string](Get-Content -LiteralPath $hot -Raw) } | ConvertTo-Json -Compress; exit 0 }",
+        "  $stale = [string](Get-Content -LiteralPath $hot -Raw); Remove-Item -LiteralPath $hot -Force",
+        "}",
+        "Get-ScheduledTask -TaskName 'sky-lab*' -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Running' } | Stop-ScheduledTask",
+        stop,
+        "if ((Get-ScheduledTask -TaskName sky-lab-launch -ErrorAction SilentlyContinue).State -eq 'Running') { Write-Error 'sky-lab-launch still runs after its stop'; exit 3 }",
+        "$gone = New-Object System.Collections.ArrayList; $left = New-Object System.Collections.ArrayList; $held = New-Object System.Collections.ArrayList",
+        "function Clean([string]$dir, [string[]]$files, [string[]]$dirs, [switch]$soft) {",
+        "  if (-not (Test-Path -LiteralPath $dir)) { return }",
+        "  foreach ($item in @(Get-ChildItem -LiteralPath $dir -Force -ErrorAction SilentlyContinue)) {",
+        "    $like = if ($item.PSIsContainer) { $dirs } else { $files }",
+        "    if (-not ($like | Where-Object { $item.Name -like $_ })) { continue }",
+        "    Remove-Item -LiteralPath $item.FullName -Recurse -Force -ErrorAction SilentlyContinue",
+        "    if (Test-Path -LiteralPath $item.FullName) { if ($soft) { [void]$held.Add($item.FullName) } else { [void]$left.Add($item.FullName) } } else { [void]$gone.Add($item.FullName) }",
+        "  }",
+        "}",
+        "Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log', '*.js.out.copy', '*.js.log.copy') @()",
+        # the capture folders are cleaned as far as they will go: a file a timed-out guest-file-close left open in the
+        # agent (proxmox.py file_read, 2026-10-17) stays until the VM restarts, and failing the try on it cost sky-c2 a
+        # rollback (b-cloak-fight 20261030-053144: 025.png.b64 and 032.png.b64); the next capture writes its own name
+        "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
+        "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
+        "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
+        "Clean (Join-Path $lab 'input') @('request.json', 'done.json') @()",
+        f"$presets = @({names})",
+        "foreach ($rec in @(Get-ChildItem -LiteralPath (Join-Path $lab 'games') -Filter '*.txt' -ErrorAction SilentlyContinue)) {",
+        "  $g = ([string](Get-Content -LiteralPath $rec.FullName -Raw)).Trim()",
+        "  if ($g) { Clean (Join-Path $g 'Data\\SKSE\\Plugins\\CharGen\\Presets') $presets @() }",
+        "}",
+        f"Clean '{skse.parent / 'Saves'}' @('TESMODPLATFORM-*') @()",
+        f"Clean '{skse}' @('skyrim-platform-pid*.log') @()",
+        "if ($left.Count -gt 0) { @{ hot = $false; removed = $gone.Count; left = @($left); held = @($held); stale = $stale } | ConvertTo-Json -Compress; exit 4 }",
+        "$ErrorActionPreference = 'Stop'",
+        start,
+        "@{ hot = $false; removed = $gone.Count; left = @(); held = @($held); stale = $stale } | ConvertTo-Json -Compress",
+    ])
 
 
 def _server_log_patterns(exprs: list[str]) -> list[str]:

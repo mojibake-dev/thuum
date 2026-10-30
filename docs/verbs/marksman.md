@@ -518,6 +518,18 @@ PartOne_UpdateEquipmentTest's unknown-spell and missing-item cases. Open (Eli: "
 client re-equips only armor after a relaunch, so the weapons in the hands wait for the player's first draw; a seat's
 engine behaviour, a probe before its fix (the record's hands applied as worn at the login's first update).
 
+The cause read (21:37 PDT, a code read on the 3f tree): applyEquipment lists every worn entry with its hand for
+setInventory, but the platform's SetInventory equips the player (0x14) with forceEquip false (InventoryApi.cpp) and on
+the player armor sticks while weapons do not (upstream's own comment in sendInputsService's onLoadGame, "Currently only
+armor is equipped after relogging"); three seconds after the load that service reports the engine's hands, empty, and
+OnUpdateEquipment replaces the record's equipment whole, so the bow is gone from the record and every shot was judged
+against an empty hand. Fix on fork m3-hands b7d14614: the player's hands are set as applyHands sets a puppet's, a
+tenth of a second after setInventory (its adds land on gameThrQ after the JS tick): the worn weapon to the right hand,
+the wornLeft entry to the left, the worn ammo by equipItem, each only when the hand does not hold it and the item is in
+the inventory, nothing added. HYPOTHESIS (H-45a) that equipItemEx sticks where the un-forced equip did not, until
+x-hands-relaunch: the record's worn keeps 0x3b562 across a relaunch step and the first shot after it is accepted with
+no E_SHOT_NO_BOW and no "hands stale" line.
+
 ## Train 53 (2026-10-26, fork m3-npc-cast 78cec009; docs/verbs/npc-stream.md slice 6)
 
 The shot names its shooter (PlayerBowShot's idx, SCHEMA_VERSION 18) so a

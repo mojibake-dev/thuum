@@ -267,11 +267,92 @@
   "cureSpells": [
     "b8780:Skyrim.esm"
   ],
+  "sharedQuestsMode": {
+    "mode": "all",
+    "denied": [
+      "3372b:Skyrim.esm",
+      "d0593:Skyrim.esm",
+      "4e50d:Skyrim.esm",
+      "2bf9c:Skyrim.esm",
+      "2610a:Skyrim.esm",
+      "d0800:Skyrim.esm",
+      "2610c:Skyrim.esm",
+      "1c5d9:Skyrim.esm",
+      "19e53:Skyrim.esm",
+      "d517a:Skyrim.esm",
+      "e2d29:Skyrim.esm",
+      "4b2d9:Skyrim.esm",
+      "d19b9:Skyrim.esm",
+      "1f251:Skyrim.esm",
+      "54d0a:Skyrim.esm",
+      "21556:Skyrim.esm",
+      "64a14:Skyrim.esm",
+      "c99ef:Skyrim.esm",
+      "1ea50:Skyrim.esm",
+      "1ea51:Skyrim.esm",
+      "50f2e:Skyrim.esm",
+      "a7b33:Skyrim.esm",
+      "5f596:Skyrim.esm",
+      "17f05:Skyrim.esm",
+      "3907c:Skyrim.esm",
+      "649fc:Skyrim.esm",
+      "95f4f:Skyrim.esm",
+      "e66fc:Skyrim.esm",
+      "d1984:Skyrim.esm",
+      "954d9:Skyrim.esm",
+      "352a:Dawnguard.esm",
+      "d06c:Dawnguard.esm",
+      "2f65:Dawnguard.esm",
+      "1a415:Dawnguard.esm",
+      "4e24:Dawnguard.esm",
+      "17f8e:Dragonborn.esm",
+      "16e02:Dragonborn.esm",
+      "18b13:Dragonborn.esm",
+      "18b15:Dragonborn.esm",
+      "305d:HearthFires.esm",
+      "f4f8c0:MysticismMagic.esp",
+      "809:Thaumaturgy.esp",
+      "2725d0:LostGrimoire.esp",
+      "1e2c7:UndeadFX.esp"
+    ],
+    "allowed": [
+      "74a83:Skyrim.esm",
+      "39645:Skyrim.esm",
+      "b6031:Skyrim.esm",
+      "3dd29:Skyrim.esm"
+    ]
+  },
   "sharedQuests": [
     "74a83:Skyrim.esm",
     "39645:Skyrim.esm",
     "b6031:Skyrim.esm",
     "3dd29:Skyrim.esm"
+  ],
+  "spellPlacedObjects": [
+    {
+      "spell": "00cc14:Apocalypse - Magic of Skyrim.esp",
+      "anchor": "caster",
+      "objects": [
+        {
+          "base": "098529:Apocalypse - Magic of Skyrim.esp",
+          "type": "MSTT",
+          "forward": 192,
+          "dz": -48
+        },
+        {
+          "base": "0735e8:Apocalypse - Magic of Skyrim.esp",
+          "type": "ACTI",
+          "forward": 192,
+          "dz": 0
+        }
+      ],
+      "lifetime": {
+        "whileHeld": true,
+        "lingerS": 5,
+        "maxS": 120
+      },
+      "perCaster": 2
+    }
   ],
   "modLock": {
     "enabled": true,
