@@ -215,6 +215,21 @@ class RunSets:
                     return rs
                 sid = rs.scenarios[rs.position]
                 verdict = await self._played(rs, sid, cold)
+                # and a red counts only after its reruns (ADR-036's note of 2026-10-30): a red run in which a seat
+                # relaunched is run again relaunched first, costing no card a reset, and only a second red is run with
+                # every seat rolled back, its verdict the scenario's; red, red and a cold green is green for the gate and
+                # a finding by name, since the relaunched seats and the cold ones disagreed (that night two reds each
+                # bought an immediate cold rerun, two rollbacks a seat, and the second preceded sky-c1's wedge)
+                last = (rs.runs.get(sid) or [{}])[-1]
+                if verdict == "red" and last.get("relaunched") and not _vm_start_failed(rs, sid):
+                    verdict = await self._played(rs, sid, cold, rerun="relaunched")
+                    again = (rs.runs.get(sid) or [{}])[-1]
+                    if verdict == "red" and again.get("relaunched") and not _vm_start_failed(rs, sid):
+                        why = f"a cold-rollback rerun of {again.get('run')}, red twice with {', '.join(again['relaunched'])} relaunched"
+                        verdict = await self._played(rs, sid, cold, rerun="cold-rollback", every=why)
+                        if verdict == "green":
+                            rs.notes.append(f"{sid}: red twice with relaunched seats ({last.get('run')}, {again.get('run')}) and green "
+                                            "on a cold rollback: relaunch-carried state is the suspect (ADR-036), a finding by name")
                 dead = _vm_start_failed(rs, sid)
                 if dead:
                     # the position stays: the scenario never played a step, so a resume plays it again
@@ -223,12 +238,6 @@ class RunSets:
                                     f"with no rerun spent on it, at {_iso(self._wall())}; resume once the lab is back")
                     self.save(rs)
                     return rs
-                # and a red counts only after a cold-rollback rerun: a red run in which a seat relaunched is run again
-                # with every seat rolled back, and that verdict is the scenario's (ADR-027's reruns follow at the end)
-                last = (rs.runs.get(sid) or [{}])[-1]
-                if verdict == "red" and last.get("relaunched"):
-                    why = f"a cold-rollback rerun of {last.get('run')}, red with {', '.join(last['relaunched'])} relaunched"
-                    verdict = await self._played(rs, sid, cold, rerun="cold-rollback", every=why)
                 faults_in_a_row = faults_in_a_row + 1 if verdict == "error" else 0
                 if verdict == "error" and rs.policy.lab_fault_stop and faults_in_a_row >= rs.policy.lab_fault_stop:
                     # the lab, not a scenario, is failing: stop here, resumable, with

@@ -61,6 +61,9 @@ class FakeProxmox:
         self.relaunch_left: list[str] = []
         self.hot_mark: str | None = None
         self.relaunch_removed = 3
+        # what the cleaning left in the capture folders (held open by the agent) and a stale mark it removed
+        self.relaunch_held: list[str] = []
+        self.relaunch_stale = ""
 
     def stop(self, guest: Guest) -> None:
         self.calls.append(("stop", guest.vmid))
@@ -111,7 +114,8 @@ class FakeProxmox:
             if self.relaunch_left:
                 left, self.relaunch_left = self.relaunch_left, []
                 return ExecResult(4, json.dumps({"hot": False, "removed": 0, "left": left}) + "\r\n", "")
-            return ExecResult(0, json.dumps({"hot": False, "removed": self.relaunch_removed, "left": []}) + "\r\n", "")
+            return ExecResult(0, json.dumps({"hot": False, "removed": self.relaunch_removed, "left": [],
+                                             "held": self.relaunch_held, "stale": self.relaunch_stale}) + "\r\n", "")
         if script is not None and "SkyrimSE.exe.*.dmp" in script:
             # the run's end (Runner._crash_check) as a quiet seat answers it: no dump, the game the check read still up
             games = [ln.strip() for ln in self.game.out.splitlines() if "@" in ln]

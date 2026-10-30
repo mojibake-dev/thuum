@@ -359,8 +359,9 @@ class RunSetTests(RunTests):
 @needs_deps
 class ColdRollbacks(RunSetTests):
     """ADR-036's amendment of ADR-030 under the relaunch mode: a set starts from a cold rollback, each seat's first run
-    in it rolled back, and a red counts only after a cold-rollback rerun: a red run in which a seat relaunched is run
-    again with every seat rolled back, and that rerun's verdict is the scenario's."""
+    in it rolled back, and a red counts only after its reruns (the note of 2026-10-30): a red run in which a seat
+    relaunched is run again relaunched first, and only a second red is run with every seat rolled back, that rerun's
+    verdict the scenario's."""
 
     def _warm(self):
         """Relaunch mode with c1 managed, and one run by hand first, so the runner knows c1 clean and only the set's
@@ -379,7 +380,7 @@ class ColdRollbacks(RunSetTests):
     def _reset(self, run_id):
         return json.loads((self.tmp / "results" / run_id / "result.json").read_text())["client_reset"]["c1"]
 
-    def test_the_sets_first_run_rolls_each_seat_back_and_a_relaunched_red_is_rerun_cold(self):
+    def test_the_sets_first_run_rolls_each_seat_back_and_a_relaunched_red_reruns_relaunched_then_cold(self):
         self._warm()
         rid = self._start(["t2-green-one", "t2-red"])
         body = self._wait(rid)
@@ -388,15 +389,19 @@ class ColdRollbacks(RunSetTests):
         self.assertEqual(self._reset(first["run"])["reason"], "the run set's first run on it (ADR-030: a set starts from a cold rollback)")
         self.assertNotIn("relaunched", first)
         entries = body["runs"]["t2-red"]
-        # the red on a relaunched seat, its cold-rollback rerun (the scenario's verdict), then ADR-027's lone-red rerun
+        # the red on a relaunched seat, its relaunched rerun, then on a second red the cold-rollback rerun (the
+        # scenario's verdict), then ADR-027's lone-red rerun
         self.assertEqual([(e.get("rerun"), e.get("relaunched"), e["verdict"]) for e in entries],
-                         [(None, ["c1"], "red"), ("cold-rollback", None, "red"), ("lone-red", ["c1"], "red")])
-        cold = self._reset(entries[1]["run"])
+                         [(None, ["c1"], "red"), ("relaunched", ["c1"], "red"), ("cold-rollback", None, "red"),
+                          ("lone-red", ["c1"], "red")])
+        self.assertEqual(self._reset(entries[1]["run"])["kind"], "relaunch", "the first rerun costs no reset")
+        cold = self._reset(entries[2]["run"])
         self.assertEqual(cold["kind"], "rollback")
-        self.assertEqual(cold["reason"], f"a cold-rollback rerun of {entries[0]['run']}, red with c1 relaunched")
+        self.assertEqual(cold["reason"], f"a cold-rollback rerun of {entries[1]['run']}, red twice with c1 relaunched")
 
-    def test_a_cold_rerun_that_is_green_makes_the_scenario_green(self):
-        # the red came from what the relaunched seat carried: the cold rerun's green is the scenario's verdict
+    def test_a_relaunched_rerun_that_is_green_makes_the_scenario_green_with_no_reset(self):
+        # a red the relaunched seat carried once (a flake): its relaunched rerun's green is the scenario's verdict, and
+        # no seat was rolled back for it
         self._warm()
         flipped: list[str] = []
         real = self.services.runner._reset_seat
@@ -418,9 +423,35 @@ class ColdRollbacks(RunSetTests):
         rid = self._start(["t2-green-one", "t2-green-two"])
         body = self._wait(rid)
         entries = body["runs"]["t2-green-two"]
-        self.assertEqual([(e.get("rerun"), e["verdict"]) for e in entries], [(None, "red"), ("cold-rollback", "green")])
+        self.assertEqual([(e.get("rerun"), e["verdict"]) for e in entries], [(None, "red"), ("relaunched", "green")])
+        self.assertEqual(self._reset(entries[1]["run"])["kind"], "relaunch")
         self.assertEqual(body["verdict"], "green", body["summary"])
         self.assertEqual(body["watch"], [])
+
+    def test_red_twice_relaunched_and_green_cold_is_green_and_a_finding_by_name(self):
+        # the red follows what every relaunched seat carries: two relaunched reds, then the cold rerun's green, which is
+        # the scenario's verdict and, named in the set's notes, a finding about relaunch-carried state (ADR-036)
+        self._warm()
+        real = self.services.runner._reset_seat
+
+        async def carried(rec, client, g):
+            note = await real(rec, client, g)
+            bad = rec.scenario.id == "t2-green-two" and rec.client_reset[client]["kind"] == "relaunch"
+            self.state.actors[1].x = 12345.0 if bad else 0.0
+            return note
+
+        self.services.runner._reset_seat = carried
+        (self.scen / "t2-green-two.yaml").write_text(GREEN.replace("id: t2-green", "id: t2-green-two").replace(
+            "  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}\n",
+            "  - assert:\n      - server.actor(c1).x != 12345\n  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}\n"))
+        rid = self._start(["t2-green-one", "t2-green-two"])
+        body = self._wait(rid)
+        entries = body["runs"]["t2-green-two"]
+        self.assertEqual([(e.get("rerun"), e["verdict"]) for e in entries],
+                         [(None, "red"), ("relaunched", "red"), ("cold-rollback", "green")])
+        self.assertEqual(body["verdict"], "green", body["summary"])
+        self.assertTrue(any("t2-green-two: red twice with relaunched seats" in n and "a finding by name" in n
+                            for n in body["notes"]), body["notes"])
 
     def test_a_red_with_no_seat_relaunched_gets_no_cold_rerun(self):
         self._warm()

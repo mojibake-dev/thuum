@@ -2604,6 +2604,33 @@ class ClientResets(RunTests):
         self.assertEqual(reset["kind"], "rollback")
         self.assertIn("the run's end could not read its game", reset["reason"])
 
+    def test_a_hot_mark_older_than_a_dist_is_removed_and_the_seat_relaunches(self):
+        """sky-c1, 2026-10-30: a 10-29 03:35Z mark inside 3o's clean-m1-next, a dist laid over it at the stage, rolled
+        the seat back at every run. The script removes a mark older than a games record (install-lab's lay) and goes on."""
+        pve = self._warm()
+        pve.relaunch_stale = "20261029T033547Z 4aa5b774 C:\\Games\\Skyrim Special Edition 1.6.1170\\Data\\Platform\\Plugins\\skymp5-client.js"
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        script = pve.relaunches[-1]
+        self.assertIn("$laid = @(Get-ChildItem -LiteralPath (Join-Path $lab 'games') -Filter '*.txt'", script)
+        self.assertIn("$_.LastWriteTimeUtc -gt $mark.LastWriteTimeUtc", script)
+        self.assertLess(script.index("$laid = "), script.index("Get-ScheduledTask -TaskName 'sky-lab*'"),
+                        "the mark is judged before anything stops")
+        self.assertTrue(any("a stale hot mark removed (20261029T033547Z 4aa5b774" in n for n in body["notes"]), body["notes"])
+
+    def test_a_capture_file_held_open_is_left_and_the_seat_relaunches(self):
+        """sky-c2, b-cloak-fight 20261030-053144: two .png.b64 sidecars a timed-out guest-file-close left open failed
+        both relaunch tries and cost a rollback. The capture folders are cleaned as far as they go."""
+        pve = self._warm()
+        pve.relaunch_held = ["C:\\sky-lab\\shots\\025.png.b64", "C:\\sky-lab\\shots\\032.png.b64"]
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        script = pve.relaunches[-1]
+        self.assertIn("Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft", script)
+        self.assertIn("Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft", script)
+        self.assertNotIn("CharGen\\Presets') $presets @() -soft", script, "presets and saves still fail the try")
+        self.assertTrue(any("2 held open left in place (C:\\sky-lab\\shots\\025.png.b64" in n for n in body["notes"]), body["notes"])
+
     def test_a_hot_push_mark_rolls_the_seat_back_in_the_same_run(self):
         pve = self._warm()
         pve.hot_mark = "20261028T182237Z 26e3d0cf C:\\Games\\Skyrim Special Edition 1.6.1170\\Data\\Platform\\Plugins\\skymp5-client.js"
