@@ -3155,3 +3155,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   mod as it is (B, a property patch in apocrypha's layer, when the layer next moves), and lab-driver throttles repeated questStart and
   questStop lines per quest to one per ten seconds with the held count, the first line never held (a probe's log-count on a start
   still reads it); tsc green, 21 lines. The memo in the weekend summary's calls list.
+- 17:44 PDT: the two rules reviews of the other pass trains (agents, the shape that found the physics holes) landed. Train 2 (0b49a28e):
+  (1) the merge brace (fixed on the -win branches); (2) SLICE TWO IS INERT: d02103fd changed TESModPlatform.psc but not the .pex, and
+  callNative resolves through the loaded .pex, so Suppress/ReleaseQuestStageFragment throw 'Native function not found' and every
+  relayed stage runs its fragment (the double reward stands); (3) rule 12 and 5: mode all accepts any u16 stage of about 1,400
+  quests with no INDX check and no record cap, at_login O(n squared), a hostile seat at 8/s persists 28,800 pairs an hour replayed to
+  every login; (4) the arrival event is armed by the quest mode message, so a server with sharedQuests [] never raises it; (5) the
+  release at the promise can unmark before a queued stage fires; (6) start-game-enabled reports cost tokens and a log line each at 8/s;
+  (7) PlayerScale reads the sex from the appearance alone (a female NPC takes the male column, within the 256-unit slack); (8) the
+  refusal order logs OWN_START for a denied quest. Train 1 (7a223e0d) and the client bits (90baae65): (1) held sightings with no
+  total cap, no sweep, no clear at a disconnect; (2) dedupe by refrId alone lets a second reporter evict the first's entry; (3) a
+  placed-dead body revived by one host sample (DiedAgo nullopt, no grace); (4) the 0.1 s push on a captured wrapper; (5) the hands
+  pass only after a setInventory's apply; (6) no restart T0 for the corpse. Verified correct lists in the agents' reports. Two fix
+  agents build the fixes on the branches now (no push until my review); P3's T2 waits on them too. CI: P3 54e021e0 pipeline 3884 GREEN
+  (the props review's fixes compile, PropTest passes); 3892 and 3893 build the -win trees; 3888 (m3-send-rate) queued.
