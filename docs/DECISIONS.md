@@ -2879,6 +2879,27 @@ parity aaafffe5; its probes are the draft's P1 to P5 and b-npc-stream. The
 cost accepted: about four to five days before the next playtest, against
 continuing to patch; the casting precedent's numbers are the argument.
 
+D71 (14:29 PDT 2026-10-30, the pass; numidium's memo on c-dungeon-enemies' three reds, taken under the pass's rule, Eli may veto):
+the non-host's loot. Facts: M3's exit scenario is red three times on the union 0e23c820, the cold rollback included (210543,
+210957, 211413), at one claim: c2's ContainerMenu after its activation of the body it killed. Everything before holds (the fight
+under one host, the engine's death by the host's report, every view agreeing). c2's trail: the body released from the puppet state
+at its death with the AI left off (PuppetApi.cpp Promote's dead branch, H-54e), the driver's Activate false 72 s later, the server's
+admission (its OpenContainer, the handler's "waiting for 'ContainerMenu open' (a corpse)"), the engine never opening, the
+handler's give-up and closing activation. The host's engine opens the same body (b-npc-body-release's cold run). So findings 58 and
+62's "anyone loots any body from any seat" (10988419) is admitted by the server and refused by the non-host's engine; it was never
+read green at T3 (x-shared-chest's claim was never run to green; the old scenarios counted server lines). HYPOTHESIS, two
+candidates the read separates: H5, a dead actor with its AI off takes no activation (the release leaves it off because H-54e saw
+a body stand up with the AI on); H1, the death never completes on a puppet (kill by message with the process stopped), so the
+engine's loot rule refuses a dying actor. Options: A) fix in the union now, impossible honestly without the read (rule 8), and a
+client head move means a rebuild, a restage and the sweep again (hours, 39 tonight at best); B) numidium's, the earlier refusal
+back behind a setting (a server head move for no player-visible change: the guest's E does nothing either way); C) merge as it
+stands with the scenario pending by name: the server's admission is harmless (the give-up releases the occupancy), the guest's
+E on a body does nothing, playtest 34's state, declared on 39's checklist. Taken: C, the scenario pending (lab/gate.yaml), M3's
+exit open until the fix's gate plays it green. The read: x-body-open-guest by path (the server's kill, then the host's engine
+death, then the body's AI switched on before a third try) in the first lab gap after the rest set; the fix the train after
+(client, Promote's dead branch or an AI-on at the server's OpenContainer, whichever the read names), gated with c-dungeon-enemies
+and b-npc-body-release.
+
 ## ADR-051: An engine that no longer loads a puppet releases it to its schedule, and the first engine to sight it moves the record
 
 Status: PROPOSED 2026-10-26 13:22 PDT (thuum-magnus, train 51; ADR-050 decision 3 asked for
