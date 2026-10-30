@@ -138,11 +138,14 @@ combat music.
   in every window (23 KB/s on the wire to a client hosting nothing) and
   each client returns 180 to 190 such packets a second, independent of the
   hosted count; read as renet's ack and keep-alive traffic at the update
-  rates (HYPOTHESIS, from ciphertext sizes alone; the read is
-  x-wire-idle-rate, a T2 on sky-srv: one idle fakeclient under 60 s of
-  tcpdump, the claim that the 26 to 31 B packet rate equals the server's
-  tick rate within 10 % and ends with the connection): its own row before
-  the per-actor budgets are tightened. Two server-wide stalls (164 ms at the
+  rates (MEASURED by x-wire-idle-rate on sky-srv, numidium 17:13 PDT
+  2026-10-29: 814.8 packets a second of 26 to 31 B to one idle fakeclient
+  against 816.4 server ticks a second, equal within 0.2 percent, nothing
+  after the close; the fakeclient's own 184.5 a second upstream is its 5 ms
+  loop): an idle client costs about 815 packets a second, near 45 KB/s with
+  headers, because the server loop ticks and sleeps 1 ms (skymp5-server
+  index.ts:222-227) and the wire sends at every update, a budget row of its
+  own before the per-actor budgets are tightened. Two server-wide stalls (164 ms at the
   Riverwood keyframe, 60 ms at c2's teleport), no gap over 0.3 s while
   hosting, no retransmission-looking repeats. The per-message counts and
   the per-type budgets come from slice 4's counters on train 54's stage
