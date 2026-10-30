@@ -568,6 +568,16 @@ and the packets are read into the schema by wire-legacy, which reads the
 old binary format through the same serde types. Hand-written sessions cover
 the paths the corpus never exercises.
 
+A session names a form the server creates during the run (a drop, a placement) as
+`"{{created:<baseId>}}"` instead of a fixed id (18:23 PDT 2026-10-29, fork m3-prop-physics
+f559b0d9): the fakeclient keeps the latest form id each CreateActor named per base and
+resolves the string when it sends (0 and an error event when none came), and the harness
+resolves the same string in a declared divergence per stack, from that client's `created`
+table in its normalized events, before matching. The first T2 of the prop-physics session had
+assumed the generator's next id (0xff000004) and read the claim refused when earlier sessions
+had allocated forms on the same server; the session names its dropped dagger by its base
+(80254) now. The two stacks' generators differ by design, so `created` is never compared.
+
 ## Fuzzing
 
 - `codec_decode`: arbitrary bytes into `wire_codec::decode`; must return

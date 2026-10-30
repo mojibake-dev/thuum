@@ -209,3 +209,13 @@ lapse, the grab through stillness and silence to its drop or limit, the step bud
 the new code and the live owner, PropTest a fourth case (a container refused, a claim from beyond reach, a sample across the cell
 leaving the record, the late listener's word). Cargo tests (250 and 22) and clippy green locally, fork-lint and tsc green; the C++
 compiles on CI (P3's push pipeline, whose difftest-build runs on the crate change).
+
+## P3's first T2 (18:23 PDT 2026-10-29)
+
+Red on the prop-physics session alone (numidium, 01:0xZ): the claim refused and the three relays absent, every other session
+identical. The session had assumed the drop's id (0xff000004, the generator's next in an empty world) and the full run's earlier
+sessions had allocated forms on the same server, so the claim named a reference that was not the dagger (E_PROP_UNKNOWN by the
+header's own caveat; the refusal line itself was lost with the container). The fix is the harness's, not the rule's: a session
+names a created form by its base, `"{{created:<baseId>}}"`, resolved by the fakeclient from the CreateActor it received and by the
+harness per stack (docs/WIRE.md, Differential harness; fork m3-prop-physics f559b0d9, P3 50a44336 with train 2's fixes merged). The
+T2 runs again on 50a44336.
