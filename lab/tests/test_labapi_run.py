@@ -2524,7 +2524,8 @@ class ClientResets(RunTests):
                  "Clean (Join-Path $lab 'frida')", "Start-ScheduledTask -TaskName sky-lab-launch"]
         at = [first.index(s) for s in steps]
         self.assertEqual(at, sorted(at), steps)
-        for named in ("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log', '*.js.out.copy', '*.js.log.copy') @()",
+        for named in ("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
+                      "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
                       "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
                       "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
                       "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
@@ -2630,6 +2631,20 @@ class ClientResets(RunTests):
         self.assertIn("Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft", script)
         self.assertNotIn("CharGen\\Presets') $presets @() -soft", script, "presets and saves still fail the try")
         self.assertTrue(any("2 held open left in place (C:\\sky-lab\\shots\\025.png.b64" in n for n in body["notes"]), body["notes"])
+
+    def test_a_trace_copy_held_open_is_left_and_the_seat_relaunches(self):
+        """sky-c1, x-quest-mode 20261030-131512: the runner's shared-read copy of the last run's story-location.js log,
+        read back through the agent, failed both relaunch tries and cost a rollback. The copies go as far as they
+        will; the scripts and their own outputs still fail the try (one held means a Frida process outlived the stop)."""
+        pve = self._warm()
+        pve.relaunch_held = ["C:\\sky-lab\\frida\\story-location-20261030-131130-x-story-arrival-login-13.js.log.copy"]
+        reset, body = self._reset()
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        script = pve.relaunches[-1]
+        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft", script)
+        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()\n", script)
+        self.assertTrue(any("1 held open left in place (C:\\sky-lab\\frida\\story-location-20261030-131130" in n
+                            for n in body["notes"]), body["notes"])
 
     def test_a_hot_push_mark_rolls_the_seat_back_in_the_same_run(self):
         pve = self._warm()
