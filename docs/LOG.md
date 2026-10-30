@@ -3634,3 +3634,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   read of the server's effect-condition evaluator refusing Reanimate on a corpse (npc-fate.md:1944-1949) is delegated to a reader
   agent (the CTDA list of MGEF 0xcab63 from the master file, EffectConditionsHold's handling of each, the misread candidate, a T0).
   rest.md's F1/F2 are already in the pass (m3-rest-correction 6a3427fa), nothing left there.
+- 13:02 PDT: the owed evaluator read is back (a reader agent, 26 tool uses; its citations spot-checked in the union's code): the refused
+  effect at 3o's reanimate ("EffectConditionsHold - effect cab63 of 65bd7 by ff000001 at 35534: its conditions fail") is Reanimate
+  Corpse's third effect, PerkDarkSoulsReanimateEffect 0xcab63, whose one CTDA is HasPerk(DarkSouls 0x581de) == 1 on the caster (the
+  record's bytes from Skyrim.esm on sky-srv; the spell's other two effects carry HasKeyword MagicNoReanimate == 0 and ActorTypeUndead ==
+  1 OR IsUndead == 0, no GetDead and no GetLevel anywhere; the level cap is the archetype's magnitude 13 and deadness the archetype's
+  own engine check). HasPerk answers 0 for the magic caller by design (condition_functions/HasPerk.cpp:35, ADR-039: the server holds no
+  perks before M5), so the rider is refused on every target and the base effects hold; EffectConditionsTest's case "Reanimate Corpse's
+  Dark Souls rider is refused by its HasPerk condition" (unit/EffectConditionsTest.cpp:408-446) already encodes it on a living target.
+  On a corpse the line is a log line alone: ApplyEffects returns for a dead target before any condition (MpActor.cpp:3776), the only
+  evaluation is OnSpellHit's hostility loop, and the raise went through CastReanimateOnHost's snippet (R2), which never consults the
+  evaluator. npc-fate.md:1944-1949's HYPOTHESIS (a GetDead or level misread) is falsified and closed; no code change. A one-line
+  follow-up for the next server train touching MpActor's effects: the refusal line names no row; appending the failing row
+  ("HasPerk(0x581de) == 1 on Target") with a dead-target case in that test would have saved this read.
