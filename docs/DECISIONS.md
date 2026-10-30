@@ -2879,6 +2879,27 @@ parity aaafffe5; its probes are the draft's P1 to P5 and b-npc-stream. The
 cost accepted: about four to five days before the next playtest, against
 continuing to patch; the casting precedent's numbers are the argument.
 
+D71 (14:29 PDT 2026-10-30, the pass; numidium's memo on c-dungeon-enemies' three reds, taken under the pass's rule, Eli may veto):
+the non-host's loot. Facts: M3's exit scenario is red three times on the union 0e23c820, the cold rollback included (210543,
+210957, 211413), at one claim: c2's ContainerMenu after its activation of the body it killed. Everything before holds (the fight
+under one host, the engine's death by the host's report, every view agreeing). c2's trail: the body released from the puppet state
+at its death with the AI left off (PuppetApi.cpp Promote's dead branch, H-54e), the driver's Activate false 72 s later, the server's
+admission (its OpenContainer, the handler's "waiting for 'ContainerMenu open' (a corpse)"), the engine never opening, the
+handler's give-up and closing activation. The host's engine opens the same body (b-npc-body-release's cold run). So findings 58 and
+62's "anyone loots any body from any seat" (10988419) is admitted by the server and refused by the non-host's engine; it was never
+read green at T3 (x-shared-chest's claim was never run to green; the old scenarios counted server lines). HYPOTHESIS, two
+candidates the read separates: H5, a dead actor with its AI off takes no activation (the release leaves it off because H-54e saw
+a body stand up with the AI on); H1, the death never completes on a puppet (kill by message with the process stopped), so the
+engine's loot rule refuses a dying actor. Options: A) fix in the union now, impossible honestly without the read (rule 8), and a
+client head move means a rebuild, a restage and the sweep again (hours, 39 tonight at best); B) numidium's, the earlier refusal
+back behind a setting (a server head move for no player-visible change: the guest's E does nothing either way); C) merge as it
+stands with the scenario pending by name: the server's admission is harmless (the give-up releases the occupancy), the guest's
+E on a body does nothing, playtest 34's state, declared on 39's checklist. Taken: C, the scenario pending (lab/gate.yaml), M3's
+exit open until the fix's gate plays it green. The read: x-body-open-guest by path (the server's kill, then the host's engine
+death, then the body's AI switched on before a third try) in the first lab gap after the rest set; the fix the train after
+(client, Promote's dead branch or an AI-on at the server's OpenContainer, whichever the read names), gated with c-dungeon-enemies
+and b-npc-body-release.
+
 ## ADR-051: An engine that no longer loads a puppet releases it to its schedule, and the first engine to sight it moves the record
 
 Status: PROPOSED 2026-10-26 13:22 PDT (thuum-magnus, train 51; ADR-050 decision 3 asked for
@@ -3363,6 +3384,21 @@ joiner sees it). v1 ships Raise Wall alone on the caster anchor; Fabricate Objec
 base id validated against the spell's list) and Wind Running's per-update placement are later deltas; the hit-target
 and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
 
+D70 (14:00 PDT 2026-10-30, the pass; numidium's memo on b-spell-placed-wall's three reds, taken under the pass's rule, Eli may veto):
+the pose model. Facts: on the union 0e23c820 the scenario's claim 3 (the caster's own wall against the server's copy, 192 along the
+yaw) failed three runs out of three, the cold rollback included (204953, 205125, 205303): the copy stood 75 to 88 units from the
+caster's engine wall, which stood 104 to 118 ahead of the caster and moved 14 units between runs at the same stand; the server
+placed once per cast, the observer holds one runtime copy of each form (the morning's CallNative fix), so the server half and the
+observer are right and the fixed step is wrong. HYPOTHESIS (the Dynamic read before the fix): the script places the wall at the
+caster's aim (TargetBox), not at a fixed step. Options: A) fix in the union, the caster reports the pose and the server validates
+and places there (shape A of the verb doc), a new message, client and server code, a rebuild and a restage, the merge hours later;
+B) the copies off for this merge through the kill switch (spellPlacedObjects emptied in both deploy settings), the scenario pending
+by name with the reason, the fix as the next train after the physics and rumor trains; C) merge the placement as it stands, pending
+the scenario: the other seat sees a wall about 80 units off, a player-visible wrong outcome by name. Taken: B. A wall in the wrong
+place blocks a gap the caster sees open, worse than no wall (playtest 38's state), and the fix is a train's worth. The verb's pose
+model becomes shape A: the caster's report, validated (reach from the caster, bounds, one report per accepted cast), the copies at
+the reported pose; the settings table keeps the forms and the lifetime, and loses the step.
+
 ## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
 
 Status: PROPOSED 14:06 PDT 2026-10-29 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes.
@@ -3425,7 +3461,7 @@ dungeons, the traps' bodies (M4's d-bleak-falls). Decision 4's slice two is ther
 loader's MSTT admission costs records and arrival messages for effect objects and buys nothing in the lab's cells), and head 3 of
 the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
 position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
-budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first.
+budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first. Eli, 12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"; the playtest 39 clause is retired, slice three is M4's, and the read before its build (npc-fate's measured "a dead ragdoll takes no SetPosition" against the row's SetPosition hypothesis) waits with it.
 
 Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet
 cost. Facts: the gamemode loops `server.tick()` then a 1 ms setTimeout (skymp5-server/ts/index.ts:222-227), about 816 ticks a

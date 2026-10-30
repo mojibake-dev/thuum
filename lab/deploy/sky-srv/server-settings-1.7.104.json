@@ -328,32 +328,7 @@
     "b6031:Skyrim.esm",
     "3dd29:Skyrim.esm"
   ],
-  "spellPlacedObjects": [
-    {
-      "spell": "00cc14:Apocalypse - Magic of Skyrim.esp",
-      "anchor": "caster",
-      "objects": [
-        {
-          "base": "098529:Apocalypse - Magic of Skyrim.esp",
-          "type": "MSTT",
-          "forward": 192,
-          "dz": -48
-        },
-        {
-          "base": "0735e8:Apocalypse - Magic of Skyrim.esp",
-          "type": "ACTI",
-          "forward": 192,
-          "dz": 0
-        }
-      ],
-      "lifetime": {
-        "whileHeld": true,
-        "lingerS": 5,
-        "maxS": 120
-      },
-      "perCaster": 2
-    }
-  ],
+  "spellPlacedObjects": [],
   "modLock": {
     "enabled": true,
     "requireHello": false

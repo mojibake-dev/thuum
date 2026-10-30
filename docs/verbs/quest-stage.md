@@ -233,6 +233,28 @@ relayed, replayed at a login, kept when the allowed list no longer names the que
 quest's own stage set (DB01Misc 10, x-quest-mode v4's frame) crossing to the other seat, a scenario of its own after the
 train's stage. Eli may still veto for A or C.
 
+Ahead, the stage-0 report churn (12:11 PDT 2026-10-30, scoped from x-quest-mode v5's server log, run 20261030-151127, and the
+code at dc3ec679): DLC1VCController 0x0201a428 (Dawnguard.esm; QUST DNAM flags 0x0119, Start Game Enabled and Run Once, the
+vampire-conversion controller) restarts itself in bursts on each seat, and each restart fires the engine's stage-0 event, so the
+seat reports stage 0 and the server refuses it OWN_START: 32 reports per seat in a burst about a minute apart in that run
+(15:12:39 one, 15:13:41 thirty-two held, on user 1; the same on user 2). The server already holds its line to one per seat per
+10 s with the count (ActionListener.cpp's ownStart map), so the cost is the wire alone: one reliable QuestStage message per
+restart, and at a new game the 330 start-game-enabled quests' first stages at the client's rate. The client cannot filter at the
+source (Skyrim Platform's Quest has no Start Game Enabled getter, the comment at the refusal). The fix in kind, a train of its own
+after D69's (client only; m3-quest-report-dedupe off the merged base): in QuestStageService.onQuestStage, a per-quest memory of the
+last stage reported and when; a report equal to the last one within REPORT_REPEAT_MS (30 s, UNMEASURED beyond the burst's shape)
+is dropped and counted, with one logTrace per quest per window ("stage N of quest X repeated K times in 30 s; dropped"); the
+server loses nothing, since a repeated (quest, stage) is its no-op already (QuestStageTest). The T3 claims for the probe
+(x-quest-report-dedupe, both seats in Riverwood for 90 s, the controller's bursts as the premise): c1.log_count("repeated
+[0-9]+ times in [0-9]+ s; dropped") >= 1 on each seat; server.log_count("E_QUEST_OWN_START: .* of 1a428:Dawnguard.esm: .*
+([3-9][0-9]|[1-9][0-9][0-9]) such report") == 0 (no window of thirty or more held); the mode-all relay unchanged (x-quest-mode v5's
+set and relay claims repeated in the same run). The premise's read first: whether the controller's bursts recur in the lab's
+frame without a vampire on either seat (they did in 151127's, both seats mortal).
+Built (12:58 PDT 2026-10-30): fork m3-quest-report-dedupe 7eb968bb off the union 0e23c820 (questStageService.ts: REPORT_REPEAT_MS 30000,
+REPORT_MEMORY_MAX 256, REPEAT_FLUSH_MS 5000; `repeated`, `closeRepeatWindow`, `flushRepeats`; tsc clean), kept local until the union and the
+physics train have merged (its client build would load the seats' host mid-sweep); the probe x-quest-report-dedupe v1 by path (0a281115:
+both seats mortal at the spawn for 150 s, the drop line on each seat, the server's held count under thirty, x-quest-mode v6's relay unchanged).
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

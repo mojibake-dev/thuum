@@ -1,22 +1,33 @@
-# b-npc-body-release (thuum-magnus, 2026-10-25): a body's occupancy is released by its looter's closing
-# activation, and the next player at the body is admitted at once. Playtest 34, section 5 (Eli): "the
-# non-host can't interact with the body" and "rotfern couldn't take armor, test 2 could". The server's
-# lines: a body is a container with ONE occupant within 512 units (D16-A), and ProcessActivateSecond
-# released a CONT and a FURN alone, so the looter's closing activation fell through, the body stayed
-# the looter's, and the other seat was refused five times ("occupant is another object and is nearby")
-# until the looter stood out of range. Train-46's aaafffe5 lets the corpse join the release. GREEN as
-# x-body-release v3 20261026-012319 on train-46's stage (aaafffe5); v2 235731 had held every claim and
-# read red on lab-api's end check alone (a mod's start-up box on c2), v1 234352 on its own bare
-# close-menu. Promoted unchanged (rule 13): the id and this header differ from the probe, the steps
-# and asserts are byte for byte.
+# b-npc-body-release (thuum-magnus, 2026-10-25; claims amended for memo D52 on 2026-10-30, its own commit, rule 13):
+# a body's occupancy is released by its looter's closing activation, and the next player at the body is
+# admitted at once. Playtest 34, section 5 (Eli): "the non-host can't interact with the body" and "rotfern
+# couldn't take armor, test 2 could". The server's lines then: a body is a container with ONE occupant within
+# 512 units (D16-A), and ProcessActivateSecond released a CONT and a FURN alone, so the looter's closing
+# activation fell through, the body stayed the looter's, and the other seat was refused five times ("occupant
+# is another object and is nearby") until the looter stood out of range. Train-46's aaafffe5 let the corpse
+# join the release. GREEN as x-body-release v3 20261026-012319 on train-46's stage (aaafffe5); promoted
+# unchanged (main f87ca564); the premise fixed d85701d (the judged approach, 51's gate).
+# D52 (playtest 37, Eli: "i WOULD like two people to be able to be in one container at once"; fork
+# dbfc8e82 and 10988419, in the pass union 0e23c820): a container or a corpse holds every player who opens
+# it (containerOccupants), so a corpse's open and close no longer pass the single-occupant check whose
+# "ProcessActivate 39fe4 - no occupant" lines this scenario counted; that check is furniture's alone now, and
+# the scenario went red three times in the union's sweep (20261030-164127: 184852, 185123, 185329) with the
+# activation itself working (the server's OpenContainer reached c1 both times). The claims now read D52's
+# path, each at least as strong as the line it replaces: the server's admission of each seat is its
+# OpenContainer, observed as the client's handler line "onOpenContainerMesage - waiting for 'ContainerMenu
+# open' (a corpse) to be true" (remoteServer.ts, logged on that message alone) with the ContainerMenu open
+# in the dump; c1's release is its handler's "menu closed" and "sent ActivateMessage" lines (the closing
+# activation, ProcessActivateSecond's corpse branch removes it from the set); and the release's effect is
+# the server's silence at c2's join: with c1 still inside the 512-unit occupation reach (its activation
+# passed the server's 452-unit reach check and it has not moved), a c1 left in the set would make c2 the
+# second occupant and log "ProcessActivate 39fe4 - 2 players in the container now" (the one line D52's path
+# writes), so that count is 0. Kept from before: no "occupant is another object", no E_ACTIVATE_REACH, the
+# body dead on the record. Two players in one body at once is x-shared-chest's (D52's own probe), not this.
 # Shape: two seats in Bleak Falls Temple 0x371de, c1 arriving first and hosting, c2 ten seconds later
 # (a puppet seat), god mode on both, a start-up message box dismissed on both (a no-op when none is up);
 # the server kills 0x39fe4 (kill-ref); c1 activates the body (the driver's Papyrus Activate, default
 # processing off: the hook reports it, the server's OpenContainer follows), the menu closes
 # (close-menu ContainerMenu, the client's closing activation), then c2, beside the body, activates it.
-# Claims: two "ProcessActivate 39fe4 - no occupant" lines (c1's, then c2's), never "occupant is
-# another object", no E_ACTIVATE_REACH, the body dead on the record. On parity fa8809a1 (no release)
-# the second "no occupant" never comes and "another object" does.
 id: b-npc-body-release
 milestone: M3
 clients: [c1, c2]
@@ -59,14 +70,28 @@ steps:
   - assert:
       - c1.npc_state(0x39fe4).isDead == true
       - c2.npc_state(0x39fe4).isDead == true
-  # the host loots and closes: the body's occupancy taken, then released by the closing activation
+  # the host loots: the activation reported, the server lays the record's inventory in and sends OpenContainer
+  # (D52: c1 joins the body's occupant set; no single-occupant line any more); the client's handler logs the
+  # server's word and the engine's ContainerMenu opens
   - c1: activate {refId: 0x39fe4}
   - wait: 4
+  - c1: dump-state
   - c1: screenshot
+  - c1: log-count {pattern: "onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true"}
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'c1.log_count("onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true") >= 1'
+  # the close: the client's closing activation (isSecondActivation) goes to the server, which takes c1 out of
+  # the occupant set (ProcessActivateSecond's corpse branch) and shuts the body with its last occupant
   - c1: close-menu {name: ContainerMenu}
   - wait: 4
+  - c1: dump-state
+  - c1: log-count {pattern: "onOpenContainerMesage - menu closed .ContainerMenu open. .a corpse."}
+  - c1: log-count {pattern: "onOpenContainerMesage - sent ActivateMessage"}
   - assert:
-      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 1'
+      - 'c1.state.menuOpen("ContainerMenu") == false'
+      - 'c1.log_count("onOpenContainerMesage - menu closed .ContainerMenu open. .a corpse.") >= 1'
+      - 'c1.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1'
   # the non-host, beside the body now, is admitted at once: placed by the judged approach at 150 units
   # from the body as the server's record has it (a fixed point stood 459 units from the record in 51's
   # gate, 20261027-061048, seven past the 452 reach the server allows a target of unknown size, where the
@@ -77,11 +102,21 @@ steps:
   - c2: close-menu {name: MessageBoxMenu}
   - c2: activate {refId: 0x39fe4}
   - wait: 4
+  - c2: dump-state
   - c2: screenshot
+  - c2: log-count {pattern: "onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true"}
+  - assert:
+      - 'c2.state.menuOpen("ContainerMenu") == true'
+      - 'c2.log_count("onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true") >= 1'
+      # the release's effect: c1 is out of the set when c2 joins, so the server never counts two
+      - 'server.log_count("ProcessActivate 39fe4 - [0-9]+ players in the container now") == 0'
   - c2: close-menu {name: ContainerMenu}
   - wait: 3
+  - c2: dump-state
+  - c2: log-count {pattern: "onOpenContainerMesage - sent ActivateMessage"}
   - assert:
-      - 'server.log_count("ProcessActivate 39fe4 - no occupant") >= 2'
+      - 'c2.state.menuOpen("ContainerMenu") == false'
+      - 'c2.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1'
       - 'server.log_count("ProcessActivate 39fe4 - occupant is another object") == 0'
       - 'server.log_count("E_ACTIVATE_REACH") == 0'
       - server.ref(0x39fe4).isDead == true
