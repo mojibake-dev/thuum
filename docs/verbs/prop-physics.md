@@ -302,6 +302,14 @@ hear it simulates again at a lapse (today c1 kept the copy Keyframed, believing 
 lab-spawn with a server-placed Basket01 (PlaceAtMe at the host's feet; the strip is flat, the cell 0xbbb1); Riverwood's exterior
 has four MISC references in all (the camp's two tankards and pot in a rock pocket, the street bucket disabled in this world).
 
+Built (09:54 PDT 2026-10-30, fork m3-prop-physics 5f7b87dc and after, the physics train off the union): (1) a prop whose word named this
+seat (a granted touch, flip's wake) sends its first read at once and opens its stream ("stream <id> started at the grant"), so the
+asleep sample and the server's lease follow SLEEP_AFTER_MS later when nothing stirs; the host-default simulation keeps the lazy
+baseline (nothing out until a move), so a cell's clutter still makes no records. (2) MpActor::DropItem places the copy 64 units
+ahead of the actor along its heading at its feet, never inside the capsule (DropItemTest's position follows). (3) The drop record
+takes DropItemService's gate, the inventory menu open (02e93cc3). (4) propPhysics is on by default again in the train, which merges
+only with b-prop-push green. The train's T3: the lab-spawn basket probes (push v9, pass v9, grab v7), then b-prop-push promoted.
+
 ## Slice three on paper (18:45 PDT 2026-10-29; ADR-058 decision 4 names it M4's build)
 
 Two props the engine owns differently from clutter, written so the row kind "prop" covers them when the build comes:

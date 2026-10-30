@@ -3570,3 +3570,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   actor. The three prop probes rewritten for lab-spawn with a server-placed Basket01 (push v9 97cf3abb, pass v9 1008e8f2, grab v7
   2de86990; the premise claims disabled == false through lab-api 5cc62f8's fact). The sweep runs (run set 20261030-164127, 102
   scenarios, to about 21:00Z); props merge dark.
+- 09:54 PDT: the physics train's fixes on fork m3-prop-physics (5f7b87dc, then the default flip): the named seat's first sample at the
+  grant with the stream opened (the lazy baseline kept for the host's default simulation), the drop's copy placed 64 units ahead of
+  the actor (DropItemTest's position follows), the drop record behind the inventory-menu gate, propPhysics on by default in the
+  train (it merges only with b-prop-push green). The CI's T0 runs on the branch; its stage after the union's merge, with the
+  lab-spawn basket probes and lab-api 5cc62f8's disabled fact.
