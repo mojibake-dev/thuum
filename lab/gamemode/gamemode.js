@@ -10,7 +10,7 @@
 //              {kind: "time"}: the server's game clock now
 //              {kind: "spell", formId}: a spell's effects and their MGEFs as the server resolves them
 //              {kind: "cellHost", cell}: who hosts the cell on the server (docs/verbs/cell-host.md)
-//              {kind: "ref", actorId}: an actor's record by form id (a hosted NPC's position and health)
+//              {kind: "ref", actorId}: a reference's record by form id (a hosted NPC's position and health; a prop's position, its actor fields null)
 //              {kind: "follow", actorId}: whether a game follows that actor out of its hosted cells (npc-handoff)
 //              {kind: "fate", actorId}: the server's roll for a game-file actor (npc-fate, ADR-046)
 //              {kind: "stream", profileId}: a player's stream counters by message type (npc-stream slice 4)
@@ -234,7 +234,24 @@ const state = {
     const actorId = Number(payload.actorId);
     const loc = mp.get(actorId, "locationalData");
     if (!loc || !Array.isArray(loc.pos)) return { found: false, actorId };
-    const pct = mp.get(actorId, "percentages") || {};
+    // the actor's fields only for an actor: the server's actor properties
+    // throw for a plain reference ("Specified Form is ObjectReference, but we
+    // tried to treat it as Actor", WorldState.h GetFormAt<MpActor>), which made
+    // a tankard's record unreadable (x-prop-grab 125719, "server holds no
+    // record for 0x3975b" while the server held it); a prop's record is its
+    // position (prop-physics, ADR-058), so those read null
+    let pct = {};
+    let isDead = null;
+    let worn = null;
+    try {
+      pct = mp.get(actorId, "percentages") || {};
+      isDead = Boolean(mp.get(actorId, "isDead"));
+      worn = wornOf(actorId);
+    } catch (e) {
+      pct = {};
+      isDead = null;
+      worn = null;
+    }
     return {
       found: true,
       actorId,
@@ -243,11 +260,11 @@ const state = {
       z: loc.pos[2],
       rot: loc.rot,
       cell: loc.cellOrWorldDesc,
-      isDead: Boolean(mp.get(actorId, "isDead")),
+      isDead,
       healthPercentage: pct.health,
       magickaPercentage: pct.magicka,
       staminaPercentage: pct.stamina,
-      worn: wornOf(actorId),
+      worn,
     };
   },
 
