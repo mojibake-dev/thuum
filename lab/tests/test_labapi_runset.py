@@ -130,6 +130,36 @@ class RunSetTests(RunTests):
         self.assertEqual(body["runs"]["t2-green-two"][0]["verdict"], "green")
         self.assertEqual(body["verdict"], "error", "the two faults never got a verdict")
 
+    def test_a_vm_that_cannot_start_stops_the_set_with_no_rerun(self):
+        """2026-10-30 04:40Z: two cards whose BARs a rescan had left unassigned crashed QEMU at every start, and the
+        set's lab-fault rerun and its next scenario spent two more starts before the two-faults stop. A run whose
+        seat's VM could not start stops the set at once, with no rerun, and a resume plays that scenario again."""
+        calls = []
+        real = self.runsets._run
+
+        async def fake(rs, sid, rerun=None, cold=None, every=""):
+            calls.append((sid, rerun))
+            if sid == "t2-green-two" and sum(1 for c in calls if c[0] == sid) == 1:
+                rs.runs.setdefault(sid, []).append({"run": "r-dead", "verdict": "error", "vm_start_failed":
+                    "E_RUN_ROLLBACK: sky-c2: E_PVE_TASK: UPID:core:1:qmstart:712: ended with start failed: QEMU exited with code 1"})
+                return "error"
+            return await real(rs, sid, rerun=rerun, cold=cold, every=every)
+
+        self.runsets._run = fake
+        rid = self._start(["t2-green-one", "t2-green-two", "t2-green-three"])
+        body = self._wait(rid)
+        self.assertEqual(body["state"], "stopped", body["summary"])
+        self.assertEqual(body["position"], 1, "stopped at the scenario whose VM could not start, to be played again")
+        self.assertEqual([c for c in calls if c[0] == "t2-green-two"], [("t2-green-two", None)], "no lab-fault rerun")
+        self.assertNotIn("t2-green-three", body["runs"])
+        self.assertTrue(any("could not start" in n and "resume" in n for n in body["notes"]), body["notes"])
+        r = self.client.post(f"/lab/runset/{rid}/resume")
+        self.assertEqual(r.status_code, 200, r.text)
+        body = self._wait(rid)
+        self.assertEqual(body["state"], "done", body["summary"])
+        self.assertEqual(body["runs"]["t2-green-two"][-1]["verdict"], "green")
+        self.assertEqual(body["runs"]["t2-green-three"][-1]["verdict"], "green")
+
     def test_two_reds_are_red_with_no_rerun(self):
         rid = self._start(["t2-red", "t2-red-two"])
         body = self._wait(rid)
