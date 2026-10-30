@@ -3624,3 +3624,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the "unless playtest 39 ranks the bodies' drift first" clause retired; recorded under ADR-058 and in prop-physics.md's slice-three
   row. Nothing in the pass changes: the bodies keep train 52's pre-kill placement and each game's own fall (npc-fate.md:114), and
   playtest 39's item 2 (bodies lying, not standing, at a load: finding 71) is this pass's fix, not slice three's.
+- 12:58 PDT: Eli: "status? when's 39 if now, please get some prework done on some other stuff". The sweep at 65 of 102 at 12:54 PDT, 3.0 min a
+  scenario, ending about 14:45 PDT; then numidium's deploy-srv and the rest set (b-npc-body-release's rerun), the merges and the
+  layer, so playtest 39 about 15:30 PDT on the merged build (the stage's bytes). Prework meanwhile: (1) the physics train carries the
+  union head locally (m3-prop-physics dde874b5, a merge of 0e23c820, tsc clean; not pushed, the client build stays off the seats'
+  host until the sweep ends); the D69 branch already contains it. (2) The five by-path probes for the physics stage and D69's T3 load
+  through lab-api's load_scenario (x-prop-push 42 steps, x-prop-pass 37, x-prop-grab 58, x-prop-drop 37, x-quest-rumor 34). (3) The
+  stage-0 repeat window built on fork m3-quest-report-dedupe 7eb968bb with its probe by path (quest-stage.md "Ahead"). (4) The owed
+  read of the server's effect-condition evaluator refusing Reanimate on a corpse (npc-fate.md:1944-1949) is delegated to a reader
+  agent (the CTDA list of MGEF 0xcab63 from the master file, EffectConditionsHold's handling of each, the misread candidate, a T0).
+  rest.md's F1/F2 are already in the pass (m3-rest-correction 6a3427fa), nothing left there.
