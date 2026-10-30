@@ -3251,3 +3251,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   code 1", the wedge's signature, on the one port the BIOS visit changed (its next rollback worked, the seat played slowly), and at
   04:23Z lab-api lost TLS to the Proxmox API while starting c2; b-npc-loot ran green between. ADR-036's relaunch never ran (every
   reset a forced rollback). 3o's gate has not restarted; the pass's stage waits behind it.
+- 21:43 PDT: the lab is DOWN again (numidium): after core's rescan both cards fail VM starts ("QEMU exited with code 1", 712 three times,
+  711 once, 04:40 to 04:42Z); 3o's relaunch-mode gate stopped itself on two lab faults before any scenario, parity unmoved. The fix is
+  a host reboot, Eli's call by its standing word. Every seat-free T2 is done (P2, P1, P3 green; the union's reruns alone when seats
+  exist). Nothing stages or gates until the reboot; the pass's code half is complete and recorded.
