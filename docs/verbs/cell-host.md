@@ -187,6 +187,20 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   a crash once a copy is disabled before its delete); H6 and H7 (the
   host's set, each relayed animation played once) are npc-stream's rows.
 
+Known limits: Why a teleport's destination cell can miss its cellFullyLoaded
+is unread (x-npc-legs 211702, one run of seven that day); the once-a-second
+poll reports the player's own parent cell without the event, and c1.log's
+"own cell ... reported without its load event" line counts the misses. The
+second quit crash (SkyrimSE.exe+0x1949d3, 13129+0x23 under 36551+0xd9d, an
+actor's skeleton going down) is the load order's, not ours
+(x-quit-second-nopuppet 082607, x-quit-second-solo 083649); the instruction's
+reading stays the re-analyst's, and the fast exit (D24-B, train-49 in 50b,
+fork parity 951ea43d) skips the engine's shutdown, so no seat meets it. With
+both plugins loaded the Loading Menu's IMenu gains one reference per loading
+screen where either alone takes one in all (x-quit-scan v3 021707; 081617,
+082111); the third holder is unnamed, the pair's numbers go upstream with
+D24-D, and the fast exit makes the count moot on a seat.
+
 ## Message contract
 
 - HostGrant and HostRelease, server to one client, reliable: thuum messages
@@ -344,15 +358,18 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   timeout still ends the connection later. The client's disconnect at exit
   (option i of docs/research/m3/decisions-for-playtest-34.md) stays a later
   row: the process ends its threads before any exit hook could flush one, and
-  it is blind to a crash or a kill. HYPOTHESIS on the number alone:
+  it is blind to a crash or a kill. The number alone was the open question:
   kStaleHostMs 3'000 is twenty-three missed reports at the client's 130 ms
   cadence and past a save's or a loading screen's stall of a second or two;
   the lab read (the host's game killed with both seats in Riverwood, the
   cell's host read every second) measures the pass and a loading screen's
-  silence calibrates it. CellHostTest's case: the silent host's cell passes
-  at the grace with no disconnect, the revived host is a candidate again, a
-  host heard again inside its grace keeps its cell at the same epoch;
-  wire-rules and wire-transport carry their own tests.
+  silence calibrates it. MEASURED: kStaleHostMs 4 s after three reads, the
+  pass 8.7 to 9.4 s after the last report, the login blips closed by the
+  smaller-of silence and the host-only mark (x-host-kill 205837, 214420,
+  221644); b-host-kill GREEN 065333, 162052. CellHostTest's case: the silent
+  host's cell passes at the grace with no disconnect, the revived host is a
+  candidate again, a host heard again inside its grace keeps its cell at the
+  same epoch; wire-rules and wire-transport carry their own tests.
   MEASURED by x-host-kill 20261023-205837 on train-39's stage (numidium's
   read): c1's last report about 21:01:08.4Z, "silent 3701 ms, stale" at
   21:01:12.1, the release and c2's grant at epoch 2 at 21:01:17.1 (8.7 s
@@ -374,10 +391,13 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   any packet (renet_netcode's time_since_last_received_packet: a keepalive
   counts, so a game whose network tick runs while its world loads is heard;
   the client's tick rides Skyrim Platform's tick event, so during a load it
-  likely stalls too, HYPOTHESIS the next read settles) and the time since a
-  message; and only a host is marked stale, since a login's first loads come
-  before any grant and a silent visitor hosts nothing to pass on. The
-  threshold stays 4 s.
+  likely stalls too, HYPOTHESIS until a pcap read: the longest gap between a
+  seat's packets across its Bleak Falls Temple load in x-host-kill 214420's
+  lab.pcap; under a second the client's network tick runs through a load on
+  keepalives, the load's length it stalls) and the time since a message; and
+  only a host is marked stale, since a login's first loads come before any
+  grant and a silent visitor hosts nothing
+  to pass on. The threshold stays 4 s.
   Third read, x-host-kill 20261023-221644 on train-40's stage 92529f31 (the
   two changes carried): no stale line at either login; the kill's alone,
   "silent 4032 ms, stale" and the pass at epoch 2 about 9.0 s after c1's
@@ -425,16 +445,20 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   normally 5 to 10 ms; the handle dropped past the bound), so a wedged socket
   never hangs the quit. Expected: the server's ClientDisconnected and the
   cell's pass inside the same second as the quit, ahead of the 4 s stale
-  line. HYPOTHESIS until the lab's read (rule 2): lab/frida/quit-path.js
-  stamps Main::Update's first frame with the byte set, the shutdown call's
-  thread, time and caller, DestroyClient's entry, return and cost, and
-  ExitProcess; lab/.cache/probes/x-host-quit.yaml (by path, for 44's stage)
-  quits c1 through the console (qqq) while it hosts Riverwood and claims
-  c2's grant within 4 s. What would falsify it: a quit reaching ExitProcess
-  with no shutdown entry (a GetProcAddress'd ExitProcess), the callbacks on
-  another thread, the datagram sent and no ClientDisconnected, or the
-  teardown past 200 ms. The stale rule stays the backstop for a crash or a
-  kill (A as the background, Eli's words).
+  line. The lab's read (rule 2): lab/frida/quit-path.js stamps Main::Update's
+  first frame with the byte set, the shutdown call's thread, time and caller,
+  DestroyClient's entry, return and cost, and ExitProcess;
+  lab/.cache/probes/x-host-quit.yaml (by path, for 44's stage) quits c1
+  through the console (qqq) while it hosts Riverwood and claims c2's grant
+  within 4 s. What would falsify it: a quit reaching ExitProcess with no
+  shutdown entry (a GetProcAddress'd ExitProcess), the callbacks on another
+  thread, the datagram sent and no ClientDisconnected, or the teardown past
+  200 ms. MEASURED: the quit flag's frame and the shutdown on the main
+  thread, DestroyClient 5 ms inside the thunk, one Disconnect datagram in the
+  pcap and the leave about 5 ms after the flag, the grant 5.4 s later
+  (x-host-quit 004815, v4 012653 GREEN at T3; b-host-quit 030427, 030801);
+  none of the falsifiers fired. The stale rule stays the backstop for a crash
+  or a kill (A as the background, Eli's words).
   MEASURED by x-host-quit 20261025-004815 on 44's stage 154ca7d4 (numidium's
   read, 17:50 to 18:00 PDT): the trace holds the premise, the quit flag's
   frame and the shutdown's entry on one thread (3928, the main thread),
@@ -470,12 +494,14 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   RCX = RBX+0x127490 in both, the process's initial thread). Their probable
   stack's frame [8], SkyrimPlatformImpl.dll+0x54fab0, reads by position as
   Skyrim Platform's own HookedWinMain return site (tilted/reverse/
-  Entry.cpp:23-42), not the thunk; the thunk's own frame is absent, which
-  is what a tail call leaves (`return func(...)` compiled as a jump,
-  HYPOTHESIS; harmless, and the trace shows the thunk ran). A variable the
-  next stage can hold fixed: both seats fail "Trying to get server mods"
-  (status 0, no connection) about every 42 s all run long, and a fetch was
-  in flight at both crashing quits.
+  Entry.cpp:23-42), not the thunk; the thunk's own frame is absent, which is
+  what a tail call leaves (`return func(...)` compiled as a jump; harmless,
+  and the trace shows the thunk ran; the reading decides nothing, since the
+  same stack stands frame for frame on 43's build without the thunk,
+  x-quit-console-43 185002, and without Frida, x-host-quit-plain 013410). A
+  variable the next stage can hold fixed: both seats fail "Trying to get
+  server mods" (status 0, no connection) about every 42 s all run long, and a
+  fetch was in flight at both crashing quits.
   Cited: gate set 20261025-015916-gate-m3-train-44 on 6cdc2b35 (20:13 PDT),
   b-host-quit green on its last runs (030427, 030801 after the 025053
   settle red at c2's first teleport, the set's watch item), b-host-kill
@@ -573,17 +599,22 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   for every menu in UI::menuMap (IMenu+0x10 the movie); BSScaleformManager
   ::LoadMovie 82325 formats "Interface/%s.swf" into GFxLoader::CreateMovie
   84640. So the leaked heap is a movie whose root's refcount never reached
-  zero (an extra holder: a plugin's GPtr, an IMenu made but never
-  registered, a load task; HYPOTHESIS which); the sixth
-  SetLimitHandler(nullptr) came from the `_Mesh_Cache` heap's owner, not a
-  movie. The leak dump at quit is a stub (84555 `xor al,al; ret`), so the
-  engine prints no heap names: the trace must. quit-path.js's names mode
-  (thuum main, this commit) joins 84512, 85302, 85301, 82073's menu walk
-  and 84554 on the heap address and prints, for the handler-carrying heap,
-  its name, its context, its roots with their refcounts and the menu that
-  owns it or none. One run on any build (the crash is the same everywhere)
-  names the movie; falsified if the heap's name is not a MovieView's, the
-  handler is not a context's +0x30, or the root's refcount reads zero.
+  zero (an extra holder: a plugin's GPtr, an IMenu made but never registered,
+  a load task); the sixth SetLimitHandler(nullptr) came from the
+  `_Mesh_Cache` heap's owner, not a movie. NAMED: the movie is the Loading
+  Menu's and its IMenu the one holder of the view (x-host-quit-names 201238);
+  the IMenu's extra references are two SKSE plugins' statics,
+  NextGenDecapitations.dll +0x204d80 and DeathDropOverhaul.dll +0x1e9620
+  (x-quit-scan v3 021707; the pair 081617, 082111): a plugin's pointer,
+  neither an unregistered IMenu nor a load task. The leak dump at quit is a
+  stub (84555 `xor al,al; ret`), so the engine prints no heap names: the
+  trace must. quit-path.js's names mode (thuum main, this commit) joins
+  84512, 85302, 85301, 82073's menu walk and 84554 on the heap address and
+  prints, for the handler-carrying heap, its name, its context, its roots
+  with their refcounts and the menu that owns it or none. One run on any
+  build (the crash is the same everywhere) names the movie; falsified if the
+  heap's name is not a MovieView's, the handler is not a context's +0x30, or
+  the root's refcount reads zero.
   NAMED (x-host-quit-names 20261025-201238, train-45's stage probe, green
   on D12-B, the crash inside the run; numidium's read, 13:18 PDT): the
   leaked movie is the engine's own LOADING MENU. The ninth and faulting
@@ -603,12 +634,15 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   the IMenu itself is what never dies before the heap teardown: an extra
   holder of the Loading Menu's IMenu (a plugin's or Skyrim Platform's
   smart pointer kept from a menu event or a loading hook) or the UI
-  destructor's own order (HYPOTHESIS which). Next, after the playtest: the
-  names mode prints the IMenu's refcount in the walk (IMenu+0x08, the
-  GRefCountBase count) so a count above one names a holder; the re-analyst
-  reads the Loading Menu's release path under the UI destructor and who
-  references the Loading Menu's IMenu (Skyrim Platform's loading hooks,
-  LoadGame.cpp, are the first suspect, then SSEDisplayTweaks' and
+  destructor's own order. DECIDED for the outside holder: refCount 5 at the
+  UI destructor's entry against the UI's own three (x-quit-holders 014250),
+  the holders two plugins' statics (021707); the destructor's order sound,
+  CONFIRMED-STATIC. Next, after the playtest: the names mode prints the
+  IMenu's refcount in the walk (IMenu+0x08, the GRefCountBase count) so a
+  count above one names a holder; the re-analyst reads the Loading Menu's
+  release path under the UI destructor and who references the Loading Menu's
+  IMenu (Skyrim Platform's loading hooks, LoadGame.cpp, are the first
+  suspect, then SSEDisplayTweaks' and
   po3_Tweaks' loading-screen options); then a solo quit per suspect plugin
   disabled (a layer change each). Not a thuum verb's bug; a fix row of its
   own.
@@ -626,9 +660,15 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   36551 calls 82073 at +0x33a before the Scaleform teardown at +0x3df, so
   no ordering bug (CONFIRMED-STATIC). For the movie to survive, the
   IMenu's count must stay at or above 1 after the map destructor: an extra
-  reference taken after the creator returned (an outside holder, HYPOTHESIS
-  who) or an unregister that released fewer than two (HYPOTHESIS). No
-  global pointer to the Loading Menu exists in the engine (the creator
+  reference taken after the creator returned (an outside holder) or an
+  unregister that released fewer than two. The outside holders NAMED: a
+  static in NextGenDecapitations.dll (+0x204d80) and one in
+  DeathDropOverhaul.dll (+0x1e9620), one reference each (x-quit-scan v3
+  021707; x-quit-bisect-ngd 081617, -ddo 082111). The short unregister
+  REFUTED: with the two plugins aside the count read 3 at the UI destructor's
+  entry and the Scaleform crash was gone (x-quit-bisect-ngd-ddo 022931), so
+  the unregister releases its two. No global pointer to the Loading Menu
+  exists in the engine (the creator
   51943, both destructors and ProcessMessage write only the instance and a
   byte flag). Skyrim Platform keeps no IMenu or GFxMovieView (the fork's
   sources read: EventHandler, FridaHooksUtils, main, BrowserApi,
@@ -653,16 +693,22 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   84561, 84559 (RE::GSysAllocPaged::ShutdownHeapEngine, Scaleform's paged
   heap teardown, GSysAllocPaged.h:39), 84554 twice, 87837+0x50). The leave
   landed before it, so the village passes; a player gets the WER box and a
-  CrashLogger log at every quit until it is understood. HYPOTHESIS: a
+  CrashLogger log at every quit until it is understood. The reading: a
   pre-existing crash on exit of this load order inside Scaleform's memory
   teardown, unseen because every lab relaunch so far was a kill and never a
   quit; the re-analyst names the frames, and two lab discriminators are
   numidium's (older CrashLogger logs on the seats with the same stack; a
   quit from the main menu with no client ever created, where the thunk does
   nothing). If the no-client quit does not crash, the teardown is in the
-  frame.
+  frame. CONFIRMED, pre-existing and the load order's: the same stack on 43's
+  build without the thunk (x-quit-console-43 185002) and in solo with no
+  client (x-quit-solo 192810); no earlier run ever quit through the engine (a
+  relaunch kills); the cause two plugins' statics (022931).
   The re-analyst's read of the stack (REA on sky-re, 18:19 PDT,
-  CONFIRMED-STATIC for the chain, HYPOTHESIS for the cause): 36551 at +0x3df
+  CONFIRMED-STATIC for the chain; the cause CONFIRMED: the ninth heap
+  destroyed carried the faulting handler, a movie memory context never
+  destroyed (x-host-quit-heaps 192408), the Loading Menu's (x-host-quit-names
+  201238), kept alive by two plugins' statics (021707)): 36551 at +0x3df
   loads the BSScaleformManager singleton and calls its teardown 82324
   (BSScaleformManager.h:50-56's fields released in order), which calls
   84561, GMemory's ShutdownHeapEngine shape, which calls 84559
@@ -682,15 +728,19 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   the only CommonLib-named one; the exe's WinHttpCloseHandle sites all lie
   in bnet code none of the 47 reaches). The thunk touches no Scaleform
   object, and GFx heaps are VirtualAlloc segments, not the CRT heap a Rust
-  free reaches. Verdict, HYPOTHESIS until a run: the engine's known at-exit
-  class, a GFx movie leaked past the UI teardown; the only way the thunk
-  could matter is ordering (a JS callback leaving a menu or GFxValue alive).
-  Decides it: the plain quit (no Frida) and the no-client quit as above, and
-  lab/frida/quit-path.js's heaps mode, which lists every heap 84554 destroys
-  at quit by name (HeapInfo.name at +0x80 through +0x38, GMemoryHeap.h:97-99)
-  with its handler and whether that handler is mapped: the leaked movie's
-  name. One lab fact worth the read: the lab's quit is the console's qqq with
-  the Console menu open, a movie a player's menu quit never has open.
+  free reaches. Verdict at the static read: the engine's known at-exit class,
+  a GFx movie leaked past the UI teardown; the only way the thunk could
+  matter is ordering (a JS callback leaving a menu or GFxValue alive).
+  CONFIRMED: a GFx movie leaked past the UI teardown, the Loading Menu's by
+  two plugins' statics (192408, 201238, 021707, 022931); the thunk cleared by
+  the plain quit (013410), the pre-thunk build (185002) and the no-client
+  quit (192810). Decides it: the plain quit (no Frida) and the no-client quit
+  as above, and lab/frida/quit-path.js's heaps mode, which lists every heap
+  84554 destroys at quit by name (HeapInfo.name at +0x80 through +0x38,
+  GMemoryHeap.h:97-99) with its handler and whether that handler is mapped:
+  the leaked movie's name. One lab fact worth the read: the lab's quit is the
+  console's qqq with the Console menu open, a
+  movie a player's menu quit never has open.
   GREEN at T3: x-host-quit v4 20261025-012653 on 44 6cdc2b35 (numidium's
   read, 18:30 PDT): the server's "user N left" line held 1.2 s after the
   quit step returned (two polls of lab-api's server.log_count, the console
@@ -764,8 +814,11 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   reported it), and the 30 s refresh re-reports only what the set holds. The
   player's parent cell is the engine's answer for the player, interior or
   exterior; c1.log traces "own cell <id> reported without its load event"
-  when the guard fires. HYPOTHESIS on the miss's cause (the event's timing at
-  a load screen); the guard holds either way.
+  when the guard fires. Why a teleport's destination cell can miss its
+  cellFullyLoaded is unread (x-npc-legs 211702, one run of seven that day);
+  the once-a-second poll reports the player's own parent cell without the
+  event, and c1.log's "own cell ... reported
+  without its load event" line counts the misses.
 
 ## Tests
 
@@ -884,19 +937,21 @@ destructor's entry the Loading Menu's IMenu read refCount 5, onStack false,
 delegateCallbacks 2, 207 ms after the quit flag. The UI's own references
 are the menu map's entry and the two delegate callbacks, three; the two
 over them are held OUTSIDE the UI, so the survival is an outside holder,
-not the destructor's order (the second branch of the earlier HYPOTHESIS
-falls). The records after the unregister and the map and stack destructors
-never reached disk (the crash came before the next flush, or the hooks
-never fired); the entry count decides it alone. Two reads are open: the
-plugin bisect in the order above (SSEDisplayTweaks first), or one run that
-names the holder: a write watchpoint on the IMenu's refcount word (IMenu +
-0x08, the count the names mode reads) logging each writer's return address
-and module across two loading screens and the quit, if the lab's Frida
-offers hardware watchpoints (Thread.setHardwareWatchpoint, per thread). The
-count of two matches the run's two loading screens (the login's and the
-teleport's), so a holder that takes a reference at every Loading Menu open
-and never gives it back is the first thing the watchpoint would show
-(HYPOTHESIS).
+not the destructor's order (the second branch of the re-analyst's holders
+read, the short unregister, falls). The records after the unregister and the
+map and stack destructors never reached disk (the crash came before the next
+flush, or the hooks never fired); the entry count decides it alone. Two reads
+are open: the plugin bisect in the order above (SSEDisplayTweaks first), or
+one run that names the holder: a write watchpoint on the IMenu's refcount
+word (IMenu + 0x08, the count the names mode reads) logging each writer's
+return address and module across two loading screens and the quit, if the
+lab's Frida offers hardware watchpoints (Thread.setHardwareWatchpoint, per
+thread). The count of two matches the run's two loading screens (the login's
+and the teleport's), so a holder that takes a reference at every Loading Menu
+open and never gives it back is the first thing the watchpoint would show.
+CONFIRMED by the scan, no watchpoint needed: one reference per loading
+screen, kept (3 at the start, 6 after three loads, x-quit-scan v3 021707),
+held in two plugins' statics; none taken with them aside (022931).
 
 THE HOLDERS NAMED (19:27 PDT, 2026-10-25; x-quit-scan v3 20261026-021707,
 numidium's run of quit-path.js's scan mode on parity aaafffe5): the
@@ -916,14 +971,15 @@ the Loading Menu's IMenu in a static that nothing clears, and the UI
 destructor's three releases cannot bring the count to zero: the IMenu and
 its movie outlive the UI and the movie's memory context survives to the
 heap teardown, which reads a freed limit handler (the crash). The per-load
-growth is one taker (or the CIF slot's transient), HYPOTHESIS; the
-earlier HYPOTHESIS "an outside holder or a short delegate release" is
-decided for the outside holder. Not ours: Skyrim Platform and skymp5-client
-hold no menu pointer (sources). The decision is Eli's (docs/research/m3/
-decisions-after-playtest-34.md D24): leave the crash, fast-exit the process
-in our quit thunk after the disconnect (the way the "fast exit" plugins
-do), or drop or replace the two plugins; x-quit-bisect-ngd-ddo (by path)
-reads the count and the quit with the two DLLs renamed aside.
+growth is THE PAIR's read below (it shows only with both plugins loaded, each
+alone taking one reference in all); the earlier reading "an outside holder or
+a short delegate release" is decided for the outside holder. Not ours: Skyrim
+Platform and skymp5-client hold no menu pointer (sources). The decision is
+Eli's (docs/research/m3/decisions-after-playtest-34.md D24): leave the crash,
+fast-exit the process in our quit thunk after the disconnect (the way the
+"fast exit" plugins do), or drop or replace the two plugins;
+x-quit-bisect-ngd-ddo (by path) reads the count
+and the quit with the two DLLs renamed aside.
 
 BUILT AHEAD, D24-B (19:33 PDT, 2026-10-25; fork m3-train-49 1c25b0e6 off
 parity aaafffe5, a client dist; built ahead does not merge): the quit
@@ -947,12 +1003,17 @@ map entry, the two callbacks, one heap word). The two plugins are the whole
 Loading Menu leak. The quit still crashed, later and elsewhere:
 c1-crash-2026-10-25-19-33-44.log, EXCEPTION_ACCESS_VIOLATION at
 SkyrimSE.exe+0x1949d3 (13129+0x23, cmp [rdi], eax with rdi 0x1f8 and rax the
-quit thread's id: a lock owner's check on a null object's member,
-HYPOTHESIS), r14 a BSFadeNode "skeleton.nif" (an actor's 3D going down),
-the stack through 106339, 19729, 37178, 12358, 19504, 19502, 37176, 37175,
-40288, 15973 to 36551+0xd9d (the shutdown routine, past the +0x3f4 of the
-Scaleform crash) and WinMain's shutdown call. So the engine's shutdown under
-this load order dies in its world teardown once the UI's part gets through:
+quit thread's id: a lock owner's check on a null object's member, a static
+reading), r14 a BSFadeNode "skeleton.nif" (an actor's 3D going down), the
+stack through 106339, 19729, 37178, 12358, 19504, 19502, 37176, 37175, 40288,
+15973 to 36551+0xd9d (the shutdown routine, past the +0x3f4 of the Scaleform
+crash) and WinMain's shutdown call. The second quit crash
+(SkyrimSE.exe+0x1949d3, 13129+0x23 under 36551+0xd9d, an actor's skeleton
+going down) is the load order's, not ours (x-quit-second-nopuppet 082607,
+x-quit-second-solo 083649); the instruction's reading stays the re-analyst's,
+and the fast exit (D24-B, train-49 in 50b, fork parity 951ea43d) skips the
+engine's shutdown, so no seat meets it. So the engine's shutdown under this
+load order dies in its world teardown once the UI's part gets through:
 a second crash that every quit so far hid behind the first. Dropping the
 two plugins (D24-C) does not give a clean quit; the fast exit (D24-B,
 train-49) skips 36551 whole and both crashes with it. Which of the two
@@ -967,12 +1028,16 @@ hit the other plugin's static), and either alone keeps the menu past the
 UI destructor and gives the Scaleform crash (87837+0x50 under
 36551+0x3f4). The growth of one per load shows only with both loaded (5
 after two loads, 6 after three; the sum of the singles is 5, so a third
-holder appears with both: v3's CoreImpactFramework stack slot, HYPOTHESIS).
-So a direct fix for the first crash must cover both plugins, or release
-the menu's outside references in our quit thunk before 36551 runs; the
-second crash, in the world teardown, stands behind it (its owner is the
-next read: x-quit-second-nopuppet, our detours off; x-quit-second-solo, no
-connected client).
+holder appears with both: v3's CoreImpactFramework stack slot the one
+candidate). With both plugins loaded the Loading Menu's IMenu gains one
+reference per loading screen where either alone takes one in all (x-quit-scan
+v3 021707; 081617, 082111); the third holder is unnamed, the pair's numbers
+go upstream with D24-D, and the fast exit makes the count moot on a seat. So
+a direct fix for the first crash must cover both plugins, or release the
+menu's outside references in our quit thunk before 36551 runs; the second
+crash, in the world teardown, stands behind it (its owner is the next read:
+x-quit-second-nopuppet, our detours off;
+x-quit-second-solo, no connected client).
 
 THE SECOND CRASH IS THE LOAD ORDER'S (01:44 PDT, 2026-10-26; numidium's runs):
 x-quit-second-nopuppet 20261026-082607 (both plugins out, skymp5-client's
