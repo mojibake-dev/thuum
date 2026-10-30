@@ -3331,3 +3331,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   host, five unlikely candidates ranked in npc-talk.md's Dynamic plan. lab/frida/dontmove-trace.js and x-npc-hold v4 (by path) arm
   the read at the union's stage; the falsifier that names a clearer is a 37612 write of 0 from a caller other than 37489 (a resurrect
   would point at 3o's host-engine resurrection paths).
+- 00:25 PDT (2026-10-30): the lab's GPU wedges have a confirmed mechanism (core's experiments on Eli's word, the night's one
+  reboot at 07:17Z). The host kernel read a wedged card's option ROM as nothing and a healthy one's as `55 aa`, and nouveau
+  probed a healthy GTX 1050 cleanly (GP107, VBIOS 86.07.61.00.25, 3072 MiB), so code 43 in the guest was Windows reporting a
+  card the host itself could not read. Then bare QEMUs with no guest and no driver: 40 single-card open and close cycles
+  clean, and the FIRST cycle opening both cards in the same second (ASPM L1 off on both links) failed with the lab's
+  signature on 00:01.1 ("broken device, retraining non-functional downstream link", "retraining failed", "Link Active not
+  set"). The cause is two GP107 secondary bus resets (no FLR, `reset_method=bus`) on two CPU root ports within the same
+  second; Windows, the NVIDIA driver, lab-api's hard stop, ASPM and the BIOS caps are bystanders. The RTX the pair had until
+  10-28 resets by FLR without dropping its link, which is why the host's reset history (core's tally of every vfio burst
+  since August) shows thirteen failures, all in dual bursts, and 0 of 1,787 solo. lab-api's 20 s reset stagger (f0480e2) is
+  the fix, live since 06:5xZ; LAB_SEAT_STOP (50e961b) stays at stop. The lab waits for the morning reboot, then the union's
+  stage (D67).
