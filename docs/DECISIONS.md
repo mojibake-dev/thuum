@@ -557,6 +557,19 @@ players a rest, however long ago the last hit. Other options weighed: 10 s
 or 30 s without a hit (an exploit window: step back and rest), and distance
 alone (standing together never ends it).
 
+**Amendment (2026-10-28 21:29 PDT, thuum-magnus under the no-questions rule; Eli may veto):** a fight is also
+recorded between a player and a hosted NPC. The read of H-53h (docs/verbs/npc-stream.md) found that the Flame
+Atronach's cloak damage effect carries condition function 719, IsHostileToActor (CommonLibSSE-NG TESCondition.h:865),
+which the server already implements as "a fight recorded between the two parties"; NotifyHostility only ever recorded
+fights between two user-played actors and TickFights forgot any pair with a non-user member, so every NPC-to-player
+effect gated on hostility was refused forever, the cloak included (a player standing in the fire took no server
+damage). The rule now admits a hosted NPC (an actor with a host) as a party: a hit by or on it with a player on the
+other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat snippet stays between two players (a hosted NPC's victim is its host engine's to fight, a
+player's copy of a hosted creature is AI-off, so a creature's hit on a player sends no notice; the server's rest
+refusal is what that player keeps). Between two hosted NPCs nothing is
+recorded (the engine's own business on the host). Fork m3-npc-fights; T0 in NpcCastTest's cloak case regains its
+damage claim (5 of 250 per cadence after the first Firebolt), the wire-rules tests cover the three pairs.
+
 ## ADR-024: The full sweep runs at the merge, not per verb
 
 Status: accepted (2026-10-05, Eli: "please yes that's great").
@@ -2523,6 +2536,34 @@ the other held her record): MoveVerdict::Pass, the record moving with the
 simulation and the per-actor word flipped both ways, no ActorHandoff and
 no tenure in this slice; docs/verbs/npc-handoff.md decision (d).
 
+2026-10-28 (playtest 37, 14:3x PDT): the door's pass. Prisoner hosted the
+Sleeping Giant from inside it while rotfern hosted Riverwood; Embry's package
+took him to the inn's door and the server refused the crossing ("door 13424:
+3550c may not cross into 133c6 (refused); the actor stays", 21:23:41Z and
+21:24:34Z), so his host's engine walked him back to the door every few
+seconds. Eli, through numidium: "let embry cross and hand him to the inn's
+host. that's a good rule to have." The rule: a persistent actor's door into a
+cell another live host holds is a crossing like D9's adjacent one; the move
+judge passes it to that host at once (an interior is deep by definition), an
+exit passes it back under D22's margin brake, a stranger's door report stays
+refused. Built on fork m3-door-pass 2a18f926 (stacked on m3-shared-containers
+dbfc8e82), T0 at the crate and CellHostTest; the refusal line at the door is
+a stranger's or an unhosted actor's alone now. T3: a door leg into a hosted
+interior, its own commit. The pass's first live run: Hod into rotfern's hosted
+inn at 00:47:23Z (playtest 37, finding 39).
+
+2026-10-28 19:1x PDT, memo D54 B (Eli: "B for D54"): the persistence fact
+leaves the door. Hilde 0x35534 (ACHR flags 0x0) was refused at her own door
+and turned back; now every actor's door counts, persistent or not: into a live
+host's cell the move passes (D9's shape), into an unhosted interior the record
+follows the host's report and freezes there when the report stops (D6's
+follow, the host's client reporting the actor by its form from indoors, the
+HYPOTHESIS the T3 door leg reads). Server-only, fork m3-door-walk 2dca472a:
+CellMoveFacts' door fact without IsPersistentReference, the judge's door arm
+unchanged, CellHostTest's two non-persistent cases (RiverwoodSvensHouse
+0x1cb84). Decision 1's "entered by a persistent actor" reads "entered through
+a door" from here.
+
 ## ADR-048: Trust is mixed by what is at stake: players' contested state stays the server's number, a host's own NPC outcomes are accepted under plausibility checks and logged, and a server setting picks the strictness
 
 Status: ACCEPTED 2026-10-24 as option B (Eli, through numidium, on the
@@ -2953,6 +2994,14 @@ Recommended B. Not in the turbo day's build: it reverses an accepted decision, s
 train after Eli's letter. The client's renewal (8b088be1, every 60 s while the menu is open) is
 inside decision 2 as written and is in the build.
 
+Note 14:18 PDT 2026-10-28 (playtest 37, Eli: "it seems like rotfern can steal an interaction from prisoner but not the
+other way around is that by design? id like no one to be able to steal from anyone"): decision 1's claim was the guest's
+mechanism and a host's own dialogue with an NPC it simulates was the engine's alone, unmarked on the server, so a guest's E
+took the actor out from under the host's open menu while a host's E on a guest's claimed actor met E_CLAIM_HELD. The first
+case now covers both: the host's own dialogue sends the same claim at its E (the rules grant a claim to the actor's own
+simulator with no pass and refuse others while it is held) and releases it at the menu's close (fork m3-voice-inflight, the
+client's TalkService). No change to decisions 1 to 4; the amendment above stays proposed.
+
 ## ADR-053: Two stage slots a day, a short playtest on each; the gate is the touched verbs' own; R0 changes merge on T0 and T2
 
 Status: ACCEPTED 23:47 PDT 2026-10-27 (Eli: "oh then yes accept"); proposed 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all
@@ -3024,6 +3073,18 @@ a seat whose relaunch fails twice and for the snapshot promotions. UNMEASURED un
 day: the minutes saved per run against the rollback's, and any state a relaunch carries that a
 rollback cleared.
 
+Note 2026-10-30 (numidium, thuum-cf agreeing under the pass's rule; amends ADR-030's cold-rerun amendment): a red
+run in which a seat relaunched is rerun relaunched first, costing no card a reset; only a second red is rerun with
+every seat rolled back, and the last rerun's verdict is the scenario's. Red, red and a cold green is green for the
+gate and a finding by name about relaunch-carried state, since the relaunched and cold seats disagreed. Why: the
+first live gate in relaunch mode (run set 20261030-050437) spent an immediate cold rerun, two rollbacks a seat, on
+each of two reds (b-duel's marginal 0.7851 against 0.78, b-npc-talk's NPC drift), and the second preceded sky-c1's
+card wedging at 05:39:41Z. The same night lab-api learned that a stale hot mark (one older than a dist laid since)
+is removed, not obeyed; that the capture folders (and, from 2026-10-30 14:09Z, the runner's frida trace copies) are
+cleaned as far as they go; and that a VM that cannot start
+stops the set with no rerun. Measured: c2 relaunched in 31 to 33 s against 55 to 64 s for a rollback, with zero
+device resets per relaunch by core's count of the host's vfio lines.
+
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 
 Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
@@ -3090,3 +3151,325 @@ by one, SkyrimPlatform.cpp:191), and after it a `look` moved the server's record
 client keeps its world and skips a new login correctly, and client-hot needs no reconnect. A
 side fact of the run: look's setAngle does move the server's rotation; the earlier "unchanged"
 readback was a stale latent read, so the lab's aim lever may be simpler than a judged teleport.
+
+## ADR-055: Deployment, a friend's seat: the eight decisions of 2026-10-19, recorded as one
+
+Status: ACCEPTED 2026-10-19 13:00 PDT by Eli's ticks on docs/private/decisions-2026-10-19.md section 2; written here
+12:32 PDT 2026-10-28 (thuum-cf) as the friend deployment's item 1 (docs/research/deploy/friend-playtest.md section 3, on
+thuum branch friend-deploy), "before any script".
+
+Context. The friend deployment's research (2026-10-19) left eight blocking questions. Eli answered them on the
+decisions page; this ADR is the record the scripts and verbs build to, so none is asked again.
+
+Decision.
+1. Identity (D1): a shared password plus per-friend profile ids now (distinct, above 0; the installer writes both from
+   an invite); a token issuer later (ADR-011's token.rs, the issuer front in the gamemode). The server keys actors by
+   profile id either way, so a character record never moves between the two.
+2. Mod delivery (D2): the friend's own Nexus API key in our one download script (Premium accounts), the manifest's
+   hashes verifying the result; a token path or a Vortex collection were not taken.
+3. Server placement (D3): a DMZ sibling on VM 520's stub, promoted from the lab's gate (core's recommendation); the
+   lab stays dark and stays the gate.
+4. Game version (D4): 1.6.1170 by the scripted downgrade (ADR-025's version).
+5. Discord (D5): the existing bot and channel; kalpa's discord module shape (a pinned setup post, a release post per
+   roll).
+6. Operator tooling (D6): the lab gamemode's console over a non-public RPC.
+7. The starting kit (D7): no helmet and a visible face, by a server setting (the plan's source hypothesis: the vanilla
+   Player base record's outfit; a gamemode rule and a layer plugin were not taken).
+8. Alternate Start (D8): in. The sub-choice (the server offers the choice and the mod supplies the places, or the mod
+   runs as written and the lab measures what breaks) is open; the default when the work starts is the mod as written
+   first, measured.
+Also recorded: sky-build always on with malcolm stopped (core, live since 2026-10-19).
+
+2026-10-28 (playtest 37, Eli through numidium, verbatim): "side note, for new players joining we'll need the alternate
+start mod working, and dropped in wearing rags not full armor/helmet." D7 refined: a new player's starting kit is the
+prisoner's rags (ClothesPrisonerTunic 0x3c9fe and ClothesPrisonerShoes 0x3ca00, or ClothesPrisonerRags 0x8f19a, by
+esm.py), worn, in place of the Player base's sixteen default items the server lays in at the actor's first inventory
+(MpObjectReference::EnsureBaseContainerAdded on base 0x7); a server setting `startingKit` (items with counts and a
+worn flag) replaces the base's kit for a player actor, with its T0 and a probe. The alternate start is apocrypha's
+layer (D8). Not the turbo loop's; the friend deployment's next server item.
+
+2026-10-28 17:4x PDT, apocrypha's vetting of the alternate start (docs/research/alternate-start.md on thuum branch
+apocrypha/alternate-start, c16e62a): Live Another Life is the pick (Realm of Lorkhan overrides Player 0x7, Alternate
+Perspective rebuilds Helgen, Unbound Reborn is an MCM). The facts for the server side: the opening cell is vanilla
+AbandonedPrison01 (Skyrim.esm 0x21594), LAL's marker at (6481, 1334, 191), so a startPoints entry may name it with or
+without the layer; in LAL's own flow the player wears rags there and the bed's script equips the chosen kit by
+EquipItem and RemoveItem, none of which reaches an R0 record, so the rags are the server's startingKit (D7) and each
+start's kit a server table, not the mod's AddItems. D8's first sub-choice recommended: the mod supplies the room, the
+statue's menu and its 54-marker table; the server performs the teleport and the kit through a permit keyed on the
+choice (castTeleports' shape). Fork work, this session's after the turbo day, with its T0 and a probe. Second
+read (apocrypha, 6e7ac18, the page's "How the pick is recorded"): the statue's menu is dialogue (a talking activator,
+94 topics), the pick is held in script ints no form exposes (chargen stage 15 the only form-level trace; the start's
+stage N on ARTHLALRumorsOfWarQuest is set in the same fragment as the MoveTo), so the permit is keyed on the LANDING: a
+record in cell 0x21594 whose one movement lands within slack of a table entry (about fifty markers, the page's table)
+is permitted and that entry names the server's kit; the vanilla-start line (MQ101's cart) is not honoured; the escape
+line is harmless.
+
+2026-10-28 18:1x PDT, apocrypha's landing table completed (the alternate-start page): the three master-marker
+landings read from the server's own Dawnguard.esm and Dragonborn.esm: the Dawnguard start (stage 8) at
+DLC1VQ03HunterStart, Dawnguard.esm 0x6E62 (0x02006E62 in our order), cell DLC1DawnguardHQ01; Harkon's court (stage 9),
+where LAL moves nobody itself and the vanilla bite wakes the player at DLC1VQ02PlayerWakeupMarker, Dawnguard.esm
+0x175CC (0x020175CC), cell DLC1VampireCastleGuildhall, the marker's role inferred from its name, so that entry takes a
+cell-wide slack; the Retching Netch (stage 3, InnMenuChoice 9) at an unnamed XMarker, Dragonborn.esm 0x3BD38
+(0x0403BD38), cell DLC2RRTheRetchingNetch. The table is FormDescs the server resolves through espm at load; the ship
+ride and the vanilla cart are out. Two starts change the player's race (stage 15's vampire lair through the chargen
+script's MakePlayerVampire, Harkon's bite through the vanilla turn plus Vampire Lord): race and appearance are R0 and
+the clock is the server's, so the first cut REFUSES those two choices (no kit entry in the permit's table, the menu's
+other starts stand); performing them server-side is a later slice. The friendly factions the bandit, Forsworn and
+ vampire starts add client-side are a known limit, not synced.
+
+2026-10-28 20:03 PDT, apocrypha's vampirism scout (docs/research/vampirism-under-the-server.md on thuum branch
+apocrypha/alternate-start, 3cbde0f), the input for D8 B's permit slice: one function turns every path,
+PlayerVampireQuestScript.VampireChange (quest 0xEAFD5; RaceCompatibility's list copy served loose), one
+Actor.SetRace by the player's race index in PlayableRaceList (RaceCompatibility.esm 0xD62/0xD63 at slot 6, rotfern.esp
+overriding at 81), fourteen disease RemoveSpells, the stage-1 ability kit, a 12 game-hour timer, PlayerIsVampire 1;
+LAL's lair line calls it then stage 3 and GameHour 19, Harkon's bite adds DLC1VampireChange, the perk, the wake marker
+and DLC1VQ02 stage 40. Today the race is R0 appearance recorded only at a race-menu close, no server path changes a
+live actor's race, the kit's spells are client-local AddSpells the learnedSpells list never hears (a client-turned
+vampire's VampireDrain is refused by the equip rule), the globals and timer client-local. The slice, when built: the
+server sets Appearance.raceId to the pair's vampire race and broadcasts UpdateAppearance outside the race-menu path's
+Playable rule (the own seat follows through applyAppearanceToPlayer and raceMenuService.alignRace, HYPOTHESIS for an
+update mid-world), the kit through learnedSpells, the hour performed or dropped, progression by named script admission
+or a server timer. Two open calls for Eli: (a) the disease path RUNS TODAY on a seat (VampireDiseaseEffectScript's
+events are ActiveEffect events on the player, admitted), so a player bitten by a lab vampire turns client-side three
+game days later with no server record: A) a server-side cure of DiseaseSanguinareVampiris 0xB8780 on the record until
+the slice, B) R3 for now; (b) rotfern's pairing is an INDEX gap, not a missing entry (apocrypha's precision): rotfern
+is PlayableRaceList[14] of 15 (four non-playable child races at [10..13] before it) and rotfernRaceVampire is
+PlayableVampireList[11] of 12 (BretonRaceChildVampire at [10] before it), so VampireChange looks up VampireList[14],
+which does not exist, and sets no race, while VampireCure finds the vampire at [11] and sets RaceList[11],
+ImperialRaceChild; the fix keeps both races at the same index, [10] in both lists, with the child entries dropped
+(apocrypha's layer, Eli's word). The served RaceCompatibility
+scripts are the plain variant, not the USKP set the readme prescribes with USSEP (numidium's layer item).
+
+2026-10-28 19:4x PDT (Eli through numidium, verbatim): "go with B but also in going with B one needs to scout out how
+vamirism changes happen. (and if race compatibility is in our modlst)". D8's sub-choice is B: Live Another Life
+supplies the content (the prison, the statue's menu, the landing table) and the server performs the outcome (the
+permit keyed on the landing, each start's kit from a server table), as the 17:4x and 18:1x reads above describe.
+With it, a read of how a vampire change happens, before the two race-changing starts are built (apocrypha's): LAL's
+chargen MakePlayerVampire, the vanilla turn and the Vampire Lord, and what each changes (race, spells, actor values,
+factions). RaceCompatibility 2.16 (the USSEP variant) is in the served load order (lab/layer/load-order.tsv slot 6,
+every client and the server): its PlayerVampireQuestScript pairs PlayableRaceList[i] with PlayableVampireList[i],
+and its Actor.SetRace and SendVampirismStateChanged calls have no native in the ledger (docs/MODS.md). Until that
+read lands, the first cut's refusal of the two vampire starts stands.
+
+2026-10-28 20:10 PDT (Eli through numidium, verbatim): "A for both, but how big of a lift is properly implementing
+D56". The two calls above (memos D56 and D57): D56 A, the server cures DiseaseSanguinareVampiris on a player's
+record whenever it appears, until the vampirism slice is built (server-only, thuum-cf's); D57 A, rotfern's pairing
+fixed in the layer at [10] in both lists with the child entries dropped (apocrypha's, by a plugin-patch kind that
+rewrites a form list, since rotfern.esp is Eli's), with the RaceCompatibility row moved to the USKP script set, at
+the next layer slot after playtest 37. The slice's size as answered: the turn as an R0 race act, the kit through
+learnedSpells, progression and feeding (named admission or a server clock), infection and cure (VC01 on the shared
+quest stages), about three verbs; the Vampire Lord (beast form, perks with no server path yet) its own later verb.
+
+Consequences. The deployment's items 2 to 9 build to these answers: the manifest ("roll") on the essentials tables,
+the enforcement verb (docs/verbs/mod-lock.md, DRAFT 2026-10-28), the DMZ server image from the lab's gate, the
+installer and sync script in canon-sync.ps1's shape, the announcements through the existing bot, the lab's proofs
+(the fresh-profile login, the mismatch, the start) and the friend-as-host scenarios after M3's host verbs. A change
+to any of the eight is a new ADR, not a rewrite of this one.
+
+2026-10-28 21:11 PDT (apocrypha, the defaults layer 539496c): the layer tree carries game-ini.tsv at its root beside plugins.txt
+(lab/layer/game-ini.tsv, outside SHA256SUMS; rows file, section, key, value, why after a header, # comments). Today's
+rows: SkyrimPrefs.ini [Interface] bGeneralSubtitles=1 and bDialogueSubtitles=1, Skyrim.ini [VATS] bVATSDisable=1 (the
+kill camera's switch). add-mods.ps1 applies them to the lab user's Documents\My Games\Skyrim Special Edition\<file>
+(the key rewritten in place within its section, a missing section appended, every other line kept). The installer and
+the sync script (canon-sync.ps1's shape, item 5 above) apply the same file the same way under the friend's user, after
+the first launch or on every sync, since the game's launcher rewrites SkyrimPrefs.ini.
+
+
+## ADR-056: World-shared quest stages, the journal stubbed (memo D55, B)
+
+Status: ACCEPTED 18:0x PDT 2026-10-28 (Eli through numidium: "i recommended as B for 55"; the memo is D55 in
+docs/research/m3/decisions-after-npc-stream.md). Written 18:2x PDT 2026-10-28 (thuum-magnus), before the first slice.
+
+Context. A quest stage set by a dialogue fragment or a script runs on the talker's game alone, and since fork
+2ce8b523 the fragment gate keeps a relayed line's fragments off the watcher on purpose (npc-stream.md, H-57a and b
+CONFIRMED by playtest 37's shop test). So each game's quest state drifts from the other's, and every line or topic whose
+conditions read that state is offered on one seat and not the other: Sven's Faendal line in A Lovely Letter (playtest
+37, Eli: "sven convo the line about faendal, the quest one, doesnt appear on prisoners thing"), the bounty rumor whose
+INFO did not even resolve on the watcher (finding 34). Eli: "appropriately communicating the worlds shared quest state
+(with stub functionality to later separate journals but thats a LONG time coming) makes sense to start now as part of
+the dialogue work." TES3MP's shape is one shared journal for the world (its JournalChanges sync, every player's entry
+sent to all), with per-player journals a server option that came later; we take the same order.
+
+Decision.
+1. The server owns the world's quest stages. Rung R0 for the record and its relay; the feed is R1: a client reports
+   its own game's stage change (the engine's quest-stage event, Skyrim Platform's `questStage`) as one message,
+   QuestStage {quest, stage}, in both directions (the report up, the relay and the replay down). The validator: the
+   quest is a QUST record in the server's load order (espm), it is on the server's shared list (decision 5), the stage
+   fits the engine's u16 stage index, at most one report per quest per 50 ms per player; a stage already recorded is a
+   no-op, never an error.
+2. The record is the world's, not a player's: per quest, the set of stages done (the engine's GetStageDone semantics,
+   because conditions read GetStage and GetStageDone and a stage can be set out of order), persisted with the world
+   and surviving a restart (rule 6: a migration note and a restart scenario).
+3. The relay: at once, reliable, to every other connected player; the replay at login, in order, after PlayerGlobals
+   (the same place the clock and the globals are sent), ascending per quest so each SetStage sees the previous ones.
+4. The apply on a seat is the engine's own Quest.SetStage for each stage not done there (idempotent: a stage done is
+   skipped), so topics, conditions and the journal follow by the engine's rules; the engine's event from that apply is
+   consumed by a loop guard and never reported. A quest the engine has not started starts at its first stage, the
+   engine's rule.
+5. The shared list is a server setting (`sharedQuests`, FormDescs, the PlayerGlobals shape) and is the stub Eli names:
+   the first slice lists Riverwood's quests (A Lovely Letter, the Riverwood rumours' quests, the Bleak Falls errands)
+   and grows by the playtests; a quest off the list stays each seat's own as today. Replaying the whole world's quest
+   state onto a fresh player (the main quest's stages move the player and start scenes) is what the list prevents.
+6. The journal is each engine's own, filled from the shared stages: one world journal on every seat, the stub. A
+   per-player journal (C's end state: private quests, shared world effects) is a later ADR with the fragment-kind table
+   it needs.
+
+Known limits of the first slice, written into docs/verbs/quest-stage.md: the QF stage fragments run on every applying
+seat (items, gold, enabled references, moved actors duplicate until the server performs world effects itself from a
+table of fragment kinds, the second slice; the R0 inventory corrects the items and gold at the next SetInventory);
+objectives, aliases and quest globals are not synced; the list is hand-kept; a stage set on a seat before its login
+replay is reported and recorded like any other.
+
+Consequences. One new message with its validator, fixtures and contract line in one commit (rule 4); a world record and
+its migration; a client service with the report, the apply and the guard; T0 for the rules and the record, T2 for the
+relay, the probe x-quest-stage (c1's console setstage on a listed quest reaches c2's GetStage within the relay's lag;
+an unlisted quest refused in the log; a restart keeps the stage) once lab-api has a quest-stage read, then scenario
+b-quest-stage. The dialogue work (npc-talk) stands on it: a line conditioned on a stage is offered on both seats once
+the stage is shared.
+
+
+## ADR-057: Spell-placed world objects are the server's, from a table keyed by spell and anchor (Raise Wall)
+
+Status: ACCEPTED under the overnight rule of 2026-10-28 ("take the recommended option, record the call"), 07:2x PDT
+2026-10-29 (thuum-magnus; written PROPOSED 22:01 PDT 2026-10-28; Eli, playtest 37: "im impatient, can we try getting
+raise wall working?"). Built and T0 green on m3-turbo-train-3o-win ee44f7d1. Eli's veto reverses it to ADR-029's
+allowlist entry (B below) at the cost of the natives.
+
+Context. Apocalypse's Raise Wall (SPEL 0xcc14, a self-delivery concentration spell) places a wall MSTT 0x98529 (a
+Havok body, no navcut) and a glow ACTI 0x735e8 by its effect script in the caster's game alone, 192 units ahead along
+the caster's yaw, Z -48, for the concentration plus a 5 s fade (apocrypha's disassembly of WB_FabricateWall_Script,
+2026-10-28). ADR-029's default (scripts run in the caster's game) is why the other seat saw nothing (numidium's
+refs-near diff at 04:25Z: the two references on c1, none on c2), and ADR-029 left the first allowlist entry open.
+apocrypha's corpus read (docs/research/apocalypse/placed-objects.md on apocrypha/alternate-start): three families by
+anchor, caster (Raise Wall, Fabricate Object, Wind Running), hit target (Tharn's Prison, Enter the Dungeon, Banish
+Living), projectile impact (Summoning Rune, Wellocs Instant Forest).
+
+Decision. Shape C of docs/verbs/spell-placed-object.md: the server places the objects itself from a settings table
+(spell, anchor, bases with offsets, lifetime rule, caps) when it accepts the cast start it already records
+(PartOne::StartCast, wire-rules casts), deletes them 5 s after the cast's end, a disconnect or a cap, and every seat
+receives them through the server-object path (collision comes with the mesh on every seat); the caster's game keeps
+the script's own copies and skips the server's whose placed_by names itself; the rise and the shaders are the client's
+cosmetics (R3, a later slice); the knockdown explosion and a wall placed where the caster's engine chose the
+no-room message are listed limits. Not chosen: A, the caster's game reporting the script's placements (Skyrim
+Platform intercepts no PlaceAtMe, and a client's pose would be trusted); B, the server running the script through
+ADR-029's allowlist (GetAngleZ, Sin, Cos, TranslateToRef missing and PlaceAtMe delegated, so no server object would be
+born).
+
+Consequences. A wire change (CreateActorProps gains placed_by, the schema bump, validator and fixtures in one commit,
+rule 4), a DB field placedBySpell with a sweep at load (rule 6), the table in both deploy settings files, T0 for the
+pose, the gate, the caps and the lifetime, T2 for the relay, the probe x-raise-wall and scenario b-spell-placed-wall
+(the wall on both seats within 2 s and 16 units, neither walks through it, gone on both within the lifetime, a late
+joiner sees it). v1 ships Raise Wall alone on the caster anchor; Fabricate Object's menu choice (a client-reported
+base id validated against the spell's list) and Wind Running's per-update placement are later deltas; the hit-target
+and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
+
+## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
+
+Status: PROPOSED 14:06 PDT 2026-10-29 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes.
+Eli's words: "heavy progress made into physics items. i feel like the canon perfection of multiplayer phys objects is gmod if
+that mental model helps at all", and "i had a friend add air strafing from the source engine to openmw i would imagine the
+networked portion physics object functionlity can be borrowed in a similar way" (2026-10-29).
+
+Context. The law gives physics to the host client (R2: the host computes, the server records; ADR-002 forbids server Havok), and
+nothing in the fork moves a prop between seats today: every item reference and spawned object is forced Keyframed on arrival
+(skymp5-client objectReferenceEx.ts, spawnProcess.ts), the loader skips movable statics (MSTT), and a kicked basket or a dropped
+sword moves on one screen alone. PLAN.md's M3 line "physics host switching for movables" has had no code (the pass's audit).
+Garry's Mod is Source: the server runs VPhysics and is the one truth, clients interpolate the networked origin and angles and
+predict only their own player, and a held or pushed prop's motion controller is the server's (Valve, "Source Multiplayer
+Networking", developer.valvesoftware.com/wiki/Source_Multiplayer_Networking; Bernier, "Latency Compensating Methods in
+Client/Server In-game Protocol Design and Optimization", GDC 2001). We cannot run the physics on the server, so what we borrow is
+the networked portion, as Eli's friend borrowed Source's air strafing into OpenMW without its physics: ONE simulator per prop,
+positions and angles networked only while the body is awake, interpolation on every other seat, and the simulator chosen by
+the interaction (Fiedler, "State Synchronization", gafferongames.com, 2015; "Networked Physics in Virtual Reality", GDC 2018).
+
+Decision 1, one simulator per prop. A prop is simulated by exactly one seat at a time: the cell's host by default, and the seat
+whose player last touched it (a Havok contact of its character controller, a grab, a drop, a shout's or spell's impulse) for as
+long as its lease holds (PROP_LEASE_MS, 3000 after the body sleeps; UNMEASURED). The owner table ADR-050 decision 4 and ADR-052
+named gets its second row kind: "prop" beside "follow", "margin" and "claim"; the cell is still the policy (a prop in an
+unhosted cell freezes at the record). Rung: the claim R0 (the server decides who simulates, on the toucher's report, newest touch
+wins by epoch), the transform R2 (the simulator's engine computes, the server records).
+
+Decision 2, the wire. Three rows in wire-schema, each with its validator in the same commit (rule 4): PropTransform {refr,
+pos, rot, asleep} from the simulator at most every 100 ms while the body is awake and once at sleep (C2S), relayed to the
+cell's other listeners (S2C) as a delta; PropClaim {refr, touch} (C2S) from the seat whose player touched a prop it does not
+simulate; PropOwner {refr, player, epoch} (S2C) to every listener at each change. The record keeps the last transform and the
+asleep flag (the reference's locationalData; no schema change for items, MSTT records are slice two's).
+
+Decision 3, the seats. The simulating seat's body is Dynamic and streams; every other seat's body is Keyframed and takes the
+stream's transform (SetPosition and the rotation through the rigid body's setters; interpolated over the sample interval as a
+figure is), so it neither falls nor fights the stream; at an owner change the new simulator's body goes Dynamic with the last
+streamed velocity (HYPOTHESIS: the hand-over is seamless at 100 ms samples) and the old one goes Keyframed. Nothing predicts.
+
+Decision 4, the slices. One: items the server already loads (MISC, WEAP, ARMO, ALCH, INGR, BOOK references with Havok, a drop's
+reference from its first frame), the probe x-prop-push (c1 walks into a basket; c2 sees it move within 32 units of c1's and rest
+where c1's rests) and x-prop-pass (c2 kicks it back: the owner flips, c1 interpolates). Two: movable statics (MSTT) admitted by
+the loader as references (the dead-placed fix's shape) and the Blue Palace's physical container. Three (later, M4): dragging and
+telekinesis as touches, ragdoll bodies under the same rows (finding 71's settle becomes a PropTransform of the body).
+
+Consequences. The observe/impose/suppress split: observe the Havok awake state and transform on the simulator (bhkRigidBody,
+hkpMotion: CommonLibSSE-NG H/hkpMotion.h, B/bhkRigidBody.h; the sleep signal is the simulation island's active mark,
+H/hkpSimulationIsland.h, the headers hold no isActive); impose the transform on the others (TESObjectREFR::SetPosition, the
+body's SetRotation, SetMotionType Keyframed: N/NiAVObject.h's SetMotionType); suppress the others' dynamics (Keyframed). The
+touch detection has no header entry point (the character controller's contact callbacks exist as listener lists nobody adds
+to: B/bhkCharProxyController.h, H/hkpContactListener.h) and is the verb's RE task; until it lands, slice one's touch is the
+player's grab and drop plus proximity to an awake prop (the nearest player within 128 units of a body that woke claims it).
+Known limits: no prediction (a prop a seat does not simulate moves a sample behind), stacked props flip owners by contact, a
+prop in an unhosted cell freezes, bodies and props stream on the same budget (prop_budget UNMEASURED).
+
+Note, 16:53 PDT 2026-10-29 (the pass, thuum-magnus): slice two's premise read against the master file. esm.py on sky-srv (Skyrim.esm
+1.6.1170, `near 0x3c` within 3000 units) lists eight MSTT references around Riverwood's spot and none around lab-spawn, every one
+of them an effect or an animated static (FXMotesForest01 three times, FXSmokeChimney02, FXMistStreet01, FXrapidsBig01, a burning
+Campfire01LandBurning, a SpitPotOpen01), nothing a player kicks; no CONT editor id in Skyrim.esm contains "Palace" or "Phys", so the
+roadmap's "physical container" of the Blue Palace stays unidentified. The props a player moves are items (slice one's set) and, in
+dungeons, the traps' bodies (M4's d-bleak-falls). Decision 4's slice two is therefore deferred to M4 with the dungeon work (the
+loader's MSTT admission costs records and arrival messages for effect objects and buys nothing in the lab's cells), and head 3 of
+the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
+position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
+budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first.
+
+Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet
+cost. Facts: the gamemode loops `server.tick()` then a 1 ms setTimeout (skymp5-server/ts/index.ts:222-227), about 816 ticks a
+second on sky-srv; the transport flushed renet at every poll (wire-transport lib.rs's poll), so every connected client took about
+815 small packets a second, near 45 KB/s with UDP and IP headers, about 365 kbit/s per idle player; the client answers at its own
+rate (184 a second from the fakeclient's 5 ms loop); an unfiltered capture showed the lab's server sending the same 31 B stream to
+both seats, so this is every player's cost. Options: A) leave it, the cost scaling with players (eight idle players about 3 Mbit/s
+up from the server, plus a busy loop); B) a fixed server tick at 1/60 s, which cuts ticks about 13x but changes the cadence of
+every system the tick drives (PartOne::Tick's timers, the VM, ingest latency up to 16.7 ms) and reopens every T2 and T3 timing
+claim; C) a send schedule in wire-transport, the tick and the ingest untouched, the outbound flush on a fixed 60 Hz clock, a message
+waiting at most 16.7 ms, one crate and one timer, server side only, no wire row and no schema change. Prior art for C: a fixed
+network send rate decoupled from the simulation step (Fiedler, "Fix Your Timestep!", Gaffer On Games, 2004; Valve, "Source
+Multiplayer Networking", developer.valvesoftware.com, the tick rate and the update rate as separate settings; Bernier, "Latency
+Compensating Methods in Client/Server In-game Protocol Design and Optimization", GDC 2001). Decision: C at 60 Hz, fork m3-send-rate
+(wire-transport's FlushClock, SEND_INTERVAL_DEFAULT 1/60 s, the bridge binding with it). Proof: the idle read again on the branch's
+image (about 60 packets a second expected, nothing after the close), the full T2, and the touched verbs' gate, since npc-stream's
+relay cadence and cell-host's grant timing ride the send path; a T3 timing claim the extra 16.7 ms moves has its margin read, never
+weakened (rule 13).
+Proof, 18:43 PDT 2026-10-29 (numidium's reads on sky-srv, the same idle script): 59.98 small packets a second to an idle client
+against 814.8 before (3,304 in 55.1 s, all 26 B, a median gap of 16.6 ms), the loop still at 847 ticks a second (only the flush
+moved), nothing after the close; the full T2 GREEN (difftest 14302, every session identical to legacy but its declared lines).
+The branch's merge waits for the touched verbs' gate when the lab is back.
+
+Note under ADR-030, D68 (09:56 PDT 2026-10-30, the pass; numidium's question, taken under the pass's rule): rule 3 at the union's merge.
+Facts: the union m3-pass-train-3-win carried verbs without a committed scenario (prop-physics slice one, quest mode all, the login's
+story arrival) beside fixes to shipped verbs; the full sweep plays only committed scenarios, so a green sweep proves the union breaks
+nothing it covers and says nothing about a verb without one. Options: A) each partial verb dark by default (a switch off at the
+merge) or made whole by a scenario promoted from its green probe before the sweep; B) cut the union to the whole verbs and restage;
+C) merge as is. Taken: A. Story arrival: b-story-arrival promoted from x-story-arrival-login (green with story-location.js). Quest
+mode all: b-quest-stage promoted from x-quest-mode (green through the relay on MS10MiscObjPointer; the denied claim is the client's
+silence), so mode all merges whole and the deploy's mode stays; quest-stage's missing scenario, a debt from before the pass, is
+closed by it. Prop-physics: dark, propPhysics off by default in the client until b-prop-push is green (the camp's tankards sit in a
+rock pocket, Riverwood's street bucket is disabled, the drop's stream has two faults; the physics train carries the fixes, the
+lab-spawn basket probes and the default back on). The fixes to shipped verbs (the placed-dead loader, the held roster, the NPC
+reach, the rented-bed correction, 3o's reanimate and Raise Wall, D64, D66, the CallNative fix) merge on the sweep as fixes always
+have. The merge record (the sweep's run set and the shas) is the LOG's.
+
+Note under ADR-056, D69 (09:56 PDT 2026-10-30, the pass; taken under the pass's rule, Eli's veto open): finding 76 is D62. The Aventus
+rumor quest (DB01Misc 0x1ea4f) is start-game-enabled, and D62 keeps every start-game-enabled quest's stages per seat unless the
+allowed list names it; the server refused the probe's set on purpose ("a start-game-enabled quest is each seat's own (D62)") while
+the mode-all relay, the report path and the login message all worked. Eli expected the rumor to propagate. Options: A) keep D62 and
+grow the allowed list with the misc and rumor quests players meet (a curated list, finding 76 its first entry); B) what is each
+seat's own is the engine's OWN START of such a quest, stage 0 and the record's start-up stages (QUST INDX, the StartUpStage flag),
+and its later stages are the world's like any other quest's, the denylist the brake and the fragment suppression keeping a relayed
+stage's script off the applying seat; C) leave rumors per seat. Taken: B, built on fork m3-quest-sge-stages (dc3ec679, T0 green: the
+D62 test became D69's on FreeformHeartwoodMill, whose stage 10 carries the flag and whose 20 does not), the train after the union's
+merge, with its own T3 (a rumor's later stage crossing) before it merges.

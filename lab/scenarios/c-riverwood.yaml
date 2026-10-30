@@ -1,0 +1,167 @@
+# c-riverwood (M3's exit, docs/PLAN.md's M3 section "Exit"; drafted 2026-10-29 from the grammar and the
+# proven scenarios' idioms, no run yet): two players in Riverwood, the village's NPCs run their schedules
+# under host one; host one leaves and host two takes over with the NPCs continuing where they stood; a
+# server restart restores them at their recorded positions and the host table grants again at the next
+# load. The frame is b-npc-puppet's: Tamriel 0x3C, grid (4,-12) 0x9732, the clock at 7.9 so the morning
+# packages send the townsfolk out to work (r-npc-packages), c1 at the landing after coc riverwood
+# (17225, -47204, -128) so it is the first loader and hosts, c2 150 units east. The two residents measured
+# are Alvor 0x13482 (the forge, beside the landing) and Gerdur 0x13489 (the mill), the two whose chores keep
+# them at a station (docs/research/m3/riverwood-ids.md); Sigrid 0x13483 shuttles between cells
+# (b-npc-handoff-cross), so she is the walker the watch measures, not a position subject. Both seats under
+# god mode through the server console (a wolf killed a level-1 seat in b-npc-handoff-restart's 145430) and
+# every start-up box dismissed (b-npc-stream-state's prelude).
+# Claims, in order:
+#  1. with both seats in Riverwood and c1 the host, after b-npc-puppet's 60 s watch over the fourteen
+#     residents: Sigrid's track moves on both seats (maxDisplacement > 100: the schedules run) and Alvor's
+#     and Gerdur's tracks end within 256 units on the two seats (the relay's lag, b-npc-puppet's measured
+#     bound for Sigrid, taken here for the two subjects); Alvor and Gerdur run on c1 (aiEnabled true, a
+#     package set) and read as puppets on c2 (aiEnabled false), c2's position of each within 64 units of
+#     c1's;
+#  2. c1 leaves (relaunch {until: gone}, b-host-quit's and b-npc-death's step): within 12 s of the step's
+#     return c2 hosts 0x9732 (GRACE_MS 5000, cell-host.md; b-host-quit's 12 s: the leave, the grace, the
+#     load and the tick; the stale rule's pass lands at 9 to 10 s, inside the gone wait) and the two
+#     residents run on c2 (aiEnabled true), each within 128 units of c1's last read of it (no reset to the
+#     placement, an interior thousands of units away); the relaunched c1 logs in where it stood and does
+#     not take the village from a live host (b-host-quit);
+#  3. a server restart (b-npc-handoff-restart's step) restores the two records within 64 units of their
+#     pre-restart snapshots, read right after the restart before any grant moves them (an until: the
+#     games log back in by themselves about 15 s after the server listens, b-cell-host), and the host
+#     table grants 0x9732 again within 45 s of the reconnects (b-cell-host's bound), exactly one seat
+#     running Alvor loaded (b-npc-handoff-night's host-agnostic read: the restart's grant is a race between
+#     the games' own logins).
+# Known limits: the 64 and 128 unit bounds are the exit's chosen bounds, not measured ones; the two reads
+# of one actor are sequential steps about a second apart, so a resident caught walking between markers can
+# fail them while the sync is whole (b-npc-puppet measured 256 for a walker's end positions); the subjects
+# were chosen for their stations to keep that risk small. Gerdur's mill may lie in 0x9733 (3,-12), which
+# both seats at the landing have in reach and which passes at the same grace (cell-host's reach rule), so
+# the host claims name 0x9732 alone. Whether server.ref answers for a record before any seat has logged
+# back in after a restart is read by the until, not assumed (the file driver loads every changeForm at
+# start; b-npc-death reads the record after a reconnect). God mode does not survive a relaunch or a
+# restart on the server, so it is set again after each (lab-relaunch-loses-god-mode, b-cell-host). Its own
+# commit (rule 13).
+id: c-riverwood
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 1200
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # c2 far away first, so c1 is the first loader (b-npc-puppet); absolute Tamriel coordinates take the
+  # worldspace's own descriptor
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c1"
+  - c2: teleport {cell: "3c:Skyrim.esm", x: 17375, y: -47204, z: -128, rot: [0, 0, 180]}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).client == "c1"
+  # claim 1: the schedules under the host, the puppets following (b-npc-puppet's watch over the fourteen
+  # residents by placed id, 60 s, long enough for the morning packages to put them at their stations)
+  - c1: watch-start {formIds: [0x13482, 0x13483, 0x13484, 0x13489, 0x1348a, 0x1348b, 0x1348c, 0x13491, 0x35534, 0x13488, 0x13487, 0x13486, 0x13485, 0x3550c], trackMax: 480}
+  - c2: watch-start {formIds: [0x13482, 0x13483, 0x13484, 0x13489, 0x1348a, 0x1348b, 0x1348c, 0x13491, 0x35534, 0x13488, 0x13487, 0x13486, 0x13485, 0x3550c], trackMax: 480}
+  - c1: screenshot
+  - c2: screenshot
+  - wait: 60
+  - c1: watch-stop
+  - c2: watch-stop
+  # each subject read on c1 then on c2 at once, so the pair of reads is as close in time as the steps allow
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c1: npc-state {formId: 0x13489}
+  - c2: npc-state {formId: 0x13489}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - c1.watched_id(0x13483).maxDisplacement > 100
+      - c2.watched_id(0x13483).maxDisplacement > 100
+      - abs(c1.watched_id(0x13482).endX - c2.watched_id(0x13482).endX) < 256
+      - abs(c1.watched_id(0x13482).endY - c2.watched_id(0x13482).endY) < 256
+      - abs(c1.watched_id(0x13489).endX - c2.watched_id(0x13489).endX) < 256
+      - abs(c1.watched_id(0x13489).endY - c2.watched_id(0x13489).endY) < 256
+      - c1.npc_state(0x13482).aiEnabled == true
+      - c1.npc_state(0x13482).package != 0
+      - c1.npc_state(0x13489).aiEnabled == true
+      - c1.npc_state(0x13489).package != 0
+      - c2.npc_state(0x13482).aiEnabled == false
+      - c2.npc_state(0x13489).aiEnabled == false
+      # the positions across seats within b-npc-puppet's measured 256 (a resident walking between two reads a
+      # second apart; the host's sample is 130 ms old): the reviewer's bound, not the draft's 64
+      - abs(c1.npc_state(0x13482).x - c2.npc_state(0x13482).x) < 256
+      - abs(c1.npc_state(0x13482).y - c2.npc_state(0x13482).y) < 256
+      - abs(c1.npc_state(0x13489).x - c2.npc_state(0x13489).x) < 256
+      - abs(c1.npc_state(0x13489).y - c2.npc_state(0x13489).y) < 256
+  # claim 2: host one leaves. c1's last read of each subject is taken right before its game goes (a seat's
+  # npc_state is its last npc-state step of that id, kept for the run); the relaunch step returns once c1
+  # is off the online list, the grace passes the village to c2, and the promotes land within a tick
+  - c1: npc-state {formId: 0x13482}
+  - c1: npc-state {formId: 0x13489}
+  - c1: relaunch {until: gone}
+  - until: {within: 12, expect: [server.host(0x9732).client == "c2"]}
+  - wait: 3
+  - c2: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13489}
+  - c2: screenshot
+  - assert:
+      - server.host(0x9732).hosted == true
+      - server.host(0x9732).client == "c2"
+      - c2.npc_state(0x13482).aiEnabled == true
+      - c2.npc_state(0x13489).aiEnabled == true
+      # continuity across the handoff within the same measured 256 (c1's last read is seconds older)
+      - abs(c2.npc_state(0x13482).x - c1.npc_state(0x13482).x) < 256
+      - abs(c2.npc_state(0x13482).y - c1.npc_state(0x13482).y) < 256
+      - abs(c2.npc_state(0x13489).x - c1.npc_state(0x13489).x) < 256
+      - abs(c2.npc_state(0x13489).y - c1.npc_state(0x13489).y) < 256
+  # the relaunched game logs in where it stood and must not take the village from a live host
+  # (b-host-quit); god mode again, since a relaunch loses the server's tgm
+  - c1: connect
+  - c1: server-console {name: TGM}
+  - wait: 15
+  - assert:
+      - server.host(0x9732).client == "c2"
+  # claim 3: the restart restores the records where their host last said; the table grants again. The
+  # snapshots are the records right before the restart; the until reads them as the restart loaded them,
+  # before the games' own reconnects bring a grant and an engine that moves them
+  - server: snapshot {name: alvor, of: "server.ref(0x13482)"}
+  - server: snapshot {name: gerdur, of: "server.ref(0x13489)"}
+  - server: restart
+  - until:
+      within: 30
+      expect:
+        - abs(server.ref(0x13482).x - snapshot("alvor").x) < 64
+        - abs(server.ref(0x13482).y - snapshot("alvor").y) < 64
+        - abs(server.ref(0x13489).x - snapshot("gerdur").x) < 64
+        - abs(server.ref(0x13489).y - snapshot("gerdur").y) < 64
+  # both seats back (the connect step waits for each game's own login), god mode straight after each
+  # login (the server's tgm does not survive a restart, b-npc-death), then the grant to whichever won
+  - c1: connect
+  - c1: server-console {name: TGM}
+  - c2: connect
+  - c2: server-console {name: TGM}
+  - until: {within: 45, expect: [server.host(0x9732).hosted == true]}
+  - wait: 20
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.host(0x9732).hosted == true
+      # whoever won the reconnect race hosts: one seat runs Alvor loaded, the other does not
+      # (b-npc-handoff-night's claim)
+      - (c1.npc_state(0x13482).is3DLoaded and c1.npc_state(0x13482).aiEnabled) != (c2.npc_state(0x13482).is3DLoaded and c2.npc_state(0x13482).aiEnabled)
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]

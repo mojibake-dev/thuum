@@ -315,14 +315,23 @@ What it is:
   - The Misc Slider's body morphs are inert on rotfern's child body.
   - Whether Eli's own character carries RaceMenu co-save data is open. The
     evidence leans vanilla: hair and ears were picked as head parts.
-- **RaceCompatibility 2.16** (USSEP variant): ESM plus override ESP. Its
+- **RaceCompatibility 2.16**: ESM plus override ESP. The served scripts are the
+  plain "20 Dawnguard" set, not the "21 Dawnguard USKP" set its readme
+  prescribes with USSEP (PlayerVampireQuestScript sha256 4b5979cc...; 537
+  disassembled lines apart in the progression, cure and feeding; apocrypha,
+  2026-10-28, docs/research/vampirism-under-the-server.md on
+  apocrypha/alternate-start 3cbde0f). Its
   scripts use vanilla natives only, among them:
   - Actor.SetRace, Game.GetFormFromFile and Actor.SendVampirismStateChanged,
     all missing;
   - Actor.AddSpell and RemoveSpell, delegated.
 
-  Vampirism maps PlayableRaceList[i] to PlayableVampireList[i], and rotfern's
-  pair sits at the same index. The SKSE variant (Nexus 122592) breaks vampire
+  Vampirism maps PlayableRaceList[i] to PlayableVampireList[i]. Rotfern's
+  pair does not sit at one index (rotfern.esp F483303D, the same read):
+  rotfern at [14] of 15, rotfernRaceVampire at [11] of 12, so a turn sets no
+  race and a cure from rotfernRaceVampire gives ImperialRaceChild. The fix is
+  the ten vanilla pairs plus rotfern's at [10] in both lists (memo D57, Eli's
+  call). The SKSE variant (Nexus 122592) breaks vampire
   progression with this ESM and is not to be used.
 - **Overrides that reach everyone.** Rotfern overrides two vanilla records
   that carry vanilla scripts: Keening and its enchantment, and the NPC Kharjo.

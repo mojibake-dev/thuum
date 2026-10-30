@@ -1,0 +1,61 @@
+# b-story-arrival (thuum-magnus, 2026-10-30; docs/verbs/quest-stage.md H-56a's fix, fork m3-story-arrival inside the union
+# m3-pass-train-3-win 820a565c; promoted from x-story-arrival-login v2, GREEN at the union's stage on 2026-10-30 with
+# lab/frida/story-location.js reading the engine's path): at login, when a seat stands inside a location, the client raises the
+# engine's own Change Location event through BGSStoryEventManager::AddEvent (the CLOC index, old none, new the current location), so
+# the Story Manager starts what an arrival starts. Playtest 38's finding: the seats log in INSIDE Riverwood (the camp is the landing)
+# and never saw A Lovely Letter start, because PlayerCharacter::SetParentCell raises the event only when currentLocation changes
+# (docs/research/m3/re-story-location.md). Shape: c1 connects, is placed at Riverwood's landing (the first change: the engine's own
+# event, the Story Manager starts 74a83, x-story-manager-walk's read), then RELAUNCHES in place: its record stands inside 13163, its
+# login raises no engine change (the driver logs no new locationChanged), and the client's arrival event is the read: the TS line,
+# the native's queued-event line, and 74a83 running after the relaunch as before it (a quest already run is not restarted; the claim
+# is that it RUNS). c2 stays at lab-spawn. The trace that read the engine's path is the probe's, not the scenario's. Known limits:
+# the native raises every Change Location branch node (bounty, World Interactions, Dawnguard's attacks) as a fast travel does
+# (HYPOTHESIS); the client setting storyArrivalAtLogin (default on) is the switch. Assertions are evaluated by lab-api only
+# (ADR-009). Its own commit (rule 13).
+id: b-story-arrival
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 480
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  # the arrival by placement: the engine's own event, the quest's start (x-story-manager-walk's read)
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  - c1: log-count {pattern: "locationChanged actor 14 old none new 13163"}
+  - c1: log-count {pattern: "questStart quest 74a83"}
+  - c1: quest-stage {quests: [0x74a83], stages: [10]}
+  - assert:
+      - 'c1.log_count("locationChanged actor 14 old none new 13163") >= 1'
+      - 'c1.log_count("questStart quest 74a83") >= 1'
+      - c1.quest(0x74a83).running() == true
+  # the login inside: the relaunched game stands where its record stands, inside the location; the engine raises no change
+  # (the driver's locationChanged count stays), the client raises the arrival event once
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 25
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: log-count {pattern: "locationChanged actor 14 old none new 13163"}
+  - c1: log-count {pattern: "arrival event raised at login for location 13163"}
+  - c1: log-count {pattern: "story change-location event queued for 14: old 0 new 13163"}
+  - c1: quest-stage {quests: [0x74a83], stages: [10]}
+  - c1: screenshot
+  - assert:
+      # the client's arrival event at the login, once (the TS line and the native's line)
+      - 'c1.log_count("arrival event raised at login for location 13163") >= 1'
+      - 'c1.log_count("story change-location event queued for 14: old 0 new 13163") >= 1'
+      # the quest runs on the relaunched seat (it ran before the relaunch; the record keeps it; the Story Manager's second start, if
+      # any, is recorded by the questStart count, not claimed)
+      - c1.quest(0x74a83).running() == true
+      - 'c1.log_count("questStart quest 74a83") >= 0'
+  - c1: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]

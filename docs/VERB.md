@@ -137,6 +137,10 @@ Rate limit / bounds:
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+A box whose item the verb has none of (no new native, no wire change) is ticked with
+"(none: why)"; `just status` counts ticked boxes, and an item with nothing to do is done.
+A box ticked ahead of its evidence is unticked with the date and the reason.
+
 ## Reviewer checklist
 
 1. Is the rung right, and is the reason for not going one rung higher real?

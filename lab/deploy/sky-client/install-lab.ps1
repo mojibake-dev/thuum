@@ -91,6 +91,11 @@ foreach ($g in $targets) {
   Set-Content -Path (Join-Path $records ($version + '.txt')) -Value $g -NoNewline
   $done += [ordered]@{ game = $g; version = $version; exeVersion = $exe.VersionInfo.FileVersion }
 }
+# A dist laid over every game folder supersedes any hot push before it (lab/tools/client-hot.sh marks the seat in
+# C:\sky-lab\hot.txt, and only a rollback cleared it), so the mark goes with the push it named. Kept, a stage's snapshot
+# carries a stale mark and lab-api's relaunch mode (ADR-036) rolls the seat back at every run: sky-c1 on 2026-10-30,
+# a 2026-10-29 03:35Z mark inside 3o's clean-m1-next, a rollback a run on the night its card wedged at one.
+if (Test-Path $dist) { Remove-Item -LiteralPath (Join-Path $lab 'hot.txt') -Force -ErrorAction SilentlyContinue }
 # game-dir.txt is the folder this boot plays; launch.ps1 rewrites it at every
 # logon from lab-api's answer. A first install names the folder installed.
 if (-not (Test-Path (Join-Path $lab 'game-dir.txt'))) { Set-Content -Path (Join-Path $lab 'game-dir.txt') -Value $targets[0] -NoNewline }

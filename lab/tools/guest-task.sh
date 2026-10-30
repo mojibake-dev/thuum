@@ -12,7 +12,7 @@ set -euo pipefail
 vmid=${1:?vmid}; name=${2:?task name}; ps=${3:?powershell}; minutes=${4:-30}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-run() { ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
+run() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
 script="C:\\sky-lab\\task-$name.ps1"; out="C:\\sky-lab\\$name.out"
 # the command goes to the clone as a script file, so it needs no quoting
 # inside the task's argument line

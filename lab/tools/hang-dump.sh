@@ -12,10 +12,31 @@ seat_api=${CLIENT_LAB_API_URL:-http://10.10.70.10/lab}   # lab-api as the clones
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 here=$(cd "$(dirname "$0")/../.." && pwd)
 run=$(curl -fsS -m 15 "$api/status" | python3 -c 'import json,sys; d=json.load(sys.stdin); print("" if d.get("run") else (d.get("last_run") or ""))')
-[ -n "$run" ] || { echo "a run is active (the runner takes a hung seat's evidence itself), or none has finished since lab-api started" >&2; exit 2; }
+active=$(curl -fsS -m 15 "$api/status" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("run") or "")')
+[ -z "$active" ] || { echo "a run is active ($active): the runner takes a hung seat's evidence itself" >&2; exit 2; }
+if [ -z "$run" ]; then
+  # no run has finished since lab-api started (2026-10-28, playtest 37's freeze: nowhere to upload): the evidence stays on
+  # the seat, a ProcDump (Sysinternals, staged in C:\sky-lab\procdump, its signature checked at the staging) mini-plus
+  # dump of SkyrimSE.exe (threads, stacks, modules, private memory) and both logs beside it in C:\sky-lab\dumps; pull
+  # it before anything rolls the clone back, since a rollback erases it
+  stamp=$(date -u +%Y%m%dT%H%M%SZ)
+  enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
+  ps="\$pd = 'C:\\sky-lab\\procdump\\procdump64.exe'; if (-not (Test-Path \$pd)) { 'no ProcDump on the seat'; exit 1 }
+New-Item -ItemType Directory -Force -Path 'C:\\sky-lab\\dumps' | Out-Null
+\$g = Get-Process SkyrimSE -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not \$g) { 'no SkyrimSE running'; exit 1 }
+& \$pd -accepteula -mp \$g.Id 'C:\\sky-lab\\dumps\\$client-hang-$stamp.dmp' | Out-Null
+\$d = 'C:\\Users\\lab\\Documents\\My Games\\Skyrim Special Edition\\SKSE'
+foreach (\$n in 'skse64.log', 'skyrim-platform.log') { Copy-Item -LiteralPath (Join-Path \$d \$n) -Destination ('C:\\sky-lab\\dumps\\$client-hang-$stamp-' + \$n) -Force }
+Get-ChildItem 'C:\\sky-lab\\dumps' -Filter '$client-hang-$stamp*' | ForEach-Object { \$_.Name + ' ' + \$_.Length }"
+  echo "== $client: no finished run to upload into; ProcDump dump kept on the seat $(date +%H:%M:%S)"
+  ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 600 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" \
+    | python3 -c 'import json,sys; d=json.load(sys.stdin); print((d.get("out-data") or "").strip())'
+  echo "== $client evidence in C:\\sky-lab\\dumps on VM $vmid (pull before a rollback)"
+  exit 0
+fi
 url="$seat_api/clients/$client/hang-dump/$run"
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-guest() { ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout ${2:-120} -- powershell -NoProfile -NonInteractive -EncodedCommand $1" \
+guest() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout ${2:-120} -- powershell -NoProfile -NonInteractive -EncodedCommand $1" \
   | python3 -c 'import json,sys; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode") == 0 else 1)'; }
 dump=$(cd "$here" && uv run --project lab/labapi python -c '
 import base64, sys

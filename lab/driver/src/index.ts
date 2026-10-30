@@ -40,6 +40,7 @@ import {
   NetImmerse,
   ObjectReference,
   Perk,
+  Quest,
   Race,
   Shout,
   Spell,
@@ -351,6 +352,62 @@ on("cellDetach", (e) => {
   const s = cellSeen(cell.getFormID(), cell.isInterior());
   s.detach += 1;
   s.lastDetachMs = ms;
+});
+
+// thuum docs/verbs/quest-stage.md (H-56a: does a placement or a walk into
+// Riverwood raise the Story Manager's Change Location event, and does the
+// SM then start A Lovely Letter 0x74a83?): the platform's locationChanged
+// (the player's own, 0x14; residents cross locations all day) and the
+// quest start and stop events, logged for the lab's log-count through the
+// console tee (lab-console-log). No step and no state: a probe reads the
+// lines. A missing form is logged as none rather than thrown.
+on("locationChanged", (e) => {
+  try {
+    const actor = e.actor ? e.actor.getFormID() : 0;
+    if (actor !== 0x14) return;
+    const oldLoc = e.oldLoc ? e.oldLoc.getFormID().toString(16) : "none";
+    const newLoc = e.newLoc ? e.newLoc.getFormID().toString(16) : "none";
+    log(`locationChanged actor ${actor.toString(16)} old ${oldLoc} new ${newLoc}`);
+  } catch (err) {
+    log(`locationChanged: unreadable event (${String(err)})`);
+  }
+});
+
+// A quest a mod's own script starts and stops twice a second (Reading List's
+// RL_DetectionQuest, playtest 38's finding 77; D65) would flood the console
+// the probes read: one line per quest and kind per ten seconds, carrying the
+// count of the lines it stands for. The first line of a quest is never held,
+// so a log-count on "questStart quest 74a83" still reads the start.
+const questLineAt = new Map<string, [number, number]>();
+function logQuestEvent(kind: string, quest: string): void {
+  const key = `${kind} ${quest}`;
+  const now = Date.now();
+  const seen = questLineAt.get(key);
+  if (seen && now - seen[0] < 10_000) {
+    seen[1] += 1;
+    return;
+  }
+  const held = seen ? seen[1] : 0;
+  questLineAt.set(key, [now, 0]);
+  log(held > 0 ? `${kind} quest ${quest} (and ${held} more in the last 10 s)` : `${kind} quest ${quest}`);
+}
+
+on("questStart", (e) => {
+  try {
+    const quest = e.quest ? e.quest.getFormID().toString(16) : "none";
+    logQuestEvent("questStart", quest);
+  } catch (err) {
+    log(`questStart: unreadable event (${String(err)})`);
+  }
+});
+
+on("questStop", (e) => {
+  try {
+    const quest = e.quest ? e.quest.getFormID().toString(16) : "none";
+    logQuestEvent("questStop", quest);
+  } catch (err) {
+    log(`questStop: unreadable event (${String(err)})`);
+  }
 });
 
 // The master behavior variables Skyrim Platform reads into
@@ -996,6 +1053,47 @@ function gazeOf(formId: number): Record<string, number | boolean | null> {
   };
 }
 
+// face-keyframes's read (playtest 37's face probe, 2026-10-28): the fork's Skyrim Platform reads an actor's three
+// FaceGen keyframe sets (BSFaceGenAnimationData's expression, modifier and phoneme, CommonLib
+// RE/B/BSFaceGenAnimationData.h:39-42) on the game thread when pollFaceKeyframes(id) asks, and faceKeyframes(id)
+// answers the last read as [expression[], modifier[], phoneme[], override] or null (fork m3-voice-inflight). Reached
+// through the module object as gazeOf's getters are, and in their timing: the answer is the previous poll's, and the
+// step polls anew, so a sampling probe reads one step behind and a single read is two steps.
+function faceOf(formId: number): Record<string, unknown> {
+  const api = skyrimPlatform as unknown as Record<string, unknown>;
+  const read = api["faceKeyframes"];
+  const poll = api["pollFaceKeyframes"];
+  if (typeof read !== "function" || typeof poll !== "function") return { available: false };
+  let last: unknown = null;
+  try {
+    last = (read as (id: number) => unknown)(formId);
+  } catch (e) {
+    last = null;
+  }
+  try {
+    (poll as (id: number) => void)(formId);
+  } catch (e) {
+    // the next read answers null
+  }
+  if (!Array.isArray(last) || last.length < 4) return { available: true, read: false };
+  const nums = (v: unknown): number[] => (Array.isArray(v) ? v.map((x) => (typeof x === "number" ? x : 0)) : []);
+  const phoneme = nums(last[2]);
+  // fork m3-face-twelve (2026-10-28, after the control read zero phonemes on a live NPC whose mouth moved): index 4
+  // carries every keyframe set of BSFaceGenAnimationData, 0x20 to 0x180 in header order; setsMax names the one that
+  // moves while a lip-synced line plays, so the probe finds the lip set without a second build
+  const sets = Array.isArray(last[4]) ? (last[4] as unknown[]).map(nums) : undefined;
+  return {
+    available: true,
+    read: true,
+    expression: nums(last[0]),
+    modifier: nums(last[1]),
+    phoneme,
+    phonemeMax: phoneme.reduce((m, x) => Math.max(m, x), 0),
+    override: Boolean(last[3]),
+    ...(sets ? { sets, setsMax: sets.map((v) => v.reduce((m, x) => Math.max(m, Math.abs(x)), 0)) } : {}),
+  };
+}
+
 function namedNpc(a: Record<string, unknown>): Actor | null {
   const id = num(a.formId) || placedId;
   return id ? Actor.from(Game.getFormEx(id)) : null;
@@ -1165,6 +1263,48 @@ function postResult(c: Config, step: Step, body: Record<string, unknown>): void 
       // never throw from a callback
     }
   });
+}
+
+// a set-stage step waiting for the engine's answer to its latent calls (the step's case in run)
+type StageSet = {
+  step: Step;
+  quest: number;
+  before: number;
+  wasRunning: boolean;
+  asked: number;
+  startedAt: number;
+  started?: boolean;
+  ok?: boolean;
+  error?: string;
+};
+let stageSet: StageSet | null = null;
+const STAGE_SET_WAIT_MS = 10000;
+
+function finishStageSet(c: Config): void {
+  if (!stageSet) return;
+  const k = stageSet;
+  const answered = k.ok !== undefined || k.error !== undefined;
+  if (!answered && Date.now() - k.startedAt < STAGE_SET_WAIT_MS) return;
+  stageSet = null;
+  try {
+    const q = Quest.from(Game.getFormEx(k.quest));
+    const data = {
+      quest: k.quest,
+      before: k.before,
+      wasRunning: k.wasRunning,
+      asked: k.asked,
+      started: k.started,
+      ok: k.ok,
+      error: k.error,
+      stage: q ? q.getCurrentStageID() : null,
+      running: q ? q.isRunning() : null,
+      done: q ? q.isStageDone(k.asked) : null,
+    };
+    if (answered) postResult(c, k.step, { ok: true, data });
+    else postResult(c, k.step, { ok: false, error: `no answer from the engine after ${STAGE_SET_WAIT_MS} ms`, data });
+  } catch (e) {
+    postResult(c, k.step, { ok: false, error: String(e) });
+  }
 }
 
 function finishDeferred(c: Config): void {
@@ -1819,6 +1959,109 @@ function run(step: Step, player: Actor): unknown {
         };
       });
       return { node, ...scales(near[0]), all };
+    }
+    case "quest-stage": {
+      // quests' stages as this seat's game holds them (Papyrus Quest.GetCurrentStageID, IsStageDone, IsRunning;
+      // skyrimPlatform.ts's Quest): {quests: [formId, ...], stages?: [n, ...]} answers per quest its current stage,
+      // whether it runs, and which of the named stages are done, keyed by the quest's form id as decimal text
+      // (docs/verbs/quest-stage.md, memo D55 B: one seat sets a shared quest's stage, the other reads it)
+      const ids = Array.isArray(a.quests) ? (a.quests as unknown[]).map((x) => num(x)) : [];
+      const stages = Array.isArray(a.stages) ? (a.stages as unknown[]).map((x) => num(x)) : [];
+      const out: Record<string, unknown> = {};
+      for (const id of ids) {
+        const q = Quest.from(Game.getFormEx(id));
+        if (!q) {
+          out[String(id)] = null;
+          continue;
+        }
+        const done: Record<string, boolean> = {};
+        for (const n of stages) done[String(n)] = q.isStageDone(n);
+        out[String(id)] = { stage: q.getCurrentStageID(), running: q.isRunning(), done };
+      }
+      return out;
+    }
+    case "set-stage": {
+      // a quest's stage set in this seat's game, as a quest's own script would (Papyrus Quest.SetCurrentStageID,
+      // skyrimPlatform.ts's Quest): {quest, stage, start?}; the seat reports it to the server like any stage its game
+      // sets. Both calls are latent: the step answers when the engine does (finishStageSet), with the engine's own
+      // true or false and the quest as it then stands, since a stopped quest whose start fails takes no stage
+      // (playtest 37, 2026-10-28: A Lovely Letter stayed at 0 and not running after a bare set). {start: true} asks
+      // Quest.Start first when the quest is not running
+      if (stageSet) return { error: "a set-stage step is still waiting for the engine" };
+      const q = Quest.from(Game.getFormEx(num(a.quest)));
+      if (!q) return { error: `no quest ${num(a.quest)}` };
+      const quest = q.getFormID();
+      const asked = num(a.stage);
+      const set: StageSet = { step, quest, before: q.getCurrentStageID(), wasRunning: q.isRunning(), asked, startedAt: Date.now() };
+      stageSet = set;
+      const first: Promise<boolean | undefined> = a.start === true && !set.wasRunning ? q.start() : Promise.resolve(undefined);
+      first
+        .then((started) => {
+          set.started = started;
+          // a wrapper from an earlier frame is out of Skyrim Platform's object pool by now ("Invalid
+          // _skyrimPlatform_indexInPool", playtest 37 at 05:59Z): the quest is looked up again for the second call
+          const again = Quest.from(Game.getFormEx(quest));
+          if (!again) throw new Error(`no quest ${quest} after its start`);
+          return again.setCurrentStageID(asked);
+        })
+        .then(
+          (ok) => {
+            set.ok = ok;
+          },
+          (e) => {
+            set.error = String(e);
+          },
+        );
+      return DEFERRED;
+    }
+    case "face-keyframes": {
+      // an actor's FaceGen keyframes as the engine animates its face (faceOf above): {formId}, else the placed npc;
+      // {player: true} for the player. The phoneme set is the mouth: its values move while a lip-synced line plays.
+      const target = a.player === true ? player : namedNpc(a);
+      if (!target) return { error: "no placed npc and no {formId}" };
+      return { formId: target.getFormID(), aiEnabled: target.isAIEnabled(), ...faceOf(target.getFormID()) };
+    }
+    case "node-rotation": {
+      // a node's rotation on a named actor ({formId}, else the npc the probe
+      // placed; {player: true} for the player), as the engine holds it after
+      // the animation (NetImmerse.GetNodeWorldRotationEuler and
+      // GetNodeLocalRotationEuler, skyrimPlatform.ts; third person), for the
+      // face probe of playtest 37 (2026-10-28, Eli: the probe before any more
+      // head builds): a puppet's head against the live NPC's on its host.
+      // Each Euler read reports `filled` false when its out-array came back
+      // untouched; beside it, the world vector from the node to {toward} (the
+      // head's magic node by default) by the scalar GetRelativeNodePosition,
+      // which turns with the head whatever the arrays do. {nodes}: the head
+      // and the neck by default. The actor's heading and AI bit ride along.
+      const target = a.player === true ? player : namedNpc(a);
+      if (!target) return { error: "no placed npc and no {formId}" };
+      const nodes = Array.isArray(a.nodes) ? (a.nodes as unknown[]).map(String) : ["NPC Head [Head]", "NPC Neck [Neck]"];
+      const toward = String(a.toward || "NPC Head MagicNode [Hmag]");
+      const read = nodes.map((node) => {
+        const world = [0, 0, 0];
+        const local = [0, 0, 0];
+        const worldOk = NetImmerse.getNodeWorldRotationEuler(target, node, world, false);
+        const localOk = NetImmerse.getNodeLocalRotationEuler(target, node, local, false);
+        return {
+          node,
+          has: NetImmerse.hasNode(target, node, false),
+          world: { ok: worldOk, value: world, filled: world.some((v) => v !== 0) },
+          local: { ok: localOk, value: local, filled: local.some((v) => v !== 0) },
+          toward: [
+            NetImmerse.getRelativeNodePositionX(target, node, toward, false),
+            NetImmerse.getRelativeNodePositionY(target, node, toward, false),
+            NetImmerse.getRelativeNodePositionZ(target, node, toward, false),
+          ],
+        };
+      });
+      return {
+        formId: target.getFormID(),
+        angleZ: target.getAngleZ(),
+        aiEnabled: target.isAIEnabled(),
+        toward,
+        towardHas: NetImmerse.hasNode(target, toward, false),
+        nodes: read,
+      };
     }
     case "head-parts": {
       // the head parts on the player's base or, with {other: true}, on the
@@ -2787,6 +3030,7 @@ on("update", () => {
   const c = config();
   if (!c) return;
   finishDeferred(c);
+  finishStageSet(c);
   releaseHeldKeys();
   sendDelayedEvents();
   runScheduledReplays();

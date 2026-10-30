@@ -15,6 +15,10 @@
 #    (SkyrimPlatform.cpp's LoadFiles) within 20 s, read with a shared read; none is a failure, the file stays laid.
 # 5. C:\sky-lab\hot.txt marks the seat (a rollback clears it with the rest of the clone); /srv/lab/turbo.log gets
 #    "<UTC> hot <stamp> <vmid> <sha8>".
+# From fork m3-turbo-knobs 26e3d0cf on, a hot push needs no relaunch: the needs reporter's list and the host's maps
+# live in sp.storage (7fbb5e74, e9953d0c). Measured 2026-10-28 on 26e3d0cf's own bundle: c2's needs record took a
+# full 61-value report 8 s after the push and ticked on; c1, Riverwood's host, kept relaying its cells' NPCs
+# through the reload with no release. A seat on an older client still relaunches after a push.
 set -euo pipefail
 client=${1:?c1 or c2}; what=${2:?a skymp5-client.js file or a fork ref}
 case "$client" in c1) vmid=711;; c2) vmid=712;; *) echo "c1 or c2" >&2; exit 2;; esac
@@ -26,7 +30,7 @@ enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 run() {  # run <powershell>: the guest's output; an answer that is no JSON is asked again (turbo-client's rule)
   local out try
   for try in 1 2 3; do
-    out=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" || true)
+    out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" || true)
     printf '%s' "$out" | python3 -c 'import sys,json; json.load(sys.stdin, strict=False)' 2>/dev/null && break
     sleep 5
   done

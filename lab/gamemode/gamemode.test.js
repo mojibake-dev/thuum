@@ -431,3 +431,23 @@ test("labState stream reads a player's counters by message type, or found: false
   mp.get = (id, k) => { if (k === "streamCounters") throw new Error("no such property"); return get(id, k); };
   assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "stream", profileId: 1 }).found, false);
 });
+
+test("labState ref serves a plain reference's position with the actor fields null", () => {
+  // prop-physics: a tankard's record (x-prop-grab 125719 read "server holds no record for 0x3975b" while the
+  // server held it, because the actor properties throw for an MpObjectReference)
+  global.mp = fakeMp();
+  mp.set(0x3975b, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [19237.1, -47480.26, -132.67], rot: [0, 0, 0] });
+  const base = mp.get;
+  mp.get = (id, key) => {
+    if (id === 0x3975b && (key === "percentages" || key === "isDead" || key === "equipment")) {
+      throw new Error("Specified Form is ObjectReference, but we tried to treat it as Actor");
+    }
+    return base(id, key);
+  };
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const tankard = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x3975b });
+  assert.deepStrictEqual(
+    [tankard.found, tankard.x, tankard.y, tankard.z, tankard.cell, tankard.isDead, tankard.healthPercentage, tankard.worn],
+    [true, 19237.1, -47480.26, -132.67, "3c:Skyrim.esm", null, undefined, null]);
+});

@@ -260,6 +260,43 @@ c = events[clocks[0]]["msg"]
 assert c["timeScale"] == 20 and 0 <= c["hour"] < 24 and 0 <= c["month"] <= 11 and c["day"] >= 1, f"SetGameTime out of shape: {c}"
 print(f"   clock ok: year {c['year']} month {c['month']} day {c['day']} hour {c['hour']:.3f} days passed {c['daysPassed']:.4f} at scale {c['timeScale']}")
 PY
+
+# the mod lock (thuum docs/verbs/mod-lock.md): the running server's manifest.json
+# is the list each Hello is judged against; the fakeclient builds its Hello from
+# a copy of it (the fakeclient runs in a fresh container, which has no manifest
+# of its own). A good Hello is welcomed and the login proceeds; a Hello with one
+# hash broken (--break-mod 0, the first full plugin) is refused with 502
+# E_MOD_LOCK_MISMATCH and the fakeclient exits 3 without logging in.
+# An image whose fakeclient has no --manifest predates the lock (fork m3-mod-lock 1992edc2 brought it): the cases
+# are skipped there, by name, since test-proto plays every branch's image (2026-10-28: train 56's merge T2 on
+# 26e3d0cf would have gone red on cases its image cannot run). The test is the image's own binary, not the branch.
+echo "== mod-lock: a good Hello welcomed, a broken one refused (502)"
+modlock_rc=0
+if ! ssh_srv "$dc exec -T skymp-server-test grep -q -a -e --manifest /srv/skymp/fakeclient"; then
+  echo "   skipped: this image's fakeclient has no --manifest (the branch predates the mod lock)"
+elif ssh_srv "$dc exec -T skymp-server-test cat /srv/skymp/data/manifest.json > /srv/lab/difftest/manifest-test.json"; then
+  ssh_srv "$dc run --rm --no-deps -T -v /srv/lab/difftest:/opt/difftest:ro skymp-server-test /srv/skymp/fakeclient --host skymp-server-test --port 7777 --profile-id 9 --moves 1 --manifest /opt/difftest/manifest-test.json --timeout-ms 20000 --settle-ms 1000 2>/dev/null" > "$tmp/modlock-good.jsonl" || true
+  ssh_srv "$dc run --rm --no-deps -T -v /srv/lab/difftest:/opt/difftest:ro skymp-server-test /srv/skymp/fakeclient --host skymp-server-test --port 7777 --profile-id 9 --moves 1 --manifest /opt/difftest/manifest-test.json --break-mod 0 --timeout-ms 20000 --settle-ms 1000 2>/dev/null" > "$tmp/modlock-bad.jsonl" || true
+  python3 - "$tmp/modlock-good.jsonl" "$tmp/modlock-bad.jsonl" <<'PYML' || modlock_rc=1
+import json, sys
+def load(path):
+    return [json.loads(l) for l in open(path) if l.strip()]
+good, bad = load(sys.argv[1]), load(sys.argv[2])
+kinds = lambda evs: [e.get("event") for e in evs]
+assert "hello" in kinds(good), f"the good run sent no Hello: {kinds(good)}"
+assert "welcome" in kinds(good), f"the good run got no Welcome: {kinds(good)}"
+done = [e for e in good if e.get("event") == "done"]
+assert done and done[0].get("rc") == 0 and any(e.get("event") == "actor" for e in good), f"the welcomed client did not log in: {done}"
+refused = [e for e in bad if e.get("event") == "refused"]
+assert refused and refused[0].get("reason") == 502, f"the broken Hello was not refused with 502: {kinds(bad)} {refused}"
+bad_done = [e for e in bad if e.get("event") == "done"]
+assert bad_done and bad_done[0].get("rc") == 3 and not any(e.get("event") == "actor" for e in bad), f"the refused client logged in anyway: {bad_done}"
+print(f"   mod-lock ok: the good Hello welcomed and logged in; the broken one refused with 502, no login")
+PYML
+  ssh_srv "$dc logs skymp-server-test 2>&1 | grep -c 'mod-lock: client' || true" | sed 's/^/   server log mod-lock lines: /'
+else
+  echo "   the server's manifest.json could not be read from the container"; modlock_rc=1
+fi
 { rpc labState '{"kind":"actor","profileId":9}'; echo; rpc labState '{"kind":"inventory","profileId":9}'; echo; rpc labState '{"kind":"time"}'; } > "$tmp/state.txt"
 python3 - "$tmp/state.txt" "$tmp/events.jsonl" <<'PY'
 import json, sys
@@ -324,6 +361,7 @@ red=""
 # no artifact means no diff, and a T2 without its diff is not green
 [ "$have_difftest" = 1 ] || red="$red no-difftest-artifact"
 [ "$attr_rc" = 0 ] || red="$red attributes-across-restart"
+[ "$modlock_rc" = 0 ] || red="$red mod-lock"
 [ "$rc" = 0 ] || red="$red difftest"
 if [ -n "$red" ]; then echo "T2 red:$red"; exit 1; fi
 # "T2 green" is a verb's T2 and nothing else (verb-merge greps for it): every session,

@@ -201,6 +201,167 @@ class ProxmoxerExecTests(unittest.TestCase):
 
 
 @needs_deps
+class ProxmoxerTaskTests(unittest.TestCase):
+    """The real backend's task wait against a scripted task-status endpoint (2026-10-30 04:23:38Z: an SSLError on
+    712's start-task poll failed a run whose start had ended TASK OK)."""
+
+    def _backend(self, statuses):
+        from labapi.proxmox import ProxmoxerGuests
+
+        class Status:
+            def __init__(self):
+                self.left = list(statuses)
+
+            def get(self):
+                st = self.left.pop(0) if len(self.left) > 1 else self.left[0]
+                if isinstance(st, Exception):
+                    raise st
+                return st
+
+        status = Status()
+
+        class Task:
+            def __init__(self):
+                self.status = status
+
+        class Node:
+            def tasks(self, upid):
+                return Task()
+
+        class Api:
+            def nodes(self, node):
+                return Node()
+
+        b = object.__new__(ProxmoxerGuests)
+        b._api = Api()
+        b._node = "core"
+        return b
+
+    def test_a_failed_task_read_is_asked_again(self):
+        from unittest import mock
+
+        b = self._backend([ConnectionError("SSLError: Max retries exceeded"), {"status": "running"},
+                           {"status": "stopped", "exitstatus": "OK"}])
+        with mock.patch("labapi.proxmox.time.sleep"):
+            self.assertEqual(b._task_end("UPID:core:0000D652:0004CDF5:6AE41BC1:qmstart:712:lab-api@pve!runner:", 5.0), "OK")
+
+    def test_a_task_read_that_never_answers_names_the_last_error(self):
+        from unittest import mock
+
+        from labapi.proxmox import ProxmoxError
+
+        b = self._backend([ConnectionError("SSLError: Max retries exceeded")])
+        with mock.patch("labapi.proxmox.time.sleep"), self.assertRaises(ProxmoxError) as cm:
+            b._task_end("UPID:core:1:qmstart:712", 0.05)
+        self.assertIn("unread until", str(cm.exception))
+        self.assertIn("SSLError", str(cm.exception))
+
+    def test_a_task_that_failed_still_fails(self):
+        from unittest import mock
+
+        b = self._backend([{"status": "stopped", "exitstatus": "start failed: QEMU exited with code 1"}])
+        with mock.patch("labapi.proxmox.time.sleep"):
+            self.assertEqual(b._task_end("UPID:core:1:qmstart:711", 5.0), "start failed: QEMU exited with code 1")
+
+
+@needs_deps
+class ResetStaggerTests(unittest.TestCase):
+    """core's host journal, 2026-10-30: every GPU wedge since August came in a burst where both lab cards reset within
+    seconds, and 1,748 single-card bursts never failed; so two seats' stops and starts land reset_stagger_s apart."""
+
+    def _control(self, stagger):
+        import time
+
+        from labapi.proxmox import GuestControl
+
+        log = []
+
+        class Backend:
+            def stop(self, g):
+                log.append(("stop", g.name, time.monotonic()))
+
+            def rollback(self, g, snap):
+                log.append(("rollback", g.name, time.monotonic()))
+
+            def start(self, g):
+                log.append(("start", g.name, time.monotonic()))
+
+        return GuestControl(Backend(), reset_stagger_s=stagger), log
+
+    def test_two_seats_rollbacks_follow_each_other_a_stagger_apart(self):
+        import threading
+
+        from labapi.guests import Guest
+
+        control, log = self._control(0.3)
+        seats = [Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1"),
+                 Guest("sky-c2", 712, "10.10.70.22", "qemu", "client", True, "clean-m1", "c2")]
+        threads = [threading.Thread(target=control.rollback_sequence, args=(g, "clean-m1")) for g in seats]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(10)
+        names = [e[1] for e in log]
+        self.assertEqual(len(log), 6, log)
+        self.assertEqual(names, [names[0]] * 3 + [names[3]] * 3, "one seat's stop, rollback and start, then the other's")
+        self.assertNotEqual(names[0], names[3])
+        self.assertGreaterEqual(log[3][2] - log[2][2], 0.29, "the second seat's stop waits out the stagger after the first's start")
+
+    def test_one_seats_own_stop_and_start_and_a_server_never_wait(self):
+        import time
+
+        from labapi.guests import Guest
+
+        control, log = self._control(5.0)
+        seat = Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1")
+        server = Guest("sky-srv", 700, "10.10.70.10", "qemu", "server", True, "", None)
+        t0 = time.monotonic()
+        control.rollback_sequence(seat, "clean-m1")
+        control.stop(server)
+        control.start(server)
+        self.assertLess(time.monotonic() - t0, 1.0, "no stagger inside one seat's sequence or for a guest with no GPU")
+
+
+@needs_deps
+class SeatStopTests(unittest.TestCase):
+    """GuestControl's seat_stop: a client seat stops by an ACPI shutdown PVE forces to a stop when it says shutdown,
+    by a hard stop otherwise, and a guest with no GPU (the server) always by a hard stop."""
+
+    def _control(self, **kw):
+        from labapi.proxmox import GuestControl
+
+        calls = []
+
+        class Backend:
+            def stop(self, g):
+                calls.append(("stop", g.name))
+
+            def stop_gently(self, g, timeout_s):
+                calls.append(("stop-gently", g.name, timeout_s))
+
+        return GuestControl(Backend(), **kw), calls
+
+    def _guests(self):
+        from labapi.guests import Guest
+
+        return (Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1"),
+                Guest("sky-srv", 700, "10.10.70.10", "qemu", "server", True, "", None))
+
+    def test_shutdown_mode_stops_a_seat_gently_and_the_server_at_once(self):
+        control, calls = self._control(seat_stop="shutdown", seat_shutdown_timeout_s=45)
+        seat, server = self._guests()
+        control.stop(seat)
+        control.stop(server)
+        self.assertEqual(calls, [("stop-gently", "sky-c1", 45), ("stop", "sky-srv")])
+
+    def test_the_default_is_the_hard_stop_it_always_was(self):
+        control, calls = self._control()
+        seat, server = self._guests()
+        control.stop(seat)
+        self.assertEqual(calls, [("stop", "sky-c1")])
+
+
+@needs_deps
 class TablesTests(unittest.TestCase):
     def test_shipped_tables(self):
         from labapi.config import PKG_DIR

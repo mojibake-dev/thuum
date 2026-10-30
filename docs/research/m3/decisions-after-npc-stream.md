@@ -701,6 +701,10 @@ Recommended B: the needs are recorded state and a death from state is the server
 either way (rule 5). Before any build the probe reads the hypotheses: x-player-cold-kill (c1 `console player.kill` on a seat, then
 c1.state and server.ref(0xff000000).isDead, screenshot) after the hold. Not today's unless Eli freezes in play.
 
+2026-10-28 23:5xZ, Eli (through numidium, on "the recommendation there is for the server to decide the death from its
+recorded cold value"): "that sounds good." B ACCEPTED; built into the night's train as a playerGlobals entry's `killAt`
+(wire-rules player_globals.rs, the C++ handler's Kill with the cause) with its T0; x-player-cold-kill reads it.
+
 ### D52. Shared containers (11:36 PDT 2026-10-28, Eli's item 8: "this works fine, left unmarked because only one person can activate a container at once. id kind of like that to be more dynamic.")
 Today the server lets one player into a container at a time (MpObjectReference::ProcessActivate: "occupant is another
 object and is nearby"), the engine's own rule for furniture and containers; Skyrim Souls RE unpauses the menu, so the
@@ -713,6 +717,24 @@ second player stands at a chest that will not open while the first browses it.
   two seats in one chest (x-container-shared), b-container-shared after it.
 - C: B without the refresh: the stale view corrects itself at the next open. Cheaper, visibly wrong once.
 Recommended B. A train of its own after the turbo trains merge; the refresh is the part that makes it feel right.
+- 13:04 PDT 2026-10-28 (the code read for B): the one-looter rule is MpObjectReference::ProcessActivate's CONT branch
+  (MpObjectReference.cpp 1627 to 1655): CheckIfObjectCanStartOccupyThis (1773 to 1810) lets a second player in only when
+  the occupant is gone, disabled, over 512 units away or in another cell; otherwise the activation does nothing on the
+  server and the seat's E is silent (playtest 36: test 2's E on a body test 1 was looting, "occupant is another object and
+  is nearby"). The occupant is one MpActor* with two event sinks (destroy, disable) that clear it. B's shape: a set of
+  occupants (each with its sinks), the inventory property and OpenContainer sent to each on its activation as today, and
+  on every change to the container's inventory (TakeItem, PutItem, the server's own moves) the "inventory" property sent
+  again to every occupant within reach, so an open menu shows the move (HYPOTHESIS: the engine's ContainerMenu refreshes
+  when the reference's inventory changes under it; skymp5-client applies the property through ModelApplyUtils). No wire
+  change; T0 on the occupant set; a probe with two seats in one chest reads the refresh. Bodies share the branch, so two
+  looters on one corpse follow.
+
+2026-10-28 17:3x PDT, D52 B's state after playtest 37: two players in one chest works on the server (dbfc8e82, the
+refused move's re-sync 9fb04fec); the HYPOTHESIS that the open ContainerMenu redraws from an inventory change was
+answered no, and the two engine refreshes we tried (the inventory-update message with a null item, the item list's
+re-read for the container) both took the store side. The working fallback is chestRedraw "reopen" (the menu closed
+and the chest activated again at each change), two-way and whole, which Eli calls "a UI nightmare"; the in-place
+refresh the engine itself uses under an open menu is the re-analyst's read (docs/research/m3/re-container-menu-refresh.md).
 
 ### D53. NPCs facing each other, and their talking animations, on the observer's screen (11:36 PDT 2026-10-28, Eli's item 6 and item 4's scene)
 The local gaze (D50, 8acf15f9) makes a puppet with no relayed target look at the LOCAL player; the host's engine relays a
@@ -730,3 +752,112 @@ NextClip on c2) and play "for one (pointing) sometimes neither": the replay's ve
   tracking update's distance gate, RE first per ADR-054): the relayed target then exists for every conversation.
 Recommended B now (a day's client work, probe x-npc-pair-gaze: Sven and Hilde's DRAGON scene at 7.9 read on the observer),
 C as the next step if B's heuristic misses.
+- 14:06 PDT 2026-10-28 (playtest 37, Eli: "those 2 animation complications are .... a challenge. dont those actions still
+  produce SOMETHING we can transmit?"; numidium's answer and the design call): yes, and both identities already travel (the
+  line, the gaze target); the puppet's engine is what does not act on them. The order, laziest first: (1) make the engine
+  consume what we send: the in-flight fix keeps every puppet line on the lip path (m3-voice-inflight), and the head-track
+  target we set works once the update that turns the neck runs; the re-analyst reads whether the face animation and the
+  head-tracking update run on an AI-off actor (RE/H/HighProcessData.h:171-182 SetHeadtrackTarget and :217 headTrackTarget
+  sit in the AI process's data), and if gated, the smallest change runs that one update for puppets (a per-frame call or a
+  detour of the gate); (2) only if neither can be made to run do we stream raw values (the phoneme keyframe,
+  RE/B/BSFaceGenAnimationData.h:39-43, while a line plays; head and neck rotations by a native hook), measured against the
+  skeleton's own update first. Playtest 37 also found the stale in-flight item (a sound-path line's) behind the snap-closing
+  dialogues and the no-lip lines; the fix rides the same branch.
+
+- 18:14 PDT 2026-10-28 (the flicker; Eli: "il reitterate, the flicker is that the entire container closes and reopens.
+  that needs a fix."): the re-analyst's read (re-container-menu-refresh.md) found the cause outside the menu:
+  TESModPlatform::AddItemEx returns without doing anything while the game is paused, and the ContainerMenu pauses it
+  (CommonLib ContainerMenu.h:14, kPausesGame), so under the open menu nothing of the other seat's take or put ever landed;
+  the redraws read an unchanged inventory, the item list's re-read blanked the selection (finding 30's "cannot place"),
+  and only the close-and-reopen fallback showed the change. Fixed on fork m3-face-twelve ed606faf (client build on): a
+  pause by an item menu no longer drops the change, and the engine's own inventory-update message (Papyrus AddItem's
+  shape, to "Top Menu") is posted from the game thread after each change lands; refreshContainerMenu is the batch's end
+  (the message twice, Skyrim Souls' shape); ItemList::Update and the mode knob are gone; chestRedraw unset means the
+  in-place redraw, "reopen" stays the fallback. HYPOTHESIS until Eli's chest redraws in place.
+
+### D54. A non-persistent resident at a door (15:5x PDT 2026-10-28, thuum-magnus, from the tail after the door pass went live)
+
+Since skymp-server:m3-door-pass-802b74f2 (21:59Z) every placed resident's door in Riverwood walked through under its host
+(Sven, Dorthe, Frodnar, Hod, Gerdur, Alvor, 1348c into their houses and the inn, the records following), except one:
+"door 1cbb0: 35534 may not cross into 1cb84 (refused); the actor stays" at 22:18:43Z and 22:24:40Z. 0x35534 is HildeRef
+and 0x1cb84 RiverwoodSvensHouse (the master file). ADR-047 D6's door fact admits "an interior entered by a persistent
+actor" (the ACHR's persistent flag; PartOne.cpp CellMoveFacts), because the engine keeps simulating persistent actors off
+screen; Hilde's reference is not flagged, so her door is neither adjacent nor a door to the rule, the verdict is Refuse,
+and her host's engine walks her back to her own door every few minutes, the Embry symptom for the few non-persistent
+residents (one of eight in Riverwood). Player-visible on both screens: a woman pacing at her door at bedtime.
+
+Options.
+- A. Leave as today: a non-persistent resident never enters an interior under the server; she paces at the door; the
+  one who hosts the interior from inside sees her never arrive.
+- B. The record moves with the engine's walk for every actor at a door, persistence or not: the door branch moves the
+  record to the door's destination itself (the player's Teleport idiom in ProcessActivateNormal: SetCellOrWorldObsolete,
+  SetPos, SetAngle) when the destination is hosted by nobody, and the pass rule applies as for a persistent actor when
+  it is hosted; an unhosted interior then holds a frozen record (ADR-035 point 8, TES3MP's shape), re-animated when a
+  player enters and hosts it. The host's engine keeps her where the engine put her (inside, unloaded, no AI), the other
+  seat's view drops the record with the grid, so no engine walks her back. Server-only; CellHostTest gains the
+  non-persistent door case; T3 a door leg with Hilde.
+- C. The persistence fact widened to "any actor with a schedule package into its own home" by the ESM (the AI package's
+  location): more reading of the game files for a distinction the engine does not make at the door.
+
+Recommended B. Nothing in TES3MP or the engine treats a non-persistent actor's door differently from a persistent one's;
+the persistence fact was a guard for the host's off-screen simulation, which an unhosted frozen record does not need.
+Eli's call; the build is a slot's, not the turbo loop's.
+
+- [ ] A (leave as today)
+- [x] B (the record moves with the walk, frozen when unhosted): Eli, 18:0x PDT 2026-10-28 via numidium, "B for D54".
+  Server-only, the next slot's build: the judge's door arm without the persistence fact, CellHostTest's non-persistent
+  door case, a T3 door leg with Hilde.
+- [ ] C (the ESM's schedule fact)
+
+### D55. Shared quest state under the dialogue work (17:5x PDT 2026-10-28, Eli, from playtest 37's Sven line)
+
+Eli, verbatim (through numidium, about 00:56Z): "sven convo the line about faendal, the quest one, doesnt appear on
+prisoners thing. part of me wants to touch on this one out of order. appropriately communicating the worlds shared
+quest state (with stub functionality to later separate journals but thats a LONG time coming) makes sense to start now
+as part of the dialogue work. some of the quests propogate and duplicate but not all. i think it's like, if you're
+there in the room to hear one dialog line you get it, but like sven if you have to get to a certain point in the convo
+it doesnt get telegraphed. sometimes the rumor dialog propagates, but svens did not."
+
+The mechanism (numidium's read, checked against the day's tails): a quest stage set by a dialogue fragment or a script
+runs on the talker's game alone, and since 2ce8b523 the fragment gate keeps a relayed line's fragments off the
+watcher on purpose; so each game's quest state drifts from the other's, and every line or topic whose conditions read
+that state (Sven's Faendal line in A Lovely Letter; the bounty rumor's INFO that would not even resolve on the watcher,
+finding 34) is offered on one seat and not the other. The lines that cross are the ones both games' states allow.
+Shared quest state is the layer the dialogue work stands on; today it is nobody's.
+
+Options.
+- A. Leave as is. Each game keeps its own quests; the gate stops the fragment duplicates; conditioned lines differ per
+  seat and a player's quest progress is invisible to the other. The journal is each player's own by accident.
+- B. World-shared quest state, the journal stubbed (Eli's lean). The server owns the world's quest stages (R0),
+  fed by the talker's report: a client's own stage change (its dialogue fragment, a script, the console's setstage in
+  the lab) is reported, R1 validated (the quest is a QUST in the loaded files, the stage is a known stage of it, the
+  reporter is a player, one report per quest per 50 ms), recorded per world (the world record, `mp.get(0,
+  "questStages")`, persisted), relayed to every other seat and replayed at login in order after PlayerGlobals. The
+  other seats apply it through the engine's own Quest.SetStage, so their topics, conditions and journals follow; the
+  apply is idempotent (a stage at or below the current one does nothing) and marks the quest so the SetStage's own
+  event is not reported back. The journal on every seat is the engine's, filled from the shared stages: one world
+  journal, the stub Eli names, until a per-player split. What the gate's fragments become: on the talker a TIF
+  fragment sets the stage and the report carries it to the world; on the watcher the gate keeps dropping the say's
+  fragments (right: the world's work is done once); the QF stage fragments that run under the watcher's SetStage are
+  the duplicated world effects, items and gold (self-correcting: R0 inventory overrides a local add at the next
+  SetInventory), enabled references and moved actors (wrong until the server performs world effects itself from a
+  table of fragment kinds, the second slice). Rungs: a stage R1 reported, R0 recorded and applied; objectives and
+  quest globals R2 recorded, later; the journal R3 per seat (the engine's own).
+- C. Per-player quests with shared world effects. Each player's quest state stays private (the engine today), and the
+  server performs only the world effects a stage brings (an enabled reference, a moved actor, a given item) when a
+  report names them. The right end state for separate journals; it needs the fragment-kind table first, and until a
+  player does a quest himself its conditioned lines stay off his seat, which is the very thing Eli saw.
+
+Recommended B, as a verb (docs/verbs/quest-stage.md) under a new ADR (ADR-056, shared quest state), the first slice
+small enough to start tonight: (1) the wire message QuestStage {quest: u32, stage: u16}, both directions, with its
+validator and fixtures; (2) the server's world record of stages, the relay, the login replay, a T0 for the record,
+the relay, the replay and each refusal; (3) the client's report (Skyrim Platform's questStage event) and apply
+(Quest.setStage when the local stage is lower, the loop guard); (4) the probe x-quest-stage after lab-api gains a
+quest-stage read: the host's console sets A Lovely Letter's stage, the other seat's Quest.getCurrentStageID equals it,
+Sven's Faendal line then offered on both. Known limits in the doc: QF world effects duplicate until the second slice;
+objectives, aliases and quest globals are not synced; one world journal. Not today's loop: tonight's branch.
+
+- [ ] A (leave as is)
+- [x] B (world-shared stages, the journal stubbed; the first slice tonight): Eli, 18:0x PDT 2026-10-28 via numidium,
+  "i recommended as B for 55". ADR-056 and docs/verbs/quest-stage.md first, then the slice on its fork branch.
+- [ ] C (per-player quests, shared world effects)
