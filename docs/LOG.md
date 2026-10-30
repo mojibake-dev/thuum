@@ -3597,3 +3597,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   corrected (main af1968a, gate.yaml alone): the scenario's premise (DDO out) is unmet on main, and a coin flip in the nightly costs
   two reruns per red and proves nothing until layer-souls takes DDO out; its claims stay as promoted. The debt is unchanged: D37 B
   unlanded. The sweep at 29 of 102, b-cast-rhythm running.
+- 12:05 PDT: b-npc-body-release RED three times in the sweep, the cold rollback included (184852, 185123, 185329), on step 26's
+  `ProcessActivate 39fe4 - no occupant` count at 0 with the activation itself working (c1's "Sent activation" and the handler's
+  "waiting for 'ContainerMenu open' (a corpse)" lines; no server line at all). numidium's cause, confirmed in the union's code at
+  0e23c820: memo D52's shared containers (dbfc8e82, 10988419) moved a corpse's open and close onto containerOccupants (Add, Remove,
+  Prune, no lines but "N players in the container now" at a second concurrent occupant), and the single-occupant check with its "no
+  occupant" and "occupant is another object" lines is furniture's alone (MpObjectReference.cpp:1965). The scenario (10-25, train-46)
+  last ran 10-28, before D52 met a gate; the claims predate it. The amendment (main 330124b, the scenario alone, rule 13; not a
+  loosening, each claim at least as strong as the line it replaces): the same shape (c1 loots and closes, then c2 is admitted); each
+  seat's admission is the server's OpenContainer read at the client's handler line (`log-count` steps, c.log_count claims) with the
+  ContainerMenu open in a dump-state; c1's release is its handler's "menu closed" and "sent ActivateMessage" lines (the closing
+  activation that ProcessActivateSecond's corpse branch takes); the release's effect is the server's silence at c2's join (no
+  "[0-9]+ players in the container now": c1 stands inside the 512-unit occupation reach, having passed the 452-unit reach check, so a
+  c1 left in the set would make c2 the second occupant and log it); kept: no "occupant is another object", no E_ACTIVATE_REACH, the
+  body dead on the record. Two seats in one body at once stays x-shared-chest's (D52's probe). Loaded through lab-api's
+  load_scenario (47 steps, 20 assertions parse) before the commit. Next (numidium): deploy-srv with the layer, then
+  `RUNSET_AFTER=20261030-164127-pass-union-0e23c820 just sweep pass-union-rest` on the same stage.
