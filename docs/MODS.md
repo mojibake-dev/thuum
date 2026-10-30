@@ -147,11 +147,18 @@ spell, effect or book carries either name, nor do the Nexus changelogs from
   0309852E, Script archetype) applies only when the caster's game finds
   room ahead (condition GetVATSFrontAreaFree >= 300, an engine geometry
   query); script WB_FabricateWall_Script places the wall (MSTT 03098529,
-  1470 x 102 x 262 units, a real collision body on the AnimStatic layer,
-  navmesh obstacle flag) 192 units ahead, starting 288 below the ground,
+  1470 x 102 x 262 units by its record bounds, the end caps visual only: the
+  collision body spans x -526..562, y -52..52, z 0..262, 1088 units wide, a
+  MOPP over a compressed mesh on the AnimStatic layer, BSXFlags Havok and
+  Articulated, no navmesh-cut data in the mesh or the record, so actors are
+  stopped by collision, not re-pathed; corrected 2026-10-28 from the mesh's
+  blocks) 192 units ahead,
+  starting 288 below the ground,
   raises it with TranslateToRef at speed 512, sets off EXPL 0300C145 there
   (no damage, knock-down), and on the stream's end fades it out and deletes
-  it after 5 s. Nothing persists between casts. Missing natives:
+  it after 5 s. Nothing persists between casts, nothing moves or scales the
+  wall after the rise, and the spell's No Dual Cast Modification flag (SPIT
+  0x800000) leaves a dual cast as one wall. Missing natives:
   GetAngleZ, Math.Sin, Math.Cos, TranslateTo (TranslateToRef reaches
   GetAngleX and GetAngleY too).
 - **Milestones**, SPEL 030A59D5, the nearest thing to Mark/Recall: five
@@ -315,13 +322,14 @@ What it is:
   - The Misc Slider's body morphs are inert on rotfern's child body.
   - Whether Eli's own character carries RaceMenu co-save data is open. The
     evidence leans vanilla: hair and ears were picked as head parts.
-- **RaceCompatibility 2.16**: ESM plus override ESP. The served scripts are the
-  plain "20 Dawnguard" set, not the "21 Dawnguard USKP" set its readme
-  prescribes with USSEP (PlayerVampireQuestScript sha256 4b5979cc...; 537
-  disassembled lines apart in the progression, cure and feeding; apocrypha,
-  2026-10-28, docs/research/vampirism-under-the-server.md on
-  apocrypha/alternate-start 3cbde0f). Its
-  scripts use vanilla natives only, among them:
+- **RaceCompatibility 2.16**: ESM plus override ESP. Since 2026-10-28 the served
+  scripts are the "21 Dawnguard USKP" set its readme prescribes with USSEP
+  (apocrypha/layer-vampire-pairing, Eli's D57 A); until then the plain "20
+  Dawnguard" set was laid, 537 disassembled lines apart in the progression,
+  cure and feeding (PlayerVampireQuestScript sha256 4b5979cc... before,
+  08c0f8b8... now; apocrypha, docs/research/vampirism-under-the-server.md).
+  The override ESP stays out: the ESM loads after USSEP here and its two quest
+  overrides already win. Its scripts use vanilla natives only, among them:
   - Actor.SetRace, Game.GetFormFromFile and Actor.SendVampirismStateChanged,
     all missing;
   - Actor.AddSpell and RemoveSpell, delegated.
@@ -379,7 +387,8 @@ What it needs from thuum:
   derivation stripped RS Children's races unevenly, leaving rotfern at
   [14] and rotfernRaceVampire at [11], so turning sets no race and curing
   gives ImperialRaceChild; the fix is RaceCompatibility's 10 vanilla pairs
-  plus the rotfern pair at [10]; (4) every complexion (FTSM, FTSF, DFTM,
+  plus the rotfern pair at [10], applied at build since 2026-10-28 by the
+  flst-set rows of lab/layer/plugin-patches.tsv (Eli's D57 A); (4) every complexion (FTSM, FTSF, DFTM,
   DFTF) now names one face texture set where the composite had six. Dead
   weight: an orphan cm01.nif, FaceGen for Kharjo and Teldryn where the
   engine never looks, stray overrides of NPC_ Kharjo and Keening (WEAP,
@@ -595,8 +604,81 @@ both seats) and broke the vanilla race menu for males, whose rebuild at open rea
 female bit as female and takes the first valid alternative where one exists, so a male's hair
 swapped to ApachiiHairM01 at menu open (a-racemenu 20261020-224305, step 18; magnus's read). The
 master's own bits are right for both paths. HYPOTHESIS until a-racemenu is green on this render.
-`drop-record <formid>` removes one record, the groups around
-it shrinking and the header's count following (the one patch that changes a file's size); it
+`flst-set <formid> <id,...>` replaces a form list's entries in the given order and keeps its
+other subrecords, the record and the groups around it resizing; it carries rotfern's vampire
+pairing (Eli's D57 A, 2026-10-28): RaceCompatibility's PlayerVampireQuestScript pairs
+PlayableRaceList[i] with PlayableVampireList[i], and rotfern.esp's overrides of the two lists had
+rotfern at [14] of 15 (four child races before it) against rotfernRaceVampire at [11] of 12, so a
+turn set no race and a cure gave ImperialRaceChild (the 2026-10-06 diff below; the read in
+docs/research/vampirism-under-the-server.md). The served copy now holds the ten vanilla pairs and
+rotfern's at [10] in both lists; Eli's plugin is untouched, and the slot's CRC32 moves with the
+render. `perk-drop-ability <formid>` removes a perk's ability entry and `spell-magnitude <formid> <value>` sets a
+spell's magnitudes, injecting the record from its master first when the plugin lacks it (the multiplayer
+defaults, below); every record patch must hit the last plugin overriding its record, which the tool
+checks against the load order. `drop-record <formid>` removes one record, the groups around
+it shrinking and the header's count following (with flst-set and perk-drop-ability the patches that change a file's size); it
+
+**Multiplayer defaults (Eli, 2026-10-28, verbatim: "some settings i want on for everyone by default
+(some settings some changes) - subtitles need to be on across the board - killcams have to be
+disabled for multiplayer - the bow's slow time perks need to not slow time", then "yeah include the
+slow time shout too"; apocrypha/layer-defaults, for the slot after playtest 37 with D57 A).** All
+four are data, read from the files, and take the layer's two existing shapes: an ini key written on
+every seat and in the friend installer, or a build-time patch on a served plugin, the server's copy
+included. Nothing happens at runtime.
+
+- **Game ini keys, `lab/layer/game-ini.tsv`.** persist-mods copies the table to the tree's root beside
+  plugins.txt (not a Data file, not in SHA256SUMS); add-mods.ps1 fetches it after plugins.txt and
+  writes each key into the lab user's Documents\My Games\Skyrim Special Edition\<file> under its
+  section, rewriting a present key in place, appending a missing section, every other line kept
+  (display.ps1's shape for iSize); the friend installer reads the same file. Rows: SkyrimPrefs.ini
+  [Interface] `bGeneralSubtitles=1` and `bDialogueSubtitles=1` (the seat's file carries both at 0; the
+  1.6.1170 executable names both, and no `bShowSubtitles`), rung R3, a seat's own HUD; Skyrim.ini
+  [VATS] `bVATSDisable=1`, the kill camera's switch, rung R3, the seat's own camera. The read behind
+  the camera key: the melee cinematic and the bow's arrow cam are the engine's VATS camera; Skyrim.esm
+  holds no game setting for it beyond `fKillCamBaseOdds` (unread semantics; every other VATS GMST is
+  camera geometry), and the executable knows `bVATSDisable`. The fork's client already blanks `KillMove*`
+  animation events for runtime figures (deathService.hookDisableKillMoves, self ids ff000000 to
+  ffffffff: other players' figures), so the ini key closes what remained, the camera on the player's
+  own kills and deaths; a paired kill move on an NPC still plays in the normal camera and is the npc-fate
+  verb's killMove. HYPOTHESIS until a seat kills with a bow and a sword and sees neither cinematic.
+- **Two record patches on the plugins that win the records (`lab/layer/plugin-patches.tsv`).** The
+  records in question are already overridden in the layer: USSEP carries Steady Hand's two perks and
+  the shout's first spell, the Spell Absorb and Twin Souls Fix (slot 20) carries all three shout spells
+  with its no-absorb flag, so a separate tail plugin copying Skyrim.esm's records would have reverted
+  their fixes; the patch lands in the copy that wins, and plugin-patch.py now refuses a record patch
+  that a later plugin overrides (the guard scans the load order after the patched plugin, by master
+  name and local id). `perk-drop-ability 00103ADA` and `00103ADB` on USSEP's copy of Archery's Steady
+  Hand ranks (SteadyHand40, SteadyHand60): each perk's one entry is an ability,
+  `PerkSteadyHandTimeSlowdown01/02` (SPEL `00103AD8/9`, a 0.5 and 0.25 modifier of actor value 78,
+  the engine's bow-zoom time scale, through MGEF `00103AD7`); the entry goes (PRKE type 1 with its
+  DATA and PRKF), the perk keeps USSEP's name, description, conditions and NNAM link, so the tree
+  still shows and sells it and it does nothing: time is the server's (R0), so the slow goes.
+  `spell-magnitude 00048AD0/1/2 1.0` on the Twin Souls fix's copies of the Slow Time shout's three
+  spells (VoiceSlowTime1/2/3, effect MGEF `00048ACD` VoiceSlowTimeEffect, archetype 37 SlowTime, which
+  scales the game's time by the magnitude: 0.3 for 8 s, 0.2 for 12 s, 0.1 for 16 s); at 1.0 time
+  keeps its pace and the shout keeps its words, walls, sound, recovery and the no-absorb flag (R0 for
+  the time, the rest the seat's own). `spell-magnitude 000D8C31 1.0` on USSEP for Block's Quick
+  Reflexes (Eli, 21:1x PDT: "yes to apocryphas ask"): the perk (PERK `000D8C33`) applies
+  PerkQuickReflexes while the player blocks a power attack, the game's time at 0.05 for 1 s through the
+  same SlowTime archetype (MGEF `000D8C32`, which USSEP overrides). No plugin of the layer overrides
+  the spell itself, so the patch's second ability applies: a plugin without the record gets Skyrim.esm's
+  copy injected into its SPEL group (read from lab/.cache/game, the host's master copy, decompressed;
+  the header's count up by one) and then the magnitude; the guard confirms nothing later carries it.
+  USSEP's size and CRC32 move with its three patches (slot 1's mod-lock entry: 21,106,651 B CRC32
+  86A15BD3 before; 21,106,777 B CRC32 7CA7F25F after, SHA-256 01064760..., the two 25-byte ability
+  blocks gone and the 176-byte spell record added), the Twin Souls fix's CRC32 with the shout rows (its
+  light slot: 42,409 B either way, CRC32 F765F49C before, C5F71B81 after, SHA-256 e2756021...); dry runs
+  of 2026-10-28. HYPOTHESIS until a seat zooms a bow with Steady Hand, blocks a power attack with Quick
+  Reflexes and shouts Slow Time with the clock unchanged on both seats. These were the only slow-time
+  records in Skyrim.esm (two perks, one shout; Dawnguard's and Dragonborn's were not read for more).
+
+The alternatives read and not taken: a GMST override for the camera (none governs it), the client's
+runtime set-gmst (not data, not in the installer), a tail plugin of vanilla copies (it would have undone
+USSEP's and the Twin Souls fix's own changes to the same records), the shout kept out of reach (its
+three word walls' scripts and words are learnable content; a magnitude of 1.0 keeps them honest), and
+the shout turned into a per-actor slow on hostiles (new spell records with a cone projectile and an
+area effect the server's magic-effects verb would carry; content work for M2 if a real replacement is
+wanted).
 carries the layer's rule that **no served plugin may override the player's base record NPC_
 0x00000007 (nor PlayerRef 0x14)**: in SkyMP every player shares 0x7 and the server builds each
 player's values and appearance from it, so a layer override changes every player's base under
