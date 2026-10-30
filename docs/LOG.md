@@ -3613,3 +3613,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   body dead on the record. Two seats in one body at once stays x-shared-chest's (D52's probe). Loaded through lab-api's
   load_scenario (47 steps, 20 assertions parse) before the commit. Next (numidium): deploy-srv with the layer, then
   `RUNSET_AFTER=20261030-164127-pass-union-0e23c820 just sweep pass-union-rest` on the same stage.
+- 12:11 PDT: the stage-0 churn numidium noted in x-quest-mode v5 (151127) scoped for a train after D69's (docs/verbs/quest-stage.md, "Ahead"):
+  the quest is DLC1VCController 0x0201a428 (Dawnguard.esm, Start Game Enabled, Run Once, the vampire-conversion controller),
+  restarting in bursts of 32 a minute apart on each seat; the server's line is already one per seat per 10 s with the count, so the
+  cost is the wire; the client has no Start Game Enabled getter, so the fix is a per-quest repeat window in onQuestStage (30 s,
+  UNMEASURED), one trace line per window, a probe with the server's held count under thirty and the mode-all relay unchanged.
+  Client only, its own branch off the merged base; nothing of it rides the D69 train. The sweep continues (numidium's rest set after
+  its end, then the merges).
