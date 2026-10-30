@@ -3437,3 +3437,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-prop-drop v3 05dc320c (the inventory open before the console drop; c1 50 west), x-prop-grab v3 1c0e0541 (the switch on),
   all four with the switch on at a relaunch of both seats. x-quest-mode v4 on DB01Misc 0x1ea4f (finding 76's rumor quest; MS13Intro
   refuses to start in this world, HYPOTHESIS Run Once and done). x-rented-bed v2 GREEN (135155): the rented-bed correction holds.
+- 07:08 PDT: lab-api's server.ref on a prop (x-prop-grab 125719, "server holds no record for 0x3975b" while the server held it): the
+  gamemode's labState ref read the actor properties for every id and those throw for an MpObjectReference; now a plain reference's
+  record is its position with the actor fields null (main c06f52f, 22 gamemode tests green), to be laid by deploy-srv before the
+  restage's probes. x-quest-mode v4 by path (sha1 5897fa0a) sets DB01Misc 0x1ea4f's stage 10 (finding 76's rumor quest) in place
+  of MS13Intro, which refuses to start in this world (v3 134416: the console typed, EnsureQuestStarted ret 0; HYPOTHESIS Run Once).
