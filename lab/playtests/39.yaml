@@ -12,8 +12,8 @@
 # seats (the grants of 2026-10-29); numidium confirms with the server's learned list and re-grants what a record lacks through
 # labCommand. Perks as 37 and 38 listed them. Everything here is server-side (labCommand); the seats type nothing.
 id: 39
-build: "fork parity 0e23c820 (the pass's union merged), thuum main d39fbd3 (the defaults layer), the parity image with spellPlacedObjects empty, clean-m1 promoted"
-world: playtest-m3-39-rotfern-prisoner-COMPOSE   # numidium composes it from playtest-m3-38-end-* (rotfern and Prisoner at their newest, Survival needs zeroed) and writes the stamp here
+build: "fork parity 0e23c820 (the pass's union merged), thuum main d39fbd3 (the defaults layer), the server image skymp-server:m3-pass-train-3-win at 0e23c820 (parity's commit, the gate's image; parity's own pipeline 4047 failed at wire-test on a CI DNS miss, 4054 rebuilds it server-only) with spellPlacedObjects empty, clean-m1 promoted"
+world: playtest-m3-39-rotfern-prisoner-20261030T220506Z   # 38's end world playtest-m3-38-end-20261029T202524Z (its two player records: 0.json rotfern profile 1, 1.json Prisoner profile 2), both characters' Survival needs 81b, 81a, 816 zeroed; Raise Wall, Dead Thrall and Reanimate Corpse already in both records (numidium, 2026-10-30)
 hold:
   minutes: 300
   reason: "playtest thirty-nine: the pass's merged base"
