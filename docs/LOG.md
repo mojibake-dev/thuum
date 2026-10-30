@@ -3233,3 +3233,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the merge and "base merged"; ADR-036 pushed with the default unchanged and a live trial; apocrypha's layer on the merged base and
   P3-win on top of it (ADR-042a) with the nine probes by path and the three traces; one full sweep as the gate for both, then
   layer-merge and verb-merge citing it. The three single-train T2s prove the parts, P3-win's T2 the sum.
+- 19:51 PDT: CI GREEN on the union: P3-win e65a345b (pipeline 3923, client and server), P3 6901781c (3922, server and difftest), P2-win
+  0dc92d5a (3919, client and server); every head of the pass compiles on both platforms. The stage build waits on the lab alone;
+  numidium's T2s run the parts (P2 since 01:42Z, then P1, then P3) and the union's last.
