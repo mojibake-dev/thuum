@@ -180,11 +180,13 @@ def _not_green_last(rs: dict) -> list[str]:
     return [s for s in rs.get("scenarios", []) if ((rs.get("runs") or {}).get(s) or [{}])[-1].get("verdict") != "green"]
 
 
-def chain(sets: list[dict]) -> tuple[dict | None, str]:
+def chain(sets: list[dict], pending: list[str] | None = None) -> tuple[dict | None, str]:
     """A gate a lab fault cut short and RUNSET_AFTER finished ("the two sets together are the sweep", runset.sh), read
     as one set: (the combined set, "") or (None, why they are not one gate). Every set but the last ended early; each
-    later set holds exactly the scenarios whose last run in the set before it was not green, and began after that one
-    ended. The combined set keeps the first's id chain, scenarios and start, each scenario's runs in order across the
+    later set holds exactly the scenarios whose last run in the set before it was not green, less those lab/gate.yaml
+    holds `pending` (`pending`; runset.sh's rest leaves them out as an "all" sweep does, and check 1 reads their reds
+    in the earlier set as pending: the union's rest of 2026-10-30, b-spell-placed-wall and c-dungeon-enemies pended
+    while the first set ran), and began after that one ended. The combined set keeps the first's id chain, scenarios and start, each scenario's runs in order across the
     sets, and the last's state and end; its verdict is the last's, or watch when a scenario went red before a later
     set's green (the ADR-027 watch item a rerun's green makes inside one set). A lab fault cleared later is no watch
     item, as inside one set."""
@@ -193,7 +195,7 @@ def chain(sets: list[dict]) -> tuple[dict | None, str]:
     for prev, rest in zip(sets, sets[1:]):
         if not _ended_early(prev):
             return None, f"{prev.get('id')} is {prev.get('state')} ({prev.get('verdict')}): it took no rest"
-        want = _not_green_last(prev)
+        want = [s for s in _not_green_last(prev) if s not in set(pending or [])]
         if sorted(rest.get("scenarios", [])) != sorted(want):
             return None, f"{rest.get('id')} is not the rest of {prev.get('id')}: it holds {len(rest.get('scenarios', []))} scenarios, the rest is {len(want)}"
         ended = prev.get("finished") or prev.get("started")
@@ -223,7 +225,7 @@ def fetch_gate(rid: str) -> dict:
     sets = [fetch(f"{API}/runset/{x}") for x in rid.split("+")]
     if len(sets) == 1:
         return sets[0]
-    rs, why = chain(sets)
+    rs, why = chain(sets, gate_lists().get("pending", []))
     if rs is None:
         raise ValueError(why)
     return rs
