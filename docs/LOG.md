@@ -3416,3 +3416,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   D64, D66, the CallNative fix) merge on the sweep as fixes always have. The one piece that merges uncovered either way is the fragment
   suppression: quest-stage never had a committed scenario (a debt from before the pass), now on record in its Status; x-quest-mode
   v3's trace reads the suppression's shape right after. The debt and this call go to DECISIONS.md with the merge record.
+- 06:46 PDT: the sixth read, x-rented-bed 130908 (agent): PREMISE (0.65). No fade, menu or disabled control at the walk; c1's own position
+  equalled the record to 0.001 units, so it did not move in its own game: it stood on Basket01 0x601c7 (z 14.7, keyframed at the
+  walk's first frame, "not a tracked prop") with the wardrobe 60 units ahead, a blocked controller. v2 by path stands c1 on the
+  room's heading marker (-797, -700) and walks 280 units of floor north. Two union findings for rest.md (the correction's open loop
+  paced by game time under a pausing menu; the sleep-state gate vacuous), owed a later train. x-reanimate-host v3 133744 red past its
+  premise: no server line about 65bd7 after the AddSpell and no cast line on c2, so the driver's Papyrus Spell.Cast never crossed the
+  client's cast hooks (the `cast` step reaches no server for an aimed spell); v4 casts the way a player does (approach to 80, the
+  mouse-pitched aim, equipspell, draw, the key held). x-npc-hold v5: dontmove-trace.js v2 adds a MoveTo hook (56626) with the caller
+  and a six-frame backtrace to name the warper; sky-srv's lab/frida needs main's script first.
