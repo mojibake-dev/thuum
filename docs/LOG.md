@@ -3396,3 +3396,23 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   never produced a dead record in any run; the lab's green kill is kill-ref (R0). v3 by path kills her that way, the reanimate reads
   unchanged. Also: the read agents share one scratchpad, and one found its first downloads overwritten by a sibling's; it re-fetched
   privately and verified the run id; the other reads are checked for their run's own stamps.
+- 06:41 PDT: reads 3 to 5 and the stage's reruns. x-raise-wall 124309 (agent): the watcher's six claims HELD (both bases at the pose, the
+  glow 174.09 against 173.95, the wall 178.75, runtime_of 1 and 1), zero "Bad call result 4" on either seat, two skip lines on c1,
+  none on c2: the CallNative fix is CONFIRMED at T3 and playtest 38's observer wall stands; the one red was c1's own MSTT read 135.7
+  units below the pose, 104 units into the mod's 240-unit rise (v3 by path, sha1 482c1cc8, waits 2 s and holds 15 s). x-quest-mode
+  131512 (agent): PREMISE or LAB, not union: mode all with 44 denied announced at both logins and read by both seats, the report path
+  alive, but the driver's Papyrus Quest.Start then SetCurrentStageID was refused by the engine for MS13Intro (no setter ran, no event,
+  nothing to report); v3 by path (sha1 7063d5db) sets both stages through the console's setstage. x-dead-placed-loot v2 GREEN (133512):
+  finding 65's loader holds with the seats in reach. x-npc-hold: the trace read in full (the hold reaches the engine in one frame,
+  lifeState 9 throughout, every Move on the zero-velocity branch, the controller still; yet eight warps of 100.77 units along his path
+  every 4 s to the leg's end 807 units away): ENGINE (a path follower warping a held walker, HYPOTHESIS 0.7) or an unnamed writer of
+  his position; the next read is a SetPosition hook with the caller's backtrace, x-npc-hold v5.
+- 06:41 PDT: D68, taken under the pass's rule on numidium's recommendation (rule 3 at the union's merge: a verb ships whole or lives on a
+  branch; the sweep proves only committed scenarios): form A. Prop-physics is decided by its read (a premise makes x-prop-push green
+  and b-prop-push promoted for the sweep; a fault rides one restage with a server-side props switch off by default). Quest mode all:
+  x-quest-mode v3 green means b-quest-stage promoted for the sweep and mode all stays; red means the deploy's sharedQuestsMode goes
+  back to the list mode at the merge. Story arrival: b-story-arrival promoted now from its green probe (its own commit, below). The
+  union's fixes to shipped verbs (the placed-dead loader, the held roster, the NPC reach, the rented-bed correction, 3o's reanimate,
+  D64, D66, the CallNative fix) merge on the sweep as fixes always have. The one piece that merges uncovered either way is the fragment
+  suppression: quest-stage never had a committed scenario (a debt from before the pass), now on record in its Status; x-quest-mode
+  v3's trace reads the suppression's shape right after. The debt and this call go to DECISIONS.md with the merge record.
