@@ -3200,3 +3200,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   respawn, death and corpse-drift runs: the outfit detour's old site FALSIFIED, the killer credit REFUTED; the x-npc-overtime row
   names Hilde 0x35534 and the probe's recorded read); npc-fate's placed-dead row carries the review's 10 s reanimate gate. The eight
   M3 docs stand at 196 to 75 tags, every remaining one a named pending read or the template's own words.
+- 18:23 PDT: P3 54e021e0's T2 RED on the prop-physics session alone (the claim refused, the three relays absent; every other session
+  identical): the session assumed the drop's id 0xff000004 while the full run's earlier sessions allocate forms on the same server
+  (the header's own caveat). Fixed where it belongs: the difftest harness and the fakeclient resolve "{{created:<baseId>}}" to the
+  id the CreateActor for that base carried (fork m3-prop-physics f559b0d9, tests in both crates), the session names its dagger by
+  base 80254. P3 is 50a44336 (the placeholder plus train 2's review fixes merged, 256 crate tests green, fork-lint), pushed
+  server-only with its difftest on the push; P3-win follows (its merge took the train's platform source again). numidium asked to
+  run the full T2 on 50a44336 in place of the queued rerun of 54e021e0.
