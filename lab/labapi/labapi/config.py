@@ -12,6 +12,8 @@ PKG_DIR = Path(__file__).resolve().parent
 LAB_DIR = PKG_DIR.parent.parent  # lab/
 # Settings.client_reset's values (ADR-036)
 CLIENT_RESETS = ("rollback", "relaunch")
+# Settings.seat_stop's values
+SEAT_STOPS = ("stop", "shutdown")
 
 
 def _version_map(spec: str) -> dict[str, str]:
@@ -324,6 +326,11 @@ class Settings:
     # seconds between one seat's GPU reset (a VM stop or start) and another's (proxmox.GuestControl, core's
     # dual-reset finding of 2026-10-30: every wedge came with both lab cards reset within seconds)
     reset_stagger_s: float = 20.0
+    # how a client seat's VM stops before a rollback (proxmox.GuestControl): "stop" at once, or "shutdown" (an ACPI
+    # shutdown PVE forces to a stop after seat_shutdown_timeout_s), for the night's question of 2026-10-30 whether a
+    # running NVIDIA driver pulled out from under its GPU matters to the wedges
+    seat_stop: str = "stop"
+    seat_shutdown_timeout_s: int = 60
     # Before a self-service snapshot (proxmox.GuestControl.snapshot_clone):
     # stop the game, its loader and Windows Error Reporting, and any running
     # sky-lab task, so the clone shuts down quiet (thuum-mundus's recipe). Then
@@ -347,6 +354,8 @@ class Settings:
         # a mistyped mode must stop lab-api at its start, not leave the lab in a reset nobody chose
         if self.client_reset not in CLIENT_RESETS:
             raise ValueError(f"LAB_CLIENT_RESET is one of {', '.join(CLIENT_RESETS)}, not {self.client_reset!r}")
+        if self.seat_stop not in SEAT_STOPS:
+            raise ValueError(f"LAB_SEAT_STOP is one of {', '.join(SEAT_STOPS)}, not {self.seat_stop!r}")
 
     def game_versions(self) -> dict[str, str]:
         """game_esm_dirs as {version: host directory of its master files}."""
@@ -424,6 +433,8 @@ class Settings:
             relaunch_rollback_every=int(_env("LAB_RELAUNCH_ROLLBACK_EVERY", str(d.relaunch_rollback_every))),
             relaunch_heartbeat_timeout_s=float(_env("LAB_RELAUNCH_HEARTBEAT_TIMEOUT_S", str(d.relaunch_heartbeat_timeout_s))),
             reset_stagger_s=float(_env("LAB_RESET_STAGGER_S", str(d.reset_stagger_s))),
+            seat_stop=_env("LAB_SEAT_STOP", d.seat_stop).strip() or d.seat_stop,  # unset or empty: stop
+            seat_shutdown_timeout_s=int(_env("LAB_SEAT_SHUTDOWN_TIMEOUT_S", str(d.seat_shutdown_timeout_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),
             game_default=_env("GAME_DEFAULT", d.game_default),
             game_esm_dirs=_env("GAME_ESM_DIRS", d.game_esm_dirs),

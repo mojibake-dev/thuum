@@ -106,6 +106,8 @@ services:
       # ADR-036's reset between runs (config.py's client_reset: rollback or relaunch), from sky-srv's .env so the
       # mode flips with a lab-api restart and no image; unset is rollback, the code's own default
       LAB_CLIENT_RESET: ${LAB_CLIENT_RESET:-rollback}
+      # how a seat's VM stops before a rollback (config.py's seat_stop: stop or shutdown), from .env like the reset mode
+      LAB_SEAT_STOP: ${LAB_SEAT_STOP:-stop}
       # the lab's tables from the deployed tree, like the Frida scripts: a
       # snapshot switch (a stacked clean-m1-<branch> for a client on another
       # wire schema) is a `just deploy-srv` and a lab-api restart, not an image
