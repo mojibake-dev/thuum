@@ -312,3 +312,10 @@ clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
       time scale 20); its dependence on other time scales is measured once
       (time scale 10) and written down as not followed
 - [x] scenario reviewed by Eli (a-rest, thuum 7b12fa7: approved)
+
+Finding 31's fix rides the pass (18:11 PDT 2026-10-29): fork m3-rest-correction 6a3427fa (F1, the clock correction and the RestIntent
+wait for the engine's wake: GetSleepState 0, no Fader Menu, the Sleep/Wait Menu closed a tick, one trace line per held tick and
+one at the release; F2, a bed's open fact is its Sleep/Wait Menu, so the furniture wait and its "gave up" line end for beds) is
+merged into m3-client-bits f9c6b7ca and m3-pass-train-1-win 9721ff72, the first pass train to stage; x-rented-bed (by path, v1 of
+2026-10-29 00:4x) reads it there: one "slept 8 h" on the server, at least one held tick and exactly one release on c1, both seats
+answering a minute after. HYPOTHESIS until that run, as the Dynamic plan says.
