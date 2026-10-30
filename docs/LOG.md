@@ -3363,3 +3363,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   other declaration held. Fix, its own difftest commit on the union: the declaration carries the computed f32 exactly, the file's idiom
   for every declared health (m3-pass-train-3-win 820a565c, pipeline 3974 with difftest-build, no client build; the client artifact stays
   3962's). numidium runs the trial from this worktree's sessions and the head's own T2 when 14617 lands. spell-cast.md's note corrected.
+- 01:32 PDT: the union's T2 GREEN on m3-pass-train-3-win 820a565c (numidium: difftest job 14617, server-build 14619; spell-cast "identical,
+  2 clients, 19 declared divergences", so D66's exact f32 holds; every other session identical; the lab's server untouched). The head
+  is verified seat-free and is the morning stage's: after Eli's reboot and core's handover, the layer on parity, then P3-win 820a565c
+  on top (the dist from 3962's client artifact 14566), the fourteen probes and three traces, one full sweep as the gate (D67).
