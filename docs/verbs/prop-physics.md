@@ -283,6 +283,25 @@ m3-prop-physics (2026-10-30; the union at 0e23c820): the guard without the refer
 follower's new prop had no line: placed within two units, Keyframed from the start). The engine reuses the deleted drop's form
 id for the copy's placeAtMe (HYPOTHESIS, harmless). x-prop-drop v4 reruns unchanged on the new client.
 
+### The drop's stream at T3 (09:52 PDT 2026-10-30; x-prop-drop v4 162049 on 0e23c820, read by an agent)
+
+With the record gate gone the non-host's drop claimed and was granted ("ff000001 claims prop ff000002 by touch 2: granted, epoch
+1"), both seats took the word, and 3.6 s later the dropper's first sample met "E_PROP_NOT_OWNER: ... another seat simulates it".
+The arithmetic: claim() sets since_ms and last_sample_ms at the grant, live() for an awake row is now < last_sample_ms +
+PROP_SILENCE_MS (3000), and the client sends its first sample only once the body has moved 2 units from its baseline (a sleeping
+copy at the dropper's feet never stirred for 3.6 s), so the row lapsed to the host before any sample and every sample after was
+refused (the refusal reaches no client; the stream ended "out of reach"). v3 passed because the host's own first sample needs no
+grant. Two faults, both the physics train's after the union's merge: (1) the seat a word names sends its first read at once as an
+awake sample and starts its stream, so the asleep sample and the lease follow SLEEP_AFTER_MS later when nothing stirs (the
+contract's own words: silence means a fault); the server alternative, counting an awake row's silence from max(last_sample_ms,
+since_ms + PROP_LEASE_MS), stays a note. (2) The server places a drop's copy at the actor's own position (MpActor::DropItem's
+PlaceAtMe) and the dropper's client wakes it Dynamic inside the player's capsule, which ejected it out of TRACK_RADIUS (c2 listed
+no sword within 400 units afterwards; HYPOTHESIS on the ejection, the lines fit it): the copy goes a step ahead of the actor along
+its heading. Follow-ups noted: a refused PropTransform should answer the sender with the current word, and the host's seat should
+hear it simulates again at a lapse (today c1 kept the copy Keyframed, believing c2 owned it). The lab's prop site moves to
+lab-spawn with a server-placed Basket01 (PlaceAtMe at the host's feet; the strip is flat, the cell 0xbbb1); Riverwood's exterior
+has four MISC references in all (the camp's two tankards and pot in a rock pocket, the street bucket disabled in this world).
+
 ## Slice three on paper (18:45 PDT 2026-10-29; ADR-058 decision 4 names it M4's build)
 
 Two props the engine owns differently from clutter, written so the row kind "prop" covers them when the build comes:

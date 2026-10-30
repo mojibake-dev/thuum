@@ -3562,3 +3562,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   disabled on both seats; no collision, no crosshair); esm.py's ref shows no enable parent in Skyrim.esm, so the world or the layer
   disables it; lab-api gains c.refs_near().disabled(baseId) for the premise. Props merge dark under D68; the physics train after
   the merge carries the owner fix, the gate, a new enabled site and the premise claim. The pre-sweep deploy and the sweep run now.
+- 09:52 PDT: x-prop-drop v4 162049 read (agent): UNION, both halves. The grant sets the row's since_ms and last_sample_ms, live() counts
+  3000 ms of silence from there, and the dropper's client sends nothing until the body moves 2 units; the copy sat still 3.6 s, the row
+  lapsed to the host, and the first sample met E_PROP_NOT_OWNER (v3 passed because the host's first sample needs no grant). And the
+  server places the copy at the actor's own position, where the dropper's Dynamic wake ejected it out of reach (HYPOTHESIS). Fixes for
+  the physics train on m3-prop-physics: the named seat's first sample at once with the stream started; the copy a step ahead of the
+  actor. The three prop probes rewritten for lab-spawn with a server-placed Basket01 (push v9 97cf3abb, pass v9 1008e8f2, grab v7
+  2de86990; the premise claims disabled == false through lab-api 5cc62f8's fact). The sweep runs (run set 20261030-164127, 102
+  scenarios, to about 21:00Z); props merge dark.
