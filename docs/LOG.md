@@ -3588,3 +3588,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   layer-souls' merge (apocrypha's e94b63c carries D37 and Skyrim Souls RE; its gate plays b-body-loot after the clone's DDO.dll
   deletion is read). The debt named for Eli: D37 B is three days unlanded, every stage since 10-28 has had DDO in. The sweep at 26
   of 102 green at 10:52 PDT, b-cast-crossfire running.
+- 10:58 PDT: correction to the 10:53 line (numidium's read after the cold rerun): b-body-loot is not red by design under Death Drop
+  Overhaul; its verdict follows the fate's roll. The three runs' worn lists before and after the kill: 174118 red, the rolled weapon
+  79760 gone at death; 174322 red (relaunched), the rolled weapon 77495 gone; 174522 GREEN (cold rollback), the rolled SteelSword
+  0x13989 kept. The mod drops some rolled gear at death and not other (x-body-loot v3 and v4 lost the shield 0x13914), so with it
+  loaded the scenario is a coin flip on the roll, and ADR-036's relaunch-carried-state finding would misattribute the pattern. The
+  sweep counts it green (the last verdict), so the union's citation never needed the pending line. The line stays, its reason
+  corrected (main af1968a, gate.yaml alone): the scenario's premise (DDO out) is unmet on main, and a coin flip in the nightly costs
+  two reruns per red and proves nothing until layer-souls takes DDO out; its claims stay as promoted. The debt is unchanged: D37 B
+  unlanded. The sweep at 29 of 102, b-cast-rhythm running.
