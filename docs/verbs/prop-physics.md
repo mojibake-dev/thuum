@@ -77,6 +77,11 @@ claim on a grab (grabRelease event), a drop (the drop's handle), a contact (the 
 - T3: x-prop-push (c1 walks into a basket at lab-spawn; within 2 s c2's basket is within 32 units of c1's and rests where c1's
   rests), x-prop-pass (c2 kicks it back; the owner flips; c1's copy follows), x-prop-drop (c1 drops a sword; c2 sees it land where
   c1's does), x-prop-restart (the basket where it rested after a server restart). Scenario b-prop-push after the probes hold.
+  Written by path (2026-10-29 and 30): x-prop-push v2 (the restart half inside it, on the guard camp's tankard 0x3975b),
+  x-prop-pass v2, x-prop-drop v1 (the server's AddItem gives c1 a SteelSword, the game's own console drops it, the touch-2 claim
+  line, one runtime copy on each seat, the two copies within 32 units in x and y through lab-api's new refs-near pos fact: the
+  listing's position rows, which no fact exposed before; the created reference's rest after a restart is not read, a created
+  reference having no stable id for server.ref). All three play at the union's stage.
 
 ## Dynamic plan
 

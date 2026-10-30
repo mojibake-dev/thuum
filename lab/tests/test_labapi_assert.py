@@ -801,6 +801,19 @@ class PuppetViews(RefsNearViews):
 
 @needs_deps
 class PuppetFactsTests(unittest.TestCase):
+    def test_pos_is_the_nearest_listed_references_position(self):
+        # x-prop-drop: two seats' copies of one prop compared where they lie, from the listing's pos rows
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), RefsNearViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.refs_near().pos(0x3E8F0).y == 55.0"))
+        self.assertTrue(ev.evaluate("abs(c1.refs_near().pos(0x5FBC0).y - c1.refs_near().pos(0x3E8F0).y) < 32"))
+        # the ids search carries no position: a base found by it alone has none
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.refs_near().pos(0x5FBBF).x == 0")
+        # a listing without the base has none either
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c2.refs_near().pos(0x3E8F0).x == 0")
+
     def test_a_seats_npc_state_a_copy_count_and_a_watched_actors_turns(self):
         from labapi.assertions import AssertionData, Evaluator
         ev = Evaluator(RichServer(), PuppetViews(), ["c1", "c2"])
