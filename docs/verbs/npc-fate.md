@@ -2365,3 +2365,20 @@ tells the host's seat outright to cast the accepted reanimate from the caster's 
 Spell.Cast on the host's engine), deterministic and still the engine's reanimation, with the level cap and the thrall's
 duration the engine's on the host; the thrall follows the caster's figure there. The server side stays R0 for the
 record's life and R2 for the thrall's behaviour.
+
+## The non-host's loot at M3's exit (D71, 14:29 PDT 2026-10-30; c-dungeon-enemies on the union 0e23c820)
+
+RED three times (210543, 210957 relaunched, 211413 cold) at claim 5's first menuOpen: c2, the puppet seat and the killer, activates
+the body and the server admits it (OpenContainer, "onOpenContainerMesage - waiting for 'ContainerMenu open' (a corpse) to be
+true" on c2), but the engine never opens the menu and the handler gives up at 15 s and sends the closing activation; the driver's
+Activate answered false. c2's body: "promote 39fe4: dead, the block lifted and the AI left off (npc-fate H-54e)" at the death
+(14:17:32), nothing of ours touches it after. The host's engine opens the same body (b-npc-body-release's cold run, 18:56). The
+scenario also counted the single-occupant lines D52 removed; its claim 5 is amended (its own commit) to read D52's path as
+b-npc-body-release's. HYPOTHESIS, the read x-body-open-guest v1 (by path, sha1 e4031424; the server's kill of 0x39fe4 and c2's open;
+the host's console kill of 0x39fe2, the engine's death by the host's report, and c2's open; then c2's npc-ai on the body and a third
+open) separates: H5, an actor with its AI off takes no activation even dead (then the fix is the AI on at the release once the body
+rests, or at the server's OpenContainer, with H-54e's stand-up re-read); H1, the death never completes on a puppet (then the fix is
+the kill path's completion on the puppet seat). The scenario is pending (lab/gate.yaml) and M3's exit stays open until the fix's
+gate plays it green; playtest 39 carries the guest's loot as a declared limit (playtest 34's state). Noted beside it: after the
+death the host kept receiving causes for the dead body from the guest's late swings (c1's "cause on 39fe4: health 0.000 ... attacker
+ff000ceb", one per hit for 50 s), the server's OnWeaponHit at 0 -> 0 each time; harmless, a bound for a later train.

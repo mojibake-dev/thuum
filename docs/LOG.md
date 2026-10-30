@@ -3661,3 +3661,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   distance at three pitches, by path, at the physics stage). numidium: deploy-srv from main (the emptied table), then the rest set.
 - 14:02 PDT: D70's Dynamic read by path, x-raise-wall-pitch v1 (01176511; both probe folders): the caster's own wall at three pitches under
   the emptied table, for the physics stage. numidium told (B, 061288b, deploy from main, the rest set, the pending line).
+- 14:29 PDT: c-dungeon-enemies, M3's exit, RED three times (210543, 210957 relaunched, 211413 cold) at claim 5's first menuOpen: the
+  server admits the non-host (c2, the killer) to the body and c2's engine never opens it (the handler's 15 s give-up, the driver's
+  Activate false); the body had been released from the puppet state at its death with the AI left off (Promote's dead branch,
+  H-54e). Everything before held. D71 (numidium's memo, taken under the pass's rule, recorded under ADR-050): C, merge as it stands
+  with the scenario pending by name (the admission is harmless, the guest's E does nothing: playtest 34's state, declared on 39's
+  checklist), M3's exit open until the fix's gate; A impossible without the read (rule 8) and a client rebuild plus the sweep again;
+  B a server head move for no visible change. The scenario's claim 5 also amended for D52 as b-npc-body-release's (its own commit).
+  The read x-body-open-guest v1 by path (e4031424): the server's kill and c2's open, the host's engine death and c2's open, then
+  c2's npc-ai on the body and a third open; H5 (AI off refuses activation) against H1 (the death never completes on a puppet).
+  Asked of numidium: the read in the first lab gap after the rest set; b-npc-body-release pended only if the rest set reds it.
