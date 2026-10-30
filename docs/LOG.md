@@ -3092,3 +3092,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   box and npc-handoff's message and native boxes tick (the table read 10/12, 5/11 and 5/11 for nothing to do). prop-physics.md gets the
   Milestone, Class and Rung lines `just status` reads (M3, B, R2/R0). Both Windows trees type-check clean (tsc on pass2win-wt and
   pass3win-wt against clientbits' node_modules; yarn is not on the Mac).
+- 17:13 PDT: x-wire-idle-rate, thuum-cf's seat-free T2 read for npc-stream's idle packet-rate HYPOTHESIS (numidium, sky-srv): one
+  idle fakeclient (profile 9, `--moves 0 --settle-ms 60000`) against skymp-server-test m3-turbo-train-3o-win on the clean world, its
+  UDP on the compose bridge filtered to the test server's address (lab-api's tcpdump; the lab's own server shares that bridge and port
+  7777 with the seats, which a first unfiltered capture caught), the server's ticks from /metrics
+  (`skymp_tick_duration_summary_seconds_count`, through a T2 settings copy with metricsAuth's auth-off value, ui.ts:72-80). Over the
+  55.1 s idle window the server sent the client 814.8 packets a second of 26 to 31 B (44,871 of 44,873, all 26 or 28 B) against its
+  816.4 ticks a second (49,926 in 61.2 s): equal within 0.2 percent, so the claim's 10 percent holds; the client sent 184.5 a second
+  (the fakeclient's own 5 ms loop), and no server packet followed the client's close. An idle client therefore costs one small packet
+  per server tick, about 815 a second (near 45 KB/s with UDP and IP headers), because the gamemode loops `server.tick()` then a 1 ms
+  setTimeout (skymp5-server/ts/index.ts:222-227) and the wire sends at every update (wire-transport lib.rs:377): a cost for the pass to
+  weigh, not a fault in the row.
