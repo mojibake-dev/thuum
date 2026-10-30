@@ -3463,3 +3463,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the heading set (look's SetAngle never turns the view, a teleport's heading does; the slope's doing, most likely), 50 units north
   of the tankards at their x. v5 of push (sha1 44ece46d) and pass (36043def): the walker starts 40 units off and runs 0.7 s, its claim
   relative to a start snapshot in server.actor's frame. The frame fact is in memory (lab-server-position-frames).
+- 07:45 PDT: x-prop-drop v3 on the restage (143937; numidium): the drop path runs end to end on the fixed client (the engine's reference
+  deleted, the server's copy Dynamic on the dropper, the stream, c2's apply, one runtime sword per seat, the copies within 32 units);
+  the one red of fourteen was my premise, the dropper being the host, whose own drop needs no claim (the host rule: "it simulates it
+  already", debug). v4 by path (sha1 b233846f) makes the non-host drop, the claim path proper. x-prop-pass v4 red on the two known
+  premises (the drift 22 degrees, the frame), v5 queued; the lab cost of the switch lever (a rollback per seat after a files probe)
+  noted for after the sweep: the lab's client template should carry propPhysics on.
