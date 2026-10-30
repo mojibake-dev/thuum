@@ -1255,7 +1255,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   rented-bed correction, finding 31) as P1-win 9721ff72; P2 58208e9f (NPC melee reach and cone, the login's Change Location event,
   quest sharing mode all under D58 B and D62 with the INDX check and a bounded record, the fragment suppression made real in the
   .pex) as P2-win dca7fe09; P3 50a44336 (ADR-058 slice one with the review's six fixes, P2 merged) as P3-win ffa51358. T2: P2 green
-  at 0b49a28e, P3 red once on its session's assumed id (fixed by the harness's created-form placeholder), the rest queued.
+  at 0b49a28e and again on 58208e9f (02:11Z), P1 green on b0cda83a (02:39Z), P3 red once on its session's assumed id (fixed by
+  the harness's created-form placeholder) then green on 6901781c with D64 folded in (03:08Z); the union P3-win e65a345b compiles on
+  both platforms and its T2 is the last before the stage (20:09 PDT).
 - D63 A (the four allowed quests stand), D64 C (the transport's 60 Hz flush clock, m3-send-rate b6f4deb4, green on CI), D65 A
   (Reading List's radar stays; the driver throttles its lines); ADR-058's slice two deferred to M4 on the esm read.
 - The exit scenarios c-riverwood and c-dungeon-enemies are committed and wait on the lab; the eight M3 verb docs stand at 196 to
