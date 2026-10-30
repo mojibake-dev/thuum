@@ -3216,3 +3216,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   to legacy but its declared lines). Its gate (npc-stream's relay cadence, cell-host's grants) waits for the lab.
 - 18:44 PDT: D64's proof recorded where the decision lives (the note under ADR-011 and WIRE.md's Transport section at 86af255d, npc-stream's
   idle-rate row here): 59.98 a second against 814.8, the loop unchanged, T2 green; m3-send-rate's merge waits for the touched verbs' gate.
+- 18:45 PDT: prop-physics.md gains the table of its UNMEASURED numbers (what each sizes at the stage: the lease, the silence, the grab's
+  limit, the speed and step floor, the reaches, the stream's cadence and dead band, the sleep stand-in, the tracking set, the
+  glide) and slice three on paper (the held object through PlayerCharacter's grab surface, CommonLibSSE-NG PlayerCharacter.h:553-570
+  and :696-712, Offsets.h:452; the body's resting root as one asleep sample applied by SetPosition; HYPOTHESIS tags for the reads
+  that come before M4's build).

@@ -219,3 +219,42 @@ header's own caveat; the refusal line itself was lost with the container). The f
 names a created form by its base, `"{{created:<baseId>}}"`, resolved by the fakeclient from the CreateActor it received and by the
 harness per stack (docs/WIRE.md, Differential harness; fork m3-prop-physics f559b0d9, P3 50a44336 with train 2's fixes merged). The
 T2 runs again on 50a44336.
+
+## The numbers the stage sizes (18:45 PDT 2026-10-29; every one UNMEASURED until x-prop-push and x-prop-pass)
+
+| number | value | where | what sizes it |
+| --- | --- | --- | --- |
+| PROP_LEASE_MS | 3000 | wire-rules props | how long a toucher keeps a sleeping prop before the host does; the hand-over's visible seam |
+| PROP_SILENCE_MS | 3000 | wire-rules props | an awake row with no sample lapses; a creeping body (under 2 units per 100 ms) sends every 2 units, so its gaps bound it |
+| PROP_GRAB_MAX_MS | 120000 | wire-rules props | a grab nobody released; the longest a player holds an object in play |
+| PROP_MAX_SPEED_UNITS_PER_S | 6000 | wire-rules props | the fastest a kicked or shouted body flies between accepted samples (E_PROP_STEP counts in the server log) |
+| PROP_STEP_FLOOR_UNITS | 128 | wire-rules props | the first sample after a grant and the host's first of a resting prop (the record's distance from the body) |
+| kPropTouchReach, kPropDropReach, kPropImpulseReach | 256, 512, 2048 | ActionListener | the claimant's distance to the record at a contact or grab, a drop, an impulse (E_PROP_REACH) |
+| SEND_MIN_MS, SAMPLE_UNITS, SAMPLE_DEGREES | 100, 2, 2 | PropService | the stream's cadence and dead band; the follower's glide reads as motion a sample behind |
+| STIR_UNITS, SLEEP_AFTER_MS | 0.25, 500 | PropService | the sleep stand-in (the platform exposes no Havok state); too short and a slowing body sleeps early, too long and the lease starts late |
+| REST_READ_MS | 100 | PropService | a resting simulated body's read cadence; the cost of sixty-four host-default props at rest |
+| TRACK_RADIUS, TRACK_MAX, RESCAN_MS | 1024, 64, 500 | PropService | which props a seat tracks; the rescan's native count |
+| GLIDE_MIN_MS, GLIDE_MAX_MS, JUMP_UNITS | 50, 300, 256 | PropService | the follower's interpolation window and its snap threshold |
+
+## Slice three on paper (18:45 PDT 2026-10-29; ADR-058 decision 4 names it M4's build)
+
+Two props the engine owns differently from clutter, written so the row kind "prop" covers them when the build comes:
+
+- The held object (the engine's grab, the Z key; telekinesis). The engine surface is CommonLibSSE-NG's PlayerCharacter: StartGrabObject
+  (PlayerCharacter.h:570, Offset::PlayerCharacter::StartGrabObject, Offsets.h:452, RELOCATION_ID 39475 and 40552), EndGrabObject (:553),
+  GetGrabbedRef (:558), IsGrabbing (:565), the runtime data grabbedObject (:697), grabObjectWeight (:698), grabSpring (:696, the mouse
+  springs) and grabType (:712, kNormal, kTelekinesis). Slice one already claims a grab (touch 1) from Skyrim Platform's grabRelease
+  event and streams the held body as any simulated prop, and the rule holds a grabbed row against every other claim until its drop
+  (props.rs). What slice three adds: the holder's heading as the held body's intent (the body hangs where the holder looks, so the
+  follower may glide the body on the holder's figure instead of on samples alone, a prediction ADR-058 decision 3 forbids today and
+  would relax for this one case), telekinesis's pull as an impulse touch, and a Frida read of StartGrabObject and EndGrabObject on both
+  seats under a grab (HYPOTHESIS: grabRelease fires on the holder's seat alone and never for a puppet's engine grab, which no puppet
+  performs).
+- The body (a ragdoll at rest). A dead actor is a prop with many bodies; the stream's transform is the root's resting place, the one
+  number every seat disagrees on today (playtest 34: bodies about 112 units apart; finding 71's silent kill and its fall). The row:
+  the body's cell host simulates the ragdoll at death (its engine ran the kill) and sends one asleep PropTransform when the root rests
+  (the 500 ms stir test on the root node); every other seat applies it as a SetPosition on the dead actor (no Keyframed set: a ragdoll
+  takes none), once, within the snap threshold. HYPOTHESIS (the read before the build, x-body-pose's successor): that SetPosition on a
+  settled ragdoll moves the whole body coherently on 1.6.1170, and that the second seat's own ragdoll, already at rest, re-settles
+  within a stride rather than standing. Corpse dragging is the held object's case on a body (the engine's grab works on ragdolls).
+- Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).
