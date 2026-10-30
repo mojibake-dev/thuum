@@ -3358,3 +3358,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   already"), the view pitched by lab-api's mouse step (20.2 px per degree, the rune probes' number; look's pitch may not reach the
   first-person view), E held 3 s; claims: the touch-1 claim granted, the grabber's stream, the host's Keyframed follow, the record
   moved; the aim is the premise. With x-prop-push v2, x-prop-pass v2 and x-prop-drop v1, slice one's four touches each have a probe.
+- 01:00 PDT: the union's first T2 with D66 inside (numidium, on 997fedf1) RED on one line: spell-cast's declared divergence said health 0.948
+  and the wire computed 0.94784 (0.9478399753570557), which the matcher compares as the exact f32; every other session identical, every
+  other declaration held. Fix, its own difftest commit on the union: the declaration carries the computed f32 exactly, the file's idiom
+  for every declared health (m3-pass-train-3-win 820a565c, pipeline 3974 with difftest-build, no client build; the client artifact stays
+  3962's). numidium runs the trial from this worktree's sessions and the head's own T2 when 14617 lands. spell-cast.md's note corrected.
