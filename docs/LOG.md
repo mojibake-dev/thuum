@@ -3194,3 +3194,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (tsc and fork-lint green, the client build on); x-rented-bed by path (validated) joins P1-win's stage probes; rest.md carries the
   note. CI at this minute: P3-win c8a6e8e8's 3893 GREEN (the physics fixes compile on Windows), P2 58208e9f building (3900), P2-win
   dca7fe09 queued (3901), P1 b0cda83a (3903) and client-bits (3904) queued, P1-win 9721ff72 next.
+- 18:19 PDT: P4's fourth batch applied (an agent from docs/private/p4-dynamic-lines-4-2026-10-29.md, my review on the diff): npc-stream.md
+  33 tags to 12 (eleven closed by the P1, P4, P6, P7 and face runs, four limits into Known limits, the two Train 57 headings' clauses
+  and three duplicates gone; the Status box names each H's numbering), npc-fate.md 26 to 13 (nine closed by the fate-roll, outfit,
+  respawn, death and corpse-drift runs: the outfit detour's old site FALSIFIED, the killer credit REFUTED; the x-npc-overtime row
+  names Hilde 0x35534 and the probe's recorded read); npc-fate's placed-dead row carries the review's 10 s reanimate gate. The eight
+  M3 docs stand at 196 to 75 tags, every remaining one a named pending read or the template's own words.
