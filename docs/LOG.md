@@ -3389,3 +3389,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reproduced by the refusal, not by the loader, whose claims all held. v2 by path (sha1 8913bb2b) approaches each seat to the body
   before its activation (c1 60, c2 80, x-shared-chest's grammar); claims unchanged; menuOpen alone proves nothing for a corpse.
   x-prop-push's in-flight rerun (132025) confirmed the pre-touch record premise (numidium); the four prop v2/v3s are queued.
+- 06:32 PDT: x-reanimate-host 125920 read (agent): PREMISE. The kill was npc-kill, the driver's Papyrus Actor.Kill on the host's engine;
+  the death judge refused its report E_DEATH_UNCHECKED (no hit the server numbered, no 200-unit drop, no activation within 512 units;
+  by design since train 44, and OnActorDeath is identical between 3o and the union), and 1.3 s later the record's alive state stood
+  Hilde back up on the host's engine (the refused-report correction; noted in npc-fate.md beside the life mirror's gate). npc-kill has
+  never produced a dead record in any run; the lab's green kill is kill-ref (R0). v3 by path kills her that way, the reanimate reads
+  unchanged. Also: the read agents share one scratchpad, and one found its first downloads overwritten by a sibling's; it re-fetched
+  privately and verified the run id; the other reads are checked for their run's own stamps.
