@@ -3169,3 +3169,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   pass only after a setInventory's apply; (6) no restart T0 for the corpse. Verified correct lists in the agents' reports. Two fix
   agents build the fixes on the branches now (no push until my review); P3's T2 waits on them too. CI: P3 54e021e0 pipeline 3884 GREEN
   (the props review's fixes compile, PropTest passes); 3892 and 3893 build the -win trees; 3888 (m3-send-rate) queued.
+- 17:59 PDT: lab/esm.py gains `cellrefs <plugin> <cell> <TYPE,...>` (the references inside an interior cell, which `near` could not reach)
+  and `ref` prints the rotation; with them x-npc-trap-report's placeholders, unfilled since 2026-10-24, are filled from Skyrim.esm
+  (Bleak Falls Temple 0x371de: the plate 0x567f2, the spike wall 0x54b15, the victim 0x39fe4, the draugr 0x380b3 and 0x380b9; the
+  corridor's axis a HYPOTHESIS the first run's screenshots read), so the hazard half of ADR-048 B can run at P2's stage. Also by
+  path: x-npc-overtime v2 records the fall instead of claiming it, x-reanimate-host v2 records the host seat's resurrect line (the
+  doc's "hosted body, AI enabled" line exists in no client), the fourth P4 draft's corrections. Playtest 39 gains a face read.
