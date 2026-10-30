@@ -3367,3 +3367,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   2 clients, 19 declared divergences", so D66's exact f32 holds; every other session identical; the lab's server untouched). The head
   is verified seat-free and is the morning stage's: after Eli's reboot and core's handover, the layer on parity, then P3-win 820a565c
   on top (the dist from 3962's client artifact 14566), the fourteen probes and three traces, one full sweep as the gate (D67).
+- 05:34 PDT: the lab is back (Eli's reboot; core's handover): apocrypha's layer bd5bb64a staged on both clones' clean-m1-next, smoke green
+  122932 after a stale 10-12 parity image on sky-srv refused castTeleports.look once; the union's verb-stage runs on top (820a565c,
+  REUSE_DIST=1 from 3962, LABAPI=3972) with thirteen probes in order. numidium's question, the two unarmed traces: answered with the
+  hold's shape, x-story-arrival-login v2 (story-location.js armed on c1 at a relaunch before the first login and again at the in-place
+  one, since a relaunch ends the trace with the process; sha1 8358ce43) and x-quest-mode v2 (quest-stage-chain.js armed on both seats,
+  c1 sets and c2 applies; sha1 f81b147d), to run after the stage's probes and before the sweep.
