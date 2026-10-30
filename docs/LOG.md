@@ -3298,3 +3298,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 23:33 PDT: CI GREEN on the final heads: m3-cast-held-time 51069b46 (3941, server and difftest), P3 6796e787 (3943, server and difftest),
   the union P3-win 7a6fd1e2 (3944, client and server). The stage tree compiles on both platforms with every fold; its T2 waits for a
   quiet window, the stage for 3o's gate and merge.
+- 23:38 PDT: b-spell-placed-wall RED twice on 3o's stage (20261030-063053 and 063222, both seats relaunched): the server's placed-2-forms
+  line held and c2's refs_near had neither 098529 nor 0735e8 of Apocalypse: Raise Wall's observer placement never happens, playtest
+  38's "doesnt appear for prisoner" reproduced at T3, a finding against 3o's spell-placed verb (ADR-057). Its cold rerun wedged c1's
+  card again (the eighth; numidium's stagger of the two seats' starts is in lab-api f0480e2), the set stopped; b-npc-handoff-door,
+  b-player-globals and b-marksman green since the ten, the watch three unrun, b-npc-talk red pending the hold's read. D67, taken under
+  the pass's rule on numidium's recommendation: 3o does not merge on its own gate; the union (P3-win, 3o inside trains 1 to 3) is the
+  new base straight from parity bf133744, merged under one full sweep with the layer, with both findings fixed in it first; 3n stays
+  the fallback. An agent reads 063053 against the server's subscription and the client's spawn path.
