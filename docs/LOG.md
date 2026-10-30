@@ -3189,3 +3189,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   restart) server-only, m3-client-bits 9a0d4c34 (the silent kill's push re-fetches the body by id; the hands pass runs after any apply
   that re-added a worn entry, by the apply's own report), P1-win 60f40cbc with the client build; fork-lint and tsc green, the C++ on
   CI. npc-puppet.md carries the hold's new shape; npc-fate.md's placed-dead row follows when the fourth P4 batch's apply lands.
+- 18:11 PDT: finding 31 (the rented-bed freeze, Eli's "if time"): m3-rest-correction 6a3427fa (client only, 73 lines: the correction
+  waits for the engine's wake, a bed's open fact is its Sleep/Wait Menu) merged into m3-client-bits f9c6b7ca and P1-win 9721ff72
+  (tsc and fork-lint green, the client build on); x-rented-bed by path (validated) joins P1-win's stage probes; rest.md carries the
+  note. CI at this minute: P3-win c8a6e8e8's 3893 GREEN (the physics fixes compile on Windows), P2 58208e9f building (3900), P2-win
+  dca7fe09 queued (3901), P1 b0cda83a (3903) and client-bits (3904) queued, P1-win 9721ff72 next.
