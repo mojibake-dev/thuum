@@ -3647,3 +3647,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   evaluator. npc-fate.md:1944-1949's HYPOTHESIS (a GetDead or level misread) is falsified and closed; no code change. A one-line
   follow-up for the next server train touching MpActor's effects: the refusal line names no row; appending the failing row
   ("HasPerk(0x581de) == 1 on Target") with a dead-target case in that test would have saved this read.
+- 14:01 PDT: b-spell-placed-wall RED three times in the sweep, the cold rollback included (204953, 205125, 205303), on claim 3 alone: the
+  server's copy of Raise Wall's wall (192 along the yaw, ADR-057 shape C) stands 75 to 88 units from the caster's own engine wall,
+  which stood 104 to 118 ahead of c1 and moved 14 units between runs at the same stand; the server placed once per cast and the
+  observer holds one runtime copy of each form (the morning's CallNative fix), so the placement model is wrong, not the halves.
+  HYPOTHESIS: the script places the wall at the caster's aim (TargetBox), so no fixed step matches. D70 (numidium's memo, taken under
+  the pass's rule, recorded under ADR-057): B, the copies off for the merge through the verb's kill switch (spellPlacedObjects
+  emptied in both deploy settings, main 061288b with the scenario's pending line in lab/gate.yaml; layer-render --check green, no code
+  change, no head move), the merge on the rest set; A (the caster-reported pose, a new message, client and server, a rebuild and a
+  restage) would have cost the afternoon and 39; C (merge the wrong place by name) refused as a player-visible wrong outcome. For
+  playtest 39 the other seat sees no wall again, item 8 rewritten as the declared limit and the known-limits list extended. The fix is
+  shape A as the next train after the physics and rumor trains, its Dynamic read first (x-raise-wall v4: the caster's engine wall's
+  distance at three pitches, by path, at the physics stage). numidium: deploy-srv from main (the emptied table), then the rest set.
