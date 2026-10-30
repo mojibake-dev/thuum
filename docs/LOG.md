@@ -3142,3 +3142,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lint-green, braces and parens balanced), pushed with the client build. The server branches P2 0b49a28e and P3 54e021e0 keep their
   shas for numidium's T2s and take the same fix by a merge from P2-win after P3's verdict. P1-win 8b7e2ade's pipeline 3881 GREEN with
   its client build: the first pass train whose Windows half compiles.
+- 17:34 PDT: P4's second batch applied (an agent from docs/private/p4-dynamic-lines-2-2026-10-29.md, my review on the diff): cell-host.md
+  20 tags to 3 lines (the quit crash's chain closed by its runs: the stale host MEASURED, the leaked movie NAMED and its two plugin
+  holders, the pre-existing crash CONFIRMED; three limits), npc-handoff.md 16 to 6 (D11 PROVEN, H5 and H9 CONFIRMED, the target
+  not imposed a limit; H1 and H2 keep their reads), npc-talk.md 9 to 5 (H-55a and H-58a CONFIRMED, H-55b a limit). Three honesty
+  lines added where the docs named reads that do not exist: npc-handoff's Dynamic plan (four probes never written), npc-talk's
+  vendor read (x-npc-vendor-claim never written) and its Known limits (the M6 row the Inventory points at).
