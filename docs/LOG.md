@@ -3175,3 +3175,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   corridor's axis a HYPOTHESIS the first run's screenshots read), so the hazard half of ADR-048 B can run at P2's stage. Also by
   path: x-npc-overtime v2 records the fall instead of claiming it, x-reanimate-host v2 records the host seat's resurrect line (the
   doc's "hosted body, AI enabled" line exists in no client), the fourth P4 draft's corrections. Playtest 39 gains a face read.
+- 18:05 PDT: train 2's review fixes built by an agent and pushed: fork m3-pass-train-2 58208e9f (six commits: the brace cherry-pick,
+  the .pex declarations that make slice two real, the INDX check with the record cap and the one-pass login replay, DENIED before
+  OWN_START with the throttled line, the arrival on the login itself, the one-shot fragment mark with the 10 s safety; crate tests
+  246 green, clippy, fork-lint, tsc), server-only (its difftest on the push); P2-win dca7fe09 (the merge took the train's platform
+  source) pushed with the client build. The PlayerScale sex column is declared in melee-reach.md (libespm reads no sex). CI: P2-win
+  a1272466's 3892 GREEN with its client build (the brace fix proven), m3-send-rate 3888 GREEN on every job, P3-win c8a6e8e8's
+  client-build green with its server-build running. numidium asked for T2 on 58208e9f after P3's.
