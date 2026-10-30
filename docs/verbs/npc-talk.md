@@ -95,7 +95,11 @@ Known limits: H-55b, ActivatePickRef on a reference that is no longer the pick, 
 crosshair stayed on him, "crosshair 13491"); the activation runs within 200 ms of the E, and a menu
 that never opens releases the claim after ten seconds (ada2ba1f). What the dialogue does (a stage,
 gold, an item, a follower) is each engine's own until M6: a guest's talk changes no shared state,
-and the Inventory's M6 row points here.
+and the Inventory's M6 row points here. The lab's hold (lab-driver npc-hold, Actor.SetDontMove) stops a walking resident at the END of his current
+sandbox leg, three to eighteen seconds after the call (x-npc-hold v2 232956 measured three to six on one sample; b-npc-talk's
+stillness reds 215828 and 053717 held Sven as a leg began and read him walking eleven seconds on, every rule intact, the
+record moved by his host's own reports): a stillness read waits out a whole leg (v7, 24 s; 22:59 PDT 2026-10-30), and the
+verb's own claim never depended on the hold (talkService withdrew it: a held actor cannot turn to face its partner).
 
 ## Message contract
 
