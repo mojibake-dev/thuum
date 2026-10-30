@@ -3456,3 +3456,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   relaunched seat (the earlier suspicion withdrawn); Sven, who stands by her, took the bolt in the five seconds between the aim and
   the key. v5 by path holds Sven on the host first and takes the aim right before the key (approach, equip, draw, wait, pitch, dump,
   key); the mouse-aimed grab keeps its dy for the restage's read.
+- 07:40 PDT: the restage's first probe, x-prop-push v4 (143032; numidium): the client fix WORKS. Both seats placed the tankards at their
+  record and the host simulates both Dynamic ("prop 3975b placed at its record", "simulated here: Dynamic"); two premises red: my
+  walker claim compared server.actor's x, which lab-api gives as offsets from lab-spawn's origin for the Tamriel worldspace (server.ref
+  and the seats' listings are absolute), with an absolute number; and the 1.2 s run from 150 west drifted 18 degrees north even with
+  the heading set (look's SetAngle never turns the view, a teleport's heading does; the slope's doing, most likely), 50 units north
+  of the tankards at their x. v5 of push (sha1 44ece46d) and pass (36043def): the walker starts 40 units off and runs 0.7 s, its claim
+  relative to a start snapshot in server.actor's frame. The frame fact is in memory (lab-server-position-frames).
