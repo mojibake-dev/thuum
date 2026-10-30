@@ -3119,3 +3119,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   read; S1/S2 limits; the collision and the fade reads named). Premise corrections recorded: b-npc-puppet never asserted the two-seat
   shout's inCombat claim the doc describes (a probe before any scenario claim), x-raise-wall has no dual-cast or interrupt step, and
   no Raise Wall claim has been read in the lab yet (both x-raise-wall runs died at a teleport before any cast).
+- 17:26 PDT: D64 (numidium's memo on the idle packet cost, the recommended C taken under the pass's rule): outbound packets leave on a
+  60 Hz flush clock in wire-transport (FlushClock, SEND_INTERVAL_DEFAULT; a zero interval is the old shape; a disconnect flushes at
+  the next poll), the tick and the ingest untouched; fork m3-send-rate cut from 3o ee44f7d1, pushed server-only (the crate changed,
+  so its difftest builds on the push); cargo tests (the clock's own case: the interval kept with its remainder, no burst after a
+  stall, a request honored) and clippy green locally. Asked of numidium: the idle read on its image (about 60 a second expected),
+  the full T2, the touched verbs' gate when the lab is back. The note under ADR-011 in DECISIONS.md; WIRE.md's Transport section
+  carries the schedule.
