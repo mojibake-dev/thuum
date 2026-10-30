@@ -89,8 +89,8 @@ hook's event send hops to the JS thread.
 
 ## Status
 
-- [ ] doc complete, inventory listed with a disposition per row, rung declared
-- [ ] engine surface cited or delegated (the touch: delegated to the re-analyst)
+- [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:36 PDT 2026-10-29 by the pass: the Engine surface table and the Observe, Impose, Suppress split carry a disposition per row; Rung R2 for the transform, R0 for the claim, declared at the top; the reference trace is the stage's, lab/references/prop-push.json when x-prop-push runs under the recorder)
+- [x] engine surface cited or delegated (ticked 17:36 PDT 2026-10-29 by the pass: every row cites CommonLibSSE-NG by file:line; the touch was delegated to the re-analyst and read, docs/research/m3/re-havok-contact.md, its ids 79131, 78304 and 26003 by `just addr`, HYPOTHESIS until lab/frida/prop-contact.js)
 - [x] message contract in wire-schema with validators and fixtures (same commit; b752b262)
 - [x] server rule in Rust with T0 (8575e59b; the C++ T0 PropTest runs on CI)
 - [ ] native hook + T1 (the contact hook BUILT, fork m3-prop-physics d4a75d02: a Gum on-enter detour on 79131 filtered to the player's proxy controller and the clutter and props layers, one propContact event per prop per 250 ms through the tick queue; T1 none, the trace at the stage; the transform read and the Keyframed set are the platform's own natives)
