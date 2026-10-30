@@ -1312,6 +1312,13 @@ id's first "sights" line stands within 1 s of the grant line (a log-timestamp pa
 CellHostTest proves the mechanism, the lab the timing). A client belt for later: hostService.onHostGrant resetting
 lastSightings so the next poll reports at once.
 
+The review of m3-pass-train-1 (18:08 PDT 2026-10-29) hardened the hold (7b8ff8ea): the dedupe key is the pair (reporter, reference),
+so a second reporter's roster no longer evicts the first's entry and the grant replays the new host's own entries while keeping the
+others for their own grant inside the expiry; the hold is bounded across cells (kHeldSightingsTotal 1024, the oldest dropped at
+the cap with a warn once per 10 s), swept once a second from the cell-host tick (the 30 s expiry no longer waits for a new
+sighting of the same cell), and a reporter's entries are forgotten at its disconnect beside the cells rule's gone. CellHostTest's
+two new cases drive the pair key and the bound; HeldSightingsCount is the lab's read.
+
 ## Status
 
 Doc drafted 2026-10-21, before any code. Build begun 2026-10-21 17:41 PDT
