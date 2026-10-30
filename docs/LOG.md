@@ -3255,3 +3255,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   711 once, 04:40 to 04:42Z); 3o's relaunch-mode gate stopped itself on two lab faults before any scenario, parity unmoved. The fix is
   a host reboot, Eli's call by its standing word. Every seat-free T2 is done (P2, P1, P3 green; the union's reruns alone when seats
   exist). Nothing stages or gates until the reboot; the pass's code half is complete and recorded.
+- 22:20 PDT: the lab is back after the second reboot and 3o's gate runs from scratch in relaunch mode (run set 20261030-050437 on
+  lab-api 09dac44; numidium): c2 relaunched in about 32 s at runs 2, 3 and 5 with zero device resets in core's host log, the first
+  live proof of ADR-036. Five in: smoke, a-restart-persistence, b-duel and b-body-loot green, b-duel red first (step 65's
+  `server.actor(c2).healthPercentage < 0.78` read 0.7851) and green on its cold rerun as ADR-030's amendment runs it; an agent reads
+  that claim's margin (the hits, the regen between them, the timing), never its number. A stale C:\sky-lab\hot.txt inside 3o's
+  clean-m1-next made c1 roll back at every run; install-lab clears it from main 7be6465, numidium deletes it by hand for this gate.
