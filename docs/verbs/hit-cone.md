@@ -99,7 +99,8 @@ IronSword and swings with attackStart.
   - a Dunmer, or a race without attack data: 80, and 115.
 - **Exceptions.** Dead targets and a target on top of the attacker pass.
 - **Refusal.** A hit outside the bound is dropped and logged E_HIT_CONE.
-- **Scope.** Player against player, as the reach is.
+- **Scope.** Players and humanoid NPCs (a playable race), as targets and as host-reported aggressors, as the reach is
+  since fork m3-npc-reach 7a80172c (14:17 PDT 2026-10-29); creatures and the non-playable humanoid races keep the old bound.
 - **Inputs.**
   - libespm reads the race's widest strike angle (RACE ATKD);
   - the C++ core passes the heading, the positions and the kept power flag

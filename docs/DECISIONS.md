@@ -557,6 +557,19 @@ players a rest, however long ago the last hit. Other options weighed: 10 s
 or 30 s without a hit (an exploit window: step back and rest), and distance
 alone (standing together never ends it).
 
+**Amendment (2026-10-28 21:29 PDT, thuum-magnus under the no-questions rule; Eli may veto):** a fight is also
+recorded between a player and a hosted NPC. The read of H-53h (docs/verbs/npc-stream.md) found that the Flame
+Atronach's cloak damage effect carries condition function 719, IsHostileToActor (CommonLibSSE-NG TESCondition.h:865),
+which the server already implements as "a fight recorded between the two parties"; NotifyHostility only ever recorded
+fights between two user-played actors and TickFights forgot any pair with a non-user member, so every NPC-to-player
+effect gated on hostility was refused forever, the cloak included (a player standing in the fire took no server
+damage). The rule now admits a hosted NPC (an actor with a host) as a party: a hit by or on it with a player on the
+other side begins the fight, the 60 s and walk-apart ends stand, the rest refusal follows, and the StartCombat snippet stays between two players (a hosted NPC's victim is its host engine's to fight, a
+player's copy of a hosted creature is AI-off, so a creature's hit on a player sends no notice; the server's rest
+refusal is what that player keeps). Between two hosted NPCs nothing is
+recorded (the engine's own business on the host). Fork m3-npc-fights; T0 in NpcCastTest's cloak case regains its
+damage claim (5 of 250 per cadence after the first Firebolt), the wire-rules tests cover the three pairs.
+
 ## ADR-024: The full sweep runs at the merge, not per verb
 
 Status: accepted (2026-10-05, Eli: "please yes that's great").
@@ -3060,6 +3073,17 @@ a seat whose relaunch fails twice and for the snapshot promotions. UNMEASURED un
 day: the minutes saved per run against the rollback's, and any state a relaunch carries that a
 rollback cleared.
 
+Note 2026-10-30 (numidium, thuum-cf agreeing under the pass's rule; amends ADR-030's cold-rerun amendment): a red
+run in which a seat relaunched is rerun relaunched first, costing no card a reset; only a second red is rerun with
+every seat rolled back, and the last rerun's verdict is the scenario's. Red, red and a cold green is green for the
+gate and a finding by name about relaunch-carried state, since the relaunched and cold seats disagreed. Why: the
+first live gate in relaunch mode (run set 20261030-050437) spent an immediate cold rerun, two rollbacks a seat, on
+each of two reds (b-duel's marginal 0.7851 against 0.78, b-npc-talk's NPC drift), and the second preceded sky-c1's
+card wedging at 05:39:41Z. The same night lab-api learned that a stale hot mark (one older than a dist laid since)
+is removed, not obeyed; that the capture folders are cleaned as far as they go; and that a VM that cannot start
+stops the set with no rerun. Measured: c2 relaunched in 31 to 33 s against 55 to 64 s for a rollback, with zero
+device resets per relaunch by core's count of the host's vfio lines.
+
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 
 Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
@@ -3301,3 +3325,125 @@ relay, the probe x-quest-stage (c1's console setstage on a listed quest reaches 
 an unlisted quest refused in the log; a restart keeps the stage) once lab-api has a quest-stage read, then scenario
 b-quest-stage. The dialogue work (npc-talk) stands on it: a line conditioned on a stage is offered on both seats once
 the stage is shared.
+
+
+## ADR-057: Spell-placed world objects are the server's, from a table keyed by spell and anchor (Raise Wall)
+
+Status: ACCEPTED under the overnight rule of 2026-10-28 ("take the recommended option, record the call"), 07:2x PDT
+2026-10-29 (thuum-magnus; written PROPOSED 22:01 PDT 2026-10-28; Eli, playtest 37: "im impatient, can we try getting
+raise wall working?"). Built and T0 green on m3-turbo-train-3o-win ee44f7d1. Eli's veto reverses it to ADR-029's
+allowlist entry (B below) at the cost of the natives.
+
+Context. Apocalypse's Raise Wall (SPEL 0xcc14, a self-delivery concentration spell) places a wall MSTT 0x98529 (a
+Havok body, no navcut) and a glow ACTI 0x735e8 by its effect script in the caster's game alone, 192 units ahead along
+the caster's yaw, Z -48, for the concentration plus a 5 s fade (apocrypha's disassembly of WB_FabricateWall_Script,
+2026-10-28). ADR-029's default (scripts run in the caster's game) is why the other seat saw nothing (numidium's
+refs-near diff at 04:25Z: the two references on c1, none on c2), and ADR-029 left the first allowlist entry open.
+apocrypha's corpus read (docs/research/apocalypse/placed-objects.md on apocrypha/alternate-start): three families by
+anchor, caster (Raise Wall, Fabricate Object, Wind Running), hit target (Tharn's Prison, Enter the Dungeon, Banish
+Living), projectile impact (Summoning Rune, Wellocs Instant Forest).
+
+Decision. Shape C of docs/verbs/spell-placed-object.md: the server places the objects itself from a settings table
+(spell, anchor, bases with offsets, lifetime rule, caps) when it accepts the cast start it already records
+(PartOne::StartCast, wire-rules casts), deletes them 5 s after the cast's end, a disconnect or a cap, and every seat
+receives them through the server-object path (collision comes with the mesh on every seat); the caster's game keeps
+the script's own copies and skips the server's whose placed_by names itself; the rise and the shaders are the client's
+cosmetics (R3, a later slice); the knockdown explosion and a wall placed where the caster's engine chose the
+no-room message are listed limits. Not chosen: A, the caster's game reporting the script's placements (Skyrim
+Platform intercepts no PlaceAtMe, and a client's pose would be trusted); B, the server running the script through
+ADR-029's allowlist (GetAngleZ, Sin, Cos, TranslateToRef missing and PlaceAtMe delegated, so no server object would be
+born).
+
+Consequences. A wire change (CreateActorProps gains placed_by, the schema bump, validator and fixtures in one commit,
+rule 4), a DB field placedBySpell with a sweep at load (rule 6), the table in both deploy settings files, T0 for the
+pose, the gate, the caps and the lifetime, T2 for the relay, the probe x-raise-wall and scenario b-spell-placed-wall
+(the wall on both seats within 2 s and 16 units, neither walks through it, gone on both within the lifetime, a late
+joiner sees it). v1 ships Raise Wall alone on the caster anchor; Fabricate Object's menu choice (a client-reported
+base id validated against the spell's list) and Wind Running's per-update placement are later deltas; the hit-target
+and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
+
+## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
+
+Status: PROPOSED 14:06 PDT 2026-10-29 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes.
+Eli's words: "heavy progress made into physics items. i feel like the canon perfection of multiplayer phys objects is gmod if
+that mental model helps at all", and "i had a friend add air strafing from the source engine to openmw i would imagine the
+networked portion physics object functionlity can be borrowed in a similar way" (2026-10-29).
+
+Context. The law gives physics to the host client (R2: the host computes, the server records; ADR-002 forbids server Havok), and
+nothing in the fork moves a prop between seats today: every item reference and spawned object is forced Keyframed on arrival
+(skymp5-client objectReferenceEx.ts, spawnProcess.ts), the loader skips movable statics (MSTT), and a kicked basket or a dropped
+sword moves on one screen alone. PLAN.md's M3 line "physics host switching for movables" has had no code (the pass's audit).
+Garry's Mod is Source: the server runs VPhysics and is the one truth, clients interpolate the networked origin and angles and
+predict only their own player, and a held or pushed prop's motion controller is the server's (Valve, "Source Multiplayer
+Networking", developer.valvesoftware.com/wiki/Source_Multiplayer_Networking; Bernier, "Latency Compensating Methods in
+Client/Server In-game Protocol Design and Optimization", GDC 2001). We cannot run the physics on the server, so what we borrow is
+the networked portion, as Eli's friend borrowed Source's air strafing into OpenMW without its physics: ONE simulator per prop,
+positions and angles networked only while the body is awake, interpolation on every other seat, and the simulator chosen by
+the interaction (Fiedler, "State Synchronization", gafferongames.com, 2015; "Networked Physics in Virtual Reality", GDC 2018).
+
+Decision 1, one simulator per prop. A prop is simulated by exactly one seat at a time: the cell's host by default, and the seat
+whose player last touched it (a Havok contact of its character controller, a grab, a drop, a shout's or spell's impulse) for as
+long as its lease holds (PROP_LEASE_MS, 3000 after the body sleeps; UNMEASURED). The owner table ADR-050 decision 4 and ADR-052
+named gets its second row kind: "prop" beside "follow", "margin" and "claim"; the cell is still the policy (a prop in an
+unhosted cell freezes at the record). Rung: the claim R0 (the server decides who simulates, on the toucher's report, newest touch
+wins by epoch), the transform R2 (the simulator's engine computes, the server records).
+
+Decision 2, the wire. Three rows in wire-schema, each with its validator in the same commit (rule 4): PropTransform {refr,
+pos, rot, asleep} from the simulator at most every 100 ms while the body is awake and once at sleep (C2S), relayed to the
+cell's other listeners (S2C) as a delta; PropClaim {refr, touch} (C2S) from the seat whose player touched a prop it does not
+simulate; PropOwner {refr, player, epoch} (S2C) to every listener at each change. The record keeps the last transform and the
+asleep flag (the reference's locationalData; no schema change for items, MSTT records are slice two's).
+
+Decision 3, the seats. The simulating seat's body is Dynamic and streams; every other seat's body is Keyframed and takes the
+stream's transform (SetPosition and the rotation through the rigid body's setters; interpolated over the sample interval as a
+figure is), so it neither falls nor fights the stream; at an owner change the new simulator's body goes Dynamic with the last
+streamed velocity (HYPOTHESIS: the hand-over is seamless at 100 ms samples) and the old one goes Keyframed. Nothing predicts.
+
+Decision 4, the slices. One: items the server already loads (MISC, WEAP, ARMO, ALCH, INGR, BOOK references with Havok, a drop's
+reference from its first frame), the probe x-prop-push (c1 walks into a basket; c2 sees it move within 32 units of c1's and rest
+where c1's rests) and x-prop-pass (c2 kicks it back: the owner flips, c1 interpolates). Two: movable statics (MSTT) admitted by
+the loader as references (the dead-placed fix's shape) and the Blue Palace's physical container. Three (later, M4): dragging and
+telekinesis as touches, ragdoll bodies under the same rows (finding 71's settle becomes a PropTransform of the body).
+
+Consequences. The observe/impose/suppress split: observe the Havok awake state and transform on the simulator (bhkRigidBody,
+hkpMotion: CommonLibSSE-NG H/hkpMotion.h, B/bhkRigidBody.h; the sleep signal is the simulation island's active mark,
+H/hkpSimulationIsland.h, the headers hold no isActive); impose the transform on the others (TESObjectREFR::SetPosition, the
+body's SetRotation, SetMotionType Keyframed: N/NiAVObject.h's SetMotionType); suppress the others' dynamics (Keyframed). The
+touch detection has no header entry point (the character controller's contact callbacks exist as listener lists nobody adds
+to: B/bhkCharProxyController.h, H/hkpContactListener.h) and is the verb's RE task; until it lands, slice one's touch is the
+player's grab and drop plus proximity to an awake prop (the nearest player within 128 units of a body that woke claims it).
+Known limits: no prediction (a prop a seat does not simulate moves a sample behind), stacked props flip owners by contact, a
+prop in an unhosted cell freezes, bodies and props stream on the same budget (prop_budget UNMEASURED).
+
+Note, 16:53 PDT 2026-10-29 (the pass, thuum-magnus): slice two's premise read against the master file. esm.py on sky-srv (Skyrim.esm
+1.6.1170, `near 0x3c` within 3000 units) lists eight MSTT references around Riverwood's spot and none around lab-spawn, every one
+of them an effect or an animated static (FXMotesForest01 three times, FXSmokeChimney02, FXMistStreet01, FXrapidsBig01, a burning
+Campfire01LandBurning, a SpitPotOpen01), nothing a player kicks; no CONT editor id in Skyrim.esm contains "Palace" or "Phys", so the
+roadmap's "physical container" of the Blue Palace stays unidentified. The props a player moves are items (slice one's set) and, in
+dungeons, the traps' bodies (M4's d-bleak-falls). Decision 4's slice two is therefore deferred to M4 with the dungeon work (the
+loader's MSTT admission costs records and arrival messages for effect objects and buys nothing in the lab's cells), and head 3 of
+the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
+position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
+budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first.
+
+Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet
+cost. Facts: the gamemode loops `server.tick()` then a 1 ms setTimeout (skymp5-server/ts/index.ts:222-227), about 816 ticks a
+second on sky-srv; the transport flushed renet at every poll (wire-transport lib.rs's poll), so every connected client took about
+815 small packets a second, near 45 KB/s with UDP and IP headers, about 365 kbit/s per idle player; the client answers at its own
+rate (184 a second from the fakeclient's 5 ms loop); an unfiltered capture showed the lab's server sending the same 31 B stream to
+both seats, so this is every player's cost. Options: A) leave it, the cost scaling with players (eight idle players about 3 Mbit/s
+up from the server, plus a busy loop); B) a fixed server tick at 1/60 s, which cuts ticks about 13x but changes the cadence of
+every system the tick drives (PartOne::Tick's timers, the VM, ingest latency up to 16.7 ms) and reopens every T2 and T3 timing
+claim; C) a send schedule in wire-transport, the tick and the ingest untouched, the outbound flush on a fixed 60 Hz clock, a message
+waiting at most 16.7 ms, one crate and one timer, server side only, no wire row and no schema change. Prior art for C: a fixed
+network send rate decoupled from the simulation step (Fiedler, "Fix Your Timestep!", Gaffer On Games, 2004; Valve, "Source
+Multiplayer Networking", developer.valvesoftware.com, the tick rate and the update rate as separate settings; Bernier, "Latency
+Compensating Methods in Client/Server In-game Protocol Design and Optimization", GDC 2001). Decision: C at 60 Hz, fork m3-send-rate
+(wire-transport's FlushClock, SEND_INTERVAL_DEFAULT 1/60 s, the bridge binding with it). Proof: the idle read again on the branch's
+image (about 60 packets a second expected, nothing after the close), the full T2, and the touched verbs' gate, since npc-stream's
+relay cadence and cell-host's grant timing ride the send path; a T3 timing claim the extra 16.7 ms moves has its margin read, never
+weakened (rule 13).
+Proof, 18:43 PDT 2026-10-29 (numidium's reads on sky-srv, the same idle script): 59.98 small packets a second to an idle client
+against 814.8 before (3,304 in 55.1 s, all 26 B, a median gap of 16.6 ms), the loop still at 847 ticks a second (only the flush
+moved), nothing after the close; the full T2 GREEN (difftest 14302, every session identical to legacy but its declared lines).
+The branch's merge waits for the touched verbs' gate when the lab is back.

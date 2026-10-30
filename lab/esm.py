@@ -21,6 +21,8 @@ field's size is the uint32 that XXXX carried.
     esm.py id <plugin> <form id>
     esm.py races <plugin>
     esm.py attacks <plugin> <race editor id substring>
+    esm.py quests <plugin> [sge|all]
+    esm.py cellrefs <plugin> <cell form id> <TYPE,TYPE,...>
 
 `near` lists the references placed in a worldspace within a radius (in the
 x-y plane) whose base record is one of the types, e.g. FLOR,CONT,ACTI,DOOR:
@@ -34,7 +36,16 @@ lists a race's attack data, one ATKD and its ATKE event name per attack
 attack angle, strike angle, stagger, attack type, knockdown, recovery,
 stamina mult; the same order as CommonLibSSE-NG's BGSAttackData::AttackData).
 The strike angle is the half angle of the engine's hit cone for that attack
-(docs/verbs/melee-reach.md).
+(docs/verbs/melee-reach.md). `quests` lists the plugin's QUST records with their
+DNAM flags (UESP, "Skyrim Mod:Mod File Format/QUST": uint16 flags, 0x01 Start Game
+Enabled, 0x100 Run Once; then priority, two unknowns and the uint32 quest type), the
+facts behind docs/verbs/quest-stage.md's D62 (a Start Game Enabled quest is each
+seat's own under sharing mode all unless the settings allow it); `sge` keeps the
+enabled ones. `cellrefs` lists the references placed inside one interior cell
+(the CELL record's children group, type 6, and its temporary and persistent
+subgroups 8 and 9) whose base record is one of the types, with each base's
+editor id and the reference's position: the probes' ids for an interior (a
+pressure plate and its trap in Bleak Falls Temple), where `near` cannot reach.
 """
 
 from __future__ import annotations
@@ -52,6 +63,9 @@ RECORD = struct.Struct("<4sIIIHHHH")
 RACE_FLAGS_AT = 32
 RACE_PLAYABLE = 1 << 0
 RACE_CHILD = 1 << 2
+# QUST DNAM flags (UESP, "Skyrim Mod:Mod File Format/QUST")
+QUST_START_GAME_ENABLED = 0x01
+QUST_RUN_ONCE = 0x100
 GROUP = struct.Struct("<4sI4siHHI")
 FIELD = struct.Struct("<4sH")
 COMPRESSED = 0x00040000
@@ -167,6 +181,61 @@ def near(buf: bytes, world: int, x: float, y: float, radius: float, types: set[s
             btype, boff = bases[base]
             out.append(Placed(fid, base, btype, record_at(buf, boff)[0].editor_id, (px, py, pz), d))
     return sorted(out, key=lambda p: p.distance)
+
+
+def cell_children(buf: bytes, cell_id: int) -> tuple[int, int] | None:
+    """The byte range of an interior cell's children group (type 6, labelled
+    with the cell's form id), found inside the CELL top group's block and
+    sub-block groups (types 2 and 3)."""
+    def walk_groups(start: int, end: int) -> tuple[int, int] | None:
+        pos = start
+        while pos + GROUP.size <= end:
+            if buf[pos:pos + 4] == b"GRUP":
+                _, gsize, label, gtype, *_ = GROUP.unpack_from(buf, pos)
+                if gtype == 6 and struct.unpack("<I", label)[0] == cell_id:
+                    return pos + GROUP.size, pos + gsize
+                if gtype in (0, 2, 3):
+                    hit = walk_groups(pos + GROUP.size, pos + gsize)
+                    if hit:
+                        return hit
+                pos += gsize
+                continue
+            _, size = struct.unpack_from("<4sI", buf, pos)
+            pos += RECORD.size + size
+        return None
+    pos = 0
+    while pos + GROUP.size <= len(buf):
+        if buf[pos:pos + 4] == b"GRUP":
+            _, gsize, label, gtype, *_ = GROUP.unpack_from(buf, pos)
+            if gtype == 0 and label == b"CELL":
+                return walk_groups(pos + GROUP.size, pos + gsize)
+            pos += gsize
+            continue
+        _, size = struct.unpack_from("<4sI", buf, pos)
+        pos += RECORD.size + size
+    return None
+
+
+def cellrefs(buf: bytes, cell_id: int, types: set[str]) -> list[Placed]:
+    span = cell_children(buf, cell_id)
+    if span is None:
+        return []
+    bases = {fid: (t, off) for t, fid, off, _ in headers(buf, 0, len(buf), types) if t in types}
+    out: list[Placed] = []
+    for t, fid, off, _ in headers(buf, span[0], span[1], None):
+        if t not in ("REFR", "ACHR"):
+            continue
+        rec, _ = record_at(buf, off)
+        name, data = rec.get("NAME"), rec.get("DATA")
+        if not name or not data or len(data) < 12:
+            continue
+        base = struct.unpack("<I", name[:4])[0]
+        if base not in bases:
+            continue
+        px, py, pz = struct.unpack_from("<3f", data)
+        btype, boff = bases[base]
+        out.append(Placed(fid, base, btype, record_at(buf, boff)[0].editor_id, (px, py, pz), 0.0))
+    return sorted(out, key=lambda p: p.form_id)
 
 
 def ref(buf: bytes, form_id: int) -> tuple[Record, int | None] | None:
@@ -295,6 +364,33 @@ def main(argv: list[str]) -> int:
             for a in attacks:
                 print(f"  {a.event:32} strike {a.strike_angle:g} angle {a.attack_angle:g} flags {a.flags:#x}")
         return 0 if hits else 1
+    if len(argv) in (3, 4) and argv[1] == "quests":
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        only_sge = len(argv) == 4 and argv[3] == "sge"
+        quests = list(walk(buf, 0, len(buf), "QUST"))
+        shown = 0
+        for rec in quests:
+            dnam = rec.get("DNAM") or b""
+            flags = struct.unpack_from("<H", dnam)[0] if len(dnam) >= 2 else 0
+            qtype = struct.unpack_from("<I", dnam, 8)[0] if len(dnam) >= 12 else -1
+            sge = bool(flags & QUST_START_GAME_ENABLED)
+            if only_sge and not sge:
+                continue
+            shown += 1
+            full = rec.get("FULL") or b""
+            name = f"lstring {struct.unpack('<I', full[:4])[0]:#x}" if len(full) >= 4 else "unnamed"
+            print(f"{rec.form_id:#010x} {rec.editor_id:40} flags {flags:#06x}{' SGE' if sge else ''}"
+                  f"{' once' if flags & QUST_RUN_ONCE else ''} type {qtype} {name}")
+        print(f"# {shown} of {len(quests)} quests shown", file=sys.stderr)
+        return 0 if shown else 1
+    if len(argv) == 5 and argv[1] == "cellrefs":
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        placed = cellrefs(buf, int(argv[3], 0), set(argv[4].split(",")))
+        for p in placed:
+            print(f"{p.form_id:#010x} {p.base_type} {p.base_id:#010x} {p.base_editor_id} at ({p.pos[0]:.0f}, {p.pos[1]:.0f}, {p.pos[2]:.0f})")
+        return 0 if placed else 1
     if len(argv) == 4 and argv[1] == "ref":
         with open(argv[2], "rb") as f:
             buf = f.read()
@@ -306,8 +402,11 @@ def main(argv: list[str]) -> int:
         base = struct.unpack("<I", (rec.get("NAME") or b"\0\0\0\0")[:4])[0]
         scale = struct.unpack("<f", rec.get("XSCL"))[0] if rec.get("XSCL") else 1.0
         pos = struct.unpack_from("<3f", data) if len(data) >= 12 else (0.0, 0.0, 0.0)
+        # DATA: position then rotation, radians (UESP, "Skyrim Mod:Mod File Format/REFR")
+        rot = struct.unpack_from("<3f", data, 12) if len(data) >= 24 else (0.0, 0.0, 0.0)
+        deg = tuple(round(r * 180.0 / 3.141592653589793, 1) for r in rot)
         where = f"world {world:#x}" if world is not None else "a cell"
-        print(f"{rec.type} {rec.form_id:#010x} base {base:#010x} in {where} at ({pos[0]:.1f}, {pos[1]:.1f}, {pos[2]:.1f}) scale {scale:g}")
+        print(f"{rec.type} {rec.form_id:#010x} base {base:#010x} in {where} at ({pos[0]:.1f}, {pos[1]:.1f}, {pos[2]:.1f}) rot ({deg[0]:g}, {deg[1]:g}, {deg[2]:g}) deg scale {scale:g}")
         if rec.get("XMRK") is not None:
             # a map marker (docs/verbs/map-markers.md): FNAM flags (visible,
             # can travel to, show all hidden), TNAM type (the engine's

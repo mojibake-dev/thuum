@@ -59,9 +59,15 @@ steps:
   # record read still (two snapshots three seconds apart within five units), c2's approach to 70 units in his
   # record's frame, now accurate, a short aim check on c2's crosshair (dump-state's crosshairRef, what E acts
   # on; lab-api's until re-dumps the client each poll), then E at once; the claim's gates read the record's
-  # reach and the same world
+  # reach and the same world.
+  # v7 (2026-10-30, the read of 20261030-053717 and 20261029-215828, both red at the stillness pair on 3o-win's
+  # gate before any claim ran): SetDontMove holds him at the END of his current sandbox leg, and a leg is three to
+  # eighteen seconds depending on where the hold lands (the greens' legs ended inside eight seconds, the reds'
+  # began as the hold landed and ran eleven seconds and more; the record moved on the host's own reports, every
+  # rule intact). So the settle waits out a whole leg before the snapshot pair; the five-unit bound is unchanged.
+  # x-npc-hold v3 (by path, snapshots every three seconds for thirty) measures the leg's upper bound at the stage.
   - c1: npc-hold {formId: 0x13491, held: true}
-  - wait: 8
+  - wait: 24
   - server: snapshot {name: s1, of: "server.ref(0x13491)"}
   - wait: 3
   - assert:

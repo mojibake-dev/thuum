@@ -2761,3 +2761,609 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 20:58 PDT: the re-analyst's read of the corpse crash (docs/research/m3/re-corpse-menu-crash.md): the item card's RequestItemCardInfo read a stale row (ExtraDataList::GetByType 12329 on a freed presence pointer of the body's Long Bow list) after the server's inventory landed under the open loot menu with no null posted (the by-name gate false under Skyrim Souls); a posted null would have rebuilt the rows first, so the body exclusion (becfd02e) was the gap: reverted on m3-face-twelve (the body announced as any target), pushed as m3-turbo-train-3e for the dist after 3d. Finding 50's row corrected in the playtest doc.
 - 21:12 PDT: m3-turbo-train-3f 6e0fbd3f pushed (3e plus two): the platform's silent item-menu post names its reason and both handles (m3-face-twelve 96fa4545: refreshContainerMenu's "not posted" and addItemEx's one case where the open menu's target is the changed reference by form id; CommonLib's GetTargetRefHandle static 405962 is the one the item card reads, so the comparison should hold, the log settles it); the quest-stage apply starts a quest not running on the seat before setting the world's stage (m3-quest-stage 5c282842, after numidium's live read at 03:59Z: set-stage 10 on A Lovely Letter 0x74a83 left both seats at stage 0, running false; the driver's set-stage gained {start: true} on main 87b6c09 and x-quest-stage uses it, probe-check ok). apocrypha's defaults layer (539496c): the three lock moves recorded in mod-lock.md (the lock follows the server's files, nothing hand-kept) and game-ini.tsv as the installer's input in ADR-055's notes. Reads running on findings 53 (the double projectile, the launch hook's growth over reloads) and 54 (the unsampled reanimation).
 - 21:26 PDT: findings 53 and 54 read (two code-read agents on the 3f tree). 53: the extra bolts are the server's RelayCast fanning a hosted caster's cast to every actor listener and mapping each OFFLINE listener (the server-made NPCs the host hosts near the caster) to that host, so c1 got 10 to 13 copies per cast and performed castSpellImmediate on its own live atronach for each (the 5 to 7 hits per cast in the server log); the watcher got one copy; the "growth over reloads" was the log tee repeating blocks, no listener leak (ClearState clears every hook listener at a reload). Fix building on fork m3-cast-relay: RelayCast skips listeners with no user (the UpdateHoster rule), a client guard against performing a relayed cast on an actor this game hosts, a count line for puppet launches on the watcher (its own second bolt undetermined: the candidate is the puppet's engine firing from a relayed creature release event). 54: the server's resurrection branch exists (a dead record whose host samples health above one point is respawned alive), but the host's dead-promoted body keeps AI off (H-54e) and under AI off the engine's Actor::Resurrect from the Reanimate effect does not take, so isDead stays true, the sampler sends 0, the word never comes and the thrall has no AI anywhere; DiedAgo is also nullopt for a death before the server's start. Fix building on fork m3-reanimate: an Actor::Resurrect hook enabling AI for a hosted body (FateApi::ResurrectActor's shape engine-wide, HYPOTHESIS), the host's dead-to-alive sample sent reliable, nullopt DiedAgo past the grace, 0xff copies through the watcher's resurrect path. Also read: the hands after a relaunch (SetInventory equips the player with forceEquip false, armor sticks and weapons do not, the +3 s report then overwrites the record's hands; fix building on m3-hands: the hands re-equipped as applyHands does) and movement (a lead shorter than the sample interval stalls the figure between samples, Eli's "frames are missing"; longer yoyos; a "follow" mode building on m3-follow-mode: one engine translateTo to the newest sample at distance over the smoothed interval, HYPOTHESIS). Raise Wall: numidium's first addspell failed on the argument (a FormDesc where the console wants the integer form id), granted at 04:22:00Z as 1a00cc14; apocrypha asked for the mod's script shape.
+- 21:38 PDT: three client fixes pushed and bundled as hot-3g-1.js (sha 4c048817, from de7ac33a = 3f plus the three) for numidium to lay after 3f's dist: m3-hands b7d14614 (the player's hands re-equipped a tenth of a second after the login's equipment apply; finding 45's cause: SetInventory's un-forced equip leaves the player's weapons unequipped and the +3 s report overwrote the record; H-45a), m3-cast-relay c5e3f470 (the host declines a relayed cast on an actor it hosts, the watcher counts each puppet's spell launches; the server's RelayCast sends only to listeners with a user, T0 in NpcCastTest with two offline bystanders), m3-follow-mode c84da2c3 (movement.mode "follow": the glide to the sample itself timed by the smoothed arrival spacing times followMargin; H-MV1; the lab template already carries mode follow and followMargin 1.15, the code default stays lead). m3-reanimate and m3-npc-fights still building; 3g = de7ac33a plus both.
+- 21:41 PDT: m3-reanimate 9ef0d567 pushed (finding 54: the Character vtable hook on Actor::Resurrect enabling the AI for a hosted body, the host's dead-to-alive sample reliable, a death with no stamp of this process past the grace with its T0, a 0xff copy's live word through resurrectActor; H-54f/g in npc-fate.md) and merged with the hot bundle's three into m3-turbo-train-3g d1f3e393 (pushed, the mirror builds its dist; image and dist together, no wire change). m3-npc-fights still building; it lands as a 3h image under 3g's dist.
+- 21:57 PDT: m3-npc-fights a739b267 pushed (H-53h: 719 is IsHostileToActor, already implemented; the fights table never admitted a hosted NPC; HitFacts carry the hosted sides, the rule counted takes a player against a player or a hosted NPC, TickFights keeps the pair, the StartCombat notice stays between players; NpcCastTest's cloak case regains its damage claim, 0.9 to 0.88 after the fight begins; wire-rules 231 tests and clippy clean) and merged into m3-turbo-train-3h 86d06cd4 (pushed; server-only over 3g, same wire, so 3h's image goes under 3g's dist). Eli: "i say we wait and restart for everything": no 3f lay and no hot bundle; the one lay is 3g's dist (due about 05:12Z) with 3h's image if green. Three probes by path written and probe-check ok: x-hands-relaunch, x-figure-follow, x-npc-creature-caster (grammar asks to numidium: a worn membership fact, a watch trackMs, an accepted-cast server line).
+- 22:01 PDT: Raise Wall: docs/verbs/spell-placed-object.md DRAFT (the agent's draft with apocrypha's script and corpus reads: three shapes, C recommended: the server places from a table keyed by spell and anchor at the accepted cast start, deletes 5 s after the end, the caster keeps its own copies) and ADR-057 PROPOSED on it; the fail script only shows a message, so a wall placed where the caster's engine chose no room is a listed v1 limit. m3-cast-log f4fa71a2 pushed (the accepted-cast server line, for a later image).
+- 22:13 PDT: RED on every Windows client build since 3d: 0831dfe1's vendor read called actor->GetVendorFaction() for its recompute and discarded the [[nodiscard]] return, MSVC C4834 under /WX (the mirror's runs of 3e, 3f and 3g all failed at that statement; fork-lint checks formatting and the codegen, not warnings), so no dist existed tonight and the lay waited. Fixed on m3-face-twelve ade31a83 (std::ignore takes the value) and merged as m3-turbo-train-3i 60c25b8d (3h plus the hunk; 3h's image pairs); the same tree pushed as m3-turbo-train-3i-win without the knob so GitLab's Windows client build runs on sky-build (about 10 min against the mirror's 45 cold), numidium takes the first green dist. m3-cast-log waits for the next image.
+- 22:45 PDT: Raise Wall's server and wire half pushed, fork m3-spell-placed 5b951a9c (CreateActorProps.placed_by, schema 20, the validator's MSTT/ACTI pairing, the fixture pair; wire-rules placements.rs with the pose, gate, lifetime; PartOne places 250 ms into a listed cast, removes 5 s after its end, sweeps at load; T0 SpellPlacedTest, seven cases; cargo 240/70/10/21 and clippy clean); the Raise Wall table in both deploy settings files (insert-only) and WIRE.md's paragraph on main. The client half (the caster's game skipping its own copy, the message types widened) is building on m3-spell-placed-client; the dist and the image lay together (schema 20), after tonight's 3i lay. The lay itself is on hold: pipeline 3724's client-build job gave no dist (the runner's pre_build_script ended the job), core retries 13833.
+- 22:58 PDT: Raise Wall's client half pushed, fork m3-spell-placed-client bb7cc946 (createActorMessage.ts takes MSTT and ACTI with placedBy; formView's spawn path skips the server's copy when this game's own reference of the base stands within 96 units of the pose, retrying 2 s, else places it), and m3-turbo-train-3j 922b6624 pushed = 3i plus m3-spell-placed, m3-spell-placed-client and m3-cast-log (schema 20: the dist and the image lay together, after tonight's 3i reads; the mirror builds its dist). The verb doc's Suppress rule rewritten as built; T0, wire and TS boxes ticked; T2, T3 and the scenario open (x-raise-wall and b-spell-placed-wall being written).
+- 23:02 PDT: LAID (numidium): server m3-turbo-train-3i-win-60c25b8d since 05:38:02Z, dist 60c25b8d on both seats by 05:58Z (c2 after a rollback: a stale guest-agent reply, then the agent dead under a QEMU-GA restart), TGM on both, follow movement on from the first launch; the seat tails back on. The quest-stage rerun with start: true: Quest.Start FALSE on A Lovely Letter 0x74a83, stage 0 on both seats, no server line; the record carries a quest-level condition on function 576 GetEventData (TESCondition.h:708) and its Location alias fills from a Change Location story event (ALFE CLOC, VMAD FavorChangeLocationQuest), so only the Story Manager can start it and a bare Start or SetStage is refused by design (finding 57); the finding under it is that the SM never started it on either seat in Riverwood; a read runs on the node and the event, and the probe's quest moves to one SetStage can start. Finding 56: c2's view settles the two old bodies 39fe2 and 39fe4 every 120 ms (their records walked away with the reanimated thralls on the host while the watcher's bodies stayed dead); log noise, a guard for a dead actor whose record is dead is the fix. m3-turbo-train-3j-win 922b6624 pushed for sky-build's client build (3j's dist and image lay together, schema 20).
+- 23:10 PDT: 3j-win's wire-test RED (pipeline 3731): wire-legacy reads a struct's fields positionally from SkyMP's bitstream, so CreateActorProps.placedBy spent a presence bit the old C++ never wrote and the capture's CreateActors misread ("count 396704 beyond the packet"). Fixed on m3-spell-placed 445447b5: LEGACY_ABSENT names the fields the schema gained after the format froze (by struct and serialized name) and the reader hands them an Absent deserializer (an optional reads none), the capture decodes field for field again; a new test asserts a captured CreateActor carries no placer. Trains m3-turbo-train-3j and -3j-win fast-forwarded to 3cc123e0. The Raise Wall probe x-raise-wall is by path (probe-check ok; FormDesc::ToString prints cc14: not 00cc14:, refs-near reads one exterior cell so the seats stand at (0, -200) and (0, 300) with the wall's line at (0, -8), MSTT is form type 36 and ACTI 24) and the scenario b-spell-placed-wall committed alone (0b712b1, self-approved for the next set); both play at 3j's stage.
+- 23:15 PDT: Eli's T4 on the 3i lay ("we're so back"): chests still need the reopen (finding 59: both seats' platform logs read "not posted: the queue gave no message data", the gate and the handle right, so CreateUIMessageData returns no InventoryUpdateData on 1.6.1170; the re-analyst reads the factory and the engine's own posting function 52849), corpses lootable on a first entry without a crash but a body's menu would not open on c2's later tries (finding 58, a read item), bodies killed at the bind play the death sound and lie at the spawn point (finding 61, building: the record's position before a silent kill), movement "looks great" (follow is the code default, m3-follow-mode 2f03b4c4). The atronach: one bolt per cast on the host (the guard holds), the bolt's path differs per screen (finding 60, building: the hosted aimed cast held for its launch geometry), the cloak's fights rule met live (the fight began at 06:10:25Z, the cloak applied at 0.5 times from 06:11:02Z; TGM hid the bar; no cloak visuals on the puppet, a visuals slice).
+- 23:22 PDT: reanimation on 3i (finding 63): rotfern's four casts (Reanimate Corpse and Dead Thrall on ff00000a, 39fe4, 39fe2, 06:17 to 06:18Z) reached the server and no "resurrection by its host's engine" followed; numidium's pull of both seats' platform logs holds ZERO verb:npc-fate lines, and every body lay in Prisoner's hosted cell (labState cellHost 371de: ff000001, epoch 5), so on rotfern's engine they were puppets the detour leaves alone and on c2 the relayed casts' effects never applied; H-54g (the Character vtable slot) is a live suspect until Prisoner's own cast on a body he hosts gives the platform line. The Story Manager read of A Lovely Letter in quest-stage.md (the CK's rule; the parking on questStart building on m3-quest-stage; x-quest-stage moved to MS13Intro 0xb6031). Seat tails off at 06:21:47Z for Eli's stream relaunch (Moonlight windows reopened, both games relaunched under them).
+- 23:25 PDT: m3-npc-launch-geometry 435b4c64 pushed (finding 60: a hosted caster's projectile cast is held up to 400 ms for its launch and goes once with the launch's origin and angles, the player's own shape; no wire change). Both seats relaunched under fresh streams at 06:23Z (TGM, server-confirmed), the seat tails back. Eli's rule for reanimation recorded in npc-fate.md: any player, any body, every screen; the mechanism through the host's engine (the relayed cast's effect there, the Resurrect hook, the sampler, the record) with the SpSnippet Spell.Cast on the host as the deterministic fallback; Prisoner's own cast is the hook's read (H-54g).
+- 23:32 PDT: Eli's overnight goal (verbatim in the session): playtest 38 at 08:30 PDT on one merged train carrying, in pain order, the live shared chest, corpses lootable by anyone any number of times, bodies staying where they died with no death sound at a load, reanimation by anyone standing and fighting on both screens, NPC projectiles landing the same on both screens, Raise Wall on both screens (3j), the atronach's cloak on the watcher and HasPerk on the server, the quest parking with x-quest-stage on MS13Intro and the Story Manager read; also follow as the default, procdump on both seats, finding 31 if time; no questions, the recommended option taken and recorded here. Calls so far: the chest's post goes through the engine's MessageDataFactoryManager creator (the re-analyst's read, docs/research/m3/re-inventory-update-factory.md: CreateUIMessageData is a per-name pool with no pool for InventoryUpdateData, null by design; fork m3-face-twelve ce257955); the Resurrect hook never fired for any reanimation (numidium's pull: zero platform lines on both seats; "stood on both screens" was each engine's own effect on its local copy with AI off), so the hook moves to the function the Reanimate effect calls once the re-analyst names it (docs/research/m3/re-resurrect-hook.md, running), item 4 red in the morning otherwise; HasPerk 448 answers false until M5 (building); the corpse loot: IsCorpse admits a server-made copy, no activation block on a dead body on any seat, the engine's own menu with the server's list under it (the flow read: every good open was the engine's own on an unblocked body; building). The lab's night (numidium): the seat tails off for the night, the train staged with its five probes and T2, the gate before 03:00, the nightly 03:30 to 05:00, apocrypha's layer f6b6b1a 05:00 to 07:30, playtest 38's world and seats by 08:30.
+- 23:50 PDT: the overnight train's parts pushed: m3-has-perk a60c5602 (HasPerk 448 false until M5, T0 in EffectConditionsTest with Reanimate Corpse's Dark Souls rider refused by its condition), m3-cloak-look 5f33ceeb (a puppet plays its race's and base's ability looks: the atronach's fire trail art 0x60d9c through the vanilla VisualEffect 0x60d9d, since the cloak effect itself has no look; knob npcCloakLook), m3-corpse-loot 10988419 (IsCorpse admits a server-made copy with the NPC rule's own key, T0 in NpcFateTest; no activation block on a dead body on any seat, a flagged body released through the promote's dead branch, formView's deadBody admits a copy, FateApi's resurrect enables the AI whenever off), m3-face-twelve ce257955 (the chest's post through MessageDataFactoryManager). The re-analyst's read of the Resurrect hook (docs/research/m3/re-resurrect-hook.md): the Character vtable slot 0xAB is right for console and Papyrus Resurrect, but the Reanimate effect never calls it; it reaches id 38820 (SetLifeState(kReanimate) through 37612), directly or from the GetUpEnd handler, and both clear the dead state inside the call, so the thrall's "stands but no NPC" was 38820 on an AI-off body; a Frida hook on 38820 enabling the AI for a hosted body (no re-disable) is building on m3-reanimate. The train assembles in train3c-wt off 3j 3cc123e0.
+- 23:58 PDT: the overnight train m3-turbo-train-3k 56d995de pushed with the client build on (sky-build) and the server image, schema 20 (the dist and the image lay together): 3j 3cc123e0 plus m3-face-twelve ce257955 (item 1, the chest's post through MessageDataFactoryManager), m3-corpse-loot 10988419 (item 2), m3-bind-silent d2081796 (item 3), m3-reanimate 4ec01060 (item 4: the Frida hook on the reanimation proper 38820 enables a hosted body's AI and leaves it on, the vtable hook kept for console and Papyrus Resurrect without its AI-off branch; the re-analyst's read), m3-npc-launch-geometry 435b4c64 (item 5), m3-has-perk a60c5602 and m3-cloak-look 5f33ceeb (item 7), m3-quest-stage 3ea2c4ce (item 8), m3-follow-mode 2f03b4c4 (the default). fork-lint and tsc green on the merged tree; T0 is CI's. numidium stages it with the five probes, runs T2 and the gate, merges, then the nightly and apocrypha's layer. Not in the train: the relayed reanimation on a host the caster does not sit on (the geometry fix may carry it), the Story Manager's start of A Lovely Letter, finding 31.
+- 00:15 PDT 2026-10-29: finding 31 read (the rented-bed freeze; the window's logs were lost to the relaunches and the saved results end 21:25Z): no sleep service exists, the bed's E is reported and the client's own activate opens the engine's Sleep/Wait menu, the 15 s getFurnitureReference give-up and the second activation are noise (a bed never seats the player); a rented bed changes only the seat-local ownership (RentRoomScript's SetActorOwner through the fragment, never synced, never read by IsSleepFurniture) and lets Survival's admitted exhaustion script take its owned-bed branch on a clock TimeService has just snapped back. The two stated hypotheses are ruled out by what dump-state would have shown (a Fader Menu or a menu left open); left: the correction landing on the engine's sleep bookkeeping (rest.md's open hypothesis), Survival's exhaustion branch, the stream. Call: F1 (the correction and the RestIntent wait for sleepState 0, no Fader Menu, the menu closed a tick) and F2 (the furniture open flow takes the Sleep/Wait menu as the fact, no give-up noise) build on fork m3-rest-correction for a LATER train (3k is staging; no restage for an item Eli marked "if there's time"), with the probe x-rented-bed by path and rest.md's Dynamic plan.
+- 01:07 PDT: 3k 56d995de RED at compile (pipeline 3755, both halves; the mirror's Windows run the same): PartOne.h:679 "no type named 'PlacementRow' in namespace 'skymp::rules'": the header forward-declares the wire-bridge types it names and m3-spell-placed's PlaceSpellObject added one without its declaration, so every TU including PartOne.h failed (3j's server build had never run green either, so the spell-placed server code met its first compiler here). Fixed on m3-spell-placed 98e7dea6 (one forward declaration), 3k fast-forwarded to 997ffa95; numidium restages on green. The nightly's window goes to the gate and the layer's sweep (numidium's call: the stage must start by about 02:00 PDT to keep 08:30). m3-rest-correction 6a3427fa (finding 31's F1 and F2) waits for a later train.
+- 01:24 PDT: 3k 997ffa95 compiled (the client artifact green) and T0 went red (pipeline 3761, 7 of 492): six SpellPlacedTest cases threw "GetRecordsByType currently supports only REFR, COBJ, KYWD, LCTN, FACT, QUST, WRLD and CELL" (the test's helper found its MSTT and ACTI bases by type) and CraftTest's craft read 0 == 1, most likely the shared unit world after the six aborted cases. Fixed on m3-spell-placed 87aabbbd: the bases by id from Skyrim.esm through lab/esm.py (MSTT 0xEEE0D BFXSmashedBarrelWithOil, ACTI 0xB79FF FXEmptyActivator), the record's type checked; 3k fast-forwarded to 68348557; numidium restages on green (its stage must start by about 02:00 PDT to keep 08:30).
+- 01:30 PDT: 3k 68348557 RED again: the unit binary died with SIGSEGV in SpellPlacedTest's "A set falls lingerS after its stream's end" case (reported at the Leave helper's SpellPlacedSets() check), 87 of 88 cases before it green, the integration tests then not run. Call (Eli's rule: a red with no fix stops that item only; numidium's proposal taken at once rather than at 02:15 to keep 08:30): Raise Wall (3j's m3-spell-placed and m3-spell-placed-client) leaves the overnight train; the fallback m3-turbo-train-3l 7fb1dfa2 is cut from 3i 60c25b8d (schema 19) with every other item (face ce257955, corpse-loot, bind-silent, reanimate 4ec01060, launch geometry, has-perk, cloak-look, quest parking, follow default, cast-log; the single commits cherry-picked since their branches were cut from 3j, the two client conflicts resolved as on 3k), fork-lint and tsc green, pushed with the client build on; numidium stages it with four probes (x-raise-wall held back). The segfault is under a code read (the disconnect path's caster_gone, the Rust side's removed set, the bridge rows' borrowed strings, Delete's re-entry into PartOne); Raise Wall is red in the morning summary with that reason and returns on its own train once T0 is green.
+- 01:41 PDT: the spell-placed T0 segfault read: a use-after-free in the core, not the rules. A placed form's ForceSubscriptionsUpdate subscribes both ways; RemoveSpellPlacedSet's Delete() unsubscribes one direction (RemoveFromGridAndUnsubscribeAll) and empties the form's own set; the test's Leave then destroyed the deleted form, whose BeforeDestroy found nothing to remove and freed it while the actors' listener sets still named it; the caster's own destroy walked those sets into the freed object (Catch2 named the last assertion that ran, line 182, not the faulting line 190). Fix on m3-spell-placed: MpObjectReference::BeforeDestroy calls UnsubscribeFromAll before RemoveFromGridAndUnsubscribeAll (the pairing SetUserActor uses and the header asks for), and RemoveSpellPlacedSet severs a fallen form's reverse edges after its Delete; fork-lint green; Raise Wall returns on its own train after 3l's gate (3l stays the morning's lay).
+- 01:45 PDT: 3l 7fb1dfa2's T0 RED on one case (pipeline 3766): CraftTest's steel recipe, COBJ 0xdb89e, carries a HasPerk condition that crafting had evaluated as true while the function was unknown; a60c5602's false refused the recipe the player's own menu offered by its perks ("Craft recipe conditions are not met"), a gameplay regression for every perk-gated recipe. Call: HasPerk answers by the evaluator's caller, which now travels in ConditionEvaluatorContext (set by EvaluateConditions): the crafting caller takes the gate as met (the player's game applied its perks to the recipe list, the behaviour before), the magic caller answers false (no perks server-side, a rider never applies, as before); m3-has-perk 394a6d7d with the crafting-caller T0 row. 3l fast-forwarded to 9b2acea2 (both halves build), 3k to 03a734b9 (server-only, Raise Wall's T0 behind it). The night's schedule (numidium): the gate through the nightly's window, the layer after it if there is room before 07:30.
+- 01:53 PDT: 3l 9b2acea2 RED at compile: my merge of the m3-has-perk BRANCH (cut from 3j) into 3l dragged 3j's spell-placed in (PartOne.h's PlaceSpellObject without its forward declaration, schema 20). numidium's shape taken: m3-turbo-train-3m b685a3fa = 7fb1dfa2 plus the cherry-pick of 394a6d7d alone, 3j verified not an ancestor, no spell-placed code, schema 19, tsc and fork-lint green, pushed with the client build on; 3l abandoned as a branch (no force push). Lesson for the night: a branch cut from a later train is cherry-picked into an earlier base, never merged.
+- 02:02 PDT: 3m b685a3fa RED at compile: HasPerk's Execute left its context parameter unnamed in the first cut and the caller-keyed body named it ("use of undeclared identifier 'context'"); fixed on m3-has-perk 8afe0fa9. m3-turbo-train-3n b588e0ff = 7fb1dfa2 plus the two HasPerk cherry-picks (3j verified not an ancestor, schema 19, the evaluator's ctx.caller present), pushed with the client build on; 3k fast-forwarded to d7548ccf (server-only). The night's compile and T0 reds (five so far) all came from code no local compiler saw: the Mac has no Docker and sky-srv holds server images only, so CI remained the first compiler; a reviewer's read of every new signature against its header is the only guard until a build tree exists off CI.
+- 02:16 PDT: m3-turbo-train-3n b588e0ff GREEN on both halves (the server image with T0, the client artifact); numidium's verb-stage deploys it, switches the server, lays the dists (c2 then c1), retakes clean-m1-next and runs x-quest-stage (MS13Intro), x-hands-relaunch, x-figure-follow and x-npc-creature-caster; verb-merge (T2, the gate) follows at once, then apocrypha's layer if there is room before 07:30, 3k's Raise Wall T0 behind it.
+- 02:34 PDT: 3n's stage on the lab (server m3-turbo-train-3n since 09:26Z, dists laid, the server restarted per probe run so the server tail stays off until the stage ends). x-quest-stage 20261029-092548 red at step 5 by my probe: the driver's quest-stage read fills its done map only for the stages named in its stages argument, which the probe omitted (fixed by path, stages: [10]); x-hands-relaunch 20261029-092719 red at step 39 with the fix's own claim green: the record's worn equalled its pre-relaunch snapshot after the relaunch and the first shot was accepted (09:29:00Z, power 0.59), the hands apply ran on the relaunched seat ("player hands re-equipped after setInventory: ammo 1397d", the bow already in hand), and no PlayerBowShot event followed the second draw and hold, so the second shot never left the seat (no refusal; a rerun's screenshot tells). Neither asks for a train change; verb-merge proceeds.
+- 02:47 PDT: 3n b588e0ff STAGED at 02:42 PDT (SkyrimPlatformImpl a7274ce4485e1ef3 on both clones, clean-m1-next retaken). Probes: x-figure-follow GREEN (20261029-093041, the follow mode's first lab read), x-hands-relaunch red with its claim green (above), x-quest-stage red by the probe (above), x-npc-creature-caster never began (20261029-093704 failed in rollback-clients, E_RUN_NO_HEARTBEAT on c2). The cause of the last, and of everything after: sky-c2's GTX 1050 wedged at 02:45 PDT (the host: vfio-pci "Invalid PCI ROM header signature: expecting 0xaa55, got 0xffff", "Cannot read device rom"; the guest: "NVIDIA GeForce GTX 1050 Error"). numidium paused the merge run set 20261029-094355-merge-m3-turbo-train-3n at position 0 (resumable; T2 had started beside it at 02:35) and asked core to recover the card; a host warm reboot may be needed and may need Eli. Until c2 returns: no gate, no layer sweep, no probes. If the card is back by about 04:30 PDT the gate resumes and the layer moves to tomorrow's slot; if not, playtest 38 runs on 3n's stage with whatever seat works. Nothing in the train is implicated.
+- 02:49 PDT: the night's lab facts (numidium): 3n b588e0ff is staged, not merged (both clones on its dist, the server image live, clean-m1-next retaken 02:24 PDT); parity did not move (the gate's run set stopped at position 0 when c2 went down); sky-c2's GTX 1050 is wedged (DevCtl 79ff, MaxPayload unwritable), the fifth link-retrain wedge in sixteen days and the third card, each after a vfio reset at a lab rollback or start, so only a host reboot re-POSTs it and core waits for Eli to supervise (evidence for ADR-036, relaunch not rollback, Eli's call); T2 of b588e0ff runs beside the paused gate; the layer f6b6b1a moves to the next slot; tonight's lab tooling: the per-clone guest-agent lock, lab-tail-stop, ProcDump on both seats, hang-dump without a run. The morning's two paths: a reboot done by about 07:15 PDT reruns the gate and then the playtest setup; otherwise playtest 38 runs on 3n's stage first and the merge follows the gate after. Raise Wall's T0 on 3k d7548ccf is still unread (GitLab).
+- 02:51 PDT: Raise Wall's T0 is GREEN: 3k d7548ccf's server-build succeeded (pipeline 3779, job 14001) with the use-after-free fix d67dd7af and the caller-keyed HasPerk, so the spell-placed server, its seven T0 cases and the whole 3k tree pass; "fixed, T0 green, not laid" for the morning (no GitLab client build with the knob off; the mirror's run is its dist when it finishes). The superseded 3k pipelines 3761, 3764, 3770 and 3773 are failed history. T2 of 3n b588e0ff still runs in difftest's sessions. The reanimation fallback for a non-host caster (the server telling the host's seat to cast the accepted reanimate from the caster's figure at the body, npc-fate.md's design) is building on m3-reanimate-host off 3n for a later train.
+- 03:06 PDT: T2 of 3n b588e0ff RED on one undeclared difference in every session: the wire stack's SpSnippet Actor.RemoveSpell of DiseaseSanguinareVampiris 0xb8780 at login (the D56 A cure), which the legacy server never sends; every other difference was declared. Declared once for every client in skymp-wire/difftest/divergences.yaml, matched by the spell's id so a session's own Rested RemoveSpell stays its own; 3n fast-forwarded to 48f2d665 with that commit alone (difftest only, no dist change, the staged dist a7274ce4 stands); numidium reruns T2 with SESSIONS=tree. An intended difference, not a behaviour fault.
+- 03:07 PDT: the reanimation fallback built for a later train, fork m3-reanimate-host off 3n (pushed, server-only): on an accepted hit on a dead body by a spell with a Reanimate-archetype effect (libespm MGEF effectType 22, CommonLib kReanimate), when the body's host is not the caster's own seat, the server sends that host one SpSnippet Spell.Cast from the caster's figure at the body, and RelayCast skips that host when the cast names the body (an aimed cast's engine target is the caster itself, so the look may double once; the TS follow-up names the crosshair's body for reanimate casts). T0 in NpcFateTest. Not in 3n (staged); it rides the Raise Wall train or the morning's call.
+- 03:08 PDT: m3-turbo-train-3o ac620176 cut from 3k d7548ccf with the two single commits 3n gained after the split (the cure's difftest declaration, the reanimation fallback m3-reanimate-host 8aae1ce1), fork-lint and tsc green, pushed server-only (its T0 in CI; the dist from the mirror's run): the Raise Wall train for after 3n merges, schema 20, its image and dist laid together.
+- 03:41 PDT: T2's rerun on 3n 48f2d665 RED on one line: the quest-stage difftest session's declared relay {t: 57, quest: 478851, stage: 10} "did not occur as declared", because 478851 is 0x74e83, a hand-converted decimal for A Lovely Letter 0x74a83 (477827) that no world shares, so the server refused the stage as unlisted and relayed nothing (MQ102's 321805 was wrong the same way, harmless on the refusal path). The ids are hex literals now (the rule of 2026-10-20 for scenarios reaches the difftest sessions too); 3n fast-forwarded to e14dc298, 3o to ee44f7d1 (difftest only, the staged dist unchanged); numidium reruns T2. The cure's declaration matched everywhere.
+- 04:15 PDT: T2 GREEN on m3-turbo-train-3n e14dc298 (pipeline 3793 green 10:46Z; zero undeclared differences, the cure's RemoveSpell matching its declaration). The merge waits only on the gate, the gate on sky-c2's host reboot (Eli's supervision). The morning order (numidium): verb-stage of e14dc298 without probes (a difftest-only head over the standing dist a7274ce4), then T2=skip verb-merge with the same gate list; 3o ee44f7d1 (3n's content plus Raise Wall's fixed spell-placed and the reanimation fallback, schema 20) is the lay after 3n's merge once its dist exists; playtest 38's first restart is 3n's.
+- 04:28 PDT: m3-turbo-train-3o-win ee44f7d1 GREEN on both halves (11:27Z: the server image m3-turbo-train-3o-win-ee44f7d1 and the client artifact), so Raise Wall's and the non-host reanimate's lay is ready: image and dist together (schema 20) at the break Eli picks after 3n's merge and playtest 38's first restart. The night's lab work now waits on core's reboot handshake for sky-c2.
+- 07:16 PDT: the morning's state: sky-c2 still stopped (no reboot overnight; core waits for Eli's supervision), nothing merged, c1 on 3n's stage, c2 down, so the 08:30 seats are not ready by the lab's fault; the order after the reboot: numidium's stage of e14dc298 without probes, the gate with T2 skipped, verb-merge and the clones, playtest 38 on the merged 3n (or on 3n's stage first if Eli prefers to play), then 3o ee44f7d1 at a break for Raise Wall and the non-host reanimate; the layer to the next slot. The morning summary is docs/private/morning-2026-10-29.md; the checklist docs/private/playtest-m3-38.md.
+- 07:17 PDT: the morning's calls taken under the overnight rule so the one open item is the reboot: ADR-057 ACCEPTED (Raise Wall's shape C, built and T0 green on 3o-win ee44f7d1; Eli may veto), the order after the reboot (stage e14dc298, gate, merge, playtest 38 on the merged 3n, then 3o at the first break, image and dist together), HasPerk's rule as built, the reanimation fallback riding 3o. The reboot itself stays Eli's: core does not reboot the lab host unsupervised, by Eli's standing word.
+- 11:10 PDT: the reboot landed: core rebooted the lab host at 11:01 PDT under Eli's supervision, both GPUs healthy; numidium rolled both clones back to clean-m1-next (3n's b588e0ff dist) and had playtest 38's seats ready at 11:08 PDT on 3n's STAGE before its gate (Eli's call to play first; lab/playtests/38.yaml: 37's end world, the camp outdoors, 37's perks). State: 3n e14dc298 staged, not merged; the gate (T2 skipped, green on e14dc298) and verb-merge after the sitting; 3o ee44f7d1 (Raise Wall, the non-host reanimate) at a break Eli picks, image and dist together; apocrypha's layer f6b6b1a not laid, next slot. The checklist docs/private/playtest-m3-38.md is v3 (item 4's non-host half and item 6 wait for 3o; the set-up names the stage, the world, the dist and the needs); the morning summary gained a section for this time. A server bug from the set-up: labCommand's console setglobal with a FormDesc argument (81a:ccQDRSSE001-SurvivalMode.esl) fails as "81ac is not a listed player global" (the hex parse swallows the plugin name's leading c; 81bc and 816c the same), so the Survival needs were not zeroed (test 1 hunger 427.5, exhaustion 252; test 2 hunger 697.5, exhaustion 405; cold 0 on both). A train item.
+- 11:30 PDT: correction to 11:10's line: the setglobal refusal was not a server bug. numidium's set-up loop wrote the FormDesc as an unbraced $g:ccQDRSSE001-SurvivalMode.esl in a zsh double-quoted curl body, and zsh took ":c" for a history modifier (resolve a command name), so the body carried "81acQDRSSE001-SurvivalMode.esl" and FormDesc::FromString's no-colon path read the hex prefix 81ac; e14dc298's parse splits a colon form correctly (PlayerGlobalsTest covers the same shape) and the gamemode copies string args as-is (the read: an Explore agent over train 3n, then numidium's own trace). Braced ${g} would have passed. The train item is struck; the needs stayed at the records' values for the sitting.
+- 11:42 PDT: a research read for the food fix found it built, not drafted: fork m3-hunger 853dd4fc (a food's Survival effects lower the recorded needs and SetGlobal sets one) is inside 3n e14dc298 and the staged dist b588e0ff, and the live server's log shows PartOne::SetSurvivalFoodSettings loading the five rows; the checklist and the morning summary said the opposite and are corrected (eating in playtest 38 is the fix's first live read). The plugin's numbers, read on sky-srv's 1.6.1170 masters: hunger restore Very Small 2 (0x8de), Small 18 (0x82d), Medium 220 (0x82b), Large 380 (0x82c); cold Small 75, Medium 200, Large 400; hunger max 1000, stages 80/160/340/520/770, rate 7.5 per 0.25 h tick; the size is an MGEF of Update.esm (0x2ee1 to 0x2ee4) on the esl's ALCH overrides (127 of them), no keyword; a vampire Large variant (esl 0x831), warmth (0x2ee6) and alchemy potions tagged 0x88c stay uncovered by design. x-survival-eat v2 (the verb doc's) has not run; it reads the HUD stage lag and the tick race.
+- 11:52 PDT: item 8's open read made runnable during the sitting: lab-driver logs the player's locationChanged (old and new location ids) and every questStart and questStop through the console tee (lab/driver/src/index.ts, one hunk, typecheck and bundle green; a stage lays it, verb-stage.sh builds the driver from the checkout), and the probe x-story-manager-walk v1 by path (lab/.cache/probes and probes-backup, probe-check ok) places c1 at Riverwood's landing, then at x 16000 in RiverwoodEdge01 0x9733 facing east and runs it across the cell line into 0x9732 for 4 s, asserting a Change Location to 13163 at least once and, as the HYPOTHESIS under test, questStart 74a83 and the quest running (a red there with the location line green points at the Story Manager's nodes or the alias fill, not the location tracking). The lab has no event-subscription step (an Explore read of the grammar), so the driver's lines are the grammar; the verb doc's Dynamic plan names it. Plays at the first stage after the driver's lay (3n's post-sitting stage or 3o's).
+- 12:43 PDT: mid-sitting, on Eli's word to me ("can you reset their survival status? then i think ill wanna try most of these tests at bleakfalls"): the Survival needs zeroed on both seats through `just playtest-console <p> setglobal 20 <81a|81b|816>:ccQDRSSE001-SurvivalMode.esl 0` (six server lines "set the global ... to 0" at 19:39:55Z to 19:39:56Z, the literal FormDesc intact this time); then both seats moved by labCommand teleport to numidium's verified Bleak Falls spot, cell 371de:Skyrim.esm (BleakFallsBarrow01, 225758) pos [-7329, 979, 573] / [-7229, 979, 573] rot [0, 0, 90], test 1 at 19:42:00Z and test 2 twelve seconds later, so rotfern's game hosts the cell (labState cellHost: hosted true, actor ff000000, epoch 1). The sitting's second half plays items 1, 2, 3, 5, 7 and 8 there (the Golden Claw chain is in sharedQuests); item 4 the host's half only on 3n; item 6 not in the build. The build untouched.
+- 13:13 PDT: playtest 38's first findings (Eli through numidium; the checklist's findings section, 64 to 68): 64 a shared chest's
+  live refresh turns a place into a use after a while ("placing a bottle becomes drinking it"); 65 a placed-dead bandit shows
+  different items per screen: CONFIRMED the loader skips every starts-dead ACHR (WorldState.cpp AttachEspmRecord, upstream's TODO),
+  the hall's ten dead-placed references dropped "no actor record loads for it" all sitting, so each engine rolls the body's
+  inventory itself; 66 a bandit outside the barrow ignored all damage: the host's roster naming it (105a22) arrived in the same
+  millisecond as the exterior block's grant (20:00:51.189Z) and was dropped "the cell is nobody's yet", the next roster was ten
+  seconds later and rotfern died at 20:01:04Z; no player hit on it reached the server (a live NPC without a server id is no hit
+  target on the client while the engine's own damage is cut): a grant should ask for the roster at once; 67 "death service is
+  busy" lines on a seat (read pending); 68 rotfern's bow drew no arrows after its relaunch (x-hands-relaunch's second shot never
+  fired; read pending). Mid-sitting at Eli's ask numidium reset the hall (world saved playtest-m3-38-before-bleakfalls-reset-
+  20261029T200344Z, 33 records moved aside), rotfern alone in it hosting (epoch 2) for item 3's protocol.
+- 13:27 PDT: playtest 38 closed (Eli: "ok. filled out. basically everything failed in one way or another."): item 1 ticked with 64's
+  note, 2 to 8 unticked; item 5's bolts and item 7's cloak passed on Eli's words; findings 64 to 76 in docs/private/playtest-m3-38-
+  findings.md (kept beside the checklist while Eli has it open; folded in when it is closed). The sitting's new ones: 69 killcams on,
+  70 the Golden Claw stage 12 relayed at the barrow's entry trigger (works as designed), 71 a killed bandit T-posing half in the ground on
+  the watcher (the silent bind kill plays no ragdoll), 72 a killed body could not be reanimated (unread), 73 and 74 a pre-dead body
+  reanimated as two local copies (no record: 65's root), 75 the atronach freezes at death, 76 a rumor's misc quest did not cross (only
+  the shared list does, D55 B; Eli's call). Logs at results/playtest-38 (numidium's pull since 18:06Z); the end world saved. Fix
+  branches cut from 3o: m3-dead-placed (the loader loads starts-dead ACHRs as dead records) and m3-grant-roster (a roster dropped for a
+  missing host replays at the grant).
+- 13:33 PDT: the two server fixes for playtest 38's confirmed mechanisms built and pushed server-only off 3o ee44f7d1, T0 on CI: fork
+  m3-dead-placed 2f886731 (finding 65: a starts-dead placement loads as the server's corpse: WorldState's loader no longer returns false
+  on the ACHR flag, MpActor::MarkPlacedDead sets isDead and zero bars with no save request, RespawnWithDelay yields to the mark; T0
+  NpcExists's floor body 0x3b9ea) and fork m3-grant-roster 5b6ef482 (finding 66: a sighting dropped for a missing host is held per cell
+  for 30 s and replayed for the grant's host by ApplyHostDecisions; T0 CellHostTest's held-and-replayed case). fork-lint green on both
+  (clang-format 21.1.8 rewrote the grant-roster files once). Verb docs: npc-fate's loader row BUILT, npc-puppet's roster-race section.
+  Both stack on 3o for the evening's train 3p with the client bits (67's log-once, 68's ammo after the wipes, 64's one post per change,
+  71's ragdoll after the silent kill) once the pulled logs are read.
+- 13:39 PDT: the pulled logs read (results/playtest-38; the seats' logs start at the 20:06Z relaunch): 66 confirmed (two shots, no hit
+  sent, no server actor), 67 one 9.6 s window of 418 lines after the respawn (fixed on m3-client-bits), 68 confirmed: the 5 s loop's
+  first apply re-added the whole inventory 5 s after the login's hands pass and un-equipped the ammo with no hands pass after it, 70
+  applied at login as designed, 71 the watcher moved the bodies 975 and 1227 units to the records' spots and replayed the death
+  animation in place, then settled 39fe4 4,583 times in ten minutes, 72 the server refused Reanimate Corpse's effect cab63 at the body
+  ("its conditions fail; not applied", ADR-039) so no reanimation ran server-side at all, 75 the accepted death report of the
+  hosted atronach reached c2 alone and c1's puppet froze with no death word. Reads of cab63's conditions and the death report's
+  send path next; the client bits (68's hands after the first apply, 71's settle once) follow.
+- 13:43 PDT: Eli's new standing goal, verbatim: "so leaving turbo mode, i wont be able to touch this this weekend very much so i want you to be
+  working on ONE big pass that will close out m3 ideally, and additionally where it touches quest states propagation. additionally with some
+  heavy progress made into physics items. i feel like the canon perfection of multiplayer phys objects is gmod if that mental model helps at
+  all." So: turbo mode ends with playtest 38 (3o staging, 3n the fallback); from here one pass on stacked fork branches through the weekend
+  (2026-10-30 to 11-01): M3's open items and playtest 38's findings first, the quest-stage propagation where M3 touches it (76's list, the
+  Story Manager read), then the physics items under the Garry's Mod model (the toucher simulates the prop, the server records it, every
+  other seat interpolates). The pass's plan is written next (docs/private/pass-m3-close.md and PLAN.md's chart lines), then built.
+- 13:51 PDT: second reads of 72, 75 and 71 from the code. 72: the refused effect was the Dark Souls perk rider's HasPerk (true to
+  ADR-039 and to rotfern's perks), the reanimation effect held; the server applies no effect to a dead target, so a 3n reanimation runs
+  only on the host's engine, and rotfern was the non-host at 20:16Z: expected, 3o's CastReanimateOnHost is the fix; the host half was
+  never tried. 75: the server sends isDead to every listener; the client logs none of it; the watcher's creature kill with AI off is
+  the frozen atronach (HYPOTHESIS; x-npc-creature-death to read; the explosion is the host's ability). 71: the settle logged before its
+  dead check once per host sample; the bind kill had no fall. m3-client-bits now carries 67, 66's belt, 68's hands pass after the first
+  apply, 71's dead-body silence and the push-with-no-force after a silent kill (17d13443 and the commit after it; tsc green; local).
+- 13:58 PDT: the pass's first train: m3-pass-train-1 7a223e0d = 3o ee44f7d1 plus m3-dead-placed 2f886731 (T0 GREEN, pipeline 3811) plus
+  m3-grant-roster 5b6ef482 (T0 GREEN, 3812), fork-lint green, pushed server-only (T0 on the merge running); numidium stages and gates it
+  after 3o's (or 3n's) merge. Probes by path for its stage (probe-check ok, backed up): x-reanimate-host (c1 hosts Riverwood and kills
+  Hilde 0x35534 through its engine; c2 learns Reanimate Corpse by the server console and casts it at her by the driver's Spell.Cast;
+  claims the host-cast server line, the record alive, her engine state alive on both seats), x-dead-placed-loot (the Bleak Falls hall's
+  skeleton 0xc3b1d and skeever 0x3b9ea have dead records; both seats open the skeleton's menu; no "doesn't exist", no roster drop for
+  a missing record; the worn set equal on both seats and the record), x-grant-roster (c1 hosts 0x9733 and runs east into 0x9732; the
+  grant within 30 s, accepted sightings after it; the race and its replay recorded). The driver's cast step takes a target by form
+  id (Papyrus Spell.Cast), so a game-file body is the target (a server-made one has a different local id per seat). The pass plan is
+  docs/private/pass-m3-close.md v1; the summary for Eli docs/private/weekend-summary.md.
+- 14:03 PDT: H-56a ANSWERED by x-story-manager-walk's console at 3o's stage (run 205447): the placement from lab-spawn into Riverwood
+  logged "locationChanged actor 14 old none new 13163" and "questStart quest 74a83" in the same millisecond (20:56:22.186Z), so the
+  Story Manager starts A Lovely Letter the moment a seat ARRIVES; the playtests' seats log in inside the location (the camp is the
+  landing) and a login is no change, which is why it never started for them. Fix shape in quest-stage.md: a login-time Change
+  Location event through the engine's own BGSStoryEventManager::AddEvent (RE first, HYPOTHESIS). The probe's own claims were framed
+  wrong (server.actor x is lab-spawn relative; x 16000 is inside the location) and are v2 by path, with x-grant-roster's x claim
+  likewise. Also read: quest 0x30002859 flaps start/stop every 0.7 s on c1 (finding 77, for apocrypha); x-npc-creature-caster 14 of 15
+  with the fix's claims held (v3 records the host-side launch chain); x-raise-wall's first run a lab fault, rerun on.
+- 14:05 PDT: PLAN.md's M3 section gained the pass's STATE block (the audit of parity bf133744: the ladder's five trains are on parity
+  whole, the voice on by default; everything after rides the turbo trains, 3o staging; the no-code list: the exit scenarios, NPC reach
+  and cone, the zone clamp, the trap read, the smooth-motion number, D8 ActorHandoff, physics movables, horses; the open Status boxes).
+  b-spell-placed-wall's frame moved 300 south for 3o's gate chain (main 334514f, its own commit; the one absolute claim moved with the
+  wall's line, the same margin). m3-pass-train-1 7a223e0d T0 green (pipeline 3819).
+- 14:07 PDT: the pass's paper for heads 2 and 3: ADR-058 (physics props: the toucher simulates, the server records, every other seat
+  keyframed; the owner table's prop row; three wire rows; slices one to three) PROPOSED and taken under the pass's rule; docs/verbs/
+  prop-physics.md DRAFT with the engine surface from CommonLibSSE-NG's headers (the touch's entry point UNKNOWN, the re-analyst's);
+  quest-stage.md's slice two: the engine's SetStage-to-fragment chain read through Ghidra (56684, 25004, 25252, 25260, 53987 the VM's
+  stage sink, 53429 the fragment lookup, 54240, 25234, 53763; ids reverse-mapped with lab/addr.py and checked by just addr), the
+  narrowest suppression a Gum replacement of 53987 keyed by (quest, stage) pairs the client is applying from the relay, HYPOTHESIS
+  until the Frida plan runs. Eli's pointer (a friend ported Source's air strafing into OpenMW): borrow the networked portion, not
+  the simulation; cited in ADR-058 (Valve's networking page, Bernier 2001, Fiedler's state synchronization).
+- 14:10 PDT: lab/frida/quest-stage-chain.js: the quest-stage chain's trace (the twelve functions of the re-analyst's read, offsets by
+  `just addr` for 1.6.1170 only, cited per line), the Dynamic plan of quest-stage.md's slice two; to run at the pass's next stage on
+  both seats (`just frida quest-stage-chain <client>`, params QUEST and RAW) around a console setstage on c1 and a relayed apply on c2,
+  before the suppression hook is built on its evidence.
+- 14:16 PDT: fork m3-npc-reach 7a80172c pushed server-only (M3's NPC melee reach and hit cone: a humanoid NPC, its race playable, is gated
+  by reach and cone as a player is, as a target and as a host-reported aggressor; creatures and the non-playable humanoid races keep the old
+  bound, a named limit; HitTest's created actor at 2000 units now refused, CellHostTest's hosted Sigrid hit beyond reach refused). The
+  Story Manager's Change Location event read (docs/research/m3/re-story-location.md): the sender gates on currentLocation, which a login
+  inside the location never changes; the native is the engine's own AddEvent with the CLOC index (ids by just addr); the side effect is
+  every CLOC branch node evaluating, as a fast travel does. The shared quest list's widening (D58 B) needs a wire field (QuestStage's
+  shared list cannot carry a mode; the validator refuses an empty list for quest 0; the client filters its reports by the list today;
+  the budget is 16 then 4 a second), so it is a schema bump with fixtures and mirrors; the record's shape stays (keyed by FormDesc).
+- 14:17 PDT: melee-reach.md and hit-cone.md scope rows widened to humanoid NPCs (fork m3-npc-reach 7a80172c, T0 on CI); the two SP
+  builds of head 2 handed to implementation agents on fork worktrees (m3-story-arrival: the login's Change Location event through the
+  engine's story event queue; m3-quest-fragment: the VM quest stage sink's replacement keyed by the relayed pairs), both to be reviewed
+  and lint-checked before any push; the exit scenarios c-riverwood and c-dungeon-enemies drafted by an agent from the lab's grammar for my
+  review (own commits after).
+- 14:22 PDT: two more builds handed to implementation agents on fork worktrees for review: m3-prop-physics (ADR-058 slice one's server
+  half: the three wire rows with validators, fixtures and C++ structs in one commit, the props rule in wire-rules with its bridge, the
+  handlers, T0 PropTest, a difftest session; the wire idiom map of 0d453dc1 and 169b5a97 as the template) and m3-quest-mode (D58 B: the
+  sharedQuests setting as an array or {mode: all, denied}, Refusal::Denied, QuestStage's mode byte with the denied list at login,
+  SCHEMA_VERSION 21, the client's report filter, T0 cases, the QuestStage budget raised to 32 then 8 a second UNMEASURED). The pass plan
+  is v2 (docs/private/pass-m3-close.md: the branch map and the trains P1-win to P4).
+- 14:29 PDT: fork m3-quest-fragment d02103fd built and reviewed (local, Windows-only compile: pushed with the client build when the lab
+  is free): Offsets::Hooks::QuestStageSink REL::ID(53987), a Gum replacement of SkyrimVM's quest stage sink keyed by (quest << 16 | stage)
+  under a mutex never held across the callback or the original, the finished callback's slot 1 fired through a documented vtable read (no
+  CommonLib header names the class's slots; HYPOTHESIS), natives TESModPlatform.SuppressQuestStageFragment and ReleaseQuestStageFragment
+  (.psc, callNative), the client's setStage wrapping its relayed and parked applies, the setting questFragmentSuppress; fork-lint and tsc
+  green. NATIVES.md rows added (rule 10), quest-stage.md's Suppress updated. The exit scenarios c-riverwood 20c01ef and c-dungeon-enemies
+  d70890b committed alone (an agent's drafts, my review: the cross-seat and handoff position bounds set to b-npc-puppet's measured 256,
+  dump-state before the menu reads), self-approved under the 10-13 word for P2's gate.
+- 14:32 PDT: fork m3-story-arrival 9dc8b4a3 built and reviewed (local until the lab is free for a client build): the native
+  TESModPlatform.SendStoryChangeLocation(Actor, Location old, Location new) builds the engine's own 0x18-byte Change Location event (a
+  typed struct with GetIndex reading REL::ID(380069), the BGSAddToPlayerInventoryEvent idiom; static_asserts on the layout) and queues it
+  through BGSStoryEventManager::AddEvent; the .psc and .pex declarations (lab/pex.py add-native); the client raises it once per login
+  after the shared list and the game load, old none, new the player's current location, logging "[verb:quest-stage] arrival event raised
+  at login for location <hex>"; setting storyArrivalAtLogin; tsc and fork-lint green; no C++ compile here (Windows-only). Probes by path
+  for P2's stage: x-story-arrival-login (the placement's start, then a relaunch in place: the client's and the native's lines, the quest
+  running) and x-quest-mode (an undeclared quest's stage crosses in mode all, a denied one is E_QUEST_DENIED). m3-npc-reach's compile red
+  (a chrono literal in a test file without the using-declaration) fixed as 5d418327, T0 rerunning.
+- 14:32 PDT: lab/frida/story-location.js: the Story Manager's Change Location trace (AddEvent_Impl against the CLOC index static,
+  SetParentCell with the player's currentLocation and the cell's location, BeginStartUpQuest, the locationChanged SendEvent; offsets by
+  just addr for 1.6.1170, cited per line), the Dynamic plan of H-56a's fix; to run at P2's stage on c1 around a placement into Riverwood
+  and a relaunch in place under m3-story-arrival.
+- 14:41 PDT: fork m3-quest-mode 11cbf4cb built and reviewed (local): sharedQuests as the array or {mode: all, denied} in wire-rules
+  quest_stages.rs (strict parser, Refusal::Denied, at_login replays every recorded quest but the denied), QuestStage's mode byte with the
+  denied list at login (SCHEMA_VERSION 21; a client's mode refused; the empty-list refusal in mode 0 only; budget 32 then 8 a second
+  UNMEASURED), the C++ mirror and E_QUEST_DENIED, the client's report filter and v2 storage, T0 QuestStageTest's mode-all case (Enter
+  clears the shared world record); cargo test green across the workspace, tsc and fork-lint green. The deploy block (mode all; the main
+  quest's intro chain MQ101 to MQ104 and the DLC starts denied, ids by esm.py) is written into quest-stage.md and lands in both deploy
+  files at P2's deploy, never before: a server without the branch refuses the object at startup. WIRE.md's QuestStage paragraph says
+  the same. The quest-fragment hook and this mode ride the same train so sharing every quest does not double its rewards.
+- 14:46 PDT: m3-npc-reach's T0 rounds: 3826 red at compile (a chrono literal the test file never declared), 3832 red on two fixtures
+  (HitTest's "npc" is a created actor on the player's base, IsCreatedAsPlayer, so the gate leaves it alone by design and the hit at
+  2000 units lands as before; CellHostTest's hosted Sigrid hit with source 0 was dropped by E_HIT_WEAPON before reach judged it), fixed
+  as dc7689d1 and be6cf6af (the helper spelled out in the file) and pushed; the rule itself read right in the log (E_HIT_REACH refusals
+  at 500 and 2000 units on the player target). P2's pre-assembly m3-pass-train-2 (local) merged npc-reach, story-arrival, quest-fragment
+  and quest-mode with the two platform branches' additive conflicts resolved by hand (both natives after Stagger; the login handler
+  mode-aware with the arrival flag); tsc, fork-lint and the wire crates' tests green on the merge.
+- 14:49 PDT: the quest-sharing mode made backward-compatible on numidium's read (a typed key change would have broken every older
+  image's start from main's deploy file: a fallback restage, turbo-back, the nightly's clean image, the layer's stage): the mode lives
+  under its own key `sharedQuestsMode` (fork m3-quest-mode fc17612d: the addon reads it first, else the `sharedQuests` array; the Rust
+  parser unchanged), and the block (mode all; MQ101 to MQ104's chain and the DLC starts denied) is in both lab/deploy/sky-srv settings
+  files on main since 47c8103, before `sharedQuests`, which stays; an image without the branch ignores the key. No timed commit.
+  P2's pre-assembly aa618c1a carries the change. (47c8103's message names docs this commit carries.)
+- 14:53 PDT: 3o's gate has two reds from the always set (numidium): a-restart-persistence 210336 ("c2 does not see c1" after the
+  restart; c2's guest agent dead at the pull, its logs lost; the server log clean at the restart: a lab fault to rerun) and b-duel
+  211244 (the step-65 held attack left c2 at 0.968 against < 0.78). My read of the duel's server log: three hits recorded, each from
+  health 1.0 (the victim regenerated between hits 13 and 48 s apart), and the held attack landed ONCE, weak and half-blocked (blocked
+  share 0.502 from the attacker's engine's hit data), where the green runs took 22 to 36 percent; the server's melee path is the parity
+  code in 3n and 3o, so the suspect is the figure on the attacker's screen: movement.mode follow as the client default since ee6bb01
+  (the figure a sample behind; m3-turbo-knobs' lead and still knobs). numidium's reader compares 090354's hit lines; if confirmed, the
+  gate's cure is the client settings' mode back to lead (a settings commit, not a scenario change) and D61 for Eli: A follow for the
+  look, B lead as before, C the hybrid (lead within melee reach when a weapon is drawn, follow otherwise), recommended C as a build.
+  With two reds the run set ends red (ADR-027 reruns a lone red only), so 3o's merge waits; 3n shares the default and would sink alike.
+- 14:54 PDT: fork m3-prop-physics's server half built and reviewed (local): b752b262 the three wire rows (PropTransform 58, PropClaim 59,
+  PropOwner 60; wire ids 66 to 68; validators with a prop budget 20 then 10 a second UNMEASURED; six fixtures; C++ structs; the client
+  interfaces; SCHEMA_VERSION 21) and 8575e59b the owner rule (wire-rules props.rs: owner_of, claim with epochs, transform with the lease
+  at sleep, host_changed, gone; the bridge; the handlers OnPropClaim and OnPropTransform; PartOne's plumbing; unit/PropTest.cpp; a difftest
+  session); cargo tests and clippy green, fork-lint green, the C++ on CI only. The client's PropService (slice one) is being built in the
+  same worktree. numidium: no movement.mode change by me; follow is Eli's own pick and goes to Eli as D61 with the duel's evidence.
+- 14:56 PDT: the sharing mode's denylist widened on apocrypha's read (docs/research/layer-quests.md on apocrypha/alternate-start: the
+  alternate start's fragments stage the main quest's chain, the guild openers, the dialogue scenes, the house purchase, the DLC openers
+  for the chosen start; a shared stage of the random-lair controllers would hand one seat's lair to everyone): 40 quests denied across
+  Skyrim.esm, Dawnguard.esm, Dragonborn.esm and HearthFires.esm, written by json.dumps(indent=2) so layer-render --check holds
+  (apocrypha: the renderer rewrites the whole file and keeps every key). The layer's MCM, version-tracker, player-alias and controller
+  quests (42 on the page) and the alternate start's own eighteen are the rule's: D62, a Start Game Enabled quest (QUST DNAM flag 0x1,
+  libespm QUST.h) is each seat's own in mode all unless listed `allowed`, being built on m3-quest-mode; client-only plugins' quests are
+  E_QUEST_UNKNOWN on the server already. Finding 77 is Reading List's own book radar (RL_DetectionQuest started and stopped every 0.5 s
+  by RL_ManagerScript), per seat, the server never sees it; Eli's call whether to slow it (a VMAD property patch) or drop the mod.
+- 14:59 PDT: the denylist took apocrypha's four non-start-game-enabled layer controllers (MysticismMagic, Thaumaturgy, LostGrimoire,
+  UndeadFX; all served), 44 entries now in both deploy files (the renderer's layout); the alternate start's twelve script-started quests
+  wait for the day that plugin is served (client-only today). apocrypha's numbers: 330 of Skyrim.esm's 1,811 quests and 162 of the
+  layer's 228 are start-game-enabled, so D62's rule keeps most mod quests a seat's own and leaves stage-started world content shared.
+  Fork CI is blocked: sky-ci's runner is out of disk (pipeline 3837's job 14167, "No space left on device" compiling wire-bridge); core
+  asked to free it; pushes held (numidium: no push needed before the base merges; the base waits on the duel's read and D61).
+- 15:07 PDT: core freed sky-ci (2.1 GB to 41 GB free: 1,900 never-pruned skymp-server image tags and a 17 GB build cache; the registry's
+  pushed images kept); a blanket prune also took the unused base images, restored from the lab registry and the internet, except
+  thuum/rust-ci, which the next pipeline rebuilds once (slower first run). core lands a scheduled prune and a disk check in sky-lab verify
+  as IaC. m3-npc-reach rerun by an empty commit pushed server-only.
+- 15:10 PDT: D62 built on fork m3-quest-mode 4a759c5b (allowed list in the Rust parser with its clash check, the bridge query, the
+  C++ check reading the QUST's DNAM through libespm after E_QUEST_UNKNOWN and before the shared check, E_QUEST_OWN_START, the login
+  replay filtered the same way, QuestStageTest's case, libespm's questData pointer initialised; cargo green, fork-lint green; the C++
+  on CI). The agent's census corrected the premise: MQ101 is not start-game-enabled, MS13 The Golden Claw is, with MS01, MS05, MS12,
+  MQ103, C00, CW00A/B and the Dialogue* hubs; so the deploy files gained `allowed` = the former curated four (the Golden Claw keeps
+  crossing as playtest 38 saw), and D63 (which start-game-enabled world quests join allowed) goes to Eli. P2's pre-assembly re-merged
+  (wire tests green). WIRE.md and quest-stage.md carry the shape.
+- 15:10 PDT: numidium stopped 3o's gate at 22:09Z after a third red (b-npc-talk 215828: Sven drifted about 100 units from his snapshot
+  during the talk; c2's teleport took 13 attempts and 56 s). The common factor is c2's seat: its teleports went from 1 attempt in 3 to 4 s
+  at 20:51Z to 10 in 43 s and 13 in 56 s by 21:58Z while c1 stayed at 1 in 3 to 4 s, slowness that survives every rollback (the host side:
+  c2's GPU link after the day's resets, or contention; core reads it). A slow c2 sends stale positions and animations and c1's engine
+  strikes the stale figure, which also reads as the duel's single blocked hit, so D61 is on hold: the whole gate reruns on the same stage
+  once c2 is healthy, and follow mode is judged on a healthy seat. P1-win and P2 stay held; the base's merge waits on that rerun.
+- 15:17 PDT: the HYPOTHESIS inventory for P4 (docs/private/hypothesis-inventory-2026-10-29.md): 196 lines across eight M3 verb docs, 4
+  closed in place, 76 open with a named read, 92 open with none, 24 the template's; the reads that close the most are quit-path.js (7),
+  npc-puppet.js (6), x-npc-trap-report (5, never run), P7 (4); cell-host's ticked "no HYPOTHESIS tags" box is inconsistent with sixteen
+  lines written after the tick (six resolved nowhere), and npc-fate's and npc-handoff's box 8 is reworded without that clause. P4's
+  shape: restore the wording and untick honestly, one stage's batch of reads by covered lines, every remaining tag a limit, a Dynamic
+  line or a deletion; the engine-map function-name tags stay under rule 2.
+- 15:18 PDT: fork m3-prop-physics's client half built and reviewed (8f887477, tsc green): PropService (tracking, the owner with the
+  mirrored lease, the Dynamic simulator's 100 ms stream and sleep, the Keyframed follower's translateTo, the grab, drop and proximity
+  touches, PropOwner's motion-type flip, the kill switch propPhysics), HostService.hostsCell, formView's movement skip for tracked
+  props. The named hole: a Keyframed body never moves from a bump, so a non-host's touch has no signal until the Havok contact native
+  (the re-analyst reads the player's character controller's contact callback now); x-prop-push uses the host as the walker. The
+  HYPOTHESIS inventory is saved for P4.
+- 15:20 PDT: x-prop-push v1 by path (probe-check ok, backed up): the guard camp's two tankards BasicTankard01 0x3975b and 0x3975c (MISC with
+  Havok, no enable parent, open ground in Riverwood's cell 0x9732; the lookup found nothing pushable within 2000 units of the landing);
+  c1, the host, runs east through them, c2 watches 100 north; claims the owner's stream and sleep lines, the follower's apply line, the
+  record moved east, the watcher's copy farther than its 100 units, and the rest kept across a server restart. The walker is the host by
+  the slice's named hole (a Keyframed body gives a non-host's bump no signal; the contact native's read is in flight). P3 pre-assembled
+  locally as m3-pass-train-3 (P2 plus m3-prop-physics).
+- 15:24 PDT: m3-npc-reach's fourth T0 (pipeline 3849) read 493 of 494: the reach rule refused the hosted resident's hit at 2000 units
+  (E_HIT_REACH logged) and the near hit fell to E_HIT_WEAPON because the victim's move sent new fate squares and the roll re-dressed her
+  record, wiping the test's sword; fixed as 6fd5b343 (armed after the move, inside the hit). The three trains are on CI server-only for
+  their first C++ compiles and T0: 3858 m3-npc-reach 6fd5b343, 3859 m3-pass-train-2 0b49a28e, 3860 m3-pass-train-3 a51762d4 (the
+  runner rebuilds thuum/rust-ci first).
+- 15:38 PDT: the touch's read (docs/research/m3/re-havok-contact.md): the player's bhkCharProxyController's ContactPointAddedCallback
+  (Address Library 79131) hears every added contact point with no motion-type filter, so a Keyframed clutter body's touch is delivered,
+  while the surface-interaction pass (ObjectInteractionCallback via 62648, the impulse body 78304) skips motion types 4 and 5 and applies
+  the push only to dynamic bodies under the 95 mass cap: a non-simulating seat swallows the bump by construction and the claim must come
+  from the manifold contact; polling bumpedBody cannot replace the detour. lab/frida/prop-contact.js carries the Dynamic plan (hooks 79131
+  and 78304, offsets by just addr; the hkpRootCdPoint and hkpCollidable field offsets from the headers at write time). An agent builds the
+  hook (a Gum on-enter detour, one propContact event per prop per 250 ms) and the client's claim on contact, with the proximity stand-in
+  behind a fallback setting.
+- 15:40 PDT: T0 GREEN on m3-npc-reach 6fd5b343 (pipeline 3858: the reach and cone gate for humanoid NPCs, the hosted resident's hit
+  refused at 2000 units and landing at 60) and on m3-pass-train-2 0b49a28e (3859: npc-reach, story-arrival, quest-fragment, quest-mode
+  with D62 and the own-key setting; the server C++ compiles and the suite passes with the mode-all and allowed cases); m3-pass-train-3
+  a51762d4 (3860, the props server half) running. The platform halves (the arrival native, the fragment hook) compile on the Windows
+  client build alone, at the -win pushes.
+- 15:46 PDT: m3-pass-train-3's first pipeline (3860) red at compile: unit/PropTest.cpp used GetCellHost's return type without the bridge's
+  rules header (the file the neighbours include); fixed on the train as b383e2e9 (to land on m3-prop-physics after the contact hook's
+  commit), rerunning server-only. The lab shows no hold and no run set; both seats' heartbeats fresh; c2's read is core's.
+- 15:51 PDT: the touch built on fork m3-prop-physics d4a75d02 (the 79131 detour, the propContact event through the tick queue, the client's
+  claim on contact, the proximity stand-in behind propContactFallback; tsc and fork-lint green; the C++ compiles on the Windows build); the
+  PropTest header fix cherry-picked onto the branch (2b2f23c0); the P3 train takes the merge (FridaHooks.cpp's additive conflict with the
+  quest-fragment hook resolved by keeping both).
+- 15:52 PDT: P4's first honest move: the T3 Status box of npc-fate and npc-handoff restored to the template's wording ("T3 scenario green,
+  no HYPOTHESIS tags") and unticked, cell-host's unticked, each with the inventory's counts and the earlier tick's text kept inside the
+  line; the boxes tick again when the reads land (quit-path.js, x-npc-trap-report, the handoff probes). Fork m3-pass-train-3's head is
+  db5c9611 (the contact hook merged, FridaHooks.cpp's includes from both hooks), pushed server-only.
+- 15:58 PDT: T0 GREEN on m3-pass-train-3 at both heads (3866 b383e2e9, 3869 db5c9611): the props server half compiles and PropTest passes
+  on top of P2. Every pass train is green on the server side; the Windows halves (the arrival native, the fragment hook, the contact hook,
+  the client services) compile at the -win pushes, which wait on numidium's base.
+- 16:19 PDT: P4's drafts for the forty unread hypothesis tags of npc-stream and npc-fate (docs/private/p4-dynamic-lines-2026-10-29.md:
+  CLOSE 15 by runs or LOG lines, LIMIT 7, READ 11 naming the probe or a new one, DELETE 7 as history); two premise corrections: x-npc-stream-p5
+  never asserted the package claim the doc describes (H3 is a READ), and npc-stream's Status tick uses the build's numbering, not the
+  Inventory table's (H4 is moot: slice 3 shipped a poll). Three new reads proposed: x-npc-overtime, x-wire-idle-rate, cloak-hostile.js.
+  The edits are applied next by an agent from the drafts, my review on the diff.
+- 16:31 PDT: core's read of sky-c2: the GPU is wedged (the PCIe link fine at 8 GT/s x16, the device in the all-ones config state, the
+  guest's Win32_VideoController "NVIDIA GeForce GTX 1050 [Error]"), so the seat has software-rendered since 21:03Z, the minute the
+  teleport timings slid and the agent died; host pressure was not a factor (5 to 41 percent CPU, no swap). Remove-and-rescan failed
+  twice on this card; the fix is a host reboot, Eli's call by its standing word, asked before 22:30Z and unanswered; the sixth wedge in
+  sixteen days, the second on this card, the cause vfio resets at two per rollback (c2 took 37 rollbacks today); numidium builds ADR-036
+  (relaunch, not rollback) to cut them to a handful, its first trial after this reboot. A software-rendered seat is worse than absent for
+  the gate (its timings read as regressions), so the lab waits on the reboot; the pass continues on CI and the docs, and T2 (fakeclients on
+  sky-srv, no seats) can run on the trains meanwhile.
+- 16:36 PDT: P4's forty endings applied to npc-stream.md and npc-fate.md by an agent from the drafts (python by sentence text,
+  my review on the diff): CLOSE 15 (runs or LOG lines named inline), LIMIT 7 (in place and in a Known limits paragraph before
+  each doc's Message contract), READ 11 (each keeps the word HYPOTHESIS beside its named read: x-npc-overtime, x-wire-idle-rate,
+  cloak-hostile.js, b-npc-stream-state's claim, x-handoff-cross's count, x-puppet-head-face, x-reanimate-host), DELETE 7 (history).
+  Tags 50 to 34 and 39 to 26; the remaining 60 are the reads above plus the tags no draft covered (npc-handoff, npc-talk, cell-host,
+  spell-placed-object next). Zero em dashes, 132 insertions, 68 deletions.
+- 16:41 PDT: H-53h's read written: lab/frida/cloak-hostile.js hooks Actor::IsHostileToActor (CommonLibSSE-NG Actor.h:593, Address
+  Library 37537 by `just addr`) and logs first sight and each flip of the answer per (self, other, caller) for calls involving the
+  player, a summary every ten seconds; x-cloak-hostile by path is the creature caster's frame plus the trace on c1 before the
+  placement, recorded not claimed. The Frida README gains entries for today's four scripts (quest-stage-chain, story-location,
+  prop-contact, cloak-hostile). numidium's T2 of P2 runs on sky-srv; P3 (db5c9611) had no difftest-build (the job's changes: rule
+  saw none of the crate's 13 changed files across the train's pushes), so lab/tools/glab.py run now takes KEY=VALUE pipeline
+  variables and started fork pipeline 3875 on m3-pass-train-3 as an API pipeline with CLIENT_BUILD_WINDOWS=0 (every changes: rule
+  counts as matched there, the client build stays off the seats' host); P3's T2 follows P2's on that artifact. ADR-036's note for
+  probes: a probe changing seat files outside the relaunch step's lever says `client: rollback` at the top level; none of today's do.
+- 16:54 PDT: ADR-058's slice two read against the master file (esm.py on sky-srv): the MSTT references around Riverwood and lab-spawn
+  are effects and animated statics (motes, chimney smoke, mist, rapids, a burning campfire, a spit pot), none a player kicks, and no
+  CONT editor id names the Blue Palace's physical container; slice two deferred to M4 with the dungeon work (a note under ADR-058),
+  head 3 continues on slice one's proof, persistence (x-prop-push's restart half suffices; the asleep sample saves at once) and a
+  rules review of m3-prop-physics by an agent. Windows trees assembled clean and lint-green, unpushed until numidium's T2 verdicts:
+  m3-pass-train-2-win (P2 + P1-win) and m3-pass-train-3-win 1d5b2321 (P3 + P2-win). Two agents draft P4's next batches (cell-host,
+  npc-handoff, npc-talk; npc-puppet, spell-placed-object).
+- 17:00 PDT: lab/esm.py gains `quests <plugin> [sge]` (QUST DNAM flags, UESP's layout): Skyrim.esm 1.6.1170 holds 1811 quests, 330 Start Game
+  Enabled (179 system, 92 miscellaneous, 9 main, 6 mages, 2 thieves, 6 brotherhood, 4 companions, 8 daedric, 13 side, 11 civil war), the
+  fact base of D63 (which of them join `allowed` under mode all; the memo in the weekend summary recommends leaving the four as they
+  are). docs/private/playtest-m3-39.md drafted: eight items across the pass's trains, each naming its train (skipped, not red, when
+  the train is not in the build). Fork pipeline 3875 green with difftest-build 14255; P3's T2 follows P2's on it (numidium).
+- 17:03 PDT: P4's Status pass, first cut: boxes the evidence already supports ticked with their reasons (npc-stream's doc-complete and
+  engine-surface boxes, npc-fate's and spell-placed-object's doc-complete, npc-talk's T2 by train 55's green, quest-stage's T2 by 3n's
+  e14dc298 green), and VERB.md gains the none rule: a box whose item the verb has none of is ticked "(none: why)", so cell-host's native
+  box and npc-handoff's message and native boxes tick (the table read 10/12, 5/11 and 5/11 for nothing to do). prop-physics.md gets the
+  Milestone, Class and Rung lines `just status` reads (M3, B, R2/R0). Both Windows trees type-check clean (tsc on pass2win-wt and
+  pass3win-wt against clientbits' node_modules; yarn is not on the Mac).
+- 17:13 PDT: x-wire-idle-rate, thuum-cf's seat-free T2 read for npc-stream's idle packet-rate HYPOTHESIS (numidium, sky-srv): one
+  idle fakeclient (profile 9, `--moves 0 --settle-ms 60000`) against skymp-server-test m3-turbo-train-3o-win on the clean world, its
+  UDP on the compose bridge filtered to the test server's address (lab-api's tcpdump; the lab's own server shares that bridge and port
+  7777 with the seats, which a first unfiltered capture caught), the server's ticks from /metrics
+  (`skymp_tick_duration_summary_seconds_count`, through a T2 settings copy with metricsAuth's auth-off value, ui.ts:72-80). Over the
+  55.1 s idle window the server sent the client 814.8 packets a second of 26 to 31 B (44,871 of 44,873, all 26 or 28 B) against its
+  816.4 ticks a second (49,926 in 61.2 s): equal within 0.2 percent, so the claim's 10 percent holds; the client sent 184.5 a second
+  (the fakeclient's own 5 ms loop), and no server packet followed the client's close. An idle client therefore costs one small packet
+  per server tick, about 815 a second (near 45 KB/s with UDP and IP headers), because the gamemode loops `server.tick()` then a 1 ms
+  setTimeout (skymp5-server/ts/index.ts:222-227) and the wire sends at every update (wire-transport lib.rs:377): a cost for the pass to
+  weigh, not a fault in the row.
+- 17:19 PDT: the prop-physics rules review (an agent on ee44f7d1..2b2f23c0) found six holes, all fixed on fork m3-prop-physics eb04cdd5
+  (the record's cell as the authority and a step budget per sample through a shared PropSampleFacts; items alone as props, within
+  reach; the silence lapse; the grab's no-lease, its limit and its clearing at a takeover; PropOwner at the subscription; isfinite
+  and a bounded refusal map; the client's final sample at untrack and a 100 ms rest read), with T0 in props.rs, the bridge and
+  PropTest; cargo, clippy, fork-lint and tsc green locally. Merged into P3 54e021e0 (pushed server-only; the crate changed, so its
+  difftest builds on the push) and P3-win 48e35c46 (pushed with the client build); P1-win 8b7e2ade and P2-win pushed earlier on P2's
+  T2 green (numidium, 00:05Z). numidium's x-wire-idle-rate MEASURED the idle rate (814.8 packets/s against 816.4 ticks/s, within 0.2
+  percent): npc-stream's row closes, and the cost it names (an idle client near 45 KB/s because the server loop ticks every 1 ms and
+  the wire sends at every update) is a budget row for the pass's end. The details in docs/verbs/prop-physics.md.
+- 17:21 PDT: P4's third batch applied (an agent from docs/private/p4-dynamic-lines-3-2026-10-29.md, my review on the diff): npc-puppet.md
+  40 tags to 11 (CLOSE 17 by the P1 and x-npc-puppet-2 runs, the engine map's function names kept as the re-analyst's labels with
+  their ROLES confirmed; LIMIT 9 into a Known limits paragraph K1/K2; DELETE 3; KEEP 5 and READ 1 keep the word; the T3 Status box
+  unticked as npc-fate's and npc-handoff's were) and spell-placed-object.md 12 to 5 (the fail script's dispel REFUTED by apocrypha's
+  read; S1/S2 limits; the collision and the fade reads named). Premise corrections recorded: b-npc-puppet never asserted the two-seat
+  shout's inCombat claim the doc describes (a probe before any scenario claim), x-raise-wall has no dual-cast or interrupt step, and
+  no Raise Wall claim has been read in the lab yet (both x-raise-wall runs died at a teleport before any cast).
+- 17:26 PDT: D64 (numidium's memo on the idle packet cost, the recommended C taken under the pass's rule): outbound packets leave on a
+  60 Hz flush clock in wire-transport (FlushClock, SEND_INTERVAL_DEFAULT; a zero interval is the old shape; a disconnect flushes at
+  the next poll), the tick and the ingest untouched; fork m3-send-rate cut from 3o ee44f7d1, pushed server-only (the crate changed,
+  so its difftest builds on the push); cargo tests (the clock's own case: the interval kept with its remainder, no burst after a
+  stall, a request honored) and clippy green locally. Asked of numidium: the idle read on its image (about 60 a second expected),
+  the full T2, the touched verbs' gate when the lab is back. The note under ADR-011 in DECISIONS.md; WIRE.md's Transport section
+  carries the schedule.
+- 17:30 PDT: docs/verbs/mount.md DRAFT: the owner table's fifth row kind, mount (the rider simulates the horse wherever the ride goes,
+  granted at the mount, released at the dismount, the rider's departure or the horse's death, no lease by time; the claim's shape,
+  the follow's cross-cell reach), the inventory from the records and CommonLibSSE-NG's mount surface (Actor.h:197-199, :370,
+  :473-474, :553-554), the build M7's with mounted combat. PLAN's "horses (host follows rider)" line is answered on paper, as the
+  pass's audit said. The physics probes x-prop-push and x-prop-pass (v2, by path) read the review's budgets (E_PROP_STEP and
+  E_PROP_REACH must read 0).
+- 17:32 PDT: quest-stage.md: two tags closed on evidence (INDX stages are not parsed, the stage check is the wire's u16, a declared
+  limit; H-56a's line points at its RESULT), 11 to 9. lab/tools/glab.py lists N pipelines (`glab.py skymp 8`) and a pipeline's jobs
+  (`glab.py jobs skymp <id>`). CI: P1-win 8b7e2ade pipeline 3881 GREEN with its client build; P2-win e4770853 pipeline 3882 RED at
+  client-build 14282 (the server, wire and difftest jobs green), read next; 3884 (P3), 3885 (P3-win) and 3888 (m3-send-rate) running.
+- 17:33 PDT: pipeline 3882's client-build (P2-win e4770853) read: the P2 merge of m3-story-arrival and m3-quest-fragment had dropped
+  SendStoryChangeLocation's `return true; }}` and the Suppress binding's `vm->BindNativeMethod(` in PapyrusTESModPlatform.cpp (C1075,
+  six C2601, C2187), a Windows-only file no server build reads; restored on the -win branches (P2-win a1272466, P3-win c8a6e8e8, both
+  lint-green, braces and parens balanced), pushed with the client build. The server branches P2 0b49a28e and P3 54e021e0 keep their
+  shas for numidium's T2s and take the same fix by a merge from P2-win after P3's verdict. P1-win 8b7e2ade's pipeline 3881 GREEN with
+  its client build: the first pass train whose Windows half compiles.
+- 17:34 PDT: P4's second batch applied (an agent from docs/private/p4-dynamic-lines-2-2026-10-29.md, my review on the diff): cell-host.md
+  20 tags to 3 lines (the quit crash's chain closed by its runs: the stale host MEASURED, the leaked movie NAMED and its two plugin
+  holders, the pre-existing crash CONFIRMED; three limits), npc-handoff.md 16 to 6 (D11 PROVEN, H5 and H9 CONFIRMED, the target
+  not imposed a limit; H1 and H2 keep their reads), npc-talk.md 9 to 5 (H-55a and H-58a CONFIRMED, H-55b a limit). Three honesty
+  lines added where the docs named reads that do not exist: npc-handoff's Dynamic plan (four probes never written), npc-talk's
+  vendor read (x-npc-vendor-claim never written) and its Known limits (the M6 row the Inventory points at).
+- 17:36 PDT: Status boxes ticked on evidence: prop-physics's doc-complete and engine-surface boxes (the touch delegated and read), npc-fate's
+  native hook (FateHooks.cpp's detours, npc-roll.js's counts). CI at this minute: P3 3884's wire jobs green with difftest 14287, its
+  server-build running; P2-win a1272466 building (3892), P3-win c8a6e8e8 queued (3893), m3-send-rate 3888 running.
+- 17:37 PDT: D65 (finding 77, Reading List's RL_DetectionQuest flapping twice a second per seat, the server never seeing it): A, leave the
+  mod as it is (B, a property patch in apocrypha's layer, when the layer next moves), and lab-driver throttles repeated questStart and
+  questStop lines per quest to one per ten seconds with the held count, the first line never held (a probe's log-count on a start
+  still reads it); tsc green, 21 lines. The memo in the weekend summary's calls list.
+- 17:44 PDT: the two rules reviews of the other pass trains (agents, the shape that found the physics holes) landed. Train 2 (0b49a28e):
+  (1) the merge brace (fixed on the -win branches); (2) SLICE TWO IS INERT: d02103fd changed TESModPlatform.psc but not the .pex, and
+  callNative resolves through the loaded .pex, so Suppress/ReleaseQuestStageFragment throw 'Native function not found' and every
+  relayed stage runs its fragment (the double reward stands); (3) rule 12 and 5: mode all accepts any u16 stage of about 1,400
+  quests with no INDX check and no record cap, at_login O(n squared), a hostile seat at 8/s persists 28,800 pairs an hour replayed to
+  every login; (4) the arrival event is armed by the quest mode message, so a server with sharedQuests [] never raises it; (5) the
+  release at the promise can unmark before a queued stage fires; (6) start-game-enabled reports cost tokens and a log line each at 8/s;
+  (7) PlayerScale reads the sex from the appearance alone (a female NPC takes the male column, within the 256-unit slack); (8) the
+  refusal order logs OWN_START for a denied quest. Train 1 (7a223e0d) and the client bits (90baae65): (1) held sightings with no
+  total cap, no sweep, no clear at a disconnect; (2) dedupe by refrId alone lets a second reporter evict the first's entry; (3) a
+  placed-dead body revived by one host sample (DiedAgo nullopt, no grace); (4) the 0.1 s push on a captured wrapper; (5) the hands
+  pass only after a setInventory's apply; (6) no restart T0 for the corpse. Verified correct lists in the agents' reports. Two fix
+  agents build the fixes on the branches now (no push until my review); P3's T2 waits on them too. CI: P3 54e021e0 pipeline 3884 GREEN
+  (the props review's fixes compile, PropTest passes); 3892 and 3893 build the -win trees; 3888 (m3-send-rate) queued.
+- 17:59 PDT: lab/esm.py gains `cellrefs <plugin> <cell> <TYPE,...>` (the references inside an interior cell, which `near` could not reach)
+  and `ref` prints the rotation; with them x-npc-trap-report's placeholders, unfilled since 2026-10-24, are filled from Skyrim.esm
+  (Bleak Falls Temple 0x371de: the plate 0x567f2, the spike wall 0x54b15, the victim 0x39fe4, the draugr 0x380b3 and 0x380b9; the
+  corridor's axis a HYPOTHESIS the first run's screenshots read), so the hazard half of ADR-048 B can run at P2's stage. Also by
+  path: x-npc-overtime v2 records the fall instead of claiming it, x-reanimate-host v2 records the host seat's resurrect line (the
+  doc's "hosted body, AI enabled" line exists in no client), the fourth P4 draft's corrections. Playtest 39 gains a face read.
+- 18:05 PDT: train 2's review fixes built by an agent and pushed: fork m3-pass-train-2 58208e9f (six commits: the brace cherry-pick,
+  the .pex declarations that make slice two real, the INDX check with the record cap and the one-pass login replay, DENIED before
+  OWN_START with the throttled line, the arrival on the login itself, the one-shot fragment mark with the 10 s safety; crate tests
+  246 green, clippy, fork-lint, tsc), server-only (its difftest on the push); P2-win dca7fe09 (the merge took the train's platform
+  source) pushed with the client build. The PlayerScale sex column is declared in melee-reach.md (libespm reads no sex). CI: P2-win
+  a1272466's 3892 GREEN with its client build (the brace fix proven), m3-send-rate 3888 GREEN on every job, P3-win c8a6e8e8's
+  client-build green with its server-build running. numidium asked for T2 on 58208e9f after P3's.
+- 18:08 PDT: train 1's review fixes built by an agent and pushed: fork m3-pass-train-1 b0cda83a (7b8ff8ea the held roster keyed by
+  (reporter, reference), bounded at 1024 across cells with the oldest dropped, swept once a second, forgotten at the reporter's
+  disconnect; b0cda83a a placed corpse ignores its host's live sample unless the server accepted a reanimate hit on it within 10 s,
+  the gate that keeps 'anyone reanimates any corpse' true while a sample alone stands nothing; three T0 cases including the corpse's
+  restart) server-only, m3-client-bits 9a0d4c34 (the silent kill's push re-fetches the body by id; the hands pass runs after any apply
+  that re-added a worn entry, by the apply's own report), P1-win 60f40cbc with the client build; fork-lint and tsc green, the C++ on
+  CI. npc-puppet.md carries the hold's new shape; npc-fate.md's placed-dead row follows when the fourth P4 batch's apply lands.
+- 18:11 PDT: finding 31 (the rented-bed freeze, Eli's "if time"): m3-rest-correction 6a3427fa (client only, 73 lines: the correction
+  waits for the engine's wake, a bed's open fact is its Sleep/Wait Menu) merged into m3-client-bits f9c6b7ca and P1-win 9721ff72
+  (tsc and fork-lint green, the client build on); x-rented-bed by path (validated) joins P1-win's stage probes; rest.md carries the
+  note. CI at this minute: P3-win c8a6e8e8's 3893 GREEN (the physics fixes compile on Windows), P2 58208e9f building (3900), P2-win
+  dca7fe09 queued (3901), P1 b0cda83a (3903) and client-bits (3904) queued, P1-win 9721ff72 next.
+- 18:19 PDT: P4's fourth batch applied (an agent from docs/private/p4-dynamic-lines-4-2026-10-29.md, my review on the diff): npc-stream.md
+  33 tags to 12 (eleven closed by the P1, P4, P6, P7 and face runs, four limits into Known limits, the two Train 57 headings' clauses
+  and three duplicates gone; the Status box names each H's numbering), npc-fate.md 26 to 13 (nine closed by the fate-roll, outfit,
+  respawn, death and corpse-drift runs: the outfit detour's old site FALSIFIED, the killer credit REFUTED; the x-npc-overtime row
+  names Hilde 0x35534 and the probe's recorded read); npc-fate's placed-dead row carries the review's 10 s reanimate gate. The eight
+  M3 docs stand at 196 to 75 tags, every remaining one a named pending read or the template's own words.
+- 18:23 PDT: P3 54e021e0's T2 RED on the prop-physics session alone (the claim refused, the three relays absent; every other session
+  identical): the session assumed the drop's id 0xff000004 while the full run's earlier sessions allocate forms on the same server
+  (the header's own caveat). Fixed where it belongs: the difftest harness and the fakeclient resolve "{{created:<baseId>}}" to the
+  id the CreateActor for that base carried (fork m3-prop-physics f559b0d9, tests in both crates), the session names its dagger by
+  base 80254. P3 is 50a44336 (the placeholder plus train 2's review fixes merged, 256 crate tests green, fork-lint), pushed
+  server-only with its difftest on the push; P3-win follows (its merge took the train's platform source again). numidium asked to
+  run the full T2 on 50a44336 in place of the queued rerun of 54e021e0.
+- 18:24 PDT: PLAN.md's M3 chart gains the pass's evening STATE block (the three trains with their shas and review state, the T2 verdicts,
+  D63 to D65, the slice-two deferral, the tag count, what M3 DONE still waits on). P3-win ffa51358 pushed with the client build.
+- 18:42 PDT: D64's reads on fork m3-send-rate b6f4deb4 (numidium, sky-srv, the same idle script as 17:13's): the server now sends an
+  idle fakeclient 59.98 packets a second (3,304 of 3,306 in the 55.1 s window, all 26 B, a median gap of 16.6 ms) against 814.8 before,
+  its loop still ticking 847.2 times a second (51,627 in 60.9 s), so the flush clock alone moved; the client's own 5 ms loop still sends
+  189.3 a second, and no server packet followed the close. The full T2 of m3-send-rate is GREEN (difftest 14302, every session identical
+  to legacy but its declared lines). Its gate (npc-stream's relay cadence, cell-host's grants) waits for the lab.
+- 18:44 PDT: D64's proof recorded where the decision lives (the note under ADR-011 and WIRE.md's Transport section at 86af255d, npc-stream's
+  idle-rate row here): 59.98 a second against 814.8, the loop unchanged, T2 green; m3-send-rate's merge waits for the touched verbs' gate.
+- 18:45 PDT: prop-physics.md gains the table of its UNMEASURED numbers (what each sizes at the stage: the lease, the silence, the grab's
+  limit, the speed and step floor, the reaches, the stream's cadence and dead band, the sleep stand-in, the tracking set, the
+  glide) and slice three on paper (the held object through PlayerCharacter's grab surface, CommonLibSSE-NG PlayerCharacter.h:553-570
+  and :696-712, Offsets.h:452; the body's resting root as one asleep sample applied by SetPosition; HYPOTHESIS tags for the reads
+  that come before M4's build).
+- 19:02 PDT: CI GREEN on every pushed head but the newest: P1 b0cda83a (3903), m3-client-bits f9c6b7ca (3907), P1-win 9721ff72 (3908, client
+  and all), P2 58208e9f (3900), P2-win dca7fe09 (3901, client and all), P3 50a44336 (3911, server and difftest); P3-win ffa51358's
+  3912 building. The Windows trees composed in stage order: P2-win 0dc92d5a takes P1-win 9721ff72 (clean), P3-win 868240a8 takes
+  P2-win 0dc92d5a (one conflict, the disconnect handler's two departures, props_gone and ForgetHeldSightings, both kept); tsc and
+  fork-lint green on both, pushed with the client build. P3-win's server content is now the full composition (trains 1, 2 and 3), the
+  tree a stage of all three would run; its own T2 is the last before that stage.
+- 19:04 PDT: D64 folded into the physics train at numidium's ask (one stage and one gate cover it; npc-stream's cadence and cell-host's
+  grants are in the gate anyway): P3 6901781c (server-only, difftest on the push), P3-win e65a345b (the client build); every crate's
+  tests and fork-lint green. The lab plan once the host is back, numidium's: 3o's gate again with b-spell-placed-wall's fix deployed,
+  the merge and "base merged"; ADR-036 pushed with the default unchanged and a live trial; apocrypha's layer on the merged base and
+  P3-win on top of it (ADR-042a) with the nine probes by path and the three traces; one full sweep as the gate for both, then
+  layer-merge and verb-merge citing it. The three single-train T2s prove the parts, P3-win's T2 the sum.
+- 19:51 PDT: CI GREEN on the union: P3-win e65a345b (pipeline 3923, client and server), P3 6901781c (3922, server and difftest), P2-win
+  0dc92d5a (3919, client and server); every head of the pass compiles on both platforms. The stage build waits on the lab alone;
+  numidium's T2s run the parts (P2 since 01:42Z, then P1, then P3) and the union's last.
+- 20:09 PDT: every single-train T2 GREEN on its final head (numidium): P2 58208e9f at 02:11Z (the quest-stage session matched under the
+  INDX check), P1 b0cda83a at 02:39Z, P3 6901781c at 03:08Z (the prop-physics session identical with its 14 declared divergences,
+  no E_PROP line in the kept log); each run stopped its services, the lab's server untouched. prop-physics's T2 box ticked; the
+  chart's state line updated. Left before the union's stage: P3-win e65a345b's T2 once the lab is back, and the reboot before that.
+- 21:14 PDT: the union's T2 (P3-win e65a345b, numidium, beside 3o's gate on sky-srv) red on one LEGACY line: god-mode's declared
+  divergence {{t 16, health 0.96288}} x1 on legacy came x0 (the legacy stack never sent c1 its damaged health this run); every wire
+  line matched and prop-physics is identical. Read as the legacy stack's timing under load (the run shared sky-srv with the gate's
+  first runs); numidium reruns it in a quiet window before the union's stage, and a second miss sends the session's legacy timing to
+  a read, not the union. ADR-036 is live (main 80ccdfe, LAB_CLIENT_RESET=relaunch): a rollback of c2 again logged the slow retrain
+  (214 s, the agent missing, the rerun green), so numidium trials relaunch mode on three runs and then runs 3o's gate from scratch
+  under it, one rollback per seat at the set's start.
+- 21:25 PDT: the lab is held until 06:24Z for core's card read (numidium): sky-c1's VM start at 04:14Z failed with "QEMU exited with
+  code 1", the wedge's signature, on the one port the BIOS visit changed (its next rollback worked, the seat played slowly), and at
+  04:23Z lab-api lost TLS to the Proxmox API while starting c2; b-npc-loot ran green between. ADR-036's relaunch never ran (every
+  reset a forced rollback). 3o's gate has not restarted; the pass's stage waits behind it.
+- 21:43 PDT: the lab is DOWN again (numidium): after core's rescan both cards fail VM starts ("QEMU exited with code 1", 712 three times,
+  711 once, 04:40 to 04:42Z); 3o's relaunch-mode gate stopped itself on two lab faults before any scenario, parity unmoved. The fix is
+  a host reboot, Eli's call by its standing word. Every seat-free T2 is done (P2, P1, P3 green; the union's reruns alone when seats
+  exist). Nothing stages or gates until the reboot; the pass's code half is complete and recorded.
+- 22:20 PDT: the lab is back after the second reboot and 3o's gate runs from scratch in relaunch mode (run set 20261030-050437 on
+  lab-api 09dac44; numidium): c2 relaunched in about 32 s at runs 2, 3 and 5 with zero device resets in core's host log, the first
+  live proof of ADR-036. Five in: smoke, a-restart-persistence, b-duel and b-body-loot green, b-duel red first (step 65's
+  `server.actor(c2).healthPercentage < 0.78` read 0.7851) and green on its cold rerun as ADR-030's amendment runs it; an agent reads
+  that claim's margin (the hits, the regen between them, the timing), never its number. A stale C:\sky-lab\hot.txt inside 3o's
+  clean-m1-next made c1 roll back at every run; install-lab clears it from main 7be6465, numidium deletes it by hand for this gate.
+- 22:37 PDT: D66 built (the recommended D of the b-duel margin read, taken under the pass's rule): fork m3-cast-held-time 51069b46 off 3o,
+  wire-rules casts.rs HOLE_MS 1000: a single stream's report after a hole counts the hole (a lost report is not a lost target, the
+  engine burned the gap), the first report and a re-contact one cadence as before, two hands of the same spell keep the cap per
+  report (the reports name no hand); the one T2 declaration that followed the cap moved in the same commit (spell-cast's second tick
+  0.96 to 0.948); casts.rs's new case covers the way, a hole, the cadence, a re-contact, a second and the two-hand cap; 241 rules
+  cases, the bridge and the harness green, clippy green; pushed server-only, its difftest on the push. R0 and server-only, so it
+  merges on T0 and T2 (ADR-053); numidium asked whether to fold it into P3 before the union's T2 rerun. b-duel's claim is unchanged.
+- 22:38 PDT: D66 folded into the physics train at numidium's word (one stage, one gate; b-duel gated there anyway): P3 6796e787 (server-only,
+  the difftest on the push, 257 rules cases green), P3-win 7a6fd1e2 (the client build): the union is trains 1 to 3 plus D64 and D66.
+  Its T2 runs in a quiet window after 3o's gate (8 of 18 green so far in relaunch mode: c1 relaunches since the stale mark went, the
+  only rollbacks the forcing ones), then the merge, the layer and the stage.
+- 22:47 PDT: 3o's gate 20261030-050437 cut short at 05:39:41Z by sky-c1's card wedging again (the full signature; core asks Eli for the
+  reboot): ten green (smoke, a-restart-persistence, b-duel on its cold rerun, b-body-loot, b-npc-loot, b-npc-death-report,
+  b-npc-respawn, b-npc-copy-fate, b-cloak-fight, b-npc-archer), b-npc-talk 053717 RED at step 20 (Sven 0x13491 about 100 units from
+  snapshot s1 during the claimed talk: red three of four on 10-28, now on a healthy stage, a finding; an agent reads the run), its
+  cold rerun erroring on c1's dead card; seven never ran and replay as RUNSET_AFTER on the same stage after the reboot, one chained
+  gate. numidium's rerun rule taken: a red with a relaunched seat reruns relaunched first, a second red reruns cold, a green first
+  rerun is green; red-red-green names a relaunch-state finding (the note under ADR-036 and ADR-030 is numidium's).
+- 22:59 PDT: b-npc-talk 053717's red READ (an agent on the run, the 10-28 runs and the greens): no talk ran; the red is the stillness pair
+  BEFORE any claim (step 20, the host's npc-hold then 8 s), and the lab's hold stops a walker at the end of his current sandbox leg,
+  three to eighteen seconds (the greens' legs ended inside 8 s; the reds 215828 and 053717 began a leg as the hold landed and walked
+  eleven seconds and more, 33 units a second, collinear); the record moved on c1's own reports as the cell's host, no non-simulator
+  accepted, no claim row touched, so the server and the claimant's client are clean. My 22:47 line's "during the claimed talk" is
+  wrong: the talk never started. Fix: b-npc-talk v7 (its own commit b8ebc705, self-approved under the 10-13 word): the settle waits
+  24 s before the snapshot pair, the five-unit bound unchanged; x-npc-hold v3 by path measures the leg's upper bound (snapshots every
+  3 s for 30 s) at the stage; npc-talk.md's Known limits carry the leg-end stop. The vain form, a `settle {{of, within, apart, timeout}}`
+  step every stillness read shares, goes to numidium's grammar list. deploy-srv must carry v7 before the gate's replay.
+- 23:31 PDT: b-npc-talk v7 RED again (20261030-062117 in the rest set, both seats cold-rolled-back: 87 units in the pair after the 24 s
+  settle), so the leg-end reading does not cover it: on 3o-win the hold does not stop Sven at all (three reds on this build, 215828,
+  053717, 062117; every green of the step on earlier builds), a build or load-order finding against the lab's hold, not the talk's
+  rule and not relaunch. A fast read runs on 062117 against the green 232956 (the hold step's result, the npc-state series, the
+  reporter of 13491's moves, the plugin set on c1, 3o's client code that could re-move a live hosted actor on its host). ADR-027's
+  lone-red rerun decides the gate honestly; the scenario is not touched again before the cause is known. b-npc-handoff-door and
+  b-player-globals green with both seats relaunched (33 and 31 s).
+- 23:33 PDT: CI GREEN on the final heads: m3-cast-held-time 51069b46 (3941, server and difftest), P3 6796e787 (3943, server and difftest),
+  the union P3-win 7a6fd1e2 (3944, client and server). The stage tree compiles on both platforms with every fold; its T2 waits for a
+  quiet window, the stage for 3o's gate and merge.
+- 23:38 PDT: b-spell-placed-wall RED twice on 3o's stage (20261030-063053 and 063222, both seats relaunched): the server's placed-2-forms
+  line held and c2's refs_near had neither 098529 nor 0735e8 of Apocalypse: Raise Wall's observer placement never happens, playtest
+  38's "doesnt appear for prisoner" reproduced at T3, a finding against 3o's spell-placed verb (ADR-057). Its cold rerun wedged c1's
+  card again (the eighth; numidium's stagger of the two seats' starts is in lab-api f0480e2), the set stopped; b-npc-handoff-door,
+  b-player-globals and b-marksman green since the ten, the watch three unrun, b-npc-talk red pending the hold's read. D67, taken under
+  the pass's rule on numidium's recommendation: 3o does not merge on its own gate; the union (P3-win, 3o inside trains 1 to 3) is the
+  new base straight from parity bf133744, merged under one full sweep with the layer, with both findings fixed in it first; 3n stays
+  the fallback. An agent reads 063053 against the server's subscription and the client's spawn path.
+
+### 2026-10-30
+
+- 00:05 PDT: the Raise Wall cause and its fix. An agent's read of 063053: the server placed both forms and every seat's view aborted
+  on its first Papyrus call on the MSTT base, every frame ("Bad call result 4", kFailedAbort): Skyrim Platform packs a form argument by
+  its formType (CallNative.cpp AnySafeToVariable) and the VM registers no Papyrus class for MovableStatic (36), so CommonLib's
+  PackHandle (RE/P/PackUnpack.h) left the variable None; the caster's own copy stood because the script's PlaceAtMe never crosses
+  the platform. Fix: fork m3-sp-pack-form 9fad9f08 packs a class-less form type as Form (the file's own static-VM idiom); merged
+  into m3-pass-train-3-win 997fedf1 (numidium told first), pipeline 3962 with the client build on (the seats are down anyway).
+  HYPOTHESIS until b-spell-placed-wall's claim 2 reads green on a seat with it (spell-placed-object.md, The cause at T3).
+- 00:19 PDT: b-spell-placed-wall v2 (12353ab, its own commit; numidium asked for it before the union's stage so the sweep plays a sound
+  frame): the 300-south move of 10-29 had stood c1 (0, -500) across lab-spawn's cell edge (the origin is 310 units north of its
+  cell's south edge, guests.yaml; the wall's line at -308 lay 2 units inside the origin cell), so c1's one-cell refs-near could
+  never list its own copies: claim 3 unreadable, a premise red behind the real one. The summit's flat strip (LAB.md's note) holds no
+  300-unit clearance inside one cell, so c1 stands at (0, -366), 56 units south of the edge, and reads through c2's figure's cell
+  (refs-near {from: other}: the nearest other actor's parent cell and distances); the blocked read moves with the line (y > -166 at
+  -174, the same 8 units); no tolerance changed. x-raise-wall by path carries the same frame (sha1 992a9efb); reviews-pending has
+  the entry, self-approved.
+- 00:24 PDT: the hold finding's two reads, no guess (rule 8). Engine (re-analyst, Ghidra): SetDontMove is lifeState 9 at Actor+0xC8
+  (54761 to 37489 to SetLifeState 37612 plus StopMoving 37817 and 37818); Actor::Move 37507 zeroes the controller's velocity every
+  step while it reads 9 (HYPOTHESIS: an immediate stop, against v2's measured 3 to 6 s); Resurrect 37321 (and 40491) writes 0 over
+  it unconditionally and nothing else clears 9. Fork range defaa7e2..ee44f7d1: nothing moves or re-flags a live hosted NPC on its own
+  host, five unlikely candidates ranked in npc-talk.md's Dynamic plan. lab/frida/dontmove-trace.js and x-npc-hold v4 (by path) arm
+  the read at the union's stage; the falsifier that names a clearer is a 37612 write of 0 from a caller other than 37489 (a resurrect
+  would point at 3o's host-engine resurrection paths).
+- 00:25 PDT (2026-10-30): the lab's GPU wedges have a confirmed mechanism (core's experiments on Eli's word, the night's one
+  reboot at 07:17Z). The host kernel read a wedged card's option ROM as nothing and a healthy one's as `55 aa`, and nouveau
+  probed a healthy GTX 1050 cleanly (GP107, VBIOS 86.07.61.00.25, 3072 MiB), so code 43 in the guest was Windows reporting a
+  card the host itself could not read. Then bare QEMUs with no guest and no driver: 40 single-card open and close cycles
+  clean, and the FIRST cycle opening both cards in the same second (ASPM L1 off on both links) failed with the lab's
+  signature on 00:01.1 ("broken device, retraining non-functional downstream link", "retraining failed", "Link Active not
+  set"). The cause is two GP107 secondary bus resets (no FLR, `reset_method=bus`) on two CPU root ports within the same
+  second; Windows, the NVIDIA driver, lab-api's hard stop, ASPM and the BIOS caps are bystanders. The RTX the pair had until
+  10-28 resets by FLR without dropping its link, which is why the host's reset history (core's tally of every vfio burst
+  since August) shows thirteen failures, all in dual bursts, and 0 of 1,787 solo. lab-api's 20 s reset stagger (f0480e2) is
+  the fix, live since 06:5xZ; LAB_SEAT_STOP (50e961b) stays at stop. The lab waits for the morning reboot, then the union's
+  stage (D67).
+- 00:27 PDT: P3-win 997fedf1 GREEN on pipeline 3962 (client-build 14566, server-build 14565); numidium queues the union's T2 on sky-srv
+  for the next quiet window and has x-npc-hold v4 (sha1 4c43515e) and x-raise-wall (992a9efb) on the union stage's probe list. The hold's
+  second read, 053717's server log: ff000000 (c1) is the only reporter moving 13491 (into cell 9731 at 05:37:22 and 9732 at 05:38:51,
+  both cells c1's), no grant, pass or follow touches him, so the door pass is out; the trace decides between the engine and the call.
+  core's mechanism for the wedges (LOG e3b342a on its side): two GP107 bus resets in the same second; lab-api's 20 s stagger is the fix
+  and is live; the lab waits for the morning reboot (c2's card failed in the experiment) and core's handover.
+- 00:43 PDT: x-prop-drop v1 by path (sha1 58313908): slice one's second sure touch, the drop (the server's AddItem gives c1 a
+  SteelSword 0x13989, the game's own console drops it, the touch-2 claim line, one runtime copy per seat, the two copies within 32
+  units); its "lands where c1's does" claim needed a fact the listing already carried, so lab-api gains c.refs_near().pos(baseId)
+  (the nearest listed reference's x, y, z; the ids search has none) with its test; x-prop-push v2 already holds the restart half.
+  The stage that plays it needs that lab-api image (LABAPI=<this push's thuum pipeline>).
+- 00:54 PDT: x-prop-grab v1 by path: slice one's grab read with the non-host as the grabber (the host's own grab is "simulates it
+  already"), the view pitched by lab-api's mouse step (20.2 px per degree, the rune probes' number; look's pitch may not reach the
+  first-person view), E held 3 s; claims: the touch-1 claim granted, the grabber's stream, the host's Keyframed follow, the record
+  moved; the aim is the premise. With x-prop-push v2, x-prop-pass v2 and x-prop-drop v1, slice one's four touches each have a probe.
+- 01:00 PDT: the union's first T2 with D66 inside (numidium, on 997fedf1) RED on one line: spell-cast's declared divergence said health 0.948
+  and the wire computed 0.94784 (0.9478399753570557), which the matcher compares as the exact f32; every other session identical, every
+  other declaration held. Fix, its own difftest commit on the union: the declaration carries the computed f32 exactly, the file's idiom
+  for every declared health (m3-pass-train-3-win 820a565c, pipeline 3974 with difftest-build, no client build; the client artifact stays
+  3962's). numidium runs the trial from this worktree's sessions and the head's own T2 when 14617 lands. spell-cast.md's note corrected.
+- 01:32 PDT: the union's T2 GREEN on m3-pass-train-3-win 820a565c (numidium: difftest job 14617, server-build 14619; spell-cast "identical,
+  2 clients, 19 declared divergences", so D66's exact f32 holds; every other session identical; the lab's server untouched). The head
+  is verified seat-free and is the morning stage's: after Eli's reboot and core's handover, the layer on parity, then P3-win 820a565c
+  on top (the dist from 3962's client artifact 14566), the fourteen probes and three traces, one full sweep as the gate (D67).

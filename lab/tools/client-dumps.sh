@@ -9,7 +9,7 @@ jump=${JUMP_HOST:-root@core.gaussing.tv}
 here=$(cd "$(dirname "$0")/../.." && pwd)
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 list="Get-ChildItem 'C:\\sky-lab\\dumps' -Filter *.dmp -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | ForEach-Object { \$_.Name + '|' + \$_.Length }"
-files=$(ssh -o BatchMode=yes "$jump" "qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$list")" \
+files=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$list")" \
   | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip())' | tr -d '\r')
 [ -n "$files" ] || { echo "no dumps on VM $vmid"; exit 0; }
 out="$here/lab/results/dumps-$vmid"; mkdir -p "$out"

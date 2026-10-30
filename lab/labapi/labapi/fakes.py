@@ -5,6 +5,7 @@ answers the labState and labCommand RPCs over an httpx mock transport
 
 from __future__ import annotations
 
+import base64
 import json
 import re
 import shutil
@@ -17,6 +18,16 @@ import httpx
 from .guests import Guest
 from .proxmox import ExecResult, ProxmoxError
 from .system import Completed
+
+
+def _encoded(command: list[str]) -> str | None:
+    """The PowerShell an -EncodedCommand carries (UTF-16LE in base64), else None."""
+    if "-EncodedCommand" not in command:
+        return None
+    try:
+        return base64.b64decode(command[command.index("-EncodedCommand") + 1]).decode("utf-16-le")
+    except (IndexError, ValueError):
+        return None
 
 
 class FakeProxmox:
@@ -42,6 +53,17 @@ class FakeProxmox:
         self.shutdown_log = ["shutdown VM: guest agent stopped the VM", "TASK OK"]
         self.shutdown_error: str | None = None
         self.agent_up = True
+        # ADR-036's relaunch between runs (Runner._relaunch_seat): each script it ran, and how the seat answers: this
+        # many fail first as a busy guest agent does, files the cleaning could not remove, hot.txt's mark when a hot
+        # push left one (None: no mark), and how many files the cleaning removed
+        self.relaunches: list[str] = []
+        self.relaunch_failures = 0
+        self.relaunch_left: list[str] = []
+        self.hot_mark: str | None = None
+        self.relaunch_removed = 3
+        # what the cleaning left in the capture folders (held open by the agent) and a stale mark it removed
+        self.relaunch_held: list[str] = []
+        self.relaunch_stale = ""
 
     def stop(self, guest: Guest) -> None:
         self.calls.append(("stop", guest.vmid))
@@ -81,7 +103,28 @@ class FakeProxmox:
             return self.game
         if any("-Filter '*.log'" in c for c in command):
             return ExecResult(0, "".join(f"{n}\r\n" for n in self.skse_logs), "")
+        script = _encoded(command)
+        if script is not None and "hot.txt" in script and "Start-ScheduledTask -TaskName sky-lab-launch" in script:
+            self.relaunches.append(script)
+            if self.relaunch_failures > 0:
+                self.relaunch_failures -= 1
+                raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: qga command 'guest-exec' failed - got timeout")
+            if self.hot_mark is not None:
+                return ExecResult(0, json.dumps({"hot": True, "mark": self.hot_mark}) + "\r\n", "")
+            if self.relaunch_left:
+                left, self.relaunch_left = self.relaunch_left, []
+                return ExecResult(4, json.dumps({"hot": False, "removed": 0, "left": left}) + "\r\n", "")
+            return ExecResult(0, json.dumps({"hot": False, "removed": self.relaunch_removed, "left": [],
+                                             "held": self.relaunch_held, "stale": self.relaunch_stale}) + "\r\n", "")
+        if script is not None and "SkyrimSE.exe.*.dmp" in script:
+            # the run's end (Runner._crash_check) as a quiet seat answers it: no dump, the game the check read still up
+            games = [ln.strip() for ln in self.game.out.splitlines() if "@" in ln]
+            return ExecResult(0, json.dumps({"games": games[-1:], "dumps": [], "curl": -1}) + "\r\n", "")
         return self.exec_result
+
+    def stop_gently(self, guest: Guest, timeout_s: int) -> None:
+        self.calls.append(("stop-gently", guest.vmid, timeout_s))
+        self.statuses[guest.vmid] = "stopped"
 
     def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]:
         self.calls.append(("shutdown", guest.vmid, timeout_s))

@@ -117,7 +117,8 @@ cap::NAME; the Refuse carries one u16 reason code (lib.rs:283 to 287).
   follows its files, and the server's copy and every client's must come from the same render (layer-stage's load
   order check). apocrypha's defaults layer (thuum apocrypha/layer-defaults 539496c, the slot after playtest 37, D57 A
   inside) moves three entries: USSEP at slot 1 from 21,106,651 B CRC32 86A15BD3 to 21,106,601 B 642C6867 (two perk
-  ability blocks dropped by a build-time patch), SpellAbsorptionAndTwinSoulsFix_SE.esp (light, 42,409 B either way)
+  ability blocks dropped by a build-time patch), then to 21,106,777 B 7CA7F25F at f8259a2 (Eli's Quick Reflexes
+  row, a spell record injected from Skyrim.esm), SpellAbsorptionAndTwinSoulsFix_SE.esp (light, 42,409 B either way)
   from F765F49C to C5F71B81 (three magnitudes set), rotfern.esp to 7B65C699; its patch tool refuses a record patch a
   later plugin overrides, so these stay the winning copies (21:11 PDT).
   The login CustomPacket of a connection without a Hello is refused with E_MOD_LOCK_NO_HELLO after a grace of one

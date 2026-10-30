@@ -354,6 +354,62 @@ on("cellDetach", (e) => {
   s.lastDetachMs = ms;
 });
 
+// thuum docs/verbs/quest-stage.md (H-56a: does a placement or a walk into
+// Riverwood raise the Story Manager's Change Location event, and does the
+// SM then start A Lovely Letter 0x74a83?): the platform's locationChanged
+// (the player's own, 0x14; residents cross locations all day) and the
+// quest start and stop events, logged for the lab's log-count through the
+// console tee (lab-console-log). No step and no state: a probe reads the
+// lines. A missing form is logged as none rather than thrown.
+on("locationChanged", (e) => {
+  try {
+    const actor = e.actor ? e.actor.getFormID() : 0;
+    if (actor !== 0x14) return;
+    const oldLoc = e.oldLoc ? e.oldLoc.getFormID().toString(16) : "none";
+    const newLoc = e.newLoc ? e.newLoc.getFormID().toString(16) : "none";
+    log(`locationChanged actor ${actor.toString(16)} old ${oldLoc} new ${newLoc}`);
+  } catch (err) {
+    log(`locationChanged: unreadable event (${String(err)})`);
+  }
+});
+
+// A quest a mod's own script starts and stops twice a second (Reading List's
+// RL_DetectionQuest, playtest 38's finding 77; D65) would flood the console
+// the probes read: one line per quest and kind per ten seconds, carrying the
+// count of the lines it stands for. The first line of a quest is never held,
+// so a log-count on "questStart quest 74a83" still reads the start.
+const questLineAt = new Map<string, [number, number]>();
+function logQuestEvent(kind: string, quest: string): void {
+  const key = `${kind} ${quest}`;
+  const now = Date.now();
+  const seen = questLineAt.get(key);
+  if (seen && now - seen[0] < 10_000) {
+    seen[1] += 1;
+    return;
+  }
+  const held = seen ? seen[1] : 0;
+  questLineAt.set(key, [now, 0]);
+  log(held > 0 ? `${kind} quest ${quest} (and ${held} more in the last 10 s)` : `${kind} quest ${quest}`);
+}
+
+on("questStart", (e) => {
+  try {
+    const quest = e.quest ? e.quest.getFormID().toString(16) : "none";
+    logQuestEvent("questStart", quest);
+  } catch (err) {
+    log(`questStart: unreadable event (${String(err)})`);
+  }
+});
+
+on("questStop", (e) => {
+  try {
+    const quest = e.quest ? e.quest.getFormID().toString(16) : "none";
+    logQuestEvent("questStop", quest);
+  } catch (err) {
+    log(`questStop: unreadable event (${String(err)})`);
+  }
+});
+
 // The master behavior variables Skyrim Platform reads into
 // getAnimationVariablesFromActor's three buffers (uint8 booleans, float32
 // floats, uint32 integers), in its index order: the fork's
@@ -1942,7 +1998,11 @@ function run(step: Step, player: Actor): unknown {
       first
         .then((started) => {
           set.started = started;
-          return q.setCurrentStageID(asked);
+          // a wrapper from an earlier frame is out of Skyrim Platform's object pool by now ("Invalid
+          // _skyrimPlatform_indexInPool", playtest 37 at 05:59Z): the quest is looked up again for the second call
+          const again = Quest.from(Game.getFormEx(quest));
+          if (!again) throw new Error(`no quest ${quest} after its start`);
+          return again.setCurrentStageID(asked);
         })
         .then(
           (ok) => {
