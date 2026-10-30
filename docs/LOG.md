@@ -3575,3 +3575,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the actor (DropItemTest's position follows), the drop record behind the inventory-menu gate, propPhysics on by default in the
   train (it merges only with b-prop-push green). The CI's T0 runs on the branch; its stage after the union's merge, with the
   lab-spawn basket probes and lab-api 5cc62f8's disabled fact.
+- 09:58 PDT: the sweep at five green of 102 (run set 20261030-164127, a-favorites running; the record carries per-scenario verdicts). The
+  physics branch's T0 green at 5f7b87dc (pipeline 4023), the default-flip build running. D69 B's T3 written as a probe by path for
+  its train's stage, x-quest-rumor v1 (the rumor's own stage 10 relayed, the denied quest kept at the client, FreeformHeartwoodMill's
+  flagged start-up stage refused and its plain stage the world's); committed as a scenario it would red today's nightly under D62, so
+  b-quest-rumor is promoted from it when green there. D68 and D69 recorded in DECISIONS.md under ADR-030 and ADR-056.
