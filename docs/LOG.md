@@ -3512,3 +3512,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   pipeline 4007; numidium runs T2 alone on it. x-prop-drop v4 (150222): 9 of 13 held (one runtime sword per seat within a unit of each
   other at the dropper's feet, the budgets clean) and the non-host dropper's seat never tracked the server's copy while the host
   simulated it, so no claim, no stream, no apply: a likely client gap, under an agent's read.
+- 08:13 PDT: x-prop-grab v4 (150704; numidium): red downstream of no grab, every pitch of the sweep reading crosshairRef 0 and the
+  mid-sweep screenshot showing the rise's rock filling the view from the north stand; v5 by path (sha1 04c9b297) stands the grabber
+  80 east on the flat facing west, as the walkers do, the sweep unchanged. Queue: quest-mode v5 (running), reanimate v6, push v6,
+  pass v6, grab v5.
