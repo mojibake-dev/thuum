@@ -28,6 +28,9 @@
 # the server kills 0x39fe4 (kill-ref); c1 activates the body (the driver's Papyrus Activate, default
 # processing off: the hook reports it, the server's OpenContainer follows), the menu closes
 # (close-menu ContainerMenu, the client's closing activation), then c2, beside the body, activates it.
+#     v5 of the guest-loot fix (22:40 PDT 2026-10-30) runs a released body's open on the timers service with its own lines, so the
+#     guest's (c2's) admission and release read "body 39fe4: the ContainerMenu is open" and "body 39fe4: closing activation sent,
+#     the menu closed"; the host's open (its body never a puppet, its AI on) keeps the generic handler's lines.
 id: b-npc-body-release
 milestone: M3
 clients: [c1, c2]
@@ -104,19 +107,19 @@ steps:
   - wait: 4
   - c2: dump-state
   - c2: screenshot
-  - c2: log-count {pattern: "onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true"}
+  - c2: log-count {pattern: "body 39fe4: the ContainerMenu is open"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == true'
-      - 'c2.log_count("onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true") >= 1'
+      - 'c2.log_count("body 39fe4: the ContainerMenu is open") >= 1'
       # the release's effect: c1 is out of the set when c2 joins, so the server never counts two
       - 'server.log_count("ProcessActivate 39fe4 - [0-9]+ players in the container now") == 0'
   - c2: close-menu {name: ContainerMenu}
   - wait: 3
   - c2: dump-state
-  - c2: log-count {pattern: "onOpenContainerMesage - sent ActivateMessage"}
+  - c2: log-count {pattern: "body 39fe4: closing activation sent, the menu closed"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == false'
-      - 'c2.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1'
+      - 'c2.log_count("body 39fe4: closing activation sent, the menu closed") >= 1'
       - 'server.log_count("ProcessActivate 39fe4 - occupant is another object") == 0'
       - 'server.log_count("E_ACTIVATE_REACH") == 0'
       - server.ref(0x39fe4).isDead == true
