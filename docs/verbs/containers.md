@@ -1,6 +1,6 @@
 # Verb: containers
 
-Written 02:0x PDT 2026-10-31 (pile item 7 of docs/private/turbo-2-prework.md; M4's "containers and loot" row) from a
+Written 00:3x PDT 2026-10-31 (pile item 7 of docs/private/turbo-2-prework.md; M4's "containers and loot" row) from a
 code map of the fork at parity dc3ec679. It records memo D52's shared containers (fork m3-shared-containers dbfc8e82,
 built 2026-10-28 without a verb doc) and carries the rest of the row as fork m4-containers-rest.
 

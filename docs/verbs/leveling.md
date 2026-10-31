@@ -1,6 +1,6 @@
 # Verb: leveling
 
-Drafted 02:2x PDT 2026-10-31 from docs/VERB.md (pile item 12 of docs/private/turbo-2-prework.md; M5 Progression's
+Drafted 00:3x PDT 2026-10-31 from docs/VERB.md (pile item 12 of docs/private/turbo-2-prework.md; M5 Progression's
 first verb; actor-values.md records what M1 built). Nothing of it is built yet; the Status boxes say so.
 
 ## Intent

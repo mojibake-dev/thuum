@@ -597,7 +597,7 @@ reached the record and make it reach it (the client's health report under an eng
 server rule that drains health at the cold maximum from the reported needs (R1 report, R0 drain), the mod's numbers from its records.
 Recommended: A tonight, B or C by the read's answer as a train after M3 closes.
 
-The read drafted (00:5x PDT 2026-10-31): x-survival-cold v1 by path (lab/.cache/probes, sha1 23b6403f; 34 steps, 14 claims), c1 alone
+The read drafted (00:2x PDT 2026-10-31): x-survival-cold v1 by path (lab/.cache/probes, sha1 23b6403f; 34 steps, 14 claims), c1 alone
 at lab-spawn with the mode switched on (828, the main script's poll starting it outdoors: 826 reads 1). Leg A, the stage: the cold need
 set to 990 (stage 5; the help flags 8e0 to 8e2 are the deploy's default 1, so no box) and the seat's health read over a minute in two
 dumps with the record's snapshots beside them: a drain shows on both, a cap shows as the maximum alone (recorded, not claimed; the
@@ -607,7 +607,7 @@ screenshot; the respawn within 40 s and ONE kill line over the next 40 s (a seco
 1000 after the respawn: a finding by name). H-D51a is read on the way (the seat's own Kill at the mod's next tick swallowed, the
 server's word the one death). Runs in a lab gap, one seat; the probe is the draft of b-survival-cold once D72 is called.
 
-D72 called (04:5x PDT 2026-10-31, Eli: "knowing that about survival i say we deactivate survival for the rest of testing"): A with the
+D72 called (01:0x PDT 2026-10-31, Eli: "knowing that about survival i say we deactivate survival for the rest of testing"): A with the
 switch off. v1's two runs (072242, 072601) answered the read's half before the kill leg: the forced cold need fell about 200 a minute at
 lab-spawn (990 read 950 at 5 s and 790 at 60 s) and c1's health stayed full through the top stage (healthPercentage 1 in every dump),
 so the mod drains nothing by stage; its one death is the Kill() at 1000, the server's word (D51 B) its mirror. For the rest of testing

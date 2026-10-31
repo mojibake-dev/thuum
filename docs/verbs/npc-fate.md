@@ -2463,7 +2463,7 @@ admission and release through these lines; the host's open, its body never a pup
 D69 merges alone meanwhile (numidium: a restage of dc3ec679, its gate always plus b-quest-rumor, b-quest-stage, b-story-arrival plus
 watch, T2 beside); the union m3-pass-train-4 is re-cut on v5 after.
 
-The fix's v5 (b878b2a6, parity dc3ec679 merged in) RED twice (00:0x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 065444 cold,
+The fix's v5 (b878b2a6, parity dc3ec679 merged in) RED twice (00:1x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 065444 cold,
 065821 relaunched, step 28 alone; numidium's read): the timers path ran whole, "AI on for the server's open (D71); reads true at the
 switch" at 07:00:20.015, "AI reads true after 150 ms; activating" at .150, "activate returned false" at .151, the 3 s give-up and the
 closing activation after; no menu. The one green read of H5 (x-body-open-guest v2 215922, leg 4) had the lab's npc-ai switch the AI on
@@ -2476,7 +2476,7 @@ refusals to the deadline switch the AI off ("the activate refused K times over N
 true is the measurement; a run of refusals falsifies the hypothesis and sends the read to Actor::ActivateRef (rule 8; the re-analyst
 on sky-re, CommonLibSSE-NG TESObjectREFR.h:367 names it). The probe stays aba01c6f.
 
-v6 GREEN (00:4x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 20261031-074043 on d10789f7's stage, a cold run; numidium's read):
+v6 GREEN (00:5x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 20261031-074043 on d10789f7's stage, a cold run; numidium's read):
 the engine takes a released body's activation about 2.1 s after its AI is switched on. c2's lines: the switch at 07:43:36.379 ("reads
 true at the switch"), nine "activate returned false" at +164, +384, +608, +818, +1027, +1271, +1475, +1690 and +1904 ms, each with
 AI true, dead true, 3D true, health 0, then "activate returned true at +2127 ms (attempt 10)", "the ContainerMenu is open" 54 ms later,

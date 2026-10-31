@@ -1,6 +1,6 @@
 # Verb: word-wall
 
-Drafted 02:4x PDT 2026-10-31 from docs/VERB.md (pile item 11 of docs/private/turbo-2-prework.md; M4's "word walls
+Drafted 00:4x PDT 2026-10-31 from docs/VERB.md (pile item 11 of docs/private/turbo-2-prework.md; M4's "word walls
 teach through the server's shout record", docs/verbs/shouts.md:453-454; Eli, playtest fourteen: "leave it in
 dungeons"). From a code map of the fork at parity dc3ec679. Nothing of it is built.
 
