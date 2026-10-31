@@ -1254,6 +1254,14 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   natives (deferred to the next update in locks, perks and weather). Parity merged into m4-locks 9ece63c2, m4-weather 6c9de3df,
   m5-perks afd12dae (which carries the effect-conditions row), m3-prop-physics f923e0a7; probes x-lockpick v3 daaee288, x-weather v2
   9f7c2cfd, x-perk-pick 5e0f733f, x-container-rest v4 3817b193 next, each scenario committing on its read. Turbo 2 as set.
+- STATE 2026-10-31 10:43 PDT (the pass's chart line): parity still b6748da0. Weather: x-weather v2 GREEN (171309 on m4-weather 6c9de3df's
+  build; two hypotheses confirmed, two to the scenario's legs), b-weather on main ca1a5f1d, the double login apply fixed at 79a74960; its
+  gate follows locks' merge. Locks: x-lockpick v3 (164727) reached the menu on the prompt's deferral, the pick leg red on a single turn
+  (the sweet spot is the engine's roll); v4 b5e2cc64 (Lockpicking 100, fourteen absolute angles) runs on the restaged 9ece63c2, its gate
+  after. New: fork m5-skill-set a68d1b80 (server-only; pipeline 4244 green): a server set of a skill moves the leveling progress entry
+  with the base (the console's SetAV snapped back at the next use before); the R0 path when numidium has a slot. Queued behind: perks
+  afd12dae (x-perk-pick), physics f923e0a7 (x-prop-launch v2), dedupe d0085bb0, containers ae2cbfd6, talk guard 7be4eb41, each with a
+  parity re-merge before its gate. Sunday's lay: the four switches OFF by layer-render, Survival off (D72).
 - STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
   sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
