@@ -4252,3 +4252,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   same shape: fixed on m4-locks 28910a3d (the prompt deferred to the next update), m5-perks d31944f4 (PerkState's apply) and m4-weather
   b8ebfb13 (SetWeather's apply), each TypeScript only and overlay-eligible; spellPlacedService records its request without
   natives and skillUseService has no message handler. x-lockpick stays v3.
+- (07:55 PDT 2026-10-31) m2-effect-conditions-row (e0f9584f; T0 green on 4214) folded into m5-perks as 445ae376 instead of its own R0
+  merge: an R0 fast-forward now would put the four cascade branches behind parity again, each needing another parity merge and
+  client build before its gate (numidium held its merge at the T2 wait on my note; its T2 ends and is kept). perks' gate carries the
+  row-naming; the branch stays for the record.
