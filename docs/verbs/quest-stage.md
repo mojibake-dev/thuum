@@ -380,3 +380,12 @@ set of a done stage, so the probe's forced report could never exist: the premise
 flagged stage stands at T0). v2 by path (the sha1 in the LOG): the start-up stage read as done on both seats before any set, stage 20's
 relay kept, and the server's OWN_START refusal reached through the reports the engine makes by itself, the vampire controller's
 stage-0 reports at its restarts (DLC1VCController 1a428, within 150 s; the churn item's own evidence), never recorded.
+
+D69's T3 (22:20 PDT 2026-10-30): x-quest-rumor v2 GREEN, 20261031-051455 on m3-quest-sge-stages dc3ec679's restage (the union's dist by
+REUSE_DIST_FROM): the rumor quest's stage relayed in mode all and applied on c2, the denied MQ102 kept per seat, FreeformHeartwoodMill's
+start-up stage 10 done on both seats by the quest's own start and its unflagged stage 20 recorded and relayed once with c2 done, the
+server's OWN_START refusal of the vampire controller's own stage-0 reports within the window. Promoted unchanged as b-quest-rumor
+(main 1b4dde1c, its own commit) and held pending in lab/gate.yaml (ebfbe115) until the train merges, since parity under D62 refuses
+the HeartwoodMill relay; the merge's commit un-pends it. The merge: a union of m3-guest-loot and m3-quest-sge-stages under one gate
+(always, c-dungeon-enemies, b-npc-body-release, b-quest-rumor, the quest-stage scenarios, watch; T2 beside it) if the guest-loot rerun
+is green, D69 alone otherwise. The Status box "T3 scenario green" ticks at the merge, when b-quest-rumor plays green in the gate.

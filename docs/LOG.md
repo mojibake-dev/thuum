@@ -3861,3 +3861,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   045859 the body's inventory apply (three TESModPlatform.addItemEx calls on 39fe4) sat between polls two and three. v4 ce1df68b (the
   poll and the beat on Skyrim Platform's own Utility.wait) is the restage's head; if the open still fails, the next lines to add are
   the activate's return and the AI's other hand.
+- 22:20 PDT: x-quest-rumor v2 GREEN on D69's restage (20261031-051455, dc3ec679 on the union's dist): D69 B proven at T3 (the rumor's
+  stage crosses, the denied quest stays, the start-up stage per seat and the later stage the world's, the controller's own-start
+  reports refused). b-quest-rumor promoted unchanged (1b4dde1c, its own commit; the steps byte-identical to the probe, checked) and
+  pending in gate.yaml (ebfbe115) until the merge, the nightly playing parity. numidium restages guest-loot on ce1df68b (build 14987);
+  on green the two trains merge as one union under one gate (always, c-dungeon-enemies, b-npc-body-release, b-quest-rumor, the
+  quest-stage scenarios, watch; T2 beside), un-pending the three in the merge's commit; on red D69 merges alone after its restage.
+  0548fff3's online wait proven live (c1 back online 62 s after a rollback, where the old check said 15).
