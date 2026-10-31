@@ -4198,3 +4198,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   T3 box ticked. The mirror's Windows runs are red on every cascade head and on physics for the UAF fix they do not carry (test_unit
   passes, test_unit_coverage dies with an access violation; parity b289cbda and the wall's e713862c pass): the parity merge before
   each gate cures them, once, after the wall merges.
+- (05:38 PDT 2026-10-31) two of the pile's small ones (item 6): b-quest-stage-restart.yaml on main 7c9cc309 (quest-stage.md's named restart
+  scenario, the debt of 10-30: the stage set through the console and relayed, kept across a server restart through the journal's
+  change form, read by a relaunched seat at its login; to run once standalone before any quest-stage gate), and fork
+  m2-effect-conditions-row 027ffa28 off parity (R0: EffectConditionsHold's refusal line names the first row that fails on its own,
+  ConditionsEvaluator::FirstFailingRow, with an optional out-parameter EffectConditionsTest's Firebolt rider case reads;
+  server-only push). The leveling branch carries a local commit (6b1404d5, the UseSkill hook's install log line) that pushes with
+  its parity merge.

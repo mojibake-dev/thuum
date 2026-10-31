@@ -393,3 +393,5 @@ is green, D69 alone otherwise. The Status box "T3 scenario green" ticks at the m
 Debt noted (22:23 PDT 2026-10-30): b-quest-stage-restart is named above as the verb's restart scenario and is not in lab/scenarios; the
 quest records' persistence across a restart rides a-restart-persistence's world today and QuestStageTest's restart case at T0. It
 is written after D69's merge (rule 6's shape: the recorded stages read back after a server restart on both seats).
+Written 05:38 PDT 2026-10-31 (thuum main 7c9cc309): the stage set and relayed, the restart, both seats' reads after the reconnect with
+the login replay lines, a relaunched c2 reading the stage at its login. Its first run is owed before any gate that lists it.
