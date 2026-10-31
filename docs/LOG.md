@@ -3772,3 +3772,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ground at its spot on both seats (the copy spawns at the dropper's feet z, half inside the terrain, and falls through to the cell's
   floor; v4's "downhill" was the same): a server spawn lift on the branch after 4076's client build, drop v6 by path with the floor
   claim (z above 14600). The bound stays.
+- 20:08 PDT: the drop's spawn lift committed on m3-prop-physics b421d1b2 (MpActor::DropItem: the copy 48 above the feet, DropItemTest's
+  z 51; clang-format 21.1.8), local until 4076's client build is green, then pushed with CLIENT_BUILD_WINDOWS=0 so the restage takes
+  4076's dist with the new server image. drop v6 by path 34853faa (the floor claim). The restage's set: push v11, pass v10c, grab v8,
+  drop v6.
