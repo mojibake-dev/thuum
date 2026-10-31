@@ -330,6 +330,13 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   seat sees motion type 4 and no impulse. Struct offsets are read from the
   CommonLibSSE-NG headers named in the header. Run on both seats through
   x-prop-push.
+- prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
+  embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
+  hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push
+  v13 034316, pass v11 034648). Armed on the host seat at a relaunch by x-prop-launch; read against an engine-native basket (the game's
+  own console placeatme) in the same run. A launch reads as a jump in vel per push (the push's impulse), a huge massInv (a wrong mass
+  after the Dynamic set) or vel growing between pushes (something else moving it). The field offsets are HYPOTHESES until the native
+  basket's lines read sane (massInv about 0.3 to 1, a nudge's speed under 100). 2026-10-30.
 - cloak-hostile.js: whether a hostile creature's engine counts the player as
   hostile before any blow (docs/verbs/npc-stream.md slice 6, H-53h). Hooks
   Actor::IsHostileToActor and logs self, other, the answer and the caller's
