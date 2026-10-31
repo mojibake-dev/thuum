@@ -40,8 +40,10 @@ lab/layer/load-order.tsv. Every patch is idempotent, keeps the file's size, and 
                     set every EFIT magnitude of a SPEL to <value>; areas, durations and effects stay, the
                     size too. A plugin without the record gets it first, copied from the master that owns
                     it (read from <game plugin dir>, decompressed) into its SPEL group, the header's count
-                    following: the one way to patch a record no plugin of the layer overrides. The Slow
-                    Time shout's three spells and Block's Quick Reflexes at 1.0, time at its pace.
+                    following: the one way to patch a record no plugin of the layer overrides. A localized
+                    master's text fields (FULL, DESC: string ids into its own strings files) cannot travel
+                    into a plugin that is not localized, so they are dropped from the copy. The Slow Time
+                    shout's three spells and Block's Quick Reflexes at 1.0, time at its pace.
 
 A patch that targets a record (drop-record, flst-set, perk-drop-ability, spell-magnitude) must hit the
 copy that wins: after patching, every plugin later in the load order is scanned for an override of the
@@ -349,20 +351,37 @@ def patch_perk_drop_ability(buf, ctx, fid_hex):
     return new, f'PERK {fid:08X}: {dropped} ability entr{"y" if dropped == 1 else "ies"} removed, {len(buf)} -> {len(new)} B'
 
 
+LOCALIZED = 0x80
+LSTRINGS = {b'FULL', b'DESC', b'NNAM', b'CNAM', b'ONAM', b'RNAM', b'SHRT', b'TNAM'}  # the lstring-typed subrecords of SPEL, PERK, MGEF and kin
+
+
 def master_record(game_dir, master, local_fid, typ):
-    """(header, decompressed body) of a master's record by local form id, or None."""
+    """(header, decompressed body, the master's TES4 flags) of a master's record by local form id, or None."""
     path = next((p for p in Path(game_dir).iterdir() if p.name.lower() == master.lower()), None)
     if path is None:
         raise SystemExit(f'{master} is not in {game_dir} (persist-mods pulls it off the host\'s persist esm directory)')
     buf = path.read_bytes()
+    mflags = struct.unpack_from('<I', buf, 8)[0]
     for o, t, flags, rfid, size in walk(buf):
         if t == typ and (rfid & 0xFFFFFF) == local_fid and t != b'TES4':
             body = buf[o + 24:o + 24 + size]
             if flags & COMPRESSED:
                 import zlib
                 body = zlib.decompress(body[4:])
-            return buf[o:o + 24], body
+            return buf[o:o + 24], body, mflags
     return None
+
+
+def portable_body(body, source_flags, target_flags):
+    """the record body fit for the target plugin: a localized plugin's text fields are string ids into its own
+    strings files, so when the source and the target differ in the localized flag the text subrecords (FULL,
+    DESC, ...) cannot travel and are dropped; the record keeps every other field."""
+    if bool(source_flags & LOCALIZED) == bool(target_flags & LOCALIZED):
+        return body, []
+    kept, dropped = [], []
+    for sig, data in subrecords(body):
+        (dropped if sig in LSTRINGS else kept).append((sig, data))
+    return join_subrecords(kept), [s.decode() for s, _ in dropped]
 
 
 def inject_record(buf, typ, fid, hdr, body, flags_mask=~COMPRESSED):
@@ -410,8 +429,10 @@ def patch_spell_magnitude(buf, ctx, fid_hex, value):
         src = master_record(ctx['game_dir'], master, fid & 0xFFFFFF, b'SPEL')
         if src is None:
             raise SystemExit(f'spell-magnitude: no SPEL {fid:08X} in the plugin nor in {master}')
-        buf = inject_record(buf, b'SPEL', fid, *src)
-        injected = f', the record injected from {master}'
+        hdr, body, mflags = src
+        body, dropped = portable_body(body, mflags, struct.unpack_from('<I', buf, 8)[0])
+        buf = inject_record(buf, b'SPEL', fid, hdr, body)
+        injected = f', the record injected from {master}' + (f' without its text fields {", ".join(dropped)} (string ids of a localized master)' if dropped else '')
         hit = record_at(buf, fid, b'SPEL')
     o, flags, size = hit
     if flags & COMPRESSED:
