@@ -389,3 +389,18 @@ subscriptions (pass v9's "out of reach" 3 s after the grant fits (b), with no E 
 (the delete line, the activation, the inventory; E_PROP) and pass v10b (a0a6e14b, in v10's slot) reads server.ref(0xff000002) at 1,
 2 and 4 s after the kick beside the seats' positions. drop v5 (024852) a lab fault at c2's files-lever relaunch (the guest agent lost
 the pid, twice in eight c2 runs after a rollback; numidium's lab-api item), its rerun after push v11.
+
+## D73: Dynamic at rest (19:56 PDT 2026-10-30)
+
+grab v8's vanish is CONFIRMED as the pickup of a failed grab (numidium's grep): c2's "Sent activation for caster= 14 and target=
+ff000002" at 02:47:37.346, the server's "Deleting 0xff item" at 38.003, the reference gone on both seats. The grab itself had closed
+and released in one instant (touch 1 and touch 2 at 36.061): a Keyframed body cannot be held, so the grant and the flip came after
+the hand had let go, and the E's release was an ordinary pickup. Together with pass v9 (a contact on a Keyframed body moves nothing
+until the grant) and push v9 (a Dynamic body denied activation takes no contact), decision 3's "every follower Keyframed" gave the
+first touch of anything no local physics. D73 (DECISIONS.md, under ADR-058): a body is Dynamic with leave to wake unless another
+seat streams it awake right now; Keyframed from a stream's first awake sample to 150 ms after its asleep sample (or a second after
+the last awake one); the grant's flip sets no motion on a body already Dynamic; the loss of the simulation sets none. Built on fork
+m3-prop-physics 0bb02f74 over 46f1a2dc (the wake); the held-hand guess a2256945 reverted. HYPOTHESIS until the restage's probes
+(push v11 1e8203e4, pass v10b a0a6e14b, grab v8 7689e959, drop v5 426cf923): the resting copies settle alike, the glide holds, a grab
+closes on the Dynamic body and its E consumes no pickup. The pickup of a real short press stays the engine's and the server's
+(ProcessActivate's item branch).
