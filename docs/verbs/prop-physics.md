@@ -624,3 +624,23 @@ lays on clean-m1 with item 7 SKIPPED.
   is due, and the existing branch runs. HYPOTHESIS until grab v9: the resting ingot reads Dynamic on c2 ("at rest: Dynamic (the stream
   ended)") within a second of the asleep sample, and E then grabs.
 
+### The restart leg's cause and D75 (16:43 PDT 2026-10-31; x-prop-push v15 220439 and 221908 on 37e960eb; the fix m3-prop-physics a2e77f3d)
+
+- Pass v13 (220942) and grab v9 (221404) GREEN on 37e960eb: the Keyframed-rest fix holds (the grab grabs). Push v15 RED at the restart
+  leg alone, twice: the push and both streams held; after the restart neither seat listed the ingot and c1's console shows no create word
+  for it in the new session (the old session's copy tracked at the first word, gone 0.3 s later at the view's reset).
+- The cause, in the server log at the restart: "Skipping FF item 2 (type is MISC), will likely overwrite at some point":
+  PartOne::AttachSaveStorage skips every 0xff reference whose base is an item (libespm IsItem) when it loads the save (the record counted
+  among the "3 ChangeForms" is loaded after that skip). Beside it, MpActor::DropItem deletes a dropped copy two minutes after the drop and
+  trims the dropper's queue at ten (the runs were shorter than two minutes; a playtest is not). Upstream's clutter policies, against
+  decision 2's record that keeps a prop's rest. A T0 through WorldState::LoadChangeForm alone (b3c66e5f, green) never met the skip; the
+  case now goes through a file save storage and AttachSaveStorage itself.
+- D75 (DECISIONS.md, under ADR-058): dropped items persist as props by default; the three policies hold only under the server setting
+  propsPersist false (WorldState::propsPersist, PartOne::SetPropsPersist, read in ScampServer). DropItemTest: persisted, the copy loads
+  at its drop point and the user's login hears its create word; not persisted, the item is skipped as upstream did. Restart behavior
+  (the Server section): the record's rest comes back on both screens at the load; HYPOTHESIS until push v16 (8e8d9377, the world
+  copies kept): the restored copy spawns Dynamic on the host and Keyframed on the watcher as a live-session copy does.
+- The six "Specified Form is ObjectReference, but we tried to treat it as Actor" warnings in the push runs were the lab's own reads
+  (labState ref's actor fields on a prop, six server.ref reads in the probe), fixed in lab/gamemode (thuum main 6bffd168), not a client
+  bug.
+

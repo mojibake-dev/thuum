@@ -4427,3 +4427,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the actor fields for an actor alone; gamemode tests 23 of 23 (a plain reference's case added). The lab host is down for Eli's GPU
   swap (the second GTX 1050 into sky-c2, the RTX back to fenestrate); the containers re-gate was 6 of 11 green when it went off and
   reruns whole after core's converge; GitLab is unreachable meanwhile, so b3c66e5f's T0 waits too.
+- (16:43 PDT 2026-10-31) the lab is back (both seats on 4 GB GTX 1050s at 582.78; the containers re-gate running since 23:38Z). Push's
+  restart cause found in the server log: "Skipping FF item 2 (type is MISC)": PartOne::AttachSaveStorage skips 0xff item references at
+  the load, and MpActor::DropItem deletes a dropped copy after two minutes and trims the dropper's queue at ten (upstream's clutter
+  policies). D75 under ADR-058: dropped items persist as props by default, the three policies behind the server setting propsPersist
+  (false restores them); m3-prop-physics a2e77f3d (server-only; DropItemTest's restart case through a file save storage and
+  AttachSaveStorage in both settings; the LoadChangeForm-only T0 b3c66e5f had passed because it never met the skip). thuum main
+  6bffd168 pushed to GitLab once it answered. Physics stages on a2e77f3d after the containers gate with push v16 8e8d9377, pass v13,
+  grab v9; b-prop-push promoted from push's green read, the gate on the same stage.

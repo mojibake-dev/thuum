@@ -3579,3 +3579,14 @@ and its later stages are the world's like any other quest's, the denylist the br
 stage's script off the applying seat; C) leave rumors per seat. Taken: B, built on fork m3-quest-sge-stages (dc3ec679, T0 green: the
 D62 test became D69's on FreeformHeartwoodMill, whose stage 10 carries the flag and whose 20 does not), the train after the union's
 merge, with its own T3 (a rumor's later stage crossing) before it merges.
+
+Note under ADR-058, D75 (16:43 PDT 2026-10-31, the pass; taken under the pass's rule): dropped items persist as props. Facts: the
+verb's record keeps a prop's rest across a restart (decision 2) and x-prop-push's restart leg claims it, yet upstream's server skips
+every 0xff item reference when it loads the save ("Skipping FF item 2 (type is MISC), will likely overwrite at some point", push v15
+220439 and 221908) and MpActor::DropItem deletes a dropped copy two minutes after the drop and trims the dropper's queue at ten: three
+clutter policies for a world where dropped items were transient. Options: A) keep upstream's policies and drop the restart claim (a prop
+lives two minutes); B) persist dropped items as props by default, the three policies behind a server setting (propsPersist false restores
+them), a cleanup lever for a crowded world later (a console sweep or a reloot-like rule, no timer); C) persist only while a seat is near.
+Taken: B (m3-prop-physics a2e77f3d: WorldState::propsPersist, PartOne::SetPropsPersist, DropItemTest through AttachSaveStorage in both
+settings). Known cost: every dropped item is a record for good until a lever says otherwise; the lab's worlds are clean per run.
+
