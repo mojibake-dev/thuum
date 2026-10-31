@@ -178,6 +178,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   ActorValues reply carries them, the kill switch; a restart keeps them (actor-values' pattern).
 - T1: none (the hook is a Skyrim Platform export; its proof is T3).
 - T2: a difftest session with a SkillUse accepted and one refused.
+- Probe x-skill-use v1 by path (549cec01; two seats, c2 the target 120 units north under god mode, twenty swings: the batches sent, One-handed 20 to 21 on the server and on the seat's base, the engine's xp 0, the level kept across a relaunch).
 - T3 scenario id: lab/scenarios/p-level-up.yaml (M5's exit): a seat's One-handed from 15 to 16 by hits on a lab NPC
   (the hits the server already judges), the "Skill increased" on its screen, the other seat's figure values and the
   record agreeing, a relaunch and a server restart keeping the level; a character level-up from a skill run (the
@@ -211,8 +212,8 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - [x] engine surface cited or delegated (headers and CommonLibSSE-NG's source; the Frida read planned)
 - [x] server logic + T0 (fork m5-leveling, 2026-10-31: wire-rules leveling.rs with its Table (nine cases), libespm's AVIF reader (EspmTest), the bridge's LevelingTable (its case), PartOne's LoadSkillTable at AttachEspm, ApplySkillUse and the `leveling` switch, ActionListener::OnSkillUse; unit/LevelingTest.cpp's three cases ride the pipeline)
 - [x] message + validator (same commit: SkillUse 63, check_skill_use, the budget, two fixtures, SkillUseMessage.h; m5-leveling 553863f8)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] native hook + T1 (fork m5-leveling, 2026-10-31: Skyrim Platform's UseSkill replacement at 40488, game/Offsets.h and FridaHooks.cpp, the skillUse event; T1 is the client build)
+- [x] TS handler (skillUseService.ts: a second's uses summed per skill into SkillUse 63; the engine's own write stays, nothing under the zeroed mults)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
