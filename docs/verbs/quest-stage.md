@@ -389,3 +389,7 @@ server's OWN_START refusal of the vampire controller's own stage-0 reports withi
 the HeartwoodMill relay; the merge's commit un-pends it. The merge: a union of m3-guest-loot and m3-quest-sge-stages under one gate
 (always, c-dungeon-enemies, b-npc-body-release, b-quest-rumor, the quest-stage scenarios, watch; T2 beside it) if the guest-loot rerun
 is green, D69 alone otherwise. The Status box "T3 scenario green" ticks at the merge, when b-quest-rumor plays green in the gate.
+
+Debt noted (22:23 PDT 2026-10-30): b-quest-stage-restart is named above as the verb's restart scenario and is not in lab/scenarios; the
+quest records' persistence across a restart rides a-restart-persistence's world today and QuestStageTest's restart case at T0. It
+is written after D69's merge (rule 6's shape: the recorded stages read back after a server restart on both seats).

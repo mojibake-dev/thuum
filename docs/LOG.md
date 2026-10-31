@@ -3868,3 +3868,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   on green the two trains merge as one union under one gate (always, c-dungeon-enemies, b-npc-body-release, b-quest-rumor, the
   quest-stage scenarios, watch; T2 beside), un-pending the three in the merge's commit; on red D69 merges alone after its restage.
   0548fff3's online wait proven live (c1 back online 62 s after a rollback, where the old check said 15).
+- 22:23 PDT: numidium cut the union fork m3-pass-train-4 848a1d67 (a --no-ff merge of m3-quest-sge-stages dc3ec679 into m3-guest-loot
+  ce1df68b; against parity remoteServer.ts, ActionListener.cpp, QuestStageTest.cpp; pushed with the knob, the stage reusing guest-loot's
+  client build 14987; pipeline 4105 with difftest for T2). Its gate, agreed, seventeen scenarios: always (smoke-two-players,
+  a-restart-persistence, b-duel), named c-dungeon-enemies, b-npc-body-release, b-npc-loot, b-npc-death-report, b-quest-rumor,
+  b-quest-stage, b-story-arrival, m0-inventory, a-activation-reach, a-sleep (the handler's first wait and open-poll changed for every
+  open it serves), watch b-npc-death, b-npc-stream-voice, b-npc-caster, c-riverwood; b-body-loot out (pending on D37); the merge
+  commit un-pends the three on green. b-quest-stage-restart is a verb-doc debt, noted. The v4 probe first, on build 14987.
