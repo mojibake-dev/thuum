@@ -4371,3 +4371,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   exit 0, tsc 0): PapyrusObjectReference::PlaceAt as the one creation path, DropItem creating the copy at the drop point (DropItemTest
   reads the create word's position), the stir clock held while Utility.isInMenuMode(). The prop probes re-frame next (a walk into the
   basket, not a run); numidium holds the physics restage for their shas. prop-physics.md has the read.
+- (12:38 PDT 2026-10-31) physics after the fix: pipeline 4258 (967ba8c8) red on one assertion of my DropItemTest addition (the create
+  word's position sits under "transform"); fixed and pushed server-only as bdad3572 (the dist is 967ba8c8's, REUSE_DIST). The prop
+  probes re-framed for the fixed build: x-prop-push v14 94e5f296 (the host faces north so the drop lands at (0, -136) on the strip, the
+  watcher at (0, -10), a walk toggle (DIK 58) and a 1 s walk north through the basket, nudge bounds > 16 and < 200), x-prop-pass v12
+  fd4e047c (the same drop; the host watches from (0, -250), c2 walks south from (0, -56)), x-prop-grab v8 7689e959 and x-prop-drop v6
+  34853faa unchanged. numidium restages physics on bdad3572 when the build lands: push, pass, drop, grab, the gate after.
+- (12:38 PDT 2026-10-31) x-quest-report-dedupe v1 0a281115 RED on its premise (20261031-192813 on d0085bb0's build; numidium's read): no
+  engine burst came in 150 s, each seat reported the controller's stage 0 once, the dedupe had nothing to drop (HYPOTHESIS: x-quest-mode
+  v5's bursts depend on the cell or the clock at login). v2 c8558fbb forces the repeat: three set-stage of the controller's stage 0 on
+  c1 a second apart, the flush line claimed 8 s later beside c1's one reported line; c2's drop claim gone; the relay leg unchanged.
