@@ -3841,3 +3841,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reads at numidium's idle signal. Also from apocrypha: the injected spell's name travelled as a two-byte garbage string (Skyrim.esm
   localized, USSEP not); fixed on apocrypha/layer-souls 5e37aefd (the injection drops FULL and DESC when the localized flags differ),
   so the Souls stage lays USSEP at 21,106,757 B, CRC32 73EAEC17, SHA-256 5d1f44fa..., replacing 7CA7F25F; cosmetic, no crash path.
+- 21:58 PDT: the login crash's lead (numidium, apocrypha): equipment applied to a draugr while its 3D loads on a BSJobs worker thread (RAX
+  two floats, 0x3DB2B8C2 and 3000.0), c1 on the guest-loot v1 client in run 041249's end world. The guest-loot client's two commits
+  run only inside onOpenContainerMessage (nothing at a login), so the first candidate is the late redress at the bind (train 47b, the
+  fate's worn set applied at every dressed NPC's 3D load, on every build since 10-27); one crash, watched across the restages; if it
+  recurs, defer the redress apply off the load frame and lay the crash's thread beside the redress line's timing.
