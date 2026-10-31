@@ -1,7 +1,9 @@
 # Verb: leveling
 
 Drafted 00:3x PDT 2026-10-31 from docs/VERB.md (pile item 12 of docs/private/turbo-2-prework.md; M5 Progression's
-first verb; actor-values.md records what M1 built). Nothing of it is built yet; the Status boxes say so.
+first verb; actor-values.md records what M1 built). MERGED to fork parity b6748da0 at 16:20Z 2026-10-31 (numidium's verb-merge:
+the gate 20261031-153419 green 10 of 10 in 11 runs with p-level-up 154211, a-actor-values and b-figure-values, c-riverwood green on
+its watch rerun; T2 beside); the Status boxes say what each tier read, the HYPOTHESIS tags what the playtest still owes.
 
 ## Intent
 

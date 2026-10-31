@@ -1247,6 +1247,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   4b52cd12, m4-weather 7ff8acbf, m5-perks 5c4b3509, m3-prop-physics 2ad267fa; their dists build in sequence, the probes run on the
   prior dists (x-skill-use v3 4585b2a0 on ef618dee's first, staged now). Two small ones: b-quest-stage-restart on main (its first run
   owed), m2-effect-conditions-row 027ffa28 (R0, the refusal row named). Turbo 2 as set.
+- STATE 2026-10-31 09:22 PDT (the pass's chart line): m5-leveling MERGED to fork parity b6748da0 (16:20Z, the gate 10 of 10 with p-level-up:
+  skills by use on two seats, One-handed 20 to 27 by 168 hits, the character's level 2 at skill 25, kept across a relaunch and a
+  restart). The lab's reads along the way: a seat placed north or east of lab-spawn's origin falls (the summit note), a swing target
+  drifts out of a sword's reach after a dozen hits (batches of twelve with a re-teleport), the client's message handlers may call no
+  natives (deferred to the next update in locks, perks and weather). Parity merged into m4-locks 9ece63c2, m4-weather 6c9de3df,
+  m5-perks afd12dae (which carries the effect-conditions row), m3-prop-physics f923e0a7; probes x-lockpick v3 daaee288, x-weather v2
+  9f7c2cfd, x-perk-pick 5e0f733f, x-container-rest v4 3817b193 next, each scenario committing on its read. Turbo 2 as set.
 - STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
   sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
