@@ -3412,6 +3412,22 @@ stands: the engine's own placement reported, the server validating it against th
 caster, the measured 206 with the caster's own motion in the window; the bases of the spell's table; one report per accepted cast)
 and placing the copies there; the alternative, 206.25 along the record's yaw, would place along a heading the engine did not use.
 
+D74 (00:15 PDT 2026-10-31, the pass; taken under the pass's rule, Eli may veto): shape A's handshake. The caster's game must know
+which casts to watch and which bases to report, and the server must tie each report to one accepted cast. Options: A) the server asks
+(PlacedRequest to the caster alone at the accepted cast: the set's id, the entry's bases as form ids, the window) and the caster's game
+answers once per base (PlacedReport: set, base, pos, yaw), the server judging each report against its request; B) the caster reports
+unasked every MSTT or ACTI its engine places near it during a cast and the server matches spell and base from its table (one message,
+but the client watches every object load and needs the table's bases); C) the client holds the table (sent at login or baked into the
+build) and reports the listed bases alone (one message plus a settings transfer). Taken: A. The request carries the exact bases and
+the set, so the client searches only when asked and only for those bases (no objectLoaded subscription, rule 9 in spirit), the set id
+makes the server's matching exact (two casts of the same spell in two hands inside one window stay apart), and the caps are judged
+before any client work; the cost is a second message type. The band is 150 to 260 units from the caster's pose at the cast on the
+ground plane and 256 up (the pitch read's 206.25 and 196.875 with the caster's own motion inside the window); the window is 3 s (the
+rise of half a second, the settle, two trips). The table's forward and dz are read and ignored so the deploy settings, restored to the
+Raise Wall entry in both files, serve a server of either shape until the merge: a shape C server (parity meanwhile) places D70's
+known-wrong wall again, a shape A server places as reported; the playtest's item 8 keeps its limit until the merge. Built as fork
+m3-wall-pose (23e334b9, 69ca1221, 866ff864, 7ac26664); the probe x-raise-wall v4, the scenario's amendment after its read.
+
 ## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
 
 Status: PROPOSED 14:06 PDT 2026-10-29 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes.

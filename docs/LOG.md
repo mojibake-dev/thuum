@@ -3904,3 +3904,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b878b2a6; remoteServer.ts alone against parity), its probe x-body-open-guest-fix v2 aba01c6f; the gate list the union's (the two
   exit scenarios, b-npc-loot, b-npc-death-report, m0-inventory, a-activation-reach, a-sleep, always, watch). The union m3-pass-train-4
   is moot and left as cut.
+- (00:15 PDT 2026-10-31) Raise Wall's reported pose built (D70's shape A; D74 the handshake): fork m3-wall-pose off parity dc3ec679:
+  23e334b9 the wire (PlacedRequest 61 S2C, PlacedReport 62 C2S, their validator, SCHEMA_VERSION 22, two fixtures each, the C++ structs
+  registered), 69ca1221 the rule and the server (placements.rs asks at the accepted cast and places each base where the caster's game
+  reports it: the band 150 to 260 on the ground and 256 up from the cast's pose, the window 3 s, the caps before the request, "nothing
+  placed, the caster's game reported no base within the window" when none comes; PartOne's SendPlacementRequests and ReportPlacedObject,
+  ActionListener::OnPlacedReport, one "placed 1 form" line per reported form; SpellPlacedTest rewritten on the request and report path),
+  866ff864 the client (SpellPlacedService: the engine's own reference nearest the point 200 ahead of the player, the view's copies and
+  earlier sets skipped, settled over two 100 ms reads, reported once per base), 7ac26664 the table reading and ignoring forward and dz
+  (so one deploy settings file serves a server of either shape until the merge; both deploy files restored to the Raise Wall entry here,
+  a shape C server placing D70's known-wrong wall meanwhile). Local: cargo test, clippy, deny and the header green across the workspace;
+  tsc green; fork-lint clean; the C++ T0 is the pipeline's (4115 for 866ff864 with the client build 15027; 7ac26664 pushed server-only).
+  Probe x-raise-wall v4 by path (960011fb; 55 steps, 34 claims): the request, two accepted reports and two "placed 1 form" lines a cast,
+  no refusal, the caster's own request and report lines, c2's copy within 16 of c1's own engine copy (both distances from c2's position),
+  one runtime reference a base a seat, the skip lines, the removal; the walk at the wall recorded and not claimed (the engine's heading at
+  the cast is the open read). b-spell-placed-wall's amendment (its own commit) after the probe's read. Guest-loot v5 (b878b2a6) RED twice
+  (065444 cold, 065821 relaunched; numidium's read): the activate 150 ms after the AI switch returned false with the AI reading true, the
+  timers path otherwise whole end to end; the one green read (leg 4 of x-body-open-guest v2) had the AI on for over five seconds first.
+  v6 (m3-guest-loot d10789f7, client build): the activate retried every 200 ms for up to 5 s, each return logged with the body's AI,
+  death, 3D and health (the beat the engine needs is the measurement; a run of refusals sends the read to Actor::ActivateRef); the probe
+  aba01c6f unchanged. The lab's order: the physics restage (b421d1b2, x-prop-launch v1), then guest-loot v6's stage and gate (M3's exit),
+  then m3-wall-pose's stage with x-raise-wall v4 and the entry deployed.

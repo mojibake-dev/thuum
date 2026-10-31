@@ -1218,7 +1218,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
   admits, the non-host's engine never opens the body released from the puppet state with its AI left off; the read x-body-open-guest
   running, the fix the train after), so M3 is NOT DONE today. Dark on the merged build: props (D68, the physics train stages after
-  playtest 39), Raise Wall's copies (D70, the caster-reported pose as a train). Pending by name: b-body-loot (the D37 layer unmerged),
+  playtest 39), Raise Wall's copies (D70; the caster-reported pose built as m3-wall-pose on 2026-10-31, D74, at its stage). Pending by name: b-body-loot (the D37 layer unmerged),
   b-spell-placed-wall (D70), c-dungeon-enemies and b-npc-body-release (D71; the host's handler stalls in the paused menu too). Built
   and waiting: m3-prop-physics dde874b5 (the union head merged), m3-quest-sge-stages dc3ec679 (D69 B), m3-quest-report-dedupe 7eb968bb.
 - STATE 2026-10-28 19:3x PDT (playtest 37's turbo night; Eli: "stop queueing things for tonight, we're blasting

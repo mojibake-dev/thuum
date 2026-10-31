@@ -214,28 +214,56 @@ are the caster's alone (ADR-057).
 
 ## Message contract
 
-- Message name / numeric type: none new. CreateActorProps (skymp.rs:213)
-  gains `placed_by: Option<u32>`, the caster's server id;
-  DestroyActor unchanged.
-- Direction: server to client.
-- Fields: placed_by: u32, nonzero, only with base_record_type MSTT or ACTI.
-- Validator rules: validate_server (wire-validate lib.rs:730) refuses the rest
-  (E_VAL_RANGE).
-- Idempotency / ordering: CreateActor's.
+- Message name / numeric type: PlacedRequest (MsgType 61, wire id 69) and
+  PlacedReport (MsgType 62, wire id 70), fork m3-wall-pose 23e334b9
+  (SCHEMA_VERSION 22, 2026-10-31; shape A, D70 and D74). CreateActorProps
+  keeps `placed_by: Option<u32>` (skymp.rs, SCHEMA_VERSION 20), the caster's
+  server id; DestroyActor unchanged.
+- Direction: PlacedRequest server to client, to the caster alone, reliable;
+  PlacedReport client to server, reliable; CreateActor as before.
+- Fields: PlacedRequest { set: u64 (the set's id the reports name), bases:
+  [u32] (the entry's bases as form ids in the load order both ends share, 1
+  to 8, none 0), windowMs: u32 (1 to 10,000; the rule's 3,000) }.
+  PlacedReport { set: u64, base: u32 (never 0), pos: [f32; 3] (engine units,
+  inside the world), yaw: f32 (degrees) }. placed_by: u32, nonzero, only with
+  base_record_type MSTT or ACTI.
+- Validator rules: check_placed_request (E_VAL_RANGE: no base, a base of 0, a
+  window of 0 or over 10 s); check_placed_report (E_VAL_NONFINITE, E_VAL_RANGE
+  on a base of 0, E_VAL_OUT_OF_WORLD; a budget of 8 then 2 a second,
+  UNMEASURED); validate_server refuses placed_by's other pairings
+  (E_VAL_RANGE). The rest is the server's rule (wire-rules placements
+  report_placed): the set this caster's own request and still open (the
+  window from the cast, the set's linger and maxS), the base one the set
+  asked for and not yet reported, the pose 150 to 260 units from where the
+  caster stood at the cast on the ground plane and within 256 of its height;
+  refused by name in the log (E_PLACED_SET, E_PLACED_LATE, E_PLACED_BASE,
+  E_PLACED_REPEAT, E_PLACED_NAN, E_PLACED_RANGE with the distance and the
+  height).
+- Idempotency / ordering: one report per base per set (a repeat is
+  E_PLACED_REPEAT); a request dropped by a newer cast in the hand refuses its
+  late reports (E_PLACED_SET); no report within the window places nothing
+  ("nothing placed, the caster's game reported no base within the window").
 - Contract doc updated: docs/WIRE.md, same commit (rule 4).
 
 ## Server
 
 - Where the logic lives: wire-rules placements.rs (Rust, ADR-010): the table,
-  the pose per anchor, the caps, the gate, each set's lifetime; PartOne wires
-  StartCast and EndCast to it, creates, disables and deletes the forms, and
-  sweeps placedBySpell forms at load (no cast ledger survives a
-  restart).
+  the caps (judged at the cast, before any request), the request at the
+  accepted cast, the report's judgment (the set, the base, the band, the
+  window), each set's lifetime; PartOne wires StartCast and EndCast to it,
+  sends the requests (SendPlacementRequests, one message a set to the
+  caster's user), judges the reports (ReportPlacedObject, from
+  ActionListener::OnPlacedReport; the base read as a FormDesc), creates each
+  reported object at its reported pose (PlaceSpellObject, placedSets
+  appended per report), disables and deletes the sets, and sweeps
+  placedBySpell forms at load (no cast ledger survives a restart).
 - The table: server setting spellPlacedObjects: `{spell:
   "00cc14:Apocalypse - Magic of Skyrim.esp", anchor: caster, objects: [{base:
-  "098529:<same plugin>", type: MSTT, forward: 192, dz: -48}, {base:
-  "0735e8:<same plugin>", type: ACTI, forward: 192, dz: 0}], lifetime:
-  {whileHeld: true, lingerS: 5, maxS: 120}, perCaster: 2}`.
+  "098529:<same plugin>", type: MSTT}, {base: "0735e8:<same plugin>", type:
+  ACTI}], lifetime: {whileHeld: true, lingerS: 5, maxS: 120}, perCaster: 2}`.
+  Shape C's `forward` and `dz` on an object are read and ignored, so the
+  deploy settings (restored to this entry with them, 2026-10-31) serve a
+  server of either shape until the train merges.
 - DB fields / migration: MpChangeFormREFR gains placedBySpell (FormDesc, absent
   reads none; rule 6); a-restart-persistence asserts no wall survives.
 - Restart behavior: swept at load.
@@ -243,28 +271,52 @@ are the caster's alone (ADR-057).
 
 ## Client
 
-- SP binding: none new.
-- TS handler: formView.ts's spawn path reads placed_by and skips; optional, a
-  translateTo from 288 below for the rise.
+- SP binding: none new (Game.findClosestReferenceOfType, the skip's own
+  primitive).
+- TS handler: services/services/spellPlacedService.ts answers a
+  PlacedRequest (fork m3-wall-pose 866ff864): per base, the engine's own
+  reference nearest the point 200 units ahead of the player along its yaw
+  (radius 160; the view's copies, told by the cleaner's protection, and
+  references reported for an earlier set are skipped), polled every 100 ms,
+  reported once two reads agree within 0.5 units (the script's wall rises at
+  512 units a second from 240 below) or at the window's deadline less a 500
+  ms reply margin; a base never found is traced and dropped. formView.ts's
+  spawn path reads placed_by and skips the server's copy while this game's
+  own stands within 96 units, as before.
 - Kill switch config key: spellPlacedObjects empty.
 
 ## Tests
 
-- T0: placements.rs: the pose at four yaws; gate, linger, caps, sweep.
-  PartOne: a start creates two 0xff forms, an end deletes them 5 s later, a
-  load sweeps them; wire-validate refuses placed_by zero.
+- T0: placements.rs (shape A): the request at the cast with the entry's bases
+  and the window, each report placed where reported, the refusals by name
+  (another's set, another caster, a base off the entry, a repeat, the band's
+  edges and beyond, not a number, late by the window, late by the linger and
+  by maxS), a cast nobody reports noted, the caps judged before any request
+  (a request awaiting its first report counts), a new stream in the hand
+  replacing the request, linger and max, the caster's leaving; wire-validate:
+  the two shapes and the report's budget, the property test; wire-json: the
+  fixtures round trip (62 types); unit/SpellPlacedTest.cpp: the request to
+  the caster alone, each report a CreateActor at the reported pose named to
+  every subscriber (the caster's game included), the refusals placing
+  nothing, a cast nobody reports placing nothing, a cast ended inside the
+  window still taking its report with the set lingering from the end, the
+  perCaster cap asking nothing further, the linger's DestroyActors, the
+  leaving caster, the sweep at load.
 - T1: none.
-- T2: a fakeclient casts; a second in the square gets two CreateActors (MSTT
-  and ACTI, placed_by the caster) within 1 s and two DestroyActors within 5 s
-  plus slack of the interrupt; a restart mid-stream leaves no form.
-- T3 scenario id: lab/scenarios/b-spell-placed-wall.yaml. c1 faces c2 400
-  units away, learns and equips the spell, hold-key 199 for 12 s. Claims: c2's refs-near (the MSTT base type, radius
-  1000) has the wall within 2 s and within 16 units of c1's read; c1 walking
-  into it (hold-key 17, 3 s, about 900 units unblocked)
-  stays within 256 of its start; c2 walking at it stays on its side; after the
-  release neither base within 7 s on either seat; c2 relaunched
-  (docs/LAB.md:556) during a 20 s hold has it after login. Probe
-  x-raise-wall: one seat, the cast and reads.
+- T2: the fakeclient's smoke session unchanged (no report in it; a listed
+  cast asks and places nothing, "nothing placed, the caster's game reported
+  no base within the window"); a difftest session with a report is owed with
+  the T3 green.
+- T3 scenario id: lab/scenarios/b-spell-placed-wall.yaml, amended for shape A
+  in its own commit after x-raise-wall v4's read: the server's request, two
+  accepted reports and two "placed 1 form" lines a cast, no refusal; c2's
+  copies where c1's own engine copies stand (c2's distance to the server's
+  copy within 16 of c1's distance to its own, both from c2's position: c1
+  reads through c2's figure's cell); one runtime reference of each base on
+  each seat; c1's skip lines; the removal after the linger; the late joiner.
+  Probe x-raise-wall v4 by path (sha1 960011fb): the same claims over two
+  casts, the walk at the wall recorded and not claimed (the engine's heading
+  at the cast is the open read).
 - Assertions that would fail if the verb silently regressed: the claims above.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
@@ -283,12 +335,12 @@ are the caster's alone (ADR-057).
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:02 PDT 2026-10-29 by the pass: the Inventory's 23 rows each carry a disposition; Rung R0 for the objects, declared at the top)
 - [x] engine surface cited or delegated
-- [x] server logic + T0 (fork m3-spell-placed 5b951a9c: wire-rules placements.rs, PartOne's placement, removal and sweep, unit/SpellPlacedTest.cpp)
-- [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h)
+- [x] server logic + T0 (fork m3-spell-placed 5b951a9c: wire-rules placements.rs, PartOne's placement, removal and sweep, unit/SpellPlacedTest.cpp); shape A: placements.rs's request and report path, the bridge, PartOne's SendPlacementRequests and ReportPlacedObject, SpellPlacedTest rewritten, m3-wall-pose 69ca1221 and 7ac26664 (the local cargo tests green; the C++ T0 is pipeline 4115's)
+- [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h); shape A: PlacedRequest and PlacedReport with their validator, fixtures and C++ structs, fork m3-wall-pose 23e334b9 (SCHEMA_VERSION 22, 2026-10-31)
 - [x] native hook + T1 (none needed)
-- [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands)
-- [ ] T2 green (T0 green on 3k d7548ccf and on 3o-win ee44f7d1, both halves built; the lay is the union m3-pass-train-3-win 997fedf1, the pack-form fix inside, at its stage after the reboot, D67)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands); shape A: spellPlacedService.ts and the two message types, m3-wall-pose 866ff864 (tsc green)
+- [ ] T2 green (shape C's T0 green on 3k d7548ccf and on 3o-win ee44f7d1 and its T2 with the union 0e23c820; shape A's T0 and T2 are m3-wall-pose's pipeline and stage, 2026-10-31)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell-placed-wall pending since D70 and amended for shape A after x-raise-wall v4's read at m3-wall-pose's stage)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -350,3 +402,29 @@ regardless: the caster reports the pose the engine chose, the server validates i
 the measured 206 with the caster's own motion inside the cast's window; the bases those of the spell's table; one report per accepted
 cast; reach from the caster) and places the copies there, the table keeping the forms and the lifetime. Shape C with 206.25 along the
 record's yaw would place along a heading the engine did not use. The train after the guest-loot train.
+
+## Shape A built (00:15 PDT 2026-10-31; fork m3-wall-pose 23e334b9, 69ca1221, 866ff864, 7ac26664, off parity dc3ec679)
+
+The handshake (D74): at the accepted cast of a listed spell the server asks the caster's game for the entry's bases (PlacedRequest:
+the set's id, the bases as form ids, the window of 3 s) and the caster's game answers once per base when the reference has settled
+(PlacedReport: set, base, pos, yaw); the server judges each report (the set its own request to this caster and still open, the base
+asked for once, the pose 150 to 260 units from where the caster stood at the cast on the ground plane and within 256 of its height:
+the pitch read's 206.25 and 196.875 with the caster's own motion inside the window) and places that base where reported, so the
+other seat's copy stands where the caster saw the wall. No report within the window places nothing (the engine's no-room failure,
+or no reference found), logged. The caps are judged at the cast, a request awaiting its first report counting as held. The table
+keeps the forms and the lifetime; its forward and dz are read and ignored so the lab's one settings file (the entry restored in
+both deploy files, 2026-10-31) serves a shape C server (parity until the merge, which places D70's known-wrong wall meanwhile) and
+a shape A server alike. The client's search is the skip's own primitive, Game.findClosestReferenceOfType, centred 200 units ahead
+of the player along its yaw with a radius of 160, the view's copies and earlier sets' references skipped; settled means two 100 ms
+reads within 0.5 units.
+
+HYPOTHESIS, cleared by x-raise-wall v4 (960011fb) at the train's stage: (1) the request lands after the script's reference exists
+(the effect starts at the cast's event, the request one round trip later), so the first poll finds it; (2) the settle test catches
+the wall's rise (about 50 units a read while rising) and reports once it stops; (3) the band holds the engine's own placement at the
+lab's stands (the pitch read's two numbers, level ground); (4) the caster's skip still finds its own copy within 96 of the server's
+pose (trivially now, the poses agree). Limits by name: a second cast from the same stand and heading inside the first set's life
+skips the first set's references and may find nothing new if the engine stacked the walls (the engine's own no-room check refuses
+most of these); a wall the engine placed outside the band is refused by name (E_PLACED_RANGE with the numbers), a finding for turbo 2
+rather than a silent miss. The scenario's amendment (its own commit, rule 13): the fixed-step formula leaves and the copy's distance
+is claimed against the caster's own engine copy, the server's lines become the request, two accepted reports and two "placed 1 form"
+lines a cast; no tolerance loosened.

@@ -642,3 +642,21 @@ any other pairing is E_VAL_RANGE in validate_server, and the transport refuses t
 The caster's own game skips a form naming itself while the script's own copy stands at the pose; every other game
 places it as any server form. The removal is the usual DestroyActor 5 s after the cast's end. Fixtures
 33-CreateActor-0 and -1 carry the field; WireJsonContractTest reads them through CreateActorMessage.h.
+
+### PlacedRequest (t 61) and PlacedReport (t 62): the caster's engine names the pose (spell-placed-object, M3; ADR-057 shape A, D70)
+
+Shape C's fixed step fell at T3 (D70: the engine stands Raise Wall 206 ahead along a heading the record's yaw does not carry), so
+since fork m3-wall-pose 23e334b9 (SCHEMA_VERSION 22, 2026-10-31) the server asks and the caster answers. PlacedRequest (id 69,
+MsgType 61), server to client, reliable, to the caster alone at its accepted cast of a listed spell: `{ set: u64 (the set's id the
+reports name), bases: [u32] (the entry's bases as form ids in the load order both ends share, one to eight, none 0), windowMs: u32
+(1 to 10,000; the rule's 3,000) }`. PlacedReport (id 70, MsgType 62), client to server, reliable, once per base per set: `{ set: u64,
+base: u32 (never 0), pos: [f32; 3] (engine units, inside the world), yaw: f32 (degrees) }`; validator: finite, E_VAL_RANGE on a base
+of 0, E_VAL_OUT_OF_WORLD, a budget of 8 then 2 a second (UNMEASURED; two bases a cast, two sets a caster). The rule (wire-rules
+placements, through the bridge's take_requests and report_placed) judges the rest: the set this caster's own request and still open
+(the window from the cast, the set's linger and maxS), the base one the set asked for and not yet reported, the pose 150 to 260 units
+from where the caster stood at the cast on the ground plane and within 256 of its height; refusals are logged by name (E_PLACED_SET,
+E_PLACED_LATE, E_PLACED_BASE, E_PLACED_REPEAT, E_PLACED_NAN, E_PLACED_RANGE with the distance and the height). An accepted report
+places that one base at the reported pose through the CreateActor path above (placedBy the caster); no report within the window
+places nothing ("nothing placed, the caster's game reported no base within the window"). The table's `forward` and `dz` are read and
+ignored, so one settings file serves a server of either shape until the train merges. Fixtures 61-PlacedRequest-0 and -1,
+62-PlacedReport-0 and -1; WireJsonContractTest reads them through PlacedRequestMessage.h and PlacedReportMessage.h.
