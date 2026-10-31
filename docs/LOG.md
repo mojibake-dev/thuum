@@ -3958,3 +3958,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Four Containers cases in PartOne_ActivateTest; tsc green; the probe and the scenario follow the build. x-survival-cold v1 red on its
   premise (the cold need falls about 200 a minute at lab-spawn; numidium's read: health full through a minute at stage 5, so the mod
   drains nothing by stage), v2 1bb33d7e (25 s stage read, 1200 for the kill) for the next gap; D72 leans A with the cold kill proven by v2.
+- (02:5x PDT 2026-10-31) The third code map (pile items 9, 10, 11) in, and four verb docs drafted from the maps and UESP's formulas:
+  docs/verbs/leveling.md (item 12: a skill use reported from a hook on PlayerCharacter::AddSkillExperience, CommonLibSSE-NG's own
+  RELOCATION_ID 39413/40488 as the cited source; the AVSK constants and fSkillUseCurve 1.95, the level cost mult*(L-1)^1.95+offset, the
+  character threshold (L+3)*25; SkillUse MsgType 64; leveling.rs owed), docs/verbs/traps.md (item 9: a host's self-activation is noted
+  and runs nothing, a lever's door activation never leaves the host's game since the client sends a non-player caster only when it
+  equals the target, the vanilla scripts run on no server; the design: the host reports linked activations, the server runs the XAPR
+  children and relays, the door opens by the host's word; x-bleak-traps is the read), docs/verbs/weather.md (item 10: no weather sync or
+  CLMT/REGN/WTHR reader exists; SetWeather S2C, the pick seeded by the clock, Weather.forceActive on the client, `weatherSync`),
+  docs/verbs/word-wall.md (item 11: the shout record is written by the console alone, no WOOP reader, no server TeachWord; WordWall C2S,
+  the record written as the console writes it, the natives as ledger lines). The containers train m4-containers-rest db7ec1e5 pushed
+  (client build); its probe waits on Bleak Falls Temple's chest ids from the master file.
