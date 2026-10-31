@@ -4293,3 +4293,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m4-containers-rest ae2cbfd6, m3-talk-console-guard 7be4eb41; their probes run on the builds numidium staged (dedupe 4ca5783c now,
   x-quest-report-dedupe 0a281115), their gates on the new heads. verb-stage stages a branch's current head only, so locks' probe and
   gate both run on 9ece63c2 once it builds.
+- (10:09 PDT 2026-10-31) x-lockpick v4 b5e2cc64 (probe-only, runs on m4-locks 9ece63c2's dist): v3 (164727) reached the Lockpicking
+  Menu on the prompt's deferral and the held A turned nothing the log sees (the sweet spot is the engine's random angle; the client
+  reports at the menu's close). v4 sets Lockpicking 100 on c1's record (console SetActorValue; the seat applies the base, its applied
+  line claimed), sweeps fourteen absolute pick angles (mouse dx -3000 to the arc's clamped left end, then 0 to 2,600 counts by 200, A
+  held 2 s each) before the "371e9 unlocked" until, teleports c1 back to its spot before the re-activation, and turns leg C's Adept
+  pick from the arc's left end. Sizes from Skyrim.esm (lab/esm.py find GMST on sky-srv): fSweetSpotVeryEasy 30, Easy 15, Average 7.5,
+  Hard 3.75, VeryHard 1.875 (degrees), fLockpickSkillSweetSpotMult 0.006 a skill point; fPartialPickVeryEasy 22 to VeryHard 6,
+  fLockpickSkillPartialPickBase 0.775, Mult 0.015; iXPRewardPickLock 20 to 60; no break-time setting in the esm (the exe's own). The
+  pick-to-mouse ratio in the menu is unknown (no export reads pickAngle), so the 200-count steps are sized for 5 to 14 counts a degree.
+  numidium told (weather's stage runs, hold to 18:26Z; locks' rerun and gate after). Found on the way: the console's SetAV on a skill
+  moves the record's base only (SetActorValueBaseByServer); the leveling progress entry keeps the login report's level and the next
+  use of that skill recomputes the base from it, so the base snaps back: leveling.md's open questions, a server fix candidate (the set
+  also writing the progress entry's level, with a T0), and the playtest's skill numbers go through the leveling path, not SetAV.

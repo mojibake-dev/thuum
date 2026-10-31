@@ -262,3 +262,9 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - The AVIF rows from the game files (libespm) or the settings' table: the files are the one source; the table is the
   fallback the T0 can pin.
 - Skill books, trainers, the Legendary reset and the level-up's pick: item 13's verb and later slices.
+- A console SetAV on a skill (found 10:09 PDT 2026-10-31 writing x-lockpick v4): ConsoleCommands' SetActorValue path is
+  SetActorValueBaseByServer, which writes the record's base and sends it (the seat applies SetActorValueBase, so the skill's
+  number moves at once) but leaves the record's progress entry at the login report's level; ApplySkillUse recomputes the
+  base from that entry at the skill's next use, so the base snaps back. Candidate fix (server, T0): a skill av's set also
+  writes the progress entry (level = the value, xp 0, threshold = level_cost). Until then a seat's skill number for a
+  playtest goes through the leveling path, and the lockpick probe's Lockpicking 100 holds only until the first pick's use.

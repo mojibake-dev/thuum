@@ -211,6 +211,16 @@ reference is E_LOCK_* and the lock is re-imposed.
 - Breakpoint plan for a human session: LockpickingMenu's runtime data (numBrokenPicks :62) against the
   containerChanged count, if the event shape disagrees.
 - Owner: agent (the probe); Eli if the minigame needs a hand the lab cannot give.
+- The pick under the lab (x-lockpick v3 164727 and v4, 2026-10-31): the menu opens on the prompt handler's deferral to the
+  update; a single A held with the pick at its start angle opened nothing (the sweet spot is the engine's random angle and the
+  client reports only at the menu's close). v4's lever: Lockpicking 100 on the record (the console's SetActorValue; the seat
+  applies the base) and a sweep of fourteen absolute angles (a mouse move past the arc's left end, where the engine clamps the
+  pick, then an offset of 0 to 2,600 counts by 200, A held 2 s each). Skyrim.esm's settings (lab/esm.py find GMST, read 10:09 PDT):
+  fSweetSpotVeryEasy 30, Easy 15, Average 7.5, Hard 3.75, VeryHard 1.875 (degrees), fLockpickSkillSweetSpotMult 0.006 a skill
+  point; fPartialPickVeryEasy 22 to VeryHard 6, fLockpickSkillPartialPickBase 0.775 and Mult 0.015; no break-time setting in the
+  esm. HYPOTHESIS: the sweet spot's half-width is the tier's angle times (1 + skill * 0.006); HYPOTHESIS: a broken pick resets
+  to the top (the absolute sweep holds either way); the pick-to-mouse ratio in the menu is unread (no export reads the runtime
+  data's pickAngle :94 or sweetSpotAngle :B4), so the steps are sized for 5 to 14 counts a degree.
 
 ## Status
 
@@ -228,9 +238,9 @@ reference is E_LOCK_* and the lock is re-imposed.
 
 ## Open questions
 
-- The minigame under the lab: whether the driver's mouse and tap-key can pick a Novice lock reliably (x-lockpick-read);
-  if not, the probe's pick leg is Eli's at turbo 2 and the lab proves the key path, the refused console unlock and
-  the broken pick (a pick broken by a deliberate wrong turn is easy to produce).
+- The minigame under the lab: v3's single turn did not pick a Novice lock; v4 (Lockpicking 100 and the absolute sweep, the
+  Dynamic plan) is the lab's answer under read. If it stays red, the probe's pick leg is Eli's at turbo 2 and the lab proves
+  the key path, the refused console unlock and the broken pick (a pick broken by a deliberate wrong turn is easy to produce).
 - Observers' sounds for the unlock and the pick: an R3 row today; a later slice could relay the unlock sound through
   the existing SpSnippet path.
 - Doors with locks to interiors the other seat hosts: the unlock is the record's; the door's open then follows the
