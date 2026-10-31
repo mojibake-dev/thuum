@@ -4381,3 +4381,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   engine burst came in 150 s, each seat reported the controller's stage 0 once, the dedupe had nothing to drop (HYPOTHESIS: x-quest-mode
   v5's bursts depend on the cell or the clock at login). v2 c8558fbb forces the repeat: three set-stage of the controller's stage 0 on
   c1 a second apart, the flush line claimed 8 s later beside c1's one reported line; c2's drop claim gone; the relay leg unchanged.
+- (12:58 PDT 2026-10-31) x-container-rest v4 3817b193 (20261031-195055 on m4-containers-rest ae2cbfd6's build; numidium's read and
+  the consoles): every server line of the verb (open with 1 occupant, E_CONTAINER_REACH at 789 against 524, shut with 0 and the
+  release by the disconnect, the open again, saved open came back shut at load), the watcher's lid Open within a second of each
+  open and its lid Close at the shut, the opener's own lid line; the one red was the probe's count (three lid Opens on c2 where the
+  second occupant's join changes no isOpen: two). v5 7fbc6645 counts two; b-container-rest on main 2a74212f (its own commit, the
+  count three for its three opens). containers.md: both HYPOTHESIS tags CONFIRMED. Recommended to numidium: the containers gate with
+  the scenario, no probe rerun.

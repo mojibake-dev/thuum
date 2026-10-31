@@ -26,7 +26,7 @@ sounds, not parsed yet).
 | the lid's Open animation and the open sound on the opener's game | engine | native (the opener's own activation) |
 | the ContainerMenu with the container's items | engine | native on the opener; the inventory is the server's (OpenContainer carries it, R0) |
 | the container's open state | code (SetOpen at the first open, the last close) | imposed: isOpen to every listener (D52: from the first occupant's open to the last's close) |
-| the lid's Open and Close on the other players' games | engine (the Open and Close animation events) | imposed: the client plays them on the isOpen change for a CONT base (HYPOTHESIS until x-container-rest) |
+| the lid's Open and Close on the other players' games | engine (the Open and Close animation events) | imposed: the client plays them on the isOpen change for a CONT base (CONFIRMED, x-container-rest v4 20261031-195055: the watcher's "lid Open played" within a second of each of the server's two opens, "lid Close played" at the shut by the disconnect and at the reconnect's closed creation; a second occupant's join changes no isOpen and plays nothing) |
 | the open and close sounds on the other players' games | record (CONT SNAM, QNAM) | later: the record's sounds are not parsed; a later slice plays them through the snippet path |
 | a put or a take | code | R0: the server moves the items between the records; R1: taken from a mover at the container (this train) |
 | the other occupants' menus redraw under a move | engine | imposed: D52's inventory re-send to the other occupants (refreshContainerMenu, playtest 37's chest) |
@@ -91,7 +91,7 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
 - Mechanism: the isOpen property (UpdateProperty, CreateActor) as before; the client plays the lid's Open or Close
   animation event on a CONT base when it changes (modelApplyUtils.ts).
 - Visual without simulation achieved by: the animation event alone; no state change on the watcher's reference.
-- Side effects: HYPOTHESIS (x-container-rest): the opener's own game hears the property too and plays Open on a lid
+- Side effects: CONFIRMED (x-container-rest v4 20261031-195055: the opener's own "lid Open played" at D's open, 19:54:54.6 on c1 against the server's 56.5): the opener's own game hears the property too and plays Open on a lid
   already open, which the graph ignores; a chest whose base has no Open event (a sack, a barrel) plays nothing.
 
 ## Suppress (engine's own behavior blocked on non-hosts)
@@ -160,7 +160,8 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
 - [x] native hook + T1 (none)
 - [x] TS handler (fork m4-containers-rest: the lid's Open and Close on the isOpen change)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-container-rest v4 20261031-195055 on ae2cbfd6: every leg green, the one red a count's
+      premise, v5 7fbc6645 corrected; b-container-rest on thuum main 2a74212f, its first run at the train's gate)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (none: no native, no suppression)
