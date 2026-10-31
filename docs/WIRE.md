@@ -691,3 +691,18 @@ a Lockpick (MISC 0xa) held for a pick (E_LOCK_NO_PICK), a broken count of 1 to 8
 opens at the activation (R0, "opens <refr> with its key"). The server's `locks` setting (default false) keeps every lock off the
 record and the props absent, today's behavior. Fixtures 64-LockReport-0 and -1, 65-LockPrompt-0 and -1; the legacy reader spends no
 bit on the lock prop (wire-legacy LEGACY_ABSENT).
+
+### SetWeather (t 66): the server's sky for the place a player stands in (weather, M4)
+
+Since fork m4-weather (SCHEMA_VERSION 25, 2026-10-31): the server picks one weather per worldspace on its game clock (wire-rules
+weather: the worldspace's pool is its weather regions' lists from the game files, REGN RDWT, chances summed, or server-settings.json's
+`weather.pools` pin; slots of `weather.changeGameMinutes` from the clock's day 0, default 120; a chance-weighted draw by a hash of the
+seed, the worldspace and the slot that never repeats the previous slot's weather when the pool has two or more entries). SetWeather
+(id 74, MsgType 66), server to client, reliable, to one player: `{ place: u32 (the worldspace, or the interior cell a release is for;
+never 0), weather: u32 (the WTHR form id; 0 releases the game's override), transition: bool (blend into it, or cut) }`, sent at login
+after the player's own CreateActor, when the player enters a place (the server sees the cell change at its half-second tick), and at
+each change of the pick for its worldspace; an interior or a worldspace without a pool hears one release on entering. Validator
+E_VAL_RANGE on a place of 0; the transport refuses it from a client by direction. The client forces the weather on a cut, blends on a
+transition, keeps a word for a place it is not in yet, and re-forces a settled drift every two seconds. The server's `weatherSync`
+setting (default false) sends nothing, today's behavior. Fixtures 66-SetWeather-0 and -1. T2 declares one SetWeather per client at
+login (difftest divergences.yaml) with lab/tools/test-proto.sh pinning one weather over Tamriel for the run.

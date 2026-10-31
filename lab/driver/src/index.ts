@@ -2113,9 +2113,14 @@ function run(step: Step, player: Actor): unknown {
     }
     case "weather": {
       // the weather forced on this client (Weather.setActive, override and
-      // accelerate) or released ({release: true}): {form}; the current one
-      // comes back (Weather.getCurrentWeather)
-      if (a.release) {
+      // accelerate) or released ({release: true}): {form}; or read alone with
+      // {read: true} (thuum docs/verbs/weather.md's probe x-weather). The
+      // current one comes back (Weather.getCurrentWeather) with the outgoing
+      // one and the blend's progress (getCurrentWeatherTransition, 1 once
+      // settled, HYPOTHESIS until the probe reads it)
+      if (a.read) {
+        // nothing changes
+      } else if (a.release) {
         Weather.releaseOverride();
       } else {
         const w = Weather.from(Game.getFormEx(num(a.form)));
@@ -2123,7 +2128,12 @@ function run(step: Step, player: Actor): unknown {
         w.setActive(true, true);
       }
       const now = Weather.getCurrentWeather();
-      return { current: now ? now.getFormID() : 0 };
+      const out = Weather.getOutgoingWeather();
+      return {
+        current: now ? now.getFormID() : 0,
+        outgoing: out ? out.getFormID() : 0,
+        transition: Weather.getCurrentWeatherTransition(),
+      };
     }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in

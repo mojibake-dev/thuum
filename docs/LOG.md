@@ -4045,3 +4045,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   4ca5783c, m4-containers-rest 0adb994e, m3-talk-console-guard 19431840; no conflicts. Each now contains the wall-pose head, so each
   merges only after wall-pose does (numidium's queue holds that order); a wall-pose fix, if its read asks one, merges into them the
   same way. Builds queued on the one Windows runner behind 4141 and 4145.
+- (02:2x PDT 2026-10-31) Weather BUILT WHOLE on fork m4-weather (stacked on m4-locks 387e4537 for MsgType 66; three commits: the
+  wire, the server half, the client; a client build), pile item 10. The design moved on a fact from the master file (lab/esm.py):
+  Tamriel's climate SkyrimClimate 0x812 lists ONE weather (SkyrimCloudy 0x12f89 at 100), so the climate is not the sky's source; the
+  forty weather regions are (REGN Weather*, each with WNAM and an RDWT list; WeatherTundra 0xc5858 has six, Sovngarde's one), and
+  libespm now reads REGN. One weather per worldspace, a pure function of the clock (slots of changeGameMinutes, a seeded draw that
+  never repeats the previous slot's weather, so the lab's two-entry pool alternates), nothing persisted (rule 6 by construction, as
+  the clock), told to each player for the place it stands in: a cut at login and at a place change, the engine's own blend on a
+  change stood through, a release (weather 0) in an interior. The `weatherSync` switch (default off) is ON in both deploy settings
+  with a lab pool of SkyrimClear 0x81a and SkyrimCloudy 0x12f89 over Tamriel at a slot of ten game minutes (30 s real), so the probe
+  sees a change; lab/tools/test-proto.sh pins T2 to one weather and a slot of a game day, and difftest's divergences.yaml declares
+  the one login word (t 66). Local greens: cargo test on wire-rules (six weather cases), wire-schema, wire-validate, wire-json,
+  wire-legacy and wire-bridge; clippy clean; the client's tsc; fork-lint after clang-format 21.1.8 on three files. T0 (WeatherTest,
+  EspmTest's REGN case) runs in the pipeline. Probe x-weather v1 by path (bd44bf04; legs A login words, B a blend within 45 s, C an
+  interior's release and the way out's cut, D a relaunch, E a restart recorded); the driver's `weather` step gained {read: true}
+  (current, outgoing, the blend's progress). docs/verbs/weather.md rewritten to the build (Known limits: one sky per worldspace where
+  TES3MP syncs per region); WIRE.md's SetWeather section. b-weather follows the read and a lab-api weather fact.

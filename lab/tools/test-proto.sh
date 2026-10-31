@@ -228,6 +228,12 @@ import json, sys
 deployed, pinned, t2, legacy = sys.argv[1:5]
 d = json.load(open(deployed))
 d["loadOrder"] = json.load(open(pinned))
+# the weather (thuum docs/verbs/weather.md): the deployed lab pool alternates two weathers every ten game
+# minutes, which a session could straddle (one SetWeather declared per client in difftest's divergences);
+# T2 pins one weather over Tamriel and a slot of a game day, so every session hears exactly the login's word
+if d.get("weatherSync"):
+    d["weather"] = {"changeGameMinutes": 1440, "seed": 1,
+                    "pools": {"3c:Skyrim.esm": [{"weather": "12f89:Skyrim.esm", "chance": 100}]}}
 json.dump(d, open(t2, "w"), indent=2)
 d["loadOrder"] = [p for p in d["loadOrder"] if not p.lower().endswith(".esl")]
 json.dump(d, open(legacy, "w"), indent=2)
