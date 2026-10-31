@@ -369,3 +369,14 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   leveling client hook goes: UseSkill's points if AddSkillExperience reads a
   zero under skymp5-client's zeroed mults, else AddSkillExperience itself with
   the engine's write cut. Probe x-skill-use-read (by path).
+
+## lockpick-trace.js
+
+The Lockpicking Menu's runtime data per frame while the lab drives the minigame (docs/verbs/locks.md, Dynamic plan; written
+11:07 PDT 2026-10-31 after x-lockpick v4's silent red): hooks IMenu slots 04 ProcessMessage and 05 AdvanceMovie read from
+VTABLE_LockpickingMenu[0] (Address Library 215604 by `just addr`), reads RUNTIME_DATA at this+0x48 (pickAngle, lockAngle, the
+break timer, sweetSpotAngle, partialPickAngle, numBrokenPicks; LockpickingMenu.h). Rows on every half-degree move of the pick or
+the lock, every broken pick, every message, and once a second. With `params: {SNAP: true}` it writes the pick's angle to the
+sweet spot every frame, so a held A opens the lock by the engine's own minigame (the lab's lever for the pick leg, HYPOTHESIS
+until its first run). `frida {script: lockpick-trace.js}` on the picking seat before the activation.
+

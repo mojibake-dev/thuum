@@ -221,6 +221,26 @@ reference is E_LOCK_* and the lock is re-imposed.
   esm. HYPOTHESIS: the sweet spot's half-width is the tier's angle times (1 + skill * 0.006); HYPOTHESIS: a broken pick resets
   to the top (the absolute sweep holds either way); the pick-to-mouse ratio in the menu is unread (no export reads the runtime
   data's pickAngle :94 or sweetSpotAngle :B4), so the steps are sized for 5 to 14 counts a degree.
+- v4 (b5e2cc64, run 20261031-175103 on 9ece63c2's build) RED after all fourteen attempts with nothing logged; the menu's
+  screenshot shows "Lockpicking 100", "Lock Level: Novice", "Lockpicks Left: 15" and the hints "Mouse Rotate Pick", "A D Rotate
+  Lock", so the record's set reached the engine and the menu is the real one. Two readings remain: the lab's mouse and held key
+  never drive the minigame, or every angle missed. v5 (cc50b014) reads the instrument with screenshots (the pick after a
+  3,000-count move left and 300 right, the lock during a 3 s hold of A, the Lockpicks Left count after) before two sweeps (A fine,
+  D coarse), each attempt waiting out its hold.
+- Frida script lab/frida/lockpick-trace.js (11:07 PDT): hooks the menu's IMenu slots 04 ProcessMessage and 05 AdvanceMovie through
+  VTABLE_LockpickingMenu[0] (Address Library 215604, `just addr`; IMenu.h:70-71), reads RUNTIME_DATA at this+0x48 (LockpickingMenu.h:116;
+  HYPOTHESIS: SE and AE share 0x48, falsified by a sweet spot outside [-90, 90]): pickAngle, lockAngle, damagePickAngle,
+  pickBreakSeconds, sweetSpotAngle, partialPickAngle, numBrokenPicks per frame (rows on a half-degree move, a break, a message,
+  once a second). Expected observations under v5's steps: pick rows following each mouse step (the ratio in degrees a count), lock
+  rows rising under the held A and falling at its release, the break timer counting at a wrong angle. Falsified by: no frame row
+  after the menu opens (the table or slot), a flat pick through the mouse steps (the mouse never reaches the menu), a flat lock
+  through the hold (the key does not). With params {SNAP: true} the script writes pickAngle to sweetSpotAngle every frame
+  (HYPOTHESIS: the write before the engine's update is the value the turn checks; angles in degrees), the lab's lever for the
+  pick leg if the ratio or the mouse path fails: a held A then opens the lock by the engine's own minigame, and the report, the
+  server's unlock and the watcher's applied line are the claims as before. The trace is a run's artifact (frida/*.jsonl), not a
+  fact, so the first run reads it by hand.
+- Owner of the pick leg after v5: the agent while the trace or the lever answers within one run; Eli's hand at turbo 2 otherwise
+  (rule 8).
 
 ## Status
 
