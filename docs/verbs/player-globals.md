@@ -606,3 +606,10 @@ answer picks B or C). Leg B, the kill: the need set to 1000; the client's report
 screenshot; the respawn within 40 s and ONE kill line over the next 40 s (a second line is a death loop, the lethal global still at
 1000 after the respawn: a finding by name). H-D51a is read on the way (the seat's own Kill at the mod's next tick swallowed, the
 server's word the one death). Runs in a lab gap, one seat; the probe is the draft of b-survival-cold once D72 is called.
+
+D72 called (04:5x PDT 2026-10-31, Eli: "knowing that about survival i say we deactivate survival for the rest of testing"): A with the
+switch off. v1's two runs (072242, 072601) answered the read's half before the kill leg: the forced cold need fell about 200 a minute at
+lab-spawn (990 read 950 at 5 s and 790 at 60 s) and c1's health stayed full through the top stage (healthPercentage 1 in every dump),
+so the mod drains nothing by stage; its one death is the Kill() at 1000, the server's word (D51 B) its mirror. For the rest of testing
+every lay puts 828 at 0 on both records and the start word leaves the mode alone; the Creation stays loaded. v2 (1bb33d7e) stays by
+path for a day the mode comes back.

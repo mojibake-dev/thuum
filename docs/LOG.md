@@ -3991,3 +3991,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   actor value) and the rule's Table (the records' constants over UESP's fallback). The read against Skyrim.esm (lab/esm.py id):
   Smithing's AVSK is 160, 0, 0.25, 300 where UESP's table writes a use mult of 1, so the records stay the source and the page the
   fallback. Three server-only pushes on the branch (2b9df509, bb0b37d8, the table after).
+- (04:5x PDT 2026-10-31) Eli, on the Survival read: "knowing that about survival i say we deactivate survival for the rest of
+  testing." D72 taken as A with the switch off (DECISIONS): every lay puts 828 at 0 on both records, the start word neither switches
+  the mode on nor zeroes needs, the Creation stays in the load order, the checklist's build line says so; x-survival-cold v2 leaves
+  the queue. Told numidium (the set-up is its lever). Status given to Eli: the pile's state, M3's exit gate running, turbo 2 Sunday
+  evening as set.
