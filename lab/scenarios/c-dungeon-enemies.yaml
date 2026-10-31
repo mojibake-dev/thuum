@@ -46,6 +46,9 @@
 #     "occupant is another object", no E_ACTIVATE_REACH, the record dead throughout. On the union 0e23c820 the
 #     non-host's open itself is red (210543, 210957, 211413: the server admits, c2's engine never opens the body
 #     released from the puppet state with its AI left off); pending until its fix, x-body-open-guest reads the cause.
+#     v5 of the guest-loot fix (22:40 PDT 2026-10-30) runs a released body's open on the timers service with its own lines, so the
+#     guest's (c2's) admission and release read "body 39fe4: the ContainerMenu is open" and "body 39fe4: closing activation sent,
+#     the menu closed"; the host's open (its body never a puppet, its AI on) keeps the generic handler's lines.
 # Known limits: 0x39fe2 fights unheld and may take some of c2's swings (thirty at 27 a hit leave margin,
 # the until bounds the wait); the pair's level is the fate's roll, so the damage claim is a share below
 # 0.95 after 25 points, not a number (a vanilla humanoid has more than 25 health, so the blow is never
@@ -236,17 +239,17 @@ steps:
   - wait: 4
   - c2: dump-state
   - c2: screenshot
-  - c2: log-count {pattern: "onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true"}
+  - c2: log-count {pattern: "body 39fe4: the ContainerMenu is open"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == true'
-      - 'c2.log_count("onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true") >= 1'
+      - 'c2.log_count("body 39fe4: the ContainerMenu is open") >= 1'
   - c2: close-menu {name: ContainerMenu}
   - wait: 4
   - c2: dump-state
-  - c2: log-count {pattern: "onOpenContainerMesage - sent ActivateMessage"}
+  - c2: log-count {pattern: "body 39fe4: closing activation sent, the menu closed"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == false'
-      - 'c2.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1'
+      - 'c2.log_count("body 39fe4: closing activation sent, the menu closed") >= 1'
   - c1: approach {formId: 0x39fe4, distance: 150, cell: "371de:Skyrim.esm"}
   - wait: 6
   - c1: close-menu {name: MessageBoxMenu}
