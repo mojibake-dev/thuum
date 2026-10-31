@@ -424,3 +424,13 @@ after the contact the host's own listing lost the basket while c2's kept it at t
 E_PROP line. The same signature as v10b's claimant: a copy placed by setPosition and set Dynamic flies at its first contact. H-P4
 reinforced; fa225f01 is the fix under test on the restage. The wake fix 46f1a2dc stays as the engine's own default for clutter
 (allowActivate true), its H-P1 justification downgraded to a note.
+
+drop v5's rerun (030029, 20:07 PDT read) RED on the distance claim alone, 157 against 150, and the number is not a roll: the sword's z on
+both seats (14520.70 and 14518.55) sits about 150 units below the strip's ground at its own spot (the basket rested at 14670 there, the
+player's feet at 14662), and v4's at the camp (z -288 to -309 against the camp's -144) was the same gap read as a hill. The 157 is the
+3D distance down to it. The copy spawns at the dropper's feet z (MpActor::DropItem's SetPos keeps pos.z), half inside the terrain, and
+falls through to the cell's floor on both seats alike, the stream faithful to the fall (the copies within 5 units). Player-visible: a
+dropped item vanishes into the floor. The fix is the server's spawn lift (the copy at the feet plus a lift, falling onto the ground as
+the engine's own drop does from the hand), a server commit on the physics branch after 4076's client build (server-only, the knob), with
+DropItemTest's position following; drop v6 by path adds the floor claim (the sword's z above 14600 on both seats). The branch's three
+client commits are pushed (fa225f01, pipeline 4076 running).
