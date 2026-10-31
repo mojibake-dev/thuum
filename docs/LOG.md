@@ -4314,3 +4314,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ConsoleCommandTest's Marksman 45 progress check. cargo test --workspace green, clippy with CI's deny set clean, fork-lint
   clean. leveling.md's Server and Tests rows and the open question's resolution; NATIVES.md's Actor.SetActorValue note. The
   gate is ADR-053's R0 path (T0 from the server build, T2 beside) in numidium's queue after the pile's lab items.
+- (10:42 PDT 2026-10-31) x-weather v2 9f7c2cfd GREEN (20261031-171309 on m4-weather 6c9de3df's own build; an agent's read): both
+  seats hear the login cut and every slot's transition within the same second, the reads agree (current, outgoing, the blend's
+  progress within 0.01), the interior releases and the way out cuts late, the relaunched seat hears the sky at its login; the
+  restart leg reads the slot's pick (the lab's restart re-pins the hour, the slot rewinds, 12f89 both times at slot 192), so the
+  scenario claims agreement after a restart, not the same sky. Two of weather.md's three hypotheses CONFIRMED (the interior's
+  release, the blend's progress below 1); the cell change within the worldspace and the re-force of a settled drift were UNREAD
+  by the probe and are b-weather's legs 3b (c1 at Riverwood) and 3c (SkyrimOvercastRain 0xc821f forced on c1 by the driver's
+  weather step, the one re-apply counted). Finding: every login word applied twice (late, then word, 18 ms apart; a transition
+  on a due tick would be forced, not blended): fixed at m4-weather 79a74960 (TS only; the late apply waits one tick). b-weather
+  on main ca1a5f1d (its own commit): claims 1 to 5 outgoing-aware, the restart leg explained. numidium told: weather's new head,
+  the scenario to deploy before weather's gate (which follows locks' merge).
