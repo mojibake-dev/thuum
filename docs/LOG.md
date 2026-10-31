@@ -3814,3 +3814,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   launch with it); three code items owed on the branch (the launch at contact, the pickup after a grab, the weapon copy through the
   ground), each behind a read. The lab's next: the guest-loot train (m3-guest-loot 05ac32a9 pushed for its Windows build), then D69.
   Every GPU watcher clean all night (numidium).
+- 21:18 PDT: x-body-open-guest-fix v1 041249 RED 1 of 5 on the guest-loot stage: the AI switch and the activate in one frame, the menu
+  never open, no later handler line, the AI off at the dump (the enable a frame early, or never taken). The fix's v2 pushed on
+  m3-guest-loot (the activate deferred one update, the AI state logged at the switch, before the activate and at the off); numidium
+  stages D69 (dc3ec679, x-quest-rumor v1 88202e30) meanwhile, then restages guest-loot on the new head.

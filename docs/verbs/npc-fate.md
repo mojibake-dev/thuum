@@ -2416,3 +2416,12 @@ the AI off (H-54e's no-drift rule). Its probe x-body-open-guest-fix v1 by path (
 within 4 s with the two lines once per body and the AI off after, then the host's open after the guest's close with its handler line
 inside the step (39e5c2f5) and no second occupant counted. The train's gate: c-dungeon-enemies, b-npc-body-release and this probe
 (b-body-open-guest promoted on green); M3's exit closes with it.
+
+x-body-open-guest-fix v1 (041249, 21:18 PDT read; the guest-loot stage, m3-guest-loot 05ac32a9, dist 14946) RED 1 of 5 at step 28: the
+fix fired ("body 39fe4: AI on for the server's open (D71)" at 04:15:38.085, the handler's "waiting for 'ContainerMenu open' (a corpse)"
+in the same millisecond), the menu never opened, no later handler line came within the run (the 2 s off line should have), and the
+dump read the body's AI off. Two candidates: the enable and the activate in one frame, the engine taking the AI state a frame later
+(v2's green read had the lab's npc-ai seconds before a separate activate); or the enable never took (the dump's off with no off line
+of ours). The fix's v2 (fork m3-guest-loot, the head after 05ac32a9): the AI state logged at the switch, the activate deferred to the
+next update callback with the state logged right before it, and the state logged at the off; a read either way. D69's stage takes
+the lab while it builds.
