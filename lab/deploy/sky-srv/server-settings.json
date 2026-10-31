@@ -333,6 +333,17 @@
     "b6031:Skyrim.esm",
     "3dd29:Skyrim.esm"
   ],
+  "weatherSync": true,
+  "weather": {
+    "changeGameMinutes": 10,
+    "seed": 1,
+    "pools": {
+      "3c:Skyrim.esm": [
+        { "weather": "81a:Skyrim.esm", "chance": 50 },
+        { "weather": "12f89:Skyrim.esm", "chance": 50 }
+      ]
+    }
+  },
   "locks": true,
   "spellPlacedObjects": [
     {
