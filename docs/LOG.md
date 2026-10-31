@@ -3986,3 +3986,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (wire-rules locks.rs: the tier from the XLOC level byte, the key's open at the activation, a pick report judged by lock, reach, gap,
   key tier and picks held, broken picks costing what is held; five cases). The docs' Status lines say "the rule alone". Memory:
   thuum-pile-state-2026-10-31 carries every branch and probe sha of the night.
+- (04:3x PDT 2026-10-31) m5-leveling grows libespm's AVIF reader (the AVSK constants and the perk tree's nodes, UESP's record
+  layout; EspmTest reads One-handed 0x44c with the root to Armsman00 0xbabe4's node 7, Smithing 0x450 with eleven nodes, and a plain
+  actor value) and the rule's Table (the records' constants over UESP's fallback). The read against Skyrim.esm (lab/esm.py id):
+  Smithing's AVSK is 160, 0, 0.25, 300 where UESP's table writes a use mult of 1, so the records stay the source and the page the
+  fallback. Three server-only pushes on the branch (2b9df509, bb0b37d8, the table after).

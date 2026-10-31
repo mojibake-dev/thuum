@@ -79,8 +79,10 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   now).
 - The server today: OnActorValues records the snapshot within bounds (R2; actor-values.md); ActorValueRecord holds
   bases, skills' progress, xp, threshold, level (ActorValueRecord.h); ActorValuesTest.cpp.
-- libespm: no AVIF record (the eighteen skills' AVSK constants); to add, or the constants from UESP's table in the
-  settings as a fallback (the game files are the source of truth, rule 1's spirit).
+- libespm: AVIF read since fork m5-leveling bb0b37d8 (AVIF.h: the AVSK constants and the perk tree's nodes; EspmTest
+  on One-handed 0x44c, Smithing 0x450 and AVDragonSouls 0x62c). The records are the source: Skyrim.esm's Smithing
+  AVSK reads 160, 0, 0.25, 300 where UESP's table writes a use mult of 1 (the page folds it into its base formula);
+  the rule's Table takes the records and keeps UESP's numbers as the fallback and the tests' expectations.
 
 ## The formulas (UESP, Skyrim:Leveling, read 2026-10-31)
 
@@ -196,7 +198,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (headers and CommonLibSSE-NG's source; the Frida read planned)
-- [ ] server logic + T0 (the rule alone: wire-rules leveling.rs on fork m5-leveling 2b9df509, eight cases green, the cost convention pinned against UESP's totals, 2026-10-31; PartOne's handler and the AVIF reader owed)
+- [ ] server logic + T0 (the rule and the reader: wire-rules leveling.rs with its Table (nine cases) and libespm's AVIF reader with its EspmTest case, fork m5-leveling bb0b37d8 and after, 2026-10-31; PartOne's handler and the SkillUse message owed)
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
 - [ ] TS handler
