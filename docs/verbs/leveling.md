@@ -196,7 +196,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (headers and CommonLibSSE-NG's source; the Frida read planned)
-- [ ] server logic + T0
+- [ ] server logic + T0 (the rule alone: wire-rules leveling.rs on fork m5-leveling 2b9df509, eight cases green, the cost convention pinned against UESP's totals, 2026-10-31; PartOne's handler and the AVIF reader owed)
 - [ ] message + validator (same commit)
 - [ ] native hook + T1
 - [ ] TS handler

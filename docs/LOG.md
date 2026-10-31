@@ -3979,3 +3979,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m3-talk-console-guard 9b796255 (client only), probe x-talk-console v1 b3156979. Leveling's T0 begun: wire-rules leveling.rs on fork
   m5-leveling (the eighteen skills' AVSK constants from UESP's table, the use, the level cost whose convention the page's totals pin
   (from L to L+1: mult * L^1.95 + offset), the character threshold, the progress state machine with its events and refusals).
+- (03:5x PDT 2026-10-31) Two rules to T0 on their own forks, server-only pushes: m5-leveling 2b9df509 (wire-rules leveling.rs: the
+  eighteen skills' AVSK constants from UESP, a use's experience, the level cost mult * L^1.95 + offset (the convention pinned by the
+  page's totals: 528,804 for a 2 and 0 skill from 15 to 100, 91,600 Smithing, 278,852 Enchanting, 142,401 Sneak, 428,568 Alchemy,
+  87,350 Pickpocket), the character threshold 75 + 25 N, Progress::apply_use with its events and refusals; eight cases) and m4-locks
+  (wire-rules locks.rs: the tier from the XLOC level byte, the key's open at the activation, a pick report judged by lock, reach, gap,
+  key tier and picks held, broken picks costing what is held; five cases). The docs' Status lines say "the rule alone". Memory:
+  thuum-pile-state-2026-10-31 carries every branch and probe sha of the night.
