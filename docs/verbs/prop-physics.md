@@ -434,3 +434,16 @@ dropped item vanishes into the floor. The fix is the server's spawn lift (the co
 the engine's own drop does from the hand), a server commit on the physics branch after 4076's client build (server-only, the knob), with
 DropItemTest's position following; drop v6 by path adds the floor claim (the sword's z above 14600 on both seats). The branch's three
 client commits are pushed (fa225f01, pipeline 4076 running).
+
+## The fixed build's first read (20:33 PDT 2026-10-30; b421d1b2's server, fa225f01's client dist 14923, LABAPI 4021)
+
+x-prop-push v11 (032724) RED 3 of 10 at the rest reads, and three fixes read true on it: "prop ff000002 placed at its record
+(translated)" (H-P4's keyframed translate in place of the setPosition snap), "simulated here: Dynamic" with the settle stream started
+and asleep (the wake), and at the walk "contact ff000002 layer 4 motion 2: owned, no claim" then "stream ff000002 started" (a kicked
+body moves and streams), the follower applying it. Then the kick's stream reached no asleep sample and both seats untracked the
+basket "out of reach" about 3 s after the kick, together: the host simulated it travelling far and the follower followed faithfully.
+Two candidates: the marker's floor sits 175 units below the strip on a slope (a round basket kicked downhill rolls far), or a throw
+(a contact impulse out of scale, or a small fast body tunnelling). pass v10c (running, the flat strip, the record snapshotted at 1,
+2 and 4 s) separates them; push v12 by path (0a0e31ef) returns the push to the flat strip with the spawn's ejection as the host's
+first contact (its settle asleep and the basket within 64 of the spot as the premise), the kick read with the record snapshotted
+(b0, r1, r2, r4) and claimed as the second stream, the rest within 400 of the spot. Then grab v8 and drop v6.
