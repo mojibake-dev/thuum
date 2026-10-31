@@ -338,3 +338,15 @@ wall's distance (recorded in the step's readings, asserted only present), the se
 within 16 at the three pitches falsifies the aim hypothesis and sends the fix to the script's own placement rule (lab/esm.py on
 the effect's VMAD, then the Papyrus source if Apocalypse ships it); a distance that follows the pitch confirms it and the message
 of shape A carries the pose. Runs at the physics train's stage, beside its probes.
+
+The Dynamic read's answer (19:36 PDT 2026-10-30; x-raise-wall-pitch v1 20261031-023141 GREEN on the physics stage, the table empty): the
+caster's own MSTT 0x1A098529 at 206.25 from the caster and the ACTI 0x1A0735E8 at 196.875 at level, after 200 counts down and after 400
+counts up alike; "set N placed" 0 each time; no E_ACTIVATE_REACH. The engine places Raise Wall at a fixed distance along the caster,
+not at the aim: the aim hypothesis is falsified. What the sweep measured (the engine's wall 248 to 262 from a watcher 366 behind the
+caster, where a wall 206 ahead along north would read 160) is the caster's heading at the cast against the record's yaw, about
+42 degrees by the law of cosines (HYPOTHESIS until a heading read: the teleport's rot and the look step set the actor's yaw as the
+record carries it, the first-person view may face elsewhere, the lab's walkers drift 20 degrees the same way). Shape A is the fix
+regardless: the caster reports the pose the engine chose, the server validates it against the caster's record (distance 150 to 260,
+the measured 206 with the caster's own motion inside the cast's window; the bases those of the spell's table; one report per accepted
+cast; reach from the caster) and places the copies there, the table keeping the forms and the lifetime. Shape C with 206.25 along the
+record's yaw would place along a heading the engine did not use. The train after the guest-loot train.

@@ -3734,3 +3734,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   units): x-prop-drop v5 by path 426cf923 on lab-spawn's flat strip, claims unchanged. push v10 861f51bf and grab v8 7689e959 after
   probe-check's rule (no client log count inside an until). The stage's queue: x-raise-wall-pitch v1, pass v9's rerun, push v10, grab
   v8, drop v5. c2's rollback took 195 s after pass v9's agent fault (numidium watching the agent).
+- 19:36 PDT: x-raise-wall-pitch v1 023141 GREEN (numidium): the engine's wall at a fixed 206.25 (MSTT) and 196.875 (ACTI) from the caster
+  at every pitch; D70's aim hypothesis falls; the sweep's offset is the caster's heading against the record's yaw (about 42 degrees,
+  HYPOTHESIS) plus 192 against 206; shape A stands with the measured distance as its validator's bound (DECISIONS, the verb doc). The
+  physics stage ended (exit 0, dde874b5 laid); the after-stage queue runs pass v9's rerun, push v10, grab v8, drop v5.
