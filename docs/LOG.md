@@ -3786,3 +3786,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   in 3 s on both seats through the stream: the marker's slope (175 below the strip) or a throw; pass v10c's record snapshots tell.
   push v12 by path 0a0e31ef (the flat strip, the ejection as the first contact, the kick read with b0/r1/r2/r4) for after grab v8 and
   drop v6.
+- 20:37 PDT: pass v10c 033116 RED at its premise on the flat: the console basket at the host's feet thrown past 400 at the Dynamic set
+  (the capsule contact's claim, the translate back into the capsule); the slope question moot. The probes spawn by the verb's own drop
+  from here: push v13 e98f89ba, pass v11 by path (the host drops a Basket01, 64 ahead and 48 up, its claim, fall and sleep the premise,
+  then the kick with b0/r1/r2/r4). A follow-up noted for the placement translate into a capsule.
