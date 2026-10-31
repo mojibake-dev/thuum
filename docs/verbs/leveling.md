@@ -128,6 +128,8 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   message played by the client on a base change the server made (a later slice for the sound).
 - Side effects: HYPOTHESIS: the engine's own level-up prompt (the Stats menu's pick) fires when xp meets the
   threshold the server wrote; item 13 takes the pick.
+  (p-level-up 152612: the screenshot about 8 s after "reaches character level 2" shows no HUD toast, the engine's lasting about
+  5 s, so unread here; the Skills menu's level-up on a seat is Eli's T4 read in turbo 2's item 3)
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
