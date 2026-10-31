@@ -3889,3 +3889,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   weather as a server global, word walls); C, M5 items to T0/T2 and probed (skills and leveling R0, perk picks as transactions,
   alchemy and enchanting on the craft path, vampirism's design); D, the turbo shape (a switch, a probe, a checklist line per item,
   the hot-push loop); E, the order Fri night to Sun afternoon with one sweep on the merged base before the seats are laid.
+- 23:25 PDT: Eli: "go ahead with the pile in that order" (docs/private/turbo-2-prework.md). The lab's queue from here: D69's merge (in
+  its gate), then guest-loot v5's stage, probe and gate (M3's exit), then the physics restage with x-prop-launch (the launch read),
+  then the dedupe's stage; the agent starts Raise Wall's reported pose (shape A: the message, the validator, the server's placement
+  at the reported pose, the client's report) while the lab works through those, then containers' rest and locks to T0.
