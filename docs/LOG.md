@@ -3818,3 +3818,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   never open, no later handler line, the AI off at the dump (the enable a frame early, or never taken). The fix's v2 pushed on
   m3-guest-loot (the activate deferred one update, the AI state logged at the switch, before the activate and at the off); numidium
   stages D69 (dc3ec679, x-quest-rumor v1 88202e30) meanwhile, then restages guest-loot on the new head.
+- 21:46 PDT: D69's stage (dc3ec679, the union's dist by REUSE_DIST_FROM, numidium's verb-stage gain 614e66c2): x-quest-rumor v1 RED twice
+  (043546, 044055) on the HeartwoodMill half alone, the rumor relay and the denied quest green: the chain trace shows the engine refusing
+  the console's setstage 10 (SetStage ret 0, no event) because a start-up stage is done by the quest's own start at login; the probe's
+  premise. v2 by path (the start-up stage read as done, stage 20's relay, the refusal through DLC1VCController's own stage-0 reports
+  within 150 s) for D69's restage after the guest-loot gate. Also: c1 crashed at 04:25:18Z, 25 s into its login to the guest-loot v1
+  stage's world (SkyrimSE.exe+015F0D8, then +0151F03; a Restless Draugr 0x8009e and USSEP's Ancient Nord War Axe 0x2c672, then a
+  Draugr 0x1d219 and the Battleaxe 0x1cb64 in the registers): HYPOTHESIS for apocrypha, the defaults layer's patched USSEP (plugin-
+  patches.tsv, its CRC changed) against the clients' copy; one crash, watched for a recurrence; the logs ride D69's clean-m1-next.
+  numidium's tooling: runset's RUNSET_AFTER rest leaves pending out (e46fda2b), playtest_setup waits 20 s for Sunshine (5c2e70e8).
