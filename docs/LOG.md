@@ -3729,3 +3729,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   current stage: push v10 49f0815b and grab v8 7d0b64c6, the basket anchored on the mining floor marker 0x10e6cc clear of every capsule,
   the track lines awaited before the key. numidium asked: the two reads after the queue, then the fixed head; 39 on clean-m1 if Eli
   returns before the fixed stage is proven.
+- 19:33 PDT: drop v4 022528 on the physics stage RED on one claim alone (the sword rolled 233 downhill on the camp's rise; the non-host
+  drop sync held end to end: the gate, the grant by touch 2, the stream at the grant, the host's apply, one copy per seat within 20
+  units): x-prop-drop v5 by path 426cf923 on lab-spawn's flat strip, claims unchanged. push v10 861f51bf and grab v8 7689e959 after
+  probe-check's rule (no client log count inside an until). The stage's queue: x-raise-wall-pitch v1, pass v9's rerun, push v10, grab
+  v8, drop v5. c2's rollback took 195 s after pass v9's agent fault (numidium watching the agent).

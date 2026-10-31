@@ -357,3 +357,11 @@ watcher 120 east facing west, the track lines awaited before the key; v8 reads t
 400 of the marker on both seats and no "out of reach" untrack. v10 red with its premise lines in place confirms H-P1; v8's flight
 confirms H-P2; the fixed head then rebuilds and restages, and the four probes play again. Until that stage is proven, playtest 39
 lays on clean-m1 (the merged base, props dark), since on this build a host's clutter cannot be kicked at all.
+
+x-prop-drop v4 (022528, 19:33 PDT read) RED on one claim alone: the non-host's drop holds end to end on the physics stage (the record
+gate clean, "drop of base 13989" and the engine copy deleted; "tracked, 0 units off", the claim by touch 2 granted at 02:30:56.998,
+"stream ... started at the grant" at 57.491 and asleep at 58.019; the host's "applied ... from the stream" at 56.941; one runtime
+SteelSword per seat, the copies within 12 x, 4 y and 20 z). The red: c2's distance to the sword 233 against 150, the sword having
+rolled downhill from the camp's rise (z -288 to -309 against -144). The site, not the code: v5 by path (426cf923) on lab-spawn's flat
+strip with every claim unchanged. push v10 and grab v8 re-shaped for probe-check's rule (a client log count is read at its log-count
+step, never polled in an until): 861f51bf and 7689e959.
