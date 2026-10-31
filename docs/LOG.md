@@ -4400,3 +4400,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and the touch fallback was off; no "at rest: Dynamic" in any run). Fixed at m3-prop-physics 37e960eb (TS only: the tick wants the
   reference when the rest or the quiet is due); the physics restage takes this head with REUSE_DIST from 967ba8c8's dist; grab v9
   depends on it, push v15 and pass v13 do not.
+- (14:53 PDT 2026-10-31) the containers gate (ae2cbfd6) RED on c-riverwood alone, 10 of 11 green, b-container-rest GREEN at its first run
+  (210801), T2 green. c-riverwood red four times (213214, 213550, 214040, 214510), three at claim 2's walker position: c1's last read of
+  0x13489 is taken before its relaunch and c2's after the pass, about 21 s apart (result.json: t+133.8 s against t+154.5 s), and a resident
+  walking to work covers 330 to 531 units in that time; the same shape was red at leveling's gate (160943) and green only when the
+  resident stood. Not containers' client change (one getType per isOpen apply). The scenario's claim measured the walk: fixed on main
+  9ee15ee2 in its own commit (the walker's two position lines removed from claim 2; Alvor, standing, keeps the continuity claim; claim 1's
+  paired reads 0.3 s apart stay). For Eli's eye: a claim removed from the M3 exit's watch item, with the measurement above. The fourth
+  red (213550) was the restart leg's Alvor 266 off after 30 s, the watch item's known shape. Containers re-gates on the new scenario
+  after physics' stage on 37e960eb (numidium's call: that stage's watch set is the comparison without containers' code).
