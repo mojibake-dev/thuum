@@ -577,3 +577,22 @@ reports the stale value, which wins (one round trip's window); gated on 828, not
 indoor login with 828 at 1 gets a restore the game would hold; not covered: the vampire blood potion (a keyword
 condition), alchemy-made reduce-hunger potions (runtime records), werewolf feeding and cannibalism, the gutworm
 multiplier. Probe: x-survival-eat v2 reads 81a before and after an eat of a Large food on a seat with 828 at 1.
+
+## Playtest 39's first finding: Survival does not kill (18:48 PDT 2026-10-30, Eli at the seats before the playtest began)
+
+Eli, pausing 39 at the laid seats: "noticing survival doesnt kill. (they sat too long and the survival screen fx for low needs are
+hard to play through)". The seats stood 40 minutes under the running clock (7.9 at the lay, timescale 20) with the needs rising from
+the set-up's zero to their maximum, the mod's low-needs image-space effects on both screens, and neither character died. Two things
+in it. (1) The lab: the needs must be zeroed at the word that starts the playtest, not at the lay, and the clock could be held until
+that word (numidium's set-up; told at once). (2) The game: whether Survival Mode's needs kill at all is the open question, not the
+server's rule. The server takes a player's own reported health drop (ActionListener::OnChangeValues: the report is the new value
+unless it sits below a value the server raised within the hold, attributes.md; increases cropped against regeneration), so an
+engine-dealt survival damage would reach the record and the server's zero would kill as any other. The mod's cold stage either
+drains health (then our client never reported it, a read) or only caps the maximums (then no death is the mod's own rule and the
+finding is a design question). UNVERIFIED either way; the read before any build: the Survival scripts' names from the esl (lab/esm.py
+on ccqdrsse001-survivalmode.esl) and the mod's documented stages, then x-survival-cold by path (a seat's needs forced to the cold
+maximum through the needs globals, its health and the server's record over two minutes). Memo D72 for Eli (not in tonight's queue):
+A) leave the mod's rule, whatever it is, and only fix the set-up; B) if the mod kills by draining health, read why the drain never
+reached the record and make it reach it (the client's health report under an engine effect); C) if the mod only caps maximums, a
+server rule that drains health at the cold maximum from the reported needs (R1 report, R0 drain), the mod's numbers from its records.
+Recommended: A tonight, B or C by the read's answer as a train after M3 closes.

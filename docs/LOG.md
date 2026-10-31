@@ -3703,3 +3703,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   spells held, streams 48989 and 49989, the hold to 01:09:52Z. Notes: Sunshine on sky-c2 reads Stopped 3 s after a restart and
   Running at 12 s (numidium's tooling note); parity's pipeline 4047 red at wire-test on a CI DNS miss (cargo-deny's fetch), 4054
   rebuilding server-only so no Windows build runs during 39. The build is frozen until Eli's report.
+- 18:48 PDT: PLAYTEST 39 PAUSED by Eli at the laid seats ("kill playtest for now. ill open later."): numidium saves the world and releases
+  the hold; the seats are free; m3-prop-physics dde874b5 pushed (pipeline 4059, the client build), numidium's verb-stage with the five
+  probes when green; 39 resumes on that stage, re-laid from the paused world with the needs zeroed at Eli's start word (the lesson: the
+  needs maxed while the seats sat 40 minutes under the clock). Finding F1 (Eli): Survival does not kill, and its low-needs effects made
+  the seats hard to play; recorded in player-globals.md with memo D72 (A leave the mod's rule and fix the set-up, B or C by a read of
+  whether the cold stage drains health or caps maximums; the server takes a player's reported health drop, OnChangeValues); not in
+  tonight's queue.
