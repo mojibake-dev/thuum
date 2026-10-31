@@ -240,17 +240,26 @@ const state = {
     // a tankard's record unreadable (x-prop-grab 125719, "server holds no
     // record for 0x3975b" while the server held it); a prop's record is its
     // position (prop-physics, ADR-058), so those read null
+    // the form's type first (the API's "type": "MpActor" or "MpObjectReference"), so a
+    // prop's record is read without the throw: every actor read on a reference
+    // logged the server's "treat it as Actor" warning, six per probe run on a
+    // dropped ingot (x-prop-push 220439), read as a client bug until the count
+    // matched the probe's own server.ref reads (2026-10-31). An API without
+    // "type" (the tests' fake) keeps the try
     let pct = {};
     let isDead = null;
     let worn = null;
-    try {
-      pct = mp.get(actorId, "percentages") || {};
-      isDead = Boolean(mp.get(actorId, "isDead"));
-      worn = wornOf(actorId);
-    } catch (e) {
-      pct = {};
-      isDead = null;
-      worn = null;
+    const type = mp.get(actorId, "type");
+    if (type !== "MpObjectReference") {
+      try {
+        pct = mp.get(actorId, "percentages") || {};
+        isDead = Boolean(mp.get(actorId, "isDead"));
+        worn = wornOf(actorId);
+      } catch (e) {
+        pct = {};
+        isDead = null;
+        worn = null;
+      }
     }
     return {
       found: true,

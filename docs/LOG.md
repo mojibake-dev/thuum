@@ -4421,3 +4421,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   restart is a T0 now: DropItemTest's case drops a copy, reloads both records into a fresh server in both orders, sets the user's
   actor and requires the copy's create word (m3-prop-physics b3c66e5f, server-only). x-prop-push v16 8e8d9377 keeps the world
   copies (world-diff) for the saved record's read. Physics stages again after the containers gate once the pipeline reads.
+- (16:05 PDT 2026-10-31) the six "Specified Form is ObjectReference, but we tried to treat it as Actor" warnings in the push runs were the
+  lab's own reads, not a client bug: lab/gamemode's labState ref read a prop's record through the actor properties inside a try (six
+  reads = b0, r1, r2, r4 and the assert's two server.ref evaluations); it now asks the form's type first (the API's "type") and reads
+  the actor fields for an actor alone; gamemode tests 23 of 23 (a plain reference's case added). The lab host is down for Eli's GPU
+  swap (the second GTX 1050 into sky-c2, the RTX back to fenestrate); the containers re-gate was 6 of 11 green when it went off and
+  reruns whole after core's converge; GitLab is unreachable meanwhile, so b3c66e5f's T0 waits too.
