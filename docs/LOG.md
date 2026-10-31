@@ -3969,3 +3969,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   docs/verbs/word-wall.md (item 11: the shout record is written by the console alone, no WOOP reader, no server TeachWord; WordWall C2S,
   the record written as the console writes it, the natives as ledger lines). The containers train m4-containers-rest db7ec1e5 pushed
   (client build); its probe waits on Bleak Falls Temple's chest ids from the master file.
+- (03:3x PDT 2026-10-31) Guest-loot v6 GREEN (x-body-open-guest-fix v2 074043, cold): the engine takes the released body's activation
+  2.1 s after the AI switch (nine refusals, the tenth taken at +2127 ms; numidium's read); M3's exit gate runs on d10789f7 (14
+  scenarios, T2 beside). Containers: the branch gained the lab's log lines (a CONT's open or shut with its occupants, the disconnect's
+  release, the load's shut) and the lid plays only on a change of the applied state (a cell's load creates hundreds of closed
+  containers): m4-containers-rest d56d2be3; probe x-container-rest v1 69f2ad68 (Bleak Falls Temple's bandit chest 0x371e9, lab/esm.py
+  cellrefs). The traps read x-bleak-traps v1 a5335d63 (the plate 0x567f2 and wall 0x54b15, the pillars 0xaa8cb to 0xaa8cd, the lever
+  0x6a9e2, the portcullis 0x3b9f1; screenshots and counts, premises alone claimed). The talk service's console guard: fork
+  m3-talk-console-guard 9b796255 (client only), probe x-talk-console v1 b3156979. Leveling's T0 begun: wire-rules leveling.rs on fork
+  m5-leveling (the eighteen skills' AVSK constants from UESP's table, the use, the level cost whose convention the page's totals pin
+  (from L to L+1: mult * L^1.95 + offset), the character threshold, the progress state machine with its events and refusals).
