@@ -376,3 +376,16 @@ hand the grab's stretched spring its force. The drop (v4) took the same flip at 
 had just created at the drop point, never a follower. The read before the fix: x-prop-pass v10 by path (372f3a71), v9's frame with
 the basket's position on both seats at 1, 2 and 4 s after the key (radius 1200, x, y, z recorded); grab v8's release read tells the
 hand's case. The two local fixes (46f1a2dc, a2256945) wait on these reads; one head move after them.
+
+x-prop-grab v8 (024409, 19:52 PDT read) RED on 4 of 12: the grab held on the marker site (the sweep's third pitch, the claim by touch 1
+granted, Dynamic, the stream at the grant at 02:47:36.113, asleep at 36.962; the host "theirs", Keyframed, applied at 36.011), then the
+basket VANISHED on both seats within 20 ms (c2 at 37.479 "untracked: its reference is gone", c1 at 37.462 "out of reach"), half a
+second after the grabber's asleep sample; no base-type-32 reference in the cell on either seat after. A simultaneous loss on the
+owner's own seat is the server's doing (the view removes a reference the server unsubscribed or deleted), not physics. Two
+candidates, HYPOTHESES: (a) the pickup delete, ProcessActivateNormal's "Deleting 0xff item" when a MISC 0xff reference is activated
+(a held E may fire an activation at its press or release, the item then given to the activator and the reference deleted on every
+seat); (b) an accepted asleep sample with a far position, OnPropTransform's SetPos(pos, Other) moving the record out of both seats'
+subscriptions (pass v9's "out of reach" 3 s after the grant fits (b), with no E pressed). numidium greps the two runs' server logs
+(the delete line, the activation, the inventory; E_PROP) and pass v10b (a0a6e14b, in v10's slot) reads server.ref(0xff000002) at 1,
+2 and 4 s after the kick beside the seats' positions. drop v5 (024852) a lab fault at c2's files-lever relaunch (the guest agent lost
+the pid, twice in eight c2 runs after a rollback; numidium's lab-api item), its rerun after push v11.
