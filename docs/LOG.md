@@ -3781,3 +3781,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   rolled back, `REUSE_DIST=1 LABAPI=4021 just verb-stage m3-prop-physics` with 14923's dist and 4079's server image, the probes push
   v11, pass v10c, grab v8, drop v6. Parity's server-only pipeline 4054 green on the retry: skymp-server:parity at 0e23c820 exists
   again. The guest-loot and dedupe pushes wait for the restage's probes.
+- 20:33 PDT: the restage on the fixed build (b421d1b2 server, 14923 dist): push v11 032724 RED 3 of 10 at the rest reads with three fixes
+  reading true (the translated placement, the wake, the kick's stream applied by the follower); the basket then travelled out of reach
+  in 3 s on both seats through the stream: the marker's slope (175 below the strip) or a throw; pass v10c's record snapshots tell.
+  push v12 by path 0a0e31ef (the flat strip, the ejection as the first contact, the kick read with b0/r1/r2/r4) for after grab v8 and
+  drop v6.
