@@ -3794,3 +3794,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Dynamic body, the E's release picks the basket up (c2's activation 05.259, the server's delete 05.461). The grab's engine read is
   owed (StartGrabObject/EndGrabObject on c2) and the pickup after a failed grab is a client follow-up; the grab is a declared limit
   for the physics train. drop v6 running, then push v13 and pass v11.
+- 20:45 PDT: drop v6 033901 on the lift build RED 3 of 15 (the floor claims): the sword rests 150 below the strip exactly as without
+  the lift, so the weapon's copy falls THROUGH the strip's (and the camp's) collision on the dropper's seat, the sync itself green.
+  The basket drop in push v13's premise tells MISC from WEAP; a placed weapon's collision read and the adoption of the engine's own
+  drop are the items; a dropped weapon is the drop's declared limit for the train (the checklist: drop a basket or a tankard). The
+  stage ended (exit 0); push v13 running, then pass v11.

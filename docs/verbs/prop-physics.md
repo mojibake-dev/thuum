@@ -471,3 +471,18 @@ the pickup after a failed grab (ActivationService could withhold an activation o
 last second and a half, since a long press is a grab in the engine's own grammar, not a pickup). For the physics train the grab
 (touch 1) is a declared limit: a held E on a prop does not lift it on this build, and its release picks the item up; the kick,
 the pass and the drop are the train's claims (b-prop-push promoted from push v13 on green).
+
+drop v6 (033901, 20:45 PDT read; the lift build b421d1b2) RED 3 of 15, the floor claims alone: the sword rests at 14521.6 (c1) and
+14514.1 (c2) against the strip's 14662, as v5's 14520.7 and 14518.6 did WITHOUT the lift. The lift moved nothing, so the copy is not
+spawned inside the ground: it falls through the strip's collision on the dropper's seat (and through the camp's landscape in v4, the
+same 150), the stream faithful, the sync green (the grant, two streams started and one asleep, the host's apply, one copy per seat
+within 7.5 in z). The basket (a MISC) of the same world rests on the strip where it is placed (pass v10b's record at 14670; push v11's
+marker basket at its floor), and push v13's premise drops a Basket01 by the same path: if it rests within 64 of the drop point, the
+weapon's copy is the special case. HYPOTHESIS: a WEAP reference the view creates by PlaceAtMe and sets Keyframed (dealWithRef), then
+Dynamic by this service, carries no working collision against the ground (the engine's own drop, DropObject, builds the weapon's
+world physics; a weapon's L_WEAPON layer and shape may need it), where a MISC's clutter shape works under the same sequence. Reads
+owed, not tonight: a Frida or console read of the placed sword's collision layer and motion on the dropper's seat after the Dynamic
+set; and the design item, the server's copy ADOPTING the engine's own dropped reference (the record bound to the reference the
+engine made, its physics the engine's) instead of a second reference the engine's is deleted for. Until then a dropped weapon is
+the drop's declared limit (it falls through the ground on both seats; its record keeps it at the floor's depth and it can be picked
+up there only by reaching it): the checklist says drop a basket or a tankard, not a weapon.
