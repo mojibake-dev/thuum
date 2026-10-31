@@ -3855,3 +3855,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   loop's Utility.wait is Skyrim Platform's own and iterated for 15 s on guests before. v4 ce1df68b pushed (the beat and the poll on
   Utility.wait, the first wait in menu mode), the restage's head after D69's probe; the onResult lines of the next run read the latent
   question. v3 0547e5d4 superseded before any run.
+- 22:07 PDT: numidium's onResult read (c2.log, spdlog): in 045522 and 045859 Utility.waitMenuMode resolved three times (the handler's first
+  wait, then two polls about 170 ms apart) and no latent of any kind completed again while cast-action and npc-stream kept logging; so
+  waitMenuMode does resolve outside a menu, and the handler's fourth VM latent never came back or its loop died after the third. In
+  045859 the body's inventory apply (three TESModPlatform.addItemEx calls on 39fe4) sat between polls two and three. v4 ce1df68b (the
+  poll and the beat on Skyrim Platform's own Utility.wait) is the restage's head; if the open still fails, the next lines to add are
+  the activate's return and the AI's other hand.
