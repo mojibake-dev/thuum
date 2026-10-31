@@ -2446,3 +2446,19 @@ the activate; superseded before any run by v4 (ce1df68b, pushed, the restage's h
 Utility.wait(0.1) as the original loop (its 15 s give-up printed on schedule in earlier runs), the first wait alone in menu mode for the
 host's open menu. Under the game-time poll a guest's menu, once open, pauses the game and the poll resumes at the close, so the AI's
 off for a guest's open lands at the close (nothing walks under the pause). The probe stays cb798c4c.
+
+The fix's v4 (ce1df68b) RED twice (22:40 PDT read; 053012 cold, 053335 relaunched, step 28 alone): the activation went out, the AI
+switched on ("reads true at the switch"), and the handler never logged again: no "after the wait" line, no error; c2.log's only latent
+completion the handler's first waitMenuMode, 58 ms before the switch. With v2's stall two awaits after the switch and v4's at the first
+(a game-time Utility.wait), the kind of wait is not the fault: after enableAI(true) on the released body this handler's next await
+never resumes, whatever it awaits, while cast-action and npc-stream keep logging. A second pattern, kept: "Trying to get server mods,
+attempt 2" after a "Request/parse error ... Could not establish connection" 13 to 15 s after the switch in every run. v5 (80188d13,
+tsc clean, local until D69's merge): a released body's open runs on the TimersService with no await after the switch (its callbacks
+run inside the game's update when the player exists): the switch and its read; a 150 ms timer that activates and logs the activate's
+return; a 100 ms poll for the ContainerMenu; at the open the AI off ("AI off again, the menu is open") and a poll for the close that
+sends the closing activation ("closing activation sent, the menu closed"); with no open within 3 s the AI off and the closing
+activation as the give-up. The other paths keep the async loop, which now has a catch that logs a throw. The probe (x-body-open-
+guest-fix v2 by path) and the two pending scenarios (c-dungeon-enemies, b-npc-body-release, their own commits) read the guest's
+admission and release through these lines; the host's open, its body never a puppet and its AI on, keeps the generic handler's lines.
+D69 merges alone meanwhile (numidium: a restage of dc3ec679, its gate always plus b-quest-rumor, b-quest-stage, b-story-arrival plus
+watch, T2 beside); the union m3-pass-train-4 is re-cut on v5 after.
