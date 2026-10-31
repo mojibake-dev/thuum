@@ -360,3 +360,12 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   the hold works; a write of 0 from a caller other than 37489 while held names
   the clearer; no write at all says the call never reached the engine. Address
   Library ids by `just addr`, 1.6.1170 only.
+- skill-use.js: what the engine hands its skill experience path (thuum
+  docs/verbs/leveling.md, M5). Hooks PlayerCharacter::AddSkillExperience
+  (Address Library 40488 on 1.6.1170; CommonLibSSE-NG's RELOCATION_ID(39413,
+  40488)) and, from the first call's `this`, the player's UseSkill through
+  its vtable slot 0xF7 (Actor.h:445); each call prints the skill (ActorValue),
+  the float (the points or the experience) and the form. Decides where the
+  leveling client hook goes: UseSkill's points if AddSkillExperience reads a
+  zero under skymp5-client's zeroed mults, else AddSkillExperience itself with
+  the engine's write cut. Probe x-skill-use-read (by path).

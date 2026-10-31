@@ -80,9 +80,10 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - The server today: OnActorValues records the snapshot within bounds (R2; actor-values.md); ActorValueRecord holds
   bases, skills' progress, xp, threshold, level (ActorValueRecord.h); ActorValuesTest.cpp.
 - libespm: AVIF read since fork m5-leveling bb0b37d8 (AVIF.h: the AVSK constants and the perk tree's nodes; EspmTest
-  on One-handed 0x44c, Smithing 0x450 and AVDragonSouls 0x62c). The records are the source: Skyrim.esm's Smithing
-  AVSK reads 160, 0, 0.25, 300 where UESP's table writes a use mult of 1 (the page folds it into its base formula);
-  the rule's Table takes the records and keeps UESP's numbers as the fallback and the tests' expectations.
+  on One-handed 0x44c, Smithing 0x450 and AVDragonSouls 0x62c). The load order is the source: Skyrim.esm's Smithing
+  AVSK reads 160, 0, 0.25, 300 but Update.esm overrides it to 1, 0, 0.25, 300, which the browser returns and UESP's
+  table shows (the patched game); a read of one plugin alone is not the game's value (the two pipelines red on the
+  160, 2026-10-31). The rule's Table takes the records and keeps UESP's numbers as the fallback.
 
 ## The formulas (UESP, Skyrim:Leveling, read 2026-10-31)
 
