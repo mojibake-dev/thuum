@@ -3776,3 +3776,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   z 51; clang-format 21.1.8), local until 4076's client build is green, then pushed with CLIENT_BUILD_WINDOWS=0 so the restage takes
   4076's dist with the new server image. drop v6 by path 34853faa (the floor claim). The restage's set: push v11, pass v10c, grab v8,
   drop v6.
+- 20:15 PDT: pipeline 4076 GREEN (fa225f01: client-build 14923 at 03:14Z, server-build 14922); the drop lift pushed server-only,
+  m3-prop-physics b421d1b2, pipeline 4079 (server-build 14928, CLIENT_BUILD_WINDOWS=0). numidium's restage after it: both clones
+  rolled back, `REUSE_DIST=1 LABAPI=4021 just verb-stage m3-prop-physics` with 14923's dist and 4079's server image, the probes push
+  v11, pass v10c, grab v8, drop v6. Parity's server-only pipeline 4054 green on the retry: skymp-server:parity at 0e23c820 exists
+  again. The guest-loot and dedupe pushes wait for the restage's probes.
