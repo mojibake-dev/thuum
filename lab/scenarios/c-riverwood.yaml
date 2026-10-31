@@ -39,6 +39,10 @@
 # start; b-npc-death reads the record after a reconnect). God mode does not survive a relaunch or a
 # restart on the server, so it is set again after each (lab-relaunch-loses-god-mode, b-cell-host). Its own
 # commit (rule 13).
+# 14:53 PDT 2026-10-31 (thuum-magnus): claim 2's two position lines on the walker 0x13489 removed; they compared c1's read before
+# its relaunch with c2's after the pass, about 21 s apart, and a walking resident covers 330 to 531 units in that time (four gate
+# reds on three builds with the identical shape, green only when the resident stood). Alvor, standing, keeps the continuity claim;
+# the walker keeps its live-switch claims and claim 1's paired reads 0.3 s apart.
 id: c-riverwood
 milestone: M3
 clients: [c1, c2]
@@ -120,11 +124,13 @@ steps:
       - server.host(0x9732).client == "c2"
       - c2.npc_state(0x13482).aiEnabled == true
       - c2.npc_state(0x13489).aiEnabled == true
-      # continuity across the handoff within the same measured 256 (c1's last read is seconds older)
+      # continuity across the handoff within the same measured 256 for the standing subject (Alvor at his forge; c1's last
+      # read is seconds older). The walker 0x13489 carries no position claim here: c1's last read comes before its relaunch
+      # and c2's after the pass, about 21 s apart in the gate runs of 2026-10-31 (containers' 213214, 214040, 214510 and
+      # leveling's 160943), and a resident walking to work covers 330 to 531 units in that time; the claim measured the walk,
+      # not the sync (claim 1's paired reads of the same walker, 0.3 s apart, held every time)
       - abs(c2.npc_state(0x13482).x - c1.npc_state(0x13482).x) < 256
       - abs(c2.npc_state(0x13482).y - c1.npc_state(0x13482).y) < 256
-      - abs(c2.npc_state(0x13489).x - c1.npc_state(0x13489).x) < 256
-      - abs(c2.npc_state(0x13489).y - c1.npc_state(0x13489).y) < 256
   # the relaunched game logs in where it stood and must not take the village from a live host
   # (b-host-quit); god mode again, since a relaunch loses the server's tgm
   - c1: connect
