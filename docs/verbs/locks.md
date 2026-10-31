@@ -187,15 +187,17 @@ reference is E_LOCK_* and the lock is re-imposed.
 - T1: none.
 - T2: a difftest session with a refused report and an accepted one.
 - T3 scenario id: lab/scenarios/b-lockpick.yaml: c1 and c2 at a Novice chest in the lab's interior (the premise set by
-  the server's console Lock on a lab chest); c1's console `unlock` undone by the server within a round trip (the
-  chest reads locked again on c1 and c2); c1 given a key by the server's console (the chest locked `lock <ref> 255 <key>`, the
+  the server's console Lock on a lab chest); c1's typed console `unlock` sent to the server (consoleCommandsService) and run there as the lab's owner
+  (enableConsoleCommandsForAll in lab/deploy/sky-srv/server-settings.json): the chest unlocks for both seats and nothing
+  changes locally before the server's word; the non-owner's refusal, the "undone" case, is T0's (ConsoleCommandTest's rank
+  case and locks.rs), since the lab has no non-owner seat (the reviewer's note on b-lockpick's draft, 2026-10-31); c1 given a key by the server's console (the chest locked `lock <ref> 255 <key>`, the
   key RiverwoodAlvorHouseKey 0x36a3d handed by AddItem), activates, the chest opens on c1
   and reads unlocked on c2; a second chest locked again by the console, c1 with Lockpicks picks it (the lab's mouse
   and tap-key through the minigame: x-lockpick reads how), the success relayed to c2, the Lockpick count on the
   record; a relaunch of c2 and a server restart keep the state. Probe x-lockpick by path first (the minigame under the
   driver, the broken pick's event).
-- Assertions that would fail if the verb silently regressed: a chest unlocked by a console `unlock` staying unlocked
-  on the server; a pick success not reaching the other seat; a broken pick not costing a Lockpick; a locked chest
+- Assertions that would fail if the verb silently regressed: a typed console `unlock` changing the chest on one seat
+  alone, or leaving it locked on the server while a seat reads it open; a pick success not reaching the other seat; a broken pick not costing a Lockpick; a locked chest
   reading unlocked after a restart.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
