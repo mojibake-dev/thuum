@@ -73,7 +73,7 @@ message, one per cast; OnEffectStart and OnEffectFinish only.
 | effect shader 0x735e7 on the wall | script | R3, later |
 | OnEffectFinish: Disable(fade) both, Wait 5, Delete all three | script | imposed: deleted 5 s after the cast's end (R0); the fade: H-SP4. Observed 2026-10-31 (x-raise-wall v5, 20261031-104852 and -105243): the two references survive the release disabled (deleted false 9 s after it) and the next cast re-uses them, re-enabled and raised again under the same ids, so no Delete shows; the server's copies still go 5 s after the cast's end |
 | the failure effect: a message, no wall | record | native; the server waits 250 ms of open stream (REFUTED: WB_OcatosRecitalFail_Script shows a message and dispels nothing, apocrypha's read, LOG 2026-10-28 22:01 PDT, so the 250 ms gate narrows no failed cast; a wall where the caster's engine chose the no-room message is the declared v1 limit: Open questions, ADR-057, Known limits S2) |
-| the collision: the mesh's Havok body (SKYL_ANIMSTATIC, MOPP), no navcut | mesh read | native: blocked, not re-pathed (HYPOTHESIS until b-spell-placed-wall's claim 4, c2's walk stays north of y -250 (v3's line, derived from the server's band: the southmost north face a wall it accepts can have is -216) and c1's within 256 of its start, or x-raise-wall v2's cast-two walk holds; unrun, 204833 and 205817 died at c2's teleport before any cast and the frames since moved; the no-navcut re-pathing is the mod's own on every seat, not claimed) |
+| the collision: the mesh's Havok body (SKYL_ANIMSTATIC, MOPP), no navcut | mesh read | native: blocked, not re-pathed (READ 2026-10-31, x-raise-wall v5 113932: c2's 3 s walk at the wall stopped 46 units from its centre line, north of it; the body is thinner than the mesh's 104; was HYPOTHESIS until b-spell-placed-wall's claim 4, c2's walk stays north of y -250 (v3's line, derived from the server's band: the southmost north face a wall it accepts can have is -216) and c1's within 256 of its start, or x-raise-wall v2's cast-two walk holds; unrun, 204833 and 205817 died at c2's teleport before any cast and the frames since moved; the no-navcut re-pathing is the mod's own on every seat, not claimed) |
 
 ### Sequences and combinations (ADR-033)
 
@@ -445,3 +445,14 @@ both runs, which a 3 s window less the 500 ms reply margin cannot settle). HYPOT
 reports both bases settled inside the window, the server's copies for set 1 stand where c1's re-raised wall stands, and no
 unsettled line. Noted for the checklist, not a claim: the caster's wall fades at the release while the other seat's copy lingers
 the table's 5 s (lingerS, the deploy entry); the mod's Delete never runs, so the linger is the only end the other seat sees.
+
+x-raise-wall v5 GREEN on 0e4b34e5 (04:44 PDT 2026-10-31, run 20261031-113932, 59 steps, every claim held): both casts request, report
+and place the same way (the ACTI reported 0.33 s after the request, the MSTT 1.2 s, cast two exactly as cast one, so the 2.3 s of the
+red runs was the old skip's artifact and the 6 s window is headroom), cast two re-using cast one's references (c1's ff0008e7 and
+ff0008b6 both times) at the same settled pose (z 14677 and 14629), the server's copies ff000002/3 then ff000004/5 at that pose,
+c2's distances 178.125 and 187.5 equal to c1's own copies' from c2's position, one runtime reference of each base on each seat, no
+unsettled line, both sets removed at their linger. The walk: c2 (W held 3 s from y 0) stopped at y -114 in lab-spawn's frame with
+the wall's centre line at -160 (c1's -366 plus the reported 206.25), 46 units from the centre line, so the collision row's HYPOTHESIS
+reads blocked (the stop sits inside the 104 the mesh read gave the body, so the Havok body is thinner than the mesh's extent, about
+24 units with the capsule's 35; recorded, nothing claimed on the thickness). The scenario's shape A amendment (its own commit) claims
+the walk north of -250 as derived from the band. Open: nothing on the mechanism; T3 is the gate's run of the amended scenario.
