@@ -3403,6 +3403,14 @@ the scenario: the other seat sees a wall about 80 units off, a player-visible wr
 place blocks a gap the caster sees open, worse than no wall (playtest 38's state), and the fix is a train's worth. The verb's pose
 model becomes shape A: the caster's report, validated (reach from the caster, bounds, one report per accepted cast), the copies at
 the reported pose; the settings table keeps the forms and the lifetime, and loses the step.
+The read (19:36 PDT): x-raise-wall-pitch v1 (20261031-023141) GREEN: the caster's own MSTT sits at 206.25 from the caster and the
+ACTI at 196.875, the same at level, 200 counts down and 400 counts up, with the server placing nothing under the switch. The aim
+hypothesis falls: the engine places the wall at a fixed distance. The sweep's 248 to 262 from a watcher 366 behind the caster is
+therefore the caster's HEADING against the record's yaw (about 42 degrees off north by the law of cosines; the walkers' 20-degree
+drift is the same family; HYPOTHESIS until a heading read), plus 14 units of the table's 192 against the engine's 206. Shape A
+stands: the engine's own placement reported, the server validating it against the caster's record (the pose 150 to 260 from the
+caster, the measured 206 with the caster's own motion in the window; the bases of the spell's table; one report per accepted cast)
+and placing the copies there; the alternative, 206.25 along the record's yaw, would place along a heading the engine did not use.
 
 ## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
 
