@@ -3476,6 +3476,27 @@ the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop
 position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
 budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first. Eli, 12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"; the playtest 39 clause is retired, slice three is M4's, and the read before its build (npc-fate's measured "a dead ragdoll takes no SetPosition" against the row's SetPosition hypothesis) waits with it.
 
+D73 (19:56 PDT 2026-10-30, the pass; taken under the pass's rule from the physics stage's reads, Eli may veto): decision 3 refined, a
+body is Dynamic unless another seat streams it awake right now. Facts (m3-prop-physics dde874b5 on the merged base): x-prop-grab v8
+(20261031-024409): the guest's grab of a follower's Keyframed body released in the same instant it took (the claim's touch 1 and
+touch 2 logged together), the grant arrived after the hand had let go, and the held E's release fired an activation 1.3 s into the
+grant that the server took as a pickup ("Deleting 0xff item" at 02:47:38.003, the basket gone on both seats within 20 ms): a Keyframed
+body cannot be held. x-prop-pass v9's rerun (023534): the walker's contact on a Keyframed body moved nothing, the grant came 0.6 s
+later, the flip then; the body's later loss is read separately (v10b's record read). x-prop-push v9 (021439): a Dynamic body set
+without the wake flag took no contact at all. The old decision 3 (every follower Keyframed, the simulator Dynamic at the grant)
+therefore gave no local physics to the first touch of anything: the kick waited a round trip on a body that does not move, the grab
+could not close. The refinement: a follower's body is Keyframed only while another seat's stream is live (from the first awake sample
+to 150 ms after the asleep sample, or a second after the last awake one), and Dynamic with leave to wake otherwise; a freshly tracked
+body with no live stream is Dynamic; the simulator's body is Dynamic with leave to wake (46f1a2dc); the grant's flip sets no motion on
+a body already Dynamic and the loss of the simulation sets none (the next awake sample does). So a kick or a grab acts on a resting
+body at once, locally, and the claim and the stream follow from the moved pose; while a stream is live the body glides as before.
+Garry's Mod's shape, nearer: every body physical locally, the authority's stream correcting it. Built: fork m3-prop-physics 0bb02f74
+(tsc clean; the held-hand guess a2256945 reverted as unproven, the pickup being the vanish's cause). HYPOTHESIS until the probes on
+the next stage: the resting Dynamic copies settle alike on both seats (a small divergence of resting clutter is accepted, as ADR-058
+accepts a sample's lag), the glide holds under Keyframed as before, and a grab now closes on the Dynamic body so its E consumes no
+pickup. Probes: x-prop-push v11, x-prop-pass v10b, x-prop-grab v8, x-prop-drop v5 on the restage; b-prop-push promoted on green.
+
+
 Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet
 cost. Facts: the gamemode loops `server.tick()` then a 1 ms setTimeout (skymp5-server/ts/index.ts:222-227), about 816 ticks a
 second on sky-srv; the transport flushed renet at every poll (wire-transport lib.rs's poll), so every connected client took about

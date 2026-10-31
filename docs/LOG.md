@@ -3752,3 +3752,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   delete of an activated 0xff MISC, (b) a far accepted asleep sample (pass v9's shape). numidium greps both runs; pass v10b a0a6e14b
   (server.ref 0xff000002 at 1, 2, 4 s) runs in v10's slot, then push v11, then drop v5's rerun (024852 a lab fault at c2's relaunch,
   lab-api's EXEC_LOST handling numidium's).
+- 19:56 PDT: grab v8's vanish CONFIRMED as the pickup of a failed grab (numidium: c2's activation at 02:47:37.346, the server's "Deleting
+  0xff item" at 38.003; pass v9's rerun shows neither): a Keyframed follower cannot be held (touch 1 and 2 in one instant). D73 under
+  ADR-058: a body is Dynamic unless another seat streams it awake right now (Keyframed from a stream's first awake sample to 150 ms
+  after its asleep one, or a second of quiet); built on m3-prop-physics 0bb02f74 over the wake fix 46f1a2dc, the held-hand guess
+  a2256945 reverted (unpushed). The branch pushes after the stage's reads end (pass v10b, push v11, drop v5's rerun), then the build,
+  the restage and the four probes; 39 on clean-m1 meanwhile if Eli opens it.
