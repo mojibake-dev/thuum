@@ -3758,3 +3758,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   after its asleep one, or a second of quiet); built on m3-prop-physics 0bb02f74 over the wake fix 46f1a2dc, the held-hand guess
   a2256945 reverted (unpushed). The branch pushes after the stage's reads end (pass v10b, push v11, drop v5's rerun), then the build,
   the restage and the four probes; 39 on clean-m1 meanwhile if Eli opens it.
+- 20:00 PDT: pass v10b 025124 (numidium): the server's record never moved, the host kept the basket, the claimant's engine lost its own
+  copy within 1 s of the grant's Dynamic set. H-P4: setPosition leaves a Keyframed body's collision behind (every flown copy had been
+  placed by it; the drop's copy, never placed, settled). Fix fa225f01 on m3-prop-physics (jumps and the first placement by keyframed
+  translate, the rest-Dynamic set at 300 ms); pass v10c by path 02af9dc2 (snapshots, no pos claims). The branch (46f1a2dc, 0bb02f74,
+  fa225f01) pushes at numidium's "queue done"; the restage's probes push v11, pass v10c, grab v8, drop v5.
