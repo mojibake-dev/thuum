@@ -1,6 +1,6 @@
 # Verb: traps
 
-Drafted 02:4x PDT 2026-10-31 from docs/VERB.md (pile item 9 of docs/private/turbo-2-prework.md; M4's dungeon row:
+Drafted 00:4x PDT 2026-10-31 from docs/VERB.md (pile item 9 of docs/private/turbo-2-prework.md; M4's dungeon row:
 traps, pressure plates, linked refs, puzzle pillars, toward the exit scenario d-bleak-falls). From a code map of the
 fork at parity dc3ec679. Nothing of it is built; the prework is the read, x-bleak-traps.
 

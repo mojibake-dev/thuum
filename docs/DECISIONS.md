@@ -3428,7 +3428,7 @@ Raise Wall entry in both files, serve a server of either shape until the merge: 
 known-wrong wall again, a shape A server places as reported; the playtest's item 8 keeps its limit until the merge. Built as fork
 m3-wall-pose (23e334b9, 69ca1221, 866ff864, 7ac26664); the probe x-raise-wall v4, the scenario's amendment after its read.
 
-D72 (04:5x PDT 2026-10-31, Eli): Survival Mode for the rest of testing. The memo (docs/verbs/player-globals.md, playtest 39's F1
+D72 (01:0x PDT 2026-10-31, Eli): Survival Mode for the rest of testing. The memo (docs/verbs/player-globals.md, playtest 39's F1
 "survival doesnt kill"): A) leave the mod's rule and fix the set-up; B) make an engine drain reach the record; C) a server drain at the
 cold maximum. The read (x-survival-cold v1, 072242 and 072601; apocrypha's script read): hunger and exhaustion never kill by the
 Creation's own scripts, a minute at the top cold stage cost no health, and the one death is the cold's Kill() at 1000, which the

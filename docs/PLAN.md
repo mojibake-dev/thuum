@@ -953,7 +953,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   2026-10-20: "cook on a closeout set of tests, that if it passes we call
   m2 done").
 
-### M3: Hosting (8 to 16 weeks, the TES3MP move)
+### M3: Hosting (8 to 16 weeks, the TES3MP move). DONE 2026-10-31 (started 2026-10-21)
+
+Closed 2026-10-31 01:31 PDT (08:31Z; LOG): the exit's last item, a guest's loot of a body released
+from the puppet state (D71), went green on m3-guest-loot v6 and the merge's gate ran 14 of 14 green
+(20261031-074556-merge-m3-guest-loot: the always set, c-riverwood, c-dungeon-enemies, b-npc-body-release
+and the container-handler set, T2 green beside it), fork parity d10789f7, both clones promoted. Ten
+days from the start. Dark on the merged build and pending by name, as the STATE line below says:
+props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-loot (the D37 layer).
 
 - STARTED 2026-10-21 00:05 PDT (Eli, after twenty-nine's report: "i
   suppose kick it off when you're ready"), with M2's close finishing in
@@ -1213,6 +1220,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   by its rest, 29 runs; watch item b-npc-body-release's old point). 52 staging (P7 v5 first); 54, 55, 53 follow
   on green; the D37 layer (layer-d37-ddo-out) stages at the end with the full sweep, then playtest 35.
 
+- STATE 2026-10-31 01:50 PDT (the pass's chart line): M3 DONE. m3-guest-loot v6 MERGED to fork parity d10789f7 (08:31Z, numidium;
+  the gate 20261031-074556 14 of 14, T2 green beside), c-dungeon-enemies and b-npc-body-release out of lab/gate.yaml's pending.
+  Staging: m3-wall-pose 1e836299 (D74's handshake, parity merged in; probe x-raise-wall v4 960011fb; b-spell-placed-wall's
+  amendment after the read, its own commit). Built, pushed and queued in the lab's order (each on 1e836299, so each merges after
+  wall-pose does): m3-quest-report-dedupe 4ca5783c, m4-containers-rest 0adb994e, m3-talk-console-guard 19431840, m5-leveling
+  e9c1521e (the server half, switch off; pipeline 4143 green on the Smithing fix), m4-locks 387e4537 (whole, switch on in the
+  deploy settings). m3-prop-physics b421d1b2 waits for its launch read (x-prop-launch v2 ce95029f). Reads by path for the slot
+  after containers: x-container-rest 69f2ad68, x-bleak-traps a5335d63, x-talk-console b3156979, x-lockpick e5014621,
+  x-skill-use-read f3cfb4df (the leveling client hook's Frida read). Survival off for the rest of testing (D72). Dark: props (D68),
+  Raise Wall's copies (D70) until wall-pose merges. Pending by name: b-body-loot (D37). Turbo 2 Sunday evening as set.
 - STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
   sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server

@@ -3925,7 +3925,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   death, 3D and health (the beat the engine needs is the measurement; a run of refusals sends the read to Actor::ActivateRef); the probe
   aba01c6f unchanged. The lab's order: the physics restage (b421d1b2, x-prop-launch v1), then guest-loot v6's stage and gate (M3's exit),
   then m3-wall-pose's stage with x-raise-wall v4 and the entry deployed.
-- (00:58 PDT 2026-10-31) Pipeline 4115 (m3-wall-pose 866ff864) green: the C++ T0 with the rewritten SpellPlacedTest and the client
+- (00:21 PDT 2026-10-31) Pipeline 4115 (m3-wall-pose 866ff864) green: the C++ T0 with the rewritten SpellPlacedTest and the client
   build 15027 for the stage; 4117 (7ac26664, server-only) and 4116 (guest-loot v6 d10789f7) running. m3-quest-report-dedupe a837ecdc
   pushed with parity dc3ec679 merged (pile item 4; its probe x-quest-report-dedupe v1 0a281115, the queue's tail). Pile item 5's read
   drafted: x-survival-cold v1 by path (23b6403f, one seat, no build; player-globals.md's D72 paragraph): the cold need forced to 990 for
@@ -3933,7 +3933,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   word (D51 B, never read), the seat down, the respawn, and one kill line only (a second is a death loop finding). Told numidium for a
   lab gap. Two code maps dispatched for pile items 7 (containers' rest) and 8 (locks and lockpicking) on a worktree off parity
   (m4-containers-rest); their verb docs follow the maps.
-- (01:30 PDT 2026-10-31) Pipelines 4116 (guest-loot v6 d10789f7, client build 15029) and 4117 (m3-wall-pose 7ac26664, server-only)
+- (00:26 PDT 2026-10-31) Pipelines 4116 (guest-loot v6 d10789f7, client build 15029) and 4117 (m3-wall-pose 7ac26664, server-only)
   green beside 4115: v6's stage and the wall-pose stage have their builds. x-prop-launch v1 RED twice on its premise (071449, 071905;
   numidium's read): the console's placeatme never reaches the engine under skymp5-client (consoleCommandsService's schema takes two
   arguments, the count makes three, and a matched command goes to the server and returns false), so phase A's native basket was never
@@ -3945,7 +3945,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   into the open console (no console or menu guard on its E handler); a one-line client fix, its own small branch. The locks map
   (pile item 8) is in: no lock state on the server, no XLOC in libespm, no KEYM record, the client strips every lock in dealWithRef,
   Skyrim Platform's lockChanged carries the reference alone and nothing names a broken pick; docs/verbs/locks.md written from it.
-- (02:1x PDT 2026-10-31) Pile items 7 and 8 from their code maps. docs/verbs/locks.md written (no lock state on the server, no XLOC or
+- (00:3x PDT 2026-10-31) Pile items 7 and 8 from their code maps. docs/verbs/locks.md written (no lock state on the server, no XLOC or
   KEYM in libespm, the client strips every lock in dealWithRef, Skyrim Platform's lockChanged carries the reference alone; the design:
   the state R0 on the record from the XLOC, a key in the record unlocks, the minigame's result reported R1 and bounded, a broken pick
   costs a Lockpick, the console unlock undone; LockReport MsgType 63 and a lock prop on CreateActor; nothing built yet). Containers:
@@ -3958,7 +3958,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Four Containers cases in PartOne_ActivateTest; tsc green; the probe and the scenario follow the build. x-survival-cold v1 red on its
   premise (the cold need falls about 200 a minute at lab-spawn; numidium's read: health full through a minute at stage 5, so the mod
   drains nothing by stage), v2 1bb33d7e (25 s stage read, 1200 for the kill) for the next gap; D72 leans A with the cold kill proven by v2.
-- (02:5x PDT 2026-10-31) The third code map (pile items 9, 10, 11) in, and four verb docs drafted from the maps and UESP's formulas:
+- (00:4x PDT 2026-10-31) The third code map (pile items 9, 10, 11) in, and four verb docs drafted from the maps and UESP's formulas:
   docs/verbs/leveling.md (item 12: a skill use reported from a hook on PlayerCharacter::AddSkillExperience, CommonLibSSE-NG's own
   RELOCATION_ID 39413/40488 as the cited source; the AVSK constants and fSkillUseCurve 1.95, the level cost mult*(L-1)^1.95+offset, the
   character threshold (L+3)*25; SkillUse MsgType 64; leveling.rs owed), docs/verbs/traps.md (item 9: a host's self-activation is noted
@@ -3969,7 +3969,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   docs/verbs/word-wall.md (item 11: the shout record is written by the console alone, no WOOP reader, no server TeachWord; WordWall C2S,
   the record written as the console writes it, the natives as ledger lines). The containers train m4-containers-rest db7ec1e5 pushed
   (client build); its probe waits on Bleak Falls Temple's chest ids from the master file.
-- (03:3x PDT 2026-10-31) Guest-loot v6 GREEN (x-body-open-guest-fix v2 074043, cold): the engine takes the released body's activation
+- (00:5x PDT 2026-10-31) Guest-loot v6 GREEN (x-body-open-guest-fix v2 074043, cold): the engine takes the released body's activation
   2.1 s after the AI switch (nine refusals, the tenth taken at +2127 ms; numidium's read); M3's exit gate runs on d10789f7 (14
   scenarios, T2 beside). Containers: the branch gained the lab's log lines (a CONT's open or shut with its occupants, the disconnect's
   release, the load's shut) and the lid plays only on a change of the applied state (a cell's load creates hundreds of closed
@@ -3979,24 +3979,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m3-talk-console-guard 9b796255 (client only), probe x-talk-console v1 b3156979. Leveling's T0 begun: wire-rules leveling.rs on fork
   m5-leveling (the eighteen skills' AVSK constants from UESP's table, the use, the level cost whose convention the page's totals pin
   (from L to L+1: mult * L^1.95 + offset), the character threshold, the progress state machine with its events and refusals).
-- (03:5x PDT 2026-10-31) Two rules to T0 on their own forks, server-only pushes: m5-leveling 2b9df509 (wire-rules leveling.rs: the
+- (00:5x PDT 2026-10-31) Two rules to T0 on their own forks, server-only pushes: m5-leveling 2b9df509 (wire-rules leveling.rs: the
   eighteen skills' AVSK constants from UESP, a use's experience, the level cost mult * L^1.95 + offset (the convention pinned by the
   page's totals: 528,804 for a 2 and 0 skill from 15 to 100, 91,600 Smithing, 278,852 Enchanting, 142,401 Sneak, 428,568 Alchemy,
   87,350 Pickpocket), the character threshold 75 + 25 N, Progress::apply_use with its events and refusals; eight cases) and m4-locks
   (wire-rules locks.rs: the tier from the XLOC level byte, the key's open at the activation, a pick report judged by lock, reach, gap,
   key tier and picks held, broken picks costing what is held; five cases). The docs' Status lines say "the rule alone". Memory:
   thuum-pile-state-2026-10-31 carries every branch and probe sha of the night.
-- (04:3x PDT 2026-10-31) m5-leveling grows libespm's AVIF reader (the AVSK constants and the perk tree's nodes, UESP's record
+- (00:5x PDT 2026-10-31) m5-leveling grows libespm's AVIF reader (the AVSK constants and the perk tree's nodes, UESP's record
   layout; EspmTest reads One-handed 0x44c with the root to Armsman00 0xbabe4's node 7, Smithing 0x450 with eleven nodes, and a plain
   actor value) and the rule's Table (the records' constants over UESP's fallback). The read against Skyrim.esm (lab/esm.py id):
   Smithing's AVSK is 160, 0, 0.25, 300 where UESP's table writes a use mult of 1, so the records stay the source and the page the
   fallback. Three server-only pushes on the branch (2b9df509, bb0b37d8, the table after).
-- (04:5x PDT 2026-10-31) Eli, on the Survival read: "knowing that about survival i say we deactivate survival for the rest of
+- (01:0x PDT 2026-10-31) Eli, on the Survival read: "knowing that about survival i say we deactivate survival for the rest of
   testing." D72 taken as A with the switch off (DECISIONS): every lay puts 828 at 0 on both records, the start word neither switches
   the mode on nor zeroes needs, the Creation stays in the load order, the checklist's build line says so; x-survival-cold v2 leaves
   the queue. Told numidium (the set-up is its lever). Status given to Eli: the pile's state, M3's exit gate running, turbo 2 Sunday
   evening as set.
-- (06:1x PDT 2026-10-31) Locks built whole on fork m4-locks (stacked on m5-leveling and m3-wall-pose for the message ids; c324c015
+- (01:2x PDT 2026-10-31) Locks built whole on fork m4-locks (stacked on m5-leveling and m3-wall-pose for the message ids; c324c015
   the contract, aec38c1a the server, the client after): libespm's XLOC and KEYM (Bleak Falls Temple's chests read 0, 25 and 0 from the
   master file, so a level byte of 0 is a Novice lock and the rule's tiers follow the Creation Kit's values), the change form's lock,
   the gate in ProcessActivateNormal (the key in the record opens, else LockPrompt to the player), OnLockReport through wire-rules
@@ -4011,3 +4011,37 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   files ride the pipelines (LevelingTest, LockTest, EspmTest's AVIF case); the probe x-lockpick and the client's skill-use hook are
   next.
 - m3-guest-loot merged to fork parity d10789f7 (2026-10-31T08:31Z): the gate 20261031-074556-merge-m3-guest-loot, 20261031-074556-smoke-two-players to 20261031-082539-c-riverwood (14 runs, 14 green, no rerun); T2 skip on skymp-server:m3-guest-loot, its T2 run beside the gate green to 08:15Z (T2_LOG; the branch changes remoteServer.ts alone against parity, so the server under test is parity's tree); clones promoted (clean-m1-next to clean-m1 on both, restacked). Verbs: npc-fate, D71 (the guest's open of a released body): the server's open switches the body's AI on, retries the engine's activate every 200 ms (v6), and switches the AI off at the open or at the deadline. x-body-open-guest-fix v2 aba01c6f GREEN 20261031-074043 on the stage: nine refusals from +164 to +1904 ms, the tenth taken at +2127 ms, the ContainerMenu open 54 ms later and the closing activation at the close. The reds that led there: v2 and v4 stopped after the switch (045522, 045859; 053012, 053335), v5's single activate at 150 ms returned false (065444, 065821). M3's exit: c-dungeon-enemies green 075356 and b-npc-body-release green 075838 in the gate, both out of gate.yaml's pending here; the container-handler set (b-npc-loot, b-npc-death-report, m0-inventory, a-activation-reach, a-sleep) and the four watch items green.
+- (01:5x PDT 2026-10-31) M3 DONE at numidium's merge (above): PLAN's M3 header carries the date and a STATE line the chart. Ten days
+  from the start (2026-10-21 00:05 PDT). What stays dark or pending on the merged build is named there (props D68, Raise Wall's
+  copies D70 until m3-wall-pose merges, b-body-loot behind the D37 layer).
+- (01:5x PDT 2026-10-31) Stamps corrected. Every stamp I wrote between 00:21 and 01:35 PDT tonight ran ahead of the clock, by up to
+  seven hours at the end (a mental clock again; the 10-28 lesson in memory). Each was reread from the session transcript's own
+  timestamp of its first write and fixed in this commit: LOG's 00:58 to 00:21, 01:30 to 00:26, 02:1x to 00:3x, 02:5x to 00:4x,
+  03:3x and 03:5x and 04:3x to 00:5x, 04:5x to 01:0x (also DECISIONS D72, player-globals.md, the summary), 06:1x to 01:2x; the verb
+  headers containers.md 00:3x, leveling.md 00:3x, locks.md 00:2x, traps, weather and word-wall 00:4x; npc-fate.md and
+  player-globals.md's D72 lines. The probes handed over by path keep their header stamps so their shas stand; their true times:
+  x-survival-cold v1 00:20 and v2 00:29, x-prop-launch v2 00:25, x-container-rest and x-bleak-traps 00:45, x-talk-console 00:46,
+  x-lockpick 01:28, x-raise-wall v4 00:06 PDT. From here the clock is read before any stamp, in the same command as the write.
+- (01:5x PDT 2026-10-31) m3-wall-pose took parity d10789f7 as 1e836299 (pipeline 4145: the server half green, the client build queued
+  behind m4-locks' 4141 build on the Windows runner). numidium's first stage of it stopped in its rollbacks on purpose: REUSE_DIST
+  would have laid the older dist beside a locally built bundle, since the merge brought remoteServer.ts; the restage waits for 4145's
+  own client build, with x-raise-wall v4 960011fb. Parity's own pipeline 4142 (d10789f7) shows a red client build: the compile ran
+  and the artifact upload failed three times on GitLab's coordinator answering 500 at 08:39Z, so it is a retry, not a code red.
+- (01:5x PDT 2026-10-31) Leveling's two reds fixed (16b4d346, pipeline 4143 GREEN): LevelingTest and EspmTest asserted Smithing's use
+  mult 160 as Skyrim.esm writes it, where the load order's Update.esm overrides it to 1 (UESP's number): the load order is the
+  source, a single plugin's read is not the game's value (leveling.md corrected; memory lab-esm-reader). Then 1e836299 merged in as
+  e9c1521e (server-only push). The Frida read for the client hook is committed (thuum 30e3d365, pipeline 4146 green):
+  lab/frida/skill-use.js hooks PlayerCharacter::AddSkillExperience (Address Library 40488, CommonLibSSE-NG's RELOCATION_ID(39413,
+  40488), rcx this, edx the skill, xmm2 the experience) and, from the first call's `this`, the player's UseSkill through its vtable
+  slot 0xF7 (Actor.h:445); probe x-skill-use-read v1 f3cfb4df by path (one seat, an iron sword and a placed bandit under TGM, eight
+  attackStart swings through one repeat step; the trace is the read, the one claim a tautology). A rule 1 slip caught before the
+  commit: the first draft carried the PlayerCharacter singleton's RVA from memory (the id was not in CommonLib's headers either);
+  dropped for the lazy hook, which needs no singleton. esm.py's id prints hex beside every float in the same commit.
+- (01:5x PDT 2026-10-31) Locks: probe x-lockpick v1 e5014621 by path (two seats in Bleak Falls Temple at the bandit chest 0x371e9: A
+  the lock on both games and the Lockpicking Menu at c1's activation, B the Novice pick with A held and the server's unlock on c2's
+  game, C the console's Lock at 50 and a broken pick or an open, D a typed unlock recorded). m4-locks re-stacked on e9c1521e as
+  387e4537 (client build queued; 4141's server half was the old leveling red, its client build runs on as the compile check).
+- (01:5x PDT 2026-10-31) The queue's branches re-stacked on 1e836299 and pushed with client builds, in the lab's order: m3-quest-report-dedupe
+  4ca5783c, m4-containers-rest 0adb994e, m3-talk-console-guard 19431840; no conflicts. Each now contains the wall-pose head, so each
+  merges only after wall-pose does (numidium's queue holds that order); a wall-pose fix, if its read asks one, merges into them the
+  same way. Builds queued on the one Windows runner behind 4141 and 4145.

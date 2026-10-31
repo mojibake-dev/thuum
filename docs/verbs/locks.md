@@ -1,6 +1,6 @@
 # Verb: locks
 
-Drafted 01:3x PDT 2026-10-31 from docs/VERB.md and a code map of the fork at parity dc3ec679 (pile item 8 of
+Drafted 00:2x PDT 2026-10-31 from docs/VERB.md and a code map of the fork at parity dc3ec679 (pile item 8 of
 docs/private/turbo-2-prework.md; M4's "doors, locks, containers" row); built 04:xx to 06:xx PDT the same day as fork
 m4-locks (stacked on m5-leveling and m3-wall-pose for the message ids), the Status boxes below. One design fact
 changed the Observe half while building: every door and container is activation-blocked in this game
