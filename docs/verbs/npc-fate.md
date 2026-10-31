@@ -2462,3 +2462,16 @@ guest-fix v2 by path) and the two pending scenarios (c-dungeon-enemies, b-npc-bo
 admission and release through these lines; the host's open, its body never a puppet and its AI on, keeps the generic handler's lines.
 D69 merges alone meanwhile (numidium: a restage of dc3ec679, its gate always plus b-quest-rumor, b-quest-stage, b-story-arrival plus
 watch, T2 beside); the union m3-pass-train-4 is re-cut on v5 after.
+
+The fix's v5 (b878b2a6, parity dc3ec679 merged in) RED twice (00:0x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 065444 cold,
+065821 relaunched, step 28 alone; numidium's read): the timers path ran whole, "AI on for the server's open (D71); reads true at the
+switch" at 07:00:20.015, "AI reads true after 150 ms; activating" at .150, "activate returned false" at .151, the 3 s give-up and the
+closing activation after; no menu. The one green read of H5 (x-body-open-guest v2 215922, leg 4) had the lab's npc-ai switch the AI on
+five seconds and more before the server's open took the body's activate; v1, v2 and v5 all activated within a frame to 150 ms of the
+switch. HYPOTHESIS (v6's run decides): the dead actor's process wants more than 150 ms after EnableAI before it takes an activation (the
+engine's own promotion of the actor's process, not a flag our switch sets). v6 (m3-guest-loot d10789f7, pushed 00:09 PDT): the activate
+retried every 200 ms for up to 5 s after the switch, each return logged with the body's state ("activate returned <bool> at +N ms
+(attempt K; AI, dead, 3D, health)"); the first true, or an open ContainerMenu regardless of the return, starts the menu poll as v5; the
+refusals to the deadline switch the AI off ("the activate refused K times over N ms") and release the occupant. The time of the first
+true is the measurement; a run of refusals falsifies the hypothesis and sends the read to Actor::ActivateRef (rule 8; the re-analyst
+on sky-re, CommonLibSSE-NG TESObjectREFR.h:367 names it). The probe stays aba01c6f.
