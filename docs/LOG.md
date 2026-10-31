@@ -3742,3 +3742,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   with no hand on it (grab v7's flight again): H-P3, the grant's flip on a follower's copy flings it (the drop's copy, never a
   follower, took the same flip without flight). Read before the fix: x-prop-pass v10 by path 372f3a71 (the position on both seats at
   1, 2 and 4 s after the key), queued after drop v5; the two local fixes wait on the reads. push v10 running, then grab v8, drop v5.
+- 19:45 PDT: push v10 023846 RED at its premise with no key pressed: the watcher's "followed: Keyframed" line prints only after an owner
+  line naming another seat (the flip), and an unclaimed host prop gives the watcher none (the Keyframed set at the track logs nothing);
+  the other three premise lines held (the marker anchor works: c1 tracked at 80 units, placed, Dynamic; c2 tracked at 131). v11 by path
+  1e8203e4 drops that line. The queue: grab v8 (running), drop v5, pass v10, push v11. numidium: c2's rollback took 195 s twice, both
+  after a pass run (a typical one 80 s), counting for core.
