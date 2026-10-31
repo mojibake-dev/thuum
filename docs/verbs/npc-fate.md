@@ -2425,3 +2425,12 @@ dump read the body's AI off. Two candidates: the enable and the activate in one 
 of ours). The fix's v2 (fork m3-guest-loot, the head after 05ac32a9): the AI state logged at the switch, the activate deferred to the
 next update callback with the state logged right before it, and the state logged at the off; a read either way. D69's stage takes
 the lab while it builds.
+
+The fix's v2 (e1235544) RED twice (22:03 PDT read; x-body-open-guest-fix 045522 cold, 045859 relaunched, step 28 alone): the AI read
+TRUE at the switch, the "one update later" line printed in the switch's own millisecond (a once('update') registered inside an update
+callback runs in the same pass), so the activate still landed in the enable's frame and the menu never opened; at the dump the AI read
+off again (whether by our deadline's off or another hand is the next run's question: the off line's presence in 045522's console).
+The server sent OpenContainer each time and logged nothing about the body. v3 (0547e5d4, pushed): a real latent beat between the
+switch and the activate (await Utility.waitMenuMode(0.2), which runs while paused), the AI state logged right before the activate,
+the off deadline 3 s. In x-body-open-guest v2's green leg the lab's npc-ai had switched the AI on seconds before a separate activate,
+so the beat the engine needs is somewhere under five seconds and above a frame. D69's restage takes the lab while v3 builds.
