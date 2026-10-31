@@ -4143,3 +4143,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   re-derived from the band: c2 north of -250, the southmost north face a wall the server accepts can have being -216; an unblocked
   walk ends at c1's capsule near -298) and commits on its own after the rerun reads. numidium restages the head with v5 unchanged.
   Noted for the checklist: the caster's wall fades at the release while the other seat's copy lingers the table's 5 s.
+- (04:10 PDT 2026-10-31) m3-prop-physics carries parity d10789f7: a clean merge (remoteServer.ts, ActionListener.cpp, QuestStageTest.cpp
+  from parity), e6befc5e, tsc green, both remotes verified, its pipeline building. Its next stage runs the launch read x-prop-launch v2
+  (ce95029f) as the pass planned, after the leveling, locks, weather and perk probes; the physics item stays SKIPPED in the checklist
+  until the train merges (D68, D73). The wall stage sits on 0e4b34e5 waiting for its client build (numidium).
