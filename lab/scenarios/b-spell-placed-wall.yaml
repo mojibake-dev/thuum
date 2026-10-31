@@ -26,6 +26,33 @@
 # nearest other actor's parent cell with the distances from that actor (lab-driver's refs-near), so claim 3's
 # distances are claim 2's pose formula instead of the caster's own 198 and 192. The one absolute claim moved with
 # the line again, north of the centre line: y > -166 at -174, the same 8 units. No tolerance changed.)
+# (v3, 04:45 PDT 2026-10-31, thuum-magnus; ADR-057 shape A, D70 and D74, fork m3-wall-pose 0e4b34e5 (gate head e713862c), after
+# x-raise-wall v5 88877000's green read at the train's stage, run 20261031-113932: shape C's pose model fell at T3 three times on the union, the engine stands the wall
+# about 206 ahead along a heading the record's yaw does not carry, x-raise-wall-pitch v1. The server now asks the caster's game
+# where its engine stands the two bases (PlacedRequest at the accepted cast, a 6 s window) and places its copies where the
+# caster's game reports them settled (PlacedReport once per base; the server's band 150 to 260 from the caster on the ground,
+# 256 up). The server's lines changed with the mechanism: "set N requested, 2 base(s)" at the cast, "reports set N base <desc>
+# at (x, y, z) yaw w: accepted" per report, "set N placed 1 form(s) ... as reported" per form (two a set, where shape C wrote
+# one "placed 2"), "nothing placed, the caster's game reported no base within the window", and E_PLACED_* on a refused report;
+# the caster's console writes "spell-placed request set N: bases ..." once a cast and "spell-placed set N base <id>: reference
+# <id> at (x, y, z) yaw w reported" once a base. The claims change with it: claim 1 is the request, two accepted reports and
+# two "placed 1 form" lines, no refusal and no E_PLACED_ line; claims 2 and 3 drop the fixed-step formula (c2.y - c1.y - 192,
+# a pose the engine never followed) and claim instead that the server's copy on c2 stands where the caster's own engine copy
+# stands: c2's distance to the server's copy (its own listing) within 16 units of c1's distance to its own copy (c1's listing
+# through c2's figure's cell and position, from: other), per base, with the caster's three console lines counted; the runtime_of
+# 1 claims on both seats stay. Claim 4's walk keeps its physical claim (c2 stopped by the wall, c1 by its own copy) with the
+# threshold re-derived from the band instead of a centre line the mechanism no longer fixes: a wall the server accepts has its
+# centre 150 to 260 from c1 along a heading within the sweep's 42 degrees of north (HYPOTHESIS, x-raise-wall-pitch), so its north
+# face lies at y -216 or north of it (-366 + 150 cos 42 + 52 cos 42) and c2 stops north of -250; an unblocked walk carries c2 into
+# c1's capsule at about -298 or past it. The old -166 assumed the wall at -174 exactly. c1's own 256 stands (blocked at 64 to 174
+# from its start by a wall in the band; unblocked it reaches c2's capsule at 298). Claim 6's late joiner claims the same pose
+# equality (c1's listing through the relaunched c2's figure) and the counts over two casts: the request twice, four reports, four
+# "placed 1 form" lines. The hold of cast one stays 30 s so the reads, the screenshots and both walks fall inside the stream. No
+# tolerance loosened: 16 units as before, now against the engine's own copy; 256 as before; the walk's threshold derived, with
+# its premise named, from the band the server enforces. v5's read of the walk: c2 stopped at y -114 with the wall's centre line at
+# -160 (c1's -366 plus the engine's 206.25), 136 units north of this claim's line and 184 north of an unblocked stop; cast two's
+# reports came 0.33 s and 1.2 s after the request, as cast one's, and the mod re-uses its two references across casts, so a second
+# cast from the same stand moves the wall rather than adding one: the counts over two casts stay four and four.)
 # GetVATSFrontAreaFree condition wants ahead of the caster; the wall and c2 share lab-spawn's origin cell and c1
 # stands in the cell south of it, reading through c2's figure's cell (refs-near lists one cell, docs/LAB.md). The
 # spell and the bases are named as FormDescs (learn-spell's spellId, form() in the claims), so the layer's slot for
@@ -35,34 +62,33 @@
 # hex ("cast cc14:Apocalypse - Magic of Skyrim.esp"), past the [verb:spell-placed] tag (a regex class) and before
 # "form(s)"'s parens.
 # Claims (the verb doc's Tests), each with what it proves:
-# 1. The placement line within 10 s of the hold and no refusal line: the server took the cast and placed two forms
-#    (R0; the gate, perCaster and the world cap stayed open).
-# 2. c2's refs-near right after that line (the until polls the server log every half second, the read costs 1 to 3
-#    s: the doc's "within 2 s" is this read's latency) lists both bases within 1000 (has) and each one's distance
-#    from c2 is within 16 units of the records' c2.y - c1.y - 192: the pose on the watcher is the server's pose
-#    projected on the line the seats stand on (the facts give a listed reference's distance, not its position; the
-#    wall's 48 units of depth add under 7 units at this range). Each base is one runtime reference on c2
-#    (runtime_of): the server's copy, once.
-# 3. c1's refs-near, read through c2's figure's cell and from its position (v2: c1 stands in the cell south of the
-#    wall's), lists its own engine copies at claim 2's distances (the script's pose equals the table's), and ONE
-#    runtime reference of each base: the skip kept the
-#    server's copy off the caster's seat (Suppress). c1's console shows the skip line, between 1 and 2 lines a cast
-#    (per set or per form: the client half's spelling, matched without its apostrophes). Red until the client half
-#    lands (runtime_of reads 2 and the line is absent), which is this scenario's job.
-# 4. c2 walking at the wall (W 17 held 3 s, about 900 units unblocked: past the centre line and into c1's figure)
-#    stays north of the centre line (server.actor(c2).y > -166 in lab-spawn's frame; the north face is at y -122), and
-#    c1 walking into its own copy stays within 256 of its start (the Havok body 1088 wide, 104 thick, 262 tall:
-#    the collision row's HYPOTHESIS, this read clears it).
-# 5. After the release, the removal line (the cast's end plus the 5 s linger plus the 50 ms tick) and then neither
-#    base on c2 (has == false): both gone on the watcher within the read's latency of the server's own stamp. The
-#    listing carries a deleted reference until the engine drops it, so a red here with the removal line present is
-#    a grammar finding (a .has that honours the deleted flag), not the verb's.
-# 6. A late joiner: c2 relaunched (until: gone, so the cast starts while c2 is off the server), c1 holds the second
-#    cast 75 s (under maxS 120; a relaunch and login take 30 to 45 s and the reads 15 more), c2 connects (the
-#    relaunched game logs in where its record stood), re-arms TGM (a relaunch drops the server's god mode) and lists
-#    both bases at the pose with runtime_of 1: the login's CreateActor carries placed_by and a seat whose cast is not
-#    open places the server's copy (Suppress's release). c1's skip count then stands between 2 and 4 (two casts).
-#    The removal after the hold's end and neither base on c2 again.
+# 1. Within 10 s of the hold: the request line once, two accepted reports, two "placed 1 form" lines, no "nothing placed" and
+#    no E_PLACED_ line: the server took the cast, asked the caster's game, judged both reports inside its band and placed two
+#    forms (R0; the gate, perCaster and the world cap stayed open). On the caster's console: the request once, two reports, no
+#    "no reference of this game's own" line (the caster's game found both of its engine's references inside the window).
+# 2. c2's refs-near after the copies stand (the until polls the server log every half second, the read costs 1 to 3 s, and 2 s
+#    more let the caster's own wall finish its rise) lists both bases within 1000 (has), each one runtime reference on c2
+#    (runtime_of: the server's copy, once), and each one's distance from c2 within 16 units of c1's own engine copy's distance
+#    from c2 (claim 3's listing): the server's copy stands where the caster saw the wall (the facts give a listed reference's
+#    distance, not its position; two references at one pose read one distance from any third point).
+# 3. c1's refs-near, read through c2's figure's cell and from its position (v2: c1 stands in the cell south of the wall's), lists
+#    its own engine copies (the distances claim 2 compares against) and ONE runtime reference of each base: the skip kept the
+#    server's copy off the caster's seat (Suppress). c1's console shows the skip line, between 1 and 2 lines a cast (per set or
+#    per form: the client half's spelling, matched without its apostrophes).
+# 4. c2 walking at the wall (W 17 held 3 s, about 900 units unblocked: past the wall and into c1's figure) stays north of y -250
+#    in lab-spawn's frame (the band's southmost north face is -216; an unblocked walk ends at c1's capsule, about -298), and c1
+#    walking into its own copy stays within 256 of its start (the Havok body 1088 wide, 104 thick, 262 tall: the collision row's
+#    HYPOTHESIS, this read clears it).
+# 5. After the release, the removal line (the cast's end plus the 5 s linger plus the 50 ms tick) and then neither base on c2
+#    (has == false): both gone on the watcher within the read's latency of the server's own stamp. The listing carries a deleted
+#    reference until the engine drops it, so a red here with the removal line present is a grammar finding (a .has that honours
+#    the deleted flag), not the verb's.
+# 6. A late joiner: c2 relaunched (until: gone, so the cast starts while c2 is off the server), c1 holds the second cast 75 s
+#    (under maxS 120; a relaunch and login take 30 to 45 s and the reads 15 more), c2 connects (the relaunched game logs in where
+#    its record stood), re-arms TGM (a relaunch drops the server's god mode) and lists both bases at the caster's own pose with
+#    runtime_of 1: the login's CreateActor carries placed_by and a seat whose cast is not open places the server's copy
+#    (Suppress's release). The counts over two casts: two requests, four reports, four "placed 1 form" lines, c1's skip count
+#    between 2 and 4. The removal after the hold's end and neither base on c2 again.
 # Recorded, not claimed: screenshots of both seats at each placement and of c2's stop at the wall, the server's
 # "at (x, y, z) yaw" placement lines, both dumps. Assertions are evaluated by lab-api only (ADR-009). Its own
 # commit (rule 13).
@@ -97,27 +123,38 @@ steps:
   - c1: draw-weapon
   - wait: 3
   - server: snapshot {name: c1start, of: "server.actor(c1)"}
-  # cast one, held 30 s: the server places 250 ms in; the reads, the screenshots and the walks fall inside
+  # cast one, held 30 s: the server asks at the cast, the caster's game reports each base once settled (the wall's rise takes
+  # about half a second), the server places each report as it lands; the reads, the screenshots and the walks fall inside
   - c1: hold-key {code: 199, ms: 30000}
-  - until: {within: 10, every: 0.5, expect: ['server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 2 form") >= 1']}
+  - until: {within: 10, every: 0.5, expect: ['server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 1 form") >= 2']}
+  # v3: the reads after the copies stand and the caster's own wall has risen
+  - wait: 2
   - c2: refs-near {radius: 1000, formTypes: [36, 24]}
   # v2: c1 reads the wall's cell through c2's figure (the listing's cell and the distances are the nearest other actor's)
   - c1: refs-near {radius: 1000, formTypes: [36, 24], from: other}
+  - c1: log-count {pattern: "spell-placed request set [0-9]+: bases"}
+  - c1: log-count {pattern: "spell-placed set [0-9]+ base [0-9a-f]+: reference [0-9a-f]+ at .* reported"}
+  - c1: log-count {pattern: "spell-placed set [0-9]+ base [0-9a-f]+: no reference of this game.s own"}
   - assert:
-      # 1. the server took the cast and placed two forms
-      - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 2 form") == 1'
+      # 1. the server asked once, took two reports, placed two forms, refused nothing
+      - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ requested, 2 base") == 1'
+      - 'server.log_count("ff000000 reports set [0-9]+ base [0-9a-f]+:Apocalypse - Magic of Skyrim.esp at .*: accepted") == 2'
+      - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 1 form") == 2'
       - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: nothing placed") == 0'
-      # 2. the watcher: both bases at the pose, each the server's one copy
+      - 'server.log_count("E_PLACED_") == 0'
+      #    the caster's game asked once, reported both bases, missed none
+      - 'c1.log_count("spell-placed request set [0-9]+: bases") == 1'
+      - 'c1.log_count("spell-placed set [0-9]+ base [0-9a-f]+: reference [0-9a-f]+ at .* reported") == 2'
+      - 'c1.log_count("spell-placed set [0-9]+ base [0-9a-f]+: no reference of this game.s own") == 0'
+      # 2. the watcher: both bases stand, each the server's one copy, each where the caster's own engine copy stands (both
+      #    distances from c2's position: c2's own listing, c1's through c2's figure's cell)
       - 'c2.refs_near().has(form("098529:Apocalypse - Magic of Skyrim.esp")) == true'
       - 'c2.refs_near().has(form("0735e8:Apocalypse - Magic of Skyrim.esp")) == true'
-      - 'abs(c2.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
-      - 'abs(c2.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
       - 'c2.refs_near().runtime_of(form("098529:Apocalypse - Magic of Skyrim.esp")) == 1'
       - 'c2.refs_near().runtime_of(form("0735e8:Apocalypse - Magic of Skyrim.esp")) == 1'
-      # 3. the caster: its own engine copies at the pose, read from c2's figure's cell and position (v2), one runtime
-      #    reference of each base
-      - 'abs(c1.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
-      - 'abs(c1.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
+      - 'abs(c2.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp")) - c1.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp"))) < 16'
+      - 'abs(c2.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp")) - c1.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp"))) < 16'
+      # 3. the caster: one runtime reference of each base (its engine's; the server's copy skipped)
       - 'c1.refs_near().runtime_of(form("098529:Apocalypse - Magic of Skyrim.esp")) == 1'
       - 'c1.refs_near().runtime_of(form("0735e8:Apocalypse - Magic of Skyrim.esp")) == 1'
   - c2: screenshot
@@ -129,8 +166,9 @@ steps:
   - wait: 4
   - c2: screenshot
   - assert:
-      # the wall's centre line is at y -174 in this frame (the caster at -366 plus 192); north of it means blocked
-      - server.actor(c2).y > -166
+      # v3: a wall the server accepts (its band) has its north face at y -216 or north of it; blocked means north of -250, an
+      # unblocked walk ends at c1's capsule near -298 (the premise: the engine's heading within 42 degrees of north, HYPOTHESIS)
+      - server.actor(c2).y > -250
       - abs(server.actor(c1).y - snapshot("c1start").y) < 256
   # 5. the release (the hold's 30 s), the linger, the removal line, then neither base on the watcher
   - until: {within: 40, every: 1, expect: ['server.log_count("set [0-9]+ removed: 2 of 2 forms deleted, its linger ran out") >= 1']}
@@ -154,21 +192,31 @@ steps:
   # c2 off the server before the cast starts; its new game logs in by itself under the held stream
   - c2: relaunch {until: gone}
   - c1: hold-key {code: 199, ms: 75000}
-  - until: {within: 10, every: 0.5, expect: ['server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 2 form") >= 2']}
+  - until: {within: 10, every: 0.5, expect: ['server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 1 form") >= 4']}
   - c2: connect
   - wait: 10
   - c2: close-menu {name: MessageBoxMenu}
   - c2: server-console {name: TGM}
   - c2: refs-near {radius: 1000, formTypes: [36, 24]}
+  - c1: refs-near {radius: 1000, formTypes: [36, 24], from: other}
+  - c1: log-count {pattern: "spell-placed request set [0-9]+: bases"}
+  - c1: log-count {pattern: "spell-placed set [0-9]+ base [0-9a-f]+: reference [0-9a-f]+ at .* reported"}
   - c2: screenshot
   - c1: screenshot
   - assert:
+      - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ requested, 2 base") == 2'
+      - 'server.log_count("ff000000 reports set [0-9]+ base [0-9a-f]+:Apocalypse - Magic of Skyrim.esp at .*: accepted") == 4'
+      - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: set [0-9]+ placed 1 form") == 4'
       - 'server.log_count("ff000000 cast cc14:Apocalypse - Magic of Skyrim.esp: nothing placed") == 0'
+      - 'server.log_count("E_PLACED_") == 0'
+      - 'c1.log_count("spell-placed request set [0-9]+: bases") == 2'
+      - 'c1.log_count("spell-placed set [0-9]+ base [0-9a-f]+: reference [0-9a-f]+ at .* reported") == 4'
       - 'c2.refs_near().has(form("098529:Apocalypse - Magic of Skyrim.esp")) == true'
       - 'c2.refs_near().has(form("0735e8:Apocalypse - Magic of Skyrim.esp")) == true'
-      - 'abs(c2.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp")) - (server.actor(c2).y - server.actor(c1).y - 192)) < 16'
       - 'c2.refs_near().runtime_of(form("098529:Apocalypse - Magic of Skyrim.esp")) == 1'
       - 'c2.refs_near().runtime_of(form("0735e8:Apocalypse - Magic of Skyrim.esp")) == 1'
+      - 'abs(c2.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp")) - c1.refs_near().distance(form("0735e8:Apocalypse - Magic of Skyrim.esp"))) < 16'
+      - 'abs(c2.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp")) - c1.refs_near().distance(form("098529:Apocalypse - Magic of Skyrim.esp"))) < 16'
   - c1: log-count {pattern: "spell-placed [0-9a-fx]+: this game.s own copy of base [0-9a-fx]+ stands at the pose. the server.s copy not placed"}
   - assert:
       - 'c1.log_count("spell-placed [0-9a-fx]+: this game.s own copy of base [0-9a-fx]+ stands at the pose. the server.s copy not placed") >= 2'
