@@ -3767,3 +3767,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Dynamic-no-wake copy took the walker's contact ("owned, no claim") and vanished from the host's own listing, c2's copy unmoved at the
   spot; H-P1's inertness unconfirmed (the body did take a contact), the wake fix kept as the engine's default. drop v5's rerun is the
   queue's last; then the branch pushes (46f1a2dc, 0bb02f74, fa225f01).
+- 20:07 PDT: QUEUE DONE (numidium); m3-prop-physics pushed at fa225f01 (46f1a2dc the wake, 0bb02f74 D73, fa225f01 H-P4), pipeline 4076
+  building. drop v5's rerun 030029 RED on the distance alone (157 against 150): read with v4, the sword lies about 150 units BELOW the
+  ground at its spot on both seats (the copy spawns at the dropper's feet z, half inside the terrain, and falls through to the cell's
+  floor; v4's "downhill" was the same): a server spawn lift on the branch after 4076's client build, drop v6 by path with the floor
+  claim (z above 14600). The bound stays.
