@@ -160,10 +160,21 @@ labapi-dev:
     @uv run --project lab/labapi labapi-dev
 
 # A cold stacked snapshot clean-m1-<x> of a lab client, through lab-api (thuum-mundus's recipe: quiesce, a clean
-# ACPI shutdown, snapshot without RAM, start, agent check; sky-c1 and sky-c2 only, never clean-sp).
+# ACPI shutdown, snapshot without RAM, start, agent check; sky-c1 and sky-c2 only, never clean-sp). lab-api's answer
+# is printed whatever it says, and one refusal is retried after 20 s: snapshot_clone checks the clone before it
+# touches it and leaves it as it was on an early failure (proxmox.py), and c2's snapshot once failed in 5 s and took
+# on the next try (v5's stage, 2026-10-31, its ProxmoxError text hidden behind curl -f).
 client-snapshot client name description="":
-    @python3 -c 'import json, sys; print(json.dumps({"name": sys.argv[1], "description": sys.argv[2]}))' {{quote(name)}} {{quote(description)}} \
-      | curl -fsS -m 900 -X POST "{{lab_api}}/clients/{{client}}/snapshot" -H 'content-type: application/json' --data-binary @-
+    #!/usr/bin/env bash
+    set -uo pipefail
+    body=$(python3 -c 'import json, sys; print(json.dumps({"name": sys.argv[1], "description": sys.argv[2]}))' {{quote(name)}} {{quote(description)}})
+    for attempt in 1 2; do
+      out=$(printf '%s' "$body" | curl -sS -m 900 -X POST "{{lab_api}}/clients/{{client}}/snapshot" -H 'content-type: application/json' --data-binary @- 2>&1)
+      printf '%s\n' "$out"
+      printf '%s' "$out" | python3 -c 'import json, sys; sys.exit(0 if json.loads(sys.stdin.read()).get("ok") else 1)' 2>/dev/null && exit 0
+      [ "$attempt" = 1 ] && { echo "   the snapshot of {{client}} was refused; one retry in 20 s" >&2; sleep 20; }
+    done
+    exit 1
 
 # Promote a stacked snapshot onto its base (clean-m1-<x> onto clean-m1, bit-identical), through lab-api.
 client-promote client from to="clean-m1":
