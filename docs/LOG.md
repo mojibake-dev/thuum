@@ -3925,3 +3925,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   death, 3D and health (the beat the engine needs is the measurement; a run of refusals sends the read to Actor::ActivateRef); the probe
   aba01c6f unchanged. The lab's order: the physics restage (b421d1b2, x-prop-launch v1), then guest-loot v6's stage and gate (M3's exit),
   then m3-wall-pose's stage with x-raise-wall v4 and the entry deployed.
+- (00:58 PDT 2026-10-31) Pipeline 4115 (m3-wall-pose 866ff864) green: the C++ T0 with the rewritten SpellPlacedTest and the client
+  build 15027 for the stage; 4117 (7ac26664, server-only) and 4116 (guest-loot v6 d10789f7) running. m3-quest-report-dedupe a837ecdc
+  pushed with parity dc3ec679 merged (pile item 4; its probe x-quest-report-dedupe v1 0a281115, the queue's tail). Pile item 5's read
+  drafted: x-survival-cold v1 by path (23b6403f, one seat, no build; player-globals.md's D72 paragraph): the cold need forced to 990 for
+  a minute (health on the seat and the record, recorded: a drain or a cap picks D72's B or C), then to 1000 for the server's own kill
+  word (D51 B, never read), the seat down, the respawn, and one kill line only (a second is a death loop finding). Told numidium for a
+  lab gap. Two code maps dispatched for pile items 7 (containers' rest) and 8 (locks and lockpicking) on a worktree off parity
+  (m4-containers-rest); their verb docs follow the maps.
