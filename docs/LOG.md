@@ -4394,3 +4394,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   The lab's prop becomes an IronIngot 0x5ace4 (a box that slides and stops): x-prop-push v15, x-prop-pass v13, x-prop-grab v9 (the
   same steps and bounds, shas in the next LOG line's message to numidium); drop v6 needs no rerun. The containers restage and gate run
   meanwhile (about 75 min); a physics restage (16 min) with the three probes after.
+- (13:56 PDT 2026-10-31) the basket runs' full read (numidium's agent): push and pass were the roll (the settle 1,050 units west, past the
+  cell's edge; refs_near lists one cell; an untracked prop sends its last sample asleep without the line); grab was a PICKUP: c2's E on
+  a body still Keyframed activated it into the inventory (the tick returned before D73's rest branch whenever no sample was pending
+  and the touch fallback was off; no "at rest: Dynamic" in any run). Fixed at m3-prop-physics 37e960eb (TS only: the tick wants the
+  reference when the rest or the quiet is due); the physics restage takes this head with REUSE_DIST from 967ba8c8's dist; grab v9
+  depends on it, push v15 and pass v13 do not.

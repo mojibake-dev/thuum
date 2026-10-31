@@ -609,3 +609,18 @@ lays on clean-m1 with item 7 SKIPPED.
   the same steps and bounds; the basket is the playtest's prop at Riverwood's camp. HYPOTHESIS until the runs: the capsule's contact
   reaches a small box on the floor as it does a basket (Skyrim kicks ingots underfoot).
 
+### The basket runs read in full, and the grab's real cause (13:56 PDT 2026-10-31; numidium's read agent on 201426, 201809, 202618; the fix m3-prop-physics 37e960eb)
+
+- Push and pass: the roll CONFIRMED (c1's "stream started at the grant", then "untracked: out of reach" 8.1 s later with no asleep line;
+  the settle 1,050 units west and 200 south of the drop, 22 units past the cell's edge; the strip itself slopes west, the drop's sword
+  slid 39 units). Two lab facts: refs_near lists the seat's own cell only (lab/driver/src/index.ts), so a prop past the cell's edge
+  leaves the listing while still in range; an untracked prop's last sample goes out asleep without the "asleep" line (propService.ts).
+- Grab: NOT a roll, a pickup. c2's E at 20:29:40.0; its claim by touch 1 and 2 at 40.2; "asleep" at 40.8; then at 41.5 c2's game sent
+  an ACTIVATION of the basket and took it into the inventory (addItemEx 12fe7, "its reference is gone"), the server deleted the 0xff
+  copy at 42.1, and c1's follow read the deletion as "out of reach" (the label covers a deleted record). The body was still
+  KEYFRAMED when E was pressed: tick() returned before D73's resting-to-Dynamic branch whenever no sample was pending and the touch
+  fallback was off (wantsRef), so no seat logged "at rest: Dynamic" in any of the four runs; a Keyframed body cannot be grabbed and the
+  E's release picks it up (the Havok prop facts of 2026-10-30). Fixed at 37e960eb: the tick wants the reference when the rest or the quiet
+  is due, and the existing branch runs. HYPOTHESIS until grab v9: the resting ingot reads Dynamic on c2 ("at rest: Dynamic (the stream
+  ended)") within a second of the asleep sample, and E then grabs.
+
