@@ -4271,3 +4271,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - (08:20 PDT 2026-10-31) leveling's order with numidium: after x-skill-use v5 for the record, p-level-up standalone on the laid stage
   (deploy-srv from d9e02b7d), then verb-merge m5-leveling on the same stage with T2 beside it (named: p-level-up, a-actor-values,
   b-figure-values, plus always and watch), locks after; a restage saved.
+- (08:24 PDT 2026-10-31) x-skill-use v5 (f804a96c, 20261031-151817) red on the landing premise: 13 of 36 swings landed, all in the
+  first 14 s, none after (numidium's read: each hit nudges the target back and after about a dozen it stands out of the sword's reach;
+  151047's 12 and 151449's 16 fit the same shape). v6 (244f93cb) moved c2 to 80 units; v7 (df00436b) swings in three batches of twelve
+  with c2 teleported back between them. p-level-up v2 (3aa0058a, c2 at 80) then v3 (e4647c46, batches of twelve with the re-teleport,
+  168 swings in all, the counts unchanged); its v1 run 152250 plays out as a record. More swings alone cannot make the count rate-proof.
