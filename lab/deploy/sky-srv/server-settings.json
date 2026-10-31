@@ -339,8 +339,14 @@
     "seed": 1,
     "pools": {
       "3c:Skyrim.esm": [
-        { "weather": "81a:Skyrim.esm", "chance": 50 },
-        { "weather": "12f89:Skyrim.esm", "chance": 50 }
+        {
+          "weather": "81a:Skyrim.esm",
+          "chance": 50
+        },
+        {
+          "weather": "12f89:Skyrim.esm",
+          "chance": 50
+        }
       ]
     }
   },

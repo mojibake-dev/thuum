@@ -683,6 +683,8 @@ function nearbyActors(player: Actor): Actor[] {
 // the NPC a solo reference's place-npc step put down (ADR-031): {other}
 // names it, not the nearest actor a random search finds
 let placedId = 0;
+// the papyrus-log step's hook, removed by {stop: true} or replaced by the next
+let papyrusLogId: number | null = null;
 // every NPC placed this session (place-npc), oldest first: a watch names
 // them all (r-npc-fight's random search missed one of two bandits,
 // docs/research/m3 readings 2026-10-18); placedId stays the last for the
@@ -2618,6 +2620,38 @@ function run(step: Step, player: Actor): unknown {
         // then a new poll, so a claim reads them on a second npc-state (gazeOf)
         ...gazeOf(npc.getFormID()),
       };
+    }
+    case "papyrus-log": {
+      // thuum docs/verbs/word-wall.md's read: every Papyrus event the engine
+      // sends to a script on the references in [minSelfId, maxSelfId] (or
+      // matching {eventPattern}), printed as it happens through Skyrim
+      // Platform's sendPapyrusEvent hook (skyrimPlatform.ts SendPapyrusEventHook:
+      // the self id and the event's name; no arguments, a known limit of the
+      // hook), so a probe can read which event a wall's trigger raises and
+      // when. {stop: true} removes the logger (YAML reads `on` and `off` as
+      // booleans, so neither names an argument). The block on Papyrus events
+      // (papyrus-events {block: false}) must be lifted first in a connected
+      // game, or the engine sends nothing to the script at all
+      if (a.stop === true) {
+        if (papyrusLogId !== null) hooks.sendPapyrusEvent.remove(papyrusLogId);
+        papyrusLogId = null;
+        return { logging: false };
+      }
+      if (papyrusLogId !== null) hooks.sendPapyrusEvent.remove(papyrusLogId);
+      const minId = a.minSelfId !== undefined ? num(a.minSelfId) : 0;
+      const maxId = a.maxSelfId !== undefined ? num(a.maxSelfId) : 0xffffffff;
+      const pattern = typeof a.eventPattern === "string" ? a.eventPattern : undefined;
+      papyrusLogId = hooks.sendPapyrusEvent.add(
+        {
+          enter: (ctx) => {
+            printConsole(`lab-driver: papyrus event ${ctx.papyrusEventName} on ${ctx.selfId.toString(16)}`);
+          },
+        },
+        minId,
+        maxId,
+        pattern,
+      );
+      return { logging: true, minSelfId: minId, maxSelfId: maxId, eventPattern: pattern ?? null };
     }
     case "papyrus-events": {
       // Skyrim Platform's Papyrus event block. skymp5-client turns it on at
