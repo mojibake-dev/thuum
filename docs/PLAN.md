@@ -1230,6 +1230,16 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   after containers: x-container-rest 69f2ad68, x-bleak-traps a5335d63, x-talk-console b3156979, x-lockpick e5014621,
   x-skill-use-read f3cfb4df (the leveling client hook's Frida read). Survival off for the rest of testing (D72). Dark: props (D68),
   Raise Wall's copies (D70) until wall-pose merges. Pending by name: b-body-loot (D37). Turbo 2 Sunday evening as set.
+- STATE 2026-10-31 04:41 PDT (the pass's chart line): fork parity b289cbda (m3-attach-uaf, the Windows coverage crash's use-after-free,
+  MERGED through ADR-053's R0 path at 11:24Z, its first use: T0 13/13, T2 green, the GitHub proof green, no lab gate). Staging:
+  m3-wall-pose 0e4b34e5 with x-raise-wall v5 88877000 (v5's two reds on a08787b5 read: Apocalypse re-uses its two wall references
+  across casts, disabled at the release and raised again by the next cast; the fix skips disabled references only and widens the
+  report window to 6 s; b-spell-placed-wall's shape A amendment drafted, its own commit after the read). The cascade for the probes'
+  client builds: m5-leveling ef618dee (whole, stages as is for x-skill-use 549cec01), m4-locks 7a098d1c (leveling merged; the
+  console's Lock takes a key, 2d79199f), m4-weather f7709626, m5-perks 1bd5abae; parity merges into each before its gate; probes
+  x-lockpick e5014621, x-weather bd44bf04, x-perk-pick 5e0f733f; scenario drafts for all five in the scratchpad, each its own
+  commit after its read. m3-prop-physics e6befc5e (parity merged) waits for x-prop-launch v2 ce95029f after them. lab-api reads a
+  seat's weather (c.weather()). Dedupe, containers' rest and the talk guard still on 1e836299, after wall-pose. Turbo 2 as set.
 - STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
   sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
