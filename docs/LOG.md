@@ -3715,3 +3715,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   RustSec fetch on VM 702), as parity's 4047 and 4054 did; difftest-build green, server-build and client-build skipped behind it;
   core asked for the DNS fix, numidium retries the job (no new pipeline), the physics stage follows the Windows green. The guest-loot
   and dedupe branches wait on the same runner.
+- 18:59 PDT: DNS back on the runners (core moved the dead Mullvad relay to us-lax-wg-201). numidium retried 4059's wire-test (job 14874;
+  server-build and the Windows client follow) and parity's server-only 4054 (14875, the parity image), rolled both clones back to
+  clean-m1-next and armed `LABAPI=4021 just verb-stage m3-prop-physics` with the five probes (sha1s checked), waiting on dde874b5's
+  builds; LABAPI 4021 is 5cc62f8's own pipeline, the newest labapi image, and nothing under lab/labapi, the driver or the gamemode
+  has changed since. thuum main's pipelines were red since 21:59Z on docs-lint's Alpine fetch (the same DNS); this push's pipeline
+  clears the record. m3-guest-loot and m3-quest-report-dedupe push after the physics builds are green (one Windows runner).
