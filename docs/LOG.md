@@ -3808,3 +3808,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   facts read (a body denied activation takes contacts after all; a Keyframed follower cannot be held, its E a pickup; setPosition then
   Dynamic flings; a weapon copy falls through the ground; a Dynamic basket launches at a standing contact), D73 and three fixes on the
   branch.
+- 20:52 PDT: pass v11 034648 RED at its premise, push v13's launch again (the host's drop settles, the host's standing capsule touches the
+  resting basket 1.8 s later, out of reach on both seats 2.25 s after): two independent runs on the flat. The physics queue is done.
+  numidium's reading, taken: on this build the wake's allowActivate is the lever both ways (inert without it on the old build, a
+  launch with it); three code items owed on the branch (the launch at contact, the pickup after a grab, the weapon copy through the
+  ground), each behind a read. The lab's next: the guest-loot train (m3-guest-loot 05ac32a9 pushed for its Windows build), then D69.
+  Every GPU watcher clean all night (numidium).
