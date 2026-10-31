@@ -2475,3 +2475,14 @@ retried every 200 ms for up to 5 s after the switch, each return logged with the
 refusals to the deadline switch the AI off ("the activate refused K times over N ms") and release the occupant. The time of the first
 true is the measurement; a run of refusals falsifies the hypothesis and sends the read to Actor::ActivateRef (rule 8; the re-analyst
 on sky-re, CommonLibSSE-NG TESObjectREFR.h:367 names it). The probe stays aba01c6f.
+
+v6 GREEN (00:4x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 20261031-074043 on d10789f7's stage, a cold run; numidium's read):
+the engine takes a released body's activation about 2.1 s after its AI is switched on. c2's lines: the switch at 07:43:36.379 ("reads
+true at the switch"), nine "activate returned false" at +164, +384, +608, +818, +1027, +1271, +1475, +1690 and +1904 ms, each with
+AI true, dead true, 3D true, health 0, then "activate returned true at +2127 ms (attempt 10)", "the ContainerMenu is open" 54 ms later,
+the AI off, and "closing activation sent, the menu closed" at the close. MEASURED once; H5's hypothesis stands (the engine's own
+promotion of the actor's process after EnableAI, not a flag of ours), the beat between 1.9 and 2.13 s here, the gate's reruns adding
+samples. The cost a player feels: a guest's body opens about two seconds after its E; a known limit of this slice, named in the
+checklist. A later refinement, if the lag matters at turbo 2: the AI on at the body's release instead of the open, with H-54e's drift
+(45 units in 5 s) as its price. M3's exit gate runs on v6 (c-dungeon-enemies, b-npc-body-release, b-npc-loot, b-npc-death-report,
+m0-inventory, a-activation-reach, a-sleep, always, watch; T2 beside).
