@@ -3875,3 +3875,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-quest-stage, b-story-arrival, m0-inventory, a-activation-reach, a-sleep (the handler's first wait and open-poll changed for every
   open it serves), watch b-npc-death, b-npc-stream-voice, b-npc-caster, c-riverwood; b-body-loot out (pending on D37); the merge
   commit un-pends the three on green. b-quest-stage-restart is a verb-doc debt, noted. The v4 probe first, on build 14987.
+- 22:40 PDT: the guest-loot fix's v4 RED twice (053012, 053335): after enableAI(true) the handler's next await never resumes whatever it
+  awaits (v2 two awaits later, v4 the first), the plugin alive; the "server mods, attempt 2" line 13 to 15 s after the switch in every
+  run (kept). v5 built: the body's open on the TimersService with no await after the switch (80188d13, local until D69's merge; the
+  activate's return logged). The probe x-body-open-guest-fix v2 by path and the two pending scenarios (a8cd208's and 330124b's
+  successors, their own commits) read the guest's lines from the body-open path. D69 merges alone (numidium's merge-d69); the union
+  m3-pass-train-4 re-cut on v5 after.
