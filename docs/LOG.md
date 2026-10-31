@@ -4090,3 +4090,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   seat; the driver's add-perks stands in for the menu's pick, `known` reads a perk, `skills` reads the engine's perkPoints; legs A
   to G on Armsman's ranks with the clean character's One-handed 20 and the server's SetLevel and SetActorValue). docs/verbs/perks.md,
   WIRE.md's section, the T2 divergence for PerkState at login.
+- (03:2x PDT 2026-10-31) x-raise-wall v4 (960011fb) ran on 1e836299's own build (20261031-100519, -100936): shape A holds end to end
+  on the FIRST cast (the request, two reports accepted, two copies placed at the reported pose, the watcher's distances within 16
+  of the caster's, the removal after the linger, the caster's skip of the server's copy, nothing refused) and the SECOND cast
+  placed nothing: the caster's search (Game.findClosestReferenceOfType) met the first wall, still standing at the same point 29 s
+  later, and skipped it as reported, so a new wall beside it was never seen. Fixed on m3-wall-pose a08787b5 (client): the search
+  lists the cell's references of the base (Cell.getNumRefs and getNthRef) and takes the nearest, skipping a reported reference only
+  while it stands within 8 units of where it was reported. x-raise-wall v5 88877000 adds the caster's refs-near, a screenshot and
+  the set-1 lines right after the second release, ahead of the claim. numidium restages on a08787b5's build; the stack takes the
+  fix by merge after v5 reads green; the b-spell-placed-wall amendment follows.
+- (03:2x PDT 2026-10-31) Leveling's client half built on fork m5-leveling: Skyrim Platform replaces PlayerCharacter::UseSkill (game/Offsets.h
+  UseSkill, Address Library 40488, the one funnel the read found) through Gum, raising `skillUse` {skill, points, source} to JS on
+  the next tick and calling the original (nothing under the zeroed mults); Definitions.txt gains SkillUseEvent and skyrimPlatform.ts
+  is regenerated; skillUseService sums a second's uses per skill into SkillUse 63 (each skill once, the amount bounded). The
+  `leveling` switch turns ON in both deploy settings. Probe x-skill-use v1 549cec01 by path (two seats: c2 the target 120 units
+  north under god mode, twenty swings; One-handed 20 to 21 on the server and on the seat's base, the engine's xp 0, the level kept
+  across a relaunch; HYPOTHESIS read: the hook fires for a hit on a figure as it did on a local NPC).

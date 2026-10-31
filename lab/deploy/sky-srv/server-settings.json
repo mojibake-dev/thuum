@@ -344,6 +344,7 @@
       ]
     }
   },
+  "leveling": true,
   "locks": true,
   "perks": true,
   "spellPlacedObjects": [
