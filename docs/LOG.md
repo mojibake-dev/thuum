@@ -4412,3 +4412,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - (14:55 PDT 2026-10-31) c-riverwood 37a35d33 (its own commit): the walker's handoff check returns as the server's record snapshotted at the
   pass against c2's read in the same breath, within the measured 256 (a handoff teleport would show; the walk cannot fail it);
   numidium's suggestion, taken as the snapshot. Physics' stage on 37e960eb runs; containers re-gates after it.
+- (15:32 PDT 2026-10-31) physics on 37e960eb (the ingot): pass v13 GREEN (220942), grab v9 GREEN (221404): the Keyframed-rest fix holds.
+  push v15 RED twice at the restart leg alone (220439, 221908): the push and its stream held, the server loaded the copy's record
+  (3 ChangeForms), but after the restart neither seat listed the ingot and c1's console shows no create word for it in the new
+  session (the old session's copy tracked at the first word, gone 0.3 s later at the view's reset); six "treat it as Actor"
+  warnings before the restart are the host's movement stream naming the prop's idx (a separate client bug, noted). The load path
+  reads right on paper (LoadChangeForm's ApplyChangeForm places the record through SetPos; SetUserActor re-pairs the actor), so the
+  restart is a T0 now: DropItemTest's case drops a copy, reloads both records into a fresh server in both orders, sets the user's
+  actor and requires the copy's create word (m3-prop-physics b3c66e5f, server-only). x-prop-push v16 8e8d9377 keeps the world
+  copies (world-diff) for the saved record's read. Physics stages again after the containers gate once the pipeline reads.
