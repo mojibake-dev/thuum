@@ -525,3 +525,25 @@ lays on clean-m1 with item 7 SKIPPED.
   server log and the "applied" lines would show on the host. The field offsets are HYPOTHESES until phase A reads sane.
 - Owner: agent (Frida), on the physics branch's restage after the guest-loot and D69 trains; Eli (x64dbg) only if the trace
   contradicts itself.
+
+### x-prop-launch v2's read (11:37 PDT 2026-10-31; run 20261031-181848 on m3-prop-physics f923e0a7's build, red at step 18; an agent's read)
+
+- The driver's place-ref worked: Basket01 0x12fe7 placed as 0xff0009c3 (the answer's 4278192579) at the host's feet, (133856.1,
+  -61330.0, 14674.7). The trace's one row for it, 0.3 s later: `ContactPointAdded ... playerProxy:true, layer 4, motion 2, ref
+  "0xff0009c3", body {type 2, massInv 0.2, pos [1912.5, -876.3, 209.7], vel [0, 0, 0]}`: a standing-capsule contact on a resting
+  native Dynamic clutter body (layer 4 kClutter, CollisionLayers.h:11; motion 2 kSphereInertia, hkpMotion.h:30; 5 kg), the fault's
+  exact shape. PropService's line at the same instant: "contact ff0009c3 layer 4 motion 2: not a tracked prop, no claim". Then no
+  row for that body; 15 s later refs-near read `"32": {"inCell": 0, "near": 0, "refs": []}`: no MISC in cell 0xbbb1 at all.
+- Not a deletion: the cleaner (worldCleanerService.ts) deletes Game.findRandomActor results at or above 0xff000000, actors only; no
+  client line names ff0009c3 after the contact; the server never heard of it. Not the listing's blindness to temporaries: push v13
+  and pass v11 listed a PlaceAtMe'd 0xff basket in the same cell (inCell 1, beyond the 400 radius).
+- The geometry: lab-spawn's origin is world y -61130, the spot y -61330, exterior cells 4096 units a side, so cell 0xbbb1's southern
+  edge is y -61440, 110 units south of the spot, across the strip the host runs along; refs-near lists one cell (SKSE
+  Cell.GetNumRefs). So the basket left the cell under that contact (a launch, or an ejection larger than the premised few dozen
+  units); the size is unmeasured because the trace has no row for the body after the contact and its two "impulse body" rows read
+  motion 32 from args[1] (not a MotionType: that argument of 78304 is not the pushed body; RAW was off).
+- v3 (3c0da75f): the basket placed 60 units south of the host (outside the capsule: the run is its first contact), every refs-near
+  with ids: [0x12fe7] (Game.FindClosestReferenceOfType over the loaded cells, bisected to 10 units) at radius 1200 and the host's y
+  recorded beside each read (the displacement follows), the tracer's RAW on for 78304's raw arguments. HYPOTHESIS until v3: the
+  contact's push carried the basket more than 110 units (the fault) rather than the engine's own spawn ejection.
+

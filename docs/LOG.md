@@ -4340,3 +4340,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   effect-conditions fold 445ae376); formatted with clang-format 21.1.8 and pushed server-only: 1f3d0adf (ConditionsEvaluator.cpp; my
   `fork-lint | tail` hid a second FAIL on MpActor.cpp, so that head is still red), then a71a9ba7 (MpActor.cpp; fork-lint exit 0 read
   without a pipe). a71a9ba7 stages with REUSE_DIST from afd12dae's dist, after physics, locks v5, dedupe, containers and the talk guard.
+- (11:37 PDT 2026-10-31) x-prop-launch v2 ce95029f RED at step 18 (20261031-181848 on m3-prop-physics f923e0a7's build; an agent's
+  read): place-ref worked (0xff0009c3 at the host's feet), the trace saw one standing-capsule contact on the resting native Dynamic
+  basket (layer 4, motion 2, massInv 0.2) and PropService's "not a tracked prop, no claim", then nothing; 15 s later cell 0xbbb1's MISC
+  list was empty and nothing deleted it (the cleaner is actors-only). The spot is 110 units from the cell's southern edge and
+  refs-near lists one cell, so the basket left the cell under the contact; the size is unmeasured (the tracer's 78304 "impulse body"
+  rows read args[1] as motion 32, not a body). v3 3c0da75f: the basket 60 units south of the host, ids: [0x12fe7] searches at 1200
+  on every read with the host's y recorded, RAW on. prop-physics.md's launch section has the read. Runs on the physics restage after
+  locks v6.
