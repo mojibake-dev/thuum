@@ -4276,3 +4276,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   151047's 12 and 151449's 16 fit the same shape). v6 (244f93cb) moved c2 to 80 units; v7 (df00436b) swings in three batches of twelve
   with c2 teleported back between them. p-level-up v2 (3aa0058a, c2 at 80) then v3 (e4647c46, batches of twelve with the re-teleport,
   168 swings in all, the counts unchanged); its v1 run 152250 plays out as a record. More swings alone cannot make the count rate-proof.
+- (08:35 PDT 2026-10-31) p-level-up v3 (e4647c46) GREEN standalone (20261031-152612 on m5-leveling b6748da0, 90 steps): 168 of 168 batched
+  swings landed at 80 units, One-handed 21 at hit 16, 22 at 33, 25 at 94 with "reaches character level 2" the same tick, 27 at 145,
+  never 28 and never level 3; the seat read base 27 and level 2 after the relaunch and the restart (the carry 1,033 applied at
+  login), c2's record at 20 throughout. leveling.md: T3 ticked (standalone; the gate runs it again), both sequence rows green. The
+  leveling gate runs (run set 20261031-153419-merge-m5-leveling, ten scenarios: always, p-level-up, a-actor-values, b-figure-values,
+  watch) with T2 beside it; v1 (152250) stands as the 120-unit record.

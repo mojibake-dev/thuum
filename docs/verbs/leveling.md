@@ -39,8 +39,8 @@ ActorValueInfo.h:34-41) and the game settings fSkillUseCurve, fXPPerSkillRank, f
 | --- | --- | --- |
 | a hundred One-handed hits at a person's rhythm, the level rising once | x-skill-use | |
 | each skill's use shape reported once (a hit, a block, a cast of each school, a lock, a craft, a sale) | x-skill-use | |
-| the level-up threshold met on both seats' displays after a relaunch and a restart | p-level-up | |
-| two players raising skills at once (two records, no crosstalk) | p-level-up | |
+| the level-up threshold met on both seats' displays after a relaunch and a restart | p-level-up | GREEN 152612 (c1's level 2 and base 27 after the relaunch and the restart; the other seat's display of a figure carries no level) |
+| two players raising skills at once (two records, no crosstalk) | p-level-up | GREEN 152612 (the target's record stayed at 20 through 168 hits on it; both raising at once is the playtest's) |
 
 ## Authority
 
@@ -209,7 +209,13 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   landing rate is the swing's, 60% here.
 - v4's relaunched rerun (20261031-151449) GREEN, 08:19 PDT: sixteen of twenty swings landed (sixteen uses sent, sixteen OnWeaponHit
   lines), "ff000000 skill 6 reaches level 21" once, the seat's base 21 with the carry 16.886 applied (the server writes the step's
-  remainder into the record, the seat applies it), kept across the relaunch. v5 (f804a96c, thirty-six swings) for the record. The missing "applied the server's
+  remainder into the record, the seat applies it), kept across the relaunch. v5 (f804a96c, thirty-six swings) for the record.
+- v5 (151817) landed 13 of 36 at 120 units, all in the first 14 s: each hit pushes the target back and after a dozen it stands out of
+  the sword's reach (numidium's read); v7 (df00436b) swings in batches of twelve with c2 teleported back to 80 units between them.
+  p-level-up v3 (e4647c46) GREEN standalone 152612 (08:35 PDT): 168 of 168 swings landed in fourteen batches, the skill 21 at hit 16,
+  22 at 33, 25 at 94 with the character's level 2 the same tick, 27 at 145 and never 28; the seat read base 27, level 2, xp 18.79 at
+  the last level and 1,033.09 after the relaunch (the login applies the record's carry; between levels the server accumulates without
+  a send), kept across the restart; c2's record at 20 throughout. The missing "applied the server's
   actor values" line on both seats is the fresh world's normal path (no record before the seat's own report), not a leveling fault.
   v2 (55b7d02a) dropped the "xp == 0 after swings" claim: the server writes the step's carry into the record and the seat applies it.
 
@@ -239,7 +245,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - [x] native hook + T1 (fork m5-leveling, 2026-10-31: Skyrim Platform's UseSkill replacement at 40488, game/Offsets.h and FridaHooks.cpp, the skillUse event; T1 is the client build)
 - [x] TS handler (skillUseService.ts: a second's uses summed per skill into SkillUse 63; the engine's own write stays, nothing under the zeroed mults)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T3 scenario green (p-level-up v3, main e4647c46, GREEN standalone 20261031-152612 on m5-leveling b6748da0: 168 of 168 batched swings landed, One-handed 20 to 27, the character's level 2 at skill 25, the relaunch and the restart keeping both, c2's record untouched; 08:35 PDT 2026-10-31; the gate runs it again), HYPOTHESIS tags read as noted beside each
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
