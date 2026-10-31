@@ -165,6 +165,11 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - Restart behavior: the record's numbers load as saved (actor-values' restart scenario).
 - Papyrus natives touched (ledger lines added): none (AdvanceSkill and SetLevel exist on the console; their rung
   stays R0).
+- A server set of a skill's base (the console's SetAV, a script's Actor.SetActorValue: MpActor::SetActorValueBaseByServer)
+  moves the record's progress entry with the base since m5-skill-set (2026-10-31): the level set, no experience toward the
+  next, the threshold the skill table's cost of that step (WorldState::skillLevelCost, installed by PartOne); the base is the
+  progress level shown, and before this the skill's next use recomputed the base from the old progress and the set snapped
+  back (found writing x-lockpick v4's Lockpicking 100). wire-rules actor_values::skill_index names the progress index.
 - Kill switch: server setting `leveling` (false: the server records snapshots as today and takes no SkillUse).
 
 ## Client
@@ -181,14 +186,18 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   levels 1, 10, 50, the level-up at the threshold with the overflow carried, the caps, the refusals by name;
   LevelingTest.cpp: a SkillUse raises the record's skill xp, a level gained writes the base and the character xp, the
   ActorValues reply carries them, the kill switch; a restart keeps them (actor-values' pattern).
+  m5-skill-set: LevelingTest's set case (the console's SetAV OneHanded 50 writes the progress entry 50/0/cost(50) and the
+  base, the record goes to the player whole, the next use earns 63 toward the step from 50 with the level and base staying
+  50) and ConsoleCommandTest's actor value case (Marksman 45's progress entry with its base); actor_values.rs's skill_index
+  test.
 - T1: none (the hook is a Skyrim Platform export; its proof is T3).
 - T2: a difftest session with a SkillUse accepted and one refused.
 - Probe x-skill-use by path, GREEN at v4's rerun 20261031-151449 on m5-leveling b6748da0 (two seats, c2 the target 120 units south
   under god mode, twenty swings: sixteen hits, the batches sent, One-handed 20 to 21 on the server and on the seat's base with the
   carry, kept across a relaunch); v5 f804a96c swings thirty-six times for the record.
 - T3 scenario id: lab/scenarios/p-level-up.yaml (M5's exit; on thuum main d9e02b7d since 2026-10-31, its first run owed before the
-  leveling gate): a seat's One-handed from 20 to 21 by hits on the other player's figure (the console's SetActorValue writes the base,
-  not the leveling standing, so not 15 to 16), then to 25 with the character's level 2, rate-proof counts, no crosstalk on the target's
+  leveling gate): a seat's One-handed from 20 to 21 by hits on the other player's figure (the console's SetActorValue wrote the base alone
+  until m5-skill-set, so the draft could not start at 15; the seat's own 20 is the start), then to 25 with the character's level 2, rate-proof counts, no crosstalk on the target's
   record, a relaunch and a server restart keeping the level. As first drafted: a seat's One-handed from 15 to 16 by hits on a lab NPC
   (the hits the server already judges), the "Skill increased" on its screen, the other seat's figure values and the
   record agreeing, a relaunch and a server restart keeping the level; a character level-up from a skill run (the
@@ -262,7 +271,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - The AVIF rows from the game files (libespm) or the settings' table: the files are the one source; the table is the
   fallback the T0 can pin.
 - Skill books, trainers, the Legendary reset and the level-up's pick: item 13's verb and later slices.
-- A console SetAV on a skill (found 10:09 PDT 2026-10-31 writing x-lockpick v4): ConsoleCommands' SetActorValue path is
+- RESOLVED on m5-skill-set (2026-10-31, the Server section): a console SetAV on a skill (found 10:09 PDT 2026-10-31 writing x-lockpick v4): ConsoleCommands' SetActorValue path is
   SetActorValueBaseByServer, which writes the record's base and sends it (the seat applies SetActorValueBase, so the skill's
   number moves at once) but leaves the record's progress entry at the login report's level; ApplySkillUse recomputes the
   base from that entry at the skill's next use, so the base snaps back. Candidate fix (server, T0): a skill av's set also

@@ -225,7 +225,7 @@ Status meanings:
 | `Actor.SendLycanthropyStateChanged` (method) | missing |  |  |  |
 | `Actor.SendTrespassAlarm` (method) | missing |  |  |  |
 | `Actor.SendVampirismStateChanged` (method) | missing |  |  |  |
-| `Actor.SetActorValue` (method) | implemented | R0 on a player; R2 delegated otherwise | a player: the base set, held against stale reports, sent (wire-rules actor_values set_ok); any other actor, and names the lab confirmed no index for: run by the host as before (CONFIRMED, x-av-probe 20261008-101643: the game sets the base). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:998] | actor-values |
+| `Actor.SetActorValue` (method) | implemented | R0 on a player; R2 delegated otherwise | a player: the base set, held against stale reports, sent (wire-rules actor_values set_ok); a skill's set moves the leveling progress entry with the base (m5-skill-set, docs/verbs/leveling.md); any other actor, and names the lab confirmed no index for: run by the host as before (CONFIRMED, x-av-probe 20261008-101643: the game sets the base). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:998] | actor-values |
 | `Actor.SetAlert` (method) | missing |  |  |  |
 | `Actor.SetAllowFlying` (method) | missing |  |  |  |
 | `Actor.SetAllowFlyingEx` (method) | missing |  |  |  |

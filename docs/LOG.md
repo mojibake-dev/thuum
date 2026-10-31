@@ -4306,3 +4306,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   moves the record's base only (SetActorValueBaseByServer); the leveling progress entry keeps the login report's level and the next
   use of that skill recomputes the base from it, so the base snaps back: leveling.md's open questions, a server fix candidate (the set
   also writing the progress entry's level, with a T0), and the playtest's skill numbers go through the leveling path, not SetAV.
+- (10:20 PDT 2026-10-31) m5-skill-set (fork branch off parity b6748da0, server-only): a server set of a skill's base now moves the
+  leveling progress entry with it. wire-rules actor_values::skill_index (its test), the bridge's actor_values_skill_index,
+  WorldState::skillLevelCost installed by PartOne from the skill table, MpActor::SetActorValueBaseByServer writing the entry
+  (level = the value, xp 0, threshold = the table's cost; E_SKILL_SET_NO_COST when no table is installed, the base alone then);
+  T0: LevelingTest's set-then-use case (SetAV OneHanded 50, the next use 63 toward the step from 50, the base stays 50) and
+  ConsoleCommandTest's Marksman 45 progress check. cargo test --workspace green, clippy with CI's deny set clean, fork-lint
+  clean. leveling.md's Server and Tests rows and the open question's resolution; NATIVES.md's Actor.SetActorValue note. The
+  gate is ADR-053's R0 path (T0 from the server build, T2 beside) in numidium's queue after the pile's lab items.
