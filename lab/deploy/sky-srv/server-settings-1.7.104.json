@@ -328,6 +328,7 @@
     "b6031:Skyrim.esm",
     "3dd29:Skyrim.esm"
   ],
+  "locks": true,
   "spellPlacedObjects": [
     {
       "spell": "00cc14:Apocalypse - Magic of Skyrim.esp",

@@ -3996,3 +3996,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the mode on nor zeroes needs, the Creation stays in the load order, the checklist's build line says so; x-survival-cold v2 leaves
   the queue. Told numidium (the set-up is its lever). Status given to Eli: the pile's state, M3's exit gate running, turbo 2 Sunday
   evening as set.
+- (06:1x PDT 2026-10-31) Locks built whole on fork m4-locks (stacked on m5-leveling and m3-wall-pose for the message ids; c324c015
+  the contract, aec38c1a the server, the client after): libespm's XLOC and KEYM (Bleak Falls Temple's chests read 0, 25 and 0 from the
+  master file, so a level byte of 0 is a Novice lock and the rule's tiers follow the Creation Kit's values), the change form's lock,
+  the gate in ProcessActivateNormal (the key in the record opens, else LockPrompt to the player), OnLockReport through wire-rules
+  locks.rs, the console's Lock and Unlock (ranked admin, the client sends the game's own lock and unlock to the server), the Papyrus
+  natives Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey (NATIVES.md rows, R0), the `locks` switch (default off; both deploy
+  settings set it true), and the client: dealWithRef applies the server's lock prop instead of stripping, LockService runs the
+  engine's own activation on the locked reference at the prompt and reports the attempt's end from lockChanged and the Lockpicking
+  Menu's close. A design fact found building: every door and container is activation-blocked in this game, so the engine's menu
+  opens only at the server's prompt (locks.md's Observe rewritten). The leveling server half landed the same way on m5-leveling
+  (553863f8 SkillUse 63, 167a4ccc the handler, 67adc699 the include): a reported use runs the formulas into the actor value record
+  with the AVIF constants loaded at AttachEspm, the record sent when a level moves, the `leveling` switch (default off). Three unit
+  files ride the pipelines (LevelingTest, LockTest, EspmTest's AVIF case); the probe x-lockpick and the client's skill-use hook are
+  next.
