@@ -3721,3 +3721,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   builds; LABAPI 4021 is 5cc62f8's own pipeline, the newest labapi image, and nothing under lab/labapi, the driver or the gamemode
   has changed since. thuum main's pipelines were red since 21:59Z on docs-lint's Alpine fetch (the same DNS); this push's pipeline
   clears the record. m3-guest-loot and m3-quest-report-dedupe push after the physics builds are green (one Windows runner).
+- 19:30 PDT: the physics stage (dde874b5, LABAPI 4021, 02:13Z): push v9 021439 RED (read: the spawn at the host's feet ejected the awake
+  body before its first track, the snap set it Dynamic without the wake flag, no contact ever after, the run through it clean; H-P1 a
+  body denied activation is inert to the controller), pass v9 021831 a lab fault (rerun queued), grab v7 022116 RED on 2 of 9 (the
+  guest's grab end to end; the flip in the hand, the basket flew out of the cell on both seats, the host untracked it; H-P2). Fixes
+  local on the branch: 46f1a2dc (allowActivate true for the simulator), a2256945 (no motion set on a held body). Reads by path for the
+  current stage: push v10 49f0815b and grab v8 7d0b64c6, the basket anchored on the mining floor marker 0x10e6cc clear of every capsule,
+  the track lines awaited before the key. numidium asked: the two reads after the queue, then the fixed head; 39 on clean-m1 if Eli
+  returns before the fixed stage is proven.
