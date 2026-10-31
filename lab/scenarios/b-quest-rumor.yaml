@@ -1,0 +1,96 @@
+# b-quest-rumor (thuum-magnus, 22:19 PDT 2026-10-30; docs/verbs/quest-stage.md, ADR-056, memo D69 B): a start-game-enabled quest's
+# later stages are the world's and its own start stays each seat's. Playtest 38's finding 76 ("prisoner picked up the aventus rumor
+# misc quest and it didn't propagate"): under D62 every start-game-enabled quest's stage was each seat's own; D69 B refuses only the
+# engine's own start (stage 0 and the record's start-up stages, QUST INDX) and relays the rest. Promoted unchanged from x-quest-rumor
+# v2 (GREEN 20261031-051455 on m3-quest-sge-stages dc3ec679's stage; the id and this header changed, steps and claims byte for byte).
+# Shape: the chain trace armed on both seats at a relaunch, both connect in mode all; c1's console sets stage 10 of DB01Misc 0x1ea4f
+# (the rumor's quest, start-game-enabled, in no list): recorded, relayed, c2's game applies it; c1 sets MQ102's stage 10 (denied):
+# kept per seat, no server line; FreeformHeartwoodMill 0xe3ea5's start-up stage 10 reads done on both seats by the quest's own start
+# (the engine refuses a console set of a done stage, so no report follows), its stage 20 (no flag) is recorded and relayed once and c2
+# has it done; the server's OWN_START refusal is reached through the reports the engine makes by itself, the vampire controller
+# DLC1VCController 1a428:Dawnguard.esm restarting in bursts (its stage 0 refused within 150 s, never recorded). Pending in
+# lab/gate.yaml until D69's train merges: on parity (D62) the HeartwoodMill relay is refused.
+id: b-quest-rumor
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 300
+steps:
+  # v2: the chain trace armed on both seats while their games are stopped (c1 sets, c2 applies the relayed stage)
+  - c1: relaunch {until: gone, frida: {script: quest-stage-chain.js}}
+  - c2: relaunch {until: gone, frida: {script: quest-stage-chain.js}}
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: quest-stage {quests: [0x1ea4f, 0x4e50d], stages: [10]}
+  - c2: quest-stage {quests: [0x1ea4f, 0x4e50d], stages: [10]}
+  - c1: log-count {pattern: "the server shares .* mode all"}
+  - c2: log-count {pattern: "the server shares .* mode all"}
+  - assert:
+      - c1.quest(0x1ea4f).stageDone(10) == false
+      - c2.quest(0x1ea4f).stageDone(10) == false
+      - 'c1.log_count("the server shares .* mode all") >= 1'
+      - 'c2.log_count("the server shares .* mode all") >= 1'
+      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent .* mode all") >= 0'
+  # an undeclared quest's stage is the world's in mode all
+  # v3: the game's own console (setstage, 22151 over the setter): the driver's Papyrus Quest.Start then SetCurrentStageID answered
+  # false to both on MS13Intro in 131512 (started false, ok false; no setter, no stage event, nothing to report)
+  - c1: console {text: "setstage 1ea4f 10"}
+  - until: {within: 15, expect: ['server.log_count("\\[verb:quest-stage\\] ff[0-9a-f]+ set 1ea4f:Skyrim.esm stage 10: recorded, relayed to 1") >= 1']}
+  - wait: 5
+  - c1: quest-stage {quests: [0x1ea4f], stages: [10]}
+  - c2: quest-stage {quests: [0x1ea4f], stages: [10]}
+  - c2: log-count {pattern: "the world.s stage 10 of quest 1ea4f set"}
+  - c2: log-count {pattern: "fragment of 1ea4f stage 10 skipped"}
+  - assert:
+      - c1.quest(0x1ea4f).stageDone(10) == true
+      - c2.quest(0x1ea4f).stageDone(10) == true
+      - c2.quest(0x1ea4f).stage() == 10
+      - 'c2.log_count("the world.s stage 10 of quest 1ea4f set") >= 1'
+      - 'server.log_count("E_QUEST_UNLISTED") == 0'
+      # recorded: the fragment's skip on the applying seat (m3-quest-fragment, when it rides the build)
+      - 'c2.log_count("fragment of 1ea4f stage 10 skipped") >= 0'
+  # a denied quest stays each seat's own
+  - c1: console {text: "setstage 4e50d 10"}
+  - wait: 5
+  - c2: quest-stage {quests: [0x4e50d], stages: [10]}
+  - assert:
+      # v6: the denied quest stays per seat at the client (QuestStageService reports every stage event but the denied, so the
+      # server never hears of it: no line about 4e50d's stage, neither a set nor a refusal); the server's E_QUEST_DENIED is the
+      # backstop for a client that does not filter, which T2's fakeclient exercises
+      - 'server.log_count("set 4e50d:Skyrim.esm stage") == 0'
+      - 'server.log_count("reported stage 10 of 4e50d:Skyrim.esm") == 0'
+      - c2.quest(0x4e50d).stageDone(10) == false
+  # the engine's own start of a start-game-enabled quest stays per seat: FreeformHeartwoodMill 0xe3ea5's stage 10 carries the
+  # start-up flag (QUST INDX) and is DONE on both seats by the quest's own start at login (v1's read: the engine refuses a console
+  # set of a done stage, so no report follows); its stage 20 carries no flag and crosses like any other quest's (D69 B)
+  - c1: quest-stage {quests: [0xe3ea5], stages: [10, 20]}
+  - c2: quest-stage {quests: [0xe3ea5], stages: [10, 20]}
+  - assert:
+      - c1.quest(0xe3ea5).stageDone(10) == true
+      - c2.quest(0xe3ea5).stageDone(10) == true
+      - c1.quest(0xe3ea5).stageDone(20) == false
+  - c1: console {text: "setstage e3ea5 20"}
+  - until: {within: 15, expect: ['server.log_count("\\[verb:quest-stage\\] ff[0-9a-f]+ set e3ea5:Skyrim.esm stage 20: recorded, relayed to 1") >= 1']}
+  - wait: 4
+  - c1: quest-stage {quests: [0xe3ea5], stages: [10, 20]}
+  - c2: quest-stage {quests: [0xe3ea5], stages: [10, 20]}
+  - assert:
+      - 'server.log_count("set e3ea5:Skyrim.esm stage 10") == 0'
+      - 'server.log_count("set e3ea5:Skyrim.esm stage 20: recorded, relayed to 1") == 1'
+      - c2.quest(0xe3ea5).stageDone(20) == true
+  # the server's refusal of a start-game-enabled quest's own start, through the reports the engine makes by itself: the vampire
+  # controller's stage-0 reports at its restarts (DLC1VCController 1a428:Dawnguard.esm), refused OWN_START, never recorded
+  - until: {within: 150, every: 5, expect: ['server.log_count("E_QUEST_OWN_START: user [0-9]+ actor ff[0-9a-f]+ reported stage 0 of 1a428:Dawnguard.esm") >= 1']}
+  - assert:
+      - 'server.log_count("E_QUEST_OWN_START: user [0-9]+ actor ff[0-9a-f]+ reported stage 0 of 1a428:Dawnguard.esm") >= 1'
+      - 'server.log_count("set 1a428:Dawnguard.esm stage") == 0'
+  - c1: screenshot
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots]
