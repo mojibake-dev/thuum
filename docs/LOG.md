@@ -3846,3 +3846,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   run only inside onOpenContainerMessage (nothing at a login), so the first candidate is the late redress at the bind (train 47b, the
   fate's worn set applied at every dressed NPC's 3D load, on every build since 10-27); one crash, watched across the restages; if it
   recurs, defer the redress apply off the load frame and lay the crash's thread beside the redress line's timing.
+- 22:03 PDT: the guest-loot fix's v2 RED twice (045522, 045859): the AI read true at the switch, the once('update') deferral ran in the
+  same millisecond, the activate in the enable's frame, no menu; the AI off at the dump. v3 pushed (m3-guest-loot 0547e5d4: a latent
+  waitMenuMode(0.2) between the switch and the activate, the state logged before it, the off deadline 3 s). numidium takes the lab to
+  D69's restage (dc3ec679, x-quest-rumor v2 7923ecc8) first; guest-loot restages on 0547e5d4 after it, the gate as agreed.
