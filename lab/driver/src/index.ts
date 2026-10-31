@@ -2413,6 +2413,25 @@ function run(step: Step, player: Actor): unknown {
       placedIds.push(placedId);
       return { formId: placedId };
     }
+    case "place-ref": {
+      // An engine-native reference of an item base (thuum docs/verbs/
+      // prop-physics.md, x-prop-launch v2): Papyrus PlaceAtMe of {base} by the
+      // player, {count} of them (1), moved to {x, y, z} from lab-spawn when
+      // given (place-npc's frame), else left where the engine put it. The
+      // console's placeatme never reaches the engine under skymp5-client
+      // (consoleCommandsService's schema sends it to the server and returns
+      // false; x-prop-launch v1 20261031-071449), so this is the one way to a
+      // reference the server does not own; the world cleaner leaves
+      // non-actors alone. Returns the reference's form id.
+      const base = Game.getFormEx(num(a.base));
+      if (!base) return { error: "no such base" };
+      const ref = player.placeAtMe(base, Math.max(1, num(a.count, 1)), false, false);
+      if (!ref) return { error: "the base placed no reference" };
+      if (a.x !== undefined || a.y !== undefined || a.z !== undefined) {
+        ref.setPosition(LAB_SPAWN.pos[0] + num(a.x), LAB_SPAWN.pos[1] + num(a.y), LAB_SPAWN.pos[2] + num(a.z));
+      }
+      return { formId: ref.getFormID(), baseId: base.getFormID(), pos: [ref.getPositionX(), ref.getPositionY(), ref.getPositionZ()] };
+    }
     case "npc-puppet": {
       // thuum docs/verbs/npc-puppet.md: the placed or named NPC made a puppet
       // ({puppet: true}) or live again through the fork's Skyrim Platform

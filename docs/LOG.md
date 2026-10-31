@@ -3933,3 +3933,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   word (D51 B, never read), the seat down, the respawn, and one kill line only (a second is a death loop finding). Told numidium for a
   lab gap. Two code maps dispatched for pile items 7 (containers' rest) and 8 (locks and lockpicking) on a worktree off parity
   (m4-containers-rest); their verb docs follow the maps.
+- (01:30 PDT 2026-10-31) Pipelines 4116 (guest-loot v6 d10789f7, client build 15029) and 4117 (m3-wall-pose 7ac26664, server-only)
+  green beside 4115: v6's stage and the wall-pose stage have their builds. x-prop-launch v1 RED twice on its premise (071449, 071905;
+  numidium's read): the console's placeatme never reaches the engine under skymp5-client (consoleCommandsService's schema takes two
+  arguments, the count makes three, and a matched command goes to the server and returns false), so phase A's native basket was never
+  placed; x-survival-cold v1 ran in the gap meanwhile (its read pending). Fix: the lab driver gains `place-ref {base, count, x, y, z}`
+  (Papyrus PlaceAtMe by the player, the one way to a reference the server does not own; the world cleaner touches actors alone),
+  lab-api's CLIENT_ACTIONS names it, the bundle builds (webpack, 420 K); x-prop-launch v2 by path (ce95029f) places phase A's basket
+  with it; the step reaches the seats with main's driver at the next dist, so v2 runs at the physics branch's next stage, after v6
+  and wall-pose. A side finding from the same run: TalkService logs "E: nothing or no actor under the crosshair" for every e typed
+  into the open console (no console or menu guard on its E handler); a one-line client fix, its own small branch. The locks map
+  (pile item 8) is in: no lock state on the server, no XLOC in libespm, no KEYM record, the client strips every lock in dealWithRef,
+  Skyrim Platform's lockChanged carries the reference alone and nothing names a broken pick; docs/verbs/locks.md written from it.
