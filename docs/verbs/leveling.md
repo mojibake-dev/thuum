@@ -189,6 +189,13 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+- x-skill-use v1 (549cec01) at ef618dee's stage, 05:25 PDT 2026-10-31: red twice before any swing at c2's teleport (the engine dropped
+  the move: the client's dump unmoved 1,176 units under lab-spawn while the server's record held the target; c1 moved). HYPOTHESIS:
+  a move asked 11 s after c2's 3D load falls inside Skyrim Platform's post-load block (the wall probe moved c2 at about 20 s); v3
+  (4585b2a0) dumps and screenshots both seats before any move, waits 10 s more and moves c2 first. The missing "applied the server's
+  actor values" line on both seats is the fresh world's normal path (no record before the seat's own report), not a leveling fault.
+  v2 (55b7d02a) dropped the "xp == 0 after swings" claim: the server writes the step's carry into the record and the seat applies it.
+
 - Frida script: lab/frida/skill-use.js, probe x-skill-use-read (by path; v1 f3cfb4df connected, v2 a18406a9 solo). READ
   2026-10-31, three runs (20261031-092918, -093933, -094735, numidium): the player's UseSkill (PlayerCharacter's vtable
   slot 0xF7, Actor.h:445) resolves from the player's own vtable to the address CommonLibSSE-NG names

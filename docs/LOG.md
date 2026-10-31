@@ -4176,3 +4176,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   than the mesh's 104; recorded). Parity b289cbda merged into the branch locally during the run and pushed after it: e713862c is the
   gate head (server-only, so the stage re-uses 0e4b34e5's dist). The b-spell-placed-wall amendment commits on its own next. The lab
   moves to leveling ef618dee with x-skill-use 549cec01 (numidium).
+- (05:25 PDT 2026-10-31) x-skill-use v1 (549cec01) red twice on m5-leveling ef618dee's own build (20261031-115628 cold, -115955
+  relaunched), both at c2's teleport before any swing: 20 attempts in 60 s, the server's record at the target, the client's own
+  dump unmoved at (134203, -60537, 13486), 1,176 units under lab-spawn, the same point both runs; c1 landed in 3 s. Read: both
+  seats' platform logs are the same build (v2.9.0, the same hook-install lines; the UseSkill hook logs no install line, to add), no
+  message box noted, no skill uses at login, no wire refusal; c2's latent calls answered through the third ragdoll removal and then
+  stopped; the one timing difference from the green wall run is the move 11 s after c2's 3D load where the wall's came at about
+  20 s (Skyrim Platform blocks MoveRefrToPosition until 50 Papyrus updates after the generated save's load event). The "applied the
+  server's actor values" line missing on both seats is no bug: in a fresh world the server records each seat's own report and
+  sends the record back only when it holds server-set values (the wall run's c2 had a record from its earlier session). x-skill-use
+  v2 55b7d02a dropped the impossible "xp == 0 after swings" claim (the server writes the carry into the record and the seat applies
+  it); v3 4585b2a0 dumps and screenshots both seats before any move, waits 10 s more and moves c2 first. The reviewer agent's pass
+  over the five drafts and the wall amendment is folded in: b-lockpick's inventory counts as hex strings and a third branch for a
+  turn that neither picks nor breaks, b-container-rest's restart leg counting the run's lid lines before and after (x-container-rest
+  v2 5bb7dd5f the same), p-level-up on the clean character's 20 (the console's SetActorValue writes the base, not the leveling
+  standing; 20 to 21 then to 25 for the character's level 2; no xp claim after a swing), b-weather's equalities outgoing-aware
+  (two reads 1 to 3 s apart can straddle a 30 s slot).
