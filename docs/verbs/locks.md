@@ -1,8 +1,12 @@
 # Verb: locks
 
 Drafted 01:3x PDT 2026-10-31 from docs/VERB.md and a code map of the fork at parity dc3ec679 (pile item 8 of
-docs/private/turbo-2-prework.md; M4's "doors, locks, containers" row). Nothing of it is built yet; the Status
-boxes say so.
+docs/private/turbo-2-prework.md; M4's "doors, locks, containers" row); built 04:xx to 06:xx PDT the same day as fork
+m4-locks (stacked on m5-leveling and m3-wall-pose for the message ids), the Status boxes below. One design fact
+changed the Observe half while building: every door and container is activation-blocked in this game
+(objectReferenceEx.ts's dealWithRef, so the player's E never reaches the engine and goes to the server as an
+Activate), so the engine's lockpicking menu cannot open by itself; the server prompts it (LockPrompt) and the
+client runs the engine's own activation on its locked reference.
 
 ## Intent
 
@@ -88,10 +92,11 @@ reference is E_LOCK_* and the lock is re-imposed.
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
-- Hook point: no hook. The engine runs its own lock logic once the client stops stripping locks: a locked
-  reference's activation opens the Lockpicking Menu (no Activate goes to the server: ActivationService holds the
-  Activate while the reference reads locked, as it holds a door mid-swing, activationService.ts:101-123), or the
-  engine unlocks with the key (then the client reports and the Activate follows).
+- Hook point: no hook. The player's E goes to the server as today's Activate (the reference is
+  activation-blocked); the server's gate (MpObjectReference::ProcessActivateNormal) opens for the key in the
+  record (R0, the lock property to every game, then the open) or sends LockPrompt to the player alone; the
+  client's LockService runs `refr.activate(player, true)` on its locked local reference, and the engine opens its
+  Lockpicking Menu (or its "requires key" box).
 - SP filter: `lockChanged` is per reference, few and far between; `menuOpen`/`menuClose` by name; `containerChanged`
   filtered to the player's Lockpick leaving with no new container.
 - Data captured: the reference's remote id, the outcome (success: lockChanged with the reference unlocked after a
@@ -122,15 +127,20 @@ reference is E_LOCK_* and the lock is re-imposed.
 
 ## Message contract
 
-- Message name / numeric type: LockReport, MsgType 64 (wire id 72; 63 went to leveling's SkillUse on 2026-10-31), client
-  to server, reliable; the lock state on CreateActorProps (`lock: Option<LockProp>`) and UpdateProperty "lock" (the
-  existing property path), server to client. SCHEMA_VERSION 24.
+- Message name / numeric type: LockReport, MsgType 64 (wire id 72), client to server, reliable; LockPrompt, MsgType
+  65 (wire id 73), server to client, reliable, the activating player alone; the lock state on CreateActorProps
+  (`lock: Option<LockProp { level: u8, key: u32, locked: bool }>`) and UpdateProperty "lock" (the existing property
+  path, the same three fields as JSON), server to client. SCHEMA_VERSION 24 (fork m4-locks c324c015, 2026-10-31).
 - Direction: LockReport C2S; the state S2C.
-- Fields: LockReport { refr: u32 (the reference's form id, never 0), outcome: u8 (0 unlocked by a pick, 1 a pick
-  broken, 2 the menu left), broken: u8 (picks broken in this attempt, 0 to 8) }. LockProp { level: i8 (-1 unlocked, 0
-  to 5 as LOCK_LEVEL), locked: bool, key: u32 (0 for none) }.
+- Fields: LockReport { refr: u32 (the reference's form id, never 0), outcome: u8 (0 the lock turned, 1 picks broke
+  and the lock stands, 2 the menu left), broken: u8 (picks broken in this attempt, 0 to 8) }. LockPrompt { refr: u32 }.
+  LockProp { level: u8 (the XLOC byte: 0 or 1 Novice, 25 Apprentice, 50 Adept, 75 Expert, 100 Master, 255 requires
+  its key), key: u32 (0 for none), locked: bool }.
 - Validator rules: refr never 0, outcome 0 to 2, broken 0 to 8 (E_VAL_RANGE); a budget of 8 then 2 a second
-  (E_VAL_RATE); LockProp's level within -1 to 5 (validate_server).
+  (E_VAL_RATE); LockPrompt's refr never 0; the lock prop's bytes are what they are (the server's). The server's rule
+  (wire-rules locks.rs): locked (E_LOCK_OPEN), within the activation reach (E_LOCK_REACH), the gap of 500 ms since the
+  player's last report on the lock (E_LOCK_RATE), a key lock refusing picks (E_LOCK_KEY), a Lockpick held for a pick
+  (E_LOCK_NO_PICK), a broken count of 1 to 8 (E_LOCK_RANGE), broken picks costing what is held and no more.
 - Idempotency / ordering: a report for an unlocked reference is E_LOCK_OPEN (nothing changes); a success on a
   "requires key" level is E_LOCK_KEY and re-imposes the lock; a broken count above the Lockpicks held is clamped
   and logged.
@@ -200,15 +210,15 @@ reference is E_LOCK_* and the lock is re-imposed.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31; no address needed)
-- [ ] server logic + T0 (the rule alone: wire-rules locks.rs on fork m4-locks, five cases green, 2026-10-31; the gate in ProcessActivateNormal, the record's field, libespm's XLOC and KEYM owed)
-- [ ] message + validator (same commit)
+- [x] server logic + T0 (fork m4-locks aec38c1a, 2026-10-31: wire-rules locks.rs (five cases, the tiers from the game files), libespm's XLOC and KEYM (a key an item on both ends), the change form's lock, GetLock/SetLock/SendLockPrompt, the gate in ProcessActivateNormal, OnLockReport, the console's Lock and Unlock, the `locks` switch; unit/LockTest.cpp's three cases on Bleak Falls Temple's chests 0x371e9 and 0x3fa69 ride the pipeline)
+- [x] message + validator (same commit: LockReport 64, LockPrompt 65, CreateActorProps.lock, their checks and budget, four fixtures, the C++ structs; m4-locks c324c015)
 - [x] native hook + T1 (none: events and natives)
-- [ ] TS handler
+- [x] TS handler (m4-locks: dealWithRef applies the server's lock prop, applyModelLock on the property, LockService's prompt and report, the console's lock and unlock sent to the server; tsc green)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (NATIVES.md: Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey implemented, R0, verb locks)
 
 ## Open questions
 

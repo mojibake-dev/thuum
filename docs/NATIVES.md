@@ -1042,10 +1042,10 @@ Status meanings:
 | `ObjectReference.GetItemCount` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:947] |  |
 | `ObjectReference.GetItemHealthPercent` (method) | missing |  |  |  |
 | `ObjectReference.GetItemMaxCharge` (method) | missing |  |  |  |
-| `ObjectReference.GetKey` (method) | missing |  |  |  |
+| `ObjectReference.GetKey` (method) | implemented | R0 | the key the lock names, as a form; none without one (docs/verbs/locks.md; fork m4-locks) | locks |
 | `ObjectReference.GetLength` (method) | missing |  |  |  |
 | `ObjectReference.GetLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:972] |  |
-| `ObjectReference.GetLockLevel` (method) | missing |  |  |  |
+| `ObjectReference.GetLockLevel` (method) | implemented | R0 | the XLOC level byte (0 or 1 Novice, 25, 50, 75, 100, 255 requires key), 0 without a lock (docs/verbs/locks.md; fork m4-locks) | locks |
 | `ObjectReference.GetMass` (method) | missing |  |  |  |
 | `ObjectReference.GetNthForm` (method) | missing |  |  |  |
 | `ObjectReference.GetNthLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:973] |  |
@@ -1083,11 +1083,11 @@ Status meanings:
 | `ObjectReference.IsIgnoringFriendlyHits` (method) | missing |  |  |  |
 | `ObjectReference.IsInDialogueWithPlayer` (method) | missing |  |  |  |
 | `ObjectReference.IsLockBroken` (method) | missing |  |  |  |
-| `ObjectReference.IsLocked` (method) | missing |  |  |  |
+| `ObjectReference.IsLocked` (method) | implemented | R0 | the server's lock record (docs/verbs/locks.md; fork m4-locks, 2026-10-31) | locks |
 | `ObjectReference.IsMapMarkerVisible` (method) | missing |  |  |  |
 | `ObjectReference.IsOffLimits` (method) | missing |  |  |  |
 | `ObjectReference.KnockAreaEffect` (method) | missing |  |  |  |
-| `ObjectReference.Lock` (method) | missing |  |  |  |
+| `ObjectReference.Lock` (method) | implemented | R0 | writes the server's lock record; abAsOwner ignored (no ownership on the server) | locks |
 | `ObjectReference.MoveTo` (method, latent) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:969; skymp5-functions-lib/index.ts:350] |  |
 | `ObjectReference.MoveToInteractionLocation` (method, latent) | missing |  |  |  |
 | `ObjectReference.MoveToMyEditorLocation` (method, latent) | missing |  |  |  |
@@ -1126,7 +1126,7 @@ Status meanings:
 | `ObjectReference.SetItemCharge` (method) | missing |  |  |  |
 | `ObjectReference.SetItemHealthPercent` (method) | missing |  |  |  |
 | `ObjectReference.SetItemMaxCharge` (method) | missing |  |  |  |
-| `ObjectReference.SetLockLevel` (method) | missing |  |  |  |
+| `ObjectReference.SetLockLevel` (method) | implemented | R0 | writes the level byte into the server's lock record (docs/verbs/locks.md; fork m4-locks) | locks |
 | `ObjectReference.SetMotionType` (method, latent) | missing |  |  |  |
 | `ObjectReference.SetNoFavorAllowed` (method) | missing |  |  |  |
 | `ObjectReference.SetOpen` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970] |  |

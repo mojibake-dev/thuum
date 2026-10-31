@@ -672,3 +672,22 @@ budget of 8 then 2 a second (UNMEASURED). The server (PartOne::ApplySkillUse thr
 game's formulas with the AVIF constants read from the game files at start (the eighteen skill records 0x44c to 0x45d): the skill's
 experience and level, the base the game shows, the character's experience, threshold and level; a level moved sends the record back
 as ActorValues (t 40). Fixtures 63-SkillUse-0 and -1; WireJsonContractTest reads them through SkillUseMessage.h.
+
+### LockReport (t 64), LockPrompt (t 65) and CreateActor's lock prop (locks, M4)
+
+Since fork m4-locks c324c015 (SCHEMA_VERSION 24, 2026-10-31): the server holds every door's and container's lock (the REFR's XLOC read
+by libespm, then the record). CreateActor (t 33) gains the optional prop `lock: { level: u8 (the XLOC byte: 0 or 1 Novice, 25
+Apprentice, 50 Adept, 75 Expert, 100 Master, 255 requires its key), key: u32 (the key's base form id, 0 none), locked: bool }`, absent
+for a reference the game files leave unlocked; the same three fields travel as UpdateProperty "lock" at a change. The client applies
+it to its own reference instead of stripping the lock. LockPrompt (id 73, MsgType 65), server to client, reliable, to the activating
+player alone: `{ refr: u32 }`, sent when a player's Activate meets a locked reference without its key (E_ACTIVATE_LOCKED in the log);
+the client runs the engine's own activation on the locked local reference, which opens the lockpicking menu or the requires-key box.
+LockReport (id 72, MsgType 64), client to server, reliable, once per attempt: `{ refr: u32 (never 0), outcome: u8 (0 the lock turned,
+1 picks broke and the lock stands, 2 the menu left), broken: u8 (0 to 8) }`; validator E_VAL_RANGE on a refr of 0, an outcome past 2 or
+over 8 broken; a budget of 8 then 2 a second (UNMEASURED). The rule (wire-rules locks) judges the report: locked (E_LOCK_OPEN), within
+the activation reach (E_LOCK_REACH), 500 ms since the player's last report on it (E_LOCK_RATE), a key lock refusing picks (E_LOCK_KEY),
+a Lockpick (MISC 0xa) held for a pick (E_LOCK_NO_PICK), a broken count of 1 to 8 (E_LOCK_RANGE); an accepted pick unlocks the record
+(the property to every listener), accepted broken picks leave the record's inventory, bounded by the count held. A key in the record
+opens at the activation (R0, "opens <refr> with its key"). The server's `locks` setting (default false) keeps every lock off the
+record and the props absent, today's behavior. Fixtures 64-LockReport-0 and -1, 65-LockPrompt-0 and -1; the legacy reader spends no
+bit on the lock prop (wire-legacy LEGACY_ABSENT).
