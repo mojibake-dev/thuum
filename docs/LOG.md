@@ -3747,3 +3747,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the other three premise lines held (the marker anchor works: c1 tracked at 80 units, placed, Dynamic; c2 tracked at 131). v11 by path
   1e8203e4 drops that line. The queue: grab v8 (running), drop v5, pass v10, push v11. numidium: c2's rollback took 195 s twice, both
   after a pass run (a typical one 80 s), counting for core.
+- 19:52 PDT: grab v8 024409 RED 4 of 12: the grab holds end to end on the marker site, then the basket vanishes on BOTH seats within
+  20 ms half a second after the grabber's asleep sample (c2 "its reference is gone"): the server's doing; candidates (a) the pickup
+  delete of an activated 0xff MISC, (b) a far accepted asleep sample (pass v9's shape). numidium greps both runs; pass v10b a0a6e14b
+  (server.ref 0xff000002 at 1, 2, 4 s) runs in v10's slot, then push v11, then drop v5's rerun (024852 a lab fault at c2's relaunch,
+  lab-api's EXEC_LOST handling numidium's).
