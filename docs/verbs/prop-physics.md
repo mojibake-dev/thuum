@@ -506,3 +506,22 @@ same for an engine-native basket the host walks into (the lab's clutter under no
 engine's. Decision (20:51 PDT, under the pass's rule): the physics train does not merge tonight; its four fixes stay on the branch with
 their reads recorded; props stay dark on parity (D68); the lab goes to the guest-loot train (M3's exit) and then D69's; playtest 39
 lays on clean-m1 with item 7 SKIPPED.
+
+## Dynamic plan: the launch at a standing contact (written 21:49 PDT 2026-10-30, for the physics branch's restage)
+
+- Frida script: lab/frida/prop-launch.js (main, beside prop-contact.js): the character proxy's ContactPointAddedCallback (79131) and
+  the surface pass's impulse body (78304) as before, plus the owner body's embedded motion at each contact and before and after every
+  push: type (+0x10), position (motionState +0x20, transform translation +0x30), linear velocity (+0xE0) and its length, angular speed
+  (+0xF0), inverse mass (inertiaAndMassInv +0xD0, w); hkpEntity.h's motion at 0x150. Armed on the host at its relaunch.
+- Probe: x-prop-launch v1 by path (sha1 3edfc17a, 63 steps): phase A, the engine's own basket (the game console's placeatme at the
+  host's feet, no record), the host 80 north, a run through it, refs-near at 1, 2 and 4 s; phase B, the server's drop (64 ahead, 48
+  up, settled under the touch-2 grant), the host 80 north, the same run, refs-near on both seats and the record's snapshots b0, r1,
+  r2, r4. Premise claims only; every number is a read.
+- What a reading names: the native basket's lines set the sane range (massInv about 0.3 to 1 for a basket, a nudge's speed under
+  100, a few pushes). In phase B a launch reads as (a) a jump in vel at each push with a sane mass: the push's impulse on this body
+  is out of scale (the proxy's recovery under an overlap, or the wake flag's activation inside the capsule); (b) a huge massInv: the
+  mass after our setMotionType(Dynamic) is wrong (the body re-created without its shape's mass); (c) vel growing between pushes
+  with few pushes: something of ours moves the body (the stream's echo through the record, the view's movement apply), which the
+  server log and the "applied" lines would show on the host. The field offsets are HYPOTHESES until phase A reads sane.
+- Owner: agent (Frida), on the physics branch's restage after the guest-loot and D69 trains; Eli (x64dbg) only if the trace
+  contradicts itself.
