@@ -3495,6 +3495,16 @@ Garry's Mod's shape, nearer: every body physical locally, the authority's stream
 the next stage: the resting Dynamic copies settle alike on both seats (a small divergence of resting clutter is accepted, as ADR-058
 accepts a sample's lag), the glide holds under Keyframed as before, and a grab now closes on the Dynamic body so its E consumes no
 pickup. Probes: x-prop-push v11, x-prop-pass v10b, x-prop-grab v8, x-prop-drop v5 on the restage; b-prop-push promoted on green.
+The flight's read (20:00 PDT): x-prop-pass v10b (20261031-025124) at 1 s after the kick: the server's record of the basket unmoved at the
+premise's spot (133847.09, -61329.46, 14670.76), the host still listing it there, the claimant's own engine listing nothing. So the
+server and the stream are not the cause; the claimant's engine loses its copy at the grant's Dynamic set. Every copy that flew (pass
+v9, v10b, grab v7) had been placed by setPosition (the first track's snap, the asleep sample's jump); the drop's copy, created at its
+place and never placed, took the same Dynamic set and settled. HYPOTHESIS H-P4: setPosition leaves a Keyframed body's Havok collision
+where it was, and the Dynamic set resolves the mismatch violently (the engine's known pitfall with SetPosition on physics objects).
+The fix, fa225f01: a follower's jumps and the first placement move the body by the engine's keyframed translate (translateTo at a speed
+that lands within 100 ms when the 3D is loaded; setPosition only before it loads), and the rest-Dynamic set waits 300 ms for the
+translate. Probes on the restage: push v11 1e8203e4, pass v10c 02af9dc2 (the record recorded by snapshots, no pos claims: the evaluator
+evaluates every operand of an or, so a missing listing raises), grab v8 7689e959, drop v5 426cf923.
 
 
 Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet

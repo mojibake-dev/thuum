@@ -404,3 +404,13 @@ m3-prop-physics 0bb02f74 over 46f1a2dc (the wake); the held-hand guess a2256945 
 (push v11 1e8203e4, pass v10b a0a6e14b, grab v8 7689e959, drop v5 426cf923): the resting copies settle alike, the glide holds, a grab
 closes on the Dynamic body and its E consumes no pickup. The pickup of a real short press stays the engine's and the server's
 (ProcessActivate's item branch).
+
+pass v10b (025124, 20:00 PDT read): at 1 s after the kick the server's record of 0xff000002 sat unmoved at the premise's spot, the
+host still listed the basket there, and the claimant (c2) listed nothing: the claimant's own engine loses its copy at the grant's
+Dynamic set, the server and the stream innocent. Every flown copy had been placed by setPosition (the first track's "placed at its
+record", the asleep sample's jump); the drop's copy, never placed, settled under the same Dynamic set. HYPOTHESIS H-P4: setPosition
+leaves a Keyframed body's collision where it was and the Dynamic set resolves the mismatch violently. Fix fa225f01: the asleep sample,
+a jump past JUMP_UNITS and the first placement all translateTo at a speed landing within 100 ms when the 3D is loaded (setPosition
+only before), the rest-Dynamic set 300 ms after. The branch for the restage: 46f1a2dc (the wake), 0bb02f74 (D73), fa225f01 (H-P4);
+its probes push v11, pass v10c (02af9dc2: the record by `server: snapshot` steps, no pos claims, since the evaluator evaluates every
+operand and a missing listing raises), grab v8, drop v5.
