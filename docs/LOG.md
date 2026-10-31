@@ -4192,3 +4192,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   v2 5bb7dd5f the same), p-level-up on the clean character's 20 (the console's SetActorValue writes the base, not the leveling
   standing; 20 to 21 then to 25 for the character's level 2; no xp claim after a swing), b-weather's equalities outgoing-aware
   (two reads 1 to 3 s apart can straddle a 30 s slot).
+- (05:31 PDT 2026-10-31) b-spell-placed-wall v4 GREEN at the wall's gate (runset merge-m3-wall-pose 20261031-121742, run 122522 on
+  e713862c, 71 steps, every claim held; the walk: c2 stopped at -113.8, c1 132 units into its own copy from -365.9); un-pended in
+  lab/gate.yaml (the D70 entry of 10-30 said "un-pend with the caster-reported pose train, whose stage proves it"), spell-placed-object.md's
+  T3 box ticked. The mirror's Windows runs are red on every cascade head and on physics for the UAF fix they do not carry (test_unit
+  passes, test_unit_coverage dies with an access violation; parity b289cbda and the wall's e713862c pass): the parity merge before
+  each gate cures them, once, after the wall merges.

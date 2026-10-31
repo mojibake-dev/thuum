@@ -340,7 +340,7 @@ are the caster's alone (ADR-057).
 - [x] native hook + T1 (none needed)
 - [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands); shape A: spellPlacedService.ts and the two message types, m3-wall-pose 866ff864 (tsc green)
 - [ ] T2 green (shape C's T0 green on 3k d7548ccf and on 3o-win ee44f7d1 and its T2 with the union 0e23c820; shape A's T0 and T2 are m3-wall-pose's pipeline and stage, 2026-10-31)
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell-placed-wall pending since D70 and amended for shape A after x-raise-wall v4's read at m3-wall-pose's stage)
+- [x] T3 scenario green, no HYPOTHESIS tags (b-spell-placed-wall v4, thuum main 9e012045, GREEN at the wall's gate: run 20261031-122522 on e713862c, 71 steps, 05:31 PDT 2026-10-31; the walk read c2 at -113.8 and c1 at 132 from its start; the shape A section's HYPOTHESIS tags all read; un-pended in lab/gate.yaml)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
