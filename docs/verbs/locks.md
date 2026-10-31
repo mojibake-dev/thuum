@@ -200,7 +200,7 @@ reference is E_LOCK_* and the lock is re-imposed.
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31; no address needed)
-- [ ] server logic + T0
+- [ ] server logic + T0 (the rule alone: wire-rules locks.rs on fork m4-locks, five cases green, 2026-10-31; the gate in ProcessActivateNormal, the record's field, libespm's XLOC and KEYM owed)
 - [ ] message + validator (same commit)
 - [x] native hook + T1 (none: events and natives)
 - [ ] TS handler
