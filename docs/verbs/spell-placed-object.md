@@ -439,7 +439,7 @@ raised again under the same ids, and nothing new is created (c1's listing 4 s in
 196.875 from the caster). a08787b5's search skipped a reported reference standing within 8 units of where it was reported, so the
 halo (back at the exact pose) was never reported and the wall was found only once it had moved, mid-rise, 2.5 s after the request,
 and went out unsettled at the deadline (z 14596 and 14600 against the settled 14629: 29 to 33 low). The fix (m3-wall-pose
-b36d93aa): eligibility is disabled-or-deleted, never reported-before (a disabled reference is the earlier cast's object faded at its
+b36d93aa, its bridge test 0e4b34e5): eligibility is disabled-or-deleted, never reported-before (a disabled reference is the earlier cast's object faded at its
 release; a re-enabled one is this cast's), and REPORT_WINDOW_MS is 6,000 (the wall began its rise about 2.3 s after the request on
 both runs, which a 3 s window less the 500 ms reply margin cannot settle). HYPOTHESIS until v5 reruns on the fix: the second cast
 reports both bases settled inside the window, the server's copies for set 1 stand where c1's re-raised wall stands, and no
