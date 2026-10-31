@@ -706,3 +706,20 @@ E_VAL_RANGE on a place of 0; the transport refuses it from a client by direction
 transition, keeps a word for a place it is not in yet, and re-forces a settled drift every two seconds. The server's `weatherSync`
 setting (default false) sends nothing, today's behavior. Fixtures 66-SetWeather-0 and -1. T2 declares one SetWeather per client at
 login (difftest divergences.yaml) with lab/tools/test-proto.sh pinning one weather over Tamriel for the run.
+
+### PerkPick (t 67) and PerkState (t 68): perks as the server's transactions (perks, M5)
+
+Since fork m5-perks (SCHEMA_VERSION 26, 2026-10-31): the server holds a player's perks on its actor value record and judges
+every pick by the perk record's own conditions (the CTDAs before its first PRKE section: HasPerk for the tree's lines and the rank
+before, GetBaseActorValue for the skill's level, GetLevel; UESP "Skyrim Mod:Mod File Format/PERK") and the points left, one a
+level past the first less the perks held (wire-rules perks). PerkPick (id 75, MsgType 67), client to server, reliable, once per
+perk the game's Skills menu took: `{ perk: u32 (never 0) }`; validator E_VAL_RANGE on 0; a budget of 8 then 2 a second
+(UNMEASURED). The rule's refusals, each logged by name: E_PERK_UNKNOWN (no such perk), E_PERK_HIDDEN (not playable, or hidden),
+E_PERK_OWNED, E_PERK_POINTS, E_PERK_PREREQ (a HasPerk condition, the perk it names), E_PERK_SKILL (an actor value condition, the
+value it names), E_PERK_LEVEL, E_PERK_CONDITION (a function the rule cannot judge, by rule 5), E_PERK_FULL (512 held). PerkState
+(id 76, MsgType 68), server to client, reliable, to one player: `{ perks: [u32] (at most 512, none 0), points: u16 }`, at login
+after the player's actor values, after every pick accepted or refused, after a level change and after the console's AddPerk,
+RemovePerk or SetLevel; validator E_VAL_RANGE on a 0 in the set. The client sets the engine's perk points, adds the set's perks it
+lacks and removes a TREE perk the set lacks (a refused pick undone); perks the trees do not list are never touched. The server's
+`perks` setting (default false) drops picks and sends no state, today's behavior. Fixtures 67-PerkPick-0 and -1, 68-PerkState-0
+and -1. T2 declares one PerkState per client at login (difftest divergences.yaml) when the deployed settings turn perks on.
