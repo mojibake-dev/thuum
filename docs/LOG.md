@@ -4240,3 +4240,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   same edge at (0, 300) on 10-29). The post-load-block HYPOTHESIS is withdrawn and the leveling client cleared. v4 7db1a600 stands c2
   at (0, -120) facing north and c1 at the origin facing south (p-level-up's draft the same). Lesson: read LAB.md's summit note before
   placing a seat at lab-spawn; only the strip south of the origin along x = 0 stands.
+- (07:28 PDT 2026-10-31) x-weather v2 9f7c2cfd: c2 off the summit's east edge ((120, 0) was the probe's spot) onto the strip at (0, -120), the
+  draft the same; no other probe or draft stands north or east of lab-spawn's origin. m2-effect-conditions-row carries parity e713862c
+  as e0f9584f (verb-merge's R0 path refuses a branch behind parity; the diff against parity is the five server files), its Windows rerun
+  green (the first attempt's one red was BondTest.cpp:357's time-based invisibility check under the slow coverage pass); numidium runs
+  the R0 merge with T2 in a gap, no seats needed.
