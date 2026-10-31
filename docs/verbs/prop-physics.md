@@ -333,3 +333,27 @@ Two props the engine owns differently from clutter, written so the row kind "pro
   within a stride rather than standing. Corpse dragging is the held object's case on a body (the engine's grab works on ragdolls).
   M4 by Eli's word (12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"); no earlier slice, whatever playtest 39 shows of the bodies' drift (ADR-058).
 - Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).
+
+## The physics stage's first reads (19:30 PDT 2026-10-30; m3-prop-physics dde874b5 on the merged base, LABAPI 4021)
+
+x-prop-push v9 (021439) RED, 6 of 10, read against c1's console: "Create actor" and "PlaceAtMe done" at 02:17:33.8 (the basket at the
+host's feet), a contact 200 ms later ("contact ff000947 layer 4 motion 2: not a tracked prop"): the host's own capsule ejecting the
+awake, freshly spawned body, not the walk; the first track at +37 ms ("tracked, 26 units off": the distance to the player), the snap
+back to the record ("placed at its record") into the capsule and the Dynamic set WITHOUT the wake flag ("simulated here: Dynamic"),
+then nothing: no contact while the host stood in it, none from the run through its spot at 02:17:48 (the walk was clean, 243 units
+south). HYPOTHESIS H-P1: a Dynamic body denied activation (setMotionType's allowActivate false) is inert to the character controller,
+so a host's clutter could never be kicked; the comment's "rests until a contact wakes it" was the guess. Fix on the branch, local
+until the read: 46f1a2dc, allowActivate true whenever this seat simulates (the stream's lazy baseline keeps a resting cell silent).
+x-prop-pass v9 (021831) a LAB FAULT (c2's relaunch lost its guest-agent pid), rerun queued. x-prop-grab v7 (022116) RED on 2 of 9: the
+guest's grab worked end to end (the pitch sweep's hit at 800 counts, the claim, the grant 0.4 s into the 1.5 s hold, Dynamic, the
+stream at the grant, asleep 0.5 s later), the host never applied and untracked the basket "out of reach" 1.6 s into the stream, and
+after the release NEITHER seat listed the basket in the cell: it flew. HYPOTHESIS H-P2: the flip (stopTranslation, setMotionType
+Dynamic) landing in the hand breaks the grab's spring and flings the body. Fix, local: a2256945, no motion set on a body this
+seat's hand holds (grabRelease marks it; the engine's grab has it Dynamic), the stream unchanged. Both probes also showed the spawn
+at the host's feet ejecting the body before its first track (push v9, grab v7 at 02:24:04.6). The reads before the head moves, on
+this stage: x-prop-push v10 (49f0815b) and x-prop-grab v8 (7d0b64c6), the basket anchored on the mining floor marker 0x10e6cc
+(relative (-423, -257, -175); ExecutePlaceAtMe takes any reference as its anchor), the host or grabber 80 north facing south, the
+watcher 120 east facing west, the track lines awaited before the key; v8 reads the release's first second and claims the rest within
+400 of the marker on both seats and no "out of reach" untrack. v10 red with its premise lines in place confirms H-P1; v8's flight
+confirms H-P2; the fixed head then rebuilds and restages, and the four probes play again. Until that stage is proven, playtest 39
+lays on clean-m1 (the merged base, props dark), since on this build a host's clutter cannot be kicked at all.
