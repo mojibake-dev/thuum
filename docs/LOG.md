@@ -3893,3 +3893,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its gate), then guest-loot v5's stage, probe and gate (M3's exit), then the physics restage with x-prop-launch (the launch read),
   then the dedupe's stage; the agent starts Raise Wall's reported pose (shape A: the message, the validator, the server's placement
   at the reported pose, the client's report) while the lab works through those, then containers' rest and locks to T0.
+
+### 2026-10-31
+
+- m3-quest-sge-stages merged to fork parity dc3ec679 (2026-10-31T06:26Z): the gate 20261031-054843-merge-m3-quest-sge-stages, 20261031-054843-smoke-two-players to 20261031-062140-c-riverwood (11 runs); T2 skip on skymp-server:m3-quest-sge-stages, its T2 run beside the gate green 05:36 to 06:05Z (T2_LOG; difftest job 14852 from 0e23c820, the branch left skymp-wire alone); clones not promoted (server-only; the stage laid the union's 0e23c820 dist through REUSE_DIST_FROM, main 614e66c2). Verbs: quest-stage, D69 B (a start-game-enabled quest keeps only the engine's own start per seat, stage 0 and the record's start-up stages, and its later stages are the world's): x-quest-rumor v2 green 20261031-051455 on the stage (v1 red twice, 043546 and 044055, on its premise: c1's console SetStage of FreeformHeartwoodMill's flagged stage 10 returned 0, the stage already done at login on both seats), b-quest-rumor green in the gate and out of gate.yaml's pending here. Watch: b-npc-death red at 060342 (step 44: the body rested 563 units off its death x against 256) and green on its relaunched rerun 060754, a finding by name. Its own train, the union m3-pass-train-4 with guest-loot dropped when the guest-loot fix's v4 went red twice (053012, 053335); guest-loot v5 stages next.
+- 23:28 PDT: D69 MERGED (numidium): fork parity dc3ec679 (was 0e23c820) at 06:26Z, the gate 20261031-054843-merge-m3-quest-sge-stages
+  10 of 10 (b-npc-death red at 060342 with the body 563 units off its death x against 256, green on its relaunched rerun 060754: the
+  corpse drift family, a watch finding by name), T2 green on the branch's image, the clones not promoted (server-only); numidium's
+  merge commit on main bumps the submodule and un-pends b-quest-rumor. The guest-loot v5 pushed with parity merged in (m3-guest-loot
+  b878b2a6; remoteServer.ts alone against parity), its probe x-body-open-guest-fix v2 aba01c6f; the gate list the union's (the two
+  exit scenarios, b-npc-loot, b-npc-death-report, m0-inventory, a-activation-reach, a-sleep, always, watch). The union m3-pass-train-4
+  is moot and left as cut.
