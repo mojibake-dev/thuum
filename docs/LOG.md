@@ -4348,3 +4348,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   rows read args[1] as motion 32, not a body). v3 3c0da75f: the basket 60 units south of the host, ids: [0x12fe7] searches at 1200
   on every read with the host's y recorded, RAW on. prop-physics.md's launch section has the read. Runs on the physics restage after
   locks v6.
+- (11:46 PDT 2026-10-31) lab/frida/prop-launch.js fixed from the re-analyst's Ghidra read of 78304 (bhkCharProxyController's
+  ObjectInteractionCallback body: rcx the controller, rdx the hkpCharacterObjectInteractionEvent with the body at +0x30, r8 the result
+  whose objectImpulse vector it scales; the push lands in 62648 after it returns): the hook reads the body at rdx+0x30 and logs the
+  event's objectImpulse, dt, projectedVelocity and massInv with the result vector before and after; `player` tags the player's proxy
+  controller (vtable 240560). Ids 240560, 79133, 62648 resolved by `just addr`. prop-physics.md's launch section has the read; the
+  physics restage's deploy-srv carries the script for x-prop-launch v3.

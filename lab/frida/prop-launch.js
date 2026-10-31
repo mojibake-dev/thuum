@@ -14,8 +14,20 @@
 // nothing. Hooks: 79131 (rcx this: the controller, whose vtable 0 is the listener; rdx the proxy; r8 the
 // hkpRootCdPoint: rootCollidableB at its header offset, read as the second collidable slot), reading the
 // collidable's layer (collisionFilterInfo & 0x7f), the owner body's motion type at +0x160 and the reference
-// through TESHavokUtilities::FindCollidableRef (26003); 78304 (the impulse body: rcx this, the body it
-// pushes). Expected (a) on the seat that simulates the basket: 79131 once per new contact with layer 4 and
+// through TESHavokUtilities::FindCollidableRef (26003); 78304, the body of bhkCharProxyController's
+// ObjectInteractionCallback with this adjusted to the bhkCharacterController (the re-analyst's Ghidra read of
+// 11:45 PDT 2026-10-31, CONFIRMED-BY-DECOMPILE: its one caller is the thunk 79133, `mov rdx, r8; add rcx, 0x10;
+// mov r8, r9; jmp`, slot 5 of vtable 240558 whose slot 2 is 79131): rcx the controller, rdx the
+// hkpCharacterObjectInteractionEvent (hkpCharacterProxyListener.h: position 0x00, normal 0x10, objectImpulse
+// 0x20 (a float), timestep 0x24, projectedVelocity 0x28, objectMassInv 0x2C, body 0x30), r8 the
+// hkpCharacterObjectInteractionResult (objectImpulse vector 0x00, impulsePosition 0x10). The function scales
+// result.objectImpulse (zero unless 0 < mass < 95, the .data constant 389158; factor 2, props' layer 10 3 or 0.1 by
+// mass, layers 6 and 14 0.1, shrunk so impulse/mass <= 1000) and writes nothing on the body; the push lands after
+// it returns, in the surface pass 62648 (activate 60849, then the motion's ApplyPointImpulse), so a velocity jump
+// shows in the NEXT call's `before`, never this call's `after`. v2 (181848) read rdx as the body and got motion 32
+// (stack past the 0x40-byte event); v3 reads the body at rdx+0x30 and logs the event's numbers and the result
+// vector before and after the scaling. `player` tags the player's proxy controller (*rcx == vtable 240560).
+// Expected (a) on the seat that simulates the basket: 79131 once per new contact with layer 4 and
 // motion type 1 to 3, then 78304 every step with the basket as its body; (b) on the other seat: 79131 fires
 // with motion type 4 and 78304 stays silent. Every id is a HYPOTHESIS until this trace reads as expected
 // (rule 2). Params: RAW (true prints the raw args). The hkpRootCdPoint's rootCollidableB offset is read from
@@ -31,7 +43,10 @@ function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(o
 const OFFSETS = {
   '1.6.1170.0': {
     contactAdded: 0xed1540, // 79131 bhkCharProxyController::ContactPointAddedCallback
-    impulseBody: 0xea1600, // 78304 the surface interaction's impulse body
+    impulseBody: 0xea1600, // 78304 bhkCharProxyController::ObjectInteractionCallback's body (rdx the event, rdx+0x30 the body)
+    proxyControllerVtable: 0x19edff0, // 240560 bhkCharProxyController's vtable: *rcx of 78304 for the player's own controller
+    interactionThunk: 0xed1620, // 79133 the listener slot 5 thunk into 78304 (not hooked; the chain's record)
+    surfacePass: 0xb83580, // 62648 the proxy's surface interaction pass that applies result.objectImpulse after 78304 returns (not hooked)
     findCollidableRef: 0x3fd3d0, // 26003 TESHavokUtilities::FindCollidableRef
     proxyControllerVtable: 0x19edff0, // 240560 the proxy controller's bhkCharacterController vtable (at +0x10)
   },
@@ -118,12 +133,25 @@ if (off === undefined) {
       emit({ fn: 'ContactPointAdded', id: 79131, tid: this.threadId, playerProxy: isPlayerProxy, layer: b.layer, motion: b.motion, ownerType: b.ownerType, ref: b.ref, body: b.body, args: raw(args) });
     },
   });
+  const vec3 = function (p) { return p.isNull() ? undefined : [f32(p, 0), f32(p, 4), f32(p, 8)].map(r1); };
+  const proxyVtableAddr = at('proxyControllerVtable');
   Interceptor.attach(at('impulseBody'), {
-    onEnter(args) { this.a = raw(args); this.body = args[1]; this.before = motionFacts(this.body); },
+    onEnter(args) {
+      this.a = raw(args);
+      const ev = args[1];
+      // hkpCharacterObjectInteractionEvent (hkpCharacterProxyListener.h): the body at 0x30, the numbers before it
+      this.body = ptrAt(ev, 0x30);
+      this.event = { objectImpulse: f32(ev, 0x20), dt: f32(ev, 0x24), projectedVelocity: f32(ev, 0x28), massInv: f32(ev, 0x2c) };
+      this.result = args[2];
+      this.resultBefore = vec3(this.result);
+      this.player = ptrAt(args[0], 0).equals(proxyVtableAddr);
+      this.before = motionFacts(this.body);
+    },
     onLeave(retval) {
       let ref = 0;
       try { const c = this.body.isNull() ? NULL : this.body.add(COLLIDABLE_IN_WORLD_OBJECT); ref = c.isNull() ? 0 : formId(findRef(c)); } catch (e) { ref = -1; }
-      emit({ fn: 'impulse body', id: 78304, tid: this.threadId, motion: u8(this.body, 0x160), ref: hex(ref), before: this.before, after: motionFacts(this.body), args: this.a });
+      emit({ fn: 'impulse body', id: 78304, tid: this.threadId, player: this.player, motion: u8(this.body, 0x160), ref: hex(ref),
+        event: this.event, result: { before: this.resultBefore, after: vec3(this.result) }, before: this.before, after: motionFacts(this.body), args: this.a });
     },
   });
   emit({ event: 'ready', version: version, raw: RAW });

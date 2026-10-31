@@ -547,3 +547,26 @@ lays on clean-m1 with item 7 SKIPPED.
   recorded beside each read (the displacement follows), the tracer's RAW on for 78304's raw arguments. HYPOTHESIS until v3: the
   contact's push carried the basket more than 110 units (the fault) rather than the engine's own spawn ejection.
 
+### 78304's arguments (the re-analyst's Ghidra read, 11:46 PDT 2026-10-31; the tracer's impulse hook corrected on main)
+
+- CONFIRMED-BY-DECOMPILE: 78304 (0xea1600) is the body of bhkCharProxyController's ObjectInteractionCallback with `this` adjusted
+  to the bhkCharacterController subobject: its one call site is the thunk 79133 (0xed1620: `mov rdx, r8; add rcx, 0x10; mov r8, r9;
+  jmp`), slot 5 of the listener vtable 240558 whose slot 2 is 79131 (the tracer's ContactPointAdded). So rcx is the controller (its
+  fields match bhkCharacterController.h: orientationCtrl +0x190, flags +0x218 with kNoFriction, bumpedForce +0x2B8, bumpedBody
+  +0x2C0), rdx the hkpCharacterObjectInteractionEvent (hkpCharacterProxyListener.h: position 0x00, normal 0x10, objectImpulse 0x20 a
+  float, timestep 0x24, projectedVelocity 0x28, objectMassInv 0x2C, body 0x30), r8 the hkpCharacterObjectInteractionResult
+  (objectImpulse vector 0x00, impulsePosition 0x10). The tracer read rdx as the body: its "motion 32" was event+0x160, stack past the
+  0x40-byte struct. Fixed: the body at rdx+0x30, the event's numbers and the result vector before and after logged.
+- CONFIRMED-BY-DECOMPILE: the function scales result.objectImpulse and writes nothing on the body: zero unless 0 < mass < 95 (the
+  .data float 389158 = 95.0, its one writer a copy of an .rdata 95.0; HYPOTHESIS that nothing writes it indirectly), factor 2.0, the
+  props' layer 10 3.0 when mass <= 47.5 else 0.1, layers 6 and 14 0.1, shrunk so impulse/mass <= 1000; records bumpedForce and
+  bumpedBody when the scaled magnitude grows; under kNoFriction the orientation controller may rewrite the vector (HYPOTHESIS, the
+  interface header is absent in the pin). The push lands after it returns, in the surface pass 62648 (0xb83580): activate 60849
+  (HYPOTHESIS), then the motion's ApplyPointImpulse(&result.objectImpulse, &result.impulsePosition) (hkpMotion.h:60), or a deferred
+  buffer when 62648's fourth argument is non-null. 62654 dispatches the listeners per manifold point, skipping motion types 4 and 5
+  (Keyframed, Fixed), clamping by the proxy's characterStrength times dt and adding the characterMass term.
+- What this means for the launch: the tracer's "a velocity jump per push" appears in the NEXT 78304 call's `before`, never the same
+  call's `after`; a body's leap at one standing contact would read as result.objectImpulse scaled far beyond the event's objectImpulse
+  (the factor path), or as a sane result with the body's velocity leaping anyway (then the push is not this path: the stream's echo,
+  the view's apply, or our Dynamic set's mass). v3's RAW rows carry the raw pointers for anything the shape above gets wrong.
+
