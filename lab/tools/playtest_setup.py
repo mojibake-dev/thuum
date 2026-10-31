@@ -346,7 +346,10 @@ def setup(n: int) -> int:
         if seat.get("by_hand"):
             rep.note(f"by hand, in the seat's own game: {seat['by_hand']}")
     print(f"== Sunshine {time.strftime('%H:%M:%S')}", flush=True)
-    ps = "Restart-Service SunshineService -Force; Start-Sleep -Seconds 3; 'sunshine ' + (Get-Service SunshineService).Status"
+    # polled to 20 s, not read once at 3: on sky-c2's RTX the service read Stopped 3 s after its restart and Running
+    # 12 s later (playtest 39, 2026-10-30)
+    ps = ("Restart-Service SunshineService -Force; $s = ''; foreach ($i in 1..20) { Start-Sleep -Seconds 1; "
+          "$s = [string](Get-Service SunshineService).Status; if ($s -eq 'Running') { break } }; 'sunshine ' + $s + ' after ' + $i + ' s'")
     for client, vmid in sorted(_clients().items()):
         d = _guest_exec(vmid, ps)
         out = (d.get("out-data") or "").strip()
