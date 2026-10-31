@@ -596,3 +596,13 @@ A) leave the mod's rule, whatever it is, and only fix the set-up; B) if the mod 
 reached the record and make it reach it (the client's health report under an engine effect); C) if the mod only caps maximums, a
 server rule that drains health at the cold maximum from the reported needs (R1 report, R0 drain), the mod's numbers from its records.
 Recommended: A tonight, B or C by the read's answer as a train after M3 closes.
+
+The read drafted (00:5x PDT 2026-10-31): x-survival-cold v1 by path (lab/.cache/probes, sha1 23b6403f; 34 steps, 14 claims), c1 alone
+at lab-spawn with the mode switched on (828, the main script's poll starting it outdoors: 826 reads 1). Leg A, the stage: the cold need
+set to 990 (stage 5; the help flags 8e0 to 8e2 are the deploy's default 1, so no box) and the seat's health read over a minute in two
+dumps with the record's snapshots beside them: a drain shows on both, a cap shows as the maximum alone (recorded, not claimed; the
+answer picks B or C). Leg B, the kill: the need set to 1000; the client's report within a second and the server's word (memo D51 B,
+"dies by the server's word: global 81b:... at 1000 reached its killAt") within 10 s, the record dead, the seat down (c1.state.down), a
+screenshot; the respawn within 40 s and ONE kill line over the next 40 s (a second line is a death loop, the lethal global still at
+1000 after the respawn: a finding by name). H-D51a is read on the way (the seat's own Kill at the mod's next tick swallowed, the
+server's word the one death). Runs in a lab gap, one seat; the probe is the draft of b-survival-cold once D72 is called.
