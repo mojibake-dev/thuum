@@ -4106,3 +4106,25 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   `leveling` switch turns ON in both deploy settings. Probe x-skill-use v1 549cec01 by path (two seats: c2 the target 120 units
   north under god mode, twenty swings; One-handed 20 to 21 on the server and on the seat's base, the engine's xp 0, the level kept
   across a relaunch; HYPOTHESIS read: the hook fires for a hit on a figure as it did on a local NPC).
+- (03:3x PDT 2026-10-31) The Windows coverage crash FOUND (a reviewer agent over the 780-line server diff 6796e787..7a6fd1e2, 48
+  min): WorldState::AttachEspmRecord (2f886731, finding 65) took the new MpActor's pointer before AddForm and marked it placed-dead
+  after; when the id was already attached, AddForm's insert dropped the duplicate and freed the form, and MarkPlacedDead wrote into
+  the freed actor. The duplicate attach is deterministic: LoadForm has no "already loaded" check, and the attach's own
+  ForceSubscriptionsUpdate chunk-loads the record's own square, re-entering LoadForm for it. Natively the writes land in freed
+  memory nobody reuses (silent); under the debugger heap OpenCppCoverage runs the binary with, the freed block reads 0xFEEEFEEE
+  and the store faults: every Windows run red since the union. Fix on fork m3-attach-uaf (off parity d10789f7, server-only push):
+  the mark through the map after AddForm, LoadForm's guard against a second attach, DestroyForm clearing the idx's unreliable
+  slot. Its GitHub Windows run is the proof; its merge is an R0 change (T0 and T2). A memory corrected on the way: GetPartOne()
+  builds a FRESH PartOne per call (unit/PartOne_ActivateTest.cpp:38-48), so the unit cases share the espm loader and static
+  locals, not a world; LockTest's ten Lockpicks were the fresh actor's own kit.
+- (03:3x PDT 2026-10-31) Lab grammar: the driver's `papyrus-log {minSelfId, maxSelfId, eventPattern?}` prints every Papyrus event the
+  engine sends to a script on those references (Skyrim Platform's sendPapyrusEvent hook: the self id and the event's name, no
+  arguments); `{stop: true}` removes it (YAML reads `on` and `off` as booleans, which a first cut tripped on). lab-api lists the
+  action. Probe x-word-wall-read v1 147f0ba8 by path (Bleak Falls Sanctum 0x371dd: the wall 0x709d1 and its trigger 0x709d2, the
+  block lifted, the logger on both, c1 walks into the trigger; `known` of WordFus 0x13e22 before and after, screenshots). Designs:
+  docs/verbs/vampirism.md (the ten race pairs, PlayerVampireQuest 0xeafd5, the globals, the abilities, the Vampire Lord later; the
+  condition as records the server has, the feed R1; after turbo 2) and docs/verbs/alchemy-enchanting.md (a memo: a brewed potion
+  and a custom enchantment are forms the engine invents on one seat and the inventory carries base ids with upstream's extras;
+  the call under the pass's rule is C now, local only and named in the checklist, with B, a template plugin, drafted as the
+  build). The deploy settings are rendered by lab/tools/layer-render.py now (the labapi test wants the renderer's form; my hand
+  insertions of the four switches passed through it unchanged).
