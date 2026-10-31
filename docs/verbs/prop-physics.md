@@ -365,3 +365,14 @@ SteelSword per seat, the copies within 12 x, 4 y and 20 z). The red: c2's distan
 rolled downhill from the camp's rise (z -288 to -309 against -144). The site, not the code: v5 by path (426cf923) on lab-spawn's flat
 strip with every claim unchanged. push v10 and grab v8 re-shaped for probe-check's rule (a client log count is read at its log-count
 step, never polled in an until): 861f51bf and 7689e959.
+
+x-prop-pass v9's rerun (023534, 19:42 PDT read) RED on 3 of 15: the pass worked (the host's own epoch 1 at the spawn's ejection, its
+stream and sleep, c2's apply; then c2's contact claimed, granted at epoch 2 at 02:37:57.331, Dynamic, the stream at the grant, the
+host "theirs"), and 3 s after its grant c2 untracked the basket "out of reach"; both listings lost it. The same flight as grab v7's,
+with no hand on the body, so H-P2 (the hand's spring) cannot be the whole cause. HYPOTHESIS H-P3: the grant's flip (stopTranslation,
+setMotionType Dynamic with the wake) on a body that had followed the host's stream flings it; the follower's copy sits where the
+stream's jump put it, and the Dynamic set may resolve a penetration (ground, capsule) violently, or resume the walker's push, or
+hand the grab's stretched spring its force. The drop (v4) took the same flip at its grant without flight, on a copy the server
+had just created at the drop point, never a follower. The read before the fix: x-prop-pass v10 by path (372f3a71), v9's frame with
+the basket's position on both seats at 1, 2 and 4 s after the key (radius 1200, x, y, z recorded); grab v8's release read tells the
+hand's case. The two local fixes (46f1a2dc, a2256945) wait on these reads; one head move after them.
