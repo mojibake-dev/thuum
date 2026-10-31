@@ -4289,3 +4289,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   T2 green beside; clones promoted). leveling.md's head says MERGED. The new parity merged into the rest (clean, tsc green, both
   remotes): m4-locks 9ece63c2, m4-weather 6c9de3df, m5-perks afd12dae, m3-prop-physics f923e0a7; locks' probe runs on 28910a3d's
   build if the stage pins it, its gate on 9ece63c2.
+- (09:26 PDT 2026-10-31) the gap-fillers carry parity b6748da0 too (clean merges, tsc green, both remotes): m3-quest-report-dedupe d0085bb0,
+  m4-containers-rest ae2cbfd6, m3-talk-console-guard 7be4eb41; their probes run on the builds numidium staged (dedupe 4ca5783c now,
+  x-quest-report-dedupe 0a281115), their gates on the new heads. verb-stage stages a branch's current head only, so locks' probe and
+  gate both run on 9ece63c2 once it builds.
