@@ -3827,3 +3827,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Draugr 0x1d219 and the Battleaxe 0x1cb64 in the registers): HYPOTHESIS for apocrypha, the defaults layer's patched USSEP (plugin-
   patches.tsv, its CRC changed) against the clients' copy; one crash, watched for a recurrence; the logs ride D69's clean-m1-next.
   numidium's tooling: runset's RUNSET_AFTER rest leaves pending out (e46fda2b), playtest_setup waits 20 s for Sunshine (5c2e70e8).
+- 21:49 PDT: the launch read prepared for the physics branch's restage: lab/frida/prop-launch.js (the contact tracer plus the body's
+  velocity, position and inverse mass at each contact and push, offsets from the Havok headers) and x-prop-launch v1 by path 3edfc17a
+  (an engine-native basket against the server's drop, the host running through each, the record snapshotted); the Dynamic plan in
+  prop-physics.md names what each reading means. The guest-loot v2 restage is laying its client; its probe next, then D69's restage
+  with x-quest-rumor v2.
