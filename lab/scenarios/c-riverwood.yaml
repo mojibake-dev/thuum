@@ -42,7 +42,9 @@
 # 14:53 PDT 2026-10-31 (thuum-magnus): claim 2's two position lines on the walker 0x13489 removed; they compared c1's read before
 # its relaunch with c2's after the pass, about 21 s apart, and a walking resident covers 330 to 531 units in that time (four gate
 # reds on three builds with the identical shape, green only when the resident stood). Alvor, standing, keeps the continuity claim;
-# the walker keeps its live-switch claims and claim 1's paired reads 0.3 s apart.
+# the walker keeps its live-switch claims and claim 1's paired reads 0.3 s apart. 14:55 PDT: the walker's handoff check comes back in
+# a form the walk cannot fail: the server's record at the pass against c2's read taken in the same breath, within the measured 256
+# (numidium's suggestion of a bound the walk cannot cross, taken as the record's snapshot).
 id: c-riverwood
 milestone: M3
 clients: [c1, c2]
@@ -115,6 +117,14 @@ steps:
   - c1: npc-state {formId: 0x13489}
   - c1: relaunch {until: gone}
   - until: {within: 12, expect: [server.host(0x9732).client == "c2"]}
+  # the walker at the pass: the server's record (the last host sample) against c2's read in the same breath, so a handoff
+  # teleport on the walker would show while its walk cannot (a third of a second of walking is under 50 units); the record's
+  # position and the seat's read are both absolute (lab-api's frames)
+  - server: snapshot {name: w89, of: "server.ref(0x13489)"}
+  - c2: npc-state {formId: 0x13489}
+  - assert:
+      - abs(c2.npc_state(0x13489).x - snapshot("w89").x) < 256
+      - abs(c2.npc_state(0x13489).y - snapshot("w89").y) < 256
   - wait: 3
   - c2: npc-state {formId: 0x13482}
   - c2: npc-state {formId: 0x13489}
