@@ -4268,3 +4268,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   other caller of the entry), the withdrawn stall reworded, the probe and scenario lines current; p-level-up.yaml on main d9e02b7d
   (its first run owed standalone before leveling's gate). Left as HYPOTHESIS: the pairing refusal E_SKILL_NO_ACTION's shape at T3,
   the engine's own level-up prompt (p-level-up's leg 3 reads it).
+- (08:20 PDT 2026-10-31) leveling's order with numidium: after x-skill-use v5 for the record, p-level-up standalone on the laid stage
+  (deploy-srv from d9e02b7d), then verb-merge m5-leveling on the same stage with T2 beside it (named: p-level-up, a-actor-values,
+  b-figure-values, plus always and watch), locks after; a restage saved.
