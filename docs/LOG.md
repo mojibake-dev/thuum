@@ -3850,3 +3850,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   same millisecond, the activate in the enable's frame, no menu; the AI off at the dump. v3 pushed (m3-guest-loot 0547e5d4: a latent
   waitMenuMode(0.2) between the switch and the activate, the state logged before it, the off deadline 3 s). numidium takes the lab to
   D69's restage (dc3ec679, x-quest-rumor v2 7923ecc8) first; guest-loot restages on 0547e5d4 after it, the gate as agreed.
+- 22:06 PDT: the guest-loot handler's loop never iterated after the activate in 045522 and 045859 (no deadline, no give-up; numidium's
+  grep), so the AI's off at the dump is another hand's. The loop's poll and v3's beat were VM latents (waitMenuMode); the original
+  loop's Utility.wait is Skyrim Platform's own and iterated for 15 s on guests before. v4 ce1df68b pushed (the beat and the poll on
+  Utility.wait, the first wait in menu mode), the restage's head after D69's probe; the onResult lines of the next run read the latent
+  question. v3 0547e5d4 superseded before any run.
