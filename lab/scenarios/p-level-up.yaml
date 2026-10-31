@@ -14,6 +14,8 @@
 # base, not the leveling standing the engine's PlayerSkills report, so the doc's "15 to 16" runs as 20 to 21): the step costs 688
 # experience, sixteen hits; the character's level 2 comes with the fifth skill level (21 + 22 + 23 + 24 = 90, plus 25 makes 115 over
 # the 100), 4,160 experience from 20, about 95 hits; level 3 (125 more) is out of a run's reach, and so is skill 27 (6,372).
+# v2 (08:23 PDT 2026-10-31, before its first run): c2 at 80 units, not 120; x-skill-use v5 (151817) landed 13 of 36 swings at 120, the
+# sword's reach edge, under the sixteen the step needs.
 # Claims (the verb doc's Tests), each with what it proves:
 # 1. The premise: One-handed 20 on the seat, experience 0, level 1 (the clean world's character, read through SKSE).
 # 2. Thirty-six swings: the batches sent, "skill 6 reaches level 21" once on the server and never 23, the seat's base at least 21
@@ -44,7 +46,8 @@ steps:
   - c2: server-console {name: TGM}
   - c1: server-console {name: AddItem, args: [0x14, 0x12eb7, 1]}
   - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
-  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0, rot: [0, 0, 0]}
+  # v2: c2 at 80 units, inside the sword's reach (at 120 the probe landed 13 to 16 of 20 and 13 of 36 swings: the reach's edge)
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
   - wait: 6
   - c1: equip {formId: 0x12eb7}
   - wait: 1
