@@ -4409,3 +4409,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   paired reads 0.3 s apart stay). For Eli's eye: a claim removed from the M3 exit's watch item, with the measurement above. The fourth
   red (213550) was the restart leg's Alvor 266 off after 30 s, the watch item's known shape. Containers re-gates on the new scenario
   after physics' stage on 37e960eb (numidium's call: that stage's watch set is the comparison without containers' code).
+- (14:55 PDT 2026-10-31) c-riverwood 37a35d33 (its own commit): the walker's handoff check returns as the server's record snapshotted at the
+  pass against c2's read in the same breath, within the measured 256 (a handoff teleport would show; the walk cannot fail it);
+  numidium's suggestion, taken as the snapshot. Physics' stage on 37e960eb runs; containers re-gates after it.
