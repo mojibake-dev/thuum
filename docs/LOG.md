@@ -3738,3 +3738,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   at every pitch; D70's aim hypothesis falls; the sweep's offset is the caster's heading against the record's yaw (about 42 degrees,
   HYPOTHESIS) plus 192 against 206; shape A stands with the measured distance as its validator's bound (DECISIONS, the verb doc). The
   physics stage ended (exit 0, dde874b5 laid); the after-stage queue runs pass v9's rerun, push v10, grab v8, drop v5.
+- 19:42 PDT: pass v9's rerun 023534 RED on 3 of 15 (numidium): the pass works, then the basket flies out of reach 3 s after c2's grant
+  with no hand on it (grab v7's flight again): H-P3, the grant's flip on a follower's copy flings it (the drop's copy, never a
+  follower, took the same flip without flight). Read before the fix: x-prop-pass v10 by path 372f3a71 (the position on both seats at
+  1, 2 and 4 s after the key), queued after drop v5; the two local fixes wait on the reads. push v10 running, then grab v8, drop v5.
