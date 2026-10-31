@@ -4135,7 +4135,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and re-enabled and raised again by the second cast, nothing new created (c1's listing 4 s into cast two: exactly cast one's ids at
   206.25 and 196.875). a08787b5's reported-and-unmoved skip hid the re-enabled halo and caught the wall only once it had moved,
   mid-rise 2.5 s after the request, reported unsettled at the deadline 29 to 33 units low. The fix, fork m3-wall-pose b36d93aa
-  (client and wire-rules, both remotes verified): eligibility is disabled-or-deleted and nothing else (a disabled reference is the
+  (client and wire-rules, both remotes verified; its wire-bridge placements test still named the 3,000 ms window and went red in
+  CI, fixed at 0e4b34e5, the head numidium stages): eligibility is disabled-or-deleted and nothing else (a disabled reference is the
   earlier cast's object; a re-enabled one is this cast's), the reported map is gone, and REPORT_WINDOW_MS is 6,000 (the second
   cast's wall began its rise about 2.3 s after the request on both runs; a 3 s window less the 500 ms reply margin cannot settle it).
   The verb doc carries the finding, row 74's observation and the window; the scenario's shape A amendment is drafted (the walk's line
