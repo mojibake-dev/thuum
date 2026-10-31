@@ -3881,3 +3881,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   activate's return logged). The probe x-body-open-guest-fix v2 by path and the two pending scenarios (a8cd208's and 330124b's
   successors, their own commits) read the guest's lines from the body-open path. D69 merges alone (numidium's merge-d69); the union
   m3-pass-train-4 re-cut on v5 after.
+- 23:10 PDT: Eli: "its gonna be a bit before i can playtest but when i do im doing turbo mode (probs sunday evening and all of monday.)
+  where i'll likely attack one open feature at a time and iterate till it's fixed. what all can we get pre-work done on and add to the
+  pile? what from m4 and m5?" The pile through Sunday evening written as docs/private/turbo-2-prework.md: A, M3's open items in
+  order (guest loot, physics with its three reads, the wall's reported pose, the dedupe, Survival's read, the small ones); B, M4
+  items pre-built to T3 behind switches (containers' rest, locks and lockpicking, traps and the puzzle door toward d-bleak-falls,
+  weather as a server global, word walls); C, M5 items to T0/T2 and probed (skills and leveling R0, perk picks as transactions,
+  alchemy and enchanting on the craft path, vampirism's design); D, the turbo shape (a switch, a probe, a checklist line per item,
+  the hot-push loop); E, the order Fri night to Sun afternoon with one sweep on the merged base before the seats are laid.
