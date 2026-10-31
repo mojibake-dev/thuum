@@ -675,6 +675,11 @@ included. Nothing happens at runtime.
   the spell itself, so the patch's second ability applies: a plugin without the record gets Skyrim.esm's
   copy injected into its SPEL group (read from lab/.cache/game, the host's master copy, decompressed;
   the header's count up by one) and then the magnitude; the guard confirms nothing later carries it.
+  Since 2026-10-30 the copy travels without its text fields: Skyrim.esm is localized (its FULL and DESC
+  are string ids into its strings files) and USSEP is not, so the first render carried the spell's name as
+  a two-byte garbage string; the injection now drops FULL and DESC when the source and target differ in
+  the localized flag (the ability's name is never shown; the effect's name is the MGEF's). USSEP becomes
+  21,106,757 B with that render.
   USSEP's size and CRC32 move with its three patches (slot 1's mod-lock entry: 21,106,651 B CRC32
   86A15BD3 before; 21,106,777 B CRC32 7CA7F25F after, SHA-256 01064760..., the two 25-byte ability
   blocks gone and the 176-byte spell record added), the Twin Souls fix's CRC32 with the shout rows (its

@@ -243,6 +243,23 @@ class SpellMagnitude(unittest.TestCase):
         with self.assertRaises(SystemExit):
             plugin_patch.patch_spell_magnitude(p, {"game_dir": str(d)}, "01000001", "1.0")  # the plugin's own index
 
+    def test_a_localized_master_s_text_fields_do_not_travel_into_a_plain_plugin(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        spel = sub(b"EDID", b"X\0") + sub(b"FULL", b"\xbb\xf0\0\0") + sub(b"DESC", b"\0\0\0\0") + sub(b"EFID", b"\1\0\0\0") + sub(b"EFIT", struct.pack("<fII", 0.05, 0, 1))
+        (d / "Skyrim.esm").write_bytes(plugin([record(b"SPEL", 0x000D8C31, spel)], masters=(), flags=plugin_patch.LOCALIZED | 1))
+        p = plugin([record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))])  # not localized
+        new, what = plugin_patch.patch_spell_magnitude(p, {"game_dir": str(d)}, "000D8C31", "1.0")
+        o, _, _, _, size = next(r for r in plugin_patch.walk(new) if r[3] == 0x000D8C31)
+        self.assertEqual([s for s, _ in plugin_patch.subrecords(new[o + 24:o + 24 + size])], [b"EDID", b"EFID", b"EFIT"])
+        self.assertIn("without its text fields FULL, DESC", what)
+        # both localized, or both plain: the text fields stay
+        q = plugin([record(b"ARMO", 0x00000D62, sub(b"EDID", b"CloakA\0"))], flags=plugin_patch.LOCALIZED)
+        new2, what2 = plugin_patch.patch_spell_magnitude(q, {"game_dir": str(d)}, "000D8C31", "1.0")
+        o, _, _, _, size = next(r for r in plugin_patch.walk(new2) if r[3] == 0x000D8C31)
+        self.assertEqual([s for s, _ in plugin_patch.subrecords(new2[o + 24:o + 24 + size])], [b"EDID", b"FULL", b"DESC", b"EFID", b"EFIT"])
+        self.assertNotIn("without", what2)
+
     def test_injects_the_record_from_its_master_when_the_plugin_lacks_it(self):
         import tempfile, zlib
         d = Path(tempfile.mkdtemp())
