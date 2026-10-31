@@ -1240,6 +1240,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   x-lockpick e5014621, x-weather bd44bf04, x-perk-pick 5e0f733f; scenario drafts for all five in the scratchpad, each its own
   commit after its read. m3-prop-physics e6befc5e (parity merged) waits for x-prop-launch v2 ce95029f after them. lab-api reads a
   seat's weather (c.weather()). Dedupe, containers' rest and the talk guard still on 1e836299, after wall-pose. Turbo 2 as set.
+- STATE 2026-10-31 05:54 PDT (the pass's chart line): m3-wall-pose MERGED to fork parity e713862c (12:51Z, numidium: the gate 8 of 8 with
+  b-spell-placed-wall v4 green at 122522, b-npc-caster green on its relaunched rerun, T2 beside, clones promoted; the scenario out of
+  lab/gate.yaml's pending): Raise Wall's copies stand where the caster's engine stands them (D70/D74 shape A), the mod's reference
+  re-use handled. The post-wall parity merged into the cascade, each tsc green and on both remotes: m5-leveling b6748da0, m4-locks
+  4b52cd12, m4-weather 7ff8acbf, m5-perks 5c4b3509, m3-prop-physics 2ad267fa; their dists build in sequence, the probes run on the
+  prior dists (x-skill-use v3 4585b2a0 on ef618dee's first, staged now). Two small ones: b-quest-stage-restart on main (its first run
+  owed), m2-effect-conditions-row 027ffa28 (R0, the refusal row named). Turbo 2 as set.
 - STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
   sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
