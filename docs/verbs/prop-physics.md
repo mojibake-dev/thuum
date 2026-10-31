@@ -458,3 +458,16 @@ makes a prop appear: push v13 (e98f89ba) and pass v11 (by path) have the host dr
 claim, fall and sleep as the premise, then the kick. For the code, a follow-up, not tonight: the first track's placement translate
 re-creates an overlap whenever the record sits inside a capsule (a login into a cell whose clutter rests where a player stands);
 the placement could stand off, or wait, when the record lies within the player's radius.
+
+grab v8 (033439, 20:40 PDT read; the fixed build) RED 4 of 12, the same shape as on the old build: the pitch sweep's hit, the claim's
+touch 1 AND touch 2 logged in the same instant (03:38:03.958), the grant, Dynamic, the stream at the grant and asleep, the host
+"theirs" and applied; then c2's "Sent activation for caster= 14 and target= ff000002" (05.259) and the server's "Deleting 0xff item"
+(05.461): the held E's release picked the basket up. Under D73 c2's copy was Dynamic at the grab (no live stream, the marker spawn
+untouched), so the instant release is not the Keyframed body's refusal: the engine's grab closes and lets go at once on this body
+for a reason still unread (the motion type set to Dynamic (1) where the file's is SphereInertia (2), HYPOTHESIS; the hold-key's
+press shape; the grab's own rules). Two items, neither tonight's: the grab's engine read (a Frida trace of the grab's start and
+release on c2, PlayerCharacter's grab fields: PlayerCharacter.h:570 StartGrabObject, :553 EndGrabObject, :697 grabbedObject), and
+the pickup after a failed grab (ActivationService could withhold an activation on a reference this seat tried to grab within the
+last second and a half, since a long press is a grab in the engine's own grammar, not a pickup). For the physics train the grab
+(touch 1) is a declared limit: a held E on a prop does not lift it on this build, and its release picks the item up; the kick,
+the pass and the drop are the train's claims (b-prop-push promoted from push v13 on green).

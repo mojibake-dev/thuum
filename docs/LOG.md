@@ -3790,3 +3790,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (the capsule contact's claim, the translate back into the capsule); the slope question moot. The probes spawn by the verb's own drop
   from here: push v13 e98f89ba, pass v11 by path (the host drops a Basket01, 64 ahead and 48 up, its claim, fall and sleep the premise,
   then the kick with b0/r1/r2/r4). A follow-up noted for the placement translate into a capsule.
+- 20:40 PDT: grab v8 033439 on the fixed build RED 4 of 12, the pickup again: the grab closes and releases in one instant even on D73's
+  Dynamic body, the E's release picks the basket up (c2's activation 05.259, the server's delete 05.461). The grab's engine read is
+  owed (StartGrabObject/EndGrabObject on c2) and the pickup after a failed grab is a client follow-up; the grab is a declared limit
+  for the physics train. drop v6 running, then push v13 and pass v11.
