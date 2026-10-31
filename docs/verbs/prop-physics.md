@@ -414,3 +414,13 @@ a jump past JUMP_UNITS and the first placement all translateTo at a speed landin
 only before), the rest-Dynamic set 300 ms after. The branch for the restage: 46f1a2dc (the wake), 0bb02f74 (D73), fa225f01 (H-P4);
 its probes push v11, pass v10c (02af9dc2: the record by `server: snapshot` steps, no pos claims, since the evaluator evaluates every
 operand and a missing listing raises), grab v8, drop v5.
+
+push v11 (025647, 20:01 PDT read; the old build dde874b5, no wake fix) RED 5 of 10 at the stream claims, as expected, and it reads
+H-P4 again from the host's side: the premise held on the marker site (both seats one copy at (133433.6, -61386.5), c1 "tracked, 80
+units off", "placed at its record" (the setPosition snap) and "simulated here: Dynamic"); at the walk c1 logged "contact ff000002
+layer 4 motion 2: owned, no claim" (02:59:54.610), so the Dynamic body set WITHOUT the wake flag did take the running walker's
+contact (H-P1's inertness is therefore unconfirmed; push v9's silence was the body inside the standing host's capsule), and right
+after the contact the host's own listing lost the basket while c2's kept it at the spot: the host's copy flew, no stream, no
+E_PROP line. The same signature as v10b's claimant: a copy placed by setPosition and set Dynamic flies at its first contact. H-P4
+reinforced; fa225f01 is the fix under test on the restage. The wake fix 46f1a2dc stays as the engine's own default for clutter
+(allowActivate true), its H-P1 justification downgraded to a note.

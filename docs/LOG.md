@@ -3763,3 +3763,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   placed by it; the drop's copy, never placed, settled). Fix fa225f01 on m3-prop-physics (jumps and the first placement by keyframed
   translate, the rest-Dynamic set at 300 ms); pass v10c by path 02af9dc2 (snapshots, no pos claims). The branch (46f1a2dc, 0bb02f74,
   fa225f01) pushes at numidium's "queue done"; the restage's probes push v11, pass v10c, grab v8, drop v5.
+- 20:01 PDT: push v11 025647 on the old build RED 5 of 10, as expected, reading H-P4 from the host's side: the setPosition-snapped,
+  Dynamic-no-wake copy took the walker's contact ("owned, no claim") and vanished from the host's own listing, c2's copy unmoved at the
+  spot; H-P1's inertness unconfirmed (the body did take a contact), the wake fix kept as the engine's default. drop v5's rerun is the
+  queue's last; then the branch pushes (46f1a2dc, 0bb02f74, fa225f01).
