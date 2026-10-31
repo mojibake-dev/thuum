@@ -71,9 +71,9 @@ message, one per cast; OnEffectStart and OnEffectFinish only.
 | the halo, ACTI 0x735e8, at the TargetBox's XY, the caster's height | script | imposed: the server's second object (R0); no collision added, Known limits S1 |
 | explosion 0xc145 at the TargetBox: knockdown 4, no damage, radius 50 | script | native in the caster's game alone |
 | effect shader 0x735e7 on the wall | script | R3, later |
-| OnEffectFinish: Disable(fade) both, Wait 5, Delete all three | script | imposed: deleted 5 s after the cast's end (R0); the fade: H-SP4 |
+| OnEffectFinish: Disable(fade) both, Wait 5, Delete all three | script | imposed: deleted 5 s after the cast's end (R0); the fade: H-SP4. Observed 2026-10-31 (x-raise-wall v5, 20261031-104852 and -105243): the two references survive the release disabled (deleted false 9 s after it) and the next cast re-uses them, re-enabled and raised again under the same ids, so no Delete shows; the server's copies still go 5 s after the cast's end |
 | the failure effect: a message, no wall | record | native; the server waits 250 ms of open stream (REFUTED: WB_OcatosRecitalFail_Script shows a message and dispels nothing, apocrypha's read, LOG 2026-10-28 22:01 PDT, so the 250 ms gate narrows no failed cast; a wall where the caster's engine chose the no-room message is the declared v1 limit: Open questions, ADR-057, Known limits S2) |
-| the collision: the mesh's Havok body (SKYL_ANIMSTATIC, MOPP), no navcut | mesh read | native: blocked, not re-pathed (HYPOTHESIS until b-spell-placed-wall's claim 4, c2's walk stays north of y -300 and c1's within 256 of its start, or x-raise-wall v2's cast-two walk holds; unrun, 204833 and 205817 died at c2's teleport before any cast and the frames since moved; the no-navcut re-pathing is the mod's own on every seat, not claimed) |
+| the collision: the mesh's Havok body (SKYL_ANIMSTATIC, MOPP), no navcut | mesh read | native: blocked, not re-pathed (HYPOTHESIS until b-spell-placed-wall's claim 4, c2's walk stays north of y -250 (v3's line, derived from the server's band: the southmost north face a wall it accepts can have is -216) and c1's within 256 of its start, or x-raise-wall v2's cast-two walk holds; unrun, 204833 and 205817 died at c2's teleport before any cast and the frames since moved; the no-navcut re-pathing is the mod's own on every seat, not claimed) |
 
 ### Sequences and combinations (ADR-033)
 
@@ -223,7 +223,7 @@ are the caster's alone (ADR-057).
   PlacedReport client to server, reliable; CreateActor as before.
 - Fields: PlacedRequest { set: u64 (the set's id the reports name), bases:
   [u32] (the entry's bases as form ids in the load order both ends share, 1
-  to 8, none 0), windowMs: u32 (1 to 10,000; the rule's 3,000) }.
+  to 8, none 0), windowMs: u32 (1 to 10,000; the rule's 6,000, 3,000 until 2026-10-31) }.
   PlacedReport { set: u64, base: u32 (never 0), pos: [f32; 3] (engine units,
   inside the world), yaw: f32 (degrees) }. placed_by: u32, nonzero, only with
   base_record_type MSTT or ACTI.
@@ -277,7 +277,7 @@ are the caster's alone (ADR-057).
   PlacedRequest (fork m3-wall-pose 866ff864): per base, the engine's own
   reference nearest the point 200 units ahead of the player along its yaw
   (radius 160; the view's copies, told by the cleaner's protection, and
-  references reported for an earlier set are skipped), polled every 100 ms,
+  references disabled or deleted are skipped, an earlier cast's objects faded at its release; v4's rule, a reference reported for an earlier set skipped, lost every second cast, x-raise-wall v5), polled every 100 ms,
   reported once two reads agree within 0.5 units (the script's wall rises at
   512 units a second from 240 below) or at the window's deadline less a 500
   ms reply margin; a base never found is traced and dropped. formView.ts's
@@ -406,7 +406,7 @@ record's yaw would place along a heading the engine did not use. The train after
 ## Shape A built (00:15 PDT 2026-10-31; fork m3-wall-pose 23e334b9, 69ca1221, 866ff864, 7ac26664, off parity dc3ec679)
 
 The handshake (D74): at the accepted cast of a listed spell the server asks the caster's game for the entry's bases (PlacedRequest:
-the set's id, the bases as form ids, the window of 3 s) and the caster's game answers once per base when the reference has settled
+the set's id, the bases as form ids, the window of 6 s: 3 s until 2026-10-31) and the caster's game answers once per base when the reference has settled
 (PlacedReport: set, base, pos, yaw); the server judges each report (the set its own request to this caster and still open, the base
 asked for once, the pose 150 to 260 units from where the caster stood at the cast on the ground plane and within 256 of its height:
 the pitch read's 206.25 and 196.875 with the caster's own motion inside the window) and places that base where reported, so the
@@ -428,3 +428,20 @@ most of these); a wall the engine placed outside the band is refused by name (E_
 rather than a silent miss. The scenario's amendment (its own commit, rule 13): the fixed-step formula leaves and the copy's distance
 is claimed against the caster's own engine copy, the server's lines become the request, two accepted reports and two "placed 1 form"
 lines a cast; no tolerance loosened.
+
+x-raise-wall v5 (88877000) read at a08787b5's stage (04:05 PDT 2026-10-31; runs 20261031-104852 cold and -105243 relaunched, both
+red at the second cast with three "placed 1 form" lines, not four): the first cast held every claim (the request, two accepted
+reports, two forms placed where reported, c2's distances equal to c1's own copies', one runtime reference of each base on both
+seats, the skip lines, the removal), so HYPOTHESIS (1) to (4) above are cleared. The second cast showed the engine's real
+behaviour: the script keeps the SAME two references across casts. At the first release both stand disabled (c1's listing 9 s
+after it: ff0009bf and ff00097c, disabled true, deleted false, at their poses); at the second cast they are re-enabled and the wall
+raised again under the same ids, and nothing new is created (c1's listing 4 s into cast two: exactly those two ids, at 206.25 and
+196.875 from the caster). a08787b5's search skipped a reported reference standing within 8 units of where it was reported, so the
+halo (back at the exact pose) was never reported and the wall was found only once it had moved, mid-rise, 2.5 s after the request,
+and went out unsettled at the deadline (z 14596 and 14600 against the settled 14629: 29 to 33 low). The fix (m3-wall-pose
+b36d93aa): eligibility is disabled-or-deleted, never reported-before (a disabled reference is the earlier cast's object faded at its
+release; a re-enabled one is this cast's), and REPORT_WINDOW_MS is 6,000 (the wall began its rise about 2.3 s after the request on
+both runs, which a 3 s window less the 500 ms reply margin cannot settle). HYPOTHESIS until v5 reruns on the fix: the second cast
+reports both bases settled inside the window, the server's copies for set 1 stand where c1's re-raised wall stands, and no
+unsettled line. Noted for the checklist, not a claim: the caster's wall fades at the release while the other seat's copy lingers
+the table's 5 s (lingerS, the deploy entry); the mod's Delete never runs, so the linger is the only end the other seat sees.
