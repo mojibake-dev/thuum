@@ -80,7 +80,10 @@ clock.rs). NPC steps for docs/verbs/npc-puppet.md: `npc-state {formId}` is kept
 per seat and read as `c.npc_state(<id>).aiEnabled` (and .inCombat, .package,
 .combatTarget, .staggering, .x, .y, .z); `refs-near {formTypes: [43]}` then
 `c.refs_near().runtime_of(<base id>)` counts that base's runtime copies (ids
-from 0xff000000); a watch records each actor's heading, read as
+from 0xff000000); a `weather {read: true}` step's sky is read as
+`c.weather().current` (the engine's current weather, a form id), `.outgoing`
+(the one it blends from, 0 once settled) and `.transition` (the blend's
+progress, 1 once settled; docs/verbs/weather.md); a watch records each actor's heading, read as
 `c.watched_id(<id>).turns` (net turns) and `.headingAtStop`; the driver's
 `npc-puppet {formId?, puppet}` calls the fork's setPuppet export and
 `npc-pose {formId?, x, y, z, angleZ, speed, direction}` is the puppet apply in

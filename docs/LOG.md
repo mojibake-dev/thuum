@@ -4147,3 +4147,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   from parity), e6befc5e, tsc green, both remotes verified, its pipeline building. Its next stage runs the launch read x-prop-launch v2
   (ce95029f) as the pass planned, after the leveling, locks, weather and perk probes; the physics item stays SKIPPED in the checklist
   until the train merges (D68, D73). The wall stage sits on 0e4b34e5 waiting for its client build (numidium).
+- m3-attach-uaf merged to fork parity b289cbda (2026-10-31T11:24Z): R0 (ADR-053): T0 pipeline 4168 server-build 15213: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m3-attach-uaf; clones not promoted. Verbs: (fill in).
+- (04:24 PDT 2026-10-31) lab-api grammar: the weather fact. A `weather` step's answer (the driver's read: current, outgoing, transition)
+  is kept per seat by the board and read as `c.weather().current`, `.outgoing` and `.transition` (assertions.py's WeatherView, the
+  method tables, two unit tests; README and LAB.md), so b-weather can claim two seats' skies equal instead of counting console lines
+  (weather.md's "after the lab-api grammar gains a weather fact"). 964 lab tests green. The scenario follows x-weather's read.

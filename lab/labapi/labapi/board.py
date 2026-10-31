@@ -76,6 +76,7 @@ class StepBoard:
         self._poisons: dict[str, dict[str, Any]] = {}
         # a skills step's answer: {skills: name -> {base, xp, legendary}, level}
         self._skills: dict[str, dict[str, Any]] = {}
+        self._weather: dict[str, dict[str, Any]] = {}
         # node-scale answers: "self" (the player's) and "other" ({other: true},
         # every actor nearby under "all")
         self._node_scales: dict[str, dict[str, Any]] = {}
@@ -152,6 +153,11 @@ class StepBoard:
             self._figure_spells[step.client] = body["data"]
         if step.action == "skills" and isinstance(body.get("data"), dict):
             self._skills[step.client] = body["data"]
+        if step.action == "weather" and isinstance(body.get("data"), dict):
+            # the sky as that seat's engine holds it after a weather step (a
+            # read, a force or a release): current, outgoing, transition
+            # (thuum docs/verbs/weather.md, c1.weather())
+            self._weather[step.client] = body["data"]
         if step.action == "node-scale" and isinstance(body.get("data"), dict):
             kind = "other" if (step.args or {}).get("other") else "self"
             self._node_scales.setdefault(step.client, {})[kind] = body["data"]
@@ -275,6 +281,9 @@ class StepBoard:
     def skills(self, observer: str) -> dict[str, Any] | None:
         return self._skills.get(observer)
 
+    def weather(self, observer: str) -> dict[str, Any] | None:
+        return self._weather.get(observer)
+
     def node_scales(self, observer: str) -> dict[str, Any] | None:
         return self._node_scales.get(observer)
 
@@ -306,6 +315,7 @@ class StepBoard:
         self._log_counts.clear()
         self._poisons.clear()
         self._skills.clear()
+        self._weather.clear()
         self._node_scales.clear()
         self._av_reads.clear()
         self._presets.clear()

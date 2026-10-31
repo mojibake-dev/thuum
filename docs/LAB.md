@@ -641,7 +641,10 @@ narrows the search's radius; docs/verbs/marksman.md), `c.refs_near()`
 radius, the cell's count for 50 PROJ; `.has(<base id>)` whether one of
 that base stood there, listed under its type or found by the ids search;
 `.distance(<base id>)` how far the nearest one lies, none a data error;
-docs/research/train-29-rows.md row 7c), and
+docs/research/train-29-rows.md row 7c), `c.weather()` (the client's last
+`weather` step, a read, a force or a release: `.current` the engine's weather
+form id, `.outgoing` the one it blends from, 0 once settled, `.transition`
+the blend's progress, 1 once settled; docs/verbs/weather.md), and
 `form("File.esm:EditorID")` through lab-api's item table. A mod's record is
 named as skymp's FormDesc names it, its local id and its plugin,
 `"aae8:Apocalypse - Magic of Skyrim.esp"` (the shape the server's settings and
