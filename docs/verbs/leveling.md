@@ -137,9 +137,9 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 ## Message contract
 
-- Message name / numeric type: SkillUse, MsgType 64 (wire id 72), client to server, reliable: `{ uses: [{ skill: u8
+- Message name / numeric type: SkillUse, MsgType 63 (wire id 71), client to server, reliable: `{ uses: [{ skill: u8
   (6 to 23), amount: f32 }] }` (up to 18 entries, one per skill per second, the amounts summed). The server's answer is
-  ActorValues (MsgType 40) as today. SCHEMA_VERSION 23 or 24 (whichever lands first with locks).
+  ActorValues (MsgType 40) as today. SCHEMA_VERSION 23 (fork m5-leveling 553863f8, 2026-10-31; locks' LockReport takes 64).
 - Direction: C2S.
 - Fields: as above.
 - Validator rules: skill 6 to 23 and listed once (E_VAL_RANGE), amounts finite and within 0 to 1e6 (E_VAL_NONFINITE,
@@ -198,8 +198,8 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (headers and CommonLibSSE-NG's source; the Frida read planned)
-- [ ] server logic + T0 (the rule and the reader: wire-rules leveling.rs with its Table (nine cases) and libespm's AVIF reader with its EspmTest case, fork m5-leveling bb0b37d8 and after, 2026-10-31; PartOne's handler and the SkillUse message owed)
-- [ ] message + validator (same commit)
+- [x] server logic + T0 (fork m5-leveling, 2026-10-31: wire-rules leveling.rs with its Table (nine cases), libespm's AVIF reader (EspmTest), the bridge's LevelingTable (its case), PartOne's LoadSkillTable at AttachEspm, ApplySkillUse and the `leveling` switch, ActionListener::OnSkillUse; unit/LevelingTest.cpp's three cases ride the pipeline)
+- [x] message + validator (same commit: SkillUse 63, check_skill_use, the budget, two fixtures, SkillUseMessage.h; m5-leveling 553863f8)
 - [ ] native hook + T1
 - [ ] TS handler
 - [ ] T2 green
