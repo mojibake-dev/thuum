@@ -4327,3 +4327,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the scenario to deploy before weather's gate (which follows locks' merge).
 - (10:43 PDT 2026-10-31) m5-skill-set a68d1b80: pipeline 4244 green (server-build with the two new T0 cases, wire-test, difftest-build); waits for
   an R0 slot. PLAN's chart line for the afternoon written.
+- (11:03 PDT 2026-10-31) x-lockpick v4 b5e2cc64 RED (20261031-175103 on m4-locks 9ece63c2's own build 4233): every step to the sweep held
+  (the creation line, c1's applied actor values with Lockpicking 100, the prompt, the Lockpicking Menu open; screenshot 025 shows the
+  menu with "Lockpicking 100", "Lock Level: Novice", "Lockpicks Left: 15" and the hints "Mouse Rotate Pick", "A D Rotate Lock"), then
+  the until on "371e9 unlocked" stayed 0 after all fourteen attempts with nothing logged: the run cannot separate an input that never
+  drives the menu from angles that missed. Also seen: hold-key answers "holding" at once and the next move ran inside the hold's last
+  second (wait 1 against a 2,000 ms hold). v5 cc50b014: the instrument read first (screenshots after a 3,000-count move left, after
+  300 counts right, during a 3 s hold of A, 3 s after; the record's Lockpick count through server.inventory), then a fine sweep with A
+  (0 to 900 by 75) and a coarse one with D (0 to 2,600 by 200), each attempt waiting 2.5 s out of its hold, a screenshot and the count
+  before the until. Runs on a locks restage after x-prop-launch v2 (numidium; the physics stage had passed the point of no return).
+- (11:03 PDT 2026-10-31) m5-perks: the fork's Formatting check refused afd12dae at verb-stage's step 1b (ConditionsEvaluator.cpp 92 to 96, the
+  effect-conditions fold 445ae376); formatted with clang-format 21.1.8 and pushed server-only: 1f3d0adf (ConditionsEvaluator.cpp; my
+  `fork-lint | tail` hid a second FAIL on MpActor.cpp, so that head is still red), then a71a9ba7 (MpActor.cpp; fork-lint exit 0 read
+  without a pipe). a71a9ba7 stages with REUSE_DIST from afd12dae's dist, after physics, locks v5, dedupe, containers and the talk guard.
