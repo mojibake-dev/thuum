@@ -254,6 +254,9 @@ class ChainCite(unittest.TestCase):
         self.assertTrue(rows[0][0], rows[0])
         # unpended, the same rest is short of it
         self.assertIn("is not the rest", gc.chain([cut, REST])[1])
+        # and runset.sh's RUNSET_AFTER plays exactly what chain() holds the rest to (rest_of, one definition)
+        self.assertEqual(gc.rest_of(cut, ["b-spell-placed-wall"]), REST["scenarios"])
+        self.assertEqual(sorted(gc.rest_of(cut)), sorted(REST["scenarios"] + ["b-spell-placed-wall"]))
 
     def test_a_rest_that_ends_red_leaves_the_gate_red(self):
         red = {**REST, "verdict": "red", "runs": {**REST["runs"], "b-spell": [{"run": "r7", "verdict": "red"}] * 3}}

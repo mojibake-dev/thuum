@@ -180,6 +180,12 @@ def _not_green_last(rs: dict) -> list[str]:
     return [s for s in rs.get("scenarios", []) if ((rs.get("runs") or {}).get(s) or [{}])[-1].get("verdict") != "green"]
 
 
+def rest_of(rs: dict, pending: list[str] | None = None) -> list[str]:
+    """What a RUNSET_AFTER rest of `rs` plays: every scenario whose last run there was not green, less those lab/gate.yaml
+    holds `pending`. One definition for both ends: runset.sh plays it and chain() holds a later set to it."""
+    return [s for s in _not_green_last(rs) if s not in set(pending or [])]
+
+
 def chain(sets: list[dict], pending: list[str] | None = None) -> tuple[dict | None, str]:
     """A gate a lab fault cut short and RUNSET_AFTER finished ("the two sets together are the sweep", runset.sh), read
     as one set: (the combined set, "") or (None, why they are not one gate). Every set but the last ended early; each
@@ -195,7 +201,7 @@ def chain(sets: list[dict], pending: list[str] | None = None) -> tuple[dict | No
     for prev, rest in zip(sets, sets[1:]):
         if not _ended_early(prev):
             return None, f"{prev.get('id')} is {prev.get('state')} ({prev.get('verdict')}): it took no rest"
-        want = [s for s in _not_green_last(prev) if s not in set(pending or [])]
+        want = rest_of(prev, pending)
         if sorted(rest.get("scenarios", [])) != sorted(want):
             return None, f"{rest.get('id')} is not the rest of {prev.get('id')}: it holds {len(rest.get('scenarios', []))} scenarios, the rest is {len(want)}"
         ended = prev.get("finished") or prev.get("started")
