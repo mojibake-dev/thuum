@@ -4388,3 +4388,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   second occupant's join changes no isOpen: two). v5 7fbc6645 counts two; b-container-rest on main 2a74212f (its own commit, the
   count three for its three opens). containers.md: both HYPOTHESIS tags CONFIRMED. Recommended to numidium: the containers gate with
   the scenario, no probe rerun.
+- (13:48 PDT 2026-10-31) physics on bdad3572 (numidium, each probe twice): drop v6 GREEN (202154); push v14, pass v12, grab v8 RED on the
+  same shape: the dropped basket landed clear of the capsule and rolled off the summit's strip (no "stream asleep", listed on neither
+  seat), the grabbed basket rolled down the marker's slope out of the follower's reach. Not the verb's path: a round body on a ridge.
+  The lab's prop becomes an IronIngot 0x5ace4 (a box that slides and stops): x-prop-push v15, x-prop-pass v13, x-prop-grab v9 (the
+  same steps and bounds, shas in the next LOG line's message to numidium); drop v6 needs no rerun. The containers restage and gate run
+  meanwhile (about 75 min); a physics restage (16 min) with the three probes after.

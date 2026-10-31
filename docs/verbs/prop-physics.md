@@ -596,3 +596,16 @@ lays on clean-m1 with item 7 SKIPPED.
   strip), the kick is read as a nudge of tens of units with the copies within 32, and no claim expects a kicked basket to stop within
   400 of a run's contact. x-prop-launch's purpose is served; it stays by path as the record (v3 3c0da75f).
 
+### The fixed build's first probes (13:48 PDT 2026-10-31; bdad3572 on 967ba8c8's dist, numidium's reads of 2014xx to 2040xx, each red twice)
+
+- x-prop-drop v6 GREEN (202154): the SteelSword's copy spawns ahead and up, falls onto the strip, the dropper streams the fall and
+  sleeps, the watcher applies, one runtime sword per seat within 32 of each other on the strip. The drop fix holds.
+- x-prop-push v14 and x-prop-pass v12 RED on the premise after the drop: the claim granted, tracked and Dynamic on the host, the
+  watcher tracking, but no "stream asleep" and the Basket01 in neither seat's 400-unit listing: the copy landed clear of the capsule
+  as meant and then ROLLED off the strip (a round body on a ridge), so its stream never slept. x-prop-grab v8 RED after the grab: c2's
+  claim by touch 1, its stream started and asleep, c1's follow applied, then c1's "untracked: out of reach" and the basket near
+  neither seat: the released basket rolled down the marker's slope. Nothing in the verb's path moved the body in either case.
+- The prop for the lab is now an IronIngot (0x5ace4, MISC with Havok, a box that slides and stops): push v15, pass v13, grab v9 with
+  the same steps and bounds; the basket is the playtest's prop at Riverwood's camp. HYPOTHESIS until the runs: the capsule's contact
+  reaches a small box on the floor as it does a basket (Skyrim kicks ingots underfoot).
+
