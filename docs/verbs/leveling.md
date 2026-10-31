@@ -192,7 +192,11 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - x-skill-use v1 (549cec01) at ef618dee's stage, 05:25 PDT 2026-10-31: red twice before any swing at c2's teleport (the engine dropped
   the move: the client's dump unmoved 1,176 units under lab-spawn while the server's record held the target; c1 moved). HYPOTHESIS:
   a move asked 11 s after c2's 3D load falls inside Skyrim Platform's post-load block (the wall probe moved c2 at about 20 s); v3
-  (4585b2a0) dumps and screenshots both seats before any move, waits 10 s more and moves c2 first. The missing "applied the server's
+  (4585b2a0) dumps and screenshots both seats before any move, waits 10 s more and moves c2 first.
+  WITHDRAWN 07:24 PDT: v3 (20261031-141639) red the same way with a clean pre-move dump (c2 at the clean spot, HUD only, every control
+  on); the target (0, 120) is over lab-spawn's north edge (docs/LAB.md's summit note of 2026-10-01: "(0, +150) and (200, 0) are over
+  the north and east edges"), so c2 landed, fell 1,176 units under god mode and rested at the same spot every run. The probe's
+  frame, not the client: v4 (7db1a600) stands c2 at (0, -120) facing north, c1 at the origin facing south. The missing "applied the server's
   actor values" line on both seats is the fresh world's normal path (no record before the seat's own report), not a leveling fault.
   v2 (55b7d02a) dropped the "xp == 0 after swings" claim: the server writes the step's carry into the record and the seat applies it.
 

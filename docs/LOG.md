@@ -4233,3 +4233,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   yet). m4-locks 0fee1628 (TS only, overlay-eligible): dealWithRef logs "lock <id> set at creation: locked, level L, key K";
   x-lockpick v3 daaee288 and b-lockpick's draft count that line at leg A. b-quest-stage-restart v2 GREEN standalone
   (20261031-135330, numidium): quest-stage.md's row ticked, in dedupe's gate. The lab moves to leveling b6748da0 with x-skill-use v3.
+- (07:24 PDT 2026-10-31) x-skill-use v3 (4585b2a0) red the same way on b6748da0's own build (20261031-141639): c2's pre-move dump clean
+  (at the clean spot, HUD only, every control on), the fall the target's: (0, 120) is over lab-spawn's north edge, which docs/LAB.md's
+  summit note has said since 2026-10-01 ("(0, +150) and (200, 0) are over the north and east edges"); c2 landed, fell 1,176 units
+  under god mode and rested at the same spot every run, so the judge never saw it settle (numidium's read; the wall's frame met the
+  same edge at (0, 300) on 10-29). The post-load-block HYPOTHESIS is withdrawn and the leveling client cleared. v4 7db1a600 stands c2
+  at (0, -120) facing north and c1 at the origin facing south (p-level-up's draft the same). Lesson: read LAB.md's summit note before
+  placing a seat at lab-spawn; only the strip south of the origin along x = 0 stands.
