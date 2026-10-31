@@ -3832,3 +3832,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (an engine-native basket against the server's drop, the host running through each, the record snapshotted); the Dynamic plan in
   prop-physics.md names what each reading means. The guest-loot v2 restage is laying its client; its probe next, then D69's restage
   with x-quest-rumor v2.
+- 21:57 PDT: apocrypha on c1's 04:25Z login crash: the patched USSEP is exonerated by bytes (the rebuilt render equals both server copies,
+  SHA-256 010647609359e1c8...; against the original only HEDR's count, the two Steady Hand PERKs and the appended Quick Reflexes SPEL
+  differ; every WEAP record identical, the draugr NPC_ records Skyrim.esm's); the crash is the equip-slot path on a BSJobs::JobThread
+  during the actor's load (BGSEquipSlot, BaseExtraList, skeleton.nif on the stack, RAX a float pair), the first login into the
+  guest-loot v1 world on the new server build; the same plugin bytes carried every login since 05:16Z. My hypothesis withdrawn; the
+  lead is the load-time equip path (the load-freeze family's neighbourhood), watched for a recurrence; the clients' copies apocrypha
+  reads at numidium's idle signal. Also from apocrypha: the injected spell's name travelled as a two-byte garbage string (Skyrim.esm
+  localized, USSEP not); fixed on apocrypha/layer-souls 5e37aefd (the injection drops FULL and DESC when the localized flags differ),
+  so the Souls stage lays USSEP at 21,106,757 B, CRC32 73EAEC17, SHA-256 5d1f44fa..., replacing 7CA7F25F; cosmetic, no crash path.
