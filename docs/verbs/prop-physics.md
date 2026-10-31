@@ -570,3 +570,29 @@ lays on clean-m1 with item 7 SKIPPED.
   (the factor path), or as a sane result with the body's velocity leaping anyway (then the push is not this path: the stream's echo,
   the view's apply, or our Dynamic set's mass). v3's RAW rows carry the raw pointers for anything the shape above gets wrong.
 
+### x-prop-launch v3's read: the launch is the engine's push plus the summit; the drop's copy spawned in the capsule (12:34 PDT 2026-10-31; run 20261031-190643, an agent's read of the fixed tracer; the fix m3-prop-physics 967ba8c8)
+
+- CONFIRMED by the trace (one row each, every field sane): the native Basket01 (0xff000884, placed 60 south of the host) took ONE push at
+  the host's run-through: `event {objectImpulse -17.748, dt 0.02217, projectedVelocity 4.290, massInv 0.2175}; result |17.7| before,
+  |35.5| after` (the clutter layer's factor 2); the body's velocity went from 0 to |6.8| m/s (476 units a second), which is the result
+  times the inverse mass (0.2, a 5 kg basket; predicted |7.1|, z eaten by the ground). The next row's impulse is 0 (the body already
+  leaving faster than the capsule). After it, no contact and no push: refs-near read it rolling down lab-spawn's west flank at 243 to
+  267 units a second (z dropping 411 over 1,120 horizontal, the heading bending west), until out of the 1,200 search. So D73's "launch"
+  item is the engine's own kick (7 m/s for a 5 kg body from a run) and the summit's slope; nothing of ours moves the body. A run-through
+  kick needs a few hundred units to stop even on the flat; lab-spawn's strip is 110 units from the cell's edge and 450 long.
+- CONFIRMED, the defect: the server's dropped copy (0xff000002) spawned at the dropper's own position (c1's "prop ff000002 tracked, 0
+  units off", c2's "170 units off" = c2's distance to c1), although MpActor::DropItem set it 64 ahead and 48 up (b421d1b2): PlaceAtMe
+  created it at the actor and the create word carried that position; the move after never reached the dropper's copy (no message, the
+  DropItemTest's two messages). Its body stood inside the capsule through the paused InventoryMenu; at the first Havok step after the
+  close it took one push (`objectImpulse -23.361 at projectedVelocity 0.094`, |46.7| after the factor; the body to |8.5| m/s = 595
+  units a second: a penetration term, HYPOTHESIS, computed upstream of 78304) and left for 991 units. Fixed at 967ba8c8: PlaceAtMe's
+  core is PapyrusObjectReference::PlaceAt(anchor, form, where), the one creation path for a server-placed form, and DropItem creates the
+  copy through it at the drop point; DropItemTest reads the create word's position.
+- CONFIRMED, the second defect: the copy read "stream ff000002 asleep" 500 ms into the dropper's open InventoryMenu (a paused world stirs
+  nothing), so the server leased a body that had never settled. Fixed at 967ba8c8: the client holds a streaming prop's stir clock while
+  Utility.isInMenuMode().
+- The probes' premise changes from here: the basket appears by the drop (the copy at the drop point, falling onto the strip), the
+  toucher WALKS into it (the walk toggle, Caps Lock, DIK 58; a walk's push is a fraction of a run's and the basket stops within the
+  strip), the kick is read as a nudge of tens of units with the copies within 32, and no claim expects a kicked basket to stop within
+  400 of a run's contact. x-prop-launch's purpose is served; it stays by path as the record (v3 3c0da75f).
+

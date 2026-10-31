@@ -4362,3 +4362,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   dropping layer, and the TURN lever (lockAngle ramped with the pick snapped) beside SNAP; x-lockpick v7 49e1db9f (one move, one hold,
   one tap for the handlers, then the lever, the until within 15 s) for a short locks restage if the lab has room tonight; else the
   pick is Eli's at the sitting and b-lockpick claims the key, console and sync legs.
+- (12:34 PDT 2026-10-31) x-prop-launch v3 3c0da75f (20261031-190643 on the physics branch's build; red only at phase B's c2 listing) READ:
+  the launch is one engine push (objectImpulse 17.7 N s at 4.29 m/s approach, the clutter factor 2, the body to 476 units a second =
+  impulse times its inverse mass 0.2) and then the summit's west flank (refs-near: 243 to 267 units a second with z dropping); nothing
+  of ours moves the body. The defect found: the server's dropped copy was created at the dropper (the create word carried the actor's
+  position; the 64-ahead move after never reached the client), spawned inside the capsule and was ejected at the first Havok step after
+  the menu closed (595 units a second); and the copy read "asleep" under the paused menu. Fixed at m3-prop-physics 967ba8c8 (fork-lint
+  exit 0, tsc 0): PapyrusObjectReference::PlaceAt as the one creation path, DropItem creating the copy at the drop point (DropItemTest
+  reads the create word's position), the stir clock held while Utility.isInMenuMode(). The prop probes re-frame next (a walk into the
+  basket, not a run); numidium holds the physics restage for their shas. prop-physics.md has the read.
