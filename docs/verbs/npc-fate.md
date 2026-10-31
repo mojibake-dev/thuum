@@ -2434,3 +2434,15 @@ The server sent OpenContainer each time and logged nothing about the body. v3 (0
 switch and the activate (await Utility.waitMenuMode(0.2), which runs while paused), the AI state logged right before the activate,
 the off deadline 3 s. In x-body-open-guest v2's green leg the lab's npc-ai had switched the AI on seconds before a separate activate,
 so the beat the engine needs is somewhere under five seconds and above a frame. D69's restage takes the lab while v3 builds.
+
+The loop's death (22:06 PDT read, numidium's grep): in 045522 and 045859 the "AI off again, no menu within 2000 ms" line printed in
+neither, so the handler's loop never iterated after the activate; the AI's off at the dump is another hand's (unread). Two observations
+frame it: the handler's first wait, Utility.waitMenuMode(0.1), resolved on the guest with no menu open (the handler ran 220 ms after
+the activation), and in x-prop-push v9's console Skyrim Platform logged "onResult called: Utility.waitMenuMode (call 1)" at the give-up
+while the 150 iterations of the loop's Utility.wait(0.1) logged nothing: Utility.wait is Skyrim Platform's own frame wait, waitMenuMode a
+VM latent. HYPOTHESIS (the next run's onResult lines decide): a second VM latent from the same handler never resolves on the guest, or
+waitMenuMode advances only in menu mode past its first call. v3 (0547e5d4) put the beat on waitMenuMode too and would have hung before
+the activate; superseded before any run by v4 (ce1df68b, pushed, the restage's head): the beat Utility.wait(0.15), the open-poll back on
+Utility.wait(0.1) as the original loop (its 15 s give-up printed on schedule in earlier runs), the first wait alone in menu mode for the
+host's open menu. Under the game-time poll a guest's menu, once open, pauses the game and the poll resumes at the close, so the AI's
+off for a guest's open lands at the close (nothing walks under the pause). The probe stays cb798c4c.
