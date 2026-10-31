@@ -345,6 +345,7 @@
     }
   },
   "locks": true,
+  "perks": true,
   "spellPlacedObjects": [
     {
       "spell": "00cc14:Apocalypse - Magic of Skyrim.esp",

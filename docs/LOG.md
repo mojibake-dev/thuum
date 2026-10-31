@@ -4061,3 +4061,32 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   interior's release and the way out's cut, D a relaunch, E a restart recorded); the driver's `weather` step gained {read: true}
   (current, outgoing, the blend's progress). docs/verbs/weather.md rewritten to the build (Known limits: one sky per worldspace where
   TES3MP syncs per region); WIRE.md's SetWeather section. b-weather follows the read and a lab-api weather fact.
+- (03:1x PDT 2026-10-31) The skill-use read is CONFIRMED (x-skill-use-read v1 f3cfb4df, v2 a18406a9 solo, v3 the replacement; runs
+  092918, 093933, 094735 by numidium): the player's UseSkill (vtable slot 0xF7) and CommonLibSSE-NG's AddSkillExperience 40488 are
+  one function (RVA 0x736e20 on 1.6.1170), called once per LANDED hit with the player, the skill, the points and the source form;
+  the points are the weapon's base damage (7.0 for the iron sword, eight hits, 352.8 xp: the use mult 6.3 applied inside, after the
+  entry). v1 saw nothing (a connected game's cleaner took the locally placed bandit; v2 went solo), v2 read the float as null (an
+  attach's context has no XMM registers; v3 replaces the function with a NativeCallback of the header's signature). leveling.md's
+  Dynamic plan carries the read and the decision: the client hook is a Skyrim Platform native replacement at 40488 raising a
+  skillUse event, skillUseService batching into SkillUse 63 with the points as the amount. Built next.
+- (03:1x PDT 2026-10-31) Two reds on the stack found and fixed: m4-locks's server half had never compiled in CI (MpObjectReference.cpp
+  used the Rust bridge without its include; 4141 and 4148 were this, misread as the leveling red) and LockTest assumed a picker
+  created empty (ten Lockpicks on it; the counts are deltas from an emptied inventory now): e7e60452, pipeline 4157 green.
+  WeatherTest's release case named a game-file cell a core without the files cannot resolve (4158): a server-made cell id stands
+  in, e9952839. The parity-wide Windows red is OpenCppCoverage's instrumented run dying mid-test (not at exit) since the union
+  0e23c820, a memory bug under the debug heap; a reviewer agent reads the 780-line server diff between 6796e787 (green) and
+  7a6fd1e2 (red). GitLab's artifact store was full (59 GB of never-expired artifacts; core is expiring), which failed every client
+  build's upload since 08:39Z, so no new dist landed by either path tonight.
+- (03:1x PDT 2026-10-31) Perks BUILT WHOLE on fork m5-perks (stacked on m4-weather e9952839 for MsgTypes 67 and 68; three commits: the
+  wire, the server half, the client; a client build), pile item 13. The design from the records: a PERK's own conditions before its
+  first section carry the whole tree (Armsman20 0x79343 wants GetBaseActorValue(OneHanded) >= 20 and HasPerk(Armsman00); the ranks
+  chain by NNAM), so the server judges a pick as the Skills menu does, by those conditions (HasPerk, GetBaseActorValue, GetLevel; any
+  other function refuses, rule 5) and the points left (one a level past the first less the perks held). The record holds the perks;
+  the client reports the engine's pick at the menu's close and every 5 s (no perk event in Skyrim Platform), the server answers with
+  the whole set and points, a refused pick is removed by that answer; only tree perks (ActorValueInfo.getPerks) are ever touched.
+  Natives Actor.AddPerk, RemovePerk, HasPerk implemented (R0, NATIVES.md); the console's AddPerk, RemovePerk and SetLevel (the lab's
+  lever for points); the `perks` switch, default off, ON in both deploy settings. Local greens: cargo test (perks.rs five cases,
+  the console table, the wire crates, the bridge), clippy, the client's tsc, fork-lint. Probe x-perk-pick v1 5e0f733f by path (one
+  seat; the driver's add-perks stands in for the menu's pick, `known` reads a perk, `skills` reads the engine's perkPoints; legs A
+  to G on Armsman's ranks with the clean character's One-handed 20 and the server's SetLevel and SetActorValue). docs/verbs/perks.md,
+  WIRE.md's section, the T2 divergence for PerkState at login.

@@ -1519,6 +1519,12 @@ function run(step: Step, player: Actor): unknown {
           out[String(Number(id))] = Game.isWordUnlocked(word) ? 1 : 0;
           continue;
         }
+        // thuum docs/verbs/perks.md: a perk reads 1 when the player holds it
+        const perk = Perk.from(form);
+        if (perk) {
+          out[String(Number(id))] = player.hasPerk(perk) ? 1 : 0;
+          continue;
+        }
         if (Spell.from(form)) {
           out[String(Number(id))] = hasSpell(player, Number(id)) ? 1 : 0;
           continue;
@@ -1810,7 +1816,8 @@ function run(step: Step, player: Actor): unknown {
         const info = ActorValueInfo.getActorValueInfoByName(n);
         out[n] = info ? { base: info.getBaseValue(player), xp: info.getSkillExperience(), legendary: info.getSkillLegendaryLevel() } : null;
       }
-      return { skills: out, level: player.getLevel() };
+      // the perk points the engine holds (thuum docs/verbs/perks.md: the server's word under its switch)
+      return { skills: out, level: player.getLevel(), perkPoints: Game.getPerkPoints() };
     }
     case "av-table": {
       // thuum docs/verbs/actor-values.md: the engine's actor value list, the

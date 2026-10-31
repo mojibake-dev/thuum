@@ -188,12 +188,22 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- Frida script: lab/frida/skill-use.js: AddSkillExperience (RELOCATION_ID 39413 for 1.6.1170, resolved through
-  addrlib by `just addr 39413`) on a solo seat with the engine's advance ON: the amounts per One-handed hit against
-  the weapon's base damage and the AVSK mult (whether the mult is applied before the entry), per Block, per
-  Destruction cast; the same with the mults zeroed (what the entry sees under SkyMP's switch). Owner: agent.
-- Breakpoint plan for a human session: Actor::UseSkill's callers if AddSkillExperience is not the one funnel.
-- Owner: agent (Frida); Eli for the Stats menu's pick (item 13).
+- Frida script: lab/frida/skill-use.js, probe x-skill-use-read (by path; v1 f3cfb4df connected, v2 a18406a9 solo). READ
+  2026-10-31, three runs (20261031-092918, -093933, -094735, numidium): the player's UseSkill (PlayerCharacter's vtable
+  slot 0xF7, Actor.h:445) resolves from the player's own vtable to the address CommonLibSSE-NG names
+  PlayerCharacter::AddSkillExperience (RELOCATION_ID(39413, 40488); RVA 0x736e20 on 1.6.1170): ONE function, the one
+  funnel. It fires once per LANDED hit (eight swings at a held bandit, eight calls; v1's swings at nothing, none), with
+  rcx the player (0x14), edx the skill (6), xmm2 the points and r9 the source form (the iron sword 0x12eb7). The points
+  are the weapon's BASE DAMAGE: 7.0 on every call (v3, the function replaced with a NativeCallback of the header's
+  signature; an attach's context has no XMM registers, so v2 read null). The engine's own record moved 0 to 352.8 xp
+  over the eight hits, 44.1 a hit: the AVSK use mult 6.3 is applied INSIDE the function, after the entry. CONFIRMED.
+- The client hook, decided by the read: a Skyrim Platform native hook at 40488 (a Gum replacement of the header's
+  signature, as the fork's DamageActor replacement) raising a `skillUse {skill, points, source}` event to JS, where
+  skillUseService batches a second's uses into SkillUse (63) with `amount` the points as received. The engine's own
+  write stays as it is: under DisableSkillAdvanceService's zeroed mults the function adds 0 and the server's formulas
+  (the same AVSK constants) write the record; the hook passes the call through. Block and the casting schools are
+  read by the same hook when their probes run (expected: the blocked damage, the spell's cost).
+- Owner: agent (the hook and the service, a client build); Eli for the Stats menu's pick (perks.md).
 
 ## Status
 

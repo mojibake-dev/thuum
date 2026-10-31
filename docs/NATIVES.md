@@ -14,11 +14,11 @@ Status meanings:
 
 | Status | Count |
 | --- | --- |
-| implemented | 97 |
+| implemented | 100 |
 | delegated | 33 |
 | stub | 2 |
 | gamemode | 18 |
-| missing | 1310 |
+| missing | 1307 |
 | total | 1460 |
 
 | Native | Status | Rung | Reason / notes | Verb |
@@ -72,7 +72,7 @@ Status meanings:
 | `ActiveMagicEffect.UnregisterForTrackedStatsEvent` (method) | missing |  |  |  |
 | `ActiveMagicEffect.UnregisterForUpdate` (method) | missing |  |  |  |
 | `ActiveMagicEffect.UnregisterForUpdateGameTime` (method) | missing |  |  |  |
-| `Actor.AddPerk` (method) | missing |  |  |  |
+| `Actor.AddPerk` (method) | implemented | R0 | writes the perk into the server's record and sends the player its perk state (docs/verbs/perks.md; fork m5-perks, 2026-10-31); no rule: a script's or the console's word | perks |
 | `Actor.AddShout` (method) | missing | R3 | Not on the server VM yet. The server itself sends it to a player's own client as an SpSnippet: after an admin's AddShout and after every login, for each shout in the server's record (docs/verbs/shouts.md); the shout list in that game follows the record, which is R0. | shouts |
 | `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782]; the server also sends it after a sleep to grant Rested (ActionListener::GrantRested) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020]; the console's AddSpell (an admin's) sends it to the target's game after recording the spell (docs/verbs/cast-teleport.md) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020] | sleep |
 | `Actor.AddToFaction` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1016] |  |
@@ -160,7 +160,7 @@ Status meanings:
 | `Actor.HasMagicEffect` (method) | missing |  |  |  |
 | `Actor.HasMagicEffectWithKeyword` (method) | missing |  |  |  |
 | `Actor.HasParentRelationship` (method) | missing |  |  |  |
-| `Actor.HasPerk` (method) | missing |  |  |  |
+| `Actor.HasPerk` (method) | implemented | R0 | the server's record (docs/verbs/perks.md; fork m5-perks, 2026-10-31); false for an actor without a record | perks |
 | `Actor.HasSpell` (method) | missing |  |  |  |
 | `Actor.IsAIEnabled` (method) | missing |  |  |  |
 | `Actor.IsAlarmed` (method) | missing |  |  |  |
@@ -212,7 +212,7 @@ Status meanings:
 | `Actor.RegenerateHead` (method) | missing |  |  |  |
 | `Actor.RemoveFromAllFactions` (method) | missing |  |  |  |
 | `Actor.RemoveFromFaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1019] |  |
-| `Actor.RemovePerk` (method) | missing |  |  |  |
+| `Actor.RemovePerk` (method) | implemented | R0 | takes the perk off the server's record and sends the player its perk state (docs/verbs/perks.md; fork m5-perks, 2026-10-31) | perks |
 | `Actor.RemoveShout` (method) | missing | R3 | Not on the server VM yet. The server itself sends it to a player's own client as an SpSnippet when that game reports a shout in its voice slot that the server's record lacks (docs/verbs/shouts.md): the shout leaves that game, whose list follows the record (R0). | shouts |
 | `Actor.RemoveSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:783]; the server also sends it when a Rested grant's eight game hours end [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1021] | sleep |
 | `Actor.ReplaceHeadPart` (method) | missing |  |  |  |
