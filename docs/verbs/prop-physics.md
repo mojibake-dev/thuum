@@ -486,3 +486,23 @@ set; and the design item, the server's copy ADOPTING the engine's own dropped re
 engine made, its physics the engine's) instead of a second reference the engine's is deleted for. Until then a dropped weapon is
 the drop's declared limit (it falls through the ground on both seats; its record keeps it at the floor's depth and it can be picked
 up there only by reaching it): the checklist says drop a basket or a tankard, not a weapon.
+
+push v13 (034316, 20:51 PDT read; the fixed build) RED at its premise on the flat strip, and it settles two things. The drop's path works
+for a MISC: "drop of base 12fe7 recorded", the engine's own drop deleted, the server's copy tracked at 0 units, the touch-2 grant,
+Dynamic, the stream at the grant (15.349) and asleep (15.848): the basket fell its 48 units and settled, so drop v6's fall-through is
+the WEAPON's own. Then, with the host standing still, one contact ("contact ff000002 layer 4 motion 2: owned, no claim" at 17.725; the
+basket had rolled against the capsule) and the stream started again (17.825) and the basket was out of reach by 19.942: a standing
+capsule's contact launched a resting body past 1200 units in two seconds, where the engine's own clutter takes a nudge. push v11's
+travel on the marker was this launch, not the slope. The view's creation path, read for the stale-collision theory: SpawnProcess
+places the copy with placeAtMe at the player initially DISABLED, setPosition's it to the record while disabled, then enables it, so the
+3D and the Havok body are built at the final place (the theory does not cover the copy; it covered the first track's snap and the
+asleep jump, which fa225f01 now translates). What remains unexplained is the launch itself: HYPOTHESES, (a) the character proxy's
+penetration recovery on a light body made Dynamic by setMotionType(1, true) where the file's body is SphereInertia (the contact
+reports motion 2, so the type is native; the mass or the inertia after the set is the question); (b) the wake flag's activation of a
+body the proxy overlaps every frame; (c) something of ours moving the body at the contact (the host's own stream echoed back through
+the record's movement: the view skips the movement block for a tracked prop, to re-check). The read, tomorrow's first lab item, by
+Frida on the host seat (prop-contact.js extended): the body's linear velocity and motion type before and after each contact, and the
+same for an engine-native basket the host walks into (the lab's clutter under no PropService), so the launch reads as ours or the
+engine's. Decision (20:51 PDT, under the pass's rule): the physics train does not merge tonight; its four fixes stay on the branch with
+their reads recorded; props stay dark on parity (D68); the lab goes to the guest-loot train (M3's exit) and then D69's; playtest 39
+lays on clean-m1 with item 7 SKIPPED.

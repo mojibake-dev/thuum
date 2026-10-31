@@ -3799,3 +3799,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   The basket drop in push v13's premise tells MISC from WEAP; a placed weapon's collision read and the adoption of the engine's own
   drop are the items; a dropped weapon is the drop's declared limit for the train (the checklist: drop a basket or a tankard). The
   stage ended (exit 0); push v13 running, then pass v11.
+- 20:51 PDT: push v13 034316 RED at its premise on the flat: the basket's drop fell and settled (the weapon's fall-through is the weapon's),
+  then one standing capsule contact launched it out of reach in 2 s (push v11's travel was this, not the slope). The view spawns a
+  copy disabled at the player, positions it, then enables it (the collision built in place), so the launch is unexplained: hypotheses
+  (the proxy's recovery on our Dynamic-set body; the wake; an echo of our own stream) and a Frida read tomorrow (the body's velocity
+  around the contact against an engine-native basket). Decision under the pass's rule: the physics train waits; props dark on parity
+  (D68); the lab goes to the guest-loot train after pass v11, then D69's; 39's item 7 skipped. Tonight's physics yield: five engine
+  facts read (a body denied activation takes contacts after all; a Keyframed follower cannot be held, its E a pickup; setPosition then
+  Dynamic flings; a weapon copy falls through the ground; a Dynamic basket launches at a standing contact), D73 and three fixes on the
+  branch.
