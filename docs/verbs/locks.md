@@ -154,7 +154,9 @@ reference is E_LOCK_* and the lock is re-imposed.
   path), the report's judgment (locked, reach, level, picks held, rate), the broken pick's consumption; PartOne and
   MpObjectReference: the lock gate in ProcessActivateNormal before the DOOR and container branches, the record's
   `lock` field, the UpdateProperty "lock" send, the console Lock and Unlock (the server's own, console.rs's rank
-  table), the Papyrus natives Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey (ledger lines, R0) and
+  table; `lock <ref> [level] [key]` since m4-locks 2d79199f, 2026-10-31: the key's base as a form id, 0 for none, a
+  level alone keeping the key, so the lab stands a key lock on any reference with 255 and a vanilla KEYM the console
+  then hands the player, RiverwoodAlvorHouseKey 0x36a3d; LockTest's console case), the Papyrus natives Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey (ledger lines, R0) and
   OnLockStateChanged (the server's VM, when a script needs it; a stub first with its ledger line).
 - libespm: XLOC parsing in REFR.cpp (level int8, key form id, flags), the KEYM record and IsItem widened (server and
   client), so keys are items the record holds.
@@ -186,7 +188,8 @@ reference is E_LOCK_* and the lock is re-imposed.
 - T2: a difftest session with a refused report and an accepted one.
 - T3 scenario id: lab/scenarios/b-lockpick.yaml: c1 and c2 at a Novice chest in the lab's interior (the premise set by
   the server's console Lock on a lab chest); c1's console `unlock` undone by the server within a round trip (the
-  chest reads locked again on c1 and c2); c1 given a key by the server's console, activates, the chest opens on c1
+  chest reads locked again on c1 and c2); c1 given a key by the server's console (the chest locked `lock <ref> 255 <key>`, the
+  key RiverwoodAlvorHouseKey 0x36a3d handed by AddItem), activates, the chest opens on c1
   and reads unlocked on c2; a second chest locked again by the console, c1 with Lockpicks picks it (the lab's mouse
   and tap-key through the minigame: x-lockpick reads how), the success relayed to c2, the Lockpick count on the
   record; a relaunch of c2 and a server restart keep the state. Probe x-lockpick by path first (the minigame under the

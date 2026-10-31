@@ -4152,3 +4152,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   is kept per seat by the board and read as `c.weather().current`, `.outgoing` and `.transition` (assertions.py's WeatherView, the
   method tables, two unit tests; README and LAB.md), so b-weather can claim two seats' skies equal instead of counting console lines
   (weather.md's "after the lab-api grammar gains a weather fact"). 964 lab tests green. The scenario follows x-weather's read.
+- (04:30 PDT 2026-10-31) parity is b289cbda (numidium's R0 merge of m3-attach-uaf at 11:24Z: T0 13/13, T2 green, the Windows proof
+  41193592558 green, no lab gate). The stack's shape from git: locks branched from leveling's server half (merge-base e9c1521e),
+  weather contains locks, perks contains weather, none carried the new parity. The cascade for the probes' client builds: m5-leveling
+  ef618dee into m4-locks (7a098d1c; the same three both-added conflicts in index.ts, messages.ts and anyMessage.ts, both sides kept),
+  locks into m4-weather (f7709626), weather into m5-perks (70f9e69b), each tsc green and on both remotes, their builds queued behind
+  the wall's 0e4b34e5 and physics' e6befc5e. Leveling stages at ef618dee (its own 4171 dist) for x-skill-use; parity merges into each
+  branch before its gate, one build each. With the locks merge, the server console's Lock takes a third argument, the key's base
+  form id (2d79199f: 0 clears it, a level alone keeps it; LockTest's console case through OnConsoleCommand), so the lab stands a key
+  lock on any reference (255 with RiverwoodAlvorHouseKey 0x36a3d, handed by AddItem), as checklist item 4 promised; locks.md says so.
