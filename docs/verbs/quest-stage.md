@@ -38,7 +38,7 @@ is the first slice's evidence.
 | two stages of one quest set within a second on the talker (the fragment's chain) | x-quest-stage | pending |
 | the same stage set on both seats at once (both talk to the same NPC) | x-quest-stage | pending (one record, two no-op reports) |
 | a stage set while the other seat is in another cell, then both meet | x-quest-stage | pending |
-| a stage set, the server restarted, a login | b-quest-stage-restart | pending |
+| a stage set, the server restarted, a login | b-quest-stage-restart | GREEN standalone 20261031-135330 (v2, main 2d920040, on parity e713862c's quest code); in dedupe's gate |
 | an unlisted quest's stage | x-quest-stage | pending (refused in the log, the seat keeps its own) |
 | a stage lower than the quest's current one (SetStage out of order) | x-quest-stage | pending (recorded as done, GetStage unchanged on the applying seat) |
 

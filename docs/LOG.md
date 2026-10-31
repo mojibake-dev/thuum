@@ -4225,3 +4225,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m2-effect-conditions-row's first push (027ffa28) was red at T0 three times: two tests count the refusal's first clause, which I
   had reworded, and PerkImpactStaggerPushFFAimed 0x153d3 lists an attack-state row (function 724) before its HasPerk; c97376f7 keeps
   the clause and names every failing row after "failing:", the test reads HasPerk by containment.
+- (06:58 PDT 2026-10-31) x-lockpick v2 (d6958064) past the approach and red at leg A (20261031-134850 on m4-locks 4b52cd12's stage):
+  no "lock 371e9 applied: locked" on either seat and no [verb:locks] server line. Read: the setting is read (ScampServer's
+  worldState.locksEnabled), the chest's XLOC is Skyrim.esm's alone (no override in the 91 files), VisitProperties carries the lock
+  at creation, and the client's dealWithRef applies it SILENTLY; the "applied" line is applyModelLock's, written at a property
+  change only, so v2's leg A counted a line no creation writes (and the server logs at SetLock only, which nothing had called
+  yet). m4-locks 0fee1628 (TS only, overlay-eligible): dealWithRef logs "lock <id> set at creation: locked, level L, key K";
+  x-lockpick v3 daaee288 and b-lockpick's draft count that line at leg A. b-quest-stage-restart v2 GREEN standalone
+  (20261031-135330, numidium): quest-stage.md's row ticked, in dedupe's gate. The lab moves to leveling b6748da0 with x-skill-use v3.

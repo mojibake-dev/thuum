@@ -171,7 +171,8 @@ reference is E_LOCK_* and the lock is re-imposed.
 ## Client
 
 - SP binding: none new (the natives above exist).
-- TS handler: dealWithRef applies the server's lock instead of stripping it; a LockService watches
+- TS handler: dealWithRef applies the server's lock instead of stripping it and logs it ("lock <id> set at creation: locked, level L,
+  key K", m4-locks 0fee1628, the lab's read before any change; a change logs "lock <id> applied: ..." from applyModelLock); a LockService watches
   `lockChanged`, the Lockpicking Menu's open and close, and `containerChanged` for the Lockpick, and sends LockReport;
   ActivationService holds an Activate on a reference that reads locked (the engine's menu runs) and sends it once
   the lock is gone.
