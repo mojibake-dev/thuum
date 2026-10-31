@@ -111,13 +111,14 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 - Hook point: a Skyrim Platform native hook on PlayerCharacter::AddSkillExperience (the one entry the engine's own
   skill uses funnel through; the game's own advance stays off since the mults are 0, so the hook's amount is the
-  engine's base amount times 0: HYPOTHESIS to settle in the Dynamic plan: whether the mult is applied before or
+  engine's base amount times 0: READ (x-skill-use-read v3, 2026-10-31: the engine hands the hook the action's base amount, 7.0 for an iron sword, and the use mult is the server's formula's) on
   after this entry. If after, the hook sees the base amount; if before, the client re-enables the mults and the hook
   cancels the engine's write instead, reporting the amount).
 - SP filter (minSelfId / maxSelfId / eventPattern): the player alone (the function is the player's), the skill 6 to
   23.
 - Data captured: {skill, amount}, batched per second into one SkillUse message.
-- Side effects of hooking here: HYPOTHESIS until a Frida trace of a solo game: no other caller of the entry.
+- Side effects of hooking here: READ 2026-10-31: the solo trace (x-skill-use-read v3) fired once per landed hit and the two-seat runs
+  (x-skill-use 151047, 151449) sent no use before the first hit and one per hit after, so no other caller showed at load or in play.
 
 ## Impose (observers render the server's decision)
 
@@ -178,8 +179,13 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   ActorValues reply carries them, the kill switch; a restart keeps them (actor-values' pattern).
 - T1: none (the hook is a Skyrim Platform export; its proof is T3).
 - T2: a difftest session with a SkillUse accepted and one refused.
-- Probe x-skill-use v1 by path (549cec01; two seats, c2 the target 120 units north under god mode, twenty swings: the batches sent, One-handed 20 to 21 on the server and on the seat's base, the engine's xp 0, the level kept across a relaunch).
-- T3 scenario id: lab/scenarios/p-level-up.yaml (M5's exit): a seat's One-handed from 15 to 16 by hits on a lab NPC
+- Probe x-skill-use by path, GREEN at v4's rerun 20261031-151449 on m5-leveling b6748da0 (two seats, c2 the target 120 units south
+  under god mode, twenty swings: sixteen hits, the batches sent, One-handed 20 to 21 on the server and on the seat's base with the
+  carry, kept across a relaunch); v5 f804a96c swings thirty-six times for the record.
+- T3 scenario id: lab/scenarios/p-level-up.yaml (M5's exit; on thuum main d9e02b7d since 2026-10-31, its first run owed before the
+  leveling gate): a seat's One-handed from 20 to 21 by hits on the other player's figure (the console's SetActorValue writes the base,
+  not the leveling standing, so not 15 to 16), then to 25 with the character's level 2, rate-proof counts, no crosstalk on the target's
+  record, a relaunch and a server restart keeping the level. As first drafted: a seat's One-handed from 15 to 16 by hits on a lab NPC
   (the hits the server already judges), the "Skill increased" on its screen, the other seat's figure values and the
   record agreeing, a relaunch and a server restart keeping the level; a character level-up from a skill run (the
   threshold at level 1 is 100 xp: eight skill levels). Probe x-skill-use by path first (the hook's amounts against
@@ -190,7 +196,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
 - x-skill-use v1 (549cec01) at ef618dee's stage, 05:25 PDT 2026-10-31: red twice before any swing at c2's teleport (the engine dropped
-  the move: the client's dump unmoved 1,176 units under lab-spawn while the server's record held the target; c1 moved). HYPOTHESIS:
+  the move: the client's dump unmoved 1,176 units under lab-spawn while the server's record held the target; c1 moved). The hypothesis, withdrawn below:
   a move asked 11 s after c2's 3D load falls inside Skyrim Platform's post-load block (the wall probe moved c2 at about 20 s); v3
   (4585b2a0) dumps and screenshots both seats before any move, waits 10 s more and moves c2 first.
   WITHDRAWN 07:24 PDT: v3 (20261031-141639) red the same way with a clean pre-move dump (c2 at the clean spot, HUD only, every control
@@ -200,7 +206,10 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 - v4 (20261031-151047), 08:16 PDT: both teleports landed; the hook's read is CONFIRMED on a figure: twelve "skill uses sent: 6:7.0
   (1 use(s))" for the twelve OnWeaponHit lines of twenty swings (0 damage under god mode), no refusal line. Too few for the step:
   12 hits are 529 xp of the 688 from 20 to 21, so no level. v5 swings thirty-six times and claims "at least 21, never 23"; the
-  landing rate is the swing's, 60% here. The missing "applied the server's
+  landing rate is the swing's, 60% here.
+- v4's relaunched rerun (20261031-151449) GREEN, 08:19 PDT: sixteen of twenty swings landed (sixteen uses sent, sixteen OnWeaponHit
+  lines), "ff000000 skill 6 reaches level 21" once, the seat's base 21 with the carry 16.886 applied (the server writes the step's
+  remainder into the record, the seat applies it), kept across the relaunch. v5 (f804a96c, thirty-six swings) for the record. The missing "applied the server's
   actor values" line on both seats is the fresh world's normal path (no record before the seat's own report), not a leveling fault.
   v2 (55b7d02a) dropped the "xp == 0 after swings" claim: the server writes the step's carry into the record and the seat applies it.
 

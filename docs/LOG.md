@@ -4262,3 +4262,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   688 the step to 21 needs. v5 (f804a96c) swings thirty-six times and claims at least 21 and never 23 (the base read at least 21),
   holding from a 45% landing rate to every swing landing; p-level-up's draft recomputed the same way (171 swings in all: skill at least 25,
   never 28; character level 2, never 3).
+- (08:19 PDT 2026-10-31) x-skill-use v4's relaunched rerun GREEN (20261031-151449 on m5-leveling b6748da0, numidium): sixteen of twenty
+  swings landed, "skill 6 reaches level 21" once, the seat's base 21 with the carry 16.886 applied and kept across the relaunch; v5
+  (f804a96c, thirty-six swings) runs for the record. leveling.md: two HYPOTHESIS tags read (the mult's place from the solo trace, no
+  other caller of the entry), the withdrawn stall reworded, the probe and scenario lines current; p-level-up.yaml on main d9e02b7d
+  (its first run owed standalone before leveling's gate). Left as HYPOTHESIS: the pairing refusal E_SKILL_NO_ACTION's shape at T3,
+  the engine's own level-up prompt (p-level-up's leg 3 reads it).
