@@ -196,7 +196,11 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   WITHDRAWN 07:24 PDT: v3 (20261031-141639) red the same way with a clean pre-move dump (c2 at the clean spot, HUD only, every control
   on); the target (0, 120) is over lab-spawn's north edge (docs/LAB.md's summit note of 2026-10-01: "(0, +150) and (200, 0) are over
   the north and east edges"), so c2 landed, fell 1,176 units under god mode and rested at the same spot every run. The probe's
-  frame, not the client: v4 (7db1a600) stands c2 at (0, -120) facing north, c1 at the origin facing south. The missing "applied the server's
+  frame, not the client: v4 (7db1a600) stands c2 at (0, -120) facing north, c1 at the origin facing south.
+- v4 (20261031-151047), 08:16 PDT: both teleports landed; the hook's read is CONFIRMED on a figure: twelve "skill uses sent: 6:7.0
+  (1 use(s))" for the twelve OnWeaponHit lines of twenty swings (0 damage under god mode), no refusal line. Too few for the step:
+  12 hits are 529 xp of the 688 from 20 to 21, so no level. v5 swings thirty-six times and claims "at least 21, never 23"; the
+  landing rate is the swing's, 60% here. The missing "applied the server's
   actor values" line on both seats is the fresh world's normal path (no record before the seat's own report), not a leveling fault.
   v2 (55b7d02a) dropped the "xp == 0 after swings" claim: the server writes the step's carry into the record and the seat applies it.
 

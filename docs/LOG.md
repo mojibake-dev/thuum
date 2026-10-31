@@ -4256,3 +4256,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   merge: an R0 fast-forward now would put the four cascade branches behind parity again, each needing another parity merge and
   client build before its gate (numidium held its merge at the T2 wait on my note; its T2 ends and is kept). perks' gate carries the
   row-naming; the branch stays for the record.
+- (08:16 PDT 2026-10-31) x-skill-use v4 (7db1a600) on m5-leveling b6748da0 (20261031-151047): both teleports landed (the south frame),
+  and the hook's HYPOTHESIS reads CONFIRMED on a figure: c1 sent twelve "skill uses sent: 6:7.0 (1 use(s))" for the server's twelve
+  OnWeaponHit lines of twenty swings (0 damage under god mode), no refusal; red only on the level, twelve hits being 529 xp of the
+  688 the step to 21 needs. v5 swings thirty-six times and claims at least 21 and never 23 (the base read at least 21), holding
+  from a 45% landing rate to every swing landing; p-level-up's draft recomputed the same way (171 swings in all: skill at least 25,
+  never 28; character level 2, never 3).
