@@ -3945,3 +3945,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   into the open console (no console or menu guard on its E handler); a one-line client fix, its own small branch. The locks map
   (pile item 8) is in: no lock state on the server, no XLOC in libespm, no KEYM record, the client strips every lock in dealWithRef,
   Skyrim Platform's lockChanged carries the reference alone and nothing names a broken pick; docs/verbs/locks.md written from it.
+- (02:1x PDT 2026-10-31) Pile items 7 and 8 from their code maps. docs/verbs/locks.md written (no lock state on the server, no XLOC or
+  KEYM in libespm, the client strips every lock in dealWithRef, Skyrim Platform's lockChanged carries the reference alone; the design:
+  the state R0 on the record from the XLOC, a key in the record unlocks, the minigame's result reported R1 and bounded, a broken pick
+  costs a Lockpick, the console unlock undone; LockReport MsgType 63 and a lock prop on CreateActor; nothing built yet). Containers:
+  docs/verbs/containers.md written (memo D52's shared occupancy recorded with it) and the rest of the row built on fork
+  m4-containers-rest off parity dc3ec679: a put or a take from beyond the activation reach or another cell refused and the mover
+  resynced (E_CONTAINER_REACH, E_CONTAINER_CELL, the activation rule's distance); RequestReloot keeps the moment asked for (a restart's
+  remaining time stood a full window later before); a CONT saved open comes back shut at load; a disconnect releases the player's
+  containers (the chest shut for the others when it was the last: a disconnect neither destroys nor disables the actor, so D52's sinks
+  never fired); the watcher's lid plays the Open and Close animation events on the isOpen change (HYPOTHESIS until x-container-rest).
+  Four Containers cases in PartOne_ActivateTest; tsc green; the probe and the scenario follow the build. x-survival-cold v1 red on its
+  premise (the cold need falls about 200 a minute at lab-spawn; numidium's read: health full through a minute at stage 5, so the mod
+  drains nothing by stage), v2 1bb33d7e (25 s stage read, 1200 for the kill) for the next gap; D72 leans A with the cold kill proven by v2.
