@@ -122,9 +122,9 @@ reference is E_LOCK_* and the lock is re-imposed.
 
 ## Message contract
 
-- Message name / numeric type: LockReport, MsgType 63 (wire id 71), client to server, reliable; the lock state on
-  CreateActorProps (`lock: Option<LockProp>`) and UpdateProperty "lock" (the existing property path), server to
-  client. SCHEMA_VERSION 23.
+- Message name / numeric type: LockReport, MsgType 64 (wire id 72; 63 went to leveling's SkillUse on 2026-10-31), client
+  to server, reliable; the lock state on CreateActorProps (`lock: Option<LockProp>`) and UpdateProperty "lock" (the
+  existing property path), server to client. SCHEMA_VERSION 24.
 - Direction: LockReport C2S; the state S2C.
 - Fields: LockReport { refr: u32 (the reference's form id, never 0), outcome: u8 (0 unlocked by a pick, 1 a pick
   broken, 2 the menu left), broken: u8 (picks broken in this attempt, 0 to 8) }. LockProp { level: i8 (-1 unlocked, 0

@@ -660,3 +660,15 @@ places that one base at the reported pose through the CreateActor path above (pl
 places nothing ("nothing placed, the caster's game reported no base within the window"). The table's `forward` and `dz` are read and
 ignored, so one settings file serves a server of either shape until the train merges. Fixtures 61-PlacedRequest-0 and -1,
 62-PlacedReport-0 and -1; WireJsonContractTest reads them through PlacedRequestMessage.h and PlacedReportMessage.h.
+
+### SkillUse (t 63): a player's skill uses for the server's formulas (leveling, M5)
+
+Since fork m5-leveling 553863f8 (SCHEMA_VERSION 23, 2026-10-31): SkillUse (id 71, MsgType 63), client to server, reliable, once a
+second while the player acts: `{ uses: [{ skill: u8 (the skill's ActorValue, 6 One-handed to 23 Enchanting), amount: f32 (the action's
+base amount as the engine computed it, summed over the second) }] }`, one to eighteen entries, each skill once. Validator: no use,
+a skill outside 6 to 23 or listed twice, an amount of 0 or below or over 100,000 are E_VAL_RANGE; non-finite E_VAL_NONFINITE; a
+budget of 8 then 2 a second (UNMEASURED). The server (PartOne::ApplySkillUse through wire-rules leveling) drops every use while its
+`leveling` setting is false, refuses a use before the player's first ActorValues report (E_SKILL_NO_RECORD), and otherwise runs the
+game's formulas with the AVIF constants read from the game files at start (the eighteen skill records 0x44c to 0x45d): the skill's
+experience and level, the base the game shows, the character's experience, threshold and level; a level moved sends the record back
+as ActorValues (t 40). Fixtures 63-SkillUse-0 and -1; WireJsonContractTest reads them through SkillUseMessage.h.
