@@ -4168,3 +4168,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   so no contamination this time. Scenario drafts for the five pending probes are written and probe-checked in the scratchpad
   (p-level-up, b-lockpick with the key leg and the typed unlock under the lab's rank, b-weather on the new fact, b-perk-pick,
   b-container-rest); each commits on its own after its probe reads.
+- (04:44 PDT 2026-10-31) x-raise-wall v5 (88877000) GREEN on m3-wall-pose 0e4b34e5's own build, run 20261031-113932 (59 steps, every
+  claim held): cast two re-uses cast one's two references at the same settled pose and both are reported 0.33 s and 1.2 s after the
+  request (cast one's cadence: the red runs' 2.3 s was the old skip's artifact; the 6 s window is headroom), four "placed 1 form"
+  lines, no unsettled line, c2's distances equal to c1's own copies', one runtime reference per base per seat, both sets removed at
+  their linger. c2's walk stopped at y -114 with the wall's centre at -160: the collision row reads blocked (the Havok body thinner
+  than the mesh's 104; recorded). Parity b289cbda merged into the branch locally during the run and pushed after it: e713862c is the
+  gate head (server-only, so the stage re-uses 0e4b34e5's dist). The b-spell-placed-wall amendment commits on its own next. The lab
+  moves to leveling ef618dee with x-skill-use 549cec01 (numidium).
