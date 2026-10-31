@@ -4245,3 +4245,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   as e0f9584f (verb-merge's R0 path refuses a branch behind parity; the diff against parity is the five server files), its Windows rerun
   green (the first attempt's one red was BondTest.cpp:357's time-based invisibility check under the slow coverage pass); numidium runs
   the R0 merge with T2 in a gap, no seats needed.
+- (07:52 PDT 2026-10-31) x-lockpick v3 (daaee288) on m4-locks 0fee1628 (20261031-144606): the creation line held on both seats, c1's
+  activation went to the server, the server refused it (E_ACTIVATE_LOCKED) and prompted c1, and c1's console threw "'Game.getFormEx'
+  can't be called in this context" 17 ms later (numidium's read): LockService.onPrompt ran its natives inside the network message
+  handler, which has no Papyrus VM context (the rule the teleport handler already follows). Three services of this weekend carried the
+  same shape: fixed on m4-locks 28910a3d (the prompt deferred to the next update), m5-perks d31944f4 (PerkState's apply) and m4-weather
+  b8ebfb13 (SetWeather's apply), each TypeScript only and overlay-eligible; spellPlacedService records its request without
+  natives and skillUseService has no message handler. x-lockpick stays v3.
