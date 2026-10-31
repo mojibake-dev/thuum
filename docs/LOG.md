@@ -4161,3 +4161,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   branch before its gate, one build each. With the locks merge, the server console's Lock takes a third argument, the key's base
   form id (2d79199f: 0 clears it, a level alone keeps it; LockTest's console case through OnConsoleCommand), so the lab stands a key
   lock on any reference (255 with RiverwoodAlvorHouseKey 0x36a3d, handed by AddItem), as checklist item 4 promised; locks.md says so.
+- (04:40 PDT 2026-10-31) perks' pipeline 4183 (70f9e69b) went red in its server-build at ConsoleCommandTest.cpp:265: the rank case
+  sends SetLevel as its listed-but-unserved command and perks serves SetLevel now (console.rs); the case names AdvSkill instead
+  (advancepcskill's alias, still unserved), m5-perks 1bd5abae. I first read the failing job as locks' (glab.py prints the newest
+  pipeline's jobs under the list) and suspected the shared CI tree again; locks' 4181 and weather's 4182 server-builds are green,
+  so no contamination this time. Scenario drafts for the five pending probes are written and probe-checked in the scratchpad
+  (p-level-up, b-lockpick with the key leg and the typed unlock under the lab's rank, b-weather on the new fact, b-perk-pick,
+  b-container-rest); each commits on its own after its probe reads.
