@@ -4215,3 +4215,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m5-leveling b6748da0 (with 6b1404d5's install log), m4-locks 4b52cd12, m4-weather 7ff8acbf, m5-perks 5c4b3509, m3-prop-physics
   2ad267fa; five client dists queue on sky-build, so the probes run on the prior dists (REUSE_DIST) and the gates on the new heads.
   The lab takes leveling with x-skill-use v3 now.
+- (06:48 PDT 2026-10-31) x-lockpick v1 (e5014621) red at its first approach on m4-locks 4b52cd12's stage (20261031-134255,
+  E_RUN_APPROACH): lab-api's approach reads the target's position through the driver's npc-state, an actor-only read (namedNpc), so a
+  CONT has none; x-shared-chest approached an NPC. x-lockpick v2 d6958064 and x-container-rest v4 3817b193 (and the two drafts)
+  teleport to the spots approach would have computed, 90 and 110 units from the chest at (-3420, 732, 575) on each seat's line
+  from its landing spot, facing it. A grammar item for later: approach on any reference (an ObjectReference position read).
+  b-quest-stage-restart's first standalone run (125456 on parity e713862c): every restart claim held; one red on "no E_QUEST_ line",
+  which counted the designed E_QUEST_OWN_START login line per seat; v2 2d92004009d5 counts E_QUEST_(?!OWN_START), rerun owed.
+  m2-effect-conditions-row's first push (027ffa28) was red at T0 three times: two tests count the refusal's first clause, which I
+  had reworded, and PerkImpactStaggerPushFFAimed 0x153d3 lists an attack-state row (function 724) before its HasPerk; c97376f7 keeps
+  the clause and names every failing row after "failing:", the test reads HasPerk by containment.
