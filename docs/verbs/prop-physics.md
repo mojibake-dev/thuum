@@ -447,3 +447,14 @@ Two candidates: the marker's floor sits 175 units below the strip on a slope (a 
 2 and 4 s) separates them; push v12 by path (0a0e31ef) returns the push to the flat strip with the spawn's ejection as the host's
 first contact (its settle asleep and the basket within 64 of the spot as the premise), the kick read with the record snapshotted
 (b0, r1, r2, r4) and claimed as the second stream, the rest within 400 of the spot. Then grab v8 and drop v6.
+
+pass v10c (033116, 20:37 PDT read) RED at its premise on the flat strip: the console's basket at the host's feet was claimed at once by the
+host's own capsule contact ("contact ff000002 layer 4 motion 2: claimed", the grant at epoch 1), the first track's "placed at its
+record (translated)" put it back into the capsule, and the Dynamic set threw it past 400 on both seats (the follower applied the stream
+and untracked it out of reach 6 s later). With the wake the ejection from inside a capsule is a throw, and the slope question is moot:
+push v11's travel on the marker had the same shape. Consequences. For the lab: a prop never spawns at a player's feet by the console
+again; the probes make it appear by the verb's own path, the server's drop (64 ahead, 48 up, b421d1b2), which is also how a player
+makes a prop appear: push v13 (e98f89ba) and pass v11 (by path) have the host drop a Basket01 from the inventory menu, its touch-2
+claim, fall and sleep as the premise, then the kick. For the code, a follow-up, not tonight: the first track's placement translate
+re-creates an overlap whenever the record sits inside a capsule (a login into a cell whose clutter rests where a player stands);
+the placement could stand off, or wait, when the record lies within the player's radius.
