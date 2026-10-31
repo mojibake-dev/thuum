@@ -369,3 +369,14 @@ An agent's rules review of the train (ee44f7d1..0b49a28e) found eight things; si
 
 T0 green locally on the crate (246 cases) and the bridge; clippy, fork-lint and tsc green; the C++ compiles on CI (the push
 pipeline, whose difftest builds on the crate change); the Windows half on P2-win's pipeline.
+
+D69's T3, first reads (21:46 PDT 2026-10-30; x-quest-rumor v1 on the m3-quest-sge-stages dc3ec679 stage, 043546 cold and 044055
+relaunched, RED on two claims alike): the rumor half holds (DB01Misc's stage relayed in mode all, the denied MQ102 kept per seat) and
+FreeformHeartwoodMill's stage 20, unflagged, was recorded and relayed once with c2 done: D69 B's point. The red: no E_QUEST_OWN_START
+for stage 10 of e3ea5 and c2's stage 10 done. The chain trace (quest-stage-chain.js on both seats) says why: on c1 EnsureQuestStarted
+returned 1 and SetStage(e3ea5, 10) returned 0 with no stage event, so nothing reached the server; on c2 stage 10 reads done with no
+set in the trace's window. A start-up stage is done by the quest's own start at login on every seat, and the engine refuses a console
+set of a done stage, so the probe's forced report could never exist: the premise, not the server (QuestStageTest's refusal of the
+flagged stage stands at T0). v2 by path (the sha1 in the LOG): the start-up stage read as done on both seats before any set, stage 20's
+relay kept, and the server's OWN_START refusal reached through the reports the engine makes by itself, the vampire controller's
+stage-0 reports at its restarts (DLC1VCController 1a428, within 150 s; the churn item's own evidence), never recorded.
