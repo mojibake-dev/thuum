@@ -3710,3 +3710,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the seats hard to play; recorded in player-globals.md with memo D72 (A leave the mod's rule and fix the set-up, B or C by a read of
   whether the cold stage drains health or caps maximums; the server takes a player's reported health drop, OnChangeValues); not in
   tonight's queue.
+- 18:48 PDT: 39 saved paused (numidium: playtest-m3-39-paused-20261031T014638Z, 1237 records), the hold released, the lab free. The
+  physics pipeline 4059 (dde874b5) failed wire-test 14865 at 01:47Z on sky-ci's "Could not resolve host: github.com" (cargo-deny's
+  RustSec fetch on VM 702), as parity's 4047 and 4054 did; difftest-build green, server-build and client-build skipped behind it;
+  core asked for the DNS fix, numidium retries the job (no new pipeline), the physics stage follows the Windows green. The guest-loot
+  and dedupe branches wait on the same runner.
