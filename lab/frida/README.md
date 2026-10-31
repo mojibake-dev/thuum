@@ -379,4 +379,9 @@ break timer, sweetSpotAngle, partialPickAngle, numBrokenPicks; LockpickingMenu.h
 the lock, every broken pick, every message, and once a second. With `params: {SNAP: true}` it writes the pick's angle to the
 sweet spot every frame, so a held A opens the lock by the engine's own minigame (the lab's lever for the pick leg, HYPOTHESIS
 until its first run). `frida {script: lockpick-trace.js}` on the picking seat before the activation.
+v2 (11:49 PDT): hooks the menu's MenuEventHandler slots (CanProcess, ProcessMouseMove, ProcessButton through VTABLE_LockpickingMenu[1],
+Address Library 215606) and rows every event that reaches them (device, type, user event, id code, value or held seconds or x and
+y, the handler's answer), after x-lockpick v6 (183903) read the pick and lock angles flat at 0 through 27 lab attempts; and a TURN
+lever (`params: {SNAP: true, TURN: true}`, TURN_DEG 1.0 a frame from TURN_START_MS 8000 after the menu's first frame, sign
+TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu's update opens the lock at its full turn.
 

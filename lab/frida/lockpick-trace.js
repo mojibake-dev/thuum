@@ -21,19 +21,39 @@
 // count), lock rows rising while A is held and falling at its release, the break timer counting at a wrong angle. Falsified by:
 // no frame row after the menu opens (the vtable or slot is wrong), a sweet spot outside [-90, 90] (the runtime offset), a pick
 // angle flat through the mouse steps (the mouse never reaches the menu), a lock angle flat through the hold (the key does not).
-// Params through LAB_PARAMS: SNAP (default false), EVERY_MS (default 1000). Offsets for 1.6.1170 only.
+// v2 (11:49 PDT 2026-10-31, after x-lockpick v6 183903: the offsets read sane (sweet 42.6 at Lockpicking 100 on a Novice lock,
+// partial 50.05, break 3 s) and the pick and lock angles sat at 0 through 27 lab attempts, so the injected input never reaches
+// the minigame). Added: hooks on the menu's own input handlers, MenuEventHandler slots 01 CanProcess, 04 ProcessMouseMove and
+// 05 ProcessButton (include/RE/M/MenuEventHandler.h:21-25) read from VTABLE_LockpickingMenu[1] (Address Library 215606 on AE,
+// Offsets_VTABLE.h:4060; `this` there is the handler subobject at menu+0x30, LockpickingMenu.h:96), each row naming the event's
+// device (InputEvent.h:53, 0 keyboard 1 mouse 2 gamepad), type (:54, 0 button 1 mouse move 3 thumbstick), user event string and
+// id code (IDEvent.h:22-23, the BSFixedString's pointer is the characters), a button's value and held seconds (ButtonEvent.h:27-28)
+// or a move's x and y (MouseMoveEvent.h:15-16), and the handler's answer: so a run shows whether the lab's input reaches the menu's
+// handler at all (no rows while the lab moves and holds: dropped upstream), or reaches it and is ignored (rows with the wrong user
+// event or device). And a second lever, TURN: TURN_START_MS after the menu's first frame (default 8000, so the lab's inputs are read
+// first), the script writes the lock's angle as a ramp of TURN_DEG a frame (default 1.0, sign TURN_SIGN, default 1, to 100) with the
+// pick snapped to the sweet spot: HYPOTHESIS that the menu's update opens the lock when lockAngle reaches its full turn whatever
+// drove it there (falsified by the ramp rows showing the engine's angle back at 0 each frame or by no unlock at 100).
+// Params through LAB_PARAMS: SNAP (default false), TURN (default false), TURN_DEG, TURN_SIGN, TURN_START_MS, EVERY_MS (default
+// 1000). Offsets for 1.6.1170 only.
 'use strict';
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS
   : ((typeof params === 'object' && params) ? params : {});
 const SNAP = !!PARAMS.SNAP;
+const TURN = !!PARAMS.TURN;
+const TURN_DEG = PARAMS.TURN_DEG ? Number(PARAMS.TURN_DEG) : 1.0;
+const TURN_SIGN = PARAMS.TURN_SIGN ? Number(PARAMS.TURN_SIGN) : 1;
+const TURN_START_MS = PARAMS.TURN_START_MS !== undefined ? (PARAMS.TURN_START_MS >>> 0) : 8000;
 const EVERY_MS = PARAMS.EVERY_MS ? (PARAMS.EVERY_MS >>> 0) : 1000;
 
 const OFFSETS = {
   '1.6.1170.0': {
     vtable: 0x18faf20, // just addr 215604 (VTABLE_LockpickingMenu[0], IMenu's table)
     runtime: 0x48, // LockpickingMenu.h:116 RelocateMember(this, 0x48, 0x58): SE and AE
+    handlerVtable: 0x18faf70, // just addr 215606 (VTABLE_LockpickingMenu[1], MenuEventHandler's table)
+    handlerInMenu: 0x30, // LockpickingMenu.h:96 RelocateMember(this, 0x30, 0x40): SE and AE
   },
 };
 // RUNTIME_DATA fields, LockpickingMenu.h:34-80
@@ -44,6 +64,9 @@ const F = {
 };
 const SLOT_PROCESS_MESSAGE = 4; // IMenu.h:70
 const SLOT_ADVANCE_MOVIE = 5; // IMenu.h:71
+const HANDLER_SLOTS = { canProcess: 1, processMouseMove: 4, processButton: 5 }; // MenuEventHandler.h:21-25
+// InputEvent.h:53-54, IDEvent.h:22-23, ButtonEvent.h:27-28, MouseMoveEvent.h:15-16
+const EV = { device: 0x08, type: 0x0c, userEvent: 0x18, idCode: 0x20, value: 0x28, heldSecs: 0x2c, mouseX: 0x28, mouseY: 0x2c };
 
 function fileVersion(path) {
   const ver = Module.load('version.dll');
@@ -84,7 +107,7 @@ if (o === undefined) {
       cleared: r.add(F.menuCleared).readU8(), finished: r.add(F.animationFinished).readU8(),
     };
   }
-  let last = null, lastRow = 0, frames = 0, snapped = 0;
+  let last = null, lastRow = 0, frames = 0, snapped = 0, firstFrameAt = 0, turnAngle = 0;
   Interceptor.attach(advanceMovie, {
     onEnter(args) {
       const self = args[0];
@@ -95,6 +118,14 @@ if (o === undefined) {
         self.add(o.runtime).add(F.pickAngle).writeFloat(v.sweet);
         snapped += 1;
         v.snapped = true;
+      }
+      if (firstFrameAt === 0) firstFrameAt = Date.now();
+      if (TURN && Date.now() - firstFrameAt >= TURN_START_MS && v.cleared === 0 && turnAngle < 100) {
+        turnAngle = Math.min(100, turnAngle + TURN_DEG);
+        self.add(o.runtime).add(F.lockAngle).writeFloat(TURN_SIGN * turnAngle);
+        if (turnAngle === TURN_DEG || Math.floor(turnAngle) % 10 === 0) {
+          emit({ kind: 'turn', written: TURN_SIGN * turnAngle, engineLock: v.lock, pick: v.pick, sweet: v.sweet, frame: frames });
+        }
       }
       const now = Date.now();
       const changed = !last || Math.abs(v.pick - last.pick) > 0.5 || Math.abs(v.lock - last.lock) > 0.5 ||
@@ -114,5 +145,28 @@ if (o === undefined) {
       emit({ kind: 'message', type: type, pick: v && v.pick, lock: v && v.lock, sweet: v && v.sweet, broken: v && v.broken, tid: this.threadId });
     },
   });
-  emit({ ready: true, version: version, vtable: '0x' + o.vtable.toString(16), processMessage: inExe(processMessage), advanceMovie: inExe(advanceMovie), snap: SNAP, everyMs: EVERY_MS });
+  // the menu's own input handlers: what reaches them while the lab moves the mouse and holds a key
+  const handlerVtable = exe.base.add(o.handlerVtable);
+  function eventFacts(ev) {
+    const out = { device: -1, type: -1 };
+    try { out.device = ev.add(EV.device).readU32(); out.type = ev.add(EV.type).readU32(); } catch (e) { return out; }
+    try { const sp = ev.add(EV.userEvent).readPointer(); out.userEvent = sp.isNull() ? '' : sp.readUtf8String(); } catch (e) { out.userEvent = '?'; }
+    try { out.idCode = ev.add(EV.idCode).readU32(); } catch (e) { /* no id */ }
+    if (out.type === 0) { try { out.value = ev.add(EV.value).readFloat(); out.heldSecs = ev.add(EV.heldSecs).readFloat(); } catch (e) { /* no body */ } }
+    if (out.type === 1) { try { out.x = ev.add(EV.mouseX).readS32(); out.y = ev.add(EV.mouseY).readS32(); } catch (e) { /* no body */ } }
+    return out;
+  }
+  Object.keys(HANDLER_SLOTS).forEach(function (name) {
+    const fn = handlerVtable.add(HANDLER_SLOTS[name] * Process.pointerSize).readPointer();
+    Interceptor.attach(fn, {
+      onEnter(args) { this.ev = eventFacts(args[1]); },
+      onLeave(retval) {
+        const row = { kind: 'handler', handler: name, answer: retval.toInt32() & 0xff, tid: this.threadId };
+        Object.assign(row, this.ev);
+        emit(row);
+      },
+    });
+    emit({ hooked: name, at: inExe(fn) });
+  });
+  emit({ ready: true, version: version, vtable: '0x' + o.vtable.toString(16), processMessage: inExe(processMessage), advanceMovie: inExe(advanceMovie), snap: SNAP, turn: TURN, turnDeg: TURN_DEG, turnSign: TURN_SIGN, turnStartMs: TURN_START_MS, everyMs: EVERY_MS });
 }

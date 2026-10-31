@@ -239,8 +239,25 @@ reference is E_LOCK_* and the lock is re-imposed.
   pick leg if the ratio or the mouse path fails: a held A then opens the lock by the engine's own minigame, and the report, the
   server's unlock and the watcher's applied line are the claims as before. The trace is a run's artifact (frida/*.jsonl), not a
   fact, so the first run reads it by hand.
-- Owner of the pick leg after v5: the agent while the trace or the lever answers within one run; Eli's hand at turbo 2 otherwise
-  (rule 8).
+- v6 (7b767004, run 20261031-183903 on 9ece63c2, the trace's first run; numidium's read): the offsets are RIGHT (CONFIRMED: the
+  ready row's vtable 0x18faf20, the menu's rows on one thread with sweetSpotAngle 42.6, damagePickAngle 90, pickBreakSeconds 3,
+  partialPickAngle 50.05, numBrokenPicks 0; a first few rows on another thread read garbage, another object), and pickAngle and
+  lockAngle read 0 in every one of 22,316 rows through all 27 attempts (the fine A sweep and the coarse D sweep): CONFIRMED that the
+  lab's injected mouse moves and held keys never reach the minigame; which layer drops them is UNREAD. Numbers read: partial 50.05
+  = fPartialPickVeryEasy 22 times (fLockpickSkillPartialPickBase 0.775 + 100 times fLockpickSkillPartialPickMult 0.015): the partial
+  formula CONFIRMED at skill 100; the sweet spot 42.6 at Novice with Lockpicking 100 is NOT 30 times (1 + 100 times 0.006) = 48, so
+  the sweet-spot formula stays HYPOTHESIS (42.6 = 30 times 1.42; 1.42 = 1 + 70 times 0.006, as if the mult counted from skill 30).
+- v7 (49e1db9f, 11:50 PDT) with lockpick-trace.js v2 (main): the menu's own MenuEventHandler slots hooked (CanProcess, ProcessMouseMove,
+  ProcessButton through VTABLE_LockpickingMenu[1], Address Library 215606; the event's device, type, user event, id code, value or
+  held seconds or x and y, and the handler's answer) while leg B makes one mouse move, one 2 s hold of A and one tap of D: no handler
+  row then means the injection is dropped upstream of the menu (the input queue never carries it), rows with the wrong user event
+  or device mean the menu ignores it. Then the lever, SNAP plus TURN from 8 s after the menu's first frame: the pick pinned to the
+  sweet spot and lockAngle ramped 1 degree a frame to 100 (HYPOTHESIS: the menu's update opens the lock at the full turn whatever
+  drove it there; falsified by the ramp rows reading the engine's angle back at 0 or by no unlock at 100). The until on "371e9
+  unlocked" is the verdict; legs C and D follow as before. Runs at the next locks restage if the lab has room after perks.
+- Owner of the pick leg after v7: if the lever opens the lock, b-lockpick's pick leg carries the frida step (the lab's hand, as a
+  teleport is its feet) and the report, the server's unlock and the watcher's applied line are the claims; if not, the pick is Eli's
+  at turbo 2 and the scenario claims the key, console and sync legs (rule 8, no v8 without a new reading).
 
 ## Status
 

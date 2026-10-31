@@ -4354,3 +4354,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   event's objectImpulse, dt, projectedVelocity and massInv with the result vector before and after; `player` tags the player's proxy
   controller (vtable 240560). Ids 240560, 79133, 62648 resolved by `just addr`. prop-physics.md's launch section has the read; the
   physics restage's deploy-srv carries the script for x-prop-launch v3.
+- (11:50 PDT 2026-10-31) x-lockpick v6 7b767004 RED at the unlock until (20261031-183903 on 9ece63c2; numidium's read of the
+  lockpick-trace.js jsonl, 44,686 rows): the runtime offsets confirmed (sweet 42.6, damage 90, break 3 s, partial 50.05 = 22 times
+  2.275), pickAngle and lockAngle 0 in every row through all 27 attempts: the lab's injected mouse and held keys never reach the
+  Lockpicking Menu. Locks leaves the lab queue (physics v3, dedupe, containers, the talk guard, perks first). lockpick-trace.js v2
+  (main): hooks on the menu's own input handlers (MenuEventHandler slots through VTABLE_LockpickingMenu[1], 215606) to name the
+  dropping layer, and the TURN lever (lockAngle ramped with the pick snapped) beside SNAP; x-lockpick v7 49e1db9f (one move, one hold,
+  one tap for the handlers, then the lever, the until within 15 s) for a short locks restage if the lab has room tonight; else the
+  pick is Eli's at the sitting and b-lockpick claims the key, console and sync legs.
