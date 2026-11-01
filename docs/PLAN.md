@@ -1407,6 +1407,12 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 
 ### M6: Quests and dialogue (open-ended; partial by design)
 
+- Scenes everyone sees (Eli, 13:25 PST 2026-11-01: "the scenes where [Hermaeus Mora] manifests, that ideally everyone would see that in
+  sync"): a quest's scene runs on the engine of the cell's host (ADR-050: scenes are an engine system the host runs for us), its
+  actors' lines and actions travel as the voice and action slices already carry them (ActorSpeech, the action relay), and the
+  scene's start and its stage ride the quest stage the server shares (ADR-056), so a manifestation plays on every seat in the cell
+  in step. The Black Books' realm and the "bring my party here" summon (the scripted-teleport permit, the message-box consent) are
+  the same milestone's first dungeon items (LOG, 2026-11-01 evening).
 - Quest state serialized from the live engine through the CommonLib quest
   layout, mirroring the documented QUST change form (stages, objectives,
   script state, instances, run data). Server owns it per policy: per-player by
