@@ -1262,6 +1262,14 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   with the base (the console's SetAV snapped back at the next use before); the R0 path when numidium has a slot. Queued behind: perks
   afd12dae (x-perk-pick), physics f923e0a7 (x-prop-launch v2), dedupe d0085bb0, containers ae2cbfd6, talk guard 7be4eb41, each with a
   parity re-merge before its gate. Sunday's lay: the four switches OFF by layer-render, Survival off (D72).
+- STATE 2026-10-31 21:07 PDT (the pass's chart line): fork parity 6414dcd2. The day merged containers' rest (ae2cbfd6, 00:44Z: the lid
+  on every screen, the second occupant, the take's reach, the disconnect's release, the saved-open chest shut at the load) and physics
+  slice one (6414dcd2, 04:03Z: the drop's copy created at the drop point, D73's Dynamic rest, D75's persistence, b-prop-push whole; the
+  lab's prop an iron ingot, the basket Eli's at the camp). Weather's probe is green and b-weather is on main (its gate next); locks' pick
+  leg is beyond the lab's hands (v6's trace) with v7's script lever optional; the skill-set fix (a68d1b80 line) waits for an R0 slot;
+  the talk guard, dedupe v2 and perks queue with their probes. All six branches carry 6414dcd2 (talk guard 9b6c3836, dedupe d822d7c7,
+  perks 0cfbb82d, weather bf231bc1, locks 701d8b20, skill-set ee7f60d4). Sunday's lay: the four switches OFF by layer-render, Survival
+  off (D72), props on by default on the merged base.
 - STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
   sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
