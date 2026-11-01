@@ -4881,3 +4881,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   server-only): a guest's activation of a scripted ACTI or FURN in a cell it does not host is relayed to the host's engine with the
   guest's actor as the activator (the pillar turns and counts there), the host's echo quiet, T0's pillar case; probe x-puzzle-relay v1
   4f3fb26a (five relayed turns, the host's pull, the marker's portcullis on both) for a stage after the pair merges on the traps dist.
+
+- 08:01 PST 2026-11-01 (thuum-magnus): m4-puzzle-relay cf70e418 generalizes the relay: a player's activation of a scripted world object goes to
+  EVERY other game in the cell (the host's engine for the count, the guests' for the same script while the layer admits it
+  everywhere), not the host alone; probe x-puzzle-relay v1 f67fabe3 has the host turn the third pillar and claims its relay to the
+  guest. The earlier entry's "to the host" is superseded.
