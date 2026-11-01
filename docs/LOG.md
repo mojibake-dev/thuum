@@ -4647,3 +4647,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   is an ACTI, not a DOOR (its rise is each engine's script on the relayed activation; the server keeps no open state for it, a known
   limit for d-bleak-falls' restart leg): the test claims the relay with the lever as caster, m4-traps 333a1cdc with the word wall's
   fixes merged. Perks restages on 395cdc49 (numidium); the seats' clocks are UTC for good.
+- (02:10 PST 2026-11-01) D77 B and C at T0 GREEN: m4-word-wall bdeb086e (pipeline 4403: WordWallTest teaches once from 100 units off the trigger,
+  refuses 2,150 off the wall, another cell, the wall itself and no reference; the wire tests, the fixtures, the difftest session) and
+  m4-traps 333a1cdc (pipeline 4404: TrapRelayTest relays the plate's wall and the lever's portcullis to the guest alone, refuses the
+  guest's report, an unlinked pair and the ninth in a second). Each carries its client first cut (the word wall hook on OnTriggerEnter,
+  the traps' widened host report and the relay's handler) under HYPOTHESIS tags until x-word-wall-read and x-bleak-traps read on the
+  perk-effects stage; each raises SCHEMA_VERSION (27, 28), so its own stage needs its own full dist. Drafts ready in the scratchpad:
+  b-perk-damage (from the probe), b-word-wall (server.actor(c).wordsKnown == "0x13e22", the record's own fact, b-shout's form).
