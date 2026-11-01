@@ -4973,3 +4973,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-object-anim). docs/verbs/traps.md and WIRE.md carry it. Main's pipeline 4512 red was the settings' shape (layer-render's,
   both files); a795cfcc green at 4513. Also on the fork: pipeline 4510 (m5-race-permit b59ab993, client build) green.
 
+- 14:23 PST 2026-11-01 the object-animation pair's names for numidium's queue: fork m4-object-animation e1db19c8 (f317ef48 plus the
+  animation family widened from the scripts' own names: the wall's 180For/Half/End/Back and Rearm, the plate's Down, the
+  activator's opened, read off the pex files and the bases' VMAD with vmad.py), thuum layer branch layer-world-scripts-host
+  8b7517f0 (the traps row host-scoped), probe x-object-anim v2 by path 5805d687 (adds decision 4's first read: the host's
+  figure of the guest after the wall's swing). ADR-059 decision 4's Dynamic plan written in traps.md (the wall's level table
+  75 to 200 by level 10 to 30, TrapHitBase's hit shape, the hypothesised RestoreActorValue path, the Frida trace to write; no
+  code until the read).
+

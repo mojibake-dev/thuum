@@ -201,8 +201,11 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   traps dist serves).
 - ADR-059 decision 3 BUILT (fork m4-object-animation off m4-world-scripts-host 9bb3d3ed, 14:2x PST 2026-11-01; the head in
   docs/LOG.md): the host's engine's world-object animation events reach the guests. Client: ObjectAnimationService hooks
-  sendAnimationEvent for the family the trap and puzzle scripts play, matched in native (HookPattern: Trigger*, Turned*,
-  FullPull*, open, close, Open, Close, Reset, Idle; the engine's exact names HYPOTHESIS until x-object-anim reads them), notes
+  sendAnimationEvent for the family the trap and puzzle scripts play, matched in native (HookPattern; from the scripts' own
+  names in the game's pex files and the bases' VMAD, read 14:23 PST 2026-11-01: the pillars' Trigger0N and Turned0N, a lever's FullPull
+  and FullPulledDown, a two-state activator's open, close and opened, the plate's Down, the swinging wall's 90/180/270 For,
+  Half, End and Back and Rearm, TrapBase's Reset and Idle; the engine's exact set HYPOTHESIS until x-object-anim reads it;
+  fork e1db19c8), notes
   the event and on the next update reports it when this seat hosts the reference's cell and the reference is no actor or
   door; a relayed ObjectAnimation plays through the engine's own PlayAnimation (the path remoteServer's lastAnimation replay
   uses). Server: OnObjectAnimation (above) records it as lastAnimation and relays; T0 ObjectAnimationTest (recorded and
@@ -212,6 +215,30 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   wall and the pillar's turn played on the guest, the guest's own plate silent under the gate: H3's other half). What stays
   the host's engine's alone: the sound (the engine plays a script's sounds where the script runs; a guest hears none until
   a later slice) and the trap's harm (decision 4).
+- ADR-059 decision 4 (harm), the Dynamic plan (rule 8; 14:23 PST 2026-11-01). Static, from the game's files: the wall TrapWallWood 0xc6440's
+  VMAD carries TrapSwingingWall's level table, LvlDamage1..6 = 75, 100, 125, 150, 175, 200 by LvlThreshold1..5 = 10, 15, 20, 25,
+  30 (the victim's level against the thresholds picks the damage; MovingTrap carries the same shape, DartTrap's is LvlWeapon1..6
+  by the same thresholds), and TrapHitBase's hit shape (trapPushBack 45, trapCausesStagger with staggerAmount 0.7, canDisease with
+  diseaseChance 1 and the six disease spells, hitFX, cameraShake, rumble, hitOnlyOnce false); TrapBase's TrapLevel (0 Easy to 3
+  VeryHard, "currently only tied to damage") and its `damage`; the placed wall 0x54b15's own VMAD sets rotation 1 alone, the
+  plate 0x567f2 and the portcullis 0x3b9f1 carry none (their bases' scripts: PressurePlate with isTriggerVolume and the Light Foot
+  check, default2StateActivator). The engine's path, HYPOTHESIS: TrapHitBase.OnTrapHitStart on the hit actor runs the Papyrus
+  damage, Actor.DamageActorValue("Health", damage), which is ActorValueOwner::RestoreActorValue(kDamage, Health, -damage) on the
+  victim (CommonLibSSE-NG include/RE/A/ActorValueOwner.h, slot 06), not the melee path's DamageActor that FridaHooks.cpp:1131
+  replaces for figures and puppets; so on the host the guest's FIGURE loses health locally and the guest never knows, and under
+  the hosted-cell gate the guest's own engine runs no trap at all: a trap cannot hurt a guest until this slice. The trace
+  (lab/frida, to write: trap-hit-trace.js, 1.6.1170): c1 hosting the temple, c2's figure on the plate; hook the figure's
+  ActorValueOwner vtable slot 06 (the figure's pointer from its form id, as the other traces look forms up) and log the modifier,
+  the actor value and the amount with the caller's module offset; hook the Papyrus event dispatch on the wall 0x54b15 for
+  OnTrapHit and OnTrapHitStart (Skyrim Platform's sendPapyrusEvent hook) and log the target. Expected: one RestoreActorValue
+  (kDamage, Health, -75) on the figure per swing at a level-1 figure, inside OnTrapHitStart's dispatch, and nothing on the guest's
+  seat. x-object-anim v2 (5805d687) carries the first read without Frida: c1's av-read of its figure of c2 after the wall swung at
+  it (leg B), beside c2's own under god mode. Then the build, in the verb's order: TrapHit { refr, target, damage } C2S from the
+  host (the next wire row with its validator and fixtures); the server's rule reads the trap base's table from its VMAD by the
+  target's recorded level and TrapLevel, checks the trap's trigger volume against the target's recorded position, applies the
+  number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
+  the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
+  restored by the server's word. Decision 5 (counts) after it.
 - Static pre-answers for ADR-059's next slices (08:03 PST 2026-11-01). Decision 3 (the host's animations to the guests): Skyrim Platform's
   sendAnimationEvent hook (FridaHooks.cpp OnSendAnimationEventEnter) takes the engine's animation-graph holder from rcx and reads
   the TESObjectREFR 0x38 bytes below it, so every reference with a graph reaches EventsApi::SendAnimationEventEnter(formId, name),
