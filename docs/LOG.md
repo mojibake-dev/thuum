@@ -4803,3 +4803,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   keys through the lab (Tab on c1, Escape on c2, the chest relocked by the console between) and the open after each; if neither key
   reaches the menu (x-lockpick v6's pick keys never did), the lab needs a Cancel-event close (a platform native), and b-locks either
   reorders its legs or waits for it.
+
+- 06:16 PST 2026-11-01 (thuum-magnus): containers, a finding from x-locks-open v2: the open handler's Utility.wait poll is suspended in menu mode
+  (Skyrim Souls RE keeps the game running but the VM's menu mode stands), so the ContainerMenu's open was never observed and the
+  occupant was released by the 15 s give-up; fork m4-container-open-poll 5ee4d72b (off parity 27f5c0a4, a client build) polls with
+  Utility.waitMenuMode, as the closing delay already did. Its gate is the containers' scenarios; the probe read is the handler's
+  "to be false" and "menu closed" lines on any open. The seats' menus are read by the driver's dump-state (Ui.isMenuOpen over a
+  list, on its own loop), which is why the probe saw the open the handler missed.
