@@ -151,6 +151,14 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
 - Breakpoint plan: none.
 - Owner: agent.
 
+- Finding and fix (06:16 PST 2026-11-01, x-locks-open v2 20261101-140443; fork m4-container-open-poll 5ee4d72b off parity 27f5c0a4): the
+  open handler (remoteServer.ts onOpenContainerMesage) polled Ui.isMenuOpen through Utility.wait, which the VM suspends in menu
+  mode, so a wait begun before the menu opened resumed only at its close; the open was never seen and the occupant left by the
+  give-up path at the 15 s deadline (late for a short open; the state since Skyrim Souls RE's unpaused menus joined the layer,
+  which keep menu mode). Utility.waitMenuMode runs through a menu (the closing delay already used it); both polls now use it, so
+  "waiting for 'ContainerMenu open' to be false" and "menu closed" are the lines a run should show, and the closing activation
+  leaves at the close. Gate: b-container-rest and the containers scenarios; the probe read is those two lines on an open.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)

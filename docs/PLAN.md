@@ -1347,8 +1347,20 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   lab-api's 20 s seat stagger (f0480e2) is the fix; the morning reboot is Eli's word; sky-srv is down since core's 07:17Z reboot.
   M3 DONE still waits on the stage, the sweep and the two exit scenarios green.
 
-### M4: World and dungeons (6 to 10 weeks, Class B)
+### M4: World and dungeons (6 to 10 weeks, Class B). Started 2026-10-30 (the weekend pass)
 
+- STATE (06:22 PST 2026-11-01, thuum-magnus; the dated record is LOG.md): locks MERGED (fork parity 395cdc49, 2026-11-01: the server's lock
+  from the REFR's XLOC, the key path, the console pair on the server, LockReport and LockPrompt; the minigame's own pick is T4;
+  b-locks pending on the lab's close of the Lockpicking Menu, not the verb: x-locks-open v1 to v3); weather MERGED (one sky per
+  worldspace, b-weather); containers' rest MERGED ae2cbfd6 (b-container-rest; the open handler's menu-mode poll fix on fork
+  m4-container-open-poll 5ee4d72b awaits its gate); dropped items and kicked objects MERGED 6414dcd2 (ADR-058 slice one,
+  b-prop-push with the restart); word walls BUILT (fork m4-word-wall 0ef96899: WordWall 69, the server's TeachWord from the
+  trigger's own record, the hook on OnTrigger, the trigger's sphere as the reach; x-word-wall at its stage, b-word-wall drafted;
+  the chant behind ADR-059's layer rows); traps, plates, levers, pillars: READ 2026-11-01 (x-bleak-traps v3: nothing runs, every
+  piece a Papyrus script behind two blocks), ADR-059 written (world scripts run on the cell's host), slice one staged (the layer's
+  named rows, the client's activationUnblockedBases, the server's links from script properties and the marker caster, fork
+  m4-traps 5a1a16b8; the platform's hosted-cell gate on fork m4-world-scripts-host 80616308); statics and doors as before; the
+  exit d-bleak-falls after ADR-059's slices.
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
   linked refs (the lever that opens the door), statics.
 - Weather and time as server globals; both rendered, neither rolled locally.
@@ -1367,8 +1379,14 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 - Exit: `d-bleak-falls` (both players through the puzzle door and the traps,
   with a restart mid-dungeon).
 
-### M5: Progression (4 to 8 weeks, Class A/B)
+### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
+- STATE (06:22 PST 2026-11-01, thuum-magnus): skills by use MERGED b6748da0 (p-level-up 10 of 10: the 40488 hook, UESP's formulas on the
+  server, the level and skills on the record); perks as transactions MERGED 395cdc49 (b-perk-pick: the pick validated against the
+  tree and the points; Skyrim Platform's array results fixed on the way) and the perk records' EFFECTS in the server's damage
+  formula MERGED 27f5c0a4 (b-perk-damage: kModAttackDamage and kModArmorRating with their keyword conditions; other entry points
+  and conditions stay a documented limit); the console's SetLevel and AdvSkill on the server (m5-skill-set); enchanting, alchemy
+  and pickpocketing as transactions: not begun (memo D77 D, the benches after the playtest); vampirism: the design owed.
 - Skills, experience, and leveling from the documented formulas, computed
   R0; the client's own leveling disabled.
 - Perks, enchanting, alchemy, pickpocketing as server transactions.

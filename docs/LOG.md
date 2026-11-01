@@ -4788,3 +4788,35 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   TESModPlatform.SetCellHosted, hostService's calls at grant, release, clear and restore; papyrus-map's scope=host column on main
   bf0296d9 writes the marker; the layer's traps row stays everywhere for v4's read. layer-world-scripts merged with main (a76e3653)
   for layer-stage's tree check, at numidium's ask.
+
+- 06:13 PST 2026-11-01 (thuum-magnus): x-locks-open v2 (20261101-140443, green as a read) names the chest red's cause and finds a second fault.
+  The engine reads the chest unlocked on both seats after the server's unlock (console GetLocked 0, GetLockLevel 0, before it 1 and
+  0). c2, which never opened the minigame, OPENED the ContainerMenu on its activation: its dump-state 5 s later lists "ContainerMenu"
+  beside the HUD, while remoteServer's onOpenContainerMesage never saw it ("waiting for 'ContainerMenu open' to be true", then "gave
+  up" at 15 s and the closing activation): the handler's Utility.wait(0.1) loop checked once before the menu opened, the menu's pause
+  held the wait until the lab's close, and the deadline had passed, so the give-up path, not the open, released the occupant. A
+  finding of its own for the containers verb: a short open under that race keeps the occupant to the deadline (the wait is game
+  time; the poll belongs on the platform's tick). c1, whose Lockpicking Menu the lab closed twice with TESModPlatform.CloseMenu (a
+  kHide message), opened no ContainerMenu afterward by the handler's activate nor by the console's own `activate`, though its lock
+  reads the same: the kHide close leaves the seat unable to open the chest while the minigame still opens on it (v1). b-locks' red is
+  therefore the lab's close, not the verb; a player exits the minigame by its own key. x-locks-open v3 fa22708f reads the menu's own exit
+  keys through the lab (Tab on c1, Escape on c2, the chest relocked by the console between) and the open after each; if neither key
+  reaches the menu (x-lockpick v6's pick keys never did), the lab needs a Cancel-event close (a platform native), and b-locks either
+  reorders its legs or waits for it.
+
+- 06:16 PST 2026-11-01 (thuum-magnus): containers, a finding from x-locks-open v2: the open handler's Utility.wait poll is suspended in menu mode
+  (Skyrim Souls RE keeps the game running but the VM's menu mode stands), so the ContainerMenu's open was never observed and the
+  occupant was released by the 15 s give-up; fork m4-container-open-poll 5ee4d72b (off parity 27f5c0a4, a client build) polls with
+  Utility.waitMenuMode, as the closing delay already did. Its gate is the containers' scenarios; the probe read is the handler's
+  "to be false" and "menu closed" lines on any open. The seats' menus are read by the driver's dump-state (Ui.isMenuOpen over a
+  list, on its own loop), which is why the probe saw the open the handler missed.
+
+- 06:19 PST 2026-11-01 (thuum-magnus): m4-traps' T0 twice red on the new test's edges, both the stranger caster: dc881a11 (4450) threw at
+  TrapRelayTest's last check through the legacy hosted caster rule; a81ed148 (4459) refused it quietly and PartOne_ActivateTest's
+  "Activate with bad hoster" wanted the throw. 5a1a16b8 keeps the throw and the new test expects it; the puzzle lever's links and
+  the marker caster held in both runs' logs ("3e728 activates 3b9f1 ... relayed to 1 game(s)"). The traps stage waits on its T0.
+
+- 06:31 PST 2026-11-01 (thuum-magnus): m4-world-scripts-host 80616308's client build is green (pipeline 4456: the platform's host-scoped rows,
+  the hosted-cell set and SetCellHosted compile into the dist); its server-build red was the inherited stranger case of
+  TrapRelayTest (the branch was cut from dc881a11). m4-traps 5a1a16b8 merged into it (ae90b4d0, server-only push; 80616308's dist
+  is its dist). The traps head 5a1a16b8 itself is T0 green (4464) and is the traps stage's head.
