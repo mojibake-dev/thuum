@@ -4640,3 +4640,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the target's activation parents name, at most eight a second, recorded through Activate's own path and relayed to the target's
   listeners but the reporter; TrapRelayTest on Bleak Falls' plate, wall, lever and portcullis; the lever carries no XLKR, the
   portcullis's XAPR names it). Both client halves wait on the reads riding the perk-effects stage.
+- (01:58 PST 2026-11-01) Two T0 reads on the new halves. Word wall (pipeline 4391): the trigger's bounds are the chamber (WordWallTrigger's OBND a
+  box of about 4,000 units a side), so a report from 2,600 units was "within reach"; the reach is measured to the WALL the trigger
+  script names (wordWall01, bounds about 320 units) when loaded, else the trigger: m4-word-wall bdeb086e. Traps (pipeline 4392): the
+  relay, the host check, the unlinked refusal and the budget held; the lever's portcullis never read open because NorPortcullisLarge01
+  is an ACTI, not a DOOR (its rise is each engine's script on the relayed activation; the server keeps no open state for it, a known
+  limit for d-bleak-falls' restart leg): the test claims the relay with the lever as caster, m4-traps 333a1cdc with the word wall's
+  fixes merged. Perks restages on 395cdc49 (numidium); the seats' clocks are UTC for good.

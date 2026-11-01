@@ -43,9 +43,11 @@ wall and the word; the server validates the wall's WOOP against the game files a
 for the chant and camera.
 Why this rung and not the one above it: the trigger is the player's own game's (its camera and chant), so the report is
 the player's; the word is the game files' and the record is the server's.
-What the server validates (R1): the wall reference exists and is a word wall (its script or its WOOP link from the
-game files), the player within reach of it (the activation rule's distance), the word one of the wall's SHOU's three,
-not known already (a repeat is idempotent).
+What the server validates (R1): the reported reference is a word wall trigger (its WordWallTriggerScript names a word,
+myWord01, a WOOP), the player in the cell of and within the activation reach of the WALL the script names (wordWall01; the
+trigger's own bounds are the chamber, a box of about 4,000 units a side, so a reach to it meant nothing: pipeline 4391
+taught from 2,600 units; the wall's bounds are about 320 units, fork bdeb086e, 01:58 PST 2026-11-01), the word not known already (a
+repeat is idempotent).
 Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a second.
 
 ## Engine surface
