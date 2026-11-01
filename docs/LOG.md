@@ -4738,3 +4738,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and remoteServer's handler ran its activate; the engine refused the activation (false twice; nothing to the run's end). Two
   readings, x-locks-open v1 a7645a8a handed to numidium: the lab's close-menu of the Lockpicking Menu (a kHide, not the menu's exit)
   leaving the chest refused, or the lock path itself (c2, which never opened the minigame, activates after the unlock).
+
+- 05:43 PST 2026-11-01 (thuum-magnus): x-locks-open v1 (20261101-132837, green as a read) tells b-locks' red apart: the lab's close of the Lockpicking
+  Menu is clean (c1's second activation reopened the minigame, "the Lockpicking Menu is open" twice), and c2, which never opened it,
+  got no ContainerMenu either after the server's unlock: the server opened the chest ("371e9 open with 1 occupant(s)"), c2's handler
+  played the lid, took the inventory and gave up after 15 s ("gave up waiting for 'ContainerMenu open'"), c1's did the same at the end.
+  So the engine refuses the chest's activation once a lock has been set and lifted on it (setLockLevel 0 then lock false at creation
+  and at the apply), while the same chest with no lock prop opened on the same handler path the night before (b-container-rest
+  20261031-235959 green, the same three console lines in the same order). CommonLibSSE-NG shows nothing that would refuse it
+  (TESObjectREFR::IsLocked is GetLockLevel() != kUnlocked, REFR_LOCK::GetLockLevel returns kUnlocked unless the kLocked flag is set,
+  src/RE/E/ExtraLock.cpp:5-14, src/RE/T/TESObjectREFR.cpp:441-445, :714-717), so the engine's own facts are the next read: x-locks-open
+  v2 9659db08 types prid, GetLocked and GetLockLevel on the chest before and after the unlock (the console step's match collects the
+  ">>" replies) and tries the engine's console `activate` on the selected chest, a path with no Skyrim Platform call. Rule 8: no
+  guess at the engine's lock branch until it reads; a Frida read of the activation's return path follows a blank v2.
+- 05:43 PST 2026-11-01 (thuum-magnus): m4-word-wall e1b4288f (server-only push, CLIENT_BUILD_WINDOWS=0; its dist is c31208c0's client build): a
+  report from inside the trigger's primitive is accepted (the engine's own OnTrigger condition), the activation reach of the wall only
+  outside it; libespm reads XPRM's shape (type at byte 28: 1 box, 2 sphere, 3 portal box) and MpObjectReference judges a sphere trigger
+  by its radius (a rotated box of the sphere's extents reaches 2,920 on its diagonals where the engine's sphere fires at 2,065, so the
+  unit test's afar case at 2,400 would have passed a box). WordWallTest gains the inside-the-sphere-far-from-the-wall case. The
+  stage's probe: x-word-wall v1 (b-word-wall's draft by path, the empty-record claim moved before the teleport into the sphere, c2
+  parked in the Temple above until its leg). ADR-059 written (main c38a7add): world scripts run on the cell's host, the admitted list
+  gains names and a hosted-cell gate; the traps' remaining work is its slices.
