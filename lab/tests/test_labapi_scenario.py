@@ -461,10 +461,15 @@ class NpcKillStep(unittest.TestCase):
         self.assertEqual((sc.steps[1].kind, sc.steps[1].action, sc.steps[1].args), ("server", "restart", {"gameHour": 7.9}))
         self.assertEqual(sc.steps[2].args, {})
         for bad in ("  - c2: log-count {}\n", '  - c2: log-count {pattern: "("}\n', '  - c2: log-count {pattern: x, n: 2}\n',
-                    "  - server: restart {gameHour: 25}\n", "  - server: restart {hour: 7}\n"):
+                    "  - server: restart {gameHour: 25}\n", "  - server: restart {hour: 7}\n",
+                    "  - server: restart {downtime: 0}\n", "  - server: restart {downtime: 500}\n", "  - server: restart {downtime: yes}\n"):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-h\nclients: [c2]\nsteps:\n{bad}")
 
+        # a deliberate downtime, alone or with the hour (b-magic-restart)
+        sc = load_scenario('id: x-d\nclients: [c1]\nsteps:\n  - server: restart {downtime: 15}\n  - server: restart {downtime: 3, gameHour: 7.9}\n')
+        self.assertEqual(sc.steps[0].args, {"downtime": 15})
+        self.assertEqual(sc.steps[1].args, {"downtime": 3, "gameHour": 7.9})
     def test_figure_spells_is_a_client_step(self):
         # a figure's added spells against its equipped ones (ADR-046, x-figure-spells)
         from labapi.scenario import load_scenario

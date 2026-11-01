@@ -500,10 +500,18 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
             # the run's server log, its lines matching the regex, for server.log_count("<pattern>")
             args = _log_count_args(args)
         if action == "restart" and args:
-            # the clock set anew at the restart (x-handoff-night: 23.0 before, 7.9 after)
+            # the clock set anew at the restart (x-handoff-night: 23.0 before, 7.9 after), and a deliberate downtime in
+            # seconds: the container stopped, held, started, so a claim about the world's clock running through a
+            # restart has a downtime to see (b-magic-restart: the restart itself fell from 10.6 s to 0.85 s when the
+            # server's process became node, 2026-11-01)
+            if not set(args) <= {"gameHour", "downtime"}:
+                raise ValueError(f"restart takes an optional gameHour from 0 to 24 and an optional downtime from 1 to 120 s, got {args}")
             hour = args.get("gameHour")
-            if set(args) != {"gameHour"} or isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
+            if hour is not None and (isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24):
                 raise ValueError(f"restart takes an optional gameHour from 0 to 24, got {args}")
+            downtime = args.get("downtime")
+            if downtime is not None and (isinstance(downtime, bool) or not isinstance(downtime, (int, float)) or not 1 <= downtime <= 120):
+                raise ValueError(f"restart's downtime is 1 to 120 seconds, got {downtime!r}")
         if action == "netem":
             # a typo must not read as zero, which clears the impairment
             if not args or set(args) - _NETEM_KEYS:
