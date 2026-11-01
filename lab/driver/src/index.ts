@@ -2641,10 +2641,14 @@ function run(step: Step, player: Actor): unknown {
       const minId = a.minSelfId !== undefined ? num(a.minSelfId) : 0;
       const maxId = a.maxSelfId !== undefined ? num(a.maxSelfId) : 0xffffffff;
       const pattern = typeof a.eventPattern === "string" ? a.eventPattern : undefined;
+      // Skyrim Platform's Handler takes both `enter` and `leave` as functions
+      // (skyrim-platform Handler.cpp); a handler with `enter` alone is
+      // "Invalid argument" (x-word-wall-read 20261101-124714, step 7)
       const handler = {
         enter: (ctx: { papyrusEventName: string; selfId: number }) => {
           printConsole(`lab-driver: papyrus event ${ctx.papyrusEventName} on ${ctx.selfId.toString(16)}`);
         },
+        leave: () => {},
       };
       // the hook's add takes the pattern as an optional fourth argument: an
       // explicit undefined there is "Invalid argument" to the native binding
