@@ -184,6 +184,63 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
   type and so clears the class pointer's bit 3; the heap layout decides per process. Fixed at c7c42de0 with the one bit masked and
   a raw type below kArraysEnd skipped, together with the review's eight fixes (LOG 00:53 PDT 2026-11-01); the same probe plays on its build.
 
+## The second half: the perks' effects in the server's formulas (D77 A, 01:19 PDT 2026-11-01)
+
+- Intent: a perk the record holds changes the numbers the server computes, read from the perk records' own entry points in the
+  game files, never from a hand table: the weapon schools' damage ranks (Armsman, Barbarian, Overdraw and every rank that uses
+  the same entry point) multiply the hit's damage; the armor schools' rating ranks (Juggernaut, Agile Defender and kin) multiply
+  a worn piece's rating. Perks the server's formulas do not model (critical hits, stagger, sneak multipliers, spells' costs, the
+  entries' abilities) stay the engine's on the holder's game and are listed under Known limits.
+- Rung: R0. The damage number is the server's already (TES5DamageFormula::CalculateDamage, applied through NetSetPercentages,
+  ActionListener.cpp:5946-5976); the multiplier is one more server-side term of it. Not R1: the attacker's game applies its own
+  perk effects to its own display alone (the DamageActor replacement cuts figures' damage), and nothing of it is reported.
+- Engine surface (the records): a PERK's effects are PRKE sections after its own conditions: PRKE {type, rank, priority} (type 2
+  an entry point), DATA {entryPoint, function, tab count}, PRKC {tab} with that tab's CTDA conditions, EPFT {function data
+  type}, EPFD {the value}, PRKF (UESP, "Skyrim Mod:Mod File Format/PERK"; libespm/src/PERK.cpp reads the record up to the first
+  section today). Entry points: CommonLibSSE-NG include/RE/B/BGSEntryPoint.h:13-106 (kCalculateWeaponDamage 0, kModAttackDamage
+  35, kModIncomingDamage 36, kModTargetDamageResistance 37, kModArmorRating 85); the functions: BGSEntryPointPerkEntry.h:20-37
+  (SetValue 1, AddValue 2, MultiplyValue 3, the rest not judged); the data types: BGSEntryPointFunctionData.h:14-24 (OneValue 1).
+  The condition functions on the tabs: TESCondition.h (HasPerk 448 :566, HasKeyword 560 :690, GetBaseActorValue 277 :351).
+- Engine surface (what Skyrim.esm says, read on sky-srv with lab/esm.py 2026-11-01): Armsman00 0xbabe4 holds one PRKE of type 2,
+  DATA 23 03 03: entry point 35 (kModAttackDamage), function 3 (multiply), three tabs; tab 0 holds HasPerk(Armsman20 0x79343) == 0
+  (the next rank not held, so ranks do not stack), tab 1 holds HasKeyword == 1 for WeapTypeMace 0x1e714, WeapTypeSword 0x1e711,
+  WeapTypeWarAxe 0x1e712, WeapTypeDagger 0x1e713, each flagged OR; tab 2 is empty; EPFT 1, EPFD 1.2. Armsman20 0x79343 the same with
+  1.4; Overdraw00 0xbabed the same with WeapTypeBow 0x1e715; Barbarian80 0x79349 and Overdraw80 0x79354 DATA 23 03 03.
+  Juggernaut00 0xbcd2a holds DATA 55 03 02: entry point 85 (kModArmorRating), multiply, two tabs; tab 0 HasPerk(Juggernaut20
+  0x7935e) == 0; tab 1 HasKeyword(ArmorHeavy 0x6bbd2) == 1 and HasKeyword(0x965b2) == 0 (the shield keyword, HYPOTHESIS until a
+  KYWD read names it); EPFD 1.2. AgileDefender00 0xbe123 the same with ArmorLight 0x6bbd3.
+- HYPOTHESIS (the tab semantics, no header names them): for kModAttackDamage the tabs are the perk owner, the weapon and the
+  target; for kModArmorRating the perk owner and the armor piece. The read above fits that (the owner's HasPerk on tab 0, the
+  weapon's or the piece's HasKeyword on tab 1); the probe's measured multiplier confirms it. HYPOTHESIS: the engine applies
+  kModArmorRating to each worn piece with that piece as the subject, before the pieces are summed.
+- Observe: nothing new; the hit is the existing R1 report. Impose: the server's number lands as before (the target's health
+  percentage); the attacker's own game shows its own engine's number on its own screen for a moment, as it does today.
+  Suppress: nothing new.
+- Message contract: none (no wire change; the rule crate gains the effects table beside the pick's conditions).
+- Server: libespm reads the PRKE sections into PERK::entries (type, rank, priority, entry point, function, tab count, the tab's
+  conditions, the data type and value). PartOne::LoadPerkTable adds each OneValue entry to the Rust table (`add_effect`) and its
+  conditions per tab (`add_effect_condition`, HasPerk's and HasKeyword's parameter made global). wire-rules perks.rs holds the
+  effects and `apply_entry_point(entry, start, record, subject keywords)`: over the held perks' effects on that entry point whose
+  owner tab holds (the pick's judge, OR groups) and whose subject tab holds against the keywords (HasKeyword groups), in (priority,
+  perk id) order, SetValue, AddValue and MultiplyValue applied to the running value; any other function, a condition the rule does
+  not judge, or a condition on a third tab leaves that effect out (counted at load, logged once). WorldState carries
+  `applyPerkEntryPoint` as PartOne installs it (the skill-set verb's std::function shape), so TES5DamageFormula asks it: the weapon
+  damage (with the arrow's) through entry point 35 with the WEAP's keywords (RecordHeader::GetKeywordIds made global, the
+  HasKeyword.cpp:32-35 idiom; unarmed has none), then each worn ARMO's rating through entry point 85 with that piece's keywords.
+  With `perks` off the formula is unchanged.
+- Client: nothing.
+- Tests: T0 wire-rules (Armsman's effect multiplies with a sword's keyword and not with a bow's; the held next rank excludes the
+  rank below so 1.4 applies, not 1.2 times 1.4; AddValue before MultiplyValue in priority order; an unjudged function leaves the
+  effect out); EspmTest reads Armsman00's entry from Skyrim.esm (35, 3, 1.2, the two tabs' counts); TES5DamageFormulaTest: an
+  attacker with Armsman00 and an iron sword deals 1.2 times the bare number, with Armsman20 as well 1.4 times; a target with
+  Juggernaut00 in iron armor takes the rating times 1.2 (the shield unchanged). T2: no session changes (the numbers' messages are
+  the same shape). T3: x-perk-damage by path (two swings on a figure, the health deltas with and without Armsman through the
+  server console's AddPerk, the ratio within 1.2 plus the engine's rounding), then b-perk-damage.
+- Known limits of this half: the formula still carries no skill term (the engine's weapon damage grows with the skill level,
+  UESP "Skyrim:Damage"; the leveling verb's number reaches the display, not this formula: its own slice), no armor-skill scaling,
+  no critical hits, no sneak multiplier perks (Assassin's Blade, Deadly Aim: kModSneakAttackMult 18, a later entry point), no
+  shield perks' block share (kModPercentBlocked 39, blocking.md's own), nothing of the perks' abilities or spells.
+
 ## Known limits
 
 - The server's formulas honour no perk yet: damage, costs and the rest use the record's values alone (M5's second
