@@ -4981,3 +4981,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   75 to 200 by level 10 to 30, TrapHitBase's hit shape, the hypothesised RestoreActorValue path, the Frida trace to write; no
   code until the read).
 
+
+- 14:37 PST 2026-11-01 m4-container-open-poll merged to fork parity 562bf934 (2026-11-01T22:37Z, numidium): the gate
+  20261101-215952-merge-m4-container-open-poll, 20261101-215952-smoke-two-players to 20261101-223315-b-npc-caster (11 runs, all
+  ten green; b-duel's Flames leg read 0.7878 for < 0.78 once and was green on its relaunched rerun 220653); T2 skip on
+  skymp-server:m4-container-open-poll with its T2 beside the gate green (37 sessions identical); both clones promoted. Verbs:
+  containers (the open handler polls the ContainerMenu with Utility.waitMenuMode, since Utility.wait stalls in menu mode). The
+  stage (562bf934 on its own GitLab build 16265, LABAPI=4494, so lab-api 046cb720 with the downtime grammar went live at its pull)
+  played b-magic-restart's downtime copy green by path (215540: the restart step 16.2 s, the effect at 15.2 s of the 10 to 25),
+  and b-locks ran cold by path green in the stage's wait (212943, claim 17's lock at creation on both seats), so both left pending
+  (thuum-magnus' commits). The gate deployed from a worktree at origin/main 55b9a3e8 so that restrictedRaces (held in the shared
+  checkout until then) did not ride it.
