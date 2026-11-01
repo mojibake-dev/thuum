@@ -4906,3 +4906,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   restart {downtime: 15}` stops, holds, starts; the grammar bounded 1 to 120 s, tests green), and the scenario restarts with 15 s of
   it, its bounds re-derived to 10 to 25 from the step's own numbers (main 046cb720, its own commit). numidium pended it (356c50bd)
   beside b-container-rest (c7f0f2ee) for the pair's citation; the LABAPI deploy and the by-path reruns follow the pair's merges.
+
+- 11:31 PST 2026-11-01 (thuum-magnus): the pair's sweep, two more reads. b-npc-handoff-cross red once (182820, a follow margin, the watch's
+  class; the reruns decide it). b-papyrus-events red twice on relaunched seats (192624, 192736: a0f stayed 0, Survival's 5 s check
+  never ran) and GREEN on the cold rollback (192846): ADR-036's relaunch-carried state, as b-npc-caster this morning, counted green
+  by the rule; numidium ruled out the admission (c1's papyrus-scripts.txt carries Survival's 37 names and the layer's 14, the
+  platform admitted 51 from 3 lines) and the login (a0f is not a PlayerGlobals value). A finding by name for the relaunch: which of
+  its "9 files cleaned" carries the Creation's one-shot. The sweep is past 75 of 111 with no open red beyond the two pending.
