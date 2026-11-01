@@ -4605,3 +4605,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   after perks merges (REUSE_DIST), probes x-perk-damage v1 5c2aac7b (five phases of six swings on c2 at Health 1000: 7, 8.4, 9.8 and
   never 11.76, 9.6824 in iron gauntlets, 9.65888 under Juggernaut) and x-word-wall-read v1 147f0ba8 (D77 B's read, never run). The
   word wall's server half starts on m4-word-wall off parity d73de274; its contract is WordWall {wall} alone (word-wall.md).
+- (01:13 PST 2026-11-01; the clocks fell back at 02:00 PDT to 01:00 PST, so the stamps above between 02:0x and 02:1x "PDT" and this one are
+  in order) c-riverwood alone on the merged base RED twice (084608 on claim 2, 085158 on claim 3), back in pending (numidium's
+  38e55037), the perks gate running without it since 08:59Z. The reads: claim 2's red was a PREMISE, not a fault: Gerdur 0x13489 had
+  walked through door 0x13423 into her house 0x133c7 seven seconds before the handoff, an unhosted interior with no 3D on c2, so no
+  promote was due (Alvor, outdoors, went live); the claim now reads her switch against her 3D on c2 (`aiEnabled == is3DLoaded`,
+  b-npc-handoff-night's form; main 20e78923, its own commit, numidium's eye on it). Claim 3's red (Alvor 68 units off the 64 bound
+  after the restart) and the missing flush line share one cause: the lab runs the server under uutils' stdbuf (the compose's
+  line-buffering wrapper), which spawns node as a child (PID 7) and dies on SIGTERM without forwarding it, so docker's stop killed
+  node outright and the flush-on-stop handler never ran; the merged flush was inert in the lab. Fixes: fork m3-log-flush 265eea9c
+  (spdlog's console sink flushes on every info line, so the wrapper has no job; pipeline green, R0 after the perks gate), thuum main
+  2154a021 (the compose runs node as PID 1; sky-srv keeps the old file until a verb-merge's deploy-srv, and the first `compose up`
+  after it is the perk-effects stage's, on an image carrying the flush), then c-riverwood alone on that base and the un-pend on green.
+  D77 B's server half BUILT: fork m4-word-wall f32fcebc off 479099cd (WordWall MsgType 69, wire id 77, SCHEMA_VERSION 27, `{wall}`
+  alone; the server resolves the reported trigger per report through its WordWallTriggerScript's myWord property, the reference's
+  over its base's, wants the player in the wall's cell within the activation reach, writes the word once into the shout record and
+  tells the seat as the console's TeachWord does, every refusal by name; natives Game.TeachWord, UnlockWord, IsWordUnlocked and
+  Actor.AddShout on the server VM, R0; WordWallTest, the wire tests, a difftest session refused from another cell). It stays off the
+  lab until its client half (the hook x-word-wall-read decides) exists: a 27 server completes no handshake with the 26 dist.

@@ -14,11 +14,11 @@ Status meanings:
 
 | Status | Count |
 | --- | --- |
-| implemented | 100 |
+| implemented | 104 |
 | delegated | 33 |
 | stub | 2 |
 | gamemode | 18 |
-| missing | 1307 |
+| missing | 1303 |
 | total | 1460 |
 
 | Native | Status | Rung | Reason / notes | Verb |
@@ -73,7 +73,7 @@ Status meanings:
 | `ActiveMagicEffect.UnregisterForUpdate` (method) | missing |  |  |  |
 | `ActiveMagicEffect.UnregisterForUpdateGameTime` (method) | missing |  |  |  |
 | `Actor.AddPerk` (method) | implemented | R0 | writes the perk into the server's record and sends the player its perk state (docs/verbs/perks.md; fork m5-perks, 2026-10-31); no rule: a script's or the console's word | perks |
-| `Actor.AddShout` (method) | missing | R3 | Not on the server VM yet. The server itself sends it to a player's own client as an SpSnippet: after an admin's AddShout and after every login, for each shout in the server's record (docs/verbs/shouts.md); the shout list in that game follows the record, which is R0. | shouts |
+| `Actor.AddShout` (method) | implemented | R0 | Since fork m4-word-wall (f32fcebc, the word wall's server half): writes the shout into the actor's record (RecordShoutEntry) and tells its game by SpSnippet Actor.AddShout, as the console does; true when the record grew. The login replays the record (docs/verbs/shouts.md). | word-wall |
 | `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782]; the server also sends it after a sleep to grant Rested (ActionListener::GrantRested) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020]; the console's AddSpell (an admin's) sends it to the target's game after recording the spell (docs/verbs/cast-teleport.md) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020] | sleep |
 | `Actor.AddToFaction` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1016] |  |
 | `Actor.AllowBleedoutDialogue` (method) | missing |  |  |  |
@@ -757,7 +757,7 @@ Status meanings:
 | `Game.IsPlayerSungazing` (global) | missing |  |  |  |
 | `Game.IsPluginInstalled` (global) | missing |  |  |  |
 | `Game.IsSneakingControlsEnabled` (global) | missing |  |  |  |
-| `Game.IsWordUnlocked` (global) | missing |  |  |  |
+| `Game.IsWordUnlocked` (global) | implemented | R0 | Since fork m4-word-wall: the default actor's record (HasShoutEntry WordUnlocked). | word-wall |
 | `Game.LoadGame` (global) | missing |  |  |  |
 | `Game.ModPerkPoints` (global) | missing |  |  |  |
 | `Game.PlayBink` (global) | missing |  |  |  |
@@ -802,10 +802,10 @@ Status meanings:
 | `Game.ShowTitleSequenceMenu` (global) | missing |  |  |  |
 | `Game.ShowTrainingMenu` (global) | missing |  |  |  |
 | `Game.StartTitleSequence` (global) | missing |  |  |  |
-| `Game.TeachWord` (global) | missing | R3 | Not on the server VM yet (a global with no player until a word wall's activation names one; the word walls' slice). The server sends it to a player's own client as an SpSnippet after an admin's TeachWord; a login restores a known word by Form.SetPlayerKnows instead, as TeachWord shows the game's word-of-power message (docs/verbs/shouts.md). | shouts |
+| `Game.TeachWord` (global) | implemented | R0 | Since fork m4-word-wall: the default actor's record (RecordShoutEntry WordKnown) and its game told by SpSnippet Game.TeachWord, as the console does; a script's own word wall on the server teaches the same way. A login restores a known word by Form.SetPlayerKnows instead (docs/verbs/shouts.md). | word-wall |
 | `Game.TriggerScreenBlood` (global) | missing |  |  |  |
 | `Game.UnbindObjectHotkey` (global) | missing |  |  |  |
-| `Game.UnlockWord` (global) | missing | R3 | As Game.TeachWord, for each unlocked word in the server's record (docs/verbs/shouts.md). | shouts |
+| `Game.UnlockWord` (global) | implemented | R0 | Since fork m4-word-wall: as Game.TeachWord, for the unlocked set (WordUnlocked). | word-wall |
 | `Game.UpdateHairColor` (global) | missing |  |  |  |
 | `Game.UpdateThirdPerson` (global) | missing |  |  |  |
 | `Game.UpdateTintMaskColors` (global) | missing |  |  |  |

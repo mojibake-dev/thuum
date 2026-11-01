@@ -723,3 +723,14 @@ RemovePerk or SetLevel; validator E_VAL_RANGE on a 0 in the set. The client sets
 lacks and removes a TREE perk the set lacks (a refused pick undone); perks the trees do not list are never touched. The server's
 `perks` setting (default false) drops picks and sends no state, today's behavior. Fixtures 67-PerkPick-0 and -1, 68-PerkState-0
 and -1. T2 declares one PerkState per client at login (difftest divergences.yaml) when the deployed settings turn perks on.
+
+### WordWall (t 69): a word wall's trigger reported, the word the server's (word-wall, M4)
+
+Since fork m4-word-wall (01:13 PST 2026-11-01, SCHEMA_VERSION 27): WordWall (id 77, MsgType 69), client to server, reliable, once per
+wall trigger a player's game fires: `{ wall: u32 (the trigger reference, never 0) }`; validator E_VAL_RANGE on 0; a budget of
+2 then 1 a second (UNMEASURED). Nothing of the word travels: the server reads it from the trigger reference's own record (the
+WordWallTriggerScript's myWord property, the reference's value over its base ACTI's, a WOOP or nothing), wants the player in the
+wall's cell within the activation reach (the lock report's idiom), writes the word into the shout record once (RecordShoutEntry
+WordKnown) and tells the seat as the console's TeachWord does (SpSnippet Game.TeachWord). Refusals, each logged by name:
+E_WORDWALL_NO_REF, E_WORDWALL_NOT_A_WALL, E_WORDWALL_CELL, E_WORDWALL_REACH; a word known already is a no-op. Fixtures
+69-WordWall-0 and -1. The difftest session word-wall reports from another cell (refused; the legacy server drops the type).

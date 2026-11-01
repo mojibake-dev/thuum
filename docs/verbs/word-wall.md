@@ -98,11 +98,16 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 ## Server
 
-- Where the logic lives: wire-rules shouts.rs gains the wall rule (the word in the wall's SHOU, the reach, the
-  repeat); PartOne's handler writes the record (RecordShoutEntry) and tells the seat; the Papyrus natives TeachWord,
-  UnlockWord, IsWordUnlocked, AddShout implemented on the server (ledger lines, R0) so a script's wall on the server
-  could teach too (shouts.md:267-270); libespm gains a WOOP reader and the wall's link (the REFR's script property
-  naming its WOOP, or the ACTI's).
+- Where the logic lives (01:13 PST 2026-11-01, fork m4-word-wall f32fcebc): ActionListener::OnWordWall resolves the reported trigger
+  per report (no table at startup, no scan of every reference): PartOne::WordOfWall reads the WordWallTriggerScript's
+  myWord property from the reference's script data and its base ACTI's (libespm's RecordHeader::GetScriptData, the
+  reference's value winning as ScriptVariablesHolder reads them), made global through that record's lookup and checked
+  to be a WOOP; the player must stand in the wall's cell within the activation reach (the lock report's idiom,
+  wire-rules activation_within_reach); RecordShoutEntry WordKnown once, the seat told by SendShoutEntry (Game.TeachWord)
+  as the console does; refusals E_WORDWALL_NO_REF, E_WORDWALL_NOT_A_WALL, E_WORDWALL_CELL, E_WORDWALL_REACH, each
+  logged by name. The Papyrus natives Game.TeachWord, Game.UnlockWord, Game.IsWordUnlocked and Actor.AddShout are
+  implemented on the server VM (NATIVES.md rows, R0) so a script's wall on the server could teach too. No SHOU rule
+  was needed: the word is the trigger's own, not a choice among the shout's three.
 - DB fields / migration: none (ShoutRecord exists).
 - Restart behavior: the record as saved.
 - Papyrus natives touched (ledger lines added): TeachWord, UnlockWord, IsWordUnlocked, AddShout (implemented, R0).
@@ -117,7 +122,8 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 - T0: the wall rule (the word in the wall's shout, a stranger's word refused, the repeat idempotent, the reach); the
   handler writing the record; the natives.
-- T2: a session with a WordWall accepted.
+- T2: difftest session word-wall, a report from another cell refused by name (the fake clients stand at the spawn; the
+  legacy server drops the type); the acceptance is T0's and T3's.
 - T3 scenario id: lab/scenarios/b-word-wall.yaml: c1 walks to Bleak Falls' wall (Unrelenting Force's second word
   "Fus"? the wall teaches the first unknown word of its shout; the lab reads the record), the `known` step true after
   the chant on c1 and after a relaunch; c2 reads the same wall, its own record; a restart keeps both. Probe x-word-wall
@@ -138,7 +144,7 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31; the wall's script read owed)
 - [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [x] message + validator (same commit; f32fcebc, SCHEMA_VERSION 27)
 - [ ] native hook + T1
 - [ ] TS handler
 - [ ] T2 green
