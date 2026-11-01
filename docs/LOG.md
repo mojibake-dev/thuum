@@ -4898,3 +4898,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Lockpicking Menu where the open was claimed); nobody had run it since locks merged. The premise fixed on main 97142e82 (an
   Unlock through the server's console first, the claims unchanged); numidium reruns it by path with b-locks at the sweep's end.
   The other scenarios' activation targets are being checked for the same moved premise.
+
+- 10:00 PST 2026-11-01 (thuum-magnus): the pair's sweep's second moved premise, b-magic-restart (red thrice, 175231, 175410, 175547, reading 30.2
+  to 30.9 s left against a bound of 30): the compose restart took 10.6 s while stdbuf swallowed the server's SIGTERM and 0.85 s since
+  node is PID 1 (numidium's measure), so the claim could no longer tell a clock that ran through the stop from one that paused; a
+  bound bump would have been rule 13's weakening. lab-api's restart step gains a deliberate downtime (main 91195ce5: `server:
+  restart {downtime: 15}` stops, holds, starts; the grammar bounded 1 to 120 s, tests green), and the scenario restarts with 15 s of
+  it, its bounds re-derived to 10 to 25 from the step's own numbers (main 046cb720, its own commit). numidium pended it (356c50bd)
+  beside b-container-rest (c7f0f2ee) for the pair's citation; the LABAPI deploy and the by-path reruns follow the pair's merges.
