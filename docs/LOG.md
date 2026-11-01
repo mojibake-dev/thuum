@@ -4482,3 +4482,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   REL::ID(18789)+0x14A routing a null children[0] to the next quad, about forty lines, ESP-less, a home for later lab-found fixes; the
   test a run set on c1 with no +02AD242 fault). Recommendation B in a quiet slot after the pass; no urgency, the crash is intermittent
   at the load and the lab's rerun covers the lab. In the summary for Eli.
+- (19:39 PDT 2026-10-31) physics' first gate on 71092a64 (run set 20261101-020334): 9 of 9 played green (b-prop-push 021111 among them) and
+  stopped early by numidium because its T2 was RED on the prop-physics session alone: four undeclared lines, the drop's create word at
+  the dropper's position on the legacy server against the drop point on the branch (967ba8c8's own change: 64 ahead along the heading
+  of 72 degrees and 48 up, the harness's f32 133927.875, -61110.22265625, 14710). Declared on c1 and c2, matched on the base as the
+  session's rule wants: m3-prop-physics 6414dcd2 (the session file alone, server-only push; numidium's SESSIONS=tree run of my tree
+  proves it). Taken A over B (a gate rule change mid-merge): the new head restages with REUSE_DIST, no probes, the full gate with T2
+  beside, ending near 04:00Z.
