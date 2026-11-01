@@ -209,7 +209,12 @@ numidium's calls on the two levers (2026-11-01):
    everyone, as a layer plugin every client loads. Eli's call; the shape is
    below.
 
-Shape of a layer fix, if Eli wants one. No shipped mod covers this site: LOD
+Eli, 2026-11-01, via numidium: "is that not an edgecase transient error?" Yes: about 14 s into a
+game start, three times in one window, none in the 15 runs since, and a rerun clears
+it. "ok bless." So the shapes below stay written up with no push; the signature note in
+lab-api is the only work owed, and it is numidium's.
+
+Shape of a layer fix, if Eli ever wants one. No shipped mod covers this site: LOD
 Refresh Bug Fix (Nexus 187070) resets the LOD quadtree after teleports and
 worldspace changes, and Bug Fixes SSE, Scrambled Bugs, po3's Tweaks and Engine
 Fixes do not touch 18789. Two shapes, in order of laziness:
