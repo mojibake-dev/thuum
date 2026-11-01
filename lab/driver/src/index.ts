@@ -2641,16 +2641,18 @@ function run(step: Step, player: Actor): unknown {
       const minId = a.minSelfId !== undefined ? num(a.minSelfId) : 0;
       const maxId = a.maxSelfId !== undefined ? num(a.maxSelfId) : 0xffffffff;
       const pattern = typeof a.eventPattern === "string" ? a.eventPattern : undefined;
-      papyrusLogId = hooks.sendPapyrusEvent.add(
-        {
-          enter: (ctx) => {
-            printConsole(`lab-driver: papyrus event ${ctx.papyrusEventName} on ${ctx.selfId.toString(16)}`);
-          },
+      const handler = {
+        enter: (ctx: { papyrusEventName: string; selfId: number }) => {
+          printConsole(`lab-driver: papyrus event ${ctx.papyrusEventName} on ${ctx.selfId.toString(16)}`);
         },
-        minId,
-        maxId,
-        pattern,
-      );
+      };
+      // the hook's add takes the pattern as an optional fourth argument: an
+      // explicit undefined there is "Invalid argument" to the native binding
+      // (x-word-wall-read 20261101-121858, step 7), so the call carries three
+      // arguments when no pattern is asked for
+      papyrusLogId = pattern === undefined
+        ? hooks.sendPapyrusEvent.add(handler, minId, maxId)
+        : hooks.sendPapyrusEvent.add(handler, minId, maxId, pattern);
       return { logging: true, minSelfId: minId, maxSelfId: maxId, eventPattern: pattern ?? null };
     }
     case "papyrus-events": {
