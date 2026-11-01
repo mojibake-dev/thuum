@@ -4892,3 +4892,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   harm lands today only on the seat whose engine runs the script (DamageActor's cut spares the player's own body; the actor-values
   report carries it), so TrapHit is required once the hosted-cell gate stops the guests' scripts; a count replay is for side-effect-free
   scripts by name (pillars), never levers. numidium queues m4-puzzle-relay after the pair and the container fix.
+
+- 09:18 PST 2026-11-01 (thuum-magnus): the pair's sweep: b-bleak-traps GREEN on its first run (164226). b-container-rest RED (171504): the bandit
+  chest's Novice lock, which the locks verb stands since parity 395cdc49, met its first activation (E_ACTIVATE_LOCKED and the
+  Lockpicking Menu where the open was claimed); nobody had run it since locks merged. The premise fixed on main 97142e82 (an
+  Unlock through the server's console first, the claims unchanged); numidium reruns it by path with b-locks at the sweep's end.
+  The other scenarios' activation targets are being checked for the same moved premise.
