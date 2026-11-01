@@ -107,7 +107,8 @@ hook's event send hops to the JS thread.
 - [x] T2 green (ticked 20:09 PDT 2026-10-29: P3 6901781c's T2 GREEN at 03:08Z, numidium, its own difftest job 14395; the prop-physics
       session identical to legacy with its 14 declared divergences, the kept server log without an E_PROP line; the union P3-win
       e65a345b's T2 is the last before the stage)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-prop-push v16 GREEN 20261101-014442 on 71092a64 with the restart leg; pass v13 and
+      grab v9 green on 37e960eb, rerun on 71092a64 at the stage; b-prop-push on thuum main d140ff89, its first run at the train's gate)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -638,8 +639,10 @@ lays on clean-m1 with item 7 SKIPPED.
 - D75 (DECISIONS.md, under ADR-058): dropped items persist as props by default; the three policies hold only under the server setting
   propsPersist false (WorldState::propsPersist, PartOne::SetPropsPersist, read in ScampServer). DropItemTest: persisted, the copy loads
   at its drop point and the user's login hears its create word; not persisted, the item is skipped as upstream did. Restart behavior
-  (the Server section): the record's rest comes back on both screens at the load; HYPOTHESIS until push v16 (8e8d9377, the world
-  copies kept): the restored copy spawns Dynamic on the host and Keyframed on the watcher as a live-session copy does.
+  (the Server section): the record's rest comes back on both screens at the load; CONFIRMED by push v16 (20261101-014442 on 71092a64,
+  GREEN with the restart leg): at the reconnect c1 heard five create words (the ingot's among them), untracked the old session's
+  copy at the view's reset, then "prop ff000002 tracked, 51 units off" and "simulated here: Dynamic" a second later; the server's
+  load took 4 ChangeForms with no "Skipping FF item" line; both seats listed the ingot where it rested.
 - The six "Specified Form is ObjectReference, but we tried to treat it as Actor" warnings in the push runs were the lab's own reads
   (labState ref's actor fields on a prop, six server.ref reads in the probe), fixed in lab/gamemode (thuum main 6bffd168), not a client
   bug.

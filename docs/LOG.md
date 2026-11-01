@@ -4458,3 +4458,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   MHDT from USSEP's copy into that plugin's record (same size, no group resize). Eli's call; nothing built. The c1 crash itself: one
   intermittent engine site (terrain upgrade, LAND 0xA7B3, LOD tile Tamriel.4.28.-20), the link ruled out (5 GT/s replay green 5 of 5,
   correctable errors on both seats at either speed), apocrypha's lead.
+- (18:55 PDT 2026-10-31) x-prop-push v16 8e8d9377 GREEN (20261101-014442 on m3-prop-physics 71092a64, REUSE_DIST 15505 with the TS
+  overlay), the restart leg included: the restored ingot back on both seats (c1's five create words at the reconnect, "tracked, 51
+  units off", "simulated here: Dynamic"; the server's load 4 ChangeForms, no "Skipping FF item"): D75 holds in the lab. b-prop-push on
+  main d140ff89 (its own commit). pass v13 and grab v9 replay on the stage; the physics gate runs on it (b-prop-push,
+  b-spell-placed-wall, b-npc-copy-fate, m0-inventory, always, watch, T2 beside). The c1 crash question closed on the infra side (the
+  5 GT/s replay green 5 of 5; the link ruled out; apocrypha's lead).
