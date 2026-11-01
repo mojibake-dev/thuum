@@ -54,11 +54,20 @@ echo "== 1. the Windows build of $sha8"
 # 39217995449's (9fb0732f, the same client source), and its inline source map's sources, mappings and all 105
 # sourcesContent entries matched (2026-10-19).
 # package.json, yarn.lock and webpack.config.js sit outside src/, so a dependency or bundler change keeps the wait.
+# Skyrim Platform's declaration sources (skyrim-platform/src/platform_se/codegen/convert-files/) count with that
+# TypeScript: the DLLs glob skyrim_platform/ and skyrim_platform_entry/ alone (src/platform_se/CMakeLists.txt:88,110);
+# pack copies skyrimPlatform.ts into Data/Platform/Modules (tools/dev_service/index.js:209-225), a declaration file
+# the game never loads (SkyrimPlatform.cpp:173,177 read -settings.txt and .js only), so the reused dist's older copy
+# runs nothing; the client compiles against npm's 2.8.0 typing (skymp5-client/tsconfig.json:15); and the codegen tools
+# run only as the Formatting check's CodegenCheck (linter-config.json:80-117), step 1b's gate, so a const enum edit
+# without its regenerated skyrim_platform/ConstEnumApi.cpp stops there, and one with it keeps the wait (2026-11-01,
+# m4-traps 346249e8: 2dece251's leave declaration cost a 35 min build for that file alone)
 dist_sha=$sha; overlay=; dist_branch=$branch
 if [ "${REUSE_DIST:-}" = 1 ]; then
   # libespm/ is server-only too: its static espm library is linked by server_guest_lib and unit alone
   # (skymp5-server/cpp/CMakeLists.txt:81, unit/CMakeLists.txt:34), never by skyrim-platform or the client (2026-11-01)
   server_only='^(skymp5-server/|libespm/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
+  overlay_ok='^(skymp5-client/src/|skyrim-platform/src/platform_se/codegen/convert-files/)'
   # the builds walked are both sources' (lab/tools/client-builds.py: the fork's client-build job on sky-build and
   # the mirror's Parity Windows run, newest first, GitLab first for a commit both built); step 7's `just build-client`
   # downloads from whichever source built the commit it is given, on the branch that built it
@@ -69,13 +78,13 @@ if [ "${REUSE_DIST:-}" = 1 ]; then
       git -C "$fork" merge-base --is-ancestor "$rsha" "$sha" || continue
       changed=$(git -C "$fork" diff --name-only "$rsha" "$sha") || continue   # errexit is off in a function under ||
       client=$(printf '%s\n' "$changed" | grep -v '^$' | grep -Ev "$server_only" || true)
-      if [ -z "$(printf '%s\n' "$client" | grep -v '^$' | grep -Ev '^skymp5-client/src/' || true)" ]; then
+      if [ -z "$(printf '%s\n' "$client" | grep -v '^$' | grep -Ev "$overlay_ok" || true)" ]; then
         dist_sha=$rsha; dist_branch=$1
         if [ -z "$client" ]; then
           echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8} on $1 has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
         else
           overlay=1
-          echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8} on $1, then $(printf '%s\n' "$client" | grep -c .) TypeScript file(s) in skymp5-client/src: its dist, with skymp5-client.js built here at $sha8 over it (step 7)"
+          echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8} on $1, then $(printf '%s\n' "$client" | grep -c .) TypeScript file(s) (skymp5-client/src, SP's declarations): its dist, with skymp5-client.js built here at $sha8 over it (step 7)"
         fi
         return 0
       fi
