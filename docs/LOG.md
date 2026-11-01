@@ -4886,3 +4886,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   EVERY other game in the cell (the host's engine for the count, the guests' for the same script while the layer admits it
   everywhere), not the host alone; probe x-puzzle-relay v1 f67fabe3 has the host turn the third pillar and claims its relay to the
   guest. The earlier entry's "to the host" is superseded.
+
+- 08:03 PST 2026-11-01 (thuum-magnus): static pre-answers in traps.md for ADR-059's next slices: the platform's animation hook reaches every
+  reference with a graph (the holder's REFR is read 0x38 below rcx), so a host can report a pillar's or a gate's animation; a trap's
+  harm lands today only on the seat whose engine runs the script (DamageActor's cut spares the player's own body; the actor-values
+  report carries it), so TrapHit is required once the hosted-cell gate stops the guests' scripts; a count replay is for side-effect-free
+  scripts by name (pillars), never levers. numidium queues m4-puzzle-relay after the pair and the container fix.

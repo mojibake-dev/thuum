@@ -192,7 +192,18 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   the guest's four turns and the host's one relayed and played on the other seat, then the host's pull and the marker's portcullis
   on both (the success path's read; the face order 1 to 2 to 3 is HYPOTHESIS). Stages after the pair merges (no client change: the
   traps dist serves).
-- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4 20261101-153828, green, first run, m4-traps 346249e8 under the layer's rows; 07:52 PST 2026-11-01): with
+- Static pre-answers for ADR-059's next slices (08:03 PST 2026-11-01). Decision 3 (the host's animations to the guests): Skyrim Platform's
+  sendAnimationEvent hook (FridaHooks.cpp OnSendAnimationEventEnter) takes the engine's animation-graph holder from rcx and reads
+  the TESObjectREFR 0x38 bytes below it, so every reference with a graph reaches EventsApi::SendAnimationEventEnter(formId, name),
+  a pillar's Trigger0N and Turned0N and a portcullis's open as much as an actor's attack; the client's hook on the game-file id range
+  in a hosted cell is the report's source (H2 half-answered: the hook's reach is the reference's, the event names a probe reads).
+  Decision 4 (harm): the platform's DamageActor replacement cuts the engine's damage to figures and puppets alone, so a trap's hit
+  on the PLAYER's own body on the engine that runs the trap's script lands and travels as the player's own ChangeValues (the
+  actor-values verb's bounded report), which is why traps hurt today on every seat whose engine runs the script; under the
+  hosted-cell gate a guest's engine runs none, and TrapHit (the host's number on the figure, the server's table) is the only path.
+  Decision 5 (counts): a replay must be limited to scripts whose activation history has no side effect on other references (a
+  pillar's turn), never a lever's (its failure fires darts); the list is by script name.
+- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4 20261101-153828, green, first run, m4-traps 346249e8 under the layer's rows; 07:52 PST 2026-11-01): with
   the scripts admitted and the engine's activation kept on their bases, Bleak Falls Temple runs. A) the host on the plate: its
   PressurePlate fires (c1 "Sent a trigger's own activation for 567f2"), the engine's activation parent activates the wall with
   the plate as the caster ("Sent a linked activation of 54b15 by 567f2"), the server relays once per activation ("567f2 activates
