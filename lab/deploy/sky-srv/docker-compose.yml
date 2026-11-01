@@ -15,11 +15,15 @@ services:
     # rescue.
     user: "${SERVER_USER:-1001:1001}"
     working_dir: /srv/skymp
-    # stdout line-buffered: the server logs through spdlog's stdout sink, which never flushes on its own, and under
-    # docker stdout is a pipe, so the C library held the last lines until its buffer filled and a run's server.log
-    # (docker logs at the run's end) lost its tail (x-invis-recast 20261016-074205: the last line 07:44:06.769, the
-    # run's end 07:44:53, its casts' lines missing). stdbuf is in the image (/usr/bin/stdbuf, uutils coreutils).
-    command: ["stdbuf", "-oL", "-eL", "node", "dist_back/skymp5-server.js"]
+    # node is PID 1: a graceful stop (docker's SIGTERM, lab-api's restart step) must reach node itself, whose
+    # handler flushes the records before it exits (skymp5-server/ts/index.ts, fork m3-save-flush-on-stop). Until
+    # 2026-11-01 the command ran under stdbuf for line-buffered stdout (the server logs through spdlog's stdout
+    # sink; under docker stdout is a pipe and the C library held the tail: x-invis-recast 20261016-074205), but the
+    # image's stdbuf is uutils', which spawns node as a child and dies on SIGTERM without forwarding it, so the
+    # flush never ran (c-riverwood 20261101-085158: no flush line at the restart, the records back where the last
+    # timed save left them). The sink flushes itself since fork m3-log-flush (spdlog flush_on info), so stdbuf is
+    # out. Deploy this with an image that carries m3-log-flush, else a killed server loses its log's tail again.
+    command: ["node", "dist_back/skymp5-server.js"]
     ports:
       - "7777:7777/udp"
       - "3000:3000"
