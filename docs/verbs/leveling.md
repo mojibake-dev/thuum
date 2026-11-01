@@ -277,3 +277,10 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   base from that entry at the skill's next use, so the base snaps back. Candidate fix (server, T0): a skill av's set also
   writes the progress entry (level = the value, xp 0, threshold = level_cost). Until then a seat's skill number for a
   playtest goes through the leveling path, and the lockpick probe's Lockpicking 100 holds only until the first pick's use.
+
+## Known limits
+
+- With leveling on, the seat's actor values report moves none of the record's skills, experience, threshold, level or
+  legendary counts, nor the skills' bases (ActionListener::OnActorValues; perks.md's pick reads them): the server computes them.
+  A Legendary reset at a seat is therefore not recorded under leveling until it is a verb (the engine's reset stands on that
+  seat alone). Off, the report stands as before (R1). (00:53 PDT 2026-11-01, the perks review.)
