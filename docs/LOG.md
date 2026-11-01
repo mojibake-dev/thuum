@@ -4708,3 +4708,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   `enter` alone: main 0844cbef. x-bleak-traps 124836: E_ACTIVATE_REACH "from 6246 units": v2's computed spot 120 units south of the
   pillar's record was the void, c2 fell to z -7021 and the server teleported it back six times; v3 7858eaaa moves nobody, the v1
   standing spots being 256 units from the pillar and 390 from the lever, inside the reach. All four rerun on the laid stage.
+
+- 05:08 PST 2026-11-01 (thuum-magnus): the locks typed-console follow-up needs no client change. Skyrim Platform's replaced console command
+  already receives the console's SELECTED reference as its first argument (ConsoleApi.cpp ConsoleComand_Execute pushes thisObj's
+  form id, 0 with none, before the typed parameters, each converted against the engine's own parameter list), so the typed form of
+  a server lock command is the engine's own: `prid 000371e9` then the bare `unlock` reaches consoleCommandsService as [0x371e9]
+  and `lock 50` as [0x371e9, 50]; what can never work is a reference typed as an argument (the engine's Unlock takes an optional
+  Integer, b-locks 124231). The earlier note's "intercept reading Game.getCurrentConsoleRef" is withdrawn: thisObj is that read.
+  Probe x-locks-typed v1 49de0098 (lab/.cache/probes; no code under test, the stage's m5-perks dist carries the locks client) claims
+  the unlock and the level-50 lock on both seats and reads what a bare `lock` does; handed to numidium to run after the four reruns
+  under the same hold. locks.md's engine-surface sentence corrected (the console pair IS intercepted since m4-locks) and the typed
+  form recorded there. On green, b-locks' claim 2 returns to the typed path in its own commit once the scenario un-pends.

@@ -88,7 +88,13 @@ reference is E_LOCK_* and the lock is re-imposed.
   lock. The wire: CreateActorMessage.h:69-70, :97-98 carry isOpen and isHarvested.
 - The client's strip: objectReferenceEx.ts:37 dealWithRef, :58-60 `if (self.isLocked()) self.lock(false, false)` for
   every reference (callers remoteServer.ts:363, formView.ts:257, spawnProcess.ts:47); the vanilla console `lock` and
-  `unlock` are not intercepted (consoleCommandsService.ts:35-71, :180-183).
+  `unlock` were not intercepted before this verb (consoleCommandsService.ts:35-71, :180-183); since m4-locks the
+  intercept sends both to the server. The typed form is the engine's: Skyrim Platform hands a replaced command the
+  console's SELECTED reference as its first argument (ConsoleApi.cpp ConsoleComand_Execute pushes thisObj's form id, 0
+  with none, before the typed parameters, each converted against the engine's own parameter list), so `prid 000371e9`
+  then the bare `unlock` reaches the intercept as [0x371e9]; a reference typed as an argument never does (the engine's
+  Unlock takes an optional Integer: 'Unknown variable 0x371e9 for parameter Integer', b-locks 20261101-124231, and the
+  ref.command forms are 'Script command not found'). Probe x-locks-typed reads it (2026-11-01).
 
 ## Observe (host or acting client sees the intent before the engine acts)
 
