@@ -4815,3 +4815,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   TrapRelayTest's last check through the legacy hosted caster rule; a81ed148 (4459) refused it quietly and PartOne_ActivateTest's
   "Activate with bad hoster" wanted the throw. 5a1a16b8 keeps the throw and the new test expects it; the puzzle lever's links and
   the marker caster held in both runs' logs ("3e728 activates 3b9f1 ... relayed to 1 game(s)"). The traps stage waits on its T0.
+
+- 06:31 PST 2026-11-01 (thuum-magnus): m4-world-scripts-host 80616308's client build is green (pipeline 4456: the platform's host-scoped rows,
+  the hosted-cell set and SetCellHosted compile into the dist); its server-build red was the inherited stranger case of
+  TrapRelayTest (the branch was cut from dc881a11). m4-traps 5a1a16b8 merged into it (ae90b4d0, server-only push; 80616308's dist
+  is its dist). The traps head 5a1a16b8 itself is T0 green (4464) and is the traps stage's head.
