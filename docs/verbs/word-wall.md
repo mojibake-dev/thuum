@@ -61,6 +61,14 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
   :2081, Shout.getNthWordOfPower :3384; the `known` lab step reads isWordUnlocked (driver index.ts:1505-1521).
 - The wall's script in the engine: WordWallTrigger (vanilla; its event and its call of TeachWord unread: the
   Dynamic plan).
+- The records, decoded from Skyrim.esm's VMAD on sky-srv (01:43 PST 2026-11-01; esm.py prints 32 bytes of a field, the decode ran the
+  module's record reader): the trigger reference 0x709d2 carries three scripts, WordWallTrigger02Script (status 3, removed),
+  WordWallTriggerScript with nine properties (myStage 60, myWord01 = WOOP 0x13e22, shoutGlobal 0x7096d, wordWall01 0x709d1,
+  myQuest 0x39645, lookTargetWord01 0x709d4, soundWallWhisper 0x709d3, word01Sound 0x709ce, myEnabler 0x493b7) and
+  WordWallTriggerBleakFallsScript; the base ACTI 0x5095e WordWallTrigger carries WordWallTriggerScript with the five shared
+  properties (the imagespace modifiers, the quest, WICastMagic04) and WordWallTrigger02Script. So the wall's word is the
+  reference's own `myWord01`; the server reads it there (PartOne::WordOfWall, the base's copy first, the reference's winning,
+  a removed script skipped). The first T0 (pipeline 4383) looked for `myWord` and refused the Sanctum's trigger as no wall.
 - CommonLibSSE-NG: none needed.
 
 ## Observe

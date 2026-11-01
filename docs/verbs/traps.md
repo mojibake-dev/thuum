@@ -114,9 +114,17 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 
 ## Server
 
-- Where the logic lives: wire-rules activation.rs gains the linked-pair rule (the XAPR and XLKR tables fed from the
-  REFR data) and the budget; PartOne relays a child's activation and opens the door on the lever's report; libespm
-  keeps every XLKR (a list, with the keyword) instead of the last one.
+- Where the logic lives (01:43 PST 2026-11-01, fork m4-traps 702567ba, the server half): ActionListener::OnActivate sends a caster
+  that is no actor and not the target to OnLinkedActivation before the hosted caster's rule (which threw "Bad hoster" on
+  a lever's report until now). The pair is the game files' through WorldState's activation-parent table, filled as each
+  reference loads (the target's XAPR names the caster: the spike wall 0x54b15's names the plate 0x567f2, the portcullis
+  0x3b9f1's names the lever 0x6a9e2, lab/esm.py 2026-11-01; the lever itself carries no XLKR, so no linked-ref table was
+  needed for the exit dungeon); the reporter must host the target's cell (PartOne::GetCellHost); a game sends at most
+  eight a second. The server records the activation through Activate's own path with the caster the engine named (a
+  door's open by SetOpen, the hazard note, the target's own children) and relays RelayedActivation {target, caster} to
+  the target's listeners but the reporter. Refusals by name: E_TRAP_NO_REF, E_TRAP_NO_CELL, E_TRAP_NOT_HOST,
+  E_TRAP_UNLINKED, E_TRAP_RATE, E_TRAP_ACTIVATE. The client half (the host's report widened to its engine's non-player
+  activations in hosted cells, the relay played by target.activate(caster) on the next update) follows x-bleak-traps.
 - DB fields / migration: none new (isOpen, lastAnimation exist).
 - Restart behavior: the door's state as saved; the pillars' faces as lastAnimation.
 - Papyrus natives touched: none.
@@ -153,7 +161,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31)
 - [ ] server logic + T0
-- [ ] message + validator (same commit)
+- [x] message + validator (same commit; 702567ba, RelayedActivation MsgType 70, SCHEMA_VERSION 28)
 - [x] native hook + T1 (none)
 - [ ] TS handler
 - [ ] T2 green

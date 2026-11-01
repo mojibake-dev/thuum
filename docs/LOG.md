@@ -4623,3 +4623,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   tells the seat as the console's TeachWord does, every refusal by name; natives Game.TeachWord, UnlockWord, IsWordUnlocked and
   Actor.AddShout on the server VM, R0; WordWallTest, the wire tests, a difftest session refused from another cell). It stays off the
   lab until its client half (the hook x-word-wall-read decides) exists: a 27 server completes no handshake with the 26 dist.
+- (01:43 PST 2026-11-01) The perks gate STOPPED at 09:30Z red three ways (numidium): T2 red in every session on the locks verb's lock prop in
+  the spawn chest 0xf321a's create word (the locks branch never ran its own T2; wire props.lock against legacy's empty props):
+  two COMMON declarations in order on m5-perks 3dafcff9 (the wire's locked word set aside, then the legacy's bare word found
+  alone; the harness consumes a declaration's matches before the next looks; 35 two-client sessions at 4, the one-client
+  activation-reach at 2, exactly the counts). b-weather 091049 red at step 52 for a cause of the client's (the read): the drift
+  watcher stayed quiet while any blend was in progress and the lab's forcing is a 24 s blend the next slot word absorbed, so
+  "re-applied" could never fire; the guard is gone on m5-perks 395cdc49 (a drift re-forces the word as a cut at the next tick;
+  the login's word no longer applies twice in a tick), TypeScript alone, the scenario untouched. The reruns died on E_RUN_CONNECT:
+  the seats booted from a pre-fallback snapshot inside the ambiguous hour and ran an hour behind, netcode's connect token
+  expiring (numidium; no lab run before 10:00Z). The restage after 10:00Z on 395cdc49, REUSE_DIST with the overlay.
+  The word wall's T0 (pipeline 4383) refused the Sanctum's trigger as no wall: its word property is `myWord01` on the reference's
+  own WordWallTriggerScript (the VMAD decoded on sky-srv through esm.py's record reader; the base's copy of the script carries the
+  five shared properties); fixed at m4-word-wall 841e4ccc. D77 C's server half BUILT: fork m4-traps 702567ba off the word wall
+  (RelayedActivation MsgType 70, SCHEMA_VERSION 28; OnLinkedActivation: the host's report of a non-actor caster accepted for a pair
+  the target's activation parents name, at most eight a second, recorded through Activate's own path and relayed to the target's
+  listeners but the reporter; TrapRelayTest on Bleak Falls' plate, wall, lever and portcullis; the lever carries no XLKR, the
+  portcullis's XAPR names it). Both client halves wait on the reads riding the perk-effects stage.

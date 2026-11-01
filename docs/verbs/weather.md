@@ -176,6 +176,14 @@ to 64 weathers; one word per player per place entered and per change stood throu
   would be forced instead of blended): fixed at m4-weather 79a74960 (the late apply waits one tick from the word's
   arrival; a word kept for another place still applies late at the exit).
 
+- The drift watcher's rule (01:43 PST 2026-11-01, fork m5-perks 395cdc49, b-weather 20261101-091049's read): every 2 s, a word applied for
+  the place the player stands in is compared with the engine's current weather, which is a blend's target from the blend's
+  first frame; equal, nothing (our own transition); anything else, settled or blending, is a drift and the word goes back on
+  as a cut ("weather applied ... (cut, re-applied N)"). The earlier guard on the blend's progress silenced the watcher through
+  a forced 24 s blend until the next 30 s slot's word absorbed it, so "re-applied" never fired; the lab's `weather` step
+  forces by a blend (setActive accelerate, HYPOTHESIS inert at the engine's own rate). The login's word applies once: the
+  late path marks it and the deferred word apply steps aside.
+
 ## Known limits
 
 - One weather per worldspace: the regional geography (snow in the north, rain in the Rift) is folded into one pool.

@@ -734,3 +734,12 @@ wall's cell within the activation reach (the lock report's idiom), writes the wo
 WordKnown) and tells the seat as the console's TeachWord does (SpSnippet Game.TeachWord). Refusals, each logged by name:
 E_WORDWALL_NO_REF, E_WORDWALL_NOT_A_WALL, E_WORDWALL_CELL, E_WORDWALL_REACH; a word known already is a no-op. Fixtures
 69-WordWall-0 and -1. The difftest session word-wall reports from another cell (refused; the legacy server drops the type).
+
+### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
+
+Since fork m4-traps (01:43 PST 2026-11-01, SCHEMA_VERSION 28): RelayedActivation (id 78, MsgType 70), server to client, reliable, to the
+target's listeners but the reporting host: `{ target: u32, caster: u32 }` (neither 0; validator E_VAL_RANGE). The host's game
+reports its engine's non-player activation as today's Activate {caster, target}; the server accepts it from the cell's host
+alone, for a pair the target's activation parents name (XAPR), at most eight a second, records it through Activate's own path
+(a door's open, the hazard note) and relays it so each other engine plays it with the caster the host's did. Fixtures
+70-RelayedActivation-0 and -1. No session triggers it (the fake clients activate no linked pair), so nothing is declared.
