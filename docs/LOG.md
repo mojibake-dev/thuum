@@ -4659,3 +4659,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   own script (chant, camera, TeachWord) stays blocked. The read confirms the event; the design question after it is whether the
   wall's scripts are let through the block on the seat (the push verb's exception as the precedent) so the chant plays, or the word
   arrives silently by the server's snippet (word-wall.md's Dynamic plan).
+- (02:39 PST 2026-11-01) The compose change 2154a021 (node as PID 1, stdbuf out) REVERTED on main (77a31b0f): the perks restage's deploy-srv pushed it
+  from the checkout and the `compose up` recreated the server with it on the perks image, which lacks m3-log-flush's flush_on, so
+  stdout went block-buffered and the gate read the damage (b-locks red three times at step 26 on a server line that came late, the
+  gate's T2 red on attributes-across-restart and activation-reach with the legacy-goes-quiet tail; b-weather GREEN at 102038, the
+  drift fix reads). numidium's A taken: the old compose redeployed, the server recreated, the perks gate rerun on 395cdc49's stage as
+  laid with a fresh T2; after perks merges, m3-log-flush's R0, then the compose change returns in a new commit. Lesson: a deploy
+  config change on main lands at the next deploy-srv whatever its comment says; one that pairs with a fork change waits for that
+  change to reach parity before it is committed.
