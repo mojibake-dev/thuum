@@ -4827,3 +4827,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   decision 1's platform half, client build green on 80616308's 4456, the server's inherited test red merged away; 4468 green).
   m4-container-open-poll 5ee4d72b (4462 green, client build). The layer is staged (e2290f01, smoke green with it, 142841) and
   the traps stage runs on 5a1a16b8 with x-word-wall, x-word-wall-chant and x-bleak-traps v4; x-locks-open v3 follows.
+
+- 06:54 PST 2026-11-01 (numidium): the traps stage (m4-traps 5a1a16b8 on the layer's clones, ed08c1ae) stopped at step 7:
+  client-driver exit 4, c2 not online after two launches, the game up with no crash log, the server never saw a connect. c2's
+  skyrim-platform.log ends "once('tick'): Invalid argument" right after skymp5-client's RunScript: the word wall's
+  sendPapyrusEvent handler (wordWallService.ts:32-41, since f3606ba0) has enter and no leave, and Skyrim Platform's
+  Handler.cpp:9-13 builds both persistents unconditionally, so the client's startup throws and no seat can log in on m4-word-wall,
+  m4-traps or m4-world-scripts-host. tsc passed because SP's typing declares SendPapyrusEventHook.Handler with enter only
+  (convert-files/skyrimPlatform.ts:1639-1641). The fix is the word wall's (every other hook add carries `leave() { },`), a
+  TypeScript change, so the restage takes the overlay over the branch's dist; the three probes rerun on the fixed head and
+  x-locks-open v3 follows. The stage's hold released.
