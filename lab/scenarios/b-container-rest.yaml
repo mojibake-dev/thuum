@@ -42,6 +42,11 @@ steps:
   # the chest holds something to take (its leveled list may roll nothing): ten gold into its server inventory by the console's
   # AddItem on the reference, so the take from afar has a move to refuse
   - c1: server-console {name: AddItem, args: [0x371e9, 0xf, 10]}
+  # the chest is a Novice lock in the game files, which the locks verb stands since parity 395cdc49 (2026-11-01): the activation
+  # below met E_ACTIVATE_LOCKED and the Lockpicking Menu instead of the open (20261101-171504), so the premise unlocks it first
+  # through the server's console, as b-locks' claim 2 does; the lock itself is b-locks' claim, not this scenario's
+  - c1: server-console {name: Unlock, args: [0x371e9]}
+  - wait: 2
   - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
   - wait: 20
   - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
