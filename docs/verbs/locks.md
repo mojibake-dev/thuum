@@ -268,7 +268,10 @@ reference is E_LOCK_* and the lock is re-imposed.
 - [x] native hook + T1 (none: events and natives)
 - [x] TS handler (m4-locks: dealWithRef applies the server's lock prop, applyModelLock on the property, LockService's prompt and report, the console's lock and unlock sent to the server; tsc green)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-locks on thuum main c8dbc382, 23:03 PDT 2026-10-31: the legs the lab can drive, the
+      creation lines, the prompt and the minigame opened, the console's unlock, the key lock refused and opened by the key, the relock, a
+      relaunch and a restart keeping the lock; its first run at the perks gate, which carries locks and weather too (m5-perks 2e0c03c6
+      stacks on both); the pick's report is the verb's declared T4: x-lockpick v6's trace showed the lab's input never reaches the menu)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey implemented, R0, verb locks)

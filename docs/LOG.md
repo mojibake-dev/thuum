@@ -4514,3 +4514,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stage 0 once and dropped its repeat inside the window; the controller's own-start count at its per-login shape; the relay crossed).
   b-quest-report-dedupe on main 354c7fef (its own commit); the dedupe gate runs on the stage with it (always, watch, b-quest-stage,
   b-quest-stage-restart, b-quest-rumor, b-quest-report-dedupe; T2 beside).
+- (23:03 PDT 2026-10-31) numidium's git read: m5-perks 3c220465 carried an OLDER locks and weather (the stack branched before the prompt
+  deferral 28910a3d, the creation line 0fee1628, the console key 2d79199f, the weather apply deferral b8ebfb13 and the double-apply fix
+  79a74960). Restacked: m4-locks 1746ca67 merged into m4-weather (f7a0de44, server-only), that weather into m5-perks (2e0c03c6, pushed
+  with its client build; git confirms 1746ca67, f7a0de44 and 9b6c3836 as ancestors); the one conflict each time ScampServer.cpp's
+  settings block with one side empty, the fuller kept. Since perks' merge brings locks and weather to parity, its gate carries all three:
+  b-perk-pick (on x-perk-pick's green), b-weather, b-locks, p-level-up, a-actor-values, b-figure-values, always, watch, T2 beside. b-locks
+  written and on main c8dbc382 (its own commit): the lab-drivable legs of the lockpick draft plus a console relock and the persistence of
+  a locked state; the pick is the verb's declared T4. Order (numidium): dedupe's verdict, parity into perks (server-only), one stage on
+  2e0c03c6's own build with the overlay for the probe and the gate.
