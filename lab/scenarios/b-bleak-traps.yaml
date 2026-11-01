@@ -1,0 +1,110 @@
+# b-bleak-traps (thuum-magnus, 07:50 PST 2026-11-01, from x-bleak-traps v4 20261101-153828 green on m4-traps 346249e8 under the layer
+# layer-world-scripts; docs/verbs/traps.md, docs/DECISIONS.md ADR-059, M4; the exit d-bleak-falls comes after the puzzle's slices).
+# Bleak Falls Temple 0x371de's traps and levers run as Papyrus scripts on the cell's host and reach the guest as relayed activations:
+# the plate TrapStonePressurePlate02 0x567f2 (PressurePlate) fires the spike wall 0x54b15 through its activation parent, the lever
+# NorLever01 0x6a9e2 (TrapLever) the portcullis 0x3b9f1 through the portcullis's, the puzzle lever 0xaa8c3 (defaultPillarPuzzleLever)
+# its four failure darts 0x39fdd, 0x3720f, 0x2ad49, 0x2ad43 through its script properties (links the server reads from the VMAD).
+# Premises the lab lays: the layer's named rows admit the scripts (Data/Platform/papyrus-scripts.txt), and the client keeps the
+# engine's activation on their bases through activationUnblockedBases (the relaunch's json write; a merged build lays the key in the
+# clients' settings and this step becomes a no-op). The host's engine fires each piece for its own press and for a guest's figure
+# alike (v4 legs A and B), the server relays the linked activation to the guest with the engine's caster ("[verb:traps] 567f2
+# activates 54b15 in cell 371de (its host ff000000 reports): relayed to 1 game(s)"), the guest plays it ("relayed activation 54b15
+# by 567f2"). The engine's shapes the counts allow for: a plate press fires twice, at the entry and about 3 s later; a lever pull
+# activates its gate twice 200 ms apart (the lever's own and its script's); a failed puzzle pull fires each dart once. The pillars'
+# turn is not claimed here: a guest's turn stays on its own screen until ADR-059 decision 2's relay to the host lands (its slice).
+# Claims: A) host on the plate: the wall relayed within 5 s, at least once, no refusal. B) guest on the plate: the host's engine
+# fires for the figure, the relay count grows. D) the lever: the portcullis relayed. E) the puzzle lever with the pillars as the
+# cell loads them (unsolved): each dart relayed once, the door marker never named (the failure path). No E_TRAP_ refusal of any code
+# and no E_ACTIVATE_REACH through the run. Assertions are evaluated by lab-api only (ADR-009). Its own commit (rule 13).
+id: b-bleak-traps
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+artifacts: [server.log, c1.log, c2.log, screenshots]
+steps:
+  - c1: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
+  - c2: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - assert:
+      - server.host(0x371de).client == "c1"
+  # A. the host onto the plate; the watcher 200 units back, facing it
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5538, z: -2054, rot: [0, 0, 0]}
+  - wait: 6
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 1']}
+  - wait: 4
+  - c1: screenshot
+  - c2: screenshot
+  - c1: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
+  - c2: log-count {pattern: "relayed activation 54b15 by 567f2"}
+  - assert:
+      - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") >= 1'
+      - 'c2.log_count("relayed activation 54b15 by 567f2") >= 1'
+      - 'server.log_count("E_TRAP_") == 0'
+  # the host off the plate, the wall resets; B. the guest onto it: the host's engine fires for the figure
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5738, z: -2054, rot: [0, 0, 0]}
+  - wait: 12
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 2']}
+  - wait: 4
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "relayed activation 54b15 by 567f2"}
+  - assert:
+      - 'server.log_count("567f2 activates 54b15 in cell 371de") >= 2'
+      - 'c2.log_count("relayed activation 54b15 by 567f2") >= 2'
+      - 'server.log_count("E_TRAP_") == 0'
+  # D. the puzzle room; the host pulls the lever, the portcullis rises on both (the standing spots are v3's, in reach of both levers)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - wait: 8
+  - c2: look-at {formId: 0x3b9f1}
+  - wait: 2
+  - c1: activate {refId: 0x6a9e2}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("6a9e2 activates 3b9f1 in cell 371de") >= 1']}
+  - wait: 5
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "relayed activation 3b9f1 by 6a9e2"}
+  - assert:
+      - 'c2.log_count("relayed activation 3b9f1 by 6a9e2") >= 1'
+      - 'server.log_count("E_TRAP_") == 0'
+  # E. the puzzle lever with the pillars unsolved: the failure's four darts, each once, the door marker never named
+  - c1: look-at {formId: 0xaa8c3}
+  - wait: 2
+  - c1: activate {refId: 0xaa8c3}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("aa8c3 activates") >= 4']}
+  - wait: 4
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "relayed activation 39fdd by aa8c3"}
+  - c2: log-count {pattern: "relayed activation 3720f by aa8c3"}
+  - c2: log-count {pattern: "relayed activation 2ad49 by aa8c3"}
+  - c2: log-count {pattern: "relayed activation 2ad43 by aa8c3"}
+  - assert:
+      - 'server.log_count("aa8c3 activates 39fdd in cell 371de") == 1'
+      - 'server.log_count("aa8c3 activates 3720f in cell 371de") == 1'
+      - 'server.log_count("aa8c3 activates 2ad49 in cell 371de") == 1'
+      - 'server.log_count("aa8c3 activates 2ad43 in cell 371de") == 1'
+      - 'server.log_count("aa8c3 activates 3e728") == 0'
+      - 'c2.log_count("relayed activation 39fdd by aa8c3") == 1'
+      - 'c2.log_count("relayed activation 3720f by aa8c3") == 1'
+      - 'c2.log_count("relayed activation 2ad49 by aa8c3") == 1'
+      - 'c2.log_count("relayed activation 2ad43 by aa8c3") == 1'
+      - 'server.log_count("E_TRAP_") == 0'
+      - 'server.log_count("E_ACTIVATE_REACH") == 0'
