@@ -4926,3 +4926,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   as A: b-shadowbond pended with the cause (the caster's own half of the swap not taken by the engine while the Flames release
   transitions; the pair's client diff touches no movement path; parity's merges since 10-30 the suspects), the pair merges, and a
   parity-at-27f5c0a4 probe stage after the container fix bisects it with x-shadowbond-swap (to write).
+
+- 13:26 PST 2026-11-01 m4-traps merged to fork parity 346249e8 (2026-11-01T21:22Z, numidium): the gate
+  20261101-155215-pair-traps-layer (cited, ADR-042; the traps train staged over the world-scripts layer as laid, ADR-042a),
+  20261101-155215-a-activation-reach to 20261101-211556-t2-fakeclient-restart (122 runs, 108 green, red only on three pending at
+  the merge); T2 skip on skymp-server:m4-traps, its T2 beside the gate green (37 sessions identical, the smoke, the mod-lock and
+  the attributes across a restart); clones not promoted (PROMOTE=0, the layer-merge promoted the pair). Verbs: traps (ADR-059
+  slice 1 and decision 2's property links: Bleak Falls Temple's plate, lever, portcullis and the puzzle lever's darts run on the
+  cell's host and relay to the guests, b-bleak-traps 0f5ced37) and the word wall (a wall teaches its word into the server's shout
+  record, b-word-wall 92c03ed9, with its leave fix 2dece251).
+
+- 13:26 PST 2026-11-01 layer-world-scripts (a mod layer) merged to main 01b1c7e3 by fast-forward (2026-11-01T21:25Z, numidium):
+  the full sweep 20261101-155215-pair-traps-layer (cited with m4-traps, ADR-042a; the layer's own run
+  20261101-142841-smoke-two-players; the eight checks ok), both clones promoted (clean-m1 is now the merged base). Plugins: none
+  added; lab/layer/papyrus-admitted.tsv gains a fourth column (`scripts`, ADR-059) and two Skyrim.esm rows, the word wall's three
+  trigger scripts and the temple's eleven trap and puzzle scripts, admitted on every seat until ADR-059's hosted-cell gate
+  (m4-world-scripts-host) has its train. The three pending reds and their causes are lab/gate.yaml's lines: b-container-rest (its
+  premise predates the locks verb's lock on 0x371e9; the fixed copy 97142e82 by path green on this stage, 20261101-211632, so it
+  leaves pending next), b-magic-restart (its bound assumed stdbuf's 10.6 s restart; node as PID 1 restarts in 0.85 s; the downtime
+  grammar 91195ce5 and 046cb720's copy land with the next stage's lab-api), b-shadowbond (the caster's half of the swap never
+  applied by its engine, three of three with a cold seat; not the pair's; x-shadowbond-swap bisects it on a parity-at-27f5c0a4
+  probe stage). A finding by name: b-papyrus-events red twice on relaunched seats and green cold (survival's 5 s check never ran
+  on the relaunched c1; the admission and the login apply ruled out). b-locks bd192c85 by path red at claim 17 (c1 logged no lock
+  at creation, c2 did; it stays pending).
