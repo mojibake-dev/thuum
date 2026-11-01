@@ -264,6 +264,14 @@
       }
     ]
   },
+  "restrictedRaces": {
+    "aa00:rotfern.esp": [
+      1
+    ],
+    "19d08:rotfern.esp": [
+      1
+    ]
+  },
   "cureSpells": [
     "b8780:Skyrim.esm"
   ],
