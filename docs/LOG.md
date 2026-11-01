@@ -4654,3 +4654,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the traps' widened host report and the relay's handler) under HYPOTHESIS tags until x-word-wall-read and x-bleak-traps read on the
   perk-effects stage; each raises SCHEMA_VERSION (27, 28), so its own stage needs its own full dist. Drafts ready in the scratchpad:
   b-perk-damage (from the probe), b-word-wall (server.actor(c).wordsKnown == "0x13e22", the record's own fact, b-shout's form).
+- (02:12 PST 2026-11-01) Word wall, a static pre-answer for its read: FridaHooks.cpp's OnSendEventEnter dispatches the JS sendPapyrusEvent hook before
+  it reads the Papyrus event block, so the client's OnTriggerEnter hook fires on a seat that blocks Papyrus events while the wall's
+  own script (chant, camera, TeachWord) stays blocked. The read confirms the event; the design question after it is whether the
+  wall's scripts are let through the block on the seat (the push verb's exception as the precedent) so the chant plays, or the word
+  arrives silently by the server's snippet (word-wall.md's Dynamic plan).

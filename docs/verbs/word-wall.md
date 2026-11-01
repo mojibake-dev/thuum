@@ -143,6 +143,14 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+- Static pre-answer (02:12 PST 2026-11-01, the fork's FridaHooks.cpp OnSendEventEnter): the platform dispatches the JS sendPapyrusEvent hook
+  (EventsApi::SendPapyrusEventEnter) BEFORE it reads TESModPlatform::GetPapyrusEventsBlocked, so the client's hook sees the
+  trigger's OnTriggerEnter while the seat blocks Papyrus events, and the wall's own script (the chant, the camera, its
+  TeachWord) does not run there. The read confirms the event's name and timing. The design question it leaves for after the
+  read, for Eli's eye: the wall's scripts could be let through the block on the seat (the push verb's per-record exception
+  is the precedent in that hook) so the chant and the glowing word play as in the game, with the server's TeachWord then a
+  repeat of the seat's own; or the word arrives silently by the server's snippet with the HUD notice alone. The first is
+  the player's experience of a word wall; the second is what the server half gives today.
 - x-word-wall-read v1 147f0ba8 runs on the perk-effects train's stage after perks merges (01:43 PDT 2026-11-01; never run before).
 - x-word-wall-read by path: c1 at Bleak Falls' word wall (its reference by lab/esm.py on the cell), Skyrim Platform's
   papyrus-events step recording the wall's events as c1 nears it (OnTriggerEnter? OnActivate?), the `known` step before
