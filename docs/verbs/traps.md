@@ -183,6 +183,13 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
   activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
   report) stays as the relay's wire.
+- Platform, ADR-059 decision 1 (fork m4-world-scripts-host 80616308 off m4-traps dc881a11, 06:07 PST 2026-11-01; a Windows build): Skyrim
+  Platform's LoadAdmittedScripts reads a second row kind, "<plugin> host: <class> ...", into a host-scoped set; OnSendEventEnter reads
+  the event's reference's parent cell and AdmittedByChain passes a host-scoped name only when that cell is in the hosted set;
+  TESModPlatform.SetCellHosted(cellFormId, hosted) fills the set and skymp5-client's hostService calls it (callNative, on the next
+  update) at every grant, release, clear and restore. papyrus-map.py writes the marker from the tsv's scope=host column (main
+  bf0296d9). Not in v4's dist: the read runs with the rows everywhere; the row flips to host when this platform is staged, and its
+  own read is whether a guest's plate stays silent while the host's fires (H3's other half). HYPOTHESIS until then.
 - Server, ADR-059 decision 2's first two pieces (fork m4-traps dc881a11, 05:58 PST 2026-11-01; T0 TrapRelayTest's puzzle room case):
   MpObjectReference::Init reads a reference's VMAD and, for defaultPillarPuzzleLever, puts its refActOn* and puzzleDoorActivator
   object properties into activationChildsByActivationParent from the parent's side (delay 0), so the puzzle lever's darts and
