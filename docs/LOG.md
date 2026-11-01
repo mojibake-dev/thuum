@@ -4475,3 +4475,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   three at about 14 s of process uptime, the initial load: a load-time race (the mechanism HYPOTHESIS, the code read confirmed). Not
   content, not the GPU link. Two levers offered to numidium: classify by signature and retry once, or a lab-only null-check patch at the
   site. The lab's process call; nothing in a verb or a layer manifest.
+- (19:11 PDT 2026-10-31) for Eli's list (apocrypha, docs/research/terrain-upgrade-crash.md 254946c9): whether the terrain-overlay race gets
+  fixed for every client. The lab's side is settled (lab-api reruns the fault and will name the signature; no lab-only engine patch since
+  the seats run the players' game). Options written up: A) upstream the site to Scrambled Bugs or po3's Tweaks (both in the layer; slow,
+  not ours to time); B) a thuum engine-fixes SKSE DLL (CommonLibSSE-NG from the submodule, runtime 1.6.1170 per ADR-022, one detour at
+  REL::ID(18789)+0x14A routing a null children[0] to the next quad, about forty lines, ESP-less, a home for later lab-found fixes; the
+  test a run set on c1 with no +02AD242 fault). Recommendation B in a quiet slot after the pass; no urgency, the crash is intermittent
+  at the load and the lab's rerun covers the lab. In the summary for Eli.
