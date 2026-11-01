@@ -182,12 +182,12 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31; the wall's script read owed)
-- [ ] server logic + T0
+- [x] server logic + T0 (fork m4-word-wall bb901be7: OnWordWall, PartOne::WordOfWall, the natives; e1b4288f: the trigger's primitive as the reach, libespm's XPRM type; WordWallTest four cases)
 - [x] message + validator (same commit; f32fcebc, SCHEMA_VERSION 27)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] native hook + T1 (none: Skyrim Platform's sendPapyrusEvent hook, an existing API, filtered in native to the game-file range and the exact event OnTrigger)
+- [x] TS handler (wordWallService.ts on OnTrigger, c31208c0; the server's TeachWord snippet lands through the shouts path; tsc green)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (NATIVES.md: Game.TeachWord, Game.UnlockWord, Game.IsWordUnlocked, Actor.AddShout implemented, R0, verb word-wall)
