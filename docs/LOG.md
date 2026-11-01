@@ -4921,3 +4921,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   pair's (no commit since 10-30 touched remoteServer's teleport, the ragdoll service or the movement files beyond the containers'
   handler and locks' dealWithRef). The cold rerun decides the count; red means a pending with this cause and a read probe,
   x-shadowbond-swap, on the cast's release against the swap's arrival.
+
+- 12:14 PST 2026-11-01 (thuum-magnus): b-shadowbond's cold rerun red too (200948, -317 again): deterministic, three of three. numidium's D2 taken
+  as A: b-shadowbond pended with the cause (the caster's own half of the swap not taken by the engine while the Flames release
+  transitions; the pair's client diff touches no movement path; parity's merges since 10-30 the suspects), the pair merges, and a
+  parity-at-27f5c0a4 probe stage after the container fix bisects it with x-shadowbond-swap (to write).
