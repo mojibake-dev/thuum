@@ -5004,3 +5004,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   8b7517f0 and probe x-object-anim v2 5805d687. A stale worktree swallowed the first train cut behind a piped worktree add; the
   old branch was reset to its remote, nothing pushed.
 
+- 14:59 PST 2026-11-01 b-shadowbond's deterministic red placed (numidium's correction: the SECOND half's claim 54, a run-out with nobody acting;
+  the first half's swap holds, 224953 and x-shadowbond-swap 224524): Apocalypse's WB_InvisProcTeleport_Script runs in the caster's
+  game under ADR-031's effect rule and swaps the actors itself when the server's run-out dispel makes the target visible first (the
+  race with the engine's 20 s expiry; c1's console: the dispel line, then "settle ff00081d: 153.0 units" as the relay returned the
+  moved figure). Fix: a never-admitted script list in Skyrim Platform's OnSendEventEnter, checked before any admission, with that one
+  name (fork m2-shadowbond-script-block; the swap's sound and effects in the caster's game are the documented loss). The bisect
+  stage is dropped. numidium's next train after the permit's: that fix with m4-puzzle-relay 6a8d5ab0 (gate always + b-shadowbond,
+  b-bleak-traps, b-papyrus-events, a-activation-reach + watch; probes b-shadowbond by path, x-puzzle-relay). Also: a frida trace
+  for decision 4 (lab/frida/trap-hit-trace.js) rides x-object-anim v3 4107f964.
+
