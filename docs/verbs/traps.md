@@ -183,6 +183,13 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
   activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
   report) stays as the relay's wire.
+- Server, ADR-059 decision 2's first two pieces (fork m4-traps dc881a11, 05:58 PST 2026-11-01; T0 TrapRelayTest's puzzle room case):
+  MpObjectReference::Init reads a reference's VMAD and, for defaultPillarPuzzleLever, puts its refActOn* and puzzleDoorActivator
+  object properties into activationChildsByActivationParent from the parent's side (delay 0), so the puzzle lever's darts and
+  marker are links the relay knows; and OnLinkedActivation takes the caster by id with the form optional, so a STAT marker the
+  loader skips (0x3e728, named by the portcullis's XAPR) is a caster the relay accepts by id, with no server-side activation
+  through it. A never-loaded TARGET (the lever activating the marker) stays E_TRAP_NO_REF by design: its consequence arrives as
+  the marker's own linked activation of the portcullis. Probe v4 re-stamped 343f06bc with that expectation.
 - x-bleak-traps v4 6fc6748f (05:49 PST 2026-11-01; ADR-059 slice 1): the two blocks lifted for Bleak Falls Temple's pieces, the scripts admitted
   by name on the layer branch layer-world-scripts 20877978 (lab/layer/papyrus-admitted.tsv's named rows, papyrus-map.py's fourth
   column, main afa69250) and the engine's activation kept on their bases by the client's activationUnblockedBases (fork m4-traps

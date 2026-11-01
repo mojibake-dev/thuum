@@ -4773,3 +4773,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the trigger's events with the scripts admitted, the server's one learn line, MS13 0x39645's stage 60 through the quest-stage verb.
   m4-traps 20b1da65 carries the word wall verb (e1b4288f merged), so numidium may run x-word-wall 319db6c0 on the traps stage too.
   Eli's checklist (items 3, 4, 9, 10) and the weekend summary carry the morning's state, including the open chest red.
+
+- 05:58 PST 2026-11-01 (thuum-magnus): m4-traps dc881a11 (server-only push): ADR-059 decision 2's links from script properties (the puzzle
+  lever's refActOn* and puzzleDoorActivator read from the VMAD into the activation table at init) and the caster by id (a STAT
+  marker the loader skips, named by the portcullis's activation parents, relays by its id; a never-loaded target stays
+  E_TRAP_NO_REF by design); TrapRelayTest's puzzle room case. x-bleak-traps v4 re-stamped 343f06bc (leg E now expects the darts
+  relayed, the marker target refused, the portcullis relayed with the marker as its caster). The traps stage should take dc881a11
+  once its T0 is green, with 20b1da65's dist (the client is unchanged since).
