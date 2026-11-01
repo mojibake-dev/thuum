@@ -1,0 +1,114 @@
+# b-perk-pick (thuum-magnus, 23:41 PDT 2026-11-01, promoted from x-perk-pick 5e0f733f; docs/verbs/perks.md, M5; fork m5-perks): perks as
+# the server's transactions. The engine's Skills menu spends a point and adds the perk in the player's game first; perkService reads
+# the tree perks held at the menu's close and every 5 s, reports each one the server's set lacks as PerkPick (R1), and the server
+# judges it by the PERK record's own conditions (the tree's lines and the skill requirement travel in the CTDAs before the first
+# PRKE) and the points left (level - 1 - perks held), answering PerkState (R0): the engine's points set, the record's perks added, a
+# tree perk the record lacks removed (a refused pick undone). The driver's add-perks stands in for the menu's pick (the same engine
+# call, Actor.AddPerk); the menu itself is Eli's T4. The records (lab/esm.py, Skyrim.esm): Armsman00 0xbabe4 has no condition;
+# Armsman20 0x79343 wants One-handed 20 and Armsman00; Armsman40 0x79342 wants One-handed 40 and Armsman20. The clean world's
+# character has One-handed 20 (a-actor-values). The server's lines: "[verb:perks] E_PERK_POINTS|E_PERK_PREREQ|E_PERK_SKILL: <player>
+# picks <id> ... refused" and "<player> takes perk <id> at level N"; the client's: "perk pick <id> reported", "perk state: N perk(s),
+# P point(s); added [...] removed [...]". One seat: a perk is the record's and renders on no figure.
+# Claims (the verb doc's Tests), each with what it proves:
+# 1. The login's PerkState line and no perk known: the switch is on and the set starts empty (R0's word before any pick).
+# 2. A pick at level 1 (Armsman): reported, refused for points (E_PERK_POINTS), undone (known 0): a pick with no points never stands.
+# 3. SetLevel 5 by the server's console: the state says four points (points come with the level; the console writes the record).
+# 4. Armsman 20 before Armsman: refused by the prerequisite (E_PERK_PREREQ) from the record's own condition, undone.
+# 5. Armsman: taken at level 5, known on the seat, three points left (the server's transaction, the state's word).
+# 6. Armsman 20 on the character's One-handed 20: taken, known.
+# 7. Armsman 40 under the skill: refused (E_PERK_SKILL), undone; with One-handed 40 on the record: taken, three perks and one point.
+# 8. A relaunch: the record's three perks back on the seat at the login (the perks are the record's, the seat renders them).
+# The Skills menu's own pick is Eli's T4 (the driver's add-perks is the same engine call). Assertions are evaluated by lab-api only
+# (ADR-009). Its own commit (rule 13).
+id: b-perk-pick
+milestone: M5
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - wait: 12
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: log-count {pattern: "perk state: "}
+  - c1: skills {names: ["OneHanded"]}
+  - c1: known {ids: [0xbabe4, 0x79343, 0x79342]}
+  - assert:
+      - 'c1.log_count("perk state: ") >= 1'
+      - 'c1.known(0xbabe4) == 0'
+  # A: a pick with no point is reported, refused and undone
+  - c1: add-perks {ids: [0xbabe4]}
+  - wait: 12
+  - c1: log-count {pattern: "perk pick babe4 reported"}
+  - c1: known {ids: [0xbabe4]}
+  - c1: skills {names: ["OneHanded"]}
+  - assert:
+      - 'c1.log_count("perk pick babe4 reported") >= 1'
+      - 'server.log_count("E_PERK_POINTS: ff[0-9a-f]+ picks babe4") >= 1'
+      - 'c1.known(0xbabe4) == 0'
+  # B: the level from the server: four points on the engine
+  - c1: server-console {name: SetLevel, args: [0x14, 5]}
+  - wait: 6
+  - c1: skills {names: ["OneHanded"]}
+  - c1: log-count {pattern: "perk state: 0 perk.s., 4 point"}
+  - assert:
+      - 'c1.log_count("perk state: 0 perk.s., 4 point") >= 1'
+  # C: the second rank before the first: refused, undone
+  - c1: add-perks {ids: [0x79343]}
+  - wait: 12
+  - c1: known {ids: [0x79343]}
+  - assert:
+      - 'server.log_count("E_PERK_PREREQ: ff[0-9a-f]+ picks 79343") >= 1'
+      - 'c1.known(0x79343) == 0'
+  # D: Armsman: accepted, three points left
+  - c1: add-perks {ids: [0xbabe4]}
+  - wait: 12
+  - c1: known {ids: [0xbabe4]}
+  - c1: log-count {pattern: "perk state: 1 perk.s., 3 point"}
+  - assert:
+      - 'server.log_count("ff[0-9a-f]+ takes perk babe4 at level 5") == 1'
+      - 'c1.known(0xbabe4) == 1'
+      - 'c1.log_count("perk state: 1 perk.s., 3 point") >= 1'
+  # E: Armsman 20 on the character's One-handed 20: accepted
+  - c1: add-perks {ids: [0x79343]}
+  - wait: 12
+  - c1: known {ids: [0x79343]}
+  - assert:
+      - 'server.log_count("ff[0-9a-f]+ takes perk 79343 at level 5") == 1'
+      - 'c1.known(0x79343) == 1'
+  # F: Armsman 40 under the skill, then with One-handed 40 on the record
+  - c1: add-perks {ids: [0x79342]}
+  - wait: 12
+  - c1: known {ids: [0x79342]}
+  - assert:
+      - 'server.log_count("E_PERK_SKILL: ff[0-9a-f]+ picks 79342") >= 1'
+      - 'c1.known(0x79342) == 0'
+  - c1: server-console {name: SetActorValue, args: [0x14, "OneHanded", 40]}
+  - wait: 6
+  - c1: add-perks {ids: [0x79342]}
+  - wait: 12
+  - c1: known {ids: [0x79342]}
+  - c1: skills {names: ["OneHanded"]}
+  - c1: log-count {pattern: "perk state: 3 perk.s., 1 point"}
+  - assert:
+      - 'server.log_count("ff[0-9a-f]+ takes perk 79342 at level 5") == 1'
+      - 'c1.known(0x79342) == 1'
+      - 'c1.log_count("perk state: 3 perk.s., 1 point") >= 1'
+  # G: a relaunch: the record's perks back on the seat at the login
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: known {ids: [0xbabe4, 0x79343, 0x79342]}
+  - c1: skills {names: ["OneHanded"]}
+  - c1: dump-state
+  - assert:
+      - 'c1.known(0xbabe4) == 1'
+      - 'c1.known(0x79343) == 1'
+      - 'c1.known(0x79342) == 1'
+artifacts: [server.log, c1.log, screenshots]
