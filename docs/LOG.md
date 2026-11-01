@@ -4913,3 +4913,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   by the rule; numidium ruled out the admission (c1's papyrus-scripts.txt carries Survival's 37 names and the layer's 14, the
   platform admitted 51 from 3 lines) and the login (a0f is not a PlayerGlobals value). A finding by name for the relaunch: which of
   its "9 files cleaned" carries the Creation's one-shot. The sweep is past 75 of 111 with no open red beyond the two pending.
+
+- 12:14 PST 2026-11-01 (thuum-magnus): the pair's sweep, b-shadowbond red twice on relaunched seats (200443, 200715: c1's y -317 where the swap
+  should have put it below -400; c2's half held). c1's console shows the client applying the swap's teleport (the ragdoll wait
+  answered) 350 ms after the Flames release and 330 ms before the equipped event, and the engine never moving: HYPOTHESIS, the
+  player's moveRefrToPosition is refused in the release-to-equipped transition and 10-30's green (203601) had other timings. Not the
+  pair's (no commit since 10-30 touched remoteServer's teleport, the ragdoll service or the movement files beyond the containers'
+  handler and locks' dealWithRef). The cold rerun decides the count; red means a pending with this cause and a read probe,
+  x-shadowbond-swap, on the cast's release against the swap's arrival.
