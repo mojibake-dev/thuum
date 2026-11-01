@@ -4810,3 +4810,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Utility.waitMenuMode, as the closing delay already did. Its gate is the containers' scenarios; the probe read is the handler's
   "to be false" and "menu closed" lines on any open. The seats' menus are read by the driver's dump-state (Ui.isMenuOpen over a
   list, on its own loop), which is why the probe saw the open the handler missed.
+
+- 06:19 PST 2026-11-01 (thuum-magnus): m4-traps' T0 twice red on the new test's edges, both the stranger caster: dc881a11 (4450) threw at
+  TrapRelayTest's last check through the legacy hosted caster rule; a81ed148 (4459) refused it quietly and PartOne_ActivateTest's
+  "Activate with bad hoster" wanted the throw. 5a1a16b8 keeps the throw and the new test expects it; the puzzle lever's links and
+  the marker caster held in both runs' logs ("3e728 activates 3b9f1 ... relayed to 1 game(s)"). The traps stage waits on its T0.
