@@ -4469,3 +4469,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   260 units past the ingot, which sat untouched 70 units away; a grab scenario would check the crosshair's reference before the E). The
   physics gate runs on the stage (b-prop-push d140ff89, b-spell-placed-wall, b-npc-copy-fate, m0-inventory, always, watch; T2 beside,
   about 60 min).
+- (19:08 PDT 2026-10-31) the c1 terrain-upgrade crash classified (apocrypha, docs/research/terrain-upgrade-crash.md on apocrypha/terrain-crash-read
+  773b8a5e): an engine null dereference in the terrain-overlay sweep (a queued terrain task's completion walks every loaded land and
+  writes the LOD diffuse into each quad's landscape material through children[0] with no null check, SkyrimSE.exe+02AD23F..248), all
+  three at about 14 s of process uptime, the initial load: a load-time race (the mechanism HYPOTHESIS, the code read confirmed). Not
+  content, not the GPU link. Two levers offered to numidium: classify by signature and retry once, or a lab-only null-check patch at the
+  site. The lab's process call; nothing in a verb or a layer manifest.
