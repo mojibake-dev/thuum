@@ -184,7 +184,9 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
 - The permit's T2: difftest session race-permit (profile 9, a new character,
   sends rotfern's race, which T2's settings restrict to profile 1, then Orc:
   the legacy server takes the first and refuses the second, the fixed server
-  the reverse; every relay declared).
+  the reverse; every relay declared, the fixed server's echo of the accepted
+  look to its sender included). No T2 client is a listed profile, so the
+  acceptance path has T0 coverage alone (the reviewer's note, 2026-11-01).
 - The permit's T3: lab/scenarios/b-race-permit.yaml (c1 keeps rotfern's race
   through its menu, the permitted seat; c2's menu lacks the race, apocrypha's
   hide lines in c2-console.log and none in c1's; c2's race-pick falls through
@@ -204,7 +206,12 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
 - [x] on fork parity (c104128f, 2026-10-03)
 - [x] the permit's rule, setting, wire props and validator built (fork
   m5-race-permit e46d87d8; T0, cargo test --workspace, clippy, fork-lint
-  green on 2026-11-01); the client's hide merged from apocrypha's e54f69b0
+  green on 2026-11-01); the client's hide merged from apocrypha's e54f69b0;
+  a reviewer agent's read folded in at dd7586c0 (14:42 PST 2026-11-01: the client's
+  apply() deferred to the update thread, the setting's keys validated and
+  lower-cased with one warning per unloaded plugin, the T2 session's echo
+  declaration); the train for the lab is m5-train-permit-onceload ef404d98
+  (parity 562bf934 with the onceLoad fix)
 - [ ] the permit at T2 (session race-permit) and T3 (b-race-permit) green on
   the stage, two seats
 - [ ] the permit on fork parity

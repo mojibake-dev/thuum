@@ -4992,3 +4992,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and b-locks ran cold by path green in the stage's wait (212943, claim 17's lock at creation on both seats), so both left pending
   (thuum-magnus' commits). The gate deployed from a worktree at origin/main 55b9a3e8 so that restrictedRaces (held in the shared
   checkout until then) did not ride it.
+
+- 14:42 PST 2026-11-01 parity moved to 562bf934 (the container fix, numidium's gate 11 of 11 with T2). Two reviewer agents read the
+  permit and ObjectAnimation diffs first (feedback-review-before-lab): the permit's client called natives inside the CreateActor
+  handler (a seat with a hidden race would have lost its own CreateActor), fixed with a deferral to the update thread, plus the
+  setting's key validation, one warning per unloaded plugin and the T2 session's echo and refr declarations (m5-race-permit
+  dd7586c0); ObjectAnimation's host would have re-reported its own lastAnimation replays, fixed with self-played marks, the hook's
+  native range split around the player, a game-file NPC case in T0 (m4-object-animation cd762ef2). Heads for numidium's queue,
+  parity 562bf934 in each: the permit train m5-train-permit-onceload ef404d98 (m5-race-permit dd7586c0 and m4-onceload-pending
+  f3f27ce0), m4-puzzle-relay 6a8d5ab0, m4-object-animation 4afe8d2a (SCHEMA_VERSION 30 kept) with layer-world-scripts-host
+  8b7517f0 and probe x-object-anim v2 5805d687. A stale worktree swallowed the first train cut behind a piped worktree add; the
+  old branch was reset to its remote, nothing pushed.
+
