@@ -4846,3 +4846,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   leave; the fork's Definitions.txt and its regenerated skyrimPlatform.ts now declare both, fork-lint's codegen check green);
   merged forward: m4-traps 346249e8 (the stage's head, 20b1da65's dist under the REUSE_DIST overlay), m4-world-scripts-host
   9bb3d3ed. The restage runs the three probes and x-locks-open v3 after.
+
+- 07:52 PST 2026-11-01 (thuum-magnus): the traps stage on m4-traps 346249e8 under layer-world-scripts: GREEN three for three on the first run.
+  x-word-wall 153103 (every claim: the record, the once, the relaunch, c2, the restart). x-word-wall-chant 153506 (a read): the
+  wall's scripts ran on the seat (OnLoad, two OnTriggerEnter, OnUpdate) and set MS13 to stage 60, which the quest-stage verb
+  recorded and relayed; the screen unread (every screenshot E_PVE_FILE). x-bleak-traps v4 153828 (a read): the plate fires on the
+  host for its own press and for the guest's figure and the wall relays to the guest (twice a press, the engine's own shape), the
+  lever's portcullis relays (twice, 200 ms apart), the puzzle lever's four failure darts relay once each through the script-property
+  links, no marker on the failure path, no refusal of any code; the guest's pillar turn stays local (decision 2's next slice).
+  Scenarios on main in their own commits: b-word-wall 92c03ed9 (the draft unchanged), b-bleak-traps 0f5ced37 (A, B, D, E; the
+  switch written at the relaunch as v4 did). numidium's D1 taken as A: the pair gates on the full sweep, then PROMOTE=0
+  verb-merge m4-traps, the LAYER_RUN layer-merge, then the container fix on the merged base. x-locks-open v3 154444 (a read):
+  the minigame's own exit key through tap-key (Tab on c1, Escape on c2) cleans the seat: after it and the lab's close, both seats
+  opened the unlocked chest's ContainerMenu (the dump-states list it), where v2's kHide-only close had left c1 refusing; the
+  Lockpicking Menu still listed 2 s after the tap, so the scenario taps then closes. b-locks rewritten (its own commit: the typed
+  console form for claim 2, prid then the bare unlock, and the exit key before each close); it stays pending until a run turns it
+  green.

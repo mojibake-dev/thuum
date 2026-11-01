@@ -151,7 +151,18 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
   is the precedent in that hook) so the chant and the glowing word play as in the game, with the server's TeachWord then a
   repeat of the seat's own; or the word arrives silently by the server's snippet with the HUD notice alone. The first is
   the player's experience of a word wall; the second is what the server half gives today.
-- x-word-wall-read v1 147f0ba8 runs on the perk-effects train's stage after perks merges (01:43 PDT 2026-11-01; never run before).
+- CONFIRMED at T3 (x-word-wall 20261101-153103, b-word-wall's draft by path on m4-traps 346249e8: every claim held: the record
+  empty before, "learns word 13e22 at wall 709d2" once, wordsKnown "0x13e22" on c1, the second pass teaching nothing more, the
+  relaunch keeping it, c2's own record, the restart keeping both; promoted as b-word-wall, main 92c03ed9). The chant (x-word-wall-chant
+  20261101-153506 under the layer's named rows): the trigger's scripts RAN on the seat: OnLoad at the trigger's 3D load, two
+  OnTriggerEnter (one per listening script), the hook's report 270 ms later, OnUpdate (WordWallTriggerScript's
+  RegisterForSingleUpdate) 540 ms after the entry, then MS13 0x39645 set to stage 60 by the seat's script and taken by the
+  quest-stage verb ("ff000000 set 39645:Skyrim.esm stage 60: recorded, relayed to 1": the Golden Claw advances on the sharing
+  seats as in the game; c2's own stage 12 the same way); the server's one learn line beside the seat's own TeachWord. The
+  screen itself (the IMODs, the glowing word, the camera) stayed unread: every screenshot of the run failed on the guest agent's
+  file read (E_PVE_FILE, a lab fault); the eye's read is the playtest's. `known` 0 before and after (a wall teaches, a soul
+  unlocks).
+- x-word-wall-read v1 147f0ba8 runs on the perk-effects train's stage- x-word-wall-read v1 147f0ba8 runs on the perk-effects train's stage after perks merges (01:43 PDT 2026-11-01; never run before).
 - READ (x-word-wall-read 20261101-131832, green as a read): with the Papyrus block lifted and the driver's papyrus-log on the wall
   0x709d1 and the trigger 0x709d2, the engine sent `OnTrigger` to the trigger twice every half second for as long as c1 stood in
   its box (86 lines in 10 s) and NOTHING else: no OnTriggerEnter, because the teleport spot 400 units south of the trigger's
@@ -187,7 +198,7 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 - [x] native hook + T1 (none: Skyrim Platform's sendPapyrusEvent hook, an existing API, filtered in native to the game-file range and the exact event OnTrigger)
 - [x] TS handler (wordWallService.ts on OnTrigger, c31208c0; the server's TeachWord snippet lands through the shouts path; tsc green)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [x] T3 scenario green, no HYPOTHESIS tags (x-word-wall 20261101-153103 green by path; b-word-wall promoted main 92c03ed9; the gate is the pair's full sweep)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: Game.TeachWord, Game.UnlockWord, Game.IsWordUnlocked, Actor.AddShout implemented, R0, verb word-wall)
