@@ -1,0 +1,87 @@
+# b-word-wall (thuum-magnus, drafted 02:1x PST 2026-11-01, promoted 07:50 PST 2026-11-01 from x-word-wall 20261101-153103 green by path on m4-traps 346249e8; docs/verbs/word-wall.md, M4, D77 B; fork m4-word-wall):
+# a word wall teaches its word into the server's shout record. Bleak Falls Sanctum 0x371dd (lab/esm.py cellrefs, 2026-10-31): the
+# wall NorWordWallWordFus 0x709d1 at (-7802, 100, 521), its trigger 0x709d2 at (-7601, -154, 674), the word WordFus 0x13e22 (the
+# trigger script's myWord01). The seat's engine sends OnTrigger to the trigger twice a half second while the player stands in its
+# ~4,000-unit primitive (the read x-word-wall-read 20261101-131832: 86 lines in 10 s, no OnTriggerEnter from inside the box, so the
+# teleport spot 400 units south of the centre is already inside and the walk below is only the player's motion); the client's hook
+# (exact pattern OnTrigger, the game-file id range) reports the wall once per session (WordWall), the server reads the word from the
+# trigger's own record, wants the player within reach of the wall and writes the word once into the shout record (R0), telling the
+# seat as the console's TeachWord does. The engine-side `known` fact reads Game.isWordUnlocked, and a wall teaches without
+# unlocking, so the record is read on the server: server.actor(c).wordsKnown is the sorted, comma-joined list of known words
+# ("0x13e22" on a record that held none; b-shout's form). The wall's own show (chant, glow, camera) stays behind the Papyrus block
+# until the layer admits its scripts by name (word-wall.md, ADR-059): not this scenario's claim. Claims:
+# 1. c1 walks into the trigger: "word wall 709d2 reported" on c1, "learns word 13e22 at wall 709d2" once on the server, c1's record
+#    "0x13e22"; a second walk teaches nothing more (the record stays, "known already" on the server).
+# 2. c1 relaunches: the record stands ("0x13e22"); the login replays it silently (SetPlayerKnows), no second "learns" line.
+# 3. c2 walks in: its own record "0x13e22", c1's untouched.
+# 4. a server restart keeps both records.
+id: b-word-wall
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 12
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # the records hold no word before anyone nears the wall
+  - assert:
+      - 'server.actor("c1").wordsKnown == ""'
+      - 'server.actor("c2").wordsKnown == ""'
+  # c2 waits 1,400 units south of the trigger: in the same cell, outside its 2,065-unit sphere? No: 1,400 is inside it, so c2
+  # waits in the Temple above (another cell) until its own leg; the sphere reaches 2,065 from the trigger (lab/esm.py XPRM)
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  # 1. c1 lands 400 units south of the trigger, inside its sphere: the engine's OnTrigger fires at once (the read), the hook
+  #    reports, the server teaches; the walk is the player's motion toward the wall, nothing the claim needs
+  - c1: teleport {cell: "371dd:Skyrim.esm", x: -7601, y: -554, z: 674, rot: [0, 0, 0]}
+  - wait: 6
+  - c1: hold-key {code: 17, ms: 4000}
+  - wait: 10
+  - c1: log-count {pattern: "word wall 709d2 reported"}
+  - c1: screenshot
+  - assert:
+      - 'c1.log_count("word wall 709d2 reported") >= 1'
+      - 'server.log_count("learns word 13e22 at wall 709d2") == 1'
+      - 'server.actor("c1").wordsKnown == "0x13e22"'
+      - 'server.log_count("E_WORDWALL_") == 0'
+  # a second walk: nothing more
+  - c1: teleport {cell: "371dd:Skyrim.esm", x: -7601, y: -554, z: 674, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: hold-key {code: 17, ms: 4000}
+  - wait: 8
+  - assert:
+      - 'server.log_count("learns word 13e22 at wall 709d2") == 1'
+      - 'server.actor("c1").wordsKnown == "0x13e22"'
+  # 2. a relaunch keeps the record, told silently at the login
+  - c1: relaunch {until: gone}
+  - wait: 20
+  - c1: close-menu {name: MessageBoxMenu}
+  - assert:
+      - 'server.actor("c1").wordsKnown == "0x13e22"'
+      - 'server.log_count("learns word 13e22 at wall 709d2") == 1'
+  # 3. c2's own record
+  - c2: teleport {cell: "371dd:Skyrim.esm", x: -7601, y: -554, z: 674, rot: [0, 0, 0]}
+  - wait: 6
+  - c2: hold-key {code: 17, ms: 4000}
+  - wait: 12
+  - c2: screenshot
+  - assert:
+      - 'server.actor("c2").wordsKnown == "0x13e22"'
+      - 'server.actor("c1").wordsKnown == "0x13e22"'
+      - 'server.log_count("learns word 13e22 at wall 709d2") == 2'
+  # 4. a restart keeps both
+  - server: restart
+  - wait: 30
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - assert:
+      - 'server.actor("c1").wordsKnown == "0x13e22"'
+      - 'server.actor("c2").wordsKnown == "0x13e22"'
