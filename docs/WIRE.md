@@ -743,3 +743,15 @@ reports its engine's non-player activation as today's Activate {caster, target};
 alone, for a pair the target's activation parents name (XAPR), at most eight a second, records it through Activate's own path
 (a door's open, the hazard note) and relays it so each other engine plays it with the caster the host's did. Fixtures
 70-RelayedActivation-0 and -1. No session triggers it (the fake clients activate no linked pair), so nothing is declared.
+
+### CreateActor's restrictedRaces and permittedRaces (character-creation, the permit; M5)
+
+CreateActor (t 33) gains the optional props `restrictedRaces: [u32]` and `permittedRaces: [u32]` (SCHEMA_VERSION 29; fork
+m5-race-permit e46d87d8, 2026-11-01): the races the server restricts to listed profiles (server setting `restrictedRaces`,
+docs/verbs/character-creation.md, the permit) and, of those, the ones the receiving player's own profile may wear, as form ids
+in the load order both ends share, cap RACES 128. They travel on a player's own CreateActor (`isMe`) alone and only while the
+server restricts a race; a figure's CreateActor never carries them. validate_server: both or neither, `isMe` true, no id 0 or
+repeated, every permitted race among the restricted, else E_VAL_RANGE; the transport refuses the message from a client by
+direction. The rule stays the server's (wire-rules appearance::race_allowed, two new facts): the client's RacePermitService
+only takes the difference off its race menu. wire-legacy reads both as absent (LEGACY_ABSENT); fixture 33-CreateActor-2
+carries them, WireJsonContractTest reads it through CreateActorMessage.h.

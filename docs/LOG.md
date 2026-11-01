@@ -4949,3 +4949,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   probe stage). A finding by name: b-papyrus-events red twice on relaunched seats and green cold (survival's 5 s check never ran
   on the relaunched c1; the admission and the login apply ruled out). b-locks bd192c85 by path red at claim 17 (c1 logged no lock
   at creation, c2 did; it stays pending).
+
+- 13:50 PST 2026-11-01 the race permit (Eli's go via apocrypha: rotfern's race for test client 1 alone): server half on fork
+  m5-race-permit e46d87d8 off parity 346249e8, apocrypha's client hide e54f69b0 merged into it; server setting
+  `restrictedRaces` ({"aa00:rotfern.esp": [1], "19d08:rotfern.esp": [1]}, the lab's line on main in its own commit, an
+  older image ignores the key), two facts on wire-rules' race rule (is_restricted, is_permitted), CreateActor's
+  restrictedRaces and permittedRaces (SCHEMA_VERSION 29) with their validator, legacy-absent reads and fixture, T0
+  RacePermitTest; docs/verbs/character-creation.md "The permit", WIRE.md. Scenario b-race-permit and difftest session
+  race-permit follow in their own commits; numidium stages the merged head with the client build. Also: b-locks out of
+  pending (55b9a3e8) on its cold green by path (20261101-212943, numidium).
+
