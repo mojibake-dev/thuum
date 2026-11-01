@@ -4788,3 +4788,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   TESModPlatform.SetCellHosted, hostService's calls at grant, release, clear and restore; papyrus-map's scope=host column on main
   bf0296d9 writes the marker; the layer's traps row stays everywhere for v4's read. layer-world-scripts merged with main (a76e3653)
   for layer-stage's tree check, at numidium's ask.
+
+- 06:13 PST 2026-11-01 (thuum-magnus): x-locks-open v2 (20261101-140443, green as a read) names the chest red's cause and finds a second fault.
+  The engine reads the chest unlocked on both seats after the server's unlock (console GetLocked 0, GetLockLevel 0, before it 1 and
+  0). c2, which never opened the minigame, OPENED the ContainerMenu on its activation: its dump-state 5 s later lists "ContainerMenu"
+  beside the HUD, while remoteServer's onOpenContainerMesage never saw it ("waiting for 'ContainerMenu open' to be true", then "gave
+  up" at 15 s and the closing activation): the handler's Utility.wait(0.1) loop checked once before the menu opened, the menu's pause
+  held the wait until the lab's close, and the deadline had passed, so the give-up path, not the open, released the occupant. A
+  finding of its own for the containers verb: a short open under that race keeps the occupant to the deadline (the wait is game
+  time; the poll belongs on the platform's tick). c1, whose Lockpicking Menu the lab closed twice with TESModPlatform.CloseMenu (a
+  kHide message), opened no ContainerMenu afterward by the handler's activate nor by the console's own `activate`, though its lock
+  reads the same: the kHide close leaves the seat unable to open the chest while the minigame still opens on it (v1). b-locks' red is
+  therefore the lab's close, not the verb; a player exits the minigame by its own key. x-locks-open v3 fa22708f reads the menu's own exit
+  keys through the lab (Tab on c1, Escape on c2, the chest relocked by the console between) and the open after each; if neither key
+  reaches the menu (x-lockpick v6's pick keys never did), the lab needs a Cancel-event close (a platform native), and b-locks either
+  reorders its legs or waits for it.
