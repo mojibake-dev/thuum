@@ -4667,3 +4667,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   laid with a fresh T2; after perks merges, m3-log-flush's R0, then the compose change returns in a new commit. Lesson: a deploy
   config change on main lands at the next deploy-srv whatever its comment says; one that pairs with a fork change waits for that
   change to reach parity before it is committed.
+- (03:12 PST 2026-11-01) The perks gate rerun on the restored compose (395cdc49's stage as laid): T2 of 395cdc49 GREEN, every session identical,
+  so the earlier T2 reds were the buffering; smoke, restart, duel, b-perk-pick (104931) and b-weather (105309) GREEN (the drift fix
+  reads). b-locks RED three times at step 26 on the scenario's premise: the typed `371e9.unlock` reached the game's console, which
+  read 371e9 as a number in exponent form and answered "Script command not found", so the server never heard an unlock; steps 1 to
+  22 held (the lock refusal, the prompt, the Lockpicking Menu). Fixed in its own commit (58f981f2: 000371e9.unlock) and pended by
+  name (aab61823) so perks merges by GATE_SET on this set when the remaining six are green; b-locks un-pends on its next green run.
