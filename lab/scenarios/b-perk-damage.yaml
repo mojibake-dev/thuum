@@ -1,0 +1,71 @@
+# b-perk-damage (thuum-magnus, drafted 05:2x PST 2026-11-01 from x-perk-damage v3 f97d8803, to promote on its green in its own commit; docs/verbs/perks.md, the second half, D77 A; fork m5-perk-effects): the perk
+# records' effects in the server's damage formula. c1 swings an iron sword (0x12eb7, damage 7) at c2 standing 80 units south
+# (p-level-up's frame); c2 stays out of god mode so the hit lands and its Health base is set to 1000 so no phase kills it; c1 under
+# TGM. The server logs each landed hit: "OnWeaponHit - <c1> hits <c2> with 12eb7 for <damage> damage (blocked share ...)".
+# v2's run 20261101-124543 read 6.4960003 for the bare hit: the lab's seats log in wearing the full iron set (c2's console at the
+# login: addItemEx 12e46 gauntlets 10, 12e49 armor 25, 12e4b boots 10, 12e4d helmet 15, all heavy), rating 60, so the formula's
+# armor penalty is 0.01 * (100 - 60 * 0.12) = 0.928 and 7 * 0.928 = 6.496 (v1 and v2 assumed prisoner clothes). Four phases of six
+# swings, c2 put back between them, at least three of six landing:
+# 1 bare: 6.496;
+# 2 the console's AddPerk Armsman00 0xbabe4 on c1: 8.4 * 0.928 = 7.7952 (kModAttackDamage, the sword's WeapTypeSword keyword);
+# 3 Armsman20 0x79343 as well: 9.8 * 0.928 = 9.0944, never 10.913 (the rank held above excludes the one below);
+# 4 Juggernaut00 0xbcd2a on c2: every worn piece heavy, 60 to 72, penalty 0.9136: 9.8 * 0.9136 = 8.95328 (kModArmorRating per piece).
+# Patterns are prefixes of the printed float so fmt's shortest round-trip form cannot miss them.
+id: b-perk-damage
+milestone: M5
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+artifacts: [server.log, c1.log, c2.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 12
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c1: server-console {name: AddItem, args: [0x14, 0x12eb7, 1]}
+  - c2: server-console {name: SetActorValue, args: [0x14, "Health", 1000]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 6
+  - c1: equip {formId: 0x12eb7}
+  - wait: 1
+  - c1: draw-weapon
+  - wait: 3
+  # 1. bare: the sword's 7 under the iron set's penalty
+  - c1: repeat {times: 6, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - wait: 4
+  - assert:
+      - 'server.log_count("OnWeaponHit - ff[0-9a-f]+ hits ff[0-9a-f]+ with 12eb7 for 6\.496[0-9]* damage") >= 3'
+  # 2. Armsman: 8.4 under the penalty
+  - c1: server-console {name: AddPerk, args: [0x14, 0xbabe4]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: repeat {times: 6, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - wait: 4
+  - assert:
+      - 'server.log_count("OnWeaponHit - ff[0-9a-f]+ hits ff[0-9a-f]+ with 12eb7 for 7\.795[0-9]* damage") >= 3'
+  # 3. Armsman 20 as well: 9.8 under the penalty, the rank below excluded
+  - c1: server-console {name: AddPerk, args: [0x14, 0x79343]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: repeat {times: 6, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - wait: 4
+  - assert:
+      - 'server.log_count("OnWeaponHit - ff[0-9a-f]+ hits ff[0-9a-f]+ with 12eb7 for 9\.094[0-9]* damage") >= 3'
+      - 'server.log_count("with 12eb7 for 10\.91") == 0'
+  # 4. Juggernaut on the target: the iron set's 60 to 72
+  - c2: server-console {name: AddPerk, args: [0x14, 0xbcd2a]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 4
+  - c1: repeat {times: 6, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - wait: 4
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("OnWeaponHit - ff[0-9a-f]+ hits ff[0-9a-f]+ with 12eb7 for 8\.953[0-9]* damage") >= 3'
+      - 'server.log_count("E_PERK_") == 0'
