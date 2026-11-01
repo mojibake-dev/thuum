@@ -14,7 +14,8 @@
 # Claims (the verb doc's Tests), each with what it proves:
 # 1. The lock stands on both games at creation; c1's activation meets it: E_ACTIVATE_LOCKED once, the prompt line, the Lockpicking Menu
 #    open within 5 s and no ContainerMenu (R0 the state, R3 the menu).
-# 2. A typed `unlock` on c1 runs on the server: "371e9 unlocked" once, c2's applied unlocked within 3 s, and c1's next activation opens
+# 2. A typed `unlock` on c1 runs on the server (the reference typed as its eight hex digits, 000371e9: the game's console took
+#    `371e9` as a number in exponent form and answered "Script command not found", b-locks 20261101-105822, -110045, -110307): "371e9 unlocked" once, c2's applied unlocked within 3 s, and c1's next activation opens
 #    the ContainerMenu with no new E_ACTIVATE_LOCKED: the console is the server's, the state one for both seats.
 # 3. The key lock: Lock [371e9, 255, key] relocks it (c2's applied line names level 255); c1's activation without the key is refused and
 #    opens neither menu within 3 s (the engine's "requires key" box); with the key (AddItem) the activation unlocks ("371e9 unlocked
@@ -70,7 +71,7 @@ steps:
   - c1: close-menu {name: Lockpicking Menu}
   - wait: 1
   # 2. a typed unlock runs on the server (the lab's rank), one state for both
-  - c1: console {text: "371e9.unlock"}
+  - c1: console {text: "000371e9.unlock"}
   - until: {within: 5, every: 0.5, expect: ['server.log_count("371e9 unlocked") >= 1']}
   - wait: 3
   - c2: log-count {pattern: "lock 371e9 applied: unlocked"}
