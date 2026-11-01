@@ -4578,3 +4578,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   numidium stages it with x-perk-pick 5e0f733f when green. Lesson kept: the scratchpad's node_modules (cast-wt, symlinked into every
   worktree) was pruned at midnight by macOS's /tmp cleaning, so the local tsc ran through a fetched typescript with the implicit
   type packages off.
+- (01:05 PDT 2026-11-01) D77 TAKEN by Eli ("those recommendations work"): the playtest moves to Monday night or Tuesday, and the extra day
+  builds, one at a time behind switches: A the perk effects in the server's damage formula (the weapon schools' damage ranks and the
+  armor schools' rating ranks, read from the perk records' entry points, perks.md's second half; a branch stacked on m5-perks), then
+  B the word wall as a verb (the wall's word into the shout record at the chant, relayed, kept across a restart), then C traps and
+  the puzzle door as verbs if the second day is there; D (alchemy and enchanting benches) stays a memo. The lay waits for Eli's word;
+  the sweep runs on the merged base as each train lands.
