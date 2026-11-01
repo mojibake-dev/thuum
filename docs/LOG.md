@@ -4533,3 +4533,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   merges by GATE_SET=20261101-052926 (a red allowed on a pending scenario only, the head unchanged, T2 green), perks follows. The owed
   fix, its own R0 branch: the server flushes its records on a graceful stop (skymp5-server/ts/index.ts handles no SIGTERM; a flush of the
   save storage's pending upserts before the exit), then c-riverwood un-pends.
+- (23:34 PDT 2026-10-31) the flush-on-stop fix built: fork m3-save-flush-on-stop 34a40459 off parity 9b6c3836 (server-only push, fork-lint
+  exit 0): ChangeFormGuard tracks an edit the saving policy skipped, MpObjectReference::FlushUnsavedEdit requests it, WorldState::
+  FlushSaveStorage asks every form and drives the save storage until nothing is pending or in flight within a budget, PartOne::FlushSaves
+  logs it, ScampServer exports flushSaves, skymp5-server/ts/index.ts handles SIGTERM and SIGINT with a 5 s flush before the exit;
+  SaveStorageTest's new case (two movement samples, the drained storage holds the first until the flush, then the second). ADR-053's R0
+  path when the pipeline is green; c-riverwood un-pends after a gate on the merged base. cell-host.md's open questions carry the read.
