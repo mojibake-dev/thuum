@@ -22,7 +22,7 @@ SHOU (its three words, libespm SHOU.cpp:8-24; no WOOP reader).
 
 | consequence | seen in | disposition |
 | --- | --- | --- |
-| the trigger as the player nears the wall | engine (the wall's script on the seat; its event, OnTriggerEnter or a self-activation, unread) | observed: the host's or the player's own report (the Dynamic plan reads which) |
+| the trigger as the player nears the wall | engine (the trigger's primitive sends OnTrigger to its reference twice a half second while the player stands in it; CONFIRMED x-word-wall-read 20261101-131832, no OnTriggerEnter from inside the box) | observed: the host's or the player's own report (the Dynamic plan reads which) |
 | the chant, the glow of the word, the camera pull | engine | native on the reading player's game; the other game sees the wall's glow by its own engine when the server's record says so (HYPOTHESIS; the read) |
 | Game.TeachWord on the seat (the word known, the HUD notice "Word of Power learned") | engine (the script) | suppressed as state: the server's record is the word's truth (R0); the seat's own TeachWord stands only as the echo; a login re-teaches from the record (ShoutSnippets.cpp:28-55, Form.SetPlayerKnows silent) |
 | the word's unlock with a soul | engine (the player's menu) | later: a transaction (the soul count on the record) |
@@ -75,7 +75,7 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 ## Observe
 
-- Hook point: the seat's own game: either Skyrim Platform's sendPapyrusEvent hook on the wall's OnTriggerEnter (rule
+- Hook point: the seat's own game: Skyrim Platform's sendPapyrusEvent hook on the trigger's OnTrigger (exact pattern, rule 9's native filter with the game-file id range; CONFIRMED by the read, the old alternatives were OnTriggerEnter or a self-activation) [was: either Skyrim Platform's sendPapyrusEvent hook on the wall's OnTriggerEnter (rule]
   9: the filter on the wall's script name), or a native hook on Game.TeachWord's Papyrus native (the word taught, the
   one funnel); the read decides.
 - SP filter: the player as the triggering actor; the script by name.

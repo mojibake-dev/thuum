@@ -3590,3 +3590,104 @@ them), a cleanup lever for a crowded world later (a console sweep or a reloot-li
 Taken: B (m3-prop-physics a2e77f3d: WorldState::propsPersist, PartOne::SetPropsPersist, DropItemTest through AttachSaveStorage in both
 settings). Known cost: every dropped item is a record for good until a lever says otherwise; the lab's worlds are clean per run.
 
+
+## ADR-059: World scripts run on the cell's host; the admitted list gains names and a hosted-cell gate (traps, puzzles, word walls)
+
+Status: PROPOSED 05:33 PST 2026-11-01 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes. Forced by the
+traps read x-bleak-traps v3 (20261101-132023) and the word wall read x-word-wall-read (131832).
+
+Context. Every trap, pressure plate, lever, portcullis and puzzle pillar in Skyrim is a Papyrus script on a reference or its base:
+in Bleak Falls Temple the plate is PressurePlate (extends TrapTriggerBase, OnTriggerEnter, then Activate on itself so its activation
+parents fire), the spike wall TrapSwingingWall and TrapHitBase (playAnimation 90For and the Trans* events, the hit's damage from a
+level table), the lever TrapLever and NorLever01SCRIPT (FullPull, FullPush), the portcullis default2StateActivator (SetOpen,
+playAnimation open), the pillars defaultPuzzlePillarScript (onActivate, playAnimationandWait Trigger0N and Turned0N, a state per
+face, the solve counted on the linked lever's defaultPillarPuzzleLever, which activates the XMarker whose activation parents open
+the portcullis, or the dart traps on a wrong pull); the word wall's trigger carries WordWallTriggerScript and two listeners (the
+chant, the glow, the camera, Game.TeachWord, SetStage MS13 60). The names and properties are the master file's VMADs read by
+lab/esm.py and the string tables of the .pex files in "Skyrim - Misc.bsa" (lab/tools/bsa-extract.py); the engine's own "trap" is a
+script calling playAnimation and Activate. In a connected game none of it runs: skymp5-client blanks every Papyrus event to a script
+not on ADR-044's admitted list (blockPapyrusEventsService, FridaHooks.cpp OnSendEventEnter) and blocks activation on every ACTI,
+DOOR, CONT and FURN (objectReferenceEx.ts dealWithRef). The read measured the result: a host on the plate, a guest on the plate, a
+pillar turned, a lever pulled, and not one line on any seat or the server beyond the sender's "Sent activation"; every activate
+returned false. The server's half of docs/verbs/traps.md (RelayedActivation 70, the linked-activation report from the host) is a
+relay with nothing to relay. The Creation Kit's own words on the activation block: a blocked reference still sends OnActivate to its
+scripts, but "only on the same script which has the BlockActivation() function set", and a scripted Activate on a blocked reference
+runs "the OnActivate block on that script" without the normal processing (ck.uesp.net/wiki/BlockActivation_-_ObjectReference,
+mirrored at papyrus.bellcube.dev/skyrimse/script/objectreference/function/blockactivation/); Skyrim Platform sets the block
+natively, so which attached script hears an OnActivate under it is a HYPOTHESIS the first probe reads. Prior art: TES3MP has every
+client run the cell's scripts and syncs the consequences as object packets (ObjectActivate, ObjectAnimPlay, ObjectState, the
+script-local variables; TES3MP/TES3MP components/openmw-mp/Packets/Object), with the cell's authority the one whose word counts;
+upstream SkyMP's own answer for pillars is a reference's lastAnimation recorded by the server's VM when a server-side script calls
+PlayAnimation and replayed by every client (MpObjectReference::SetLastAnimation, remoteServer.ts "pillars in bleakfalls are not
+reliable"), which needs the vanilla scripts' .pex files on the server and a VM that implements their natives (1,310 missing in
+docs/NATIVES.md). The design law decides between the two: a host client owns SIMULATION for its cell, we do not reimplement what
+an engine runs for us, and the server owns STATE.
+
+Decision 1, who runs a world script. The cell's HOST runs the scripts of the cell's world objects (traps, plates, levers,
+portcullises, pillars, puzzle levers, dart traps): on the host, Papyrus events to a reference in a cell this game hosts pass the
+block; on every other seat they stay blanked. The gate is runtime and the client's word: hostService tells Skyrim Platform the
+set of hosted cells (a new native on TESModPlatform, setHostedCells, called at every grant and release), and OnSendEventEnter
+compares the event's self reference's parent cell against it before the name walk. A player's-own class stays as ADR-044 has it
+(the effects on the player and those it casts) and gains the word wall's three trigger scripts by NAME on every seat: the show is
+the reader's, the scripts gate themselves on Game.GetPlayer(), and a host's seat ignores a figure in the trigger for the same
+reason. The admitted list (Data/Platform/papyrus-scripts.txt, built from lab/layer/papyrus-admitted.tsv by papyrus-map.py) therefore
+gains two row kinds beside ADR-044's whole plugins: a plugin's scripts by name admitted everywhere, and a plugin's scripts by name
+admitted on the hosting seat alone (the row's marker; the tsv's scripts column). Skyrim.esm never gets a whole-plugin row.
+
+Decision 2, activation. A guest's activation of a world object travels as today (Activate C2S); the server, finding the target a
+scripted ACTI in a cell the sender does not host, relays it to the HOST (RelayedActivation 70 toward the host, caster the guest's
+figure id as the host's game knows it), whose engine activates the reference as that actor; the host's engine then runs the
+script, and the activations the script and the activation parents make are the host's report (the linked-activation report built
+on m4-traps, widened to every activation the host's engine makes with a non-player caster in a hosted cell), which the server
+checks against the game files' links (XAPR, XLKR, the scripts' properties where a link is a property: refActOnSuccess01,
+puzzleDoorActivator, refActOnFailure0N are read from the VMAD into the link table) and records. The host's own press of a plate or
+pull of a lever needs the engine's processing on that seat: dealWithRef lifts BlockActivation on a scripted ACTI while this game
+hosts its cell (the same runtime set) and restores it at release. HYPOTHESIS H1: under the native block a relayed scripted
+activate reaches no attached script, so the lift is needed for the relay's target too (the first probe reads both forms).
+
+Decision 3, what guests see. Guests run no world script, so the host reports what its engine SHOWS: a world object's animation
+event (the sendAnimationEvent hook on game-file references in hosted cells, the Trigger0N, Turned0N, FullPull, open, 90For
+family) travels as ObjectAnimation {refr, event} (C2S from the host, S2C to the cell's other listeners; a wire row with its
+validator and fixtures in one commit, rule 4; budget per reference), the server writes it as the reference's lastAnimation
+(the existing record field and CreateActor prop) and every other seat plays it (remoteServer's lastAnimation replay, its retry
+kept); a DOOR's open stays isOpen. This is TES3MP's ObjectAnimPlay and upstream's lastAnimation with the host's engine, not the
+server's VM, as the player of the animation. R2: the host computes, the server records and relays.
+
+Decision 4, harm. A trap's damage to a player is the host's engine's number on that player's figure, reported by the host
+(TrapHit {refr, target, damage}: the next wire row, with the validator reading the trap script's level table from its VMAD
+properties, LvlDamage1..6 by LvlThreshold1..5 against the target's level, and the trap's trigger volume against the target's
+recorded position), applied by the server to the record (R1), shown on the hit seat by the server's ChangeValues; a kill is
+ADR-048's hazard death with the trap as the activation beside the body. The guest's own engine runs no trap script, so nothing
+hurts twice (the read's double-fire hazard closes by construction).
+
+Decision 5, state. A scripted ACTI's logic lives in the host's engine's script state for the session; the server keeps two things
+so another engine can rebuild it: the reference's lastAnimation (the visual) and its ACTIVATION COUNT since the cell's record
+began (scriptedActivations on the change form: a migration, rule 6, and a restart-persistence scenario). A new host (a hand-off,
+a reconnect, a restart) receives the counts at the cell's load and its engine is fed that many relayed activations per
+reference, spaced by the script's own busy window (defaultPuzzlePillarScript ignores an activation while it turns; the spacing
+is the first probe's measurement, UNMEASURED), so a pillar reaches the same face and the lever's solved count the same value
+from the same initial state: a Papyrus script here is a function of its activation history. A word wall's word is the record's
+already (docs/verbs/word-wall.md).
+
+Decision 6, the lab. lab/layer/papyrus-admitted.tsv gains the two row kinds; the first rows: Skyrim.esm everywhere
+WordWallTriggerScript WordWallTrigger02Script WordWallTriggerBleakFallsScript; Skyrim.esm host PressurePlate TrapTriggerBase
+TrapSwingingWall TrapHitBase MovingTrap TrapLever NorLever01SCRIPT default2StateActivator defaultPuzzlePillarScript
+defaultPillarPuzzleLever traplever DartTrap. A layer-stage carries the file (lab-plugins-write-reloads: the clones take it at the
+relaunch); d-bleak-falls stays M4's exit; x-bleak-traps v4 is the first read on the layer: the plate under the host, the plate
+under a guest (the host's engine fires once, the guest's never), a pillar from a guest (the relay to the host, the animation back),
+the lever, the puzzle's darts and portcullis, a hand-off mid-puzzle, a restart.
+
+Consequences. Three wire rows over the weekend's one (RelayedActivation stays; ObjectAnimation, TrapHit, the counts in the
+record); one Skyrim Platform change (the hosted-cell set, the two admission markers, the animation hook's reference range; a
+Windows build); client: hostService's set, dealWithRef's lift, the animation report, the relay's handler toward the host;
+server: the relay's host branch, the link table from VMAD properties, the animation and hit handlers with their validators, the
+counts and their replay. Built in slices, each probed on the layer before the next, traps.md's rows re-tagged as each read lands.
+What this rejects: running the vanilla scripts on the server's VM (the .pex files would have to leave the game's folder, the VM
+lacks their natives, and it is the server simulating a cell, which the law forbids); admitting Skyrim.esm whole (every quest and
+alias script would run on every seat, ADR-044's reason).
+
+Risks. H1 above; H2, the sendAnimationEvent hook sees a non-actor reference's NotifyAnimationGraph (Skyrim Platform's
+hook is on IAnimationGraphManagerHolder, which every animated reference holds; UNREAD); H3, a guest's figure on the host's
+engine enters a plate's primitive as an actor (the copy's character controller is a real one; the voice slice saw figures trigger
+nothing because nothing ran); H4, the replay's spacing and the count's drift when a relayed activation is refused by the
+script's busy window (the server counts what the host's engine confirms through the animation report, not what it relayed).
