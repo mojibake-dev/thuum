@@ -87,7 +87,7 @@ to 64 weathers; one word per player per place entered and per change stood throu
   reads below 1 through a blend: CONFIRMED (0.65 and 0.58 mid-blend on both seats within 0.01 of each other, 1 with
   outgoing 0 once settled). HYPOTHESIS until b-weather's legs 3b and 3c: the override survives a cell change within the
   worldspace (x-weather's seats never left lab-spawn's cell; the scenario moves c1 to Riverwood), and the client leaves
-  a blend alone and re-forces only a settled drift (no drift happened in the probe, so the re-force path never ran; the
+  a blend alone and re-forces any drift, blending or settled (the first rule re-forced a settled one alone and never fired, b-weather 091049; the
   scenario forces SkyrimOvercastRain 0xc821f on c1 through the driver's weather step and reads the one re-apply).
 
 ## Suppress
@@ -131,7 +131,7 @@ to 64 weathers; one word per player per place entered and per change stood throu
 
 - SP binding: none new.
 - TS handler: weatherService.ts: applies SetWeather (release, cut or blend) when the player's place matches, keeps a
-  word for another place until the player gets there, and every two seconds re-forces a settled drift from the word.
+  word for another place until the player gets there, and every two seconds re-forces a drift from the word, blending or settled.
   Lines: "weather applied W to P (cut|transition, word|late|re-applied N)", "weather released in P", "weather word
   for P kept".
 - Kill switch config key: `weatherSync` (server). The client needs none: no word, no override.
