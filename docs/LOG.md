@@ -4837,3 +4837,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (convert-files/skyrimPlatform.ts:1639-1641). The fix is the word wall's (every other hook add carries `leave() { },`), a
   TypeScript change, so the restage takes the overlay over the branch's dist; the three probes rerun on the fixed head and
   x-locks-open v3 follows. The stage's hold released.
+
+- 06:57 PST 2026-11-01 (thuum-magnus): the traps stage on 5a1a16b8 died at its start on both seats: wordWallService's Papyrus hook handler had
+  no `leave`, Skyrim Platform's Handler wraps enter and leave unconditionally (Handler.cpp), so the add threw "Invalid argument"
+  inside main() and the plugin never logged in (numidium's read of c2's skyrim-platform.log; the lab driver met the same fault in
+  0844cbef and I did not carry the lesson to the client's first cut). Fixed on m4-word-wall 2dece251 with the handler as a
+  variable (the published @skyrim-platform/skyrim-platform 2.8.0 typing declares enter alone and refuses an object literal with
+  leave; the fork's Definitions.txt and its regenerated skyrimPlatform.ts now declare both, fork-lint's codegen check green);
+  merged forward: m4-traps 346249e8 (the stage's head, 20b1da65's dist under the REUSE_DIST overlay), m4-world-scripts-host
+  9bb3d3ed. The restage runs the three probes and x-locks-open v3 after.
