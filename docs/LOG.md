@@ -4510,3 +4510,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   controller's second report at 31.6 s was reported, outside the 30 s window. v3 d42cd5e5 claims the engine's own repeat on both seats
   and drops the forced sets; one run on the laid stage; b-quest-report-dedupe promoted on its green (the draft rebuilt). quest-stage.md
   carries the reads.
+- (22:29 PDT 2026-10-31) x-quest-report-dedupe v3 d42cd5e5 GREEN (20261101-052612 on 3d3d68df: both seats reported DLC1NPCMentalModel's
+  stage 0 once and dropped its repeat inside the window; the controller's own-start count at its per-login shape; the relay crossed).
+  b-quest-report-dedupe on main 354c7fef (its own commit); the dedupe gate runs on the stage with it (always, watch, b-quest-stage,
+  b-quest-stage-restart, b-quest-rumor, b-quest-report-dedupe; T2 beside).
