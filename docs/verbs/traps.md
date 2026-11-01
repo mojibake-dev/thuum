@@ -227,7 +227,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   victim (CommonLibSSE-NG include/RE/A/ActorValueOwner.h, slot 06), not the melee path's DamageActor that FridaHooks.cpp:1131
   replaces for figures and puppets; so on the host the guest's FIGURE loses health locally and the guest never knows, and under
   the hosted-cell gate the guest's own engine runs no trap at all: a trap cannot hurt a guest until this slice. The trace
-  (lab/frida, to write: trap-hit-trace.js, 1.6.1170): c1 hosting the temple, c2's figure on the plate; hook the figure's
+  lab/frida/trap-hit-trace.js (written 14:46 PST 2026-11-01, 1.6.1170; x-object-anim v3 runs it on c1 before leg B): c1 hosting the temple, c2's figure on the plate; hook the figure's
   ActorValueOwner vtable slot 06 (the figure's pointer from its form id, as the other traces look forms up) and log the modifier,
   the actor value and the amount with the caller's module offset; hook the Papyrus event dispatch on the wall 0x54b15 for
   OnTrapHit and OnTrapHitStart (Skyrim Platform's sendPapyrusEvent hook) and log the target. Expected: one RestoreActorValue
