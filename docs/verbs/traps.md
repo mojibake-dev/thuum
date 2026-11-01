@@ -25,7 +25,7 @@ DOORs carry (ACTI.cpp reads the VMAD alone).
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | the plate's press animation and sound on the stepping player's game | engine | native |
-| the plate activates its children (XAPR, the delay): the blade's swing, the spears | engine (every game runs the vanilla script of the loaded cell) | imposed: the host's game fires it (its engine's own parent link) and reports the self-activation (today: noted alone, ActionListener.cpp:1938-1963); the server runs the children through its own XAPR table (ActivateChilds :1928-1959) and tells the other games to play the child's activation (R2 recorded, the host's engine the oracle) |
+| the plate activates its children (XAPR, the delay): the blade's swing, the spears | engine (the cell's host runs the plate's script under ADR-059; CONFIRMED v4 legs A and B) | imposed: the host's game fires it (its engine's own parent link) and reports the self-activation (today: noted alone, ActionListener.cpp:1938-1963); the server runs the children through its own XAPR table (ActivateChilds :1928-1959) and tells the other games to play the child's activation (R2 recorded, the host's engine the oracle) |
 | a trap's damage to a player | engine | native on the hit player's game, reported through its own ChangeValues (taken as reported today, :4154-4221; a hazard bound later) |
 | a trap's kill of an NPC | engine | R2 recorded: ADR-048's hazard death with "an activation beside the body" (:3488-3496) |
 | a pillar's turn (an ACTI's script PlayAnimation on itself) | engine | imposed: the server's Papyrus has no script, so the turn is the host's report of the pillar's state (its animation name, lastAnimation today, remoteServer.ts:386-399 "pillars in bleakfalls are not reliable") |
@@ -183,7 +183,41 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
   activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
   report) stays as the relay's wire.
-- Platform, ADR-059 decision 1 (fork m4-world-scripts-host 80616308 off m4-traps dc881a11, 06:07 PST 2026-11-01; a Windows build): Skyrim
+- Server, ADR-059 decision 2's last piece (fork m4-puzzle-relay cf70e418 off m4-traps 346249e8, 08:01 PST 2026-11-01; T0 TrapRelayTest's
+  pillar case both ways): a player's activation of a scripted world object (an ACTI or FURN whose record or base carries a script,
+  the VMAD read once per base) is relayed to every other game in the cell as RelayedActivation with the player's actor as the
+  caster: the host's engine runs the script where the cell is simulated (a guest's pillar turn counts on the host's lever), and the
+  guests' engines run it while the layer admits the scripts everywhere (the hosted-cell gate's train replaces the guests' share with
+  the host's animations, decision 3); every seat's echo of a figure's activation is taken quietly. Probe x-puzzle-relay v1 f67fabe3:
+  the guest's four turns and the host's one relayed and played on the other seat, then the host's pull and the marker's portcullis
+  on both (the success path's read; the face order 1 to 2 to 3 is HYPOTHESIS). Stages after the pair merges (no client change: the
+  traps dist serves).
+- Static pre-answers for ADR-059's next slices (08:03 PST 2026-11-01). Decision 3 (the host's animations to the guests): Skyrim Platform's
+  sendAnimationEvent hook (FridaHooks.cpp OnSendAnimationEventEnter) takes the engine's animation-graph holder from rcx and reads
+  the TESObjectREFR 0x38 bytes below it, so every reference with a graph reaches EventsApi::SendAnimationEventEnter(formId, name),
+  a pillar's Trigger0N and Turned0N and a portcullis's open as much as an actor's attack; the client's hook on the game-file id range
+  in a hosted cell is the report's source (H2 half-answered: the hook's reach is the reference's, the event names a probe reads).
+  Decision 4 (harm): the platform's DamageActor replacement cuts the engine's damage to figures and puppets alone, so a trap's hit
+  on the PLAYER's own body on the engine that runs the trap's script lands and travels as the player's own ChangeValues (the
+  actor-values verb's bounded report), which is why traps hurt today on every seat whose engine runs the script; under the
+  hosted-cell gate a guest's engine runs none, and TrapHit (the host's number on the figure, the server's table) is the only path.
+  Decision 5 (counts): a replay must be limited to scripts whose activation history has no side effect on other references (a
+  pillar's turn), never a lever's (its failure fires darts); the list is by script name.
+- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4 20261101-153828, green, first run, m4-traps 346249e8 under the layer's rows; 07:52 PST 2026-11-01): with
+  the scripts admitted and the engine's activation kept on their bases, Bleak Falls Temple runs. A) the host on the plate: its
+  PressurePlate fires (c1 "Sent a trigger's own activation for 567f2"), the engine's activation parent activates the wall with
+  the plate as the caster ("Sent a linked activation of 54b15 by 567f2"), the server relays once per activation ("567f2 activates
+  54b15 in cell 371de ... relayed to 1 game(s)") and c2 plays it ("relayed activation 54b15 by 567f2"); a press fires TWICE, at
+  the entry and about 3 s later (the engine's own shape, four lines a press on each side). B) the guest on the plate: the host's
+  engine fires for the guest's FIGURE (H3 confirmed) and the relay reaches the guest the same way; whether the guest's own
+  engine also fired its plate (the scripts are admitted everywhere in this dist) left no line and is the hosted-cell gate's read.
+  C) the guest's pillar turn stays on its own screen (one "Sent activation" line, nothing relayed): decision 2's relay to the host
+  is the next slice. D) the lever: two linked activations of the portcullis 200 ms apart (the lever's own and its script's),
+  relayed, c2 playing both. E) the puzzle lever with the pillars unsolved: defaultPillarPuzzleLever fires its four failure darts
+  once each (0x39fdd, 0x3720f, 0x2ad49, 0x2ad43), all four relayed through the links the server read from the script's
+  properties; the door marker is never named on the failure path (so no E_TRAP_NO_REF, and the marker-caster path waits for a
+  solved pull). No E_TRAP_ or E_ACTIVATE_REACH line in the run. Scenario b-bleak-traps (main 0f5ced37) claims A, B, D and E.
+- Platform, ADR-059 decision 1 (- Platform, ADR-059 decision 1 (fork m4-world-scripts-host 80616308 off m4-traps dc881a11, 06:07 PST 2026-11-01; a Windows build): Skyrim
   Platform's LoadAdmittedScripts reads a second row kind, "<plugin> host: <class> ...", into a host-scoped set; OnSendEventEnter reads
   the event's reference's parent cell and AdmittedByChain passes a host-scoped name only when that cell is in the hosted set;
   TESModPlatform.SetCellHosted(cellFormId, hosted) fills the set and skymp5-client's hostService calls it (callNative, on the next

@@ -6,9 +6,16 @@
 # 0x3EAF3, 100 for 60 s; lab/esm.py) and the server restarts at once; both
 # clients reconnect (an in-game client keeps its world, and its game still
 # holds the server's 100 on its maximum, which the server's MagicEffects
-# names again at the login). The restart takes about 36 s from its step to
-# the reconnected assert (a-restart-persistence 20261010-131100), so the
-# effect has about 20 s of its 60 left: between 10 and 30 counts. c1's game
+# names again at the login). The restart's downtime is the step's own, 15 s
+# (server: restart {downtime: 15}, lab-api since 09:59 PST 2026-11-01): a compose
+# restart alone took 10.6 s while stdbuf swallowed the server's SIGTERM and
+# 0.85 s since its process is node (2026-11-01), too short to tell a clock
+# that ran through the stop from one that did not (the pair sweep's three reds,
+# 20261101-175231, -175410, -175547, all reading 30.2 to 30.9 s left against
+# the old bound of 30). With the 15 s stop, the 20 s and 5 s waits and the
+# start, about 41 s pass from the drink's 57 s read, so the effect has about
+# 16 s of its 60 left: between 10 and 25 counts, and a clock that paused with
+# the server would read about 31. c1's game
 # agrees with the server's health throughout, and at the end both give the
 # 100 back once: health is set to 0.6 of 200 (twice: a regenerating client's
 # late falls can undo a lone set, b-marksman) ten seconds or so before the
@@ -38,15 +45,15 @@ steps:
       - server.effects(c1).left("0x3eaf3") > 50
       - server.effects(c1).magnitude("0x3eaf3") == 100
       - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
-  - server: restart
+  - server: restart {downtime: 15}
   - wait: 20
   - c1: reconnect
   - c2: reconnect
   - wait: 5
-  # after the restart: the effect with its time left on the world's clock
+  # after the restart: the effect with its time left on the world's clock, the 15 s stop counted
   - assert:
       - server.effects(c1).left("0x3eaf3") > 10
-      - server.effects(c1).left("0x3eaf3") < 30
+      - server.effects(c1).left("0x3eaf3") < 25
       - server.effects(c1).magnitude("0x3eaf3") == 100
       - abs(c1.state.healthPercentage - server.actor(c1).healthPercentage) < 0.04
   - c2: screenshot

@@ -4846,3 +4846,83 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   leave; the fork's Definitions.txt and its regenerated skyrimPlatform.ts now declare both, fork-lint's codegen check green);
   merged forward: m4-traps 346249e8 (the stage's head, 20b1da65's dist under the REUSE_DIST overlay), m4-world-scripts-host
   9bb3d3ed. The restage runs the three probes and x-locks-open v3 after.
+
+- 07:52 PST 2026-11-01 (thuum-magnus): the traps stage on m4-traps 346249e8 under layer-world-scripts: GREEN three for three on the first run.
+  x-word-wall 153103 (every claim: the record, the once, the relaunch, c2, the restart). x-word-wall-chant 153506 (a read): the
+  wall's scripts ran on the seat (OnLoad, two OnTriggerEnter, OnUpdate) and set MS13 to stage 60, which the quest-stage verb
+  recorded and relayed; the screen unread (every screenshot E_PVE_FILE). x-bleak-traps v4 153828 (a read): the plate fires on the
+  host for its own press and for the guest's figure and the wall relays to the guest (twice a press, the engine's own shape), the
+  lever's portcullis relays (twice, 200 ms apart), the puzzle lever's four failure darts relay once each through the script-property
+  links, no marker on the failure path, no refusal of any code; the guest's pillar turn stays local (decision 2's next slice).
+  Scenarios on main in their own commits: b-word-wall 92c03ed9 (the draft unchanged), b-bleak-traps 0f5ced37 (A, B, D, E; the
+  switch written at the relaunch as v4 did). numidium's D1 taken as A: the pair gates on the full sweep, then PROMOTE=0
+  verb-merge m4-traps, the LAYER_RUN layer-merge, then the container fix on the merged base. x-locks-open v3 154444 (a read):
+  the minigame's own exit key through tap-key (Tab on c1, Escape on c2) cleans the seat: after it and the lab's close, both seats
+  opened the unlocked chest's ContainerMenu (the dump-states list it), where v2's kHide-only close had left c1 refusing; the
+  Lockpicking Menu still listed 2 s after the tap, so the scenario taps then closes. b-locks rewritten (its own commit: the typed
+  console form for claim 2, prid then the bare unlock, and the exit key before each close); it stays pending until a run turns it
+  green.
+
+- 07:56 PST 2026-11-01 (numidium): the traps restage's lab side. verb-stage's REUSE_DIST now counts Skyrim Platform's declaration
+  sources (codegen/convert-files) with the client's TypeScript (main ab44aadd): the DLLs glob skyrim_platform/ and
+  skyrim_platform_entry/ alone, pack copies skyrimPlatform.ts only into Data/Platform/Modules, which the game never loads, the
+  client compiles against npm's typing, and the codegen tools run only in the Formatting check (step 1b), so 2dece251's typing
+  edit took 16087's dist at 20b1da65 with skymp5-client.js built here instead of a 35 min Windows wait. The first restage attempt
+  lost 10 min: the failed stage's server (m4-traps 5a1a16b8, wire SCHEMA_VERSION 28) was still up when both seats rolled back to
+  the layer's clean-m1-next (parity's client, 26); the netcode protocol id carries the schema version, so both seats retried every
+  15 s, the server logged nothing, and client-rollback's online wait failed both. The stage script now rolls back by lab-api alone
+  (verb-stage's step 7 launch test proves the seats). The second attempt ran clean, STAGE EXIT 0. The pair's gate: main 0f5ced37
+  merged into layer-world-scripts (4731b6aa, both remotes), deploy-srv from it (both new scenarios on sky-srv at main's hashes),
+  run set 20261101-155215-pair-traps-layer, 111 scenarios, started 15:52Z; T2 for 346249e8 runs beside it. b-locks bd192c85 runs
+  by path after the set's last run and before the merges (a set leaves no gap between its runs for a hand run).
+
+- 07:58 PST 2026-11-01 (thuum-magnus): the pair's gate runs (run set 20261101-155215-pair-traps-layer, 111 scenarios, numidium; b-locks bd192c85
+  after it, then the two merges). Meanwhile ADR-059 decision 2's last piece on fork m4-puzzle-relay 283b0169 (off the traps head,
+  server-only): a guest's activation of a scripted ACTI or FURN in a cell it does not host is relayed to the host's engine with the
+  guest's actor as the activator (the pillar turns and counts there), the host's echo quiet, T0's pillar case; probe x-puzzle-relay v1
+  4f3fb26a (five relayed turns, the host's pull, the marker's portcullis on both) for a stage after the pair merges on the traps dist.
+
+- 08:01 PST 2026-11-01 (thuum-magnus): m4-puzzle-relay cf70e418 generalizes the relay: a player's activation of a scripted world object goes to
+  EVERY other game in the cell (the host's engine for the count, the guests' for the same script while the layer admits it
+  everywhere), not the host alone; probe x-puzzle-relay v1 f67fabe3 has the host turn the third pillar and claims its relay to the
+  guest. The earlier entry's "to the host" is superseded.
+
+- 08:03 PST 2026-11-01 (thuum-magnus): static pre-answers in traps.md for ADR-059's next slices: the platform's animation hook reaches every
+  reference with a graph (the holder's REFR is read 0x38 below rcx), so a host can report a pillar's or a gate's animation; a trap's
+  harm lands today only on the seat whose engine runs the script (DamageActor's cut spares the player's own body; the actor-values
+  report carries it), so TrapHit is required once the hosted-cell gate stops the guests' scripts; a count replay is for side-effect-free
+  scripts by name (pillars), never levers. numidium queues m4-puzzle-relay after the pair and the container fix.
+
+- 09:18 PST 2026-11-01 (thuum-magnus): the pair's sweep: b-bleak-traps GREEN on its first run (164226). b-container-rest RED (171504): the bandit
+  chest's Novice lock, which the locks verb stands since parity 395cdc49, met its first activation (E_ACTIVATE_LOCKED and the
+  Lockpicking Menu where the open was claimed); nobody had run it since locks merged. The premise fixed on main 97142e82 (an
+  Unlock through the server's console first, the claims unchanged); numidium reruns it by path with b-locks at the sweep's end.
+  The other scenarios' activation targets are being checked for the same moved premise.
+
+- 10:00 PST 2026-11-01 (thuum-magnus): the pair's sweep's second moved premise, b-magic-restart (red thrice, 175231, 175410, 175547, reading 30.2
+  to 30.9 s left against a bound of 30): the compose restart took 10.6 s while stdbuf swallowed the server's SIGTERM and 0.85 s since
+  node is PID 1 (numidium's measure), so the claim could no longer tell a clock that ran through the stop from one that paused; a
+  bound bump would have been rule 13's weakening. lab-api's restart step gains a deliberate downtime (main 91195ce5: `server:
+  restart {downtime: 15}` stops, holds, starts; the grammar bounded 1 to 120 s, tests green), and the scenario restarts with 15 s of
+  it, its bounds re-derived to 10 to 25 from the step's own numbers (main 046cb720, its own commit). numidium pended it (356c50bd)
+  beside b-container-rest (c7f0f2ee) for the pair's citation; the LABAPI deploy and the by-path reruns follow the pair's merges.
+
+- 11:31 PST 2026-11-01 (thuum-magnus): the pair's sweep, two more reads. b-npc-handoff-cross red once (182820, a follow margin, the watch's
+  class; the reruns decide it). b-papyrus-events red twice on relaunched seats (192624, 192736: a0f stayed 0, Survival's 5 s check
+  never ran) and GREEN on the cold rollback (192846): ADR-036's relaunch-carried state, as b-npc-caster this morning, counted green
+  by the rule; numidium ruled out the admission (c1's papyrus-scripts.txt carries Survival's 37 names and the layer's 14, the
+  platform admitted 51 from 3 lines) and the login (a0f is not a PlayerGlobals value). A finding by name for the relaunch: which of
+  its "9 files cleaned" carries the Creation's one-shot. The sweep is past 75 of 111 with no open red beyond the two pending.
+
+- 12:14 PST 2026-11-01 (thuum-magnus): the pair's sweep, b-shadowbond red twice on relaunched seats (200443, 200715: c1's y -317 where the swap
+  should have put it below -400; c2's half held). c1's console shows the client applying the swap's teleport (the ragdoll wait
+  answered) 350 ms after the Flames release and 330 ms before the equipped event, and the engine never moving: HYPOTHESIS, the
+  player's moveRefrToPosition is refused in the release-to-equipped transition and 10-30's green (203601) had other timings. Not the
+  pair's (no commit since 10-30 touched remoteServer's teleport, the ragdoll service or the movement files beyond the containers'
+  handler and locks' dealWithRef). The cold rerun decides the count; red means a pending with this cause and a read probe,
+  x-shadowbond-swap, on the cast's release against the swap's arrival.
+
+- 12:14 PST 2026-11-01 (thuum-magnus): b-shadowbond's cold rerun red too (200948, -317 again): deterministic, three of three. numidium's D2 taken
+  as A: b-shadowbond pended with the cause (the caster's own half of the swap not taken by the engine while the Flames release
+  transitions; the pair's client diff touches no movement path; parity's merges since 10-30 the suspects), the pair merges, and a
+  parity-at-27f5c0a4 probe stage after the container fix bisects it with x-shadowbond-swap (to write).

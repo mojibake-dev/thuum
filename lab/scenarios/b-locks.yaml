@@ -1,4 +1,4 @@
-# b-locks (thuum-magnus, 23:03 PDT 2026-10-31, from x-lockpick's legs the lab can drive, v3 164727 to v6 183903; docs/verbs/locks.md, M4;
+# b-locks (thuum-magnus, 23:03 PDT 2026-10-31; 07:52 PST 2026-11-01: claim 2 on the typed console form and every Lockpicking Menu exit through its own key, from x-lockpick's legs the lab can drive, v3 164727 to v6 183903; docs/verbs/locks.md, M4;
 # fork m4-locks): locks on two seats. The server owns a reference's lock (level, key, locked: the REFR's XLOC at first touch, the record
 # after), travels it as a property, refuses an activation without the key (E_ACTIVATE_LOCKED: the seat's own game then runs the engine's
 # activation, the Lockpicking Menu or the "requires key" box), unlocks for the key in the record (R0), and runs the game's own console
@@ -14,12 +14,12 @@
 # Claims (the verb doc's Tests), each with what it proves:
 # 1. The lock stands on both games at creation; c1's activation meets it: E_ACTIVATE_LOCKED once, the prompt line, the Lockpicking Menu
 #    open within 5 s and no ContainerMenu (R0 the state, R3 the menu).
-# 2. c1's console unlock runs on the server through the lab's server-console step (the server's Unlock command, the same
-#    path the probes use for AddItem and god mode). The TYPED path is a finding of its own, not this scenario's claim: every seat
-#    logs "Error in ConsoleCommandsService: command set was null in setupServerOnlyCommands", so skymp5-client's intercept is
-#    never set up and a typed `unlock 0x371e9` fell to the engine's console ("Unknown variable '0x371e9'", 20261101-124231; the
-#    ref.command forms were "Script command not found", -105822, -110045, -110307, -121404). The server's unlock is the claim: "371e9 unlocked" once, c2's applied unlocked within 3 s, and c1's next activation opens
-#    the ContainerMenu with no new E_ACTIVATE_LOCKED: the console is the server's, the state one for both seats.
+# 2. c1's TYPED console unlock runs on the server: `prid 000371e9` selects the chest as a click would, the bare `unlock` reaches
+#    skymp5-client's intercept with the selection as its first argument (Skyrim Platform's ConsoleComand_Execute; x-locks-typed
+#    20261101-132414 green), travels as ConsoleCommand and runs on the server under the lab's rank. A reference typed as an
+#    argument never works (the engine parses `unlock 0x371e9` by its own signature: 'Unknown variable', 20261101-124231). The
+#    claim: "371e9 unlocked" once, c2's applied unlocked within 3 s, and c1's next activation opens the ContainerMenu with no new
+#    E_ACTIVATE_LOCKED: the console is the server's, the state one for both seats.
 # 3. The key lock: Lock [371e9, 255, key] relocks it (c2's applied line names level 255); c1's activation without the key is refused and
 #    opens neither menu within 3 s (the engine's "requires key" box); with the key (AddItem) the activation unlocks ("371e9 unlocked
 #    (level 255, key 36a3d") and opens the ContainerMenu, c2's applied unlocked: the key path is the record's inventory.
@@ -71,10 +71,18 @@ steps:
       - 'c1.log_count("lock prompt 371e9: the engine.s activation run") == 1'
       - 'c1.state.menuOpen("Lockpicking Menu") == true'
       - 'c1.state.menuOpen("ContainerMenu") == false'
+  # the menu's own exit first (Tab, DIK 15; Escape works too), then the lab's close: a kHide alone leaves the seat unable to
+  # open the chest afterward (x-locks-open v1 and v2), the exit key cleans it (v3 20261101-154444, both seats)
+  - c1: tap-key {code: 15}
+  - wait: 2
   - c1: close-menu {name: Lockpicking Menu}
   - wait: 1
-  # 2. a typed unlock runs on the server (the lab's rank), one state for both
-  - c1: server-console {name: Unlock, args: [0x371e9]}
+  # 2. the typed unlock runs on the server (the lab's rank), one state for both: the console's selected reference (prid, as a
+  #    click selects it) then the bare command, which Skyrim Platform hands the intercept with the selection first
+  #    (x-locks-typed 20261101-132414)
+  - c1: console {text: "prid 000371e9"}
+  - wait: 1
+  - c1: console {text: "unlock", match: "unlock"}
   - until: {within: 5, every: 0.5, expect: ['server.log_count("371e9 unlocked") >= 1']}
   - wait: 3
   - c2: log-count {pattern: "lock 371e9 applied: unlocked"}
@@ -157,5 +165,9 @@ steps:
       - 'c1.state.menuOpen("Lockpicking Menu") == true'
       - 'c1.state.menuOpen("ContainerMenu") == false'
       - 'server.log_count("E_LOCK_") == 0'
+  # the menu's own exit first (Tab, DIK 15; Escape works too), then the lab's close: a kHide alone leaves the seat unable to
+  # open the chest afterward (x-locks-open v1 and v2), the exit key cleans it (v3 20261101-154444, both seats)
+  - c1: tap-key {code: 15}
+  - wait: 2
   - c1: close-menu {name: Lockpicking Menu}
 artifacts: [server.log, c1.log, c2.log, screenshots]
