@@ -4523,3 +4523,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   written and on main c8dbc382 (its own commit): the lab-drivable legs of the lockpick draft plus a console relock and the persistence of
   a locked state; the pick is the verb's declared T4. Order (numidium): dedupe's verdict, parity into perks (server-only), one stage on
   2e0c03c6's own build with the overlay for the probe and the gate.
+- (23:28 PDT 2026-10-31) dedupe's gate (20261101-052926) 10 of 11 green, the four quest scenarios and T2 among them; c-riverwood RED 4 of 5
+  on claim 3's restart leg: the walking resident 0x13489 (Gerdur) comes back 800 to 1,200 units from the snapshot taken just before the
+  restart (060020: x 21181 against 22082, y -43496 against -44705; 061000; 062052) while standing Alvor's record equals its snapshot to
+  the hundredth (once Alvor too, 80 and 106 off, 060512). numidium's read, taken: the restart restores the last SAVED record, not the
+  live one; a resident walking at the stop comes back where the save last caught her (the watch item's known shape, Alvor 266 off at
+  213550; red now because Gerdur walks at this hour). Player-visible: an NPC appears up to 1,200 units back on her path after a server
+  restart. B taken (the pending list, not a claim change): c-riverwood pended in lab/gate.yaml by name (995dc7c3, its own commit); dedupe
+  merges by GATE_SET=20261101-052926 (a red allowed on a pending scenario only, the head unchanged, T2 green), perks follows. The owed
+  fix, its own R0 branch: the server flushes its records on a graceful stop (skymp5-server/ts/index.ts handles no SIGTERM; a flush of the
+  save storage's pending upserts before the exit), then c-riverwood un-pends.
