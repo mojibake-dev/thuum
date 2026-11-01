@@ -4820,3 +4820,29 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the hosted-cell set and SetCellHosted compile into the dist); its server-build red was the inherited stranger case of
   TrapRelayTest (the branch was cut from dc881a11). m4-traps 5a1a16b8 merged into it (ae90b4d0, server-only push; 80616308's dist
   is its dist). The traps head 5a1a16b8 itself is T0 green (4464) and is the traps stage's head.
+
+- 06:45 PST 2026-11-01 (thuum-magnus): three branches green in CI. m4-word-wall abb1b098 (parity 27f5c0a4 merged; the first merge 0ef96899 had
+  dropped WordOfWall's closing brace before the perk helper's namespace, both sides of the conflict ending on the shared brace:
+  pipeline 4466 red, fixed; T0 green on 4471; its dist is c31208c0's client build). m4-world-scripts-host ae90b4d0 (ADR-059
+  decision 1's platform half, client build green on 80616308's 4456, the server's inherited test red merged away; 4468 green).
+  m4-container-open-poll 5ee4d72b (4462 green, client build). The layer is staged (e2290f01, smoke green with it, 142841) and
+  the traps stage runs on 5a1a16b8 with x-word-wall, x-word-wall-chant and x-bleak-traps v4; x-locks-open v3 follows.
+
+- 06:54 PST 2026-11-01 (numidium): the traps stage (m4-traps 5a1a16b8 on the layer's clones, ed08c1ae) stopped at step 7:
+  client-driver exit 4, c2 not online after two launches, the game up with no crash log, the server never saw a connect. c2's
+  skyrim-platform.log ends "once('tick'): Invalid argument" right after skymp5-client's RunScript: the word wall's
+  sendPapyrusEvent handler (wordWallService.ts:32-41, since f3606ba0) has enter and no leave, and Skyrim Platform's
+  Handler.cpp:9-13 builds both persistents unconditionally, so the client's startup throws and no seat can log in on m4-word-wall,
+  m4-traps or m4-world-scripts-host. tsc passed because SP's typing declares SendPapyrusEventHook.Handler with enter only
+  (convert-files/skyrimPlatform.ts:1639-1641). The fix is the word wall's (every other hook add carries `leave() { },`), a
+  TypeScript change, so the restage takes the overlay over the branch's dist; the three probes rerun on the fixed head and
+  x-locks-open v3 follows. The stage's hold released.
+
+- 06:57 PST 2026-11-01 (thuum-magnus): the traps stage on 5a1a16b8 died at its start on both seats: wordWallService's Papyrus hook handler had
+  no `leave`, Skyrim Platform's Handler wraps enter and leave unconditionally (Handler.cpp), so the add threw "Invalid argument"
+  inside main() and the plugin never logged in (numidium's read of c2's skyrim-platform.log; the lab driver met the same fault in
+  0844cbef and I did not carry the lesson to the client's first cut). Fixed on m4-word-wall 2dece251 with the handler as a
+  variable (the published @skyrim-platform/skyrim-platform 2.8.0 typing declares enter alone and refuses an object literal with
+  leave; the fork's Definitions.txt and its regenerated skyrimPlatform.ts now declare both, fork-lint's codegen check green);
+  merged forward: m4-traps 346249e8 (the stage's head, 20b1da65's dist under the REUSE_DIST overlay), m4-world-scripts-host
+  9bb3d3ed. The restage runs the three probes and x-locks-open v3 after.
