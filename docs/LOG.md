@@ -4862,3 +4862,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Lockpicking Menu still listed 2 s after the tap, so the scenario taps then closes. b-locks rewritten (its own commit: the typed
   console form for claim 2, prid then the bare unlock, and the exit key before each close); it stays pending until a run turns it
   green.
+
+- 07:56 PST 2026-11-01 (numidium): the traps restage's lab side. verb-stage's REUSE_DIST now counts Skyrim Platform's declaration
+  sources (codegen/convert-files) with the client's TypeScript (main ab44aadd): the DLLs glob skyrim_platform/ and
+  skyrim_platform_entry/ alone, pack copies skyrimPlatform.ts only into Data/Platform/Modules, which the game never loads, the
+  client compiles against npm's typing, and the codegen tools run only in the Formatting check (step 1b), so 2dece251's typing
+  edit took 16087's dist at 20b1da65 with skymp5-client.js built here instead of a 35 min Windows wait. The first restage attempt
+  lost 10 min: the failed stage's server (m4-traps 5a1a16b8, wire SCHEMA_VERSION 28) was still up when both seats rolled back to
+  the layer's clean-m1-next (parity's client, 26); the netcode protocol id carries the schema version, so both seats retried every
+  15 s, the server logged nothing, and client-rollback's online wait failed both. The stage script now rolls back by lab-api alone
+  (verb-stage's step 7 launch test proves the seats). The second attempt ran clean, STAGE EXIT 0. The pair's gate: main 0f5ced37
+  merged into layer-world-scripts (4731b6aa, both remotes), deploy-srv from it (both new scenarios on sky-srv at main's hashes),
+  run set 20261101-155215-pair-traps-layer, 111 scenarios, started 15:52Z; T2 for 346249e8 runs beside it. b-locks bd192c85 runs
+  by path after the set's last run and before the merges (a set leaves no gap between its runs for a hand run).
