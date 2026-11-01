@@ -4503,3 +4503,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   both clones promoted). The parity pass (clean merges, tsc green, server-only pushes): m3-quest-report-dedupe 3d3d68df,
   m5-perks 3c220465, m4-weather 1780c8a0, m4-locks 1746ca67, m5-skill-set 356444cf. Next in the lab: dedupe v2 c8558fbb on 3d3d68df,
   perks' probe on 3c220465, weather's gate on 1780c8a0.
+- (22:26 PDT 2026-10-31) x-quest-report-dedupe v2 c8558fbb RED twice on 3d3d68df (051908, 052159; numidium's read): the three set-stage calls
+  of the controller's stage 0 fired one report, since the engine fires nothing for a set of the stage a quest already stands at; the
+  dedupe meanwhile dropped the engine's own repeat in every run, Dawnguard's DLC1NPCMentalModel (QUST 0x02002b6e) stage 0 at the login
+  and again about 30 s later, "repeated 1 times in 34 s; dropped" at connect + 40 s on both seats (also in v1's 192813, unread then); the
+  controller's second report at 31.6 s was reported, outside the 30 s window. v3 d42cd5e5 claims the engine's own repeat on both seats
+  and drops the forced sets; one run on the laid stage; b-quest-report-dedupe promoted on its green (the draft rebuilt). quest-stage.md
+  carries the reads.

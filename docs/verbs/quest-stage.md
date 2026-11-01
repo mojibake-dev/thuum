@@ -244,7 +244,13 @@ source (Skyrim Platform's Quest has no Start Game Enabled getter, the comment at
 after D69's (client only; m3-quest-report-dedupe off the merged base): in QuestStageService.onQuestStage, a per-quest memory of the
 last stage reported and when; a report equal to the last one within REPORT_REPEAT_MS (30 s, UNMEASURED beyond the burst's shape)
 is dropped and counted, with one logTrace per quest per window ("stage N of quest X repeated K times in 30 s; dropped"); the
-server loses nothing, since a repeated (quest, stage) is its no-op already (QuestStageTest). The T3 claims for the probe
+server loses nothing, since a repeated (quest, stage) is its no-op already (QuestStageTest). Lab reads (22:26 PDT 2026-10-31): a set of the stage a
+quest already stands at (the driver's set-stage, Quest.SetCurrentStageID) fires no stage event, so a forced repeat cannot be made that
+way (x-quest-report-dedupe v2 051908 and 052159: three sets, one report); the engine's own repeat exists on every login: Dawnguard's
+DLC1NPCMentalModel (QUST 0x02002b6e) fires its stage 0 at the login and again about 30 s later on every seat, and the dedupe dropped it
+in every run so far ("stage 0 of quest 2002b6e repeated 1 times in 34 s; dropped" at connect + 40 s on both seats in 192813, 051908,
+052159); the controller 201a428's second report 31.6 s after its first was reported, outside the 30 s window, as designed. v3 claims
+the engine's own repeat (d42cd5e5); b-quest-report-dedupe follows its green. The T3 claims for the probe
 (x-quest-report-dedupe, both seats in Riverwood for 90 s, the controller's bursts as the premise): c1.log_count("repeated
 [0-9]+ times in [0-9]+ s; dropped") >= 1 on each seat; server.log_count("E_QUEST_OWN_START: .* of 1a428:Dawnguard.esm: .*
 ([3-9][0-9]|[1-9][0-9][0-9]) such report") == 0 (no window of thirty or more held); the mode-all relay unchanged (x-quest-mode v5's
