@@ -4446,3 +4446,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   weather and perks met one conflict each in skymp5-client/src/view/modelApplyUtils.ts (locks' applyModelLock against containers'
   lidState fields at the same spot), kept both. Physics stages on 71092a64 (REUSE_DIST 15505 with the TS overlay): push v16, pass v13,
   grab v9, the gate on the same stage once push reads green and b-prop-push is on main.
+- (18:03 PDT 2026-10-31) lab fault, not a verb's: since the card swap c1's game crashed three times in the containers gate at one engine site
+  (SkyrimSE.exe+02AD242, mov rax, [rcx], TESObjectLAND 0xA7B3, the Tamriel.4.28.-20 terrain texture, BGSQueuedTerrainUpgrade: the
+  terrain upgrade path, 30 to 45 s into the NPC runs); core found correctable PCIe errors on c1's link at Gen3 (8 GT/s), none on c2,
+  and caps the port to 5 GT/s live; numidium replays the gate's crash window (b-npc-loot, b-npc-death, b-npc-stream-voice,
+  b-npc-caster, c-riverwood) before physics restages on 71092a64 (about 40 min). An E_RUN_GAME on c1 in that window is the link.
