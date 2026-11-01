@@ -148,6 +148,14 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+- Static pre-answer (02:40 PST 2026-11-01) for the relay's first HYPOTHESIS (an activation-blocked reference and a scripted activate):
+  the Creation Kit's BlockActivation (ObjectReference) blocks the reference's default processing and the player's own
+  activation while the OnActivate event is still sent to its scripts (https://ck.uesp.net/wiki/BlockActivation_-_ObjectReference),
+  and ObjectReference.Activate with abDefaultProcessingOnly false runs the scripts
+  (https://ck.uesp.net/wiki/Activate_-_ObjectReference). skymp5-client blocks every ACTI and DOOR (objectReferenceEx.ts), so
+  the relayed `target.activate(caster, false)` should fire a trap's script (TrapSwingingWall's swing, the portcullis's rise)
+  without the default processing the block withholds; a DOOR's open travels by its isOpen property regardless. The read
+  confirms on the spike wall and the portcullis; the volume of engine-internal activations and the double play stay the read's.
 - x-bleak-traps v1 by path (the read, no code): c1 hosts Bleak Falls Temple 0x371de, c2 beside; (1) c1 teleported onto
   the plate 0x567f2: both screenshots at 1 and 3 s (the wall 0x54b15's swing), the server log's activation note, c2's
   console for any activation event lines; (2) c2 onto the same plate: the same reads (the guest's engine fires its own
