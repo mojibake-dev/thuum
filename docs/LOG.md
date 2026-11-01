@@ -4464,3 +4464,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   main d140ff89 (its own commit). pass v13 and grab v9 replay on the stage; the physics gate runs on it (b-prop-push,
   b-spell-placed-wall, b-npc-copy-fate, m0-inventory, always, watch, T2 beside). The c1 crash question closed on the infra side (the
   5 GT/s replay green 5 of 5; the link ruled out; apocrypha's lead).
+- (19:03 PDT 2026-10-31) physics' three probes on 71092a64: push v16 GREEN 014442, pass v13 GREEN 014937, grab v9 red at 015410 and GREEN on its
+  cold rerun 015841 (the red was the aim: c2's E activated the moonstone ore vein 0x10e6cb, ACTI MineOreMoonstone03_LFallForestRocks,
+  260 units past the ingot, which sat untouched 70 units away; a grab scenario would check the crosshair's reference before the E). The
+  physics gate runs on the stage (b-prop-push d140ff89, b-spell-placed-wall, b-npc-copy-fate, m0-inventory, always, watch; T2 beside,
+  about 60 min).
