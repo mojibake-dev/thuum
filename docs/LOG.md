@@ -4599,3 +4599,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   holds them) and TES5DamageFormulaTest (7 to 8.4 and 9.8, the bow untouched, Iron Gauntlets 10 to 12); CI's ctest is the oracle.
   Tab semantics and the per-piece armor application stay HYPOTHESIS until x-perk-damage measures the ratio. The train stages after
   perks merges (it stacks on it).
+- (01:50 PDT 2026-11-01) D77 A at T0 GREEN: m5-perk-effects 456090e1 (39eeb1e5's pipeline 4363 failed on a compile error, a helper declared
+  below its first caller in PartOne.cpp; 4365 passed its ctest: EspmTest reads Armsman00's and Juggernaut00's entries as decoded from
+  lab/esm.py's dump, TES5DamageFormulaTest multiplies 7 to 8.4 and 9.8 and leaves the bow, Iron Gauntlets' 10 to 12). Stage-ready
+  after perks merges (REUSE_DIST), probes x-perk-damage v1 5c2aac7b (five phases of six swings on c2 at Health 1000: 7, 8.4, 9.8 and
+  never 11.76, 9.6824 in iron gauntlets, 9.65888 under Juggernaut) and x-word-wall-read v1 147f0ba8 (D77 B's read, never run). The
+  word wall's server half starts on m4-word-wall off parity d73de274; its contract is WordWall {wall} alone (word-wall.md).
