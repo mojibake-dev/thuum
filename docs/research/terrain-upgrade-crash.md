@@ -193,19 +193,50 @@ An engine null dereference in the terrain-overlay sweep (18789 via 13414),
 reached from the terrain update job when a queued terrain task completes while
 a loaded land's quad geometry is not attached yet. Not content, not the GPU
 link. It is a load-time flake with a stable signature: SkyrimSE.exe+02AD242
-with BGSQueuedTerrainUpgrade and a TESObjectLAND on the stack.
+with BGSQueuedTerrainUpgrade and a TESObjectLAND on the stack, inside the
+first ~20 s of process uptime. docs/LOG.md 19:08 PDT (0450a3d5) records it.
 
-1. Classify by signature. An E_RUN_GAME with that signature in the first ~20 s
-   of process uptime is this race, not the verb under test; the harness can
-   retry the run once instead of failing it.
-2. Lab-only code patch if the retries cost too much: a null check at
-   18789+0x15F. Replace `mov rcx,[rax]; mov rax,[rcx]; call [rax+0x38]`
-   (+02AD23F..+02AD248, 9 bytes) with a jump to a stub that tests rcx and
-   continues at +02AD420 (`inc esi`, the next-quad path) when it is zero. A
-   dozen bytes in an SKSE plugin or a Frida Memory.patchCode on the lab seats;
-   the signature above is the test.
-3. Nothing to change in the layer for this. The Tamriel WRLD side finding
-   stands on its own (below).
+numidium's calls on the two levers (2026-11-01):
+
+1. **Retry is already there; the name is what was owed.** lab-api reruns an
+   E_RUN_GAME-class fault as a lab fault (two of the three crash runs reran
+   green in-set; the third read green anyway). What it adds: on a crash fault
+   it reads the newest Crash Logger file and notes "the known terrain-overlay
+   race" when the signature matches, so a reader never re-diagnoses it. Single
+   probe runs (lab-run) get no retry and are rerun by hand.
+2. **No lab-only patch.** The seats run the players' game; a patched engine on
+   the seats would stop measuring it. If the race is fixed, it is fixed for
+   everyone, as a layer plugin every client loads. Eli's call; the shape is
+   below.
+
+Shape of a layer fix, if Eli wants one. No shipped mod covers this site: LOD
+Refresh Bug Fix (Nexus 187070) resets the LOD quadtree after teleports and
+worldspace changes, and Bug Fixes SSE, Scrambled Bugs, po3's Tweaks and Engine
+Fixes do not touch 18789. Two shapes, in order of laziness:
+
+- **A, upstream it.** Scrambled Bugs and po3's Tweaks take engine-fix
+  contributions on GitHub; the lab already ships both. File the site with the
+  disassembly above (the function by Address Library id, the two unchecked
+  paths, the three logs). If taken, the layer gets the fix by updating a mod it
+  already carries, and so does everyone else. Slow and not in our hands.
+- **B, a thuum engine-fixes DLL.** One CommonLibSSE-NG SKSE plugin (the
+  submodule is already in the repo; sky-build 720 is the Windows build box) that
+  pins the runtime to 1.6.1170 (ADR-022) and installs one detour: at
+  REL::ID(18789) + 0x14A, the `cmp word ptr [rax+0x122], 0; ja` pair (10 bytes),
+  jump to a trampoline that reads children.size and children[0] itself and
+  routes both the empty-array case and a null children[0] to the next-quad path
+  at + 0x340 (`inc esi`), else continues at + 0x162 as before. About forty
+  lines with CommonLib's trampoline and Xbyak. The hook sits before the
+  compare, so the original `jmp + 0x162` from the empty-array branch is never
+  reached with a patched target under it. One DLL in the layer, ESP-less, keyed
+  by id with this page as its spec; later lab-found engine fixes go in the same
+  DLL the same way. The fork's MpClientPlugin could host the detour instead
+  (every client loads it already), but that couples an engine fix to the skymp
+  client's build and upstream merges; the separate DLL is the cleaner "we do
+  it this way".
+
+Either way the layer test is the signature: a run set on c1 with no
++02AD242 fault across the containers gate.
 
 ## Side finding: the Tamriel worldspace ITMs
 
