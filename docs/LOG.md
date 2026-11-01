@@ -4561,3 +4561,4 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   held the creation's position; the case now claims that, 0 then 200 after the flush (m3-save-flush-on-stop 028a036a, server-only
   push; R0 when its ctest is green). Skill-set 464c0881 merges R0 first on numidium's word (its T2 running); perks takes that parity
   as a server-only merge before its gate, the full build's dist staying valid through the overlay.
+- m5-skill-set merged to fork parity 464c0881 (2026-11-01T07:32Z): R0 (ADR-053): T0 pipeline 4343 server-build 15719: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m5-skill-set, its T2 of 464c0881 green (T2_LOG, zero undeclared differences); clones not promoted (no client change). Verbs: leveling's skill set (a68d1b80: a server set of a skill's base moves the progress entry with it, so a console or lab SetAV no longer snaps back under leveling; the playtest's SetAV caveat lifts).
