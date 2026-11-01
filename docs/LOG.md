@@ -4451,3 +4451,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   terrain upgrade path, 30 to 45 s into the NPC runs); core found correctable PCIe errors on c1's link at Gen3 (8 GT/s), none on c2,
   and caps the port to 5 GT/s live; numidium replays the gate's crash window (b-npc-loot, b-npc-death, b-npc-stream-voice,
   b-npc-caster, c-riverwood) before physics restages on 71092a64 (about 40 min). An E_RUN_GAME on c1 in that window is the link.
+- (18:53 PDT 2026-10-31) backlog (apocrypha's side finding from the c1 terrain-crash read, docs/research/terrain-upgrade-crash.md on
+  apocrypha/terrain-crash-read 23654f1c): nine deployed plugins override Tamriel's WRLD 0x3C with Dragonborn's copy unchanged, and the
+  winner (mihailatmoranremains.esp, slot 39) reverts USSEP's regenerated max-height data (MHDT, USSEP #27167) in 28 cells (18 around
+  Castle Volkihar); flight and camera ceilings only, not the crash. Fix shape offered: a plugin-patch.py kind forward-subrecord copying
+  MHDT from USSEP's copy into that plugin's record (same size, no group resize). Eli's call; nothing built. The c1 crash itself: one
+  intermittent engine site (terrain upgrade, LAND 0xA7B3, LOD tile Tamriel.4.28.-20), the link ruled out (5 GT/s replay green 5 of 5,
+  correctable errors on both seats at either speed), apocrypha's lead.
