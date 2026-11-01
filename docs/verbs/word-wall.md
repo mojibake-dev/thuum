@@ -88,9 +88,12 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 ## Message contract
 
-- Message name / numeric type: WordWall, C2S, reliable, `{ wall: u32, word: u32 }`, MsgType after the pile's others;
-  validator: both never 0, a budget of 2 then 1 a second. SCHEMA_VERSION bumped with it.
-- Idempotency / ordering: a known word is a no-op.
+- Message name / numeric type: WordWall, C2S, reliable, `{ wall: u32 }`, MsgType 69 (after PerkState 68); validator: the
+  wall never 0, a budget of 2 then 1 a second. SCHEMA_VERSION bumped with it. The word travels nowhere: the server reads
+  it from the wall's own record (the trigger reference's script property, below), so a seat can name a wall it stands at
+  and nothing else (01:43 PDT 2026-11-01; the first draft carried the word too, an untrusted field the server would only have checked
+  against the same table).
+- Idempotency / ordering: a known word is a no-op; a wall reported again teaches nothing more.
 - Contract doc updated: docs/WIRE.md with the build.
 
 ## Server
@@ -124,6 +127,7 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
+- x-word-wall-read v1 147f0ba8 runs on the perk-effects train's stage after perks merges (01:43 PDT 2026-11-01; never run before).
 - x-word-wall-read by path: c1 at Bleak Falls' word wall (its reference by lab/esm.py on the cell), Skyrim Platform's
   papyrus-events step recording the wall's events as c1 nears it (OnTriggerEnter? OnActivate?), the `known` step before
   and after, c1's console for the HUD notice line; a Frida read of Game.TeachWord's native if the event carries no
