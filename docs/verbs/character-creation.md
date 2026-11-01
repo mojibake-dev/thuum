@@ -139,11 +139,19 @@ races on sky-srv, 2026-11-01). The lab's seats are profiles 1 (c1) and 2 (c2).
   not native" and nothing came off the menu (b-race-permit 20261101-232833,
   c2's console 23:30:02Z); the service logs "stays listed; the hide awaits
   its native" instead. The enforcement is the server's refusal alone, which
-  is what Eli asked for; the hide returns as its own slice with a
-  TESModPlatform native declared through lab/pex.py add-native (the pex
-  rule) or SKSE's own Race.pex laid by the layer, after a read of which
-  Race.pex the seats load. Courtesy only, then as now: the plugin bytes and
-  load order stay identical on every seat.
+  is what Eli asked for. The hide returns in the bondblock train (apocrypha
+  26ebe040, 15:40 PST 2026-11-01): the seats load SKSE's own loose Data\Scripts\Race.pex
+  (6,634 bytes, sha256 ecdf2b18..., byte-identical to lab/.cache/skse-1.6.1170's;
+  lab/pex.py dump: IsRaceFlagSet, SetRaceFlag and ClearRaceFlag native,
+  IsPlayable and MakeUnplayable two- and three-instruction wrappers over them),
+  so the hide is race.clearRaceFlag(1) with isRaceFlagSet(1) through Skyrim
+  Platform's typed Race, no callNative; the isPlayable() that passed on c2 was
+  Form's, through the binding's inheritance. The per-race line "taken off the
+  menu; playable now: false" returns with it. Courtesy only, then as now: the
+  plugin bytes and load order stay identical on every seat.
+- T2's lesson: a prop on the player's own CreateActor is a login-time
+  divergence in EVERY difftest session, declared once in difftest's
+  divergences.yaml as the lock's is (fork ee9fdec5), not per session.
 
 ## Not in this verb
 

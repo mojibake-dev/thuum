@@ -5024,3 +5024,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   scenario's hide claims back by path there. ObjectAnimation's T0 red of 4522 was the test's bandit (never loaded); fixed
   2717fe64 (Alvor under npcEnabled), T0 green in 16369.
 
+- 15:40 PST 2026-11-01 the permit train's T2 read every session red: the player's own CreateActor carries props.restrictedRaces on the wire
+  server and the bare word on legacy, undeclared outside the race-permit session (numidium's read). Declared once as a common
+  divergence in difftest's divergences.yaml, the lock's two-step shape (fork m5-race-permit ee9fdec5); paper-only heads with the
+  server-only knob: the permit train 25c00758 (64ec9666's dist stands, its stage continues) and the bondblock train a29a421b
+  (15281798 plus the declaration; 15281798 carries apocrypha's hide 26ebe040: race.clearRaceFlag(1) through the typed Race, the
+  seats' Race.pex being SKSE's with MakeUnplayable a script wrapper). The hide's two claims run by path at the bondblock stage
+  (x-race-permit-hide d567a586) and return to b-race-permit on main after the permit merges.
+
