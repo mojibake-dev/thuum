@@ -4682,3 +4682,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   each stages with its own full dist once its read settles the hook). merge-parity.sh now runs tsc through
   node_modules/typescript/bin/tsc (npx's "tsc" resolved to a placeholder package) and skips it for a merge without client change.
 - m3-log-flush merged to fork parity 8de9ada5 (2026-11-01T12:24Z): R0 (ADR-053): T0 pipeline 4414 server-build 15987: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m3-log-flush, its T2 of 8de9ada5 green (T2_LOG); clones not promoted. Verbs: the log flush (ScampServer.cpp's GetLogger: spdlog's console sink flushes on every info line, so the server's log needs no stdbuf and survives a kill; the prerequisite for the PID 1 compose, which returns as its own commit now that every branch that merges 8de9ada5 carries the flush).
+- (04:29 PST 2026-11-01) LOG-FLUSH MERGED by R0 (parity 8de9ada5, 12:24Z, numidium). The parity pass: m5-perk-effects 27f5c0a4, m4-word-wall bb901be7,
+  m4-traps 16d29f6c (server-only pushes), and the node-as-PID-1 compose back on main (48c2209a), paired now with an image carrying
+  the flush. The perk-effects stage on 5623da30 ran its four first runs RED, none on the server halves: b-locks 121404 (the eight-digit
+  ref.command form is as unknown to the engine's console as the short one; the client's console intercept takes the reference as
+  its first ARGUMENT and reads it with parseInt, so the typed line is `unlock 0x371e9`, main 8dad4492, b-locks still pending for its
+  next run); x-perk-damage 121726 (the probe listed no `artifacts:`, so the run kept no log to read: v2 0743f648 lists server.log,
+  c1.log, c2.log, screenshots); x-word-wall-read 121858 (the driver's papyrus-log passed an explicit undefined event pattern as the
+  hook's fourth argument, "Invalid argument" to Skyrim Platform: main 0578bbe6 adds the hook with three arguments when no pattern
+  is asked for; the stage's build-driver rebuilds it); x-bleak-traps 122019 (E_RUN_APPROACH: `approach` reads npc-state and is
+  actor-only, so the pillar and the lever get teleports 120 and 100 units south of their records: v2 b7b49295). The restage on
+  27f5c0a4 with b-locks before the probes.
