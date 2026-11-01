@@ -56,7 +56,9 @@ echo "== 1. the Windows build of $sha8"
 # package.json, yarn.lock and webpack.config.js sit outside src/, so a dependency or bundler change keeps the wait.
 dist_sha=$sha; overlay=; dist_branch=$branch
 if [ "${REUSE_DIST:-}" = 1 ]; then
-  server_only='^(skymp5-server/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
+  # libespm/ is server-only too: its static espm library is linked by server_guest_lib and unit alone
+  # (skymp5-server/cpp/CMakeLists.txt:81, unit/CMakeLists.txt:34), never by skyrim-platform or the client (2026-11-01)
+  server_only='^(skymp5-server/|libespm/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
   # the builds walked are both sources' (lab/tools/client-builds.py: the fork's client-build job on sky-build and
   # the mirror's Parity Windows run, newest first, GitLab first for a commit both built); step 7's `just build-client`
   # downloads from whichever source built the commit it is given, on the branch that built it
