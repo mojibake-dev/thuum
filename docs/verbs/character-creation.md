@@ -129,14 +129,21 @@ races on sky-srv, 2026-11-01). The lab's seats are profiles 1 (c1) and 2 (c2).
   wire-legacy reads both as absent; fixture 33-CreateActor-2 goes through
   WireJsonContractTest.
 - The menu side (apocrypha, fork apocrypha/race-permit-client e54f69b0,
-  merged into m5-race-permit): skymp5-client's RacePermitService takes the
-  restricted races the login does not permit off the race menu with the
-  engine's Race.MakeUnplayable, at login and as the RaceSex Menu opens, never
-  the race the player's base already wears. Courtesy only: the rule is the
-  server's, and the plugin bytes and load order stay identical on every seat.
-  Its lines: "restricted races [...] permitted here [...] hidden [...]" at
-  login, "race 0x... taken off the menu" per hidden race, E_RACE_PERMIT for a
-  restricted id that is no race in the game's load order.
+  merged into m5-race-permit): skymp5-client's RacePermitService reads the
+  two lists at login and names the races to take off the menu (never the one
+  the player's base already wears). Its lines: "restricted races [...]
+  permitted here [...] hidden [...]" at login, E_RACE_PERMIT for a restricted
+  id that is no race in the game's load order. The hide itself is OFF since
+  15:35 PST 2026-11-01 (fork 0594f294): the seats' loaded Race.pex defines MakeUnplayable
+  as a script function, not a native one, so callNative threw "Function is
+  not native" and nothing came off the menu (b-race-permit 20261101-232833,
+  c2's console 23:30:02Z); the service logs "stays listed; the hide awaits
+  its native" instead. The enforcement is the server's refusal alone, which
+  is what Eli asked for; the hide returns as its own slice with a
+  TESModPlatform native declared through lab/pex.py add-native (the pex
+  rule) or SKSE's own Race.pex laid by the layer, after a read of which
+  Race.pex the seats load. Courtesy only, then as now: the plugin bytes and
+  load order stay identical on every seat.
 
 ## Not in this verb
 
@@ -188,10 +195,12 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
   look to its sender included). No T2 client is a listed profile, so the
   acceptance path has T0 coverage alone (the reviewer's note, 2026-11-01).
 - The permit's T3: lab/scenarios/b-race-permit.yaml (c1 keeps rotfern's race
-  through its menu, the permitted seat; c2's menu lacks the race, apocrypha's
-  hide lines in c2-console.log and none in c1's; c2's race-pick falls through
-  to Actor.SetRace and the server refuses the result: E_APPEARANCE_RACE once,
-  the record and c1's view of c2 unchanged).
+  through its menu, the permitted seat; c2 picks the same race, which its
+  menu still lists while the hide is off, and the server refuses the result:
+  E_APPEARANCE_RACE once, the record and c1's view of c2 unchanged; both
+  seats log the permit's lists, neither E_RACE_PERMIT). Its first run
+  20261101-232833 held every claim but the hide's two, which left with the
+  hide (9de7a6a7).
 
 ## Status
 

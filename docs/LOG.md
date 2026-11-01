@@ -5014,3 +5014,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-bleak-traps, b-papyrus-events, a-activation-reach + watch; probes b-shadowbond by path, x-puzzle-relay). Also: a frida trace
   for decision 4 (lab/frida/trap-hit-trace.js) rides x-object-anim v3 4107f964.
 
+- 15:35 PST 2026-11-01 b-race-permit's first run (20261101-232833, the permit train's stage) held every claim but the hide's two: c2 decided
+  its lists right and callNative("Race", "MakeUnplayable") threw "Function is not native" (SKSE's Race.psc defines MakeUnplayable
+  as a script wrapper around the native ClearRaceFlag, apocrypha's read). Taken as B for tonight: the hide call out (fork
+  m5-race-permit 0594f294, the lists and E_RACE_PERMIT kept), b-race-permit without its two hide claims (9de7a6a7, its own
+  commit), the permit train re-merged as m5-train-permit-onceload 64ec9666 and the bondblock train as m4-train-bondblock-puzzle
+  5f891310 (both pushed with their client builds). The hide returns as race.clearRaceFlag(1) with isRaceFlagSet(1) (Skyrim
+  Platform's typed Race, no callNative), apocrypha's commit next, merged into the bondblock train before its stage with the
+  scenario's hide claims back by path there. ObjectAnimation's T0 red of 4522 was the test's bandit (never loaded); fixed
+  2717fe64 (Alvor under npcEnabled), T0 green in 16369.
+
