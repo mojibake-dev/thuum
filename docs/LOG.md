@@ -4585,3 +4585,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the puzzle door as verbs if the second day is there; D (alchemy and enchanting benches) stays a memo. The lay waits for Eli's word;
   the sweep runs on the merged base as each train lands.
 - m3-save-flush-on-stop merged to fork parity d73de274 (2026-11-01T08:18Z): R0 (ADR-053): T0 pipeline 4351 server-build 15740: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m3-save-flush-on-stop, its T2 of d73de274 green (T2_LOG); clones not promoted. Verbs: the save flush at a stop (ChangeFormGuard marks an edit the saving policy skipped, IsLocationSavingNeeded saving a position every 30 s at most; WorldState::FlushSaveStorage requests every such edit and drives the storage until nothing is pending; skymp5-server/ts/index.ts flushes for up to 5 s on SIGTERM and SIGINT; SaveStorageTest's case claims the creation's 0 before the flush and 200 after). The fix behind c-riverwood's pend (claim 3's walker record restored 800 to 1,200 units off); c-riverwood un-pends after a gate plays it green on this base.
+- (01:35 PDT 2026-11-01) x-perk-pick GREEN on m5-perks 7cefcb62's stage (20261101-082532; c1 launched on the mask-fixed dist without a crash,
+  CONFIRMING the array fix's shape and the review's client half); b-perk-pick promoted on main e9436a15 in its own commit (the probe's
+  53 steps). The flush fix MERGED by R0 (parity d73de274, 08:18Z; T0 4351, T2 green); perks takes it: m5-perks 479099cd, the gate's
+  head (server-only merge, 4352's dist 15746 by REUSE_DIST). c-riverwood un-pended and back in watch (main 05bb3009); numidium's
+  chain: the restage of 479099cd, c-riverwood alone on the merged base (a red sends it back to pending with its read), then the gate
+  (b-perk-pick, b-weather, b-locks, p-level-up, a-actor-values, b-figure-values, always, watch, T2 beside). D77 A BUILT: fork
+  m5-perk-effects 39eeb1e5 off 479099cd (server-only push): libespm reads a PERK's sections (PRKE, DATA, PRKC, CTDA by tab, EPFT, EPFD),
+  the Rust perk table holds the effects and applies an entry point over the held perks (owner tab by the pick's judge, subject tab by
+  HasKeyword against the weapon's or the armor piece's keywords, OR groups, priority order, Set/Add/Multiply), WorldState::
+  applyPerkEntryPoint installed by PartOne, TES5DamageFormula asks it for kModAttackDamage 35 on the weapon damage and
+  kModArmorRating 85 on each worn piece's rating; T0 in wire-rules, EspmTest (Armsman00 and Juggernaut00's entries as Skyrim.esm
+  holds them) and TES5DamageFormulaTest (7 to 8.4 and 9.8, the bow untouched, Iron Gauntlets 10 to 12); CI's ctest is the oracle.
+  Tab semantics and the per-piece armor application stay HYPOTHESIS until x-perk-damage measures the ratio. The train stages after
+  perks merges (it stacks on it).
