@@ -755,3 +755,17 @@ repeated, every permitted race among the restricted, else E_VAL_RANGE; the trans
 direction. The rule stays the server's (wire-rules appearance::race_allowed, two new facts): the client's RacePermitService
 only takes the difference off its race menu. wire-legacy reads both as absent (LEGACY_ABSENT); fixture 33-CreateActor-2
 carries them, WireJsonContractTest reads it through CreateActorMessage.h.
+
+### ObjectAnimation (t 71): the host's world-object animations to the guests (traps, M4; ADR-059 decision 3)
+
+Since fork m4-object-animation (14:2x PST 2026-11-01, SCHEMA_VERSION 30; 29 is the permit's): ObjectAnimation (id 79, MsgType 71),
+both directions, reliable: `{ refr: u32 (the animated game-file reference, never 0), event: string (the behavior graph event
+name, at most ANIM_EVENT 128 bytes, never empty) }`; validator E_VAL_RANGE on either, the sender's budget 32 then 8 a second
+(E_VAL_RATE, UNMEASURED). The cell's host reports its engine's animation event on a world object (a puzzle pillar's Turned01, a
+lever's FullPull, a portcullis's Open: the hook matched in native to that family); the server takes it from the host alone for a
+reference that is no actor (E_OBJANIM_NOT_HOST and kin, logged by name), drops a DOOR's quietly (its open is isOpen's), caps a
+reference at 8 a second (E_OBJANIM_RATE), writes the event as the reference's lastAnimation (CreateActor's prop, so a late joiner
+replays it) and relays the same message to the cell's other listeners, whose engines run no world script under ADR-059's
+hosted-cell gate and play it through PlayAnimation. Fixtures 71-ObjectAnimation-0 and -1; WireJsonContractTest reads them
+through ObjectAnimationMessage.h. No difftest session triggers it yet (the fake clients host no cell).
+

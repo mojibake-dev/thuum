@@ -110,6 +110,13 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 - Direction: C2S the report, S2C the relay.
 - Validator rules: the report from the cell's host alone (the server's rule), the pair linked in the game files
   (XAPR or XLKR), a budget.
+- ADR-059 decision 3 (fork m4-object-animation, 2026-11-01): `ObjectAnimation` { refr: u32, event: string } (MsgType 71,
+  wire id 79, Both, SCHEMA_VERSION 30), reliable: C2S the host's report of a world object's animation event, S2C the
+  server's relay of the same message to the cell's other games. Validator: refr never 0, event never empty
+  (E_VAL_RANGE), the sender's budget 32 then 8 a second (E_VAL_RATE, UNMEASURED). The server's rule: the cell's host
+  alone, a game-file reference that is no actor (E_OBJANIM_NOT_HOST, E_OBJANIM_ACTOR, E_OBJANIM_NO_REF,
+  E_OBJANIM_NO_CELL, E_OBJANIM_RANGE), a DOOR dropped quietly (its open is isOpen's), at most 8 a second per reference
+  (E_OBJANIM_RATE); the event is written as the reference's lastAnimation, the record field CreateActor already carries.
 - Contract doc updated: docs/WIRE.md with the build.
 
 ## Server
@@ -192,6 +199,19 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   the guest's four turns and the host's one relayed and played on the other seat, then the host's pull and the marker's portcullis
   on both (the success path's read; the face order 1 to 2 to 3 is HYPOTHESIS). Stages after the pair merges (no client change: the
   traps dist serves).
+- ADR-059 decision 3 BUILT (fork m4-object-animation off m4-world-scripts-host 9bb3d3ed, 14:2x PST 2026-11-01; the head in
+  docs/LOG.md): the host's engine's world-object animation events reach the guests. Client: ObjectAnimationService hooks
+  sendAnimationEvent for the family the trap and puzzle scripts play, matched in native (HookPattern: Trigger*, Turned*,
+  FullPull*, open, close, Open, Close, Reset, Idle; the engine's exact names HYPOTHESIS until x-object-anim reads them), notes
+  the event and on the next update reports it when this seat hosts the reference's cell and the reference is no actor or
+  door; a relayed ObjectAnimation plays through the engine's own PlayAnimation (the path remoteServer's lastAnimation replay
+  uses). Server: OnObjectAnimation (above) records it as lastAnimation and relays; T0 ObjectAnimationTest (recorded and
+  relayed to the guest alone; a guest's, an actor's, a missing reference's, an empty event's refused; the ninth in a second
+  on one reference dropped). The train with the hosted-cell gate: the layer's traps row flips to scope=host, guests stop
+  running the scripts, and the relay plus these animations are what a guest sees; its read is x-object-anim (the plate's
+  wall and the pillar's turn played on the guest, the guest's own plate silent under the gate: H3's other half). What stays
+  the host's engine's alone: the sound (the engine plays a script's sounds where the script runs; a guest hears none until
+  a later slice) and the trap's harm (decision 4).
 - Static pre-answers for ADR-059's next slices (08:03 PST 2026-11-01). Decision 3 (the host's animations to the guests): Skyrim Platform's
   sendAnimationEvent hook (FridaHooks.cpp OnSendAnimationEventEnter) takes the engine's animation-graph holder from rcx and reads
   the TESObjectREFR 0x38 bytes below it, so every reference with a graph reaches EventsApi::SendAnimationEventEnter(formId, name),
@@ -252,7 +272,8 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31)
 - [x] server logic + T0 (fork m4-traps 16d29f6c: OnLinkedActivation, the host's linked report, the relay, the budget; dc881a11: links from script properties, the caster by id; TrapRelayTest three cases)
-- [x] message + validator (same commit; 702567ba, RelayedActivation MsgType 70, SCHEMA_VERSION 28)
+- [x] message + validator (same commit; 702567ba, RelayedActivation MsgType 70, SCHEMA_VERSION 28; decision 3's
+  ObjectAnimation MsgType 71, SCHEMA_VERSION 30, fork m4-object-animation)
 - [x] native hook + T1 (none)
 - [x] TS handler, first cut (relayedActivationService.ts plays the relay, activationService.ts sends a hosted cell's non-player activations, objectReferenceEx.ts keeps the engine's activation on activationUnblockedBases; 20b1da65, tsc green); its hosted-cell shape is ADR-059 decision 1's platform change
 - [ ] T2 green

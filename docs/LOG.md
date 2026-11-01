@@ -4965,3 +4965,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (20261101-212943) and out of pending (55b9a3e8); numidium picks the fix's slot (its own stage after the permit, or a train
   with it). The permit's server pipeline 4509 (e46d87d8) is green.
 
+- 14:15 PST 2026-11-01 ADR-059 decision 3 BUILT on fork m4-object-animation f317ef48 (off m4-world-scripts-host 9bb3d3ed, the hosted-cell
+  gate, so one train carries both): ObjectAnimation (MsgType 71, wire id 79, Both, SCHEMA_VERSION 30; the permit's 29 sits on
+  m5-race-permit, the two merge at parity with 30 kept), the host's world-object animation events recorded as lastAnimation and
+  relayed to the cell's other games; validator, fixtures, T0 ObjectAnimationTest, the client's ObjectAnimationService (the
+  hook matched in native to the trap and puzzle scripts' event family, HYPOTHESIS on the engine's exact names until
+  x-object-anim). docs/verbs/traps.md and WIRE.md carry it. Main's pipeline 4512 red was the settings' shape (layer-render's,
+  both files); a795cfcc green at 4513. Also on the fork: pipeline 4510 (m5-race-permit b59ab993, client build) green.
+
