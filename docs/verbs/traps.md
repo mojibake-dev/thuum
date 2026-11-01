@@ -183,7 +183,14 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
   activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
   report) stays as the relay's wire.
-- READ CONFIRMED (x-bleak-traps v4 20261101-153828, green, first run, m4-traps 346249e8 under the layer's rows; 07:52 PST 2026-11-01): with
+- Server, ADR-059 decision 2's last piece (fork m4-puzzle-relay 283b0169 off m4-traps 346249e8, 07:58 PST 2026-11-01; T0 TrapRelayTest's
+  pillar case): a player's activation of a scripted world object (an ACTI or FURN whose record or base carries a script, the VMAD
+  read once per base) in a cell another game hosts is relayed to that host as RelayedActivation with the player's actor as the
+  caster, so the host's engine runs the script where the cell is simulated (a guest's pillar turn counts on the host's lever); the
+  host's echo of the figure's activation is taken quietly; the host's own press relays to nobody. Probe x-puzzle-relay v1 4f3fb26a:
+  the guest's five turns relayed and played on the host, then the host's pull and the marker's portcullis on both (the success path's
+  read; the face order 1 to 2 to 3 is HYPOTHESIS). Stages after the pair merges (no client change: the traps dist serves).
+- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4 20261101-153828, green, first run, m4-traps 346249e8 under the layer's rows; 07:52 PST 2026-11-01): with
   the scripts admitted and the engine's activation kept on their bases, Bleak Falls Temple runs. A) the host on the plate: its
   PressurePlate fires (c1 "Sent a trigger's own activation for 567f2"), the engine's activation parent activates the wall with
   the plate as the caster ("Sent a linked activation of 54b15 by 567f2"), the server relays once per activation ("567f2 activates

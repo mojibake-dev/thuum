@@ -4875,3 +4875,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   merged into layer-world-scripts (4731b6aa, both remotes), deploy-srv from it (both new scenarios on sky-srv at main's hashes),
   run set 20261101-155215-pair-traps-layer, 111 scenarios, started 15:52Z; T2 for 346249e8 runs beside it. b-locks bd192c85 runs
   by path after the set's last run and before the merges (a set leaves no gap between its runs for a hand run).
+
+- 07:58 PST 2026-11-01 (thuum-magnus): the pair's gate runs (run set 20261101-155215-pair-traps-layer, 111 scenarios, numidium; b-locks bd192c85
+  after it, then the two merges). Meanwhile ADR-059 decision 2's last piece on fork m4-puzzle-relay 283b0169 (off the traps head,
+  server-only): a guest's activation of a scripted ACTI or FURN in a cell it does not host is relayed to the host's engine with the
+  guest's actor as the activator (the pillar turns and counts there), the host's echo quiet, T0's pillar case; probe x-puzzle-relay v1
+  4f3fb26a (five relayed turns, the host's pull, the marker's portcullis on both) for a stage after the pair merges on the traps dist.
