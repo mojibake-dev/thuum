@@ -4959,3 +4959,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   race-permit follow in their own commits; numidium stages the merged head with the client build. Also: b-locks out of
   pending (55b9a3e8) on its cold green by path (20261101-212943, numidium).
 
+- 13:59 PST 2026-11-01 the landing race behind b-locks' red claim 17 fixed on fork m4-onceload-pending f3f27ce0 (client only): a
+  game-file reference's CreateActor props wait for the engine to load it (pendingLoads, swept on the update thread and at cell
+  load) instead of being dropped after 120 frames; docs/verbs/locks.md "The landing race". b-locks itself is green cold
+  (20261101-212943) and out of pending (55b9a3e8); numidium picks the fix's slot (its own stage after the permit, or a train
+  with it). The permit's server pipeline 4509 (e46d87d8) is green.
+

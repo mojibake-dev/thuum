@@ -184,6 +184,19 @@ reference is E_LOCK_* and the lock is re-imposed.
   the lock is gone.
 - Kill switch config key: `locks` (server), mirrored to the client in the settings the login carries.
 
+### The landing race (b-locks claim 17, 2026-11-01)
+
+Run 20261101-212155 (b-locks by path on the pair's stage) read no "lock 371e9 set at creation" on c1 while c2 logged it: c1's
+landing took 9.6 s and its CreateActor for the chest came before the engine had loaded the cell, so remoteServer's onceLoad
+gave up after 120 frames ("Failed to load object reference 371e9") and the lock, with every other prop of that CreateActor
+(inventory, open state, node scales, isDisabled, the last animation), was never applied; the cold rerun 212943 landed fast and
+held every claim. The fix (fork m4-onceload-pending f3f27ce0, 13:59 PST 2026-11-01): the props wait in RemoteServer.pendingLoads once the
+frames run out, swept every 2 s on the update thread and at once after cellFullyLoaded or cellAttach, applied when the engine
+has the reference (a trace line with the wait), dropped with the old error line after 120 s; a newer CreateActor for the same
+reference replaces the wait and its DestroyActor ends it. Nothing on the wire or the server changes. Evidence: a slow landing
+cannot be forced, so the fix rides on the regression set (b-locks, b-container-rest, a-activation-reach) and the trace line in
+the console log when a landing is slow.
+
 ## Tests
 
 - T0: locks.rs (the key rule, the report's judgment by name, the pick consumption, the rate); LockTest.cpp (an
