@@ -183,6 +183,14 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
   activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
   report) stays as the relay's wire.
+- x-bleak-traps v4 6fc6748f (05:49 PST 2026-11-01; ADR-059 slice 1): the two blocks lifted for Bleak Falls Temple's pieces, the scripts admitted
+  by name on the layer branch layer-world-scripts 20877978 (lab/layer/papyrus-admitted.tsv's named rows, papyrus-map.py's fourth
+  column, main afa69250) and the engine's activation kept on their bases by the client's activationUnblockedBases (fork m4-traps
+  20b1da65, the relaunch step's json write). Reads A to E in the probe's header: the plate's own fire and the wall's linked
+  activation relayed to the guest; the guest's plate (its own engine and the host's for its figure, H3); the guest's pillar turning
+  on its own screen alone (decision 2's gap); the lever's portcullis on both; the puzzle lever's four darts refused E_TRAP_UNLINKED
+  (links by script property, the link table's next source). H1 (OnActivate under the native block) is moot where the block is
+  lifted; the host-gated shape comes with the platform change.
 - x-bleak-traps v1 by path (the read, no code): c1 hosts Bleak Falls Temple 0x371de, c2 beside; (1) c1 teleported onto
   the plate 0x567f2: both screenshots at 1 and 3 s (the wall 0x54b15's swing), the server log's activation note, c2's
   console for any activation event lines; (2) c2 onto the same plate: the same reads (the guest's engine fires its own

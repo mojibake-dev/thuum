@@ -4759,3 +4759,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stage's probe: x-word-wall v1 (b-word-wall's draft by path, the empty-record claim moved before the teleport into the sphere, c2
   parked in the Temple above until its leg). ADR-059 written (main c38a7add): world scripts run on the cell's host, the admitted list
   gains names and a hosted-cell gate; the traps' remaining work is its slices.
+
+- 05:49 PST 2026-11-01 (thuum-magnus): ADR-059 slice 1, the read's enablers. papyrus-map.py reads a fourth tsv column that names the classes a
+  row admits (main afa69250, two tests); the layer branch layer-world-scripts 20877978 carries Skyrim.esm's named rows (the word wall's
+  three trigger scripts; Bleak Falls Temple's twelve trap and puzzle classes), never the plugin whole; fork m4-traps 20b1da65 (the word
+  wall's e1b4288f merged in) keeps the engine's activation on bases the client settings name (activationUnblockedBases, a list or a
+  hex string, default none). x-bleak-traps v4 6fc6748f sets the key on both seats at a relaunch and reads legs A to E (traps.md's Dynamic
+  plan). It needs the layer staged (the clones' papyrus-scripts.txt) under the m4-traps dist: numidium's sequence after the word
+  wall's stage. The driver's activate step prints false whether or not a menu opens (b-container-rest 235959's four), so that bool
+  reads nothing.
