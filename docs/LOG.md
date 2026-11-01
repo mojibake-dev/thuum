@@ -4562,3 +4562,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   push; R0 when its ctest is green). Skill-set 464c0881 merges R0 first on numidium's word (its T2 running); perks takes that parity
   as a server-only merge before its gate, the full build's dist staying valid through the overlay.
 - m5-skill-set merged to fork parity 464c0881 (2026-11-01T07:32Z): R0 (ADR-053): T0 pipeline 4343 server-build 15719: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m5-skill-set, its T2 of 464c0881 green (T2_LOG, zero undeclared differences); clones not promoted (no client change). Verbs: leveling's skill set (a68d1b80: a server set of a skill's base moves the progress entry with it, so a console or lab SetAV no longer snaps back under leveling; the playtest's SetAV caveat lifts).
+- (00:53 PDT 2026-11-01) perks' first stage on 2b8c7592 FAILED before its probe: c1 crashed twice at launch (CrashLogger 07:37Z, 07:39Z,
+  EXCEPTION_ACCESS_VIOLATION in SkyrimPlatformImpl.dll while a native's signature was described; c2 launched on the same dist). The
+  cause is the array fix's use of CommonLib's TypeInfo::GetTypeInfo for an object array: it masks 0xB off the raw type (the class
+  pointer with bit 0 set), which also clears the pointer's bit 3, so a class at an 8-aligned address is read at a wrong one; the heap
+  layout decides per process. Fixed by masking the one bit and skipping a raw type below kArraysEnd. In the same head, a review
+  agent's eight findings on the branch (a read before its first lab run): an accepted actor values report rebuilt the record without
+  its perks (kept now, R0); the pick read client-written skill numbers (with leveling on, the report's skills, xp, threshold, level,
+  legendary and the skills' bases stay out of the record; off, the seat's bounded report stands, R1, declared); PerkState left the
+  server with `perks` off (WorldState::perksEnabled, read in SendPerkState); OR-flagged conditions were ANDed (wire-rules Clause and
+  FLAG_OR, groups ANDed, a two-parent perk takes with either); E_PERK_NO_RECORD left the engine's pick standing (the state resent);
+  perks load sorted and unique; AddPerkByServer stops at the wire's cap (perks_max); the client reads each tree's owned ranks (18
+  natives a tick, not 500) and re-applies at a save's load ('loadGame'). T0 cases for each (PerkTest, ActorValuesTest, wire-rules).
+  m5-perks c7c42de0 (both remotes; cargo test and clippy green; fork-lint exit 0; tsc clean on the service), the full dist building;
+  numidium stages it with x-perk-pick 5e0f733f when green. Lesson kept: the scratchpad's node_modules (cast-wt, symlinked into every
+  worktree) was pruned at midnight by macOS's /tmp cleaning, so the local tsc ran through a fetched typescript with the implicit
+  type packages off.

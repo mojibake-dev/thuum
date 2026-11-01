@@ -131,6 +131,15 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
 - Restart behavior: the record as saved; the points recomputed from level and perks.
 - Papyrus natives touched (ledger lines added): Actor.AddPerk, Actor.RemovePerk, Actor.HasPerk (implemented, R0).
 
+- The numbers a pick reads: with leveling on, the record's skills, experience, level and the skills' bases are the server's
+  (R0; an actor values report moves none of them, ActionListener::OnActorValues), so the conditions judge what the server wrote;
+  with leveling off they are the seat's own bounded reports (R1, actor-values.md), declared here: `perks` runs with `leveling`.
+  The perks themselves ride no report and the merged record keeps them. A perk's conditions are judged in the engine's groups
+  (a run of CTDA rows flagged OR and the row after them holds when any member holds; the groups are ANDed), so a perk with two
+  parents takes with either. No PerkState leaves the server with `perks` off (the console's and the natives' writes included),
+  and a pick before the record is refused with the state sent, so the engine's own pick is undone. The record's perks load
+  sorted and unique; a server write stops at the wire's cap.
+
 ## Client
 
 - SP binding: none new.
@@ -170,6 +179,10 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
   and no client code had consumed an array result before. Fixed in the platform at m5-perks 2b8c7592 (MakeValueType names the
   element class for kObjectArray, wrapObject maps an array per element; the dist rebuilt whole, sp3.js being a resource inside
   the DLL); the probe stands unchanged and its rerun on the rebuilt dist is the confirmation.
+- The stage on 2b8c7592 (07:27Z): c1 crashed twice at launch in SkyrimPlatformImpl.dll (an access violation while a native's
+  signature was described; c2 launched on the same dist). CommonLib's TypeInfo::GetTypeInfo masks 0xB off an object array's raw
+  type and so clears the class pointer's bit 3; the heap layout decides per process. Fixed at c7c42de0 with the one bit masked and
+  a raw type below kArraysEnd skipped, together with the review's eight fixes (LOG 00:53 PDT 2026-11-01); the same probe plays on its build.
 
 ## Known limits
 
