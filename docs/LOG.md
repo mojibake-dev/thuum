@@ -4820,3 +4820,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the hosted-cell set and SetCellHosted compile into the dist); its server-build red was the inherited stranger case of
   TrapRelayTest (the branch was cut from dc881a11). m4-traps 5a1a16b8 merged into it (ae90b4d0, server-only push; 80616308's dist
   is its dist). The traps head 5a1a16b8 itself is T0 green (4464) and is the traps stage's head.
+
+- 06:45 PST 2026-11-01 (thuum-magnus): three branches green in CI. m4-word-wall abb1b098 (parity 27f5c0a4 merged; the first merge 0ef96899 had
+  dropped WordOfWall's closing brace before the perk helper's namespace, both sides of the conflict ending on the shared brace:
+  pipeline 4466 red, fixed; T0 green on 4471; its dist is c31208c0's client build). m4-world-scripts-host ae90b4d0 (ADR-059
+  decision 1's platform half, client build green on 80616308's 4456, the server's inherited test red merged away; 4468 green).
+  m4-container-open-poll 5ee4d72b (4462 green, client build). The layer is staged (e2290f01, smoke green with it, 142841) and
+  the traps stage runs on 5a1a16b8 with x-word-wall, x-word-wall-chant and x-bleak-traps v4; x-locks-open v3 follows.
