@@ -152,6 +152,25 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
   repeat of the seat's own; or the word arrives silently by the server's snippet with the HUD notice alone. The first is
   the player's experience of a word wall; the second is what the server half gives today.
 - x-word-wall-read v1 147f0ba8 runs on the perk-effects train's stage after perks merges (01:43 PDT 2026-11-01; never run before).
+- READ (x-word-wall-read 20261101-131832, green as a read): with the Papyrus block lifted and the driver's papyrus-log on the wall
+  0x709d1 and the trigger 0x709d2, the engine sent `OnTrigger` to the trigger twice every half second for as long as c1 stood in
+  its box (86 lines in 10 s) and NOTHING else: no OnTriggerEnter, because the teleport spot 400 units south of the trigger's
+  centre is already inside its ~4,000-unit primitive, so the entry happened before the logger was on. The hook therefore keys on
+  `OnTrigger` (a seat that spawns or loads inside the box never sees an Enter) and sends WordWall once per wall per session; the
+  server's WordKnown record is the second guard. The word stayed unknown (`known` 0x13e22 = 0 before and after) although the block
+  was lifted: WordWallTrigger02Script enters its `Listening` state in OnLoad (the pex's string table: OnLoad, Listening,
+  StartWordWall), which the block had already swallowed at the cell's load, so lifting the block mid-cell runs no show; the chant
+  needs the trigger's three scripts admitted before the cell loads (below). CONFIRMED: the hook's event and its timing.
+- The chant (the design question above), the pass's call (05:3x PST 2026-11-01, thuum-magnus): option one, the wall's scripts run on
+  the reading seat. Mechanism: Skyrim Platform's admitted list (Data/Platform/papyrus-scripts.txt, FridaHooks.cpp LoadAdmittedScripts,
+  ADR-044) gains Skyrim.esm's WordWallTriggerScript, WordWallTrigger02Script and WordWallTriggerBleakFallsScript by NAME (today's
+  rows are whole plugins: a per-script row is a papyrus-map.py change and an ADR-044 amendment, written with the traps' rows, which
+  need the same). Consequences the scripts carry on the seat (the pex string tables, lab/.cache/game "Skyrim - Misc.bsa"):
+  Game.TeachWord(myWord01) locally (the server's TeachWord snippet then repeats it; a refused report leaves the seat's word until the
+  login's record, and a shout cast is judged against the record anyway, E_SHOUT_WORD), SetStage(MS13, 60) (the Golden Claw's
+  stage at the word: the quest-stage verb's rule decides what the server records), ApplyCrossFade and the IMODs (R3), the wall's
+  playAnimation (Learned, Dark1Wild to Dark3ExitWild: R3, the seat's own wall), the sounds and the enabler (R3). HYPOTHESIS until
+  the layer probe (x-word-wall-chant) runs with the rows in place; the verb's server half and hook ship first and do not wait on it.
 - x-word-wall-read by path: c1 at Bleak Falls' word wall (its reference by lab/esm.py on the cell), Skyrim Platform's
   papyrus-events step recording the wall's events as c1 nears it (OnTriggerEnter? OnActivate?), the `known` step before
   and after, c1's console for the HUD notice line; a Frida read of Game.TeachWord's native if the event carries no

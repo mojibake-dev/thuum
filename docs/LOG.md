@@ -4719,3 +4719,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the unlock and the level-50 lock on both seats and reads what a bare `lock` does; handed to numidium to run after the four reruns
   under the same hold. locks.md's engine-surface sentence corrected (the console pair IS intercepted since m4-locks) and the typed
   form recorded there. On green, b-locks' claim 2 returns to the typed path in its own commit once the scenario un-pends.
+
+- 05:28 PST 2026-11-01 (thuum-magnus): the perk-effects restage's five runs (27f5c0a4, driver 0844cbef). x-perk-damage v3 131600 GREEN: six of six
+  hits at every number (6.496 bare under the iron set, 7.795 Armsman, 9.094 Armsman 20 with no 10.91, 8.953 Juggernaut on the target):
+  the perk records' effects are in the server's damage formula at T3; b-perk-damage promoted from it (main dd5ea0d9, its own commit),
+  the gate named to numidium (verb-merge m5-perk-effects b-perk-pick b-perk-damage). x-word-wall-read 131832: the trigger 0x709d2 gets
+  `OnTrigger` twice every half second while the seat stands in its box and nothing else (no OnTriggerEnter: the spot 400 units south
+  of the centre is inside the 4,000-unit primitive, so the entry preceded the logger), so the hook keys on OnTrigger with a per-wall
+  once; the word stayed unknown with the block lifted because WordWallTrigger02Script's Listening state is entered in OnLoad, which
+  the block swallowed at the cell's load (word-wall.md's Dynamic section; the chant decided for option one, the scripts admitted by
+  name, HYPOTHESIS until a layer probe). x-bleak-traps v3 132023: nothing runs anywhere (the plate, the pillar, the lever: no line on
+  any seat or the server beyond the sender's "Sent activation", every activate false): every trap and puzzle piece is a Papyrus script
+  (the pex read, traps.md) behind two blocks, BlockActivation on every ACTI and the Papyrus event block; the traps rows' "the host's
+  engine fires it" is falsified until the host runs those scripts; an ADR follows (world scripts on the cell's host). x-locks-typed
+  132414 GREEN (numidium): `prid 000371e9` then the bare `unlock` and `lock 50` reach the server through the intercept; b-locks'
+  claim 2 may return to the typed path after its un-pend. b-locks 131237 RED at step 30: after the server's unlock and c1's applied
+  line, c1's activation of the chest opened no ContainerMenu although the server opened the chest ("371e9 open with 1 occupant(s)")
+  and remoteServer's handler ran its activate; the engine refused the activation (false twice; nothing to the run's end). Two
+  readings, x-locks-open v1 a7645a8a handed to numidium: the lab's close-menu of the Lockpicking Menu (a kHide, not the menu's exit)
+  leaving the chest refused, or the lock path itself (c2, which never opened the minigame, activates after the unlock).

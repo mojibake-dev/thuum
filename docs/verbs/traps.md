@@ -156,6 +156,33 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   the relayed `target.activate(caster, false)` should fire a trap's script (TrapSwingingWall's swing, the portcullis's rise)
   without the default processing the block withholds; a DOOR's open travels by its isOpen property regardless. The read
   confirms on the spike wall and the portcullis; the volume of engine-internal activations and the double play stay the read's.
+- READ (x-bleak-traps v3 7858eaaa, 20261101-132023, green as a read; v1 122019 and v2 124836 fell on premises): NOTHING runs. A) c1
+  (the host) on the plate 0x567f2 and B) c2 on it: no line on either seat or the server names the plate or the wall 0x54b15
+  (log-count 0, 0, 0 three times). C) c2's activation of the pillar 0xaa8cb returned false; c2's console holds its one "Sent
+  activation" line, c1 and the server nothing. D) c1's pull of the lever 0x6a9e2 returned false; one console line on c1, the
+  server logged nothing for 6a9e2, 3b9f1 or 3720f. The static pre-answer above was half right and beside the point: the relay's
+  scripted activate may well reach a script, but no trap, pillar or lever script RUNS on any seat today, so there is nothing to
+  relay. Two blocks: skymp5-client's BlockActivation on every ACTI (objectReferenceEx.ts dealWithRef), which withholds the
+  engine's own processing and, the Creation Kit wiki says, sends OnActivate only to the script that set the block (none here:
+  Skyrim Platform sets it natively; https://papyrus.bellcube.dev/skyrimse/script/objectreference/function/blockactivation/ mirrors
+  https://ck.uesp.net/wiki/BlockActivation_-_ObjectReference), and the Papyrus event block (blockPapyrusEventsService, ADR-044),
+  which swallows OnTriggerEnter, OnActivate, OnLoad and OnCellAttach for every script not on the admitted list. The server's
+  part held: a player's activation of a scripted ACTI is taken and does nothing (ProcessActivateNormal, an ACTI acts only for an
+  actor), no refusal. HYPOTHESIS rows 27 to 35 are therefore FALSIFIED as "the host's engine fires it": the host's engine fires
+  nothing until its scripts run. The scripts (lab/.cache/game "Skyrim - Misc.bsa", lab/tools/bsa-extract.py, the pex string
+  tables; the VMADs by lab/esm.py's reader): the plate TrapStonePressurePlate02 0x1a4bb carries PressurePlate (extends
+  TrapTriggerBase: OnTriggerEnter, Activate on itself, hasPerk Light Foot, getValue), the wall TrapWallWood 0xc6440 TrapHitBase and
+  TrapSwingingWall (extends MovingTrap: onTriggerEnter, fireTrap, playAnimation 90For/180For/270For and the Trans* events), the
+  lever NorLever01 0x21513 TrapLever (TriggerType 2, toggle) and NorLever01SCRIPT (playAnimation FullPull/FullPush), the
+  portcullis NorPortcullisLarge01 0x3e726 default2StateActivator (SetOpen, playAnimation open/close), the pillars
+  NorDefaultPuzzlePillar01 0xaa8ce defaultPuzzlePillarScript (onActivate, playAnimationandWait Trigger0N/Turned0N, GetLinkedRef,
+  activate; the REFRs 0xaa8cb/cc/cd carry initialState 1/3/1 and solveState 3/2/2 and link 0xaa8c3), the puzzle lever 0xaa8c3
+  (base 0xb7db4) defaultPillarPuzzleLever (pillarCount 3, puzzleDoorActivator the XMarker 0x3e728 whose activation parents open
+  the portcullis 0x3b9f1 with XAPD 1, refActOnSuccess01 0x3b9f1, refActOnFailure01..04 0x39fdd, 0x3720f, 0x2ad49, 0x2ad43) plus
+  traplever, the dart trap TrapDartPortSingle02 0x173fc DartTrap (NumShots). Every one is Papyrus: the engine's "trap" is a
+  script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
+  activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
+  report) stays as the relay's wire.
 - x-bleak-traps v1 by path (the read, no code): c1 hosts Bleak Falls Temple 0x371de, c2 beside; (1) c1 teleported onto
   the plate 0x567f2: both screenshots at 1 and 3 s (the wall 0x54b15's swing), the server log's activation note, c2's
   console for any activation event lines; (2) c2 onto the same plate: the same reads (the guest's engine fires its own
