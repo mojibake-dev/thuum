@@ -271,7 +271,11 @@ where (real since 2026-10-01):
    the target is `clean-m1`, the wire client taken cold on top of
    `clean-sp`, which stays as the RakNet baseline: Proxmox rolls back only to
    the newest snapshot, so deleting `clean-m1` (and pointing
-   lab/labapi/labapi/guests.yaml back at `clean-sp`) is the way back. Steam offline mode is
+   lab/labapi/labapi/guests.yaml back at `clean-sp`) is the way back.
+   (`clean-sp` predates the RTC key and its config section deliberately keeps the local-time RTC; if
+   it is ever retaken, add RealTimeIsUniversal=1 to the disk and set `localtime: 0` in its section
+   together (2026-11-01: every other section of 711 and 712 is `localtime: 0` with a keyed disk).)
+   Steam offline mode is
    what lets a cold boot in the dark lab reach a running game at all.
    sky-c1 (711, GTX 1050) and sky-c2 (712, RTX 5060 Ti) are both through it
    as of 2026-10-01. On sky-c2 the driver installer first refused the card
