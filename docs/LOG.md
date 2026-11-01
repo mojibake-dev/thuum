@@ -4693,3 +4693,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   is asked for; the stage's build-driver rebuilds it); x-bleak-traps 122019 (E_RUN_APPROACH: `approach` reads npc-state and is
   actor-only, so the pillar and the lever get teleports 120 and 100 units south of their records: v2 b7b49295). The restage on
   27f5c0a4 with b-locks before the probes.
+- (04:59 PST 2026-11-01) The perk-effects restage on 27f5c0a4 (the flush, the PID 1 compose, the rebuilt driver) ran the four RED again, every cause
+  now in the logs and none in the server halves. b-locks 124231: `unlock 0x371e9` reached the engine's own console ("Unknown
+  variable '0x371e9' for parameter Integer (Optional)"): the engine parses a typed command's arguments by ITS signature before the
+  client's intercept runs, and the engine's unlock takes no reference (it acts on the console's selected one), so a typed `unlock
+  <ref>` can never reach the server; the scenario unlocks through the server-console step (main 78c9ecc4, b-locks still pending),
+  and the typed path is a finding for the locks verb: `prid <ref>` then the bare command, with the intercept reading the console's
+  selected reference (Game.getCurrentConsoleRef) when no argument is typed. The seats' "command set was null in
+  setupServerOnlyCommands" line is the engine's `set` command alone, not the intercept's setup. x-perk-damage 124543: seven hits
+  landed at 6.4960003, the bare 7 under the armor penalty of the FULL IRON SET both seats log in wearing (c2's console: addItemEx
+  12e46, 12e49, 12e4b, 12e4d; rating 60, penalty 0.928): v3 f97d8803 claims 6.496, 7.795, 9.094 (never 10.91) and 8.953 with
+  Juggernaut over the whole set, the gauntlets phase gone. x-word-wall-read 124714: still "Invalid argument" with the driver at
+  0578bbe6, because Skyrim Platform's Handler takes `enter` AND `leave` as functions (Handler.cpp) and papyrus-log's handler had
+  `enter` alone: main 0844cbef. x-bleak-traps 124836: E_ACTIVATE_REACH "from 6246 units": v2's computed spot 120 units south of the
+  pillar's record was the void, c2 fell to z -7021 and the server teleported it back six times; v3 7858eaaa moves nobody, the v1
+  standing spots being 256 units from the pillar and 390 from the lever, inside the reach. All four rerun on the laid stage.
