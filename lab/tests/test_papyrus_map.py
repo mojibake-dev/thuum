@@ -49,6 +49,25 @@ class AdmittedList(unittest.TestCase):
                 self.assertNotIn(r["plugin"].lower(), layer, f"{r['plugin']} is a layer plugin; its source is layer")
 
 
+class NamedRows(unittest.TestCase):
+    def test_a_named_row_admits_its_names_alone(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            game = Path(d) / "game"; game.mkdir()
+            (game / "Skyrim.esm").write_bytes(b"TES4")
+            order = Path(d) / "load-order.tsv"; order.write_text("plugin\tmod\n")
+            tsv = Path(d) / "admitted.tsv"
+            tsv.write_text("plugin\tsource\twhy\tscripts\nSkyrim.esm\tgame\tthe word wall\tWordWallTriggerScript WordWallTrigger02Script WordWallTriggerScript\n")
+            lines, summary = papyrus_map.build(d, str(tsv), str(order), str(game))
+            self.assertEqual(lines, ["Skyrim.esm: WordWallTrigger02Script WordWallTriggerScript"])
+            self.assertIn("named", summary[0])
+
+    def test_the_layer_s_game_rows_are_named_or_creation_club(self):
+        for r in rows(TSV):
+            if r["source"] == "game" and not (r.get("scripts") or "").strip():
+                self.assertTrue(r["plugin"].lower().startswith("cc"), f"{r['plugin']}: a game plugin is admitted whole only from the Creation Club set (ADR-059)")
+
+
 class VmadReader(unittest.TestCase):
     def test_a_record_s_scripts_and_their_properties(self):
         d = struct.pack("<hhH", 5, 2, 2)

@@ -21,7 +21,11 @@ the Creation Club set: ccQDRSSE001-SurvivalMode.esl) has no layer folder, so onl
 are read, from the copy persist-mods pulls off the host's persist esm directory into
 lab/.cache/game.
 
-lab/layer/papyrus-admitted.tsv: plugin, source (layer | game), why.
+lab/layer/papyrus-admitted.tsv: plugin, source (layer | game), why, and an optional fourth column `scripts`
+(ADR-059): a space-separated list of class names that makes the row admit THOSE names alone, with no VMAD
+scan of the plugin. It is how a game plugin's scripts enter the list one by one (Skyrim.esm's word wall
+trigger scripts, its trap and puzzle scripts) without admitting the plugin whole, which ADR-044 forbids
+for the game's own files beyond the Creation Club set.
 """
 import csv
 import os
@@ -280,7 +284,14 @@ def build(tree, admitted_tsv, load_order_tsv, game_dir):
     lines, summary = [], []
     for r in rows(admitted_tsv):
         plugin, source = r['plugin'], r['source']
-        if source == 'layer':
+        named = (r.get('scripts') or '').split()
+        if named:
+            # a named row admits these classes alone (ADR-059); the plugin must still be one the clients load
+            path = Path(game_dir) / plugin if source == 'game' else Path(tree) / (folder_of.get(plugin.lower()) or '') / plugin
+            if not path.is_file():
+                raise SystemExit(f'{plugin}: not at {path}')
+            names = unique(named)
+        elif source == 'layer':
             folder = folder_of.get(plugin.lower())
             if not folder:
                 raise SystemExit(f'{plugin}: not in {load_order_tsv}')
@@ -296,7 +307,7 @@ def build(tree, admitted_tsv, load_order_tsv, game_dir):
         else:
             raise SystemExit(f'{plugin}: unknown source {source!r}')
         lines.append(f'{plugin}: ' + ' '.join(names))
-        summary.append(f'{plugin}: {len(names)} script class names ({source})')
+        summary.append(f'{plugin}: {len(names)} script class names ({source}{", named" if named else ""})')
     return lines, summary
 
 
