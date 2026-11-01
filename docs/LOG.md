@@ -4546,3 +4546,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (it returns when the flush fix un-pends it); owed tooling: gate-cite's check 1 should skip a pending scenario's last run. The parity
   pass (clean merges, tsc green, server-only pushes): m5-perks e2363ec2 (the stage on 2e0c03c6's own build with the overlay),
   m4-weather 07f6b3d7, m4-locks fff5f581, m5-skill-set 464c0881, m3-save-flush-on-stop d47a7dca.
+- (00:20 PDT 2026-11-01) x-perk-pick RED twice on m5-perks e2363ec2 (20261101-065822, 070024: no "perk state:" line within 25 s of the login)
+  and READ: c1's console threw "Cannot read properties of undefined (reading 'prototype')" at PerkService's slot in the update order
+  (right after WeatherService's line) and every 5 s after, its tick. The platform's fault, not the verb's: Sp3Api stamps a native's
+  result with the return type's class name, VmProvider::MakeValueType named kObject alone, so every ARRAY a native returns was stamped
+  "" and sp3.js's wrapObject read sp[""].prototype; ActorValueInfo.getPerks is the one array call on the path (apply() runs it before
+  its log line), and no client code had consumed an array result before, so the fault was never seen. Fixed in the platform, one shape
+  for every array-returning native: MakeValueType names the element class for kObjectArray (CommonLib's TypeInfo::GetTypeInfo reads it
+  for arrays), wrapObject maps an array per element, a single object's path unchanged; m5-perks 2b8c7592 (fork-lint exit 0; a node
+  check of the wrapper on an object array, a primitive array, a single object, a null). sp3.js is a cmrc resource inside the DLL, so
+  the stage needs the full dist build (no REUSE_DIST); the probe 5e0f733f stands. The flush fix's CI red (pipeline 4344,
+  SaveStorageTest.cpp:287) was the test's premise: a created form's Init requests a save of its own (WorldState::AddForm's comment;
+  RequestSave copies the change form then), so both movement samples fell inside IsLocationSavingNeeded's 30 s and the drained storage
+  held the creation's position; the case now claims that, 0 then 200 after the flush (m3-save-flush-on-stop 028a036a, server-only
+  push; R0 when its ctest is green). Skill-set 464c0881 merges R0 first on numidium's word (its T2 running); perks takes that parity
+  as a server-only merge before its gate, the full build's dist staying valid through the overlay.

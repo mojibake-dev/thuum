@@ -162,6 +162,14 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
   gone; (4) add-perks [0xbabe4]: accepted, known 1, points 1; (5) add-perks [0x52d50] with One-handed at 20 (set-av or
   the server's SetActorValue): accepted; (6) a relaunch: both perks known again at the login. The menu's own pick is
   Eli's T4 (the checklist: open the Skills menu, spend a point).
+- x-perk-pick v1 READ (20261101-065822 and 070024 on m5-perks e2363ec2, red before step 1: no "perk state:" line within 25 s
+  of the login): the console threw "Cannot read properties of undefined (reading 'prototype')" at this service's slot in the
+  update order and every 5 s after (the tick); the platform's fault, not the verb's. Sp3Api stamps a native's result with the
+  return type's class name, VmProvider::MakeValueType named kObject alone, so every array a native returns was stamped "" and
+  sp3.js's wrapObject read sp[""].prototype; ActorValueInfo.getPerks is the one array call here (apply() before its log line),
+  and no client code had consumed an array result before. Fixed in the platform at m5-perks 2b8c7592 (MakeValueType names the
+  element class for kObjectArray, wrapObject maps an array per element; the dist rebuilt whole, sp3.js being a resource inside
+  the DLL); the probe stands unchanged and its rerun on the rebuilt dist is the confirmation.
 
 ## Known limits
 
