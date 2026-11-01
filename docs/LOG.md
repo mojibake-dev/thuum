@@ -4768,3 +4768,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   plan). It needs the layer staged (the clones' papyrus-scripts.txt) under the m4-traps dist: numidium's sequence after the word
   wall's stage. The driver's activate step prints false whether or not a menu opens (b-container-rest 235959's four), so that bool
   reads nothing.
+
+- 05:53 PST 2026-11-01 (thuum-magnus): x-word-wall-chant v1 7babc547 written for the layer stage (word-wall.md's chant call): the show on screen,
+  the trigger's events with the scripts admitted, the server's one learn line, MS13 0x39645's stage 60 through the quest-stage verb.
+  m4-traps 20b1da65 carries the word wall verb (e1b4288f merged), so numidium may run x-word-wall 319db6c0 on the traps stage too.
+  Eli's checklist (items 3, 4, 9, 10) and the weekend summary carry the morning's state, including the open chest red.

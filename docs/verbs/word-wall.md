@@ -170,7 +170,9 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
   login's record, and a shout cast is judged against the record anyway, E_SHOUT_WORD), SetStage(MS13, 60) (the Golden Claw's
   stage at the word: the quest-stage verb's rule decides what the server records), ApplyCrossFade and the IMODs (R3), the wall's
   playAnimation (Learned, Dark1Wild to Dark3ExitWild: R3, the seat's own wall), the sounds and the enabler (R3). HYPOTHESIS until
-  the layer probe (x-word-wall-chant) runs with the rows in place; the verb's server half and hook ship first and do not wait on it.
+  the layer probe x-word-wall-chant v1 7babc547 (05:53 PST 2026-11-01; the layer branch layer-world-scripts 20877978's rows, on a build with the verb) reads the
+  show, the trigger's events, the one server learn line and MS13's stage as the quest-stage verb logs it; the verb's server half and hook ship
+  first and do not wait on it.
 - x-word-wall-read by path: c1 at Bleak Falls' word wall (its reference by lab/esm.py on the cell), Skyrim Platform's
   papyrus-events step recording the wall's events as c1 nears it (OnTriggerEnter? OnActivate?), the `known` step before
   and after, c1's console for the HUD notice line; a Frida read of Game.TeachWord's native if the event carries no
