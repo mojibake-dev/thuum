@@ -25,7 +25,10 @@ lab/layer/papyrus-admitted.tsv: plugin, source (layer | game), why, and an optio
 (ADR-059): a space-separated list of class names that makes the row admit THOSE names alone, with no VMAD
 scan of the plugin. It is how a game plugin's scripts enter the list one by one (Skyrim.esm's word wall
 trigger scripts, its trap and puzzle scripts) without admitting the plugin whole, which ADR-044 forbids
-for the game's own files beyond the Creation Club set.
+for the game's own files beyond the Creation Club set. An optional fifth column `scope` of `host` writes
+the row as "<plugin> host: <class> ...": Skyrim Platform (FridaHooks.cpp, ADR-059 decision 1) admits
+those names only for an event on a reference in a cell the seat hosts; any other value or none is
+everywhere.
 """
 import csv
 import os
@@ -306,8 +309,11 @@ def build(tree, admitted_tsv, load_order_tsv, game_dir):
             names = unique(plugin_names(path))
         else:
             raise SystemExit(f'{plugin}: unknown source {source!r}')
-        lines.append(f'{plugin}: ' + ' '.join(names))
-        summary.append(f'{plugin}: {len(names)} script class names ({source}{", named" if named else ""})')
+        host = (r.get('scope') or '').strip().lower() == 'host'
+        if host and not named:
+            raise SystemExit(f'{plugin}: a host-scoped row names its scripts (ADR-059)')
+        lines.append(f'{plugin}{" host" if host else ""}: ' + ' '.join(names))
+        summary.append(f'{plugin}: {len(names)} script class names ({source}{", named" if named else ""}{", host" if host else ""})')
     return lines, summary
 
 

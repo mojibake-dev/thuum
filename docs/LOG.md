@@ -4759,3 +4759,25 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stage's probe: x-word-wall v1 (b-word-wall's draft by path, the empty-record claim moved before the teleport into the sphere, c2
   parked in the Temple above until its leg). ADR-059 written (main c38a7add): world scripts run on the cell's host, the admitted list
   gains names and a hosted-cell gate; the traps' remaining work is its slices.
+
+- 05:49 PST 2026-11-01 (thuum-magnus): ADR-059 slice 1, the read's enablers. papyrus-map.py reads a fourth tsv column that names the classes a
+  row admits (main afa69250, two tests); the layer branch layer-world-scripts 20877978 carries Skyrim.esm's named rows (the word wall's
+  three trigger scripts; Bleak Falls Temple's twelve trap and puzzle classes), never the plugin whole; fork m4-traps 20b1da65 (the word
+  wall's e1b4288f merged in) keeps the engine's activation on bases the client settings name (activationUnblockedBases, a list or a
+  hex string, default none). x-bleak-traps v4 6fc6748f sets the key on both seats at a relaunch and reads legs A to E (traps.md's Dynamic
+  plan). It needs the layer staged (the clones' papyrus-scripts.txt) under the m4-traps dist: numidium's sequence after the word
+  wall's stage. The driver's activate step prints false whether or not a menu opens (b-container-rest 235959's four), so that bool
+  reads nothing.
+
+- 05:53 PST 2026-11-01 (thuum-magnus): x-word-wall-chant v1 7babc547 written for the layer stage (word-wall.md's chant call): the show on screen,
+  the trigger's events with the scripts admitted, the server's one learn line, MS13 0x39645's stage 60 through the quest-stage verb.
+  m4-traps 20b1da65 carries the word wall verb (e1b4288f merged), so numidium may run x-word-wall 319db6c0 on the traps stage too.
+  Eli's checklist (items 3, 4, 9, 10) and the weekend summary carry the morning's state, including the open chest red.
+
+- 05:58 PST 2026-11-01 (thuum-magnus): m4-traps dc881a11 (server-only push): ADR-059 decision 2's links from script properties (the puzzle
+  lever's refActOn* and puzzleDoorActivator read from the VMAD into the activation table at init) and the caster by id (a STAT
+  marker the loader skips, named by the portcullis's activation parents, relays by its id; a never-loaded target stays
+  E_TRAP_NO_REF by design); TrapRelayTest's puzzle room case. x-bleak-traps v4 re-stamped 343f06bc (leg E now expects the darts
+  relayed, the marker target refused, the portcullis relayed with the marker as its caster). The traps stage should take dc881a11
+  once its T0 is green, with 20b1da65's dist (the client is unchanged since).
+- m5-perk-effects merged to fork parity 27f5c0a4 (2026-11-01T14:04Z): the gate 20261101-133134-merge-m5-perk-effects, 20261101-133134-smoke-two-players to 20261101-140020-b-npc-caster (10 runs, 8 of 8 green); T2 skip on skymp-server:m5-perk-effects, its T2 of 27f5c0a4 beside the gate green (T2_LOG); clones not promoted (no client change; the stage on 456090e1's GitHub build 41289964191 by REUSE_DIST with the weather TS overlay). Verbs: perk effects, D77 A (the perk records' entry points in the server's damage formula: Armsman and Juggernaut read from the esm; b-perk-damage green at 134214, from x-perk-damage v3 131600: the bare hit 6.496 against the target's iron set, 7.795 and 9.094 with Armsman, 8.953 with Juggernaut). Reruns: b-npc-caster red twice with relaunched seats (135504, 135746), green on a cold rollback 140020 (relaunch-carried state the suspect, ADR-036, a finding). The stage also read x-word-wall-read and x-bleak-traps v3 (green, D77 B and C), x-locks-typed (green: the typed lock commands reach the server through the console's selected reference) and x-locks-open v1 (the lock path leaves the engine refusing a chest whose lock was set and lifted; b-locks stays pending).

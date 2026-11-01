@@ -62,6 +62,18 @@ class NamedRows(unittest.TestCase):
             self.assertEqual(lines, ["Skyrim.esm: WordWallTrigger02Script WordWallTriggerScript"])
             self.assertIn("named", summary[0])
 
+    def test_a_host_scoped_row_writes_the_host_marker(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            game = Path(d) / "game"; game.mkdir()
+            (game / "Skyrim.esm").write_bytes(b"TES4")
+            order = Path(d) / "load-order.tsv"; order.write_text("plugin\tmod\n")
+            tsv = Path(d) / "admitted.tsv"
+            tsv.write_text("plugin\tsource\twhy\tscripts\tscope\nSkyrim.esm\tgame\tthe traps\tTrapLever PressurePlate\thost\n")
+            lines, summary = papyrus_map.build(d, str(tsv), str(order), str(game))
+            self.assertEqual(lines, ["Skyrim.esm host: PressurePlate TrapLever"])
+            self.assertIn("host", summary[0])
+
     def test_the_layer_s_game_rows_are_named_or_creation_club(self):
         for r in rows(TSV):
             if r["source"] == "game" and not (r.get("scripts") or "").strip():

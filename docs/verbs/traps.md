@@ -183,6 +183,21 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
   activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
   report) stays as the relay's wire.
+- Server, ADR-059 decision 2's first two pieces (fork m4-traps dc881a11, 05:58 PST 2026-11-01; T0 TrapRelayTest's puzzle room case):
+  MpObjectReference::Init reads a reference's VMAD and, for defaultPillarPuzzleLever, puts its refActOn* and puzzleDoorActivator
+  object properties into activationChildsByActivationParent from the parent's side (delay 0), so the puzzle lever's darts and
+  marker are links the relay knows; and OnLinkedActivation takes the caster by id with the form optional, so a STAT marker the
+  loader skips (0x3e728, named by the portcullis's XAPR) is a caster the relay accepts by id, with no server-side activation
+  through it. A never-loaded TARGET (the lever activating the marker) stays E_TRAP_NO_REF by design: its consequence arrives as
+  the marker's own linked activation of the portcullis. Probe v4 re-stamped 343f06bc with that expectation.
+- x-bleak-traps v4 6fc6748f (05:49 PST 2026-11-01; ADR-059 slice 1): the two blocks lifted for Bleak Falls Temple's pieces, the scripts admitted
+  by name on the layer branch layer-world-scripts 20877978 (lab/layer/papyrus-admitted.tsv's named rows, papyrus-map.py's fourth
+  column, main afa69250) and the engine's activation kept on their bases by the client's activationUnblockedBases (fork m4-traps
+  20b1da65, the relaunch step's json write). Reads A to E in the probe's header: the plate's own fire and the wall's linked
+  activation relayed to the guest; the guest's plate (its own engine and the host's for its figure, H3); the guest's pillar turning
+  on its own screen alone (decision 2's gap); the lever's portcullis on both; the puzzle lever's four darts refused E_TRAP_UNLINKED
+  (links by script property, the link table's next source). H1 (OnActivate under the native block) is moot where the block is
+  lifted; the host-gated shape comes with the platform change.
 - x-bleak-traps v1 by path (the read, no code): c1 hosts Bleak Falls Temple 0x371de, c2 beside; (1) c1 teleported onto
   the plate 0x567f2: both screenshots at 1 and 3 s (the wall 0x54b15's swing), the server log's activation note, c2's
   console for any activation event lines; (2) c2 onto the same plate: the same reads (the guest's engine fires its own
@@ -195,12 +210,12 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31)
-- [ ] server logic + T0
+- [x] server logic + T0 (fork m4-traps 16d29f6c: OnLinkedActivation, the host's linked report, the relay, the budget; dc881a11: links from script properties, the caster by id; TrapRelayTest three cases)
 - [x] message + validator (same commit; 702567ba, RelayedActivation MsgType 70, SCHEMA_VERSION 28)
 - [x] native hook + T1 (none)
-- [ ] TS handler
+- [x] TS handler, first cut (relayedActivationService.ts plays the relay, activationService.ts sends a hosted cell's non-player activations, objectReferenceEx.ts keeps the engine's activation on activationUnblockedBases; 20b1da65, tsc green); its hosted-cell shape is ADR-059 decision 1's platform change
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [ ] ledger and suppression registry updated
+- [x] ledger and suppression registry updated (no new native; the suppression rows are the inventory's)
