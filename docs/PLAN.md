@@ -525,7 +525,11 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         and material id with the cast (a wire change, message plus
         validator in one commit) and call the decal placement 44186 after
         the relayed launch for a grenade projectile (spell-cast.md); a
-        per-figure rune cap in the observer's game.
+        per-figure rune cap in the observer's game. QUEUED by Eli
+        2026-11-02 ("yes please queue it on virtue that it should have been
+        done already tbh", relayed by numidium): behind the arm's five
+        fixes; engine-facing, so its own stage, gated with b-spell and the
+        rune probes.
       - Finger of Death's kill: the allowlisted server-side kill (ADR-029's
         ground; MpActor::Kill is the primitive) with the client's script
         blanked. Not built in Train-30; the default stood into playtest
