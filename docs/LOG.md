@@ -5230,3 +5230,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and 131 units against 150 to 260): the band widened to 64 to 320 on fork m4-turbo2-wall-range (a server redeploy under the turbo,
   R0 after); F2 Hilde's puppet left behind on the guest's seat when the host's Hilde went indoors to an unhosted cell (npc-handoff D6
   and D11: released, re-puppeted, a ghost), recorded for the M3 rows, no quick fix.
+
+- 12:25 PST 2026-11-02 turbo 2's NPC findings F3 to F6 read and two heads cut: the client m4-turbo2-deaths-client 920cf981 (F3 no move of a dead
+  body, D78 C; F4 one resurrect per body and a 1.5 s grace before the puppet flag) for client-hot, and the server m4-turbo2-wall-range
+  f6c25cec (F1 the band, F5 the reanimation's end taken from the host within 90 s of the server's stand-up; ActorDeathTest) for the
+  redeploy; F6 (Alvor hostile at the forge) recorded. npc-fate.md carries the reads.

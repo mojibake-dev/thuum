@@ -1970,6 +1970,35 @@ the evaluator. Follow-up for the next server train touching MpActor's effects (o
 no row; append the failing row ("HasPerk(0x581de) == 1 on Target") and add the dead-target case to that test. And the aim: on c2 the mouse step's pitch found the body at 700 to 800 counts for a target 80 units off
 and about 120 below the eye (about 13 counts a degree on this seat; the rune probes' 20.2 was another seat's or another frame's).
 
+## Playtest 40's death findings (12:25 PST 2026-11-02; turbo 2 on parity 64dbacfe; numidium's logs at results/playtest-40)
+
+- F3, Eli: "dead things fall on one screen, on the other they freeze and are embedded in the ground." Hod 0x1348a and Faendal
+  0x1348c, hosted by c1, killed by rotfern's bow headshots at 20:11:37 and :41; 0x1066df, hosted by c2, killed by rotfern's melee at
+  20:10:13. On the guest's seat each puppet died 1.5 to 1.7 s AHEAD of the server's word (the relayed arrow's or the attacker's own
+  engine's kill; "body ... released from the puppet state" at 20:11:35.9 against the server's death at :37.68), so the pre-kill
+  placement never ran, and two seconds later train 52's restBody moved the dead ragdoll to the host's spot ("rested at the host's
+  spot, 118 units away"): the move took, and the body froze into the ground. Fix (fork m4-turbo2-deaths-client 920cf981, the client):
+  a dead body is never moved; the host's distance is logged once ("lies where it fell, N units from the host's (D78 C)"). D78's C
+  stands as the rule; the same spot is M4's pose replication.
+- F4, Eli: the reanimated Hod "runs and fights correctly" on the host and on the guest "is laying on the ground kind of sliding
+  around". The server stood him up at 20:12:20 on c1's sample ("resurrection by its host's engine", 42 s after his death, the reanimate
+  accepted 6.5 s before); c2 queued "resurrect 1348a (puppet false)" FIVE times in one tick (five isDead updates while the engine still
+  read him dead) and flagged him a puppet 36 ms later (AI off before the engine's get-up); the body stayed lying and slid on the stream
+  while every relayed action was refused ("performAction refused on 1348a: attackStart after 15 retries"). Fix (the same client head):
+  one resurrect per body per two seconds, and the puppet flag waits 1.5 s after a resurrect. HYPOTHESIS: the engine's get-up completes
+  within the grace; if the thrall still lies after it, the read is FateApi's ResurrectActor itself (x-npc-respawn's "did not stand it
+  up" has company).
+- F5: the thrall's end. Reanimate Corpse's spell ended at 20:13:21 and the engine killed Hod again on his host; the host's report named
+  no cause (cause 0, killer 0) and the server refused it ("E_DEATH_UNCHECKED: no hit, drop or activation the server saw"), holding Hod
+  alive at one point while c1 had him dead. Fix (fork m4-turbo2-wall-range f6c25cec, the server): MpActor::NoteHostStoodUp at the
+  resurrection branch; a host's cause-0 report within kReanimatedEndMs (90 s: Reanimate Corpse and its kin last 60 s) of that stand-up,
+  on a body with an accepted reanimate, is the reanimation's end (ActorDeathTest's case: refused without the stand-up, taken within
+  the span, refused past it). Dead Thrall has no end but a hit's.
+- F6: Alvor hostile ("pissed") after the kills yet working his forge on both screens: the host engine's furniture package against our
+  hostility word (the server's package for him read ff000c5e then 1cb09; "ProcessActivate 1c785 - occupant is already this object").
+  Recorded, not fixed under the turbo; a read of what the engine does with an angered NPC in a sandbox package when its aggression
+  comes from the server.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
