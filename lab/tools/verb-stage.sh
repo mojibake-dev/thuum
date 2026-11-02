@@ -123,6 +123,25 @@ for i in $(seq 1 120); do
       echo "   run $win_id failed, rerun $reruns $(date +%H:%M:%S)"
       gh run rerun "$win_id" -R mojibake-dev/skymp --failed >/dev/null 2>&1 || true
       sleep 60;;
+    completed:cancelled)
+      # a newer push to the branch cancels the mirror's run (cancel-in-progress) while the fork's own client-build of this
+      # head goes on building it on sky-build, which the loop's top takes once it succeeds (m5-train-permit-onceload
+      # 64ec9666, 2026-11-01: the 25c00758 push cancelled run 41362790349 and stopped the stage, then job 16373 succeeded)
+      live=$(python3 - "$sha" <<'PY' || true
+import sys
+sys.path.insert(0, "lab/tools")
+import glab
+t = glab.token("skymp")
+for p in glab.get(t, f"/projects/7/pipelines?sha={sys.argv[1]}&per_page=5"):
+    for j in glab.get(t, f"/projects/7/pipelines/{p['id']}/jobs?per_page=50"):
+        if j["name"] == "client-build" and j["status"] in ("created", "waiting_for_resource", "preparing", "pending", "running"):
+            print(j["id"])
+            sys.exit(0)
+PY
+)
+      [ -n "$live" ] || { echo "== Windows run $win_id ended cancelled and no GitLab client-build of $sha8 is live" >&2; exit 1; }
+      [ -n "${said_cancelled:-}" ] || echo "   run $win_id cancelled (a newer push); GitLab's client-build $live of $sha8 is live: waiting for it $(date +%H:%M:%S)"
+      said_cancelled=1; sleep 60;;
     completed:*) echo "== Windows run $win_id ended $con" >&2; exit 1;;
     *) sleep 60;;
   esac
