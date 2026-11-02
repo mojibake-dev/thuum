@@ -5219,3 +5219,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   into another SkyrimSE.exe (numidium's read: `Get-Process SkyrimSE` plus a 5 s sleep takes whichever process is alive, intermittently
   the wrong one). Every trace silence of the night is retracted as evidence (the pillar's family, the figure's physics); the trap-path
   chain stands as HYPOTHESIS as before. numidium fixes lab-api after Eli's turbo; v4 reruns unchanged.
+
+- 11:38 PST 2026-11-02 TURBO 2 ON (numidium): Eli at the seats under a 300 min hold from about 19:40Z, profile lab/playtests/40.yaml; the build is
+  the merged base, fork parity 64dbacfe (image skymp-server:m4-object-animation-64dbacfe, dist client-build 16578 in both clean-m1s);
+  locks, weatherSync, perks and leveling OFF through the playtest overlay, each item's switch turned on at its turn; Survival off. The
+  build is frozen until Eli's report; findings come to thuum-magnus for fixes (client-hot for TS, a redeploy for the server). The
+  trap-path rerun waits for numidium's frida pid fix after the turbo.
