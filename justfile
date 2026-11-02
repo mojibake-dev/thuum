@@ -511,6 +511,11 @@ playtest-ready n:
 playtest-profile-check n:
     @uv run --project lab/labapi python lab/tools/playtest_setup.py check {{n}}
 
+# One turbo switch (locks, weatherSync, perks, leveling) on a running playtest's server: the overlay's line written and
+# read back, the server restarted on it, then playtest-ready's relaunch and checks, then the profile's hold again.
+playtest-switch n key state:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py switch {{n}} {{key}} {{state}}
+
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
 

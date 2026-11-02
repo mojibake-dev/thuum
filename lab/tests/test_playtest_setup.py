@@ -117,6 +117,19 @@ class PlaytestProfile(unittest.TestCase):
             with self.assertRaises(ProfileError, msg=bad):
                 self.load(PROFILE + bad)
 
+    def test_a_switch_sets_one_key_of_the_running_overlay(self):
+        # playtest-switch (numidium, 2026-11-02): one turbo switch over the running overlay, every other key kept
+        import json
+
+        from playtest_setup import ProfileError, switched
+
+        running = '{"locks": false, "perks": false, "npcEnabled": true, "time": {"start": {"hour": 7.9}}}'
+        self.assertEqual(json.loads(switched(running, "perks", True)),
+                         {"locks": False, "perks": True, "npcEnabled": True, "time": {"start": {"hour": 7.9}}})
+        for bad in ("npcEnabled", "weather", "gameHour"):
+            with self.assertRaises(ProfileError, msg=bad):
+                switched(running, bad, True)
+
     def test_a_profiles_hour_is_the_clocks_time_block(self):
         # playtest thirty-one's morning (thuum-magnus, 2026-10-22): the runner's own shape for a run's gameHour, the
         # epoch at setup and start.hour at the hour, the deployed block's other keys kept

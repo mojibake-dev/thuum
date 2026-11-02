@@ -428,9 +428,62 @@ def ready(n: int) -> int:
     return 0 if not rep.bad else 1
 
 
+def switched(overlay_text_now: str, key: str, on: bool) -> str:
+    """The running overlay with one turbo switch set, every other key as it is (a playtest's server alone)."""
+    if key not in SWITCHES:
+        raise ProfileError(f"a turbo switch is one of {', '.join(SWITCHES)}, got {key!r}")
+    d = json.loads(overlay_text_now)
+    d[key] = on
+    return json.dumps(d, indent=2) + "\n"
+
+
+def switch(n: int, key: str, on: bool) -> int:
+    """One turbo switch on a running playtest's server (docs/private/playtest-turbo-2.md: the overlay's line, the
+    server's restart, both seats relaunched), each step gated on the one before (playtest 34's unguarded restart): the
+    write read back, the mount checked, the restart's listen line awaited, then ready(n), and the profile's hold
+    again, since the relaunch takes its own 180 min one (Turbo 2's arm one, 2026-11-02, from a scratchpad script)."""
+    p = load_profile(n)
+    text = switched(_srv(f"cat {OVERLAY}"), key, on)
+    print(f"== playtest {n}: {key} {'on' if on else 'off'} {time.strftime('%H:%M:%S')}", flush=True)
+    mount = _mounted_settings()
+    if mount != OVERLAY:
+        print(f"== the server runs on {mount or 'no settings mount'}, not {OVERLAY}: no write, no restart", flush=True)
+        return 1
+    _srv(f"sudo tee {OVERLAY} > /dev/null", stdin=text)
+    back = json.loads(_srv(f"cat {OVERLAY}"))
+    if back.get(key) is not on:
+        print(f"== the overlay reads {key} {back.get(key)!r} after the write: no restart", flush=True)
+        return 1
+    print(f"== the overlay reads {({k: back.get(k) for k in SWITCHES})}", flush=True)
+    since = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
+    _srv("cd /srv/lab && docker compose restart skymp-server", timeout=240)
+    for _ in range(60):
+        if _srv(f"docker logs --since {since} lab-skymp-server-1 2>&1 | grep -c 'listening on' || true").strip() not in ("", "0"):
+            break
+        time.sleep(2)
+    else:
+        print(f"== no listen line within 120 s of the restart at {since}: no relaunch", flush=True)
+        return 1
+    mount = _mounted_settings()
+    if mount != OVERLAY:
+        print(f"== after the restart the server runs on {mount or 'no settings mount'}: no relaunch", flush=True)
+        return 1
+    rc = ready(n)
+    hold = p.get("hold") or {}
+    _http("POST", "/hold", {"minutes": int(hold.get("minutes", 180)), "reason": hold.get("reason") or f"playtest {n}"})
+    print(f"== hold {hold.get('minutes', 180)} min again: {hold.get('reason') or f'playtest {n}'}", flush=True)
+    return rc
+
+
 def main(argv: list[str]) -> int:
+    if len(argv) == 4 and argv[0] == "switch" and argv[1].isdigit() and argv[3] in ("on", "off"):
+        try:
+            return switch(int(argv[1]), argv[2], argv[3] == "on")
+        except ProfileError as e:
+            print(f"== profile {argv[1]}: {e}", file=sys.stderr)
+            return 2
     if len(argv) != 2 or argv[0] not in ("setup", "ready", "check") or not argv[1].isdigit():
-        print("usage: playtest_setup.py setup|ready|check <n>", file=sys.stderr)
+        print("usage: playtest_setup.py setup|ready|check <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
         return 2
     n = int(argv[1])
     try:
