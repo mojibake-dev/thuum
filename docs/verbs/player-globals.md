@@ -251,7 +251,9 @@ change reports through the watch and the record keeps it, so the default is the 
 and the plugin stays raw. No fork code: the lab's two settings files list the global with default 1 (thuum main c9177cbc, in
 layer-render's shape). ADR-053: a server-only change that moves the engine's FX on every seat keeps one probe at the slot,
 x-global-default by path (d8f5cd9b): both seats read 1 at login; c1 sets 0 as the MCM would and reads 0 while c2 keeps 1; a relaunch
-and a server restart keep both. Then b-global-default in its own commit. The deploy pairs with its probe (numidium).
+and a server restart keep both. GREEN on its first run (20261102-220306, numidium, on the deployed c9177cbc settings): every claim
+held, the default is live on the lab. Promoted to b-global-default (thuum main 80f42576, its own commit) at 14:07 PST 2026-11-02; it joins the
+next gate's set beside b-player-globals.
 
 ## Status
 

@@ -5314,3 +5314,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (CapFigureRunes; iMaxPlayerRunes 1). Probe x-rune-glyph by path e4bdd74b; the stage after the arm's train, gated with b-spell and
   the rune probes. spell-cast.md's row, WIRE.md and PLAN carry it.
 
+- 14:07 PST 2026-11-02 the Undead FX default GREEN at T3 on its first run (x-global-default 20261102-220306 on the deployed settings c9177cbc, both
+  seats 1 at login, c1's MCM-style 0 kept across a relaunch and a restart, c2's 1 untouched); promoted to b-global-default (80f42576).
+  Eli's item of the hour is live on the lab with the plugin raw.
+
