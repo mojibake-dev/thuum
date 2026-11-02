@@ -5241,3 +5241,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   container skip; a stage with the deaths set and b-object-anim). ADR-058 slice two pulled forward by the same word (DECISIONS,
   prop-physics.md). F8's root (the shared loot path's lost live updates, a store turning into "use" on chests and bodies) still to
   read; skill books and the puppet settle loops next; the lab is free for stages and probes.
+
+- 12:37 PST 2026-11-02 turbo 2's arm one, the lab side (numidium): the lay was profile 40 (lab/playtests/40.yaml; main fbde5f4b,
+  9614f849, b7ac9590) on 39's end world over the merged base 64dbacfe, the server's switches through the playtest overlay
+  (playtest_setup.py's SWITCHES: locks, weatherSync, perks and leveling OFF at the lay; leveling ON 20:00Z, perks ON 20:19Z, each by
+  a guarded overlay write, a restart and playtest-ready's relaunch), Survival off (828 at 0 on both records, the server's SetGlobal).
+  Two lay faults of mine, both fixed: Raise Wall's id counted from the deploy loadOrder (0x2500cc14, "no spell"; the server's
+  labState spell read gives 0x1a00cc14) and playtest 39's two Moonlight windows, dead since the setup's Sunshine restart, taken for
+  streams (Eli: "you havent opened the streams"); playtest-ready now fails a stream with no socket. Lab reads beyond 0743d017: F8's
+  store turning into "use" was a SKILL BOOK each time (the server's ReadBookEvent for ff000001 at 20:27:46.9 and 20:27:52.7 under
+  the chest 371e9, 20:29:30.2 under the body 39fe2), so the loot path's book store is the first read; F9, new: after the 20:19:47
+  restart the relaunched host's fresh engine stood two dead NPCs up ("1066df stands again ... its death before this process; the
+  record's death cleared", and Faendal 1348c, 20:20:35Z), against M3's "bodies lie where they died after a relaunch". Evidence:
+  https://thuum.gaussing.tv/results/playtest-40/ (every log from 19:38Z) and the world playtest-turbo-2-arm1-end-evidence-20261102T203234Z
+  (not a base; Eli ditches this world). Landing: m4-turbo2-wall-range 4b6f5fa3 by R0 (verb-merge's per-sha T2 and the head's
+  ctest), then m4-turbo2-deaths-client on the new parity through verb-stage and its gate.
