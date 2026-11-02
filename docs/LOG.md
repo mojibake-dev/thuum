@@ -5040,3 +5040,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   merged. Meanwhile the permit's gate was green 12 of 12 with T2 38 of 38 on 7fe600e6, and verb-merge refused it on two builds in
   the runs (the T2's tag pull moved the lab's image mid-gate; numidium's restage and regate run now, its tooling fix owed).
 
+
+### 2026-11-02
+
+- m5-train-permit-onceload merged to fork parity 7fe600e6 (2026-11-02T02:16Z, numidium): the gate
+  20261102-013806-merge-m5-train-permit-onceload, 20261102-013806-smoke-two-players to 20261102-021256-b-npc-caster (12 runs, all
+  green on the first run); T2 skip on skymp-server:m5-train-permit-onceload, citing the T2 of 7fe600e6 green beside the first gate
+  (38 sessions identical, after the permit's create word was declared common in divergences.yaml and race-permit's departure echo
+  moved to c1, refr:ff000003); clones promoted. Verbs: the race permit (restrictedRaces: rotfern's aa00 and its vampire race 19d08
+  for profile 1 alone; the server refuses another profile's pick with E_APPEARANCE_RACE; b-race-permit 94787ef1 claims the
+  refusal, the client's menu hide is apocrypha's next slice, since Race.MakeUnplayable is a script wrapper in SKSE's Race.pex and
+  threw "not native") and onceLoad (a game-file reference's CreateActor props wait for its 3D instead of dropping after 120
+  frames: b-locks claim 17's slow landing). The first gate (20261102-002715) was green 12 of 12 and refused by gate-cite check 2:
+  the T2 beside it pulled the branch's bare tag after 7fe600e6's pipeline had pushed a new image, and the lab's next server
+  recreate took it (054b5d43 for five runs, 534c49dc after), so the train was restaged on 7fe600e6 and gated again; T2 runs on the
+  per-sha tag since.
