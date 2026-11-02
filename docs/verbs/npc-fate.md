@@ -1408,6 +1408,20 @@ inventory, and a layer adding such lines reopens the read (layer-stage's
 check; the source is powerof3's Spell-Perk-Item-Distributor if the
 re-analyst needs the sites).
 
+- The death's Havok handoff, static (23:19 PST 2026-11-01; the re-analyst on sky-re, Ghidra 1.6.1170, for memo D78 "where a body lies on
+  every screen"; every id by `just addr`, HYPOTHESIS until the trace): Actor::KillImpl (37896, slot 0x10E) hands every ragdoll-bearing
+  actor to Havok synchronously at the kill (AddRagdollToWorld, SetMotionType kDynamic and ToggleConstraints(false) per graph,
+  ActionDeathWait performed, collision layer kDeadBip, the death force or the heading times fDeathForceForceMin 35); a_ragdollInstant
+  only trades DeathWait plus the 2 s fDyingTimer for ActionRagdollInstant plus no timer. The graph's DeathStop tag calls Actor::KillDying
+  (37317, slot 0xAA), which makes the body dynamic again; the dying state ends on the timer through KillImmediate (37735). Every kill
+  route reaches slot 0x10E (engine damage, a kill move's KillActorHandler 42838 through Actor::Kill 37316's task 0xA, Papyrus Kill, our
+  deathService kill). The only data gate is TESRace::Flag::kImmobile (bit 9 of TESRace+0x108) on the actor's race, read in both
+  KillImpl and KillDying: set, no ragdoll and no DeathWait perform, kDead after the timer with Havok untouched. SetLifeState(kDead) and
+  KillImmediate reach kDead with Havok untouched and play nothing. The trace to confirm: 37896, 38084, 38089, 77866, 77998, 39419, 37735,
+  37612, 42865, 37317 and 38447 through x-npc-death-host v5's sword kill, then once more with bit 9 written into the target's race.
+  Consequence for the verb: "bodies lie within a stride" is the engine's own limit (R2 fall per game); same-spot bodies are M4's pose
+  replication (D78), not a death-animation switch.
+
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
     resolves to a TESNPC, writes ExtraLeveledCreature (originalBase,

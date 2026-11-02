@@ -5168,3 +5168,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 22:51 PST 2026-11-01 x-trap-path v2 (064240) green on its premise and silent in its trace for every hook, the god-mode host on the plate included
   (traps.md: the two candidates). v3 by path, sha1 40c153a5: a liveness swing on the figure before the plate legs; runs in the first free
   window after the pair's sweep. Tonight ends here (Eli: packaging, turbo in the morning); the pair's sweep is numidium's.
+
+- 23:19 PST 2026-11-01 D78's read (Eli: "prove or disprove that with a subagent"): the re-analyst on sky-re shows the Havok handoff is synchronous
+  inside Actor::KillImpl for every ragdoll-bearing actor and repeated by KillDying at the DeathStop tag; a_ragdollInstant never avoids
+  it; the one gate is TESRace::Flag::kImmobile on the race. Option A (the engine's own death animation, no Havok) is disproved as
+  drafted; A' (the race flag for the kill window) is a fragile trick; same-spot bodies are B's (pose replication) in M4, C closes M3's
+  row. Folded into docs/private/decisions-m4-bodies.md and npc-fate.md's Dynamic plan. Also: a-melee-cone 071410 errored on a c1
+  startup crash (terrain streaming at 14 s uptime, engine frames only, the seats' known family): a rerun, read to numidium.
